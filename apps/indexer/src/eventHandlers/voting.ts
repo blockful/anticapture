@@ -138,7 +138,7 @@ export const proposalCreated = async (
     description,
     timestamp,
     status: ProposalStatus.PENDING,
-    endTimestamp: timestamp + BigInt(blockDelta * blockTime),
+    endTimestamp: timestamp + BigInt(Math.floor(blockDelta * blockTime)),
   });
 
   // Update proposer's proposal count
