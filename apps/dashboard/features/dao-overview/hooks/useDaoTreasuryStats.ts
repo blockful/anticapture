@@ -14,7 +14,7 @@ export const useDaoTreasuryStats = ({
   tokenData: { data?: TokenDataResponse | null };
 }) => {
   return useMemo(() => {
-    const lastPrice = tokenData.data?.price || 0;
+    const lastPrice = Number(tokenData.data?.price) || 0;
     const liquidTreasuryNonDaoValue = Number(
       treasuryNonDao.data?.[0]?.totalAssets || 0,
     );
