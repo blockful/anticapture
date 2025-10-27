@@ -18,6 +18,7 @@ import {
   lastUpdate,
   assets,
   votingPower,
+  delegationPercentage,
   votingPowerVariations,
   accountBalanceVariations,
 } from "./controller";
@@ -25,6 +26,7 @@ import { DrizzleProposalsActivityRepository } from "./repositories/proposals-act
 import { docs } from "./docs";
 import { env } from "@/env";
 import {
+  DelegationPercentageRepository,
   AccountBalanceRepository,
   DrizzleRepository,
   NFTPriceRepository,
@@ -36,6 +38,7 @@ import { errorHandler } from "./middlewares";
 import { getClient } from "@/lib/client";
 import { getChain } from "@/lib/utils";
 import {
+  DelegationPercentageService,
   HistoricalVotingPowerService,
   VotingPowerService,
   TransactionsService,
@@ -94,6 +97,10 @@ const repo = new DrizzleRepository();
 const votingPowerRepo = new VotingPowerRepository();
 const proposalsRepo = new DrizzleProposalsActivityRepository();
 const transactionsRepo = new TransactionsRepository();
+const delegationPercentageRepo = new DelegationPercentageRepository();
+const delegationPercentageService = new DelegationPercentageService(
+  delegationPercentageRepo,
+);
 const accountBalanceRepo = new AccountBalanceRepository();
 const transactionsService = new TransactionsService(transactionsRepo);
 const votingPowerService = new VotingPowerService(votingPowerRepo);
@@ -135,6 +142,7 @@ historicalOnchain(
 );
 transactions(app, transactionsService);
 lastUpdate(app);
+delegationPercentage(app, delegationPercentageService);
 votingPower(app, votingPowerService);
 votingPowerVariations(app, votingPowerService);
 accountBalanceVariations(

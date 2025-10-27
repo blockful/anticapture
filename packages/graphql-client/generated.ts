@@ -16,10 +16,26 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   BigInt: { input: any; output: any; }
+  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
+  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
+  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
+};
+
+export type AggregatedDelegatedSupplyItem = {
+  __typename?: 'AggregatedDelegatedSupplyItem';
+  date: Scalars['String']['output'];
+  high: Scalars['String']['output'];
+};
+
+export type AggregatedDelegatedSupplyPage = {
+  __typename?: 'AggregatedDelegatedSupplyPage';
+  items: Array<AggregatedDelegatedSupplyItem>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int']['output'];
 };
 
 export enum HttpMethod {
@@ -42,9 +58,11 @@ export type Meta = {
 export type PageInfo = {
   __typename?: 'PageInfo';
   endCursor?: Maybe<Scalars['String']['output']>;
+  endDate?: Maybe<Scalars['String']['output']>;
   hasNextPage: Scalars['Boolean']['output'];
   hasPreviousPage: Scalars['Boolean']['output'];
   startCursor?: Maybe<Scalars['String']['output']>;
+  startDate?: Maybe<Scalars['String']['output']>;
 };
 
 export type Query = {
@@ -59,6 +77,12 @@ export type Query = {
   accountPower?: Maybe<AccountPower>;
   accountPowers: AccountPowerPage;
   accounts: AccountPage;
+  /**
+   * Aggregated delegation supply across all supported DAOs.
+   * Returns the mean delegation percentage for each day in the specified range.
+   * Only includes dates where ALL DAOs have data available.
+   */
+  aggregatedDelegatedSupply: AggregatedDelegatedSupplyPage;
   /** Get active token supply for DAO */
   compareActiveSupply?: Maybe<CompareActiveSupply_200_Response>;
   /** Compare average turnout between time periods */
@@ -189,6 +213,16 @@ export type QueryAccountsArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   where?: InputMaybe<AccountFilter>;
+};
+
+
+export type QueryAggregatedDelegatedSupplyArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  endDate?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  orderDirection?: InputMaybe<Scalars['String']['input']>;
+  startDate: Scalars['String']['input'];
 };
 
 
