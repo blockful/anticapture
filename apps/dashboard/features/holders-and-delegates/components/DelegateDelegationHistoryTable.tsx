@@ -19,6 +19,7 @@ import daoConfigByDaoId from "@/shared/dao-config";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
 import { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
+import daoConfig from "@/shared/dao-config";
 
 interface DelegateDelegationHistoryTableProps {
   accountId: string;
@@ -29,6 +30,9 @@ export const DelegateDelegationHistoryTable = ({
   accountId,
   daoId,
 }: DelegateDelegationHistoryTableProps) => {
+  const {
+    daoOverview: { token },
+  } = daoConfig[daoId];
   const [sortBy, setSortBy] = useState<"timestamp" | "delta">("timestamp");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [filterVariables, setFilterVariables] =
@@ -229,11 +233,15 @@ export const DelegateDelegationHistoryTable = ({
         let amount = "0";
         if (item.delegation) {
           amount = formatNumberUserReadable(
-            Number(formatUnits(BigInt(item.delegation.value), 18)),
+            token === "ERC20"
+              ? Number(formatUnits(BigInt(item.delegation.value), 18))
+              : Number(item.delegation.value),
           );
         } else if (item.transfer) {
           amount = formatNumberUserReadable(
-            Number(formatUnits(BigInt(item.transfer.value), 18)),
+            token === "ERC20"
+              ? Number(formatUnits(BigInt(item.transfer.value), 18))
+              : Number(item.transfer.value),
           );
         }
 
