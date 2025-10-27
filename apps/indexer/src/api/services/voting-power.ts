@@ -1,6 +1,7 @@
 import { Address } from "viem";
 
 import { DBVotingPowerWithRelations } from "@/api/mappers";
+import { DBVotingPowerVariation } from "../mappers/top-voting-power-variations";
 
 interface VotingPowerRepository {
   getVotingPowers(
@@ -9,13 +10,26 @@ interface VotingPowerRepository {
     limit: number,
     orderDirection: "asc" | "desc",
     orderBy: "timestamp" | "delta",
+    minDelta?: string,
+    maxDelta?: string,
   ): Promise<DBVotingPowerWithRelations[]>;
 
-  getVotingPowerCount(account: Address): Promise<number>;
+  getVotingPowerCount(
+    account: Address,
+    minDelta?: string,
+    maxDelta?: string,
+  ): Promise<number>;
+
+  getTopVotingPowerChanges(
+    startTimestamp: number,
+    limit: number,
+    skip: number,
+    orderDirection: "asc" | "desc",
+  ): Promise<DBVotingPowerVariation[]>;
 }
 
 export class VotingPowerService {
-  constructor(private readonly repository: VotingPowerRepository) {}
+  constructor(private readonly votingRepository: VotingPowerRepository) {}
 
   async getVotingPowers(
     account: Address,
@@ -23,16 +37,38 @@ export class VotingPowerService {
     limit: number,
     orderDirection: "asc" | "desc" = "desc",
     orderBy: "timestamp" | "delta" = "timestamp",
+    minDelta?: string,
+    maxDelta?: string,
   ): Promise<{ items: DBVotingPowerWithRelations[]; totalCount: number }> {
-    const items = await this.repository.getVotingPowers(
+    const items = await this.votingRepository.getVotingPowers(
       account,
       skip,
       limit,
       orderDirection,
       orderBy,
+      minDelta,
+      maxDelta,
     );
 
-    const totalCount = await this.repository.getVotingPowerCount(account);
+    const totalCount = await this.votingRepository.getVotingPowerCount(
+      account,
+      minDelta,
+      maxDelta,
+    );
     return { items, totalCount };
+  }
+
+  async getTopVotingPowerVariations(
+    startTimestamp: number,
+    skip: number,
+    limit: number,
+    orderDirection: "asc" | "desc",
+  ): Promise<DBVotingPowerVariation[]> {
+    return this.votingRepository.getTopVotingPowerChanges(
+      startTimestamp,
+      limit,
+      skip,
+      orderDirection,
+    );
   }
 }

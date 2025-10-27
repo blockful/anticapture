@@ -1,9 +1,9 @@
 import { Search } from "lucide-react";
 import { IconButton } from "@/shared/components/design-system/buttons/icon-button/IconButton";
 
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 
-const meta = {
+const meta: Meta<typeof IconButton> = {
   title: "Design System/Buttons/IconButton",
   component: IconButton,
   parameters: {
@@ -27,7 +27,7 @@ const meta = {
       description: "Additional CSS classes",
     },
   },
-} satisfies Meta<typeof IconButton>;
+};
 
 export default meta;
 type Story = StoryObj<typeof meta>;

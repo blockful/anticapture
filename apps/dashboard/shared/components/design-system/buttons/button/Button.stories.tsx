@@ -5,14 +5,14 @@ import {
 } from "@/shared/components/design-system/buttons/button/Button";
 import { ButtonProps } from "@/shared/components/design-system/buttons/types";
 
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 
 // Extended type for stories that includes the custom showIcon property
 type ButtonStoryArgs = ButtonProps & {
   showIcon?: boolean;
 };
 
-const meta = {
+const meta: Meta<ButtonStoryArgs> = {
   title: "Design System/Buttons/Button",
   component: Button,
   parameters: {
@@ -43,7 +43,7 @@ const meta = {
       description: "Additional CSS classes",
     },
   },
-} satisfies Meta<ButtonStoryArgs>;
+};
 
 export default meta;
 type Story = StoryObj<ButtonStoryArgs>;

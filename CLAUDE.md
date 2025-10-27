@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-**Anticapture** is a comprehensive DAO governance security platform built as a monorepo that provides data-driven analysis to help DAO communities identify, assess, and mitigate governance capture risks. The platform serves major DAOs including Uniswap, ENS, Optimism, and Arbitrum.
+**Anticapture** is a comprehensive DAO governance security platform built as a monorepo that provides data-driven analysis to help DAO communities identify, assess, and mitigate governance capture risks. The platform serves major DAOs including Uniswap, ENS, and Optimism.
 
 ## Overall Architecture
 
@@ -20,15 +20,15 @@ The project follows a **microservices architecture** organized as a **pnpm monor
 
 ```md
 anticapture/
-├── apps/                          # Main applications
-│   ├── dashboard/                 # Next.js frontend application
-│   ├── api-gateway/              # GraphQL Mesh unified API
-│   ├── indexer/                  # Ponder blockchain event indexer
-│   ├── graphql-client/           # Generated GraphQL client library
-│   ├── indexer-metrics/          # Grafana/Prometheus monitoring
-│   └── local-node/               # Local Ethereum development node
-├── infra/                        # Infrastructure and deployment configs
-├── packages/                     # Shared packages (if any)
+├── apps/ # Main applications
+│ ├── dashboard/ # Next.js frontend application
+│ ├── api-gateway/ # GraphQL Mesh unified API
+│ ├── indexer/ # Ponder blockchain event indexer
+│ ├── graphql-client/ # Generated GraphQL client library
+│ ├── indexer-metrics/ # Grafana/Prometheus monitoring
+│ └── local-node/ # Local Ethereum development node
+├── infra/ # Infrastructure and deployment configs
+├── packages/ # Shared packages (if any)
 └── [root config files]
 ```
 
@@ -79,7 +79,7 @@ anticapture/
 
 **Key Features**:
 
-- Multi-DAO support (Uniswap, ENS, Optimism, Arbitrum)
+- Multi-DAO support (Uniswap, ENS, Optimism)
 - Governance security analysis and risk assessment
 - Attack profitability calculations
 - Token distribution visualization
@@ -220,11 +220,7 @@ The codebase follows modern full-stack development practices with emphasis on:
 
 This architecture enables the team to build, maintain, and scale a complex DAO governance analysis platform while maintaining code quality and developer productivity.
 
-## General instructions for Claude Code
-
-- Always run `turbo lint` after making any code changes.
-
 ### MCP Tools
 
 - **Context7 MCP**: Use to fetch updated documentation for libraries and frameworks like Next.js, Tailwind CSS, Shadcn.
-- **Playwright MCP**: Use to check visual changes in the frontend with a real browser when UI modifications are made. 
+- **Playwright MCP**: Use to check visual changes in the frontend with a real browser when UI modifications are made.

@@ -1,6 +1,7 @@
 export * from "./dao";
 export * from "./governance-activity/controller";
 export * from "./token-distribution/controller";
+export * from "./token-properties.controller.ts";
 export * from "./token-historical-data.controller";
 export * from "./proposals-activity.controller";
 export * from "./assets.controller";
@@ -9,3 +10,6 @@ export * from "./transactions.controller";
 export * from "./proposals";
 export * from "./last-update.controller";
 export * from "./voting-power";
+export * from "./delegation-percentage.controller";
+export * from "./top-account-balance-variations";
+export * from "./top-voting-power-variations";

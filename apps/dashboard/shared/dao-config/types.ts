@@ -2,17 +2,8 @@ import { ReactNode } from "react";
 import { Address, Chain } from "viem";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
-import {
-  RiskLevel,
-  SupportStageEnum,
-  GovernanceImplementationEnum,
-} from "@/shared/types/enums";
+import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
 import { DaoIconProps } from "@/shared/components/icons/types";
-
-// Existing types
-export enum ChainNameEnum {
-  Ethereum = "ethereum",
-}
 
 export type DaoMetricsDayBucket = {
   date: string;
@@ -28,17 +19,16 @@ export type DaoMetricsDayBucket = {
   count: number;
 };
 
-export type PriceEntry = [timestamp: number, value: number];
-
-export interface TokenHistoricalDataMetrics {
-  prices: PriceEntry[];
-  market_caps: PriceEntry[];
-  total_volumes: PriceEntry[];
-}
+export type PriceEntry = { timestamp: number; price: string };
 
 export interface MultilineChartDataSetPoint {
   date: number;
   [key: string]: number;
+}
+
+export interface ChartDataSetPoint {
+  date: number;
+  [key: string]: number | string | undefined;
 }
 
 export type GovernanceImplementation = {
@@ -58,7 +48,6 @@ export type GovernanceImplementationField = {
 // Base DAO information
 interface BaseInfo {
   name: string;
-  supportStage: SupportStageEnum;
   icon?: (props: DaoIconProps) => ReactNode;
   disableDaoPage?: boolean;
 }
@@ -66,25 +55,27 @@ interface BaseInfo {
 // Section configurations without data storage
 export interface DaoOverviewConfig {
   chain: Chain;
+  blockTime: number;
   contracts: {
     token: Address;
     governor?: Address;
     timelock?: Address;
   };
+  token: "ERC20" | "ERC721";
   cancelFunction?: string;
   snapshot?: string;
   tally?: string;
-  rules?: {
-    delay?: boolean;
-    changeVote?: boolean;
-    timelock?: boolean;
-    cancelFunction?: boolean;
+  rules: {
+    delay: boolean;
+    changeVote: boolean;
+    timelock: boolean;
+    cancelFunction: boolean;
     logic:
       | "For"
       | "For + Abstain"
       | "For + Abstain + Against"
       | "All Votes Cast";
-    quorumCalculation: "Total Supply" | "Del. Supply";
+    quorumCalculation: string;
     proposalThreshold?: string;
   };
   securityCouncil?: {
@@ -120,16 +111,17 @@ export interface DaoAddresses {
     OptimismTokenDistributor: string;
     OptimismUniv3Uni: string;
   };
-  [DaoIdEnum.ARBITRUM]: {
-    ArbitrumTimelock: string;
-    ArbitrumTokenDistributor: string;
-    ArbitrumDaoWallet: string;
-  };
   [DaoIdEnum.GITCOIN]: {
     GTCWallet: string;
     GTCTimelock: string;
     GTCUniv3Uni: string;
   };
+  [DaoIdEnum.NOUNS]: {
+    NounsTimelock: string;
+    PayerContract: string;
+    ClientIncentivesRewardsProxy: string;
+  };
+  [DaoIdEnum.SCR]: Record<string, never>;
 }
 
 export interface AttackProfitabilityConfig {
@@ -151,10 +143,6 @@ export interface DaoConfiguration extends BaseInfo {
   resilienceStages?: boolean;
   tokenDistribution?: boolean;
   dataTables?: boolean;
-  showSupport?: {
-    snapshotProposal: string;
-    snapshotSpace: string;
-  };
   riskAnalysis?: boolean;
   noStage?: boolean;
 }

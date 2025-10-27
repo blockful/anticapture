@@ -8,6 +8,8 @@ import { OPClient } from "@/indexer/op";
 import { DAOClient } from "@/interfaces/client";
 import { ARBClient } from "@/indexer/arb";
 import { GTCClient } from "@/indexer/gtc/client";
+import { Client as NounsClient } from "@/indexer/nouns/client";
+import { SCRClient } from "@/indexer/scr";
 
 export function getClient<
   TTransport extends Transport = Transport,
@@ -38,6 +40,14 @@ export function getClient<
     case DaoIdEnum.GTC: {
       const { governor } = CONTRACT_ADDRESSES[daoId];
       return new GTCClient(client, governor.address);
+    }
+    case DaoIdEnum.NOUNS: {
+      const { governor } = CONTRACT_ADDRESSES[daoId];
+      return new NounsClient(client, governor.address);
+    }
+    case DaoIdEnum.SCR: {
+      const { governor } = CONTRACT_ADDRESSES[daoId];
+      return new SCRClient(client, governor.address);
     }
     default:
       return null;

@@ -21,10 +21,16 @@ import {
   GovernorIndexer as ARBGovernorIndexer,
 } from "@/indexer/arb";
 import {
-  GTCTokenIndexer,
   GovernorIndexer as GTCGovernorIndexer,
+  GTCTokenIndexer,
 } from "@/indexer/gtc";
-import { getClient } from "./lib/client";
+import { SCRTokenIndexer, SCRGovernorIndexer, SCRClient } from "@/indexer/scr";
+import {
+  NounsTokenIndexer,
+  GovernorIndexer as NounsGovernorIndexer,
+  Client as NounsClient,
+} from "@/indexer/nouns";
+import { getClient } from "@/lib/client";
 
 const { DAO_ID: daoId, CHAIN_ID: chainId, RPC_URL: rpcUrl } = env;
 
@@ -74,6 +80,22 @@ switch (daoId) {
   case DaoIdEnum.GTC: {
     GTCTokenIndexer(token.address, token.decimals);
     GTCGovernorIndexer(daoClient, blockTime);
+    break;
+  }
+  case DaoIdEnum.NOUNS: {
+    const { token, governor } = CONTRACT_ADDRESSES[daoId];
+    NounsTokenIndexer(token.address, token.decimals);
+    NounsGovernorIndexer(
+      new NounsClient(client, governor.address),
+      blockTime,
+      token.address,
+    );
+    break;
+  }
+  case DaoIdEnum.SCR: {
+    const { token, governor } = CONTRACT_ADDRESSES[daoId];
+    SCRTokenIndexer(token.address, token.decimals);
+    SCRGovernorIndexer(new SCRClient(client, governor.address), blockTime);
     break;
   }
   default:

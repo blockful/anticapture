@@ -83,6 +83,7 @@ export const votingPowerHistory = onchainTable(
     accountId: drizzle.text("account_id").$type<Address>().notNull(),
     votingPower: drizzle.bigint("voting_power").notNull(),
     delta: drizzle.bigint("delta").notNull(),
+    deltaMod: drizzle.bigint("delta_mod").notNull(),
     timestamp: drizzle.bigint().notNull(),
     logIndex: drizzle.integer("log_index").notNull(),
   }),
@@ -156,14 +157,14 @@ export const transfer = onchainTable(
 export const votesOnchain = onchainTable(
   "votes_onchain",
   (drizzle) => ({
-    txHash: drizzle.text("tx_hash"),
+    txHash: drizzle.text("tx_hash").notNull(),
     daoId: drizzle.text("dao_id").notNull(),
     voterAccountId: drizzle.text("voter_account_id").$type<Address>().notNull(),
-    proposalId: drizzle.text("proposal_id"),
-    support: drizzle.text(),
-    votingPower: drizzle.text(),
+    proposalId: drizzle.text("proposal_id").notNull(),
+    support: drizzle.text().notNull(),
+    votingPower: drizzle.bigint().notNull(),
     reason: drizzle.text(),
-    timestamp: drizzle.bigint(),
+    timestamp: drizzle.bigint().notNull(),
   }),
   (table) => ({
     pk: primaryKey({
@@ -238,6 +239,11 @@ export const transaction = onchainTable("transaction", (drizzle) => ({
   isLending: drizzle.boolean().notNull().default(false),
   isTotal: drizzle.boolean().notNull().default(false),
   timestamp: drizzle.bigint().notNull(),
+}));
+
+export const tokenPrice = onchainTable("token_price", (drizzle) => ({
+  price: drizzle.bigint().notNull(), // price in ETH
+  timestamp: drizzle.bigint().primaryKey(),
 }));
 
 // Account Power and Balance relations

@@ -5,6 +5,20 @@ import { Address, Hex } from "viem";
 import { ensureAccountExists } from "./shared";
 import { ProposalStatus } from "@/lib/constants";
 
+/**
+ * ### Creates:
+ * - New `Account` record (for voter if it doesn't exist)
+ * - New `AccountPower` record (if voter doesn't have one for this DAO)
+ * - New `votesOnchain` record with vote details (transaction hash, support, voting power, reason)
+ *
+ * ### Updates:
+ * - `AccountPower`: Increments voter's total vote count by 1
+ * - `AccountPower`: Sets last vote timestamp to current vote timestamp
+ * - `AccountPower`: Sets first vote timestamp (only if voter has never voted before)
+ * - `proposalsOnchain`: Increments `againstVotes` if support is 0 (against)
+ * - `proposalsOnchain`: Increments `forVotes` if support is 1 (for)
+ * - `proposalsOnchain`: Increments `abstainVotes` if support is 2 (abstain)
+ */
 export const voteCast = async (
   context: Context,
   daoId: string,
@@ -47,7 +61,7 @@ export const voteCast = async (
     proposalId,
     voterAccountId: voter,
     support: support.toString(),
-    votingPower: votingPower.toString(),
+    votingPower,
     reason,
     timestamp,
   });
@@ -62,6 +76,19 @@ export const voteCast = async (
     }));
 };
 
+/**
+ * ### Creates:
+ * - New `Account` record (for proposer if it doesn't exist)
+ * - New `proposalsOnchain` record with proposal details (targets, values, signatures, calldatas, blocks, description, status)
+ * - New `AccountPower` record (if proposer doesn't have one for this DAO)
+ *
+ * ### Updates:
+ * - `AccountPower`: Increments proposer's total proposals count by 1
+ *
+ * ### Calculates:
+ * - Proposal end timestamp based on block delta and average block time
+ * - Sets initial proposal status to PENDING
+ */
 export const proposalCreated = async (
   context: Context,
   daoId: string,
@@ -127,6 +154,10 @@ export const proposalCreated = async (
     }));
 };
 
+/**
+ * ### Updates:
+ * - `proposalsOnchain`: Sets the proposal status to the provided status value
+ */
 export const updateProposalStatus = async (
   context: Context,
   proposalId: string,

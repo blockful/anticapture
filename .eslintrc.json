@@ -17,6 +17,7 @@
     ]
   },
   "ignorePatterns": [
+    "apps/api-gateway/**",
     "node_modules",
     "dist",
     "build",
