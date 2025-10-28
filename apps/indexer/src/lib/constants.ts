@@ -130,6 +130,7 @@ export const CONTRACT_ADDRESSES = {
   },
   [DaoIdEnum.OBOL]: {
     blockTime: 12,
+    tokenType: "ERC20",
     // https://etherscan.io/address/0x0B010000b7624eb9B3DfBC279673C76E9D29D5F7
     // Token created: Sep-19-2022 11:12:47 PM UTC
     token: {

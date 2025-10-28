@@ -1,9 +1,5 @@
 import { DaoConfiguration } from "@/shared/dao-config/types";
-import {
-  RiskLevel,
-  SupportStageEnum,
-  GovernanceImplementationEnum,
-} from "@/shared/types/enums";
+import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 import { ObolIcon } from "@/shared/components/icons";
@@ -11,9 +7,9 @@ import { mainnet } from "viem/chains";
 
 export const OBOL: DaoConfiguration = {
   name: "Obol Collective",
-  supportStage: SupportStageEnum.FULL,
   icon: ObolIcon,
   daoOverview: {
+    token: "ERC20",
     chain: mainnet,
     blockTime: 12,
     snapshot: "",
