@@ -10,7 +10,15 @@ import {
   CEXAddresses,
   DEXAddresses,
   LendingAddresses,
+  MetricTypesEnum,
+  TreasuryAddresses,
 } from "@/lib/constants";
+import {
+  updateSupplyMetric,
+  updateTotalSupply,
+  updateCirculatingSupply,
+  updateDelegatedSupply,
+} from "@/eventHandlers/metrics";
 
 export function SCRTokenIndexer(address: Address, decimals: number) {
   const daoId = DaoIdEnum.SCR;
@@ -24,26 +32,116 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
   });
 
   ponder.on(`SCRToken:Transfer`, async ({ event, context }) => {
-    // Process the transfer
-    await tokenTransfer(context, daoId, {
-      from: event.args.from,
-      to: event.args.to,
-      tokenAddress: address,
-      transactionHash: event.transaction.hash,
-      value: event.args.value,
-      timestamp: event.block.timestamp,
-      logIndex: event.log.logIndex,
-    });
+    const { from, to, value } = event.args;
+    const { timestamp } = event.block;
 
-    // Handle transaction creation/update with flag calculation
-    await handleTransaction(
+    const cexAddressList = Object.values(CEXAddresses[daoId]);
+    const dexAddressList = Object.values(DEXAddresses[daoId]);
+    const lendingAddressList = Object.values(LendingAddresses[daoId]);
+    const burningAddressList = Object.values(BurningAddresses[daoId]);
+    const treasuryAddressList = Object.values(TreasuryAddresses[daoId]);
+
+    await tokenTransfer(
       context,
       daoId,
+      {
+        from: event.args.from,
+        to: event.args.to,
+        token: address,
+        transactionHash: event.transaction.hash,
+        value: event.args.value,
+        timestamp: event.block.timestamp,
+        logIndex: event.log.logIndex,
+      },
+      {
+        cex: cexAddressList,
+        dex: dexAddressList,
+        lending: lendingAddressList,
+        burning: burningAddressList,
+      },
+    );
+
+    await updateSupplyMetric(
+      context,
+      "lendingSupply",
+      lendingAddressList,
+      MetricTypesEnum.LENDING_SUPPLY,
+      from,
+      to,
+      value,
+      daoId,
+      address,
+      timestamp,
+    );
+
+    await updateSupplyMetric(
+      context,
+      "cexSupply",
+      cexAddressList,
+      MetricTypesEnum.CEX_SUPPLY,
+      from,
+      to,
+      value,
+      daoId,
+      address,
+      timestamp,
+    );
+
+    await updateSupplyMetric(
+      context,
+      "dexSupply",
+      dexAddressList,
+      MetricTypesEnum.DEX_SUPPLY,
+      from,
+      to,
+      value,
+      daoId,
+      address,
+      timestamp,
+    );
+
+    await updateSupplyMetric(
+      context,
+      "treasury",
+      treasuryAddressList,
+      MetricTypesEnum.TREASURY,
+      from,
+      to,
+      value,
+      daoId,
+      address,
+      timestamp,
+    );
+
+    await updateTotalSupply(
+      context,
+      burningAddressList,
+      MetricTypesEnum.TOTAL_SUPPLY,
+      from,
+      to,
+      value,
+      daoId,
+      address,
+      timestamp,
+    );
+
+    await updateCirculatingSupply(
+      context,
+      MetricTypesEnum.CIRCULATING_SUPPLY,
+      daoId,
+      address,
+      timestamp,
+    );
+
+    if (!event.transaction.to) return;
+
+    await handleTransaction(
+      context,
       event.transaction.hash,
       event.transaction.from,
       event.transaction.to,
       event.block.timestamp,
-      [event.args.from, event.args.to], // Addresses to check
+      [event.args.from, event.args.to],
     );
   });
 
@@ -52,18 +150,10 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
     // Process the delegation change
 
     // Pre-compute address lists for flag determination
-    const lendingAddressList = Object.values(
-      LendingAddresses[daoId as DaoIdEnum] || {},
-    );
-    const cexAddressList = Object.values(
-      CEXAddresses[daoId as DaoIdEnum] || {},
-    );
-    const dexAddressList = Object.values(
-      DEXAddresses[daoId as DaoIdEnum] || {},
-    );
-    const burningAddressList = Object.values(
-      BurningAddresses[daoId as DaoIdEnum] || {},
-    );
+    const lendingAddressList = Object.values(LendingAddresses[daoId] || {});
+    const cexAddressList = Object.values(CEXAddresses[daoId] || {});
+    const dexAddressList = Object.values(DEXAddresses[daoId] || {});
+    const burningAddressList = Object.values(BurningAddresses[daoId] || {});
 
     for (const { _delegatee: delegate, _numerator: percentage } of event.args
       .newDelegatees) {
@@ -118,8 +208,7 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
           isTotal,
         })
         .onConflictDoUpdate((current) => ({
-          delegatedValue:
-            current.delegatedValue + delegatorBalanceValue,
+          delegatedValue: current.delegatedValue + delegatorBalanceValue,
         }));
 
       // Transaction flag updates moved to DAO-specific indexer
@@ -149,10 +238,11 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
           delegationsCount: (current.delegationsCount ?? 0) + 1,
         }));
     }
-    // Handle transaction creation/update with flag calculation
+
+    if (!event.transaction.to) return;
+
     await handleTransaction(
       context,
-      daoId,
       event.transaction.hash,
       event.transaction.from,
       event.transaction.to,
@@ -160,14 +250,12 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
       [
         ...event.args.newDelegatees.map(({ _delegatee }) => _delegatee),
         ...event.args.oldDelegatees.map(({ _delegatee }) => _delegatee),
-      ], // Addresses to check
+      ],
     );
   });
 
   ponder.on(`SCRToken:DelegateVotesChanged`, async ({ event, context }) => {
-    // Process the delegate votes change
     await delegatedVotesChanged(context, daoId, {
-      tokenId: event.log.address,
       delegate: event.args.delegate,
       txHash: event.transaction.hash,
       newBalance: event.args.newVotes,
@@ -176,10 +264,18 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
       logIndex: event.log.logIndex,
     });
 
-    // Handle transaction creation/update with flag calculation
-    await handleTransaction(
+    await updateDelegatedSupply(
       context,
       daoId,
+      event.log.address,
+      event.args.newVotes - event.args.previousVotes,
+      event.block.timestamp,
+    );
+
+    if (!event.transaction.to) return;
+
+    await handleTransaction(
+      context,
       event.transaction.hash,
       event.transaction.from,
       event.transaction.to,

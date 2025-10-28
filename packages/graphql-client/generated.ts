@@ -16,10 +16,26 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   BigInt: { input: any; output: any; }
+  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
+  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
+  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
+};
+
+export type AggregatedDelegatedSupplyItem = {
+  __typename?: 'AggregatedDelegatedSupplyItem';
+  date: Scalars['String']['output'];
+  high: Scalars['String']['output'];
+};
+
+export type AggregatedDelegatedSupplyPage = {
+  __typename?: 'AggregatedDelegatedSupplyPage';
+  items: Array<AggregatedDelegatedSupplyItem>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int']['output'];
 };
 
 export enum HttpMethod {
@@ -42,9 +58,11 @@ export type Meta = {
 export type PageInfo = {
   __typename?: 'PageInfo';
   endCursor?: Maybe<Scalars['String']['output']>;
+  endDate?: Maybe<Scalars['String']['output']>;
   hasNextPage: Scalars['Boolean']['output'];
   hasPreviousPage: Scalars['Boolean']['output'];
   startCursor?: Maybe<Scalars['String']['output']>;
+  startDate?: Maybe<Scalars['String']['output']>;
 };
 
 export type Query = {
@@ -53,10 +71,18 @@ export type Query = {
   _meta?: Maybe<Meta>;
   account?: Maybe<Account>;
   accountBalance?: Maybe<AccountBalance>;
+  /** Returns a mapping of the biggest variations to account balances associated by account address */
+  accountBalanceVariations?: Maybe<AccountBalanceVariations_200_Response>;
   accountBalances: AccountBalancePage;
   accountPower?: Maybe<AccountPower>;
   accountPowers: AccountPowerPage;
   accounts: AccountPage;
+  /**
+   * Aggregated delegation supply across all supported DAOs.
+   * Returns the mean delegation percentage for each day in the specified range.
+   * Only includes dates where ALL DAOs have data available.
+   */
+  aggregatedDelegatedSupply: AggregatedDelegatedSupplyPage;
   /** Get active token supply for DAO */
   compareActiveSupply?: Maybe<CompareActiveSupply_200_Response>;
   /** Compare average turnout between time periods */
@@ -88,7 +114,7 @@ export type Query = {
   /** Fetch historical token balances for multiple addresses at a specific time period using multicall */
   historicalBalances?: Maybe<Array<Maybe<Query_HistoricalBalances_Items>>>;
   /** Get historical market data for a specific token */
-  historicalTokenData?: Maybe<HistoricalTokenData_200_Response>;
+  historicalTokenData?: Maybe<Array<Maybe<Query_HistoricalTokenData_Items>>>;
   /** Fetch historical voting power for multiple addresses at a specific time period using multicall */
   historicalVotingPower?: Maybe<Array<Maybe<Query_HistoricalVotingPower_Items>>>;
   /** Get the last update time */
@@ -103,7 +129,10 @@ export type Query = {
   proposalsActivity?: Maybe<ProposalsActivity_200_Response>;
   proposalsOnchain?: Maybe<ProposalsOnchain>;
   proposalsOnchains: ProposalsOnchainPage;
-  token?: Maybe<Token>;
+  /** Get property data for a specific token */
+  token?: Maybe<Token_200_Response>;
+  tokenPrice?: Maybe<TokenPrice>;
+  tokenPrices: TokenPricePage;
   tokens: TokenPage;
   /** Get total assets */
   totalAssets?: Maybe<Array<Maybe<Query_TotalAssets_Items>>>;
@@ -116,6 +145,8 @@ export type Query = {
   votesOnchains: VotesOnchainPage;
   votingPowerHistory?: Maybe<VotingPowerHistory>;
   votingPowerHistorys: VotingPowerHistoryPage;
+  /** Returns a mapping of the biggest changes to voting power associated by delegate address */
+  votingPowerVariations?: Maybe<VotingPowerVariations_200_Response>;
   /** Returns a list of voting power changes */
   votingPowers?: Maybe<VotingPowers_200_Response>;
 };
@@ -139,6 +170,14 @@ export type QueryAccountArgs = {
 export type QueryAccountBalanceArgs = {
   accountId: Scalars['String']['input'];
   tokenId: Scalars['String']['input'];
+};
+
+
+export type QueryAccountBalanceVariationsArgs = {
+  days?: InputMaybe<QueryInput_AccountBalanceVariations_Days>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderDirection?: InputMaybe<QueryInput_AccountBalanceVariations_OrderDirection>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
 };
 
 
@@ -174,6 +213,16 @@ export type QueryAccountsArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   where?: InputMaybe<AccountFilter>;
+};
+
+
+export type QueryAggregatedDelegatedSupplyArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  endDate?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  orderDirection?: InputMaybe<Scalars['String']['input']>;
+  startDate: Scalars['String']['input'];
 };
 
 
@@ -288,7 +337,8 @@ export type QueryHistoricalBalancesArgs = {
 
 
 export type QueryHistoricalTokenDataArgs = {
-  days?: InputMaybe<QueryInput_HistoricalTokenData_Days>;
+  limit?: InputMaybe<Scalars['Float']['input']>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
 };
 
 
@@ -310,6 +360,7 @@ export type QueryProposalArgs = {
 
 
 export type QueryProposalNonVotersArgs = {
+  addresses?: InputMaybe<Scalars['JSON']['input']>;
   id: Scalars['String']['input'];
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   orderDirection?: InputMaybe<QueryInput_ProposalNonVoters_OrderDirection>;
@@ -353,7 +404,22 @@ export type QueryProposalsOnchainsArgs = {
 
 
 export type QueryTokenArgs = {
-  id: Scalars['String']['input'];
+  currency?: InputMaybe<QueryInput_Token_Currency>;
+};
+
+
+export type QueryTokenPriceArgs = {
+  timestamp: Scalars['BigInt']['input'];
+};
+
+
+export type QueryTokenPricesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<Scalars['String']['input']>;
+  orderDirection?: InputMaybe<Scalars['String']['input']>;
+  where?: InputMaybe<TokenPriceFilter>;
 };
 
 
@@ -436,6 +502,14 @@ export type QueryVotingPowerHistorysArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   where?: InputMaybe<VotingPowerHistoryFilter>;
+};
+
+
+export type QueryVotingPowerVariationsArgs = {
+  days?: InputMaybe<QueryInput_VotingPowerVariations_Days>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderDirection?: InputMaybe<QueryInput_VotingPowerVariations_OrderDirection>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
 };
 
 
@@ -614,6 +688,12 @@ export type AccountBalancePage = {
   items: Array<AccountBalance>;
   pageInfo: PageInfo;
   totalCount: Scalars['Int']['output'];
+};
+
+export type AccountBalanceVariations_200_Response = {
+  __typename?: 'accountBalanceVariations_200_response';
+  items: Array<Maybe<Query_AccountBalanceVariations_Items_Items>>;
+  period: Query_AccountBalanceVariations_Period;
 };
 
 export type AccountFilter = {
@@ -1132,13 +1212,6 @@ export type DelegationPage = {
   totalCount: Scalars['Int']['output'];
 };
 
-export type HistoricalTokenData_200_Response = {
-  __typename?: 'historicalTokenData_200_response';
-  market_caps: Array<Maybe<Array<Maybe<Scalars['Float']['output']>>>>;
-  prices: Array<Maybe<Array<Maybe<Scalars['Float']['output']>>>>;
-  total_volumes: Array<Maybe<Array<Maybe<Scalars['Float']['output']>>>>;
-};
-
 export type LastUpdate_200_Response = {
   __typename?: 'lastUpdate_200_response';
   lastUpdate: Scalars['String']['output'];
@@ -1362,6 +1435,19 @@ export type Proposals_200_Response = {
   totalCount: Scalars['Float']['output'];
 };
 
+export enum QueryInput_AccountBalanceVariations_Days {
+  '7d' = '_7d',
+  '30d' = '_30d',
+  '90d' = '_90d',
+  '180d' = '_180d',
+  '365d' = '_365d'
+}
+
+export enum QueryInput_AccountBalanceVariations_OrderDirection {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
 export enum QueryInput_CompareActiveSupply_Days {
   '7d' = '_7d',
   '30d' = '_30d',
@@ -1458,14 +1544,6 @@ export enum QueryInput_HistoricalBalances_Days {
   '365d' = '_365d'
 }
 
-export enum QueryInput_HistoricalTokenData_Days {
-  '7d' = '_7d',
-  '30d' = '_30d',
-  '90d' = '_90d',
-  '180d' = '_180d',
-  '365d' = '_365d'
-}
-
 export enum QueryInput_HistoricalVotingPower_Days {
   '7d' = '_7d',
   '30d' = '_30d',
@@ -1509,6 +1587,11 @@ export enum QueryInput_Proposals_OrderDirection {
   Desc = 'desc'
 }
 
+export enum QueryInput_Token_Currency {
+  Eth = 'eth',
+  Usd = 'usd'
+}
+
 export enum QueryInput_TotalAssets_Days {
   '7d' = '_7d',
   '30d' = '_30d',
@@ -1518,6 +1601,19 @@ export enum QueryInput_TotalAssets_Days {
 }
 
 export enum QueryInput_Transactions_SortOrder {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
+export enum QueryInput_VotingPowerVariations_Days {
+  '7d' = '_7d',
+  '30d' = '_30d',
+  '90d' = '_90d',
+  '180d' = '_180d',
+  '365d' = '_365d'
+}
+
+export enum QueryInput_VotingPowerVariations_OrderDirection {
   Asc = 'asc',
   Desc = 'desc'
 }
@@ -1532,12 +1628,34 @@ export enum QueryInput_VotingPowers_OrderDirection {
   Desc = 'desc'
 }
 
+export type Query_AccountBalanceVariations_Items_Items = {
+  __typename?: 'query_accountBalanceVariations_items_items';
+  absoluteChange: Scalars['String']['output'];
+  accountId: Scalars['String']['output'];
+  currentBalance: Scalars['String']['output'];
+  percentageChange: Scalars['String']['output'];
+  previousBalance: Scalars['String']['output'];
+};
+
+export type Query_AccountBalanceVariations_Period = {
+  __typename?: 'query_accountBalanceVariations_period';
+  days: Scalars['String']['output'];
+  endTimestamp: Scalars['String']['output'];
+  startTimestamp: Scalars['String']['output'];
+};
+
 export type Query_HistoricalBalances_Items = {
   __typename?: 'query_historicalBalances_items';
   address: Scalars['String']['output'];
   balance: Scalars['String']['output'];
   blockNumber: Scalars['Float']['output'];
   tokenAddress: Scalars['String']['output'];
+};
+
+export type Query_HistoricalTokenData_Items = {
+  __typename?: 'query_historicalTokenData_items';
+  price: Scalars['String']['output'];
+  timestamp: Scalars['Float']['output'];
 };
 
 export type Query_HistoricalVotingPower_Items = {
@@ -1659,6 +1777,22 @@ export type Query_Transactions_Transactions_Items_Transfers_Items = {
   toAccountId: Scalars['String']['output'];
   tokenId: Scalars['String']['output'];
   transactionHash: Scalars['String']['output'];
+};
+
+export type Query_VotingPowerVariations_Items_Items = {
+  __typename?: 'query_votingPowerVariations_items_items';
+  absoluteChange: Scalars['String']['output'];
+  accountId: Scalars['String']['output'];
+  currentVotingPower: Scalars['String']['output'];
+  percentageChange: Scalars['String']['output'];
+  previousVotingPower?: Maybe<Scalars['String']['output']>;
+};
+
+export type Query_VotingPowerVariations_Period = {
+  __typename?: 'query_votingPowerVariations_period';
+  days: Scalars['String']['output'];
+  endTimestamp: Scalars['String']['output'];
+  startTimestamp: Scalars['String']['output'];
 };
 
 export type Query_VotingPowers_Items_Items = {
@@ -1800,6 +1934,55 @@ export type TokenPage = {
   items: Array<Token>;
   pageInfo: PageInfo;
   totalCount: Scalars['Int']['output'];
+};
+
+export type TokenPrice = {
+  __typename?: 'tokenPrice';
+  price: Scalars['BigInt']['output'];
+  timestamp: Scalars['BigInt']['output'];
+};
+
+export type TokenPriceFilter = {
+  AND?: InputMaybe<Array<InputMaybe<TokenPriceFilter>>>;
+  OR?: InputMaybe<Array<InputMaybe<TokenPriceFilter>>>;
+  price?: InputMaybe<Scalars['BigInt']['input']>;
+  price_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  price_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  price_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
+  price_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  price_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  price_not?: InputMaybe<Scalars['BigInt']['input']>;
+  price_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
+  timestamp?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
+  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_not?: InputMaybe<Scalars['BigInt']['input']>;
+  timestamp_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
+};
+
+export type TokenPricePage = {
+  __typename?: 'tokenPricePage';
+  items: Array<TokenPrice>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type Token_200_Response = {
+  __typename?: 'token_200_response';
+  cexSupply: Scalars['String']['output'];
+  circulatingSupply: Scalars['String']['output'];
+  decimals: Scalars['Float']['output'];
+  delegatedSupply: Scalars['String']['output'];
+  dexSupply: Scalars['String']['output'];
+  id: Scalars['String']['output'];
+  lendingSupply: Scalars['String']['output'];
+  name?: Maybe<Scalars['String']['output']>;
+  price: Scalars['String']['output'];
+  totalSupply: Scalars['String']['output'];
+  treasury: Scalars['String']['output'];
 };
 
 export type Transaction = {
@@ -2034,7 +2217,7 @@ export type VotesOnchain = {
   daoId: Scalars['String']['output'];
   proposal?: Maybe<ProposalsOnchain>;
   proposalId: Scalars['String']['output'];
-  reason: Scalars['String']['output'];
+  reason?: Maybe<Scalars['String']['output']>;
   support: Scalars['String']['output'];
   timestamp: Scalars['BigInt']['output'];
   txHash: Scalars['String']['output'];
@@ -2226,6 +2409,12 @@ export type VotingPowerHistoryPage = {
   items: Array<VotingPowerHistory>;
   pageInfo: PageInfo;
   totalCount: Scalars['Int']['output'];
+};
+
+export type VotingPowerVariations_200_Response = {
+  __typename?: 'votingPowerVariations_200_response';
+  items: Array<Maybe<Query_VotingPowerVariations_Items_Items>>;
+  period: Query_VotingPowerVariations_Period;
 };
 
 export type VotingPowers_200_Response = {
