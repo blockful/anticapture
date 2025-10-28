@@ -2,14 +2,13 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from "react";
-import { BadgeInAnalysis, Button } from "@/shared/components";
+import { Button } from "@/shared/components";
 import { useParams, useRouter } from "next/navigation";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { ChevronsUpDown } from "lucide-react";
 import { cn } from "@/shared/utils/";
 import { DaoAvatarIcon } from "@/shared/components/icons";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { SupportStageEnum } from "@/shared/types/enums";
 
 export const HeaderDAOSidebarDropdown = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -43,22 +42,21 @@ export const HeaderDAOSidebarDropdown = () => {
 
   const dropdownItems = useMemo(
     () => [
-      ...Object.values(DaoIdEnum).map((daoIdValue, index) => ({
-        id: index,
-        label: daoConfigByDaoId[daoIdValue].name,
-        icon: (
-          <DaoAvatarIcon
-            daoId={daoIdValue}
-            className="size-icon-md"
-            isRounded
-          />
-        ),
-        href: `/${daoIdValue.toLowerCase()}`,
-        name: daoIdValue,
-        isDisabled:
-          daoConfigByDaoId[daoIdValue].supportStage ===
-          SupportStageEnum.ANALYSIS,
-      })),
+      ...Object.values(DaoIdEnum)
+        .filter((daoId) => daoId !== DaoIdEnum.NOUNS) // TODO remove this when Nouns is fully supported
+        .map((daoIdValue, index) => ({
+          id: index,
+          label: daoConfigByDaoId[daoIdValue].name,
+          icon: (
+            <DaoAvatarIcon
+              daoId={daoIdValue}
+              className="size-icon-md"
+              isRounded
+            />
+          ),
+          href: `/${daoIdValue.toLowerCase()}`,
+          name: daoIdValue,
+        })),
     ],
     [],
   );
@@ -112,38 +110,20 @@ export const HeaderDAOSidebarDropdown = () => {
               variant="ghost"
               size="lg"
               key={item.id}
-              className={cn(
-                "w-full",
-                !item.isDisabled && "hover:bg-middle-dark",
-              )}
+              className={"w-full"}
               onClick={() => handleSelectItem(item.id, item.href || "")}
               role="menuitemradio"
               aria-checked={item.id === selectedHeaderSidebarItem}
-              disabled={item.isDisabled}
             >
               <div className="flex w-full items-center gap-1.5 sm:gap-2">
                 <DaoAvatarIcon
                   daoId={item.name}
-                  className={cn(
-                    "size-icon-xxs sm:size-icon-sm",
-                    item.isDisabled && "opacity-75",
-                  )}
+                  className={cn("size-icon-xxs sm:size-icon-sm")}
                   isRounded
                 />
-                <h1
-                  className={cn(
-                    "text-primary text-sm font-normal",
-                    item.isDisabled && "text-secondary opacity-75",
-                  )}
-                >
+                <h1 className={cn("text-primary text-sm font-normal")}>
                   {item.label}
                 </h1>
-                {item.isDisabled && (
-                  <BadgeInAnalysis
-                    iconClassName="size-3"
-                    className="text-xs font-medium"
-                  />
-                )}
               </div>
             </Button>
           ))}

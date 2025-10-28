@@ -31,10 +31,12 @@ export function normalizeDatasetAllTreasury(
     }))
     .sort((a, b) => a.timestamp - b.timestamp);
 
-  const sortedDataset = [...tokenPrices].sort((a, b) => a[0] - b[0]);
+  const sortedDataset = [...tokenPrices].sort(
+    (a, b) => a.timestamp - b.timestamp,
+  );
 
   // Map each token price point to a normalized data point
-  return sortedDataset.map(([timestamp, price]) => {
+  return sortedDataset.map(({ timestamp, price }) => {
     // Find the most recent asset value at or before this timestamp
     const lastAssetValue = findMostRecentValue(
       sortedAssets,
@@ -54,7 +56,7 @@ export function normalizeDatasetAllTreasury(
     );
 
     // Calculate the final value
-    const finalValue = price * lastHighValue + lastAssetValue;
+    const finalValue = Number(price) * lastHighValue + lastAssetValue;
 
     return {
       date: timestamp,

@@ -144,9 +144,9 @@ export const HeaderMobile = ({
             )}
             onClick={(e) => e.stopPropagation()}
           >
-            {menuItems.map((item) => (
+            {menuItems.map((item, id) => (
               <ButtonHeaderSidebar
-                key={item.anchorId + item.label}
+                key={id}
                 anchorId={item.anchorId || ""}
                 icon={item.icon}
                 label={item.label}

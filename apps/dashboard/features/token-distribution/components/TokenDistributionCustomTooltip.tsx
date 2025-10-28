@@ -79,6 +79,20 @@ export const TokenDistributionCustomTooltip: React.FC<
                 entry.name === "PROPOSALS_GOVERNANCE" ||
                 entry.name === "TOKEN_PRICE";
 
+              const point = payload[0].payload;
+
+              const getFormattedValue = () => {
+                if (typeof value === "string") return value;
+
+                if (entry.name === "PROPOSALS_GOVERNANCE") {
+                  return point.PROPOSALS_GOVERNANCE_TEXT;
+                }
+
+                const prefix = entry.name === "TOKEN_PRICE" ? "$" : "";
+                const suffix = shouldSkipDaoId ? "" : ` ${daoId}`;
+                return `${prefix}${formatNumberUserReadable(value)}${suffix}`;
+              };
+
               return (
                 <p
                   key={index}
@@ -89,11 +103,7 @@ export const TokenDistributionCustomTooltip: React.FC<
                   <strong
                     className={typeof value === "string" ? "break-words" : ""}
                   >
-                    {typeof value === "string"
-                      ? value
-                      : `${entry.name === "TOKEN_PRICE" ? "$" : ""}${formatNumberUserReadable(
-                          Number.isFinite(value) ? Math.floor(value) : 0,
-                        )}${shouldSkipDaoId ? "" : ` ${daoId}`}`}
+                    {getFormattedValue()}
                   </strong>
                 </p>
               );

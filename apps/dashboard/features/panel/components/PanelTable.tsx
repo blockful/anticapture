@@ -3,26 +3,21 @@
 import React, { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ColumnDef } from "@tanstack/react-table";
-import { PanelDao } from "@/shared/constants/mocked-data/mocked-data";
 import {
-  BadgeInAnalysis,
   SkeletonRow,
   RiskAreaCardEnum,
   RiskAreaCardWrapper,
   Button,
 } from "@/shared/components";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { TimeInterval } from "@/shared/types/enums/TimeInterval";
-import { useDelegatedSupply } from "@/shared/hooks";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { useScreenSize } from "@/shared/hooks";
-import { SupportStageEnum } from "@/shared/types/enums/SupportStageEnum";
+import { useScreenSize, useTokenData } from "@/shared/hooks";
 import {
   ArrowUpDown,
   ArrowState,
   DaoAvatarIcon,
 } from "@/shared/components/icons";
-import { cn, formatNumberUserReadable } from "@/shared/utils";
+import { formatNumberUserReadable } from "@/shared/utils";
 import { StageTag } from "@/features/resilience-stages/components";
 import { Stage } from "@/shared/types/enums/Stage";
 import {
@@ -32,15 +27,19 @@ import {
 import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
 import { Table } from "@/shared/components/design-system/table/Table";
 
-export const PanelTable = ({ days }: { days: TimeInterval }) => {
+type PanelDao = {
+  dao: string;
+  inAnalysis?: boolean;
+};
+
+export const PanelTable = () => {
   const router = useRouter();
   const { isMobile } = useScreenSize();
   // Create a ref to store the actual delegated supply values
   const delegatedSupplyValues = useRef<Record<number, number>>({});
 
   const notOnElectionDaoIds = Object.values(DaoIdEnum).filter(
-    (daoId) =>
-      daoConfigByDaoId[daoId].supportStage !== SupportStageEnum.ELECTION,
+    (daoId) => daoId !== DaoIdEnum.NOUNS, // TODO remove this when Nouns is fully supported
   );
   // Create initial data
   const data = notOnElectionDaoIds.map((daoId, index) => ({
@@ -52,24 +51,22 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
   const DelegatedSupplyCell = ({
     daoId,
     rowIndex,
-    days,
   }: {
     daoId: DaoIdEnum;
     rowIndex: number;
-    days: TimeInterval;
   }) => {
-    const { data: supplyData } = useDelegatedSupply(daoId, String(days));
+    const { data: tokenData } = useTokenData(daoId);
+    const delegatedSupply = tokenData?.delegatedSupply;
+
     // Store the numeric value in the ref when data changes
     useEffect(() => {
-      if (supplyData) {
-        const numericValue = Number(
-          BigInt(supplyData.currentDelegatedSupply) / BigInt(10 ** 18),
-        );
+      if (delegatedSupply) {
+        const numericValue = Number(BigInt(delegatedSupply) / BigInt(10 ** 18));
         delegatedSupplyValues.current[rowIndex] = numericValue;
       }
-    }, [supplyData, rowIndex]);
+    }, [delegatedSupply, rowIndex]);
 
-    if (!supplyData) {
+    if (!delegatedSupply) {
       return (
         <SkeletonRow
           parentClassName="flex animate-pulse justify-end pr-4"
@@ -79,7 +76,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
     }
 
     const formattedSupply = formatNumberUserReadable(
-      Number(BigInt(supplyData.currentDelegatedSupply) / BigInt(10 ** 18)),
+      Number(BigInt(delegatedSupply) / BigInt(10 ** 18)),
     );
 
     return (
@@ -142,16 +139,9 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
       accessorKey: "dao",
       cell: ({ row }) => {
         const dao: string = row.getValue("dao");
-        const details = dao ? daoConfigByDaoId[dao as DaoIdEnum] : null;
-        const isInAnalysis =
-          details?.supportStage === SupportStageEnum.ANALYSIS;
         return (
           <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto">
-            <div
-              className={cn("flex w-full gap-3", {
-                "w-full flex-col md:w-fit lg:flex-row": isInAnalysis,
-              })}
-            >
+            <div className={"flex w-full gap-3"}>
               <div className="flex w-full items-center gap-1.5">
                 {!isMobile && (
                   <DaoAvatarIcon
@@ -167,16 +157,6 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
                     : daoConfigByDaoId[dao as DaoIdEnum].name}
                 </p>
               </div>
-              {isInAnalysis && (
-                <>
-                  <div className="hidden w-full items-center lg:flex">
-                    <BadgeInAnalysis />
-                  </div>
-                  <div className="flex w-full items-center lg:hidden">
-                    <BadgeInAnalysis hasIcon={false} />
-                  </div>
-                </>
-              )}
             </div>
           </div>
         );
@@ -251,16 +231,7 @@ export const PanelTable = ({ days }: { days: TimeInterval }) => {
       cell: ({ row }) => {
         const daoId = row.getValue("dao") as DaoIdEnum;
         const rowIndex = row.index;
-        const isInAnalysis =
-          daoConfigByDaoId[daoId].supportStage === SupportStageEnum.ANALYSIS;
-        if (isInAnalysis) {
-          return (
-            <div className="justify-endtext-end flex items-center">{"-"}</div>
-          );
-        }
-        return (
-          <DelegatedSupplyCell daoId={daoId} rowIndex={rowIndex} days={days} />
-        );
+        return <DelegatedSupplyCell daoId={daoId} rowIndex={rowIndex} />;
       },
       header: ({ column }) => (
         <Button
