@@ -209,7 +209,8 @@ export const useChartMetrics = ({
         result[normalizeTimestamp(timestamp)] = {
           ...result[normalizeTimestamp(timestamp)],
           date: normalizeTimestamp(timestamp),
-          PROPOSALS_GOVERNANCE: proposal.title || "",
+          PROPOSALS_GOVERNANCE: 1,
+          PROPOSALS_GOVERNANCE_TEXT: proposal.title || "",
         };
         // }
       });
@@ -226,10 +227,15 @@ export const useChartMetrics = ({
     [timeSeriesDatasets, tokenPriceDatasets, proposalsDatasets].forEach(
       (dataset) => {
         Object.entries(dataset).forEach(([key, value]) => {
-          result[key] = {
-            ...result[key],
-            ...value,
-          };
+          if (!result[key]) {
+            result[key] = value;
+          } else {
+            Object.entries(value).forEach(([k, v]) => {
+              if (result[key][k] === undefined) {
+                result[key][k] = v;
+              }
+            });
+          }
         });
       },
     );
@@ -265,6 +271,12 @@ export const useChartMetrics = ({
           } else {
             processedPoint[metricKey] = 0;
           }
+        }
+      });
+
+      Object.entries(point).forEach(([key, value]) => {
+        if (!processedPoint[key]) {
+          processedPoint[key] = value;
         }
       });
 
