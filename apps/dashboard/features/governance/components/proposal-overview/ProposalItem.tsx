@@ -43,25 +43,25 @@ export const getTextStatusColor = (status: ProposalStatus) => {
 export const getBackgroundStatusColor = (status: ProposalStatus) => {
   switch (status) {
     case ProposalStatus.PENDING:
-      return "bg-warning";
+      return "bg-surface-opacity-warning";
     case ProposalStatus.ONGOING:
       return "bg-surface-opacity-brand";
     case ProposalStatus.EXECUTED:
-      return "bg-success";
+      return "bg-surface-opacity-success";
     case ProposalStatus.DEFEATED:
-      return "bg-error";
+      return "bg-surface-opacity-error";
     case ProposalStatus.CANCELLED:
-      return "bg-error";
+      return "bg-surface-opacity-error";
     case ProposalStatus.QUEUED:
-      return "bg-primary";
+      return "bg-surface-opacity-brand";
     case ProposalStatus.SUCCEEDED:
-      return "bg-success";
+      return "bg-surface-opacity-success";
     case ProposalStatus.EXPIRED:
-      return "bg-error";
+      return "bg-surface-opacity-error";
     case ProposalStatus.NO_QUORUM:
-      return "bg-secondary";
+      return "bg-surface-opacity";
     default:
-      return "bg-secondary";
+      return "bg-surface-opacity";
   }
 };
 
