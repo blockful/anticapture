@@ -5,8 +5,7 @@ import { User2Icon, X, CheckCircle2, ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Query_Proposals_Items_Items } from "@anticapture/graphql-client/hooks";
 import EnsGovernorAbi from "@/abis/ens-governor.json";
-import loadingAnimation from "@/public/loading-animation.json";
-import Lottie from "lottie-react";
+
 import {
   Account,
   Chain,
@@ -20,13 +19,13 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
 import toast from "react-hot-toast";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
-import Link from "next/link";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { DotFilledIcon } from "@radix-ui/react-icons";
 interface VotingModalProps {
   isOpen: boolean;
   onClose: () => void;
   proposal: Query_Proposals_Items_Items;
+  votingPower: string;
 }
 
 const getDaoGovernanceAddress = (daoId: DaoIdEnum) => {
@@ -134,6 +133,7 @@ export const VotingModal = ({
   isOpen,
   onClose,
   proposal,
+  votingPower,
 }: VotingModalProps) => {
   const [vote, setVote] = useState<string>("");
   const [comment, setComment] = useState<string>("");
@@ -225,26 +225,13 @@ export const VotingModal = ({
 
         {/* Content */}
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-4">
-            <Lottie
-              animationData={loadingAnimation}
-              loop={true}
-              className="w-1/2"
-            />
-
-            {transactionhash && (
-              <p className="text-secondary font-inter text-center text-[14px] font-normal not-italic leading-[20px]">
-                Transaction hash:{" "}
-                <Link
-                  href={`https://etherscan.io/tx/${transactionhash}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {transactionhash}
-                </Link>
-              </p>
-            )}
-          </div>
+          <LoadingComponent
+            transactionhash={transactionhash}
+            proposalId={proposal?.id as string}
+            proposalTitle={proposal?.title as string}
+            votingPower={votingPower}
+            vote={vote as "for" | "against" | "abstain"}
+          />
         ) : (
           <>
             {/* your vote  */}
@@ -368,6 +355,70 @@ export const VotingModal = ({
             Submit
           </Button>
         </div>
+      </div>
+    </div>
+  );
+};
+
+interface LoadingComponentProps {
+  transactionhash: string;
+  proposalId: string;
+  proposalTitle: string;
+  votingPower: string;
+  vote: "for" | "against" | "abstain";
+}
+
+const LoadingComponent = ({
+  transactionhash,
+  proposalId,
+  proposalTitle,
+  votingPower,
+  vote,
+}: LoadingComponentProps) => {
+  console.log(transactionhash);
+
+  return (
+    <div className="flex flex-col items-start justify-start gap-3 p-4">
+      <div className="flex items-start justify-start">
+        <p className="font-inter text-secondary w-[116px] shrink-0 text-[12px] font-medium not-italic leading-[20px]">
+          Proposal ID
+        </p>
+        <p className="font-inter text-primary break-all text-[14px] font-normal not-italic leading-[20px]">
+          {proposalId}
+        </p>
+      </div>
+      <div className="flex items-start justify-start">
+        <p className="font-inter text-secondary w-[116px] shrink-0 text-[12px] font-medium not-italic leading-[20px]">
+          Proposal Title
+        </p>
+        <p className="font-inter text-primary break-all text-[14px] font-normal not-italic leading-[20px]">
+          {proposalTitle}
+        </p>
+      </div>
+      <div className="flex items-start justify-start">
+        <p className="font-inter text-secondary w-[116px] shrink-0 text-[12px] font-medium not-italic leading-[20px]">
+          Voting Power
+        </p>
+        <p className="font-inter text-primary text-[14px] font-normal not-italic leading-[20px]">
+          {votingPower}
+        </p>
+      </div>
+      <div className="flex items-start justify-start">
+        <p className="font-inter text-secondary w-[116px] shrink-0 text-[12px] font-medium not-italic leading-[20px]">
+          Vote
+        </p>
+        <p
+          className={cn(
+            "font-inter text-primary rounded-full px-[6px] py-0.5 text-[12px] font-medium not-italic leading-[16px]",
+            vote === "for"
+              ? "text-success bg-surface-opacity-success"
+              : vote === "against"
+                ? "text-error bg-surface-opacity-error"
+                : "text-primary bg-surface-default",
+          )}
+        >
+          {vote === "for" ? "For" : vote === "against" ? "Against" : "Abstain"}
+        </p>
       </div>
     </div>
   );

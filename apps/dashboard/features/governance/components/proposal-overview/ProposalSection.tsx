@@ -95,6 +95,7 @@ export const ProposalSection = () => {
           isOpen={isVotingModalOpen}
           onClose={() => setIsVotingModalOpen(false)}
           proposal={proposal as Query_Proposals_Items_Items}
+          votingPower={votingPower}
         />
       </div>
     </div>
