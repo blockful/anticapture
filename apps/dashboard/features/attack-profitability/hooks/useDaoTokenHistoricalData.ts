@@ -50,6 +50,7 @@ export const useDaoTokenHistoricalData = ({
     () =>
       fetchDaoTokenHistoricalData({
         daoId,
+        limit,
       }),
     { revalidateOnFocus: false, ...config },
   );
