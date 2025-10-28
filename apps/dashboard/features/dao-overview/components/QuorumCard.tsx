@@ -58,7 +58,8 @@ const resolveQuorum = (
       }
       break;
     }
-    case QUORUM_CALCULATION_TYPES.SCROLL || QUORUM_CALCULATION_TYPES.OBOL: {
+    case QUORUM_CALCULATION_TYPES.SCROLL:
+    case QUORUM_CALCULATION_TYPES.OBOL: {
       // SCROLL: Quorum fixed at 0.21% total $SCR
       // OBOL: Quorum fixed at 0.84% total $OBOL
       if (calculable) {
@@ -106,7 +107,7 @@ export const QuorumCard = () => {
     useTimeSeriesData(
       daoIdEnum,
       [MetricTypesEnum.TOTAL_SUPPLY],
-      TimeInterval.SEVEN_DAYS,
+      TimeInterval.ONE_YEAR, // Changed from SEVEN_DAYS to ensure we get historical data
     );
 
   const { data: delegatedSupply } = useDelegatedSupply(

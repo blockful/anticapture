@@ -125,9 +125,6 @@ type Query {
   """Get the last update time"""
   lastUpdate(chart: queryInput_lastUpdate_chart!): lastUpdate_200_response
 
-  """Get delegation percentage day buckets with forward-fill"""
-  getDelegationPercentage(startDate: String, endDate: String, orderDirection: queryInput_getDelegationPercentage_orderDirection = asc, limit: NonNegativeInt = 365, after: String, before: String): getDelegationPercentage_200_response
-
   """Returns a list of voting power changes"""
   votingPowers(account: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_votingPowers_orderBy = timestamp, orderDirection: queryInput_votingPowers_orderDirection = desc, minDelta: String, maxDelta: String): votingPowers_200_response
 
@@ -1806,28 +1803,6 @@ enum queryInput_lastUpdate_chart {
   cost_comparison
   attack_profitability
   token_distribution
-}
-
-type getDelegationPercentage_200_response {
-  items: [query_getDelegationPercentage_items_items]!
-  totalCount: Float!
-  pageInfo: query_getDelegationPercentage_pageInfo!
-}
-
-type query_getDelegationPercentage_items_items {
-  date: String!
-  high: String!
-}
-
-type query_getDelegationPercentage_pageInfo {
-  hasNextPage: Boolean!
-  endDate: String
-  startDate: String
-}
-
-enum queryInput_getDelegationPercentage_orderDirection {
-  asc
-  desc
 }
 
 type votingPowers_200_response {
