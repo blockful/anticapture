@@ -109,6 +109,8 @@ type Query {
     offset: NonNegativeInt
     sortBy: timestamp_const
     sortOrder: queryInput_transactions_sortOrder = desc
+    fromDate: Int
+    toDate: Int
     from: String
     to: String
     minAmount: String
@@ -138,6 +140,9 @@ type Query {
 
   """Get total assets"""
   totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
+
+  """Get delegation percentage day buckets with forward-fill"""
+  delegationPercentageByDay(startDate: String, endDate: String, orderDirection: queryInput_delegationPercentageByDay_orderDirection = asc, limit: NonNegativeInt = 365, after: String, before: String): delegationPercentageByDay_200_response
 }
 
 """
@@ -1522,8 +1527,8 @@ enum queryInput_compareVotes_days {
 }
 
 type compareAverageTurnout_200_response {
-  currentAverageTurnout: Float!
-  oldAverageTurnout: Float!
+  currentAverageTurnout: String!
+  oldAverageTurnout: String!
   changeRate: Float!
 }
 
@@ -1609,7 +1614,7 @@ type query_proposals_items_items {
   daoId: String!
   txHash: String!
   proposerAccountId: String!
-  title: String
+  title: String!
   description: String!
   startBlock: Float!
   endBlock: Float!
@@ -1636,7 +1641,7 @@ type proposal_200_response {
   daoId: String!
   txHash: String!
   proposerAccountId: String!
-  title: String
+  title: String!
   description: String!
   startBlock: Float!
   endBlock: Float!
@@ -1892,4 +1897,26 @@ enum queryInput_totalAssets_days {
   _90d
   _180d
   _365d
+}
+
+type delegationPercentageByDay_200_response {
+  items: [query_delegationPercentageByDay_items_items]!
+  totalCount: Float!
+  pageInfo: query_delegationPercentageByDay_pageInfo!
+}
+
+type query_delegationPercentageByDay_items_items {
+  date: String!
+  high: String!
+}
+
+type query_delegationPercentageByDay_pageInfo {
+  hasNextPage: Boolean!
+  endDate: String
+  startDate: String
+}
+
+enum queryInput_delegationPercentageByDay_orderDirection {
+  asc
+  desc
 }
