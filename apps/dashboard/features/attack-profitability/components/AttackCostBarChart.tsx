@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import {
   useActiveSupply,
   useAverageTurnout,
@@ -68,7 +68,6 @@ export const AttackCostBarChart = ({
 }: AttackCostBarChartProps) => {
   const { daoId }: { daoId: string } = useParams();
   const selectedDaoId = daoId.toUpperCase() as DaoIdEnum;
-  const [mocked, setMocked] = useState(false);
   const timeInterval = TimeInterval.NINETY_DAYS;
 
   const liquidTreasury = useTreasuryAssetNonDaoToken(
@@ -103,22 +102,6 @@ export const AttackCostBarChart = ({
 
   const { isMobile } = useScreenSize();
 
-  useEffect(() => {
-    setMocked(
-      delegatedSupply.data?.currentDelegatedSupply === undefined &&
-        activeSupply.data?.activeSupply === undefined &&
-        averageTurnout.data?.currentAverageTurnout === undefined &&
-        daoTopTokenHolderExcludingTheDao?.balance === undefined &&
-        vetoCouncilVotingPower === undefined,
-    );
-  }, [
-    delegatedSupply.data?.currentDelegatedSupply,
-    activeSupply.data?.activeSupply,
-    averageTurnout.data?.currentAverageTurnout,
-    daoTopTokenHolderExcludingTheDao?.balance,
-    vetoCouncilVotingPower,
-  ]);
-
   const isLoading =
     liquidTreasury.loading ||
     delegatedSupply.isLoading ||
@@ -127,6 +110,22 @@ export const AttackCostBarChart = ({
     daoTokenPriceHistoricalDataLoading ||
     daoTopTokenHolderExcludingTheDaoLoading ||
     isVetoCouncilLoading;
+
+  const mocked = useMemo(() => {
+    return (
+      delegatedSupply.data?.currentDelegatedSupply === undefined &&
+      activeSupply.data?.activeSupply === undefined &&
+      averageTurnout.data?.currentAverageTurnout === undefined &&
+      daoTopTokenHolderExcludingTheDao?.balance === undefined &&
+      vetoCouncilVotingPower === undefined
+    );
+  }, [
+    delegatedSupply.data?.currentDelegatedSupply,
+    activeSupply.data?.activeSupply,
+    averageTurnout.data?.currentAverageTurnout,
+    daoTopTokenHolderExcludingTheDao?.balance,
+    vetoCouncilVotingPower,
+  ]);
 
   const chartData: ChartDataItem[] = useMemo(() => {
     if (isLoading) return [];
@@ -234,12 +233,16 @@ export const AttackCostBarChart = ({
     daoTopTokenHolderExcludingTheDao?.balance,
   ]);
 
+  const prevCsvRef = useRef<string>("");
+
   useEffect(() => {
-    if (!mocked && chartData.length) {
+    if (mocked || !chartData.length) return;
+    const serialized = JSON.stringify(chartData);
+    if (serialized !== prevCsvRef.current) {
+      prevCsvRef.current = serialized;
       setCsvData(chartData as Data);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chartData, mocked]);
+  }, [chartData, mocked, setCsvData]);
 
   if (isLoading) {
     return (
