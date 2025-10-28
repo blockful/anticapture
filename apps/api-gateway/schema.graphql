@@ -1548,8 +1548,8 @@ enum queryInput_compareVotes_days {
 }
 
 type compareAverageTurnout_200_response {
-  currentAverageTurnout: Float!
-  oldAverageTurnout: Float!
+  currentAverageTurnout: String!
+  oldAverageTurnout: String!
   changeRate: Float!
 }
 
@@ -1635,7 +1635,7 @@ type query_proposals_items_items {
   daoId: String!
   txHash: String!
   proposerAccountId: String!
-  title: String
+  title: String!
   description: String!
   startBlock: Float!
   endBlock: Float!
@@ -1662,7 +1662,7 @@ type proposal_200_response {
   daoId: String!
   txHash: String!
   proposerAccountId: String!
-  title: String
+  title: String!
   description: String!
   startBlock: Float!
   endBlock: Float!

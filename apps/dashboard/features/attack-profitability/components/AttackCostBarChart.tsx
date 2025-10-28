@@ -139,14 +139,9 @@ export const AttackCostBarChart = ({
     const lastPrice =
       prices.length > 0 ? Number(prices[prices.length - 1].price) : 0;
 
-    const formatValue = (value: number, token: "ERC20" | "ERC721"): number => {
-      const formattedValue =
-        token === "ERC20"
-          ? Number(formatEther(BigInt(Math.floor(value))))
-          : value;
-
-      if (valueMode === "usd") return formattedValue * lastPrice;
-      return formattedValue;
+    const formatValue = (value: number, lastPrice: number): number => {
+      if (valueMode === "usd") return value * lastPrice;
+      return value;
     };
 
     return [
@@ -169,8 +164,14 @@ export const AttackCostBarChart = ({
         id: "delegatedSupply",
         name: "Delegated Supply",
         value: formatValue(
-          Number(delegatedSupply.data?.currentDelegatedSupply),
-          daoConfig.daoOverview.token,
+          daoConfig.daoOverview.token === "ERC20"
+            ? Number(
+                formatEther(
+                  BigInt(delegatedSupply.data?.currentDelegatedSupply || 0),
+                ),
+              )
+            : Number(delegatedSupply.data?.currentDelegatedSupply),
+          lastPrice,
         ),
         type: BarChartEnum.REGULAR,
         customColor: "#EC762ECC",
@@ -181,8 +182,10 @@ export const AttackCostBarChart = ({
         type: BarChartEnum.REGULAR,
         customColor: "#EC762EE6",
         value: formatValue(
-          Number(activeSupply.data?.activeSupply),
-          daoConfig.daoOverview.token,
+          daoConfig.daoOverview.token === "ERC20"
+            ? Number(formatEther(BigInt(activeSupply.data?.activeSupply || 0)))
+            : Number(activeSupply.data?.activeSupply),
+          lastPrice,
         ),
       },
       {
@@ -191,8 +194,14 @@ export const AttackCostBarChart = ({
         type: BarChartEnum.REGULAR,
         customColor: "#EC762EB3",
         value: formatValue(
-          Number(averageTurnout.data?.currentAverageTurnout),
-          daoConfig.daoOverview.token,
+          daoConfig.daoOverview.token === "ERC20"
+            ? Number(
+                formatEther(
+                  BigInt(averageTurnout.data?.currentAverageTurnout || 0),
+                ),
+              )
+            : Number(averageTurnout.data?.currentAverageTurnout),
+          lastPrice,
         ),
       },
       {
@@ -201,22 +210,28 @@ export const AttackCostBarChart = ({
         type: BarChartEnum.REGULAR,
         customColor: "#EC762E80",
         value: formatValue(
-          Number(daoTopTokenHolderExcludingTheDao?.balance),
-          daoConfig.daoOverview.token,
+          daoConfig.daoOverview.token === "ERC20"
+            ? Number(
+                formatEther(
+                  BigInt(daoTopTokenHolderExcludingTheDao?.balance || 0),
+                ),
+              )
+            : Number(daoTopTokenHolderExcludingTheDao?.balance),
+          lastPrice,
         ),
       },
     ];
   }, [
-    // fixing this causes an exahaustive-deps re-render for OP and UNI
     isLoading,
     mocked,
-    liquidTreasury.data?.[0]?.totalAssets,
-    delegatedSupply?.data?.currentDelegatedSupply,
-    activeSupply?.data?.activeSupply,
-    averageTurnout?.data?.currentAverageTurnout,
-    daoTopTokenHolderExcludingTheDao?.balance,
     daoTokenPriceHistoricalData,
     valueMode,
+    liquidTreasury.data,
+    delegatedSupply.data?.currentDelegatedSupply,
+    daoConfig.daoOverview.token,
+    activeSupply.data?.activeSupply,
+    averageTurnout.data?.currentAverageTurnout,
+    daoTopTokenHolderExcludingTheDao?.balance,
   ]);
 
   useEffect(() => {

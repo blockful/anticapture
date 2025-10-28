@@ -7,6 +7,7 @@ export const DAYS_IN_YEAR = 365;
 export const CONTRACT_ADDRESSES = {
   [DaoIdEnum.UNI]: {
     blockTime: 12,
+    tokenType: "ERC20",
     // https://etherscan.io/address/0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984
     token: {
       address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
@@ -21,6 +22,7 @@ export const CONTRACT_ADDRESSES = {
   },
   [DaoIdEnum.ENS]: {
     blockTime: 12,
+    tokenType: "ERC20",
     // https://etherscan.io/address/0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72
     token: {
       address: "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
@@ -36,6 +38,7 @@ export const CONTRACT_ADDRESSES = {
   [DaoIdEnum.ARB]: {
     blockTime: 0.25,
     // https://arbiscan.io/address/0x912CE59144191C1204E64559FE8253a0e49E6548
+    tokenType: "ERC20",
     token: {
       address: "0x912CE59144191C1204E64559FE8253a0e49E6548",
       decimals: 18,
@@ -44,6 +47,7 @@ export const CONTRACT_ADDRESSES = {
   },
   [DaoIdEnum.OP]: {
     blockTime: 2,
+    tokenType: "ERC20",
     // https://optimistic.etherscan.io/token/0x4200000000000000000000000000000000000042
     token: {
       address: "0x4200000000000000000000000000000000000042",
@@ -58,6 +62,7 @@ export const CONTRACT_ADDRESSES = {
   },
   [DaoIdEnum.TEST]: {
     blockTime: 12,
+    tokenType: "ERC20",
     token: {
       address: "0x244dE6b06E7087110b94Cde88A42d9aBA17efa52",
       decimals: 18,
@@ -71,6 +76,7 @@ export const CONTRACT_ADDRESSES = {
   [DaoIdEnum.GTC]: {
     blockTime: 12,
     // https://etherscan.io/address/0xDe30da39c46104798bB5aA3fe8B9e0e1F348163F
+    tokenType: "ERC20",
     token: {
       address: "0xDe30da39c46104798bB5aA3fe8B9e0e1F348163F",
       decimals: 18,
@@ -89,6 +95,7 @@ export const CONTRACT_ADDRESSES = {
   },
   [DaoIdEnum.NOUNS]: {
     blockTime: 12,
+    tokenType: "ERC721",
     token: {
       // https://etherscan.io/token/0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03
       address: "0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03",
@@ -109,6 +116,7 @@ export const CONTRACT_ADDRESSES = {
   [DaoIdEnum.SCR]: {
     blockTime: 1.5,
     // https://scrollscan.com/address/0xd29687c813D741E2F938F4aC377128810E217b1b
+    tokenType: "ERC20",
     token: {
       address: "0xd29687c813D741E2F938F4aC377128810E217b1b",
       decimals: 18,

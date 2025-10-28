@@ -18,6 +18,7 @@ import { Address } from "viem";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
+import daoConfig from "@/shared/dao-config";
 
 interface DelegateTableData {
   address: string;
@@ -66,6 +67,9 @@ export const Delegates = ({
   // State for managing sort order
   const [sortBy, setSortBy] = useState<string>("votingPower");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const {
+    daoOverview: { token },
+  } = daoConfig[daoId];
 
   // State for address filtering
   const [currentAddressFilter, setCurrentAddressFilter] = useState<string>("");
@@ -126,7 +130,10 @@ export const Delegates = ({
 
     return data.map((delegate): DelegateTableData => {
       const votingPowerBigInt = BigInt(delegate.votingPower || "0");
-      const votingPowerFormatted = Number(votingPowerBigInt / BigInt(10 ** 18));
+      const votingPowerFormatted =
+        token === "ERC20"
+          ? Number(votingPowerBigInt / BigInt(10 ** 18))
+          : Number(votingPowerBigInt);
 
       const activity = delegate.proposalsActivity
         ? `${delegate.proposalsActivity.votedProposals}/${delegate.proposalsActivity.totalProposals}`
@@ -147,9 +154,10 @@ export const Delegates = ({
         const historicalVotingPowerBigInt = BigInt(
           delegate.historicalVotingPower,
         );
-        const historicalVotingPowerFormatted = Number(
-          historicalVotingPowerBigInt / BigInt(10 ** 18),
-        );
+        const historicalVotingPowerFormatted =
+          token === "ERC20"
+            ? Number(historicalVotingPowerBigInt / BigInt(10 ** 18))
+            : Number(historicalVotingPowerBigInt);
 
         const absoluteChange =
           votingPowerFormatted - historicalVotingPowerFormatted;
@@ -175,7 +183,7 @@ export const Delegates = ({
         delegators: delegate.delegationsCount,
       };
     });
-  }, [data]);
+  }, [data, token]);
 
   const delegateColumns: ColumnDef<DelegateTableData>[] = [
     {

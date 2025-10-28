@@ -91,7 +91,7 @@ if (!daoClient) {
   throw new Error(`Client not found for DAO ${env.DAO_ID}`);
 }
 
-const { blockTime } = CONTRACT_ADDRESSES[env.DAO_ID];
+const { blockTime, tokenType } = CONTRACT_ADDRESSES[env.DAO_ID];
 
 const repo = new DrizzleRepository();
 const votingPowerRepo = new VotingPowerRepository();
@@ -132,7 +132,7 @@ token(
 );
 
 tokenDistribution(app, repo);
-governanceActivity(app, repo);
+governanceActivity(app, repo, tokenType);
 proposalsActivity(app, proposalsRepo, env.DAO_ID, daoClient);
 proposals(app, new ProposalsService(repo, daoClient), daoClient, blockTime);
 historicalOnchain(
