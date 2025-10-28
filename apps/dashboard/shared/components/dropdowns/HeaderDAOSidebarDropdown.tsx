@@ -1,7 +1,6 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import { useState, useRef, useEffect, useMemo } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/shared/components";
 import { useParams, useRouter } from "next/navigation";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -9,6 +8,14 @@ import { ChevronsUpDown } from "lucide-react";
 import { cn } from "@/shared/utils/";
 import { DaoAvatarIcon } from "@/shared/components/icons";
 import daoConfigByDaoId from "@/shared/dao-config";
+
+type Item = {
+  id: number;
+  label: string;
+  icon: React.ReactNode;
+  href: string;
+  name: string;
+};
 
 export const HeaderDAOSidebarDropdown = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -18,6 +25,7 @@ export const HeaderDAOSidebarDropdown = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { daoId } = useParams<{ daoId: string }>();
 
+  // restore selected item on mount
   useEffect(() => {
     const savedItem = sessionStorage.getItem("selectedHeaderSidebarItem");
     if (savedItem) {
@@ -25,41 +33,42 @@ export const HeaderDAOSidebarDropdown = () => {
     }
   }, []);
 
+  const handleClickOutside = useCallback((event: MouseEvent) => {
+    if (
+      dropdownRef.current &&
+      !dropdownRef.current.contains(event.target as Node)
+    ) {
+      setIsOpen(false);
+    }
+  }, []);
+
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [handleClickOutside]);
 
-  const dropdownItems = useMemo(
-    () => [
-      ...Object.values(DaoIdEnum)
-        .filter((daoId) => daoId !== DaoIdEnum.NOUNS) // TODO remove this when Nouns is fully supported
-        .map((daoIdValue, index) => ({
-          id: index,
-          label: daoConfigByDaoId[daoIdValue].name,
-          icon: (
-            <DaoAvatarIcon
-              daoId={daoIdValue}
-              className="size-icon-md"
-              isRounded
-            />
-          ),
-          href: `/${daoIdValue.toLowerCase()}`,
-          name: daoIdValue,
-        })),
-    ],
-    [],
-  );
+  // stable, single-build dropdown items (imports are static)
+  const dropdownItemsRef = useRef<Item[] | null>(null);
+  if (!dropdownItemsRef.current) {
+    dropdownItemsRef.current = Object.values(DaoIdEnum)
+      .filter((id) => id !== DaoIdEnum.NOUNS) // TODO: remove when Nouns is fully supported
+      .map((daoIdValue, index) => ({
+        id: index,
+        label: daoConfigByDaoId[daoIdValue].name,
+        icon: (
+          <DaoAvatarIcon
+            daoId={daoIdValue}
+            className="size-icon-md"
+            isRounded
+          />
+        ),
+        href: `/${daoIdValue.toLowerCase()}`,
+        name: daoIdValue,
+      }));
+  }
+  const dropdownItems = dropdownItemsRef.current!;
 
   const currentItem = dropdownItems.find(
     (item) => item.name === daoId.toUpperCase(),
@@ -117,7 +126,7 @@ export const HeaderDAOSidebarDropdown = () => {
             >
               <div className="flex w-full items-center gap-1.5 sm:gap-2">
                 <DaoAvatarIcon
-                  daoId={item.name}
+                  daoId={item.name as DaoIdEnum}
                   className={cn("size-icon-xxs sm:size-icon-sm")}
                   isRounded
                 />
