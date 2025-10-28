@@ -5,6 +5,7 @@ import {
   GetProposalQuery,
   useGetProposalQuery,
 } from "@anticapture/graphql-client/hooks";
+import { getProposalStatus } from "@/features/governance/utils";
 
 export interface UseProposalResult {
   proposal: GetProposalQuery["proposal"] | null;
@@ -38,7 +39,10 @@ export const useProposal = ({
       return null;
     }
 
-    return data.proposal;
+    return {
+      ...data.proposal,
+      status: getProposalStatus(data.proposal.status),
+    };
   }, [data]);
 
   return {

@@ -15,12 +15,12 @@ interface ProposalItemProps {
   className?: string;
 }
 
-const getTextStatusColor = (status: ProposalStatus) => {
+export const getTextStatusColor = (status: ProposalStatus) => {
   switch (status) {
     case ProposalStatus.PENDING:
       return "text-warning";
     case ProposalStatus.ONGOING:
-      return "text-primary";
+      return "text-link";
     case ProposalStatus.EXECUTED:
       return "text-success";
     case ProposalStatus.DEFEATED:
@@ -40,12 +40,12 @@ const getTextStatusColor = (status: ProposalStatus) => {
   }
 };
 
-const getBackgroundStatusColor = (status: ProposalStatus) => {
+export const getBackgroundStatusColor = (status: ProposalStatus) => {
   switch (status) {
     case ProposalStatus.PENDING:
       return "bg-warning";
     case ProposalStatus.ONGOING:
-      return "bg-primary";
+      return "bg-surface-opacity-brand";
     case ProposalStatus.EXECUTED:
       return "bg-success";
     case ProposalStatus.DEFEATED:
