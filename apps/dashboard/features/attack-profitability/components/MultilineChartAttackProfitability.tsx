@@ -57,7 +57,7 @@ export const MultilineChartAttackProfitability = ({
 
   const { data: treasuryAssetNonDAOToken = [] } = useTreasuryAssetNonDaoToken(
     daoEnum,
-    TimeInterval.ONE_YEAR,
+    days,
   );
 
   const { data: daoTokenPriceHistoricalData } = useDaoTokenHistoricalData({
