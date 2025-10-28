@@ -5,14 +5,8 @@ import { formatNumberUserReadable } from "@/shared/utils/";
 import { TextCardDaoInfoItem } from "@/features/dao-overview/components";
 import { Badge, Clock, Users } from "lucide-react";
 import { useParams } from "next/navigation";
-import {
-  useDaoData,
-  useDelegatedSupply,
-  useTimeSeriesData,
-} from "@/shared/hooks";
+import { useDaoData, useTokenData } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
-import { TimeInterval } from "@/shared/types/enums";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
@@ -101,19 +95,10 @@ export const QuorumCard = () => {
   const daoConfig = daoConfigByDaoId[daoIdEnum];
   const { logic, proposalThreshold } = daoConfig.daoOverview.rules;
 
-  const { data: timeSeriesData, isLoading: isTimeSeriesDataLoading } =
-    useTimeSeriesData(
-      daoIdEnum,
-      [MetricTypesEnum.TOTAL_SUPPLY],
-      TimeInterval.SEVEN_DAYS,
-    );
+  const { data: tokenData, isLoading: isTokenDataLoading } =
+    useTokenData(daoIdEnum);
 
-  const { data: delegatedSupply } = useDelegatedSupply(
-    daoIdEnum,
-    TimeInterval.SEVEN_DAYS,
-  );
-
-  if (isDaoDataLoading || isTimeSeriesDataLoading) {
+  if (isDaoDataLoading || isTokenDataLoading) {
     return <SkeletonDaoInfoCards />;
   }
 
@@ -152,20 +137,20 @@ export const QuorumCard = () => {
     );
   }
 
-  const totalSupply =
-    timeSeriesData?.[MetricTypesEnum.TOTAL_SUPPLY]?.at(-1)?.high ?? null;
-
   const { value: quorumValue, percentage: quorumPercentage } = resolveQuorum(
     daoData?.quorum,
-    totalSupply,
+    tokenData?.totalSupply,
     daoConfig.daoOverview.rules?.quorumCalculation,
-    delegatedSupply?.currentDelegatedSupply,
+    tokenData?.delegatedSupply,
   );
 
   const {
     value: proposalThresholdValue,
     percentage: proposalThresholdPercentageFormatted,
-  } = resolveProposalThreshold(daoData?.proposalThreshold, totalSupply);
+  } = resolveProposalThreshold(
+    daoData?.proposalThreshold,
+    tokenData?.totalSupply,
+  );
 
   const proposalThresholdText = `${proposalThresholdValue} ${daoData?.id || "Unknown ID"} ${proposalThresholdPercentageFormatted}`;
   const textCardDaoInfo = proposalThreshold ?? proposalThresholdText;
