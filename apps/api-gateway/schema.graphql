@@ -145,11 +145,11 @@ type Query {
   accountBalanceVariations(days: queryInput_accountBalanceVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalanceVariations_orderDirection = desc): accountBalanceVariations_200_response
 
   """
-  Aggregated delegation supply across all supported DAOs.
+  Average delegation percentage across all supported DAOs by day.
   Returns the mean delegation percentage for each day in the specified range.
   Only includes dates where ALL DAOs have data available.
   """
-  aggregatedDelegatedSupply(
+  averageDelegationPercentageByDay(
     """
     Start date (Unix timestamp in seconds). Required.
     All DAOs will return data starting from this date.
@@ -176,7 +176,7 @@ type Query {
 
     """Maximum number of items to return. Default: 100"""
     limit: Int
-  ): AggregatedDelegatedSupplyPage!
+  ): AverageDelegationPercentagePage!
 }
 
 """
@@ -1576,8 +1576,8 @@ enum queryInput_compareVotes_days {
 }
 
 type compareAverageTurnout_200_response {
-  currentAverageTurnout: Float!
-  oldAverageTurnout: Float!
+  currentAverageTurnout: String!
+  oldAverageTurnout: String!
   changeRate: Float!
 }
 
@@ -1663,7 +1663,7 @@ type query_proposals_items_items {
   daoId: String!
   txHash: String!
   proposerAccountId: String!
-  title: String
+  title: String!
   description: String!
   startBlock: Float!
   endBlock: Float!
@@ -1690,7 +1690,7 @@ type proposal_200_response {
   daoId: String!
   txHash: String!
   proposerAccountId: String!
-  title: String
+  title: String!
   description: String!
   startBlock: Float!
   endBlock: Float!
@@ -1957,13 +1957,18 @@ enum HTTPMethod {
   PATCH
 }
 
-type AggregatedDelegatedSupplyItem {
+type AverageDelegationPercentageItem {
   date: String!
   high: String!
 }
 
-type AggregatedDelegatedSupplyPage {
-  items: [AggregatedDelegatedSupplyItem!]!
+type AverageDelegationPercentagePage {
+  items: [AverageDelegationPercentageItem!]!
+
+  """
+  The actual number of items returned in this response.
+  May be less than requested if DAOs don't have overlapping data for the full date range.
+  """
   totalCount: Int!
   pageInfo: PageInfo!
 }

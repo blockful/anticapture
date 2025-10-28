@@ -13,7 +13,7 @@ export function delegationPercentage(
   app.openapi(
     createRoute({
       method: "get",
-      operationId: "getDelegationPercentage",
+      operationId: "delegationPercentageByDay",
       path: "/delegation-percentage",
       summary: "Get delegation percentage day buckets with forward-fill",
       tags: ["metrics"],
@@ -30,7 +30,7 @@ export function delegationPercentage(
       },
     }),
     async (ctx) => {
-      const serviceResult = await service.getDelegationPercentage(
+      const serviceResult = await service.delegationPercentageByDay(
         ctx.req.valid("query"),
       );
       const httpResponse = toApi(serviceResult);

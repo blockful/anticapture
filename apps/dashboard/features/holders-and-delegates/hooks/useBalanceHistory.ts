@@ -10,6 +10,8 @@ import {
 
 import { formatUnits } from "viem";
 import { ApolloError, NetworkStatus } from "@apollo/client";
+import daoConfig from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 // Interface for a single transfer
 export interface Transfer {
@@ -55,6 +57,9 @@ export function useBalanceHistory(
   const itemsPerPage = 10;
   const [currentPage, setCurrentPage] = useState(1);
   const [isPaginationLoading, setIsPaginationLoading] = useState(false);
+  const {
+    daoOverview: { token },
+  } = daoConfig[daoId as DaoIdEnum];
 
   // Reset page to 1 when transaction type or sorting changes
   useEffect(() => {
@@ -154,7 +159,10 @@ export function useBalanceHistory(
 
     return data.transfers.items.map((transfer) => ({
       timestamp: transfer.timestamp?.toString() || "",
-      amount: formatUnits(BigInt(transfer.amount || "0"), 18),
+      amount:
+        token === "ERC20"
+          ? formatUnits(BigInt(transfer.amount || "0"), 18)
+          : (transfer.amount || "0").toString(),
       fromAccountId: transfer.fromAccountId || null,
       toAccountId: transfer.toAccountId || null,
       transactionHash: transfer.transactionHash,
@@ -162,7 +170,7 @@ export function useBalanceHistory(
         | "in"
         | "out",
     }));
-  }, [data, accountId]);
+  }, [data, accountId, token]);
 
   // Real pagination info from GraphQL query
   const paginationInfo: PaginationInfo = useMemo(() => {

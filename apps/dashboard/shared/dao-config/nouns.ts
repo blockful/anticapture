@@ -220,4 +220,5 @@ export const NOUNS: DaoConfiguration = {
   riskAnalysis: true,
   resilienceStages: true,
   tokenDistribution: true,
+  dataTables: true,
 };
