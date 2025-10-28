@@ -1,6 +1,6 @@
 import { Context, Event, ponder } from "ponder:registry";
 import { token } from "ponder:schema";
-import { Address } from "viem";
+import { Address, zeroAddress } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
 import {
@@ -69,7 +69,7 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
         MetricTypesEnum.TREASURY,
         from,
         to,
-        event.transaction.value,
+        1n,
         daoId,
         address,
         timestamp,
@@ -127,6 +127,20 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
         daoId,
         address,
         1n,
+        event.block.timestamp,
+      );
+
+      if (!event.transaction.to) return;
+      await updateSupplyMetric(
+        context,
+        "treasury",
+        Object.values(TreasuryAddresses[daoId]),
+        MetricTypesEnum.TREASURY,
+        zeroAddress,
+        event.transaction.to,
+        1n,
+        daoId,
+        address,
         event.block.timestamp,
       );
     }

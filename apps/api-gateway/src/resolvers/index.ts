@@ -2,7 +2,7 @@ import { daosResolver } from "./daos";
 import { listResolvers } from "./list";
 import { itemResolvers } from "./item";
 import { restResolvers } from "./rest";
-import { aggregatedDelegatedSupplyResolver } from "./aggregated-delegated-supply";
+import { averageDelegationPercentageByDayResolver } from "./average-delegation-percentage";
 
 export default {
   Query: {
@@ -10,6 +10,6 @@ export default {
     ...itemResolvers,
     ...restResolvers,
     daos: daosResolver,
-    aggregatedDelegatedSupply: aggregatedDelegatedSupplyResolver,
+    averageDelegationPercentageByDay: averageDelegationPercentageByDayResolver,
   },
 };
