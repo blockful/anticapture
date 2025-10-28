@@ -15,6 +15,7 @@ const Jazzicon = dynamic(
 );
 
 export const ConnectWalletCustom = ({
+  label = "Connect to vote",
   className,
 }: {
   label?: string;
@@ -60,7 +61,7 @@ export const ConnectWalletCustom = ({
                     size="md"
                   >
                     <Wallet className="size-3.5" />
-                    Connect to vote
+                    {label}
                   </Button>
                 );
               }

@@ -85,12 +85,14 @@ export const ProposalHeader = ({
                 <VotedBadge vote={Number(votesOnchain?.support)} />
               </div>
             )
+          ) : proposalStatus.toLowerCase() === "active" ? (
+            <div className="hidden lg:flex">
+              <ConnectWalletCustom />
+            </div>
           ) : (
-            proposalStatus.toLowerCase() === "active" && (
-              <div className="hidden lg:flex">
-                <ConnectWalletCustom />
-              </div>
-            )
+            <div className="hidden lg:flex">
+              <ConnectWalletCustom label="Connect wallet" />
+            </div>
           )}
         </div>
       </div>
