@@ -113,7 +113,7 @@ export const VotesTable = <TData, TValue>({
   const table = useReactTable(tableConfig);
 
   return (
-    <div className="scrollbar-custom border-border-default relative h-[500px] overflow-auto rounded-md border">
+    <div className="scrollbar-custom border-border-default relative w-full overflow-x-auto rounded-md border">
       <table
         className={cn(
           "text-secondary md:bg-surface-default w-full caption-bottom border-separate border-spacing-0 bg-transparent text-sm",
@@ -121,7 +121,7 @@ export const VotesTable = <TData, TValue>({
           className,
         )}
       >
-        <TableHeader className="bg-surface-contrast text-secondary sticky top-0 z-10 text-xs font-normal">
+        <TableHeader className="bg-surface-contrast text-secondary sticky top-0 text-xs font-normal">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow
               key={headerGroup.id}

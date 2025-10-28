@@ -134,3 +134,30 @@ query GetProposalNonVoters(
     totalCount
   }
 }
+
+# Get account power
+query GetAccountPower($address: String!, $proposalId: String!) {
+  accountPower(accountId: $address) {
+    votingPower
+    accountId
+  }
+  votesOnchain(proposalId: $proposalId, voterAccountId: $address) {
+    support
+    votingPower
+    reason
+    timestamp
+    txHash
+    daoId
+  }
+}
+
+query GetUserVote($proposalId: String!, $address: String!) {
+  votesOnchain(proposalId: $proposalId, voterAccountId: $address) {
+    support
+    votingPower
+    reason
+    timestamp
+    txHash
+    daoId
+  }
+}

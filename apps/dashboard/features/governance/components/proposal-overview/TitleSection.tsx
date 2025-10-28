@@ -6,7 +6,6 @@ import { Share2 } from "lucide-react";
 import { GetProposalQuery } from "@anticapture/graphql-client";
 import { Address } from "viem";
 import { ProposalBadge } from "@/features/governance/components/proposal-overview/ProposalBadge";
-import { getStatusText } from "@/features/governance/components/proposal-overview/ProposalItem";
 import { ProposalStatus } from "@/features/governance/types";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 
@@ -19,9 +18,9 @@ export const TitleSection = ({
     <div className="flex w-full flex-col gap-3">
       <div className="flex w-full items-center justify-start gap-2">
         {/* Badge Ongoing Proposal */}
-        <ProposalBadge>
-          {getStatusText(proposal.status.toLowerCase() as ProposalStatus)}
-        </ProposalBadge>
+        <ProposalBadge
+          status={proposal.status.toLowerCase() as ProposalStatus}
+        />
 
         <BulletDivider />
 

@@ -274,7 +274,9 @@ export const TabsVotedContent = ({
 
           return (
             <div className="flex h-10 items-center p-2">
-              <span className="text-secondary text-sm">{formattedDate}</span>
+              <span className="text-secondary whitespace-nowrap text-sm">
+                {formattedDate}
+              </span>
             </div>
           );
         },
@@ -301,7 +303,7 @@ export const TabsVotedContent = ({
       },
       {
         accessorKey: "votingPower",
-        size: 150,
+        size: 160,
         cell: ({ row }) => {
           const votingPower = row.getValue("votingPower") as string;
           const voterAddress = row.getValue("voterAccountId") as string;
@@ -367,7 +369,7 @@ export const TabsVotedContent = ({
             onClick={() => handleSort("votingPower")}
           >
             <h4 className="text-table-header whitespace-nowrap">
-              Voting Power (CAT)
+              Voting Power ({daoId?.toString().toUpperCase()})
             </h4>
             <ArrowUpDown
               props={{ className: "size-4 ml-1" }}
@@ -384,7 +386,7 @@ export const TabsVotedContent = ({
       },
       {
         accessorKey: "historicalVotingPower",
-        size: 150,
+        size: 160,
         cell: ({ row }) => {
           const voterAddress = row.getValue("voterAccountId") as string;
           const historicalVotingPower = row.getValue(
@@ -475,7 +477,7 @@ export const TabsVotedContent = ({
           );
         },
         header: () => (
-          <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
+          <div className="text-table-header flex h-8 w-full shrink-0 items-center justify-start whitespace-nowrap px-2">
             <p>VP Change (Last 30d)</p>
           </div>
         ),

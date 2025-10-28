@@ -15,12 +15,12 @@ interface ProposalItemProps {
   className?: string;
 }
 
-const getTextStatusColor = (status: ProposalStatus) => {
+export const getTextStatusColor = (status: ProposalStatus) => {
   switch (status) {
     case ProposalStatus.PENDING:
       return "text-warning";
     case ProposalStatus.ONGOING:
-      return "text-primary";
+      return "text-link";
     case ProposalStatus.EXECUTED:
       return "text-success";
     case ProposalStatus.DEFEATED:
@@ -34,18 +34,18 @@ const getTextStatusColor = (status: ProposalStatus) => {
     case ProposalStatus.EXPIRED:
       return "text-error";
     case ProposalStatus.NO_QUORUM:
-      return "text-error";
+      return "text-secondary";
     default:
       return "text-secondary";
   }
 };
 
-const getBackgroundStatusColor = (status: ProposalStatus) => {
+export const getBackgroundStatusColor = (status: ProposalStatus) => {
   switch (status) {
     case ProposalStatus.PENDING:
       return "bg-warning";
     case ProposalStatus.ONGOING:
-      return "bg-primary";
+      return "bg-surface-opacity-brand";
     case ProposalStatus.EXECUTED:
       return "bg-success";
     case ProposalStatus.DEFEATED:
@@ -59,7 +59,7 @@ const getBackgroundStatusColor = (status: ProposalStatus) => {
     case ProposalStatus.EXPIRED:
       return "bg-error";
     case ProposalStatus.NO_QUORUM:
-      return "bg-error";
+      return "bg-secondary";
     default:
       return "bg-secondary";
   }
