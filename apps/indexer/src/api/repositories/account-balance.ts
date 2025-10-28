@@ -162,7 +162,7 @@ export class AccountBalanceRepository {
         address: combined.accountId,
         balance:
           sql<string>`${combined.currentBalance} - ${combined.fromChange} + ${combined.toChange}`.as(
-            "absolute_change",
+            "balance",
           ),
       })
       .from(combined);
