@@ -11,6 +11,8 @@ import {
   VotingPowersQuery,
   QueryVotingPowersArgs,
 } from "@anticapture/graphql-client/hooks";
+import daoConfig from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 // Interface for a single delegation history item
 export interface DelegationHistoryItem {
@@ -68,6 +70,9 @@ export function useDelegateDelegationHistory(
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isPaginationLoading, setIsPaginationLoading] =
     useState<boolean>(false);
+  const {
+    daoOverview: { token },
+  } = daoConfig[daoId as DaoIdEnum];
 
   // Reset page to 1 when sorting changes
   useEffect(() => {
@@ -110,12 +115,14 @@ export function useDelegateDelegationHistory(
         // Determine the type, action, and direction based on the data and delta
         let type: "delegation" | "transfer" = "delegation";
         let action = "Unknown";
-        let isGain = false;
 
         // Parse delta to determine if it's a gain or loss
-        // Convert from wei to token units using formatUnits (same as graph hook)
-        const deltaValue = Number(formatUnits(BigInt(item.delta || "0"), 18));
-        isGain = deltaValue > 0;
+        const delta = Number(
+          token === "ERC20"
+            ? formatUnits(BigInt(item.delta || "0"), 18)
+            : item.delta || "0",
+        );
+        const isGain = delta > 0;
 
         if (item.delegation) {
           type = "delegation";
@@ -142,7 +149,7 @@ export function useDelegateDelegationHistory(
         return {
           timestamp: item.timestamp,
           transactionHash: item.transactionHash,
-          delta: item.delta,
+          delta: delta.toString(),
           delegation: item.delegation,
           transfer: item.transfer,
           votingPower: item.votingPower,
@@ -151,7 +158,7 @@ export function useDelegateDelegationHistory(
           isGain,
         };
       });
-  }, [data, account]);
+  }, [data, account, token]);
 
   const totalCount = data?.votingPowers?.totalCount ?? 0;
   const currentItemsCount = transformedData.length;

@@ -112,6 +112,8 @@ type Query {
     offset: NonNegativeInt
     sortBy: timestamp_const
     sortOrder: queryInput_transactions_sortOrder = desc
+    fromDate: Int
+    toDate: Int
     from: String
     to: String
     minAmount: String
@@ -126,6 +128,9 @@ type Query {
   """Get the last update time"""
   lastUpdate(chart: queryInput_lastUpdate_chart!): lastUpdate_200_response
 
+  """Get delegation percentage day buckets with forward-fill"""
+  getDelegationPercentage(startDate: String, endDate: String, orderDirection: queryInput_getDelegationPercentage_orderDirection = asc, limit: NonNegativeInt = 365, after: String, before: String): getDelegationPercentage_200_response
+
   """Returns a list of voting power changes"""
   votingPowers(account: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_votingPowers_orderBy = timestamp, orderDirection: queryInput_votingPowers_orderDirection = desc, minDelta: String, maxDelta: String): votingPowers_200_response
 
@@ -138,6 +143,40 @@ type Query {
   Returns a mapping of the biggest variations to account balances associated by account address
   """
   accountBalanceVariations(days: queryInput_accountBalanceVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalanceVariations_orderDirection = desc): accountBalanceVariations_200_response
+
+  """
+  Average delegation percentage across all supported DAOs by day.
+  Returns the mean delegation percentage for each day in the specified range.
+  Only includes dates where ALL DAOs have data available.
+  """
+  averageDelegationPercentageByDay(
+    """
+    Start date (Unix timestamp in seconds). Required.
+    All DAOs will return data starting from this date.
+    The aggregation will begin from the latest start date among all DAOs.
+    """
+    startDate: String!
+
+    """
+    End date (Unix timestamp in seconds). Optional.
+    If not provided, returns data up to the latest available date.
+    """
+    endDate: String
+
+    """Cursor for pagination. Returns items after this date."""
+    after: String
+
+    """Cursor for pagination. Returns items before this date."""
+    before: String
+
+    """
+    Sort direction: "asc" or "desc". Default: "asc"
+    """
+    orderDirection: String
+
+    """Maximum number of items to return. Default: 100"""
+    limit: Int
+  ): AverageDelegationPercentagePage!
 }
 
 """
@@ -152,6 +191,8 @@ type PageInfo {
   hasPreviousPage: Boolean!
   startCursor: String
   endCursor: String
+  endDate: String
+  startDate: String
 }
 
 type Meta {
@@ -1535,8 +1576,8 @@ enum queryInput_compareVotes_days {
 }
 
 type compareAverageTurnout_200_response {
-  currentAverageTurnout: Float!
-  oldAverageTurnout: Float!
+  currentAverageTurnout: String!
+  oldAverageTurnout: String!
   changeRate: Float!
 }
 
@@ -1622,7 +1663,7 @@ type query_proposals_items_items {
   daoId: String!
   txHash: String!
   proposerAccountId: String!
-  title: String
+  title: String!
   description: String!
   startBlock: Float!
   endBlock: Float!
@@ -1649,7 +1690,7 @@ type proposal_200_response {
   daoId: String!
   txHash: String!
   proposerAccountId: String!
-  title: String
+  title: String!
   description: String!
   startBlock: Float!
   endBlock: Float!
@@ -1777,6 +1818,28 @@ enum queryInput_lastUpdate_chart {
   token_distribution
 }
 
+type getDelegationPercentage_200_response {
+  items: [query_getDelegationPercentage_items_items]!
+  totalCount: Float!
+  pageInfo: query_getDelegationPercentage_pageInfo!
+}
+
+type query_getDelegationPercentage_items_items {
+  date: String!
+  high: String!
+}
+
+type query_getDelegationPercentage_pageInfo {
+  hasNextPage: Boolean!
+  endDate: String
+  startDate: String
+}
+
+enum queryInput_getDelegationPercentage_orderDirection {
+  asc
+  desc
+}
+
 type votingPowers_200_response {
   items: [query_votingPowers_items_items]!
   totalCount: Float!
@@ -1892,4 +1955,20 @@ enum HTTPMethod {
   OPTIONS
   TRACE
   PATCH
+}
+
+type AverageDelegationPercentageItem {
+  date: String!
+  high: String!
+}
+
+type AverageDelegationPercentagePage {
+  items: [AverageDelegationPercentageItem!]!
+
+  """
+  The actual number of items returned in this response.
+  May be less than requested if DAOs don't have overlapping data for the full date range.
+  """
+  totalCount: Int!
+  pageInfo: PageInfo!
 }

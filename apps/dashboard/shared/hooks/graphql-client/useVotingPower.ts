@@ -10,6 +10,7 @@ import {
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { NetworkStatus } from "@apollo/client";
+import daoConfig from "@/shared/dao-config";
 
 interface PaginationInfo {
   hasNextPage: boolean;
@@ -65,6 +66,9 @@ export const useVotingPower = ({
   orderDirection = "desc",
 }: UseVotingPowerParams): UseVotingPowerResult => {
   const itemsPerPage = 10;
+  const {
+    daoOverview: { token },
+  } = daoConfig[daoId];
 
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isPaginationLoading, setIsPaginationLoading] =
@@ -349,7 +353,10 @@ export const useVotingPower = ({
   const topDelegatorsItems = topFiveDelegators?.accountBalances.items?.map(
     (item) => ({
       ...item,
-      balance: Number(BigInt(item.balance) / BigInt(10 ** 18)),
+      balance:
+        token === "ERC20"
+          ? Number(BigInt(item.balance) / BigInt(10 ** 18))
+          : Number(item.balance),
       rawBalance: BigInt(item.balance),
     }),
   );

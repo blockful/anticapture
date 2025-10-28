@@ -17,6 +17,7 @@ import { useScreenSize } from "@/shared/hooks";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { Button } from "@/shared/components";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
+import daoConfig from "@/shared/dao-config";
 
 interface TokenHolderTableData {
   address: Address;
@@ -38,6 +39,9 @@ export const TokenHolders = ({
   const [currentAddressFilter, setCurrentAddressFilter] = useState<string>("");
   const pageLimit: number = 15;
   const { isMobile } = useScreenSize();
+  const {
+    daoOverview: { token },
+  } = daoConfig[daoId];
 
   const handleAddressFilterApply = (address: string | undefined) => {
     setCurrentAddressFilter(address || "");
@@ -75,8 +79,14 @@ export const TokenHolders = ({
     if (!historicalBalance) return null;
 
     try {
-      const current = Number(formatUnits(BigInt(currentBalance), 18));
-      const historical = Number(formatUnits(BigInt(historicalBalance), 18));
+      const current =
+        token === "ERC20"
+          ? Number(formatUnits(BigInt(currentBalance), 18))
+          : Number(currentBalance);
+      const historical =
+        token === "ERC20"
+          ? Number(formatUnits(BigInt(historicalBalance), 18))
+          : Number(historicalBalance);
 
       if (historical === 0) return { percentageChange: 0, absoluteChange: 0 };
 
@@ -105,12 +115,15 @@ export const TokenHolders = ({
         return {
           address: holder.accountId as Address,
           type: holder.account?.type,
-          balance: Number(formatUnits(BigInt(holder.balance), 18)),
+          balance:
+            token === "ERC20"
+              ? Number(formatUnits(BigInt(holder.balance), 18))
+              : Number(holder.balance),
           variation,
           delegate: holder.delegate as Address,
         };
       }) || [],
-    [tokenHoldersData, historicalBalancesCache],
+    [tokenHoldersData, historicalBalancesCache, token],
   );
 
   const tokenHoldersColumns: ColumnDef<TokenHolderTableData>[] = [

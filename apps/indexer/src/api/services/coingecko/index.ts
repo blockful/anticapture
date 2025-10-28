@@ -65,7 +65,7 @@ export class CoingeckoService {
     }
 
     return data.prices.map(([timestamp, price]) => ({
-      price: price.toString(),
+      price: price.toFixed(2),
       timestamp: timestamp,
     }));
   }
@@ -81,7 +81,8 @@ export class CoingeckoService {
       `/simple/token_price/${assetPlatform}?contract_addresses=${formattedAddress}&vs_currencies=${targetCurrency}`,
     );
 
-    const data = await response.data();
+    const data = response.data;
+
     const { success, data: price } = createCoingeckoTokenPriceDataSchema(
       formattedAddress,
       targetCurrency,
