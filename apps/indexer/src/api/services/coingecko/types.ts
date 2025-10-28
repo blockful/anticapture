@@ -19,7 +19,7 @@ export const CoingeckoTokenIdEnum: Record<DaoIdEnum, string> = {
   TEST: "ethereum-name-service",
   NOUNS: "nouns",
   SCR: "scroll",
-  COMP: "compound",
+  COMP: "compound-governance-token",
 } as const;
 
 export const CoingeckoIdToAssetPlatformId = {

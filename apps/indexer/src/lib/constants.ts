@@ -129,8 +129,9 @@ export const CONTRACT_ADDRESSES = {
     },
   },
   [DaoIdEnum.COMP]: {
-    blockTime: 1.5,
+    blockTime: 12,
     // https://etherscan.io/address/0xc00e94Cb662C3520282E6f5717214004A7f26888
+    tokenType: "ERC20",
     token: {
       address: "0xc00e94Cb662C3520282E6f5717214004A7f26888",
       decimals: 18,
