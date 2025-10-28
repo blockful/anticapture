@@ -149,12 +149,7 @@ export class AccountBalanceRepository {
         transfersTo,
         sql`${accountBalance.accountId} = ${transfersTo.accountId}`,
       )
-      .where(
-        and(
-          sql`${transfersFrom.accountId} IS NOT NULL OR ${transfersTo.accountId} IS NOT NULL`,
-          inArray(accountBalance.accountId, addresses),
-        ),
-      )
+      .where(inArray(accountBalance.accountId, addresses))
       .as("combined");
 
     const result = await db
