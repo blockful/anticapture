@@ -1,9 +1,5 @@
 import { DaoConfiguration } from "@/shared/dao-config/types";
-import {
-  RiskLevel,
-  SupportStageEnum,
-  GovernanceImplementationEnum,
-} from "@/shared/types/enums";
+import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { OptimismIcon } from "@/shared/components/icons";
 import { optimism } from "viem/chains";
@@ -11,10 +7,10 @@ import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
 export const OP: DaoConfiguration = {
   name: "Optimism",
-  supportStage: SupportStageEnum.FULL,
   noStage: true,
   icon: OptimismIcon,
   daoOverview: {
+    token: "ERC20",
     chain: optimism,
     blockTime: 2,
     snapshot: "https://snapshot.box/#/s:citizenshouse.eth",

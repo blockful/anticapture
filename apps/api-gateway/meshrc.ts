@@ -57,6 +57,71 @@ export default processConfig(
           ];
         }),
     ],
+    additionalTypeDefs:`
+      type AverageDelegationPercentageItem {
+        date: String!
+        high: String!
+      }
+
+      type PageInfo {
+        hasNextPage: Boolean!
+        hasPreviousPage: Boolean!
+        endDate: String
+        startDate: String
+      }
+
+      type AverageDelegationPercentagePage {
+        items: [AverageDelegationPercentageItem!]!
+        """
+        The actual number of items returned in this response.
+        May be less than requested if DAOs don't have overlapping data for the full date range.
+        """
+        totalCount: Int!
+        pageInfo: PageInfo!
+      }
+
+      extend type Query {
+        """
+        Average delegation percentage across all supported DAOs by day.
+        Returns the mean delegation percentage for each day in the specified range.
+        Only includes dates where ALL DAOs have data available.
+        """
+        averageDelegationPercentageByDay(
+          """
+          Start date (Unix timestamp in seconds). Required.
+          All DAOs will return data starting from this date.
+          The aggregation will begin from the latest start date among all DAOs.
+          """
+          startDate: String!
+
+          """
+          End date (Unix timestamp in seconds). Optional.
+          If not provided, returns data up to the latest available date.
+          """
+          endDate: String
+
+          """
+          Cursor for pagination. Returns items after this date.
+          """
+          after: String
+
+          """
+          Cursor for pagination. Returns items before this date.
+          """
+          before: String
+
+          """
+          Sort direction: "asc" or "desc". Default: "asc"
+          """
+          orderDirection: String
+
+          """
+          Maximum number of items to return. Default: 100
+          """
+          limit: Int
+        ): AverageDelegationPercentagePage!
+      }
+    `,
     additionalResolvers: ["src/resolvers/index"],
   },
   {

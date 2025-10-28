@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import {
   useActiveSupply,
   useAverageTurnout,
@@ -68,8 +68,8 @@ export const AttackCostBarChart = ({
 }: AttackCostBarChartProps) => {
   const { daoId }: { daoId: string } = useParams();
   const selectedDaoId = daoId.toUpperCase() as DaoIdEnum;
-  const [mocked, setMocked] = useState<boolean>(false);
   const timeInterval = TimeInterval.NINETY_DAYS;
+
   const liquidTreasury = useTreasuryAssetNonDaoToken(
     selectedDaoId,
     timeInterval,
@@ -83,7 +83,7 @@ export const AttackCostBarChart = ({
     loading: daoTokenPriceHistoricalDataLoading,
   } = useDaoTokenHistoricalData({
     daoId: selectedDaoId,
-    days: TimeInterval.SEVEN_DAYS,
+    limit: 1,
   });
 
   const daoConfig = daoConfigByDaoId[selectedDaoId];
@@ -102,22 +102,6 @@ export const AttackCostBarChart = ({
 
   const { isMobile } = useScreenSize();
 
-  useEffect(() => {
-    setMocked(
-      delegatedSupply.data?.currentDelegatedSupply === undefined &&
-        activeSupply.data?.activeSupply === undefined &&
-        averageTurnout.data?.currentAverageTurnout === undefined &&
-        daoTopTokenHolderExcludingTheDao?.balance === undefined &&
-        vetoCouncilVotingPower === undefined,
-    );
-  }, [
-    delegatedSupply.data?.currentDelegatedSupply,
-    activeSupply.data?.activeSupply,
-    averageTurnout.data?.currentAverageTurnout,
-    daoTopTokenHolderExcludingTheDao?.balance,
-    vetoCouncilVotingPower,
-  ]);
-
   const isLoading =
     liquidTreasury.loading ||
     delegatedSupply.isLoading ||
@@ -127,6 +111,22 @@ export const AttackCostBarChart = ({
     daoTopTokenHolderExcludingTheDaoLoading ||
     isVetoCouncilLoading;
 
+  const mocked = useMemo(() => {
+    return (
+      delegatedSupply.data?.currentDelegatedSupply === undefined &&
+      activeSupply.data?.activeSupply === undefined &&
+      averageTurnout.data?.currentAverageTurnout === undefined &&
+      daoTopTokenHolderExcludingTheDao?.balance === undefined &&
+      vetoCouncilVotingPower === undefined
+    );
+  }, [
+    delegatedSupply.data?.currentDelegatedSupply,
+    activeSupply.data?.activeSupply,
+    averageTurnout.data?.currentAverageTurnout,
+    daoTopTokenHolderExcludingTheDao?.balance,
+    vetoCouncilVotingPower,
+  ]);
+
   const chartData: ChartDataItem[] = useMemo(() => {
     if (isLoading) return [];
 
@@ -134,19 +134,13 @@ export const AttackCostBarChart = ({
       return mockedAttackCostBarData as ChartDataItem[];
     }
 
-    const prices = daoTokenPriceHistoricalData.prices;
-    const lastPrice = prices.length > 0 ? prices[prices.length - 1][1] : 0;
+    const prices = daoTokenPriceHistoricalData;
+    const lastPrice =
+      prices.length > 0 ? Number(prices[prices.length - 1].price) : 0;
 
-    const formatValue = (value: number): number => {
-      if (value == null) return 0;
-
-      const formattedValue = Number(formatEther(BigInt(value || 0)));
-
-      if (valueMode === "usd") {
-        return formattedValue * lastPrice;
-      }
-
-      return formattedValue;
+    const formatValue = (value: number, lastPrice: number): number => {
+      if (valueMode === "usd") return value * lastPrice;
+      return value;
     };
 
     return [
@@ -169,7 +163,14 @@ export const AttackCostBarChart = ({
         id: "delegatedSupply",
         name: "Delegated Supply",
         value: formatValue(
-          Number(delegatedSupply.data?.currentDelegatedSupply),
+          daoConfig.daoOverview.token === "ERC20"
+            ? Number(
+                formatEther(
+                  BigInt(delegatedSupply.data?.currentDelegatedSupply || 0),
+                ),
+              )
+            : Number(delegatedSupply.data?.currentDelegatedSupply),
+          lastPrice,
         ),
         type: BarChartEnum.REGULAR,
         customColor: "#EC762ECC",
@@ -179,42 +180,69 @@ export const AttackCostBarChart = ({
         name: "Active Supply (90d)",
         type: BarChartEnum.REGULAR,
         customColor: "#EC762EE6",
-        value: formatValue(Number(activeSupply.data?.activeSupply)),
+        value: formatValue(
+          daoConfig.daoOverview.token === "ERC20"
+            ? Number(formatEther(BigInt(activeSupply.data?.activeSupply || 0)))
+            : Number(activeSupply.data?.activeSupply),
+          lastPrice,
+        ),
       },
       {
         id: "averageTurnout",
         name: "Average Turnout (90d)",
         type: BarChartEnum.REGULAR,
         customColor: "#EC762EB3",
-        value: formatValue(Number(averageTurnout.data?.currentAverageTurnout)),
+        value: formatValue(
+          daoConfig.daoOverview.token === "ERC20"
+            ? Number(
+                formatEther(
+                  BigInt(averageTurnout.data?.currentAverageTurnout || 0),
+                ),
+              )
+            : Number(averageTurnout.data?.currentAverageTurnout),
+          lastPrice,
+        ),
       },
       {
         id: "topTokenHolder",
         name: "Top Holder",
         type: BarChartEnum.REGULAR,
         customColor: "#EC762E80",
-        value: formatValue(Number(daoTopTokenHolderExcludingTheDao?.balance)),
+        value: formatValue(
+          daoConfig.daoOverview.token === "ERC20"
+            ? Number(
+                formatEther(
+                  BigInt(daoTopTokenHolderExcludingTheDao?.balance || 0),
+                ),
+              )
+            : Number(daoTopTokenHolderExcludingTheDao?.balance),
+          lastPrice,
+        ),
       },
     ];
   }, [
-    // fixing this causes an exahaustive-deps re-render for OP and UNI
     isLoading,
     mocked,
-    liquidTreasury.data?.[0]?.totalAssets,
-    delegatedSupply?.data?.currentDelegatedSupply,
-    activeSupply?.data?.activeSupply,
-    averageTurnout?.data?.currentAverageTurnout,
-    daoTopTokenHolderExcludingTheDao?.balance,
-    daoTokenPriceHistoricalData.prices,
+    daoTokenPriceHistoricalData,
     valueMode,
+    liquidTreasury.data,
+    delegatedSupply.data?.currentDelegatedSupply,
+    daoConfig.daoOverview.token,
+    activeSupply.data?.activeSupply,
+    averageTurnout.data?.currentAverageTurnout,
+    daoTopTokenHolderExcludingTheDao?.balance,
   ]);
 
+  const prevCsvRef = useRef<string>("");
+
   useEffect(() => {
-    if (!mocked && chartData.length) {
+    if (mocked || !chartData.length) return;
+    const serialized = JSON.stringify(chartData);
+    if (serialized !== prevCsvRef.current) {
+      prevCsvRef.current = serialized;
       setCsvData(chartData as Data);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chartData, mocked]);
+  }, [chartData, mocked, setCsvData]);
 
   if (isLoading) {
     return (

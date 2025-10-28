@@ -54,7 +54,7 @@ export class NFTPriceService {
       price: (
         Number(formatEther(BigInt(price))) * ethPriceResponse[index]![1]
       ).toFixed(2),
-      timestamp,
+      timestamp: timestamp * 1000,
     }));
   }
 
