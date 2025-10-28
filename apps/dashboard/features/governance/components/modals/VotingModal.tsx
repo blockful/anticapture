@@ -1,142 +1,26 @@
 "use client";
 
 import { Button } from "@/shared/components";
-import {
-  User2Icon,
-  X,
-  CheckCircle2,
-  ExternalLink,
-  Pencil,
-  Check,
-  Hourglass,
-} from "lucide-react";
+import { User2Icon, X, ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Query_Proposals_Items_Items } from "@anticapture/graphql-client/hooks";
-import EnsGovernorAbi from "@/abis/ens-governor.json";
 
-import {
-  Account,
-  Chain,
-  createWalletClient,
-  custom,
-  formatEther,
-  publicActions,
-} from "viem";
+import { Account, formatEther } from "viem";
 import { useAccount } from "wagmi";
 import { DaoIdEnum } from "@/shared/types/daos";
-import daoConfigByDaoId from "@/shared/dao-config";
-import toast from "react-hot-toast";
-import { cn, formatNumberUserReadable } from "@/shared/utils";
+import { formatNumberUserReadable } from "@/shared/utils";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { DotFilledIcon } from "@radix-ui/react-icons";
-import { SpinIcon } from "@/shared/components/icons/SpinIcon";
+import { LoadingComponent } from "@/features/governance/components/modals/LoadingContent";
+import { VoteOption } from "@/features/governance/components/proposal-overview/VoteOption";
+import { voteOnProposal } from "@/features/governance/utils/voteOnProposal";
+import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 interface VotingModalProps {
   isOpen: boolean;
   onClose: () => void;
   proposal: Query_Proposals_Items_Items;
   votingPower: string;
 }
-
-const getDaoGovernanceAddress = (daoId: DaoIdEnum) => {
-  return daoConfigByDaoId[daoId].daoOverview.contracts?.governor;
-};
-
-const showCustomToast = (message: string, type: "success" | "error") => {
-  toast.custom(
-    (t) => (
-      <div
-        className={cn(
-          "flex max-w-[500px] items-center justify-between gap-4 px-6 py-4 text-black shadow-lg transition-all",
-          type === "success" ? "bg-success" : "bg-error",
-          t.visible ? "animate-enter" : "animate-leave",
-        )}
-      >
-        <div className="flex items-center gap-3">
-          <CheckCircle2 className="size-6 flex-shrink-0" />
-          <span className="font-inter text-base font-normal leading-6">
-            {message}
-          </span>
-        </div>
-        <button
-          onClick={() => toast.dismiss(t.id)}
-          className="flex-shrink-0 transition-opacity hover:opacity-70"
-          aria-label="Close notification"
-        >
-          <X className="size-5" />
-        </button>
-      </div>
-    ),
-    {
-      duration: 4000,
-      position: "top-center",
-    },
-  );
-};
-
-const handleVote = async (
-  vote: "for" | "against" | "abstain",
-  proposalId: string,
-  account: Account,
-  chain: Chain,
-  daoId: DaoIdEnum,
-  setTransactionhash: (hash: string) => void,
-  comment?: string,
-) => {
-  const daoGovernanceAddress = getDaoGovernanceAddress(daoId);
-
-  if (!daoGovernanceAddress) {
-    throw new Error("DAO governance address not found");
-  }
-
-  const voteNumber = vote === "for" ? 1 : vote === "against" ? 0 : 2;
-
-  const walletClient = createWalletClient({
-    account: account,
-    chain: chain,
-    transport: custom(window.ethereum),
-  });
-
-  const client = walletClient.extend(publicActions);
-
-  try {
-    let request;
-
-    if (!comment) {
-      const simulatedRequest = await client.simulateContract({
-        abi: EnsGovernorAbi,
-        address: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
-        functionName: "castVote",
-        args: [proposalId, voteNumber],
-      });
-
-      request = simulatedRequest.request;
-    } else {
-      const simulatedRequest = await client.simulateContract({
-        abi: EnsGovernorAbi,
-        address: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
-        functionName: "castVoteWithReason",
-        args: [proposalId, voteNumber, comment],
-      });
-
-      request = simulatedRequest.request;
-    }
-
-    if (!request) {
-      throw new Error("Request not found");
-    }
-
-    const hash = await client.writeContract(request);
-    setTransactionhash(hash);
-    const transaction = await client.waitForTransactionReceipt({ hash: hash });
-    setTransactionhash("");
-
-    return transaction;
-  } catch (error) {
-    console.error(error);
-    showCustomToast("Failed to vote", "error");
-    return null;
-  }
-};
 
 export const VotingModal = ({
   isOpen,
@@ -253,7 +137,6 @@ export const VotingModal = ({
               <VoteOption
                 vote="for"
                 optionPercentage={forPercentage}
-                totalOptionVotes={proposal.forVotes}
                 votingPower={proposal?.forVotes}
                 onChange={setVote}
                 checked={vote === "for"}
@@ -263,7 +146,6 @@ export const VotingModal = ({
               <VoteOption
                 vote="against"
                 optionPercentage={againstPercentage}
-                totalOptionVotes={proposal.againstVotes}
                 votingPower={proposal?.againstVotes}
                 onChange={setVote}
                 checked={vote === "against"}
@@ -273,7 +155,6 @@ export const VotingModal = ({
               <VoteOption
                 vote="abstain"
                 optionPercentage={abstainPercentage}
-                totalOptionVotes={proposal.abstainVotes}
                 votingPower={proposal?.abstainVotes}
                 onChange={setVote}
                 checked={vote === "abstain"}
@@ -343,7 +224,7 @@ export const VotingModal = ({
             onClick={async () => {
               if (!address || !chain) return;
               setIsLoading(true);
-              const hash = await handleVote(
+              const hash = await voteOnProposal(
                 vote as "for" | "against" | "abstain",
                 proposal?.id as string,
                 address as unknown as Account,
@@ -363,214 +244,6 @@ export const VotingModal = ({
           >
             Submit
           </Button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-interface LoadingComponentProps {
-  transactionhash: string;
-  proposalId: string;
-  proposalTitle: string;
-  votingPower: string;
-  vote: "for" | "against" | "abstain";
-}
-
-const LoadingComponent = ({
-  transactionhash,
-  proposalId,
-  proposalTitle,
-  votingPower,
-  vote,
-}: LoadingComponentProps) => {
-  console.log(transactionhash);
-
-  return (
-    <div className="flex flex-col items-start justify-start gap-3">
-      <div className="flex flex-col items-start justify-start gap-3 p-4">
-        <div className="flex items-start justify-start">
-          <p className="font-inter text-secondary w-[116px] shrink-0 text-[12px] font-medium not-italic leading-[20px]">
-            Proposal ID
-          </p>
-          <p className="font-inter text-primary break-all text-[14px] font-normal not-italic leading-[20px]">
-            {proposalId}
-          </p>
-        </div>
-        <div className="flex items-start justify-start">
-          <p className="font-inter text-secondary w-[116px] shrink-0 text-[12px] font-medium not-italic leading-[20px]">
-            Proposal Title
-          </p>
-          <p className="font-inter text-primary break-all text-[14px] font-normal not-italic leading-[20px]">
-            {proposalTitle}
-          </p>
-        </div>
-        <div className="flex items-start justify-start">
-          <p className="font-inter text-secondary w-[116px] shrink-0 text-[12px] font-medium not-italic leading-[20px]">
-            Voting Power
-          </p>
-          <p className="font-inter text-primary text-[14px] font-normal not-italic leading-[20px]">
-            {votingPower}
-          </p>
-        </div>
-        <div className="flex items-start justify-start">
-          <p className="font-inter text-secondary w-[116px] shrink-0 text-[12px] font-medium not-italic leading-[20px]">
-            Vote
-          </p>
-          <p
-            className={cn(
-              "font-inter text-primary rounded-full px-[6px] py-0.5 text-[12px] font-medium not-italic leading-[16px]",
-              vote === "for"
-                ? "text-success bg-surface-opacity-success"
-                : vote === "against"
-                  ? "text-error bg-surface-opacity-error"
-                  : "text-primary bg-surface-default",
-            )}
-          >
-            {vote === "for"
-              ? "For"
-              : vote === "against"
-                ? "Against"
-                : "Abstain"}
-          </p>
-        </div>
-      </div>
-
-      <div className="flex w-full flex-col items-start justify-start gap-3 p-4">
-        <div className="border-border-default flex w-full flex-col items-center justify-start gap-3 border p-3">
-          {/* Confirm your vote in your wallet */}
-          <div className="flex w-full items-center justify-start gap-3">
-            {!transactionhash ? (
-              <div className="bg-surface-default relative flex size-[32px] items-center justify-center rounded-full">
-                <SpinIcon className="absolute left-1/2 top-1/2 size-8 shrink-0 -translate-x-1/2 -translate-y-1/2 animate-spin text-orange-500" />
-                <div className="bg-primary flex size-6 shrink-0 items-center justify-center rounded-full">
-                  <Pencil className="size-[14px] text-black" />
-                </div>
-              </div>
-            ) : (
-              <div className="bg-surface-default relative flex size-[32px] items-center justify-center rounded-full">
-                <div className="border-border-default absolute left-1/2 top-1/2 size-8 shrink-0 -translate-x-1/2 -translate-y-1/2 animate-spin rounded-full border-[1px]" />
-                <div className="bg-surface-opacity-success flex size-6 shrink-0 items-center justify-center rounded-full">
-                  <Check className="text-success size-[14px]" />
-                </div>
-              </div>
-            )}
-            <p className="font-inter text-primary text-[14px] font-normal not-italic leading-[20px]">
-              Confirm your vote in your wallet
-            </p>
-          </div>
-
-          <div className="flex w-full items-center justify-start">
-            <div className="bg-border-default ml-4 h-6 w-0.5 shrink-0" />
-          </div>
-
-          {/* Wait for vote submission to complete */}
-          <div className="flex w-full items-center justify-start gap-3">
-            {transactionhash ? (
-              <div className="bg-surface-default relative flex size-[32px] items-center justify-center rounded-full">
-                <SpinIcon className="absolute left-1/2 top-1/2 size-8 shrink-0 -translate-x-1/2 -translate-y-1/2 animate-spin text-orange-500" />
-                <div className="bg-primary flex size-6 shrink-0 items-center justify-center rounded-full">
-                  <Hourglass className="size-[14px] text-black" />
-                </div>
-              </div>
-            ) : (
-              <div className="bg-surface-default relative flex size-[32px] items-center justify-center rounded-full">
-                <div className="border-border-default absolute left-1/2 top-1/2 size-8 shrink-0 -translate-x-1/2 -translate-y-1/2 animate-spin rounded-full border-[1px]" />
-                <div className="bg-border-default flex size-6 shrink-0 items-center justify-center rounded-full">
-                  <Hourglass className="text-secondary size-[14px]" />
-                </div>
-              </div>
-            )}
-            <p className="font-inter text-primary text-[14px] font-normal not-italic leading-[20px]">
-              Wait for vote submission to complete
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-interface VoteOptionProps {
-  vote: "for" | "against" | "abstain";
-  optionPercentage: number;
-  votingPower: string;
-  totalOptionVotes: string;
-  onChange: (vote: "for" | "against" | "abstain") => void;
-  checked: boolean;
-}
-
-const VoteOption = ({
-  vote,
-  optionPercentage,
-  votingPower,
-  totalOptionVotes,
-  onChange,
-  checked,
-}: VoteOptionProps) => {
-  const userReadableVotingPower = formatNumberUserReadable(
-    Number(formatEther(BigInt(votingPower))),
-    1,
-  );
-
-  console.log(totalOptionVotes);
-
-  return (
-    <div className="flex flex-col">
-      <div className="border-border-default flex items-center justify-between border px-[10px] py-2">
-        <div className="flex w-full items-center gap-2">
-          <div className="flex w-[100px] items-center gap-2">
-            <input
-              className="border-primary checked:border-primary checked:bg-primary box-border h-4 w-4 cursor-pointer appearance-none rounded-full border-2 bg-transparent"
-              type="radio"
-              name="vote"
-              id="for"
-              checked={checked}
-              onChange={() => onChange(vote)}
-            />
-            <p
-              className={cn(
-                "font-inter text-[14px] font-normal not-italic leading-[20px]",
-                vote === "for"
-                  ? "text-success"
-                  : vote === "against"
-                    ? "text-error"
-                    : "text-primary",
-              )}
-            >
-              {vote === "for"
-                ? "For"
-                : vote === "against"
-                  ? "Against"
-                  : "Abstain"}
-            </p>
-          </div>
-
-          <div className="bg-surface-hover relative h-1 w-full max-w-[270px] flex-1">
-            <div
-              className={cn(
-                "h-1",
-                vote === "for"
-                  ? "bg-success"
-                  : vote === "against"
-                    ? "bg-error"
-                    : "bg-primary",
-              )}
-              style={{ width: `${optionPercentage}%` }}
-            />
-          </div>
-        </div>
-
-        <div className="flex shrink-0 items-center justify-end gap-2">
-          {/* <p className="text-primary font-inter w-[50px] text-[14px] font-normal not-italic leading-[20px]">
-            {checked && percentageChange.toFixed(1)}
-          </p> */}
-          <p className="text-primary font-inter w-[50px] text-[14px] font-normal not-italic leading-[20px]">
-            {userReadableVotingPower}
-          </p>
-          <p className="text-primary font-inter w-[50px] text-[14px] font-normal not-italic leading-[20px]">
-            {optionPercentage.toFixed(1)}%
-          </p>
         </div>
       </div>
     </div>
