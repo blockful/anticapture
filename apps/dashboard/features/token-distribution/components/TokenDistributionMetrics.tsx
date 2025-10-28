@@ -155,15 +155,8 @@ export const TokenDistributionMetrics = ({
                           // Count all the proposal titles (strings) in the data
                           currentValue = metricData.reduce(
                             (sum: number, val) => {
-                              // If val is a non-empty string, it means there's a proposal at that timestamp
-                              return (
-                                sum +
-                                (val &&
-                                typeof val === "string" &&
-                                val.length > 0
-                                  ? 1
-                                  : 0)
-                              );
+                              // If val is a non-zero, it means there's a proposal at that timestamp
+                              return sum + (val ? 1 : 0);
                             },
                             0,
                           );
