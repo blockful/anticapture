@@ -5,7 +5,7 @@ import { useProposals } from "@/features/token-distribution/hooks/useProposals";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
-import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
+import { DaoMetricsDayBucket, PriceEntry } from "@/shared/dao-config/types";
 import { ChartDataSetPoint } from "@/shared/dao-config/types";
 import { MetricSchema } from "@/features/token-distribution/utils/metrics";
 import { normalizeTimestamp } from "@/features/token-distribution/utils/chart";
@@ -21,10 +21,12 @@ export const useChartMetrics = ({
   appliedMetrics,
   daoId,
   metricsSchema,
+  tokenType,
 }: {
   appliedMetrics: string[];
   daoId: DaoIdEnum;
   metricsSchema: Record<string, MetricSchema>;
+  tokenType: "ERC20" | "ERC721";
 }): UseChartMetricsResult => {
   // Get direct enum metrics
   const enumMetrics = appliedMetrics.filter((key) =>
@@ -157,7 +159,8 @@ export const useChartMetrics = ({
             result[normalizeTimestamp(item.date)] = {
               ...result[normalizeTimestamp(item.date)],
               date: normalizeTimestamp(item.date),
-              [metricKey]: Number(value) / 1e18, // Convert from wei to token units
+              [metricKey]:
+                tokenType === "ERC721" ? Number(value) : Number(value) / 1e18, // Convert from wei to token units
             };
           });
         }
@@ -165,7 +168,7 @@ export const useChartMetrics = ({
     }
 
     return result;
-  }, [timeSeriesData, stableAppliedMetrics, metricsSchema]);
+  }, [timeSeriesData, stableAppliedMetrics, metricsSchema, tokenType]);
 
   // Process historical token data separately
   const tokenPriceDatasets = useMemo(() => {
@@ -173,10 +176,10 @@ export const useChartMetrics = ({
 
     if (
       stableAppliedMetrics.includes("TOKEN_PRICE") &&
-      filteredHistoricalTokenData?.prices
+      filteredHistoricalTokenData
     ) {
-      filteredHistoricalTokenData.prices.forEach(
-        ([timestamp, price]: [number, number]) => {
+      filteredHistoricalTokenData.forEach(
+        ({ timestamp, price }: PriceEntry) => {
           result[normalizeTimestamp(timestamp)] = {
             ...result[normalizeTimestamp(timestamp)],
             date: normalizeTimestamp(timestamp),
@@ -206,7 +209,8 @@ export const useChartMetrics = ({
         result[normalizeTimestamp(timestamp)] = {
           ...result[normalizeTimestamp(timestamp)],
           date: normalizeTimestamp(timestamp),
-          PROPOSALS_GOVERNANCE: proposal.title || "",
+          PROPOSALS_GOVERNANCE: 1,
+          PROPOSALS_GOVERNANCE_TEXT: proposal.title || "",
         };
         // }
       });
@@ -223,10 +227,15 @@ export const useChartMetrics = ({
     [timeSeriesDatasets, tokenPriceDatasets, proposalsDatasets].forEach(
       (dataset) => {
         Object.entries(dataset).forEach(([key, value]) => {
-          result[key] = {
-            ...result[key],
-            ...value,
-          };
+          if (!result[key]) {
+            result[key] = value;
+          } else {
+            Object.entries(value).forEach(([k, v]) => {
+              if (result[key][k] === undefined) {
+                result[key][k] = v;
+              }
+            });
+          }
         });
       },
     );
@@ -262,6 +271,12 @@ export const useChartMetrics = ({
           } else {
             processedPoint[metricKey] = 0;
           }
+        }
+      });
+
+      Object.entries(point).forEach(([key, value]) => {
+        if (!processedPoint[key]) {
+          processedPoint[key] = value;
         }
       });
 

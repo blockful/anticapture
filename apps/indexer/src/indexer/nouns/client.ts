@@ -7,7 +7,7 @@ import {
   toHex,
   Transport,
 } from "viem";
-import { getBlockNumber, readContract } from "viem/actions";
+import { readContract } from "viem/actions";
 
 import { DAOClient } from "@/interfaces/client";
 import { GovernorAbi } from "./abi/governor";

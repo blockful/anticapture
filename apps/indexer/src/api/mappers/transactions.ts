@@ -1,6 +1,6 @@
+import { transfer, delegation, transaction } from "ponder:schema";
+import { formatEther, isAddress } from "viem";
 import { z } from "@hono/zod-openapi";
-import { transaction, transfer, delegation } from "ponder:schema";
-import { isAddress } from "viem";
 
 export type DBTransaction = typeof transaction.$inferSelect & {
   transfers: DBTransfer[];
@@ -17,58 +17,73 @@ export enum AffectedSupply {
   TOTAL = "TOTAL",
 }
 
-export const TransactionsRequestSchema = z.object({
-  limit: z.coerce
-    .number()
-    .int()
-    .min(1, "Limit must be a positive integer")
-    .max(100, "Limit cannot exceed 100")
-    .optional()
-    .default(50),
-  offset: z.coerce
-    .number()
-    .int()
-    .min(0, "Offset must be a non-negative integer")
-    .optional()
-    .default(0),
-  sortBy: z.enum(["timestamp"]).optional().default("timestamp"),
-  sortOrder: z.enum(["asc", "desc"]).optional().default("desc"),
-  from: z
-    .string()
-    .refine((addr) => isAddress(addr))
-    .optional(),
-  to: z
-    .string()
-    .refine((addr) => isAddress(addr))
-    .optional(),
-  minAmount: z
-    .string()
-    .transform((val) => BigInt(val))
-    .optional(), //z.coerce.bigint().optional() doesn't work because of a bug with zod, zod asks for a string that satisfies REGEX ^d+$, when it should be ^\d+$
-  maxAmount: z
-    .string()
-    .transform((val) => BigInt(val))
-    .optional(), //z.coerce.bigint().optional() doesn't work because of a bug with zod, zod asks for a string that satisfies REGEX ^d+$, when it should be ^\d+$
-  affectedSupply: z
-    .union([
-      z.nativeEnum(AffectedSupply),
-      z.array(z.nativeEnum(AffectedSupply)),
-    ])
-    .optional()
-    .describe(
-      "Filter transactions by affected supply type. Can be: 'CEX', 'DEX', 'LENDING', or 'TOTAL'",
-    )
-    .transform((affectedSupply) => {
-      if (!affectedSupply?.length) return {};
+export const TransactionsRequestSchema = z
+  .object({
+    limit: z.coerce
+      .number()
+      .int()
+      .min(1, "Limit must be a positive integer")
+      .max(100, "Limit cannot exceed 100")
+      .optional()
+      .default(50),
+    offset: z.coerce
+      .number()
+      .int()
+      .min(0, "Offset must be a non-negative integer")
+      .optional()
+      .default(0),
+    sortBy: z.enum(["timestamp"]).optional().default("timestamp"),
+    sortOrder: z.enum(["asc", "desc"]).optional().default("desc"),
+    fromDate: z.coerce.number().int("fromDate must be an integer").optional(),
+    toDate: z.coerce.number().int("toDate must be an integer").optional(),
+    from: z
+      .string()
+      .refine((addr) => isAddress(addr))
+      .optional(),
+    to: z
+      .string()
+      .refine((addr) => isAddress(addr))
+      .optional(),
+    minAmount: z
+      .string()
+      .transform((val) => BigInt(val))
+      .optional(), //z.coerce.bigint().optional() doesn't work because of a bug with zod, zod asks for a string that satisfies REGEX ^d+$, when it should be ^\d+$
+    maxAmount: z
+      .string()
+      .transform((val) => BigInt(val))
+      .optional(), //z.coerce.bigint().optional() doesn't work because of a bug with zod, zod asks for a string that satisfies REGEX ^d+$, when it should be ^\d+$
+    affectedSupply: z
+      .union([
+        z.nativeEnum(AffectedSupply),
+        z.array(z.nativeEnum(AffectedSupply)),
+      ])
+      .optional()
+      .describe(
+        "Filter transactions by affected supply type. Can be: 'CEX', 'DEX', 'LENDING', or 'TOTAL'",
+      )
+      .transform((affectedSupply) => {
+        if (!affectedSupply?.length) return {};
 
-      return {
-        isCex: affectedSupply.includes(AffectedSupply.CEX),
-        isDex: affectedSupply.includes(AffectedSupply.DEX),
-        isLending: affectedSupply.includes(AffectedSupply.LENDING),
-        isTotal: affectedSupply.includes(AffectedSupply.TOTAL),
-      };
-    }),
-});
+        return {
+          isCex: affectedSupply.includes(AffectedSupply.CEX),
+          isDex: affectedSupply.includes(AffectedSupply.DEX),
+          isLending: affectedSupply.includes(AffectedSupply.LENDING),
+          isTotal: affectedSupply.includes(AffectedSupply.TOTAL),
+        };
+      }),
+  })
+  .refine(
+    (data) => {
+      if (data.fromDate && data.toDate) {
+        return data.fromDate <= data.toDate;
+      }
+      return true;
+    },
+    {
+      message: "fromDate must be less than or equal to toDate",
+      path: ["fromDate"],
+    },
+  );
 
 export type TransactionsRequest = z.infer<typeof TransactionsRequestSchema>;
 
@@ -130,7 +145,7 @@ export const TransactionMapper = {
       transactionHash: t.transactionHash,
       daoId: t.daoId,
       tokenId: t.tokenId,
-      amount: t.amount.toString(),
+      amount: formatEther(t.amount),
       fromAccountId: t.fromAccountId,
       toAccountId: t.toAccountId,
       timestamp: t.timestamp.toString(),
@@ -148,7 +163,7 @@ export const TransactionMapper = {
       daoId: d.daoId,
       delegateAccountId: d.delegateAccountId,
       delegatorAccountId: d.delegatorAccountId,
-      delegatedValue: d.delegatedValue.toString(),
+      delegatedValue: formatEther(d.delegatedValue),
       previousDelegate: d.previousDelegate,
       timestamp: d.timestamp.toString(),
       logIndex: d.logIndex,

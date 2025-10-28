@@ -4,114 +4,284 @@ directive @resolveRoot(subgraph: String) on FIELD_DEFINITION
 
 directive @typescript(subgraph: String, type: String) on SCALAR | ENUM
 
-directive @example(subgraph: String, value: ObjMap) repeatable on FIELD_DEFINITION | OBJECT | INPUT_OBJECT | ENUM | SCALAR
+directive @example(
+  subgraph: String
+  value: ObjMap
+) repeatable on FIELD_DEFINITION | OBJECT | INPUT_OBJECT | ENUM | SCALAR
 
-directive @httpOperation(subgraph: String, path: String, operationSpecificHeaders: [[String]], httpMethod: HTTPMethod, isBinary: Boolean, requestBaseBody: ObjMap, queryParamArgMap: ObjMap, queryStringOptionsByParam: ObjMap, jsonApiFields: Boolean, queryStringOptions: ObjMap) on FIELD_DEFINITION
+directive @httpOperation(
+  subgraph: String
+  path: String
+  operationSpecificHeaders: [[String]]
+  httpMethod: HTTPMethod
+  isBinary: Boolean
+  requestBaseBody: ObjMap
+  queryParamArgMap: ObjMap
+  queryStringOptionsByParam: ObjMap
+  jsonApiFields: Boolean
+  queryStringOptions: ObjMap
+) on FIELD_DEFINITION
 
-directive @transport(subgraph: String, kind: String, location: String, headers: [[String]], queryStringOptions: ObjMap, queryParams: [[String]]) repeatable on SCHEMA
+directive @transport(
+  subgraph: String
+  kind: String
+  location: String
+  headers: [[String]]
+  queryStringOptions: ObjMap
+  queryParams: [[String]]
+) repeatable on SCHEMA
 
 type Query {
   dao(id: String!): dao
-  daos(where: daoFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): daoPage!
+  daos(
+    where: daoFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): daoPage!
 
-  """Get property data for a specific token"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/token`\nGet property data for a specific token\n"
   token(currency: queryInput_token_currency = usd): token_200_response
-  tokens(where: tokenFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPage!
+  tokens(
+    where: tokenFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): tokenPage!
   account(id: String!): account
-  accounts(where: accountFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountPage!
+  accounts(
+    where: accountFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): accountPage!
   accountBalance(accountId: String!, tokenId: String!): accountBalance
-  accountBalances(where: accountBalanceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountBalancePage!
+  accountBalances(
+    where: accountBalanceFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): accountBalancePage!
   accountPower(accountId: String!): accountPower
-  accountPowers(where: accountPowerFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountPowerPage!
-  votingPowerHistory(transactionHash: String!, accountId: String!): votingPowerHistory
-  votingPowerHistorys(where: votingPowerHistoryFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votingPowerHistoryPage!
-  delegation(transactionHash: String!, delegatorAccountId: String!, delegateAccountId: String!): delegation
-  delegations(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): delegationPage!
-  transfer(transactionHash: String!, fromAccountId: String!, toAccountId: String!): transfer
-  transfers(where: transferFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): transferPage!
+  accountPowers(
+    where: accountPowerFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): accountPowerPage!
+  votingPowerHistory(
+    transactionHash: String!
+    accountId: String!
+  ): votingPowerHistory
+  votingPowerHistorys(
+    where: votingPowerHistoryFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): votingPowerHistoryPage!
+  delegation(
+    transactionHash: String!
+    delegatorAccountId: String!
+    delegateAccountId: String!
+  ): delegation
+  delegations(
+    where: delegationFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): delegationPage!
+  transfer(
+    transactionHash: String!
+    fromAccountId: String!
+    toAccountId: String!
+  ): transfer
+  transfers(
+    where: transferFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): transferPage!
   votesOnchain(voterAccountId: String!, proposalId: String!): votesOnchain
-  votesOnchains(where: votesOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votesOnchainPage!
+  votesOnchains(
+    where: votesOnchainFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): votesOnchainPage!
   proposalsOnchain(id: String!): proposalsOnchain
-  proposalsOnchains(where: proposalsOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): proposalsOnchainPage!
-  daoMetricsDayBucket(date: BigInt!, tokenId: String!, metricType: String!): daoMetricsDayBucket
-  daoMetricsDayBuckets(where: daoMetricsDayBucketFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): daoMetricsDayBucketPage!
+  proposalsOnchains(
+    where: proposalsOnchainFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): proposalsOnchainPage!
+  daoMetricsDayBucket(
+    date: BigInt!
+    tokenId: String!
+    metricType: String!
+  ): daoMetricsDayBucket
+  daoMetricsDayBuckets(
+    where: daoMetricsDayBucketFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): daoMetricsDayBucketPage!
   transaction(transactionHash: String!): transaction
-  _(where: transactionFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): transactionPage!
+  _(
+    where: transactionFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): transactionPage!
   tokenPrice(timestamp: BigInt!): tokenPrice
-  tokenPrices(where: tokenPriceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPricePage!
+  tokenPrices(
+    where: tokenPriceFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): tokenPricePage!
   _meta: Meta
 
-  """Get total assets"""
-  totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/token/historical-data`\nGet historical market data for a specific token\n"
+  historicalTokenData(
+    skip: NonNegativeInt
+    limit: Float = 365
+  ): [query_historicalTokenData_items]
 
-  """Get historical market data for a specific token"""
-  historicalTokenData(skip: NonNegativeInt, limit: Float = 365): [query_historicalTokenData_items]
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/total-supply/compare`\nCompare total supply between periods\n"
+  compareTotalSupply(
+    days: queryInput_compareTotalSupply_days = _90d
+  ): compareTotalSupply_200_response
 
-  """Compare total supply between periods"""
-  compareTotalSupply(days: queryInput_compareTotalSupply_days = _90d): compareTotalSupply_200_response
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/delegated-supply/compare`\nCompare delegated supply between periods\n"
+  compareDelegatedSupply(
+    days: queryInput_compareDelegatedSupply_days = _90d
+  ): compareDelegatedSupply_200_response
 
-  """Compare delegated supply between periods"""
-  compareDelegatedSupply(days: queryInput_compareDelegatedSupply_days = _90d): compareDelegatedSupply_200_response
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/circulating-supply/compare`\nCompare circulating supply between periods\n"
+  compareCirculatingSupply(
+    days: queryInput_compareCirculatingSupply_days = _90d
+  ): compareCirculatingSupply_200_response
 
-  """Compare circulating supply between periods"""
-  compareCirculatingSupply(days: queryInput_compareCirculatingSupply_days = _90d): compareCirculatingSupply_200_response
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/treasury/compare`\nCompare treasury between periods\n"
+  compareTreasury(
+    days: queryInput_compareTreasury_days = _90d
+  ): compareTreasury_200_response
 
-  """Compare treasury between periods"""
-  compareTreasury(days: queryInput_compareTreasury_days = _90d): compareTreasury_200_response
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/cex-supply/compare`\nCompare cex supply between periods\n"
+  compareCexSupply(
+    days: queryInput_compareCexSupply_days = _90d
+  ): compareCexSupply_200_response
 
-  """Compare cex supply between periods"""
-  compareCexSupply(days: queryInput_compareCexSupply_days = _90d): compareCexSupply_200_response
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/dex-supply/compare`\nCompare dex supply between periods\n"
+  compareDexSupply(
+    days: queryInput_compareDexSupply_days = _90d
+  ): compareDexSupply_200_response
 
-  """Compare dex supply between periods"""
-  compareDexSupply(days: queryInput_compareDexSupply_days = _90d): compareDexSupply_200_response
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/lending-supply/compare`\nCompare lending supply between periods\n"
+  compareLendingSupply(
+    days: queryInput_compareLendingSupply_days = _90d
+  ): compareLendingSupply_200_response
 
-  """Compare lending supply between periods"""
-  compareLendingSupply(days: queryInput_compareLendingSupply_days = _90d): compareLendingSupply_200_response
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/active-supply/compare`\nGet active token supply for DAO\n"
+  compareActiveSupply(
+    days: queryInput_compareActiveSupply_days = _90d
+  ): compareActiveSupply_200_response
 
-  """Get active token supply for DAO"""
-  compareActiveSupply(days: queryInput_compareActiveSupply_days = _90d): compareActiveSupply_200_response
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/proposals/compare`\nCompare number of proposals between time periods\n"
+  compareProposals(
+    days: queryInput_compareProposals_days = _90d
+  ): compareProposals_200_response
 
-  """Compare number of proposals between time periods"""
-  compareProposals(days: queryInput_compareProposals_days = _90d): compareProposals_200_response
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/votes/compare`\nCompare number of votes between time periods\n"
+  compareVotes(
+    days: queryInput_compareVotes_days = _90d
+  ): compareVotes_200_response
 
-  """Compare number of votes between time periods"""
-  compareVotes(days: queryInput_compareVotes_days = _90d): compareVotes_200_response
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/average-turnout/compare`\nCompare average turnout between time periods\n"
+  compareAverageTurnout(
+    days: queryInput_compareAverageTurnout_days = _90d
+  ): compareAverageTurnout_200_response
 
-  """Compare average turnout between time periods"""
-  compareAverageTurnout(days: queryInput_compareAverageTurnout_days = _90d): compareAverageTurnout_200_response
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/proposals-activity`\nReturns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window\n"
+  proposalsActivity(
+    address: String!
+    fromDate: NonNegativeInt
+    skip: NonNegativeInt
+    limit: PositiveInt = 10
+    orderBy: queryInput_proposalsActivity_orderBy = timestamp
+    orderDirection: queryInput_proposalsActivity_orderDirection = desc
+    userVoteFilter: queryInput_proposalsActivity_userVoteFilter
+  ): proposalsActivity_200_response
 
-  """
-  Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window
-  """
-  proposalsActivity(address: String!, fromDate: NonNegativeInt, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_proposalsActivity_orderBy = timestamp, orderDirection: queryInput_proposalsActivity_orderDirection = desc, userVoteFilter: queryInput_proposalsActivity_userVoteFilter): proposalsActivity_200_response
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/proposals`\nReturns a list of proposal\n"
+  proposals(
+    skip: NonNegativeInt
+    limit: PositiveInt = 10
+    orderDirection: queryInput_proposals_orderDirection = desc
+    status: JSON
+    fromDate: Float
+  ): proposals_200_response
 
-  """Returns a list of proposal"""
-  proposals(skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposals_orderDirection = desc, status: JSON, fromDate: Float): proposals_200_response
-
-  """Returns a single proposal by its ID"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/proposals/{args.id}`\nReturns a single proposal by its ID\n"
   proposal(id: String!): proposal_200_response
 
-  """Returns the active delegates that did not vote on a given proposal"""
-  proposalNonVoters(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposalNonVoters_orderDirection = desc, addresses: JSON): proposalNonVoters_200_response
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/proposals/{args.id}/non-voters`\nReturns the active delegates that did not vote on a given proposal\n"
+  proposalNonVoters(
+    id: String!
+    skip: NonNegativeInt
+    limit: PositiveInt = 10
+    orderDirection: queryInput_proposalNonVoters_orderDirection = desc
+    addresses: JSON
+  ): proposalNonVoters_200_response
 
-  """
-  Fetch historical token balances for multiple addresses at a specific time period using multicall
-  """
-  historicalBalances(addresses: JSON!, days: queryInput_historicalBalances_days = _7d): [query_historicalBalances_items]
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/historical-balances`\nFetch historical token balances for multiple addresses at a specific time period using multicall\n"
+  historicalBalances(
+    addresses: JSON!
+    days: queryInput_historicalBalances_days = _7d
+  ): [query_historicalBalances_items]
 
-  """
-  Fetch historical voting power for multiple addresses at a specific time period using multicall
-  """
-  historicalVotingPower(addresses: JSON!, days: queryInput_historicalVotingPower_days = _7d, fromDate: Float): [query_historicalVotingPower_items]
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/historical-voting-power`\nFetch historical voting power for multiple addresses at a specific time period using multicall\n"
+  historicalVotingPower(
+    addresses: JSON!
+    days: queryInput_historicalVotingPower_days = _7d
+    fromDate: Float
+  ): [query_historicalVotingPower_items]
 
-  """
-  Get transactions with their associated transfers and delegations, with optional filtering and sorting
-  """
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/transactions`\nGet transactions with their associated transfers and delegations, with optional filtering and sorting\n"
   transactions(
     limit: PositiveInt = 50
     offset: NonNegativeInt
     sortBy: timestamp_const
     sortOrder: queryInput_transactions_sortOrder = desc
+    fromDate: Int
+    toDate: Int
     from: String
     to: String
     minAmount: String
@@ -123,27 +293,94 @@ type Query {
     affectedSupply: JSON
   ): transactions_200_response
 
-  """Get the last update time"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/last-update`\nGet the last update time\n"
   lastUpdate(chart: queryInput_lastUpdate_chart!): lastUpdate_200_response
 
-  """Returns a list of voting power changes"""
-  votingPowers(account: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_votingPowers_orderBy = timestamp, orderDirection: queryInput_votingPowers_orderDirection = desc, minDelta: String, maxDelta: String): votingPowers_200_response
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/delegation-percentage`\nGet delegation percentage day buckets with forward-fill\n"
+  getDelegationPercentage(
+    startDate: String
+    endDate: String
+    orderDirection: queryInput_getDelegationPercentage_orderDirection = asc
+    limit: NonNegativeInt = 365
+    after: String
+    before: String
+  ): getDelegationPercentage_200_response
+
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/voting-powers`\nReturns a list of voting power changes\n"
+  votingPowers(
+    account: String!
+    skip: NonNegativeInt
+    limit: PositiveInt = 10
+    orderBy: queryInput_votingPowers_orderBy = timestamp
+    orderDirection: queryInput_votingPowers_orderDirection = desc
+    minDelta: String
+    maxDelta: String
+  ): votingPowers_200_response
+
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/voting-power/variations`\nReturns a mapping of the biggest changes to voting power associated by delegate address\n"
+  votingPowerVariations(
+    days: queryInput_votingPowerVariations_days = _90d
+    limit: PositiveInt = 20
+    skip: NonNegativeInt
+    orderDirection: queryInput_votingPowerVariations_orderDirection = desc
+  ): votingPowerVariations_200_response
+
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/account-balance/variations`\nReturns a mapping of the biggest variations to account balances associated by account address\n"
+  accountBalanceVariations(
+    days: queryInput_accountBalanceVariations_days = _90d
+    limit: PositiveInt = 20
+    skip: NonNegativeInt
+    orderDirection: queryInput_accountBalanceVariations_orderDirection = desc
+  ): accountBalanceVariations_200_response
 
   """
-  Returns a mapping of the biggest changes to voting power associated by delegate address
+  Aggregated delegation supply across all supported DAOs.
+  Returns the mean delegation percentage for each day in the specified range.
+  Only includes dates where ALL DAOs have data available.
   """
-  votingPowerVariations(days: queryInput_votingPowerVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_votingPowerVariations_orderDirection = desc): votingPowerVariations_200_response
+  aggregatedDelegatedSupply(
+    """
+    Start date (Unix timestamp in seconds). Required.
+    All DAOs will return data starting from this date.
+    The aggregation will begin from the latest start date among all DAOs.
+    """
+    startDate: String!
 
-  """
-  Returns a mapping of the biggest variations to account balances associated by account address
-  """
-  accountBalanceVariations(days: queryInput_accountBalanceVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalanceVariations_orderDirection = desc): accountBalanceVariations_200_response
+    """
+    End date (Unix timestamp in seconds). Optional.
+    If not provided, returns data up to the latest available date.
+    """
+    endDate: String
+
+    """
+    Cursor for pagination. Returns items after this date.
+    """
+    after: String
+
+    """
+    Cursor for pagination. Returns items before this date.
+    """
+    before: String
+
+    """
+    Sort direction: "asc" or "desc". Default: "asc"
+    """
+    orderDirection: String
+
+    """
+    Maximum number of items to return. Default: 100
+    """
+    limit: Int
+  ): AggregatedDelegatedSupplyPage!
 }
 
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
-scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
+scalar JSON
+  @specifiedBy(
+    url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf"
+  )
 
 scalar BigInt
 
@@ -152,6 +389,8 @@ type PageInfo {
   hasPreviousPage: Boolean!
   startCursor: String
   endCursor: String
+  endDate: String
+  startDate: String
 }
 
 type Meta {
@@ -347,15 +586,78 @@ input tokenFilter {
 
 type account {
   id: String!
-  balances(where: accountBalanceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountBalancePage
-  powers(where: accountPowerFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountPowerPage
-  delegationsFrom(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): delegationPage
-  delegationsTo(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): delegationPage
-  sentTransfers(where: transferFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): transferPage
-  receivedTransfers(where: transferFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): transferPage
-  proposals(where: proposalsOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): proposalsOnchainPage
-  votes(where: votesOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votesOnchainPage
-  delegatedFromBalances(where: accountBalanceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountBalancePage
+  balances(
+    where: accountBalanceFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): accountBalancePage
+  powers(
+    where: accountPowerFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): accountPowerPage
+  delegationsFrom(
+    where: delegationFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): delegationPage
+  delegationsTo(
+    where: delegationFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): delegationPage
+  sentTransfers(
+    where: transferFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): transferPage
+  receivedTransfers(
+    where: transferFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): transferPage
+  proposals(
+    where: proposalsOnchainFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): proposalsOnchainPage
+  votes(
+    where: votesOnchainFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): votesOnchainPage
+  delegatedFromBalances(
+    where: accountBalanceFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): accountBalancePage
 }
 
 type accountBalancePage {
@@ -543,8 +845,22 @@ type transaction {
   isLending: Boolean!
   isTotal: Boolean!
   timestamp: BigInt!
-  transfers(where: transferFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): transferPage
-  delegations(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): delegationPage
+  transfers(
+    where: transferFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): transferPage
+  delegations(
+    where: delegationFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): delegationPage
 }
 
 type transferPage {
@@ -786,7 +1102,14 @@ type proposalsOnchain {
   forVotes: BigInt!
   againstVotes: BigInt!
   abstainVotes: BigInt!
-  votes(where: votesOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votesOnchainPage
+  votes(
+    where: votesOnchainFilter
+    orderBy: String
+    orderDirection: String
+    before: String
+    after: String
+    limit: Int
+  ): votesOnchainPage
   proposer: account
 }
 
@@ -1356,25 +1679,14 @@ input tokenPriceFilter {
   timestamp_lte: BigInt
 }
 
-type query_totalAssets_items {
-  totalAssets: String!
-  date: String!
-}
-
-enum queryInput_totalAssets_days {
-  _7d
-  _30d
-  _90d
-  _180d
-  _365d
-}
-
 type query_historicalTokenData_items {
   price: String!
-  timestamp: String!
+  timestamp: Float!
 }
 
-"""Integers that will have a value of 0 or more."""
+"""
+Integers that will have a value of 0 or more.
+"""
 scalar NonNegativeInt
 
 type token_200_response {
@@ -1626,7 +1938,9 @@ type query_proposalsActivity_proposals_items_userVote {
   timestamp: String!
 }
 
-"""Integers that will have a value greater than 0."""
+"""
+Integers that will have a value greater than 0.
+"""
 scalar PositiveInt
 
 enum queryInput_proposalsActivity_orderBy {
@@ -1815,6 +2129,28 @@ enum queryInput_lastUpdate_chart {
   token_distribution
 }
 
+type getDelegationPercentage_200_response {
+  items: [query_getDelegationPercentage_items_items]!
+  totalCount: Float!
+  pageInfo: query_getDelegationPercentage_pageInfo!
+}
+
+type query_getDelegationPercentage_items_items {
+  date: String!
+  high: String!
+}
+
+type query_getDelegationPercentage_pageInfo {
+  hasNextPage: Boolean!
+  endDate: String
+  startDate: String
+}
+
+enum queryInput_getDelegationPercentage_orderDirection {
+  asc
+  desc
+}
+
 type votingPowers_200_response {
   items: [query_votingPowers_items_items]!
   totalCount: Float!
@@ -1930,4 +2266,15 @@ enum HTTPMethod {
   OPTIONS
   TRACE
   PATCH
+}
+
+type AggregatedDelegatedSupplyItem {
+  date: String!
+  high: String!
+}
+
+type AggregatedDelegatedSupplyPage {
+  items: [AggregatedDelegatedSupplyItem!]!
+  totalCount: Int!
+  pageInfo: PageInfo!
 }
