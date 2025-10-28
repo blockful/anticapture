@@ -378,7 +378,22 @@ export const CEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     OKX: "0x611f7bF868a6212f871e89F7e44684045DdFB09d",
   },
   [DaoIdEnum.COMP]: {
-    // TODO
+    Robinhood: "0x73AF3bcf944a6559933396c1577B257e2054D935",
+    "Robinhood 2": "0x841ed663F2636863D40be4EE76243377dff13a34",
+    "Binance 1": "0xF977814e90dA44bFA03b6295A0616a897441aceC",
+    "Binance 2": "0x47ac0Fb4F2D84898e4D9E7b4DaB3C24507a6D503",
+    "Binance 3": "0x28C6c06298d514Db089934071355E5743bf21d60",
+    "Binance 4": "0x21a31Ee1afC51d94C2eFcCAa2092aD1028285549",
+    "Binance 5": "0xDFd5293D8e347dFe59E90eFd55b2956a1343963d",
+    ByBit: "0x6522B7F9d481eCEB96557F44753a4b893F837E90",
+    OKX: "0x073F564419b625A45D8aEa3bb0dE4d5647113AD7",
+    Upbit: "0x47ac0Fb4F2D84898e4D9E7b4DaB3C24507a6D503",
+    BtcTurk: "0x76eC5A0D3632b2133d9f1980903305B62678Fbd3",
+    Bithumb: "0x75252a69676C2472EdF9974476e9c636ca7a8AF1",
+    Kraken: "0x7DAFbA1d69F6C01AE7567Ffd7b046Ca03B706f83",
+    "Kraken 2": "0xd2DD7b597Fd2435b6dB61ddf48544fd931e6869F",
+    "Kucoin 1": "0x2933782B5A8d72f2754103D1489614F29bfA4625",
+    "Kucoin 2": "0x58edF78281334335EfFa23101bBe3371b6a36A51",
   },
 };
 
@@ -433,7 +448,9 @@ export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     Nuri: "0x76c662b1e25CB67D7365191B55813D8CD3Fdac02",
   },
   [DaoIdEnum.COMP]: {
-    // TODO
+    Uniswap: "0x5598931BfBb43EEC686fa4b5b92B5152ebADC2f6",
+    "Uniswap 2": "0xea4Ba4CE14fdd287f380b55419B1C5b6c3f22ab6",
+    "Pancake Swap": "0x0392957571F28037607C14832D16f8B653eDd472",
   },
 };
 
@@ -473,7 +490,8 @@ export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     Aave: "0x25718130C2a8eb94e2e1FAFB5f1cDd4b459aCf64",
   },
   [DaoIdEnum.COMP]: {
-    // TODO
+    Compound: "0xc3d688B66703497DAA19211EEdff47f25384cdc3",
+    "Compound 2": "0x3Afdc9BCA9213A35503b077a6072F3D0d5AB0840",
   },
 };
 
