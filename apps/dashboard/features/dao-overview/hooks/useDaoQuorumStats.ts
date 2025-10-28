@@ -7,7 +7,7 @@ import { formatEther } from "viem";
 export const useDaoQuorumStats = ({
   daoData,
   averageTurnout,
-  totalSupplyValue,
+  totalSupply,
   delegatedSupply,
   daoConfig,
 }: {
@@ -15,10 +15,7 @@ export const useDaoQuorumStats = ({
   averageTurnout: {
     data?: AverageTurnoutResponse | null;
   } | null;
-  totalSupplyValue: {
-    value: string | null;
-    changeRate: string | null;
-  };
+  totalSupply?: string;
   delegatedSupply: { data?: { currentDelegatedSupply?: string } | null };
   daoConfig: DaoConfiguration;
 }) => {
@@ -37,10 +34,10 @@ export const useDaoQuorumStats = ({
 
     const quorumMinPercentage =
       daoData?.quorum &&
-      totalSupplyValue.value !== undefined &&
+      totalSupply !== undefined &&
       formatEther(
         (BigInt(daoData.quorum) * BigInt(1e20)) /
-          BigInt(totalSupplyValue.value ?? ("1" as string)),
+          BigInt(totalSupply ?? ("1" as string)),
       );
 
     const quorumMinPercentageDelSupply =
@@ -85,7 +82,7 @@ export const useDaoQuorumStats = ({
   }, [
     daoData?.quorum,
     averageTurnout?.data,
-    totalSupplyValue.value,
+    totalSupply,
     delegatedSupply.data?.currentDelegatedSupply,
     daoConfig,
   ]);

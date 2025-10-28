@@ -3,7 +3,6 @@ import {
   useActiveSupply,
   useDelegatedSupply,
   useAverageTurnout,
-  useTimeSeriesData,
   useTokenData,
 } from "@/shared/hooks";
 import { useTreasuryAssetNonDaoToken } from "@/features/attack-profitability/hooks";
@@ -14,8 +13,6 @@ import { useCompareTreasury } from "@/features/dao-overview/hooks/useCompareTrea
 import { useTopDelegatesToPass } from "@/features/dao-overview/hooks/useTopDelegatesToPass";
 import { useDaoTreasuryStats } from "@/features/dao-overview/hooks/useDaoTreasuryStats";
 import { useDaoQuorumStats } from "@/features/dao-overview/hooks/useDaoQuorumStats";
-import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
-import { calculateChangeRate } from "@/features/token-distribution/utils";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { DaoConfiguration } from "@/shared/dao-config/types";
 import { formatEther } from "viem";
@@ -44,26 +41,15 @@ export const useDaoOverviewData = ({
     orderDirection: "desc",
     days: TimeInterval.NINETY_DAYS,
   });
-  const totalSupply = useTimeSeriesData(
-    daoId,
-    [MetricTypesEnum.TOTAL_SUPPLY],
-    TimeInterval.SEVEN_DAYS,
-  );
 
-  const totalSupplyValue = {
-    value:
-      totalSupply.data?.[MetricTypesEnum.TOTAL_SUPPLY]?.at(-1)?.high ?? null,
-    changeRate: calculateChangeRate(
-      totalSupply.data?.[MetricTypesEnum.TOTAL_SUPPLY],
-    ),
-  };
+  const totalSupply = tokenData.data?.totalSupply;
 
   const proposalThresholdPercentage =
     daoData?.data?.proposalThreshold &&
-    totalSupplyValue.value !== undefined &&
+    totalSupply !== undefined &&
     formatEther(
       (BigInt(daoData.data.proposalThreshold) * BigInt(1e20)) /
-        BigInt(totalSupplyValue.value ?? ("1" as string)),
+        BigInt(totalSupply ?? ("1" as string)),
     );
 
   const proposalThresholdValue = daoData?.data?.proposalThreshold
@@ -78,7 +64,7 @@ export const useDaoOverviewData = ({
   } = useDaoQuorumStats({
     daoData: daoData.data,
     averageTurnout,
-    totalSupplyValue,
+    totalSupply,
     delegatedSupply,
     daoConfig,
   });
@@ -106,8 +92,7 @@ export const useDaoOverviewData = ({
     tokenData.isLoading ||
     treasuryNonDao.loading ||
     treasuryAll.loading ||
-    holders.loading ||
-    totalSupply.isLoading;
+    holders.loading;
 
   return {
     daoData: daoData.data,
