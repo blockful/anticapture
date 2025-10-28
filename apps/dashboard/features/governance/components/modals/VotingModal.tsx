@@ -145,16 +145,6 @@ export const VotingModal = ({
     Number(proposal?.againstVotes) +
     Number(proposal?.abstainVotes);
 
-  const userReadableForVotes = formatNumberUserReadable(
-    Number(formatEther(BigInt(proposal?.forVotes || "0"))),
-  );
-  const userReadableAgainstVotes = formatNumberUserReadable(
-    Number(formatEther(BigInt(proposal?.againstVotes || "0"))),
-  );
-  const userReadableAbstainVotes = formatNumberUserReadable(
-    Number(formatEther(BigInt(proposal?.abstainVotes || "0"))),
-  );
-
   const userReadableTotalVotes = formatNumberUserReadable(
     Number(formatEther(BigInt(Number(totalVotes || "0")))),
   );
@@ -266,8 +256,9 @@ export const VotingModal = ({
               {/* For vote  */}
               <VoteOption
                 vote="for"
-                percentage={forPercentage}
-                userReadableVotes={userReadableForVotes}
+                optionPercentage={forPercentage}
+                totalOptionVotes={proposal.forVotes}
+                votingPower={proposal?.forVotes}
                 onChange={setVote}
                 checked={vote === "for"}
               />
@@ -275,8 +266,9 @@ export const VotingModal = ({
               {/* Against vote  */}
               <VoteOption
                 vote="against"
-                percentage={againstPercentage}
-                userReadableVotes={userReadableAgainstVotes}
+                optionPercentage={againstPercentage}
+                totalOptionVotes={proposal.againstVotes}
+                votingPower={proposal?.againstVotes}
                 onChange={setVote}
                 checked={vote === "against"}
               />
@@ -284,8 +276,9 @@ export const VotingModal = ({
               {/* Abstain vote  */}
               <VoteOption
                 vote="abstain"
-                percentage={abstainPercentage}
-                userReadableVotes={userReadableAbstainVotes}
+                optionPercentage={abstainPercentage}
+                totalOptionVotes={proposal.abstainVotes}
+                votingPower={proposal?.abstainVotes}
                 onChange={setVote}
                 checked={vote === "abstain"}
               />
@@ -382,19 +375,28 @@ export const VotingModal = ({
 
 interface VoteOptionProps {
   vote: "for" | "against" | "abstain";
-  percentage: number;
-  userReadableVotes: string;
+  optionPercentage: number;
+  votingPower: string;
+  totalOptionVotes: string;
   onChange: (vote: "for" | "against" | "abstain") => void;
   checked: boolean;
 }
 
 const VoteOption = ({
   vote,
-  percentage,
-  userReadableVotes,
+  optionPercentage,
+  votingPower,
+  totalOptionVotes,
   onChange,
   checked,
 }: VoteOptionProps) => {
+  const userReadableVotingPower = formatNumberUserReadable(
+    Number(formatEther(BigInt(votingPower))),
+    1,
+  );
+
+  console.log(totalOptionVotes);
+
   return (
     <div className="flex flex-col">
       <div className="border-border-default flex items-center justify-between border px-[10px] py-2">
@@ -436,17 +438,20 @@ const VoteOption = ({
                     ? "bg-error"
                     : "bg-primary",
               )}
-              style={{ width: `${percentage}%` }}
+              style={{ width: `${optionPercentage}%` }}
             />
           </div>
         </div>
 
-        <div className="flex w-[110px] shrink-0 items-center justify-end gap-2">
-          <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-            {userReadableVotes}
+        <div className="flex shrink-0 items-center justify-end gap-2">
+          {/* <p className="text-primary font-inter w-[50px] text-[14px] font-normal not-italic leading-[20px]">
+            {checked && percentageChange.toFixed(1)}
+          </p> */}
+          <p className="text-primary font-inter w-[50px] text-[14px] font-normal not-italic leading-[20px]">
+            {userReadableVotingPower}
           </p>
-          <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-            {percentage.toFixed(1)}%
+          <p className="text-primary font-inter w-[50px] text-[14px] font-normal not-italic leading-[20px]">
+            {optionPercentage.toFixed(1)}%
           </p>
         </div>
       </div>
