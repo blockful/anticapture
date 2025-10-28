@@ -68,7 +68,7 @@ const showCustomToast = (message: string, type: "success" | "error") => {
     ),
     {
       duration: 4000,
-      position: "bottom-left",
+      position: "top-center",
     },
   );
 };
@@ -354,10 +354,10 @@ export const VotingModal = ({
               );
               setIsLoading(false);
               if (hash) {
-                showCustomToast("Vote submitted successfully!", "success");
                 onClose();
                 // Reload the page to fetch fresh data
                 window.location.reload();
+                showCustomToast("Vote submitted successfully!", "success");
               }
             }}
           >
