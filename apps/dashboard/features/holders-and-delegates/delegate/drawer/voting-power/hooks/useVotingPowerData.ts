@@ -4,10 +4,11 @@ import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
 import { useMultipleEnsData } from "@/shared/hooks/useEnsData";
 import { Address } from "viem";
 import { formatAddress } from "@/shared/utils/formatAddress";
+import daoConfig from "@/shared/dao-config";
 
 export interface VotingPowerData {
   // Dados básicos
-  topFiveDelegators: any[];
+  topFiveDelegators: unknown[];
   currentVotingPower: number;
   loading: boolean;
 
@@ -35,6 +36,9 @@ export const useVotingPowerData = (
   daoId: DaoIdEnum,
   address: string,
 ): VotingPowerData => {
+  const {
+    daoOverview: { token },
+  } = daoConfig[daoId];
   const { topFiveDelegators, delegatorsVotingPowerDetails, loading } =
     useVotingPower({
       daoId,
@@ -79,7 +83,9 @@ export const useVotingPowerData = (
   );
 
   const currentVotingPowerNumber = Number(
-    BigInt(delegateCurrentVotingPower) / BigInt(10 ** 18),
+    token === "ERC20"
+      ? BigInt(delegateCurrentVotingPower) / BigInt(10 ** 18)
+      : Number(delegateCurrentVotingPower),
   );
 
   // Calculate the total value of the delegators that will be shown individually (>= 1%)
@@ -160,7 +166,10 @@ export const useVotingPowerData = (
     if (percentage >= 1) {
       pieData.push({
         name: item.accountId || "",
-        value: Number(BigInt(item.rawBalance) / BigInt(10 ** 18)),
+        value:
+          token === "ERC20"
+            ? Number(BigInt(item.rawBalance) / BigInt(10 ** 18))
+            : Number(item.rawBalance),
       });
     }
   });
@@ -169,13 +178,16 @@ export const useVotingPowerData = (
   if (othersValue > BigInt(0)) {
     pieData.push({
       name: "others",
-      value: Number(othersValue / BigInt(10 ** 18)),
+      value:
+        token === "ERC20"
+          ? Number(othersValue / BigInt(10 ** 18))
+          : Number(othersValue),
     });
   }
 
   // Create legend items from chartConfig
   const legendItems = Object.entries(chartConfig).map(
-    ([key, config]: [
+    ([, config]: [
       string,
       { color: string; label: string; percentage: string; ensName?: string },
     ]) => ({

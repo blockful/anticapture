@@ -25,6 +25,7 @@ const daoItemQueries = [
   "token",
   "votingPowerVariations",
   "accountBalanceVariations",
+  "delegationPercentageByDay",
 ];
 
 export const restResolvers = daoItemQueries.reduce((acc, fieldName) => {

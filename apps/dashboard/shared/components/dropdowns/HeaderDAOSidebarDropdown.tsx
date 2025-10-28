@@ -1,15 +1,21 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import { useState, useRef, useEffect, useMemo } from "react";
-import { BadgeInAnalysis, Button } from "@/shared/components";
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import { Button } from "@/shared/components";
 import { useParams, useRouter } from "next/navigation";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { ChevronsUpDown } from "lucide-react";
 import { cn } from "@/shared/utils/";
 import { DaoAvatarIcon } from "@/shared/components/icons";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { SupportStageEnum } from "@/shared/types/enums";
+
+type Item = {
+  id: number;
+  label: string;
+  icon: React.ReactNode;
+  href: string;
+  name: string;
+};
 
 export const HeaderDAOSidebarDropdown = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -19,6 +25,7 @@ export const HeaderDAOSidebarDropdown = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { daoId } = useParams<{ daoId: string }>();
 
+  // restore selected item on mount
   useEffect(() => {
     const savedItem = sessionStorage.getItem("selectedHeaderSidebarItem");
     if (savedItem) {
@@ -26,24 +33,28 @@ export const HeaderDAOSidebarDropdown = () => {
     }
   }, []);
 
+  const handleClickOutside = useCallback((event: MouseEvent) => {
+    if (
+      dropdownRef.current &&
+      !dropdownRef.current.contains(event.target as Node)
+    ) {
+      setIsOpen(false);
+    }
+  }, []);
+
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [handleClickOutside]);
 
-  const dropdownItems = useMemo(
-    () => [
-      ...Object.values(DaoIdEnum).map((daoIdValue, index) => ({
+  // stable, single-build dropdown items (imports are static)
+  const dropdownItemsRef = useRef<Item[] | null>(null);
+  if (!dropdownItemsRef.current) {
+    dropdownItemsRef.current = Object.values(DaoIdEnum)
+      .filter((id) => id !== DaoIdEnum.NOUNS) // TODO: remove when Nouns is fully supported
+      .map((daoIdValue, index) => ({
         id: index,
         label: daoConfigByDaoId[daoIdValue].name,
         icon: (
@@ -55,13 +66,9 @@ export const HeaderDAOSidebarDropdown = () => {
         ),
         href: `/${daoIdValue.toLowerCase()}`,
         name: daoIdValue,
-        isDisabled:
-          daoConfigByDaoId[daoIdValue].supportStage ===
-          SupportStageEnum.ANALYSIS,
-      })),
-    ],
-    [],
-  );
+      }));
+  }
+  const dropdownItems = dropdownItemsRef.current!;
 
   const currentItem = dropdownItems.find(
     (item) => item.name === daoId.toUpperCase(),
@@ -112,38 +119,20 @@ export const HeaderDAOSidebarDropdown = () => {
               variant="ghost"
               size="lg"
               key={item.id}
-              className={cn(
-                "w-full",
-                !item.isDisabled && "hover:bg-middle-dark",
-              )}
+              className={"w-full"}
               onClick={() => handleSelectItem(item.id, item.href || "")}
               role="menuitemradio"
               aria-checked={item.id === selectedHeaderSidebarItem}
-              disabled={item.isDisabled}
             >
               <div className="flex w-full items-center gap-1.5 sm:gap-2">
                 <DaoAvatarIcon
-                  daoId={item.name}
-                  className={cn(
-                    "size-icon-xxs sm:size-icon-sm",
-                    item.isDisabled && "opacity-75",
-                  )}
+                  daoId={item.name as DaoIdEnum}
+                  className={cn("size-icon-xxs sm:size-icon-sm")}
                   isRounded
                 />
-                <h1
-                  className={cn(
-                    "text-primary text-sm font-normal",
-                    item.isDisabled && "text-secondary opacity-75",
-                  )}
-                >
+                <h1 className={cn("text-primary text-sm font-normal")}>
                   {item.label}
                 </h1>
-                {item.isDisabled && (
-                  <BadgeInAnalysis
-                    iconClassName="size-3"
-                    className="text-xs font-medium"
-                  />
-                )}
               </div>
             </Button>
           ))}
