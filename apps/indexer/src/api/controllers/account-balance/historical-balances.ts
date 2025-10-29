@@ -8,7 +8,7 @@ import {
   HistoricalVotingPowerService,
 } from "@/api/services";
 
-export function historicalOnchain(
+export function historicalBalances(
   app: Hono,
   daoId: DaoIdEnum,
   votingPowerService: HistoricalVotingPowerService,

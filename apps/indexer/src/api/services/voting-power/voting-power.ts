@@ -22,7 +22,7 @@ interface VotingPowerRepository {
     maxDelta?: string,
   ): Promise<number>;
 
-  getTopVotingPowerChanges(
+  getVotingPowerChanges(
     startTimestamp: number,
     limit: number,
     skip: number,
@@ -60,13 +60,13 @@ export class VotingPowerService {
     return { items, totalCount };
   }
 
-  async getTopVotingPowerVariations(
+  async getVotingPowerVariations(
     startTimestamp: number,
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
   ): Promise<DBVotingPowerVariation[]> {
-    return this.votingRepository.getTopVotingPowerChanges(
+    return this.votingRepository.getVotingPowerChanges(
       startTimestamp,
       limit,
       skip,

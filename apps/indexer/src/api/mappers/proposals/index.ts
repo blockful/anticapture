@@ -1,2 +1,2 @@
-export * from "./votes";
+export * from "./voters";
 export * from "./proposals";

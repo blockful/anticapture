@@ -2,7 +2,7 @@ import { DaysEnum, DaysOpts } from "@/lib/enums";
 import { z } from "@hono/zod-openapi";
 import { PERCENTAGE_NO_BASELINE } from "../constants";
 
-export const TopVotingPowerVariationsRequestSchema = z.object({
+export const VotingPowerVariationsRequestSchema = z.object({
   days: z
     .enum(DaysOpts)
     .optional()
@@ -24,7 +24,7 @@ export const TopVotingPowerVariationsRequestSchema = z.object({
   orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
 });
 
-export const TopVotingPowerVariationsResponseSchema = z.object({
+export const VotingPowerVariationsResponseSchema = z.object({
   period: z.object({
     days: z.string(),
     startTimestamp: z.string(),
@@ -41,8 +41,8 @@ export const TopVotingPowerVariationsResponseSchema = z.object({
   ),
 });
 
-export type TopVotingPowerVariationsResponse = z.infer<
-  typeof TopVotingPowerVariationsResponseSchema
+export type VotingPowerVariationsResponse = z.infer<
+  typeof VotingPowerVariationsResponseSchema
 >;
 
 export type DBVotingPowerVariation = {
@@ -53,12 +53,12 @@ export type DBVotingPowerVariation = {
   percentageChange: number;
 };
 
-export const TopVotingPowerVariationsMapper = (
+export const VotingPowerVariationsMapper = (
   variations: DBVotingPowerVariation[],
   endTimestamp: number,
   days: DaysEnum,
-): TopVotingPowerVariationsResponse => {
-  return TopVotingPowerVariationsResponseSchema.parse({
+): VotingPowerVariationsResponse => {
+  return VotingPowerVariationsResponseSchema.parse({
     period: {
       days: DaysEnum[days] as string,
       startTimestamp: new Date((endTimestamp - days) * 1000).toISOString(),

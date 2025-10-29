@@ -1,1 +1,1 @@
-export * from "./delegation-percentage.service";
+export * from "./delegation-percentage";

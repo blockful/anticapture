@@ -4,7 +4,7 @@ import { transfer, accountBalance } from "ponder:schema";
 import { DBAccountBalanceVariation } from "@/api/mappers";
 
 export class AccountBalanceRepository {
-  async getTopAccountBalanceVariations(
+  async getAccountBalanceVariations(
     startTimestamp: number,
     limit: number,
     skip: number,

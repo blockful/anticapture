@@ -129,7 +129,7 @@ export class VotingPowerRepository {
     }));
   }
 
-  async getTopVotingPowerChanges(
+  async getVotingPowerChanges(
     startTimestamp: number,
     limit: number,
     skip: number,

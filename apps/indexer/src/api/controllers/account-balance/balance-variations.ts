@@ -1,14 +1,14 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 import {
-  TopAccountBalanceVariationsMapper,
-  TopAccountBalanceVariationsRequestSchema,
-  TopAccountBalanceVariationsResponseSchema,
+  AccountBalanceVariationsMapper,
+  AccountBalanceVariationsRequestSchema,
+  AccountBalanceVariationsResponseSchema,
 } from "@/api/mappers";
-import { TopBalanceVariationsService } from "@/api/services";
+import { BalanceVariationsService } from "@/api/services";
 
 export function accountBalanceVariations(
   app: Hono,
-  service: TopBalanceVariationsService,
+  service: BalanceVariationsService,
 ) {
   app.openapi(
     createRoute({
@@ -20,14 +20,14 @@ export function accountBalanceVariations(
         "Returns a mapping of the biggest variations to account balances associated by account address",
       tags: ["transactions"],
       request: {
-        query: TopAccountBalanceVariationsRequestSchema,
+        query: AccountBalanceVariationsRequestSchema,
       },
       responses: {
         200: {
           description: "Successfully retrieved account balance variations",
           content: {
             "application/json": {
-              schema: TopAccountBalanceVariationsResponseSchema,
+              schema: AccountBalanceVariationsResponseSchema,
             },
           },
         },
@@ -37,14 +37,14 @@ export function accountBalanceVariations(
       const { days, limit, skip, orderDirection } = context.req.valid("query");
       const now = Math.floor(Date.now() / 1000);
 
-      const result = await service.getTopAccountBalanceVariations(
+      const result = await service.getAccountBalanceVariations(
         now - days,
         skip,
         limit,
         orderDirection,
       );
 
-      return context.json(TopAccountBalanceVariationsMapper(result, now, days));
+      return context.json(AccountBalanceVariationsMapper(result, now, days));
     },
   );
 }

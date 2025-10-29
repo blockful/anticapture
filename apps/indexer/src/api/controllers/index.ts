@@ -5,6 +5,5 @@ export * from "./governance-activity";
 export * from "./last-update";
 export * from "./proposals";
 export * from "./token";
-export * from "./token-distribution";
 export * from "./transactions";
 export * from "./voting-power";

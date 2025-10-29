@@ -7,7 +7,7 @@ interface AssetsClient {
   fetchTotalAssets(size: number): Promise<DuneResponse>;
 }
 
-export function assets(app: Hono, service: AssetsClient) {
+export function totalAssets(app: Hono, service: AssetsClient) {
   app.openapi(
     createRoute({
       method: "get",

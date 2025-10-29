@@ -3,7 +3,7 @@ import { z } from "@hono/zod-openapi";
 import { Address } from "viem";
 import { PERCENTAGE_NO_BASELINE } from "@/api/mappers/constants";
 
-export const TopAccountBalanceVariationsRequestSchema = z.object({
+export const AccountBalanceVariationsRequestSchema = z.object({
   days: z
     .enum(DaysOpts)
     .optional()
@@ -25,7 +25,7 @@ export const TopAccountBalanceVariationsRequestSchema = z.object({
   orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
 });
 
-export const TopAccountBalanceVariationsResponseSchema = z.object({
+export const AccountBalanceVariationsResponseSchema = z.object({
   period: z.object({
     days: z.string(),
     startTimestamp: z.string(),
@@ -42,8 +42,8 @@ export const TopAccountBalanceVariationsResponseSchema = z.object({
   ),
 });
 
-export type TopAccountBalanceVariationsResponse = z.infer<
-  typeof TopAccountBalanceVariationsResponseSchema
+export type AccountBalanceVariationsResponse = z.infer<
+  typeof AccountBalanceVariationsResponseSchema
 >;
 
 export type DBAccountBalanceVariation = {
@@ -54,12 +54,12 @@ export type DBAccountBalanceVariation = {
   percentageChange: number;
 };
 
-export const TopAccountBalanceVariationsMapper = (
+export const AccountBalanceVariationsMapper = (
   variations: DBAccountBalanceVariation[],
   endTimestamp: number,
   days: DaysEnum,
-): TopAccountBalanceVariationsResponse => {
-  return TopAccountBalanceVariationsResponseSchema.parse({
+): AccountBalanceVariationsResponse => {
+  return AccountBalanceVariationsResponseSchema.parse({
     period: {
       days: DaysEnum[days] as string,
       startTimestamp: new Date((endTimestamp - days) * 1000).toISOString(),

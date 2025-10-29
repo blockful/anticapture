@@ -16,7 +16,7 @@ import {
   transactions,
   proposals,
   lastUpdate,
-  assets,
+  totalAssets,
   votingPower,
   delegationPercentage,
   votingPowerVariations,
@@ -47,7 +47,7 @@ import {
   CoingeckoService,
   NFTPriceService,
   TokenService,
-  TopBalanceVariationsService,
+  BalanceVariationsService,
 } from "@/api/services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
@@ -107,21 +107,21 @@ const votingPowerService = new VotingPowerService(votingPowerRepo);
 
 if (env.DUNE_API_URL && env.DUNE_API_KEY) {
   const duneClient = new DuneService(env.DUNE_API_URL, env.DUNE_API_KEY);
-  assets(app, duneClient);
+  totalAssets(app, duneClient);
 }
 
 const tokenPriceClient =
   env.DAO_ID === DaoIdEnum.NOUNS
     ? new NFTPriceService(
-      new NFTPriceRepository(),
-      env.COINGECKO_API_URL,
-      env.COINGECKO_API_KEY,
-    )
+        new NFTPriceRepository(),
+        env.COINGECKO_API_URL,
+        env.COINGECKO_API_KEY,
+      )
     : new CoingeckoService(
-      env.COINGECKO_API_URL,
-      env.COINGECKO_API_KEY,
-      env.DAO_ID,
-    );
+        env.COINGECKO_API_URL,
+        env.COINGECKO_API_KEY,
+        env.DAO_ID,
+      );
 
 tokenHistoricalData(app, tokenPriceClient);
 token(
@@ -145,10 +145,7 @@ lastUpdate(app);
 delegationPercentage(app, delegationPercentageService);
 votingPower(app, votingPowerService);
 votingPowerVariations(app, votingPowerService);
-accountBalanceVariations(
-  app,
-  new TopBalanceVariationsService(accountBalanceRepo),
-);
+accountBalanceVariations(app, new BalanceVariationsService(accountBalanceRepo));
 docs(app);
 
 export default app;

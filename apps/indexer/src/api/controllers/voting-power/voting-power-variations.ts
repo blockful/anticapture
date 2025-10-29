@@ -1,9 +1,9 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 import { VotingPowerService } from "@/api/services";
 import {
-  TopVotingPowerVariationsMapper,
-  TopVotingPowerVariationsRequestSchema,
-  TopVotingPowerVariationsResponseSchema,
+  VotingPowerVariationsMapper,
+  VotingPowerVariationsRequestSchema,
+  VotingPowerVariationsResponseSchema,
 } from "@/api/mappers/";
 
 export function votingPowerVariations(app: Hono, service: VotingPowerService) {
@@ -17,14 +17,14 @@ export function votingPowerVariations(app: Hono, service: VotingPowerService) {
         "Returns a mapping of the biggest changes to voting power associated by delegate address",
       tags: ["proposals"],
       request: {
-        query: TopVotingPowerVariationsRequestSchema,
+        query: VotingPowerVariationsRequestSchema,
       },
       responses: {
         200: {
           description: "Successfully retrieved voting power changes",
           content: {
             "application/json": {
-              schema: TopVotingPowerVariationsResponseSchema,
+              schema: VotingPowerVariationsResponseSchema,
             },
           },
         },
@@ -34,14 +34,14 @@ export function votingPowerVariations(app: Hono, service: VotingPowerService) {
       const { days, limit, skip, orderDirection } = context.req.valid("query");
       const now = Math.floor(Date.now() / 1000);
 
-      const result = await service.getTopVotingPowerVariations(
+      const result = await service.getVotingPowerVariations(
         now - days,
         skip,
         limit,
         orderDirection,
       );
 
-      return context.json(TopVotingPowerVariationsMapper(result, now, days));
+      return context.json(VotingPowerVariationsMapper(result, now, days));
     },
   );
 }
