@@ -1,10 +1,25 @@
-import { TransactionsRepository } from "../../repositories/transactions.repository";
 import {
   TransactionsRequest,
   TransactionsResponse,
   TransactionMapper,
+  DBTransaction,
 } from "../../mappers/transactions";
 import { containsAnyValue } from "../utils";
+
+interface TransactionsRepository {
+  getFilteredAggregateTransactions(
+    req: TransactionsRequest,
+  ): Promise<DBTransaction[]>;
+  getFilteredAggregateTransactionsCount(
+    req: TransactionsRequest,
+  ): Promise<number>;
+  getRecentAggregateTransactions(
+    req: TransactionsRequest,
+  ): Promise<DBTransaction[]>;
+  getRecentAggregateTransactionsCount(
+    req: TransactionsRequest,
+  ): Promise<number>;
+}
 
 export class TransactionsService {
   constructor(private transactionsRepository: TransactionsRepository) {}
@@ -20,16 +35,27 @@ export class TransactionsService {
       affectedSupply: params.affectedSupply,
     });
 
-    const result = isFiltered
-      ? await this.transactionsRepository.getFilteredAggregateTransactions(
-          params,
-        )
-      : await this.transactionsRepository.getRecentAggregateTransactions(
-          params,
-        );
+    const [result, totalCount] = await Promise.all(
+      isFiltered
+        ? [
+            this.transactionsRepository.getFilteredAggregateTransactions(
+              params,
+            ),
+            this.transactionsRepository.getFilteredAggregateTransactionsCount(
+              params,
+            ),
+          ]
+        : [
+            this.transactionsRepository.getRecentAggregateTransactions(params),
+            this.transactionsRepository.getRecentAggregateTransactionsCount(
+              params,
+            ),
+          ],
+    );
 
     return {
-      transactions: result.map(TransactionMapper.toApi),
+      items: result.map(TransactionMapper.toApi),
+      totalCount,
     };
   }
 }
