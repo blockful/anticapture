@@ -28,6 +28,7 @@ export const ProposalSection = () => {
 
   const { proposal, loading, error } = useProposal({
     proposalId: proposalId as string,
+    daoId: daoId as DaoIdEnum,
   });
 
   const { votingPower, votesOnchain } = useVoterInfo({

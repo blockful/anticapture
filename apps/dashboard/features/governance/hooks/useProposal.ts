@@ -15,10 +15,12 @@ export interface UseProposalResult {
 
 export interface UseProposalParams {
   proposalId: string;
+  daoId: DaoIdEnum;
 }
 
 export const useProposal = ({
   proposalId,
+  daoId,
 }: UseProposalParams): UseProposalResult => {
   // Main proposal query
   const { data, loading, error } = useGetProposalQuery({
@@ -27,7 +29,7 @@ export const useProposal = ({
     },
     context: {
       headers: {
-        "anticapture-dao-id": DaoIdEnum.ENS,
+        "anticapture-dao-id": daoId,
       },
     },
     skip: !proposalId, // Skip query if no proposalId provided
