@@ -163,7 +163,7 @@ export function useTopAccountsChartData({
 
       return {
         ...item,
-        name: ensData?.[item.address as Address]?.ens || item.address,
+        name: ensData?.[item.address as Address]?.ens,
         latestDelegate: delegateAddress
           ? ensData?.[delegateAddress]?.ens || delegateAddress
           : undefined,

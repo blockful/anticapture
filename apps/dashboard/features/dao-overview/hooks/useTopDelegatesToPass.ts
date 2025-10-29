@@ -1,28 +1,29 @@
-import { TokenHolder } from "@/features/holders-and-delegates";
 import { useMemo } from "react";
 
 export const useTopDelegatesToPass = ({
-  holders,
+  topDelegates,
   quorumValue,
 }: {
-  holders: { data?: TokenHolder[] | null };
+  topDelegates: { votingPower: string; accountId: string }[];
   quorumValue: number | null;
 }) => {
   return useMemo(() => {
-    if (!holders?.data || !quorumValue) return null;
+    if (!topDelegates || !quorumValue) return null;
 
-    const topHolders = holders.data
-      .map((h) => ({ balance: Number(h.balance) / 10 ** 18 }))
-      .sort((a, b) => b.balance - a.balance);
+    const topHolders = topDelegates
+      .map((h) => ({ votingPower: Number(h.votingPower) / 1e18 }))
+      .sort((a, b) => b.votingPower - a.votingPower);
 
     let balance = 0;
     let count = 0;
     for (const h of topHolders) {
-      balance += h.balance;
+      balance += h.votingPower;
       count++;
       if (balance >= quorumValue) break;
     }
 
+    console.log({ quorumValue, balance, count });
+
     return balance < quorumValue ? "20+" : count;
-  }, [holders?.data, quorumValue]);
+  }, [topDelegates, quorumValue]);
 };

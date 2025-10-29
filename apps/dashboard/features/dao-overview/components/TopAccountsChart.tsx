@@ -50,7 +50,7 @@ export const TopAccountsChart = ({
   const handleCloseDrawer = useCallback(() => setSelectedAddress(null), []);
 
   return (
-    <div className="border-light-dark text-primary sm:bg-surface-default relative flex h-40 w-full items-center justify-center sm:rounded-lg">
+    <div className="border-light-dark text-primary sm:bg-surface-default relative flex h-52 w-full items-center justify-center sm:rounded-lg">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={chartConfig.data} margin={{ top: 50, bottom: 20 }}>
           <Tooltip

@@ -147,16 +147,18 @@ export const StagesContainer = ({
         "sm:bg-surface-default gap-4 md:p-4": context === "overview",
       })}
     >
-      <div className="flex h-5 items-center gap-2">
-        <DefaultLink
-          href={`${daoId.toLowerCase()}/resilience-stages`}
-          openInNewTab={false}
-          className="text-primary border-border-contrast hover:border-primary border-b border-dashed font-mono text-[13px] font-medium tracking-wider"
-        >
-          RESILIENCE STAGES
-        </DefaultLink>
-        <TooltipInfo text="Resilience Stages are based on governance mechanisms, considering the riskiest exposed vector as criteria for progression." />
-      </div>
+      {context === "overview" && (
+        <div className="flex h-5 items-center gap-2">
+          <DefaultLink
+            href={`${daoId.toLowerCase()}/resilience-stages`}
+            openInNewTab={false}
+            className="text-primary border-border-contrast hover:border-primary border-b border-dashed font-mono text-[13px] font-medium tracking-wider"
+          >
+            RESILIENCE STAGES
+          </DefaultLink>
+          <TooltipInfo text="Resilience Stages are based on governance mechanisms, considering the riskiest exposed vector as criteria for progression." />
+        </div>
+      )}
       <div className="flex flex-col gap-5">
         <div className={cn("flex flex-col")}>
           {/* Timeline Component */}
@@ -248,44 +250,42 @@ export const StagesContainer = ({
               className="border-light-dark bg-surface-contrast relative flex items-center justify-between gap-1 border-b p-2 sm:border-none sm:p-3"
               onMouseLeave={() => !isMobile && setShowTooltip(false)}
             >
-              <Button
-                variant="ghost"
-                className="group px-0 py-0 font-mono"
-                onClick={handleButtonClick}
-                onMouseEnter={() => !isMobile && setShowTooltip(true)}
-              >
-                <span className="border-foreground text-alternative-sm text-nowrap border-b border-dashed font-medium duration-300 hover:border-white">
-                  {currentDaoStage === Stage.NONE ? (
-                    <span className="text-secondary group-hover:text-primary uppercase duration-300">
-                      Does not qualify
-                    </span>
-                  ) : (
-                    <>
-                      <span className="text-primary uppercase duration-300">
-                        {currentDaoStage !== Stage.UNKNOWN
-                          ? formatPlural(
-                              highRiskItems.length ||
-                                mediumRiskItems.length ||
-                                lowRiskItems.length,
-                              "ITEM",
-                            )
-                          : "? ITEMS"}
-                      </span>
-                      <span
-                        className={cn(
-                          "text-secondary duration-300",
-                          isStageKnown && "group-hover:text-primary",
-                        )}
-                      >
-                        {" "}
-                        {isStageKnown
-                          ? `TO STAGE ${Number(currentDaoStage) + 1}`
-                          : "TO NEXT"}
-                      </span>
-                    </>
-                  )}
+              {currentDaoStage === Stage.NONE ? (
+                <span className="text-secondary group-hover:text-primary font-mono text-sm/tight font-medium uppercase duration-300">
+                  Does not qualify
                 </span>
-              </Button>
+              ) : (
+                <Button
+                  variant="ghost"
+                  className="group px-0 py-0 font-mono"
+                  onClick={handleButtonClick}
+                  onMouseEnter={() => !isMobile && setShowTooltip(true)}
+                >
+                  <span className="border-foreground text-alternative-sm text-nowrap border-b border-dashed font-medium duration-300 hover:border-white">
+                    <span className="text-primary uppercase duration-300">
+                      {currentDaoStage !== Stage.UNKNOWN
+                        ? formatPlural(
+                            highRiskItems.length ||
+                              mediumRiskItems.length ||
+                              lowRiskItems.length,
+                            "ITEM",
+                          )
+                        : "? ITEMS"}
+                    </span>
+                    <span
+                      className={cn(
+                        "text-secondary duration-300",
+                        isStageKnown && "group-hover:text-primary",
+                      )}
+                    >
+                      {" "}
+                      {isStageKnown
+                        ? `TO STAGE ${Number(currentDaoStage) + 1}`
+                        : "TO NEXT"}
+                    </span>
+                  </span>
+                </Button>
+              )}
 
               <div className="flex gap-1.5">
                 {boxConfigs.map(({ variant, count }) => (
@@ -293,13 +293,13 @@ export const StagesContainer = ({
                     key={variant}
                     variant={variant}
                     disabled={!isStageKnown}
-                    className="border-0 px-2 py-1"
+                    className={cn("border-0 px-2 py-1", {
+                      "border-1": currentDaoStage === Stage.NONE,
+                    })}
                     onClick={() => setShowTooltip((prev) => !prev)}
                     onMouseEnter={() => !isMobile && setShowTooltip(true)}
                   >
-                    <span className="font-mono">
-                      {isStageKnown ? count : "?"}
-                    </span>
+                    <span className="font-mono">{count}</span>
                   </OutlinedBox>
                 ))}
               </div>

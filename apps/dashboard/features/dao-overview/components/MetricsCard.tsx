@@ -41,11 +41,17 @@ export const MetricsCard = ({
     ? daoConfig.daoOverview.chain.blockTime / 1000
     : 0;
 
+  console.log(proposalThresholdValue);
+
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-4 md:justify-between md:gap-2 md:border-none">
       <DaoOverviewMetricCard
         title="Proposal Threshold"
-        text={`${proposalThresholdValue} ${daoId || "Unknown ID"} (${proposalThresholdPercentageFormatted} Total Supply)`}
+        text={
+          Number(proposalThresholdValue)
+            ? `${proposalThresholdValue} ${daoId || "Unknown ID"} (${proposalThresholdPercentageFormatted} Total Supply)`
+            : "Only Foundation Proposes"
+        }
         subText={"Minimum voting power to submit"}
         className="border-b-1 border-border-contrast border-dashed pb-4 md:border-none md:p-3"
       />

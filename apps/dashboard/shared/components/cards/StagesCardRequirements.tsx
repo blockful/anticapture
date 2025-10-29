@@ -4,7 +4,6 @@ import { cn } from "@/shared/utils/";
 import { AlertCircle, AlertTriangle } from "lucide-react";
 import { Stage } from "@/shared/types/enums/Stage";
 import { ReactNode } from "react";
-import { InlineAlert } from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
 
 const STAGE_STYLES: Record<Stage, string> = {
   [Stage.ZERO]: "text-error",
@@ -58,10 +57,11 @@ export const StagesCardRequirements = ({
       )}
     >
       {daoStage === Stage.NONE ? (
-        <InlineAlert
-          text="The DAO doesn't qualify for the staging system because it doesn't use its governor and timelock structure to autonomously execute its proposals without depending on a centralized entity."
-          variant="info"
-        />
+        <p className="text-secondary text-sm font-normal">
+          The DAO doesn&apos;t qualify for the staging system because it
+          doesn&apos;t use its governor and timelock structure to autonomously
+          execute its proposals without depending on a centralized entity.
+        </p>
       ) : (
         <div>
           {context !== "overview" && (

@@ -5,6 +5,7 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { EntityType } from "@/features/holders-and-delegates";
 import { TopAccountChartData } from "@/features/dao-overview/components/TopAccountsChart";
+import { formatAddress } from "@/shared/utils/formatAddress";
 
 interface CustomTooltipProps {
   active?: boolean;
@@ -33,7 +34,9 @@ export const CustomTooltip: React.FC<CustomTooltipProps> = ({
 
   return (
     <div className="bg-surface-background text-secondary flex flex-col gap-1 rounded-md p-2 text-sm">
-      <span className="text-primary">{data.name}</span>
+      <span className="text-primary">
+        {data.name || formatAddress(data.address)}
+      </span>
       <span>
         Balance: {formatNumberUserReadable(data.balance)} {daoId}
       </span>

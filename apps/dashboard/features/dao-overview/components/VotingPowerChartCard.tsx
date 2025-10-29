@@ -1,6 +1,6 @@
 "use client";
 
-import { TooltipInfo } from "@/shared/components";
+import { SkeletonRow, TooltipInfo } from "@/shared/components";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { DaoIdEnum } from "@/shared/types/daos";
 import {
@@ -57,11 +57,14 @@ export const VotingPowerChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
         </DefaultLink>
         <TooltipInfo text="Addresses with the most delegated votes." />
       </div>
-      <TopAccountsChart
-        daoId={daoId}
-        chartData={chartData}
-        entityType="delegate"
-      />
+      {votingPowerVariations.loading && <SkeletonRow className="h-52 w-full" />}
+      {!votingPowerVariations.loading && (
+        <TopAccountsChart
+          daoId={daoId}
+          chartData={chartData}
+          entityType="delegate"
+        />
+      )}
     </div>
   );
 };

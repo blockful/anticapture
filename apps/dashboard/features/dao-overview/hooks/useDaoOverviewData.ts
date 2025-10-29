@@ -6,7 +6,6 @@ import {
   useTokenData,
 } from "@/shared/hooks";
 import { useTreasuryAssetNonDaoToken } from "@/features/attack-profitability/hooks";
-import { useTokenHolders } from "@/features/holders-and-delegates";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
 import { useCompareTreasury } from "@/features/dao-overview/hooks/useCompareTreasury";
@@ -16,6 +15,7 @@ import { useDaoQuorumStats } from "@/features/dao-overview/hooks/useDaoQuorumSta
 import { formatNumberUserReadable } from "@/shared/utils";
 import { DaoConfiguration } from "@/shared/dao-config/types";
 import { formatEther } from "viem";
+import { useGetDelegatesQuery } from "@anticapture/graphql-client/hooks";
 
 export const useDaoOverviewData = ({
   daoId,
@@ -35,12 +35,20 @@ export const useDaoOverviewData = ({
   const treasuryAll = useCompareTreasury(daoId, TimeInterval.NINETY_DAYS);
   const tokenData = useTokenData(daoId);
 
-  const holders = useTokenHolders({
-    daoId,
-    limit: 20,
-    orderDirection: "desc",
-    days: TimeInterval.NINETY_DAYS,
+  const delegates = useGetDelegatesQuery({
+    variables: {
+      after: undefined,
+      before: undefined,
+      orderBy: "votingPower",
+      orderDirection: "desc",
+      limit: 20,
+    },
+    context: { headers: { "anticapture-dao-id": daoId } },
+    notifyOnNetworkStatusChange: true,
+    fetchPolicy: "cache-and-network", // Always check network for fresh data
   });
+
+  const topDelegates = delegates.data?.accountPowers?.items || [];
 
   const totalSupply = tokenData.data?.totalSupply;
 
@@ -76,7 +84,7 @@ export const useDaoOverviewData = ({
   });
 
   const topDelegatesToPass = useTopDelegatesToPass({
-    holders,
+    topDelegates,
     quorumValue,
   });
 
@@ -92,7 +100,7 @@ export const useDaoOverviewData = ({
     tokenData.isLoading ||
     treasuryNonDao.loading ||
     treasuryAll.loading ||
-    holders.loading;
+    delegates.loading;
 
   return {
     daoData: daoData.data,

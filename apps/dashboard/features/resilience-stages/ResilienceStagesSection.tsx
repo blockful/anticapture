@@ -13,6 +13,7 @@ import {
   StagesContainer,
   stageToRiskMapping,
 } from "@/features/resilience-stages/components/StagesContainer";
+import { SubSectionsContainer } from "@/shared/components/design-system/section";
 interface ResilienceStagesSectionProps {
   daoId: DaoIdEnum;
 }
@@ -34,12 +35,14 @@ export const ResilienceStagesSection = ({
       icon={<BarChart className="section-layout-icon" />}
       description={PAGES_CONSTANTS.resilienceStages.description}
     >
-      <StagesContainer
-        daoId={daoId}
-        currentDaoStage={currentDaoStage}
-        daoConfig={daoConfig}
-        context="section"
-      />
+      <SubSectionsContainer>
+        <StagesContainer
+          daoId={daoId}
+          currentDaoStage={currentDaoStage}
+          daoConfig={daoConfig}
+          context="section"
+        />
+      </SubSectionsContainer>
     </TheSectionLayout>
   );
 };

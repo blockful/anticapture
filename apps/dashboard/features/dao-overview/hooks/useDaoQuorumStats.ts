@@ -20,11 +20,9 @@ export const useDaoQuorumStats = ({
   daoConfig: DaoConfiguration;
 }) => {
   return useMemo(() => {
-    const quorumValue = daoData?.quorum
-      ? Number(daoData.quorum) / 10 ** 18
-      : null;
+    const quorumValue = daoData?.quorum ? Number(daoData.quorum) / 1e18 : null;
     const turnoutTokens = averageTurnout?.data
-      ? Number(averageTurnout.data.currentAverageTurnout) / 10 ** 18
+      ? Number(averageTurnout.data.currentAverageTurnout) / 1e18
       : null;
 
     const averageTurnoutPercentAboveQuorum =

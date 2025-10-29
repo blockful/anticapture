@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { formatEther } from "viem";
-import { TooltipInfo } from "@/shared/components";
+import { SkeletonRow, TooltipInfo } from "@/shared/components";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { DaoIdEnum } from "@/shared/types/daos";
 import {
@@ -55,11 +55,16 @@ export const AccountBalanceChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
         </DefaultLink>
         <TooltipInfo text="Addresses with the highest number of governance tokens." />
       </div>
-      <TopAccountsChart
-        daoId={daoId}
-        chartData={chartData}
-        entityType="tokenHolder"
-      />
+      {accountBalanceVariations.loading && (
+        <SkeletonRow className="h-52 w-full" />
+      )}
+      {!accountBalanceVariations.loading && (
+        <TopAccountsChart
+          daoId={daoId}
+          chartData={chartData}
+          entityType="tokenHolder"
+        />
+      )}
     </div>
   );
 };
