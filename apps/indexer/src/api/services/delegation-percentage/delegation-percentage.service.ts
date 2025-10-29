@@ -28,12 +28,12 @@
 
 import { MetricTypesEnum } from "@/lib/constants";
 import { SECONDS_IN_DAY, getCurrentDayTimestamp } from "@/lib/enums";
-import { DelegationPercentageRepository } from "@/api/repositories/delegation-percentage.repository";
+import { DelegationPercentageRepository } from "@/api/repositories/";
 import {
   DelegationPercentageItem,
   DelegationPercentageQuery,
   normalizeTimestamp,
-} from "@/api/mappers/delegation-percentage";
+} from "@/api/mappers/";
 
 /**
  * Service result type

@@ -1,7 +1,9 @@
 import { Address } from "viem";
 
-import { DBVotingPowerWithRelations } from "@/api/mappers";
-import { DBVotingPowerVariation } from "../mappers/top-voting-power-variations";
+import {
+  DBVotingPowerWithRelations,
+  DBVotingPowerVariation,
+} from "@/api/mappers";
 
 interface VotingPowerRepository {
   getVotingPowers(

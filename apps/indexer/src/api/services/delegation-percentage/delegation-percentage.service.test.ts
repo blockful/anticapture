@@ -1,5 +1,5 @@
 import { DelegationPercentageService } from "./delegation-percentage.service";
-import { DelegationPercentageRepository } from "@/api/repositories/delegation-percentage.repository";
+import { DelegationPercentageRepository } from "@/api/repositories/";
 import { MetricTypesEnum } from "@/lib/constants";
 
 /**
@@ -532,7 +532,7 @@ describe("DelegationPercentageService", () => {
       // Mock console.error to suppress test output
       const consoleErrorSpy = jest
         .spyOn(console, "error")
-        .mockImplementation(() => {});
+        .mockImplementation(() => { });
 
       // Mock: error fetching previous values
       mockRepository.getLastMetricBeforeDate.mockRejectedValue(

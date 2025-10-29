@@ -1,7 +1,7 @@
 import { asc, desc, gte, sql } from "ponder";
 import { db } from "ponder:api";
 import { transfer, accountBalance } from "ponder:schema";
-import { DBAccountBalanceVariation } from "../mappers";
+import { DBAccountBalanceVariation } from "@/api/mappers";
 
 export class AccountBalanceRepository {
   async getTopAccountBalanceVariations(

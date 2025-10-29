@@ -1,4 +1,4 @@
-import { DBTransaction, TransactionsRequest } from "../mappers";
+import { DBTransaction, TransactionsRequest } from "@/api/mappers";
 import { sql } from "drizzle-orm";
 import { db } from "ponder:api";
 import { delegation, transaction, transfer } from "ponder:schema";

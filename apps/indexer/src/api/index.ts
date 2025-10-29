@@ -21,8 +21,8 @@ import {
   delegationPercentage,
   votingPowerVariations,
   accountBalanceVariations,
-} from "./controller";
-import { DrizzleProposalsActivityRepository } from "./repositories/proposals-activity.repository";
+} from "@/api/controllers";
+import { DrizzleProposalsActivityRepository } from "@/api/repositories";
 import { docs } from "./docs";
 import { env } from "@/env";
 import {
@@ -33,7 +33,7 @@ import {
   TokenRepository,
   TransactionsRepository,
   VotingPowerRepository,
-} from "./repositories";
+} from "@/api/repositories";
 import { errorHandler } from "./middlewares";
 import { getClient } from "@/lib/client";
 import { getChain } from "@/lib/utils";
@@ -48,7 +48,7 @@ import {
   NFTPriceService,
   TokenService,
   TopBalanceVariationsService,
-} from "./services";
+} from "@/api/services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 
@@ -113,15 +113,15 @@ if (env.DUNE_API_URL && env.DUNE_API_KEY) {
 const tokenPriceClient =
   env.DAO_ID === DaoIdEnum.NOUNS
     ? new NFTPriceService(
-        new NFTPriceRepository(),
-        env.COINGECKO_API_URL,
-        env.COINGECKO_API_KEY,
-      )
+      new NFTPriceRepository(),
+      env.COINGECKO_API_URL,
+      env.COINGECKO_API_KEY,
+    )
     : new CoingeckoService(
-        env.COINGECKO_API_URL,
-        env.COINGECKO_API_KEY,
-        env.DAO_ID,
-      );
+      env.COINGECKO_API_URL,
+      env.COINGECKO_API_KEY,
+      env.DAO_ID,
+    );
 
 tokenHistoricalData(app, tokenPriceClient);
 token(

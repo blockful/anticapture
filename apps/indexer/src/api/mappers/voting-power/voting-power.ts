@@ -1,7 +1,7 @@
 import { z } from "@hono/zod-openapi";
 import { votingPowerHistory } from "ponder:schema";
 
-import { DBDelegation, DBTransfer } from "./transactions";
+import { DBDelegation, DBTransfer } from "../transactions";
 import { isAddress } from "viem";
 
 export type DBVotingPower = typeof votingPowerHistory.$inferSelect;
@@ -79,17 +79,17 @@ export const VotingPowerMapper = (
       logIndex: p.logIndex,
       delegation: p.delegations
         ? {
-            from: p.delegations.delegatorAccountId,
-            value: p.delegations.delegatedValue.toString(),
-            to: p.delegations.delegateAccountId,
-          }
+          from: p.delegations.delegatorAccountId,
+          value: p.delegations.delegatedValue.toString(),
+          to: p.delegations.delegateAccountId,
+        }
         : null,
       transfer: p.transfers
         ? {
-            value: p.transfers.amount.toString(),
-            from: p.transfers.fromAccountId,
-            to: p.transfers.toAccountId,
-          }
+          value: p.transfers.amount.toString(),
+          from: p.transfers.fromAccountId,
+          to: p.transfers.toAccountId,
+        }
         : null,
     })),
     totalCount,

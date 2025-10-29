@@ -1,7 +1,7 @@
 import { DaysEnum, DaysOpts } from "@/lib/enums";
 import { z } from "@hono/zod-openapi";
 import { Address } from "viem";
-import { PERCENTAGE_NO_BASELINE } from "./constants";
+import { PERCENTAGE_NO_BASELINE } from "@/api/mappers/constants";
 
 export const TopAccountBalanceVariationsRequestSchema = z.object({
   days: z

@@ -2,7 +2,7 @@ import { db } from "ponder:api";
 import { inArray } from "ponder";
 import { daoMetricsDayBucket } from "ponder:schema";
 
-import { ChartType } from "../mappers/last-update";
+import { ChartType } from "@/api/mappers/";
 import { MetricTypesEnum } from "@/lib/constants";
 
 export interface LastUpdateRepository {

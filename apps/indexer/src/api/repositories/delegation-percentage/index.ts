@@ -2,7 +2,7 @@ import { db } from "ponder:api";
 import { daoMetricsDayBucket } from "ponder:schema";
 import { and, gte, lte, inArray, desc, asc } from "ponder";
 import { MetricTypesEnum } from "@/lib/constants";
-import type { RepositoryFilters } from "@/api/mappers/delegation-percentage";
+import type { RepositoryFilters } from "@/api/mappers/";
 
 export class DelegationPercentageRepository {
   /**

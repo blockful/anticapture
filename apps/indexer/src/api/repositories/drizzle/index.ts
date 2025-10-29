@@ -27,9 +27,9 @@ import {
   AverageTurnoutCompareQueryResult,
   ProposalsCompareQueryResult,
   VotesCompareQueryResult,
-} from "../controller/governance-activity/types";
+} from "@/api/controllers";
 import { DaysEnum } from "@/lib/enums";
-import { DBProposal } from "../mappers";
+import { DBProposal } from "@/api/mappers";
 
 export class DrizzleRepository {
   async getSupplyComparison(metricType: string, days: DaysEnum) {
