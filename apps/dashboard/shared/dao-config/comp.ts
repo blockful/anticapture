@@ -3,6 +3,7 @@ import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { CompoundIcon } from "@/shared/components/icons";
 import { mainnet } from "viem/chains";
+import { QUORUM_CALCULATION_TYPES } from "../constants/labels";
 
 export const COMP: DaoConfiguration = {
   name: "Compound",
@@ -25,7 +26,7 @@ export const COMP: DaoConfiguration = {
       timelock: true,
       cancelFunction: true,
       logic: "For + Abstain",
-      quorumCalculation: "400K $COMP",
+      quorumCalculation: QUORUM_CALCULATION_TYPES.COMPOUND,
       proposalThreshold: "25K $COMP",
     },
   },
@@ -282,4 +283,5 @@ export const COMP: DaoConfiguration = {
   resilienceStages: true,
   tokenDistribution: true,
   riskAnalysis: true,
+  dataTables: true,
 };
