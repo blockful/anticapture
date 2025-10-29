@@ -27,11 +27,12 @@ export const ProposalInfoSection = ({
 
   const timeLeftText = getTimeLeftText(proposal.endTimestamp);
 
-  const forVotesPercentage = (Number(proposal.forVotes) / totalVotes) * 100;
+  const forVotesPercentage =
+    totalVotes === 0 ? 0 : (Number(proposal.forVotes) / totalVotes) * 100;
   const againstVotesPercentage =
-    (Number(proposal.againstVotes) / totalVotes) * 100;
+    totalVotes === 0 ? 0 : (Number(proposal.againstVotes) / totalVotes) * 100;
   const abstainVotesPercentage =
-    (Number(proposal.abstainVotes) / totalVotes) * 100;
+    totalVotes === 0 ? 0 : (Number(proposal.abstainVotes) / totalVotes) * 100;
 
   return (
     <div className="border-surface-default flex w-full flex-col border lg:w-[420px]">
