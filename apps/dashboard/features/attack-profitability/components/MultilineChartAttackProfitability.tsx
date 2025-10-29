@@ -185,12 +185,13 @@ export const MultilineChartAttackProfitability = ({
   }, [
     filterData,
     chartConfig,
-    daoId,
     mocked,
     quorumValue,
     daoTokenPriceHistoricalData,
     treasuryAssetNonDAOToken,
     timeSeriesData,
+    daoConfig?.attackProfitability?.dynamicQuorum?.percentage,
+    daoConfig?.daoOverview.token,
   ]);
 
   const prevCsvRef = useRef<string>("");
