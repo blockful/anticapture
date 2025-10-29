@@ -10,7 +10,7 @@ export const AttackProfitabilityCustomTooltip: React.FC<
 > = ({ active, payload, label, chartConfig }) => {
   if (!active || !payload || payload.length === 0) return null;
 
-  const date = new Date(label * 1000).toLocaleDateString("en-US", {
+  const date = new Date(label).toLocaleDateString("en-US", {
     month: "short",
     day: "2-digit",
   });
