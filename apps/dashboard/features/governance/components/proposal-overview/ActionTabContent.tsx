@@ -1,5 +1,7 @@
+import { BlankSlate } from "@/shared/components";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { GetProposalQuery } from "@anticapture/graphql-client";
+import { Inbox } from "lucide-react";
 
 export const ActionsTabContent = ({
   proposal,
@@ -8,15 +10,23 @@ export const ActionsTabContent = ({
 }) => {
   return (
     <div className="text-primary flex flex-col gap-3 p-4">
-      {proposal.targets.map((target, index) => (
-        <ActionItem
-          key={index}
-          index={index}
-          target={proposal.targets[index]}
-          value={proposal.values[index]}
-          calldata={proposal.calldatas[index]}
+      {proposal.targets.length === 0 ? (
+        <BlankSlate
+          variant="default"
+          icon={Inbox}
+          description="No actions found"
         />
-      ))}
+      ) : (
+        proposal.targets.map((target, index) => (
+          <ActionItem
+            key={index}
+            index={index}
+            target={proposal.targets[index]}
+            value={proposal.values[index]}
+            calldata={proposal.calldatas[index]}
+          />
+        ))
+      )}
     </div>
   );
 };
