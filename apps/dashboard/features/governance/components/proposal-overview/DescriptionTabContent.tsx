@@ -33,49 +33,49 @@ export const DescriptionTabContent = ({
               component: "h1",
               props: {
                 className:
-                  "text-primary break-words font-inter text-[24px] font-medium not-italic leading-[32px] tracking-[-0.144px]",
+                  "text-primary break-words font-inter text-[24px] font-medium not-italic leading-[32px] tracking-[-0.144px] mb-2 mt-2",
               },
             },
             h2: {
               component: "h2",
               props: {
                 className:
-                  "text-primary pt-4 font-inter text-[20px] font-medium not-italic leading-[28px] tracking-[-0.1px] break-words",
+                  "text-primary font-inter text-[20px] font-medium not-italic leading-[28px] tracking-[-0.1px] break-words mb-1.5 mt-2",
               },
             },
             h3: {
               component: "h3",
               props: {
                 className:
-                  "text-primary pt-4 font-inter text-[16px] font-medium not-italic leading-[24px] break-words",
+                  "text-primary font-inter text-[16px] font-medium not-italic leading-[24px] break-words mb-1.5 mt-2",
               },
             },
             h4: {
               component: "h4",
               props: {
                 className:
-                  "text-primary pt-4 font-inter text-[14px] font-medium not-italic leading-[20px] tracking-[-0.084px] break-words",
+                  "text-primary font-inter text-[14px] font-medium not-italic leading-[20px] tracking-[-0.084px] break-words mb-1.5 mt-2",
               },
             },
             h5: {
               component: "h5",
               props: {
                 className:
-                  "text-primary pt-4 font-inter text-[12px] font-medium not-italic leading-[16px] tracking-[-0.072px] break-words",
+                  "text-primary font-inter text-[12px] font-medium not-italic leading-[16px] tracking-[-0.072px] break-words mb-1.5 mt-2",
               },
             },
             h6: {
               component: "h6",
               props: {
                 className:
-                  "text-primary pt-4 font-inter text-[10px] font-medium not-italic leading-[14px] tracking-[-0.06px] break-words",
+                  "text-primary font-inter text-[10px] font-medium not-italic leading-[14px] tracking-[-0.06px] break-words mb-1.5 mt-2",
               },
             },
             p: {
               component: "p",
               props: {
                 className:
-                  "text-secondary text-[14px] py-1 leading-[20px] break-words",
+                  "text-secondary text-[14px] leading-[20px] break-words mb-2",
               },
             },
             hr: {
@@ -101,13 +101,13 @@ export const DescriptionTabContent = ({
             ul: {
               component: "ul",
               props: {
-                className: "list-disc space-y-2 mt-4 mb-4 pl-4",
+                className: "list-disc ml-5 mb-4",
               },
             },
             ol: {
               component: "ol",
               props: {
-                className: "list-decimal space-y-2 mt-4 mb-4 pl-4",
+                className: "list-decimal ml-5 mb-4",
               },
             },
             li: {
