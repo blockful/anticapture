@@ -3,11 +3,10 @@ import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { CompoundIcon } from "@/shared/components/icons";
 import { mainnet } from "viem/chains";
-import { QUORUM_CALCULATION_TYPES } from "../constants/labels";
+import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
 export const COMP: DaoConfiguration = {
   name: "Compound",
-  // supportStage: SupportStageEnum.FULL,
   icon: CompoundIcon,
   daoOverview: {
     token: "ERC20",
@@ -19,13 +18,14 @@ export const COMP: DaoConfiguration = {
       token: "0xc00e94Cb662C3520282E6f5717214004A7f26888",
       timelock: "0x6d903f6003cca6255D85CcA4D3B5E5146dC33925",
     },
-    cancelFunction: "true", // TODO: verify
+    cancelFunction:
+      "https://etherscan.io/address/0x6d903f6003cca6255D85CcA4D3B5E5146dC33925#writeContract#F5",
     rules: {
       delay: true,
       changeVote: false,
       timelock: true,
       cancelFunction: true,
-      logic: "For + Abstain",
+      logic: "For",
       quorumCalculation: QUORUM_CALCULATION_TYPES.COMPOUND,
       proposalThreshold: "25K $COMP",
     },
@@ -116,7 +116,7 @@ export const COMP: DaoConfiguration = {
           "The domain is not signed with a valid signature (DNSSEC) and it is not possible to establish a secure connection to it (HTTPS).",
       },
       [GovernanceImplementationEnum.ATTACK_PROFITABILITY]: {
-        value: "U$2.72B", // TODO: verify
+        value: "U$2.72B",
         riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[

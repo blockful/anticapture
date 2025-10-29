@@ -52,6 +52,8 @@ const resolveQuorum = (
       }
       break;
     }
+
+    case QUORUM_CALCULATION_TYPES.COMPOUND:
     case QUORUM_CALCULATION_TYPES.SCROLL: {
       // SCROLL: Quorum fixed at 0.21% total $SCR
       if (calculable) {
