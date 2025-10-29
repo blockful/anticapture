@@ -83,6 +83,7 @@ export const GovernanceSection = () => {
         icon={<Landmark className="section-layout-icon" />}
         description="View and vote on executable proposals from this DAO."
         anchorId="governance"
+        className="sm:bg-transparent"
       >
         <div className="flex-1">
           {loading && proposals.length === 0 ? (
