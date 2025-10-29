@@ -156,7 +156,7 @@ export class AccountBalanceRepository {
       .select({
         address: combined.accountId,
         balance:
-          sql<string>`${combined.currentBalance} - ${combined.fromChange} + ${combined.toChange}`.as(
+          sql<string>`${combined.currentBalance} - (${combined.fromChange} + ${combined.toChange})`.as(
             "balance",
           ),
       })
