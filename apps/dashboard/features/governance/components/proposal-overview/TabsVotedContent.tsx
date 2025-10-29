@@ -6,7 +6,7 @@ import {
   useVotes,
   VoteWithHistoricalPower,
 } from "@/features/governance/hooks/useVotes";
-import { SkeletonRow, Button } from "@/shared/components";
+import { SkeletonRow, Button, BlankSlate } from "@/shared/components";
 import { ColumnDef } from "@tanstack/react-table";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
@@ -17,6 +17,7 @@ import {
   XCircle,
   ArrowUp,
   ArrowDown,
+  Inbox,
 } from "lucide-react";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { VotesTable } from "@/features/governance/components/proposal-overview/VotesTable";
@@ -559,7 +560,17 @@ export const TabsVotedContent = ({
 
   return (
     <div className="w-full">
-      <VotesTable columns={columns} data={tableData} />
+      <VotesTable
+        columns={columns}
+        data={tableData}
+        showWhenEmpty={
+          <BlankSlate
+            variant="default"
+            icon={Inbox}
+            description="No votes found"
+          />
+        }
+      />
     </div>
   );
 };
