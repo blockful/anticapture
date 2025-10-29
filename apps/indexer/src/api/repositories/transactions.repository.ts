@@ -98,7 +98,7 @@ export class TransactionsRepository {
     return result.rows;
   }
 
-  async getFilteredAggregateTransactionsCount(
+  async getAggregatedTransactionsCount(
     filter: TransactionsRequest,
   ): Promise<number> {
     const { transfer: transferFilter, delegation: delegationFilter } =
@@ -197,29 +197,6 @@ export class TransactionsRepository {
     const result = await db.execute<DBTransaction>(query);
 
     return result.rows;
-  }
-
-  async getRecentAggregateTransactionsCount(
-    params: TransactionsRequest,
-  ): Promise<number> {
-    const timePeriodConditions = this.coalesceConditionArray(
-      this.timePeriodToSql(params),
-    );
-
-    const query = await db
-      .select({
-        count: countDistinct(
-          sql`coalesce(${transfer.transactionHash}, ${delegation.transactionHash})`,
-        ),
-      })
-      .from(transfer)
-      .fullJoin(
-        delegation,
-        eq(transfer.transactionHash, delegation.transactionHash),
-      )
-      .where(sql.raw(timePeriodConditions));
-
-    return query[0]?.count || 0;
   }
 
   private filterToSql(filter: TransactionsRequest): {

@@ -10,15 +10,10 @@ interface TransactionsRepository {
   getFilteredAggregateTransactions(
     req: TransactionsRequest,
   ): Promise<DBTransaction[]>;
-  getFilteredAggregateTransactionsCount(
-    req: TransactionsRequest,
-  ): Promise<number>;
+  getAggregatedTransactionsCount(req: TransactionsRequest): Promise<number>;
   getRecentAggregateTransactions(
     req: TransactionsRequest,
   ): Promise<DBTransaction[]>;
-  getRecentAggregateTransactionsCount(
-    req: TransactionsRequest,
-  ): Promise<number>;
 }
 
 export class TransactionsService {
@@ -35,23 +30,12 @@ export class TransactionsService {
       affectedSupply: params.affectedSupply,
     });
 
-    const [result, totalCount] = await Promise.all(
+    const [totalCount, result] = await Promise.all([
+      this.transactionsRepository.getAggregatedTransactionsCount(params),
       isFiltered
-        ? [
-            this.transactionsRepository.getFilteredAggregateTransactions(
-              params,
-            ),
-            this.transactionsRepository.getFilteredAggregateTransactionsCount(
-              params,
-            ),
-          ]
-        : [
-            this.transactionsRepository.getRecentAggregateTransactions(params),
-            this.transactionsRepository.getRecentAggregateTransactionsCount(
-              params,
-            ),
-          ],
-    );
+        ? this.transactionsRepository.getFilteredAggregateTransactions(params)
+        : this.transactionsRepository.getRecentAggregateTransactions(params),
+    ]);
 
     return {
       items: result.map(TransactionMapper.toApi),
