@@ -120,6 +120,7 @@ export const MultilineChartAttackProfitability = ({
       all: normalizeDatasetAllTreasury(
         daoTokenPriceHistoricalData,
         "all",
+        daoConfig?.daoOverview.token,
         treasuryAssetNonDAOToken,
         treasurySupplyChart,
       ),

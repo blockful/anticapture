@@ -1,8 +1,10 @@
+import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
 import {
   PriceEntry,
   DaoMetricsDayBucket,
   MultilineChartDataSetPoint,
 } from "@/shared/dao-config/types";
+import { formatEther } from "viem";
 
 export function normalizeDataset(
   tokenPrices: PriceEntry[],
@@ -21,11 +23,20 @@ export function normalizeDataset(
   }
 
   const parsedMultipliers = multiplierDataSet.reduce(
-    (acc, item) => ({
-      ...acc,
-      [Number(item.date) * 1000]:
-        tokenType === "ERC721" ? Number(item.high) : Number(item.high) / 1e18,
-    }),
+    (acc, item) => {
+      const value =
+        tokenType === "ERC721"
+          ? Number(item.high)
+          : Number(formatEther(BigInt(item.high)));
+
+      return {
+        ...acc,
+        [Number(item.date) * 1000]: value,
+        // Forward fill the value for the next day that will be overwritten
+        // by the next day's value if it exists
+        [(Number(item.date) + SECONDS_PER_DAY) * 1000]: value,
+      };
+    },
     {} as Record<number, number>,
   );
 
