@@ -22,16 +22,20 @@ export type Scalars = {
   PositiveInt: { input: any; output: any; }
 };
 
-export type AggregatedDelegatedSupplyItem = {
-  __typename?: 'AggregatedDelegatedSupplyItem';
+export type AverageDelegationPercentageItem = {
+  __typename?: 'AverageDelegationPercentageItem';
   date: Scalars['String']['output'];
   high: Scalars['String']['output'];
 };
 
-export type AggregatedDelegatedSupplyPage = {
-  __typename?: 'AggregatedDelegatedSupplyPage';
-  items: Array<AggregatedDelegatedSupplyItem>;
+export type AverageDelegationPercentagePage = {
+  __typename?: 'AverageDelegationPercentagePage';
+  items: Array<AverageDelegationPercentageItem>;
   pageInfo: PageInfo;
+  /**
+   * The actual number of items returned in this response.
+   * May be less than requested if DAOs don't have overlapping data for the full date range.
+   */
   totalCount: Scalars['Int']['output'];
 };
 
@@ -75,11 +79,11 @@ export type Query = {
   accountPowers: AccountPowerPage;
   accounts: AccountPage;
   /**
-   * Aggregated delegation supply across all supported DAOs.
+   * Average delegation percentage across all supported DAOs by day.
    * Returns the mean delegation percentage for each day in the specified range.
    * Only includes dates where ALL DAOs have data available.
    */
-  aggregatedDelegatedSupply: AggregatedDelegatedSupplyPage;
+  averageDelegationPercentageByDay: AverageDelegationPercentagePage;
   /** Get active token supply for DAO */
   compareActiveSupply?: Maybe<CompareActiveSupply_200_Response>;
   /** Compare average turnout between time periods */
@@ -107,9 +111,9 @@ export type Query = {
   daoMetricsDayBuckets: DaoMetricsDayBucketPage;
   daos: DaoPage;
   delegation?: Maybe<Delegation>;
-  delegations: DelegationPage;
   /** Get delegation percentage day buckets with forward-fill */
-  getDelegationPercentage?: Maybe<GetDelegationPercentage_200_Response>;
+  delegationPercentageByDay?: Maybe<DelegationPercentageByDay_200_Response>;
+  delegations: DelegationPage;
   /** Fetch historical token balances for multiple addresses at a specific time period using multicall */
   historicalBalances?: Maybe<Array<Maybe<Query_HistoricalBalances_Items>>>;
   /** Get historical market data for a specific token */
@@ -215,7 +219,7 @@ export type QueryAccountsArgs = {
 };
 
 
-export type QueryAggregatedDelegatedSupplyArgs = {
+export type QueryAverageDelegationPercentageByDayArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   endDate?: InputMaybe<Scalars['String']['input']>;
@@ -319,6 +323,16 @@ export type QueryDelegationArgs = {
 };
 
 
+export type QueryDelegationPercentageByDayArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  endDate?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  orderDirection?: InputMaybe<QueryInput_DelegationPercentageByDay_OrderDirection>;
+  startDate?: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type QueryDelegationsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -326,16 +340,6 @@ export type QueryDelegationsArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   where?: InputMaybe<DelegationFilter>;
-};
-
-
-export type QueryGetDelegationPercentageArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  endDate?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['NonNegativeInt']['input']>;
-  orderDirection?: InputMaybe<QueryInput_GetDelegationPercentage_OrderDirection>;
-  startDate?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -455,6 +459,7 @@ export type QueryTransactionArgs = {
 export type QueryTransactionsArgs = {
   affectedSupply?: InputMaybe<Scalars['JSON']['input']>;
   from?: InputMaybe<Scalars['String']['input']>;
+  fromDate?: InputMaybe<Scalars['Int']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   maxAmount?: InputMaybe<Scalars['String']['input']>;
   minAmount?: InputMaybe<Scalars['String']['input']>;
@@ -462,6 +467,7 @@ export type QueryTransactionsArgs = {
   sortBy?: InputMaybe<Timestamp_Const>;
   sortOrder?: InputMaybe<QueryInput_Transactions_SortOrder>;
   to?: InputMaybe<Scalars['String']['input']>;
+  toDate?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -828,8 +834,8 @@ export type CompareActiveSupply_200_Response = {
 export type CompareAverageTurnout_200_Response = {
   __typename?: 'compareAverageTurnout_200_response';
   changeRate: Scalars['Float']['output'];
-  currentAverageTurnout: Scalars['Float']['output'];
-  oldAverageTurnout: Scalars['Float']['output'];
+  currentAverageTurnout: Scalars['String']['output'];
+  oldAverageTurnout: Scalars['String']['output'];
 };
 
 export type CompareCexSupply_200_Response = {
@@ -1221,10 +1227,10 @@ export type DelegationPage = {
   totalCount: Scalars['Int']['output'];
 };
 
-export type GetDelegationPercentage_200_Response = {
-  __typename?: 'getDelegationPercentage_200_response';
-  items: Array<Maybe<Query_GetDelegationPercentage_Items_Items>>;
-  pageInfo: Query_GetDelegationPercentage_PageInfo;
+export type DelegationPercentageByDay_200_Response = {
+  __typename?: 'delegationPercentageByDay_200_response';
+  items: Array<Maybe<Query_DelegationPercentageByDay_Items_Items>>;
+  pageInfo: Query_DelegationPercentageByDay_PageInfo;
   totalCount: Scalars['Float']['output'];
 };
 
@@ -1267,7 +1273,7 @@ export type Proposal_200_Response = {
   status: Scalars['String']['output'];
   targets: Array<Maybe<Scalars['String']['output']>>;
   timestamp: Scalars['String']['output'];
-  title?: Maybe<Scalars['String']['output']>;
+  title: Scalars['String']['output'];
   txHash: Scalars['String']['output'];
   values: Array<Maybe<Scalars['String']['output']>>;
 };
@@ -1552,7 +1558,7 @@ export enum QueryInput_CompareVotes_Days {
   '365d' = '_365d'
 }
 
-export enum QueryInput_GetDelegationPercentage_OrderDirection {
+export enum QueryInput_DelegationPercentageByDay_OrderDirection {
   Asc = 'asc',
   Desc = 'desc'
 }
@@ -1665,14 +1671,14 @@ export type Query_AccountBalanceVariations_Period = {
   startTimestamp: Scalars['String']['output'];
 };
 
-export type Query_GetDelegationPercentage_Items_Items = {
-  __typename?: 'query_getDelegationPercentage_items_items';
+export type Query_DelegationPercentageByDay_Items_Items = {
+  __typename?: 'query_delegationPercentageByDay_items_items';
   date: Scalars['String']['output'];
   high: Scalars['String']['output'];
 };
 
-export type Query_GetDelegationPercentage_PageInfo = {
-  __typename?: 'query_getDelegationPercentage_pageInfo';
+export type Query_DelegationPercentageByDay_PageInfo = {
+  __typename?: 'query_delegationPercentageByDay_pageInfo';
   endDate?: Maybe<Scalars['String']['output']>;
   hasNextPage: Scalars['Boolean']['output'];
   startDate?: Maybe<Scalars['String']['output']>;
@@ -1756,7 +1762,7 @@ export type Query_Proposals_Items_Items = {
   status: Scalars['String']['output'];
   targets: Array<Maybe<Scalars['String']['output']>>;
   timestamp: Scalars['String']['output'];
-  title?: Maybe<Scalars['String']['output']>;
+  title: Scalars['String']['output'];
   txHash: Scalars['String']['output'];
   values: Array<Maybe<Scalars['String']['output']>>;
 };
@@ -2656,14 +2662,14 @@ export type GetProposalsFromDaoQueryVariables = Exact<{
 }>;
 
 
-export type GetProposalsFromDaoQuery = { __typename?: 'Query', proposals?: { __typename?: 'proposals_200_response', totalCount: number, items: Array<{ __typename?: 'query_proposals_items_items', id: string, daoId: string, txHash: string, description: string, quorum: string, forVotes: string, againstVotes: string, abstainVotes: string, timestamp: string, status: string, proposerAccountId: string, title?: string | null, startTimestamp: string, endTimestamp: string, calldatas: Array<string | null>, targets: Array<string | null>, values: Array<string | null> } | null> } | null };
+export type GetProposalsFromDaoQuery = { __typename?: 'Query', proposals?: { __typename?: 'proposals_200_response', totalCount: number, items: Array<{ __typename?: 'query_proposals_items_items', id: string, daoId: string, txHash: string, description: string, quorum: string, forVotes: string, againstVotes: string, abstainVotes: string, timestamp: string, status: string, proposerAccountId: string, title: string, startTimestamp: string, endTimestamp: string, calldatas: Array<string | null>, targets: Array<string | null>, values: Array<string | null> } | null> } | null };
 
 export type GetProposalQueryVariables = Exact<{
   id: Scalars['String']['input'];
 }>;
 
 
-export type GetProposalQuery = { __typename?: 'Query', proposal?: { __typename?: 'proposal_200_response', id: string, daoId: string, txHash: string, proposerAccountId: string, title?: string | null, description: string, quorum: string, timestamp: string, status: string, forVotes: string, againstVotes: string, abstainVotes: string, startTimestamp: string, endTimestamp: string, calldatas: Array<string | null>, targets: Array<string | null>, values: Array<string | null> } | null };
+export type GetProposalQuery = { __typename?: 'Query', proposal?: { __typename?: 'proposal_200_response', id: string, daoId: string, txHash: string, proposerAccountId: string, title: string, description: string, quorum: string, timestamp: string, status: string, forVotes: string, againstVotes: string, abstainVotes: string, startTimestamp: string, endTimestamp: string, calldatas: Array<string | null>, targets: Array<string | null>, values: Array<string | null> } | null };
 
 export type GetVotesOnchainsQueryVariables = Exact<{
   proposalId?: InputMaybe<Scalars['String']['input']>;
@@ -2687,6 +2693,7 @@ export type GetVotesOnchainsTotalCountQuery = { __typename?: 'Query', votesOncha
 export type GetVotingPowerChangeQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];
   days: QueryInput_HistoricalVotingPower_Days;
+  fromDate?: InputMaybe<Scalars['Float']['input']>;
 }>;
 
 
@@ -2744,7 +2751,7 @@ export type GetProposalsQueryVariables = Exact<{
 }>;
 
 
-export type GetProposalsQuery = { __typename?: 'Query', proposals?: { __typename?: 'proposals_200_response', items: Array<{ __typename?: 'query_proposals_items_items', id: string, title?: string | null, timestamp: string } | null> } | null };
+export type GetProposalsQuery = { __typename?: 'Query', proposals?: { __typename?: 'proposals_200_response', items: Array<{ __typename?: 'query_proposals_items_items', id: string, title: string, timestamp: string } | null> } | null };
 
 export type GetDaoAddressesAccountBalancesQueryVariables = Exact<{
   tokenAddresses: Scalars['String']['input'];
@@ -4109,8 +4116,8 @@ export type GetVotesOnchainsTotalCountLazyQueryHookResult = ReturnType<typeof us
 export type GetVotesOnchainsTotalCountSuspenseQueryHookResult = ReturnType<typeof useGetVotesOnchainsTotalCountSuspenseQuery>;
 export type GetVotesOnchainsTotalCountQueryResult = Apollo.QueryResult<GetVotesOnchainsTotalCountQuery, GetVotesOnchainsTotalCountQueryVariables>;
 export const GetVotingPowerChangeDocument = gql`
-    query GetVotingPowerChange($addresses: JSON!, $days: queryInput_historicalVotingPower_days!) {
-  historicalVotingPower(addresses: $addresses, days: $days) {
+    query GetVotingPowerChange($addresses: JSON!, $days: queryInput_historicalVotingPower_days!, $fromDate: Float) {
+  historicalVotingPower(addresses: $addresses, days: $days, fromDate: $fromDate) {
     address
     votingPower
   }
@@ -4131,6 +4138,7 @@ export const GetVotingPowerChangeDocument = gql`
  *   variables: {
  *      addresses: // value for 'addresses'
  *      days: // value for 'days'
+ *      fromDate: // value for 'fromDate'
  *   },
  * });
  */

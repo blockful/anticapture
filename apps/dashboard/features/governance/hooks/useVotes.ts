@@ -32,11 +32,13 @@ export interface UseVotesParams {
   limit?: number;
   orderBy?: string;
   orderDirection?: string;
+  proposalStartTimestamp?: number;
 }
 
 export const useVotes = ({
   daoId,
   proposalId,
+  proposalStartTimestamp,
   limit = 10,
   orderBy = "timestamp",
   orderDirection = "desc",
@@ -100,6 +102,7 @@ export const useVotes = ({
           variables: {
             addresses,
             days: QueryInput_HistoricalVotingPower_Days["30d"],
+            fromDate: proposalStartTimestamp,
           },
           context: {
             headers: {
