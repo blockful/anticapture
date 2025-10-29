@@ -13,6 +13,6 @@ export type VotesCompareQueryResult = {
 };
 
 export type AverageTurnoutCompareQueryResult = {
-  currentAverageTurnout: number;
-  oldAverageTurnout: number;
+  currentAverageTurnout: string;
+  oldAverageTurnout: string;
 };

@@ -2,7 +2,7 @@ import {
   aggregateMeanPercentage,
   buildPaginatedResponse,
   DelegationPercentageResponse,
-} from './aggregated-delegated-supply';
+} from './average-delegation-percentage';
 
 describe('aggregateMeanPercentage', () => {
   it('should calculate mean percentage when DAOs have same dates', () => {
@@ -17,6 +17,7 @@ describe('aggregateMeanPercentage', () => {
           totalCount: 2,
           pageInfo: {
             hasNextPage: false,
+            hasPreviousPage: false,
             endDate: null,
             startDate: null,
           },
@@ -32,6 +33,7 @@ describe('aggregateMeanPercentage', () => {
           totalCount: 2,
           pageInfo: {
             hasNextPage: false,
+            hasPreviousPage: false,
             endDate: null,
             startDate: null,
           },
@@ -71,6 +73,7 @@ describe('aggregateMeanPercentage', () => {
           totalCount: 1,
           pageInfo: {
             hasNextPage: false,
+            hasPreviousPage: false,
             endDate: null,
             startDate: null,
           },
@@ -85,6 +88,7 @@ describe('aggregateMeanPercentage', () => {
           totalCount: 1,
           pageInfo: {
             hasNextPage: false,
+            hasPreviousPage: false,
             endDate: null,
             startDate: null,
           },
@@ -111,6 +115,7 @@ describe('aggregateMeanPercentage', () => {
           totalCount: 3,
           pageInfo: {
             hasNextPage: false,
+            hasPreviousPage: false,
             endDate: null,
             startDate: null,
           },
@@ -134,6 +139,7 @@ describe('buildPaginatedResponse', () => {
     expect(result.items).toHaveLength(0);
     expect(result.totalCount).toBe(0);
     expect(result.pageInfo.hasNextPage).toBe(false);
+    expect(result.pageInfo.hasPreviousPage).toBe(false);
     expect(result.pageInfo.endDate).toBeNull();
     expect(result.pageInfo.startDate).toBeNull();
   });
@@ -201,4 +207,34 @@ describe('buildPaginatedResponse', () => {
     expect(result.items[1].date).toBe('3');
     expect(result.pageInfo.hasNextPage).toBe(true);
   });
+
+  it('should calculate hasPreviousPage correctly', () => {
+    const items = [
+      { date: '1', high: '10' },
+      { date: '2', high: '20' },
+      { date: '3', high: '30' },
+    ];
+
+    // No pagination - hasPreviousPage should be false
+    const result1 = buildPaginatedResponse(items, {
+      startDate: '1',
+      after: undefined,
+    }, false);
+    expect(result1.pageInfo.hasPreviousPage).toBe(false);
+
+    // Paginated forward but after === startDate - hasPreviousPage should be false
+    const result2 = buildPaginatedResponse(items, {
+      startDate: '1',
+      after: '1',
+    }, false);
+    expect(result2.pageInfo.hasPreviousPage).toBe(false);
+
+    // Paginated forward and after !== startDate - hasPreviousPage should be true
+    const result3 = buildPaginatedResponse(items, {
+      startDate: '1',
+      after: '2',
+    }, false);
+    expect(result3.pageInfo.hasPreviousPage).toBe(true);
+  });
 });
+
