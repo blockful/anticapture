@@ -25,8 +25,10 @@ import { AccountBalanceChartCard } from "@/features/dao-overview/components/Acco
 import { VotingPowerChartCard } from "@/features/dao-overview/components/VotingPowerChartCard";
 import { MetricsCard } from "@/features/dao-overview/components/MetricsCard";
 import { AttackProfitabilityChartCard } from "@/features/dao-overview/components/AttackProfitabilityChartCard";
+import { useRouter } from "next/navigation";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
+  const router = useRouter();
   const daoConfig = daoConfigByDaoId[daoId];
   const daoOverview = daoConfig.daoOverview;
 
@@ -138,7 +140,9 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           <RiskAreaCardWrapper
             title={riskAreas.title}
             riskAreas={riskAreas.risks}
-            onRiskClick={() => {}}
+            onRiskClick={() => {
+              router.push(`/${daoId.toLowerCase()}/risk-analysis`);
+            }}
             variant={RiskAreaCardEnum.DAO_OVERVIEW}
             className="grid h-full grid-cols-2 gap-2 px-5 md:px-0"
           />
