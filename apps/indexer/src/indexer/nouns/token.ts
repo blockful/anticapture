@@ -1,6 +1,6 @@
 import { Context, Event, ponder } from "ponder:registry";
 import { token } from "ponder:schema";
-import { Address, zeroAddress } from "viem";
+import { Address, isAddressEqual, zeroAddress } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
 import {
@@ -8,20 +8,21 @@ import {
   delegatedVotesChanged,
   tokenTransfer,
 } from "@/eventHandlers";
-import { handleTransaction, storeDailyBucket } from "@/eventHandlers/shared";
+import { handleTransaction } from "@/eventHandlers/shared";
 import {
   BurningAddresses,
   MetricTypesEnum,
   TreasuryAddresses,
 } from "@/lib/constants";
 import {
-  updateDelegatedSupply,
+  // updateDelegatedSupply,
   updateSupplyMetric,
   updateTotalSupply,
 } from "@/eventHandlers/metrics";
 
 export function NounsTokenIndexer(address: Address, decimals: number) {
   const daoId = DaoIdEnum.NOUNS;
+  const timelock = TreasuryAddresses[daoId].timelock!;
 
   ponder.on("NounsToken:setup", async ({ context }) => {
     await context.db.insert(token).values({
@@ -41,9 +42,6 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
       context: Context;
     }) => {
       const { from, to } = event.args;
-      const { timestamp } = event.block;
-
-      const burningAddressList = Object.values(BurningAddresses[daoId]);
 
       await tokenTransfer(
         context,
@@ -58,34 +56,35 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
           logIndex: event.log.logIndex,
         },
         {
-          burning: burningAddressList,
+          burning: Object.values(BurningAddresses[daoId]),
         },
       );
 
-      await updateSupplyMetric(
-        context,
-        "treasury",
-        Object.values(TreasuryAddresses[daoId]),
-        MetricTypesEnum.TREASURY,
-        from,
-        to,
-        1n,
-        daoId,
-        address,
-        timestamp,
-      );
+      const isFromTimelock = isAddressEqual(event.args.from, timelock);
+      const isToTimelock = isAddressEqual(event.args.to, timelock);
 
-      await updateTotalSupply(
-        context,
-        burningAddressList,
-        MetricTypesEnum.TOTAL_SUPPLY,
-        from,
-        to,
-        1n,
-        daoId,
-        address,
-        timestamp,
-      );
+      if (isFromTimelock || isToTimelock) {
+        //   await updateDelegatedSupply(
+        //     context,
+        //     daoId,
+        //     address,
+        //     isAddressEqual(event.args.from, timelock) ? -1n : 1n,
+        //     event.block.timestamp,
+        //   );
+
+        await updateSupplyMetric(
+          context,
+          "treasury",
+          Object.values(TreasuryAddresses[daoId]),
+          MetricTypesEnum.TREASURY,
+          zeroAddress,
+          timelock,
+          isFromTimelock ? -1n : 1n,
+          daoId,
+          address,
+          event.block.timestamp,
+        );
+      }
 
       if (!event.transaction.to) return;
 
@@ -101,49 +100,17 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
   );
 
   ponder.on(`NounsToken:NounCreated`, async ({ event, context }) => {
-    const tokenData = await context.db.find(token, {
-      id: address,
-    });
-
-    if (!tokenData) {
-      return;
-    }
-
-    await storeDailyBucket(
+    await updateTotalSupply(
       context,
+      Object.values(BurningAddresses[daoId]),
       MetricTypesEnum.TOTAL_SUPPLY,
-      tokenData.totalSupply,
-      tokenData.totalSupply + 1n,
+      zeroAddress,
+      timelock,
+      1n,
       daoId,
-      event.block.timestamp,
       address,
+      event.block.timestamp,
     );
-
-    // every 10th token is automatically delegated to the treasury
-    // which doesn't count towards the delegated supply
-    if (event.args.tokenId % 10n !== 0n) {
-      await updateDelegatedSupply(
-        context,
-        daoId,
-        address,
-        1n,
-        event.block.timestamp,
-      );
-
-      if (!event.transaction.to) return;
-      await updateSupplyMetric(
-        context,
-        "treasury",
-        Object.values(TreasuryAddresses[daoId]),
-        MetricTypesEnum.TREASURY,
-        zeroAddress,
-        event.transaction.to,
-        1n,
-        daoId,
-        address,
-        event.block.timestamp,
-      );
-    }
   });
 
   ponder.on(`NounsToken:DelegateChanged`, async ({ event, context }) => {
@@ -179,6 +146,23 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
       logIndex: event.log.logIndex,
     });
 
+    // if (isAddressEqual(event.args.delegate, timelock)) {
+    //   const value = event.args.newBalance - event.args.previousBalance;
+
+    //   await updateSupplyMetric(
+    //     context,
+    //     "treasury",
+    //     Object.values(TreasuryAddresses[daoId]),
+    //     MetricTypesEnum.TREASURY,
+    //     value < 0n ? timelock : zeroAddress,
+    //     value > 0n ? zeroAddress : timelock,
+    //     1n,
+    //     daoId,
+    //     address,
+    //     event.block.timestamp,
+    //   );
+    // }
+
     if (!event.transaction.to) return;
 
     await handleTransaction(
@@ -187,7 +171,7 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
       event.transaction.from,
       event.transaction.to,
       event.block.timestamp,
-      [event.args.delegate], // Address to check
+      [event.args.delegate],
     );
   });
 }
