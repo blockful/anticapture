@@ -22,8 +22,6 @@ export const useTopDelegatesToPass = ({
       if (balance >= quorumValue) break;
     }
 
-    console.log({ quorumValue, balance, count });
-
     return balance < quorumValue ? "20+" : count;
   }, [topDelegates, quorumValue]);
 };
