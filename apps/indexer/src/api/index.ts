@@ -12,7 +12,7 @@ import {
   tokenDistribution,
   token,
   proposalsActivity,
-  historicalOnchain,
+  historicalBalances,
   transactions,
   proposals,
   lastUpdate,
@@ -135,7 +135,7 @@ tokenDistribution(app, repo);
 governanceActivity(app, repo, tokenType);
 proposalsActivity(app, proposalsRepo, env.DAO_ID, daoClient);
 proposals(app, new ProposalsService(repo, daoClient), daoClient, blockTime);
-historicalOnchain(
+historicalBalances(
   app,
   env.DAO_ID,
   new HistoricalVotingPowerService(votingPowerRepo),
