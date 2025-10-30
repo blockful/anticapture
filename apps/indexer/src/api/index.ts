@@ -12,17 +12,17 @@ import {
   tokenDistribution,
   token,
   proposalsActivity,
-  historicalOnchain,
+  historicalBalances,
   transactions,
   proposals,
   lastUpdate,
-  assets,
+  totalAssets,
   votingPower,
   delegationPercentage,
   votingPowerVariations,
   accountBalanceVariations,
-} from "./controller";
-import { DrizzleProposalsActivityRepository } from "./repositories/proposals-activity.repository";
+} from "@/api/controllers";
+import { DrizzleProposalsActivityRepository } from "@/api/repositories";
 import { docs } from "./docs";
 import { env } from "@/env";
 import {
@@ -33,7 +33,7 @@ import {
   TokenRepository,
   TransactionsRepository,
   VotingPowerRepository,
-} from "./repositories";
+} from "@/api/repositories";
 import { errorHandler } from "./middlewares";
 import { getClient } from "@/lib/client";
 import { getChain } from "@/lib/utils";
@@ -47,8 +47,8 @@ import {
   CoingeckoService,
   NFTPriceService,
   TokenService,
-  TopBalanceVariationsService,
-} from "./services";
+  BalanceVariationsService,
+} from "@/api/services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 
@@ -107,7 +107,7 @@ const votingPowerService = new VotingPowerService(votingPowerRepo);
 
 if (env.DUNE_API_URL && env.DUNE_API_KEY) {
   const duneClient = new DuneService(env.DUNE_API_URL, env.DUNE_API_KEY);
-  assets(app, duneClient);
+  totalAssets(app, duneClient);
 }
 
 const tokenPriceClient =
@@ -135,7 +135,7 @@ tokenDistribution(app, repo);
 governanceActivity(app, repo, tokenType);
 proposalsActivity(app, proposalsRepo, env.DAO_ID, daoClient);
 proposals(app, new ProposalsService(repo, daoClient), daoClient, blockTime);
-historicalOnchain(
+historicalBalances(
   app,
   env.DAO_ID,
   new HistoricalVotingPowerService(votingPowerRepo),
@@ -145,10 +145,7 @@ lastUpdate(app);
 delegationPercentage(app, delegationPercentageService);
 votingPower(app, votingPowerService);
 votingPowerVariations(app, votingPowerService);
-accountBalanceVariations(
-  app,
-  new TopBalanceVariationsService(accountBalanceRepo),
-);
+accountBalanceVariations(app, new BalanceVariationsService(accountBalanceRepo));
 docs(app);
 
 export default app;

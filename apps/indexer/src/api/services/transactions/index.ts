@@ -1,9 +1,9 @@
-import { TransactionsRepository } from "../../repositories/transactions.repository";
+import { TransactionsRepository } from "@/api/repositories";
 import {
   TransactionsRequest,
   TransactionsResponse,
   TransactionMapper,
-} from "../../mappers/transactions";
+} from "@/api/mappers/";
 import { containsAnyValue } from "../utils";
 
 export class TransactionsService {

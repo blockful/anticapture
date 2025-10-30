@@ -1,6 +1,4 @@
 export * from "./delegation-percentage";
-export * from "./historical-balances";
-export * from "./historical-voting-power";
 export * from "./voting-power";
 export * from "./coingecko";
 export * from "./dune";
@@ -9,6 +7,5 @@ export * from "./transactions";
 export * from "./proposals-activity";
 export * from "./last-update";
 export * from "./historical-balances";
-export * from "./nftPrice";
+export * from "./nft-price";
 export * from "./token";
-export * from "./historical-balances/top-balance-variations";

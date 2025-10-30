@@ -7,7 +7,7 @@ import {
   OrderByField,
   OrderDirection,
   VoteFilter,
-} from "@/api/repositories/proposals-activity.repository";
+} from "@/api/repositories/";
 import { DAOClient } from "@/interfaces/client";
 import { DBProposal } from "@/api/mappers";
 
@@ -66,7 +66,7 @@ export class ProposalsActivityService {
   constructor(
     private readonly repository: ProposalsActivityRepository,
     private readonly daoClient: DAOClient,
-  ) {}
+  ) { }
 
   async getProposalsActivity({
     address,

@@ -1,5 +1,5 @@
-import { ChartType } from "@/api/mappers/last-update";
-import { LastUpdateRepository } from "@/api/repositories/last-update.repository";
+import { ChartType } from "@/api/mappers/";
+import { LastUpdateRepository } from "@/api/repositories/";
 
 export class LastUpdateService {
   constructor(private readonly repository: LastUpdateRepository) {}
