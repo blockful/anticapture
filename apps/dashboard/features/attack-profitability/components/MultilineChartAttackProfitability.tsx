@@ -63,7 +63,7 @@ export const MultilineChartAttackProfitability = ({
 
   const { data: treasuryAssetNonDAOToken = [] } = useTreasuryAssetNonDaoToken(
     daoEnum,
-    TimeInterval.ONE_YEAR,
+    days,
   );
 
   const { data: daoTokenPriceHistoricalData } = useDaoTokenHistoricalData({
@@ -191,12 +191,13 @@ export const MultilineChartAttackProfitability = ({
   }, [
     filterData,
     chartConfig,
-    daoId,
     mocked,
     quorumValue,
     daoTokenPriceHistoricalData,
     treasuryAssetNonDAOToken,
     timeSeriesData,
+    daoConfig?.attackProfitability?.dynamicQuorum?.percentage,
+    daoConfig?.daoOverview.token,
   ]);
 
   const prevCsvRef = useRef<string>("");

@@ -35,6 +35,7 @@ export const HeaderDAOSidebar = () => {
                 page={PAGES_CONSTANTS.daoOverview.page}
                 icon={PieChart}
                 label={PAGES_CONSTANTS.daoOverview.title}
+                key={PAGES_CONSTANTS.daoOverview.title}
               />
             )}
             {daoConfig.attackProfitability && (
@@ -42,6 +43,7 @@ export const HeaderDAOSidebar = () => {
                 page={PAGES_CONSTANTS.attackProfitability.page}
                 icon={Crosshair2Icon}
                 label={PAGES_CONSTANTS.attackProfitability.title}
+                key={PAGES_CONSTANTS.attackProfitability.title}
               />
             )}
             {daoConfig.riskAnalysis && (
@@ -49,6 +51,7 @@ export const HeaderDAOSidebar = () => {
                 page={PAGES_CONSTANTS.riskAnalysis.page}
                 icon={Gauge}
                 label={PAGES_CONSTANTS.riskAnalysis.title}
+                key={PAGES_CONSTANTS.riskAnalysis.title}
               />
             )}
             {daoConfig.resilienceStages && (
@@ -56,6 +59,7 @@ export const HeaderDAOSidebar = () => {
                 page={PAGES_CONSTANTS.resilienceStages.page}
                 icon={BarChart}
                 label={PAGES_CONSTANTS.resilienceStages.title}
+                key={PAGES_CONSTANTS.resilienceStages.title}
               />
             )}
             {daoConfig.tokenDistribution && (
@@ -63,6 +67,7 @@ export const HeaderDAOSidebar = () => {
                 page={PAGES_CONSTANTS.tokenDistribution.page}
                 icon={ArrowRightLeft}
                 label={PAGES_CONSTANTS.tokenDistribution.title}
+                key={PAGES_CONSTANTS.tokenDistribution.title}
               />
             )}
             {daoConfig.dataTables && (
@@ -70,6 +75,7 @@ export const HeaderDAOSidebar = () => {
                 page={PAGES_CONSTANTS.holdersAndDelegates.page}
                 icon={UserCheck}
                 label={PAGES_CONSTANTS.holdersAndDelegates.title}
+                key={PAGES_CONSTANTS.holdersAndDelegates.title}
               />
             )}
           </div>
