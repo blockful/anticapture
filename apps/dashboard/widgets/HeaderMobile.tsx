@@ -159,7 +159,7 @@ export const HeaderMobile = ({
             {staticPages.map((item) => (
               <Link href={`/${item.anchorId}`} key={item.anchorId}>
                 <ButtonHeaderSidebar
-                  key={item.anchorId}
+                  key={item.anchorId + item.label}
                   anchorId={item.anchorId || ""}
                   icon={item.icon}
                   label={item.label}

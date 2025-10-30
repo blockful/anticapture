@@ -35,6 +35,7 @@ export const HeaderDAOSidebar = () => {
                 anchorId={SECTIONS_CONSTANTS.daoOverview.anchorId}
                 icon={PieChart}
                 label={SECTIONS_CONSTANTS.daoOverview.title}
+                key={SECTIONS_CONSTANTS.daoOverview.anchorId}
               />
             )}
             {daoConfig.attackProfitability && (
@@ -42,6 +43,7 @@ export const HeaderDAOSidebar = () => {
                 anchorId={SECTIONS_CONSTANTS.attackProfitability.anchorId}
                 icon={Crosshair2Icon}
                 label={SECTIONS_CONSTANTS.attackProfitability.title}
+                key={SECTIONS_CONSTANTS.attackProfitability.anchorId}
               />
             )}
             {daoConfig.riskAnalysis && (
@@ -49,6 +51,7 @@ export const HeaderDAOSidebar = () => {
                 anchorId={SECTIONS_CONSTANTS.riskAnalysis.anchorId}
                 icon={Gauge}
                 label={SECTIONS_CONSTANTS.riskAnalysis.title}
+                key={SECTIONS_CONSTANTS.riskAnalysis.anchorId}
               />
             )}
             {daoConfig.governanceImplementation && (
@@ -58,6 +61,7 @@ export const HeaderDAOSidebar = () => {
                 label={
                   SECTIONS_CONSTANTS.governanceImplementation.titleAbbreviation
                 }
+                key={SECTIONS_CONSTANTS.governanceImplementation.anchorId}
               />
             )}
             {daoConfig.resilienceStages && (
@@ -65,6 +69,7 @@ export const HeaderDAOSidebar = () => {
                 anchorId={SECTIONS_CONSTANTS.resilienceStages.anchorId}
                 icon={BarChart}
                 label={SECTIONS_CONSTANTS.resilienceStages.title}
+                key={SECTIONS_CONSTANTS.resilienceStages.anchorId}
               />
             )}
             {daoConfig.tokenDistribution && (
@@ -72,6 +77,7 @@ export const HeaderDAOSidebar = () => {
                 anchorId={SECTIONS_CONSTANTS.tokenDistribution.anchorId}
                 icon={ArrowRightLeft}
                 label={SECTIONS_CONSTANTS.tokenDistribution.title}
+                key={SECTIONS_CONSTANTS.tokenDistribution.anchorId}
               />
             )}
             {daoConfig.dataTables && (
@@ -79,6 +85,7 @@ export const HeaderDAOSidebar = () => {
                 anchorId={SECTIONS_CONSTANTS.holdersAndDelegates.anchorId}
                 icon={UserCheck}
                 label={SECTIONS_CONSTANTS.holdersAndDelegates.title}
+                key={SECTIONS_CONSTANTS.holdersAndDelegates.anchorId}
               />
             )}
           </div>
