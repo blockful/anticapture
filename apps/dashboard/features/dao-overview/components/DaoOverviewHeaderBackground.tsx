@@ -11,6 +11,8 @@ const PixelPattern = ({
       width="100%"
       height="100%"
       fill="none"
+      viewBox="0 0 970 100"
+      preserveAspectRatio="none"
     >
       <g clipPath="url(#a)">
         <path fill={bgColor} d="M0 0h972v100H0z" />

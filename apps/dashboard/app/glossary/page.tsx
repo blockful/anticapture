@@ -46,7 +46,7 @@ export default function GlossaryPage() {
         </div>
 
         <div className="flex min-h-screen w-full flex-col items-center">
-          <div className="xl4k:max-w-7xl w-full flex-1">
+          <div className="w-full flex-1">
             <TheSectionLayout
               title={PAGES_CONSTANTS.glossary.title}
               icon={<BookOpen className="section-layout-icon" />}

@@ -44,7 +44,7 @@ export default async function DaoLayout({ children, params }: DaoLayoutProps) {
           <HeaderMobile />
         </div>
         <div className="flex min-h-screen w-full flex-col items-center">
-          <div className="xl4k:max-w-7xl w-full flex-1">{children}</div>
+          <div className="w-full flex-1">{children}</div>
           <Footer />
         </div>
       </main>
