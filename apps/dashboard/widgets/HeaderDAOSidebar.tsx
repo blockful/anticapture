@@ -6,11 +6,11 @@ import {
   HeaderDAOSidebarDropdown,
   ButtonHeaderSidebar,
 } from "@/shared/components";
-import { BarChart, Gauge, Lightbulb, UserCheck } from "lucide-react";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
+import { BarChart, Gauge, UserCheck } from "lucide-react";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { ArrowRightLeft, PieChart } from "lucide-react";
 import { Crosshair2Icon } from "@radix-ui/react-icons";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 export const HeaderDAOSidebar = () => {
   const pathname = usePathname();
 
@@ -32,60 +32,50 @@ export const HeaderDAOSidebar = () => {
           <div className="flex flex-col gap-3 p-4">
             {daoConfig.daoOverview && (
               <ButtonHeaderSidebar
-                anchorId={SECTIONS_CONSTANTS.daoOverview.anchorId}
+                page={PAGES_CONSTANTS.daoOverview.page}
                 icon={PieChart}
-                label={SECTIONS_CONSTANTS.daoOverview.title}
-                key={SECTIONS_CONSTANTS.daoOverview.anchorId}
+                label={PAGES_CONSTANTS.daoOverview.title}
+                key={PAGES_CONSTANTS.daoOverview.title}
               />
             )}
             {daoConfig.attackProfitability && (
               <ButtonHeaderSidebar
-                anchorId={SECTIONS_CONSTANTS.attackProfitability.anchorId}
+                page={PAGES_CONSTANTS.attackProfitability.page}
                 icon={Crosshair2Icon}
-                label={SECTIONS_CONSTANTS.attackProfitability.title}
-                key={SECTIONS_CONSTANTS.attackProfitability.anchorId}
+                label={PAGES_CONSTANTS.attackProfitability.title}
+                key={PAGES_CONSTANTS.attackProfitability.title}
               />
             )}
             {daoConfig.riskAnalysis && (
               <ButtonHeaderSidebar
-                anchorId={SECTIONS_CONSTANTS.riskAnalysis.anchorId}
+                page={PAGES_CONSTANTS.riskAnalysis.page}
                 icon={Gauge}
-                label={SECTIONS_CONSTANTS.riskAnalysis.title}
-                key={SECTIONS_CONSTANTS.riskAnalysis.anchorId}
-              />
-            )}
-            {daoConfig.governanceImplementation && (
-              <ButtonHeaderSidebar
-                anchorId={SECTIONS_CONSTANTS.governanceImplementation.anchorId}
-                icon={Lightbulb}
-                label={
-                  SECTIONS_CONSTANTS.governanceImplementation.titleAbbreviation
-                }
-                key={SECTIONS_CONSTANTS.governanceImplementation.anchorId}
+                label={PAGES_CONSTANTS.riskAnalysis.title}
+                key={PAGES_CONSTANTS.riskAnalysis.title}
               />
             )}
             {daoConfig.resilienceStages && (
               <ButtonHeaderSidebar
-                anchorId={SECTIONS_CONSTANTS.resilienceStages.anchorId}
+                page={PAGES_CONSTANTS.resilienceStages.page}
                 icon={BarChart}
-                label={SECTIONS_CONSTANTS.resilienceStages.title}
-                key={SECTIONS_CONSTANTS.resilienceStages.anchorId}
+                label={PAGES_CONSTANTS.resilienceStages.title}
+                key={PAGES_CONSTANTS.resilienceStages.title}
               />
             )}
             {daoConfig.tokenDistribution && (
               <ButtonHeaderSidebar
-                anchorId={SECTIONS_CONSTANTS.tokenDistribution.anchorId}
+                page={PAGES_CONSTANTS.tokenDistribution.page}
                 icon={ArrowRightLeft}
-                label={SECTIONS_CONSTANTS.tokenDistribution.title}
-                key={SECTIONS_CONSTANTS.tokenDistribution.anchorId}
+                label={PAGES_CONSTANTS.tokenDistribution.title}
+                key={PAGES_CONSTANTS.tokenDistribution.title}
               />
             )}
             {daoConfig.dataTables && (
               <ButtonHeaderSidebar
-                anchorId={SECTIONS_CONSTANTS.holdersAndDelegates.anchorId}
+                page={PAGES_CONSTANTS.holdersAndDelegates.page}
                 icon={UserCheck}
-                label={SECTIONS_CONSTANTS.holdersAndDelegates.title}
-                key={SECTIONS_CONSTANTS.holdersAndDelegates.anchorId}
+                label={PAGES_CONSTANTS.holdersAndDelegates.title}
+                key={PAGES_CONSTANTS.holdersAndDelegates.title}
               />
             )}
           </div>

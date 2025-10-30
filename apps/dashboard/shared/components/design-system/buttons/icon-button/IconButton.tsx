@@ -8,7 +8,7 @@ import {
 import { variantStyles } from "@/shared/components/design-system/buttons/styles";
 
 interface IconButtonProps extends ButtonProps {
-  icon: ElementType;
+  icon?: ElementType;
   iconClassName?: string;
 }
 
@@ -56,9 +56,11 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
         {loading ? (
           <Spinner label={loadingText} />
         ) : (
-          <Icon
-            className={cn(iconSizeStyles[size], iconClassName, "shrink-0")}
-          />
+          Icon && (
+            <Icon
+              className={cn(iconSizeStyles[size], iconClassName, "shrink-0")}
+            />
+          )
         )}
       </button>
     );

@@ -1,69 +1,118 @@
 "use client";
 
 import { cn } from "@/shared/utils/";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
-import { useSectionObserver } from "@/shared/hooks";
-import { ButtonHTMLAttributes, useEffect } from "react";
-import { ElementType } from "react";
-import { Button } from "@/shared/components";
+import { useParams, usePathname } from "next/navigation";
+import Link from "next/link";
+import { ButtonHTMLAttributes, ElementType } from "react";
 
-interface ButtonHeaderSidebar extends ButtonHTMLAttributes<HTMLButtonElement> {
-  anchorId: string;
+interface ButtonHeaderSidebarProps
+  extends ButtonHTMLAttributes<HTMLButtonElement | HTMLAnchorElement> {
+  page: string;
   icon: ElementType;
   label: string;
   className?: string;
+  isGlobal?: boolean;
+  isAction?: boolean;
 }
+
 export const ButtonHeaderSidebar = ({
-  anchorId,
+  page,
   icon: Icon,
   label,
   className,
+  isGlobal = false,
+  isAction = false,
+  onClick,
   ...props
-}: ButtonHeaderSidebar) => {
-  const { activeSection, handleSectionClick } = useSectionObserver({
-    initialSection: SECTIONS_CONSTANTS.daoOverview.anchorId,
-  });
-  const isActive = (sectionId: string) => activeSection === sectionId;
+}: ButtonHeaderSidebarProps) => {
+  const params = useParams();
+  const pathname = usePathname();
 
-  useEffect(() => {
-    const sectionId = sessionStorage.getItem("scrollToSection");
-    if (sectionId) {
-      const el = document.getElementById(sectionId);
-      handleSectionClick(sectionId);
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth" });
-        sessionStorage.removeItem("scrollToSection");
+  const daoId = params?.daoId as string;
+  const currentPage = pathname?.split("/").filter(Boolean).pop();
+
+  // Determine if this button should be highlighted as active
+  const isActive = (() => {
+    if (page === "/") {
+      if (isGlobal) {
+        // Panel (global) is active only on home page
+        return pathname === "/";
+      } else {
+        // DAO Overview is active on /{daoId} pages
+        return pathname === `/${daoId}` || pathname === `/${daoId}/`;
       }
     }
-  }, [handleSectionClick]);
+    // Other pages are active when the last segment matches
+    return currentPage === page;
+  })();
 
-  return (
-    <Button
-      variant="ghost"
-      className={cn(
-        "group w-full justify-start px-2",
-        {
-          "cursor-default bg-white hover:bg-white": isActive(anchorId),
-        },
-        className,
-      )}
-      onClick={() => handleSectionClick(anchorId)}
-      {...props}
-    >
+  // Generate the target path (only for navigation buttons)
+  let targetPath: string = "#";
+
+  if (!isAction) {
+    if (isGlobal) {
+      // Global pages always use absolute path (e.g., /donate, /glossary)
+      targetPath = page ? `/${page}` : "/";
+    } else if (daoId) {
+      // DAO pages include daoId (e.g., /ens/risk-analysis)
+      targetPath = page === "/" ? `/${daoId}` : `/${daoId}/${page}`;
+    } else {
+      // No daoId: Panel goes to home, others go to "#"
+      targetPath = page === "/" ? "/" : "#";
+    }
+  }
+
+  const baseClassName = cn(
+    "group flex w-full cursor-pointer items-center gap-3 rounded-md border border-transparent p-2 text-sm font-medium",
+    {
+      "cursor-default bg-white": isActive,
+      "hover:border-light-dark hover:bg-surface-contrast": !isActive,
+    },
+    className,
+  );
+
+  const content = (
+    <>
       <Icon
         className={cn("size-4", {
-          "text-inverted": isActive(anchorId),
-          "text-secondary group-hover:text-primary": !isActive(anchorId),
+          "text-inverted": isActive,
+          "text-secondary group-hover:text-primary": !isActive,
         })}
       />
       <p
-        className={cn("", {
-          "text-inverted": isActive(anchorId),
-          "text-secondary group-hover:text-primary": !isActive(anchorId),
+        className={cn({
+          "text-inverted": isActive,
+          "text-secondary group-hover:text-primary": !isActive,
         })}
       >
         {label}
       </p>
-    </Button>
+    </>
+  );
+
+  // Render as button for action buttons (e.g., Alerts)
+  if (isAction) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className={baseClassName}
+        {...props}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  // Render as Link for navigation buttons
+  return (
+    <Link
+      href={targetPath}
+      onClick={onClick}
+      {...props}
+      className={baseClassName}
+    >
+      {content}
+    </Link>
   );
 };

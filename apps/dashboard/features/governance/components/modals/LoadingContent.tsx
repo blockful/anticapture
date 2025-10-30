@@ -17,8 +17,6 @@ export const LoadingComponent = ({
   votingPower,
   vote,
 }: LoadingComponentProps) => {
-  console.log(transactionhash);
-
   return (
     <div className="flex flex-col items-start justify-start gap-3">
       <div className="flex flex-col items-start justify-start gap-3 p-4">
