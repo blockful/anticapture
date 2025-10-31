@@ -98,7 +98,7 @@ export const useTransactionsTableData = ({
 
   return {
     data: adaptTransactionsToTableData(
-      (data?.transactions?.transactions as GraphTransaction[]) ?? [],
+      (data?.transactions?.items as GraphTransaction[]) ?? [],
     ),
     loading,
     error,
