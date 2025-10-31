@@ -61,12 +61,12 @@ export const VoteCard = ({
                     label={
                       isMobile
                         ? formatBlocksToUserReadable(
-                            daoData.votingDelay,
+                            Number(daoData.votingDelay),
                             daoConfig.daoOverview.blockTime,
                             true,
                           )
                         : formatBlocksToUserReadable(
-                            daoData.votingDelay,
+                            Number(daoData.votingDelay),
                             daoConfig.daoOverview.blockTime,
                             false,
                           )
