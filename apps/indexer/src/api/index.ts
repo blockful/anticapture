@@ -48,6 +48,7 @@ import {
   NFTPriceService,
   TokenService,
   TopBalanceVariationsService,
+  HistoricalBalancesService,
 } from "./services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
@@ -139,6 +140,7 @@ historicalOnchain(
   app,
   env.DAO_ID,
   new HistoricalVotingPowerService(votingPowerRepo),
+  new HistoricalBalancesService(accountBalanceRepo),
 );
 transactions(app, transactionsService);
 lastUpdate(app);
