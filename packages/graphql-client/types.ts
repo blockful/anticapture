@@ -2769,6 +2769,7 @@ export type GetProposalsActivityQuery = { __typename?: 'Query', proposalsActivit
 
 export type GetProposalsQueryVariables = Exact<{
   fromDate?: InputMaybe<Scalars['Float']['input']>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
 }>;
 
 

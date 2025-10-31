@@ -10,6 +10,7 @@ export const useProposals = (daoId: DaoIdEnum, fromDate: number) => {
     },
     variables: {
       fromDate,
+      limit: 1000,
     },
     fetchPolicy: "cache-and-network",
     notifyOnNetworkStatusChange: true,

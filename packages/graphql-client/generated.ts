@@ -2772,6 +2772,7 @@ export type GetProposalsActivityQuery = { __typename?: 'Query', proposalsActivit
 
 export type GetProposalsQueryVariables = Exact<{
   fromDate?: InputMaybe<Scalars['Float']['input']>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
 }>;
 
 
@@ -4597,8 +4598,8 @@ export type GetProposalsActivityLazyQueryHookResult = ReturnType<typeof useGetPr
 export type GetProposalsActivitySuspenseQueryHookResult = ReturnType<typeof useGetProposalsActivitySuspenseQuery>;
 export type GetProposalsActivityQueryResult = Apollo.QueryResult<GetProposalsActivityQuery, GetProposalsActivityQueryVariables>;
 export const GetProposalsDocument = gql`
-    query GetProposals($fromDate: Float) {
-  proposals(limit: 100, orderDirection: asc, fromDate: $fromDate) {
+    query GetProposals($fromDate: Float, $limit: PositiveInt = 365) {
+  proposals(limit: $limit, orderDirection: asc, fromDate: $fromDate) {
     items {
       id
       title
@@ -4621,6 +4622,7 @@ export const GetProposalsDocument = gql`
  * const { data, loading, error } = useGetProposalsQuery({
  *   variables: {
  *      fromDate: // value for 'fromDate'
+ *      limit: // value for 'limit'
  *   },
  * });
  */

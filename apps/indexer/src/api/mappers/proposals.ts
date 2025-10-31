@@ -14,7 +14,7 @@ export const ProposalsRequestSchema = z.object({
     .number()
     .int()
     .min(1, "Limit must be a positive integer")
-    .max(100, "Limit cannot exceed 100")
+    .max(1000, "Limit cannot exceed 1000")
     .default(10)
     .optional(),
   orderDirection: z.enum(["asc", "desc"]).default("desc").optional(),
