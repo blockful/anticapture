@@ -12,7 +12,7 @@ export default function DonatePage() {
           <HeaderMobile overlayClassName="top-[57px]" />
         </div>
         <div className="flex min-h-screen w-full flex-col items-center">
-          <div className="xl4k:max-w-7xl w-full flex-1">
+          <div className="w-full flex-1">
             <DonationSection />
           </div>
           <Footer />

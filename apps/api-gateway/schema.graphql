@@ -83,7 +83,7 @@ type Query {
   proposalsActivity(address: String!, fromDate: NonNegativeInt, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_proposalsActivity_orderBy = timestamp, orderDirection: queryInput_proposalsActivity_orderDirection = desc, userVoteFilter: queryInput_proposalsActivity_userVoteFilter): proposalsActivity_200_response
 
   """Returns a list of proposal"""
-  proposals(skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposals_orderDirection = desc, status: JSON, fromDate: Float): proposals_200_response
+  proposals(skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposals_orderDirection = desc, status: JSON, fromDate: Float, fromEndDate: Float): proposals_200_response
 
   """Returns a single proposal by its ID"""
   proposal(id: String!): proposal_200_response
@@ -124,6 +124,9 @@ type Query {
 
   """Get the last update time"""
   lastUpdate(chart: queryInput_lastUpdate_chart!): lastUpdate_200_response
+
+  """Get delegation percentage day buckets with forward-fill"""
+  delegationPercentageByDay(startDate: String, endDate: String, orderDirection: queryInput_delegationPercentageByDay_orderDirection = asc, limit: NonNegativeInt = 365, after: String, before: String): delegationPercentageByDay_200_response
 
   """Returns a list of voting power changes"""
   votingPowers(account: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_votingPowers_orderBy = timestamp, orderDirection: queryInput_votingPowers_orderDirection = desc, minDelta: String, maxDelta: String): votingPowers_200_response
@@ -1803,6 +1806,28 @@ enum queryInput_lastUpdate_chart {
   cost_comparison
   attack_profitability
   token_distribution
+}
+
+type delegationPercentageByDay_200_response {
+  items: [query_delegationPercentageByDay_items_items]!
+  totalCount: Float!
+  pageInfo: query_delegationPercentageByDay_pageInfo!
+}
+
+type query_delegationPercentageByDay_items_items {
+  date: String!
+  high: String!
+}
+
+type query_delegationPercentageByDay_pageInfo {
+  hasNextPage: Boolean!
+  endDate: String
+  startDate: String
+}
+
+enum queryInput_delegationPercentageByDay_orderDirection {
+  asc
+  desc
 }
 
 type votingPowers_200_response {

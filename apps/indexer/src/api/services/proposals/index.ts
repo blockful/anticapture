@@ -11,6 +11,7 @@ interface ProposalsRepository {
     orderDirection: "asc" | "desc",
     status: string[] | undefined,
     fromDate: number | undefined,
+    fromEndDate: number | undefined,
   ): Promise<DBProposal[]>;
   getProposalsCount(): Promise<number>;
   getProposalById(proposalId: string): Promise<DBProposal | undefined>;
@@ -84,6 +85,7 @@ export class ProposalsService {
     orderDirection = "desc",
     status,
     fromDate,
+    fromEndDate,
   }: ProposalsRequest): Promise<DBProposal[]> {
     // 1. Prepare status for database query
     const dbStatuses = status
@@ -97,6 +99,7 @@ export class ProposalsService {
       orderDirection,
       dbStatuses,
       fromDate,
+      fromEndDate,
     );
 
     // 3. Update each proposal with its real on-chain status
