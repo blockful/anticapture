@@ -118,6 +118,9 @@ export const OBOL: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.SECURITY_COUNCIL
           ].description,
+        requirements: [
+          "The Obol Security Council must upgrade its multisig to the highest standard, with at least 8 signers and a 75% approval threshold for transactions.",
+        ],
         riskExplanation:
           "As of now, Obol Collective functions with a small committee multi-sig (2/3) but intends to develop towards a full Security Council structure. Treasury is not controlled by governance, but malicious proposals may still pose a risk to the protocol and its users.",
       },
