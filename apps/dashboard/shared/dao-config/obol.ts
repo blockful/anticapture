@@ -7,6 +7,10 @@ import { mainnet } from "viem/chains";
 
 export const OBOL: DaoConfiguration = {
   name: "Obol Collective",
+  color: {
+    svgColor: "#4a90e2",
+    svgBgColor: "#e8f2ff",
+  },
   icon: ObolIcon,
   daoOverview: {
     token: "ERC20",

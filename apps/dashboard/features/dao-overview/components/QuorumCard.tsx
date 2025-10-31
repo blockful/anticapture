@@ -2,7 +2,6 @@
 
 import { BaseCardDaoInfo, SkeletonDaoInfoCards } from "@/shared/components";
 import { formatNumberUserReadable } from "@/shared/utils/";
-import { TextCardDaoInfoItem } from "@/features/dao-overview/components";
 import { Badge, Clock, Users } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useDaoData, useTokenData } from "@/shared/hooks";
@@ -173,13 +172,12 @@ export const QuorumCard = () => {
             tooltip:
               'Specifies whether quorum is calculated based on "For" votes, "For + Abstain" votes, or all votes cast',
             items: [
-              <TextCardDaoInfoItem
-                className="items-center"
+              <p
                 key="text-logic"
-                item={{
-                  label: logic,
-                }}
-              />,
+                className="text-primary flex items-center text-sm font-normal"
+              >
+                {logic}
+              </p>,
             ],
           },
           {
@@ -187,13 +185,12 @@ export const QuorumCard = () => {
             tooltip:
               "The minimum voting power required to submit an on-chain proposal.",
             items: [
-              <TextCardDaoInfoItem
+              <p
                 key="text-proposal-threshold"
-                item={{
-                  value: textCardDaoInfo,
-                  daoId: daoIdEnum,
-                }}
-              />,
+                className="text-primary flex text-sm font-normal"
+              >
+                {textCardDaoInfo}
+              </p>,
             ],
           },
         ],

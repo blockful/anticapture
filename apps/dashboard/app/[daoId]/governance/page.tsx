@@ -28,6 +28,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     [DaoIdEnum.GITCOIN]: `${baseUrl}/opengraph-images/gitcoin.png`,
     [DaoIdEnum.NOUNS]: `${baseUrl}/opengraph-images/nouns.png`,
     [DaoIdEnum.SCR]: `${baseUrl}/opengraph-images/scr.png`,
+    [DaoIdEnum.OBOL]: `${baseUrl}/opengraph-images/obol.png`,
   };
 
   const ogTitle = `Anticapture - ${daoId} DAO`;
