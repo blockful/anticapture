@@ -16,7 +16,7 @@ query Transactions(
     maxAmount: $maxAmount
     sortOrder: $sortOrder
   ) {
-    transactions {
+    items {
       from
       isCex
       isDex

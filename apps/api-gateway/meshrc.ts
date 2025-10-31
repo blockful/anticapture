@@ -80,6 +80,11 @@ export default processConfig(
         pageInfo: PageInfo!
       }
 
+      type DAOList {
+        items: [dao_200_response!]!
+        totalCount: Int!
+      }
+
       extend type Query {
         """
         Average delegation percentage across all supported DAOs by day.
@@ -120,21 +125,10 @@ export default processConfig(
           """
           limit: Int
         ): AverageDelegationPercentagePage!
-      }
-      type DAO {
-        id: String!
-        chainId: Int!
-        quorum: String!
-        proposalThreshold: String!
-        votingDelay: String!
-        votingPeriod: String!
-        timelockDelay: String!
-      }
-      type DAOList {
-        items: [DAO!]!
-        totalCount: Int!
-      }
-      extend type Query {
+
+        """
+        Get all DAOs
+        """
         daos: DAOList!
       }
     `,

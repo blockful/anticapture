@@ -179,6 +179,8 @@ type Query {
     """Maximum number of items to return. Default: 100"""
     limit: Int
   ): AverageDelegationPercentagePage!
+
+  """Get all DAOs"""
   daos: DAOList!
 }
 
@@ -1908,17 +1910,7 @@ type AverageDelegationPercentagePage {
   pageInfo: PageInfo!
 }
 
-type DAO {
-  id: String!
-  chainId: Int!
-  quorum: String!
-  proposalThreshold: String!
-  votingDelay: String!
-  votingPeriod: String!
-  timelockDelay: String!
-}
-
 type DAOList {
-  items: [DAO!]!
+  items: [dao_200_response!]!
   totalCount: Int!
 }
