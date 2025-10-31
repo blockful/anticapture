@@ -1,26 +1,22 @@
-export interface CachedDaoData {
-  id: string;
-  chainId: number;
-  quorum: string;
-  proposalThreshold: string;
-  votingDelay: string;
-  votingPeriod: string;
-  timelockDelay: string;
+import { DaoResponse } from "@/api/mappers";
+import { DaoDataCache } from "./dao-cache.interface";
+
+/**
+ * Internal cache data structure with timestamp for TTL management
+ */
+interface CachedDaoData extends DaoResponse {
   timestamp: number;
 }
 
 /**
- * In-memory cache for DAO governance parameters
+ * In-memory cache implementation for DAO governance parameters
  * Uses Dependency Injection pattern for easy testing and future Redis migration
  */
-export class DaoCache {
+export class DaoCache implements DaoDataCache {
   private cache = new Map<string, CachedDaoData>();
   private readonly CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
-  /**
-   * Retrieves cached DAO data if valid, null if expired or not found
-   */
-  get(daoId: string): CachedDaoData | null {
+  get(daoId: string): DaoResponse | null {
     const cached = this.cache.get(daoId);
     if (!cached) return null;
 
@@ -30,19 +26,20 @@ export class DaoCache {
       return null;
     }
 
-    return cached;
+    // Remove internal timestamp before returning
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { timestamp, ...daoResponse } = cached;
+    return daoResponse;
   }
 
-  /**
-   * Stores DAO data in cache with current timestamp
-   */
-  set(data: CachedDaoData): void {
-    this.cache.set(data.id, { ...data, timestamp: Date.now() });
+  set(daoId: string, data: DaoResponse): void {
+    const cachedData: CachedDaoData = {
+      ...data,
+      timestamp: Date.now(),
+    };
+    this.cache.set(daoId, cachedData);
   }
 
-  /**
-   * Clears all cached data
-   */
   clear(): void {
     this.cache.clear();
   }
