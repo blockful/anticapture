@@ -6,39 +6,10 @@ import {
   voteCast,
 } from "@/eventHandlers";
 import { DaoIdEnum } from "@/lib/enums";
-import { DAOClient } from "@/interfaces/client";
-import { dao } from "ponder:schema";
 import { ProposalStatus } from "@/lib/constants";
-import { env } from "@/env";
 
-export function SCRGovernorIndexer(client: DAOClient, blockTime: number) {
+export function SCRGovernorIndexer(blockTime: number) {
   const daoId = DaoIdEnum.SCR;
-
-  ponder.on(`SCRGovernor:setup`, async ({ context }) => {
-    const [
-      votingPeriod,
-      quorum,
-      votingDelay,
-      timelockDelay,
-      proposalThreshold,
-    ] = await Promise.all([
-      client.getVotingPeriod(),
-      client.getQuorum(null),
-      client.getVotingDelay(),
-      client.getTimelockDelay(),
-      client.getProposalThreshold(),
-    ]);
-
-    await context.db.insert(dao).values({
-      id: daoId,
-      votingPeriod,
-      quorum,
-      votingDelay,
-      timelockDelay,
-      proposalThreshold,
-      chainId: env.CHAIN_ID,
-    });
-  });
 
   ponder.on(`SCRGovernor:VoteCast`, async ({ event, context }) => {
     await voteCast(context, daoId, {
