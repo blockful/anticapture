@@ -121,6 +121,22 @@ export default processConfig(
           limit: Int
         ): AverageDelegationPercentagePage!
       }
+      type DAO {
+        id: String!
+        chainId: Int!
+        quorum: String!
+        proposalThreshold: String!
+        votingDelay: String!
+        votingPeriod: String!
+        timelockDelay: String!
+      }
+      type DAOList {
+        items: [DAO!]!
+        totalCount: Int!
+      }
+      extend type Query {
+        daos: DAOList!
+      }
     `,
     additionalResolvers: ["src/resolvers/index"],
   },
