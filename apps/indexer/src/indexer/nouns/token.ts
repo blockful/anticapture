@@ -23,7 +23,6 @@ import {
 export function NounsTokenIndexer(address: Address, decimals: number) {
   const daoId = DaoIdEnum.NOUNS;
   const timelock = TreasuryAddresses[daoId].timelock!;
-  const auction = TreasuryAddresses[daoId].auction!;
 
   ponder.on("NounsToken:setup", async ({ context }) => {
     await context.db.insert(token).values({
@@ -79,11 +78,12 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
         );
       }
 
-      const isFromAuction = isAddressEqual(event.args.from, auction);
+      const isToZeroAddress = isAddressEqual(event.args.to, zeroAddress);
 
-      if (isFromAuction) {
+      // Delegating to zero address is equivalent to self-delegation
+      if (isToZeroAddress) {
         await delegatedVotesChanged(context, daoId, {
-          delegate: event.args.to,
+          delegate: event.args.from,
           txHash: event.transaction.hash,
           newBalance: 1n,
           oldBalance: 0n,
@@ -91,7 +91,6 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
           logIndex: event.log.logIndex,
         });
       }
-
       if (!event.transaction.to) return;
 
       await handleTransaction(
