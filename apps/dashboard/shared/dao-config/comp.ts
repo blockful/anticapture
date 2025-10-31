@@ -190,7 +190,7 @@ export const COMP: DaoConfiguration = {
       },
       [GovernanceImplementationEnum.TIMELOCK_ADMIN]: {
         value: "Yes",
-        riskLevel: RiskLevel.MEDIUM,
+        riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.TIMELOCK_ADMIN
@@ -208,16 +208,13 @@ export const COMP: DaoConfiguration = {
       },
       [GovernanceImplementationEnum.VETO_STRATEGY]: {
         value: "Yes",
-        riskLevel: RiskLevel.MEDIUM,
+        riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VETO_STRATEGY
           ].description,
-        requirements: [
-          "Veto strategy should be fully controlled by the DAO in order to have a low risk level.",
-        ],
         riskExplanation:
-          "There is a veto strategy controlled by the Security Council multisig.",
+          "There is a veto strategy controlled by the Compound DAO.",
       },
       [GovernanceImplementationEnum.VOTE_MUTABILITY]: {
         value: "No",
