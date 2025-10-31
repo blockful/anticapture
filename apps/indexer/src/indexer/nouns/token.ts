@@ -15,7 +15,7 @@ import {
   TreasuryAddresses,
 } from "@/lib/constants";
 import {
-  // updateDelegatedSupply,
+  updateDelegatedSupply,
   updateSupplyMetric,
   updateTotalSupply,
 } from "@/eventHandlers/metrics";
@@ -23,6 +23,7 @@ import {
 export function NounsTokenIndexer(address: Address, decimals: number) {
   const daoId = DaoIdEnum.NOUNS;
   const timelock = TreasuryAddresses[daoId].timelock!;
+  const auction = TreasuryAddresses[daoId].auction!;
 
   ponder.on("NounsToken:setup", async ({ context }) => {
     await context.db.insert(token).values({
@@ -64,14 +65,6 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
       const isToTimelock = isAddressEqual(event.args.to, timelock);
 
       if (isFromTimelock || isToTimelock) {
-        //   await updateDelegatedSupply(
-        //     context,
-        //     daoId,
-        //     address,
-        //     isAddressEqual(event.args.from, timelock) ? -1n : 1n,
-        //     event.block.timestamp,
-        //   );
-
         await updateSupplyMetric(
           context,
           "treasury",
@@ -84,6 +77,19 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
           address,
           event.block.timestamp,
         );
+      }
+
+      const isFromAuction = isAddressEqual(event.args.from, auction);
+
+      if (isFromAuction) {
+        await delegatedVotesChanged(context, daoId, {
+          delegate: event.args.to,
+          txHash: event.transaction.hash,
+          newBalance: 1n,
+          oldBalance: 0n,
+          timestamp: event.block.timestamp,
+          logIndex: event.log.logIndex,
+        });
       }
 
       if (!event.transaction.to) return;
@@ -111,6 +117,14 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
       address,
       event.block.timestamp,
     );
+
+    await updateDelegatedSupply(
+      context,
+      daoId,
+      address,
+      1n,
+      event.block.timestamp,
+    );
   });
 
   ponder.on(`NounsToken:DelegateChanged`, async ({ event, context }) => {
@@ -132,7 +146,7 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
       event.transaction.from,
       event.transaction.to,
       event.block.timestamp,
-      [event.args.delegator, event.args.toDelegate], // Addresses to check
+      [event.args.delegator, event.args.toDelegate],
     );
   });
 
@@ -145,23 +159,6 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
       timestamp: event.block.timestamp,
       logIndex: event.log.logIndex,
     });
-
-    // if (isAddressEqual(event.args.delegate, timelock)) {
-    //   const value = event.args.newBalance - event.args.previousBalance;
-
-    //   await updateSupplyMetric(
-    //     context,
-    //     "treasury",
-    //     Object.values(TreasuryAddresses[daoId]),
-    //     MetricTypesEnum.TREASURY,
-    //     value < 0n ? timelock : zeroAddress,
-    //     value > 0n ? zeroAddress : timelock,
-    //     1n,
-    //     daoId,
-    //     address,
-    //     event.block.timestamp,
-    //   );
-    // }
 
     if (!event.transaction.to) return;
 
