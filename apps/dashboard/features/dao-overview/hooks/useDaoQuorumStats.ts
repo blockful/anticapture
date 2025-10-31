@@ -3,6 +3,7 @@ import { AverageTurnoutResponse } from "@/shared/hooks";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { useMemo } from "react";
 import { formatEther } from "viem";
+import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
 export const useDaoQuorumStats = ({
   daoData,
@@ -61,10 +62,18 @@ export const useDaoQuorumStats = ({
       ? `(${parseFloat(quorumMinPercentage).toFixed(1)}% ${daoConfig.daoOverview.rules?.quorumCalculation})`
       : "(N/A)";
 
+    const usesLiteralQuorumText =
+      daoConfig.daoOverview.rules?.quorumCalculation ===
+        QUORUM_CALCULATION_TYPES.OBOL ||
+      daoConfig.daoOverview.rules?.quorumCalculation ===
+        QUORUM_CALCULATION_TYPES.SCROLL;
+
     const quorumPercentage =
       daoConfig.daoOverview.rules?.quorumCalculation === "Del. Supply"
         ? quorumPercentageDelSupply
-        : quorumPercentageTotalSupply;
+        : usesLiteralQuorumText
+          ? `(${daoConfig.daoOverview.rules.quorumCalculation})`
+          : quorumPercentageTotalSupply;
 
     const quorumValueFormatted =
       daoConfig.daoOverview.rules?.quorumCalculation === "Del. Supply"
