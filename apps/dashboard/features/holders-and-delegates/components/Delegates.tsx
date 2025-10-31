@@ -16,7 +16,7 @@ import { Plus } from "lucide-react";
 import { ProgressCircle } from "@/features/holders-and-delegates/components/ProgressCircle";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useScreenSize } from "@/shared/hooks";
-import { Address } from "viem";
+import { Address, formatUnits } from "viem";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
@@ -69,9 +69,7 @@ export const Delegates = ({
   // State for managing sort order
   const [sortBy, setSortBy] = useState<string>("votingPower");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-  const {
-    daoOverview: { token },
-  } = daoConfig[daoId];
+  const { decimals } = daoConfig[daoId];
 
   // State for address filtering
   const [currentAddressFilter, setCurrentAddressFilter] = useState<string>("");
@@ -134,10 +132,9 @@ export const Delegates = ({
 
     return data.map((delegate): DelegateTableData => {
       const votingPowerBigInt = BigInt(delegate.votingPower || "0");
-      const votingPowerFormatted =
-        token === "ERC20"
-          ? Number(votingPowerBigInt / BigInt(10 ** 18))
-          : Number(votingPowerBigInt);
+      const votingPowerFormatted = Number(
+        formatUnits(votingPowerBigInt, decimals),
+      );
 
       const activity = delegate.proposalsActivity
         ? `${delegate.proposalsActivity.votedProposals}/${delegate.proposalsActivity.totalProposals}`
@@ -158,10 +155,9 @@ export const Delegates = ({
         const historicalVotingPowerBigInt = BigInt(
           delegate.historicalVotingPower,
         );
-        const historicalVotingPowerFormatted =
-          token === "ERC20"
-            ? Number(historicalVotingPowerBigInt / BigInt(10 ** 18))
-            : Number(historicalVotingPowerBigInt);
+        const historicalVotingPowerFormatted = Number(
+          formatUnits(historicalVotingPowerBigInt, decimals),
+        );
 
         const absoluteChange =
           votingPowerFormatted - historicalVotingPowerFormatted;
@@ -187,7 +183,7 @@ export const Delegates = ({
         delegators: delegate.delegationsCount,
       };
     });
-  }, [data, token]);
+  }, [data, decimals]);
 
   const delegateColumns: ColumnDef<DelegateTableData>[] = [
     {

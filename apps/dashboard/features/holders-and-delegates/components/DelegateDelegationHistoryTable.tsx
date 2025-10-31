@@ -32,9 +32,7 @@ export const DelegateDelegationHistoryTable = ({
   accountId,
   daoId,
 }: DelegateDelegationHistoryTableProps) => {
-  const {
-    daoOverview: { token },
-  } = daoConfig[daoId];
+  const { decimals } = daoConfig[daoId];
   const [sortBy, setSortBy] = useState<"timestamp" | "delta">("timestamp");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [filterVariables, setFilterVariables] =
@@ -235,15 +233,11 @@ export const DelegateDelegationHistoryTable = ({
         let amount = "0";
         if (item.delegation) {
           amount = formatNumberUserReadable(
-            token === "ERC20"
-              ? Number(formatUnits(BigInt(item.delegation.value), 18))
-              : Number(item.delegation.value),
+            Number(formatUnits(BigInt(item.delegation.value), decimals)),
           );
         } else if (item.transfer) {
           amount = formatNumberUserReadable(
-            token === "ERC20"
-              ? Number(formatUnits(BigInt(item.transfer.value), 18))
-              : Number(item.transfer.value),
+            Number(formatUnits(BigInt(item.transfer.value), decimals)),
           );
         } else {
           // Auto delegation protocols wont have neither delegation nor transfer, so we use the delta

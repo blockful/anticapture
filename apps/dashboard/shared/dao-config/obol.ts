@@ -7,6 +7,7 @@ import { mainnet } from "viem/chains";
 
 export const OBOL: DaoConfiguration = {
   name: "Obol Collective",
+  decimals: 18,
   color: {
     svgColor: "#4a90e2",
     svgBgColor: "#e8f2ff",
