@@ -28,6 +28,7 @@ export const ProposalsRequestSchema = z.object({
       return normalized.map((v) => v.toUpperCase());
     }),
   fromDate: z.coerce.number().optional(),
+  fromEndDate: z.coerce.number().optional(),
 });
 
 export type ProposalsRequest = z.infer<typeof ProposalsRequestSchema>;
