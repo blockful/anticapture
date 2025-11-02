@@ -41,6 +41,9 @@ type Query {
   tokenPrices(where: tokenPriceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPricePage!
   _meta: Meta
 
+  """Get total assets"""
+  totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
+
   """Get historical market data for a specific token"""
   historicalTokenData(skip: NonNegativeInt, limit: Float = 365): [query_historicalTokenData_items]
 
@@ -1400,6 +1403,19 @@ input tokenPriceFilter {
   timestamp_lte: BigInt
 }
 
+type query_totalAssets_items {
+  totalAssets: String!
+  date: String!
+}
+
+enum queryInput_totalAssets_days {
+  _7d
+  _30d
+  _90d
+  _180d
+  _365d
+}
+
 type query_historicalTokenData_items {
   price: String!
   timestamp: Float!
@@ -1743,10 +1759,11 @@ enum queryInput_historicalVotingPower_days {
 }
 
 type transactions_200_response {
-  transactions: [query_transactions_transactions_items]!
+  items: [query_transactions_items_items]!
+  totalCount: Float!
 }
 
-type query_transactions_transactions_items {
+type query_transactions_items_items {
   transactionHash: String!
   from: String
   to: String
@@ -1755,11 +1772,11 @@ type query_transactions_transactions_items {
   isLending: Boolean!
   isTotal: Boolean!
   timestamp: String!
-  transfers: [query_transactions_transactions_items_transfers_items]!
-  delegations: [query_transactions_transactions_items_delegations_items]!
+  transfers: [query_transactions_items_items_transfers_items]!
+  delegations: [query_transactions_items_items_delegations_items]!
 }
 
-type query_transactions_transactions_items_transfers_items {
+type query_transactions_items_items_transfers_items {
   transactionHash: String!
   daoId: String!
   tokenId: String!
@@ -1774,7 +1791,7 @@ type query_transactions_transactions_items_transfers_items {
   isTotal: Boolean!
 }
 
-type query_transactions_transactions_items_delegations_items {
+type query_transactions_items_items_delegations_items {
   transactionHash: String!
   daoId: String!
   delegateAccountId: String!
