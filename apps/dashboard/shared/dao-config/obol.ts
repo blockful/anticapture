@@ -16,7 +16,6 @@ export const OBOL: DaoConfiguration = {
   daoOverview: {
     token: "ERC20",
     chain: mainnet,
-    blockTime: 12,
     snapshot: "",
     contracts: {
       governor: "0xcB1622185A0c62A80494bEde05Ba95ef29Fbf85c",
