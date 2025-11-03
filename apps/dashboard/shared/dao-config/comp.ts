@@ -32,7 +32,11 @@ export const COMP: DaoConfiguration = {
   },
   attackProfitability: {
     riskLevel: RiskLevel.HIGH,
-    supportsLiquidTreasuryCall: true,
+    supportsLiquidTreasuryCall: false,
+    liquidTreasury: {
+      date: (Date.now() / 1000).toString(),
+      totalAssets: "150000000.00000000",
+    },
     attackCostBarChart: {
       // 41 addresses -> You can check all the addresses in this dashboard: https://encurtador.com.br/kDHn
       Timelock: "0x6d903f6003cca6255D85CcA4D3B5E5146dC33925",
