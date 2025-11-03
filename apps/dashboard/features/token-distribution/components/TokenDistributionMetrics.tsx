@@ -175,6 +175,16 @@ export const TokenDistributionMetrics = ({
                               100
                             : 0;
 
+                        // Cap variation magnitude to 999% while preserving sign
+                        const cappedVariationMagnitude = Math.min(
+                          Math.abs(variation),
+                          999,
+                        );
+                        const cappedVariation =
+                          variation < 0
+                            ? -cappedVariationMagnitude
+                            : cappedVariationMagnitude;
+
                         // Hide amount and variation for VOLUME category metrics
                         const isVolumeMetric = metric.category === "VOLUME";
 
@@ -214,7 +224,7 @@ export const TokenDistributionMetrics = ({
                             ? "" // No variation for volume metrics or when no data
                             : Math.abs(variation) < 0.1 // Consider values less than 0.1% as zero
                               ? "" // Empty string when variation is essentially zero
-                              : `${variation > 0 ? "+" : ""}${variation.toFixed(1)}`;
+                              : `${cappedVariation > 0 ? "+" : ""}${cappedVariation.toFixed(1)}`;
 
                         const handleClick = () => {
                           const metricKey = appliedMetrics.find(
