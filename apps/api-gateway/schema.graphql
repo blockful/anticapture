@@ -80,16 +80,8 @@ type Query {
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/proposals-activity`\nReturns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window\n"
   proposalsActivity(address: String!, fromDate: NonNegativeInt, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_proposalsActivity_orderBy = timestamp, orderDirection: queryInput_proposalsActivity_orderDirection = desc, userVoteFilter: queryInput_proposalsActivity_userVoteFilter): proposalsActivity_200_response
 
-<<<<<<< HEAD
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/proposals`\nReturns a list of proposal\n"
-  proposals(skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposals_orderDirection = desc, status: JSON, fromDate: Float): proposals_200_response
-||||||| b3d2c24f
-  """Returns a list of proposal"""
-  proposals(skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposals_orderDirection = desc, status: JSON, fromDate: Float): proposals_200_response
-=======
   """Returns a list of proposal"""
   proposals(skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposals_orderDirection = desc, status: JSON, fromDate: Float, fromEndDate: Float): proposals_200_response
->>>>>>> feat/index-compound
 
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/proposals/{args.id}`\nReturns a single proposal by its ID\n"
   proposal(id: String!): proposal_200_response
@@ -123,16 +115,8 @@ type Query {
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/last-update`\nGet the last update time\n"
   lastUpdate(chart: queryInput_lastUpdate_chart!): lastUpdate_200_response
 
-<<<<<<< HEAD
-  "\n>**Method**: `GET`\n>**Base URL**: `https://compound-api-dev.up.railway.app`\n>**Path**: `/delegation-percentage`\nGet delegation percentage day buckets with forward-fill\n"
-  delegationPercentageByDay(startDate: String, endDate: String, orderDirection: queryInput_delegationPercentageByDay_orderDirection = asc, limit: NonNegativeInt = 365, after: String, before: String): delegationPercentageByDay_200_response
-||||||| b3d2c24f
-  """Get delegation percentage day buckets with forward-fill"""
-  getDelegationPercentage(startDate: String, endDate: String, orderDirection: queryInput_getDelegationPercentage_orderDirection = asc, limit: NonNegativeInt = 365, after: String, before: String): getDelegationPercentage_200_response
-=======
   """Get delegation percentage day buckets with forward-fill"""
   delegationPercentageByDay(startDate: String, endDate: String, orderDirection: queryInput_delegationPercentageByDay_orderDirection = asc, limit: NonNegativeInt = 365, after: String, before: String): delegationPercentageByDay_200_response
->>>>>>> feat/index-compound
 
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/voting-powers`\nReturns a list of voting power changes\n"
   votingPowers(account: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_votingPowers_orderBy = timestamp, orderDirection: queryInput_votingPowers_orderDirection = desc, minDelta: String, maxDelta: String): votingPowers_200_response
@@ -143,19 +127,12 @@ type Query {
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/account-balance/variations`\nReturns a mapping of the biggest variations to account balances associated by account address\n"
   accountBalanceVariations(days: queryInput_accountBalanceVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalanceVariations_orderDirection = desc): accountBalanceVariations_200_response
 
-<<<<<<< HEAD
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/delegation-percentage`\nGet delegation percentage day buckets with forward-fill\n"
-  getDelegationPercentage(startDate: String, endDate: String, orderDirection: queryInput_getDelegationPercentage_orderDirection = asc, limit: NonNegativeInt = 365, after: String, before: String): getDelegationPercentage_200_response
-
-||||||| b3d2c24f
-=======
   """Get total assets"""
   totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
 
   """Get delegation percentage day buckets with forward-fill"""
   delegationPercentageByDay(startDate: String, endDate: String, orderDirection: queryInput_delegationPercentageByDay_orderDirection = asc, limit: NonNegativeInt = 365, after: String, before: String): delegationPercentageByDay_200_response
 
->>>>>>> feat/index-compound
   """
   Average delegation percentage across all supported DAOs by day.
   Returns the mean delegation percentage for each day in the specified range.
@@ -1752,16 +1729,8 @@ enum queryInput_historicalVotingPower_days {
 }
 
 type transactions_200_response {
-<<<<<<< HEAD
   items: [query_transactions_items_items]!
   totalCount: Float!
-  transactions: [query_transactions_transactions_items]!
-||||||| b3d2c24f
-  transactions: [query_transactions_transactions_items]!
-=======
-  items: [query_transactions_items_items]!
-  totalCount: Float!
->>>>>>> feat/index-compound
 }
 
 type query_transactions_items_items {
@@ -1965,74 +1934,6 @@ enum HTTPMethod {
   PATCH
 }
 
-<<<<<<< HEAD
-type query_transactions_transactions_items {
-  transactionHash: String!
-  from: String
-  to: String
-  isCex: Boolean!
-  isDex: Boolean!
-  isLending: Boolean!
-  isTotal: Boolean!
-  timestamp: String!
-  transfers: [query_transactions_transactions_items_transfers_items]!
-  delegations: [query_transactions_transactions_items_delegations_items]!
-}
-
-type query_transactions_transactions_items_transfers_items {
-  transactionHash: String!
-  daoId: String!
-  tokenId: String!
-  amount: String!
-  fromAccountId: String!
-  toAccountId: String!
-  timestamp: String!
-  logIndex: Float!
-  isCex: Boolean!
-  isDex: Boolean!
-  isLending: Boolean!
-  isTotal: Boolean!
-}
-
-type query_transactions_transactions_items_delegations_items {
-  transactionHash: String!
-  daoId: String!
-  delegateAccountId: String!
-  delegatorAccountId: String!
-  delegatedValue: String!
-  previousDelegate: String
-  timestamp: String!
-  logIndex: Float!
-  isCex: Boolean!
-  isDex: Boolean!
-  isLending: Boolean!
-  isTotal: Boolean!
-}
-
-type getDelegationPercentage_200_response {
-  items: [query_getDelegationPercentage_items_items]!
-  totalCount: Float!
-  pageInfo: query_getDelegationPercentage_pageInfo!
-}
-
-type query_getDelegationPercentage_items_items {
-  date: String!
-  high: String!
-}
-
-type query_getDelegationPercentage_pageInfo {
-  hasNextPage: Boolean!
-  endDate: String
-  startDate: String
-}
-
-enum queryInput_getDelegationPercentage_orderDirection {
-  asc
-  desc
-}
-
-||||||| b3d2c24f
-=======
 type query_totalAssets_items {
   totalAssets: String!
   date: String!
@@ -2068,7 +1969,6 @@ enum queryInput_delegationPercentageByDay_orderDirection {
   desc
 }
 
->>>>>>> feat/index-compound
 type AverageDelegationPercentageItem {
   date: String!
   high: String!
@@ -2084,3 +1984,4 @@ type AverageDelegationPercentagePage {
   totalCount: Int!
   pageInfo: PageInfo!
 }
+
