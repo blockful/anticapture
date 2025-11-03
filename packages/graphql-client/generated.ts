@@ -115,7 +115,7 @@ export type Query = {
   compareTreasury?: Maybe<CompareTreasury_200_Response>;
   /** Compare number of votes between time periods */
   compareVotes?: Maybe<CompareVotes_200_Response>;
-  /** Returns current governance parameters for this DAO (cached for 1 hour) */
+  /** Returns current governance parameters for this DAO */
   dao?: Maybe<Dao_200_Response>;
   daoMetricsDayBucket?: Maybe<DaoMetricsDayBucket>;
   daoMetricsDayBuckets: DaoMetricsDayBucketPage;

@@ -9,8 +9,7 @@ export function dao(app: Hono, service: DaoService) {
       operationId: "dao",
       path: "/dao",
       summary: "Get DAO governance parameters",
-      description:
-        "Returns current governance parameters for this DAO (cached for 1 hour)",
+      description: "Returns current governance parameters for this DAO",
       tags: ["governance"],
       responses: {
         200: {

@@ -142,7 +142,7 @@ type Query {
   accountBalanceVariations(days: queryInput_accountBalanceVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalanceVariations_orderDirection = desc): accountBalanceVariations_200_response
 
   """
-  Returns current governance parameters for this DAO (cached for 1 hour)
+  Returns current governance parameters for this DAO
   """
   dao: dao_200_response
 
