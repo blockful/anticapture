@@ -8,9 +8,8 @@ import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 export const COMP: DaoConfiguration = {
   name: "Compound",
   color: {
-    // FIXME
-    svgColor: "#000000",
-    svgBgColor: "#FFFFFF",
+    svgColor: "#070A0E",
+    svgBgColor: "#00D395",
   },
   icon: CompoundIcon,
   daoOverview: {

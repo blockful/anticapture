@@ -17,16 +17,8 @@ import { useLastUpdateLabel } from "@/features/attack-profitability/hooks/useLas
 import { ChartType } from "@/shared/hooks/useLastUpdate";
 import { getDateRange } from "@/shared/utils";
 import { Dropdown, Option } from "@/shared/components/dropdowns/Dropdown";
+import { InlineAlert } from "@/shared/components/alerts/InlineAlert";
 
-const Label = () => (
-  <div className="flex h-full flex-row gap-1 rounded-l-full px-2">
-    <p className="text-secondary flex items-center text-xs font-medium">
-      *Value for &apos;Total treasury&apos; is aproximated according to measures
-      taken on November 3rd, 2025, as indexing is not yet live for the $COMP
-      treasury
-    </p>
-  </div>
-);
 export const AttackProfitabilitySection = ({
   daoId,
   attackProfitability,
@@ -133,7 +125,10 @@ export const AttackProfitabilitySection = ({
           <AttackProfitabilityAccordion />
         </div>
         <div className="flex flex-col gap-2">
-          <Label />
+          <InlineAlert
+            variant="info"
+            label="The ‘Liquid Treasury’ value is an estimate derived from data recorded on 10/03/25."
+          />
         </div>
       </div>
     </div>
