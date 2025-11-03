@@ -4,6 +4,7 @@ import { EthereumIcon } from "@/shared/components/icons/EthereumIcon";
 import { DollarSign } from "lucide-react";
 import { DaoConfiguration, DaoOverviewConfig } from "@/shared/dao-config/types";
 import { OPMainnetIcon } from "@/shared/components/icons/OPMainnetIcon";
+import { cn } from "@/shared/utils";
 
 interface DaoOverviewHeaderProps {
   daoId: string;
@@ -68,7 +69,10 @@ export const DaoOverviewHeader = ({
         <DefaultLink
           href={`${baseLinkRoute}/${daoOverview.contracts?.token}`}
           openInNewTab
-          className="after:text-border-contrast text-xs uppercase after:content-['•']"
+          className={cn(
+            `after:text-border-contrast text-xs uppercase`,
+            daoConfig.forumLink && `after:content-['•']`,
+          )}
         >
           Token
         </DefaultLink>
