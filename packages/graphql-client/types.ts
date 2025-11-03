@@ -380,6 +380,7 @@ export type QueryProposalNonVotersArgs = {
 
 export type QueryProposalsArgs = {
   fromDate?: InputMaybe<Scalars['Float']['input']>;
+  fromEndDate?: InputMaybe<Scalars['Float']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   orderDirection?: InputMaybe<QueryInput_Proposals_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
@@ -1770,6 +1771,52 @@ export type Query_TotalAssets_Items = {
   totalAssets: Scalars['String']['output'];
 };
 
+export type Query_Transactions_Items_Items = {
+  __typename?: 'query_transactions_items_items';
+  delegations: Array<Maybe<Query_Transactions_Items_Items_Delegations_Items>>;
+  from?: Maybe<Scalars['String']['output']>;
+  isCex: Scalars['Boolean']['output'];
+  isDex: Scalars['Boolean']['output'];
+  isLending: Scalars['Boolean']['output'];
+  isTotal: Scalars['Boolean']['output'];
+  timestamp: Scalars['String']['output'];
+  to?: Maybe<Scalars['String']['output']>;
+  transactionHash: Scalars['String']['output'];
+  transfers: Array<Maybe<Query_Transactions_Items_Items_Transfers_Items>>;
+};
+
+export type Query_Transactions_Items_Items_Delegations_Items = {
+  __typename?: 'query_transactions_items_items_delegations_items';
+  daoId: Scalars['String']['output'];
+  delegateAccountId: Scalars['String']['output'];
+  delegatedValue: Scalars['String']['output'];
+  delegatorAccountId: Scalars['String']['output'];
+  isCex: Scalars['Boolean']['output'];
+  isDex: Scalars['Boolean']['output'];
+  isLending: Scalars['Boolean']['output'];
+  isTotal: Scalars['Boolean']['output'];
+  logIndex: Scalars['Float']['output'];
+  previousDelegate?: Maybe<Scalars['String']['output']>;
+  timestamp: Scalars['String']['output'];
+  transactionHash: Scalars['String']['output'];
+};
+
+export type Query_Transactions_Items_Items_Transfers_Items = {
+  __typename?: 'query_transactions_items_items_transfers_items';
+  amount: Scalars['String']['output'];
+  daoId: Scalars['String']['output'];
+  fromAccountId: Scalars['String']['output'];
+  isCex: Scalars['Boolean']['output'];
+  isDex: Scalars['Boolean']['output'];
+  isLending: Scalars['Boolean']['output'];
+  isTotal: Scalars['Boolean']['output'];
+  logIndex: Scalars['Float']['output'];
+  timestamp: Scalars['String']['output'];
+  toAccountId: Scalars['String']['output'];
+  tokenId: Scalars['String']['output'];
+  transactionHash: Scalars['String']['output'];
+};
+
 export type Query_Transactions_Transactions_Items = {
   __typename?: 'query_transactions_transactions_items';
   delegations: Array<Maybe<Query_Transactions_Transactions_Items_Delegations_Items>>;
@@ -2124,6 +2171,8 @@ export type TransactionPage = {
 
 export type Transactions_200_Response = {
   __typename?: 'transactions_200_response';
+  items: Array<Maybe<Query_Transactions_Items_Items>>;
+  totalCount: Scalars['Float']['output'];
   transactions: Array<Maybe<Query_Transactions_Transactions_Items>>;
 };
 
@@ -2810,7 +2859,7 @@ export type TransactionsQueryVariables = Exact<{
 }>;
 
 
-export type TransactionsQuery = { __typename?: 'Query', transactions?: { __typename?: 'transactions_200_response', transactions: Array<{ __typename?: 'query_transactions_transactions_items', from?: string | null, isCex: boolean, isDex: boolean, isLending: boolean, isTotal: boolean, timestamp: string, to?: string | null, transactionHash: string, delegations: Array<{ __typename?: 'query_transactions_transactions_items_delegations_items', daoId: string, delegateAccountId: string, delegatedValue: string, delegatorAccountId: string, isCex: boolean, isDex: boolean, isTotal: boolean, isLending: boolean, logIndex: number, previousDelegate?: string | null, timestamp: string, transactionHash: string } | null>, transfers: Array<{ __typename?: 'query_transactions_transactions_items_transfers_items', amount: string, daoId: string, fromAccountId: string, isCex: boolean, isDex: boolean, isLending: boolean, isTotal: boolean, logIndex: number, timestamp: string, toAccountId: string, tokenId: string, transactionHash: string } | null> } | null> } | null };
+export type TransactionsQuery = { __typename?: 'Query', transactions?: { __typename?: 'transactions_200_response', totalCount: number, items: Array<{ __typename?: 'query_transactions_items_items', from?: string | null, isCex: boolean, isDex: boolean, isLending: boolean, isTotal: boolean, timestamp: string, to?: string | null, transactionHash: string, delegations: Array<{ __typename?: 'query_transactions_items_items_delegations_items', daoId: string, delegateAccountId: string, delegatedValue: string, delegatorAccountId: string, isCex: boolean, isDex: boolean, isTotal: boolean, isLending: boolean, logIndex: number, previousDelegate?: string | null, timestamp: string, transactionHash: string } | null>, transfers: Array<{ __typename?: 'query_transactions_items_items_transfers_items', amount: string, daoId: string, fromAccountId: string, isCex: boolean, isDex: boolean, isLending: boolean, isTotal: boolean, logIndex: number, timestamp: string, toAccountId: string, tokenId: string, transactionHash: string } | null> } | null> } | null };
 
 export type VotingPowersQueryVariables = Exact<{
   account: Scalars['String']['input'];
