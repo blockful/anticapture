@@ -7,6 +7,11 @@ import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
 export const OP: DaoConfiguration = {
   name: "Optimism",
+  color: {
+    svgColor: "#ff0420",
+    svgBgColor: "#FFF2FB",
+  },
+  forumLink: "https://gov.optimism.io/",
   noStage: true,
   icon: OptimismIcon,
   daoOverview: {
