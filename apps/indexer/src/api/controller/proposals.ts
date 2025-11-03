@@ -41,7 +41,7 @@ export function proposals(
       },
     }),
     async (context) => {
-      const { skip, limit, orderDirection, status, fromDate } =
+      const { skip, limit, orderDirection, status, fromDate, fromEndDate } =
         context.req.valid("query");
 
       const result = await service.getProposals({
@@ -50,6 +50,7 @@ export function proposals(
         orderDirection,
         status,
         fromDate,
+        fromEndDate,
       });
 
       const quorums = await Promise.all(

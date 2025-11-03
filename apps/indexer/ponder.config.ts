@@ -6,6 +6,7 @@ import gitcoinConfig from "./config/gitcoin.config";
 import nounsConfig from "./config/nouns.config";
 import scrollConfig from "./config/scroll.config";
 import compoundConfig from "./config/compound.config";
+import obolConfig from "./config/obol.config";
 
 export default {
   chains: {
@@ -17,6 +18,7 @@ export default {
     ...nounsConfig.chains,
     ...scrollConfig.chains,
     ...compoundConfig.chains,
+    ...obolConfig.chains,
   },
   contracts: {
     ...arbitrumConfig.contracts,
@@ -27,5 +29,6 @@ export default {
     ...nounsConfig.contracts,
     ...scrollConfig.contracts,
     ...compoundConfig.contracts,
+    ...obolConfig.contracts,
   },
 };

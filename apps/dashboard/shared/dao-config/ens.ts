@@ -8,6 +8,11 @@ import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
 export const ENS: DaoConfiguration = {
   name: "ENS",
+  color: {
+    svgColor: "#0080bc",
+    svgBgColor: "#fff",
+  },
+  forumLink: "https://discuss.ens.domains/",
   icon: EnsIcon,
   daoOverview: {
     token: "ERC20",
@@ -245,4 +250,5 @@ export const ENS: DaoConfiguration = {
   resilienceStages: true,
   tokenDistribution: true,
   dataTables: true,
+  governancePage: true,
 };
