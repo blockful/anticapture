@@ -6,6 +6,7 @@ export enum DaoIdEnum {
   NOUNS = "NOUNS",
   SCR = "SCR",
   COMP = "COMP",
+  OBOL = "OBOL",
 }
 
 export interface DAO {

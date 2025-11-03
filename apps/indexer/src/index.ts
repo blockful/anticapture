@@ -31,6 +31,11 @@ import {
   GovernorIndexer as NounsGovernorIndexer,
   Client as NounsClient,
 } from "@/indexer/nouns";
+import {
+  ObolClient,
+  GovernorIndexer as ObolGovernorIndexer,
+  ObolTokenIndexer,
+} from "@/indexer/obol";
 
 const { DAO_ID: daoId, CHAIN_ID: chainId, RPC_URL: rpcUrl } = env;
 
@@ -103,6 +108,12 @@ switch (daoId) {
     const { token, governor } = CONTRACT_ADDRESSES[daoId];
     COMPTokenIndexer(token.address, token.decimals);
     COMPGovernorIndexer(new COMPClient(client, governor.address), blockTime);
+    break;
+  }
+  case DaoIdEnum.OBOL: {
+    const { token, governor } = CONTRACT_ADDRESSES[daoId];
+    ObolTokenIndexer(token.address, token.decimals);
+    ObolGovernorIndexer(new ObolClient(client, governor.address), blockTime);
     break;
   }
   default:

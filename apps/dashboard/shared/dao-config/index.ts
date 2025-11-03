@@ -4,6 +4,7 @@ import { UNI } from "@/shared/dao-config/uni";
 import { GTC } from "@/shared/dao-config/gtc";
 import { SCR } from "@/shared/dao-config/scr";
 import { COMP } from "@/shared/dao-config/comp";
+import { OBOL } from "@/shared/dao-config/obol";
 import { NOUNS } from "@/shared/dao-config/nouns";
 
 export default {
@@ -14,4 +15,5 @@ export default {
   SCR,
   NOUNS,
   COMP,
+  OBOL,
 } as const;
