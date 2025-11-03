@@ -7,6 +7,11 @@ import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
 export const COMP: DaoConfiguration = {
   name: "Compound",
+  color: {
+    // FIXME
+    svgColor: "#000000",
+    svgBgColor: "#FFFFFF",
+  },
   icon: CompoundIcon,
   daoOverview: {
     token: "ERC20",

@@ -36,6 +36,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     [DaoIdEnum.SCR]: `${baseUrl}/opengraph-images/scroll.png`,
     [DaoIdEnum.NOUNS]: `${baseUrl}/opengraph-images/nouns.png`,
     [DaoIdEnum.OBOL]: `${baseUrl}/opengraph-images/obol.png`,
+    [DaoIdEnum.COMP]: `${baseUrl}/opengraph-images/obol.png`, // FIXME
   };
 
   const imageUrl =
