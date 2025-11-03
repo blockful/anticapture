@@ -4,22 +4,22 @@ import {
   DaoMetricsDayBucket,
   MultilineChartDataSetPoint,
 } from "@/shared/dao-config/types";
+import { formatUnits } from "viem";
 
-import { formatEther } from "viem";
-import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
-
-// The idea of this function is to have a value per day of the governance token treasury * token price + assets
-// The problem is that the governance token treasury is not updated every day, so we need to normalize it
-// The solution is to use the last value available for the governance token treasury
-// TODO this can be abstracted to the same structure as normalizeDataset
+/**
+ * Calculates per-day total treasury value:
+ *   total = (gov token treasury * gov token price) + non-DAO asset treasuries
+ * Uses exact-day values only (no forward-fill). Any continuity should come from upstream.
+ */
 export function normalizeDatasetAllTreasury(
   tokenPrices: PriceEntry[],
   key: string,
-  tokenType: "ERC20" | "ERC721",
   assetTreasuries: TreasuryAssetNonDaoToken[],
   govTreasuries: DaoMetricsDayBucket[] = [],
+  decimals: number, // decimals for the governance token (used with formatUnits)
 ): MultilineChartDataSetPoint[] {
-  const assetTreasuriesMap = [...assetTreasuries].reduce(
+  // Map: timestamp (ms) -> non-DAO assets value
+  const assetTreasuriesMap = assetTreasuries.reduce(
     (acc, item) => ({
       ...acc,
       [new Date(item.date).getTime()]: Number(item.totalAssets),
@@ -27,28 +27,22 @@ export function normalizeDatasetAllTreasury(
     {} as Record<number, number>,
   );
 
+  // Map: timestamp (ms) -> governance treasury amount (normalized by decimals for ERC20)
   const govTreasuriesMap = govTreasuries.reduce(
-    (acc, item) => {
-      const value =
-        tokenType === "ERC721"
-          ? Number(item.close)
-          : Number(formatEther(BigInt(item.close)));
-
-      return {
-        ...acc,
-        [Number(item.date) * 1000]: value,
-        // Forward fill the value for the next day that will be overwritten
-        // by the next day's value if it exists
-        [(Number(item.date) + SECONDS_PER_DAY) * 1000]: value,
-      };
-    },
+    (acc, item) => ({
+      ...acc,
+      [Number(item.date) * 1000]: Number(
+        formatUnits(BigInt(item.close), decimals),
+      ),
+    }),
     {} as Record<number, number>,
   );
 
+  // Merge by tokenPrices' timestamps
   return tokenPrices.map(({ timestamp, price }) => ({
     date: timestamp,
     [key]:
-      Number(price) * govTreasuriesMap[timestamp] +
+      Number(price) * (govTreasuriesMap[timestamp] ?? 0) +
       (assetTreasuriesMap[timestamp] ?? 0),
   }));
 }

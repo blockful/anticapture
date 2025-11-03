@@ -68,7 +68,7 @@ export const MultilineChartAttackProfitability = ({
 
   const { data: daoTokenPriceHistoricalData } = useDaoTokenHistoricalData({
     daoId: daoEnum,
-    limit: Number(days.split("d")[0]),
+    limit: Number(days.split("d")[0]) - 7,
   });
 
   const { data: timeSeriesData } = useTimeSeriesData(
@@ -126,16 +126,16 @@ export const MultilineChartAttackProfitability = ({
       all: normalizeDatasetAllTreasury(
         daoTokenPriceHistoricalData,
         "all",
-        daoConfig?.daoOverview.token,
         treasuryAssetNonDAOToken,
         treasurySupplyChart,
+        daoConfig.decimals,
       ),
       quorum: daoConfig?.attackProfitability?.dynamicQuorum?.percentage
         ? normalizeDataset(
             daoTokenPriceHistoricalData,
             "quorum",
             1,
-            daoConfig?.daoOverview.token,
+            daoConfig.decimals,
             delegatedSupplyChart,
           ).map((datasetpoint) => ({
             ...datasetpoint,
@@ -148,7 +148,7 @@ export const MultilineChartAttackProfitability = ({
               daoTokenPriceHistoricalData,
               "quorum",
               quorumValue,
-              daoConfig?.daoOverview.token,
+              daoConfig.decimals,
             )
           : [],
       delegated: delegatedSupplyChart
@@ -156,7 +156,7 @@ export const MultilineChartAttackProfitability = ({
             daoTokenPriceHistoricalData,
             "delegated",
             1,
-            daoConfig?.daoOverview.token,
+            daoConfig.decimals,
             delegatedSupplyChart,
           )
         : [],
@@ -198,7 +198,7 @@ export const MultilineChartAttackProfitability = ({
     treasuryAssetNonDAOToken,
     timeSeriesData,
     daoConfig?.attackProfitability?.dynamicQuorum?.percentage,
-    daoConfig?.daoOverview.token,
+    daoConfig.decimals,
   ]);
 
   const prevCsvRef = useRef<string>("");
