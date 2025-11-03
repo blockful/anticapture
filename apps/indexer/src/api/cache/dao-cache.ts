@@ -14,7 +14,7 @@ interface CachedDaoData extends DaoResponse {
  */
 export class DaoCache implements DaoDataCache {
   private cache = new Map<string, CachedDaoData>();
-  private readonly CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+  private readonly CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 
   get(daoId: string): DaoResponse | null {
     const cached = this.cache.get(daoId);

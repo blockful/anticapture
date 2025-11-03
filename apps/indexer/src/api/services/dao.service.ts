@@ -11,7 +11,7 @@ export class DaoService {
 
   /**
    * Retrieves DAO governance parameters from cache or blockchain
-   * Caches results for 5 minutes
+   * Caches results
    */
   async getDaoParameters(): Promise<DaoResponse> {
     const daoId = this.client.getDaoId();
