@@ -227,9 +227,9 @@ export function governanceActivity(
               data.currentAverageTurnout?.split(".")[0] || "0",
             oldAverageTurnout: data.oldAverageTurnout?.split(".")[0] || "0",
             changeRate: data.oldAverageTurnout
-              ? 1 -
-                Number(data.currentAverageTurnout) /
-                  Number(data.oldAverageTurnout)
+              ? Number(data.currentAverageTurnout) /
+                  Number(data.oldAverageTurnout) -
+                1
               : 0,
           },
           200,
@@ -239,11 +239,12 @@ export function governanceActivity(
       return context.json(
         {
           ...data,
-          changeRate: data.oldAverageTurnout
-            ? 1 -
-              Number(formatEther(BigInt(data.currentAverageTurnout))) /
-                Number(formatEther(BigInt(data.oldAverageTurnout)))
-            : 0,
+          changeRate:
+            Number(formatEther(BigInt(data.oldAverageTurnout))) > 0
+              ? Number(formatEther(BigInt(data.currentAverageTurnout))) /
+                  Number(formatEther(BigInt(data.oldAverageTurnout))) -
+                1
+              : 0,
         },
         200,
       );
