@@ -78,19 +78,17 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
         );
       }
 
-      const isToZeroAddress = isAddressEqual(event.args.to, zeroAddress);
+      await delegateChanged(context, daoId, {
+        delegator: event.args.to,
+        delegate: event.args.to,
+        tokenId: event.log.address,
+        previousDelegate: event.args.from,
+        txHash: event.transaction.hash,
+        timestamp: event.block.timestamp,
+        logIndex: event.log.logIndex,
+        delegatorBalance: 1n,
+      });
 
-      // Delegating to zero address is equivalent to self-delegation
-      if (isToZeroAddress) {
-        await delegatedVotesChanged(context, daoId, {
-          delegate: event.args.from,
-          txHash: event.transaction.hash,
-          newBalance: 1n,
-          oldBalance: 0n,
-          timestamp: event.block.timestamp,
-          logIndex: event.log.logIndex,
-        });
-      }
       if (!event.transaction.to) return;
 
       await handleTransaction(
@@ -129,9 +127,9 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
   ponder.on(`NounsToken:DelegateChanged`, async ({ event, context }) => {
     await delegateChanged(context, daoId, {
       delegator: event.args.delegator,
-      toDelegate: event.args.toDelegate,
+      delegate: event.args.toDelegate,
       tokenId: event.log.address,
-      fromDelegate: event.args.fromDelegate,
+      previousDelegate: event.args.fromDelegate,
       txHash: event.transaction.hash,
       timestamp: event.block.timestamp,
       logIndex: event.log.logIndex,
