@@ -1,0 +1,14 @@
+query AccountBalanceVariations(
+  $days: queryInput_accountBalanceVariations_days!
+  $limit: PositiveInt = 10
+) {
+  accountBalanceVariations(days: $days, limit: $limit) {
+    items {
+      accountId
+      previousBalance
+      currentBalance
+      absoluteChange
+      percentageChange
+    }
+  }
+}

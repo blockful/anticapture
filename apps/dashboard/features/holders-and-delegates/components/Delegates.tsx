@@ -1,3 +1,5 @@
+"use client";
+
 import { useMemo, useState } from "react";
 import { ColumnDef, HeaderContext } from "@tanstack/react-table";
 
@@ -73,6 +75,7 @@ export const Delegates = ({
 
   // State for address filtering
   const [currentAddressFilter, setCurrentAddressFilter] = useState<string>("");
+  const pageLimit: number = 15;
 
   const handleAddressFilterApply = (address: string | undefined) => {
     setCurrentAddressFilter(address || "");
@@ -100,6 +103,7 @@ export const Delegates = ({
     daoId,
     days: timePeriod,
     address: currentAddressFilter,
+    limit: pageLimit,
   });
 
   const [selectedDelegate, setSelectedDelegate] = useState<string | null>(null);

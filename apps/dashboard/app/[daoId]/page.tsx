@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { BaseHeaderLayoutSidebar } from "@/shared/components/";
-
-import { DaoTemplate } from "@/templates";
-import { HeaderMobile } from "@/widgets/HeaderMobile";
-import { HeaderDAOSidebar, HeaderSidebar, StickyPageHeader } from "@/widgets";
-import { Footer } from "@/shared/components/design-system/footer/Footer";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { DaoOverviewSection } from "@/features/dao-overview";
 
 type Props = {
   params: Promise<{ daoId: string }>;
@@ -47,25 +43,18 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   };
 }
 
-export default function DaoPage() {
-  return (
-    <div className="bg-surface-background dark flex h-screen overflow-hidden">
-      <BaseHeaderLayoutSidebar>
-        <HeaderSidebar />
-        <HeaderDAOSidebar />
-      </BaseHeaderLayoutSidebar>
-      <main className="relative flex-1 overflow-auto lg:ml-[330px]">
-        <div className="sm:hidden">
-          <StickyPageHeader />
-          <HeaderMobile />
-        </div>
-        <div className="flex min-h-screen w-full flex-col items-center">
-          <div className="xl4k:max-w-7xl w-full flex-1">
-            <DaoTemplate />
-          </div>
-          <Footer />
-        </div>
-      </main>
-    </div>
-  );
+export default async function DaoPage({
+  params,
+}: {
+  params: Promise<{ daoId: string }>;
+}) {
+  const { daoId } = await params;
+  const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
+  const daoConstants = daoConfigByDaoId[daoIdEnum];
+
+  if (!daoConstants.daoOverview) {
+    return null;
+  }
+
+  return <DaoOverviewSection daoId={daoIdEnum} />;
 }

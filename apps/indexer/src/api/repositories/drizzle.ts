@@ -118,15 +118,15 @@ export class DrizzleRepository {
   async getAverageTurnoutCompare(days: DaysEnum) {
     const query = sql<AverageTurnoutCompareQueryResult>`
       WITH old_average_turnout AS (
-        SELECT AVG(${proposalsOnchain.forVotes} + ${proposalsOnchain.againstVotes} + ${proposalsOnchain.abstainVotes}) AS "oldAverageTurnout"
+        SELECT COALESCE(AVG(${proposalsOnchain.forVotes} + ${proposalsOnchain.againstVotes} + ${proposalsOnchain.abstainVotes}), 0) AS "oldAverageTurnout"
         FROM ${proposalsOnchain}
         WHERE ${proposalsOnchain.timestamp} <= ${this.now() - days}
         AND ${proposalsOnchain.status} != 'CANCELED'
       ),
       current_average_turnout AS (
-        SELECT AVG(${proposalsOnchain.forVotes} + ${proposalsOnchain.againstVotes} + ${proposalsOnchain.abstainVotes}) AS "currentAverageTurnout"
+        SELECT COALESCE(AVG(${proposalsOnchain.forVotes} + ${proposalsOnchain.againstVotes} + ${proposalsOnchain.abstainVotes}), 0) AS "currentAverageTurnout"
         FROM ${proposalsOnchain}
-        WHERE ${proposalsOnchain.status} != 'CANCELED'
+        WHERE ${proposalsOnchain.status} != 'CANCELED' AND ${proposalsOnchain.timestamp} >= ${this.now() - days}
       )
       SELECT * FROM current_average_turnout
       JOIN old_average_turnout ON 1=1;
@@ -141,6 +141,7 @@ export class DrizzleRepository {
     orderDirection: "asc" | "desc",
     status: string[] | undefined,
     fromDate: number | undefined,
+    fromEndDate: number | undefined,
   ): Promise<DBProposal[]> {
     const whereClauses: SQL<unknown>[] = [];
 
@@ -150,6 +151,12 @@ export class DrizzleRepository {
 
     if (fromDate) {
       whereClauses.push(gte(proposalsOnchain.timestamp, BigInt(fromDate)));
+    }
+
+    if (fromEndDate) {
+      whereClauses.push(
+        gte(proposalsOnchain.endTimestamp, BigInt(fromEndDate)),
+      );
     }
 
     return await db

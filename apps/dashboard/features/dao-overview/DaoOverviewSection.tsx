@@ -1,103 +1,82 @@
 "use client";
 
-import {
-  RiskAreaCardEnum,
-  RiskAreaCardWrapper,
-  TooltipInfo,
-} from "@/shared/components";
-import { FilePenLine, LinkIcon, Shield } from "lucide-react";
+import { Suspense } from "react";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { useInView } from "react-intersection-observer";
-import { useScreenSize } from "@/shared/hooks";
-import { useEffect } from "react";
-import { RiskLevel } from "@/shared/types/enums/RiskLevel";
-import { useDaoPageInteraction } from "@/shared/contexts/DaoPageInteractionContext";
-import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
+import { DaoAvatarIcon } from "@/shared/components/icons";
+import { DaoOverviewSkeleton } from "@/features/dao-overview/skeleton/DaoOverviewSkeleton";
+import { useDaoOverviewData } from "@/features/dao-overview/hooks/useDaoOverviewData";
+import { DaoOverviewHeader } from "@/features/dao-overview/components/DaoOverviewHeader";
+import { DaoOverviewHeaderMetrics } from "@/features/dao-overview/components/DaoOverviewHeaderMetrics";
+import { TokenDistributionChartCard } from "@/features/dao-overview/components/TokenDistributionChartCard";
+import { DaoOverviewHeaderBackground } from "@/features/dao-overview/components/DaoOverviewHeaderBackground";
+import { SecurityCouncilCard } from "@/features/dao-overview/components/SecurityCouncilCard";
+import { formatEther } from "viem";
+import { formatNumberUserReadable } from "@/shared/utils";
+import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
+import { StagesContainer } from "@/features/resilience-stages/components/StagesContainer";
 import {
   fieldsToArray,
-  filterFieldsByRiskLevel,
   getDaoStageFromFields,
 } from "@/shared/dao-config/utils";
-import {
-  DaoInfoDropdown,
-  QuorumCard,
-  SecurityCouncilCard,
-  StagesDaoOverview,
-  TimelockCard,
-  VoteCard,
-} from "@/features/dao-overview/components";
-import { DaoAvatarIcon } from "@/shared/components/icons";
-import { LightningBoltIcon, TokensIcon } from "@radix-ui/react-icons";
-import { RiskAreaEnum } from "@/shared/types/enums/RiskArea";
+import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
+import { RiskAreaCardEnum, RiskAreaCardWrapper } from "@/shared/components";
+import { AccountBalanceChartCard } from "@/features/dao-overview/components/AccountBalanceChartCard";
+import { VotingPowerChartCard } from "@/features/dao-overview/components/VotingPowerChartCard";
+import { MetricsCard } from "@/features/dao-overview/components/MetricsCard";
+import { AttackProfitabilityChartCard } from "@/features/dao-overview/components/AttackProfitabilityChartCard";
+import { useRouter } from "next/navigation";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
+  const router = useRouter();
   const daoConfig = daoConfigByDaoId[daoId];
   const daoOverview = daoConfig.daoOverview;
-  const { isMobile, isDesktop } = useScreenSize();
-  const { scrollToSection, setActiveRisk } = useDaoPageInteraction();
-  const { ref, inView } = useInView({
-    threshold: isMobile ? 0.3 : isDesktop ? 0.5 : 0.7,
+
+  const {
+    isLoading,
+    treasuryStats,
+    delegatedSupply,
+    activeSupply,
+    averageTurnout,
+    averageTurnoutPercentAboveQuorum,
+    topDelegatesToPass,
+    proposalThresholdValue,
+    proposalThresholdPercentage,
+    quorumValueFormatted,
+    quorumPercentage,
+    votingPeriod,
+    votingDelay,
+    timelockDelay,
+  } = useDaoOverviewData({ daoId, daoConfig });
+
+  const {
+    liquidTreasuryAllValue,
+    liquidTreasuryAllPercent,
+    liquidTreasuryNonDaoValue,
+    lastPrice,
+  } = treasuryStats;
+
+  if (isLoading) return <DaoOverviewSkeleton />;
+
+  const delegatedSupplyValue = formatNumberUserReadable(
+    Number(
+      formatEther(BigInt(delegatedSupply.data?.currentDelegatedSupply || 0)),
+    ),
+  );
+  const activeSupplyValue = formatNumberUserReadable(
+    Number(formatEther(BigInt(activeSupply.data?.activeSupply || 0))),
+  );
+  const averageTurnoutValue = formatNumberUserReadable(
+    Number(
+      formatEther(BigInt(averageTurnout.data?.currentAverageTurnout || 0)),
+    ),
+  );
+
+  const currentDaoStage = getDaoStageFromFields({
+    fields: fieldsToArray(daoConfig.governanceImplementation?.fields),
+    noStage: daoConfig.noStage,
   });
 
-  useEffect(() => {
-    if (inView) {
-      window.dispatchEvent(
-        new CustomEvent("sectionInView", {
-          detail: SECTIONS_CONSTANTS.daoOverview.anchorId,
-        }),
-      );
-    }
-  }, [inView]);
-
-  if (!daoOverview) {
-    return null;
-  }
-
-  const onChainOptions = [
-    ...(daoOverview.contracts?.governor
-      ? [
-          {
-            value: "Governor",
-            icon: <Shield className="text-link size-4" />,
-            href: `${daoOverview.chain.blockExplorers?.default.url}/address/${daoOverview.contracts?.governor}`,
-          },
-        ]
-      : []),
-    ...(daoOverview.contracts?.token
-      ? [
-          {
-            value: "Token",
-            icon: <TokensIcon className="text-link size-4" />,
-            href: `${daoOverview.chain.blockExplorers?.default.url}/address/${daoOverview.contracts?.token}`,
-          },
-        ]
-      : []),
-  ];
-
-  const offChainOptions = [
-    ...(daoOverview.snapshot
-      ? [
-          {
-            value: "Snapshot",
-            icon: <LightningBoltIcon className="text-link size-4" />,
-            href: daoOverview.snapshot,
-          },
-        ]
-      : []),
-    ...(daoOverview.contracts?.token
-      ? [
-          {
-            value: "Token",
-            icon: <TokensIcon className="text-link size-4" />,
-            href: `${daoOverview.chain.blockExplorers?.default.url}/address/${daoOverview.contracts?.token}`,
-          },
-        ]
-      : []),
-  ];
-
-  // Risk areas data using our utility function
   const daoRiskAreas = getDaoRiskAreas(daoId);
   const riskAreas = {
     title: "RISK AREAS",
@@ -107,213 +86,109 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     })),
   };
 
-  const handleRiskAreaClick = (riskName: RiskAreaEnum) => {
-    // First set the active risk
-    setActiveRisk(riskName);
-
-    // Then scroll to the risk analysis section
-    scrollToSection(SECTIONS_CONSTANTS.riskAnalysis.anchorId);
-  };
-
   return (
-    <div
-      id={SECTIONS_CONSTANTS.daoOverview.anchorId}
-      className="sm:bg-surface-default flex h-full w-full flex-col gap-4 px-4 py-8 sm:gap-0 sm:p-5"
-      ref={ref}
-    >
-      <div
-        id="dao-info-header"
-        className="hidden w-full flex-col sm:flex xl:flex-row"
-      >
-        {/* Desktop: DAO info and Risk Areas with vertical divider */}
-        <div className="flex w-full flex-col items-start gap-5 xl:w-1/2">
-          {/* DAO Info */}
-          <div className="flex gap-3.5">
-            <div className="flex">
-              <DaoAvatarIcon daoId={daoId} className="size-icon-xl" isRounded />
-            </div>
-            <div className="flex flex-col gap-2">
-              <div>
-                <h3 className="text-primary text-[24px] font-medium leading-8">
-                  {daoConfig.name}
-                </h3>
-              </div>
-              <div className="flex gap-2">
-                {onChainOptions.length > 0 && (
-                  <DaoInfoDropdown
-                    defaultValue={{
-                      value: "OnChain Gov",
-                      icon: <LinkIcon className="text-primary size-3.5" />,
-                      href: "",
-                    }}
-                    options={onChainOptions}
-                  />
-                )}
-                {offChainOptions.length > 0 && (
-                  <DaoInfoDropdown
-                    defaultValue={{
-                      value: "OffChain Gov",
-                      icon: <FilePenLine className="text-primary size-3.5" />,
-                      href: "",
-                    }}
-                    options={offChainOptions}
-                  />
-                )}
-              </div>
-            </div>
-          </div>
-          <div className="flex h-full w-full flex-col">
-            <div className="mb-2 flex h-full items-center gap-2">
-              <p className="text-primary font-mono text-xs font-medium tracking-wider">
-                RESILIENCE STAGE
-              </p>
-              <TooltipInfo text="Resilience Stages are based on governance mechanisms, considering the riskier exposed vector as criteria for progression." />
-            </div>
-            <StagesDaoOverview
-              currentStage={getDaoStageFromFields({
-                fields: fieldsToArray(
-                  daoConfig.governanceImplementation?.fields,
-                ),
-                noStage: daoConfig.noStage,
-              })}
-              highRiskItems={filterFieldsByRiskLevel(
-                fieldsToArray(daoConfig.governanceImplementation?.fields),
-                RiskLevel.HIGH,
-              )}
-              mediumRiskItems={filterFieldsByRiskLevel(
-                fieldsToArray(daoConfig.governanceImplementation?.fields),
-                RiskLevel.MEDIUM,
-              )}
-              lowRiskItems={filterFieldsByRiskLevel(
-                fieldsToArray(daoConfig.governanceImplementation?.fields),
-                RiskLevel.LOW,
-              )}
+    <Suspense fallback={<DaoOverviewSkeleton />}>
+      <div className="relative flex flex-col gap-5 md:gap-2">
+        <DaoOverviewHeaderBackground
+          color={daoConfig.color.svgColor}
+          bgColor={daoConfig.color.svgBgColor}
+        />
+        <div className="relative z-10 mx-5 flex flex-col gap-4 pt-5">
+          <div className="border-inverted md:bg-inverted flex flex-col gap-1 md:flex-row md:border-2">
+            <DaoAvatarIcon
+              daoId={daoId}
+              className="border-inverted size-32 flex-shrink-0 rounded-none border-2 md:border-none"
             />
+            <div className="flex flex-1 flex-col">
+              <DaoOverviewHeader
+                daoId={daoId}
+                daoConfig={daoConfig}
+                daoOverview={daoOverview}
+                lastPrice={lastPrice}
+              />
+              <DaoOverviewHeaderMetrics
+                daoId={daoId}
+                delegatedSupplyValue={delegatedSupplyValue}
+                activeSupplyValue={activeSupplyValue}
+                averageTurnoutValue={averageTurnoutValue}
+                averageTurnoutPercentAboveQuorum={
+                  averageTurnoutPercentAboveQuorum
+                }
+                liquidTreasuryAllValue={liquidTreasuryAllValue}
+                liquidTreasuryAllPercent={liquidTreasuryAllPercent}
+                liquidTreasuryNonDaoValue={liquidTreasuryNonDaoValue}
+                topDelegatesToPass={topDelegatesToPass}
+              />
+            </div>
           </div>
         </div>
-        {/* Vertical divider for desktop layout */}
-        <div className="mx-5 hidden border-l border-neutral-800 xl:block" />
-        <div className="flex w-full xl:w-1/2">
-          <div className="flex w-full flex-col gap-1">
-            <RiskAreaCardWrapper
-              title={riskAreas.title}
-              riskAreas={riskAreas.risks}
-              onRiskClick={(riskName) => {
-                handleRiskAreaClick(riskName);
-              }}
-              variant={RiskAreaCardEnum.DAO_OVERVIEW}
-              className="grid grid-cols-2 gap-1"
+        <div className="block md:hidden">
+          <DividerDefault isHorizontal />
+        </div>
+        <div className="border-x-1 border-inverted grid grid-cols-1 gap-5 md:mx-5 md:grid-cols-2 md:gap-2">
+          <div className="w-full px-5 md:px-0">
+            <StagesContainer
+              daoId={daoId}
+              currentDaoStage={currentDaoStage}
+              daoConfig={daoConfig}
+              context="overview"
             />
+          </div>
+          <div className="block md:hidden">
+            <DividerDefault isHorizontal />
+          </div>
+          <RiskAreaCardWrapper
+            title={riskAreas.title}
+            riskAreas={riskAreas.risks}
+            onRiskClick={() => {
+              router.push(`/${daoId.toLowerCase()}/risk-analysis`);
+            }}
+            variant={RiskAreaCardEnum.DAO_OVERVIEW}
+            className="grid h-full grid-cols-2 gap-2 px-5 md:px-0"
+          />
+          <div className="block md:hidden">
+            <DividerDefault isHorizontal />
           </div>
         </div>
-        <div className="flex w-full flex-1"></div>
-      </div>
-      <div id="dao-info-header" className="flex flex-col gap-3.5 sm:hidden">
-        <div className="flex items-center gap-3">
-          <DaoAvatarIcon daoId={daoId} className="size-icon-md" isRounded />
-          <h2 className="text-primary text-[24px] font-semibold leading-8">
-            {daoConfig.name}
-          </h2>
+        <div className="border-x-1 border-inverted mx-5">
+          <MetricsCard
+            proposalThresholdValue={proposalThresholdValue}
+            proposalThresholdPercentage={proposalThresholdPercentage}
+            quorumValueFormatted={quorumValueFormatted}
+            quorumPercentage={quorumPercentage}
+            daoId={daoId}
+            daoConfig={daoConfig}
+            votingPeriod={votingPeriod}
+            votingDelay={votingDelay}
+            timelockDelay={timelockDelay}
+          />
         </div>
-        <div className="flex flex-col gap-3">
-          <div className="flex gap-2">
-            <DaoInfoDropdown
-              defaultValue={{
-                value: "OnChain Gov",
-                icon: <LinkIcon className="text-primary size-3.5" />,
-                href: "",
-              }}
-              options={onChainOptions}
-            />
-            <DaoInfoDropdown
-              defaultValue={{
-                value: "OffChain Gov",
-                icon: <FilePenLine className="text-primary size-3.5" />,
-                href: "",
-              }}
-              options={offChainOptions}
-            />
+        <div className="block md:hidden">
+          <DividerDefault isHorizontal />
+        </div>
+        <SecurityCouncilCard daoOverview={daoOverview} />
+        <div className="border-x-1 border-inverted grid grid-cols-1 gap-5 md:mx-5 md:grid-cols-2 md:gap-2">
+          <AttackProfitabilityChartCard daoId={daoId} />
+          <div className="block md:hidden">
+            <DividerDefault isHorizontal />
           </div>
-          <div className="flex w-full flex-col">
-            <div className="mb-3 mt-3 flex h-full items-center gap-2">
-              <p className="text-primary font-mono text-xs font-medium tracking-wider">
-                RESILIENCE STAGE
-              </p>
-              <TooltipInfo text="Resilience Stages are based on governance mechanisms, considering the riskier exposed vector as criteria for progression." />
-            </div>
-            <StagesDaoOverview
-              currentStage={getDaoStageFromFields({
-                fields: fieldsToArray(
-                  daoConfig.governanceImplementation?.fields,
-                ),
-                noStage: daoConfig.noStage,
-              })}
-              highRiskItems={filterFieldsByRiskLevel(
-                fieldsToArray(daoConfig.governanceImplementation?.fields),
-                RiskLevel.HIGH,
-              )}
-              mediumRiskItems={filterFieldsByRiskLevel(
-                fieldsToArray(daoConfig.governanceImplementation?.fields),
-                RiskLevel.MEDIUM,
-              )}
-              lowRiskItems={filterFieldsByRiskLevel(
-                fieldsToArray(daoConfig.governanceImplementation?.fields),
-                RiskLevel.LOW,
-              )}
-            />
+          <TokenDistributionChartCard daoId={daoId} />
+        </div>
+        <div className="block md:hidden">
+          <DividerDefault isHorizontal />
+        </div>
+        <div className="border-x-1 border-inverted grid grid-cols-1 gap-5 md:mx-5 md:grid-cols-2 md:gap-2">
+          <div className="w-full">
+            <AccountBalanceChartCard daoId={daoId} />
           </div>
-          <div className="flex w-full flex-col">
-            <div className="mb-3 mt-3 flex h-full items-center gap-2">
-              <h3 className="text-primary font-mono text-xs font-medium tracking-wider">
-                RISK AREAS
-              </h3>
-            </div>
-            <RiskAreaCardWrapper
-              title={riskAreas.title}
-              riskAreas={riskAreas.risks}
-              onRiskClick={(riskName) => {
-                handleRiskAreaClick(riskName);
-              }}
-              variant={RiskAreaCardEnum.DAO_OVERVIEW}
-              className="grid grid-cols-2 gap-1"
-            />
+          <div className="block md:hidden">
+            <DividerDefault isHorizontal />
+          </div>
+          <div className="w-full">
+            <VotingPowerChartCard daoId={daoId} />
           </div>
         </div>
       </div>
-      {daoOverview.securityCouncil && (
-        <div className="w-full">
-          {/* Horizontal divider between main info/risk area and Security Council */}
-          <div>
-            <div className="border-light-dark my-5 w-full border-t" />
-          </div>
-          <div className="hidden h-full w-full sm:flex">
-            <SecurityCouncilCard daoOverview={daoOverview} />
-          </div>
-          <div className="mt-4 flex h-full w-full sm:hidden">
-            <SecurityCouncilCard daoOverview={daoOverview} />
-          </div>
-        </div>
-      )}
-      <div className="border-light-dark my-4 border sm:hidden" />
-      <div
-        id="dao-info-cards"
-        className="sm:border-light-dark flex w-full flex-col gap-2 p-0 sm:mt-5 sm:flex-row sm:border-t sm:pt-5"
-      >
-        <div className="sm:border-light-dark flex w-full sm:border-r">
-          <VoteCard daoOverview={daoOverview} />
-        </div>
-        <div className="border-light-dark w-full border-b sm:hidden" />
-
-        <div className="sm:border-light-dark flex w-full sm:border-r">
-          <TimelockCard daoOverview={daoOverview} />
-        </div>
-        <div className="border-light-dark w-full border-b sm:hidden" />
-
-        <div className="flex w-full">
-          <QuorumCard />
-        </div>
-        <div className="border-light-dark w-full border-b sm:hidden" />
-      </div>
-    </div>
+    </Suspense>
   );
 };

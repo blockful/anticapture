@@ -7,12 +7,16 @@ import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
 export const OP: DaoConfiguration = {
   name: "Optimism",
+  color: {
+    svgColor: "#ff0420",
+    svgBgColor: "#FFF2FB",
+  },
+  forumLink: "https://gov.optimism.io/",
   noStage: true,
   icon: OptimismIcon,
   daoOverview: {
     token: "ERC20",
     chain: optimism,
-    blockTime: 2,
     snapshot: "https://snapshot.box/#/s:citizenshouse.eth",
     contracts: {
       governor: "0xcDF27F107725988f2261Ce2256bDfCdE8B382B10",
