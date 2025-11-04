@@ -116,7 +116,6 @@ export class COMPClient<
     againstVotes: bigint;
     abstainVotes: bigint;
   }): bigint {
-    // https://www.tally.xyz/gov/compound
     return votes.forVotes;
   }
 }
