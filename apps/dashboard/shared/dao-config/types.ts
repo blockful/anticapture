@@ -127,6 +127,7 @@ export interface DaoAddresses {
     ClientIncentivesRewardsProxy: string;
   };
   [DaoIdEnum.SCR]: Record<string, never>;
+  [DaoIdEnum.OBOL]: Record<string, never>;
 }
 
 export interface AttackProfitabilityConfig {
