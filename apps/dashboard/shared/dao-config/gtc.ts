@@ -16,7 +16,6 @@ export const GTC: DaoConfiguration = {
   daoOverview: {
     token: "ERC20",
     chain: mainnet,
-    blockTime: 12,
     snapshot: "https://snapshot.box/#/s:gitcoindao.eth",
     contracts: {
       governor: "0x9D4C63565D5618310271bF3F3c01b2954C1D1639",
