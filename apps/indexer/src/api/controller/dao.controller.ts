@@ -20,10 +20,6 @@ export function dao(app: Hono, service: DaoService) {
             },
           },
         },
-        500: {
-          description:
-            "Internal server error - failed to fetch governance parameters",
-        },
       },
     }),
     async (context) => {
