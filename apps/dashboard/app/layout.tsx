@@ -1,5 +1,6 @@
 import "@/app/globals.css";
 import "tailwindcss";
+import { Toaster } from "react-hot-toast";
 
 import type { Metadata } from "next";
 import { GlobalProviders } from "@/shared/providers/GlobalProviders";
@@ -72,6 +73,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           {children}
           <CookieConsent />
         </GlobalProviders>
+        <Toaster position="bottom-left" reverseOrder={false} />
       </body>
     </html>
   );

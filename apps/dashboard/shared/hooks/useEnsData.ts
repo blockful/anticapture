@@ -31,7 +31,6 @@ export const fetchMultipleEnsData = async (
       const data = await fetchEnsData({ address });
       return { address, data };
     } catch (error) {
-      console.error(`Error fetching ENS data for ${address}:`, error);
       return { address, data: null };
     }
   });

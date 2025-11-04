@@ -28,6 +28,7 @@ export const ProposalsRequestSchema = z.object({
       return normalized.map((v) => v.toUpperCase());
     }),
   fromDate: z.coerce.number().optional(),
+  fromEndDate: z.coerce.number().optional(),
 });
 
 export type ProposalsRequest = z.infer<typeof ProposalsRequestSchema>;
@@ -37,7 +38,7 @@ export const ProposalResponseSchema = z.object({
   daoId: z.string(),
   txHash: z.string(),
   proposerAccountId: z.string(),
-  title: z.string().optional(),
+  title: z.string(),
   description: z.string(),
   startBlock: z.number(),
   endBlock: z.number(),
@@ -81,7 +82,9 @@ export const ProposalMapper = {
       daoId: p.daoId,
       txHash: p.txHash,
       proposerAccountId: p.proposerAccountId,
-      title: p.description.split("\n")[0]?.replace(/^#+\s*/, ""),
+      title:
+        p.description.split("\n")[0]?.replace(/^#+\s*/, "") ||
+        "Untitled Proposal",
       description: p.description,
       startBlock: p.startBlock,
       endBlock: p.endBlock,

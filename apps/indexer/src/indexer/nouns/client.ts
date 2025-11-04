@@ -30,6 +30,10 @@ export class Client<
     this.abi = GovernorAbi;
   }
 
+  getDaoId(): string {
+    return "NOUNS";
+  }
+
   async getQuorum(): Promise<bigint> {
     return 0n;
     // const blockNumber = await getBlockNumber(this.client);

@@ -58,30 +58,40 @@ export default processConfig(
         }),
     ],
     additionalTypeDefs:`
-      type AggregatedDelegatedSupplyItem {
+      type AverageDelegationPercentageItem {
         date: String!
         high: String!
       }
 
       type PageInfo {
         hasNextPage: Boolean!
+        hasPreviousPage: Boolean!
         endDate: String
         startDate: String
       }
 
-      type AggregatedDelegatedSupplyPage {
-        items: [AggregatedDelegatedSupplyItem!]!
+      type AverageDelegationPercentagePage {
+        items: [AverageDelegationPercentageItem!]!
+        """
+        The actual number of items returned in this response.
+        May be less than requested if DAOs don't have overlapping data for the full date range.
+        """
         totalCount: Int!
         pageInfo: PageInfo!
       }
 
+      type DAOList {
+        items: [dao_200_response!]!
+        totalCount: Int!
+      }
+
       extend type Query {
         """
-        Aggregated delegation supply across all supported DAOs.
+        Average delegation percentage across all supported DAOs by day.
         Returns the mean delegation percentage for each day in the specified range.
         Only includes dates where ALL DAOs have data available.
         """
-        aggregatedDelegatedSupply(
+        averageDelegationPercentageByDay(
           """
           Start date (Unix timestamp in seconds). Required.
           All DAOs will return data starting from this date.
@@ -114,7 +124,12 @@ export default processConfig(
           Maximum number of items to return. Default: 100
           """
           limit: Int
-        ): AggregatedDelegatedSupplyPage!
+        ): AverageDelegationPercentagePage!
+
+        """
+        Get all DAOs
+        """
+        daos: DAOList!
       }
     `,
     additionalResolvers: ["src/resolvers/index"],

@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components/FilterSort";
 import { ColumnDef } from "@tanstack/react-table";
@@ -6,7 +8,7 @@ import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
-import { formatUnits, parseEther } from "viem";
+import { Address, formatUnits, parseEther, zeroAddress } from "viem";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import { DaoIdEnum } from "@/shared/types/daos";
 import Link from "next/link";
@@ -19,6 +21,7 @@ import daoConfigByDaoId from "@/shared/dao-config";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
 import { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
+import daoConfig from "@/shared/dao-config";
 
 interface DelegateDelegationHistoryTableProps {
   accountId: string;
@@ -29,6 +32,9 @@ export const DelegateDelegationHistoryTable = ({
   accountId,
   daoId,
 }: DelegateDelegationHistoryTableProps) => {
+  const {
+    daoOverview: { token },
+  } = daoConfig[daoId];
   const [sortBy, setSortBy] = useState<"timestamp" | "delta">("timestamp");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [filterVariables, setFilterVariables] =
@@ -229,12 +235,19 @@ export const DelegateDelegationHistoryTable = ({
         let amount = "0";
         if (item.delegation) {
           amount = formatNumberUserReadable(
-            Number(formatUnits(BigInt(item.delegation.value), 18)),
+            token === "ERC20"
+              ? Number(formatUnits(BigInt(item.delegation.value), 18))
+              : Number(item.delegation.value),
           );
         } else if (item.transfer) {
           amount = formatNumberUserReadable(
-            Number(formatUnits(BigInt(item.transfer.value), 18)),
+            token === "ERC20"
+              ? Number(formatUnits(BigInt(item.transfer.value), 18))
+              : Number(item.transfer.value),
           );
+        } else {
+          // Auto delegation protocols wont have neither delegation nor transfer, so we use the delta
+          amount = item.delta;
         }
 
         return (
@@ -281,15 +294,17 @@ export const DelegateDelegationHistoryTable = ({
         }
 
         // Get delegator address based on the transaction type and direction
-        let delegatorAddress = "";
+        let delegatorAddress: Address = zeroAddress;
         if (item.delegation) {
-          delegatorAddress = item.delegation.from;
+          delegatorAddress = item.delegation.from as Address;
         } else if (item.transfer) {
           // For transfers: if delta is negative, fromAccountId is delegator
           // If delta is positive, toAccountId is delegator
           delegatorAddress = item.isGain
-            ? item.transfer.to
-            : item.transfer.from;
+            ? (item.transfer.to as Address)
+            : (item.transfer.from as Address);
+        } else if (Number(item.delta) < 0) {
+          delegatorAddress = accountId as Address;
         }
 
         return (
@@ -359,13 +374,15 @@ export const DelegateDelegationHistoryTable = ({
         }
 
         // Get delegate address based on the transaction type and direction
-        let delegateAddress = accountId;
+        let delegateAddress: Address = zeroAddress;
         if (item.delegation) {
           // For delegation, delegate is the one receiving the delegation
-          delegateAddress = item.delegation.to;
+          delegateAddress = item.delegation.to as Address;
         } else if (item.transfer) {
           // For transfers, the selected address should always be at the delegates column
-          delegateAddress = accountId;
+          delegateAddress = accountId as Address;
+        } else if (Number(item.delta) > 0) {
+          delegateAddress = accountId as Address;
         }
 
         return (

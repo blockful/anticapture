@@ -2,10 +2,8 @@
 
 import { cn } from "@/shared/utils/";
 import { AlertCircle, AlertTriangle } from "lucide-react";
-import { PointerIcon } from "@/shared/components/icons";
 import { Stage } from "@/shared/types/enums/Stage";
 import { ReactNode } from "react";
-import { InlineAlert } from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
 
 const STAGE_STYLES: Record<Stage, string> = {
   [Stage.ZERO]: "text-error",
@@ -34,54 +32,46 @@ const STAGE_DESCRIPTIONS: Record<Stage, string> = {
   [Stage.UNKNOWN]: "",
 };
 
-const STAGE_POINTER_POSITIONS: Record<Stage, string> = {
-  [Stage.ZERO]: "bottom-0 left-[25%] -translate-x-1/2 translate-y-px",
-  [Stage.ONE]: "bottom-0 left-[75%] -translate-x-1/2 translate-y-px",
-  [Stage.TWO]: "hidden",
-  [Stage.NONE]: "",
-  [Stage.UNKNOWN]: "",
-};
-
 interface StagesCardRequirementsProps {
   daoStage: Stage;
   issues?: Array<string>;
   className?: string;
+  context?: "overview" | "section";
 }
 
 export const StagesCardRequirements = ({
   daoStage,
   issues = ["Security Council", "Voting Period", "Proposal Threshold"],
   className = "",
+  context,
 }: StagesCardRequirementsProps) => {
   const stageStyles =
     STAGE_STYLES[daoStage] || "border-middle-dark text-secondary";
 
   return (
-    <div>
-      {daoStage !== Stage.NONE && (
-        <div className="relative w-full">
-          <PointerIcon
-            className={cn(
-              "absolute bottom-0 -translate-x-1/2 translate-y-px",
-              STAGE_POINTER_POSITIONS[daoStage],
-            )}
-          />
-        </div>
+    <div
+      className={cn(
+        "bg-surface-contrast rounded-md p-4",
+        stageStyles,
+        className,
       )}
-
+    >
       {daoStage === Stage.NONE ? (
-        <InlineAlert
-          text="The DAO doesn't qualify for the staging system because it doesn't use its governor and timelock structure to autonomously execute its proposals without depending on a centralized entity."
-          variant="info"
-        />
+        <p className="text-secondary text-sm font-normal">
+          The DAO doesn&apos;t qualify for the staging system because it
+          doesn&apos;t use its governor and timelock structure to autonomously
+          execute its proposals without depending on a centralized entity.
+        </p>
       ) : (
-        <div
-          className={`bg-surface-contrast rounded-md p-4 ${stageStyles} ${className}`}
-        >
-          <Title daoStage={daoStage}>{STAGE_TITLES[daoStage]}</Title>
-          <Description>{STAGE_DESCRIPTIONS[daoStage]}</Description>
+        <div>
+          {context !== "overview" && (
+            <Title daoStage={daoStage}>{STAGE_TITLES[daoStage]}</Title>
+          )}
+          <Description className={context !== "overview" ? "mb-4" : ""}>
+            {STAGE_DESCRIPTIONS[daoStage]}
+          </Description>
 
-          {issues.length > 0 && (
+          {issues.length > 0 && context !== "overview" && (
             <>
               <Title daoStage={daoStage}>Issues that need to be fixed</Title>
               <div className="flex flex-wrap gap-4">
@@ -118,9 +108,20 @@ const Title = ({
   );
 };
 
-const Description = ({ children }: { children: ReactNode }) => {
+const Description = ({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) => {
   return (
-    <p className="font-inter text-primary mb-4 text-sm font-normal leading-5">
+    <p
+      className={cn(
+        `font-inter text-primary text-[13px] text-sm font-normal leading-5`,
+        className,
+      )}
+    >
       {children}
     </p>
   );

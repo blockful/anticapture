@@ -48,6 +48,11 @@ export type GovernanceImplementationField = {
 // Base DAO information
 interface BaseInfo {
   name: string;
+  forumLink?: string;
+  color: {
+    svgColor: string;
+    svgBgColor: string;
+  };
   icon?: (props: DaoIconProps) => ReactNode;
   disableDaoPage?: boolean;
 }
@@ -55,7 +60,6 @@ interface BaseInfo {
 // Section configurations without data storage
 export interface DaoOverviewConfig {
   chain: Chain;
-  blockTime: number;
   contracts: {
     token: Address;
     governor?: Address;
@@ -122,6 +126,7 @@ export interface DaoAddresses {
     ClientIncentivesRewardsProxy: string;
   };
   [DaoIdEnum.SCR]: Record<string, never>;
+  [DaoIdEnum.OBOL]: Record<string, never>;
 }
 
 export interface AttackProfitabilityConfig {
@@ -145,4 +150,5 @@ export interface DaoConfiguration extends BaseInfo {
   dataTables?: boolean;
   riskAnalysis?: boolean;
   noStage?: boolean;
+  governancePage?: boolean;
 }

@@ -1,6 +1,5 @@
 import { ponder } from "ponder:registry";
-import { Address, zeroAddress } from "viem";
-import { dao, tokenPrice } from "ponder:schema";
+import { tokenPrice } from "ponder:schema";
 
 import {
   updateProposalStatus,
@@ -8,51 +7,11 @@ import {
   voteCast,
 } from "@/eventHandlers";
 import { DaoIdEnum } from "@/lib/enums";
-import { DAOClient } from "@/interfaces/client";
-import {
-  MetricTypesEnum,
-  ProposalStatus,
-  TreasuryAddresses,
-} from "@/lib/constants";
-import { env } from "@/env";
-import {
-  // updateDelegatedSupply,
-  updateSupplyMetric,
-} from "@/eventHandlers/metrics";
+import { ProposalStatus } from "@/lib/constants";
 import { truncateTimestampTime } from "@/eventHandlers/shared";
 
-export function GovernorIndexer(
-  client: DAOClient,
-  blockTime: number,
-  tokenAddress: Address,
-) {
+export function GovernorIndexer(blockTime: number) {
   const daoId = DaoIdEnum.NOUNS;
-
-  ponder.on(`NounsGovernor:setup`, async ({ context }) => {
-    const [
-      votingPeriod,
-      quorum,
-      votingDelay,
-      timelockDelay,
-      proposalThreshold,
-    ] = await Promise.all([
-      client.getVotingPeriod(),
-      client.getQuorum(null),
-      client.getVotingDelay(),
-      client.getTimelockDelay(),
-      client.getProposalThreshold(),
-    ]);
-
-    await context.db.insert(dao).values({
-      id: daoId,
-      votingPeriod,
-      quorum,
-      votingDelay,
-      timelockDelay,
-      proposalThreshold,
-      chainId: env.CHAIN_ID,
-    });
-  });
 
   ponder.on(`NounsGovernor:VoteCast`, async ({ event, context }) => {
     await voteCast(context, daoId, {
@@ -111,19 +70,5 @@ export function GovernorIndexer(
       price: event.args.amount,
       timestamp: truncateTimestampTime(event.block.timestamp),
     });
-
-    if (!event.transaction.to) return;
-    await updateSupplyMetric(
-      context,
-      "treasury",
-      Object.values(TreasuryAddresses[daoId]),
-      MetricTypesEnum.TREASURY,
-      zeroAddress,
-      event.transaction.to,
-      event.args.amount,
-      daoId,
-      tokenAddress,
-      event.block.timestamp,
-    );
   });
 }
