@@ -13,11 +13,15 @@ interface UseDaoDataResult {
 
 export const useDaoData = (daoId: DaoIdEnum): UseDaoDataResult => {
   const { data, loading, error, refetch } = useGetDaoDataQuery({
-    variables: { daoId },
+    context: {
+      headers: {
+        "anticapture-dao-id": daoId,
+      },
+    },
   });
 
   return {
-    data: data?.dao ? { ...data.dao, id: daoId } : null,
+    data: data?.dao || null,
     loading,
     error: error || null,
     refetch,
