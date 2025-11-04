@@ -30,6 +30,10 @@ export class ObolClient<
     this.abi = ObolGovernorAbi;
   }
 
+  getDaoId(): string {
+    return "OBOL";
+  }
+
   async getQuorum(): Promise<bigint> {
     const blockNumber = await getBlockNumber(this.client);
     const targetBlock = blockNumber - 10n;

@@ -24,7 +24,6 @@ import {
   GovernorIndexer as NounsGovernorIndexer,
 } from "@/indexer/nouns";
 import {
-  ObolClient,
   GovernorIndexer as ObolGovernorIndexer,
   ObolTokenIndexer,
 } from "@/indexer/obol";
@@ -82,9 +81,9 @@ switch (daoId) {
     break;
   }
   case DaoIdEnum.OBOL: {
-    const { token, governor } = CONTRACT_ADDRESSES[daoId];
+    const { token } = CONTRACT_ADDRESSES[daoId];
     ObolTokenIndexer(token.address, token.decimals);
-    ObolGovernorIndexer(new ObolClient(client, governor.address), blockTime);
+    ObolGovernorIndexer(blockTime);
     break;
   }
   default:
