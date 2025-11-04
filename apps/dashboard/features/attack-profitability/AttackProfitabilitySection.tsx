@@ -17,6 +17,7 @@ import { useLastUpdateLabel } from "@/features/attack-profitability/hooks/useLas
 import { ChartType } from "@/shared/hooks/useLastUpdate";
 import { getDateRange } from "@/shared/utils";
 import { Dropdown, Option } from "@/shared/components/dropdowns/Dropdown";
+import { InlineAlert } from "@/shared/components/alerts/InlineAlert";
 
 export const AttackProfitabilitySection = ({
   daoId,
@@ -123,6 +124,14 @@ export const AttackProfitabilitySection = ({
         <div className="flex flex-col gap-2">
           <AttackProfitabilityAccordion />
         </div>
+        {daoId === DaoIdEnum.COMP && (
+          <div className="flex flex-col gap-2">
+            <InlineAlert
+              variant="info"
+              label="The ‘Liquid Treasury’ value is an estimate derived from data recorded on 10/03/25."
+            />
+          </div>
+        )}
       </div>
     </div>
   );
