@@ -53,12 +53,12 @@ export const useDaoOverviewData = ({
   const totalSupply = tokenData.data?.totalSupply;
 
   const proposalThresholdPercentage =
-    daoData?.data?.proposalThreshold &&
-    totalSupply !== undefined &&
-    formatEther(
-      (BigInt(daoData.data.proposalThreshold) * BigInt(1e20)) /
-        BigInt(totalSupply ?? ("1" as string)),
-    );
+    daoData?.data?.proposalThreshold && totalSupply !== undefined
+      ? formatEther(
+          (BigInt(daoData.data.proposalThreshold) * BigInt(1e20)) /
+            BigInt(totalSupply ?? ("1" as string)),
+        )
+      : null;
 
   const proposalThresholdValue = daoData?.data?.proposalThreshold
     ? `${formatNumberUserReadable(Number(daoData.data.proposalThreshold) / 10 ** 18)}`
@@ -88,9 +88,15 @@ export const useDaoOverviewData = ({
     quorumValue,
   });
 
-  const votingPeriod = daoData?.data?.votingPeriod;
-  const votingDelay = daoData?.data?.votingDelay;
-  const timelockDelay = daoData?.data?.timelockDelay;
+  const votingPeriod = daoData?.data?.votingPeriod
+    ? Number(daoData.data.votingPeriod)
+    : 0;
+  const votingDelay = daoData?.data?.votingDelay
+    ? Number(daoData.data.votingDelay)
+    : 0;
+  const timelockDelay = daoData?.data?.timelockDelay
+    ? Number(daoData.data.timelockDelay)
+    : 0;
 
   const isLoading =
     daoData.loading ||

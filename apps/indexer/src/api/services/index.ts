@@ -12,3 +12,4 @@ export * from "./historical-balances";
 export * from "./nftPrice";
 export * from "./token";
 export * from "./historical-balances/top-balance-variations";
+export * from "./dao.service";
