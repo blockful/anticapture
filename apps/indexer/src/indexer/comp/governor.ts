@@ -1,5 +1,4 @@
 import { ponder } from "ponder:registry";
-import { dao } from "ponder:schema";
 
 import {
   proposalCreated,
@@ -7,38 +6,10 @@ import {
   voteCast,
 } from "@/eventHandlers";
 import { DaoIdEnum } from "@/lib/enums";
-import { DAOClient } from "@/interfaces/client";
 import { ProposalStatus } from "@/lib/constants";
-import { env } from "@/env";
 
-export function COMPGovernorIndexer(client: DAOClient, blockTime: number) {
+export function COMPGovernorIndexer(blockTime: number) {
   const daoId = DaoIdEnum.COMP;
-
-  ponder.on("COMPGovernor:setup", async ({ context }) => {
-    const [
-      votingPeriod,
-      quorum,
-      votingDelay,
-      timelockDelay,
-      proposalThreshold,
-    ] = await Promise.all([
-      client.getVotingPeriod(),
-      client.getQuorum(null),
-      client.getVotingDelay(),
-      client.getTimelockDelay(),
-      client.getProposalThreshold(),
-    ]);
-
-    await context.db.insert(dao).values({
-      id: daoId,
-      votingPeriod,
-      quorum,
-      votingDelay,
-      timelockDelay,
-      proposalThreshold,
-      chainId: env.CHAIN_ID,
-    });
-  });
 
   ponder.on("COMPGovernor:VoteCast", async ({ event, context }) => {
     await voteCast(context, daoId, {

@@ -16,9 +16,12 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   BigInt: { input: any; output: any; }
+  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
+  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
+  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
 };
 
@@ -36,6 +39,12 @@ export type AverageDelegationPercentagePage = {
    * The actual number of items returned in this response.
    * May be less than requested if DAOs don't have overlapping data for the full date range.
    */
+  totalCount: Scalars['Int']['output'];
+};
+
+export type DaoList = {
+  __typename?: 'DAOList';
+  items: Array<Dao_200_Response>;
   totalCount: Scalars['Int']['output'];
 };
 
@@ -106,10 +115,12 @@ export type Query = {
   compareTreasury?: Maybe<CompareTreasury_200_Response>;
   /** Compare number of votes between time periods */
   compareVotes?: Maybe<CompareVotes_200_Response>;
-  dao?: Maybe<Dao>;
+  /** Returns current governance parameters for this DAO */
+  dao?: Maybe<Dao_200_Response>;
   daoMetricsDayBucket?: Maybe<DaoMetricsDayBucket>;
   daoMetricsDayBuckets: DaoMetricsDayBucketPage;
-  daos: DaoPage;
+  /** Get all DAOs */
+  daos: DaoList;
   delegation?: Maybe<Delegation>;
   /** Get delegation percentage day buckets with forward-fill */
   delegationPercentageByDay?: Maybe<DelegationPercentageByDay_200_Response>;
@@ -284,11 +295,6 @@ export type QueryCompareVotesArgs = {
 };
 
 
-export type QueryDaoArgs = {
-  id: Scalars['String']['input'];
-};
-
-
 export type QueryDaoMetricsDayBucketArgs = {
   date: Scalars['BigInt']['input'];
   metricType: Scalars['String']['input'];
@@ -303,16 +309,6 @@ export type QueryDaoMetricsDayBucketsArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   where?: InputMaybe<DaoMetricsDayBucketFilter>;
-};
-
-
-export type QueryDaosArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  where?: InputMaybe<DaoFilter>;
 };
 
 
@@ -902,80 +898,6 @@ export type CompareVotes_200_Response = {
   oldVotes: Scalars['Float']['output'];
 };
 
-export type Dao = {
-  __typename?: 'dao';
-  chainId: Scalars['Int']['output'];
-  id: Scalars['String']['output'];
-  proposalThreshold: Scalars['BigInt']['output'];
-  quorum: Scalars['BigInt']['output'];
-  timelockDelay: Scalars['BigInt']['output'];
-  votingDelay: Scalars['BigInt']['output'];
-  votingPeriod: Scalars['BigInt']['output'];
-};
-
-export type DaoFilter = {
-  AND?: InputMaybe<Array<InputMaybe<DaoFilter>>>;
-  OR?: InputMaybe<Array<InputMaybe<DaoFilter>>>;
-  chainId?: InputMaybe<Scalars['Int']['input']>;
-  chainId_gt?: InputMaybe<Scalars['Int']['input']>;
-  chainId_gte?: InputMaybe<Scalars['Int']['input']>;
-  chainId_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
-  chainId_lt?: InputMaybe<Scalars['Int']['input']>;
-  chainId_lte?: InputMaybe<Scalars['Int']['input']>;
-  chainId_not?: InputMaybe<Scalars['Int']['input']>;
-  chainId_not_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  id_contains?: InputMaybe<Scalars['String']['input']>;
-  id_ends_with?: InputMaybe<Scalars['String']['input']>;
-  id_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  id_not?: InputMaybe<Scalars['String']['input']>;
-  id_not_contains?: InputMaybe<Scalars['String']['input']>;
-  id_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  id_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  id_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  id_starts_with?: InputMaybe<Scalars['String']['input']>;
-  proposalThreshold?: InputMaybe<Scalars['BigInt']['input']>;
-  proposalThreshold_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  proposalThreshold_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  proposalThreshold_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  proposalThreshold_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  proposalThreshold_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  proposalThreshold_not?: InputMaybe<Scalars['BigInt']['input']>;
-  proposalThreshold_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  quorum?: InputMaybe<Scalars['BigInt']['input']>;
-  quorum_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  quorum_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  quorum_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  quorum_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  quorum_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  quorum_not?: InputMaybe<Scalars['BigInt']['input']>;
-  quorum_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  timelockDelay?: InputMaybe<Scalars['BigInt']['input']>;
-  timelockDelay_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  timelockDelay_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  timelockDelay_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  timelockDelay_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  timelockDelay_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  timelockDelay_not?: InputMaybe<Scalars['BigInt']['input']>;
-  timelockDelay_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  votingDelay?: InputMaybe<Scalars['BigInt']['input']>;
-  votingDelay_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  votingDelay_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  votingDelay_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  votingDelay_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  votingDelay_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  votingDelay_not?: InputMaybe<Scalars['BigInt']['input']>;
-  votingDelay_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  votingPeriod?: InputMaybe<Scalars['BigInt']['input']>;
-  votingPeriod_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  votingPeriod_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  votingPeriod_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  votingPeriod_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  votingPeriod_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  votingPeriod_not?: InputMaybe<Scalars['BigInt']['input']>;
-  votingPeriod_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-};
-
 export type DaoMetricsDayBucket = {
   __typename?: 'daoMetricsDayBucket';
   average: Scalars['BigInt']['output'];
@@ -1100,11 +1022,15 @@ export type DaoMetricsDayBucketPage = {
   totalCount: Scalars['Int']['output'];
 };
 
-export type DaoPage = {
-  __typename?: 'daoPage';
-  items: Array<Dao>;
-  pageInfo: PageInfo;
-  totalCount: Scalars['Int']['output'];
+export type Dao_200_Response = {
+  __typename?: 'dao_200_response';
+  chainId: Scalars['Float']['output'];
+  id: Scalars['String']['output'];
+  proposalThreshold: Scalars['String']['output'];
+  quorum: Scalars['String']['output'];
+  timelockDelay: Scalars['String']['output'];
+  votingDelay: Scalars['String']['output'];
+  votingPeriod: Scalars['String']['output'];
 };
 
 export type Delegation = {
@@ -1820,52 +1746,6 @@ export type Query_Transactions_Items_Items_Transfers_Items = {
   transactionHash: Scalars['String']['output'];
 };
 
-export type Query_Transactions_Transactions_Items = {
-  __typename?: 'query_transactions_transactions_items';
-  delegations: Array<Maybe<Query_Transactions_Transactions_Items_Delegations_Items>>;
-  from?: Maybe<Scalars['String']['output']>;
-  isCex: Scalars['Boolean']['output'];
-  isDex: Scalars['Boolean']['output'];
-  isLending: Scalars['Boolean']['output'];
-  isTotal: Scalars['Boolean']['output'];
-  timestamp: Scalars['String']['output'];
-  to?: Maybe<Scalars['String']['output']>;
-  transactionHash: Scalars['String']['output'];
-  transfers: Array<Maybe<Query_Transactions_Transactions_Items_Transfers_Items>>;
-};
-
-export type Query_Transactions_Transactions_Items_Delegations_Items = {
-  __typename?: 'query_transactions_transactions_items_delegations_items';
-  daoId: Scalars['String']['output'];
-  delegateAccountId: Scalars['String']['output'];
-  delegatedValue: Scalars['String']['output'];
-  delegatorAccountId: Scalars['String']['output'];
-  isCex: Scalars['Boolean']['output'];
-  isDex: Scalars['Boolean']['output'];
-  isLending: Scalars['Boolean']['output'];
-  isTotal: Scalars['Boolean']['output'];
-  logIndex: Scalars['Float']['output'];
-  previousDelegate?: Maybe<Scalars['String']['output']>;
-  timestamp: Scalars['String']['output'];
-  transactionHash: Scalars['String']['output'];
-};
-
-export type Query_Transactions_Transactions_Items_Transfers_Items = {
-  __typename?: 'query_transactions_transactions_items_transfers_items';
-  amount: Scalars['String']['output'];
-  daoId: Scalars['String']['output'];
-  fromAccountId: Scalars['String']['output'];
-  isCex: Scalars['Boolean']['output'];
-  isDex: Scalars['Boolean']['output'];
-  isLending: Scalars['Boolean']['output'];
-  isTotal: Scalars['Boolean']['output'];
-  logIndex: Scalars['Float']['output'];
-  timestamp: Scalars['String']['output'];
-  toAccountId: Scalars['String']['output'];
-  tokenId: Scalars['String']['output'];
-  transactionHash: Scalars['String']['output'];
-};
-
 export type Query_VotingPowerVariations_Items_Items = {
   __typename?: 'query_votingPowerVariations_items_items';
   absoluteChange: Scalars['String']['output'];
@@ -2176,7 +2056,6 @@ export type Transactions_200_Response = {
   __typename?: 'transactions_200_response';
   items: Array<Maybe<Query_Transactions_Items_Items>>;
   totalCount: Scalars['Float']['output'];
-  transactions: Array<Maybe<Query_Transactions_Transactions_Items>>;
 };
 
 export type Transfer = {
@@ -2592,12 +2471,10 @@ export type VotingPowerVariationsQueryVariables = Exact<{
 
 export type VotingPowerVariationsQuery = { __typename?: 'Query', votingPowerVariations?: { __typename?: 'votingPowerVariations_200_response', items: Array<{ __typename?: 'query_votingPowerVariations_items_items', absoluteChange: string, accountId: string, currentVotingPower: string, percentageChange: string, previousVotingPower?: string | null } | null> } | null };
 
-export type GetDaoDataQueryVariables = Exact<{
-  daoId: Scalars['String']['input'];
-}>;
+export type GetDaoDataQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetDaoDataQuery = { __typename?: 'Query', dao?: { __typename?: 'dao', id: string, quorum: any, proposalThreshold: any, votingDelay: any, votingPeriod: any, timelockDelay: any } | null };
+export type GetDaoDataQuery = { __typename?: 'Query', dao?: { __typename?: 'dao_200_response', id: string, chainId: number, quorum: string, proposalThreshold: string, votingDelay: string, votingPeriod: string, timelockDelay: string } | null };
 
 export type GetDelegatesQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
@@ -3326,9 +3203,10 @@ export type VotingPowerVariationsLazyQueryHookResult = ReturnType<typeof useVoti
 export type VotingPowerVariationsSuspenseQueryHookResult = ReturnType<typeof useVotingPowerVariationsSuspenseQuery>;
 export type VotingPowerVariationsQueryResult = Apollo.QueryResult<VotingPowerVariationsQuery, VotingPowerVariationsQueryVariables>;
 export const GetDaoDataDocument = gql`
-    query GetDaoData($daoId: String!) {
-  dao(id: $daoId) {
+    query GetDaoData {
+  dao {
     id
+    chainId
     quorum
     proposalThreshold
     votingDelay
@@ -3350,11 +3228,10 @@ export const GetDaoDataDocument = gql`
  * @example
  * const { data, loading, error } = useGetDaoDataQuery({
  *   variables: {
- *      daoId: // value for 'daoId'
  *   },
  * });
  */
-export function useGetDaoDataQuery(baseOptions: Apollo.QueryHookOptions<GetDaoDataQuery, GetDaoDataQueryVariables> & ({ variables: GetDaoDataQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useGetDaoDataQuery(baseOptions?: Apollo.QueryHookOptions<GetDaoDataQuery, GetDaoDataQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<GetDaoDataQuery, GetDaoDataQueryVariables>(GetDaoDataDocument, options);
       }

@@ -17,7 +17,6 @@ export const OP: DaoConfiguration = {
   daoOverview: {
     token: "ERC20",
     chain: optimism,
-    blockTime: 2,
     snapshot: "https://snapshot.box/#/s:citizenshouse.eth",
     contracts: {
       governor: "0xcDF27F107725988f2261Ce2256bDfCdE8B382B10",

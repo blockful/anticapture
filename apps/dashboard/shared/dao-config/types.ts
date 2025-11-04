@@ -61,7 +61,6 @@ interface BaseInfo {
 // Section configurations without data storage
 export interface DaoOverviewConfig {
   chain: Chain;
-  blockTime: number;
   contracts: {
     token: Address;
     governor?: Address;

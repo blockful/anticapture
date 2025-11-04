@@ -30,6 +30,10 @@ export class COMPClient<
     this.abi = COMPGovernorAbi;
   }
 
+  getDaoId(): string {
+    return "COMP";
+  }
+
   async getQuorum(): Promise<bigint> {
     const blockNumber = await getBlockNumber(this.client);
     const targetBlock = blockNumber - 10n;
