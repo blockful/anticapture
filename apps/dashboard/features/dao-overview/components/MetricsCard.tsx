@@ -8,7 +8,6 @@ interface MetricsCardProps {
   proposalThresholdValue: string;
   proposalThresholdPercentage: string | null;
   quorumValueFormatted: string;
-  quorumPercentage: string | null;
   votingPeriod: number;
   votingDelay: number;
   timelockDelay: number;
@@ -20,7 +19,6 @@ export const MetricsCard = ({
   proposalThresholdValue,
   proposalThresholdPercentage,
   quorumValueFormatted,
-  quorumPercentage,
   votingPeriod,
   votingDelay,
   timelockDelay,
@@ -76,7 +74,7 @@ export const MetricsCard = ({
 
       <DaoOverviewMetricCard
         title="Quorum"
-        text={`${quorumValueFormatted} ${daoId || "Unknown ID"} ${quorumPercentage}`}
+        text={`${quorumValueFormatted} ${daoId}`}
         subText={
           <span>
             Only{" "}
