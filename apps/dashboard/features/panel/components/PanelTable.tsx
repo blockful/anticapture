@@ -119,6 +119,25 @@ export const PanelTable = () => {
       },
     },
     {
+      accessorKey: "chain",
+      cell: ({ row }) => {
+        const dao: string = row.getValue("dao");
+        const ChainIcon =
+          daoConfigByDaoId[dao as DaoIdEnum].daoOverview.chain.icon;
+        return (
+          <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto">
+            <div className={"flex w-full items-center gap-3"}>
+              <ChainIcon className="size-6 rounded-full" />
+            </div>
+          </div>
+        );
+      },
+      header: () => <h4 className="text-table-header">Chain</h4>,
+      meta: {
+        columnClassName: "w-auto",
+      },
+    },
+    {
       accessorKey: "stage",
       cell: ({ row }) => {
         const daoId = row.getValue("dao") as DaoIdEnum;

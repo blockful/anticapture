@@ -52,9 +52,13 @@ interface BaseInfo {
   disableDaoPage?: boolean;
 }
 
+export interface ChainWithIcon extends Chain {
+  icon: (props: DaoIconProps) => ReactNode;
+}
+
 // Section configurations without data storage
 export interface DaoOverviewConfig {
-  chain: Chain;
+  chain: ChainWithIcon;
   blockTime: number;
   contracts: {
     token: Address;

@@ -10,7 +10,7 @@ export const NOUNS: DaoConfiguration = {
   daoOverview: {
     token: "ERC721",
     blockTime: 12,
-    chain: mainnet,
+    chain: { ...mainnet, icon: NounsIcon },
     snapshot: "",
     contracts: {
       governor: "0x6f3E6272A167e8AcCb32072d08E0957F9c79223d",
