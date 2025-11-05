@@ -82,6 +82,7 @@ export const useDaoOverviewData = ({
   const topDelegatesToPass = useTopDelegatesToPass({
     topDelegates: delegates.data?.accountPowers?.items || [],
     quorumValue,
+    decimals,
   });
 
   return {
