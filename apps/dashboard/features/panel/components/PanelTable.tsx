@@ -88,54 +88,6 @@ export const PanelTable = () => {
 
   const panelColumns: ColumnDef<PanelDao>[] = [
     {
-      accessorKey: "#",
-      cell: ({ row }) => {
-        const dao: string = row.getValue("dao");
-        const details = dao ? daoConfigByDaoId[dao as DaoIdEnum] : null;
-        return (
-          <div className="flex min-h-[68px] w-full items-center justify-center gap-3 pr-3 sm:min-h-0">
-            <p className="scrollbar-none text-secondary flex items-center overflow-auto py-3">
-              {row.index + 1}
-            </p>
-            {isMobile && details && (
-              <DaoAvatarIcon
-                daoId={dao as DaoIdEnum}
-                className="size-icon-md"
-                isRounded
-              />
-            )}
-          </div>
-        );
-      },
-      header: ({ column }) => (
-        <div className="flex items-center justify-center">
-          <Button
-            variant="ghost"
-            className="text-secondary"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            <ArrowUpDown
-              props={{
-                className: "size-4",
-              }}
-              activeState={
-                column.getIsSorted() === "asc"
-                  ? ArrowState.UP
-                  : column.getIsSorted() === "desc"
-                    ? ArrowState.DOWN
-                    : ArrowState.DEFAULT
-              }
-            />
-          </Button>
-        </div>
-      ),
-      enableSorting: true,
-      sortingFn: (rowA, rowB) => rowA.index - rowB.index,
-      meta: {
-        columnClassName: "w-10",
-      },
-    },
-    {
       accessorKey: "dao",
       cell: ({ row }) => {
         const dao: string = row.getValue("dao");
