@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 
 export const showCustomToast = (message: string, type: "success" | "error") => {
   toast.custom(
-    (t) => (
+    (t: { id: string; visible: boolean }) => (
       <div
         className={cn(
           "flex max-w-[500px] items-center justify-between gap-4 px-6 py-4 text-black shadow-lg transition-all",

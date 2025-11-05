@@ -69,16 +69,6 @@ export class DrizzleRepository {
     return result.rows[0];
   }
 
-  async getVotingDelay(): Promise<bigint> {
-    const result = await db.query.dao.findFirst({
-      columns: {
-        votingDelay: true,
-      },
-    });
-
-    return result!.votingDelay;
-  }
-
   async getProposalsCompare(days: DaysEnum) {
     const query = sql`
       WITH old_proposals AS (
@@ -118,15 +108,15 @@ export class DrizzleRepository {
   async getAverageTurnoutCompare(days: DaysEnum) {
     const query = sql<AverageTurnoutCompareQueryResult>`
       WITH old_average_turnout AS (
-        SELECT AVG(${proposalsOnchain.forVotes} + ${proposalsOnchain.againstVotes} + ${proposalsOnchain.abstainVotes}) AS "oldAverageTurnout"
+        SELECT COALESCE(AVG(${proposalsOnchain.forVotes} + ${proposalsOnchain.againstVotes} + ${proposalsOnchain.abstainVotes}), 0) AS "oldAverageTurnout"
         FROM ${proposalsOnchain}
         WHERE ${proposalsOnchain.timestamp} <= ${this.now() - days}
         AND ${proposalsOnchain.status} != 'CANCELED'
       ),
       current_average_turnout AS (
-        SELECT AVG(${proposalsOnchain.forVotes} + ${proposalsOnchain.againstVotes} + ${proposalsOnchain.abstainVotes}) AS "currentAverageTurnout"
+        SELECT COALESCE(AVG(${proposalsOnchain.forVotes} + ${proposalsOnchain.againstVotes} + ${proposalsOnchain.abstainVotes}), 0) AS "currentAverageTurnout"
         FROM ${proposalsOnchain}
-        WHERE ${proposalsOnchain.status} != 'CANCELED'
+        WHERE ${proposalsOnchain.status} != 'CANCELED' AND ${proposalsOnchain.timestamp} >= ${this.now() - days}
       )
       SELECT * FROM current_average_turnout
       JOIN old_average_turnout ON 1=1;

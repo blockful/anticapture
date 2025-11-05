@@ -4,6 +4,7 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
 import { DaoIconProps } from "@/shared/components/icons/types";
+import { TreasuryAssetNonDaoToken } from "@/features/attack-profitability/hooks";
 
 export type DaoMetricsDayBucket = {
   date: string;
@@ -48,6 +49,11 @@ export type GovernanceImplementationField = {
 // Base DAO information
 interface BaseInfo {
   name: string;
+  forumLink?: string;
+  color: {
+    svgColor: string;
+    svgBgColor: string;
+  };
   icon?: (props: DaoIconProps) => ReactNode;
   disableDaoPage?: boolean;
 }
@@ -125,11 +131,56 @@ export interface DaoAddresses {
     PayerContract: string;
     ClientIncentivesRewardsProxy: string;
   };
-  [DaoIdEnum.SCR]: Record<string, never>;
+  [DaoIdEnum.SCR]: Record<string, string>;
+  [DaoIdEnum.COMP]: {
+    Timelock: Address;
+    Comptroller: Address;
+    v2WBTC: Address;
+    v2USDC: Address;
+    v2DAI: Address;
+    v2USDT: Address;
+    v2ETH: Address;
+    v2UNI: Address;
+    v2BAT: Address;
+    v2LINK: Address;
+    v2TUSD: Address;
+    v2AAVE: Address;
+    v2COMP: Address;
+    mainnetETH: Address;
+    mainnetstETH: Address;
+    mainnetUSDT: Address;
+    mainnetUSDS: Address;
+    mainnetUSDC: Address;
+    mainnetWBTC: Address;
+    opETH: Address;
+    opUSDT: Address;
+    opUSDC: Address;
+    uniUSDC: Address;
+    uniETH: Address;
+    polyUSDT0: Address;
+    polyUSDC: Address;
+    ronWETH: Address;
+    ronRON: Address;
+    manUSDe: Address;
+    baseUSDbC: Address;
+    baseUSDC: Address;
+    baseAERO: Address;
+    baseUSDS: Address;
+    baseETH: Address;
+    arbUSDT0: Address;
+    arbUSDC: Address;
+    "arbUSDC.e": Address;
+    arbETH: Address;
+    linUSDC: Address;
+    linETH: Address;
+    scrUSDC: Address;
+  };
+  [DaoIdEnum.OBOL]: Record<string, string>;
 }
 
 export interface AttackProfitabilityConfig {
   riskLevel?: RiskLevel;
+  liquidTreasury?: TreasuryAssetNonDaoToken; // FIXME(DEV-161): Remove once treasury fetching from Octav is operational
   supportsLiquidTreasuryCall?: boolean;
   attackCostBarChart: DaoAddresses[DaoIdEnum];
   dynamicQuorum?: {

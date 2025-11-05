@@ -63,7 +63,6 @@ export const GovernanceSection = () => {
           title="Governance"
           icon={<Building2 className="section-layout-icon" />}
           description="View and vote on executable proposals from this DAO."
-          anchorId="governance"
         >
           <div className="flex flex-col items-center justify-center py-12">
             <p className="text-error mb-4">
@@ -82,7 +81,6 @@ export const GovernanceSection = () => {
         title="Governance"
         icon={<Landmark className="section-layout-icon" />}
         description="View and vote on executable proposals from this DAO."
-        anchorId="governance"
         className="sm:bg-transparent"
       >
         <div className="flex-1">

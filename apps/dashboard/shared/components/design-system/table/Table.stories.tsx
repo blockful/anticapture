@@ -101,7 +101,7 @@ export const DefaultTable: Story = {
   },
   render: (args) => (
     <div className="flex w-full justify-center p-4">
-      <ExampleDataTable {...args} />
+      <ExampleDataTable {...args} columns={args.columns} data={args.data} />
     </div>
   ),
 };

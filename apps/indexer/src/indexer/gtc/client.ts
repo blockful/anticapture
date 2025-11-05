@@ -30,6 +30,10 @@ export class GTCClient<
     this.abi = GovernorAbi;
   }
 
+  getDaoId(): string {
+    return "GTC";
+  }
+
   async getQuorum(): Promise<bigint> {
     const blockNumber = await getBlockNumber(this.client);
     const targetBlock = blockNumber - 10n;

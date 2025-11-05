@@ -8,6 +8,11 @@ import { OptimismChainIcon } from "@/shared/components/icons/OptimismChainIcon";
 
 export const OP: DaoConfiguration = {
   name: "Optimism",
+  color: {
+    svgColor: "#ff0420",
+    svgBgColor: "#FFF2FB",
+  },
+  forumLink: "https://gov.optimism.io/",
   noStage: true,
   icon: OptimismIcon,
   daoOverview: {

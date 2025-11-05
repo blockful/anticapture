@@ -9,6 +9,11 @@ import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
 
 export const UNI: DaoConfiguration = {
   name: "Uniswap",
+  color: {
+    svgColor: "#fc72ff",
+    svgBgColor: "#FFF2FB",
+  },
+  forumLink: "https://gov.uniswap.org/",
   icon: UniswapIcon,
   daoOverview: {
     token: "ERC20",

@@ -11,9 +11,6 @@ directive @httpOperation(subgraph: String, path: String, operationSpecificHeader
 directive @transport(subgraph: String, kind: String, location: String, headers: [[String]], queryStringOptions: ObjMap, queryParams: [[String]]) repeatable on SCHEMA
 
 type Query {
-  dao(id: String!): dao
-  daos(where: daoFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): daoPage!
-
   """Get property data for a specific token"""
   token(currency: queryInput_token_currency = usd): token_200_response
   tokens(where: tokenFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPage!
@@ -144,6 +141,14 @@ type Query {
   """
   accountBalanceVariations(days: queryInput_accountBalanceVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalanceVariations_orderDirection = desc): accountBalanceVariations_200_response
 
+  """Returns current governance parameters for this DAO"""
+  dao: dao_200_response
+  """Get total assets"""
+  totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
+
+  """Get delegation percentage day buckets with forward-fill"""
+  delegationPercentageByDay(startDate: String, endDate: String, orderDirection: queryInput_delegationPercentageByDay_orderDirection = asc, limit: NonNegativeInt = 365, after: String, before: String): delegationPercentageByDay_200_response
+
   """
   Average delegation percentage across all supported DAOs by day.
   Returns the mean delegation percentage for each day in the specified range.
@@ -177,6 +182,9 @@ type Query {
     """Maximum number of items to return. Default: 100"""
     limit: Int
   ): AverageDelegationPercentagePage!
+
+  """Get all DAOs"""
+  daos: DAOList!
 }
 
 """
@@ -197,85 +205,6 @@ type PageInfo {
 
 type Meta {
   status: JSON
-}
-
-type dao {
-  id: String!
-  quorum: BigInt!
-  proposalThreshold: BigInt!
-  votingDelay: BigInt!
-  votingPeriod: BigInt!
-  timelockDelay: BigInt!
-  chainId: Int!
-}
-
-type daoPage {
-  items: [dao!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-input daoFilter {
-  AND: [daoFilter]
-  OR: [daoFilter]
-  id: String
-  id_not: String
-  id_in: [String]
-  id_not_in: [String]
-  id_contains: String
-  id_not_contains: String
-  id_starts_with: String
-  id_ends_with: String
-  id_not_starts_with: String
-  id_not_ends_with: String
-  quorum: BigInt
-  quorum_not: BigInt
-  quorum_in: [BigInt]
-  quorum_not_in: [BigInt]
-  quorum_gt: BigInt
-  quorum_lt: BigInt
-  quorum_gte: BigInt
-  quorum_lte: BigInt
-  proposalThreshold: BigInt
-  proposalThreshold_not: BigInt
-  proposalThreshold_in: [BigInt]
-  proposalThreshold_not_in: [BigInt]
-  proposalThreshold_gt: BigInt
-  proposalThreshold_lt: BigInt
-  proposalThreshold_gte: BigInt
-  proposalThreshold_lte: BigInt
-  votingDelay: BigInt
-  votingDelay_not: BigInt
-  votingDelay_in: [BigInt]
-  votingDelay_not_in: [BigInt]
-  votingDelay_gt: BigInt
-  votingDelay_lt: BigInt
-  votingDelay_gte: BigInt
-  votingDelay_lte: BigInt
-  votingPeriod: BigInt
-  votingPeriod_not: BigInt
-  votingPeriod_in: [BigInt]
-  votingPeriod_not_in: [BigInt]
-  votingPeriod_gt: BigInt
-  votingPeriod_lt: BigInt
-  votingPeriod_gte: BigInt
-  votingPeriod_lte: BigInt
-  timelockDelay: BigInt
-  timelockDelay_not: BigInt
-  timelockDelay_in: [BigInt]
-  timelockDelay_not_in: [BigInt]
-  timelockDelay_gt: BigInt
-  timelockDelay_lt: BigInt
-  timelockDelay_gte: BigInt
-  timelockDelay_lte: BigInt
-  chainId: Int
-  chainId_not: Int
-  chainId_in: [Int]
-  chainId_not_in: [Int]
-  chainId_gt: Int
-  chainId_lt: Int
-  chainId_gte: Int
-  chainId_lte: Int
 }
 
 type token {
@@ -1753,10 +1682,11 @@ enum queryInput_historicalVotingPower_days {
 }
 
 type transactions_200_response {
-  transactions: [query_transactions_transactions_items]!
+  items: [query_transactions_items_items]!
+  totalCount: Float!
 }
 
-type query_transactions_transactions_items {
+type query_transactions_items_items {
   transactionHash: String!
   from: String
   to: String
@@ -1765,11 +1695,11 @@ type query_transactions_transactions_items {
   isLending: Boolean!
   isTotal: Boolean!
   timestamp: String!
-  transfers: [query_transactions_transactions_items_transfers_items]!
-  delegations: [query_transactions_transactions_items_delegations_items]!
+  transfers: [query_transactions_items_items_transfers_items]!
+  delegations: [query_transactions_items_items_delegations_items]!
 }
 
-type query_transactions_transactions_items_transfers_items {
+type query_transactions_items_items_transfers_items {
   transactionHash: String!
   daoId: String!
   tokenId: String!
@@ -1784,7 +1714,7 @@ type query_transactions_transactions_items_transfers_items {
   isTotal: Boolean!
 }
 
-type query_transactions_transactions_items_delegations_items {
+type query_transactions_items_items_delegations_items {
   transactionHash: String!
   daoId: String!
   delegateAccountId: String!
@@ -1943,6 +1873,16 @@ enum queryInput_accountBalanceVariations_orderDirection {
   desc
 }
 
+type dao_200_response {
+  id: String!
+  chainId: Float!
+  quorum: String!
+  proposalThreshold: String!
+  votingDelay: String!
+  votingPeriod: String!
+  timelockDelay: String!
+}
+
 scalar ObjMap
 
 enum HTTPMethod {
@@ -1955,6 +1895,41 @@ enum HTTPMethod {
   OPTIONS
   TRACE
   PATCH
+}
+
+type query_totalAssets_items {
+  totalAssets: String!
+  date: String!
+}
+
+enum queryInput_totalAssets_days {
+  _7d
+  _30d
+  _90d
+  _180d
+  _365d
+}
+
+type delegationPercentageByDay_200_response {
+  items: [query_delegationPercentageByDay_items_items]!
+  totalCount: Float!
+  pageInfo: query_delegationPercentageByDay_pageInfo!
+}
+
+type query_delegationPercentageByDay_items_items {
+  date: String!
+  high: String!
+}
+
+type query_delegationPercentageByDay_pageInfo {
+  hasNextPage: Boolean!
+  endDate: String
+  startDate: String
+}
+
+enum queryInput_delegationPercentageByDay_orderDirection {
+  asc
+  desc
 }
 
 type AverageDelegationPercentageItem {
@@ -1971,4 +1946,9 @@ type AverageDelegationPercentagePage {
   """
   totalCount: Int!
   pageInfo: PageInfo!
+}
+
+type DAOList {
+  items: [dao_200_response!]!
+  totalCount: Int!
 }

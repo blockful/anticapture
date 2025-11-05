@@ -9,6 +9,11 @@ import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
 
 export const ENS: DaoConfiguration = {
   name: "ENS",
+  color: {
+    svgColor: "#0080bc",
+    svgBgColor: "#fff",
+  },
+  forumLink: "https://discuss.ens.domains/",
   icon: EnsIcon,
   daoOverview: {
     token: "ERC20",
