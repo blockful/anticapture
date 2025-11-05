@@ -16,12 +16,9 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   BigInt: { input: any; output: any; }
-  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
-  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
-  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
 };
 
@@ -2727,6 +2724,13 @@ export type GetTokenHoldersCoutingQueryVariables = Exact<{ [key: string]: never;
 
 export type GetTokenHoldersCoutingQuery = { __typename?: 'Query', accountBalances: { __typename?: 'accountBalancePage', totalCount: number } };
 
+export type TokenInfoQueryVariables = Exact<{
+  currency?: InputMaybe<QueryInput_Token_Currency>;
+}>;
+
+
+export type TokenInfoQuery = { __typename?: 'Query', token?: { __typename?: 'token_200_response', circulatingSupply: string, delegatedSupply: string, lendingSupply: string, name?: string | null, treasury: string } | null };
+
 export type TransactionsQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   offset?: InputMaybe<Scalars['NonNegativeInt']['input']>;
@@ -4716,6 +4720,50 @@ export type GetTokenHoldersCoutingQueryHookResult = ReturnType<typeof useGetToke
 export type GetTokenHoldersCoutingLazyQueryHookResult = ReturnType<typeof useGetTokenHoldersCoutingLazyQuery>;
 export type GetTokenHoldersCoutingSuspenseQueryHookResult = ReturnType<typeof useGetTokenHoldersCoutingSuspenseQuery>;
 export type GetTokenHoldersCoutingQueryResult = Apollo.QueryResult<GetTokenHoldersCoutingQuery, GetTokenHoldersCoutingQueryVariables>;
+export const TokenInfoDocument = gql`
+    query TokenInfo($currency: queryInput_token_currency = usd) {
+  token(currency: $currency) {
+    circulatingSupply
+    delegatedSupply
+    lendingSupply
+    name
+    treasury
+  }
+}
+    `;
+
+/**
+ * __useTokenInfoQuery__
+ *
+ * To run a query within a React component, call `useTokenInfoQuery` and pass it any options that fit your needs.
+ * When your component renders, `useTokenInfoQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useTokenInfoQuery({
+ *   variables: {
+ *      currency: // value for 'currency'
+ *   },
+ * });
+ */
+export function useTokenInfoQuery(baseOptions?: Apollo.QueryHookOptions<TokenInfoQuery, TokenInfoQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<TokenInfoQuery, TokenInfoQueryVariables>(TokenInfoDocument, options);
+      }
+export function useTokenInfoLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<TokenInfoQuery, TokenInfoQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<TokenInfoQuery, TokenInfoQueryVariables>(TokenInfoDocument, options);
+        }
+export function useTokenInfoSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<TokenInfoQuery, TokenInfoQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<TokenInfoQuery, TokenInfoQueryVariables>(TokenInfoDocument, options);
+        }
+export type TokenInfoQueryHookResult = ReturnType<typeof useTokenInfoQuery>;
+export type TokenInfoLazyQueryHookResult = ReturnType<typeof useTokenInfoLazyQuery>;
+export type TokenInfoSuspenseQueryHookResult = ReturnType<typeof useTokenInfoSuspenseQuery>;
+export type TokenInfoQueryResult = Apollo.QueryResult<TokenInfoQuery, TokenInfoQueryVariables>;
 export const TransactionsDocument = gql`
     query Transactions($limit: PositiveInt, $offset: NonNegativeInt, $from: String, $to: String, $minAmount: String, $maxAmount: String, $sortOrder: queryInput_transactions_sortOrder) {
   transactions(
