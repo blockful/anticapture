@@ -38,11 +38,8 @@ export const PanelTable = () => {
   // Create a ref to store the actual delegated supply values
   const delegatedSupplyValues = useRef<Record<number, number>>({});
 
-  const notOnElectionDaoIds = Object.values(DaoIdEnum).filter(
-    (daoId) => daoId !== DaoIdEnum.NOUNS, // TODO remove this when Nouns is fully supported
-  );
   // Create initial data
-  const data = notOnElectionDaoIds.map((daoId, index) => ({
+  const data = Object.values(DaoIdEnum).map((daoId, index) => ({
     id: index,
     dao: daoId,
   }));

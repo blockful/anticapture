@@ -1,3 +1,5 @@
+import { parseUnits } from "viem";
+
 import {
   useDaoData,
   useActiveSupply,
@@ -14,7 +16,6 @@ import { useDaoTreasuryStats } from "@/features/dao-overview/hooks/useDaoTreasur
 import { useDaoQuorumStats } from "@/features/dao-overview/hooks/useDaoQuorumStats";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { DaoConfiguration } from "@/shared/dao-config/types";
-import { formatEther } from "viem";
 import { useGetDelegatesQuery } from "@anticapture/graphql-client/hooks";
 
 export const useDaoOverviewData = ({
@@ -24,6 +25,8 @@ export const useDaoOverviewData = ({
   daoId: DaoIdEnum;
   daoConfig: DaoConfiguration;
 }) => {
+  const { decimals } = daoConfig;
+
   const daoData = useDaoData(daoId);
   const activeSupply = useActiveSupply(daoId, TimeInterval.NINETY_DAYS);
   const delegatedSupply = useDelegatedSupply(daoId, TimeInterval.NINETY_DAYS);
@@ -53,12 +56,12 @@ export const useDaoOverviewData = ({
   const totalSupply = tokenData.data?.totalSupply;
 
   const proposalThresholdPercentage =
-    daoData?.data?.proposalThreshold && totalSupply !== undefined
-      ? formatEther(
-          (BigInt(daoData.data.proposalThreshold) * BigInt(1e20)) /
-            BigInt(totalSupply ?? ("1" as string)),
-        )
-      : null;
+    daoData?.data?.proposalThreshold && totalSupply
+      ? (
+          parseUnits(daoData.data.proposalThreshold, decimals) /
+          parseUnits(totalSupply, decimals)
+        ).toString()
+      : "0";
 
   const proposalThresholdValue = daoData?.data?.proposalThreshold
     ? `${formatNumberUserReadable(Number(daoData.data.proposalThreshold) / 10 ** 18)}`
