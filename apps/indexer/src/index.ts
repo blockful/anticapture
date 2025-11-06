@@ -14,6 +14,7 @@ import {
   OPTokenIndexer,
 } from "@/indexer/op";
 import { ARBTokenIndexer } from "@/indexer/arb";
+import { COMPGovernorIndexer, COMPTokenIndexer } from "@/indexer/comp";
 import {
   GovernorIndexer as GTCGovernorIndexer,
   GTCTokenIndexer,
@@ -78,6 +79,12 @@ switch (daoId) {
     const { token } = CONTRACT_ADDRESSES[daoId];
     SCRTokenIndexer(token.address, token.decimals);
     SCRGovernorIndexer(blockTime);
+    break;
+  }
+  case DaoIdEnum.COMP: {
+    const { token } = CONTRACT_ADDRESSES[daoId];
+    COMPTokenIndexer(token.address, token.decimals);
+    COMPGovernorIndexer(blockTime);
     break;
   }
   case DaoIdEnum.OBOL: {
