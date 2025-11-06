@@ -11,7 +11,13 @@ import {
 } from "@/shared/components";
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { useScreenSize, useTokenData, useActiveSupply } from "@/shared/hooks";
+import {
+  useScreenSize,
+  useTokenData,
+  useActiveSupply,
+  useDaoData,
+  useAverageTurnout,
+} from "@/shared/hooks";
 import {
   ArrowUpDown,
   ArrowState,
@@ -44,6 +50,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
   const circSupplyValues = useRef<Record<number, number>>({});
   const delegSupplyValues = useRef<Record<number, number>>({});
   const activeSupplyValues = useRef<Record<number, number>>({});
+  const quorumSurplusValues = useRef<Record<number, number>>({});
 
   const notOnElectionDaoIds = Object.values(DaoIdEnum).filter(
     (daoId) => daoId !== DaoIdEnum.NOUNS, // TODO remove this when Nouns is fully supported
@@ -240,6 +247,77 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
     const formattedValue = formatNumberUserReadable(
       Number(BigInt(activeSupply) / BigInt(10 ** 18)),
     );
+
+    return (
+      <div className="text-secondary flex w-full items-center justify-end py-3 text-end text-sm font-normal">
+        {formattedValue}
+      </div>
+    );
+  };
+
+  // Liquid Quorum Surplus Cell
+  const QuorumSurplusCell = ({
+    daoId,
+    rowIndex,
+  }: {
+    daoId: DaoIdEnum;
+    rowIndex: number;
+  }) => {
+    console.log("daoId", daoId);
+    const { data: daoData, loading: daoDataLoading } = useDaoData(daoId);
+    const { data: averageTurnoutData, isLoading: averageTurnoutLoading } =
+      useAverageTurnout(daoId, TimeInterval.NINETY_DAYS, {
+        revalidateOnMount: true,
+        revalidateIfStale: true,
+      });
+
+    console.log("daoData", daoData);
+
+    const quorumValue = daoData?.quorum ? Number(daoData.quorum) / 1e18 : null;
+    const turnoutTokens = averageTurnoutData
+      ? Number(averageTurnoutData.currentAverageTurnout) / 1e18
+      : null;
+
+    console.log("quorumValue", quorumValue);
+    console.log("turnoutTokens", turnoutTokens);
+
+    const surplus =
+      quorumValue !== null && turnoutTokens !== null
+        ? turnoutTokens - quorumValue
+        : null;
+
+    console.log("surplus", surplus);
+
+    // Store the numeric value in the ref when data changes
+    useEffect(() => {
+      if (surplus !== null) {
+        quorumSurplusValues.current[rowIndex] = surplus;
+      } else {
+        // Clear value when data is not available
+        delete quorumSurplusValues.current[rowIndex];
+      }
+    }, [surplus, rowIndex]);
+
+    const isLoading = daoDataLoading || averageTurnoutLoading;
+
+    if (isLoading) {
+      return (
+        <SkeletonRow
+          parentClassName="flex animate-pulse justify-end pr-4"
+          className="h-5 w-full max-w-20 md:max-w-32"
+        />
+      );
+    }
+
+    if (surplus === null) {
+      return (
+        <div className="text-secondary flex w-full items-center justify-end py-3 text-end text-sm font-normal">
+          N/A
+        </div>
+      );
+    }
+
+    const formattedValue = formatNumberUserReadable(surplus);
 
     return (
       <div className="text-secondary flex w-full items-center justify-end py-3 text-end text-sm font-normal">
@@ -541,6 +619,48 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         const indexB = rowB.index;
         const valueA = activeSupplyValues.current[indexA] || 0;
         const valueB = activeSupplyValues.current[indexB] || 0;
+        return valueA - valueB;
+      },
+      meta: {
+        columnClassName: "w-auto",
+      },
+    },
+    {
+      accessorKey: "quorumSurplus",
+      cell: ({ row }) => {
+        const daoId = row.getValue("dao") as DaoIdEnum;
+        const rowIndex = row.index;
+        return <QuorumSurplusCell daoId={daoId} rowIndex={rowIndex} />;
+      },
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          className="text-secondary w-full justify-end px-0 text-right"
+          onClick={() => column.toggleSorting()}
+        >
+          <h4 className="text-table-header whitespace-nowrap text-right">
+            Quorum Surplus
+          </h4>
+          <ArrowUpDown
+            props={{
+              className: "size-4 shrink-0",
+            }}
+            activeState={
+              column.getIsSorted() === "asc"
+                ? ArrowState.UP
+                : column.getIsSorted() === "desc"
+                  ? ArrowState.DOWN
+                  : ArrowState.DEFAULT
+            }
+          />
+        </Button>
+      ),
+      enableSorting: true,
+      sortingFn: (rowA, rowB) => {
+        const indexA = rowA.index;
+        const indexB = rowB.index;
+        const valueA = quorumSurplusValues.current[indexA] || 0;
+        const valueB = quorumSurplusValues.current[indexB] || 0;
         return valueA - valueB;
       },
       meta: {
