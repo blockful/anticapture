@@ -37,7 +37,6 @@ export const PanelTable = () => {
   const router = useRouter();
   const { isMobile } = useScreenSize();
   // Create refs to store the actual numeric values for sorting
-  const delegatedSupplyValues = useRef<Record<number, number>>({});
   const liquidTreasuryValues = useRef<Record<number, number>>({});
   const circSupplyValues = useRef<Record<number, number>>({});
   const delegSupplyValues = useRef<Record<number, number>>({});
@@ -51,45 +50,6 @@ export const PanelTable = () => {
     id: index,
     dao: daoId,
   }));
-
-  // Create a cell component that stores its value in the ref
-  const DelegatedSupplyCell = ({
-    daoId,
-    rowIndex,
-  }: {
-    daoId: DaoIdEnum;
-    rowIndex: number;
-  }) => {
-    const { data: tokenData } = useTokenData(daoId);
-    const delegatedSupply = tokenData?.delegatedSupply;
-
-    // Store the numeric value in the ref when data changes
-    useEffect(() => {
-      if (delegatedSupply) {
-        const numericValue = Number(BigInt(delegatedSupply) / BigInt(10 ** 18));
-        delegatedSupplyValues.current[rowIndex] = numericValue;
-      }
-    }, [delegatedSupply, rowIndex]);
-
-    if (!delegatedSupply) {
-      return (
-        <SkeletonRow
-          parentClassName="flex animate-pulse justify-end pr-4"
-          className="h-5 w-full max-w-20 md:max-w-32"
-        />
-      );
-    }
-
-    const formattedSupply = formatNumberUserReadable(
-      Number(BigInt(delegatedSupply) / BigInt(10 ** 18)),
-    );
-
-    return (
-      <div className="text-secondary flex w-full items-center justify-end py-3 text-end text-sm font-normal">
-        {formattedSupply}
-      </div>
-    );
-  };
 
   // Liquid Treasury Cell
   const LiquidTreasuryCell = ({
@@ -373,45 +333,6 @@ export const PanelTable = () => {
       },
     },
     {
-      accessorKey: "delegatedSupply",
-      cell: ({ row }) => {
-        const daoId = row.getValue("dao") as DaoIdEnum;
-        const rowIndex = row.index;
-        return <DelegatedSupplyCell daoId={daoId} rowIndex={rowIndex} />;
-      },
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          className="text-secondary w-full justify-end px-0"
-          onClick={() => column.toggleSorting()}
-        >
-          <h4 className="text-table-header whitespace-nowrap">
-            Delegated Supply
-          </h4>
-          <ArrowUpDown
-            props={{
-              className: "size-4 shrink-0",
-            }}
-            activeState={
-              column.getIsSorted() === "asc"
-                ? ArrowState.UP
-                : column.getIsSorted() === "desc"
-                  ? ArrowState.DOWN
-                  : ArrowState.DEFAULT
-            }
-          />
-        </Button>
-      ),
-      enableSorting: true,
-      sortingFn: (rowA, rowB) => {
-        const indexA = rowA.index;
-        const indexB = rowB.index;
-        const valueA = delegatedSupplyValues.current[indexA] || 0;
-        const valueB = delegatedSupplyValues.current[indexB] || 0;
-        return valueA - valueB;
-      },
-    },
-    {
       accessorKey: "liquidTreasury",
       cell: ({ row }) => {
         const daoId = row.getValue("dao") as DaoIdEnum;
@@ -453,6 +374,7 @@ export const PanelTable = () => {
         columnClassName: "w-auto",
       },
     },
+
     {
       accessorKey: "circSupply",
       cell: ({ row }) => {
@@ -495,6 +417,7 @@ export const PanelTable = () => {
         columnClassName: "w-auto",
       },
     },
+
     {
       accessorKey: "delegSupply",
       cell: ({ row }) => {
