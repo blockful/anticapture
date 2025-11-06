@@ -36,8 +36,12 @@ type PanelDao = {
 export const PanelTable = () => {
   const router = useRouter();
   const { isMobile } = useScreenSize();
-  // Create a ref to store the actual delegated supply values
+  // Create refs to store the actual numeric values for sorting
   const delegatedSupplyValues = useRef<Record<number, number>>({});
+  const liquidTreasuryValues = useRef<Record<number, number>>({});
+  const circSupplyValues = useRef<Record<number, number>>({});
+  const delegSupplyValues = useRef<Record<number, number>>({});
+  const activeSupplyValues = useRef<Record<number, number>>({});
 
   const notOnElectionDaoIds = Object.values(DaoIdEnum).filter(
     (daoId) => daoId !== DaoIdEnum.NOUNS, // TODO remove this when Nouns is fully supported
@@ -88,9 +92,23 @@ export const PanelTable = () => {
   };
 
   // Liquid Treasury Cell
-  const LiquidTreasuryCell = ({ daoId }: { daoId: DaoIdEnum }) => {
+  const LiquidTreasuryCell = ({
+    daoId,
+    rowIndex,
+  }: {
+    daoId: DaoIdEnum;
+    rowIndex: number;
+  }) => {
     const { data: tokenData } = useTokenData(daoId);
     const treasury = tokenData?.treasury;
+
+    // Store the numeric value in the ref when data changes
+    useEffect(() => {
+      if (treasury) {
+        const numericValue = Number(BigInt(treasury) / BigInt(10 ** 18));
+        liquidTreasuryValues.current[rowIndex] = numericValue;
+      }
+    }, [treasury, rowIndex]);
 
     if (!treasury) {
       return (
@@ -113,9 +131,25 @@ export const PanelTable = () => {
   };
 
   // Circ. Supply Cell
-  const CircSupplyCell = ({ daoId }: { daoId: DaoIdEnum }) => {
+  const CircSupplyCell = ({
+    daoId,
+    rowIndex,
+  }: {
+    daoId: DaoIdEnum;
+    rowIndex: number;
+  }) => {
     const { data: tokenData } = useTokenData(daoId);
     const circulatingSupply = tokenData?.circulatingSupply;
+
+    // Store the numeric value in the ref when data changes
+    useEffect(() => {
+      if (circulatingSupply) {
+        const numericValue = Number(
+          BigInt(circulatingSupply) / BigInt(10 ** 18),
+        );
+        circSupplyValues.current[rowIndex] = numericValue;
+      }
+    }, [circulatingSupply, rowIndex]);
 
     if (!circulatingSupply) {
       return (
@@ -138,9 +172,23 @@ export const PanelTable = () => {
   };
 
   // Deleg. Supply Cell (separate from DelegatedSupplyCell which uses refs for sorting)
-  const DelegSupplyCell = ({ daoId }: { daoId: DaoIdEnum }) => {
+  const DelegSupplyCell = ({
+    daoId,
+    rowIndex,
+  }: {
+    daoId: DaoIdEnum;
+    rowIndex: number;
+  }) => {
     const { data: tokenData } = useTokenData(daoId);
     const delegatedSupply = tokenData?.delegatedSupply;
+
+    // Store the numeric value in the ref when data changes
+    useEffect(() => {
+      if (delegatedSupply) {
+        const numericValue = Number(BigInt(delegatedSupply) / BigInt(10 ** 18));
+        delegSupplyValues.current[rowIndex] = numericValue;
+      }
+    }, [delegatedSupply, rowIndex]);
 
     if (!delegatedSupply) {
       return (
@@ -163,11 +211,27 @@ export const PanelTable = () => {
   };
 
   // Active Supply Cell
-  const ActiveSupplyCell = ({ daoId }: { daoId: DaoIdEnum }) => {
+  const ActiveSupplyCell = ({
+    daoId,
+    rowIndex,
+  }: {
+    daoId: DaoIdEnum;
+    rowIndex: number;
+  }) => {
     const { data: activeSupplyData } = useActiveSupply(
       daoId,
       TimeInterval.NINETY_DAYS,
     );
+
+    const activeSupply = activeSupplyData?.activeSupply;
+
+    // Store the numeric value in the ref when data changes
+    useEffect(() => {
+      if (activeSupply) {
+        const numericValue = Number(BigInt(activeSupply) / BigInt(10 ** 18));
+        activeSupplyValues.current[rowIndex] = numericValue;
+      }
+    }, [activeSupply, rowIndex]);
 
     if (activeSupplyData === undefined) {
       return (
@@ -177,8 +241,6 @@ export const PanelTable = () => {
         />
       );
     }
-
-    const activeSupply = activeSupplyData?.activeSupply;
 
     if (!activeSupply) {
       return (
@@ -351,9 +413,38 @@ export const PanelTable = () => {
       accessorKey: "liquidTreasury",
       cell: ({ row }) => {
         const daoId = row.getValue("dao") as DaoIdEnum;
-        return <LiquidTreasuryCell daoId={daoId} />;
+        const rowIndex = row.index;
+        return <LiquidTreasuryCell daoId={daoId} rowIndex={rowIndex} />;
       },
-      header: () => <h4 className="text-table-header">Liquid Treasury</h4>,
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          className="text-secondary w-full justify-end"
+          onClick={() => column.toggleSorting()}
+        >
+          <h4 className="text-table-header">Liquid Treasury</h4>
+          <ArrowUpDown
+            props={{
+              className: "size-4",
+            }}
+            activeState={
+              column.getIsSorted() === "asc"
+                ? ArrowState.UP
+                : column.getIsSorted() === "desc"
+                  ? ArrowState.DOWN
+                  : ArrowState.DEFAULT
+            }
+          />
+        </Button>
+      ),
+      enableSorting: true,
+      sortingFn: (rowA, rowB) => {
+        const indexA = rowA.index;
+        const indexB = rowB.index;
+        const valueA = liquidTreasuryValues.current[indexA] || 0;
+        const valueB = liquidTreasuryValues.current[indexB] || 0;
+        return valueA - valueB;
+      },
       meta: {
         columnClassName: "w-auto",
       },
@@ -362,9 +453,38 @@ export const PanelTable = () => {
       accessorKey: "circSupply",
       cell: ({ row }) => {
         const daoId = row.getValue("dao") as DaoIdEnum;
-        return <CircSupplyCell daoId={daoId} />;
+        const rowIndex = row.index;
+        return <CircSupplyCell daoId={daoId} rowIndex={rowIndex} />;
       },
-      header: () => <h4 className="text-table-header">Circ. Supply</h4>,
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          className="text-secondary w-full justify-end"
+          onClick={() => column.toggleSorting()}
+        >
+          <h4 className="text-table-header">Circ. Supply</h4>
+          <ArrowUpDown
+            props={{
+              className: "size-4",
+            }}
+            activeState={
+              column.getIsSorted() === "asc"
+                ? ArrowState.UP
+                : column.getIsSorted() === "desc"
+                  ? ArrowState.DOWN
+                  : ArrowState.DEFAULT
+            }
+          />
+        </Button>
+      ),
+      enableSorting: true,
+      sortingFn: (rowA, rowB) => {
+        const indexA = rowA.index;
+        const indexB = rowB.index;
+        const valueA = circSupplyValues.current[indexA] || 0;
+        const valueB = circSupplyValues.current[indexB] || 0;
+        return valueA - valueB;
+      },
       meta: {
         columnClassName: "w-auto",
       },
@@ -373,9 +493,38 @@ export const PanelTable = () => {
       accessorKey: "delegSupply",
       cell: ({ row }) => {
         const daoId = row.getValue("dao") as DaoIdEnum;
-        return <DelegSupplyCell daoId={daoId} />;
+        const rowIndex = row.index;
+        return <DelegSupplyCell daoId={daoId} rowIndex={rowIndex} />;
       },
-      header: () => <h4 className="text-table-header">Deleg. Supply</h4>,
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          className="text-secondary w-full justify-end"
+          onClick={() => column.toggleSorting()}
+        >
+          <h4 className="text-table-header">Deleg. Supply</h4>
+          <ArrowUpDown
+            props={{
+              className: "size-4",
+            }}
+            activeState={
+              column.getIsSorted() === "asc"
+                ? ArrowState.UP
+                : column.getIsSorted() === "desc"
+                  ? ArrowState.DOWN
+                  : ArrowState.DEFAULT
+            }
+          />
+        </Button>
+      ),
+      enableSorting: true,
+      sortingFn: (rowA, rowB) => {
+        const indexA = rowA.index;
+        const indexB = rowB.index;
+        const valueA = delegSupplyValues.current[indexA] || 0;
+        const valueB = delegSupplyValues.current[indexB] || 0;
+        return valueA - valueB;
+      },
       meta: {
         columnClassName: "w-auto",
       },
@@ -384,9 +533,38 @@ export const PanelTable = () => {
       accessorKey: "activeSupply",
       cell: ({ row }) => {
         const daoId = row.getValue("dao") as DaoIdEnum;
-        return <ActiveSupplyCell daoId={daoId} />;
+        const rowIndex = row.index;
+        return <ActiveSupplyCell daoId={daoId} rowIndex={rowIndex} />;
       },
-      header: () => <h4 className="text-table-header">Active Supply</h4>,
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          className="text-secondary w-full justify-end"
+          onClick={() => column.toggleSorting()}
+        >
+          <h4 className="text-table-header">Active Supply</h4>
+          <ArrowUpDown
+            props={{
+              className: "size-4",
+            }}
+            activeState={
+              column.getIsSorted() === "asc"
+                ? ArrowState.UP
+                : column.getIsSorted() === "desc"
+                  ? ArrowState.DOWN
+                  : ArrowState.DEFAULT
+            }
+          />
+        </Button>
+      ),
+      enableSorting: true,
+      sortingFn: (rowA, rowB) => {
+        const indexA = rowA.index;
+        const indexB = rowB.index;
+        const valueA = activeSupplyValues.current[indexA] || 0;
+        const valueB = activeSupplyValues.current[indexB] || 0;
+        return valueA - valueB;
+      },
       meta: {
         columnClassName: "w-auto",
       },
