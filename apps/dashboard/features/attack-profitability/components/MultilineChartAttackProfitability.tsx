@@ -42,6 +42,7 @@ import {
 import daoConfigByDaoId from "@/shared/dao-config";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 import { Data } from "react-csv/lib/core";
+import { parseUnits } from "viem";
 
 interface MultilineChartAttackProfitabilityProps {
   days: string;
@@ -88,9 +89,9 @@ export const MultilineChartAttackProfitability = ({
     [timeSeriesData],
   );
 
-  const quorumValue = daoData?.quorum
-    ? Number(daoData.quorum) / 10 ** 18
-    : null;
+  const quorumValue = Number(
+    parseUnits(daoData?.quorum || "0", daoConfig.decimals),
+  );
 
   const chartConfig = useMemo(
     () => ({
