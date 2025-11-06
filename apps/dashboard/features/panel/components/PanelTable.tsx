@@ -11,7 +11,7 @@ import {
 } from "@/shared/components";
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { useScreenSize, useTokenData } from "@/shared/hooks";
+import { useScreenSize, useTokenData, useActiveSupply } from "@/shared/hooks";
 import {
   ArrowUpDown,
   ArrowState,
@@ -20,6 +20,7 @@ import {
 import { formatNumberUserReadable } from "@/shared/utils";
 import { StageTag } from "@/features/resilience-stages/components";
 import { Stage } from "@/shared/types/enums/Stage";
+import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import {
   fieldsToArray,
   getDaoStageFromFields,
@@ -82,6 +83,118 @@ export const PanelTable = () => {
     return (
       <div className="text-secondary flex w-full items-center justify-end py-3 text-end text-sm font-normal">
         {formattedSupply}
+      </div>
+    );
+  };
+
+  // Liquid Treasury Cell
+  const LiquidTreasuryCell = ({ daoId }: { daoId: DaoIdEnum }) => {
+    const { data: tokenData } = useTokenData(daoId);
+    const treasury = tokenData?.treasury;
+
+    if (!treasury) {
+      return (
+        <SkeletonRow
+          parentClassName="flex animate-pulse justify-end pr-4"
+          className="h-5 w-full max-w-20 md:max-w-32"
+        />
+      );
+    }
+
+    const formattedValue = formatNumberUserReadable(
+      Number(BigInt(treasury) / BigInt(10 ** 18)),
+    );
+
+    return (
+      <div className="text-secondary flex w-full items-center justify-end py-3 text-end text-sm font-normal">
+        {formattedValue}
+      </div>
+    );
+  };
+
+  // Circ. Supply Cell
+  const CircSupplyCell = ({ daoId }: { daoId: DaoIdEnum }) => {
+    const { data: tokenData } = useTokenData(daoId);
+    const circulatingSupply = tokenData?.circulatingSupply;
+
+    if (!circulatingSupply) {
+      return (
+        <SkeletonRow
+          parentClassName="flex animate-pulse justify-end pr-4"
+          className="h-5 w-full max-w-20 md:max-w-32"
+        />
+      );
+    }
+
+    const formattedValue = formatNumberUserReadable(
+      Number(BigInt(circulatingSupply) / BigInt(10 ** 18)),
+    );
+
+    return (
+      <div className="text-secondary flex w-full items-center justify-end py-3 text-end text-sm font-normal">
+        {formattedValue}
+      </div>
+    );
+  };
+
+  // Deleg. Supply Cell (separate from DelegatedSupplyCell which uses refs for sorting)
+  const DelegSupplyCell = ({ daoId }: { daoId: DaoIdEnum }) => {
+    const { data: tokenData } = useTokenData(daoId);
+    const delegatedSupply = tokenData?.delegatedSupply;
+
+    if (!delegatedSupply) {
+      return (
+        <SkeletonRow
+          parentClassName="flex animate-pulse justify-end pr-4"
+          className="h-5 w-full max-w-20 md:max-w-32"
+        />
+      );
+    }
+
+    const formattedValue = formatNumberUserReadable(
+      Number(BigInt(delegatedSupply) / BigInt(10 ** 18)),
+    );
+
+    return (
+      <div className="text-secondary flex w-full items-center justify-end py-3 text-end text-sm font-normal">
+        {formattedValue}
+      </div>
+    );
+  };
+
+  // Active Supply Cell
+  const ActiveSupplyCell = ({ daoId }: { daoId: DaoIdEnum }) => {
+    const { data: activeSupplyData } = useActiveSupply(
+      daoId,
+      TimeInterval.NINETY_DAYS,
+    );
+
+    if (activeSupplyData === undefined) {
+      return (
+        <SkeletonRow
+          parentClassName="flex animate-pulse justify-end pr-4"
+          className="h-5 w-full max-w-20 md:max-w-32"
+        />
+      );
+    }
+
+    const activeSupply = activeSupplyData?.activeSupply;
+
+    if (!activeSupply) {
+      return (
+        <div className="text-secondary flex w-full items-center justify-end py-3 text-end text-sm font-normal">
+          N/A
+        </div>
+      );
+    }
+
+    const formattedValue = formatNumberUserReadable(
+      Number(BigInt(activeSupply) / BigInt(10 ** 18)),
+    );
+
+    return (
+      <div className="text-secondary flex w-full items-center justify-end py-3 text-end text-sm font-normal">
+        {formattedValue}
       </div>
     );
   };
@@ -232,6 +345,50 @@ export const PanelTable = () => {
         const valueA = delegatedSupplyValues.current[indexA] || 0;
         const valueB = delegatedSupplyValues.current[indexB] || 0;
         return valueA - valueB;
+      },
+    },
+    {
+      accessorKey: "liquidTreasury",
+      cell: ({ row }) => {
+        const daoId = row.getValue("dao") as DaoIdEnum;
+        return <LiquidTreasuryCell daoId={daoId} />;
+      },
+      header: () => <h4 className="text-table-header">Liquid Treasury</h4>,
+      meta: {
+        columnClassName: "w-auto",
+      },
+    },
+    {
+      accessorKey: "circSupply",
+      cell: ({ row }) => {
+        const daoId = row.getValue("dao") as DaoIdEnum;
+        return <CircSupplyCell daoId={daoId} />;
+      },
+      header: () => <h4 className="text-table-header">Circ. Supply</h4>,
+      meta: {
+        columnClassName: "w-auto",
+      },
+    },
+    {
+      accessorKey: "delegSupply",
+      cell: ({ row }) => {
+        const daoId = row.getValue("dao") as DaoIdEnum;
+        return <DelegSupplyCell daoId={daoId} />;
+      },
+      header: () => <h4 className="text-table-header">Deleg. Supply</h4>,
+      meta: {
+        columnClassName: "w-auto",
+      },
+    },
+    {
+      accessorKey: "activeSupply",
+      cell: ({ row }) => {
+        const daoId = row.getValue("dao") as DaoIdEnum;
+        return <ActiveSupplyCell daoId={daoId} />;
+      },
+      header: () => <h4 className="text-table-header">Active Supply</h4>,
+      meta: {
+        columnClassName: "w-auto",
       },
     },
   ];
