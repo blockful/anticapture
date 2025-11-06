@@ -4,37 +4,39 @@ export const ProposalSectionSkeleton = () => {
   return (
     <div>
       {/* Header Skeleton */}
-      <div className="border-border-default mx-auto flex h-[65px] w-full max-w-7xl shrink-0 items-center justify-between gap-6 border-b px-5 py-2">
-        <div className="flex items-center gap-2">
-          <SkeletonRow
-            parentClassName="flex animate-pulse"
-            className="h-[14px] w-[14px] shrink-0"
-          />
-          <SkeletonRow
-            parentClassName="flex animate-pulse"
-            className="size-6 shrink-0 rounded-full"
-          />
-          <SkeletonRow
-            parentClassName="flex animate-pulse"
-            className="h-[20px] w-40 shrink-0"
-          />
-        </div>
-
-        <div className="flex items-center gap-2">
-          <div className="hidden flex-col items-end gap-0.5 lg:flex">
+      <div className="border-border-default mx-auto flex h-[65px] w-full shrink-0 items-center justify-between gap-6 border-b px-5 py-2">
+        <div className="m-auto flex w-full max-w-7xl items-center justify-between">
+          <div className="flex items-center gap-2">
             <SkeletonRow
               parentClassName="flex animate-pulse"
-              className="h-[16px] w-32 shrink-0"
+              className="h-[14px] w-[14px] shrink-0"
             />
             <SkeletonRow
               parentClassName="flex animate-pulse"
-              className="h-[20px] w-20 shrink-0"
+              className="size-6 shrink-0 rounded-full"
+            />
+            <SkeletonRow
+              parentClassName="flex animate-pulse"
+              className="h-[20px] w-40 shrink-0"
             />
           </div>
-          <SkeletonRow
-            parentClassName="flex animate-pulse"
-            className="h-10 w-32 shrink-0 rounded"
-          />
+
+          <div className="flex items-center gap-2">
+            <div className="hidden flex-col items-end gap-0.5 lg:flex">
+              <SkeletonRow
+                parentClassName="flex animate-pulse"
+                className="h-[16px] w-32 shrink-0"
+              />
+              <SkeletonRow
+                parentClassName="flex animate-pulse"
+                className="h-[20px] w-20 shrink-0"
+              />
+            </div>
+            <SkeletonRow
+              parentClassName="flex animate-pulse"
+              className="h-10 w-32 shrink-0 rounded"
+            />
+          </div>
         </div>
       </div>
 
