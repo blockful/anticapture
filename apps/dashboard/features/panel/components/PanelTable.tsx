@@ -382,13 +382,15 @@ export const PanelTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="text-secondary w-full justify-end"
+          className="text-secondary w-full justify-end px-0"
           onClick={() => column.toggleSorting()}
         >
-          <h4 className="text-table-header">Delegated Supply</h4>
+          <h4 className="text-table-header whitespace-nowrap">
+            Delegated Supply
+          </h4>
           <ArrowUpDown
             props={{
-              className: "size-4",
+              className: "size-4 shrink-0",
             }}
             activeState={
               column.getIsSorted() === "asc"
@@ -419,13 +421,15 @@ export const PanelTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="text-secondary w-full justify-end"
+          className="text-secondary w-full justify-end px-0 text-right"
           onClick={() => column.toggleSorting()}
         >
-          <h4 className="text-table-header">Liquid Treasury</h4>
+          <h4 className="text-table-header whitespace-nowrap text-right">
+            Liquid Treasury
+          </h4>
           <ArrowUpDown
             props={{
-              className: "size-4",
+              className: "size-4 shrink-0",
             }}
             activeState={
               column.getIsSorted() === "asc"
@@ -459,13 +463,15 @@ export const PanelTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="text-secondary w-full justify-end"
+          className="text-secondary w-full justify-end px-0 text-right"
           onClick={() => column.toggleSorting()}
         >
-          <h4 className="text-table-header">Circ. Supply</h4>
+          <h4 className="text-table-header whitespace-nowrap text-right">
+            Circ. Supply
+          </h4>
           <ArrowUpDown
             props={{
-              className: "size-4",
+              className: "size-4 shrink-0",
             }}
             activeState={
               column.getIsSorted() === "asc"
@@ -499,13 +505,15 @@ export const PanelTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="text-secondary w-full justify-end"
+          className="text-secondary w-full justify-end px-0 text-right"
           onClick={() => column.toggleSorting()}
         >
-          <h4 className="text-table-header">Deleg. Supply</h4>
+          <h4 className="text-table-header whitespace-nowrap text-right">
+            Deleg. Supply
+          </h4>
           <ArrowUpDown
             props={{
-              className: "size-4",
+              className: "size-4 shrink-0 ",
             }}
             activeState={
               column.getIsSorted() === "asc"
@@ -539,13 +547,15 @@ export const PanelTable = () => {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="text-secondary w-full justify-end"
+          className="text-secondary w-full justify-end px-0 text-right"
           onClick={() => column.toggleSorting()}
         >
-          <h4 className="text-table-header">Active Supply</h4>
+          <h4 className="text-table-header whitespace-nowrap text-right">
+            Active Supply
+          </h4>
           <ArrowUpDown
             props={{
-              className: "size-4",
+              className: "size-4 shrink-0",
             }}
             activeState={
               column.getIsSorted() === "asc"
