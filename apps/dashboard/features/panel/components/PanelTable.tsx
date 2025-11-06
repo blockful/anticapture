@@ -33,7 +33,10 @@ type PanelDao = {
   inAnalysis?: boolean;
 };
 
-export const PanelTable = () => {
+type PanelTableProps = {
+  currency: "usd" | "eth";
+};
+export const PanelTable = ({ currency }: PanelTableProps) => {
   const router = useRouter();
   const { isMobile } = useScreenSize();
   // Create refs to store the actual numeric values for sorting
@@ -55,11 +58,16 @@ export const PanelTable = () => {
   const LiquidTreasuryCell = ({
     daoId,
     rowIndex,
+    currency: cellCurrency,
   }: {
     daoId: DaoIdEnum;
     rowIndex: number;
+    currency: "usd" | "eth";
   }) => {
-    const { data: tokenData } = useTokenData(daoId);
+    const { data: tokenData, isLoading } = useTokenData(daoId, cellCurrency, {
+      revalidateOnMount: true,
+      revalidateIfStale: true,
+    });
     const treasury = tokenData?.treasury;
 
     // Store the numeric value in the ref when data changes
@@ -67,10 +75,13 @@ export const PanelTable = () => {
       if (treasury) {
         const numericValue = Number(BigInt(treasury) / BigInt(10 ** 18));
         liquidTreasuryValues.current[rowIndex] = numericValue;
+      } else {
+        // Clear value when data is not available
+        delete liquidTreasuryValues.current[rowIndex];
       }
     }, [treasury, rowIndex]);
 
-    if (!treasury) {
+    if (isLoading || !treasury) {
       return (
         <SkeletonRow
           parentClassName="flex animate-pulse justify-end pr-4"
@@ -94,11 +105,16 @@ export const PanelTable = () => {
   const CircSupplyCell = ({
     daoId,
     rowIndex,
+    currency: cellCurrency,
   }: {
     daoId: DaoIdEnum;
     rowIndex: number;
+    currency: "usd" | "eth";
   }) => {
-    const { data: tokenData } = useTokenData(daoId);
+    const { data: tokenData, isLoading } = useTokenData(daoId, cellCurrency, {
+      revalidateOnMount: true,
+      revalidateIfStale: true,
+    });
     const circulatingSupply = tokenData?.circulatingSupply;
 
     // Store the numeric value in the ref when data changes
@@ -108,10 +124,13 @@ export const PanelTable = () => {
           BigInt(circulatingSupply) / BigInt(10 ** 18),
         );
         circSupplyValues.current[rowIndex] = numericValue;
+      } else {
+        // Clear value when data is not available
+        delete circSupplyValues.current[rowIndex];
       }
     }, [circulatingSupply, rowIndex]);
 
-    if (!circulatingSupply) {
+    if (isLoading || !circulatingSupply) {
       return (
         <SkeletonRow
           parentClassName="flex animate-pulse justify-end pr-4"
@@ -135,11 +154,16 @@ export const PanelTable = () => {
   const DelegSupplyCell = ({
     daoId,
     rowIndex,
+    currency: cellCurrency,
   }: {
     daoId: DaoIdEnum;
     rowIndex: number;
+    currency: "usd" | "eth";
   }) => {
-    const { data: tokenData } = useTokenData(daoId);
+    const { data: tokenData, isLoading } = useTokenData(daoId, cellCurrency, {
+      revalidateOnMount: true,
+      revalidateIfStale: true,
+    });
     const delegatedSupply = tokenData?.delegatedSupply;
 
     // Store the numeric value in the ref when data changes
@@ -147,10 +171,13 @@ export const PanelTable = () => {
       if (delegatedSupply) {
         const numericValue = Number(BigInt(delegatedSupply) / BigInt(10 ** 18));
         delegSupplyValues.current[rowIndex] = numericValue;
+      } else {
+        // Clear value when data is not available
+        delete delegSupplyValues.current[rowIndex];
       }
     }, [delegatedSupply, rowIndex]);
 
-    if (!delegatedSupply) {
+    if (isLoading || !delegatedSupply) {
       return (
         <SkeletonRow
           parentClassName="flex animate-pulse justify-end pr-4"
@@ -337,7 +364,13 @@ export const PanelTable = () => {
       cell: ({ row }) => {
         const daoId = row.getValue("dao") as DaoIdEnum;
         const rowIndex = row.index;
-        return <LiquidTreasuryCell daoId={daoId} rowIndex={rowIndex} />;
+        return (
+          <LiquidTreasuryCell
+            daoId={daoId}
+            rowIndex={rowIndex}
+            currency={currency}
+          />
+        );
       },
       header: ({ column }) => (
         <Button
@@ -380,7 +413,13 @@ export const PanelTable = () => {
       cell: ({ row }) => {
         const daoId = row.getValue("dao") as DaoIdEnum;
         const rowIndex = row.index;
-        return <CircSupplyCell daoId={daoId} rowIndex={rowIndex} />;
+        return (
+          <CircSupplyCell
+            daoId={daoId}
+            rowIndex={rowIndex}
+            currency={currency}
+          />
+        );
       },
       header: ({ column }) => (
         <Button
@@ -423,7 +462,13 @@ export const PanelTable = () => {
       cell: ({ row }) => {
         const daoId = row.getValue("dao") as DaoIdEnum;
         const rowIndex = row.index;
-        return <DelegSupplyCell daoId={daoId} rowIndex={rowIndex} />;
+        return (
+          <DelegSupplyCell
+            daoId={daoId}
+            rowIndex={rowIndex}
+            currency={currency}
+          />
+        );
       },
       header: ({ column }) => (
         <Button
