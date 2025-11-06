@@ -8,7 +8,7 @@ import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
-import { Address, formatUnits, parseEther, zeroAddress } from "viem";
+import { Address, formatUnits, parseUnits, zeroAddress } from "viem";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import { DaoIdEnum } from "@/shared/types/daos";
 import Link from "next/link";
@@ -191,10 +191,10 @@ export const DelegateDelegationHistoryTable = ({
 
               setFilterVariables(() => ({
                 minDelta: filterState.minAmount
-                  ? parseEther(filterState.minAmount).toString()
+                  ? parseUnits(filterState.minAmount, decimals).toString()
                   : undefined,
                 maxDelta: filterState.maxAmount
-                  ? parseEther(filterState.maxAmount).toString()
+                  ? parseUnits(filterState.maxAmount, decimals).toString()
                   : undefined,
               }));
 

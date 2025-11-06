@@ -9,14 +9,16 @@ import {
   XCircle,
 } from "lucide-react";
 import { formatNumberUserReadable } from "@/shared/utils";
-import { formatEther } from "viem";
+import { formatUnits } from "viem";
 import { BulletDivider } from "@/features/governance/components/proposal-overview/BulletDivider";
 import { ProposalInfoText } from "@/features/governance/components/proposal-overview/ProposalInfoText";
 
 export const ProposalInfoSection = ({
   proposal,
+  decimals,
 }: {
   proposal: NonNullable<GetProposalQuery["proposal"]>;
+  decimals: number;
 }) => {
   const totalVotes =
     Number(proposal.forVotes) +
@@ -66,9 +68,7 @@ export const ProposalInfoSection = ({
                 <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
                   {formatNumberUserReadable(
                     Number(
-                      Number(
-                        formatEther(BigInt(proposal.forVotes || "0")),
-                      ).toFixed(1),
+                      formatUnits(BigInt(proposal.forVotes || "0"), decimals),
                     ),
                   )}
                 </p>
@@ -107,9 +107,10 @@ export const ProposalInfoSection = ({
                 <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
                   {formatNumberUserReadable(
                     Number(
-                      Number(
-                        formatEther(BigInt(proposal.againstVotes || "0")),
-                      ).toFixed(1),
+                      formatUnits(
+                        BigInt(proposal.againstVotes || "0"),
+                        decimals,
+                      ),
                     ),
                   )}
                 </p>
@@ -148,9 +149,10 @@ export const ProposalInfoSection = ({
                 <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
                   {formatNumberUserReadable(
                     Number(
-                      Number(
-                        formatEther(BigInt(proposal.abstainVotes || "0")),
-                      ).toFixed(1),
+                      formatUnits(
+                        BigInt(proposal.abstainVotes || "0"),
+                        decimals,
+                      ),
                     ),
                   )}
                 </p>
@@ -181,10 +183,12 @@ export const ProposalInfoSection = ({
           </p>
           <BulletDivider />
           <p className="font-inter text-secondary text-[14px] font-normal not-italic leading-[20px]">
-            {formatNumberUserReadable(Number(formatEther(BigInt(quorumVotes))))}{" "}
+            {formatNumberUserReadable(
+              Number(formatUnits(BigInt(quorumVotes), decimals)),
+            )}{" "}
             /{" "}
             {formatNumberUserReadable(
-              Number(formatEther(BigInt(proposal.quorum))),
+              Number(formatUnits(BigInt(proposal.quorum), decimals)),
             )}
           </p>
           {quorumVotes >= Number(proposal.quorum) && (

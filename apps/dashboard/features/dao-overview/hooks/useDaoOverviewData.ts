@@ -77,6 +77,7 @@ export const useDaoOverviewData = ({
     treasuryAll,
     treasuryNonDao,
     tokenData,
+    decimals,
   });
 
   const topDelegatesToPass = useTopDelegatesToPass({
