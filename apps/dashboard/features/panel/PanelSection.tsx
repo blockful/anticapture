@@ -1,9 +1,6 @@
 "use client";
 
-import { TheSectionLayout } from "@/shared/components";
 import { PanelTable } from "@/features/panel/components";
-import { BarChart3 } from "lucide-react";
-import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import {
   SubSection,
   SubSectionsContainer,
@@ -17,25 +14,18 @@ export const PanelSection = () => {
   const [currency, setCurrency] = useState<"usd" | "eth">("usd");
 
   return (
-    <TheSectionLayout
-      title={PAGES_CONSTANTS.panel.title}
-      icon={<BarChart3 className="section-layout-icon" />}
-      className="bg-surface-background! mt-[56px]! sm:mt-0!"
-      isSwitchDateLinear
-    >
-      <SubSectionsContainer>
-        <SubSection
-          subsectionTitle="Panel"
-          subsectionDescription="Check governance security across DAOs, with details on attack vectors and capture risks."
-          switcherComponent={
-            <SwitcherCurrency currency={currency} setCurrency={setCurrency} />
-          }
-          dateRange=""
-        >
-          <PanelTable currency={currency} />
-        </SubSection>
-      </SubSectionsContainer>
-    </TheSectionLayout>
+    <SubSectionsContainer>
+      <SubSection
+        subsectionTitle="Panel"
+        subsectionDescription="Check governance security across DAOs, with details on attack vectors and capture risks."
+        switcherComponent={
+          <SwitcherCurrency currency={currency} setCurrency={setCurrency} />
+        }
+        dateRange=""
+      >
+        <PanelTable currency={currency} />
+      </SubSection>
+    </SubSectionsContainer>
   );
 };
 
