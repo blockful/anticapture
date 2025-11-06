@@ -17,11 +17,7 @@ export default function Loading() {
 
     // If it's a valid DAO page, show DAO overview skeleton
     if (daoConfig && daoConfig.daoOverview && pathname === `/${daoId}`) {
-      return (
-        <div className="bg-surface-background dark flex h-screen overflow-hidden">
-          <DaoOverviewSkeleton />
-        </div>
-      );
+      return <DaoOverviewSkeleton />;
     }
   }
 

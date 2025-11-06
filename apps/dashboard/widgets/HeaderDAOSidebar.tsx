@@ -18,7 +18,7 @@ export const HeaderDAOSidebar = () => {
   const daoId = isDefault ? null : pathname.split("/")[1]?.toUpperCase();
   const daoConfig = daoConfigByDaoId[daoId as DaoIdEnum];
 
-  if (daoConfig.disableDaoPage) {
+  if (!daoConfig || daoConfig.disableDaoPage) {
     return null;
   }
 
