@@ -4,6 +4,7 @@ import { TheSectionLayout } from "@/shared/components";
 import {
   PanelTable,
   DelegatedSupplyHistory,
+  DaoProtectionLevels,
 } from "@/features/panel/components";
 import { BarChart3 } from "lucide-react";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
@@ -17,7 +18,7 @@ export const PanelSection = () => {
       isSwitchDateLinear
     >
       <div className="grid grid-cols-3 gap-4">
-        <DelegatedSupplyHistory />
+        <DaoProtectionLevels />
         <DelegatedSupplyHistory />
         <DelegatedSupplyHistory />
       </div>
