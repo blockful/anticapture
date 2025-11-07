@@ -299,6 +299,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
   }) => {
     const { data: quorumGap, isLoading: quorumGapLoading } =
       useQuorumGap(daoId);
+    console.log({ PanelTable: quorumGap });
 
     // Store the numeric value in the ref when data changes
     useEffect(() => {

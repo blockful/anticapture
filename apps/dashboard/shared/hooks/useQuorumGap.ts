@@ -52,6 +52,8 @@ query GetDaoData {
 
   const data: QuorumGapResponse = response.data.data;
 
+  console.log({ data });
+
   const isGapEligible =
     Math.floor((Date.now() - days) / 1000) <
     Number(data.proposals.items[0].timestamp);
@@ -60,6 +62,8 @@ query GetDaoData {
     ? Number(data.compareAverageTurnout.currentAverageTurnout) / 1e18
     : null;
   const quorumGap = quorum && avgTurnout ? (avgTurnout / quorum - 1) * 100 : 0;
+
+  console.log({ isGapEligible, quorumGap });
 
   return isGapEligible ? quorumGap : null;
 };
