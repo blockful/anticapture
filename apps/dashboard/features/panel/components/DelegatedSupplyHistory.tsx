@@ -39,11 +39,11 @@ export const DelegatedSupplyHistory = () => {
           changes over time.
         </p>
       </div>
-      <div className="relative flex h-[300px] w-full items-center justify-center pb-2">
+      <div className="relative flex h-[180px] w-full items-center justify-center pb-2">
         <ChartContainer className="h-full w-full" config={chartConfig}>
           <LineChart
             data={fakeData}
-            margin={{ top: 0, right: 16, left: 32, bottom: 24 }}
+            margin={{ top: 0, right: 16, left: 32, bottom: 0 }}
           >
             <CartesianGrid vertical={false} stroke="#27272a" />
             <XAxis
