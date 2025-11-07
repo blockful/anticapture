@@ -5,6 +5,7 @@ import {
   PanelTable,
   DelegatedSupplyHistory,
   DaoProtectionLevels,
+  TreasuryMonitoring,
 } from "@/features/panel/components";
 import { BarChart3 } from "lucide-react";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
@@ -19,7 +20,7 @@ export const PanelSection = () => {
     >
       <div className="grid grid-cols-3 gap-4">
         <DaoProtectionLevels />
-        <DelegatedSupplyHistory />
+        <TreasuryMonitoring />
         <DelegatedSupplyHistory />
       </div>
 
