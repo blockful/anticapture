@@ -39,7 +39,7 @@ export const DelegatedSupplyHistory = () => {
           changes over time.
         </p>
       </div>
-      <div className="relative flex h-[180px] w-full items-center justify-center pb-2">
+      <div className="relative flex h-[150px] w-full items-center justify-center pb-2">
         <ChartContainer className="h-full w-full" config={chartConfig}>
           <LineChart
             data={fakeData}
