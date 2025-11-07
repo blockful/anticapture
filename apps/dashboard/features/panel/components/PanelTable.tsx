@@ -327,7 +327,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         <div className="text-secondary flex w-full items-center justify-end text-end text-sm font-normal">
           <TooltipPlain
             triggerComponent={
-              <div className="text-secondary decoration-secondary/20 flex w-full items-center justify-end py-3 text-end text-sm font-normal underline decoration-dashed underline-offset-[6px]">
+              <div className="text-secondary decoration-secondary/20 hover:decoration-primary flex w-full items-center justify-end py-3 text-end text-sm font-normal underline decoration-dashed underline-offset-[6px] transition-colors duration-300">
                 N/A
               </div>
             }
@@ -667,7 +667,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
                 className="text-secondary w-full justify-end px-0 text-right"
                 onClick={() => column.toggleSorting()}
               >
-                <h4 className="text-table-header decoration-secondary/20 whitespace-nowrap text-right underline decoration-dashed underline-offset-[6px]">
+                <h4 className="text-table-header decoration-secondary/20 hover:decoration-primary whitespace-nowrap text-right underline decoration-dashed underline-offset-[6px] transition-colors duration-300">
                   Quorum Gap
                 </h4>
                 <ArrowUpDown
