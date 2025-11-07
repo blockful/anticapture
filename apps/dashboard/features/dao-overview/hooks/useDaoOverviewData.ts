@@ -1,7 +1,8 @@
+import { formatUnits, parseUnits } from "viem";
+
 import {
   useDaoData,
   useActiveSupply,
-  useDelegatedSupply,
   useAverageTurnout,
   useTokenData,
 } from "@/shared/hooks";
@@ -11,10 +12,8 @@ import { TimeInterval } from "@/shared/types/enums";
 import { useCompareTreasury } from "@/features/dao-overview/hooks/useCompareTreasury";
 import { useTopDelegatesToPass } from "@/features/dao-overview/hooks/useTopDelegatesToPass";
 import { useDaoTreasuryStats } from "@/features/dao-overview/hooks/useDaoTreasuryStats";
-import { useDaoQuorumStats } from "@/features/dao-overview/hooks/useDaoQuorumStats";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { DaoConfiguration } from "@/shared/dao-config/types";
-import { formatEther } from "viem";
 import { useGetDelegatesQuery } from "@anticapture/graphql-client/hooks";
 
 export const useDaoOverviewData = ({
@@ -24,9 +23,10 @@ export const useDaoOverviewData = ({
   daoId: DaoIdEnum;
   daoConfig: DaoConfiguration;
 }) => {
+  const { decimals } = daoConfig;
+
   const daoData = useDaoData(daoId);
   const activeSupply = useActiveSupply(daoId, TimeInterval.NINETY_DAYS);
-  const delegatedSupply = useDelegatedSupply(daoId, TimeInterval.NINETY_DAYS);
   const averageTurnout = useAverageTurnout(daoId, TimeInterval.NINETY_DAYS);
   const treasuryNonDao = useTreasuryAssetNonDaoToken(
     daoId,
@@ -48,82 +48,75 @@ export const useDaoOverviewData = ({
     fetchPolicy: "cache-and-network", // Always check network for fresh data
   });
 
-  const topDelegates = delegates.data?.accountPowers?.items || [];
-
   const totalSupply = tokenData.data?.totalSupply;
 
   const proposalThresholdPercentage =
-    daoData?.data?.proposalThreshold && totalSupply !== undefined
-      ? formatEther(
-          (BigInt(daoData.data.proposalThreshold) * BigInt(1e20)) /
-            BigInt(totalSupply ?? ("1" as string)),
-        )
-      : null;
+    daoData?.data?.proposalThreshold && totalSupply
+      ? (
+          parseUnits(daoData.data.proposalThreshold, decimals) /
+          parseUnits(totalSupply, decimals)
+        ).toString()
+      : "0";
 
   const proposalThresholdValue = daoData?.data?.proposalThreshold
-    ? `${formatNumberUserReadable(Number(daoData.data.proposalThreshold) / 10 ** 18)}`
+    ? `${formatNumberUserReadable(Number(formatUnits(BigInt(daoData.data.proposalThreshold), decimals)))}`
     : "No Threshold";
 
-  const {
-    quorumValue,
-    averageTurnoutPercentAboveQuorum,
-    quorumPercentage,
-    quorumValueFormatted,
-  } = useDaoQuorumStats({
-    daoData: daoData.data,
-    averageTurnout,
-    totalSupply,
-    delegatedSupply,
-    daoConfig,
-  });
+  const quorumValue = Number(
+    formatUnits(BigInt(daoData.data?.quorum || 0), decimals),
+  );
+
+  const turnoutValue = Number(
+    formatUnits(
+      BigInt(averageTurnout.data?.currentAverageTurnout || 0),
+      decimals,
+    ),
+  );
 
   const treasuryStats = useDaoTreasuryStats({
     treasuryAll,
     treasuryNonDao,
     tokenData,
+    decimals,
   });
 
   const topDelegatesToPass = useTopDelegatesToPass({
-    topDelegates,
+    topDelegates: delegates.data?.accountPowers?.items || [],
     quorumValue,
+    decimals,
   });
-
-  const votingPeriod = daoData?.data?.votingPeriod
-    ? Number(daoData.data.votingPeriod)
-    : 0;
-  const votingDelay = daoData?.data?.votingDelay
-    ? Number(daoData.data.votingDelay)
-    : 0;
-  const timelockDelay = daoData?.data?.timelockDelay
-    ? Number(daoData.data.timelockDelay)
-    : 0;
-
-  const isLoading =
-    daoData.loading ||
-    activeSupply.isLoading ||
-    delegatedSupply.isLoading ||
-    averageTurnout.isLoading ||
-    tokenData.isLoading ||
-    treasuryNonDao.loading ||
-    treasuryAll.loading ||
-    delegates.loading;
 
   return {
     daoData: daoData.data,
-    activeSupply,
-    delegatedSupply,
-    averageTurnout,
+    activeSupply: Number(
+      formatUnits(BigInt(activeSupply.data?.activeSupply || 0), decimals),
+    ),
+    delegatedSupply: Number(
+      formatUnits(BigInt(tokenData.data?.delegatedSupply || 0), decimals),
+    ),
+    averageTurnout: Number(
+      formatUnits(
+        BigInt(averageTurnout.data?.currentAverageTurnout || 0),
+        decimals,
+      ),
+    ),
     treasuryStats,
     quorumValue,
-    averageTurnoutPercentAboveQuorum,
+    averageTurnoutPercentAboveQuorum: (turnoutValue / quorumValue - 1) * 100,
     topDelegatesToPass,
-    isLoading,
     proposalThresholdValue,
     proposalThresholdPercentage,
-    quorumValueFormatted,
-    quorumPercentage,
-    votingPeriod,
-    votingDelay,
-    timelockDelay,
+    quorumValueFormatted: quorumValue,
+    votingPeriod: Number(daoData.data?.votingPeriod ?? 0),
+    votingDelay: Number(daoData.data?.votingDelay ?? 0),
+    timelockDelay: Number(daoData.data?.timelockDelay ?? 0),
+    isLoading:
+      daoData.loading ||
+      activeSupply.isLoading ||
+      averageTurnout.isLoading ||
+      tokenData.isLoading ||
+      treasuryNonDao.loading ||
+      treasuryAll.loading ||
+      delegates.loading,
   };
 };

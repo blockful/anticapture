@@ -5,7 +5,7 @@ import { User2Icon, X, ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Query_Proposals_Items_Items } from "@anticapture/graphql-client/hooks";
 
-import { Account, formatEther } from "viem";
+import { Account, formatUnits } from "viem";
 import { useAccount } from "wagmi";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils";
@@ -20,6 +20,7 @@ interface VotingModalProps {
   onClose: () => void;
   proposal: Query_Proposals_Items_Items;
   votingPower: string;
+  decimals: number;
 }
 
 export const VotingModal = ({
@@ -27,6 +28,7 @@ export const VotingModal = ({
   onClose,
   proposal,
   votingPower,
+  decimals,
 }: VotingModalProps) => {
   const [vote, setVote] = useState<string>("");
   const [comment, setComment] = useState<string>("");
@@ -39,10 +41,10 @@ export const VotingModal = ({
     Number(proposal?.abstainVotes);
 
   const userReadableTotalVotes = formatNumberUserReadable(
-    Number(formatEther(BigInt(Number(totalVotes || "0")))),
+    Number(formatUnits(BigInt(totalVotes || 0), decimals)),
   );
   const userReadableQuorum = formatNumberUserReadable(
-    Number(formatEther(BigInt(Number(proposal?.quorum || "0")))),
+    Number(formatUnits(BigInt(proposal?.quorum || 0), decimals)),
   );
   const forPercentage = (Number(proposal?.forVotes) / Number(totalVotes)) * 100;
   const againstPercentage =
@@ -140,6 +142,7 @@ export const VotingModal = ({
                 votingPower={proposal?.forVotes}
                 onChange={setVote}
                 checked={vote === "for"}
+                decimals={decimals}
               />
 
               {/* Against vote  */}
@@ -149,6 +152,7 @@ export const VotingModal = ({
                 votingPower={proposal?.againstVotes}
                 onChange={setVote}
                 checked={vote === "against"}
+                decimals={decimals}
               />
 
               {/* Abstain vote  */}
@@ -158,6 +162,7 @@ export const VotingModal = ({
                 votingPower={proposal?.abstainVotes}
                 onChange={setVote}
                 checked={vote === "abstain"}
+                decimals={decimals}
               />
 
               <div className="border-border-default flex items-center justify-start gap-2 border px-[10px] py-2">

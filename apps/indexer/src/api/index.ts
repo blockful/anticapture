@@ -35,6 +35,7 @@ import {
   TokenRepository,
   TransactionsRepository,
   VotingPowerRepository,
+  NounsVotingPowerRepository,
 } from "./repositories";
 import { errorHandler } from "./middlewares";
 import { getClient } from "@/lib/client";
@@ -107,7 +108,12 @@ const delegationPercentageService = new DelegationPercentageService(
 );
 const accountBalanceRepo = new AccountBalanceRepository();
 const transactionsService = new TransactionsService(transactionsRepo);
-const votingPowerService = new VotingPowerService(votingPowerRepo);
+const votingPowerService = new VotingPowerService(
+  env.DAO_ID === DaoIdEnum.NOUNS
+    ? new NounsVotingPowerRepository()
+    : votingPowerRepo,
+  votingPowerRepo,
+);
 const daoCache = new DaoCache();
 const daoService = new DaoService(daoClient, daoCache, env.CHAIN_ID);
 

@@ -10,8 +10,9 @@ import {
   adaptTransactionsToTableData,
   GraphTransaction,
 } from "@/features/transactions/utils/transactionsAdapter";
-import { parseEther } from "viem";
+import { formatUnits } from "viem";
 import { SupplyType } from "@/shared/components";
+import daoConfig from "@/shared/dao-config";
 
 export interface TransactionsFilters {
   from?: string;
@@ -47,6 +48,7 @@ export const useTransactionsTableData = ({
   offset = 0,
   filters,
 }: UseTransactionsTableDataParams) => {
+  const { decimals } = daoConfig[daoId];
   const [currentPage, setCurrentPage] = useState(
     Math.floor(offset / limit) + 1,
   );
@@ -58,10 +60,10 @@ export const useTransactionsTableData = ({
       ...(filters?.from && { from: filters?.from }),
       ...(filters?.to && { to: filters?.to }),
       ...(filters?.minAmount && {
-        minAmount: parseEther(String(filters.minAmount)).toString(),
+        minAmount: formatUnits(BigInt(filters.minAmount), decimals),
       }),
       ...(filters?.maxAmount && {
-        maxAmount: parseEther(String(filters.maxAmount)).toString(),
+        maxAmount: formatUnits(BigInt(filters.maxAmount), decimals),
       }),
       ...(filters?.sortOrder && {
         sortOrder: filters?.sortOrder as QueryInput_Transactions_SortOrder,
@@ -99,6 +101,7 @@ export const useTransactionsTableData = ({
   return {
     data: adaptTransactionsToTableData(
       (data?.transactions?.items as GraphTransaction[]) ?? [],
+      decimals,
     ),
     loading,
     error,

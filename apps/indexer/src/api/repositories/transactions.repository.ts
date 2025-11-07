@@ -125,6 +125,7 @@ export class TransactionsRepository {
   ): Promise<DBTransaction[]> {
     const timePeriodConditions = this.coalesceConditionArray(
       this.timePeriodToSql(params),
+      "AND",
     );
 
     const query = sql`
@@ -208,10 +209,13 @@ export class TransactionsRepository {
     const checkIsLending = filter.affectedSupply.isLending ?? false;
     const checkIsTotal = filter.affectedSupply.isTotal ?? false;
 
-    const timePeriodConditions: string[] = this.timePeriodToSql(filter);
+    const timePeriodConditions: string = this.coalesceConditionArray(
+      this.timePeriodToSql(filter),
+      "AND",
+    );
 
-    const transferConditions: string[] = [...timePeriodConditions];
-    const delegationConditions: string[] = [...timePeriodConditions];
+    const transferConditions: string[] = [timePeriodConditions];
+    const delegationConditions: string[] = [timePeriodConditions];
 
     if (checkIsDex) {
       transferConditions.push(`transfers.is_dex = true`);
@@ -256,8 +260,8 @@ export class TransactionsRepository {
     }
 
     return {
-      transfer: this.coalesceConditionArray(transferConditions),
-      delegation: this.coalesceConditionArray(delegationConditions),
+      transfer: this.coalesceConditionArray(transferConditions, "OR"),
+      delegation: this.coalesceConditionArray(delegationConditions, "OR"),
     };
   }
 
@@ -276,7 +280,10 @@ export class TransactionsRepository {
     return filterConditions;
   }
 
-  private coalesceConditionArray(conditions: string[]): string {
-    return conditions.length > 0 ? conditions.join(" AND ") : "true";
+  private coalesceConditionArray(
+    conditions: string[],
+    operator: "AND" | "OR",
+  ): string {
+    return conditions.length > 0 ? conditions.join(` ${operator} `) : "true";
   }
 }

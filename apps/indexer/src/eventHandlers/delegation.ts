@@ -35,32 +35,35 @@ export const delegateChanged = async (
   daoId: DaoIdEnum,
   args: {
     delegator: Address;
-    toDelegate: Address;
+    delegate: Address;
     tokenId: Address;
-    fromDelegate: Address;
+    previousDelegate: Address;
     txHash: Hex;
     timestamp: bigint;
     logIndex: number;
+    delegatorBalance?: bigint;
   },
 ) => {
   const {
     delegator,
-    toDelegate,
+    delegate,
     tokenId,
     txHash,
-    fromDelegate,
+    previousDelegate,
     timestamp,
     logIndex,
+    delegatorBalance: _delegatorBalance,
   } = args;
 
   // Ensure all required accounts exist in parallel
-  await ensureAccountsExist(context, [delegator, toDelegate]);
+  await ensureAccountsExist(context, [delegator, delegate]);
 
-  // Get the delegator's current balance
-  const delegatorBalance = await context.db.find(accountBalance, {
-    accountId: delegator,
-    tokenId,
-  });
+  const delegatorBalance = _delegatorBalance
+    ? { balance: _delegatorBalance }
+    : await context.db.find(accountBalance, {
+        accountId: delegator,
+        tokenId,
+      });
 
   // Pre-compute address lists for flag determination
   const lendingAddressList = Object.values(LendingAddresses[daoId] || {});
@@ -70,15 +73,15 @@ export const delegateChanged = async (
 
   // Determine flags for the delegation
   const isCex =
-    cexAddressList.includes(delegator) || cexAddressList.includes(toDelegate);
+    cexAddressList.includes(delegator) || cexAddressList.includes(delegate);
   const isDex =
-    dexAddressList.includes(delegator) || dexAddressList.includes(toDelegate);
+    dexAddressList.includes(delegator) || dexAddressList.includes(delegate);
   const isLending =
     lendingAddressList.includes(delegator) ||
-    lendingAddressList.includes(toDelegate);
+    lendingAddressList.includes(delegate);
   const isBurning =
     burningAddressList.includes(delegator) ||
-    burningAddressList.includes(toDelegate);
+    burningAddressList.includes(delegate);
   const isTotal = isBurning;
 
   await context.db
@@ -86,10 +89,10 @@ export const delegateChanged = async (
     .values({
       transactionHash: txHash,
       daoId,
-      delegateAccountId: toDelegate,
+      delegateAccountId: delegate,
       delegatorAccountId: delegator,
       delegatedValue: delegatorBalance?.balance ?? 0n,
-      previousDelegate: fromDelegate,
+      previousDelegate,
       timestamp,
       logIndex,
       isCex,
@@ -107,18 +110,18 @@ export const delegateChanged = async (
     .values({
       accountId: delegator,
       tokenId,
-      delegate: toDelegate,
+      delegate: delegate,
       balance: BigInt(0),
     })
     .onConflictDoUpdate({
-      delegate: toDelegate,
+      delegate: delegate,
     });
 
-  if (fromDelegate !== zeroAddress) {
+  if (previousDelegate !== zeroAddress) {
     await context.db
       .insert(accountPower)
       .values({
-        accountId: fromDelegate,
+        accountId: previousDelegate,
         daoId,
         delegationsCount: 0,
       })
@@ -130,7 +133,7 @@ export const delegateChanged = async (
   await context.db
     .insert(accountPower)
     .values({
-      accountId: toDelegate,
+      accountId: delegate,
       daoId,
     })
     .onConflictDoUpdate((current) => ({

@@ -1,6 +1,6 @@
 import { SupplyType } from "@/shared/components/badges/SupplyLabel";
 import { formatNumberUserReadable } from "@/shared/utils";
-import { formatEther } from "viem";
+import { formatUnits } from "viem";
 import { TransactionData } from "@/features/transactions/hooks/useTransactionsTableData";
 
 export type GraphTransaction = {
@@ -68,6 +68,7 @@ const formatRelativeTime = (timestampSec: string): string => {
 
 export const adaptTransactionsToTableData = (
   transactions: GraphTransaction[],
+  decimals: number,
 ): TransactionData[] => {
   return transactions.map((tx, idx) => {
     const affectedSupply = deduceSupplyTypes(tx);
@@ -79,8 +80,12 @@ export const adaptTransactionsToTableData = (
       0;
 
     const amount = formatNumberUserReadable(
-      Number(formatEther(BigInt(transfersAmountRaw))) +
-        Number(formatEther(BigInt(delegationsAmountRaw))) || 0,
+      Number(
+        formatUnits(
+          BigInt(transfersAmountRaw) + BigInt(delegationsAmountRaw),
+          decimals,
+        ),
+      ) || 0,
       2,
     );
 
@@ -89,7 +94,7 @@ export const adaptTransactionsToTableData = (
       id: `${idx + 1}.${tidx + 1}`,
       affectedSupply: ["Others"] as SupplyType[],
       amount: formatNumberUserReadable(
-        Number(formatEther(BigInt(t.amount || 0))),
+        Number(formatUnits(BigInt(t.amount || 0), decimals)),
         2,
       ),
       date: formatRelativeTime(t.timestamp),
@@ -100,7 +105,7 @@ export const adaptTransactionsToTableData = (
       id: `${idx + 1}.${didx + 1}`,
       affectedSupply: ["Delegation"] as SupplyType[],
       amount: formatNumberUserReadable(
-        Number(formatEther(BigInt(d.delegatedValue))) || 0,
+        Number(formatUnits(BigInt(d.delegatedValue), decimals)) || 0,
         2,
       ),
       date: formatRelativeTime(d.timestamp),

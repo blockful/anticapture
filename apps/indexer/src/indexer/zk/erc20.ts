@@ -150,9 +150,9 @@ export function ZKTokenIndexer(address: Address, decimals: number) {
   ponder.on(`ZKToken:DelegateChanged`, async ({ event, context }) => {
     await delegateChanged(context, daoId, {
       delegator: event.args.delegator,
-      toDelegate: event.args.toDelegate,
+      delegate: event.args.toDelegate,
       tokenId: event.log.address,
-      fromDelegate: event.args.fromDelegate,
+      previousDelegate: event.args.fromDelegate,
       txHash: event.transaction.hash,
       timestamp: event.block.timestamp,
       logIndex: event.log.logIndex,
