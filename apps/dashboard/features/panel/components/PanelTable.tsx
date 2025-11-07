@@ -77,19 +77,26 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
       revalidateIfStale: true,
     });
     const treasury = tokenData?.treasury;
+    const treasuryInUsd = treasury
+      ? Number(formatEther(BigInt(treasury))) * (tokenData?.price ?? 0)
+      : null;
+    const valueToShow = cellCurrency === "usd" ? treasuryInUsd : treasury;
 
     // Store the numeric value in the ref when data changes
     useEffect(() => {
-      if (treasury) {
-        const numericValue = Number(formatEther(BigInt(treasury)));
+      if (treasury && valueToShow != null) {
+        const numericValue =
+          cellCurrency === "usd"
+            ? (valueToShow as number)
+            : Number(formatEther(BigInt(valueToShow as string)));
         liquidTreasuryValues.current[rowIndex] = numericValue;
       } else {
         // Clear value when data is not available
         delete liquidTreasuryValues.current[rowIndex];
       }
-    }, [treasury, rowIndex]);
+    }, [treasury, valueToShow, cellCurrency, rowIndex]);
 
-    if (isLoading || !treasury) {
+    if (isLoading || !treasury || valueToShow == null) {
       return (
         <SkeletonRow
           parentClassName="flex animate-pulse justify-end pr-4"
@@ -99,7 +106,9 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
     }
 
     const formattedValue = formatNumberUserReadable(
-      Number(formatEther(BigInt(treasury))),
+      cellCurrency === "usd"
+        ? (valueToShow as number)
+        : Number(formatEther(BigInt(valueToShow as string))),
     );
 
     return (
