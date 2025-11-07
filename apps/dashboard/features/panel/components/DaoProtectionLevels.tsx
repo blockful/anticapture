@@ -3,34 +3,14 @@
 import { Eye, Target } from "lucide-react";
 import { BarChart, Bar, XAxis, Cell, LabelList } from "recharts";
 import { ChartConfig, ChartContainer } from "@/shared/components/ui/chart";
-
-// Fake data for now
-const stageData = [
-  {
-    stage: "No Stage",
-    value: 1,
-    riskLevel: "Doesn't apply",
-    color: "var(--color-surface-hover)",
-  },
-  {
-    stage: "Stage 0",
-    value: 2,
-    riskLevel: "High Risk",
-    color: "var(--color-error)",
-  },
-  {
-    stage: "Stage 1",
-    value: 1,
-    riskLevel: "Medium Risk",
-    color: "var(--color-warning)",
-  },
-  {
-    stage: "Stage 2",
-    value: 0,
-    riskLevel: "Low Risk",
-    color: "var(--color-success)",
-  },
-];
+import { DaoIdEnum } from "@/shared/types/daos";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { Stage } from "@/shared/types/enums/Stage";
+import {
+  fieldsToArray,
+  getDaoStageFromFields,
+} from "@/shared/dao-config/utils";
+import { useMemo } from "react";
 
 const chartConfig: ChartConfig = {
   value: {
@@ -40,6 +20,73 @@ const chartConfig: ChartConfig = {
 } satisfies ChartConfig;
 
 export const DaoProtectionLevels = () => {
+  // Calculate stage distribution from real DAO data
+  const stageData = useMemo(() => {
+    // Get all DAOs except NOUNS (as per PanelTable logic)
+    const daoIds = Object.values(DaoIdEnum).filter(
+      (daoId) => daoId !== DaoIdEnum.NOUNS,
+    );
+
+    // Count DAOs by stage
+    const stageCounts = {
+      [Stage.NONE]: 0,
+      [Stage.ZERO]: 0,
+      [Stage.ONE]: 0,
+      [Stage.TWO]: 0,
+      [Stage.UNKNOWN]: 0,
+    };
+
+    daoIds.forEach((daoId) => {
+      const daoConfig = daoConfigByDaoId[daoId];
+      let stage: Stage;
+
+      if (!daoConfig.governanceImplementation) {
+        stage = Stage.UNKNOWN;
+      } else {
+        stage = getDaoStageFromFields({
+          fields: fieldsToArray(daoConfig.governanceImplementation?.fields),
+          noStage: daoConfig.noStage,
+        });
+      }
+
+      stageCounts[stage] = (stageCounts[stage] || 0) + 1;
+    });
+
+    // Map to chart data format
+    return [
+      {
+        stage: "No Stage",
+        value: stageCounts[Stage.NONE],
+        riskLevel: "Doesn't apply",
+        color: "var(--color-surface-hover)",
+      },
+      {
+        stage: "Stage 0",
+        value: stageCounts[Stage.ZERO],
+        riskLevel: "High Risk",
+        color: "var(--color-error)",
+      },
+      {
+        stage: "Stage 1",
+        value: stageCounts[Stage.ONE],
+        riskLevel: "Medium Risk",
+        color: "var(--color-warning)",
+      },
+      {
+        stage: "Stage 2",
+        value: stageCounts[Stage.TWO],
+        riskLevel: "Low Risk",
+        color: "var(--color-success)",
+      },
+    ];
+  }, []);
+
+  // Calculate total monitored DAOs
+  const totalMonitored = useMemo(() => {
+    return Object.values(DaoIdEnum).filter((daoId) => daoId !== DaoIdEnum.NOUNS)
+      .length;
+  }, []);
+
   return (
     <div className="bg-surface-default flex w-full flex-col gap-4 rounded-lg p-4">
       <div className="flex flex-col gap-1">
@@ -60,7 +107,7 @@ export const DaoProtectionLevels = () => {
             currently:
           </p>
           <p className="text-primary text-alternative-xs font-mono font-medium uppercase leading-[16px] tracking-[0.72px]">
-            4 DAOs monitored
+            {totalMonitored} DAOs monitored
           </p>
         </div>
         <div className="border-t-brand flex items-center gap-1.5 border-b-0 border-l-4 border-r-0 border-t-0 pl-3">
