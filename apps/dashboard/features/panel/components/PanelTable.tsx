@@ -24,6 +24,7 @@ import {
   DaoAvatarIcon,
 } from "@/shared/components/icons";
 import { formatNumberUserReadable } from "@/shared/utils";
+import { formatEther } from "viem";
 import { StageTag } from "@/features/resilience-stages/components";
 import { Stage } from "@/shared/types/enums/Stage";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
@@ -80,7 +81,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
     // Store the numeric value in the ref when data changes
     useEffect(() => {
       if (treasury) {
-        const numericValue = Number(BigInt(treasury) / BigInt(10 ** 18));
+        const numericValue = Number(formatEther(BigInt(treasury)));
         liquidTreasuryValues.current[rowIndex] = numericValue;
       } else {
         // Clear value when data is not available
@@ -98,7 +99,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
     }
 
     const formattedValue = formatNumberUserReadable(
-      Number(BigInt(treasury) / BigInt(10 ** 18)),
+      Number(formatEther(BigInt(treasury))),
     );
 
     return (
@@ -118,18 +119,24 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
     rowIndex: number;
     currency: "usd" | "eth";
   }) => {
-    const { data: tokenData, isLoading } = useTokenData(daoId, cellCurrency, {
+    const { data: tokenData, isLoading } = useTokenData(daoId, "usd", {
       revalidateOnMount: true,
       revalidateIfStale: true,
     });
     const circulatingSupply = tokenData?.circulatingSupply;
+    const price = tokenData?.price;
+
+    const circulatingSupplyInUsd = circulatingSupply
+      ? Number(formatEther(BigInt(circulatingSupply))) * (price ?? 0)
+      : null;
+
+    const valueToShow =
+      cellCurrency === "usd" ? circulatingSupplyInUsd : circulatingSupply;
 
     // Store the numeric value in the ref when data changes
     useEffect(() => {
       if (circulatingSupply) {
-        const numericValue = Number(
-          BigInt(circulatingSupply) / BigInt(10 ** 18),
-        );
+        const numericValue = Number(formatEther(BigInt(circulatingSupply)));
         circSupplyValues.current[rowIndex] = numericValue;
       } else {
         // Clear value when data is not available
@@ -137,7 +144,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
       }
     }, [circulatingSupply, rowIndex]);
 
-    if (isLoading || !circulatingSupply) {
+    if (isLoading || !circulatingSupply || valueToShow == null) {
       return (
         <SkeletonRow
           parentClassName="flex animate-pulse justify-end pr-4"
@@ -147,7 +154,9 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
     }
 
     const formattedValue = formatNumberUserReadable(
-      Number(BigInt(circulatingSupply) / BigInt(10 ** 18)),
+      cellCurrency === "usd"
+        ? (valueToShow as number)
+        : Number(formatEther(BigInt(valueToShow as string))),
     );
 
     return (
@@ -176,7 +185,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
     // Store the numeric value in the ref when data changes
     useEffect(() => {
       if (delegatedSupply) {
-        const numericValue = Number(BigInt(delegatedSupply) / BigInt(10 ** 18));
+        const numericValue = Number(formatEther(BigInt(delegatedSupply)));
         delegSupplyValues.current[rowIndex] = numericValue;
       } else {
         // Clear value when data is not available
@@ -194,7 +203,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
     }
 
     const formattedValue = formatNumberUserReadable(
-      Number(BigInt(delegatedSupply) / BigInt(10 ** 18)),
+      Number(formatEther(BigInt(delegatedSupply))),
     );
 
     return (
@@ -222,7 +231,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
     // Store the numeric value in the ref when data changes
     useEffect(() => {
       if (activeSupply) {
-        const numericValue = Number(BigInt(activeSupply) / BigInt(10 ** 18));
+        const numericValue = Number(formatEther(BigInt(activeSupply)));
         activeSupplyValues.current[rowIndex] = numericValue;
       }
     }, [activeSupply, rowIndex]);
@@ -245,7 +254,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
     }
 
     const formattedValue = formatNumberUserReadable(
-      Number(BigInt(activeSupply) / BigInt(10 ** 18)),
+      Number(formatEther(BigInt(activeSupply))),
     );
 
     return (
