@@ -52,18 +52,15 @@ query GetDaoData {
 
   const data: QuorumGapResponse = response.data.data;
 
-  console.log({ data });
-
-  const isGapEligible =
-    Math.floor((Date.now() - days) / 1000) <
-    Number(data.proposals.items[0].timestamp);
+  const cutoffDate = Math.floor(
+    new Date(new Date().setDate(new Date().getDate() - days)).getTime() / 1000,
+  );
+  const isGapEligible = cutoffDate < Number(data.proposals.items[0].timestamp);
   const quorum = data.dao.quorum ? Number(data.dao.quorum) / 1e18 : null;
   const avgTurnout = data.compareAverageTurnout.currentAverageTurnout
     ? Number(data.compareAverageTurnout.currentAverageTurnout) / 1e18
     : null;
   const quorumGap = quorum && avgTurnout ? (avgTurnout / quorum - 1) * 100 : 0;
-
-  console.log({ isGapEligible, quorumGap });
 
   return isGapEligible ? quorumGap : null;
 };

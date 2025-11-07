@@ -50,7 +50,6 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   } = useDaoOverviewData({ daoId, daoConfig });
 
   const { data: quorumGap } = useQuorumGap(daoId);
-  console.log({ DaoOverviewSection: quorumGap });
 
   const {
     liquidTreasuryAllValue,
