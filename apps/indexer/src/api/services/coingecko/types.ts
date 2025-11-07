@@ -8,6 +8,7 @@ enum AssetPlatformEnum {
   ARBITRUM = "arbitrum-one",
   OPTIMISM = "optimistic-ethereum",
   SCROLL = "scroll",
+  ZKSYNC = "zksync",
 }
 
 export const CoingeckoTokenIdEnum: Record<DaoIdEnum, string> = {
@@ -21,6 +22,7 @@ export const CoingeckoTokenIdEnum: Record<DaoIdEnum, string> = {
   SCR: "scroll",
   COMP: "compound-governance-token",
   OBOL: "obol-2",
+  ZK: "zk",
 } as const;
 
 export const CoingeckoIdToAssetPlatformId = {
@@ -32,6 +34,7 @@ export const CoingeckoIdToAssetPlatformId = {
   [CoingeckoTokenIdEnum.SCR]: AssetPlatformEnum.SCROLL,
   [CoingeckoTokenIdEnum.COMP]: AssetPlatformEnum.ETHEREUM,
   [CoingeckoTokenIdEnum.OBOL]: AssetPlatformEnum.ETHEREUM,
+  [CoingeckoTokenIdEnum.ZK]: AssetPlatformEnum.ZKSYNC,
 } as const;
 
 export interface CoingeckoHistoricalMarketData {

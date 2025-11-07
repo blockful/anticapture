@@ -160,6 +160,21 @@ export const CONTRACT_ADDRESSES = {
       startBlock: 21883431,
     },
   },
+  [DaoIdEnum.ZK]: {
+    blockTime: 1,
+    tokenType: "ERC20",
+    // https://explorer.zksync.io/address/0x5A7d6b2F92C77FAD6CCaBd7EE0624E64907Eaf3E
+    token: {
+      address: "0x5A7d6b2F92C77FAD6CCaBd7EE0624E64907Eaf3E",
+      decimals: 18,
+      startBlock: 34572100,
+    },
+    // https://explorer.zksync.io/address/0xb83FF6501214ddF40C91C9565d095400f3F45746
+    governor: {
+      address: "0xb83FF6501214ddF40C91C9565d095400f3F45746",
+      startBlock: 55519658,
+    },
+  },
 } as const;
 
 export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -299,6 +314,9 @@ export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     "Protocol Revenue": "0xDe5aE4De36c966747Ea7DF13BD9589642e2B1D0d",
     "Grant Program": "0xa59f60A7684A69E63c07bEC087cEC3D0607cd5cE",
     "DV Labs Treasury 2": "0x6BeFB6484AA10187947Dda81fC01e495f7168dB4",
+  },
+  [DaoIdEnum.ZK]: {
+    timelock: "0xe5d21A9179CA2E1F0F327d598D464CcF60d89c3d",
   },
 };
 
@@ -491,6 +509,7 @@ export const CEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     "MEXC Hot Wallet": "0x9642b23Ed1E01Df1092B92641051881a322F5D4E",
     "Binance Wallet Proxy": "0x73D8bD54F7Cf5FAb43fE4Ef40A62D390644946Db",
   },
+  [DaoIdEnum.ZK]: {},
 };
 
 export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -552,6 +571,7 @@ export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     "Uniswap V3 Pool": "0x57F52C9faa6D40c5163D76b8D7dD81ddB7c95434",
     "Uniswap PoolManager": "0x000000000004444c5dc75cB358380D2e3dE08A90",
   },
+  [DaoIdEnum.ZK]: {},
 };
 
 export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -594,6 +614,7 @@ export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     "Compound 2": "0x3Afdc9BCA9213A35503b077a6072F3D0d5AB0840",
   },
   [DaoIdEnum.OBOL]: {},
+  [DaoIdEnum.ZK]: {},
 };
 
 export const BurningAddresses: Record<
@@ -655,6 +676,11 @@ export const BurningAddresses: Record<
     ZeroAddress: zeroAddress,
     Dead: "0x0000000000000000000000000000000000000000",
     TokenContract: "0x0B010000b7624eb9B3DfBC279673C76E9D29D5F7",
+  },
+  [DaoIdEnum.ZK]: {
+    ZeroAddress: zeroAddress,
+    Dead: "0x0000000000000000000000000000000000000000",
+    TokenContract: "0x5A7d6b2F92C77FAD6CCaBd7EE0624E64907Eaf3E",
   },
 };
 
