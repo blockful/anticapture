@@ -324,15 +324,16 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
 
     if (!quorumGap) {
       return (
-        <TooltipPlain
-          triggerComponent={
-            <div className="text-secondary flex w-full items-center justify-end py-3 text-end text-sm font-normal">
-              N/A
-            </div>
-          }
-          contentComponent="No recent proposals in the last 90 days"
-          className="text-secondary flex w-full items-center justify-end py-3 text-end text-sm font-normal"
-        />
+        <div className="text-secondary flex w-full items-center justify-end text-end text-sm font-normal">
+          <TooltipPlain
+            triggerComponent={
+              <div className="text-secondary flex w-full items-center justify-end py-3 text-end text-sm font-normal">
+                N/A
+              </div>
+            }
+            contentComponent="No recent proposals in the last 90 days"
+          />
+        </div>
       );
     }
 
@@ -658,34 +659,36 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         return <QuorumGapCell daoId={daoId} rowIndex={rowIndex} />;
       },
       header: ({ column }) => (
-        <TooltipPlain
-          triggerComponent={
-            <Button
-              variant="ghost"
-              className="text-secondary w-full justify-end px-0 text-right"
-              onClick={() => column.toggleSorting()}
-            >
-              <h4 className="text-table-header whitespace-nowrap text-right">
-                Quorum Gap
-              </h4>
-              <ArrowUpDown
-                props={{
-                  className: "size-4 shrink-0",
-                }}
-                activeState={
-                  column.getIsSorted() === "asc"
-                    ? ArrowState.UP
-                    : column.getIsSorted() === "desc"
-                      ? ArrowState.DOWN
-                      : ArrowState.DEFAULT
-                }
-              />
-            </Button>
-          }
-          contentComponent="
+        <div className="w-full justify-end px-0 text-right">
+          <TooltipPlain
+            triggerComponent={
+              <Button
+                variant="ghost"
+                className="text-secondary w-full justify-end px-0 text-right"
+                onClick={() => column.toggleSorting()}
+              >
+                <h4 className="text-table-header whitespace-nowrap text-right">
+                  Quorum Gap
+                </h4>
+                <ArrowUpDown
+                  props={{
+                    className: "size-4 shrink-0",
+                  }}
+                  activeState={
+                    column.getIsSorted() === "asc"
+                      ? ArrowState.UP
+                      : column.getIsSorted() === "desc"
+                        ? ArrowState.DOWN
+                        : ArrowState.DEFAULT
+                  }
+                />
+              </Button>
+            }
+            contentComponent="
 Shows how much participation was above or below the quorum in the last 90d. Calculated as (average turnout ÷ quorum) − 1
           "
-        />
+          />
+        </div>
       ),
       enableSorting: true,
       sortingFn: (rowA, rowB) => {
