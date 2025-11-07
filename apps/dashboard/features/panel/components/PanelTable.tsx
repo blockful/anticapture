@@ -228,26 +228,42 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
   const ActiveSupplyCell = ({
     daoId,
     rowIndex,
+    currency: cellCurrency,
   }: {
     daoId: DaoIdEnum;
     rowIndex: number;
+    currency: "usd" | "eth";
   }) => {
     const { data: activeSupplyData } = useActiveSupply(
       daoId,
       TimeInterval.NINETY_DAYS,
     );
 
+    const { data: tokenData, isLoading } = useTokenData(daoId, cellCurrency, {
+      revalidateOnMount: true,
+      revalidateIfStale: true,
+    });
+
     const activeSupply = activeSupplyData?.activeSupply;
+    const activeSupplyInUsd = activeSupply
+      ? Number(formatEther(BigInt(activeSupply))) * (tokenData?.price ?? 0)
+      : null;
+
+    const valueToShow =
+      cellCurrency === "usd" ? activeSupplyInUsd : activeSupply;
 
     // Store the numeric value in the ref when data changes
     useEffect(() => {
-      if (activeSupply) {
-        const numericValue = Number(formatEther(BigInt(activeSupply)));
+      if (activeSupply && valueToShow != null) {
+        const numericValue =
+          cellCurrency === "usd"
+            ? (valueToShow as number)
+            : Number(formatEther(BigInt(valueToShow as string)));
         activeSupplyValues.current[rowIndex] = numericValue;
       }
-    }, [activeSupply, rowIndex]);
+    }, [activeSupply, valueToShow, cellCurrency, rowIndex]);
 
-    if (activeSupplyData === undefined) {
+    if (isLoading || !activeSupply || valueToShow == null) {
       return (
         <SkeletonRow
           parentClassName="flex animate-pulse justify-end pr-4"
@@ -256,16 +272,10 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
       );
     }
 
-    if (!activeSupply) {
-      return (
-        <div className="text-secondary flex w-full items-center justify-end py-3 text-end text-sm font-normal">
-          N/A
-        </div>
-      );
-    }
-
     const formattedValue = formatNumberUserReadable(
-      Number(formatEther(BigInt(activeSupply))),
+      cellCurrency === "usd"
+        ? (valueToShow as number)
+        : Number(formatEther(BigInt(valueToShow as string))),
     );
 
     return (
@@ -608,7 +618,13 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
       cell: ({ row }) => {
         const daoId = row.getValue("dao") as DaoIdEnum;
         const rowIndex = row.index;
-        return <ActiveSupplyCell daoId={daoId} rowIndex={rowIndex} />;
+        return (
+          <ActiveSupplyCell
+            daoId={daoId}
+            rowIndex={rowIndex}
+            currency={currency}
+          />
+        );
       },
       header: ({ column }) => (
         <Button
