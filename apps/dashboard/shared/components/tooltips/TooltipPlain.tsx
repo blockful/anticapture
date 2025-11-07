@@ -6,14 +6,15 @@ import {
   TooltipContent,
 } from "@/shared/components/ui/tooltip";
 import { cn } from "@/shared/utils/";
-import { Info } from "lucide-react";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 
-export function TooltipInfo({
-  text = "",
+export function TooltipPlain({
+  triggerComponent,
+  contentComponent,
   className,
 }: {
-  text?: string;
+  triggerComponent: ReactNode;
+  contentComponent: ReactNode;
   className?: string;
 }) {
   const [open, setOpen] = useState<boolean>(false);
@@ -33,7 +34,7 @@ export function TooltipInfo({
         aria-label="tooltip-info"
         onClick={handleToggle}
       >
-        <Info className="text-secondary size-3.5 cursor-pointer" />
+        {triggerComponent}
       </TooltipTrigger>
       <TooltipContent
         side="top"
@@ -47,7 +48,7 @@ export function TooltipInfo({
           className,
         )}
       >
-        {text}
+        {contentComponent}
       </TooltipContent>
     </Tooltip>
   );
