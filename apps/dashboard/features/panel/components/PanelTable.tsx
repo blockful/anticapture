@@ -8,6 +8,7 @@ import {
   RiskAreaCardEnum,
   RiskAreaCardWrapper,
   Button,
+  TooltipInfo,
 } from "@/shared/components";
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
@@ -670,6 +671,11 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
                   ? ArrowState.DOWN
                   : ArrowState.DEFAULT
             }
+          />
+          <TooltipInfo
+            text="
+Shows how much participation was above or below the quorum in the last 90d. Calculated as (average turnout ÷ quorum) − 1.
+            "
           />
         </Button>
       ),
