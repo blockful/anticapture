@@ -43,7 +43,7 @@ export const DaoOverviewHeaderMetrics = ({
       subText={
         quorumGap
           ? `${Math.abs(quorumGap).toFixed(2)}% ${quorumGap < 0 ? "below" : "above"} quorum`
-          : `No recent proposals` // TODO: Decide final text
+          : `No recent proposals`
       }
     />
 

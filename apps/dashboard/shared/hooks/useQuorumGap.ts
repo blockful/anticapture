@@ -32,7 +32,7 @@ query GetDaoData {
   dao {
     quorum
   }
-  proposals(limit: ${limit}, fromDate${cutoffDate}) {
+  proposals(limit: ${limit}, fromDate: ${cutoffDate}) {
     items {
       timestamp
     }
