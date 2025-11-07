@@ -302,7 +302,6 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
     daoId: DaoIdEnum;
     rowIndex: number;
   }) => {
-    console.log("daoId", daoId);
     const { data: daoData, loading: daoDataLoading } = useDaoData(daoId);
     const { data: averageTurnoutData, isLoading: averageTurnoutLoading } =
       useAverageTurnout(daoId, TimeInterval.NINETY_DAYS, {
@@ -310,32 +309,25 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         revalidateIfStale: true,
       });
 
-    console.log("daoData", daoData);
-
     const quorumValue = daoData?.quorum ? Number(daoData.quorum) / 1e18 : null;
     const turnoutTokens = averageTurnoutData
       ? Number(averageTurnoutData.currentAverageTurnout) / 1e18
       : null;
 
-    console.log("quorumValue", quorumValue);
-    console.log("turnoutTokens", turnoutTokens);
-
-    const surplus =
-      quorumValue !== null && turnoutTokens !== null
-        ? turnoutTokens - quorumValue
+    const surplusPercentage =
+      quorumValue !== null && turnoutTokens !== null && quorumValue > 0
+        ? (turnoutTokens / quorumValue - 1) * 100
         : null;
-
-    console.log("surplus", surplus);
 
     // Store the numeric value in the ref when data changes
     useEffect(() => {
-      if (surplus !== null) {
-        quorumSurplusValues.current[rowIndex] = surplus;
+      if (surplusPercentage !== null) {
+        quorumSurplusValues.current[rowIndex] = surplusPercentage;
       } else {
         // Clear value when data is not available
         delete quorumSurplusValues.current[rowIndex];
       }
-    }, [surplus, rowIndex]);
+    }, [surplusPercentage, rowIndex]);
 
     const isLoading = daoDataLoading || averageTurnoutLoading;
 
@@ -348,7 +340,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
       );
     }
 
-    if (surplus === null) {
+    if (surplusPercentage === null) {
       return (
         <div className="text-secondary flex w-full items-center justify-end py-3 text-end text-sm font-normal">
           N/A
@@ -356,7 +348,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
       );
     }
 
-    const formattedValue = formatNumberUserReadable(surplus);
+    const formattedValue = `${formatNumberUserReadable(surplusPercentage, 1)}%`;
 
     return (
       <div className="text-secondary flex w-full items-center justify-end py-3 text-end text-sm font-normal">
