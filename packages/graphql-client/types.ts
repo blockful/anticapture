@@ -13,12 +13,9 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   BigInt: { input: any; output: any; }
-  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
-  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
-  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
 };
 
@@ -2557,6 +2554,14 @@ export type GetDelegateDelegationHistoryGraphQueryVariables = Exact<{
 
 
 export type GetDelegateDelegationHistoryGraphQuery = { __typename?: 'Query', votingPowerHistorys: { __typename?: 'votingPowerHistoryPage', totalCount: number, items: Array<{ __typename?: 'votingPowerHistory', delta: any, transactionHash: string, timestamp: any, votingPower: any, delegation?: { __typename?: 'delegation', delegatorAccountId: string, delegatedValue: any, previousDelegate?: string | null, delegateAccountId: string } | null, transfer?: { __typename?: 'transfer', amount: any, fromAccountId: string, toAccountId: string } | null }> } };
+
+export type GetDelegatedSupplyHistoryQueryVariables = Exact<{
+  startDate: Scalars['String']['input'];
+  endDate?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GetDelegatedSupplyHistoryQuery = { __typename?: 'Query', averageDelegationPercentageByDay: { __typename?: 'AverageDelegationPercentagePage', items: Array<{ __typename?: 'AverageDelegationPercentageItem', date: string, high: string }> } };
 
 export type GetDelegatesCountQueryVariables = Exact<{ [key: string]: never; }>;
 

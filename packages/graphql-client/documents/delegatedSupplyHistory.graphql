@@ -1,0 +1,12 @@
+query GetDelegatedSupplyHistory($startDate: String!, $endDate: String) {
+  averageDelegationPercentageByDay(
+    startDate: $startDate
+    endDate: $endDate
+    limit: 365
+  ) {
+    items {
+      date
+      high
+    }
+  }
+}
