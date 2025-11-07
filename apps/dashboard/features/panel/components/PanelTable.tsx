@@ -11,13 +11,7 @@ import {
 } from "@/shared/components";
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
-import {
-  useScreenSize,
-  useTokenData,
-  useActiveSupply,
-  useDaoData,
-  useAverageTurnout,
-} from "@/shared/hooks";
+import { useScreenSize, useTokenData, useActiveSupply } from "@/shared/hooks";
 import {
   ArrowUpDown,
   ArrowState,
@@ -34,6 +28,7 @@ import {
 } from "@/shared/dao-config/utils";
 import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
 import { Table } from "@/shared/components/design-system/table/Table";
+import { useQuorumGap } from "@/shared/hooks/useQuorumGap";
 
 type PanelDao = {
   dao: string;
@@ -302,34 +297,20 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
     daoId: DaoIdEnum;
     rowIndex: number;
   }) => {
-    const { data: daoData, loading: daoDataLoading } = useDaoData(daoId);
-    const { data: averageTurnoutData, isLoading: averageTurnoutLoading } =
-      useAverageTurnout(daoId, TimeInterval.NINETY_DAYS, {
-        revalidateOnMount: true,
-        revalidateIfStale: true,
-      });
-
-    const quorumValue = daoData?.quorum ? Number(daoData.quorum) / 1e18 : null;
-    const turnoutTokens = averageTurnoutData
-      ? Number(averageTurnoutData.currentAverageTurnout) / 1e18
-      : null;
-
-    const surplusPercentage =
-      quorumValue !== null && turnoutTokens !== null && quorumValue > 0
-        ? (turnoutTokens / quorumValue - 1) * 100
-        : null;
+    const { data: quorumGap, isLoading: quorumGapLoading } =
+      useQuorumGap(daoId);
 
     // Store the numeric value in the ref when data changes
     useEffect(() => {
-      if (surplusPercentage !== null) {
-        quorumSurplusValues.current[rowIndex] = surplusPercentage;
+      if (quorumGap) {
+        quorumSurplusValues.current[rowIndex] = quorumGap;
       } else {
         // Clear value when data is not available
         delete quorumSurplusValues.current[rowIndex];
       }
-    }, [surplusPercentage, rowIndex]);
+    }, [quorumGap, rowIndex]);
 
-    const isLoading = daoDataLoading || averageTurnoutLoading;
+    const isLoading = quorumGapLoading;
 
     if (isLoading) {
       return (
@@ -340,7 +321,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
       );
     }
 
-    if (surplusPercentage === null) {
+    if (!quorumGap) {
       return (
         <div className="text-secondary flex w-full items-center justify-end py-3 text-end text-sm font-normal">
           N/A
@@ -348,7 +329,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
       );
     }
 
-    const formattedValue = `${formatNumberUserReadable(surplusPercentage, 1)}%`;
+    const formattedValue = `${formatNumberUserReadable(quorumGap, 1)}%`;
 
     return (
       <div className="text-secondary flex w-full items-center justify-end py-3 text-end text-sm font-normal">

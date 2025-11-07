@@ -1,5 +1,4 @@
 import { DaoConfiguration } from "@/shared/dao-config/types";
-import { AverageTurnoutResponse } from "@/shared/hooks";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { useMemo } from "react";
 import { formatEther } from "viem";
@@ -7,30 +6,17 @@ import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
 export const useDaoQuorumStats = ({
   daoData,
-  averageTurnout,
   totalSupply,
   delegatedSupply,
   daoConfig,
 }: {
   daoData?: { quorum?: string } | null;
-  averageTurnout: {
-    data?: AverageTurnoutResponse | null;
-  } | null;
   totalSupply?: string;
   delegatedSupply: { data?: { currentDelegatedSupply?: string } | null };
   daoConfig: DaoConfiguration;
 }) => {
   return useMemo(() => {
     const quorumValue = daoData?.quorum ? Number(daoData.quorum) / 1e18 : null;
-    const turnoutTokens = averageTurnout?.data
-      ? Number(averageTurnout.data.currentAverageTurnout) / 1e18
-      : null;
-
-    const averageTurnoutPercentAboveQuorum =
-      quorumValue && turnoutTokens
-        ? (turnoutTokens / quorumValue - 1) * 100
-        : 0;
-
     const quorumMinPercentage =
       daoData?.quorum &&
       totalSupply !== undefined &&
@@ -82,13 +68,11 @@ export const useDaoQuorumStats = ({
 
     return {
       quorumValue,
-      averageTurnoutPercentAboveQuorum,
       quorumValueFormatted,
       quorumPercentage,
     };
   }, [
     daoData?.quorum,
-    averageTurnout?.data,
     totalSupply,
     delegatedSupply.data?.currentDelegatedSupply,
     daoConfig,

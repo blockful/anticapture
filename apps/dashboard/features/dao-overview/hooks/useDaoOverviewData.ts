@@ -64,18 +64,13 @@ export const useDaoOverviewData = ({
     ? `${formatNumberUserReadable(Number(daoData.data.proposalThreshold) / 10 ** 18)}`
     : "No Threshold";
 
-  const {
-    quorumValue,
-    averageTurnoutPercentAboveQuorum,
-    quorumPercentage,
-    quorumValueFormatted,
-  } = useDaoQuorumStats({
-    daoData: daoData.data,
-    averageTurnout,
-    totalSupply,
-    delegatedSupply,
-    daoConfig,
-  });
+  const { quorumValue, quorumPercentage, quorumValueFormatted } =
+    useDaoQuorumStats({
+      daoData: daoData.data,
+      totalSupply,
+      delegatedSupply,
+      daoConfig,
+    });
 
   const treasuryStats = useDaoTreasuryStats({
     treasuryAll,
@@ -115,7 +110,6 @@ export const useDaoOverviewData = ({
     averageTurnout,
     treasuryStats,
     quorumValue,
-    averageTurnoutPercentAboveQuorum,
     topDelegatesToPass,
     isLoading,
     proposalThresholdValue,

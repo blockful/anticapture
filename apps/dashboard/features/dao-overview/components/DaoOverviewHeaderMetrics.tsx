@@ -6,7 +6,7 @@ interface DaoOverviewHeaderMetricsProps {
   delegatedSupplyValue: string;
   activeSupplyValue: string;
   averageTurnoutValue: string;
-  averageTurnoutPercentAboveQuorum: number;
+  quorumGap: number | null | undefined;
   liquidTreasuryAllValue: number;
   liquidTreasuryAllPercent: string;
   liquidTreasuryNonDaoValue: number;
@@ -18,7 +18,7 @@ export const DaoOverviewHeaderMetrics = ({
   delegatedSupplyValue,
   activeSupplyValue,
   averageTurnoutValue,
-  averageTurnoutPercentAboveQuorum,
+  quorumGap,
   liquidTreasuryAllValue,
   liquidTreasuryAllPercent,
   liquidTreasuryNonDaoValue,
@@ -40,7 +40,11 @@ export const DaoOverviewHeaderMetrics = ({
     <DaoOverviewMetricCard
       title="Average Turnout"
       text={`${averageTurnoutValue} ${daoId}`}
-      subText={`${Math.abs(averageTurnoutPercentAboveQuorum).toFixed(2)}% ${averageTurnoutPercentAboveQuorum < 0 ? "below" : "above"} quorum`}
+      subText={
+        quorumGap
+          ? `${Math.abs(quorumGap).toFixed(2)}% ${quorumGap < 0 ? "below" : "above"} quorum`
+          : `No recent proposals` // TODO: Decide final text
+      }
     />
 
     <DaoOverviewMetricCard
