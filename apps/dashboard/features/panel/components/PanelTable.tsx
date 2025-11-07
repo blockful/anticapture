@@ -46,7 +46,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
   const circSupplyValues = useRef<Record<number, number>>({});
   const delegSupplyValues = useRef<Record<number, number>>({});
   const activeSupplyValues = useRef<Record<number, number>>({});
-  const quorumSurplusValues = useRef<Record<number, number>>({});
+  const quorumGapValues = useRef<Record<number, number>>({});
 
   const notOnElectionDaoIds = Object.values(DaoIdEnum).filter(
     (daoId) => daoId !== DaoIdEnum.NOUNS, // TODO remove this when Nouns is fully supported
@@ -289,8 +289,8 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
     );
   };
 
-  // Liquid Quorum Surplus Cell
-  const QuorumSurplusCell = ({
+  // Liquid Quorum Gap Cell
+  const QuorumGapCell = ({
     daoId,
     rowIndex,
   }: {
@@ -303,10 +303,10 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
     // Store the numeric value in the ref when data changes
     useEffect(() => {
       if (quorumGap) {
-        quorumSurplusValues.current[rowIndex] = quorumGap;
+        quorumGapValues.current[rowIndex] = quorumGap;
       } else {
         // Clear value when data is not available
-        delete quorumSurplusValues.current[rowIndex];
+        delete quorumGapValues.current[rowIndex];
       }
     }, [quorumGap, rowIndex]);
 
@@ -644,11 +644,11 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
       },
     },
     {
-      accessorKey: "quorumSurplus",
+      accessorKey: "quorumGap",
       cell: ({ row }) => {
         const daoId = row.getValue("dao") as DaoIdEnum;
         const rowIndex = row.index;
-        return <QuorumSurplusCell daoId={daoId} rowIndex={rowIndex} />;
+        return <QuorumGapCell daoId={daoId} rowIndex={rowIndex} />;
       },
       header: ({ column }) => (
         <Button
@@ -657,7 +657,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
           onClick={() => column.toggleSorting()}
         >
           <h4 className="text-table-header whitespace-nowrap text-right">
-            Quorum Surplus
+            Quorum Gap
           </h4>
           <ArrowUpDown
             props={{
@@ -677,8 +677,8 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
       sortingFn: (rowA, rowB) => {
         const indexA = rowA.index;
         const indexB = rowB.index;
-        const valueA = quorumSurplusValues.current[indexA] || 0;
-        const valueB = quorumSurplusValues.current[indexB] || 0;
+        const valueA = quorumGapValues.current[indexA] || 0;
+        const valueB = quorumGapValues.current[indexB] || 0;
         return valueA - valueB;
       },
       meta: {
