@@ -20,20 +20,23 @@ import { useState } from "react";
 import { VotingModal } from "@/features/governance/components/modals/VotingModal";
 import { useVoterInfo } from "@/features/governance/hooks/useAccountPower";
 import { DaoIdEnum } from "@/shared/types/daos";
+import daoConfig from "@/shared/dao-config";
 
 export const ProposalSection = () => {
   const { proposalId, daoId } = useParams();
   const { address } = useAccount();
   const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
+  const daoEnum = daoId as DaoIdEnum;
+  const { decimals } = daoConfig[daoEnum];
 
   const { proposal, loading, error } = useProposal({
     proposalId: proposalId as string,
-    daoId: daoId as DaoIdEnum,
+    daoId: daoEnum,
   });
 
   const { votingPower, votesOnchain } = useVoterInfo({
     address: address ?? "",
-    daoId: daoId?.toString().toUpperCase() as DaoIdEnum,
+    daoId: daoEnum,
     proposalId: proposalId as string,
   });
 
@@ -67,7 +70,7 @@ export const ProposalSection = () => {
         <div className="flex flex-col gap-6 p-5 lg:flex-row lg:pt-0">
           <div className="self-star left-0 top-5 flex h-fit w-full flex-col gap-6 lg:sticky lg:top-[85px] lg:w-[420px]">
             <TitleSection proposal={proposal} />
-            <ProposalInfoSection proposal={proposal} />
+            <ProposalInfoSection proposal={proposal} decimals={decimals} />
             <ProposalStatusSection proposal={proposal} />
 
             {address ? (
@@ -97,6 +100,7 @@ export const ProposalSection = () => {
           onClose={() => setIsVotingModalOpen(false)}
           proposal={proposal as Query_Proposals_Items_Items}
           votingPower={votingPower}
+          decimals={decimals}
         />
       </div>
     </div>

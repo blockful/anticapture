@@ -1,5 +1,6 @@
+import { formatUnits } from "viem";
+
 import { cn, formatNumberUserReadable } from "@/shared/utils";
-import { formatEther } from "viem";
 
 interface VoteOptionProps {
   vote: "for" | "against" | "abstain";
@@ -7,6 +8,7 @@ interface VoteOptionProps {
   votingPower: string;
   onChange: (vote: "for" | "against" | "abstain") => void;
   checked: boolean;
+  decimals: number;
 }
 
 export const VoteOption = ({
@@ -15,9 +17,10 @@ export const VoteOption = ({
   votingPower,
   onChange,
   checked,
+  decimals,
 }: VoteOptionProps) => {
   const userReadableVotingPower = formatNumberUserReadable(
-    Number(formatEther(BigInt(votingPower))),
+    Number(formatUnits(BigInt(votingPower), decimals)),
     1,
   );
 

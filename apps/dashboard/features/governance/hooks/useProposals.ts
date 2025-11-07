@@ -9,6 +9,7 @@ import {
 } from "@anticapture/graphql-client/hooks";
 import type { Proposal as GovernanceProposal } from "@/features/governance/types";
 import { transformToGovernanceProposal } from "@/features/governance/utils/transformToGovernanceProposal";
+import daoConfig from "@/shared/dao-config";
 
 export interface PaginationInfo {
   hasNextPage: boolean;
@@ -44,6 +45,7 @@ export const useProposals = ({
 }: UseProposalsParams = {}): UseProposalsResult => {
   const [isPaginationLoading, setIsPaginationLoading] = useState(false);
   const [allProposals, setAllProposals] = useState<GovernanceProposal[]>([]);
+  const { decimals } = daoConfig[daoId as DaoIdEnum];
 
   const queryVariables = useMemo(
     () => ({
@@ -134,8 +136,8 @@ export const useProposals = ({
           ).filter((proposal) => proposal !== null);
 
           // Transform to governance proposals and append to existing list
-          const newGovernanceProposals = newRawProposals.map(
-            transformToGovernanceProposal,
+          const newGovernanceProposals = newRawProposals.map((proposal) =>
+            transformToGovernanceProposal(proposal, decimals),
           );
 
           if (newGovernanceProposals.length > 0) {

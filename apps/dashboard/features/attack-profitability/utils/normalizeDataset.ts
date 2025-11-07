@@ -3,12 +3,13 @@ import {
   DaoMetricsDayBucket,
   MultilineChartDataSetPoint,
 } from "@/shared/dao-config/types";
+import { formatUnits } from "viem";
 
 export function normalizeDataset(
   tokenPrices: PriceEntry[],
   key: string,
   multiplier: number,
-  tokenType: "ERC20" | "ERC721" = "ERC20",
+  decimals: number,
   multiplierDataSet?: DaoMetricsDayBucket[],
 ): MultilineChartDataSetPoint[] {
   if (!multiplierDataSet?.length) {
@@ -20,17 +21,19 @@ export function normalizeDataset(
       }));
   }
 
-  const parsedMultipliers = multiplierDataSet.reduce(
+  const multipliersByTs = multiplierDataSet.reduce(
     (acc, item) => ({
       ...acc,
-      [Number(item.date) * 1000]:
-        tokenType === "ERC721" ? Number(item.high) : Number(item.high) / 1e18,
+      [Number(item.date) * 1000]: Number(
+        formatUnits(BigInt(item.high), decimals),
+      ),
     }),
     {} as Record<number, number>,
   );
 
-  return tokenPrices.map(({ timestamp, price }) => ({
+  // Multiply using the exact timestamp's multiplier (may be undefined if missing)
+  return [...tokenPrices].reverse().map(({ timestamp, price }) => ({
     date: timestamp,
-    [key]: Number(price) * parsedMultipliers[timestamp],
+    [key]: Number(price) * (multipliersByTs[timestamp] ?? 0),
   }));
 }

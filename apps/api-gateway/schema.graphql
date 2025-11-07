@@ -38,9 +38,6 @@ type Query {
   tokenPrices(where: tokenPriceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPricePage!
   _meta: Meta
 
-  """Get total assets"""
-  totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
-
   """Get historical market data for a specific token"""
   historicalTokenData(skip: NonNegativeInt, limit: Float = 365): [query_historicalTokenData_items]
 
@@ -143,11 +140,6 @@ type Query {
 
   """Returns current governance parameters for this DAO"""
   dao: dao_200_response
-  """Get total assets"""
-  totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
-
-  """Get delegation percentage day buckets with forward-fill"""
-  delegationPercentageByDay(startDate: String, endDate: String, orderDirection: queryInput_delegationPercentageByDay_orderDirection = asc, limit: NonNegativeInt = 365, after: String, before: String): delegationPercentageByDay_200_response
 
   """
   Average delegation percentage across all supported DAOs by day.
@@ -1326,19 +1318,6 @@ input tokenPriceFilter {
   timestamp_lte: BigInt
 }
 
-type query_totalAssets_items {
-  totalAssets: String!
-  date: String!
-}
-
-enum queryInput_totalAssets_days {
-  _7d
-  _30d
-  _90d
-  _180d
-  _365d
-}
-
 type query_historicalTokenData_items {
   price: String!
   timestamp: Float!
@@ -1895,41 +1874,6 @@ enum HTTPMethod {
   OPTIONS
   TRACE
   PATCH
-}
-
-type query_totalAssets_items {
-  totalAssets: String!
-  date: String!
-}
-
-enum queryInput_totalAssets_days {
-  _7d
-  _30d
-  _90d
-  _180d
-  _365d
-}
-
-type delegationPercentageByDay_200_response {
-  items: [query_delegationPercentageByDay_items_items]!
-  totalCount: Float!
-  pageInfo: query_delegationPercentageByDay_pageInfo!
-}
-
-type query_delegationPercentageByDay_items_items {
-  date: String!
-  high: String!
-}
-
-type query_delegationPercentageByDay_pageInfo {
-  hasNextPage: Boolean!
-  endDate: String
-  startDate: String
-}
-
-enum queryInput_delegationPercentageByDay_orderDirection {
-  asc
-  desc
 }
 
 type AverageDelegationPercentageItem {

@@ -15,8 +15,6 @@ export const updateDelegatedSupply = async (
 ) => {
   let currentDelegatedSupply = 0n;
 
-  // TODO is token.delegatedSupply the same as the last dailyMetric.delegatedSupply?
-
   const { delegatedSupply: newDelegatedSupply } = await context.db
     .update(token, { id: tokenId })
     .set((current) => {

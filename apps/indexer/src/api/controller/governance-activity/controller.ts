@@ -223,13 +223,14 @@ export function governanceActivity(
       if (tokenType === "ERC721") {
         return context.json(
           {
-            ...data,
-            changeRate:
-              Number(data.oldAverageTurnout) > 0
-                ? Number(data.currentAverageTurnout) /
-                    Number(data.oldAverageTurnout) -
-                  1
-                : 0,
+            currentAverageTurnout:
+              data.currentAverageTurnout?.split(".")[0] || "0",
+            oldAverageTurnout: data.oldAverageTurnout?.split(".")[0] || "0",
+            changeRate: data.oldAverageTurnout
+              ? Number(data.currentAverageTurnout) /
+                  Number(data.oldAverageTurnout) -
+                1
+              : 0,
           },
           200,
         );
