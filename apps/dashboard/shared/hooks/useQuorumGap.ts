@@ -23,12 +23,16 @@ export const fetchQuorumGap = async ({
 }): Promise<number | null> => {
   const days = 90;
   const limit = 1;
+  const cutoffDate = Math.floor(
+    new Date(new Date().setDate(new Date().getDate() - days)).getTime() / 1000,
+  );
+
   const query = `
 query GetDaoData {
   dao {
     quorum
   }
-  proposals(limit: ${limit}) {
+  proposals(limit: ${limit}, fromDate${cutoffDate}) {
     items {
       timestamp
     }
@@ -52,10 +56,7 @@ query GetDaoData {
 
   const data: QuorumGapResponse = response.data.data;
 
-  const cutoffDate = Math.floor(
-    new Date(new Date().setDate(new Date().getDate() - days)).getTime() / 1000,
-  );
-  const isGapEligible = cutoffDate < Number(data.proposals.items[0].timestamp);
+  const isGapEligible = data.proposals.items.length > 0;
   const quorum = data.dao.quorum ? Number(data.dao.quorum) / 1e18 : null;
   const avgTurnout = data.compareAverageTurnout.currentAverageTurnout
     ? Number(data.compareAverageTurnout.currentAverageTurnout) / 1e18

@@ -331,6 +331,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
             </div>
           }
           contentComponent="No recent proposals in the last 90 days"
+          className="flex w-full items-center justify-end"
         />
       );
     }
