@@ -7,10 +7,12 @@ import { formatNumberUserReadable } from "@/shared/utils";
 const monitoringData = [
   {
     title: "Total Treasury monitored",
-    current: 2200000000, // $2.2B
-    total: 22700000000, // $22.7B
-    percentage: 5,
+    current: 4100000000, // $4.1B
+    total: 16200000000, // $16.2B
+    percentage: 25,
   },
+
+  // Fake data for now
   {
     title: "Total Value Locked (TVL) Monitored",
     current: 5600000000, // $5.6B
@@ -61,7 +63,7 @@ export const TreasuryMonitoring = () => {
 
       {/* Alert */}
       <InlineAlert
-        text="More than $57.8B could be vulnerable without active monitoring"
+        text="More than $12.1B could be vulnerable without active monitoring"
         variant="error"
       />
     </div>
