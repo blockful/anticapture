@@ -1,5 +1,5 @@
 import { Context, Event, ponder } from "ponder:registry";
-import { token } from "ponder:schema";
+import { accountBalance, token } from "ponder:schema";
 import { Address, isAddressEqual, zeroAddress } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
@@ -43,6 +43,24 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
     }) => {
       const { from, to } = event.args;
 
+      // Auto-self-delegate for Nouns when no explicit delegate is set
+      const toBal = await context.db.find(accountBalance, {
+        accountId: event.args.to,
+        tokenId: event.log.address,
+      });
+
+      if (toBal?.delegate === zeroAddress) {
+        await delegateChanged(context, daoId, {
+          delegator: event.args.to,
+          delegate: event.args.to,
+          tokenId: event.log.address,
+          previousDelegate: zeroAddress,
+          txHash: event.transaction.hash,
+          timestamp: event.block.timestamp,
+          logIndex: event.log.logIndex,
+        });
+      }
+
       await tokenTransfer(
         context,
         daoId,
@@ -77,17 +95,6 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
           event.block.timestamp,
         );
       }
-
-      await delegateChanged(context, daoId, {
-        delegator: event.args.to,
-        delegate: event.args.to,
-        tokenId: event.log.address,
-        previousDelegate: event.args.from,
-        txHash: event.transaction.hash,
-        timestamp: event.block.timestamp,
-        logIndex: event.log.logIndex,
-        delegatorBalance: 1n,
-      });
 
       if (!event.transaction.to) return;
 
