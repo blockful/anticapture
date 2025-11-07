@@ -15,7 +15,8 @@ export const NOUNS: DaoConfiguration = {
   daoOverview: {
     token: "ERC721",
     chain: mainnet,
-    snapshot: "",
+    priceDisclaimer:
+      "Based on the average price of the last 30 days of the auction.",
     contracts: {
       governor: "0x6f3E6272A167e8AcCb32072d08E0957F9c79223d",
       token: "0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03",
