@@ -7,6 +7,7 @@ export enum DaoIdEnum {
   SCR = "SCR",
   COMP = "COMP",
   OBOL = "OBOL",
+  ZK = "ZK",
 }
 
 export interface DAO {
