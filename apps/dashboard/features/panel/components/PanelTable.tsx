@@ -181,19 +181,28 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
       revalidateIfStale: true,
     });
     const delegatedSupply = tokenData?.delegatedSupply;
+    const delegatedSupplyInUsd = delegatedSupply
+      ? Number(formatEther(BigInt(delegatedSupply))) * (tokenData?.price ?? 0)
+      : null;
+
+    const valueToShow =
+      cellCurrency === "usd" ? delegatedSupplyInUsd : delegatedSupply;
 
     // Store the numeric value in the ref when data changes
     useEffect(() => {
-      if (delegatedSupply) {
-        const numericValue = Number(formatEther(BigInt(delegatedSupply)));
+      if (delegatedSupply && valueToShow != null) {
+        const numericValue =
+          cellCurrency === "usd"
+            ? (valueToShow as number)
+            : Number(formatEther(BigInt(valueToShow as string)));
         delegSupplyValues.current[rowIndex] = numericValue;
       } else {
         // Clear value when data is not available
         delete delegSupplyValues.current[rowIndex];
       }
-    }, [delegatedSupply, rowIndex]);
+    }, [delegatedSupply, valueToShow, cellCurrency, rowIndex]);
 
-    if (isLoading || !delegatedSupply) {
+    if (isLoading || !delegatedSupply || valueToShow == null) {
       return (
         <SkeletonRow
           parentClassName="flex animate-pulse justify-end pr-4"
@@ -203,7 +212,9 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
     }
 
     const formattedValue = formatNumberUserReadable(
-      Number(formatEther(BigInt(delegatedSupply))),
+      cellCurrency === "usd"
+        ? (valueToShow as number)
+        : Number(formatEther(BigInt(valueToShow as string))),
     );
 
     return (
