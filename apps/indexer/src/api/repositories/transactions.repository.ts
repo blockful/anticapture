@@ -262,14 +262,14 @@ export class TransactionsRepository {
     return {
       transfer: this.coalesceConditionArray(
         [
-          timePeriodConditions,
+          `(${timePeriodConditions})`,
           this.coalesceConditionArray(transferConditions, "OR"),
         ],
         "AND",
       ),
       delegation: this.coalesceConditionArray(
         [
-          timePeriodConditions,
+          `(${timePeriodConditions})`,
           this.coalesceConditionArray(delegationConditions, "OR"),
         ],
         "AND",
