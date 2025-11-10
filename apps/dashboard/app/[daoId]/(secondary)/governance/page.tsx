@@ -30,7 +30,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     [DaoIdEnum.SCR]: `${baseUrl}/opengraph-images/scr.png`,
     [DaoIdEnum.OBOL]: `${baseUrl}/opengraph-images/obol.png`,
     [DaoIdEnum.COMP]: `${baseUrl}/opengraph-images/comp.png`,
-    [DaoIdEnum.ZK]: `${baseUrl}/opengraph-images/ens.png`, // TODO
+    [DaoIdEnum.ZK]: `${baseUrl}/opengraph-images/zk.png`,
   };
 
   const ogTitle = `Anticapture - ${daoId} DAO`;

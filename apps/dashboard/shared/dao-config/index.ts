@@ -6,6 +6,7 @@ import { SCR } from "@/shared/dao-config/scr";
 import { COMP } from "@/shared/dao-config/comp";
 import { OBOL } from "@/shared/dao-config/obol";
 import { NOUNS } from "@/shared/dao-config/nouns";
+import { ZK } from "@/shared/dao-config/zk";
 
 export default {
   UNI,
@@ -16,4 +17,5 @@ export default {
   NOUNS,
   COMP,
   OBOL,
+  ZK,
 } as const;
