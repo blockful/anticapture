@@ -11,16 +11,16 @@ export class TransactionsRepository {
       this.filterToSql(filter);
 
     const query = sql`
-      WITH filtered_transactions AS (
-        SELECT DISTINCT ${transfer.transactionHash} AS transaction_hash
+    WITH filtered_transactions AS (
+        SELECT DISTINCT ${transfer.transactionHash}
         FROM ${transfer}
         WHERE ${sql.raw(transferFilter)}
         UNION
-        SELECT DISTINCT ${delegation.transactionHash} AS transaction_hash
+        SELECT DISTINCT ${delegation.transactionHash}
         FROM ${delegation}
         WHERE ${sql.raw(delegationFilter)}
-      ),
-      latest_filtered_transactions AS (
+    ),
+    latest_filtered_transactions AS (
         SELECT 
           ${transaction.transactionHash},
           ${transaction.fromAddress},
@@ -31,77 +31,70 @@ export class TransactionsRepository {
           ${transaction.isTotal},
           ${transaction.timestamp}
         FROM ${transaction}
-        JOIN filtered_transactions ft
-          ON ft.transaction_hash = ${transaction.transactionHash}
+        WHERE ${transaction.transactionHash} IN (SELECT transaction_hash FROM filtered_transactions)
         ORDER BY ${transaction.timestamp} DESC
         LIMIT ${filter.limit}
-      ),
-      transfer_aggregates AS (
+    ),
+    transfer_aggregates AS (
         SELECT 
           ${transfer.transactionHash},
-          JSON_AGG(
-            JSON_BUILD_OBJECT(
-              'transactionHash', ${transfer.transactionHash},
-              'daoId', ${transfer.daoId},
-              'tokenId', ${transfer.tokenId},
-              'amount', ${transfer.amount},
-              'fromAccountId', ${transfer.fromAccountId},
-              'toAccountId', ${transfer.toAccountId},
-              'timestamp', ${transfer.timestamp},
-              'logIndex', ${transfer.logIndex},
-              'isCex', ${transfer.isCex},
-              'isDex', ${transfer.isDex},
-              'isLending', ${transfer.isLending},
-              'isTotal', ${transfer.isTotal}
-            )
-          ) AS transfers
+          JSON_AGG(JSON_BUILD_OBJECT(
+            'transactionHash', ${transfer.transactionHash},
+            'daoId', ${transfer.daoId},
+            'tokenId', ${transfer.tokenId},
+            'amount', ${transfer.amount},
+            'fromAccountId', ${transfer.fromAccountId},
+            'toAccountId', ${transfer.toAccountId},
+            'timestamp', ${transfer.timestamp},
+            'logIndex', ${transfer.logIndex},
+            'isCex', ${transfer.isCex},
+            'isDex', ${transfer.isDex},
+            'isLending', ${transfer.isLending},
+            'isTotal', ${transfer.isTotal}
+          )) as transfers
         FROM ${transfer}
-        JOIN latest_filtered_transactions lt
-          ON lt.transaction_hash = ${transfer.transactionHash}
+        WHERE ${transfer.transactionHash} IN (SELECT transaction_hash FROM latest_filtered_transactions)
         GROUP BY ${transfer.transactionHash}
-      ),
-      delegation_aggregates AS (
+    ),
+    delegation_aggregates AS (
         SELECT 
           ${delegation.transactionHash},
-          JSON_AGG(
-            JSON_BUILD_OBJECT(
-              'transactionHash', ${delegation.transactionHash},
-              'daoId', ${delegation.daoId},
-              'delegateAccountId', ${delegation.delegateAccountId},
-              'delegatorAccountId', ${delegation.delegatorAccountId},
-              'delegatedValue', ${delegation.delegatedValue},
-              'previousDelegate', ${delegation.previousDelegate},
-              'timestamp', ${delegation.timestamp},
-              'logIndex', ${delegation.logIndex},
-              'isCex', ${delegation.isCex},
-              'isDex', ${delegation.isDex},
-              'isLending', ${delegation.isLending},
-              'isTotal', ${delegation.isTotal}
-            )
-          ) AS delegations
+          JSON_AGG(JSON_BUILD_OBJECT(
+            'transactionHash', ${delegation.transactionHash},
+            'daoId', ${delegation.daoId},
+            'delegateAccountId', ${delegation.delegateAccountId},
+            'delegatorAccountId', ${delegation.delegatorAccountId},
+            'delegatedValue', ${delegation.delegatedValue},
+            'previousDelegate', ${delegation.previousDelegate},
+            'timestamp', ${delegation.timestamp},
+            'logIndex', ${delegation.logIndex},
+            'isCex', ${delegation.isCex},
+            'isDex', ${delegation.isDex},
+            'isLending', ${delegation.isLending},
+            'isTotal', ${delegation.isTotal}
+          )) as delegations
         FROM ${delegation}
-        JOIN latest_filtered_transactions lt
-          ON lt.transaction_hash = ${delegation.transactionHash}
+        WHERE ${delegation.transactionHash} IN (SELECT ${delegation.transactionHash} FROM latest_filtered_transactions)
         GROUP BY ${delegation.transactionHash}
-      )
-      SELECT 
-        lt.transaction_hash AS "transactionHash",
-        lt.from_address   AS "fromAddress", 
-        lt.to_address     AS "toAddress",
-        lt.is_cex         AS "isCex",
-        lt.is_dex         AS "isDex",
-        lt.is_lending     AS "isLending", 
-        lt.is_total       AS "isTotal", 
-        lt.timestamp,
-        COALESCE(ta.transfers, '[]'::json)    AS transfers,
-        COALESCE(da.delegations, '[]'::json)  AS delegations
-      FROM latest_filtered_transactions lt
-      LEFT JOIN transfer_aggregates   ta ON ta.transaction_hash = lt.transaction_hash
-      LEFT JOIN delegation_aggregates da ON da.transaction_hash = lt.transaction_hash
-      ORDER BY lt.timestamp DESC;
-    `;
-
+    )
+    SELECT 
+      lt.transaction_hash AS "transactionHash",
+      lt.from_address AS "fromAddress", 
+      lt.to_address AS "toAddress",
+      lt.is_cex AS "isCex",
+      lt.is_dex AS "isDex",
+      lt.is_lending AS "isLending", 
+      lt.is_total AS "isTotal", 
+      lt.timestamp,
+      COALESCE(ta.transfers, '[]'::json) as transfers,
+      COALESCE(da.delegations, '[]'::json) as delegations
+    FROM latest_filtered_transactions lt
+    LEFT JOIN transfer_aggregates ta ON ta.transaction_hash = lt.transaction_hash
+    LEFT JOIN delegation_aggregates da ON da.transaction_hash = lt.transaction_hash
+    ORDER BY lt.timestamp DESC;
+`;
     const result = await db.execute<DBTransaction>(query);
+
     return result.rows;
   }
 
@@ -211,64 +204,75 @@ export class TransactionsRepository {
     transfer: string;
     delegation: string;
   } {
+    const transferTimePeriodConditions: string = this.coalesceConditionArray(
+      this.timePeriodToSql(filter, "transfers"),
+      "AND",
+    );
+    const delegationTimePeriodConditions: string = this.coalesceConditionArray(
+      this.timePeriodToSql(filter, "delegations"),
+      "AND",
+    );
     const checkIsDex = filter.affectedSupply.isDex ?? false;
     const checkIsCex = filter.affectedSupply.isCex ?? false;
     const checkIsLending = filter.affectedSupply.isLending ?? false;
     const checkIsTotal = filter.affectedSupply.isTotal ?? false;
 
-    const timePeriodConditions = this.coalesceConditionArray(
-      this.timePeriodToSql(filter),
-      "AND",
-    );
-
     const transferConditions: string[] = [];
     const delegationConditions: string[] = [];
 
     if (checkIsDex) {
-      transferConditions.push(`is_dex = true`);
-      delegationConditions.push(`is_dex = true`);
+      transferConditions.push(`transfers.is_dex = true`);
+      delegationConditions.push(`delegations.is_dex = true`);
     }
     if (checkIsCex) {
-      transferConditions.push(`is_cex = true`);
-      delegationConditions.push(`is_cex = true`);
+      transferConditions.push(`transfers.is_cex = true`);
+      delegationConditions.push(`delegations.is_cex = true`);
     }
     if (checkIsLending) {
-      transferConditions.push(`is_lending = true`);
-      delegationConditions.push(`is_lending = true`);
+      transferConditions.push(`transfers.is_lending = true`);
+      delegationConditions.push(`delegations.is_lending = true`);
     }
     if (checkIsTotal) {
-      transferConditions.push(`is_total = true`);
-      delegationConditions.push(`is_total = true`);
+      transferConditions.push(`transfers.is_total = true`);
+      delegationConditions.push(`delegations.is_total = true`);
     }
 
     if (filter.minAmount != null) {
-      transferConditions.push(`amount >= ${filter.minAmount}`);
-      delegationConditions.push(`delegated_value >= ${filter.minAmount}`);
+      transferConditions.push(`transfers.amount >= ${filter.minAmount}`);
+      delegationConditions.push(
+        `delegations.delegated_value >= ${filter.minAmount}`,
+      );
     }
     if (filter.maxAmount != null) {
-      transferConditions.push(`amount <= ${filter.maxAmount}`);
-      delegationConditions.push(`delegated_value <= ${filter.maxAmount}`);
+      transferConditions.push(`transfers.amount <= ${filter.maxAmount}`);
+      delegationConditions.push(
+        `delegations.delegated_value <= ${filter.maxAmount}`,
+      );
     }
     if (filter.from != null) {
-      transferConditions.push(`from_account_id = '${filter.from}'`);
-      delegationConditions.push(`delegator_account_id = '${filter.from}'`);
+      transferConditions.push(`transfers.from_account_id = '${filter.from}'`);
+      delegationConditions.push(
+        `delegations.delegator_account_id = '${filter.from}'`,
+      );
     }
     if (filter.to != null) {
-      transferConditions.push(`to_account_id = '${filter.to}'`);
-      delegationConditions.push(`delegate_account_id = '${filter.to}'`);
+      transferConditions.push(`transfers.to_account_id = '${filter.to}'`);
+      delegationConditions.push(
+        `delegations.delegate_account_id = '${filter.to}'`,
+      );
     }
 
     return {
       transfer: this.coalesceConditionArray(
         [
-          `(${timePeriodConditions})`,
+          `(${transferTimePeriodConditions})`,
           this.coalesceConditionArray(transferConditions, "OR"),
         ],
         "AND",
       ),
       delegation: this.coalesceConditionArray(
         [
-          `(${timePeriodConditions})`,
+          `(${delegationTimePeriodConditions})`,
           this.coalesceConditionArray(delegationConditions, "OR"),
         ],
         "AND",
@@ -276,14 +280,17 @@ export class TransactionsRepository {
     };
   }
 
-  private timePeriodToSql(filter: TransactionsRequest): string[] {
+  private timePeriodToSql(
+    filter: TransactionsRequest,
+    tableAlias?: string,
+  ): string[] {
     const filterConditions: string[] = [];
+    const tsCol = tableAlias ? `${tableAlias}.timestamp` : "timestamp";
 
     if (filter.fromDate)
-      filterConditions.push(`timestamp >= ${BigInt(filter.fromDate)}`);
-
+      filterConditions.push(`${tsCol} >= ${BigInt(filter.fromDate)}`);
     if (filter.toDate)
-      filterConditions.push(`timestamp <= ${BigInt(filter.toDate)}`);
+      filterConditions.push(`${tsCol} <= ${BigInt(filter.toDate)}`);
 
     return filterConditions;
   }
