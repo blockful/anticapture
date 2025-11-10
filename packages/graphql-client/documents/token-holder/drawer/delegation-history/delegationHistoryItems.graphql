@@ -1,6 +1,14 @@
-query GetDelegationHistoryItems($delegator: String!, $after: String, $before: String, $orderBy: String = "timestamp", $orderDirection: String = "desc", $limit: Int = 10) {
+query GetDelegationHistoryItems(
+  $delegator: String!
+  $delegate: String
+  $after: String
+  $before: String
+  $orderBy: String = "timestamp"
+  $orderDirection: String = "desc"
+  $limit: Int = 10
+) {
   delegations(
-    where: {delegatorAccountId: $delegator}
+    where: { delegatorAccountId: $delegator, delegateAccountId: $delegate }
     orderBy: $orderBy
     orderDirection: $orderDirection
     limit: $limit
@@ -16,6 +24,7 @@ query GetDelegationHistoryItems($delegator: String!, $after: String, $before: St
           }
         }
       }
+      transactionHash
       timestamp
     }
     pageInfo {
@@ -25,4 +34,4 @@ query GetDelegationHistoryItems($delegator: String!, $after: String, $before: St
       endCursor
     }
   }
-} 
+}

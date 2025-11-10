@@ -8,6 +8,7 @@ import { GetDelegationHistoryItemsQuery } from "@anticapture/graphql-client";
 import { useMemo, useCallback, useState, useEffect } from "react";
 import { NetworkStatus } from "@apollo/client";
 import { DaoIdEnum } from "@/shared/types/daos";
+import { AmountFilterVariables } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
 
 interface PaginationInfo {
   hasNextPage: boolean;
@@ -34,16 +35,20 @@ interface UseDelegationHistoryResult {
 
 interface UseDelegationHistoryParams {
   delegatorAccountId: string;
+  delegateAccountId?: string;
   daoId: DaoIdEnum;
   orderBy?: string;
   orderDirection?: string;
+  filterVariables?: AmountFilterVariables;
 }
 
 export const useDelegationHistory = ({
   delegatorAccountId,
+  delegateAccountId,
   daoId,
   orderBy = "timestamp",
   orderDirection = "desc",
+  filterVariables,
 }: UseDelegationHistoryParams): UseDelegationHistoryResult => {
   const itemsPerPage = 10; // This should match the limit in the GraphQL query
 
@@ -72,6 +77,8 @@ export const useDelegationHistory = ({
       orderBy,
       orderDirection,
       limit: itemsPerPage,
+      ...(delegateAccountId && { delegate: delegateAccountId }),
+      ...filterVariables,
     },
     context: {
       headers: {
@@ -103,6 +110,7 @@ export const useDelegationHistory = ({
       ) => ({
         delegate: delegation.delegate,
         timestamp: delegation.timestamp,
+        transactionHash: delegation.transactionHash,
       }),
     );
   }, [delegationHistoryData]);

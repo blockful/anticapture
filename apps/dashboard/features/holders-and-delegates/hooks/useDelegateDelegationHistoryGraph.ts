@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useGetDelegateDelegationHistoryGraphQuery } from "@anticapture/graphql-client/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { VotingPowerTimePeriod } from "@/features/holders-and-delegates/components/DelegatesDelegationHistory/VotingPowerTimePeriodSwitcher";
+import { TimePeriod } from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
 import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
 import { formatUnits } from "viem";
 import daoConfig from "@/shared/dao-config";
@@ -28,7 +28,7 @@ export interface UseDelegateDelegationHistoryGraphResult {
 export function useDelegateDelegationHistoryGraph(
   accountId: string,
   daoId: DaoIdEnum,
-  timePeriod: VotingPowerTimePeriod = "all",
+  timePeriod: TimePeriod = "all",
 ): UseDelegateDelegationHistoryGraphResult {
   const {
     daoOverview: { token },
@@ -124,7 +124,7 @@ export function useDelegateDelegationHistoryGraph(
         };
       })
       .sort((a, b) => a.timestamp - b.timestamp); // Sort chronologically for chart display
-  }, [data]);
+  }, [data, token]);
 
   return {
     delegationHistory,

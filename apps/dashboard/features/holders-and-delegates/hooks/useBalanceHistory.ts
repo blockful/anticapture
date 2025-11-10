@@ -12,6 +12,7 @@ import { formatUnits } from "viem";
 import { ApolloError, NetworkStatus } from "@apollo/client";
 import daoConfig from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
+import { AmountFilterVariables } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
 
 // Interface for a single transfer
 export interface Transfer {
@@ -53,6 +54,9 @@ export function useBalanceHistory(
   orderBy: string = "timestamp",
   orderDirection: "asc" | "desc" = "desc",
   transactionType: "all" | "buy" | "sell" = "all",
+  fromFilter?: string,
+  toFilter?: string,
+  filterVariables?: AmountFilterVariables,
 ): UseBalanceHistoryResult {
   const itemsPerPage = 10;
   const [currentPage, setCurrentPage] = useState(1);
@@ -72,8 +76,19 @@ export function useBalanceHistory(
       limit: itemsPerPage,
       orderBy,
       orderDirection,
+      ...filterVariables,
+      ...(fromFilter && { from: fromFilter }),
+      ...(toFilter && { to: toFilter }),
     }),
-    [accountId, itemsPerPage, orderBy, orderDirection],
+    [
+      accountId,
+      itemsPerPage,
+      orderBy,
+      orderDirection,
+      filterVariables,
+      fromFilter,
+      toFilter,
+    ],
   );
 
   const queryOptions = {

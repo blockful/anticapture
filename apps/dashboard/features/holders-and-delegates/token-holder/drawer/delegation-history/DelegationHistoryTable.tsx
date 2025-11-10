@@ -1,10 +1,10 @@
 "use client";
 
-import { Button, SkeletonRow } from "@/shared/components";
+import { Button, IconButton, SkeletonRow } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { ColumnDef } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
-import { Address } from "viem";
+import { Address, parseEther } from "viem";
 import { useDelegationHistory } from "@/features/holders-and-delegates/hooks/useDelegationHistory";
 import { formatUnits } from "viem";
 import {
@@ -12,12 +12,19 @@ import {
   formatDateUserReadable,
 } from "@/shared/utils/";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
-import { AlertOctagon, Inbox } from "lucide-react";
+import { AlertOctagon, ExternalLink, Inbox } from "lucide-react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
-
+import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { Table } from "@/shared/components/design-system/table/Table";
 import daoConfig from "@/shared/dao-config";
+import { AmountFilterVariables } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
+import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
+import { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
+import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
+import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
+import { fetchEnsData } from "@/shared/hooks/useEnsData";
+import Link from "next/link";
 
 interface DelegationData {
   address: string;
@@ -41,6 +48,16 @@ export const DelegationHistoryTable = ({
   const [sortBy, setSortBy] = useState<"timestamp" | "delegatedValue">(
     "timestamp",
   );
+  const [filterVariables, setFilterVariables] =
+    useState<AmountFilterVariables>();
+  const [isFilterActive, setIsFilterActive] = useState(false);
+  const [addressFilter, setAddressFilter] = useState<string>();
+
+  const sortOptions: SortOption[] = [
+    { value: "largest-first", label: "Largest first" },
+    { value: "smallest-first", label: "Smallest first" },
+  ];
+
   const {
     data: delegationHistory,
     loading,
@@ -51,8 +68,10 @@ export const DelegationHistoryTable = ({
   } = useDelegationHistory({
     daoId,
     delegatorAccountId: address,
+    delegateAccountId: addressFilter,
     orderBy: sortBy,
     orderDirection: sortOrder,
+    filterVariables,
   });
 
   useEffect(() => {
@@ -80,6 +99,7 @@ export const DelegationHistoryTable = ({
       return {
         address: delegateAddress,
         amount: formattedAmount,
+        transactionHash: delegation.transactionHash,
         date,
         timestamp: Number(timestamp),
       };
@@ -89,8 +109,23 @@ export const DelegationHistoryTable = ({
     {
       accessorKey: "address",
       header: () => (
-        <div className="text-table-header flex w-full items-center justify-start">
-          Delegate Address
+        <div className="text-table-header flex h-8 w-full items-center justify-start px-4">
+          <span>Delegate Address</span>
+          <div className="ml-2 w-[180px]">
+            <AddressFilter
+              onApply={async (addr) => {
+                if ((addr ?? "").indexOf(".eth") > 0) {
+                  const { address } = await fetchEnsData({
+                    address: addr as `${string}.eth`,
+                  });
+                  setAddressFilter(address || "");
+                  return;
+                }
+                setAddressFilter(addr || "");
+              }}
+              currentFilter={addressFilter}
+            />
+          </div>
         </div>
       ),
       cell: ({ row }) => {
@@ -123,37 +158,44 @@ export const DelegationHistoryTable = ({
     },
     {
       accessorKey: "amount",
-      header: ({ column }) => {
-        const handleSortToggle = () => {
-          const newSortOrder = sortOrder === "desc" ? "asc" : "desc";
-          setSortBy("delegatedValue");
-          setSortOrder(newSortOrder);
-          column.toggleSorting(newSortOrder === "desc");
-        };
+      header: () => (
+        <div className="flex items-center justify-end gap-1.5">
+          <h4 className="text-table-header">Amount ({daoId})</h4>
+          <AmountFilter
+            onApply={(filterState: AmountFilterState) => {
+              setSortOrder(
+                filterState.sortOrder === "largest-first" ? "desc" : "asc",
+              );
 
-        return (
-          <div className="text-table-header flex w-full items-center justify-end">
-            Amount ({daoId})
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-secondary justify-end"
-              onClick={handleSortToggle}
-            >
-              <ArrowUpDown
-                props={{ className: "ml-2 size-4" }}
-                activeState={
-                  sortBy === "delegatedValue"
-                    ? sortOrder === "asc"
-                      ? ArrowState.UP
-                      : ArrowState.DOWN
-                    : ArrowState.DEFAULT
-                }
-              />
-            </Button>
-          </div>
-        );
-      },
+              setFilterVariables(() => ({
+                minDelta: filterState.minAmount
+                  ? parseEther(filterState.minAmount).toString()
+                  : undefined,
+                maxDelta: filterState.maxAmount
+                  ? parseEther(filterState.maxAmount).toString()
+                  : undefined,
+              }));
+
+              setIsFilterActive(
+                !!(filterVariables?.minDelta || filterVariables?.maxDelta),
+              );
+              // Update sort to delegatedValue when filter is applied
+              setSortBy("delegatedValue");
+            }}
+            onReset={() => {
+              setIsFilterActive(false);
+              // Reset to default sorting
+              setSortBy("timestamp");
+              setFilterVariables(() => ({
+                minDelta: undefined,
+                maxDelta: undefined,
+              }));
+            }}
+            isActive={isFilterActive}
+            sortOptions={sortOptions}
+          />
+        </div>
+      ),
       cell: ({ row }) => {
         if (!isMounted || loading) {
           return (
@@ -225,6 +267,39 @@ export const DelegationHistoryTable = ({
           </div>
         );
       },
+    },
+    {
+      accessorKey: "transactionHash",
+      meta: {
+        columnClassName: "w-10",
+      },
+      cell: ({ row }) => {
+        const transactionHash = row.getValue("transactionHash") as string;
+
+        if (loading) {
+          return (
+            <div className="flex items-center justify-center">
+              <SkeletonRow className="h-4 w-4" />
+            </div>
+          );
+        }
+
+        return (
+          <div className="flex items-center justify-center">
+            <Link
+              href={`${daoConfigByDaoId[daoId].daoOverview.chain.blockExplorers?.default.url}/tx/${transactionHash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-secondary cursor-pointer text-white transition-colors"
+              title="View on Tally"
+            >
+              <IconButton variant="ghost" icon={ExternalLink} />
+            </Link>
+          </div>
+        );
+      },
+      header: () => <div className="w-full"></div>,
+      enableSorting: false,
     },
   ];
 
