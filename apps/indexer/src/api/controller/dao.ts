@@ -19,11 +19,11 @@ export function daoController(app: Hono, client: DAOClient, daoId: DaoIdEnum) {
             "application/json": {
               schema: z.object({
                 id: z.string(),
-                votingDelay: z.bigint(),
-                votingPeriod: z.bigint(),
-                timelockDelay: z.bigint(),
-                quorum: z.bigint(),
-                proposalThreshold: z.bigint(),
+                votingDelay: z.string(),
+                votingPeriod: z.string(),
+                timelockDelay: z.string(),
+                quorum: z.string(),
+                proposalThreshold: z.string(),
               }),
             },
           },

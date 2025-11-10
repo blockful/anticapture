@@ -3,7 +3,11 @@ import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 
 import { env } from "@/env";
-import { ARBTokenAbi, GovernorAbi, GovernorTreasuryAbi } from "@/indexer/arb";
+import {
+  ARBTokenAbi,
+  // GovernorAbi, // Commented: ARBGovernor disabled
+  GovernorTreasuryAbi,
+} from "@/indexer/arb";
 
 const ARB_CONTRACTS = CONTRACT_ADDRESSES[DaoIdEnum.ARB];
 
@@ -18,6 +22,7 @@ export default createConfig({
       rpc: env.RPC_URL,
       maxRequestsPerSecond: env.MAX_REQUESTS_PER_SECOND,
       pollingInterval: env.POLLING_INTERVAL,
+      disableCache: true,
     },
   },
   contracts: {
@@ -27,12 +32,12 @@ export default createConfig({
       address: ARB_CONTRACTS.token.address,
       startBlock: ARB_CONTRACTS.token.startBlock,
     },
-    ARBGovernor: {
-      abi: GovernorAbi,
-      chain: "arbitrum_mainnet",
-      address: ARB_CONTRACTS.governor.address,
-      startBlock: ARB_CONTRACTS.governor.startBlock,
-    },
+    // ARBGovernor: {
+    //   abi: GovernorAbi,
+    //   chain: "arbitrum_mainnet",
+    //   address: ARB_CONTRACTS.governor.address,
+    //   startBlock: ARB_CONTRACTS.governor.startBlock,
+    // },
     ARBGovernorTreasury: {
       abi: GovernorTreasuryAbi,
       chain: "arbitrum_mainnet",
