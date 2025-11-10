@@ -149,7 +149,7 @@ export const getTransactionsColumns = ({
       header: () => (
         <Button
           variant="ghost"
-          className="!text-table-header w-full justify-start px-4"
+          className="!text-table-header w-full justify-start px-4 py-0"
           onClick={() => {
             setSortOrder(sortOrder === "asc" ? "desc" : "asc");
           }}

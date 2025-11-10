@@ -1,3 +1,4 @@
+import { useCallback, useRef } from "react";
 import { ChartContainer } from "@/shared/components/ui/chart";
 import {
   Area,
@@ -46,6 +47,23 @@ export const SectionComposedChart = ({
   brushRange: { startIndex: number; endIndex: number };
   setBrushRange: (range: { startIndex: number; endIndex: number }) => void;
 }) => {
+  const brushTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const handleBrushChange = useCallback(
+    (brushArea: { startIndex?: number; endIndex?: number }) => {
+      if (brushArea && chartData) {
+        const { startIndex = 0, endIndex = chartData.length - 1 } = brushArea;
+
+        if (brushTimeoutRef.current) {
+          clearTimeout(brushTimeoutRef.current);
+        }
+
+        brushTimeoutRef.current = setTimeout(() => {
+          setBrushRange({ startIndex, endIndex });
+        }, 100);
+      }
+    },
+    [chartData, setBrushRange],
+  );
   return (
     <ChartContainer
       className="h-full w-full justify-start"
@@ -332,15 +350,7 @@ export const SectionComposedChart = ({
           travellerWidth={10}
           startIndex={brushRange.startIndex}
           endIndex={brushRange.endIndex}
-          onChange={(brushArea) => {
-            if (brushArea && chartData) {
-              const { startIndex = 0, endIndex = chartData.length - 1 } =
-                brushArea;
-
-              // Update brush range in store
-              setBrushRange({ startIndex, endIndex });
-            }
-          }}
+          onChange={handleBrushChange}
         >
           <AreaChart height={32} width={1128} data={chartData}>
             <XAxis dataKey="date" hide />

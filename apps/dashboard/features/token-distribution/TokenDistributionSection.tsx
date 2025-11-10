@@ -18,7 +18,6 @@ import daoConfig from "@/shared/dao-config";
 import { TransactionsTable } from "@/features/transactions";
 import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { useBrushStore } from "@/features/token-distribution/store/useBrushStore";
-import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
 
 type CsvRow = Record<string, number | string | null>;
 
@@ -90,15 +89,16 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         : "Non-Transfer";
   }, [metrics, hasTransfer]);
 
-  const { brushRange } = useBrushStore();
-  const debouncedBrushRange = useDebouncedValue(brushRange, 800);
+  const startIndex = useBrushStore((state) => state.brushRange.startIndex);
+  const endIndex = useBrushStore((state) => state.brushRange.endIndex);
+
   const startDate = useMemo(() => {
-    return chartData?.[debouncedBrushRange.startIndex]?.date;
-  }, [chartData, debouncedBrushRange.startIndex]);
+    return chartData?.[startIndex]?.date;
+  }, [chartData, startIndex]);
 
   const endDate = useMemo(() => {
-    return chartData?.[debouncedBrushRange.endIndex]?.date;
-  }, [chartData, debouncedBrushRange.endIndex]);
+    return chartData?.[endIndex]?.date;
+  }, [chartData, endIndex]);
 
   return (
     <div className="flex flex-col gap-[13px]">
