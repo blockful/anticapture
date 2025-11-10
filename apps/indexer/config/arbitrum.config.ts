@@ -22,7 +22,6 @@ export default createConfig({
       rpc: env.RPC_URL,
       maxRequestsPerSecond: env.MAX_REQUESTS_PER_SECOND,
       pollingInterval: env.POLLING_INTERVAL,
-      disableCache: true,
     },
   },
   contracts: {
