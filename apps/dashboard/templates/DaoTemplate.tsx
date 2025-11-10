@@ -77,9 +77,6 @@ export const DaoTemplate = () => {
         {daoConstants.dataTables && (
           <HoldersAndDelegatesSection daoId={daoIdEnum} />
         )}
-
-        {/* Demo section for expandable table - remove this in production */}
-        {/* <TransactionsTable /> */}
       </div>
     </>
   );

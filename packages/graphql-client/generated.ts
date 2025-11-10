@@ -16,9 +16,12 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   BigInt: { input: any; output: any; }
+  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
+  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
+  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
 };
 
@@ -1820,52 +1823,6 @@ export type Query_Transactions_Items_Items_Transfers_Items = {
   transactionHash: Scalars['String']['output'];
 };
 
-export type Query_Transactions_Transactions_Items = {
-  __typename?: 'query_transactions_transactions_items';
-  delegations: Array<Maybe<Query_Transactions_Transactions_Items_Delegations_Items>>;
-  from?: Maybe<Scalars['String']['output']>;
-  isCex: Scalars['Boolean']['output'];
-  isDex: Scalars['Boolean']['output'];
-  isLending: Scalars['Boolean']['output'];
-  isTotal: Scalars['Boolean']['output'];
-  timestamp: Scalars['String']['output'];
-  to?: Maybe<Scalars['String']['output']>;
-  transactionHash: Scalars['String']['output'];
-  transfers: Array<Maybe<Query_Transactions_Transactions_Items_Transfers_Items>>;
-};
-
-export type Query_Transactions_Transactions_Items_Delegations_Items = {
-  __typename?: 'query_transactions_transactions_items_delegations_items';
-  daoId: Scalars['String']['output'];
-  delegateAccountId: Scalars['String']['output'];
-  delegatedValue: Scalars['String']['output'];
-  delegatorAccountId: Scalars['String']['output'];
-  isCex: Scalars['Boolean']['output'];
-  isDex: Scalars['Boolean']['output'];
-  isLending: Scalars['Boolean']['output'];
-  isTotal: Scalars['Boolean']['output'];
-  logIndex: Scalars['Float']['output'];
-  previousDelegate?: Maybe<Scalars['String']['output']>;
-  timestamp: Scalars['String']['output'];
-  transactionHash: Scalars['String']['output'];
-};
-
-export type Query_Transactions_Transactions_Items_Transfers_Items = {
-  __typename?: 'query_transactions_transactions_items_transfers_items';
-  amount: Scalars['String']['output'];
-  daoId: Scalars['String']['output'];
-  fromAccountId: Scalars['String']['output'];
-  isCex: Scalars['Boolean']['output'];
-  isDex: Scalars['Boolean']['output'];
-  isLending: Scalars['Boolean']['output'];
-  isTotal: Scalars['Boolean']['output'];
-  logIndex: Scalars['Float']['output'];
-  timestamp: Scalars['String']['output'];
-  toAccountId: Scalars['String']['output'];
-  tokenId: Scalars['String']['output'];
-  transactionHash: Scalars['String']['output'];
-};
-
 export type Query_VotingPowerVariations_Items_Items = {
   __typename?: 'query_votingPowerVariations_items_items';
   absoluteChange: Scalars['String']['output'];
@@ -2176,7 +2133,6 @@ export type Transactions_200_Response = {
   __typename?: 'transactions_200_response';
   items: Array<Maybe<Query_Transactions_Items_Items>>;
   totalCount: Scalars['Float']['output'];
-  transactions: Array<Maybe<Query_Transactions_Transactions_Items>>;
 };
 
 export type Transfer = {
@@ -2858,6 +2814,9 @@ export type TransactionsQueryVariables = Exact<{
   minAmount?: InputMaybe<Scalars['String']['input']>;
   maxAmount?: InputMaybe<Scalars['String']['input']>;
   sortOrder?: InputMaybe<QueryInput_Transactions_SortOrder>;
+  affectedSupply?: InputMaybe<Scalars['JSON']['input']>;
+  fromDate?: InputMaybe<Scalars['Int']['input']>;
+  toDate?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
@@ -4840,7 +4799,7 @@ export type GetTokenHoldersCoutingLazyQueryHookResult = ReturnType<typeof useGet
 export type GetTokenHoldersCoutingSuspenseQueryHookResult = ReturnType<typeof useGetTokenHoldersCoutingSuspenseQuery>;
 export type GetTokenHoldersCoutingQueryResult = Apollo.QueryResult<GetTokenHoldersCoutingQuery, GetTokenHoldersCoutingQueryVariables>;
 export const TransactionsDocument = gql`
-    query Transactions($limit: PositiveInt, $offset: NonNegativeInt, $from: String, $to: String, $minAmount: String, $maxAmount: String, $sortOrder: queryInput_transactions_sortOrder) {
+    query Transactions($limit: PositiveInt, $offset: NonNegativeInt, $from: String, $to: String, $minAmount: String, $maxAmount: String, $sortOrder: queryInput_transactions_sortOrder, $affectedSupply: JSON, $fromDate: Int, $toDate: Int) {
   transactions(
     limit: $limit
     offset: $offset
@@ -4849,6 +4808,9 @@ export const TransactionsDocument = gql`
     minAmount: $minAmount
     maxAmount: $maxAmount
     sortOrder: $sortOrder
+    affectedSupply: $affectedSupply
+    fromDate: $fromDate
+    toDate: $toDate
   ) {
     items {
       from
@@ -4912,6 +4874,9 @@ export const TransactionsDocument = gql`
  *      minAmount: // value for 'minAmount'
  *      maxAmount: // value for 'maxAmount'
  *      sortOrder: // value for 'sortOrder'
+ *      affectedSupply: // value for 'affectedSupply'
+ *      fromDate: // value for 'fromDate'
+ *      toDate: // value for 'toDate'
  *   },
  * });
  */
