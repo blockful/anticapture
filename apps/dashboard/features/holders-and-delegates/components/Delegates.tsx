@@ -300,6 +300,7 @@ export const Delegates = ({
       },
       cell: ({ row }) => {
         const addr = row.original.address;
+
         const variation = row.getValue("variation") as
           | {
               percentageChange: number;
@@ -309,25 +310,26 @@ export const Delegates = ({
 
         if (isHistoricalLoadingFor(addr) || loading) {
           return (
-            <div className="flex items-center justify-start">
+            <div className="flex w-full items-center justify-center">
               <SkeletonRow
-                className="h-5 w-16"
-                parentClassName="justify-start flex animate-pulse"
+                className="h-4 w-16"
+                parentClassName="flex animate-pulse"
               />
             </div>
           );
         }
 
         return (
-          <div className="flex w-full items-center justify-start gap-2 text-sm">
+          <div className="flex w-full items-center justify-center gap-2 text-sm">
+            {(variation?.percentageChange || 0) < 0 ? "-" : ""}
             {formatNumberUserReadable(Math.abs(variation?.absoluteChange || 0))}
             <Percentage value={variation?.percentageChange || 0} />
           </div>
         );
       },
       header: () => (
-        <h4 className="text-table-header flex w-full items-center justify-start">
-          Variation
+        <h4 className="text-table-header flex w-full items-center justify-center">
+          Change
         </h4>
       ),
       enableSorting: false,
@@ -496,9 +498,7 @@ export const Delegates = ({
         isOpen={!!selectedDelegate}
         onClose={handleCloseDrawer}
         entityType="delegate"
-        address={
-          selectedDelegate || "0x0000000000000000000000000000000000000000"
-        }
+        address={selectedDelegate || "None"}
         daoId={daoId as DaoIdEnum}
       />
     </>

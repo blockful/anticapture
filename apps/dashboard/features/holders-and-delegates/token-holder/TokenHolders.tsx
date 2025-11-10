@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { formatNumberUserReadable } from "@/shared/utils";
+import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { Address, formatUnits, zeroAddress } from "viem";
 import { Plus } from "lucide-react";
@@ -15,9 +15,10 @@ import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 import { useScreenSize } from "@/shared/hooks";
 import { Table } from "@/shared/components/design-system/table/Table";
-import { Button } from "@/shared/components";
+import { Button, Sparkline } from "@/shared/components";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
 import daoConfig from "@/shared/dao-config";
+import { DaoMetricsDayBucket } from "@anticapture/graphql-client";
 
 interface TokenHolderTableData {
   address: Address;
@@ -72,41 +73,40 @@ export const TokenHolders = ({
     setSelectedTokenHolder("");
   };
 
-  const calculateVariation = (
-    currentBalance: string,
-    historicalBalance: string | undefined,
-  ): { percentageChange: number; absoluteChange: number } | null => {
-    if (!historicalBalance) return null;
+  const tableData: TokenHolderTableData[] = useMemo(() => {
+    const calculateVariation = (
+      currentBalance: string,
+      historicalBalance: string | undefined,
+    ): { percentageChange: number; absoluteChange: number } | null => {
+      if (!historicalBalance) return null;
 
-    try {
-      const current =
-        token === "ERC20"
-          ? Number(formatUnits(BigInt(currentBalance), 18))
-          : Number(currentBalance);
-      const historical =
-        token === "ERC20"
-          ? Number(formatUnits(BigInt(historicalBalance), 18))
-          : Number(historicalBalance);
+      try {
+        const current =
+          token === "ERC20"
+            ? Number(formatUnits(BigInt(currentBalance), 18))
+            : Number(currentBalance);
+        const historical =
+          token === "ERC20"
+            ? Number(formatUnits(BigInt(historicalBalance), 18))
+            : Number(historicalBalance);
 
-      if (historical === 0) return { percentageChange: 0, absoluteChange: 0 };
+        if (historical === 0) return { percentageChange: 0, absoluteChange: 0 };
 
-      // Calculate absolute change in tokens
-      const absoluteChange = current - historical;
-      // Calculate percentage variation
-      const percentageChange = ((current - historical) / historical) * 100;
+        // Calculate absolute change in tokens
+        const absoluteChange = current - historical;
+        // Calculate percentage variation
+        const percentageChange = ((current - historical) / historical) * 100;
 
-      return {
-        percentageChange: Number(percentageChange.toFixed(2)),
-        absoluteChange: Number(absoluteChange.toFixed(2)),
-      };
-    } catch (error) {
-      console.error("Error calculating variation:", error);
-      return { percentageChange: 0, absoluteChange: 0 };
-    }
-  };
-
-  const tableData: TokenHolderTableData[] = useMemo(
-    () =>
+        return {
+          percentageChange: Number(percentageChange.toFixed(2)),
+          absoluteChange: Number(absoluteChange.toFixed(2)),
+        };
+      } catch (error) {
+        console.error("Error calculating variation:", error);
+        return { percentageChange: 0, absoluteChange: 0 };
+      }
+    };
+    return (
       tokenHoldersData?.map((holder) => {
         const historicalBalance = historicalBalancesCache.get(holder.accountId);
 
@@ -122,9 +122,9 @@ export const TokenHolders = ({
           variation,
           delegate: holder.delegate as Address,
         };
-      }) || [],
-    [tokenHoldersData, historicalBalancesCache, token],
-  );
+      }) || []
+    );
+  }, [tokenHoldersData, historicalBalancesCache, token]);
 
   const tokenHoldersColumns: ColumnDef<TokenHolderTableData>[] = [
     {
@@ -241,8 +241,8 @@ export const TokenHolders = ({
     {
       accessorKey: "variation",
       header: () => (
-        <div className="text-table-header flex w-full items-center justify-start">
-          Variation ({daoId})
+        <div className="text-table-header flex w-full items-center justify-center">
+          Change ({daoId})
         </div>
       ),
       size: 250,
@@ -258,7 +258,7 @@ export const TokenHolders = ({
 
         if (isHistoricalLoadingFor(addr) || loading) {
           return (
-            <div className="flex w-full items-center justify-start">
+            <div className="flex w-full items-center justify-center">
               <SkeletonRow
                 className="h-4 w-16"
                 parentClassName="flex animate-pulse"
@@ -268,7 +268,8 @@ export const TokenHolders = ({
         }
 
         return (
-          <div className="flex w-full items-center justify-start gap-2 text-sm">
+          <div className="flex w-full items-center justify-center gap-2 text-sm">
+            {(variation?.percentageChange || 0) < 0 ? "-" : ""}
             {formatNumberUserReadable(Math.abs(variation?.absoluteChange || 0))}
             <Percentage value={variation?.percentageChange || 0} />
           </div>
@@ -306,17 +307,48 @@ export const TokenHolders = ({
 
         return (
           <div className="flex items-center gap-1.5">
-            <EnsAvatar
-              address={delegate as Address}
-              size="sm"
-              variant="rounded"
+            {delegate === zeroAddress ? (
+              <span className="text-secondary text-sm">None</span>
+            ) : (
+              <EnsAvatar
+                address={delegate as Address}
+                size="sm"
+                variant="rounded"
+              />
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "chartLastDays",
+      cell: ({ row }) => {
+        const variation: string = row.getValue("variation");
+        const chartLastDays: DaoMetricsDayBucket[] =
+          row.getValue("chartLastDays") ?? [];
+
+        if (loading) {
+          return (
+            <div className="flex w-full justify-center">
+              <SkeletonRow className="h-5 w-32" />
+            </div>
+          );
+        }
+
+        return (
+          <div className="flex w-full justify-center py-2.5">
+            <Sparkline
+              data={chartLastDays.map((item) => Number(item.high))}
+              strokeColor={cn([Number(variation) < 0 ? "#f87171" : "#4ADE80"])}
             />
           </div>
         );
       },
-      meta: {
-        columnClassName: "w-72",
-      },
+      header: () => (
+        <div className="text-table-header flex w-full items-center justify-center pr-20">
+          Last 1y
+        </div>
+      ),
     },
   ];
 

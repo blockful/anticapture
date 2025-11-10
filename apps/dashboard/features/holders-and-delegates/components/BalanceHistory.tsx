@@ -342,23 +342,21 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
         );
       },
       header: () => (
-        <div className="text-table-header flex h-8 w-full items-center justify-start px-4">
+        <div className="text-table-header flex w-full items-center justify-start gap-2">
           <span>From</span>
-          <div className="ml-2 w-[180px]">
-            <AddressFilter
-              onApply={async (addr) => {
-                if ((addr ?? "").indexOf(".eth") > 0) {
-                  const { address } = await fetchEnsData({
-                    address: addr as `${string}.eth`,
-                  });
-                  setFromFilter(address || "");
-                  return;
-                }
-                setFromFilter(addr || "");
-              }}
-              currentFilter={fromFilter}
-            />
-          </div>
+          <AddressFilter
+            onApply={async (addr) => {
+              if ((addr ?? "").indexOf(".eth") > 0) {
+                const { address } = await fetchEnsData({
+                  address: addr as `${string}.eth`,
+                });
+                setFromFilter(address || "");
+                return;
+              }
+              setFromFilter(addr || "");
+            }}
+            currentFilter={fromFilter}
+          />
         </div>
       ),
     },
@@ -410,23 +408,21 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
         );
       },
       header: () => (
-        <div className="text-table-header flex h-8 w-full items-center justify-start px-4">
+        <div className="text-table-header flex w-full items-center justify-start gap-2">
           <span>To</span>
-          <div className="ml-2 w-[180px]">
-            <AddressFilter
-              onApply={async (addr) => {
-                if ((addr ?? "").indexOf(".eth") > 0) {
-                  const { address } = await fetchEnsData({
-                    address: addr as `${string}.eth`,
-                  });
-                  setToFilter(address || "");
-                  return;
-                }
-                setToFilter(addr || "");
-              }}
-              currentFilter={toFilter}
-            />
-          </div>
+          <AddressFilter
+            onApply={async (addr) => {
+              if ((addr ?? "").indexOf(".eth") > 0) {
+                const { address } = await fetchEnsData({
+                  address: addr as `${string}.eth`,
+                });
+                setToFilter(address || "");
+                return;
+              }
+              setToFilter(addr || "");
+            }}
+            currentFilter={toFilter}
+          />
         </div>
       ),
     },
