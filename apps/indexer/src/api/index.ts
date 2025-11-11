@@ -45,16 +45,18 @@ import {
   VotingPowerService,
   TransactionsService,
   ProposalsService,
-  DuneService,
   CoingeckoService,
   NFTPriceService,
   TokenService,
   TopBalanceVariationsService,
   HistoricalBalancesService,
   DaoService,
+  TreasuryService,
+  DefiLlamaProvider,
 } from "./services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
+import { startTreasurySyncCron } from "./jobs/treasury-sync.cron";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -111,10 +113,10 @@ const votingPowerService = new VotingPowerService(votingPowerRepo);
 const daoCache = new DaoCache();
 const daoService = new DaoService(daoClient, daoCache, env.CHAIN_ID);
 
-if (env.DUNE_API_URL && env.DUNE_API_KEY) {
-  const duneClient = new DuneService(env.DUNE_API_URL, env.DUNE_API_KEY);
-  assets(app, duneClient);
-}
+// Treasury service with DeFi Llama provider
+const defiLlamaProvider = new DefiLlamaProvider(env.DEFILLAMA_API_URL);
+const treasuryService = new TreasuryService(defiLlamaProvider, env.DAO_ID);
+assets(app, treasuryService);
 
 const tokenPriceClient =
   env.DAO_ID === DaoIdEnum.NOUNS
@@ -158,5 +160,8 @@ accountBalanceVariations(
 );
 dao(app, daoService);
 docs(app);
+
+// Start treasury sync cron job
+startTreasurySyncCron(treasuryService);
 
 export default app;
