@@ -48,17 +48,27 @@ export interface UseBalanceHistoryResult {
   fetchingMore: boolean;
 }
 
-export function useBalanceHistory(
-  accountId: string,
-  daoId: string,
-  orderBy: string = "timestamp",
-  orderDirection: "asc" | "desc" = "desc",
-  transactionType: "all" | "buy" | "sell" = "all",
-  fromFilter?: string,
-  toFilter?: string,
-  filterVariables?: AmountFilterVariables,
-): UseBalanceHistoryResult {
-  const itemsPerPage = 10;
+export function useBalanceHistory({
+  accountId,
+  daoId,
+  orderBy = "timestamp",
+  orderDirection = "desc",
+  transactionType = "all",
+  fromFilter,
+  toFilter,
+  filterVariables,
+  itemsPerPage = 10,
+}: {
+  accountId: string;
+  daoId: DaoIdEnum;
+  orderBy?: string;
+  orderDirection?: "asc" | "desc";
+  transactionType?: "all" | "buy" | "sell";
+  fromFilter?: string;
+  toFilter?: string;
+  filterVariables?: AmountFilterVariables;
+  itemsPerPage?: number;
+}): UseBalanceHistoryResult {
   const [currentPage, setCurrentPage] = useState(1);
   const [isPaginationLoading, setIsPaginationLoading] = useState(false);
   const {

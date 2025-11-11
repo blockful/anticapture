@@ -1,0 +1,17 @@
+query BalanceChart(
+  $accountId: String!
+  $limit: Int = 10
+  $orderBy: String = "timestamp"
+  $orderDirection: String = "desc"
+) {
+  transfers(
+    where: { OR: [{ fromAccountId: $accountId }, { toAccountId: $accountId }] }
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+    limit: $limit
+  ) {
+    items {
+      amount
+    }
+  }
+}

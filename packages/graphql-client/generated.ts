@@ -2704,6 +2704,16 @@ export type GetDaoAddressesAccountBalancesQueryVariables = Exact<{
 
 export type GetDaoAddressesAccountBalancesQuery = { __typename?: 'Query', accountBalances: { __typename?: 'accountBalancePage', items: Array<{ __typename?: 'accountBalance', accountId: string, balance: any }> } };
 
+export type BalanceChartQueryVariables = Exact<{
+  accountId: Scalars['String']['input'];
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<Scalars['String']['input']>;
+  orderDirection?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type BalanceChartQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', items: Array<{ __typename?: 'transfer', amount: any }> } };
+
 export type GetDelegationHistoryCountQueryVariables = Exact<{
   delegator: Scalars['String']['input'];
 }>;
@@ -4576,6 +4586,56 @@ export type GetDaoAddressesAccountBalancesQueryHookResult = ReturnType<typeof us
 export type GetDaoAddressesAccountBalancesLazyQueryHookResult = ReturnType<typeof useGetDaoAddressesAccountBalancesLazyQuery>;
 export type GetDaoAddressesAccountBalancesSuspenseQueryHookResult = ReturnType<typeof useGetDaoAddressesAccountBalancesSuspenseQuery>;
 export type GetDaoAddressesAccountBalancesQueryResult = Apollo.QueryResult<GetDaoAddressesAccountBalancesQuery, GetDaoAddressesAccountBalancesQueryVariables>;
+export const BalanceChartDocument = gql`
+    query BalanceChart($accountId: String!, $limit: Int = 10, $orderBy: String = "timestamp", $orderDirection: String = "desc") {
+  transfers(
+    where: {OR: [{fromAccountId: $accountId}, {toAccountId: $accountId}]}
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+    limit: $limit
+  ) {
+    items {
+      amount
+    }
+  }
+}
+    `;
+
+/**
+ * __useBalanceChartQuery__
+ *
+ * To run a query within a React component, call `useBalanceChartQuery` and pass it any options that fit your needs.
+ * When your component renders, `useBalanceChartQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useBalanceChartQuery({
+ *   variables: {
+ *      accountId: // value for 'accountId'
+ *      limit: // value for 'limit'
+ *      orderBy: // value for 'orderBy'
+ *      orderDirection: // value for 'orderDirection'
+ *   },
+ * });
+ */
+export function useBalanceChartQuery(baseOptions: Apollo.QueryHookOptions<BalanceChartQuery, BalanceChartQueryVariables> & ({ variables: BalanceChartQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<BalanceChartQuery, BalanceChartQueryVariables>(BalanceChartDocument, options);
+      }
+export function useBalanceChartLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<BalanceChartQuery, BalanceChartQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<BalanceChartQuery, BalanceChartQueryVariables>(BalanceChartDocument, options);
+        }
+export function useBalanceChartSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<BalanceChartQuery, BalanceChartQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<BalanceChartQuery, BalanceChartQueryVariables>(BalanceChartDocument, options);
+        }
+export type BalanceChartQueryHookResult = ReturnType<typeof useBalanceChartQuery>;
+export type BalanceChartLazyQueryHookResult = ReturnType<typeof useBalanceChartLazyQuery>;
+export type BalanceChartSuspenseQueryHookResult = ReturnType<typeof useBalanceChartSuspenseQuery>;
+export type BalanceChartQueryResult = Apollo.QueryResult<BalanceChartQuery, BalanceChartQueryVariables>;
 export const GetDelegationHistoryCountDocument = gql`
     query GetDelegationHistoryCount($delegator: String!) {
   delegations(where: {delegatorAccountId: $delegator}) {

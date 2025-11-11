@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { cn, formatNumberUserReadable } from "@/shared/utils";
+import { formatNumberUserReadable } from "@/shared/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { Address, formatUnits, zeroAddress } from "viem";
 import { Plus } from "lucide-react";
@@ -15,10 +15,16 @@ import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 import { useScreenSize } from "@/shared/hooks";
 import { Table } from "@/shared/components/design-system/table/Table";
-import { Button, Sparkline } from "@/shared/components";
+import { Button } from "@/shared/components";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
 import daoConfig from "@/shared/dao-config";
-import { DaoMetricsDayBucket } from "@anticapture/graphql-client";
+import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
+import {
+  FilterDropdown,
+  FilterOption,
+} from "@/shared/components/dropdowns/FilterDropdown";
+import { BalanceChart } from "@/features/holders-and-delegates/token-holder/components/BalanceChart";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 
 interface TokenHolderTableData {
   address: Address;
@@ -37,12 +43,19 @@ export const TokenHolders = ({
 }) => {
   const [selectedTokenHolder, setSelectedTokenHolder] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
   const [currentAddressFilter, setCurrentAddressFilter] = useState<string>("");
   const pageLimit: number = 15;
   const { isMobile } = useScreenSize();
   const {
     daoOverview: { token },
   } = daoConfig[daoId];
+
+  const typeFilterOptions: FilterOption[] = [
+    { value: "all", label: "All Types" },
+    { value: "Contract", label: "Contract" },
+    { value: "EOA", label: "EOA" },
+  ];
 
   const handleAddressFilterApply = (address: string | undefined) => {
     setCurrentAddressFilter(address || "");
@@ -158,7 +171,7 @@ export const TokenHolders = ({
         const addressValue: string = row.getValue("address");
 
         return (
-          <div className="group flex w-full items-center gap-2">
+          <div className="group flex w-full items-center">
             <EnsAvatar
               address={addressValue as Address}
               size="sm"
@@ -167,14 +180,15 @@ export const TokenHolders = ({
               nameClassName="[tr:hover_&]:border-primary"
             />
             {!isMobile && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="opacity-0 transition-opacity [tr:hover_&]:opacity-100"
-              >
-                <Plus className="size-3.5" />
-                <span className="text-sm font-medium">Details</span>
-              </Button>
+              <div className="flex items-center opacity-0 transition-opacity [tr:hover_&]:opacity-100">
+                <CopyAndPasteButton
+                  textToCopy={addressValue as `0x${string}`}
+                />
+                <Button variant="outline" size="sm">
+                  <Plus className="size-3.5" />
+                  <span className="text-sm font-medium">Details</span>
+                </Button>
+              </div>
             )}
           </div>
         );
@@ -182,6 +196,42 @@ export const TokenHolders = ({
       meta: {
         columnClassName: "w-72",
       },
+    },
+    {
+      accessorKey: "type",
+      meta: {
+        columnClassName: "w-20",
+      },
+      cell: () => {
+        // const type = row.getValue("type") as string;
+
+        if (loading) {
+          return (
+            <div className="flex items-center">
+              <SkeletonRow
+                parentClassName="flex animate-pulse"
+                className="h-6 w-12 rounded-full"
+              />
+            </div>
+          );
+        }
+
+        return (
+          <div className="flex items-center">
+            <BadgeStatus variant={"dimmed"}>{"Contract"}</BadgeStatus>
+          </div>
+        );
+      },
+      header: () => (
+        <div className="flex items-center gap-2">
+          <h4 className="text-table-header text-xs">Type</h4>
+          <FilterDropdown
+            options={typeFilterOptions}
+            selectedValue={typeFilter}
+            onValueChange={setTypeFilter}
+          />
+        </div>
+      ),
     },
     {
       accessorKey: "balance",
@@ -234,9 +284,6 @@ export const TokenHolders = ({
           </div>
         );
       },
-      meta: {
-        columnClassName: "w-48",
-      },
     },
     {
       accessorKey: "variation",
@@ -275,13 +322,10 @@ export const TokenHolders = ({
           </div>
         );
       },
-      meta: {
-        columnClassName: "w-72",
-      },
     },
     {
       accessorKey: "delegate",
-      size: 160,
+      // size: 160,
       header: () => (
         <div className="text-table-header flex w-full items-center justify-start">
           Delegate
@@ -308,7 +352,9 @@ export const TokenHolders = ({
         return (
           <div className="flex items-center gap-1.5">
             {delegate === zeroAddress ? (
-              <span className="text-secondary text-sm">None</span>
+              <div className="flex items-center">
+                <BadgeStatus variant={"error"}>{"Not delegated"}</BadgeStatus>
+              </div>
             ) : (
               <EnsAvatar
                 address={delegate as Address}
@@ -323,9 +369,12 @@ export const TokenHolders = ({
     {
       accessorKey: "chartLastDays",
       cell: ({ row }) => {
-        const variation: string = row.getValue("variation");
-        const chartLastDays: DaoMetricsDayBucket[] =
-          row.getValue("chartLastDays") ?? [];
+        const variation = row.getValue("variation") as
+          | {
+              percentageChange: number;
+              absoluteChange: number;
+            }
+          | undefined;
 
         if (loading) {
           return (
@@ -336,17 +385,16 @@ export const TokenHolders = ({
         }
 
         return (
-          <div className="flex w-full justify-center py-2.5">
-            <Sparkline
-              data={chartLastDays.map((item) => Number(item.high))}
-              strokeColor={cn([Number(variation) < 0 ? "#f87171" : "#4ADE80"])}
-            />
-          </div>
+          <BalanceChart
+            accountId={row.original.address}
+            daoId={daoId}
+            percentageChange={variation?.percentageChange || 0}
+          />
         );
       },
       header: () => (
         <div className="text-table-header flex w-full items-center justify-center pr-20">
-          Last 1y
+          Last 1 Year
         </div>
       ),
     },

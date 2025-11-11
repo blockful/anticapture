@@ -69,7 +69,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
 
   // Use the balance history hook
   const { transfers, loading, paginationInfo, fetchNextPage, fetchingMore } =
-    useBalanceHistory(
+    useBalanceHistory({
       accountId,
       daoId,
       orderBy,
@@ -78,7 +78,7 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
       fromFilter,
       toFilter,
       filterVariables,
-    );
+    });
 
   // Handle sorting - both date and amount now control the GraphQL query
   const handleSort = (field: string) => {
