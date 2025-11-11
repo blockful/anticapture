@@ -214,8 +214,8 @@ export class TransactionsRepository {
       "AND",
     );
 
-    const transferConditions: string[] = [timePeriodConditions];
-    const delegationConditions: string[] = [timePeriodConditions];
+    const transferConditions: string[] = [];
+    const delegationConditions: string[] = [];
 
     if (checkIsDex) {
       transferConditions.push(`transfers.is_dex = true`);
@@ -260,8 +260,20 @@ export class TransactionsRepository {
     }
 
     return {
-      transfer: this.coalesceConditionArray(transferConditions, "OR"),
-      delegation: this.coalesceConditionArray(delegationConditions, "OR"),
+      transfer: this.coalesceConditionArray(
+        [
+          `(${timePeriodConditions})`,
+          this.coalesceConditionArray(transferConditions, "OR"),
+        ],
+        "AND",
+      ),
+      delegation: this.coalesceConditionArray(
+        [
+          `(${timePeriodConditions})`,
+          this.coalesceConditionArray(delegationConditions, "OR"),
+        ],
+        "AND",
+      ),
     };
   }
 
