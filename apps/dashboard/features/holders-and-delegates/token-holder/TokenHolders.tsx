@@ -19,10 +19,6 @@ import { Button } from "@/shared/components";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
 import daoConfig from "@/shared/dao-config";
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
-import {
-  FilterDropdown,
-  FilterOption,
-} from "@/shared/components/dropdowns/FilterDropdown";
 import { BalanceChart } from "@/features/holders-and-delegates/token-holder/components/BalanceChart";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 
@@ -43,19 +39,12 @@ export const TokenHolders = ({
 }) => {
   const [selectedTokenHolder, setSelectedTokenHolder] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
-  const [typeFilter, setTypeFilter] = useState<string>("all");
   const [currentAddressFilter, setCurrentAddressFilter] = useState<string>("");
   const pageLimit: number = 15;
   const { isMobile } = useScreenSize();
   const {
     daoOverview: { token },
   } = daoConfig[daoId];
-
-  const typeFilterOptions: FilterOption[] = [
-    { value: "all", label: "All Types" },
-    { value: "Contract", label: "Contract" },
-    { value: "EOA", label: "EOA" },
-  ];
 
   const handleAddressFilterApply = (address: string | undefined) => {
     setCurrentAddressFilter(address || "");
@@ -198,42 +187,9 @@ export const TokenHolders = ({
       },
     },
     {
-      accessorKey: "type",
       meta: {
         columnClassName: "w-20",
       },
-      cell: () => {
-        // const type = row.getValue("type") as string;
-
-        if (loading) {
-          return (
-            <div className="flex items-center">
-              <SkeletonRow
-                parentClassName="flex animate-pulse"
-                className="h-6 w-12 rounded-full"
-              />
-            </div>
-          );
-        }
-
-        return (
-          <div className="flex items-center">
-            <BadgeStatus variant={"dimmed"}>{"Contract"}</BadgeStatus>
-          </div>
-        );
-      },
-      header: () => (
-        <div className="flex items-center gap-2">
-          <h4 className="text-table-header text-xs">Type</h4>
-          <FilterDropdown
-            options={typeFilterOptions}
-            selectedValue={typeFilter}
-            onValueChange={setTypeFilter}
-          />
-        </div>
-      ),
-    },
-    {
       accessorKey: "balance",
       size: 160,
       header: ({ column }) => {
@@ -385,18 +341,23 @@ export const TokenHolders = ({
         }
 
         return (
-          <BalanceChart
-            accountId={row.original.address}
-            daoId={daoId}
-            percentageChange={variation?.percentageChange || 0}
-          />
+          <div className="pr-2">
+            <BalanceChart
+              accountId={row.original.address}
+              daoId={daoId}
+              percentageChange={variation?.percentageChange || 0}
+            />
+          </div>
         );
       },
       header: () => (
-        <div className="text-table-header flex w-full items-center justify-center pr-20">
-          Last 1 Year
+        <div className="text-table-header flex w-full items-center justify-start">
+          Last {days.replace("d", "")} days
         </div>
       ),
+      meta: {
+        columnClassName: "w-16",
+      },
     },
   ];
 

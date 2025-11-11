@@ -2550,6 +2550,16 @@ export type GetVotingPowerCountingQueryVariables = Exact<{
 
 export type GetVotingPowerCountingQuery = { __typename?: 'Query', accountBalances: { __typename?: 'accountBalancePage', totalCount: number } };
 
+export type GetVotingPowerChartQueryVariables = Exact<{
+  account: Scalars['String']['input'];
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderDirection?: InputMaybe<QueryInput_VotingPowers_OrderDirection>;
+  orderBy?: InputMaybe<QueryInput_VotingPowers_OrderBy>;
+}>;
+
+
+export type GetVotingPowerChartQuery = { __typename?: 'Query', votingPowers?: { __typename?: 'votingPowers_200_response', items: Array<{ __typename?: 'query_votingPowers_items_items', votingPower: string, timestamp: string } | null> } | null };
+
 export type GetDelegateDelegationHistoryQueryVariables = Exact<{
   accountId: Scalars['String']['input'];
   orderBy?: InputMaybe<Scalars['String']['input']>;
@@ -3667,6 +3677,57 @@ export type GetVotingPowerCountingQueryHookResult = ReturnType<typeof useGetVoti
 export type GetVotingPowerCountingLazyQueryHookResult = ReturnType<typeof useGetVotingPowerCountingLazyQuery>;
 export type GetVotingPowerCountingSuspenseQueryHookResult = ReturnType<typeof useGetVotingPowerCountingSuspenseQuery>;
 export type GetVotingPowerCountingQueryResult = Apollo.QueryResult<GetVotingPowerCountingQuery, GetVotingPowerCountingQueryVariables>;
+export const GetVotingPowerChartDocument = gql`
+    query GetVotingPowerChart($account: String!, $limit: PositiveInt = 10, $orderDirection: queryInput_votingPowers_orderDirection = desc, $orderBy: queryInput_votingPowers_orderBy) {
+  votingPowers(
+    account: $account
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+    limit: $limit
+  ) {
+    items {
+      votingPower
+      timestamp
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetVotingPowerChartQuery__
+ *
+ * To run a query within a React component, call `useGetVotingPowerChartQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetVotingPowerChartQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetVotingPowerChartQuery({
+ *   variables: {
+ *      account: // value for 'account'
+ *      limit: // value for 'limit'
+ *      orderDirection: // value for 'orderDirection'
+ *      orderBy: // value for 'orderBy'
+ *   },
+ * });
+ */
+export function useGetVotingPowerChartQuery(baseOptions: Apollo.QueryHookOptions<GetVotingPowerChartQuery, GetVotingPowerChartQueryVariables> & ({ variables: GetVotingPowerChartQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetVotingPowerChartQuery, GetVotingPowerChartQueryVariables>(GetVotingPowerChartDocument, options);
+      }
+export function useGetVotingPowerChartLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetVotingPowerChartQuery, GetVotingPowerChartQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetVotingPowerChartQuery, GetVotingPowerChartQueryVariables>(GetVotingPowerChartDocument, options);
+        }
+export function useGetVotingPowerChartSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetVotingPowerChartQuery, GetVotingPowerChartQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetVotingPowerChartQuery, GetVotingPowerChartQueryVariables>(GetVotingPowerChartDocument, options);
+        }
+export type GetVotingPowerChartQueryHookResult = ReturnType<typeof useGetVotingPowerChartQuery>;
+export type GetVotingPowerChartLazyQueryHookResult = ReturnType<typeof useGetVotingPowerChartLazyQuery>;
+export type GetVotingPowerChartSuspenseQueryHookResult = ReturnType<typeof useGetVotingPowerChartSuspenseQuery>;
+export type GetVotingPowerChartQueryResult = Apollo.QueryResult<GetVotingPowerChartQuery, GetVotingPowerChartQueryVariables>;
 export const GetDelegateDelegationHistoryDocument = gql`
     query GetDelegateDelegationHistory($accountId: String!, $orderBy: String = "timestamp", $orderDirection: String = "desc", $limit: Int = 10, $after: String, $before: String) {
   votingPowerHistorys(

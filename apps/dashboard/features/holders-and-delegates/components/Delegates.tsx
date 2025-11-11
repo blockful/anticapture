@@ -21,6 +21,8 @@ import { Table } from "@/shared/components/design-system/table/Table";
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
 import daoConfig from "@/shared/dao-config";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import { VotingPowerChart } from "@/features/holders-and-delegates/delegate/drawer/components/VotingPowerChart";
 
 interface DelegateTableData {
   address: string;
@@ -210,24 +212,22 @@ export const Delegates = ({
         }
 
         return (
-          <div className="flex items-center gap-3">
+          <div className="group flex w-full items-center">
             <EnsAvatar
-              address={address as `0x${string}`}
+              address={address as Address}
               size="sm"
               variant="rounded"
-              showName={true}
               isDashed={true}
               nameClassName="[tr:hover_&]:border-primary"
             />
             {!isMobile && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="opacity-0 transition-opacity [tr:hover_&]:opacity-100"
-              >
-                <Plus className="size-3.5" />
-                <p className="text-sm font-medium">Details</p>
-              </Button>
+              <div className="flex items-center opacity-0 transition-opacity [tr:hover_&]:opacity-100">
+                <CopyAndPasteButton textToCopy={address as `0x${string}`} />
+                <Button variant="outline" size="sm">
+                  <Plus className="size-3.5" />
+                  <span className="text-sm font-medium">Details</span>
+                </Button>
+              </div>
             )}
           </div>
         );
@@ -248,9 +248,6 @@ export const Delegates = ({
     },
     {
       accessorKey: "votingPower",
-      meta: {
-        columnClassName: "w-80",
-      },
       cell: ({ row }) => {
         const votingPower = row.getValue("votingPower") as string;
 
@@ -329,7 +326,7 @@ export const Delegates = ({
       },
       header: () => (
         <h4 className="text-table-header flex w-full items-center justify-center">
-          Change
+          Change ({daoId})
         </h4>
       ),
       enableSorting: false,
@@ -405,6 +402,44 @@ export const Delegates = ({
         </Button>
       ),
       enableSorting: false,
+    },
+    {
+      accessorKey: "chartLastDays",
+      cell: ({ row }) => {
+        const variation = row.getValue("variation") as
+          | {
+              percentageChange: number;
+              absoluteChange: number;
+            }
+          | undefined;
+
+        if (loading) {
+          return (
+            <div className="flex w-full justify-center">
+              <SkeletonRow className="h-5 w-32" />
+            </div>
+          );
+        }
+
+        return (
+          <div className="pr-2">
+            <VotingPowerChart
+              days={timePeriod}
+              accountId={row.original.address}
+              daoId={daoId}
+              percentageChange={variation?.percentageChange || 0}
+            />
+          </div>
+        );
+      },
+      header: () => (
+        <div className="text-table-header flex w-full items-center justify-start">
+          Last {timePeriod.replace("d", "")} days
+        </div>
+      ),
+      meta: {
+        columnClassName: "w-16",
+      },
     },
   ];
 

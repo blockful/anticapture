@@ -2547,6 +2547,16 @@ export type GetVotingPowerCountingQueryVariables = Exact<{
 
 export type GetVotingPowerCountingQuery = { __typename?: 'Query', accountBalances: { __typename?: 'accountBalancePage', totalCount: number } };
 
+export type GetVotingPowerChartQueryVariables = Exact<{
+  account: Scalars['String']['input'];
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderDirection?: InputMaybe<QueryInput_VotingPowers_OrderDirection>;
+  orderBy?: InputMaybe<QueryInput_VotingPowers_OrderBy>;
+}>;
+
+
+export type GetVotingPowerChartQuery = { __typename?: 'Query', votingPowers?: { __typename?: 'votingPowers_200_response', items: Array<{ __typename?: 'query_votingPowers_items_items', votingPower: string, timestamp: string } | null> } | null };
+
 export type GetDelegateDelegationHistoryQueryVariables = Exact<{
   accountId: Scalars['String']['input'];
   orderBy?: InputMaybe<Scalars['String']['input']>;

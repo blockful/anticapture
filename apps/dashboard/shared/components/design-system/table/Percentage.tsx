@@ -49,7 +49,7 @@ export const Percentage = ({ className, value, ...props }: PercentageProps) => {
           className={cn("size-4", variant === "negative" && "text-error")}
         />
       )}
-      {Math.abs(value)}%
+      {value > 1000 ? "> 1000" : value < -1000 ? "< -1000" : Math.abs(value)}%
     </span>
   );
 };
