@@ -7,6 +7,7 @@ import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
 export const COMP: DaoConfiguration = {
   name: "Compound",
+  decimals: 18,
   color: {
     svgColor: "#070A0E",
     svgBgColor: "#00D395",

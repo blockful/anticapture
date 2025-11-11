@@ -46,9 +46,9 @@ export function useTopAccountsChartData({
     return addresses
       .map((address) => {
         const latestDelegation = delegationData[address]?.find(
-          (item) => item.delegate?.id !== zeroAddress,
+          (item) => item.delegateAccountId !== zeroAddress,
         );
-        return latestDelegation?.delegate?.id as Address | undefined;
+        return latestDelegation?.delegateAccountId as Address | undefined;
       })
       .filter((address): address is Address => !!address);
   }, [addresses, delegationData]);
@@ -154,10 +154,10 @@ export function useTopAccountsChartData({
   const processedData = useMemo(() => {
     return chartData.map((item) => {
       const latestDelegation = delegationData[item.address]?.find(
-        (delegation) => delegation.delegate?.id !== zeroAddress,
+        (delegation) => delegation.delegateAccountId !== zeroAddress,
       );
 
-      const delegateAddress = latestDelegation?.delegate?.id as
+      const delegateAddress = latestDelegation?.delegateAccountId as
         | Address
         | undefined;
 

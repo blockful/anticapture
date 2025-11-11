@@ -8,7 +8,7 @@ import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
-import { Address, formatUnits, parseEther, zeroAddress } from "viem";
+import { Address, formatUnits, parseUnits, zeroAddress } from "viem";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import { DaoIdEnum } from "@/shared/types/daos";
 import Link from "next/link";
@@ -32,9 +32,7 @@ export const DelegateDelegationHistoryTable = ({
   accountId,
   daoId,
 }: DelegateDelegationHistoryTableProps) => {
-  const {
-    daoOverview: { token },
-  } = daoConfig[daoId];
+  const { decimals } = daoConfig[daoId];
   const [sortBy, setSortBy] = useState<"timestamp" | "delta">("timestamp");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [filterVariables, setFilterVariables] =
@@ -193,10 +191,10 @@ export const DelegateDelegationHistoryTable = ({
 
               setFilterVariables(() => ({
                 minDelta: filterState.minAmount
-                  ? parseEther(filterState.minAmount).toString()
+                  ? parseUnits(filterState.minAmount, decimals).toString()
                   : undefined,
                 maxDelta: filterState.maxAmount
-                  ? parseEther(filterState.maxAmount).toString()
+                  ? parseUnits(filterState.maxAmount, decimals).toString()
                   : undefined,
               }));
 
@@ -235,15 +233,11 @@ export const DelegateDelegationHistoryTable = ({
         let amount = "0";
         if (item.delegation) {
           amount = formatNumberUserReadable(
-            token === "ERC20"
-              ? Number(formatUnits(BigInt(item.delegation.value), 18))
-              : Number(item.delegation.value),
+            Number(formatUnits(BigInt(item.delegation.value), decimals)),
           );
         } else if (item.transfer) {
           amount = formatNumberUserReadable(
-            token === "ERC20"
-              ? Number(formatUnits(BigInt(item.transfer.value), 18))
-              : Number(item.transfer.value),
+            Number(formatUnits(BigInt(item.transfer.value), decimals)),
           );
         } else {
           // Auto delegation protocols wont have neither delegation nor transfer, so we use the delta
