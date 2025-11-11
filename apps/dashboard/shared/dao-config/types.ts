@@ -65,7 +65,6 @@ export interface ChainWithIcon extends Chain {
 // Section configurations without data storage
 export interface DaoOverviewConfig {
   chain: ChainWithIcon;
-  blockTime: number;
   contracts: {
     token: Address;
     governor?: Address;
