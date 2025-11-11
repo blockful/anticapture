@@ -2,7 +2,7 @@ import { DaoConfiguration } from "@/shared/dao-config/types";
 import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { ZKIcon } from "@/shared/components/icons";
-import { mainnet } from "viem/chains";
+import { zksync } from "viem/chains";
 
 export const ZK: DaoConfiguration = {
   name: "ZKSync",
@@ -14,7 +14,7 @@ export const ZK: DaoConfiguration = {
   icon: ZKIcon,
   daoOverview: {
     token: "ERC20",
-    chain: mainnet,
+    chain: zksync,
     contracts: {
       governor: "0xb83FF6501214ddF40C91C9565d095400f3F45746",
       token: "0x5A7d6b2F92C77FAD6CCaBd7EE0624E64907Eaf3E",
