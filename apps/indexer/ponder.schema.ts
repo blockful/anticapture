@@ -401,3 +401,19 @@ export const accountRelations = relations(account, ({ many }) => ({
     relationName: "delegatedBalances",
   }),
 }));
+
+/**
+ * Historical treasury data from external APIs (DeFi Llama)
+ * This is offchain data populated via cron jobs, not from blockchain indexing
+ */
+export const historicalTreasury = onchainTable(
+  "historical_treasury",
+  (drizzle) => ({
+    date: drizzle.text().primaryKey(), // ISO format: "2024-01-15"
+    totalTreasury: drizzle.text("total_treasury").notNull(), // USD value as string
+    treasuryWithoutDaoToken: drizzle
+      .text("treasury_without_dao_token")
+      .notNull(), // Excluding native token
+    updatedAt: drizzle.bigint("updated_at", { mode: "number" }).notNull(), // Unix timestamp
+  }),
+);

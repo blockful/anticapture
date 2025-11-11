@@ -1,37 +1,38 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import * as offchainSchema from "@/offchain/offchain.schema";
+import { historicalTreasury } from "ponder:schema";
 import { env } from "@/env";
 
 /**
- * Writable database connection for offchain data.
- * Separate from Ponder's managed connection.
+ * Writable database connection for tables that need write access from API.
  *
- * Used for:
- * - External API data (DeFi Llama treasury)
- * - Manual data operations outside indexing
- * - Background jobs and cron tasks
+ * The Ponder db is read-only to protect data integrity during indexing.
+ * This connection allows writing to specific tables (like historical_treasury)
+ * that are populated from external APIs via cron jobs.
+ *
  */
 const pool = new Pool({
   connectionString: env.DATABASE_URL,
 });
 
-// Set search_path to match Ponder's schema
+// Set search_path to match Ponder's schema on every connection
 pool.on("connect", (client) => {
   // Priority: DATABASE_SCHEMA env var > RAILWAY_DEPLOYMENT_ID > 'public'
   const schema =
     process.env.DATABASE_SCHEMA ||
     process.env.RAILWAY_DEPLOYMENT_ID ||
     "public";
+
   client.query(`SET search_path TO "${schema}"`, (err) => {
     if (err) {
-      console.error(`Failed to set search_path to ${schema}:`, err);
+      console.error(`[DB] Failed to set search_path to ${schema}:`, err);
     } else {
-      console.log(`[DB] Set search_path to "${schema}"`);
+      console.log(`[DB] Writable connection set to schema "${schema}"`);
     }
   });
 });
 
+// Export writable db with only the tables that need write access
 export const writableDb = drizzle(pool, {
-  schema: offchainSchema,
+  schema: { historicalTreasury },
 });

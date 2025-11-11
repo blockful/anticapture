@@ -1,5 +1,5 @@
 import { writableDb } from "@/lib/db";
-import { historicalTreasury } from "@/offchain/offchain.schema";
+import { historicalTreasury } from "ponder:schema";
 import { TreasuryProvider } from "./providers";
 import { TreasuryDataPoint } from "./types";
 import { eq } from "drizzle-orm";
