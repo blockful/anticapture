@@ -60,16 +60,15 @@ export const ZK: DaoConfiguration = {
         riskExplanation:
           "The domain is not signed with a valid signature (DNSSEC) and it is not possible to establish a secure connection to it (HTTPS).",
       },
-      // Quantify the profitability of an attack on Nouns.
       [GovernanceImplementationEnum.ATTACK_PROFITABILITY]: {
-        value: "",
+        value: "<$10K USD",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.ATTACK_PROFITABILITY
           ].description,
-        requirements: [""],
-        riskExplanation: "",
+        riskExplanation:
+          "zkSync does not maintain a liquid treasury. The only assets under the DAO's control are governance tokens ($ZK).",
       },
       [GovernanceImplementationEnum.PROPOSAL_FLASHLOAN_PROTECTION]: {
         value: "Yes",
@@ -98,8 +97,11 @@ export const ZK: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL
           ].description,
-        requirements: [""],
-        riskExplanation: "",
+        requirements: [
+          "The DAO must enforce a permissionless way to cancel any live proposal if the proposer's voting power drops below the proposal-creation threshold.",
+        ],
+        riskExplanation:
+          "Once a proposal is submitted, the proposer can immediately dump their tokens, reducing their financial risk in case of an attack.",
       },
       [GovernanceImplementationEnum.SECURITY_COUNCIL]: {
         value: "Yes",
@@ -117,8 +119,10 @@ export const ZK: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.SPAM_RESISTANCE
           ].description,
-        requirements: [""],
-        riskExplanation: "",
+        requirements: [
+          "ZkSync has no limit on active proposals or proposals submitted per address. With a low proposal threshold, it is susceptible to spam in its governance.",
+        ],
+        riskExplanation: "ZkSync governance is vulnerable to spam proposals.",
       },
       [GovernanceImplementationEnum.TIMELOCK_ADMIN]: {
         value: "Yes",
@@ -145,7 +149,8 @@ export const ZK: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VETO_STRATEGY
           ].description,
-        riskExplanation: "",
+        riskExplanation:
+          "The zkSync Security Council aligns with leading security council standards.",
       },
       [GovernanceImplementationEnum.VOTE_MUTABILITY]: {
         value: "No",
@@ -167,7 +172,8 @@ export const ZK: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_DELAY
           ].description,
-        riskExplanation: "",
+        riskExplanation:
+          "With six days, zkSync has enough time to gather votes and delegates with the goal of blocking a malicious proposal in the DAO.",
       },
       [GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION]: {
         value: "Yes",
@@ -186,7 +192,8 @@ export const ZK: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_PERIOD
           ].description,
-        riskExplanation: ".",
+        riskExplanation:
+          "Six days is enough time for the DAO to organize itself against an attack during the voting period..",
       },
       [GovernanceImplementationEnum.VOTING_SUBSIDY]: {
         value: "No",
@@ -195,8 +202,11 @@ export const ZK: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_SUBSIDY
           ].description,
-        requirements: [""],
-        riskExplanation: ".",
+        requirements: [
+          "Introduce a voting subsidy mechanism to encourage higher voter turnout and reduce voter attrition in times of need.",
+        ],
+        riskExplanation:
+          "The voting subsidy is not applied, requiring voters to pay gas on the proposals they vote on.",
       },
     },
   },
