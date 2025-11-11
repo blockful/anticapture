@@ -43,7 +43,7 @@ export function assets(app: Hono, service: TreasuryClient) {
             "application/json": {
               schema: z.array(
                 z.object({
-                  date: z.string(),
+                  date: z.number().describe("Unix timestamp in milliseconds"),
                   totalTreasury: z.string(),
                   treasuryWithoutDaoToken: z.string(),
                 }),
@@ -59,9 +59,9 @@ export function assets(app: Hono, service: TreasuryClient) {
       // Fetch from database via treasury service
       const data = await service.getHistoricalTreasury(days);
 
-      // Return both treasury values for frontend flexibility
+      // Convert date string to timestamp for frontend
       const response = data.map((item) => ({
-        date: item.date,
+        date: new Date(item.date).getTime(),
         totalTreasury: item.totalTreasury,
         treasuryWithoutDaoToken: item.treasuryWithoutDaoToken,
       }));

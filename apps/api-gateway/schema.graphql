@@ -38,6 +38,8 @@ type Query {
   _(where: transactionFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): transactionPage!
   tokenPrice(timestamp: BigInt!): tokenPrice
   tokenPrices(where: tokenPriceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPricePage!
+  historicalTreasury(date: String!): historicalTreasury
+  historicalTreasurys(where: historicalTreasuryFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): historicalTreasuryPage!
   _meta: Meta
 
   """Get historical treasury data (total and without DAO token)"""
@@ -1323,13 +1325,70 @@ input tokenPriceFilter {
   timestamp_lte: BigInt
 }
 
+type historicalTreasury {
+  date: String!
+  totalTreasury: String!
+  treasuryWithoutDaoToken: String!
+  updatedAt: BigInt!
+}
+
+type historicalTreasuryPage {
+  items: [historicalTreasury!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+input historicalTreasuryFilter {
+  AND: [historicalTreasuryFilter]
+  OR: [historicalTreasuryFilter]
+  date: String
+  date_not: String
+  date_in: [String]
+  date_not_in: [String]
+  date_contains: String
+  date_not_contains: String
+  date_starts_with: String
+  date_ends_with: String
+  date_not_starts_with: String
+  date_not_ends_with: String
+  totalTreasury: String
+  totalTreasury_not: String
+  totalTreasury_in: [String]
+  totalTreasury_not_in: [String]
+  totalTreasury_contains: String
+  totalTreasury_not_contains: String
+  totalTreasury_starts_with: String
+  totalTreasury_ends_with: String
+  totalTreasury_not_starts_with: String
+  totalTreasury_not_ends_with: String
+  treasuryWithoutDaoToken: String
+  treasuryWithoutDaoToken_not: String
+  treasuryWithoutDaoToken_in: [String]
+  treasuryWithoutDaoToken_not_in: [String]
+  treasuryWithoutDaoToken_contains: String
+  treasuryWithoutDaoToken_not_contains: String
+  treasuryWithoutDaoToken_starts_with: String
+  treasuryWithoutDaoToken_ends_with: String
+  treasuryWithoutDaoToken_not_starts_with: String
+  treasuryWithoutDaoToken_not_ends_with: String
+  updatedAt: BigInt
+  updatedAt_not: BigInt
+  updatedAt_in: [BigInt]
+  updatedAt_not_in: [BigInt]
+  updatedAt_gt: BigInt
+  updatedAt_lt: BigInt
+  updatedAt_gte: BigInt
+  updatedAt_lte: BigInt
+}
+
 type Mutation {
   """Fetches latest data from DeFi Llama and syncs to database"""
   syncTreasury: syncTreasury_response
 }
 
 type query_totalAssets_items {
-  date: String!
+  """Unix timestamp in milliseconds"""
+  date: Float!
   totalTreasury: String!
   treasuryWithoutDaoToken: String!
 }

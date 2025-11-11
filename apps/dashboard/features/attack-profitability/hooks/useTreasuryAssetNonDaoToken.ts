@@ -5,7 +5,7 @@ import useSWR, { SWRConfiguration } from "swr";
 import axios from "axios";
 
 export interface TreasuryAssetData {
-  date: string;
+  date: number;
   totalTreasury: string;
   treasuryWithoutDaoToken: string;
 }
