@@ -79,7 +79,7 @@ export class ZKClient<
       abi: [
         {
           inputs: [],
-          name: "delay",
+          name: "getMinDelay",
           outputs: [
             {
               internalType: "uint256",
@@ -92,7 +92,7 @@ export class ZKClient<
         },
       ],
       address: timelockAddress,
-      functionName: "delay",
+      functionName: "getMinDelay",
     });
   }
 
