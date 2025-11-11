@@ -189,7 +189,7 @@ export const UNI: DaoConfiguration = {
   },
   attackProfitability: {
     riskLevel: RiskLevel.LOW,
-    supportsLiquidTreasuryCall: false,
+    supportsLiquidTreasuryCall: true,
     attackCostBarChart: {
       UniTimelock: "0x1a9C8182C09F50C8318d769245beA52c32BE35BC",
       UniTokenDistributor: "0x090D4613473dEE047c3f2706764f49E0821D256e",
