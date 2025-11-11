@@ -16,7 +16,6 @@ export const COMP: DaoConfiguration = {
   daoOverview: {
     token: "ERC20",
     chain: { ...mainnet, icon: MainnetIcon },
-    blockTime: 12,
     snapshot: "https://snapshot.box/#/s:comp-vote.eth/proposals",
     contracts: {
       governor: "0x309a862bbC1A00e45506cB8A802D1ff10004c8C0",

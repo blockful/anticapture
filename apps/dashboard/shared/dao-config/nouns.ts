@@ -13,7 +13,6 @@ export const NOUNS: DaoConfiguration = {
   icon: NounsIcon,
   daoOverview: {
     token: "ERC721",
-    blockTime: 12,
     chain: { ...mainnet, icon: NounsIcon },
     snapshot: "",
     contracts: {
