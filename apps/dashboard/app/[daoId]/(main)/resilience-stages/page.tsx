@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { AttackProfitabilitySection } from "@/features/attack-profitability";
-import { SubSectionsContainer } from "@/shared/components/design-system/section";
-import { RiskLevelCard, TheSectionLayout } from "@/shared/components";
-import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
-import { Crosshair2Icon } from "@radix-ui/react-icons";
+import { ResilienceStagesSection } from "@/features/resilience-stages";
 
 type Props = {
   params: Promise<{ daoId: string }>;
@@ -29,36 +25,37 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     [DaoIdEnum.SCR]: `${baseUrl}/opengraph-images/scroll.png`,
     [DaoIdEnum.NOUNS]: `${baseUrl}/opengraph-images/nouns.png`,
     [DaoIdEnum.OBOL]: `${baseUrl}/opengraph-images/obol.png`,
+    [DaoIdEnum.COMP]: `${baseUrl}/opengraph-images/comp.png`,
   };
 
   const imageUrl =
     ogImage[daoId as DaoIdEnum] || `${baseUrl}/opengraph-images/default.png`;
 
   return {
-    title: `Anticapture - ${daoId} DAO Attack Profitability`,
-    description: `Analyze attack profitability and governance capture costs for ${daoId} DAO.`,
+    title: `Anticapture - ${daoId} DAO Resilience Stages`,
+    description: `Assess ${daoId} DAO governance resilience and security stages.`,
     openGraph: {
-      title: `Anticapture - ${daoId} DAO Attack Profitability`,
-      description: `Analyze attack profitability and governance capture costs for ${daoId} DAO.`,
+      title: `Anticapture - ${daoId} DAO Resilience Stages`,
+      description: `Assess ${daoId} DAO governance resilience and security stages.`,
       images: [
         {
           url: imageUrl,
           width: 1200,
           height: 630,
-          alt: `${daoId} DAO Attack Profitability Open Graph Image`,
+          alt: `${daoId} DAO Resilience Stages Open Graph Image`,
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      title: `Anticapture - ${daoId} DAO Attack Profitability`,
-      description: `Analyze attack profitability and governance capture costs for ${daoId} DAO.`,
+      title: `Anticapture - ${daoId} DAO Resilience Stages`,
+      description: `Assess ${daoId} DAO governance resilience and security stages.`,
       images: [imageUrl],
     },
   };
 }
 
-export default async function AttackProfitabilityPage({
+export default async function ResilienceStagesPage({
   params,
 }: {
   params: Promise<{ daoId: string }>;
@@ -67,25 +64,9 @@ export default async function AttackProfitabilityPage({
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
   const daoConstants = daoConfigByDaoId[daoIdEnum];
 
-  if (!daoConstants.attackProfitability) {
+  if (!daoConstants.resilienceStages) {
     return null;
   }
 
-  return (
-    <TheSectionLayout
-      title={PAGES_CONSTANTS.attackProfitability.title}
-      icon={<Crosshair2Icon className="section-layout-icon" />}
-      description={PAGES_CONSTANTS.attackProfitability.description}
-      riskLevel={
-        <RiskLevelCard status={daoConstants.attackProfitability?.riskLevel} />
-      }
-    >
-      <SubSectionsContainer>
-        <AttackProfitabilitySection
-          daoId={daoIdEnum}
-          attackProfitability={daoConstants.attackProfitability}
-        />
-      </SubSectionsContainer>
-    </TheSectionLayout>
-  );
+  return <ResilienceStagesSection daoId={daoIdEnum} />;
 }

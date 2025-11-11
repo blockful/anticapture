@@ -69,16 +69,6 @@ export class DrizzleRepository {
     return result.rows[0];
   }
 
-  async getVotingDelay(): Promise<bigint> {
-    const result = await db.query.dao.findFirst({
-      columns: {
-        votingDelay: true,
-      },
-    });
-
-    return result!.votingDelay;
-  }
-
   async getProposalsCompare(days: DaysEnum) {
     const query = sql`
       WITH old_proposals AS (

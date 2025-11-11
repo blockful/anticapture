@@ -1,35 +1,20 @@
-import {
-  Address,
-  createPublicClient,
-  http,
-  parseAbi,
-  PublicClient,
-} from "viem";
-import { multicall } from "viem/actions";
+import { Address, createPublicClient, http, PublicClient } from "viem";
 
-import { DaoIdEnum, DaysEnum } from "@/lib/enums";
-import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { getChain } from "@/lib/utils";
-import { calculateHistoricalBlockNumber } from "@/lib/blockTime";
 import { env } from "@/env";
+import { DBHistoricalBalance } from "@/api/mappers";
 
-export interface HistoricalBalance {
-  address: Address;
-  balance: bigint;
-  blockNumber: number;
-  tokenAddress: Address;
-}
-
-export interface HistoricalBalancesRequest {
-  addresses: Address[];
-  daysInSeconds: DaysEnum;
-  daoId: DaoIdEnum;
+interface AccountBalanceRepository {
+  getHistoricalBalances(
+    addresses: Address[],
+    timestamp: number,
+  ): Promise<DBHistoricalBalance[]>;
 }
 
 export class HistoricalBalancesService {
   private client: PublicClient;
 
-  constructor() {
+  constructor(private readonly repository: AccountBalanceRepository) {
     const { CHAIN_ID: chainId, RPC_URL: rpcUrl } = env;
     const chain = getChain(chainId);
 
@@ -45,103 +30,12 @@ export class HistoricalBalancesService {
 
   /**
    * Fetches historical balances for multiple addresses at a specific time period
-   * Uses Multicall3 for efficient batch queries when available (block 19+)
-   * Falls back to individual calls for earlier blocks
    */
-  async getHistoricalBalances({
-    addresses,
-    daysInSeconds,
-    daoId,
-  }: HistoricalBalancesRequest): Promise<HistoricalBalance[]> {
-    const tokenAddress = CONTRACT_ADDRESSES[daoId].token.address;
-    const currentBlockNumber = await this.getCurrentBlockNumber();
-    const blockNumber = calculateHistoricalBlockNumber(
-      daysInSeconds,
-      currentBlockNumber,
-      CONTRACT_ADDRESSES[daoId].blockTime,
-    );
-    try {
-      return await this.getBalancesWithMulticall(
-        addresses,
-        blockNumber,
-        tokenAddress,
-      );
-    } catch (error) {
-      console.error("Error fetching historical balances:", error);
-      // Fallback to individual calls if multicall fails
-      return await this.getBalancesIndividually(
-        addresses,
-        blockNumber,
-        tokenAddress,
-      );
-    }
-  }
-
-  /**
-   * Get balances using Multicall3 for efficient batch processing
-   */
-  private async getBalancesWithMulticall(
+  async getHistoricalBalances(
     addresses: Address[],
-    blockNumber: number,
-    tokenAddress: Address,
-  ): Promise<HistoricalBalance[]> {
-    const results = await multicall(this.client, {
-      contracts: addresses.map((address) => ({
-        address: tokenAddress,
-        abi: parseAbi([
-          "function balanceOf(address account) external view returns (uint256)",
-        ]),
-        functionName: "balanceOf",
-        args: [address],
-      })),
-      blockNumber: BigInt(blockNumber),
-    });
-
-    // Transform results into HistoricalBalance objects
-    return addresses.map((address, index) => {
-      const result = results[index];
-      const balance = result?.result || 0n;
-
-      return {
-        address,
-        balance,
-        blockNumber,
-        tokenAddress,
-      };
-    });
-  }
-
-  /**
-   * Get balances using individual readContract calls
-   */
-  private async getBalancesIndividually(
-    addresses: Address[],
-    blockNumber: number,
-    tokenAddress: Address,
-  ): Promise<HistoricalBalance[]> {
-    const balances = await Promise.allSettled(
-      addresses.map((address) =>
-        this.client.readContract({
-          address: tokenAddress,
-          abi: parseAbi([
-            "function balanceOf(address account) external view returns (uint256)",
-          ]),
-          functionName: "balanceOf",
-          args: [address],
-          blockNumber: BigInt(blockNumber),
-        }),
-      ),
-    );
-    // Transform results into HistoricalBalance objects
-    return addresses.map((address, index) => ({
-      address,
-      balance:
-        balances[index]?.status === "fulfilled"
-          ? (balances[index].value as bigint)
-          : 0n,
-      blockNumber,
-      tokenAddress,
-    }));
+    timestamp: number,
+  ): Promise<DBHistoricalBalance[]> {
+    return await this.repository.getHistoricalBalances(addresses, timestamp);
   }
 
   /**
