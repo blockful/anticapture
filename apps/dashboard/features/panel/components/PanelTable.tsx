@@ -1,8 +1,10 @@
 "use client";
 
+import { formatUnits } from "viem";
 import React, { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ColumnDef } from "@tanstack/react-table";
+
 import {
   SkeletonRow,
   RiskAreaCardEnum,
@@ -26,6 +28,7 @@ import {
 } from "@/shared/dao-config/utils";
 import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
 import { Table } from "@/shared/components/design-system/table/Table";
+import daoConfig from "@/shared/dao-config";
 
 type PanelDao = {
   dao: string;
@@ -38,11 +41,8 @@ export const PanelTable = () => {
   // Create a ref to store the actual delegated supply values
   const delegatedSupplyValues = useRef<Record<number, number>>({});
 
-  const notOnElectionDaoIds = Object.values(DaoIdEnum).filter(
-    (daoId) => daoId !== DaoIdEnum.NOUNS, // TODO remove this when Nouns is fully supported
-  );
   // Create initial data
-  const data = notOnElectionDaoIds.map((daoId, index) => ({
+  const data = Object.values(DaoIdEnum).map((daoId, index) => ({
     id: index,
     dao: daoId,
   }));
@@ -58,13 +58,15 @@ export const PanelTable = () => {
     const { data: tokenData } = useTokenData(daoId);
     const delegatedSupply = tokenData?.delegatedSupply;
 
+    const { decimals } = daoConfig[daoId];
+    const parsedDelegatedSupply = Number(
+      formatUnits(BigInt(delegatedSupply || 0), decimals),
+    );
+
     // Store the numeric value in the ref when data changes
     useEffect(() => {
-      if (delegatedSupply) {
-        const numericValue = Number(BigInt(delegatedSupply) / BigInt(10 ** 18));
-        delegatedSupplyValues.current[rowIndex] = numericValue;
-      }
-    }, [delegatedSupply, rowIndex]);
+      delegatedSupplyValues.current[rowIndex] = parsedDelegatedSupply;
+    }, [parsedDelegatedSupply, rowIndex]);
 
     if (!delegatedSupply) {
       return (
@@ -75,13 +77,9 @@ export const PanelTable = () => {
       );
     }
 
-    const formattedSupply = formatNumberUserReadable(
-      Number(BigInt(delegatedSupply) / BigInt(10 ** 18)),
-    );
-
     return (
       <div className="text-secondary flex w-full items-center justify-end py-3 text-end text-sm font-normal">
-        {formattedSupply}
+        {formatNumberUserReadable(parsedDelegatedSupply)}
       </div>
     );
   };

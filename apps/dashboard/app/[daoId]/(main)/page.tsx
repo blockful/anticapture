@@ -52,7 +52,7 @@ export default async function DaoPage({
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
   const daoConstants = daoConfigByDaoId[daoIdEnum];
 
-  if (!daoConstants.daoOverview) {
+  if (!daoConstants?.daoOverview) {
     return null;
   }
 

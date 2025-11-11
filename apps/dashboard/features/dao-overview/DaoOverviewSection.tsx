@@ -11,7 +11,6 @@ import { DaoOverviewHeaderMetrics } from "@/features/dao-overview/components/Dao
 import { TokenDistributionChartCard } from "@/features/dao-overview/components/TokenDistributionChartCard";
 import { DaoOverviewHeaderBackground } from "@/features/dao-overview/components/DaoOverviewHeaderBackground";
 import { SecurityCouncilCard } from "@/features/dao-overview/components/SecurityCouncilCard";
-import { formatEther } from "viem";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 import { StagesContainer } from "@/features/resilience-stages/components/StagesContainer";
@@ -43,7 +42,6 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     proposalThresholdValue,
     proposalThresholdPercentage,
     quorumValueFormatted,
-    quorumPercentage,
     votingPeriod,
     votingDelay,
     timelockDelay,
@@ -58,19 +56,9 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
 
   if (isLoading) return <DaoOverviewSkeleton />;
 
-  const delegatedSupplyValue = formatNumberUserReadable(
-    Number(
-      formatEther(BigInt(delegatedSupply.data?.currentDelegatedSupply || 0)),
-    ),
-  );
-  const activeSupplyValue = formatNumberUserReadable(
-    Number(formatEther(BigInt(activeSupply.data?.activeSupply || 0))),
-  );
-  const averageTurnoutValue = formatNumberUserReadable(
-    Number(
-      formatEther(BigInt(averageTurnout.data?.currentAverageTurnout || 0)),
-    ),
-  );
+  const delegatedSupplyValue = formatNumberUserReadable(delegatedSupply);
+  const activeSupplyValue = formatNumberUserReadable(activeSupply);
+  const averageTurnoutValue = formatNumberUserReadable(averageTurnout);
 
   const currentDaoStage = getDaoStageFromFields({
     fields: fieldsToArray(daoConfig.governanceImplementation?.fields),
@@ -154,8 +142,9 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           <MetricsCard
             proposalThresholdValue={proposalThresholdValue}
             proposalThresholdPercentage={proposalThresholdPercentage}
-            quorumValueFormatted={quorumValueFormatted}
-            quorumPercentage={quorumPercentage}
+            quorumValueFormatted={formatNumberUserReadable(
+              quorumValueFormatted,
+            )}
             daoId={daoId}
             daoConfig={daoConfig}
             votingPeriod={votingPeriod}
