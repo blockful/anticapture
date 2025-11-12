@@ -96,7 +96,7 @@ export class TreasuryService {
           date: item.date,
           totalTreasury: item.totalTreasury,
           treasuryWithoutDaoToken: item.treasuryWithoutDaoToken,
-          updatedAt: Date.now(),
+          updatedAt: BigInt(Date.now()),
         })),
       );
       console.log(`[TreasuryService] Inserted ${toInsert.length} new records`);
@@ -104,7 +104,7 @@ export class TreasuryService {
 
     // 5. Update changed records
     if (toUpdate.length > 0) {
-      const now = Date.now();
+      const now = BigInt(Date.now());
       for (const item of toUpdate) {
         await writableDb
           .update(historicalTreasury)

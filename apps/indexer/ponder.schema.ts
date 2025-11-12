@@ -414,6 +414,6 @@ export const historicalTreasury = onchainTable(
     treasuryWithoutDaoToken: drizzle
       .text("treasury_without_dao_token")
       .notNull(), // Excluding native token
-    updatedAt: drizzle.bigint("updated_at", { mode: "number" }).notNull(), // Unix timestamp
+    updatedAt: drizzle.bigint("updated_at").notNull(), // Unix timestamp
   }),
 );
