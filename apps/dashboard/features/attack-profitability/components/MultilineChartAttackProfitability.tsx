@@ -37,7 +37,6 @@ import {
 import {
   normalizeDataset,
   normalizeDatasetTreasuryNonDaoToken,
-  normalizeDatasetAllTreasury,
 } from "@/features/attack-profitability/utils";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
@@ -118,7 +117,10 @@ export const MultilineChartAttackProfitability = ({
         treasuryAssetData,
         "treasuryNonDAO",
       ),
-      all: normalizeDatasetAllTreasury(treasuryAssetData, "all"),
+      all: treasuryAssetData.map((item) => ({
+        date: item.date,
+        all: Number(item.totalTreasury),
+      })),
       quorum: daoConfig?.attackProfitability?.dynamicQuorum?.percentage
         ? normalizeDataset(
             daoTokenPriceHistoricalData,
