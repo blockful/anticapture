@@ -42,7 +42,8 @@ export function normalizeDatasetAllTreasury(
   return tokenPrices.map(({ timestamp, price }) => ({
     date: timestamp,
     [key]:
-      Number(price) * (govTreasuriesMap[timestamp] ?? 0) +
-      (assetTreasuriesMap[timestamp] ?? 0),
+      Number(price) *
+      ((govTreasuriesMap[timestamp] ?? 0) +
+        (assetTreasuriesMap[timestamp] ?? 0)),
   }));
 }
