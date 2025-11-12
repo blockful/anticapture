@@ -7,7 +7,7 @@ import { Address } from "viem";
 export interface TokenDataResponse {
   id: Address;
   name: DaoIdEnum;
-  decimals: 18;
+  decimals: number;
   cexSupply: string;
   circulatingSupply: string;
   delegatedSupply: string;

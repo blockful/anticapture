@@ -2563,25 +2563,6 @@ export type GetDelegatesCountQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type GetDelegatesCountQuery = { __typename?: 'Query', accountPowers: { __typename?: 'accountPowerPage', totalCount: number } };
 
-export type GetDelegationHistoryCountQueryVariables = Exact<{
-  delegator: Scalars['String']['input'];
-}>;
-
-
-export type GetDelegationHistoryCountQuery = { __typename?: 'Query', delegations: { __typename?: 'delegationPage', totalCount: number } };
-
-export type GetDelegationHistoryItemsQueryVariables = Exact<{
-  delegator: Scalars['String']['input'];
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-}>;
-
-
-export type GetDelegationHistoryItemsQuery = { __typename?: 'Query', delegations: { __typename?: 'delegationPage', items: Array<{ __typename?: 'delegation', timestamp: any, delegate?: { __typename?: 'account', id: string, powers?: { __typename?: 'accountPowerPage', items: Array<{ __typename?: 'accountPower', votingPower: any }> } | null } | null }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null } } };
-
 export type GetHistoricalVotingAndActivityQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];
   address: Scalars['String']['input'];
@@ -2695,6 +2676,7 @@ export type GetProposalsActivityQuery = { __typename?: 'Query', proposalsActivit
 
 export type GetProposalsQueryVariables = Exact<{
   fromDate?: InputMaybe<Scalars['Float']['input']>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
 }>;
 
 
@@ -2707,6 +2689,25 @@ export type GetDaoAddressesAccountBalancesQueryVariables = Exact<{
 
 
 export type GetDaoAddressesAccountBalancesQuery = { __typename?: 'Query', accountBalances: { __typename?: 'accountBalancePage', items: Array<{ __typename?: 'accountBalance', accountId: string, balance: any }> } };
+
+export type GetDelegationHistoryCountQueryVariables = Exact<{
+  delegator: Scalars['String']['input'];
+}>;
+
+
+export type GetDelegationHistoryCountQuery = { __typename?: 'Query', delegations: { __typename?: 'delegationPage', totalCount: number } };
+
+export type GetDelegationHistoryItemsQueryVariables = Exact<{
+  delegator: Scalars['String']['input'];
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  orderBy?: InputMaybe<Scalars['String']['input']>;
+  orderDirection?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetDelegationHistoryItemsQuery = { __typename?: 'Query', delegations: { __typename?: 'delegationPage', items: Array<{ __typename?: 'delegation', delegateAccountId: string, delegatedValue: any, timestamp: any }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null } } };
 
 export type GetTopTokenHoldersQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;

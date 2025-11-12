@@ -41,6 +41,7 @@ import {
 import daoConfigByDaoId from "@/shared/dao-config";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 import { Data } from "react-csv/lib/core";
+import { parseUnits } from "viem";
 
 interface MultilineChartAttackProfitabilityProps {
   days: string;
@@ -64,7 +65,7 @@ export const MultilineChartAttackProfitability = ({
 
   const { data: daoTokenPriceHistoricalData } = useDaoTokenHistoricalData({
     daoId: daoEnum,
-    limit: Number(days.split("d")[0]),
+    limit: Number(days.split("d")[0]) - 7,
   });
 
   const { data: timeSeriesData } = useTimeSeriesData(
@@ -84,9 +85,9 @@ export const MultilineChartAttackProfitability = ({
     [timeSeriesData],
   );
 
-  const quorumValue = daoData?.quorum
-    ? Number(daoData.quorum) / 10 ** 18
-    : null;
+  const quorumValue = Number(
+    parseUnits(daoData?.quorum || "0", daoConfig.decimals),
+  );
 
   const chartConfig = useMemo(
     () => ({
@@ -126,7 +127,7 @@ export const MultilineChartAttackProfitability = ({
             daoTokenPriceHistoricalData,
             "quorum",
             1,
-            daoConfig?.daoOverview.token,
+            daoConfig.decimals,
             delegatedSupplyChart,
           ).map((datasetpoint) => ({
             ...datasetpoint,
@@ -139,7 +140,7 @@ export const MultilineChartAttackProfitability = ({
               daoTokenPriceHistoricalData,
               "quorum",
               quorumValue,
-              daoConfig?.daoOverview.token,
+              daoConfig.decimals,
             )
           : [],
       delegated: delegatedSupplyChart
@@ -147,7 +148,7 @@ export const MultilineChartAttackProfitability = ({
             daoTokenPriceHistoricalData,
             "delegated",
             1,
-            daoConfig?.daoOverview.token,
+            daoConfig.decimals,
             delegatedSupplyChart,
           )
         : [],
@@ -183,7 +184,7 @@ export const MultilineChartAttackProfitability = ({
     treasuryAssetData,
     timeSeriesData,
     daoConfig?.attackProfitability?.dynamicQuorum?.percentage,
-    daoConfig?.daoOverview.token,
+    daoConfig.decimals,
   ]);
 
   const prevCsvRef = useRef<string>("");

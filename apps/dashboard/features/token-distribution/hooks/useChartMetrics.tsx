@@ -10,6 +10,8 @@ import { ChartDataSetPoint } from "@/shared/dao-config/types";
 import { MetricSchema } from "@/features/token-distribution/utils/metrics";
 import { normalizeTimestamp } from "@/features/token-distribution/utils/chart";
 import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
+import { formatUnits } from "viem";
+import daoConfig from "@/shared/dao-config";
 
 export interface UseChartMetricsResult {
   chartData: ChartDataSetPoint[];
@@ -21,12 +23,10 @@ export const useChartMetrics = ({
   appliedMetrics,
   daoId,
   metricsSchema,
-  tokenType,
 }: {
   appliedMetrics: string[];
   daoId: DaoIdEnum;
   metricsSchema: Record<string, MetricSchema>;
-  tokenType: "ERC20" | "ERC721";
 }): UseChartMetricsResult => {
   // Get direct enum metrics
   const enumMetrics = appliedMetrics.filter((key) =>
@@ -159,8 +159,10 @@ export const useChartMetrics = ({
             result[normalizeTimestamp(item.date)] = {
               ...result[normalizeTimestamp(item.date)],
               date: normalizeTimestamp(item.date),
-              [metricKey]:
-                tokenType === "ERC721" ? Number(value) : Number(value) / 1e18, // Convert from wei to token units
+              [metricKey]: formatUnits(
+                BigInt(value),
+                daoConfig[daoId].decimals,
+              ), // Convert from wei to token units
             };
           });
         }
@@ -168,7 +170,7 @@ export const useChartMetrics = ({
     }
 
     return result;
-  }, [timeSeriesData, stableAppliedMetrics, metricsSchema, tokenType]);
+  }, [timeSeriesData, stableAppliedMetrics, metricsSchema, daoId]);
 
   // Process historical token data separately
   const tokenPriceDatasets = useMemo(() => {

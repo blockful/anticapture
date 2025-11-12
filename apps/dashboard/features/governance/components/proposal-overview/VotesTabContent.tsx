@@ -11,8 +11,9 @@ import {
   useGetVotesOnchainsTotalCountQuery,
   useGetProposalNonVotersQuery,
 } from "@anticapture/graphql-client/hooks";
-import { formatEther } from "viem";
+import { formatUnits } from "viem";
 import { TabsDidntVoteContent } from "@/features/governance/components/proposal-overview/TabsDidntVoteContent";
+import daoConfig from "@/shared/dao-config";
 
 export const VotesTabContent = ({
   proposal,
@@ -21,7 +22,9 @@ export const VotesTabContent = ({
 }) => {
   const [activeTab, setActiveTab] = useState<"voted" | "didntVote">("voted");
 
-  const { daoId } = useParams();
+  const { daoId } = useParams<{ daoId: string }>();
+  const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
+  const { decimals } = daoConfig[daoIdEnum];
 
   const TabsContent = TabsContentMapping[activeTab];
 
@@ -32,7 +35,7 @@ export const VotesTabContent = ({
     },
     context: {
       headers: {
-        "anticapture-dao-id": (daoId as string)?.toUpperCase() as DaoIdEnum,
+        "anticapture-dao-id": daoIdEnum,
       },
     },
   });
@@ -45,17 +48,18 @@ export const VotesTabContent = ({
     },
     context: {
       headers: {
-        "anticapture-dao-id": (daoId as string)?.toUpperCase() as DaoIdEnum,
+        "anticapture-dao-id": daoIdEnum,
       },
     },
   });
 
   const totalVotes = formatNumberUserReadable(
     Number(
-      formatEther(
+      formatUnits(
         BigInt(proposal.forVotes) +
           BigInt(proposal.againstVotes) +
           BigInt(proposal.abstainVotes),
+        decimals,
       ),
     ),
   );

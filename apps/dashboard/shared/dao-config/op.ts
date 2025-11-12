@@ -7,6 +7,7 @@ import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
 export const OP: DaoConfiguration = {
   name: "Optimism",
+  decimals: 18,
   color: {
     svgColor: "#ff0420",
     svgBgColor: "#FFF2FB",

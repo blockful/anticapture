@@ -122,7 +122,10 @@ export const SectionComposedChart = ({
           <YAxis
             yAxisId="secondary"
             orientation="right"
-            domain={["auto", "auto"]}
+            domain={[
+              (dataMin: number) => Math.floor(dataMin * 0.25), // 25% chart padding from the lower value
+              (dataMax: number) => Math.ceil(dataMax * 1.1), // 10% chart padding from the upper value
+            ]}
             tickFormatter={(value) => `$${Number(value)}`}
             stroke="#8884d8"
             tick={{ fill: "#8884d8", fontSize: 10 }}
