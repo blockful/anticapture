@@ -56,7 +56,7 @@ export const MetricsCard = ({
 
       <DaoOverviewMetricCard
         title="Voting Period"
-        text={`${formatBlocksToUserReadable(votingPeriod, daoConfigBlockTime, true)} to vote`}
+        text={`${formatBlocksToUserReadable(votingPeriod, daoConfigBlockTime)} to vote`}
         subText={
           <span>
             Starts after{" "}
