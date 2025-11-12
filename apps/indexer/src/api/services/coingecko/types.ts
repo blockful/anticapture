@@ -22,7 +22,7 @@ export const CoingeckoTokenIdEnum: Record<DaoIdEnum, string> = {
   SCR: "scroll",
   COMP: "compound-governance-token",
   OBOL: "obol-2",
-  ZK: "zk",
+  ZK: "zksync",
 } as const;
 
 export const CoingeckoIdToAssetPlatformId = {

@@ -509,7 +509,26 @@ export const CEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     "MEXC Hot Wallet": "0x9642b23Ed1E01Df1092B92641051881a322F5D4E",
     "Binance Wallet Proxy": "0x73D8bD54F7Cf5FAb43fE4Ef40A62D390644946Db",
   },
-  [DaoIdEnum.ZK]: {},
+  [DaoIdEnum.ZK]: {
+    "Binance 1": "0xf977814e90da44bfa03b6295a0616a897441acec",
+    "Binance 2": "0x7aed074ca56f5050d5a2e512ecc5bf7103937d76",
+    "Binance 3": "0xa84fd90d8640fa63d194601e0b2d1c9094297083",
+    "Binance 4": "0x43684d03d81d3a4c70da68febdd61029d426f042",
+    "Binance 5": "0x98adef6f2ac8572ec48965509d69a8dd5e8bba9d",
+    Bybit: "0xacf9a5610cb9e6ec9c84ca7429815e95b6607e9f",
+    OKX1: "0x611f7bf868a6212f871e89f7e44684045ddfb09d",
+    BtcTurk: "0x7aed074ca56f5050d5a2e512ecc5bf7103937d76",
+    MEXC: "0xfe4931fb4deabc515f1a48b94b6b17653eeaa34f",
+    Bitget: "0x97b9d2102a9a65a26e1ee82d59e42d1b73b68689",
+    Kraken: "0xd2dd7b597fd2435b6db61ddf48544fd931e6869f",
+    Kucoin: "0xd6216fc19db775df9774a6e33526131da7d19a2c",
+    "Kucoin 2": "0x2933782b5a8d72f2754103d1489614f29bfa4625",
+    Gate: "0x0d0707963952f2fba59dd06f2b425ace40b492fe",
+    "Gate 2": "0xc882b111a75c0c657fc507c04fbfcd2cc984f071",
+    "Crypto.com": "0x2a584c02de672425729af2f174fb19fe734dde5d",
+    OKX2: "0xf9b52be2426f06ab6d560f64a7b15e820f33cbdb",
+    OKX3: "0xecf17c7f6a6090f1edd21e0beb2268197270fb44",
+  },
 };
 
 export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -571,7 +590,10 @@ export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     "Uniswap V3 Pool": "0x57F52C9faa6D40c5163D76b8D7dD81ddB7c95434",
     "Uniswap PoolManager": "0x000000000004444c5dc75cB358380D2e3dE08A90",
   },
-  [DaoIdEnum.ZK]: {},
+  [DaoIdEnum.ZK]: {
+    "Pancake Swap": "0xf92b0178bc932a59d45c1c4aac81712aac6a5b61",
+    Uniswap: "0x3d7264539E6e3f596bb485E3091f3Ae02Ad01ef8",
+  },
 };
 
 export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -614,7 +636,10 @@ export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     "Compound 2": "0x3Afdc9BCA9213A35503b077a6072F3D0d5AB0840",
   },
   [DaoIdEnum.OBOL]: {},
-  [DaoIdEnum.ZK]: {},
+  [DaoIdEnum.ZK]: {
+    Aave: "0xd6cd2c0fc55936498726cacc497832052a9b2d1b",
+    Venus: "0x697a70779c1a03ba2bd28b7627a902bff831b616",
+  },
 };
 
 export const BurningAddresses: Record<
