@@ -173,6 +173,7 @@ export interface DaoAddresses {
     scrUSDC: Address;
   };
   [DaoIdEnum.OBOL]: Record<string, string>;
+  [DaoIdEnum.ZK]: Record<string, string>;
 }
 
 export interface AttackProfitabilityConfig {
