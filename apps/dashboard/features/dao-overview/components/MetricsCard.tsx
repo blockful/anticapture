@@ -1,6 +1,9 @@
 import { DaoOverviewMetricCard } from "@/features/dao-overview/components/DaoOverviewMetricCard";
 import { DaoConfiguration } from "@/shared/dao-config/types";
-import { formatBlocksToUserReadable } from "@/shared/utils";
+import {
+  formatBlocksToUserReadable,
+  formatSecondsToReadable,
+} from "@/shared/utils";
 
 interface MetricsCardProps {
   daoId: string;
@@ -56,7 +59,7 @@ export const MetricsCard = ({
 
       <DaoOverviewMetricCard
         title="Voting Period"
-        text={`${formatBlocksToUserReadable(votingPeriod, daoConfigBlockTime)} to vote`}
+        text={`${formatBlocksToUserReadable(votingPeriod, daoConfigBlockTime, true)} to vote`}
         subText={
           <span>
             Starts after{" "}
@@ -98,11 +101,7 @@ export const MetricsCard = ({
             <span>
               After{" "}
               <span className="bg-surface-opacity rounded-full px-1.5 py-0.5">
-                {formatBlocksToUserReadable(
-                  timelockDelay,
-                  daoConfigBlockTime,
-                  true,
-                ) || "N/A"}
+                {formatSecondsToReadable(timelockDelay, true) || "N/A"}
               </span>{" "}
               of delay
             </span>
