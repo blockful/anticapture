@@ -44,8 +44,8 @@ export class TreasuryService {
     );
 
     // 3. Process data in reverse chronological order (newest first)
-    const sortedProviderData = [...providerData].sort((a, b) =>
-      b.date.localeCompare(a.date),
+    const sortedProviderData = [...providerData].sort(
+      (a, b) => Number(b.date - a.date), // Bigint comparison
     );
 
     const toInsert: typeof providerData = [];
@@ -144,11 +144,10 @@ export class TreasuryService {
 
     // Filter by days if specified
     if (days) {
-      const cutoffDate = new Date();
-      cutoffDate.setDate(cutoffDate.getDate() - days);
-      const cutoffStr = cutoffDate.toISOString().split("T")[0]!; // ISO format always has 'T'
-
-      return results.filter((r) => r.date >= cutoffStr);
+      const cutoffTimestamp = BigInt(
+        Math.floor(Date.now() / 1000) - days * 24 * 60 * 60,
+      );
+      return results.filter((r) => r.date >= cutoffTimestamp);
     }
 
     return results;

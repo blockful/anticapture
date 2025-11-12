@@ -1,5 +1,5 @@
 export interface TreasuryDataPoint {
-  date: string; // ISO format "2024-01-15"
+  date: bigint; // Unix timestamp in seconds (start of day)
   totalTreasury: string; // USD value
   treasuryWithoutDaoToken: string; // USD value excluding native token
 }

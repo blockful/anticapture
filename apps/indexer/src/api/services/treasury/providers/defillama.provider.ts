@@ -60,10 +60,10 @@ export class DefiLlamaProvider implements TreasuryProvider {
   private transformData(rawData: RawDefiLlamaResponse): TreasuryDataPoint[] {
     const { chainTvls } = rawData;
 
-    // Map: chainKey → Map(date → latest dataPoint)
+    // Map: chainKey → Map(dayTimestamp → latest dataPoint)
     const chainsByDate = new Map<
       string,
-      Map<string, { timestamp: number; value: number }>
+      Map<bigint, { timestamp: number; value: number }>
     >();
 
     // First pass: For each chain, keep only the latest timestamp per date
@@ -73,15 +73,15 @@ export class DefiLlamaProvider implements TreasuryProvider {
         continue; // Skip {Chain}-OwnTokens variants
       }
 
-      const dateMap = new Map<string, { timestamp: number; value: number }>();
+      const dateMap = new Map<bigint, { timestamp: number; value: number }>();
 
       for (const dataPoint of chainData.tvl || []) {
-        const date = this.timestampToDateString(dataPoint.date);
-        const existing = dateMap.get(date);
+        const dayTimestamp = this.timestampToStartOfDay(dataPoint.date);
+        const existing = dateMap.get(dayTimestamp);
 
         // Keep only the latest timestamp for each date
         if (!existing || dataPoint.date > existing.timestamp) {
-          dateMap.set(date, {
+          dateMap.set(dayTimestamp, {
             timestamp: dataPoint.date,
             value: dataPoint.totalLiquidityUSD,
           });
@@ -93,18 +93,18 @@ export class DefiLlamaProvider implements TreasuryProvider {
 
     // Second pass: Aggregate across chains
     const aggregatedByDate = new Map<
-      string,
+      bigint,
       { total: number; withoutOwnToken: number }
     >();
 
     for (const [chainKey, dateMap] of chainsByDate.entries()) {
       const isGlobalOwnTokens = chainKey === "OwnTokens";
 
-      for (const [date, { value }] of dateMap.entries()) {
-        let entry = aggregatedByDate.get(date);
+      for (const [dayTimestamp, { value }] of dateMap.entries()) {
+        let entry = aggregatedByDate.get(dayTimestamp);
         if (!entry) {
           entry = { total: 0, withoutOwnToken: 0 };
-          aggregatedByDate.set(date, entry);
+          aggregatedByDate.set(dayTimestamp, entry);
         }
 
         if (isGlobalOwnTokens) {
@@ -120,23 +120,21 @@ export class DefiLlamaProvider implements TreasuryProvider {
 
     // Convert map to array and format
     return Array.from(aggregatedByDate.entries())
-      .map(([date, values]) => ({
-        date,
+      .map(([dayTimestamp, values]) => ({
+        date: dayTimestamp,
         totalTreasury: values.total.toFixed(2),
         treasuryWithoutDaoToken: Math.max(0, values.withoutOwnToken).toFixed(2), // Ensure non-negative
       }))
-      .sort((a, b) => a.date.localeCompare(b.date)); // Sort by date ascending
+      .sort((a, b) => Number(a.date - b.date)); // Sort by timestamp ascending
   }
 
   /**
-   * Converts Unix timestamp to ISO date string (YYYY-MM-DD).
+   * Converts Unix timestamp to start of day timestamp (in seconds).
+   * Normalizes timestamps to UTC midnight.
    */
-  private timestampToDateString(timestamp: number): string {
+  private timestampToStartOfDay(timestamp: number): bigint {
     const date = new Date(timestamp * 1000); // DeFi Llama uses seconds
-    const isoString = date.toISOString().split("T")[0];
-    if (!isoString) {
-      throw new Error("Failed to convert timestamp to date string");
-    }
-    return isoString;
+    date.setUTCHours(0, 0, 0, 0);
+    return BigInt(Math.floor(date.getTime() / 1000));
   }
 }

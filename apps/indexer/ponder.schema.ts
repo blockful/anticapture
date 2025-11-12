@@ -409,11 +409,11 @@ export const accountRelations = relations(account, ({ many }) => ({
 export const historicalTreasury = onchainTable(
   "historical_treasury",
   (drizzle) => ({
-    date: drizzle.text().primaryKey(), // ISO format: "2024-01-15"
+    date: drizzle.bigint().primaryKey(), // Unix timestamp in seconds (start of day)
     totalTreasury: drizzle.text("total_treasury").notNull(), // USD value as string
     treasuryWithoutDaoToken: drizzle
       .text("treasury_without_dao_token")
       .notNull(), // Excluding native token
-    updatedAt: drizzle.bigint("updated_at").notNull(), // Unix timestamp
+    updatedAt: drizzle.bigint("updated_at").notNull(), // Unix timestamp in milliseconds
   }),
 );

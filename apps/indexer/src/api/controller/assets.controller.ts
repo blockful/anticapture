@@ -5,7 +5,7 @@ import { DaysOpts } from "@/lib/enums";
 interface TreasuryClient {
   getHistoricalTreasury(days?: number): Promise<
     Array<{
-      date: string;
+      date: bigint;
       totalTreasury: string;
       treasuryWithoutDaoToken: string;
     }>
@@ -59,9 +59,9 @@ export function assets(app: Hono, service: TreasuryClient) {
       // Fetch from database via treasury service
       const data = await service.getHistoricalTreasury(days);
 
-      // Convert date string to timestamp for frontend
+      // Convert bigint timestamp (seconds) to milliseconds for frontend
       const response = data.map((item) => ({
-        date: new Date(item.date).getTime(),
+        date: Number(item.date) * 1000, // Convert seconds to milliseconds
         totalTreasury: item.totalTreasury,
         treasuryWithoutDaoToken: item.treasuryWithoutDaoToken,
       }));
