@@ -39,7 +39,7 @@ export class ZKClient<
       abi: this.abi,
       address: this.address,
       functionName: "quorum",
-      args: [BigInt(Date.now() / 1000)],
+      args: [BigInt(Math.floor(Date.now() / 1000))],
     });
   }
 
