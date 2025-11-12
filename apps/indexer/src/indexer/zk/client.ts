@@ -11,7 +11,7 @@ import {
 import { DAOClient } from "@/interfaces/client";
 import { GovernorBase } from "../governor.base";
 import { GovernorAbi } from "./abi";
-import { getBlockNumber, readContract } from "viem/actions";
+import { readContract } from "viem/actions";
 
 export class ZKClient<
     TTransport extends Transport = Transport,
@@ -35,13 +35,11 @@ export class ZKClient<
   }
 
   async getQuorum(): Promise<bigint> {
-    const blockNumber = await getBlockNumber(this.client);
-    const targetBlock = blockNumber - 10n;
     return readContract(this.client, {
       abi: this.abi,
       address: this.address,
       functionName: "quorum",
-      args: [targetBlock < 0n ? 0n : targetBlock],
+      args: [BigInt(Date.now() / 1000)],
     });
   }
 
