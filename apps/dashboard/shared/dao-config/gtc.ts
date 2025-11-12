@@ -40,7 +40,7 @@ export const GTC: DaoConfiguration = {
     riskLevel: RiskLevel.HIGH,
     supportsLiquidTreasuryCall: true,
     attackCostBarChart: {
-      GitcoinTimelock: "0x57a8865cfB1eCEf7253c27da6B4BC3dAEE5Be518", //addd marketcap addresses treasury
+      GitcoinTimelock: "0x57a8865cfB1eCEf7253c27da6B4BC3dAEE5Be518",
     },
   },
   riskAnalysis: true,
