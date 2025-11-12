@@ -17,7 +17,6 @@ const pool = new Pool({
 
 // Set search_path to match Ponder's schema on every connection
 pool.on("connect", (client) => {
-  // Priority: DATABASE_SCHEMA env var > RAILWAY_DEPLOYMENT_ID > 'public'
   const schema =
     process.env.DATABASE_SCHEMA ||
     process.env.RAILWAY_DEPLOYMENT_ID ||
