@@ -1325,8 +1325,8 @@ input tokenPriceFilter {
 
 type historicalTreasury {
   date: BigInt!
-  totalTreasury: BigInt!
-  treasuryWithoutDaoToken: BigInt!
+  totalTreasury: Int!
+  treasuryWithoutDaoToken: Int!
   updatedAt: BigInt!
 }
 
@@ -1347,22 +1347,22 @@ input historicalTreasuryFilter {
   date_lt: BigInt
   date_gte: BigInt
   date_lte: BigInt
-  totalTreasury: BigInt
-  totalTreasury_not: BigInt
-  totalTreasury_in: [BigInt]
-  totalTreasury_not_in: [BigInt]
-  totalTreasury_gt: BigInt
-  totalTreasury_lt: BigInt
-  totalTreasury_gte: BigInt
-  totalTreasury_lte: BigInt
-  treasuryWithoutDaoToken: BigInt
-  treasuryWithoutDaoToken_not: BigInt
-  treasuryWithoutDaoToken_in: [BigInt]
-  treasuryWithoutDaoToken_not_in: [BigInt]
-  treasuryWithoutDaoToken_gt: BigInt
-  treasuryWithoutDaoToken_lt: BigInt
-  treasuryWithoutDaoToken_gte: BigInt
-  treasuryWithoutDaoToken_lte: BigInt
+  totalTreasury: Int
+  totalTreasury_not: Int
+  totalTreasury_in: [Int]
+  totalTreasury_not_in: [Int]
+  totalTreasury_gt: Int
+  totalTreasury_lt: Int
+  totalTreasury_gte: Int
+  totalTreasury_lte: Int
+  treasuryWithoutDaoToken: Int
+  treasuryWithoutDaoToken_not: Int
+  treasuryWithoutDaoToken_in: [Int]
+  treasuryWithoutDaoToken_not_in: [Int]
+  treasuryWithoutDaoToken_gt: Int
+  treasuryWithoutDaoToken_lt: Int
+  treasuryWithoutDaoToken_gte: Int
+  treasuryWithoutDaoToken_lte: Int
   updatedAt: BigInt
   updatedAt_not: BigInt
   updatedAt_in: [BigInt]
@@ -1376,8 +1376,8 @@ input historicalTreasuryFilter {
 type query_totalAssets_items {
   """Unix timestamp in milliseconds"""
   date: Float!
-  totalTreasury: String!
-  treasuryWithoutDaoToken: String!
+  totalTreasury: Int!
+  treasuryWithoutDaoToken: Int!
 }
 
 enum queryInput_totalAssets_days {

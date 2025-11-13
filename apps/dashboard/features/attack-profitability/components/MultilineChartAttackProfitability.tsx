@@ -120,7 +120,7 @@ export const MultilineChartAttackProfitability = ({
       ),
       all: treasuryAssetData.map((item) => ({
         date: item.date,
-        all: Number(item.totalTreasury),
+        all: item.totalTreasury,
       })),
       quorum: daoConfig?.attackProfitability?.dynamicQuorum?.percentage
         ? normalizeDataset(
