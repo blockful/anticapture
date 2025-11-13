@@ -57,7 +57,7 @@ import {
 } from "./services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
-import { startTreasurySyncCron } from "./jobs/treasury-sync.cron";
+import { startTreasurySyncCron } from "./treasury-sync.cron";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -120,7 +120,10 @@ const daoCache = new DaoCache();
 const daoService = new DaoService(daoClient, daoCache, env.CHAIN_ID);
 
 // Treasury service with DeFi Llama provider
-const defiLlamaProvider = new DefiLlamaProvider(env.DEFILLAMA_API_URL);
+const defiLlamaProvider = new DefiLlamaProvider(
+  env.DEFILLAMA_API_URL,
+  env.TREASURY_PROVIDER_PROTOCOL_ID,
+);
 const treasuryService = new TreasuryService(defiLlamaProvider, env.DAO_ID);
 assets(app, treasuryService);
 

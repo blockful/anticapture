@@ -2,14 +2,9 @@ import { TreasuryDataPoint } from "../types";
 
 export interface TreasuryProvider {
   /**
-   * Fetches historical treasury data for a given DAO.
-   * @param daoId - Internal DAO identifier (e.g., 'ENS', 'UNI')
-   * @returns Array of historical treasury data points
+   * Fetches historical treasury data from the configured provider.
+   * Provider-specific DAO ID is configured during instantiation.
+   * @returns Array of historical treasury data points, or empty array if provider is not configured
    */
-  fetchTreasury(daoId: string): Promise<TreasuryDataPoint[]>;
-
-  /**
-   * Returns list of DAO IDs supported by this provider.
-   */
-  getSupportedDaos(): string[];
+  fetchTreasury(): Promise<TreasuryDataPoint[]>;
 }

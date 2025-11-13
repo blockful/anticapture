@@ -24,7 +24,7 @@ export class TreasuryService {
     console.log(`[TreasuryService] Starting sync for DAO: ${this.daoId}`);
 
     // 1. Fetch all historical data from provider
-    const providerData = await this.provider.fetchTreasury(this.daoId);
+    const providerData = await this.provider.fetchTreasury();
     console.log(
       `[TreasuryService] Fetched ${providerData.length} data points from provider`,
     );

@@ -1,61 +1,76 @@
-import { HTTPException } from "hono/http-exception";
 import axios, { AxiosInstance } from "axios";
 import { TreasuryProvider } from "./treasury-provider.interface";
 import { TreasuryDataPoint, RawDefiLlamaResponse } from "../types";
 
 export class DefiLlamaProvider implements TreasuryProvider {
   private readonly client: AxiosInstance;
+  private readonly providerDaoId: string;
+  private isValid: boolean = false;
 
-  // DAO ID mapping encapsulated in provider
-  // Based on Phase 0 research - internal IDs are UPPERCASE, DeFi Llama IDs vary
-  private readonly daoMapping: Record<string, string> = {
-    ENS: "ENS", // Case-sensitive!
-    UNI: "uniswap",
-    OP: "optimism-foundation",
-    ARB: "arbitrum-dao",
-    GTC: "gitcoin",
-    NOUNS: "nouns",
-    // SCR (Scroll) - Not available in DeFi Llama
-  };
-
-  constructor(baseUrl: string) {
+  constructor(baseUrl: string, providerDaoId: string) {
     this.client = axios.create({
       baseURL: baseUrl,
     });
+    this.providerDaoId = providerDaoId;
+    void this.validateConnection();
   }
 
-  getSupportedDaos(): string[] {
-    return Object.keys(this.daoMapping);
-  }
-
-  async fetchTreasury(daoId: string): Promise<TreasuryDataPoint[]> {
-    // 1. Validate DAO support
-    const llamaDaoId = this.daoMapping[daoId];
-    if (!llamaDaoId) {
-      throw new HTTPException(400, {
-        message: `DAO '${daoId}' not supported by DeFi Llama provider`,
-      });
-    }
-
-    // 2. Fetch from DeFi Llama API
+  /**
+   * Validates that the provider DAO ID exists in DeFi Llama.
+   * Logs warning if validation fails but doesn't throw.
+   */
+  private async validateConnection(): Promise<void> {
     try {
-      const response = await this.client.get<RawDefiLlamaResponse>(
-        `/${llamaDaoId}`,
+      console.log(
+        `[DefiLlamaProvider] Validating connection for DAO ID: ${this.providerDaoId}`,
       );
 
-      // 3. Transform DeFi Llama format → our format
+      const response = await this.client.get<RawDefiLlamaResponse>(
+        `/${this.providerDaoId}`,
+      );
+
+      // Check if response has valid data structure
+      if (
+        !response.data?.chainTvls ||
+        Object.keys(response.data.chainTvls).length === 0
+      ) {
+        throw new Error("Invalid response structure or empty data");
+      }
+
+      this.isValid = true;
+      console.log(
+        `[DefiLlamaProvider] ✓ Connection validated for ${this.providerDaoId}`,
+      );
+    } catch (error) {
+      this.isValid = false;
+      console.warn(
+        `[DefiLlamaProvider] ⚠ Failed to validate provider DAO ID '${this.providerDaoId}'. Treasury data will not be available.`,
+      );
+    }
+  }
+
+  async fetchTreasury(): Promise<TreasuryDataPoint[]> {
+    if (!this.isValid) {
+      return [];
+    }
+
+    try {
+      const response = await this.client.get<RawDefiLlamaResponse>(
+        `/${this.providerDaoId}`,
+      );
+
       return this.transformData(response.data);
     } catch (error) {
-      throw new HTTPException(503, {
-        message: `Failed to fetch treasury data from DeFi Llama for DAO '${daoId}'`,
-        cause: error,
-      });
+      console.error(
+        `[DefiLlamaProvider] Failed to fetch treasury data for ${this.providerDaoId}:`,
+        error,
+      );
+      return [];
     }
   }
 
   /**
    * Transforms DeFi Llama's raw response into our standardized format.
-   * Replicates DeFi Llama's aggregation logic from Phase 0 research.
    */
   private transformData(rawData: RawDefiLlamaResponse): TreasuryDataPoint[] {
     const { chainTvls } = rawData;
@@ -66,9 +81,9 @@ export class DefiLlamaProvider implements TreasuryProvider {
       Map<bigint, { timestamp: number; value: number }>
     >();
 
-    // First pass: For each chain, keep only the latest timestamp per date
+    // For each chain, keep only the latest timestamp per date
     for (const [chainKey, chainData] of Object.entries(chainTvls)) {
-      // Only process base chains (no hyphens) and global OwnTokens
+      // Only process base chains and global OwnTokens
       if (chainKey.includes("-")) {
         continue; // Skip {Chain}-OwnTokens variants
       }
@@ -91,7 +106,7 @@ export class DefiLlamaProvider implements TreasuryProvider {
       chainsByDate.set(chainKey, dateMap);
     }
 
-    // Second pass: Aggregate across chains
+    // Aggregate across chains
     const aggregatedByDate = new Map<
       bigint,
       { total: number; withoutOwnToken: number }
