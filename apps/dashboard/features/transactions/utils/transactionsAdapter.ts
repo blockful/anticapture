@@ -96,7 +96,7 @@ export const adaptTransactionsToTableData = (
     const amount = formatNumberUserReadable(
       Number(
         formatUnits(
-          BigInt(transfersAmountRaw) + BigInt(delegationsAmountRaw),
+          toBigIntSafe(transfersAmountRaw) + toBigIntSafe(delegationsAmountRaw),
           decimals,
         ),
       ) || 0,
@@ -108,7 +108,7 @@ export const adaptTransactionsToTableData = (
       id: `${idx + 1}.${tidx + 1}`,
       affectedSupply: ["Transfer"] as SupplyType[],
       amount: formatNumberUserReadable(
-        Number(formatUnits(BigInt(t.amount || 0), decimals)),
+        Number(formatUnits(toBigIntSafe(t.amount || 0), decimals)),
         2,
       ),
       date: formatRelativeTime(t.timestamp),
@@ -119,7 +119,7 @@ export const adaptTransactionsToTableData = (
       id: `${idx + 1}.${didx + 1}`,
       affectedSupply: ["Delegation"] as SupplyType[],
       amount: formatNumberUserReadable(
-        Number(formatUnits(BigInt(d.delegatedValue), decimals)) || 0,
+        Number(formatUnits(toBigIntSafe(d.delegatedValue), decimals)) || 0,
         2,
       ),
       date: formatRelativeTime(d.timestamp),

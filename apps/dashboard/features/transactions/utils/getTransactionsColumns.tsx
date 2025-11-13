@@ -72,6 +72,9 @@ export const getTransactionsColumns = ({
         );
       },
       size: 180,
+      meta: {
+        columnClassName: "w-42",
+      },
     },
     {
       accessorKey: "amount",
@@ -149,7 +152,7 @@ export const getTransactionsColumns = ({
       header: () => (
         <Button
           variant="ghost"
-          className="!text-table-header w-full justify-start px-4 py-0"
+          className="!text-table-header w-full justify-start px-4 py-0 text-xs"
           onClick={() => {
             setSortOrder(sortOrder === "asc" ? "desc" : "asc");
           }}
@@ -324,9 +327,7 @@ export const getTransactionsColumns = ({
         }
 
         if (isNestedRow) {
-          return (
-            <div className="flex h-10 items-center justify-center px-2"></div>
-          );
+          return null;
         }
 
         return (
@@ -334,6 +335,7 @@ export const getTransactionsColumns = ({
             href={"https://etherscan.io/tx/" + txHash}
             target="_blank"
             rel="noopener noreferrer"
+            className="text-primary hover:bg-surface-contrast flex h-fit cursor-pointer items-center justify-center gap-1.5 rounded-md bg-transparent px-2 py-1 text-sm/tight font-medium transition-colors duration-300"
           >
             <ExternalLink className="h-3 w-3 text-white opacity-50" />
           </Link>

@@ -218,67 +218,77 @@ export const Table = <TData, TValue>({
         <TableBody className={className}>
           {table.getRowModel().rows.length > 0 ? (
             <>
-              {table.getRowModel().rows.map((row) => (
-                <>
-                  <TableRow
-                    key={row.id}
-                    className={cn(
-                      "border-transparent transition-colors duration-300",
-                      onRowClick && !disableRowClick?.(row.original)
-                        ? "hover:bg-surface-contrast cursor-pointer"
-                        : "cursor-default",
-                    )}
-                    onClick={() =>
-                      !disableRowClick?.(row.original) &&
-                      onRowClick?.(row.original)
-                    }
-                  >
-                    {row.getVisibleCells().map((cell, index) => {
-                      const colMeta = (
-                        cell.column.columnDef as { meta?: ColumnMeta }
-                      ).meta;
-                      return (
-                        <TableCell
-                          key={cell.id}
-                          className={cn(
-                            cell.column.getIndex() === 0 &&
-                              stickyFirstColumn &&
-                              "bg-surface-default sticky left-0 z-20",
-                            rowSizeVariants[size],
-                            colMeta?.columnClassName,
-                          )}
-                        >
-                          <div className="flex items-center gap-2">
-                            {index === 0 && enableExpanding && (
-                              <TreeLines row={row} />
+              {table.getRowModel().rows.map((row) => {
+                const isLastNestedRow =
+                  row.getParentRow()?.getLeafRows().slice(-1)[0].id === row.id;
+
+                return (
+                  <>
+                    <TableRow
+                      key={row.id}
+                      className={cn(
+                        "border-transparent transition-colors duration-300",
+                        onRowClick && !disableRowClick?.(row.original)
+                          ? "hover:bg-surface-contrast cursor-pointer"
+                          : "cursor-default",
+                        enableExpanding &&
+                          row.depth === 0 &&
+                          "border-light-dark",
+                        row.getIsExpanded() && "border-b-transparent",
+                        isLastNestedRow && "border-b-light-dark",
+                      )}
+                      onClick={() =>
+                        !disableRowClick?.(row.original) &&
+                        onRowClick?.(row.original)
+                      }
+                    >
+                      {row.getVisibleCells().map((cell, index) => {
+                        const colMeta = (
+                          cell.column.columnDef as { meta?: ColumnMeta }
+                        ).meta;
+                        return (
+                          <TableCell
+                            key={cell.id}
+                            className={cn(
+                              cell.column.getIndex() === 0 &&
+                                stickyFirstColumn &&
+                                "bg-surface-default sticky left-0 z-20",
+                              rowSizeVariants[size],
+                              colMeta?.columnClassName,
                             )}
-                            {index === 0 && (
-                              <ExpandButton
-                                row={row as Row<ExpandableData>}
-                                enableExpanding={enableExpanding}
-                              />
-                            )}
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext(),
-                            )}
-                          </div>
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                  {row.getIsExpanded() && renderSubComponent && (
-                    <TableRow>
-                      <TableCell
-                        colSpan={columns.length}
-                        className="bg-surface-contrast p-0"
-                      >
-                        {renderSubComponent(row)}
-                      </TableCell>
+                          >
+                            <div className="flex items-center gap-2">
+                              {index === 0 && enableExpanding && (
+                                <TreeLines row={row} />
+                              )}
+                              {index === 0 && (
+                                <ExpandButton
+                                  row={row as Row<ExpandableData>}
+                                  enableExpanding={enableExpanding}
+                                />
+                              )}
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext(),
+                              )}
+                            </div>
+                          </TableCell>
+                        );
+                      })}
                     </TableRow>
-                  )}
-                </>
-              ))}
+                    {row.getIsExpanded() && renderSubComponent && (
+                      <TableRow>
+                        <TableCell
+                          colSpan={columns.length}
+                          className="bg-surface-contrast p-0"
+                        >
+                          {renderSubComponent(row)}
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </>
+                );
+              })}
 
               <div ref={sentinelRef} aria-hidden="true" />
 

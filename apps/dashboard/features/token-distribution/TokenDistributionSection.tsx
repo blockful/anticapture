@@ -14,7 +14,6 @@ import { useTokenDistributionStore } from "@/features/token-distribution/store/u
 import { CSVLink } from "react-csv";
 import { defaultLinkVariants } from "@/shared/components/design-system/links/default-link";
 import { ChartDataSetPoint } from "@/shared/dao-config/types";
-import daoConfig from "@/shared/dao-config";
 import { TransactionsTable } from "@/features/transactions";
 import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { useBrushStore } from "@/features/token-distribution/store/useBrushStore";
@@ -106,7 +105,7 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   }, [chartData, endIndex]);
 
   return (
-    <div className="flex flex-col gap-[13px]">
+    <div className="flex flex-col gap-5">
       <Card className="xl:border-light-dark xl:bg-surface-default xl4k:max-w-full flex flex-col gap-4 rounded-lg border-none shadow-none xl:max-w-full xl:flex-row xl:gap-0 xl:border">
         <CardContent className="order-2 flex h-full w-full flex-col gap-6 p-0 xl:order-1">
           <div className="flex h-full w-full gap-1.5">
@@ -148,7 +147,8 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           />
         </div>
       </Card>
-      <CardContent className="order-2 flex h-full w-full flex-col gap-6 p-0 xl:order-1">
+      <div className="border-light-dark h-px w-full border border-dashed" />
+      <CardContent className="order-2 flex h-full w-full flex-col gap-4 p-0 xl:order-1">
         <div className="flex h-full w-full justify-between gap-1.5">
           <CardTitle className="!text-alternative-sm text-primary flex items-center font-mono font-medium uppercase tracking-wide xl:gap-2.5">
             TRANSACTIONS

@@ -59,20 +59,17 @@ interface UseTransactionsTableDataParams {
 export const useTransactionsTableData = ({
   daoId,
   limit = 10,
-  offset = 0,
   filters,
 }: UseTransactionsTableDataParams) => {
+  const [currentPage, setCurrentPage] = useState(1);
   const { decimals } = daoConfig[daoId];
   const [isPaginationLoading, setIsPaginationLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(
-    Math.floor(offset / limit) + 1,
-  );
 
   const { data, error, refetch, fetchMore, networkStatus } =
     useTransactionsQuery({
       variables: {
         limit,
-        offset: (currentPage - 1) * limit,
+        offset: 0,
         ...(filters?.from && { from: filters?.from }),
         ...(filters?.to && { to: filters?.to }),
         ...(filters?.minAmount && {

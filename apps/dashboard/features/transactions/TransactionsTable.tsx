@@ -118,13 +118,11 @@ export const TransactionsTable = ({
           hasMore={pagination.hasNextPage}
           isLoadingMore={fetchingMore}
           onLoadMore={fetchNextPage}
-          // withDownloadCSV={true}
           wrapperClassName="h-[450px]"
           className="h-[400px]"
           enableExpanding={true}
           getSubRows={(row) => row.subRows}
           withSorting={true}
-          stickyFirstColumn={true}
           mobileTableFixed={true}
         />
       </div>
