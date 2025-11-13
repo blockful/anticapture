@@ -410,10 +410,10 @@ export const historicalTreasury = onchainTable(
   "historical_treasury",
   (drizzle) => ({
     date: drizzle.bigint().primaryKey(), // Unix timestamp in seconds (start of day)
-    totalTreasury: drizzle.bigint("total_treasury").notNull(), // USD value
+    totalTreasury: drizzle.integer("total_treasury").notNull(), // USD value
     treasuryWithoutDaoToken: drizzle
-      .bigint("treasury_without_dao_token")
-      .notNull(), // Excluding native token
-    updatedAt: drizzle.bigint("updated_at").notNull(), // Unix timestamp in milliseconds
+      .integer("treasury_without_dao_token")
+      .notNull(), // Excluding governance token
+    updatedAt: drizzle.text("updated_at").notNull(), // Unix timestamp in milliseconds
   }),
 );
