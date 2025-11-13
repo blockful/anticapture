@@ -12,3 +12,4 @@ export * from "./voting-power";
 export * from "./delegation-percentage.controller";
 export * from "./top-account-balance-variations";
 export * from "./top-voting-power-variations";
+export * from "./dao.controller";

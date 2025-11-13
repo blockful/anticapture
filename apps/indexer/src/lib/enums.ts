@@ -7,6 +7,7 @@ export enum DaoIdEnum {
   NOUNS = "NOUNS",
   TEST = "TEST",
   SCR = "SCR",
+  COMP = "COMP",
   OBOL = "OBOL",
 }
 

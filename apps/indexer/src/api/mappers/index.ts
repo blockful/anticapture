@@ -6,3 +6,4 @@ export * from "./token";
 export * from "./delegation-percentage";
 export * from "./top-voting-power-variations";
 export * from "./account-balance";
+export * from "./dao";

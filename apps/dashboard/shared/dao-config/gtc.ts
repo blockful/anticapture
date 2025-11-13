@@ -7,6 +7,7 @@ import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
 export const GTC: DaoConfiguration = {
   name: "Gitcoin",
+  decimals: 18,
   color: {
     svgColor: "#1e443f",
     svgBgColor: "#D0E1DE",
@@ -16,7 +17,6 @@ export const GTC: DaoConfiguration = {
   daoOverview: {
     token: "ERC20",
     chain: mainnet,
-    blockTime: 12,
     snapshot: "https://snapshot.box/#/s:gitcoindao.eth",
     contracts: {
       governor: "0x9D4C63565D5618310271bF3F3c01b2954C1D1639",

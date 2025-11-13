@@ -4,7 +4,10 @@ import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
 import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
-import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
+import {
+  DAYS_IN_SECONDS,
+  SECONDS_PER_DAY,
+} from "@/shared/constants/time-related";
 import axios from "axios";
 
 const fetchTimeSeries = async (
@@ -13,7 +16,7 @@ const fetchTimeSeries = async (
   metricTypes: MetricTypesEnum[],
 ): Promise<Record<MetricTypesEnum, DaoMetricsDayBucket[]>> => {
   const fromDate = String(
-    Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[days],
+    Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[days] - SECONDS_PER_DAY,
   ).slice(0, 10);
 
   const whereConditions = metricTypes
@@ -27,7 +30,7 @@ const fetchTimeSeries = async (
         },
         orderBy: "date",
         orderDirection: "asc",
-        limit: 365
+        limit: 367
       ) {
         items {
           date
@@ -78,7 +81,7 @@ const fetchTimeSeries = async (
 };
 
 /**
- * Fill the gaps on the dailyMetricBuckets using the previous day's values
+ * Fill the gaps in the dailyMetricBuckets using forward-fill logic.
  */
 const applyMetricsContinuity = (
   data: Record<MetricTypesEnum, DaoMetricsDayBucket[]> | undefined,
@@ -89,39 +92,42 @@ const applyMetricsContinuity = (
   const metricsWithContinuity: Record<MetricTypesEnum, DaoMetricsDayBucket[]> =
     {} as Record<MetricTypesEnum, DaoMetricsDayBucket[]>;
 
-  const allDates = new Set<string>();
   for (const metricType of metricTypes) {
-    if (data[metricType]) {
-      data[metricType].forEach((item) => {
-        allDates.add(item.date);
-      });
+    const series = data[metricType];
+    if (!series?.length) {
+      metricsWithContinuity[metricType] = [];
+      continue;
     }
-  }
 
-  const sortedDates = Array.from(allDates).sort(
-    (a, b) => Number(a) - Number(b),
-  );
+    const sortedSeries = [...series].sort(
+      (a, b) => Number(a.date) - Number(b.date),
+    );
 
-  for (const metricType of metricTypes) {
-    metricsWithContinuity[metricType] = [];
+    // Build a map with forward-fill logic
+    const parsedSeries = sortedSeries.reduce(
+      (acc, item) => {
+        const timestamp = Number(item.date) * 1000;
 
-    if (data[metricType] && data[metricType].length > 0) {
-      let lastKnownEntry: DaoMetricsDayBucket | null = null;
+        acc[timestamp] = item;
 
-      for (const date of sortedDates) {
-        const entry = data[metricType].find((item) => item.date === date);
+        // Forward-fill for the next day — overwritten if real value exists
+        const nextDay = timestamp + 24 * 60 * 60 * 1000;
+        acc[nextDay] = acc[nextDay] ?? item;
 
-        if (entry) {
-          metricsWithContinuity[metricType].push(entry);
-          lastKnownEntry = entry;
-        } else if (lastKnownEntry) {
-          metricsWithContinuity[metricType].push({
-            ...lastKnownEntry,
-            date: date,
-          });
-        }
-      }
-    }
+        return acc;
+      },
+      {} as Record<number, DaoMetricsDayBucket>,
+    );
+
+    // Convert timestamps back into sorted DaoMetricsDayBucket array
+    const filledSeries = Object.entries(parsedSeries)
+      .sort(([a], [b]) => Number(a) - Number(b))
+      .map(([ts, item]) => ({
+        ...item,
+        date: String(Math.floor(Number(ts) / 1000)),
+      }));
+
+    metricsWithContinuity[metricType] = filledSeries;
   }
 
   return metricsWithContinuity;

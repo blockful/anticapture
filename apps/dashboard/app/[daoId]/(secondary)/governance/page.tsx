@@ -3,9 +3,9 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import { BaseHeaderLayoutSidebar } from "@/shared/components/";
 
 import { HeaderMobile } from "@/widgets/HeaderMobile";
-import { HeaderSidebar } from "@/widgets";
+import { HeaderDAOSidebar, HeaderSidebar, StickyPageHeader } from "@/widgets";
 import { Footer } from "@/shared/components/design-system/footer/Footer";
-import { ProposalSection } from "@/features/governance/components/proposal-overview/ProposalSection";
+import { GovernanceSection } from "@/features/governance";
 
 type Props = {
   params: Promise<{ daoId: string }>;
@@ -29,17 +29,21 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     [DaoIdEnum.NOUNS]: `${baseUrl}/opengraph-images/nouns.png`,
     [DaoIdEnum.SCR]: `${baseUrl}/opengraph-images/scr.png`,
     [DaoIdEnum.OBOL]: `${baseUrl}/opengraph-images/obol.png`,
+    [DaoIdEnum.COMP]: `${baseUrl}/opengraph-images/comp.png`,
   };
+
+  const ogTitle = `Anticapture - ${daoId} DAO`;
+  const ogDescription = `Explore and mitigate governance risks in ${daoId} DAO.`;
 
   const imageUrl =
     ogImage[daoId as DaoIdEnum] || `${baseUrl}/opengraph-images/default.png`;
 
   return {
-    title: `Anticapture - ${daoId} DAO`,
-    description: `Explore and mitigate governance risks in ${daoId} DAO.`,
+    title: ogTitle,
+    description: ogDescription,
     openGraph: {
-      title: `Anticapture - ${daoId} DAO`,
-      description: `Explore and mitigate governance risks in ${daoId} DAO.`,
+      title: ogTitle,
+      description: ogDescription,
       images: [
         {
           url: imageUrl,
@@ -51,26 +55,28 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: `Anticapture - ${daoId} DAO`,
-      description: `Explore and mitigate governance risks in ${daoId} DAO.`,
+      title: ogTitle,
+      description: ogDescription,
       images: [imageUrl],
     },
   };
 }
 
-export default function ProposalPage() {
+export default function DaoPage() {
   return (
     <div className="bg-surface-background dark flex h-screen overflow-hidden">
       <BaseHeaderLayoutSidebar>
         <HeaderSidebar />
+        <HeaderDAOSidebar />
       </BaseHeaderLayoutSidebar>
-      <main className="relative flex-1 overflow-auto pt-[57px] sm:ml-[70px] sm:pt-0">
+      <main className="relative flex-1 overflow-auto lg:ml-[330px]">
         <div className="sm:hidden">
+          <StickyPageHeader />
           <HeaderMobile />
         </div>
         <div className="flex min-h-screen w-full flex-col items-center">
-          <div className="w-full flex-1">
-            <ProposalSection />
+          <div className="xl4k:max-w-7xl w-full flex-1">
+            <GovernanceSection />
           </div>
           <Footer />
         </div>

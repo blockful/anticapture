@@ -7,6 +7,7 @@ import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
 export const OP: DaoConfiguration = {
   name: "Optimism",
+  decimals: 18,
   color: {
     svgColor: "#ff0420",
     svgBgColor: "#FFF2FB",
@@ -17,7 +18,6 @@ export const OP: DaoConfiguration = {
   daoOverview: {
     token: "ERC20",
     chain: optimism,
-    blockTime: 2,
     snapshot: "https://snapshot.box/#/s:citizenshouse.eth",
     contracts: {
       governor: "0xcDF27F107725988f2261Ce2256bDfCdE8B382B10",

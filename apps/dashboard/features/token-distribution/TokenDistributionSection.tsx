@@ -26,13 +26,11 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const [hoveredMetricKey, setHoveredMetricKey] = useState<string | null>(null);
   const [hasTransfer, setHasTransfer] = useState<boolean>(true);
   const { metrics, setMetrics } = useTokenDistributionStore();
-  const daoCfg = daoConfig[daoId];
 
   const { chartData, chartConfig, isLoading } = useChartMetrics({
     appliedMetrics: metrics,
     daoId,
     metricsSchema,
-    tokenType: daoCfg.daoOverview.token,
   });
 
   const buildCsvData = (

@@ -21,10 +21,12 @@ import {
   delegationPercentage,
   votingPowerVariations,
   accountBalanceVariations,
+  dao,
 } from "./controller";
 import { DrizzleProposalsActivityRepository } from "./repositories/proposals-activity.repository";
 import { docs } from "./docs";
 import { env } from "@/env";
+import { DaoCache } from "./cache/dao-cache";
 import {
   DelegationPercentageRepository,
   AccountBalanceRepository,
@@ -33,6 +35,7 @@ import {
   TokenRepository,
   TransactionsRepository,
   VotingPowerRepository,
+  NounsVotingPowerRepository,
 } from "./repositories";
 import { errorHandler } from "./middlewares";
 import { getClient } from "@/lib/client";
@@ -48,6 +51,8 @@ import {
   NFTPriceService,
   TokenService,
   TopBalanceVariationsService,
+  HistoricalBalancesService,
+  DaoService,
 } from "./services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
@@ -103,7 +108,14 @@ const delegationPercentageService = new DelegationPercentageService(
 );
 const accountBalanceRepo = new AccountBalanceRepository();
 const transactionsService = new TransactionsService(transactionsRepo);
-const votingPowerService = new VotingPowerService(votingPowerRepo);
+const votingPowerService = new VotingPowerService(
+  env.DAO_ID === DaoIdEnum.NOUNS
+    ? new NounsVotingPowerRepository()
+    : votingPowerRepo,
+  votingPowerRepo,
+);
+const daoCache = new DaoCache();
+const daoService = new DaoService(daoClient, daoCache, env.CHAIN_ID);
 
 if (env.DUNE_API_URL && env.DUNE_API_KEY) {
   const duneClient = new DuneService(env.DUNE_API_URL, env.DUNE_API_KEY);
@@ -139,6 +151,7 @@ historicalOnchain(
   app,
   env.DAO_ID,
   new HistoricalVotingPowerService(votingPowerRepo),
+  new HistoricalBalancesService(accountBalanceRepo),
 );
 transactions(app, transactionsService);
 lastUpdate(app);
@@ -149,6 +162,7 @@ accountBalanceVariations(
   app,
   new TopBalanceVariationsService(accountBalanceRepo),
 );
+dao(app, daoService);
 docs(app);
 
 export default app;

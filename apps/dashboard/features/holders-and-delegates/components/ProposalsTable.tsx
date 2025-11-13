@@ -107,12 +107,12 @@ export const ProposalsTable = ({
           item.proposal,
           finalResult.text,
           Number(daoData?.votingPeriod) *
-            daoConfigByDaoId[daoIdEnum]?.daoOverview.blockTime, //voting period comes in blocks, so we need to convert it to seconds
+            (daoConfigByDaoId[daoIdEnum]?.daoOverview.chain.blockTime ?? 12000), //voting period comes in blocks, so we need to convert it to seconds
         ),
         status: item.proposal?.status || "unknown",
       };
     });
-  }, [proposals, daoData?.votingPeriod, daoIdEnum]);
+  }, [proposals, daoData?.votingPeriod, daoIdEnum, daoConfigByDaoId]);
 
   const proposalColumns: ColumnDef<ProposalTableData>[] = [
     {

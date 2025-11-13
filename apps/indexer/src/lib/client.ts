@@ -9,6 +9,7 @@ import { DAOClient } from "@/interfaces/client";
 import { GTCClient } from "@/indexer/gtc/client";
 import { Client as NounsClient } from "@/indexer/nouns/client";
 import { SCRClient } from "@/indexer/scr";
+import { COMPClient } from "@/indexer/comp";
 import { ObolClient } from "@/indexer/obol/client";
 
 export function getClient<
@@ -47,6 +48,10 @@ export function getClient<
     case DaoIdEnum.SCR: {
       const { governor } = CONTRACT_ADDRESSES[daoId];
       return new SCRClient(client, governor.address);
+    }
+    case DaoIdEnum.COMP: {
+      const { governor } = CONTRACT_ADDRESSES[daoId];
+      return new COMPClient(client, governor.address);
     }
     case DaoIdEnum.OBOL: {
       const { governor } = CONTRACT_ADDRESSES[daoId];

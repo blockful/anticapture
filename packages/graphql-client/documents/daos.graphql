@@ -1,6 +1,7 @@
-query GetDaoData($daoId: String!) {
-  dao(id: $daoId) {
+query GetDaoData {
+  dao {
     id
+    chainId
     quorum
     proposalThreshold
     votingDelay

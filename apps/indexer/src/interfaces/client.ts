@@ -1,6 +1,7 @@
 import { DBProposal } from "@/api/mappers";
 
 export interface DAOClient {
+  getDaoId: () => string;
   getVotingDelay: () => Promise<bigint>;
   getVotingPeriod: () => Promise<bigint>;
   getTimelockDelay: () => Promise<bigint>;

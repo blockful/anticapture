@@ -8,16 +8,6 @@ import {
 } from "ponder";
 import { Address, zeroAddress } from "viem";
 
-export const dao = onchainTable("dao", (drizzle) => ({
-  id: drizzle.text().primaryKey(),
-  quorum: drizzle.bigint().notNull().default(0n),
-  proposalThreshold: drizzle.bigint("proposal_threshold").notNull().default(0n),
-  votingDelay: drizzle.bigint("voting_delay").notNull().default(0n),
-  votingPeriod: drizzle.bigint("voting_period").notNull().default(0n),
-  timelockDelay: drizzle.bigint("timelock_delay").notNull().default(0n),
-  chainId: drizzle.integer("chain_id").notNull(),
-}));
-
 export const token = onchainTable("token", (drizzle) => ({
   id: drizzle.text().primaryKey(),
   name: drizzle.text(),

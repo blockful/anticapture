@@ -1,5 +1,5 @@
 import { ponder } from "ponder:registry";
-import { dao, tokenPrice } from "ponder:schema";
+import { tokenPrice } from "ponder:schema";
 
 import {
   updateProposalStatus,
@@ -7,39 +7,11 @@ import {
   voteCast,
 } from "@/eventHandlers";
 import { DaoIdEnum } from "@/lib/enums";
-import { DAOClient } from "@/interfaces/client";
 import { ProposalStatus } from "@/lib/constants";
-import { env } from "@/env";
 import { truncateTimestampTime } from "@/eventHandlers/shared";
 
-export function GovernorIndexer(client: DAOClient, blockTime: number) {
+export function GovernorIndexer(blockTime: number) {
   const daoId = DaoIdEnum.NOUNS;
-
-  ponder.on(`NounsGovernor:setup`, async ({ context }) => {
-    const [
-      votingPeriod,
-      quorum,
-      votingDelay,
-      timelockDelay,
-      proposalThreshold,
-    ] = await Promise.all([
-      client.getVotingPeriod(),
-      client.getQuorum(null),
-      client.getVotingDelay(),
-      client.getTimelockDelay(),
-      client.getProposalThreshold(),
-    ]);
-
-    await context.db.insert(dao).values({
-      id: daoId,
-      votingPeriod,
-      quorum,
-      votingDelay,
-      timelockDelay,
-      proposalThreshold,
-      chainId: env.CHAIN_ID,
-    });
-  });
 
   ponder.on(`NounsGovernor:VoteCast`, async ({ event, context }) => {
     await voteCast(context, daoId, {
