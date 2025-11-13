@@ -41,8 +41,8 @@ export const DaoOverviewHeaderMetrics = ({
       title="Average Turnout"
       text={`${averageTurnoutValue} ${daoId}`}
       subText={
-        quorumGap
-          ? `${Math.abs(quorumGap).toFixed(2)}% ${quorumGap < 0 ? "below" : "above"} quorum`
+        quorumGap !== null && quorumGap !== undefined && !isNaN(quorumGap)
+          ? `${quorumGap !== 0 ? Math.abs(quorumGap).toFixed(2) + "%" : ""} ${quorumGap < 0 ? "below" : quorumGap == 0 ? "equal to" : "above"} quorum`
           : `No recent proposals`
       }
     />
