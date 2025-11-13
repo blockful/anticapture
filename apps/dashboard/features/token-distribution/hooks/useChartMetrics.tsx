@@ -314,8 +314,6 @@ export const useChartMetrics = ({
     proposalsLoading,
   ]);
 
-  console.log({ useChartMetrics: chartData });
-
   return {
     chartData,
     chartConfig,
