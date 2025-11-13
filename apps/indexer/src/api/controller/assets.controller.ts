@@ -3,11 +3,14 @@ import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 import { DaysOpts } from "@/lib/enums";
 
 interface TreasuryClient {
-  getHistoricalTreasury(days?: number): Promise<
+  getHistoricalTreasury(params: {
+    days?: number;
+    order?: "asc" | "desc";
+  }): Promise<
     Array<{
       date: bigint;
-      totalTreasury: bigint;
-      treasuryWithoutDaoToken: bigint;
+      totalTreasury: number;
+      treasuryWithoutDaoToken: number;
     }>
   >;
   syncTreasury?(): Promise<{
@@ -27,11 +30,11 @@ export function assets(app: Hono, service: TreasuryClient) {
       tags: ["assets"],
       request: {
         query: z.object({
-          // TODO add sort by date and remove sorting from apps/dashboard/features/attack-profitability/utils/normalizeDataset.ts:19
           days: z
             .enum(DaysOpts)
             .default("7d")
             .transform((val) => parseInt(val.replace("d", ""))),
+          order: z.enum(["asc", "desc"]).optional().default("asc"),
         }),
       },
       responses: {
@@ -42,8 +45,8 @@ export function assets(app: Hono, service: TreasuryClient) {
               schema: z.array(
                 z.object({
                   date: z.number().describe("Unix timestamp in milliseconds"),
-                  totalTreasury: z.string(),
-                  treasuryWithoutDaoToken: z.string(),
+                  totalTreasury: z.number(),
+                  treasuryWithoutDaoToken: z.number(),
                 }),
               ),
             },
@@ -52,15 +55,15 @@ export function assets(app: Hono, service: TreasuryClient) {
       },
     }),
     async (context) => {
-      const { days } = context.req.valid("query");
+      const { days, order } = context.req.valid("query");
 
       // Fetch from database via treasury service
-      const data = await service.getHistoricalTreasury(days);
+      const data = await service.getHistoricalTreasury({ days, order });
 
       const response = data.map((item) => ({
         date: Number(item.date) * 1000, // Convert seconds to milliseconds
-        totalTreasury: item.totalTreasury.toString(),
-        treasuryWithoutDaoToken: item.treasuryWithoutDaoToken.toString(),
+        totalTreasury: item.totalTreasury,
+        treasuryWithoutDaoToken: item.treasuryWithoutDaoToken,
       }));
 
       return context.json(response);
