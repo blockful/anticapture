@@ -56,6 +56,7 @@ query GetDaoData {
     },
   );
 
+  // TODO: move the logic to the backend and return the quorum gap directly
   const data: QuorumGapResponse = response.data.data;
 
   const { decimals } = daoConfig[daoId];
