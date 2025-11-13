@@ -33,7 +33,10 @@ import { TreeLines } from "@/shared/components/tables/TreeLines";
 import { EmptyState } from "@/shared/components/design-system/table/components/EmptyState";
 import { CSVLink } from "react-csv";
 import { defaultLinkVariants } from "@/shared/components/design-system/links/default-link";
-import { ExpandButton } from "@/shared/components/design-system/table/ExpandButton";
+import {
+  ExpandableData,
+  ExpandButton,
+} from "@/shared/components/design-system/table/ExpandButton";
 
 type ColumnMeta = {
   columnClassName?: string;
@@ -260,7 +263,7 @@ export const Table = <TData, TValue>({
                               )}
                               {index === 0 && (
                                 <ExpandButton
-                                  row={row}
+                                  row={row as Row<ExpandableData>}
                                   enableExpanding={enableExpanding}
                                 />
                               )}
