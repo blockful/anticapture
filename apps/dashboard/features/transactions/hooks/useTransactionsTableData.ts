@@ -49,9 +49,17 @@ interface PaginationInfo {
   itemsPerPage: number;
 }
 
+interface UseTransactionsTableDataParams {
+  daoId: DaoIdEnum;
+  limit?: number;
+  offset?: number;
+  filters?: TransactionsFilters;
+}
+
 export const useTransactionsTableData = ({
   daoId,
-  limit = 15,
+  limit = 10,
+  offset = 0,
   filters,
 }: UseTransactionsTableDataParams) => {
   const { decimals } = daoConfig[daoId];
@@ -60,32 +68,33 @@ export const useTransactionsTableData = ({
     Math.floor(offset / limit) + 1,
   );
 
-  const { data, loading, error, refetch, fetchMore, networkStatus } = useTransactionsQuery({
-    variables: {
-      limit,
-      offset: (currentPage - 1) * limit,
-      ...(filters?.from && { from: filters?.from }),
-      ...(filters?.to && { to: filters?.to }),
-      ...(filters?.minAmount && {
-        minAmount: formatUnits(BigInt(filters.minAmount), decimals),
-      }),
-      ...(filters?.maxAmount && {
-        maxAmount: formatUnits(BigInt(filters.maxAmount), decimals),
-      }),
-      ...(filters?.sortOrder && {
-        sortOrder: filters?.sortOrder as QueryInput_Transactions_SortOrder,
-      }),
-      ...(filters?.affectedSupply && {
+  const { data, error, refetch, fetchMore, networkStatus } =
+    useTransactionsQuery({
+      variables: {
+        limit,
+        offset: (currentPage - 1) * limit,
+        ...(filters?.from && { from: filters?.from }),
+        ...(filters?.to && { to: filters?.to }),
+        ...(filters?.minAmount && {
+          minAmount: formatUnits(BigInt(filters.minAmount), decimals),
+        }),
+        ...(filters?.maxAmount && {
+          maxAmount: formatUnits(BigInt(filters.maxAmount), decimals),
+        }),
+        ...(filters?.sortOrder && {
+          sortOrder: filters?.sortOrder as QueryInput_Transactions_SortOrder,
+        }),
+        ...(filters?.affectedSupply && {
           affectedSupply: filters?.affectedSupply,
         }),
-      ...(filters?.fromDate && { fromDate: filters?.fromDate }),
-      ...(filters?.toDate && { toDate: filters?.toDate }),
-    },
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
+        ...(filters?.fromDate && { fromDate: filters?.fromDate }),
+        ...(filters?.toDate && { toDate: filters?.toDate }),
       },
-      context: { headers: { "anticapture-dao-id": daoId } },
+      context: {
+        headers: {
+          "anticapture-dao-id": daoId,
+        },
+      },
       notifyOnNetworkStatusChange: true,
       fetchPolicy: "cache-and-network",
     });
