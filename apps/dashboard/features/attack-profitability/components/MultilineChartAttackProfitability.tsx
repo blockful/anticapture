@@ -135,9 +135,8 @@ export const MultilineChartAttackProfitability = ({
         ? normalizeDataset(
             daoTokenPriceHistoricalData,
             "quorum",
-            1,
-            daoConfig.decimals,
             delegatedSupplyChart,
+            daoConfig.decimals,
           ).map((datasetpoint) => ({
             ...datasetpoint,
             quorum:
@@ -156,9 +155,8 @@ export const MultilineChartAttackProfitability = ({
         ? normalizeDataset(
             daoTokenPriceHistoricalData,
             "delegated",
-            1,
-            daoConfig.decimals,
             delegatedSupplyChart,
+            daoConfig.decimals,
           )
         : [],
     };

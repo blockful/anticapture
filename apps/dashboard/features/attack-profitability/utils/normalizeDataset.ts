@@ -8,11 +8,10 @@ import { formatUnits } from "viem";
 export function normalizeDataset(
   tokenPrices: PriceEntry[],
   key: string,
-  multiplier: number,
+  multiplier: number | Pick<DaoMetricsDayBucket, "date" | "high">[],
   decimals: number,
-  multiplierDataSet?: DaoMetricsDayBucket[],
 ): MultilineChartDataSetPoint[] {
-  if (!multiplierDataSet?.length) {
+  if (!Array.isArray(multiplier)) {
     return tokenPrices
       .sort((a, b) => a.timestamp - b.timestamp)
       .map(({ timestamp, price }) => ({
@@ -21,7 +20,7 @@ export function normalizeDataset(
       }));
   }
 
-  const multipliersByTs = multiplierDataSet.reduce(
+  const multipliersByTs = multiplier.reduce(
     (acc, item) => ({
       ...acc,
       [Number(item.date) * 1000]: Number(
