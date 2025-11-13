@@ -2,6 +2,8 @@ import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
 import { DaoIdEnum } from "@/shared/types/daos";
 import useSWR, { SWRConfiguration } from "swr";
 import axios from "axios";
+import { formatUnits } from "viem";
+import daoConfig from "@/shared/dao-config";
 
 interface QuorumGapResponse {
   dao: {
@@ -56,10 +58,19 @@ query GetDaoData {
 
   const data: QuorumGapResponse = response.data.data;
 
+  const { decimals } = daoConfig[daoId];
+
   const isGapEligible = data.proposals.items.length > 0;
-  const quorum = data.dao.quorum ? Number(data.dao.quorum) / 1e18 : null;
+  const quorum = data.dao.quorum
+    ? Number(formatUnits(BigInt(data.dao.quorum), decimals))
+    : null;
   const avgTurnout = data.compareAverageTurnout.currentAverageTurnout
-    ? Number(data.compareAverageTurnout.currentAverageTurnout) / 1e18
+    ? Number(
+        formatUnits(
+          BigInt(data.compareAverageTurnout.currentAverageTurnout),
+          decimals,
+        ),
+      )
     : null;
   const quorumGap = quorum && avgTurnout ? (avgTurnout / quorum - 1) * 100 : 0;
 

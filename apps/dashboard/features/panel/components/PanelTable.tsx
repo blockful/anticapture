@@ -19,7 +19,7 @@ import {
   DaoAvatarIcon,
 } from "@/shared/components/icons";
 import { formatNumberUserReadable } from "@/shared/utils";
-import { formatEther } from "viem";
+import { formatUnits } from "viem";
 import { StageTag } from "@/features/resilience-stages/components";
 import { Stage } from "@/shared/types/enums/Stage";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
@@ -70,10 +70,13 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
       revalidateOnMount: true,
       revalidateIfStale: true,
     });
+    const decimals = daoConfigByDaoId[daoId].decimals;
     const treasury = tokenData?.treasury;
     const treasuryInUsd = treasury
-      ? Number(formatEther(BigInt(treasury))) * (tokenData?.price ?? 0)
+      ? Number(formatUnits(BigInt(treasury), decimals)) *
+        (tokenData?.price ?? 0)
       : null;
+
     const valueToShow = cellCurrency === "usd" ? treasuryInUsd : treasury;
 
     // Store the numeric value in the ref when data changes
@@ -82,13 +85,13 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         const numericValue =
           cellCurrency === "usd"
             ? (valueToShow as number)
-            : Number(formatEther(BigInt(valueToShow as string)));
+            : Number(formatUnits(BigInt(valueToShow as string), decimals));
         liquidTreasuryValues.current[rowIndex] = numericValue;
       } else {
         // Clear value when data is not available
         delete liquidTreasuryValues.current[rowIndex];
       }
-    }, [treasury, valueToShow, cellCurrency, rowIndex]);
+    }, [treasury, valueToShow, cellCurrency, rowIndex, decimals]);
 
     if (isLoading || !treasury || valueToShow == null) {
       return (
@@ -102,7 +105,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
     const formattedValue = formatNumberUserReadable(
       cellCurrency === "usd"
         ? (valueToShow as number)
-        : Number(formatEther(BigInt(valueToShow as string))),
+        : Number(formatUnits(BigInt(valueToShow as string), decimals)),
     );
 
     return (
@@ -128,9 +131,9 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
     });
     const circulatingSupply = tokenData?.circulatingSupply;
     const price = tokenData?.price;
-
+    const decimals = daoConfigByDaoId[daoId].decimals;
     const circulatingSupplyInUsd = circulatingSupply
-      ? Number(formatEther(BigInt(circulatingSupply))) * (price ?? 0)
+      ? Number(formatUnits(BigInt(circulatingSupply), decimals)) * (price ?? 0)
       : null;
 
     const valueToShow =
@@ -139,13 +142,15 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
     // Store the numeric value in the ref when data changes
     useEffect(() => {
       if (circulatingSupply) {
-        const numericValue = Number(formatEther(BigInt(circulatingSupply)));
+        const numericValue = Number(
+          formatUnits(BigInt(circulatingSupply), decimals),
+        );
         circSupplyValues.current[rowIndex] = numericValue;
       } else {
         // Clear value when data is not available
         delete circSupplyValues.current[rowIndex];
       }
-    }, [circulatingSupply, rowIndex]);
+    }, [circulatingSupply, rowIndex, decimals]);
 
     if (isLoading || !circulatingSupply || valueToShow == null) {
       return (
@@ -159,7 +164,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
     const formattedValue = formatNumberUserReadable(
       cellCurrency === "usd"
         ? (valueToShow as number)
-        : Number(formatEther(BigInt(valueToShow as string))),
+        : Number(formatUnits(BigInt(valueToShow as string), decimals)),
     );
 
     return (
@@ -184,8 +189,10 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
       revalidateIfStale: true,
     });
     const delegatedSupply = tokenData?.delegatedSupply;
+    const decimals = daoConfigByDaoId[daoId].decimals;
     const delegatedSupplyInUsd = delegatedSupply
-      ? Number(formatEther(BigInt(delegatedSupply))) * (tokenData?.price ?? 0)
+      ? Number(formatUnits(BigInt(delegatedSupply), decimals)) *
+        (tokenData?.price ?? 0)
       : null;
 
     const valueToShow =
@@ -197,13 +204,13 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         const numericValue =
           cellCurrency === "usd"
             ? (valueToShow as number)
-            : Number(formatEther(BigInt(valueToShow as string)));
+            : Number(formatUnits(BigInt(valueToShow as string), decimals));
         delegSupplyValues.current[rowIndex] = numericValue;
       } else {
         // Clear value when data is not available
         delete delegSupplyValues.current[rowIndex];
       }
-    }, [delegatedSupply, valueToShow, cellCurrency, rowIndex]);
+    }, [delegatedSupply, valueToShow, cellCurrency, rowIndex, decimals]);
 
     if (isLoading || !delegatedSupply || valueToShow == null) {
       return (
@@ -217,7 +224,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
     const formattedValue = formatNumberUserReadable(
       cellCurrency === "usd"
         ? (valueToShow as number)
-        : Number(formatEther(BigInt(valueToShow as string))),
+        : Number(formatUnits(BigInt(valueToShow as string), decimals)),
     );
 
     return (
@@ -246,10 +253,11 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
       revalidateOnMount: true,
       revalidateIfStale: true,
     });
-
+    const decimals = daoConfigByDaoId[daoId].decimals;
     const activeSupply = activeSupplyData?.activeSupply;
     const activeSupplyInUsd = activeSupply
-      ? Number(formatEther(BigInt(activeSupply))) * (tokenData?.price ?? 0)
+      ? Number(formatUnits(BigInt(activeSupply), decimals)) *
+        (tokenData?.price ?? 0)
       : null;
 
     const valueToShow =
@@ -261,10 +269,10 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         const numericValue =
           cellCurrency === "usd"
             ? (valueToShow as number)
-            : Number(formatEther(BigInt(valueToShow as string)));
+            : Number(formatUnits(BigInt(valueToShow as string), decimals));
         activeSupplyValues.current[rowIndex] = numericValue;
       }
-    }, [activeSupply, valueToShow, cellCurrency, rowIndex]);
+    }, [activeSupply, valueToShow, cellCurrency, rowIndex, decimals]);
 
     if (isLoading || !activeSupply || valueToShow == null) {
       return (
@@ -278,7 +286,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
     const formattedValue = formatNumberUserReadable(
       cellCurrency === "usd"
         ? (valueToShow as number)
-        : Number(formatEther(BigInt(valueToShow as string))),
+        : Number(formatUnits(BigInt(valueToShow as string), decimals)),
     );
 
     return (

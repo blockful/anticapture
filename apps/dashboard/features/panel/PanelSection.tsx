@@ -40,24 +40,24 @@ const SwitcherCurrency = ({
   setCurrency,
   isSmall = false,
 }: SwitcherCurrencyProps) => {
-  const currencies: ("usd" | "eth")[] = ["usd", "eth"];
+  const currencies: ("usd" | "eth")[] = ["eth", "usd"];
 
   return (
     <Tabs defaultValue={currency} className="gap-1">
       <TabsList>
-        {currencies.map((curr) => (
+        {currencies.map((currency) => (
           <TabsTrigger
-            key={curr}
+            key={currency}
             className={cn(
               "cursor-pointer text-sm font-medium",
               isSmall
                 ? "min-w-[60px] px-1.5 py-0.5"
                 : "min-w-[84px] px-3 py-1.5",
             )}
-            value={curr}
-            onClick={() => setCurrency(curr)}
+            value={currency}
+            onClick={() => setCurrency(currency)}
           >
-            {curr.toUpperCase()}
+            {currency === "usd" ? "USD" : "Token Amount"}
           </TabsTrigger>
         ))}
       </TabsList>
