@@ -71,7 +71,9 @@ export const AttackCostBarChart = ({
   const selectedDaoId = daoId.toUpperCase() as DaoIdEnum;
   const timeInterval = TimeInterval.NINETY_DAYS;
 
-  const liquidTreasury = useTreasuryAssetData(selectedDaoId, timeInterval);
+  const liquidTreasury = useTreasuryAssetData(selectedDaoId, "1d", {
+    order: "desc",
+  });
   const delegatedSupply = useDelegatedSupply(selectedDaoId, timeInterval);
   const activeSupply = useActiveSupply(selectedDaoId, timeInterval);
   const averageTurnout = useAverageTurnout(selectedDaoId, timeInterval);
@@ -149,13 +151,10 @@ export const AttackCostBarChart = ({
               id: "liquidTreasury",
               name: "Liquid Treasury",
               type: BarChartEnum.REGULAR,
-              value: Number(
-                liquidTreasury.data?.[0]?.treasuryWithoutDaoToken || 0,
-              ),
+              value: liquidTreasury.data?.[0]?.treasuryWithoutDaoToken || 0,
               customColor: "#EC762EFF",
               displayValue:
-                Number(liquidTreasury.data?.[0]?.treasuryWithoutDaoToken || 0) >
-                10000
+                (liquidTreasury.data?.[0]?.treasuryWithoutDaoToken || 0) > 10000
                   ? undefined
                   : "<$10,000",
             },
