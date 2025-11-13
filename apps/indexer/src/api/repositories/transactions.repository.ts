@@ -230,8 +230,12 @@ export class TransactionsRepository {
   }): "UNION" | "RIGHT JOIN" | "LEFT JOIN" {
     const { transfers, delegations } = includes;
 
-    if (transfers && delegations) return "UNION";
-    if (transfers) return "LEFT JOIN";
-    if (delegations) return "RIGHT JOIN";
+    if (transfers && delegations) {
+      return "UNION";
+    } else if (transfers) {
+      return "LEFT JOIN";
+    } else {
+      return "RIGHT JOIN";
+    }
   }
 }
