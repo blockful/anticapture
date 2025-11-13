@@ -6,8 +6,6 @@ directive @typescript(subgraph: String, type: String) on SCALAR | ENUM
 
 directive @example(subgraph: String, value: ObjMap) repeatable on FIELD_DEFINITION | OBJECT | INPUT_OBJECT | ENUM | SCALAR
 
-directive @statusCodeTypeName(subgraph: String, typeName: String, statusCode: String) repeatable on UNION
-
 directive @httpOperation(subgraph: String, path: String, operationSpecificHeaders: [[String]], httpMethod: HTTPMethod, isBinary: Boolean, requestBaseBody: ObjMap, queryParamArgMap: ObjMap, queryStringOptionsByParam: ObjMap, jsonApiFields: Boolean, queryStringOptions: ObjMap) on FIELD_DEFINITION
 
 directive @transport(subgraph: String, kind: String, location: String, headers: [[String]], queryStringOptions: ObjMap, queryParams: [[String]]) repeatable on SCHEMA
@@ -38,7 +36,7 @@ type Query {
   _(where: transactionFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): transactionPage!
   tokenPrice(timestamp: BigInt!): tokenPrice
   tokenPrices(where: tokenPriceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPricePage!
-  historicalTreasury(date: String!): historicalTreasury
+  historicalTreasury(date: BigInt!): historicalTreasury
   historicalTreasurys(where: historicalTreasuryFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): historicalTreasuryPage!
   _meta: Meta
 
@@ -1326,9 +1324,9 @@ input tokenPriceFilter {
 }
 
 type historicalTreasury {
-  date: String!
-  totalTreasury: String!
-  treasuryWithoutDaoToken: String!
+  date: BigInt!
+  totalTreasury: BigInt!
+  treasuryWithoutDaoToken: BigInt!
   updatedAt: BigInt!
 }
 
@@ -1341,36 +1339,30 @@ type historicalTreasuryPage {
 input historicalTreasuryFilter {
   AND: [historicalTreasuryFilter]
   OR: [historicalTreasuryFilter]
-  date: String
-  date_not: String
-  date_in: [String]
-  date_not_in: [String]
-  date_contains: String
-  date_not_contains: String
-  date_starts_with: String
-  date_ends_with: String
-  date_not_starts_with: String
-  date_not_ends_with: String
-  totalTreasury: String
-  totalTreasury_not: String
-  totalTreasury_in: [String]
-  totalTreasury_not_in: [String]
-  totalTreasury_contains: String
-  totalTreasury_not_contains: String
-  totalTreasury_starts_with: String
-  totalTreasury_ends_with: String
-  totalTreasury_not_starts_with: String
-  totalTreasury_not_ends_with: String
-  treasuryWithoutDaoToken: String
-  treasuryWithoutDaoToken_not: String
-  treasuryWithoutDaoToken_in: [String]
-  treasuryWithoutDaoToken_not_in: [String]
-  treasuryWithoutDaoToken_contains: String
-  treasuryWithoutDaoToken_not_contains: String
-  treasuryWithoutDaoToken_starts_with: String
-  treasuryWithoutDaoToken_ends_with: String
-  treasuryWithoutDaoToken_not_starts_with: String
-  treasuryWithoutDaoToken_not_ends_with: String
+  date: BigInt
+  date_not: BigInt
+  date_in: [BigInt]
+  date_not_in: [BigInt]
+  date_gt: BigInt
+  date_lt: BigInt
+  date_gte: BigInt
+  date_lte: BigInt
+  totalTreasury: BigInt
+  totalTreasury_not: BigInt
+  totalTreasury_in: [BigInt]
+  totalTreasury_not_in: [BigInt]
+  totalTreasury_gt: BigInt
+  totalTreasury_lt: BigInt
+  totalTreasury_gte: BigInt
+  totalTreasury_lte: BigInt
+  treasuryWithoutDaoToken: BigInt
+  treasuryWithoutDaoToken_not: BigInt
+  treasuryWithoutDaoToken_in: [BigInt]
+  treasuryWithoutDaoToken_not_in: [BigInt]
+  treasuryWithoutDaoToken_gt: BigInt
+  treasuryWithoutDaoToken_lt: BigInt
+  treasuryWithoutDaoToken_gte: BigInt
+  treasuryWithoutDaoToken_lte: BigInt
   updatedAt: BigInt
   updatedAt_not: BigInt
   updatedAt_in: [BigInt]
@@ -1379,11 +1371,6 @@ input historicalTreasuryFilter {
   updatedAt_lt: BigInt
   updatedAt_gte: BigInt
   updatedAt_lte: BigInt
-}
-
-type Mutation {
-  """Fetches latest data from DeFi Llama and syncs to database"""
-  syncTreasury: syncTreasury_response
 }
 
 type query_totalAssets_items {
@@ -1943,24 +1930,6 @@ type dao_200_response {
   votingDelay: String!
   votingPeriod: String!
   timelockDelay: String!
-}
-
-union syncTreasury_response = syncTreasury_200_response | syncTreasury_501_response
-
-type syncTreasury_200_response {
-  message: String!
-  inserted: Float!
-  updated: Float!
-  unchanged: Float!
-  stoppedEarly: Boolean!
-}
-
-type syncTreasury_501_response {
-  message: String!
-  inserted: Float!
-  updated: Float!
-  unchanged: Float!
-  stoppedEarly: Boolean!
 }
 
 scalar ObjMap

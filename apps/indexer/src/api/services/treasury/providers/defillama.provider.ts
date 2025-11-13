@@ -7,12 +7,23 @@ export class DefiLlamaProvider implements TreasuryProvider {
   private readonly providerDaoId: string;
   private isValid: boolean = false;
 
-  constructor(baseUrl: string, providerDaoId: string) {
+  private constructor(baseUrl: string, providerDaoId: string) {
     this.client = axios.create({
       baseURL: baseUrl,
     });
     this.providerDaoId = providerDaoId;
-    void this.validateConnection();
+  }
+
+  /**
+   * Factory method to create a validated provider instance
+   */
+  static async create(
+    baseUrl: string,
+    providerDaoId: string,
+  ): Promise<DefiLlamaProvider> {
+    const instance = new DefiLlamaProvider(baseUrl, providerDaoId);
+    await instance.validateConnection();
+    return instance;
   }
 
   /**

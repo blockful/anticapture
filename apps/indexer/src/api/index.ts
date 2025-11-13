@@ -118,9 +118,7 @@ const votingPowerService = new VotingPowerService(
 );
 const daoCache = new DaoCache();
 const daoService = new DaoService(daoClient, daoCache, env.CHAIN_ID);
-
-// Treasury service with DeFi Llama provider
-const defiLlamaProvider = new DefiLlamaProvider(
+const defiLlamaProvider = await DefiLlamaProvider.create(
   env.DEFILLAMA_API_URL,
   env.TREASURY_PROVIDER_PROTOCOL_ID,
 );
