@@ -8,6 +8,7 @@ import { ChevronsUpDown } from "lucide-react";
 import { cn } from "@/shared/utils/";
 import { DaoAvatarIcon } from "@/shared/components/icons";
 import daoConfigByDaoId from "@/shared/dao-config";
+import { apolloClient } from "@/shared/providers/GlobalProviders";
 
 type Item = {
   id: number;
@@ -77,6 +78,7 @@ export const HeaderDAOSidebarDropdown = () => {
   const toggleDropdown = () => setIsOpen((prev) => !prev);
 
   const handleSelectItem = (id: number, href: string) => {
+    apolloClient.cache.reset();
     setSelectedHeaderSidebarItem(id);
     sessionStorage.setItem("selectedHeaderSidebarItem", id.toString());
     setIsOpen(false);
