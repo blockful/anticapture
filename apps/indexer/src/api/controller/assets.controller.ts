@@ -11,10 +11,8 @@ interface TreasuryClient {
     }>
   >;
   syncTreasury?(): Promise<{
-    inserted: number;
-    updated: number;
+    synced: number;
     unchanged: number;
-    stoppedEarly: boolean;
   }>;
 }
 

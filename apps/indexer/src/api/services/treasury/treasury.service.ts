@@ -2,34 +2,23 @@ import { writableDb } from "@/lib/db";
 import { historicalTreasury } from "ponder:schema";
 import { TreasuryProvider } from "./providers";
 import { TreasuryDataPoint } from "./types";
-import { eq } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 
 export class TreasuryService {
-  constructor(
-    private readonly provider: TreasuryProvider,
-    private readonly daoId: string,
-  ) {}
+  constructor(private readonly provider: TreasuryProvider) {}
 
   /**
    * Syncs treasury data from provider to database.
-   * Inserts missing dates and updates existing values that changed.
-   * Uses early stop optimization: stops checking older dates when values match.
+   * Uses upsert to insert new dates or update changed values.
    */
   async syncTreasury(): Promise<{
-    inserted: number;
-    updated: number;
+    synced: number;
     unchanged: number;
-    stoppedEarly: boolean;
   }> {
-    console.log(`[TreasuryService] Starting sync for DAO: ${this.daoId}`);
-
-    // 1. Fetch all historical data from provider
+    // Fetch all historical data from provider
     const providerData = await this.provider.fetchTreasury();
-    console.log(
-      `[TreasuryService] Fetched ${providerData.length} data points from provider`,
-    );
 
-    // 2. Get existing records from database (all fields for comparison)
+    // Get existing records from database
     const existingRecords = await writableDb
       .select({
         date: historicalTreasury.date,
@@ -37,28 +26,22 @@ export class TreasuryService {
         treasuryWithoutDaoToken: historicalTreasury.treasuryWithoutDaoToken,
       })
       .from(historicalTreasury);
-
     const existingDataMap = new Map(existingRecords.map((r) => [r.date, r]));
-    console.log(
-      `[TreasuryService] Found ${existingDataMap.size} existing records in database`,
+
+    // Process data in reverse chronological order (newest first)
+    const sortedProviderData = [...providerData].sort((a, b) =>
+      Number(b.date - a.date),
     );
 
-    // 3. Process data in reverse chronological order (newest first)
-    const sortedProviderData = [...providerData].sort(
-      (a, b) => Number(b.date - a.date), // Bigint comparison
-    );
-
-    const toInsert: typeof providerData = [];
-    const toUpdate: typeof providerData = [];
+    const toUpsert: typeof providerData = [];
     let unchangedCount = 0;
-    let stoppedEarly = false;
 
     for (const item of sortedProviderData) {
       const existing = existingDataMap.get(item.date);
 
       if (!existing) {
-        // New date - needs to be inserted
-        toInsert.push(item);
+        // New date - will be upserted
+        toUpsert.push(item);
       } else {
         // Existing date - check if values changed
         const valuesChanged =
@@ -66,63 +49,41 @@ export class TreasuryService {
           existing.treasuryWithoutDaoToken !== item.treasuryWithoutDaoToken;
 
         if (valuesChanged) {
-          toUpdate.push(item);
+          // Values changed - will be upserted
+          toUpsert.push(item);
         } else {
-          // Values unchanged - early stop optimization
+          // Values unchanged - stop checking older records
           unchangedCount++;
-          console.log(
-            `[TreasuryService] Found unchanged value at ${item.date}, stopping early (${sortedProviderData.indexOf(item) + 1}/${sortedProviderData.length} processed)`,
-          );
-          stoppedEarly = true;
           break;
         }
       }
     }
 
-    // Count remaining items as unchanged if we stopped early
-    if (stoppedEarly) {
-      const processed = toInsert.length + toUpdate.length + unchangedCount;
-      unchangedCount += sortedProviderData.length - processed;
-    }
-
-    console.log(
-      `[TreasuryService] Sync plan: ${toInsert.length} insert, ${toUpdate.length} update, ${unchangedCount} unchanged`,
-    );
-
-    // 4. Insert new records
-    if (toInsert.length > 0) {
-      await writableDb.insert(historicalTreasury).values(
-        toInsert.map((item) => ({
-          date: item.date,
-          totalTreasury: item.totalTreasury,
-          treasuryWithoutDaoToken: item.treasuryWithoutDaoToken,
-          updatedAt: BigInt(Date.now()),
-        })),
-      );
-      console.log(`[TreasuryService] Inserted ${toInsert.length} new records`);
-    }
-
-    // 5. Update changed records
-    if (toUpdate.length > 0) {
-      const now = BigInt(Date.now());
-      for (const item of toUpdate) {
-        await writableDb
-          .update(historicalTreasury)
-          .set({
+    // Batch upsert all records that need processing
+    if (toUpsert.length > 0) {
+      await writableDb
+        .insert(historicalTreasury)
+        .values(
+          toUpsert.map((item) => ({
+            date: item.date,
             totalTreasury: item.totalTreasury,
             treasuryWithoutDaoToken: item.treasuryWithoutDaoToken,
-            updatedAt: now,
-          })
-          .where(eq(historicalTreasury.date, item.date));
-      }
-      console.log(`[TreasuryService] Updated ${toUpdate.length} records`);
+            updatedAt: BigInt(Date.now()),
+          })),
+        )
+        .onConflictDoUpdate({
+          target: historicalTreasury.date,
+          set: {
+            totalTreasury: sql`excluded.total_treasury`,
+            treasuryWithoutDaoToken: sql`excluded.treasury_without_dao_token`,
+            updatedAt: sql`excluded.updated_at`,
+          },
+        });
     }
 
     return {
-      inserted: toInsert.length,
-      updated: toUpdate.length,
+      synced: toUpsert.length,
       unchanged: unchangedCount,
-      stoppedEarly,
     };
   }
 
@@ -151,13 +112,5 @@ export class TreasuryService {
     }
 
     return results;
-  }
-
-  /**
-   * Clears all historical treasury data (use with caution).
-   */
-  async clearHistoricalData(): Promise<void> {
-    await writableDb.delete(historicalTreasury);
-    console.log(`[TreasuryService] Cleared all historical treasury data`);
   }
 }

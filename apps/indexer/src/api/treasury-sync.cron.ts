@@ -6,7 +6,7 @@ async function runSync(treasuryService: TreasuryService) {
     console.log(`[Cron] Starting treasury sync...`);
     const result = await treasuryService.syncTreasury();
     console.log(
-      `[Cron] Sync completed: ${result.inserted} inserted, ${result.updated} updated, ${result.unchanged} unchanged`,
+      `[Cron] Sync completed: ${result.synced} synced, ${result.unchanged} unchanged`,
     );
     return result;
   } catch (error) {

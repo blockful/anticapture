@@ -124,7 +124,7 @@ const defiLlamaProvider = new DefiLlamaProvider(
   env.DEFILLAMA_API_URL,
   env.TREASURY_PROVIDER_PROTOCOL_ID,
 );
-const treasuryService = new TreasuryService(defiLlamaProvider, env.DAO_ID);
+const treasuryService = new TreasuryService(defiLlamaProvider);
 assets(app, treasuryService);
 
 const tokenPriceClient =
