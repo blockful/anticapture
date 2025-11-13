@@ -328,7 +328,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
       );
     }
 
-    if (!quorumGap) {
+    if (quorumGap === null || quorumGap === undefined || isNaN(quorumGap)) {
       return (
         <div className="text-secondary flex w-full items-center justify-end text-end text-sm font-normal">
           <TooltipPlain
