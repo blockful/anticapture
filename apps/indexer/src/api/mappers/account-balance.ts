@@ -1,7 +1,9 @@
-import { DaysEnum, DaysOpts } from "@/lib/enums";
+import { DaoIdEnum, DaysEnum, DaysOpts } from "@/lib/enums";
 import { z } from "@hono/zod-openapi";
 import { Address } from "viem";
 import { PERCENTAGE_NO_BASELINE } from "./constants";
+import { calculateHistoricalBlockNumber } from "@/lib/blockTime";
+import { CONTRACT_ADDRESSES } from "@/lib/constants";
 
 export const TopAccountBalanceVariationsRequestSchema = z.object({
   days: z
@@ -52,6 +54,35 @@ export type DBAccountBalanceVariation = {
   currentBalance: bigint;
   absoluteChange: bigint;
   percentageChange: number;
+};
+
+export interface DBHistoricalBalance {
+  address: Address;
+  balance: string;
+}
+
+export type HistoricalBalance = DBHistoricalBalance & {
+  blockNumber: number;
+  tokenAddress: Address;
+};
+
+export const HistoricalBalanceMapper = (
+  daoId: DaoIdEnum,
+  balances: DBHistoricalBalance[],
+  currentBlockNumber: number,
+  days: DaysEnum,
+): HistoricalBalance[] => {
+  const blockNumber = calculateHistoricalBlockNumber(
+    days,
+    currentBlockNumber,
+    CONTRACT_ADDRESSES[daoId].blockTime,
+  );
+
+  return balances.map((b) => ({
+    ...b,
+    blockNumber: blockNumber,
+    tokenAddress: CONTRACT_ADDRESSES[daoId].token.address,
+  }));
 };
 
 export const TopAccountBalanceVariationsMapper = (

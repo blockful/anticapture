@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoAvatarIcon } from "@/shared/components/icons";
@@ -11,7 +11,6 @@ import { DaoOverviewHeaderMetrics } from "@/features/dao-overview/components/Dao
 import { TokenDistributionChartCard } from "@/features/dao-overview/components/TokenDistributionChartCard";
 import { DaoOverviewHeaderBackground } from "@/features/dao-overview/components/DaoOverviewHeaderBackground";
 import { SecurityCouncilCard } from "@/features/dao-overview/components/SecurityCouncilCard";
-import { formatEther } from "viem";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 import { StagesContainer } from "@/features/resilience-stages/components/StagesContainer";
@@ -26,11 +25,19 @@ import { VotingPowerChartCard } from "@/features/dao-overview/components/VotingP
 import { MetricsCard } from "@/features/dao-overview/components/MetricsCard";
 import { AttackProfitabilityChartCard } from "@/features/dao-overview/components/AttackProfitabilityChartCard";
 import { useRouter } from "next/navigation";
+import { apolloClient } from "@/shared/providers/GlobalProviders";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const router = useRouter();
   const daoConfig = daoConfigByDaoId[daoId];
   const daoOverview = daoConfig.daoOverview;
+
+  useEffect(() => {
+    // FIXME:
+    //   This is only a workaround for now, as Apollo Client does not yet support HTTP header context for cache indexing;
+    //   https://github.com/apollographql/apollo-feature-requests/issues/326
+    apolloClient.cache.reset();
+  }, [daoId]);
 
   const {
     isLoading,
@@ -43,7 +50,6 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     proposalThresholdValue,
     proposalThresholdPercentage,
     quorumValueFormatted,
-    quorumPercentage,
     votingPeriod,
     votingDelay,
     timelockDelay,
@@ -58,19 +64,9 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
 
   if (isLoading) return <DaoOverviewSkeleton />;
 
-  const delegatedSupplyValue = formatNumberUserReadable(
-    Number(
-      formatEther(BigInt(delegatedSupply.data?.currentDelegatedSupply || 0)),
-    ),
-  );
-  const activeSupplyValue = formatNumberUserReadable(
-    Number(formatEther(BigInt(activeSupply.data?.activeSupply || 0))),
-  );
-  const averageTurnoutValue = formatNumberUserReadable(
-    Number(
-      formatEther(BigInt(averageTurnout.data?.currentAverageTurnout || 0)),
-    ),
-  );
+  const delegatedSupplyValue = formatNumberUserReadable(delegatedSupply);
+  const activeSupplyValue = formatNumberUserReadable(activeSupply);
+  const averageTurnoutValue = formatNumberUserReadable(averageTurnout);
 
   const currentDaoStage = getDaoStageFromFields({
     fields: fieldsToArray(daoConfig.governanceImplementation?.fields),
@@ -154,8 +150,9 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           <MetricsCard
             proposalThresholdValue={proposalThresholdValue}
             proposalThresholdPercentage={proposalThresholdPercentage}
-            quorumValueFormatted={quorumValueFormatted}
-            quorumPercentage={quorumPercentage}
+            quorumValueFormatted={formatNumberUserReadable(
+              quorumValueFormatted,
+            )}
             daoId={daoId}
             daoConfig={daoConfig}
             votingPeriod={votingPeriod}

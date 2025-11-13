@@ -10,9 +10,10 @@ import {
   adaptTransactionsToTableData,
   GraphTransaction,
 } from "@/features/transactions/utils/transactionsAdapter";
-import { parseEther } from "viem";
 import { NetworkStatus } from "@apollo/client";
+import { formatUnits } from "viem";
 import { SupplyType } from "@/shared/components";
+import daoConfig from "@/shared/dao-config";
 
 export type AffectedSupplyType = "CEX" | "DEX" | "LENDING" | "TOTAL";
 
@@ -52,35 +53,37 @@ export const useTransactionsTableData = ({
   daoId,
   limit = 15,
   filters,
-}: {
-  daoId: DaoIdEnum;
-  limit?: number;
-  filters?: TransactionsFilters;
-}) => {
-  const [currentPage, setCurrentPage] = useState(1);
+}: UseTransactionsTableDataParams) => {
+  const { decimals } = daoConfig[daoId];
   const [isPaginationLoading, setIsPaginationLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(
+    Math.floor(offset / limit) + 1,
+  );
 
-  const { data, error, refetch, fetchMore, networkStatus } =
-    useTransactionsQuery({
-      variables: {
-        limit,
-        offset: 0,
-        ...(filters?.from && { from: filters?.from }),
-        ...(filters?.to && { to: filters?.to }),
-        ...(filters?.minAmount && {
-          minAmount: parseEther(String(filters.minAmount)).toString(),
-        }),
-        ...(filters?.maxAmount && {
-          maxAmount: parseEther(String(filters.maxAmount)).toString(),
-        }),
-        ...(filters?.sortOrder && {
-          sortOrder: filters?.sortOrder as QueryInput_Transactions_SortOrder,
-        }),
-        ...(filters?.affectedSupply && {
+  const { data, loading, error, refetch, fetchMore, networkStatus } = useTransactionsQuery({
+    variables: {
+      limit,
+      offset: (currentPage - 1) * limit,
+      ...(filters?.from && { from: filters?.from }),
+      ...(filters?.to && { to: filters?.to }),
+      ...(filters?.minAmount && {
+        minAmount: formatUnits(BigInt(filters.minAmount), decimals),
+      }),
+      ...(filters?.maxAmount && {
+        maxAmount: formatUnits(BigInt(filters.maxAmount), decimals),
+      }),
+      ...(filters?.sortOrder && {
+        sortOrder: filters?.sortOrder as QueryInput_Transactions_SortOrder,
+      }),
+      ...(filters?.affectedSupply && {
           affectedSupply: filters?.affectedSupply,
         }),
-        ...(filters?.fromDate && { fromDate: filters?.fromDate }),
-        ...(filters?.toDate && { toDate: filters?.toDate }),
+      ...(filters?.fromDate && { fromDate: filters?.fromDate }),
+      ...(filters?.toDate && { toDate: filters?.toDate }),
+    },
+    context: {
+      headers: {
+        "anticapture-dao-id": daoId,
       },
       context: { headers: { "anticapture-dao-id": daoId } },
       notifyOnNetworkStatusChange: true,
@@ -160,7 +163,8 @@ export const useTransactionsTableData = ({
 
   return {
     data: adaptTransactionsToTableData(
-      transactions as unknown as GraphTransaction[],
+      (data?.transactions?.items as GraphTransaction[]) ?? [],
+      decimals,
     ),
     loading: isInitialLoading,
     error,

@@ -31,6 +31,10 @@ export class SCRClient<
     this.abi = GovernorAbi;
   }
 
+  getDaoId(): string {
+    return "SCR";
+  }
+
   async getQuorum(_: string | null): Promise<bigint> {
     return parseEther("2100000"); // 2.1M $SCR (0.21% Total Supply)
   }

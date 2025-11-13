@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { formatEther } from "viem";
+import { formatUnits } from "viem";
 import { SkeletonRow, TooltipInfo } from "@/shared/components";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -11,6 +11,7 @@ import {
 } from "@/features/dao-overview/components/TopAccountsChart";
 import { useAccountBalanceVariations } from "@/features/dao-overview/hooks/useAccountBalanceVariations";
 import { TimeInterval } from "@/shared/types/enums";
+import daoConfig from "@/shared/dao-config";
 
 export const AccountBalanceChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
   const accountBalanceVariations = useAccountBalanceVariations(
@@ -23,13 +24,22 @@ export const AccountBalanceChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
 
     return rawItems.map((item) => {
       const absoluteChange = Number(
-        formatEther(BigInt(item?.absoluteChange || 0)),
+        formatUnits(
+          BigInt(item?.absoluteChange || 0),
+          daoConfig[daoId].decimals,
+        ),
       );
       const percentageChange =
         item?.percentageChange === "NO BASELINE"
           ? 0
           : Number(item?.percentageChange);
-      const balance = Number(formatEther(BigInt(item?.currentBalance || 0)));
+
+      const balance = Number(
+        formatUnits(
+          BigInt(item?.currentBalance || 0),
+          daoConfig[daoId].decimals,
+        ),
+      );
 
       return {
         address: item?.accountId || "",
@@ -41,7 +51,7 @@ export const AccountBalanceChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
         },
       };
     });
-  }, [accountBalanceVariations.data]);
+  }, [accountBalanceVariations.data, daoId]);
 
   return (
     <div className="sm:bg-surface-default flex w-full flex-col gap-4 px-5 md:p-4">

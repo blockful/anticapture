@@ -4,6 +4,8 @@ import { EthereumIcon } from "@/shared/components/icons/EthereumIcon";
 import { DollarSign } from "lucide-react";
 import { DaoConfiguration, DaoOverviewConfig } from "@/shared/dao-config/types";
 import { OPMainnetIcon } from "@/shared/components/icons/OPMainnetIcon";
+import { cn } from "@/shared/utils";
+import { TooltipInfo } from "@/shared/components";
 
 interface DaoOverviewHeaderProps {
   daoId: string;
@@ -47,6 +49,9 @@ export const DaoOverviewHeader = ({
           className="bg-surface-opacity text-primary h-5 rounded-full text-xs"
         >
           1 {daoId} = ${lastPrice.toFixed(2)}
+          {daoOverview.priceDisclaimer && (
+            <TooltipInfo text={daoOverview.priceDisclaimer} />
+          )}
         </BadgeStatus>
       </div>
 
@@ -58,6 +63,15 @@ export const DaoOverviewHeader = ({
         >
           Governor
         </DefaultLink>
+        {daoOverview.contracts?.timelock && (
+          <DefaultLink
+            href={`${baseLinkRoute}/${daoOverview.contracts.timelock}`}
+            openInNewTab
+            className="after:text-border-contrast text-xs uppercase after:content-['•']"
+          >
+            Timelock
+          </DefaultLink>
+        )}
         <DefaultLink
           href={daoOverview.snapshot || "#"}
           openInNewTab
@@ -68,7 +82,10 @@ export const DaoOverviewHeader = ({
         <DefaultLink
           href={`${baseLinkRoute}/${daoOverview.contracts?.token}`}
           openInNewTab
-          className="after:text-border-contrast text-xs uppercase after:content-['•']"
+          className={cn(
+            `after:text-border-contrast text-xs uppercase`,
+            daoConfig.forumLink && `after:content-['•']`,
+          )}
         >
           Token
         </DefaultLink>

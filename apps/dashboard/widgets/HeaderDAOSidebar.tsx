@@ -6,7 +6,7 @@ import {
   HeaderDAOSidebarDropdown,
   ButtonHeaderSidebar,
 } from "@/shared/components";
-import { BarChart, Gauge, UserCheck } from "lucide-react";
+import { BarChart, Gauge, Landmark, UserCheck } from "lucide-react";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { ArrowRightLeft, PieChart } from "lucide-react";
 import { Crosshair2Icon } from "@radix-ui/react-icons";
@@ -18,7 +18,7 @@ export const HeaderDAOSidebar = () => {
   const daoId = isDefault ? null : pathname.split("/")[1]?.toUpperCase();
   const daoConfig = daoConfigByDaoId[daoId as DaoIdEnum];
 
-  if (daoConfig.disableDaoPage) {
+  if (!daoConfig || daoConfig.disableDaoPage) {
     return null;
   }
 
@@ -76,6 +76,15 @@ export const HeaderDAOSidebar = () => {
                 icon={UserCheck}
                 label={PAGES_CONSTANTS.holdersAndDelegates.title}
                 key={PAGES_CONSTANTS.holdersAndDelegates.title}
+              />
+            )}
+
+            {daoConfig.governancePage && (
+              <ButtonHeaderSidebar
+                page={"governance"}
+                icon={Landmark}
+                label="Governance"
+                key="Governance"
               />
             )}
           </div>

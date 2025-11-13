@@ -125,6 +125,7 @@ export class TransactionsRepository {
   ): Promise<DBTransaction[]> {
     const timePeriodConditions = this.coalesceConditionArray(
       this.timePeriodToSql(params),
+      "AND",
     );
 
     const query = sql`
@@ -203,15 +204,21 @@ export class TransactionsRepository {
     transfer: string;
     delegation: string;
   } {
+    const transferTimePeriodConditions: string = this.coalesceConditionArray(
+      this.timePeriodToSql(filter, "transfers"),
+      "AND",
+    );
+    const delegationTimePeriodConditions: string = this.coalesceConditionArray(
+      this.timePeriodToSql(filter, "delegations"),
+      "AND",
+    );
     const checkIsDex = filter.affectedSupply.isDex ?? false;
     const checkIsCex = filter.affectedSupply.isCex ?? false;
     const checkIsLending = filter.affectedSupply.isLending ?? false;
     const checkIsTotal = filter.affectedSupply.isTotal ?? false;
 
-    const timePeriodConditions: string[] = this.timePeriodToSql(filter);
-
-    const transferConditions: string[] = [...timePeriodConditions];
-    const delegationConditions: string[] = [...timePeriodConditions];
+    const transferConditions: string[] = [];
+    const delegationConditions: string[] = [];
 
     if (checkIsDex) {
       transferConditions.push(`transfers.is_dex = true`);
@@ -256,27 +263,42 @@ export class TransactionsRepository {
     }
 
     return {
-      transfer: this.coalesceConditionArray(transferConditions),
-      delegation: this.coalesceConditionArray(delegationConditions),
+      transfer: this.coalesceConditionArray(
+        [
+          `(${transferTimePeriodConditions})`,
+          `(${this.coalesceConditionArray(transferConditions, "OR")})`,
+        ],
+        "AND",
+      ),
+      delegation: this.coalesceConditionArray(
+        [
+          `(${delegationTimePeriodConditions})`,
+          `(${this.coalesceConditionArray(delegationConditions, "OR")})`,
+        ],
+        "AND",
+      ),
     };
   }
 
-  private timePeriodToSql(filter: TransactionsRequest): string[] {
+  private timePeriodToSql(
+    filter: TransactionsRequest,
+    tableAlias?: string,
+  ): string[] {
     const filterConditions: string[] = [];
+    const tsCol = tableAlias ? `${tableAlias}.timestamp` : "timestamp";
 
     if (filter.fromDate)
-      filterConditions.push(
-        `delegations.timestamp >= ${BigInt(filter.fromDate)} OR transfers.timestamp >= ${BigInt(filter.fromDate)}`,
-      );
+      filterConditions.push(`${tsCol} >= ${BigInt(filter.fromDate)}`);
     if (filter.toDate)
-      filterConditions.push(
-        `delegations.timestamp <= ${BigInt(filter.toDate)} OR transfers.timestamp <= ${BigInt(filter.toDate)}`,
-      );
+      filterConditions.push(`${tsCol} <= ${BigInt(filter.toDate)}`);
 
     return filterConditions;
   }
 
-  private coalesceConditionArray(conditions: string[]): string {
-    return conditions.length > 0 ? conditions.join(" AND ") : "true";
+  private coalesceConditionArray(
+    conditions: string[],
+    operator: "AND" | "OR",
+  ): string {
+    return conditions.length > 0 ? conditions.join(` ${operator} `) : "true";
   }
 }

@@ -30,6 +30,10 @@ export class ENSClient<
     this.abi = ENSGovernorAbi;
   }
 
+  getDaoId(): string {
+    return "ENS";
+  }
+
   async getQuorum(): Promise<bigint> {
     const blockNumber = await getBlockNumber(this.client);
     const targetBlock = blockNumber - 10n;

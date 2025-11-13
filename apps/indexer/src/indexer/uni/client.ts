@@ -30,6 +30,10 @@ export class UNIClient<
     this.abi = GovernorAbi;
   }
 
+  getDaoId(): string {
+    return "UNI";
+  }
+
   async getQuorum(): Promise<bigint> {
     return readContract(this.client, {
       abi: this.abi,

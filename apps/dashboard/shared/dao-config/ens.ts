@@ -8,6 +8,7 @@ import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
 export const ENS: DaoConfiguration = {
   name: "ENS",
+  decimals: 18,
   color: {
     svgColor: "#0080bc",
     svgBgColor: "#fff",
@@ -17,7 +18,6 @@ export const ENS: DaoConfiguration = {
   daoOverview: {
     token: "ERC20",
     chain: mainnet,
-    blockTime: 12,
     snapshot: "https://snapshot.box/#/s:ens.eth",
     contracts: {
       governor: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",

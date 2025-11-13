@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { ALL_DAOS, DaoIdEnum } from "@/shared/types/daos";
-import NotFound from "@/app/[daoId]/not-found";
+import NotFound from "@/app/[daoId]/(main)/not-found";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { BaseHeaderLayoutSidebar } from "@/shared/components/";
 import { HeaderMobile } from "@/widgets/HeaderMobile";

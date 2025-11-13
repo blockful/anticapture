@@ -19,6 +19,7 @@ export const CoingeckoTokenIdEnum: Record<DaoIdEnum, string> = {
   TEST: "ethereum-name-service",
   NOUNS: "nouns",
   SCR: "scroll",
+  COMP: "compound-governance-token",
   OBOL: "obol-2",
 } as const;
 
@@ -29,6 +30,7 @@ export const CoingeckoIdToAssetPlatformId = {
   [CoingeckoTokenIdEnum.OP]: AssetPlatformEnum.OPTIMISM,
   [CoingeckoTokenIdEnum.GTC]: AssetPlatformEnum.ETHEREUM,
   [CoingeckoTokenIdEnum.SCR]: AssetPlatformEnum.SCROLL,
+  [CoingeckoTokenIdEnum.COMP]: AssetPlatformEnum.ETHEREUM,
   [CoingeckoTokenIdEnum.OBOL]: AssetPlatformEnum.ETHEREUM,
 } as const;
 
