@@ -1,5 +1,5 @@
 import { DBTransaction, TransactionsRequest } from "../mappers";
-import { sql, eq, or, countDistinct } from "drizzle-orm";
+import { sql, eq, or, countDistinct, SQLChunk } from "drizzle-orm";
 import { db } from "ponder:api";
 import { delegation, transaction, transfer } from "ponder:schema";
 
@@ -7,21 +7,9 @@ export class TransactionsRepository {
   async getFilteredAggregateTransactions(
     filter: TransactionsRequest,
   ): Promise<DBTransaction[]> {
-    const { transfer: transferFilter, delegation: delegationFilter } =
-      this.filterToSql(filter);
-
-    const joinCriteria = this.resolveJoinCriteria(filter.includes);
-
+    const hashQuery = this.resolveTransactionHashQuery(filter);
     const query = sql`
-    WITH filtered_transactions AS (
-        SELECT DISTINCT ${transfer.transactionHash}
-        FROM ${transfer}
-        WHERE ${sql.raw(transferFilter)}
-        ${sql.raw(joinCriteria)} 
-        SELECT DISTINCT ${delegation.transactionHash}
-        FROM ${delegation}
-        WHERE ${sql.raw(delegationFilter)}
-    ),
+    WITH filtered_transactions AS (${hashQuery}),
     latest_filtered_transactions AS (
         SELECT 
           ${transaction.transactionHash},
@@ -224,18 +212,26 @@ export class TransactionsRepository {
     return conditions.length > 0 ? conditions.join(` ${operator} `) : "true";
   }
 
-  private resolveJoinCriteria(includes: {
-    transfers: boolean;
-    delegations: boolean;
-  }): "UNION" | "RIGHT JOIN" | "LEFT JOIN" {
-    const { transfers, delegations } = includes;
+  private resolveTransactionHashQuery(filter: TransactionsRequest): SQLChunk {
+    const { transfer: transferFilter, delegation: delegationFilter } =
+      this.filterToSql(filter);
+    const { transfers, delegations } = filter.includes;
+
+    const transferChunk = sql`
+        SELECT DISTINCT ${transfer.transactionHash}
+        FROM ${transfer}
+        WHERE ${sql.raw(transferFilter)}`;
+    const delegationChunk = sql`
+        SELECT DISTINCT ${delegation.transactionHash}
+        FROM ${delegation}
+        WHERE ${sql.raw(delegationFilter)}`;
 
     if (transfers && delegations) {
-      return "UNION";
+      return sql`${transferChunk} UNION ${delegationChunk}`;
     } else if (transfers) {
-      return "LEFT JOIN";
+      return transferChunk;
     } else {
-      return "RIGHT JOIN";
+      return delegationChunk;
     }
   }
 }
