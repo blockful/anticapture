@@ -1,4 +1,6 @@
+import { formatUnits } from "viem";
 import { useMemo } from "react";
+
 import { useTimeSeriesData } from "@/shared/hooks";
 import { useDaoTokenHistoricalData } from "@/features/attack-profitability/hooks/useDaoTokenHistoricalData";
 import { useProposals } from "@/features/token-distribution/hooks/useProposals";
@@ -10,8 +12,6 @@ import { ChartDataSetPoint } from "@/shared/dao-config/types";
 import { MetricSchema } from "@/features/token-distribution/utils/metrics";
 import { normalizeTimestamp } from "@/features/token-distribution/utils/chart";
 import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
-import { formatUnits } from "viem";
-import daoConfig from "@/shared/dao-config";
 
 export interface UseChartMetricsResult {
   chartData: ChartDataSetPoint[];
@@ -23,10 +23,12 @@ export const useChartMetrics = ({
   appliedMetrics,
   daoId,
   metricsSchema,
+  decimals,
 }: {
   appliedMetrics: string[];
   daoId: DaoIdEnum;
   metricsSchema: Record<string, MetricSchema>;
+  decimals: number;
 }): UseChartMetricsResult => {
   // Get direct enum metrics
   const enumMetrics = appliedMetrics.filter((key) =>
@@ -159,10 +161,7 @@ export const useChartMetrics = ({
             result[normalizeTimestamp(item.date)] = {
               ...result[normalizeTimestamp(item.date)],
               date: normalizeTimestamp(item.date),
-              [metricKey]: formatUnits(
-                BigInt(value),
-                daoConfig[daoId].decimals,
-              ), // Convert from wei to token units
+              [metricKey]: Number(formatUnits(BigInt(value), decimals)),
             };
           });
         }
@@ -170,7 +169,7 @@ export const useChartMetrics = ({
     }
 
     return result;
-  }, [timeSeriesData, stableAppliedMetrics, metricsSchema, daoId]);
+  }, [timeSeriesData, stableAppliedMetrics, metricsSchema, decimals]);
 
   // Process historical token data separately
   const tokenPriceDatasets = useMemo(() => {
@@ -314,6 +313,8 @@ export const useChartMetrics = ({
     shouldFetchProposals,
     proposalsLoading,
   ]);
+
+  console.log({ useChartMetrics: chartData });
 
   return {
     chartData,
