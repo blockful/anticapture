@@ -10,8 +10,6 @@ export class TransactionsRepository {
     const { transfer: transferFilter, delegation: delegationFilter } =
       this.filterToSql(filter);
 
-    console.log({ filter, transferFilter, delegationFilter });
-
     const query = sql`
     WITH filtered_transactions AS (
         SELECT DISTINCT ${transfer.transactionHash}
