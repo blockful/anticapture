@@ -6,8 +6,8 @@ interface TreasuryClient {
   getHistoricalTreasury(days?: number): Promise<
     Array<{
       date: bigint;
-      totalTreasury: string;
-      treasuryWithoutDaoToken: string;
+      totalTreasury: bigint;
+      treasuryWithoutDaoToken: bigint;
     }>
   >;
   syncTreasury?(): Promise<{
@@ -62,8 +62,8 @@ export function assets(app: Hono, service: TreasuryClient) {
       // Convert bigint timestamp (seconds) to milliseconds for frontend
       const response = data.map((item) => ({
         date: Number(item.date) * 1000, // Convert seconds to milliseconds
-        totalTreasury: item.totalTreasury,
-        treasuryWithoutDaoToken: item.treasuryWithoutDaoToken,
+        totalTreasury: item.totalTreasury.toString(),
+        treasuryWithoutDaoToken: item.treasuryWithoutDaoToken.toString(),
       }));
 
       return context.json(response);

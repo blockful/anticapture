@@ -122,8 +122,8 @@ export class DefiLlamaProvider implements TreasuryProvider {
     return Array.from(aggregatedByDate.entries())
       .map(([dayTimestamp, values]) => ({
         date: dayTimestamp,
-        totalTreasury: values.total.toFixed(2),
-        treasuryWithoutDaoToken: Math.max(0, values.withoutOwnToken).toFixed(2), // Ensure non-negative
+        totalTreasury: BigInt(values.total),
+        treasuryWithoutDaoToken: BigInt(values.withoutOwnToken),
       }))
       .sort((a, b) => Number(a.date - b.date)); // Sort by timestamp ascending
   }

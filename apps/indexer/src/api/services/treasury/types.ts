@@ -1,7 +1,7 @@
 export interface TreasuryDataPoint {
   date: bigint; // Unix timestamp in seconds (start of day)
-  totalTreasury: string; // USD value
-  treasuryWithoutDaoToken: string; // USD value excluding native token
+  totalTreasury: bigint; // USD value
+  treasuryWithoutDaoToken: bigint; // USD value excluding native token
 }
 
 export interface RawDefiLlamaResponse {
