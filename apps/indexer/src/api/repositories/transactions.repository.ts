@@ -204,15 +204,18 @@ export class TransactionsRepository {
     transfer: string;
     delegation: string;
   } {
+    const transferTimePeriodConditions: string = this.coalesceConditionArray(
+      this.timePeriodToSql(filter, "transfers"),
+      "AND",
+    );
+    const delegationTimePeriodConditions: string = this.coalesceConditionArray(
+      this.timePeriodToSql(filter, "delegations"),
+      "AND",
+    );
     const checkIsDex = filter.affectedSupply.isDex ?? false;
     const checkIsCex = filter.affectedSupply.isCex ?? false;
     const checkIsLending = filter.affectedSupply.isLending ?? false;
     const checkIsTotal = filter.affectedSupply.isTotal ?? false;
-
-    const timePeriodConditions: string = this.coalesceConditionArray(
-      this.timePeriodToSql(filter),
-      "AND",
-    );
 
     const transferConditions: string[] = [];
     const delegationConditions: string[] = [];
@@ -262,32 +265,32 @@ export class TransactionsRepository {
     return {
       transfer: this.coalesceConditionArray(
         [
-          `(${timePeriodConditions})`,
-          this.coalesceConditionArray(transferConditions, "OR"),
+          `(${transferTimePeriodConditions})`,
+          `(${this.coalesceConditionArray(transferConditions, "OR")})`,
         ],
         "AND",
       ),
       delegation: this.coalesceConditionArray(
         [
-          `(${timePeriodConditions})`,
-          this.coalesceConditionArray(delegationConditions, "OR"),
+          `(${delegationTimePeriodConditions})`,
+          `(${this.coalesceConditionArray(delegationConditions, "OR")})`,
         ],
         "AND",
       ),
     };
   }
 
-  private timePeriodToSql(filter: TransactionsRequest): string[] {
+  private timePeriodToSql(
+    filter: TransactionsRequest,
+    tableAlias?: string,
+  ): string[] {
     const filterConditions: string[] = [];
+    const tsCol = tableAlias ? `${tableAlias}.timestamp` : "timestamp";
 
     if (filter.fromDate)
-      filterConditions.push(
-        `delegations.timestamp >= ${BigInt(filter.fromDate)} OR transfers.timestamp >= ${BigInt(filter.fromDate)}`,
-      );
+      filterConditions.push(`${tsCol} >= ${BigInt(filter.fromDate)}`);
     if (filter.toDate)
-      filterConditions.push(
-        `delegations.timestamp <= ${BigInt(filter.toDate)} OR transfers.timestamp <= ${BigInt(filter.toDate)}`,
-      );
+      filterConditions.push(`${tsCol} <= ${BigInt(filter.toDate)}`);
 
     return filterConditions;
   }
