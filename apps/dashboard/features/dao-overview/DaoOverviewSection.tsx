@@ -33,7 +33,9 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const daoOverview = daoConfig.daoOverview;
 
   useEffect(() => {
-    console.log("fodase", daoId);
+    // FIXME:
+    //   This is only a workaround for now, as Apollo Client does not yet support HTTP header context for cache indexing;
+    //   https://github.com/apollographql/apollo-feature-requests/issues/326
     apolloClient.cache.reset();
   }, [daoId]);
 
