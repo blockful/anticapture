@@ -1,5 +1,5 @@
 import { DBTransaction, TransactionsRequest } from "../mappers";
-import { sql, eq, or, countDistinct } from "drizzle-orm";
+import { sql, eq, or, countDistinct, SQL } from "drizzle-orm";
 import { db } from "ponder:api";
 import { delegation, transaction, transfer } from "ponder:schema";
 
@@ -7,76 +7,120 @@ export class TransactionsRepository {
   async getFilteredAggregateTransactions(
     filter: TransactionsRequest,
   ): Promise<DBTransaction[]> {
+    const includeTransfers = !!filter.includes.transfers;
+    const includeDelegations = !!filter.includes.delegations;
+
     const { transfer: transferFilter, delegation: delegationFilter } =
       this.filterToSql(filter);
 
+    const filteredTransactionsParts: SQL[] = [];
+
+    if (includeTransfers) {
+      filteredTransactionsParts.push(sql`
+      SELECT DISTINCT ${transfer.transactionHash}
+      FROM ${transfer}
+      WHERE ${sql.raw(transferFilter)}
+    `);
+    }
+
+    if (includeDelegations) {
+      filteredTransactionsParts.push(sql`
+      SELECT DISTINCT ${delegation.transactionHash}
+      FROM ${delegation}
+      WHERE ${sql.raw(delegationFilter)}
+    `);
+    }
+
+    const filteredTransactionsCTE = sql.join(
+      filteredTransactionsParts,
+      sql` UNION `,
+    );
+
+    const transferAggregatesCTE = includeTransfers
+      ? sql`
+    transfer_aggregates AS (
+      SELECT 
+        ${transfer.transactionHash},
+        JSON_AGG(JSON_BUILD_OBJECT(
+          'transactionHash', ${transfer.transactionHash},
+          'daoId', ${transfer.daoId},
+          'tokenId', ${transfer.tokenId},
+          'amount', ${transfer.amount},
+          'fromAccountId', ${transfer.fromAccountId},
+          'toAccountId', ${transfer.toAccountId},
+          'timestamp', ${transfer.timestamp},
+          'logIndex', ${transfer.logIndex},
+          'isCex', ${transfer.isCex},
+          'isDex', ${transfer.isDex},
+          'isLending', ${transfer.isLending},
+          'isTotal', ${transfer.isTotal}
+        )) as transfers
+      FROM ${transfer}
+      WHERE ${transfer.transactionHash} IN (SELECT transaction_hash FROM latest_filtered_transactions)
+      GROUP BY ${transfer.transactionHash}
+    )
+  `
+      : sql``;
+
+    const delegationAggregatesCTE = includeDelegations
+      ? sql`
+    delegation_aggregates AS (
+      SELECT 
+        ${delegation.transactionHash},
+        JSON_AGG(JSON_BUILD_OBJECT(
+          'transactionHash', ${delegation.transactionHash},
+          'daoId', ${delegation.daoId},
+          'delegateAccountId', ${delegation.delegateAccountId},
+          'delegatorAccountId', ${delegation.delegatorAccountId},
+          'delegatedValue', ${delegation.delegatedValue},
+          'previousDelegate', ${delegation.previousDelegate},
+          'timestamp', ${delegation.timestamp},
+          'logIndex', ${delegation.logIndex},
+          'isCex', ${delegation.isCex},
+          'isDex', ${delegation.isDex},
+          'isLending', ${delegation.isLending},
+          'isTotal', ${delegation.isTotal}
+        )) as delegations
+      FROM ${delegation}
+      WHERE ${delegation.transactionHash} IN (SELECT ${delegation.transactionHash} FROM latest_filtered_transactions)
+      GROUP BY ${delegation.transactionHash}
+    )
+  `
+      : sql``;
+
+    const joins: SQL[] = [];
+    if (includeTransfers) {
+      joins.push(
+        sql`LEFT JOIN transfer_aggregates ta ON ta.transaction_hash = lt.transaction_hash`,
+      );
+    }
+    if (includeDelegations) {
+      joins.push(
+        sql`LEFT JOIN delegation_aggregates da ON da.transaction_hash = lt.transaction_hash`,
+      );
+    }
+
     const query = sql`
     WITH filtered_transactions AS (
-        SELECT DISTINCT ${transfer.transactionHash}
-        FROM ${transfer}
-        WHERE ${sql.raw(transferFilter)}
-        UNION
-        SELECT DISTINCT ${delegation.transactionHash}
-        FROM ${delegation}
-        WHERE ${sql.raw(delegationFilter)}
+      ${filteredTransactionsCTE}
     ),
     latest_filtered_transactions AS (
-        SELECT 
-          ${transaction.transactionHash},
-          ${transaction.fromAddress},
-          ${transaction.toAddress},
-          ${transaction.isCex},
-          ${transaction.isDex},
-          ${transaction.isLending},
-          ${transaction.isTotal},
-          ${transaction.timestamp}
-        FROM ${transaction}
-        WHERE ${transaction.transactionHash} IN (SELECT transaction_hash FROM filtered_transactions)
-        ORDER BY ${transaction.timestamp} DESC
-        LIMIT ${filter.limit}
-    ),
-    transfer_aggregates AS (
-        SELECT 
-          ${transfer.transactionHash},
-          JSON_AGG(JSON_BUILD_OBJECT(
-            'transactionHash', ${transfer.transactionHash},
-            'daoId', ${transfer.daoId},
-            'tokenId', ${transfer.tokenId},
-            'amount', ${transfer.amount},
-            'fromAccountId', ${transfer.fromAccountId},
-            'toAccountId', ${transfer.toAccountId},
-            'timestamp', ${transfer.timestamp},
-            'logIndex', ${transfer.logIndex},
-            'isCex', ${transfer.isCex},
-            'isDex', ${transfer.isDex},
-            'isLending', ${transfer.isLending},
-            'isTotal', ${transfer.isTotal}
-          )) as transfers
-        FROM ${transfer}
-        WHERE ${transfer.transactionHash} IN (SELECT transaction_hash FROM latest_filtered_transactions)
-        GROUP BY ${transfer.transactionHash}
-    ),
-    delegation_aggregates AS (
-        SELECT 
-          ${delegation.transactionHash},
-          JSON_AGG(JSON_BUILD_OBJECT(
-            'transactionHash', ${delegation.transactionHash},
-            'daoId', ${delegation.daoId},
-            'delegateAccountId', ${delegation.delegateAccountId},
-            'delegatorAccountId', ${delegation.delegatorAccountId},
-            'delegatedValue', ${delegation.delegatedValue},
-            'previousDelegate', ${delegation.previousDelegate},
-            'timestamp', ${delegation.timestamp},
-            'logIndex', ${delegation.logIndex},
-            'isCex', ${delegation.isCex},
-            'isDex', ${delegation.isDex},
-            'isLending', ${delegation.isLending},
-            'isTotal', ${delegation.isTotal}
-          )) as delegations
-        FROM ${delegation}
-        WHERE ${delegation.transactionHash} IN (SELECT ${delegation.transactionHash} FROM latest_filtered_transactions)
-        GROUP BY ${delegation.transactionHash}
+      SELECT 
+        ${transaction.transactionHash},
+        ${transaction.fromAddress},
+        ${transaction.toAddress},
+        ${transaction.isCex},
+        ${transaction.isDex},
+        ${transaction.isLending},
+        ${transaction.isTotal},
+        ${transaction.timestamp}
+      FROM ${transaction}
+      WHERE ${transaction.transactionHash} IN (SELECT transaction_hash FROM filtered_transactions)
+      ORDER BY ${transaction.timestamp} DESC
+      LIMIT ${filter.limit}
     )
+    ${includeTransfers ? sql`, ${transferAggregatesCTE}` : sql``}
+    ${includeDelegations ? sql`, ${delegationAggregatesCTE}` : sql``}
     SELECT 
       lt.transaction_hash AS "transactionHash",
       lt.from_address AS "fromAddress", 
@@ -85,16 +129,15 @@ export class TransactionsRepository {
       lt.is_dex AS "isDex",
       lt.is_lending AS "isLending", 
       lt.is_total AS "isTotal", 
-      lt.timestamp,
-      COALESCE(ta.transfers, '[]'::json) as transfers,
-      COALESCE(da.delegations, '[]'::json) as delegations
+      lt.timestamp
+      ${includeTransfers ? sql`, COALESCE(ta.transfers, '[]'::json) as transfers` : sql`, '[]'::json as transfers`}
+      ${includeDelegations ? sql`, COALESCE(da.delegations, '[]'::json) as delegations` : sql`, '[]'::json as delegations`}
     FROM latest_filtered_transactions lt
-    LEFT JOIN transfer_aggregates ta ON ta.transaction_hash = lt.transaction_hash
-    LEFT JOIN delegation_aggregates da ON da.transaction_hash = lt.transaction_hash
+    ${sql.join(joins, sql` `)}
     ORDER BY lt.timestamp DESC;
-`;
-    const result = await db.execute<DBTransaction>(query);
+  `;
 
+    const result = await db.execute<DBTransaction>(query);
     return result.rows;
   }
 
@@ -118,86 +161,6 @@ export class TransactionsRepository {
       .where(or(sql.raw(transferFilter), sql.raw(delegationFilter)));
 
     return query[0]?.count || 0;
-  }
-
-  async getRecentAggregateTransactions(
-    params: TransactionsRequest,
-  ): Promise<DBTransaction[]> {
-    const timePeriodConditions = this.coalesceConditionArray(
-      this.timePeriodToSql(params),
-      "AND",
-    );
-
-    const query = sql`
-        SELECT
-          tx.transaction_hash AS "transactionHash",
-          tx.from_address AS "fromAddress",
-          tx.to_address AS "toAddress",
-          tx.is_cex AS "isCex",
-          tx.is_dex AS "isDex",
-          tx.is_lending AS "isLending",
-          tx.is_total AS "isTotal",
-          tx.timestamp,
-          COALESCE(transfers_agg.transfers, '[]'::json) as transfers,
-          COALESCE(delegations_agg.delegations, '[]'::json) as delegations
-        FROM (
-            SELECT
-              ${transaction.transactionHash},
-              ${transaction.fromAddress},
-              ${transaction.toAddress},
-              ${transaction.isCex},
-              ${transaction.isDex},
-              ${transaction.isLending},
-              ${transaction.isTotal},
-              ${transaction.timestamp}
-            FROM ${transaction}
-            WHERE ${sql.raw(timePeriodConditions)}
-            ORDER BY timestamp ${sql.raw(params.sortOrder)}
-            LIMIT ${params.limit} OFFSET ${params.offset}
-        ) tx
-        LEFT JOIN LATERAL (
-            SELECT
-              JSON_AGG(JSON_BUILD_OBJECT(
-                'transactionHash', ${transfer.transactionHash},
-                'daoId', ${transfer.daoId},
-                'tokenId', ${transfer.tokenId},
-                'amount', ${transfer.amount},
-                'fromAccountId', ${transfer.fromAccountId},
-                'toAccountId', ${transfer.toAccountId},
-                'timestamp', ${transfer.timestamp},
-                'logIndex', ${transfer.logIndex},
-                'isCex', ${transfer.isCex},
-                'isDex', ${transfer.isDex},
-                'isLending', ${transfer.isLending},
-                'isTotal', ${transfer.isTotal}
-              )) as transfers
-            FROM ${transfer}
-            WHERE ${transfer.transactionHash} = tx.transaction_hash
-        ) transfers_agg ON true
-        LEFT JOIN LATERAL (
-            SELECT
-              JSON_AGG(JSON_BUILD_OBJECT(
-                'transactionHash', ${delegation.transactionHash},
-                'daoId', ${delegation.daoId},
-                'delegateAccountId', ${delegation.delegateAccountId},
-                'delegatorAccountId', ${delegation.delegatorAccountId},
-                'delegatedValue', ${delegation.delegatedValue},
-                'previousDelegate', ${delegation.previousDelegate},
-                'timestamp', ${delegation.timestamp},
-                'logIndex', ${delegation.logIndex},
-                'isCex', ${delegation.isCex},
-                'isDex', ${delegation.isDex},
-                'isLending', ${delegation.isLending},
-                'isTotal', ${delegation.isTotal}
-              )) as delegations
-            FROM ${delegation}
-            WHERE ${delegation.transactionHash} = tx.transaction_hash
-        ) delegations_agg ON true
-        ORDER BY tx.timestamp ${sql.raw(params.sortOrder)};
-    `;
-    const result = await db.execute<DBTransaction>(query);
-
-    return result.rows;
   }
 
   private filterToSql(filter: TransactionsRequest): {
