@@ -1,11 +1,16 @@
-import { writableDb } from "@/lib/db";
+import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { historicalTreasury } from "ponder:schema";
 import { TreasuryProvider } from "./providers";
 import { TreasuryDataPoint } from "./types";
-import { sql } from "drizzle-orm";
+import { sql, gte, desc, asc } from "drizzle-orm";
 
 export class TreasuryService {
-  constructor(private readonly provider: TreasuryProvider) {}
+  constructor(
+    private readonly db: NodePgDatabase<{
+      historicalTreasury: typeof historicalTreasury;
+    }>,
+    private readonly provider: TreasuryProvider,
+  ) {}
 
   /**
    * Syncs treasury data from provider to database.
@@ -19,7 +24,7 @@ export class TreasuryService {
     const providerData = await this.provider.fetchTreasury();
 
     // Get existing records from database
-    const existingRecords = await writableDb
+    const existingRecords = await this.db
       .select({
         date: historicalTreasury.date,
         totalTreasury: historicalTreasury.totalTreasury,
@@ -60,26 +65,24 @@ export class TreasuryService {
     }
 
     // Batch upsert all records that need processing
-    if (toUpsert.length > 0) {
-      await writableDb
-        .insert(historicalTreasury)
-        .values(
-          toUpsert.map((item) => ({
-            date: item.date,
-            totalTreasury: item.totalTreasury,
-            treasuryWithoutDaoToken: item.treasuryWithoutDaoToken,
-            updatedAt: BigInt(Date.now()),
-          })),
-        )
-        .onConflictDoUpdate({
-          target: historicalTreasury.date,
-          set: {
-            totalTreasury: sql`excluded.total_treasury`,
-            treasuryWithoutDaoToken: sql`excluded.treasury_without_dao_token`,
-            updatedAt: sql`excluded.updated_at`,
-          },
-        });
-    }
+    await this.db
+      .insert(historicalTreasury)
+      .values(
+        toUpsert.map((item) => ({
+          date: item.date,
+          totalTreasury: item.totalTreasury,
+          treasuryWithoutDaoToken: item.treasuryWithoutDaoToken,
+          updatedAt: Date.now().toString(),
+        })),
+      )
+      .onConflictDoUpdate({
+        target: historicalTreasury.date,
+        set: {
+          totalTreasury: sql`excluded.total_treasury`,
+          treasuryWithoutDaoToken: sql`excluded.treasury_without_dao_token`,
+          updatedAt: sql`excluded.updated_at`,
+        },
+      });
 
     return {
       synced: toUpsert.length,
@@ -89,28 +92,40 @@ export class TreasuryService {
 
   /**
    * Gets historical treasury data from database.
-   * @param days - Number of days to fetch (optional, defaults to all)
+   * @param params - Query parameters
+   * @param params.days - Number of days to fetch (optional, defaults to all)
+   * @param params.order - Sort order
    */
-  async getHistoricalTreasury(days?: number): Promise<TreasuryDataPoint[]> {
-    const query = writableDb
+  async getHistoricalTreasury(params: {
+    days?: number;
+    order?: "asc" | "desc";
+  }): Promise<TreasuryDataPoint[]> {
+    const { days, order = "asc" } = params;
+
+    // Build base query
+    let query = this.db
       .select({
         date: historicalTreasury.date,
         totalTreasury: historicalTreasury.totalTreasury,
         treasuryWithoutDaoToken: historicalTreasury.treasuryWithoutDaoToken,
       })
       .from(historicalTreasury)
-      .orderBy(historicalTreasury.date);
-
-    const results = await query;
+      .$dynamic();
 
     // Filter by days if specified
     if (days) {
       const cutoffTimestamp = BigInt(
         Math.floor(Date.now() / 1000) - days * 24 * 60 * 60,
       );
-      return results.filter((r) => r.date >= cutoffTimestamp);
+      query = query.where(gte(historicalTreasury.date, cutoffTimestamp));
     }
 
-    return results;
+    // Apply ordering
+    query =
+      order === "asc"
+        ? query.orderBy(asc(historicalTreasury.date))
+        : query.orderBy(desc(historicalTreasury.date));
+
+    return await query;
   }
 }
