@@ -177,7 +177,7 @@ export interface DaoAddresses {
 
 export interface AttackProfitabilityConfig {
   riskLevel?: RiskLevel;
-  liquidTreasury?: TreasuryAssetData; // FIXME(DEV-161): Remove once treasury fetching from Octav is operational
+  liquidTreasury?: TreasuryAssetData;
   supportsLiquidTreasuryCall?: boolean;
   attackCostBarChart: DaoAddresses[DaoIdEnum];
   dynamicQuorum?: {
