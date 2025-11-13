@@ -6,29 +6,36 @@ import axios from "axios";
 
 export interface TreasuryAssetData {
   date: number;
-  totalTreasury: string;
-  treasuryWithoutDaoToken: string;
+  totalTreasury: number;
+  treasuryWithoutDaoToken: number;
 }
 
 export const fetchTreasuryAssetData = async ({
   daoId,
   days,
+  order = "asc",
 }: {
   daoId: DaoIdEnum;
   days: string;
+  order?: "asc" | "desc";
 }): Promise<TreasuryAssetData[]> => {
   const query = `
-  query getTotalAssets {
-  totalAssets(days:_${days}){
-    date
-    totalTreasury
-    treasuryWithoutDaoToken
-  }
-}`;
+  query getTotalAssets($days: String!, $order: String) {
+    totalAssets(days: $days, order: $order) {
+      date
+      totalTreasury
+      treasuryWithoutDaoToken
+    }
+  }`;
+
   const response = await axios.post(
     `${BACKEND_ENDPOINT}`,
     {
       query,
+      variables: {
+        days: `_${days}`,
+        order,
+      },
     },
     {
       headers: {
@@ -45,9 +52,13 @@ export const fetchTreasuryAssetData = async ({
 export const useTreasuryAssetData = (
   daoId: DaoIdEnum,
   days: string,
-  config?: Partial<SWRConfiguration<TreasuryAssetData[], Error>>,
+  options?: {
+    order?: "asc" | "desc";
+    config?: Partial<SWRConfiguration<TreasuryAssetData[], Error>>;
+  },
 ) => {
-  const key = daoId && days ? [`treasury-assets`, daoId, days] : null;
+  const { order, config } = options || {};
+  const key = daoId && days ? [`treasury-assets`, daoId, days, order] : null;
 
   const supportsLiquidTreasuryCall =
     daoConfigByDaoId[daoId].attackProfitability?.supportsLiquidTreasuryCall;
@@ -59,7 +70,7 @@ export const useTreasuryAssetData = (
 
   const { data, error, isValidating, mutate } = useSWR<TreasuryAssetData[]>(
     fetchKey,
-    () => fetchTreasuryAssetData({ daoId, days }),
+    () => fetchTreasuryAssetData({ daoId, days, order }),
     {
       revalidateOnFocus: false,
       shouldRetryOnError: false,
