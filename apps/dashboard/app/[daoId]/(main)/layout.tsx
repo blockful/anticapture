@@ -1,4 +1,6 @@
-import { ReactNode } from "react";
+"use client";
+
+import { ReactNode, use } from "react";
 import { ALL_DAOS, DaoIdEnum } from "@/shared/types/daos";
 import NotFound from "@/app/[daoId]/(main)/not-found";
 import daoConfigByDaoId from "@/shared/dao-config";
@@ -16,8 +18,8 @@ interface DaoLayoutProps {
   params: Promise<DaoParams>;
 }
 
-export default async function DaoLayout({ children, params }: DaoLayoutProps) {
-  const { daoId } = await params;
+export default function DaoLayout({ children, params }: DaoLayoutProps) {
+  const { daoId } = use(params);
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
   const daoConstants = daoConfigByDaoId[daoIdEnum];
 
