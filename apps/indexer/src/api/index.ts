@@ -5,6 +5,7 @@ import schema from "ponder:schema";
 import { logger } from "hono/logger";
 import { fromZodError } from "zod-validation-error";
 import { createPublicClient, http } from "viem";
+import { writableDb } from "@/lib/db";
 
 import {
   governanceActivity,
@@ -118,11 +119,11 @@ const votingPowerService = new VotingPowerService(
 );
 const daoCache = new DaoCache();
 const daoService = new DaoService(daoClient, daoCache, env.CHAIN_ID);
-const defiLlamaProvider = await DefiLlamaProvider.create(
+const defiLlamaProvider = new DefiLlamaProvider(
   env.DEFILLAMA_API_URL,
   env.TREASURY_PROVIDER_PROTOCOL_ID,
 );
-const treasuryService = new TreasuryService(defiLlamaProvider);
+const treasuryService = new TreasuryService(writableDb, defiLlamaProvider);
 assets(app, treasuryService);
 
 const tokenPriceClient =

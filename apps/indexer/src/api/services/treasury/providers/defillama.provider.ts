@@ -1,70 +1,34 @@
 import axios, { AxiosInstance } from "axios";
 import { TreasuryProvider } from "./treasury-provider.interface";
-import { TreasuryDataPoint, RawDefiLlamaResponse } from "../types";
+import { TreasuryDataPoint } from "../types";
+import { truncateTimestampTime } from "@/eventHandlers/shared";
+
+export interface RawDefiLlamaResponse {
+  chainTvls: Record<
+    string,
+    {
+      tvl: Array<{
+        date: number; // Unix timestamp in seconds
+        totalLiquidityUSD: number;
+      }>;
+      tokensInUsd?: Array<unknown>;
+      tokens?: Array<unknown>;
+    }
+  >;
+}
 
 export class DefiLlamaProvider implements TreasuryProvider {
   private readonly client: AxiosInstance;
   private readonly providerDaoId: string;
-  private isValid: boolean = false;
 
-  private constructor(baseUrl: string, providerDaoId: string) {
+  constructor(baseUrl: string, providerDaoId: string) {
     this.client = axios.create({
       baseURL: baseUrl,
     });
     this.providerDaoId = providerDaoId;
   }
 
-  /**
-   * Factory method to create a validated provider instance
-   */
-  static async create(
-    baseUrl: string,
-    providerDaoId: string,
-  ): Promise<DefiLlamaProvider> {
-    const instance = new DefiLlamaProvider(baseUrl, providerDaoId);
-    await instance.validateConnection();
-    return instance;
-  }
-
-  /**
-   * Validates that the provider DAO ID exists in DeFi Llama.
-   * Logs warning if validation fails but doesn't throw.
-   */
-  private async validateConnection(): Promise<void> {
-    try {
-      console.log(
-        `[DefiLlamaProvider] Validating connection for DAO ID: ${this.providerDaoId}`,
-      );
-
-      const response = await this.client.get<RawDefiLlamaResponse>(
-        `/${this.providerDaoId}`,
-      );
-
-      // Check if response has valid data structure
-      if (
-        !response.data?.chainTvls ||
-        Object.keys(response.data.chainTvls).length === 0
-      ) {
-        throw new Error("Invalid response structure or empty data");
-      }
-
-      this.isValid = true;
-      console.log(
-        `[DefiLlamaProvider] ✓ Connection validated for ${this.providerDaoId}`,
-      );
-    } catch (error) {
-      this.isValid = false;
-      console.warn(
-        `[DefiLlamaProvider] ⚠ Failed to validate provider DAO ID '${this.providerDaoId}'. Treasury data will not be available.`,
-      );
-    }
-  }
-
   async fetchTreasury(): Promise<TreasuryDataPoint[]> {
-    if (!this.isValid) {
-      return [];
-    }
-
     try {
       const response = await this.client.get<RawDefiLlamaResponse>(
         `/${this.providerDaoId}`,
@@ -102,7 +66,7 @@ export class DefiLlamaProvider implements TreasuryProvider {
       const dateMap = new Map<bigint, { timestamp: number; value: number }>();
 
       for (const dataPoint of chainData.tvl || []) {
-        const dayTimestamp = this.timestampToStartOfDay(dataPoint.date);
+        const dayTimestamp = truncateTimestampTime(BigInt(dataPoint.date));
         const existing = dateMap.get(dayTimestamp);
 
         // Keep only the latest timestamp for each date
@@ -148,19 +112,9 @@ export class DefiLlamaProvider implements TreasuryProvider {
     return Array.from(aggregatedByDate.entries())
       .map(([dayTimestamp, values]) => ({
         date: dayTimestamp,
-        totalTreasury: BigInt(values.total),
-        treasuryWithoutDaoToken: BigInt(values.withoutOwnToken),
+        totalTreasury: values.total,
+        treasuryWithoutDaoToken: values.withoutOwnToken,
       }))
       .sort((a, b) => Number(a.date - b.date)); // Sort by timestamp ascending
-  }
-
-  /**
-   * Converts Unix timestamp to start of day timestamp (in seconds).
-   * Normalizes timestamps to UTC midnight.
-   */
-  private timestampToStartOfDay(timestamp: number): bigint {
-    const date = new Date(timestamp * 1000); // DeFi Llama uses seconds
-    date.setUTCHours(0, 0, 0, 0);
-    return BigInt(Math.floor(date.getTime() / 1000));
   }
 }
