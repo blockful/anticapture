@@ -6,11 +6,7 @@ interface ExpandButtonProps<TData> {
   enableExpanding: boolean;
 }
 
-export type ExpandableData = {
-  subRows?: unknown[];
-};
-
-export const ExpandButton = <TData extends ExpandableData>({
+export const ExpandButton = <TData,>({
   row,
   enableExpanding,
 }: ExpandButtonProps<TData>) => {
