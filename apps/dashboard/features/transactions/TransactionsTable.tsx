@@ -9,7 +9,7 @@ import { AffectedSupplyType } from "@/features/transactions/hooks/useTransaction
 import { Table } from "@/shared/components/design-system/table/Table";
 import { getTransactionsColumns } from "@/features/transactions/utils/getTransactionsColumns";
 
-const AcceptedMetrics: string[] = ["CEX", "DEX", "LENDING", "TOTAL"];
+export const AcceptedMetrics: string[] = ["CEX", "DEX", "LENDING", "TOTAL"];
 
 export const TransactionsTable = ({
   metrics,
@@ -36,11 +36,12 @@ export const TransactionsTable = ({
       AcceptedMetrics.includes(metric),
     ) as AffectedSupplyType[];
 
-  const formattedAffectedSupply = affectedSupply
-    ? affectedSupply
-    : !hasTransfer
-      ? (AcceptedMetrics as AffectedSupplyType[])
-      : [];
+  const formattedAffectedSupply =
+    affectedSupply.length > 0
+      ? affectedSupply
+      : !hasTransfer
+        ? (AcceptedMetrics as AffectedSupplyType[])
+        : [];
 
   const {
     data: tableData,
@@ -82,7 +83,7 @@ export const TransactionsTable = ({
       <div className="flex flex-col gap-2">
         <Table
           columns={columns}
-          data={Array.from({ length: 7 }, () => ({
+          data={Array.from({ length: 12 }, () => ({
             id: "loading-row",
             affectedSupply: ["CEX", "DEX"] as SupplyType[],
             amount: "1000000",
