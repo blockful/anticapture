@@ -141,16 +141,17 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
 
     // Store the numeric value in the ref when data changes
     useEffect(() => {
-      if (circulatingSupply) {
-        const numericValue = Number(
-          formatUnits(BigInt(circulatingSupply), decimals),
-        );
+      if (circulatingSupply && valueToShow != null) {
+        const numericValue =
+          cellCurrency === "usd"
+            ? (valueToShow as number)
+            : Number(formatUnits(BigInt(valueToShow as string), decimals));
         circSupplyValues.current[rowIndex] = numericValue;
       } else {
         // Clear value when data is not available
         delete circSupplyValues.current[rowIndex];
       }
-    }, [circulatingSupply, rowIndex, decimals]);
+    }, [circulatingSupply, valueToShow, cellCurrency, rowIndex, decimals]);
 
     if (isLoading || !circulatingSupply || valueToShow == null) {
       return (
