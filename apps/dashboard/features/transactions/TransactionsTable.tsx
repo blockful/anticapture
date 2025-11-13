@@ -82,7 +82,7 @@ export const TransactionsTable = ({
       <div className="flex flex-col gap-2">
         <Table
           columns={columns}
-          data={Array.from({ length: 7 }, () => ({
+          data={Array.from({ length: 12 }, () => ({
             id: "loading-row",
             affectedSupply: ["CEX", "DEX"] as SupplyType[],
             amount: "1000000",
