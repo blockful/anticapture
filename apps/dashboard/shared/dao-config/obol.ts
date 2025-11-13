@@ -8,6 +8,7 @@ import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
 
 export const OBOL: DaoConfiguration = {
   name: "Obol Collective",
+  decimals: 18,
   color: {
     svgColor: "#0F7C76",
     svgBgColor: "#e8f2ff",

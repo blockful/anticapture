@@ -8,6 +8,7 @@ import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
 
 export const GTC: DaoConfiguration = {
   name: "Gitcoin",
+  decimals: 18,
   color: {
     svgColor: "#1e443f",
     svgBgColor: "#D0E1DE",

@@ -35,15 +35,18 @@ export class Client<
   }
 
   async getQuorum(): Promise<bigint> {
-    return 0n;
-    // const blockNumber = await getBlockNumber(this.client);
-    // const targetBlock = blockNumber - 10n;
-    // return readContract(this.client, {
-    //   abi: this.abi,
-    //   address: this.address,
-    //   functionName: "quorum",
-    //   args: [targetBlock < 0n ? 0n : targetBlock],
-    // });
+    const lastProposalId = await readContract(this.client, {
+      abi: this.abi,
+      address: this.address,
+      functionName: "proposalCount",
+    });
+
+    return await readContract(this.client, {
+      abi: this.abi,
+      address: this.address,
+      functionName: "quorumVotes",
+      args: [lastProposalId],
+    });
   }
 
   async getProposalThreshold(): Promise<bigint> {

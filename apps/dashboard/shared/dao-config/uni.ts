@@ -9,6 +9,7 @@ import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
 
 export const UNI: DaoConfiguration = {
   name: "Uniswap",
+  decimals: 18,
   color: {
     svgColor: "#fc72ff",
     svgBgColor: "#FFF2FB",

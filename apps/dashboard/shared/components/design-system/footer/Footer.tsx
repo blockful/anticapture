@@ -31,7 +31,7 @@ export const Footer = ({ variant, className }: FooterProps) => {
       <div className="flex flex-col items-center justify-center gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
           <p className="text-alternative-sm text-secondary flex font-mono uppercase tracking-wider">
-            &gt;v0.7.4_
+            &gt;v1.0.1_
           </p>
           <p className="text-alternative-sm text-secondary flex font-mono uppercase tracking-wider">
             powered by

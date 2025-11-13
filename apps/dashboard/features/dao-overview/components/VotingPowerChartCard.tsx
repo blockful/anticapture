@@ -7,10 +7,11 @@ import {
   TopAccountChartData,
   TopAccountsChart,
 } from "@/features/dao-overview/components/TopAccountsChart";
-import { formatEther } from "viem";
+import { formatUnits } from "viem";
 import { TimeInterval } from "@/shared/types/enums";
 import { useMemo } from "react";
 import { useVotingPowerVariations } from "@/features/dao-overview/hooks/useVotingPowerVariations";
+import daoConfig from "@/shared/dao-config";
 
 export const VotingPowerChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
   const votingPowerVariations = useVotingPowerVariations(
@@ -23,14 +24,22 @@ export const VotingPowerChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
 
     return rawItems.map((item) => {
       const absoluteChange = Number(
-        formatEther(BigInt(item?.absoluteChange || 0)),
+        formatUnits(
+          BigInt(item?.absoluteChange || 0),
+          daoConfig[daoId].decimals,
+        ),
       );
+
       const percentageChange =
         item?.percentageChange === "NO BASELINE"
           ? 0
           : Number(item?.percentageChange);
+
       const balance = Number(
-        formatEther(BigInt(item?.currentVotingPower || 0)),
+        formatUnits(
+          BigInt(item?.currentVotingPower || 0),
+          daoConfig[daoId].decimals,
+        ),
       );
 
       return {
@@ -43,7 +52,7 @@ export const VotingPowerChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
         },
       };
     });
-  }, [votingPowerVariations.data]);
+  }, [votingPowerVariations.data, daoId]);
 
   return (
     <div className="sm:bg-surface-default flex w-full flex-col gap-4 px-5 md:p-4">

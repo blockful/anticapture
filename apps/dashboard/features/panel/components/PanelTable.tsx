@@ -3,6 +3,7 @@
 import React, { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ColumnDef } from "@tanstack/react-table";
+
 import {
   SkeletonRow,
   RiskAreaCardEnum,
@@ -49,11 +50,8 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
   const activeSupplyValues = useRef<Record<number, number>>({});
   const quorumGapValues = useRef<Record<number, number>>({});
 
-  const notOnElectionDaoIds = Object.values(DaoIdEnum).filter(
-    (daoId) => daoId !== DaoIdEnum.NOUNS, // TODO remove this when Nouns is fully supported
-  );
   // Create initial data
-  const data = notOnElectionDaoIds.map((daoId, index) => ({
+  const data = Object.values(DaoIdEnum).map((daoId, index) => ({
     id: index,
     dao: daoId,
   }));

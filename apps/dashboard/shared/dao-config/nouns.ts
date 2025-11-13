@@ -6,6 +6,7 @@ import { mainnet } from "viem/chains";
 
 export const NOUNS: DaoConfiguration = {
   name: "Nouns",
+  decimals: 0,
   color: {
     svgColor: "#000000",
     svgBgColor: "#FFFFFF",
@@ -14,6 +15,8 @@ export const NOUNS: DaoConfiguration = {
   daoOverview: {
     token: "ERC721",
     chain: { ...mainnet, icon: NounsIcon },
+    priceDisclaimer:
+      "Based on the average price of the last 30 days of the auction.",
     snapshot: "",
     contracts: {
       governor: "0x6f3E6272A167e8AcCb32072d08E0957F9c79223d",
