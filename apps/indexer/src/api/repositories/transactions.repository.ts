@@ -10,6 +10,8 @@ export class TransactionsRepository {
     const { transfer: transferFilter, delegation: delegationFilter } =
       this.filterToSql(filter);
 
+    console.log({ filter, transferFilter, delegationFilter });
+
     const query = sql`
     WITH filtered_transactions AS (
         SELECT DISTINCT ${transfer.transactionHash}
@@ -266,14 +268,14 @@ export class TransactionsRepository {
       transfer: this.coalesceConditionArray(
         [
           `(${transferTimePeriodConditions})`,
-          this.coalesceConditionArray(transferConditions, "OR"),
+          `(${this.coalesceConditionArray(transferConditions, "OR")})`,
         ],
         "AND",
       ),
       delegation: this.coalesceConditionArray(
         [
           `(${delegationTimePeriodConditions})`,
-          this.coalesceConditionArray(delegationConditions, "OR"),
+          `(${this.coalesceConditionArray(delegationConditions, "OR")})`,
         ],
         "AND",
       ),
