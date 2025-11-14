@@ -29,7 +29,7 @@ import { mockedAttackCostBarData } from "@/shared/constants/mocked-data/mocked-a
 import {
   useDaoTokenHistoricalData,
   useTopTokenHolderNonDao,
-  useTreasuryAssetData,
+  useLatestTreasuryAsset,
   useVetoCouncilVotingPower,
 } from "@/features/attack-profitability/hooks";
 import daoConfigByDaoId from "@/shared/dao-config";
@@ -71,13 +71,7 @@ export const AttackCostBarChart = ({
   const selectedDaoId = daoId.toUpperCase() as DaoIdEnum;
   const timeInterval = TimeInterval.NINETY_DAYS;
 
-  const liquidTreasury = useTreasuryAssetData(
-    selectedDaoId,
-    TimeInterval.ONE_DAY,
-    {
-      order: "desc",
-    },
-  );
+  const liquidTreasury = useLatestTreasuryAsset(selectedDaoId);
   const delegatedSupply = useDelegatedSupply(selectedDaoId, timeInterval);
   const activeSupply = useActiveSupply(selectedDaoId, timeInterval);
   const averageTurnout = useAverageTurnout(selectedDaoId, timeInterval);
@@ -155,10 +149,10 @@ export const AttackCostBarChart = ({
               id: "liquidTreasury",
               name: "Liquid Treasury",
               type: BarChartEnum.REGULAR,
-              value: liquidTreasury.data?.[0]?.treasuryWithoutDaoToken || 0,
+              value: liquidTreasury.data?.treasuryWithoutDaoToken || 0,
               customColor: "#EC762EFF",
               displayValue:
-                (liquidTreasury.data?.[0]?.treasuryWithoutDaoToken || 0) > 10000
+                (liquidTreasury.data?.treasuryWithoutDaoToken || 0) > 10000
                   ? undefined
                   : "<$10,000",
             },

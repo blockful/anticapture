@@ -130,4 +130,22 @@ export class TreasuryService {
 
     return await query;
   }
+
+  /**
+   * Gets the most recent treasury data point.
+   * @returns The latest treasury data point or null if none exists
+   */
+  async getLatestTreasury(): Promise<TreasuryDataPoint | null> {
+    const results = await this.db
+      .select({
+        date: historicalTreasury.date,
+        totalTreasury: historicalTreasury.totalTreasury,
+        treasuryWithoutDaoToken: historicalTreasury.treasuryWithoutDaoToken,
+      })
+      .from(historicalTreasury)
+      .orderBy(desc(historicalTreasury.date))
+      .limit(1);
+
+    return results[0] ?? null;
+  }
 }

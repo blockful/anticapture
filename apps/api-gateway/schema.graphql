@@ -43,6 +43,9 @@ type Query {
   """Get historical treasury data (total and without DAO token)"""
   totalAssets(days: queryInput_totalAssets_days = _7d, order: queryInput_totalAssets_order = asc): [query_totalAssets_items]
 
+  """Get the most recent treasury data point (total and without DAO token)"""
+  latestTotalAssets: LatestTotalAssets
+
   """Get historical market data for a specific token"""
   historicalTokenData(skip: NonNegativeInt, limit: Float = 365): [query_historicalTokenData_items]
 
@@ -1383,7 +1386,6 @@ type query_totalAssets_items {
 }
 
 enum queryInput_totalAssets_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1394,6 +1396,13 @@ enum queryInput_totalAssets_days {
 enum queryInput_totalAssets_order {
   asc
   desc
+}
+
+type LatestTotalAssets {
+  """Unix timestamp in milliseconds"""
+  date: Float!
+  totalTreasury: Float!
+  treasuryWithoutDaoToken: Float!
 }
 
 type query_historicalTokenData_items {
@@ -1430,7 +1439,6 @@ type compareTotalSupply_200_response {
 }
 
 enum queryInput_compareTotalSupply_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1445,7 +1453,6 @@ type compareDelegatedSupply_200_response {
 }
 
 enum queryInput_compareDelegatedSupply_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1460,7 +1467,6 @@ type compareCirculatingSupply_200_response {
 }
 
 enum queryInput_compareCirculatingSupply_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1475,7 +1481,6 @@ type compareTreasury_200_response {
 }
 
 enum queryInput_compareTreasury_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1490,7 +1495,6 @@ type compareCexSupply_200_response {
 }
 
 enum queryInput_compareCexSupply_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1505,7 +1509,6 @@ type compareDexSupply_200_response {
 }
 
 enum queryInput_compareDexSupply_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1520,7 +1523,6 @@ type compareLendingSupply_200_response {
 }
 
 enum queryInput_compareLendingSupply_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1533,7 +1535,6 @@ type compareActiveSupply_200_response {
 }
 
 enum queryInput_compareActiveSupply_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1548,7 +1549,6 @@ type compareProposals_200_response {
 }
 
 enum queryInput_compareProposals_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1563,7 +1563,6 @@ type compareVotes_200_response {
 }
 
 enum queryInput_compareVotes_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1578,7 +1577,6 @@ type compareAverageTurnout_200_response {
 }
 
 enum queryInput_compareAverageTurnout_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1729,7 +1727,6 @@ type query_historicalBalances_items {
 }
 
 enum queryInput_historicalBalances_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1743,7 +1740,6 @@ type query_historicalVotingPower_items {
 }
 
 enum queryInput_historicalVotingPower_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1899,7 +1895,6 @@ type query_votingPowerVariations_items_items {
 }
 
 enum queryInput_votingPowerVariations_days {
-  _1d
   _7d
   _30d
   _90d
@@ -1932,7 +1927,6 @@ type query_accountBalanceVariations_items_items {
 }
 
 enum queryInput_accountBalanceVariations_days {
-  _1d
   _7d
   _30d
   _90d

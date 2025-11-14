@@ -13,6 +13,11 @@ interface TreasuryClient {
       treasuryWithoutDaoToken: number;
     }>
   >;
+  getLatestTreasury(): Promise<{
+    date: bigint;
+    totalTreasury: number;
+    treasuryWithoutDaoToken: number;
+  } | null>;
   syncTreasury?(): Promise<{
     synced: number;
     unchanged: number;
@@ -65,6 +70,49 @@ export function assets(app: Hono, service: TreasuryClient) {
         totalTreasury: item.totalTreasury,
         treasuryWithoutDaoToken: item.treasuryWithoutDaoToken,
       }));
+
+      return context.json(response);
+    },
+  );
+
+  app.openapi(
+    createRoute({
+      method: "get",
+      operationId: "latestTotalAssets",
+      path: "/total-assets/latest",
+      summary: "Get latest total assets",
+      description:
+        "Get the most recent treasury data point (total and without DAO token)",
+      tags: ["assets"],
+      responses: {
+        200: {
+          description: "Returns the latest total assets or null if not found",
+          content: {
+            "application/json": {
+              schema: z
+                .object({
+                  date: z.number().describe("Unix timestamp in milliseconds"),
+                  totalTreasury: z.number(),
+                  treasuryWithoutDaoToken: z.number(),
+                })
+                .nullable(),
+            },
+          },
+        },
+      },
+    }),
+    async (context) => {
+      const data = await service.getLatestTreasury();
+
+      if (!data) {
+        return context.json(null);
+      }
+
+      const response = {
+        date: Number(data.date) * 1000, // seconds to milliseconds
+        totalTreasury: data.totalTreasury,
+        treasuryWithoutDaoToken: data.treasuryWithoutDaoToken,
+      };
 
       return context.json(response);
     },

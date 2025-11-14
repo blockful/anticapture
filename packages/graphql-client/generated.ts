@@ -60,6 +60,14 @@ export enum HttpMethod {
   Trace = 'TRACE'
 }
 
+export type LatestTotalAssets = {
+  __typename?: 'LatestTotalAssets';
+  /** Unix timestamp in milliseconds */
+  date: Scalars['Float']['output'];
+  totalTreasury: Scalars['Float']['output'];
+  treasuryWithoutDaoToken: Scalars['Float']['output'];
+};
+
 export type Meta = {
   __typename?: 'Meta';
   status?: Maybe<Scalars['JSON']['output']>;
@@ -135,6 +143,8 @@ export type Query = {
   historicalVotingPower?: Maybe<Array<Maybe<Query_HistoricalVotingPower_Items>>>;
   /** Get the last update time */
   lastUpdate?: Maybe<LastUpdate_200_Response>;
+  /** Get the most recent treasury data point (total and without DAO token) */
+  latestTotalAssets?: Maybe<LatestTotalAssets>;
   /** Returns a single proposal by its ID */
   proposal?: Maybe<Proposal_200_Response>;
   /** Returns the active delegates that did not vote on a given proposal */
@@ -1457,7 +1467,6 @@ export type Proposals_200_Response = {
 };
 
 export enum QueryInput_AccountBalanceVariations_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1471,7 +1480,6 @@ export enum QueryInput_AccountBalanceVariations_OrderDirection {
 }
 
 export enum QueryInput_CompareActiveSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1480,7 +1488,6 @@ export enum QueryInput_CompareActiveSupply_Days {
 }
 
 export enum QueryInput_CompareAverageTurnout_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1489,7 +1496,6 @@ export enum QueryInput_CompareAverageTurnout_Days {
 }
 
 export enum QueryInput_CompareCexSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1498,7 +1504,6 @@ export enum QueryInput_CompareCexSupply_Days {
 }
 
 export enum QueryInput_CompareCirculatingSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1507,7 +1512,6 @@ export enum QueryInput_CompareCirculatingSupply_Days {
 }
 
 export enum QueryInput_CompareDelegatedSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1516,7 +1520,6 @@ export enum QueryInput_CompareDelegatedSupply_Days {
 }
 
 export enum QueryInput_CompareDexSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1525,7 +1528,6 @@ export enum QueryInput_CompareDexSupply_Days {
 }
 
 export enum QueryInput_CompareLendingSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1534,7 +1536,6 @@ export enum QueryInput_CompareLendingSupply_Days {
 }
 
 export enum QueryInput_CompareProposals_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1543,7 +1544,6 @@ export enum QueryInput_CompareProposals_Days {
 }
 
 export enum QueryInput_CompareTotalSupply_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1552,7 +1552,6 @@ export enum QueryInput_CompareTotalSupply_Days {
 }
 
 export enum QueryInput_CompareTreasury_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1561,7 +1560,6 @@ export enum QueryInput_CompareTreasury_Days {
 }
 
 export enum QueryInput_CompareVotes_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1575,7 +1573,6 @@ export enum QueryInput_DelegationPercentageByDay_OrderDirection {
 }
 
 export enum QueryInput_HistoricalBalances_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1584,7 +1581,6 @@ export enum QueryInput_HistoricalBalances_Days {
 }
 
 export enum QueryInput_HistoricalVotingPower_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1633,7 +1629,6 @@ export enum QueryInput_Token_Currency {
 }
 
 export enum QueryInput_TotalAssets_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1652,7 +1647,6 @@ export enum QueryInput_Transactions_SortOrder {
 }
 
 export enum QueryInput_VotingPowerVariations_Days {
-  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',

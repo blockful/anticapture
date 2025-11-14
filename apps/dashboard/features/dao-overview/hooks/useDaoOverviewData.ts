@@ -28,7 +28,7 @@ export const useDaoOverviewData = ({
   const daoData = useDaoData(daoId);
   const activeSupply = useActiveSupply(daoId, TimeInterval.NINETY_DAYS);
   const averageTurnout = useAverageTurnout(daoId, TimeInterval.NINETY_DAYS);
-  const treasuryNonDao = useTreasuryAssetData(daoId, TimeInterval.ONE_DAY, {
+  const treasuryNonDao = useTreasuryAssetData(daoId, TimeInterval.NINETY_DAYS, {
     order: "desc",
   });
   const treasuryAll = useCompareTreasury(daoId, TimeInterval.NINETY_DAYS);
