@@ -17,15 +17,15 @@ export function accountInteractions(
       operationId: "accountInteractions",
       path: "/account-balance/interactions",
       summary: "Get top interactions between accounts for a given period",
-      description:
-        "Returns a mapping of the largest interactions between accounts associated by account address",
+      description: `Returns a mapping of the largest interactions between accounts. 
+Positive amounts signify net token transfers FROM <accountId>, whilst negative amounts refer to net transfers TO <accountId>`,
       tags: ["transactions"],
       request: {
         query: AccountInteractionsRequestSchema,
       },
       responses: {
         200: {
-          description: "Successfully retrieved account balance variations",
+          description: "Successfully retrieved account interactions",
           content: {
             "application/json": {
               schema: AccountInteractionsResponseSchema,
