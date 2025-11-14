@@ -17,7 +17,6 @@ import { ChartDataSetPoint } from "@/shared/dao-config/types";
 import { TransactionsTable } from "@/features/transactions";
 import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { useBrushStore } from "@/features/token-distribution/store/useBrushStore";
-import { AcceptedMetrics } from "@/features/transactions/TransactionsTable";
 
 type CsvRow = Record<string, number | string | null>;
 
@@ -77,21 +76,11 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     });
   };
 
-  const filteredMetrics = useMemo(() => {
-    return metrics
-      .map((metric) => metric.replace("_SUPPLY", ""))
-      .filter((metric) => AcceptedMetrics.includes(metric));
-  }, [metrics]);
-
   const csvData = buildCsvData(chartData, metrics);
 
   const switchValue = useMemo(() => {
-    return filteredMetrics.length > 0
-      ? "Non-Transfer"
-      : hasTransfer
-        ? "All"
-        : "Non-Transfer";
-  }, [filteredMetrics, hasTransfer]);
+    return hasTransfer ? "All" : "Non-Transfer";
+  }, [hasTransfer]);
 
   const startIndex = useBrushStore((state) => state.brushRange.startIndex);
   const endIndex = useBrushStore((state) => state.brushRange.endIndex);
@@ -165,7 +154,6 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
                   key={option}
                   value={option}
                   onClick={() => setHasTransfer(option === "All")}
-                  disabled={filteredMetrics.length > 0}
                 >
                   {option}
                 </TabsTrigger>

@@ -36,12 +36,10 @@ export const TransactionsTable = ({
       AcceptedMetrics.includes(metric),
     ) as AffectedSupplyType[];
 
-  const formattedAffectedSupply =
-    affectedSupply.length > 0
-      ? affectedSupply
-      : !hasTransfer
-        ? (AcceptedMetrics as AffectedSupplyType[])
-        : [];
+  const includes = [
+    ...(metrics.includes("DELEGATED_SUPPLY") ? ["DELEGATION"] : []),
+    ...(hasTransfer ? ["TRANSFER"] : []),
+  ];
 
   const {
     data: tableData,
@@ -59,7 +57,8 @@ export const TransactionsTable = ({
       minAmount,
       maxAmount,
       sortOrder,
-      affectedSupply: formattedAffectedSupply,
+      affectedSupply: affectedSupply || undefined,
+      includes,
     },
   });
 

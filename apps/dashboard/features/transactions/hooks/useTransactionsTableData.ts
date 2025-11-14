@@ -26,6 +26,7 @@ export interface TransactionsFilters {
   maxAmount?: number;
   affectedSupply?: AffectedSupplyType[];
   sortOrder: "asc" | "desc";
+  includes?: string[];
 }
 
 export interface TransactionData {
@@ -86,6 +87,7 @@ export const useTransactionsTableData = ({
         }),
         ...(filters?.fromDate && { fromDate: filters?.fromDate }),
         ...(filters?.toDate && { toDate: filters?.toDate }),
+        ...(filters?.includes && { includes: filters?.includes }),
       },
       context: {
         headers: {

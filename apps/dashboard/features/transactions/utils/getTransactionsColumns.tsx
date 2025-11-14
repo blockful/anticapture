@@ -56,7 +56,7 @@ export const getTransactionsColumns = ({
 
         if (loading) {
           return (
-            <div className="flex flex-wrap gap-2 px-2">
+            <div className="flex flex-nowrap gap-2 px-2">
               <SkeletonRow className="h-5 w-16" />
               <SkeletonRow className="h-5 w-12" />
             </div>
@@ -64,7 +64,7 @@ export const getTransactionsColumns = ({
         }
 
         return (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-nowrap gap-2">
             {supplies.map((supply, index) => (
               <SupplyLabel key={index} type={supply} />
             ))}
