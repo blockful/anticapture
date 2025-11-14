@@ -71,9 +71,13 @@ export const AttackCostBarChart = ({
   const selectedDaoId = daoId.toUpperCase() as DaoIdEnum;
   const timeInterval = TimeInterval.NINETY_DAYS;
 
-  const liquidTreasury = useTreasuryAssetData(selectedDaoId, "1d", {
-    order: "desc",
-  });
+  const liquidTreasury = useTreasuryAssetData(
+    selectedDaoId,
+    TimeInterval.ONE_DAY,
+    {
+      order: "desc",
+    },
+  );
   const delegatedSupply = useDelegatedSupply(selectedDaoId, timeInterval);
   const activeSupply = useActiveSupply(selectedDaoId, timeInterval);
   const averageTurnout = useAverageTurnout(selectedDaoId, timeInterval);

@@ -126,6 +126,8 @@ export type Query = {
   historicalBalances?: Maybe<Array<Maybe<Query_HistoricalBalances_Items>>>;
   /** Get historical market data for a specific token */
   historicalTokenData?: Maybe<Array<Maybe<Query_HistoricalTokenData_Items>>>;
+  historicalTreasury?: Maybe<HistoricalTreasury>;
+  historicalTreasurys: HistoricalTreasuryPage;
   /** Fetch historical voting power for multiple addresses at a specific time period using multicall */
   historicalVotingPower?: Maybe<Array<Maybe<Query_HistoricalVotingPower_Items>>>;
   /** Get the last update time */
@@ -145,7 +147,7 @@ export type Query = {
   tokenPrice?: Maybe<TokenPrice>;
   tokenPrices: TokenPricePage;
   tokens: TokenPage;
-  /** Get total assets */
+  /** Get historical treasury data (total and without DAO token) */
   totalAssets?: Maybe<Array<Maybe<Query_TotalAssets_Items>>>;
   transaction?: Maybe<Transaction>;
   /** Get transactions with their associated transfers and delegations, with optional filtering and sorting */
@@ -348,6 +350,21 @@ export type QueryHistoricalTokenDataArgs = {
 };
 
 
+export type QueryHistoricalTreasuryArgs = {
+  date: Scalars['BigInt']['input'];
+};
+
+
+export type QueryHistoricalTreasurysArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<Scalars['String']['input']>;
+  orderDirection?: InputMaybe<Scalars['String']['input']>;
+  where?: InputMaybe<HistoricalTreasuryFilter>;
+};
+
+
 export type QueryHistoricalVotingPowerArgs = {
   addresses: Scalars['JSON']['input'];
   days?: InputMaybe<QueryInput_HistoricalVotingPower_Days>;
@@ -442,6 +459,7 @@ export type QueryTokensArgs = {
 
 export type QueryTotalAssetsArgs = {
   days?: InputMaybe<QueryInput_TotalAssets_Days>;
+  order?: InputMaybe<QueryInput_TotalAssets_Order>;
 };
 
 
@@ -1158,6 +1176,60 @@ export type DelegationPercentageByDay_200_Response = {
   totalCount: Scalars['Float']['output'];
 };
 
+export type HistoricalTreasury = {
+  __typename?: 'historicalTreasury';
+  date: Scalars['BigInt']['output'];
+  totalTreasury: Scalars['Int']['output'];
+  treasuryWithoutDaoToken: Scalars['Int']['output'];
+  updatedAt: Scalars['String']['output'];
+};
+
+export type HistoricalTreasuryFilter = {
+  AND?: InputMaybe<Array<InputMaybe<HistoricalTreasuryFilter>>>;
+  OR?: InputMaybe<Array<InputMaybe<HistoricalTreasuryFilter>>>;
+  date?: InputMaybe<Scalars['BigInt']['input']>;
+  date_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  date_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  date_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
+  date_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  date_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  date_not?: InputMaybe<Scalars['BigInt']['input']>;
+  date_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
+  totalTreasury?: InputMaybe<Scalars['Int']['input']>;
+  totalTreasury_gt?: InputMaybe<Scalars['Int']['input']>;
+  totalTreasury_gte?: InputMaybe<Scalars['Int']['input']>;
+  totalTreasury_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
+  totalTreasury_lt?: InputMaybe<Scalars['Int']['input']>;
+  totalTreasury_lte?: InputMaybe<Scalars['Int']['input']>;
+  totalTreasury_not?: InputMaybe<Scalars['Int']['input']>;
+  totalTreasury_not_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
+  treasuryWithoutDaoToken?: InputMaybe<Scalars['Int']['input']>;
+  treasuryWithoutDaoToken_gt?: InputMaybe<Scalars['Int']['input']>;
+  treasuryWithoutDaoToken_gte?: InputMaybe<Scalars['Int']['input']>;
+  treasuryWithoutDaoToken_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
+  treasuryWithoutDaoToken_lt?: InputMaybe<Scalars['Int']['input']>;
+  treasuryWithoutDaoToken_lte?: InputMaybe<Scalars['Int']['input']>;
+  treasuryWithoutDaoToken_not?: InputMaybe<Scalars['Int']['input']>;
+  treasuryWithoutDaoToken_not_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
+  updatedAt?: InputMaybe<Scalars['String']['input']>;
+  updatedAt_contains?: InputMaybe<Scalars['String']['input']>;
+  updatedAt_ends_with?: InputMaybe<Scalars['String']['input']>;
+  updatedAt_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  updatedAt_not?: InputMaybe<Scalars['String']['input']>;
+  updatedAt_not_contains?: InputMaybe<Scalars['String']['input']>;
+  updatedAt_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  updatedAt_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  updatedAt_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  updatedAt_starts_with?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type HistoricalTreasuryPage = {
+  __typename?: 'historicalTreasuryPage';
+  items: Array<HistoricalTreasury>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int']['output'];
+};
+
 export type LastUpdate_200_Response = {
   __typename?: 'lastUpdate_200_response';
   lastUpdate: Scalars['String']['output'];
@@ -1382,6 +1454,7 @@ export type Proposals_200_Response = {
 };
 
 export enum QueryInput_AccountBalanceVariations_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1395,6 +1468,7 @@ export enum QueryInput_AccountBalanceVariations_OrderDirection {
 }
 
 export enum QueryInput_CompareActiveSupply_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1403,6 +1477,7 @@ export enum QueryInput_CompareActiveSupply_Days {
 }
 
 export enum QueryInput_CompareAverageTurnout_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1411,6 +1486,7 @@ export enum QueryInput_CompareAverageTurnout_Days {
 }
 
 export enum QueryInput_CompareCexSupply_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1419,6 +1495,7 @@ export enum QueryInput_CompareCexSupply_Days {
 }
 
 export enum QueryInput_CompareCirculatingSupply_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1427,6 +1504,7 @@ export enum QueryInput_CompareCirculatingSupply_Days {
 }
 
 export enum QueryInput_CompareDelegatedSupply_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1435,6 +1513,7 @@ export enum QueryInput_CompareDelegatedSupply_Days {
 }
 
 export enum QueryInput_CompareDexSupply_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1443,6 +1522,7 @@ export enum QueryInput_CompareDexSupply_Days {
 }
 
 export enum QueryInput_CompareLendingSupply_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1451,6 +1531,7 @@ export enum QueryInput_CompareLendingSupply_Days {
 }
 
 export enum QueryInput_CompareProposals_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1459,6 +1540,7 @@ export enum QueryInput_CompareProposals_Days {
 }
 
 export enum QueryInput_CompareTotalSupply_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1467,6 +1549,7 @@ export enum QueryInput_CompareTotalSupply_Days {
 }
 
 export enum QueryInput_CompareTreasury_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1475,6 +1558,7 @@ export enum QueryInput_CompareTreasury_Days {
 }
 
 export enum QueryInput_CompareVotes_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1488,6 +1572,7 @@ export enum QueryInput_DelegationPercentageByDay_OrderDirection {
 }
 
 export enum QueryInput_HistoricalBalances_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1496,6 +1581,7 @@ export enum QueryInput_HistoricalBalances_Days {
 }
 
 export enum QueryInput_HistoricalVotingPower_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1544,11 +1630,17 @@ export enum QueryInput_Token_Currency {
 }
 
 export enum QueryInput_TotalAssets_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
   '180d' = '_180d',
   '365d' = '_365d'
+}
+
+export enum QueryInput_TotalAssets_Order {
+  Asc = 'asc',
+  Desc = 'desc'
 }
 
 export enum QueryInput_Transactions_SortOrder {
@@ -1557,6 +1649,7 @@ export enum QueryInput_Transactions_SortOrder {
 }
 
 export enum QueryInput_VotingPowerVariations_Days {
+  '1d' = '_1d',
   '7d' = '_7d',
   '30d' = '_30d',
   '90d' = '_90d',
@@ -1693,8 +1786,10 @@ export type Query_Proposals_Items_Items = {
 
 export type Query_TotalAssets_Items = {
   __typename?: 'query_totalAssets_items';
-  date: Scalars['String']['output'];
-  totalAssets: Scalars['String']['output'];
+  /** Unix timestamp in milliseconds */
+  date: Scalars['Float']['output'];
+  totalTreasury: Scalars['Float']['output'];
+  treasuryWithoutDaoToken: Scalars['Float']['output'];
 };
 
 export type Query_Transactions_Items_Items = {
