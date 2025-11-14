@@ -26,13 +26,13 @@ export const transformToGovernanceProposal = (
   const abstainVotes = Number(
     formatUnits(BigInt(graphqlProposal?.abstainVotes || "0"), decimals),
   );
-  const quorum = formatUnits(BigInt(graphqlProposal?.quorum || "0"), decimals);
-
+  const quorum = Number(
+    formatUnits(BigInt(graphqlProposal?.quorum || "0"), decimals),
+  );
   const total = forVotes + againstVotes + abstainVotes;
 
-  const forPercentage = total > 0 ? Math.round((forVotes / total) * 100) : 0;
-  const againstPercentage =
-    total > 0 ? Math.round((againstVotes / total) * 100) : 0;
+  const forPercentage = total > 0 ? (forVotes / total) * 100 : 0;
+  const againstPercentage = total > 0 ? (againstVotes / total) * 100 : 0;
 
   // Calculate time text using the helper function
   const timeText = getTimeText(
@@ -41,21 +41,19 @@ export const transformToGovernanceProposal = (
   );
 
   return {
-    // Spread all the original GraphQL fields
     ...graphqlProposal,
-    // Add computed fields
     title: graphqlProposal.title || "Untitled Proposal",
     status: getProposalStatus(graphqlProposal.status),
     state: getProposalState(graphqlProposal.status),
     proposer: graphqlProposal.proposerAccountId,
     votes: {
-      for: forVotes.toString(),
-      against: againstVotes.toString(),
-      total: formatUnits(BigInt(Math.floor(total)), decimals).toString(),
-      forPercentage: forPercentage.toString(),
-      againstPercentage: againstPercentage.toString(),
+      for: forVotes.toFixed(2),
+      against: againstVotes.toFixed(2),
+      total: total.toFixed(2),
+      forPercentage: forPercentage.toFixed(0),
+      againstPercentage: againstPercentage.toFixed(0),
     },
-    quorum: quorum,
+    quorum: quorum.toFixed(2),
     timeText,
     values: graphqlProposal.values,
     calldatas: graphqlProposal.calldatas,
