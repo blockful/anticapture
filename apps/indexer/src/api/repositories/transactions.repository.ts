@@ -126,6 +126,7 @@ export class TransactionsRepository {
     const checkIsCex = filter.affectedSupply.isCex ?? false;
     const checkIsLending = filter.affectedSupply.isLending ?? false;
     const checkIsTotal = filter.affectedSupply.isTotal ?? false;
+    const checkIsUnassigned = filter.affectedSupply.isUnassigned ?? false;
 
     const transferConditions: string[] = [];
     const delegationConditions: string[] = [];
@@ -146,17 +147,41 @@ export class TransactionsRepository {
       transferConditions.push(`transfers.is_total = true`);
       delegationConditions.push(`delegations.is_total = true`);
     }
+    if (checkIsUnassigned) {
+      transferConditions.push(
+        this.coalesceConditionArray(
+          [
+            `transfers.is_total = false`,
+            `transfers.is_cex = false`,
+            `transfers.is_dex = false`,
+            `transfers.is_lending = false`,
+          ],
+          "AND",
+        ),
+      );
+      delegationConditions.push(
+        this.coalesceConditionArray(
+          [
+            `delegations.is_total = false`,
+            `delegations.is_cex = false`,
+            `delegations.is_dex = false`,
+            `delegations.is_lending = false`,
+          ],
+          "AND",
+        ),
+      );
+    }
 
     if (filter.minAmount != null) {
-      transferConditions.push(`transfers.amount >= ${filter.minAmount}`);
+      transferConditions.push(`transfers.amount >= ${filter.minAmount} `);
       delegationConditions.push(
-        `delegations.delegated_value >= ${filter.minAmount}`,
+        `delegations.delegated_value >= ${filter.minAmount} `,
       );
     }
     if (filter.maxAmount != null) {
-      transferConditions.push(`transfers.amount <= ${filter.maxAmount}`);
+      transferConditions.push(`transfers.amount <= ${filter.maxAmount} `);
       delegationConditions.push(
-        `delegations.delegated_value <= ${filter.maxAmount}`,
+        `delegations.delegated_value <= ${filter.maxAmount} `,
       );
     }
     if (filter.from != null) {
@@ -175,15 +200,15 @@ export class TransactionsRepository {
     return {
       transfer: this.coalesceConditionArray(
         [
-          `(${transferTimePeriodConditions})`,
-          `(${this.coalesceConditionArray(transferConditions, "OR")})`,
+          transferTimePeriodConditions,
+          this.coalesceConditionArray(transferConditions, "OR"),
         ],
         "AND",
       ),
       delegation: this.coalesceConditionArray(
         [
-          `(${delegationTimePeriodConditions})`,
-          `(${this.coalesceConditionArray(delegationConditions, "OR")})`,
+          delegationTimePeriodConditions,
+          this.coalesceConditionArray(delegationConditions, "OR"),
         ],
         "AND",
       ),
@@ -198,9 +223,9 @@ export class TransactionsRepository {
     const tsCol = tableAlias ? `${tableAlias}.timestamp` : "timestamp";
 
     if (filter.fromDate)
-      filterConditions.push(`${tsCol} >= ${BigInt(filter.fromDate)}`);
+      filterConditions.push(`${tsCol} >= ${BigInt(filter.fromDate)} `);
     if (filter.toDate)
-      filterConditions.push(`${tsCol} <= ${BigInt(filter.toDate)}`);
+      filterConditions.push(`${tsCol} <= ${BigInt(filter.toDate)} `);
 
     return filterConditions;
   }
@@ -209,25 +234,27 @@ export class TransactionsRepository {
     conditions: string[],
     operator: "AND" | "OR",
   ): string {
-    return conditions.length > 0 ? conditions.join(` ${operator} `) : "true";
+    const separator = ` ${operator} `;
+    return conditions.length > 0 ? `(${conditions.join(separator)})` : "true";
   }
 
   private resolveTransactionHashQuery(filter: TransactionsRequest): SQLChunk {
     const { transfer: transferFilter, delegation: delegationFilter } =
       this.filterToSql(filter);
     const { transfers, delegations } = filter.includes;
+    console.log({ filter: filter, sql: this.filterToSql(filter) });
 
     const transferChunk = sql`
         SELECT DISTINCT ${transfer.transactionHash}
         FROM ${transfer}
-        WHERE ${sql.raw(transferFilter)}`;
+        WHERE ${sql.raw(transferFilter)} `;
     const delegationChunk = sql`
         SELECT DISTINCT ${delegation.transactionHash}
         FROM ${delegation}
-        WHERE ${sql.raw(delegationFilter)}`;
+        WHERE ${sql.raw(delegationFilter)} `;
 
     if (transfers && delegations) {
-      return sql`${transferChunk} UNION ${delegationChunk}`;
+      return sql`${transferChunk} UNION ${delegationChunk} `;
     } else if (transfers) {
       return transferChunk;
     } else {
