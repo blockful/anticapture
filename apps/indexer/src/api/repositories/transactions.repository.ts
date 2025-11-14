@@ -173,15 +173,15 @@ export class TransactionsRepository {
     }
 
     if (filter.minAmount != null) {
-      transferConditions.push(`transfers.amount >= ${filter.minAmount} `);
+      transferConditions.push(`transfers.amount >= ${filter.minAmount}`);
       delegationConditions.push(
-        `delegations.delegated_value >= ${filter.minAmount} `,
+        `delegations.delegated_value >= ${filter.minAmount}`,
       );
     }
     if (filter.maxAmount != null) {
-      transferConditions.push(`transfers.amount <= ${filter.maxAmount} `);
+      transferConditions.push(`transfers.amount <= ${filter.maxAmount}`);
       delegationConditions.push(
-        `delegations.delegated_value <= ${filter.maxAmount} `,
+        `delegations.delegated_value <= ${filter.maxAmount}`,
       );
     }
     if (filter.from != null) {
@@ -223,9 +223,9 @@ export class TransactionsRepository {
     const tsCol = tableAlias ? `${tableAlias}.timestamp` : "timestamp";
 
     if (filter.fromDate)
-      filterConditions.push(`${tsCol} >= ${BigInt(filter.fromDate)} `);
+      filterConditions.push(`${tsCol} >= ${BigInt(filter.fromDate)}`);
     if (filter.toDate)
-      filterConditions.push(`${tsCol} <= ${BigInt(filter.toDate)} `);
+      filterConditions.push(`${tsCol} <= ${BigInt(filter.toDate)}`);
 
     return filterConditions;
   }
@@ -242,19 +242,18 @@ export class TransactionsRepository {
     const { transfer: transferFilter, delegation: delegationFilter } =
       this.filterToSql(filter);
     const { transfers, delegations } = filter.includes;
-    console.log({ filter: filter, sql: this.filterToSql(filter) });
 
     const transferChunk = sql`
         SELECT DISTINCT ${transfer.transactionHash}
         FROM ${transfer}
-        WHERE ${sql.raw(transferFilter)} `;
+        WHERE ${sql.raw(transferFilter)}`;
     const delegationChunk = sql`
         SELECT DISTINCT ${delegation.transactionHash}
         FROM ${delegation}
-        WHERE ${sql.raw(delegationFilter)} `;
+        WHERE ${sql.raw(delegationFilter)}`;
 
     if (transfers && delegations) {
-      return sql`${transferChunk} UNION ${delegationChunk} `;
+      return sql`${transferChunk} UNION ${delegationChunk}`;
     } else if (transfers) {
       return transferChunk;
     } else {
