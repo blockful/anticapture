@@ -128,7 +128,7 @@ export class AccountBalanceRepository {
 
     const transfersFrom = db
       .select({
-        accountId: transfer.fromAccountId,
+        accountId: scopedTransfers.fromAccountId,
         fromAmount: sql<string>`-SUM(${transfer.amount})`.as("from_amount"),
       })
       .from(scopedTransfers)
@@ -138,7 +138,7 @@ export class AccountBalanceRepository {
     // Aggregate incoming transfers (positive amounts)
     const transfersTo = db
       .select({
-        accountId: transfer.toAccountId,
+        accountId: scopedTransfers.toAccountId,
         toAmount: sql<string>`SUM(${transfer.amount})`.as("to_amount"),
       })
       .from(scopedTransfers)
