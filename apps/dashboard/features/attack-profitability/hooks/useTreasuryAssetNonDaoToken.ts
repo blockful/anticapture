@@ -20,8 +20,8 @@ export const fetchTreasuryAssetData = async ({
   order?: "asc" | "desc";
 }): Promise<TreasuryAssetData[]> => {
   const query = `
-  query getTotalAssets($days: String!, $order: String) {
-    totalAssets(days: $days, order: $order) {
+  query {
+    totalAssets(days: _${days}, order: ${order}) {
       date
       totalTreasury
       treasuryWithoutDaoToken
@@ -32,10 +32,6 @@ export const fetchTreasuryAssetData = async ({
     `${BACKEND_ENDPOINT}`,
     {
       query,
-      variables: {
-        days: `_${days}`,
-        order,
-      },
     },
     {
       headers: {

@@ -65,24 +65,26 @@ export class TreasuryService {
     }
 
     // Batch upsert all records that need processing
-    await this.db
-      .insert(historicalTreasury)
-      .values(
-        toUpsert.map((item) => ({
-          date: item.date,
-          totalTreasury: item.totalTreasury,
-          treasuryWithoutDaoToken: item.treasuryWithoutDaoToken,
-          updatedAt: Date.now().toString(),
-        })),
-      )
-      .onConflictDoUpdate({
-        target: historicalTreasury.date,
-        set: {
-          totalTreasury: sql`excluded.total_treasury`,
-          treasuryWithoutDaoToken: sql`excluded.treasury_without_dao_token`,
-          updatedAt: sql`excluded.updated_at`,
-        },
-      });
+    if (toUpsert.length > 0) {
+      await this.db
+        .insert(historicalTreasury)
+        .values(
+          toUpsert.map((item) => ({
+            date: item.date,
+            totalTreasury: item.totalTreasury,
+            treasuryWithoutDaoToken: item.treasuryWithoutDaoToken,
+            updatedAt: Date.now().toString(),
+          })),
+        )
+        .onConflictDoUpdate({
+          target: historicalTreasury.date,
+          set: {
+            totalTreasury: sql`excluded.total_treasury`,
+            treasuryWithoutDaoToken: sql`excluded.treasury_without_dao_token`,
+            updatedAt: sql`excluded.updated_at`,
+          },
+        });
+    }
 
     return {
       synced: toUpsert.length,

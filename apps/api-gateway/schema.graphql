@@ -41,7 +41,7 @@ type Query {
   _meta: Meta
 
   """Get historical treasury data (total and without DAO token)"""
-  totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
+  totalAssets(days: queryInput_totalAssets_days = _7d, order: queryInput_totalAssets_order = asc): [query_totalAssets_items]
 
   """Get historical market data for a specific token"""
   historicalTokenData(skip: NonNegativeInt, limit: Float = 365): [query_historicalTokenData_items]
@@ -1327,7 +1327,7 @@ type historicalTreasury {
   date: BigInt!
   totalTreasury: Int!
   treasuryWithoutDaoToken: Int!
-  updatedAt: BigInt!
+  updatedAt: String!
 }
 
 type historicalTreasuryPage {
@@ -1363,21 +1363,23 @@ input historicalTreasuryFilter {
   treasuryWithoutDaoToken_lt: Int
   treasuryWithoutDaoToken_gte: Int
   treasuryWithoutDaoToken_lte: Int
-  updatedAt: BigInt
-  updatedAt_not: BigInt
-  updatedAt_in: [BigInt]
-  updatedAt_not_in: [BigInt]
-  updatedAt_gt: BigInt
-  updatedAt_lt: BigInt
-  updatedAt_gte: BigInt
-  updatedAt_lte: BigInt
+  updatedAt: String
+  updatedAt_not: String
+  updatedAt_in: [String]
+  updatedAt_not_in: [String]
+  updatedAt_contains: String
+  updatedAt_not_contains: String
+  updatedAt_starts_with: String
+  updatedAt_ends_with: String
+  updatedAt_not_starts_with: String
+  updatedAt_not_ends_with: String
 }
 
 type query_totalAssets_items {
   """Unix timestamp in milliseconds"""
   date: Float!
-  totalTreasury: Int!
-  treasuryWithoutDaoToken: Int!
+  totalTreasury: Float!
+  treasuryWithoutDaoToken: Float!
 }
 
 enum queryInput_totalAssets_days {
@@ -1386,6 +1388,11 @@ enum queryInput_totalAssets_days {
   _90d
   _180d
   _365d
+}
+
+enum queryInput_totalAssets_order {
+  asc
+  desc
 }
 
 type query_historicalTokenData_items {
