@@ -17,25 +17,23 @@ export const useDaoTreasuryStats = ({
 }) => {
   return useMemo(() => {
     const lastPrice = Number(tokenData.data?.price) || 0;
-    const liquidTreasuryNonDaoValue = Number(
+    const liquidTreasuryUSD = Number(
       treasuryNonDao.data?.[0]?.totalAssets || 0,
     );
     const daoTreasuryTokens = Number(treasuryAll.data?.currentTreasury || 0);
-    const liquidTreasuryAllValue =
+    const govTreasuryUSD =
       Number(formatUnits(BigInt(daoTreasuryTokens), decimals)) * lastPrice;
 
-    const liquidTreasuryAllPercent = liquidTreasuryAllValue
+    const liquidTreasuryAllPercent = govTreasuryUSD
       ? Math.round(
-          ((liquidTreasuryAllValue - liquidTreasuryNonDaoValue) /
-            liquidTreasuryAllValue) *
-            100,
+          (govTreasuryUSD / (govTreasuryUSD + liquidTreasuryUSD)) * 100,
         ).toString()
       : "0";
 
     return {
       lastPrice,
-      liquidTreasuryNonDaoValue,
-      liquidTreasuryAllValue,
+      liquidTreasuryNonDaoValue: liquidTreasuryUSD,
+      liquidTreasuryAllValue: govTreasuryUSD,
       liquidTreasuryAllPercent,
     };
   }, [tokenData, treasuryAll.data, treasuryNonDao.data, decimals]);
