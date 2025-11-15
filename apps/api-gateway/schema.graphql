@@ -125,6 +125,9 @@ type Query {
     Filter transactions by affected supply type. Can be: 'CEX', 'DEX', 'LENDING', or 'TOTAL'
     """
     affectedSupply: JSON
+
+    """Filter by transaction type. Can be one of: 'TRANSFER', 'DELEGATION'"""
+    includes: JSON
   ): transactions_200_response
 
   """Get the last update time"""
@@ -148,6 +151,9 @@ type Query {
 
   """Returns current governance parameters for this DAO"""
   dao: dao_200_response
+
+  """Get total assets"""
+  totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
 
   """
   Average delegation percentage across all supported DAOs by day.
@@ -1961,6 +1967,19 @@ enum HTTPMethod {
   OPTIONS
   TRACE
   PATCH
+}
+
+type query_totalAssets_items {
+  totalAssets: String!
+  date: String!
+}
+
+enum queryInput_totalAssets_days {
+  _7d
+  _30d
+  _90d
+  _180d
+  _365d
 }
 
 type AverageDelegationPercentageItem {
