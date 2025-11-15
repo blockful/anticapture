@@ -36,3 +36,18 @@ export function normalizeDataset(
     [key]: Number(price) * (multipliersByTs[timestamp] ?? 0),
   }));
 }
+
+/**
+ * Filters historical data to only include entries with timestamps at midnight (00:00:00 UTC).
+ * This removes partial data from the current day or any data points that don't represent
+ * a complete daily snapshot.
+ *
+ * @param data - Array of price entries with timestamps
+ * @returns Filtered array containing only entries with midnight timestamps
+ */
+export const getOnlyClosedData = (data: PriceEntry[]): PriceEntry[] => {
+  return data.filter((entry) => {
+    const dateStr = new Date(entry.timestamp).toISOString();
+    return dateStr.endsWith("T00:00:00.000Z");
+  });
+};
