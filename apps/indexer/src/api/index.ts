@@ -22,6 +22,7 @@ import {
   votingPowerVariations,
   accountBalanceVariations,
   dao,
+  accountInteractions,
 } from "./controller";
 import { DrizzleProposalsActivityRepository } from "./repositories/proposals-activity.repository";
 import { docs } from "./docs";
@@ -50,7 +51,7 @@ import {
   CoingeckoService,
   NFTPriceService,
   TokenService,
-  TopBalanceVariationsService,
+  BalanceVariationsService,
   HistoricalBalancesService,
   DaoService,
 } from "./services";
@@ -116,6 +117,7 @@ const votingPowerService = new VotingPowerService(
 );
 const daoCache = new DaoCache();
 const daoService = new DaoService(daoClient, daoCache, env.CHAIN_ID);
+const accountBalanceService = new BalanceVariationsService(accountBalanceRepo);
 
 if (env.DUNE_API_URL && env.DUNE_API_KEY) {
   const duneClient = new DuneService(env.DUNE_API_URL, env.DUNE_API_KEY);
@@ -158,10 +160,8 @@ lastUpdate(app);
 delegationPercentage(app, delegationPercentageService);
 votingPower(app, votingPowerService);
 votingPowerVariations(app, votingPowerService);
-accountBalanceVariations(
-  app,
-  new TopBalanceVariationsService(accountBalanceRepo),
-);
+accountBalanceVariations(app, accountBalanceService);
+accountInteractions(app, accountBalanceService);
 dao(app, daoService);
 docs(app);
 

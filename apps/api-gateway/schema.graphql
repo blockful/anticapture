@@ -141,6 +141,11 @@ type Query {
   """
   accountBalanceVariations(days: queryInput_accountBalanceVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalanceVariations_orderDirection = desc): accountBalanceVariations_200_response
 
+  """
+  Returns a mapping of the largest interactions between accounts associated by account address
+  """
+  accountInteractions(days: queryInput_accountInteractions_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountInteractions_orderDirection = desc, accountId: String!): accountInteractions_200_response
+
   """Returns current governance parameters for this DAO"""
   dao: dao_200_response
 
@@ -1854,6 +1859,35 @@ enum queryInput_accountBalanceVariations_days {
 }
 
 enum queryInput_accountBalanceVariations_orderDirection {
+  asc
+  desc
+}
+
+type accountInteractions_200_response {
+  period: query_accountInteractions_period!
+  items: [query_accountInteractions_items_items]!
+}
+
+type query_accountInteractions_period {
+  days: String!
+  startTimestamp: String!
+  endTimestamp: String!
+}
+
+type query_accountInteractions_items_items {
+  accountId: String!
+  amountTransferred: String!
+}
+
+enum queryInput_accountInteractions_days {
+  _7d
+  _30d
+  _90d
+  _180d
+  _365d
+}
+
+enum queryInput_accountInteractions_orderDirection {
   asc
   desc
 }
