@@ -48,7 +48,7 @@ const deduceSupplyTypes = (tx: GraphTransaction): SupplyType[] => {
   if (tx.isDex) types.push("DEX");
   if (tx.isLending) types.push("Lending");
   if (tx.delegations && tx.delegations.length > 0) types.push("Delegation");
-  if (types.length === 0) types.push("Others");
+  if (types.length === 0) types.push("Other");
   return types;
 };
 
@@ -64,6 +64,20 @@ const formatRelativeTime = (timestampSec: string): string => {
   if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
   if (minutes > 0) return `${minutes} min ago`;
   return "just now";
+};
+
+const toBigIntSafe = (val: string | number | undefined | null): bigint => {
+  if (val == null || val === "") return 0n;
+  if (typeof val === "bigint") return val;
+  if (typeof val === "string") {
+    const clean = val.trim();
+    if (/^-?\d+$/.test(clean)) return BigInt(clean);
+    const num = Number(clean);
+    if (!isFinite(num)) return 0n;
+    return BigInt(Math.floor(num));
+  }
+  if (Number.isInteger(val)) return BigInt(val);
+  return BigInt(Math.floor(val as number));
 };
 
 export const adaptTransactionsToTableData = (
@@ -82,7 +96,7 @@ export const adaptTransactionsToTableData = (
     const amount = formatNumberUserReadable(
       Number(
         formatUnits(
-          BigInt(transfersAmountRaw) + BigInt(delegationsAmountRaw),
+          toBigIntSafe(transfersAmountRaw) + toBigIntSafe(delegationsAmountRaw),
           decimals,
         ),
       ) || 0,
@@ -92,9 +106,9 @@ export const adaptTransactionsToTableData = (
     // add transfers to subRows also
     const transfersSubRows = tx.transfers?.map((t, tidx) => ({
       id: `${idx + 1}.${tidx + 1}`,
-      affectedSupply: ["Others"] as SupplyType[],
+      affectedSupply: ["Other"] as SupplyType[],
       amount: formatNumberUserReadable(
-        Number(formatUnits(BigInt(t.amount || 0), decimals)),
+        Number(formatUnits(toBigIntSafe(t.amount || 0), decimals)),
         2,
       ),
       date: formatRelativeTime(t.timestamp),
@@ -105,7 +119,7 @@ export const adaptTransactionsToTableData = (
       id: `${idx + 1}.${didx + 1}`,
       affectedSupply: ["Delegation"] as SupplyType[],
       amount: formatNumberUserReadable(
-        Number(formatUnits(BigInt(d.delegatedValue), decimals)) || 0,
+        Number(formatUnits(toBigIntSafe(d.delegatedValue), decimals)) || 0,
         2,
       ),
       date: formatRelativeTime(d.timestamp),
