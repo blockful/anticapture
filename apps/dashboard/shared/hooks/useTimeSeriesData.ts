@@ -30,7 +30,7 @@ const fetchTimeSeries = async (
         },
         orderBy: "date",
         orderDirection: "asc",
-        limit: 367
+        limit: 370
       ) {
         items {
           date
@@ -92,42 +92,40 @@ const applyMetricsContinuity = (
   const metricsWithContinuity: Record<MetricTypesEnum, DaoMetricsDayBucket[]> =
     {} as Record<MetricTypesEnum, DaoMetricsDayBucket[]>;
 
+  const allDates = new Set<string>();
   for (const metricType of metricTypes) {
-    const series = data[metricType];
-    if (!series?.length) {
-      metricsWithContinuity[metricType] = [];
-      continue;
+    if (data[metricType]) {
+      data[metricType].forEach((item) => {
+        allDates.add(item.date);
+      });
     }
+  }
+  allDates.add(Math.floor(Date.now() / 1000).toString());
 
-    const sortedSeries = [...series].sort(
-      (a, b) => Number(a.date) - Number(b.date),
-    );
+  const sortedDates = Array.from(allDates).sort(
+    (a, b) => Number(a) - Number(b),
+  );
 
-    // Build a map with forward-fill logic
-    const parsedSeries = sortedSeries.reduce(
-      (acc, item) => {
-        const timestamp = Number(item.date) * 1000;
+  for (const metricType of metricTypes) {
+    metricsWithContinuity[metricType] = [];
 
-        acc[timestamp] = item;
+    if (data[metricType] && data[metricType].length > 0) {
+      let lastKnownEntry: DaoMetricsDayBucket = data[metricType][0];
 
-        // Forward-fill for the next day — overwritten if real value exists
-        const nextDay = timestamp + 24 * 60 * 60 * 1000;
-        acc[nextDay] = acc[nextDay] ?? item;
+      for (const date of sortedDates) {
+        const entry = data[metricType].find((item) => item.date === date);
 
-        return acc;
-      },
-      {} as Record<number, DaoMetricsDayBucket>,
-    );
-
-    // Convert timestamps back into sorted DaoMetricsDayBucket array
-    const filledSeries = Object.entries(parsedSeries)
-      .sort(([a], [b]) => Number(a) - Number(b))
-      .map(([ts, item]) => ({
-        ...item,
-        date: String(Math.floor(Number(ts) / 1000)),
-      }));
-
-    metricsWithContinuity[metricType] = filledSeries;
+        if (entry) {
+          metricsWithContinuity[metricType].push(entry);
+          lastKnownEntry = entry;
+        } else if (lastKnownEntry) {
+          metricsWithContinuity[metricType].push({
+            ...lastKnownEntry,
+            date: date,
+          });
+        }
+      }
+    }
   }
 
   return metricsWithContinuity;
