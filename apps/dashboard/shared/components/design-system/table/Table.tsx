@@ -263,7 +263,7 @@ export const Table = <TData, TValue>({
                               )}
                               {index === 0 && (
                                 <ExpandButton
-                                  row={row as Row<ExpandableData>}
+                                  row={row as unknown as Row<ExpandableData>}
                                   enableExpanding={enableExpanding}
                                 />
                               )}
