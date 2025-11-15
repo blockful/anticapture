@@ -42,7 +42,7 @@ import {
 import daoConfigByDaoId from "@/shared/dao-config";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 import { Data } from "react-csv/lib/core";
-import { parseUnits } from "viem";
+import { formatUnits } from "viem";
 
 interface MultilineChartAttackProfitabilityProps {
   days: string;
@@ -90,7 +90,7 @@ export const MultilineChartAttackProfitability = ({
   );
 
   const quorumValue = Number(
-    parseUnits(daoData?.quorum || "0", daoConfig.decimals),
+    formatUnits(BigInt(daoData?.quorum || "0"), daoConfig.decimals),
   );
 
   const chartConfig = useMemo(
@@ -117,51 +117,50 @@ export const MultilineChartAttackProfitability = ({
     let datasets: Record<string, MultilineChartDataSetPoint[]> = {};
     if (mocked) {
       datasets = mockedAttackProfitabilityDatasets;
-    }
-
-    datasets = {
-      treasuryNonDAO: normalizeDatasetTreasuryNonDaoToken(
-        treasuryAssetNonDAOToken,
-        "treasuryNonDAO",
-      ).reverse(),
-      all: normalizeDatasetAllTreasury(
-        daoTokenPriceHistoricalData,
-        "all",
-        treasuryAssetNonDAOToken,
-        treasurySupplyChart,
-        daoConfig.decimals,
-      ),
-      quorum: daoConfig?.attackProfitability?.dynamicQuorum?.percentage
-        ? normalizeDataset(
-            daoTokenPriceHistoricalData,
-            "quorum",
-            1,
-            daoConfig.decimals,
-            delegatedSupplyChart,
-          ).map((datasetpoint) => ({
-            ...datasetpoint,
-            quorum:
-              datasetpoint.quorum *
-              (daoConfig?.attackProfitability?.dynamicQuorum?.percentage ?? 0),
-          }))
-        : quorumValue
+    } else {
+      datasets = {
+        treasuryNonDAO: normalizeDatasetTreasuryNonDaoToken(
+          treasuryAssetNonDAOToken,
+          "treasuryNonDAO",
+        ).reverse(),
+        all: normalizeDatasetAllTreasury(
+          daoTokenPriceHistoricalData,
+          "all",
+          treasuryAssetNonDAOToken,
+          treasurySupplyChart,
+          daoConfig.decimals,
+        ),
+        quorum: daoConfig?.attackProfitability?.dynamicQuorum?.percentage
           ? normalizeDataset(
               daoTokenPriceHistoricalData,
               "quorum",
-              quorumValue,
+              delegatedSupplyChart,
+              daoConfig.decimals,
+            ).map((datasetpoint) => ({
+              ...datasetpoint,
+              quorum:
+                datasetpoint.quorum *
+                (daoConfig?.attackProfitability?.dynamicQuorum?.percentage ??
+                  0),
+            }))
+          : quorumValue
+            ? normalizeDataset(
+                daoTokenPriceHistoricalData,
+                "quorum",
+                quorumValue,
+                daoConfig.decimals,
+              )
+            : [],
+        delegated: delegatedSupplyChart
+          ? normalizeDataset(
+              daoTokenPriceHistoricalData,
+              "delegated",
+              delegatedSupplyChart,
               daoConfig.decimals,
             )
           : [],
-      delegated: delegatedSupplyChart
-        ? normalizeDataset(
-            daoTokenPriceHistoricalData,
-            "delegated",
-            1,
-            daoConfig.decimals,
-            delegatedSupplyChart,
-          )
-        : [],
-    };
+      };
+    }
 
     const lastKnownValues: Record<string, number | null> = {};
 

@@ -1,4 +1,4 @@
-import { formatUnits, parseUnits } from "viem";
+import { formatUnits } from "viem";
 
 import {
   useDaoData,
@@ -53,8 +53,11 @@ export const useDaoOverviewData = ({
   const proposalThresholdPercentage =
     daoData?.data?.proposalThreshold && totalSupply
       ? (
-          parseUnits(daoData.data.proposalThreshold, decimals) /
-          parseUnits(totalSupply, decimals)
+          (Number(
+            formatUnits(BigInt(daoData.data.proposalThreshold), decimals),
+          ) /
+            Number(formatUnits(BigInt(totalSupply), decimals))) *
+          100
         ).toString()
       : "0";
 
