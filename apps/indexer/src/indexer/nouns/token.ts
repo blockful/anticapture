@@ -1,6 +1,6 @@
 import { Context, Event, ponder } from "ponder:registry";
-import { token } from "ponder:schema";
-import { Address, zeroAddress } from "viem";
+import { accountBalance, token } from "ponder:schema";
+import { Address, isAddressEqual, zeroAddress } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
 import {
@@ -8,7 +8,7 @@ import {
   delegatedVotesChanged,
   tokenTransfer,
 } from "@/eventHandlers";
-import { handleTransaction, storeDailyBucket } from "@/eventHandlers/shared";
+import { handleTransaction } from "@/eventHandlers/shared";
 import {
   BurningAddresses,
   MetricTypesEnum,
@@ -22,6 +22,7 @@ import {
 
 export function NounsTokenIndexer(address: Address, decimals: number) {
   const daoId = DaoIdEnum.NOUNS;
+  const timelock = TreasuryAddresses[daoId].timelock!;
 
   ponder.on("NounsToken:setup", async ({ context }) => {
     await context.db.insert(token).values({
@@ -41,9 +42,24 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
       context: Context;
     }) => {
       const { from, to } = event.args;
-      const { timestamp } = event.block;
 
-      const burningAddressList = Object.values(BurningAddresses[daoId]);
+      // Auto-self-delegate for Nouns when no explicit delegate is set
+      const toBal = await context.db.find(accountBalance, {
+        accountId: event.args.to,
+        tokenId: event.log.address,
+      });
+
+      if (toBal?.delegate === zeroAddress) {
+        await delegateChanged(context, daoId, {
+          delegator: event.args.to,
+          delegate: event.args.to,
+          tokenId: event.log.address,
+          previousDelegate: zeroAddress,
+          txHash: event.transaction.hash,
+          timestamp: event.block.timestamp,
+          logIndex: event.log.logIndex,
+        });
+      }
 
       await tokenTransfer(
         context,
@@ -58,34 +74,27 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
           logIndex: event.log.logIndex,
         },
         {
-          burning: burningAddressList,
+          burning: Object.values(BurningAddresses[daoId]),
         },
       );
 
-      await updateSupplyMetric(
-        context,
-        "treasury",
-        Object.values(TreasuryAddresses[daoId]),
-        MetricTypesEnum.TREASURY,
-        from,
-        to,
-        1n,
-        daoId,
-        address,
-        timestamp,
-      );
+      const isFromTimelock = isAddressEqual(event.args.from, timelock);
+      const isToTimelock = isAddressEqual(event.args.to, timelock);
 
-      await updateTotalSupply(
-        context,
-        burningAddressList,
-        MetricTypesEnum.TOTAL_SUPPLY,
-        from,
-        to,
-        1n,
-        daoId,
-        address,
-        timestamp,
-      );
+      if (isFromTimelock || isToTimelock) {
+        await updateSupplyMetric(
+          context,
+          "treasury",
+          Object.values(TreasuryAddresses[daoId]),
+          MetricTypesEnum.TREASURY,
+          zeroAddress,
+          timelock,
+          isFromTimelock ? -1n : 1n,
+          daoId,
+          address,
+          event.block.timestamp,
+        );
+      }
 
       if (!event.transaction.to) return;
 
@@ -101,57 +110,33 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
   );
 
   ponder.on(`NounsToken:NounCreated`, async ({ event, context }) => {
-    const tokenData = await context.db.find(token, {
-      id: address,
-    });
-
-    if (!tokenData) {
-      return;
-    }
-
-    await storeDailyBucket(
+    await updateTotalSupply(
       context,
+      Object.values(BurningAddresses[daoId]),
       MetricTypesEnum.TOTAL_SUPPLY,
-      tokenData.totalSupply,
-      tokenData.totalSupply + 1n,
+      zeroAddress,
+      timelock,
+      1n,
       daoId,
-      event.block.timestamp,
       address,
+      event.block.timestamp,
     );
 
-    // every 10th token is automatically delegated to the treasury
-    // which doesn't count towards the delegated supply
-    if (event.args.tokenId % 10n !== 0n) {
-      await updateDelegatedSupply(
-        context,
-        daoId,
-        address,
-        1n,
-        event.block.timestamp,
-      );
-
-      if (!event.transaction.to) return;
-      await updateSupplyMetric(
-        context,
-        "treasury",
-        Object.values(TreasuryAddresses[daoId]),
-        MetricTypesEnum.TREASURY,
-        zeroAddress,
-        event.transaction.to,
-        1n,
-        daoId,
-        address,
-        event.block.timestamp,
-      );
-    }
+    await updateDelegatedSupply(
+      context,
+      daoId,
+      address,
+      1n,
+      event.block.timestamp,
+    );
   });
 
   ponder.on(`NounsToken:DelegateChanged`, async ({ event, context }) => {
     await delegateChanged(context, daoId, {
       delegator: event.args.delegator,
-      toDelegate: event.args.toDelegate,
+      delegate: event.args.toDelegate,
       tokenId: event.log.address,
-      fromDelegate: event.args.fromDelegate,
+      previousDelegate: event.args.fromDelegate,
       txHash: event.transaction.hash,
       timestamp: event.block.timestamp,
       logIndex: event.log.logIndex,
@@ -165,7 +150,7 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
       event.transaction.from,
       event.transaction.to,
       event.block.timestamp,
-      [event.args.delegator, event.args.toDelegate], // Addresses to check
+      [event.args.delegator, event.args.toDelegate],
     );
   });
 
@@ -187,7 +172,7 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
       event.transaction.from,
       event.transaction.to,
       event.block.timestamp,
-      [event.args.delegate], // Address to check
+      [event.args.delegate],
     );
   });
 }

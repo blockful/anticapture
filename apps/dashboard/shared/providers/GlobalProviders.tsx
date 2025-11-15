@@ -15,7 +15,7 @@ import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
 const queryClient = new QueryClient();
 
 // Apollo Client setup
-const apolloClient = new ApolloClient({
+export const apolloClient = new ApolloClient({
   uri: BACKEND_ENDPOINT,
   cache: new InMemoryCache(),
 });

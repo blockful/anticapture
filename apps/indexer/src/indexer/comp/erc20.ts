@@ -167,9 +167,9 @@ export function COMPTokenIndexer(address: Address, decimals: number) {
     // Process the delegation change
     await delegateChanged(context, daoId, {
       delegator: delegator,
-      toDelegate: toDelegate,
+      delegate: toDelegate,
       tokenId: address,
-      fromDelegate: fromDelegate,
+      previousDelegate: fromDelegate,
       txHash: hash,
       timestamp: timestamp,
       logIndex: logIndex,
