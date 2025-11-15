@@ -17,6 +17,7 @@ import { ChartDataSetPoint } from "@/shared/dao-config/types";
 import { TransactionsTable } from "@/features/transactions";
 import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { useBrushStore } from "@/features/token-distribution/store/useBrushStore";
+import daoConfig from "@/shared/dao-config";
 
 type CsvRow = Record<string, number | string | null>;
 
@@ -24,11 +25,13 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const [hoveredMetricKey, setHoveredMetricKey] = useState<string | null>(null);
   const [hasTransfer, setHasTransfer] = useState<boolean>(true);
   const { metrics, setMetrics } = useTokenDistributionStore();
+  const { decimals } = daoConfig[daoId];
 
   const { chartData, chartConfig, isLoading } = useChartMetrics({
     appliedMetrics: metrics,
     daoId,
     metricsSchema,
+    decimals,
   });
 
   const buildCsvData = (

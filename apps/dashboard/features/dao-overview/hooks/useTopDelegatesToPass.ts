@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { parseUnits } from "viem";
+import { formatUnits } from "viem";
 
 export const useTopDelegatesToPass = ({
   topDelegates,
@@ -14,7 +14,7 @@ export const useTopDelegatesToPass = ({
     if (!topDelegates || !quorumValue) return null;
 
     const topHolders = topDelegates.map((h) => ({
-      votingPower: Number(parseUnits(h.votingPower, decimals)),
+      votingPower: Number(formatUnits(BigInt(h.votingPower), decimals)),
     }));
 
     let balance = 0;

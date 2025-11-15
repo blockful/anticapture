@@ -25,6 +25,7 @@ import { VotingPowerChartCard } from "@/features/dao-overview/components/VotingP
 import { MetricsCard } from "@/features/dao-overview/components/MetricsCard";
 import { AttackProfitabilityChartCard } from "@/features/dao-overview/components/AttackProfitabilityChartCard";
 import { useRouter } from "next/navigation";
+import { useQuorumGap } from "@/shared/hooks/useQuorumGap";
 import { apolloClient } from "@/shared/providers/GlobalProviders";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
@@ -45,7 +46,6 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     delegatedSupply,
     activeSupply,
     averageTurnout,
-    averageTurnoutPercentAboveQuorum,
     topDelegatesToPass,
     proposalThresholdValue,
     proposalThresholdPercentage,
@@ -54,6 +54,8 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     votingDelay,
     timelockDelay,
   } = useDaoOverviewData({ daoId, daoConfig });
+
+  const { data: quorumGap } = useQuorumGap(daoId);
 
   const {
     liquidTreasuryAllValue,
@@ -107,9 +109,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
                 delegatedSupplyValue={delegatedSupplyValue}
                 activeSupplyValue={activeSupplyValue}
                 averageTurnoutValue={averageTurnoutValue}
-                averageTurnoutPercentAboveQuorum={
-                  averageTurnoutPercentAboveQuorum
-                }
+                quorumGap={quorumGap}
                 liquidTreasuryAllValue={liquidTreasuryAllValue}
                 liquidTreasuryAllPercent={liquidTreasuryAllPercent}
                 liquidTreasuryNonDaoValue={liquidTreasuryNonDaoValue}

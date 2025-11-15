@@ -16,7 +16,7 @@ export const SCR: DaoConfiguration = {
   icon: ScrollIcon,
   daoOverview: {
     token: "ERC20",
-    chain: { ...scroll, blockTime: 3_000 },
+    chain: { ...scroll, icon: ScrollIcon },
     snapshot: "",
     contracts: {
       governor: "0x2f3f2054776bd3c2fc30d750734a8f539bb214f0",

@@ -137,8 +137,7 @@ export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
           <p>
             {" "}
             {proposal.votes.total
-              ? formatNumberUserReadable(Number(proposal.votes.total)) +
-                " votes"
+              ? `${formatNumberUserReadable(Number(proposal.votes.total))} votes`
               : "Waiting to start"}
           </p>
           <div className="flex items-center justify-center gap-2">
