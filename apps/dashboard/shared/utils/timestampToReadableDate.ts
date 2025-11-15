@@ -21,11 +21,12 @@ export const timestampToReadableDate = (
 
   const month = newDate.toLocaleDateString("en-US", { month: "short" });
   const year = newDate.toLocaleDateString("en-US", { year: "2-digit" });
+  const day = newDate.toLocaleDateString("en-US", { day: "2-digit" });
 
   return format === "abbreviated"
     ? `${month} '${year}`
     : format === "day_abbreviated"
-      ? `${newDate.getDate()}. ${month}`
+      ? `${day}. ${month}`
       : newDate.toLocaleDateString("en-US", {
           month: "short",
           day: "2-digit",

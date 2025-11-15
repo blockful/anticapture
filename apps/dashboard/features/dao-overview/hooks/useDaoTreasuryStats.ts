@@ -1,4 +1,4 @@
-import { TreasuryAssetNonDaoToken } from "@/features/attack-profitability/hooks";
+import { TreasuryAssetData } from "@/features/attack-profitability/hooks";
 import { TokenDataResponse } from "@/shared/hooks";
 import { CompareTreasury_200_Response } from "@anticapture/graphql-client";
 import { useMemo } from "react";
@@ -11,15 +11,14 @@ export const useDaoTreasuryStats = ({
   decimals,
 }: {
   treasuryAll: { data?: CompareTreasury_200_Response | null };
-  treasuryNonDao: { data?: TreasuryAssetNonDaoToken[] | null };
+  treasuryNonDao: { data?: TreasuryAssetData[] | null };
   tokenData: { data?: TokenDataResponse | null };
   decimals: number;
 }) => {
   return useMemo(() => {
     const lastPrice = Number(tokenData.data?.price) || 0;
-    const liquidTreasuryNonDaoValue = Number(
-      treasuryNonDao.data?.[0]?.totalAssets || 0,
-    );
+    const liquidTreasuryNonDaoValue =
+      treasuryNonDao.data?.[0]?.treasuryWithoutDaoToken || 0;
     const daoTreasuryTokens = Number(treasuryAll.data?.currentTreasury || 0);
     const liquidTreasuryAllValue =
       Number(formatUnits(BigInt(daoTreasuryTokens), decimals)) * lastPrice;

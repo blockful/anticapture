@@ -129,10 +129,14 @@ export type Query = {
   historicalBalances?: Maybe<Array<Maybe<Query_HistoricalBalances_Items>>>;
   /** Get historical market data for a specific token */
   historicalTokenData?: Maybe<Array<Maybe<Query_HistoricalTokenData_Items>>>;
+  historicalTreasury?: Maybe<HistoricalTreasury>;
+  historicalTreasurys: HistoricalTreasuryPage;
   /** Fetch historical voting power for multiple addresses at a specific time period using multicall */
   historicalVotingPower?: Maybe<Array<Maybe<Query_HistoricalVotingPower_Items>>>;
   /** Get the last update time */
   lastUpdate?: Maybe<LastUpdate_200_Response>;
+  /** Get the most recent treasury data point (total and without DAO token) */
+  latestTotalAssets?: Maybe<LatestTotalAssets_200_Response>;
   /** Returns a single proposal by its ID */
   proposal?: Maybe<Proposal_200_Response>;
   /** Returns the active delegates that did not vote on a given proposal */
@@ -148,7 +152,7 @@ export type Query = {
   tokenPrice?: Maybe<TokenPrice>;
   tokenPrices: TokenPricePage;
   tokens: TokenPage;
-  /** Get total assets */
+  /** Get historical treasury data (total and without DAO token) */
   totalAssets?: Maybe<Array<Maybe<Query_TotalAssets_Items>>>;
   transaction?: Maybe<Transaction>;
   /** Get transactions with their associated transfers and delegations, with optional filtering and sorting */
@@ -351,6 +355,21 @@ export type QueryHistoricalTokenDataArgs = {
 };
 
 
+export type QueryHistoricalTreasuryArgs = {
+  date: Scalars['BigInt']['input'];
+};
+
+
+export type QueryHistoricalTreasurysArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<Scalars['String']['input']>;
+  orderDirection?: InputMaybe<Scalars['String']['input']>;
+  where?: InputMaybe<HistoricalTreasuryFilter>;
+};
+
+
 export type QueryHistoricalVotingPowerArgs = {
   addresses: Scalars['JSON']['input'];
   days?: InputMaybe<QueryInput_HistoricalVotingPower_Days>;
@@ -445,6 +464,7 @@ export type QueryTokensArgs = {
 
 export type QueryTotalAssetsArgs = {
   days?: InputMaybe<QueryInput_TotalAssets_Days>;
+  order?: InputMaybe<QueryInput_TotalAssets_Order>;
 };
 
 
@@ -457,6 +477,7 @@ export type QueryTransactionsArgs = {
   affectedSupply?: InputMaybe<Scalars['JSON']['input']>;
   from?: InputMaybe<Scalars['String']['input']>;
   fromDate?: InputMaybe<Scalars['Int']['input']>;
+  includes?: InputMaybe<Scalars['JSON']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   maxAmount?: InputMaybe<Scalars['String']['input']>;
   minAmount?: InputMaybe<Scalars['String']['input']>;
@@ -1161,9 +1182,71 @@ export type DelegationPercentageByDay_200_Response = {
   totalCount: Scalars['Float']['output'];
 };
 
+export type HistoricalTreasury = {
+  __typename?: 'historicalTreasury';
+  date: Scalars['BigInt']['output'];
+  totalTreasury: Scalars['Int']['output'];
+  treasuryWithoutDaoToken: Scalars['Int']['output'];
+  updatedAt: Scalars['String']['output'];
+};
+
+export type HistoricalTreasuryFilter = {
+  AND?: InputMaybe<Array<InputMaybe<HistoricalTreasuryFilter>>>;
+  OR?: InputMaybe<Array<InputMaybe<HistoricalTreasuryFilter>>>;
+  date?: InputMaybe<Scalars['BigInt']['input']>;
+  date_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  date_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  date_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
+  date_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  date_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  date_not?: InputMaybe<Scalars['BigInt']['input']>;
+  date_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
+  totalTreasury?: InputMaybe<Scalars['Int']['input']>;
+  totalTreasury_gt?: InputMaybe<Scalars['Int']['input']>;
+  totalTreasury_gte?: InputMaybe<Scalars['Int']['input']>;
+  totalTreasury_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
+  totalTreasury_lt?: InputMaybe<Scalars['Int']['input']>;
+  totalTreasury_lte?: InputMaybe<Scalars['Int']['input']>;
+  totalTreasury_not?: InputMaybe<Scalars['Int']['input']>;
+  totalTreasury_not_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
+  treasuryWithoutDaoToken?: InputMaybe<Scalars['Int']['input']>;
+  treasuryWithoutDaoToken_gt?: InputMaybe<Scalars['Int']['input']>;
+  treasuryWithoutDaoToken_gte?: InputMaybe<Scalars['Int']['input']>;
+  treasuryWithoutDaoToken_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
+  treasuryWithoutDaoToken_lt?: InputMaybe<Scalars['Int']['input']>;
+  treasuryWithoutDaoToken_lte?: InputMaybe<Scalars['Int']['input']>;
+  treasuryWithoutDaoToken_not?: InputMaybe<Scalars['Int']['input']>;
+  treasuryWithoutDaoToken_not_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
+  updatedAt?: InputMaybe<Scalars['String']['input']>;
+  updatedAt_contains?: InputMaybe<Scalars['String']['input']>;
+  updatedAt_ends_with?: InputMaybe<Scalars['String']['input']>;
+  updatedAt_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  updatedAt_not?: InputMaybe<Scalars['String']['input']>;
+  updatedAt_not_contains?: InputMaybe<Scalars['String']['input']>;
+  updatedAt_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  updatedAt_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  updatedAt_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  updatedAt_starts_with?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type HistoricalTreasuryPage = {
+  __typename?: 'historicalTreasuryPage';
+  items: Array<HistoricalTreasury>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int']['output'];
+};
+
 export type LastUpdate_200_Response = {
   __typename?: 'lastUpdate_200_response';
   lastUpdate: Scalars['String']['output'];
+};
+
+export type LatestTotalAssets_200_Response = {
+  __typename?: 'latestTotalAssets_200_response';
+  /** Unix timestamp in milliseconds */
+  date: Scalars['Float']['output'];
+  totalTreasury: Scalars['Float']['output'];
+  treasuryWithoutDaoToken: Scalars['Float']['output'];
 };
 
 export enum MetricType {
@@ -1554,6 +1637,11 @@ export enum QueryInput_TotalAssets_Days {
   '365d' = '_365d'
 }
 
+export enum QueryInput_TotalAssets_Order {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
 export enum QueryInput_Transactions_SortOrder {
   Asc = 'asc',
   Desc = 'desc'
@@ -1696,8 +1784,10 @@ export type Query_Proposals_Items_Items = {
 
 export type Query_TotalAssets_Items = {
   __typename?: 'query_totalAssets_items';
-  date: Scalars['String']['output'];
-  totalAssets: Scalars['String']['output'];
+  /** Unix timestamp in milliseconds */
+  date: Scalars['Float']['output'];
+  totalTreasury: Scalars['Float']['output'];
+  treasuryWithoutDaoToken: Scalars['Float']['output'];
 };
 
 export type Query_Transactions_Items_Items = {

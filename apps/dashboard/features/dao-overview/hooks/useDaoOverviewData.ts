@@ -6,7 +6,7 @@ import {
   useAverageTurnout,
   useTokenData,
 } from "@/shared/hooks";
-import { useTreasuryAssetNonDaoToken } from "@/features/attack-profitability/hooks";
+import { useTreasuryAssetData } from "@/features/attack-profitability/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
 import { useCompareTreasury } from "@/features/dao-overview/hooks/useCompareTreasury";
@@ -28,10 +28,9 @@ export const useDaoOverviewData = ({
   const daoData = useDaoData(daoId);
   const activeSupply = useActiveSupply(daoId, TimeInterval.NINETY_DAYS);
   const averageTurnout = useAverageTurnout(daoId, TimeInterval.NINETY_DAYS);
-  const treasuryNonDao = useTreasuryAssetNonDaoToken(
-    daoId,
-    TimeInterval.NINETY_DAYS,
-  );
+  const treasuryNonDao = useTreasuryAssetData(daoId, TimeInterval.NINETY_DAYS, {
+    order: "desc",
+  });
   const treasuryAll = useCompareTreasury(daoId, TimeInterval.NINETY_DAYS);
   const tokenData = useTokenData(daoId);
 
