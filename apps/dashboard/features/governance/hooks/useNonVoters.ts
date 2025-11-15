@@ -1,5 +1,5 @@
-import { useMemo, useState, useCallback, useEffect } from "react";
-import { ApolloError } from "@apollo/client";
+import { useMemo, useCallback } from "react";
+import { ApolloError, NetworkStatus } from "@apollo/client";
 import { DaoIdEnum } from "@/shared/types/daos";
 import {
   GetProposalNonVotersQuery,
@@ -38,14 +38,9 @@ export const useNonVoters = ({
   limit = 10,
   orderDirection = "desc",
 }: UseNonVotersParams = {}): UseNonVotersResult => {
-  // State for pagination
-  const [allNonVoters, setAllNonVoters] = useState<NonVoter[]>([]);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [hasInitialized, setHasInitialized] = useState(false);
-
   // Build query variables - always skip: 0 for initial query
-  const queryVariables = useMemo(() => {
-    return {
+  const queryVariables = useMemo(
+    () => ({
       id: proposalId || "",
       limit,
       skip: 0,
@@ -53,87 +48,71 @@ export const useNonVoters = ({
         orderDirection === "asc"
           ? QueryInput_ProposalNonVoters_OrderDirection.Asc
           : QueryInput_ProposalNonVoters_OrderDirection.Desc,
-    };
-  }, [proposalId, limit, orderDirection]);
+    }),
+    [proposalId, limit, orderDirection],
+  );
 
   // Main non-voters query
-  const { data, loading, error, fetchMore } = useGetProposalNonVotersQuery({
-    variables: queryVariables,
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
+  const { data, loading, error, fetchMore, networkStatus } =
+    useGetProposalNonVotersQuery({
+      variables: queryVariables,
+      context: {
+        headers: {
+          "anticapture-dao-id": daoId,
+        },
       },
-    },
-    skip: !proposalId,
-    notifyOnNetworkStatusChange: true,
-  });
+      skip: !proposalId,
+      notifyOnNetworkStatusChange: true,
+    });
 
-  // Reset accumulated non-voters when parameters change
-  useEffect(() => {
-    setAllNonVoters([]);
-    setIsLoadingMore(false);
-    setHasInitialized(false);
-  }, [orderDirection, proposalId]);
-
-  // Initialize allNonVoters on first load ONLY
-  useEffect(() => {
-    if (data?.proposalNonVoters?.items && !hasInitialized) {
-      const initialNonVoters = data.proposalNonVoters.items as NonVoter[];
-      setAllNonVoters(initialNonVoters);
-      setHasInitialized(true);
-    }
-  }, [data?.proposalNonVoters?.items, hasInitialized]);
-
-  // Use accumulated non-voters for pagination
-  const nonVoters = allNonVoters;
-
-  // Extract total count
-  const totalCount = useMemo(() => {
-    return data?.proposalNonVoters?.totalCount || 0;
-  }, [data?.proposalNonVoters?.totalCount]);
+  // Extract non-voters and total count from data
+  const nonVoters = (data?.proposalNonVoters?.items as NonVoter[]) || [];
+  const totalCount = data?.proposalNonVoters?.totalCount || 0;
 
   // Calculate if there's a next page
-  const hasNextPage = useMemo(() => {
-    return allNonVoters.length < totalCount;
-  }, [allNonVoters.length, totalCount]);
+  const hasNextPage = nonVoters.length < totalCount;
+  const isLoadingMore = networkStatus === NetworkStatus.fetchMore;
 
   // Load more non-voters for pagination
   const loadMore = useCallback(async () => {
     if (!hasNextPage || isLoadingMore) return;
 
-    setIsLoadingMore(true);
-
     try {
-      const newSkip = allNonVoters.length;
-
-      const result = await fetchMore({
+      await fetchMore({
         variables: {
           id: proposalId || "",
           limit,
-          skip: newSkip,
+          skip: nonVoters.length,
           orderDirection:
             orderDirection === "asc"
               ? QueryInput_ProposalNonVoters_OrderDirection.Asc
               : QueryInput_ProposalNonVoters_OrderDirection.Desc,
         },
-      });
+        updateQuery: (prev, { fetchMoreResult }) => {
+          if (!fetchMoreResult?.proposalNonVoters) return prev;
 
-      if (result.data?.proposalNonVoters?.items) {
-        const newNonVoters = result.data.proposalNonVoters.items as NonVoter[];
-        setAllNonVoters((prev) => [...prev, ...newNonVoters]);
-      }
+          const prevItems = prev.proposalNonVoters?.items || [];
+          const newItems = fetchMoreResult.proposalNonVoters.items || [];
+
+          return {
+            ...fetchMoreResult,
+            proposalNonVoters: {
+              ...fetchMoreResult.proposalNonVoters,
+              items: [...prevItems, ...newItems],
+            },
+          };
+        },
+      });
     } catch (error) {
       console.error("Error loading more non-voters:", error);
-    } finally {
-      setIsLoadingMore(false);
     }
   }, [
     hasNextPage,
     isLoadingMore,
-    allNonVoters.length,
-    limit,
     fetchMore,
     proposalId,
+    limit,
+    nonVoters.length,
     orderDirection,
   ]);
 
