@@ -8,6 +8,7 @@ import { useParams } from "next/navigation";
 import { AffectedSupplyType } from "@/features/transactions/hooks/useTransactionsTableData";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { getTransactionsColumns } from "@/features/transactions/utils/getTransactionsColumns";
+import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
 
 export const AcceptedMetrics: string[] = ["CEX", "DEX", "LENDING", "TOTAL"];
 
@@ -38,7 +39,6 @@ export const TransactionsTable = ({
 
   const includes = [
     ...(metrics.includes("DELEGATED_SUPPLY") ? ["DELEGATION"] : []),
-    ...(hasTransfer ? ["TRANSFER"] : []),
   ];
 
   const {
@@ -50,14 +50,16 @@ export const TransactionsTable = ({
   } = useTransactionsTableData({
     daoId: daoId.toUpperCase() as DaoIdEnum,
     filters: {
-      toDate: endDate,
+      toDate: endDate + SECONDS_PER_DAY - 1, // include the entire end date
       fromDate: startDate,
       from: fromFilter || undefined,
       to: toFilter || undefined,
       minAmount,
       maxAmount,
       sortOrder,
-      affectedSupply: affectedSupply || undefined,
+      affectedSupply: hasTransfer
+        ? [...affectedSupply, "UNASSIGNED"]
+        : affectedSupply || undefined,
       includes,
     },
   });

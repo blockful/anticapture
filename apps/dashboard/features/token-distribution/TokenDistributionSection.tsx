@@ -79,7 +79,7 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const csvData = buildCsvData(chartData, metrics);
 
   const switchValue = useMemo(() => {
-    return hasTransfer ? "All" : "Non-Transfer";
+    return hasTransfer ? "All" : "Labeled-Only";
   }, [hasTransfer]);
 
   const startIndex = useBrushStore((state) => state.brushRange.startIndex);
@@ -148,7 +148,7 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             className="flex gap-1 rounded-md"
           >
             <TabsList>
-              {["Non-Transfer", "All"].map((option) => (
+              {["Labeled-Only", "All"].map((option) => (
                 <TabsTrigger
                   className="cursor-pointer px-3 py-0.5 text-sm font-normal"
                   key={option}

@@ -15,7 +15,12 @@ import { formatUnits } from "viem";
 import { SupplyType } from "@/shared/components";
 import daoConfig from "@/shared/dao-config";
 
-export type AffectedSupplyType = "CEX" | "DEX" | "LENDING" | "TOTAL";
+export type AffectedSupplyType =
+  | "CEX"
+  | "DEX"
+  | "LENDING"
+  | "TOTAL"
+  | "UNASSIGNED";
 
 export interface TransactionsFilters {
   toDate?: number;
