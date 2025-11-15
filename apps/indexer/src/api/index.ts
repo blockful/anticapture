@@ -119,12 +119,18 @@ const votingPowerService = new VotingPowerService(
 );
 const daoCache = new DaoCache();
 const daoService = new DaoService(daoClient, daoCache, env.CHAIN_ID);
-const defiLlamaProvider = new DefiLlamaProvider(
-  env.DEFILLAMA_API_URL,
-  env.TREASURY_PROVIDER_PROTOCOL_ID,
-);
-const treasuryService = new TreasuryService(writableDb, defiLlamaProvider);
-assets(app, treasuryService);
+
+if (env.TREASURY_PROVIDER_PROTOCOL_ID) {
+  const defiLlamaProvider = new DefiLlamaProvider(
+    env.DEFILLAMA_API_URL,
+    env.TREASURY_PROVIDER_PROTOCOL_ID,
+  );
+  const treasuryService = new TreasuryService(writableDb, defiLlamaProvider);
+  assets(app, treasuryService);
+
+  // fill the historical treasury table each day
+  startTreasurySyncCron(treasuryService);
+}
 
 const tokenPriceClient =
   env.DAO_ID === DaoIdEnum.NOUNS
@@ -168,8 +174,5 @@ accountBalanceVariations(
 );
 dao(app, daoService);
 docs(app);
-
-// Start treasury sync cron job
-startTreasurySyncCron(treasuryService);
 
 export default app;
