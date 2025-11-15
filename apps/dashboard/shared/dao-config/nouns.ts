@@ -3,6 +3,7 @@ import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { NounsIcon } from "@/shared/components/icons";
 import { mainnet } from "viem/chains";
+import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
 
 export const NOUNS: DaoConfiguration = {
   name: "Nouns",
@@ -14,7 +15,7 @@ export const NOUNS: DaoConfiguration = {
   icon: NounsIcon,
   daoOverview: {
     token: "ERC721",
-    chain: { ...mainnet, icon: NounsIcon },
+    chain: { ...mainnet, icon: MainnetIcon },
     priceDisclaimer:
       "Based on the average price of the last 30 days of the auction.",
     snapshot: "",
