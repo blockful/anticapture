@@ -15,6 +15,7 @@ export enum AffectedSupply {
   DEX = "DEX",
   LENDING = "LENDING",
   TOTAL = "TOTAL",
+  UNASSIGNED = "UNASSIGNED",
 }
 
 export enum TransactionType {
@@ -74,6 +75,7 @@ export const TransactionsRequestSchema = z
           isDex: affectedSupply.includes(AffectedSupply.DEX),
           isLending: affectedSupply.includes(AffectedSupply.LENDING),
           isTotal: affectedSupply.includes(AffectedSupply.TOTAL),
+          isUnassigned: affectedSupply.includes(AffectedSupply.UNASSIGNED),
         };
       }),
     includes: z
