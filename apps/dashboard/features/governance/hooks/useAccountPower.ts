@@ -6,7 +6,7 @@ import {
   useGetAccountPowerQuery,
 } from "@anticapture/graphql-client/hooks";
 import { formatNumberUserReadable } from "@/shared/utils";
-import { formatEther } from "viem";
+import { formatUnits } from "viem";
 
 export interface UseAccountPowerResult {
   accountPower: GetAccountPowerQuery["accountPower"] | null;
@@ -22,12 +22,14 @@ export interface UseAccountPowerParams {
   address: string;
   daoId: DaoIdEnum;
   proposalId: string;
+  decimals: number;
 }
 
 export const useVoterInfo = ({
   address,
   daoId,
   proposalId,
+  decimals,
 }: UseAccountPowerParams): UseAccountPowerResult => {
   // Main account power query
   const { data, loading, error, refetch } = useGetAccountPowerQuery({
@@ -57,12 +59,12 @@ export const useVoterInfo = ({
     return {
       accountPower: data.accountPower,
       votingPower: formatNumberUserReadable(
-        Number(formatEther(BigInt(data.accountPower.votingPower))),
+        Number(formatUnits(BigInt(data.accountPower.votingPower), decimals)),
       ),
       votesOnchain: data.votesOnchain || null,
       hasVoted: !!data.votesOnchain,
     };
-  }, [data]);
+  }, [data, decimals]);
 
   return {
     accountPower,

@@ -9,8 +9,11 @@ import {
   getFilteredRowModel,
   ColumnFiltersState,
   getSortedRowModel,
+  getExpandedRowModel,
+  ExpandedState,
   useReactTable,
   TableOptions,
+  Row,
 } from "@tanstack/react-table";
 import {
   TableContainer,
@@ -26,9 +29,14 @@ import {
   headerSizeVariants,
   rowSizeVariants,
 } from "@/shared/components/design-system/table/styles";
+import { TreeLines } from "@/shared/components/tables/TreeLines";
 import { EmptyState } from "@/shared/components/design-system/table/components/EmptyState";
 import { CSVLink } from "react-csv";
 import { defaultLinkVariants } from "@/shared/components/design-system/links/default-link";
+import {
+  ExpandableData,
+  ExpandButton,
+} from "@/shared/components/design-system/table/ExpandButton";
 
 type ColumnMeta = {
   columnClassName?: string;
@@ -56,6 +64,10 @@ interface DataTableProps<TData, TValue> {
   withDownloadCSV?: boolean;
   withSorting?: boolean;
   wrapperClassName?: string;
+  enableExpanding?: boolean;
+  getRowCanExpand?: (row: Row<TData>) => boolean;
+  renderSubComponent?: (row: Row<TData>) => ReactNode;
+  getSubRows?: (originalRow: TData, index: number) => TData[] | undefined;
 }
 
 export const Table = <TData, TValue>({
@@ -76,9 +88,14 @@ export const Table = <TData, TValue>({
   withDownloadCSV = false,
   withSorting = false,
   wrapperClassName,
+  enableExpanding = false,
+  getRowCanExpand,
+  renderSubComponent,
+  getSubRows,
 }: DataTableProps<TData, TValue>) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [expanded, setExpanded] = useState<ExpandedState>({});
 
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
@@ -114,6 +131,10 @@ export const Table = <TData, TValue>({
     state = { ...state, columnFilters };
   }
 
+  if (enableExpanding) {
+    state = { ...state, expanded };
+  }
+
   const tableConfig: TableOptions<TData> = {
     data,
     columns,
@@ -126,6 +147,12 @@ export const Table = <TData, TValue>({
     ...(filterColumn && {
       getFilteredRowModel: getFilteredRowModel(),
       onColumnFiltersChange: setColumnFilters,
+    }),
+    ...(enableExpanding && {
+      getExpandedRowModel: getExpandedRowModel(),
+      onExpandedChange: setExpanded,
+      ...(getRowCanExpand && { getRowCanExpand }),
+      ...(getSubRows && { getSubRows }),
     }),
   };
 
@@ -171,7 +198,7 @@ export const Table = <TData, TValue>({
                     className={cn(
                       header.column.getIndex() === 0 &&
                         stickyFirstColumn &&
-                        "bg-surface-contrast sticky left-0 z-50",
+                        "bg-surface-contrast sticky left-0 z-20",
                       headerSizeVariants[size],
                       columnMeta?.columnClassName,
                     )}
@@ -191,44 +218,77 @@ export const Table = <TData, TValue>({
         <TableBody className={className}>
           {table.getRowModel().rows.length > 0 ? (
             <>
-              {table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  className={cn(
-                    "border-transparent transition-colors duration-300",
-                    onRowClick && !disableRowClick?.(row.original)
-                      ? "hover:bg-surface-contrast cursor-pointer"
-                      : "cursor-default",
-                  )}
-                  onClick={() =>
-                    !disableRowClick?.(row.original) &&
-                    onRowClick?.(row.original)
-                  }
-                >
-                  {row.getVisibleCells().map((cell) => {
-                    const colMeta = (
-                      cell.column.columnDef as { meta?: ColumnMeta }
-                    ).meta;
-                    return (
-                      <TableCell
-                        key={cell.id}
-                        className={cn(
-                          cell.column.getIndex() === 0 &&
-                            stickyFirstColumn &&
-                            "bg-surface-default sticky left-0 z-50",
-                          rowSizeVariants[size],
-                          colMeta?.columnClassName,
-                        )}
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-              ))}
+              {table.getRowModel().rows.map((row) => {
+                const isLastNestedRow =
+                  row.getParentRow()?.getLeafRows().slice(-1)[0].id === row.id;
+
+                return (
+                  <>
+                    <TableRow
+                      key={row.id}
+                      className={cn(
+                        "border-transparent transition-colors duration-300",
+                        onRowClick && !disableRowClick?.(row.original)
+                          ? "hover:bg-surface-contrast cursor-pointer"
+                          : "cursor-default",
+                        enableExpanding &&
+                          row.depth === 0 &&
+                          "border-light-dark",
+                        row.getIsExpanded() && "border-b-transparent",
+                        isLastNestedRow && "border-b-light-dark",
+                      )}
+                      onClick={() =>
+                        !disableRowClick?.(row.original) &&
+                        onRowClick?.(row.original)
+                      }
+                    >
+                      {row.getVisibleCells().map((cell, index) => {
+                        const colMeta = (
+                          cell.column.columnDef as { meta?: ColumnMeta }
+                        ).meta;
+                        return (
+                          <TableCell
+                            key={cell.id}
+                            className={cn(
+                              cell.column.getIndex() === 0 &&
+                                stickyFirstColumn &&
+                                "bg-surface-default sticky left-0 z-20",
+                              rowSizeVariants[size],
+                              colMeta?.columnClassName,
+                            )}
+                          >
+                            <div className="flex items-center gap-2">
+                              {index === 0 && enableExpanding && (
+                                <TreeLines row={row} />
+                              )}
+                              {index === 0 && (
+                                <ExpandButton
+                                  row={row as unknown as Row<ExpandableData>}
+                                  enableExpanding={enableExpanding}
+                                />
+                              )}
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext(),
+                              )}
+                            </div>
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                    {row.getIsExpanded() && renderSubComponent && (
+                      <TableRow>
+                        <TableCell
+                          colSpan={columns.length}
+                          className="bg-surface-contrast p-0"
+                        >
+                          {renderSubComponent(row)}
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </>
+                );
+              })}
 
               <div ref={sentinelRef} aria-hidden="true" />
 

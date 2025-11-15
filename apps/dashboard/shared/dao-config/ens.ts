@@ -5,9 +5,11 @@ import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governan
 import { EnsIcon } from "@/shared/components/icons";
 import { mainnet } from "viem/chains";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
+import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
 
 export const ENS: DaoConfiguration = {
   name: "ENS",
+  decimals: 18,
   color: {
     svgColor: "#0080bc",
     svgBgColor: "#fff",
@@ -16,7 +18,7 @@ export const ENS: DaoConfiguration = {
   icon: EnsIcon,
   daoOverview: {
     token: "ERC20",
-    chain: mainnet,
+    chain: { ...mainnet, icon: MainnetIcon },
     snapshot: "https://snapshot.box/#/s:ens.eth",
     contracts: {
       governor: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
