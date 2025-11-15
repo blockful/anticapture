@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback, useEffect } from "react";
+import { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import { ApolloError } from "@apollo/client";
 import { DaoIdEnum } from "@/shared/types/daos";
 import {
@@ -42,6 +42,8 @@ export const useNonVoters = ({
   const [allNonVoters, setAllNonVoters] = useState<NonVoter[]>([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
+  // Ref to track current skip value to avoid stale closures
+  const skipRef = useRef(0);
 
   // Build query variables - always skip: 0 for initial query
   const queryVariables = useMemo(() => {
@@ -73,6 +75,7 @@ export const useNonVoters = ({
     setAllNonVoters([]);
     setIsLoadingMore(false);
     setHasInitialized(false);
+    skipRef.current = 0;
   }, [orderDirection, proposalId]);
 
   // Initialize allNonVoters on first load ONLY
@@ -80,6 +83,7 @@ export const useNonVoters = ({
     if (data?.proposalNonVoters?.items && !hasInitialized) {
       const initialNonVoters = data.proposalNonVoters.items as NonVoter[];
       setAllNonVoters(initialNonVoters);
+      skipRef.current = initialNonVoters.length;
       setHasInitialized(true);
     }
   }, [data?.proposalNonVoters?.items, hasInitialized]);
@@ -99,18 +103,19 @@ export const useNonVoters = ({
 
   // Load more non-voters for pagination
   const loadMore = useCallback(async () => {
-    if (!hasNextPage || isLoadingMore) return;
+    if (!hasNextPage || isLoadingMore || !hasInitialized) return;
 
     setIsLoadingMore(true);
 
     try {
-      const newSkip = allNonVoters.length;
+      // Use ref to get the current skip value, avoiding stale closure issues
+      const currentSkip = skipRef.current;
 
       const result = await fetchMore({
         variables: {
           id: proposalId || "",
           limit,
-          skip: newSkip,
+          skip: currentSkip,
           orderDirection:
             orderDirection === "asc"
               ? QueryInput_ProposalNonVoters_OrderDirection.Asc
@@ -120,7 +125,11 @@ export const useNonVoters = ({
 
       if (result.data?.proposalNonVoters?.items) {
         const newNonVoters = result.data.proposalNonVoters.items as NonVoter[];
-        setAllNonVoters((prev) => [...prev, ...newNonVoters]);
+        setAllNonVoters((prev) => {
+          const updated = [...prev, ...newNonVoters];
+          skipRef.current = updated.length;
+          return updated;
+        });
       }
     } catch (error) {
       console.error("Error loading more non-voters:", error);
@@ -130,7 +139,7 @@ export const useNonVoters = ({
   }, [
     hasNextPage,
     isLoadingMore,
-    allNonVoters.length,
+    hasInitialized,
     limit,
     fetchMore,
     proposalId,
