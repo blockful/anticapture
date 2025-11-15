@@ -22,10 +22,8 @@ const chartConfig: ChartConfig = {
 export const DaoProtectionLevels = () => {
   // Calculate stage distribution from real DAO data
   const stageData = useMemo(() => {
-    // Get all DAOs except NOUNS (as per PanelTable logic)
-    const daoIds = Object.values(DaoIdEnum).filter(
-      (daoId) => daoId !== DaoIdEnum.NOUNS,
-    );
+    // Get all DAOs
+    const daoIds = Object.values(DaoIdEnum);
 
     // Count DAOs by stage
     const stageCounts = {
@@ -83,8 +81,7 @@ export const DaoProtectionLevels = () => {
 
   // Calculate total monitored DAOs
   const totalMonitored = useMemo(() => {
-    return Object.values(DaoIdEnum).filter((daoId) => daoId !== DaoIdEnum.NOUNS)
-      .length;
+    return Object.values(DaoIdEnum).length;
   }, []);
 
   return (
