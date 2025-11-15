@@ -44,7 +44,7 @@ type Query {
   totalAssets(days: queryInput_totalAssets_days = _7d, order: queryInput_totalAssets_order = asc): [query_totalAssets_items]
 
   """Get the most recent treasury data point (total and without DAO token)"""
-  latestTotalAssets: LatestTotalAssets
+  latestTotalAssets: latestTotalAssets_200_response
 
   """Get historical market data for a specific token"""
   historicalTokenData(skip: NonNegativeInt, limit: Float = 365): [query_historicalTokenData_items]
@@ -151,9 +151,6 @@ type Query {
 
   """Returns current governance parameters for this DAO"""
   dao: dao_200_response
-
-  """Get total assets"""
-  totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
 
   """
   Average delegation percentage across all supported DAOs by day.
@@ -1404,7 +1401,7 @@ enum queryInput_totalAssets_order {
   desc
 }
 
-type LatestTotalAssets {
+type latestTotalAssets_200_response {
   """Unix timestamp in milliseconds"""
   date: Float!
   totalTreasury: Float!
@@ -1967,19 +1964,6 @@ enum HTTPMethod {
   OPTIONS
   TRACE
   PATCH
-}
-
-type query_totalAssets_items {
-  totalAssets: String!
-  date: String!
-}
-
-enum queryInput_totalAssets_days {
-  _7d
-  _30d
-  _90d
-  _180d
-  _365d
 }
 
 type AverageDelegationPercentageItem {

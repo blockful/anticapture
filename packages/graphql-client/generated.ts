@@ -60,14 +60,6 @@ export enum HttpMethod {
   Trace = 'TRACE'
 }
 
-export type LatestTotalAssets = {
-  __typename?: 'LatestTotalAssets';
-  /** Unix timestamp in milliseconds */
-  date: Scalars['Float']['output'];
-  totalTreasury: Scalars['Float']['output'];
-  treasuryWithoutDaoToken: Scalars['Float']['output'];
-};
-
 export type Meta = {
   __typename?: 'Meta';
   status?: Maybe<Scalars['JSON']['output']>;
@@ -144,7 +136,7 @@ export type Query = {
   /** Get the last update time */
   lastUpdate?: Maybe<LastUpdate_200_Response>;
   /** Get the most recent treasury data point (total and without DAO token) */
-  latestTotalAssets?: Maybe<LatestTotalAssets>;
+  latestTotalAssets?: Maybe<LatestTotalAssets_200_Response>;
   /** Returns a single proposal by its ID */
   proposal?: Maybe<Proposal_200_Response>;
   /** Returns the active delegates that did not vote on a given proposal */
@@ -485,6 +477,7 @@ export type QueryTransactionsArgs = {
   affectedSupply?: InputMaybe<Scalars['JSON']['input']>;
   from?: InputMaybe<Scalars['String']['input']>;
   fromDate?: InputMaybe<Scalars['Int']['input']>;
+  includes?: InputMaybe<Scalars['JSON']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   maxAmount?: InputMaybe<Scalars['String']['input']>;
   minAmount?: InputMaybe<Scalars['String']['input']>;
@@ -1246,6 +1239,14 @@ export type HistoricalTreasuryPage = {
 export type LastUpdate_200_Response = {
   __typename?: 'lastUpdate_200_response';
   lastUpdate: Scalars['String']['output'];
+};
+
+export type LatestTotalAssets_200_Response = {
+  __typename?: 'latestTotalAssets_200_response';
+  /** Unix timestamp in milliseconds */
+  date: Scalars['Float']['output'];
+  totalTreasury: Scalars['Float']['output'];
+  treasuryWithoutDaoToken: Scalars['Float']['output'];
 };
 
 export enum MetricType {
