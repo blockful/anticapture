@@ -80,12 +80,12 @@ export const useProposals = ({
   // Initialize allProposals on first load
   useEffect(() => {
     if (rawProposals.length > 0 && allProposals.length === 0) {
-      const normalizedProposals = rawProposals.map(
-        transformToGovernanceProposal,
+      const normalizedProposals = rawProposals.map((p) =>
+        transformToGovernanceProposal(p, decimals),
       );
       setAllProposals(normalizedProposals);
     }
-  }, [rawProposals, allProposals.length]);
+  }, [rawProposals, allProposals.length, decimals]);
 
   // Pagination info
   const pagination: PaginationInfo = useMemo(() => {
@@ -167,6 +167,7 @@ export const useProposals = ({
     isPaginationLoading,
     queryVariables,
     allProposals.length,
+    decimals,
   ]);
 
   return {

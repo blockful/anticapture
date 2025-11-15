@@ -11,6 +11,7 @@ import { DefaultLink } from "@/shared/components/design-system/links/default-lin
 import { DaoIdEnum } from "@/shared/types/daos";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { OverviewMetric } from "@/features/dao-overview/components/OverviewMetric";
+import daoConfig from "@/shared/dao-config";
 
 const OVERVIEW_TOKEN_DISTRIBUTION_METRICS = [
   MetricTypesEnum.DELEGATED_SUPPLY,
@@ -20,6 +21,8 @@ const OVERVIEW_TOKEN_DISTRIBUTION_METRICS = [
 ];
 
 export const TokenDistributionChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
+  const { decimals } = daoConfig[daoId];
+
   const {
     chartData: tokenDistributionChartData,
     chartConfig: tokenDistributionChartConfig,
@@ -28,6 +31,7 @@ export const TokenDistributionChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
     appliedMetrics: OVERVIEW_TOKEN_DISTRIBUTION_METRICS,
     daoId,
     metricsSchema,
+    decimals,
   });
 
   const overviewTokenDistributionMetricsSchema = Object.fromEntries(
