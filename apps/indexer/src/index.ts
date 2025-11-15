@@ -28,6 +28,10 @@ import {
   GovernorIndexer as ObolGovernorIndexer,
   ObolTokenIndexer,
 } from "@/indexer/obol";
+import {
+  ZKTokenIndexer,
+  GovernorIndexer as ZKGovernorIndexer,
+} from "./indexer/zk";
 
 const { DAO_ID: daoId } = env;
 
@@ -91,6 +95,12 @@ switch (daoId) {
     const { token } = CONTRACT_ADDRESSES[daoId];
     ObolTokenIndexer(token.address, token.decimals);
     ObolGovernorIndexer(blockTime);
+    break;
+  }
+  case DaoIdEnum.ZK: {
+    const { token } = CONTRACT_ADDRESSES[daoId];
+    ZKTokenIndexer(token.address, token.decimals);
+    ZKGovernorIndexer(blockTime);
     break;
   }
   default:
