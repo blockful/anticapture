@@ -2538,6 +2538,14 @@ export type GetDelegateDelegationHistoryGraphQueryVariables = Exact<{
 
 export type GetDelegateDelegationHistoryGraphQuery = { __typename?: 'Query', votingPowerHistorys: { __typename?: 'votingPowerHistoryPage', totalCount: number, items: Array<{ __typename?: 'votingPowerHistory', delta: any, transactionHash: string, timestamp: any, votingPower: any, delegation?: { __typename?: 'delegation', delegatorAccountId: string, delegatedValue: any, previousDelegate?: string | null, delegateAccountId: string } | null, transfer?: { __typename?: 'transfer', amount: any, fromAccountId: string, toAccountId: string } | null }> } };
 
+export type GetDelegatedSupplyHistoryQueryVariables = Exact<{
+  startDate: Scalars['String']['input'];
+  endDate?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GetDelegatedSupplyHistoryQuery = { __typename?: 'Query', averageDelegationPercentageByDay: { __typename?: 'AverageDelegationPercentagePage', items: Array<{ __typename?: 'AverageDelegationPercentageItem', date: string, high: string }> } };
+
 export type GetDelegatesCountQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -3718,6 +3726,54 @@ export type GetDelegateDelegationHistoryGraphQueryHookResult = ReturnType<typeof
 export type GetDelegateDelegationHistoryGraphLazyQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryGraphLazyQuery>;
 export type GetDelegateDelegationHistoryGraphSuspenseQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryGraphSuspenseQuery>;
 export type GetDelegateDelegationHistoryGraphQueryResult = Apollo.QueryResult<GetDelegateDelegationHistoryGraphQuery, GetDelegateDelegationHistoryGraphQueryVariables>;
+export const GetDelegatedSupplyHistoryDocument = gql`
+    query GetDelegatedSupplyHistory($startDate: String!, $endDate: String) {
+  averageDelegationPercentageByDay(
+    startDate: $startDate
+    endDate: $endDate
+    limit: 365
+  ) {
+    items {
+      date
+      high
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetDelegatedSupplyHistoryQuery__
+ *
+ * To run a query within a React component, call `useGetDelegatedSupplyHistoryQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetDelegatedSupplyHistoryQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetDelegatedSupplyHistoryQuery({
+ *   variables: {
+ *      startDate: // value for 'startDate'
+ *      endDate: // value for 'endDate'
+ *   },
+ * });
+ */
+export function useGetDelegatedSupplyHistoryQuery(baseOptions: Apollo.QueryHookOptions<GetDelegatedSupplyHistoryQuery, GetDelegatedSupplyHistoryQueryVariables> & ({ variables: GetDelegatedSupplyHistoryQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetDelegatedSupplyHistoryQuery, GetDelegatedSupplyHistoryQueryVariables>(GetDelegatedSupplyHistoryDocument, options);
+      }
+export function useGetDelegatedSupplyHistoryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDelegatedSupplyHistoryQuery, GetDelegatedSupplyHistoryQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetDelegatedSupplyHistoryQuery, GetDelegatedSupplyHistoryQueryVariables>(GetDelegatedSupplyHistoryDocument, options);
+        }
+export function useGetDelegatedSupplyHistorySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegatedSupplyHistoryQuery, GetDelegatedSupplyHistoryQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetDelegatedSupplyHistoryQuery, GetDelegatedSupplyHistoryQueryVariables>(GetDelegatedSupplyHistoryDocument, options);
+        }
+export type GetDelegatedSupplyHistoryQueryHookResult = ReturnType<typeof useGetDelegatedSupplyHistoryQuery>;
+export type GetDelegatedSupplyHistoryLazyQueryHookResult = ReturnType<typeof useGetDelegatedSupplyHistoryLazyQuery>;
+export type GetDelegatedSupplyHistorySuspenseQueryHookResult = ReturnType<typeof useGetDelegatedSupplyHistorySuspenseQuery>;
+export type GetDelegatedSupplyHistoryQueryResult = Apollo.QueryResult<GetDelegatedSupplyHistoryQuery, GetDelegatedSupplyHistoryQueryVariables>;
 export const GetDelegatesCountDocument = gql`
     query GetDelegatesCount {
   accountPowers(where: {votingPower_gt: 0}) {

@@ -1,6 +1,11 @@
 "use client";
 
-import { PanelTable } from "@/features/panel/components";
+import {
+  PanelTable,
+  DelegatedSupplyHistory,
+  DaoProtectionLevels,
+  TreasuryMonitoring,
+} from "@/features/panel/components";
 import {
   SubSection,
   SubSectionsContainer,
@@ -14,18 +19,28 @@ export const PanelSection = () => {
   const [currency, setCurrency] = useState<"usd" | "eth">("usd");
 
   return (
-    <SubSectionsContainer>
-      <SubSection
-        subsectionTitle="Panel"
-        subsectionDescription="Check governance security across DAOs, with details on attack vectors and capture risks."
-        switcherComponent={
-          <SwitcherCurrency currency={currency} setCurrency={setCurrency} />
-        }
-        dateRange=""
-      >
-        <PanelTable currency={currency} />
-      </SubSection>
-    </SubSectionsContainer>
+    <div className="flex flex-col gap-2 p-4">
+      <div className="grid grid-cols-1 gap-2 lg:grid-cols-3">
+        <DaoProtectionLevels />
+        <TreasuryMonitoring />
+        <DelegatedSupplyHistory />
+      </div>
+
+      <SubSectionsContainer>
+        <SubSection
+          subsectionTitle="Panel"
+          subsectionDescription="Check governance security across DAOs, with details on attack vectors and capture risks."
+          switcherComponent={
+            <SwitcherCurrency currency={currency} setCurrency={setCurrency} />
+          }
+          dateRange=""
+        >
+          <div className="flex flex-col gap-4 px-2 py-4">
+            <PanelTable currency={currency} />
+          </div>
+        </SubSection>
+      </SubSectionsContainer>
+    </div>
   );
 };
 
