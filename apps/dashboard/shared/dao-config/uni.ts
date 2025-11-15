@@ -5,6 +5,7 @@ import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governan
 import { UniswapIcon } from "@/shared/components/icons";
 import { mainnet } from "viem/chains";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
+import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
 
 export const UNI: DaoConfiguration = {
   name: "Uniswap",
@@ -17,7 +18,7 @@ export const UNI: DaoConfiguration = {
   icon: UniswapIcon,
   daoOverview: {
     token: "ERC20",
-    chain: mainnet,
+    chain: { ...mainnet, icon: MainnetIcon },
     contracts: {
       governor: "0x408ED6354d4973f66138C91495F2f2FCbd8724C3",
       token: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",

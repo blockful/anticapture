@@ -69,13 +69,6 @@ export const useDaoOverviewData = ({
     formatUnits(BigInt(daoData.data?.quorum || 0), decimals),
   );
 
-  const turnoutValue = Number(
-    formatUnits(
-      BigInt(averageTurnout.data?.currentAverageTurnout || 0),
-      decimals,
-    ),
-  );
-
   const treasuryStats = useDaoTreasuryStats({
     treasuryAll,
     treasuryNonDao,
@@ -105,7 +98,6 @@ export const useDaoOverviewData = ({
     ),
     treasuryStats,
     quorumValue,
-    averageTurnoutPercentAboveQuorum: (turnoutValue / quorumValue - 1) * 100,
     topDelegatesToPass,
     proposalThresholdValue,
     proposalThresholdPercentage,
