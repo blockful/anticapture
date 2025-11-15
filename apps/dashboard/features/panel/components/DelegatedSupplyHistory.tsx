@@ -236,18 +236,6 @@ export const DelegatedSupplyHistory = () => {
             />
           </LineChart>
         </ChartContainer>
-        {/* X-axis pointers (vertical lines above labels) */}
-        <div className="absolute bottom-0 left-[32px] right-[16px] flex justify-between">
-          {chartData.map((_, index) => (
-            <div
-              key={index}
-              className="flex flex-col items-center"
-              style={{ width: `${100 / chartData.length}%` }}
-            >
-              <div className="bg-surface-contrast h-[8px] w-px" />
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );
