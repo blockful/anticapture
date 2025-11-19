@@ -122,33 +122,38 @@ export class TransactionsRepository {
       this.timePeriodToSql(filter, "delegations"),
       "AND",
     );
+
+    const transferSupplyConditions: string[] = [];
+    const delegationSupplyConditions: string[] = [];
+    const transferAmountConditions: string[] = [];
+    const delegationAmountConditions: string[] = [];
+    const transferOtherConditions: string[] = [];
+    const delegationOtherConditions: string[] = [];
+
     const checkIsDex = filter.affectedSupply.isDex ?? false;
     const checkIsCex = filter.affectedSupply.isCex ?? false;
     const checkIsLending = filter.affectedSupply.isLending ?? false;
     const checkIsTotal = filter.affectedSupply.isTotal ?? false;
     const checkIsUnassigned = filter.affectedSupply.isUnassigned ?? false;
 
-    const transferConditions: string[] = [];
-    const delegationConditions: string[] = [];
-
     if (checkIsDex) {
-      transferConditions.push(`transfers.is_dex = true`);
-      delegationConditions.push(`delegations.is_dex = true`);
+      transferSupplyConditions.push(`transfers.is_dex = true`);
+      delegationSupplyConditions.push(`delegations.is_dex = true`);
     }
     if (checkIsCex) {
-      transferConditions.push(`transfers.is_cex = true`);
-      delegationConditions.push(`delegations.is_cex = true`);
+      transferSupplyConditions.push(`transfers.is_cex = true`);
+      delegationSupplyConditions.push(`delegations.is_cex = true`);
     }
     if (checkIsLending) {
-      transferConditions.push(`transfers.is_lending = true`);
-      delegationConditions.push(`delegations.is_lending = true`);
+      transferSupplyConditions.push(`transfers.is_lending = true`);
+      delegationSupplyConditions.push(`delegations.is_lending = true`);
     }
     if (checkIsTotal) {
-      transferConditions.push(`transfers.is_total = true`);
-      delegationConditions.push(`delegations.is_total = true`);
+      transferSupplyConditions.push(`transfers.is_total = true`);
+      delegationSupplyConditions.push(`delegations.is_total = true`);
     }
     if (checkIsUnassigned) {
-      transferConditions.push(
+      transferSupplyConditions.push(
         this.coalesceConditionArray(
           [
             `transfers.is_total = false`,
@@ -159,7 +164,7 @@ export class TransactionsRepository {
           "AND",
         ),
       );
-      delegationConditions.push(
+      delegationSupplyConditions.push(
         this.coalesceConditionArray(
           [
             `delegations.is_total = false`,
@@ -173,42 +178,71 @@ export class TransactionsRepository {
     }
 
     if (filter.minAmount != null) {
-      transferConditions.push(`transfers.amount >= ${filter.minAmount}`);
-      delegationConditions.push(
+      transferAmountConditions.push(`transfers.amount >= ${filter.minAmount}`);
+      delegationAmountConditions.push(
         `delegations.delegated_value >= ${filter.minAmount}`,
       );
     }
     if (filter.maxAmount != null) {
-      transferConditions.push(`transfers.amount <= ${filter.maxAmount}`);
-      delegationConditions.push(
+      transferAmountConditions.push(`transfers.amount <= ${filter.maxAmount}`);
+      delegationAmountConditions.push(
         `delegations.delegated_value <= ${filter.maxAmount}`,
       );
     }
     if (filter.from != null) {
-      transferConditions.push(`transfers.from_account_id = '${filter.from}'`);
-      delegationConditions.push(
+      transferOtherConditions.push(
+        `transfers.from_account_id = '${filter.from}'`,
+      );
+      delegationOtherConditions.push(
         `delegations.delegator_account_id = '${filter.from}'`,
       );
     }
     if (filter.to != null) {
-      transferConditions.push(`transfers.to_account_id = '${filter.to}'`);
-      delegationConditions.push(
+      transferOtherConditions.push(`transfers.to_account_id = '${filter.to}'`);
+      delegationOtherConditions.push(
         `delegations.delegate_account_id = '${filter.to}'`,
       );
     }
+
+    const transferSupplyBlock =
+      transferSupplyConditions.length > 0
+        ? this.coalesceConditionArray(transferSupplyConditions, "OR")
+        : "true";
+    const delegationSupplyBlock =
+      delegationSupplyConditions.length > 0
+        ? this.coalesceConditionArray(delegationSupplyConditions, "OR")
+        : "true";
+
+    const transferAmountBlock =
+      transferAmountConditions.length > 0
+        ? this.coalesceConditionArray(transferAmountConditions, "AND")
+        : "true";
+    const delegationAmountBlock =
+      delegationAmountConditions.length > 0
+        ? this.coalesceConditionArray(delegationAmountConditions, "AND")
+        : "true";
+
+    const transferOtherBlock =
+      transferOtherConditions.length > 0
+        ? this.coalesceConditionArray(transferOtherConditions, "AND")
+        : "true";
+    const delegationOtherBlock =
+      delegationOtherConditions.length > 0
+        ? this.coalesceConditionArray(delegationOtherConditions, "AND")
+        : "true";
 
     return {
       transfer: this.coalesceConditionArray(
         [
           transferTimePeriodConditions,
-          this.coalesceConditionArray(transferConditions, "OR"),
+          `(${transferSupplyBlock} AND ${transferAmountBlock} AND ${transferOtherBlock})`,
         ],
         "AND",
       ),
       delegation: this.coalesceConditionArray(
         [
           delegationTimePeriodConditions,
-          this.coalesceConditionArray(delegationConditions, "OR"),
+          `(${delegationSupplyBlock} AND ${delegationAmountBlock} AND ${delegationOtherBlock})`,
         ],
         "AND",
       ),
