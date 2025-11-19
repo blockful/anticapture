@@ -11,7 +11,7 @@ import {
   GraphTransaction,
 } from "@/features/transactions/utils/transactionsAdapter";
 import { NetworkStatus } from "@apollo/client";
-import { formatUnits } from "viem";
+import { parseUnits } from "viem";
 import { SupplyType } from "@/shared/components";
 import daoConfig from "@/shared/dao-config";
 
@@ -79,10 +79,16 @@ export const useTransactionsTableData = ({
         ...(filters?.from && { from: filters?.from }),
         ...(filters?.to && { to: filters?.to }),
         ...(filters?.minAmount && {
-          minAmount: formatUnits(BigInt(filters.minAmount), decimals),
+          minAmount: parseUnits(
+            filters.minAmount.toString(),
+            decimals,
+          ).toString(),
         }),
         ...(filters?.maxAmount && {
-          maxAmount: formatUnits(BigInt(filters.maxAmount), decimals),
+          maxAmount: parseUnits(
+            filters.maxAmount.toString(),
+            decimals,
+          ).toString(),
         }),
         ...(filters?.sortOrder && {
           sortOrder: filters?.sortOrder as QueryInput_Transactions_SortOrder,
