@@ -23,8 +23,9 @@ export const TabsDidntVoteContent = ({
   proposal: NonNullable<GetProposalQuery["proposal"]>;
 }) => {
   const loadingRowRef = useRef<HTMLTableRowElement>(null);
-  const { daoId } = useParams();
-  const { decimals } = daoConfig[daoId as DaoIdEnum];
+  const { daoId } = useParams<{ daoId: string }>();
+  const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
+  const { decimals } = daoConfig[daoIdEnum];
 
   // State for managing sort order
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");

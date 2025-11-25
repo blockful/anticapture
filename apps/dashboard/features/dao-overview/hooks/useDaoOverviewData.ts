@@ -1,4 +1,4 @@
-import { formatUnits, parseUnits } from "viem";
+import { formatUnits } from "viem";
 
 import {
   useDaoData,
@@ -53,8 +53,11 @@ export const useDaoOverviewData = ({
   const proposalThresholdPercentage =
     daoData?.data?.proposalThreshold && totalSupply
       ? (
-          parseUnits(daoData.data.proposalThreshold, decimals) /
-          parseUnits(totalSupply, decimals)
+          (Number(
+            formatUnits(BigInt(daoData.data.proposalThreshold), decimals),
+          ) /
+            Number(formatUnits(BigInt(totalSupply), decimals))) *
+          100
         ).toString()
       : "0";
 
@@ -64,13 +67,6 @@ export const useDaoOverviewData = ({
 
   const quorumValue = Number(
     formatUnits(BigInt(daoData.data?.quorum || 0), decimals),
-  );
-
-  const turnoutValue = Number(
-    formatUnits(
-      BigInt(averageTurnout.data?.currentAverageTurnout || 0),
-      decimals,
-    ),
   );
 
   const treasuryStats = useDaoTreasuryStats({
@@ -102,7 +98,6 @@ export const useDaoOverviewData = ({
     ),
     treasuryStats,
     quorumValue,
-    averageTurnoutPercentAboveQuorum: (turnoutValue / quorumValue - 1) * 100,
     topDelegatesToPass,
     proposalThresholdValue,
     proposalThresholdPercentage,

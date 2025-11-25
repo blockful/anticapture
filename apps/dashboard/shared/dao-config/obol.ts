@@ -4,6 +4,7 @@ import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governan
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 import { ObolIcon } from "@/shared/components/icons";
 import { mainnet } from "viem/chains";
+import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
 
 export const OBOL: DaoConfiguration = {
   name: "Obol Collective",
@@ -15,7 +16,7 @@ export const OBOL: DaoConfiguration = {
   icon: ObolIcon,
   daoOverview: {
     token: "ERC20",
-    chain: mainnet,
+    chain: { ...mainnet, icon: MainnetIcon },
     snapshot: "",
     contracts: {
       governor: "0xcB1622185A0c62A80494bEde05Ba95ef29Fbf85c",
