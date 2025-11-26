@@ -10,7 +10,9 @@ import { Table } from "@/shared/components/design-system/table/Table";
 import { getTransactionsColumns } from "@/features/transactions/utils/getTransactionsColumns";
 import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
 
-export const AcceptedMetrics: string[] = ["CEX", "DEX", "LENDING", "TOTAL"];
+type Supply = "CEX" | "DEX" | "LENDING" | "TOTAL" | "UNASSIGNED";
+
+export const AcceptedMetrics: Supply[] = ["CEX", "DEX", "LENDING", "TOTAL"];
 
 export const TransactionsTable = ({
   metrics,
@@ -34,8 +36,21 @@ export const TransactionsTable = ({
   const affectedSupply = metrics
     .map((metric) => metric.replace("_SUPPLY", ""))
     .filter((metric) =>
-      AcceptedMetrics.includes(metric),
+      AcceptedMetrics.includes(metric as Supply),
     ) as AffectedSupplyType[];
+
+  const buildFilters = (
+    showAll: boolean,
+    affectedSupply: Supply[],
+  ): Supply[] => {
+    if (showAll) {
+      return affectedSupply.length ? [...affectedSupply, "UNASSIGNED"] : [];
+    } else {
+      return affectedSupply.length
+        ? affectedSupply
+        : ["CEX", "DEX", "LENDING", "TOTAL"];
+    }
+  };
 
   const includes = [
     ...(metrics.includes("DELEGATED_SUPPLY") ? ["DELEGATION"] : []),
@@ -57,9 +72,7 @@ export const TransactionsTable = ({
       minAmount,
       maxAmount,
       sortOrder,
-      affectedSupply: hasTransfer
-        ? [...affectedSupply, "UNASSIGNED"]
-        : affectedSupply || undefined,
+      affectedSupply: buildFilters(hasTransfer, affectedSupply),
       includes,
     },
   });
