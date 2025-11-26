@@ -7,6 +7,7 @@ import nounsConfig from "./config/nouns.config";
 import scrollConfig from "./config/scroll.config";
 import compoundConfig from "./config/compound.config";
 import obolConfig from "./config/obol.config";
+import zkConfig from "./config/zk.config";
 
 export default {
   chains: {
@@ -19,6 +20,7 @@ export default {
     ...scrollConfig.chains,
     ...compoundConfig.chains,
     ...obolConfig.chains,
+    ...zkConfig.chains,
   },
   contracts: {
     ...arbitrumConfig.contracts,
@@ -30,5 +32,6 @@ export default {
     ...scrollConfig.contracts,
     ...compoundConfig.contracts,
     ...obolConfig.contracts,
+    ...zkConfig.contracts,
   },
 };
