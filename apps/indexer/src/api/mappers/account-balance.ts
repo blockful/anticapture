@@ -1,9 +1,11 @@
-import { DaysEnum, DaysOpts } from "@/lib/enums";
+import { DaoIdEnum, DaysEnum, DaysOpts } from "@/lib/enums";
 import { z } from "@hono/zod-openapi";
 import { Address } from "viem";
 import { PERCENTAGE_NO_BASELINE } from "./constants";
+import { calculateHistoricalBlockNumber } from "@/lib/blockTime";
+import { CONTRACT_ADDRESSES } from "@/lib/constants";
 
-export const TopAccountBalanceVariationsRequestSchema = z.object({
+export const AccountBalanceVariationsRequestSchema = z.object({
   days: z
     .enum(DaysOpts)
     .optional()
@@ -25,7 +27,7 @@ export const TopAccountBalanceVariationsRequestSchema = z.object({
   orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
 });
 
-export const TopAccountBalanceVariationsResponseSchema = z.object({
+export const AccountBalanceVariationsResponseSchema = z.object({
   period: z.object({
     days: z.string(),
     startTimestamp: z.string(),
@@ -42,8 +44,31 @@ export const TopAccountBalanceVariationsResponseSchema = z.object({
   ),
 });
 
-export type TopAccountBalanceVariationsResponse = z.infer<
-  typeof TopAccountBalanceVariationsResponseSchema
+export const AccountInteractionsRequestSchema =
+  AccountBalanceVariationsRequestSchema.extend({
+    accountId: z.string(),
+  });
+
+export const AccountInteractionsResponseSchema = z.object({
+  period: z.object({
+    days: z.string(),
+    startTimestamp: z.string(),
+    endTimestamp: z.string(),
+  }),
+  items: z.array(
+    z.object({
+      accountId: z.string(),
+      amountTransferred: z.string(),
+    }),
+  ),
+});
+
+export type AccountBalanceVariationsResponse = z.infer<
+  typeof AccountBalanceVariationsResponseSchema
+>;
+
+export type AccountInteractionsResponse = z.infer<
+  typeof AccountInteractionsResponseSchema
 >;
 
 export type DBAccountBalanceVariation = {
@@ -54,12 +79,41 @@ export type DBAccountBalanceVariation = {
   percentageChange: number;
 };
 
-export const TopAccountBalanceVariationsMapper = (
+export interface DBHistoricalBalance {
+  address: Address;
+  balance: string;
+}
+
+export type HistoricalBalance = DBHistoricalBalance & {
+  blockNumber: number;
+  tokenAddress: Address;
+};
+
+export const HistoricalBalanceMapper = (
+  daoId: DaoIdEnum,
+  balances: DBHistoricalBalance[],
+  currentBlockNumber: number,
+  days: DaysEnum,
+): HistoricalBalance[] => {
+  const blockNumber = calculateHistoricalBlockNumber(
+    days,
+    currentBlockNumber,
+    CONTRACT_ADDRESSES[daoId].blockTime,
+  );
+
+  return balances.map((b) => ({
+    ...b,
+    blockNumber: blockNumber,
+    tokenAddress: CONTRACT_ADDRESSES[daoId].token.address,
+  }));
+};
+
+export const AccountBalanceVariationsMapper = (
   variations: DBAccountBalanceVariation[],
   endTimestamp: number,
   days: DaysEnum,
-): TopAccountBalanceVariationsResponse => {
-  return TopAccountBalanceVariationsResponseSchema.parse({
+): AccountBalanceVariationsResponse => {
+  return AccountBalanceVariationsResponseSchema.parse({
     period: {
       days: DaysEnum[days] as string,
       startTimestamp: new Date((endTimestamp - days) * 1000).toISOString(),
@@ -82,5 +136,26 @@ export const TopAccountBalanceVariationsMapper = (
           : PERCENTAGE_NO_BASELINE,
       }),
     ),
+  });
+};
+
+export const AccountInteractionsMapper = (
+  accountId: Address,
+  interactions: DBAccountBalanceVariation[],
+  endTimestamp: number,
+  days: DaysEnum,
+): AccountInteractionsResponse => {
+  return AccountInteractionsResponseSchema.parse({
+    period: {
+      days: DaysEnum[days] as string,
+      startTimestamp: new Date((endTimestamp - days) * 1000).toISOString(),
+      endTimestamp: new Date(endTimestamp * 1000).toISOString(),
+    },
+    items: interactions
+      .filter(({ accountId: addr }) => addr !== accountId)
+      .map(({ accountId, absoluteChange }) => ({
+        accountId: accountId,
+        amountTransferred: absoluteChange.toString(),
+      })),
   });
 };

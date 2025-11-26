@@ -17,6 +17,7 @@ import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 
 import { DaoIdEnum } from "@/shared/types/daos";
 import { Table } from "@/shared/components/design-system/table/Table";
+import daoConfig from "@/shared/dao-config";
 
 interface DelegationData {
   address: string;
@@ -32,6 +33,7 @@ export const DelegationHistoryTable = ({
   address: string;
   daoId: DaoIdEnum;
 }) => {
+  const { decimals } = daoConfig[daoId];
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [sortBy, setSortBy] = useState<"timestamp" | "delegatedValue">(
@@ -57,15 +59,13 @@ export const DelegationHistoryTable = ({
 
   const data: DelegationData[] =
     delegationHistory?.map((delegation) => {
-      const delegateAddress = delegation.delegate?.id || "";
-      const votingPower =
-        delegation.delegate?.powers?.items?.[0]?.votingPower || "0";
+      const delegateAddress = delegation.delegateAccountId || "";
+      const delegatedValue = delegation.delegatedValue || "0";
       const timestamp = delegation.timestamp || 0;
 
-      const formattedAmount =
-        votingPower !== "0"
-          ? Number(formatUnits(BigInt(votingPower), 18)).toFixed(2)
-          : "0";
+      const formattedAmount = Number(
+        formatUnits(BigInt(delegatedValue), decimals),
+      ).toFixed(2);
 
       const date = timestamp
         ? formatDateUserReadable(new Date(Number(timestamp) * 1000))

@@ -60,7 +60,7 @@ export class DelegationPercentageService {
   /**
    * Main method to get delegation percentage data with forward-fill and pagination
    */
-  async getDelegationPercentage(
+  async delegationPercentageByDay(
     filters: DelegationPercentageQuery,
   ): Promise<DelegationPercentageServiceResult> {
     const { after, before, startDate, endDate, orderDirection, limit } =
@@ -85,7 +85,7 @@ export class DelegationPercentageService {
       startDate: referenceDate,
       endDate: normalizedBefore || normalizedEndDate,
       orderDirection,
-      limit: limit + 1, // Necessary to check if there is a next page
+      limit: (limit + 1) * 2, // The limit is doubled to ensure we get all delegation and total supply values
     });
 
     // 3. Organize data by date

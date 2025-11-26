@@ -3,7 +3,6 @@
 import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoPageInteractionProvider } from "@/shared/contexts/DaoPageInteractionContext";
 import { AttackProfitabilitySection } from "@/features/attack-profitability";
 import { RiskAnalysisSection } from "@/features/risk-analysis";
 import { GovernanceImplementationSection } from "@/features/governance-implementation";
@@ -32,7 +31,7 @@ export const DaoTemplate = () => {
     " SECURITY UPDATES.";
 
   return (
-    <DaoPageInteractionProvider>
+    <>
       {/* <MessageStacker messages={messages} /> */}
       {/* <BannerAlert
         icon={<Info className="size-4" />}
@@ -78,10 +77,7 @@ export const DaoTemplate = () => {
         {daoConstants.dataTables && (
           <HoldersAndDelegatesSection daoId={daoIdEnum} />
         )}
-
-        {/* Demo section for expandable table - remove this in production */}
-        {/* <TransactionsTable /> */}
       </div>
-    </DaoPageInteractionProvider>
+    </>
   );
 };

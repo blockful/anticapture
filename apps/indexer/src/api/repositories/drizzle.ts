@@ -69,16 +69,6 @@ export class DrizzleRepository {
     return result.rows[0];
   }
 
-  async getVotingDelay(): Promise<bigint> {
-    const result = await db.query.dao.findFirst({
-      columns: {
-        votingDelay: true,
-      },
-    });
-
-    return result!.votingDelay;
-  }
-
   async getProposalsCompare(days: DaysEnum) {
     const query = sql`
       WITH old_proposals AS (
@@ -116,17 +106,17 @@ export class DrizzleRepository {
   }
 
   async getAverageTurnoutCompare(days: DaysEnum) {
-    const query = sql`
+    const query = sql<AverageTurnoutCompareQueryResult>`
       WITH old_average_turnout AS (
-        SELECT AVG(po."for_votes" + po."against_votes" + po."abstain_votes") AS "oldAverageTurnout"
-        FROM "proposals_onchain" po
-        WHERE po.timestamp <= ${this.now() - days}
-        AND po.status != 'CANCELED'
+        SELECT COALESCE(AVG(${proposalsOnchain.forVotes} + ${proposalsOnchain.againstVotes} + ${proposalsOnchain.abstainVotes}), 0) AS "oldAverageTurnout"
+        FROM ${proposalsOnchain}
+        WHERE ${proposalsOnchain.timestamp} <= ${this.now() - days}
+        AND ${proposalsOnchain.status} != 'CANCELED'
       ),
       current_average_turnout AS (
-        SELECT AVG(po."for_votes" + po."against_votes" + po."abstain_votes") AS "currentAverageTurnout"
-        FROM "proposals_onchain" po
-        WHERE po.status != 'CANCELED'
+        SELECT COALESCE(AVG(${proposalsOnchain.forVotes} + ${proposalsOnchain.againstVotes} + ${proposalsOnchain.abstainVotes}), 0) AS "currentAverageTurnout"
+        FROM ${proposalsOnchain}
+        WHERE ${proposalsOnchain.status} != 'CANCELED' AND ${proposalsOnchain.timestamp} >= ${this.now() - days}
       )
       SELECT * FROM current_average_turnout
       JOIN old_average_turnout ON 1=1;
@@ -141,6 +131,7 @@ export class DrizzleRepository {
     orderDirection: "asc" | "desc",
     status: string[] | undefined,
     fromDate: number | undefined,
+    fromEndDate: number | undefined,
   ): Promise<DBProposal[]> {
     const whereClauses: SQL<unknown>[] = [];
 
@@ -150,6 +141,12 @@ export class DrizzleRepository {
 
     if (fromDate) {
       whereClauses.push(gte(proposalsOnchain.timestamp, BigInt(fromDate)));
+    }
+
+    if (fromEndDate) {
+      whereClauses.push(
+        gte(proposalsOnchain.endTimestamp, BigInt(fromEndDate)),
+      );
     }
 
     return await db

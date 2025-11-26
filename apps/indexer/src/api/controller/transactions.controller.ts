@@ -37,11 +37,14 @@ export function transactions(app: Hono, service: TransactionsService) {
         offset,
         sortBy,
         sortOrder,
+        fromDate,
+        toDate,
         from,
         to,
         minAmount,
         maxAmount,
         affectedSupply,
+        includes,
       } = context.req.valid("query");
 
       const result = await service.getTransactions({
@@ -49,11 +52,14 @@ export function transactions(app: Hono, service: TransactionsService) {
         offset,
         sortBy,
         sortOrder,
+        fromDate,
+        toDate,
         from,
         to,
         minAmount,
         maxAmount,
         affectedSupply,
+        includes,
       });
 
       return context.json(result);

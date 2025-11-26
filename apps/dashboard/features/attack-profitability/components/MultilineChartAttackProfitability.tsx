@@ -29,7 +29,11 @@ import {
   useDaoTokenHistoricalData,
   useTreasuryAssetNonDaoToken,
 } from "@/features/attack-profitability/hooks";
-import { timestampToReadableDate } from "@/shared/utils";
+import {
+  cn,
+  formatNumberUserReadable,
+  timestampToReadableDate,
+} from "@/shared/utils";
 import {
   normalizeDataset,
   normalizeDatasetTreasuryNonDaoToken,
@@ -38,17 +42,20 @@ import {
 import daoConfigByDaoId from "@/shared/dao-config";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 import { Data } from "react-csv/lib/core";
+import { formatUnits } from "viem";
 
 interface MultilineChartAttackProfitabilityProps {
   days: string;
   filterData?: string[];
-  setCsvData: (data: Data) => void;
+  setCsvData?: (data: Data) => void;
+  context?: "overview" | "section";
 }
 
 export const MultilineChartAttackProfitability = ({
   filterData,
   days,
   setCsvData,
+  context = "section",
 }: MultilineChartAttackProfitabilityProps) => {
   const { daoId } = useParams<{ daoId: string }>();
   const daoEnum = daoId.toUpperCase() as DaoIdEnum;
@@ -57,12 +64,12 @@ export const MultilineChartAttackProfitability = ({
 
   const { data: treasuryAssetNonDAOToken = [] } = useTreasuryAssetNonDaoToken(
     daoEnum,
-    TimeInterval.ONE_YEAR,
+    days,
   );
 
   const { data: daoTokenPriceHistoricalData } = useDaoTokenHistoricalData({
     daoId: daoEnum,
-    limit: Number(days.split("d")[0]),
+    limit: Number(days.split("d")[0]) - 7,
   });
 
   const { data: timeSeriesData } = useTimeSeriesData(
@@ -82,9 +89,9 @@ export const MultilineChartAttackProfitability = ({
     [timeSeriesData],
   );
 
-  const quorumValue = daoData?.quorum
-    ? Number(daoData.quorum) / 10 ** 18
-    : null;
+  const quorumValue = Number(
+    formatUnits(BigInt(daoData?.quorum || "0"), daoConfig.decimals),
+  );
 
   const chartConfig = useMemo(
     () => ({
@@ -110,50 +117,50 @@ export const MultilineChartAttackProfitability = ({
     let datasets: Record<string, MultilineChartDataSetPoint[]> = {};
     if (mocked) {
       datasets = mockedAttackProfitabilityDatasets;
-    }
-
-    datasets = {
-      treasuryNonDAO: normalizeDatasetTreasuryNonDaoToken(
-        treasuryAssetNonDAOToken,
-        "treasuryNonDAO",
-      ).reverse(),
-      all: normalizeDatasetAllTreasury(
-        daoTokenPriceHistoricalData,
-        "all",
-        treasuryAssetNonDAOToken,
-        treasurySupplyChart,
-      ),
-      quorum: daoConfig?.attackProfitability?.dynamicQuorum?.percentage
-        ? normalizeDataset(
-            daoTokenPriceHistoricalData,
-            "quorum",
-            1,
-            daoConfig?.daoOverview.token,
-            delegatedSupplyChart,
-          ).map((datasetpoint) => ({
-            ...datasetpoint,
-            quorum:
-              datasetpoint.quorum *
-              (daoConfig?.attackProfitability?.dynamicQuorum?.percentage ?? 0),
-          }))
-        : quorumValue
+    } else {
+      datasets = {
+        treasuryNonDAO: normalizeDatasetTreasuryNonDaoToken(
+          treasuryAssetNonDAOToken,
+          "treasuryNonDAO",
+        ).reverse(),
+        all: normalizeDatasetAllTreasury(
+          daoTokenPriceHistoricalData,
+          "all",
+          treasuryAssetNonDAOToken,
+          treasurySupplyChart,
+          daoConfig.decimals,
+        ),
+        quorum: daoConfig?.attackProfitability?.dynamicQuorum?.percentage
           ? normalizeDataset(
               daoTokenPriceHistoricalData,
               "quorum",
-              quorumValue,
-              daoConfig?.daoOverview.token,
+              delegatedSupplyChart,
+              daoConfig.decimals,
+            ).map((datasetpoint) => ({
+              ...datasetpoint,
+              quorum:
+                datasetpoint.quorum *
+                (daoConfig?.attackProfitability?.dynamicQuorum?.percentage ??
+                  0),
+            }))
+          : quorumValue
+            ? normalizeDataset(
+                daoTokenPriceHistoricalData,
+                "quorum",
+                quorumValue,
+                daoConfig.decimals,
+              )
+            : [],
+        delegated: delegatedSupplyChart
+          ? normalizeDataset(
+              daoTokenPriceHistoricalData,
+              "delegated",
+              delegatedSupplyChart,
+              daoConfig.decimals,
             )
           : [],
-      delegated: delegatedSupplyChart
-        ? normalizeDataset(
-            daoTokenPriceHistoricalData,
-            "delegated",
-            1,
-            daoConfig?.daoOverview.token,
-            delegatedSupplyChart,
-          )
-        : [],
-    };
+      };
+    }
 
     const lastKnownValues: Record<string, number | null> = {};
 
@@ -185,12 +192,13 @@ export const MultilineChartAttackProfitability = ({
   }, [
     filterData,
     chartConfig,
-    daoId,
     mocked,
     quorumValue,
     daoTokenPriceHistoricalData,
     treasuryAssetNonDAOToken,
     timeSeriesData,
+    daoConfig?.attackProfitability?.dynamicQuorum?.percentage,
+    daoConfig.decimals,
   ]);
 
   const prevCsvRef = useRef<string>("");
@@ -200,27 +208,46 @@ export const MultilineChartAttackProfitability = ({
     const serialized = JSON.stringify(chartData);
     if (serialized !== prevCsvRef.current) {
       prevCsvRef.current = serialized;
-      setCsvData(chartData as Data);
+      setCsvData?.(chartData as Data);
     }
   }, [chartData, mocked, setCsvData]);
 
   return (
-    <div className="sm:border-light-dark sm:bg-surface-default text-primary relative flex h-[300px] w-full items-center justify-center rounded-lg">
+    <div
+      className={cn(
+        "sm:border-light-dark sm:bg-surface-default text-primary relative flex h-[300px] w-full items-center justify-center rounded-lg",
+        {
+          "-mb-1 h-44": context === "overview",
+        },
+      )}
+    >
       {mocked && <ResearchPendingChartBlur />}
-      <ChartContainer className="h-full w-full" config={chartConfig}>
-        <LineChart data={chartData}>
+      <ChartContainer
+        className="h-full w-full justify-start"
+        config={chartConfig}
+      >
+        <LineChart
+          data={chartData}
+          margin={{ top: 0, right: 16, left: -16, bottom: 0 }}
+        >
           <CartesianGrid vertical={false} stroke="#27272a" />
           <XAxis
             dataKey="date"
             scale="time"
             type="number"
             domain={["auto", "auto"]}
-            tickLine={false}
-            axisLine={false}
             tickMargin={8}
-            tickFormatter={(date) => timestampToReadableDate(date)}
+            tickFormatter={(timestamp) =>
+              timestampToReadableDate(timestamp, "abbreviated")
+            }
+            allowDuplicatedCategory={false}
+            padding={{ left: 0, right: 20 }}
           />
-          <YAxis hide={true} />
+          <YAxis
+            tickFormatter={(value) => formatNumberUserReadable(value)}
+            yAxisId={0}
+            domain={["auto", "auto"]}
+          />
           <Tooltip
             content={
               <AttackProfitabilityCustomTooltip chartConfig={chartConfig} />

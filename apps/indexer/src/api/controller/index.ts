@@ -11,5 +11,7 @@ export * from "./proposals";
 export * from "./last-update.controller";
 export * from "./voting-power";
 export * from "./delegation-percentage.controller";
-export * from "./top-account-balance-variations";
+export * from "./account/balance-variations.ts";
+export * from "./account/interactions.ts";
 export * from "./top-voting-power-variations";
+export * from "./dao.controller";

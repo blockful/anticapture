@@ -4,15 +4,21 @@ import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governan
 import { OptimismIcon } from "@/shared/components/icons";
 import { optimism } from "viem/chains";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
+import { OptimismChainIcon } from "@/shared/components/icons/OptimismChainIcon";
 
 export const OP: DaoConfiguration = {
   name: "Optimism",
+  decimals: 18,
+  color: {
+    svgColor: "#ff0420",
+    svgBgColor: "#FFF2FB",
+  },
+  forumLink: "https://gov.optimism.io/",
   noStage: true,
   icon: OptimismIcon,
   daoOverview: {
     token: "ERC20",
-    chain: optimism,
-    blockTime: 2,
+    chain: { ...optimism, icon: OptimismChainIcon },
     snapshot: "https://snapshot.box/#/s:citizenshouse.eth",
     contracts: {
       governor: "0xcDF27F107725988f2261Ce2256bDfCdE8B382B10",

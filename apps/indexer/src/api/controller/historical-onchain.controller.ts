@@ -1,20 +1,19 @@
 import { isAddress } from "viem";
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 
-import { DaoIdEnum, DaysOpts, DaysEnum } from "@/lib/enums";
+import { DaysOpts, DaysEnum, DaoIdEnum } from "@/lib/enums";
 import {
   HistoricalBalancesService,
-  HistoricalBalancesRequest,
   HistoricalVotingPowerService,
 } from "../services";
+import { HistoricalBalanceMapper } from "../mappers";
 
 export function historicalOnchain(
   app: Hono,
   daoId: DaoIdEnum,
   votingPowerService: HistoricalVotingPowerService,
+  balancesService: HistoricalBalancesService,
 ) {
-  const balancesService = new HistoricalBalancesService();
-
   // Historical Balances endpoint
   app.openapi(
     createRoute({
@@ -65,16 +64,22 @@ export function historicalOnchain(
     }),
     async (context) => {
       const { addresses, days } = context.req.valid("query");
+      const now = Math.floor(Date.now() / 1000);
 
-      const request: HistoricalBalancesRequest = {
+      const balances = await balancesService.getHistoricalBalances(
         addresses,
-        daysInSeconds: days,
-        daoId,
-      };
+        now - days,
+      );
 
-      const balances = await balancesService.getHistoricalBalances(request);
-
-      return context.json(balances, 200);
+      return context.json(
+        HistoricalBalanceMapper(
+          daoId,
+          balances,
+          await balancesService.getCurrentBlockNumber(),
+          days,
+        ),
+        200,
+      );
     },
   );
 

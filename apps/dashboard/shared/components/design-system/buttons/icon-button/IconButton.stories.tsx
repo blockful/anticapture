@@ -75,15 +75,15 @@ export const Sizes: Story = {
   render: (args) => (
     <div className="flex items-center gap-4">
       <div className="flex flex-col items-center gap-2">
-        <IconButton {...args} size="sm" />
+        <IconButton {...args} size="sm" icon={args.icon} />
         <span className="text-xs text-gray-400">SM</span>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <IconButton {...args} size="md" />
+        <IconButton {...args} size="md" icon={args.icon} />
         <span className="text-xs text-gray-400">MD</span>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <IconButton {...args} size="lg" />
+        <IconButton {...args} size="lg" icon={args.icon} />
         <span className="text-xs text-gray-400">LG</span>
       </div>
     </div>
@@ -97,19 +97,19 @@ export const Variants: Story = {
   render: (args) => (
     <div className="flex items-center gap-4">
       <div className="flex flex-col items-center gap-2">
-        <IconButton {...args} variant="primary" />
+        <IconButton {...args} variant="primary" icon={args.icon} />
         <span className="text-xs text-gray-400">Primary</span>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <IconButton {...args} variant="outline" />
+        <IconButton {...args} variant="outline" icon={args.icon} />
         <span className="text-xs text-gray-400">Outline</span>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <IconButton {...args} variant="ghost" />
+        <IconButton {...args} variant="ghost" icon={args.icon} />
         <span className="text-xs text-gray-400">Ghost</span>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <IconButton {...args} variant="destructive" />
+        <IconButton {...args} variant="destructive" icon={args.icon} />
         <span className="text-xs text-gray-400">Destructive</span>
       </div>
     </div>

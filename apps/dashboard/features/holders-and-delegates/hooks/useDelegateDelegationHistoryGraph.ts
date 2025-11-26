@@ -4,6 +4,7 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import { VotingPowerTimePeriod } from "@/features/holders-and-delegates/components/DelegatesDelegationHistory/VotingPowerTimePeriodSwitcher";
 import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
 import { formatUnits } from "viem";
+import daoConfig from "@/shared/dao-config";
 
 // Interface for a single delegation history item for the graph
 export interface DelegationHistoryGraphItem {
@@ -29,6 +30,10 @@ export function useDelegateDelegationHistoryGraph(
   daoId: DaoIdEnum,
   timePeriod: VotingPowerTimePeriod = "all",
 ): UseDelegateDelegationHistoryGraphResult {
+  const {
+    daoOverview: { token },
+  } = daoConfig[daoId];
+
   // Calculate timestamp range based on time period
   const { fromTimestamp, toTimestamp } = useMemo(() => {
     const nowInSeconds = Date.now() / 1000;
@@ -79,10 +84,14 @@ export function useDelegateDelegationHistoryGraph(
     return data.votingPowerHistorys.items
       .map((item) => {
         // Convert from wei to token units using Viem's formatUnits
-        const votingPower = Number(
-          formatUnits(BigInt(item.votingPower.toString()), 18),
-        );
-        const delta = Number(formatUnits(BigInt(item.delta.toString()), 18));
+        const votingPower =
+          token === "ERC20"
+            ? Number(formatUnits(BigInt(item.votingPower.toString()), 18))
+            : Number(item.votingPower.toString());
+        const delta =
+          token === "ERC20"
+            ? Number(formatUnits(BigInt(item.delta.toString()), 18))
+            : Number(item.delta.toString());
         const isGain = delta > 0;
 
         // Determine transaction type and extract address information

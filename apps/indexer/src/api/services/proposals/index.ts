@@ -11,10 +11,10 @@ interface ProposalsRepository {
     orderDirection: "asc" | "desc",
     status: string[] | undefined,
     fromDate: number | undefined,
+    fromEndDate: number | undefined,
   ): Promise<DBProposal[]>;
   getProposalsCount(): Promise<number>;
   getProposalById(proposalId: string): Promise<DBProposal | undefined>;
-  getVotingDelay(): Promise<bigint>;
   getProposalNonVoters(
     proposalId: string,
     skip: number,
@@ -35,10 +35,6 @@ export class ProposalsService {
     private readonly proposalsRepo: ProposalsRepository,
     private readonly daoClient: DAOClient,
   ) {}
-
-  async getVotingDelay(): Promise<bigint> {
-    return this.proposalsRepo.getVotingDelay();
-  }
 
   async getProposalsCount(): Promise<number> {
     return this.proposalsRepo.getProposalsCount();
@@ -84,6 +80,7 @@ export class ProposalsService {
     orderDirection = "desc",
     status,
     fromDate,
+    fromEndDate,
   }: ProposalsRequest): Promise<DBProposal[]> {
     // 1. Prepare status for database query
     const dbStatuses = status
@@ -97,6 +94,7 @@ export class ProposalsService {
       orderDirection,
       dbStatuses,
       fromDate,
+      fromEndDate,
     );
 
     // 3. Update each proposal with its real on-chain status

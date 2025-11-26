@@ -22,6 +22,10 @@ export class OPClient<
     this.abi = GovernorAbi;
   }
 
+  getDaoId(): string {
+    return "OP";
+  }
+
   async getQuorum(proposalId: string | null): Promise<bigint> {
     if (!proposalId) return 0n;
     return readContract(this.client, {

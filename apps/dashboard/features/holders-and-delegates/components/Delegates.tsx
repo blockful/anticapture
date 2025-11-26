@@ -1,3 +1,5 @@
+"use client";
+
 import { useMemo, useState } from "react";
 import { ColumnDef, HeaderContext } from "@tanstack/react-table";
 
@@ -14,10 +16,11 @@ import { Plus } from "lucide-react";
 import { ProgressCircle } from "@/features/holders-and-delegates/components/ProgressCircle";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useScreenSize } from "@/shared/hooks";
-import { Address } from "viem";
+import { Address, formatUnits } from "viem";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
+import daoConfig from "@/shared/dao-config";
 
 interface DelegateTableData {
   address: string;
@@ -66,9 +69,11 @@ export const Delegates = ({
   // State for managing sort order
   const [sortBy, setSortBy] = useState<string>("votingPower");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const { decimals } = daoConfig[daoId];
 
   // State for address filtering
   const [currentAddressFilter, setCurrentAddressFilter] = useState<string>("");
+  const pageLimit: number = 15;
 
   const handleAddressFilterApply = (address: string | undefined) => {
     setCurrentAddressFilter(address || "");
@@ -96,6 +101,7 @@ export const Delegates = ({
     daoId,
     days: timePeriod,
     address: currentAddressFilter,
+    limit: pageLimit,
   });
 
   const [selectedDelegate, setSelectedDelegate] = useState<string | null>(null);
@@ -126,7 +132,9 @@ export const Delegates = ({
 
     return data.map((delegate): DelegateTableData => {
       const votingPowerBigInt = BigInt(delegate.votingPower || "0");
-      const votingPowerFormatted = Number(votingPowerBigInt / BigInt(10 ** 18));
+      const votingPowerFormatted = Number(
+        formatUnits(votingPowerBigInt, decimals),
+      );
 
       const activity = delegate.proposalsActivity
         ? `${delegate.proposalsActivity.votedProposals}/${delegate.proposalsActivity.totalProposals}`
@@ -148,7 +156,7 @@ export const Delegates = ({
           delegate.historicalVotingPower,
         );
         const historicalVotingPowerFormatted = Number(
-          historicalVotingPowerBigInt / BigInt(10 ** 18),
+          formatUnits(historicalVotingPowerBigInt, decimals),
         );
 
         const absoluteChange =
@@ -175,7 +183,7 @@ export const Delegates = ({
         delegators: delegate.delegationsCount,
       };
     });
-  }, [data]);
+  }, [data, decimals]);
 
   const delegateColumns: ColumnDef<DelegateTableData>[] = [
     {

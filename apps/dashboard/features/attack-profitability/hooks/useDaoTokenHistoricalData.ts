@@ -3,6 +3,7 @@ import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
 import { DaoIdEnum } from "@/shared/types/daos";
 import axios from "axios";
 import { PriceEntry } from "@/shared/dao-config/types";
+import { getOnlyClosedData } from "@/features/attack-profitability/utils/normalizeDataset";
 
 export const fetchDaoTokenHistoricalData = async ({
   daoId,
@@ -40,22 +41,28 @@ export const useDaoTokenHistoricalData = ({
   daoId,
   config,
   limit,
+  closedDataOnly = true,
 }: {
   daoId: DaoIdEnum;
   limit?: number;
   config?: Partial<SWRConfiguration<PriceEntry[] | null, Error>>;
+  closedDataOnly?: boolean;
 }) => {
   const { data, error, isValidating, mutate } = useSWR<PriceEntry[] | null>(
     ["daoTokenHistoricalData", daoId, limit],
     () =>
       fetchDaoTokenHistoricalData({
         daoId,
+        limit,
       }),
     { revalidateOnFocus: false, ...config },
   );
 
+  const closedDataOnlyData =
+    closedDataOnly && data ? getOnlyClosedData(data) : data;
+
   return {
-    data: data ?? [],
+    data: closedDataOnlyData ?? [],
     loading: isValidating,
     error,
     refetch: mutate,

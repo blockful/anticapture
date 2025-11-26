@@ -1,4 +1,6 @@
+import { formatUnits } from "viem";
 import { useMemo } from "react";
+
 import { useTimeSeriesData } from "@/shared/hooks";
 import { useDaoTokenHistoricalData } from "@/features/attack-profitability/hooks/useDaoTokenHistoricalData";
 import { useProposals } from "@/features/token-distribution/hooks/useProposals";
@@ -21,12 +23,12 @@ export const useChartMetrics = ({
   appliedMetrics,
   daoId,
   metricsSchema,
-  tokenType,
+  decimals,
 }: {
   appliedMetrics: string[];
   daoId: DaoIdEnum;
   metricsSchema: Record<string, MetricSchema>;
-  tokenType: "ERC20" | "ERC721";
+  decimals: number;
 }): UseChartMetricsResult => {
   // Get direct enum metrics
   const enumMetrics = appliedMetrics.filter((key) =>
@@ -159,8 +161,7 @@ export const useChartMetrics = ({
             result[normalizeTimestamp(item.date)] = {
               ...result[normalizeTimestamp(item.date)],
               date: normalizeTimestamp(item.date),
-              [metricKey]:
-                tokenType === "ERC721" ? Number(value) : Number(value) / 1e18, // Convert from wei to token units
+              [metricKey]: Number(formatUnits(BigInt(value), decimals)),
             };
           });
         }
@@ -168,7 +169,7 @@ export const useChartMetrics = ({
     }
 
     return result;
-  }, [timeSeriesData, stableAppliedMetrics, metricsSchema, tokenType]);
+  }, [timeSeriesData, stableAppliedMetrics, metricsSchema, decimals]);
 
   // Process historical token data separately
   const tokenPriceDatasets = useMemo(() => {
@@ -209,7 +210,8 @@ export const useChartMetrics = ({
         result[normalizeTimestamp(timestamp)] = {
           ...result[normalizeTimestamp(timestamp)],
           date: normalizeTimestamp(timestamp),
-          PROPOSALS_GOVERNANCE: proposal.title || "",
+          PROPOSALS_GOVERNANCE: 1,
+          PROPOSALS_GOVERNANCE_TEXT: proposal.title || "",
         };
         // }
       });
@@ -226,10 +228,15 @@ export const useChartMetrics = ({
     [timeSeriesDatasets, tokenPriceDatasets, proposalsDatasets].forEach(
       (dataset) => {
         Object.entries(dataset).forEach(([key, value]) => {
-          result[key] = {
-            ...result[key],
-            ...value,
-          };
+          if (!result[key]) {
+            result[key] = value;
+          } else {
+            Object.entries(value).forEach(([k, v]) => {
+              if (result[key][k] === undefined) {
+                result[key][k] = v;
+              }
+            });
+          }
         });
       },
     );
@@ -265,6 +272,12 @@ export const useChartMetrics = ({
           } else {
             processedPoint[metricKey] = 0;
           }
+        }
+      });
+
+      Object.entries(point).forEach(([key, value]) => {
+        if (!processedPoint[key]) {
+          processedPoint[key] = value;
         }
       });
 

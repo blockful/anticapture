@@ -21,6 +21,10 @@ export class ARBClient<
     this.address = address;
   }
 
+  getDaoId(): string {
+    return "ARB";
+  }
+
   async getQuorum(_: string | null): Promise<bigint> {
     const blockNumber = await getBlockNumber(this.client);
     return readContract(this.client, {

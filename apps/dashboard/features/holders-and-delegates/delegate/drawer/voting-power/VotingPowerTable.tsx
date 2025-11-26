@@ -13,6 +13,7 @@ import { useVotingPower } from "@/shared/hooks/graphql-client/useVotingPower";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { Table } from "@/shared/components/design-system/table/Table";
+import daoConfig from "@/shared/dao-config";
 
 export const VotingPowerTable = ({
   address,
@@ -24,6 +25,9 @@ export const VotingPowerTable = ({
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [sortBy, setSortBy] = useState<"balance">("balance");
+  const {
+    daoOverview: { token },
+  } = daoConfig[daoId as DaoIdEnum];
 
   const { balances, loading, error, pagination, fetchNextPage, fetchingMore } =
     useVotingPower({
@@ -132,7 +136,9 @@ export const VotingPowerTable = ({
         return (
           <div className="flex w-full items-center justify-end text-sm">
             {formatNumberUserReadable(
-              Number(BigInt(amount)) / Number(BigInt(10 ** 18)) || 0,
+              token === "ERC20"
+                ? Number(BigInt(amount)) / Number(BigInt(10 ** 18)) || 0
+                : Number(amount) || 0,
             )}
           </div>
         );

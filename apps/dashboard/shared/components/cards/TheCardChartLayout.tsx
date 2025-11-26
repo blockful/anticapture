@@ -60,9 +60,7 @@ export const TheCardChartLayout = ({
               <p className="text-secondary text-sm font-normal">{subtitle}</p>
             </div>
             {switcherComponent && (
-              <div className="mt-2 flex w-full justify-end">
-                {switcherComponent}
-              </div>
+              <div className="flex w-full justify-end">{switcherComponent}</div>
             )}
           </div>
         )}

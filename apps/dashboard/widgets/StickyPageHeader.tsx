@@ -7,10 +7,10 @@ import {
 } from "@/shared/components";
 import { cn } from "@/shared/utils/";
 import { BarChart4 } from "lucide-react";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
 import { useRouter } from "next/navigation";
 import { HeaderNavMobile } from "@/widgets";
 import { TelegramIcon } from "@/shared/components/icons";
+import { ANTICAPTURE_TELEGRAM_BOT } from "@/shared/constants/social-media";
 export const StickyPageHeader = () => {
   const [lastScrollY, setLastScrollY] = useState<number>(0);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
@@ -20,19 +20,25 @@ export const StickyPageHeader = () => {
   const menuItems = useMemo(
     () => [
       {
-        anchorId: SECTIONS_CONSTANTS.panel.anchorId,
+        page: "panel",
         label: "Panel",
         icon: BarChart4,
         onClick: () => {
-          sessionStorage.setItem("scrollToSection", "panel");
           router.push("/");
           setIsMenuOpen(false);
         },
       },
       {
-        anchorId: SECTIONS_CONSTANTS.alerts.anchorId,
+        page: "alerts",
         label: "Get Security Alerts",
         icon: TelegramIcon,
+        onClick: () => {
+          window.open(
+            ANTICAPTURE_TELEGRAM_BOT,
+            "_blank",
+            "noopener,noreferrer",
+          );
+        },
       },
     ],
     [router],
@@ -72,7 +78,7 @@ export const StickyPageHeader = () => {
     <div className="h-[98px]">
       <header
         className={cn(
-          "bg-surface-background fixed top-0 right-0 left-0 z-30 w-full shadow-md transition-transform duration-300",
+          "bg-surface-background fixed left-0 right-0 top-0 z-30 w-full shadow-md transition-transform duration-300",
         )}
       >
         <HeaderDAOSidebarDropdown />
@@ -87,7 +93,7 @@ export const StickyPageHeader = () => {
       >
         <div
           className={cn(
-            `fixed top-[87px] right-0 left-0 z-30 flex h-[calc(100vh-57px)] w-screen bg-black/90 transition-all duration-300`,
+            `fixed left-0 right-0 top-[87px] z-30 flex h-[calc(100vh-57px)] w-screen bg-black/90 transition-all duration-300`,
             isMenuOpen
               ? "pointer-events-auto opacity-100"
               : "pointer-events-none opacity-0",
@@ -103,8 +109,8 @@ export const StickyPageHeader = () => {
           >
             {menuItems.map((item) => (
               <ButtonHeaderSidebar
-                key={item.anchorId}
-                anchorId={item.anchorId || ""}
+                key={item.page}
+                page={item.page || ""}
                 icon={item.icon}
                 label={item.label}
                 onClick={item.onClick}

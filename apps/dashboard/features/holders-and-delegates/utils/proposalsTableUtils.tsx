@@ -152,7 +152,7 @@ export const getVoteTimingData = (
   // Convert timestamps to numbers for calculation
   const voteTime = Number(userVote.timestamp);
   const startTime = Number(proposal.timestamp); // Proposal start time
-  const duration = Number(daoVotingPeriod ?? 0); // Use DAO voting period or fallback to 30 days
+  const duration = Number(daoVotingPeriod ?? 0) / 1000; // Use DAO voting period or fallback to 30 days (in seconds)
   const endTime = startTime + duration;
 
   if (voteTime >= endTime) {

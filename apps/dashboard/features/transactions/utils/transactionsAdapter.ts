@@ -1,6 +1,6 @@
 import { SupplyType } from "@/shared/components/badges/SupplyLabel";
 import { formatNumberUserReadable } from "@/shared/utils";
-import { formatEther } from "viem";
+import { formatUnits } from "viem";
 import { TransactionData } from "@/features/transactions/hooks/useTransactionsTableData";
 
 export type GraphTransaction = {
@@ -48,7 +48,7 @@ const deduceSupplyTypes = (tx: GraphTransaction): SupplyType[] => {
   if (tx.isDex) types.push("DEX");
   if (tx.isLending) types.push("Lending");
   if (tx.delegations && tx.delegations.length > 0) types.push("Delegation");
-  if (types.length === 0) types.push("Others");
+  if (types.length === 0) types.push("Other");
   return types;
 };
 
@@ -66,8 +66,23 @@ const formatRelativeTime = (timestampSec: string): string => {
   return "just now";
 };
 
+const toBigIntSafe = (val: string | number | undefined | null): bigint => {
+  if (val == null || val === "") return 0n;
+  if (typeof val === "bigint") return val;
+  if (typeof val === "string") {
+    const clean = val.trim();
+    if (/^-?\d+$/.test(clean)) return BigInt(clean);
+    const num = Number(clean);
+    if (!isFinite(num)) return 0n;
+    return BigInt(Math.floor(num));
+  }
+  if (Number.isInteger(val)) return BigInt(val);
+  return BigInt(Math.floor(val as number));
+};
+
 export const adaptTransactionsToTableData = (
   transactions: GraphTransaction[],
+  decimals: number,
 ): TransactionData[] => {
   return transactions.map((tx, idx) => {
     const affectedSupply = deduceSupplyTypes(tx);
@@ -79,17 +94,21 @@ export const adaptTransactionsToTableData = (
       0;
 
     const amount = formatNumberUserReadable(
-      Number(formatEther(BigInt(transfersAmountRaw))) +
-        Number(formatEther(BigInt(delegationsAmountRaw))) || 0,
+      Number(
+        formatUnits(
+          toBigIntSafe(transfersAmountRaw) + toBigIntSafe(delegationsAmountRaw),
+          decimals,
+        ),
+      ) || 0,
       2,
     );
 
     // add transfers to subRows also
     const transfersSubRows = tx.transfers?.map((t, tidx) => ({
       id: `${idx + 1}.${tidx + 1}`,
-      affectedSupply: ["Others"] as SupplyType[],
+      affectedSupply: ["Other"] as SupplyType[],
       amount: formatNumberUserReadable(
-        Number(formatEther(BigInt(t.amount || 0))),
+        Number(formatUnits(toBigIntSafe(t.amount || 0), decimals)),
         2,
       ),
       date: formatRelativeTime(t.timestamp),
@@ -100,7 +119,7 @@ export const adaptTransactionsToTableData = (
       id: `${idx + 1}.${didx + 1}`,
       affectedSupply: ["Delegation"] as SupplyType[],
       amount: formatNumberUserReadable(
-        Number(formatEther(BigInt(d.delegatedValue))) || 0,
+        Number(formatUnits(toBigIntSafe(d.delegatedValue), decimals)) || 0,
         2,
       ),
       date: formatRelativeTime(d.timestamp),

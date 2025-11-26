@@ -1,12 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import {
-  useActiveSupply,
-  useAverageTurnout,
-  useDelegatedSupply,
-} from "@/shared/hooks";
-import { DaoIdEnum } from "@/shared/types/daos";
+import { formatUnits } from "viem";
+import { useParams } from "next/navigation";
+import { useEffect, useMemo, useRef } from "react";
 import {
   BarChart,
   Bar,
@@ -17,10 +13,16 @@ import {
   Cell,
   LabelProps,
 } from "recharts";
+import { Data } from "react-csv/lib/core";
+
+import {
+  useActiveSupply,
+  useAverageTurnout,
+  useDelegatedSupply,
+} from "@/shared/hooks";
+import { DaoIdEnum } from "@/shared/types/daos";
 import { SkeletonRow } from "@/shared/components";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
-import { formatEther } from "viem";
-import { useParams } from "next/navigation";
 import { formatNumberUserReadable } from "@/shared/utils/";
 import { useScreenSize } from "@/shared/hooks";
 import { mockedAttackCostBarData } from "@/shared/constants/mocked-data/mocked-attack-cost-bar-data";
@@ -32,7 +34,6 @@ import {
 } from "@/features/attack-profitability/hooks";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
-import { Data } from "react-csv/lib/core";
 
 interface StackedValue {
   value: number;
@@ -68,7 +69,6 @@ export const AttackCostBarChart = ({
 }: AttackCostBarChartProps) => {
   const { daoId }: { daoId: string } = useParams();
   const selectedDaoId = daoId.toUpperCase() as DaoIdEnum;
-  const [mocked, setMocked] = useState(false);
   const timeInterval = TimeInterval.NINETY_DAYS;
 
   const liquidTreasury = useTreasuryAssetNonDaoToken(
@@ -103,22 +103,6 @@ export const AttackCostBarChart = ({
 
   const { isMobile } = useScreenSize();
 
-  useEffect(() => {
-    setMocked(
-      delegatedSupply.data?.currentDelegatedSupply === undefined &&
-        activeSupply.data?.activeSupply === undefined &&
-        averageTurnout.data?.currentAverageTurnout === undefined &&
-        daoTopTokenHolderExcludingTheDao?.balance === undefined &&
-        vetoCouncilVotingPower === undefined,
-    );
-  }, [
-    delegatedSupply.data?.currentDelegatedSupply,
-    activeSupply.data?.activeSupply,
-    averageTurnout.data?.currentAverageTurnout,
-    daoTopTokenHolderExcludingTheDao?.balance,
-    vetoCouncilVotingPower,
-  ]);
-
   const isLoading =
     liquidTreasury.loading ||
     delegatedSupply.isLoading ||
@@ -127,6 +111,22 @@ export const AttackCostBarChart = ({
     daoTokenPriceHistoricalDataLoading ||
     daoTopTokenHolderExcludingTheDaoLoading ||
     isVetoCouncilLoading;
+
+  const mocked = useMemo(() => {
+    return (
+      delegatedSupply.data?.currentDelegatedSupply === undefined &&
+      activeSupply.data?.activeSupply === undefined &&
+      averageTurnout.data?.currentAverageTurnout === undefined &&
+      daoTopTokenHolderExcludingTheDao?.balance === undefined &&
+      vetoCouncilVotingPower === undefined
+    );
+  }, [
+    delegatedSupply.data?.currentDelegatedSupply,
+    activeSupply.data?.activeSupply,
+    averageTurnout.data?.currentAverageTurnout,
+    daoTopTokenHolderExcludingTheDao?.balance,
+    vetoCouncilVotingPower,
+  ]);
 
   const chartData: ChartDataItem[] = useMemo(() => {
     if (isLoading) return [];
@@ -139,14 +139,9 @@ export const AttackCostBarChart = ({
     const lastPrice =
       prices.length > 0 ? Number(prices[prices.length - 1].price) : 0;
 
-    const formatValue = (value: number, token: "ERC20" | "ERC721"): number => {
-      const formattedValue =
-        token === "ERC20"
-          ? Number(formatEther(BigInt(Math.floor(value))))
-          : value;
-
-      if (valueMode === "usd") return formattedValue * lastPrice;
-      return formattedValue;
+    const formatValue = (value: number, lastPrice: number): number => {
+      if (valueMode === "usd") return value * lastPrice;
+      return value;
     };
 
     return [
@@ -169,8 +164,13 @@ export const AttackCostBarChart = ({
         id: "delegatedSupply",
         name: "Delegated Supply",
         value: formatValue(
-          Number(delegatedSupply.data?.currentDelegatedSupply),
-          daoConfig.daoOverview.token,
+          Number(
+            formatUnits(
+              BigInt(delegatedSupply.data?.currentDelegatedSupply || 0),
+              daoConfig.decimals,
+            ),
+          ),
+          lastPrice,
         ),
         type: BarChartEnum.REGULAR,
         customColor: "#EC762ECC",
@@ -181,8 +181,13 @@ export const AttackCostBarChart = ({
         type: BarChartEnum.REGULAR,
         customColor: "#EC762EE6",
         value: formatValue(
-          Number(activeSupply.data?.activeSupply),
-          daoConfig.daoOverview.token,
+          Number(
+            formatUnits(
+              BigInt(activeSupply.data?.activeSupply || 0),
+              daoConfig.decimals,
+            ),
+          ),
+          lastPrice,
         ),
       },
       {
@@ -191,8 +196,13 @@ export const AttackCostBarChart = ({
         type: BarChartEnum.REGULAR,
         customColor: "#EC762EB3",
         value: formatValue(
-          Number(averageTurnout.data?.currentAverageTurnout),
-          daoConfig.daoOverview.token,
+          Number(
+            formatUnits(
+              BigInt(averageTurnout.data?.currentAverageTurnout || 0),
+              daoConfig.decimals,
+            ),
+          ),
+          lastPrice,
         ),
       },
       {
@@ -201,30 +211,39 @@ export const AttackCostBarChart = ({
         type: BarChartEnum.REGULAR,
         customColor: "#EC762E80",
         value: formatValue(
-          Number(daoTopTokenHolderExcludingTheDao?.balance),
-          daoConfig.daoOverview.token,
+          Number(
+            formatUnits(
+              BigInt(daoTopTokenHolderExcludingTheDao?.balance || 0),
+              daoConfig.decimals,
+            ),
+          ),
+          lastPrice,
         ),
       },
     ];
   }, [
-    // fixing this causes an exahaustive-deps re-render for OP and UNI
     isLoading,
     mocked,
-    liquidTreasury.data?.[0]?.totalAssets,
-    delegatedSupply?.data?.currentDelegatedSupply,
-    activeSupply?.data?.activeSupply,
-    averageTurnout?.data?.currentAverageTurnout,
-    daoTopTokenHolderExcludingTheDao?.balance,
     daoTokenPriceHistoricalData,
     valueMode,
+    liquidTreasury.data,
+    delegatedSupply.data?.currentDelegatedSupply,
+    activeSupply.data?.activeSupply,
+    averageTurnout.data?.currentAverageTurnout,
+    daoTopTokenHolderExcludingTheDao?.balance,
+    daoConfig.decimals,
   ]);
 
+  const prevCsvRef = useRef<string>("");
+
   useEffect(() => {
-    if (!mocked && chartData.length) {
+    if (mocked || !chartData.length) return;
+    const serialized = JSON.stringify(chartData);
+    if (serialized !== prevCsvRef.current) {
+      prevCsvRef.current = serialized;
       setCsvData(chartData as Data);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chartData, mocked]);
+  }, [chartData, mocked, setCsvData]);
 
   if (isLoading) {
     return (
@@ -239,7 +258,7 @@ export const AttackCostBarChart = ({
       {mocked && (
         <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-black/5 backdrop-blur-[6px]" />
       )}
-      <ResponsiveContainer width="100%" height={280}>
+      <ResponsiveContainer width="100%" height={430}>
         <BarChart
           data={chartData}
           barSize={isMobile ? 30 : 40}

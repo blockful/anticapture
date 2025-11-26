@@ -15,17 +15,19 @@ import {
   historicalOnchain,
   transactions,
   proposals,
-  daoController,
   lastUpdate,
   assets,
   votingPower,
   delegationPercentage,
   votingPowerVariations,
   accountBalanceVariations,
+  dao,
+  accountInteractions,
 } from "./controller";
 import { DrizzleProposalsActivityRepository } from "./repositories/proposals-activity.repository";
 import { docs } from "./docs";
 import { env } from "@/env";
+import { DaoCache } from "./cache/dao-cache";
 import {
   DelegationPercentageRepository,
   AccountBalanceRepository,
@@ -34,6 +36,7 @@ import {
   TokenRepository,
   TransactionsRepository,
   VotingPowerRepository,
+  NounsVotingPowerRepository,
 } from "./repositories";
 import { errorHandler } from "./middlewares";
 import { getClient } from "@/lib/client";
@@ -48,7 +51,9 @@ import {
   CoingeckoService,
   NFTPriceService,
   TokenService,
-  TopBalanceVariationsService,
+  BalanceVariationsService,
+  HistoricalBalancesService,
+  DaoService,
 } from "./services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
@@ -92,7 +97,7 @@ if (!daoClient) {
   throw new Error(`Client not found for DAO ${env.DAO_ID}`);
 }
 
-const { blockTime } = CONTRACT_ADDRESSES[env.DAO_ID];
+const { blockTime, tokenType } = CONTRACT_ADDRESSES[env.DAO_ID];
 
 const repo = new DrizzleRepository();
 const votingPowerRepo = new VotingPowerRepository();
@@ -104,7 +109,15 @@ const delegationPercentageService = new DelegationPercentageService(
 );
 const accountBalanceRepo = new AccountBalanceRepository();
 const transactionsService = new TransactionsService(transactionsRepo);
-const votingPowerService = new VotingPowerService(votingPowerRepo);
+const votingPowerService = new VotingPowerService(
+  env.DAO_ID === DaoIdEnum.NOUNS
+    ? new NounsVotingPowerRepository()
+    : votingPowerRepo,
+  votingPowerRepo,
+);
+const daoCache = new DaoCache();
+const daoService = new DaoService(daoClient, daoCache, env.CHAIN_ID);
+const accountBalanceService = new BalanceVariationsService(accountBalanceRepo);
 
 if (env.DUNE_API_URL && env.DUNE_API_KEY) {
   const duneClient = new DuneService(env.DUNE_API_URL, env.DUNE_API_KEY);
@@ -133,24 +146,23 @@ token(
 );
 
 tokenDistribution(app, repo);
-governanceActivity(app, repo);
-daoController(app, daoClient, env.DAO_ID);
+governanceActivity(app, repo, tokenType);
 proposalsActivity(app, proposalsRepo, env.DAO_ID, daoClient);
 proposals(app, new ProposalsService(repo, daoClient), daoClient, blockTime);
 historicalOnchain(
   app,
   env.DAO_ID,
   new HistoricalVotingPowerService(votingPowerRepo),
+  new HistoricalBalancesService(accountBalanceRepo),
 );
 transactions(app, transactionsService);
 lastUpdate(app);
 delegationPercentage(app, delegationPercentageService);
 votingPower(app, votingPowerService);
 votingPowerVariations(app, votingPowerService);
-accountBalanceVariations(
-  app,
-  new TopBalanceVariationsService(accountBalanceRepo),
-);
+accountBalanceVariations(app, accountBalanceService);
+accountInteractions(app, accountBalanceService);
+dao(app, daoService);
 docs(app);
 
 export default app;

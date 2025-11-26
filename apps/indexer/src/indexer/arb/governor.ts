@@ -1,5 +1,5 @@
 import { ponder } from "ponder:registry";
-// import { dao } from "ponder:schema";
+//
 
 import {
   proposalCreated,
@@ -8,37 +8,9 @@ import {
 } from "@/eventHandlers";
 import { DaoIdEnum } from "@/lib/enums";
 import { ProposalStatus } from "@/lib/constants";
-import { DAOClient } from "@/interfaces";
-// import { env } from "@/env";
 
-export function GovernorIndexer(client: DAOClient, blockTime: number) {
+export function GovernorIndexer(blockTime: number) {
   const daoId = DaoIdEnum.ARB;
-
-  // ===== ARBGovernor handlers commented out =====
-  // ponder.on(`ARBGovernor:setup`, async () => {
-  //   // const [
-  //   //   votingPeriod,
-  //   //   quorum,
-  //   //   votingDelay,
-  //   //   timelockDelay,
-  //   //   proposalThreshold,
-  //   // ] = await Promise.all([
-  //   //   client.getVotingPeriod(),
-  //   //   client.getQuorum(null),
-  //   //   client.getVotingDelay(),
-  //   //   client.getTimelockDelay(),
-  //   //   client.getProposalThreshold(),
-  //   // ]);
-  //   // await context.db.insert(dao).values({
-  //   //   id: daoId,
-  //   //   votingPeriod,
-  //   //   quorum,
-  //   //   votingDelay,
-  //   //   timelockDelay,
-  //   //   proposalThreshold,
-  //   //   chainId: env.CHAIN_ID,
-  //   // });
-  // });
 
   // ponder.on(`ARBGovernor:VoteCast`, async ({ event, context }) => {
   //   await voteCast(context, daoId, {

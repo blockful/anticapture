@@ -1,7 +1,4 @@
-import { createPublicClient, http } from "viem";
-
 import { env } from "@/env";
-import { getChain } from "@/lib/utils";
 import { DaoIdEnum } from "@/lib/enums";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import {
@@ -20,82 +17,92 @@ import {
   ARBTokenIndexer,
   GovernorIndexer as ARBGovernorIndexer,
 } from "@/indexer/arb";
+import { COMPGovernorIndexer, COMPTokenIndexer } from "@/indexer/comp";
 import {
   GovernorIndexer as GTCGovernorIndexer,
   GTCTokenIndexer,
 } from "@/indexer/gtc";
-import { SCRTokenIndexer, SCRGovernorIndexer, SCRClient } from "@/indexer/scr";
+import { SCRTokenIndexer, SCRGovernorIndexer } from "@/indexer/scr";
 import {
   NounsTokenIndexer,
   GovernorIndexer as NounsGovernorIndexer,
-  Client as NounsClient,
 } from "@/indexer/nouns";
-import { getClient } from "@/lib/client";
+import {
+  GovernorIndexer as ObolGovernorIndexer,
+  ObolTokenIndexer,
+} from "@/indexer/obol";
+import {
+  ZKTokenIndexer,
+  GovernorIndexer as ZKGovernorIndexer,
+} from "./indexer/zk";
 
-const { DAO_ID: daoId, CHAIN_ID: chainId, RPC_URL: rpcUrl } = env;
-
-const chain = getChain(chainId);
-if (!chain) {
-  throw new Error(`Chain not found for chainId ${chainId}`);
-}
-console.log("Connected to chain", chain.name);
-
-const client = createPublicClient({
-  chain,
-  transport: http(rpcUrl),
-});
-
-const daoClient = getClient(daoId, client);
-if (!daoClient) {
-  throw new Error(`DAO client not found for DAO ${daoId}`);
-}
-
+const { DAO_ID: daoId } = env;
 const { token, blockTime } = CONTRACT_ADDRESSES[daoId];
+
 switch (daoId) {
   case DaoIdEnum.ENS: {
+    const { token } = CONTRACT_ADDRESSES[daoId];
     ENSTokenIndexer(token.address, token.decimals);
-    ENSGovernorIndexer(daoClient, blockTime);
+    ENSGovernorIndexer(blockTime);
     break;
   }
   case DaoIdEnum.UNI: {
+    const { token } = CONTRACT_ADDRESSES[daoId];
     UNITokenIndexer(token.address, token.decimals);
-    UNIGovernorIndexer(daoClient, blockTime);
+    UNIGovernorIndexer(blockTime);
     break;
   }
   case DaoIdEnum.ARB: {
     ARBTokenIndexer(token.address, token.decimals);
-    ARBGovernorIndexer(daoClient, blockTime);
+    ARBGovernorIndexer(blockTime);
     break;
   }
   case DaoIdEnum.OP: {
+    const { token } = CONTRACT_ADDRESSES[daoId];
     OPTokenIndexer(token.address, token.decimals);
-    OPGovernorIndexer(daoClient, blockTime);
+    OPGovernorIndexer(blockTime);
     break;
   }
   case DaoIdEnum.TEST: {
+    const { token } = CONTRACT_ADDRESSES[daoId];
     ENSTokenIndexer(token.address, token.decimals, daoId);
-    ENSGovernorIndexer(daoClient, blockTime);
+    ENSGovernorIndexer(blockTime, daoId);
     break;
   }
   case DaoIdEnum.GTC: {
+    const { token } = CONTRACT_ADDRESSES[daoId];
     GTCTokenIndexer(token.address, token.decimals);
-    GTCGovernorIndexer(daoClient, blockTime);
+    GTCGovernorIndexer(blockTime);
     break;
   }
   case DaoIdEnum.NOUNS: {
-    const { token, governor } = CONTRACT_ADDRESSES[daoId];
+    const { token } = CONTRACT_ADDRESSES[daoId];
     NounsTokenIndexer(token.address, token.decimals);
-    NounsGovernorIndexer(
-      new NounsClient(client, governor.address),
-      blockTime,
-      token.address,
-    );
+    NounsGovernorIndexer(blockTime);
     break;
   }
   case DaoIdEnum.SCR: {
-    const { token, governor } = CONTRACT_ADDRESSES[daoId];
+    const { token } = CONTRACT_ADDRESSES[daoId];
     SCRTokenIndexer(token.address, token.decimals);
-    SCRGovernorIndexer(new SCRClient(client, governor.address), blockTime);
+    SCRGovernorIndexer(blockTime);
+    break;
+  }
+  case DaoIdEnum.COMP: {
+    const { token } = CONTRACT_ADDRESSES[daoId];
+    COMPTokenIndexer(token.address, token.decimals);
+    COMPGovernorIndexer(blockTime);
+    break;
+  }
+  case DaoIdEnum.OBOL: {
+    const { token } = CONTRACT_ADDRESSES[daoId];
+    ObolTokenIndexer(token.address, token.decimals);
+    ObolGovernorIndexer(blockTime);
+    break;
+  }
+  case DaoIdEnum.ZK: {
+    const { token } = CONTRACT_ADDRESSES[daoId];
+    ZKTokenIndexer(token.address, token.decimals);
+    ZKGovernorIndexer(blockTime);
     break;
   }
   default:

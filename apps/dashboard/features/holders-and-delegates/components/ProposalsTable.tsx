@@ -29,6 +29,7 @@ import {
 } from "@/features/holders-and-delegates/utils/proposalsTableUtils";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 import { Table } from "@/shared/components/design-system/table/Table";
+import daoConfig from "@/shared/dao-config";
 
 interface ProposalTableData {
   proposalId: string;
@@ -72,6 +73,9 @@ export const ProposalsTable = ({
   fetchNextPage,
 }: ProposalsTableProps) => {
   const { data: daoData } = useDaoData(daoIdEnum);
+  const {
+    daoOverview: { token },
+  } = daoConfig[daoIdEnum];
 
   const tableData = useMemo(() => {
     if (!proposals || proposals.length === 0) return [];
@@ -92,19 +96,23 @@ export const ProposalsTable = ({
         finalResult,
         userVote,
         votingPower: item.userVote?.votingPower
-          ? formatNumberUserReadable(Number(item.userVote.votingPower) / 1e18)
+          ? formatNumberUserReadable(
+              token === "ERC20"
+                ? Number(item.userVote.votingPower) / 1e18
+                : Number(item.userVote.votingPower),
+            )
           : "-",
         voteTiming: getVoteTimingData(
           item.userVote,
           item.proposal,
           finalResult.text,
           Number(daoData?.votingPeriod) *
-            daoConfigByDaoId[daoIdEnum]?.daoOverview.blockTime, //voting period comes in blocks, so we need to convert it to seconds
+            (daoConfigByDaoId[daoIdEnum]?.daoOverview.chain.blockTime ?? 12000), //voting period comes in blocks, so we need to convert it to seconds
         ),
         status: item.proposal?.status || "unknown",
       };
     });
-  }, [proposals, daoData?.votingPeriod, daoIdEnum]);
+  }, [proposals, daoData?.votingPeriod, daoIdEnum, daoConfigByDaoId]);
 
   const proposalColumns: ColumnDef<ProposalTableData>[] = [
     {

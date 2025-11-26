@@ -1,5 +1,8 @@
 const format = (value: number, suffix: string, fixed: number) =>
-  value.toFixed(fixed).replace(/\.?0+$/, "") + suffix;
+  value
+    .toFixed(fixed)
+    .replace(/(\.\d*?)0+$/, "$1")
+    .replace(/\.$/, "") + suffix;
 
 export function formatNumberUserReadable(
   num: number,
