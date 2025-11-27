@@ -42,10 +42,12 @@ export const PanelTable = () => {
   const delegatedSupplyValues = useRef<Record<number, number>>({});
 
   // Create initial data
-  const data = Object.values(DaoIdEnum).map((daoId, index) => ({
-    id: index,
-    dao: daoId,
-  }));
+  const data = Object.values(DaoIdEnum) // TODO: un-hide ZK once released
+    .filter((daoIdValue, _) => daoIdValue !== DaoIdEnum.ZK)
+    .map((daoId, index) => ({
+      id: index,
+      dao: daoId,
+    }));
 
   // Create a cell component that stores its value in the ref
   const DelegatedSupplyCell = ({
