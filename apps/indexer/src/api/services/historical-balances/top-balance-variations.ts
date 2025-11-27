@@ -7,6 +7,7 @@ interface AccountBalanceRepository {
     limit: number,
     skip: number,
     orderDirection: "asc" | "desc",
+    omitZeroNetVariation: boolean,
   ): Promise<DBAccountBalanceVariation[]>;
 
   getAccountInteractions(
@@ -15,6 +16,7 @@ interface AccountBalanceRepository {
     limit: number,
     skip: number,
     orderDirection: "asc" | "desc",
+    omitZeroNetVariation: boolean,
   ): Promise<DBAccountBalanceVariation[]>;
 }
 
@@ -26,12 +28,14 @@ export class BalanceVariationsService {
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
+    omitZeroNetVariation: boolean,
   ): Promise<DBAccountBalanceVariation[]> {
     return this.repository.getAccountBalanceVariations(
       startTimestamp,
       limit,
       skip,
       orderDirection,
+      omitZeroNetVariation,
     );
   }
 
@@ -41,6 +45,7 @@ export class BalanceVariationsService {
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
+    omitZeroNetVariation: boolean,
   ): Promise<DBAccountBalanceVariation[]> {
     return this.repository.getAccountInteractions(
       accountId,
@@ -48,6 +53,7 @@ export class BalanceVariationsService {
       limit,
       skip,
       orderDirection,
+      omitZeroNetVariation,
     );
   }
 }

@@ -24,6 +24,7 @@ export const AccountBalanceVariationsRequestSchema = z.object({
     .min(0, "Skip must be a non-negative integer")
     .optional()
     .default(0),
+  skipZeroNetVariationDeltas: z.boolean().optional().default(true),
   orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
 });
 
@@ -59,6 +60,8 @@ export const AccountInteractionsResponseSchema = z.object({
     z.object({
       accountId: z.string(),
       amountTransferred: z.string(),
+      totalVolume: z.string(),
+      transferCount: z.string(),
     }),
   ),
 });
@@ -76,6 +79,8 @@ export type DBAccountBalanceVariation = {
   previousBalance: bigint;
   currentBalance: bigint;
   absoluteChange: bigint;
+  totalVolume: bigint;
+  transferCount: bigint;
   percentageChange: number;
 };
 
@@ -153,9 +158,11 @@ export const AccountInteractionsMapper = (
     },
     items: interactions
       .filter(({ accountId: addr }) => addr !== accountId)
-      .map(({ accountId, absoluteChange }) => ({
+      .map(({ accountId, absoluteChange, totalVolume, transferCount }) => ({
         accountId: accountId,
         amountTransferred: absoluteChange.toString(),
+        totalVolume: totalVolume.toString(),
+        transferCount: transferCount.toString(),
       })),
   });
 };

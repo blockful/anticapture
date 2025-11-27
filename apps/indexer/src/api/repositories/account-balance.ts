@@ -82,8 +82,16 @@ export class AccountBalanceRepository {
     limit: number,
     skip: number,
     orderDirection: "asc" | "desc",
+    omitZeroNetVariation: boolean,
   ): Promise<DBAccountBalanceVariation[]> {
-    return this.getVariations(startTimestamp, limit, skip, orderDirection);
+    return this.getVariations(
+      startTimestamp,
+      limit,
+      skip,
+      orderDirection,
+      undefined,
+      omitZeroNetVariation,
+    );
   }
 
   async getAccountInteractions(
@@ -92,6 +100,7 @@ export class AccountBalanceRepository {
     limit: number,
     skip: number,
     orderDirection: "asc" | "desc",
+    omitZeroNetVariation: boolean,
   ): Promise<DBAccountBalanceVariation[]> {
     return this.getVariations(
       startTimestamp,
@@ -99,6 +108,7 @@ export class AccountBalanceRepository {
       skip,
       orderDirection,
       accountId,
+      omitZeroNetVariation,
     );
   }
 
@@ -108,6 +118,7 @@ export class AccountBalanceRepository {
     skip: number,
     orderDirection: "asc" | "desc",
     address?: Address,
+    omitZeroNetVariation: boolean = true,
   ): Promise<DBAccountBalanceVariation[]> {
     // Aggregate outgoing transfers (negative amounts)
     const scopedTransfers = db
@@ -130,6 +141,7 @@ export class AccountBalanceRepository {
       .select({
         accountId: scopedTransfers.fromAccountId,
         fromAmount: sql<string>`-SUM(${transfer.amount})`.as("from_amount"),
+        fromCount: sql<string>`COUNT(*)`.as("from_count"),
       })
       .from(scopedTransfers)
       .groupBy(scopedTransfers.fromAccountId)
@@ -140,6 +152,7 @@ export class AccountBalanceRepository {
       .select({
         accountId: scopedTransfers.toAccountId,
         toAmount: sql<string>`SUM(${transfer.amount})`.as("to_amount"),
+        toCount: sql<string>`COUNT(*)`.as("to_count"),
       })
       .from(scopedTransfers)
       .groupBy(scopedTransfers.toAccountId)
@@ -155,6 +168,12 @@ export class AccountBalanceRepository {
         ),
         toChange: sql<string>`COALESCE(${transfersTo.toAmount}, 0)`.as(
           "to_change",
+        ),
+        fromCount: sql<number>`COALESCE(${transfersFrom.fromCount}, 0)`.as(
+          "from_count",
+        ),
+        toCount: sql<number>`COALESCE(${transfersTo.toCount}, 0)`.as(
+          "to_count",
         ),
       })
       .from(accountBalance)
@@ -175,13 +194,25 @@ export class AccountBalanceRepository {
       .select({
         accountId: combined.accountId,
         currentBalance: combined.currentBalance,
+        totalVolume:
+          sql<string>`ABS(${combined.fromChange}) + ABS(${combined.toChange})`.as(
+            "total_volume",
+          ),
         absoluteChange:
           sql<string>`${combined.fromChange} + ${combined.toChange}`.as(
             "absolute_change",
           ),
+        transferCount:
+          sql<number>`${combined.fromCount} + ${combined.toCount}`.as(
+            "transfer_count",
+          ),
       })
       .from(combined)
-      .where(sql`(${combined.fromChange} + ${combined.toChange}) != 0`)
+      .where(
+        omitZeroNetVariation
+          ? sql`(${combined.fromChange} + ${combined.toChange}) != 0`
+          : undefined,
+      )
       .orderBy(
         orderDirection === "desc"
           ? desc(sql`ABS(${combined.fromChange} + ${combined.toChange})`)
@@ -190,18 +221,28 @@ export class AccountBalanceRepository {
       .offset(skip)
       .limit(limit);
 
-    return result.map(({ accountId, currentBalance, absoluteChange }) => ({
-      accountId: accountId,
-      previousBalance: currentBalance - BigInt(absoluteChange),
-      currentBalance: currentBalance,
-      absoluteChange: BigInt(absoluteChange),
-      percentageChange:
-        currentBalance - BigInt(absoluteChange)
-          ? Number(
-              (BigInt(absoluteChange) * 10000n) /
-                (currentBalance - BigInt(absoluteChange)),
-            ) / 100
-          : 0,
-    }));
+    return result.map(
+      ({
+        accountId,
+        currentBalance,
+        absoluteChange,
+        totalVolume,
+        transferCount,
+      }) => ({
+        accountId: accountId,
+        previousBalance: currentBalance - BigInt(absoluteChange),
+        currentBalance: currentBalance,
+        absoluteChange: BigInt(absoluteChange),
+        totalVolume: BigInt(totalVolume),
+        transferCount: BigInt(transferCount),
+        percentageChange:
+          currentBalance - BigInt(absoluteChange)
+            ? Number(
+                (BigInt(absoluteChange) * 10000n) /
+                  (currentBalance - BigInt(absoluteChange)),
+              ) / 100
+            : 0,
+      }),
+    );
   }
 }
