@@ -81,7 +81,7 @@ export const ZK: DaoConfiguration = {
           "Voting power are based on block previous to when voters could first cast a vote, making flashloan votes impossible.",
       },
       [GovernanceImplementationEnum.PROPOSAL_THRESHOLD]: {
-        value: "5,2% Market Supply",
+        value: "1M $ZK",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -114,7 +114,7 @@ export const ZK: DaoConfiguration = {
       },
       [GovernanceImplementationEnum.SPAM_RESISTANCE]: {
         value: "No",
-        riskLevel: RiskLevel.LOW,
+        riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.SPAM_RESISTANCE
@@ -167,13 +167,12 @@ export const ZK: DaoConfiguration = {
       },
       [GovernanceImplementationEnum.VOTING_DELAY]: {
         value: "6 days",
-        riskLevel: RiskLevel.HIGH,
+        riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_DELAY
           ].description,
-        riskExplanation:
-          "With six days, zkSync has enough time to gather votes and delegates with the goal of blocking a malicious proposal in the DAO.",
+        riskExplanation: "Six days is a sufficient delay for Voting Delay.",
       },
       [GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION]: {
         value: "Yes",
