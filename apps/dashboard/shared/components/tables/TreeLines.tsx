@@ -58,7 +58,7 @@ const TreeConnector = <TData,>({ row }: { row: Row<TData> }) => {
     <>
       {/* Vertical line from top to middle */}
       <div
-        className="border-border-contrast absolute left-[80%] border-l"
+        className="border-border-contrast absolute left-[70%] border-l"
         style={{
           top: "-32px",
           height: "calc(50% + 32px)",
@@ -67,14 +67,14 @@ const TreeConnector = <TData,>({ row }: { row: Row<TData> }) => {
 
       {/* Horizontal line to the right */}
       <div
-        className="border-border-contrast absolute left-[80%] top-1/2 border-t"
-        style={{ width: "25%" }}
+        className="border-border-contrast absolute left-[70%] top-1/2 border-t"
+        style={{ width: "100%" }}
       />
 
       {/* Vertical line from middle to bottom - only for non-last children (T-shaped) */}
       {hasMoreSiblings && (
         <div
-          className="border-border-contrast absolute left-[80%] border-l"
+          className="border-border-contrast absolute left-[70%] border-l"
           style={{
             top: "50%",
             height: "calc(50% + 32px)",
@@ -101,7 +101,7 @@ const AncestorLine = <TData,>({
 
   return (
     <div
-      className="border-border-contrast absolute left-[80%] border-l"
+      className="border-border-contrast absolute left-[70%] border-l"
       style={{
         top: "-20px",
         height: "calc(100% + 48px)",

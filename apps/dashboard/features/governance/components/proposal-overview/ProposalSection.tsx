@@ -23,10 +23,13 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfig from "@/shared/dao-config";
 
 export const ProposalSection = () => {
-  const { proposalId, daoId } = useParams();
+  const { proposalId, daoId } = useParams<{
+    proposalId: string;
+    daoId: string;
+  }>();
   const { address } = useAccount();
   const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
-  const daoEnum = daoId as DaoIdEnum;
+  const daoEnum = daoId.toUpperCase() as DaoIdEnum;
   const { decimals } = daoConfig[daoEnum];
 
   const { proposal, loading, error } = useProposal({
@@ -38,6 +41,7 @@ export const ProposalSection = () => {
     address: address ?? "",
     daoId: daoEnum,
     proposalId: proposalId as string,
+    decimals,
   });
 
   if (loading) {

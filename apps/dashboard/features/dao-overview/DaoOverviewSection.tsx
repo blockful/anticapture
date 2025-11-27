@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoAvatarIcon } from "@/shared/components/icons";
@@ -25,11 +25,20 @@ import { VotingPowerChartCard } from "@/features/dao-overview/components/VotingP
 import { MetricsCard } from "@/features/dao-overview/components/MetricsCard";
 import { AttackProfitabilityChartCard } from "@/features/dao-overview/components/AttackProfitabilityChartCard";
 import { useRouter } from "next/navigation";
+import { useQuorumGap } from "@/shared/hooks/useQuorumGap";
+import { apolloClient } from "@/shared/providers/GlobalProviders";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const router = useRouter();
   const daoConfig = daoConfigByDaoId[daoId];
   const daoOverview = daoConfig.daoOverview;
+
+  useEffect(() => {
+    // FIXME:
+    //   This is only a workaround for now, as Apollo Client does not yet support HTTP header context for cache indexing;
+    //   https://github.com/apollographql/apollo-feature-requests/issues/326
+    apolloClient.cache.reset();
+  }, [daoId]);
 
   const {
     isLoading,
@@ -37,7 +46,6 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     delegatedSupply,
     activeSupply,
     averageTurnout,
-    averageTurnoutPercentAboveQuorum,
     topDelegatesToPass,
     proposalThresholdValue,
     proposalThresholdPercentage,
@@ -46,6 +54,8 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     votingDelay,
     timelockDelay,
   } = useDaoOverviewData({ daoId, daoConfig });
+
+  const { data: quorumGap } = useQuorumGap(daoId);
 
   const {
     liquidTreasuryAllValue,
@@ -99,9 +109,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
                 delegatedSupplyValue={delegatedSupplyValue}
                 activeSupplyValue={activeSupplyValue}
                 averageTurnoutValue={averageTurnoutValue}
-                averageTurnoutPercentAboveQuorum={
-                  averageTurnoutPercentAboveQuorum
-                }
+                quorumGap={quorumGap}
                 liquidTreasuryAllValue={liquidTreasuryAllValue}
                 liquidTreasuryAllPercent={liquidTreasuryAllPercent}
                 liquidTreasuryNonDaoValue={liquidTreasuryNonDaoValue}

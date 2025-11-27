@@ -15,6 +15,12 @@ export enum AffectedSupply {
   DEX = "DEX",
   LENDING = "LENDING",
   TOTAL = "TOTAL",
+  UNASSIGNED = "UNASSIGNED",
+}
+
+export enum TransactionType {
+  TRANSFER = "TRANSFER",
+  DELEGATION = "DELEGATION",
 }
 
 export const TransactionsRequestSchema = z
@@ -69,6 +75,28 @@ export const TransactionsRequestSchema = z
           isDex: affectedSupply.includes(AffectedSupply.DEX),
           isLending: affectedSupply.includes(AffectedSupply.LENDING),
           isTotal: affectedSupply.includes(AffectedSupply.TOTAL),
+          isUnassigned: affectedSupply.includes(AffectedSupply.UNASSIGNED),
+        };
+      }),
+    includes: z
+      .union([
+        z.nativeEnum(TransactionType),
+        z.array(z.nativeEnum(TransactionType)),
+      ])
+      .optional()
+      .describe(
+        "Filter by transaction type. Can be one of: 'TRANSFER', 'DELEGATION'",
+      )
+      .transform((includeTypes) => {
+        if (!includeTypes?.length)
+          return {
+            transfers: true,
+            delegations: true,
+          };
+
+        return {
+          transfers: includeTypes.includes(TransactionType.TRANSFER),
+          delegations: includeTypes.includes(TransactionType.DELEGATION),
         };
       }),
   })

@@ -64,7 +64,12 @@ export const Metric = ({
               },
             )}
           >
-            {percentage}%
+            {Number(percentage) > 1000
+              ? "> 1000"
+              : Number(percentage) < -1000
+                ? "< -1000"
+                : percentage}
+            %
           </p>
         )}
         <X
