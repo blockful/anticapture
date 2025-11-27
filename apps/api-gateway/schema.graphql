@@ -150,6 +150,9 @@ type Query {
   """Returns current governance parameters for this DAO"""
   dao: dao_200_response
 
+  """Get total assets"""
+  totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
+
   """
   Average delegation percentage across all supported DAOs by day.
   Returns the mean delegation percentage for each day in the specified range.
@@ -1917,6 +1920,19 @@ enum HTTPMethod {
   PATCH
 }
 
+type query_totalAssets_items {
+  totalAssets: String!
+  date: String!
+}
+
+enum queryInput_totalAssets_days {
+  _7d
+  _30d
+  _90d
+  _180d
+  _365d
+}
+
 type AverageDelegationPercentageItem {
   date: String!
   high: String!
@@ -1937,3 +1953,4 @@ type DAOList {
   items: [dao_200_response!]!
   totalCount: Int!
 }
+
