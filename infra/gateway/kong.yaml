@@ -1,0 +1,84 @@
+_format_version: "3.0"
+_transform: true
+
+# Services - Define backend services for each DAO indexer
+services:
+  - name: ens-indexer-service
+    url: https://ens-api-dev-0561.up.railway.app
+    protocol: https
+    host: ens-indexer
+    port: 42069
+    path: /
+    retries: 5
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    tags:
+      - ens
+      - indexer
+    routes:
+      - name: ens-route
+        paths:
+          - /ens
+        strip_path: true
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - OPTIONS
+        tags:
+          - ens-api
+
+  - name: uni-indexer-service
+    url: https://uniswap-api-dev.up.railway.app
+    protocol: https
+    host: uni-indexer
+    port: 42069
+    path: /
+    retries: 5
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    tags:
+      - uniswap
+      - indexer
+    routes:
+      - name: uni-route
+        paths:
+          - /uni
+        strip_path: true
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - OPTIONS
+        tags:
+          - uni-api
+
+plugins:
+  # Global CORS Plugin
+  - name: cors
+    config:
+      origins:
+        - "*"
+      methods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - OPTIONS
+        - HEAD
+        - PATCH
+      headers:
+        - Accept
+        - Authorization
+        - Content-Type
+        - X-Requested-With
+        - apikey
+      exposed_headers:
+        - X-Auth-Token
+      credentials: true
+      max_age: 3600
+      preflight_continue: false
