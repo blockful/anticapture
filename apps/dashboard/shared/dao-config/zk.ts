@@ -14,7 +14,7 @@ export const ZK: DaoConfiguration = {
   icon: ZKIcon,
   daoOverview: {
     token: "ERC20",
-    chain: zksync,
+    chain: { ...zksync, icon: ZKIcon },
     contracts: {
       governor: "0xb83FF6501214ddF40C91C9565d095400f3F45746",
       token: "0x5A7d6b2F92C77FAD6CCaBd7EE0624E64907Eaf3E",
