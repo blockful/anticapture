@@ -139,19 +139,16 @@ type Query {
   """
   Returns a mapping of the biggest variations to account balances associated by account address
   """
-  accountBalanceVariations(days: queryInput_accountBalanceVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, skipZeroNetVariationDeltas: Boolean = true, orderDirection: queryInput_accountBalanceVariations_orderDirection = desc): accountBalanceVariations_200_response
+  accountBalanceVariations(days: queryInput_accountBalanceVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalanceVariations_orderDirection = desc): accountBalanceVariations_200_response
 
   """
   Returns a mapping of the largest interactions between accounts. 
   Positive amounts signify net token transfers FROM <accountId>, whilst negative amounts refer to net transfers TO <accountId>
   """
-  accountInteractions(days: queryInput_accountInteractions_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, skipZeroNetVariationDeltas: Boolean = true, orderDirection: queryInput_accountInteractions_orderDirection = desc, accountId: String!): accountInteractions_200_response
+  accountInteractions(days: queryInput_accountInteractions_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountInteractions_orderDirection = desc, accountId: String!): accountInteractions_200_response
 
   """Returns current governance parameters for this DAO"""
   dao: dao_200_response
-
-  """Get total assets"""
-  totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
 
   """
   Average delegation percentage across all supported DAOs by day.
@@ -1866,6 +1863,7 @@ enum queryInput_accountBalanceVariations_orderDirection {
 
 type accountInteractions_200_response {
   period: query_accountInteractions_period!
+  totalCount: Float!
   items: [query_accountInteractions_items_items]!
 }
 
@@ -1919,19 +1917,6 @@ enum HTTPMethod {
   PATCH
 }
 
-type query_totalAssets_items {
-  totalAssets: String!
-  date: String!
-}
-
-enum queryInput_totalAssets_days {
-  _7d
-  _30d
-  _90d
-  _180d
-  _365d
-}
-
 type AverageDelegationPercentageItem {
   date: String!
   high: String!
@@ -1952,4 +1937,3 @@ type DAOList {
   items: [dao_200_response!]!
   totalCount: Int!
 }
-

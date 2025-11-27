@@ -34,8 +34,7 @@ export function accountBalanceVariations(
       },
     }),
     async (context) => {
-      const { days, limit, skip, skipZeroNetVariationDeltas, orderDirection } =
-        context.req.valid("query");
+      const { days, limit, skip, orderDirection } = context.req.valid("query");
       const now = Math.floor(Date.now() / 1000);
 
       const result = await service.getAccountBalanceVariations(
@@ -43,7 +42,6 @@ export function accountBalanceVariations(
         skip,
         limit,
         orderDirection,
-        skipZeroNetVariationDeltas,
       );
 
       return context.json(AccountBalanceVariationsMapper(result, now, days));

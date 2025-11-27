@@ -24,7 +24,6 @@ export const AccountBalanceVariationsRequestSchema = z.object({
     .min(0, "Skip must be a non-negative integer")
     .optional()
     .default(0),
-  skipZeroNetVariationDeltas: z.boolean().optional().default(true),
   orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
 });
 
@@ -56,6 +55,7 @@ export const AccountInteractionsResponseSchema = z.object({
     startTimestamp: z.string(),
     endTimestamp: z.string(),
   }),
+  totalCount: z.number(),
   items: z.array(
     z.object({
       accountId: z.string(),
@@ -79,10 +79,18 @@ export type DBAccountBalanceVariation = {
   previousBalance: bigint;
   currentBalance: bigint;
   absoluteChange: bigint;
-  totalVolume: bigint;
-  transferCount: bigint;
   percentageChange: number;
 };
+
+export type DBAccountInteraction = DBAccountBalanceVariation & {
+  totalVolume: bigint;
+  transferCount: bigint;
+};
+
+export interface AccountInteractions {
+  interactionCount: number;
+  interactions: DBAccountInteraction[];
+}
 
 export interface DBHistoricalBalance {
   address: Address;
@@ -146,7 +154,7 @@ export const AccountBalanceVariationsMapper = (
 
 export const AccountInteractionsMapper = (
   accountId: Address,
-  interactions: DBAccountBalanceVariation[],
+  interactions: AccountInteractions,
   endTimestamp: number,
   days: DaysEnum,
 ): AccountInteractionsResponse => {
@@ -156,7 +164,8 @@ export const AccountInteractionsMapper = (
       startTimestamp: new Date((endTimestamp - days) * 1000).toISOString(),
       endTimestamp: new Date(endTimestamp * 1000).toISOString(),
     },
-    items: interactions
+    totalCount: interactions.interactionCount,
+    items: interactions.interactions
       .filter(({ accountId: addr }) => addr !== accountId)
       .map(({ accountId, absoluteChange, totalVolume, transferCount }) => ({
         accountId: accountId,
