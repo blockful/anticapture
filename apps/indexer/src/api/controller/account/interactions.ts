@@ -47,8 +47,6 @@ Positive amounts signify net token transfers FROM <accountId>, whilst negative a
         orderDirection,
       );
 
-      console.log({ result });
-
       return context.json(
         AccountInteractionsMapper(accountId as Address, result, now, days),
       );
