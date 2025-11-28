@@ -47,6 +47,14 @@ export const AccountBalanceVariationsResponseSchema = z.object({
 export const AccountInteractionsRequestSchema =
   AccountBalanceVariationsRequestSchema.extend({
     accountId: z.string(),
+    minAmount: z
+      .string()
+      .transform((val) => BigInt(val))
+      .optional(), //z.coerce.bigint().optional() doesn't work because of a bug with zod, zod asks for a string that satisfies REGEX ^d+$, when it should be ^\d+$
+    maxAmount: z
+      .string()
+      .transform((val) => BigInt(val))
+      .optional(), //z.coerce.bigint().optional() doesn't work because of a bug with zod, zod asks for a string that satisfies REGEX ^d+$, when it should be ^\d+$
   });
 
 export const AccountInteractionsResponseSchema = z.object({
@@ -55,10 +63,13 @@ export const AccountInteractionsResponseSchema = z.object({
     startTimestamp: z.string(),
     endTimestamp: z.string(),
   }),
+  totalCount: z.number(),
   items: z.array(
     z.object({
       accountId: z.string(),
       amountTransferred: z.string(),
+      totalVolume: z.string(),
+      transferCount: z.string(),
     }),
   ),
 });
@@ -79,6 +90,16 @@ export type DBAccountBalanceVariation = {
   percentageChange: number;
 };
 
+export type DBAccountInteraction = DBAccountBalanceVariation & {
+  totalVolume: bigint;
+  transferCount: bigint;
+};
+
+export interface AccountInteractions {
+  interactionCount: number;
+  interactions: DBAccountInteraction[];
+}
+
 export interface DBHistoricalBalance {
   address: Address;
   balance: string;
@@ -88,6 +109,11 @@ export type HistoricalBalance = DBHistoricalBalance & {
   blockNumber: number;
   tokenAddress: Address;
 };
+
+export interface AmountFilter {
+  minAmount: bigint | undefined;
+  maxAmount: bigint | undefined;
+}
 
 export const HistoricalBalanceMapper = (
   daoId: DaoIdEnum,
@@ -141,7 +167,7 @@ export const AccountBalanceVariationsMapper = (
 
 export const AccountInteractionsMapper = (
   accountId: Address,
-  interactions: DBAccountBalanceVariation[],
+  interactions: AccountInteractions,
   endTimestamp: number,
   days: DaysEnum,
 ): AccountInteractionsResponse => {
@@ -151,11 +177,14 @@ export const AccountInteractionsMapper = (
       startTimestamp: new Date((endTimestamp - days) * 1000).toISOString(),
       endTimestamp: new Date(endTimestamp * 1000).toISOString(),
     },
-    items: interactions
+    totalCount: interactions.interactionCount,
+    items: interactions.interactions
       .filter(({ accountId: addr }) => addr !== accountId)
-      .map(({ accountId, absoluteChange }) => ({
+      .map(({ accountId, absoluteChange, totalVolume, transferCount }) => ({
         accountId: accountId,
         amountTransferred: absoluteChange.toString(),
+        totalVolume: totalVolume.toString(),
+        transferCount: transferCount.toString(),
       })),
   });
 };

@@ -1,4 +1,4 @@
-import { asc, desc, gte, sql, and, inArray, eq, or } from "ponder";
+import { asc, desc, gte, sql, and, inArray } from "ponder";
 import { db } from "ponder:api";
 import { transfer, accountBalance } from "ponder:schema";
 import { DBAccountBalanceVariation, DBHistoricalBalance } from "../mappers";
@@ -83,47 +83,11 @@ export class AccountBalanceRepository {
     skip: number,
     orderDirection: "asc" | "desc",
   ): Promise<DBAccountBalanceVariation[]> {
-    return this.getVariations(startTimestamp, limit, skip, orderDirection);
-  }
-
-  async getAccountInteractions(
-    accountId: Address,
-    startTimestamp: number,
-    limit: number,
-    skip: number,
-    orderDirection: "asc" | "desc",
-  ): Promise<DBAccountBalanceVariation[]> {
-    return this.getVariations(
-      startTimestamp,
-      limit,
-      skip,
-      orderDirection,
-      accountId,
-    );
-  }
-
-  private async getVariations(
-    startTimestamp: number,
-    limit: number,
-    skip: number,
-    orderDirection: "asc" | "desc",
-    address?: Address,
-  ): Promise<DBAccountBalanceVariation[]> {
     // Aggregate outgoing transfers (negative amounts)
     const scopedTransfers = db
       .select()
       .from(transfer)
-      .where(
-        and(
-          gte(transfer.timestamp, BigInt(startTimestamp)),
-          address
-            ? or(
-                eq(transfer.toAccountId, address),
-                eq(transfer.fromAccountId, address),
-              )
-            : undefined,
-        ),
-      )
+      .where(gte(transfer.timestamp, BigInt(startTimestamp)))
       .as("scoped_transfers");
 
     const transfersFrom = db
