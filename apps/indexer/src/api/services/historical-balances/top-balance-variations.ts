@@ -1,4 +1,8 @@
-import { DBAccountBalanceVariation, AccountInteractions } from "@/api/mappers";
+import {
+  DBAccountBalanceVariation,
+  AccountInteractions,
+  AmountFilter,
+} from "@/api/mappers";
 import { Address } from "viem";
 
 interface AccountBalanceRepository {
@@ -17,6 +21,7 @@ interface AccountInteractionsRepository {
     limit: number,
     skip: number,
     orderDirection: "asc" | "desc",
+    filter: AmountFilter,
   ): Promise<AccountInteractions>;
 }
 
@@ -46,6 +51,7 @@ export class BalanceVariationsService {
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
+    filter: AmountFilter,
   ): Promise<AccountInteractions> {
     return this.interactionRepository.getAccountInteractions(
       accountId,
@@ -53,6 +59,7 @@ export class BalanceVariationsService {
       limit,
       skip,
       orderDirection,
+      filter,
     );
   }
 }

@@ -47,6 +47,14 @@ export const AccountBalanceVariationsResponseSchema = z.object({
 export const AccountInteractionsRequestSchema =
   AccountBalanceVariationsRequestSchema.extend({
     accountId: z.string(),
+    minAmount: z
+      .string()
+      .transform((val) => BigInt(val))
+      .optional(), //z.coerce.bigint().optional() doesn't work because of a bug with zod, zod asks for a string that satisfies REGEX ^d+$, when it should be ^\d+$
+    maxAmount: z
+      .string()
+      .transform((val) => BigInt(val))
+      .optional(), //z.coerce.bigint().optional() doesn't work because of a bug with zod, zod asks for a string that satisfies REGEX ^d+$, when it should be ^\d+$
   });
 
 export const AccountInteractionsResponseSchema = z.object({
@@ -101,6 +109,11 @@ export type HistoricalBalance = DBHistoricalBalance & {
   blockNumber: number;
   tokenAddress: Address;
 };
+
+export interface AmountFilter {
+  minAmount: bigint | undefined;
+  maxAmount: bigint | undefined;
+}
 
 export const HistoricalBalanceMapper = (
   daoId: DaoIdEnum,

@@ -1,7 +1,7 @@
-import { asc, desc, gte, sql, and, eq, or } from "ponder";
+import { asc, desc, gte, sql, and, eq, or, lte } from "ponder";
 import { db } from "ponder:api";
 import { transfer, accountBalance } from "ponder:schema";
-import { AccountInteractions } from "../mappers";
+import { AccountInteractions, AmountFilter } from "../mappers";
 import { Address } from "viem";
 
 export class AccountInteractionsRepository {
@@ -11,20 +11,30 @@ export class AccountInteractionsRepository {
     limit: number,
     skip: number,
     orderDirection: "asc" | "desc",
+    filter: AmountFilter,
   ): Promise<AccountInteractions> {
+    // Aggregate outgoing transfers (negative amounts)
+    const transferCriteria = [
+      gte(transfer.timestamp, BigInt(startTimestamp)),
+      or(
+        eq(transfer.toAccountId, accountId),
+        eq(transfer.fromAccountId, accountId),
+      ),
+    ];
+
+    if (filter.minAmount !== undefined) {
+      transferCriteria.push(gte(transfer.amount, filter.minAmount));
+    }
+
+    if (filter.maxAmount !== undefined) {
+      transferCriteria.push(lte(transfer.amount, filter.maxAmount));
+    }
+
     // Aggregate outgoing transfers (negative amounts)
     const scopedTransfers = db
       .select()
       .from(transfer)
-      .where(
-        and(
-          gte(transfer.timestamp, BigInt(startTimestamp)),
-          or(
-            eq(transfer.toAccountId, accountId),
-            eq(transfer.fromAccountId, accountId),
-          ),
-        ),
-      )
+      .where(and(...transferCriteria))
       .as("scoped_transfers");
 
     const totalCountResult = await db
