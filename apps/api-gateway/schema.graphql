@@ -142,9 +142,10 @@ type Query {
   accountBalanceVariations(days: queryInput_accountBalanceVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalanceVariations_orderDirection = desc): accountBalanceVariations_200_response
 
   """
-  Returns a mapping of the largest interactions between accounts associated by account address
+  Returns a mapping of the largest interactions between accounts. 
+  Positive amounts signify net token transfers FROM <accountId>, whilst negative amounts refer to net transfers TO <accountId>
   """
-  accountInteractions(days: queryInput_accountInteractions_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountInteractions_orderDirection = desc, accountId: String!): accountInteractions_200_response
+  accountInteractions(days: queryInput_accountInteractions_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountInteractions_orderDirection = desc, accountId: String!, minAmount: String, maxAmount: String): accountInteractions_200_response
 
   """Returns current governance parameters for this DAO"""
   dao: dao_200_response
@@ -1865,6 +1866,7 @@ enum queryInput_accountBalanceVariations_orderDirection {
 
 type accountInteractions_200_response {
   period: query_accountInteractions_period!
+  totalCount: Float!
   items: [query_accountInteractions_items_items]!
 }
 
@@ -1877,6 +1879,8 @@ type query_accountInteractions_period {
 type query_accountInteractions_items_items {
   accountId: String!
   amountTransferred: String!
+  totalVolume: String!
+  transferCount: String!
 }
 
 enum queryInput_accountInteractions_days {
@@ -1949,3 +1953,4 @@ type DAOList {
   items: [dao_200_response!]!
   totalCount: Int!
 }
+

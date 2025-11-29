@@ -35,8 +35,15 @@ Positive amounts signify net token transfers FROM <accountId>, whilst negative a
       },
     }),
     async (context) => {
-      const { accountId, days, limit, skip, orderDirection } =
-        context.req.valid("query");
+      const {
+        accountId,
+        days,
+        limit,
+        skip,
+        orderDirection,
+        minAmount,
+        maxAmount,
+      } = context.req.valid("query");
       const now = Math.floor(Date.now() / 1000);
 
       const result = await service.getAccountInteractions(
@@ -45,6 +52,10 @@ Positive amounts signify net token transfers FROM <accountId>, whilst negative a
         skip,
         limit,
         orderDirection,
+        {
+          minAmount,
+          maxAmount,
+        },
       );
 
       return context.json(
