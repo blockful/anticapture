@@ -160,17 +160,6 @@ export const useTransactionsTableData = ({
           const newItems = fetchMoreResult.transactions.items ?? [];
           const merged = [...prevItems, ...newItems];
 
-          console.log({
-            prevItems: prevItems.map((i) =>
-              i?.delegations.map((d) => d?.delegatedValue),
-            ),
-            newItems: newItems.map((i) =>
-              i?.delegations.map((d) => d?.delegatedValue),
-            ),
-            merged: merged.map((i) =>
-              i?.delegations.map((d) => d?.delegatedValue),
-            ),
-          });
 
           return {
             ...fetchMoreResult,
