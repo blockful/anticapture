@@ -5,7 +5,10 @@ import { Address, formatUnits } from "viem";
 import { formatAddress } from "@/shared/utils/formatAddress";
 import { useGetAccountInteractionsQuery } from "@anticapture/graphql-client/hooks";
 import daoConfig from "@/shared/dao-config";
-import { Query_AccountInteractions_Items_Items } from "@anticapture/graphql-client";
+import {
+  Query_AccountInteractions_Items_Items,
+  QueryInput_AccountInteractions_OrderDirection,
+} from "@anticapture/graphql-client";
 
 interface Interaction {
   accountId: string;
@@ -34,17 +37,26 @@ interface InteractionResponse {
 export const useAccountInteractionsData = ({
   daoId,
   address,
+  sortDirection,
+  filterVariables,
 }: {
   daoId: DaoIdEnum;
   address: string;
-  orderBy?: string;
-  orderDirection?: "asc" | "desc";
+  sortDirection?: "asc" | "desc";
+  filterVariables?: {
+    minAmount?: string;
+    maxAmount?: string;
+  };
 }): InteractionResponse => {
   const { decimals } = daoConfig[daoId];
 
   const { data, loading, error } = useGetAccountInteractionsQuery({
     variables: {
       address: address,
+      orderDirection:
+        sortDirection as QueryInput_AccountInteractions_OrderDirection,
+      minAmount: filterVariables?.minAmount,
+      maxAmount: filterVariables?.maxAmount,
     },
     context: {
       headers: {

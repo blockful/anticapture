@@ -6,7 +6,7 @@ import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 import { ArrowDown, ArrowUp, Inbox } from "lucide-react";
 import { useAccountInteractionsData } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/hooks/useAccountInteractionsData";
-import { ThePieChart } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/ThePieChart";
+import { TopInteractionsChart } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/TopInteractionsChart";
 import { TopInteractionsTable } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/TopInteractionsTable";
 
 const ChartLegend = ({
@@ -89,7 +89,7 @@ export const TopInteractions = ({
     );
   }
 
-  const variant = netBalanceChange || 0 >= 0 ? "positive" : "negative";
+  const variant = netBalanceChange >= 0 ? "positive" : "negative";
 
   return (
     <div className="flex w-full flex-col gap-4 p-4">
@@ -97,7 +97,7 @@ export const TopInteractions = ({
         <div className="flex h-full w-full flex-col">
           <div className="flex w-full flex-col gap-4 md:flex-row">
             <div>
-              <ThePieChart
+              <TopInteractionsChart
                 currentValue={totalCount || 0}
                 pieData={pieData}
                 chartConfig={chartConfig}
@@ -137,7 +137,7 @@ export const TopInteractions = ({
                           )}
                         />
                       )}
-                      {formatNumberUserReadable(netBalanceChange)}
+                      {formatNumberUserReadable(Math.abs(netBalanceChange))}
                     </p>
                   )}
                 </div>

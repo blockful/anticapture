@@ -13,7 +13,7 @@ import { renderCustomizedLabel } from "@/features/holders-and-delegates/delegate
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 
-const PieChartCustomTooltip: React.FC<
+const TopInteractionsChartCustomTooltip: React.FC<
   TooltipProps<number, string> & {
     chartConfig: Record<
       string,
@@ -44,7 +44,7 @@ const PieChartCustomTooltip: React.FC<
   );
 };
 
-export const ThePieChart = ({
+export const TopInteractionsChart = ({
   currentValue,
   pieData,
   chartConfig,
@@ -95,7 +95,7 @@ export const ThePieChart = ({
           </Pie>
           <Tooltip
             content={
-              <PieChartCustomTooltip
+              <TopInteractionsChartCustomTooltip
                 chartConfig={chartConfig}
                 currentValue={currentValue}
               />

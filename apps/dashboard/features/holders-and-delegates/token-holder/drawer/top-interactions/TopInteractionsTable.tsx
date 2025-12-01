@@ -2,17 +2,22 @@
 
 import { useEffect, useState } from "react";
 
-import { SkeletonRow } from "@/shared/components";
+import { Button, SkeletonRow } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { ColumnDef } from "@tanstack/react-table";
-import { Address } from "viem";
+import { Address, parseUnits } from "viem";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
-import { AlertOctagon, Inbox } from "lucide-react";
+import { AlertOctagon, ArrowDown, ArrowUp, Inbox } from "lucide-react";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { formatNumberUserReadable } from "@/shared/utils";
+import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { Table } from "@/shared/components/design-system/table/Table";
 import daoConfig from "@/shared/dao-config";
 import { useAccountInteractionsData } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/hooks/useAccountInteractionsData";
+import { AddressFilter } from "@/shared/components/design-system/table/filters";
+import { percentageVariants } from "@/shared/components/design-system/table/Percentage";
+import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
+import { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
+import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 
 export const TopInteractionsTable = ({
   address,
@@ -21,15 +26,27 @@ export const TopInteractionsTable = ({
   address: string;
   daoId: string;
 }) => {
+  const [currentAddressFilter, setCurrentAddressFilter] = useState<string>("");
   const [isMounted, setIsMounted] = useState<boolean>(false);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [filterVariables, setFilterVariables] = useState<{
+    minAmount?: string;
+    maxAmount?: string;
+  }>();
+  const [isFilterActive, setIsFilterActive] = useState(false);
+
   const {
+    decimals,
     daoOverview: { token },
   } = daoConfig[daoId as DaoIdEnum];
 
-  const { interactions, loading, error } = useAccountInteractionsData({
-    daoId: daoId as DaoIdEnum,
-    address: address,
-  });
+  const { interactions, loading, error, totalCount } =
+    useAccountInteractionsData({
+      daoId: daoId as DaoIdEnum,
+      address: address,
+      sortDirection,
+      filterVariables,
+    });
 
   useEffect(() => {
     setIsMounted(true);
@@ -48,6 +65,10 @@ export const TopInteractionsTable = ({
     };
   });
 
+  const handleAddressFilterApply = (address: string | undefined) => {
+    setCurrentAddressFilter(address || "");
+  };
+
   const columns: ColumnDef<{
     address: string;
     volume: number;
@@ -58,7 +79,12 @@ export const TopInteractionsTable = ({
       accessorKey: "address",
       header: () => (
         <div className="text-table-header flex w-full items-center justify-start">
-          Address
+          <span>Address</span>
+          <AddressFilter
+            onApply={handleAddressFilterApply}
+            currentFilter={currentAddressFilter}
+            className="ml-2"
+          />
         </div>
       ),
       meta: {
@@ -95,8 +121,37 @@ export const TopInteractionsTable = ({
       accessorKey: "volume",
       header: () => {
         return (
-          <div className="text-table-header flex w-full items-center justify-end whitespace-nowrap">
-            Volume ({daoId})
+          <div className="flex items-center justify-end gap-1.5">
+            <h4 className="text-table-header">Volume ({daoId})</h4>
+            <AmountFilter
+              onApply={(filterState: AmountFilterState) => {
+                setSortDirection(
+                  filterState.sortOrder === "largest-first" ? "desc" : "asc",
+                );
+
+                setFilterVariables(() => ({
+                  minAmount: filterState.minAmount
+                    ? parseUnits(filterState.minAmount, decimals).toString()
+                    : undefined,
+                  maxAmount: filterState.maxAmount
+                    ? parseUnits(filterState.maxAmount, decimals).toString()
+                    : undefined,
+                }));
+
+                setIsFilterActive(
+                  !!(filterVariables?.minAmount || filterVariables?.maxAmount),
+                );
+              }}
+              onReset={() => {
+                setIsFilterActive(false);
+                // Reset to default sorting
+                setFilterVariables(() => ({
+                  minAmount: undefined,
+                  maxAmount: undefined,
+                }));
+              }}
+              isActive={isFilterActive}
+            />
           </div>
         );
       },
@@ -140,23 +195,81 @@ export const TopInteractionsTable = ({
           );
         }
         const balanceChange: number = row.getValue("balanceChange");
+
+        const value =
+          token === "ERC20"
+            ? Number(BigInt(balanceChange)) / Number(BigInt(10 ** 18)) || 0
+            : Number(balanceChange) || 0;
+        const variant = value >= 0 ? "positive" : "negative";
+
+        if (value === 0) {
+          return (
+            <span
+              className={cn(
+                "flex w-full items-center justify-end text-sm",
+                percentageVariants({ variant: "neutral" }),
+              )}
+            >
+              0
+            </span>
+          );
+        }
+
         return (
-          <div className="flex w-full items-center justify-end text-sm">
-            {formatNumberUserReadable(
-              token === "ERC20"
-                ? Number(BigInt(balanceChange)) / Number(BigInt(10 ** 18)) || 0
-                : Number(balanceChange) || 0,
+          <span
+            className={cn(
+              "flex w-full items-center justify-end text-sm",
+              percentageVariants({ variant }),
             )}
-          </div>
+          >
+            {value > 0 ? (
+              <ArrowUp
+                className={cn(
+                  "size-4",
+                  variant === "positive" && "text-success",
+                )}
+              />
+            ) : (
+              <ArrowDown
+                className={cn("size-4", variant === "negative" && "text-error")}
+              />
+            )}
+            {formatNumberUserReadable(Math.abs(value))}
+          </span>
         );
       },
     },
     {
       accessorKey: "totalInteractions",
-      header: () => {
+      header: ({ column }) => {
+        const handleSortToggle = () => {
+          const newSortOrder = sortDirection === "desc" ? "asc" : "desc";
+          setSortDirection(newSortOrder);
+          column.toggleSorting(newSortOrder === "desc");
+        };
+
         return (
           <div className="text-table-header flex w-full items-center justify-end whitespace-nowrap">
             Total Interactions
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-secondary justify-end p-0"
+              onClick={handleSortToggle}
+            >
+              <ArrowUpDown
+                props={{
+                  className: "size-4",
+                }}
+                activeState={
+                  sortDirection === "asc"
+                    ? ArrowState.UP
+                    : sortDirection === "desc"
+                      ? ArrowState.DOWN
+                      : ArrowState.DEFAULT
+                }
+              />
+            </Button>
           </div>
         );
       },
@@ -172,7 +285,8 @@ export const TopInteractionsTable = ({
         const totalInteractions: number = row.getValue("totalInteractions");
         return (
           <div className="flex w-full items-center justify-end text-sm">
-            {Number(totalInteractions) || 0}
+            {Number(totalInteractions) || 0} (
+            {((totalInteractions / totalCount) * 100).toFixed(2)}%)
           </div>
         );
       },
@@ -198,7 +312,7 @@ export const TopInteractionsTable = ({
         <BlankSlate
           variant="default"
           icon={Inbox}
-          description="No voting power data found for this address"
+          description="No interaction data found for this address"
         />
       </div>
     );
