@@ -6,6 +6,7 @@ export * from "./proposals";
 export * from "./transactions";
 export * from "./proposals-activity";
 export * from "./last-update";
-export * from "./historical-balances";
+export * from "./account-balance";
 export * from "./nft-price";
 export * from "./token";
+export * from "./dao";

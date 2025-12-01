@@ -2,7 +2,7 @@ import { Address } from "viem";
 import { DaoIdEnum } from "@/lib/enums";
 import { eq, sql } from "ponder";
 import { db } from "ponder:api";
-import { accountPower, dao } from "ponder:schema";
+import { accountPower } from "ponder:schema";
 
 export type DbProposal = {
   id: string;
@@ -46,8 +46,6 @@ export type OrderDirection = "asc" | "desc";
 export interface ProposalsActivityRepository {
   getFirstVoteTimestamp(address: Address): Promise<number | null>;
 
-  getDaoVotingPeriod(daoId: DaoIdEnum): Promise<number | undefined>;
-
   getProposals(
     daoId: DaoIdEnum,
     activityStart: number,
@@ -88,16 +86,6 @@ export class DrizzleProposalsActivityRepository
     return account?.firstVoteTimestamp
       ? Number(account.firstVoteTimestamp)
       : null;
-  }
-
-  async getDaoVotingPeriod(daoId: DaoIdEnum): Promise<number | undefined> {
-    const _dao = await db.query.dao.findFirst({
-      where: eq(dao.id, daoId),
-      columns: {
-        votingPeriod: true,
-      },
-    });
-    return _dao?.votingPeriod ? Number(_dao.votingPeriod) : undefined;
   }
 
   async getProposals(

@@ -1,6 +1,6 @@
 "use client";
 
-import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { ButtonHeaderDAOSidebarMobile } from "@/shared/components";
 import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -16,38 +16,38 @@ export const HeaderNavMobile = () => {
 
   const options = [
     {
-      anchorId: SECTIONS_CONSTANTS.daoOverview.anchorId,
-      title: SECTIONS_CONSTANTS.daoOverview.title,
+      page: PAGES_CONSTANTS.daoOverview.page,
+      title: PAGES_CONSTANTS.daoOverview.title,
       enabled: !!daoConfig.daoOverview,
     },
     {
-      anchorId: SECTIONS_CONSTANTS.attackProfitability.anchorId,
-      title: SECTIONS_CONSTANTS.attackProfitability.title,
+      page: PAGES_CONSTANTS.attackProfitability.page,
+      title: PAGES_CONSTANTS.attackProfitability.title,
       enabled: !!daoConfig.attackProfitability,
     },
     {
-      anchorId: SECTIONS_CONSTANTS.riskAnalysis.anchorId,
-      title: SECTIONS_CONSTANTS.riskAnalysis.title,
+      page: PAGES_CONSTANTS.riskAnalysis.page,
+      title: PAGES_CONSTANTS.riskAnalysis.title,
       enabled: !!daoConfig.riskAnalysis,
     },
+    // {
+    //   page: PAGES_CONSTANTS.governanceImplementation.page,
+    //   title: PAGES_CONSTANTS.governanceImplementation.titleAbbreviation,
+    //   enabled: !!daoConfig.governanceImplementation,
+    // },
     {
-      anchorId: SECTIONS_CONSTANTS.governanceImplementation.anchorId,
-      title: SECTIONS_CONSTANTS.governanceImplementation.titleAbbreviation,
-      enabled: !!daoConfig.governanceImplementation,
-    },
-    {
-      anchorId: SECTIONS_CONSTANTS.resilienceStages.anchorId,
-      title: SECTIONS_CONSTANTS.resilienceStages.title,
+      page: PAGES_CONSTANTS.resilienceStages.page,
+      title: PAGES_CONSTANTS.resilienceStages.title,
       enabled: !!daoConfig.resilienceStages,
     },
     {
-      anchorId: SECTIONS_CONSTANTS.tokenDistribution.anchorId,
-      title: SECTIONS_CONSTANTS.tokenDistribution.title,
+      page: PAGES_CONSTANTS.tokenDistribution.page,
+      title: PAGES_CONSTANTS.tokenDistribution.title,
       enabled: !!daoConfig.tokenDistribution,
     },
     {
-      anchorId: SECTIONS_CONSTANTS.holdersAndDelegates.anchorId,
-      title: SECTIONS_CONSTANTS.holdersAndDelegates.title,
+      page: PAGES_CONSTANTS.holdersAndDelegates.page,
+      title: PAGES_CONSTANTS.holdersAndDelegates.title,
       enabled: true,
     },
   ];

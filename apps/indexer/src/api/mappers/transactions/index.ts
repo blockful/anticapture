@@ -1,5 +1,5 @@
 import { transfer, delegation, transaction } from "ponder:schema";
-import { formatEther, isAddress } from "viem";
+import { isAddress } from "viem";
 import { z } from "@hono/zod-openapi";
 
 export type DBTransaction = typeof transaction.$inferSelect & {
@@ -15,6 +15,12 @@ export enum AffectedSupply {
   DEX = "DEX",
   LENDING = "LENDING",
   TOTAL = "TOTAL",
+  UNASSIGNED = "UNASSIGNED",
+}
+
+export enum TransactionType {
+  TRANSFER = "TRANSFER",
+  DELEGATION = "DELEGATION",
 }
 
 export const TransactionsRequestSchema = z
@@ -69,6 +75,28 @@ export const TransactionsRequestSchema = z
           isDex: affectedSupply.includes(AffectedSupply.DEX),
           isLending: affectedSupply.includes(AffectedSupply.LENDING),
           isTotal: affectedSupply.includes(AffectedSupply.TOTAL),
+          isUnassigned: affectedSupply.includes(AffectedSupply.UNASSIGNED),
+        };
+      }),
+    includes: z
+      .union([
+        z.nativeEnum(TransactionType),
+        z.array(z.nativeEnum(TransactionType)),
+      ])
+      .optional()
+      .describe(
+        "Filter by transaction type. Can be one of: 'TRANSFER', 'DELEGATION'",
+      )
+      .transform((includeTypes) => {
+        if (!includeTypes?.length)
+          return {
+            transfers: true,
+            delegations: true,
+          };
+
+        return {
+          transfers: includeTypes.includes(TransactionType.TRANSFER),
+          delegations: includeTypes.includes(TransactionType.DELEGATION),
         };
       }),
   })
@@ -131,7 +159,8 @@ export const TransactionResponseSchema = z.object({
 });
 
 export const TransactionsResponseSchema = z.object({
-  transactions: z.array(TransactionResponseSchema),
+  items: z.array(TransactionResponseSchema),
+  totalCount: z.number(),
 });
 
 export type TransactionsResponse = z.infer<typeof TransactionsResponseSchema>;
@@ -145,7 +174,7 @@ export const TransactionMapper = {
       transactionHash: t.transactionHash,
       daoId: t.daoId,
       tokenId: t.tokenId,
-      amount: formatEther(t.amount),
+      amount: t.amount.toString(),
       fromAccountId: t.fromAccountId,
       toAccountId: t.toAccountId,
       timestamp: t.timestamp.toString(),
@@ -163,7 +192,7 @@ export const TransactionMapper = {
       daoId: d.daoId,
       delegateAccountId: d.delegateAccountId,
       delegatorAccountId: d.delegatorAccountId,
-      delegatedValue: formatEther(d.delegatedValue),
+      delegatedValue: d.delegatedValue.toString(),
       previousDelegate: d.previousDelegate,
       timestamp: d.timestamp.toString(),
       logIndex: d.logIndex,

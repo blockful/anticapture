@@ -7,11 +7,16 @@ import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 
 export const SCR: DaoConfiguration = {
   name: "Scroll",
+  decimals: 18,
+  color: {
+    svgColor: "#ebc28e",
+    svgBgColor: "#ffeeda",
+  },
+  forumLink: "https://governance.scroll.io/",
   icon: ScrollIcon,
   daoOverview: {
     token: "ERC20",
-    chain: scroll,
-    blockTime: 1.5,
+    chain: { ...scroll, icon: ScrollIcon },
     snapshot: "",
     contracts: {
       governor: "0x2f3f2054776bd3c2fc30d750734a8f539bb214f0",

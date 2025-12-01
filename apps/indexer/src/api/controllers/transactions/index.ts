@@ -44,6 +44,7 @@ export function transactions(app: Hono, service: TransactionsService) {
         minAmount,
         maxAmount,
         affectedSupply,
+        includes,
       } = context.req.valid("query");
 
       const result = await service.getTransactions({
@@ -58,6 +59,7 @@ export function transactions(app: Hono, service: TransactionsService) {
         minAmount,
         maxAmount,
         affectedSupply,
+        includes,
       });
 
       return context.json(result);

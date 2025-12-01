@@ -15,7 +15,6 @@ interface ProposalsRepository {
   ): Promise<DBProposal[]>;
   getProposalsCount(): Promise<number>;
   getProposalById(proposalId: string): Promise<DBProposal | undefined>;
-  getVotingDelay(): Promise<bigint>;
   getProposalNonVoters(
     proposalId: string,
     skip: number,
@@ -36,10 +35,6 @@ export class ProposalsService {
     private readonly proposalsRepo: ProposalsRepository,
     private readonly daoClient: DAOClient,
   ) {}
-
-  async getVotingDelay(): Promise<bigint> {
-    return this.proposalsRepo.getVotingDelay();
-  }
 
   async getProposalsCount(): Promise<number> {
     return this.proposalsRepo.getProposalsCount();

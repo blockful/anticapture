@@ -21,7 +21,9 @@ interface VotingPowerRepository {
     minDelta?: string,
     maxDelta?: string,
   ): Promise<number>;
+}
 
+interface VotingPowerVariationRepository {
   getVotingPowerChanges(
     startTimestamp: number,
     limit: number,
@@ -31,7 +33,10 @@ interface VotingPowerRepository {
 }
 
 export class VotingPowerService {
-  constructor(private readonly votingRepository: VotingPowerRepository) {}
+  constructor(
+    private readonly votingRepository: VotingPowerRepository,
+    private readonly votingPowerVariationRepository: VotingPowerVariationRepository,
+  ) {}
 
   async getVotingPowers(
     account: Address,
@@ -66,7 +71,7 @@ export class VotingPowerService {
     limit: number,
     orderDirection: "asc" | "desc",
   ): Promise<DBVotingPowerVariation[]> {
-    return this.votingRepository.getVotingPowerChanges(
+    return this.votingPowerVariationRepository.getVotingPowerChanges(
       startTimestamp,
       limit,
       skip,

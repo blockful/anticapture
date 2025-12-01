@@ -214,6 +214,30 @@
     scrollbar-width: none; /* Firefox */
   }
 
+  /* Custom styled scrollbar */
+  .scrollbar-custom {
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: var(--base-muted) transparent; /* Firefox - thumb and track */
+  }
+
+  .scrollbar-custom::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-thumb {
+    background-color: var(--base-muted);
+    border-radius: 4px;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+    background-color: var(--base-border);
+  }
+
   .scrollbar-thin {
     scrollbar-width: thin; /* Firefox */
     scrollbar-color: #a1a1aa transparent; /* Firefox */

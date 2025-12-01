@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 import { ColumnDef } from "@tanstack/react-table";
 import {
   QueryClient,
@@ -101,7 +101,7 @@ export const DefaultTable: Story = {
   },
   render: (args) => (
     <div className="flex w-full justify-center p-4">
-      <ExampleDataTable {...args} />
+      <ExampleDataTable {...args} columns={args.columns} data={args.data} />
     </div>
   ),
 };

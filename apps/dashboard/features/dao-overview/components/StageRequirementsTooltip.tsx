@@ -42,7 +42,7 @@ export const StageRequirementsTooltip = ({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      <div className="stage-tooltip-box-shadow border-light-dark bg-surface-background relative w-[calc(100vw-44px)] min-w-[375px] rounded-lg border sm:w-[25vw]">
+      <div className="stage-tooltip-box-shadow border-light-dark bg-surface-background relative w-[calc(100vw-44px)] rounded-lg border sm:w-[25vw]">
         {/* Header */}
         <div className="p-4">
           <div className="flex justify-start">
@@ -53,7 +53,6 @@ export const StageRequirementsTooltip = ({
                 ] as "error" | "warning" | "success"
               }
               className="mb-2 p-1"
-              hideIcon={true}
             >
               {currentStage === Stage.NONE ? (
                 <span className="text-sm font-medium">NO STAGE</span>

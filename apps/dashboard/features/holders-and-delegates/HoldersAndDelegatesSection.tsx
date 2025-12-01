@@ -1,14 +1,16 @@
 "use client";
 
 import { ReactElement, useState } from "react";
-import { TheSectionLayout, SwitcherDate } from "@/shared/components";
+import { TheSectionLayout } from "@/shared/components";
 import { TimeInterval } from "@/shared/types/enums";
-import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { UserCheck } from "lucide-react";
 import { Delegates } from "@/features/holders-and-delegates/components";
 import { TabButton } from "@/features/holders-and-delegates/components/TabButton";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TokenHolders } from "@/features/holders-and-delegates/token-holder";
+import { SubSectionsContainer } from "@/shared/components/design-system/section";
+import { SwitcherDateMobile } from "@/shared/components/switchers/SwitcherDateMobile";
 
 type TabId = "tokenHolders" | "delegates";
 
@@ -56,18 +58,21 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
 
   return (
     <TheSectionLayout
-      title={SECTIONS_CONSTANTS.holdersAndDelegates.title}
+      title={PAGES_CONSTANTS.holdersAndDelegates.title}
       subtitle={"Holders & Delegates"}
       icon={<UserCheck className="section-layout-icon" />}
-      description={SECTIONS_CONSTANTS.holdersAndDelegates.description}
-      switchDate={
-        <SwitcherDate defaultValue={defaultDays} setTimeInterval={setDays} />
-      }
-      days={days}
-      anchorId={SECTIONS_CONSTANTS.holdersAndDelegates.anchorId}
-      leftContent={<HoldersAndDelegatesLeftComponent />}
+      description={PAGES_CONSTANTS.holdersAndDelegates.description}
     >
-      {tabComponentMap[activeTab]}
+      <SubSectionsContainer>
+        <div className="flex h-full w-full items-center justify-between">
+          <HoldersAndDelegatesLeftComponent />
+          <SwitcherDateMobile
+            defaultValue={defaultDays}
+            setTimeInterval={setDays}
+          />
+        </div>
+        {tabComponentMap[activeTab]}
+      </SubSectionsContainer>
     </TheSectionLayout>
   );
 };

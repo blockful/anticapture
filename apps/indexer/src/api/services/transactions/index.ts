@@ -1,10 +1,16 @@
-import { TransactionsRepository } from "@/api/repositories";
 import {
   TransactionsRequest,
   TransactionsResponse,
   TransactionMapper,
+  DBTransaction,
 } from "@/api/mappers/";
-import { containsAnyValue } from "../utils";
+
+interface TransactionsRepository {
+  getFilteredAggregateTransactions(
+    req: TransactionsRequest,
+  ): Promise<DBTransaction[]>;
+  getAggregatedTransactionsCount(req: TransactionsRequest): Promise<number>;
+}
 
 export class TransactionsService {
   constructor(private transactionsRepository: TransactionsRepository) {}
@@ -12,24 +18,14 @@ export class TransactionsService {
   async getTransactions(
     params: TransactionsRequest,
   ): Promise<TransactionsResponse> {
-    const isFiltered = containsAnyValue({
-      from: params.from,
-      to: params.to,
-      minAmount: params.minAmount,
-      maxAmount: params.maxAmount,
-      affectedSupply: params.affectedSupply,
-    });
-
-    const result = isFiltered
-      ? await this.transactionsRepository.getFilteredAggregateTransactions(
-          params,
-        )
-      : await this.transactionsRepository.getRecentAggregateTransactions(
-          params,
-        );
+    const [totalCount, result] = await Promise.all([
+      this.transactionsRepository.getAggregatedTransactionsCount(params),
+      this.transactionsRepository.getFilteredAggregateTransactions(params),
+    ]);
 
     return {
-      transactions: result.map(TransactionMapper.toApi),
+      items: result.map(TransactionMapper.toApi),
+      totalCount,
     };
   }
 }

@@ -1,0 +1,7 @@
+query CompareTreasury($days: queryInput_compareTreasury_days!) {
+  compareTreasury(days: $days) {
+    changeRate
+    currentTreasury
+    oldTreasury
+  }
+}

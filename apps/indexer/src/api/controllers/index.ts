@@ -7,3 +7,4 @@ export * from "./proposals";
 export * from "./token";
 export * from "./transactions";
 export * from "./voting-power";
+export * from "./dao";

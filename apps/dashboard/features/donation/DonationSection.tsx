@@ -1,6 +1,4 @@
-"use client";
-
-import { SECTIONS_CONSTANTS } from "@/shared/constants/sections-constants";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { Heart } from "lucide-react";
 import { TheSectionLayout } from "@/shared/components";
 import {
@@ -14,10 +12,9 @@ export const DonationSection = () => {
 
   return (
     <TheSectionLayout
-      title={SECTIONS_CONSTANTS.donate.title}
+      title={PAGES_CONSTANTS.donate.title}
       icon={<Heart className="section-layout-icon" />}
-      description={SECTIONS_CONSTANTS.donate.description}
-      anchorId={SECTIONS_CONSTANTS.donate.anchorId}
+      description={PAGES_CONSTANTS.donate.description}
       className="bg-surface-background! mt-[56px]! sm:mt-0!"
     >
       <div className="flex flex-col gap-2">

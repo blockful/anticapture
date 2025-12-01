@@ -66,7 +66,7 @@ export class ProposalsActivityService {
   constructor(
     private readonly repository: ProposalsActivityRepository,
     private readonly daoClient: DAOClient,
-  ) { }
+  ) {}
 
   async getProposalsActivity({
     address,
@@ -87,13 +87,10 @@ export class ProposalsActivityService {
       return this.createEmptyActivity(address, true);
     }
 
-    // Get voting period for the DAO
-    const votingPeriodBlocks = await this.repository.getDaoVotingPeriod(daoId);
-    if (!votingPeriodBlocks) {
-      throw new Error(`DAO ${daoId} not found or missing voting period`);
-    }
+    // Get voting period for the DAO from blockchain
+    const votingPeriodBlocks = await this.daoClient.getVotingPeriod();
 
-    const votingPeriodSeconds = votingPeriodBlocks * blockTime;
+    const votingPeriodSeconds = Number(votingPeriodBlocks) * blockTime;
 
     // Calculate activity start time
     const activityStart = this.calculateActivityStart(

@@ -6,6 +6,10 @@ query Transactions(
   $minAmount: String
   $maxAmount: String
   $sortOrder: queryInput_transactions_sortOrder
+  $affectedSupply: JSON
+  $fromDate: Int
+  $toDate: Int
+  $includes: JSON
 ) {
   transactions(
     limit: $limit
@@ -15,8 +19,12 @@ query Transactions(
     minAmount: $minAmount
     maxAmount: $maxAmount
     sortOrder: $sortOrder
+    affectedSupply: $affectedSupply
+    fromDate: $fromDate
+    toDate: $toDate
+    includes: $includes
   ) {
-    transactions {
+    items {
       from
       isCex
       isDex
@@ -54,5 +62,6 @@ query Transactions(
         transactionHash
       }
     }
+    totalCount
   }
 }

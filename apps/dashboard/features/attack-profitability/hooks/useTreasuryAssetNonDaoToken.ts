@@ -48,6 +48,8 @@ export const useTreasuryAssetNonDaoToken = (
 
   const supportsLiquidTreasuryCall =
     daoConfigByDaoId[daoId].attackProfitability?.supportsLiquidTreasuryCall;
+  const fixedTreasuryValue =
+    daoConfigByDaoId[daoId].attackProfitability?.liquidTreasury;
 
   // Only create a valid key if the DAO supports liquid treasury calls
   const fetchKey = supportsLiquidTreasuryCall ? key : null;
@@ -61,7 +63,11 @@ export const useTreasuryAssetNonDaoToken = (
   });
 
   // Return default data (empty array) when liquid treasury is not supported
-  const finalData = supportsLiquidTreasuryCall ? data : [];
+  const finalData = supportsLiquidTreasuryCall
+    ? data
+    : fixedTreasuryValue
+      ? [fixedTreasuryValue]
+      : [];
 
   return {
     data: finalData,

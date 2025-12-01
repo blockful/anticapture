@@ -4,14 +4,20 @@ import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governan
 import { GitcoinIcon } from "@/shared/components/icons";
 import { mainnet } from "viem/chains";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
+import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
 
 export const GTC: DaoConfiguration = {
   name: "Gitcoin",
+  decimals: 18,
+  color: {
+    svgColor: "#1e443f",
+    svgBgColor: "#D0E1DE",
+  },
+  forumLink: "https://gov.gitcoin.co/",
   icon: GitcoinIcon,
   daoOverview: {
     token: "ERC20",
-    chain: mainnet,
-    blockTime: 12,
+    chain: { ...mainnet, icon: MainnetIcon },
     snapshot: "https://snapshot.box/#/s:gitcoindao.eth",
     contracts: {
       governor: "0x9D4C63565D5618310271bF3F3c01b2954C1D1639",

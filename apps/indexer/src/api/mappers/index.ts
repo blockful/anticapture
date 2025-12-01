@@ -5,3 +5,4 @@ export * from "./transactions";
 export * from "./token";
 export * from "./delegation-percentage";
 export * from "./account-balance";
+export * from "./dao";
