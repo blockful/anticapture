@@ -19,7 +19,6 @@ import { Button } from "@/shared/components";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
 import daoConfig from "@/shared/dao-config";
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
-import { BalanceChart } from "@/features/holders-and-delegates/token-holder/components/BalanceChart";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 
 interface TokenHolderTableData {
@@ -320,43 +319,6 @@ export const TokenHolders = ({
             )}
           </div>
         );
-      },
-    },
-    {
-      accessorKey: "chartLastDays",
-      cell: ({ row }) => {
-        const variation = row.getValue("variation") as
-          | {
-              percentageChange: number;
-              absoluteChange: number;
-            }
-          | undefined;
-
-        if (loading) {
-          return (
-            <div className="flex w-full justify-center">
-              <SkeletonRow className="h-5 w-32" />
-            </div>
-          );
-        }
-
-        return (
-          <div className="pr-2">
-            <BalanceChart
-              accountId={row.original.address}
-              daoId={daoId}
-              percentageChange={variation?.percentageChange || 0}
-            />
-          </div>
-        );
-      },
-      header: () => (
-        <div className="text-table-header flex w-full items-center justify-start">
-          Last {days.replace("d", "")} days
-        </div>
-      ),
-      meta: {
-        columnClassName: "w-16",
       },
     },
   ];

@@ -1,0 +1,178 @@
+"use client";
+
+import { DaoIdEnum } from "@/shared/types/daos";
+import { cn, formatNumberUserReadable } from "@/shared/utils";
+import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
+import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
+import { ArrowDown, ArrowUp, Inbox } from "lucide-react";
+import { useAccountInteractionsData } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/hooks/useAccountInteractionsData";
+import { ThePieChart } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/ThePieChart";
+import { TopInteractionsTable } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/TopInteractionsTable";
+
+const ChartLegend = ({
+  items,
+  loading,
+}: {
+  items: { color: string; label: string; percentage: string }[];
+  loading?: boolean;
+}) => {
+  if (loading) {
+    return (
+      <div className="flex w-full flex-wrap items-center justify-between gap-2 sm:justify-normal sm:gap-3">
+        {Array.from({ length: 10 }, (_, i) => (
+          <div key={i} className="flex items-center gap-2">
+            <SkeletonRow
+              parentClassName="flex animate-pulse"
+              className="rounded-xs size-2"
+            />
+            <SkeletonRow
+              parentClassName="flex animate-pulse"
+              className="h-4 w-16"
+            />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex w-full flex-wrap items-center justify-between gap-2 sm:justify-normal sm:gap-3">
+      {items.map((item) => {
+        return (
+          <div key={item.label} className="flex items-center gap-2">
+            <span
+              className="rounded-xs size-2"
+              style={{ backgroundColor: item.color }}
+            />
+            <span className="text-secondary flex flex-row gap-2 text-sm font-medium">
+              {item.label}
+              <span
+                className="text-secondary text-sm font-medium"
+                style={{
+                  color: item.color,
+                }}
+              >
+                {item.percentage}%
+              </span>
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+export const TopInteractions = ({
+  address,
+  daoId,
+}: {
+  address: string;
+  daoId: DaoIdEnum;
+}) => {
+  const {
+    topFive,
+    totalCount,
+    netBalanceChange,
+    legendItems,
+    pieData,
+    chartConfig,
+    loading: loadingVotingPowerData,
+  } = useAccountInteractionsData({ daoId, address });
+
+  if (!topFive || (topFive.length === 0 && !loadingVotingPowerData)) {
+    return (
+      <BlankSlate
+        variant="default"
+        icon={Inbox}
+        description="No delegators found"
+      />
+    );
+  }
+
+  const variant = netBalanceChange || 0 >= 0 ? "positive" : "negative";
+
+  return (
+    <div className="flex w-full flex-col gap-4 p-4">
+      <div className="border-light-dark text-primary flex h-fit w-full flex-col gap-4 overflow-y-auto border p-4 sm:flex-row">
+        <div className="flex h-full w-full flex-col">
+          <div className="flex w-full flex-col gap-4 md:flex-row">
+            <div>
+              <ThePieChart
+                currentValue={totalCount || 0}
+                pieData={pieData}
+                chartConfig={chartConfig}
+              />
+            </div>
+
+            <div className="flex w-full flex-col gap-6">
+              <div className="flex flex-col gap-1">
+                <p className="text-secondary text-alternative-xs font-mono font-medium uppercase">
+                  Net Balance Change
+                </p>
+                <div className="text-md font-normal">
+                  {!netBalanceChange ? (
+                    <SkeletonRow
+                      parentClassName="flex animate-pulse"
+                      className="h-6 w-24"
+                    />
+                  ) : (
+                    <p
+                      className={cn(
+                        "flex items-center text-sm font-normal",
+                        variant === "positive" ? "text-success" : "text-error",
+                      )}
+                    >
+                      {netBalanceChange > 0 ? (
+                        <ArrowUp
+                          className={cn(
+                            "size-4",
+                            variant === "positive" && "text-success",
+                          )}
+                        />
+                      ) : (
+                        <ArrowDown
+                          className={cn(
+                            "size-4",
+                            variant === "negative" && "text-error",
+                          )}
+                        />
+                      )}
+                      {formatNumberUserReadable(netBalanceChange)}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="hidden h-px w-full bg-[#27272A] sm:flex" />
+
+              <div className="hidden flex-col gap-2 sm:flex">
+                <p className="text-secondary text-alternative-xs font-mono font-medium uppercase">
+                  Top Interaction (by aggregated value)
+                </p>
+
+                <div className="scrollbar-none flex flex-col gap-4 overflow-y-auto">
+                  {!legendItems || !topFive ? (
+                    <ChartLegend items={[]} loading={true} />
+                  ) : !topFive ? (
+                    <div className="text-secondary text-sm">
+                      Loading Interactions...
+                    </div>
+                  ) : topFive && topFive.length > 0 ? (
+                    <ChartLegend items={legendItems} />
+                  ) : (
+                    <div className="text-secondary text-sm">
+                      No interactions found
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="flex w-full flex-col gap-4">
+        <TopInteractionsTable address={address} daoId={daoId} />
+      </div>
+    </div>
+  );
+};

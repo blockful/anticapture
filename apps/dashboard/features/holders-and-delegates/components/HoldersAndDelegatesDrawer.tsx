@@ -15,6 +15,7 @@ import { BalanceHistory } from "@/features/holders-and-delegates/components/Bala
 import { DelegationHistoryTable } from "@/features/holders-and-delegates/token-holder/drawer/delegation-history/DelegationHistoryTable";
 import { DelegateProposalsActivity } from "@/features/holders-and-delegates/components/DelegateProposalsActivity";
 import { IconButton } from "@/shared/components";
+import { TopInteractions } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/TopInteractions";
 
 export type EntityType = "delegate" | "tokenHolder";
 
@@ -65,6 +66,11 @@ export const HoldersAndDelegatesDrawer = ({
           id: "delegationHistory",
           label: "Delegation History",
           content: <DelegationHistoryTable address={address} daoId={daoId} />,
+        },
+        {
+          id: "topInteractions",
+          label: "Top Interactions",
+          content: <TopInteractions address={address} daoId={daoId} />,
         },
         {
           id: "balanceHistory",

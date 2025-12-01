@@ -2782,6 +2782,18 @@ export type BalanceChartQueryVariables = Exact<{
 
 export type BalanceChartQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', items: Array<{ __typename?: 'transfer', amount: any }> } };
 
+export type GetAccountInteractionsQueryVariables = Exact<{
+  address: Scalars['String']['input'];
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  maxAmount?: InputMaybe<Scalars['String']['input']>;
+  minAmount?: InputMaybe<Scalars['String']['input']>;
+  orderDirection?: InputMaybe<QueryInput_AccountInteractions_OrderDirection>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+}>;
+
+
+export type GetAccountInteractionsQuery = { __typename?: 'Query', accountInteractions?: { __typename?: 'accountInteractions_200_response', totalCount: number, items: Array<{ __typename?: 'query_accountInteractions_items_items', accountId: string, amountTransferred: string, totalVolume: string, transferCount: string } | null> } | null };
+
 export type GetDelegationHistoryCountQueryVariables = Exact<{
   delegator: Scalars['String']['input'];
 }>;

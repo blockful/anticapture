@@ -44,8 +44,6 @@ const VotingPowerChartComponent = ({
     skip: !accountId,
   });
 
-  console.log("votingPowerQuery", votingPowerQuery);
-
   const chartData =
     useMemo(() => {
       const votingPowers = votingPowerQuery.data?.votingPowers?.items || [];
@@ -63,8 +61,6 @@ const VotingPowerChartComponent = ({
       </div>
     );
   }
-
-  console.log(chartData.map((item) => Number(item.high)));
 
   return (
     <div className="flex w-full justify-center py-2.5">

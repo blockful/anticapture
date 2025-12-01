@@ -22,8 +22,6 @@ import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
 import daoConfig from "@/shared/dao-config";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { VotingPowerChart } from "@/features/holders-and-delegates/delegate/drawer/components/VotingPowerChart";
-
 interface DelegateTableData {
   address: string;
   votingPower: string;
@@ -250,14 +248,14 @@ export const Delegates = ({
         if (loading) {
           return (
             <SkeletonRow
-              parentClassName="flex animate-pulse justify-end w-full pr-4"
+              parentClassName="flex animate-pulse w-full items-center justify-center pr-4"
               className="h-5 w-full max-w-20"
             />
           );
         }
 
         return (
-          <div className="text-secondary flex items-center justify-end text-end text-sm font-normal">
+          <div className="text-secondary flex w-full items-center justify-center text-end text-sm font-normal">
             {votingPower}
           </div>
         );
@@ -266,7 +264,7 @@ export const Delegates = ({
         <Button
           variant="ghost"
           size="sm"
-          className="text-secondary w-full justify-end p-0"
+          className="text-secondary w-full p-0"
           onClick={() => handleSort("votingPower")}
         >
           <h4 className="text-table-header whitespace-nowrap">
@@ -285,6 +283,9 @@ export const Delegates = ({
         </Button>
       ),
       enableSorting: false,
+      meta: {
+        columnClassName: "w-80",
+      },
     },
     {
       accessorKey: "variation",
@@ -398,44 +399,6 @@ export const Delegates = ({
         </Button>
       ),
       enableSorting: false,
-    },
-    {
-      accessorKey: "chartLastDays",
-      cell: ({ row }) => {
-        const variation = row.getValue("variation") as
-          | {
-              percentageChange: number;
-              absoluteChange: number;
-            }
-          | undefined;
-
-        if (loading) {
-          return (
-            <div className="flex w-full justify-center">
-              <SkeletonRow className="h-5 w-32" />
-            </div>
-          );
-        }
-
-        return (
-          <div className="pr-2">
-            <VotingPowerChart
-              days={timePeriod}
-              accountId={row.original.address}
-              daoId={daoId}
-              percentageChange={variation?.percentageChange || 0}
-            />
-          </div>
-        );
-      },
-      header: () => (
-        <div className="text-table-header flex w-full items-center justify-start">
-          Last {timePeriod.replace("d", "")} days
-        </div>
-      ),
-      meta: {
-        columnClassName: "w-16",
-      },
     },
   ];
 

@@ -2785,6 +2785,18 @@ export type BalanceChartQueryVariables = Exact<{
 
 export type BalanceChartQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', items: Array<{ __typename?: 'transfer', amount: any }> } };
 
+export type GetAccountInteractionsQueryVariables = Exact<{
+  address: Scalars['String']['input'];
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  maxAmount?: InputMaybe<Scalars['String']['input']>;
+  minAmount?: InputMaybe<Scalars['String']['input']>;
+  orderDirection?: InputMaybe<QueryInput_AccountInteractions_OrderDirection>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+}>;
+
+
+export type GetAccountInteractionsQuery = { __typename?: 'Query', accountInteractions?: { __typename?: 'accountInteractions_200_response', totalCount: number, items: Array<{ __typename?: 'query_accountInteractions_items_items', accountId: string, amountTransferred: string, totalVolume: string, transferCount: string } | null> } | null };
+
 export type GetDelegationHistoryCountQueryVariables = Exact<{
   delegator: Scalars['String']['input'];
 }>;
@@ -4818,6 +4830,65 @@ export type BalanceChartQueryHookResult = ReturnType<typeof useBalanceChartQuery
 export type BalanceChartLazyQueryHookResult = ReturnType<typeof useBalanceChartLazyQuery>;
 export type BalanceChartSuspenseQueryHookResult = ReturnType<typeof useBalanceChartSuspenseQuery>;
 export type BalanceChartQueryResult = Apollo.QueryResult<BalanceChartQuery, BalanceChartQueryVariables>;
+export const GetAccountInteractionsDocument = gql`
+    query getAccountInteractions($address: String!, $limit: PositiveInt, $maxAmount: String, $minAmount: String, $orderDirection: queryInput_accountInteractions_orderDirection, $skip: NonNegativeInt) {
+  accountInteractions(
+    accountId: $address
+    days: _90d
+    limit: $limit
+    maxAmount: $maxAmount
+    minAmount: $minAmount
+    orderDirection: $orderDirection
+    skip: $skip
+  ) {
+    totalCount
+    items {
+      accountId
+      amountTransferred
+      totalVolume
+      transferCount
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetAccountInteractionsQuery__
+ *
+ * To run a query within a React component, call `useGetAccountInteractionsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAccountInteractionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAccountInteractionsQuery({
+ *   variables: {
+ *      address: // value for 'address'
+ *      limit: // value for 'limit'
+ *      maxAmount: // value for 'maxAmount'
+ *      minAmount: // value for 'minAmount'
+ *      orderDirection: // value for 'orderDirection'
+ *      skip: // value for 'skip'
+ *   },
+ * });
+ */
+export function useGetAccountInteractionsQuery(baseOptions: Apollo.QueryHookOptions<GetAccountInteractionsQuery, GetAccountInteractionsQueryVariables> & ({ variables: GetAccountInteractionsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetAccountInteractionsQuery, GetAccountInteractionsQueryVariables>(GetAccountInteractionsDocument, options);
+      }
+export function useGetAccountInteractionsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAccountInteractionsQuery, GetAccountInteractionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetAccountInteractionsQuery, GetAccountInteractionsQueryVariables>(GetAccountInteractionsDocument, options);
+        }
+export function useGetAccountInteractionsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetAccountInteractionsQuery, GetAccountInteractionsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetAccountInteractionsQuery, GetAccountInteractionsQueryVariables>(GetAccountInteractionsDocument, options);
+        }
+export type GetAccountInteractionsQueryHookResult = ReturnType<typeof useGetAccountInteractionsQuery>;
+export type GetAccountInteractionsLazyQueryHookResult = ReturnType<typeof useGetAccountInteractionsLazyQuery>;
+export type GetAccountInteractionsSuspenseQueryHookResult = ReturnType<typeof useGetAccountInteractionsSuspenseQuery>;
+export type GetAccountInteractionsQueryResult = Apollo.QueryResult<GetAccountInteractionsQuery, GetAccountInteractionsQueryVariables>;
 export const GetDelegationHistoryCountDocument = gql`
     query GetDelegationHistoryCount($delegator: String!) {
   delegations(where: {delegatorAccountId: $delegator}) {
