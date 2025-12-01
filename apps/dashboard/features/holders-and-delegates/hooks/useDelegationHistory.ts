@@ -101,17 +101,7 @@ export const useDelegationHistory = ({
   }, [orderBy, orderDirection, refetch]);
 
   const processedData = useMemo(() => {
-    if (!delegationHistoryData?.delegations?.items) return null;
-
-    return delegationHistoryData.delegations.items.map(
-      (
-        delegation: GetDelegationHistoryItemsQuery["delegations"]["items"][number],
-      ) => ({
-        delegate: delegation.delegate,
-        timestamp: delegation.timestamp,
-        transactionHash: delegation.transactionHash,
-      }),
-    );
+    return delegationHistoryData?.delegations?.items ?? [];
   }, [delegationHistoryData]);
 
   // Fetch totalCount with separate lightweight query
