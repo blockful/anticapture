@@ -19,6 +19,7 @@ query GetDelegationHistoryItems(
       delegateAccountId
       delegatedValue
       timestamp
+      transactionHash
     }
     pageInfo {
       hasNextPage
