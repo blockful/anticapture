@@ -39,6 +39,7 @@ export const useAccountInteractionsData = ({
   address,
   sortDirection,
   filterVariables,
+  limit = 100,
 }: {
   daoId: DaoIdEnum;
   address: string;
@@ -47,6 +48,7 @@ export const useAccountInteractionsData = ({
     minAmount?: string;
     maxAmount?: string;
   };
+  limit?: number;
 }): InteractionResponse => {
   const { decimals } = daoConfig[daoId];
 
@@ -57,12 +59,14 @@ export const useAccountInteractionsData = ({
         sortDirection as QueryInput_AccountInteractions_OrderDirection,
       minAmount: filterVariables?.minAmount,
       maxAmount: filterVariables?.maxAmount,
+      limit,
     },
     context: {
       headers: {
         "anticapture-dao-id": daoId,
       },
     },
+    notifyOnNetworkStatusChange: true,
     fetchPolicy: "cache-and-network",
   });
 

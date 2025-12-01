@@ -84,7 +84,7 @@ export const TopInteractions = ({
       <BlankSlate
         variant="default"
         icon={Inbox}
-        description="No delegators found"
+        description="No interactions found"
       />
     );
   }
