@@ -1,7 +1,12 @@
-import { DBAccountBalanceVariation } from "@/api/mappers";
+import {
+  DBAccountBalanceVariation,
+  AccountInteractions,
+  AmountFilter,
+} from "@/api/mappers";
+import { Address } from "viem";
 
 interface AccountBalanceRepository {
-  getTopAccountBalanceVariations(
+  getAccountBalanceVariations(
     startTimestamp: number,
     limit: number,
     skip: number,
@@ -9,20 +14,52 @@ interface AccountBalanceRepository {
   ): Promise<DBAccountBalanceVariation[]>;
 }
 
-export class TopBalanceVariationsService {
-  constructor(private readonly repository: AccountBalanceRepository) {}
+interface AccountInteractionsRepository {
+  getAccountInteractions(
+    accountId: Address,
+    startTimestamp: number,
+    limit: number,
+    skip: number,
+    orderDirection: "asc" | "desc",
+    filter: AmountFilter,
+  ): Promise<AccountInteractions>;
+}
 
-  async getTopAccountBalanceVariations(
+export class BalanceVariationsService {
+  constructor(
+    private readonly balanceRepository: AccountBalanceRepository,
+    private readonly interactionRepository: AccountInteractionsRepository,
+  ) {}
+
+  async getAccountBalanceVariations(
     startTimestamp: number,
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
   ): Promise<DBAccountBalanceVariation[]> {
-    return this.repository.getTopAccountBalanceVariations(
+    return this.balanceRepository.getAccountBalanceVariations(
       startTimestamp,
       limit,
       skip,
       orderDirection,
+    );
+  }
+
+  async getAccountInteractions(
+    accountId: Address,
+    startTimestamp: number,
+    skip: number,
+    limit: number,
+    orderDirection: "asc" | "desc",
+    filter: AmountFilter,
+  ): Promise<AccountInteractions> {
+    return this.interactionRepository.getAccountInteractions(
+      accountId,
+      startTimestamp,
+      limit,
+      skip,
+      orderDirection,
+      filter,
     );
   }
 }

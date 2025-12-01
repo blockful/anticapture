@@ -4,7 +4,10 @@ import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
 import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
-import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
+import {
+  DAYS_IN_SECONDS,
+  SECONDS_PER_DAY,
+} from "@/shared/constants/time-related";
 import axios from "axios";
 
 const fetchTimeSeries = async (
@@ -13,7 +16,7 @@ const fetchTimeSeries = async (
   metricTypes: MetricTypesEnum[],
 ): Promise<Record<MetricTypesEnum, DaoMetricsDayBucket[]>> => {
   const fromDate = String(
-    Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[days],
+    Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[days] - SECONDS_PER_DAY,
   ).slice(0, 10);
 
   const whereConditions = metricTypes
@@ -27,7 +30,7 @@ const fetchTimeSeries = async (
         },
         orderBy: "date",
         orderDirection: "asc",
-        limit: 365
+        limit: 370
       ) {
         items {
           date
@@ -78,7 +81,7 @@ const fetchTimeSeries = async (
 };
 
 /**
- * Fill the gaps on the dailyMetricBuckets using the previous day's values
+ * Fill the gaps in the dailyMetricBuckets using forward-fill logic.
  */
 const applyMetricsContinuity = (
   data: Record<MetricTypesEnum, DaoMetricsDayBucket[]> | undefined,
@@ -97,6 +100,7 @@ const applyMetricsContinuity = (
       });
     }
   }
+  allDates.add(Math.floor(Date.now() / 1000).toString());
 
   const sortedDates = Array.from(allDates).sort(
     (a, b) => Number(a) - Number(b),
@@ -106,7 +110,7 @@ const applyMetricsContinuity = (
     metricsWithContinuity[metricType] = [];
 
     if (data[metricType] && data[metricType].length > 0) {
-      let lastKnownEntry: DaoMetricsDayBucket | null = null;
+      let lastKnownEntry: DaoMetricsDayBucket = data[metricType][0];
 
       for (const date of sortedDates) {
         const entry = data[metricType].find((item) => item.date === date);

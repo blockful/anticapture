@@ -1,3 +1,5 @@
+import { formatUnits } from "viem";
+
 import { DaoIdEnum } from "@/shared/types/daos";
 import { GetProposalQuery } from "@anticapture/graphql-client";
 import { useParams } from "next/navigation";
@@ -13,7 +15,7 @@ import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { VotesTable } from "@/features/governance/components/proposal-overview/VotesTable";
-import { formatEther } from "viem";
+import daoConfig from "@/shared/dao-config";
 
 export const TabsDidntVoteContent = ({
   proposal,
@@ -21,7 +23,9 @@ export const TabsDidntVoteContent = ({
   proposal: NonNullable<GetProposalQuery["proposal"]>;
 }) => {
   const loadingRowRef = useRef<HTMLTableRowElement>(null);
-  const { daoId } = useParams();
+  const { daoId } = useParams<{ daoId: string }>();
+  const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
+  const { decimals } = daoConfig[daoIdEnum];
 
   // State for managing sort order
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
@@ -287,12 +291,12 @@ export const TabsDidntVoteContent = ({
 
           // Calculate percentage change from absolute variation
           const currentVotingPower = row.original.votingPower;
-          const currentVP = currentVotingPower
-            ? Number(formatEther(BigInt(currentVotingPower)))
-            : 0;
-          const variation = votingPowerVariation
-            ? Number(formatEther(BigInt(votingPowerVariation)))
-            : 0;
+          const currentVP = Number(
+            formatUnits(BigInt(currentVotingPower || 0), decimals),
+          );
+          const variation = Number(
+            formatUnits(BigInt(votingPowerVariation || 0), decimals),
+          );
           const historicalVP = currentVP - variation;
           const changePercentage =
             historicalVP !== 0 ? (variation / historicalVP) * 100 : 0;

@@ -100,7 +100,6 @@ export const useDelegationHistory = ({
     });
   }, [orderBy, orderDirection, refetch]);
 
-  // Process the delegation history data
   const processedData = useMemo(() => {
     if (!delegationHistoryData?.delegations?.items) return null;
 

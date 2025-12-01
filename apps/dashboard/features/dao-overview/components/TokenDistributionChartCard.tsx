@@ -21,7 +21,8 @@ const OVERVIEW_TOKEN_DISTRIBUTION_METRICS = [
 ];
 
 export const TokenDistributionChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
-  const daoCfg = daoConfig[daoId];
+  const { decimals } = daoConfig[daoId];
+
   const {
     chartData: tokenDistributionChartData,
     chartConfig: tokenDistributionChartConfig,
@@ -30,7 +31,7 @@ export const TokenDistributionChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
     appliedMetrics: OVERVIEW_TOKEN_DISTRIBUTION_METRICS,
     daoId,
     metricsSchema,
-    tokenType: daoCfg.daoOverview.token,
+    decimals,
   });
 
   const overviewTokenDistributionMetricsSchema = Object.fromEntries(

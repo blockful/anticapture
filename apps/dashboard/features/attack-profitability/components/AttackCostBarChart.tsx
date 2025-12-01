@@ -1,12 +1,8 @@
 "use client";
 
+import { formatUnits } from "viem";
+import { useParams } from "next/navigation";
 import { useEffect, useMemo, useRef } from "react";
-import {
-  useActiveSupply,
-  useAverageTurnout,
-  useDelegatedSupply,
-} from "@/shared/hooks";
-import { DaoIdEnum } from "@/shared/types/daos";
 import {
   BarChart,
   Bar,
@@ -17,10 +13,16 @@ import {
   Cell,
   LabelProps,
 } from "recharts";
+import { Data } from "react-csv/lib/core";
+
+import {
+  useActiveSupply,
+  useAverageTurnout,
+  useDelegatedSupply,
+} from "@/shared/hooks";
+import { DaoIdEnum } from "@/shared/types/daos";
 import { SkeletonRow } from "@/shared/components";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
-import { formatEther } from "viem";
-import { useParams } from "next/navigation";
 import { formatNumberUserReadable } from "@/shared/utils/";
 import { useScreenSize } from "@/shared/hooks";
 import { mockedAttackCostBarData } from "@/shared/constants/mocked-data/mocked-attack-cost-bar-data";
@@ -32,7 +34,6 @@ import {
 } from "@/features/attack-profitability/hooks";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
-import { Data } from "react-csv/lib/core";
 
 interface StackedValue {
   value: number;
@@ -163,13 +164,12 @@ export const AttackCostBarChart = ({
         id: "delegatedSupply",
         name: "Delegated Supply",
         value: formatValue(
-          daoConfig.daoOverview.token === "ERC20"
-            ? Number(
-                formatEther(
-                  BigInt(delegatedSupply.data?.currentDelegatedSupply || 0),
-                ),
-              )
-            : Number(delegatedSupply.data?.currentDelegatedSupply),
+          Number(
+            formatUnits(
+              BigInt(delegatedSupply.data?.currentDelegatedSupply || 0),
+              daoConfig.decimals,
+            ),
+          ),
           lastPrice,
         ),
         type: BarChartEnum.REGULAR,
@@ -181,9 +181,12 @@ export const AttackCostBarChart = ({
         type: BarChartEnum.REGULAR,
         customColor: "#EC762EE6",
         value: formatValue(
-          daoConfig.daoOverview.token === "ERC20"
-            ? Number(formatEther(BigInt(activeSupply.data?.activeSupply || 0)))
-            : Number(activeSupply.data?.activeSupply),
+          Number(
+            formatUnits(
+              BigInt(activeSupply.data?.activeSupply || 0),
+              daoConfig.decimals,
+            ),
+          ),
           lastPrice,
         ),
       },
@@ -193,13 +196,12 @@ export const AttackCostBarChart = ({
         type: BarChartEnum.REGULAR,
         customColor: "#EC762EB3",
         value: formatValue(
-          daoConfig.daoOverview.token === "ERC20"
-            ? Number(
-                formatEther(
-                  BigInt(averageTurnout.data?.currentAverageTurnout || 0),
-                ),
-              )
-            : Number(averageTurnout.data?.currentAverageTurnout),
+          Number(
+            formatUnits(
+              BigInt(averageTurnout.data?.currentAverageTurnout || 0),
+              daoConfig.decimals,
+            ),
+          ),
           lastPrice,
         ),
       },
@@ -209,13 +211,12 @@ export const AttackCostBarChart = ({
         type: BarChartEnum.REGULAR,
         customColor: "#EC762E80",
         value: formatValue(
-          daoConfig.daoOverview.token === "ERC20"
-            ? Number(
-                formatEther(
-                  BigInt(daoTopTokenHolderExcludingTheDao?.balance || 0),
-                ),
-              )
-            : Number(daoTopTokenHolderExcludingTheDao?.balance),
+          Number(
+            formatUnits(
+              BigInt(daoTopTokenHolderExcludingTheDao?.balance || 0),
+              daoConfig.decimals,
+            ),
+          ),
           lastPrice,
         ),
       },
@@ -227,10 +228,10 @@ export const AttackCostBarChart = ({
     valueMode,
     liquidTreasury.data,
     delegatedSupply.data?.currentDelegatedSupply,
-    daoConfig.daoOverview.token,
     activeSupply.data?.activeSupply,
     averageTurnout.data?.currentAverageTurnout,
     daoTopTokenHolderExcludingTheDao?.balance,
+    daoConfig.decimals,
   ]);
 
   const prevCsvRef = useRef<string>("");

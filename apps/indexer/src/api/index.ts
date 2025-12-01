@@ -22,6 +22,7 @@ import {
   votingPowerVariations,
   accountBalanceVariations,
   dao,
+  accountInteractions,
 } from "./controller";
 import { DrizzleProposalsActivityRepository } from "./repositories/proposals-activity.repository";
 import { docs } from "./docs";
@@ -35,6 +36,8 @@ import {
   TokenRepository,
   TransactionsRepository,
   VotingPowerRepository,
+  NounsVotingPowerRepository,
+  AccountInteractionsRepository,
 } from "./repositories";
 import { errorHandler } from "./middlewares";
 import { getClient } from "@/lib/client";
@@ -49,7 +52,7 @@ import {
   CoingeckoService,
   NFTPriceService,
   TokenService,
-  TopBalanceVariationsService,
+  BalanceVariationsService,
   HistoricalBalancesService,
   DaoService,
 } from "./services";
@@ -106,10 +109,20 @@ const delegationPercentageService = new DelegationPercentageService(
   delegationPercentageRepo,
 );
 const accountBalanceRepo = new AccountBalanceRepository();
+const accountInteractionRepo = new AccountInteractionsRepository();
 const transactionsService = new TransactionsService(transactionsRepo);
-const votingPowerService = new VotingPowerService(votingPowerRepo);
+const votingPowerService = new VotingPowerService(
+  env.DAO_ID === DaoIdEnum.NOUNS
+    ? new NounsVotingPowerRepository()
+    : votingPowerRepo,
+  votingPowerRepo,
+);
 const daoCache = new DaoCache();
 const daoService = new DaoService(daoClient, daoCache, env.CHAIN_ID);
+const accountBalanceService = new BalanceVariationsService(
+  accountBalanceRepo,
+  accountInteractionRepo,
+);
 
 if (env.DUNE_API_URL && env.DUNE_API_KEY) {
   const duneClient = new DuneService(env.DUNE_API_URL, env.DUNE_API_KEY);
@@ -152,10 +165,8 @@ lastUpdate(app);
 delegationPercentage(app, delegationPercentageService);
 votingPower(app, votingPowerService);
 votingPowerVariations(app, votingPowerService);
-accountBalanceVariations(
-  app,
-  new TopBalanceVariationsService(accountBalanceRepo),
-);
+accountBalanceVariations(app, accountBalanceService);
+accountInteractions(app, accountBalanceService);
 dao(app, daoService);
 docs(app);
 

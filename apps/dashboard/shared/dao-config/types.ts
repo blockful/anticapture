@@ -49,6 +49,7 @@ export type GovernanceImplementationField = {
 // Base DAO information
 interface BaseInfo {
   name: string;
+  decimals: number;
   forumLink?: string;
   color: {
     svgColor: string;
@@ -58,9 +59,13 @@ interface BaseInfo {
   disableDaoPage?: boolean;
 }
 
+export interface ChainWithIcon extends Chain {
+  icon: (props: DaoIconProps) => ReactNode;
+}
+
 // Section configurations without data storage
 export interface DaoOverviewConfig {
-  chain: Chain;
+  chain: ChainWithIcon;
   contracts: {
     token: Address;
     governor?: Address;
@@ -70,6 +75,7 @@ export interface DaoOverviewConfig {
   cancelFunction?: string;
   snapshot?: string;
   tally?: string;
+  priceDisclaimer?: string;
   rules: {
     delay: boolean;
     changeVote: boolean;

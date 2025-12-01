@@ -4,9 +4,11 @@ import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governan
 import { CompoundIcon } from "@/shared/components/icons";
 import { mainnet } from "viem/chains";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
+import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
 
 export const COMP: DaoConfiguration = {
   name: "Compound",
+  decimals: 18,
   color: {
     svgColor: "#070A0E",
     svgBgColor: "#00D395",
@@ -14,7 +16,7 @@ export const COMP: DaoConfiguration = {
   icon: CompoundIcon,
   daoOverview: {
     token: "ERC20",
-    chain: mainnet,
+    chain: { ...mainnet, icon: MainnetIcon },
     snapshot: "https://snapshot.box/#/s:comp-vote.eth/proposals",
     contracts: {
       governor: "0x309a862bbC1A00e45506cB8A802D1ff10004c8C0",

@@ -2,39 +2,39 @@ import { TreasuryAssetNonDaoToken } from "@/features/attack-profitability/hooks"
 import { TokenDataResponse } from "@/shared/hooks";
 import { CompareTreasury_200_Response } from "@anticapture/graphql-client";
 import { useMemo } from "react";
-import { formatEther } from "viem";
+import { formatUnits } from "viem";
 
 export const useDaoTreasuryStats = ({
   treasuryAll,
   treasuryNonDao,
   tokenData,
+  decimals,
 }: {
   treasuryAll: { data?: CompareTreasury_200_Response | null };
   treasuryNonDao: { data?: TreasuryAssetNonDaoToken[] | null };
   tokenData: { data?: TokenDataResponse | null };
+  decimals: number;
 }) => {
   return useMemo(() => {
     const lastPrice = Number(tokenData.data?.price) || 0;
-    const liquidTreasuryNonDaoValue = Number(
+    const liquidTreasuryUSD = Number(
       treasuryNonDao.data?.[0]?.totalAssets || 0,
     );
     const daoTreasuryTokens = Number(treasuryAll.data?.currentTreasury || 0);
-    const liquidTreasuryAllValue =
-      Number(formatEther(BigInt(daoTreasuryTokens))) * lastPrice;
+    const govTreasuryUSD =
+      Number(formatUnits(BigInt(daoTreasuryTokens), decimals)) * lastPrice;
 
-    const liquidTreasuryAllPercent = liquidTreasuryAllValue
+    const liquidTreasuryAllPercent = govTreasuryUSD
       ? Math.round(
-          ((liquidTreasuryAllValue - liquidTreasuryNonDaoValue) /
-            liquidTreasuryAllValue) *
-            100,
+          (govTreasuryUSD / (govTreasuryUSD + liquidTreasuryUSD)) * 100,
         ).toString()
       : "0";
 
     return {
       lastPrice,
-      liquidTreasuryNonDaoValue,
-      liquidTreasuryAllValue,
+      liquidTreasuryNonDaoValue: liquidTreasuryUSD,
+      liquidTreasuryAllValue: govTreasuryUSD,
       liquidTreasuryAllPercent,
     };
-  }, [tokenData, treasuryAll.data, treasuryNonDao.data]);
+  }, [tokenData, treasuryAll.data, treasuryNonDao.data, decimals]);
 };
