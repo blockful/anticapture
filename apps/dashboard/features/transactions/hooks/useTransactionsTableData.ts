@@ -68,9 +68,9 @@ export const useTransactionsTableData = ({
   filters,
 }: UseTransactionsTableDataParams) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const { decimals } = daoConfig[daoId];
   const [isPaginationLoading, setIsPaginationLoading] = useState(false);
 
+  const { decimals } = daoConfig[daoId];
   const { data, error, refetch, fetchMore, networkStatus } =
     useTransactionsQuery({
       variables: {
@@ -110,16 +110,25 @@ export const useTransactionsTableData = ({
     });
 
   // reset page when filters change
+  const filtersHash = useMemo(
+    () =>
+      JSON.stringify({
+        from: filters?.from,
+        to: filters?.to,
+        minAmount: filters?.minAmount,
+        maxAmount: filters?.maxAmount,
+        sortOrder: filters?.sortOrder,
+        affectedSupply: filters?.affectedSupply,
+        includes: filters?.includes,
+        fromDate: filters?.fromDate,
+        toDate: filters?.toDate,
+      }),
+    [filters],
+  );
+
   useEffect(() => {
     setCurrentPage(1);
-  }, [
-    filters?.from,
-    filters?.to,
-    filters?.minAmount,
-    filters?.maxAmount,
-    filters?.sortOrder,
-    filters?.affectedSupply,
-  ]);
+  }, [filtersHash]);
 
   const transactions = useMemo(() => data?.transactions?.items ?? [], [data]);
   const totalCount = data?.transactions?.totalCount ?? 0;
@@ -147,14 +156,16 @@ export const useTransactionsTableData = ({
         updateQuery: (prev, { fetchMoreResult }) => {
           if (!fetchMoreResult?.transactions?.items?.length) return prev;
 
+          const prevItems = prev.transactions?.items ?? [];
+          const newItems = fetchMoreResult.transactions.items ?? [];
+          const merged = [...prevItems, ...newItems];
+
+
           return {
             ...fetchMoreResult,
             transactions: {
               ...fetchMoreResult.transactions,
-              items: [
-                ...(prev.transactions?.items ?? []),
-                ...fetchMoreResult.transactions.items,
-              ],
+              items: merged,
             },
           };
         },
