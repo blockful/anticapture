@@ -9,7 +9,6 @@ import {
   BottomNavigationButtons,
 } from "@/shared/components";
 import { AnticaptureIcon, TelegramIcon } from "@/shared/components/icons";
-import { ANTICAPTURE_TELEGRAM_BOT } from "@/shared/constants/social-media";
 export const HeaderSidebar = () => {
   const headerItems = useMemo(
     () => [
@@ -20,17 +19,10 @@ export const HeaderSidebar = () => {
         isGlobal: true,
       },
       {
-        page: "",
+        page: "alerts",
         label: "Alerts",
         icon: TelegramIcon,
-        isAction: true,
-        onClick: () => {
-          window.open(
-            ANTICAPTURE_TELEGRAM_BOT,
-            "_blank",
-            "noopener,noreferrer",
-          );
-        },
+        isGlobal: true,
       },
     ],
     [],
@@ -57,8 +49,6 @@ export const HeaderSidebar = () => {
                 label={item.label}
                 className="text-xs! font-medium! flex-col gap-1"
                 isGlobal={item.isGlobal}
-                isAction={item.isAction}
-                onClick={item.onClick}
               />
             ))}
           </div>
