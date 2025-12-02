@@ -2,13 +2,13 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { BarChart4 } from "lucide-react";
+import { BarChart4, Bell } from "lucide-react";
 import {
   ButtonHeaderSidebar,
   ConnectWallet,
   BottomNavigationButtons,
 } from "@/shared/components";
-import { AnticaptureIcon, TelegramIcon } from "@/shared/components/icons";
+import { AnticaptureIcon } from "@/shared/components/icons";
 export const HeaderSidebar = () => {
   const headerItems = useMemo(
     () => [
@@ -21,7 +21,7 @@ export const HeaderSidebar = () => {
       {
         page: "alerts",
         label: "Alerts",
-        icon: TelegramIcon,
+        icon: Bell,
         isGlobal: true,
       },
     ],
