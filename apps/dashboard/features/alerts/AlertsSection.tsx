@@ -1,9 +1,12 @@
 import { Bell } from "lucide-react";
 import { TheSectionLayout } from "@/shared/components";
+import {
+  ALERTS_ITEMS,
+  AlertItem,
+} from "@/features/alerts/utils/alerts-constants";
+import { AlertCard } from "@/features/alerts/components";
 
 export const AlertsSection = () => {
-  // get alerts constants from somewhere
-
   return (
     <TheSectionLayout
       title={"Security Alerts"}
@@ -14,7 +17,24 @@ export const AlertsSection = () => {
       className="bg-surface-background! mt-[56px]! sm:mt-0!"
     >
       <div className="flex flex-col gap-2">
-        <h1>Alerts</h1>
+        {/* Dashed line separator - Mobile only */}
+        <div className="border-light-dark -mx-4 border-t border-dashed sm:hidden" />
+
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {ALERTS_ITEMS.map((alert: AlertItem) => (
+            <AlertCard
+              key={alert.title}
+              title={alert.title}
+              description={alert.description}
+              icon={alert.icon}
+              availability={alert.availability}
+              link={alert.link}
+            />
+          ))}
+        </div>
+
+        {/* Border separator - Mobile only */}
+        <div className="border-light-dark -mx-4 border-t sm:hidden" />
       </div>
     </TheSectionLayout>
   );
