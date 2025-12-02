@@ -1,12 +1,27 @@
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { cn } from "@/shared/utils";
 import { AlertItem } from "@/features/alerts/utils/alerts-constants";
+import { AlertAvailability } from "@/features/alerts/types";
+import Link from "next/link";
 
-export const AlertCard = ({ title, description, icon: Icon }: AlertItem) => {
+export const AlertCard = ({
+  title,
+  description,
+  icon: Icon,
+  availability,
+  link,
+  active = true,
+}: AlertItem) => {
+  const mapAvailabilityToColorBadge = {
+    [AlertAvailability.AVAILABLE]: "bg-surface-opacity-success text-success",
+    [AlertAvailability.COMING_SOON]: "bg-[#fafafa]/12 text-secondary",
+  };
+
   const cardContent = (
     <Card
       className={cn(
         "bg-surface-background sm:bg-surface-default border-border-default w-full rounded-none border",
+        !active && "pointer-events-none opacity-65",
       )}
     >
       <CardContent className="sm:p-3">
@@ -21,8 +36,13 @@ export const AlertCard = ({ title, description, icon: Icon }: AlertItem) => {
               </div>
             </div>
 
-            <div className="text-success bg-surface-opacity-success rounded-full px-[6px] py-0.5 text-sm font-medium">
-              active
+            <div
+              className={cn(
+                "rounded-full px-[6px] py-0.5 text-sm font-medium",
+                mapAvailabilityToColorBadge[availability],
+              )}
+            >
+              {availability}
             </div>
           </div>
 
@@ -33,6 +53,19 @@ export const AlertCard = ({ title, description, icon: Icon }: AlertItem) => {
       </CardContent>
     </Card>
   );
+
+  if (active) {
+    return (
+      <Link
+        href={link}
+        className="flex h-full w-full flex-1"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {cardContent}
+      </Link>
+    );
+  }
 
   return cardContent;
 };

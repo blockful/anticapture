@@ -4,15 +4,15 @@ export interface Alert {
   id: string;
   title: string;
   description: string;
-  severity: AlertSeverity;
-  timestamp: number;
-  daoId?: string;
-  daoName?: string;
   link?: string;
-  isRead?: boolean;
 }
 
 export interface AlertCardProps {
   alert: Alert;
   onMarkAsRead?: (alertId: string) => void;
+}
+
+export enum AlertAvailability {
+  AVAILABLE = "available",
+  COMING_SOON = "coming soon",
 }

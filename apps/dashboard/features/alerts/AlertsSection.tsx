@@ -29,6 +29,7 @@ export const AlertsSection = () => {
               icon={alert.icon}
               availability={alert.availability}
               link={alert.link}
+              active={alert.active}
             />
           ))}
         </div>

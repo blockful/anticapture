@@ -5,13 +5,15 @@ import {
 } from "@/shared/components/icons";
 import { ANTICAPTURE_TELEGRAM_BOT } from "@/shared/constants/social-media";
 import { JSX, ReactNode, SVGProps } from "react";
+import { AlertAvailability } from "@/features/alerts/types";
 
 export interface AlertItem {
   title: string;
   description: ReactNode;
   icon: (props: SVGProps<SVGSVGElement>) => JSX.Element;
-  availability: "available" | "coming soon";
+  availability: AlertAvailability;
   link: string;
+  active: boolean;
 }
 
 export const ALERTS_ITEMS: AlertItem[] = [
@@ -21,8 +23,9 @@ export const ALERTS_ITEMS: AlertItem[] = [
       <>You&apos;re in crypto, so real-time governance alerts is a must.</>
     ),
     icon: TelegramColorIcon,
-    availability: "available",
+    availability: AlertAvailability.AVAILABLE,
     link: ANTICAPTURE_TELEGRAM_BOT,
+    active: true,
   },
   {
     title: "Slack",
@@ -30,8 +33,9 @@ export const ALERTS_ITEMS: AlertItem[] = [
       <>Receive direct messages of your preferred DAOs governance updates.</>
     ),
     icon: SlackColorIcon,
-    availability: "available",
+    availability: AlertAvailability.AVAILABLE,
     link: ANTICAPTURE_TELEGRAM_BOT,
+    active: true,
   },
   {
     title: "Discord",
@@ -42,7 +46,8 @@ export const ALERTS_ITEMS: AlertItem[] = [
       </>
     ),
     icon: DiscordColorIcon,
-    availability: "coming soon",
+    availability: AlertAvailability.COMING_SOON,
     link: ANTICAPTURE_TELEGRAM_BOT,
+    active: false,
   },
 ];
