@@ -24,7 +24,7 @@ export const AlertCard = ({
         !active && "pointer-events-none opacity-65",
       )}
     >
-      <CardContent className="sm:p-3">
+      <CardContent className="p-3">
         <div className="flex flex-col items-start gap-3">
           <div className="flex w-full items-center justify-between gap-2">
             <div className="flex items-center justify-center gap-2">
@@ -38,7 +38,7 @@ export const AlertCard = ({
 
             <div
               className={cn(
-                "rounded-full px-[6px] py-0.5 text-sm font-medium",
+                "shrink-0 whitespace-nowrap rounded-full px-[6px] py-0.5 text-sm font-medium",
                 mapAvailabilityToColorBadge[availability],
               )}
             >
