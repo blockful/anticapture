@@ -2,8 +2,7 @@ import { Card, CardContent } from "@/shared/components/ui/card";
 import { cn } from "@/shared/utils";
 import { AlertItem } from "@/features/alerts/utils/alerts-constants";
 
-export const AlertCard = ({ title, description, icon }: AlertItem) => {
-  const Icon = icon;
+export const AlertCard = ({ title, description, icon: Icon }: AlertItem) => {
   const cardContent = (
     <Card
       className={cn(
@@ -15,7 +14,7 @@ export const AlertCard = ({ title, description, icon }: AlertItem) => {
           <div className="flex w-full items-center justify-between gap-2">
             <div className="flex items-center justify-center gap-2">
               <div className="flex-shrink-0">
-                <Icon className="text-primary size-5" />
+                <Icon className="size-5" />
               </div>
               <div className="mb-1 flex items-center gap-2">
                 <h3 className="text-primary text-sm font-medium">{title}</h3>
