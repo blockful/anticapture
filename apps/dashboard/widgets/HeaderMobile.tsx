@@ -116,7 +116,7 @@ export const HeaderMobile = ({
       {/* Mobile Menu - Overlay */}
       <div
         className={cn(
-          "bg-surface-background sticky top-0 z-30 w-full transition-all duration-300",
+          "bg-surface-background sticky top-0 z-50 w-full transition-all duration-300",
         )}
       >
         <div
