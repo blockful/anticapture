@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { SupplyType } from "@/shared/components/badges/SupplyLabel";
 import { useTransactionsTableData } from "@/features/transactions";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -10,7 +10,9 @@ import { Table } from "@/shared/components/design-system/table/Table";
 import { getTransactionsColumns } from "@/features/transactions/utils/getTransactionsColumns";
 import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
 
-export const AcceptedMetrics: string[] = ["CEX", "DEX", "LENDING", "TOTAL"];
+type Supply = "CEX" | "DEX" | "LENDING" | "TOTAL" | "UNASSIGNED";
+
+export const AcceptedMetrics: Supply[] = ["CEX", "DEX", "LENDING", "TOTAL"];
 
 export const TransactionsTable = ({
   metrics,
@@ -31,11 +33,28 @@ export const TransactionsTable = ({
   const [maxAmount, setMaxAmount] = useState<number | undefined>();
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
-  const affectedSupply = metrics
-    .map((metric) => metric.replace("_SUPPLY", ""))
-    .filter((metric) =>
-      AcceptedMetrics.includes(metric),
-    ) as AffectedSupplyType[];
+  const affectedSupply = useMemo(
+    () =>
+      metrics
+        .map((metric) => metric.replace("_SUPPLY", ""))
+        .filter((metric) =>
+          AcceptedMetrics.includes(metric as Supply),
+        ) as AffectedSupplyType[],
+    [metrics],
+  );
+
+  const buildFilters = (
+    showAll: boolean,
+    affectedSupply: Supply[],
+  ): Supply[] => {
+    if (showAll) {
+      return affectedSupply.length ? [...affectedSupply, "UNASSIGNED"] : [];
+    } else {
+      return affectedSupply.length
+        ? affectedSupply
+        : ["CEX", "DEX", "LENDING", "TOTAL"];
+    }
+  };
 
   const includes = [
     ...(metrics.includes("DELEGATED_SUPPLY") ? ["DELEGATION"] : []),
@@ -57,9 +76,7 @@ export const TransactionsTable = ({
       minAmount,
       maxAmount,
       sortOrder,
-      affectedSupply: hasTransfer
-        ? [...affectedSupply, "UNASSIGNED"]
-        : affectedSupply || undefined,
+      affectedSupply: buildFilters(hasTransfer, affectedSupply),
       includes,
     },
   });
