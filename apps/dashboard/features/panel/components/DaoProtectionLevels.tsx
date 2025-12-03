@@ -85,7 +85,7 @@ export const DaoProtectionLevels = () => {
   }, []);
 
   return (
-    <div className="bg-surface-default flex w-full flex-col gap-4 rounded-lg p-4">
+    <div className="bg-surface-default flex w-full flex-col gap-4 p-4">
       <div className="flex flex-col gap-1">
         <h3 className="text-primary text-alternative-sm font-mono font-medium uppercase leading-[20px] tracking-[0.78px]">
           DAO Protection Levels

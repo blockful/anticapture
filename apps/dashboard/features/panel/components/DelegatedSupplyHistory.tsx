@@ -128,7 +128,7 @@ export const DelegatedSupplyHistory = () => {
 
   if (loading) {
     return (
-      <div className="bg-surface-default flex w-full flex-col gap-4 rounded-lg p-4">
+      <div className="bg-surface-default flex w-full flex-col gap-4 p-4">
         <div className="flex flex-col gap-1">
           <h3 className="text-primary text-alternative-sm font-mono font-medium uppercase leading-[20px] tracking-[0.78px]">
             delegated supply history
@@ -148,7 +148,7 @@ export const DelegatedSupplyHistory = () => {
 
   if (error || !chartData || chartData.length === 0) {
     return (
-      <div className="bg-surface-default flex w-full flex-col gap-4 rounded-lg p-4">
+      <div className="bg-surface-default flex w-full flex-col gap-4 p-4">
         <div className="flex flex-col gap-1">
           <h3 className="text-primary text-alternative-sm font-mono font-medium uppercase leading-[20px] tracking-[0.78px]">
             delegated supply history
@@ -167,7 +167,7 @@ export const DelegatedSupplyHistory = () => {
   }
 
   return (
-    <div className="bg-surface-default flex w-full flex-col gap-4 rounded-lg p-4">
+    <div className="bg-surface-default flex w-full flex-col gap-4 p-4">
       <div className="flex flex-col gap-1">
         <h3 className="text-primary text-alternative-sm font-mono font-medium uppercase leading-[20px] tracking-[0.78px]">
           delegated supply history

@@ -23,7 +23,7 @@ const monitoringData = [
 
 export const TreasuryMonitoring = () => {
   return (
-    <div className="bg-surface-default flex w-full flex-col gap-4 rounded-lg p-4">
+    <div className="bg-surface-default flex w-full flex-col gap-4 p-4">
       <div className="flex flex-col gap-3">
         {monitoringData.map((item, index) => (
           <div key={index} className="flex flex-col gap-2">
