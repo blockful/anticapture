@@ -162,11 +162,9 @@ export const Delegates = ({
         const absoluteChange =
           votingPowerFormatted - historicalVotingPowerFormatted;
         const percentageChange =
-          historicalVotingPowerFormatted === 0
-            ? 0
-            : ((votingPowerFormatted - historicalVotingPowerFormatted) /
-                historicalVotingPowerFormatted) *
-              100;
+          ((votingPowerFormatted - historicalVotingPowerFormatted) /
+            historicalVotingPowerFormatted) *
+          100;
 
         variation = {
           percentageChange: Number(percentageChange.toFixed(2)),
@@ -260,7 +258,7 @@ export const Delegates = ({
         }
 
         return (
-          <div className="text-secondary flex items-center justify-end text-end text-sm font-normal">
+          <div className="text-secondary w-full justify-end text-end text-sm font-normal">
             {votingPower}
           </div>
         );

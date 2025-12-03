@@ -231,7 +231,8 @@ export const useDelegates = ({
     if (!delegatesData?.accountPowers?.items) return null;
 
     return delegatesData.accountPowers.items.map((delegate) => {
-      const historicalVotingPower = historicalVPCache.get(delegate.accountId);
+      const historicalVotingPower =
+        historicalVPCache.get(delegate.accountId) || "0";
       const proposalsActivity = delegateActivities.get(delegate.accountId);
       return {
         ...delegate,
