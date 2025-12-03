@@ -12,6 +12,7 @@ import { SCRClient } from "@/indexer/scr";
 import { COMPClient } from "@/indexer/comp";
 import { ObolClient } from "@/indexer/obol/client";
 import { ZKClient } from "@/indexer/zk";
+import { SHUClient } from "@/indexer/shu";
 
 export function getClient<
   TTransport extends Transport = Transport,
@@ -61,6 +62,10 @@ export function getClient<
     case DaoIdEnum.ZK: {
       const { governor } = CONTRACT_ADDRESSES[daoId];
       return new ZKClient(client, governor.address);
+    }
+    case DaoIdEnum.SHU: {
+      const { azorius: governor } = CONTRACT_ADDRESSES[daoId];
+      return new SHUClient(client, governor.address);
     }
     default:
       return null;
