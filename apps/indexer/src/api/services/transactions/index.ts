@@ -3,7 +3,7 @@ import {
   TransactionsResponse,
   TransactionMapper,
   DBTransaction,
-} from "../../mappers/transactions";
+} from "@/api/mappers/";
 
 interface TransactionsRepository {
   getFilteredAggregateTransactions(
