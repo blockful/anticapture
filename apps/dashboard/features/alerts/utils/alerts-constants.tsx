@@ -3,7 +3,10 @@ import {
   SlackColorIcon,
   TelegramColorIcon,
 } from "@/shared/components/icons";
-import { ANTICAPTURE_TELEGRAM_BOT } from "@/shared/constants/social-media";
+import {
+  ANTICAPTURE_SLACK_BOT,
+  ANTICAPTURE_TELEGRAM_BOT,
+} from "@/shared/constants/social-media";
 import { JSX, ReactNode, SVGProps } from "react";
 import { AlertAvailability } from "@/features/alerts/types";
 
@@ -34,7 +37,7 @@ export const ALERTS_ITEMS: AlertItem[] = [
     ),
     icon: SlackColorIcon,
     availability: AlertAvailability.AVAILABLE,
-    link: ANTICAPTURE_TELEGRAM_BOT,
+    link: ANTICAPTURE_SLACK_BOT,
     active: true,
   },
   {
@@ -47,7 +50,7 @@ export const ALERTS_ITEMS: AlertItem[] = [
     ),
     icon: DiscordColorIcon,
     availability: AlertAvailability.COMING_SOON,
-    link: ANTICAPTURE_TELEGRAM_BOT,
+    link: "/",
     active: false,
   },
 ];
