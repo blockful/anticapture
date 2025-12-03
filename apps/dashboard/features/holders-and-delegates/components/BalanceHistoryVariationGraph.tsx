@@ -13,9 +13,11 @@ import { ChartContainer } from "@/shared/components/ui/chart";
 import { timestampToReadableDate } from "@/shared/utils";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { DelegationHistoryGraphItem } from "@/features/holders-and-delegates/hooks";
 import { useState } from "react";
-import { useDelegateDelegationHistoryGraph } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistoryGraph";
+import {
+  BalanceHistoryGraphItem,
+  useBalanceHistoryGraph,
+} from "@/features/holders-and-delegates/hooks/useBalanceHistoryGraph";
 import {
   TimePeriodSwitcher,
   TimePeriod,
@@ -24,7 +26,7 @@ import { ChartExceptionState } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 
-interface VotingPowerVariationGraphProps {
+interface BalanceHistoryVariationGraphProps {
   accountId: string;
   daoId: DaoIdEnum;
 }
@@ -34,19 +36,17 @@ interface CustomDotProps {
   cy: number;
   payload: {
     timestamp: number;
-    votingPower: number;
-    delta: number;
-    type: string;
-    isGain: boolean;
+    amount: number;
+    direction: "in" | "out";
     transactionHash: string;
-    fromAddress?: string;
-    toAddress?: string;
+    fromAccountId: string | null;
+    toAccountId: string | null;
   };
 }
 
 const chartConfig = {
-  votingPower: {
-    label: "Voting Power",
+  amount: {
+    label: "Transfer",
     color: "#3b82f6",
   },
 };
@@ -79,21 +79,24 @@ const generateMonthlyTicks = (chartData: Array<{ timestamp: number }>) => {
   return Array.from(new Set(ticks));
 };
 
-export const VotingPowerVariationGraph = ({
+export const BalanceHistoryVariationGraph = ({
   accountId,
   daoId,
-}: VotingPowerVariationGraphProps) => {
+}: BalanceHistoryVariationGraphProps) => {
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("all");
 
-  const { delegationHistory, loading, error } =
-    useDelegateDelegationHistoryGraph(accountId, daoId, selectedPeriod);
+  const { balanceHistory, loading, error } = useBalanceHistoryGraph(
+    accountId,
+    daoId,
+    selectedPeriod,
+  );
 
   if (loading) {
     return (
       <div className="w-full">
         <ChartExceptionState
           state="loading"
-          title="VOTING POWER VARIATION"
+          title="BALANCE HISTORY"
           headerContent={
             <TimePeriodSwitcher
               value={selectedPeriod}
@@ -111,7 +114,7 @@ export const VotingPowerVariationGraph = ({
       <div className="w-full">
         <ChartExceptionState
           state="error"
-          title="VOTING POWER VARIATION"
+          title="BALANCE HISTORY"
           errorMessage="Error loading data"
           headerContent={
             <TimePeriodSwitcher
@@ -125,13 +128,13 @@ export const VotingPowerVariationGraph = ({
     );
   }
 
-  if (!delegationHistory || delegationHistory.length === 0) {
+  if (!balanceHistory || balanceHistory.length === 0) {
     return (
       <div className="w-full">
         <ChartExceptionState
           state="no-data"
-          title="VOTING POWER VARIATION"
-          noDataMessage="No voting power data available"
+          title="BALANCE HISTORY"
+          noDataMessage="No balance history data available"
           headerContent={
             <TimePeriodSwitcher
               value={selectedPeriod}
@@ -144,16 +147,14 @@ export const VotingPowerVariationGraph = ({
     );
   }
 
-  const chartData = delegationHistory
+  const chartData = balanceHistory
     .map((dataPoint) => ({
-      timestamp: dataPoint.timestamp,
-      votingPower: dataPoint.votingPower,
-      delta: dataPoint.delta,
-      type: dataPoint.type,
-      isGain: dataPoint.isGain,
+      timestamp: Number(dataPoint.timestamp),
+      amount: dataPoint.amount,
+      direction: dataPoint.direction,
       transactionHash: dataPoint.transactionHash,
-      fromAddress: dataPoint.fromAddress,
-      toAddress: dataPoint.toAddress,
+      fromAccountId: dataPoint.fromAccountId,
+      toAccountId: dataPoint.toAccountId,
     }))
     .sort((a, b) => a.timestamp - b.timestamp);
 
@@ -166,8 +167,16 @@ export const VotingPowerVariationGraph = ({
         cx={cx}
         cy={cy}
         r={4}
-        fill={payload.isGain ? "var(--base-success)" : "var(--base-error)"}
-        stroke={payload.isGain ? "var(--base-success)" : "var(--base-error)"}
+        fill={
+          payload.direction === "in"
+            ? "var(--base-success)"
+            : "var(--base-error)"
+        }
+        stroke={
+          payload.direction === "in"
+            ? "var(--base-success)"
+            : "var(--base-error)"
+        }
         strokeWidth={2}
         className="cursor-pointer"
       />
@@ -178,7 +187,7 @@ export const VotingPowerVariationGraph = ({
     <div className="w-full">
       <div className="flex items-center justify-between">
         <h3 className="text-secondary font-mono text-[13px] font-medium uppercase">
-          VOTING POWER VARIATION
+          BALANCE HISTORY
         </h3>
         <TimePeriodSwitcher
           value={selectedPeriod}
@@ -219,43 +228,40 @@ export const VotingPowerVariationGraph = ({
               content={(props) => {
                 const { active, payload } = props;
                 if (active && payload && payload.length) {
-                  const data = payload[0]
-                    ?.payload as DelegationHistoryGraphItem;
+                  const data = payload[0]?.payload as BalanceHistoryGraphItem;
 
                   // Determine which address to show based on transaction type and direction
                   const getDisplayAddress = () => {
-                    if (data.type === "delegation") {
-                      return data.isGain ? data.fromAddress : data.toAddress;
-                    } else if (data.type === "transfer") {
-                      return data.isGain ? data.fromAddress : data.toAddress;
+                    if (data.direction === "in") {
+                      return data.fromAccountId;
+                    } else if (data.direction === "out") {
+                      return data.toAccountId;
                     }
                     return null;
                   };
 
                   const displayAddress = getDisplayAddress();
                   const addressLabel =
-                    data.type === "delegation"
-                      ? "Delegated from"
-                      : "Transferred from";
+                    data.direction === "in" ? "Buy from" : "Sell to";
 
                   return (
                     <div className="bg-surface-contrast border-light-dark rounded-lg border p-3 shadow-lg">
                       <p className="text-primary text-sm font-medium">
-                        {timestampToReadableDate(data.timestamp / 1000)}
+                        {timestampToReadableDate(Number(data.timestamp) / 1000)}
                       </p>
-                      <p className="text-secondary text-xs">
-                        Voting Power:{" "}
-                        {formatNumberUserReadable(data.votingPower)}
+                      <p className="text-secondary flex gap-1 text-xs">
+                        Balance:
+                        {formatNumberUserReadable(Number(data.amount))}
                       </p>
-                      <p className="text-secondary text-xs">
-                        Type: {data.type}
+                      <p className="text-secondary flex gap-1 text-xs">
+                        Type:
+                        <p
+                          className={`text-xs ${data.direction === "in" ? "text-success" : "text-error"}`}
+                        >
+                          {data.direction === "in" ? "Buy" : "Sell"}
+                        </p>
                       </p>
-                      <p
-                        className={`text-xs ${data.isGain ? "text-success" : "text-error"}`}
-                      >
-                        {data.isGain && "+"}
-                        {formatNumberUserReadable(parseFloat(data.delta))}
-                      </p>
+
                       <p className="text-secondary text-xs">{addressLabel}:</p>
                       {displayAddress && (
                         <EnsAvatar
@@ -275,7 +281,7 @@ export const VotingPowerVariationGraph = ({
             />
             <Line
               type="monotone"
-              dataKey="votingPower"
+              dataKey="amount"
               stroke="var(--base-primary)"
               strokeWidth={1}
               dot={CustomDot}

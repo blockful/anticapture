@@ -65,6 +65,8 @@ export function useDelegateDelegationHistory(
   orderBy: "timestamp" | "delta" = "timestamp",
   orderDirection: "asc" | "desc" = "desc",
   filterVariables?: AmountFilterVariables,
+  toFilter?: string,
+  fromFilter?: string,
 ): UseDelegateDelegationHistoryResult {
   const itemsPerPage = 15;
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -86,8 +88,18 @@ export function useDelegateDelegationHistory(
       orderBy: orderBy as QueryInput_VotingPowers_OrderBy,
       orderDirection: orderDirection as QueryInput_VotingPowers_OrderDirection,
       ...filterVariables,
+      ...(fromFilter && { delegator: fromFilter }),
+      ...(toFilter && { delegate: toFilter }),
     }),
-    [account, itemsPerPage, orderBy, orderDirection, filterVariables],
+    [
+      account,
+      itemsPerPage,
+      orderBy,
+      orderDirection,
+      filterVariables,
+      fromFilter,
+      toFilter,
+    ],
   );
 
   const queryOptions = {

@@ -1,5 +1,6 @@
 query GetDelegationHistoryItems(
   $delegator: String!
+  $delegate: String
   $after: String
   $before: String
   $orderBy: String = "timestamp"
@@ -7,7 +8,7 @@ query GetDelegationHistoryItems(
   $limit: Int = 10
 ) {
   delegations(
-    where: { delegatorAccountId: $delegator }
+    where: { delegatorAccountId: $delegator, delegateAccountId: $delegate }
     orderBy: $orderBy
     orderDirection: $orderDirection
     limit: $limit
@@ -18,6 +19,7 @@ query GetDelegationHistoryItems(
       delegateAccountId
       delegatedValue
       timestamp
+      transactionHash
     }
     pageInfo {
       hasNextPage

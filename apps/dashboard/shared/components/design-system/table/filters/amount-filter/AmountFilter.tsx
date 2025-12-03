@@ -17,7 +17,7 @@ interface AmountFilterProps {
   onApply: (state: AmountFilterState) => void;
   onReset: () => void;
   isActive?: boolean;
-  sortOptions: SortOption[];
+  sortOptions?: SortOption[];
 }
 
 export const AmountFilter = ({
@@ -41,7 +41,7 @@ export const AmountFilter = ({
 
   // Inicializar a store com o sortOrder padrão
   useEffect(() => {
-    if (sortOptions[0]?.value && sortOrder === "") {
+    if (sortOptions && sortOptions[0]?.value && sortOrder === "") {
       initialize(sortOptions[0].value);
     }
   }, [sortOptions, sortOrder, initialize]);
@@ -60,7 +60,7 @@ export const AmountFilter = ({
   };
 
   const handleReset = () => {
-    reset(sortOptions[0]?.value || "");
+    reset(sortOptions?.[0]?.value || "");
     onReset();
   };
 
@@ -88,13 +88,17 @@ export const AmountFilter = ({
         initialMin={minAmount}
         initialMax={maxAmount}
       />
-      <div className="border-border-contrast border-b" />
-      <FilterSort
-        title="Sort"
-        options={sortOptions}
-        setFilter={handleSortChange}
-        initialValue={sortOrder}
-      />
+      {sortOptions && (
+        <>
+          <div className="border-border-contrast border-b" />
+          <FilterSort
+            title="Sort"
+            options={sortOptions}
+            setFilter={handleSortChange}
+            initialValue={sortOrder}
+          />
+        </>
+      )}
     </FilterBox>
   );
 };

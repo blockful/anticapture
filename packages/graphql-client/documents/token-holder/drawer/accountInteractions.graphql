@@ -1,0 +1,26 @@
+query getAccountInteractions(
+  $address: String!
+  $limit: PositiveInt
+  $maxAmount: String
+  $minAmount: String
+  $orderDirection: queryInput_accountInteractions_orderDirection
+  $skip: NonNegativeInt
+) {
+  accountInteractions(
+    accountId: $address
+    days: _90d
+    limit: $limit
+    maxAmount: $maxAmount
+    minAmount: $minAmount
+    orderDirection: $orderDirection
+    skip: $skip
+  ) {
+    totalCount
+    items {
+      accountId
+      amountTransferred
+      totalVolume
+      transferCount
+    }
+  }
+}

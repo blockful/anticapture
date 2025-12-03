@@ -7,30 +7,30 @@ import { useScreenSize } from "@/shared/hooks";
 import { CheckIcon, ChevronDown } from "lucide-react";
 import { Button } from "@/shared/components";
 
-export type VotingPowerTimePeriod = "30d" | "90d" | "all";
+export type TimePeriod = "30d" | "90d" | "all";
 
-interface VotingPowerTimePeriodSwitcherProps {
-  setTimePeriod: (timePeriod: VotingPowerTimePeriod) => void;
-  value: VotingPowerTimePeriod;
+interface TimePeriodSwitcherProps {
+  setTimePeriod: (timePeriod: TimePeriod) => void;
+  value: TimePeriod;
   isSmall?: boolean;
 }
 
-export const VotingPowerTimePeriodSwitcher = ({
+export const TimePeriodSwitcher = ({
   setTimePeriod,
   value,
   isSmall = false,
-}: VotingPowerTimePeriodSwitcherProps) => {
+}: TimePeriodSwitcherProps) => {
   const { isMobile } = useScreenSize();
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  const activeTimePeriods: VotingPowerTimePeriod[] = ["30d", "90d", "all"];
+  const activeTimePeriods: TimePeriod[] = ["30d", "90d", "all"];
 
-  const handleSelect = (period: VotingPowerTimePeriod) => {
+  const handleSelect = (period: TimePeriod) => {
     setTimePeriod(period);
     setIsOpen(false);
   };
 
-  const formatPeriod = (period: VotingPowerTimePeriod) =>
+  const formatPeriod = (period: TimePeriod) =>
     period === "all" ? "Max available data" : period;
 
   return isMobile ? (

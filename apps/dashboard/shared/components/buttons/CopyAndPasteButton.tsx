@@ -18,7 +18,9 @@ export const CopyAndPasteButton = ({
 }: CopyButtonProps) => {
   const [isCopied, setIsCopied] = useState<boolean>(false);
 
-  const handleCopy = async () => {
+  const handleCopy = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+
     if (!textToCopy || disabled) return;
 
     try {

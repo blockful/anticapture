@@ -6,7 +6,8 @@ import { cn } from "@/shared/utils/cn";
 import { Address } from "viem";
 import Image, { ImageProps } from "next/image";
 import { useState } from "react";
-import { UserIcon } from "@/shared/components/icons";
+import Blockies from "react-blockies";
+
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { formatAddress } from "@/shared/utils/formatAddress";
 
@@ -37,11 +38,11 @@ const sizeClasses: Record<AvatarSize, string> = {
   lg: "size-12", // 48px
 };
 
-const iconSizes: Record<AvatarSize, string> = {
-  xs: "size-3", // 12px
-  sm: "size-4", // 16px
-  md: "size-6", // 24px
-  lg: "size-8", // 32px
+const iconSizes: Record<AvatarSize, number> = {
+  xs: 12, // 12px
+  sm: 16, // 16px
+  md: 24, // 24px
+  lg: 32, // 32px
 };
 
 const variantClasses: Record<AvatarVariant, string> = {
@@ -137,7 +138,14 @@ export const EnsAvatar = ({
     // Fallback: show user icon
     return (
       <div className={baseClasses}>
-        <UserIcon className={iconSizes[size]} />
+        <Blockies
+          seed={address as string}
+          size={iconSizes[size]}
+          scale={3}
+          color="#18181b"
+          bgColor="#ec762e"
+          spotColor="#ffffff"
+        />
       </div>
     );
   };

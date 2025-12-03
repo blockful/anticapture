@@ -12,6 +12,7 @@ import { formatUnits } from "viem";
 import { ApolloError, NetworkStatus } from "@apollo/client";
 import daoConfig from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
+import { AmountFilterVariables } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
 
 // Interface for a single transfer
 export interface Transfer {
@@ -47,14 +48,27 @@ export interface UseBalanceHistoryResult {
   fetchingMore: boolean;
 }
 
-export function useBalanceHistory(
-  accountId: string,
-  daoId: string,
-  orderBy: string = "timestamp",
-  orderDirection: "asc" | "desc" = "desc",
-  transactionType: "all" | "buy" | "sell" = "all",
-): UseBalanceHistoryResult {
-  const itemsPerPage = 10;
+export function useBalanceHistory({
+  accountId,
+  daoId,
+  orderBy = "timestamp",
+  orderDirection = "desc",
+  transactionType = "all",
+  fromFilter,
+  toFilter,
+  filterVariables,
+  itemsPerPage = 10,
+}: {
+  accountId: string;
+  daoId: DaoIdEnum;
+  orderBy?: string;
+  orderDirection?: "asc" | "desc";
+  transactionType?: "all" | "buy" | "sell";
+  fromFilter?: string;
+  toFilter?: string;
+  filterVariables?: AmountFilterVariables;
+  itemsPerPage?: number;
+}): UseBalanceHistoryResult {
   const [currentPage, setCurrentPage] = useState(1);
   const [isPaginationLoading, setIsPaginationLoading] = useState(false);
   const {
@@ -72,8 +86,19 @@ export function useBalanceHistory(
       limit: itemsPerPage,
       orderBy,
       orderDirection,
+      ...filterVariables,
+      ...(fromFilter && { from: fromFilter }),
+      ...(toFilter && { to: toFilter }),
     }),
-    [accountId, itemsPerPage, orderBy, orderDirection],
+    [
+      accountId,
+      itemsPerPage,
+      orderBy,
+      orderDirection,
+      filterVariables,
+      fromFilter,
+      toFilter,
+    ],
   );
 
   const queryOptions = {

@@ -21,7 +21,7 @@ import { Table } from "@/shared/components/design-system/table/Table";
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
 import daoConfig from "@/shared/dao-config";
-
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 interface DelegateTableData {
   address: string;
   votingPower: string;
@@ -206,24 +206,22 @@ export const Delegates = ({
         }
 
         return (
-          <div className="flex items-center gap-3">
+          <div className="group flex w-full items-center">
             <EnsAvatar
-              address={address as `0x${string}`}
+              address={address as Address}
               size="sm"
               variant="rounded"
-              showName={true}
               isDashed={true}
               nameClassName="[tr:hover_&]:border-primary"
             />
             {!isMobile && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="opacity-0 transition-opacity [tr:hover_&]:opacity-100"
-              >
-                <Plus className="size-3.5" />
-                <p className="text-sm font-medium">Details</p>
-              </Button>
+              <div className="flex items-center opacity-0 transition-opacity [tr:hover_&]:opacity-100">
+                <CopyAndPasteButton textToCopy={address as `0x${string}`} />
+                <Button variant="outline" size="sm">
+                  <Plus className="size-3.5" />
+                  <span className="text-sm font-medium">Details</span>
+                </Button>
+              </div>
             )}
           </div>
         );
@@ -244,23 +242,20 @@ export const Delegates = ({
     },
     {
       accessorKey: "votingPower",
-      meta: {
-        columnClassName: "w-80",
-      },
       cell: ({ row }) => {
         const votingPower = row.getValue("votingPower") as string;
 
         if (loading) {
           return (
             <SkeletonRow
-              parentClassName="flex animate-pulse justify-end w-full pr-4"
+              parentClassName="flex animate-pulse w-full items-center justify-center pr-4"
               className="h-5 w-full max-w-20"
             />
           );
         }
 
         return (
-          <div className="text-secondary flex items-center justify-end text-end text-sm font-normal">
+          <div className="text-secondary flex w-full items-center justify-center text-end text-sm font-normal">
             {votingPower}
           </div>
         );
@@ -269,7 +264,7 @@ export const Delegates = ({
         <Button
           variant="ghost"
           size="sm"
-          className="text-secondary w-full justify-end p-0"
+          className="text-secondary w-full p-0"
           onClick={() => handleSort("votingPower")}
         >
           <h4 className="text-table-header whitespace-nowrap">
@@ -288,6 +283,9 @@ export const Delegates = ({
         </Button>
       ),
       enableSorting: false,
+      meta: {
+        columnClassName: "w-80",
+      },
     },
     {
       accessorKey: "variation",
@@ -296,6 +294,7 @@ export const Delegates = ({
       },
       cell: ({ row }) => {
         const addr = row.original.address;
+
         const variation = row.getValue("variation") as
           | {
               percentageChange: number;
@@ -305,25 +304,26 @@ export const Delegates = ({
 
         if (isHistoricalLoadingFor(addr) || loading) {
           return (
-            <div className="flex items-center justify-start">
+            <div className="flex w-full items-center justify-center">
               <SkeletonRow
-                className="h-5 w-16"
-                parentClassName="justify-start flex animate-pulse"
+                className="h-4 w-16"
+                parentClassName="flex animate-pulse"
               />
             </div>
           );
         }
 
         return (
-          <div className="flex w-full items-center justify-start gap-2 text-sm">
+          <div className="flex w-full items-center justify-center gap-2 text-sm">
+            {(variation?.percentageChange || 0) < 0 ? "-" : ""}
             {formatNumberUserReadable(Math.abs(variation?.absoluteChange || 0))}
             <Percentage value={variation?.percentageChange || 0} />
           </div>
         );
       },
       header: () => (
-        <h4 className="text-table-header flex w-full items-center justify-start">
-          Variation
+        <h4 className="text-table-header flex w-full items-center justify-center">
+          Change ({daoId})
         </h4>
       ),
       enableSorting: false,
@@ -492,9 +492,7 @@ export const Delegates = ({
         isOpen={!!selectedDelegate}
         onClose={handleCloseDrawer}
         entityType="delegate"
-        address={
-          selectedDelegate || "0x0000000000000000000000000000000000000000"
-        }
+        address={selectedDelegate || "None"}
         daoId={daoId as DaoIdEnum}
       />
     </>

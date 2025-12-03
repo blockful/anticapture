@@ -18,6 +18,8 @@ import { Table } from "@/shared/components/design-system/table/Table";
 import { Button } from "@/shared/components";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
 import daoConfig from "@/shared/dao-config";
+import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 
 interface TokenHolderTableData {
   address: Address;
@@ -72,41 +74,40 @@ export const TokenHolders = ({
     setSelectedTokenHolder("");
   };
 
-  const calculateVariation = (
-    currentBalance: string,
-    historicalBalance: string | undefined,
-  ): { percentageChange: number; absoluteChange: number } | null => {
-    if (!historicalBalance) return null;
+  const tableData: TokenHolderTableData[] = useMemo(() => {
+    const calculateVariation = (
+      currentBalance: string,
+      historicalBalance: string | undefined,
+    ): { percentageChange: number; absoluteChange: number } | null => {
+      if (!historicalBalance) return null;
 
-    try {
-      const current =
-        token === "ERC20"
-          ? Number(formatUnits(BigInt(currentBalance), 18))
-          : Number(currentBalance);
-      const historical =
-        token === "ERC20"
-          ? Number(formatUnits(BigInt(historicalBalance), 18))
-          : Number(historicalBalance);
+      try {
+        const current =
+          token === "ERC20"
+            ? Number(formatUnits(BigInt(currentBalance), 18))
+            : Number(currentBalance);
+        const historical =
+          token === "ERC20"
+            ? Number(formatUnits(BigInt(historicalBalance), 18))
+            : Number(historicalBalance);
 
-      if (historical === 0) return { percentageChange: 0, absoluteChange: 0 };
+        if (historical === 0) return { percentageChange: 0, absoluteChange: 0 };
 
-      // Calculate absolute change in tokens
-      const absoluteChange = current - historical;
-      // Calculate percentage variation
-      const percentageChange = ((current - historical) / historical) * 100;
+        // Calculate absolute change in tokens
+        const absoluteChange = current - historical;
+        // Calculate percentage variation
+        const percentageChange = ((current - historical) / historical) * 100;
 
-      return {
-        percentageChange: Number(percentageChange.toFixed(2)),
-        absoluteChange: Number(absoluteChange.toFixed(2)),
-      };
-    } catch (error) {
-      console.error("Error calculating variation:", error);
-      return { percentageChange: 0, absoluteChange: 0 };
-    }
-  };
-
-  const tableData: TokenHolderTableData[] = useMemo(
-    () =>
+        return {
+          percentageChange: Number(percentageChange.toFixed(2)),
+          absoluteChange: Number(absoluteChange.toFixed(2)),
+        };
+      } catch (error) {
+        console.error("Error calculating variation:", error);
+        return { percentageChange: 0, absoluteChange: 0 };
+      }
+    };
+    return (
       tokenHoldersData?.map((holder) => {
         const historicalBalance = historicalBalancesCache.get(holder.accountId);
 
@@ -122,9 +123,9 @@ export const TokenHolders = ({
           variation,
           delegate: holder.delegate as Address,
         };
-      }) || [],
-    [tokenHoldersData, historicalBalancesCache, token],
-  );
+      }) || []
+    );
+  }, [tokenHoldersData, historicalBalancesCache, token]);
 
   const tokenHoldersColumns: ColumnDef<TokenHolderTableData>[] = [
     {
@@ -158,7 +159,7 @@ export const TokenHolders = ({
         const addressValue: string = row.getValue("address");
 
         return (
-          <div className="group flex w-full items-center gap-2">
+          <div className="group flex w-full items-center">
             <EnsAvatar
               address={addressValue as Address}
               size="sm"
@@ -167,14 +168,15 @@ export const TokenHolders = ({
               nameClassName="[tr:hover_&]:border-primary"
             />
             {!isMobile && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="opacity-0 transition-opacity [tr:hover_&]:opacity-100"
-              >
-                <Plus className="size-3.5" />
-                <span className="text-sm font-medium">Details</span>
-              </Button>
+              <div className="flex items-center opacity-0 transition-opacity [tr:hover_&]:opacity-100">
+                <CopyAndPasteButton
+                  textToCopy={addressValue as `0x${string}`}
+                />
+                <Button variant="outline" size="sm">
+                  <Plus className="size-3.5" />
+                  <span className="text-sm font-medium">Details</span>
+                </Button>
+              </div>
             )}
           </div>
         );
@@ -184,6 +186,9 @@ export const TokenHolders = ({
       },
     },
     {
+      meta: {
+        columnClassName: "w-20",
+      },
       accessorKey: "balance",
       size: 160,
       header: ({ column }) => {
@@ -234,15 +239,12 @@ export const TokenHolders = ({
           </div>
         );
       },
-      meta: {
-        columnClassName: "w-48",
-      },
     },
     {
       accessorKey: "variation",
       header: () => (
-        <div className="text-table-header flex w-full items-center justify-start">
-          Variation ({daoId})
+        <div className="text-table-header flex w-full items-center justify-center">
+          Change ({daoId})
         </div>
       ),
       size: 250,
@@ -258,7 +260,7 @@ export const TokenHolders = ({
 
         if (isHistoricalLoadingFor(addr) || loading) {
           return (
-            <div className="flex w-full items-center justify-start">
+            <div className="flex w-full items-center justify-center">
               <SkeletonRow
                 className="h-4 w-16"
                 parentClassName="flex animate-pulse"
@@ -268,19 +270,17 @@ export const TokenHolders = ({
         }
 
         return (
-          <div className="flex w-full items-center justify-start gap-2 text-sm">
+          <div className="flex w-full items-center justify-center gap-2 text-sm">
+            {(variation?.percentageChange || 0) < 0 ? "-" : ""}
             {formatNumberUserReadable(Math.abs(variation?.absoluteChange || 0))}
             <Percentage value={variation?.percentageChange || 0} />
           </div>
         );
       },
-      meta: {
-        columnClassName: "w-72",
-      },
     },
     {
       accessorKey: "delegate",
-      size: 160,
+      // size: 160,
       header: () => (
         <div className="text-table-header flex w-full items-center justify-start">
           Delegate
@@ -306,16 +306,19 @@ export const TokenHolders = ({
 
         return (
           <div className="flex items-center gap-1.5">
-            <EnsAvatar
-              address={delegate as Address}
-              size="sm"
-              variant="rounded"
-            />
+            {delegate === zeroAddress ? (
+              <div className="flex items-center">
+                <BadgeStatus variant={"error"}>{"Not delegated"}</BadgeStatus>
+              </div>
+            ) : (
+              <EnsAvatar
+                address={delegate as Address}
+                size="sm"
+                variant="rounded"
+              />
+            )}
           </div>
         );
-      },
-      meta: {
-        columnClassName: "w-72",
       },
     },
   ];

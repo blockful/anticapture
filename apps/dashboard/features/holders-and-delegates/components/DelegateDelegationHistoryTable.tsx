@@ -22,6 +22,8 @@ import { Table } from "@/shared/components/design-system/table/Table";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
 import { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 import daoConfig from "@/shared/dao-config";
+import { AddressFilter } from "@/shared/components/design-system/table/filters";
+import { fetchEnsData } from "@/shared/hooks/useEnsData";
 
 interface DelegateDelegationHistoryTableProps {
   accountId: string;
@@ -38,7 +40,8 @@ export const DelegateDelegationHistoryTable = ({
   const [filterVariables, setFilterVariables] =
     useState<AmountFilterVariables>();
   const [isFilterActive, setIsFilterActive] = useState(false);
-
+  const [fromFilter, setFromFilter] = useState<string>();
+  const [toFilter, setToFilter] = useState<string>();
   const sortOptions: SortOption[] = [
     { value: "largest-first", label: "Largest first" },
     { value: "smallest-first", label: "Smallest first" },
@@ -57,6 +60,8 @@ export const DelegateDelegationHistoryTable = ({
     sortBy,
     sortDirection,
     filterVariables,
+    toFilter,
+    fromFilter,
   );
 
   // Handle sorting
@@ -265,9 +270,22 @@ export const DelegateDelegationHistoryTable = ({
         columnClassName: "w-32",
       },
       header: () => (
-        <h4 className="text-table-header flex w-full items-center justify-start">
-          Delegator
-        </h4>
+        <div className="text-table-header flex w-full items-center justify-start gap-2">
+          <span>Delegator</span>
+          <AddressFilter
+            onApply={async (addr) => {
+              if ((addr ?? "").indexOf(".eth") > 0) {
+                const { address } = await fetchEnsData({
+                  address: addr as `${string}.eth`,
+                });
+                setFromFilter(address || "");
+                return;
+              }
+              setFromFilter(addr || "");
+            }}
+            currentFilter={fromFilter}
+          />
+        </div>
       ),
       cell: ({ row }) => {
         const item = row.original;
@@ -345,9 +363,22 @@ export const DelegateDelegationHistoryTable = ({
         columnClassName: "w-32",
       },
       header: () => (
-        <h4 className="text-table-header flex w-full items-center justify-start">
-          Delegate
-        </h4>
+        <div className="text-table-header flex w-full items-center justify-start gap-2">
+          <span>Delegate</span>
+          <AddressFilter
+            onApply={async (addr) => {
+              if ((addr ?? "").indexOf(".eth") > 0) {
+                const { address } = await fetchEnsData({
+                  address: addr as `${string}.eth`,
+                });
+                setToFilter(address || "");
+                return;
+              }
+              setToFilter(addr || "");
+            }}
+            currentFilter={toFilter}
+          />
+        </div>
       ),
       cell: ({ row }) => {
         const item = row.original;
