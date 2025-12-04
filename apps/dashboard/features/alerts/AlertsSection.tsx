@@ -20,7 +20,7 @@ export const AlertsSection = () => {
         {/* Dashed line separator - Mobile only */}
         <div className="border-light-dark -mx-4 border-t border-dashed sm:hidden" />
 
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 py-5 md:grid-cols-3">
           {ALERTS_ITEMS.map((alert: AlertItem) => (
             <AlertCard
               key={alert.title}
