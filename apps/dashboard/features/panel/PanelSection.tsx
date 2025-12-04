@@ -19,7 +19,7 @@ export const PanelSection = () => {
   const [currency, setCurrency] = useState<"usd" | "eth">("usd");
 
   return (
-    <div className="flex flex-col gap-2 p-4 pt-[70px] sm:pt-0">
+    <div className="flex flex-col gap-2 p-4 pt-[70px] sm:pt-5">
       <div className="grid grid-cols-1 gap-2 lg:grid-cols-3">
         <DaoProtectionLevels />
         <TreasuryMonitoring />
