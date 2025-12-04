@@ -14,7 +14,7 @@ export function useTokenDistributionParams(chartData: ChartDataSetPoint[]) {
   const { metrics, setMetrics, hasTransfer, setHasTransfer } =
     useTokenDistributionStore();
 
-  const brushRange = useBrushStore((s) => s.brushRange);
+  const brushRange = useBrushStore((state) => state.brushRange);
 
   const initialized = useRef(false);
 
@@ -33,16 +33,20 @@ export function useTokenDistributionParams(chartData: ChartDataSetPoint[]) {
     }
 
     // hasTransfer
-    const ht = searchParams.get("hasTransfer");
-    setHasTransfer(ht ? ht === "true" : true);
+    const rawHasTransfer = searchParams.get("hasTransfer");
+    setHasTransfer(rawHasTransfer ? rawHasTransfer === "true" : true);
 
     // brush: startDate / endDate
-    const start = searchParams.get("startDate");
-    const end = searchParams.get("endDate");
+    const rawStartDate = searchParams.get("startDate");
+    const rawEndDate = searchParams.get("endDate");
 
-    if (start && end) {
-      const startIndex = chartData.findIndex((p) => p.date === Number(start));
-      const endIndex = chartData.findIndex((p) => p.date === Number(end));
+    if (rawStartDate && rawEndDate) {
+      const startIndex = chartData.findIndex(
+        (point) => point.date === Number(rawStartDate),
+      );
+      const endIndex = chartData.findIndex(
+        (point) => point.date === Number(rawEndDate),
+      );
 
       useBrushStore.setState({
         brushRange: {
