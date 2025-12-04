@@ -8,7 +8,7 @@ export const badgeVariants = cva(
     variants: {
       variant: {
         default:
-          "gap-1.5 border-transparent text-sm font-medium bg-surface-contrast leading-tight text-secondary",
+          "gap-1.5 border-transparent bg-surface-contrast text-secondary",
         secondary:
           "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
         destructive:
