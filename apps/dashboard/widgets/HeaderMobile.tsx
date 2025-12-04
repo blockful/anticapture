@@ -4,9 +4,17 @@ import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { ButtonHeaderSidebar, ConnectWallet } from "@/shared/components";
 import { cn } from "@/shared/utils/";
-import { X, Menu, BarChart4, BookOpen, Heart, HelpCircle } from "lucide-react";
+import {
+  X,
+  Menu,
+  BarChart4,
+  BookOpen,
+  Heart,
+  HelpCircle,
+  Bell,
+} from "lucide-react";
 import { usePathname } from "next/navigation";
-import { AnticaptureIcon, TelegramIcon } from "@/shared/components/icons";
+import { AnticaptureIcon } from "@/shared/components/icons";
 
 export const HeaderMobile = ({
   overlayClassName,
@@ -33,7 +41,7 @@ export const HeaderMobile = ({
         page: "alerts",
         isGlobal: true,
         label: "Alerts",
-        icon: TelegramIcon,
+        icon: Bell,
       },
     ],
     [],
