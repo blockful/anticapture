@@ -26,9 +26,7 @@ export interface AlertItem {
 export const ALERTS_ITEMS: AlertItem[] = [
   {
     title: "Telegram",
-    description: (
-      <>You&apos;re in crypto, so real-time governance alerts is a must.</>
-    ),
+    description: "You're in crypto, so real-time governance alerts is a must.",
     icon: TelegramColorIcon,
     availability: AlertAvailability.AVAILABLE,
     link: ANTICAPTURE_TELEGRAM_BOT,
@@ -36,9 +34,8 @@ export const ALERTS_ITEMS: AlertItem[] = [
   },
   {
     title: "Slack",
-    description: (
-      <>Receive direct messages of your preferred DAOs governance updates.</>
-    ),
+    description:
+      "Receive direct messages of your preferred DAOs governance updates.",
     icon: SlackColorIcon,
     availability: AlertAvailability.AVAILABLE,
     link: ANTICAPTURE_SLACK_BOT,
@@ -46,12 +43,8 @@ export const ALERTS_ITEMS: AlertItem[] = [
   },
   {
     title: "Discord",
-    description: (
-      <>
-        Beyond that 2021 NFT server, you can get real-time governance alerts
-        that actually matter.
-      </>
-    ),
+    description:
+      "Beyond that 2021 NFT server, you can get real-time governance alerts that actually matter.",
     icon: DiscordColorIcon,
     availability: AlertAvailability.COMING_SOON,
     link: "/",
