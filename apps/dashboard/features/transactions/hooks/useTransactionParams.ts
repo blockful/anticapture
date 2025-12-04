@@ -81,13 +81,11 @@ export function useTransactionsTableParams({
     else params.set("to", toFilter);
 
     // MIN
-    if (minAmount === undefined || minAmount === null)
-      params.delete("minAmount");
+    if (!minAmount) params.delete("minAmount");
     else params.set("minAmount", String(minAmount));
 
     // MAX
-    if (maxAmount === undefined || maxAmount === null)
-      params.delete("maxAmount");
+    if (!maxAmount) params.delete("maxAmount");
     else params.set("maxAmount", String(maxAmount));
 
     // SORT ORDER
