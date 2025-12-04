@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { initialMetrics } from "@/features/token-distribution/utils/metrics";
 
 export interface TokenDistributionState {
   metrics: string[];
@@ -10,7 +9,7 @@ export interface TokenDistributionState {
 export const useTokenDistributionStore = create<TokenDistributionState>()(
   persist(
     (set) => ({
-      metrics: initialMetrics,
+      metrics: [],
       setMetrics: (metrics: string[]) => {
         set({ metrics });
       },
