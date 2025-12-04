@@ -13,11 +13,6 @@ export const AlertCard = ({
   link,
   active = true,
 }: AlertItem) => {
-  const mapAvailabilityToColorBadge = {
-    [AlertAvailability.AVAILABLE]: "bg-surface-opacity-success text-success",
-    [AlertAvailability.COMING_SOON]: "bg-[#fafafa]/12 text-secondary",
-  };
-
   const cardContent = (
     <Card
       className={cn(
@@ -35,15 +30,6 @@ export const AlertCard = ({
               <div className="flex items-center gap-2">
                 <h3 className="text-primary text-sm font-medium">{title}</h3>
               </div>
-            </div>
-
-            <div
-              className={cn(
-                "shrink-0 whitespace-nowrap rounded-full px-[6px] py-0.5 text-sm font-medium",
-                mapAvailabilityToColorBadge[availability],
-              )}
-            >
-              {availability}
             </div>
 
             <Badge
