@@ -10,8 +10,8 @@ import {
 import { JSX, ReactNode, SVGProps } from "react";
 
 export enum AlertAvailability {
-  AVAILABLE = "available",
-  COMING_SOON = "coming soon",
+  AVAILABLE = "Available",
+  COMING_SOON = "Coming Soon",
 }
 
 export interface AlertItem {
