@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   TokenDistributionChart,
   TokenDistributionMetrics,
@@ -8,10 +8,7 @@ import {
 import { DownloadIcon } from "lucide-react";
 import { Card, CardContent, CardTitle } from "@/shared/components/ui/card";
 import { DaoIdEnum } from "@/shared/types/daos";
-import {
-  initialMetrics,
-  metricsSchema,
-} from "@/features/token-distribution/utils";
+import { metricsSchema } from "@/features/token-distribution/utils";
 import { useChartMetrics } from "@/features/token-distribution/hooks/useChartMetrics";
 import { useTokenDistributionStore } from "@/features/token-distribution/store/useTokenDistributionStore";
 import { CSVLink } from "react-csv";
@@ -21,56 +18,15 @@ import { TransactionsTable } from "@/features/transactions";
 import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { useBrushStore } from "@/features/token-distribution/store/useBrushStore";
 import daoConfig from "@/shared/dao-config";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useTokenDistributionParams } from "@/features/token-distribution/hooks/useTokenDistributionParams";
 
 type CsvRow = Record<string, number | string | null>;
 
 export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const [hoveredMetricKey, setHoveredMetricKey] = useState<string | null>(null);
-  const [hasTransfer, setHasTransfer] = useState<boolean>(true);
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const { metrics, setMetrics } = useTokenDistributionStore();
+  const { metrics, setMetrics, hasTransfer, setHasTransfer } =
+    useTokenDistributionStore();
   const { decimals } = daoConfig[daoId];
-  const initializedRef = useRef(false);
-
-  const metricsFromUrl = useMemo(() => {
-    const raw = searchParams.get("metrics");
-    return raw ? raw.split(",") : [];
-  }, [searchParams]);
-
-  useEffect(() => {
-    if (initializedRef.current) return;
-
-    initializedRef.current = true;
-
-    if (metricsFromUrl.length > 0) {
-      setMetrics(metricsFromUrl);
-    }
-
-    if (metrics.length === 0) {
-      setMetrics(initialMetrics);
-    }
-  }, [metricsFromUrl, metrics, setMetrics]);
-
-  useEffect(() => {
-    if (!initializedRef.current) return;
-
-    const newParams = new URLSearchParams(searchParams.toString());
-
-    if (metrics.length === 0) {
-      newParams.delete("metrics");
-    } else {
-      newParams.set("metrics", metrics.join(","));
-    }
-
-    const newUrl = `?${newParams.toString()}`;
-
-    if (newUrl !== `?${searchParams.toString()}`) {
-      router.replace(newUrl);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [metrics, router]);
 
   const { chartData, chartConfig, isLoading } = useChartMetrics({
     appliedMetrics: metrics,
@@ -78,6 +34,21 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     metricsSchema,
     decimals,
   });
+
+  const startIndex = useBrushStore((state) => state.brushRange.startIndex);
+  const endIndex = useBrushStore((state) => state.brushRange.endIndex);
+
+  const startDate = useMemo(
+    () => chartData?.[startIndex]?.date,
+    [chartData, startIndex],
+  );
+
+  const endDate = useMemo(
+    () => chartData?.[endIndex]?.date,
+    [chartData, endIndex],
+  );
+
+  useTokenDistributionParams(chartData);
 
   const buildCsvData = (
     points: ChartDataSetPoint[] | undefined,
@@ -129,17 +100,6 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const switchValue = useMemo(() => {
     return hasTransfer ? "All" : "Labeled-Only";
   }, [hasTransfer]);
-
-  const startIndex = useBrushStore((state) => state.brushRange.startIndex);
-  const endIndex = useBrushStore((state) => state.brushRange.endIndex);
-
-  const startDate = useMemo(() => {
-    return chartData?.[startIndex]?.date;
-  }, [chartData, startIndex]);
-
-  const endDate = useMemo(() => {
-    return chartData?.[endIndex]?.date;
-  }, [chartData, endIndex]);
 
   return (
     <div className="flex flex-col gap-5">
