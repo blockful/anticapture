@@ -33,9 +33,6 @@ export const AlertsSection = () => {
             />
           ))}
         </div>
-
-        {/* Border separator - Mobile only */}
-        <div className="border-light-dark -mx-4 border-t sm:hidden" />
       </div>
     </TheSectionLayout>
   );
