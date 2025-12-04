@@ -8,7 +8,11 @@ import {
   ANTICAPTURE_TELEGRAM_BOT,
 } from "@/shared/constants/social-media";
 import { JSX, ReactNode, SVGProps } from "react";
-import { AlertAvailability } from "@/features/alerts/types";
+
+export enum AlertAvailability {
+  AVAILABLE = "available",
+  COMING_SOON = "coming soon",
+}
 
 export interface AlertItem {
   title: string;
