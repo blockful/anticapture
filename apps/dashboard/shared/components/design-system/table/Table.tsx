@@ -68,6 +68,7 @@ interface DataTableProps<TData, TValue> {
   getRowCanExpand?: (row: Row<TData>) => boolean;
   renderSubComponent?: (row: Row<TData>) => ReactNode;
   getSubRows?: (originalRow: TData, index: number) => TData[] | undefined;
+  loadingOverlay?: ReactNode;
 }
 
 export const Table = <TData, TValue>({
@@ -92,6 +93,7 @@ export const Table = <TData, TValue>({
   getRowCanExpand,
   renderSubComponent,
   getSubRows,
+  loadingOverlay,
 }: DataTableProps<TData, TValue>) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -215,7 +217,8 @@ export const Table = <TData, TValue>({
             </TableRow>
           ))}
         </TableHeader>
-        <TableBody className={className}>
+        <TableBody className={cn("relative", className)}>
+          {loadingOverlay}
           {table.getRowModel().rows.length > 0 ? (
             <>
               {table.getRowModel().rows.map((row) => {

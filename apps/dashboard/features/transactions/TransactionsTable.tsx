@@ -14,6 +14,19 @@ type Supply = "CEX" | "DEX" | "LENDING" | "TOTAL" | "UNASSIGNED";
 
 export const AcceptedMetrics: Supply[] = ["CEX", "DEX", "LENDING", "TOTAL"];
 
+const LoadingOverlay = (
+  <div className="bg-surface-default/80 absolute inset-0 z-20 flex w-full flex-col items-center justify-center text-center">
+    <div className="mb-2.5">Icon</div>
+    <p className="text-primary mb-1 font-mono text-[13px] font-medium uppercase tracking-wider">
+      Syncing Data with Chart…
+    </p>
+    <p className="text-secondary text-sm">
+      The table reflects the metrics and timeframe you choose above. <br />
+      This might take a moment.
+    </p>
+  </div>
+);
+
 export const TransactionsTable = ({
   metrics,
   hasTransfer,
@@ -96,9 +109,9 @@ export const TransactionsTable = ({
     setSortOrder,
   });
 
-  if (loading && (!tableData || tableData.length === 0)) {
+  if (loading) {
     return (
-      <div className="flex flex-col gap-2">
+      <div className="relative flex flex-col gap-2">
         <Table
           columns={columns}
           data={Array.from({ length: 12 }, () => ({
@@ -118,9 +131,9 @@ export const TransactionsTable = ({
           withSorting={true}
           size="sm"
           mobileTableFixed={true}
-          withDownloadCSV={true}
           wrapperClassName="h-[450px]"
           className="h-[400px]"
+          loadingOverlay={LoadingOverlay}
         />
       </div>
     );
