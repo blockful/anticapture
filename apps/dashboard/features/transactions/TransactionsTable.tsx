@@ -9,6 +9,7 @@ import { AffectedSupplyType } from "@/features/transactions/hooks/useTransaction
 import { Table } from "@/shared/components/design-system/table/Table";
 import { getTransactionsColumns } from "@/features/transactions/utils/getTransactionsColumns";
 import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
+import { Hourglass } from "lucide-react";
 
 type Supply = "CEX" | "DEX" | "LENDING" | "TOTAL" | "UNASSIGNED";
 
@@ -16,7 +17,12 @@ export const AcceptedMetrics: Supply[] = ["CEX", "DEX", "LENDING", "TOTAL"];
 
 const LoadingOverlay = (
   <div className="bg-surface-default/80 absolute inset-0 z-20 flex w-full flex-col items-center justify-center text-center">
-    <div className="mb-2.5">Icon</div>
+    <div className="bg-surface-default relative mb-2.5 flex size-[32px] items-center justify-center rounded-full">
+      <div className="border-surface-solid-brand absolute left-1/2 top-1/2 size-8 shrink-0 -translate-x-1/2 -translate-y-1/2 animate-spin rounded-full border-[1px]" />
+      <div className="bg-surface-action flex size-6 shrink-0 items-center justify-center rounded-full">
+        <Hourglass className="text-inverted size-[14px]" />
+      </div>
+    </div>
     <p className="text-primary mb-1 font-mono text-[13px] font-medium uppercase tracking-wider">
       Syncing Data with Chart…
     </p>
@@ -114,7 +120,7 @@ export const TransactionsTable = ({
       <div className="relative flex flex-col gap-2">
         <Table
           columns={columns}
-          data={Array.from({ length: 12 }, () => ({
+          data={Array.from({ length: 10 }, () => ({
             id: "loading-row",
             affectedSupply: ["CEX", "DEX"] as SupplyType[],
             amount: "1000000",
@@ -127,7 +133,6 @@ export const TransactionsTable = ({
           }))}
           enableExpanding={true}
           getSubRows={(row) => row.subRows}
-          stickyFirstColumn={true}
           withSorting={true}
           size="sm"
           mobileTableFixed={true}
@@ -154,7 +159,6 @@ export const TransactionsTable = ({
           enableExpanding={true}
           getSubRows={(row) => row.subRows}
           withSorting={true}
-          mobileTableFixed={true}
         />
       </div>
     </div>

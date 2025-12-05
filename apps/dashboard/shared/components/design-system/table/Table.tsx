@@ -188,6 +188,7 @@ export const Table = <TData, TValue>({
           mobileTableFixed ? "table-fixed" : "table-auto md:table-fixed",
         )}
       >
+        {loadingOverlay}
         <TableHeader className="bg-surface-contrast text-secondary sticky -top-px z-30 text-xs font-medium">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className={"border-light-dark"}>
@@ -218,7 +219,6 @@ export const Table = <TData, TValue>({
           ))}
         </TableHeader>
         <TableBody className={cn("relative", className)}>
-          {loadingOverlay}
           {table.getRowModel().rows.length > 0 ? (
             <>
               {table.getRowModel().rows.map((row) => {
