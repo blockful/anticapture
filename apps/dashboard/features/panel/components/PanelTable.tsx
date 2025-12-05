@@ -18,7 +18,7 @@ import {
   ArrowState,
   DaoAvatarIcon,
 } from "@/shared/components/icons";
-import { formatNumberUserReadable } from "@/shared/utils";
+import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { formatUnits } from "viem";
 import { StageTag } from "@/features/resilience-stages/components";
 import { Stage } from "@/shared/types/enums/Stage";
@@ -31,6 +31,11 @@ import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { useQuorumGap } from "@/shared/hooks/useQuorumGap";
 import { TooltipPlain } from "@/shared/components/tooltips/TooltipPlain";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/shared/components/ui/tooltip";
 
 type PanelDao = {
   dao: string;
@@ -391,10 +396,30 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         const dao: string = row.getValue("dao");
         const ChainIcon =
           daoConfigByDaoId[dao as DaoIdEnum].daoOverview.chain.icon;
+        const chainName =
+          daoConfigByDaoId[dao as DaoIdEnum].daoOverview.chain.name;
+
         return (
           <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto">
             <div className={"flex w-full items-center gap-3"}>
-              <ChainIcon className="size-6 rounded-full" />
+              <Tooltip>
+                <TooltipTrigger role="button" aria-label="tooltip-info">
+                  <ChainIcon className="size-6 cursor-pointer rounded-full" />
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  align="center"
+                  sideOffset={10}
+                  avoidCollisions={true}
+                  className={cn(
+                    "border-light-dark bg-surface-default text-primary z-50 rounded-lg border p-3 text-center shadow-sm",
+                    "w-fit max-w-[calc(100vw-2rem)] sm:max-w-md",
+                    "whitespace-normal break-words",
+                  )}
+                >
+                  {chainName}
+                </TooltipContent>
+              </Tooltip>
             </div>
           </div>
         );
