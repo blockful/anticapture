@@ -47,7 +47,7 @@ const deduceSupplyTypes = (tx: GraphTransaction): SupplyType[] => {
   if (tx.isCex) types.push("CEX");
   if (tx.isDex) types.push("DEX");
   if (tx.isLending) types.push("Lending");
-  if (tx.delegations && tx.delegations.length > 0) types.push("Delegation");
+  if (tx.delegations && tx.delegations.length > 0) types.push("Delegated");
   if (types.length === 0) types.push("Other");
   return types;
 };
@@ -117,7 +117,7 @@ export const adaptTransactionsToTableData = (
     }));
     const delegationsSubRows = tx.delegations?.map((d, didx) => ({
       id: `${idx + 1}.${didx + 1}`,
-      affectedSupply: ["Delegation"] as SupplyType[],
+      affectedSupply: ["Delegated"] as SupplyType[],
       amount: formatNumberUserReadable(
         Number(formatUnits(toBigIntSafe(d.delegatedValue), decimals)) || 0,
         2,

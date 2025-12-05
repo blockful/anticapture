@@ -15,9 +15,9 @@ import { CSVLink } from "react-csv";
 import { defaultLinkVariants } from "@/shared/components/design-system/links/default-link";
 import { ChartDataSetPoint } from "@/shared/dao-config/types";
 import { TransactionsTable } from "@/features/transactions";
-import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { useBrushStore } from "@/features/token-distribution/store/useBrushStore";
 import daoConfig from "@/shared/dao-config";
+import { Switch } from "@/shared/components/ui/switch";
 
 type CsvRow = Record<string, number | string | null>;
 
@@ -145,24 +145,11 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           <CardTitle className="!text-alternative-sm text-primary flex items-center font-mono font-medium uppercase tracking-wide xl:gap-2.5">
             TRANSACTIONS
           </CardTitle>
-          <Tabs
-            defaultValue="All"
-            value={switchValue}
-            className="flex gap-1 rounded-md"
-          >
-            <TabsList>
-              {["Labeled-Only", "All"].map((option) => (
-                <TabsTrigger
-                  className="cursor-pointer px-3 py-0.5 text-sm font-normal"
-                  key={option}
-                  value={option}
-                  onClick={() => setHasTransfer(option === "All")}
-                >
-                  {option}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
+          <Switch
+            label="Show Others"
+            checked={switchValue === "All"}
+            onCheckedChange={(value) => setHasTransfer(value)}
+          />
         </div>
         <TransactionsTable
           metrics={metrics}

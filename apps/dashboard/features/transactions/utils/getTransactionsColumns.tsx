@@ -73,7 +73,7 @@ export const getTransactionsColumns = ({
       },
       size: 180,
       meta: {
-        columnClassName: "w-42",
+        columnClassName: "w-60",
       },
     },
     {
@@ -97,8 +97,7 @@ export const getTransactionsColumns = ({
         const hasSubRows =
           row.original.subRows && row.original.subRows.length > 0;
         const isNestedRow = row.depth > 0;
-        const isDelegation =
-          row.original.affectedSupply?.includes("Delegation");
+        const isDelegation = row.original.affectedSupply?.includes("Delegated");
 
         if (loading) {
           return (
@@ -146,13 +145,16 @@ export const getTransactionsColumns = ({
         );
       },
       size: 162,
+      meta: {
+        columnClassName: "w-60",
+      },
     },
     {
       accessorKey: "date",
       header: () => (
         <Button
           variant="ghost"
-          className="!text-table-header w-full justify-start px-4 py-0 text-xs"
+          className="!text-table-header w-full justify-start px-0 py-0 text-xs"
           onClick={() => {
             setSortOrder(sortOrder === "asc" ? "desc" : "asc");
           }}
@@ -175,22 +177,27 @@ export const getTransactionsColumns = ({
 
         if (loading) {
           return (
-            <div className="flex items-center justify-start px-4">
+            <div className="flex items-center justify-start">
               <SkeletonRow className="h-4 w-16" />
             </div>
           );
         }
 
         return date ? (
-          <span className="text-secondary w-full px-4 text-sm">{date}</span>
+          <span className="text-secondary w-full text-nowrap text-sm">
+            {date}
+          </span>
         ) : null;
       },
       size: 162,
+      meta: {
+        columnClassName: "w-60",
+      },
     },
     {
       accessorKey: "from",
       header: () => (
-        <div className="text-table-header flex h-8 w-full items-center justify-start px-4">
+        <div className="text-table-header flex h-8 w-full items-center justify-start">
           <span>From</span>
           <div className="ml-2 w-[180px]">
             <AddressFilter
@@ -214,7 +221,7 @@ export const getTransactionsColumns = ({
 
         if (loading) {
           return (
-            <div className="flex h-10 items-center gap-3 p-2">
+            <div className="flex h-10 items-center gap-3">
               <SkeletonRow
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
@@ -228,7 +235,7 @@ export const getTransactionsColumns = ({
         }
 
         return (
-          <div className="flex h-10 items-center gap-3 p-2">
+          <div className="flex h-10 items-center gap-3">
             <div className="overflow-truncate flex max-w-[140px] items-center gap-2">
               <EnsAvatar
                 address={from as `0x${string}`}
@@ -242,15 +249,16 @@ export const getTransactionsColumns = ({
         );
       },
       size: 162,
+      meta: {
+        columnClassName: "w-60",
+      },
     },
     {
       id: "arrow",
       header: "",
       cell: () => {
         if (loading) {
-          return (
-            <div className="flex h-10 items-center justify-center px-2"></div>
-          );
+          return <div className="flex h-10 items-center justify-center"></div>;
         }
 
         return <ArrowRight className="h-3 w-3 text-white opacity-50" />;
@@ -260,7 +268,7 @@ export const getTransactionsColumns = ({
     {
       accessorKey: "to",
       header: () => (
-        <div className="text-table-header flex h-8 w-full items-center justify-start px-4">
+        <div className="text-table-header flex h-8 w-full items-center justify-start">
           <span>To</span>
           <div className="ml-2 w-[180px]">
             <AddressFilter
@@ -284,7 +292,7 @@ export const getTransactionsColumns = ({
 
         if (loading) {
           return (
-            <div className="flex h-10 items-center gap-3 p-2">
+            <div className="flex h-10 items-center gap-3">
               <SkeletonRow
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
@@ -298,7 +306,7 @@ export const getTransactionsColumns = ({
         }
 
         return (
-          <div className="flex h-10 items-center gap-3 p-2">
+          <div className="flex h-10 items-center gap-3">
             <div className="overflow-truncate flex max-w-[140px] items-center gap-2">
               <EnsAvatar
                 address={to as `0x${string}`}
@@ -312,6 +320,9 @@ export const getTransactionsColumns = ({
         );
       },
       size: 162,
+      meta: {
+        columnClassName: "w-60",
+      },
     },
     {
       id: "actions",
@@ -335,7 +346,7 @@ export const getTransactionsColumns = ({
             href={"https://etherscan.io/tx/" + txHash}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-primary hover:bg-surface-contrast flex h-fit cursor-pointer items-center justify-center gap-1.5 rounded-md bg-transparent px-2 py-1 text-sm/tight font-medium transition-colors duration-300"
+            className="text-primary hover:bg-surface-contrast ml-auto flex h-fit cursor-pointer items-center justify-center gap-1.5 rounded-md bg-transparent px-2 py-1 text-sm/tight font-medium transition-colors duration-300"
           >
             <ExternalLink className="h-3 w-3 text-white opacity-50" />
           </Link>

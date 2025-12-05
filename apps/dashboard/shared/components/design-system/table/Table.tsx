@@ -68,6 +68,7 @@ interface DataTableProps<TData, TValue> {
   getRowCanExpand?: (row: Row<TData>) => boolean;
   renderSubComponent?: (row: Row<TData>) => ReactNode;
   getSubRows?: (originalRow: TData, index: number) => TData[] | undefined;
+  loadingOverlay?: ReactNode;
 }
 
 export const Table = <TData, TValue>({
@@ -92,6 +93,7 @@ export const Table = <TData, TValue>({
   getRowCanExpand,
   renderSubComponent,
   getSubRows,
+  loadingOverlay,
 }: DataTableProps<TData, TValue>) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -177,15 +179,23 @@ export const Table = <TData, TValue>({
 
   return (
     <div
-      className={cn("flex w-full flex-col", wrapperClassName)}
+      className={cn("relative flex w-full flex-col", wrapperClassName)}
       ref={wrapperRef}
     >
+      <div
+        className="pointer-events-none absolute right-0 top-0 z-40 h-full w-24 md:hidden"
+        style={{
+          background:
+            "linear-gradient(270deg, #09090B 1.25%, rgba(9, 9, 11, 0) 84.91%)",
+        }}
+      />
       <TableContainer
         className={cn(
           "text-secondary md:bg-surface-default border-separate border-spacing-0 bg-transparent",
           mobileTableFixed ? "table-fixed" : "table-auto md:table-fixed",
         )}
       >
+        {loadingOverlay}
         <TableHeader className="bg-surface-contrast text-secondary sticky -top-px z-30 text-xs font-medium">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className={"border-light-dark"}>
@@ -215,19 +225,18 @@ export const Table = <TData, TValue>({
             </TableRow>
           ))}
         </TableHeader>
-        <TableBody className={className}>
+        <TableBody className={cn("relative", className)}>
           {table.getRowModel().rows.length > 0 ? (
             <>
               {table.getRowModel().rows.map((row) => {
                 const isLastNestedRow =
                   row.getParentRow()?.getLeafRows().slice(-1)[0].id === row.id;
-
                 return (
                   <>
                     <TableRow
                       key={row.id}
                       className={cn(
-                        "border-transparent transition-colors duration-300",
+                        "border-transparent transition-all duration-300",
                         onRowClick && !disableRowClick?.(row.original)
                           ? "hover:bg-surface-contrast cursor-pointer"
                           : "cursor-default",
@@ -236,6 +245,7 @@ export const Table = <TData, TValue>({
                           "border-light-dark",
                         row.getIsExpanded() && "border-b-transparent",
                         isLastNestedRow && "border-b-light-dark",
+                        row.depth !== 0 && "animate-slideFadeIn",
                       )}
                       onClick={() =>
                         !disableRowClick?.(row.original) &&
