@@ -64,7 +64,7 @@ export const TreasuryMonitoring = () => {
       {/* Alert */}
       <InlineAlert
         text="More than $12.1B could be vulnerable without active monitoring"
-        variant="error"
+        variant="warning"
       />
     </div>
   );
