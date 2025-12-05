@@ -1,6 +1,6 @@
 import { cn } from "@/shared/utils";
 
-export type SupplyType = "CEX" | "DEX" | "Delegation" | "Lending" | "Other";
+export type SupplyType = "CEX" | "DEX" | "Delegated" | "Lending" | "Other";
 
 interface SupplyLabelProps {
   type: SupplyType;
@@ -18,8 +18,8 @@ const supplyTypeConfig = {
     textClass: "text-success",
     boxClass: "bg-success",
   },
-  Delegation: {
-    text: "Delegation",
+  Delegated: {
+    text: "Delegated",
     textClass: "text-blue-400",
     boxClass: "bg-blue-400",
   },
