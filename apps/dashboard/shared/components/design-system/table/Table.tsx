@@ -224,13 +224,12 @@ export const Table = <TData, TValue>({
               {table.getRowModel().rows.map((row) => {
                 const isLastNestedRow =
                   row.getParentRow()?.getLeafRows().slice(-1)[0].id === row.id;
-
                 return (
                   <>
                     <TableRow
                       key={row.id}
                       className={cn(
-                        "border-transparent transition-colors duration-300",
+                        "border-transparent transition-all duration-300",
                         onRowClick && !disableRowClick?.(row.original)
                           ? "hover:bg-surface-contrast cursor-pointer"
                           : "cursor-default",
@@ -239,6 +238,7 @@ export const Table = <TData, TValue>({
                           "border-light-dark",
                         row.getIsExpanded() && "border-b-transparent",
                         isLastNestedRow && "border-b-light-dark",
+                        row.depth !== 0 && "animate-slideFadeIn",
                       )}
                       onClick={() =>
                         !disableRowClick?.(row.original) &&
