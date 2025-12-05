@@ -23,14 +23,14 @@ const monitoringData = [
 
 export const TreasuryMonitoring = () => {
   return (
-    <div className="bg-surface-default flex w-full flex-col gap-4 rounded-lg p-4">
+    <div className="bg-surface-default flex w-full flex-col gap-4 p-4">
       <div className="flex flex-col gap-3">
         {monitoringData.map((item, index) => (
           <div key={index} className="flex flex-col gap-2">
             <h3 className="text-primary text-alternative-sm font-mono font-medium uppercase leading-[20px] tracking-[0.78px]">
               {item.title}
             </h3>
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col">
               {/* Value display */}
               <div className="flex items-end gap-1">
                 <p className="text-primary font-mono text-2xl font-normal uppercase leading-[32px]">
@@ -64,7 +64,7 @@ export const TreasuryMonitoring = () => {
       {/* Alert */}
       <InlineAlert
         text="More than $12.1B could be vulnerable without active monitoring"
-        variant="error"
+        variant="warning"
       />
     </div>
   );

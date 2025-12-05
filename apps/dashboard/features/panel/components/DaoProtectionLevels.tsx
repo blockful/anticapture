@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, Target } from "lucide-react";
+import { Eye } from "lucide-react";
 import { BarChart, Bar, XAxis, Cell, LabelList } from "recharts";
 import { ChartConfig, ChartContainer } from "@/shared/components/ui/chart";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -11,6 +11,7 @@ import {
   getDaoStageFromFields,
 } from "@/shared/dao-config/utils";
 import { useMemo } from "react";
+import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 
 const chartConfig: ChartConfig = {
   value: {
@@ -85,7 +86,7 @@ export const DaoProtectionLevels = () => {
   }, []);
 
   return (
-    <div className="bg-surface-default flex w-full flex-col gap-4 rounded-lg p-4">
+    <div className="bg-surface-default flex w-full flex-col gap-4 p-4">
       <div className="flex flex-col gap-1">
         <h3 className="text-primary text-alternative-sm font-mono font-medium uppercase leading-[20px] tracking-[0.78px]">
           DAO Protection Levels
@@ -98,6 +99,7 @@ export const DaoProtectionLevels = () => {
 
       {/* Status indicators */}
       <div className="flex w-full flex-col gap-2">
+        <DividerDefault isHorizontal />
         <div className="border-t-brand flex items-center gap-1.5 border-b-0 border-l-4 border-r-0 border-t-0 pl-3">
           <Eye className="text-secondary size-3.5" />
           <p className="text-secondary text-alternative-xs font-mono font-medium uppercase leading-[16px] tracking-[0.72px]">
@@ -107,15 +109,7 @@ export const DaoProtectionLevels = () => {
             {totalMonitored} DAOs monitored
           </p>
         </div>
-        <div className="border-t-brand flex items-center gap-1.5 border-b-0 border-l-4 border-r-0 border-t-0 pl-3">
-          <Target className="text-secondary size-3.5" />
-          <p className="text-secondary text-alternative-xs font-mono font-medium uppercase leading-[16px] tracking-[0.72px]">
-            Goal:
-          </p>
-          <p className="text-primary text-alternative-xs font-mono font-medium uppercase leading-[16px] tracking-[0.72px]">
-            Entire ecosystem
-          </p>
-        </div>
+        <DividerDefault isHorizontal />
       </div>
 
       {/* Bar Chart */}
