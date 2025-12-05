@@ -1,7 +1,7 @@
 "use client";
 
 import { Eye } from "lucide-react";
-import { BarChart, Bar, XAxis, Cell, LabelList } from "recharts";
+import { BarChart, Bar, XAxis, Cell, LabelList, Tooltip } from "recharts";
 import { ChartConfig, ChartContainer } from "@/shared/components/ui/chart";
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
@@ -12,6 +12,7 @@ import {
 } from "@/shared/dao-config/utils";
 import { useMemo } from "react";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
+import { DaoProtectionLevelsTooltip } from "@/features/panel/components/DaoProtectionLevelsTooltip";
 
 const chartConfig: ChartConfig = {
   value: {
@@ -58,6 +59,8 @@ export const DaoProtectionLevels = () => {
         value: stageCounts[Stage.NONE],
         riskLevel: "Doesn't apply",
         color: "var(--color-surface-hover)",
+        description:
+          "DAOs that don't qualify for the staging system because they lack autonomous execution and rely on a centralized entity.",
       },
       {
         stage: "Stage 0",
@@ -121,6 +124,11 @@ export const DaoProtectionLevels = () => {
               margin={{ top: 28, right: 0, left: 0, bottom: 0 }}
             >
               <XAxis dataKey="stage" hide axisLine={false} tickLine={false} />
+              <Tooltip
+                content={DaoProtectionLevelsTooltip}
+                cursor={false}
+                allowEscapeViewBox={{ x: false, y: true }}
+              />
               <Bar dataKey="value" radius={[0, 0, 0, 0]} minPointSize={1}>
                 {stageData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
