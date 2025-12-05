@@ -182,7 +182,7 @@ export const DelegatedSupplyHistory = () => {
         <ChartContainer className="h-full w-full" config={chartConfig}>
           <LineChart
             data={chartData}
-            margin={{ top: 0, right: 16, left: 32, bottom: 0 }}
+            margin={{ top: 0, right: 16, left: 15, bottom: 0 }}
           >
             <CartesianGrid vertical={false} stroke="#27272a" />
             <XAxis
