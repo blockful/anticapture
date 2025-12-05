@@ -30,7 +30,7 @@ export const TreasuryMonitoring = () => {
             <h3 className="text-primary text-alternative-sm font-mono font-medium uppercase leading-[20px] tracking-[0.78px]">
               {item.title}
             </h3>
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col">
               {/* Value display */}
               <div className="flex items-end gap-1">
                 <p className="text-primary font-mono text-2xl font-normal uppercase leading-[32px]">
