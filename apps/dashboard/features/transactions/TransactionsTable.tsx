@@ -9,6 +9,7 @@ import { AffectedSupplyType } from "@/features/transactions/hooks/useTransaction
 import { Table } from "@/shared/components/design-system/table/Table";
 import { getTransactionsColumns } from "@/features/transactions/utils/getTransactionsColumns";
 import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
+import { useTransactionsTableParams } from "@/features/transactions/hooks/useTransactionParams";
 
 type Supply = "CEX" | "DEX" | "LENDING" | "TOTAL" | "UNASSIGNED";
 
@@ -32,6 +33,19 @@ export const TransactionsTable = ({
   const [minAmount, setMinAmount] = useState<number | undefined>();
   const [maxAmount, setMaxAmount] = useState<number | undefined>();
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+
+  useTransactionsTableParams({
+    fromFilter,
+    setFromFilter,
+    toFilter,
+    setToFilter,
+    minAmount,
+    setMinAmount,
+    maxAmount,
+    setMaxAmount,
+    sortOrder,
+    setSortOrder,
+  });
 
   const affectedSupply = useMemo(
     () =>
