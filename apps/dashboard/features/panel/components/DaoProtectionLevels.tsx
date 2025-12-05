@@ -11,6 +11,7 @@ import {
   getDaoStageFromFields,
 } from "@/shared/dao-config/utils";
 import { useMemo } from "react";
+import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 
 const chartConfig: ChartConfig = {
   value: {
@@ -98,6 +99,7 @@ export const DaoProtectionLevels = () => {
 
       {/* Status indicators */}
       <div className="flex w-full flex-col gap-2">
+        <DividerDefault isHorizontal />
         <div className="border-t-brand flex items-center gap-1.5 border-b-0 border-l-4 border-r-0 border-t-0 pl-3">
           <Eye className="text-secondary size-3.5" />
           <p className="text-secondary text-alternative-xs font-mono font-medium uppercase leading-[16px] tracking-[0.72px]">
@@ -107,6 +109,7 @@ export const DaoProtectionLevels = () => {
             {totalMonitored} DAOs monitored
           </p>
         </div>
+        <DividerDefault isHorizontal />
       </div>
 
       {/* Bar Chart */}
