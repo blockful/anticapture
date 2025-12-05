@@ -179,9 +179,16 @@ export const Table = <TData, TValue>({
 
   return (
     <div
-      className={cn("flex w-full flex-col", wrapperClassName)}
+      className={cn("relative flex w-full flex-col", wrapperClassName)}
       ref={wrapperRef}
     >
+      <div
+        className="pointer-events-none absolute right-0 top-0 z-40 h-full w-24 md:hidden"
+        style={{
+          background:
+            "linear-gradient(270deg, #09090B 1.25%, rgba(9, 9, 11, 0) 84.91%)",
+        }}
+      />
       <TableContainer
         className={cn(
           "text-secondary md:bg-surface-default border-separate border-spacing-0 bg-transparent",
