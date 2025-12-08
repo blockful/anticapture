@@ -647,25 +647,33 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         );
       },
       header: ({ column }) => (
-        <Button
-          variant="ghost"
-          className="text-secondary w-full justify-end px-0 text-right"
-          onClick={() => column.toggleSorting()}
-        >
-          <TitleUnderlined title="Active Supply" />
-          <ArrowUpDown
-            props={{
-              className: "size-4 shrink-0",
-            }}
-            activeState={
-              column.getIsSorted() === "asc"
-                ? ArrowState.UP
-                : column.getIsSorted() === "desc"
-                  ? ArrowState.DOWN
-                  : ArrowState.DEFAULT
+        <div className="w-full justify-end px-0 text-right">
+          <TooltipPlain
+            triggerComponent={
+              <Button
+                variant="ghost"
+                className="text-secondary group w-full justify-end px-0 text-right"
+                onClick={() => column.toggleSorting()}
+              >
+                <TitleUnderlined title="Active Supply" />
+                <ArrowUpDown
+                  props={{
+                    className: "size-4 shrink-0",
+                  }}
+                  activeState={
+                    column.getIsSorted() === "asc"
+                      ? ArrowState.UP
+                      : column.getIsSorted() === "desc"
+                        ? ArrowState.DOWN
+                        : ArrowState.DEFAULT
+                  }
+                />
+              </Button>
             }
+            contentComponent="hahah"
+            className="font-normal"
           />
-        </Button>
+        </div>
       ),
       enableSorting: true,
       sortingFn: (rowA, rowB) => {
@@ -692,7 +700,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
             triggerComponent={
               <Button
                 variant="ghost"
-                className="text-secondary w-full justify-end px-0 text-right"
+                className="text-secondary group w-full justify-end px-0 text-right"
                 onClick={() => column.toggleSorting()}
               >
                 <TitleUnderlined title="Quorum Gap" />
@@ -759,7 +767,7 @@ const TitleUnderlined = ({
   return (
     <h4
       className={cn(
-        "text-table-header decoration-secondary/20 hover:decoration-primary whitespace-nowrap text-right underline decoration-dashed underline-offset-[6px] transition-colors duration-300",
+        "text-table-header decoration-secondary/20 group-hover:decoration-primary whitespace-nowrap text-right underline decoration-dashed underline-offset-[6px] transition-colors duration-300",
         className,
       )}
     >
