@@ -63,7 +63,7 @@ export const TreasuryMonitoring = () => {
 
       {/* Alert */}
       <InlineAlert
-        text="More than $12.1B could be vulnerable without active monitoring"
+        text="Only a portion of the ecosystem's funds is monitored by Anticapture, which means some risks may not be detected yet."
         variant="error"
       />
     </div>
