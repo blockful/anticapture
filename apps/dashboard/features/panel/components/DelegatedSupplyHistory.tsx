@@ -83,9 +83,6 @@ export const DelegatedSupplyHistory = () => {
       .filter((item): item is NonNullable<typeof item> => item !== null);
   }, [data]);
 
-  const delegatedSupplyDescription =
-    "Shows how delegated supply changes over time in DAOs indexed by Anticapture. Lower delegation can make governance easier to influence.";
-
   // Calculate Y-axis domain and ticks with standard increments (5% or 10%)
   const yAxisConfig = useMemo(() => {
     if (!chartData || chartData.length === 0) {
@@ -131,39 +128,86 @@ export const DelegatedSupplyHistory = () => {
 
   if (loading) {
     return (
-      <div className="bg-surface-default flex w-full flex-col gap-4 p-4">
-        <div className="flex flex-col gap-1">
-          <h3 className="text-primary text-alternative-sm font-mono font-medium uppercase leading-[20px] tracking-[0.78px]">
-            delegated supply history
-          </h3>
-          <p className="text-secondary text-sm font-normal leading-[20px]">
-            {delegatedSupplyDescription}
-          </p>
-        </div>
-        <div className="relative flex h-[150px] w-full items-center justify-center pb-2">
-          <SkeletonRow className="h-full w-full" />
-        </div>
-      </div>
+      <ContentWrapper>
+        <SkeletonRow className="h-full w-full" />
+      </ContentWrapper>
     );
   }
 
   if (error || !chartData || chartData.length === 0) {
     return (
-      <div className="bg-surface-default flex w-full flex-col gap-4 p-4">
-        <div className="flex flex-col gap-1">
-          <h3 className="text-primary text-alternative-sm font-mono font-medium uppercase leading-[20px] tracking-[0.78px]">
-            delegated supply history
-          </h3>
-          <p className="text-secondary text-sm font-normal leading-[20px]">
-            {delegatedSupplyDescription}
-          </p>
-        </div>
-        <div className="relative flex h-[150px] w-full items-center justify-center pb-2">
-          <p className="text-secondary text-sm">No data available</p>
-        </div>
-      </div>
+      <ContentWrapper>
+        <p className="text-secondary text-sm">No data available</p>
+      </ContentWrapper>
     );
   }
+
+  return (
+    <ContentWrapper>
+      <ChartContainer className="h-full w-full" config={chartConfig}>
+        <LineChart
+          data={chartData}
+          margin={{ top: 0, right: 16, left: 15, bottom: 0 }}
+        >
+          <CartesianGrid vertical={false} stroke="#27272a" />
+          <XAxis
+            dataKey="date"
+            tickLine={false}
+            axisLine={false}
+            tickMargin={8}
+            tick={{
+              fill: "var(--color-secondary)",
+              fontSize: 12,
+              fontFamily: "Inter",
+              fontWeight: 400,
+            }}
+            tickFormatter={(value) => value}
+          />
+          <YAxis
+            domain={yAxisConfig.domain}
+            ticks={yAxisConfig.ticks}
+            tickFormatter={(value) => (value === 0 ? "0" : `${value}%`)}
+            tickLine={false}
+            axisLine={false}
+            tickMargin={8}
+            width={28}
+            tick={{
+              fill: "var(--color-secondary)",
+              fontSize: 12,
+              fontFamily: "Inter",
+              fontWeight: 400,
+            }}
+          />
+          <Tooltip
+            content={({ active, payload, label }) => {
+              if (!active || !payload?.length) return null;
+              const data = payload[0];
+              return (
+                <div className="border-light-dark bg-surface-default text-primary rounded-lg border px-3 py-2 shadow-lg">
+                  <p className="text-secondary text-xs">{label}</p>
+                  <p className="text-primary text-sm font-medium">
+                    {data.value}%
+                  </p>
+                </div>
+              );
+            }}
+          />
+          <Line
+            type="monotone"
+            dataKey="percentage"
+            stroke="#FF6B6B"
+            strokeWidth={2}
+            dot={false}
+          />
+        </LineChart>
+      </ChartContainer>
+    </ContentWrapper>
+  );
+};
+
+const ContentWrapper = ({ children }: { children: React.ReactNode }) => {
+  const delegatedSupplyDescription =
+    "Shows how delegated supply changes over time in DAOs indexed by Anticapture. Lower delegation can make governance easier to influence.";
 
   return (
     <div className="bg-surface-default flex w-full flex-col gap-4 p-4">
@@ -176,63 +220,7 @@ export const DelegatedSupplyHistory = () => {
         </p>
       </div>
       <div className="relative flex h-[150px] w-full items-center justify-center pb-2">
-        <ChartContainer className="h-full w-full" config={chartConfig}>
-          <LineChart
-            data={chartData}
-            margin={{ top: 0, right: 16, left: 15, bottom: 0 }}
-          >
-            <CartesianGrid vertical={false} stroke="#27272a" />
-            <XAxis
-              dataKey="date"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              tick={{
-                fill: "var(--color-secondary)",
-                fontSize: 12,
-                fontFamily: "Inter",
-                fontWeight: 400,
-              }}
-              tickFormatter={(value) => value}
-            />
-            <YAxis
-              domain={yAxisConfig.domain}
-              ticks={yAxisConfig.ticks}
-              tickFormatter={(value) => (value === 0 ? "0" : `${value}%`)}
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              width={28}
-              tick={{
-                fill: "var(--color-secondary)",
-                fontSize: 12,
-                fontFamily: "Inter",
-                fontWeight: 400,
-              }}
-            />
-            <Tooltip
-              content={({ active, payload, label }) => {
-                if (!active || !payload?.length) return null;
-                const data = payload[0];
-                return (
-                  <div className="border-light-dark bg-surface-default text-primary rounded-lg border px-3 py-2 shadow-lg">
-                    <p className="text-secondary text-xs">{label}</p>
-                    <p className="text-primary text-sm font-medium">
-                      {data.value}%
-                    </p>
-                  </div>
-                );
-              }}
-            />
-            <Line
-              type="monotone"
-              dataKey="percentage"
-              stroke="#FF6B6B"
-              strokeWidth={2}
-              dot={false}
-            />
-          </LineChart>
-        </ChartContainer>
+        {children}
       </div>
     </div>
   );
