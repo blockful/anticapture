@@ -45,13 +45,10 @@ export const voteCast = async (
       daoId,
       votesCount: 1,
       lastVoteTimestamp: timestamp,
-      firstVoteTimestamp: timestamp, // Set as first vote timestamp for new accounts
     })
     .onConflictDoUpdate((current) => ({
       votesCount: current.votesCount + 1,
       lastVoteTimestamp: timestamp,
-      // Only set firstVoteTimestamp if it's not already set (0 means never voted before)
-      firstVoteTimestamp: current.firstVoteTimestamp ?? timestamp,
     }));
 
   // Create vote record
