@@ -79,7 +79,7 @@ export const votingPowerHistory = onchainTable(
   }),
   (table) => ({
     pk: primaryKey({
-      columns: [table.transactionHash, table.accountId],
+      columns: [table.transactionHash, table.accountId, table.logIndex],
     }),
   }),
 );
