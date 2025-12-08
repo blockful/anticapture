@@ -485,7 +485,15 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         );
       },
       header: () => (
-        <TitleUnderlined title="Risk Areas" className="text-left" />
+        <div className="w-full justify-end px-0 text-left">
+          <TooltipPlain
+            triggerComponent={
+              <TitleUnderlined title="Risk Areas" className="text-left" />
+            }
+            contentComponent="hahah"
+            className="font-normal"
+          />
+        </div>
       ),
       meta: {
         columnClassName: "w-56",
@@ -554,25 +562,33 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         );
       },
       header: ({ column }) => (
-        <Button
-          variant="ghost"
-          className="text-secondary w-full justify-end px-0 text-right"
-          onClick={() => column.toggleSorting()}
-        >
-          <TitleUnderlined title="Circ. Supply" />
-          <ArrowUpDown
-            props={{
-              className: "size-4 shrink-0",
-            }}
-            activeState={
-              column.getIsSorted() === "asc"
-                ? ArrowState.UP
-                : column.getIsSorted() === "desc"
-                  ? ArrowState.DOWN
-                  : ArrowState.DEFAULT
+        <div className="w-full justify-end px-0 text-right">
+          <TooltipPlain
+            triggerComponent={
+              <Button
+                variant="ghost"
+                className="text-secondary group w-full justify-end px-0 text-right"
+                onClick={() => column.toggleSorting()}
+              >
+                <TitleUnderlined title="Circ. Supply" />
+                <ArrowUpDown
+                  props={{
+                    className: "size-4 shrink-0",
+                  }}
+                  activeState={
+                    column.getIsSorted() === "asc"
+                      ? ArrowState.UP
+                      : column.getIsSorted() === "desc"
+                        ? ArrowState.DOWN
+                        : ArrowState.DEFAULT
+                  }
+                />
+              </Button>
             }
+            contentComponent="hahah"
+            className="font-normal"
           />
-        </Button>
+        </div>
       ),
       enableSorting: true,
       sortingFn: (rowA, rowB) => {
@@ -775,7 +791,7 @@ const TitleUnderlined = ({
   return (
     <h4
       className={cn(
-        "text-table-header decoration-secondary/20 group-hover:decoration-primary whitespace-nowrap text-right underline decoration-dashed underline-offset-[6px] transition-colors duration-300",
+        "text-table-header decoration-secondary/20 group-hover:decoration-primary hover:decoration-primary whitespace-nowrap text-right underline decoration-dashed underline-offset-[6px] transition-colors duration-300",
         className,
       )}
     >
