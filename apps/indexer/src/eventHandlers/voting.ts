@@ -104,6 +104,7 @@ export const proposalCreated = async (
     startBlock: string;
     endBlock: string;
     description: string;
+    blockNumber: bigint;
     timestamp: bigint;
   },
 ) => {
@@ -118,12 +119,13 @@ export const proposalCreated = async (
     startBlock,
     endBlock,
     description,
+    blockNumber,
     timestamp,
   } = args;
 
   await ensureAccountExists(context, proposer);
 
-  const blockDelta = parseInt(endBlock) - parseInt(startBlock);
+  const blockDelta = parseInt(endBlock) - Number(blockNumber);
   await context.db.insert(proposalsOnchain).values({
     id: proposalId,
     txHash,
