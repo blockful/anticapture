@@ -462,7 +462,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
             triggerComponent={
               <TitleUnderlined title="Stage" className="text-left" />
             }
-            contentComponent="hahah"
+            contentComponent="Resilience Stages are based on governance mechanisms, using the riskiest exposed vector as the criterion for progression."
             className="font-normal"
           />
         </div>
@@ -500,7 +500,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
             triggerComponent={
               <TitleUnderlined title="Risk Areas" className="text-left" />
             }
-            contentComponent="hahah"
+            contentComponent="Assess critical vulnerabilities in the DAO's governance setup.Each item highlights a specific risk area, showing which issues are resolved and which still expose the system to threats."
             className="font-normal"
           />
         </div>
@@ -595,7 +595,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
                 />
               </Button>
             }
-            contentComponent="hahah"
+            contentComponent="Total number of tokens currently in circulation and available to the market, excluding tokens locked, burned, or held in treasury."
             className="font-normal"
           />
         </div>
@@ -650,7 +650,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
                 />
               </Button>
             }
-            contentComponent="hahah"
+            contentComponent="Total amount of voting power that has been delegated to addresses, whether or not it was used in recent votes."
             className="font-normal"
           />
         </div>
@@ -704,7 +704,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
                 />
               </Button>
             }
-            contentComponent="hahah"
+            contentComponent="Voting power used in governance over the last 90 days."
             className="font-normal"
           />
         </div>
