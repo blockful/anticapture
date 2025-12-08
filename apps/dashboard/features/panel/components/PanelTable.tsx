@@ -456,7 +456,17 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
           </div>
         );
       },
-      header: () => <TitleUnderlined title="Stage" className="text-left" />,
+      header: () => (
+        <div className="w-full justify-end px-0 text-left">
+          <TooltipPlain
+            triggerComponent={
+              <TitleUnderlined title="Stage" className="text-left" />
+            }
+            contentComponent="hahah"
+            className="font-normal"
+          />
+        </div>
+      ),
       meta: {
         columnClassName: "w-40",
       },
