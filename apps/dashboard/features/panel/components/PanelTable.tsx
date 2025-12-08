@@ -456,7 +456,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
           </div>
         );
       },
-      header: () => <h4 className="text-table-header">Stage</h4>,
+      header: () => <TitleUnderlined title="Stage" className="text-left" />,
       meta: {
         columnClassName: "w-40",
       },
@@ -484,7 +484,9 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
           </div>
         );
       },
-      header: () => <h4 className="text-table-header w">Risk Areas</h4>,
+      header: () => (
+        <TitleUnderlined title="Risk Areas" className="text-left" />
+      ),
       meta: {
         columnClassName: "w-56",
       },
@@ -557,9 +559,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
           className="text-secondary w-full justify-end px-0 text-right"
           onClick={() => column.toggleSorting()}
         >
-          <h4 className="text-table-header whitespace-nowrap text-right">
-            Circ. Supply
-          </h4>
+          <TitleUnderlined title="Circ. Supply" />
           <ArrowUpDown
             props={{
               className: "size-4 shrink-0",
@@ -606,9 +606,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
           className="text-secondary w-full justify-end px-0 text-right"
           onClick={() => column.toggleSorting()}
         >
-          <h4 className="text-table-header whitespace-nowrap text-right">
-            Deleg. Supply
-          </h4>
+          <TitleUnderlined title="Deleg. Supply" />
           <ArrowUpDown
             props={{
               className: "size-4 shrink-0 ",
@@ -654,9 +652,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
           className="text-secondary w-full justify-end px-0 text-right"
           onClick={() => column.toggleSorting()}
         >
-          <h4 className="text-table-header whitespace-nowrap text-right">
-            Active Supply
-          </h4>
+          <TitleUnderlined title="Active Supply" />
           <ArrowUpDown
             props={{
               className: "size-4 shrink-0",
@@ -699,9 +695,8 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
                 className="text-secondary w-full justify-end px-0 text-right"
                 onClick={() => column.toggleSorting()}
               >
-                <h4 className="text-table-header decoration-secondary/20 hover:decoration-primary whitespace-nowrap text-right underline decoration-dashed underline-offset-[6px] transition-colors duration-300">
-                  Quorum Gap
-                </h4>
+                <TitleUnderlined title="Quorum Gap" />
+
                 <ArrowUpDown
                   props={{
                     className: "size-4 shrink-0",
@@ -751,5 +746,24 @@ Shows how much participation was above or below the quorum in the last 90d. Calc
         !!daoConfigByDaoId[row.dao as DaoIdEnum].disableDaoPage
       }
     />
+  );
+};
+
+const TitleUnderlined = ({
+  title,
+  className,
+}: {
+  title: string;
+  className?: string;
+}) => {
+  return (
+    <h4
+      className={cn(
+        "text-table-header decoration-secondary/20 hover:decoration-primary whitespace-nowrap text-right underline decoration-dashed underline-offset-[6px] transition-colors duration-300",
+        className,
+      )}
+    >
+      {title}
+    </h4>
   );
 };
