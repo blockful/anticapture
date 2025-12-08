@@ -60,18 +60,24 @@ export const DaoProtectionLevels = () => {
         value: stageCounts[Stage.ZERO],
         riskLevel: "High Risk",
         color: "var(--color-error)",
+        description:
+          "DAOs that have a critical weakness that could let an attacker influence or take over governance",
       },
       {
         stage: "Stage 1",
         value: stageCounts[Stage.ONE],
         riskLevel: "Medium Risk",
         color: "var(--color-warning)",
+        description:
+          "DAOs that have no critical weaknesses, but still have a medium-risk issue that could affect governance.",
       },
       {
         stage: "Stage 2",
         value: stageCounts[Stage.TWO],
         riskLevel: "Low Risk",
         color: "var(--color-success)",
+        description:
+          "DAOs with no significant risks and strong protection against governance attacks.",
       },
       {
         stage: "No Stage",
