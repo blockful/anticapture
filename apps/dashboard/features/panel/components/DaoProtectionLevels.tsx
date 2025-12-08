@@ -30,11 +30,11 @@ export const DaoProtectionLevels = () => {
 
     // Count DAOs by stage
     const stageCounts = {
-      [Stage.NONE]: 0,
       [Stage.ZERO]: 0,
       [Stage.ONE]: 0,
       [Stage.TWO]: 0,
       [Stage.UNKNOWN]: 0,
+      [Stage.NONE]: 0,
     };
 
     daoIds.forEach((daoId) => {
@@ -56,14 +56,6 @@ export const DaoProtectionLevels = () => {
     // Map to chart data format
     return [
       {
-        stage: "No Stage",
-        value: stageCounts[Stage.NONE],
-        riskLevel: "Doesn't apply",
-        color: "var(--color-surface-hover)",
-        description:
-          "DAOs that don't qualify for the staging system because they lack autonomous execution and rely on a centralized entity.",
-      },
-      {
         stage: "Stage 0",
         value: stageCounts[Stage.ZERO],
         riskLevel: "High Risk",
@@ -80,6 +72,14 @@ export const DaoProtectionLevels = () => {
         value: stageCounts[Stage.TWO],
         riskLevel: "Low Risk",
         color: "var(--color-success)",
+      },
+      {
+        stage: "No Stage",
+        value: stageCounts[Stage.NONE],
+        riskLevel: "Doesn't apply",
+        color: "var(--color-surface-hover)",
+        description:
+          "DAOs that don't qualify for the staging system because they lack autonomous execution and rely on a centralized entity.",
       },
     ];
   }, []);
