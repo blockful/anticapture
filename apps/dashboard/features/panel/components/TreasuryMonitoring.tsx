@@ -6,7 +6,7 @@ import { formatNumberUserReadable } from "@/shared/utils";
 // Fake data for now
 const monitoringData = [
   {
-    title: "Total Treasury monitored",
+    title: "Treasury: Monitored vs Ecosystem total",
     current: 4100000000, // $4.1B
     total: 16200000000, // $16.2B
     percentage: 25,
@@ -14,7 +14,7 @@ const monitoringData = [
 
   // Fake data for now
   {
-    title: "Total Value Locked (TVL) Monitored",
+    title: "TVL: Monitored vs Ecosystem Total",
     current: 5600000000, // $5.6B
     total: 35100000000, // $35.1B
     percentage: 16,
