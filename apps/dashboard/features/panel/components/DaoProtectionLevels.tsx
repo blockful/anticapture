@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye } from "lucide-react";
+import { ChevronRight, Eye } from "lucide-react";
 import { BarChart, Bar, XAxis, Cell, LabelList, Tooltip } from "recharts";
 import { ChartConfig, ChartContainer } from "@/shared/components/ui/chart";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -13,6 +13,7 @@ import {
 import { useMemo } from "react";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 import { DaoProtectionLevelsTooltip } from "@/features/panel/components/DaoProtectionLevelsTooltip";
+import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 
 const chartConfig: ChartConfig = {
   value: {
@@ -89,7 +90,7 @@ export const DaoProtectionLevels = () => {
   }, []);
 
   return (
-    <div className="bg-surface-default flex w-full flex-col gap-4 p-4">
+    <div className="bg-surface-default flex w-full flex-col gap-2 p-4">
       <div className="flex flex-col gap-1">
         <h3 className="text-primary text-alternative-sm font-mono font-medium uppercase leading-[20px] tracking-[0.78px]">
           DAO Protection Levels
@@ -98,6 +99,14 @@ export const DaoProtectionLevels = () => {
           Anticapture monitors vulnerabilities across DAOs and rate their
           protection level using the Stages framework.
         </p>
+        <DefaultLink
+          href="https://blockful.gitbook.io/anticapture/anticapture/framework"
+          variant="highlight"
+          openInNewTab={false}
+        >
+          DAO Protection Levels
+          <ChevronRight className="size-4" />
+        </DefaultLink>
       </div>
 
       {/* Status indicators */}
