@@ -52,8 +52,9 @@ export const HeaderDAOSidebarDropdown = () => {
   // stable, single-build dropdown items (imports are static)
   const dropdownItemsRef = useRef<Item[] | null>(null);
   if (!dropdownItemsRef.current) {
-    dropdownItemsRef.current = Object.values(DaoIdEnum).map(
-      (daoIdValue, index) => ({
+    dropdownItemsRef.current = Object.values(DaoIdEnum)
+      .filter((daoIdValue, _) => daoIdValue !== DaoIdEnum.ZK) // TODO: un-hide ZK once released
+      .map((daoIdValue, index) => ({
         id: index,
         label: daoConfigByDaoId[daoIdValue].name,
         icon: (
@@ -65,8 +66,7 @@ export const HeaderDAOSidebarDropdown = () => {
         ),
         href: `/${daoIdValue.toLowerCase()}`,
         name: daoIdValue,
-      }),
-    );
+      }));
   }
   const dropdownItems = dropdownItemsRef.current!;
 
