@@ -83,6 +83,9 @@ export const DelegatedSupplyHistory = () => {
       .filter((item): item is NonNullable<typeof item> => item !== null);
   }, [data]);
 
+  const delegatedSupplyDescription =
+    "Shows how delegated supply changes over time in DAOs indexed by Anticapture. Lower delegation can make governance easier to influence.";
+
   // Calculate Y-axis domain and ticks with standard increments (5% or 10%)
   const yAxisConfig = useMemo(() => {
     if (!chartData || chartData.length === 0) {
@@ -134,9 +137,7 @@ export const DelegatedSupplyHistory = () => {
             delegated supply history
           </h3>
           <p className="text-secondary text-sm font-normal leading-[20px]">
-            Fewer tokens are delegated out of the total supply, making it easier
-            for attackers to gain influence. The chart shows how this share
-            changes over time.
+            {delegatedSupplyDescription}
           </p>
         </div>
         <div className="relative flex h-[150px] w-full items-center justify-center pb-2">
@@ -154,9 +155,7 @@ export const DelegatedSupplyHistory = () => {
             delegated supply history
           </h3>
           <p className="text-secondary text-sm font-normal leading-[20px]">
-            Fewer tokens are delegated out of the total supply, making it easier
-            for attackers to gain influence. The chart shows how this share
-            changes over time.
+            {delegatedSupplyDescription}
           </p>
         </div>
         <div className="relative flex h-[150px] w-full items-center justify-center pb-2">
@@ -173,9 +172,7 @@ export const DelegatedSupplyHistory = () => {
           delegated supply history
         </h3>
         <p className="text-secondary text-sm font-normal leading-[20px]">
-          Fewer tokens are delegated out of the total supply, making it easier
-          for attackers to gain influence. The chart shows how this share
-          changes over time.
+          {delegatedSupplyDescription}
         </p>
       </div>
       <div className="relative flex h-[150px] w-full items-center justify-center pb-2">
