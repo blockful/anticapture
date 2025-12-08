@@ -11,7 +11,7 @@ import {
 import { ChartConfig, ChartContainer } from "@/shared/components/ui/chart";
 import { useDelegationPercentageByDay } from "@/shared/hooks";
 import { useMemo } from "react";
-import { SkeletonRow } from "@/shared/components";
+import { SkeletonRow, TooltipInfo } from "@/shared/components";
 
 const chartConfig: ChartConfig = {
   delegatedSupply: {
@@ -209,12 +209,18 @@ const ContentWrapper = ({ children }: { children: React.ReactNode }) => {
   const delegatedSupplyDescription =
     "Shows how delegated supply changes over time in DAOs indexed by Anticapture. Lower delegation can make governance easier to influence.";
 
+  const tooltipText =
+    "Delegation shows how much of the token supply actively participates in governance. When this share keeps falling, decisions depend on a shrinking group of voters, increasing the chance of concentrated influence across the ecosystem.";
+
   return (
     <div className="bg-surface-default flex w-full flex-col gap-4 p-4">
       <div className="flex flex-col gap-1">
-        <h3 className="text-primary text-alternative-sm font-mono font-medium uppercase leading-[20px] tracking-[0.78px]">
-          delegated supply history
-        </h3>
+        <div className="flex items-center gap-2">
+          <h3 className="text-primary text-alternative-sm font-mono font-medium uppercase leading-[20px] tracking-[0.78px]">
+            delegated supply history
+          </h3>
+          <TooltipInfo text={tooltipText} />
+        </div>
         <p className="text-secondary text-sm font-normal leading-[20px]">
           {delegatedSupplyDescription}
         </p>
