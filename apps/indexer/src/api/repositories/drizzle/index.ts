@@ -133,7 +133,7 @@ export class DrizzleRepository {
     status: string[] | undefined,
     fromDate: number | undefined,
     fromEndDate: number | undefined,
-    proposalTypeIndexToExclude: number[] | undefined,
+    proposalTypeExclude: number[] | undefined,
   ): Promise<DBProposal[]> {
     const whereClauses: SQL<unknown>[] = [];
 
@@ -150,9 +150,9 @@ export class DrizzleRepository {
         gte(proposalsOnchain.endTimestamp, BigInt(fromEndDate)),
       );
     }
-    if (proposalTypeIndexToExclude && proposalTypeIndexToExclude.length > 0) {
+    if (proposalTypeExclude && proposalTypeExclude.length > 0) {
       whereClauses.push(
-        notInArray(proposalsOnchain.proposalType, proposalTypeIndexToExclude),
+        notInArray(proposalsOnchain.proposalType, proposalTypeExclude),
       );
     }
     return await db

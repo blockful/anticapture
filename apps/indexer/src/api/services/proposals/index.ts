@@ -91,7 +91,7 @@ export class ProposalsService {
       : undefined;
 
     // 2.Filter proposal type using DAO config
-    let proposalTypeIndexToExclude: number[] | undefined;
+    let proposalTypeExclude: number[] | undefined;
     if (!includeOptimisticProposals) {
       const daoConfig = CONTRACT_ADDRESSES[env.DAO_ID];
       const optimisticType =
@@ -99,7 +99,7 @@ export class ProposalsService {
           ? daoConfig.optimisticProposalType
           : undefined;
       if (optimisticType !== undefined) {
-        proposalTypeIndexToExclude = [optimisticType];
+        proposalTypeExclude = [optimisticType];
       }
     }
 
@@ -111,7 +111,7 @@ export class ProposalsService {
       dbStatuses,
       fromDate,
       fromEndDate,
-      proposalTypeIndexToExclude,
+      proposalTypeExclude,
     );
 
     // 4. Update each proposal with its real on-chain status
