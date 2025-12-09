@@ -132,6 +132,7 @@ export class DrizzleRepository {
     status: string[] | undefined,
     fromDate: number | undefined,
     fromEndDate: number | undefined,
+    proposalType: number[] | undefined,
   ): Promise<DBProposal[]> {
     const whereClauses: SQL<unknown>[] = [];
 
@@ -147,6 +148,10 @@ export class DrizzleRepository {
       whereClauses.push(
         gte(proposalsOnchain.endTimestamp, BigInt(fromEndDate)),
       );
+    }
+
+    if (proposalType && proposalType.length > 0) {
+      whereClauses.push(inArray(proposalsOnchain.proposalType, proposalType));
     }
 
     return await db

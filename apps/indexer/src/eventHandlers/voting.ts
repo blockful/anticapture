@@ -105,6 +105,7 @@ export const proposalCreated = async (
     endBlock: string;
     description: string;
     timestamp: bigint;
+    proposalType?: number;
   },
 ) => {
   const {
@@ -139,6 +140,7 @@ export const proposalCreated = async (
     timestamp,
     status: ProposalStatus.PENDING,
     endTimestamp: timestamp + BigInt(blockDelta * blockTime),
+    proposalType: args.proposalType ?? null,
   });
 
   // Update proposer's proposal count

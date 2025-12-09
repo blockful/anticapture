@@ -29,6 +29,14 @@ export const ProposalsRequestSchema = z.object({
     }),
   fromDate: z.coerce.number().optional(),
   fromEndDate: z.coerce.number().optional(),
+  proposalType: z
+    .union([z.coerce.number(), z.array(z.coerce.number())])
+    .optional()
+    .transform((val) => {
+      if (!val) return undefined;
+      // Always normalize to array
+      return typeof val === "number" ? [val] : val;
+    }),
 });
 
 export type ProposalsRequest = z.infer<typeof ProposalsRequestSchema>;
@@ -53,6 +61,7 @@ export const ProposalResponseSchema = z.object({
   calldatas: z.array(z.string()),
   values: z.array(z.string()),
   targets: z.array(z.string()),
+  proposalType: z.number().optional(),
 });
 
 export const ProposalsResponseSchema = z.object({
@@ -102,6 +111,7 @@ export const ProposalMapper = {
       calldatas: p.calldatas,
       values: p.values.map((v) => v.toString()),
       targets: p.targets,
+      proposalType: p.proposalType ?? undefined,
     };
   },
 };
