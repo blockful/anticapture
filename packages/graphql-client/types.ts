@@ -394,6 +394,7 @@ export type QueryProposalsArgs = {
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   orderDirection?: InputMaybe<QueryInput_Proposals_OrderDirection>;
   proposalType?: InputMaybe<Scalars['JSON']['input']>;
+  proposalTypeExclude?: InputMaybe<Scalars['JSON']['input']>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   status?: InputMaybe<Scalars['JSON']['input']>;
 };

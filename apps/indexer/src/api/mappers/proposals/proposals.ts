@@ -29,22 +29,7 @@ export const ProposalsRequestSchema = z.object({
     }),
   fromDate: z.coerce.number().optional(),
   fromEndDate: z.coerce.number().optional(),
-  proposalType: z
-    .union([z.coerce.number(), z.array(z.coerce.number())])
-    .optional()
-    .transform((val) => {
-      if (!val) return undefined;
-      // Always normalize to array
-      return typeof val === "number" ? [val] : val;
-    }),
-  proposalTypeExclude: z
-    .union([z.coerce.number(), z.array(z.coerce.number())])
-    .optional()
-    .transform((val) => {
-      if (!val) return undefined;
-      // Always normalize to array
-      return typeof val === "number" ? [val] : val;
-    }),
+  includeOptimisticProposals: z.coerce.boolean().optional(),
 });
 
 export type ProposalsRequest = z.infer<typeof ProposalsRequestSchema>;

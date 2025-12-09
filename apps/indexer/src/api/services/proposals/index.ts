@@ -1,7 +1,8 @@
 import { DBProposal, ProposalsRequest, VotersResponse } from "@/api/mappers";
 import { DAOClient } from "@/interfaces/client";
-import { ProposalStatus } from "@/lib/constants";
+import { ProposalStatus, CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaysEnum } from "@/lib/enums";
+import { env } from "@/env";
 import { Address } from "viem";
 
 interface ProposalsRepository {
@@ -12,7 +13,6 @@ interface ProposalsRepository {
     status: string[] | undefined,
     fromDate: number | undefined,
     fromEndDate: number | undefined,
-    proposalType: number[] | undefined,
     proposalTypeExclude: number[] | undefined,
   ): Promise<DBProposal[]>;
   getProposalsCount(): Promise<number>;
@@ -83,15 +83,27 @@ export class ProposalsService {
     status,
     fromDate,
     fromEndDate,
-    proposalType,
-    proposalTypeExclude,
+    includeOptimisticProposals = true,
   }: ProposalsRequest): Promise<DBProposal[]> {
     // 1. Prepare status for database query
     const dbStatuses = status
       ? this.prepareStatusForDatabase(status)
       : undefined;
 
-    // 2. Fetch proposals from database
+    // 2.Filter proposal type using DAO config
+    let proposalTypeIndexToExclude: number[] | undefined;
+    if (!includeOptimisticProposals) {
+      const daoConfig = CONTRACT_ADDRESSES[env.DAO_ID];
+      const optimisticType =
+        "optimisticProposalType" in daoConfig
+          ? daoConfig.optimisticProposalType
+          : undefined;
+      if (optimisticType !== undefined) {
+        proposalTypeIndexToExclude = [optimisticType];
+      }
+    }
+
+    // 3. Fetch proposals from database
     const proposals = await this.proposalsRepo.getProposals(
       skip,
       limit,
@@ -99,16 +111,15 @@ export class ProposalsService {
       dbStatuses,
       fromDate,
       fromEndDate,
-      proposalType,
-      proposalTypeExclude,
+      proposalTypeIndexToExclude,
     );
 
-    // 3. Update each proposal with its real on-chain status
+    // 4. Update each proposal with its real on-chain status
     for (const proposal of proposals) {
       proposal.status = await this.daoClient.getProposalStatus(proposal);
     }
 
-    // 4. Filter by originally requested statuses (handles on-chain determined statuses)
+    // 5. Filter by originally requested statuses (handles on-chain determined statuses)
     return status ? this.filterProposalsByStatus(proposals, status) : proposals;
   }
 

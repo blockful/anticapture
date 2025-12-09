@@ -48,8 +48,7 @@ export function proposals(
         status,
         fromDate,
         fromEndDate,
-        proposalType,
-        proposalTypeExclude,
+        includeOptimisticProposals,
       } = context.req.valid("query");
 
       const result = await service.getProposals({
@@ -59,8 +58,7 @@ export function proposals(
         status,
         fromDate,
         fromEndDate,
-        proposalType,
-        proposalTypeExclude,
+        includeOptimisticProposals,
       });
 
       const [quorums, votingDelay] = await Promise.all([
