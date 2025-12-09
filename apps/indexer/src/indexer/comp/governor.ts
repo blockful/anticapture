@@ -36,6 +36,7 @@ export function COMPGovernorIndexer(blockTime: number) {
       endBlock: event.args.voteEnd.toString(),
       description: event.args.description,
       timestamp: event.block.timestamp,
+      blockNumber: event.block.number,
     });
   });
 

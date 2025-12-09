@@ -55,7 +55,6 @@ export const accountPower = onchainTable(
       .bigint("last_vote_timestamp")
       .default(BigInt(0))
       .notNull(),
-    firstVoteTimestamp: drizzle.bigint("first_vote_timestamp"),
   }),
   (table) => ({
     pk: primaryKey({
@@ -79,7 +78,7 @@ export const votingPowerHistory = onchainTable(
   }),
   (table) => ({
     pk: primaryKey({
-      columns: [table.transactionHash, table.accountId],
+      columns: [table.transactionHash, table.accountId, table.logIndex],
     }),
   }),
 );
