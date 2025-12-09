@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { SupplyType } from "@/shared/components/badges/SupplyLabel";
 import { useTransactionsTableData } from "@/features/transactions";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -33,11 +33,15 @@ export const TransactionsTable = ({
   const [maxAmount, setMaxAmount] = useState<number | undefined>();
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
-  const affectedSupply = metrics
-    .map((metric) => metric.replace("_SUPPLY", ""))
-    .filter((metric) =>
-      AcceptedMetrics.includes(metric as Supply),
-    ) as AffectedSupplyType[];
+  const affectedSupply = useMemo(
+    () =>
+      metrics
+        .map((metric) => metric.replace("_SUPPLY", ""))
+        .filter((metric) =>
+          AcceptedMetrics.includes(metric as Supply),
+        ) as AffectedSupplyType[],
+    [metrics],
+  );
 
   const buildFilters = (
     showAll: boolean,
