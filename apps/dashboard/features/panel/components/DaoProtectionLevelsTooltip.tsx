@@ -37,11 +37,20 @@ export const DaoProtectionLevelsTooltip = ({
         minWidth: "200px",
       }}
     >
-      <p className="text-primary text-sm font-medium">{data.stage}</p>
-      <p className="text-secondary text-xs">{data.riskLevel}</p>
-      <p className="text-primary mt-1 text-xs font-medium">
-        {data.value} DAO{data.value !== 1 ? "s" : ""}
-      </p>
+      <div className="flex w-full items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div
+            className="h-2 w-2 rounded-full"
+            style={{ backgroundColor: data.color }}
+          />
+          <p className="text-primary text-xs font-normal">{data.stage}</p>
+        </div>
+
+        <p className="text-primary text-xs font-normal">
+          {data.value} DAO{data.value !== 1 ? "s" : ""}
+        </p>
+      </div>
+
       {data.description && (
         <p className="text-secondary mt-2 max-w-[250px] text-xs">
           {data.description}
