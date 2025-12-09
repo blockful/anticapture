@@ -785,6 +785,7 @@ Shows how much participation was above or below the quorum in the last 90d. Calc
       columns={panelColumns}
       data={data}
       withSorting={true}
+      stickyFirstColumn={true}
       onRowClick={handleRowClick}
       disableRowClick={(row: PanelDao) =>
         !!daoConfigByDaoId[row.dao as DaoIdEnum].disableDaoPage

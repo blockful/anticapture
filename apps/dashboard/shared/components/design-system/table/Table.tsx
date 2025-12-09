@@ -252,7 +252,7 @@ export const Table = <TData, TValue>({
                             className={cn(
                               cell.column.getIndex() === 0 &&
                                 stickyFirstColumn &&
-                                "bg-surface-default sticky left-0 z-20",
+                                "bg-surface-background sticky left-0 z-20 shadow-2xl shadow-white",
                               rowSizeVariants[size],
                               colMeta?.columnClassName,
                             )}
