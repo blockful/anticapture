@@ -108,7 +108,7 @@ export const DaoProtectionLevels = () => {
         <DefaultLink
           href="https://blockful.gitbook.io/anticapture/anticapture/framework"
           variant="highlight"
-          openInNewTab={false}
+          openInNewTab
         >
           DAO Protection Levels
           <ChevronRight className="size-4" />
