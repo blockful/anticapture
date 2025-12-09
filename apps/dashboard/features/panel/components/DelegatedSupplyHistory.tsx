@@ -225,7 +225,7 @@ const ContentWrapper = ({ children }: { children: React.ReactNode }) => {
           {delegatedSupplyDescription}
         </p>
       </div>
-      <div className="relative flex h-[150px] w-full items-center justify-center pb-2">
+      <div className="relative flex h-[175px] w-full items-center justify-center pb-1">
         {children}
       </div>
     </div>
