@@ -227,7 +227,7 @@ export const Table = <TData, TValue>({
                     <TableRow
                       key={row.id}
                       className={cn(
-                        "border-transparent transition-colors duration-300",
+                        "group border-transparent transition-colors duration-300",
                         onRowClick && !disableRowClick?.(row.original)
                           ? "hover:bg-surface-contrast cursor-pointer"
                           : "cursor-default",

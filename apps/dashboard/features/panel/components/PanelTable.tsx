@@ -367,7 +367,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
       cell: ({ row }) => {
         const dao: string = row.getValue("dao");
         return (
-          <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto">
+          <div className="scrollbar-none group flex w-full items-center gap-3 space-x-1 overflow-auto">
             <div className={"flex w-full gap-3"}>
               <div className="flex w-full items-center gap-1.5">
                 <DaoAvatarIcon
@@ -375,12 +375,10 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
                   className="size-icon-sm"
                 />
                 {!isMobile && (
-                  <p className="text-primary whitespace-nowrap text-sm font-medium">
-                    {daoConfigByDaoId[dao as DaoIdEnum].name ===
-                    daoConfigByDaoId[DaoIdEnum.ENS].name
-                      ? "ENS"
-                      : daoConfigByDaoId[dao as DaoIdEnum].name}
-                  </p>
+                  <TitleUnderlined
+                    className="text-primary whitespace-nowrap text-sm font-medium"
+                    title={daoConfigByDaoId[dao as DaoIdEnum].name}
+                  />
                 )}
               </div>
             </div>
