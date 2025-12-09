@@ -99,18 +99,18 @@ export const DaoProtectionLevels = () => {
     <div className="bg-surface-default flex w-full flex-col gap-2 p-4">
       <div className="flex flex-col gap-1">
         <h3 className="text-primary text-alternative-sm font-mono font-medium uppercase leading-[20px] tracking-[0.78px]">
-          DAO Protection Levels
+          DAO Governance Risk Levels
         </h3>
         <p className="text-secondary text-sm font-normal leading-[20px]">
-          Anticapture monitors vulnerabilities across DAOs and rate their
-          protection level using the Stages framework.
+          This platform monitors DAO governance risks and rates them through
+          Anticapture&apos;s Stage system.
         </p>
         <DefaultLink
           href="https://blockful.gitbook.io/anticapture/anticapture/framework"
           variant="highlight"
           openInNewTab
         >
-          DAO Protection Levels
+          Learn the Stage Criteria
           <ChevronRight className="size-4" />
         </DefaultLink>
       </div>
@@ -124,7 +124,7 @@ export const DaoProtectionLevels = () => {
             currently:
           </p>
           <p className="text-primary text-alternative-xs font-mono font-medium uppercase leading-[16px] tracking-[0.72px]">
-            {totalMonitored} DAOs monitored
+            {totalMonitored} DAOs monitored by Anticapture
           </p>
         </div>
         <DividerDefault isHorizontal />
@@ -132,11 +132,11 @@ export const DaoProtectionLevels = () => {
 
       {/* Bar Chart */}
       <div className="flex flex-col gap-2">
-        <div className="relative flex h-[60px] w-full items-end">
+        <div className="relative flex h-[75px] w-full items-end">
           <ChartContainer className="h-full w-full" config={chartConfig}>
             <BarChart
               data={stageData}
-              margin={{ top: 28, right: 0, left: 0, bottom: 0 }}
+              margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
             >
               <XAxis dataKey="stage" hide axisLine={false} tickLine={false} />
               <Tooltip
