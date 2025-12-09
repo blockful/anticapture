@@ -14,6 +14,7 @@ export const OBOL: DaoConfiguration = {
     svgBgColor: "#e8f2ff",
   },
   icon: ObolIcon,
+  noStage: true,
   daoOverview: {
     token: "ERC20",
     chain: { ...mainnet, icon: MainnetIcon },
