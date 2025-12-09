@@ -394,10 +394,9 @@ export type QueryProposalNonVotersArgs = {
 export type QueryProposalsArgs = {
   fromDate?: InputMaybe<Scalars['Float']['input']>;
   fromEndDate?: InputMaybe<Scalars['Float']['input']>;
+  includeOptimisticProposals?: InputMaybe<QueryInput_Proposals_IncludeOptimisticProposals>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   orderDirection?: InputMaybe<QueryInput_Proposals_OrderDirection>;
-  proposalType?: InputMaybe<Scalars['JSON']['input']>;
-  proposalTypeExclude?: InputMaybe<Scalars['JSON']['input']>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   status?: InputMaybe<Scalars['JSON']['input']>;
 };
@@ -1576,6 +1575,11 @@ export enum QueryInput_ProposalsActivity_UserVoteFilter {
   No = 'no',
   NoVote = 'no_vote',
   Yes = 'yes'
+}
+
+export enum QueryInput_Proposals_IncludeOptimisticProposals {
+  False = 'FALSE',
+  True = 'TRUE'
 }
 
 export enum QueryInput_Proposals_OrderDirection {

@@ -31,6 +31,7 @@ export const ProposalsRequestSchema = z.object({
   fromEndDate: z.coerce.number().optional(),
   includeOptimisticProposals: z
     .enum(["true", "false"])
+    .default("true")
     .transform((value) => value === "true"),
 });
 
