@@ -37,6 +37,14 @@ export const ProposalsRequestSchema = z.object({
       // Always normalize to array
       return typeof val === "number" ? [val] : val;
     }),
+  proposalTypeExclude: z
+    .union([z.coerce.number(), z.array(z.coerce.number())])
+    .optional()
+    .transform((val) => {
+      if (!val) return undefined;
+      // Always normalize to array
+      return typeof val === "number" ? [val] : val;
+    }),
 });
 
 export type ProposalsRequest = z.infer<typeof ProposalsRequestSchema>;
