@@ -349,6 +349,21 @@
     @apply text-secondary size-5;
   }
 
+  /* Sticky column border - uses pseudo-element to ensure border sticks with sticky element
+   * This is necessary because borders don't work properly with position: sticky
+   * Reference: https://stackoverflow.com/questions/50361698/border-style-do-not-work-with-sticky-position-element
+   */
+  .sticky-border-r::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: var(--color-border-default);
+    pointer-events: none;
+  }
+
   /* Recharts Brush tick formatting */
   .recharts-brush-texts text {
     fill: #fafafa !important;
