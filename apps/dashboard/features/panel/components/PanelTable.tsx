@@ -175,6 +175,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
 
     return (
       <div className="text-secondary flex w-full items-center justify-end py-3 text-end text-sm font-normal">
+        {cellCurrency === "usd" ? "$" : ""}
         {formattedValue}
       </div>
     );
@@ -235,6 +236,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
 
     return (
       <div className="text-secondary flex w-full items-center justify-end py-3 text-end text-sm font-normal">
+        {cellCurrency === "usd" ? "$" : ""}
         {formattedValue}
       </div>
     );
@@ -297,6 +299,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
 
     return (
       <div className="text-secondary flex w-full items-center justify-end py-3 text-end text-sm font-normal">
+        {cellCurrency === "usd" ? "$" : ""}
         {formattedValue}
       </div>
     );
