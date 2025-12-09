@@ -502,7 +502,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
             triggerComponent={
               <TitleUnderlined title="Risk Areas" className="text-left" />
             }
-            contentComponent="Assess critical vulnerabilities in the DAO's governance setup.Each item highlights a specific risk area, showing which issues are resolved and which still expose the system to threats."
+            contentComponent="Assess critical vulnerabilities in the DAO's governance setup. Each item highlights a specific risk area, showing which issues are resolved and which still expose the system to threats."
             className="font-normal"
           />
         </div>
