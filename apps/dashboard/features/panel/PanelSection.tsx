@@ -35,7 +35,7 @@ export const PanelSection = () => {
           }
           dateRange=""
         >
-          <div className="flex flex-col px-2">
+          <div className="flex flex-col">
             <PanelTable currency={currency} />
           </div>
         </SubSection>
