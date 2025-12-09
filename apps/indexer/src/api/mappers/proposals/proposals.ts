@@ -29,7 +29,9 @@ export const ProposalsRequestSchema = z.object({
     }),
   fromDate: z.coerce.number().optional(),
   fromEndDate: z.coerce.number().optional(),
-  includeOptimisticProposals: z.coerce.boolean().optional(),
+  includeOptimisticProposals: z
+    .enum(["true", "false"])
+    .transform((value) => value === "true"),
 });
 
 export type ProposalsRequest = z.infer<typeof ProposalsRequestSchema>;
