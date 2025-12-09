@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { Fragment, ReactNode, useEffect, useRef, useState } from "react";
 import {
   ColumnDef as TanstackColumnDef,
   flexRender,
@@ -223,7 +223,7 @@ export const Table = <TData, TValue>({
                   row.getParentRow()?.getLeafRows().slice(-1)[0].id === row.id;
 
                 return (
-                  <>
+                  <Fragment key={row.id}>
                     <TableRow
                       key={row.id}
                       className={cn(
@@ -286,7 +286,7 @@ export const Table = <TData, TValue>({
                         </TableCell>
                       </TableRow>
                     )}
-                  </>
+                  </Fragment>
                 );
               })}
 
