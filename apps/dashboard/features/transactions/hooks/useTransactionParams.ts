@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { parseAsInteger, useQueryState } from "nuqs";
 
 interface TransactionsTableParams {
   fromFilter: string;
@@ -28,8 +28,11 @@ export function useTransactionsTableParams({
   sortOrder,
   setSortOrder,
 }: TransactionsTableParams) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const [from, setFrom] = useQueryState("from");
+  const [to, setTo] = useQueryState("to");
+  const [min, setMin] = useQueryState("min", parseAsInteger);
+  const [max, setMax] = useQueryState("max", parseAsInteger);
+  const [sort, setSort] = useQueryState("sort");
 
   const initialized = useRef(false);
 
@@ -38,28 +41,25 @@ export function useTransactionsTableParams({
     initialized.current = true;
 
     // FROM
-    const rawFrom = searchParams.get("from");
-    if (rawFrom) setFromFilter(rawFrom);
+    if (from) setFromFilter(from);
 
     // TO
-    const rawTo = searchParams.get("to");
-    if (rawTo) setToFilter(rawTo);
+    if (to) setToFilter(to);
 
     // MIN AMOUNT
-    const rawMinAmount = searchParams.get("minAmount");
-    if (rawMinAmount) setMinAmount(Number(rawMinAmount));
+    if (min) setMinAmount(Number(min));
 
     // MAX AMOUNT
-    const rawMaxAmount = searchParams.get("maxAmount");
-    if (rawMaxAmount) setMaxAmount(Number(rawMaxAmount));
+    if (max) setMaxAmount(Number(max));
 
     // SORT ORDER
-    const rawSortOrder = searchParams.get("sortOrder");
-    if (rawSortOrder === "asc" || rawSortOrder === "desc") {
-      setSortOrder(rawSortOrder);
-    }
+    if (sort) setSortOrder(sort as "asc" | "desc");
   }, [
-    searchParams,
+    from,
+    to,
+    min,
+    max,
+    sort,
     setFromFilter,
     setToFilter,
     setMinAmount,
@@ -70,40 +70,23 @@ export function useTransactionsTableParams({
   useEffect(() => {
     if (!initialized.current) return;
 
-    const params = new URLSearchParams(searchParams.toString());
-
     // FROM
-    if (!fromFilter) params.delete("from");
-    else params.set("from", fromFilter);
+    if (!fromFilter) setFrom(null);
+    else setFrom(fromFilter);
 
     // TO
-    if (!toFilter) params.delete("to");
-    else params.set("to", toFilter);
+    if (!toFilter) setTo(null);
+    else setTo(toFilter);
 
     // MIN
-    if (!minAmount) params.delete("minAmount");
-    else params.set("minAmount", String(minAmount));
+    if (!minAmount) setMin(null);
+    else setMin(minAmount);
 
     // MAX
-    if (!maxAmount) params.delete("maxAmount");
-    else params.set("maxAmount", String(maxAmount));
+    if (!maxAmount) setMax(null);
+    else setMax(maxAmount);
 
     // SORT ORDER
-    params.set("sortOrder", sortOrder);
-
-    const newUrl = `?${params.toString()}`;
-    const oldUrl = `?${searchParams.toString()}`;
-
-    if (newUrl !== oldUrl) {
-      router.replace(newUrl);
-    }
-  }, [
-    fromFilter,
-    toFilter,
-    minAmount,
-    maxAmount,
-    sortOrder,
-    router,
-    searchParams,
-  ]);
+    setSort(sortOrder);
+  }, [fromFilter, toFilter, minAmount, maxAmount, sortOrder]);
 }

@@ -1,51 +1,48 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { initialMetrics } from "@/features/token-distribution/utils";
 import { useTokenDistributionStore } from "@/features/token-distribution/store/useTokenDistributionStore";
 import { useBrushStore } from "@/features/token-distribution/store/useBrushStore";
 import { ChartDataSetPoint } from "@/shared/dao-config/types";
+import { useQueryState } from "nuqs";
 
 export function useTokenDistributionParams(chartData: ChartDataSetPoint[]) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const { metrics, setMetrics, hasTransfer, setHasTransfer } =
-    useTokenDistributionStore();
+  const [metrics, setMetrics] = useQueryState("metrics");
+  const [hasTransfer, setHasTransfer] = useQueryState("hasTransfer");
+  const [startDate, setStartDate] = useQueryState("startDate");
+  const [endDate, setEndDate] = useQueryState("endDate");
+  const {
+    metrics: storeMetrics,
+    setMetrics: setStoreMetrics,
+    hasTransfer: storeHasTransfer,
+    setHasTransfer: setStoreHasTransfer,
+  } = useTokenDistributionStore();
 
   const brushRange = useBrushStore((state) => state.brushRange);
 
   const initialized = useRef(false);
 
   useEffect(() => {
-    if (!chartData?.length) return;
     if (initialized.current) return;
+    if (!chartData?.length) return;
 
     initialized.current = true;
 
-    // metrics
-    const rawMetrics = searchParams.get("metrics");
-    if (rawMetrics) {
-      setMetrics(rawMetrics.split(","));
-    } else if (metrics.length === 0) {
-      setMetrics(initialMetrics);
+    if (metrics) {
+      setStoreMetrics(metrics.split(","));
+    } else {
+      setStoreMetrics(initialMetrics);
     }
 
-    // hasTransfer
-    const rawHasTransfer = searchParams.get("hasTransfer");
-    setHasTransfer(rawHasTransfer ? rawHasTransfer === "true" : true);
+    setStoreHasTransfer(hasTransfer === "true");
 
-    // brush: startDate / endDate
-    const rawStartDate = searchParams.get("startDate");
-    const rawEndDate = searchParams.get("endDate");
-
-    if (rawStartDate && rawEndDate) {
+    if (startDate && endDate) {
       const startIndex = chartData.findIndex(
-        (point) => point.date === Number(rawStartDate),
+        (point) => point.date === Number(startDate),
       );
       const endIndex = chartData.findIndex(
-        (point) => point.date === Number(rawEndDate),
+        (point) => point.date === Number(endDate),
       );
 
       useBrushStore.setState({
@@ -55,34 +52,35 @@ export function useTokenDistributionParams(chartData: ChartDataSetPoint[]) {
         },
       });
     }
-  }, [chartData, searchParams, metrics.length, setMetrics, setHasTransfer]);
+  }, [
+    chartData,
+    metrics?.length,
+    setStoreMetrics,
+    setStoreHasTransfer,
+    startDate,
+    endDate,
+    hasTransfer,
+    storeMetrics.length,
+    metrics,
+  ]);
 
   useEffect(() => {
     if (!initialized.current) return;
-    if (!chartData?.length) return;
-
-    const params = new URLSearchParams(searchParams.toString());
 
     // metrics
-    if (!metrics.length) params.delete("metrics");
-    else params.set("metrics", metrics.join(","));
+    if (!storeMetrics.length) setMetrics(null);
+    else setMetrics(storeMetrics.join(","));
 
     // hasTransfer
-    params.set("hasTransfer", String(hasTransfer));
+    setHasTransfer(storeHasTransfer ? "true" : "false");
 
     // brush
     const start = chartData[brushRange.startIndex]?.date;
     const end = chartData[brushRange.endIndex]?.date;
 
-    if (start) params.set("startDate", String(start));
-    if (end) params.set("endDate", String(end));
+    if (start) setStartDate(String(start));
+    if (end) setEndDate(String(end));
 
-    const newUrl = `?${params.toString()}`;
-    const oldUrl = `?${searchParams.toString()}`;
-
-    if (newUrl !== oldUrl) {
-      router.replace(newUrl);
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [metrics, hasTransfer, brushRange, chartData, router]);
+  }, [storeMetrics, storeHasTransfer, brushRange, chartData]);
 }
