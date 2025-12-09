@@ -343,7 +343,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
           <TooltipPlain
             triggerComponent={
               <div className="text-secondary decoration-secondary/20 hover:decoration-primary flex w-full items-center justify-end py-3 text-end text-sm font-normal underline decoration-dashed underline-offset-[6px] transition-colors duration-300">
-                N/A
+                No Activity
               </div>
             }
             contentComponent="No recent proposals in the last 90 days"
