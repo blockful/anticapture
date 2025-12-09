@@ -305,7 +305,7 @@ export const RiskAreaCard = ({
           description={riskInfo.description}
           riskLevel={riskArea.level}
         >
-          <div className="flex size-5 sm:size-7">
+          <div className="flex size-7">
             <RiskAreaCardInternal
               risk={modifiedRiskArea}
               isActive={isActive}
@@ -315,7 +315,7 @@ export const RiskAreaCard = ({
           </div>
         </RiskTooltipCard>
       ) : (
-        <div className="flex size-5 sm:size-7">
+        <div className="flex size-7">
           <RiskAreaCardInternal
             risk={modifiedRiskArea}
             isActive={isActive}
