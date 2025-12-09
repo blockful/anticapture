@@ -58,13 +58,13 @@ const SwitcherCurrency = ({
   const currencies: ("usd" | "eth")[] = ["eth", "usd"];
 
   return (
-    <Tabs defaultValue={currency} className="gap-1">
+    <Tabs defaultValue={currency} className="w-full gap-1 sm:w-auto">
       <TabsList>
         {currencies.map((currency) => (
           <TabsTrigger
             key={currency}
             className={cn(
-              "cursor-pointer text-sm font-medium",
+              "w-full cursor-pointer px-2 text-sm font-medium sm:w-auto",
               isSmall
                 ? "min-w-[60px] px-1.5 py-0.5"
                 : "min-w-[84px] px-3 py-1.5",
