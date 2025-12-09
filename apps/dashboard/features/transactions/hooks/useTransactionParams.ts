@@ -88,5 +88,16 @@ export function useTransactionsTableParams({
 
     // SORT ORDER
     setSort(sortOrder);
-  }, [fromFilter, toFilter, minAmount, maxAmount, sortOrder]);
+  }, [
+    fromFilter,
+    toFilter,
+    minAmount,
+    maxAmount,
+    sortOrder,
+    setFrom,
+    setTo,
+    setMin,
+    setMax,
+    setSort,
+  ]);
 }
