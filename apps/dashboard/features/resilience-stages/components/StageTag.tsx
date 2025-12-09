@@ -7,8 +7,8 @@ const STAGE_STYLES: Record<Stage, string> = {
   [Stage.ZERO]: "text-error bg-surface-opacity-error",
   [Stage.ONE]: "text-warning bg-surface-opacity-warning",
   [Stage.TWO]: "text-success bg-surface-opacity-success",
-  [Stage.NONE]: "bg-surface-contrast text-secondary",
-  [Stage.UNKNOWN]: "bg-surface-contrast text-secondary",
+  [Stage.NONE]: "bg-surface-opacity text-secondary",
+  [Stage.UNKNOWN]: "bg-surface-opacity text-secondary",
 };
 
 interface StageTagProps {
