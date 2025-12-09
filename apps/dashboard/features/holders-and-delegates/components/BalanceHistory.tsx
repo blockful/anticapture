@@ -19,11 +19,12 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
 import { AmountFilterVariables } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
-import { parseEther } from "viem";
+import { parseUnits } from "viem";
 import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
 import { AddressFilter } from "@/shared/components/design-system/table/filters";
 import { fetchEnsData } from "@/shared/hooks/useEnsData";
 import { BalanceHistoryVariationGraph } from "@/features/holders-and-delegates/components/BalanceHistoryVariationGraph";
+import daoConfig from "@/shared/dao-config";
 
 interface BalanceHistoryData {
   id: string;
@@ -42,6 +43,8 @@ interface BalanceHistoryProps {
 }
 
 export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
+  const { decimals } = daoConfig[daoId];
+
   const [sortBy, setSortBy] = useState<string>("date");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [orderBy, setOrderBy] = useState<string>("timestamp");
@@ -234,10 +237,10 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
 
               setFilterVariables(() => ({
                 minDelta: filterState.minAmount
-                  ? parseEther(filterState.minAmount).toString()
+                  ? parseUnits(filterState.minAmount, decimals).toString()
                   : undefined,
                 maxDelta: filterState.maxAmount
-                  ? parseEther(filterState.maxAmount).toString()
+                  ? parseUnits(filterState.maxAmount, decimals).toString()
                   : undefined,
               }));
 

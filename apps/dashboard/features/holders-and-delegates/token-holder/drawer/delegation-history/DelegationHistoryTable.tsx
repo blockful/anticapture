@@ -4,7 +4,7 @@ import { Button, IconButton, SkeletonRow } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { ColumnDef } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
-import { Address, parseEther } from "viem";
+import { Address, parseUnits } from "viem";
 import { useDelegationHistory } from "@/features/holders-and-delegates/hooks/useDelegationHistory";
 import { formatUnits } from "viem";
 import {
@@ -163,10 +163,10 @@ export const DelegationHistoryTable = ({
 
               setFilterVariables(() => ({
                 minDelta: filterState.minAmount
-                  ? parseEther(filterState.minAmount).toString()
+                  ? parseUnits(filterState.minAmount, decimals).toString()
                   : undefined,
                 maxDelta: filterState.maxAmount
-                  ? parseEther(filterState.maxAmount).toString()
+                  ? parseUnits(filterState.maxAmount, decimals).toString()
                   : undefined,
               }));
 

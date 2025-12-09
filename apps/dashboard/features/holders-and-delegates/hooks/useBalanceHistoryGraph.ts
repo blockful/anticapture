@@ -28,6 +28,7 @@ export function useBalanceHistoryGraph(
   timePeriod: TimePeriod = "all",
 ): UseBalanceHistoryGraphResult {
   const {
+    decimals,
     daoOverview: { token },
   } = daoConfig[daoId];
 
@@ -83,7 +84,7 @@ export function useBalanceHistoryGraph(
         // Convert from wei to token units using Viem's formatUnits
         const amount =
           token === "ERC20"
-            ? Number(formatUnits(BigInt(item.amount.toString()), 18))
+            ? Number(formatUnits(BigInt(item.amount.toString()), decimals))
             : Number(item.amount.toString());
 
         return {

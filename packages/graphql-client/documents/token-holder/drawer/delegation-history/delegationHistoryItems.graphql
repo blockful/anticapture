@@ -8,7 +8,7 @@ query GetDelegationHistoryItems(
   $limit: Int = 10
 ) {
   delegations(
-    where: { delegatorAccountId: $delegator, delegateAccountId: $delegate }
+    where: { delegatorAccountId: $delegator, delegateAccountId: $delegate,  delegatedValue_gt: 0 }
     orderBy: $orderBy
     orderDirection: $orderDirection
     limit: $limit

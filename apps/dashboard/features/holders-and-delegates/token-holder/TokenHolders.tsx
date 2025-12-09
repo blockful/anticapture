@@ -280,7 +280,6 @@ export const TokenHolders = ({
     },
     {
       accessorKey: "delegate",
-      // size: 160,
       header: () => (
         <div className="text-table-header flex w-full items-center justify-start">
           Delegate

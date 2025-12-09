@@ -2,7 +2,7 @@ import { useVotingPower } from "@/shared/hooks/graphql-client/useVotingPower";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
 import { useMultipleEnsData } from "@/shared/hooks/useEnsData";
-import { Address } from "viem";
+import { Address, formatUnits } from "viem";
 import { formatAddress } from "@/shared/utils/formatAddress";
 import daoConfig from "@/shared/dao-config";
 
@@ -37,6 +37,7 @@ export const useVotingPowerData = (
   address: string,
 ): VotingPowerData => {
   const {
+    decimals,
     daoOverview: { token },
   } = daoConfig[daoId];
   const { topFiveDelegators, delegatorsVotingPowerDetails, loading } =
@@ -84,7 +85,7 @@ export const useVotingPowerData = (
 
   const currentVotingPowerNumber = Number(
     token === "ERC20"
-      ? BigInt(delegateCurrentVotingPower) / BigInt(10 ** 18)
+      ? Number(formatUnits(BigInt(delegateCurrentVotingPower), decimals))
       : Number(delegateCurrentVotingPower),
   );
 
@@ -153,7 +154,7 @@ export const useVotingPowerData = (
       label: "Others",
       value:
         token === "ERC20"
-          ? Number(othersValue / BigInt(10 ** 18))
+          ? Number(othersValue / BigInt(10 ** decimals))
           : Number(othersValue),
     });
   }

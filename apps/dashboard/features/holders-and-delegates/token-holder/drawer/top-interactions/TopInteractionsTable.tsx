@@ -169,7 +169,7 @@ export const TopInteractionsTable = ({
           <div className="flex w-full items-center justify-end text-sm">
             {formatNumberUserReadable(
               token === "ERC20"
-                ? Number(BigInt(volume)) / Number(BigInt(10 ** 18)) || 0
+                ? Number(BigInt(volume)) / Number(BigInt(10 ** decimals)) || 0
                 : Number(volume) || 0,
             )}
           </div>
@@ -198,7 +198,8 @@ export const TopInteractionsTable = ({
 
         const value =
           token === "ERC20"
-            ? Number(BigInt(balanceChange)) / Number(BigInt(10 ** 18)) || 0
+            ? Number(BigInt(balanceChange)) / Number(BigInt(10 ** decimals)) ||
+              0
             : Number(balanceChange) || 0;
         const variant = value >= 0 ? "positive" : "negative";
 
