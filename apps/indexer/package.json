@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "ponder dev --schema public",
-    "start": "ponder start --views-schema=anticapture --schema=$RAILWAY_DEPLOYMENT_ID",
+    "start": "ponder start --views-schema=anticapture --schema=VASCO",
     "serve": "ponder serve --schema=anticapture",
     "db:list": "ponder db list",
     "db:prune": "ponder db prune",

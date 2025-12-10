@@ -9,3 +9,4 @@ export * from "./account-balance";
 export * from "./nft-price";
 export * from "./token";
 export * from "./dao";
+export * from "./proposals-activity";
