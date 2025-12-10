@@ -14,12 +14,12 @@ const mapVariantToIcon = {
     bgColor: "bg-surface-contrast",
   },
   warning: {
-    icon: <AlertTriangle className="text-warning size-4" />,
+    icon: <AlertCircle className="text-warning size-4" />,
     color: "text-warning",
     bgColor: "bg-warning/10",
   },
   error: {
-    icon: <AlertCircle className="text-error size-4" />,
+    icon: <AlertTriangle className="text-error size-4" />,
     color: "text-error",
     bgColor: "bg-error/10",
   },

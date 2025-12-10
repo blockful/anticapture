@@ -11,7 +11,7 @@ import {
 import { ChartConfig, ChartContainer } from "@/shared/components/ui/chart";
 import { useDelegationPercentageByDay } from "@/shared/hooks";
 import { useMemo } from "react";
-import { SkeletonRow } from "@/shared/components";
+import { SkeletonRow, TooltipInfo } from "@/shared/components";
 
 const chartConfig: ChartConfig = {
   delegatedSupply: {
@@ -128,114 +128,105 @@ export const DelegatedSupplyHistory = () => {
 
   if (loading) {
     return (
-      <div className="bg-surface-default flex w-full flex-col gap-4 rounded-lg p-4">
-        <div className="flex flex-col gap-1">
-          <h3 className="text-primary text-alternative-sm font-mono font-medium uppercase leading-[20px] tracking-[0.78px]">
-            delegated supply history
-          </h3>
-          <p className="text-secondary text-sm font-normal leading-[20px]">
-            Fewer tokens are delegated out of the total supply, making it easier
-            for attackers to gain influence. The chart shows how this share
-            changes over time.
-          </p>
-        </div>
-        <div className="relative flex h-[150px] w-full items-center justify-center pb-2">
-          <SkeletonRow className="h-full w-full" />
-        </div>
-      </div>
+      <ContentWrapper>
+        <SkeletonRow className="h-full w-full" />
+      </ContentWrapper>
     );
   }
 
   if (error || !chartData || chartData.length === 0) {
     return (
-      <div className="bg-surface-default flex w-full flex-col gap-4 rounded-lg p-4">
-        <div className="flex flex-col gap-1">
-          <h3 className="text-primary text-alternative-sm font-mono font-medium uppercase leading-[20px] tracking-[0.78px]">
-            delegated supply history
-          </h3>
-          <p className="text-secondary text-sm font-normal leading-[20px]">
-            Fewer tokens are delegated out of the total supply, making it easier
-            for attackers to gain influence. The chart shows how this share
-            changes over time.
-          </p>
-        </div>
-        <div className="relative flex h-[150px] w-full items-center justify-center pb-2">
-          <p className="text-secondary text-sm">No data available</p>
-        </div>
-      </div>
+      <ContentWrapper>
+        <p className="text-secondary text-sm">No data available</p>
+      </ContentWrapper>
     );
   }
 
   return (
-    <div className="bg-surface-default flex w-full flex-col gap-4 rounded-lg p-4">
+    <ContentWrapper>
+      <ChartContainer className="h-full w-full" config={chartConfig}>
+        <LineChart
+          data={chartData}
+          margin={{ top: 0, right: 16, left: 15, bottom: 0 }}
+        >
+          <CartesianGrid vertical={false} stroke="#27272a" />
+          <XAxis
+            dataKey="date"
+            tickLine={false}
+            axisLine={false}
+            tickMargin={8}
+            tick={{
+              fill: "var(--color-secondary)",
+              fontSize: 12,
+              fontFamily: "Inter",
+              fontWeight: 400,
+            }}
+            tickFormatter={(value) => value}
+          />
+          <YAxis
+            domain={yAxisConfig.domain}
+            ticks={yAxisConfig.ticks}
+            tickFormatter={(value) => (value === 0 ? "0" : `${value}%`)}
+            tickLine={false}
+            axisLine={false}
+            tickMargin={8}
+            width={28}
+            tick={{
+              fill: "var(--color-secondary)",
+              fontSize: 12,
+              fontFamily: "Inter",
+              fontWeight: 400,
+            }}
+          />
+          <Tooltip
+            content={({ active, payload, label }) => {
+              if (!active || !payload?.length) return null;
+              const data = payload[0];
+              return (
+                <div className="border-light-dark bg-surface-default text-primary rounded-lg border px-3 py-2 shadow-lg">
+                  <p className="text-secondary text-xs">{label}</p>
+                  <p className="text-primary text-sm font-medium">
+                    {data.value}%
+                  </p>
+                </div>
+              );
+            }}
+          />
+          <Line
+            type="monotone"
+            dataKey="percentage"
+            stroke="#FF6B6B"
+            strokeWidth={2}
+            dot={false}
+          />
+        </LineChart>
+      </ChartContainer>
+    </ContentWrapper>
+  );
+};
+
+const ContentWrapper = ({ children }: { children: React.ReactNode }) => {
+  const delegatedSupplyDescription =
+    "Shows how delegated supply changes over time in DAOs indexed by Anticapture. Lower delegation can make governance easier to influence.";
+
+  const tooltipText =
+    "Delegation shows how much of the token supply actively participates in governance. When this share keeps falling, decisions depend on a shrinking group of voters, increasing the chance of concentrated influence across the ecosystem.";
+
+  return (
+    <div className="bg-surface-default flex w-full flex-col gap-4 p-4">
       <div className="flex flex-col gap-1">
-        <h3 className="text-primary text-alternative-sm font-mono font-medium uppercase leading-[20px] tracking-[0.78px]">
-          delegated supply history
-        </h3>
+        <div className="flex items-center gap-2">
+          <h3 className="text-primary text-alternative-sm font-mono font-medium uppercase leading-[20px] tracking-[0.78px]">
+            delegated supply history
+          </h3>
+          <TooltipInfo text={tooltipText} />
+        </div>
         <p className="text-secondary text-sm font-normal leading-[20px]">
-          Fewer tokens are delegated out of the total supply, making it easier
-          for attackers to gain influence. The chart shows how this share
-          changes over time.
+          {delegatedSupplyDescription}
         </p>
       </div>
-      <div className="relative flex h-[150px] w-full items-center justify-center pb-2">
-        <ChartContainer className="h-full w-full" config={chartConfig}>
-          <LineChart
-            data={chartData}
-            margin={{ top: 0, right: 16, left: 32, bottom: 0 }}
-          >
-            <CartesianGrid vertical={false} stroke="#27272a" />
-            <XAxis
-              dataKey="date"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              tick={{
-                fill: "var(--color-secondary)",
-                fontSize: 12,
-                fontFamily: "Inter",
-                fontWeight: 400,
-              }}
-              tickFormatter={(value) => value}
-            />
-            <YAxis
-              domain={yAxisConfig.domain}
-              ticks={yAxisConfig.ticks}
-              tickFormatter={(value) => (value === 0 ? "0" : `${value}%`)}
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              width={28}
-              tick={{
-                fill: "var(--color-secondary)",
-                fontSize: 12,
-                fontFamily: "Inter",
-                fontWeight: 400,
-              }}
-            />
-            <Tooltip
-              content={({ active, payload, label }) => {
-                if (!active || !payload?.length) return null;
-                const data = payload[0];
-                return (
-                  <div className="border-light-dark bg-surface-default text-primary rounded-lg border px-3 py-2 shadow-lg">
-                    <p className="text-secondary text-xs">{label}</p>
-                    <p className="text-primary text-sm font-medium">
-                      {data.value}%
-                    </p>
-                  </div>
-                );
-              }}
-            />
-            <Line
-              type="monotone"
-              dataKey="percentage"
-              stroke="#FF6B6B"
-              strokeWidth={2}
-              dot={false}
-            />
-          </LineChart>
-        </ChartContainer>
+      <div className="relative flex h-[175px] w-full items-center justify-center pb-1">
+        {children}
       </div>
     </div>
   );
