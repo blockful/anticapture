@@ -2588,13 +2588,6 @@ export type GetDelegateDelegationHistoryQueryVariables = Exact<{
 
 export type GetDelegateDelegationHistoryQuery = { __typename?: 'Query', votingPowerHistorys: { __typename?: 'votingPowerHistoryPage', totalCount: number, items: Array<{ __typename?: 'votingPowerHistory', delta: any, transactionHash: string, timestamp: any, votingPower: any, delegation?: { __typename?: 'delegation', delegatorAccountId: string, delegatedValue: any, previousDelegate?: string | null, delegateAccountId: string } | null, transfer?: { __typename?: 'transfer', amount: any, fromAccountId: string, toAccountId: string } | null }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null } } };
 
-export type GetDelegateDelegationHistoryTotalCountQueryVariables = Exact<{
-  accountId: Scalars['String']['input'];
-}>;
-
-
-export type GetDelegateDelegationHistoryTotalCountQuery = { __typename?: 'Query', votingPowerHistorys: { __typename?: 'votingPowerHistoryPage', totalCount: number } };
-
 export type GetDelegateDelegationHistoryGraphQueryVariables = Exact<{
   accountId: Scalars['String']['input'];
   fromTimestamp?: InputMaybe<Scalars['BigInt']['input']>;
@@ -2847,7 +2840,7 @@ export type VotingPowersQuery = { __typename?: 'Query', votingPowers?: { __typen
 export const BalanceHistoryDocument = gql`
     query BalanceHistory($from: String, $to: String, $after: String, $before: String, $limit: Int = 10, $orderBy: String = "timestamp", $orderDirection: String = "desc", $minDelta: BigInt, $maxDelta: BigInt) {
   transfers(
-    where: {OR: [{fromAccountId: $from}, {toAccountId: $to}, {amount_gte: $minDelta, amount_lte: $maxDelta}]}
+    where: {OR: [{fromAccountId: $from}, {toAccountId: $to}], amount_gte: $minDelta, amount_lte: $maxDelta}
     orderBy: $orderBy
     orderDirection: $orderDirection
     limit: $limit
@@ -3654,46 +3647,6 @@ export type GetDelegateDelegationHistoryQueryHookResult = ReturnType<typeof useG
 export type GetDelegateDelegationHistoryLazyQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryLazyQuery>;
 export type GetDelegateDelegationHistorySuspenseQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistorySuspenseQuery>;
 export type GetDelegateDelegationHistoryQueryResult = Apollo.QueryResult<GetDelegateDelegationHistoryQuery, GetDelegateDelegationHistoryQueryVariables>;
-export const GetDelegateDelegationHistoryTotalCountDocument = gql`
-    query GetDelegateDelegationHistoryTotalCount($accountId: String!) {
-  votingPowerHistorys(where: {accountId: $accountId}) {
-    totalCount
-  }
-}
-    `;
-
-/**
- * __useGetDelegateDelegationHistoryTotalCountQuery__
- *
- * To run a query within a React component, call `useGetDelegateDelegationHistoryTotalCountQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetDelegateDelegationHistoryTotalCountQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetDelegateDelegationHistoryTotalCountQuery({
- *   variables: {
- *      accountId: // value for 'accountId'
- *   },
- * });
- */
-export function useGetDelegateDelegationHistoryTotalCountQuery(baseOptions: Apollo.QueryHookOptions<GetDelegateDelegationHistoryTotalCountQuery, GetDelegateDelegationHistoryTotalCountQueryVariables> & ({ variables: GetDelegateDelegationHistoryTotalCountQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetDelegateDelegationHistoryTotalCountQuery, GetDelegateDelegationHistoryTotalCountQueryVariables>(GetDelegateDelegationHistoryTotalCountDocument, options);
-      }
-export function useGetDelegateDelegationHistoryTotalCountLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDelegateDelegationHistoryTotalCountQuery, GetDelegateDelegationHistoryTotalCountQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetDelegateDelegationHistoryTotalCountQuery, GetDelegateDelegationHistoryTotalCountQueryVariables>(GetDelegateDelegationHistoryTotalCountDocument, options);
-        }
-export function useGetDelegateDelegationHistoryTotalCountSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegateDelegationHistoryTotalCountQuery, GetDelegateDelegationHistoryTotalCountQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetDelegateDelegationHistoryTotalCountQuery, GetDelegateDelegationHistoryTotalCountQueryVariables>(GetDelegateDelegationHistoryTotalCountDocument, options);
-        }
-export type GetDelegateDelegationHistoryTotalCountQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryTotalCountQuery>;
-export type GetDelegateDelegationHistoryTotalCountLazyQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryTotalCountLazyQuery>;
-export type GetDelegateDelegationHistoryTotalCountSuspenseQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryTotalCountSuspenseQuery>;
-export type GetDelegateDelegationHistoryTotalCountQueryResult = Apollo.QueryResult<GetDelegateDelegationHistoryTotalCountQuery, GetDelegateDelegationHistoryTotalCountQueryVariables>;
 export const GetDelegateDelegationHistoryGraphDocument = gql`
     query GetDelegateDelegationHistoryGraph($accountId: String!, $fromTimestamp: BigInt, $toTimestamp: BigInt, $orderBy: String = "timestamp", $orderDirection: String = "desc") {
   votingPowerHistorys(

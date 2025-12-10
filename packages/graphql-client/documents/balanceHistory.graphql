@@ -11,11 +11,9 @@ query BalanceHistory(
 ) {
   transfers(
     where: {
-      OR: [
-        { fromAccountId: $from }
-        { toAccountId: $to }
-        { amount_gte: $minDelta, amount_lte: $maxDelta }
-      ]
+      OR: [{ fromAccountId: $from }, { toAccountId: $to }]
+      amount_gte: $minDelta
+      amount_lte: $maxDelta
     }
     orderBy: $orderBy
     orderDirection: $orderDirection

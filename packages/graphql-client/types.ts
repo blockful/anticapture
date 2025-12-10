@@ -2585,13 +2585,6 @@ export type GetDelegateDelegationHistoryQueryVariables = Exact<{
 
 export type GetDelegateDelegationHistoryQuery = { __typename?: 'Query', votingPowerHistorys: { __typename?: 'votingPowerHistoryPage', totalCount: number, items: Array<{ __typename?: 'votingPowerHistory', delta: any, transactionHash: string, timestamp: any, votingPower: any, delegation?: { __typename?: 'delegation', delegatorAccountId: string, delegatedValue: any, previousDelegate?: string | null, delegateAccountId: string } | null, transfer?: { __typename?: 'transfer', amount: any, fromAccountId: string, toAccountId: string } | null }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null } } };
 
-export type GetDelegateDelegationHistoryTotalCountQueryVariables = Exact<{
-  accountId: Scalars['String']['input'];
-}>;
-
-
-export type GetDelegateDelegationHistoryTotalCountQuery = { __typename?: 'Query', votingPowerHistorys: { __typename?: 'votingPowerHistoryPage', totalCount: number } };
-
 export type GetDelegateDelegationHistoryGraphQueryVariables = Exact<{
   accountId: Scalars['String']['input'];
   fromTimestamp?: InputMaybe<Scalars['BigInt']['input']>;
