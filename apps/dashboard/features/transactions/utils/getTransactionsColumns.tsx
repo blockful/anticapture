@@ -13,37 +13,23 @@ import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 import { TransactionData } from "@/features/transactions/hooks/useTransactionsTableData";
 import Link from "next/link";
 import { fetchEnsData } from "@/shared/hooks/useEnsData";
+import { Address } from "viem";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { cn } from "@/shared/utils";
-import { Address } from "viem";
+import { TransactionsParamsType } from "@/features/transactions/hooks/useTransactionParams";
 
 export const getTransactionsColumns = ({
   loading,
   daoId,
-  min,
-  max,
-  setMin,
-  setMax,
-  from,
-  setFrom,
-  to,
-  setTo,
-  sort,
-  setSort,
+  filterParams,
 }: {
   loading: boolean;
   daoId: DaoIdEnum;
-  min: number | null;
-  max: number | null;
-  setMin: (min: number) => void;
-  setMax: (max: number) => void;
-  from: Address | null;
-  setFrom: (from: Address) => void;
-  to: Address | null;
-  setTo: (to: Address) => void;
-  sort: "asc" | "desc" | null;
-  setSort: (order: "asc" | "desc") => void;
+  filterParams: TransactionsParamsType;
 }): ColumnDef<TransactionData>[] => {
+  const { min, max, setMin, setMax, from, setFrom, to, setTo, sort, setSort } =
+    filterParams;
+
   return [
     {
       accessorKey: "affectedSupply",

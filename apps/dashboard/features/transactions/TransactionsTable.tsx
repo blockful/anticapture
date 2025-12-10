@@ -9,8 +9,7 @@ import { AffectedSupplyType } from "@/features/transactions/hooks/useTransaction
 import { Table } from "@/shared/components/design-system/table/Table";
 import { getTransactionsColumns } from "@/features/transactions/utils/getTransactionsColumns";
 import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
-import { parseAsInteger, parseAsStringEnum, useQueryState } from "nuqs";
-import { parseAsAddress } from "@/shared/utils/parseAsAddress";
+import { useTransactionsTableParams } from "@/features/transactions/hooks/useTransactionParams";
 
 type Supply = "CEX" | "DEX" | "LENDING" | "TOTAL" | "UNASSIGNED";
 
@@ -28,14 +27,7 @@ export const TransactionsTable = ({
   endDate: number;
 }) => {
   const { daoId } = useParams<{ daoId: DaoIdEnum }>();
-  const [from, setFrom] = useQueryState("from", parseAsAddress);
-  const [to, setTo] = useQueryState("to", parseAsAddress);
-  const [min, setMin] = useQueryState("min", parseAsInteger);
-  const [max, setMax] = useQueryState("max", parseAsInteger);
-  const [sort, setSort] = useQueryState(
-    "sort",
-    parseAsStringEnum(["asc", "desc"]),
-  );
+  const filterParams = useTransactionsTableParams();
 
   const affectedSupply = useMemo(
     () =>
@@ -73,13 +65,9 @@ export const TransactionsTable = ({
   } = useTransactionsTableData({
     daoId: daoId.toUpperCase() as DaoIdEnum,
     filters: {
+      ...filterParams,
       toDate: endDate + SECONDS_PER_DAY - 1, // include the entire end date
       fromDate: startDate,
-      from,
-      to,
-      minAmount: min,
-      maxAmount: max,
-      sortOrder: sort as "asc" | "desc",
       affectedSupply: buildFilters(hasTransfer, affectedSupply),
       includes,
     },
@@ -88,16 +76,7 @@ export const TransactionsTable = ({
   const columns = getTransactionsColumns({
     loading,
     daoId: daoId.toUpperCase() as DaoIdEnum,
-    min,
-    max,
-    setMin,
-    setMax,
-    from,
-    setFrom,
-    to,
-    setTo,
-    sort,
-    setSort,
+    filterParams,
   });
 
   if (loading && (!tableData || tableData.length === 0)) {
