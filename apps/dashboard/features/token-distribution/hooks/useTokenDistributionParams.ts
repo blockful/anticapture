@@ -12,6 +12,7 @@ export function useTokenDistributionParams(chartData: ChartDataSetPoint[]) {
   const [hasTransfer, setHasTransfer] = useQueryState("hasTransfer");
   const [startDate, setStartDate] = useQueryState("startDate", parseAsInteger);
   const [endDate, setEndDate] = useQueryState("endDate", parseAsInteger);
+
   const {
     metrics: storeMetrics,
     setMetrics: setStoreMetrics,
@@ -19,66 +20,63 @@ export function useTokenDistributionParams(chartData: ChartDataSetPoint[]) {
     setHasTransfer: setStoreHasTransfer,
   } = useTokenDistributionStore();
 
-  const brushRange = useBrushStore((state) => state.brushRange);
+  const brushRange = useBrushStore((s) => s.brushRange);
 
-  const initialized = useRef(false);
+  const isInitialized = useRef(false);
 
   useEffect(() => {
-    if (initialized.current) return;
-    if (!chartData?.length) return;
+    if (isInitialized.current) return;
 
-    initialized.current = true;
-
-    if (metrics) {
-      setStoreMetrics(metrics.split(","));
-    } else {
-      setStoreMetrics(initialMetrics);
+    if (!storeMetrics || storeMetrics.length === 0) {
+      setStoreMetrics(metrics ? metrics.split(",") : initialMetrics);
     }
 
     setStoreHasTransfer(hasTransfer === "true");
-
-    if (startDate && endDate) {
-      const startIndex = chartData.findIndex(
-        (point) => point.date === startDate,
-      );
-      const endIndex = chartData.findIndex((point) => point.date === endDate);
-
-      useBrushStore.setState({
-        brushRange: {
-          startIndex: startIndex >= 0 ? startIndex : 0,
-          endIndex: endIndex >= 0 ? endIndex : chartData.length - 1,
-        },
-      });
-    }
-  }, [
-    chartData,
-    metrics?.length,
-    setStoreMetrics,
-    setStoreHasTransfer,
-    startDate,
-    endDate,
-    hasTransfer,
-    storeMetrics.length,
-    metrics,
-  ]);
+  }, []);
 
   useEffect(() => {
-    if (!initialized.current) return;
+    if (isInitialized.current || !chartData?.length) return;
 
-    // metrics
-    if (!storeMetrics.length) setMetrics(null);
-    else setMetrics(storeMetrics.join(","));
+    let startIndex = 0;
+    let endIndex = chartData.length - 1;
 
-    // hasTransfer
+    if (startDate && endDate) {
+      const foundStart = chartData.findIndex((p) => p.date === startDate);
+      const foundEnd = chartData.findIndex((p) => p.date === endDate);
+
+      if (foundStart >= 0) startIndex = foundStart;
+      if (foundEnd >= 0) endIndex = foundEnd;
+    }
+
+    useBrushStore.setState({
+      brushRange: { startIndex, endIndex },
+    });
+
+    isInitialized.current = true;
+  }, [chartData, startDate, endDate]);
+
+  useEffect(() => {
+    if (!isInitialized.current) return;
+
+    setMetrics(storeMetrics?.length ? storeMetrics.join(",") : null);
+
     setHasTransfer(storeHasTransfer ? "true" : "false");
 
-    // brush
-    const start = chartData[brushRange.startIndex]?.date;
-    const end = chartData[brushRange.endIndex]?.date;
+    if (chartData?.length) {
+      const start = chartData[brushRange.startIndex]?.date;
+      const end = chartData[brushRange.endIndex]?.date;
 
-    if (start) setStartDate(start);
-    if (end) setEndDate(end);
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [storeMetrics, storeHasTransfer, brushRange, chartData]);
+      if (start !== undefined) setStartDate(start);
+      if (end !== undefined) setEndDate(end);
+    }
+  }, [
+    storeMetrics,
+    storeHasTransfer,
+    brushRange,
+    chartData,
+    setMetrics,
+    setHasTransfer,
+    setStartDate,
+    setEndDate,
+  ]);
 }
