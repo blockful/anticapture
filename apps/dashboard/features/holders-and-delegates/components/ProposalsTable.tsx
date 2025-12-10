@@ -372,14 +372,23 @@ export const ProposalsTable = ({
           );
         }
 
+        const govPlatformUrl =
+          daoConfigByDaoId[daoIdEnum]?.daoOverview?.govPlatform?.url;
+        const govPlatformName =
+          daoConfigByDaoId[daoIdEnum]?.daoOverview?.govPlatform?.name;
+
+        if (!govPlatformUrl) {
+          return <div />;
+        }
+
         return (
           <div className="flex items-center justify-center">
             <Link
-              href={`${daoConfigByDaoId[daoIdEnum]?.daoOverview?.tally}/proposal/${proposalId}`}
+              href={`${govPlatformUrl}${proposalId}`}
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-secondary cursor-pointer text-white transition-colors"
-              title="View on Tally"
+              title={`View on ${govPlatformName}`}
             >
               <IconButton variant="ghost" icon={ExternalLink} />
             </Link>
