@@ -75,8 +75,8 @@ export const TransactionsTable = ({
     filters: {
       toDate: endDate + SECONDS_PER_DAY - 1, // include the entire end date
       fromDate: startDate,
-      from: from,
-      to: to,
+      from,
+      to,
       minAmount: min,
       maxAmount: max,
       sortOrder: sort as "asc" | "desc",
