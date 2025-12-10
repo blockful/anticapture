@@ -138,7 +138,7 @@ export const DaoProtectionLevels = () => {
               <Tooltip
                 content={DaoProtectionLevelsTooltip}
                 cursor={false}
-                allowEscapeViewBox={{ x: false, y: true }}
+                allowEscapeViewBox={{ x: true, y: true }}
               />
               <Bar dataKey="value" radius={[0, 0, 0, 0]} minPointSize={1}>
                 {stageData.map((entry, index) => (

@@ -30,10 +30,6 @@ export const DaoProtectionLevelsTooltip = ({
     <div
       className="border-light-dark bg-surface-default text-primary rounded-lg border px-3 py-2 shadow-lg"
       style={{
-        position: "absolute",
-        left: coordinate.x,
-        top: coordinate.y - 10,
-        transform: "translate(-50%, -100%)",
         minWidth: "200px",
       }}
     >
