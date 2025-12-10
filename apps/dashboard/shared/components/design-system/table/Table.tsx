@@ -158,42 +158,38 @@ export const Table = <TData, TValue>({
 
   const table = useReactTable(tableConfig);
 
-  const formatCsvData = (data: TData[]): Record<string, string | number>[] => {
-    return data.map((row) => {
-      const serialized: Record<string, string | number> = {};
+  const escapeCsv = (value: string) => value.replace(/"/g, '""');
 
-      Object.entries(row as Record<string, unknown>).forEach(([key, value]) => {
-        if (value == null) {
-          serialized[key] = "";
-          return;
-        }
-        if (typeof value === "string" || typeof value === "number") {
-          serialized[key] = value.toString().replace(/"/g, '""');
-          return;
-        }
-        if (typeof value === "boolean") {
-          serialized[key] = value ? "true" : "false";
-          return;
-        }
-        if (value instanceof Date) {
-          serialized[key] = value.toISOString();
-          return;
-        }
-        if (Array.isArray(value)) {
-          const arr = value.map((v) => String(v)).join(", ");
-          serialized[key] = `"${arr.replace(/"/g, '""')}"`;
-          return;
-        }
-        try {
-          const json = JSON.stringify(value);
-          serialized[key] = `"${json.replace(/"/g, '""')}"`;
-        } catch {
-          serialized[key] = "";
-        }
-      });
+  const serializeValue = (value: unknown): string => {
+    const primitiveTypes = new Set(["string", "number", "boolean"]);
 
-      return serialized;
-    });
+    if (!value) return "";
+
+    if (primitiveTypes.has(typeof value)) {
+      return escapeCsv(String(value));
+    }
+
+    if (value instanceof Date) {
+      return value.toISOString();
+    }
+
+    try {
+      return escapeCsv(JSON.stringify(value));
+    } catch {
+      return "";
+    }
+  };
+
+  const formatCsvData = (data: TData[]): Record<string, string>[] => {
+    return data.map((row) =>
+      Object.entries(row as Record<string, unknown>).reduce<
+        Record<string, string>
+      >((acc, [key, value]) => {
+        const serialized = serializeValue(value);
+        acc[key] = /[",\n]/.test(serialized) ? `"${serialized}"` : serialized;
+        return acc;
+      }, {}),
+    );
   };
 
   return (
