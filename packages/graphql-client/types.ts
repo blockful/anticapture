@@ -13,9 +13,12 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   BigInt: { input: any; output: any; }
+  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
+  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
+  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
 };
 
@@ -208,6 +211,8 @@ export type QueryAccountInteractionsArgs = {
   accountId: Scalars['String']['input'];
   days?: InputMaybe<QueryInput_AccountInteractions_Days>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  maxAmount?: InputMaybe<Scalars['String']['input']>;
+  minAmount?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<QueryInput_AccountInteractions_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
 };
@@ -736,6 +741,7 @@ export type AccountInteractions_200_Response = {
   __typename?: 'accountInteractions_200_response';
   items: Array<Maybe<Query_AccountInteractions_Items_Items>>;
   period: Query_AccountInteractions_Period;
+  totalCount: Scalars['Float']['output'];
 };
 
 export type AccountPage = {
@@ -1630,6 +1636,8 @@ export type Query_AccountInteractions_Items_Items = {
   __typename?: 'query_accountInteractions_items_items';
   accountId: Scalars['String']['output'];
   amountTransferred: Scalars['String']['output'];
+  totalVolume: Scalars['String']['output'];
+  transferCount: Scalars['String']['output'];
 };
 
 export type Query_AccountInteractions_Period = {

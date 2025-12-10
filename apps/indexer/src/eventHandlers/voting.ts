@@ -45,13 +45,10 @@ export const voteCast = async (
       daoId,
       votesCount: 1,
       lastVoteTimestamp: timestamp,
-      firstVoteTimestamp: timestamp, // Set as first vote timestamp for new accounts
     })
     .onConflictDoUpdate((current) => ({
       votesCount: current.votesCount + 1,
       lastVoteTimestamp: timestamp,
-      // Only set firstVoteTimestamp if it's not already set (0 means never voted before)
-      firstVoteTimestamp: current.firstVoteTimestamp ?? timestamp,
     }));
 
   // Create vote record
@@ -104,6 +101,7 @@ export const proposalCreated = async (
     startBlock: string;
     endBlock: string;
     description: string;
+    blockNumber: bigint;
     timestamp: bigint;
   },
 ) => {
@@ -118,12 +116,13 @@ export const proposalCreated = async (
     startBlock,
     endBlock,
     description,
+    blockNumber,
     timestamp,
   } = args;
 
   await ensureAccountExists(context, proposer);
 
-  const blockDelta = parseInt(endBlock) - parseInt(startBlock);
+  const blockDelta = parseInt(endBlock) - Number(blockNumber);
   await context.db.insert(proposalsOnchain).values({
     id: proposalId,
     txHash,

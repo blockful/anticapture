@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   TokenDistributionChart,
   TokenDistributionMetrics,
@@ -14,16 +14,13 @@ import { useTokenDistributionStore } from "@/features/token-distribution/store/u
 import { CSVLink } from "react-csv";
 import { defaultLinkVariants } from "@/shared/components/design-system/links/default-link";
 import { ChartDataSetPoint } from "@/shared/dao-config/types";
-import { TransactionsTable } from "@/features/transactions";
-import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
-import { useBrushStore } from "@/features/token-distribution/store/useBrushStore";
 import daoConfig from "@/shared/dao-config";
 
 type CsvRow = Record<string, number | string | null>;
 
 export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const [hoveredMetricKey, setHoveredMetricKey] = useState<string | null>(null);
-  const [hasTransfer, setHasTransfer] = useState<boolean>(true);
+  // const [hasTransfer, setHasTransfer] = useState<boolean>(true);
   const { metrics, setMetrics } = useTokenDistributionStore();
   const { decimals } = daoConfig[daoId];
 
@@ -81,20 +78,20 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
 
   const csvData = buildCsvData(chartData, metrics);
 
-  const switchValue = useMemo(() => {
-    return hasTransfer ? "All" : "Labeled-Only";
-  }, [hasTransfer]);
+  // const switchValue = useMemo(() => {
+  //   return hasTransfer ? "All" : "Labeled-Only";
+  // }, [hasTransfer]);
 
-  const startIndex = useBrushStore((state) => state.brushRange.startIndex);
-  const endIndex = useBrushStore((state) => state.brushRange.endIndex);
+  // const startIndex = useBrushStore((state) => state.brushRange.startIndex);
+  // const endIndex = useBrushStore((state) => state.brushRange.endIndex);
 
-  const startDate = useMemo(() => {
-    return chartData?.[startIndex]?.date;
-  }, [chartData, startIndex]);
+  // const startDate = useMemo(() => {
+  //   return chartData?.[startIndex]?.date;
+  // }, [chartData, startIndex]);
 
-  const endDate = useMemo(() => {
-    return chartData?.[endIndex]?.date;
-  }, [chartData, endIndex]);
+  // const endDate = useMemo(() => {
+  //   return chartData?.[endIndex]?.date;
+  // }, [chartData, endIndex]);
 
   return (
     <div className="flex flex-col gap-5">
@@ -139,7 +136,7 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           />
         </div>
       </Card>
-      <div className="border-light-dark h-px w-full border border-dashed" />
+      {/* <div className="border-light-dark h-px w-full border border-dashed" />
       <CardContent className="order-2 flex h-full w-full flex-col gap-4 p-0 xl:order-1">
         <div className="flex h-full w-full justify-between gap-1.5">
           <CardTitle className="!text-alternative-sm text-primary flex items-center font-mono font-medium uppercase tracking-wide xl:gap-2.5">
@@ -170,7 +167,7 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           endDate={endDate}
           startDate={startDate}
         />
-      </CardContent>
+      </CardContent> */}
     </div>
   );
 };
