@@ -1,4 +1,4 @@
-import axios, { AxiosInstance } from "axios";
+import { AxiosInstance } from "axios";
 import { TreasuryProvider } from "./treasury-provider.interface";
 import { TreasuryDataPoint } from "../types";
 import { truncateTimestampTime } from "@/eventHandlers/shared";
@@ -9,7 +9,7 @@ export interface RawDefiLlamaResponse {
     {
       tvl: Array<{
         date: number; // Unix timestamp in seconds
-        totalLiquidityUSD: number;
+        totalLiquidityUSD: bigint;
       }>;
       tokensInUsd?: Array<unknown>;
       tokens?: Array<unknown>;
@@ -21,10 +21,8 @@ export class DefiLlamaProvider implements TreasuryProvider {
   private readonly client: AxiosInstance;
   private readonly providerDaoId: string;
 
-  constructor(baseUrl: string, providerDaoId: string) {
-    this.client = axios.create({
-      baseURL: baseUrl,
-    });
+  constructor(client: AxiosInstance, providerDaoId: string) {
+    this.client = client;
     this.providerDaoId = providerDaoId;
   }
 
@@ -53,7 +51,7 @@ export class DefiLlamaProvider implements TreasuryProvider {
     // Map: chainKey → Map(dayTimestamp → latest dataPoint)
     const chainsByDate = new Map<
       string,
-      Map<bigint, { timestamp: number; value: number }>
+      Map<bigint, { timestamp: number; value: bigint }>
     >();
 
     // For each chain, keep only the latest timestamp per date
@@ -63,7 +61,7 @@ export class DefiLlamaProvider implements TreasuryProvider {
         continue; // Skip {Chain}-OwnTokens variants
       }
 
-      const dateMap = new Map<bigint, { timestamp: number; value: number }>();
+      const dateMap = new Map<bigint, { timestamp: number; value: bigint }>();
 
       for (const dataPoint of chainData.tvl || []) {
         const dayTimestamp = truncateTimestampTime(BigInt(dataPoint.date));
@@ -84,7 +82,7 @@ export class DefiLlamaProvider implements TreasuryProvider {
     // Aggregate across chains
     const aggregatedByDate = new Map<
       bigint,
-      { total: number; withoutOwnToken: number }
+      { total: bigint; withoutOwnToken: bigint }
     >();
 
     for (const [chainKey, dateMap] of chainsByDate.entries()) {
@@ -93,7 +91,7 @@ export class DefiLlamaProvider implements TreasuryProvider {
       for (const [dayTimestamp, { value }] of dateMap.entries()) {
         let entry = aggregatedByDate.get(dayTimestamp);
         if (!entry) {
-          entry = { total: 0, withoutOwnToken: 0 };
+          entry = { total: 0n, withoutOwnToken: 0n };
           aggregatedByDate.set(dayTimestamp, entry);
         }
 
