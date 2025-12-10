@@ -189,7 +189,8 @@ export interface AttackProfitabilityConfig {
     percentage: number;
   };
 }
-export interface GovernanceImplementationConfig extends GovernanceImplementation {}
+export interface GovernanceImplementationConfig
+  extends GovernanceImplementation {}
 
 // Complete DAO configuration structure
 export interface DaoConfiguration extends BaseInfo {

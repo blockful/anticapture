@@ -14,7 +14,7 @@ function TabsList({
     <TabsPrimitive.List
       data-slot="tabs-list"
       className={cn(
-        "text-muted-foreground/50 border-light-dark bg-surface-default text-primary/50 inline-flex h-full w-full items-center justify-center gap-1 rounded-lg border p-1 text-sm leading-tight font-medium",
+        "text-muted-foreground/50 border-light-dark bg-surface-default text-primary/50 inline-flex h-full w-full items-center justify-center gap-1 border p-1 text-sm font-medium leading-tight",
         className,
       )}
       {...props}
@@ -30,7 +30,7 @@ function TabsTrigger({
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
       className={cn(
-        "ring-offset-background focus-visible:ring-ring data-[state=active]:bg-surface-contrast data-[state=active]:text-primary/100 inline-flex items-center justify-center rounded-[4px] px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-all disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-xs",
+        "ring-offset-background focus-visible:ring-ring data-[state=active]:bg-surface-contrast data-[state=active]:text-primary/100 data-[state=active]:shadow-xs inline-flex items-center justify-center whitespace-nowrap px-3 py-1.5 text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50",
         className,
       )}
       {...props}
@@ -46,7 +46,7 @@ function TabsContent({
     <TabsPrimitive.Content
       data-slot="tabs-content"
       className={cn(
-        "ring-offset-background focus-visible:ring-ring text-center focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden",
+        "ring-offset-background focus-visible:ring-ring focus-visible:outline-hidden text-center focus-visible:ring-2 focus-visible:ring-offset-2",
         className,
       )}
       {...props}
