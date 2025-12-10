@@ -5,13 +5,13 @@ import { initialMetrics } from "@/features/token-distribution/utils";
 import { useTokenDistributionStore } from "@/features/token-distribution/store/useTokenDistributionStore";
 import { useBrushStore } from "@/features/token-distribution/store/useBrushStore";
 import { ChartDataSetPoint } from "@/shared/dao-config/types";
-import { useQueryState } from "nuqs";
+import { parseAsInteger, useQueryState } from "nuqs";
 
 export function useTokenDistributionParams(chartData: ChartDataSetPoint[]) {
   const [metrics, setMetrics] = useQueryState("metrics");
   const [hasTransfer, setHasTransfer] = useQueryState("hasTransfer");
-  const [startDate, setStartDate] = useQueryState("startDate");
-  const [endDate, setEndDate] = useQueryState("endDate");
+  const [startDate, setStartDate] = useQueryState("startDate", parseAsInteger);
+  const [endDate, setEndDate] = useQueryState("endDate", parseAsInteger);
   const {
     metrics: storeMetrics,
     setMetrics: setStoreMetrics,
@@ -39,11 +39,9 @@ export function useTokenDistributionParams(chartData: ChartDataSetPoint[]) {
 
     if (startDate && endDate) {
       const startIndex = chartData.findIndex(
-        (point) => point.date === Number(startDate),
+        (point) => point.date === startDate,
       );
-      const endIndex = chartData.findIndex(
-        (point) => point.date === Number(endDate),
-      );
+      const endIndex = chartData.findIndex((point) => point.date === endDate);
 
       useBrushStore.setState({
         brushRange: {
@@ -78,8 +76,8 @@ export function useTokenDistributionParams(chartData: ChartDataSetPoint[]) {
     const start = chartData[brushRange.startIndex]?.date;
     const end = chartData[brushRange.endIndex]?.date;
 
-    if (start) setStartDate(String(start));
-    if (end) setEndDate(String(end));
+    if (start) setStartDate(start);
+    if (end) setEndDate(end);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storeMetrics, storeHasTransfer, brushRange, chartData]);
