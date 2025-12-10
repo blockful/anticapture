@@ -37,7 +37,13 @@ const NotFound = () => {
                   <Link href="/">Go to Dashboard</Link>
                 </Button>
                 <Button asChild variant="outline" size="md">
-                  <Link href="/">Report Issue</Link>
+                  <Link
+                    href="https://t.me/+4oj-_q_8bGI4N2Qx"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Report Issue
+                  </Link>
                 </Button>
               </div>
             </div>
