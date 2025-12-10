@@ -42,7 +42,7 @@ const NotFound = () => {
                 </p>
               </div>
 
-              <div className="flex w-full flex-col items-center justify-center gap-2 md:flex-row">
+              <div className="mt-4 flex w-full flex-col items-center justify-center gap-2 md:flex-row">
                 <Button
                   asChild
                   variant="primary"
