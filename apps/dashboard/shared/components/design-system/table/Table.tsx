@@ -159,76 +159,17 @@ export const Table = <TData, TValue>({
   const table = useReactTable(tableConfig);
 
   const formatCsvData = (data: TData[]): object[] => {
-    // Helper to safely serialize values, handling circular references
-    const safeStringify = (value: unknown): string | number | null => {
-      // Handle null/undefined
-      if (value === null || value === undefined) {
-        return "";
-      }
-
-      // Handle primitives
-      if (typeof value === "string" || typeof value === "number") {
-        return value;
-      }
-
-      if (typeof value === "boolean") {
-        return value ? "true" : "false";
-      }
-
-      // Skip functions and symbols
-      if (typeof value === "function" || typeof value === "symbol") {
-        return "";
-      }
-
-      // Handle objects and arrays
-      if (typeof value === "object") {
-        // Check if it's a React component or element
-        if (
-          value &&
-          typeof value === "object" &&
-          ("$$typeof" in value || "type" in value || "props" in value)
-        ) {
-          return "[React Component]";
-        }
-
-        try {
-          const seen = new WeakSet();
-          const json = JSON.stringify(value, (key, val) => {
-            // Skip circular references
-            if (typeof val === "object" && val !== null) {
-              if (seen.has(val)) {
-                return "[Circular]";
-              }
-              seen.add(val);
-            }
-            // Skip functions
-            if (typeof val === "function") {
-              return "[Function]";
-            }
-            // Skip React components
-            if (
-              val &&
-              typeof val === "object" &&
-              ("$$typeof" in val || "type" in val)
-            ) {
-              return "[React Component]";
-            }
-            return val;
-          });
-          return json.replace(/"/g, '""');
-        } catch (error) {
-          // If stringify fails (e.g., circular reference), return a placeholder
-          return "[Non-serializable]";
-        }
-      }
-
-      return "";
-    };
-
     return data.map((row) => {
       const serialized: Record<string, string | number | null> = {};
       Object.entries(row as Record<string, unknown>).forEach(([key, value]) => {
-        serialized[key] = safeStringify(value);
+        if (value === null || value === undefined) {
+          serialized[key] = "";
+        } else if (typeof value === "object") {
+          const json = JSON.stringify(value).replace(/"/g, '""');
+          serialized[key] = `"${json}"`;
+        } else {
+          serialized[key] = value as string | number;
+        }
       });
       return serialized;
     });
