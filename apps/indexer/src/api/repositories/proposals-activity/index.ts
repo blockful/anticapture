@@ -1,8 +1,8 @@
 import { Address } from "viem";
 import { DaoIdEnum } from "@/lib/enums";
-import { eq, sql } from "ponder";
+import { asc, eq, sql } from "ponder";
 import { db } from "ponder:api";
-import { accountPower } from "ponder:schema";
+import { votesOnchain } from "ponder:schema";
 
 export type DbProposal = {
   id: string;
@@ -73,19 +73,19 @@ export interface ProposalsActivityRepository {
   }>;
 }
 
-export class DrizzleProposalsActivityRepository
-  implements ProposalsActivityRepository
-{
+/* eslint-disable */
+export class DrizzleProposalsActivityRepository implements ProposalsActivityRepository {
+  /* eslint-enable */
+
   async getFirstVoteTimestamp(address: Address): Promise<number | null> {
-    const account = await db.query.accountPower.findFirst({
-      where: eq(accountPower.accountId, address),
+    const firstVote = await db.query.votesOnchain.findFirst({
+      where: eq(votesOnchain.voterAccountId, address),
       columns: {
-        firstVoteTimestamp: true,
+        timestamp: true,
       },
+      orderBy: asc(votesOnchain.timestamp),
     });
-    return account?.firstVoteTimestamp
-      ? Number(account.firstVoteTimestamp)
-      : null;
+    return Number(firstVote?.timestamp) || null;
   }
 
   async getProposals(
@@ -175,9 +175,7 @@ export class DrizzleProposalsActivityRepository
     // Main query with LEFT JOIN to get proposals and their votes
     const query = sql`
       SELECT 
-        p.id, p.dao_id, p.proposer_account_id, p.description, p.start_block, p.end_block,
-        p.timestamp, p.status, p.for_votes, p.against_votes, p.abstain_votes,
-        (p.timestamp + ${votingPeriodSeconds}) as proposal_end_timestamp,
+        p.*,
         v.tx_hash as vote_id, v.voter_account_id, v.proposal_id, v.support, v.voting_power, v.reason, v.timestamp as vote_timestamp
       FROM proposals_onchain p
       LEFT JOIN votes_onchain v ON p.id = v.proposal_id AND v.voter_account_id = ${address}
@@ -209,7 +207,7 @@ export class DrizzleProposalsActivityRepository
         for_votes: string;
         against_votes: string;
         abstain_votes: string;
-        proposal_end_timestamp: string;
+        end_timestamp: string;
         vote_id: string | null;
         voter_account_id: string | null;
         proposal_id: string | null;
@@ -237,7 +235,7 @@ export class DrizzleProposalsActivityRepository
         for_votes: BigInt(row.for_votes),
         against_votes: BigInt(row.against_votes),
         abstain_votes: BigInt(row.abstain_votes),
-        proposal_end_timestamp: row.proposal_end_timestamp,
+        proposal_end_timestamp: row.end_timestamp,
       },
       userVote: row.vote_id
         ? {
