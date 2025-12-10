@@ -24,9 +24,9 @@ const NotFound = () => {
             <Image
               src="/images/bg-404.png"
               alt="Not Found"
-              width={602}
+              width={1200}
               height={302}
-              className="animate-fade-in pointer-events-none absolute left-0 top-0 h-screen w-full object-cover"
+              className="animate-fade-in pointer-events-none absolute left-1/2 top-0 w-[1200px] min-w-[1200px] -translate-x-1/2"
             />
             <div className="text-primary relative z-10 flex w-full flex-col items-center justify-center gap-4 px-5">
               <NotFoundPageIcon className="w-full max-w-[602px]" />
