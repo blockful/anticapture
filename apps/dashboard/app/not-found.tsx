@@ -23,8 +23,8 @@ const NotFound = () => {
               height={302}
               className="pointer-events-none absolute left-0 top-0 h-screen w-full object-cover"
             />
-            <div className="text-primary relative z-10 flex flex-col items-center justify-center gap-4">
-              <NotFoundPageIcon />
+            <div className="text-primary relative z-10 flex flex-col items-center justify-center gap-4 px-10">
+              <NotFoundPageIcon className="w-full max-w-[602px]" />
               <h3 className="text-primary font-['Roboto_Mono'] text-[24px] font-normal uppercase leading-8">
                 [ERROR:page_NOT_FOUND]
               </h3>

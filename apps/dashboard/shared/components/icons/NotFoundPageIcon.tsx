@@ -3,8 +3,6 @@ import { SVGProps } from "react";
 export const NotFoundPageIcon = ({ ...props }: SVGProps<SVGSVGElement>) => {
   return (
     <svg
-      width="602"
-      height="302"
       viewBox="0 0 602 302"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
