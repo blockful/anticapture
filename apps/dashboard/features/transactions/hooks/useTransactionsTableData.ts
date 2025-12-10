@@ -23,12 +23,12 @@ export type AffectedSupplyType =
   | "UNASSIGNED";
 
 export interface TransactionsFilters {
+  from: string | null;
+  to: string | null;
+  minAmount: number | null;
+  maxAmount: number | null;
   toDate?: number;
   fromDate?: number;
-  from?: string;
-  to?: string;
-  minAmount?: number;
-  maxAmount?: number;
   affectedSupply?: AffectedSupplyType[];
   sortOrder: "asc" | "desc";
   includes?: string[];
@@ -159,7 +159,6 @@ export const useTransactionsTableData = ({
           const prevItems = prev.transactions?.items ?? [];
           const newItems = fetchMoreResult.transactions.items ?? [];
           const merged = [...prevItems, ...newItems];
-
 
           return {
             ...fetchMoreResult,
