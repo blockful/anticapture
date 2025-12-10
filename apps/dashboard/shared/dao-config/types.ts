@@ -61,7 +61,7 @@ interface BaseInfo {
 
 export interface ChainWithIcon extends Chain {
   icon: (props: DaoIconProps) => ReactNode;
-  blockTime?: number;
+  blockTime: number;
 }
 
 // Section configurations without data storage
