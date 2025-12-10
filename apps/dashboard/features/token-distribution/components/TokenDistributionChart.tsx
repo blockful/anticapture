@@ -173,7 +173,6 @@ export const TokenDistributionChart = ({
       </TokenDistributionWrapper>
     );
   }
-
   return (
     <TokenDistributionWrapper context={context}>
       {context === "overview" ? (
