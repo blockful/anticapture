@@ -9,14 +9,14 @@ interface TreasuryClient {
   }): Promise<
     Array<{
       date: bigint;
-      totalTreasury: number;
-      treasuryWithoutDaoToken: number;
+      totalTreasury: bigint;
+      treasuryWithoutDaoToken: bigint;
     }>
   >;
   getLatestTreasury(): Promise<{
     date: bigint;
-    totalTreasury: number;
-    treasuryWithoutDaoToken: number;
+    totalTreasury: bigint;
+    treasuryWithoutDaoToken: bigint;
   } | null>;
   syncTreasury?(): Promise<{
     synced: number;
@@ -50,8 +50,12 @@ export function assets(app: Hono, service: TreasuryClient) {
               schema: z.array(
                 z.object({
                   date: z.number().describe("Unix timestamp in milliseconds"),
-                  totalTreasury: z.number(),
-                  treasuryWithoutDaoToken: z.number(),
+                  totalTreasury: z
+                    .string()
+                    .describe("USD value as string (supports large values)"),
+                  treasuryWithoutDaoToken: z
+                    .string()
+                    .describe("USD value as string (supports large values)"),
                 }),
               ),
             },
@@ -67,8 +71,8 @@ export function assets(app: Hono, service: TreasuryClient) {
 
       const response = data.map((item) => ({
         date: Number(item.date) * 1000, // Convert seconds to milliseconds
-        totalTreasury: item.totalTreasury,
-        treasuryWithoutDaoToken: item.treasuryWithoutDaoToken,
+        totalTreasury: item.totalTreasury.toString(),
+        treasuryWithoutDaoToken: item.treasuryWithoutDaoToken.toString(),
       }));
 
       return context.json(response);
@@ -92,8 +96,12 @@ export function assets(app: Hono, service: TreasuryClient) {
               schema: z
                 .object({
                   date: z.number().describe("Unix timestamp in milliseconds"),
-                  totalTreasury: z.number(),
-                  treasuryWithoutDaoToken: z.number(),
+                  totalTreasury: z
+                    .string()
+                    .describe("USD value as string (supports large values)"),
+                  treasuryWithoutDaoToken: z
+                    .string()
+                    .describe("USD value as string (supports large values)"),
                 })
                 .nullable(),
             },
@@ -110,8 +118,8 @@ export function assets(app: Hono, service: TreasuryClient) {
 
       const response = {
         date: Number(data.date) * 1000, // seconds to milliseconds
-        totalTreasury: data.totalTreasury,
-        treasuryWithoutDaoToken: data.treasuryWithoutDaoToken,
+        totalTreasury: data.totalTreasury.toString(),
+        treasuryWithoutDaoToken: data.treasuryWithoutDaoToken.toString(),
       };
 
       return context.json(response);
