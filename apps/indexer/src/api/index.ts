@@ -5,8 +5,6 @@ import schema from "ponder:schema";
 import { logger } from "hono/logger";
 import { fromZodError } from "zod-validation-error";
 import { createPublicClient, http } from "viem";
-import { writableDb } from "@/lib/db";
-
 import {
   governanceActivity,
   tokenHistoricalData,
@@ -17,7 +15,6 @@ import {
   transactions,
   proposals,
   lastUpdate,
-  assets,
   votingPower,
   delegationPercentage,
   votingPowerVariations,
@@ -53,12 +50,10 @@ import {
   TopBalanceVariationsService,
   HistoricalBalancesService,
   DaoService,
-  TreasuryService,
-  DefiLlamaProvider,
 } from "./services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
-import { startTreasurySyncCron } from "./treasury-sync.cron";
+import { createTreasuryProvider } from "./services/treasury/treasury-provider-factory";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -120,17 +115,7 @@ const votingPowerService = new VotingPowerService(
 const daoCache = new DaoCache();
 const daoService = new DaoService(daoClient, daoCache, env.CHAIN_ID);
 
-if (env.TREASURY_PROVIDER_PROTOCOL_ID) {
-  const defiLlamaProvider = new DefiLlamaProvider(
-    env.DEFILLAMA_API_URL,
-    env.TREASURY_PROVIDER_PROTOCOL_ID,
-  );
-  const treasuryService = new TreasuryService(writableDb, defiLlamaProvider);
-  assets(app, treasuryService);
-
-  // fill the historical treasury table each day
-  startTreasurySyncCron(treasuryService);
-}
+createTreasuryProvider(app);
 
 const tokenPriceClient =
   env.DAO_ID === DaoIdEnum.NOUNS
