@@ -15,13 +15,13 @@ const NotFound = () => {
           <HeaderMobile />
         </div>
         <div className="flex min-h-screen w-full flex-col items-center">
-          <div className="relative flex w-full flex-1 items-center justify-center">
+          <div className="animate-fade-in relative flex w-full flex-1 items-center justify-center">
             <Image
               src="/images/bg-404.png"
               alt="Not Found"
               width={602}
               height={302}
-              className="pointer-events-none absolute left-0 top-0 h-screen w-full object-cover"
+              className="animate-fade-in pointer-events-none absolute left-0 top-0 h-screen w-full object-cover"
             />
             <div className="text-primary relative z-10 flex w-full flex-col items-center justify-center gap-4 px-5">
               <NotFoundPageIcon className="w-full max-w-[602px]" />
