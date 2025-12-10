@@ -160,7 +160,6 @@ export const useTransactionsTableData = ({
           const newItems = fetchMoreResult.transactions.items ?? [];
           const merged = [...prevItems, ...newItems];
 
-
           return {
             ...fetchMoreResult,
             transactions: {

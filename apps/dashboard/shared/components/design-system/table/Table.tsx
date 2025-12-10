@@ -158,21 +158,38 @@ export const Table = <TData, TValue>({
 
   const table = useReactTable(tableConfig);
 
-  const formatCsvData = (data: TData[]): object[] => {
-    return data.map((row) => {
-      const serialized: Record<string, string | number | null> = {};
-      Object.entries(row as Record<string, unknown>).forEach(([key, value]) => {
-        if (value === null || value === undefined) {
-          serialized[key] = "";
-        } else if (typeof value === "object") {
-          const json = JSON.stringify(value).replace(/"/g, '""');
-          serialized[key] = `"${json}"`;
-        } else {
-          serialized[key] = value as string | number;
-        }
-      });
-      return serialized;
-    });
+  const escapeCsv = (value: string) => value.replace(/"/g, '""');
+
+  const serializeValue = (value: unknown): string => {
+    const primitiveTypes = new Set(["string", "number", "boolean"]);
+
+    if (!value) return "";
+
+    if (primitiveTypes.has(typeof value)) {
+      return escapeCsv(String(value));
+    }
+
+    if (value instanceof Date) {
+      return value.toISOString();
+    }
+
+    try {
+      return escapeCsv(JSON.stringify(value));
+    } catch {
+      return "";
+    }
+  };
+
+  const formatCsvData = (data: TData[]): Record<string, string>[] => {
+    return data.map((row) =>
+      Object.entries(row as Record<string, unknown>).reduce<
+        Record<string, string>
+      >((acc, [key, value]) => {
+        const serialized = serializeValue(value);
+        acc[key] = /[",\n]/.test(serialized) ? `"${serialized}"` : serialized;
+        return acc;
+      }, {}),
+    );
   };
 
   return (

@@ -2,7 +2,7 @@ import { cn } from "@/shared/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 import { ArrowDown, ArrowUp } from "lucide-react";
 
-const percentageVariants = cva(
+export const percentageVariants = cva(
   "flex items-center gap-0.5 transition-colors duration-300 text-sm font-normal",
   {
     variants: {
@@ -49,8 +49,7 @@ export const Percentage = ({ className, value, ...props }: PercentageProps) => {
           className={cn("size-4", variant === "negative" && "text-error")}
         />
       )}
-      {value < 0 ? "-" : ""}
-      {value > 1000 ? ">1000" : Math.abs(value)}%
+      {value > 1000 ? "> 1000" : value < -1000 ? "< -1000" : Math.abs(value)}%
     </span>
   );
 };

@@ -72,9 +72,7 @@ export const TopAccountsChart = ({
         isOpen={!!selectedAddress}
         onClose={handleCloseDrawer}
         entityType={entityType}
-        address={
-          selectedAddress || "0x0000000000000000000000000000000000000000"
-        }
+        address={selectedAddress || "None"}
         daoId={daoId}
       />
     </div>

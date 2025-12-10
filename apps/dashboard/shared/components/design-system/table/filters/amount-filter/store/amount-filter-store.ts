@@ -7,46 +7,90 @@ export interface AmountFilterState {
 }
 
 interface AmountFilterStore {
-  // Estados
-  minAmount: string;
-  maxAmount: string;
-  sortOrder: string;
+  instances: Record<string, AmountFilterState>;
 
-  // Ações
-  setMinAmount: (amount: string) => void;
-  setMaxAmount: (amount: string) => void;
-  setSortOrder: (order: string) => void;
-  reset: (defaultSortOrder?: string) => void;
-  initialize: (defaultSortOrder: string) => void;
-  getState: () => AmountFilterState;
+  // Ações - todas agora recebem um filterId
+  setMinAmount: (filterId: string, amount: string) => void;
+  setMaxAmount: (filterId: string, amount: string) => void;
+  setSortOrder: (filterId: string, order: string) => void;
+  reset: (filterId: string, defaultSortOrder?: string) => void;
+  initialize: (filterId: string, defaultSortOrder: string) => void;
+  getState: (filterId: string) => AmountFilterState;
 }
 
-export const useAmountFilterStore = create<AmountFilterStore>((set, get) => ({
-  // Estados iniciais
+const defaultState: AmountFilterState = {
   minAmount: "",
   maxAmount: "",
   sortOrder: "",
+};
 
-  // Ações
-  setMinAmount: (amount: string) => set({ minAmount: amount }),
-  setMaxAmount: (amount: string) => set({ maxAmount: amount }),
-  setSortOrder: (order: string) => set({ sortOrder: order }),
+export const useAmountFilterStore = create<AmountFilterStore>((set, get) => ({
+  instances: {},
 
-  reset: (defaultSortOrder = "") =>
-    set({
-      minAmount: "",
-      maxAmount: "",
-      sortOrder: defaultSortOrder,
+  getState: (filterId: string) => {
+    const state = get().instances[filterId];
+    return state || { ...defaultState };
+  },
+
+  setMinAmount: (filterId: string, amount: string) =>
+    set((state) => ({
+      instances: {
+        ...state.instances,
+        [filterId]: {
+          ...(state.instances[filterId] || defaultState),
+          minAmount: amount,
+        },
+      },
+    })),
+
+  setMaxAmount: (filterId: string, amount: string) =>
+    set((state) => ({
+      instances: {
+        ...state.instances,
+        [filterId]: {
+          ...(state.instances[filterId] || defaultState),
+          maxAmount: amount,
+        },
+      },
+    })),
+
+  setSortOrder: (filterId: string, order: string) =>
+    set((state) => ({
+      instances: {
+        ...state.instances,
+        [filterId]: {
+          ...(state.instances[filterId] || defaultState),
+          sortOrder: order,
+        },
+      },
+    })),
+
+  reset: (filterId: string, defaultSortOrder = "") =>
+    set((state) => ({
+      instances: {
+        ...state.instances,
+        [filterId]: {
+          minAmount: "",
+          maxAmount: "",
+          sortOrder: defaultSortOrder,
+        },
+      },
+    })),
+
+  initialize: (filterId: string, defaultSortOrder: string) =>
+    set((state) => {
+      if (!state.instances[filterId]) {
+        return {
+          instances: {
+            ...state.instances,
+            [filterId]: {
+              minAmount: "",
+              maxAmount: "",
+              sortOrder: defaultSortOrder,
+            },
+          },
+        };
+      }
+      return state;
     }),
-
-  initialize: (defaultSortOrder: string) =>
-    set({
-      sortOrder: defaultSortOrder,
-    }),
-
-  getState: () => ({
-    minAmount: get().minAmount,
-    maxAmount: get().maxAmount,
-    sortOrder: get().sortOrder,
-  }),
 }));

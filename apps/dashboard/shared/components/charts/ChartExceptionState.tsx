@@ -1,4 +1,5 @@
-import { SkeletonRow } from "@/shared/components";
+import { BlankSlate, SkeletonRow } from "@/shared/components";
+import { Inbox } from "lucide-react";
 
 interface ChartExceptionStateProps {
   state: "loading" | "error" | "no-data";
@@ -35,10 +36,12 @@ export const ChartExceptionState = ({
         );
       case "no-data":
         return (
-          <div
-            className={`border-light-dark bg-surface-default text-primary relative flex ${height} w-full items-center justify-center rounded-lg`}
-          >
-            <div className="text-secondary text-sm">{noDataMessage}</div>
+          <div className="flex flex-col items-center justify-center p-4">
+            <BlankSlate
+              variant="default"
+              icon={Inbox}
+              description={noDataMessage}
+            />
           </div>
         );
       default:

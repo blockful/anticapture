@@ -22,6 +22,9 @@ import { Table } from "@/shared/components/design-system/table/Table";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
 import { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 import daoConfig from "@/shared/dao-config";
+import { AddressFilter } from "@/shared/components/design-system/table/filters";
+import { fetchEnsData } from "@/shared/hooks/useEnsData";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 
 interface DelegateDelegationHistoryTableProps {
   accountId: string;
@@ -38,7 +41,8 @@ export const DelegateDelegationHistoryTable = ({
   const [filterVariables, setFilterVariables] =
     useState<AmountFilterVariables>();
   const [isFilterActive, setIsFilterActive] = useState(false);
-
+  const [fromFilter, setFromFilter] = useState<string>();
+  const [toFilter, setToFilter] = useState<string>();
   const sortOptions: SortOption[] = [
     { value: "largest-first", label: "Largest first" },
     { value: "smallest-first", label: "Smallest first" },
@@ -51,13 +55,15 @@ export const DelegateDelegationHistoryTable = ({
     fetchNextPage,
     fetchingMore,
     error,
-  } = useDelegateDelegationHistory(
+  } = useDelegateDelegationHistory({
     accountId,
     daoId,
-    sortBy,
-    sortDirection,
+    orderBy: sortBy,
+    orderDirection: sortDirection,
     filterVariables,
-  );
+    customFromFilter: fromFilter,
+    customToFilter: toFilter,
+  });
 
   // Handle sorting
   const handleSort = (field: "timestamp" | "delta") => {
@@ -184,6 +190,7 @@ export const DelegateDelegationHistoryTable = ({
         <div className="flex items-center gap-1.5">
           <h4 className="text-table-header">Amount ({daoId})</h4>
           <AmountFilter
+            filterId="delegation-amount-filter"
             onApply={(filterState: AmountFilterState) => {
               setSortDirection(
                 filterState.sortOrder === "largest-first" ? "desc" : "asc",
@@ -265,9 +272,22 @@ export const DelegateDelegationHistoryTable = ({
         columnClassName: "w-32",
       },
       header: () => (
-        <h4 className="text-table-header flex w-full items-center justify-start">
-          Delegator
-        </h4>
+        <div className="text-table-header flex w-full items-center justify-start gap-2">
+          <span>Delegator</span>
+          <AddressFilter
+            onApply={async (addr) => {
+              if ((addr ?? "").indexOf(".eth") > 0) {
+                const { address } = await fetchEnsData({
+                  address: addr as `${string}.eth`,
+                });
+                setFromFilter(address || "");
+                return;
+              }
+              setFromFilter(addr || "");
+            }}
+            currentFilter={fromFilter}
+          />
+        </div>
       ),
       cell: ({ row }) => {
         const item = row.original;
@@ -302,7 +322,7 @@ export const DelegateDelegationHistoryTable = ({
         }
 
         return (
-          <div className="flex items-center gap-3">
+          <div className="group flex items-center gap-3">
             <div className="overflow-truncate flex max-w-[140px] items-center gap-2">
               <EnsAvatar
                 address={delegatorAddress as `0x${string}`}
@@ -316,6 +336,16 @@ export const DelegateDelegationHistoryTable = ({
                     : "text-secondary",
                 )}
               />
+              <div className="flex items-center opacity-0 transition-opacity group-hover:opacity-100">
+                <CopyAndPasteButton
+                  textToCopy={delegatorAddress as `0x${string}`}
+                  customTooltipText={{
+                    default: "Copy address",
+                    copied: "Address copied!",
+                  }}
+                  className="p-2"
+                />
+              </div>
             </div>
           </div>
         );
@@ -345,9 +375,22 @@ export const DelegateDelegationHistoryTable = ({
         columnClassName: "w-32",
       },
       header: () => (
-        <h4 className="text-table-header flex w-full items-center justify-start">
-          Delegate
-        </h4>
+        <div className="text-table-header flex w-full items-center justify-start gap-2">
+          <span>Delegate</span>
+          <AddressFilter
+            onApply={async (addr) => {
+              if ((addr ?? "").indexOf(".eth") > 0) {
+                const { address } = await fetchEnsData({
+                  address: addr as `${string}.eth`,
+                });
+                setToFilter(address || "");
+                return;
+              }
+              setToFilter(addr || "");
+            }}
+            currentFilter={toFilter}
+          />
+        </div>
       ),
       cell: ({ row }) => {
         const item = row.original;
@@ -380,7 +423,7 @@ export const DelegateDelegationHistoryTable = ({
         }
 
         return (
-          <div className="flex items-center justify-between gap-3">
+          <div className="group flex items-center justify-between gap-3">
             <div className="flex max-w-[140px] items-center gap-2 overflow-hidden">
               <EnsAvatar
                 address={delegateAddress as `0x${string}`}
@@ -394,6 +437,16 @@ export const DelegateDelegationHistoryTable = ({
                     : "text-secondary",
                 )}
               />
+              <div className="flex items-center opacity-0 transition-opacity group-hover:opacity-100">
+                <CopyAndPasteButton
+                  textToCopy={delegateAddress as `0x${string}`}
+                  customTooltipText={{
+                    default: "Copy address",
+                    copied: "Address copied!",
+                  }}
+                  className="p-2"
+                />
+              </div>
             </div>
             <Link
               href={`${daoConfigByDaoId[daoId].daoOverview.chain.blockExplorers?.default.url}/tx/${item.transactionHash}`}
@@ -453,7 +506,7 @@ export const DelegateDelegationHistoryTable = ({
   }
 
   return (
-    <div className="flex flex-col gap-2 p-4">
+    <div className="flex w-full flex-col gap-2 p-4">
       <Table
         columns={columns}
         data={delegationHistory}
@@ -461,9 +514,9 @@ export const DelegateDelegationHistoryTable = ({
         hasMore={paginationInfo.hasNextPage}
         isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}
-        withDownloadCSV={true}
         wrapperClassName="h-[450px]"
         className="h-[400px]"
+        withDownloadCSV={true}
       />
     </div>
   );

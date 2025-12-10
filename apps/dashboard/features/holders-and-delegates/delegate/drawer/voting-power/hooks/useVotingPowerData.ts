@@ -2,7 +2,7 @@ import { useVotingPower } from "@/shared/hooks/graphql-client/useVotingPower";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
 import { useMultipleEnsData } from "@/shared/hooks/useEnsData";
-import { Address } from "viem";
+import { Address, formatUnits } from "viem";
 import { formatAddress } from "@/shared/utils/formatAddress";
 import daoConfig from "@/shared/dao-config";
 
@@ -37,6 +37,7 @@ export const useVotingPowerData = (
   address: string,
 ): VotingPowerData => {
   const {
+    decimals,
     daoOverview: { token },
   } = daoConfig[daoId];
   const { topFiveDelegators, delegatorsVotingPowerDetails, loading } =
@@ -84,24 +85,14 @@ export const useVotingPowerData = (
 
   const currentVotingPowerNumber = Number(
     token === "ERC20"
-      ? BigInt(delegateCurrentVotingPower) / BigInt(10 ** 18)
+      ? Number(formatUnits(BigInt(delegateCurrentVotingPower), decimals))
       : Number(delegateCurrentVotingPower),
   );
 
   // Calculate the total value of the delegators that will be shown individually (>= 1%)
   const totalIndividualDelegators = topFiveDelegators.reduce((acc, item) => {
     if (item.rawBalance === 0n) return acc;
-
-    const percentage = Number(
-      (Number(BigInt(item.rawBalance)) / Number(delegateCurrentVotingPower)) *
-        100,
-    );
-
-    // Sum only delegators with >= 1%
-    if (percentage >= 1) {
-      return acc + BigInt(item.rawBalance);
-    }
-    return acc;
+    return acc + BigInt(item.rawBalance);
   }, BigInt(0));
 
   // Others is the remaining value that completes 100%
@@ -110,16 +101,15 @@ export const useVotingPowerData = (
     (Number(othersValue) / Number(delegateCurrentVotingPower)) * 100,
   );
 
-  // Create chart config (only those with >= 1%)
   const chartConfig: Record<
     string,
     { label: string; color: string; percentage: string; ensName?: string }
   > = {};
 
-  // Add delegators to config (only those with >= 1%)
-  topFiveDelegators.forEach((delegator, index) => {
-    const key = delegator.accountId || `delegator-${index}`;
+  // Create pie data
+  const pieData: { name: string; label: string; value: number }[] = [];
 
+  topFiveDelegators.forEach((delegator, index) => {
     if (delegator.rawBalance === 0n) return;
 
     const percentage = Number(
@@ -128,18 +118,24 @@ export const useVotingPowerData = (
         100,
     );
 
-    // Only add delegators with >= 1% to individual config
-    if (percentage >= 1) {
-      const ensName = ensData?.[delegator.accountId as Address]?.ens;
-      const displayLabel = ensName || formatAddress(delegator.accountId) || "";
+    const ensName = ensData?.[delegator.accountId as Address]?.ens;
+    const displayLabel = ensName || formatAddress(delegator.accountId) || "";
 
-      chartConfig[key] = {
-        label: displayLabel,
-        color: PIE_CHART_COLORS[index % PIE_CHART_COLORS.length],
-        percentage: percentage.toFixed(2),
-        ensName,
-      };
-    }
+    chartConfig[delegator.accountId || `delegator-${index}`] = {
+      label: displayLabel,
+      color: PIE_CHART_COLORS[index % PIE_CHART_COLORS.length],
+      percentage: percentage.toFixed(2),
+      ensName,
+    };
+
+    pieData.push({
+      name: delegator.accountId || "",
+      label: displayLabel,
+      value:
+        token === "ERC20"
+          ? Number(BigInt(delegator.rawBalance) / BigInt(10 ** 18))
+          : Number(delegator.rawBalance),
+    });
   });
 
   // Add Others if there's remaining voting power
@@ -151,36 +147,14 @@ export const useVotingPowerData = (
     };
   }
 
-  // Create pie data
-  const pieData: { name: string; value: number }[] = [];
-
-  // Add delegators with >= 1%
-  topFiveDelegators.forEach((item) => {
-    if (item.rawBalance === 0n) return;
-
-    const percentage = Number(
-      (Number(BigInt(item.rawBalance)) / Number(delegateCurrentVotingPower)) *
-        100,
-    );
-
-    if (percentage >= 1) {
-      pieData.push({
-        name: item.accountId || "",
-        value:
-          token === "ERC20"
-            ? Number(BigInt(item.rawBalance) / BigInt(10 ** 18))
-            : Number(item.rawBalance),
-      });
-    }
-  });
-
   // Add "Others" slice to pie chart if there's remaining voting power
   if (othersValue > BigInt(0)) {
     pieData.push({
       name: "others",
+      label: "Others",
       value:
         token === "ERC20"
-          ? Number(othersValue / BigInt(10 ** 18))
+          ? Number(othersValue / BigInt(10 ** decimals))
           : Number(othersValue),
     });
   }

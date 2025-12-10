@@ -1,0 +1,28 @@
+query BalanceHistoryGraph(
+  $accountId: String!
+  $orderBy: String = "timestamp"
+  $orderDirection: String = "desc"
+  $fromTimestamp: BigInt
+  $toTimestamp: BigInt
+) {
+  transfers(
+    where: {
+      AND: [
+        { OR: [{ fromAccountId: $accountId }, { toAccountId: $accountId }] }
+        { timestamp_gte: $fromTimestamp }
+        { timestamp_lte: $toTimestamp }
+      ]
+    }
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+    limit: 1000
+  ) {
+    items {
+      timestamp
+      amount
+      fromAccountId
+      toAccountId
+      transactionHash
+    }
+  }
+}
