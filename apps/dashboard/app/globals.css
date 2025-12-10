@@ -362,6 +362,10 @@
     width: 1px;
     background-color: var(--color-border-default);
     pointer-events: none;
+
+    @media (min-width: 768px) {
+      display: none;
+    }
   }
 
   /* Recharts Brush tick formatting */
