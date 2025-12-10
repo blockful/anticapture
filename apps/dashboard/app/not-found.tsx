@@ -21,7 +21,7 @@ const NotFound = () => {
               alt="Not Found"
               width={602}
               height={302}
-              className="pointer-events-none absolute left-0 top-0 h-full w-full object-contain"
+              className="pointer-events-none absolute left-0 top-0 h-screen w-full object-cover"
             />
             <div className="text-primary relative z-10 flex flex-col items-center justify-center gap-4">
               <NotFoundPageIcon />
