@@ -1,7 +1,7 @@
 import { asc, desc, gte, sql, and, eq, or, lte } from "ponder";
 import { db } from "ponder:api";
 import { transfer, accountBalance } from "ponder:schema";
-import { AccountInteractions, AmountFilter } from "../../mappers";
+import { AccountInteractions, Filter } from "../../mappers";
 import { Address } from "viem";
 
 export class AccountInteractionsRepository {
@@ -10,8 +10,9 @@ export class AccountInteractionsRepository {
     startTimestamp: number,
     limit: number,
     skip: number,
+    orderBy: "volume" | "count",
     orderDirection: "asc" | "desc",
-    filter: AmountFilter,
+    filter: Filter,
   ): Promise<AccountInteractions> {
     // Aggregate outgoing transfers (negative amounts)
     const transferCriteria = [
@@ -28,6 +29,15 @@ export class AccountInteractionsRepository {
 
     if (filter.maxAmount !== undefined) {
       transferCriteria.push(lte(transfer.amount, filter.maxAmount));
+    }
+
+    if (filter.address) {
+      transferCriteria.push(
+        or(
+          eq(transfer.toAccountId, filter.address),
+          eq(transfer.fromAccountId, filter.address),
+        ),
+      );
     }
 
     // Aggregate outgoing transfers (negative amounts)
@@ -96,6 +106,12 @@ export class AccountInteractionsRepository {
       )
       .as("combined");
 
+    const orderDirectionFn = orderDirection === "desc" ? desc : asc;
+    const orderByField =
+      orderBy === "count"
+        ? sql`${combined.fromCount} + ${combined.toCount}`
+        : sql`ABS(${combined.fromChange}) + ABS(${combined.toChange})`;
+
     const result = await db
       .select({
         accountId: combined.accountId,
@@ -114,11 +130,7 @@ export class AccountInteractionsRepository {
           ),
       })
       .from(combined)
-      .orderBy(
-        orderDirection === "desc"
-          ? desc(sql`${combined.fromCount} + ${combined.toCount}`)
-          : asc(sql`${combined.fromCount} + ${combined.toCount}`),
-      )
+      .orderBy(orderDirectionFn(orderByField))
       .offset(skip)
       .limit(limit);
 
