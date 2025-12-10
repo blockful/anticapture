@@ -104,7 +104,7 @@ export const DelegationHistoryTable = ({
     {
       accessorKey: "address",
       header: () => (
-        <div className="text-table-header flex h-8 w-full items-center justify-start px-4">
+        <div className="text-table-header flex h-8 w-full items-center justify-start">
           <span>Delegate Address</span>
           <div className="ml-2 w-[180px]">
             <AddressFilter
@@ -167,6 +167,7 @@ export const DelegationHistoryTable = ({
         <div className="flex items-center justify-end gap-1.5">
           <h4 className="text-table-header">Amount ({daoId})</h4>
           <AmountFilter
+            filterId="delegation-amount-filter"
             onApply={(filterState: AmountFilterState) => {
               setSortOrder(
                 filterState.sortOrder === "largest-first" ? "desc" : "asc",

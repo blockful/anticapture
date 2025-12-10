@@ -18,6 +18,7 @@ interface AmountFilterProps {
   onReset: () => void;
   isActive?: boolean;
   sortOptions?: SortOption[];
+  filterId: string;
 }
 
 export const AmountFilter = ({
@@ -26,49 +27,35 @@ export const AmountFilter = ({
   onReset,
   isActive = false,
   sortOptions,
+  filterId,
 }: AmountFilterProps) => {
-  const {
-    minAmount,
-    maxAmount,
-    sortOrder,
-    setMinAmount,
-    setMaxAmount,
-    setSortOrder,
-    reset,
-    initialize,
-    getState,
-  } = useAmountFilterStore();
+  const store = useAmountFilterStore();
 
-  // Inicializar a store com o sortOrder padrão
+  const { minAmount, maxAmount, sortOrder } = store.getState(filterId);
+
   useEffect(() => {
     if (sortOptions && sortOptions[0]?.value && sortOrder === "") {
-      initialize(sortOptions[0].value);
+      store.initialize(filterId, sortOptions[0].value);
     }
-  }, [sortOptions, sortOrder, initialize]);
+  }, [sortOptions, sortOrder, filterId, store]);
 
   const handleMinMaxChange = (min: string, max: string) => {
-    setMinAmount(min);
-    setMaxAmount(max);
+    store.setMinAmount(filterId, min);
+    store.setMaxAmount(filterId, max);
   };
 
   const handleSortChange = (sort: string) => {
-    setSortOrder(sort);
+    store.setSortOrder(filterId, sort);
   };
 
   const handleApply = () => {
-    onApply(getState());
+    onApply(store.getState(filterId));
   };
 
   const handleReset = () => {
-    reset(sortOptions?.[0]?.value || "");
+    store.reset(filterId, sortOptions?.[0]?.value || "");
     onReset();
   };
-
-  // const validator = (value: string) => {
-  //   if (!value.trim()) return true;
-  //   const onlyDigitsRegex = /^[0-9]+$/;
-  //   return onlyDigitsRegex.test(value);
-  // };
 
   return (
     <FilterBox

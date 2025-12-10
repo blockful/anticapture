@@ -2465,44 +2465,6 @@ export type BalanceHistoryTotalCountQueryVariables = Exact<{
 
 export type BalanceHistoryTotalCountQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', totalCount: number } };
 
-export type BalanceHistoryBuyQueryVariables = Exact<{
-  account: Scalars['String']['input'];
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type BalanceHistoryBuyQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', items: Array<{ __typename?: 'transfer', timestamp: any, amount: any, fromAccountId: string, toAccountId: string, transactionHash: string }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
-
-export type BalanceHistoryBuyTotalCountQueryVariables = Exact<{
-  account: Scalars['String']['input'];
-}>;
-
-
-export type BalanceHistoryBuyTotalCountQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', totalCount: number } };
-
-export type BalanceHistorySellQueryVariables = Exact<{
-  account: Scalars['String']['input'];
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type BalanceHistorySellQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', items: Array<{ __typename?: 'transfer', timestamp: any, amount: any, fromAccountId: string, toAccountId: string, transactionHash: string }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
-
-export type BalanceHistorySellTotalCountQueryVariables = Exact<{
-  account: Scalars['String']['input'];
-}>;
-
-
-export type BalanceHistorySellTotalCountQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', totalCount: number } };
-
 export type BalanceHistoryGraphQueryVariables = Exact<{
   accountId: Scalars['String']['input'];
   orderBy?: InputMaybe<Scalars['String']['input']>;
@@ -2625,6 +2587,13 @@ export type GetDelegateDelegationHistoryQueryVariables = Exact<{
 
 
 export type GetDelegateDelegationHistoryQuery = { __typename?: 'Query', votingPowerHistorys: { __typename?: 'votingPowerHistoryPage', totalCount: number, items: Array<{ __typename?: 'votingPowerHistory', delta: any, transactionHash: string, timestamp: any, votingPower: any, delegation?: { __typename?: 'delegation', delegatorAccountId: string, delegatedValue: any, previousDelegate?: string | null, delegateAccountId: string } | null, transfer?: { __typename?: 'transfer', amount: any, fromAccountId: string, toAccountId: string } | null }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null } } };
+
+export type GetDelegateDelegationHistoryTotalCountQueryVariables = Exact<{
+  accountId: Scalars['String']['input'];
+}>;
+
+
+export type GetDelegateDelegationHistoryTotalCountQuery = { __typename?: 'Query', votingPowerHistorys: { __typename?: 'votingPowerHistoryPage', totalCount: number } };
 
 export type GetDelegateDelegationHistoryGraphQueryVariables = Exact<{
   accountId: Scalars['String']['input'];
@@ -2814,6 +2783,8 @@ export type GetDelegationHistoryItemsQueryVariables = Exact<{
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
+  minDelta?: InputMaybe<Scalars['BigInt']['input']>;
+  maxDelta?: InputMaybe<Scalars['BigInt']['input']>;
 }>;
 
 
@@ -2980,214 +2951,6 @@ export type BalanceHistoryTotalCountQueryHookResult = ReturnType<typeof useBalan
 export type BalanceHistoryTotalCountLazyQueryHookResult = ReturnType<typeof useBalanceHistoryTotalCountLazyQuery>;
 export type BalanceHistoryTotalCountSuspenseQueryHookResult = ReturnType<typeof useBalanceHistoryTotalCountSuspenseQuery>;
 export type BalanceHistoryTotalCountQueryResult = Apollo.QueryResult<BalanceHistoryTotalCountQuery, BalanceHistoryTotalCountQueryVariables>;
-export const BalanceHistoryBuyDocument = gql`
-    query BalanceHistoryBuy($account: String!, $after: String, $before: String, $limit: Int = 10, $orderBy: String = "timestamp", $orderDirection: String = "desc") {
-  transfers(
-    where: {toAccountId: $account}
-    orderBy: $orderBy
-    orderDirection: $orderDirection
-    limit: $limit
-    after: $after
-    before: $before
-  ) {
-    items {
-      timestamp
-      amount
-      fromAccountId
-      toAccountId
-      transactionHash
-    }
-    pageInfo {
-      endCursor
-      hasNextPage
-      hasPreviousPage
-      startCursor
-    }
-  }
-}
-    `;
-
-/**
- * __useBalanceHistoryBuyQuery__
- *
- * To run a query within a React component, call `useBalanceHistoryBuyQuery` and pass it any options that fit your needs.
- * When your component renders, `useBalanceHistoryBuyQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useBalanceHistoryBuyQuery({
- *   variables: {
- *      account: // value for 'account'
- *      after: // value for 'after'
- *      before: // value for 'before'
- *      limit: // value for 'limit'
- *      orderBy: // value for 'orderBy'
- *      orderDirection: // value for 'orderDirection'
- *   },
- * });
- */
-export function useBalanceHistoryBuyQuery(baseOptions: Apollo.QueryHookOptions<BalanceHistoryBuyQuery, BalanceHistoryBuyQueryVariables> & ({ variables: BalanceHistoryBuyQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<BalanceHistoryBuyQuery, BalanceHistoryBuyQueryVariables>(BalanceHistoryBuyDocument, options);
-      }
-export function useBalanceHistoryBuyLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<BalanceHistoryBuyQuery, BalanceHistoryBuyQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<BalanceHistoryBuyQuery, BalanceHistoryBuyQueryVariables>(BalanceHistoryBuyDocument, options);
-        }
-export function useBalanceHistoryBuySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<BalanceHistoryBuyQuery, BalanceHistoryBuyQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<BalanceHistoryBuyQuery, BalanceHistoryBuyQueryVariables>(BalanceHistoryBuyDocument, options);
-        }
-export type BalanceHistoryBuyQueryHookResult = ReturnType<typeof useBalanceHistoryBuyQuery>;
-export type BalanceHistoryBuyLazyQueryHookResult = ReturnType<typeof useBalanceHistoryBuyLazyQuery>;
-export type BalanceHistoryBuySuspenseQueryHookResult = ReturnType<typeof useBalanceHistoryBuySuspenseQuery>;
-export type BalanceHistoryBuyQueryResult = Apollo.QueryResult<BalanceHistoryBuyQuery, BalanceHistoryBuyQueryVariables>;
-export const BalanceHistoryBuyTotalCountDocument = gql`
-    query BalanceHistoryBuyTotalCount($account: String!) {
-  transfers(where: {toAccountId: $account}) {
-    totalCount
-  }
-}
-    `;
-
-/**
- * __useBalanceHistoryBuyTotalCountQuery__
- *
- * To run a query within a React component, call `useBalanceHistoryBuyTotalCountQuery` and pass it any options that fit your needs.
- * When your component renders, `useBalanceHistoryBuyTotalCountQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useBalanceHistoryBuyTotalCountQuery({
- *   variables: {
- *      account: // value for 'account'
- *   },
- * });
- */
-export function useBalanceHistoryBuyTotalCountQuery(baseOptions: Apollo.QueryHookOptions<BalanceHistoryBuyTotalCountQuery, BalanceHistoryBuyTotalCountQueryVariables> & ({ variables: BalanceHistoryBuyTotalCountQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<BalanceHistoryBuyTotalCountQuery, BalanceHistoryBuyTotalCountQueryVariables>(BalanceHistoryBuyTotalCountDocument, options);
-      }
-export function useBalanceHistoryBuyTotalCountLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<BalanceHistoryBuyTotalCountQuery, BalanceHistoryBuyTotalCountQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<BalanceHistoryBuyTotalCountQuery, BalanceHistoryBuyTotalCountQueryVariables>(BalanceHistoryBuyTotalCountDocument, options);
-        }
-export function useBalanceHistoryBuyTotalCountSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<BalanceHistoryBuyTotalCountQuery, BalanceHistoryBuyTotalCountQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<BalanceHistoryBuyTotalCountQuery, BalanceHistoryBuyTotalCountQueryVariables>(BalanceHistoryBuyTotalCountDocument, options);
-        }
-export type BalanceHistoryBuyTotalCountQueryHookResult = ReturnType<typeof useBalanceHistoryBuyTotalCountQuery>;
-export type BalanceHistoryBuyTotalCountLazyQueryHookResult = ReturnType<typeof useBalanceHistoryBuyTotalCountLazyQuery>;
-export type BalanceHistoryBuyTotalCountSuspenseQueryHookResult = ReturnType<typeof useBalanceHistoryBuyTotalCountSuspenseQuery>;
-export type BalanceHistoryBuyTotalCountQueryResult = Apollo.QueryResult<BalanceHistoryBuyTotalCountQuery, BalanceHistoryBuyTotalCountQueryVariables>;
-export const BalanceHistorySellDocument = gql`
-    query BalanceHistorySell($account: String!, $after: String, $before: String, $limit: Int = 10, $orderBy: String = "timestamp", $orderDirection: String = "desc") {
-  transfers(
-    where: {fromAccountId: $account}
-    orderBy: $orderBy
-    orderDirection: $orderDirection
-    limit: $limit
-    after: $after
-    before: $before
-  ) {
-    items {
-      timestamp
-      amount
-      fromAccountId
-      toAccountId
-      transactionHash
-    }
-    pageInfo {
-      endCursor
-      hasNextPage
-      hasPreviousPage
-      startCursor
-    }
-  }
-}
-    `;
-
-/**
- * __useBalanceHistorySellQuery__
- *
- * To run a query within a React component, call `useBalanceHistorySellQuery` and pass it any options that fit your needs.
- * When your component renders, `useBalanceHistorySellQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useBalanceHistorySellQuery({
- *   variables: {
- *      account: // value for 'account'
- *      after: // value for 'after'
- *      before: // value for 'before'
- *      limit: // value for 'limit'
- *      orderBy: // value for 'orderBy'
- *      orderDirection: // value for 'orderDirection'
- *   },
- * });
- */
-export function useBalanceHistorySellQuery(baseOptions: Apollo.QueryHookOptions<BalanceHistorySellQuery, BalanceHistorySellQueryVariables> & ({ variables: BalanceHistorySellQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<BalanceHistorySellQuery, BalanceHistorySellQueryVariables>(BalanceHistorySellDocument, options);
-      }
-export function useBalanceHistorySellLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<BalanceHistorySellQuery, BalanceHistorySellQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<BalanceHistorySellQuery, BalanceHistorySellQueryVariables>(BalanceHistorySellDocument, options);
-        }
-export function useBalanceHistorySellSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<BalanceHistorySellQuery, BalanceHistorySellQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<BalanceHistorySellQuery, BalanceHistorySellQueryVariables>(BalanceHistorySellDocument, options);
-        }
-export type BalanceHistorySellQueryHookResult = ReturnType<typeof useBalanceHistorySellQuery>;
-export type BalanceHistorySellLazyQueryHookResult = ReturnType<typeof useBalanceHistorySellLazyQuery>;
-export type BalanceHistorySellSuspenseQueryHookResult = ReturnType<typeof useBalanceHistorySellSuspenseQuery>;
-export type BalanceHistorySellQueryResult = Apollo.QueryResult<BalanceHistorySellQuery, BalanceHistorySellQueryVariables>;
-export const BalanceHistorySellTotalCountDocument = gql`
-    query BalanceHistorySellTotalCount($account: String!) {
-  transfers(where: {fromAccountId: $account}) {
-    totalCount
-  }
-}
-    `;
-
-/**
- * __useBalanceHistorySellTotalCountQuery__
- *
- * To run a query within a React component, call `useBalanceHistorySellTotalCountQuery` and pass it any options that fit your needs.
- * When your component renders, `useBalanceHistorySellTotalCountQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useBalanceHistorySellTotalCountQuery({
- *   variables: {
- *      account: // value for 'account'
- *   },
- * });
- */
-export function useBalanceHistorySellTotalCountQuery(baseOptions: Apollo.QueryHookOptions<BalanceHistorySellTotalCountQuery, BalanceHistorySellTotalCountQueryVariables> & ({ variables: BalanceHistorySellTotalCountQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<BalanceHistorySellTotalCountQuery, BalanceHistorySellTotalCountQueryVariables>(BalanceHistorySellTotalCountDocument, options);
-      }
-export function useBalanceHistorySellTotalCountLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<BalanceHistorySellTotalCountQuery, BalanceHistorySellTotalCountQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<BalanceHistorySellTotalCountQuery, BalanceHistorySellTotalCountQueryVariables>(BalanceHistorySellTotalCountDocument, options);
-        }
-export function useBalanceHistorySellTotalCountSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<BalanceHistorySellTotalCountQuery, BalanceHistorySellTotalCountQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<BalanceHistorySellTotalCountQuery, BalanceHistorySellTotalCountQueryVariables>(BalanceHistorySellTotalCountDocument, options);
-        }
-export type BalanceHistorySellTotalCountQueryHookResult = ReturnType<typeof useBalanceHistorySellTotalCountQuery>;
-export type BalanceHistorySellTotalCountLazyQueryHookResult = ReturnType<typeof useBalanceHistorySellTotalCountLazyQuery>;
-export type BalanceHistorySellTotalCountSuspenseQueryHookResult = ReturnType<typeof useBalanceHistorySellTotalCountSuspenseQuery>;
-export type BalanceHistorySellTotalCountQueryResult = Apollo.QueryResult<BalanceHistorySellTotalCountQuery, BalanceHistorySellTotalCountQueryVariables>;
 export const BalanceHistoryGraphDocument = gql`
     query BalanceHistoryGraph($accountId: String!, $orderBy: String = "timestamp", $orderDirection: String = "desc", $fromTimestamp: BigInt, $toTimestamp: BigInt) {
   transfers(
@@ -3891,6 +3654,46 @@ export type GetDelegateDelegationHistoryQueryHookResult = ReturnType<typeof useG
 export type GetDelegateDelegationHistoryLazyQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryLazyQuery>;
 export type GetDelegateDelegationHistorySuspenseQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistorySuspenseQuery>;
 export type GetDelegateDelegationHistoryQueryResult = Apollo.QueryResult<GetDelegateDelegationHistoryQuery, GetDelegateDelegationHistoryQueryVariables>;
+export const GetDelegateDelegationHistoryTotalCountDocument = gql`
+    query GetDelegateDelegationHistoryTotalCount($accountId: String!) {
+  votingPowerHistorys(where: {accountId: $accountId}) {
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useGetDelegateDelegationHistoryTotalCountQuery__
+ *
+ * To run a query within a React component, call `useGetDelegateDelegationHistoryTotalCountQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetDelegateDelegationHistoryTotalCountQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetDelegateDelegationHistoryTotalCountQuery({
+ *   variables: {
+ *      accountId: // value for 'accountId'
+ *   },
+ * });
+ */
+export function useGetDelegateDelegationHistoryTotalCountQuery(baseOptions: Apollo.QueryHookOptions<GetDelegateDelegationHistoryTotalCountQuery, GetDelegateDelegationHistoryTotalCountQueryVariables> & ({ variables: GetDelegateDelegationHistoryTotalCountQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetDelegateDelegationHistoryTotalCountQuery, GetDelegateDelegationHistoryTotalCountQueryVariables>(GetDelegateDelegationHistoryTotalCountDocument, options);
+      }
+export function useGetDelegateDelegationHistoryTotalCountLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDelegateDelegationHistoryTotalCountQuery, GetDelegateDelegationHistoryTotalCountQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetDelegateDelegationHistoryTotalCountQuery, GetDelegateDelegationHistoryTotalCountQueryVariables>(GetDelegateDelegationHistoryTotalCountDocument, options);
+        }
+export function useGetDelegateDelegationHistoryTotalCountSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegateDelegationHistoryTotalCountQuery, GetDelegateDelegationHistoryTotalCountQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetDelegateDelegationHistoryTotalCountQuery, GetDelegateDelegationHistoryTotalCountQueryVariables>(GetDelegateDelegationHistoryTotalCountDocument, options);
+        }
+export type GetDelegateDelegationHistoryTotalCountQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryTotalCountQuery>;
+export type GetDelegateDelegationHistoryTotalCountLazyQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryTotalCountLazyQuery>;
+export type GetDelegateDelegationHistoryTotalCountSuspenseQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryTotalCountSuspenseQuery>;
+export type GetDelegateDelegationHistoryTotalCountQueryResult = Apollo.QueryResult<GetDelegateDelegationHistoryTotalCountQuery, GetDelegateDelegationHistoryTotalCountQueryVariables>;
 export const GetDelegateDelegationHistoryGraphDocument = gql`
     query GetDelegateDelegationHistoryGraph($accountId: String!, $fromTimestamp: BigInt, $toTimestamp: BigInt, $orderBy: String = "timestamp", $orderDirection: String = "desc") {
   votingPowerHistorys(
@@ -4934,9 +4737,9 @@ export type GetDelegationHistoryCountLazyQueryHookResult = ReturnType<typeof use
 export type GetDelegationHistoryCountSuspenseQueryHookResult = ReturnType<typeof useGetDelegationHistoryCountSuspenseQuery>;
 export type GetDelegationHistoryCountQueryResult = Apollo.QueryResult<GetDelegationHistoryCountQuery, GetDelegationHistoryCountQueryVariables>;
 export const GetDelegationHistoryItemsDocument = gql`
-    query GetDelegationHistoryItems($delegator: String!, $delegate: String, $after: String, $before: String, $orderBy: String = "timestamp", $orderDirection: String = "desc", $limit: Int = 10) {
+    query GetDelegationHistoryItems($delegator: String!, $delegate: String, $after: String, $before: String, $orderBy: String = "timestamp", $orderDirection: String = "desc", $limit: Int = 10, $minDelta: BigInt = 0, $maxDelta: BigInt) {
   delegations(
-    where: {delegatorAccountId: $delegator, delegateAccountId: $delegate, delegatedValue_gt: 0}
+    where: {delegatorAccountId: $delegator, delegateAccountId: $delegate, delegatedValue_gte: $minDelta, delegatedValue_lte: $maxDelta}
     orderBy: $orderBy
     orderDirection: $orderDirection
     limit: $limit
@@ -4978,6 +4781,8 @@ export const GetDelegationHistoryItemsDocument = gql`
  *      orderBy: // value for 'orderBy'
  *      orderDirection: // value for 'orderDirection'
  *      limit: // value for 'limit'
+ *      minDelta: // value for 'minDelta'
+ *      maxDelta: // value for 'maxDelta'
  *   },
  * });
  */

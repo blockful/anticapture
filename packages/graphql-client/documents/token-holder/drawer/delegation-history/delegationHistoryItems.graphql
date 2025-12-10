@@ -6,9 +6,16 @@ query GetDelegationHistoryItems(
   $orderBy: String = "timestamp"
   $orderDirection: String = "desc"
   $limit: Int = 10
+  $minDelta: BigInt = 0
+  $maxDelta: BigInt
 ) {
   delegations(
-    where: { delegatorAccountId: $delegator, delegateAccountId: $delegate,  delegatedValue_gt: 0 }
+    where: {
+      delegatorAccountId: $delegator
+      delegateAccountId: $delegate
+      delegatedValue_gte: $minDelta
+      delegatedValue_lte: $maxDelta
+    }
     orderBy: $orderBy
     orderDirection: $orderDirection
     limit: $limit

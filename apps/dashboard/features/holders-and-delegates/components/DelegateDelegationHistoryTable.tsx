@@ -55,15 +55,15 @@ export const DelegateDelegationHistoryTable = ({
     fetchNextPage,
     fetchingMore,
     error,
-  } = useDelegateDelegationHistory(
+  } = useDelegateDelegationHistory({
     accountId,
     daoId,
-    sortBy,
-    sortDirection,
+    orderBy: sortBy,
+    orderDirection: sortDirection,
     filterVariables,
-    toFilter,
-    fromFilter,
-  );
+    customFromFilter: fromFilter,
+    customToFilter: toFilter,
+  });
 
   // Handle sorting
   const handleSort = (field: "timestamp" | "delta") => {
@@ -190,6 +190,7 @@ export const DelegateDelegationHistoryTable = ({
         <div className="flex items-center gap-1.5">
           <h4 className="text-table-header">Amount ({daoId})</h4>
           <AmountFilter
+            filterId="delegation-amount-filter"
             onApply={(filterState: AmountFilterState) => {
               setSortDirection(
                 filterState.sortOrder === "largest-first" ? "desc" : "asc",
@@ -505,7 +506,7 @@ export const DelegateDelegationHistoryTable = ({
   }
 
   return (
-    <div className="flex flex-col gap-2 p-4">
+    <div className="flex w-full flex-col gap-2 p-4">
       <Table
         columns={columns}
         data={delegationHistory}
@@ -513,9 +514,9 @@ export const DelegateDelegationHistoryTable = ({
         hasMore={paginationInfo.hasNextPage}
         isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}
-        withDownloadCSV={true}
         wrapperClassName="h-[450px]"
         className="h-[400px]"
+        withDownloadCSV={true}
       />
     </div>
   );

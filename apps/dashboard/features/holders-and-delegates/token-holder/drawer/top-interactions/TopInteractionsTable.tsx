@@ -19,6 +19,7 @@ import { AmountFilter } from "@/shared/components/design-system/table/filters/am
 import { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
 
 export const TopInteractionsTable = ({
   address,
@@ -30,11 +31,19 @@ export const TopInteractionsTable = ({
   const [currentAddressFilter, setCurrentAddressFilter] = useState<string>("");
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [sortBy, setSortBy] = useState<"transferCount" | "totalVolume">(
+    "transferCount",
+  );
   const [filterVariables, setFilterVariables] = useState<{
     minAmount?: string;
     maxAmount?: string;
   }>();
   const [isFilterActive, setIsFilterActive] = useState(false);
+
+  const sortOptions: SortOption[] = [
+    { value: "largest-first", label: "Largest first" },
+    { value: "smallest-first", label: "Smallest first" },
+  ];
 
   const {
     decimals,
@@ -45,6 +54,8 @@ export const TopInteractionsTable = ({
     useAccountInteractionsData({
       daoId: daoId as DaoIdEnum,
       address: address,
+      accountId: currentAddressFilter,
+      sortBy,
       sortDirection,
       filterVariables,
     });
@@ -135,6 +146,7 @@ export const TopInteractionsTable = ({
           <div className="flex items-center justify-end gap-1.5">
             <h4 className="text-table-header">Volume ({daoId})</h4>
             <AmountFilter
+              filterId="top-interactions-volume-filter"
               onApply={(filterState: AmountFilterState) => {
                 setSortDirection(
                   filterState.sortOrder === "largest-first" ? "desc" : "asc",
@@ -152,16 +164,20 @@ export const TopInteractionsTable = ({
                 setIsFilterActive(
                   !!(filterVariables?.minAmount || filterVariables?.maxAmount),
                 );
+
+                setSortBy("totalVolume");
               }}
               onReset={() => {
                 setIsFilterActive(false);
                 // Reset to default sorting
+                setSortBy("transferCount");
                 setFilterVariables(() => ({
                   minAmount: undefined,
                   maxAmount: undefined,
                 }));
               }}
               isActive={isFilterActive}
+              sortOptions={sortOptions}
             />
           </div>
         );

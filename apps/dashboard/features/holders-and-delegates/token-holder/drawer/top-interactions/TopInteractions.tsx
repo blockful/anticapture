@@ -107,7 +107,7 @@ export const TopInteractions = ({
             <div className="flex w-full flex-col gap-6">
               <div className="flex flex-col gap-1">
                 <p className="text-secondary text-alternative-xs font-mono font-medium uppercase">
-                  Net Balance Change (90D)
+                  Net Tokens In/Out (90D)
                 </p>
                 <div className="text-md font-normal">
                   {!netBalanceChange ? (

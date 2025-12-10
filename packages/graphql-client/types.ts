@@ -2462,44 +2462,6 @@ export type BalanceHistoryTotalCountQueryVariables = Exact<{
 
 export type BalanceHistoryTotalCountQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', totalCount: number } };
 
-export type BalanceHistoryBuyQueryVariables = Exact<{
-  account: Scalars['String']['input'];
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type BalanceHistoryBuyQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', items: Array<{ __typename?: 'transfer', timestamp: any, amount: any, fromAccountId: string, toAccountId: string, transactionHash: string }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
-
-export type BalanceHistoryBuyTotalCountQueryVariables = Exact<{
-  account: Scalars['String']['input'];
-}>;
-
-
-export type BalanceHistoryBuyTotalCountQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', totalCount: number } };
-
-export type BalanceHistorySellQueryVariables = Exact<{
-  account: Scalars['String']['input'];
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type BalanceHistorySellQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', items: Array<{ __typename?: 'transfer', timestamp: any, amount: any, fromAccountId: string, toAccountId: string, transactionHash: string }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
-
-export type BalanceHistorySellTotalCountQueryVariables = Exact<{
-  account: Scalars['String']['input'];
-}>;
-
-
-export type BalanceHistorySellTotalCountQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', totalCount: number } };
-
 export type BalanceHistoryGraphQueryVariables = Exact<{
   accountId: Scalars['String']['input'];
   orderBy?: InputMaybe<Scalars['String']['input']>;
@@ -2622,6 +2584,13 @@ export type GetDelegateDelegationHistoryQueryVariables = Exact<{
 
 
 export type GetDelegateDelegationHistoryQuery = { __typename?: 'Query', votingPowerHistorys: { __typename?: 'votingPowerHistoryPage', totalCount: number, items: Array<{ __typename?: 'votingPowerHistory', delta: any, transactionHash: string, timestamp: any, votingPower: any, delegation?: { __typename?: 'delegation', delegatorAccountId: string, delegatedValue: any, previousDelegate?: string | null, delegateAccountId: string } | null, transfer?: { __typename?: 'transfer', amount: any, fromAccountId: string, toAccountId: string } | null }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null } } };
+
+export type GetDelegateDelegationHistoryTotalCountQueryVariables = Exact<{
+  accountId: Scalars['String']['input'];
+}>;
+
+
+export type GetDelegateDelegationHistoryTotalCountQuery = { __typename?: 'Query', votingPowerHistorys: { __typename?: 'votingPowerHistoryPage', totalCount: number } };
 
 export type GetDelegateDelegationHistoryGraphQueryVariables = Exact<{
   accountId: Scalars['String']['input'];
@@ -2811,6 +2780,8 @@ export type GetDelegationHistoryItemsQueryVariables = Exact<{
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
+  minDelta?: InputMaybe<Scalars['BigInt']['input']>;
+  maxDelta?: InputMaybe<Scalars['BigInt']['input']>;
 }>;
 
 

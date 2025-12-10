@@ -46,9 +46,8 @@ export const BalanceHistoryTable = ({
 }) => {
   const { decimals } = daoConfig[daoId];
 
-  const [sortBy, setSortBy] = useState<string>("date");
   const [typeFilter, setTypeFilter] = useState<string>("all");
-  const [orderBy, setOrderBy] = useState<string>("timestamp");
+  const [orderBy, setOrderBy] = useState<"timestamp" | "amount">("timestamp");
   const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("desc");
   const [filterVariables, setFilterVariables] =
     useState<AmountFilterVariables>();
@@ -83,30 +82,6 @@ export const BalanceHistoryTable = ({
       customToFilter,
       filterVariables,
     });
-  // Handle sorting
-  const handleSort = (field: string) => {
-    if (field === "date") {
-      const newOrderBy = "timestamp";
-      const newOrderDirection =
-        sortBy === "date" &&
-        orderBy === "timestamp" &&
-        orderDirection === "desc"
-          ? "asc"
-          : "desc";
-      setOrderBy(newOrderBy);
-      setOrderDirection(newOrderDirection);
-      setSortBy("date");
-    } else if (field === "amount") {
-      const newOrderBy = "amount";
-      const newOrderDirection =
-        sortBy === "amount" && orderBy === "amount" && orderDirection === "desc"
-          ? "asc"
-          : "desc";
-      setOrderBy(newOrderBy);
-      setOrderDirection(newOrderDirection);
-      setSortBy("amount");
-    }
-  };
 
   const isInitialLoading = loading && (!transfers || transfers.length === 0);
 
@@ -178,26 +153,34 @@ export const BalanceHistoryTable = ({
           </div>
         );
       },
-      header: () => (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-secondary w-full justify-start p-0"
-          onClick={() => handleSort("date")}
-        >
-          <span className="text-xs">Date</span>
-          <ArrowUpDown
-            props={{ className: "size-4" }}
-            activeState={
-              sortBy === "date"
-                ? orderDirection === "asc"
-                  ? ArrowState.UP
-                  : ArrowState.DOWN
-                : ArrowState.DEFAULT
-            }
-          />
-        </Button>
-      ),
+      header: ({ column }) => {
+        const handleSortToggle = () => {
+          const newSortOrder = orderDirection === "desc" ? "asc" : "desc";
+          setOrderBy("timestamp");
+          setOrderDirection(newSortOrder);
+          column.toggleSorting(newSortOrder === "desc");
+        };
+        return (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-secondary w-full justify-start p-0"
+            onClick={handleSortToggle}
+          >
+            <span className="text-xs">Date</span>
+            <ArrowUpDown
+              props={{ className: "size-4" }}
+              activeState={
+                orderBy === "timestamp"
+                  ? orderDirection === "asc"
+                    ? ArrowState.UP
+                    : ArrowState.DOWN
+                  : ArrowState.DEFAULT
+              }
+            />
+          </Button>
+        );
+      },
     },
     {
       accessorKey: "amount",
@@ -228,6 +211,7 @@ export const BalanceHistoryTable = ({
         <div className="text-secondary flex w-full items-center justify-end gap-1.5 text-nowrap font-medium">
           <span className="text-xs">Amount ({daoId.toUpperCase()})</span>
           <AmountFilter
+            filterId="balance-history-amount-filter"
             onApply={(filterState) => {
               setOrderDirection(
                 filterState.sortOrder === "largest-first" ? "desc" : "asc",
@@ -245,11 +229,13 @@ export const BalanceHistoryTable = ({
               setIsFilterActive(
                 !!(filterVariables?.minDelta || filterVariables?.maxDelta),
               );
-              setSortBy("delta");
+
+              setOrderBy("amount");
             }}
             onReset={() => {
               setIsFilterActive(false);
-              setSortBy("timestamp");
+              // Reset to default sorting
+              setOrderBy("timestamp");
               setFilterVariables(() => ({
                 minDelta: undefined,
                 maxDelta: undefined,
