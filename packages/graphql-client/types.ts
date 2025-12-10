@@ -2448,6 +2448,8 @@ export type BalanceHistoryQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Int']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
+  minDelta?: InputMaybe<Scalars['BigInt']['input']>;
+  maxDelta?: InputMaybe<Scalars['BigInt']['input']>;
 }>;
 
 

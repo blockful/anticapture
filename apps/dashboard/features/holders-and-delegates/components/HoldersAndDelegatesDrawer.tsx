@@ -11,7 +11,7 @@ import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButt
 import { DelegateDelegationsHistory } from "@/features/holders-and-delegates/components/DelegatesDelegationHistory/DelegateDelegationsHistory";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { VotingPower } from "@/features/holders-and-delegates/delegate/drawer/voting-power/VotingPower";
-import { BalanceHistory } from "@/features/holders-and-delegates/components/BalanceHistory";
+import { BalanceHistory } from "@/features/holders-and-delegates/components/BalanceHistory/BalanceHistory";
 import { DelegationHistoryTable } from "@/features/holders-and-delegates/token-holder/drawer/delegation-history/DelegationHistoryTable";
 import { DelegateProposalsActivity } from "@/features/holders-and-delegates/components/DelegateProposalsActivity";
 import { IconButton } from "@/shared/components";
@@ -130,7 +130,14 @@ export const HoldersAndDelegatesDrawer = ({
                     />
                   </div>
 
-                  <CopyAndPasteButton textToCopy={address as `0x${string}`} />
+                  <CopyAndPasteButton
+                    textToCopy={address as `0x${string}`}
+                    className="p-0"
+                    customTooltipText={{
+                      default: "Copy address",
+                      copied: "Address copied!",
+                    }}
+                  />
                 </div>
               </div>
 

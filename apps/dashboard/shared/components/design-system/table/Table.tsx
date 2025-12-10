@@ -158,19 +158,40 @@ export const Table = <TData, TValue>({
 
   const table = useReactTable(tableConfig);
 
-  const formatCsvData = (data: TData[]): object[] => {
+  const formatCsvData = (data: TData[]): Record<string, string | number>[] => {
     return data.map((row) => {
-      const serialized: Record<string, string | number | null> = {};
+      const serialized: Record<string, string | number> = {};
+
       Object.entries(row as Record<string, unknown>).forEach(([key, value]) => {
-        if (value === null || value === undefined) {
+        if (value == null) {
           serialized[key] = "";
-        } else if (typeof value === "object") {
-          const json = JSON.stringify(value).replace(/"/g, '""');
-          serialized[key] = `"${json}"`;
-        } else {
-          serialized[key] = value as string | number;
+          return;
+        }
+        if (typeof value === "string" || typeof value === "number") {
+          serialized[key] = value.toString().replace(/"/g, '""');
+          return;
+        }
+        if (typeof value === "boolean") {
+          serialized[key] = value ? "true" : "false";
+          return;
+        }
+        if (value instanceof Date) {
+          serialized[key] = value.toISOString();
+          return;
+        }
+        if (Array.isArray(value)) {
+          const arr = value.map((v) => String(v)).join(", ");
+          serialized[key] = `"${arr.replace(/"/g, '""')}"`;
+          return;
+        }
+        try {
+          const json = JSON.stringify(value);
+          serialized[key] = `"${json.replace(/"/g, '""')}"`;
+        } catch {
+          serialized[key] = "";
         }
       });
+
       return serialized;
     });
   };

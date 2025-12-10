@@ -214,7 +214,14 @@ export const Delegates = ({
             />
             {!isMobile && (
               <div className="flex items-center opacity-0 transition-opacity [tr:hover_&]:opacity-100">
-                <CopyAndPasteButton textToCopy={address as `0x${string}`} />
+                <CopyAndPasteButton
+                  textToCopy={address as `0x${string}`}
+                  customTooltipText={{
+                    default: "Copy address",
+                    copied: "Address copied!",
+                  }}
+                  className="p-2"
+                />
                 <Button variant="outline" size="sm">
                   <Plus className="size-3.5" />
                   <span className="text-sm font-medium">Details</span>
@@ -246,14 +253,14 @@ export const Delegates = ({
         if (loading) {
           return (
             <SkeletonRow
-              parentClassName="flex animate-pulse w-full items-center justify-center pr-4"
+              parentClassName="flex animate-pulse w-full items-center justify-end pr-4"
               className="h-5 w-full max-w-20"
             />
           );
         }
 
         return (
-          <div className="text-secondary flex w-full items-center justify-center text-end text-sm font-normal">
+          <div className="text-secondary flex w-full items-center justify-end text-end text-sm font-normal">
             {votingPower}
           </div>
         );
@@ -262,7 +269,7 @@ export const Delegates = ({
         <Button
           variant="ghost"
           size="sm"
-          className="text-secondary w-full p-0"
+          className="text-secondary w-full justify-end p-0"
           onClick={() => handleSort("votingPower")}
         >
           <h4 className="text-table-header whitespace-nowrap">
@@ -282,7 +289,7 @@ export const Delegates = ({
       ),
       enableSorting: false,
       meta: {
-        columnClassName: "w-80",
+        columnClassName: "w-72",
       },
     },
     {

@@ -171,6 +171,11 @@ export const TokenHolders = ({
               <div className="flex items-center opacity-0 transition-opacity [tr:hover_&]:opacity-100">
                 <CopyAndPasteButton
                   textToCopy={addressValue as `0x${string}`}
+                  customTooltipText={{
+                    default: "Copy address",
+                    copied: "Address copied!",
+                  }}
+                  className="p-2"
                 />
                 <Button variant="outline" size="sm">
                   <Plus className="size-3.5" />

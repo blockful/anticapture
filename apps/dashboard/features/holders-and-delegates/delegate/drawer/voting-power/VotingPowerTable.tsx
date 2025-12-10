@@ -14,6 +14,7 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { Table } from "@/shared/components/design-system/table/Table";
 import daoConfig from "@/shared/dao-config";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 
 export const VotingPowerTable = ({
   address,
@@ -87,6 +88,16 @@ export const VotingPowerTable = ({
               size="sm"
               variant="rounded"
             />
+            <div className="flex items-center opacity-0 transition-opacity [tr:hover_&]:opacity-100">
+              <CopyAndPasteButton
+                textToCopy={address as `0x${string}`}
+                customTooltipText={{
+                  default: "Copy address",
+                  copied: "Address copied!",
+                }}
+                className="p-2"
+              />
+            </div>
           </div>
         );
       },

@@ -2451,6 +2451,8 @@ export type BalanceHistoryQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Int']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
+  minDelta?: InputMaybe<Scalars['BigInt']['input']>;
+  maxDelta?: InputMaybe<Scalars['BigInt']['input']>;
 }>;
 
 
@@ -2872,9 +2874,9 @@ export type VotingPowersQuery = { __typename?: 'Query', votingPowers?: { __typen
 
 
 export const BalanceHistoryDocument = gql`
-    query BalanceHistory($from: String, $to: String, $after: String, $before: String, $limit: Int = 10, $orderBy: String = "timestamp", $orderDirection: String = "desc") {
+    query BalanceHistory($from: String, $to: String, $after: String, $before: String, $limit: Int = 10, $orderBy: String = "timestamp", $orderDirection: String = "desc", $minDelta: BigInt, $maxDelta: BigInt) {
   transfers(
-    where: {OR: [{fromAccountId: $from}, {toAccountId: $to}]}
+    where: {OR: [{fromAccountId: $from}, {toAccountId: $to}, {amount_gte: $minDelta, amount_lte: $maxDelta}]}
     orderBy: $orderBy
     orderDirection: $orderDirection
     limit: $limit
@@ -2917,6 +2919,8 @@ export const BalanceHistoryDocument = gql`
  *      limit: // value for 'limit'
  *      orderBy: // value for 'orderBy'
  *      orderDirection: // value for 'orderDirection'
+ *      minDelta: // value for 'minDelta'
+ *      maxDelta: // value for 'maxDelta'
  *   },
  * });
  */
@@ -4932,7 +4936,7 @@ export type GetDelegationHistoryCountQueryResult = Apollo.QueryResult<GetDelegat
 export const GetDelegationHistoryItemsDocument = gql`
     query GetDelegationHistoryItems($delegator: String!, $delegate: String, $after: String, $before: String, $orderBy: String = "timestamp", $orderDirection: String = "desc", $limit: Int = 10) {
   delegations(
-    where: {delegatorAccountId: $delegator, delegateAccountId: $delegate}
+    where: {delegatorAccountId: $delegator, delegateAccountId: $delegate, delegatedValue_gt: 0}
     orderBy: $orderBy
     orderDirection: $orderDirection
     limit: $limit

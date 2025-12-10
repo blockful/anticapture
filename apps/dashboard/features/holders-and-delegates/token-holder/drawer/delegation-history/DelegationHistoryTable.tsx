@@ -25,6 +25,7 @@ import { AmountFilter } from "@/shared/components/design-system/table/filters/am
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
 import { fetchEnsData } from "@/shared/hooks/useEnsData";
 import Link from "next/link";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 
 interface DelegationData {
   address: string;
@@ -146,6 +147,16 @@ export const DelegationHistoryTable = ({
               size="sm"
               variant="rounded"
             />
+            <div className="flex items-center opacity-0 transition-opacity [tr:hover_&]:opacity-100">
+              <CopyAndPasteButton
+                textToCopy={address as `0x${string}`}
+                customTooltipText={{
+                  default: "Copy address",
+                  copied: "Address copied!",
+                }}
+                className="p-2"
+              />
+            </div>
           </div>
         );
       },

@@ -134,7 +134,7 @@ export const BalanceHistoryVariationGraph = ({
         <ChartExceptionState
           state="no-data"
           title="BALANCE HISTORY"
-          noDataMessage="No balance history data available"
+          noDataMessage="No balance history data found for this address"
           headerContent={
             <TimePeriodSwitcher
               value={selectedPeriod}

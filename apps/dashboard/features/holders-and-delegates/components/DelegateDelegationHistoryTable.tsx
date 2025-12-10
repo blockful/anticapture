@@ -24,6 +24,7 @@ import { AmountFilterState } from "@/shared/components/design-system/table/filte
 import daoConfig from "@/shared/dao-config";
 import { AddressFilter } from "@/shared/components/design-system/table/filters";
 import { fetchEnsData } from "@/shared/hooks/useEnsData";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 
 interface DelegateDelegationHistoryTableProps {
   accountId: string;
@@ -320,7 +321,7 @@ export const DelegateDelegationHistoryTable = ({
         }
 
         return (
-          <div className="flex items-center gap-3">
+          <div className="group flex items-center gap-3">
             <div className="overflow-truncate flex max-w-[140px] items-center gap-2">
               <EnsAvatar
                 address={delegatorAddress as `0x${string}`}
@@ -334,6 +335,16 @@ export const DelegateDelegationHistoryTable = ({
                     : "text-secondary",
                 )}
               />
+              <div className="flex items-center opacity-0 transition-opacity group-hover:opacity-100">
+                <CopyAndPasteButton
+                  textToCopy={delegatorAddress as `0x${string}`}
+                  customTooltipText={{
+                    default: "Copy address",
+                    copied: "Address copied!",
+                  }}
+                  className="p-2"
+                />
+              </div>
             </div>
           </div>
         );
@@ -411,7 +422,7 @@ export const DelegateDelegationHistoryTable = ({
         }
 
         return (
-          <div className="flex items-center justify-between gap-3">
+          <div className="group flex items-center justify-between gap-3">
             <div className="flex max-w-[140px] items-center gap-2 overflow-hidden">
               <EnsAvatar
                 address={delegateAddress as `0x${string}`}
@@ -425,6 +436,16 @@ export const DelegateDelegationHistoryTable = ({
                     : "text-secondary",
                 )}
               />
+              <div className="flex items-center opacity-0 transition-opacity group-hover:opacity-100">
+                <CopyAndPasteButton
+                  textToCopy={delegateAddress as `0x${string}`}
+                  customTooltipText={{
+                    default: "Copy address",
+                    copied: "Address copied!",
+                  }}
+                  className="p-2"
+                />
+              </div>
             </div>
             <Link
               href={`${daoConfigByDaoId[daoId].daoOverview.chain.blockExplorers?.default.url}/tx/${item.transactionHash}`}

@@ -1,20 +1,14 @@
 import { useCallback, useMemo, useState, useEffect } from "react";
 import {
   useBalanceHistoryQuery,
-  useBalanceHistoryBuyQuery,
-  useBalanceHistorySellQuery,
   useBalanceHistoryTotalCountQuery,
-  useBalanceHistoryBuyTotalCountQuery,
-  useBalanceHistorySellTotalCountQuery,
 } from "@anticapture/graphql-client/hooks";
-
 import { formatUnits } from "viem";
 import { ApolloError, NetworkStatus } from "@apollo/client";
 import daoConfig from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { AmountFilterVariables } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
 
-// Interface for a single transfer
 export interface Transfer {
   timestamp: string;
   amount: string;
@@ -24,7 +18,6 @@ export interface Transfer {
   direction: "in" | "out";
 }
 
-// Interface for pagination info
 export interface PaginationInfo {
   hasNextPage: boolean;
   hasPreviousPage: boolean;
@@ -37,7 +30,6 @@ export interface PaginationInfo {
   currentItemsCount: number;
 }
 
-// Interface for the hook result
 export interface UseBalanceHistoryResult {
   transfers: Transfer[];
   loading: boolean;
@@ -54,8 +46,8 @@ export function useBalanceHistory({
   orderBy = "timestamp",
   orderDirection = "desc",
   transactionType = "all",
-  fromFilter,
-  toFilter,
+  customFromFilter,
+  customToFilter,
   filterVariables,
   itemsPerPage = 10,
 }: {
@@ -64,8 +56,8 @@ export function useBalanceHistory({
   orderBy?: string;
   orderDirection?: "asc" | "desc";
   transactionType?: "all" | "buy" | "sell";
-  fromFilter?: string;
-  toFilter?: string;
+  customFromFilter?: string;
+  customToFilter?: string;
   filterVariables?: AmountFilterVariables;
   itemsPerPage?: number;
 }): UseBalanceHistoryResult {
@@ -75,29 +67,68 @@ export function useBalanceHistory({
     daoOverview: { token },
   } = daoConfig[daoId as DaoIdEnum];
 
-  // Reset page to 1 when transaction type or sorting changes
+  // Reset page to 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [transactionType, orderBy, orderDirection]);
+  }, [
+    transactionType,
+    orderBy,
+    orderDirection,
+    customFromFilter,
+    customToFilter,
+  ]);
+
+  const { fromFilter, toFilter } = useMemo(() => {
+    if (customToFilter && customToFilter !== accountId) {
+      return {
+        fromFilter: accountId,
+        toFilter: customToFilter,
+      };
+    }
+
+    if (customFromFilter && customFromFilter !== accountId) {
+      return {
+        fromFilter: customFromFilter,
+        toFilter: accountId,
+      };
+    }
+
+    if (transactionType === "buy") {
+      return {
+        fromFilter: undefined,
+        toFilter: accountId,
+      };
+    }
+
+    if (transactionType === "sell") {
+      return {
+        fromFilter: accountId,
+        toFilter: undefined,
+      };
+    }
+
+    return {
+      fromFilter: accountId,
+      toFilter: accountId,
+    };
+  }, [accountId, transactionType, customFromFilter, customToFilter]);
 
   const queryVariables = useMemo(
     () => ({
-      account: accountId,
+      from: fromFilter,
+      to: toFilter,
       limit: itemsPerPage,
       orderBy,
       orderDirection,
       ...filterVariables,
-      ...(fromFilter && { from: fromFilter }),
-      ...(toFilter && { to: toFilter }),
     }),
     [
-      accountId,
+      fromFilter,
+      toFilter,
       itemsPerPage,
       orderBy,
       orderDirection,
       filterVariables,
-      fromFilter,
-      toFilter,
     ],
   );
 
@@ -112,71 +143,21 @@ export function useBalanceHistory({
     fetchPolicy: "cache-and-network" as const,
   };
 
-  // Use different queries based on transaction type
-  const allQuery = useBalanceHistoryQuery({
+  const { data, networkStatus, error, fetchMore } = useBalanceHistoryQuery({
     variables: queryVariables,
     ...queryOptions,
-    skip: !accountId || transactionType !== "all",
   });
 
-  const buyQuery = useBalanceHistoryBuyQuery({
-    variables: queryVariables,
-    ...queryOptions,
-    skip: !accountId || transactionType !== "buy",
-  });
-
-  const sellQuery = useBalanceHistorySellQuery({
-    variables: queryVariables,
-    ...queryOptions,
-    skip: !accountId || transactionType !== "sell",
-  });
-
-  // Use separate totalCount queries (called only once or when filters change)
-  const totalCountQueryOptions = {
+  const { data: totalCountData } = useBalanceHistoryTotalCountQuery({
+    variables: { account: accountId },
     context: {
       headers: {
         "anticapture-dao-id": daoId,
       },
     },
     skip: !accountId,
-    fetchPolicy: "cache-first" as const, // Use cache-first for totalCount to reduce calls
-  };
-
-  const allTotalCountQuery = useBalanceHistoryTotalCountQuery({
-    variables: { account: accountId },
-    ...totalCountQueryOptions,
-    skip: !accountId || transactionType !== "all",
+    fetchPolicy: "cache-first" as const,
   });
-
-  const buyTotalCountQuery = useBalanceHistoryBuyTotalCountQuery({
-    variables: { account: accountId },
-    ...totalCountQueryOptions,
-    skip: !accountId || transactionType !== "buy",
-  });
-
-  const sellTotalCountQuery = useBalanceHistorySellTotalCountQuery({
-    variables: { account: accountId },
-    ...totalCountQueryOptions,
-    skip: !accountId || transactionType !== "sell",
-  });
-
-  // Select the active queries based on transaction type
-  const activeQuery =
-    transactionType === "buy"
-      ? buyQuery
-      : transactionType === "sell"
-        ? sellQuery
-        : allQuery;
-
-  const activeTotalCountQuery =
-    transactionType === "buy"
-      ? buyTotalCountQuery
-      : transactionType === "sell"
-        ? sellTotalCountQuery
-        : allTotalCountQuery;
-
-  const { data, networkStatus, error, fetchMore } = activeQuery;
-  const { data: totalCountData } = activeTotalCountQuery;
 
   // Transform raw transfers to our format
   const transformedTransfers = useMemo(() => {
@@ -197,7 +178,7 @@ export function useBalanceHistory({
     }));
   }, [data, accountId, token]);
 
-  // Real pagination info from GraphQL query
+  // Pagination info
   const paginationInfo: PaginationInfo = useMemo(() => {
     const pageInfo = data?.transfers?.pageInfo;
     const totalCount = totalCountData?.transfers?.totalCount || 0;
@@ -223,14 +204,13 @@ export function useBalanceHistory({
     itemsPerPage,
   ]);
 
-  // Fetch next page function
+  // Fetch next page
   const fetchNextPage = useCallback(async () => {
     if (
       !paginationInfo.hasNextPage ||
       !paginationInfo.endCursor ||
       isPaginationLoading
     ) {
-      console.warn("No next page available or already loading");
       return;
     }
 
@@ -278,14 +258,13 @@ export function useBalanceHistory({
     queryVariables,
   ]);
 
-  // Fetch previous page function
+  // Fetch previous page
   const fetchPreviousPage = useCallback(async () => {
     if (
       !paginationInfo.hasPreviousPage ||
       !paginationInfo.startCursor ||
       isPaginationLoading
     ) {
-      console.warn("No previous page available or already loading");
       return;
     }
 

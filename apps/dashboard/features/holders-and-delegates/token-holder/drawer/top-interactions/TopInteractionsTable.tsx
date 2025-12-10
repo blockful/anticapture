@@ -18,6 +18,7 @@ import { percentageVariants } from "@/shared/components/design-system/table/Perc
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
 import { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 
 export const TopInteractionsTable = ({
   address,
@@ -113,6 +114,16 @@ export const TopInteractionsTable = ({
               size="sm"
               variant="rounded"
             />
+            <div className="flex items-center opacity-0 transition-opacity [tr:hover_&]:opacity-100">
+              <CopyAndPasteButton
+                textToCopy={address as `0x${string}`}
+                customTooltipText={{
+                  default: "Copy address",
+                  copied: "Address copied!",
+                }}
+                className="p-2"
+              />
+            </div>
           </div>
         );
       },
