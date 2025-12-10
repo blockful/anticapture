@@ -8,6 +8,12 @@ import { startTreasurySyncCron } from "@/api/treasury-sync.cron";
 import { DuneProvider } from "./providers/dune-provider";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 
+/**
+ * Creates a treasury provider based on the environment variables
+ * @param app - The Hono app instance
+ * @returns void
+ * @throws Error if no treasury provider is configured
+ */
 export function createTreasuryProvider(app: Hono) {
   if (env.TREASURY_PROVIDER_PROTOCOL_ID && env.DEFILLAMA_API_URL) {
     const axiosClient = axios.create({
