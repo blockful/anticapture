@@ -138,7 +138,8 @@ export const getVoteTimingData = (
   userVote: Query_ProposalsActivity_Proposals_Items_UserVote | null | undefined,
   proposal: Query_ProposalsActivity_Proposals_Items_Proposal,
   finalResultStatus: string,
-  daoVotingPeriod: number | undefined,
+  daoVotingPeriod: number,
+  daoVotingDelay: number,
 ): { text: string; percentage: number } => {
   // If user didn't vote
   if (!userVote || !userVote.timestamp) {
@@ -151,9 +152,8 @@ export const getVoteTimingData = (
 
   // Convert timestamps to numbers for calculation
   const voteTime = Number(userVote.timestamp);
-  const startTime = Number(proposal.timestamp); // Proposal start time
-  const duration = Number(daoVotingPeriod ?? 0) / 1000; // Use DAO voting period or fallback to 30 days (in seconds)
-  const endTime = startTime + duration;
+  const startTime = Number(proposal.timestamp) + daoVotingDelay;
+  const endTime = startTime + daoVotingPeriod;
 
   if (voteTime >= endTime) {
     return { text: "Expired", percentage: 100 };
@@ -161,7 +161,10 @@ export const getVoteTimingData = (
 
   // Calculate how much time has passed as a percentage
   const timeElapsed = voteTime - startTime;
-  const percentage = Math.max(0, Math.min(100, (timeElapsed / duration) * 100));
+  const percentage = Math.max(
+    0,
+    Math.min(100, (timeElapsed / daoVotingPeriod) * 100),
+  );
 
   const timeDiff = endTime - voteTime;
   const daysLeft = Math.floor(timeDiff / (24 * 60 * 60));
@@ -169,6 +172,9 @@ export const getVoteTimingData = (
   if (daysLeft >= 4) {
     return { text: `Early (${daysLeft}d left)`, percentage };
   } else {
+    if (daysLeft == 0) {
+      return { text: `Late (<1d left)`, percentage };
+    }
     return { text: `Late (${daysLeft}d left)`, percentage };
   }
 };
