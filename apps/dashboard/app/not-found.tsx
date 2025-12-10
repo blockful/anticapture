@@ -23,22 +23,35 @@ const NotFound = () => {
               height={302}
               className="pointer-events-none absolute left-0 top-0 h-screen w-full object-cover"
             />
-            <div className="text-primary relative z-10 flex flex-col items-center justify-center gap-4 px-10">
+            <div className="text-primary relative z-10 flex w-full flex-col items-center justify-center gap-4 px-5">
               <NotFoundPageIcon className="w-full max-w-[602px]" />
               <h3 className="text-primary font-['Roboto_Mono'] text-[24px] font-normal uppercase leading-8">
                 [ERROR:page_NOT_FOUND]
               </h3>
-              <p className="text-secondary text-center font-['Inter'] text-base font-normal leading-6">
-                The system couldn&apos;t resolve the requested route.
-              </p>
-              <p className="text-secondary text-center font-['Inter'] text-base font-normal leading-6">
-                Check the URL or submit a bug report.
-              </p>
-              <div className="flex items-center justify-center gap-2">
-                <Button asChild variant="primary" size="md">
+              <div className="flex flex-col items-center justify-center">
+                <p className="text-secondary text-center font-['Inter'] text-base font-normal leading-6">
+                  The system couldn&apos;t resolve the requested route.
+                </p>
+                <p className="text-secondary text-center font-['Inter'] text-base font-normal leading-6">
+                  Check the URL or submit a bug report.
+                </p>
+              </div>
+
+              <div className="flex w-full flex-col items-center justify-center gap-2 md:flex-row">
+                <Button
+                  asChild
+                  variant="primary"
+                  className="w-full md:w-auto"
+                  size="md"
+                >
                   <Link href="/">Go to Dashboard</Link>
                 </Button>
-                <Button asChild variant="outline" size="md">
+                <Button
+                  asChild
+                  variant="outline"
+                  className="w-full md:w-auto"
+                  size="md"
+                >
                   <Link
                     href="https://t.me/+4oj-_q_8bGI4N2Qx"
                     target="_blank"
