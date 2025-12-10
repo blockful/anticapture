@@ -61,7 +61,7 @@ interface BaseInfo {
 
 export interface ChainWithIcon extends Chain {
   icon: (props: DaoIconProps) => ReactNode;
-  blockTime: number;
+  blockTime?: number;
 }
 
 // Section configurations without data storage
@@ -189,7 +189,8 @@ export interface AttackProfitabilityConfig {
     percentage: number;
   };
 }
-export interface GovernanceImplementationConfig extends GovernanceImplementation {}
+export interface GovernanceImplementationConfig
+  extends GovernanceImplementation {}
 
 // Complete DAO configuration structure
 export interface DaoConfiguration extends BaseInfo {
