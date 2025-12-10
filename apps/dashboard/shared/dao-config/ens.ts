@@ -35,8 +35,8 @@ export const ENS: DaoConfiguration = {
       quorumCalculation: QUORUM_CALCULATION_TYPES.TOTAL_SUPPLY,
     },
     govPlatform: {
-      name: "Tally",
-      url: "https://tally.xyz/gov/ens/proposal/",
+      name: "Anticapture",
+      url: "https://anticapture.com/ens/governance/proposal/",
     },
     securityCouncil: {
       isActive: true,
