@@ -29,8 +29,10 @@ const NotFound = () => {
                 [ERROR:page_NOT_FOUND]
               </h3>
               <p className="text-secondary text-center font-['Inter'] text-base font-normal leading-6">
-                The system couldn&apos;t resolve the requested route. Check the
-                URL or submit a bug report.
+                The system couldn&apos;t resolve the requested route.
+              </p>
+              <p className="text-secondary text-center font-['Inter'] text-base font-normal leading-6">
+                Check the URL or submit a bug report.
               </p>
               <div className="flex items-center justify-center gap-2">
                 <Button asChild variant="primary" size="md">
