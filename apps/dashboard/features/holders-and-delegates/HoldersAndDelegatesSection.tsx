@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactElement } from "react";
+import { ReactElement, useEffect } from "react";
 import { TheSectionLayout } from "@/shared/components";
 import { TimeInterval } from "@/shared/types/enums";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
@@ -25,6 +25,29 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     "tab",
     parseAsString.withDefault("tokenHolders"),
   );
+
+  // clean up filters when switching tabs
+  const setDrawerAddress = useQueryState("drawerAddress")[1];
+  const setCurrentAddressFilter = useQueryState("address")[1];
+  const setSortOrder = useQueryState("sort")[1];
+  const setSortBy = useQueryState("sortBy")[1];
+
+  useEffect(() => {
+    const cleanupFilters = async () => {
+      setDrawerAddress(null);
+      setCurrentAddressFilter(null);
+      setSortOrder(null);
+      setSortBy(null);
+    };
+
+    cleanupFilters();
+  }, [
+    activeTab,
+    setDrawerAddress,
+    setCurrentAddressFilter,
+    setSortOrder,
+    setSortBy,
+  ]);
 
   // Map from tab ID to tab component
   const tabComponentMap: Record<TabId, ReactElement> = {

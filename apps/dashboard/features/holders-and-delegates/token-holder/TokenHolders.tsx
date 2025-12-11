@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
+import { parseAsStringEnum, useQueryState } from "nuqs";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { Address, formatUnits, zeroAddress } from "viem";
@@ -37,17 +37,13 @@ export const TokenHolders = ({
   days: TimeInterval;
   daoId: DaoIdEnum;
 }) => {
-  const [drawerAddress, setDrawerAddress] = useQueryState(
-    "holderAddress",
-    parseAsString.withDefault("aaa"),
-  );
-
+  const [drawerAddress, setDrawerAddress] = useQueryState("drawerAddress");
+  const [currentAddressFilter, setCurrentAddressFilter] =
+    useQueryState("address");
   const [sortOrder, setSortOrder] = useQueryState(
     "sort",
     parseAsStringEnum(["desc", "asc"]).withDefault("desc"),
   );
-  const [currentAddressFilter, setCurrentAddressFilter] =
-    useQueryState("address");
   const pageLimit: number = 15;
   const { isMobile } = useScreenSize();
   const {

@@ -69,18 +69,18 @@ export const Delegates = ({
 }: DelegatesProps) => {
   const pageLimit: number = 15;
 
-  const [drawerAddress, setDrawerAddress] = useQueryState("delegateAddress");
+  const [drawerAddress, setDrawerAddress] = useQueryState("drawerAddress");
   const [currentAddressFilter, setCurrentAddressFilter] =
     useQueryState("address");
+  const [sortOrder, setSortOrder] = useQueryState(
+    "sort",
+    parseAsStringEnum(["desc", "asc"]).withDefault("desc"),
+  );
   const [sortBy, setSortBy] = useQueryState(
     "sortBy",
     parseAsStringEnum(["delegationsCount", "votingPower"]).withDefault(
       "votingPower",
     ),
-  );
-  const [sortDirection, setSortDirection] = useQueryState(
-    "sort",
-    parseAsStringEnum(["desc", "asc"]).withDefault("desc"),
   );
   const { decimals } = daoConfig[daoId];
 
@@ -106,7 +106,7 @@ export const Delegates = ({
   } = useDelegates({
     fromDate,
     orderBy: sortBy,
-    orderDirection: sortDirection,
+    orderDirection: sortOrder,
     daoId,
     days: timePeriod,
     address: currentAddressFilter,
@@ -119,11 +119,11 @@ export const Delegates = ({
   const handleSort = (field: string) => {
     if (sortBy === field) {
       // Toggle direction if same field
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
       // New field, default to desc for votingPower, asc for delegationsCount
       setSortBy(field as "votingPower" | "delegationsCount");
-      setSortDirection(field === "votingPower" ? "desc" : "asc");
+      setSortOrder(field === "votingPower" ? "desc" : "asc");
     }
   };
 
@@ -279,7 +279,7 @@ export const Delegates = ({
             props={{ className: "size-4" }}
             activeState={
               sortBy === "votingPower"
-                ? sortDirection === "asc"
+                ? sortOrder === "asc"
                   ? ArrowState.UP
                   : ArrowState.DOWN
                 : ArrowState.DEFAULT
@@ -395,7 +395,7 @@ export const Delegates = ({
             props={{ className: "size-4" }}
             activeState={
               sortBy === "delegationsCount"
-                ? sortDirection === "asc"
+                ? sortOrder === "asc"
                   ? ArrowState.UP
                   : ArrowState.DOWN
                 : ArrowState.DEFAULT
