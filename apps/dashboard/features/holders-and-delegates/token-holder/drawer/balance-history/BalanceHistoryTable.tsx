@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { SkeletonRow, Button, IconButton } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
@@ -17,7 +17,6 @@ import {
 import daoConfigByDaoId from "@/shared/dao-config";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
-import { AmountFilterVariables } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
 import { parseUnits } from "viem";
 import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
 import { AddressFilter } from "@/shared/components/design-system/table/filters";
@@ -25,6 +24,13 @@ import { fetchEnsData } from "@/shared/hooks/useEnsData";
 import daoConfig from "@/shared/dao-config";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { DaoIdEnum } from "@/shared/types/daos";
+import {
+  parseAsBoolean,
+  parseAsString,
+  parseAsStringEnum,
+  useQueryState,
+  useQueryStates,
+} from "nuqs";
 
 interface BalanceHistoryData {
   id: string;
@@ -46,14 +52,28 @@ export const BalanceHistoryTable = ({
 }) => {
   const { decimals } = daoConfig[daoId];
 
-  const [typeFilter, setTypeFilter] = useState<string>("all");
-  const [orderBy, setOrderBy] = useState<"timestamp" | "amount">("timestamp");
-  const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("desc");
-  const [filterVariables, setFilterVariables] =
-    useState<AmountFilterVariables>();
-  const [isFilterActive, setIsFilterActive] = useState(false);
-  const [customFromFilter, setCustomFromFilter] = useState<string>();
-  const [customToFilter, setCustomToFilter] = useState<string>();
+  const [typeFilter, setTypeFilter] = useQueryState(
+    "type",
+    parseAsStringEnum(["all", "buy", "sell"]).withDefault("all"),
+  );
+  const [orderBy, setOrderBy] = useQueryState(
+    "orderBy",
+    parseAsStringEnum(["timestamp", "amount"]).withDefault("timestamp"),
+  );
+  const [orderDirection, setOrderDirection] = useQueryState(
+    "orderDirection",
+    parseAsStringEnum(["asc", "desc"]).withDefault("desc"),
+  );
+  const [filterVariables, setFilterVariables] = useQueryStates({
+    minDelta: parseAsString,
+    maxDelta: parseAsString,
+  });
+  const [customFromFilter, setCustomFromFilter] = useQueryState("from");
+  const [customToFilter, setCustomToFilter] = useQueryState("to");
+  const [isFilterActive, setIsFilterActive] = useQueryState(
+    "active",
+    parseAsBoolean.withDefault(false),
+  );
 
   const sortOptions: SortOption[] = [
     { value: "largest-first", label: "Largest first" },
@@ -281,10 +301,10 @@ export const BalanceHistoryTable = ({
             options={typeFilterOptions}
             selectedValue={typeFilter}
             onValueChange={(value) => {
-              setTypeFilter(value);
+              setTypeFilter(value as "all" | "buy" | "sell");
               if (value === "all") {
-                setCustomFromFilter(undefined);
-                setCustomToFilter(undefined);
+                setCustomFromFilter(null);
+                setCustomToFilter(null);
               }
             }}
           />
@@ -354,14 +374,14 @@ export const BalanceHistoryTable = ({
                 const { address } = await fetchEnsData({
                   address: addr as `${string}.eth`,
                 });
-                setCustomFromFilter(address || undefined);
-                setCustomToFilter(undefined);
+                setCustomFromFilter(address || null);
+                setCustomToFilter(null);
                 return;
               }
-              setCustomFromFilter(addr || undefined);
-              setCustomToFilter(undefined);
+              setCustomFromFilter(addr || null);
+              setCustomToFilter(null);
             }}
-            currentFilter={customFromFilter}
+            currentFilter={customFromFilter || undefined}
           />
         </div>
       ),
@@ -434,14 +454,14 @@ export const BalanceHistoryTable = ({
                 const { address } = await fetchEnsData({
                   address: addr as `${string}.eth`,
                 });
-                setCustomToFilter(address || undefined);
-                setCustomFromFilter(undefined);
+                setCustomToFilter(address || null);
+                setCustomFromFilter(null);
                 return;
               }
-              setCustomToFilter(addr || undefined);
-              setCustomFromFilter(undefined);
+              setCustomToFilter(addr || null);
+              setCustomFromFilter(null);
             }}
-            currentFilter={customToFilter}
+            currentFilter={customToFilter || undefined}
           />
         </div>
       ),

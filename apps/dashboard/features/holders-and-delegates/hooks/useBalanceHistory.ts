@@ -53,11 +53,11 @@ export function useBalanceHistory({
 }: {
   accountId: string;
   daoId: DaoIdEnum;
+  customFromFilter: string | null;
+  customToFilter: string | null;
   orderBy?: string;
   orderDirection?: "asc" | "desc";
   transactionType?: "all" | "buy" | "sell";
-  customFromFilter?: string;
-  customToFilter?: string;
   filterVariables?: AmountFilterVariables;
   itemsPerPage?: number;
 }): UseBalanceHistoryResult {
@@ -120,7 +120,8 @@ export function useBalanceHistory({
       limit: itemsPerPage,
       orderBy,
       orderDirection,
-      ...filterVariables,
+      minDelta: filterVariables?.minDelta ?? undefined,
+      maxDelta: filterVariables?.maxDelta ?? undefined,
     }),
     [
       fromFilter,

@@ -13,18 +13,15 @@ import { ChartContainer } from "@/shared/components/ui/chart";
 import { timestampToReadableDate } from "@/shared/utils";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { useState } from "react";
 import {
   BalanceHistoryGraphItem,
   useBalanceHistoryGraph,
 } from "@/features/holders-and-delegates/hooks/useBalanceHistoryGraph";
-import {
-  TimePeriodSwitcher,
-  TimePeriod,
-} from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
+import { TimePeriodSwitcher } from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
 import { ChartExceptionState } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
+import { parseAsStringEnum, useQueryState } from "nuqs";
 
 interface BalanceHistoryVariationGraphProps {
   accountId: string;
@@ -83,7 +80,10 @@ export const BalanceHistoryVariationGraph = ({
   accountId,
   daoId,
 }: BalanceHistoryVariationGraphProps) => {
-  const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("all");
+  const [selectedPeriod, setSelectedPeriod] = useQueryState(
+    "selectedPeriod",
+    parseAsStringEnum(["30d", "90d", "all"]).withDefault("all"),
+  );
 
   const { balanceHistory, loading, error } = useBalanceHistoryGraph(
     accountId,
