@@ -11,7 +11,7 @@ export function accountBalance(app: Hono, service: AccountBalanceService) {
     createRoute({
       method: "get",
       operationId: "accountBalance",
-      path: "/account-balance/:accountId",
+      path: "/account-balances/:accountId",
       summary: "Get account balance",
       description: "Returns account balance",
       tags: ["transactions"],

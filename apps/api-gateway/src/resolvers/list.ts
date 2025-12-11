@@ -1,6 +1,5 @@
 
 const daoListQueries = [
-  'accountBalances',
   'accountPowers',
   'accounts',
   'daoMetricsDayBuckets',

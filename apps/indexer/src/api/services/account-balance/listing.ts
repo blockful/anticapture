@@ -51,7 +51,7 @@ export class AccountBalanceService {
     const result = await this.repo.getAccountBalance(accountId);
 
     if (!result) {
-      throw new Error("Not found"); // Review error handling
+      throw new Error("Account not found");
     }
 
     return result;
