@@ -1,0 +1,10 @@
+node_modules
+dist
+*.log
+.env
+.env.local
+*.tsbuildinfo
+coverage
+.turbo
+.ponder
+dump
