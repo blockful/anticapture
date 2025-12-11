@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useQueryState } from "nuqs";
+import { useMemo } from "react";
+import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { Address, formatUnits, zeroAddress } from "viem";
@@ -37,10 +37,17 @@ export const TokenHolders = ({
   days: TimeInterval;
   daoId: DaoIdEnum;
 }) => {
-  const [drawerAddress, setDrawerAddress] = useQueryState("holderAddress");
+  const [drawerAddress, setDrawerAddress] = useQueryState(
+    "holderAddress",
+    parseAsString.withDefault("aaa"),
+  );
 
-  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
-  const [currentAddressFilter, setCurrentAddressFilter] = useState<string>("");
+  const [sortOrder, setSortOrder] = useQueryState(
+    "sort",
+    parseAsStringEnum(["desc", "asc"]).withDefault("desc"),
+  );
+  const [currentAddressFilter, setCurrentAddressFilter] =
+    useQueryState("address");
   const pageLimit: number = 15;
   const { isMobile } = useScreenSize();
   const {
@@ -48,7 +55,7 @@ export const TokenHolders = ({
   } = daoConfig[daoId];
 
   const handleAddressFilterApply = (address: string | undefined) => {
-    setCurrentAddressFilter(address || "");
+    setCurrentAddressFilter(address || null);
   };
 
   const {
@@ -126,7 +133,7 @@ export const TokenHolders = ({
           <span>Address</span>
           <AddressFilter
             onApply={handleAddressFilterApply}
-            currentFilter={currentAddressFilter}
+            currentFilter={currentAddressFilter || undefined}
             className="ml-2"
           />
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { ColumnDef, HeaderContext } from "@tanstack/react-table";
 
 import {
@@ -22,7 +22,7 @@ import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
 import daoConfig from "@/shared/dao-config";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { useQueryState } from "nuqs";
+import { parseAsStringEnum, useQueryState } from "nuqs";
 interface DelegateTableData {
   address: string;
   votingPower: string;
@@ -67,16 +67,22 @@ export const Delegates = ({
   timePeriod = TimeInterval.THIRTY_DAYS,
   daoId,
 }: DelegatesProps) => {
-  const [drawerAddress, setDrawerAddress] = useQueryState("delegateAddress");
-
-  // State for managing sort order
-  const [sortBy, setSortBy] = useState<string>("votingPower");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-  const { decimals } = daoConfig[daoId];
-
-  // State for address filtering
-  const [currentAddressFilter, setCurrentAddressFilter] = useState<string>("");
   const pageLimit: number = 15;
+
+  const [drawerAddress, setDrawerAddress] = useQueryState("delegateAddress");
+  const [currentAddressFilter, setCurrentAddressFilter] =
+    useQueryState("address");
+  const [sortBy, setSortBy] = useQueryState(
+    "sortBy",
+    parseAsStringEnum(["delegationsCount", "votingPower"]).withDefault(
+      "votingPower",
+    ),
+  );
+  const [sortDirection, setSortDirection] = useQueryState(
+    "sort",
+    parseAsStringEnum(["desc", "asc"]).withDefault("desc"),
+  );
+  const { decimals } = daoConfig[daoId];
 
   const handleAddressFilterApply = (address: string | undefined) => {
     setCurrentAddressFilter(address || "");
@@ -116,7 +122,7 @@ export const Delegates = ({
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
       // New field, default to desc for votingPower, asc for delegationsCount
-      setSortBy(field);
+      setSortBy(field as "votingPower" | "delegationsCount");
       setSortDirection(field === "votingPower" ? "desc" : "asc");
     }
   };
@@ -230,7 +236,7 @@ export const Delegates = ({
           <p>Address</p>
           <AddressFilter
             onApply={handleAddressFilterApply}
-            currentFilter={currentAddressFilter}
+            currentFilter={currentAddressFilter || undefined}
             className="ml-2"
           />
         </div>
