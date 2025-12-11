@@ -8,6 +8,7 @@ import scrollConfig from "./config/scroll.config";
 import compoundConfig from "./config/compound.config";
 import obolConfig from "./config/obol.config";
 import zkConfig from "./config/zk.config";
+import shutterConfig from "./config/shutter.config";
 
 export default {
   chains: {
@@ -21,6 +22,7 @@ export default {
     ...compoundConfig.chains,
     ...obolConfig.chains,
     ...zkConfig.chains,
+    ...shutterConfig.chains,
   },
   contracts: {
     ...arbitrumConfig.contracts,
@@ -33,5 +35,6 @@ export default {
     ...compoundConfig.contracts,
     ...obolConfig.contracts,
     ...zkConfig.contracts,
+    ...shutterConfig.contracts,
   },
 };

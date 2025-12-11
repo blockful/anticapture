@@ -175,6 +175,26 @@ export const CONTRACT_ADDRESSES = {
       startBlock: 55519658,
     },
   },
+  [DaoIdEnum.SHU]: {
+    blockTime: 12,
+    tokenType: "ERC20",
+    // https://etherscan.io/address/0xe485E2f1bab389C08721B291f6b59780feC83Fd7
+    token: {
+      address: "0xe485E2f1bab389C08721B291f6b59780feC83Fd7",
+      decimals: 18,
+      startBlock: 19021394,
+    },
+    // https://etherscan.io/address/0xAA6BfA174d2f803b517026E93DBBEc1eBa26258e
+    azorius: {
+      address: "0xAA6BfA174d2f803b517026E93DBBEc1eBa26258e",
+      startBlock: 19021698,
+    },
+    // https://etherscan.io/address/0x4b29d8B250B8b442ECfCd3a4e3D91933d2db720F
+    linearVotingStrategy: {
+      address: "0x4b29d8B250B8b442ECfCd3a4e3D91933d2db720F",
+      startBlock: 19021698,
+    },
+  },
 } as const;
 
 export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -317,6 +337,9 @@ export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   },
   [DaoIdEnum.ZK]: {
     timelock: "0xe5d21A9179CA2E1F0F327d598D464CcF60d89c3d",
+  },
+  [DaoIdEnum.SHU]: {
+    timelock: "0x36bD3044ab68f600f6d3e081056F34f2a58432c4",
   },
 };
 
@@ -529,6 +552,7 @@ export const CEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     OKX2: "0xf9b52be2426f06ab6d560f64a7b15e820f33cbdb",
     OKX3: "0xecf17c7f6a6090f1edd21e0beb2268197270fb44",
   },
+  [DaoIdEnum.SHU]: {},
 };
 
 export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -594,6 +618,7 @@ export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     "Pancake Swap": "0xf92b0178bc932a59d45c1c4aac81712aac6a5b61",
     Uniswap: "0x3d7264539E6e3f596bb485E3091f3Ae02Ad01ef8",
   },
+  [DaoIdEnum.SHU]: {},
 };
 
 export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -640,6 +665,7 @@ export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     Aave: "0xd6cd2c0fc55936498726cacc497832052a9b2d1b",
     Venus: "0x697a70779c1a03ba2bd28b7627a902bff831b616",
   },
+  [DaoIdEnum.SHU]: {},
 };
 
 export const BurningAddresses: Record<
@@ -706,6 +732,11 @@ export const BurningAddresses: Record<
     ZeroAddress: zeroAddress,
     Dead: "0x0000000000000000000000000000000000000000",
     TokenContract: "0x5A7d6b2F92C77FAD6CCaBd7EE0624E64907Eaf3E",
+  },
+  [DaoIdEnum.SHU]: {
+    ZeroAddress: zeroAddress,
+    Dead: "0x000000000000000000000000000000000000dEaD",
+    TokenContract: "0xe485E2f1bab389C08721B291f6b59780feC83Fd7",
   },
 };
 
