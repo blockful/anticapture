@@ -1,5 +1,7 @@
 const daoItemQueries = [
-  'accountInteractions',
+  "accountBalance",
+  "accountBalances",
+  "accountInteractions",
   "compareActiveSupply",
   "compareAverageTurnout",
   "compareCexSupply",

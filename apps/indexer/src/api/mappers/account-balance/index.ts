@@ -5,6 +5,77 @@ import { PERCENTAGE_NO_BASELINE } from "@/api/mappers/constants";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { calculateHistoricalBlockNumber } from "@/lib/blockTime";
 
+export const AccountBalancesRequestSchema = z.object({
+  // TODO: Validate
+  limit: z.coerce
+    .number()
+    .int()
+    .min(1, "Limit must be a positive integer")
+    .max(100, "Limit cannot exceed 100")
+    .optional()
+    .default(20),
+  skip: z.coerce
+    .number()
+    .int()
+    .min(0, "Skip must be a non-negative integer")
+    .optional()
+    .default(0),
+  orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
+  includeAddresses: z.array(z.string()).optional().default([]),
+  excludeAddresses: z.array(z.string()).optional().default([]),
+  includeDelegates: z.array(z.string()).optional().default([]),
+  excludeDelegates: z.array(z.string()).optional().default([]),
+  balanceGreaterThan: z
+    .string()
+    .transform((val) => BigInt(val))
+    .optional(),
+  balanceLessThan: z
+    .string()
+    .transform((val) => BigInt(val))
+    .optional(),
+});
+
+export const AccountBalanceResponseSchema = z.object({
+  accountId: z.string(),
+  balance: z.string(),
+  tokenId: z.string(),
+  delegate: z.string(),
+});
+
+export const AccountBalancesResponseSchema = z.object({
+  items: z.array(AccountBalanceResponseSchema),
+  totalCount: z.number(),
+});
+
+export type AccountBalancesResponse = z.infer<
+  typeof AccountBalancesResponseSchema
+>;
+
+export type AccountBalanceResponse = z.infer<
+  typeof AccountBalanceResponseSchema
+>;
+
+export const AccountBalancesResponseMapper = (
+  items: DBAccountBalance[],
+  totalCount: bigint,
+): AccountBalancesResponse => {
+  return {
+    totalCount: Number(totalCount),
+    items: items.map((item) => AccountBalanceResponseMapper(item)),
+  };
+};
+
+export const AccountBalanceResponseMapper = (
+  item: DBAccountBalance,
+): AccountBalanceResponse => {
+  return {
+    accountId: item.accountId,
+    balance: item.balance.toString(),
+    tokenId: item.tokenId,
+    delegate: item.delegate,
+  };
+};
+
 export const AccountBalanceVariationsRequestSchema = z.object({
   days: z
     .enum(DaysOpts)
@@ -93,6 +164,13 @@ export type DBAccountBalanceVariation = {
 export type DBAccountInteraction = DBAccountBalanceVariation & {
   totalVolume: bigint;
   transferCount: bigint;
+};
+
+export type DBAccountBalance = {
+  accountId: Address;
+  delegate: string;
+  tokenId: string;
+  balance: bigint;
 };
 
 export interface AccountInteractions {
