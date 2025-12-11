@@ -8,12 +8,12 @@ import { cn } from "@/shared/utils";
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { useScreenSize } from "@/shared/hooks";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { DelegateDelegationsHistory } from "@/features/holders-and-delegates/components/DelegatesDelegationHistory/DelegateDelegationsHistory";
+import { DelegateDelegationsHistory } from "@/features/holders-and-delegates/delegate/drawer/delegation-history/DelegateDelegationsHistory";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { VotingPower } from "@/features/holders-and-delegates/delegate/drawer/voting-power/VotingPower";
-import { BalanceHistory } from "@/features/holders-and-delegates/components/BalanceHistory/BalanceHistory";
+import { BalanceHistory } from "@/features/holders-and-delegates/token-holder/drawer/balance-history/BalanceHistory";
 import { DelegationHistoryTable } from "@/features/holders-and-delegates/token-holder/drawer/delegation-history/DelegationHistoryTable";
-import { DelegateProposalsActivity } from "@/features/holders-and-delegates/components/DelegateProposalsActivity";
+import { DelegateProposalsActivity } from "@/features/holders-and-delegates/delegate/drawer/votes/DelegateProposalsActivity";
 import { IconButton } from "@/shared/components";
 import { TopInteractions } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/TopInteractions";
 

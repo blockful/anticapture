@@ -1,8 +1,8 @@
 "use client";
 
 import { DaoIdEnum } from "@/shared/types/daos";
-import { BalanceHistoryVariationGraph } from "@/features/holders-and-delegates/components/BalanceHistory/BalanceHistoryVariationGraph";
-import { BalanceHistoryTable } from "@/features/holders-and-delegates/components/BalanceHistory/BalanceHistoryTable";
+import { BalanceHistoryVariationGraph } from "@/features/holders-and-delegates/token-holder/drawer/balance-history/BalanceHistoryVariationGraph";
+import { BalanceHistoryTable } from "@/features/holders-and-delegates/token-holder/drawer/balance-history/BalanceHistoryTable";
 
 interface BalanceHistoryProps {
   accountId: string;

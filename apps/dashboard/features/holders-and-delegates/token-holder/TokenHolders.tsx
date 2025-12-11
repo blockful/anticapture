@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useQueryState } from "nuqs";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { Address, formatUnits, zeroAddress } from "viem";
@@ -36,7 +37,8 @@ export const TokenHolders = ({
   days: TimeInterval;
   daoId: DaoIdEnum;
 }) => {
-  const [selectedTokenHolder, setSelectedTokenHolder] = useState<string>("");
+  const [drawerAddress, setDrawerAddress] = useQueryState("holderAddress");
+
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
   const [currentAddressFilter, setCurrentAddressFilter] = useState<string>("");
   const pageLimit: number = 15;
@@ -66,14 +68,6 @@ export const TokenHolders = ({
     days: days,
   });
 
-  const handleOpenDrawer = (address: string) => {
-    setSelectedTokenHolder(address);
-  };
-
-  const handleCloseDrawer = () => {
-    setSelectedTokenHolder("");
-  };
-
   const tableData: TokenHolderTableData[] = useMemo(() => {
     const calculateVariation = (
       currentBalance: string,
@@ -93,9 +87,7 @@ export const TokenHolders = ({
 
         if (historical === 0) return { percentageChange: 0, absoluteChange: 0 };
 
-        // Calculate absolute change in tokens
         const absoluteChange = current - historical;
-        // Calculate percentage variation
         const percentageChange = ((current - historical) / historical) * 100;
 
         return {
@@ -110,7 +102,6 @@ export const TokenHolders = ({
     return (
       tokenHoldersData?.map((holder) => {
         const historicalBalance = historicalBalancesCache.get(holder.accountId);
-
         const variation = calculateVariation(holder.balance, historicalBalance);
 
         return {
@@ -412,7 +403,7 @@ export const TokenHolders = ({
             hasMore={pagination.hasNextPage}
             isLoadingMore={fetchingMore}
             onLoadMore={fetchNextPage}
-            onRowClick={(row) => handleOpenDrawer(row.address as Address)}
+            onRowClick={(row) => setDrawerAddress(row.address as Address)}
             size="sm"
             withDownloadCSV={true}
             wrapperClassName="h-[450px]"
@@ -421,10 +412,10 @@ export const TokenHolders = ({
         </div>
       </div>
       <HoldersAndDelegatesDrawer
-        isOpen={!!selectedTokenHolder}
-        onClose={handleCloseDrawer}
+        isOpen={!!drawerAddress}
+        onClose={() => setDrawerAddress("")}
         entityType="tokenHolder"
-        address={selectedTokenHolder || ""}
+        address={drawerAddress || ""}
         daoId={daoId}
       />
     </>
