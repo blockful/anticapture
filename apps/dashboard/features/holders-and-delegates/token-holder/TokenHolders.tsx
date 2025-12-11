@@ -413,7 +413,7 @@ export const TokenHolders = ({
       </div>
       <HoldersAndDelegatesDrawer
         isOpen={!!drawerAddress}
-        onClose={() => setDrawerAddress("")}
+        onClose={() => setDrawerAddress(null)}
         entityType="tokenHolder"
         address={drawerAddress || ""}
         daoId={daoId}

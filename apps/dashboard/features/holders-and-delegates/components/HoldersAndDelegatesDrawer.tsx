@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Drawer, DrawerContent } from "@/shared/components/ui/drawer";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { X } from "lucide-react";
@@ -16,6 +15,7 @@ import { DelegationHistoryTable } from "@/features/holders-and-delegates/token-h
 import { DelegateProposalsActivity } from "@/features/holders-and-delegates/delegate/drawer/votes/DelegateProposalsActivity";
 import { IconButton } from "@/shared/components";
 import { TopInteractions } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/TopInteractions";
+import { useQueryState } from "nuqs";
 
 export type EntityType = "delegate" | "tokenHolder";
 
@@ -81,7 +81,9 @@ export const HoldersAndDelegatesDrawer = ({
     },
   };
 
-  const [activeTab, setActiveTab] = useState(entities[entityType].tabs[0].id);
+  const [activeTab, setActiveTab] = useQueryState("drawerTab", {
+    defaultValue: entities[entityType].tabs[0].id,
+  });
 
   const { isMobile } = useScreenSize();
 
@@ -89,10 +91,15 @@ export const HoldersAndDelegatesDrawer = ({
     return entities[entityType].tabs.find((tab) => tab.id === tabId)?.content;
   };
 
+  const handleCloseDrawer = () => {
+    onClose();
+    setActiveTab(null);
+  };
+
   return (
     <Drawer
       open={isOpen}
-      onOpenChange={onClose}
+      onOpenChange={handleCloseDrawer}
       direction={isMobile ? "bottom" : "right"}
     >
       <DrawerContent>
@@ -144,7 +151,7 @@ export const HoldersAndDelegatesDrawer = ({
               <IconButton
                 variant="outline"
                 size="sm"
-                onClick={onClose}
+                onClick={handleCloseDrawer}
                 icon={X}
               />
             </div>

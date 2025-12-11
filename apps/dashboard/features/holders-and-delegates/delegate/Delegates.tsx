@@ -22,6 +22,7 @@ import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
 import daoConfig from "@/shared/dao-config";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import { useQueryState } from "nuqs";
 interface DelegateTableData {
   address: string;
   votingPower: string;
@@ -66,6 +67,8 @@ export const Delegates = ({
   timePeriod = TimeInterval.THIRTY_DAYS,
   daoId,
 }: DelegatesProps) => {
+  const [drawerAddress, setDrawerAddress] = useQueryState("delegateAddress");
+
   // State for managing sort order
   const [sortBy, setSortBy] = useState<string>("votingPower");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
@@ -104,7 +107,6 @@ export const Delegates = ({
     limit: pageLimit,
   });
 
-  const [selectedDelegate, setSelectedDelegate] = useState<string | null>(null);
   const { isMobile } = useScreenSize();
 
   // Handle sorting for voting power and delegators
@@ -117,14 +119,6 @@ export const Delegates = ({
       setSortBy(field);
       setSortDirection(field === "votingPower" ? "desc" : "asc");
     }
-  };
-
-  const handleOpenDrawer = (address: string) => {
-    setSelectedDelegate(address);
-  };
-
-  const handleCloseDrawer = () => {
-    setSelectedDelegate(null);
   };
 
   const tableData = useMemo(() => {
@@ -483,7 +477,7 @@ export const Delegates = ({
         <Table
           columns={delegateColumns}
           data={tableData}
-          onRowClick={(row) => handleOpenDrawer(row.address as Address)}
+          onRowClick={(row) => setDrawerAddress(row.address as Address)}
           size="sm"
           hasMore={pagination.hasNextPage}
           isLoadingMore={fetchingMore}
@@ -494,11 +488,11 @@ export const Delegates = ({
         />
       </div>
       <HoldersAndDelegatesDrawer
-        isOpen={!!selectedDelegate}
-        onClose={handleCloseDrawer}
+        isOpen={!!drawerAddress}
+        onClose={() => setDrawerAddress(null)}
         entityType="delegate"
-        address={selectedDelegate || "None"}
-        daoId={daoId as DaoIdEnum}
+        address={drawerAddress || ""}
+        daoId={daoId}
       />
     </>
   );
