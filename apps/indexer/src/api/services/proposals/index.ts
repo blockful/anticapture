@@ -13,7 +13,7 @@ interface ProposalsRepository {
     status: string[] | undefined,
     fromDate: number | undefined,
     fromEndDate: number | undefined,
-    proposalTypeExclude: number[] | undefined,
+    proposalTypeExclude?: number[],
   ): Promise<DBProposal[]>;
   getProposalsCount(): Promise<number>;
   getProposalById(proposalId: string): Promise<DBProposal | undefined>;
@@ -91,7 +91,7 @@ export class ProposalsService {
       : undefined;
 
     // 2.Filter proposal type using DAO config
-    let proposalTypeExclude: number[] | undefined;
+    let proposalTypeExclude: number[] | undefined = undefined;
     if (!includeOptimisticProposals) {
       const daoConfig = CONTRACT_ADDRESSES[env.DAO_ID];
       const optimisticType =

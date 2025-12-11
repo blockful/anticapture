@@ -57,7 +57,7 @@ export const ProposalResponseSchema = z.object({
   calldatas: z.array(z.string()),
   values: z.array(z.string()),
   targets: z.array(z.string()),
-  proposalType: z.number().optional(),
+  proposalType: z.number().nullish(),
 });
 
 export const ProposalsResponseSchema = z.object({
@@ -107,7 +107,7 @@ export const ProposalMapper = {
       calldatas: p.calldatas,
       values: p.values.map((v) => v.toString()),
       targets: p.targets,
-      proposalType: p.proposalType ?? undefined,
+      proposalType: p.proposalType,
     };
   },
 };

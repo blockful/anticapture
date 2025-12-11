@@ -133,7 +133,7 @@ export class DrizzleRepository {
     status: string[] | undefined,
     fromDate: number | undefined,
     fromEndDate: number | undefined,
-    proposalTypeExclude: number[] | undefined,
+    proposalTypeExclude?: number[],
   ): Promise<DBProposal[]> {
     const whereClauses: SQL<unknown>[] = [];
 
