@@ -7,15 +7,9 @@ export interface ApiResponse {
   data?: unknown;
   error?: string;
   statusCode?: number;
-  responseTime?: number;
 }
 
 export interface AggregatedResponse {
-  timestamp: string;
-  totalApis: number;
-  successCount: number;
-  failureCount: number;
-  totalResponseTime: number;
   responses: ApiResponse[];
 }
 
@@ -23,33 +17,25 @@ export interface AggregatedResponse {
  * Fetches data from a single API endpoint
  */
 async function fetchFromApi(url: string): Promise<ApiResponse> {
-  const startTime = Date.now();
-
   try {
     const response = await axios.get(url, {
       timeout: env.REQUEST_TIMEOUT,
       validateStatus: (status) => status < 500, // Don't throw on 4xx errors
     });
 
-    const responseTime = Date.now() - startTime;
-
     return {
       url,
       success: response.status >= 200 && response.status < 300,
       data: response.data,
       statusCode: response.status,
-      responseTime,
     };
   } catch (error) {
-    const responseTime = Date.now() - startTime;
-
     if (error instanceof AxiosError) {
       return {
         url,
         success: false,
         error: error.message,
         statusCode: error.response?.status,
-        responseTime,
       };
     }
 
@@ -57,19 +43,17 @@ async function fetchFromApi(url: string): Promise<ApiResponse> {
       url,
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
-      responseTime,
     };
   }
 }
 
 /**
  * Aggregates responses with a specific path appended to each API URL
+ * Returns generic array of API responses
  */
 export async function aggregateApisWithPath(
   path: string,
 ): Promise<AggregatedResponse> {
-  const startTime = Date.now();
-
   // Append path to each API URL
   const urlsWithPath = apiUrls.map((baseUrl) => {
     const url = new URL(baseUrl);
@@ -97,16 +81,5 @@ export async function aggregateApisWithPath(
     };
   });
 
-  const totalResponseTime = Date.now() - startTime;
-  const successCount = responses.filter((r) => r.success).length;
-  const failureCount = responses.length - successCount;
-
-  return {
-    timestamp: new Date().toISOString(),
-    totalApis: apiUrls.length,
-    successCount,
-    failureCount,
-    totalResponseTime,
-    responses,
-  };
+  return { responses };
 }

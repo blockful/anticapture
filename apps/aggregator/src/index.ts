@@ -39,8 +39,8 @@ async function registerPlugins() {
 async function start() {
   try {
     await registerPlugins();
-    await healthRoutes(fastify);
-    await daosRoutes(fastify);
+    healthRoutes(fastify);
+    daosRoutes(fastify);
 
     await fastify.listen({
       port: env.PORT,

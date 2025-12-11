@@ -3,18 +3,21 @@ import { FastifyInstance } from "fastify";
 import { apiUrls } from "@/config/env";
 import { aggregateApisWithPath } from "@/services/aggregator";
 
-export async function healthRoutes(fastify: FastifyInstance) {
+export function healthRoutes(fastify: FastifyInstance) {
   // Health check endpoint - checks health of all configured APIs
   fastify.get("/health", async () => {
-    const apisHealth = await aggregateApisWithPath("/health");
+    const { responses } = await aggregateApisWithPath("/health");
+
+    const successCount = responses.filter((r) => r.success).length;
 
     return {
-      status: apisHealth.failureCount === 0 ? "ok" : "degraded",
+      status: successCount === apiUrls.length ? "ok" : "degraded",
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
       environment: process.env.NODE_ENV || "development",
       configuredApis: apiUrls.length,
-      apis: apisHealth,
+      successfulApis: successCount,
+      apis: responses,
     };
   });
 }
