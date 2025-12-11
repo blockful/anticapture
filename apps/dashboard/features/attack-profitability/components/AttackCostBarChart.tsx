@@ -149,10 +149,10 @@ export const AttackCostBarChart = ({
               id: "liquidTreasury",
               name: "Liquid Treasury",
               type: BarChartEnum.REGULAR,
-              value: liquidTreasury.data?.treasuryWithoutDaoToken || 0,
+              value: liquidTreasury.data?.liquidTreasury || 0,
               customColor: "#EC762EFF",
               displayValue:
-                (liquidTreasury.data?.treasuryWithoutDaoToken || 0) > 10000
+                (liquidTreasury.data?.liquidTreasury || 0) > 10000
                   ? undefined
                   : "<$10,000",
             },

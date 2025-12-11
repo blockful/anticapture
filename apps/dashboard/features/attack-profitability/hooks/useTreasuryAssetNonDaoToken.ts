@@ -1,13 +1,13 @@
 import daoConfigByDaoId from "@/shared/dao-config";
 import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
+import { normalizeTimestamp } from "@/shared/utils";
 import { DaoIdEnum } from "@/shared/types/daos";
 import useSWR, { SWRConfiguration } from "swr";
 import axios from "axios";
 
 export interface TreasuryAssetData {
   date: number;
-  totalTreasury: number;
-  treasuryWithoutDaoToken: number;
+  liquidTreasury: number;
 }
 
 export const fetchTreasuryAssetData = async ({
@@ -23,8 +23,7 @@ export const fetchTreasuryAssetData = async ({
   query {
     totalAssets(days: _${days}, order: ${order}) {
       date
-      totalTreasury
-      treasuryWithoutDaoToken
+      liquidTreasury
     }
   }`;
 
@@ -42,7 +41,10 @@ export const fetchTreasuryAssetData = async ({
   const { totalAssets } = response.data.data as {
     totalAssets: TreasuryAssetData[];
   };
-  return totalAssets;
+  return totalAssets.map((item) => ({
+    ...item,
+    date: normalizeTimestamp(item.date) * 1000, // normalize to midnight, return in ms
+  }));
 };
 
 export const useTreasuryAssetData = (

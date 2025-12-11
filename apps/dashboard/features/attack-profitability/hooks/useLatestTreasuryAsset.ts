@@ -6,8 +6,7 @@ import axios from "axios";
 
 export interface LatestTreasuryAsset {
   date: number;
-  totalTreasury: number;
-  treasuryWithoutDaoToken: number;
+  liquidTreasury: number;
 }
 
 export const fetchLatestTreasuryAsset = async ({
@@ -19,8 +18,7 @@ export const fetchLatestTreasuryAsset = async ({
   query {
     latestTotalAssets {
       date
-      totalTreasury
-      treasuryWithoutDaoToken
+      liquidTreasury
     }
   }`;
 

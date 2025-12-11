@@ -7,6 +7,6 @@ export function normalizeDatasetTreasuryNonDaoToken(
 ): MultilineChartDataSetPoint[] {
   return treasuryData.map((item) => ({
     date: item.date,
-    [key]: item.treasuryWithoutDaoToken,
+    [key]: item.liquidTreasury,
   }));
 }
