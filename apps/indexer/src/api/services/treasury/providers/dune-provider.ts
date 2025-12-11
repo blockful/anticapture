@@ -15,7 +15,7 @@ export interface DuneResponse {
   result: {
     rows: {
       date: string;
-      totalAssets: string;
+      liquidTreasury: number;
     }[];
   };
   next_uri: string;
@@ -52,11 +52,10 @@ export class DuneProvider implements TreasuryProvider {
       if (!year || !month || !day) {
         throw new Error(`Invalid date string: ${row.date}`);
       }
-      const timestamp = Math.floor(Date.UTC(year, month - 1, day) / 1000); // TODO: Check if this is correct
+      const timestamp = Math.floor(Date.UTC(year, month - 1, day) / 1000);
       return {
         date: BigInt(timestamp),
-        totalTreasury: BigInt(row.totalAssets),
-        treasuryWithoutDaoToken: 0n, // TODO: Implement this
+        liquidTreasury: row.liquidTreasury,
       };
     });
   }
