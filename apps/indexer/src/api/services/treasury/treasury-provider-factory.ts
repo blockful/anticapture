@@ -3,7 +3,7 @@ import axios from "axios";
 import { DefiLlamaProvider } from "./providers/defillama–provider";
 import { DuneProvider } from "./providers/dune-provider";
 import { TreasuryService } from "./treasury.service";
-import { assets } from "@/api/controller";
+import { assets } from "@/api/controllers";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 
 /**
