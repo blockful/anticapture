@@ -364,7 +364,7 @@ export const Delegates = ({
     {
       accessorKey: "delegators",
       meta: {
-        columnClassName: "w-20",
+        columnClassName: "w-28",
       },
       cell: ({ row }) => {
         const delegators = row.getValue("delegators") as number;
@@ -387,7 +387,7 @@ export const Delegates = ({
         <Button
           variant="ghost"
           size="sm"
-          className="text-secondary w-full justify-end p-0"
+          className="text-secondary w-full justify-start p-0"
           onClick={() => handleSort("delegationsCount")}
         >
           <h4 className="text-table-header">Delegators</h4>
