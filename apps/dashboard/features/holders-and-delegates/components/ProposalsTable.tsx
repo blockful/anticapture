@@ -106,13 +106,20 @@ export const ProposalsTable = ({
           item.userVote,
           item.proposal,
           finalResult.text,
-          Number(daoData?.votingPeriod) *
-            (daoConfigByDaoId[daoIdEnum]?.daoOverview.chain.blockTime ?? 12000), //voting period comes in blocks, so we need to convert it to seconds
+          // dao data come in blocks, we then convert it to seconds
+          (Number(daoData?.votingPeriod) *
+            daoConfigByDaoId[daoIdEnum]?.daoOverview.chain.blockTime) /
+            1000,
+          daoData?.votingDelay
+            ? (Number(daoData?.votingDelay) *
+                daoConfigByDaoId[daoIdEnum]?.daoOverview.chain.blockTime) /
+                1000
+            : 0,
         ),
         status: item.proposal?.status || "unknown",
       };
     });
-  }, [proposals, daoData?.votingPeriod, daoIdEnum, daoConfigByDaoId]);
+  }, [proposals, daoData, daoIdEnum, token]);
 
   const proposalColumns: ColumnDef<ProposalTableData>[] = [
     {
@@ -365,14 +372,23 @@ export const ProposalsTable = ({
           );
         }
 
+        const govPlatformUrl =
+          daoConfigByDaoId[daoIdEnum]?.daoOverview?.govPlatform?.url;
+        const govPlatformName =
+          daoConfigByDaoId[daoIdEnum]?.daoOverview?.govPlatform?.name;
+
+        if (!govPlatformUrl) {
+          return  null;
+        }
+
         return (
           <div className="flex items-center justify-center">
             <Link
-              href={`${daoConfigByDaoId[daoIdEnum]?.daoOverview?.tally}/proposal/${proposalId}`}
+              href={`${govPlatformUrl}${proposalId}`}
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-secondary cursor-pointer text-white transition-colors"
-              title="View on Tally"
+              title={`View on ${govPlatformName}`}
             >
               <IconButton variant="ghost" icon={ExternalLink} />
             </Link>

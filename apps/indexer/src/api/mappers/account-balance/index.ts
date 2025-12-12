@@ -130,6 +130,13 @@ export const AccountInteractionsRequestSchema =
       .string()
       .transform((val) => BigInt(val))
       .optional(), //z.coerce.bigint().optional() doesn't work because of a bug with zod, zod asks for a string that satisfies REGEX ^d+$, when it should be ^\d+$
+    orderBy: z.enum(["volume", "count"]).optional().default("count"),
+    address: z
+      .string()
+      .optional()
+      .transform((addr) =>
+        addr ? (isAddress(addr) ? addr : undefined) : undefined,
+      ),
   });
 
 export const AccountInteractionsResponseSchema = z.object({
@@ -192,9 +199,10 @@ export type HistoricalBalance = DBHistoricalBalance & {
   tokenAddress: Address;
 };
 
-export interface AmountFilter {
-  minAmount: bigint | undefined;
-  maxAmount: bigint | undefined;
+export interface Filter {
+  address?: Address;
+  minAmount?: bigint;
+  maxAmount?: bigint;
 }
 
 export const HistoricalBalanceMapper = (
@@ -248,7 +256,6 @@ export const AccountBalanceVariationsMapper = (
 };
 
 export const AccountInteractionsMapper = (
-  accountId: Address,
   interactions: AccountInteractions,
   endTimestamp: number,
   days: DaysEnum,
@@ -260,13 +267,13 @@ export const AccountInteractionsMapper = (
       endTimestamp: new Date(endTimestamp * 1000).toISOString(),
     },
     totalCount: interactions.interactionCount,
-    items: interactions.interactions
-      .filter(({ accountId: addr }) => addr !== accountId)
-      .map(({ accountId, absoluteChange, totalVolume, transferCount }) => ({
+    items: interactions.interactions.map(
+      ({ accountId, absoluteChange, totalVolume, transferCount }) => ({
         accountId: accountId,
         amountTransferred: absoluteChange.toString(),
         totalVolume: totalVolume.toString(),
         transferCount: transferCount.toString(),
-      })),
+      }),
+    ),
   });
 };

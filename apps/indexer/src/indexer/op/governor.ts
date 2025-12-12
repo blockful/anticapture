@@ -38,6 +38,7 @@ export function GovernorIndexer(blockTime: number) {
         endBlock: event.args.endBlock.toString(),
         description: event.args.description,
         timestamp: event.block.timestamp,
+        blockNumber: event.block.number,
       });
     },
   );
@@ -57,6 +58,8 @@ export function GovernorIndexer(blockTime: number) {
         endBlock: event.args.endBlock.toString(),
         description: event.args.description,
         timestamp: event.block.timestamp,
+        proposalType: event.args.proposalType,
+        blockNumber: event.block.number,
       });
     },
   );
@@ -76,6 +79,8 @@ export function GovernorIndexer(blockTime: number) {
         endBlock: event.args.endBlock.toString(),
         description: event.args.description,
         timestamp: event.block.timestamp,
+        proposalType: event.args.proposalType,
+        blockNumber: event.block.number,
       });
     },
   );
@@ -95,6 +100,7 @@ export function GovernorIndexer(blockTime: number) {
         endBlock: event.args.endBlock.toString(),
         description: event.args.description,
         timestamp: event.block.timestamp,
+        blockNumber: event.block.number,
       });
     },
   );

@@ -111,7 +111,9 @@ export const SectionComposedChart = ({
         <XAxis
           dataKey="date"
           type="number"
-          domain={["dataMin", "dataMax"]}
+          domain={
+            chartData.length ? ["dataMin", "dataMax"] : [0, 1] // fallback
+          }
           ticks={dynamicTicks}
           interval={0}
           tickMargin={8}
@@ -125,7 +127,9 @@ export const SectionComposedChart = ({
         {/* PRIMARY AXIS - For larger scale metrics */}
         <YAxis
           yAxisId="primary"
-          domain={["auto", "auto"]}
+          domain={
+            chartData.length ? ["auto", "auto"] : [0, 1] // fallback
+          }
           tickFormatter={(value) =>
             `${formatNumberUserReadable(Number(value))}\n${daoId}`
           }
