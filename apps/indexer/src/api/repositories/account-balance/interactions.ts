@@ -96,7 +96,7 @@ export class AccountInteractionsRepository {
         sql`${accountBalance.accountId} = ${transfersTo.accountId}`,
       )
       .where(
-        sql`${transfersFrom.accountId} IS NOT NULL OR ${transfersTo.accountId} IS NOT NULL`,
+        sql`${transfersFrom.accountId} IS NOT NULL OR ${transfersTo.accountId} IS NOT NULL AND (${transfersFrom.accountId} != ${transfersTo.accountId})`,
       )
       .as("combined");
 

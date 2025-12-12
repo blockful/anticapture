@@ -62,9 +62,7 @@ Positive amounts signify net token transfers FROM <accountId>, whilst negative a
         },
       );
 
-      return context.json(
-        AccountInteractionsMapper(accountId as Address, result, now, days),
-      );
+      return context.json(AccountInteractionsMapper(result, now, days));
     },
   );
 }
