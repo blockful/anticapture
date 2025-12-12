@@ -40,9 +40,11 @@ Positive amounts signify net token transfers FROM <accountId>, whilst negative a
         days,
         limit,
         skip,
+        orderBy,
         orderDirection,
         minAmount,
         maxAmount,
+        address,
       } = context.req.valid("query");
       const now = Math.floor(Date.now() / 1000);
 
@@ -51,8 +53,10 @@ Positive amounts signify net token transfers FROM <accountId>, whilst negative a
         now - days,
         skip,
         limit,
+        orderBy,
         orderDirection,
         {
+          address,
           minAmount,
           maxAmount,
         },
