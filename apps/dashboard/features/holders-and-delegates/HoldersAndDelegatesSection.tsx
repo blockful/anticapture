@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactElement, useEffect } from "react";
+import { ReactElement } from "react";
 import { TheSectionLayout } from "@/shared/components";
 import { TimeInterval } from "@/shared/types/enums";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
@@ -32,22 +32,17 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const setSortOrder = useQueryState("sort")[1];
   const setSortBy = useQueryState("sortBy")[1];
 
-  useEffect(() => {
-    const cleanupFilters = async () => {
-      setDrawerAddress(null);
-      setCurrentAddressFilter(null);
-      setSortOrder(null);
-      setSortBy(null);
-    };
+  const cleanupFilters = () => {
+    setDrawerAddress(null);
+    setCurrentAddressFilter(null);
+    setSortOrder(null);
+    setSortBy(null);
+  };
 
+  const handleTabChange = (tab: TabId) => {
     cleanupFilters();
-  }, [
-    activeTab,
-    setDrawerAddress,
-    setCurrentAddressFilter,
-    setSortOrder,
-    setSortBy,
-  ]);
+    setActiveTab(tab);
+  };
 
   // Map from tab ID to tab component
   const tabComponentMap: Record<TabId, ReactElement> = {
@@ -76,7 +71,7 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               id={tab.id}
               label={tab.label}
               activeTab={activeTab as TabId}
-              setActiveTab={setActiveTab}
+              setActiveTab={handleTabChange}
             />
           ))}
         </div>

@@ -20,6 +20,13 @@ import { AmountFilterState } from "@/shared/components/design-system/table/filte
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
+import {
+  parseAsBoolean,
+  parseAsString,
+  parseAsStringEnum,
+  useQueryState,
+  useQueryStates,
+} from "nuqs";
 
 export const TopInteractionsTable = ({
   address,
@@ -28,17 +35,27 @@ export const TopInteractionsTable = ({
   address: string;
   daoId: string;
 }) => {
-  const [currentAddressFilter, setCurrentAddressFilter] = useState<string>("");
   const [isMounted, setIsMounted] = useState<boolean>(false);
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-  const [sortBy, setSortBy] = useState<"transferCount" | "totalVolume">(
-    "transferCount",
+  const [currentAddressFilter, setCurrentAddressFilter] =
+    useQueryState("tabAddress");
+  const [sortBy, setSortBy] = useQueryState(
+    "orderBy",
+    parseAsStringEnum(["transferCount", "totalVolume"]).withDefault(
+      "transferCount",
+    ),
   );
-  const [filterVariables, setFilterVariables] = useState<{
-    minAmount?: string;
-    maxAmount?: string;
-  }>();
-  const [isFilterActive, setIsFilterActive] = useState(false);
+  const [sortDirection, setSortDirection] = useQueryState(
+    "orderDirection",
+    parseAsStringEnum(["asc", "desc"]).withDefault("desc"),
+  );
+  const [filterVariables, setFilterVariables] = useQueryStates({
+    minAmount: parseAsString,
+    maxAmount: parseAsString,
+  });
+  const [isFilterActive, setIsFilterActive] = useQueryState(
+    "active",
+    parseAsBoolean.withDefault(false),
+  );
 
   const sortOptions: SortOption[] = [
     { value: "largest-first", label: "Largest first" },
@@ -54,7 +71,7 @@ export const TopInteractionsTable = ({
     useAccountInteractionsData({
       daoId: daoId as DaoIdEnum,
       address: address,
-      accountId: currentAddressFilter,
+      accountId: currentAddressFilter ?? undefined,
       sortBy,
       sortDirection,
       filterVariables,
@@ -94,7 +111,7 @@ export const TopInteractionsTable = ({
           <span>Address</span>
           <AddressFilter
             onApply={handleAddressFilterApply}
-            currentFilter={currentAddressFilter}
+            currentFilter={currentAddressFilter ?? undefined}
             className="ml-2"
           />
         </div>

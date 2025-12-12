@@ -18,7 +18,6 @@ import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { Table } from "@/shared/components/design-system/table/Table";
 import daoConfig from "@/shared/dao-config";
-import { AmountFilterVariables } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
 import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
 import { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
@@ -26,6 +25,13 @@ import { AddressFilter } from "@/shared/components/design-system/table/filters/A
 import { fetchEnsData } from "@/shared/hooks/useEnsData";
 import Link from "next/link";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import {
+  parseAsBoolean,
+  parseAsString,
+  parseAsStringEnum,
+  useQueryState,
+  useQueryStates,
+} from "nuqs";
 
 interface DelegationData {
   address: string;
@@ -43,14 +49,24 @@ export const DelegationHistoryTable = ({
 }) => {
   const { decimals } = daoConfig[daoId];
   const [isMounted, setIsMounted] = useState<boolean>(false);
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [sortBy, setSortBy] = useState<"timestamp" | "delegatedValue">(
-    "timestamp",
+
+  const [sortBy, setSortBy] = useQueryState(
+    "orderBy",
+    parseAsStringEnum(["timestamp", "delegatedValue"]).withDefault("timestamp"),
   );
-  const [filterVariables, setFilterVariables] =
-    useState<AmountFilterVariables>();
-  const [isFilterActive, setIsFilterActive] = useState(false);
-  const [addressFilter, setAddressFilter] = useState<string>();
+  const [sortOrder, setSortOrder] = useQueryState(
+    "orderDirection",
+    parseAsStringEnum(["asc", "desc"]).withDefault("desc"),
+  );
+  const [filterVariables, setFilterVariables] = useQueryStates({
+    minDelta: parseAsString,
+    maxDelta: parseAsString,
+  });
+  const [isFilterActive, setIsFilterActive] = useQueryState(
+    "active",
+    parseAsBoolean.withDefault(false),
+  );
+  const [addressFilter, setAddressFilter] = useQueryState("tabAddress");
 
   const sortOptions: SortOption[] = [
     { value: "largest-first", label: "Largest first" },
@@ -67,7 +83,7 @@ export const DelegationHistoryTable = ({
   } = useDelegationHistory({
     daoId,
     delegatorAccountId: address,
-    delegateAccountId: addressFilter,
+    delegateAccountId: addressFilter ?? undefined,
     orderBy: sortBy,
     orderDirection: sortOrder,
     filterVariables,
@@ -118,7 +134,7 @@ export const DelegationHistoryTable = ({
                 }
                 setAddressFilter(addr || "");
               }}
-              currentFilter={addressFilter}
+              currentFilter={addressFilter ?? undefined}
             />
           </div>
         </div>

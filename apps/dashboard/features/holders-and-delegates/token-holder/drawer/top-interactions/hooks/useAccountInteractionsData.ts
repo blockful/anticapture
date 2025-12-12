@@ -49,8 +49,8 @@ export const useAccountInteractionsData = ({
   sortBy?: "transferCount" | "totalVolume";
   sortDirection?: "asc" | "desc";
   filterVariables?: {
-    minAmount?: string;
-    maxAmount?: string;
+    minAmount: string | null;
+    maxAmount: string | null;
   };
   limit?: number;
 }): InteractionResponse => {
@@ -63,8 +63,8 @@ export const useAccountInteractionsData = ({
       // orderBy: sortBy,
       orderDirection:
         sortDirection as QueryInput_AccountInteractions_OrderDirection,
-      minAmount: filterVariables?.minAmount,
-      maxAmount: filterVariables?.maxAmount,
+      minAmount: filterVariables?.minAmount ?? undefined,
+      maxAmount: filterVariables?.maxAmount ?? undefined,
       limit,
     },
     context: {
