@@ -15,7 +15,7 @@ export interface DuneResponse {
   result: {
     rows: {
       date: string;
-      liquidTreasury: number;
+      totalAssets: number;
     }[];
   };
   next_uri: string;
@@ -55,7 +55,7 @@ export class DuneProvider implements TreasuryProvider {
       const timestamp = Math.floor(Date.UTC(year, month - 1, day) / 1000);
       return {
         date: BigInt(timestamp),
-        liquidTreasury: row.liquidTreasury,
+        liquidTreasury: row.totalAssets ?? 0,
       };
     });
   }
