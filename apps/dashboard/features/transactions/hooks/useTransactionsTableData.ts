@@ -14,6 +14,7 @@ import { NetworkStatus } from "@apollo/client";
 import { parseUnits } from "viem";
 import { SupplyType } from "@/shared/components";
 import daoConfig from "@/shared/dao-config";
+import { TransactionsParamsType } from "@/features/transactions/hooks/useTransactionParams";
 
 export type AffectedSupplyType =
   | "CEX"
@@ -22,15 +23,10 @@ export type AffectedSupplyType =
   | "TOTAL"
   | "UNASSIGNED";
 
-export interface TransactionsFilters {
+export interface TransactionsFilters extends TransactionsParamsType {
   toDate?: number;
   fromDate?: number;
-  from?: string;
-  to?: string;
-  minAmount?: number;
-  maxAmount?: number;
   affectedSupply?: AffectedSupplyType[];
-  sortOrder: "asc" | "desc";
   includes?: string[];
 }
 
@@ -78,20 +74,14 @@ export const useTransactionsTableData = ({
         offset: 0,
         ...(filters?.from && { from: filters?.from }),
         ...(filters?.to && { to: filters?.to }),
-        ...(filters?.minAmount && {
-          minAmount: parseUnits(
-            filters.minAmount.toString(),
-            decimals,
-          ).toString(),
+        ...(filters?.min && {
+          minAmount: parseUnits(filters.min.toString(), decimals).toString(),
         }),
-        ...(filters?.maxAmount && {
-          maxAmount: parseUnits(
-            filters.maxAmount.toString(),
-            decimals,
-          ).toString(),
+        ...(filters?.max && {
+          maxAmount: parseUnits(filters.max.toString(), decimals).toString(),
         }),
-        ...(filters?.sortOrder && {
-          sortOrder: filters?.sortOrder as QueryInput_Transactions_SortOrder,
+        ...(filters?.sort && {
+          sortOrder: filters?.sort as QueryInput_Transactions_SortOrder,
         }),
         ...(filters?.affectedSupply && {
           affectedSupply: filters?.affectedSupply,
@@ -115,9 +105,9 @@ export const useTransactionsTableData = ({
       JSON.stringify({
         from: filters?.from,
         to: filters?.to,
-        minAmount: filters?.minAmount,
-        maxAmount: filters?.maxAmount,
-        sortOrder: filters?.sortOrder,
+        minAmount: filters?.min,
+        maxAmount: filters?.max,
+        sortOrder: filters?.sort,
         affectedSupply: filters?.affectedSupply,
         includes: filters?.includes,
         fromDate: filters?.fromDate,
