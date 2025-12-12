@@ -13,6 +13,7 @@ import { Hand, Trophy, Check, Zap } from "lucide-react";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { FilterOption } from "@/shared/components/dropdowns/FilterDropdown";
 import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
+import { parseAsStringEnum, useQueryState } from "nuqs";
 
 interface DelegateProposalsActivityProps {
   address: string;
@@ -24,8 +25,14 @@ export const DelegateProposalsActivity = ({
   daoId,
 }: DelegateProposalsActivityProps) => {
   const [userVoteFilter, setUserVoteFilter] = useState<string>("all");
-  const [orderBy, setOrderBy] = useState<string>("timestamp");
-  const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("desc");
+  const [orderBy, setOrderBy] = useQueryState(
+    "orderBy",
+    parseAsStringEnum(["timestamp", "votingPower"]).withDefault("timestamp"),
+  );
+  const [orderDirection, setOrderDirection] = useQueryState(
+    "orderDirection",
+    parseAsStringEnum(["asc", "desc"]).withDefault("desc"),
+  );
   const itemsPerPage = 10;
 
   // Filter options for user vote
@@ -39,7 +46,7 @@ export const DelegateProposalsActivity = ({
 
   // Handle sorting changes
   const handleSortChange = (field: string, direction: "asc" | "desc") => {
-    setOrderBy(field);
+    setOrderBy(field as "timestamp" | "votingPower");
     setOrderDirection(direction);
   };
 

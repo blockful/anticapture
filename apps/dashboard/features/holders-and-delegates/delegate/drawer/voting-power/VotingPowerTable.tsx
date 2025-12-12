@@ -15,6 +15,7 @@ import { formatNumberUserReadable } from "@/shared/utils";
 import { Table } from "@/shared/components/design-system/table/Table";
 import daoConfig from "@/shared/dao-config";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import { parseAsStringEnum, useQueryState } from "nuqs";
 
 export const VotingPowerTable = ({
   address,
@@ -24,8 +25,14 @@ export const VotingPowerTable = ({
   daoId: string;
 }) => {
   const [isMounted, setIsMounted] = useState<boolean>(false);
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [sortBy, setSortBy] = useState<"balance">("balance");
+  const [sortBy, setSortBy] = useQueryState(
+    "orderBy",
+    parseAsStringEnum(["balance"]).withDefault("balance"),
+  );
+  const [sortOrder, setSortOrder] = useQueryState(
+    "orderDirection",
+    parseAsStringEnum(["asc", "desc"]).withDefault("desc"),
+  );
   const {
     daoOverview: { token },
   } = daoConfig[daoId as DaoIdEnum];
