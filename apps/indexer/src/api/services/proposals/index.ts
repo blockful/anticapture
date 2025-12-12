@@ -1,8 +1,7 @@
 import { DBProposal, ProposalsRequest, VotersResponse } from "@/api/mappers";
 import { DAOClient } from "@/interfaces/client";
-import { ProposalStatus, CONTRACT_ADDRESSES } from "@/lib/constants";
+import { ProposalStatus } from "@/lib/constants";
 import { DaysEnum } from "@/lib/enums";
-import { env } from "@/env";
 import { Address } from "viem";
 
 interface ProposalsRepository {
@@ -36,6 +35,7 @@ export class ProposalsService {
   constructor(
     private readonly proposalsRepo: ProposalsRepository,
     private readonly daoClient: DAOClient,
+    private readonly optimisticProposalType?: number,
   ) {}
 
   async getProposalsCount(): Promise<number> {
@@ -90,18 +90,11 @@ export class ProposalsService {
       ? this.prepareStatusForDatabase(status)
       : undefined;
 
-    // 2.Filter proposal type using DAO config
-    let proposalTypeExclude: number[] | undefined = undefined;
-    if (!includeOptimisticProposals) {
-      const daoConfig = CONTRACT_ADDRESSES[env.DAO_ID];
-      const optimisticType =
-        "optimisticProposalType" in daoConfig
-          ? daoConfig.optimisticProposalType
-          : undefined;
-      if (optimisticType !== undefined) {
-        proposalTypeExclude = [optimisticType];
-      }
-    }
+    // 2. Filter proposal type using DAO config
+    const proposalTypeExclude =
+      !includeOptimisticProposals && this.optimisticProposalType !== undefined
+        ? [this.optimisticProposalType]
+        : undefined;
 
     // 3. Fetch proposals from database
     const proposals = await this.proposalsRepo.getProposals(
