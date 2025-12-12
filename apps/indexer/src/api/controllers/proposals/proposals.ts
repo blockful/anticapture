@@ -41,8 +41,15 @@ export function proposals(
       },
     }),
     async (context) => {
-      const { skip, limit, orderDirection, status, fromDate, fromEndDate } =
-        context.req.valid("query");
+      const {
+        skip,
+        limit,
+        orderDirection,
+        status,
+        fromDate,
+        fromEndDate,
+        includeOptimisticProposals,
+      } = context.req.valid("query");
 
       const result = await service.getProposals({
         skip,
@@ -51,6 +58,7 @@ export function proposals(
         status,
         fromDate,
         fromEndDate,
+        includeOptimisticProposals,
       });
 
       const [quorums, votingDelay] = await Promise.all([

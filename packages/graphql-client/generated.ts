@@ -415,6 +415,7 @@ export type QueryProposalNonVotersArgs = {
 export type QueryProposalsArgs = {
   fromDate?: InputMaybe<Scalars['Float']['input']>;
   fromEndDate?: InputMaybe<Scalars['Float']['input']>;
+  includeOptimisticProposals?: InputMaybe<QueryInput_Proposals_IncludeOptimisticProposals>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   orderDirection?: InputMaybe<QueryInput_Proposals_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
@@ -1299,6 +1300,7 @@ export type Proposal_200_Response = {
   endTimestamp: Scalars['String']['output'];
   forVotes: Scalars['String']['output'];
   id: Scalars['String']['output'];
+  proposalType?: Maybe<Scalars['Float']['output']>;
   proposerAccountId: Scalars['String']['output'];
   quorum: Scalars['String']['output'];
   startBlock: Scalars['Float']['output'];
@@ -1334,6 +1336,7 @@ export type ProposalsOnchain = {
   endTimestamp: Scalars['BigInt']['output'];
   forVotes: Scalars['BigInt']['output'];
   id: Scalars['String']['output'];
+  proposalType?: Maybe<Scalars['Int']['output']>;
   proposer?: Maybe<Account>;
   proposerAccountId: Scalars['String']['output'];
   signatures: Scalars['JSON']['output'];
@@ -1429,6 +1432,14 @@ export type ProposalsOnchainFilter = {
   id_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   id_not_starts_with?: InputMaybe<Scalars['String']['input']>;
   id_starts_with?: InputMaybe<Scalars['String']['input']>;
+  proposalType?: InputMaybe<Scalars['Int']['input']>;
+  proposalType_gt?: InputMaybe<Scalars['Int']['input']>;
+  proposalType_gte?: InputMaybe<Scalars['Int']['input']>;
+  proposalType_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
+  proposalType_lt?: InputMaybe<Scalars['Int']['input']>;
+  proposalType_lte?: InputMaybe<Scalars['Int']['input']>;
+  proposalType_not?: InputMaybe<Scalars['Int']['input']>;
+  proposalType_not_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
   proposerAccountId?: InputMaybe<Scalars['String']['input']>;
   proposerAccountId_contains?: InputMaybe<Scalars['String']['input']>;
   proposerAccountId_ends_with?: InputMaybe<Scalars['String']['input']>;
@@ -1655,6 +1666,11 @@ export enum QueryInput_ProposalsActivity_UserVoteFilter {
   Yes = 'yes'
 }
 
+export enum QueryInput_Proposals_IncludeOptimisticProposals {
+  False = 'FALSE',
+  True = 'TRUE'
+}
+
 export enum QueryInput_Proposals_OrderDirection {
   Asc = 'asc',
   Desc = 'desc'
@@ -1821,6 +1837,7 @@ export type Query_Proposals_Items_Items = {
   endTimestamp: Scalars['String']['output'];
   forVotes: Scalars['String']['output'];
   id: Scalars['String']['output'];
+  proposalType?: Maybe<Scalars['Float']['output']>;
   proposerAccountId: Scalars['String']['output'];
   quorum: Scalars['String']['output'];
   startBlock: Scalars['Float']['output'];
