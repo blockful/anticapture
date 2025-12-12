@@ -158,6 +158,18 @@ export const BalanceHistoryVariationGraph = ({
     }))
     .sort((a, b) => a.timestamp - b.timestamp);
 
+  const extendedChartData = [
+    {
+      timestamp: chartData[0]?.timestamp - 1000, // to avoid hover conflict with first point
+      amount: 0,
+      direction: "none",
+      transactionHash: "initial",
+      fromAccountId: null,
+      toAccountId: null,
+    },
+    ...chartData,
+  ];
+
   // Custom dot component to show each transfer/delegation point
   const CustomDot = (props: CustomDotProps) => {
     const { cx, cy, payload } = props;
@@ -198,7 +210,7 @@ export const BalanceHistoryVariationGraph = ({
       <div className="relative h-[200px] w-full">
         <ChartContainer config={chartConfig} className="h-full w-full">
           <LineChart
-            data={chartData}
+            data={extendedChartData}
             margin={{ top: 25, right: 30, left: -20, bottom: 5 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="var(--base-border)" />
@@ -207,7 +219,7 @@ export const BalanceHistoryVariationGraph = ({
               type="number"
               scale="time"
               domain={["dataMin", "dataMax"]}
-              ticks={generateMonthlyTicks(chartData)}
+              ticks={generateMonthlyTicks(extendedChartData)}
               tickFormatter={(value: number) => {
                 const date = new Date(value);
                 const month = date.toLocaleDateString("en-US", {
@@ -241,6 +253,12 @@ export const BalanceHistoryVariationGraph = ({
                   };
 
                   const displayAddress = getDisplayAddress();
+                  const type =
+                    data.direction === "in"
+                      ? "Buy"
+                      : data.direction === "out"
+                        ? "Sell"
+                        : "Initial Balance";
                   const addressLabel =
                     data.direction === "in" ? "Buy from" : "Sell to";
 
@@ -256,13 +274,17 @@ export const BalanceHistoryVariationGraph = ({
                       <p className="text-secondary flex gap-1 text-xs">
                         Type:
                         <p
-                          className={`text-xs ${data.direction === "in" ? "text-success" : "text-error"}`}
+                          className={`text-xs ${data.direction === "in" ? "text-success" : data.direction === "out" ? "text-error" : "text-primary"}`}
                         >
-                          {data.direction === "in" ? "Buy" : "Sell"}
+                          {type}
                         </p>
                       </p>
 
-                      <p className="text-secondary text-xs">{addressLabel}:</p>
+                      {displayAddress && (
+                        <p className="text-secondary text-xs">
+                          {addressLabel}:
+                        </p>
+                      )}
                       {displayAddress && (
                         <EnsAvatar
                           address={displayAddress as `0x${string}`}

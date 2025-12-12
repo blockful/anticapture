@@ -157,6 +157,20 @@ export const VotingPowerVariationGraph = ({
     }))
     .sort((a, b) => a.timestamp - b.timestamp);
 
+  const extendedChartData = [
+    {
+      timestamp: chartData[0]?.timestamp - 1000, // to avoid hover conflict with first point
+      votingPower: 0,
+      delta: "0",
+      type: "initial",
+      isGain: true,
+      transactionHash: "initial",
+      fromAddress: undefined,
+      toAddress: undefined,
+    },
+    ...chartData,
+  ];
+
   // Custom dot component to show each transfer/delegation point
   const CustomDot = (props: CustomDotProps) => {
     const { cx, cy, payload } = props;
@@ -189,7 +203,7 @@ export const VotingPowerVariationGraph = ({
       <div className="relative h-[200px] w-full">
         <ChartContainer config={chartConfig} className="h-full w-full">
           <LineChart
-            data={chartData}
+            data={extendedChartData}
             margin={{ top: 25, right: 30, left: -20, bottom: 5 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="var(--base-border)" />
@@ -198,7 +212,7 @@ export const VotingPowerVariationGraph = ({
               type="number"
               scale="time"
               domain={["dataMin", "dataMax"]}
-              ticks={generateMonthlyTicks(chartData)}
+              ticks={generateMonthlyTicks(extendedChartData)}
               tickFormatter={(value: number) => {
                 const date = new Date(value);
                 const month = date.toLocaleDateString("en-US", {
@@ -233,6 +247,12 @@ export const VotingPowerVariationGraph = ({
                   };
 
                   const displayAddress = getDisplayAddress();
+                  const type =
+                    data.type === "delegation"
+                      ? "Delegation"
+                      : data.type === "transfer"
+                        ? "Transfer"
+                        : "Initial Voting Power";
                   const addressLabel =
                     data.type === "delegation"
                       ? "Delegated from"
@@ -247,16 +267,18 @@ export const VotingPowerVariationGraph = ({
                         Voting Power:{" "}
                         {formatNumberUserReadable(data.votingPower)}
                       </p>
-                      <p className="text-secondary text-xs">
-                        Type: {data.type}
-                      </p>
+                      <p className="text-secondary text-xs">Type: {type}</p>
                       <p
                         className={`text-xs ${data.isGain ? "text-success" : "text-error"}`}
                       >
                         {data.isGain && "+"}
                         {formatNumberUserReadable(parseFloat(data.delta))}
                       </p>
-                      <p className="text-secondary text-xs">{addressLabel}:</p>
+                      {displayAddress && (
+                        <p className="text-secondary text-xs">
+                          {addressLabel}:
+                        </p>
+                      )}
                       {displayAddress && (
                         <EnsAvatar
                           address={displayAddress as `0x${string}`}
