@@ -185,6 +185,7 @@ export const proposalsOnchain = onchainTable(
     forVotes: drizzle.bigint("for_votes").default(0n).notNull(),
     againstVotes: drizzle.bigint("against_votes").default(0n).notNull(),
     abstainVotes: drizzle.bigint("abstain_votes").default(0n).notNull(),
+    proposalType: drizzle.integer("proposal_type"),
   }),
   (table) => ({
     proposalsOnchainProposerIdx: index().on(table.proposerAccountId),

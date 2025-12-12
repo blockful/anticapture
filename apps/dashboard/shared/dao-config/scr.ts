@@ -23,6 +23,10 @@ export const SCR: DaoConfiguration = {
       token: "0xd29687c813D741E2F938F4aC377128810E217b1b",
       timelock: "0x79D83D1518e2eAA64cdc0631df01b06e2762CC14",
     },
+    govPlatform: {
+      name: "Agora",
+      url: "https://gov.scroll.io/proposals/",
+    },
     rules: {
       delay: true,
       changeVote: false,

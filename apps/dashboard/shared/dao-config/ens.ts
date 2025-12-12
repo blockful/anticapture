@@ -34,7 +34,10 @@ export const ENS: DaoConfiguration = {
       logic: "For + Abstain",
       quorumCalculation: QUORUM_CALCULATION_TYPES.TOTAL_SUPPLY,
     },
-    tally: "https://tally.xyz/gov/ens",
+    govPlatform: {
+      name: "Anticapture",
+      url: "https://anticapture.com/ens/governance/proposal/",
+    },
     securityCouncil: {
       isActive: true,
       vetoCouncilAddress: "0x552DF471a4c7Fea11Ea8d7a7b0Acc6989b902a95",

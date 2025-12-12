@@ -12,6 +12,7 @@ interface ProposalsRepository {
     status: string[] | undefined,
     fromDate: number | undefined,
     fromEndDate: number | undefined,
+    proposalTypeExclude?: number[],
   ): Promise<DBProposal[]>;
   getProposalsCount(): Promise<number>;
   getProposalById(proposalId: string): Promise<DBProposal | undefined>;
@@ -34,6 +35,7 @@ export class ProposalsService {
   constructor(
     private readonly proposalsRepo: ProposalsRepository,
     private readonly daoClient: DAOClient,
+    private readonly optimisticProposalType?: number,
   ) {}
 
   async getProposalsCount(): Promise<number> {
@@ -81,13 +83,20 @@ export class ProposalsService {
     status,
     fromDate,
     fromEndDate,
+    includeOptimisticProposals = true,
   }: ProposalsRequest): Promise<DBProposal[]> {
     // 1. Prepare status for database query
     const dbStatuses = status
       ? this.prepareStatusForDatabase(status)
       : undefined;
 
-    // 2. Fetch proposals from database
+    // 2. Filter proposal type using DAO config
+    const proposalTypeExclude =
+      !includeOptimisticProposals && this.optimisticProposalType !== undefined
+        ? [this.optimisticProposalType]
+        : undefined;
+
+    // 3. Fetch proposals from database
     const proposals = await this.proposalsRepo.getProposals(
       skip,
       limit,
@@ -95,14 +104,15 @@ export class ProposalsService {
       dbStatuses,
       fromDate,
       fromEndDate,
+      proposalTypeExclude,
     );
 
-    // 3. Update each proposal with its real on-chain status
+    // 4. Update each proposal with its real on-chain status
     for (const proposal of proposals) {
       proposal.status = await this.daoClient.getProposalStatus(proposal);
     }
 
-    // 4. Filter by originally requested statuses (handles on-chain determined statuses)
+    // 5. Filter by originally requested statuses (handles on-chain determined statuses)
     return status ? this.filterProposalsByStatus(proposals, status) : proposals;
   }
 

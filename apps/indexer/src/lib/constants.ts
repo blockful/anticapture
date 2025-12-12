@@ -48,6 +48,7 @@ export const CONTRACT_ADDRESSES = {
   [DaoIdEnum.OP]: {
     blockTime: 2,
     tokenType: "ERC20",
+    optimisticProposalType: 2,
     // https://optimistic.etherscan.io/token/0x4200000000000000000000000000000000000042
     token: {
       address: "0x4200000000000000000000000000000000000042",

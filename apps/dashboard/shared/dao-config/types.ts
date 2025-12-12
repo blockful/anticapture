@@ -72,10 +72,13 @@ export interface DaoOverviewConfig {
     governor?: Address;
     timelock?: Address;
   };
+  govPlatform?: {
+    name: string;
+    url: string;
+  };
   token: "ERC20" | "ERC721";
   cancelFunction?: string;
   snapshot?: string;
-  tally?: string;
   priceDisclaimer?: string;
   rules: {
     delay: boolean;
@@ -189,8 +192,7 @@ export interface AttackProfitabilityConfig {
     percentage: number;
   };
 }
-export interface GovernanceImplementationConfig
-  extends GovernanceImplementation {}
+export interface GovernanceImplementationConfig extends GovernanceImplementation {}
 
 // Complete DAO configuration structure
 export interface DaoConfiguration extends BaseInfo {

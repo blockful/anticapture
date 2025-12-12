@@ -40,6 +40,7 @@
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
   --animate-scroll-left: scroll-left 20s linear infinite;
+  --animate-fade-in: fade-in 0.5s ease-in;
 
   /* DEV: TODO: Remove these colors once the new design system is fully implemented. 
    * Check the border colors and gradients as well.
@@ -182,6 +183,16 @@
     }
     to {
       transform: translateX(-50%);
+    }
+  }
+
+  /* Fade in animation */
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
     }
   }
 }

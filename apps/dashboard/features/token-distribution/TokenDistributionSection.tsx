@@ -15,12 +15,12 @@ import { CSVLink } from "react-csv";
 import { defaultLinkVariants } from "@/shared/components/design-system/links/default-link";
 import { ChartDataSetPoint } from "@/shared/dao-config/types";
 import daoConfig from "@/shared/dao-config";
+import { useTokenDistributionParams } from "@/features/token-distribution/hooks/useTokenDistributionParams";
 
 type CsvRow = Record<string, number | string | null>;
 
 export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const [hoveredMetricKey, setHoveredMetricKey] = useState<string | null>(null);
-  // const [hasTransfer, setHasTransfer] = useState<boolean>(true);
   const { metrics, setMetrics } = useTokenDistributionStore();
   const { decimals } = daoConfig[daoId];
 
@@ -30,6 +30,8 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     metricsSchema,
     decimals,
   });
+
+  useTokenDistributionParams(chartData);
 
   const buildCsvData = (
     points: ChartDataSetPoint[] | undefined,

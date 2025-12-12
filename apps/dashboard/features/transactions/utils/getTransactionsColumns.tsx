@@ -13,36 +13,23 @@ import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 import { TransactionData } from "@/features/transactions/hooks/useTransactionsTableData";
 import Link from "next/link";
 import { fetchEnsData } from "@/shared/hooks/useEnsData";
+import { Address } from "viem";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { cn } from "@/shared/utils";
+import { TransactionsParamsType } from "@/features/transactions/hooks/useTransactionParams";
 
 export const getTransactionsColumns = ({
   loading,
   daoId,
-  minAmount,
-  maxAmount,
-  setMinAmount,
-  setMaxAmount,
-  fromFilter,
-  setFromFilter,
-  toFilter,
-  setToFilter,
-  sortOrder,
-  setSortOrder,
+  filterParams,
 }: {
   loading: boolean;
   daoId: DaoIdEnum;
-  minAmount: number | undefined;
-  maxAmount: number | undefined;
-  setMinAmount: (min: number | undefined) => void;
-  setMaxAmount: (max: number | undefined) => void;
-  fromFilter: string;
-  setFromFilter: (from: string) => void;
-  toFilter: string;
-  setToFilter: (to: string) => void;
-  sortOrder: "asc" | "desc";
-  setSortOrder: (order: "asc" | "desc") => void;
+  filterParams: TransactionsParamsType;
 }): ColumnDef<TransactionData>[] => {
+  const { min, max, setMin, setMax, from, setFrom, to, setTo, sort, setSort } =
+    filterParams;
+
   return [
     {
       accessorKey: "affectedSupply",
@@ -84,11 +71,12 @@ export const getTransactionsColumns = ({
           <AmountFilter
             onApply={(params) => {
               const { min, max } = params;
-              setMinAmount(min);
-              setMaxAmount(max);
+
+              if (min) setMin(min);
+              if (max) setMax(max);
             }}
-            currentMin={minAmount}
-            currentMax={maxAmount}
+            currentMin={min ?? undefined}
+            currentMax={max ?? undefined}
           />
         </div>
       ),
@@ -154,16 +142,16 @@ export const getTransactionsColumns = ({
           variant="ghost"
           className="!text-table-header w-full justify-start px-4 py-0 text-xs"
           onClick={() => {
-            setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+            setSort(sort === "asc" ? "desc" : "asc");
           }}
         >
           Date
           <ArrowUpDown
             props={{ className: "ml-2 size-4" }}
             activeState={
-              sortOrder === "asc"
+              sort === "asc"
                 ? ArrowState.UP
-                : sortOrder === "desc"
+                : sort === "desc"
                   ? ArrowState.DOWN
                   : ArrowState.DEFAULT
             }
@@ -199,12 +187,12 @@ export const getTransactionsColumns = ({
                   const { address } = await fetchEnsData({
                     address: addr as `${string}.eth`,
                   });
-                  setFromFilter(address || "");
+                  setFrom(address || "");
                   return;
                 }
-                setFromFilter(addr || "");
+                setFrom((addr as Address) || "");
               }}
-              currentFilter={fromFilter}
+              currentFilter={from ?? undefined}
             />
           </div>
         </div>
@@ -269,12 +257,12 @@ export const getTransactionsColumns = ({
                   const { address } = await fetchEnsData({
                     address: addr as `${string}.eth`,
                   });
-                  setToFilter(address || "");
+                  setTo(address || "");
                   return;
                 }
-                setToFilter(addr || "");
+                setTo((addr as Address) || "");
               }}
-              currentFilter={toFilter}
+              currentFilter={to ?? undefined}
             />
           </div>
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { SupplyType } from "@/shared/components/badges/SupplyLabel";
 import { useTransactionsTableData } from "@/features/transactions";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -9,6 +9,7 @@ import { AffectedSupplyType } from "@/features/transactions/hooks/useTransaction
 import { Table } from "@/shared/components/design-system/table/Table";
 import { getTransactionsColumns } from "@/features/transactions/utils/getTransactionsColumns";
 import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
+import { useTransactionsTableParams } from "@/features/transactions/hooks/useTransactionParams";
 
 type Supply = "CEX" | "DEX" | "LENDING" | "TOTAL" | "UNASSIGNED";
 
@@ -26,12 +27,7 @@ export const TransactionsTable = ({
   endDate: number;
 }) => {
   const { daoId } = useParams<{ daoId: DaoIdEnum }>();
-
-  const [fromFilter, setFromFilter] = useState<string>("");
-  const [toFilter, setToFilter] = useState<string>("");
-  const [minAmount, setMinAmount] = useState<number | undefined>();
-  const [maxAmount, setMaxAmount] = useState<number | undefined>();
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const filterParams = useTransactionsTableParams();
 
   const affectedSupply = useMemo(
     () =>
@@ -69,13 +65,9 @@ export const TransactionsTable = ({
   } = useTransactionsTableData({
     daoId: daoId.toUpperCase() as DaoIdEnum,
     filters: {
+      ...filterParams,
       toDate: endDate + SECONDS_PER_DAY - 1, // include the entire end date
       fromDate: startDate,
-      from: fromFilter || undefined,
-      to: toFilter || undefined,
-      minAmount,
-      maxAmount,
-      sortOrder,
       affectedSupply: buildFilters(hasTransfer, affectedSupply),
       includes,
     },
@@ -84,16 +76,7 @@ export const TransactionsTable = ({
   const columns = getTransactionsColumns({
     loading,
     daoId: daoId.toUpperCase() as DaoIdEnum,
-    minAmount,
-    maxAmount,
-    setMinAmount,
-    setMaxAmount,
-    fromFilter,
-    setFromFilter,
-    toFilter,
-    setToFilter,
-    sortOrder,
-    setSortOrder,
+    filterParams,
   });
 
   if (loading && (!tableData || tableData.length === 0)) {
