@@ -8,7 +8,7 @@ import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { DaoMetricsDayBucket, PriceEntry } from "@/shared/dao-config/types";
 import { ChartDataSetPoint } from "@/shared/dao-config/types";
 import { MetricSchema } from "@/features/token-distribution/utils/metrics";
-import { normalizeTimestamp } from "@/shared/utils";
+import { normalizeTimestamp } from "@/features/token-distribution/utils";
 import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 import { formatUnits } from "viem";
 import daoConfig from "@/shared/dao-config";
