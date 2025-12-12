@@ -37,6 +37,7 @@ import {
 import {
   normalizeDataset,
   normalizeDatasetTreasuryNonDaoToken,
+  normalizeDatasetAllTreasury,
 } from "@/features/attack-profitability/utils";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
@@ -104,8 +105,10 @@ export const MultilineChartAttackProfitability = ({
 
   const chartData = useMemo(() => {
     let delegatedSupplyChart: DaoMetricsDayBucket[] = [];
+    let treasurySupplyChart: DaoMetricsDayBucket[] = [];
     if (timeSeriesData) {
       delegatedSupplyChart = timeSeriesData[MetricTypesEnum.DELEGATED_SUPPLY];
+      treasurySupplyChart = timeSeriesData[MetricTypesEnum.TREASURY];
     }
 
     let datasets: Record<string, MultilineChartDataSetPoint[]> = {};
@@ -118,10 +121,13 @@ export const MultilineChartAttackProfitability = ({
         treasuryAssetData,
         "treasuryNonDAO",
       ),
-      all: treasuryAssetData.map((item) => ({
-        date: item.date,
-        all: item.totalTreasury,
-      })),
+      all: normalizeDatasetAllTreasury(
+        daoTokenPriceHistoricalData,
+        "all",
+        treasuryAssetData,
+        treasurySupplyChart,
+        daoConfig.decimals,
+      ),
       quorum: daoConfig?.attackProfitability?.dynamicQuorum?.percentage
         ? normalizeDataset(
             daoTokenPriceHistoricalData,
