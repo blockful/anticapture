@@ -2,6 +2,7 @@ import { env } from "@/env";
 import axios from "axios";
 import { DefiLlamaProvider } from "./providers/defillama–provider";
 import { DuneProvider } from "./providers/dune-provider";
+import { TreasuryService } from "./treasury.service";
 import { assets } from "@/api/controller";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 
@@ -21,13 +22,15 @@ export function createTreasuryProvider(app: Hono) {
       axiosClient,
       env.TREASURY_PROVIDER_PROTOCOL_ID,
     );
-    assets(app, defiLlamaProvider);
+    const treasuryService = new TreasuryService(defiLlamaProvider);
+    assets(app, treasuryService);
   } else if (env.DUNE_API_URL && env.DUNE_API_KEY) {
     const axiosClient = axios.create({
       baseURL: env.DUNE_API_URL,
     });
     const duneProvider = new DuneProvider(axiosClient, env.DUNE_API_KEY);
-    assets(app, duneProvider);
+    const treasuryService = new TreasuryService(duneProvider);
+    assets(app, treasuryService);
   } else {
     throw new Error("Not enough variables to create a treasury provider");
   }
