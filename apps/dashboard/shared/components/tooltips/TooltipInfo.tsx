@@ -5,8 +5,8 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/shared/components/ui/tooltip";
-import { Info } from "lucide-react";
 import { cn } from "@/shared/utils/";
+import { Info } from "lucide-react";
 import { useState } from "react";
 
 export function TooltipInfo({
@@ -43,7 +43,7 @@ export function TooltipInfo({
         className={cn(
           "border-light-dark bg-surface-default text-primary z-50 rounded-lg border p-3 text-center shadow-sm",
           "w-fit max-w-[calc(100vw-2rem)] sm:max-w-md",
-          "break-words whitespace-normal",
+          "whitespace-normal break-words",
           className,
         )}
       >

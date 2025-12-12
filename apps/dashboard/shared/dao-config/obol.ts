@@ -4,6 +4,7 @@ import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governan
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 import { ObolIcon } from "@/shared/components/icons";
 import { mainnet } from "viem/chains";
+import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
 
 export const OBOL: DaoConfiguration = {
   name: "Obol Collective",
@@ -13,9 +14,10 @@ export const OBOL: DaoConfiguration = {
     svgBgColor: "#e8f2ff",
   },
   icon: ObolIcon,
+  noStage: true,
   daoOverview: {
     token: "ERC20",
-    chain: mainnet,
+    chain: { ...mainnet, icon: MainnetIcon },
     snapshot: "",
     contracts: {
       governor: "0xcB1622185A0c62A80494bEde05Ba95ef29Fbf85c",
@@ -24,7 +26,10 @@ export const OBOL: DaoConfiguration = {
     },
     cancelFunction:
       "https://etherscan.io/address/0xcb1622185a0c62a80494bede05ba95ef29fbf85c#writeContract#F1",
-    tally: "https://www.tally.xyz/gov/obol",
+    govPlatform: {
+      name: "Tally",
+      url: "https://tally.xyz/gov/obol/proposal/",
+    },
     rules: {
       delay: true,
       changeVote: false,

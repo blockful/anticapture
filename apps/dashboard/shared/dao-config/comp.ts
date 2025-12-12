@@ -4,6 +4,7 @@ import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governan
 import { CompoundIcon } from "@/shared/components/icons";
 import { mainnet } from "viem/chains";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
+import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
 
 export const COMP: DaoConfiguration = {
   name: "Compound",
@@ -13,14 +14,19 @@ export const COMP: DaoConfiguration = {
     svgBgColor: "#00D395",
   },
   icon: CompoundIcon,
+
   daoOverview: {
     token: "ERC20",
-    chain: mainnet,
+    chain: { ...mainnet, icon: MainnetIcon },
     snapshot: "https://snapshot.box/#/s:comp-vote.eth/proposals",
     contracts: {
       governor: "0x309a862bbC1A00e45506cB8A802D1ff10004c8C0",
       token: "0xc00e94Cb662C3520282E6f5717214004A7f26888",
       timelock: "0x6d903f6003cca6255D85CcA4D3B5E5146dC33925",
+    },
+    govPlatform: {
+      name: "Tally",
+      url: "https://tally.xyz/gov/compound/proposal/",
     },
     cancelFunction:
       "https://etherscan.io/address/0x6d903f6003cca6255D85CcA4D3B5E5146dC33925#writeContract#F5",

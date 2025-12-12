@@ -59,18 +59,26 @@ interface BaseInfo {
   disableDaoPage?: boolean;
 }
 
+export interface ChainWithIcon extends Chain {
+  icon: (props: DaoIconProps) => ReactNode;
+  blockTime: number;
+}
+
 // Section configurations without data storage
 export interface DaoOverviewConfig {
-  chain: Chain;
+  chain: ChainWithIcon;
   contracts: {
     token: Address;
     governor?: Address;
     timelock?: Address;
   };
+  govPlatform?: {
+    name: string;
+    url: string;
+  };
   token: "ERC20" | "ERC721";
   cancelFunction?: string;
   snapshot?: string;
-  tally?: string;
   priceDisclaimer?: string;
   rules: {
     delay: boolean;

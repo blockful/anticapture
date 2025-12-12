@@ -20,21 +20,19 @@ export const useDaoTreasuryStats = ({
     const liquidTreasuryNonDaoValue =
       treasuryNonDao.data?.[0]?.liquidTreasury || 0;
     const daoTreasuryTokens = Number(treasuryAll.data?.currentTreasury || 0);
-    const liquidTreasuryAllValue =
+    const govTreasuryUSD =
       Number(formatUnits(BigInt(daoTreasuryTokens), decimals)) * lastPrice;
 
-    const liquidTreasuryAllPercent = liquidTreasuryAllValue
+    const liquidTreasuryAllPercent = govTreasuryUSD
       ? Math.round(
-          ((liquidTreasuryAllValue - liquidTreasuryNonDaoValue) /
-            liquidTreasuryAllValue) *
-            100,
+          (govTreasuryUSD / (govTreasuryUSD + liquidTreasuryNonDaoValue)) * 100,
         ).toString()
       : "0";
 
     return {
       lastPrice,
-      liquidTreasuryNonDaoValue,
-      liquidTreasuryAllValue,
+      liquidTreasuryNonDaoValue: liquidTreasuryNonDaoValue,
+      liquidTreasuryAllValue: govTreasuryUSD,
       liquidTreasuryAllPercent,
     };
   }, [tokenData, treasuryAll.data, treasuryNonDao.data, decimals]);

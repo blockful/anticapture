@@ -84,6 +84,11 @@ export type Query = {
   /** Returns a mapping of the biggest variations to account balances associated by account address */
   accountBalanceVariations?: Maybe<AccountBalanceVariations_200_Response>;
   accountBalances: AccountBalancePage;
+  /**
+   * Returns a mapping of the largest interactions between accounts.
+   * Positive amounts signify net token transfers FROM <accountId>, whilst negative amounts refer to net transfers TO <accountId>
+   */
+  accountInteractions?: Maybe<AccountInteractions_200_Response>;
   accountPower?: Maybe<AccountPower>;
   accountPowers: AccountPowerPage;
   accounts: AccountPage;
@@ -206,6 +211,17 @@ export type QueryAccountBalancesArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   where?: InputMaybe<AccountBalanceFilter>;
+};
+
+
+export type QueryAccountInteractionsArgs = {
+  accountId: Scalars['String']['input'];
+  days?: InputMaybe<QueryInput_AccountInteractions_Days>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  maxAmount?: InputMaybe<Scalars['String']['input']>;
+  minAmount?: InputMaybe<Scalars['String']['input']>;
+  orderDirection?: InputMaybe<QueryInput_AccountInteractions_OrderDirection>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
 };
 
 
@@ -742,6 +758,13 @@ export type AccountFilter = {
   id_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   id_not_starts_with?: InputMaybe<Scalars['String']['input']>;
   id_starts_with?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type AccountInteractions_200_Response = {
+  __typename?: 'accountInteractions_200_response';
+  items: Array<Maybe<Query_AccountInteractions_Items_Items>>;
+  period: Query_AccountInteractions_Period;
+  totalCount: Scalars['Float']['output'];
 };
 
 export type AccountPage = {
@@ -1480,6 +1503,19 @@ export enum QueryInput_AccountBalanceVariations_OrderDirection {
   Desc = 'desc'
 }
 
+export enum QueryInput_AccountInteractions_Days {
+  '7d' = '_7d',
+  '30d' = '_30d',
+  '90d' = '_90d',
+  '180d' = '_180d',
+  '365d' = '_365d'
+}
+
+export enum QueryInput_AccountInteractions_OrderDirection {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
 export enum QueryInput_CompareActiveSupply_Days {
   '7d' = '_7d',
   '30d' = '_30d',
@@ -1681,6 +1717,21 @@ export type Query_AccountBalanceVariations_Items_Items = {
 
 export type Query_AccountBalanceVariations_Period = {
   __typename?: 'query_accountBalanceVariations_period';
+  days: Scalars['String']['output'];
+  endTimestamp: Scalars['String']['output'];
+  startTimestamp: Scalars['String']['output'];
+};
+
+export type Query_AccountInteractions_Items_Items = {
+  __typename?: 'query_accountInteractions_items_items';
+  accountId: Scalars['String']['output'];
+  amountTransferred: Scalars['String']['output'];
+  totalVolume: Scalars['String']['output'];
+  transferCount: Scalars['String']['output'];
+};
+
+export type Query_AccountInteractions_Period = {
+  __typename?: 'query_accountInteractions_period';
   days: Scalars['String']['output'];
   endTimestamp: Scalars['String']['output'];
   startTimestamp: Scalars['String']['output'];
@@ -2651,6 +2702,14 @@ export type GetDelegateDelegationHistoryGraphQueryVariables = Exact<{
 
 export type GetDelegateDelegationHistoryGraphQuery = { __typename?: 'Query', votingPowerHistorys: { __typename?: 'votingPowerHistoryPage', totalCount: number, items: Array<{ __typename?: 'votingPowerHistory', delta: any, transactionHash: string, timestamp: any, votingPower: any, delegation?: { __typename?: 'delegation', delegatorAccountId: string, delegatedValue: any, previousDelegate?: string | null, delegateAccountId: string } | null, transfer?: { __typename?: 'transfer', amount: any, fromAccountId: string, toAccountId: string } | null }> } };
 
+export type GetDelegatedSupplyHistoryQueryVariables = Exact<{
+  startDate: Scalars['String']['input'];
+  endDate?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GetDelegatedSupplyHistoryQuery = { __typename?: 'Query', averageDelegationPercentageByDay: { __typename?: 'AverageDelegationPercentagePage', items: Array<{ __typename?: 'AverageDelegationPercentageItem', date: string, high: string }> } };
+
 export type GetDelegatesCountQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -2818,6 +2877,13 @@ export type GetTokenHoldersCoutingQueryVariables = Exact<{ [key: string]: never;
 
 export type GetTokenHoldersCoutingQuery = { __typename?: 'Query', accountBalances: { __typename?: 'accountBalancePage', totalCount: number } };
 
+export type TokenInfoQueryVariables = Exact<{
+  currency?: InputMaybe<QueryInput_Token_Currency>;
+}>;
+
+
+export type TokenInfoQuery = { __typename?: 'Query', token?: { __typename?: 'token_200_response', circulatingSupply: string, delegatedSupply: string, lendingSupply: string, name?: string | null, treasury: string } | null };
+
 export type TransactionsQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   offset?: InputMaybe<Scalars['NonNegativeInt']['input']>;
@@ -2826,6 +2892,10 @@ export type TransactionsQueryVariables = Exact<{
   minAmount?: InputMaybe<Scalars['String']['input']>;
   maxAmount?: InputMaybe<Scalars['String']['input']>;
   sortOrder?: InputMaybe<QueryInput_Transactions_SortOrder>;
+  affectedSupply?: InputMaybe<Scalars['JSON']['input']>;
+  fromDate?: InputMaybe<Scalars['Int']['input']>;
+  toDate?: InputMaybe<Scalars['Int']['input']>;
+  includes?: InputMaybe<Scalars['JSON']['input']>;
 }>;
 
 
@@ -3820,6 +3890,54 @@ export type GetDelegateDelegationHistoryGraphQueryHookResult = ReturnType<typeof
 export type GetDelegateDelegationHistoryGraphLazyQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryGraphLazyQuery>;
 export type GetDelegateDelegationHistoryGraphSuspenseQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryGraphSuspenseQuery>;
 export type GetDelegateDelegationHistoryGraphQueryResult = Apollo.QueryResult<GetDelegateDelegationHistoryGraphQuery, GetDelegateDelegationHistoryGraphQueryVariables>;
+export const GetDelegatedSupplyHistoryDocument = gql`
+    query GetDelegatedSupplyHistory($startDate: String!, $endDate: String) {
+  averageDelegationPercentageByDay(
+    startDate: $startDate
+    endDate: $endDate
+    limit: 365
+  ) {
+    items {
+      date
+      high
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetDelegatedSupplyHistoryQuery__
+ *
+ * To run a query within a React component, call `useGetDelegatedSupplyHistoryQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetDelegatedSupplyHistoryQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetDelegatedSupplyHistoryQuery({
+ *   variables: {
+ *      startDate: // value for 'startDate'
+ *      endDate: // value for 'endDate'
+ *   },
+ * });
+ */
+export function useGetDelegatedSupplyHistoryQuery(baseOptions: Apollo.QueryHookOptions<GetDelegatedSupplyHistoryQuery, GetDelegatedSupplyHistoryQueryVariables> & ({ variables: GetDelegatedSupplyHistoryQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetDelegatedSupplyHistoryQuery, GetDelegatedSupplyHistoryQueryVariables>(GetDelegatedSupplyHistoryDocument, options);
+      }
+export function useGetDelegatedSupplyHistoryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDelegatedSupplyHistoryQuery, GetDelegatedSupplyHistoryQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetDelegatedSupplyHistoryQuery, GetDelegatedSupplyHistoryQueryVariables>(GetDelegatedSupplyHistoryDocument, options);
+        }
+export function useGetDelegatedSupplyHistorySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegatedSupplyHistoryQuery, GetDelegatedSupplyHistoryQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetDelegatedSupplyHistoryQuery, GetDelegatedSupplyHistoryQueryVariables>(GetDelegatedSupplyHistoryDocument, options);
+        }
+export type GetDelegatedSupplyHistoryQueryHookResult = ReturnType<typeof useGetDelegatedSupplyHistoryQuery>;
+export type GetDelegatedSupplyHistoryLazyQueryHookResult = ReturnType<typeof useGetDelegatedSupplyHistoryLazyQuery>;
+export type GetDelegatedSupplyHistorySuspenseQueryHookResult = ReturnType<typeof useGetDelegatedSupplyHistorySuspenseQuery>;
+export type GetDelegatedSupplyHistoryQueryResult = Apollo.QueryResult<GetDelegatedSupplyHistoryQuery, GetDelegatedSupplyHistoryQueryVariables>;
 export const GetDelegatesCountDocument = gql`
     query GetDelegatesCount {
   accountPowers(where: {votingPower_gt: 0}) {
@@ -4802,8 +4920,52 @@ export type GetTokenHoldersCoutingQueryHookResult = ReturnType<typeof useGetToke
 export type GetTokenHoldersCoutingLazyQueryHookResult = ReturnType<typeof useGetTokenHoldersCoutingLazyQuery>;
 export type GetTokenHoldersCoutingSuspenseQueryHookResult = ReturnType<typeof useGetTokenHoldersCoutingSuspenseQuery>;
 export type GetTokenHoldersCoutingQueryResult = Apollo.QueryResult<GetTokenHoldersCoutingQuery, GetTokenHoldersCoutingQueryVariables>;
+export const TokenInfoDocument = gql`
+    query TokenInfo($currency: queryInput_token_currency = usd) {
+  token(currency: $currency) {
+    circulatingSupply
+    delegatedSupply
+    lendingSupply
+    name
+    treasury
+  }
+}
+    `;
+
+/**
+ * __useTokenInfoQuery__
+ *
+ * To run a query within a React component, call `useTokenInfoQuery` and pass it any options that fit your needs.
+ * When your component renders, `useTokenInfoQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useTokenInfoQuery({
+ *   variables: {
+ *      currency: // value for 'currency'
+ *   },
+ * });
+ */
+export function useTokenInfoQuery(baseOptions?: Apollo.QueryHookOptions<TokenInfoQuery, TokenInfoQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<TokenInfoQuery, TokenInfoQueryVariables>(TokenInfoDocument, options);
+      }
+export function useTokenInfoLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<TokenInfoQuery, TokenInfoQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<TokenInfoQuery, TokenInfoQueryVariables>(TokenInfoDocument, options);
+        }
+export function useTokenInfoSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<TokenInfoQuery, TokenInfoQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<TokenInfoQuery, TokenInfoQueryVariables>(TokenInfoDocument, options);
+        }
+export type TokenInfoQueryHookResult = ReturnType<typeof useTokenInfoQuery>;
+export type TokenInfoLazyQueryHookResult = ReturnType<typeof useTokenInfoLazyQuery>;
+export type TokenInfoSuspenseQueryHookResult = ReturnType<typeof useTokenInfoSuspenseQuery>;
+export type TokenInfoQueryResult = Apollo.QueryResult<TokenInfoQuery, TokenInfoQueryVariables>;
 export const TransactionsDocument = gql`
-    query Transactions($limit: PositiveInt, $offset: NonNegativeInt, $from: String, $to: String, $minAmount: String, $maxAmount: String, $sortOrder: queryInput_transactions_sortOrder) {
+    query Transactions($limit: PositiveInt, $offset: NonNegativeInt, $from: String, $to: String, $minAmount: String, $maxAmount: String, $sortOrder: queryInput_transactions_sortOrder, $affectedSupply: JSON, $fromDate: Int, $toDate: Int, $includes: JSON) {
   transactions(
     limit: $limit
     offset: $offset
@@ -4812,6 +4974,10 @@ export const TransactionsDocument = gql`
     minAmount: $minAmount
     maxAmount: $maxAmount
     sortOrder: $sortOrder
+    affectedSupply: $affectedSupply
+    fromDate: $fromDate
+    toDate: $toDate
+    includes: $includes
   ) {
     items {
       from
@@ -4875,6 +5041,10 @@ export const TransactionsDocument = gql`
  *      minAmount: // value for 'minAmount'
  *      maxAmount: // value for 'maxAmount'
  *      sortOrder: // value for 'sortOrder'
+ *      affectedSupply: // value for 'affectedSupply'
+ *      fromDate: // value for 'fromDate'
+ *      toDate: // value for 'toDate'
+ *      includes: // value for 'includes'
  *   },
  * });
  */

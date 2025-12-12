@@ -4,6 +4,7 @@ import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governan
 import { OptimismIcon } from "@/shared/components/icons";
 import { optimism } from "viem/chains";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
+import { OptimismChainIcon } from "@/shared/components/icons/OptimismChainIcon";
 
 export const OP: DaoConfiguration = {
   name: "Optimism",
@@ -17,8 +18,12 @@ export const OP: DaoConfiguration = {
   icon: OptimismIcon,
   daoOverview: {
     token: "ERC20",
-    chain: optimism,
+    chain: { ...optimism, icon: OptimismChainIcon },
     snapshot: "https://snapshot.box/#/s:citizenshouse.eth",
+    govPlatform: {
+      name: "Agora",
+      url: "https://vote.optimism.io/proposals/",
+    },
     contracts: {
       governor: "0xcDF27F107725988f2261Ce2256bDfCdE8B382B10",
       token: "0x4200000000000000000000000000000000000042",

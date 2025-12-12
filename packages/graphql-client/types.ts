@@ -81,6 +81,11 @@ export type Query = {
   /** Returns a mapping of the biggest variations to account balances associated by account address */
   accountBalanceVariations?: Maybe<AccountBalanceVariations_200_Response>;
   accountBalances: AccountBalancePage;
+  /**
+   * Returns a mapping of the largest interactions between accounts.
+   * Positive amounts signify net token transfers FROM <accountId>, whilst negative amounts refer to net transfers TO <accountId>
+   */
+  accountInteractions?: Maybe<AccountInteractions_200_Response>;
   accountPower?: Maybe<AccountPower>;
   accountPowers: AccountPowerPage;
   accounts: AccountPage;
@@ -203,6 +208,17 @@ export type QueryAccountBalancesArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   where?: InputMaybe<AccountBalanceFilter>;
+};
+
+
+export type QueryAccountInteractionsArgs = {
+  accountId: Scalars['String']['input'];
+  days?: InputMaybe<QueryInput_AccountInteractions_Days>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  maxAmount?: InputMaybe<Scalars['String']['input']>;
+  minAmount?: InputMaybe<Scalars['String']['input']>;
+  orderDirection?: InputMaybe<QueryInput_AccountInteractions_OrderDirection>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
 };
 
 
@@ -739,6 +755,13 @@ export type AccountFilter = {
   id_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   id_not_starts_with?: InputMaybe<Scalars['String']['input']>;
   id_starts_with?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type AccountInteractions_200_Response = {
+  __typename?: 'accountInteractions_200_response';
+  items: Array<Maybe<Query_AccountInteractions_Items_Items>>;
+  period: Query_AccountInteractions_Period;
+  totalCount: Scalars['Float']['output'];
 };
 
 export type AccountPage = {
@@ -1477,6 +1500,19 @@ export enum QueryInput_AccountBalanceVariations_OrderDirection {
   Desc = 'desc'
 }
 
+export enum QueryInput_AccountInteractions_Days {
+  '7d' = '_7d',
+  '30d' = '_30d',
+  '90d' = '_90d',
+  '180d' = '_180d',
+  '365d' = '_365d'
+}
+
+export enum QueryInput_AccountInteractions_OrderDirection {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
 export enum QueryInput_CompareActiveSupply_Days {
   '7d' = '_7d',
   '30d' = '_30d',
@@ -1678,6 +1714,21 @@ export type Query_AccountBalanceVariations_Items_Items = {
 
 export type Query_AccountBalanceVariations_Period = {
   __typename?: 'query_accountBalanceVariations_period';
+  days: Scalars['String']['output'];
+  endTimestamp: Scalars['String']['output'];
+  startTimestamp: Scalars['String']['output'];
+};
+
+export type Query_AccountInteractions_Items_Items = {
+  __typename?: 'query_accountInteractions_items_items';
+  accountId: Scalars['String']['output'];
+  amountTransferred: Scalars['String']['output'];
+  totalVolume: Scalars['String']['output'];
+  transferCount: Scalars['String']['output'];
+};
+
+export type Query_AccountInteractions_Period = {
+  __typename?: 'query_accountInteractions_period';
   days: Scalars['String']['output'];
   endTimestamp: Scalars['String']['output'];
   startTimestamp: Scalars['String']['output'];
@@ -2648,6 +2699,14 @@ export type GetDelegateDelegationHistoryGraphQueryVariables = Exact<{
 
 export type GetDelegateDelegationHistoryGraphQuery = { __typename?: 'Query', votingPowerHistorys: { __typename?: 'votingPowerHistoryPage', totalCount: number, items: Array<{ __typename?: 'votingPowerHistory', delta: any, transactionHash: string, timestamp: any, votingPower: any, delegation?: { __typename?: 'delegation', delegatorAccountId: string, delegatedValue: any, previousDelegate?: string | null, delegateAccountId: string } | null, transfer?: { __typename?: 'transfer', amount: any, fromAccountId: string, toAccountId: string } | null }> } };
 
+export type GetDelegatedSupplyHistoryQueryVariables = Exact<{
+  startDate: Scalars['String']['input'];
+  endDate?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GetDelegatedSupplyHistoryQuery = { __typename?: 'Query', averageDelegationPercentageByDay: { __typename?: 'AverageDelegationPercentagePage', items: Array<{ __typename?: 'AverageDelegationPercentageItem', date: string, high: string }> } };
+
 export type GetDelegatesCountQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -2815,6 +2874,13 @@ export type GetTokenHoldersCoutingQueryVariables = Exact<{ [key: string]: never;
 
 export type GetTokenHoldersCoutingQuery = { __typename?: 'Query', accountBalances: { __typename?: 'accountBalancePage', totalCount: number } };
 
+export type TokenInfoQueryVariables = Exact<{
+  currency?: InputMaybe<QueryInput_Token_Currency>;
+}>;
+
+
+export type TokenInfoQuery = { __typename?: 'Query', token?: { __typename?: 'token_200_response', circulatingSupply: string, delegatedSupply: string, lendingSupply: string, name?: string | null, treasury: string } | null };
+
 export type TransactionsQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   offset?: InputMaybe<Scalars['NonNegativeInt']['input']>;
@@ -2823,6 +2889,10 @@ export type TransactionsQueryVariables = Exact<{
   minAmount?: InputMaybe<Scalars['String']['input']>;
   maxAmount?: InputMaybe<Scalars['String']['input']>;
   sortOrder?: InputMaybe<QueryInput_Transactions_SortOrder>;
+  affectedSupply?: InputMaybe<Scalars['JSON']['input']>;
+  fromDate?: InputMaybe<Scalars['Int']['input']>;
+  toDate?: InputMaybe<Scalars['Int']['input']>;
+  includes?: InputMaybe<Scalars['JSON']['input']>;
 }>;
 
 

@@ -11,7 +11,7 @@ import {
   tokenDistribution,
   token,
   proposalsActivity,
-  historicalOnchain,
+  historicalBalances,
   transactions,
   proposals,
   lastUpdate,
@@ -20,11 +20,11 @@ import {
   votingPowerVariations,
   accountBalanceVariations,
   dao,
-} from "./controller";
-import { DrizzleProposalsActivityRepository } from "./repositories/proposals-activity.repository";
-import { docs } from "./docs";
+  accountInteractions,
+} from "@/api/controllers";
+import { docs } from "@/api/docs";
 import { env } from "@/env";
-import { DaoCache } from "./cache/dao-cache";
+import { DaoCache } from "@/api/cache/dao-cache";
 import {
   DelegationPercentageRepository,
   AccountBalanceRepository,
@@ -33,9 +33,11 @@ import {
   TokenRepository,
   TransactionsRepository,
   VotingPowerRepository,
+  DrizzleProposalsActivityRepository,
   NounsVotingPowerRepository,
-} from "./repositories";
-import { errorHandler } from "./middlewares";
+  AccountInteractionsRepository,
+} from "@/api/repositories";
+import { errorHandler } from "@/api/middlewares";
 import { getClient } from "@/lib/client";
 import { getChain } from "@/lib/utils";
 import {
@@ -47,10 +49,10 @@ import {
   CoingeckoService,
   NFTPriceService,
   TokenService,
-  TopBalanceVariationsService,
+  BalanceVariationsService,
   HistoricalBalancesService,
   DaoService,
-} from "./services";
+} from "@/api/services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 import { createTreasuryProvider } from "./services/treasury/treasury-provider-factory";
@@ -105,6 +107,7 @@ const delegationPercentageService = new DelegationPercentageService(
   delegationPercentageRepo,
 );
 const accountBalanceRepo = new AccountBalanceRepository();
+const accountInteractionRepo = new AccountInteractionsRepository();
 const transactionsService = new TransactionsService(transactionsRepo);
 const votingPowerService = new VotingPowerService(
   env.DAO_ID === DaoIdEnum.NOUNS
@@ -114,6 +117,10 @@ const votingPowerService = new VotingPowerService(
 );
 const daoCache = new DaoCache();
 const daoService = new DaoService(daoClient, daoCache, env.CHAIN_ID);
+const accountBalanceService = new BalanceVariationsService(
+  accountBalanceRepo,
+  accountInteractionRepo,
+);
 
 createTreasuryProvider(app);
 
@@ -142,7 +149,7 @@ tokenDistribution(app, repo);
 governanceActivity(app, repo, tokenType);
 proposalsActivity(app, proposalsRepo, env.DAO_ID, daoClient);
 proposals(app, new ProposalsService(repo, daoClient), daoClient, blockTime);
-historicalOnchain(
+historicalBalances(
   app,
   env.DAO_ID,
   new HistoricalVotingPowerService(votingPowerRepo),
@@ -153,10 +160,8 @@ lastUpdate(app);
 delegationPercentage(app, delegationPercentageService);
 votingPower(app, votingPowerService);
 votingPowerVariations(app, votingPowerService);
-accountBalanceVariations(
-  app,
-  new TopBalanceVariationsService(accountBalanceRepo),
-);
+accountBalanceVariations(app, accountBalanceService);
+accountInteractions(app, accountBalanceService);
 dao(app, daoService);
 docs(app);
 

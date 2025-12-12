@@ -40,6 +40,7 @@
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
   --animate-scroll-left: scroll-left 20s linear infinite;
+  --animate-fade-in: fade-in 0.5s ease-in;
 
   /* DEV: TODO: Remove these colors once the new design system is fully implemented. 
    * Check the border colors and gradients as well.
@@ -182,6 +183,16 @@
     }
     to {
       transform: translateX(-50%);
+    }
+  }
+
+  /* Fade in animation */
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
     }
   }
 }
@@ -347,6 +358,25 @@
 
   .section-layout-icon {
     @apply text-secondary size-5;
+  }
+
+  /* Sticky column border - uses pseudo-element to ensure border sticks with sticky element
+   * This is necessary because borders don't work properly with position: sticky
+   * Reference: https://stackoverflow.com/questions/50361698/border-style-do-not-work-with-sticky-position-element
+   */
+  .sticky-border-r::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: var(--color-border-default);
+    pointer-events: none;
+
+    @media (min-width: 768px) {
+      display: none;
+    }
   }
 
   /* Recharts Brush tick formatting */

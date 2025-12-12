@@ -16,10 +16,6 @@ const nextConfig = {
     contentDispositionType: "attachment",
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
-  webpack: (config: { externals: string[] }) => {
-    config.externals.push("pino-pretty");
-    return config;
-  },
   async headers() {
     return [
       {
@@ -33,6 +29,7 @@ const nextConfig = {
       },
     ];
   },
+  serverExternalPackages: ["pino-pretty"],
 };
 
 export default nextConfig;

@@ -4,6 +4,7 @@ import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governan
 import { GitcoinIcon } from "@/shared/components/icons";
 import { mainnet } from "viem/chains";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
+import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
 
 export const GTC: DaoConfiguration = {
   name: "Gitcoin",
@@ -16,14 +17,17 @@ export const GTC: DaoConfiguration = {
   icon: GitcoinIcon,
   daoOverview: {
     token: "ERC20",
-    chain: mainnet,
+    chain: { ...mainnet, icon: MainnetIcon },
     snapshot: "https://snapshot.box/#/s:gitcoindao.eth",
     contracts: {
       governor: "0x9D4C63565D5618310271bF3F3c01b2954C1D1639",
       token: "0xDe30da39c46104798bB5aA3fe8B9e0e1F348163F",
       timelock: "0x57a8865cfB1eCEf7253c27da6B4BC3dAEE5Be518",
     },
-    tally: "https://tally.xyz/gov/gitcoin",
+    govPlatform: {
+      name: "Tally",
+      url: "https://tally.xyz/gov/gitcoin/proposal/",
+    },
     cancelFunction:
       "https://etherscan.io/address/0x57a8865cfB1eCEf7253c27da6B4BC3dAEE5Be518#writeContract#F2",
     rules: {
