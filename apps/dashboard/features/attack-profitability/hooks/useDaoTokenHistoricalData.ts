@@ -54,6 +54,7 @@ export const useDaoTokenHistoricalData = ({
       }),
     { revalidateOnFocus: false, ...config },
   );
+  data?.pop(); // remove last item because it will never be a full day
 
   return {
     data: data ?? [],
