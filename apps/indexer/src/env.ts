@@ -11,8 +11,13 @@ const envSchema = z.object({
   MAX_REQUESTS_PER_SECOND: z.coerce.number().default(20),
   DAO_ID: z.nativeEnum(DaoIdEnum),
   CHAIN_ID: z.coerce.number(),
+
+  // Treasury provider configuration
+  DEFILLAMA_API_URL: z.string().optional(),
+  TREASURY_PROVIDER_PROTOCOL_ID: z.string().optional(),
   DUNE_API_URL: z.string().optional(),
   DUNE_API_KEY: z.string().optional(),
+
   COINGECKO_API_URL: z.string(),
   COINGECKO_API_KEY: z.string(),
   REDIS_URL: z.string().optional(),

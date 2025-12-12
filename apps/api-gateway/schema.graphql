@@ -20,7 +20,7 @@ type Query {
   accountBalances(where: accountBalanceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountBalancePage!
   accountPower(accountId: String!): accountPower
   accountPowers(where: accountPowerFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountPowerPage!
-  votingPowerHistory(transactionHash: String!, accountId: String!): votingPowerHistory
+  votingPowerHistory(transactionHash: String!, accountId: String!, logIndex: Float!): votingPowerHistory
   votingPowerHistorys(where: votingPowerHistoryFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votingPowerHistoryPage!
   delegation(transactionHash: String!, delegatorAccountId: String!, delegateAccountId: String!): delegation
   delegations(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): delegationPage!
@@ -38,8 +38,10 @@ type Query {
   tokenPrices(where: tokenPriceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPricePage!
   _meta: Meta
 
-  """Get total assets"""
-  totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
+  """
+  Get historical Liquid Treasury (treasury without DAO tokens) directly from provider
+  """
+  totalAssets(days: queryInput_totalAssets_days = _7d, order: queryInput_totalAssets_order = asc): [query_totalAssets_items]
 
   """Get historical market data for a specific token"""
   historicalTokenData(skip: NonNegativeInt, limit: Float = 365): [query_historicalTokenData_items]
@@ -148,7 +150,7 @@ type Query {
   Returns a mapping of the largest interactions between accounts. 
   Positive amounts signify net token transfers FROM <accountId>, whilst negative amounts refer to net transfers TO <accountId>
   """
-  accountInteractions(days: queryInput_accountInteractions_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountInteractions_orderDirection = desc, accountId: String!, minAmount: String, maxAmount: String): accountInteractions_200_response
+  accountInteractions(days: queryInput_accountInteractions_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountInteractions_orderDirection = desc, accountId: String!, minAmount: String, maxAmount: String, orderBy: queryInput_accountInteractions_orderBy = count, address: String): accountInteractions_200_response
 
   """Returns current governance parameters for this DAO"""
   dao: dao_200_response
@@ -358,7 +360,6 @@ type accountPower {
   proposalsCount: Int!
   delegationsCount: Int!
   lastVoteTimestamp: BigInt!
-  firstVoteTimestamp: BigInt
   account: account
 }
 
@@ -474,14 +475,6 @@ input accountPowerFilter {
   lastVoteTimestamp_lt: BigInt
   lastVoteTimestamp_gte: BigInt
   lastVoteTimestamp_lte: BigInt
-  firstVoteTimestamp: BigInt
-  firstVoteTimestamp_not: BigInt
-  firstVoteTimestamp_in: [BigInt]
-  firstVoteTimestamp_not_in: [BigInt]
-  firstVoteTimestamp_gt: BigInt
-  firstVoteTimestamp_lt: BigInt
-  firstVoteTimestamp_gte: BigInt
-  firstVoteTimestamp_lte: BigInt
 }
 
 type delegationPage {
@@ -1340,8 +1333,9 @@ input tokenPriceFilter {
 }
 
 type query_totalAssets_items {
-  totalAssets: String!
-  date: String!
+  """Unix timestamp in milliseconds"""
+  date: Float!
+  liquidTreasury: Float!
 }
 
 enum queryInput_totalAssets_days {
@@ -1350,6 +1344,11 @@ enum queryInput_totalAssets_days {
   _90d
   _180d
   _365d
+}
+
+enum queryInput_totalAssets_order {
+  asc
+  desc
 }
 
 type query_historicalTokenData_items {
@@ -1923,6 +1922,11 @@ enum queryInput_accountInteractions_days {
 enum queryInput_accountInteractions_orderDirection {
   asc
   desc
+}
+
+enum queryInput_accountInteractions_orderBy {
+  volume
+  count
 }
 
 type dao_200_response {

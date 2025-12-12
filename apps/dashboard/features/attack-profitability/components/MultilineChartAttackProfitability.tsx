@@ -27,7 +27,7 @@ import { ResearchPendingChartBlur } from "@/shared/components/charts/ResearchPen
 import { AttackProfitabilityCustomTooltip } from "@/features/attack-profitability/components";
 import {
   useDaoTokenHistoricalData,
-  useTreasuryAssetNonDaoToken,
+  useTreasuryAssetData,
 } from "@/features/attack-profitability/hooks";
 import {
   cn,
@@ -37,7 +37,7 @@ import {
 import {
   normalizeDataset,
   normalizeDatasetTreasuryNonDaoToken,
-  normalizeDatasetAllTreasury,
+  calculateTotalTreasury,
 } from "@/features/attack-profitability/utils";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
@@ -62,10 +62,7 @@ export const MultilineChartAttackProfitability = ({
   const { data: daoData } = useDaoData(daoEnum);
   const daoConfig = daoConfigByDaoId[daoEnum];
 
-  const { data: treasuryAssetNonDAOToken = [] } = useTreasuryAssetNonDaoToken(
-    daoEnum,
-    days,
-  );
+  const { data: treasuryAssetData = [] } = useTreasuryAssetData(daoEnum, days);
 
   const { data: daoTokenPriceHistoricalData } = useDaoTokenHistoricalData({
     daoId: daoEnum,
@@ -110,8 +107,8 @@ export const MultilineChartAttackProfitability = ({
     let delegatedSupplyChart: DaoMetricsDayBucket[] = [];
     let treasurySupplyChart: DaoMetricsDayBucket[] = [];
     if (timeSeriesData) {
-      treasurySupplyChart = timeSeriesData[MetricTypesEnum.TREASURY];
       delegatedSupplyChart = timeSeriesData[MetricTypesEnum.DELEGATED_SUPPLY];
+      treasurySupplyChart = timeSeriesData[MetricTypesEnum.TREASURY];
     }
 
     let datasets: Record<string, MultilineChartDataSetPoint[]> = {};
@@ -120,13 +117,13 @@ export const MultilineChartAttackProfitability = ({
     } else {
       datasets = {
         treasuryNonDAO: normalizeDatasetTreasuryNonDaoToken(
-          treasuryAssetNonDAOToken,
+          treasuryAssetData,
           "treasuryNonDAO",
-        ).reverse(),
-        all: normalizeDatasetAllTreasury(
+        ),
+        all: calculateTotalTreasury(
           daoTokenPriceHistoricalData,
           "all",
-          treasuryAssetNonDAOToken,
+          treasuryAssetData,
           treasurySupplyChart,
           daoConfig.decimals,
         ),
@@ -170,32 +167,26 @@ export const MultilineChartAttackProfitability = ({
       ),
     );
 
-    const data = Array.from(allDates).map((date) => {
-      const dataPoint: Record<string, number | null> = { date };
+    const data = Array.from(allDates)
+      .sort((a, b) => a - b)
+      .map((date) => {
+        const dataPoint: Record<string, number | null> = { date };
 
-      Object.entries(datasets).forEach(([key, dataset]) => {
-        const chartLabel = chartConfig[key as keyof typeof chartConfig]?.label;
-        const isKeySelected = filterData?.includes(key);
-        const isLabelSelected = filterData?.includes(chartLabel);
-
-        if (isKeySelected || isLabelSelected) {
+        Object.entries(datasets).forEach(([key, dataset]) => {
           const value = dataset.find((d) => d.date === date)?.[key] ?? null;
           if (value !== null) lastKnownValues[key] = value;
           dataPoint[key] = lastKnownValues[key] ?? null;
-        }
-      });
+        });
 
-      return dataPoint;
-    });
+        return dataPoint;
+      });
 
     return data;
   }, [
-    filterData,
-    chartConfig,
     mocked,
     quorumValue,
     daoTokenPriceHistoricalData,
-    treasuryAssetNonDAOToken,
+    treasuryAssetData,
     timeSeriesData,
     daoConfig?.attackProfitability?.dynamicQuorum?.percentage,
     daoConfig.decimals,
@@ -254,10 +245,13 @@ export const MultilineChartAttackProfitability = ({
             }
           />
           {Object.entries(chartConfig)
-            .filter(
-              ([key], index: number) =>
-                !filterData || key !== filterData[index],
-            )
+            .filter(([key, config]) => {
+              if (!filterData) return true;
+              // Show line if key OR label is in filterData
+              return (
+                filterData.includes(key) || filterData.includes(config.label)
+              );
+            })
             .map(([key, config]) => (
               <Line
                 key={key}

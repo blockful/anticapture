@@ -5,7 +5,6 @@ import schema from "ponder:schema";
 import { logger } from "hono/logger";
 import { fromZodError } from "zod-validation-error";
 import { createPublicClient, http } from "viem";
-
 import {
   governanceActivity,
   tokenHistoricalData,
@@ -16,7 +15,6 @@ import {
   transactions,
   proposals,
   lastUpdate,
-  totalAssets,
   votingPower,
   delegationPercentage,
   votingPowerVariations,
@@ -48,7 +46,6 @@ import {
   VotingPowerService,
   TransactionsService,
   ProposalsService,
-  DuneService,
   CoingeckoService,
   NFTPriceService,
   TokenService,
@@ -58,6 +55,7 @@ import {
 } from "@/api/services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
+import { createTreasuryProvider } from "./services/treasury/treasury-provider-factory";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -129,10 +127,7 @@ const accountBalanceService = new BalanceVariationsService(
   accountInteractionRepo,
 );
 
-if (env.DUNE_API_URL && env.DUNE_API_KEY) {
-  const duneClient = new DuneService(env.DUNE_API_URL, env.DUNE_API_KEY);
-  totalAssets(app, duneClient);
-}
+createTreasuryProvider(app);
 
 const tokenPriceClient =
   env.DAO_ID === DaoIdEnum.NOUNS

@@ -1,54 +1,59 @@
-import { TreasuryAssetNonDaoToken } from "@/features/attack-profitability/hooks";
 import {
   PriceEntry,
   DaoMetricsDayBucket,
   MultilineChartDataSetPoint,
 } from "@/shared/dao-config/types";
+import { TreasuryAssetData } from "@/features/attack-profitability/hooks";
 import { formatUnits } from "viem";
 
 /**
- * Calculates per-day total treasury value:
- *   total = (gov token treasury * gov token price) + non-DAO asset treasuries
- * Uses exact-day values only (no forward-fill). Any continuity should come from upstream.
+ * Calculates total treasury by combining:
+ * 1. Liquid Treasury (from providers like Dune/DefiLlama)
+ * 2. Gov Token Treasury Value = (gov token quantity × price)
+ *
+ * Formula: Total = Liquid Treasury + (Gov Tokens × Price)
+ *
  */
-export function normalizeDatasetAllTreasury(
+export function calculateTotalTreasury(
   tokenPrices: PriceEntry[],
   key: string,
-  assetTreasuries: TreasuryAssetNonDaoToken[],
-  govTreasuries: DaoMetricsDayBucket[] = [],
-  decimals: number, // decimals for the governance token (used with formatUnits)
+  liquidTreasuryData: TreasuryAssetData[],
+  govTreasuryQuantities: DaoMetricsDayBucket[] = [],
+  decimals: number,
 ): MultilineChartDataSetPoint[] {
-  // Map: timestamp (ms) -> non-DAO assets value
-  const assetTreasuriesMap = assetTreasuries.map((item) => ({
-    date: new Date(item.date).getTime(),
-    totalAssets: Number(item.totalAssets),
-  }));
-
-  // Map: timestamp (ms) -> governance treasury amount (normalized by decimals for ERC20)
-  const govTreasuriesMap = govTreasuries.reduce(
-    (acc, item) => ({
-      ...acc,
-      [Number(item.date) * 1000]: Number(
-        formatUnits(BigInt(item.close), decimals),
-      ),
-    }),
-    {} as Record<number, number>,
+  // Maps liquid treasury and gov token quantities by timestamp
+  const liquidTreasuryMap = new Map(
+    liquidTreasuryData.map((item) => [item.date, item.liquidTreasury]),
+  );
+  const govQuantitiesMap = new Map(
+    govTreasuryQuantities.map((item) => [
+      Number(item.date) * 1000,
+      Number(formatUnits(BigInt(item.close), decimals)),
+    ]),
   );
 
-  let currentAssetIndex = 0;
+  let lastLiquidTreasury = 0;
+  let lastGovQuantity = 0;
+
   return tokenPrices.map(({ timestamp, price }) => {
-    if (
-      timestamp > assetTreasuriesMap[currentAssetIndex]?.date &&
-      currentAssetIndex < assetTreasuriesMap.length - 1
-    ) {
-      currentAssetIndex++;
+    // Get or forward-fill liquid treasury value
+    const liquidTreasury =
+      liquidTreasuryMap.get(timestamp) ?? lastLiquidTreasury;
+    if (liquidTreasuryMap.has(timestamp)) {
+      lastLiquidTreasury = liquidTreasury;
     }
+
+    // Get or forward-fill gov token quantity
+    const govTokenQuantity = govQuantitiesMap.get(timestamp) ?? lastGovQuantity;
+    if (govQuantitiesMap.has(timestamp)) {
+      lastGovQuantity = govTokenQuantity;
+    }
+
+    const govTokenValue = Number(price) * govTokenQuantity;
 
     return {
       date: timestamp,
-      [key]:
-        Number(price) * (govTreasuriesMap[timestamp] ?? 1) +
-        (assetTreasuriesMap[currentAssetIndex]?.totalAssets ?? 0),
+      [key]: liquidTreasury + govTokenValue, // Total = Liquid + Gov Token Value
     };
   });
 }

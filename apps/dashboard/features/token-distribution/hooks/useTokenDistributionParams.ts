@@ -32,6 +32,7 @@ export function useTokenDistributionParams(chartData: ChartDataSetPoint[]) {
     }
 
     setStoreHasTransfer(hasTransfer === "true");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
