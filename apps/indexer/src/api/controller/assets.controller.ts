@@ -1,37 +1,16 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
-
 import { DaysOpts } from "@/lib/enums";
+import { TreasuryService } from "@/api/services/treasury";
 
-interface TreasuryClient {
-  getHistoricalTreasury(params: {
-    days?: number;
-    order?: "asc" | "desc";
-  }): Promise<
-    Array<{
-      date: bigint;
-      totalTreasury: bigint;
-      treasuryWithoutDaoToken: bigint;
-    }>
-  >;
-  getLatestTreasury(): Promise<{
-    date: bigint;
-    totalTreasury: bigint;
-    treasuryWithoutDaoToken: bigint;
-  } | null>;
-  syncTreasury?(): Promise<{
-    synced: number;
-    unchanged: number;
-  }>;
-}
-
-export function assets(app: Hono, service: TreasuryClient) {
+export function assets(app: Hono, treasuryService: TreasuryService) {
   app.openapi(
     createRoute({
       method: "get",
       operationId: "totalAssets",
       path: "/total-assets",
-      summary: "Get total assets",
-      description: "Get historical treasury data (total and without DAO token)",
+      summary: "Get liquid treasury data",
+      description:
+        "Get historical Liquid Treasury (treasury without DAO tokens) directly from provider",
       tags: ["assets"],
       request: {
         query: z.object({
@@ -44,18 +23,13 @@ export function assets(app: Hono, service: TreasuryClient) {
       },
       responses: {
         200: {
-          description: "Returns the total assets by day",
+          description: "Returns the liquid treasury by day",
           content: {
             "application/json": {
               schema: z.array(
                 z.object({
                   date: z.number().describe("Unix timestamp in milliseconds"),
-                  totalTreasury: z
-                    .string()
-                    .describe("USD value as string (supports large values)"),
-                  treasuryWithoutDaoToken: z
-                    .string()
-                    .describe("USD value as string (supports large values)"),
+                  liquidTreasury: z.number(),
                 }),
               ),
             },
@@ -65,63 +39,7 @@ export function assets(app: Hono, service: TreasuryClient) {
     }),
     async (context) => {
       const { days, order } = context.req.valid("query");
-
-      // Fetch from database via treasury service
-      const data = await service.getHistoricalTreasury({ days, order });
-
-      const response = data.map((item) => ({
-        date: Number(item.date) * 1000, // Convert seconds to milliseconds
-        totalTreasury: item.totalTreasury.toString(),
-        treasuryWithoutDaoToken: item.treasuryWithoutDaoToken.toString(),
-      }));
-
-      return context.json(response);
-    },
-  );
-
-  app.openapi(
-    createRoute({
-      method: "get",
-      operationId: "latestTotalAssets",
-      path: "/total-assets/latest",
-      summary: "Get latest total assets",
-      description:
-        "Get the most recent treasury data point (total and without DAO token)",
-      tags: ["assets"],
-      responses: {
-        200: {
-          description: "Returns the latest total assets or null if not found",
-          content: {
-            "application/json": {
-              schema: z
-                .object({
-                  date: z.number().describe("Unix timestamp in milliseconds"),
-                  totalTreasury: z
-                    .string()
-                    .describe("USD value as string (supports large values)"),
-                  treasuryWithoutDaoToken: z
-                    .string()
-                    .describe("USD value as string (supports large values)"),
-                })
-                .nullable(),
-            },
-          },
-        },
-      },
-    }),
-    async (context) => {
-      const data = await service.getLatestTreasury();
-
-      if (!data) {
-        return context.json(null);
-      }
-
-      const response = {
-        date: Number(data.date) * 1000, // seconds to milliseconds
-        totalTreasury: data.totalTreasury.toString(),
-        treasuryWithoutDaoToken: data.treasuryWithoutDaoToken.toString(),
-      };
-
+      const response = await treasuryService.getTreasuryHistory(days, order);
       return context.json(response);
     },
   );
