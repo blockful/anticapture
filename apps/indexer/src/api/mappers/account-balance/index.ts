@@ -1,6 +1,6 @@
 import { DaoIdEnum, DaysEnum, DaysOpts } from "@/lib/enums";
 import { z } from "@hono/zod-openapi";
-import { Address } from "viem";
+import { Address, isAddress } from "viem";
 import { PERCENTAGE_NO_BASELINE } from "@/api/mappers/constants";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { calculateHistoricalBlockNumber } from "@/lib/blockTime";
@@ -21,10 +21,22 @@ export const AccountBalancesRequestSchema = z.object({
     .optional()
     .default(0),
   orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
-  includeAddresses: z.array(z.string()).optional().default([]),
-  excludeAddresses: z.array(z.string()).optional().default([]),
-  includeDelegates: z.array(z.string()).optional().default([]),
-  excludeDelegates: z.array(z.string()).optional().default([]),
+  includeAddresses: z
+    .array(z.string().refine((addr) => isAddress(addr)))
+    .optional()
+    .default([]),
+  excludeAddresses: z
+    .array(z.string().refine((addr) => isAddress(addr)))
+    .optional()
+    .default([]),
+  includeDelegates: z
+    .array(z.string().refine((addr) => isAddress(addr)))
+    .optional()
+    .default([]),
+  excludeDelegates: z
+    .array(z.string().refine((addr) => isAddress(addr)))
+    .optional()
+    .default([]),
   balanceGreaterThan: z
     .string()
     .transform((val) => BigInt(val))

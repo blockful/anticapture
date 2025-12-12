@@ -5,7 +5,6 @@ import {
   AccountBalancesResponseMapper,
   AccountBalancesResponseSchema,
 } from "@/api/mappers";
-import { Address } from "viem";
 
 export function accountBalances(app: Hono, service: AccountBalanceService) {
   app.openapi(
@@ -15,7 +14,7 @@ export function accountBalances(app: Hono, service: AccountBalanceService) {
       path: "/account-balances",
       summary: "Get account balances",
       description: "Returns account balances",
-      tags: ["transactions"],
+      tags: ["account-balances"],
       request: {
         query: AccountBalancesRequestSchema,
       },
@@ -47,10 +46,10 @@ export function accountBalances(app: Hono, service: AccountBalanceService) {
         skip,
         limit,
         orderDirection,
-        includeAddresses as Address[],
-        excludeAddresses as Address[],
-        includeDelegates as Address[],
-        excludeDelegates as Address[],
+        includeAddresses,
+        excludeAddresses,
+        includeDelegates,
+        excludeDelegates,
         {
           minAmount: balanceGreaterThan,
           maxAmount: balanceLessThan,

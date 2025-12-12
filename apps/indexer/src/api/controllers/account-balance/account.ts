@@ -14,7 +14,7 @@ export function accountBalance(app: Hono, service: AccountBalanceService) {
       path: "/account-balances/:accountId",
       summary: "Get account balance",
       description: "Returns account balance",
-      tags: ["transactions"],
+      tags: ["account-balances"],
       responses: {
         200: {
           description: "Successfully retrieved account balance",
