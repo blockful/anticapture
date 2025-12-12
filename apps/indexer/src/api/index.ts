@@ -23,13 +23,15 @@ import {
   accountBalanceVariations,
   dao,
   accountInteractions,
+  accountBalances,
+  accountBalance,
 } from "@/api/controllers";
 import { docs } from "@/api/docs";
 import { env } from "@/env";
 import { DaoCache } from "@/api/cache/dao-cache";
 import {
   DelegationPercentageRepository,
-  AccountBalanceRepository,
+  BalanceVariationsRepository,
   DrizzleRepository,
   NFTPriceRepository,
   TokenRepository,
@@ -55,9 +57,11 @@ import {
   BalanceVariationsService,
   HistoricalBalancesService,
   DaoService,
+  AccountBalanceService,
 } from "@/api/services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
+import { AccountBalanceRepository } from "./repositories/account-balance/listing";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -113,6 +117,7 @@ const delegationPercentageRepo = new DelegationPercentageRepository();
 const delegationPercentageService = new DelegationPercentageService(
   delegationPercentageRepo,
 );
+const balanceVariationsRepo = new BalanceVariationsRepository();
 const accountBalanceRepo = new AccountBalanceRepository();
 const accountInteractionRepo = new AccountInteractionsRepository();
 const transactionsService = new TransactionsService(transactionsRepo);
@@ -124,10 +129,11 @@ const votingPowerService = new VotingPowerService(
 );
 const daoCache = new DaoCache();
 const daoService = new DaoService(daoClient, daoCache, env.CHAIN_ID);
-const accountBalanceService = new BalanceVariationsService(
-  accountBalanceRepo,
+const balanceVariationsService = new BalanceVariationsService(
+  balanceVariationsRepo,
   accountInteractionRepo,
 );
+const accountBalanceService = new AccountBalanceService(accountBalanceRepo);
 
 if (env.DUNE_API_URL && env.DUNE_API_KEY) {
   const duneClient = new DuneService(env.DUNE_API_URL, env.DUNE_API_KEY);
@@ -168,15 +174,17 @@ historicalBalances(
   app,
   env.DAO_ID,
   new HistoricalVotingPowerService(votingPowerRepo),
-  new HistoricalBalancesService(accountBalanceRepo),
+  new HistoricalBalancesService(balanceVariationsRepo),
 );
 transactions(app, transactionsService);
 lastUpdate(app);
 delegationPercentage(app, delegationPercentageService);
 votingPower(app, votingPowerService);
 votingPowerVariations(app, votingPowerService);
-accountBalanceVariations(app, accountBalanceService);
-accountInteractions(app, accountBalanceService);
+accountBalanceVariations(app, balanceVariationsService);
+accountBalance(app, accountBalanceService);
+accountBalances(app, env.DAO_ID, accountBalanceService);
+accountInteractions(app, balanceVariationsService);
 dao(app, daoService);
 docs(app);
 
