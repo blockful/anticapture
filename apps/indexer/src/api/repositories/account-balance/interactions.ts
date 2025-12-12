@@ -47,12 +47,6 @@ export class AccountInteractionsRepository {
       .where(and(...transferCriteria))
       .as("scoped_transfers");
 
-    const totalCountResult = await db
-      .select({
-        count: sql<number>`COUNT(*)`.as("count"),
-      })
-      .from(scopedTransfers);
-
     const transfersFrom = db
       .select({
         accountId: scopedTransfers.fromAccountId,
@@ -102,7 +96,7 @@ export class AccountInteractionsRepository {
         sql`${accountBalance.accountId} = ${transfersTo.accountId}`,
       )
       .where(
-        sql`${transfersFrom.accountId} IS NOT NULL OR ${transfersTo.accountId} IS NOT NULL`,
+        sql`${transfersFrom.accountId} IS NOT NULL OR ${transfersTo.accountId} IS NOT NULL AND (${transfersFrom.accountId} != ${transfersTo.accountId})`,
       )
       .as("combined");
 
@@ -112,7 +106,7 @@ export class AccountInteractionsRepository {
         ? sql`${combined.fromCount} + ${combined.toCount}`
         : sql`ABS(${combined.fromChange}) + ABS(${combined.toChange})`;
 
-    const result = await db
+    const baseQuery = db
       .select({
         accountId: combined.accountId,
         currentBalance: combined.currentBalance,
@@ -130,13 +124,19 @@ export class AccountInteractionsRepository {
           ),
       })
       .from(combined)
-      .orderBy(orderDirectionFn(orderByField))
-      .offset(skip)
-      .limit(limit);
+      .orderBy(orderDirectionFn(orderByField));
+
+    const totalCountResult = await db
+      .select({
+        count: sql<number>`COUNT(*)`.as("count"),
+      })
+      .from(baseQuery.as("subquery"));
+
+    const pagedResult = await baseQuery.offset(skip).limit(limit);
 
     return {
       interactionCount: Number(totalCountResult[0]?.count) ?? 0,
-      interactions: result.map(
+      interactions: pagedResult.map(
         ({
           accountId,
           currentBalance,

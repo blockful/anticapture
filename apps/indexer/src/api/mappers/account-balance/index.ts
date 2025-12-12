@@ -174,7 +174,6 @@ export const AccountBalanceVariationsMapper = (
 };
 
 export const AccountInteractionsMapper = (
-  accountId: Address,
   interactions: AccountInteractions,
   endTimestamp: number,
   days: DaysEnum,
@@ -186,13 +185,13 @@ export const AccountInteractionsMapper = (
       endTimestamp: new Date(endTimestamp * 1000).toISOString(),
     },
     totalCount: interactions.interactionCount,
-    items: interactions.interactions
-      .filter(({ accountId: addr }) => addr !== accountId)
-      .map(({ accountId, absoluteChange, totalVolume, transferCount }) => ({
+    items: interactions.interactions.map(
+      ({ accountId, absoluteChange, totalVolume, transferCount }) => ({
         accountId: accountId,
         amountTransferred: absoluteChange.toString(),
         totalVolume: totalVolume.toString(),
         transferCount: transferCount.toString(),
-      })),
+      }),
+    ),
   });
 };
