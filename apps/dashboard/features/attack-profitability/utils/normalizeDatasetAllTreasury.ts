@@ -14,7 +14,7 @@ import { formatUnits } from "viem";
  * Formula: Total = Liquid Treasury + (Gov Tokens × Price)
  *
  */
-export function normalizeDatasetAllTreasury(
+export function calculateTotalTreasury(
   tokenPrices: PriceEntry[],
   key: string,
   liquidTreasuryData: TreasuryAssetData[],
