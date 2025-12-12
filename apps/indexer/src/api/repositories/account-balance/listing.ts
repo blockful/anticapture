@@ -9,20 +9,18 @@ export class AccountBalanceRepository {
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
-    includeAddresses: Address[],
+    addresses: Address[],
+    delegates: Address[],
     excludeAddresses: Address[],
-    includeDelegates: Address[],
-    excludeDelegates: Address[],
     amountfilter: AmountFilter,
   ): Promise<{
     items: DBAccountBalance[];
     totalCount: bigint;
   }> {
     const filter = this.filterToSql(
-      includeAddresses,
+      addresses,
+      delegates,
       excludeAddresses,
-      includeDelegates,
-      excludeDelegates,
       amountfilter,
     );
 
@@ -62,31 +60,27 @@ export class AccountBalanceRepository {
   }
 
   private filterToSql(
-    includeAddresses: Address[],
+    addresses: Address[],
+    delegates: Address[],
     excludeAddresses: Address[],
-    includeDelegates: Address[],
-    excludeDelegates: Address[],
     amountfilter: AmountFilter,
   ): SQL | undefined {
     const conditions = [];
 
-    if (includeAddresses.length) {
-      conditions.push(inArray(accountBalance.accountId, includeAddresses));
+    if (addresses.length) {
+      conditions.push(inArray(accountBalance.accountId, addresses));
     }
-    if (excludeAddresses.length) {
-      conditions.push(not(inArray(accountBalance.accountId, excludeAddresses)));
-    }
-    if (includeDelegates.length) {
-      conditions.push(inArray(accountBalance.delegate, includeDelegates));
-    }
-    if (excludeDelegates.length) {
-      conditions.push(not(inArray(accountBalance.delegate, excludeDelegates)));
+    if (delegates.length) {
+      conditions.push(inArray(accountBalance.delegate, delegates));
     }
     if (amountfilter.minAmount) {
       gte(accountBalance.balance, BigInt(amountfilter.minAmount));
     }
     if (amountfilter.maxAmount) {
       gte(accountBalance.balance, BigInt(amountfilter.maxAmount));
+    }
+    if (excludeAddresses.length) {
+      conditions.push(not(inArray(accountBalance.accountId, excludeAddresses)));
     }
 
     return and(...conditions);

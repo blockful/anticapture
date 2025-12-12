@@ -1,4 +1,6 @@
 import { AmountFilter, DBAccountBalance } from "@/api/mappers";
+import { TreasuryAddresses } from "@/lib/constants";
+import { DaoIdEnum } from "@/lib/enums";
 import { Address } from "viem";
 
 interface AccountBalanceRepository {
@@ -6,10 +8,9 @@ interface AccountBalanceRepository {
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
-    includeAddresses: Address[],
+    addresses: Address[],
+    delegates: Address[],
     excludeAddresses: Address[],
-    includeDelegates: Address[],
-    excludeDelegates: Address[],
     amountfilter: AmountFilter,
   ): Promise<{
     items: DBAccountBalance[];
@@ -23,26 +24,26 @@ export class AccountBalanceService {
   constructor(private readonly repo: AccountBalanceRepository) {}
 
   async getAccountBalances(
+    daoId: DaoIdEnum,
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
-    includeAddresses: Address[],
-    excludeAddresses: Address[],
-    includeDelegates: Address[],
-    excludeDelegates: Address[],
+    addresses: Address[],
+    delegates: Address[],
     amountFilter: AmountFilter,
   ): Promise<{
     items: DBAccountBalance[];
     totalCount: bigint;
   }> {
+    const excludeAddresses = Object.values(TreasuryAddresses[daoId]);
+
     return await this.repo.getAccountBalances(
       skip,
       limit,
       orderDirection,
-      includeAddresses,
+      addresses,
+      delegates,
       excludeAddresses,
-      includeDelegates,
-      excludeDelegates,
       amountFilter,
     );
   }

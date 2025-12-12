@@ -5,8 +5,13 @@ import {
   AccountBalancesResponseMapper,
   AccountBalancesResponseSchema,
 } from "@/api/mappers";
+import { DaoIdEnum } from "@/lib/enums";
 
-export function accountBalances(app: Hono, service: AccountBalanceService) {
+export function accountBalances(
+  app: Hono,
+  daoId: DaoIdEnum,
+  service: AccountBalanceService,
+) {
   app.openapi(
     createRoute({
       method: "get",
@@ -31,10 +36,8 @@ export function accountBalances(app: Hono, service: AccountBalanceService) {
     }),
     async (context) => {
       const {
-        includeAddresses,
-        excludeAddresses,
-        includeDelegates,
-        excludeDelegates,
+        addresses,
+        delegates,
         balanceLessThan,
         balanceGreaterThan,
         limit,
@@ -43,13 +46,12 @@ export function accountBalances(app: Hono, service: AccountBalanceService) {
       } = context.req.valid("query");
 
       const result = await service.getAccountBalances(
+        daoId,
         skip,
         limit,
         orderDirection,
-        includeAddresses,
-        excludeAddresses,
-        includeDelegates,
-        excludeDelegates,
+        addresses,
+        delegates,
         {
           minAmount: balanceGreaterThan,
           maxAmount: balanceLessThan,

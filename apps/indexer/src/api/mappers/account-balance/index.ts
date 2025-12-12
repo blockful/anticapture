@@ -21,19 +21,11 @@ export const AccountBalancesRequestSchema = z.object({
     .optional()
     .default(0),
   orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
-  includeAddresses: z
+  addresses: z
     .array(z.string().refine((addr) => isAddress(addr)))
     .optional()
     .default([]),
-  excludeAddresses: z
-    .array(z.string().refine((addr) => isAddress(addr)))
-    .optional()
-    .default([]),
-  includeDelegates: z
-    .array(z.string().refine((addr) => isAddress(addr)))
-    .optional()
-    .default([]),
-  excludeDelegates: z
+  delegates: z
     .array(z.string().refine((addr) => isAddress(addr)))
     .optional()
     .default([]),
