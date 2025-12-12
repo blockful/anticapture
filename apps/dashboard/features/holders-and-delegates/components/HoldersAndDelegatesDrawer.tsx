@@ -15,7 +15,7 @@ import { DelegationHistoryTable } from "@/features/holders-and-delegates/token-h
 import { DelegateProposalsActivity } from "@/features/holders-and-delegates/delegate/drawer/votes/DelegateProposalsActivity";
 import { IconButton } from "@/shared/components";
 import { TopInteractions } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/TopInteractions";
-import { useQueryState } from "nuqs";
+import { parseAsString, useQueryState, useQueryStates } from "nuqs";
 
 export type EntityType = "delegate" | "tokenHolder";
 
@@ -85,6 +85,40 @@ export const HoldersAndDelegatesDrawer = ({
     defaultValue: entities[entityType].tabs[0].id,
   });
 
+  // clean up filters when switching tabs
+  const setSortOrder = useQueryState("orderDirection")[1];
+  const setSortBy = useQueryState("orderBy")[1];
+  const setIsFilterActive = useQueryState("active")[1];
+  const setFilterVariables = useQueryStates({
+    minDelta: parseAsString,
+    maxDelta: parseAsString,
+  })[1];
+  const setToFilter = useQueryState("to")[1];
+  const setFromFilter = useQueryState("from")[1];
+  const setSelectedPeriod = useQueryState("selectedPeriod")[1];
+  const setTypeFilter = useQueryState("type")[1];
+  const setTabAddress = useQueryState("tabAddress")[1];
+
+  const cleanupFilters = () => {
+    setSortOrder(null);
+    setSortBy(null);
+    setIsFilterActive(null);
+    setFilterVariables({
+      minDelta: null,
+      maxDelta: null,
+    });
+    setToFilter(null);
+    setFromFilter(null);
+    setSelectedPeriod(null);
+    setTypeFilter(null);
+    setTabAddress(null);
+  };
+
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId);
+    cleanupFilters();
+  };
+
   const { isMobile } = useScreenSize();
 
   const renderTabContent = (tabId: string) => {
@@ -94,6 +128,7 @@ export const HoldersAndDelegatesDrawer = ({
   const handleCloseDrawer = () => {
     onClose();
     setActiveTab(null);
+    cleanupFilters();
   };
 
   return (
@@ -158,7 +193,7 @@ export const HoldersAndDelegatesDrawer = ({
             <Tabs
               defaultValue={entities[entityType].tabs[0].id}
               value={activeTab}
-              onValueChange={(tabId) => setActiveTab(tabId)}
+              onValueChange={handleTabChange}
               className="w-fit min-w-full"
             >
               <TabsList className="group flex border-b border-b-white/10 pl-4">
