@@ -2,6 +2,7 @@ import { ponder } from "ponder:registry";
 
 import {
   proposalCreated,
+  proposalExtended,
   updateProposalStatus,
   voteCast,
 } from "@/eventHandlers";
@@ -53,6 +54,15 @@ export function COMPGovernorIndexer(blockTime: number) {
       context,
       event.args.proposalId.toString(),
       ProposalStatus.EXECUTED,
+    );
+  });
+
+  ponder.on(`COMPGovernor:ProposalExtended`, async ({ event, context }) => {
+    await proposalExtended(
+      context,
+      event.args.proposalId.toString(),
+      blockTime,
+      event.args.extendedDeadline,
     );
   });
 
