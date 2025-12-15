@@ -6,6 +6,7 @@ import { DefaultLink } from "@/shared/components/design-system/links/default-lin
 import { Github, Twitter } from "lucide-react";
 import Link from "next/link";
 import { TelegramIcon } from "@/shared/components/icons/TelegramIcon";
+import { useGitHubRelease } from "@/shared/hooks";
 
 const footerVariant = cva(
   "w-full justify-center items-center px-4 py-3 opacity-60 hover:opacity-100 transition-opacity duration-300  ",
@@ -26,13 +27,23 @@ type FooterProps = VariantProps<typeof footerVariant> & {
 };
 
 export const Footer = ({ variant, className }: FooterProps) => {
+  const { data: release } = useGitHubRelease();
+  const version = release?.tag_name || "v1.1.0";
+  const releaseUrl =
+    release?.html_url || "https://github.com/blockful/anticapture/releases";
+
   return (
     <footer className={cn(footerVariant({ variant }), className)}>
       <div className="flex flex-col items-center justify-center gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
-          <p className="text-alternative-sm text-secondary flex font-mono uppercase tracking-wider">
-            &gt;v1.1.0_
-          </p>
+          <DefaultLink
+            href={releaseUrl}
+            openInNewTab
+            variant="default"
+            className="text-alternative-sm text-secondary flex font-mono uppercase tracking-wider"
+          >
+            &gt;{version}_
+          </DefaultLink>
           <p className="text-alternative-sm text-secondary flex font-mono uppercase tracking-wider">
             powered by
           </p>
