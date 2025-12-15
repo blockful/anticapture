@@ -212,10 +212,12 @@ export type QueryAccountBalancesArgs = {
 
 export type QueryAccountInteractionsArgs = {
   accountId: Scalars['String']['input'];
+  address?: InputMaybe<Scalars['String']['input']>;
   days?: InputMaybe<QueryInput_AccountInteractions_Days>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   maxAmount?: InputMaybe<Scalars['String']['input']>;
   minAmount?: InputMaybe<Scalars['String']['input']>;
+  orderBy?: InputMaybe<QueryInput_AccountInteractions_OrderBy>;
   orderDirection?: InputMaybe<QueryInput_AccountInteractions_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
 };
@@ -521,6 +523,7 @@ export type QueryVotesOnchainsArgs = {
 
 export type QueryVotingPowerHistoryArgs = {
   accountId: Scalars['String']['input'];
+  logIndex: Scalars['Float']['input'];
   transactionHash: Scalars['String']['input'];
 };
 
@@ -761,7 +764,6 @@ export type AccountPower = {
   accountId: Scalars['String']['output'];
   daoId: Scalars['String']['output'];
   delegationsCount: Scalars['Int']['output'];
-  firstVoteTimestamp?: Maybe<Scalars['BigInt']['output']>;
   lastVoteTimestamp: Scalars['BigInt']['output'];
   proposalsCount: Scalars['Int']['output'];
   votesCount: Scalars['Int']['output'];
@@ -799,14 +801,6 @@ export type AccountPowerFilter = {
   delegationsCount_lte?: InputMaybe<Scalars['Int']['input']>;
   delegationsCount_not?: InputMaybe<Scalars['Int']['input']>;
   delegationsCount_not_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
-  firstVoteTimestamp?: InputMaybe<Scalars['BigInt']['input']>;
-  firstVoteTimestamp_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  firstVoteTimestamp_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  firstVoteTimestamp_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  firstVoteTimestamp_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  firstVoteTimestamp_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  firstVoteTimestamp_not?: InputMaybe<Scalars['BigInt']['input']>;
-  firstVoteTimestamp_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
   lastVoteTimestamp?: InputMaybe<Scalars['BigInt']['input']>;
   lastVoteTimestamp_gt?: InputMaybe<Scalars['BigInt']['input']>;
   lastVoteTimestamp_gte?: InputMaybe<Scalars['BigInt']['input']>;
@@ -1438,6 +1432,11 @@ export enum QueryInput_AccountInteractions_Days {
   '90d' = '_90d',
   '180d' = '_180d',
   '365d' = '_365d'
+}
+
+export enum QueryInput_AccountInteractions_OrderBy {
+  Count = 'count',
+  Volume = 'volume'
 }
 
 export enum QueryInput_AccountInteractions_OrderDirection {
