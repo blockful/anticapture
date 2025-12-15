@@ -20,7 +20,7 @@ type Query {
   accountBalances(where: accountBalanceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountBalancePage!
   accountPower(accountId: String!): accountPower
   accountPowers(where: accountPowerFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountPowerPage!
-  votingPowerHistory(transactionHash: String!, accountId: String!): votingPowerHistory
+  votingPowerHistory(transactionHash: String!, accountId: String!, logIndex: Float!): votingPowerHistory
   votingPowerHistorys(where: votingPowerHistoryFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votingPowerHistoryPage!
   delegation(transactionHash: String!, delegatorAccountId: String!, delegateAccountId: String!): delegation
   delegations(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): delegationPage!
@@ -83,7 +83,7 @@ type Query {
   proposalsActivity(address: String!, fromDate: NonNegativeInt, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_proposalsActivity_orderBy = timestamp, orderDirection: queryInput_proposalsActivity_orderDirection = desc, userVoteFilter: queryInput_proposalsActivity_userVoteFilter): proposalsActivity_200_response
 
   """Returns a list of proposal"""
-  proposals(skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposals_orderDirection = desc, status: JSON, fromDate: Float, fromEndDate: Float): proposals_200_response
+  proposals(skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposals_orderDirection = desc, status: JSON, fromDate: Float, fromEndDate: Float, includeOptimisticProposals: queryInput_proposals_includeOptimisticProposals = TRUE): proposals_200_response
 
   """Returns a single proposal by its ID"""
   proposal(id: String!): proposal_200_response
@@ -148,7 +148,7 @@ type Query {
   Returns a mapping of the largest interactions between accounts. 
   Positive amounts signify net token transfers FROM <accountId>, whilst negative amounts refer to net transfers TO <accountId>
   """
-  accountInteractions(days: queryInput_accountInteractions_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountInteractions_orderDirection = desc, accountId: String!, minAmount: String, maxAmount: String): accountInteractions_200_response
+  accountInteractions(days: queryInput_accountInteractions_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountInteractions_orderDirection = desc, accountId: String!, minAmount: String, maxAmount: String, orderBy: queryInput_accountInteractions_orderBy = count, address: String): accountInteractions_200_response
 
   """Returns current governance parameters for this DAO"""
   dao: dao_200_response
@@ -358,7 +358,6 @@ type accountPower {
   proposalsCount: Int!
   delegationsCount: Int!
   lastVoteTimestamp: BigInt!
-  firstVoteTimestamp: BigInt
   account: account
 }
 
@@ -474,14 +473,6 @@ input accountPowerFilter {
   lastVoteTimestamp_lt: BigInt
   lastVoteTimestamp_gte: BigInt
   lastVoteTimestamp_lte: BigInt
-  firstVoteTimestamp: BigInt
-  firstVoteTimestamp_not: BigInt
-  firstVoteTimestamp_in: [BigInt]
-  firstVoteTimestamp_not_in: [BigInt]
-  firstVoteTimestamp_gt: BigInt
-  firstVoteTimestamp_lt: BigInt
-  firstVoteTimestamp_gte: BigInt
-  firstVoteTimestamp_lte: BigInt
 }
 
 type delegationPage {
@@ -760,6 +751,7 @@ type proposalsOnchain {
   forVotes: BigInt!
   againstVotes: BigInt!
   abstainVotes: BigInt!
+  proposalType: Int
   votes(where: votesOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votesOnchainPage
   proposer: account
 }
@@ -983,6 +975,14 @@ input proposalsOnchainFilter {
   abstainVotes_lt: BigInt
   abstainVotes_gte: BigInt
   abstainVotes_lte: BigInt
+  proposalType: Int
+  proposalType_not: Int
+  proposalType_in: [Int]
+  proposalType_not_in: [Int]
+  proposalType_gt: Int
+  proposalType_lt: Int
+  proposalType_gte: Int
+  proposalType_lte: Int
 }
 
 type accountPage {
@@ -1611,11 +1611,17 @@ type query_proposals_items_items {
   calldatas: [String]!
   values: [String]!
   targets: [String]!
+  proposalType: Float
 }
 
 enum queryInput_proposals_orderDirection {
   asc
   desc
+}
+
+enum queryInput_proposals_includeOptimisticProposals {
+  TRUE
+  FALSE
 }
 
 type proposal_200_response {
@@ -1638,6 +1644,7 @@ type proposal_200_response {
   calldatas: [String]!
   values: [String]!
   targets: [String]!
+  proposalType: Float
 }
 
 type proposalNonVoters_200_response {
@@ -1907,6 +1914,11 @@ enum queryInput_accountInteractions_days {
 enum queryInput_accountInteractions_orderDirection {
   asc
   desc
+}
+
+enum queryInput_accountInteractions_orderBy {
+  volume
+  count
 }
 
 type dao_200_response {
