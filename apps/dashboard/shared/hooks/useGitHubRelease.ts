@@ -13,7 +13,6 @@ const GITHUB_API_URL =
 
 export const fetchLatestRelease = async (): Promise<GitHubRelease> => {
   const response = await axios.get(GITHUB_API_URL);
-  console.log({ response });
   return response.data;
 };
 
