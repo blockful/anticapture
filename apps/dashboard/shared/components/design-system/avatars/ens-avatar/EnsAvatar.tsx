@@ -13,8 +13,10 @@ import { formatAddress } from "@/shared/utils/formatAddress";
 export type AvatarSize = "xs" | "sm" | "md" | "lg";
 export type AvatarVariant = "square" | "rounded";
 
-interface EnsAvatarProps
-  extends Omit<ImageProps, "src" | "alt" | "fill" | "className" | "loading"> {
+interface EnsAvatarProps extends Omit<
+  ImageProps,
+  "src" | "alt" | "fill" | "className" | "loading"
+> {
   address?: Address;
   imageUrl?: string;
   size?: AvatarSize;
