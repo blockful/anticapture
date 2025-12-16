@@ -65,7 +65,7 @@ export class CoingeckoService {
     }
 
     return data.prices.map(([timestamp, price]) => ({
-      price: price.toFixed(2),
+      price: price.toFixed(4),
       timestamp: timestamp,
     }));
   }
