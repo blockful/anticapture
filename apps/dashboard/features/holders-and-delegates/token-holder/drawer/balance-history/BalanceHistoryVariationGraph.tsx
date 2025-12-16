@@ -302,7 +302,7 @@ export const BalanceHistoryVariationGraph = ({
               }}
             />
             <Line
-              type="monotone"
+              type="stepAfter"
               dataKey="amount"
               stroke="var(--base-primary)"
               strokeWidth={1}

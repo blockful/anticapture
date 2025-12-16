@@ -296,7 +296,7 @@ export const VotingPowerVariationGraph = ({
               }}
             />
             <Line
-              type="monotone"
+              type="stepAfter"
               dataKey="votingPower"
               stroke="var(--base-primary)"
               strokeWidth={1}
