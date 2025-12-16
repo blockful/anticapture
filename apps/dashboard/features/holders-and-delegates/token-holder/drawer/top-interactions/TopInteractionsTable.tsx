@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { Button, SkeletonRow } from "@/shared/components";
+import { Button, SkeletonRow, TooltipInfo } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { ColumnDef } from "@tanstack/react-table";
 import { Address, parseUnits } from "viem";
@@ -149,7 +149,8 @@ export const TopInteractionsTable = ({
                   default: "Copy address",
                   copied: "Address copied!",
                 }}
-                className="p-2"
+                className="p-1"
+                iconSize="md"
               />
             </div>
           </div>
@@ -162,6 +163,7 @@ export const TopInteractionsTable = ({
         return (
           <div className="flex items-center justify-end gap-1.5">
             <h4 className="text-table-header">Volume ({daoId})</h4>
+            <TooltipInfo text="Total amount transferred between the two addresses, counting both incoming and outgoing transactions." />
             <AmountFilter
               filterId="top-interactions-volume-filter"
               onApply={(filterState: AmountFilterState) => {
@@ -224,8 +226,9 @@ export const TopInteractionsTable = ({
       accessorKey: "balanceChange",
       header: () => {
         return (
-          <div className="text-table-header flex w-full items-center justify-end whitespace-nowrap">
+          <div className="text-table-header flex w-full items-center justify-end gap-1.5 whitespace-nowrap">
             Balance Change ({daoId})
+            <TooltipInfo text="Net change in the holder’s balance from these interactions: incoming minus outgoing" />
           </div>
         );
       },
@@ -294,8 +297,9 @@ export const TopInteractionsTable = ({
         };
 
         return (
-          <div className="text-table-header flex w-full items-center justify-end whitespace-nowrap">
+          <div className="text-table-header flex w-full items-center justify-end gap-1.5 whitespace-nowrap">
             Total Interactions
+            <TooltipInfo text="Addresses ranked by how many transactions they had with the holder (interaction count)" />
             <Button
               variant="ghost"
               size="sm"

@@ -169,7 +169,8 @@ export const TokenHolders = ({
                     default: "Copy address",
                     copied: "Address copied!",
                   }}
-                  className="p-2"
+                  className="mx-1 p-1"
+                  iconSize="md"
                 />
                 <Button variant="outline" size="sm">
                   <Plus className="size-3.5" />

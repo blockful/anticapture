@@ -17,17 +17,20 @@ const TopInteractionsChartCustomTooltip: React.FC<
   TooltipProps<number, string> & {
     chartConfig: Record<
       string,
-      { label: string; color: string; ensName?: string }
+      {
+        value: number;
+        label: string;
+        color: string;
+        ensName?: string;
+        percentage?: number;
+      }
     >;
-    currentValue: number;
   }
-> = ({ active, payload, chartConfig, currentValue }) => {
+> = ({ active, payload, chartConfig }) => {
   if (!active || !payload || payload.length === 0) return null;
 
   const data = payload[0];
-  const value = data.value !== undefined ? data.value : 0;
   const name = data.name || "";
-  const percentage = ((value / currentValue) * 100).toFixed(2);
 
   const config = chartConfig[name];
   const label = config?.label || name;
@@ -37,7 +40,8 @@ const TopInteractionsChartCustomTooltip: React.FC<
       <div className="flex flex-col gap-1">
         <p className="text-sm font-medium">{label}</p>
         <p className="text-xs">
-          {formatNumberUserReadable(value)} transactions ({percentage}%)
+          {formatNumberUserReadable(config?.value || 0)} transactions (
+          {config?.percentage}%)
         </p>
       </div>
     </div>
@@ -45,7 +49,6 @@ const TopInteractionsChartCustomTooltip: React.FC<
 };
 
 export const TopInteractionsChart = ({
-  currentValue,
   pieData,
   chartConfig,
 }: {
@@ -53,7 +56,12 @@ export const TopInteractionsChart = ({
   pieData: { name: string; value: number }[];
   chartConfig: Record<
     string,
-    { label: string; color: string; ensName?: string }
+    {
+      value: number;
+      label: string;
+      color: string;
+      ensName?: string;
+    }
   >;
 }) => {
   if (!pieData || pieData.length === 0) {
@@ -95,10 +103,7 @@ export const TopInteractionsChart = ({
           </Pie>
           <Tooltip
             content={
-              <TopInteractionsChartCustomTooltip
-                chartConfig={chartConfig}
-                currentValue={currentValue}
-              />
+              <TopInteractionsChartCustomTooltip chartConfig={chartConfig} />
             }
           />
         </PieChart>

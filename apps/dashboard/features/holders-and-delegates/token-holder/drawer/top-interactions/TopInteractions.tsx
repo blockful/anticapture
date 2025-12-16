@@ -81,11 +81,13 @@ export const TopInteractions = ({
 
   if (!topFive || (topFive.length === 0 && !loadingVotingPowerData)) {
     return (
-      <BlankSlate
-        variant="default"
-        icon={Inbox}
-        description="No interactions found"
-      />
+      <div className="flex w-full flex-col gap-4 p-4">
+        <BlankSlate
+          variant="default"
+          icon={Inbox}
+          description="No interactions found"
+        />
+      </div>
     );
   }
 

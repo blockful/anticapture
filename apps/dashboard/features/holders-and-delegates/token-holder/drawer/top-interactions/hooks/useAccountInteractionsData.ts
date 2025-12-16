@@ -25,9 +25,19 @@ interface InteractionResponse {
   loading: boolean;
   chartConfig: Record<
     string,
-    { label: string; color: string; percentage: string; ensName?: string }
+    {
+      label: string;
+      value: number;
+      color: string;
+      percentage: string;
+      ensName?: string;
+    }
   >;
-  pieData: { name: string; label: string; value: number }[];
+  pieData: {
+    name: string;
+    label: string;
+    value: number;
+  }[];
   legendItems: { color: string; label: string; percentage: string }[];
   totalIndividualInteractions: number;
   totalCount: number;
@@ -113,32 +123,54 @@ export const useAccountInteractionsData = ({
     return acc + Number(item?.transferCount);
   }, 0);
 
-  const othersValue = totalCount - totalIndividualInteractions;
-  const othersPercentage = Number(
-    (Number(othersValue) / Number(totalCount)) * 100,
-  );
-
   const chartConfig: Record<
     string,
-    { label: string; color: string; percentage: string; ensName?: string }
+    {
+      label: string;
+      color: string;
+      value: number;
+      percentage: string;
+      ensName?: string;
+    }
   > = {};
 
-  const pieData: { name: string; label: string; value: number }[] = [];
+  const pieData: {
+    name: string;
+    label: string;
+    value: number;
+  }[] = [];
+
+  const totalTransfers = interactionsData
+    ? interactionsData.reduce((acc, item) => {
+        return acc + Number(item?.transferCount || 0);
+      }, 0)
+    : 0;
+
+  const topFiveTransfers = topFive.reduce((acc, item) => {
+    return acc + Number(item?.transferCount || 0);
+  }, 0);
+
+  const othersValue = totalTransfers - topFiveTransfers;
+
+  const othersPercentage =
+    totalTransfers > 0 ? (othersValue / totalTransfers) * 100 : 0;
 
   topFive.forEach((interaction, index) => {
     if (!interaction?.accountId) {
       return;
     }
 
-    const percentage = Number(
-      (Number(interaction.transferCount || 0) / Number(totalCount)) * 100,
-    );
+    const percentage =
+      totalTransfers > 0
+        ? (Number(interaction.transferCount || 0) / totalTransfers) * 100
+        : 0;
 
     const ensName = ensData?.[interaction.accountId as Address]?.ens;
     const displayLabel = ensName || formatAddress(interaction.accountId) || "";
 
     chartConfig[interaction.accountId || `interaction-${index}`] = {
       label: displayLabel,
+      value: Number(interaction.transferCount || 0),
       color: PIE_CHART_COLORS[index % PIE_CHART_COLORS.length],
       percentage: percentage.toFixed(2),
       ensName,
@@ -155,13 +187,14 @@ export const useAccountInteractionsData = ({
     chartConfig["others"] = {
       label: "Others",
       color: "#9CA3AF",
+      value: othersValue,
       percentage: othersPercentage.toFixed(2),
     };
 
     pieData.push({
       name: "others",
       label: "Others",
-      value: Number(othersValue),
+      value: othersValue,
     });
   }
 

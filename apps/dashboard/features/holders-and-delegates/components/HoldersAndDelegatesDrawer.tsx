@@ -174,7 +174,8 @@ export const HoldersAndDelegatesDrawer = ({
 
                   <CopyAndPasteButton
                     textToCopy={address as `0x${string}`}
-                    className="p-0"
+                    className="p-1"
+                    iconSize="md"
                     customTooltipText={{
                       default: "Copy address",
                       copied: "Address copied!",

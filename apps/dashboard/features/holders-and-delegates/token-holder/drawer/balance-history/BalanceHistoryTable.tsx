@@ -354,7 +354,8 @@ export const BalanceHistoryTable = ({
                     default: "Copy address",
                     copied: "Address copied!",
                   }}
-                  className="p-2"
+                  className="p-1"
+                  iconSize="md"
                 />
               </div>
             </div>
@@ -429,7 +430,8 @@ export const BalanceHistoryTable = ({
                     default: "Copy address",
                     copied: "Address copied!",
                   }}
-                  className="p-2"
+                  className="p-1"
+                  iconSize="md"
                 />
               </div>
             </div>

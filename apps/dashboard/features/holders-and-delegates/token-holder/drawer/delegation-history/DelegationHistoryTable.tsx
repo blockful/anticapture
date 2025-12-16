@@ -170,7 +170,8 @@ export const DelegationHistoryTable = ({
                   default: "Copy address",
                   copied: "Address copied!",
                 }}
-                className="p-2"
+                className="p-1"
+                iconSize="md"
               />
             </div>
           </div>

@@ -15,6 +15,7 @@ interface CopyButtonProps {
   className?: string;
   disabled?: boolean;
   customTooltipText?: { default: string; copied: string };
+  iconSize?: "sm" | "md" | "lg";
 }
 
 export const CopyAndPasteButton = ({
@@ -22,6 +23,7 @@ export const CopyAndPasteButton = ({
   className,
   disabled = false,
   customTooltipText,
+  iconSize = "lg",
 }: CopyButtonProps) => {
   const [open, setOpen] = useState(false);
   const [isCopied, setIsCopied] = useState<boolean>(false);
@@ -58,7 +60,7 @@ export const CopyAndPasteButton = ({
           aria-label={tooltipText}
           variant="ghost"
           className={cn("group", className)}
-          size="lg"
+          size={iconSize}
           iconClassName={cn(
             isCopied
               ? "text-success"
