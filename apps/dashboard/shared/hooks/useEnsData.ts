@@ -3,7 +3,34 @@
 import { default as useSWR } from "swr";
 import { Address } from "viem";
 
-const ensUrl = "https://api.ensdata.net";
+const getEnsUrl = (address: Address | `${string}.eth`) => {
+  return `https://api.ethfollow.xyz/api/v1/users/${address}/ens`;
+};
+
+type EnsRecords = {
+  avatar?: string;
+  "com.discord"?: string;
+  "com.github"?: string;
+  "com.twitter"?: string;
+  description?: string;
+  email?: string;
+  header?: string;
+  location?: string;
+  name?: string;
+  "org.telegram"?: string;
+  url?: string;
+  [key: string]: string | undefined;
+};
+
+type EnsApiResponse = {
+  ens: {
+    name: string;
+    address: Address;
+    avatar: string;
+    records: EnsRecords;
+    updated_at: string;
+  };
+};
 
 type EnsData = {
   address: Address;
@@ -12,14 +39,21 @@ type EnsData = {
   avatar: string;
 };
 
-/* Fetch Dao Total Supply */
 export const fetchEnsData = async ({
   address,
 }: {
   address: Address | `${string}.eth`;
 }): Promise<EnsData> => {
-  const response = await fetch(`${ensUrl}/${address}`);
-  return response.json();
+  const response = await fetch(getEnsUrl(address));
+  const data: EnsApiResponse = await response.json();
+
+  // Transform API response to match expected EnsData structure
+  return {
+    address: data.ens.address,
+    avatar_url: data.ens.records.avatar || data.ens.avatar || "",
+    ens: data.ens.name,
+    avatar: data.ens.avatar || data.ens.records.avatar || "",
+  };
 };
 
 /* Fetch multiple ENS data */
