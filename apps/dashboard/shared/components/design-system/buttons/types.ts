@@ -11,4 +11,5 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   loadingText?: string;
   size?: ButtonSize;
   variant?: ButtonVariant;
+  asChild?: boolean;
 }

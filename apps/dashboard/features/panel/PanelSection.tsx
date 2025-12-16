@@ -19,7 +19,7 @@ export const PanelSection = () => {
   const [currency, setCurrency] = useState<"usd" | "eth">("usd");
 
   return (
-    <div className="flex flex-col gap-2 p-4 pt-[70px] sm:pt-0">
+    <div className="flex flex-col gap-8 p-4 pt-[70px] sm:gap-2 sm:pt-5">
       <div className="grid grid-cols-1 gap-2 lg:grid-cols-3">
         <DaoProtectionLevels />
         <TreasuryMonitoring />
@@ -35,7 +35,7 @@ export const PanelSection = () => {
           }
           dateRange=""
         >
-          <div className="flex flex-col gap-4 px-2 py-4">
+          <div className="flex flex-col">
             <PanelTable currency={currency} />
           </div>
         </SubSection>
@@ -58,13 +58,16 @@ const SwitcherCurrency = ({
   const currencies: ("usd" | "eth")[] = ["eth", "usd"];
 
   return (
-    <Tabs defaultValue={currency} className="gap-1">
+    <Tabs
+      defaultValue={currency}
+      className="mt-4 w-full gap-1 sm:mt-0 sm:w-auto"
+    >
       <TabsList>
         {currencies.map((currency) => (
           <TabsTrigger
             key={currency}
             className={cn(
-              "cursor-pointer text-sm font-medium",
+              "w-full cursor-pointer px-2 text-sm font-medium sm:w-auto",
               isSmall
                 ? "min-w-[60px] px-1.5 py-0.5"
                 : "min-w-[84px] px-3 py-1.5",

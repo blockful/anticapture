@@ -1,7 +1,7 @@
 "use client";
 
-import { Eye, Target } from "lucide-react";
-import { BarChart, Bar, XAxis, Cell, LabelList } from "recharts";
+import { ChevronRight } from "lucide-react";
+import { BarChart, Bar, XAxis, Cell, LabelList, Tooltip } from "recharts";
 import { ChartConfig, ChartContainer } from "@/shared/components/ui/chart";
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
@@ -11,6 +11,9 @@ import {
   getDaoStageFromFields,
 } from "@/shared/dao-config/utils";
 import { useMemo } from "react";
+import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
+import { DaoProtectionLevelsTooltip } from "@/features/panel/components/DaoProtectionLevelsTooltip";
+import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 
 const chartConfig: ChartConfig = {
   value: {
@@ -27,11 +30,11 @@ export const DaoProtectionLevels = () => {
 
     // Count DAOs by stage
     const stageCounts = {
-      [Stage.NONE]: 0,
       [Stage.ZERO]: 0,
       [Stage.ONE]: 0,
       [Stage.TWO]: 0,
       [Stage.UNKNOWN]: 0,
+      [Stage.NONE]: 0,
     };
 
     daoIds.forEach((daoId) => {
@@ -53,28 +56,36 @@ export const DaoProtectionLevels = () => {
     // Map to chart data format
     return [
       {
-        stage: "No Stage",
-        value: stageCounts[Stage.NONE],
-        riskLevel: "Doesn't apply",
-        color: "var(--color-surface-hover)",
-      },
-      {
         stage: "Stage 0",
         value: stageCounts[Stage.ZERO],
         riskLevel: "High Risk",
         color: "var(--color-error)",
+        description:
+          "DAOs that have a critical weakness that could let an attacker influence or take over governance",
       },
       {
         stage: "Stage 1",
         value: stageCounts[Stage.ONE],
         riskLevel: "Medium Risk",
         color: "var(--color-warning)",
+        description:
+          "DAOs that have no critical weaknesses, but still have a medium-risk issue that could affect governance.",
       },
       {
         stage: "Stage 2",
         value: stageCounts[Stage.TWO],
         riskLevel: "Low Risk",
         color: "var(--color-success)",
+        description:
+          "DAOs with no significant risks and strong protection against governance attacks.",
+      },
+      {
+        stage: "No Stage",
+        value: stageCounts[Stage.NONE],
+        riskLevel: "Doesn't apply",
+        color: "var(--color-surface-hover)",
+        description:
+          "DAOs that don't qualify for the staging system because they lack autonomous execution and rely on a centralized entity.",
       },
     ];
   }, []);
@@ -85,48 +96,50 @@ export const DaoProtectionLevels = () => {
   }, []);
 
   return (
-    <div className="bg-surface-default flex w-full flex-col gap-4 rounded-lg p-4">
+    <div className="bg-surface-default flex w-full flex-col gap-2 p-4">
       <div className="flex flex-col gap-1">
         <h3 className="text-primary text-alternative-sm font-mono font-medium uppercase leading-[20px] tracking-[0.78px]">
-          DAO Protection Levels
+          DAO Governance Risk Levels
         </h3>
         <p className="text-secondary text-sm font-normal leading-[20px]">
-          Anticapture monitors vulnerabilities across DAOs and rate their
-          protection level using the Stages framework.
+          This platform monitors DAO governance risks and rates them through
+          Anticapture&apos;s Stage system.
         </p>
+        <DefaultLink
+          href="https://blockful.gitbook.io/anticapture/anticapture/framework"
+          variant="highlight"
+          openInNewTab
+        >
+          Learn the Stage Criteria
+          <ChevronRight className="size-4" />
+        </DefaultLink>
       </div>
 
       {/* Status indicators */}
       <div className="flex w-full flex-col gap-2">
+        <DividerDefault isHorizontal />
         <div className="border-t-brand flex items-center gap-1.5 border-b-0 border-l-4 border-r-0 border-t-0 pl-3">
-          <Eye className="text-secondary size-3.5" />
-          <p className="text-secondary text-alternative-xs font-mono font-medium uppercase leading-[16px] tracking-[0.72px]">
-            currently:
-          </p>
           <p className="text-primary text-alternative-xs font-mono font-medium uppercase leading-[16px] tracking-[0.72px]">
-            {totalMonitored} DAOs monitored
+            {totalMonitored} DAOs monitored by Anticapture
           </p>
         </div>
-        <div className="border-t-brand flex items-center gap-1.5 border-b-0 border-l-4 border-r-0 border-t-0 pl-3">
-          <Target className="text-secondary size-3.5" />
-          <p className="text-secondary text-alternative-xs font-mono font-medium uppercase leading-[16px] tracking-[0.72px]">
-            Goal:
-          </p>
-          <p className="text-primary text-alternative-xs font-mono font-medium uppercase leading-[16px] tracking-[0.72px]">
-            Entire ecosystem
-          </p>
-        </div>
+        <DividerDefault isHorizontal />
       </div>
 
       {/* Bar Chart */}
       <div className="flex flex-col gap-2">
-        <div className="relative flex h-[60px] w-full items-end">
+        <div className="relative flex h-[75px] w-full items-end">
           <ChartContainer className="h-full w-full" config={chartConfig}>
             <BarChart
               data={stageData}
-              margin={{ top: 28, right: 0, left: 0, bottom: 0 }}
+              margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
             >
               <XAxis dataKey="stage" hide axisLine={false} tickLine={false} />
+              <Tooltip
+                content={DaoProtectionLevelsTooltip}
+                cursor={false}
+                allowEscapeViewBox={{ x: true, y: true }}
+              />
               <Bar dataKey="value" radius={[0, 0, 0, 0]} minPointSize={1}>
                 {stageData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />

@@ -18,7 +18,7 @@ import {
   ArrowState,
   DaoAvatarIcon,
 } from "@/shared/components/icons";
-import { formatNumberUserReadable } from "@/shared/utils";
+import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { formatUnits } from "viem";
 import { StageTag } from "@/features/resilience-stages/components";
 import { Stage } from "@/shared/types/enums/Stage";
@@ -31,6 +31,11 @@ import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { useQuorumGap } from "@/shared/hooks/useQuorumGap";
 import { TooltipPlain } from "@/shared/components/tooltips/TooltipPlain";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/shared/components/ui/tooltip";
 
 type PanelDao = {
   dao: string;
@@ -170,6 +175,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
 
     return (
       <div className="text-secondary flex w-full items-center justify-end py-3 text-end text-sm font-normal">
+        {cellCurrency === "usd" ? "$" : ""}
         {formattedValue}
       </div>
     );
@@ -230,6 +236,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
 
     return (
       <div className="text-secondary flex w-full items-center justify-end py-3 text-end text-sm font-normal">
+        {cellCurrency === "usd" ? "$" : ""}
         {formattedValue}
       </div>
     );
@@ -292,6 +299,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
 
     return (
       <div className="text-secondary flex w-full items-center justify-end py-3 text-end text-sm font-normal">
+        {cellCurrency === "usd" ? "$" : ""}
         {formattedValue}
       </div>
     );
@@ -335,7 +343,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
           <TooltipPlain
             triggerComponent={
               <div className="text-secondary decoration-secondary/20 hover:decoration-primary flex w-full items-center justify-end py-3 text-end text-sm font-normal underline decoration-dashed underline-offset-[6px] transition-colors duration-300">
-                N/A
+                No Activity
               </div>
             }
             contentComponent="No recent proposals in the last 90 days"
@@ -359,22 +367,19 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
       cell: ({ row }) => {
         const dao: string = row.getValue("dao");
         return (
-          <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto">
+          <div className="scrollbar-none group flex w-full items-center gap-3 space-x-1 overflow-auto">
             <div className={"flex w-full gap-3"}>
               <div className="flex w-full items-center gap-1.5">
+                <DaoAvatarIcon
+                  daoId={dao as DaoIdEnum}
+                  className="size-icon-sm"
+                />
                 {!isMobile && (
-                  <DaoAvatarIcon
-                    daoId={dao as DaoIdEnum}
-                    className="size-icon-sm"
-                    isRounded
+                  <TitleUnderlined
+                    className="text-primary whitespace-nowrap text-sm font-medium"
+                    title={daoConfigByDaoId[dao as DaoIdEnum].name}
                   />
                 )}
-                <p className="text-primary text-sm font-medium">
-                  {daoConfigByDaoId[dao as DaoIdEnum].name ===
-                  daoConfigByDaoId[DaoIdEnum.ENS].name
-                    ? "ENS"
-                    : daoConfigByDaoId[dao as DaoIdEnum].name}
-                </p>
               </div>
             </div>
           </div>
@@ -391,10 +396,30 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         const dao: string = row.getValue("dao");
         const ChainIcon =
           daoConfigByDaoId[dao as DaoIdEnum].daoOverview.chain.icon;
+        const chainName =
+          daoConfigByDaoId[dao as DaoIdEnum].daoOverview.chain.name;
+
         return (
           <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto">
             <div className={"flex w-full items-center gap-3"}>
-              <ChainIcon className="size-6 rounded-full" />
+              <Tooltip>
+                <TooltipTrigger role="button" aria-label="tooltip-info">
+                  <ChainIcon className="size-6 cursor-pointer rounded-full" />
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  align="center"
+                  sideOffset={10}
+                  avoidCollisions={true}
+                  className={cn(
+                    "border-light-dark bg-surface-default text-primary z-50 rounded-lg border p-3 text-center shadow-sm",
+                    "w-fit max-w-[calc(100vw-2rem)] sm:max-w-md",
+                    "whitespace-normal break-words",
+                  )}
+                >
+                  {chainName}
+                </TooltipContent>
+              </Tooltip>
             </div>
           </div>
         );
@@ -431,7 +456,17 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
           </div>
         );
       },
-      header: () => <h4 className="text-table-header">Stage</h4>,
+      header: () => (
+        <div className="w-full justify-end px-0 text-left">
+          <TooltipPlain
+            triggerComponent={
+              <TitleUnderlined title="Stage" className="text-left" />
+            }
+            contentComponent="Resilience Stages are based on governance mechanisms, using the riskiest exposed vector as the criterion for progression."
+            className="font-normal"
+          />
+        </div>
+      ),
       meta: {
         columnClassName: "w-40",
       },
@@ -459,7 +494,17 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
           </div>
         );
       },
-      header: () => <h4 className="text-table-header w">Risk Areas</h4>,
+      header: () => (
+        <div className="w-full justify-end px-0 text-left">
+          <TooltipPlain
+            triggerComponent={
+              <TitleUnderlined title="Risk Areas" className="text-left" />
+            }
+            contentComponent="Assess critical vulnerabilities in the DAO's governance setup. Each item highlights a specific risk area, showing which issues are resolved and which still expose the system to threats."
+            className="font-normal"
+          />
+        </div>
+      ),
       meta: {
         columnClassName: "w-56",
       },
@@ -527,27 +572,33 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         );
       },
       header: ({ column }) => (
-        <Button
-          variant="ghost"
-          className="text-secondary w-full justify-end px-0 text-right"
-          onClick={() => column.toggleSorting()}
-        >
-          <h4 className="text-table-header whitespace-nowrap text-right">
-            Circ. Supply
-          </h4>
-          <ArrowUpDown
-            props={{
-              className: "size-4 shrink-0",
-            }}
-            activeState={
-              column.getIsSorted() === "asc"
-                ? ArrowState.UP
-                : column.getIsSorted() === "desc"
-                  ? ArrowState.DOWN
-                  : ArrowState.DEFAULT
+        <div className="w-full justify-end px-0 text-right">
+          <TooltipPlain
+            triggerComponent={
+              <Button
+                variant="ghost"
+                className="text-secondary group w-full justify-end px-0 text-right"
+                onClick={() => column.toggleSorting()}
+              >
+                <TitleUnderlined title="Circ. Supply" />
+                <ArrowUpDown
+                  props={{
+                    className: "size-4 shrink-0",
+                  }}
+                  activeState={
+                    column.getIsSorted() === "asc"
+                      ? ArrowState.UP
+                      : column.getIsSorted() === "desc"
+                        ? ArrowState.DOWN
+                        : ArrowState.DEFAULT
+                  }
+                />
+              </Button>
             }
+            contentComponent="Total number of tokens currently in circulation and available to the market, excluding tokens locked, burned, or held in treasury."
+            className="font-normal"
           />
-        </Button>
+        </div>
       ),
       enableSorting: true,
       sortingFn: (rowA, rowB) => {
@@ -576,27 +627,33 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         );
       },
       header: ({ column }) => (
-        <Button
-          variant="ghost"
-          className="text-secondary w-full justify-end px-0 text-right"
-          onClick={() => column.toggleSorting()}
-        >
-          <h4 className="text-table-header whitespace-nowrap text-right">
-            Deleg. Supply
-          </h4>
-          <ArrowUpDown
-            props={{
-              className: "size-4 shrink-0 ",
-            }}
-            activeState={
-              column.getIsSorted() === "asc"
-                ? ArrowState.UP
-                : column.getIsSorted() === "desc"
-                  ? ArrowState.DOWN
-                  : ArrowState.DEFAULT
+        <div className="w-full justify-end px-0 text-right">
+          <TooltipPlain
+            triggerComponent={
+              <Button
+                variant="ghost"
+                className="text-secondary group w-full justify-end px-0 text-right"
+                onClick={() => column.toggleSorting()}
+              >
+                <TitleUnderlined title="Deleg. Supply" />
+                <ArrowUpDown
+                  props={{
+                    className: "size-4 shrink-0 ",
+                  }}
+                  activeState={
+                    column.getIsSorted() === "asc"
+                      ? ArrowState.UP
+                      : column.getIsSorted() === "desc"
+                        ? ArrowState.DOWN
+                        : ArrowState.DEFAULT
+                  }
+                />
+              </Button>
             }
+            contentComponent="Total amount of voting power that has been delegated to addresses, whether or not it was used in recent votes."
+            className="font-normal"
           />
-        </Button>
+        </div>
       ),
       enableSorting: true,
       sortingFn: (rowA, rowB) => {
@@ -624,27 +681,33 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         );
       },
       header: ({ column }) => (
-        <Button
-          variant="ghost"
-          className="text-secondary w-full justify-end px-0 text-right"
-          onClick={() => column.toggleSorting()}
-        >
-          <h4 className="text-table-header whitespace-nowrap text-right">
-            Active Supply
-          </h4>
-          <ArrowUpDown
-            props={{
-              className: "size-4 shrink-0",
-            }}
-            activeState={
-              column.getIsSorted() === "asc"
-                ? ArrowState.UP
-                : column.getIsSorted() === "desc"
-                  ? ArrowState.DOWN
-                  : ArrowState.DEFAULT
+        <div className="w-full justify-end px-0 text-right">
+          <TooltipPlain
+            triggerComponent={
+              <Button
+                variant="ghost"
+                className="text-secondary group w-full justify-end px-0 text-right"
+                onClick={() => column.toggleSorting()}
+              >
+                <TitleUnderlined title="Active Supply" />
+                <ArrowUpDown
+                  props={{
+                    className: "size-4 shrink-0",
+                  }}
+                  activeState={
+                    column.getIsSorted() === "asc"
+                      ? ArrowState.UP
+                      : column.getIsSorted() === "desc"
+                        ? ArrowState.DOWN
+                        : ArrowState.DEFAULT
+                  }
+                />
+              </Button>
             }
+            contentComponent="Voting power used in governance over the last 90 days."
+            className="font-normal"
           />
-        </Button>
+        </div>
       ),
       enableSorting: true,
       sortingFn: (rowA, rowB) => {
@@ -671,12 +734,11 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
             triggerComponent={
               <Button
                 variant="ghost"
-                className="text-secondary w-full justify-end px-0 text-right"
+                className="text-secondary group w-full justify-end px-0 text-right"
                 onClick={() => column.toggleSorting()}
               >
-                <h4 className="text-table-header decoration-secondary/20 hover:decoration-primary whitespace-nowrap text-right underline decoration-dashed underline-offset-[6px] transition-colors duration-300">
-                  Quorum Gap
-                </h4>
+                <TitleUnderlined title="Quorum Gap" />
+
                 <ArrowUpDown
                   props={{
                     className: "size-4 shrink-0",
@@ -721,10 +783,30 @@ Shows how much participation was above or below the quorum in the last 90d. Calc
       columns={panelColumns}
       data={data}
       withSorting={true}
+      stickyFirstColumn={true}
       onRowClick={handleRowClick}
       disableRowClick={(row: PanelDao) =>
         !!daoConfigByDaoId[row.dao as DaoIdEnum].disableDaoPage
       }
     />
+  );
+};
+
+const TitleUnderlined = ({
+  title,
+  className,
+}: {
+  title: string;
+  className?: string;
+}) => {
+  return (
+    <h4
+      className={cn(
+        "text-table-header decoration-secondary/20 group-hover:decoration-primary hover:decoration-primary whitespace-nowrap text-right underline decoration-dashed underline-offset-[6px] transition-colors duration-300",
+        className,
+      )}
+    >
+      {title}
+    </h4>
   );
 };
