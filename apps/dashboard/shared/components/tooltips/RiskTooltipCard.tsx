@@ -27,7 +27,7 @@ export const RiskTooltipCard = ({
       : [];
 
   const titleComponent = (
-    <div className="mb-2 flex items-center gap-2">
+    <div className="flex items-center gap-2">
       <h4 className="text-alternative-sm text-primary font-mono font-medium uppercase tracking-wider">
         {title}
       </h4>
