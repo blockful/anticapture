@@ -3,16 +3,20 @@
 import { Content, Trigger, Root } from "@radix-ui/react-tooltip";
 import { cn } from "@/shared/utils/";
 import { ReactNode, useState } from "react";
+import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
+interface TooltipProps {
+  children: ReactNode;
+  tooltipContent: ReactNode;
+  className?: string;
+  title?: ReactNode;
+}
 
 export function Tooltip({
   children,
   tooltipContent,
   className,
-}: {
-  children: ReactNode;
-  tooltipContent: ReactNode;
-  className?: string;
-}) {
+  title,
+}: TooltipProps) {
   const [open, setOpen] = useState<boolean>(false);
 
   const handleToggle = () => {
@@ -36,8 +40,8 @@ export function Tooltip({
       <Content
         data-slot="tooltip-content"
         className={cn(
-          "bg-popover text-popover-foreground z-50 overflow-hidden rounded-md border px-3 py-1.5 text-sm shadow-md",
-          "bg-surface-contrast border-border-contrast text-primary max-w-[350px]",
+          "bg-surface-contrast border-border-contrast text-primary font-inter z-50 max-w-[380px] overflow-hidden rounded-md border px-3 py-1.5 text-center text-sm font-normal not-italic leading-5 shadow-md",
+          title ? "text-secondary text-left" : "text-primary",
           className,
         )}
         side="top"
@@ -45,13 +49,14 @@ export function Tooltip({
         sideOffset={10}
         avoidCollisions={true}
       >
+        {title && (
+          <div className="text-primary whitespace-nowrap text-center font-mono text-[13px] font-medium uppercase not-italic leading-[20px] tracking-[0.78px]">
+            {title}
+          </div>
+        )}
+        <DividerDefault className="bg-border-contrast mb-2" />
         {tooltipContent}
       </Content>
     </Root>
   );
 }
-
-// TooltipPlainStyles
-// "border-light-dark bg-surface-default text-primary z-50 rounded-lg border p-3 text-center shadow-sm",
-// "w-fit max-w-[calc(100vw-2rem)] sm:max-w-md",
-// "whitespace-normal break-words",
