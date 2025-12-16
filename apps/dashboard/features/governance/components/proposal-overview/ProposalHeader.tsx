@@ -81,7 +81,7 @@ export const ProposalHeader = ({
               )
             ) : (
               <div className="hidden items-center gap-4 lg:flex">
-                <div className="bg-secondary ml-4 h-[28px] w-[1px] flex-shrink-0" />
+                <div className="bg-secondary ml-4 h-[28px] w-px shrink-0" />
                 <VotedBadge vote={Number(votesOnchain?.support)} />
               </div>
             )
