@@ -24,7 +24,12 @@ export function Tooltip({
   };
 
   return (
-    <Root open={open} onOpenChange={handleOpenChange}>
+    <Root
+      open={open}
+      delayDuration={0}
+      onOpenChange={handleOpenChange}
+      disableHoverableContent
+    >
       <Trigger role="button" aria-label="tooltip-info" onClick={handleToggle}>
         {children}
       </Trigger>
