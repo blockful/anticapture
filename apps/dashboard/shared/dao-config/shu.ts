@@ -24,7 +24,6 @@ export const SHU: DaoConfiguration = {
       token: "0xe485E2f1bab389C08721B291f6b59780feC83Fd7",
       timelock: "0x36bD3044ab68f600f6d3e081056F34f2a58432c4",
     },
-    cancelFunction: undefined,
     rules: {
       delay: true,
       changeVote: false,
@@ -38,7 +37,7 @@ export const SHU: DaoConfiguration = {
   },
   attackProfitability: {
     riskLevel: RiskLevel.HIGH,
-    supportsLiquidTreasuryCall: true,
+    supportsLiquidTreasuryCall: false,
     attackCostBarChart: {},
   },
   riskAnalysis: true,
