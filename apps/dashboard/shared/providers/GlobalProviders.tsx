@@ -9,7 +9,8 @@ import { lightTheme, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
 import { wagmiConfig } from "@/shared/services/wallet/wallet";
-import { TooltipProvider } from "@/shared/components/ui/tooltip";
+// import { TooltipProvider } from "@/shared/components/ui/tooltip";
+import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
 
 const queryClient = new QueryClient();
