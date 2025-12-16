@@ -30,6 +30,7 @@ export function Tooltip({
   const onClick = isMobile
     ? (e: React.MouseEvent) => {
         e.preventDefault();
+        e.stopPropagation();
         setOpen(true);
       }
     : undefined;
