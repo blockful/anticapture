@@ -14,6 +14,7 @@ export const OBOL: DaoConfiguration = {
     svgBgColor: "#e8f2ff",
   },
   icon: ObolIcon,
+  noStage: true,
   daoOverview: {
     token: "ERC20",
     chain: { ...mainnet, icon: MainnetIcon },
@@ -25,7 +26,10 @@ export const OBOL: DaoConfiguration = {
     },
     cancelFunction:
       "https://etherscan.io/address/0xcb1622185a0c62a80494bede05ba95ef29fbf85c#writeContract#F1",
-    tally: "https://www.tally.xyz/gov/obol",
+    govPlatform: {
+      name: "Tally",
+      url: "https://tally.xyz/gov/obol/proposal/",
+    },
     rules: {
       delay: true,
       changeVote: false,

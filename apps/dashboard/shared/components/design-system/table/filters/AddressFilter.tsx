@@ -143,7 +143,7 @@ export function AddressFilter({
           {/* Input Section */}
           <div className="px-3">
             <SearchField
-              placeholder="Search by address"
+              placeholder="Search by address or ENS"
               value={tempAddress}
               onChange={(e: ChangeEvent<HTMLInputElement>) => {
                 setTempAddress(e.target.value);

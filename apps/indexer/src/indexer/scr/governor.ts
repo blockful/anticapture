@@ -38,6 +38,7 @@ export function SCRGovernorIndexer(blockTime: number) {
         endBlock: event.args.endBlock.toString(),
         description: event.args.description,
         timestamp: event.block.timestamp,
+        blockNumber: event.block.number,
       });
     },
   );
@@ -57,6 +58,8 @@ export function SCRGovernorIndexer(blockTime: number) {
         endBlock: event.args.endBlock.toString(),
         description: event.args.description,
         timestamp: event.block.timestamp,
+        blockNumber: event.block.number,
+        proposalType: event.args.proposalType,
       });
     },
   );
@@ -76,6 +79,8 @@ export function SCRGovernorIndexer(blockTime: number) {
         endBlock: event.args.endBlock.toString(),
         description: event.args.description,
         timestamp: event.block.timestamp,
+        blockNumber: event.block.number,
+        proposalType: event.args.proposalType,
       });
     },
   );
@@ -95,6 +100,7 @@ export function SCRGovernorIndexer(blockTime: number) {
         endBlock: event.args.endBlock.toString(),
         description: event.args.description,
         timestamp: event.block.timestamp,
+        blockNumber: event.block.number,
       });
     },
   );

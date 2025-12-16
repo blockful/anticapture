@@ -55,7 +55,6 @@ export const accountPower = onchainTable(
       .bigint("last_vote_timestamp")
       .default(BigInt(0))
       .notNull(),
-    firstVoteTimestamp: drizzle.bigint("first_vote_timestamp"),
   }),
   (table) => ({
     pk: primaryKey({
@@ -79,7 +78,7 @@ export const votingPowerHistory = onchainTable(
   }),
   (table) => ({
     pk: primaryKey({
-      columns: [table.transactionHash, table.accountId],
+      columns: [table.transactionHash, table.accountId, table.logIndex],
     }),
   }),
 );
@@ -186,6 +185,7 @@ export const proposalsOnchain = onchainTable(
     forVotes: drizzle.bigint("for_votes").default(0n).notNull(),
     againstVotes: drizzle.bigint("against_votes").default(0n).notNull(),
     abstainVotes: drizzle.bigint("abstain_votes").default(0n).notNull(),
+    proposalType: drizzle.integer("proposal_type"),
   }),
   (table) => ({
     proposalsOnchainProposerIdx: index().on(table.proposerAccountId),

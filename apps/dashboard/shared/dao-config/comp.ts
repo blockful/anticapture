@@ -14,6 +14,7 @@ export const COMP: DaoConfiguration = {
     svgBgColor: "#00D395",
   },
   icon: CompoundIcon,
+
   daoOverview: {
     token: "ERC20",
     chain: { ...mainnet, icon: MainnetIcon },
@@ -22,6 +23,10 @@ export const COMP: DaoConfiguration = {
       governor: "0x309a862bbC1A00e45506cB8A802D1ff10004c8C0",
       token: "0xc00e94Cb662C3520282E6f5717214004A7f26888",
       timelock: "0x6d903f6003cca6255D85CcA4D3B5E5146dC33925",
+    },
+    govPlatform: {
+      name: "Tally",
+      url: "https://tally.xyz/gov/compound/proposal/",
     },
     cancelFunction:
       "https://etherscan.io/address/0x6d903f6003cca6255D85CcA4D3B5E5146dC33925#writeContract#F5",
