@@ -70,7 +70,7 @@ export const ProposalHeader = ({
           {/* If already voted: show voted badge */}
           {address ? (
             !votesOnchain?.support ? (
-              proposalStatus.toLowerCase() === "active" && (
+              proposalStatus.toLowerCase() === "ongoing" && (
                 <Button
                   className="hidden lg:flex"
                   onClick={() => setIsVotingModalOpen(true)}
@@ -85,7 +85,7 @@ export const ProposalHeader = ({
                 <VotedBadge vote={Number(votesOnchain?.support)} />
               </div>
             )
-          ) : proposalStatus.toLowerCase() === "active" ? (
+          ) : proposalStatus.toLowerCase() === "ongoing" ? (
             <div className="hidden lg:flex">
               <ConnectWalletCustom />
             </div>
