@@ -2,11 +2,6 @@
 
 import { ReactNode } from "react";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@radix-ui/react-tooltip";
-import {
   Popover,
   PopoverTrigger,
   PopoverContent,
@@ -15,6 +10,7 @@ import { RiskLevel } from "@/shared/types/enums/RiskLevel";
 import { useScreenSize } from "@/shared/hooks";
 import { RiskLevelCardSmall } from "@/shared/components/cards/RiskLevelCardSmall";
 import { cn } from "@/shared/utils";
+import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 
 interface RiskTooltipCardProps {
   title?: string;
@@ -90,22 +86,5 @@ export const RiskTooltipCard = ({
     );
   }
 
-  return (
-    <Tooltip>
-      <TooltipTrigger>{children}</TooltipTrigger>
-      <TooltipContent
-        side="top"
-        align="center"
-        sideOffset={10}
-        avoidCollisions={true}
-        className={cn(
-          "border-light-dark bg-surface-background z-50 rounded-md border p-3 text-left shadow-lg",
-          "w-fit max-w-[calc(100vw-2rem)] sm:max-w-md",
-          "whitespace-normal break-words",
-        )}
-      >
-        {content}
-      </TooltipContent>
-    </Tooltip>
-  );
+  return <Tooltip tooltipContent={content}>{children}</Tooltip>;
 };
