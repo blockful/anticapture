@@ -40,7 +40,7 @@ export function Tooltip({
       <Content
         data-slot="tooltip-content"
         className={cn(
-          "bg-surface-contrast border-border-contrast text-primary font-inter z-50 max-w-[380px] overflow-hidden rounded-md border px-3 py-1.5 text-center text-sm font-normal not-italic leading-5 shadow-md",
+          "bg-surface-contrast border-border-contrast text-primary font-inter z-50 flex max-w-[380px] flex-col overflow-hidden rounded-md border px-3 py-1.5 text-center text-sm font-normal not-italic leading-5 shadow-md",
           title ? "text-secondary text-left" : "text-primary",
           className,
         )}
@@ -50,11 +50,11 @@ export function Tooltip({
         avoidCollisions={true}
       >
         {title && (
-          <div className="text-primary whitespace-nowrap text-center font-mono text-[13px] font-medium uppercase not-italic leading-[20px] tracking-[0.78px]">
+          <div className="text-primary flex w-full items-center justify-start gap-2 whitespace-nowrap text-start font-mono text-[13px] font-medium uppercase not-italic leading-[20px] tracking-[0.78px]">
             {title}
           </div>
         )}
-        {title && <DividerDefault className="bg-border-contrast mb-2" />}
+        {title && <DividerDefault className="bg-border-contrast my-2" />}
         {tooltipContent}
       </Content>
     </Root>

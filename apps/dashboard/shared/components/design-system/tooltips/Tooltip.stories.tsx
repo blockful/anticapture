@@ -41,7 +41,7 @@ export const Default: Story = {
   },
   render: (args) => (
     <Tooltip {...args}>
-      <Info className="text-secondary size-4 cursor-pointer" />
+      <Info className="text-secondary size-4" />
     </Tooltip>
   ),
 };
@@ -53,7 +53,7 @@ export const WithTitle: Story = {
   },
   render: (args) => (
     <Tooltip {...args}>
-      <Info className="text-secondary size-4 cursor-pointer" />
+      <Info className="text-secondary size-4" />
     </Tooltip>
   ),
 };
@@ -65,7 +65,9 @@ export const LongContent: Story = {
   },
   render: (args) => (
     <Tooltip {...args}>
-      <Info className="text-secondary size-4 cursor-pointer" />
+      <span className="text-primary text-lg font-normal leading-tight">
+        Hover Me!
+      </span>
     </Tooltip>
   ),
 };
@@ -73,7 +75,7 @@ export const LongContent: Story = {
 export const WithTitleAndLongContent: Story = {
   args: {
     title: (
-      <div>
+      <div className="flex items-center justify-start gap-2">
         Detailed Information <RiskLevelCardSmall status={RiskLevel.HIGH} />
       </div>
     ),
@@ -82,7 +84,7 @@ export const WithTitleAndLongContent: Story = {
   },
   render: (args) => (
     <Tooltip {...args}>
-      <Info className="text-secondary size-4 cursor-pointer" />
+      <Info className="text-secondary size-4" />
     </Tooltip>
   ),
 };
@@ -91,16 +93,16 @@ export const DifferentIcons: Story = {
   render: () => (
     <div className="flex items-center gap-6">
       <Tooltip tooltipContent="Info tooltip">
-        <Info className="text-secondary size-4 cursor-pointer" />
+        <Info className="text-secondary size-4" />
       </Tooltip>
       <Tooltip tooltipContent="Help tooltip">
-        <HelpCircle className="text-secondary size-4 cursor-pointer" />
+        <HelpCircle className="text-secondary size-4" />
       </Tooltip>
       <Tooltip
         title="Warning"
         tooltipContent="This is a warning tooltip with a title."
       >
-        <AlertCircle className="text-secondary size-4 cursor-pointer" />
+        <AlertCircle className="text-secondary size-4" />
       </Tooltip>
     </div>
   ),
@@ -114,7 +116,7 @@ export const CustomStyling: Story = {
   },
   render: (args) => (
     <Tooltip {...args}>
-      <Info className="text-secondary size-4 cursor-pointer" />
+      <Info className="text-secondary size-4" />
     </Tooltip>
   ),
 };
@@ -135,7 +137,7 @@ export const RichContent: Story = {
   },
   render: (args) => (
     <Tooltip {...args}>
-      <Info className="text-secondary size-4 cursor-pointer" />
+      <Info className="text-secondary size-4" />
     </Tooltip>
   ),
 };
