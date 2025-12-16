@@ -54,7 +54,7 @@ export function Tooltip({
             {title}
           </div>
         )}
-        <DividerDefault className="bg-border-contrast mb-2" />
+        {title && <DividerDefault className="bg-border-contrast mb-2" />}
         {tooltipContent}
       </Content>
     </Root>
