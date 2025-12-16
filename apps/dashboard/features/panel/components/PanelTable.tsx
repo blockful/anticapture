@@ -337,7 +337,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         <div className="text-secondary flex w-full items-center justify-end text-end text-sm font-normal">
           <Tooltip
             tooltipContent={
-              <div>
+              <div className="text-center">
                 <p>No recent proposals in the last 90 days</p>
               </div>
             }
@@ -449,7 +449,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         <div className="w-full justify-end px-0 text-left">
           <Tooltip
             tooltipContent={
-              <div>
+              <div className="text-center">
                 <p>
                   Resilience Stages are based on governance mechanisms, using
                   the riskiest exposed vector as the criterion for progression.
@@ -492,7 +492,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         <div className="w-full justify-end px-0 text-left">
           <Tooltip
             tooltipContent={
-              <div>
+              <div className="text-center">
                 <p>
                   Assess critical vulnerabilities in the DAO&apos;s governance
                   setup. Each item highlights a specific risk area, showing
@@ -576,7 +576,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         <div className="w-full justify-end px-0 text-right">
           <Tooltip
             tooltipContent={
-              <div>
+              <div className="text-center">
                 <p>
                   Total number of tokens currently in circulation and available
                   to the market, excluding tokens locked, burned, or held in
@@ -637,7 +637,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         <div className="w-full justify-end px-0 text-right">
           <Tooltip
             tooltipContent={
-              <div>
+              <div className="text-center">
                 <p>
                   Total amount of voting power that has been delegated to
                   addresses, whether or not it was used in recent votes.
@@ -696,7 +696,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         <div className="w-full justify-end px-0 text-right">
           <Tooltip
             tooltipContent={
-              <div>
+              <div className="text-center">
                 <p>Voting power used in governance over the last 90 days.</p>
               </div>
             }
@@ -746,7 +746,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         <div className="w-full justify-end px-0 text-right">
           <Tooltip
             tooltipContent={
-              <div>
+              <div className="text-center">
                 <p>
                   Shows how much participation was above or below the quorum in
                   the last 90d. Calculated as (average turnout ÷ quorum) − 1
