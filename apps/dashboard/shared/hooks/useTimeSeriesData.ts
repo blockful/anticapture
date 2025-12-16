@@ -92,28 +92,47 @@ const applyMetricsContinuity = (
   const metricsWithContinuity: Record<MetricTypesEnum, DaoMetricsDayBucket[]> =
     {} as Record<MetricTypesEnum, DaoMetricsDayBucket[]>;
 
-  const allDates = new Set<string>();
+  // Find min and max dates across all metrics
+  let minDate = Infinity;
+  let maxDate = -Infinity;
+
   for (const metricType of metricTypes) {
     if (data[metricType]) {
       data[metricType].forEach((item) => {
-        allDates.add(item.date);
+        const timestamp = Number(item.date);
+        minDate = Math.min(minDate, timestamp);
+        maxDate = Math.max(maxDate, timestamp);
       });
     }
   }
-  allDates.add(Math.floor(Date.now() / 1000).toString());
 
-  const sortedDates = Array.from(allDates).sort(
-    (a, b) => Number(a) - Number(b),
-  );
+  if (minDate === Infinity) return metricsWithContinuity;
+
+  // Align current time to day boundary and include it
+  const DAY_IN_SECONDS = 86400;
+  const now = Math.floor(Date.now() / 1000);
+  const todayAligned = Math.floor(now / DAY_IN_SECONDS) * DAY_IN_SECONDS;
+  maxDate = Math.max(maxDate, todayAligned);
+
+  // Generate ALL dates between min and max (assuming daily buckets)
+  const allDates: number[] = [];
+  for (let d = minDate; d <= maxDate; d += DAY_IN_SECONDS) {
+    allDates.push(d);
+  }
 
   for (const metricType of metricTypes) {
     metricsWithContinuity[metricType] = [];
 
     if (data[metricType] && data[metricType].length > 0) {
-      let lastKnownEntry: DaoMetricsDayBucket = data[metricType][0];
+      // Create a map for O(1) lookups - normalize to numbers
+      const dataMap = new Map(
+        data[metricType].map((item) => [Number(item.date), item]),
+      );
 
-      for (const date of sortedDates) {
-        const entry = data[metricType].find((item) => item.date === date);
+      let lastKnownEntry: DaoMetricsDayBucket | null = null;
+
+      for (const date of allDates) {
+        const entry = dataMap.get(date);
 
         if (entry) {
           metricsWithContinuity[metricType].push(entry);
@@ -121,7 +140,7 @@ const applyMetricsContinuity = (
         } else if (lastKnownEntry) {
           metricsWithContinuity[metricType].push({
             ...lastKnownEntry,
-            date: date,
+            date: date.toString(), // or date, depending on your type
           });
         }
       }
