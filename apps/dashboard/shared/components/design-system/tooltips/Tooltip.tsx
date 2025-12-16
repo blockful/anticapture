@@ -4,6 +4,8 @@ import { Content, Trigger, Root } from "@radix-ui/react-tooltip";
 import { cn } from "@/shared/utils/";
 import { ReactNode, useState } from "react";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
+import { useScreenSize } from "@/shared/hooks/useScreenSize";
+
 interface TooltipProps {
   children: ReactNode;
   tooltipContent: ReactNode;
@@ -18,14 +20,19 @@ export function Tooltip({
   title,
 }: TooltipProps) {
   const [open, setOpen] = useState<boolean>(false);
-
-  const handleToggle = () => {
-    setOpen((prev) => !prev);
-  };
+  const { isMobile } = useScreenSize();
 
   const handleOpenChange = (nextOpen: boolean) => {
     setOpen(nextOpen);
   };
+
+  // On mobile, prevent default behavior and manually control open state
+  const onClick = isMobile
+    ? (e: React.MouseEvent) => {
+        e.preventDefault();
+        setOpen(true);
+      }
+    : undefined;
 
   return (
     <Root
@@ -34,7 +41,7 @@ export function Tooltip({
       onOpenChange={handleOpenChange}
       disableHoverableContent
     >
-      <Trigger role="button" aria-label="tooltip-info" onClick={handleToggle}>
+      <Trigger role="button" aria-label="tooltip-info" onClick={onClick}>
         {children}
       </Trigger>
       <Content
