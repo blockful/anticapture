@@ -50,7 +50,7 @@ export function Tooltip({
         avoidCollisions={true}
       >
         {title && (
-          <div className="text-primary flex w-full items-center justify-start gap-2 whitespace-nowrap text-start font-mono text-[13px] font-medium uppercase not-italic leading-[20px] tracking-[0.78px]">
+          <div className="text-primary flex w-full items-center justify-start gap-2 whitespace-nowrap text-start font-mono text-[13px] font-medium uppercase not-italic leading-5 tracking-[0.78px]">
             {title}
           </div>
         )}
