@@ -11,6 +11,7 @@ import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
 import { wagmiConfig } from "@/shared/services/wallet/wallet";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 const queryClient = new QueryClient();
 
@@ -31,7 +32,7 @@ export const GlobalProviders = ({ children }: { children: ReactNode }) => {
                 accentColor: "#E66AE9",
               })}
             >
-              {children}
+              <NuqsAdapter>{children}</NuqsAdapter>
             </RainbowKitProvider>
           </TooltipProvider>
         </ApolloProvider>
