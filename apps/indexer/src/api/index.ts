@@ -12,22 +12,21 @@ import {
   tokenDistribution,
   token,
   proposalsActivity,
-  historicalOnchain,
+  historicalBalances,
   transactions,
   proposals,
   lastUpdate,
-  assets,
+  totalAssets,
   votingPower,
   delegationPercentage,
   votingPowerVariations,
   accountBalanceVariations,
   dao,
   accountInteractions,
-} from "./controller";
-import { DrizzleProposalsActivityRepository } from "./repositories/proposals-activity.repository";
-import { docs } from "./docs";
+} from "@/api/controllers";
+import { docs } from "@/api/docs";
 import { env } from "@/env";
-import { DaoCache } from "./cache/dao-cache";
+import { DaoCache } from "@/api/cache/dao-cache";
 import {
   DelegationPercentageRepository,
   AccountBalanceRepository,
@@ -36,10 +35,11 @@ import {
   TokenRepository,
   TransactionsRepository,
   VotingPowerRepository,
+  DrizzleProposalsActivityRepository,
   NounsVotingPowerRepository,
   AccountInteractionsRepository,
-} from "./repositories";
-import { errorHandler } from "./middlewares";
+} from "@/api/repositories";
+import { errorHandler } from "@/api/middlewares";
 import { getClient } from "@/lib/client";
 import { getChain } from "@/lib/utils";
 import {
@@ -55,7 +55,7 @@ import {
   BalanceVariationsService,
   HistoricalBalancesService,
   DaoService,
-} from "./services";
+} from "@/api/services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 
@@ -98,7 +98,12 @@ if (!daoClient) {
   throw new Error(`Client not found for DAO ${env.DAO_ID}`);
 }
 
-const { blockTime, tokenType } = CONTRACT_ADDRESSES[env.DAO_ID];
+const daoConfig = CONTRACT_ADDRESSES[env.DAO_ID];
+const { blockTime, tokenType } = daoConfig;
+const optimisticProposalType =
+  "optimisticProposalType" in daoConfig
+    ? daoConfig.optimisticProposalType
+    : undefined;
 
 const repo = new DrizzleRepository();
 const votingPowerRepo = new VotingPowerRepository();
@@ -126,7 +131,7 @@ const accountBalanceService = new BalanceVariationsService(
 
 if (env.DUNE_API_URL && env.DUNE_API_KEY) {
   const duneClient = new DuneService(env.DUNE_API_URL, env.DUNE_API_KEY);
-  assets(app, duneClient);
+  totalAssets(app, duneClient);
 }
 
 const tokenPriceClient =
@@ -153,8 +158,13 @@ token(
 tokenDistribution(app, repo);
 governanceActivity(app, repo, tokenType);
 proposalsActivity(app, proposalsRepo, env.DAO_ID, daoClient);
-proposals(app, new ProposalsService(repo, daoClient), daoClient, blockTime);
-historicalOnchain(
+proposals(
+  app,
+  new ProposalsService(repo, daoClient, optimisticProposalType),
+  daoClient,
+  blockTime,
+);
+historicalBalances(
   app,
   env.DAO_ID,
   new HistoricalVotingPowerService(votingPowerRepo),

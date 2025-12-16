@@ -1,13 +1,13 @@
 export enum DaoIdEnum {
-  UNISWAP = "UNI",
+  COMP = "COMP",
   ENS = "ENS",
-  OPTIMISM = "OP",
-  GITCOIN = "GTC",
   NOUNS = "NOUNS",
   SCR = "SCR",
-  COMP = "COMP",
   OBOL = "OBOL",
   SHU = "SHU",
+  OPTIMISM = "OP",
+  UNISWAP = "UNI",
+  GITCOIN = "GTC",
 }
 
 export interface DAO {

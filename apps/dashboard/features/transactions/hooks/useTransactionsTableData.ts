@@ -14,6 +14,7 @@ import { NetworkStatus } from "@apollo/client";
 import { parseUnits } from "viem";
 import { SupplyType } from "@/shared/components";
 import daoConfig from "@/shared/dao-config";
+import { TransactionsParamsType } from "@/features/transactions/hooks/useTransactionParams";
 
 export type AffectedSupplyType =
   | "CEX"
@@ -22,15 +23,10 @@ export type AffectedSupplyType =
   | "TOTAL"
   | "UNASSIGNED";
 
-export interface TransactionsFilters {
+export interface TransactionsFilters extends TransactionsParamsType {
   toDate?: number;
   fromDate?: number;
-  from?: string;
-  to?: string;
-  minAmount?: number;
-  maxAmount?: number;
   affectedSupply?: AffectedSupplyType[];
-  sortOrder: "asc" | "desc";
   includes?: string[];
 }
 
@@ -68,9 +64,9 @@ export const useTransactionsTableData = ({
   filters,
 }: UseTransactionsTableDataParams) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const { decimals } = daoConfig[daoId];
   const [isPaginationLoading, setIsPaginationLoading] = useState(false);
 
+  const { decimals } = daoConfig[daoId];
   const { data, error, refetch, fetchMore, networkStatus } =
     useTransactionsQuery({
       variables: {
@@ -78,20 +74,14 @@ export const useTransactionsTableData = ({
         offset: 0,
         ...(filters?.from && { from: filters?.from }),
         ...(filters?.to && { to: filters?.to }),
-        ...(filters?.minAmount && {
-          minAmount: parseUnits(
-            filters.minAmount.toString(),
-            decimals,
-          ).toString(),
+        ...(filters?.min && {
+          minAmount: parseUnits(filters.min.toString(), decimals).toString(),
         }),
-        ...(filters?.maxAmount && {
-          maxAmount: parseUnits(
-            filters.maxAmount.toString(),
-            decimals,
-          ).toString(),
+        ...(filters?.max && {
+          maxAmount: parseUnits(filters.max.toString(), decimals).toString(),
         }),
-        ...(filters?.sortOrder && {
-          sortOrder: filters?.sortOrder as QueryInput_Transactions_SortOrder,
+        ...(filters?.sort && {
+          sortOrder: filters?.sort as QueryInput_Transactions_SortOrder,
         }),
         ...(filters?.affectedSupply && {
           affectedSupply: filters?.affectedSupply,
@@ -110,16 +100,25 @@ export const useTransactionsTableData = ({
     });
 
   // reset page when filters change
+  const filtersHash = useMemo(
+    () =>
+      JSON.stringify({
+        from: filters?.from,
+        to: filters?.to,
+        minAmount: filters?.min,
+        maxAmount: filters?.max,
+        sortOrder: filters?.sort,
+        affectedSupply: filters?.affectedSupply,
+        includes: filters?.includes,
+        fromDate: filters?.fromDate,
+        toDate: filters?.toDate,
+      }),
+    [filters],
+  );
+
   useEffect(() => {
     setCurrentPage(1);
-  }, [
-    filters?.from,
-    filters?.to,
-    filters?.minAmount,
-    filters?.maxAmount,
-    filters?.sortOrder,
-    filters?.affectedSupply,
-  ]);
+  }, [filtersHash]);
 
   const transactions = useMemo(() => data?.transactions?.items ?? [], [data]);
   const totalCount = data?.transactions?.totalCount ?? 0;
@@ -147,14 +146,15 @@ export const useTransactionsTableData = ({
         updateQuery: (prev, { fetchMoreResult }) => {
           if (!fetchMoreResult?.transactions?.items?.length) return prev;
 
+          const prevItems = prev.transactions?.items ?? [];
+          const newItems = fetchMoreResult.transactions.items ?? [];
+          const merged = [...prevItems, ...newItems];
+
           return {
             ...fetchMoreResult,
             transactions: {
               ...fetchMoreResult.transactions,
-              items: [
-                ...(prev.transactions?.items ?? []),
-                ...fetchMoreResult.transactions.items,
-              ],
+              items: merged,
             },
           };
         },

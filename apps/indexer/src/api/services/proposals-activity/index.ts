@@ -7,7 +7,7 @@ import {
   OrderByField,
   OrderDirection,
   VoteFilter,
-} from "@/api/repositories/proposals-activity.repository";
+} from "@/api/repositories/";
 import { DAOClient } from "@/interfaces/client";
 import { DBProposal } from "@/api/mappers";
 
@@ -89,14 +89,13 @@ export class ProposalsActivityService {
 
     // Get voting period for the DAO from blockchain
     const votingPeriodBlocks = await this.daoClient.getVotingPeriod();
+    const votingDelay = await this.daoClient.getVotingDelay();
 
-    const votingPeriodSeconds = Number(votingPeriodBlocks) * blockTime;
+    const votingPeriodSeconds =
+      Number(votingPeriodBlocks + votingDelay) * blockTime;
 
-    // Calculate activity start time
-    const activityStart = this.calculateActivityStart(
-      firstVoteTimestamp,
-      fromDate,
-    );
+    const activityStart =
+      fromDate && fromDate > firstVoteTimestamp ? fromDate : firstVoteTimestamp;
 
     // Get proposals with votes, filtering, sorting, and pagination in SQL
     const { proposals: proposalsWithVotes, totalCount } =
@@ -169,15 +168,6 @@ export class ProposalsActivityService {
       ...analytics,
       proposals,
     };
-  }
-
-  private calculateActivityStart(
-    firstVoteTimestamp: number,
-    fromDate?: number,
-  ): number {
-    return fromDate && fromDate > firstVoteTimestamp
-      ? fromDate
-      : firstVoteTimestamp;
   }
 
   private calculateAnalytics(proposals: DbProposal[], userVotes: DbVote[]) {

@@ -16,9 +16,12 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   BigInt: { input: any; output: any; }
+  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
+  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
+  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
 };
 
@@ -81,6 +84,11 @@ export type Query = {
   /** Returns a mapping of the biggest variations to account balances associated by account address */
   accountBalanceVariations?: Maybe<AccountBalanceVariations_200_Response>;
   accountBalances: AccountBalancePage;
+  /**
+   * Returns a mapping of the largest interactions between accounts.
+   * Positive amounts signify net token transfers FROM <accountId>, whilst negative amounts refer to net transfers TO <accountId>
+   */
+  accountInteractions?: Maybe<AccountInteractions_200_Response>;
   accountPower?: Maybe<AccountPower>;
   accountPowers: AccountPowerPage;
   accounts: AccountPage;
@@ -145,6 +153,8 @@ export type Query = {
   tokenPrice?: Maybe<TokenPrice>;
   tokenPrices: TokenPricePage;
   tokens: TokenPage;
+  /** Get total assets */
+  totalAssets?: Maybe<Array<Maybe<Query_TotalAssets_Items>>>;
   transaction?: Maybe<Transaction>;
   /** Get transactions with their associated transfers and delegations, with optional filtering and sorting */
   transactions?: Maybe<Transactions_200_Response>;
@@ -197,6 +207,19 @@ export type QueryAccountBalancesArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   where?: InputMaybe<AccountBalanceFilter>;
+};
+
+
+export type QueryAccountInteractionsArgs = {
+  accountId: Scalars['String']['input'];
+  address?: InputMaybe<Scalars['String']['input']>;
+  days?: InputMaybe<QueryInput_AccountInteractions_Days>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  maxAmount?: InputMaybe<Scalars['String']['input']>;
+  minAmount?: InputMaybe<Scalars['String']['input']>;
+  orderBy?: InputMaybe<QueryInput_AccountInteractions_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_AccountInteractions_OrderDirection>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
 };
 
 
@@ -375,6 +398,7 @@ export type QueryProposalNonVotersArgs = {
 export type QueryProposalsArgs = {
   fromDate?: InputMaybe<Scalars['Float']['input']>;
   fromEndDate?: InputMaybe<Scalars['Float']['input']>;
+  includeOptimisticProposals?: InputMaybe<QueryInput_Proposals_IncludeOptimisticProposals>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   orderDirection?: InputMaybe<QueryInput_Proposals_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
@@ -438,6 +462,11 @@ export type QueryTokensArgs = {
 };
 
 
+export type QueryTotalAssetsArgs = {
+  days?: InputMaybe<QueryInput_TotalAssets_Days>;
+};
+
+
 export type QueryTransactionArgs = {
   transactionHash: Scalars['String']['input'];
 };
@@ -494,6 +523,7 @@ export type QueryVotesOnchainsArgs = {
 
 export type QueryVotingPowerHistoryArgs = {
   accountId: Scalars['String']['input'];
+  logIndex: Scalars['Float']['input'];
   transactionHash: Scalars['String']['input'];
 };
 
@@ -714,6 +744,13 @@ export type AccountFilter = {
   id_starts_with?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type AccountInteractions_200_Response = {
+  __typename?: 'accountInteractions_200_response';
+  items: Array<Maybe<Query_AccountInteractions_Items_Items>>;
+  period: Query_AccountInteractions_Period;
+  totalCount: Scalars['Float']['output'];
+};
+
 export type AccountPage = {
   __typename?: 'accountPage';
   items: Array<Account>;
@@ -727,7 +764,6 @@ export type AccountPower = {
   accountId: Scalars['String']['output'];
   daoId: Scalars['String']['output'];
   delegationsCount: Scalars['Int']['output'];
-  firstVoteTimestamp?: Maybe<Scalars['BigInt']['output']>;
   lastVoteTimestamp: Scalars['BigInt']['output'];
   proposalsCount: Scalars['Int']['output'];
   votesCount: Scalars['Int']['output'];
@@ -765,14 +801,6 @@ export type AccountPowerFilter = {
   delegationsCount_lte?: InputMaybe<Scalars['Int']['input']>;
   delegationsCount_not?: InputMaybe<Scalars['Int']['input']>;
   delegationsCount_not_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
-  firstVoteTimestamp?: InputMaybe<Scalars['BigInt']['input']>;
-  firstVoteTimestamp_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  firstVoteTimestamp_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  firstVoteTimestamp_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  firstVoteTimestamp_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  firstVoteTimestamp_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  firstVoteTimestamp_not?: InputMaybe<Scalars['BigInt']['input']>;
-  firstVoteTimestamp_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
   lastVoteTimestamp?: InputMaybe<Scalars['BigInt']['input']>;
   lastVoteTimestamp_gt?: InputMaybe<Scalars['BigInt']['input']>;
   lastVoteTimestamp_gte?: InputMaybe<Scalars['BigInt']['input']>;
@@ -1184,6 +1212,7 @@ export type Proposal_200_Response = {
   endTimestamp: Scalars['String']['output'];
   forVotes: Scalars['String']['output'];
   id: Scalars['String']['output'];
+  proposalType?: Maybe<Scalars['Float']['output']>;
   proposerAccountId: Scalars['String']['output'];
   quorum: Scalars['String']['output'];
   startBlock: Scalars['Float']['output'];
@@ -1219,6 +1248,7 @@ export type ProposalsOnchain = {
   endTimestamp: Scalars['BigInt']['output'];
   forVotes: Scalars['BigInt']['output'];
   id: Scalars['String']['output'];
+  proposalType?: Maybe<Scalars['Int']['output']>;
   proposer?: Maybe<Account>;
   proposerAccountId: Scalars['String']['output'];
   signatures: Scalars['JSON']['output'];
@@ -1314,6 +1344,14 @@ export type ProposalsOnchainFilter = {
   id_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   id_not_starts_with?: InputMaybe<Scalars['String']['input']>;
   id_starts_with?: InputMaybe<Scalars['String']['input']>;
+  proposalType?: InputMaybe<Scalars['Int']['input']>;
+  proposalType_gt?: InputMaybe<Scalars['Int']['input']>;
+  proposalType_gte?: InputMaybe<Scalars['Int']['input']>;
+  proposalType_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
+  proposalType_lt?: InputMaybe<Scalars['Int']['input']>;
+  proposalType_lte?: InputMaybe<Scalars['Int']['input']>;
+  proposalType_not?: InputMaybe<Scalars['Int']['input']>;
+  proposalType_not_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
   proposerAccountId?: InputMaybe<Scalars['String']['input']>;
   proposerAccountId_contains?: InputMaybe<Scalars['String']['input']>;
   proposerAccountId_ends_with?: InputMaybe<Scalars['String']['input']>;
@@ -1384,6 +1422,24 @@ export enum QueryInput_AccountBalanceVariations_Days {
 }
 
 export enum QueryInput_AccountBalanceVariations_OrderDirection {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
+export enum QueryInput_AccountInteractions_Days {
+  '7d' = '_7d',
+  '30d' = '_30d',
+  '90d' = '_90d',
+  '180d' = '_180d',
+  '365d' = '_365d'
+}
+
+export enum QueryInput_AccountInteractions_OrderBy {
+  Count = 'count',
+  Volume = 'volume'
+}
+
+export enum QueryInput_AccountInteractions_OrderDirection {
   Asc = 'asc',
   Desc = 'desc'
 }
@@ -1527,6 +1583,11 @@ export enum QueryInput_ProposalsActivity_UserVoteFilter {
   Yes = 'yes'
 }
 
+export enum QueryInput_Proposals_IncludeOptimisticProposals {
+  False = 'FALSE',
+  True = 'TRUE'
+}
+
 export enum QueryInput_Proposals_OrderDirection {
   Asc = 'asc',
   Desc = 'desc'
@@ -1535,6 +1596,14 @@ export enum QueryInput_Proposals_OrderDirection {
 export enum QueryInput_Token_Currency {
   Eth = 'eth',
   Usd = 'usd'
+}
+
+export enum QueryInput_TotalAssets_Days {
+  '7d' = '_7d',
+  '30d' = '_30d',
+  '90d' = '_90d',
+  '180d' = '_180d',
+  '365d' = '_365d'
 }
 
 export enum QueryInput_Transactions_SortOrder {
@@ -1576,6 +1645,21 @@ export type Query_AccountBalanceVariations_Items_Items = {
 
 export type Query_AccountBalanceVariations_Period = {
   __typename?: 'query_accountBalanceVariations_period';
+  days: Scalars['String']['output'];
+  endTimestamp: Scalars['String']['output'];
+  startTimestamp: Scalars['String']['output'];
+};
+
+export type Query_AccountInteractions_Items_Items = {
+  __typename?: 'query_accountInteractions_items_items';
+  accountId: Scalars['String']['output'];
+  amountTransferred: Scalars['String']['output'];
+  totalVolume: Scalars['String']['output'];
+  transferCount: Scalars['String']['output'];
+};
+
+export type Query_AccountInteractions_Period = {
+  __typename?: 'query_accountInteractions_period';
   days: Scalars['String']['output'];
   endTimestamp: Scalars['String']['output'];
   startTimestamp: Scalars['String']['output'];
@@ -1665,6 +1749,7 @@ export type Query_Proposals_Items_Items = {
   endTimestamp: Scalars['String']['output'];
   forVotes: Scalars['String']['output'];
   id: Scalars['String']['output'];
+  proposalType?: Maybe<Scalars['Float']['output']>;
   proposerAccountId: Scalars['String']['output'];
   quorum: Scalars['String']['output'];
   startBlock: Scalars['Float']['output'];
@@ -1675,6 +1760,12 @@ export type Query_Proposals_Items_Items = {
   title: Scalars['String']['output'];
   txHash: Scalars['String']['output'];
   values: Array<Maybe<Scalars['String']['output']>>;
+};
+
+export type Query_TotalAssets_Items = {
+  __typename?: 'query_totalAssets_items';
+  date: Scalars['String']['output'];
+  totalAssets: Scalars['String']['output'];
 };
 
 export type Query_Transactions_Items_Items = {

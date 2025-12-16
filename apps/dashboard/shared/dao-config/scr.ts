@@ -16,12 +16,16 @@ export const SCR: DaoConfiguration = {
   icon: ScrollIcon,
   daoOverview: {
     token: "ERC20",
-    chain: { ...scroll, icon: ScrollIcon },
+    chain: { ...scroll, icon: ScrollIcon, blockTime: 3000 },
     snapshot: "",
     contracts: {
       governor: "0x2f3f2054776bd3c2fc30d750734a8f539bb214f0",
       token: "0xd29687c813D741E2F938F4aC377128810E217b1b",
       timelock: "0x79D83D1518e2eAA64cdc0631df01b06e2762CC14",
+    },
+    govPlatform: {
+      name: "Agora",
+      url: "https://gov.scroll.io/proposals/",
     },
     rules: {
       delay: true,

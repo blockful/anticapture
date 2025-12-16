@@ -14,10 +14,10 @@ import { GovernorBase } from "../governor.base";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 
 export class SHUClient<
-    TTransport extends Transport = Transport,
-    TChain extends Chain = Chain,
-    TAccount extends Account | undefined = Account | undefined,
-  >
+  TTransport extends Transport = Transport,
+  TChain extends Chain = Chain,
+  TAccount extends Account | undefined = Account | undefined,
+>
   extends GovernorBase
   implements DAOClient
 {
@@ -40,25 +40,26 @@ export class SHUClient<
   }
 
   async getProposalThreshold(): Promise<bigint> {
-    return readContract(this.client, {
-      abi: [
-        {
-          anonymous: false,
-          inputs: [
-            {
-              indexed: false,
-              internalType: "uint256",
-              name: "requiredProposerWeight",
-              type: "uint256",
-            },
-          ],
-          name: "RequiredProposerWeightUpdated",
-          type: "event",
-        },
-      ],
-      address: this.votingStrategyAddress,
-      functionName: "requiredProposerWeight",
-    });
+    return 0n;
+    // readContract(this.client, {
+    //   abi: [
+    //     {
+    //       anonymous: false,
+    //       inputs: [
+    //         {
+    //           indexed: false,
+    //           internalType: "uint256",
+    //           name: "requiredProposerWeight",
+    //           type: "uint256",
+    //         },
+    //       ],
+    //       name: "RequiredProposerWeightUpdated",
+    //       type: "event",
+    //     },
+    //   ],
+    //   address: this.votingStrategyAddress,
+    //   functionName: "requiredProposerWeight",
+    // });
   }
 
   async getVotingDelay(): Promise<bigint> {
@@ -88,17 +89,11 @@ export class SHUClient<
       await readContract(this.client, {
         abi: [
           {
-            anonymous: false,
-            inputs: [
-              {
-                indexed: false,
-                internalType: "uint32",
-                name: "timelockPeriod",
-                type: "uint32",
-              },
-            ],
-            name: "TimelockPeriodUpdated",
-            type: "event",
+            inputs: [],
+            name: "timelockPeriod",
+            outputs: [{ internalType: "uint32", name: "", type: "uint32" }],
+            stateMutability: "view",
+            type: "function",
           },
         ],
         address: this.governorAddress,

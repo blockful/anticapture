@@ -17,3 +17,7 @@ export * from "@/shared/components/icons/ShutterIcon";
 // THE IMPORT OF DAO AVATAR ICON MUST BE LAST
 export * from "@/shared/components/icons/DaoAvatarIcon";
 export * from "@/shared/components/icons/CookieBackground";
+
+export * from "@/shared/components/icons/TelegramColorIcon";
+export * from "@/shared/components/icons/SlackColorIcon";
+export * from "@/shared/components/icons/DiscordColorIcon";

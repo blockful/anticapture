@@ -32,8 +32,6 @@ export const SHU: DaoConfiguration = {
       logic: "For + Abstain",
       quorumCalculation: QUORUM_CALCULATION_TYPES.TOTAL_SUPPLY,
     },
-    tally:
-      "https://app.decentdao.org/home?dao=eth%3A0x36bD3044ab68f600f6d3e081056F34f2a58432c4&page=1&size=10",
   },
   attackProfitability: {
     riskLevel: RiskLevel.HIGH,
