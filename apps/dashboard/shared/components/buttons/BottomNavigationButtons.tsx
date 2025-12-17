@@ -68,6 +68,9 @@ export const BottomNavigationButtons = ({
                   "text-secondary group-hover:text-primary": !item.isActive,
                 })}
               />
+              <p className="text-secondary group-hover:text-primary font-inter text-xs font-medium transition-colors duration-300">
+                {item.label}
+              </p>
             </Link>
           </Tooltip>
         );
