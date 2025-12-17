@@ -195,6 +195,18 @@
       opacity: 1;
     }
   }
+
+  /* Tooltip animation */
+  @keyframes tooltip-show {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 
 /* 
@@ -383,6 +395,12 @@
   .recharts-brush-texts text {
     fill: #fafafa !important;
     font-size: 10px;
+  }
+
+  /* Tooltip animation styles */
+  .tooltip-content-animate {
+    transform-origin: var(--radix-tooltip-content-transform-origin);
+    animation: tooltip-show 0.3s ease;
   }
 }
 
