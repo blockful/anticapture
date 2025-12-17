@@ -11,7 +11,7 @@ directive @httpOperation(subgraph: String, path: String, operationSpecificHeader
 directive @transport(subgraph: String, kind: String, location: String, headers: [[String]], queryStringOptions: ObjMap, queryParams: [[String]]) repeatable on SCHEMA
 
 type Query {
-  """Get property data for a specific token"""
+  "\n>**Method**: `GET`\n>**Base URL**: `https://obol-api-dev.up.railway.app`\n>**Path**: `/token`\nGet property data for a specific token\n"
   token(currency: queryInput_token_currency = usd): token_200_response
   tokens(where: tokenFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPage!
   account(id: String!): account
@@ -20,7 +20,7 @@ type Query {
   accountBalances(where: accountBalanceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountBalancePage!
   accountPower(accountId: String!): accountPower
   accountPowers(where: accountPowerFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountPowerPage!
-  votingPowerHistory(transactionHash: String!, accountId: String!): votingPowerHistory
+  votingPowerHistory(transactionHash: String!, accountId: String!, logIndex: Float!): votingPowerHistory
   votingPowerHistorys(where: votingPowerHistoryFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votingPowerHistoryPage!
   delegation(transactionHash: String!, delegatorAccountId: String!, delegateAccountId: String!): delegation
   delegations(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): delegationPage!
@@ -38,72 +38,64 @@ type Query {
   tokenPrices(where: tokenPriceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPricePage!
   _meta: Meta
 
-  """Get total assets"""
+  "\n>**Method**: `GET`\n>**Base URL**: `https://ens-api-dev-0561.up.railway.app`\n>**Path**: `/total-assets`\nGet total assets\n"
   totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
 
-  """Get historical market data for a specific token"""
+  "\n>**Method**: `GET`\n>**Base URL**: `https://obol-api-dev.up.railway.app`\n>**Path**: `/token/historical-data`\nGet historical market data for a specific token\n"
   historicalTokenData(skip: NonNegativeInt, limit: Float = 365): [query_historicalTokenData_items]
 
-  """Compare total supply between periods"""
+  "\n>**Method**: `GET`\n>**Base URL**: `https://obol-api-dev.up.railway.app`\n>**Path**: `/total-supply/compare`\nCompare total supply between periods\n"
   compareTotalSupply(days: queryInput_compareTotalSupply_days = _90d): compareTotalSupply_200_response
 
-  """Compare delegated supply between periods"""
+  "\n>**Method**: `GET`\n>**Base URL**: `https://obol-api-dev.up.railway.app`\n>**Path**: `/delegated-supply/compare`\nCompare delegated supply between periods\n"
   compareDelegatedSupply(days: queryInput_compareDelegatedSupply_days = _90d): compareDelegatedSupply_200_response
 
-  """Compare circulating supply between periods"""
+  "\n>**Method**: `GET`\n>**Base URL**: `https://obol-api-dev.up.railway.app`\n>**Path**: `/circulating-supply/compare`\nCompare circulating supply between periods\n"
   compareCirculatingSupply(days: queryInput_compareCirculatingSupply_days = _90d): compareCirculatingSupply_200_response
 
-  """Compare treasury between periods"""
+  "\n>**Method**: `GET`\n>**Base URL**: `https://obol-api-dev.up.railway.app`\n>**Path**: `/treasury/compare`\nCompare treasury between periods\n"
   compareTreasury(days: queryInput_compareTreasury_days = _90d): compareTreasury_200_response
 
-  """Compare cex supply between periods"""
+  "\n>**Method**: `GET`\n>**Base URL**: `https://obol-api-dev.up.railway.app`\n>**Path**: `/cex-supply/compare`\nCompare cex supply between periods\n"
   compareCexSupply(days: queryInput_compareCexSupply_days = _90d): compareCexSupply_200_response
 
-  """Compare dex supply between periods"""
+  "\n>**Method**: `GET`\n>**Base URL**: `https://obol-api-dev.up.railway.app`\n>**Path**: `/dex-supply/compare`\nCompare dex supply between periods\n"
   compareDexSupply(days: queryInput_compareDexSupply_days = _90d): compareDexSupply_200_response
 
-  """Compare lending supply between periods"""
+  "\n>**Method**: `GET`\n>**Base URL**: `https://obol-api-dev.up.railway.app`\n>**Path**: `/lending-supply/compare`\nCompare lending supply between periods\n"
   compareLendingSupply(days: queryInput_compareLendingSupply_days = _90d): compareLendingSupply_200_response
 
-  """Get active token supply for DAO"""
+  "\n>**Method**: `GET`\n>**Base URL**: `https://obol-api-dev.up.railway.app`\n>**Path**: `/active-supply/compare`\nGet active token supply for DAO\n"
   compareActiveSupply(days: queryInput_compareActiveSupply_days = _90d): compareActiveSupply_200_response
 
-  """Compare number of proposals between time periods"""
+  "\n>**Method**: `GET`\n>**Base URL**: `https://obol-api-dev.up.railway.app`\n>**Path**: `/proposals/compare`\nCompare number of proposals between time periods\n"
   compareProposals(days: queryInput_compareProposals_days = _90d): compareProposals_200_response
 
-  """Compare number of votes between time periods"""
+  "\n>**Method**: `GET`\n>**Base URL**: `https://obol-api-dev.up.railway.app`\n>**Path**: `/votes/compare`\nCompare number of votes between time periods\n"
   compareVotes(days: queryInput_compareVotes_days = _90d): compareVotes_200_response
 
-  """Compare average turnout between time periods"""
+  "\n>**Method**: `GET`\n>**Base URL**: `https://obol-api-dev.up.railway.app`\n>**Path**: `/average-turnout/compare`\nCompare average turnout between time periods\n"
   compareAverageTurnout(days: queryInput_compareAverageTurnout_days = _90d): compareAverageTurnout_200_response
 
-  """
-  Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window
-  """
+  "\n>**Method**: `GET`\n>**Base URL**: `https://obol-api-dev.up.railway.app`\n>**Path**: `/proposals-activity`\nReturns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window\n"
   proposalsActivity(address: String!, fromDate: NonNegativeInt, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_proposalsActivity_orderBy = timestamp, orderDirection: queryInput_proposalsActivity_orderDirection = desc, userVoteFilter: queryInput_proposalsActivity_userVoteFilter): proposalsActivity_200_response
 
-  """Returns a list of proposal"""
-  proposals(skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposals_orderDirection = desc, status: JSON, fromDate: Float, fromEndDate: Float): proposals_200_response
+  "\n>**Method**: `GET`\n>**Base URL**: `https://obol-api-dev.up.railway.app`\n>**Path**: `/proposals`\nReturns a list of proposal\n"
+  proposals(skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposals_orderDirection = desc, status: JSON, fromDate: Float, fromEndDate: Float, includeOptimisticProposals: queryInput_proposals_includeOptimisticProposals = TRUE): proposals_200_response
 
-  """Returns a single proposal by its ID"""
+  "\n>**Method**: `GET`\n>**Base URL**: `https://obol-api-dev.up.railway.app`\n>**Path**: `/proposals/{args.id}`\nReturns a single proposal by its ID\n"
   proposal(id: String!): proposal_200_response
 
-  """Returns the active delegates that did not vote on a given proposal"""
+  "\n>**Method**: `GET`\n>**Base URL**: `https://obol-api-dev.up.railway.app`\n>**Path**: `/proposals/{args.id}/non-voters`\nReturns the active delegates that did not vote on a given proposal\n"
   proposalNonVoters(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposalNonVoters_orderDirection = desc, addresses: JSON): proposalNonVoters_200_response
 
-  """
-  Fetch historical token balances for multiple addresses at a specific time period using multicall
-  """
+  "\n>**Method**: `GET`\n>**Base URL**: `https://obol-api-dev.up.railway.app`\n>**Path**: `/historical-balances`\nFetch historical token balances for multiple addresses at a specific time period using multicall\n"
   historicalBalances(addresses: JSON!, days: queryInput_historicalBalances_days = _7d): [query_historicalBalances_items]
 
-  """
-  Fetch historical voting power for multiple addresses at a specific time period using multicall
-  """
+  "\n>**Method**: `GET`\n>**Base URL**: `https://obol-api-dev.up.railway.app`\n>**Path**: `/historical-voting-power`\nFetch historical voting power for multiple addresses at a specific time period using multicall\n"
   historicalVotingPower(addresses: JSON!, days: queryInput_historicalVotingPower_days = _7d, fromDate: Float): [query_historicalVotingPower_items]
 
-  """
-  Get transactions with their associated transfers and delegations, with optional filtering and sorting
-  """
+  "\n>**Method**: `GET`\n>**Base URL**: `https://obol-api-dev.up.railway.app`\n>**Path**: `/transactions`\nGet transactions with their associated transfers and delegations, with optional filtering and sorting\n"
   transactions(
     limit: PositiveInt = 50
     offset: NonNegativeInt
@@ -125,32 +117,25 @@ type Query {
     includes: JSON
   ): transactions_200_response
 
-  """Get the last update time"""
+  "\n>**Method**: `GET`\n>**Base URL**: `https://obol-api-dev.up.railway.app`\n>**Path**: `/last-update`\nGet the last update time\n"
   lastUpdate(chart: queryInput_lastUpdate_chart!): lastUpdate_200_response
 
-  """Get delegation percentage day buckets with forward-fill"""
+  "\n>**Method**: `GET`\n>**Base URL**: `https://obol-api-dev.up.railway.app`\n>**Path**: `/delegation-percentage`\nGet delegation percentage day buckets with forward-fill\n"
   delegationPercentageByDay(startDate: String, endDate: String, orderDirection: queryInput_delegationPercentageByDay_orderDirection = asc, limit: NonNegativeInt = 365, after: String, before: String): delegationPercentageByDay_200_response
 
-  """Returns a list of voting power changes"""
+  "\n>**Method**: `GET`\n>**Base URL**: `https://obol-api-dev.up.railway.app`\n>**Path**: `/voting-powers`\nReturns a list of voting power changes\n"
   votingPowers(account: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_votingPowers_orderBy = timestamp, orderDirection: queryInput_votingPowers_orderDirection = desc, minDelta: String, maxDelta: String): votingPowers_200_response
 
-  """
-  Returns a mapping of the biggest changes to voting power associated by delegate address
-  """
+  "\n>**Method**: `GET`\n>**Base URL**: `https://obol-api-dev.up.railway.app`\n>**Path**: `/voting-power/variations`\nReturns a mapping of the biggest changes to voting power associated by delegate address\n"
   votingPowerVariations(days: queryInput_votingPowerVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_votingPowerVariations_orderDirection = desc): votingPowerVariations_200_response
 
-  """
-  Returns a mapping of the biggest variations to account balances associated by account address
-  """
+  "\n>**Method**: `GET`\n>**Base URL**: `https://obol-api-dev.up.railway.app`\n>**Path**: `/account-balance/variations`\nReturns a mapping of the biggest variations to account balances associated by account address\n"
   accountBalanceVariations(days: queryInput_accountBalanceVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalanceVariations_orderDirection = desc): accountBalanceVariations_200_response
 
-  """
-  Returns a mapping of the largest interactions between accounts. 
-  Positive amounts signify net token transfers FROM <accountId>, whilst negative amounts refer to net transfers TO <accountId>
-  """
-  accountInteractions(days: queryInput_accountInteractions_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountInteractions_orderDirection = desc, accountId: String!, minAmount: String, maxAmount: String): accountInteractions_200_response
+  "\n>**Method**: `GET`\n>**Base URL**: `https://obol-api-dev.up.railway.app`\n>**Path**: `/account-balance/interactions`\nReturns a mapping of the largest interactions between accounts. \nPositive amounts signify net token transfers FROM <accountId>, whilst negative amounts refer to net transfers TO <accountId>\n"
+  accountInteractions(days: queryInput_accountInteractions_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountInteractions_orderDirection = desc, accountId: String!, minAmount: String, maxAmount: String, orderBy: queryInput_accountInteractions_orderBy = count, address: String): accountInteractions_200_response
 
-  """Returns current governance parameters for this DAO"""
+  "\n>**Method**: `GET`\n>**Base URL**: `https://obol-api-dev.up.railway.app`\n>**Path**: `/dao`\nReturns current governance parameters for this DAO\n"
   dao: dao_200_response
 
   """
@@ -358,7 +343,6 @@ type accountPower {
   proposalsCount: Int!
   delegationsCount: Int!
   lastVoteTimestamp: BigInt!
-  firstVoteTimestamp: BigInt
   account: account
 }
 
@@ -474,14 +458,6 @@ input accountPowerFilter {
   lastVoteTimestamp_lt: BigInt
   lastVoteTimestamp_gte: BigInt
   lastVoteTimestamp_lte: BigInt
-  firstVoteTimestamp: BigInt
-  firstVoteTimestamp_not: BigInt
-  firstVoteTimestamp_in: [BigInt]
-  firstVoteTimestamp_not_in: [BigInt]
-  firstVoteTimestamp_gt: BigInt
-  firstVoteTimestamp_lt: BigInt
-  firstVoteTimestamp_gte: BigInt
-  firstVoteTimestamp_lte: BigInt
 }
 
 type delegationPage {
@@ -760,6 +736,7 @@ type proposalsOnchain {
   forVotes: BigInt!
   againstVotes: BigInt!
   abstainVotes: BigInt!
+  proposalType: Int
   votes(where: votesOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votesOnchainPage
   proposer: account
 }
@@ -983,6 +960,14 @@ input proposalsOnchainFilter {
   abstainVotes_lt: BigInt
   abstainVotes_gte: BigInt
   abstainVotes_lte: BigInt
+  proposalType: Int
+  proposalType_not: Int
+  proposalType_in: [Int]
+  proposalType_not_in: [Int]
+  proposalType_gt: Int
+  proposalType_lt: Int
+  proposalType_gte: Int
+  proposalType_lte: Int
 }
 
 type accountPage {
@@ -1611,11 +1596,17 @@ type query_proposals_items_items {
   calldatas: [String]!
   values: [String]!
   targets: [String]!
+  proposalType: Float
 }
 
 enum queryInput_proposals_orderDirection {
   asc
   desc
+}
+
+enum queryInput_proposals_includeOptimisticProposals {
+  TRUE
+  FALSE
 }
 
 type proposal_200_response {
@@ -1638,6 +1629,7 @@ type proposal_200_response {
   calldatas: [String]!
   values: [String]!
   targets: [String]!
+  proposalType: Float
 }
 
 type proposalNonVoters_200_response {
@@ -1907,6 +1899,11 @@ enum queryInput_accountInteractions_days {
 enum queryInput_accountInteractions_orderDirection {
   asc
   desc
+}
+
+enum queryInput_accountInteractions_orderBy {
+  volume
+  count
 }
 
 type dao_200_response {

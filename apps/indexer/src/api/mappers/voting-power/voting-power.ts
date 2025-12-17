@@ -10,7 +10,7 @@ export type DBVotingPowerWithRelations = DBVotingPower & {
   transfers: DBTransfer | null;
 };
 
-export const VotingPowerRequestSchema = z.object({
+export const HistoricalVotingPowerRequestSchema = z.object({
   account: z.string().refine((addr) => isAddress(addr)),
   skip: z.coerce
     .number()
@@ -31,9 +31,11 @@ export const VotingPowerRequestSchema = z.object({
   maxDelta: z.string().optional(),
 });
 
-export type VotingPowerRequest = z.infer<typeof VotingPowerRequestSchema>;
+export type VotingPowerRequest = z.infer<
+  typeof HistoricalVotingPowerRequestSchema
+>;
 
-export const VotingPowerResponseSchema = z.object({
+export const HistoricalVotingPowerResponseSchema = z.object({
   items: z.array(
     z.object({
       transactionHash: z.string(),
@@ -62,7 +64,9 @@ export const VotingPowerResponseSchema = z.object({
   totalCount: z.number(),
 });
 
-export type VotingPowerResponse = z.infer<typeof VotingPowerResponseSchema>;
+export type VotingPowerResponse = z.infer<
+  typeof HistoricalVotingPowerResponseSchema
+>;
 
 export const VotingPowerMapper = (
   p: DBVotingPowerWithRelations[],
@@ -79,17 +83,17 @@ export const VotingPowerMapper = (
       logIndex: p.logIndex,
       delegation: p.delegations
         ? {
-          from: p.delegations.delegatorAccountId,
-          value: p.delegations.delegatedValue.toString(),
-          to: p.delegations.delegateAccountId,
-        }
+            from: p.delegations.delegatorAccountId,
+            value: p.delegations.delegatedValue.toString(),
+            to: p.delegations.delegateAccountId,
+          }
         : null,
       transfer: p.transfers
         ? {
-          value: p.transfers.amount.toString(),
-          from: p.transfers.fromAccountId,
-          to: p.transfers.toAccountId,
-        }
+            value: p.transfers.amount.toString(),
+            from: p.transfers.fromAccountId,
+            to: p.transfers.toAccountId,
+          }
         : null,
     })),
     totalCount,

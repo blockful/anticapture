@@ -1,5 +1,5 @@
 import { Address } from "viem";
-import { gte, and, inArray, lte, desc, eq, asc, sql } from "drizzle-orm";
+import { gte, and, lte, desc, eq, asc, sql } from "drizzle-orm";
 import { db } from "ponder:api";
 import {
   votingPowerHistory,
@@ -14,28 +14,6 @@ import {
 } from "@/api/mappers";
 
 export class VotingPowerRepository {
-  async getHistoricalVotingPower(
-    addresses: Address[],
-    timestamp: bigint,
-  ): Promise<{ address: Address; votingPower: bigint }[]> {
-    return await db
-      .selectDistinctOn([votingPowerHistory.accountId], {
-        address: votingPowerHistory.accountId,
-        votingPower: votingPowerHistory.votingPower,
-      })
-      .from(votingPowerHistory)
-      .where(
-        and(
-          inArray(votingPowerHistory.accountId, addresses),
-          lte(votingPowerHistory.timestamp, timestamp),
-        ),
-      )
-      .orderBy(
-        votingPowerHistory.accountId,
-        desc(votingPowerHistory.timestamp),
-      );
-  }
-
   async getVotingPowerCount(
     accountId: Address,
     minDelta?: string,
@@ -55,7 +33,7 @@ export class VotingPowerRepository {
     );
   }
 
-  async getVotingPowers(
+  async getHistoricalVotingPowers(
     accountId: Address,
     skip: number,
     limit: number,
@@ -188,22 +166,28 @@ export class VotingPowerRepository {
     accountId: Address,
     startTimestamp: number,
   ): Promise<DBVotingPowerVariation> {
-    const [delta] = await db
+    const history = db
       .select({
         accountId: votingPowerHistory.accountId,
-        absoluteChange: sql<bigint>`SUM(${votingPowerHistory.delta})`.as(
-          "agg_delta",
-        ),
+        delta: votingPowerHistory.delta,
       })
       .from(votingPowerHistory)
       .orderBy(desc(votingPowerHistory.timestamp))
-      .groupBy(votingPowerHistory.accountId, votingPowerHistory.timestamp)
       .where(
         and(
           eq(votingPowerHistory.accountId, accountId),
           gte(votingPowerHistory.timestamp, BigInt(startTimestamp)),
         ),
-      );
+      )
+      .as("history");
+
+    const [delta] = await db
+      .select({
+        accountId: history.accountId,
+        absoluteChange: sql<bigint>`SUM(${history.delta})`.as("agg_delta"),
+      })
+      .from(history)
+      .groupBy(history.accountId);
 
     const [currentAccountPower] = await db
       .select({ currentVotingPower: accountPower.votingPower })
@@ -211,12 +195,19 @@ export class VotingPowerRepository {
       .where(eq(accountPower.accountId, accountId));
 
     if (!(delta && currentAccountPower)) {
-      throw new Error(`Account not found`);
+      throw new Error("Account not found");
     }
 
     const numericAbsoluteChange = BigInt(delta!.absoluteChange);
     const currentVotingPower = currentAccountPower.currentVotingPower;
     const oldVotingPower = currentVotingPower - numericAbsoluteChange;
+    console.log({
+      numericAbsoluteChange: numericAbsoluteChange,
+      currentVotingPower: currentVotingPower,
+      oldVotingPower: oldVotingPower,
+      percentageChange:
+        Number((numericAbsoluteChange * 10000n) / oldVotingPower) / 100,
+    });
     const percentageChange = oldVotingPower
       ? Number((numericAbsoluteChange * 10000n) / oldVotingPower) / 100
       : 0;

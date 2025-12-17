@@ -6,6 +6,7 @@ import {
   VotingPowerVariationsByAccountIdMapper,
   VotingPowerVariationsRequestSchema,
   VotingPowerVariationsResponseSchema,
+  VotingPowerVariationsMapper,
 } from "@/api/mappers/";
 import { Address } from "viem";
 
@@ -44,9 +45,7 @@ export function votingPowerVariations(app: Hono, service: VotingPowerService) {
         orderDirection,
       );
 
-      return context.json(
-        VotingPowerVariationsByAccountIdMapper(result, now, days),
-      );
+      return context.json(VotingPowerVariationsMapper(result, now, days));
     },
   );
 

@@ -25,7 +25,7 @@ export class NounsVotingPowerRepository {
     );
   }
 
-  async getVotingPowers(
+  async getHistoricalVotingPowers(
     accountId: Address,
     skip: number,
     limit: number,
