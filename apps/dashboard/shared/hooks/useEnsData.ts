@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 import { Address } from "viem";
 
 const getEnsUrl = (address: Address | `${string}.eth`) => {
@@ -74,15 +75,8 @@ export const fetchEnsData = async ({
 }: {
   address: Address | `${string}.eth`;
 }): Promise<EnsData> => {
-  const response = await fetch(getEnsUrl(address));
-
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch ENS data: ${response.status} ${response.statusText}`,
-    );
-  }
-
-  const data: EnsApiResponse = await response.json();
+  const response = await axios.get<EnsApiResponse>(getEnsUrl(address));
+  const data = response.data;
 
   // Validate response structure
   if (!data?.ens) {
