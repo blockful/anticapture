@@ -56,65 +56,6 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
     dao: daoId,
   }));
 
-  // Liquid Treasury Cell
-  // const LiquidTreasuryCell = ({
-  //   daoId,
-  //   rowIndex,
-  //   currency: cellCurrency,
-  // }: {
-  //   daoId: DaoIdEnum;
-  //   rowIndex: number;
-  //   currency: "usd" | "eth";
-  // }) => {
-  //   const { data: tokenData, isLoading } = useTokenData(daoId, cellCurrency, {
-  //     revalidateOnMount: true,
-  //     revalidateIfStale: true,
-  //   });
-  //   const decimals = daoConfigByDaoId[daoId].decimals;
-  //   const treasury = tokenData?.treasury;
-  //   const treasuryInUsd = treasury
-  //     ? Number(formatUnits(BigInt(treasury), decimals)) *
-  //       (tokenData?.price ?? 0)
-  //     : null;
-
-  //   const valueToShow = cellCurrency === "usd" ? treasuryInUsd : treasury;
-
-  //   // Store the numeric value in the ref when data changes
-  //   useEffect(() => {
-  //     if (treasury && valueToShow != null) {
-  //       const numericValue =
-  //         cellCurrency === "usd"
-  //           ? (valueToShow as number)
-  //           : Number(formatUnits(BigInt(valueToShow as string), decimals));
-  //       liquidTreasuryValues.current[rowIndex] = numericValue;
-  //     } else {
-  //       // Clear value when data is not available
-  //       delete liquidTreasuryValues.current[rowIndex];
-  //     }
-  //   }, [treasury, valueToShow, cellCurrency, rowIndex, decimals]);
-
-  //   if (isLoading || !treasury || valueToShow == null) {
-  //     return (
-  //       <SkeletonRow
-  //         parentClassName="flex animate-pulse justify-end pr-4"
-  //         className="h-5 w-full max-w-20 md:max-w-32"
-  //       />
-  //     );
-  //   }
-
-  //   const formattedValue = formatNumberUserReadable(
-  //     cellCurrency === "usd"
-  //       ? (valueToShow as number)
-  //       : Number(formatUnits(BigInt(valueToShow as string), decimals)),
-  //   );
-
-  //   return (
-  //     <div className="text-secondary flex w-full items-center justify-end py-3 text-end text-sm font-normal">
-  //       {formattedValue}
-  //     </div>
-  //   );
-  // };
-
   // Circ. Supply Cell
   const CircSupplyCell = ({
     daoId,
@@ -510,54 +451,6 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         columnClassName: "w-56",
       },
     },
-    // {
-    //   accessorKey: "liquidTreasury",
-    //   cell: ({ row }) => {
-    //     const daoId = row.getValue("dao") as DaoIdEnum;
-    //     const rowIndex = row.index;
-    //     return (
-    //       <LiquidTreasuryCell
-    //         daoId={daoId}
-    //         rowIndex={rowIndex}
-    //         currency={currency}
-    //       />
-    //     );
-    //   },
-    //   header: ({ column }) => (
-    //     <Button
-    //       variant="ghost"
-    //       className="text-secondary w-full justify-end px-0 text-right"
-    //       onClick={() => column.toggleSorting()}
-    //     >
-    //       <h4 className="text-table-header whitespace-nowrap text-right">
-    //         Liquid Treasury
-    //       </h4>
-    //       <ArrowUpDown
-    //         props={{
-    //           className: "size-4 shrink-0",
-    //         }}
-    //         activeState={
-    //           column.getIsSorted() === "asc"
-    //             ? ArrowState.UP
-    //             : column.getIsSorted() === "desc"
-    //               ? ArrowState.DOWN
-    //               : ArrowState.DEFAULT
-    //         }
-    //       />
-    //     </Button>
-    //   ),
-    //   enableSorting: true,
-    //   sortingFn: (rowA, rowB) => {
-    //     const indexA = rowA.index;
-    //     const indexB = rowB.index;
-    //     const valueA = liquidTreasuryValues.current[indexA] || 0;
-    //     const valueB = liquidTreasuryValues.current[indexB] || 0;
-    //     return valueA - valueB;
-    //   },
-    //   meta: {
-    //     columnClassName: "w-auto",
-    //   },
-    // },
 
     {
       accessorKey: "circSupply",
