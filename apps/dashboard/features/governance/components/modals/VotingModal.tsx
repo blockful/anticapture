@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/shared/components";
-import { User2Icon, X, ExternalLink } from "lucide-react";
+import { User2Icon, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Query_Proposals_Items_Items } from "@anticapture/graphql-client/hooks";
 
@@ -9,8 +9,6 @@ import { Account, formatUnits } from "viem";
 import { useAccount, useWalletClient } from "wagmi";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils";
-import { DefaultLink } from "@/shared/components/design-system/links/default-link";
-import { DotFilledIcon } from "@radix-ui/react-icons";
 import { LoadingComponent } from "@/features/governance/components/modals/LoadingContent";
 import { VoteOption } from "@/features/governance/components/proposal-overview/VoteOption";
 import { voteOnProposal } from "@/features/governance/utils/voteOnProposal";
@@ -188,34 +186,6 @@ export const VotingModal = ({
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
               />
-            </div>
-
-            {/* You can also vote through  */}
-            <div className="text-primary overflow-hidden px-4 pb-4">
-              <div className="flex items-center justify-start gap-2 py-2">
-                <p className="text-secondary font-mono text-[12px] font-medium uppercase not-italic leading-4 tracking-[0.045em]">
-                  You can also vote through:
-                </p>
-
-                {/* TODO: Check links urls */}
-                <DefaultLink href="https://tally.so/r/3pQ0p7" openInNewTab>
-                  Tally <ExternalLink className="size-3.5 shrink-0" />
-                </DefaultLink>
-                <DotFilledIcon className="text-secondary size-3.5 shrink-0" />
-                <DefaultLink
-                  href={`https://etherscan.io/address/`}
-                  openInNewTab
-                >
-                  Etherscan <ExternalLink className="size-3.5 shrink-0" />
-                </DefaultLink>
-                <DotFilledIcon className="text-secondary size-3.5 shrink-0" />
-                <DefaultLink
-                  href={`https://agora.blockful.io/dao/${proposal?.daoId}`}
-                  openInNewTab
-                >
-                  Agora <ExternalLink className="size-3.5 shrink-0" />
-                </DefaultLink>
-              </div>
             </div>
           </>
         )}
