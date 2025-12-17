@@ -39,32 +39,118 @@ type EnsData = {
   avatar: string;
 };
 
+/**
+ * Hook to fetch ENS data for a single address or ENS name
+ * @param address - Ethereum address or ENS name (e.g., "0x123..." or "vitalik.eth")
+ * @returns Object containing ENS data, error, and loading state
+ */
+export const useEnsData = (
+  address: Address | `${string}.eth` | null | undefined,
+) => {
+  const { data, error, isLoading } = useSWR<EnsData>(
+    address ? [`ensData`, address] : null,
+    () => fetchEnsData({ address: address! }),
+    {
+      revalidateOnFocus: false,
+      shouldRetryOnError: false,
+    },
+  );
+  return {
+    data,
+    error,
+    isLoading,
+  };
+};
+
+/**
+ * Fetches ENS data from the API for a single address or ENS name
+ * @param address - Ethereum address or ENS name
+ * @returns Promise resolving to EnsData
+ * @throws Error if the API request fails or response is invalid
+ */
 export const fetchEnsData = async ({
   address,
 }: {
   address: Address | `${string}.eth`;
 }): Promise<EnsData> => {
   const response = await fetch(getEnsUrl(address));
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch ENS data: ${response.status} ${response.statusText}`,
+    );
+  }
+
   const data: EnsApiResponse = await response.json();
+
+  // Validate response structure
+  if (!data?.ens) {
+    throw new Error("Invalid ENS API response: missing ens field");
+  }
+
+  if (!data.ens.address || !data.ens.name) {
+    throw new Error("Invalid ENS API response: missing required fields");
+  }
 
   // Transform API response to match expected EnsData structure
   return {
     address: data.ens.address,
-    avatar_url: data.ens.records.avatar || data.ens.avatar || "",
+    avatar_url: data.ens.avatar || data.ens.avatar || "",
     ens: data.ens.name,
     avatar: data.ens.avatar || data.ens.records.avatar || "",
   };
 };
 
-/* Fetch multiple ENS data */
+/**
+ * Hook to fetch ENS data for multiple addresses
+ * @param addresses - Array of Ethereum addresses
+ * @returns Object containing a map of addresses to ENS data, error, and loading state
+ */
+export const useMultipleEnsData = (addresses: Address[]) => {
+  // Deduplicate and sort addresses for stable SWR key
+  const uniqueAddresses = Array.from(new Set(addresses)).sort();
+  const key =
+    uniqueAddresses.length > 0
+      ? [`multipleEnsData`, uniqueAddresses.join(",")]
+      : null;
+
+  const { data, error, isLoading } = useSWR<Record<Address, EnsData>>(
+    key,
+    () => fetchMultipleEnsData(uniqueAddresses),
+    {
+      revalidateOnFocus: false,
+      shouldRetryOnError: false,
+    },
+  );
+  return {
+    data,
+    error,
+    isLoading,
+  };
+};
+
+/**
+ * Fetches ENS data for multiple addresses in parallel
+ * @param addresses - Array of Ethereum addresses (will be deduplicated)
+ * @returns Promise resolving to a map of addresses to ENS data
+ */
 export const fetchMultipleEnsData = async (
   addresses: Address[],
 ): Promise<Record<Address, EnsData>> => {
-  const promises = addresses.map(async (address) => {
+  // Deduplicate addresses to avoid unnecessary API calls
+  const uniqueAddresses = Array.from(new Set(addresses));
+
+  if (uniqueAddresses.length === 0) {
+    return {};
+  }
+
+  const promises = uniqueAddresses.map(async (address) => {
     try {
       const data = await fetchEnsData({ address });
       return { address, data };
     } catch (error) {
+      // Log error for debugging but don't throw to allow partial results
+      console.warn(`Failed to fetch ENS data for ${address}:`, error);
       return { address, data: null };
     }
   });
@@ -79,36 +165,4 @@ export const fetchMultipleEnsData = async (
   });
 
   return ensDataMap;
-};
-
-export const useEnsData = (address: Address | `${string}.eth`) => {
-  const { data, error, isLoading } = useSWR<EnsData>(
-    address ? [`ensData`, address] : null,
-    () => fetchEnsData({ address }),
-    {
-      revalidateOnFocus: false,
-    },
-  );
-  return {
-    data,
-    error,
-    isLoading,
-  };
-};
-
-export const useMultipleEnsData = (addresses: Address[]) => {
-  const { data, error, isLoading } = useSWR<Record<Address, EnsData>>(
-    addresses.length > 0
-      ? [`multipleEnsData`, addresses.sort().join(",")]
-      : null,
-    () => fetchMultipleEnsData(addresses),
-    {
-      revalidateOnFocus: false,
-    },
-  );
-  return {
-    data,
-    error,
-    isLoading,
-  };
 };
