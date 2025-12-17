@@ -1,6 +1,6 @@
 query VotingPowers(
   $account: String!
-  $involvedAddresses: JSON
+  $relatedAddresses: JSON
   $skip: NonNegativeInt
   $limit: PositiveInt = 10
   $orderDirection: queryInput_votingPowers_orderDirection = desc
@@ -10,7 +10,7 @@ query VotingPowers(
 ) {
   votingPowers(
     account: $account
-    involvedAddresses: $involvedAddresses
+    relatedAddresses: $relatedAddresses
     skip: $skip
     orderDirection: $orderDirection
     limit: $limit
