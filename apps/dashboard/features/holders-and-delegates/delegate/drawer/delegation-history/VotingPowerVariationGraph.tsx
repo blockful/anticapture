@@ -158,7 +158,7 @@ export const VotingPowerVariationGraph = ({
     .sort((a, b) => a.timestamp - b.timestamp);
 
   const extendedChartData =
-    chartData.length > 1000
+    chartData.length < 1000
       ? [
           {
             timestamp: chartData[0]?.timestamp - 1000, // to avoid hover conflict with first point

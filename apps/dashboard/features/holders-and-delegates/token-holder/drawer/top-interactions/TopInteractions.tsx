@@ -85,7 +85,7 @@ export const TopInteractions = ({
         <BlankSlate
           variant="default"
           icon={Inbox}
-          description="No interactions found"
+          description="No interactions found in 90 days."
         />
       </div>
     );
