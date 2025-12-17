@@ -37,6 +37,7 @@ export const voteOnProposal = async (
         address: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
         functionName: "castVote",
         args: [proposalId, voteNumber],
+        account,
       });
 
       request = simulatedRequest.request;
@@ -46,6 +47,7 @@ export const voteOnProposal = async (
         address: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
         functionName: "castVoteWithReason",
         args: [proposalId, voteNumber, comment],
+        account,
       });
 
       request = simulatedRequest.request;
