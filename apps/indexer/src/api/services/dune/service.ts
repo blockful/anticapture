@@ -1,13 +1,13 @@
 import { HTTPException } from "hono/http-exception";
-import { DuneResponse } from "./types";
+import { DuneResponse } from "../treasury/providers/dune-provider";
 
 export class DuneService {
   constructor(
     private readonly apiUrl: string,
     private readonly apiKey: string,
-  ) { }
+  ) {}
 
-  async fetchTotalAssets(size: number): Promise<DuneResponse> {
+  async fetchLiquidTreasury(size: number): Promise<DuneResponse> {
     try {
       const response = await fetch(this.apiUrl + `?limit=${size}`, {
         headers: {
@@ -23,7 +23,7 @@ export class DuneService {
       return data as DuneResponse;
     } catch (error) {
       throw new HTTPException(503, {
-        message: "Failed to fetch total assets data",
+        message: "Failed to fetch liquid treasury data",
         cause: error,
       });
     }
