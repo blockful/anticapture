@@ -35,9 +35,9 @@ type EnsApiResponse = {
 
 type EnsData = {
   address: Address;
-  avatar_url: string;
+  avatar_url: string | null;
   ens: string;
-  avatar: string;
+  avatar: string | null;
 };
 
 /**
@@ -91,9 +91,9 @@ export const fetchEnsData = async ({
   // Transform API response to match expected EnsData structure
   return {
     address: data.ens.address,
-    avatar_url: data.ens.avatar || "",
-    ens: data.ens.name || "",
-    avatar: data.ens.avatar || data.ens.records?.avatar || "",
+    avatar_url: data.ens.avatar,
+    ens: data.ens.name,
+    avatar: data.ens.avatar,
   };
 };
 
