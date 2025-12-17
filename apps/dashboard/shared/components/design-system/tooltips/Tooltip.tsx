@@ -48,7 +48,7 @@ export function Tooltip({
       <Content
         data-slot="tooltip-content"
         className={cn(
-          "tooltip-content-animate bg-surface-contrast border-border-contrast text-primary font-inter z-50 flex max-w-[380px] flex-col overflow-hidden rounded-md border px-3 py-1.5 text-center text-sm font-normal not-italic leading-5 shadow-md",
+          "tooltip-content-animate bg-surface-contrast border-border-contrast text-primary font-inter !z-[9999] flex max-w-[380px] flex-col overflow-hidden rounded-md border px-3 py-1.5 text-center text-sm font-normal not-italic leading-5 shadow-md",
           title ? "text-secondary text-left" : "text-primary",
           className,
         )}
