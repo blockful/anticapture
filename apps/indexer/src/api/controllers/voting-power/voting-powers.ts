@@ -33,6 +33,7 @@ export function votingPower(app: Hono, service: VotingPowerService) {
     async (context) => {
       const {
         account,
+        involvedAddresses,
         skip,
         limit,
         orderDirection,
@@ -49,6 +50,7 @@ export function votingPower(app: Hono, service: VotingPowerService) {
         orderBy,
         minDelta,
         maxDelta,
+        involvedAddresses,
       );
       return context.json(VotingPowerMapper(items, totalCount));
     },

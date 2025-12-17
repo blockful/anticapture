@@ -1,5 +1,5 @@
 import { Address } from "viem";
-import { gte, and, inArray, lte, desc, eq, asc, sql } from "drizzle-orm";
+import { gte, and, inArray, lte, desc, eq, asc, sql, or } from "drizzle-orm";
 import { db } from "ponder:api";
 import {
   votingPowerHistory,
@@ -40,19 +40,68 @@ export class VotingPowerRepository {
     accountId: Address,
     minDelta?: string,
     maxDelta?: string,
+    involvedAddresses?: Address[],
   ): Promise<number> {
-    return await db.$count(
-      votingPowerHistory,
-      and(
-        eq(votingPowerHistory.accountId, accountId),
-        minDelta
-          ? gte(votingPowerHistory.deltaMod, BigInt(minDelta))
-          : undefined,
-        maxDelta
-          ? lte(votingPowerHistory.deltaMod, BigInt(maxDelta))
-          : undefined,
-      ),
-    );
+    if (!involvedAddresses) {
+      return await db.$count(
+        votingPowerHistory,
+        and(
+          eq(votingPowerHistory.accountId, accountId),
+          minDelta
+            ? gte(votingPowerHistory.deltaMod, BigInt(minDelta))
+            : undefined,
+          maxDelta
+            ? lte(votingPowerHistory.deltaMod, BigInt(maxDelta))
+            : undefined,
+        ),
+      );
+    }
+
+    const response = await db
+      .select({
+        count: sql<number>`COUNT(*)`.as("count"),
+      })
+      .from(votingPowerHistory)
+      .leftJoin(
+        delegation,
+        sql`${votingPowerHistory.transactionHash} = ${delegation.transactionHash} 
+          AND ${delegation.logIndex} = (
+            SELECT MAX(${delegation.logIndex}) 
+            FROM ${delegation} 
+            WHERE ${delegation.transactionHash} = ${votingPowerHistory.transactionHash} 
+            AND ${delegation.logIndex} < ${votingPowerHistory.logIndex}
+        )`,
+      )
+      .leftJoin(
+        transfer,
+        sql`${votingPowerHistory.transactionHash} = ${transfer.transactionHash} 
+          AND ${transfer.logIndex} = (
+            SELECT MAX(${transfer.logIndex}) 
+            FROM ${transfer}
+            WHERE ${transfer.transactionHash} = ${votingPowerHistory.transactionHash} 
+            AND ${transfer.logIndex} < ${votingPowerHistory.logIndex}
+            
+        )`,
+      )
+      .where(
+        and(
+          eq(votingPowerHistory.accountId, accountId),
+          minDelta
+            ? gte(votingPowerHistory.deltaMod, BigInt(minDelta))
+            : undefined,
+          maxDelta
+            ? lte(votingPowerHistory.deltaMod, BigInt(maxDelta))
+            : undefined,
+          or(
+            inArray(delegation.delegateAccountId, involvedAddresses),
+            inArray(delegation.delegatorAccountId, involvedAddresses),
+            inArray(transfer.toAccountId, involvedAddresses),
+            inArray(transfer.fromAccountId, involvedAddresses),
+          ),
+        ),
+      );
+
+    return response?.[0]?.count ?? 0;
   }
 
   async getVotingPowers(
@@ -63,10 +112,32 @@ export class VotingPowerRepository {
     orderBy: "timestamp" | "delta",
     minDelta?: string,
     maxDelta?: string,
+    involvedAddresses?: Address[],
   ): Promise<DBVotingPowerWithRelations[]> {
     const result = await db
       .select()
       .from(votingPowerHistory)
+      .leftJoin(
+        delegation,
+        sql`${votingPowerHistory.transactionHash} = ${delegation.transactionHash} 
+          AND ${delegation.logIndex} = (
+            SELECT MAX(${delegation.logIndex}) 
+            FROM ${delegation} 
+            WHERE ${delegation.transactionHash} = ${votingPowerHistory.transactionHash} 
+            AND ${delegation.logIndex} < ${votingPowerHistory.logIndex}
+        )`,
+      )
+      .leftJoin(
+        transfer,
+        sql`${votingPowerHistory.transactionHash} = ${transfer.transactionHash} 
+          AND ${transfer.logIndex} = (
+            SELECT MAX(${transfer.logIndex}) 
+            FROM ${transfer}
+            WHERE ${transfer.transactionHash} = ${votingPowerHistory.transactionHash} 
+            AND ${transfer.logIndex} < ${votingPowerHistory.logIndex}
+            
+        )`,
+      )
       .where(
         and(
           eq(votingPowerHistory.accountId, accountId),
@@ -76,27 +147,14 @@ export class VotingPowerRepository {
           maxDelta
             ? lte(votingPowerHistory.deltaMod, BigInt(maxDelta))
             : undefined,
+          involvedAddresses &&
+            or(
+              inArray(delegation.delegateAccountId, involvedAddresses),
+              inArray(delegation.delegatorAccountId, involvedAddresses),
+              inArray(transfer.toAccountId, involvedAddresses),
+              inArray(transfer.fromAccountId, involvedAddresses),
+            ),
         ),
-      )
-      .leftJoin(
-        delegation,
-        sql`${votingPowerHistory.transactionHash} = ${delegation.transactionHash} 
-          AND ${delegation.logIndex} = (
-            SELECT MAX(d2.log_index) 
-            FROM ${delegation} d2 
-            WHERE d2.transaction_hash = ${votingPowerHistory.transactionHash} 
-            AND d2.log_index < ${votingPowerHistory.logIndex}
-        )`,
-      )
-      .leftJoin(
-        transfer,
-        sql`${votingPowerHistory.transactionHash} = ${transfer.transactionHash} 
-          AND ${transfer.logIndex} = (
-            SELECT MAX(t2.log_index) 
-            FROM ${transfer} t2 
-            WHERE t2.transaction_hash = ${votingPowerHistory.transactionHash} 
-            AND t2.log_index < ${votingPowerHistory.logIndex}
-        )`,
       )
       .orderBy(
         orderDirection === "asc"
