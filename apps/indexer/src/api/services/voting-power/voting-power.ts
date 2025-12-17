@@ -24,12 +24,17 @@ interface VotingPowerRepository {
 }
 
 interface VotingPowerVariationRepository {
-  getVotingPowerChanges(
+  getVotingPowerVariations(
     startTimestamp: number,
     limit: number,
     skip: number,
     orderDirection: "asc" | "desc",
   ): Promise<DBVotingPowerVariation[]>;
+
+  getVotingPowerVariationsByAccountId(
+    accountId: Address,
+    startTimestamp: number,
+  ): Promise<DBVotingPowerVariation>;
 }
 
 export class VotingPowerService {
@@ -71,11 +76,21 @@ export class VotingPowerService {
     limit: number,
     orderDirection: "asc" | "desc",
   ): Promise<DBVotingPowerVariation[]> {
-    return this.votingPowerVariationRepository.getVotingPowerChanges(
+    return this.votingPowerVariationRepository.getVotingPowerVariations(
       startTimestamp,
       limit,
       skip,
       orderDirection,
+    );
+  }
+
+  async getVotingPowerVariationsByAccountId(
+    accountId: Address,
+    startTimestamp: number,
+  ): Promise<DBVotingPowerVariation> {
+    return this.votingPowerVariationRepository.getVotingPowerVariationsByAccountId(
+      accountId,
+      startTimestamp,
     );
   }
 }

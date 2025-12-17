@@ -1,6 +1,7 @@
 import { DaysEnum, DaysOpts } from "@/lib/enums";
 import { z } from "@hono/zod-openapi";
 import { PERCENTAGE_NO_BASELINE } from "../constants";
+import { PeriodResponseMapper, PeriodResponseSchema } from "../shared";
 
 export const VotingPowerVariationsRequestSchema = z.object({
   days: z
@@ -24,25 +25,42 @@ export const VotingPowerVariationsRequestSchema = z.object({
   orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
 });
 
-export const VotingPowerVariationsResponseSchema = z.object({
-  period: z.object({
-    days: z.string(),
-    startTimestamp: z.string(),
-    endTimestamp: z.string(),
-  }),
-  items: z.array(
-    z.object({
-      accountId: z.string(),
-      previousVotingPower: z.string().nullish(),
-      currentVotingPower: z.string(),
-      absoluteChange: z.string(),
-      percentageChange: z.string(),
-    }),
-  ),
+export const VotingPowerVariationsByAccountIdRequestSchema = z.object({
+  days: z
+    .enum(DaysOpts)
+    .optional()
+    .default("90d")
+    .transform((val) => DaysEnum[val]),
 });
+
+export const VotingPowerVariationResponseSchema = z.object({
+  accountId: z.string(),
+  previousVotingPower: z.string().nullish(),
+  currentVotingPower: z.string(),
+  absoluteChange: z.string(),
+  percentageChange: z.string(),
+});
+
+export const VotingPowerVariationsByAccountIdResponseSchema = z.object({
+  period: PeriodResponseSchema,
+  data: VotingPowerVariationResponseSchema,
+});
+
+export const VotingPowerVariationsResponseSchema = z.object({
+  period: PeriodResponseSchema,
+  items: z.array(VotingPowerVariationResponseSchema),
+});
+
+export type VotingPowerVariationResponse = z.infer<
+  typeof VotingPowerVariationResponseSchema
+>;
 
 export type VotingPowerVariationsResponse = z.infer<
   typeof VotingPowerVariationsResponseSchema
+>;
+
+export type VotingPowerVariationsByAccountIdResponse = z.infer<
+  typeof VotingPowerVariationsByAccountIdResponseSchema
 >;
 
 export type DBVotingPowerVariation = {
@@ -53,33 +71,36 @@ export type DBVotingPowerVariation = {
   percentageChange: number;
 };
 
+export const VotingPowerVariationResponseMapper = (
+  delta: DBVotingPowerVariation,
+): VotingPowerVariationResponse => ({
+  accountId: delta.accountId,
+  previousVotingPower: delta.previousVotingPower?.toString(),
+  currentVotingPower: delta.currentVotingPower.toString(),
+  absoluteChange: delta.absoluteChange.toString(),
+  percentageChange: delta.previousVotingPower
+    ? delta.percentageChange.toString()
+    : PERCENTAGE_NO_BASELINE,
+});
+
 export const VotingPowerVariationsMapper = (
   variations: DBVotingPowerVariation[],
   endTimestamp: number,
   days: DaysEnum,
 ): VotingPowerVariationsResponse => {
   return VotingPowerVariationsResponseSchema.parse({
-    period: {
-      days: DaysEnum[days] as string,
-      startTimestamp: new Date((endTimestamp - days) * 1000).toISOString(),
-      endTimestamp: new Date(endTimestamp * 1000).toISOString(),
-    },
-    items: variations.map(
-      ({
-        accountId,
-        previousVotingPower,
-        currentVotingPower,
-        absoluteChange,
-        percentageChange,
-      }) => ({
-        accountId: accountId,
-        previousVotingPower: previousVotingPower?.toString(),
-        currentVotingPower: currentVotingPower.toString(),
-        absoluteChange: absoluteChange.toString(),
-        percentageChange: previousVotingPower
-          ? percentageChange.toString()
-          : PERCENTAGE_NO_BASELINE,
-      }),
-    ),
+    period: PeriodResponseMapper(endTimestamp, days),
+    items: variations.map(VotingPowerVariationResponseMapper),
+  });
+};
+
+export const VotingPowerVariationsByAccountIdMapper = (
+  delta: DBVotingPowerVariation,
+  endTimestamp: number,
+  days: DaysEnum,
+): VotingPowerVariationsByAccountIdResponse => {
+  return VotingPowerVariationsByAccountIdResponseSchema.parse({
+    period: PeriodResponseMapper(endTimestamp, days),
+    data: VotingPowerVariationResponseMapper(delta),
   });
 };

@@ -4,6 +4,7 @@ import { Address } from "viem";
 import { PERCENTAGE_NO_BASELINE } from "@/api/mappers/constants";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { calculateHistoricalBlockNumber } from "@/lib/blockTime";
+import { PeriodResponseMapper, PeriodResponseSchema } from "../shared";
 
 export const AccountBalanceVariationsRequestSchema = z.object({
   days: z
@@ -28,11 +29,7 @@ export const AccountBalanceVariationsRequestSchema = z.object({
 });
 
 export const AccountBalanceVariationsResponseSchema = z.object({
-  period: z.object({
-    days: z.string(),
-    startTimestamp: z.string(),
-    endTimestamp: z.string(),
-  }),
+  period: PeriodResponseSchema,
   items: z.array(
     z.object({
       accountId: z.string(),
@@ -58,11 +55,7 @@ export const AccountInteractionsRequestSchema =
   });
 
 export const AccountInteractionsResponseSchema = z.object({
-  period: z.object({
-    days: z.string(),
-    startTimestamp: z.string(),
-    endTimestamp: z.string(),
-  }),
+  period: PeriodResponseSchema,
   totalCount: z.number(),
   items: z.array(
     z.object({
@@ -140,11 +133,7 @@ export const AccountBalanceVariationsMapper = (
   days: DaysEnum,
 ): AccountBalanceVariationsResponse => {
   return AccountBalanceVariationsResponseSchema.parse({
-    period: {
-      days: DaysEnum[days] as string,
-      startTimestamp: new Date((endTimestamp - days) * 1000).toISOString(),
-      endTimestamp: new Date(endTimestamp * 1000).toISOString(),
-    },
+    period: PeriodResponseMapper(endTimestamp, days),
     items: variations.map(
       ({
         accountId,
@@ -172,11 +161,7 @@ export const AccountInteractionsMapper = (
   days: DaysEnum,
 ): AccountInteractionsResponse => {
   return AccountInteractionsResponseSchema.parse({
-    period: {
-      days: DaysEnum[days] as string,
-      startTimestamp: new Date((endTimestamp - days) * 1000).toISOString(),
-      endTimestamp: new Date(endTimestamp * 1000).toISOString(),
-    },
+    period: PeriodResponseMapper(endTimestamp, days),
     totalCount: interactions.interactionCount,
     items: interactions.interactions
       .filter(({ accountId: addr }) => addr !== accountId)
