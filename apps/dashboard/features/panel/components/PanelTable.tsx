@@ -573,7 +573,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         );
       },
       header: ({ column }) => (
-        <div className="w-full justify-end px-0 text-right">
+        <div className="flex w-full justify-end gap-2 px-0 text-right">
           <Tooltip
             tooltipContent={
               <div className="text-center">
@@ -585,26 +585,26 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
               </div>
             }
           >
-            <Button
-              variant="ghost"
-              className="text-secondary group w-full justify-end px-0 text-right"
-              onClick={() => column.toggleSorting()}
-            >
-              <TitleUnderlined title="Circ. Supply" />
-              <ArrowUpDown
-                props={{
-                  className: "size-4 shrink-0",
-                }}
-                activeState={
-                  column.getIsSorted() === "asc"
-                    ? ArrowState.UP
-                    : column.getIsSorted() === "desc"
-                      ? ArrowState.DOWN
-                      : ArrowState.DEFAULT
-                }
-              />
-            </Button>
+            <TitleUnderlined title="Circ. Supply" />
           </Tooltip>
+          <Button
+            variant="ghost"
+            className="text-secondary hover:bg-surface-hover group justify-end px-1 py-1 text-right"
+            onClick={() => column.toggleSorting()}
+          >
+            <ArrowUpDown
+              props={{
+                className: "size-4 shrink-0",
+              }}
+              activeState={
+                column.getIsSorted() === "asc"
+                  ? ArrowState.UP
+                  : column.getIsSorted() === "desc"
+                    ? ArrowState.DOWN
+                    : ArrowState.DEFAULT
+              }
+            />
+          </Button>
         </div>
       ),
       enableSorting: true,
@@ -634,7 +634,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         );
       },
       header: ({ column }) => (
-        <div className="w-full justify-end px-0 text-right">
+        <div className="flex w-full justify-end gap-2 px-0 text-right">
           <Tooltip
             tooltipContent={
               <div className="text-center">
@@ -645,26 +645,26 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
               </div>
             }
           >
-            <Button
-              variant="ghost"
-              className="text-secondary group w-full justify-end px-0 text-right"
-              onClick={() => column.toggleSorting()}
-            >
-              <TitleUnderlined title="Deleg. Supply" />
-              <ArrowUpDown
-                props={{
-                  className: "size-4 shrink-0 ",
-                }}
-                activeState={
-                  column.getIsSorted() === "asc"
-                    ? ArrowState.UP
-                    : column.getIsSorted() === "desc"
-                      ? ArrowState.DOWN
-                      : ArrowState.DEFAULT
-                }
-              />
-            </Button>
+            <TitleUnderlined title="Deleg. Supply" />
           </Tooltip>
+          <Button
+            variant="ghost"
+            className="text-secondary hover:bg-surface-hover group justify-end px-1 py-1 text-right"
+            onClick={() => column.toggleSorting()}
+          >
+            <ArrowUpDown
+              props={{
+                className: "size-4 shrink-0 ",
+              }}
+              activeState={
+                column.getIsSorted() === "asc"
+                  ? ArrowState.UP
+                  : column.getIsSorted() === "desc"
+                    ? ArrowState.DOWN
+                    : ArrowState.DEFAULT
+              }
+            />
+          </Button>
         </div>
       ),
       enableSorting: true,
@@ -693,7 +693,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         );
       },
       header: ({ column }) => (
-        <div className="w-full justify-end px-0 text-right">
+        <div className="flex w-full justify-end gap-2 px-0 text-right">
           <Tooltip
             tooltipContent={
               <div className="text-center">
@@ -701,26 +701,26 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
               </div>
             }
           >
-            <Button
-              variant="ghost"
-              className="text-secondary group w-full justify-end px-0 text-right"
-              onClick={() => column.toggleSorting()}
-            >
-              <TitleUnderlined title="Active Supply" />
-              <ArrowUpDown
-                props={{
-                  className: "size-4 shrink-0",
-                }}
-                activeState={
-                  column.getIsSorted() === "asc"
-                    ? ArrowState.UP
-                    : column.getIsSorted() === "desc"
-                      ? ArrowState.DOWN
-                      : ArrowState.DEFAULT
-                }
-              />
-            </Button>
+            <TitleUnderlined title="Active Supply" />
           </Tooltip>
+          <Button
+            variant="ghost"
+            className="text-secondary hover:bg-surface-hover group justify-end px-1 py-1 text-right"
+            onClick={() => column.toggleSorting()}
+          >
+            <ArrowUpDown
+              props={{
+                className: "size-4 shrink-0",
+              }}
+              activeState={
+                column.getIsSorted() === "asc"
+                  ? ArrowState.UP
+                  : column.getIsSorted() === "desc"
+                    ? ArrowState.DOWN
+                    : ArrowState.DEFAULT
+              }
+            />
+          </Button>
         </div>
       ),
       enableSorting: true,
@@ -743,7 +743,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         return <QuorumGapCell daoId={daoId} rowIndex={rowIndex} />;
       },
       header: ({ column }) => (
-        <div className="w-full justify-end px-0 text-right">
+        <div className="flex w-full justify-end gap-2 px-0 text-right">
           <Tooltip
             tooltipContent={
               <div className="text-center">
@@ -754,27 +754,26 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
               </div>
             }
           >
-            <Button
-              variant="ghost"
-              className="text-secondary group w-full justify-end px-0 text-right"
-              onClick={() => column.toggleSorting()}
-            >
-              <TitleUnderlined title="Quorum Gap" />
-
-              <ArrowUpDown
-                props={{
-                  className: "size-4 shrink-0",
-                }}
-                activeState={
-                  column.getIsSorted() === "asc"
-                    ? ArrowState.UP
-                    : column.getIsSorted() === "desc"
-                      ? ArrowState.DOWN
-                      : ArrowState.DEFAULT
-                }
-              />
-            </Button>
+            <TitleUnderlined title="Quorum Gap" />
           </Tooltip>
+          <Button
+            variant="ghost"
+            className="text-secondary hover:bg-surface-hover group justify-end px-1 py-1 text-right"
+            onClick={() => column.toggleSorting()}
+          >
+            <ArrowUpDown
+              props={{
+                className: "size-4 shrink-0",
+              }}
+              activeState={
+                column.getIsSorted() === "asc"
+                  ? ArrowState.UP
+                  : column.getIsSorted() === "desc"
+                    ? ArrowState.DOWN
+                    : ArrowState.DEFAULT
+              }
+            />
+          </Button>
         </div>
       ),
       enableSorting: true,
