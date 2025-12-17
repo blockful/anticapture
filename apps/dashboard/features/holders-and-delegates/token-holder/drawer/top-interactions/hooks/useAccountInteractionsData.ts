@@ -41,6 +41,7 @@ interface InteractionResponse {
   legendItems: { color: string; label: string; percentage: string }[];
   totalIndividualInteractions: number;
   totalCount: number;
+  totalTransfers: number;
   error?: Error;
 }
 
@@ -112,6 +113,7 @@ export const useAccountInteractionsData = ({
     pieData: [],
     legendItems: [],
     totalCount: 0,
+    totalTransfers: 0,
     error,
   };
 
@@ -224,6 +226,7 @@ export const useAccountInteractionsData = ({
     chartConfig,
     netBalanceChange: netBalanceChange || 0,
     totalCount,
+    totalTransfers,
     pieData,
     legendItems,
     totalIndividualInteractions,

@@ -155,9 +155,6 @@ export const DelegateDelegationHistoryTable = ({
   const columns: ColumnDef<DelegationHistoryItem>[] = [
     {
       accessorKey: "timestamp",
-      meta: {
-        columnClassName: "w-32",
-      },
       header: () => (
         <Button
           variant="ghost"
@@ -197,12 +194,12 @@ export const DelegateDelegationHistoryTable = ({
           </div>
         );
       },
+      meta: {
+        columnClassName: "w-32",
+      },
     },
     {
       accessorKey: "amount",
-      meta: {
-        columnClassName: "w-52",
-      },
       header: () => (
         <div className="flex items-center gap-1.5">
           <h4 className="text-table-header">Amount ({daoId})</h4>
@@ -282,12 +279,12 @@ export const DelegateDelegationHistoryTable = ({
           </div>
         );
       },
+      meta: {
+        columnClassName: "w-52",
+      },
     },
     {
       accessorKey: "delegator",
-      meta: {
-        columnClassName: "w-32",
-      },
       header: () => (
         <div className="text-table-header flex w-full items-center justify-start gap-2">
           <span>Delegator</span>
@@ -368,12 +365,12 @@ export const DelegateDelegationHistoryTable = ({
           </div>
         );
       },
+      meta: {
+        columnClassName: "w-32",
+      },
     },
     {
       accessorKey: "arrow",
-      meta: {
-        columnClassName: "w-16",
-      },
       header: () => <div className="w-full"></div>,
       cell: () => {
         if (loading) {
@@ -386,12 +383,12 @@ export const DelegateDelegationHistoryTable = ({
           </div>
         );
       },
+      meta: {
+        columnClassName: "w-16",
+      },
     },
     {
       accessorKey: "delegate",
-      meta: {
-        columnClassName: "w-32",
-      },
       header: () => (
         <div className="text-table-header flex w-full items-center justify-start gap-2">
           <span>Delegate</span>
@@ -478,57 +475,17 @@ export const DelegateDelegationHistoryTable = ({
           </div>
         );
       },
+      meta: {
+        columnClassName: "w-32",
+      },
     },
   ];
-
-  if (loading && delegationHistory.length === 0) {
-    return (
-      <div className="bg-surface-default flex flex-col">
-        {/* Table */}
-        <div className="flex flex-col gap-2 p-4">
-          <Table
-            columns={columns}
-            data={Array.from({ length: 12 }, () => ({
-              timestamp: "1716153600",
-              transactionHash: "0x1234567890",
-              delta: "1000000000000000000",
-              delegation: null,
-              transfer: null,
-              votingPower: "1000000000000000000",
-              type: "delegation" as const,
-              action: "Delegation",
-              isGain: true,
-              delegator: "0x1234567890",
-              delegate: "0x1234567890",
-            }))}
-            className="h-[400px]"
-            wrapperClassName="h-[450px]"
-            withDownloadCSV={true}
-            size="sm"
-          />
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-surface-default flex flex-col items-center justify-center p-4">
-        <div className="text-danger text-center">
-          <p className="text-lg font-semibold">
-            Error loading delegation history
-          </p>
-          <p className="mt-2 text-sm">Please try again later</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex w-full flex-col gap-2 p-4">
       <Table
         columns={columns}
-        data={delegationHistory}
+        data={loading ? Array(12).fill({}) : delegationHistory}
         size="sm"
         hasMore={paginationInfo.hasNextPage}
         isLoadingMore={fetchingMore}
@@ -536,6 +493,8 @@ export const DelegateDelegationHistoryTable = ({
         wrapperClassName="h-[450px]"
         className="h-[400px]"
         withDownloadCSV={true}
+        error={error}
+        emptyTitle="No delegation history found for this address"
       />
     </div>
   );

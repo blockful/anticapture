@@ -157,19 +157,22 @@ export const VotingPowerVariationGraph = ({
     }))
     .sort((a, b) => a.timestamp - b.timestamp);
 
-  const extendedChartData = [
-    {
-      timestamp: chartData[0]?.timestamp - 1000, // to avoid hover conflict with first point
-      votingPower: 0,
-      delta: "0",
-      type: "initial",
-      isGain: true,
-      transactionHash: "initial",
-      fromAddress: undefined,
-      toAddress: undefined,
-    },
-    ...chartData,
-  ];
+  const extendedChartData =
+    chartData.length > 1000
+      ? [
+          {
+            timestamp: chartData[0]?.timestamp - 1000, // to avoid hover conflict with first point
+            votingPower: 0,
+            delta: "0",
+            type: "initial",
+            isGain: true,
+            transactionHash: "initial",
+            fromAddress: undefined,
+            toAddress: undefined,
+          },
+          ...chartData,
+        ]
+      : chartData;
 
   // Custom dot component to show each transfer/delegation point
   const CustomDot = (props: CustomDotProps) => {

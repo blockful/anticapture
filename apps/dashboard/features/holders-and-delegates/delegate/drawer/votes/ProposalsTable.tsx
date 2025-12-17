@@ -11,7 +11,7 @@ import {
 } from "@/shared/components";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { formatNumberUserReadable, cn } from "@/shared/utils";
-import { AlertOctagon, ExternalLink, Inbox } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { useDaoData } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { Query_ProposalsActivity_Proposals_Items } from "@anticapture/graphql-client";
@@ -27,7 +27,6 @@ import {
   getVoteTimingData,
   proposalsFinalResultMapping,
 } from "@/features/holders-and-delegates/utils/proposalsTableUtils";
-import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 import { Table } from "@/shared/components/design-system/table/Table";
 import daoConfig from "@/shared/dao-config";
 
@@ -400,56 +399,11 @@ export const ProposalsTable = ({
     },
   ];
 
-  if (loading) {
-    return (
-      <div className="flex flex-col gap-4">
-        <Table
-          columns={proposalColumns}
-          data={Array.from({ length: 12 }, (_, i) => ({
-            proposalId: `loading-${i}`,
-            proposalName: "",
-            finalResult: { text: "", icon: null },
-            userVote: { text: "", icon: null },
-            votingPower: "",
-            voteTiming: { text: "", percentage: 0 },
-            status: "",
-          }))}
-          withDownloadCSV={true}
-          size="sm"
-          wrapperClassName="h-[450px]"
-          className="h-[400px]"
-        />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <BlankSlate
-        variant="default"
-        icon={AlertOctagon}
-        title="FAILED TO LOAD API DEFINITION"
-        description="Please check your network connection and refresh the page."
-      />
-    );
-  }
-
-  if (!proposals || (proposals.length === 0 && userVoteFilter === "all")) {
-    return (
-      <BlankSlate
-        variant="default"
-        icon={Inbox}
-        title=""
-        description="No voted proposals to show"
-      />
-    );
-  }
-
   return (
     <div className="flex flex-col gap-4">
       <Table
         columns={proposalColumns}
-        data={tableData}
+        data={loading ? Array(12).fill({}) : tableData}
         size="sm"
         hasMore={pagination.hasNextPage}
         isLoadingMore={fetchingMore}
@@ -457,6 +411,8 @@ export const ProposalsTable = ({
         withDownloadCSV={true}
         wrapperClassName="h-[450px]"
         className="h-[400px]"
+        error={error}
+        emptyTitle="No voted proposals to show"
       />
     </div>
   );

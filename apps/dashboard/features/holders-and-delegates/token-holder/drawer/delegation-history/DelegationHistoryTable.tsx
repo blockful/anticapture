@@ -11,8 +11,7 @@ import {
   formatNumberUserReadable,
   formatDateUserReadable,
 } from "@/shared/utils/";
-import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
-import { AlertOctagon, ExternalLink, Inbox } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -177,6 +176,9 @@ export const DelegationHistoryTable = ({
           </div>
         );
       },
+      meta: {
+        columnClassName: "w-72",
+      },
     },
     {
       accessorKey: "amount",
@@ -239,6 +241,9 @@ export const DelegationHistoryTable = ({
           </div>
         );
       },
+      meta: {
+        columnClassName: "w-40",
+      },
     },
     {
       accessorKey: "date",
@@ -290,19 +295,19 @@ export const DelegationHistoryTable = ({
           </div>
         );
       },
+      meta: {
+        columnClassName: "w-24",
+      },
     },
     {
       accessorKey: "transactionHash",
-      meta: {
-        columnClassName: "w-10",
-      },
       cell: ({ row }) => {
         const transactionHash = row.getValue("transactionHash") as string;
 
         if (loading) {
           return (
             <div className="flex items-center justify-center">
-              <SkeletonRow className="h-4 w-4" />
+              <SkeletonRow className="h-6 w-6" />
             </div>
           );
         }
@@ -322,34 +327,11 @@ export const DelegationHistoryTable = ({
         );
       },
       header: () => <div className="w-full"></div>,
-      enableSorting: false,
+      meta: {
+        columnClassName: "w-12",
+      },
     },
   ];
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center p-4">
-        <BlankSlate
-          variant="title"
-          icon={AlertOctagon}
-          title="Failed to load the API definition"
-          description="Please check your network connection and refresh the page."
-        />
-      </div>
-    );
-  }
-
-  if (!loading && data.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center p-4">
-        <BlankSlate
-          variant="default"
-          icon={Inbox}
-          description="No delegation history found for this address"
-        />
-      </div>
-    );
-  }
 
   return (
     <div className="flex h-full w-full flex-col gap-4 p-4">
@@ -365,6 +347,8 @@ export const DelegationHistoryTable = ({
           withDownloadCSV={true}
           wrapperClassName="h-[450px]"
           className="h-[400px]"
+          error={error}
+          emptyTitle="No delegation history found for this address"
         />
       </div>
     </div>

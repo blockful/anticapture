@@ -91,17 +91,23 @@ export const BalanceHistoryTable = ({
   const transactionType = typeFilter as "all" | "buy" | "sell";
 
   // Use the balance history hook
-  const { transfers, loading, paginationInfo, fetchNextPage, fetchingMore } =
-    useBalanceHistory({
-      accountId,
-      daoId,
-      orderBy,
-      orderDirection,
-      transactionType,
-      customFromFilter,
-      customToFilter,
-      filterVariables,
-    });
+  const {
+    transfers,
+    loading,
+    paginationInfo,
+    fetchNextPage,
+    fetchingMore,
+    error,
+  } = useBalanceHistory({
+    accountId,
+    daoId,
+    orderBy,
+    orderDirection,
+    transactionType,
+    customFromFilter,
+    customToFilter,
+    filterVariables,
+  });
 
   const isInitialLoading = loading && (!transfers || transfers.length === 0);
 
@@ -470,29 +476,10 @@ export const BalanceHistoryTable = ({
     },
   ];
 
-  if (isInitialLoading) {
-    return (
-      <Table
-        columns={balanceHistoryColumns}
-        data={Array.from({ length: 12 }, (_, i) => ({
-          id: `skeleton-${i}`,
-          date: "",
-          amount: "",
-          type: "Buy" as "Buy" | "Sell",
-          fromAddress: "",
-          toAddress: "",
-        }))}
-        withDownloadCSV={true}
-        size="sm"
-        wrapperClassName="h-[450px]"
-        className="h-[400px]"
-      />
-    );
-  }
   return (
     <Table
       columns={balanceHistoryColumns}
-      data={transformedData}
+      data={isInitialLoading ? Array(12).fill({}) : transformedData}
       size="sm"
       hasMore={paginationInfo.hasNextPage}
       isLoadingMore={fetchingMore}
@@ -500,6 +487,7 @@ export const BalanceHistoryTable = ({
       wrapperClassName="h-[450px]"
       className="h-[400px]"
       withDownloadCSV={true}
+      error={error}
     />
   );
 };

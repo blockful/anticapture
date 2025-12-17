@@ -6,8 +6,7 @@ import { Button, SkeletonRow, TooltipInfo } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { ColumnDef } from "@tanstack/react-table";
 import { Address, parseUnits } from "viem";
-import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
-import { AlertOctagon, ArrowDown, ArrowUp, Inbox } from "lucide-react";
+import { ArrowDown, ArrowUp } from "lucide-react";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { Table } from "@/shared/components/design-system/table/Table";
@@ -67,7 +66,7 @@ export const TopInteractionsTable = ({
     daoOverview: { token },
   } = daoConfig[daoId as DaoIdEnum];
 
-  const { interactions, loading, error, totalCount } =
+  const { interactions, loading, error, totalTransfers } =
     useAccountInteractionsData({
       daoId: daoId as DaoIdEnum,
       address: address,
@@ -116,9 +115,6 @@ export const TopInteractionsTable = ({
           />
         </div>
       ),
-      meta: {
-        columnClassName: "w-72",
-      },
       cell: ({ row }) => {
         if (!isMounted || loading) {
           return (
@@ -155,6 +151,9 @@ export const TopInteractionsTable = ({
             </div>
           </div>
         );
+      },
+      meta: {
+        columnClassName: "w-60",
       },
     },
     {
@@ -204,10 +203,12 @@ export const TopInteractionsTable = ({
       cell: ({ row }) => {
         if (!isMounted || loading) {
           return (
-            <SkeletonRow
-              parentClassName="flex animate-pulse justify-end"
-              className="h-4 w-16"
-            />
+            <div className="flex w-full items-center justify-end text-sm">
+              <SkeletonRow
+                parentClassName="flex animate-pulse justify-end"
+                className="h-4 w-16"
+              />
+            </div>
           );
         }
         const volume: number = row.getValue("volume");
@@ -235,10 +236,12 @@ export const TopInteractionsTable = ({
       cell: ({ row }) => {
         if (!isMounted || loading) {
           return (
-            <SkeletonRow
-              parentClassName="flex animate-pulse justify-end"
-              className="h-4 w-16"
-            />
+            <div className="flex w-full items-center justify-end text-sm">
+              <SkeletonRow
+                parentClassName="flex animate-pulse justify-end"
+                className="h-4 w-16"
+              />
+            </div>
           );
         }
         const balanceChange: number = row.getValue("balanceChange");
@@ -325,47 +328,24 @@ export const TopInteractionsTable = ({
       cell: ({ row }) => {
         if (!isMounted || loading) {
           return (
-            <SkeletonRow
-              parentClassName="flex animate-pulse justify-end"
-              className="h-4 w-16"
-            />
+            <div className="flex w-full items-center justify-end text-sm">
+              <SkeletonRow
+                parentClassName="flex animate-pulse justify-end"
+                className="h-4 w-16"
+              />
+            </div>
           );
         }
         const totalInteractions: number = row.getValue("totalInteractions");
         return (
           <div className="flex w-full items-center justify-end text-sm">
             {Number(totalInteractions) || 0} (
-            {((totalInteractions / totalCount) * 100).toFixed(2)}%)
+            {((totalInteractions / totalTransfers) * 100).toFixed(2)}%)
           </div>
         );
       },
     },
   ];
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center p-4">
-        <BlankSlate
-          variant="title"
-          icon={AlertOctagon}
-          title="Failed to load the API definition"
-          description="Please check your network connection and refresh the page."
-        />
-      </div>
-    );
-  }
-
-  if (!loading && tableData.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center p-4">
-        <BlankSlate
-          variant="default"
-          icon={Inbox}
-          description="No interaction data found for this address"
-        />
-      </div>
-    );
-  }
 
   return (
     <div className="flex w-full flex-col gap-2">
@@ -374,12 +354,11 @@ export const TopInteractionsTable = ({
         data={loading ? Array(12).fill({}) : tableData}
         filterColumn="address"
         size="sm"
-        // hasMore={pagination.hasNextPage}
-        // isLoadingMore={fetchingMore}
-        // onLoadMore={fetchNextPage}
         withDownloadCSV={true}
         wrapperClassName="h-[450px]"
         className="h-[400px]"
+        emptyTitle="No interactions found for this address"
+        error={error}
       />
     </div>
   );

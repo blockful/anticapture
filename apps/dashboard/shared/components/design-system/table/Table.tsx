@@ -24,7 +24,7 @@ import {
   TableRow,
 } from "@/shared/components/design-system/table/components";
 import { cn } from "@/shared/utils";
-import { DownloadIcon } from "lucide-react";
+import { DownloadIcon, Inbox } from "lucide-react";
 import {
   headerSizeVariants,
   rowSizeVariants,
@@ -68,6 +68,9 @@ interface DataTableProps<TData, TValue> {
   getRowCanExpand?: (row: Row<TData>) => boolean;
   renderSubComponent?: (row: Row<TData>) => ReactNode;
   getSubRows?: (originalRow: TData, index: number) => TData[] | undefined;
+  error?: Error | null;
+  emptyTitle?: string;
+  emptyDescription?: string;
 }
 
 export const Table = <TData, TValue>({
@@ -92,6 +95,9 @@ export const Table = <TData, TValue>({
   getRowCanExpand,
   renderSubComponent,
   getSubRows,
+  error,
+  emptyTitle = "No results available",
+  emptyDescription = "Try adjusting your filters or check back later.",
 }: DataTableProps<TData, TValue>) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -326,7 +332,20 @@ export const Table = <TData, TValue>({
               colSpan={columns.length}
               className={cn("text-center", className)}
             >
-              {customEmptyState || <EmptyState />}
+              {" "}
+              {customEmptyState ? (
+                customEmptyState
+              ) : error ? (
+                <EmptyState />
+              ) : (
+                data.length === 0 && (
+                  <EmptyState
+                    icon={<Inbox />}
+                    title={emptyTitle}
+                    description={emptyDescription}
+                  />
+                )
+              )}
             </TableCell>
           )}
         </TableBody>

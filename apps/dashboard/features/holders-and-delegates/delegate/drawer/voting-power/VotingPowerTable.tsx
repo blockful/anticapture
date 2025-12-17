@@ -6,8 +6,6 @@ import { Button, SkeletonRow } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { ColumnDef } from "@tanstack/react-table";
 import { Address } from "viem";
-import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
-import { AlertOctagon, Inbox } from "lucide-react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { useVotingPower } from "@/shared/hooks/graphql-client/useVotingPower";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -69,9 +67,6 @@ export const VotingPowerTable = ({
           Address
         </div>
       ),
-      meta: {
-        columnClassName: "w-72",
-      },
       cell: ({ row }) => {
         if (!isMounted || loading) {
           return (
@@ -109,6 +104,9 @@ export const VotingPowerTable = ({
           </div>
         );
       },
+      meta: {
+        columnClassName: "w-72",
+      },
     },
     {
       accessorKey: "amount",
@@ -145,10 +143,12 @@ export const VotingPowerTable = ({
       cell: ({ row }) => {
         if (!isMounted || loading) {
           return (
-            <SkeletonRow
-              parentClassName="flex animate-pulse justify-end"
-              className="h-4 w-16"
-            />
+            <div className="flex w-full items-center justify-end text-sm">
+              <SkeletonRow
+                parentClassName="flex animate-pulse justify-end"
+                className="h-4 w-16"
+              />
+            </div>
           );
         }
         const amount: number = row.getValue("amount");
@@ -161,6 +161,9 @@ export const VotingPowerTable = ({
             )}
           </div>
         );
+      },
+      meta: {
+        columnClassName: "w-72",
       },
     },
     {
@@ -198,33 +201,11 @@ export const VotingPowerTable = ({
           </div>
         );
       },
+      meta: {
+        columnClassName: "w-72",
+      },
     },
   ];
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center p-4">
-        <BlankSlate
-          variant="title"
-          icon={AlertOctagon}
-          title="Failed to load the API definition"
-          description="Please check your network connection and refresh the page."
-        />
-      </div>
-    );
-  }
-
-  if (!loading && tableData.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center p-4">
-        <BlankSlate
-          variant="default"
-          icon={Inbox}
-          description="No voting power data found for this address"
-        />
-      </div>
-    );
-  }
 
   return (
     <div className="flex w-full flex-col gap-2">
@@ -239,6 +220,8 @@ export const VotingPowerTable = ({
         withDownloadCSV={true}
         wrapperClassName="h-[450px]"
         className="h-[400px]"
+        emptyTitle="No voting power data found for this address"
+        error={error}
       />
     </div>
   );

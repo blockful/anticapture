@@ -186,11 +186,7 @@ export const TokenHolders = ({
       },
     },
     {
-      meta: {
-        columnClassName: "w-20",
-      },
       accessorKey: "balance",
-      size: 160,
       header: ({ column }) => {
         const handleSortToggle = () => {
           const newSortOrder = sortOrder === "desc" ? "asc" : "desc";
@@ -239,6 +235,9 @@ export const TokenHolders = ({
           </div>
         );
       },
+      meta: {
+        columnClassName: "w-72",
+      },
     },
     {
       accessorKey: "variation",
@@ -247,7 +246,6 @@ export const TokenHolders = ({
           Change ({daoId})
         </div>
       ),
-      size: 250,
       cell: ({ row }) => {
         const addr = row.original.address;
 
@@ -276,6 +274,9 @@ export const TokenHolders = ({
             <Percentage value={variation?.percentageChange || 0} />
           </div>
         );
+      },
+      meta: {
+        columnClassName: "w-80",
       },
     },
     {
@@ -322,88 +323,13 @@ export const TokenHolders = ({
     },
   ];
 
-  if (loading) {
-    return (
-      <div className="w-full text-white">
-        <div className="flex flex-col gap-2">
-          <Table
-            size="sm"
-            columns={tokenHoldersColumns}
-            data={
-              Array.from({ length: 12 }, () => ({
-                address: zeroAddress,
-                type: "EOA" as string | undefined,
-                balance: 0,
-                variation: { percentageChange: 0, absoluteChange: 0 },
-                delegate: zeroAddress,
-              })) as TokenHolderTableData[]
-            }
-            withDownloadCSV={true}
-            onRowClick={() => {}}
-            className="h-[400px]"
-            wrapperClassName="h-[450px]"
-          />
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="w-full text-white">
-        <div className="flex flex-col gap-2">
-          <div className="md:border-light-dark relative w-full overflow-auto md:rounded-lg md:border">
-            <table className="bg-surface-background text-secondary md:bg-surface-default w-full table-auto caption-bottom text-sm">
-              <thead className="text-secondary sm:bg-surface-contrast text-xs font-semibold sm:font-medium [&_th:first-child]:border-r [&_th:first-child]:border-white/10 md:[&_th]:border-none [&_tr]:border-b">
-                <tr className="border-light-dark">
-                  {tokenHoldersColumns.map((column, index) => (
-                    <th
-                      key={index}
-                      className="text-left [&:has([role=checkbox])]:pr-0"
-                      style={{
-                        width: column.size ? column.size : "auto",
-                      }}
-                    >
-                      {typeof column.header === "function"
-                        ? column.header({
-                            column: {
-                              getIsSorted: () => false,
-                              toggleSorting: () => {},
-                            },
-                          } as Parameters<typeof column.header>[0])
-                        : column.header}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="scrollbar-none [&_tr:last-child]:border-0">
-                <tr className="hover:bg-surface-contrast transition-colors duration-300">
-                  <td
-                    colSpan={tokenHoldersColumns.length}
-                    className="bg-light h-[410px] p-0 text-center"
-                  >
-                    <div className="flex h-full items-center justify-center">
-                      <div className="text-error">
-                        {/* Error loading token holders: {error.message} */}
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <>
       <div className="w-full text-white">
         <div className="flex flex-col gap-2">
           <Table
             columns={tokenHoldersColumns}
-            data={tableData}
+            data={loading ? Array(12).fill({}) : tableData}
             hasMore={pagination.hasNextPage}
             isLoadingMore={fetchingMore}
             onLoadMore={fetchNextPage}
@@ -412,6 +338,7 @@ export const TokenHolders = ({
             withDownloadCSV={true}
             wrapperClassName="h-[450px]"
             className="h-[400px]"
+            error={error}
           />
         </div>
       </div>

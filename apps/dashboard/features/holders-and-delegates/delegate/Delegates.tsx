@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { ColumnDef, HeaderContext } from "@tanstack/react-table";
+import { ColumnDef } from "@tanstack/react-table";
 
 import {
   useDelegates,
@@ -288,16 +288,12 @@ export const Delegates = ({
           />
         </Button>
       ),
-      enableSorting: false,
       meta: {
         columnClassName: "w-72",
       },
     },
     {
       accessorKey: "variation",
-      meta: {
-        columnClassName: "w-64",
-      },
       cell: ({ row }) => {
         const addr = row.original.address;
 
@@ -332,7 +328,9 @@ export const Delegates = ({
           Change ({daoId})
         </h4>
       ),
-      enableSorting: false,
+      meta: {
+        columnClassName: "w-64",
+      },
     },
     {
       accessorKey: "activity",
@@ -360,13 +358,9 @@ export const Delegates = ({
           Activity
         </h4>
       ),
-      enableSorting: false,
     },
     {
       accessorKey: "delegators",
-      meta: {
-        columnClassName: "w-28",
-      },
       cell: ({ row }) => {
         const delegators = row.getValue("delegators") as number;
 
@@ -404,86 +398,18 @@ export const Delegates = ({
           />
         </Button>
       ),
-      enableSorting: false,
+      meta: {
+        columnClassName: "w-28",
+      },
     },
   ];
-
-  if (loading) {
-    return (
-      <div className="flex flex-col gap-2">
-        <Table
-          columns={delegateColumns}
-          data={Array.from({ length: 12 }, () => ({
-            address: `0x${"0".repeat(40)}`,
-            type: "",
-            votingPower: "0",
-            variation: { percentageChange: 0, absoluteChange: 0 },
-            activity: "0/0",
-            activityPercentage: 0,
-            delegators: 0,
-          }))}
-          withDownloadCSV={true}
-          size="sm"
-          wrapperClassName="h-[450px]"
-          className="h-[400px]"
-        />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex flex-col gap-2">
-        <div className="md:border-light-dark relative w-full overflow-auto md:rounded-lg md:border">
-          <table className="bg-surface-background text-secondary md:bg-surface-default w-full table-auto caption-bottom text-sm">
-            <thead className="text-secondary sm:bg-surface-contrast text-xs font-semibold sm:font-medium [&_th:first-child]:border-r md:[&_th]:border-none [&_tr]:border-b">
-              <tr className="border-light-dark">
-                {delegateColumns.map((column, index) => (
-                  <th
-                    key={index}
-                    className="h-8 text-left [&:has([role=checkbox])]:pr-0"
-                    style={{
-                      width: column.size ? column.size : "auto",
-                    }}
-                  >
-                    {typeof column.header === "function"
-                      ? column.header({
-                          column: {
-                            getIsSorted: () => false,
-                            toggleSorting: () => {},
-                          },
-                        } as HeaderContext<DelegateTableData, unknown>)
-                      : column.header}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="scrollbar-none [&_tr:last-child]:border-0">
-              <tr className="hover:bg-surface-contrast transition-colors duration-300">
-                <td
-                  colSpan={delegateColumns.length}
-                  className="bg-light h-[410px] p-0 text-center"
-                >
-                  <div className="flex h-full items-center justify-center">
-                    <div className="text-error">
-                      Error loading delegates: {error.message}
-                    </div>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <>
       <div className="flex flex-col gap-2">
         <Table
           columns={delegateColumns}
-          data={tableData}
+          data={loading ? Array(12).fill({}) : tableData}
           onRowClick={(row) => setDrawerAddress(row.address as Address)}
           size="sm"
           hasMore={pagination.hasNextPage}
@@ -492,6 +418,8 @@ export const Delegates = ({
           withDownloadCSV={true}
           wrapperClassName="h-[450px]"
           className="h-[400px]"
+          error={error}
+          emptyTitle="No delegates found"
         />
       </div>
       <HoldersAndDelegatesDrawer
