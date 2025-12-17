@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import type { Query_Proposals_Items_Items } from "@anticapture/graphql-client/hooks";
 
 import { Account, formatUnits } from "viem";
-import { useAccount } from "wagmi";
+import { useAccount, useWalletClient } from "wagmi";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
@@ -53,6 +53,7 @@ export const VotingModal = ({
     (Number(proposal?.abstainVotes) / Number(totalVotes)) * 100;
 
   const { address, chain } = useAccount();
+  const { data: walletClient } = useWalletClient();
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -224,10 +225,10 @@ export const VotingModal = ({
             Close
           </Button>
           <Button
-            disabled={!address || !chain || !vote || isLoading}
+            disabled={!address || !chain || !vote || !walletClient || isLoading}
             loading={isLoading}
             onClick={async () => {
-              if (!address || !chain) return;
+              if (!address || !chain || !walletClient) return;
               setIsLoading(true);
               const hash = await voteOnProposal(
                 vote as "for" | "against" | "abstain",
@@ -235,6 +236,7 @@ export const VotingModal = ({
                 address as unknown as Account,
                 chain,
                 DaoIdEnum.ENS as DaoIdEnum,
+                walletClient,
                 setTransactionhash,
                 comment,
               );
