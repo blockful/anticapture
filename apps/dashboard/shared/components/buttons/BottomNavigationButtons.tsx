@@ -13,7 +13,6 @@ interface BottomNavigationButtonsProps {
 
 export const BottomNavigationButtons = ({
   className,
-  isCompact = false,
 }: BottomNavigationButtonsProps) => {
   const pathname = usePathname();
 
@@ -60,7 +59,7 @@ export const BottomNavigationButtons = ({
                   "hover:border-light-dark hover:bg-surface-contrast":
                     !item.isActive,
                 },
-                isCompact && "flex-col gap-1 text-xs font-medium",
+                "flex-col gap-1 text-xs font-medium",
               )}
             >
               <Icon
@@ -69,16 +68,6 @@ export const BottomNavigationButtons = ({
                   "text-secondary group-hover:text-primary": !item.isActive,
                 })}
               />
-              {!isCompact && (
-                <p
-                  className={cn("", {
-                    "text-inverted": item.isActive,
-                    "text-secondary group-hover:text-primary": !item.isActive,
-                  })}
-                >
-                  {item.label}
-                </p>
-              )}
             </Link>
           </Tooltip>
         );
