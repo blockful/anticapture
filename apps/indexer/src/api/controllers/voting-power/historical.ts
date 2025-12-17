@@ -4,7 +4,7 @@ import { VotingPowerService } from "@/api/services";
 import {
   HistoricalVotingPowerResponseSchema,
   HistoricalVotingPowerRequestSchema,
-  VotingPowerMapper,
+  HistoricalVotingPowerMapper,
 } from "@/api/mappers";
 
 export function votingPower(app: Hono, service: VotingPowerService) {
@@ -50,7 +50,7 @@ export function votingPower(app: Hono, service: VotingPowerService) {
         minDelta,
         maxDelta,
       );
-      return context.json(VotingPowerMapper(items, totalCount));
+      return context.json(HistoricalVotingPowerMapper(items, totalCount));
     },
   );
 }

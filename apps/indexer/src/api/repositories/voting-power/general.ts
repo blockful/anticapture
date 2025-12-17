@@ -1,5 +1,5 @@
 import { Address } from "viem";
-import { gte, and, lte, desc, eq, asc, sql } from "drizzle-orm";
+import { gte, and, lte, desc, eq, asc, sql, SQL, inArray } from "drizzle-orm";
 import { db } from "ponder:api";
 import {
   votingPowerHistory,
@@ -9,12 +9,14 @@ import {
 } from "ponder:schema";
 
 import {
+  AmountFilter,
+  DBAccountPower,
   DBVotingPowerVariation,
-  DBVotingPowerWithRelations,
+  DBHistoricalVotingPowerWithRelations,
 } from "@/api/mappers";
 
 export class VotingPowerRepository {
-  async getVotingPowerCount(
+  async getHistoricalVotingPowerCount(
     accountId: Address,
     minDelta?: string,
     maxDelta?: string,
@@ -41,7 +43,7 @@ export class VotingPowerRepository {
     orderBy: "timestamp" | "delta",
     minDelta?: string,
     maxDelta?: string,
-  ): Promise<DBVotingPowerWithRelations[]> {
+  ): Promise<DBHistoricalVotingPowerWithRelations[]> {
     const result = await db
       .select()
       .from(votingPowerHistory)
@@ -219,5 +221,84 @@ export class VotingPowerRepository {
       absoluteChange: numericAbsoluteChange,
       percentageChange: percentageChange,
     };
+  }
+
+  async getVotingPowers(
+    skip: number,
+    limit: number,
+    orderDirection: "asc" | "desc",
+    amountFilter: AmountFilter,
+    addresses: Address[],
+  ): Promise<{ items: DBAccountPower[]; totalCount: number }> {
+    const baseQuery = db
+      .select()
+      .from(accountPower)
+      .where(this.filterToSql(addresses, amountFilter));
+
+    const [totalCount] = await db
+      .select({
+        count: sql<number>`COUNT(*)`.as("count"),
+      })
+      .from(baseQuery.as("subquery"));
+
+    const result = await baseQuery
+      .orderBy(
+        orderDirection === "desc"
+          ? desc(accountPower.votingPower)
+          : asc(accountPower.votingPower),
+      )
+      .offset(skip)
+      .limit(limit);
+
+    return {
+      items: result.map((r) => ({
+        accountId: r.accountId,
+        votingPower: r.votingPower,
+        delegationsCount: r.delegationsCount,
+        votesCount: r.votesCount,
+        proposalsCount: r.proposalsCount,
+      })),
+      totalCount: Number(totalCount?.count ?? 0),
+    };
+  }
+
+  async getVotingPowersByAccountId(
+    accountId: Address,
+  ): Promise<DBAccountPower> {
+    const [result] = await db
+      .select()
+      .from(accountPower)
+      .where(eq(accountPower.accountId, accountId));
+
+    if (!result) {
+      throw new Error("Account not found");
+    }
+
+    return {
+      accountId: result.accountId,
+      votingPower: result.votingPower,
+      delegationsCount: result.delegationsCount,
+      votesCount: result.votesCount,
+      proposalsCount: result.proposalsCount,
+    };
+  }
+
+  private filterToSql(
+    addresses: Address[],
+    amountfilter: AmountFilter,
+  ): SQL | undefined {
+    const conditions = [];
+
+    if (addresses.length) {
+      conditions.push(inArray(accountPower.accountId, addresses));
+    }
+    if (amountfilter.minAmount) {
+      gte(accountPower.votingPower, BigInt(amountfilter.minAmount));
+    }
+    if (amountfilter.maxAmount) {
+      gte(accountPower.votingPower, BigInt(amountfilter.maxAmount));
+    }
+
+    return and(...conditions);
   }
 }

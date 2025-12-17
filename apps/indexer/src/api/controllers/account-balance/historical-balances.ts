@@ -2,16 +2,12 @@ import { isAddress } from "viem";
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 
 import { DaysOpts, DaysEnum, DaoIdEnum } from "@/lib/enums";
-import {
-  HistoricalBalancesService,
-  HistoricalVotingPowerService,
-} from "@/api/services";
+import { HistoricalBalancesService } from "@/api/services";
 import { HistoricalBalanceMapper } from "@/api/mappers";
 
 export function historicalBalances(
   app: Hono,
   daoId: DaoIdEnum,
-  votingPowerService: HistoricalVotingPowerService,
   balancesService: HistoricalBalancesService,
 ) {
   // Historical Balances endpoint

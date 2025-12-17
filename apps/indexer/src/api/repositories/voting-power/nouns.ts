@@ -3,10 +3,10 @@ import { gte, and, lte, desc, eq, asc, sql } from "drizzle-orm";
 import { db } from "ponder:api";
 import { votingPowerHistory, delegation, transfer } from "ponder:schema";
 
-import { DBVotingPowerWithRelations } from "@/api/mappers";
+import { DBHistoricalVotingPowerWithRelations } from "@/api/mappers";
 
 export class NounsVotingPowerRepository {
-  async getVotingPowerCount(
+  async getHistoricalVotingPowerCount(
     accountId: Address,
     minDelta?: string,
     maxDelta?: string,
@@ -33,7 +33,7 @@ export class NounsVotingPowerRepository {
     orderBy: "timestamp" | "delta",
     minDelta?: string,
     maxDelta?: string,
-  ): Promise<DBVotingPowerWithRelations[]> {
+  ): Promise<DBHistoricalVotingPowerWithRelations[]> {
     const result = await db
       .select()
       .from(votingPowerHistory)

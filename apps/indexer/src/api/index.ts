@@ -29,7 +29,6 @@ import { env } from "@/env";
 import { DaoCache } from "@/api/cache/dao-cache";
 import {
   DelegationPercentageRepository,
-  AccountBalanceRepository,
   DrizzleRepository,
   NFTPriceRepository,
   TokenRepository,
@@ -38,13 +37,13 @@ import {
   DrizzleProposalsActivityRepository,
   NounsVotingPowerRepository,
   AccountInteractionsRepository,
+  AccountBalanceRepository,
 } from "@/api/repositories";
 import { errorHandler } from "@/api/middlewares";
 import { getClient } from "@/lib/client";
 import { getChain } from "@/lib/utils";
 import {
   DelegationPercentageService,
-  HistoricalVotingPowerService,
   VotingPowerService,
   TransactionsService,
   ProposalsService,
@@ -53,8 +52,8 @@ import {
   NFTPriceService,
   TokenService,
   BalanceVariationsService,
-  HistoricalBalancesService,
   DaoService,
+  HistoricalBalancesService,
 } from "@/api/services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
@@ -101,6 +100,7 @@ if (!daoClient) {
 const { blockTime, tokenType } = CONTRACT_ADDRESSES[env.DAO_ID];
 
 const repo = new DrizzleRepository();
+const accountBalanceRepo = new AccountBalanceRepository();
 const votingPowerRepo = new VotingPowerRepository();
 const proposalsRepo = new DrizzleProposalsActivityRepository();
 const transactionsRepo = new TransactionsRepository();
@@ -108,7 +108,6 @@ const delegationPercentageRepo = new DelegationPercentageRepository();
 const delegationPercentageService = new DelegationPercentageService(
   delegationPercentageRepo,
 );
-const accountBalanceRepo = new AccountBalanceRepository();
 const accountInteractionRepo = new AccountInteractionsRepository();
 const transactionsService = new TransactionsService(transactionsRepo);
 const votingPowerService = new VotingPowerService(
@@ -157,7 +156,6 @@ proposals(app, new ProposalsService(repo, daoClient), daoClient, blockTime);
 historicalBalances(
   app,
   env.DAO_ID,
-  new HistoricalVotingPowerService(votingPowerRepo),
   new HistoricalBalancesService(accountBalanceRepo),
 );
 transactions(app, transactionsService);

@@ -1,4 +1,4 @@
-import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
+import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 import { VotingPowerService } from "@/api/services";
 import {
   VotingPowerVariationsByAccountIdRequestSchema,
@@ -8,7 +8,7 @@ import {
   VotingPowerVariationsResponseSchema,
   VotingPowerVariationsMapper,
 } from "@/api/mappers/";
-import { Address } from "viem";
+import { Address, isAddress } from "viem";
 
 export function votingPowerVariations(app: Hono, service: VotingPowerService) {
   app.openapi(
@@ -53,13 +53,16 @@ export function votingPowerVariations(app: Hono, service: VotingPowerService) {
     createRoute({
       method: "get",
       operationId: "votingPowerVariationsByAccountId",
-      path: "/voting-powers/:accountId/variations",
+      path: "/voting-powers/{accountId}/variations",
       summary:
         "Get top changes in voting power for a given period for a single account",
       description:
         "Returns a the changes to voting power by period and accountId",
       tags: ["proposals"],
       request: {
+        params: z.object({
+          accountId: z.string().refine((addr) => isAddress(addr)),
+        }),
         query: VotingPowerVariationsByAccountIdRequestSchema,
       },
       responses: {
@@ -74,7 +77,7 @@ export function votingPowerVariations(app: Hono, service: VotingPowerService) {
       },
     }),
     async (context) => {
-      const accountId = context.req.param("accountId");
+      const { accountId } = context.req.valid("param");
       const { days } = context.req.valid("query");
       const now = Math.floor(Date.now() / 1000);
 

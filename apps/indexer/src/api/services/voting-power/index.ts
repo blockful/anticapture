@@ -1,11 +1,13 @@
 import { Address } from "viem";
 
 import {
-  DBVotingPowerWithRelations,
+  DBHistoricalVotingPowerWithRelations,
   DBVotingPowerVariation,
+  AmountFilter,
+  DBAccountPower,
 } from "@/api/mappers";
 
-interface VotingPowerRepository {
+interface HistoricalVotingPowerRepository {
   getHistoricalVotingPowers(
     accountId: Address,
     skip: number,
@@ -14,16 +16,16 @@ interface VotingPowerRepository {
     orderBy: "timestamp" | "delta",
     minDelta?: string,
     maxDelta?: string,
-  ): Promise<DBVotingPowerWithRelations[]>;
+  ): Promise<DBHistoricalVotingPowerWithRelations[]>;
 
-  getVotingPowerCount(
+  getHistoricalVotingPowerCount(
     account: Address,
     minDelta?: string,
     maxDelta?: string,
   ): Promise<number>;
 }
 
-interface VotingPowerVariationRepository {
+interface VotingPowersRepository {
   getVotingPowerVariations(
     startTimestamp: number,
     limit: number,
@@ -35,12 +37,22 @@ interface VotingPowerVariationRepository {
     accountId: Address,
     startTimestamp: number,
   ): Promise<DBVotingPowerVariation>;
+
+  getVotingPowers(
+    skip: number,
+    limit: number,
+    orderDirection: "asc" | "desc",
+    amountFilter: AmountFilter,
+    addresses: Address[],
+  ): Promise<{ items: DBAccountPower[]; totalCount: number }>;
+
+  getVotingPowersByAccountId(accountId: Address): Promise<DBAccountPower>;
 }
 
 export class VotingPowerService {
   constructor(
-    private readonly votingRepository: VotingPowerRepository,
-    private readonly votingPowerVariationRepository: VotingPowerVariationRepository,
+    private readonly historicalVotingRepository: HistoricalVotingPowerRepository,
+    private readonly votingPowerRepository: VotingPowersRepository,
   ) {}
 
   async getHistoricalVotingPowers(
@@ -51,22 +63,27 @@ export class VotingPowerService {
     orderBy: "timestamp" | "delta" = "timestamp",
     minDelta?: string,
     maxDelta?: string,
-  ): Promise<{ items: DBVotingPowerWithRelations[]; totalCount: number }> {
-    const items = await this.votingRepository.getHistoricalVotingPowers(
-      account,
-      skip,
-      limit,
-      orderDirection,
-      orderBy,
-      minDelta,
-      maxDelta,
-    );
+  ): Promise<{
+    items: DBHistoricalVotingPowerWithRelations[];
+    totalCount: number;
+  }> {
+    const items =
+      await this.historicalVotingRepository.getHistoricalVotingPowers(
+        account,
+        skip,
+        limit,
+        orderDirection,
+        orderBy,
+        minDelta,
+        maxDelta,
+      );
 
-    const totalCount = await this.votingRepository.getVotingPowerCount(
-      account,
-      minDelta,
-      maxDelta,
-    );
+    const totalCount =
+      await this.historicalVotingRepository.getHistoricalVotingPowerCount(
+        account,
+        minDelta,
+        maxDelta,
+      );
     return { items, totalCount };
   }
 
@@ -76,7 +93,7 @@ export class VotingPowerService {
     limit: number,
     orderDirection: "asc" | "desc",
   ): Promise<DBVotingPowerVariation[]> {
-    return this.votingPowerVariationRepository.getVotingPowerVariations(
+    return this.votingPowerRepository.getVotingPowerVariations(
       startTimestamp,
       limit,
       skip,
@@ -88,9 +105,31 @@ export class VotingPowerService {
     accountId: Address,
     startTimestamp: number,
   ): Promise<DBVotingPowerVariation> {
-    return this.votingPowerVariationRepository.getVotingPowerVariationsByAccountId(
+    return this.votingPowerRepository.getVotingPowerVariationsByAccountId(
       accountId,
       startTimestamp,
     );
+  }
+
+  async getVotingPowers(
+    skip: number,
+    limit: number,
+    orderDirection: "asc" | "desc",
+    amountFilter: AmountFilter,
+    addresses: Address[],
+  ): Promise<{ items: DBAccountPower[]; totalCount: number }> {
+    return this.votingPowerRepository.getVotingPowers(
+      limit,
+      skip,
+      orderDirection,
+      amountFilter,
+      addresses,
+    );
+  }
+
+  async getVotingPowersByAccountId(
+    accountId: Address,
+  ): Promise<DBAccountPower> {
+    return this.votingPowerRepository.getVotingPowersByAccountId(accountId);
   }
 }
