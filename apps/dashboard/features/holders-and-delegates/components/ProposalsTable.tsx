@@ -378,7 +378,7 @@ export const ProposalsTable = ({
           daoConfigByDaoId[daoIdEnum]?.daoOverview?.govPlatform?.name;
 
         if (!govPlatformUrl) {
-          return  null;
+          return null;
         }
 
         return (
