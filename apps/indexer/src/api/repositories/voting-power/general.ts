@@ -40,9 +40,9 @@ export class VotingPowerRepository {
     accountId: Address,
     minDelta?: string,
     maxDelta?: string,
-    involvedAddresses?: Address[],
+    relatedAddresses?: Address[],
   ): Promise<number> {
-    if (!involvedAddresses) {
+    if (!relatedAddresses) {
       return await db.$count(
         votingPowerHistory,
         and(
@@ -93,10 +93,10 @@ export class VotingPowerRepository {
             ? lte(votingPowerHistory.deltaMod, BigInt(maxDelta))
             : undefined,
           or(
-            inArray(delegation.delegateAccountId, involvedAddresses),
-            inArray(delegation.delegatorAccountId, involvedAddresses),
-            inArray(transfer.toAccountId, involvedAddresses),
-            inArray(transfer.fromAccountId, involvedAddresses),
+            inArray(delegation.delegateAccountId, relatedAddresses),
+            inArray(delegation.delegatorAccountId, relatedAddresses),
+            inArray(transfer.toAccountId, relatedAddresses),
+            inArray(transfer.fromAccountId, relatedAddresses),
           ),
         ),
       );
@@ -112,7 +112,7 @@ export class VotingPowerRepository {
     orderBy: "timestamp" | "delta",
     minDelta?: string,
     maxDelta?: string,
-    involvedAddresses?: Address[],
+    relatedAddresses?: Address[],
   ): Promise<DBVotingPowerWithRelations[]> {
     const result = await db
       .select()
@@ -147,12 +147,12 @@ export class VotingPowerRepository {
           maxDelta
             ? lte(votingPowerHistory.deltaMod, BigInt(maxDelta))
             : undefined,
-          involvedAddresses &&
+          relatedAddresses &&
             or(
-              inArray(delegation.delegateAccountId, involvedAddresses),
-              inArray(delegation.delegatorAccountId, involvedAddresses),
-              inArray(transfer.toAccountId, involvedAddresses),
-              inArray(transfer.fromAccountId, involvedAddresses),
+              inArray(delegation.delegateAccountId, relatedAddresses),
+              inArray(delegation.delegatorAccountId, relatedAddresses),
+              inArray(transfer.toAccountId, relatedAddresses),
+              inArray(transfer.fromAccountId, relatedAddresses),
             ),
         ),
       )

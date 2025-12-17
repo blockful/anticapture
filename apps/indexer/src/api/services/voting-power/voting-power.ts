@@ -14,14 +14,14 @@ interface VotingPowerRepository {
     orderBy: "timestamp" | "delta",
     minDelta?: string,
     maxDelta?: string,
-    involvedAddresses?: Address[],
+    relatedAddresses?: Address[],
   ): Promise<DBVotingPowerWithRelations[]>;
 
   getVotingPowerCount(
     account: Address,
     minDelta?: string,
     maxDelta?: string,
-    involvedAddresses?: Address[],
+    relatedAddresses?: Address[],
   ): Promise<number>;
 }
 
@@ -48,7 +48,7 @@ export class VotingPowerService {
     orderBy: "timestamp" | "delta" = "timestamp",
     minDelta?: string,
     maxDelta?: string,
-    involvedAddresses?: Address[],
+    relatedAddresses?: Address[],
   ): Promise<{ items: DBVotingPowerWithRelations[]; totalCount: number }> {
     const items = await this.votingRepository.getVotingPowers(
       account,
@@ -58,14 +58,14 @@ export class VotingPowerService {
       orderBy,
       minDelta,
       maxDelta,
-      involvedAddresses,
+      relatedAddresses,
     );
 
     const totalCount = await this.votingRepository.getVotingPowerCount(
       account,
       minDelta,
       maxDelta,
-      involvedAddresses,
+      relatedAddresses,
     );
     return { items, totalCount };
   }

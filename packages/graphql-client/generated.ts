@@ -548,6 +548,7 @@ export type QueryVotingPowerVariationsArgs = {
 
 export type QueryVotingPowersArgs = {
   account: Scalars['String']['input'];
+  involvedAddresses?: InputMaybe<Scalars['JSON']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   maxDelta?: InputMaybe<Scalars['String']['input']>;
   minDelta?: InputMaybe<Scalars['String']['input']>;
@@ -2830,6 +2831,7 @@ export type TransactionsQuery = { __typename?: 'Query', transactions?: { __typen
 
 export type VotingPowersQueryVariables = Exact<{
   account: Scalars['String']['input'];
+  involvedAddresses?: InputMaybe<Scalars['JSON']['input']>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   orderDirection?: InputMaybe<QueryInput_VotingPowers_OrderDirection>;
@@ -4992,9 +4994,10 @@ export type TransactionsLazyQueryHookResult = ReturnType<typeof useTransactionsL
 export type TransactionsSuspenseQueryHookResult = ReturnType<typeof useTransactionsSuspenseQuery>;
 export type TransactionsQueryResult = Apollo.QueryResult<TransactionsQuery, TransactionsQueryVariables>;
 export const VotingPowersDocument = gql`
-    query VotingPowers($account: String!, $skip: NonNegativeInt, $limit: PositiveInt = 10, $orderDirection: queryInput_votingPowers_orderDirection = desc, $orderBy: queryInput_votingPowers_orderBy, $maxDelta: String, $minDelta: String) {
+    query VotingPowers($account: String!, $involvedAddresses: JSON, $skip: NonNegativeInt, $limit: PositiveInt = 10, $orderDirection: queryInput_votingPowers_orderDirection = desc, $orderBy: queryInput_votingPowers_orderBy, $maxDelta: String, $minDelta: String) {
   votingPowers(
     account: $account
+    involvedAddresses: $involvedAddresses
     skip: $skip
     orderDirection: $orderDirection
     limit: $limit
@@ -5039,6 +5042,7 @@ export const VotingPowersDocument = gql`
  * const { data, loading, error } = useVotingPowersQuery({
  *   variables: {
  *      account: // value for 'account'
+ *      involvedAddresses: // value for 'involvedAddresses'
  *      skip: // value for 'skip'
  *      limit: // value for 'limit'
  *      orderDirection: // value for 'orderDirection'
