@@ -30,12 +30,7 @@ import {
 import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { useQuorumGap } from "@/shared/hooks/useQuorumGap";
-import { TooltipPlain } from "@/shared/components/tooltips/TooltipPlain";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/shared/components/ui/tooltip";
+import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 
 type PanelDao = {
   dao: string;
@@ -340,14 +335,17 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
     if (quorumGap === null || quorumGap === undefined || isNaN(quorumGap)) {
       return (
         <div className="text-secondary flex w-full items-center justify-end text-end text-sm font-normal">
-          <TooltipPlain
-            triggerComponent={
-              <div className="text-secondary decoration-secondary/20 hover:decoration-primary flex w-full items-center justify-end py-3 text-end text-sm font-normal underline decoration-dashed underline-offset-[6px] transition-colors duration-300">
-                No Activity
+          <Tooltip
+            tooltipContent={
+              <div className="text-center">
+                <p>No recent proposals in the last 90 days</p>
               </div>
             }
-            contentComponent="No recent proposals in the last 90 days"
-          />
+          >
+            <div className="text-secondary decoration-secondary/20 hover:decoration-primary flex w-full items-center justify-end py-3 text-end text-sm font-normal underline decoration-dashed underline-offset-[6px] transition-colors duration-300">
+              No Activity
+            </div>
+          </Tooltip>
         </div>
       );
     }
@@ -402,23 +400,14 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         return (
           <div className="scrollbar-none flex w-full items-center gap-3 space-x-1 overflow-auto">
             <div className={"flex w-full items-center gap-3"}>
-              <Tooltip>
-                <TooltipTrigger role="button" aria-label="tooltip-info">
-                  <ChainIcon className="size-6 cursor-pointer rounded-full" />
-                </TooltipTrigger>
-                <TooltipContent
-                  side="top"
-                  align="center"
-                  sideOffset={10}
-                  avoidCollisions={true}
-                  className={cn(
-                    "border-light-dark bg-surface-default text-primary z-50 rounded-lg border p-3 text-center shadow-sm",
-                    "w-fit max-w-[calc(100vw-2rem)] sm:max-w-md",
-                    "whitespace-normal break-words",
-                  )}
-                >
-                  {chainName}
-                </TooltipContent>
+              <Tooltip
+                tooltipContent={
+                  <div>
+                    <p>{chainName}</p>
+                  </div>
+                }
+              >
+                <ChainIcon className="size-6 cursor-pointer rounded-full" />
               </Tooltip>
             </div>
           </div>
@@ -458,13 +447,18 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
       },
       header: () => (
         <div className="w-full justify-end px-0 text-left">
-          <TooltipPlain
-            triggerComponent={
-              <TitleUnderlined title="Stage" className="text-left" />
+          <Tooltip
+            tooltipContent={
+              <div className="text-center">
+                <p>
+                  Resilience Stages are based on governance mechanisms, using
+                  the riskiest exposed vector as the criterion for progression.
+                </p>
+              </div>
             }
-            contentComponent="Resilience Stages are based on governance mechanisms, using the riskiest exposed vector as the criterion for progression."
-            className="font-normal"
-          />
+          >
+            <TitleUnderlined title="Stage" className="text-left" />
+          </Tooltip>
         </div>
       ),
       meta: {
@@ -496,13 +490,20 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
       },
       header: () => (
         <div className="w-full justify-end px-0 text-left">
-          <TooltipPlain
-            triggerComponent={
-              <TitleUnderlined title="Risk Areas" className="text-left" />
+          <Tooltip
+            tooltipContent={
+              <div className="text-center">
+                <p>
+                  Assess critical vulnerabilities in the DAO&apos;s governance
+                  setup. Each item highlights a specific risk area, showing
+                  which issues are resolved and which still expose the system to
+                  threats.
+                </p>
+              </div>
             }
-            contentComponent="Assess critical vulnerabilities in the DAO's governance setup. Each item highlights a specific risk area, showing which issues are resolved and which still expose the system to threats."
-            className="font-normal"
-          />
+          >
+            <TitleUnderlined title="Risk Areas" className="text-left" />
+          </Tooltip>
         </div>
       ),
       meta: {
@@ -573,31 +574,37 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
       },
       header: ({ column }) => (
         <div className="w-full justify-end px-0 text-right">
-          <TooltipPlain
-            triggerComponent={
-              <Button
-                variant="ghost"
-                className="text-secondary group w-full justify-end px-0 text-right"
-                onClick={() => column.toggleSorting()}
-              >
-                <TitleUnderlined title="Circ. Supply" />
-                <ArrowUpDown
-                  props={{
-                    className: "size-4 shrink-0",
-                  }}
-                  activeState={
-                    column.getIsSorted() === "asc"
-                      ? ArrowState.UP
-                      : column.getIsSorted() === "desc"
-                        ? ArrowState.DOWN
-                        : ArrowState.DEFAULT
-                  }
-                />
-              </Button>
+          <Tooltip
+            tooltipContent={
+              <div className="text-center">
+                <p>
+                  Total number of tokens currently in circulation and available
+                  to the market, excluding tokens locked, burned, or held in
+                  treasury.
+                </p>
+              </div>
             }
-            contentComponent="Total number of tokens currently in circulation and available to the market, excluding tokens locked, burned, or held in treasury."
-            className="font-normal"
-          />
+          >
+            <Button
+              variant="ghost"
+              className="text-secondary group w-full justify-end px-0 text-right"
+              onClick={() => column.toggleSorting()}
+            >
+              <TitleUnderlined title="Circ. Supply" />
+              <ArrowUpDown
+                props={{
+                  className: "size-4 shrink-0",
+                }}
+                activeState={
+                  column.getIsSorted() === "asc"
+                    ? ArrowState.UP
+                    : column.getIsSorted() === "desc"
+                      ? ArrowState.DOWN
+                      : ArrowState.DEFAULT
+                }
+              />
+            </Button>
+          </Tooltip>
         </div>
       ),
       enableSorting: true,
@@ -628,31 +635,36 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
       },
       header: ({ column }) => (
         <div className="w-full justify-end px-0 text-right">
-          <TooltipPlain
-            triggerComponent={
-              <Button
-                variant="ghost"
-                className="text-secondary group w-full justify-end px-0 text-right"
-                onClick={() => column.toggleSorting()}
-              >
-                <TitleUnderlined title="Deleg. Supply" />
-                <ArrowUpDown
-                  props={{
-                    className: "size-4 shrink-0 ",
-                  }}
-                  activeState={
-                    column.getIsSorted() === "asc"
-                      ? ArrowState.UP
-                      : column.getIsSorted() === "desc"
-                        ? ArrowState.DOWN
-                        : ArrowState.DEFAULT
-                  }
-                />
-              </Button>
+          <Tooltip
+            tooltipContent={
+              <div className="text-center">
+                <p>
+                  Total amount of voting power that has been delegated to
+                  addresses, whether or not it was used in recent votes.
+                </p>
+              </div>
             }
-            contentComponent="Total amount of voting power that has been delegated to addresses, whether or not it was used in recent votes."
-            className="font-normal"
-          />
+          >
+            <Button
+              variant="ghost"
+              className="text-secondary group w-full justify-end px-0 text-right"
+              onClick={() => column.toggleSorting()}
+            >
+              <TitleUnderlined title="Deleg. Supply" />
+              <ArrowUpDown
+                props={{
+                  className: "size-4 shrink-0 ",
+                }}
+                activeState={
+                  column.getIsSorted() === "asc"
+                    ? ArrowState.UP
+                    : column.getIsSorted() === "desc"
+                      ? ArrowState.DOWN
+                      : ArrowState.DEFAULT
+                }
+              />
+            </Button>
+          </Tooltip>
         </div>
       ),
       enableSorting: true,
@@ -682,31 +694,33 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
       },
       header: ({ column }) => (
         <div className="w-full justify-end px-0 text-right">
-          <TooltipPlain
-            triggerComponent={
-              <Button
-                variant="ghost"
-                className="text-secondary group w-full justify-end px-0 text-right"
-                onClick={() => column.toggleSorting()}
-              >
-                <TitleUnderlined title="Active Supply" />
-                <ArrowUpDown
-                  props={{
-                    className: "size-4 shrink-0",
-                  }}
-                  activeState={
-                    column.getIsSorted() === "asc"
-                      ? ArrowState.UP
-                      : column.getIsSorted() === "desc"
-                        ? ArrowState.DOWN
-                        : ArrowState.DEFAULT
-                  }
-                />
-              </Button>
+          <Tooltip
+            tooltipContent={
+              <div className="text-center">
+                <p>Voting power used in governance over the last 90 days.</p>
+              </div>
             }
-            contentComponent="Voting power used in governance over the last 90 days."
-            className="font-normal"
-          />
+          >
+            <Button
+              variant="ghost"
+              className="text-secondary group w-full justify-end px-0 text-right"
+              onClick={() => column.toggleSorting()}
+            >
+              <TitleUnderlined title="Active Supply" />
+              <ArrowUpDown
+                props={{
+                  className: "size-4 shrink-0",
+                }}
+                activeState={
+                  column.getIsSorted() === "asc"
+                    ? ArrowState.UP
+                    : column.getIsSorted() === "desc"
+                      ? ArrowState.DOWN
+                      : ArrowState.DEFAULT
+                }
+              />
+            </Button>
+          </Tooltip>
         </div>
       ),
       enableSorting: true,
@@ -730,34 +744,37 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
       },
       header: ({ column }) => (
         <div className="w-full justify-end px-0 text-right">
-          <TooltipPlain
-            triggerComponent={
-              <Button
-                variant="ghost"
-                className="text-secondary group w-full justify-end px-0 text-right"
-                onClick={() => column.toggleSorting()}
-              >
-                <TitleUnderlined title="Quorum Gap" />
-
-                <ArrowUpDown
-                  props={{
-                    className: "size-4 shrink-0",
-                  }}
-                  activeState={
-                    column.getIsSorted() === "asc"
-                      ? ArrowState.UP
-                      : column.getIsSorted() === "desc"
-                        ? ArrowState.DOWN
-                        : ArrowState.DEFAULT
-                  }
-                />
-              </Button>
+          <Tooltip
+            tooltipContent={
+              <div className="text-center">
+                <p>
+                  Shows how much participation was above or below the quorum in
+                  the last 90d. Calculated as (average turnout ÷ quorum) − 1
+                </p>
+              </div>
             }
-            contentComponent="
-Shows how much participation was above or below the quorum in the last 90d. Calculated as (average turnout ÷ quorum) − 1
-          "
-            className="font-normal"
-          />
+          >
+            <Button
+              variant="ghost"
+              className="text-secondary group w-full justify-end px-0 text-right"
+              onClick={() => column.toggleSorting()}
+            >
+              <TitleUnderlined title="Quorum Gap" />
+
+              <ArrowUpDown
+                props={{
+                  className: "size-4 shrink-0",
+                }}
+                activeState={
+                  column.getIsSorted() === "asc"
+                    ? ArrowState.UP
+                    : column.getIsSorted() === "desc"
+                      ? ArrowState.DOWN
+                      : ArrowState.DEFAULT
+                }
+              />
+            </Button>
+          </Tooltip>
         </div>
       ),
       enableSorting: true,
