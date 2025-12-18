@@ -56,65 +56,6 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
     dao: daoId,
   }));
 
-  // Liquid Treasury Cell
-  // const LiquidTreasuryCell = ({
-  //   daoId,
-  //   rowIndex,
-  //   currency: cellCurrency,
-  // }: {
-  //   daoId: DaoIdEnum;
-  //   rowIndex: number;
-  //   currency: "usd" | "eth";
-  // }) => {
-  //   const { data: tokenData, isLoading } = useTokenData(daoId, cellCurrency, {
-  //     revalidateOnMount: true,
-  //     revalidateIfStale: true,
-  //   });
-  //   const decimals = daoConfigByDaoId[daoId].decimals;
-  //   const treasury = tokenData?.treasury;
-  //   const treasuryInUsd = treasury
-  //     ? Number(formatUnits(BigInt(treasury), decimals)) *
-  //       (tokenData?.price ?? 0)
-  //     : null;
-
-  //   const valueToShow = cellCurrency === "usd" ? treasuryInUsd : treasury;
-
-  //   // Store the numeric value in the ref when data changes
-  //   useEffect(() => {
-  //     if (treasury && valueToShow != null) {
-  //       const numericValue =
-  //         cellCurrency === "usd"
-  //           ? (valueToShow as number)
-  //           : Number(formatUnits(BigInt(valueToShow as string), decimals));
-  //       liquidTreasuryValues.current[rowIndex] = numericValue;
-  //     } else {
-  //       // Clear value when data is not available
-  //       delete liquidTreasuryValues.current[rowIndex];
-  //     }
-  //   }, [treasury, valueToShow, cellCurrency, rowIndex, decimals]);
-
-  //   if (isLoading || !treasury || valueToShow == null) {
-  //     return (
-  //       <SkeletonRow
-  //         parentClassName="flex animate-pulse justify-end pr-4"
-  //         className="h-5 w-full max-w-20 md:max-w-32"
-  //       />
-  //     );
-  //   }
-
-  //   const formattedValue = formatNumberUserReadable(
-  //     cellCurrency === "usd"
-  //       ? (valueToShow as number)
-  //       : Number(formatUnits(BigInt(valueToShow as string), decimals)),
-  //   );
-
-  //   return (
-  //     <div className="text-secondary flex w-full items-center justify-end py-3 text-end text-sm font-normal">
-  //       {formattedValue}
-  //     </div>
-  //   );
-  // };
-
   // Circ. Supply Cell
   const CircSupplyCell = ({
     daoId,
@@ -510,54 +451,6 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         columnClassName: "w-56",
       },
     },
-    // {
-    //   accessorKey: "liquidTreasury",
-    //   cell: ({ row }) => {
-    //     const daoId = row.getValue("dao") as DaoIdEnum;
-    //     const rowIndex = row.index;
-    //     return (
-    //       <LiquidTreasuryCell
-    //         daoId={daoId}
-    //         rowIndex={rowIndex}
-    //         currency={currency}
-    //       />
-    //     );
-    //   },
-    //   header: ({ column }) => (
-    //     <Button
-    //       variant="ghost"
-    //       className="text-secondary w-full justify-end px-0 text-right"
-    //       onClick={() => column.toggleSorting()}
-    //     >
-    //       <h4 className="text-table-header whitespace-nowrap text-right">
-    //         Liquid Treasury
-    //       </h4>
-    //       <ArrowUpDown
-    //         props={{
-    //           className: "size-4 shrink-0",
-    //         }}
-    //         activeState={
-    //           column.getIsSorted() === "asc"
-    //             ? ArrowState.UP
-    //             : column.getIsSorted() === "desc"
-    //               ? ArrowState.DOWN
-    //               : ArrowState.DEFAULT
-    //         }
-    //       />
-    //     </Button>
-    //   ),
-    //   enableSorting: true,
-    //   sortingFn: (rowA, rowB) => {
-    //     const indexA = rowA.index;
-    //     const indexB = rowB.index;
-    //     const valueA = liquidTreasuryValues.current[indexA] || 0;
-    //     const valueB = liquidTreasuryValues.current[indexB] || 0;
-    //     return valueA - valueB;
-    //   },
-    //   meta: {
-    //     columnClassName: "w-auto",
-    //   },
-    // },
 
     {
       accessorKey: "circSupply",
@@ -573,7 +466,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         );
       },
       header: ({ column }) => (
-        <div className="w-full justify-end px-0 text-right">
+        <div className="flex w-full justify-end gap-2 px-0 text-right">
           <Tooltip
             tooltipContent={
               <div className="text-center">
@@ -585,26 +478,26 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
               </div>
             }
           >
-            <Button
-              variant="ghost"
-              className="text-secondary group w-full justify-end px-0 text-right"
-              onClick={() => column.toggleSorting()}
-            >
-              <TitleUnderlined title="Circ. Supply" />
-              <ArrowUpDown
-                props={{
-                  className: "size-4 shrink-0",
-                }}
-                activeState={
-                  column.getIsSorted() === "asc"
-                    ? ArrowState.UP
-                    : column.getIsSorted() === "desc"
-                      ? ArrowState.DOWN
-                      : ArrowState.DEFAULT
-                }
-              />
-            </Button>
+            <TitleUnderlined title="Circ. Supply" />
           </Tooltip>
+          <Button
+            variant="ghost"
+            className="text-secondary hover:bg-surface-hover group justify-end px-1 py-1 text-right"
+            onClick={() => column.toggleSorting()}
+          >
+            <ArrowUpDown
+              props={{
+                className: "size-4 shrink-0",
+              }}
+              activeState={
+                column.getIsSorted() === "asc"
+                  ? ArrowState.UP
+                  : column.getIsSorted() === "desc"
+                    ? ArrowState.DOWN
+                    : ArrowState.DEFAULT
+              }
+            />
+          </Button>
         </div>
       ),
       enableSorting: true,
@@ -634,7 +527,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         );
       },
       header: ({ column }) => (
-        <div className="w-full justify-end px-0 text-right">
+        <div className="flex w-full justify-end gap-2 px-0 text-right">
           <Tooltip
             tooltipContent={
               <div className="text-center">
@@ -645,26 +538,26 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
               </div>
             }
           >
-            <Button
-              variant="ghost"
-              className="text-secondary group w-full justify-end px-0 text-right"
-              onClick={() => column.toggleSorting()}
-            >
-              <TitleUnderlined title="Deleg. Supply" />
-              <ArrowUpDown
-                props={{
-                  className: "size-4 shrink-0 ",
-                }}
-                activeState={
-                  column.getIsSorted() === "asc"
-                    ? ArrowState.UP
-                    : column.getIsSorted() === "desc"
-                      ? ArrowState.DOWN
-                      : ArrowState.DEFAULT
-                }
-              />
-            </Button>
+            <TitleUnderlined title="Deleg. Supply" />
           </Tooltip>
+          <Button
+            variant="ghost"
+            className="text-secondary hover:bg-surface-hover group justify-end px-1 py-1 text-right"
+            onClick={() => column.toggleSorting()}
+          >
+            <ArrowUpDown
+              props={{
+                className: "size-4 shrink-0 ",
+              }}
+              activeState={
+                column.getIsSorted() === "asc"
+                  ? ArrowState.UP
+                  : column.getIsSorted() === "desc"
+                    ? ArrowState.DOWN
+                    : ArrowState.DEFAULT
+              }
+            />
+          </Button>
         </div>
       ),
       enableSorting: true,
@@ -693,7 +586,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         );
       },
       header: ({ column }) => (
-        <div className="w-full justify-end px-0 text-right">
+        <div className="flex w-full justify-end gap-2 px-0 text-right">
           <Tooltip
             tooltipContent={
               <div className="text-center">
@@ -701,26 +594,26 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
               </div>
             }
           >
-            <Button
-              variant="ghost"
-              className="text-secondary group w-full justify-end px-0 text-right"
-              onClick={() => column.toggleSorting()}
-            >
-              <TitleUnderlined title="Active Supply" />
-              <ArrowUpDown
-                props={{
-                  className: "size-4 shrink-0",
-                }}
-                activeState={
-                  column.getIsSorted() === "asc"
-                    ? ArrowState.UP
-                    : column.getIsSorted() === "desc"
-                      ? ArrowState.DOWN
-                      : ArrowState.DEFAULT
-                }
-              />
-            </Button>
+            <TitleUnderlined title="Active Supply" />
           </Tooltip>
+          <Button
+            variant="ghost"
+            className="text-secondary hover:bg-surface-hover group justify-end px-1 py-1 text-right"
+            onClick={() => column.toggleSorting()}
+          >
+            <ArrowUpDown
+              props={{
+                className: "size-4 shrink-0",
+              }}
+              activeState={
+                column.getIsSorted() === "asc"
+                  ? ArrowState.UP
+                  : column.getIsSorted() === "desc"
+                    ? ArrowState.DOWN
+                    : ArrowState.DEFAULT
+              }
+            />
+          </Button>
         </div>
       ),
       enableSorting: true,
@@ -743,7 +636,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         return <QuorumGapCell daoId={daoId} rowIndex={rowIndex} />;
       },
       header: ({ column }) => (
-        <div className="w-full justify-end px-0 text-right">
+        <div className="flex w-full justify-end gap-2 px-0 text-right">
           <Tooltip
             tooltipContent={
               <div className="text-center">
@@ -754,27 +647,26 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
               </div>
             }
           >
-            <Button
-              variant="ghost"
-              className="text-secondary group w-full justify-end px-0 text-right"
-              onClick={() => column.toggleSorting()}
-            >
-              <TitleUnderlined title="Quorum Gap" />
-
-              <ArrowUpDown
-                props={{
-                  className: "size-4 shrink-0",
-                }}
-                activeState={
-                  column.getIsSorted() === "asc"
-                    ? ArrowState.UP
-                    : column.getIsSorted() === "desc"
-                      ? ArrowState.DOWN
-                      : ArrowState.DEFAULT
-                }
-              />
-            </Button>
+            <TitleUnderlined title="Quorum Gap" />
           </Tooltip>
+          <Button
+            variant="ghost"
+            className="text-secondary hover:bg-surface-hover group justify-end px-1 py-1 text-right"
+            onClick={() => column.toggleSorting()}
+          >
+            <ArrowUpDown
+              props={{
+                className: "size-4 shrink-0",
+              }}
+              activeState={
+                column.getIsSorted() === "asc"
+                  ? ArrowState.UP
+                  : column.getIsSorted() === "desc"
+                    ? ArrowState.DOWN
+                    : ArrowState.DEFAULT
+              }
+            />
+          </Button>
         </div>
       ),
       enableSorting: true,
