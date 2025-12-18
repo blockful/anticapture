@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueries } from "@tanstack/react-query";
 import axios from "axios";
 import { Address } from "viem";
 
@@ -103,59 +103,34 @@ export const fetchEnsData = async ({
  * @returns Object containing a map of addresses to ENS data, error, and loading state
  */
 export const useMultipleEnsData = (addresses: Address[]) => {
-  // Deduplicate and sort addresses for stable query key
-  const uniqueAddresses = Array.from(new Set(addresses)).sort();
+  // Deduplicate addresses to avoid unnecessary queries
+  const uniqueAddresses = Array.from(new Set(addresses));
 
-  const { data, error, isLoading } = useQuery<Record<Address, EnsData>>({
-    queryKey: ["multipleEnsData", uniqueAddresses.join(",")],
-    queryFn: () => fetchMultipleEnsData(uniqueAddresses),
-    enabled: uniqueAddresses.length > 0,
-    refetchOnWindowFocus: false,
-    retry: false,
-    staleTime: 1000 * 60 * 60 * 24, // Consider data fresh for 24 hours
-    gcTime: 1000 * 60 * 60 * 24, // Keep in cache for 24 hours
+  const queries = useQueries({
+    queries: uniqueAddresses.map((address) => ({
+      queryKey: ["addressEns", address],
+      queryFn: () => fetchEnsData({ address }),
+      refetchOnWindowFocus: false,
+      retry: false,
+      staleTime: 1000 * 60 * 60 * 24, // Consider data fresh for 24 hours
+      gcTime: 1000 * 60 * 60 * 24, // Keep in cache for 24 hours
+    })),
   });
+
+  // Transform the array of query results into Record<Address, EnsData>
+  const data: Record<Address, EnsData> = {};
+  queries.forEach((query, index) => {
+    if (query.data) {
+      data[uniqueAddresses[index]] = query.data;
+    }
+  });
+
+  const isLoading = queries.some((query) => query.isLoading);
+  const error = queries.find((query) => query.error)?.error;
+
   return {
     data,
     error,
     isLoading,
   };
-};
-
-/**
- * Fetches ENS data for multiple addresses in parallel
- * @param addresses - Array of Ethereum addresses (will be deduplicated)
- * @returns Promise resolving to a map of addresses to ENS data
- */
-export const fetchMultipleEnsData = async (
-  addresses: Address[],
-): Promise<Record<Address, EnsData>> => {
-  // Deduplicate addresses to avoid unnecessary API calls
-  const uniqueAddresses = Array.from(new Set(addresses));
-
-  if (uniqueAddresses.length === 0) {
-    return {};
-  }
-
-  const promises = uniqueAddresses.map(async (address) => {
-    try {
-      const data = await fetchEnsData({ address });
-      return { address, data };
-    } catch (error) {
-      // Log error for debugging but don't throw to allow partial results
-      console.warn(`Failed to fetch ENS data for ${address}:`, error);
-      return { address, data: null };
-    }
-  });
-
-  const results = await Promise.all(promises);
-
-  const ensDataMap: Record<Address, EnsData> = {};
-  results.forEach(({ address, data }) => {
-    if (data) {
-      ensDataMap[address] = data;
-    }
-  });
-
-  return ensDataMap;
 };
