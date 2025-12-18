@@ -7,7 +7,6 @@ import { MetricTypesEnum } from "@/lib/constants";
 
 export const updateCirculatingSupply = async (
   context: Context,
-  metricType: MetricTypesEnum,
   daoId: string,
   tokenAddress: Address,
   timestamp: bigint,
@@ -24,7 +23,7 @@ export const updateCirculatingSupply = async (
 
   await storeDailyBucket(
     context,
-    metricType,
+    MetricTypesEnum.CIRCULATING_SUPPLY,
     currentCirculatingSupply,
     newCirculatingSupply,
     daoId,
