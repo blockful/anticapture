@@ -1,6 +1,7 @@
 "use client";
 
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useState, useMemo } from "react";
+import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
 import { Filter, Loader2 } from "lucide-react";
 import { isAddress } from "viem";
 import { getEnsAddress } from "viem/actions";
@@ -42,9 +43,19 @@ export function AddressFilter({
   const [isResolving, setIsResolving] = useState<boolean>(false);
   const [ensAddressError, setEnsAddressError] = useState<string | null>(null);
 
-  const isValidAddress =
-    tempAddress.trim() &&
-    (isAddress(tempAddress.trim()) || isEnsAddress(tempAddress.trim()));
+  // Debounce the address value for validation display to avoid showing errors while typing
+  const debouncedAddress = useDebouncedValue(tempAddress, 500);
+
+  const isValidAddress = useMemo(() => {
+    const trimmed = tempAddress.trim();
+    return trimmed && (isAddress(trimmed) || isEnsAddress(trimmed));
+  }, [tempAddress]);
+
+  // Use debounced value for showing validation errors
+  const shouldShowValidationError = useMemo(() => {
+    const trimmed = debouncedAddress.trim();
+    return trimmed && !isAddress(trimmed) && !isEnsAddress(trimmed);
+  }, [debouncedAddress]);
 
   const handleApply = async () => {
     const trimmedAddress = tempAddress.trim();
@@ -150,7 +161,7 @@ export function AddressFilter({
                 setEnsAddressError(null);
               }}
             />
-            {tempAddress.trim() && !isValidAddress && (
+            {shouldShowValidationError && (
               <p className="text-error mt-2 text-xs">
                 Please enter a valid Ethereum address or ENS name
               </p>
