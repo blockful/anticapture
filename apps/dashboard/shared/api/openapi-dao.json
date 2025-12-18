@@ -1,0 +1,62 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "Swagger Anticapture Server",
+    "description": "Anticapture is an application with the purpose of analyze and warn the main governance risks of each DAO",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/dao": {
+      "get": {
+        "operationId": "dao",
+        "summary": "Get DAO governance parameters",
+        "description": "Returns current governance parameters for this DAO",
+        "tags": ["governance"],
+        "responses": {
+          "200": {
+            "description": "DAO governance parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "chainId": {
+                      "type": "number"
+                    },
+                    "quorum": {
+                      "type": "string"
+                    },
+                    "proposalThreshold": {
+                      "type": "string"
+                    },
+                    "votingDelay": {
+                      "type": "string"
+                    },
+                    "votingPeriod": {
+                      "type": "string"
+                    },
+                    "timelockDelay": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "chainId",
+                    "quorum",
+                    "proposalThreshold",
+                    "votingDelay",
+                    "votingPeriod",
+                    "timelockDelay"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

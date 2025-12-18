@@ -1,7 +1,8 @@
 import { HeaderSidebar } from "@/widgets";
-import { DonationSection } from "@/features/donation";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
 import { Footer } from "@/shared/components/design-system/footer/Footer";
+import { DaoGovernanceParams } from "@/features/dao-overview/components";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 export default function DonatePage() {
   return (
@@ -13,7 +14,7 @@ export default function DonatePage() {
         </div>
         <div className="flex min-h-screen w-full flex-col items-center">
           <div className="w-full flex-1">
-            <DonationSection />
+            <DaoGovernanceParams daoId={DaoIdEnum.ENS} />
           </div>
           <Footer />
         </div>
