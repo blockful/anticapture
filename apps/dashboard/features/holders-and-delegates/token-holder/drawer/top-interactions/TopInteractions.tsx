@@ -1,13 +1,13 @@
 "use client";
 
-import { ThePieChart } from "@/features/holders-and-delegates/delegate/drawer/voting-power/ThePieChart";
-import { VotingPowerTable } from "@/features/holders-and-delegates/delegate/drawer/voting-power/VotingPowerTable";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { formatNumberUserReadable } from "@/shared/utils";
+import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
-import { useVotingPowerData } from "@/features/holders-and-delegates/delegate/drawer/voting-power/hooks/useVotingPowerData";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
-import { Inbox } from "lucide-react";
+import { ArrowDown, ArrowUp, Inbox } from "lucide-react";
+import { useAccountInteractionsData } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/hooks/useAccountInteractionsData";
+import { TopInteractionsChart } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/TopInteractionsChart";
+import { TopInteractionsTable } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/TopInteractionsTable";
 
 const ChartLegend = ({
   items,
@@ -62,7 +62,7 @@ const ChartLegend = ({
   );
 };
 
-export const VotingPower = ({
+export const TopInteractions = ({
   address,
   daoId,
 }: {
@@ -70,34 +70,37 @@ export const VotingPower = ({
   daoId: DaoIdEnum;
 }) => {
   const {
-    topFiveDelegators,
-    currentVotingPower,
+    topFive,
+    totalCount,
+    netBalanceChange,
     legendItems,
     pieData,
     chartConfig,
     loading: loadingVotingPowerData,
-  } = useVotingPowerData(daoId, address);
+  } = useAccountInteractionsData({ daoId, address });
 
-  if (
-    !topFiveDelegators ||
-    (topFiveDelegators.length === 0 && !loadingVotingPowerData)
-  ) {
+  if (!topFive || (topFive.length === 0 && !loadingVotingPowerData)) {
     return (
-      <BlankSlate
-        variant="default"
-        icon={Inbox}
-        description="No delegators found"
-      />
+      <div className="flex w-full flex-col gap-4 p-4">
+        <BlankSlate
+          variant="default"
+          icon={Inbox}
+          description="No interactions found in 90 days."
+        />
+      </div>
     );
   }
+
+  const variant = netBalanceChange >= 0 ? "positive" : "negative";
+
   return (
     <div className="flex w-full flex-col gap-4 p-4">
       <div className="border-light-dark text-primary flex h-fit w-full flex-col gap-4 overflow-y-auto border p-4 sm:flex-row">
         <div className="flex h-full w-full flex-col">
           <div className="flex w-full flex-col gap-4 md:flex-row">
             <div>
-              <ThePieChart
-                currentVotingPower={currentVotingPower}
+              <TopInteractionsChart
+                currentValue={totalCount || 0}
                 pieData={pieData}
                 chartConfig={chartConfig}
               />
@@ -106,40 +109,61 @@ export const VotingPower = ({
             <div className="flex w-full flex-col gap-6">
               <div className="flex flex-col gap-1">
                 <p className="text-secondary text-alternative-xs font-mono font-medium uppercase">
-                  Current Voting Power
+                  Net Tokens In/Out (90D)
                 </p>
                 <div className="text-md font-normal">
-                  {!currentVotingPower ? (
+                  {!netBalanceChange ? (
                     <SkeletonRow
                       parentClassName="flex animate-pulse"
                       className="h-6 w-24"
                     />
                   ) : (
-                    formatNumberUserReadable(currentVotingPower)
+                    <p
+                      className={cn(
+                        "flex items-center text-sm font-normal",
+                        variant === "positive" ? "text-success" : "text-error",
+                      )}
+                    >
+                      {netBalanceChange > 0 ? (
+                        <ArrowUp
+                          className={cn(
+                            "size-4",
+                            variant === "positive" && "text-success",
+                          )}
+                        />
+                      ) : (
+                        <ArrowDown
+                          className={cn(
+                            "size-4",
+                            variant === "negative" && "text-error",
+                          )}
+                        />
+                      )}
+                      {formatNumberUserReadable(Math.abs(netBalanceChange))}
+                    </p>
                   )}
                 </div>
               </div>
 
               <div className="hidden h-px w-full bg-[#27272A] sm:flex" />
 
-              {/* Delegators */}
               <div className="hidden flex-col gap-2 sm:flex">
                 <p className="text-secondary text-alternative-xs font-mono font-medium uppercase">
-                  Delegators
+                  Top Interaction (by aggregated value)
                 </p>
 
                 <div className="scrollbar-none flex flex-col gap-4 overflow-y-auto">
-                  {!legendItems || !topFiveDelegators ? (
+                  {!legendItems || !topFive ? (
                     <ChartLegend items={[]} loading={true} />
-                  ) : !topFiveDelegators ? (
+                  ) : !topFive ? (
                     <div className="text-secondary text-sm">
-                      Loading delegators...
+                      Loading Interactions...
                     </div>
-                  ) : topFiveDelegators && topFiveDelegators.length > 0 ? (
+                  ) : topFive && topFive.length > 0 ? (
                     <ChartLegend items={legendItems} />
                   ) : (
                     <div className="text-secondary text-sm">
-                      No delegators found
+                      No interactions found
                     </div>
                   )}
                 </div>
@@ -149,7 +173,7 @@ export const VotingPower = ({
         </div>
       </div>
       <div className="flex w-full flex-col gap-4">
-        <VotingPowerTable address={address} daoId={daoId} />
+        <TopInteractionsTable address={address} daoId={daoId} />
       </div>
     </div>
   );

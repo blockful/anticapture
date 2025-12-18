@@ -79,17 +79,17 @@ export const VotingPowerMapper = (
       logIndex: p.logIndex,
       delegation: p.delegations
         ? {
-          from: p.delegations.delegatorAccountId,
-          value: p.delegations.delegatedValue.toString(),
-          to: p.delegations.delegateAccountId,
-        }
+            from: p.delegations.delegatorAccountId,
+            value: p.delegations.delegatedValue.toString(),
+            to: p.delegations.delegateAccountId,
+          }
         : null,
       transfer: p.transfers
         ? {
-          value: p.transfers.amount.toString(),
-          from: p.transfers.fromAccountId,
-          to: p.transfers.toAccountId,
-        }
+            value: p.transfers.amount.toString(),
+            from: p.transfers.fromAccountId,
+            to: p.transfers.toAccountId,
+          }
         : null,
     })),
     totalCount,

@@ -168,3 +168,21 @@ export const updateProposalStatus = async (
     status,
   });
 };
+
+/**
+ * ### Updates:
+ * - `proposalsOnchain`: Sets the new deadline (endBlock) and endTimestamp
+ */
+export const proposalExtended = async (
+  context: Context,
+  proposalId: string,
+  blockTime: number,
+  extendedDeadline: bigint,
+) => {
+  await context.db.update(proposalsOnchain, { id: proposalId }).set((row) => ({
+    endBlock: Number(extendedDeadline),
+    endTimestamp:
+      row.endTimestamp +
+      BigInt((Number(extendedDeadline) - row.endBlock) * blockTime),
+  }));
+};
