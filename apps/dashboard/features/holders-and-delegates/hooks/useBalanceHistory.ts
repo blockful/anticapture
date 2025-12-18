@@ -83,7 +83,6 @@ export function useBalanceHistory({
     const and: { fromAccountId?: string; toAccountId?: string }[] = [];
     let or: { fromAccountId?: string; toAccountId?: string }[] | undefined;
 
-    // filtros numéricos
     const where: {
       amount_gte?: InputMaybe<string>;
       amount_lte?: InputMaybe<string>;
