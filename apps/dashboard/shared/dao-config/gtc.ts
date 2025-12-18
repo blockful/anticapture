@@ -42,7 +42,6 @@ export const GTC: DaoConfiguration = {
   },
   // attackProfitability: {
   //   riskLevel: RiskLevel.HIGH,
-  //   supportsLiquidTreasuryCall: false,
   //   attackCostBarChart: {
   //     OptimismTimelock: "",
   //     OptimismTokenDistributor: "",
