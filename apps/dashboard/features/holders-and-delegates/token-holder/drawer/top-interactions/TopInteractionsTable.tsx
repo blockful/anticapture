@@ -26,7 +26,7 @@ import {
   useQueryState,
   useQueryStates,
 } from "nuqs";
-import { TooltipPlain } from "@/shared/components/tooltips/TooltipPlain";
+import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 
 export const TopInteractionsTable = ({
   address,
@@ -162,15 +162,11 @@ export const TopInteractionsTable = ({
       header: () => {
         return (
           <div className="flex items-center justify-end gap-1.5">
-            <TooltipPlain
-              triggerComponent={
-                <h4 className="text-table-header decoration-secondary/20 group-hover:decoration-primary hover:decoration-primary whitespace-nowrap text-right underline decoration-dashed underline-offset-[6px] transition-colors duration-300">
-                  Volume ({daoId})
-                </h4>
-              }
-              contentComponent="Total amount transferred between the two addresses, counting both incoming and outgoing transactions."
-              className="font-normal"
-            />
+            <Tooltip tooltipContent="Total amount transferred between the two addresses, counting both incoming and outgoing transactions.">
+              <h4 className="text-table-header decoration-secondary/20 group-hover:decoration-primary hover:decoration-primary whitespace-nowrap text-right underline decoration-dashed underline-offset-[6px] transition-colors duration-300">
+                Volume ({daoId})
+              </h4>
+            </Tooltip>
             <AmountFilter
               filterId="top-interactions-volume-filter"
               onApply={(filterState: AmountFilterState) => {
@@ -236,15 +232,11 @@ export const TopInteractionsTable = ({
       header: () => {
         return (
           <div className="flex w-full items-center justify-end gap-1.5 whitespace-nowrap">
-            <TooltipPlain
-              triggerComponent={
-                <h4 className="text-table-header decoration-secondary/20 group-hover:decoration-primary hover:decoration-primary whitespace-nowrap text-right underline decoration-dashed underline-offset-[6px] transition-colors duration-300">
-                  Balance Change ({daoId})
-                </h4>
-              }
-              contentComponent="Net change in the holder’s balance from these interactions: incoming minus outgoing."
-              className="font-normal"
-            />
+            <Tooltip tooltipContent="Net change in the holder’s balance from these interactions: incoming minus outgoing.">
+              <h4 className="text-table-header decoration-secondary/20 group-hover:decoration-primary hover:decoration-primary whitespace-nowrap text-right underline decoration-dashed underline-offset-[6px] transition-colors duration-300">
+                Balance Change ({daoId})
+              </h4>
+            </Tooltip>
           </div>
         );
       },
@@ -316,15 +308,11 @@ export const TopInteractionsTable = ({
 
         return (
           <div className="flex w-full items-center justify-end gap-1.5 whitespace-nowrap">
-            <TooltipPlain
-              triggerComponent={
-                <h4 className="text-table-header decoration-secondary/20 group-hover:decoration-primary hover:decoration-primary whitespace-nowrap text-right underline decoration-dashed underline-offset-[6px] transition-colors duration-300">
-                  Total Interactions
-                </h4>
-              }
-              contentComponent="Addresses ranked by how many transactions they had with the holder (interaction count)."
-              className="font-normal"
-            />
+            <Tooltip tooltipContent="Addresses ranked by how many transactions they had with the holder (interaction count).">
+              <h4 className="text-table-header decoration-secondary/20 group-hover:decoration-primary hover:decoration-primary whitespace-nowrap text-right underline decoration-dashed underline-offset-[6px] transition-colors duration-300">
+                Total Interactions
+              </h4>
+            </Tooltip>
             <Button
               variant="ghost"
               size="sm"
