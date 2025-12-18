@@ -545,13 +545,14 @@ export type QueryVotingPowerVariationsArgs = {
 
 export type QueryVotingPowersArgs = {
   account: Scalars['String']['input'];
+  fromAddresses?: InputMaybe<Scalars['JSON']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   maxDelta?: InputMaybe<Scalars['String']['input']>;
   minDelta?: InputMaybe<Scalars['String']['input']>;
   orderBy?: InputMaybe<QueryInput_VotingPowers_OrderBy>;
   orderDirection?: InputMaybe<QueryInput_VotingPowers_OrderDirection>;
-  relatedAddresses?: InputMaybe<Scalars['JSON']['input']>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  toAddresses?: InputMaybe<Scalars['JSON']['input']>;
 };
 
 export type Account = {
@@ -2828,13 +2829,14 @@ export type TransactionsQuery = { __typename?: 'Query', transactions?: { __typen
 
 export type VotingPowersQueryVariables = Exact<{
   account: Scalars['String']['input'];
-  relatedAddresses?: InputMaybe<Scalars['JSON']['input']>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   orderDirection?: InputMaybe<QueryInput_VotingPowers_OrderDirection>;
   orderBy?: InputMaybe<QueryInput_VotingPowers_OrderBy>;
   maxDelta?: InputMaybe<Scalars['String']['input']>;
   minDelta?: InputMaybe<Scalars['String']['input']>;
+  fromAddresses?: InputMaybe<Scalars['JSON']['input']>;
+  toAddresses?: InputMaybe<Scalars['JSON']['input']>;
 }>;
 
 

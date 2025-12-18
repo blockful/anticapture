@@ -11,8 +11,16 @@ export type DBVotingPowerWithRelations = DBVotingPower & {
 };
 
 export const VotingPowerRequestSchema = z.object({
-  account: z.string().refine((addr) => isAddress(addr)),
-  relatedAddresses: z
+  fromAddresses: z
+    .union([
+      z
+        .string()
+        .refine(isAddress, "Invalid address")
+        .transform((addr) => [addr]),
+      z.array(z.string().refine(isAddress, "Invalid addresses")),
+    ])
+    .optional(),
+  toAddresses: z
     .union([
       z
         .string()

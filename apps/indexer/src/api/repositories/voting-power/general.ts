@@ -40,9 +40,10 @@ export class VotingPowerRepository {
     accountId: Address,
     minDelta?: string,
     maxDelta?: string,
-    relatedAddresses?: Address[],
+    fromAddresses?: Address[],
+    toAddresses?: Address[],
   ): Promise<number> {
-    if (!relatedAddresses) {
+    if (!fromAddresses && !toAddresses) {
       return await db.$count(
         votingPowerHistory,
         and(
@@ -92,12 +93,18 @@ export class VotingPowerRepository {
           maxDelta
             ? lte(votingPowerHistory.deltaMod, BigInt(maxDelta))
             : undefined,
-          or(
-            inArray(delegation.delegateAccountId, relatedAddresses),
-            inArray(delegation.delegatorAccountId, relatedAddresses),
-            inArray(transfer.toAccountId, relatedAddresses),
-            inArray(transfer.fromAccountId, relatedAddresses),
-          ),
+          toAddresses
+            ? or(
+                inArray(delegation.delegateAccountId, toAddresses),
+                inArray(transfer.toAccountId, toAddresses),
+              )
+            : undefined,
+          fromAddresses
+            ? or(
+                inArray(delegation.delegatorAccountId, fromAddresses),
+                inArray(transfer.fromAccountId, fromAddresses),
+              )
+            : undefined,
         ),
       );
 
@@ -112,7 +119,8 @@ export class VotingPowerRepository {
     orderBy: "timestamp" | "delta",
     minDelta?: string,
     maxDelta?: string,
-    relatedAddresses?: Address[],
+    fromAddresses?: Address[],
+    toAddresses?: Address[],
   ): Promise<DBVotingPowerWithRelations[]> {
     const result = await db
       .select()
@@ -147,13 +155,18 @@ export class VotingPowerRepository {
           maxDelta
             ? lte(votingPowerHistory.deltaMod, BigInt(maxDelta))
             : undefined,
-          relatedAddresses &&
-            or(
-              inArray(delegation.delegateAccountId, relatedAddresses),
-              inArray(delegation.delegatorAccountId, relatedAddresses),
-              inArray(transfer.toAccountId, relatedAddresses),
-              inArray(transfer.fromAccountId, relatedAddresses),
-            ),
+          toAddresses
+            ? or(
+                inArray(delegation.delegateAccountId, toAddresses),
+                inArray(transfer.toAccountId, toAddresses),
+              )
+            : undefined,
+          fromAddresses
+            ? or(
+                inArray(delegation.delegatorAccountId, fromAddresses),
+                inArray(transfer.fromAccountId, fromAddresses),
+              )
+            : undefined,
         ),
       )
       .orderBy(
