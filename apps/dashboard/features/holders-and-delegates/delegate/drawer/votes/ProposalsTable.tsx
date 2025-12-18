@@ -412,7 +412,6 @@ export const ProposalsTable = ({
         wrapperClassName="h-[450px]"
         className="h-[400px]"
         error={error}
-        emptyTitle="No voted proposals to show"
       />
     </div>
   );

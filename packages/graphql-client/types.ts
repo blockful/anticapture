@@ -2457,15 +2457,12 @@ export type VotingPowers_200_Response = {
 };
 
 export type BalanceHistoryQueryVariables = Exact<{
-  from?: InputMaybe<Scalars['String']['input']>;
-  to?: InputMaybe<Scalars['String']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
-  minDelta?: InputMaybe<Scalars['BigInt']['input']>;
-  maxDelta?: InputMaybe<Scalars['BigInt']['input']>;
+  where?: InputMaybe<TransferFilter>;
 }>;
 
 

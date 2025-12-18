@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { Button, SkeletonRow, TooltipInfo } from "@/shared/components";
+import { Button, SkeletonRow } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { ColumnDef } from "@tanstack/react-table";
 import { Address, parseUnits } from "viem";
@@ -26,6 +26,7 @@ import {
   useQueryState,
   useQueryStates,
 } from "nuqs";
+import { TooltipPlain } from "@/shared/components/tooltips/TooltipPlain";
 
 export const TopInteractionsTable = ({
   address,
@@ -161,8 +162,15 @@ export const TopInteractionsTable = ({
       header: () => {
         return (
           <div className="flex items-center justify-end gap-1.5">
-            <h4 className="text-table-header">Volume ({daoId})</h4>
-            <TooltipInfo text="Total amount transferred between the two addresses, counting both incoming and outgoing transactions." />
+            <TooltipPlain
+              triggerComponent={
+                <h4 className="text-table-header decoration-secondary/20 group-hover:decoration-primary hover:decoration-primary whitespace-nowrap text-right underline decoration-dashed underline-offset-[6px] transition-colors duration-300">
+                  Volume ({daoId})
+                </h4>
+              }
+              contentComponent="Total amount transferred between the two addresses, counting both incoming and outgoing transactions."
+              className="font-normal"
+            />
             <AmountFilter
               filterId="top-interactions-volume-filter"
               onApply={(filterState: AmountFilterState) => {
@@ -227,9 +235,16 @@ export const TopInteractionsTable = ({
       accessorKey: "balanceChange",
       header: () => {
         return (
-          <div className="text-table-header flex w-full items-center justify-end gap-1.5 whitespace-nowrap">
-            Balance Change ({daoId})
-            <TooltipInfo text="Net change in the holder’s balance from these interactions: incoming minus outgoing" />
+          <div className="flex w-full items-center justify-end gap-1.5 whitespace-nowrap">
+            <TooltipPlain
+              triggerComponent={
+                <h4 className="text-table-header decoration-secondary/20 group-hover:decoration-primary hover:decoration-primary whitespace-nowrap text-right underline decoration-dashed underline-offset-[6px] transition-colors duration-300">
+                  Balance Change ({daoId})
+                </h4>
+              }
+              contentComponent="Net change in the holder’s balance from these interactions: incoming minus outgoing."
+              className="font-normal"
+            />
           </div>
         );
       },
@@ -300,9 +315,16 @@ export const TopInteractionsTable = ({
         };
 
         return (
-          <div className="text-table-header flex w-full items-center justify-end gap-1.5 whitespace-nowrap">
-            Total Interactions
-            <TooltipInfo text="Addresses ranked by how many transactions they had with the holder (interaction count)" />
+          <div className="flex w-full items-center justify-end gap-1.5 whitespace-nowrap">
+            <TooltipPlain
+              triggerComponent={
+                <h4 className="text-table-header decoration-secondary/20 group-hover:decoration-primary hover:decoration-primary whitespace-nowrap text-right underline decoration-dashed underline-offset-[6px] transition-colors duration-300">
+                  Total Interactions
+                </h4>
+              }
+              contentComponent="Addresses ranked by how many transactions they had with the holder (interaction count)."
+              className="font-normal"
+            />
             <Button
               variant="ghost"
               size="sm"
@@ -357,7 +379,6 @@ export const TopInteractionsTable = ({
         withDownloadCSV={true}
         wrapperClassName="h-[450px]"
         className="h-[400px]"
-        emptyTitle="No interactions found for this address"
         error={error}
       />
     </div>

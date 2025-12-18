@@ -419,7 +419,6 @@ export const Delegates = ({
           wrapperClassName="h-[450px]"
           className="h-[400px]"
           error={error}
-          emptyTitle="No delegates found"
         />
       </div>
       <HoldersAndDelegatesDrawer

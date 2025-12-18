@@ -220,7 +220,6 @@ export const VotingPowerTable = ({
         withDownloadCSV={true}
         wrapperClassName="h-[450px]"
         className="h-[400px]"
-        emptyTitle="No voting power data found for this address"
         error={error}
       />
     </div>

@@ -494,7 +494,6 @@ export const DelegateDelegationHistoryTable = ({
         className="h-[400px]"
         withDownloadCSV={true}
         error={error}
-        emptyTitle="No delegation history found for this address"
       />
     </div>
   );

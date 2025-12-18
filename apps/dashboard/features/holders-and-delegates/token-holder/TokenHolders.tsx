@@ -236,7 +236,7 @@ export const TokenHolders = ({
         );
       },
       meta: {
-        columnClassName: "w-72",
+        columnClassName: "w-20",
       },
     },
     {
@@ -319,6 +319,9 @@ export const TokenHolders = ({
             )}
           </div>
         );
+      },
+      meta: {
+        columnClassName: "w-80",
       },
     },
   ];

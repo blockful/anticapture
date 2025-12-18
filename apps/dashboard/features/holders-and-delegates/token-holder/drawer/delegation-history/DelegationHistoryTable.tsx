@@ -348,7 +348,6 @@ export const DelegationHistoryTable = ({
           wrapperClassName="h-[450px]"
           className="h-[400px]"
           error={error}
-          emptyTitle="No delegation history found for this address"
         />
       </div>
     </div>

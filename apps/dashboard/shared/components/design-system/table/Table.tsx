@@ -96,8 +96,8 @@ export const Table = <TData, TValue>({
   renderSubComponent,
   getSubRows,
   error,
-  emptyTitle = "No results available",
-  emptyDescription = "Try adjusting your filters or check back later.",
+  emptyTitle = "Nothing to show yet",
+  emptyDescription = "No relevant governance signals were detected for this selection.",
 }: DataTableProps<TData, TValue>) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -350,7 +350,7 @@ export const Table = <TData, TValue>({
           )}
         </TableBody>
       </TableContainer>
-      {withDownloadCSV && (
+      {withDownloadCSV && data.length > 0 && (
         <p className="text-secondary mt-2 flex font-mono text-[13px] tracking-wider">
           [DOWNLOAD AS{" "}
           <CSVLink

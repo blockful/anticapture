@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState, useEffect } from "react";
 import {
+  InputMaybe,
   useBalanceHistoryQuery,
   useBalanceHistoryTotalCountQuery,
 } from "@anticapture/graphql-client/hooks";
@@ -78,59 +79,69 @@ export function useBalanceHistory({
     customToFilter,
   ]);
 
-  const { fromFilter, toFilter } = useMemo(() => {
+  const filterIntent = useMemo(() => {
     if (customToFilter && customToFilter !== accountId) {
-      return {
-        fromFilter: accountId,
-        toFilter: customToFilter,
-      };
+      return { mode: "PAIR", from: accountId, to: customToFilter };
     }
 
     if (customFromFilter && customFromFilter !== accountId) {
-      return {
-        fromFilter: customFromFilter,
-        toFilter: accountId,
-      };
+      return { mode: "PAIR", from: customFromFilter, to: accountId };
     }
 
     if (transactionType === "buy") {
-      return {
-        fromFilter: undefined,
-        toFilter: accountId,
-      };
+      return { mode: "IN" };
     }
 
     if (transactionType === "sell") {
-      return {
-        fromFilter: accountId,
-        toFilter: undefined,
-      };
+      return { mode: "OUT" };
     }
 
-    return {
-      fromFilter: accountId,
-      toFilter: accountId,
+    return { mode: "ALL" };
+  }, [accountId, customFromFilter, customToFilter, transactionType]);
+
+  const queryWhere = useMemo(() => {
+    const where: {
+      amount_gte?: InputMaybe<string>;
+      amount_lte?: InputMaybe<string>;
+      AND?: { fromAccountId?: string; toAccountId?: string }[];
+      OR?: { fromAccountId?: string; toAccountId?: string }[];
+    } = {
+      amount_gte: filterVariables?.minDelta || undefined,
+      amount_lte: filterVariables?.maxDelta || undefined,
     };
-  }, [accountId, transactionType, customFromFilter, customToFilter]);
+
+    switch (filterIntent.mode) {
+      case "ALL":
+        where.OR = [{ fromAccountId: accountId }, { toAccountId: accountId }];
+        break;
+
+      case "IN":
+        where.AND = [{ toAccountId: accountId }];
+        break;
+
+      case "OUT":
+        where.AND = [{ fromAccountId: accountId }];
+        break;
+
+      case "PAIR":
+        where.AND = [
+          { fromAccountId: filterIntent.from },
+          { toAccountId: filterIntent.to },
+        ];
+        break;
+    }
+
+    return where;
+  }, [filterIntent, filterVariables, accountId]);
 
   const queryVariables = useMemo(
     () => ({
-      from: fromFilter,
-      to: toFilter,
       limit: itemsPerPage,
       orderBy,
       orderDirection,
-      minDelta: filterVariables?.minDelta ?? undefined,
-      maxDelta: filterVariables?.maxDelta ?? undefined,
+      where: queryWhere,
     }),
-    [
-      fromFilter,
-      toFilter,
-      itemsPerPage,
-      orderBy,
-      orderDirection,
-      filterVariables,
-    ],
+    [itemsPerPage, orderBy, orderDirection, queryWhere],
   );
 
   const queryOptions = {
