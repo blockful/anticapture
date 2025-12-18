@@ -73,7 +73,7 @@ export const EnsAvatar = ({
   // Only fetch ENS data if we have an address and either we need imageUrl or fetchEnsName is true
   const shouldFetchEns = address && !imageUrl;
   const { data: ensData, isLoading: ensLoading } = useEnsData(
-    shouldFetchEns ? address : ("" as Address),
+    shouldFetchEns ? address : null,
   );
 
   // Determine the final image URL to use
