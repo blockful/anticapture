@@ -79,60 +79,65 @@ export function useBalanceHistory({
     customToFilter,
   ]);
 
-  const filterIntent = useMemo(() => {
-    if (customToFilter && customToFilter !== accountId) {
-      return { mode: "PAIR", from: accountId, to: customToFilter };
-    }
-
-    if (customFromFilter && customFromFilter !== accountId) {
-      return { mode: "PAIR", from: customFromFilter, to: accountId };
-    }
-
-    if (transactionType === "buy") {
-      return { mode: "IN" };
-    }
-
-    if (transactionType === "sell") {
-      return { mode: "OUT" };
-    }
-
-    return { mode: "ALL" };
-  }, [accountId, customFromFilter, customToFilter, transactionType]);
-
   const queryWhere = useMemo(() => {
+    const and: { fromAccountId?: string; toAccountId?: string }[] = [];
+    let or: { fromAccountId?: string; toAccountId?: string }[] | undefined;
+
+    // filtros numéricos
     const where: {
       amount_gte?: InputMaybe<string>;
       amount_lte?: InputMaybe<string>;
-      AND?: { fromAccountId?: string; toAccountId?: string }[];
-      OR?: { fromAccountId?: string; toAccountId?: string }[];
+      AND?: typeof and;
+      OR?: typeof or;
     } = {
       amount_gte: filterVariables?.minDelta || undefined,
       amount_lte: filterVariables?.maxDelta || undefined,
     };
 
-    switch (filterIntent.mode) {
-      case "ALL":
-        where.OR = [{ fromAccountId: accountId }, { toAccountId: accountId }];
+    switch (transactionType) {
+      case "all":
+        or = [{ fromAccountId: accountId }, { toAccountId: accountId }];
         break;
 
-      case "IN":
-        where.AND = [{ toAccountId: accountId }];
+      case "buy":
+        and.push({ toAccountId: accountId });
         break;
 
-      case "OUT":
-        where.AND = [{ fromAccountId: accountId }];
-        break;
-
-      case "PAIR":
-        where.AND = [
-          { fromAccountId: filterIntent.from },
-          { toAccountId: filterIntent.to },
-        ];
+      case "sell":
+        and.push({ fromAccountId: accountId });
         break;
     }
 
+    if (customFromFilter) {
+      and.push(
+        customFromFilter === accountId
+          ? { fromAccountId: accountId }
+          : { fromAccountId: customFromFilter, toAccountId: accountId },
+      );
+    }
+
+    if (customToFilter) {
+      and.push(
+        customToFilter === accountId
+          ? { toAccountId: accountId }
+          : { fromAccountId: accountId, toAccountId: customToFilter },
+      );
+    }
+
+    if (and.length > 0) {
+      where.AND = and;
+    } else if (or) {
+      where.OR = or;
+    }
+
     return where;
-  }, [filterIntent, filterVariables, accountId]);
+  }, [
+    accountId,
+    transactionType,
+    customFromFilter,
+    customToFilter,
+    filterVariables,
+  ]);
 
   const queryVariables = useMemo(
     () => ({
