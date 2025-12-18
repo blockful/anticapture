@@ -22,6 +22,7 @@ import {
   accountBalanceVariations,
   dao,
   accountInteractions,
+  treasury,
 } from "@/api/controllers";
 import { docs } from "@/api/docs";
 import { env } from "@/env";
@@ -128,7 +129,10 @@ const accountBalanceService = new BalanceVariationsService(
   accountInteractionRepo,
 );
 
-createTreasuryProvider(app);
+const treasuryService = createTreasuryProvider(app);
+if (treasuryService) {
+  treasury(app, treasuryService);
+}
 
 const tokenPriceClient =
   env.DAO_ID === DaoIdEnum.NOUNS
