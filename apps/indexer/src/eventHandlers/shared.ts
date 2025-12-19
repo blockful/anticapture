@@ -3,6 +3,7 @@ import { Context } from "ponder:registry";
 import { account, daoMetricsDayBucket, transaction } from "ponder:schema";
 
 import { MetricTypesEnum } from "@/lib/constants";
+import { SECONDS_IN_DAY } from "@/lib/enums";
 import { delta, max, min } from "@/lib/utils";
 
 export const ensureAccountExists = async (
@@ -144,7 +145,40 @@ export const handleTransaction = async (
   );
 };
 
+// Time constants
+export const ONE_DAY_MS = SECONDS_IN_DAY * 1000;
+
+/**
+ * Truncate timestamp (seconds) to midnight UTC
+ */
 export const truncateTimestampTime = (timestampSeconds: bigint): bigint => {
-  const SECONDS_IN_DAY = BigInt(86400); // 24 * 60 * 60
-  return (timestampSeconds / SECONDS_IN_DAY) * SECONDS_IN_DAY;
+  const secondsInDay = BigInt(SECONDS_IN_DAY);
+  return (timestampSeconds / secondsInDay) * secondsInDay;
+};
+
+/**
+ * Truncate timestamp (milliseconds) to midnight UTC
+ */
+export const truncateTimestampTimeMs = (timestampMs: number): number => {
+  return Math.floor(timestampMs / ONE_DAY_MS) * ONE_DAY_MS;
+};
+
+/**
+ * Calculate cutoff timestamp for filtering data by days
+ */
+export const calculateCutoffTimestamp = (days: number): bigint => {
+  return BigInt(Math.floor(Date.now() / 1000) - days * SECONDS_IN_DAY);
+};
+
+/**
+ * Normalize all timestamps in a Map to midnight UTC
+ */
+export const normalizeMapTimestamps = <T>(
+  map: Map<number, T>,
+): Map<number, T> => {
+  const normalized = new Map<number, T>();
+  map.forEach((value, ts) => {
+    normalized.set(truncateTimestampTimeMs(ts), value);
+  });
+  return normalized;
 };
