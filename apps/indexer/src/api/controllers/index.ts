@@ -1,5 +1,4 @@
 export * from "./account-balance";
-export * from "./assets";
 export * from "./delegation-percentage";
 export * from "./governance-activity";
 export * from "./last-update";
