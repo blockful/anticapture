@@ -9,12 +9,10 @@ import { MetricTypesEnum } from "@/lib/constants";
 export class TreasuryRepository {
   /**
    * Fetch DAO token quantities from daoMetricsDayBucket table
-   * @param daoId - The ID of the DAO
    * @param cutoffTimestamp - The timestamp to filter the data
    * @returns Map of timestamp (ms) to token quantity (bigint)
    */
   async getTokenQuantities(
-    daoId: string,
     cutoffTimestamp: bigint,
   ): Promise<Map<number, bigint>> {
     const results = await db.query.daoMetricsDayBucket.findMany({
@@ -23,7 +21,6 @@ export class TreasuryRepository {
         close: true,
       },
       where: and(
-        eq(daoMetricsDayBucket.daoId, daoId),
         eq(daoMetricsDayBucket.metricType, MetricTypesEnum.TREASURY),
         gte(daoMetricsDayBucket.date, cutoffTimestamp),
       ),
