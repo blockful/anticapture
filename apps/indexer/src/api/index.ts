@@ -129,9 +129,9 @@ const accountBalanceService = new BalanceVariationsService(
   accountInteractionRepo,
 );
 
-const treasuryService = createTreasuryProvider(app);
+const treasuryService = createTreasuryProvider();
 if (treasuryService) {
-  treasury(app, treasuryService);
+  treasury(app, treasuryService, env.DAO_ID);
 }
 
 const tokenPriceClient =
