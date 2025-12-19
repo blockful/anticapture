@@ -290,9 +290,11 @@ export const Table = <TData, TValue>({
                 );
               })}
 
-              <TableCell aria-hidden="true">
-                <div ref={sentinelRef} />
-              </TableCell>
+              <tr className="h-0! pointer-events-none border-none">
+                <td aria-hidden="true">
+                  <div ref={sentinelRef} />
+                </td>
+              </tr>
 
               {isLoadingMore && (
                 <TableRow>
