@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { SkeletonRow, Button, IconButton } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
@@ -15,8 +15,22 @@ import {
   FilterOption,
 } from "@/shared/components/dropdowns/FilterDropdown";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
 import { Table } from "@/shared/components/design-system/table/Table";
+import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
+import { parseUnits } from "viem";
+import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
+import { AddressFilter } from "@/shared/components/design-system/table/filters";
+import { fetchEnsData } from "@/shared/hooks/useEnsData";
+import daoConfig from "@/shared/dao-config";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import { DaoIdEnum } from "@/shared/types/daos";
+import {
+  parseAsBoolean,
+  parseAsString,
+  parseAsStringEnum,
+  useQueryState,
+  useQueryStates,
+} from "nuqs";
 
 interface BalanceHistoryData {
   id: string;
@@ -29,64 +43,71 @@ interface BalanceHistoryData {
   toEns?: string;
 }
 
-interface BalanceHistoryProps {
+export const BalanceHistoryTable = ({
+  accountId,
+  daoId,
+}: {
   accountId: string;
   daoId: DaoIdEnum;
-}
+}) => {
+  const { decimals } = daoConfig[daoId];
 
-export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
-  const [sortBy, setSortBy] = useState<string>("date");
-  const [typeFilter, setTypeFilter] = useState<string>("all");
-  const [orderBy, setOrderBy] = useState<string>("timestamp");
-  const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("desc");
+  const [typeFilter, setTypeFilter] = useQueryState(
+    "type",
+    parseAsStringEnum(["all", "buy", "sell"]).withDefault("all"),
+  );
+  const [orderBy, setOrderBy] = useQueryState(
+    "orderBy",
+    parseAsStringEnum(["timestamp", "amount"]).withDefault("timestamp"),
+  );
+  const [orderDirection, setOrderDirection] = useQueryState(
+    "orderDirection",
+    parseAsStringEnum(["asc", "desc"]).withDefault("desc"),
+  );
+  const [filterVariables, setFilterVariables] = useQueryStates({
+    minDelta: parseAsString,
+    maxDelta: parseAsString,
+  });
+  const [customFromFilter, setCustomFromFilter] = useQueryState("from");
+  const [customToFilter, setCustomToFilter] = useQueryState("to");
+  const [isFilterActive, setIsFilterActive] = useQueryState(
+    "active",
+    parseAsBoolean.withDefault(false),
+  );
+
+  const sortOptions: SortOption[] = [
+    { value: "largest-first", label: "Largest first" },
+    { value: "smallest-first", label: "Smallest first" },
+  ];
 
   // Filter options for transaction type
   const typeFilterOptions: FilterOption[] = [
     { value: "all", label: "All Transactions" },
-    { value: "Buy", label: "Buy" },
-    { value: "Sell", label: "Sell" },
+    { value: "buy", label: "Buy" },
+    { value: "sell", label: "Sell" },
   ];
 
   // Convert UI filter to hook filter format
-  const transactionType =
-    typeFilter === "Buy" ? "buy" : typeFilter === "Sell" ? "sell" : "all";
+  const transactionType = typeFilter as "all" | "buy" | "sell";
 
   // Use the balance history hook
-  const { transfers, loading, paginationInfo, fetchNextPage, fetchingMore } =
-    useBalanceHistory(
-      accountId,
-      daoId,
-      orderBy,
-      orderDirection,
-      transactionType,
-    );
-
-  // Handle sorting - both date and amount now control the GraphQL query
-  const handleSort = (field: string) => {
-    if (field === "date") {
-      const newOrderBy = "timestamp";
-      // Toggle direction if we're already sorting by date, otherwise start with desc
-      const newOrderDirection =
-        sortBy === "date" &&
-        orderBy === "timestamp" &&
-        orderDirection === "desc"
-          ? "asc"
-          : "desc";
-      setOrderBy(newOrderBy);
-      setOrderDirection(newOrderDirection);
-      setSortBy("date");
-    } else if (field === "amount") {
-      const newOrderBy = "amount";
-      // Toggle direction if we're already sorting by amount, otherwise start with desc
-      const newOrderDirection =
-        sortBy === "amount" && orderBy === "amount" && orderDirection === "desc"
-          ? "asc"
-          : "desc";
-      setOrderBy(newOrderBy);
-      setOrderDirection(newOrderDirection);
-      setSortBy("amount");
-    }
-  };
+  const {
+    transfers,
+    loading,
+    paginationInfo,
+    fetchNextPage,
+    fetchingMore,
+    error,
+  } = useBalanceHistory({
+    accountId,
+    daoId,
+    orderBy,
+    orderDirection,
+    transactionType,
+    customFromFilter,
+    customToFilter,
+    filterVariables,
+  });
 
   const isInitialLoading = loading && (!transfers || transfers.length === 0);
 
@@ -158,26 +179,34 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
           </div>
         );
       },
-      header: () => (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-secondary w-full justify-start p-0"
-          onClick={() => handleSort("date")}
-        >
-          <span className="text-xs">Date</span>
-          <ArrowUpDown
-            props={{ className: "size-4" }}
-            activeState={
-              sortBy === "date"
-                ? orderDirection === "asc"
-                  ? ArrowState.UP
-                  : ArrowState.DOWN
-                : ArrowState.DEFAULT
-            }
-          />
-        </Button>
-      ),
+      header: ({ column }) => {
+        const handleSortToggle = () => {
+          const newSortOrder = orderDirection === "desc" ? "asc" : "desc";
+          setOrderBy("timestamp");
+          setOrderDirection(newSortOrder);
+          column.toggleSorting(newSortOrder === "desc");
+        };
+        return (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-secondary w-full justify-start p-0"
+            onClick={handleSortToggle}
+          >
+            <span className="text-xs">Date</span>
+            <ArrowUpDown
+              props={{ className: "size-4" }}
+              activeState={
+                orderBy === "timestamp"
+                  ? orderDirection === "asc"
+                    ? ArrowState.UP
+                    : ArrowState.DOWN
+                  : ArrowState.DEFAULT
+              }
+            />
+          </Button>
+        );
+      },
     },
     {
       accessorKey: "amount",
@@ -205,24 +234,43 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
         );
       },
       header: () => (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-secondary w-full justify-end p-0"
-          onClick={() => handleSort("amount")}
-        >
+        <div className="text-secondary flex w-full items-center justify-end gap-1.5 text-nowrap font-medium">
           <span className="text-xs">Amount ({daoId.toUpperCase()})</span>
-          <ArrowUpDown
-            props={{ className: " size-4" }}
-            activeState={
-              sortBy === "amount"
-                ? orderDirection === "asc"
-                  ? ArrowState.UP
-                  : ArrowState.DOWN
-                : ArrowState.DEFAULT
-            }
+          <AmountFilter
+            filterId="balance-history-amount-filter"
+            onApply={(filterState) => {
+              setOrderDirection(
+                filterState.sortOrder === "largest-first" ? "desc" : "asc",
+              );
+
+              setFilterVariables(() => ({
+                minDelta: filterState.minAmount
+                  ? parseUnits(filterState.minAmount, decimals).toString()
+                  : undefined,
+                maxDelta: filterState.maxAmount
+                  ? parseUnits(filterState.maxAmount, decimals).toString()
+                  : undefined,
+              }));
+
+              setIsFilterActive(
+                !!(filterVariables?.minDelta || filterVariables?.maxDelta),
+              );
+
+              setOrderBy("amount");
+            }}
+            onReset={() => {
+              setIsFilterActive(false);
+              // Reset to default sorting
+              setOrderBy("timestamp");
+              setFilterVariables(() => ({
+                minDelta: undefined,
+                maxDelta: undefined,
+              }));
+            }}
+            isActive={isFilterActive}
+            sortOptions={sortOptions}
           />
-        </Button>
+        </div>
       ),
     },
     {
@@ -246,7 +294,9 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
 
         return (
           <div className="flex items-center">
-            <BadgeStatus variant="dimmed">{type}</BadgeStatus>
+            <BadgeStatus variant={type === "Buy" ? "success" : "error"}>
+              {type}
+            </BadgeStatus>
           </div>
         );
       },
@@ -256,7 +306,13 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
           <FilterDropdown
             options={typeFilterOptions}
             selectedValue={typeFilter}
-            onValueChange={setTypeFilter}
+            onValueChange={(value) => {
+              setTypeFilter(value as "all" | "buy" | "sell");
+              if (value === "all") {
+                setCustomFromFilter(null);
+                setCustomToFilter(null);
+              }
+            }}
           />
         </div>
       ),
@@ -285,8 +341,8 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
         }
 
         return (
-          <div className="flex w-full items-center justify-between gap-3">
-            <div className="text-primary flex max-w-[160px] items-center gap-2 overflow-hidden">
+          <div className="group flex w-full items-center justify-between gap-3">
+            <div className="text-primary flex max-w-40 items-center gap-2 overflow-hidden">
               <EnsAvatar
                 address={fromAddress as `0x${string}`}
                 size="sm"
@@ -297,13 +353,45 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
                   fromAddress === accountId && "text-primary",
                 )}
               />
+              <div className="flex items-center opacity-0 transition-opacity group-hover:opacity-100">
+                <CopyAndPasteButton
+                  textToCopy={fromAddress as `0x${string}`}
+                  customTooltipText={{
+                    default: "Copy address",
+                    copied: "Address copied!",
+                  }}
+                  className="p-1"
+                  iconSize="md"
+                />
+              </div>
             </div>
 
             <ArrowRight className="text-secondary size-4" />
           </div>
         );
       },
-      header: () => <h4 className="text-table-header text-xs">From</h4>,
+      header: () => (
+        <div className="text-table-header flex w-full items-center justify-start gap-2">
+          <span>From</span>
+          <AddressFilter
+            onApply={async (addr) => {
+              setTypeFilter("all");
+
+              if ((addr ?? "").indexOf(".eth") > 0) {
+                const { address } = await fetchEnsData({
+                  address: addr as `${string}.eth`,
+                });
+                setCustomFromFilter(address || null);
+                setCustomToFilter(null);
+                return;
+              }
+              setCustomFromFilter(addr || null);
+              setCustomToFilter(null);
+            }}
+            currentFilter={customFromFilter || undefined}
+          />
+        </div>
+      ),
     },
     {
       accessorKey: "toAddress",
@@ -329,8 +417,8 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
         }
 
         return (
-          <div className="flex w-full items-center justify-between gap-3">
-            <div className="text-primary flex max-w-[160px] items-center gap-2 overflow-hidden">
+          <div className="group flex w-full items-center justify-between gap-3">
+            <div className="text-primary flex max-w-40 items-center gap-2 overflow-hidden">
               <EnsAvatar
                 address={toAddress as `0x${string}`}
                 size="sm"
@@ -341,6 +429,17 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
                   toAddress === accountId && "text-primary",
                 )}
               />
+              <div className="flex items-center opacity-0 transition-opacity group-hover:opacity-100">
+                <CopyAndPasteButton
+                  textToCopy={toAddress as `0x${string}`}
+                  customTooltipText={{
+                    default: "Copy address",
+                    copied: "Address copied!",
+                  }}
+                  className="p-1"
+                  iconSize="md"
+                />
+              </div>
             </div>
             <a
               href={`${daoConfigByDaoId[daoId].daoOverview.chain.blockExplorers?.default.url}/tx/${row.original.id}`}
@@ -352,45 +451,43 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
           </div>
         );
       },
-      header: () => <h4 className="text-table-header text-xs">To</h4>,
+      header: () => (
+        <div className="text-table-header flex w-full items-center justify-start gap-2">
+          <span>To</span>
+          <AddressFilter
+            onApply={async (addr) => {
+              setTypeFilter("all");
+
+              if ((addr ?? "").indexOf(".eth") > 0) {
+                const { address } = await fetchEnsData({
+                  address: addr as `${string}.eth`,
+                });
+                setCustomToFilter(address || null);
+                setCustomFromFilter(null);
+                return;
+              }
+              setCustomToFilter(addr || null);
+              setCustomFromFilter(null);
+            }}
+            currentFilter={customToFilter || undefined}
+          />
+        </div>
+      ),
     },
   ];
 
-  if (isInitialLoading) {
-    return (
-      <div className="flex w-full flex-col gap-2 p-4">
-        <Table
-          columns={balanceHistoryColumns}
-          data={Array.from({ length: 12 }, (_, i) => ({
-            id: `skeleton-${i}`,
-            date: "",
-            amount: "",
-            type: "Buy" as "Buy" | "Sell",
-            fromAddress: "",
-            toAddress: "",
-          }))}
-          withDownloadCSV={true}
-          size="sm"
-          wrapperClassName="h-[450px]"
-          className="h-[400px]"
-        />
-      </div>
-    );
-  }
-
   return (
-    <div className="flex w-full flex-col gap-2 p-4">
-      <Table
-        columns={balanceHistoryColumns}
-        data={transformedData}
-        size="sm"
-        hasMore={paginationInfo.hasNextPage}
-        isLoadingMore={fetchingMore}
-        onLoadMore={fetchNextPage}
-        wrapperClassName="h-[450px]"
-        className="h-[400px]"
-        withDownloadCSV={true}
-      />
-    </div>
+    <Table
+      columns={balanceHistoryColumns}
+      data={isInitialLoading ? Array(12).fill({}) : transformedData}
+      size="sm"
+      hasMore={paginationInfo.hasNextPage}
+      isLoadingMore={fetchingMore}
+      onLoadMore={fetchNextPage}
+      wrapperClassName="h-[450px]"
+      className="h-[400px]"
+      withDownloadCSV={true}
+      error={error}
+    />
   );
 };

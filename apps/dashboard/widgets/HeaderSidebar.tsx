@@ -55,7 +55,7 @@ export const HeaderSidebar = () => {
 
           <div className="flex w-full flex-col">
             <div className="border-middle-dark mx-1.5 flex flex-col gap-2 border-b border-t py-2">
-              <BottomNavigationButtons isCompact />
+              <BottomNavigationButtons />
             </div>
             <div className="mx-auto flex flex-col px-2 py-4">
               <ConnectWallet label="" className="px-2.5" />

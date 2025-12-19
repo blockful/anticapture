@@ -1,0 +1,19 @@
+<link rel="icon" type="image/png" href="/images/orbit-ui-logo.png" />
+<title>Orbit UI - Storybook</title>
+
+<style>
+  /* Override sidebar icon colors */
+  .sidebar-item[data-nodetype="component"] svg,
+  .sidebar-item[data-nodetype="story"] svg,
+  .sidebar-item[data-nodetype="group"] svg,
+  .sidebar-item svg,
+  [class*="TreeNode"] svg,
+  [class*="LeafNode"] svg {
+    color: #FAFAFA !important;
+  }
+
+  /* Specifically target the component/story icons */
+  svg[data-test-status] {
+    color: #FAFAFA !important;
+  }
+</style>
