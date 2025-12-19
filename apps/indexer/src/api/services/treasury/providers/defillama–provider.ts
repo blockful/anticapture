@@ -26,13 +26,13 @@ export class DefiLlamaProvider implements TreasuryProvider {
     this.providerDaoId = providerDaoId;
   }
 
-  async fetchTreasury(): Promise<TreasuryDataPoint[]> {
+  async fetchTreasury(cutoffTimestamp: bigint): Promise<TreasuryDataPoint[]> {
     try {
       const response = await this.client.get<RawDefiLlamaResponse>(
         `/${this.providerDaoId}`,
       );
 
-      return this.transformData(response.data);
+      return this.transformData(response.data, cutoffTimestamp);
     } catch (error) {
       console.error(
         `[DefiLlamaProvider] Failed to fetch treasury data for ${this.providerDaoId}:`,
@@ -45,7 +45,10 @@ export class DefiLlamaProvider implements TreasuryProvider {
   /**
    * Transforms DeFi Llama's raw response into our standardized format.
    */
-  private transformData(rawData: RawDefiLlamaResponse): TreasuryDataPoint[] {
+  private transformData(
+    rawData: RawDefiLlamaResponse,
+    cutoffTimestamp: bigint,
+  ): TreasuryDataPoint[] {
     const { chainTvls } = rawData;
 
     // Map: chainKey → Map(dayTimestamp → latest dataPoint)
@@ -106,8 +109,9 @@ export class DefiLlamaProvider implements TreasuryProvider {
       }
     }
 
-    // Convert map to array and format
+    // Convert map to array, filter by cutoff, and format
     return Array.from(aggregatedByDate.entries())
+      .filter(([dayTimestamp]) => dayTimestamp >= cutoffTimestamp)
       .map(([dayTimestamp, values]) => ({
         date: dayTimestamp,
         liquidTreasury: values.withoutOwnToken, // Liquid Treasury

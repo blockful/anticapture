@@ -28,7 +28,7 @@ export class DuneProvider implements TreasuryProvider {
     private readonly apiKey: string,
   ) {}
 
-  async fetchTreasury(): Promise<TreasuryDataPoint[]> {
+  async fetchTreasury(cutoffTimestamp: bigint): Promise<TreasuryDataPoint[]> {
     try {
       const response = await this.client.get<DuneResponse>("/", {
         headers: {
@@ -36,7 +36,7 @@ export class DuneProvider implements TreasuryProvider {
         },
       });
 
-      return this.transformData(response.data);
+      return this.transformData(response.data, cutoffTimestamp);
     } catch (error) {
       throw new HTTPException(503, {
         message: "Failed to fetch total assets data",
@@ -45,18 +45,25 @@ export class DuneProvider implements TreasuryProvider {
     }
   }
 
-  private transformData(data: DuneResponse): TreasuryDataPoint[] {
-    return data.result.rows.map((row) => {
-      // Parse date string "YYYY-MM-DD" and convert to Unix timestamp (seconds)
-      const [year, month, day] = row.date.split("-").map(Number);
-      if (!year || !month || !day) {
-        throw new Error(`Invalid date string: ${row.date}`);
-      }
-      const timestamp = Math.floor(Date.UTC(year, month - 1, day) / 1000);
-      return {
-        date: BigInt(timestamp),
-        liquidTreasury: row.totalAssets ?? 0,
-      };
-    });
+  private transformData(
+    data: DuneResponse,
+    cutoffTimestamp: bigint,
+  ): TreasuryDataPoint[] {
+    return data.result.rows
+      .map((row) => {
+        // Parse date string "YYYY-MM-DD" and convert to Unix timestamp (seconds)
+        const [year, month, day] = row.date.split("-").map(Number);
+        if (!year || !month || !day) {
+          throw new Error(`Invalid date string: ${row.date}`);
+        }
+        const timestamp = BigInt(
+          Math.floor(Date.UTC(year, month - 1, day) / 1000),
+        );
+        return {
+          date: timestamp,
+          liquidTreasury: row.totalAssets ?? 0,
+        };
+      })
+      .filter((item) => item.date >= cutoffTimestamp);
   }
 }
