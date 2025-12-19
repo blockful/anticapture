@@ -1,40 +1,34 @@
-import { TreasuryAssetNonDaoToken } from "@/features/attack-profitability/hooks";
-import { TokenDataResponse } from "@/shared/hooks";
-import { CompareTreasury_200_Response } from "@anticapture/graphql-client";
 import { useMemo } from "react";
-import { formatUnits } from "viem";
+import { useTreasury } from "@/features/attack-profitability/hooks/useTreasury";
+import { TokenDataResponse } from "@/shared/hooks";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 export const useDaoTreasuryStats = ({
-  treasuryAll,
-  treasuryNonDao,
+  daoId,
   tokenData,
-  decimals,
 }: {
-  treasuryAll: { data?: CompareTreasury_200_Response | null };
-  treasuryNonDao: { data?: TreasuryAssetNonDaoToken[] | null };
+  daoId: DaoIdEnum;
   tokenData: { data?: TokenDataResponse | null };
-  decimals: number;
 }) => {
+  const { data: liquidTreasury } = useTreasury(daoId, "liquid", 1);
+  const { data: tokenTreasury } = useTreasury(daoId, "dao-token", 1);
+  const { data: allTreasury } = useTreasury(daoId, "total", 1);
+
   return useMemo(() => {
     const lastPrice = Number(tokenData.data?.price) || 0;
-    const liquidTreasuryUSD = Number(
-      treasuryNonDao.data?.[0]?.totalAssets || 0,
-    );
-    const daoTreasuryTokens = Number(treasuryAll.data?.currentTreasury || 0);
-    const govTreasuryUSD =
-      Number(formatUnits(BigInt(daoTreasuryTokens), decimals)) * lastPrice;
+    const liquidValue = liquidTreasury[0]?.value ?? 0;
+    const tokenValue = tokenTreasury[0]?.value ?? 0;
+    const totalValue = allTreasury[0]?.value ?? 0;
 
-    const liquidTreasuryAllPercent = govTreasuryUSD
-      ? Math.round(
-          (govTreasuryUSD / (govTreasuryUSD + liquidTreasuryUSD)) * 100,
-        ).toString()
+    const liquidTreasuryAllPercent = totalValue
+      ? Math.round((tokenValue / totalValue) * 100).toString()
       : "0";
 
     return {
       lastPrice,
-      liquidTreasuryNonDaoValue: liquidTreasuryUSD,
-      liquidTreasuryAllValue: govTreasuryUSD,
+      liquidTreasuryNonDaoValue: liquidValue,
+      liquidTreasuryAllValue: tokenValue,
       liquidTreasuryAllPercent,
     };
-  }, [tokenData, treasuryAll.data, treasuryNonDao.data, decimals]);
+  }, [liquidTreasury, tokenTreasury, allTreasury, tokenData]);
 };
