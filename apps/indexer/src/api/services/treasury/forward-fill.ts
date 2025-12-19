@@ -6,6 +6,8 @@
  *
  */
 
+import { truncateTimestampTimeMs, ONE_DAY_MS } from "@/eventHandlers/shared";
+
 /**
  * Forward-fill sparse data across a master timeline.
  *
@@ -36,20 +38,23 @@ export function forwardFill<T>(
 }
 
 /**
- * Create a sorted timeline from multiple data sources.
- * Useful when you need a master timeline from different datasets.
- *
- * @param dataSources - Array of Maps with timestamp keys
- * @returns Sorted unique timestamps
+ * Create daily timeline from first data point to today (midnight UTC)
+ * Accepts multiple maps and finds the earliest timestamp across all
  */
-export function createTimeline(
-  ...dataSources: Array<Map<number, unknown>>
+export function createDailyTimelineFromData(
+  ...dataMaps: Map<number, unknown>[]
 ): number[] {
-  const uniqueTimestamps = new Set<number>();
+  const allTimestamps = dataMaps.flatMap((map) => [...map.keys()]);
 
-  for (const source of dataSources) {
-    source.forEach((_, timestamp) => uniqueTimestamps.add(timestamp));
-  }
+  if (allTimestamps.length === 0) return [];
 
-  return Array.from(uniqueTimestamps).sort((a, b) => a - b);
+  const firstTimestamp = Math.min(...allTimestamps);
+  const todayMidnight = truncateTimestampTimeMs(Date.now());
+  const totalDays =
+    Math.floor((todayMidnight - firstTimestamp) / ONE_DAY_MS) + 1;
+
+  return Array.from(
+    { length: totalDays },
+    (_, i) => firstTimestamp + i * ONE_DAY_MS,
+  );
 }
