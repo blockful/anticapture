@@ -1,36 +1,140 @@
+import { formatUnits } from "viem";
 import { TreasuryProvider } from "./providers";
+import { TreasuryResponse } from "./types";
+import { TreasuryRepository } from "./treasury.repository";
+import { forwardFill, createDailyTimelineFromData } from "./forward-fill";
+import {
+  calculateCutoffTimestamp,
+  truncateTimestampTimeMs,
+  normalizeMapTimestamps,
+} from "@/eventHandlers/shared";
 
-export interface TreasuryHistoryResponse {
-  date: number; // Unix timestamp in milliseconds
-  liquidTreasury: number;
-}
-
+/**
+ * Treasury Service - Orchestrates treasury data retrieval and calculation.
+ * Responsibility: Coordinate between provider, repository, and business logic.
+ */
 export class TreasuryService {
-  constructor(private provider: TreasuryProvider) {}
+  private repository: TreasuryRepository;
 
-  async getTreasuryHistory(
+  constructor(private provider: TreasuryProvider) {
+    this.repository = new TreasuryRepository();
+  }
+
+  /**
+   * Get liquid treasury only (from external providers)
+   */
+  async getLiquidTreasury(
     days: number,
-    order: "asc" | "desc" = "asc",
-  ): Promise<TreasuryHistoryResponse[]> {
-    // Fetch from provider
-    const allData = await this.provider.fetchTreasury();
+    order: "asc" | "desc",
+  ): Promise<TreasuryResponse> {
+    const cutoffTimestamp = calculateCutoffTimestamp(days);
+    const data = await this.provider.fetchTreasury(cutoffTimestamp);
 
-    // Filter by days
-    const cutoffTimestamp = BigInt(
-      Math.floor(Date.now() / 1000) - days * 24 * 60 * 60,
+    if (data.length === 0) {
+      return { items: [], totalCount: 0 };
+    }
+
+    // Convert to map with normalized timestamps (midnight UTC)
+    const liquidMap = new Map<number, number>();
+    data.forEach((item) => {
+      const timestampMs = truncateTimestampTimeMs(Number(item.date) * 1000);
+      liquidMap.set(timestampMs, item.liquidTreasury);
+    });
+
+    // Create timeline from first data point to today
+    const timeline = createDailyTimelineFromData(liquidMap);
+
+    // Forward-fill to remove gaps
+    const filledValues = forwardFill(timeline, liquidMap);
+
+    // Build response
+    const items = timeline
+      .map((timestamp) => ({
+        date: timestamp,
+        value: filledValues.get(timestamp) ?? 0,
+      }))
+      .sort((a, b) => (order === "desc" ? b.date - a.date : a.date - b.date));
+
+    return { items, totalCount: items.length };
+  }
+
+  /**
+   * Get DAO token treasury only (token quantity × price)
+   */
+  async getTokenTreasury(
+    days: number,
+    order: "asc" | "desc",
+    decimals: number,
+  ): Promise<TreasuryResponse> {
+    const cutoffTimestamp = calculateCutoffTimestamp(days);
+
+    // Fetch data from DB
+    const [tokenQuantities, historicalPrices] = await Promise.all([
+      this.repository.getTokenQuantities(cutoffTimestamp),
+      this.repository.getHistoricalPrices(cutoffTimestamp),
+    ]);
+
+    if (tokenQuantities.size === 0 && historicalPrices.size === 0) {
+      return { items: [], totalCount: 0 };
+    }
+
+    // Normalize all timestamps to midnight UTC
+    const normalizedQuantities = normalizeMapTimestamps(tokenQuantities);
+    const normalizedPrices = normalizeMapTimestamps(historicalPrices);
+
+    // Create timeline from first data point to today
+    const timeline = createDailyTimelineFromData(
+      normalizedQuantities,
+      normalizedPrices,
     );
-    const filteredData = allData.filter((item) => item.date >= cutoffTimestamp);
 
-    // Sort
-    const sortedData =
-      order === "desc"
-        ? filteredData.sort((a, b) => Number(b.date - a.date))
-        : filteredData.sort((a, b) => Number(a.date - b.date));
+    // Forward-fill both quantities and prices
+    const filledQuantities = forwardFill(timeline, normalizedQuantities);
+    const filledPrices = forwardFill(timeline, normalizedPrices);
 
-    // Transform to response format (seconds to milliseconds)
-    return sortedData.map((item) => ({
-      date: Number(item.date) * 1000,
-      liquidTreasury: item.liquidTreasury,
+    // Calculate token treasury values
+    const items = timeline
+      .map((timestamp) => {
+        const quantity = filledQuantities.get(timestamp) ?? 0n;
+        const price = filledPrices.get(timestamp) ?? 0;
+        const tokenAmount = Number(formatUnits(quantity, decimals));
+
+        return { date: timestamp, value: price * tokenAmount };
+      })
+      .sort((a, b) => (order === "desc" ? b.date - a.date : a.date - b.date));
+
+    return { items, totalCount: items.length };
+  }
+
+  /**
+   * Get total treasury (liquid + token)
+   */
+  async getTotalTreasury(
+    days: number,
+    order: "asc" | "desc",
+    decimals: number,
+  ): Promise<TreasuryResponse> {
+    const [liquidResult, tokenResult] = await Promise.all([
+      this.getLiquidTreasury(days, order),
+      this.getTokenTreasury(days, order, decimals),
+    ]);
+
+    if (liquidResult.items.length === 0 && tokenResult.items.length === 0) {
+      return { items: [], totalCount: 0 };
+    }
+
+    // If only one has data, use that timeline; otherwise both have same timeline
+    const baseItems =
+      liquidResult.items.length > 0 ? liquidResult.items : tokenResult.items;
+
+    // Sum values (same timeline guaranteed by forward-fill when both have data)
+    const items = baseItems.map((item, i) => ({
+      date: item.date,
+      value:
+        (liquidResult.items[i]?.value ?? 0) +
+        (tokenResult.items[i]?.value ?? 0),
     }));
+
+    return { items, totalCount: items.length };
   }
 }
