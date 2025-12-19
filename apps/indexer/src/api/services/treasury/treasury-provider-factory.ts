@@ -3,16 +3,13 @@ import axios from "axios";
 import { DefiLlamaProvider } from "./providers/defillama–provider";
 import { DuneProvider } from "./providers/dune-provider";
 import { TreasuryService } from "./treasury.service";
-import { assets } from "@/api/controllers";
-import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 
 /**
- * Creates a treasury provider and registers API routes
+ * Creates a treasury provider
  * Providers fetch data on-demand
- * @param app - The Hono app instance
  * @returns TreasuryService instance or null if no provider is configured
  */
-export function createTreasuryProvider(app: Hono): TreasuryService | null {
+export function createTreasuryProvider(): TreasuryService | null {
   if (env.TREASURY_PROVIDER_PROTOCOL_ID && env.DEFILLAMA_API_URL) {
     const axiosClient = axios.create({
       baseURL: env.DEFILLAMA_API_URL,
@@ -21,17 +18,13 @@ export function createTreasuryProvider(app: Hono): TreasuryService | null {
       axiosClient,
       env.TREASURY_PROVIDER_PROTOCOL_ID,
     );
-    const treasuryService = new TreasuryService(defiLlamaProvider);
-    assets(app, treasuryService);
-    return treasuryService;
+    return new TreasuryService(defiLlamaProvider);
   } else if (env.DUNE_API_URL && env.DUNE_API_KEY) {
     const axiosClient = axios.create({
       baseURL: env.DUNE_API_URL,
     });
     const duneProvider = new DuneProvider(axiosClient, env.DUNE_API_KEY);
-    const treasuryService = new TreasuryService(duneProvider);
-    assets(app, treasuryService);
-    return treasuryService;
+    return new TreasuryService(duneProvider);
   } else {
     console.warn("Treasury provider not configured.");
     return null;
