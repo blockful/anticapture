@@ -1,19 +1,20 @@
-import { HeaderMobile } from "@/widgets/HeaderMobile";
-import { HomeTemplate } from "@/templates";
 import { HeaderSidebar } from "@/widgets";
+import { HeaderMobile } from "@/widgets/HeaderMobile";
 import { Footer } from "@/shared/components/design-system/footer/Footer";
+import { DaoGovernanceParams } from "@/features/dao-overview/components";
+import { DaoIdEnum } from "@/shared/types/daos";
 
-export default function Home() {
+export default function DonatePage() {
   return (
     <div className="bg-surface-background dark flex h-screen overflow-hidden">
       <HeaderSidebar />
       <main className="flex-1 overflow-auto sm:ml-[72px]">
         <div className="sm:hidden">
-          <HeaderMobile />
+          <HeaderMobile overlayClassName="top-[57px]" />
         </div>
         <div className="flex min-h-screen w-full flex-col items-center">
           <div className="w-full flex-1">
-            <HomeTemplate />
+            <DaoGovernanceParams daoId={DaoIdEnum.ENS} />
           </div>
           <Footer />
         </div>
