@@ -1,6 +1,6 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
-import { TreasuryService, TreasuryType } from "@/api/services/treasury";
+import { TreasuryService } from "@/api/services/treasury";
 import {
   TreasuryResponseSchema,
   TreasuryQuerySchema,
@@ -34,13 +34,7 @@ export function treasury(app: Hono, treasuryService: TreasuryService) {
     }),
     async (context) => {
       const { days, order } = context.req.valid("query");
-
-      const result = await treasuryService.getTreasury(
-        TreasuryType.LIQUID,
-        days,
-        order,
-      );
-
+      const result = await treasuryService.getLiquidTreasury(days, order);
       return context.json(result);
     },
   );
@@ -73,16 +67,12 @@ export function treasury(app: Hono, treasuryService: TreasuryService) {
     }),
     async (context) => {
       const { days, order } = context.req.valid("query");
-
       const decimals = CONTRACT_ADDRESSES[env.DAO_ID].token.decimals;
-
-      const result = await treasuryService.getTreasury(
-        TreasuryType.DAO_TOKEN,
+      const result = await treasuryService.getTokenTreasury(
         days,
         order,
         decimals,
       );
-
       return context.json(result);
     },
   );
@@ -115,16 +105,12 @@ export function treasury(app: Hono, treasuryService: TreasuryService) {
     }),
     async (context) => {
       const { days, order } = context.req.valid("query");
-
       const decimals = CONTRACT_ADDRESSES[env.DAO_ID].token.decimals;
-
-      const result = await treasuryService.getTreasury(
-        TreasuryType.TOTAL,
+      const result = await treasuryService.getTotalTreasury(
         days,
         order,
         decimals,
       );
-
       return context.json(result);
     },
   );

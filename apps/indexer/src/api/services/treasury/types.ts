@@ -9,15 +9,6 @@ export interface TreasuryDataPoint {
 }
 
 /**
- * Enum to set the type of treasury
- */
-export enum TreasuryType {
-  LIQUID = "liquid",
-  DAO_TOKEN = "dao-token",
-  TOTAL = "total",
-}
-
-/**
  * Treasury's response to the client
  */
 export interface TreasuryResponse {
