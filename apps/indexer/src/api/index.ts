@@ -24,7 +24,6 @@ import {
   dao,
   accountInteractions,
   accountBalances,
-  accountBalance,
 } from "@/api/controllers";
 import { docs } from "@/api/docs";
 import { env } from "@/env";
@@ -182,7 +181,6 @@ delegationPercentage(app, delegationPercentageService);
 votingPower(app, votingPowerService);
 votingPowerVariations(app, votingPowerService);
 accountBalanceVariations(app, balanceVariationsService);
-accountBalance(app, accountBalanceService);
 accountBalances(app, env.DAO_ID, accountBalanceService);
 accountInteractions(app, balanceVariationsService);
 dao(app, daoService);
