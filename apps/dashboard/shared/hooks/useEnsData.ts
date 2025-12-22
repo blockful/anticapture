@@ -4,13 +4,8 @@ import { useQuery, useQueries } from "@tanstack/react-query";
 import { Address, isAddress } from "viem";
 import { normalize } from "viem/ens";
 import { publicClient } from "@/shared/services/wallet/wallet";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 
-// Constants
-const ENS_FALLBACK_API_BASE_URL = "https://api.ethfollow.xyz/api/v1";
-const ENS_FALLBACK_API_TIMEOUT = 5000; // 5 seconds
-
-// Types
 type EnsData = {
   address: Address;
   avatar_url: string | null;
@@ -18,6 +13,7 @@ type EnsData = {
   avatar: string | null;
 };
 
+// Fallback API types
 type EnsRecords = {
   avatar?: string;
   "com.discord"?: string;
@@ -43,15 +39,6 @@ type EnsApiResponse = {
   };
 };
 
-// Axios instance for ENS fallback API
-const ensFallbackApi = axios.create({
-  baseURL: ENS_FALLBACK_API_BASE_URL,
-  timeout: ENS_FALLBACK_API_TIMEOUT,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
 /**
  * Hook to fetch ENS data for a single address
  * @param address - Ethereum address (e.g., "0x123...")
@@ -75,6 +62,15 @@ export const useEnsData = (address: Address | null | undefined) => {
 };
 
 /**
+ * Builds the ENS API URL for the fallback service
+ * @param address - Ethereum address or ENS name
+ * @returns API URL string
+ */
+const getEnsApiUrl = (address: Address | `${string}.eth`): string => {
+  return `https://api.ethfollow.xyz/api/v1/users/${address}/ens`;
+};
+
+/**
  * Fetches ENS data from the fallback API service
  * @param address - Ethereum address
  * @returns Promise resolving to EnsData or null if request fails
@@ -85,9 +81,9 @@ const fetchEnsDataFromApi = async ({
   address: Address;
 }): Promise<EnsData | null> => {
   try {
-    const response = await ensFallbackApi.get<EnsApiResponse>(
-      `/users/${address}/ens`,
-    );
+    const response = await axios.get<EnsApiResponse>(getEnsApiUrl(address), {
+      timeout: 5000, // 5 second timeout
+    });
 
     const { ens } = response.data;
 
@@ -99,10 +95,6 @@ const fetchEnsDataFromApi = async ({
     };
   } catch (error) {
     // Silently fail - this is a fallback, so we don't want to throw
-    // Only log non-timeout errors for debugging
-    if (error instanceof AxiosError && error.code !== "ECONNABORTED") {
-      // Could add logging here if needed, but silently fail for now
-    }
     return null;
   }
 };
@@ -118,24 +110,24 @@ export const fetchEnsDataFromAddress = async ({
 }: {
   address: Address;
 }): Promise<EnsData> => {
-  // Validate address format
-  if (!isAddress(address)) {
-    return {
-      address,
-      avatar_url: null,
-      ens: "",
-      avatar: null,
-    };
-  }
-
   // Try primary method: viem publicClient
   try {
+    if (!isAddress(address)) {
+      // Invalid address, return empty data
+      return {
+        address: address,
+        avatar_url: null,
+        ens: "",
+        avatar: null,
+      };
+    }
+
     const ensName = await publicClient.getEnsName({ address });
 
     // If address has no ENS name, return empty data (this is normal, not an error)
     if (!ensName) {
       return {
-        address,
+        address: address,
         avatar_url: null,
         ens: "",
         avatar: null,
@@ -143,24 +135,17 @@ export const fetchEnsDataFromAddress = async ({
     }
 
     // Address has ENS name, try to get avatar
-    // Avatar fetch failure is non-critical, so we catch errors silently
     let avatarUrl: string | null = null;
-    try {
-      avatarUrl = await publicClient.getEnsAvatar({ name: normalize(ensName) });
-    } catch {
-      // Avatar fetch failed, but we still have the ENS name
-      // Continue without avatar rather than failing entirely
-    }
+    avatarUrl = await publicClient.getEnsAvatar({ name: normalize(ensName) });
 
     return {
-      address,
+      address: address,
       avatar_url: avatarUrl,
       ens: ensName,
       avatar: avatarUrl,
     };
   } catch (error) {
     // Primary method threw an error (network issue, RPC error, etc.)
-    // Only use fallback for actual errors, not when address has no ENS
     const fallbackData = await fetchEnsDataFromApi({ address });
     if (fallbackData) {
       return fallbackData;
@@ -168,7 +153,7 @@ export const fetchEnsDataFromAddress = async ({
 
     // If fallback also fails, return empty data
     return {
-      address,
+      address: address,
       avatar_url: null,
       ens: "",
       avatar: null,
