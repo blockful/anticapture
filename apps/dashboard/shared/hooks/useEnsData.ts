@@ -4,39 +4,12 @@ import { useQuery, useQueries } from "@tanstack/react-query";
 import { Address, isAddress } from "viem";
 import { normalize } from "viem/ens";
 import { publicClient } from "@/shared/services/wallet/wallet";
-import axios from "axios";
 
 type EnsData = {
   address: Address;
   avatar_url: string | null;
   ens: string;
   avatar: string | null;
-};
-
-// Fallback API types
-type EnsRecords = {
-  avatar?: string;
-  "com.discord"?: string;
-  "com.github"?: string;
-  "com.twitter"?: string;
-  description?: string;
-  email?: string;
-  header?: string;
-  location?: string;
-  name?: string;
-  "org.telegram"?: string;
-  url?: string;
-  [key: string]: string | undefined;
-};
-
-type EnsApiResponse = {
-  ens: {
-    name: string;
-    address: Address;
-    avatar: string | null;
-    records: EnsRecords | null;
-    updated_at: string;
-  };
 };
 
 /**
@@ -62,46 +35,7 @@ export const useEnsData = (address: Address | null | undefined) => {
 };
 
 /**
- * Builds the ENS API URL for the fallback service
- * @param address - Ethereum address or ENS name
- * @returns API URL string
- */
-const getEnsApiUrl = (address: Address | `${string}.eth`): string => {
-  return `https://api.ethfollow.xyz/api/v1/users/${address}/ens`;
-};
-
-/**
- * Fetches ENS data from the fallback API service
- * @param address - Ethereum address
- * @returns Promise resolving to EnsData or null if request fails
- */
-const fetchEnsDataFromApi = async ({
-  address,
-}: {
-  address: Address;
-}): Promise<EnsData | null> => {
-  try {
-    const response = await axios.get<EnsApiResponse>(getEnsApiUrl(address), {
-      timeout: 5000, // 5 second timeout
-    });
-
-    const { ens } = response.data;
-
-    return {
-      address: ens.address,
-      avatar_url: ens.avatar,
-      ens: ens.name || "",
-      avatar: ens.avatar,
-    };
-  } catch (error) {
-    // Silently fail - this is a fallback, so we don't want to throw
-    return null;
-  }
-};
-
-/**
  * Fetches ENS data using viem for a single address
- * Falls back to external API only if viem throws an error (not if address has no ENS)
  * @param address - Ethereum address
  * @returns Promise resolving to EnsData
  */
@@ -110,55 +44,24 @@ export const fetchEnsDataFromAddress = async ({
 }: {
   address: Address;
 }): Promise<EnsData> => {
-  // Try primary method: viem publicClient
-  try {
-    if (!isAddress(address)) {
-      // Invalid address, return empty data
-      return {
-        address: address,
-        avatar_url: null,
-        ens: "",
-        avatar: null,
-      };
-    }
+  let ensName: string | null = null;
+  let avatarUrl: string | null = null;
 
-    const ensName = await publicClient.getEnsName({ address });
-
-    // If address has no ENS name, return empty data (this is normal, not an error)
-    if (!ensName) {
-      return {
-        address: address,
-        avatar_url: null,
-        ens: "",
-        avatar: null,
-      };
-    }
-
-    // Address has ENS name, try to get avatar
-    let avatarUrl: string | null = null;
-    avatarUrl = await publicClient.getEnsAvatar({ name: normalize(ensName) });
-
-    return {
-      address: address,
-      avatar_url: avatarUrl,
-      ens: ensName,
-      avatar: avatarUrl,
-    };
-  } catch (error) {
-    // Primary method threw an error (network issue, RPC error, etc.)
-    const fallbackData = await fetchEnsDataFromApi({ address });
-    if (fallbackData) {
-      return fallbackData;
-    }
-
-    // If fallback also fails, return empty data
-    return {
-      address: address,
-      avatar_url: null,
-      ens: "",
-      avatar: null,
-    };
+  if (isAddress(address)) {
+    ensName = await publicClient.getEnsName({ address });
   }
+
+  // Get avatar URL if we have an ENS name
+  if (ensName) {
+    avatarUrl = await publicClient.getEnsAvatar({ name: normalize(ensName) });
+  }
+
+  return {
+    address: address,
+    avatar_url: avatarUrl,
+    ens: ensName || "",
+    avatar: avatarUrl,
+  };
 };
 
 export const fetchAddressFromEnsName = async ({
