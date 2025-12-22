@@ -132,8 +132,18 @@ const accountBalanceService = new BalanceVariationsService(
   accountInteractionRepo,
 );
 
-const tokenPriceProvider = createTokenPriceProvider();
-const treasuryService = createTreasuryService(tokenPriceProvider!);
+const tokenPriceProvider = createTokenPriceProvider(
+  env.COINGECKO_API_URL,
+  env.COINGECKO_API_KEY,
+  env.DAO_ID,
+);
+const treasuryService = createTreasuryService(
+  tokenPriceProvider,
+  env.DEFILLAMA_API_URL,
+  env.TREASURY_PROVIDER_PROTOCOL_ID,
+  env.DUNE_API_URL,
+  env.DUNE_API_KEY,
+);
 treasury(app, treasuryService);
 
 const tokenPriceClient =
