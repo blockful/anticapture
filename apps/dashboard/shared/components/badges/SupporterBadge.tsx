@@ -21,6 +21,7 @@ export const SupporterBadge = ({ address }: { address: Address }) => {
             width={16}
             height={16}
             className="object-cover"
+            unoptimized
           />
         </div>
       ) : (
