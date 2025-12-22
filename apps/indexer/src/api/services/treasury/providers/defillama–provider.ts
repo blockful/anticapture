@@ -1,6 +1,6 @@
 import { AxiosInstance } from "axios";
 import { TreasuryProvider } from "./treasury-provider.interface";
-import { TreasuryDataPoint } from "../types";
+import { LiquidTreasuryDataPoint } from "../types";
 import { truncateTimestampTime } from "@/eventHandlers/shared";
 
 interface RawDefiLlamaResponse {
@@ -26,7 +26,9 @@ export class DefiLlamaProvider implements TreasuryProvider {
     this.providerDaoId = providerDaoId;
   }
 
-  async fetchTreasury(cutoffTimestamp: bigint): Promise<TreasuryDataPoint[]> {
+  async fetchTreasury(
+    cutoffTimestamp: bigint,
+  ): Promise<LiquidTreasuryDataPoint[]> {
     try {
       const response = await this.client.get<RawDefiLlamaResponse>(
         `/${this.providerDaoId}`,
@@ -48,7 +50,7 @@ export class DefiLlamaProvider implements TreasuryProvider {
   private transformData(
     rawData: RawDefiLlamaResponse,
     cutoffTimestamp: bigint,
-  ): TreasuryDataPoint[] {
+  ): LiquidTreasuryDataPoint[] {
     const { chainTvls } = rawData;
 
     // Map: chainKey → Map(dayTimestamp → latest dataPoint)

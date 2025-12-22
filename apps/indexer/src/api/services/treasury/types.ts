@@ -1,7 +1,7 @@
 /**
  * Interface to represent a treasury's data point
  */
-export interface TreasuryDataPoint {
+export interface LiquidTreasuryDataPoint {
   date: bigint; // Unix timestamp in seconds (start of day)
   liquidTreasury: number;
 }

@@ -1,5 +1,5 @@
 import { HTTPException } from "hono/http-exception";
-import { TreasuryDataPoint } from "../types";
+import { LiquidTreasuryDataPoint } from "../types";
 import { TreasuryProvider } from "./treasury-provider.interface";
 import { AxiosInstance } from "axios";
 
@@ -28,7 +28,9 @@ export class DuneProvider implements TreasuryProvider {
     private readonly apiKey: string,
   ) {}
 
-  async fetchTreasury(cutoffTimestamp: bigint): Promise<TreasuryDataPoint[]> {
+  async fetchTreasury(
+    cutoffTimestamp: bigint,
+  ): Promise<LiquidTreasuryDataPoint[]> {
     try {
       const response = await this.client.get<DuneResponse>("/", {
         headers: {
@@ -48,7 +50,7 @@ export class DuneProvider implements TreasuryProvider {
   private transformData(
     data: DuneResponse,
     cutoffTimestamp: bigint,
-  ): TreasuryDataPoint[] {
+  ): LiquidTreasuryDataPoint[] {
     return data.result.rows
       .map((row) => {
         // Parse date string "YYYY-MM-DD" and convert to Unix timestamp (seconds)
