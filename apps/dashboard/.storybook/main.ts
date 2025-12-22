@@ -4,7 +4,7 @@ import { join, dirname } from "path";
 import { resolve } from "path";
 import { readFileSync, existsSync } from "fs";
 
-// Load environment variables from .env.local manually
+// Load environment variables from .env. local manually
 // This ensures FIGMA_TOKEN is available to Storybook
 // (dotenv might not be available, so we load manually)
 const envPath = resolve(__dirname, "../.env.local");
@@ -14,9 +14,9 @@ if (existsSync(envPath)) {
     envFile.split("\n").forEach((line) => {
       const match = line.match(/^([^=:#]+)=(.*)$/);
       if (match) {
-        const key = match[1].trim();
+        const key = match[1]. trim();
         const value = match[2].trim().replace(/^["']|["']$/g, "");
-        if (!process.env[key]) {
+        if (! process.env[key]) {
           process.env[key] = value;
         }
       }
@@ -37,7 +37,7 @@ function getAbsolutePath(value: string): any {
 const config: StorybookConfig = {
   stories: [
     "../stories/**/*.mdx",
-    "../stories/**/*.stories.@(js|jsx|mjs|ts|tsx)",
+    "../stories/**/*. stories.@(js|jsx|mjs|ts|tsx)",
     "../shared/**/*.stories.@(js|jsx|mjs|ts|tsx)",
   ],
   addons: [
@@ -69,13 +69,8 @@ const config: StorybookConfig = {
     };
 
     // Inject FIGMA_TOKEN into browser bundle for Storybook addon-designs
-    // SECURITY: Only inject token in development mode, NEVER in production builds
-    // Storybook sets NODE_ENV=production during 'storybook build'
-    const isProduction = process.env.NODE_ENV === "production";
-
-    if (!isProduction && process.env.FIGMA_TOKEN) {
-      // Only inject token in dev mode (storybook dev)
-      // Dynamically require webpack (it's available in Storybook's node_modules)
+    if (process.env. FIGMA_TOKEN) {
+      // Token exists - inject it into the bundle
       const webpack = require("webpack");
       config.plugins = config.plugins || [];
       config.plugins.push(
@@ -83,25 +78,17 @@ const config: StorybookConfig = {
           "process.env.FIGMA_TOKEN": JSON.stringify(process.env.FIGMA_TOKEN),
         })
       );
-    } else if (isProduction) {
-      // Production build: explicitly set token to undefined for security
-      // This ensures token is NEVER in production Storybook builds
-      const webpack = require("webpack");
-      config.plugins = config.plugins || [];
-      config.plugins.push(
-        new webpack.DefinePlugin({
-          "process.env.FIGMA_TOKEN": JSON.stringify(undefined),
-        })
-      );
-      console.log(
-        "🔒 Production build: FIGMA_TOKEN excluded for security"
-      );
-    } else if (!process.env.FIGMA_TOKEN) {
+      console.log("✅ FIGMA_TOKEN injetado no bundle do Storybook");
+    } else {
+      // Token not found - warn the user
       console.warn(
-        "⚠️  FIGMA_TOKEN not found. Figma design integration will not work in Storybook."
+        "⚠️  FIGMA_TOKEN não encontrado.  Integração com Figma não funcionará no Storybook."
       );
       console.warn(
-        "   Please add FIGMA_TOKEN to apps/dashboard/.env.local and restart Storybook."
+        "   Para desenvolvimento local:  adicione FIGMA_TOKEN ao arquivo apps/dashboard/.env.local"
+      );
+      console.warn(
+        "   Para Vercel (preview/production): adicione FIGMA_TOKEN nas Environment Variables do projeto"
       );
     }
 
