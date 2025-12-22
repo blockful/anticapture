@@ -27,6 +27,7 @@
     "zod-validation-error": "^3.4.1"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.2.13",
     "@types/jest": "^29.5.14",
     "@types/node": "^20.16.5",
     "@types/pg": "^8.11.10",
