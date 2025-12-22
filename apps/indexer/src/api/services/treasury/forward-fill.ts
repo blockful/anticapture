@@ -13,14 +13,16 @@ import { truncateTimestampTimeMs, ONE_DAY_MS } from "@/eventHandlers/shared";
  *
  * @param timeline - Sorted array of timestamps
  * @param sparseData - Map of timestamp to value (may have gaps)
+ * @param initialValue - Optional initial value to use when no data exists before the first timeline entry
  * @returns Map with values filled for all timeline timestamps
  */
 export function forwardFill<T>(
   timeline: number[],
   sparseData: Map<number, T>,
+  initialValue?: T,
 ): Map<number, T> {
   const result = new Map<number, T>();
-  let lastKnownValue: T | undefined;
+  let lastKnownValue: T | undefined = initialValue;
 
   for (const timestamp of timeline) {
     // Update last known value if we have data at this timestamp

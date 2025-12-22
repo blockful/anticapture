@@ -38,8 +38,18 @@ type Query {
   tokenPrices(where: tokenPriceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPricePage!
   _meta: Meta
 
-  """Get total assets"""
-  totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
+  """
+  Get historical Liquid Treasury (treasury without DAO tokens) from external providers (DefiLlama/Dune)
+  """
+  getLiquidTreasury(days: queryInput_getLiquidTreasury_days = _365d, order: queryInput_getLiquidTreasury_order = asc): getLiquidTreasury_200_response
+
+  """
+  Get historical DAO Token Treasury value (governance token quantity × token price)
+  """
+  getDaoTokenTreasury(days: queryInput_getDaoTokenTreasury_days = _365d, order: queryInput_getDaoTokenTreasury_order = asc): getDaoTokenTreasury_200_response
+
+  """Get historical Total Treasury (liquid treasury + DAO token treasury)"""
+  getTotalTreasury(days: queryInput_getTotalTreasury_days = _365d, order: queryInput_getTotalTreasury_order = asc): getTotalTreasury_200_response
 
   """Get historical market data for a specific token"""
   historicalTokenData(skip: NonNegativeInt, limit: Float = 365): [query_historicalTokenData_items]
@@ -1330,17 +1340,88 @@ input tokenPriceFilter {
   timestamp_lte: BigInt
 }
 
-type query_totalAssets_items {
-  totalAssets: String!
-  date: String!
+type getLiquidTreasury_200_response {
+  items: [query_getLiquidTreasury_items_items]!
+
+  """Total number of items"""
+  totalCount: Float!
 }
 
-enum queryInput_totalAssets_days {
+type query_getLiquidTreasury_items_items {
+  """Treasury value in USD"""
+  value: Float!
+
+  """Unix timestamp in milliseconds"""
+  date: Float!
+}
+
+enum queryInput_getLiquidTreasury_days {
   _7d
   _30d
   _90d
   _180d
   _365d
+}
+
+enum queryInput_getLiquidTreasury_order {
+  asc
+  desc
+}
+
+type getDaoTokenTreasury_200_response {
+  items: [query_getDaoTokenTreasury_items_items]!
+
+  """Total number of items"""
+  totalCount: Float!
+}
+
+type query_getDaoTokenTreasury_items_items {
+  """Treasury value in USD"""
+  value: Float!
+
+  """Unix timestamp in milliseconds"""
+  date: Float!
+}
+
+enum queryInput_getDaoTokenTreasury_days {
+  _7d
+  _30d
+  _90d
+  _180d
+  _365d
+}
+
+enum queryInput_getDaoTokenTreasury_order {
+  asc
+  desc
+}
+
+type getTotalTreasury_200_response {
+  items: [query_getTotalTreasury_items_items]!
+
+  """Total number of items"""
+  totalCount: Float!
+}
+
+type query_getTotalTreasury_items_items {
+  """Treasury value in USD"""
+  value: Float!
+
+  """Unix timestamp in milliseconds"""
+  date: Float!
+}
+
+enum queryInput_getTotalTreasury_days {
+  _7d
+  _30d
+  _90d
+  _180d
+  _365d
+}
+
+enum queryInput_getTotalTreasury_order {
+  asc
+  desc
 }
 
 type query_historicalTokenData_items {

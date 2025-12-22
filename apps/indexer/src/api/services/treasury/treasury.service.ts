@@ -1,6 +1,6 @@
 import { formatUnits } from "viem";
 import { TreasuryProvider } from "./providers";
-import { TreasuryResponse } from "./types";
+import { PriceProvider, TreasuryResponse } from "./types";
 import { TreasuryRepository } from "./treasury.repository";
 import { forwardFill, createDailyTimelineFromData } from "./forward-fill";
 import {
@@ -16,7 +16,10 @@ import {
 export class TreasuryService {
   private repository: TreasuryRepository;
 
-  constructor(private provider: TreasuryProvider) {
+  constructor(
+    private provider: TreasuryProvider,
+    private priceProvider?: PriceProvider,
+  ) {
     this.repository = new TreasuryRepository();
   }
 
@@ -66,12 +69,16 @@ export class TreasuryService {
     order: "asc" | "desc",
     decimals: number,
   ): Promise<TreasuryResponse> {
+    if (!this.priceProvider) {
+      return { items: [], totalCount: 0 };
+    }
+
     const cutoffTimestamp = calculateCutoffTimestamp(days);
 
-    // Fetch data from DB
+    // Fetch token quantities from DB and prices from CoinGecko
     const [tokenQuantities, historicalPrices] = await Promise.all([
       this.repository.getTokenQuantities(cutoffTimestamp),
-      this.repository.getHistoricalPrices(cutoffTimestamp),
+      this.priceProvider.getHistoricalPrices(days),
     ]);
 
     if (tokenQuantities.size === 0 && historicalPrices.size === 0) {

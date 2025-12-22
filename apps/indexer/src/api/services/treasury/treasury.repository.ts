@@ -1,6 +1,6 @@
 import { db } from "ponder:api";
 import { daoMetricsDayBucket, tokenPrice } from "ponder:schema";
-import { and, eq, gte } from "ponder";
+import { and, eq, gte, lte, desc } from "ponder";
 import { MetricTypesEnum } from "@/lib/constants";
 
 /**
@@ -60,5 +60,24 @@ export class TreasuryRepository {
     });
 
     return map;
+  }
+
+  /**
+   * Fetch the last token quantity before a given cutoff timestamp.
+   * Used to get initial value for forward-fill when no data exists in the requested range.
+   * @param cutoffTimestamp - The timestamp to search before
+   * @returns The last known token quantity or null if not found
+   */
+  async getLastTokenQuantityBeforeDate(
+    cutoffTimestamp: bigint,
+  ): Promise<bigint | null> {
+    const result = await db.query.daoMetricsDayBucket.findFirst({
+      where: and(
+        eq(daoMetricsDayBucket.metricType, MetricTypesEnum.TREASURY),
+        lte(daoMetricsDayBucket.date, cutoffTimestamp),
+      ),
+      orderBy: desc(daoMetricsDayBucket.date),
+    });
+    return result?.close ?? null;
   }
 }

@@ -65,7 +65,7 @@ export const MultilineChartAttackProfitability = ({
 
   const { data: daoTokenPriceHistoricalData } = useDaoTokenHistoricalData({
     daoId: daoEnum,
-    limit: numDays - 7,
+    limit: numDays,
   });
 
   const { data: timeSeriesData } = useTimeSeriesData(
