@@ -39,6 +39,7 @@ import {
   NounsVotingPowerRepository,
   AccountInteractionsRepository,
   LastUpdateRepositoryImpl,
+  ProposalsRepository,
 } from "@/api/repositories";
 import { errorHandler } from "@/api/middlewares";
 import { getClient } from "@/lib/client";
@@ -169,7 +170,11 @@ proposalsActivity(
 );
 proposals(
   app,
-  new ProposalsService(repo, daoClient, optimisticProposalType),
+  new ProposalsService(
+    new ProposalsRepository(db),
+    daoClient,
+    optimisticProposalType,
+  ),
   daoClient,
   blockTime,
 );
