@@ -2,12 +2,16 @@ import type { Meta, StoryObj } from "@storybook/nextjs";
 import { AlertCircle, Info, CheckCircle2, AlertTriangle } from "lucide-react";
 
 import { BannerAlert } from "@/shared/components/design-system/alerts/banner-alert/BannerAlert";
+import { getFigmaDesignConfig } from "@/shared/utils/figma-storybook";
 
 const meta: Meta<typeof BannerAlert> = {
   title: "Design System/Alerts/BannerAlert",
   component: BannerAlert,
   parameters: {
     layout: "fullwidth",
+    design: getFigmaDesignConfig(
+      "https://www.figma.com/design/DEKMQifA8YOb3oxznHboSY/%F0%9F%93%81-Orbit-UI?node-id=10150-19926",
+    ),
   },
   tags: ["autodocs"],
   argTypes: {

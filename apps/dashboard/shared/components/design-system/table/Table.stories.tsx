@@ -73,11 +73,16 @@ const mockFetchPage = async ({
   };
 };
 
+import { getFigmaDesignConfig } from "@/shared/utils/figma-storybook";
+
 const meta: Meta<typeof ExampleDataTable> = {
   title: "Data Display/Table",
   component: ExampleDataTable,
   parameters: {
     layout: "fullscreen",
+    design: getFigmaDesignConfig(
+      "https://www.figma.com/design/DEKMQifA8YOb3oxznHboSY/%F0%9F%93%81-Orbit-UI?node-id=10706-9608",
+    ),
   },
   argTypes: {
     size: {

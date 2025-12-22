@@ -7,7 +7,7 @@ const badgeStatusVariants = cva(
   {
     variants: {
       variant: {
-        primary: "bg-surface-action-primary text-inverted",
+        primary: "bg-surface-action text-inverted",
         secondary: "bg-surface-hover text-primary",
         error: "bg-surface-opacity-error text-error",
         outline:
