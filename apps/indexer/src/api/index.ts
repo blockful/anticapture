@@ -1,4 +1,4 @@
-import { graphql } from "drizzle-orm";
+import { graphql } from "ponder";
 import { db } from "ponder:api";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import schema from "ponder:schema";
@@ -109,15 +109,15 @@ const optimisticProposalType =
 
 const repo = new DrizzleRepository(db);
 const votingPowerRepo = new VotingPowerRepository(db);
-const proposalsRepo = new DrizzleProposalsActivityRepository(db);
-const transactionsRepo = new TransactionsRepository(db);
-const delegationPercentageRepo = new DelegationPercentageRepository(db);
+
 const delegationPercentageService = new DelegationPercentageService(
-  delegationPercentageRepo,
+  new DelegationPercentageRepository(db),
 );
 const accountBalanceRepo = new AccountBalanceRepository(db);
-const accountInteractionRepo = new AccountInteractionsRepository(db);
-const transactionsService = new TransactionsService(transactionsRepo);
+
+const transactionsService = new TransactionsService(
+  new TransactionsRepository(db),
+);
 const votingPowerService = new VotingPowerService(
   env.DAO_ID === DaoIdEnum.NOUNS
     ? new NounsVotingPowerRepository(db)
@@ -128,7 +128,7 @@ const daoCache = new DaoCache();
 const daoService = new DaoService(daoClient, daoCache, env.CHAIN_ID);
 const accountBalanceService = new BalanceVariationsService(
   accountBalanceRepo,
-  accountInteractionRepo,
+  new AccountInteractionsRepository(db),
 );
 const repository = new LastUpdateRepositoryImpl(db);
 const lastUpdateService = new LastUpdateService(repository);
@@ -161,7 +161,12 @@ token(
 
 tokenDistribution(app, repo);
 governanceActivity(app, repo, tokenType);
-proposalsActivity(app, proposalsRepo, env.DAO_ID, daoClient);
+proposalsActivity(
+  app,
+  new DrizzleProposalsActivityRepository(db),
+  env.DAO_ID,
+  daoClient,
+);
 proposals(
   app,
   new ProposalsService(repo, daoClient, optimisticProposalType),

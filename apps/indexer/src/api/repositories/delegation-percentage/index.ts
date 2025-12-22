@@ -1,17 +1,23 @@
 import { daoMetricsDayBucket } from "ponder:schema";
 import { and, gte, lte, inArray, desc, asc } from "drizzle-orm";
-import { MetricTypesEnum } from "@/lib/constants";
-import type { RepositoryFilters } from "@/api/mappers/";
+
 import { DrizzleDB } from "@/api/database";
+import { MetricTypesEnum } from "@/lib/constants";
+import type { RepositoryFilters } from "@/api/mappers";
+
+type DaoMetricRow = typeof daoMetricsDayBucket.$inferSelect;
 
 export class DelegationPercentageRepository {
   constructor(private readonly db: DrizzleDB) {}
+
   /**
    * Fetches DELEGATED_SUPPLY and TOTAL_SUPPLY metrics from database
    * @param filters - Date range and ordering filters
    * @returns Array of metrics ordered by date
    */
-  async getDaoMetricsByDateRange(filters: RepositoryFilters) {
+  async getDaoMetricsByDateRange(
+    filters: RepositoryFilters,
+  ): Promise<DaoMetricRow[]> {
     const { startDate, endDate, orderDirection, limit } = filters;
 
     const conditions = [
@@ -44,7 +50,10 @@ export class DelegationPercentageRepository {
    * @param beforeDate - The date to search before
    * @returns The most recent metric row or null if not found
    */
-  async getLastMetricBeforeDate(metricType: string, beforeDate: string) {
+  async getLastMetricBeforeDate(
+    metricType: string,
+    beforeDate: string,
+  ): Promise<DaoMetricRow | undefined> {
     return await this.db.query.daoMetricsDayBucket.findFirst({
       where: and(
         lte(daoMetricsDayBucket.date, BigInt(beforeDate)),

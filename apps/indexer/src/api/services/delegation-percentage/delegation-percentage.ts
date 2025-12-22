@@ -26,14 +26,26 @@
  *
  */
 
+import { daoMetricsDayBucket } from "ponder:schema";
+
 import { MetricTypesEnum } from "@/lib/constants";
 import { SECONDS_IN_DAY, getCurrentDayTimestamp } from "@/lib/enums";
-import { DelegationPercentageRepository } from "@/api/repositories/";
 import {
   DelegationPercentageItem,
   DelegationPercentageQuery,
   normalizeTimestamp,
-} from "@/api/mappers/";
+  RepositoryFilters,
+} from "@/api/mappers";
+
+type DaoMetricRow = typeof daoMetricsDayBucket.$inferSelect;
+
+interface DelegationPercentageRepository {
+  getDaoMetricsByDateRange(filters: RepositoryFilters): Promise<DaoMetricRow[]>;
+  getLastMetricBeforeDate(
+    metricType: string,
+    beforeDate: string,
+  ): Promise<DaoMetricRow | undefined>;
+}
 
 /**
  * Service result type
