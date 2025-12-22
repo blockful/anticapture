@@ -2,29 +2,29 @@ import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import { VotingPowerService } from "@/api/services";
 import {
-  VotingPowerResponseSchema,
-  VotingPowerRequestSchema,
-  VotingPowerMapper,
+  HistoricalVotingPowerResponseSchema,
+  HistoricalVotingPowerRequestSchema,
+  HistoricalVotingPowerMapper,
 } from "@/api/mappers";
 
-export function votingPower(app: Hono, service: VotingPowerService) {
+export function historicalVotingPowers(app: Hono, service: VotingPowerService) {
   app.openapi(
     createRoute({
       method: "get",
-      operationId: "votingPowers",
-      path: "/voting-powers",
+      operationId: "historicalVotingPowers",
+      path: "/voting-powers/historical",
       summary: "Get voting power changes",
       description: "Returns a list of voting power changes",
       tags: ["proposals"],
       request: {
-        query: VotingPowerRequestSchema,
+        query: HistoricalVotingPowerRequestSchema,
       },
       responses: {
         200: {
           description: "Successfully retrieved voting power changes",
           content: {
             "application/json": {
-              schema: VotingPowerResponseSchema,
+              schema: HistoricalVotingPowerResponseSchema,
             },
           },
         },
@@ -41,7 +41,7 @@ export function votingPower(app: Hono, service: VotingPowerService) {
         maxDelta,
       } = context.req.valid("query");
 
-      const { items, totalCount } = await service.getVotingPowers(
+      const { items, totalCount } = await service.getHistoricalVotingPowers(
         account,
         skip,
         limit,
@@ -50,7 +50,7 @@ export function votingPower(app: Hono, service: VotingPowerService) {
         minDelta,
         maxDelta,
       );
-      return context.json(VotingPowerMapper(items, totalCount));
+      return context.json(HistoricalVotingPowerMapper(items, totalCount));
     },
   );
 }

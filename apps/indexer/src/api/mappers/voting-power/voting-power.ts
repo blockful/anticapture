@@ -4,13 +4,13 @@ import { votingPowerHistory } from "ponder:schema";
 import { DBDelegation, DBTransfer } from "../transactions";
 import { isAddress } from "viem";
 
-export type DBVotingPower = typeof votingPowerHistory.$inferSelect;
-export type DBVotingPowerWithRelations = DBVotingPower & {
+export type DBHistoricalVotingPower = typeof votingPowerHistory.$inferSelect;
+export type DBHistoricalVotingPowerWithRelations = DBHistoricalVotingPower & {
   delegations: DBDelegation | null;
   transfers: DBTransfer | null;
 };
 
-export const VotingPowerRequestSchema = z.object({
+export const HistoricalVotingPowerRequestSchema = z.object({
   account: z.string().refine((addr) => isAddress(addr)),
   skip: z.coerce
     .number()
@@ -31,9 +31,11 @@ export const VotingPowerRequestSchema = z.object({
   maxDelta: z.string().optional(),
 });
 
-export type VotingPowerRequest = z.infer<typeof VotingPowerRequestSchema>;
+export type HistoricalVotingPowerRequest = z.infer<
+  typeof HistoricalVotingPowerRequestSchema
+>;
 
-export const VotingPowerResponseSchema = z.object({
+export const HistoricalVotingPowerResponseSchema = z.object({
   items: z.array(
     z.object({
       transactionHash: z.string(),
@@ -62,12 +64,14 @@ export const VotingPowerResponseSchema = z.object({
   totalCount: z.number(),
 });
 
-export type VotingPowerResponse = z.infer<typeof VotingPowerResponseSchema>;
+export type HistoricalVotingPowerResponse = z.infer<
+  typeof HistoricalVotingPowerResponseSchema
+>;
 
-export const VotingPowerMapper = (
-  p: DBVotingPowerWithRelations[],
+export const HistoricalVotingPowerMapper = (
+  p: DBHistoricalVotingPowerWithRelations[],
   totalCount: number,
-): VotingPowerResponse => {
+): HistoricalVotingPowerResponse => {
   return {
     items: p.map((p) => ({
       transactionHash: p.transactionHash,

@@ -1,7 +1,5 @@
-
 const daoListQueries = [
   'accountBalances',
-  'accountPowers',
   'accounts',
   'daoMetricsDayBuckets',
   'delegations',
@@ -9,7 +7,6 @@ const daoListQueries = [
   'tokens',
   'transfers',
   'votesOnchains',
-  'votingPowerHistorys',
 ]
 
 export const listResolvers = daoListQueries.reduce((acc, fieldName) => {
