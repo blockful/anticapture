@@ -3,7 +3,8 @@
   "globalEnv": [".env"],
   "tasks": {
     "build": {
-      "outputs": ["dist/**", ".next/**", ".next/cache/**"]
+      "outputs": ["dist/**", ".next/**", ".next/cache/**"],
+      "env": ["FIGMA_TOKEN"]
     },
     "clean": {},
     "lint": {},
