@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { z } from "zod";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.NEXT_PUBLIC_RESEND_API_KEY);
 
 const contactFormSchema = z.object({
   nameOrAlias: z.string().min(2),
@@ -46,8 +46,9 @@ export async function POST(request: NextRequest) {
       .join(", ");
 
     const { data, error } = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev",
-      to: process.env.CONTACT_EMAIL || "anticapture@blockful.io",
+      from:
+        process.env.NEXT_PUBLIC_RESEND_FROM_EMAIL || "onboarding@resend.dev",
+      to: process.env.NEXT_PUBLIC_CONTACT_EMAIL || "anticapture@blockful.io",
       subject: `Contact Request from ${validatedData.nameOrAlias} - ${validatedData.whichDao}`,
       html: `
         <h2>New Contact Request</h2>
