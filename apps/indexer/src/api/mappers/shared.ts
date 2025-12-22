@@ -1,6 +1,11 @@
 import { DaysEnum } from "@/lib/enums";
 import { z } from "@hono/zod-openapi";
 
+export type AmountFilter = {
+  minAmount: number | bigint | undefined;
+  maxAmount: number | bigint | undefined;
+};
+
 export const PeriodResponseSchema = z.object({
   days: z.string(),
   startTimestamp: z.string(),
