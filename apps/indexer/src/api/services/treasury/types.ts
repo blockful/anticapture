@@ -18,3 +18,10 @@ export interface TreasuryResponse {
   }[];
   totalCount: number;
 }
+
+/**
+ * Interface for fetching historical token prices
+ */
+export interface PriceProvider {
+  getHistoricalPrices(days: number): Promise<Map<number, number>>;
+}

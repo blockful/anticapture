@@ -57,7 +57,10 @@ import {
 } from "@/api/services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
-import { createTreasuryProvider } from "./services/treasury/treasury-provider-factory";
+import {
+  createLiquidTreasuryProvider,
+  createTokenPriceProvider,
+} from "./services/treasury/treasury-provider-factory";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -129,7 +132,9 @@ const accountBalanceService = new BalanceVariationsService(
   accountInteractionRepo,
 );
 
-const treasuryService = createTreasuryProvider();
+const tokenPriceProvider = createTokenPriceProvider();
+const treasuryService = createLiquidTreasuryProvider(tokenPriceProvider!);
+
 if (treasuryService) {
   treasury(app, treasuryService);
 }
