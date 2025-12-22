@@ -1,15 +1,15 @@
 query GetTopFiveDelegators(
-  $delegate: String!,
-  $limit: Int = 5
+  $delegates: [String]!,
+  $limit: PositiveInt = 5
 ) {
   accountBalances(
-    where: { delegate: $delegate, balance_gt: 0 }
-    orderBy: "balance"
-    orderDirection: "desc"
+    delegates: $delegates
+    balanceGreaterThan: "0"
+    orderDirection: desc
     limit: $limit
   ) {
     items {
-      accountId    
+      accountId
       balance
     }
   }
