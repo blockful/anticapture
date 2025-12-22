@@ -3,7 +3,7 @@ import { Context } from "ponder:registry";
 import { account, daoMetricsDayBucket, transaction } from "ponder:schema";
 
 import { MetricTypesEnum } from "@/lib/constants";
-import { SECONDS_IN_DAY } from "@/lib/enums";
+import { SECONDS_IN_DAY, ONE_DAY_MS } from "@/lib/enums";
 import { delta, max, min } from "@/lib/utils";
 
 export const ensureAccountExists = async (
@@ -144,9 +144,6 @@ export const handleTransaction = async (
     addresses.some((addr) => burning.includes(addr)),
   );
 };
-
-// Time constants
-export const ONE_DAY_MS = SECONDS_IN_DAY * 1000;
 
 /**
  * Truncate timestamp (seconds) to midnight UTC

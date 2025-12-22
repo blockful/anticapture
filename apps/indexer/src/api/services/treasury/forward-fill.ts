@@ -6,7 +6,8 @@
  *
  */
 
-import { truncateTimestampTimeMs, ONE_DAY_MS } from "@/eventHandlers/shared";
+import { truncateTimestampTimeMs } from "@/eventHandlers/shared";
+import { ONE_DAY_MS } from "@/lib/enums";
 
 /**
  * Forward-fill sparse data across a master timeline.
