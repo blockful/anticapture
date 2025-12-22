@@ -130,6 +130,7 @@ export const EnsAvatar = ({
             alt={finalAlt}
             fill
             className="object-cover"
+            unoptimized
             onError={() => setImageError(true)}
             {...imageProps}
           />

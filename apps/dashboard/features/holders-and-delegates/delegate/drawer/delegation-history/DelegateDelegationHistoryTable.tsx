@@ -21,7 +21,7 @@ import { AmountFilter } from "@/shared/components/design-system/table/filters/am
 import { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 import daoConfig from "@/shared/dao-config";
 import { AddressFilter } from "@/shared/components/design-system/table/filters";
-import { fetchEnsData } from "@/shared/hooks/useEnsData";
+import { fetchAddressFromEnsName } from "@/shared/hooks/useEnsData";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import {
   parseAsBoolean,
@@ -296,10 +296,10 @@ export const DelegateDelegationHistoryTable = ({
                 return;
               }
               if (addr.indexOf(".eth") > 0) {
-                const { address } = await fetchEnsData({
-                  address: addr as `${string}.eth`,
+                const address = await fetchAddressFromEnsName({
+                  ensName: addr as `${string}.eth`,
                 });
-                setFromFilter(address || "");
+                setFromFilter(address);
                 return;
               }
               if (isAddress(addr)) {
@@ -406,10 +406,10 @@ export const DelegateDelegationHistoryTable = ({
                 return;
               }
               if (addr.indexOf(".eth") > 0) {
-                const { address } = await fetchEnsData({
-                  address: addr as `${string}.eth`,
+                const address = await fetchAddressFromEnsName({
+                  ensName: addr as `${string}.eth`,
                 });
-                setToFilter(address || "");
+                setToFilter(address);
                 return;
               }
               if (isAddress(addr)) {

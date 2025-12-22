@@ -21,7 +21,7 @@ import { SortOption } from "@/shared/components/design-system/table/filters/amou
 import { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
-import { fetchEnsData } from "@/shared/hooks/useEnsData";
+import { fetchAddressFromEnsName } from "@/shared/hooks/useEnsData";
 import Link from "next/link";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import {
@@ -125,10 +125,10 @@ export const DelegationHistoryTable = ({
             <AddressFilter
               onApply={async (addr) => {
                 if ((addr ?? "").indexOf(".eth") > 0) {
-                  const { address } = await fetchEnsData({
-                    address: addr as `${string}.eth`,
+                  const address = await fetchAddressFromEnsName({
+                    ensName: addr as `${string}.eth`,
                   });
-                  setAddressFilter(address || "");
+                  setAddressFilter(address);
                   return;
                 }
                 setAddressFilter(addr || "");
