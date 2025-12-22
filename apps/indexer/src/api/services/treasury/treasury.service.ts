@@ -17,7 +17,7 @@ export class TreasuryService {
   private repository: TreasuryRepository;
 
   constructor(
-    private provider: TreasuryProvider,
+    private provider?: TreasuryProvider,
     private priceProvider?: PriceProvider,
   ) {
     this.repository = new TreasuryRepository();
@@ -30,6 +30,10 @@ export class TreasuryService {
     days: number,
     order: "asc" | "desc",
   ): Promise<TreasuryResponse> {
+    if (!this.provider) {
+      return { items: [], totalCount: 0 };
+    }
+
     const cutoffTimestamp = calculateCutoffTimestamp(days);
     const data = await this.provider.fetchTreasury(cutoffTimestamp);
 

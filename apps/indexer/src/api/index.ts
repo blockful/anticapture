@@ -58,7 +58,7 @@ import {
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 import {
-  createLiquidTreasuryProvider,
+  createTreasuryService,
   createTokenPriceProvider,
 } from "./services/treasury/treasury-provider-factory";
 
@@ -133,11 +133,8 @@ const accountBalanceService = new BalanceVariationsService(
 );
 
 const tokenPriceProvider = createTokenPriceProvider();
-const treasuryService = createLiquidTreasuryProvider(tokenPriceProvider!);
-
-if (treasuryService) {
-  treasury(app, treasuryService);
-}
+const treasuryService = createTreasuryService(tokenPriceProvider!);
+treasury(app, treasuryService);
 
 const tokenPriceClient =
   env.DAO_ID === DaoIdEnum.NOUNS
