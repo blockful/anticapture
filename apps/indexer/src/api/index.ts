@@ -17,12 +17,13 @@ import {
   proposals,
   lastUpdate,
   totalAssets,
-  votingPower,
+  historicalVotingPowers,
   delegationPercentage,
   votingPowerVariations,
   accountBalanceVariations,
   dao,
   accountInteractions,
+  votingPowers,
 } from "@/api/controllers";
 import { docs } from "@/api/docs";
 import { env } from "@/env";
@@ -161,8 +162,9 @@ historicalBalances(
 transactions(app, transactionsService);
 lastUpdate(app);
 delegationPercentage(app, delegationPercentageService);
-votingPower(app, votingPowerService);
+historicalVotingPowers(app, votingPowerService);
 votingPowerVariations(app, votingPowerService);
+votingPowers(app, votingPowerService);
 accountBalanceVariations(app, accountBalanceService);
 accountInteractions(app, accountBalanceService);
 dao(app, daoService);

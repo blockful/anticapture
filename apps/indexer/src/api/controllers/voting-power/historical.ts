@@ -7,7 +7,7 @@ import {
   HistoricalVotingPowerMapper,
 } from "@/api/mappers";
 
-export function votingPower(app: Hono, service: VotingPowerService) {
+export function historicalVotingPowers(app: Hono, service: VotingPowerService) {
   app.openapi(
     createRoute({
       method: "get",
