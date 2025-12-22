@@ -7,7 +7,7 @@ import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
-import { Address, formatUnits, parseUnits, zeroAddress } from "viem";
+import { Address, formatUnits, isAddress, parseUnits, zeroAddress } from "viem";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import { DaoIdEnum } from "@/shared/types/daos";
 import Link from "next/link";
@@ -30,6 +30,7 @@ import {
   useQueryState,
   useQueryStates,
 } from "nuqs";
+import { parseAsAddress } from "@/shared/utils/parseAsAddress";
 
 interface DelegateDelegationHistoryTableProps {
   accountId: string;
@@ -58,8 +59,8 @@ export const DelegateDelegationHistoryTable = ({
     "active",
     parseAsBoolean.withDefault(false),
   );
-  const [fromFilter, setFromFilter] = useQueryState("from");
-  const [toFilter, setToFilter] = useQueryState("to");
+  const [fromFilter, setFromFilter] = useQueryState("from", parseAsAddress);
+  const [toFilter, setToFilter] = useQueryState("to", parseAsAddress);
   const sortOptions: SortOption[] = [
     { value: "largest-first", label: "Largest first" },
     { value: "smallest-first", label: "Smallest first" },
@@ -78,8 +79,8 @@ export const DelegateDelegationHistoryTable = ({
     orderBy: sortBy,
     orderDirection: sortDirection,
     filterVariables,
-    customFromFilter: fromFilter ?? undefined,
-    customToFilter: toFilter ?? undefined,
+    fromAddress: fromFilter ?? undefined,
+    toAddress: toFilter ?? undefined,
   });
 
   // Handle sorting
@@ -290,14 +291,20 @@ export const DelegateDelegationHistoryTable = ({
           <span>Delegator</span>
           <AddressFilter
             onApply={async (addr) => {
-              if ((addr ?? "").indexOf(".eth") > 0) {
+              if (!addr) {
+                setFromFilter(null);
+                return;
+              }
+              if (addr.indexOf(".eth") > 0) {
                 const { address } = await fetchEnsData({
                   address: addr as `${string}.eth`,
                 });
                 setFromFilter(address || "");
                 return;
               }
-              setFromFilter(addr || "");
+              if (isAddress(addr)) {
+                setFromFilter(addr);
+              }
             }}
             currentFilter={fromFilter ?? undefined}
           />
@@ -394,14 +401,20 @@ export const DelegateDelegationHistoryTable = ({
           <span>Delegate</span>
           <AddressFilter
             onApply={async (addr) => {
-              if ((addr ?? "").indexOf(".eth") > 0) {
+              if (!addr) {
+                setToFilter(null);
+                return;
+              }
+              if (addr.indexOf(".eth") > 0) {
                 const { address } = await fetchEnsData({
                   address: addr as `${string}.eth`,
                 });
                 setToFilter(address || "");
                 return;
               }
-              setToFilter(addr || "");
+              if (isAddress(addr)) {
+                setToFilter(addr);
+              }
             }}
             currentFilter={toFilter ?? undefined}
           />
