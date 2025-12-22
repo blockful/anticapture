@@ -20,7 +20,7 @@ type EnsData = {
 export const useEnsData = (address: Address | null | undefined) => {
   const { data, error, isLoading } = useQuery<EnsData>({
     queryKey: ["ensData", address ?? null],
-    queryFn: () => fetchEnsData({ address: address! }),
+    queryFn: () => fetchEnsDataFromAddress({ address: address! }),
     enabled: !!address,
     refetchOnWindowFocus: false,
     retry: false,
@@ -39,7 +39,7 @@ export const useEnsData = (address: Address | null | undefined) => {
  * @param address - Ethereum address
  * @returns Promise resolving to EnsData
  */
-export const fetchEnsData = async ({
+export const fetchEnsDataFromAddress = async ({
   address,
 }: {
   address: Address;
@@ -64,6 +64,17 @@ export const fetchEnsData = async ({
   };
 };
 
+export const fetchAddressFromEnsName = async ({
+  ensName,
+}: {
+  ensName: `${string}.eth`;
+}): Promise<Address | null> => {
+  const address = await publicClient.getEnsAddress({
+    name: normalize(ensName),
+  });
+  return address || null;
+};
+
 /**
  * Hook to fetch ENS data for multiple addresses
  * @param addresses - Array of Ethereum addresses
@@ -76,7 +87,7 @@ export const useMultipleEnsData = (addresses: Address[]) => {
   const queries = useQueries({
     queries: uniqueAddresses.map((address) => ({
       queryKey: ["addressEns", address],
-      queryFn: () => fetchEnsData({ address }),
+      queryFn: () => fetchEnsDataFromAddress({ address }),
       refetchOnWindowFocus: false,
       retry: false,
       staleTime: 1000 * 60 * 60 * 24, // Consider data fresh for 24 hours
