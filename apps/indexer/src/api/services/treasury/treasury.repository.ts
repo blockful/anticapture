@@ -1,5 +1,5 @@
 import { db } from "ponder:api";
-import { daoMetricsDayBucket, tokenPrice } from "ponder:schema";
+import { daoMetricsDayBucket } from "ponder:schema";
 import { and, eq, gte, lte, desc } from "ponder";
 import { MetricTypesEnum } from "@/lib/constants";
 
@@ -31,32 +31,6 @@ export class TreasuryRepository {
     results.forEach((item) => {
       const timestampMs = Number(item.date) * 1000;
       map.set(timestampMs, item.close);
-    });
-
-    return map;
-  }
-
-  /**
-   * Fetch historical token prices from tokenPrice table
-   * @param cutoffTimestamp - The timestamp to filter the data
-   * @returns Map of timestamp (ms) to price (number)
-   */
-  async getHistoricalPrices(
-    cutoffTimestamp: bigint,
-  ): Promise<Map<number, number>> {
-    const results = await db.query.tokenPrice.findMany({
-      columns: {
-        timestamp: true,
-        price: true,
-      },
-      where: gte(tokenPrice.timestamp, cutoffTimestamp),
-      orderBy: (fields, { asc }) => [asc(fields.timestamp)],
-    });
-
-    const map = new Map<number, number>();
-    results.forEach((item) => {
-      const timestampMs = Number(item.timestamp) * 1000;
-      map.set(timestampMs, Number(item.price));
     });
 
     return map;
