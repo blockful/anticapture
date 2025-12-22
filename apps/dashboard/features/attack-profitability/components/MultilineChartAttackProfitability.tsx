@@ -60,8 +60,16 @@ export const MultilineChartAttackProfitability = ({
 
   const numDays = Number(days.split("d")[0]);
 
-  const { data: liquidTreasuryData } = useTreasury(daoEnum, "liquid", numDays);
-  const { data: totalTreasuryData } = useTreasury(daoEnum, "total", numDays);
+  const { data: liquidTreasuryData } = useTreasury(
+    daoEnum,
+    "liquid",
+    days as TimeInterval,
+  );
+  const { data: totalTreasuryData } = useTreasury(
+    daoEnum,
+    "total",
+    days as TimeInterval,
+  );
 
   const { data: daoTokenPriceHistoricalData } = useDaoTokenHistoricalData({
     daoId: daoEnum,

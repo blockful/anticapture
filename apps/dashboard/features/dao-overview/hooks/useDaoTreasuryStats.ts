@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useTreasury } from "@/features/attack-profitability/hooks/useTreasury";
 import { TokenDataResponse } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
+import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 
 export const useDaoTreasuryStats = ({
   daoId,
@@ -11,15 +12,30 @@ export const useDaoTreasuryStats = ({
   tokenData: { data?: TokenDataResponse | null };
 }) => {
   // Use 7 days (minimum supported) with desc order to get most recent first
-  const { data: liquidTreasury } = useTreasury(daoId, "liquid", 7, {
-    order: "desc",
-  });
-  const { data: tokenTreasury } = useTreasury(daoId, "dao-token", 7, {
-    order: "desc",
-  });
-  const { data: allTreasury } = useTreasury(daoId, "total", 7, {
-    order: "desc",
-  });
+  const { data: liquidTreasury } = useTreasury(
+    daoId,
+    "liquid",
+    TimeInterval.SEVEN_DAYS,
+    {
+      order: "desc",
+    },
+  );
+  const { data: tokenTreasury } = useTreasury(
+    daoId,
+    "dao-token",
+    TimeInterval.SEVEN_DAYS,
+    {
+      order: "desc",
+    },
+  );
+  const { data: allTreasury } = useTreasury(
+    daoId,
+    "total",
+    TimeInterval.SEVEN_DAYS,
+    {
+      order: "desc",
+    },
+  );
 
   return useMemo(() => {
     const lastPrice = Number(tokenData.data?.price) || 0;

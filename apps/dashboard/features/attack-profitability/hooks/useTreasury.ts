@@ -1,6 +1,7 @@
 import useSWR, { SWRConfiguration } from "swr";
 import axios from "axios";
 import { DaoIdEnum } from "@/shared/types/daos";
+import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
 
 export type TreasuryType = "liquid" | "dao-token" | "total";
@@ -24,16 +25,16 @@ const QUERY_NAME_MAP: Record<TreasuryType, string> = {
 const fetchTreasury = async ({
   daoId,
   type = "total",
-  days = 365,
+  days = TimeInterval.ONE_YEAR,
   order = "asc",
 }: {
   daoId: DaoIdEnum;
   type?: TreasuryType;
-  days?: number;
+  days?: TimeInterval;
   order?: "asc" | "desc";
 }): Promise<TreasuryResponse> => {
   const queryName = QUERY_NAME_MAP[type];
-  const daysParam = `_${days}d`;
+  const daysParam = `_${days}`;
 
   const query = `query GetTreasury {
     ${queryName}(days: ${daysParam}, order: ${order}) {
@@ -59,7 +60,7 @@ const fetchTreasury = async ({
 export const useTreasury = (
   daoId: DaoIdEnum,
   type: TreasuryType = "total",
-  days: number = 365,
+  days: TimeInterval = TimeInterval.ONE_YEAR,
   options?: {
     order?: "asc" | "desc";
     config?: Partial<SWRConfiguration<TreasuryResponse, Error>>;
