@@ -11,9 +11,10 @@
     "test": "jest",
     "test:security": "jest --testPathPattern=security",
     "check:token-security": "node scripts/check-token-security.js",
+    "validate:figma-token": "node scripts/validate-figma-token.js",
     "format": "prettier --write .",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build",
+    "build-storybook": "node scripts/validate-figma-token.js && storybook build",
     "test:storybook-production": "node scripts/test-production-storybook.js",
     "clean": "rm -rf node_modules .next out build coverage storybook-static *.tsbuildinfo *storybook.log",
     "typecheck": "tsc --noEmit"
