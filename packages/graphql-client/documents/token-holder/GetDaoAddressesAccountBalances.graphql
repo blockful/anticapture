@@ -1,7 +1,12 @@
-query GetDaoAddressesAccountBalances {
+query GetDaoAddressesAccountBalances(
+  $tokenAddresses: String!
+  $daoAddresses: [String]!
+) {
   accountBalances(
-    orderDirection: desc
-    limit: "1" 
+    where: { tokenId: $tokenAddresses, accountId_not_in: $daoAddresses }
+    orderBy: "balance"
+    orderDirection: "DESC"
+    limit: 1
   ) {
     items {
       accountId
