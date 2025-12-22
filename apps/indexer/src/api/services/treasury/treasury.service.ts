@@ -134,11 +134,12 @@ export class TreasuryService {
       return { items: [], totalCount: 0 };
     }
 
-    // If only one has data, use that timeline; otherwise both have same timeline
+    // Use the timeline with more data points (liquid or token could be empty)
     const baseItems =
-      liquidResult.items.length > 0 ? liquidResult.items : tokenResult.items;
+      liquidResult.items.length > tokenResult.items.length
+        ? liquidResult.items
+        : tokenResult.items;
 
-    // Sum values (same timeline guaranteed by forward-fill when both have data)
     const items = baseItems.map((item, i) => ({
       date: item.date,
       value:
