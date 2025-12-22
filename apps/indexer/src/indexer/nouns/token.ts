@@ -15,6 +15,7 @@ import {
   TreasuryAddresses,
 } from "@/lib/constants";
 import {
+  updateCirculatingSupply,
   updateDelegatedSupply,
   updateSupplyMetric,
   updateTotalSupply,
@@ -90,6 +91,13 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
           zeroAddress,
           timelock,
           isFromTimelock ? -1n : 1n,
+          daoId,
+          address,
+          event.block.timestamp,
+        );
+
+        await updateCirculatingSupply(
+          context,
           daoId,
           address,
           event.block.timestamp,

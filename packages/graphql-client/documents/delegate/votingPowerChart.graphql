@@ -1,0 +1,18 @@
+query GetVotingPowerChart(
+  $account: String!
+  $limit: PositiveInt = 10
+  $orderDirection: queryInput_votingPowers_orderDirection = desc
+  $orderBy: queryInput_votingPowers_orderBy
+) {
+  votingPowers(
+    account: $account
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+    limit: $limit
+  ) {
+    items {
+      votingPower
+      timestamp
+    }
+  }
+}

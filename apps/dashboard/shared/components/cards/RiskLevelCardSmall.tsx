@@ -25,12 +25,16 @@ const riskConfigs: Record<RiskLevel, RiskConfig> = {
   },
   [RiskLevel.LOW]: {
     color: "success",
-    pattern: ["bg-success", "bg-middle-dark", "bg-middle-dark"],
+    pattern: ["bg-success", "bg-surface-contrast", "bg-surface-contrast"],
     icon: <CheckCircle2 className="text-success size-3.5" />,
   },
   [RiskLevel.NONE]: {
     color: "secondary",
-    pattern: ["bg-middle-dark", "bg-middle-dark", "bg-middle-dark"],
+    pattern: [
+      "bg-surface-contrast",
+      "bg-surface-contrast",
+      "bg-surface-contrast",
+    ],
     icon: <CounterClockwiseClockIcon className="text-secondary size-3.5" />,
   },
 };
@@ -81,7 +85,7 @@ export const RiskLevelCardSmall = ({
   return (
     <div
       className={cn(
-        "bg-surface-contrast flex h-full w-fit gap-1 rounded-full px-2 py-0.5",
+        "bg-surface-opacity flex h-full w-fit gap-1 rounded-full px-2 py-0.5",
         className,
       )}
     >

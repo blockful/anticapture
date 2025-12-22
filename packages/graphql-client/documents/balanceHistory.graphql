@@ -1,6 +1,13 @@
-query BalanceHistory($account: String!, $after: String, $before: String, $limit: Int = 10, $orderBy: String = "timestamp", $orderDirection: String = "desc") {
+query BalanceHistory(
+  $after: String
+  $before: String
+  $limit: Int = 10
+  $orderBy: String = "timestamp"
+  $orderDirection: String = "desc"
+  $where: transferFilter
+) {
   transfers(
-    where: {OR: [{fromAccountId: $account}, {toAccountId: $account}]}
+    where: $where
     orderBy: $orderBy
     orderDirection: $orderDirection
     limit: $limit
@@ -19,81 +26,14 @@ query BalanceHistory($account: String!, $after: String, $before: String, $limit:
       hasNextPage
       hasPreviousPage
       startCursor
-    }    
+    }
   }
 }
 
 query BalanceHistoryTotalCount($account: String!) {
   transfers(
-    where: {OR: [{fromAccountId: $account}, {toAccountId: $account}]}
+    where: { OR: [{ fromAccountId: $account }, { toAccountId: $account }] }
   ) {
     totalCount
   }
 }
-
-query BalanceHistoryBuy($account: String!, $after: String, $before: String, $limit: Int = 10, $orderBy: String = "timestamp", $orderDirection: String = "desc") {
-  transfers(
-    where: {toAccountId: $account}
-    orderBy: $orderBy
-    orderDirection: $orderDirection
-    limit: $limit
-    after: $after
-    before: $before
-  ) {
-    items {
-      timestamp
-      amount
-      fromAccountId
-      toAccountId
-      transactionHash
-    }
-    pageInfo {
-      endCursor
-      hasNextPage
-      hasPreviousPage
-      startCursor
-    }    
-  }
-}
-
-query BalanceHistoryBuyTotalCount($account: String!) {
-  transfers(
-    where: {toAccountId: $account}
-  ) {
-    totalCount
-  }
-}
-
-query BalanceHistorySell($account: String!, $after: String, $before: String, $limit: Int = 10, $orderBy: String = "timestamp", $orderDirection: String = "desc") {
-  transfers(
-    where: {fromAccountId: $account}
-    orderBy: $orderBy
-    orderDirection: $orderDirection
-    limit: $limit
-    after: $after
-    before: $before
-  ) {
-    items {
-      timestamp
-      amount
-      fromAccountId
-      toAccountId
-      transactionHash
-    }
-    pageInfo {
-      endCursor
-      hasNextPage
-      hasPreviousPage
-      startCursor
-    }    
-  }
-}
-
-query BalanceHistorySellTotalCount($account: String!) {
-  transfers(
-    where: {fromAccountId: $account}
-  ) {
-    totalCount
-  }
-}
-
