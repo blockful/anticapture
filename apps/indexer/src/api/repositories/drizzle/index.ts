@@ -31,10 +31,10 @@ import {
 } from "@/api/controllers";
 import { DaysEnum } from "@/lib/enums";
 import { DBProposal } from "@/api/mappers";
-import { DrizzleDB } from "@/api/database";
+import { ReadonlyDrizzle } from "@/api/database";
 
 export class DrizzleRepository {
-  constructor(private db: DrizzleDB) {}
+  constructor(private db: ReadonlyDrizzle) {}
 
   async getSupplyComparison(metricType: string, days: DaysEnum) {
     const query = sql`

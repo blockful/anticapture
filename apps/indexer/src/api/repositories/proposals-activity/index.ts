@@ -3,7 +3,7 @@ import { DaoIdEnum } from "@/lib/enums";
 import { asc, eq, sql } from "drizzle-orm";
 
 import { votesOnchain } from "ponder:schema";
-import { DrizzleDB } from "@/api/database";
+import { ReadonlyDrizzle } from "@/api/database";
 
 export type DbProposal = {
   id: string;
@@ -77,7 +77,7 @@ export interface ProposalsActivityRepository {
 /* eslint-disable */
 export class DrizzleProposalsActivityRepository implements ProposalsActivityRepository {
   /* eslint-enable */
-  constructor(private readonly db: DrizzleDB) {}
+  constructor(private readonly db: ReadonlyDrizzle) {}
 
   async getFirstVoteTimestamp(address: Address): Promise<number | null> {
     const firstVote = await this.db.query.votesOnchain.findFirst({

@@ -2,10 +2,10 @@ import { tokenPrice } from "ponder:schema";
 import { desc, sql } from "drizzle-orm";
 
 import { TokenHistoricalPriceResponse } from "@/api/mappers";
-import { DrizzleDB } from "@/api/database";
+import { ReadonlyDrizzle } from "@/api/database";
 
 export class NFTPriceRepository {
-  constructor(private readonly db: DrizzleDB) {}
+  constructor(private readonly db: ReadonlyDrizzle) {}
   /**
    * Repository for handling NFT price data and calculations.
    * Provides methods to retrieve historical NFT auction prices with rolling averages.

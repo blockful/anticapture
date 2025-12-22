@@ -3,14 +3,14 @@ import { daoMetricsDayBucket } from "ponder:schema";
 
 import { ChartType } from "@/api/mappers/";
 import { MetricTypesEnum } from "@/lib/constants";
-import { DrizzleDB } from "@/api/database";
+import { ReadonlyDrizzle } from "@/api/database";
 
 export interface LastUpdateRepository {
   getLastUpdate(chart: ChartType): Promise<bigint | undefined>;
 }
 
 export class LastUpdateRepositoryImpl implements LastUpdateRepository {
-  constructor(private readonly db: DrizzleDB) {}
+  constructor(private readonly db: ReadonlyDrizzle) {}
 
   async getLastUpdate(chart: ChartType) {
     let metricsToCheck: MetricTypesEnum[] = [];

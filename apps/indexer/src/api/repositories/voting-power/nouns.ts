@@ -4,10 +4,10 @@ import { gte, and, lte, desc, eq, asc, sql } from "drizzle-orm";
 import { votingPowerHistory, delegation, transfer } from "ponder:schema";
 
 import { DBVotingPowerWithRelations } from "@/api/mappers";
-import { DrizzleDB } from "@/api/database";
+import { ReadonlyDrizzle } from "@/api/database";
 
 export class NounsVotingPowerRepository {
-  constructor(private readonly db: DrizzleDB) {}
+  constructor(private readonly db: ReadonlyDrizzle) {}
 
   async getVotingPowerCount(
     accountId: Address,

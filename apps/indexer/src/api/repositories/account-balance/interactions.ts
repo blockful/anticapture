@@ -2,11 +2,11 @@ import { Address } from "viem";
 import { transfer, accountBalance } from "ponder:schema";
 import { asc, desc, gte, sql, and, eq, or, lte } from "drizzle-orm";
 
-import { DrizzleDB } from "@/api/database";
+import { ReadonlyDrizzle } from "@/api/database";
 import { AccountInteractions, Filter } from "@/api/mappers";
 
 export class AccountInteractionsRepository {
-  constructor(private readonly db: DrizzleDB) {}
+  constructor(private readonly db: ReadonlyDrizzle) {}
 
   async getAccountInteractions(
     accountId: Address,

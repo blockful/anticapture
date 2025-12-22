@@ -1,14 +1,14 @@
 import { daoMetricsDayBucket } from "ponder:schema";
 import { and, gte, lte, inArray, desc, asc } from "drizzle-orm";
 
-import { DrizzleDB } from "@/api/database";
+import { ReadonlyDrizzle } from "@/api/database";
 import { MetricTypesEnum } from "@/lib/constants";
 import type { RepositoryFilters } from "@/api/mappers";
 
 type DaoMetricRow = typeof daoMetricsDayBucket.$inferSelect;
 
 export class DelegationPercentageRepository {
-  constructor(private readonly db: DrizzleDB) {}
+  constructor(private readonly db: ReadonlyDrizzle) {}
 
   /**
    * Fetches DELEGATED_SUPPLY and TOTAL_SUPPLY metrics from database

@@ -2,11 +2,11 @@ import { Address } from "viem";
 import { transfer, accountBalance } from "ponder:schema";
 import { asc, desc, gte, sql, and, inArray } from "drizzle-orm";
 
-import { DrizzleDB } from "@/api/database";
+import { ReadonlyDrizzle } from "@/api/database";
 import { DBAccountBalanceVariation, DBHistoricalBalance } from "@/api/mappers";
 
 export class AccountBalanceRepository {
-  constructor(private readonly db: DrizzleDB) {}
+  constructor(private readonly db: ReadonlyDrizzle) {}
 
   async getHistoricalBalances(
     addresses: Address[],

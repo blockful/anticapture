@@ -28,10 +28,3 @@ export type ReadonlyDrizzle = Omit<
   | "refreshMaterializedView"
   | "_"
 >;
-
-/**
- * Database-agnostic type supporting both read-write and read-only contexts
- * Use this type in repositories that work with both Ponder's API context
- * and indexing context
- */
-export type DrizzleDB = Drizzle | ReadonlyDrizzle;

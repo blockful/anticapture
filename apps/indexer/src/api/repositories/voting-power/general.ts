@@ -12,10 +12,10 @@ import {
   DBVotingPowerVariation,
   DBVotingPowerWithRelations,
 } from "@/api/mappers";
-import { DrizzleDB } from "@/api/database";
+import { ReadonlyDrizzle } from "@/api/database";
 
 export class VotingPowerRepository {
-  constructor(private readonly db: DrizzleDB) {}
+  constructor(private readonly db: ReadonlyDrizzle) {}
 
   async getHistoricalVotingPower(
     addresses: Address[],

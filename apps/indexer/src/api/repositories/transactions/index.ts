@@ -2,10 +2,10 @@ import { DBTransaction, TransactionsRequest } from "@/api/mappers";
 import { sql, eq, or, countDistinct, SQLChunk } from "drizzle-orm";
 
 import { delegation, transaction, transfer } from "ponder:schema";
-import { DrizzleDB } from "@/api/database";
+import { ReadonlyDrizzle } from "@/api/database";
 
 export class TransactionsRepository {
-  constructor(private readonly db: DrizzleDB) {}
+  constructor(private readonly db: ReadonlyDrizzle) {}
   async getFilteredAggregateTransactions(
     filter: TransactionsRequest,
   ): Promise<DBTransaction[]> {
