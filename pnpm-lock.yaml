@@ -376,6 +376,9 @@ importers:
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@20.19.25)(typescript@5.9.3)
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
@@ -26495,7 +26498,7 @@ snapshots:
       "@nolyfill/is-core-module": 1.0.39
       debug: 4.4.1
       eslint: 8.57.1
-      get-tsconfig: 4.10.1
+      get-tsconfig: 4.13.0
       is-bun-module: 2.0.0
       stable-hash: 0.0.5
       tinyglobby: 0.2.14
@@ -30845,7 +30848,7 @@ snapshots:
   tsx@4.21.0:
     dependencies:
       esbuild: 0.27.1
-      get-tsconfig: 4.10.1
+      get-tsconfig: 4.13.0
     optionalDependencies:
       fsevents: 2.3.3
 
