@@ -124,7 +124,7 @@ export default function ContactPage() {
                 </div>
                 <div className="relative flex-1">
                   <Image
-                    src="/images/satellite.svg"
+                    src="/images/satellite.png"
                     alt="Satellite"
                     width={400}
                     height={403}
