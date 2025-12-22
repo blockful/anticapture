@@ -2,27 +2,29 @@ import type { StorybookConfig } from "@storybook/nextjs";
 
 import { join, dirname } from "path";
 import { resolve } from "path";
-import { readFileSync } from "fs";
+import { readFileSync, existsSync } from "fs";
 
 // Load environment variables from .env.local manually
 // This ensures FIGMA_TOKEN is available to Storybook
 // (dotenv might not be available, so we load manually)
-try {
-  const envPath = resolve(__dirname, "../.env.local");
-  const envFile = readFileSync(envPath, "utf-8");
-  envFile.split("\n").forEach((line) => {
-    const match = line.match(/^([^=:#]+)=(.*)$/);
-    if (match) {
-      const key = match[1].trim();
-      const value = match[2].trim().replace(/^["']|["']$/g, "");
-      if (!process.env[key]) {
-        process.env[key] = value;
+const envPath = resolve(__dirname, "../.env.local");
+if (existsSync(envPath)) {
+  try {
+    const envFile = readFileSync(envPath, "utf-8");
+    envFile.split("\n").forEach((line) => {
+      const match = line.match(/^([^=:#]+)=(.*)$/);
+      if (match) {
+        const key = match[1].trim();
+        const value = match[2].trim().replace(/^["']|["']$/g, "");
+        if (!process.env[key]) {
+          process.env[key] = value;
+        }
       }
-    }
-  });
-} catch (error) {
-  // .env.local might not exist, that's okay
-  console.warn("Could not load .env.local file:", error);
+    });
+  } catch (error) {
+    // Failed to parse .env.local, log quietly
+    console.info("ℹ️  Could not parse .env.local file");
+  }
 }
 
 /**
