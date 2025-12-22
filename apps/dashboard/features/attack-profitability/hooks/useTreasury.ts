@@ -15,6 +15,12 @@ export interface TreasuryResponse {
   totalCount: number;
 }
 
+const QUERY_NAME_MAP: Record<TreasuryType, string> = {
+  liquid: "getLiquidTreasury",
+  "dao-token": "getDaoTokenTreasury",
+  total: "getTotalTreasury",
+};
+
 const fetchTreasury = async ({
   daoId,
   type = "total",
@@ -26,15 +32,28 @@ const fetchTreasury = async ({
   days?: number;
   order?: "asc" | "desc";
 }): Promise<TreasuryResponse> => {
-  const url = `${BACKEND_ENDPOINT}/treasury/${type}`;
-  const headers = { "anticapture-dao-id": daoId };
+  const queryName = QUERY_NAME_MAP[type];
+  const daysParam = `_${days}d`;
 
-  const response = await axios.get(url, {
-    params: { days: `${days}d`, order },
-    headers,
-  });
+  const query = `query GetTreasury {
+    ${queryName}(days: ${daysParam}, order: ${order}) {
+      items {
+        date
+        value
+      }
+      totalCount
+    }
+  }`;
 
-  return response.data;
+  const response: {
+    data: { data: { [key: string]: TreasuryResponse } };
+  } = await axios.post(
+    `${BACKEND_ENDPOINT}`,
+    { query },
+    { headers: { "anticapture-dao-id": daoId } },
+  );
+
+  return response.data.data[queryName];
 };
 
 export const useTreasury = (
