@@ -1,15 +1,18 @@
 import { asc, desc, gte, sql, and, inArray } from "ponder";
-import { db } from "ponder:api";
+
 import { transfer, accountBalance } from "ponder:schema";
 import { DBAccountBalanceVariation, DBHistoricalBalance } from "@/api/mappers";
 import { Address } from "viem";
+import { DrizzleDB } from "@/api/database";
 
 export class AccountBalanceRepository {
+  constructor(private readonly db: DrizzleDB) {}
+
   async getHistoricalBalances(
     addresses: Address[],
     timestamp: number,
   ): Promise<DBHistoricalBalance[]> {
-    const transfersFrom = db
+    const transfersFrom = this.db
       .select({
         accountId: transfer.fromAccountId,
         fromAmount: sql<string>`-SUM(${transfer.amount})`.as("from_amount"),
@@ -25,7 +28,7 @@ export class AccountBalanceRepository {
       .as("transfers_from");
 
     // Aggregate incoming transfers (positive amounts)
-    const transfersTo = db
+    const transfersTo = this.db
       .select({
         accountId: transfer.toAccountId,
         toAmount: sql<string>`SUM(${transfer.amount})`.as("to_amount"),
@@ -41,7 +44,7 @@ export class AccountBalanceRepository {
       .as("transfers_to");
 
     // Combine both aggregations
-    const combined = db
+    const combined = this.db
       .select({
         accountId: accountBalance.accountId,
         currentBalance: accountBalance.balance,
@@ -64,7 +67,7 @@ export class AccountBalanceRepository {
       .where(inArray(accountBalance.accountId, addresses))
       .as("combined");
 
-    const result = await db
+    const result = await this.db
       .select({
         address: combined.accountId,
         balance:
@@ -84,13 +87,13 @@ export class AccountBalanceRepository {
     orderDirection: "asc" | "desc",
   ): Promise<DBAccountBalanceVariation[]> {
     // Aggregate outgoing transfers (negative amounts)
-    const scopedTransfers = db
+    const scopedTransfers = this.db
       .select()
       .from(transfer)
       .where(gte(transfer.timestamp, BigInt(startTimestamp)))
       .as("scoped_transfers");
 
-    const transfersFrom = db
+    const transfersFrom = this.db
       .select({
         accountId: scopedTransfers.fromAccountId,
         fromAmount: sql<string>`-SUM(${transfer.amount})`.as("from_amount"),
@@ -100,7 +103,7 @@ export class AccountBalanceRepository {
       .as("transfers_from");
 
     // Aggregate incoming transfers (positive amounts)
-    const transfersTo = db
+    const transfersTo = this.db
       .select({
         accountId: scopedTransfers.toAccountId,
         toAmount: sql<string>`SUM(${transfer.amount})`.as("to_amount"),
@@ -110,7 +113,7 @@ export class AccountBalanceRepository {
       .as("transfers_to");
 
     // Combine both aggregations
-    const combined = db
+    const combined = this.db
       .select({
         accountId: accountBalance.accountId,
         currentBalance: accountBalance.balance,
@@ -135,7 +138,7 @@ export class AccountBalanceRepository {
       )
       .as("combined");
 
-    const result = await db
+    const result = await this.db
       .select({
         accountId: combined.accountId,
         currentBalance: combined.currentBalance,

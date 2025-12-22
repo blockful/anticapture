@@ -1,10 +1,13 @@
 import { asc, desc, gte, sql, and, eq, or, lte } from "ponder";
-import { db } from "ponder:api";
+
 import { transfer, accountBalance } from "ponder:schema";
 import { AccountInteractions, Filter } from "../../mappers";
 import { Address } from "viem";
+import { DrizzleDB } from "@/api/database";
 
 export class AccountInteractionsRepository {
+  constructor(private readonly db: DrizzleDB) {}
+
   async getAccountInteractions(
     accountId: Address,
     startTimestamp: number,
@@ -41,13 +44,13 @@ export class AccountInteractionsRepository {
     }
 
     // Aggregate outgoing transfers (negative amounts)
-    const scopedTransfers = db
+    const scopedTransfers = this.db
       .select()
       .from(transfer)
       .where(and(...transferCriteria))
       .as("scoped_transfers");
 
-    const transfersFrom = db
+    const transfersFrom = this.db
       .select({
         accountId: scopedTransfers.fromAccountId,
         fromAmount: sql<string>`-SUM(${transfer.amount})`.as("from_amount"),
@@ -58,7 +61,7 @@ export class AccountInteractionsRepository {
       .as("transfers_from");
 
     // Aggregate incoming transfers (positive amounts)
-    const transfersTo = db
+    const transfersTo = this.db
       .select({
         accountId: scopedTransfers.toAccountId,
         toAmount: sql<string>`SUM(${transfer.amount})`.as("to_amount"),
@@ -69,7 +72,7 @@ export class AccountInteractionsRepository {
       .as("transfers_to");
 
     // Combine both aggregations
-    const combined = db
+    const combined = this.db
       .select({
         accountId: accountBalance.accountId,
         currentBalance: accountBalance.balance,
@@ -106,7 +109,7 @@ export class AccountInteractionsRepository {
         ? sql`${combined.fromCount} + ${combined.toCount}`
         : sql`ABS(${combined.fromChange}) + ABS(${combined.toChange})`;
 
-    const baseQuery = db
+    const baseQuery = this.db
       .select({
         accountId: combined.accountId,
         currentBalance: combined.currentBalance,
@@ -126,7 +129,7 @@ export class AccountInteractionsRepository {
       .from(combined)
       .orderBy(orderDirectionFn(orderByField));
 
-    const totalCountResult = await db
+    const totalCountResult = await this.db
       .select({
         count: sql<number>`COUNT(*)`.as("count"),
       })

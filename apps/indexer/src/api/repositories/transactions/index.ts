@@ -1,9 +1,11 @@
 import { DBTransaction, TransactionsRequest } from "@/api/mappers";
 import { sql, eq, or, countDistinct, SQLChunk } from "drizzle-orm";
-import { db } from "ponder:api";
+
 import { delegation, transaction, transfer } from "ponder:schema";
+import { DrizzleDB } from "@/api/database";
 
 export class TransactionsRepository {
+  constructor(private readonly db: DrizzleDB) {}
   async getFilteredAggregateTransactions(
     filter: TransactionsRequest,
   ): Promise<DBTransaction[]> {
@@ -84,7 +86,7 @@ export class TransactionsRepository {
     LEFT JOIN delegation_aggregates da ON da.transaction_hash = lt.transaction_hash
     ORDER BY lt.timestamp DESC;
 `;
-    const result = await db.execute<DBTransaction>(query);
+    const result = await this.db.execute<DBTransaction>(query);
 
     return result.rows;
   }
@@ -95,7 +97,7 @@ export class TransactionsRepository {
     const { transfer: transferFilter, delegation: delegationFilter } =
       this.filterToSql(filter);
 
-    const query = await db
+    const query = await this.db
       .select({
         count: countDistinct(
           sql`coalesce(${transfer.transactionHash}, ${delegation.transactionHash})`,

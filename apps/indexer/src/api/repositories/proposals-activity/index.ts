@@ -1,8 +1,9 @@
 import { Address } from "viem";
 import { DaoIdEnum } from "@/lib/enums";
 import { asc, eq, sql } from "ponder";
-import { db } from "ponder:api";
+
 import { votesOnchain } from "ponder:schema";
+import { DrizzleDB } from "@/api/database";
 
 export type DbProposal = {
   id: string;
@@ -76,9 +77,10 @@ export interface ProposalsActivityRepository {
 /* eslint-disable */
 export class DrizzleProposalsActivityRepository implements ProposalsActivityRepository {
   /* eslint-enable */
+  constructor(private readonly db: DrizzleDB) {}
 
   async getFirstVoteTimestamp(address: Address): Promise<number | null> {
-    const firstVote = await db.query.votesOnchain.findFirst({
+    const firstVote = await this.db.query.votesOnchain.findFirst({
       where: eq(votesOnchain.voterAccountId, address),
       columns: {
         timestamp: true,
@@ -102,7 +104,7 @@ export class DrizzleProposalsActivityRepository implements ProposalsActivityRepo
       ORDER BY timestamp DESC
     `;
 
-    const result = await db.execute<DbProposal>(query);
+    const result = await this.db.execute<DbProposal>(query);
     return result.rows;
   }
 
@@ -121,7 +123,7 @@ export class DrizzleProposalsActivityRepository implements ProposalsActivityRepo
         AND proposal_id IN (${sql.raw(proposalIds.map((id) => `'${id}'`).join(","))})
     `;
 
-    const result = await db.execute<DbVote>(query);
+    const result = await this.db.execute<DbVote>(query);
     return result.rows;
   }
 
@@ -195,7 +197,7 @@ export class DrizzleProposalsActivityRepository implements ProposalsActivityRepo
     `;
 
     const [result, countResult] = await Promise.all([
-      db.execute<{
+      this.db.execute<{
         id: string;
         dao_id: string;
         proposer_account_id: string;
@@ -216,7 +218,7 @@ export class DrizzleProposalsActivityRepository implements ProposalsActivityRepo
         reason: string | null;
         vote_timestamp: string | null;
       }>(query),
-      db.execute<{ total_count: string }>(countQuery),
+      this.db.execute<{ total_count: string }>(countQuery),
     ]);
 
     const totalCount = Number(countResult.rows[0]?.total_count || 0);

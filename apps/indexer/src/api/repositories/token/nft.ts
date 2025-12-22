@@ -1,10 +1,11 @@
-import { db } from "ponder:api";
 import { tokenPrice } from "ponder:schema";
 import { desc, sql } from "ponder";
 
 import { TokenHistoricalPriceResponse } from "@/api/mappers";
+import { DrizzleDB } from "@/api/database";
 
 export class NFTPriceRepository {
+  constructor(private readonly db: DrizzleDB) {}
   /**
    * Repository for handling NFT price data and calculations.
    * Provides methods to retrieve historical NFT auction prices with rolling averages.
@@ -13,7 +14,7 @@ export class NFTPriceRepository {
     limit: number,
     offset: number,
   ): Promise<TokenHistoricalPriceResponse> {
-    return await db
+    return await this.db
       .select({
         price: sql<string>`
       CAST(
@@ -32,7 +33,7 @@ export class NFTPriceRepository {
   }
 
   async getTokenPrice(): Promise<string> {
-    return (await db.query.tokenPrice.findFirst({
+    return (await this.db.query.tokenPrice.findFirst({
       orderBy: desc(tokenPrice.timestamp),
     }))!.price.toString();
   }

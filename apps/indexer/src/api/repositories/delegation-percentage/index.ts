@@ -1,10 +1,11 @@
-import { db } from "ponder:api";
 import { daoMetricsDayBucket } from "ponder:schema";
 import { and, gte, lte, inArray, desc, asc } from "ponder";
 import { MetricTypesEnum } from "@/lib/constants";
 import type { RepositoryFilters } from "@/api/mappers/";
+import { DrizzleDB } from "@/api/database";
 
 export class DelegationPercentageRepository {
+  constructor(private readonly db: DrizzleDB) {}
   /**
    * Fetches DELEGATED_SUPPLY and TOTAL_SUPPLY metrics from database
    * @param filters - Date range and ordering filters
@@ -27,7 +28,7 @@ export class DelegationPercentageRepository {
       conditions.push(lte(daoMetricsDayBucket.date, BigInt(endDate)));
     }
 
-    return db.query.daoMetricsDayBucket.findMany({
+    return this.db.query.daoMetricsDayBucket.findMany({
       where: and(...conditions),
       limit,
       orderBy:
@@ -44,7 +45,7 @@ export class DelegationPercentageRepository {
    * @returns The most recent metric row or null if not found
    */
   async getLastMetricBeforeDate(metricType: string, beforeDate: string) {
-    return await db.query.daoMetricsDayBucket.findFirst({
+    return await this.db.query.daoMetricsDayBucket.findFirst({
       where: and(
         lte(daoMetricsDayBucket.date, BigInt(beforeDate)),
         inArray(daoMetricsDayBucket.metricType, [metricType]),

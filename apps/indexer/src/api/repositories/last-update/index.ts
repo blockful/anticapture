@@ -1,15 +1,17 @@
-import { db } from "ponder:api";
 import { inArray } from "ponder";
 import { daoMetricsDayBucket } from "ponder:schema";
 
 import { ChartType } from "@/api/mappers/";
 import { MetricTypesEnum } from "@/lib/constants";
+import { DrizzleDB } from "@/api/database";
 
 export interface LastUpdateRepository {
   getLastUpdate(chart: ChartType): Promise<bigint | undefined>;
 }
 
 export class LastUpdateRepositoryImpl implements LastUpdateRepository {
+  constructor(private readonly db: DrizzleDB) {}
+
   async getLastUpdate(chart: ChartType) {
     let metricsToCheck: MetricTypesEnum[] = [];
 
@@ -36,7 +38,7 @@ export class LastUpdateRepositoryImpl implements LastUpdateRepository {
         break;
     }
     // Find the record with the greatest timestamp for the specified metrics
-    const lastUpdate = await db.query.daoMetricsDayBucket.findFirst({
+    const lastUpdate = await this.db.query.daoMetricsDayBucket.findFirst({
       columns: {
         lastUpdate: true,
       },

@@ -1,6 +1,6 @@
 import { Address } from "viem";
 import { gte, and, inArray, lte, desc, eq, asc, sql } from "drizzle-orm";
-import { db } from "ponder:api";
+
 import {
   votingPowerHistory,
   delegation,
@@ -12,13 +12,16 @@ import {
   DBVotingPowerVariation,
   DBVotingPowerWithRelations,
 } from "@/api/mappers";
+import { DrizzleDB } from "@/api/database";
 
 export class VotingPowerRepository {
+  constructor(private readonly db: DrizzleDB) {}
+
   async getHistoricalVotingPower(
     addresses: Address[],
     timestamp: bigint,
   ): Promise<{ address: Address; votingPower: bigint }[]> {
-    return await db
+    return await this.db
       .selectDistinctOn([votingPowerHistory.accountId], {
         address: votingPowerHistory.accountId,
         votingPower: votingPowerHistory.votingPower,
@@ -41,7 +44,7 @@ export class VotingPowerRepository {
     minDelta?: string,
     maxDelta?: string,
   ): Promise<number> {
-    return await db.$count(
+    return await this.db.$count(
       votingPowerHistory,
       and(
         eq(votingPowerHistory.accountId, accountId),
@@ -64,7 +67,7 @@ export class VotingPowerRepository {
     minDelta?: string,
     maxDelta?: string,
   ): Promise<DBVotingPowerWithRelations[]> {
-    const result = await db
+    const result = await this.db
       .select()
       .from(votingPowerHistory)
       .where(
@@ -135,7 +138,7 @@ export class VotingPowerRepository {
     skip: number,
     orderDirection: "asc" | "desc",
   ): Promise<DBVotingPowerVariation[]> {
-    const history = db
+    const history = this.db
       .select({
         delta: votingPowerHistory.delta,
         accountId: votingPowerHistory.accountId,
@@ -145,7 +148,7 @@ export class VotingPowerRepository {
       .where(gte(votingPowerHistory.timestamp, BigInt(startTimestamp)))
       .as("history");
 
-    const aggregate = db
+    const aggregate = this.db
       .select({
         accountId: history.accountId,
         absoluteChange: sql<bigint>`SUM(${history.delta})`.as("agg_delta"),
@@ -156,7 +159,7 @@ export class VotingPowerRepository {
       .groupBy(history.accountId, accountPower.votingPower)
       .as("aggregate");
 
-    const result = await db
+    const result = await this.db
       .select()
       .from(aggregate)
       .orderBy(

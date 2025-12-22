@@ -1,5 +1,5 @@
-import { db } from "ponder:api";
 import { graphql } from "ponder";
+import { db } from "ponder:api";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import schema from "ponder:schema";
 import { logger } from "hono/logger";
@@ -38,6 +38,7 @@ import {
   DrizzleProposalsActivityRepository,
   NounsVotingPowerRepository,
   AccountInteractionsRepository,
+  LastUpdateRepositoryImpl,
 } from "@/api/repositories";
 import { errorHandler } from "@/api/middlewares";
 import { getClient } from "@/lib/client";
@@ -55,6 +56,7 @@ import {
   BalanceVariationsService,
   HistoricalBalancesService,
   DaoService,
+  LastUpdateService,
 } from "@/api/services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
@@ -105,20 +107,20 @@ const optimisticProposalType =
     ? daoConfig.optimisticProposalType
     : undefined;
 
-const repo = new DrizzleRepository();
-const votingPowerRepo = new VotingPowerRepository();
-const proposalsRepo = new DrizzleProposalsActivityRepository();
-const transactionsRepo = new TransactionsRepository();
-const delegationPercentageRepo = new DelegationPercentageRepository();
+const repo = new DrizzleRepository(db);
+const votingPowerRepo = new VotingPowerRepository(db);
+const proposalsRepo = new DrizzleProposalsActivityRepository(db);
+const transactionsRepo = new TransactionsRepository(db);
+const delegationPercentageRepo = new DelegationPercentageRepository(db);
 const delegationPercentageService = new DelegationPercentageService(
   delegationPercentageRepo,
 );
-const accountBalanceRepo = new AccountBalanceRepository();
-const accountInteractionRepo = new AccountInteractionsRepository();
+const accountBalanceRepo = new AccountBalanceRepository(db);
+const accountInteractionRepo = new AccountInteractionsRepository(db);
 const transactionsService = new TransactionsService(transactionsRepo);
 const votingPowerService = new VotingPowerService(
   env.DAO_ID === DaoIdEnum.NOUNS
-    ? new NounsVotingPowerRepository()
+    ? new NounsVotingPowerRepository(db)
     : votingPowerRepo,
   votingPowerRepo,
 );
@@ -128,6 +130,8 @@ const accountBalanceService = new BalanceVariationsService(
   accountBalanceRepo,
   accountInteractionRepo,
 );
+const repository = new LastUpdateRepositoryImpl(db);
+const lastUpdateService = new LastUpdateService(repository);
 
 if (env.DUNE_API_URL && env.DUNE_API_KEY) {
   const duneClient = new DuneService(env.DUNE_API_URL, env.DUNE_API_KEY);
@@ -137,7 +141,7 @@ if (env.DUNE_API_URL && env.DUNE_API_KEY) {
 const tokenPriceClient =
   env.DAO_ID === DaoIdEnum.NOUNS
     ? new NFTPriceService(
-        new NFTPriceRepository(),
+        new NFTPriceRepository(db),
         env.COINGECKO_API_URL,
         env.COINGECKO_API_KEY,
       )
@@ -151,7 +155,7 @@ tokenHistoricalData(app, tokenPriceClient);
 token(
   app,
   tokenPriceClient,
-  new TokenService(new TokenRepository()),
+  new TokenService(new TokenRepository(db)),
   env.DAO_ID,
 );
 
@@ -171,7 +175,7 @@ historicalBalances(
   new HistoricalBalancesService(accountBalanceRepo),
 );
 transactions(app, transactionsService);
-lastUpdate(app);
+lastUpdate(app, lastUpdateService);
 delegationPercentage(app, delegationPercentageService);
 votingPower(app, votingPowerService);
 votingPowerVariations(app, votingPowerService);

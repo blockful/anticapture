@@ -13,7 +13,7 @@ import {
   count,
   max,
 } from "ponder";
-import { db } from "ponder:api";
+
 import {
   accountPower,
   proposalsOnchain,
@@ -31,8 +31,11 @@ import {
 } from "@/api/controllers";
 import { DaysEnum } from "@/lib/enums";
 import { DBProposal } from "@/api/mappers";
+import { DrizzleDB } from "@/api/database";
 
 export class DrizzleRepository {
+  constructor(private db: DrizzleDB) {}
+
   async getSupplyComparison(metricType: string, days: DaysEnum) {
     const query = sql`
       WITH old_data AS (
@@ -54,9 +57,10 @@ export class DrizzleRepository {
       LEFT JOIN old_data ON 1=1;
     `;
 
-    const result = await db.execute<{ oldValue: string; currentValue: string }>(
-      query,
-    );
+    const result = await this.db.execute<{
+      oldValue: string;
+      currentValue: string;
+    }>(query);
     return result.rows[0];
   }
 
@@ -66,7 +70,7 @@ export class DrizzleRepository {
       FROM "account_power" ap
       WHERE ap."last_vote_timestamp" >= ${this.now() - days}
     `;
-    const result = await db.execute<ActiveSupplyQueryResult>(query);
+    const result = await this.db.execute<ActiveSupplyQueryResult>(query);
     return result.rows[0];
   }
 
@@ -84,7 +88,7 @@ export class DrizzleRepository {
       SELECT * FROM current_proposals
       JOIN old_proposals ON 1=1;
     `;
-    const result = await db.execute<ProposalsCompareQueryResult>(query);
+    const result = await this.db.execute<ProposalsCompareQueryResult>(query);
     return result.rows[0];
   }
 
@@ -102,7 +106,7 @@ export class DrizzleRepository {
       SELECT * FROM current_votes
       JOIN old_votes ON 1=1;
     `;
-    const result = await db.execute<VotesCompareQueryResult>(query);
+    const result = await this.db.execute<VotesCompareQueryResult>(query);
     return result.rows[0];
   }
 
@@ -122,7 +126,8 @@ export class DrizzleRepository {
       SELECT * FROM current_average_turnout
       JOIN old_average_turnout ON 1=1;
     `;
-    const result = await db.execute<AverageTurnoutCompareQueryResult>(query);
+    const result =
+      await this.db.execute<AverageTurnoutCompareQueryResult>(query);
     return result.rows[0];
   }
 
@@ -155,7 +160,7 @@ export class DrizzleRepository {
         notInArray(proposalsOnchain.proposalType, proposalTypeExclude),
       );
     }
-    return await db
+    return await this.db
       .select()
       .from(proposalsOnchain)
       .where(and(...whereClauses))
@@ -169,13 +174,13 @@ export class DrizzleRepository {
   }
 
   async getProposalById(proposalId: string): Promise<DBProposal | undefined> {
-    return await db.query.proposalsOnchain.findFirst({
+    return await this.db.query.proposalsOnchain.findFirst({
       where: eq(proposalsOnchain.id, proposalId),
     });
   }
 
   async getProposalsCount(): Promise<number> {
-    return db.$count(proposalsOnchain);
+    return this.db.$count(proposalsOnchain);
   }
 
   async getProposalNonVoters(
@@ -185,7 +190,7 @@ export class DrizzleRepository {
     orderDirection: "asc" | "desc",
     addresses?: Address[],
   ): Promise<{ voter: Address; votingPower: bigint }[]> {
-    return await db
+    return await this.db
       .select({
         voter: accountPower.accountId,
         votingPower: accountPower.votingPower,
@@ -215,7 +220,7 @@ export class DrizzleRepository {
   }
 
   async getProposalNonVotersCount(proposalId: string): Promise<number> {
-    const countResult = await db
+    const countResult = await this.db
       .select({ count: count(accountPower.accountId) })
       .from(accountPower)
       .leftJoin(
@@ -234,7 +239,7 @@ export class DrizzleRepository {
   async getLastVotersTimestamp(
     voters: Address[],
   ): Promise<Record<Address, bigint>> {
-    const timestamps = await db
+    const timestamps = await this.db
       .select({
         voterAccountId: votesOnchain.voterAccountId,
         lastVoteTimestamp: max(votesOnchain.timestamp),
@@ -256,8 +261,8 @@ export class DrizzleRepository {
     voters: Address[],
     comparisonTimestamp: number,
   ): Promise<Record<Address, bigint>> {
-    const currentPower = db.$with("current_power").as(
-      db
+    const currentPower = this.db.$with("current_power").as(
+      this.db
         .selectDistinctOn([votingPowerHistory.accountId], {
           accountId: votingPowerHistory.accountId,
           votingPower: votingPowerHistory.votingPower,
@@ -270,8 +275,8 @@ export class DrizzleRepository {
         ),
     );
 
-    const oldPower = db.$with("old_power").as(
-      db
+    const oldPower = this.db.$with("old_power").as(
+      this.db
         .selectDistinctOn([votingPowerHistory.accountId], {
           accountId: votingPowerHistory.accountId,
           votingPower: votingPowerHistory.votingPower,
@@ -289,7 +294,7 @@ export class DrizzleRepository {
         ),
     );
 
-    const result = await db
+    const result = await this.db
       .with(currentPower, oldPower)
       .select({
         voterAccountId: currentPower.accountId,

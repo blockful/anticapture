@@ -1,11 +1,9 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
-import { ChartType } from "@/api/mappers/";
-import { LastUpdateService } from "@/api/services";
-import { LastUpdateRepositoryImpl } from "@/api/repositories";
 
-export function lastUpdate(app: Hono) {
-  const repository = new LastUpdateRepositoryImpl();
-  const service = new LastUpdateService(repository);
+import { ChartType } from "@/api/mappers";
+import { LastUpdateService } from "@/api/services";
+
+export function lastUpdate(app: Hono, service: LastUpdateService) {
   app.openapi(
     createRoute({
       method: "get",

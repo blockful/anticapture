@@ -1,17 +1,20 @@
 import { Address } from "viem";
 import { gte, and, lte, desc, eq, asc, sql } from "drizzle-orm";
-import { db } from "ponder:api";
+
 import { votingPowerHistory, delegation, transfer } from "ponder:schema";
 
 import { DBVotingPowerWithRelations } from "@/api/mappers";
+import { DrizzleDB } from "@/api/database";
 
 export class NounsVotingPowerRepository {
+  constructor(private readonly db: DrizzleDB) {}
+
   async getVotingPowerCount(
     accountId: Address,
     minDelta?: string,
     maxDelta?: string,
   ): Promise<number> {
-    return await db.$count(
+    return await this.db.$count(
       votingPowerHistory,
       and(
         eq(votingPowerHistory.accountId, accountId),
@@ -34,7 +37,7 @@ export class NounsVotingPowerRepository {
     minDelta?: string,
     maxDelta?: string,
   ): Promise<DBVotingPowerWithRelations[]> {
-    const result = await db
+    const result = await this.db
       .select()
       .from(votingPowerHistory)
       .where(
