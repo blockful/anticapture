@@ -119,8 +119,8 @@ export class VotingPowerService {
     addresses: Address[],
   ): Promise<{ items: DBAccountPower[]; totalCount: number }> {
     return this.votingPowerRepository.getVotingPowers(
-      limit,
       skip,
+      limit,
       orderDirection,
       amountFilter,
       addresses,

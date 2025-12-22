@@ -203,13 +203,6 @@ export class VotingPowerRepository {
     const numericAbsoluteChange = BigInt(delta!.absoluteChange);
     const currentVotingPower = currentAccountPower.currentVotingPower;
     const oldVotingPower = currentVotingPower - numericAbsoluteChange;
-    console.log({
-      numericAbsoluteChange: numericAbsoluteChange,
-      currentVotingPower: currentVotingPower,
-      oldVotingPower: oldVotingPower,
-      percentageChange:
-        Number((numericAbsoluteChange * 10000n) / oldVotingPower) / 100,
-    });
     const percentageChange = oldVotingPower
       ? Number((numericAbsoluteChange * 10000n) / oldVotingPower) / 100
       : 0;
@@ -230,18 +223,10 @@ export class VotingPowerRepository {
     amountFilter: AmountFilter,
     addresses: Address[],
   ): Promise<{ items: DBAccountPower[]; totalCount: number }> {
-    const baseQuery = db
+    const result = await db
       .select()
       .from(accountPower)
-      .where(this.filterToSql(addresses, amountFilter));
-
-    const [totalCount] = await db
-      .select({
-        count: sql<number>`COUNT(*)`.as("count"),
-      })
-      .from(baseQuery.as("subquery"));
-
-    const result = await baseQuery
+      .where(this.filterToSql(addresses, amountFilter))
       .orderBy(
         orderDirection === "desc"
           ? desc(accountPower.votingPower)
@@ -249,6 +234,13 @@ export class VotingPowerRepository {
       )
       .offset(skip)
       .limit(limit);
+
+    const [totalCount] = await db
+      .select({
+        count: sql<number>`COUNT(*)`.as("count"),
+      })
+      .from(accountPower)
+      .where(this.filterToSql(addresses, amountFilter));
 
     return {
       items: result.map((r) => ({
@@ -299,6 +291,6 @@ export class VotingPowerRepository {
       gte(accountPower.votingPower, BigInt(amountfilter.maxAmount));
     }
 
-    return and(...conditions);
+    return conditions.length ? and(...conditions) : sql`true`;
   }
 }
