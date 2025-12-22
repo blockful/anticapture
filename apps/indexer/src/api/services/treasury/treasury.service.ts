@@ -99,8 +99,16 @@ export class TreasuryService {
       normalizedPrices,
     );
 
+    // Get last known quantity before cutoff to use as initial value for forward-fill
+    const lastKnownQuantity =
+      await this.repository.getLastTokenQuantityBeforeDate(cutoffTimestamp);
+
     // Forward-fill both quantities and prices
-    const filledQuantities = forwardFill(timeline, normalizedQuantities);
+    const filledQuantities = forwardFill(
+      timeline,
+      normalizedQuantities,
+      lastKnownQuantity ?? undefined,
+    );
     const filledPrices = forwardFill(timeline, normalizedPrices);
 
     // Calculate token treasury values
@@ -136,9 +144,7 @@ export class TreasuryService {
 
     // Use the timeline with more data points (liquid or token could be empty)
     const baseItems =
-      liquidResult.items.length > tokenResult.items.length
-        ? liquidResult.items
-        : tokenResult.items;
+      liquidResult.items.length > 0 ? liquidResult.items : tokenResult.items;
 
     const items = baseItems.map((item, i) => ({
       date: item.date,
