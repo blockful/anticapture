@@ -10,9 +10,16 @@ export const useDaoTreasuryStats = ({
   daoId: DaoIdEnum;
   tokenData: { data?: TokenDataResponse | null };
 }) => {
-  const { data: liquidTreasury } = useTreasury(daoId, "liquid", 1);
-  const { data: tokenTreasury } = useTreasury(daoId, "dao-token", 1);
-  const { data: allTreasury } = useTreasury(daoId, "total", 1);
+  // Use 7 days (minimum supported) with desc order to get most recent first
+  const { data: liquidTreasury } = useTreasury(daoId, "liquid", 7, {
+    order: "desc",
+  });
+  const { data: tokenTreasury } = useTreasury(daoId, "dao-token", 7, {
+    order: "desc",
+  });
+  const { data: allTreasury } = useTreasury(daoId, "total", 7, {
+    order: "desc",
+  });
 
   return useMemo(() => {
     const lastPrice = Number(tokenData.data?.price) || 0;
