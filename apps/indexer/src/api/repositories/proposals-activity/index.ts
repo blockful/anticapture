@@ -1,6 +1,6 @@
 import { Address } from "viem";
 import { DaoIdEnum } from "@/lib/enums";
-import { asc, eq, sql } from "ponder";
+import { asc, eq, sql } from "drizzle-orm";
 
 import { votesOnchain } from "ponder:schema";
 import { DrizzleDB } from "@/api/database";

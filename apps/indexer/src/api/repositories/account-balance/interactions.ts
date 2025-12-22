@@ -1,9 +1,9 @@
-import { asc, desc, gte, sql, and, eq, or, lte } from "ponder";
-
-import { transfer, accountBalance } from "ponder:schema";
-import { AccountInteractions, Filter } from "../../mappers";
 import { Address } from "viem";
+import { transfer, accountBalance } from "ponder:schema";
+import { asc, desc, gte, sql, and, eq, or, lte } from "drizzle-orm";
+
 import { DrizzleDB } from "@/api/database";
+import { AccountInteractions, Filter } from "@/api/mappers";
 
 export class AccountInteractionsRepository {
   constructor(private readonly db: DrizzleDB) {}

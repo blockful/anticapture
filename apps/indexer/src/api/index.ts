@@ -1,4 +1,4 @@
-import { graphql } from "ponder";
+import { graphql } from "drizzle-orm";
 import { db } from "ponder:api";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import schema from "ponder:schema";

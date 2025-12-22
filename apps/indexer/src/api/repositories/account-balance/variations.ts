@@ -1,9 +1,9 @@
-import { asc, desc, gte, sql, and, inArray } from "ponder";
-
-import { transfer, accountBalance } from "ponder:schema";
-import { DBAccountBalanceVariation, DBHistoricalBalance } from "@/api/mappers";
 import { Address } from "viem";
+import { transfer, accountBalance } from "ponder:schema";
+import { asc, desc, gte, sql, and, inArray } from "drizzle-orm";
+
 import { DrizzleDB } from "@/api/database";
+import { DBAccountBalanceVariation, DBHistoricalBalance } from "@/api/mappers";
 
 export class AccountBalanceRepository {
   constructor(private readonly db: DrizzleDB) {}

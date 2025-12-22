@@ -1,4 +1,4 @@
-import { inArray } from "ponder";
+import { inArray } from "drizzle-orm";
 import { daoMetricsDayBucket } from "ponder:schema";
 
 import { ChartType } from "@/api/mappers/";
