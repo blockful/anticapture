@@ -22,10 +22,12 @@ import {
   FormField,
   FormItem,
   FormLabel,
-} from "@/shared/components/design-system/form/form";
-import { Input } from "@/shared/components/design-system/form/fields/input/input";
-import { Checkbox } from "@/shared/components/design-system/form/fields/checkbox/checkbox";
-import { Textarea } from "@/shared/components/design-system/form/fields/textarea/textarea";
+} from "@/shared/components/design-system/form";
+import {
+  Checkbox,
+  Input,
+  Textarea,
+} from "@/shared/components/design-system/form/fields";
 
 type ContactFormValues = z.infer<typeof contactFormSchema>;
 
