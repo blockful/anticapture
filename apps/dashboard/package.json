@@ -13,7 +13,8 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "clean": "rm -rf node_modules .next out build coverage storybook-static *.tsbuildinfo *storybook.log",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "generate": "kubb generate"
   },
   "dependencies": {
     "@anticapture/graphql-client": "workspace:*",
@@ -53,10 +54,19 @@
     "vaul": "^1.1.2",
     "viem": "^2.37.11",
     "wagmi": "^2.12.25",
+    "zod": "^3.25.76",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^4.1.1",
+    "@kubb/cli": "^4.12.12",
+    "@kubb/core": "^4.12.12",
+    "@kubb/plugin-client": "^4.12.12",
+    "@kubb/plugin-oas": "^4.12.12",
+    "@kubb/plugin-react-query": "^4.12.12",
+    "@kubb/plugin-ts": "^4.12.12",
+    "@kubb/plugin-zod": "^4.12.12",
+    "@kubb/swagger": "^2.28.4",
     "@storybook/addon-onboarding": "^9.1.10",
     "@storybook/addon-vitest": "9.1.10",
     "@storybook/manager-api": "^8.6.14",
