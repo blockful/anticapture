@@ -1,12 +1,6 @@
 import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
-import {
-  Account,
-  Chain,
-  createWalletClient,
-  custom,
-  publicActions,
-} from "viem";
+import { Account, Chain, publicActions, WalletClient } from "viem";
 import EnsGovernorAbi from "@/abis/ens-governor.json";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 
@@ -20,6 +14,7 @@ export const voteOnProposal = async (
   account: Account,
   chain: Chain,
   daoId: DaoIdEnum,
+  walletClient: WalletClient,
   setTransactionhash: (hash: string) => void,
   comment?: string,
 ) => {
@@ -30,12 +25,6 @@ export const voteOnProposal = async (
   }
 
   const voteNumber = vote === "for" ? 1 : vote === "against" ? 0 : 2;
-
-  const walletClient = createWalletClient({
-    account: account,
-    chain: chain,
-    transport: custom(window.ethereum),
-  });
 
   const client = walletClient.extend(publicActions);
 
@@ -48,6 +37,7 @@ export const voteOnProposal = async (
         address: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
         functionName: "castVote",
         args: [proposalId, voteNumber],
+        account,
       });
 
       request = simulatedRequest.request;
@@ -57,6 +47,7 @@ export const voteOnProposal = async (
         address: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
         functionName: "castVoteWithReason",
         args: [proposalId, voteNumber, comment],
+        account,
       });
 
       request = simulatedRequest.request;
