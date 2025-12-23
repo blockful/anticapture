@@ -2,7 +2,7 @@ import { formatUnits } from "viem";
 import { TreasuryProvider } from "./providers";
 import { PriceProvider } from "./types";
 import { TreasuryResponse } from "@/api/mappers/treasury";
-import { TreasuryRepository } from "../../repositories/treasury/treasury.repository";
+import { TreasuryRepository } from "../../repositories/treasury";
 import { forwardFill, createDailyTimelineFromData } from "./forward-fill";
 import {
   calculateCutoffTimestamp,
@@ -16,9 +16,9 @@ import {
  */
 export class TreasuryService {
   constructor(
+    private repository: TreasuryRepository,
     private provider?: TreasuryProvider,
     private priceProvider?: PriceProvider,
-    private repository: TreasuryRepository = new TreasuryRepository(),
   ) {}
 
   /**

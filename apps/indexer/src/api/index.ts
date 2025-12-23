@@ -38,6 +38,7 @@ import {
   DrizzleProposalsActivityRepository,
   NounsVotingPowerRepository,
   AccountInteractionsRepository,
+  TreasuryRepository,
 } from "@/api/repositories";
 import { errorHandler } from "@/api/middlewares";
 import { getClient } from "@/lib/client";
@@ -138,6 +139,7 @@ const tokenPriceProvider = createTokenPriceProvider(
   env.DAO_ID,
 );
 const treasuryService = createTreasuryService(
+  new TreasuryRepository(),
   tokenPriceProvider,
   env.DEFILLAMA_API_URL,
   env.TREASURY_PROVIDER_PROTOCOL_ID,

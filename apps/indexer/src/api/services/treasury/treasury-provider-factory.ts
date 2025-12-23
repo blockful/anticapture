@@ -3,6 +3,7 @@ import { DefiLlamaProvider } from "./providers/defillama–provider";
 import { DuneProvider } from "./providers/dune-provider";
 import { CoingeckoPriceProvider } from "./providers/coingecko-price-provider";
 import { TreasuryService } from "./treasury.service";
+import { TreasuryRepository } from "@/api/repositories/treasury";
 import { CoingeckoService } from "@/api/services/coingecko";
 import { PriceProvider } from "./types";
 import { DaoIdEnum } from "@/lib/enums";
@@ -28,6 +29,7 @@ export function createTokenPriceProvider(
  * @returns TreasuryService instance
  */
 export function createTreasuryService(
+  repository: TreasuryRepository,
   tokenPriceProvider: PriceProvider,
   defiLlamaApiUrl?: string,
   defiLlamaProtocolId?: string,
@@ -51,5 +53,5 @@ export function createTreasuryService(
     );
   }
 
-  return new TreasuryService(liquidProvider, tokenPriceProvider);
+  return new TreasuryService(repository, liquidProvider, tokenPriceProvider);
 }
