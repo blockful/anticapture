@@ -11,6 +11,8 @@ export const TreasuryResponseSchema = z.object({
   totalCount: z.number().describe("Total number of items"),
 });
 
+export type TreasuryResponse = z.infer<typeof TreasuryResponseSchema>;
+
 export const TreasuryQuerySchema = z.object({
   days: z
     .enum(DaysOpts)

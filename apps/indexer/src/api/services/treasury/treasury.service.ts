@@ -1,6 +1,7 @@
 import { formatUnits } from "viem";
 import { TreasuryProvider } from "./providers";
-import { PriceProvider, TreasuryResponse } from "./types";
+import { PriceProvider } from "./types";
+import { TreasuryResponse } from "@/api/mappers/treasury";
 import { TreasuryRepository } from "./treasury.repository";
 import { forwardFill, createDailyTimelineFromData } from "./forward-fill";
 import {

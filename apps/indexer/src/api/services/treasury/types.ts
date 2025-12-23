@@ -7,17 +7,6 @@ export interface LiquidTreasuryDataPoint {
 }
 
 /**
- * Treasury's response to the client
- */
-export interface TreasuryResponse {
-  items: {
-    value: number;
-    date: number;
-  }[];
-  totalCount: number;
-}
-
-/**
  * Interface for fetching historical token prices
  */
 export interface PriceProvider {
