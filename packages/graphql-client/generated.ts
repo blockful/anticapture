@@ -548,12 +548,14 @@ export type QueryVotingPowerVariationsArgs = {
 
 export type QueryVotingPowersArgs = {
   account: Scalars['String']['input'];
+  fromAddresses?: InputMaybe<Scalars['JSON']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   maxDelta?: InputMaybe<Scalars['String']['input']>;
   minDelta?: InputMaybe<Scalars['String']['input']>;
   orderBy?: InputMaybe<QueryInput_VotingPowers_OrderBy>;
   orderDirection?: InputMaybe<QueryInput_VotingPowers_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  toAddresses?: InputMaybe<Scalars['JSON']['input']>;
 };
 
 export type Account = {
@@ -2844,6 +2846,8 @@ export type VotingPowersQueryVariables = Exact<{
   orderBy?: InputMaybe<QueryInput_VotingPowers_OrderBy>;
   maxDelta?: InputMaybe<Scalars['String']['input']>;
   minDelta?: InputMaybe<Scalars['String']['input']>;
+  fromAddresses?: InputMaybe<Scalars['JSON']['input']>;
+  toAddresses?: InputMaybe<Scalars['JSON']['input']>;
 }>;
 
 
@@ -5011,9 +5015,11 @@ export type TransactionsLazyQueryHookResult = ReturnType<typeof useTransactionsL
 export type TransactionsSuspenseQueryHookResult = ReturnType<typeof useTransactionsSuspenseQuery>;
 export type TransactionsQueryResult = Apollo.QueryResult<TransactionsQuery, TransactionsQueryVariables>;
 export const VotingPowersDocument = gql`
-    query VotingPowers($account: String!, $skip: NonNegativeInt, $limit: PositiveInt = 10, $orderDirection: queryInput_votingPowers_orderDirection = desc, $orderBy: queryInput_votingPowers_orderBy, $maxDelta: String, $minDelta: String) {
+    query VotingPowers($account: String!, $skip: NonNegativeInt, $limit: PositiveInt = 10, $orderDirection: queryInput_votingPowers_orderDirection = desc, $orderBy: queryInput_votingPowers_orderBy, $maxDelta: String, $minDelta: String, $fromAddresses: JSON, $toAddresses: JSON) {
   votingPowers(
     account: $account
+    fromAddresses: $fromAddresses
+    toAddresses: $toAddresses
     skip: $skip
     orderDirection: $orderDirection
     limit: $limit
@@ -5064,6 +5070,8 @@ export const VotingPowersDocument = gql`
  *      orderBy: // value for 'orderBy'
  *      maxDelta: // value for 'maxDelta'
  *      minDelta: // value for 'minDelta'
+ *      fromAddresses: // value for 'fromAddresses'
+ *      toAddresses: // value for 'toAddresses'
  *   },
  * });
  */

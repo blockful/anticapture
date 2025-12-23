@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState, useEffect } from "react";
 import { ApolloError, NetworkStatus } from "@apollo/client";
-import { formatUnits } from "viem";
+import { Address, formatUnits } from "viem";
 
 import {
   useVotingPowersQuery,
@@ -68,6 +68,8 @@ export function useDelegateDelegationHistory({
   customFromFilter,
   customToFilter,
   itemsPerPage = 10,
+  fromAddress,
+  toAddress,
 }: {
   accountId: string;
   daoId: DaoIdEnum;
@@ -78,6 +80,8 @@ export function useDelegateDelegationHistory({
   customToFilter?: string;
   filterVariables?: AmountFilterVariables;
   itemsPerPage?: number;
+  fromAddress?: Address;
+  toAddress?: Address;
 }): UseDelegateDelegationHistoryResult {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isPaginationLoading, setIsPaginationLoading] =
@@ -121,6 +125,8 @@ export function useDelegateDelegationHistory({
       ...(filterVariables?.minDelta && { minDelta: filterVariables.minDelta }),
       ...(fromFilter && { delegator: fromFilter }),
       ...(toFilter && { delegate: toFilter }),
+      ...(fromAddress && { fromAddresses: fromAddress }),
+      ...(toAddress && { toAddresses: toAddress }),
     }),
     [
       accountId,
@@ -130,6 +136,8 @@ export function useDelegateDelegationHistory({
       filterVariables,
       fromFilter,
       toFilter,
+      fromAddress,
+      toAddress,
     ],
   );
 
