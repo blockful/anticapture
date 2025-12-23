@@ -58,10 +58,7 @@ import {
 } from "@/api/services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
-import {
-  createTreasuryService,
-  createTokenPriceProvider,
-} from "./services/treasury/treasury-provider-factory";
+import { createTreasuryService } from "./services/treasury/treasury-provider-factory";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -133,7 +130,7 @@ const accountBalanceService = new BalanceVariationsService(
   accountInteractionRepo,
 );
 
-const tokenPriceProvider = createTokenPriceProvider(
+const tokenPriceProvider = new CoingeckoService(
   env.COINGECKO_API_URL,
   env.COINGECKO_API_KEY,
   env.DAO_ID,

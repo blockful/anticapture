@@ -1,24 +1,9 @@
 import axios from "axios";
 import { DefiLlamaProvider } from "./providers/defillama–provider";
 import { DuneProvider } from "./providers/dune-provider";
-import { CoingeckoPriceProvider } from "./providers/coingecko-price-provider";
 import { TreasuryService } from "./treasury.service";
 import { TreasuryRepository } from "@/api/repositories/treasury";
-import { CoingeckoService } from "@/api/services/coingecko";
 import { PriceProvider } from "./types";
-import { DaoIdEnum } from "@/lib/enums";
-
-/**
- * Creates the price provider for token prices (CoinGecko)
- */
-export function createTokenPriceProvider(
-  apiUrl: string,
-  apiKey: string,
-  daoId: DaoIdEnum,
-): PriceProvider {
-  const coingeckoService = new CoingeckoService(apiUrl, apiKey, daoId);
-  return new CoingeckoPriceProvider(coingeckoService);
-}
 
 /**
  * Creates a treasury service with optional liquid treasury provider.
