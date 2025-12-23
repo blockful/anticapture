@@ -1,7 +1,7 @@
 "use client";
 
 import { Drawer, DrawerContent } from "@/shared/components/ui/drawer";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { EnsNameWithAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsNameWithAvatar";
 import { X } from "lucide-react";
 import { cn } from "@/shared/utils";
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
@@ -150,7 +150,7 @@ export const HoldersAndDelegatesDrawer = ({
                 <div className="flex items-center justify-center gap-2">
                   {/* Desktop */}
                   <div className="hidden sm:block">
-                    <EnsAvatar
+                    <EnsNameWithAvatar
                       address={address as `0x${string}`}
                       size="sm"
                       variant="rounded"
@@ -162,7 +162,7 @@ export const HoldersAndDelegatesDrawer = ({
 
                   {/* Mobile */}
                   <div className="block sm:hidden">
-                    <EnsAvatar
+                    <EnsNameWithAvatar
                       address={address as `0x${string}`}
                       size="sm"
                       variant="rounded"

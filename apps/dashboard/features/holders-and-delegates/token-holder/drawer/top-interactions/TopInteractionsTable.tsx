@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { Button, SkeletonRow } from "@/shared/components";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { EnsNameWithAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsNameWithAvatar";
 import { ColumnDef } from "@tanstack/react-table";
 import { Address, parseUnits } from "viem";
 import { ArrowDown, ArrowUp } from "lucide-react";
@@ -134,7 +134,7 @@ export const TopInteractionsTable = ({
         const addressValue: string = row.getValue("address");
         return (
           <div className="flex w-full items-center gap-2">
-            <EnsAvatar
+            <EnsNameWithAvatar
               address={addressValue as Address}
               size="sm"
               variant="rounded"

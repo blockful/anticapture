@@ -3,7 +3,7 @@
 import { CheckCircle2, XCircle } from "lucide-react";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { Proposal, ProposalStatus } from "@/features/governance/types";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { EnsNameWithAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsNameWithAvatar";
 import { Address } from "viem";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -123,7 +123,7 @@ export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
           <BulletDivider />
           <span>
             by{" "}
-            <EnsAvatar
+            <EnsNameWithAvatar
               address={proposal.proposer as Address}
               showAvatar={false}
               nameClassName="text-secondary"

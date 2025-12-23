@@ -4,7 +4,7 @@ import React from "react";
 import { BarProps } from "recharts";
 import { Address } from "viem";
 import { formatNumberUserReadable } from "@/shared/utils";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { EnsNameWithAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsNameWithAvatar";
 import { TopAccountChartData } from "@/features/dao-overview/components/TopAccountsChart";
 
 export interface CustomBarShapeProps extends BarProps {
@@ -49,7 +49,7 @@ export const CustomBarShape: React.FC<CustomBarShapeProps> = ({
           width={24}
           height={24}
         >
-          <EnsAvatar
+          <EnsNameWithAvatar
             address={payload.address as Address}
             size="sm"
             variant="rounded"

@@ -9,7 +9,7 @@ import {
 } from "@/features/holders-and-delegates";
 import { TimeInterval } from "@/shared/types/enums";
 import { SkeletonRow, Button } from "@/shared/components";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { EnsNameWithAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsNameWithAvatar";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { Plus } from "lucide-react";
@@ -205,7 +205,7 @@ export const Delegates = ({
 
         return (
           <div className="group flex w-full items-center">
-            <EnsAvatar
+            <EnsNameWithAvatar
               address={address as Address}
               size="sm"
               variant="rounded"

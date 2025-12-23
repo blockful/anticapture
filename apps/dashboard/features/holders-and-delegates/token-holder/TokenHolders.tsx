@@ -7,7 +7,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Address, formatUnits, zeroAddress } from "viem";
 import { Plus } from "lucide-react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { EnsNameWithAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsNameWithAvatar";
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { useTokenHolders } from "@/features/holders-and-delegates/hooks/useTokenHolders";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -154,7 +154,7 @@ export const TokenHolders = ({
 
         return (
           <div className="group flex w-full items-center">
-            <EnsAvatar
+            <EnsNameWithAvatar
               address={addressValue as Address}
               size="sm"
               variant="rounded"
@@ -311,7 +311,7 @@ export const TokenHolders = ({
                 <BadgeStatus variant={"error"}>{"Not delegated"}</BadgeStatus>
               </div>
             ) : (
-              <EnsAvatar
+              <EnsNameWithAvatar
                 address={delegate as Address}
                 size="sm"
                 variant="rounded"

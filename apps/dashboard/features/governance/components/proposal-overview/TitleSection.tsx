@@ -1,4 +1,4 @@
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { EnsNameWithAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsNameWithAvatar";
 import { BulletDivider } from "@/features/governance/components/proposal-overview/BulletDivider";
 
 import { ChatBubbleIcon } from "@radix-ui/react-icons";
@@ -25,7 +25,7 @@ export const TitleSection = ({
         <BulletDivider />
 
         {/* Proposer  */}
-        <EnsAvatar
+        <EnsNameWithAvatar
           size="xs"
           address={proposal?.proposerAccountId as Address}
           nameClassName="text-secondary"

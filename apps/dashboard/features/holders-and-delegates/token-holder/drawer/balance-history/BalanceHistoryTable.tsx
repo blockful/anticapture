@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { SkeletonRow, Button, IconButton } from "@/shared/components";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { EnsNameWithAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsNameWithAvatar";
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
@@ -343,11 +343,10 @@ export const BalanceHistoryTable = ({
         return (
           <div className="group flex w-full items-center justify-between gap-3">
             <div className="text-primary flex max-w-40 items-center gap-2 overflow-hidden">
-              <EnsAvatar
+              <EnsNameWithAvatar
                 address={fromAddress as `0x${string}`}
                 size="sm"
                 variant="rounded"
-                showName={true}
                 nameClassName={cn(
                   "text-secondary truncate max-w-[120px]",
                   fromAddress === accountId && "text-primary",
@@ -419,11 +418,10 @@ export const BalanceHistoryTable = ({
         return (
           <div className="group flex w-full items-center justify-between gap-3">
             <div className="text-primary flex max-w-40 items-center gap-2 overflow-hidden">
-              <EnsAvatar
+              <EnsNameWithAvatar
                 address={toAddress as `0x${string}`}
                 size="sm"
                 variant="rounded"
-                showName={true}
                 nameClassName={cn(
                   "text-secondary truncate max-w-[120px]",
                   toAddress === accountId && "text-primary",

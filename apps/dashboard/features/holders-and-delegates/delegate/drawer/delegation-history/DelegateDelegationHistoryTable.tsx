@@ -3,7 +3,7 @@
 import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components/FilterSort";
 import { ColumnDef } from "@tanstack/react-table";
 import { SkeletonRow, Button, IconButton } from "@/shared/components";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { EnsNameWithAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsNameWithAvatar";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
@@ -338,11 +338,10 @@ export const DelegateDelegationHistoryTable = ({
         return (
           <div className="group flex items-center gap-3">
             <div className="overflow-truncate flex max-w-[140px] items-center gap-2">
-              <EnsAvatar
+              <EnsNameWithAvatar
                 address={delegatorAddress as `0x${string}`}
                 size="sm"
                 variant="rounded"
-                showName={true}
                 nameClassName={cn(
                   "truncate max-w-[125px]",
                   delegatorAddress === accountId
@@ -440,11 +439,10 @@ export const DelegateDelegationHistoryTable = ({
         return (
           <div className="group flex items-center justify-between gap-3">
             <div className="flex max-w-[140px] items-center gap-2 overflow-hidden">
-              <EnsAvatar
+              <EnsNameWithAvatar
                 address={delegateAddress as `0x${string}`}
                 size="sm"
                 variant="rounded"
-                showName={true}
                 nameClassName={cn(
                   "truncate max-w-[125px]",
                   delegateAddress === accountId

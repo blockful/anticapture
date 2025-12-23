@@ -14,7 +14,7 @@ import { TransactionData } from "@/features/transactions/hooks/useTransactionsTa
 import Link from "next/link";
 import { fetchAddressFromEnsName } from "@/shared/hooks/useEnsData";
 import { Address, zeroAddress } from "viem";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { EnsNameWithAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsNameWithAvatar";
 import { cn } from "@/shared/utils";
 import { TransactionsParamsType } from "@/features/transactions/hooks/useTransactionParams";
 
@@ -218,11 +218,10 @@ export const getTransactionsColumns = ({
         return (
           <div className="flex h-10 items-center gap-3 p-2">
             <div className="overflow-truncate flex max-w-[140px] items-center gap-2">
-              <EnsAvatar
+              <EnsNameWithAvatar
                 address={from as `0x${string}`}
                 size="sm"
                 variant="rounded"
-                showName={true}
                 nameClassName={cn("truncate max-w-[125px]")}
               />
             </div>
@@ -288,11 +287,10 @@ export const getTransactionsColumns = ({
         return (
           <div className="flex h-10 items-center gap-3 p-2">
             <div className="overflow-truncate flex max-w-[140px] items-center gap-2">
-              <EnsAvatar
+              <EnsNameWithAvatar
                 address={to as `0x${string}`}
                 size="sm"
                 variant="rounded"
-                showName={true}
                 nameClassName={cn("truncate max-w-[125px]")}
               />
             </div>

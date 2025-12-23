@@ -12,25 +12,43 @@ type EnsData = {
   avatar: string | null;
 };
 
-/**
- * Hook to fetch ENS data for a single address
- * @param address - Ethereum address (e.g., "0x123...")
- * @returns Object containing ENS data, error, and loading state
- */
-export const useEnsData = (address: Address | null | undefined) => {
-  const { data, error, isLoading } = useQuery<EnsData>({
-    queryKey: ["ensData", address ?? null],
-    queryFn: () => fetchEnsDataFromAddress({ address: address! }),
+export const useEnsNameFromAddress = ({ address }: { address: Address }) => {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["ensName", address],
+    queryFn: () => publicClient.getEnsName({ address }),
     enabled: !!address,
     refetchOnWindowFocus: false,
     retry: false,
     staleTime: 1000 * 60 * 60 * 24, // Consider data fresh for 24 hours
     gcTime: 1000 * 60 * 60 * 24, // Keep in cache for 24 hours
   });
+
   return {
     data,
-    error,
     isLoading,
+    error,
+  };
+};
+
+export const useEnsAvatarFromEnsName = ({
+  ensName,
+}: {
+  ensName?: `${string}.eth`;
+}) => {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["ensAvatar", ensName],
+    queryFn: () => publicClient.getEnsAvatar({ name: normalize(ensName!) }),
+    enabled: !!ensName,
+    refetchOnWindowFocus: false,
+    retry: false,
+    staleTime: 1000 * 60 * 60 * 24, // Consider data fresh for 24 hours
+    gcTime: 1000 * 60 * 60 * 24, // Keep in cache for 24 hours
+  });
+
+  return {
+    data,
+    isLoading,
+    error,
   };
 };
 

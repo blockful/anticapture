@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
 
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { EnsNameWithAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsNameWithAvatar";
 
-const meta: Meta<typeof EnsAvatar> = {
+const meta: Meta<typeof EnsNameWithAvatar> = {
   title: "Design System/Avatars/EnsAvatar",
-  component: EnsAvatar,
+  component: EnsNameWithAvatar,
   parameters: {
     layout: "centered",
   },
@@ -14,7 +14,7 @@ const meta: Meta<typeof EnsAvatar> = {
       control: "text",
       description: "Ethereum address to fetch ENS avatar from",
     },
-    imageUrl: {
+    ensName: {
       control: "text",
       description: "Direct image URL (takes precedence over ENS)",
     },
@@ -59,7 +59,7 @@ export const Default: Story = {
 // With direct image URL
 export const WithImageUrl: Story = {
   args: {
-    imageUrl: "https://euc.li/duds.eth",
+    address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
     size: "md",
     variant: "rounded",
     alt: "ENS Avatar",
@@ -81,32 +81,32 @@ export const SizeVariants: Story = {
   render: () => (
     <div className="flex items-center gap-4">
       <div className="flex flex-col items-center gap-2">
-        <EnsAvatar
-          imageUrl="https://euc.li/duds.eth"
+        <EnsNameWithAvatar
+          address="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
           size="xs"
           variant="rounded"
         />
         <span className="text-xs text-gray-400">XS (16px)</span>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <EnsAvatar
-          imageUrl="https://euc.li/duds.eth"
+        <EnsNameWithAvatar
+          address="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
           size="sm"
           variant="rounded"
         />
         <span className="text-xs text-gray-400">SM (24px)</span>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <EnsAvatar
-          imageUrl="https://euc.li/duds.eth"
+        <EnsNameWithAvatar
+          address="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
           size="md"
           variant="rounded"
         />
         <span className="text-xs text-gray-400">MD (36px)</span>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <EnsAvatar
-          imageUrl="https://euc.li/duds.eth"
+        <EnsNameWithAvatar
+          address="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
           size="lg"
           variant="rounded"
         />
@@ -121,16 +121,16 @@ export const ShapeVariants: Story = {
   render: () => (
     <div className="flex items-center gap-4">
       <div className="flex flex-col items-center gap-2">
-        <EnsAvatar
-          imageUrl="https://euc.li/duds.eth"
+        <EnsNameWithAvatar
+          address="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
           size="lg"
           variant="rounded"
         />
         <span className="text-xs text-gray-400">Rounded</span>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <EnsAvatar
-          imageUrl="https://euc.li/duds.eth"
+        <EnsNameWithAvatar
+          address="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
           size="lg"
           variant="square"
         />
@@ -145,19 +145,39 @@ export const LoadingStates: Story = {
   render: () => (
     <div className="flex items-center gap-4">
       <div className="flex flex-col items-center gap-2">
-        <EnsAvatar size="xs" variant="rounded" loading={true} />
+        <EnsNameWithAvatar
+          address="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+          size="xs"
+          variant="rounded"
+          loading={true}
+        />
         <span className="text-xs text-gray-400">XS Loading</span>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <EnsAvatar size="sm" variant="rounded" loading={true} />
+        <EnsNameWithAvatar
+          address="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+          size="sm"
+          variant="rounded"
+          loading={true}
+        />
         <span className="text-xs text-gray-400">SM Loading</span>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <EnsAvatar size="md" variant="rounded" loading={true} />
+        <EnsNameWithAvatar
+          address="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+          size="md"
+          variant="rounded"
+          loading={true}
+        />
         <span className="text-xs text-gray-400">MD Loading</span>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <EnsAvatar size="lg" variant="rounded" loading={true} />
+        <EnsNameWithAvatar
+          address="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+          size="lg"
+          variant="rounded"
+          loading={true}
+        />
         <span className="text-xs text-gray-400">LG Loading</span>
       </div>
     </div>
@@ -178,19 +198,35 @@ export const FallbackStates: Story = {
   render: () => (
     <div className="flex items-center gap-4">
       <div className="flex flex-col items-center gap-2">
-        <EnsAvatar size="xs" variant="rounded" />
+        <EnsNameWithAvatar
+          address="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+          size="xs"
+          variant="rounded"
+        />
         <span className="text-xs text-gray-400">XS Fallback</span>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <EnsAvatar size="sm" variant="rounded" />
+        <EnsNameWithAvatar
+          address="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+          size="sm"
+          variant="rounded"
+        />
         <span className="text-xs text-gray-400">SM Fallback</span>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <EnsAvatar size="md" variant="rounded" />
+        <EnsNameWithAvatar
+          address="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+          size="md"
+          variant="rounded"
+        />
         <span className="text-xs text-gray-400">MD Fallback</span>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <EnsAvatar size="lg" variant="rounded" />
+        <EnsNameWithAvatar
+          address="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+          size="lg"
+          variant="rounded"
+        />
         <span className="text-xs text-gray-400">LG Fallback</span>
       </div>
     </div>
@@ -202,11 +238,19 @@ export const FallbackShapes: Story = {
   render: () => (
     <div className="flex items-center gap-4">
       <div className="flex flex-col items-center gap-2">
-        <EnsAvatar size="lg" variant="rounded" />
+        <EnsNameWithAvatar
+          address="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+          size="lg"
+          variant="rounded"
+        />
         <span className="text-xs text-gray-400">Rounded Fallback</span>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <EnsAvatar size="lg" variant="square" />
+        <EnsNameWithAvatar
+          address="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+          size="lg"
+          variant="square"
+        />
         <span className="text-xs text-gray-400">Square Fallback</span>
       </div>
     </div>
@@ -216,7 +260,7 @@ export const FallbackShapes: Story = {
 // With custom className
 export const WithCustomStyling: Story = {
   args: {
-    imageUrl: "https://euc.li/duds.eth",
+    address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
     size: "lg",
     variant: "rounded",
     className: "border-2 border-blue-500 shadow-lg",
@@ -228,7 +272,7 @@ export const RealENSExamples: Story = {
   render: () => (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-4">
-        <EnsAvatar
+        <EnsNameWithAvatar
           address="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045" // vitalik.eth
           size="md"
           variant="rounded"
@@ -236,7 +280,7 @@ export const RealENSExamples: Story = {
         <span className="text-sm text-gray-300">vitalik.eth</span>
       </div>
       <div className="flex items-center gap-4">
-        <EnsAvatar
+        <EnsNameWithAvatar
           address="0x983110309620D911731Ac0932219af06091b6744" // brantly.eth
           size="md"
           variant="rounded"
@@ -244,7 +288,7 @@ export const RealENSExamples: Story = {
         <span className="text-sm text-gray-300">brantly.eth</span>
       </div>
       <div className="flex items-center gap-4">
-        <EnsAvatar
+        <EnsNameWithAvatar
           address="0xb8c2C29ee19D8307cb7255e1Cd9CbDE883A267d5" // nick.eth
           size="md"
           variant="rounded"

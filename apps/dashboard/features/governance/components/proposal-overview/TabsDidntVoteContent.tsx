@@ -10,7 +10,7 @@ import {
 } from "@/features/governance/hooks/useNonVoters";
 import { SkeletonRow, Button } from "@/shared/components";
 import { ColumnDef } from "@tanstack/react-table";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { EnsNameWithAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsNameWithAvatar";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
@@ -115,11 +115,10 @@ export const TabsDidntVoteContent = ({
 
           return (
             <div className="flex h-10 w-full items-center gap-3 p-2">
-              <EnsAvatar
+              <EnsNameWithAvatar
                 address={voterAddress as `0x${string}`}
                 size="sm"
                 variant="rounded"
-                showName={true}
                 isDashed={true}
               />
             </div>

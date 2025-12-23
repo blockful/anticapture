@@ -1,15 +1,13 @@
 "use client";
 
-import { useEnsData } from "@/shared/hooks/useEnsData";
 import { cn } from "@/shared/utils/cn";
-// import { formatAddress } from "@/shared/utils/formatAddress";
-import { Address } from "viem";
 import Image, { ImageProps } from "next/image";
 import { useState } from "react";
 import Blockies from "react-blockies";
 
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
-import { formatAddress } from "@/shared/utils/formatAddress";
+import { useEnsAvatarFromEnsName } from "@/shared/hooks/useEnsData";
+import { Address } from "viem";
 
 export type AvatarSize = "xs" | "sm" | "md" | "lg";
 export type AvatarVariant = "square" | "rounded";
@@ -18,19 +16,12 @@ interface EnsAvatarProps extends Omit<
   ImageProps,
   "src" | "alt" | "fill" | "className" | "loading"
 > {
-  address?: Address;
-  imageUrl?: string;
+  address: Address; // Used for blockies fallback
+  ensName?: `${string}.eth`; // Used for ens avatar
   size?: AvatarSize;
   variant?: AvatarVariant;
-  loading?: boolean;
   className?: string;
-  alt?: string;
-  showName?: boolean;
-  showAvatar?: boolean;
-  nameClassName?: string;
-  containerClassName?: string;
-  isDashed?: boolean;
-  showFullAddress?: boolean;
+  isEnsLoading?: boolean;
 }
 
 const sizeClasses: Record<AvatarSize, string> = {
@@ -54,52 +45,22 @@ const variantClasses: Record<AvatarVariant, string> = {
 
 export const EnsAvatar = ({
   address,
-  imageUrl,
   size = "md",
   variant = "rounded",
-  loading = false,
   className,
-  alt,
-  showName = true,
-  showAvatar = true,
-  nameClassName,
-  containerClassName,
-  showFullAddress = false,
-  isDashed = false,
+  isEnsLoading,
+  ensName,
   ...imageProps
 }: EnsAvatarProps) => {
   const [imageError, setImageError] = useState<boolean>(false);
 
-  // Only fetch ENS data if we have an address and either we need imageUrl or fetchEnsName is true
-  const shouldFetchEns = address && !imageUrl;
-  const { data: ensData, isLoading: ensLoading } = useEnsData(
-    shouldFetchEns ? address : null,
-  );
-
-  // Determine the final image URL to use
-  const finalImageUrl =
-    imageUrl ||
-    (ensData?.avatar && ensData.avatar.includes("http")
-      ? ensData.avatar
-      : ensData?.avatar_url);
-
-  // Determine alt text
-  const finalAlt = alt || ensData?.ens || address || "Avatar";
-
-  // Determine what to display as the name
-  const getDisplayName = () => {
-    if (ensData?.ens) {
-      return ensData.ens;
-    }
-    if (address) {
-      return showFullAddress ? address : formatAddress(address);
-    }
-    return "Unknown";
-  };
-
-  const displayName = getDisplayName();
-  const isLoadingName = loading || ensLoading;
-  const isEnsName = Boolean(ensData?.ens);
+  const {
+    data: ensAvatar,
+    isLoading: ensAvatarLoading,
+    error: ensAvatarError,
+  } = useEnsAvatarFromEnsName({
+    ensName,
+  });
 
   const baseClasses = cn(
     sizeClasses[size],
@@ -108,11 +69,8 @@ export const EnsAvatar = ({
     className,
   );
 
-  // Show skeleton when loading (either external loading prop or ENS data loading)
-  const isLoading = loading || ensLoading;
-
   const avatarElement = () => {
-    if (isLoading) {
+    if (isEnsLoading || ensAvatarLoading) {
       return (
         <SkeletonRow
           parentClassName="flex animate-pulse"
@@ -122,12 +80,12 @@ export const EnsAvatar = ({
     }
 
     // Show image if available and no error
-    if (finalImageUrl && !imageError) {
+    if (ensAvatar && !imageError && !ensAvatarError) {
       return (
         <div className={baseClasses}>
           <Image
-            src={finalImageUrl}
-            alt={finalAlt}
+            src={ensAvatar}
+            alt={ensName || ""}
             fill
             className="object-cover"
             unoptimized
@@ -138,7 +96,7 @@ export const EnsAvatar = ({
       );
     }
 
-    // Fallback: show user icon
+    // Fallback: show blockies image
     return (
       <div className={baseClasses}>
         <Blockies
@@ -153,45 +111,5 @@ export const EnsAvatar = ({
     );
   };
 
-  // If showName is false, return just the avatar
-  if (!showName) {
-    return avatarElement();
-  }
-
-  if (!showAvatar) {
-    return (
-      <span className={cn("text-primary text-sm", nameClassName)}>
-        {displayName}
-      </span>
-    );
-  }
-
-  // Return avatar with name
-  return (
-    <div className={cn("flex min-w-0 items-center gap-3", containerClassName)}>
-      {avatarElement()}
-
-      <div className="flex min-w-0 flex-col">
-        <div className="flex items-center gap-2">
-          {isLoadingName ? (
-            <SkeletonRow
-              parentClassName="flex animate-pulse"
-              className="h-4 w-24"
-            />
-          ) : (
-            <span
-              className={cn(
-                "text-primary inline-block text-sm",
-                isEnsName && "overflow-hidden truncate whitespace-nowrap",
-                isDashed && "border-b border-dashed border-[#3F3F46]",
-                nameClassName,
-              )}
-            >
-              {displayName}
-            </span>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+  return avatarElement();
 };
