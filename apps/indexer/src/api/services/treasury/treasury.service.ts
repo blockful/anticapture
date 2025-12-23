@@ -2,7 +2,7 @@ import { formatUnits } from "viem";
 import { TreasuryProvider } from "./providers";
 import { PriceProvider } from "./types";
 import { TreasuryResponse } from "@/api/mappers/treasury";
-import { TreasuryRepository } from "./treasury.repository";
+import { TreasuryRepository } from "../../repositories/treasury/treasury.repository";
 import { forwardFill, createDailyTimelineFromData } from "./forward-fill";
 import {
   calculateCutoffTimestamp,
@@ -15,14 +15,11 @@ import {
  * Responsibility: Coordinate between provider, repository, and business logic.
  */
 export class TreasuryService {
-  private repository: TreasuryRepository;
-
   constructor(
     private provider?: TreasuryProvider,
     private priceProvider?: PriceProvider,
-  ) {
-    this.repository = new TreasuryRepository();
-  }
+    private repository: TreasuryRepository = new TreasuryRepository(),
+  ) {}
 
   /**
    * Get liquid treasury only (from external providers)
