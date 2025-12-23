@@ -7,5 +7,5 @@ export interface TreasuryProvider {
    * @param cutoffTimestamp - Only return data points with date >= this timestamp (Unix seconds)
    * @returns Array of historical treasury data points, or empty array if provider is not configured
    */
-  fetchTreasury(cutoffTimestamp: bigint): Promise<LiquidTreasuryDataPoint[]>;
+  fetchTreasury(cutoffTimestamp: number): Promise<LiquidTreasuryDataPoint[]>;
 }

@@ -43,7 +43,7 @@ export const storeDailyBucket = async (
   await context.db
     .insert(daoMetricsDayBucket)
     .values({
-      date: truncateTimestampTime(timestamp),
+      date: BigInt(truncateTimestampTime(Number(timestamp))),
       tokenId: tokenAddress,
       metricType,
       daoId,
@@ -148,9 +148,8 @@ export const handleTransaction = async (
 /**
  * Truncate timestamp (seconds) to midnight UTC
  */
-export const truncateTimestampTime = (timestampSeconds: bigint): bigint => {
-  const secondsInDay = BigInt(SECONDS_IN_DAY);
-  return (timestampSeconds / secondsInDay) * secondsInDay;
+export const truncateTimestampTime = (timestampSeconds: number): number => {
+  return Math.floor(timestampSeconds / SECONDS_IN_DAY) * SECONDS_IN_DAY;
 };
 
 /**
@@ -163,8 +162,8 @@ export const truncateTimestampTimeMs = (timestampMs: number): number => {
 /**
  * Calculate cutoff timestamp for filtering data by days
  */
-export const calculateCutoffTimestamp = (days: number): bigint => {
-  return BigInt(Math.floor(Date.now() / 1000) - days * SECONDS_IN_DAY);
+export const calculateCutoffTimestamp = (days: number): number => {
+  return Math.floor(Date.now() / 1000) - days * SECONDS_IN_DAY;
 };
 
 /**

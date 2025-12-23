@@ -13,7 +13,7 @@ export class TreasuryRepository {
    * @returns Map of timestamp (ms) to token quantity (bigint)
    */
   async getTokenQuantities(
-    cutoffTimestamp: bigint,
+    cutoffTimestamp: number,
   ): Promise<Map<number, bigint>> {
     const results = await db.query.daoMetricsDayBucket.findMany({
       columns: {
@@ -22,7 +22,7 @@ export class TreasuryRepository {
       },
       where: and(
         eq(daoMetricsDayBucket.metricType, MetricTypesEnum.TREASURY),
-        gte(daoMetricsDayBucket.date, cutoffTimestamp),
+        gte(daoMetricsDayBucket.date, BigInt(cutoffTimestamp)),
       ),
       orderBy: (fields, { asc }) => [asc(fields.date)],
     });
@@ -43,12 +43,12 @@ export class TreasuryRepository {
    * @returns The last known token quantity or null if not found
    */
   async getLastTokenQuantityBeforeDate(
-    cutoffTimestamp: bigint,
+    cutoffTimestamp: number,
   ): Promise<bigint | null> {
     const result = await db.query.daoMetricsDayBucket.findFirst({
       where: and(
         eq(daoMetricsDayBucket.metricType, MetricTypesEnum.TREASURY),
-        lte(daoMetricsDayBucket.date, cutoffTimestamp),
+        lte(daoMetricsDayBucket.date, BigInt(cutoffTimestamp)),
       ),
       orderBy: desc(daoMetricsDayBucket.date),
     });

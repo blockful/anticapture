@@ -44,7 +44,7 @@ export class TreasuryService {
     // Convert to map with normalized timestamps (midnight UTC)
     const liquidMap = new Map<number, number>();
     data.forEach((item) => {
-      const timestampMs = truncateTimestampTimeMs(Number(item.date) * 1000);
+      const timestampMs = truncateTimestampTimeMs(item.date * 1000);
       liquidMap.set(timestampMs, item.liquidTreasury);
     });
 

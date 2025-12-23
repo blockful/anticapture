@@ -29,7 +29,7 @@ export class DuneProvider implements TreasuryProvider {
   ) {}
 
   async fetchTreasury(
-    cutoffTimestamp: bigint,
+    cutoffTimestamp: number,
   ): Promise<LiquidTreasuryDataPoint[]> {
     try {
       const response = await this.client.get<DuneResponse>("/", {
@@ -49,7 +49,7 @@ export class DuneProvider implements TreasuryProvider {
 
   private transformData(
     data: DuneResponse,
-    cutoffTimestamp: bigint,
+    cutoffTimestamp: number,
   ): LiquidTreasuryDataPoint[] {
     return data.result.rows
       .map((row) => {
@@ -58,9 +58,7 @@ export class DuneProvider implements TreasuryProvider {
         if (!year || !month || !day) {
           throw new Error(`Invalid date string: ${row.date}`);
         }
-        const timestamp = BigInt(
-          Math.floor(Date.UTC(year, month - 1, day) / 1000),
-        );
+        const timestamp = Math.floor(Date.UTC(year, month - 1, day) / 1000);
         return {
           date: timestamp,
           liquidTreasury: row.totalAssets ?? 0,

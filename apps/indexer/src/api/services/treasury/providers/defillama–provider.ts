@@ -27,7 +27,7 @@ export class DefiLlamaProvider implements TreasuryProvider {
   }
 
   async fetchTreasury(
-    cutoffTimestamp: bigint,
+    cutoffTimestamp: number,
   ): Promise<LiquidTreasuryDataPoint[]> {
     try {
       const response = await this.client.get<RawDefiLlamaResponse>(
@@ -49,14 +49,14 @@ export class DefiLlamaProvider implements TreasuryProvider {
    */
   private transformData(
     rawData: RawDefiLlamaResponse,
-    cutoffTimestamp: bigint,
+    cutoffTimestamp: number,
   ): LiquidTreasuryDataPoint[] {
     const { chainTvls } = rawData;
 
     // Map: chainKey → Map(dayTimestamp → latest dataPoint)
     const chainsByDate = new Map<
       string,
-      Map<bigint, { timestamp: number; value: number }>
+      Map<number, { timestamp: number; value: number }>
     >();
 
     // For each chain, keep only the latest timestamp per date
@@ -66,10 +66,10 @@ export class DefiLlamaProvider implements TreasuryProvider {
         continue; // Skip {Chain}-OwnTokens variants
       }
 
-      const dateMap = new Map<bigint, { timestamp: number; value: number }>();
+      const dateMap = new Map<number, { timestamp: number; value: number }>();
 
       for (const dataPoint of chainData.tvl || []) {
-        const dayTimestamp = truncateTimestampTime(BigInt(dataPoint.date));
+        const dayTimestamp = truncateTimestampTime(dataPoint.date);
         const existing = dateMap.get(dayTimestamp);
 
         // Keep only the latest timestamp for each date
@@ -86,7 +86,7 @@ export class DefiLlamaProvider implements TreasuryProvider {
 
     // Aggregate across chains
     const aggregatedByDate = new Map<
-      bigint,
+      number,
       { total: number; withoutOwnToken: number }
     >();
 
@@ -118,6 +118,6 @@ export class DefiLlamaProvider implements TreasuryProvider {
         date: dayTimestamp,
         liquidTreasury: values.withoutOwnToken, // Liquid Treasury
       }))
-      .sort((a, b) => Number(a.date - b.date)); // Sort by timestamp ascending
+      .sort((a, b) => a.date - b.date); // Sort by timestamp ascending
   }
 }
