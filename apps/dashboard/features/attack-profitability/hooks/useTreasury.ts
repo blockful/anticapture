@@ -1,4 +1,4 @@
-import useSWR, { SWRConfiguration } from "swr";
+import useSWR from "swr";
 import axios from "axios";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
@@ -61,21 +61,14 @@ export const useTreasury = (
   daoId: DaoIdEnum,
   type: TreasuryType = "total",
   days: TimeInterval = TimeInterval.ONE_YEAR,
-  options?: {
-    order?: "asc" | "desc";
-    config?: Partial<SWRConfiguration<TreasuryResponse, Error>>;
-  },
+  order: "asc" | "desc" = "asc",
 ) => {
-  const { order = "asc", config } = options || {};
-  const key = daoId ? ["treasury", daoId, type, days, order] : null;
-
-  const { data, error, isValidating, mutate } = useSWR<TreasuryResponse>(
-    key,
+  const { data, error, isValidating } = useSWR<TreasuryResponse>(
+    ["treasury", daoId, type, days, order],
     () => fetchTreasury({ daoId, type, days, order }),
     {
       revalidateOnFocus: false,
       shouldRetryOnError: false,
-      ...config,
     },
   );
 
@@ -84,6 +77,5 @@ export const useTreasury = (
     totalCount: data?.totalCount ?? 0,
     loading: isValidating,
     error,
-    refetch: mutate,
   };
 };

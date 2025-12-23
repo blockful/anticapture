@@ -16,25 +16,19 @@ export const useDaoTreasuryStats = ({
     daoId,
     "liquid",
     TimeInterval.SEVEN_DAYS,
-    {
-      order: "desc",
-    },
+    "desc",
   );
   const { data: tokenTreasury } = useTreasury(
     daoId,
     "dao-token",
     TimeInterval.SEVEN_DAYS,
-    {
-      order: "desc",
-    },
+    "desc",
   );
   const { data: allTreasury } = useTreasury(
     daoId,
     "total",
     TimeInterval.SEVEN_DAYS,
-    {
-      order: "desc",
-    },
+    "desc",
   );
 
   return useMemo(() => {
