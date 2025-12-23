@@ -2,7 +2,7 @@
 
 import { cn } from "@/shared/utils/";
 import { usePathname } from "next/navigation";
-import { Heart, BookOpen, HelpCircle } from "lucide-react";
+import { Heart, BookOpen, HelpCircle, Mail } from "lucide-react";
 import Link from "next/link";
 
 interface BottomNavigationButtonsProps {
@@ -16,6 +16,12 @@ export const BottomNavigationButtons = ({
   const pathname = usePathname();
 
   const navigationItems = [
+    {
+      icon: Mail,
+      label: "Contact",
+      href: "/contact",
+      isActive: pathname === "/contact",
+    },
     {
       icon: Heart,
       label: "Donate",
