@@ -3,17 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/shared/components/ui/form";
-import { Input } from "@/shared/components/ui/input";
-import { Textarea } from "@/shared/components/ui/textarea";
-import { Checkbox } from "@/shared/components/ui/checkbox";
 import { Footer } from "@/shared/components/design-system/footer";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
 import { HeaderSidebar } from "@/widgets";
@@ -26,6 +15,17 @@ import {
   useContactForm,
 } from "@/shared/hooks/useContactForm";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/shared/components/design-system/form/form";
+import { Input } from "@/shared/components/design-system/form/fields/input/input";
+import { Checkbox } from "@/shared/components/design-system/form/fields/checkbox/checkbox";
+import { Textarea } from "@/shared/components/design-system/form/fields/textarea/textarea";
 
 type ContactFormValues = z.infer<typeof contactFormSchema>;
 
