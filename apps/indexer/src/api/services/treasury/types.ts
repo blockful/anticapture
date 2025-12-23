@@ -10,5 +10,5 @@ export interface LiquidTreasuryDataPoint {
  * Interface for fetching historical token prices
  */
 export interface PriceProvider {
-  getHistoricalPrices(days: number): Promise<Map<number, number>>;
+  getHistoricalPricesMap(days: number): Promise<Map<number, number>>;
 }

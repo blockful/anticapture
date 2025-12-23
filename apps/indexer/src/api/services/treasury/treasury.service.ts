@@ -80,7 +80,7 @@ export class TreasuryService {
     // Fetch token quantities from DB and prices from CoinGecko
     const [tokenQuantities, historicalPrices] = await Promise.all([
       this.repository.getTokenQuantities(cutoffTimestamp),
-      this.priceProvider.getHistoricalPrices(days),
+      this.priceProvider.getHistoricalPricesMap(days),
     ]);
 
     if (tokenQuantities.size === 0 && historicalPrices.size === 0) {
