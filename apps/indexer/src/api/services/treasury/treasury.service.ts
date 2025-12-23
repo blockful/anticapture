@@ -47,7 +47,7 @@ export class TreasuryService {
     });
 
     // Create timeline from first data point to today
-    const timeline = createDailyTimelineFromData(liquidMap);
+    const timeline = createDailyTimelineFromData([...liquidMap.keys()]);
 
     // Forward-fill to remove gaps
     const filledValues = forwardFill(timeline, liquidMap);
@@ -92,10 +92,10 @@ export class TreasuryService {
     const normalizedPrices = normalizeMapTimestamps(historicalPrices);
 
     // Create timeline from first data point to today
-    const timeline = createDailyTimelineFromData(
-      normalizedQuantities,
-      normalizedPrices,
-    );
+    const timeline = createDailyTimelineFromData([
+      ...normalizedQuantities.keys(),
+      ...normalizedPrices.keys(),
+    ]);
 
     // Get last known quantity before cutoff to use as initial value for forward-fill
     const lastKnownQuantity =

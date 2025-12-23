@@ -42,16 +42,11 @@ export function forwardFill<T>(
 
 /**
  * Create daily timeline from first data point to today (midnight UTC)
- * Accepts multiple maps and finds the earliest timestamp across all
  */
-export function createDailyTimelineFromData(
-  ...dataMaps: Map<number, unknown>[]
-): number[] {
-  const allTimestamps = dataMaps.flatMap((map) => [...map.keys()]);
+export function createDailyTimelineFromData(timestamps: number[]): number[] {
+  if (timestamps.length === 0) return [];
 
-  if (allTimestamps.length === 0) return [];
-
-  const firstTimestamp = Math.min(...allTimestamps);
+  const firstTimestamp = Math.min(...timestamps);
   const todayMidnight = truncateTimestampTimeMs(Date.now());
   const totalDays =
     Math.floor((todayMidnight - firstTimestamp) / ONE_DAY_MS) + 1;
