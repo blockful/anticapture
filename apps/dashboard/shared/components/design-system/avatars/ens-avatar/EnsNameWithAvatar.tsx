@@ -37,15 +37,9 @@ export const EnsNameWithAvatar = ({
   showFullAddress = false,
   isDashed = false,
 }: EnsNameWithAvatarProps) => {
-  const {
-    data: ensName,
-    isLoading: ensNameLoading,
-    error: ensNameError,
-  } = useEnsNameFromAddress({
+  const { data: ensName, isLoading: ensNameLoading } = useEnsNameFromAddress({
     address,
   });
-
-  console.log("ensName", ensName, ensNameLoading, ensNameError);
 
   // Determine what to display as the name
   const getDisplayName = () => {
