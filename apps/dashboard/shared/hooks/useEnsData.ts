@@ -1,9 +1,37 @@
 "use client";
 
 import { useQuery, useQueries } from "@tanstack/react-query";
-import { Address, isAddress } from "viem";
-import { normalize } from "viem/ens";
-import { publicClient } from "@/shared/services/wallet/wallet";
+import axios from "axios";
+import { Address } from "viem";
+
+const getEnsUrl = (address: Address | `${string}.eth`) => {
+  return `https://api.ethfollow.xyz/api/v1/users/${address}/ens`;
+};
+
+type EnsRecords = {
+  avatar?: string;
+  "com.discord"?: string;
+  "com.github"?: string;
+  "com.twitter"?: string;
+  description?: string;
+  email?: string;
+  header?: string;
+  location?: string;
+  name?: string;
+  "org.telegram"?: string;
+  url?: string;
+  [key: string]: string | undefined;
+};
+
+type EnsApiResponse = {
+  ens: {
+    name: string;
+    address: Address;
+    avatar: string | null;
+    records: EnsRecords | null;
+    updated_at: string;
+  };
+};
 
 type EnsData = {
   address: Address;
@@ -13,11 +41,13 @@ type EnsData = {
 };
 
 /**
- * Hook to fetch ENS data for a single address
- * @param address - Ethereum address (e.g., "0x123...")
+ * Hook to fetch ENS data for a single address or ENS name
+ * @param address - Ethereum address or ENS name (e.g., "0x123..." or "vitalik.eth")
  * @returns Object containing ENS data, error, and loading state
  */
-export const useEnsData = (address: Address | null | undefined) => {
+export const useEnsData = (
+  address: Address | `${string}.eth` | null | undefined,
+) => {
   const { data, error, isLoading } = useQuery<EnsData>({
     queryKey: ["ensData", address ?? null],
     queryFn: () => fetchEnsDataFromAddress({ address: address! }),
@@ -35,32 +65,35 @@ export const useEnsData = (address: Address | null | undefined) => {
 };
 
 /**
- * Fetches ENS data using viem for a single address
- * @param address - Ethereum address
+ * Fetches ENS data from the API for a single address or ENS name
+ * @param address - Ethereum address or ENS name
  * @returns Promise resolving to EnsData
+ * @throws Error if the API request fails or response is invalid
  */
 export const fetchEnsDataFromAddress = async ({
   address,
 }: {
-  address: Address;
+  address: Address | `${string}.eth`;
 }): Promise<EnsData> => {
-  let ensName: string | null = null;
-  let avatarUrl: string | null = null;
+  const response = await axios.get<EnsApiResponse>(getEnsUrl(address));
+  const data = response.data;
 
-  if (isAddress(address)) {
-    ensName = await publicClient.getEnsName({ address });
+  // Validate response structure
+  if (!data?.ens) {
+    throw new Error("Invalid ENS API response: missing ens field");
   }
 
-  // Get avatar URL if we have an ENS name
-  if (ensName) {
-    avatarUrl = await publicClient.getEnsAvatar({ name: normalize(ensName) });
+  if (!data.ens.address) {
+    throw new Error("Invalid ENS API response: missing address field");
   }
 
+  // Empty name is valid (means no ENS name exists for this address)
+  // Transform API response to match expected EnsData structure
   return {
-    address: address,
-    avatar_url: avatarUrl,
-    ens: ensName || "",
-    avatar: avatarUrl,
+    address: data.ens.address,
+    avatar_url: data.ens.avatar,
+    ens: data.ens.name,
+    avatar: data.ens.avatar,
   };
 };
 
