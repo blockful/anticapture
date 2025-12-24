@@ -102,10 +102,19 @@ export const fetchAddressFromEnsName = async ({
 }: {
   ensName: `${string}.eth`;
 }): Promise<Address | null> => {
-  const address = await publicClient.getEnsAddress({
-    name: normalize(ensName),
-  });
-  return address || null;
+  const response = await axios.get<EnsApiResponse>(getEnsUrl(ensName));
+  const data = response.data;
+
+  // Validate response structure
+  if (!data?.ens) {
+    throw new Error("Invalid ENS API response: missing ens field");
+  }
+
+  if (!data.ens.address) {
+    throw new Error("Invalid ENS API response: missing address field");
+  }
+
+  return data.ens.address;
 };
 
 /**
