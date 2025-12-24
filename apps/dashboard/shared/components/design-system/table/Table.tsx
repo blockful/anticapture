@@ -313,7 +313,12 @@ export const Table = <TData, TValue>({
                 );
               })}
 
-              <div ref={sentinelRef} />
+              {/* Sentinel for infinite scrolling */}
+              <tr>
+                <td>
+                  <div ref={sentinelRef} />
+                </td>
+              </tr>
 
               {isLoadingMore && (
                 <TableRow>
