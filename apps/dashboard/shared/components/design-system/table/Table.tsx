@@ -102,9 +102,14 @@ export const Table = <TData, TValue>({
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [expanded, setExpanded] = useState<ExpandedState>({});
+  const [isMounted, setIsMounted] = useState(false);
 
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!onLoadMore || !hasMore) return;
@@ -353,7 +358,7 @@ export const Table = <TData, TValue>({
           )}
         </TableBody>
       </TableContainer>
-      {withDownloadCSV && data.length > 0 && (
+      {withDownloadCSV && data.length > 0 && isMounted && (
         <p className="text-secondary mt-2 flex font-mono text-[13px] tracking-wider">
           [DOWNLOAD AS{" "}
           <CSVLink
