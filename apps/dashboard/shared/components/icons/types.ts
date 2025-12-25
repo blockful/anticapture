@@ -10,5 +10,5 @@ export interface DaoAvatarIconProps extends ComponentProps<"svg"> {
 export type AvatarIconProps = Omit<DaoAvatarIconProps, "daoId">;
 
 export interface DaoIconProps extends ComponentProps<"svg"> {
-  showBackground: boolean;
+  showBackground?: boolean;
 }
