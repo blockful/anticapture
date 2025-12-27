@@ -88,10 +88,18 @@ export const TokenHolders = ({
           ? Number(formatUnits(BigInt(historicalBalance), 18))
           : Number(historicalBalance);
 
-      if (historical === 0) return { percentageChange: 0, absoluteChange: 0 };
-
       // Calculate absolute change in tokens
       const absoluteChange = current - historical;
+
+      // If historical is 0, we can't calculate percentage (division by zero)
+      // Use a large number so the UI displays ">1000%"
+      if (historical === 0) {
+        return {
+          percentageChange: 9999,
+          absoluteChange: Number(absoluteChange.toFixed(2)),
+        };
+      }
+
       // Calculate percentage variation
       const percentageChange = ((current - historical) / historical) * 100;
 
