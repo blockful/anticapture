@@ -23,6 +23,7 @@ import {
   accountBalanceVariations,
   dao,
   accountInteractions,
+  tokenHolders,
 } from "@/api/controllers";
 import { docs } from "@/api/docs";
 import { env } from "@/env";
@@ -38,6 +39,7 @@ import {
   DrizzleProposalsActivityRepository,
   NounsVotingPowerRepository,
   AccountInteractionsRepository,
+  TokenHoldersRepository,
 } from "@/api/repositories";
 import { errorHandler } from "@/api/middlewares";
 import { getClient } from "@/lib/client";
@@ -55,6 +57,7 @@ import {
   BalanceVariationsService,
   HistoricalBalancesService,
   DaoService,
+  TokenHoldersService,
 } from "@/api/services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
@@ -128,6 +131,8 @@ const accountBalanceService = new BalanceVariationsService(
   accountBalanceRepo,
   accountInteractionRepo,
 );
+const tokenHoldersRepo = new TokenHoldersRepository();
+const tokenHoldersService = new TokenHoldersService(tokenHoldersRepo);
 
 if (env.DUNE_API_URL && env.DUNE_API_KEY) {
   const duneClient = new DuneService(env.DUNE_API_URL, env.DUNE_API_KEY);
@@ -177,6 +182,7 @@ votingPower(app, votingPowerService);
 votingPowerVariations(app, votingPowerService);
 accountBalanceVariations(app, accountBalanceService);
 accountInteractions(app, accountBalanceService);
+tokenHolders(app, tokenHoldersService);
 dao(app, daoService);
 docs(app);
 
