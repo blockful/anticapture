@@ -101,7 +101,7 @@ export class TokenHoldersRepository {
       })
       .from(combined);
 
-    const totalCount = countResult[0]?.count ?? 0;
+    const totalCount = Number(countResult[0]?.count) ?? 0;
 
     return {
       totalCount,
