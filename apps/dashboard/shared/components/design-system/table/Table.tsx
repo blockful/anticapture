@@ -284,7 +284,7 @@ export const Table = <TData, TValue>({
                           cell.column.columnDef as { meta?: ColumnMeta }
                         ).meta;
                         const cellContent = (
-                          <div className="flex items-center gap-2">
+                          <div className="flex w-full items-center gap-2">
                             {index === 0 && enableExpanding && (
                               <TreeLines row={row} />
                             )}
@@ -317,7 +317,7 @@ export const Table = <TData, TValue>({
                               <Link
                                 href={rowHref}
                                 prefetch={true}
-                                className="flex h-full w-full items-center"
+                                className="flex h-full w-full items-center justify-start"
                                 onClick={(e) => {
                                   // Let Link handle navigation naturally
                                   e.stopPropagation();
