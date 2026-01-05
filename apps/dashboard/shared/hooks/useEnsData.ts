@@ -41,13 +41,11 @@ type EnsData = {
 };
 
 /**
- * Hook to fetch ENS data for a single address or ENS name
- * @param address - Ethereum address or ENS name (e.g., "0x123..." or "vitalik.eth")
+ * Hook to fetch ENS data for a single address
+ * @param address - Ethereum address (e.g., "0x123..." )
  * @returns Object containing ENS data, error, and loading state
  */
-export const useEnsData = (
-  address: Address | `${string}.eth` | null | undefined,
-) => {
+export const useEnsData = (address: Address | null | undefined) => {
   const { data, error, isLoading } = useQuery<EnsData>({
     queryKey: ["ensData", address ?? null],
     queryFn: () => fetchEnsDataFromAddress({ address: address! }),
@@ -65,15 +63,15 @@ export const useEnsData = (
 };
 
 /**
- * Fetches ENS data from the API for a single address or ENS name
- * @param address - Ethereum address or ENS name
+ * Fetches ENS data from the API for a single address
+ * @param address - Ethereum address
  * @returns Promise resolving to EnsData
  * @throws Error if the API request fails or response is invalid
  */
 export const fetchEnsDataFromAddress = async ({
   address,
 }: {
-  address: Address | `${string}.eth`;
+  address: Address;
 }): Promise<EnsData> => {
   const response = await axios.get<EnsApiResponse>(getEnsUrl(address));
   const data = response.data;
