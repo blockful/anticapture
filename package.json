@@ -22,7 +22,9 @@
     ],
     "*.{json,md,yml,yaml}": [
       "prettier --write"
-    ]
+    ],
+    "packages/graphql-client/generated.ts": [],
+    "packages/graphql-client/types.ts": []
   },
   "license": "MIT",
   "packageManager": "pnpm@10.10.0",

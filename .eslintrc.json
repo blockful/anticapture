@@ -25,6 +25,8 @@
     "out",
     "coverage",
     "*.config.js",
-    "*.config.ts"
+    "*.config.ts",
+    "packages/graphql-client/generated.ts",
+    "packages/graphql-client/types.ts"
   ]
 }
