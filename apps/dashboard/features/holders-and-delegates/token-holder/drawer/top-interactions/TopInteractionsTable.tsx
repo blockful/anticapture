@@ -254,6 +254,9 @@ export const TopInteractionsTable = ({
         const balanceChange: number = row.getValue("balanceChange");
 
         const value = Number(formatUnits(BigInt(balanceChange), decimals));
+
+        // this is inverted because is relative to the drawer address
+        // thus a positive value on the row means the drawer address is sending tokens
         const variant = value < 0 ? "positive" : "negative";
 
         if (value === 0) {
@@ -277,6 +280,8 @@ export const TopInteractionsTable = ({
             )}
           >
             {value < 0 ? (
+              // this is inverted because is relative to the drawer address
+              // thus a positive value on the row means the drawer address is sending tokens
               <ArrowUp
                 className={cn(
                   "size-4",
