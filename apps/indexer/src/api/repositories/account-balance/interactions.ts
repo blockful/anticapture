@@ -1,8 +1,9 @@
+import { Address, isAddressEqual } from "viem";
 import { asc, desc, gte, sql, and, eq, or, lte } from "ponder";
 import { db } from "ponder:api";
 import { transfer, accountBalance } from "ponder:schema";
+
 import { AccountInteractions, Filter } from "../../mappers";
-import { Address } from "viem";
 
 export class AccountInteractionsRepository {
   async getAccountInteractions(
@@ -135,30 +136,34 @@ export class AccountInteractionsRepository {
     const pagedResult = await baseQuery.offset(skip).limit(limit);
 
     return {
-      interactionCount: Number(totalCountResult[0]?.count) ?? 0,
-      interactions: pagedResult.map(
-        ({
-          accountId,
-          currentBalance,
-          absoluteChange,
-          totalVolume,
-          transferCount,
-        }) => ({
-          accountId: accountId,
-          previousBalance: currentBalance - BigInt(absoluteChange),
-          currentBalance: currentBalance,
-          absoluteChange: BigInt(absoluteChange),
-          totalVolume: BigInt(totalVolume),
-          transferCount: BigInt(transferCount),
-          percentageChange:
-            currentBalance - BigInt(absoluteChange)
-              ? Number(
-                  (BigInt(absoluteChange) * 10000n) /
-                    (currentBalance - BigInt(absoluteChange)),
-                ) / 100
-              : 0,
-        }),
-      ),
+      interactionCount: totalCountResult[0]?.count
+        ? Number(totalCountResult[0].count) - 1
+        : 0,
+      interactions: pagedResult
+        .filter((acc) => !isAddressEqual(acc.accountId, accountId))
+        .map(
+          ({
+            accountId,
+            currentBalance,
+            absoluteChange,
+            totalVolume,
+            transferCount,
+          }) => ({
+            accountId: accountId,
+            previousBalance: currentBalance - BigInt(absoluteChange),
+            currentBalance: currentBalance,
+            absoluteChange: BigInt(absoluteChange),
+            totalVolume: BigInt(totalVolume),
+            transferCount: BigInt(transferCount),
+            percentageChange:
+              currentBalance - BigInt(absoluteChange)
+                ? Number(
+                    (BigInt(absoluteChange) * 10000n) /
+                      (currentBalance - BigInt(absoluteChange)),
+                  ) / 100
+                : 0,
+          }),
+        ),
     };
   }
 }
