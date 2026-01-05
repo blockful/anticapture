@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Button, SkeletonRow } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { ColumnDef } from "@tanstack/react-table";
-import { Address, parseUnits } from "viem";
+import { Address, formatUnits, parseUnits } from "viem";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
@@ -141,7 +141,7 @@ export const TopInteractionsTable = ({
             />
             <div className="flex items-center opacity-0 transition-opacity [tr:hover_&]:opacity-100">
               <CopyAndPasteButton
-                textToCopy={address as `0x${string}`}
+                textToCopy={addressValue as `0x${string}`}
                 customTooltipText={{
                   default: "Copy address",
                   copied: "Address copied!",
@@ -253,12 +253,11 @@ export const TopInteractionsTable = ({
         }
         const balanceChange: number = row.getValue("balanceChange");
 
-        const value =
-          token === "ERC20"
-            ? Number(BigInt(balanceChange)) / Number(BigInt(10 ** decimals)) ||
-              0
-            : Number(balanceChange) || 0;
-        const variant = value >= 0 ? "positive" : "negative";
+        const value = Number(formatUnits(BigInt(balanceChange), decimals));
+
+        // this is inverted because is relative to the drawer address
+        // thus a positive value on the row means the drawer address is sending tokens
+        const variant = value < 0 ? "positive" : "negative";
 
         if (value === 0) {
           return (
@@ -280,7 +279,9 @@ export const TopInteractionsTable = ({
               percentageVariants({ variant }),
             )}
           >
-            {value > 0 ? (
+            {value < 0 ? (
+              // this is inverted because is relative to the drawer address
+              // thus a positive value on the row means the drawer address is sending tokens
               <ArrowUp
                 className={cn(
                   "size-4",
