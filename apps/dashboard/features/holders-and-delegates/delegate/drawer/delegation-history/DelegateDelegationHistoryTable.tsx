@@ -79,8 +79,6 @@ export const DelegateDelegationHistoryTable = ({
     orderBy: sortBy,
     orderDirection: sortDirection,
     filterVariables,
-    fromAddress: fromFilter ?? undefined,
-    toAddress: toFilter ?? undefined,
   });
 
   // Handle sorting
