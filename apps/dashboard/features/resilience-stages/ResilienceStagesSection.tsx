@@ -1,5 +1,3 @@
-"use client";
-
 import { RiskLevelCard, TheSectionLayout } from "@/shared/components";
 import daoConfigByDaoId from "@/shared/dao-config";
 import {

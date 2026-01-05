@@ -3,13 +3,9 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoOverviewSection } from "@/features/dao-overview";
 
-type Props = {
-  params: Promise<{ daoId: string }>;
-};
-
-export async function generateMetadata(props: Props): Promise<Metadata> {
-  const params = await props.params;
-  const daoId = params.daoId.toUpperCase() as DaoIdEnum;
+export async function generateMetadata(): Promise<Metadata> {
+  // const params = await props.params;
+  // const daoId = params.daoId.toUpperCase() as DaoIdEnum;
 
   const baseUrl =
     process.env.NEXT_PUBLIC_SITE_URL ||
@@ -17,28 +13,28 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       ? `https://${process.env.VERCEL_URL}`
       : "http://localhost:3000");
 
-  const imageUrl = `${baseUrl}/opengraph-images/${params.daoId}.png`;
+  // const imageUrl = `${baseUrl}/opengraph-images/${params.daoId}.png`;
 
   return {
-    title: `Anticapture - ${daoId} DAO`,
-    description: `Explore and mitigate governance risks in ${daoId} DAO.`,
+    title: `Anticapture - ENS DAO`,
+    description: `Explore and mitigate governance risks in ENS DAO.`,
     openGraph: {
-      title: `Anticapture - ${daoId} DAO`,
-      description: `Explore and mitigate governance risks in ${daoId} DAO.`,
+      title: `Anticapture -    DAO`,
+      description: `Explore and mitigate governance risks in  DAO.`,
       images: [
         {
-          url: imageUrl,
+          url: `${baseUrl}/opengraph-images/ens.png`,
           width: 1200,
           height: 630,
-          alt: `${daoId} DAO Open Graph Image`,
+          alt: `DAO Open Graph Image`,
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      title: `Anticapture - ${daoId} DAO`,
-      description: `Explore and mitigate governance risks in ${daoId} DAO.`,
-      images: [imageUrl],
+      title: `Anticapture - ENS DAO`,
+      description: `Explore and mitigate governance risks in ENS DAO.`,
+      images: [],
     },
   };
 }

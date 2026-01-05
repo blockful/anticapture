@@ -1,11 +1,5 @@
-"use client";
-
-import {
-  Button,
-  StagesCardRequirements,
-  TooltipInfo,
-} from "@/shared/components";
-import { cn, formatPlural } from "@/shared/utils/";
+import { StagesCardRequirements, TooltipInfo } from "@/shared/components";
+import { cn } from "@/shared/utils/";
 import {
   filterFieldsByRiskLevel,
   fieldsToArray,
@@ -19,12 +13,8 @@ import {
 import { DaoAvatarIcon, PointerIcon } from "@/shared/components/icons";
 import { Stage } from "@/shared/types/enums/Stage";
 import { DaoConfiguration } from "@/shared/dao-config/types";
-import { OutlinedBox } from "@/shared/components/boxes/OutlinedBox";
-import { useCallback, useState } from "react";
-import { useScreenSize } from "@/shared/hooks";
-import { StageRequirementsTooltip } from "@/features/dao-overview/components/StageRequirementsTooltip";
-import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import { StagesTooltipButton } from "@/features/resilience-stages/components/StagesTooltipButton";
 
 interface StagesContainerProps {
   daoId: DaoIdEnum;
@@ -91,8 +81,6 @@ export const StagesContainer = ({
   context,
   currentDaoStage,
 }: StagesContainerProps) => {
-  const [showTooltip, setShowTooltip] = useState(false);
-  const { isMobile } = useScreenSize();
   const isStageKnown = ![Stage.UNKNOWN, Stage.NONE].includes(currentDaoStage);
 
   const highRiskItems = filterFieldsByRiskLevel(
@@ -123,23 +111,6 @@ export const StagesContainer = ({
       : mediumRiskItems.length > 0
         ? mediumRiskItems.map((i) => i.name)
         : [];
-
-  const boxConfigs = [
-    { variant: "error", count: highRiskItems.length },
-    { variant: "warning", count: mediumRiskItems.length },
-    { variant: "success", count: lowRiskItems.length },
-  ] as const;
-
-  const handleButtonClick = useCallback(() => {
-    if (isMobile) {
-      setShowTooltip((prev) => !prev);
-    } else {
-      const section = document.getElementById(
-        PAGES_CONSTANTS.resilienceStages.page,
-      );
-      section?.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [isMobile]);
 
   return (
     <div
@@ -241,78 +212,20 @@ export const StagesContainer = ({
             daoStage={currentDaoStage}
             context={context}
             className={cn({
-              "border-border-contrast border-b-1 rounded-none p-3":
+              "border-border-contrast rounded-none border-b p-3":
                 context === "overview",
             })}
           />
           {context === "overview" && (
-            <div
-              className="border-light-dark bg-surface-contrast relative flex items-center justify-between gap-1 border-b p-2 sm:border-none sm:p-3"
-              onMouseLeave={() => !isMobile && setShowTooltip(false)}
-            >
-              {currentDaoStage === Stage.NONE ? (
-                <span className="text-secondary group-hover:text-primary font-mono text-sm/tight font-medium uppercase duration-300">
-                  Does not qualify
-                </span>
-              ) : (
-                <Button
-                  variant="ghost"
-                  className="group px-0 py-0 font-mono"
-                  onClick={handleButtonClick}
-                  onMouseEnter={() => !isMobile && setShowTooltip(true)}
-                >
-                  <span className="border-foreground text-alternative-sm text-nowrap border-b border-dashed font-medium duration-300 hover:border-white">
-                    <span className="text-primary uppercase duration-300">
-                      {currentDaoStage !== Stage.UNKNOWN
-                        ? formatPlural(
-                            highRiskItems.length ||
-                              mediumRiskItems.length ||
-                              lowRiskItems.length,
-                            "ITEM",
-                          )
-                        : "? ITEMS"}
-                    </span>
-                    <span
-                      className={cn(
-                        "text-secondary duration-300",
-                        isStageKnown && "group-hover:text-primary",
-                      )}
-                    >
-                      {" "}
-                      {isStageKnown
-                        ? `TO STAGE ${Number(currentDaoStage) + 1}`
-                        : "TO NEXT"}
-                    </span>
-                  </span>
-                </Button>
-              )}
-
-              <div className="flex gap-1.5">
-                {boxConfigs.map(({ variant, count }) => (
-                  <OutlinedBox
-                    key={variant}
-                    variant={variant}
-                    disabled={!isStageKnown}
-                    className={cn("border-0 px-2 py-1", {
-                      "border-1": currentDaoStage === Stage.NONE,
-                    })}
-                    onClick={() => setShowTooltip((prev) => !prev)}
-                    onMouseEnter={() => !isMobile && setShowTooltip(true)}
-                  >
-                    <span className="font-mono">{count}</span>
-                  </OutlinedBox>
-                ))}
-              </div>
-              {showTooltip && isStageKnown && (
-                <StageRequirementsTooltip
-                  currentStage={currentDaoStage}
-                  nextStage={Number(currentDaoStage) + 1}
-                  requirements={requirements}
-                  onMouseEnter={() => !isMobile && setShowTooltip(true)}
-                  onMouseLeave={() => !isMobile && setShowTooltip(false)}
-                />
-              )}
-            </div>
+            <StagesTooltipButton
+              currentDaoStage={currentDaoStage}
+              isStageKnown={isStageKnown}
+              highRiskItemsCount={highRiskItems.length}
+              mediumRiskItemsCount={mediumRiskItems.length}
+              lowRiskItemsCount={lowRiskItems.length}
+              requirements={requirements}
+              daoId={daoId.toLowerCase()}
+            />
           )}
         </div>
         {context === "section" && (
