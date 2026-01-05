@@ -36,6 +36,7 @@ export interface Proposal extends Omit<
   | "abstainVotes"
   | "quorum"
   | "description"
+  | "calldatas"
 > {
   title: string; // Add title field that's computed from description
   status: ProposalStatus;

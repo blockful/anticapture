@@ -57,7 +57,6 @@ export const transformToGovernanceProposal = (
     quorum: quorum.toFixed(2),
     timeText,
     values: graphqlProposal.values,
-    calldatas: graphqlProposal.calldatas,
     targets: graphqlProposal.targets,
   };
 };
