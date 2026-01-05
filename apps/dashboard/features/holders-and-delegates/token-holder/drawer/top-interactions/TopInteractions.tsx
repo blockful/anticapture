@@ -118,13 +118,15 @@ export const TopInteractions = ({
                       className="h-6 w-24"
                     />
                   ) : (
+                    // this is inverted because is relative to the drawer address
+                    // thus a positive value on the row means the drawer address is sending tokens
                     <p
                       className={cn(
                         "flex items-center text-sm font-normal",
-                        variant === "positive" ? "text-success" : "text-error",
+                        variant !== "positive" ? "text-success" : "text-error",
                       )}
                     >
-                      {netBalanceChange > 0 ? (
+                      {netBalanceChange < 0 ? (
                         <ArrowUp
                           className={cn(
                             "size-4",

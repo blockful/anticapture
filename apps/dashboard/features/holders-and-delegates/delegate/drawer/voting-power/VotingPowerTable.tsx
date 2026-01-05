@@ -92,7 +92,7 @@ export const VotingPowerTable = ({
             />
             <div className="flex items-center opacity-0 transition-opacity [tr:hover_&]:opacity-100">
               <CopyAndPasteButton
-                textToCopy={address as `0x${string}`}
+                textToCopy={addressValue as `0x${string}`}
                 customTooltipText={{
                   default: "Copy address",
                   copied: "Address copied!",
