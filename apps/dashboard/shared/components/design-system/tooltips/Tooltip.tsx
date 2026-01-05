@@ -11,6 +11,7 @@ interface TooltipProps {
   tooltipContent: ReactNode;
   className?: string;
   title?: ReactNode;
+  asChild?: boolean;
 }
 
 export function Tooltip({
@@ -18,6 +19,7 @@ export function Tooltip({
   tooltipContent,
   className,
   title,
+  asChild = false,
 }: TooltipProps) {
   const [open, setOpen] = useState<boolean>(false);
   const { isMobile } = useScreenSize();
@@ -42,7 +44,12 @@ export function Tooltip({
       onOpenChange={handleOpenChange}
       disableHoverableContent
     >
-      <Trigger role="button" aria-label="tooltip-info" onClick={onClick}>
+      <Trigger
+        asChild={asChild}
+        role="button"
+        aria-label="tooltip-info"
+        onClick={onClick}
+      >
         {children}
       </Trigger>
       <Portal>
