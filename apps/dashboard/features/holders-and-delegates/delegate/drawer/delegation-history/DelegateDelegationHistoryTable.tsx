@@ -7,7 +7,7 @@ import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
-import { Address, formatUnits, isAddress, parseUnits, zeroAddress } from "viem";
+import { Address, formatUnits, parseUnits, zeroAddress } from "viem";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import { DaoIdEnum } from "@/shared/types/daos";
 import Link from "next/link";
@@ -20,8 +20,6 @@ import { Table } from "@/shared/components/design-system/table/Table";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
 import { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 import daoConfig from "@/shared/dao-config";
-import { AddressFilter } from "@/shared/components/design-system/table/filters";
-import { fetchAddressFromEnsName } from "@/shared/hooks/useEnsData";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import {
   parseAsBoolean,
@@ -30,7 +28,6 @@ import {
   useQueryState,
   useQueryStates,
 } from "nuqs";
-import { parseAsAddress } from "@/shared/utils/parseAsAddress";
 
 interface DelegateDelegationHistoryTableProps {
   accountId: string;
@@ -59,8 +56,8 @@ export const DelegateDelegationHistoryTable = ({
     "active",
     parseAsBoolean.withDefault(false),
   );
-  const [fromFilter, setFromFilter] = useQueryState("from", parseAsAddress);
-  const [toFilter, setToFilter] = useQueryState("to", parseAsAddress);
+  // const [fromFilter, setFromFilter] = useQueryState("from", parseAsAddress);
+  // const [toFilter, setToFilter] = useQueryState("to", parseAsAddress);
   const sortOptions: SortOption[] = [
     { value: "largest-first", label: "Largest first" },
     { value: "smallest-first", label: "Smallest first" },
@@ -79,8 +76,6 @@ export const DelegateDelegationHistoryTable = ({
     orderBy: sortBy,
     orderDirection: sortDirection,
     filterVariables,
-    fromAddress: fromFilter ?? undefined,
-    toAddress: toFilter ?? undefined,
   });
 
   // Handle sorting
@@ -289,7 +284,7 @@ export const DelegateDelegationHistoryTable = ({
       header: () => (
         <div className="text-table-header flex w-full items-center justify-start gap-2">
           <span>Delegator</span>
-          <AddressFilter
+          {/* <AddressFilter
             onApply={async (addr) => {
               if (!addr) {
                 setFromFilter(null);
@@ -307,7 +302,7 @@ export const DelegateDelegationHistoryTable = ({
               }
             }}
             currentFilter={fromFilter ?? undefined}
-          />
+          /> */}
         </div>
       ),
       cell: ({ row }) => {
@@ -399,7 +394,7 @@ export const DelegateDelegationHistoryTable = ({
       header: () => (
         <div className="text-table-header flex w-full items-center justify-start gap-2">
           <span>Delegate</span>
-          <AddressFilter
+          {/* <AddressFilter
             onApply={async (addr) => {
               if (!addr) {
                 setToFilter(null);
@@ -417,7 +412,7 @@ export const DelegateDelegationHistoryTable = ({
               }
             }}
             currentFilter={toFilter ?? undefined}
-          />
+          /> */}
         </div>
       ),
       cell: ({ row }) => {
