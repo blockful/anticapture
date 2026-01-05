@@ -161,10 +161,15 @@ export const Delegates = ({
 
         const absoluteChange =
           votingPowerFormatted - historicalVotingPowerFormatted;
+
+        // If historical is 0, we can't calculate percentage (division by zero)
+        // Use a large number so the UI displays ">1000%"
         const percentageChange =
-          ((votingPowerFormatted - historicalVotingPowerFormatted) /
-            historicalVotingPowerFormatted) *
-          100;
+          historicalVotingPowerFormatted === 0
+            ? 9999
+            : ((votingPowerFormatted - historicalVotingPowerFormatted) /
+                historicalVotingPowerFormatted) *
+              100;
 
         variation = {
           percentageChange: Number(percentageChange.toFixed(2)),
