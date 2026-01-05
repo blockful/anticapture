@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState, useEffect } from "react";
 import { ApolloError, NetworkStatus } from "@apollo/client";
-import { formatUnits } from "viem";
+import { Address, formatUnits } from "viem";
 
 import {
   useVotingPowersQuery,
@@ -59,14 +59,30 @@ export type AmountFilterVariables = Pick<
   "maxDelta" | "minDelta"
 >;
 
-export function useDelegateDelegationHistory(
-  account: string,
-  daoId: string,
-  orderBy: "timestamp" | "delta" = "timestamp",
-  orderDirection: "asc" | "desc" = "desc",
-  filterVariables?: AmountFilterVariables,
-): UseDelegateDelegationHistoryResult {
-  const itemsPerPage = 15;
+export function useDelegateDelegationHistory({
+  accountId,
+  daoId,
+  orderBy = "timestamp",
+  orderDirection = "desc",
+  filterVariables,
+  customFromFilter,
+  customToFilter,
+  itemsPerPage = 10,
+  fromAddress,
+  toAddress,
+}: {
+  accountId: string;
+  daoId: DaoIdEnum;
+  orderBy?: string;
+  orderDirection?: "asc" | "desc";
+  transactionType?: "all" | "buy" | "sell";
+  customFromFilter?: string;
+  customToFilter?: string;
+  filterVariables?: AmountFilterVariables;
+  itemsPerPage?: number;
+  fromAddress?: Address;
+  toAddress?: Address;
+}): UseDelegateDelegationHistoryResult {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isPaginationLoading, setIsPaginationLoading] =
     useState<boolean>(false);
@@ -77,17 +93,52 @@ export function useDelegateDelegationHistory(
   // Reset page to 1 when sorting changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [orderBy, orderDirection, account]);
+  }, [orderBy, orderDirection, accountId, customFromFilter, customToFilter]);
+
+  const { fromFilter, toFilter } = useMemo(() => {
+    if (customToFilter && customToFilter !== accountId) {
+      return {
+        fromFilter: accountId,
+        toFilter: customToFilter,
+      };
+    }
+
+    if (customFromFilter && customFromFilter !== accountId) {
+      return {
+        fromFilter: customFromFilter,
+        toFilter: accountId,
+      };
+    }
+    return {
+      fromFilter: accountId,
+      toFilter: accountId,
+    };
+  }, [accountId, customFromFilter, customToFilter]);
 
   const queryVariables = useMemo(
     () => ({
-      account,
+      account: accountId,
       limit: itemsPerPage,
       orderBy: orderBy as QueryInput_VotingPowers_OrderBy,
       orderDirection: orderDirection as QueryInput_VotingPowers_OrderDirection,
-      ...filterVariables,
+      ...(filterVariables?.maxDelta && { maxDelta: filterVariables.maxDelta }),
+      ...(filterVariables?.minDelta && { minDelta: filterVariables.minDelta }),
+      ...(fromFilter && { delegator: fromFilter }),
+      ...(toFilter && { delegate: toFilter }),
+      ...(fromAddress && { fromAddresses: fromAddress }),
+      ...(toAddress && { toAddresses: toAddress }),
     }),
-    [account, itemsPerPage, orderBy, orderDirection, filterVariables],
+    [
+      accountId,
+      itemsPerPage,
+      orderBy,
+      orderDirection,
+      filterVariables,
+      fromFilter,
+      toFilter,
+      fromAddress,
+      toAddress,
+    ],
   );
 
   const queryOptions = {
@@ -127,7 +178,7 @@ export function useDelegateDelegationHistory(
         if (item.delegation) {
           type = "delegation";
           // Check if delegate gains or loses voting power
-          if (item.delegation.to === account) {
+          if (item.delegation.to === accountId) {
             // Delegate gains voting power - someone delegated to them
             action = `Received delegation from ${item.delegation.from}`;
           } else {
@@ -158,7 +209,7 @@ export function useDelegateDelegationHistory(
           isGain,
         };
       });
-  }, [data, account, token]);
+  }, [data, accountId, token]);
 
   const totalCount = data?.votingPowers?.totalCount ?? 0;
   const currentItemsCount = transformedData.length;

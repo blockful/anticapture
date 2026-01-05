@@ -6,9 +6,13 @@ query VotingPowers(
   $orderBy: queryInput_votingPowers_orderBy
   $maxDelta: String
   $minDelta: String
+  $fromAddresses: JSON
+  $toAddresses: JSON
 ) {
   votingPowers(
     account: $account
+    fromAddresses: $fromAddresses
+    toAddresses: $toAddresses
     skip: $skip
     orderDirection: $orderDirection
     limit: $limit

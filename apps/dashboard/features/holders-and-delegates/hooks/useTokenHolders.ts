@@ -47,10 +47,10 @@ interface UseTokenHoldersResult {
 
 interface UseTokenHoldersParams {
   daoId: DaoIdEnum;
+  address: string | null;
   orderBy?: string;
   orderDirection?: string;
   limit?: number;
-  address?: string;
   days: TimeInterval;
 }
 

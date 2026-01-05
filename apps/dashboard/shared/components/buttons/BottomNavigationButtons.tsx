@@ -4,7 +4,6 @@ import { cn } from "@/shared/utils/";
 import { usePathname } from "next/navigation";
 import { Heart, BookOpen, HelpCircle } from "lucide-react";
 import Link from "next/link";
-import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 
 interface BottomNavigationButtonsProps {
   className?: string;
@@ -13,7 +12,6 @@ interface BottomNavigationButtonsProps {
 
 export const BottomNavigationButtons = ({
   className,
-  isCompact = false,
 }: BottomNavigationButtonsProps) => {
   const pathname = usePathname();
 
@@ -43,44 +41,36 @@ export const BottomNavigationButtons = ({
       {navigationItems.map((item) => {
         const Icon = item.icon;
         return (
-          <Tooltip
-            key={item.href}
-            tooltipContent={
-              <div>
-                <p>{item.label}</p>
-              </div>
-            }
+          <Link
+            key={item.label}
+            href={item.href}
+            className={cn(
+              "group flex w-full cursor-pointer items-center gap-3 rounded-md border border-transparent py-1.5 text-sm font-medium transition-colors",
+              {
+                "cursor-default bg-white": item.isActive,
+                "hover:border-light-dark hover:bg-surface-contrast":
+                  !item.isActive,
+              },
+              "flex-col gap-1 text-xs font-medium",
+            )}
           >
-            <Link
-              href={item.href}
+            <Icon
+              className={cn("size-4", {
+                "text-inverted": item.isActive,
+                "text-secondary group-hover:text-primary": !item.isActive,
+              })}
+            />
+            <p
               className={cn(
-                "group flex w-full cursor-pointer items-center gap-3 rounded-md border border-transparent py-1.5 text-sm font-medium transition-colors",
+                "font-inter text-xs font-medium transition-colors duration-300",
                 {
-                  "cursor-default bg-white": item.isActive,
-                  "hover:border-light-dark hover:bg-surface-contrast":
-                    !item.isActive,
+                  "text-secondary group-hover:text-primary": !item.isActive,
                 },
-                isCompact && "flex-col gap-1 text-xs font-medium",
               )}
             >
-              <Icon
-                className={cn("size-4", {
-                  "text-inverted": item.isActive,
-                  "text-secondary group-hover:text-primary": !item.isActive,
-                })}
-              />
-              {!isCompact && (
-                <p
-                  className={cn("", {
-                    "text-inverted": item.isActive,
-                    "text-secondary group-hover:text-primary": !item.isActive,
-                  })}
-                >
-                  {item.label}
-                </p>
-              )}
-            </Link>
-          </Tooltip>
+              {item.label}
+            </p>
+          </Link>
         );
       })}
     </div>

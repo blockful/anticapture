@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components/FilterSort";
 import { ColumnDef } from "@tanstack/react-table";
 import { SkeletonRow, Button, IconButton } from "@/shared/components";
@@ -8,20 +7,30 @@ import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
-import { Address, formatUnits, parseUnits, zeroAddress } from "viem";
+import { Address, formatUnits, isAddress, parseUnits, zeroAddress } from "viem";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import { DaoIdEnum } from "@/shared/types/daos";
 import Link from "next/link";
 import {
   useDelegateDelegationHistory,
   DelegationHistoryItem,
-  AmountFilterVariables,
 } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
 import { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 import daoConfig from "@/shared/dao-config";
+import { AddressFilter } from "@/shared/components/design-system/table/filters";
+import { fetchAddressFromEnsName } from "@/shared/hooks/useEnsData";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import {
+  parseAsBoolean,
+  parseAsString,
+  parseAsStringEnum,
+  useQueryState,
+  useQueryStates,
+} from "nuqs";
+import { parseAsAddress } from "@/shared/utils/parseAsAddress";
 
 interface DelegateDelegationHistoryTableProps {
   accountId: string;
@@ -33,12 +42,25 @@ export const DelegateDelegationHistoryTable = ({
   daoId,
 }: DelegateDelegationHistoryTableProps) => {
   const { decimals } = daoConfig[daoId];
-  const [sortBy, setSortBy] = useState<"timestamp" | "delta">("timestamp");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-  const [filterVariables, setFilterVariables] =
-    useState<AmountFilterVariables>();
-  const [isFilterActive, setIsFilterActive] = useState(false);
 
+  const [sortBy, setSortBy] = useQueryState(
+    "orderBy",
+    parseAsStringEnum(["timestamp", "delta"]).withDefault("timestamp"),
+  );
+  const [sortDirection, setSortDirection] = useQueryState(
+    "orderDirection",
+    parseAsStringEnum(["asc", "desc"]).withDefault("desc"),
+  );
+  const [filterVariables, setFilterVariables] = useQueryStates({
+    minDelta: parseAsString,
+    maxDelta: parseAsString,
+  });
+  const [isFilterActive, setIsFilterActive] = useQueryState(
+    "active",
+    parseAsBoolean.withDefault(false),
+  );
+  const [fromFilter, setFromFilter] = useQueryState("from", parseAsAddress);
+  const [toFilter, setToFilter] = useQueryState("to", parseAsAddress);
   const sortOptions: SortOption[] = [
     { value: "largest-first", label: "Largest first" },
     { value: "smallest-first", label: "Smallest first" },
@@ -51,13 +73,15 @@ export const DelegateDelegationHistoryTable = ({
     fetchNextPage,
     fetchingMore,
     error,
-  } = useDelegateDelegationHistory(
+  } = useDelegateDelegationHistory({
     accountId,
     daoId,
-    sortBy,
-    sortDirection,
+    orderBy: sortBy,
+    orderDirection: sortDirection,
     filterVariables,
-  );
+    fromAddress: fromFilter ?? undefined,
+    toAddress: toFilter ?? undefined,
+  });
 
   // Handle sorting
   const handleSort = (field: "timestamp" | "delta") => {
@@ -132,9 +156,6 @@ export const DelegateDelegationHistoryTable = ({
   const columns: ColumnDef<DelegationHistoryItem>[] = [
     {
       accessorKey: "timestamp",
-      meta: {
-        columnClassName: "w-32",
-      },
       header: () => (
         <Button
           variant="ghost"
@@ -174,16 +195,17 @@ export const DelegateDelegationHistoryTable = ({
           </div>
         );
       },
+      meta: {
+        columnClassName: "w-32",
+      },
     },
     {
       accessorKey: "amount",
-      meta: {
-        columnClassName: "w-52",
-      },
       header: () => (
         <div className="flex items-center gap-1.5">
           <h4 className="text-table-header">Amount ({daoId})</h4>
           <AmountFilter
+            filterId="delegation-amount-filter"
             onApply={(filterState: AmountFilterState) => {
               setSortDirection(
                 filterState.sortOrder === "largest-first" ? "desc" : "asc",
@@ -258,16 +280,35 @@ export const DelegateDelegationHistoryTable = ({
           </div>
         );
       },
+      meta: {
+        columnClassName: "w-52",
+      },
     },
     {
       accessorKey: "delegator",
-      meta: {
-        columnClassName: "w-32",
-      },
       header: () => (
-        <h4 className="text-table-header flex w-full items-center justify-start">
-          Delegator
-        </h4>
+        <div className="text-table-header flex w-full items-center justify-start gap-2">
+          <span>Delegator</span>
+          <AddressFilter
+            onApply={async (addr) => {
+              if (!addr) {
+                setFromFilter(null);
+                return;
+              }
+              if (addr.indexOf(".eth") > 0) {
+                const address = await fetchAddressFromEnsName({
+                  ensName: addr as `${string}.eth`,
+                });
+                setFromFilter(address);
+                return;
+              }
+              if (isAddress(addr)) {
+                setFromFilter(addr);
+              }
+            }}
+            currentFilter={fromFilter ?? undefined}
+          />
+        </div>
       ),
       cell: ({ row }) => {
         const item = row.original;
@@ -302,7 +343,7 @@ export const DelegateDelegationHistoryTable = ({
         }
 
         return (
-          <div className="flex items-center gap-3">
+          <div className="group flex items-center gap-3">
             <div className="overflow-truncate flex max-w-[140px] items-center gap-2">
               <EnsAvatar
                 address={delegatorAddress as `0x${string}`}
@@ -316,16 +357,27 @@ export const DelegateDelegationHistoryTable = ({
                     : "text-secondary",
                 )}
               />
+              <div className="flex items-center opacity-0 transition-opacity group-hover:opacity-100">
+                <CopyAndPasteButton
+                  textToCopy={delegatorAddress as `0x${string}`}
+                  customTooltipText={{
+                    default: "Copy address",
+                    copied: "Address copied!",
+                  }}
+                  className="p-1"
+                  iconSize="md"
+                />
+              </div>
             </div>
           </div>
         );
       },
+      meta: {
+        columnClassName: "w-32",
+      },
     },
     {
       accessorKey: "arrow",
-      meta: {
-        columnClassName: "w-16",
-      },
       header: () => <div className="w-full"></div>,
       cell: () => {
         if (loading) {
@@ -338,16 +390,35 @@ export const DelegateDelegationHistoryTable = ({
           </div>
         );
       },
+      meta: {
+        columnClassName: "w-16",
+      },
     },
     {
       accessorKey: "delegate",
-      meta: {
-        columnClassName: "w-32",
-      },
       header: () => (
-        <h4 className="text-table-header flex w-full items-center justify-start">
-          Delegate
-        </h4>
+        <div className="text-table-header flex w-full items-center justify-start gap-2">
+          <span>Delegate</span>
+          <AddressFilter
+            onApply={async (addr) => {
+              if (!addr) {
+                setToFilter(null);
+                return;
+              }
+              if (addr.indexOf(".eth") > 0) {
+                const address = await fetchAddressFromEnsName({
+                  ensName: addr as `${string}.eth`,
+                });
+                setToFilter(address);
+                return;
+              }
+              if (isAddress(addr)) {
+                setToFilter(addr);
+              }
+            }}
+            currentFilter={toFilter ?? undefined}
+          />
+        </div>
       ),
       cell: ({ row }) => {
         const item = row.original;
@@ -380,7 +451,7 @@ export const DelegateDelegationHistoryTable = ({
         }
 
         return (
-          <div className="flex items-center justify-between gap-3">
+          <div className="group flex items-center justify-between gap-3">
             <div className="flex max-w-[140px] items-center gap-2 overflow-hidden">
               <EnsAvatar
                 address={delegateAddress as `0x${string}`}
@@ -394,6 +465,17 @@ export const DelegateDelegationHistoryTable = ({
                     : "text-secondary",
                 )}
               />
+              <div className="flex items-center opacity-0 transition-opacity group-hover:opacity-100">
+                <CopyAndPasteButton
+                  textToCopy={delegateAddress as `0x${string}`}
+                  customTooltipText={{
+                    default: "Copy address",
+                    copied: "Address copied!",
+                  }}
+                  className="p-1"
+                  iconSize="md"
+                />
+              </div>
             </div>
             <Link
               href={`${daoConfigByDaoId[daoId].daoOverview.chain.blockExplorers?.default.url}/tx/${item.transactionHash}`}
@@ -406,64 +488,25 @@ export const DelegateDelegationHistoryTable = ({
           </div>
         );
       },
+      meta: {
+        columnClassName: "w-32",
+      },
     },
   ];
 
-  if (loading && delegationHistory.length === 0) {
-    return (
-      <div className="bg-surface-default flex flex-col">
-        {/* Table */}
-        <div className="flex flex-col gap-2 p-4">
-          <Table
-            columns={columns}
-            data={Array.from({ length: 12 }, () => ({
-              timestamp: "1716153600",
-              transactionHash: "0x1234567890",
-              delta: "1000000000000000000",
-              delegation: null,
-              transfer: null,
-              votingPower: "1000000000000000000",
-              type: "delegation" as const,
-              action: "Delegation",
-              isGain: true,
-              delegator: "0x1234567890",
-              delegate: "0x1234567890",
-            }))}
-            className="h-[400px]"
-            wrapperClassName="h-[450px]"
-            withDownloadCSV={true}
-            size="sm"
-          />
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-surface-default flex flex-col items-center justify-center p-4">
-        <div className="text-danger text-center">
-          <p className="text-lg font-semibold">
-            Error loading delegation history
-          </p>
-          <p className="mt-2 text-sm">Please try again later</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="flex flex-col gap-2 p-4">
+    <div className="flex w-full flex-col gap-2 p-4">
       <Table
         columns={columns}
-        data={delegationHistory}
+        data={loading ? Array(12).fill({}) : delegationHistory}
         size="sm"
         hasMore={paginationInfo.hasNextPage}
         isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}
-        withDownloadCSV={true}
         wrapperClassName="h-[450px]"
         className="h-[400px]"
+        withDownloadCSV={true}
+        error={error}
       />
     </div>
   );
