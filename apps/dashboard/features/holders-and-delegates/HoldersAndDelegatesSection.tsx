@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactElement, useState } from "react";
+import { ReactElement } from "react";
 import { TheSectionLayout } from "@/shared/components";
 import { TimeInterval } from "@/shared/types/enums";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
@@ -11,20 +11,43 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import { TokenHolders } from "@/features/holders-and-delegates/token-holder";
 import { SubSectionsContainer } from "@/shared/components/design-system/section";
 import { SwitcherDateMobile } from "@/shared/components/switchers/SwitcherDateMobile";
+import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 
 type TabId = "tokenHolders" | "delegates";
 
 export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const defaultDays = TimeInterval.ONE_YEAR;
-  const [days, setDays] = useState<TimeInterval>(defaultDays);
-  const [activeTab, setActiveTab] = useState<TabId>("tokenHolders");
+  const [days, setDays] = useQueryState(
+    "days",
+    parseAsStringEnum(Object.values(TimeInterval)).withDefault(defaultDays),
+  );
+  const [activeTab, setActiveTab] = useQueryState(
+    "tab",
+    parseAsString.withDefault("tokenHolders"),
+  );
+
+  // clean up filters when switching tabs
+  const setDrawerAddress = useQueryState("drawerAddress")[1];
+  const setCurrentAddressFilter = useQueryState("address")[1];
+  const setSortOrder = useQueryState("sort")[1];
+  const setSortBy = useQueryState("sortBy")[1];
+
+  const cleanupFilters = () => {
+    setDrawerAddress(null);
+    setCurrentAddressFilter(null);
+    setSortOrder(null);
+    setSortBy(null);
+  };
+
+  const handleTabChange = (tab: TabId) => {
+    cleanupFilters();
+    setActiveTab(tab);
+  };
 
   // Map from tab ID to tab component
   const tabComponentMap: Record<TabId, ReactElement> = {
-    tokenHolders: <TokenHolders days={days} daoId={daoId} />,
-    delegates: (
-      <Delegates daoId={daoId as unknown as DaoIdEnum} timePeriod={days} />
-    ),
+    tokenHolders: <TokenHolders days={days || defaultDays} daoId={daoId} />,
+    delegates: <Delegates daoId={daoId} timePeriod={days || defaultDays} />,
   };
 
   const HoldersAndDelegatesLeftComponent = () => {
@@ -47,8 +70,8 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               key={tab.id}
               id={tab.id}
               label={tab.label}
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
+              activeTab={activeTab as TabId}
+              setActiveTab={handleTabChange}
             />
           ))}
         </div>
@@ -71,7 +94,7 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             setTimeInterval={setDays}
           />
         </div>
-        {tabComponentMap[activeTab]}
+        {tabComponentMap[activeTab as TabId]}
       </SubSectionsContainer>
     </TheSectionLayout>
   );

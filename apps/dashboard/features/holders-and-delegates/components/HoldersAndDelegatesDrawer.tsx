@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Drawer, DrawerContent } from "@/shared/components/ui/drawer";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { X } from "lucide-react";
@@ -8,13 +7,15 @@ import { cn } from "@/shared/utils";
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { useScreenSize } from "@/shared/hooks";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { DelegateDelegationsHistory } from "@/features/holders-and-delegates/components/DelegatesDelegationHistory/DelegateDelegationsHistory";
+import { DelegateDelegationsHistory } from "@/features/holders-and-delegates/delegate/drawer/delegation-history/DelegateDelegationsHistory";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { VotingPower } from "@/features/holders-and-delegates/delegate/drawer/voting-power/VotingPower";
-import { BalanceHistory } from "@/features/holders-and-delegates/components/BalanceHistory";
+import { BalanceHistory } from "@/features/holders-and-delegates/token-holder/drawer/balance-history/BalanceHistory";
 import { DelegationHistoryTable } from "@/features/holders-and-delegates/token-holder/drawer/delegation-history/DelegationHistoryTable";
-import { DelegateProposalsActivity } from "@/features/holders-and-delegates/components/DelegateProposalsActivity";
+import { DelegateProposalsActivity } from "@/features/holders-and-delegates/delegate/drawer/votes/DelegateProposalsActivity";
 import { IconButton } from "@/shared/components";
+import { TopInteractions } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/TopInteractions";
+import { parseAsString, useQueryState, useQueryStates } from "nuqs";
 
 export type EntityType = "delegate" | "tokenHolder";
 
@@ -67,6 +68,11 @@ export const HoldersAndDelegatesDrawer = ({
           content: <DelegationHistoryTable address={address} daoId={daoId} />,
         },
         {
+          id: "topInteractions",
+          label: "Top Interactions",
+          content: <TopInteractions address={address} daoId={daoId} />,
+        },
+        {
           id: "balanceHistory",
           label: "Balance History",
           content: <BalanceHistory accountId={address} daoId={daoId} />,
@@ -75,7 +81,43 @@ export const HoldersAndDelegatesDrawer = ({
     },
   };
 
-  const [activeTab, setActiveTab] = useState(entities[entityType].tabs[0].id);
+  const [activeTab, setActiveTab] = useQueryState("drawerTab", {
+    defaultValue: entities[entityType].tabs[0].id,
+  });
+
+  // clean up filters when switching tabs
+  const setSortOrder = useQueryState("orderDirection")[1];
+  const setSortBy = useQueryState("orderBy")[1];
+  const setIsFilterActive = useQueryState("active")[1];
+  const setFilterVariables = useQueryStates({
+    minDelta: parseAsString,
+    maxDelta: parseAsString,
+  })[1];
+  const setToFilter = useQueryState("to")[1];
+  const setFromFilter = useQueryState("from")[1];
+  const setSelectedPeriod = useQueryState("selectedPeriod")[1];
+  const setTypeFilter = useQueryState("type")[1];
+  const setTabAddress = useQueryState("tabAddress")[1];
+
+  const cleanupFilters = () => {
+    setSortOrder(null);
+    setSortBy(null);
+    setIsFilterActive(null);
+    setFilterVariables({
+      minDelta: null,
+      maxDelta: null,
+    });
+    setToFilter(null);
+    setFromFilter(null);
+    setSelectedPeriod(null);
+    setTypeFilter(null);
+    setTabAddress(null);
+  };
+
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId);
+    cleanupFilters();
+  };
 
   const { isMobile } = useScreenSize();
 
@@ -83,10 +125,16 @@ export const HoldersAndDelegatesDrawer = ({
     return entities[entityType].tabs.find((tab) => tab.id === tabId)?.content;
   };
 
+  const handleCloseDrawer = () => {
+    onClose();
+    setActiveTab(null);
+    cleanupFilters();
+  };
+
   return (
     <Drawer
       open={isOpen}
-      onOpenChange={onClose}
+      onOpenChange={handleCloseDrawer}
       direction={isMobile ? "bottom" : "right"}
     >
       <DrawerContent>
@@ -124,21 +172,29 @@ export const HoldersAndDelegatesDrawer = ({
                     />
                   </div>
 
-                  <CopyAndPasteButton textToCopy={address as `0x${string}`} />
+                  <CopyAndPasteButton
+                    textToCopy={address as `0x${string}`}
+                    className="p-1"
+                    iconSize="md"
+                    customTooltipText={{
+                      default: "Copy address",
+                      copied: "Address copied!",
+                    }}
+                  />
                 </div>
               </div>
 
               <IconButton
                 variant="outline"
                 size="sm"
-                onClick={onClose}
+                onClick={handleCloseDrawer}
                 icon={X}
               />
             </div>
             <Tabs
               defaultValue={entities[entityType].tabs[0].id}
               value={activeTab}
-              onValueChange={(tabId) => setActiveTab(tabId)}
+              onValueChange={handleTabChange}
               className="w-fit min-w-full"
             >
               <TabsList className="group flex border-b border-b-white/10 pl-4">

@@ -12,6 +12,10 @@ export const TableContainer = forwardRef<
         "md:border-light-dark scrollbar-thin relative w-full overflow-y-auto md:rounded-lg md:border",
         className,
       )}
+      style={{
+        // Safari mobile: enable smooth scrolling
+        WebkitOverflowScrolling: "touch",
+      }}
     >
       <table
         data-slot="table"

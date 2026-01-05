@@ -80,7 +80,6 @@ export const ProposalMapper = {
     p: DBProposal,
     quorum: bigint,
     blockTime: number,
-    votingDelay: bigint,
   ): ProposalResponse => {
     return {
       id: p.id,
@@ -101,7 +100,7 @@ export const ProposalMapper = {
       endTimestamp: p.endTimestamp.toString(),
       startTimestamp: (
         Number(p.endTimestamp) -
-        (p.endBlock - p.startBlock + Number(votingDelay)) * blockTime
+        (p.endBlock - p.startBlock) * blockTime
       ).toString(),
       quorum: quorum.toString(),
       calldatas: p.calldatas,

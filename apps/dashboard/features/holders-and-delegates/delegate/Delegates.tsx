@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { ColumnDef, HeaderContext } from "@tanstack/react-table";
+import { useMemo } from "react";
+import { ColumnDef } from "@tanstack/react-table";
 
 import {
   useDelegates,
@@ -21,7 +21,8 @@ import { Table } from "@/shared/components/design-system/table/Table";
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
 import daoConfig from "@/shared/dao-config";
-
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import { parseAsStringEnum, useQueryState } from "nuqs";
 interface DelegateTableData {
   address: string;
   votingPower: string;
@@ -66,14 +67,22 @@ export const Delegates = ({
   timePeriod = TimeInterval.THIRTY_DAYS,
   daoId,
 }: DelegatesProps) => {
-  // State for managing sort order
-  const [sortBy, setSortBy] = useState<string>("votingPower");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-  const { decimals } = daoConfig[daoId];
-
-  // State for address filtering
-  const [currentAddressFilter, setCurrentAddressFilter] = useState<string>("");
   const pageLimit: number = 15;
+
+  const [drawerAddress, setDrawerAddress] = useQueryState("drawerAddress");
+  const [currentAddressFilter, setCurrentAddressFilter] =
+    useQueryState("address");
+  const [sortOrder, setSortOrder] = useQueryState(
+    "sort",
+    parseAsStringEnum(["desc", "asc"]).withDefault("desc"),
+  );
+  const [sortBy, setSortBy] = useQueryState(
+    "sortBy",
+    parseAsStringEnum(["delegationsCount", "votingPower"]).withDefault(
+      "votingPower",
+    ),
+  );
+  const { decimals } = daoConfig[daoId];
 
   const handleAddressFilterApply = (address: string | undefined) => {
     setCurrentAddressFilter(address || "");
@@ -97,34 +106,25 @@ export const Delegates = ({
   } = useDelegates({
     fromDate,
     orderBy: sortBy,
-    orderDirection: sortDirection,
+    orderDirection: sortOrder,
     daoId,
     days: timePeriod,
     address: currentAddressFilter,
     limit: pageLimit,
   });
 
-  const [selectedDelegate, setSelectedDelegate] = useState<string | null>(null);
   const { isMobile } = useScreenSize();
 
   // Handle sorting for voting power and delegators
   const handleSort = (field: string) => {
     if (sortBy === field) {
       // Toggle direction if same field
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
       // New field, default to desc for votingPower, asc for delegationsCount
-      setSortBy(field);
-      setSortDirection(field === "votingPower" ? "desc" : "asc");
+      setSortBy(field as "votingPower" | "delegationsCount");
+      setSortOrder(field === "votingPower" ? "desc" : "asc");
     }
-  };
-
-  const handleOpenDrawer = (address: string) => {
-    setSelectedDelegate(address);
-  };
-
-  const handleCloseDrawer = () => {
-    setSelectedDelegate(null);
   };
 
   const tableData = useMemo(() => {
@@ -209,24 +209,30 @@ export const Delegates = ({
         }
 
         return (
-          <div className="flex items-center gap-3">
+          <div className="group flex w-full items-center">
             <EnsAvatar
-              address={address as `0x${string}`}
+              address={address as Address}
               size="sm"
               variant="rounded"
-              showName={true}
               isDashed={true}
               nameClassName="[tr:hover_&]:border-primary"
             />
             {!isMobile && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="opacity-0 transition-opacity [tr:hover_&]:opacity-100"
-              >
-                <Plus className="size-3.5" />
-                <p className="text-sm font-medium">Details</p>
-              </Button>
+              <div className="flex items-center opacity-0 transition-opacity [tr:hover_&]:opacity-100">
+                <CopyAndPasteButton
+                  textToCopy={address as `0x${string}`}
+                  customTooltipText={{
+                    default: "Copy address",
+                    copied: "Address copied!",
+                  }}
+                  className="mx-1 p-1"
+                  iconSize="md"
+                />
+                <Button variant="outline" size="sm">
+                  <Plus className="size-3.5" />
+                  <span className="text-sm font-medium">Details</span>
+                </Button>
+              </div>
             )}
           </div>
         );
@@ -236,7 +242,7 @@ export const Delegates = ({
           <p>Address</p>
           <AddressFilter
             onApply={handleAddressFilterApply}
-            currentFilter={currentAddressFilter}
+            currentFilter={currentAddressFilter || undefined}
             className="ml-2"
           />
         </div>
@@ -247,23 +253,20 @@ export const Delegates = ({
     },
     {
       accessorKey: "votingPower",
-      meta: {
-        columnClassName: "w-80",
-      },
       cell: ({ row }) => {
         const votingPower = row.getValue("votingPower") as string;
 
         if (loading) {
           return (
             <SkeletonRow
-              parentClassName="flex animate-pulse justify-end w-full pr-4"
+              parentClassName="flex animate-pulse w-full items-center justify-end pr-4"
               className="h-5 w-full max-w-20"
             />
           );
         }
 
         return (
-          <div className="text-secondary w-full justify-end text-end text-sm font-normal">
+          <div className="text-secondary flex w-full items-center justify-end text-end text-sm font-normal">
             {votingPower}
           </div>
         );
@@ -282,7 +285,7 @@ export const Delegates = ({
             props={{ className: "size-4" }}
             activeState={
               sortBy === "votingPower"
-                ? sortDirection === "asc"
+                ? sortOrder === "asc"
                   ? ArrowState.UP
                   : ArrowState.DOWN
                 : ArrowState.DEFAULT
@@ -290,15 +293,15 @@ export const Delegates = ({
           />
         </Button>
       ),
-      enableSorting: false,
+      meta: {
+        columnClassName: "w-72",
+      },
     },
     {
       accessorKey: "variation",
-      meta: {
-        columnClassName: "w-64",
-      },
       cell: ({ row }) => {
         const addr = row.original.address;
+
         const variation = row.getValue("variation") as
           | {
               percentageChange: number;
@@ -308,28 +311,31 @@ export const Delegates = ({
 
         if (isHistoricalLoadingFor(addr) || loading) {
           return (
-            <div className="flex items-center justify-start">
+            <div className="flex w-full items-center justify-center">
               <SkeletonRow
-                className="h-5 w-16"
-                parentClassName="justify-start flex animate-pulse"
+                className="h-4 w-16"
+                parentClassName="flex animate-pulse"
               />
             </div>
           );
         }
 
         return (
-          <div className="flex w-full items-center justify-start gap-2 text-sm">
+          <div className="flex w-full items-center justify-center gap-2 text-sm">
+            {(variation?.percentageChange || 0) < 0 ? "-" : ""}
             {formatNumberUserReadable(Math.abs(variation?.absoluteChange || 0))}
             <Percentage value={variation?.percentageChange || 0} />
           </div>
         );
       },
       header: () => (
-        <h4 className="text-table-header flex w-full items-center justify-start">
-          Variation
+        <h4 className="text-table-header flex w-full items-center justify-center">
+          Change ({daoId})
         </h4>
       ),
-      enableSorting: false,
+      meta: {
+        columnClassName: "w-64",
+      },
     },
     {
       accessorKey: "activity",
@@ -357,13 +363,9 @@ export const Delegates = ({
           Activity
         </h4>
       ),
-      enableSorting: false,
     },
     {
       accessorKey: "delegators",
-      meta: {
-        columnClassName: "w-20",
-      },
       cell: ({ row }) => {
         const delegators = row.getValue("delegators") as number;
 
@@ -385,7 +387,7 @@ export const Delegates = ({
         <Button
           variant="ghost"
           size="sm"
-          className="text-secondary w-full justify-end p-0"
+          className="text-secondary w-full justify-start p-0"
           onClick={() => handleSort("delegationsCount")}
         >
           <h4 className="text-table-header">Delegators</h4>
@@ -393,7 +395,7 @@ export const Delegates = ({
             props={{ className: "size-4" }}
             activeState={
               sortBy === "delegationsCount"
-                ? sortDirection === "asc"
+                ? sortOrder === "asc"
                   ? ArrowState.UP
                   : ArrowState.DOWN
                 : ArrowState.DEFAULT
@@ -401,87 +403,19 @@ export const Delegates = ({
           />
         </Button>
       ),
-      enableSorting: false,
+      meta: {
+        columnClassName: "w-28",
+      },
     },
   ];
-
-  if (loading) {
-    return (
-      <div className="flex flex-col gap-2">
-        <Table
-          columns={delegateColumns}
-          data={Array.from({ length: 12 }, () => ({
-            address: `0x${"0".repeat(40)}`,
-            type: "",
-            votingPower: "0",
-            variation: { percentageChange: 0, absoluteChange: 0 },
-            activity: "0/0",
-            activityPercentage: 0,
-            delegators: 0,
-          }))}
-          withDownloadCSV={true}
-          size="sm"
-          wrapperClassName="h-[450px]"
-          className="h-[400px]"
-        />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex flex-col gap-2">
-        <div className="md:border-light-dark relative w-full overflow-auto md:rounded-lg md:border">
-          <table className="bg-surface-background text-secondary md:bg-surface-default w-full table-auto caption-bottom text-sm">
-            <thead className="text-secondary sm:bg-surface-contrast text-xs font-semibold sm:font-medium [&_th:first-child]:border-r md:[&_th]:border-none [&_tr]:border-b">
-              <tr className="border-light-dark">
-                {delegateColumns.map((column, index) => (
-                  <th
-                    key={index}
-                    className="h-8 text-left [&:has([role=checkbox])]:pr-0"
-                    style={{
-                      width: column.size ? column.size : "auto",
-                    }}
-                  >
-                    {typeof column.header === "function"
-                      ? column.header({
-                          column: {
-                            getIsSorted: () => false,
-                            toggleSorting: () => {},
-                          },
-                        } as HeaderContext<DelegateTableData, unknown>)
-                      : column.header}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="scrollbar-none [&_tr:last-child]:border-0">
-              <tr className="hover:bg-surface-contrast transition-colors duration-300">
-                <td
-                  colSpan={delegateColumns.length}
-                  className="bg-light h-[410px] p-0 text-center"
-                >
-                  <div className="flex h-full items-center justify-center">
-                    <div className="text-error">
-                      Error loading delegates: {error.message}
-                    </div>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <>
       <div className="flex flex-col gap-2">
         <Table
           columns={delegateColumns}
-          data={tableData}
-          onRowClick={(row) => handleOpenDrawer(row.address as Address)}
+          data={loading ? Array(12).fill({}) : tableData}
+          onRowClick={(row) => setDrawerAddress(row.address as Address)}
           size="sm"
           hasMore={pagination.hasNextPage}
           isLoadingMore={fetchingMore}
@@ -489,16 +423,15 @@ export const Delegates = ({
           withDownloadCSV={true}
           wrapperClassName="h-[450px]"
           className="h-[400px]"
+          error={error}
         />
       </div>
       <HoldersAndDelegatesDrawer
-        isOpen={!!selectedDelegate}
-        onClose={handleCloseDrawer}
+        isOpen={!!drawerAddress}
+        onClose={() => setDrawerAddress(null)}
         entityType="delegate"
-        address={
-          selectedDelegate || "0x0000000000000000000000000000000000000000"
-        }
-        daoId={daoId as DaoIdEnum}
+        address={drawerAddress || ""}
+        daoId={daoId}
       />
     </>
   );
