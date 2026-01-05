@@ -26,7 +26,6 @@ query GetProposalsFromDao(
       title
       startTimestamp
       endTimestamp
-      calldatas
       targets
       values
     }
