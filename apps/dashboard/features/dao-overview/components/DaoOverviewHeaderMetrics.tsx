@@ -4,7 +4,7 @@ import { useDaoOverviewData } from "@/features/dao-overview/hooks/useDaoOverview
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useQuorumGap } from "@/shared/hooks/useQuorumGap";
 import { DaoConfiguration } from "@/shared/dao-config/types";
-import { DaoOverviewHeader } from "./DaoOverviewHeader";
+import { DaoOverviewHeader } from "@/features/dao-overview/components/DaoOverviewHeader";
 
 interface DaoOverviewHeaderMetricsProps {
   daoId: string;
