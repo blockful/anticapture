@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { ColumnDef } from "@tanstack/react-table";
 
 import {
@@ -41,7 +40,6 @@ type PanelTableProps = {
   currency: "usd" | "eth";
 };
 export const PanelTable = ({ currency }: PanelTableProps) => {
-  const router = useRouter();
   const { isMobile } = useScreenSize();
   // Create refs to store the actual numeric values for sorting
   // const liquidTreasuryValues = useRef<Record<number, number>>({}); // commented for depoly
@@ -683,17 +681,13 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
     },
   ];
 
-  const handleRowClick = (row: PanelDao) => {
-    row.dao && router.push(`/${row.dao.toLowerCase()}`);
-  };
-
   return (
     <Table
       columns={panelColumns}
       data={data}
       withSorting={true}
       stickyFirstColumn={true}
-      onRowClick={handleRowClick}
+      href={(row: PanelDao) => (row.dao ? `/${row.dao.toLowerCase()}` : null)}
       disableRowClick={(row: PanelDao) =>
         !!daoConfigByDaoId[row.dao as DaoIdEnum].disableDaoPage
       }
