@@ -20,8 +20,6 @@ import { Table } from "@/shared/components/design-system/table/Table";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
 import { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 import daoConfig from "@/shared/dao-config";
-import { AddressFilter } from "@/shared/components/design-system/table/filters";
-import { fetchEnsData } from "@/shared/hooks/useEnsData";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import {
   parseAsBoolean,
@@ -58,8 +56,8 @@ export const DelegateDelegationHistoryTable = ({
     "active",
     parseAsBoolean.withDefault(false),
   );
-  const [fromFilter, setFromFilter] = useQueryState("from");
-  const [toFilter, setToFilter] = useQueryState("to");
+  // const [fromFilter, setFromFilter] = useQueryState("from", parseAsAddress);
+  // const [toFilter, setToFilter] = useQueryState("to", parseAsAddress);
   const sortOptions: SortOption[] = [
     { value: "largest-first", label: "Largest first" },
     { value: "smallest-first", label: "Smallest first" },
@@ -78,8 +76,6 @@ export const DelegateDelegationHistoryTable = ({
     orderBy: sortBy,
     orderDirection: sortDirection,
     filterVariables,
-    customFromFilter: fromFilter ?? undefined,
-    customToFilter: toFilter ?? undefined,
   });
 
   // Handle sorting
@@ -288,19 +284,25 @@ export const DelegateDelegationHistoryTable = ({
       header: () => (
         <div className="text-table-header flex w-full items-center justify-start gap-2">
           <span>Delegator</span>
-          <AddressFilter
+          {/* <AddressFilter
             onApply={async (addr) => {
-              if ((addr ?? "").indexOf(".eth") > 0) {
-                const { address } = await fetchEnsData({
-                  address: addr as `${string}.eth`,
-                });
-                setFromFilter(address || "");
+              if (!addr) {
+                setFromFilter(null);
                 return;
               }
-              setFromFilter(addr || "");
+              if (addr.indexOf(".eth") > 0) {
+                const address = await fetchAddressFromEnsName({
+                  ensName: addr as `${string}.eth`,
+                });
+                setFromFilter(address);
+                return;
+              }
+              if (isAddress(addr)) {
+                setFromFilter(addr);
+              }
             }}
             currentFilter={fromFilter ?? undefined}
-          />
+          /> */}
         </div>
       ),
       cell: ({ row }) => {
@@ -392,19 +394,25 @@ export const DelegateDelegationHistoryTable = ({
       header: () => (
         <div className="text-table-header flex w-full items-center justify-start gap-2">
           <span>Delegate</span>
-          <AddressFilter
+          {/* <AddressFilter
             onApply={async (addr) => {
-              if ((addr ?? "").indexOf(".eth") > 0) {
-                const { address } = await fetchEnsData({
-                  address: addr as `${string}.eth`,
-                });
-                setToFilter(address || "");
+              if (!addr) {
+                setToFilter(null);
                 return;
               }
-              setToFilter(addr || "");
+              if (addr.indexOf(".eth") > 0) {
+                const address = await fetchAddressFromEnsName({
+                  ensName: addr as `${string}.eth`,
+                });
+                setToFilter(address);
+                return;
+              }
+              if (isAddress(addr)) {
+                setToFilter(addr);
+              }
             }}
             currentFilter={toFilter ?? undefined}
-          />
+          /> */}
         </div>
       ),
       cell: ({ row }) => {

@@ -11,7 +11,24 @@ export type DBVotingPowerWithRelations = DBVotingPower & {
 };
 
 export const VotingPowerRequestSchema = z.object({
-  account: z.string().refine((addr) => isAddress(addr)),
+  fromAddresses: z
+    .union([
+      z
+        .string()
+        .refine(isAddress, "Invalid address")
+        .transform((addr) => [addr]),
+      z.array(z.string().refine(isAddress, "Invalid addresses")),
+    ])
+    .optional(),
+  toAddresses: z
+    .union([
+      z
+        .string()
+        .refine(isAddress, "Invalid address")
+        .transform((addr) => [addr]),
+      z.array(z.string().refine(isAddress, "Invalid addresses")),
+    ])
+    .optional(),
   skip: z.coerce
     .number()
     .int()
@@ -92,6 +109,6 @@ export const VotingPowerMapper = (
           }
         : null,
     })),
-    totalCount,
+    totalCount: Number(totalCount),
   };
 };

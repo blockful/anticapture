@@ -5,8 +5,9 @@ import { useParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import { ButtonHTMLAttributes, ElementType } from "react";
 
-interface ButtonHeaderSidebarProps
-  extends ButtonHTMLAttributes<HTMLButtonElement | HTMLAnchorElement> {
+interface ButtonHeaderSidebarProps extends ButtonHTMLAttributes<
+  HTMLButtonElement | HTMLAnchorElement
+> {
   page: string;
   icon: ElementType;
   label: string;

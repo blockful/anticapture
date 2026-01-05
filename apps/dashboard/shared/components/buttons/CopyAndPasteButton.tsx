@@ -46,7 +46,7 @@ export const CopyAndPasteButton = ({
       : "Copy to clipboard";
 
   return (
-    <Tooltip tooltipContent={tooltipText}>
+    <Tooltip asChild tooltipContent={tooltipText}>
       <IconButton
         onClick={handleCopy}
         disabled={disabled || !textToCopy}

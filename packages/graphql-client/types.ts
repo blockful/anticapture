@@ -545,12 +545,14 @@ export type QueryVotingPowerVariationsArgs = {
 
 export type QueryVotingPowersArgs = {
   account: Scalars['String']['input'];
+  fromAddresses?: InputMaybe<Scalars['JSON']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   maxDelta?: InputMaybe<Scalars['String']['input']>;
   minDelta?: InputMaybe<Scalars['String']['input']>;
   orderBy?: InputMaybe<QueryInput_VotingPowers_OrderBy>;
   orderDirection?: InputMaybe<QueryInput_VotingPowers_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  toAddresses?: InputMaybe<Scalars['JSON']['input']>;
 };
 
 export type Account = {

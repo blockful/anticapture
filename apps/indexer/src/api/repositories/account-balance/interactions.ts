@@ -99,7 +99,7 @@ export class AccountInteractionsRepository {
         sql`${accountBalance.accountId} = ${transfersTo.accountId}`,
       )
       .where(
-        sql`${transfersFrom.accountId} IS NOT NULL OR ${transfersTo.accountId} IS NOT NULL AND (${transfersFrom.accountId} != ${transfersTo.accountId})`,
+        sql`(${transfersFrom.accountId} IS NOT NULL OR ${transfersTo.accountId} IS NOT NULL) AND ${accountBalance.accountId} != ${accountId}`,
       )
       .as("combined");
 
@@ -138,7 +138,9 @@ export class AccountInteractionsRepository {
     const pagedResult = await baseQuery.offset(skip).limit(limit);
 
     return {
-      interactionCount: Number(totalCountResult[0]?.count) ?? 0,
+      interactionCount: totalCountResult[0]?.count
+        ? Number(totalCountResult[0].count)
+        : 0,
       interactions: pagedResult.map(
         ({
           accountId,
