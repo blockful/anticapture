@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, SVGProps } from "react";
 import { Address, Chain } from "viem";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
@@ -59,7 +59,7 @@ interface BaseInfo {
 }
 
 export interface ChainWithIcon extends Chain {
-  icon: (props: DaoIconProps) => ReactNode;
+  icon: (props: SVGProps<SVGSVGElement>) => ReactNode;
   blockTime: number;
 }
 

@@ -2843,8 +2843,6 @@ export type VotingPowersQueryVariables = Exact<{
   orderBy?: InputMaybe<QueryInput_VotingPowers_OrderBy>;
   maxDelta?: InputMaybe<Scalars['String']['input']>;
   minDelta?: InputMaybe<Scalars['String']['input']>;
-  fromAddresses?: InputMaybe<Scalars['JSON']['input']>;
-  toAddresses?: InputMaybe<Scalars['JSON']['input']>;
 }>;
 
 
