@@ -225,7 +225,7 @@ export const StagesContainer = ({
             daoStage={currentDaoStage}
             context={context}
             className={cn({
-              "border-border-contrast border-b-1 rounded-none p-3":
+              "border-border-contrast rounded-none border-b p-3":
                 context === "overview",
             })}
           />
@@ -278,7 +278,7 @@ export const StagesContainer = ({
                     variant={variant}
                     disabled={!isStageKnown}
                     className={cn("border-0 px-2 py-1", {
-                      "border-1": currentDaoStage === Stage.NONE,
+                      border: currentDaoStage === Stage.NONE,
                     })}
                     onClick={() => setShowTooltip((prev) => !prev)}
                     onMouseEnter={() => !isMobile && setShowTooltip(true)}
