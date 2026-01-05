@@ -91,6 +91,14 @@ export const TokenHolders = ({
         if (historical === 0) return { percentageChange: 0, absoluteChange: 0 };
 
         const absoluteChange = current - historical;
+
+        if (historical === 0) {
+          return {
+            percentageChange: 9999,
+            absoluteChange: Number(absoluteChange.toFixed(2)),
+          };
+        }
+
         const percentageChange = ((current - historical) / historical) * 100;
 
         return {
