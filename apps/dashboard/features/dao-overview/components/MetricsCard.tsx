@@ -4,28 +4,24 @@ import {
   formatBlocksToUserReadable,
   formatSecondsToReadable,
 } from "@/shared/utils";
+import { useDaoOverviewData } from "@/features/dao-overview/hooks/useDaoOverviewData";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 interface MetricsCardProps {
   daoId: string;
   daoConfig: DaoConfiguration;
-  proposalThresholdValue: string;
-  proposalThresholdPercentage: string | null;
-  quorumValueFormatted: string;
-  votingPeriod: number;
-  votingDelay: number;
-  timelockDelay: number;
 }
 
-export const MetricsCard = ({
-  daoId,
-  daoConfig,
-  proposalThresholdValue,
-  proposalThresholdPercentage,
-  quorumValueFormatted,
-  votingPeriod,
-  votingDelay,
-  timelockDelay,
-}: MetricsCardProps) => {
+export const MetricsCard = ({ daoId, daoConfig }: MetricsCardProps) => {
+  const {
+    proposalThresholdValue,
+    proposalThresholdPercentage,
+    quorumValueFormatted,
+    votingPeriod,
+    votingDelay,
+    timelockDelay,
+  } = useDaoOverviewData({ daoId: daoId as DaoIdEnum, daoConfig });
+
   const proposalThresholdPercentageFormatted = proposalThresholdPercentage
     ? `${parseFloat(proposalThresholdPercentage).toFixed(1)}%`
     : "N/A";
@@ -71,7 +67,7 @@ export const MetricsCard = ({
             delay
           </span>
         }
-        className="border-b-1 border-border-contrast border-dashed pb-4 md:border-none md:p-3"
+        className="border-border-contrast border-b border-dashed pb-4 md:border-none md:p-3"
         textClassName="mb-1"
       />
 
@@ -87,7 +83,7 @@ export const MetricsCard = ({
             votes are counted
           </span>
         }
-        className="border-b-1 border-border-contrast border-dashed pb-4 md:border-none md:p-3"
+        className="border-border-contrast border-b border-dashed pb-4 md:border-none md:p-3"
         textClassName="mb-1"
       />
 
