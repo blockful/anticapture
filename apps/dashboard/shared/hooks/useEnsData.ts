@@ -105,11 +105,11 @@ export const fetchAddressFromEnsName = async ({
 
   // Validate response structure
   if (!data?.ens) {
-    throw new Error("Invalid ENS API response: missing ens field");
+    return null;
   }
 
   if (!data.ens.address) {
-    throw new Error("Invalid ENS API response: missing address field");
+    return null;
   }
 
   return data.ens.address;
