@@ -20,6 +20,7 @@ export const MetricsCard = ({ daoId, daoConfig }: MetricsCardProps) => {
     votingPeriod,
     votingDelay,
     timelockDelay,
+    isLoading,
   } = useDaoOverviewData({ daoId: daoId as DaoIdEnum, daoConfig });
 
   const proposalThresholdPercentageFormatted = proposalThresholdPercentage
@@ -48,7 +49,8 @@ export const MetricsCard = ({ daoId, daoConfig }: MetricsCardProps) => {
             : "Only Foundation Proposes"
         }
         subText={"Minimum voting power to submit"}
-        className="border-b-1 border-border-contrast border-dashed pb-4 md:border-none md:p-3"
+        className="border-border-contrast border-b border-dashed pb-4 md:border-none md:p-3"
+        isLoading={isLoading}
       />
 
       <DaoOverviewMetricCard
@@ -67,6 +69,7 @@ export const MetricsCard = ({ daoId, daoConfig }: MetricsCardProps) => {
             delay
           </span>
         }
+        isLoading={isLoading}
         className="border-border-contrast border-b border-dashed pb-4 md:border-none md:p-3"
         textClassName="mb-1"
       />
@@ -85,6 +88,7 @@ export const MetricsCard = ({ daoId, daoConfig }: MetricsCardProps) => {
         }
         className="border-border-contrast border-b border-dashed pb-4 md:border-none md:p-3"
         textClassName="mb-1"
+        isLoading={isLoading}
       />
 
       <DaoOverviewMetricCard
@@ -104,6 +108,7 @@ export const MetricsCard = ({ daoId, daoConfig }: MetricsCardProps) => {
           )
         }
         textClassName="mb-1"
+        isLoading={isLoading}
       />
     </div>
   );

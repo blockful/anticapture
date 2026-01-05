@@ -12,6 +12,7 @@ interface DaoOverviewHeaderProps {
   daoConfig: DaoConfiguration;
   daoOverview: DaoOverviewConfig;
   lastPrice: number;
+  isLoading: boolean;
 }
 
 const chainIconsSchema: Record<
@@ -27,6 +28,7 @@ export const DaoOverviewHeader = ({
   daoConfig,
   daoOverview,
   lastPrice,
+  isLoading,
 }: DaoOverviewHeaderProps) => {
   const baseLinkRoute = `${daoOverview.chain.blockExplorers?.default.url}/address`;
   const chainName = daoOverview.chain.name;
@@ -46,7 +48,12 @@ export const DaoOverviewHeader = ({
         <BadgeStatus
           icon={DollarSign}
           iconVariant="secondary"
-          className="bg-surface-opacity text-primary h-5 rounded-full text-xs"
+          className={cn(
+            "bg-surface-opacity text-primary h-5 rounded-full text-xs",
+            {
+              "bg-secondary text-secondary animate-pulse": isLoading,
+            },
+          )}
         >
           1 {daoId} = ${lastPrice.toFixed(2)}
           {daoOverview.priceDisclaimer && (

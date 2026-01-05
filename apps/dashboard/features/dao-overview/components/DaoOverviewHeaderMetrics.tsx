@@ -21,6 +21,7 @@ export const DaoOverviewHeaderMetrics = ({
     activeSupply,
     averageTurnout,
     topDelegatesToPass,
+    isLoading,
   } = useDaoOverviewData({ daoId: daoId as DaoIdEnum, daoConfig });
 
   const { data: quorumGap } = useQuorumGap(daoId as DaoIdEnum);
@@ -43,23 +44,27 @@ export const DaoOverviewHeaderMetrics = ({
         daoConfig={daoConfig}
         daoOverview={daoConfig.daoOverview}
         lastPrice={lastPrice}
+        isLoading={isLoading}
       />
       <div className="border-t-border-default md:bg-surface-default grid grid-cols-2 gap-4 border-t border-dashed pt-4 md:grid-cols-4 md:gap-0.5 md:border-none md:pt-0">
         <DaoOverviewMetricCard
           title="Votable Supply"
           text={`${delegatedSupplyValue} ${daoId} delegated`}
           subText={`${activeSupplyValue} ${daoId} active in last 90d`}
+          isLoading={isLoading}
         />
 
         <DaoOverviewMetricCard
           title="Treasury"
           text={`$${formatNumberUserReadable(liquidTreasuryAllValue)} (${liquidTreasuryAllPercent}% in ${daoId})`}
           subText={`$${formatNumberUserReadable(liquidTreasuryNonDaoValue)} not counting ${daoId}`}
+          isLoading={isLoading}
         />
 
         <DaoOverviewMetricCard
           title="Average Turnout"
           text={`${averageTurnoutValue} ${daoId}`}
+          isLoading={isLoading}
           subText={
             quorumGap !== null && quorumGap !== undefined && !isNaN(quorumGap)
               ? `${quorumGap !== 0 ? Math.abs(quorumGap).toFixed(2) + "%" : ""} ${quorumGap < 0 ? "below" : quorumGap == 0 ? "equal to" : "above"} quorum`
@@ -71,6 +76,7 @@ export const DaoOverviewHeaderMetrics = ({
           title="Delegate to Pass"
           text={`Top ${topDelegatesToPass || "N/A"} delegates`}
           subText="To reach quorum"
+          isLoading={isLoading}
         />
       </div>
     </div>
