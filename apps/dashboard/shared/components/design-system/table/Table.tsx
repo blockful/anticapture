@@ -354,7 +354,7 @@ export const Table = <TData, TValue>({
 
               {/* Sentinel for infinite scrolling */}
               <tr>
-                <td>
+                <td colSpan={columns.length}>
                   <div ref={sentinelRef} />
                 </td>
               </tr>
