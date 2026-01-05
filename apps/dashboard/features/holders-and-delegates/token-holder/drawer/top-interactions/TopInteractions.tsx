@@ -121,10 +121,10 @@ export const TopInteractions = ({
                     <p
                       className={cn(
                         "flex items-center text-sm font-normal",
-                        variant === "positive" ? "text-success" : "text-error",
+                        variant !== "positive" ? "text-success" : "text-error",
                       )}
                     >
-                      {netBalanceChange > 0 ? (
+                      {netBalanceChange < 0 ? (
                         <ArrowUp
                           className={cn(
                             "size-4",
