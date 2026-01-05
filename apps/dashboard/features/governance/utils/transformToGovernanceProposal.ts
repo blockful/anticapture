@@ -1,4 +1,4 @@
-import { Query_Proposals_Items_Items } from "@anticapture/graphql-client/hooks";
+import { GetProposalsFromDaoQuery } from "@anticapture/graphql-client/hooks";
 import {
   getTimeText,
   getProposalStatus,
@@ -7,9 +7,10 @@ import {
 import type { Proposal as GovernanceProposal } from "@/features/governance/types";
 import { formatUnits } from "viem";
 
-type GraphQLProposal = Omit<
-  Query_Proposals_Items_Items,
-  "endBlock" | "startBlock"
+type GraphQLProposal = NonNullable<
+  NonNullable<
+    NonNullable<GetProposalsFromDaoQuery["proposals"]>["items"]
+  >[number]
 >;
 
 // Helper function to transform GraphQL proposal data to governance component format

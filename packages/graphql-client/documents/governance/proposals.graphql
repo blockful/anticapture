@@ -16,7 +16,6 @@ query GetProposalsFromDao(
       id
       daoId
       txHash
-      description
       quorum
       forVotes
       againstVotes
