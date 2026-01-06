@@ -26,15 +26,6 @@ export default processConfig(
                   endpoint: value,
                 },
               },
-              transforms: [
-                {
-                  // docs: https://developer.adobe.com/graphql-mesh-gateway/mesh/basic/transforms/filter-schema/
-                  filterSchema: {
-                    mode: "bare",
-                    filters: ["Query.!transfer", "Query.!transfers"],
-                  },
-                },
-              ],
             },
             {
               name: `rest_${daoName}`,
