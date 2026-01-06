@@ -1,5 +1,16 @@
 import { AmountFilter, DBAccountBalance } from "@/api/mappers";
-import { and, asc, desc, eq, gte, inArray, not, SQL, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  gt,
+  inArray,
+  lt,
+  not,
+  SQL,
+  sql,
+} from "drizzle-orm";
 import { db } from "ponder:api";
 import { accountBalance } from "ponder:schema";
 import { Address } from "viem";
@@ -24,15 +35,19 @@ export class AccountBalanceRepository {
       amountfilter,
     );
 
-    const baseQuery = db.select().from(accountBalance).where(filter);
-
+    // Get total count with filters
     const totalCount = await db
       .select({
         count: sql<number>`COUNT(*)`.as("count"),
       })
-      .from(baseQuery.as("subquery"));
+      .from(accountBalance)
+      .where(filter);
 
-    const page = await baseQuery
+    // Get paginated results
+    const page = await db
+      .select()
+      .from(accountBalance)
+      .where(filter)
       .orderBy(
         orderDirection === "desc"
           ? desc(accountBalance.balance)
@@ -70,15 +85,29 @@ export class AccountBalanceRepository {
     if (addresses.length) {
       conditions.push(inArray(accountBalance.accountId, addresses));
     }
+
     if (delegates.length) {
       conditions.push(inArray(accountBalance.delegate, delegates));
     }
-    if (amountfilter.minAmount) {
-      gte(accountBalance.balance, BigInt(amountfilter.minAmount));
+
+    if (
+      amountfilter.minAmount !== null &&
+      amountfilter.minAmount !== undefined
+    ) {
+      conditions.push(
+        gt(accountBalance.balance, BigInt(amountfilter.minAmount)),
+      );
     }
-    if (amountfilter.maxAmount) {
-      gte(accountBalance.balance, BigInt(amountfilter.maxAmount));
+
+    if (
+      amountfilter.maxAmount !== null &&
+      amountfilter.maxAmount !== undefined
+    ) {
+      conditions.push(
+        lt(accountBalance.balance, BigInt(amountfilter.maxAmount)),
+      );
     }
+
     if (excludeAddresses.length) {
       conditions.push(not(inArray(accountBalance.accountId, excludeAddresses)));
     }
