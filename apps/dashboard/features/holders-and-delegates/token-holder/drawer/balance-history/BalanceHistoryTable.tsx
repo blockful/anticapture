@@ -377,11 +377,9 @@ export const BalanceHistoryTable = ({
                   ensName: addr as `${string}.eth`,
                 });
                 setCustomFromFilter(address);
-                setCustomToFilter(null);
                 return;
               }
               setCustomFromFilter(addr || null);
-              setCustomToFilter(null);
             }}
             currentFilter={customFromFilter || undefined}
           />
@@ -458,11 +456,9 @@ export const BalanceHistoryTable = ({
                   ensName: addr as `${string}.eth`,
                 });
                 setCustomToFilter(address);
-                setCustomFromFilter(null);
                 return;
               }
               setCustomToFilter(addr || null);
-              setCustomFromFilter(null);
             }}
             currentFilter={customToFilter || undefined}
           />

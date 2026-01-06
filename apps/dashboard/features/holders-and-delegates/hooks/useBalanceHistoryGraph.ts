@@ -55,7 +55,7 @@ export function useBalanceHistoryGraph(
 
   const { data, loading, error } = useBalanceHistoryGraphQuery({
     variables: {
-      accountId,
+      address: accountId,
       fromDate,
       sortBy: QueryInput_Transfers_SortBy.Timestamp,
       sortOrder: QueryInput_Transfers_SortOrder.Asc,

@@ -2518,7 +2518,6 @@ export type BalanceHistoryQuery = { __typename?: 'Query', transfers?: { __typena
 
 export type BalanceHistoryGraphQueryVariables = Exact<{
   address: Scalars['String']['input'];
-  accountId: Scalars['String']['input'];
   sortBy?: InputMaybe<QueryInput_Transfers_SortBy>;
   sortOrder?: InputMaybe<QueryInput_Transfers_SortOrder>;
   fromDate?: InputMaybe<Scalars['Float']['input']>;

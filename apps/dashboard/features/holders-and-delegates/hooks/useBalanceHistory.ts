@@ -6,7 +6,6 @@ import {
   Timestamp_Const,
   QueryInput_Transfers_SortOrder,
   useBalanceHistoryQuery,
-  QueryInput_Transfers_Conditional,
   QueryInput_Transfers_SortBy,
 } from "@anticapture/graphql-client/hooks";
 
@@ -51,19 +50,16 @@ export function useBalanceHistory({
 
   const variables = useMemo(() => {
     const where: BalanceHistoryQueryVariables = {
+      address: accountId,
       sortBy: orderBy as QueryInput_Transfers_SortBy,
       sortOrder: orderDirection as QueryInput_Transfers_SortOrder,
       fromValue: filterVariables?.minDelta,
       toValue: filterVariables?.maxDelta,
+      from: customFromFilter,
+      to: customToFilter,
     };
 
     switch (transactionType) {
-      case "all":
-        where.conditional = QueryInput_Transfers_Conditional.Or;
-        where.from = accountId;
-        where.to = accountId;
-        break;
-
       case "buy":
         where.to = accountId;
         break;
@@ -73,28 +69,12 @@ export function useBalanceHistory({
         break;
     }
 
-    // if (customFromFilter) {
-    //   and.push(
-    //     customFromFilter === accountId
-    //       ? { fromAccountId: accountId }
-    //       : { fromAccountId: customFromFilter, toAccountId: accountId },
-    //   );
-    // }
-
-    // if (customToFilter) {
-    //   and.push(
-    //     customToFilter === accountId
-    //       ? { toAccountId: accountId }
-    //       : { fromAccountId: accountId, toAccountId: customToFilter },
-    //   );
-    // }
-
     return where;
   }, [
     accountId,
     transactionType,
-    // customFromFilter,
-    // customToFilter,
+    customFromFilter,
+    customToFilter,
     filterVariables,
     orderBy,
     orderDirection,
