@@ -21,19 +21,6 @@ query BalanceHistory(
       toAccountId
       transactionHash
     }
-    pageInfo {
-      endCursor
-      hasNextPage
-      hasPreviousPage
-      startCursor
-    }
-  }
-}
-
-query BalanceHistoryTotalCount($account: String!) {
-  transfers(
-    where: { OR: [{ fromAccountId: $account }, { toAccountId: $account }] }
-  ) {
     totalCount
   }
 }
