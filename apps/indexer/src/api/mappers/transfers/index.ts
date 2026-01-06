@@ -21,11 +21,11 @@ export const TransfersRequestSchema = z.object({
     .optional()
     .transform((val) => val && (val.toLowerCase() as Address)),
   fromDate: z.coerce.number().optional(),
-  fromValue: z.coerce
+  fromValue: z
     .string()
     .transform((val) => BigInt(val))
     .optional(),
-  toValue: z.coerce
+  toValue: z
     .string()
     .transform((val) => BigInt(val))
     .optional(),
