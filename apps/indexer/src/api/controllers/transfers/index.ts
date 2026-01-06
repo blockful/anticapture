@@ -12,17 +12,15 @@ export function transfers(app: Hono, service: TransfersService) {
       method: "get",
       operationId: "transfers",
       path: "/transfers",
-      summary: "Get transactions with transfers and delegations",
-      description:
-        "Get transactions with their associated transfers and delegations, with optional filtering and sorting",
-      tags: ["transactions"],
+      summary: "Get transfers",
+      description: "Get transfers, with optional filtering and sorting",
+      tags: ["transfers"],
       request: {
         query: TransfersRequestSchema,
       },
       responses: {
         200: {
-          description:
-            "Returns transactions with their transfers and delegations",
+          description: "Returns transfers",
           content: {
             "application/json": {
               schema: TransfersResponseSchema,
@@ -32,8 +30,17 @@ export function transfers(app: Hono, service: TransfersService) {
       },
     }),
     async (context) => {
-      const { limit, offset, sortBy, sortOrder, from, to } =
-        context.req.valid("query");
+      const {
+        limit,
+        offset,
+        sortBy,
+        sortOrder,
+        from,
+        to,
+        fromValue,
+        toValue,
+        fromDate,
+      } = context.req.valid("query");
 
       const result = await service.getTransfers({
         limit,
@@ -42,6 +49,9 @@ export function transfers(app: Hono, service: TransfersService) {
         sortOrder,
         from,
         to,
+        fromValue,
+        toValue,
+        fromDate,
       });
 
       return context.json(result);
