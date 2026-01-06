@@ -18,10 +18,6 @@ type Query {
   accounts(where: accountFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountPage!
   accountBalance(accountId: String!, tokenId: String!): accountBalance
   accountBalances(where: accountBalanceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountBalancePage!
-  accountPower(accountId: String!): accountPower
-  accountPowers(where: accountPowerFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountPowerPage!
-  votingPowerHistory(transactionHash: String!, accountId: String!, logIndex: Float!): votingPowerHistory
-  votingPowerHistorys(where: votingPowerHistoryFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votingPowerHistoryPage!
   delegation(transactionHash: String!, delegatorAccountId: String!, delegateAccountId: String!): delegation
   delegations(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): delegationPage!
   transfer(transactionHash: String!, fromAccountId: String!, toAccountId: String!): transfer

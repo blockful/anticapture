@@ -2,7 +2,6 @@ import { z } from "@hono/zod-openapi";
 import { votingPowerHistory } from "ponder:schema";
 
 import { DBDelegation, DBTransfer } from "../transactions";
-import { isAddress } from "viem";
 
 export type DBHistoricalVotingPower = typeof votingPowerHistory.$inferSelect;
 export type DBHistoricalVotingPowerWithRelations = DBHistoricalVotingPower & {
@@ -11,7 +10,6 @@ export type DBHistoricalVotingPowerWithRelations = DBHistoricalVotingPower & {
 };
 
 export const HistoricalVotingPowerRequestSchema = z.object({
-  account: z.string().refine((addr) => isAddress(addr)),
   skip: z.coerce
     .number()
     .int()

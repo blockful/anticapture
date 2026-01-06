@@ -53,11 +53,11 @@ export const VotingPowersRequestSchema = z.object({
     .array(z.string().refine((addr) => isAddress(addr)))
     .optional()
     .default([]),
-  powerGreaterThan: z
+  fromValue: z
     .string()
     .transform((val) => BigInt(val))
     .optional(),
-  powerLessThan: z
+  toValue: z
     .string()
     .transform((val) => BigInt(val))
     .optional(),

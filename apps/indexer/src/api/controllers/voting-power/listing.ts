@@ -16,7 +16,7 @@ export function votingPowers(app: Hono, service: VotingPowerService) {
       operationId: "votingPowers",
       path: "/voting-powers",
       summary: "Get voting powers",
-      description: "TODO",
+      description: "Returns sorted and paginated account voting power records",
       tags: ["proposals"],
       request: {
         query: VotingPowersRequestSchema,
@@ -33,22 +33,16 @@ export function votingPowers(app: Hono, service: VotingPowerService) {
       },
     }),
     async (context) => {
-      const {
-        limit,
-        skip,
-        orderDirection,
-        addresses,
-        powerGreaterThan,
-        powerLessThan,
-      } = context.req.valid("query");
+      const { limit, skip, orderDirection, addresses, fromValue, toValue } =
+        context.req.valid("query");
 
       const { items, totalCount } = await service.getVotingPowers(
         skip,
         limit,
         orderDirection,
         {
-          minAmount: powerGreaterThan,
-          maxAmount: powerLessThan,
+          minAmount: fromValue,
+          maxAmount: toValue,
         },
         addresses,
       );
@@ -62,8 +56,9 @@ export function votingPowers(app: Hono, service: VotingPowerService) {
       method: "get",
       operationId: "votingPowerByAccountId",
       path: "/voting-powers/{accountId}",
-      summary: "TODO",
-      description: "TODO",
+      summary: "Get account powers",
+      description:
+        "Returns voting power information for a specific address (account)",
       tags: ["proposals"],
       request: {
         params: z.object({

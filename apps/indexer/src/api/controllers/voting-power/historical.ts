@@ -1,4 +1,4 @@
-import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
+import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 
 import { VotingPowerService } from "@/api/services";
 import {
@@ -6,17 +6,21 @@ import {
   HistoricalVotingPowerRequestSchema,
   HistoricalVotingPowerMapper,
 } from "@/api/mappers";
+import { isAddress } from "viem";
 
 export function historicalVotingPowers(app: Hono, service: VotingPowerService) {
   app.openapi(
     createRoute({
       method: "get",
       operationId: "historicalVotingPowers",
-      path: "/voting-powers/historical",
+      path: "/voting-powers/{accountId}/historical",
       summary: "Get voting power changes",
       description: "Returns a list of voting power changes",
       tags: ["proposals"],
       request: {
+        params: z.object({
+          accountId: z.string().refine((addr) => isAddress(addr)),
+        }),
         query: HistoricalVotingPowerRequestSchema,
       },
       responses: {
@@ -31,18 +35,12 @@ export function historicalVotingPowers(app: Hono, service: VotingPowerService) {
       },
     }),
     async (context) => {
-      const {
-        account,
-        skip,
-        limit,
-        orderDirection,
-        orderBy,
-        minDelta,
-        maxDelta,
-      } = context.req.valid("query");
+      const { skip, limit, orderDirection, orderBy, minDelta, maxDelta } =
+        context.req.valid("query");
+      const { accountId } = context.req.valid("param");
 
       const { items, totalCount } = await service.getHistoricalVotingPowers(
-        account,
+        accountId,
         skip,
         limit,
         orderDirection,
