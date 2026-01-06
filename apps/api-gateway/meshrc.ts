@@ -26,6 +26,25 @@ export default processConfig(
                   endpoint: value,
                 },
               },
+              transforms: [
+                {
+                  rename: {
+                    renames: [
+                      {
+                        useRegExpForFields: true,
+                        from: {
+                          type: "Query",
+                          field: "(transfers?)",
+                        },
+                        to: {
+                          type: "Query",
+                          field: "GQL_$1",
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
             },
             {
               name: `rest_${daoName}`,
