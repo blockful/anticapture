@@ -2512,7 +2512,7 @@ export type BalanceHistoryGraphQueryVariables = Exact<{
 }>;
 
 
-export type BalanceHistoryGraphQuery = { __typename?: 'Query', transfers?: { __typename?: 'transfers_200_response', items: Array<{ __typename?: 'query_transfers_items_items', timestamp: string, amount: string, fromAccountId: string, toAccountId: string, transactionHash: string } | null> } | null };
+export type BalanceHistoryGraphQuery = { __typename?: 'Query', transfers?: { __typename?: 'transfers_200_response', items: Array<{ __typename?: 'query_transfers_items_items', timestamp: string, amount: string, fromAccountId: string, toAccountId: string, transactionHash: string, logIndex: number } | null> } | null };
 
 export type AccountBalanceVariationsQueryVariables = Exact<{
   days: QueryInput_AccountBalanceVariations_Days;

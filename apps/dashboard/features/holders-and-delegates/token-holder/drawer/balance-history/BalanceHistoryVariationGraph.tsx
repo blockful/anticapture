@@ -38,6 +38,7 @@ interface CustomDotProps {
     transactionHash: string;
     fromAccountId: string | null;
     toAccountId: string | null;
+    logIndex: number;
   };
 }
 
@@ -147,38 +148,27 @@ export const BalanceHistoryVariationGraph = ({
     );
   }
 
-  const chartData = balanceHistory
-    .map((dataPoint) => ({
-      timestamp: Number(dataPoint.timestamp),
-      amount: dataPoint.amount,
-      direction: dataPoint.direction,
-      transactionHash: dataPoint.transactionHash,
-      fromAccountId: dataPoint.fromAccountId,
-      toAccountId: dataPoint.toAccountId,
-    }))
-    .sort((a, b) => a.timestamp - b.timestamp);
-
   const extendedChartData =
-    chartData.length < 1000
+    balanceHistory.length < 1000
       ? [
           {
-            timestamp: chartData[0]?.timestamp - 1000, // to avoid hover conflict with first point
+            timestamp: balanceHistory[0]?.timestamp - 1000, // to avoid hover conflict with first point
             amount: 0,
             direction: "none",
             transactionHash: "initial",
             fromAccountId: null,
             toAccountId: null,
           },
-          ...chartData,
+          ...balanceHistory,
         ]
-      : chartData;
+      : balanceHistory;
 
   // Custom dot component to show each transfer/delegation point
   const CustomDot = (props: CustomDotProps) => {
     const { cx, cy, payload } = props;
     return (
       <Dot
-        key={payload.transactionHash}
+        key={`${payload.transactionHash}-${payload.logIndex}`}
         cx={cx}
         cy={cy}
         r={4}

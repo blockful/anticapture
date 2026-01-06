@@ -10,7 +10,6 @@ import {
   QueryInput_Transfers_SortBy,
 } from "@anticapture/graphql-client/hooks";
 
-import daoConfig from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { AmountFilterVariables } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
 
@@ -24,9 +23,11 @@ export function useBalanceHistory({
   customToFilter,
   filterVariables,
   itemsPerPage = 10,
+  decimals,
 }: {
   accountId: string;
   daoId: DaoIdEnum;
+  decimals: number;
   customFromFilter: string | null;
   customToFilter: string | null;
   orderBy?: "timestamp" | "amount";
@@ -36,9 +37,6 @@ export function useBalanceHistory({
   itemsPerPage?: number;
 }) {
   const [currentPage, setCurrentPage] = useState(1);
-  const {
-    daoOverview: { token },
-  } = daoConfig[daoId as DaoIdEnum];
 
   // Reset page to 1 when filters change
   useEffect(() => {
@@ -51,7 +49,7 @@ export function useBalanceHistory({
     customToFilter,
   ]);
 
-  const queryWhere = useMemo(() => {
+  const variables = useMemo(() => {
     const where: BalanceHistoryQueryVariables = {
       sortBy: orderBy as QueryInput_Transfers_SortBy,
       sortOrder: orderDirection as QueryInput_Transfers_SortOrder,
@@ -102,25 +100,13 @@ export function useBalanceHistory({
     orderDirection,
   ]);
 
-  const queryVariables = useMemo(
-    () => ({
-      limit: itemsPerPage,
-      orderBy,
-      orderDirection,
-      where: queryWhere,
-    }),
-    [itemsPerPage, orderBy, orderDirection, queryWhere],
-  );
-
   const { data, error, loading } = useBalanceHistoryQuery({
-    variables: queryVariables,
+    variables,
     context: {
       headers: {
         "anticapture-dao-id": daoId,
       },
     },
-    skip: !accountId,
-    fetchPolicy: "cache-and-network",
   });
 
   // Transform raw transfers to our format
@@ -131,10 +117,7 @@ export function useBalanceHistory({
       .filter((t) => !!t)
       .map((transfer) => ({
         timestamp: transfer.timestamp.toString(),
-        amount:
-          token === "ERC20"
-            ? formatUnits(BigInt(transfer.amount || "0"), 18)
-            : (transfer.amount || "0").toString(),
+        amount: Number(formatUnits(BigInt(transfer.amount), decimals)),
         fromAccountId: transfer.fromAccountId,
         toAccountId: transfer.toAccountId,
         transactionHash: transfer.transactionHash,
@@ -142,7 +125,7 @@ export function useBalanceHistory({
           | "in"
           | "out",
       }));
-  }, [data, accountId, token]);
+  }, [data, accountId, decimals]);
 
   return {
     transfers: transformedTransfers,

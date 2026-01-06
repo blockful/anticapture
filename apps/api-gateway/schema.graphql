@@ -27,7 +27,7 @@ type Query {
   transfer(transactionHash: String!, fromAccountId: String!, toAccountId: String!): transfer
 
   """Get transfers, with optional filtering and sorting"""
-  transfers(limit: Float = 10, offset: Float, sortBy: queryInput_transfers_sortBy = timestamp, sortOrder: queryInput_transfers_sortOrder = asc, from: String, to: String, fromDate: Float, fromValue: String, toValue: String, conditional: queryInput_transfers_conditional = and): transfers_200_response
+  transfers(limit: Float = 10, offset: Float, sortBy: queryInput_transfers_sortBy = timestamp, sortOrder: queryInput_transfers_sortOrder = asc, from: String, to: String, fromDate: Float, fromValue: String, toValue: String, conditional: queryInput_transfers_conditional = or): transfers_200_response
   votesOnchain(voterAccountId: String!, proposalId: String!): votesOnchain
   votesOnchains(where: votesOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votesOnchainPage!
   proposalsOnchain(id: String!): proposalsOnchain

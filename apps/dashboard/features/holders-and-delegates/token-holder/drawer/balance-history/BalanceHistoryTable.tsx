@@ -93,6 +93,7 @@ export const BalanceHistoryTable = ({
   // Use the balance history hook
   const { transfers, loading, fetchNextPage, error, hasNextPage } =
     useBalanceHistory({
+      decimals,
       accountId,
       daoId,
       orderBy,
@@ -139,10 +140,10 @@ export const BalanceHistoryTable = ({
       return {
         id: transfer.transactionHash,
         date: relativeTime,
-        amount: formatNumberUserReadable(parseFloat(transfer.amount)),
+        amount: formatNumberUserReadable(transfer.amount),
         type: transfer.direction === "in" ? "Buy" : ("Sell" as "Buy" | "Sell"),
-        fromAddress: transfer.fromAccountId || "",
-        toAddress: transfer.toAccountId || "",
+        fromAddress: transfer.fromAccountId,
+        toAddress: transfer.toAccountId,
       };
     });
   }, [transfers]);
