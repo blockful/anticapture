@@ -1,5 +1,9 @@
 import { useMemo } from "react";
-import { useBalanceHistoryGraphQuery } from "@anticapture/graphql-client/hooks";
+import {
+  QueryInput_Transfers_SortBy,
+  QueryInput_Transfers_SortOrder,
+  useBalanceHistoryGraphQuery,
+} from "@anticapture/graphql-client/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimePeriod } from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
 import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
@@ -27,13 +31,10 @@ export function useBalanceHistoryGraph(
   daoId: DaoIdEnum,
   timePeriod: TimePeriod = "all",
 ): UseBalanceHistoryGraphResult {
-  const {
-    decimals,
-    daoOverview: { token },
-  } = daoConfig[daoId];
+  const { decimals } = daoConfig[daoId];
 
   // Calculate timestamp range based on time period
-  const { fromTimestamp, toTimestamp } = useMemo(() => {
+  const { fromTimestamp } = useMemo(() => {
     const nowInSeconds = Date.now() / 1000;
 
     // For "all", treat as all time by not setting limits
@@ -60,10 +61,9 @@ export function useBalanceHistoryGraph(
   const { data, loading, error } = useBalanceHistoryGraphQuery({
     variables: {
       accountId,
-      fromTimestamp,
-      toTimestamp,
-      orderBy: "timestamp",
-      orderDirection: "desc",
+      fromDate: fromTimestamp,
+      sortBy: QueryInput_Transfers_SortBy.Timestamp,
+      sortOrder: QueryInput_Transfers_SortOrder.Desc,
     },
     context: {
       headers: {
@@ -75,17 +75,12 @@ export function useBalanceHistoryGraph(
   });
 
   const balanceHistory = useMemo((): BalanceHistoryGraphItem[] => {
-    if (!data?.transfers?.items) {
-      return [];
-    }
+    if (!data?.transfers?.items) return [];
 
     return data.transfers.items
+      .filter((item) => item !== null)
       .map((item) => {
-        // Convert from wei to token units using Viem's formatUnits
-        const amount =
-          token === "ERC20"
-            ? Number(formatUnits(BigInt(item.amount.toString()), decimals))
-            : Number(item.amount.toString());
+        const amount = Number(formatUnits(BigInt(item.amount), decimals));
 
         return {
           ...item,
@@ -97,7 +92,7 @@ export function useBalanceHistoryGraph(
         };
       })
       .sort((a, b) => a.timestamp - b.timestamp); // Sort chronologically for chart display
-  }, [data, token, accountId]);
+  }, [data, accountId, decimals]);
 
   return {
     balanceHistory,

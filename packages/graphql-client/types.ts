@@ -74,7 +74,6 @@ export type PageInfo = {
 
 export type Query = {
   __typename?: 'Query';
-  _: TransactionPage;
   _meta?: Maybe<Meta>;
   account?: Maybe<Account>;
   accountBalance?: Maybe<AccountBalance>;
@@ -156,7 +155,8 @@ export type Query = {
   /** Get transactions with their associated transfers and delegations, with optional filtering and sorting */
   transactions?: Maybe<Transactions_200_Response>;
   transfer?: Maybe<Transfer>;
-  transfers: TransferPage;
+  /** Get transfers, with optional filtering and sorting */
+  transfers?: Maybe<Transfers_200_Response>;
   votesOnchain?: Maybe<VotesOnchain>;
   votesOnchains: VotesOnchainPage;
   votingPowerHistory?: Maybe<VotingPowerHistory>;
@@ -165,16 +165,6 @@ export type Query = {
   votingPowerVariations?: Maybe<VotingPowerVariations_200_Response>;
   /** Returns a list of voting power changes */
   votingPowers?: Maybe<VotingPowers_200_Response>;
-};
-
-
-export type Query_Args = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  where?: InputMaybe<TransactionFilter>;
 };
 
 
@@ -493,12 +483,16 @@ export type QueryTransferArgs = {
 
 
 export type QueryTransfersArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  where?: InputMaybe<TransferFilter>;
+  conditional?: InputMaybe<QueryInput_Transfers_Conditional>;
+  from?: InputMaybe<Scalars['String']['input']>;
+  fromDate?: InputMaybe<Scalars['Float']['input']>;
+  fromValue?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Float']['input']>;
+  offset?: InputMaybe<Scalars['Float']['input']>;
+  sortBy?: InputMaybe<QueryInput_Transfers_SortBy>;
+  sortOrder?: InputMaybe<QueryInput_Transfers_SortOrder>;
+  to?: InputMaybe<Scalars['String']['input']>;
+  toValue?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -1610,6 +1604,21 @@ export enum QueryInput_Transactions_SortOrder {
   Desc = 'desc'
 }
 
+export enum QueryInput_Transfers_Conditional {
+  And = 'and',
+  Or = 'or'
+}
+
+export enum QueryInput_Transfers_SortBy {
+  Amount = 'amount',
+  Timestamp = 'timestamp'
+}
+
+export enum QueryInput_Transfers_SortOrder {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
 export enum QueryInput_VotingPowerVariations_Days {
   '7d' = '_7d',
   '30d' = '_30d',
@@ -1799,6 +1808,22 @@ export type Query_Transactions_Items_Items_Delegations_Items = {
 
 export type Query_Transactions_Items_Items_Transfers_Items = {
   __typename?: 'query_transactions_items_items_transfers_items';
+  amount: Scalars['String']['output'];
+  daoId: Scalars['String']['output'];
+  fromAccountId: Scalars['String']['output'];
+  isCex: Scalars['Boolean']['output'];
+  isDex: Scalars['Boolean']['output'];
+  isLending: Scalars['Boolean']['output'];
+  isTotal: Scalars['Boolean']['output'];
+  logIndex: Scalars['Float']['output'];
+  timestamp: Scalars['String']['output'];
+  toAccountId: Scalars['String']['output'];
+  tokenId: Scalars['String']['output'];
+  transactionHash: Scalars['String']['output'];
+};
+
+export type Query_Transfers_Items_Items = {
+  __typename?: 'query_transfers_items_items';
   amount: Scalars['String']['output'];
   daoId: Scalars['String']['output'];
   fromAccountId: Scalars['String']['output'];
@@ -2247,6 +2272,12 @@ export type TransferPage = {
   totalCount: Scalars['Int']['output'];
 };
 
+export type Transfers_200_Response = {
+  __typename?: 'transfers_200_response';
+  items: Array<Maybe<Query_Transfers_Items_Items>>;
+  totalCount: Scalars['Float']['output'];
+};
+
 export type VotesOnchain = {
   __typename?: 'votesOnchain';
   daoId: Scalars['String']['output'];
@@ -2459,34 +2490,29 @@ export type VotingPowers_200_Response = {
 };
 
 export type BalanceHistoryQueryVariables = Exact<{
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  where?: InputMaybe<TransferFilter>;
+  offset?: InputMaybe<Scalars['Float']['input']>;
+  limit?: InputMaybe<Scalars['Float']['input']>;
+  sortBy?: InputMaybe<QueryInput_Transfers_SortBy>;
+  sortOrder?: InputMaybe<QueryInput_Transfers_SortOrder>;
+  from?: InputMaybe<Scalars['String']['input']>;
+  to?: InputMaybe<Scalars['String']['input']>;
+  fromValue?: InputMaybe<Scalars['String']['input']>;
+  toValue?: InputMaybe<Scalars['String']['input']>;
+  conditional?: InputMaybe<QueryInput_Transfers_Conditional>;
 }>;
 
 
-export type BalanceHistoryQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', items: Array<{ __typename?: 'transfer', timestamp: any, amount: any, fromAccountId: string, toAccountId: string, transactionHash: string }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
-
-export type BalanceHistoryTotalCountQueryVariables = Exact<{
-  account: Scalars['String']['input'];
-}>;
-
-
-export type BalanceHistoryTotalCountQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', totalCount: number } };
+export type BalanceHistoryQuery = { __typename?: 'Query', transfers?: { __typename?: 'transfers_200_response', totalCount: number, items: Array<{ __typename?: 'query_transfers_items_items', timestamp: string, amount: string, fromAccountId: string, toAccountId: string, transactionHash: string } | null> } | null };
 
 export type BalanceHistoryGraphQueryVariables = Exact<{
   accountId: Scalars['String']['input'];
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  fromTimestamp?: InputMaybe<Scalars['BigInt']['input']>;
-  toTimestamp?: InputMaybe<Scalars['BigInt']['input']>;
+  sortBy?: InputMaybe<QueryInput_Transfers_SortBy>;
+  sortOrder?: InputMaybe<QueryInput_Transfers_SortOrder>;
+  fromDate?: InputMaybe<Scalars['Float']['input']>;
 }>;
 
 
-export type BalanceHistoryGraphQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', items: Array<{ __typename?: 'transfer', timestamp: any, amount: any, fromAccountId: string, toAccountId: string, transactionHash: string }> } };
+export type BalanceHistoryGraphQuery = { __typename?: 'Query', transfers?: { __typename?: 'transfers_200_response', items: Array<{ __typename?: 'query_transfers_items_items', timestamp: string, amount: string, fromAccountId: string, toAccountId: string, transactionHash: string } | null> } | null };
 
 export type AccountBalanceVariationsQueryVariables = Exact<{
   days: QueryInput_AccountBalanceVariations_Days;
@@ -2753,13 +2779,13 @@ export type GetDaoAddressesAccountBalancesQuery = { __typename?: 'Query', accoun
 
 export type BalanceChartQueryVariables = Exact<{
   accountId: Scalars['String']['input'];
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Float']['input']>;
+  sortBy?: InputMaybe<QueryInput_Transfers_SortBy>;
+  sortOrder?: InputMaybe<QueryInput_Transfers_SortOrder>;
 }>;
 
 
-export type BalanceChartQuery = { __typename?: 'Query', transfers: { __typename?: 'transferPage', items: Array<{ __typename?: 'transfer', amount: any }> } };
+export type BalanceChartQuery = { __typename?: 'Query', transfers?: { __typename?: 'transfers_200_response', items: Array<{ __typename?: 'query_transfers_items_items', amount: string } | null> } | null };
 
 export type GetAccountInteractionsQueryVariables = Exact<{
   address: Scalars['String']['input'];
