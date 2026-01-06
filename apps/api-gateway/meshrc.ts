@@ -28,6 +28,16 @@ export default processConfig(
               },
               transforms: [
                 {
+                  filterSchema: {
+                    filters: [
+                      'Query.!{accountPower}',
+                      'Query.!{accountPowers}',
+                      'Query.!{votingPowerHistory}',
+                      'Query.!{votingPowerHistorys}'
+                    ]
+                  }
+                },
+                {
                   rename: {
                     renames: [
                       {
@@ -57,7 +67,7 @@ export default processConfig(
           ];
         }),
     ],
-    additionalTypeDefs:`
+    additionalTypeDefs: `
       type AverageDelegationPercentageItem {
         date: String!
         high: String!
