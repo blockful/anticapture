@@ -40,6 +40,7 @@ export function transfers(app: Hono, service: TransfersService) {
         fromValue,
         toValue,
         fromDate,
+        conditional,
       } = context.req.valid("query");
 
       const result = await service.getTransfers({
@@ -52,6 +53,7 @@ export function transfers(app: Hono, service: TransfersService) {
         fromValue,
         toValue,
         fromDate,
+        conditional,
       });
 
       return context.json(result);
