@@ -88,15 +88,11 @@ export const AttackCostBarChart = ({
   });
 
   const daoConfig = daoConfigByDaoId[selectedDaoId];
-  const attackCostBarChart =
-    daoConfig?.attackProfitability?.attackCostBarChart || {};
-  const daoAddresses: string[] = Object.values(attackCostBarChart);
-  const tokenAddress = daoConfig?.daoOverview.contracts.token;
 
   const {
     data: daoTopTokenHolderExcludingTheDao,
     loading: daoTopTokenHolderExcludingTheDaoLoading,
-  } = useTopTokenHolderNonDao(selectedDaoId, tokenAddress, daoAddresses);
+  } = useTopTokenHolderNonDao(selectedDaoId);
 
   const { data: vetoCouncilVotingPower, isLoading: isVetoCouncilLoading } =
     useVetoCouncilVotingPower(selectedDaoId);
@@ -148,18 +144,18 @@ export const AttackCostBarChart = ({
       ...(valueMode === "token"
         ? []
         : [
-            {
-              id: "liquidTreasury",
-              name: "Liquid Treasury",
-              type: BarChartEnum.REGULAR,
-              value: Number(liquidTreasury.data?.[0]?.totalAssets || 0),
-              customColor: "#EC762EFF",
-              displayValue:
-                Number(liquidTreasury.data?.[0]?.totalAssets || 0) > 10000
-                  ? undefined
-                  : "<$10,000",
-            },
-          ]),
+          {
+            id: "liquidTreasury",
+            name: "Liquid Treasury",
+            type: BarChartEnum.REGULAR,
+            value: Number(liquidTreasury.data?.[0]?.totalAssets || 0),
+            customColor: "#EC762EFF",
+            displayValue:
+              Number(liquidTreasury.data?.[0]?.totalAssets || 0) > 10000
+                ? undefined
+                : "<$10,000",
+          },
+        ]),
       {
         id: "delegatedSupply",
         name: "Delegated Supply",
@@ -305,30 +301,30 @@ export const AttackCostBarChart = ({
                   stackId="stack"
                   radius={[
                     index ===
-                    (chartData.find(
-                      (item) => item.type === BarChartEnum.STACKED,
-                    )?.stackedValues?.length || 0) -
+                      (chartData.find(
+                        (item) => item.type === BarChartEnum.STACKED,
+                      )?.stackedValues?.length || 0) -
                       1
                       ? 4
                       : 0,
                     index ===
-                    (chartData.find(
-                      (item) => item.type === BarChartEnum.STACKED,
-                    )?.stackedValues?.length || 0) -
+                      (chartData.find(
+                        (item) => item.type === BarChartEnum.STACKED,
+                      )?.stackedValues?.length || 0) -
                       1
                       ? 4
                       : 0,
                     index ===
-                    (chartData.find(
-                      (item) => item.type === BarChartEnum.STACKED,
-                    )?.stackedValues?.length || 0) -
+                      (chartData.find(
+                        (item) => item.type === BarChartEnum.STACKED,
+                      )?.stackedValues?.length || 0) -
                       1
                       ? 0
                       : 0,
                     index ===
-                    (chartData.find(
-                      (item) => item.type === BarChartEnum.STACKED,
-                    )?.stackedValues?.length || 0) -
+                      (chartData.find(
+                        (item) => item.type === BarChartEnum.STACKED,
+                      )?.stackedValues?.length || 0) -
                       1
                       ? 0
                       : 0,
@@ -344,13 +340,13 @@ export const AttackCostBarChart = ({
                     (chartData.find(
                       (item) => item.type === BarChartEnum.STACKED,
                     )?.stackedValues?.length || 0) -
-                      1 && (
-                    <LabelList
-                      content={(props) => (
-                        <StackedLabel {...props} data={chartData} />
-                      )}
-                    />
-                  )}
+                    1 && (
+                      <LabelList
+                        content={(props) => (
+                          <StackedLabel {...props} data={chartData} />
+                        )}
+                      />
+                    )}
                 </Bar>
               ))}
         </BarChart>
