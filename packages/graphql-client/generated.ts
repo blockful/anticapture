@@ -77,6 +77,8 @@ export type PageInfo = {
 
 export type Query = {
   __typename?: 'Query';
+  GQL_transfer?: Maybe<Transfer>;
+  GQL_transfers: TransferPage;
   _meta?: Maybe<Meta>;
   account?: Maybe<Account>;
   accountBalance?: Maybe<AccountBalance>;
@@ -157,7 +159,6 @@ export type Query = {
   transaction?: Maybe<Transaction>;
   /** Get transactions with their associated transfers and delegations, with optional filtering and sorting */
   transactions?: Maybe<Transactions_200_Response>;
-  transfer?: Maybe<Transfer>;
   /** Get transfers, with optional filtering and sorting */
   transfers?: Maybe<Transfers_200_Response>;
   votesOnchain?: Maybe<VotesOnchain>;
@@ -168,6 +169,23 @@ export type Query = {
   votingPowerVariations?: Maybe<VotingPowerVariations_200_Response>;
   /** Returns a list of voting power changes */
   votingPowers?: Maybe<VotingPowers_200_Response>;
+};
+
+
+export type QueryGql_TransferArgs = {
+  fromAccountId: Scalars['String']['input'];
+  toAccountId: Scalars['String']['input'];
+  transactionHash: Scalars['String']['input'];
+};
+
+
+export type QueryGql_TransfersArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<Scalars['String']['input']>;
+  orderDirection?: InputMaybe<Scalars['String']['input']>;
+  where?: InputMaybe<TransferFilter>;
 };
 
 
@@ -475,13 +493,6 @@ export type QueryTransactionsArgs = {
   sortOrder?: InputMaybe<QueryInput_Transactions_SortOrder>;
   to?: InputMaybe<Scalars['String']['input']>;
   toDate?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
-export type QueryTransferArgs = {
-  fromAccountId: Scalars['String']['input'];
-  toAccountId: Scalars['String']['input'];
-  transactionHash: Scalars['String']['input'];
 };
 
 
