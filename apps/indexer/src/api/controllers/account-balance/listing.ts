@@ -1,4 +1,4 @@
-import { createRoute, OpenAPIHono as Hono } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono as Hono, z } from "@hono/zod-openapi";
 import { AccountBalanceService } from "@/api/services";
 import {
   AccountBalancesRequestSchema,
@@ -9,7 +9,7 @@ import {
   AccountBalanceResponseMapper,
   AccountBalanceResponseSchema,
 } from "@/api/mappers";
-import { Address } from "viem";
+import { Address, isAddress } from "viem";
 import { DaoIdEnum } from "@/lib/enums";
 
 export function accountBalances(
@@ -73,10 +73,15 @@ export function accountBalances(
     createRoute({
       method: "get",
       operationId: "accountBalanceByAccountId",
-      path: "/account-balances/:accountId",
+      path: "/account-balances/{accountId}",
       summary: "Get account balance",
       description: "Returns account balance",
       tags: ["account-balances"],
+      request: {
+        params: z.object({
+          accountId: z.string().refine((addr) => isAddress(addr)),
+        }),
+      },
       responses: {
         200: {
           description: "Successfully retrieved account balance",
