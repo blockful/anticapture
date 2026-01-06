@@ -2777,16 +2777,6 @@ export type GetDaoAddressesAccountBalancesQueryVariables = Exact<{
 
 export type GetDaoAddressesAccountBalancesQuery = { __typename?: 'Query', accountBalances: { __typename?: 'accountBalancePage', items: Array<{ __typename?: 'accountBalance', accountId: string, balance: any }> } };
 
-export type BalanceChartQueryVariables = Exact<{
-  accountId: Scalars['String']['input'];
-  limit?: InputMaybe<Scalars['Float']['input']>;
-  sortBy?: InputMaybe<QueryInput_Transfers_SortBy>;
-  sortOrder?: InputMaybe<QueryInput_Transfers_SortOrder>;
-}>;
-
-
-export type BalanceChartQuery = { __typename?: 'Query', transfers?: { __typename?: 'transfers_200_response', items: Array<{ __typename?: 'query_transfers_items_items', amount: string } | null> } | null };
-
 export type GetAccountInteractionsQueryVariables = Exact<{
   address: Scalars['String']['input'];
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;

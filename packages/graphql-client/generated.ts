@@ -2780,16 +2780,6 @@ export type GetDaoAddressesAccountBalancesQueryVariables = Exact<{
 
 export type GetDaoAddressesAccountBalancesQuery = { __typename?: 'Query', accountBalances: { __typename?: 'accountBalancePage', items: Array<{ __typename?: 'accountBalance', accountId: string, balance: any }> } };
 
-export type BalanceChartQueryVariables = Exact<{
-  accountId: Scalars['String']['input'];
-  limit?: InputMaybe<Scalars['Float']['input']>;
-  sortBy?: InputMaybe<QueryInput_Transfers_SortBy>;
-  sortOrder?: InputMaybe<QueryInput_Transfers_SortOrder>;
-}>;
-
-
-export type BalanceChartQuery = { __typename?: 'Query', transfers?: { __typename?: 'transfers_200_response', items: Array<{ __typename?: 'query_transfers_items_items', amount: string } | null> } | null };
-
 export type GetAccountInteractionsQueryVariables = Exact<{
   address: Scalars['String']['input'];
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
@@ -4540,57 +4530,6 @@ export type GetDaoAddressesAccountBalancesQueryHookResult = ReturnType<typeof us
 export type GetDaoAddressesAccountBalancesLazyQueryHookResult = ReturnType<typeof useGetDaoAddressesAccountBalancesLazyQuery>;
 export type GetDaoAddressesAccountBalancesSuspenseQueryHookResult = ReturnType<typeof useGetDaoAddressesAccountBalancesSuspenseQuery>;
 export type GetDaoAddressesAccountBalancesQueryResult = Apollo.QueryResult<GetDaoAddressesAccountBalancesQuery, GetDaoAddressesAccountBalancesQueryVariables>;
-export const BalanceChartDocument = gql`
-    query BalanceChart($accountId: String!, $limit: Float = 10, $sortBy: queryInput_transfers_sortBy, $sortOrder: queryInput_transfers_sortOrder) {
-  transfers(
-    from: $accountId
-    to: $accountId
-    sortBy: $sortBy
-    sortOrder: $sortOrder
-    limit: $limit
-  ) {
-    items {
-      amount
-    }
-  }
-}
-    `;
-
-/**
- * __useBalanceChartQuery__
- *
- * To run a query within a React component, call `useBalanceChartQuery` and pass it any options that fit your needs.
- * When your component renders, `useBalanceChartQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useBalanceChartQuery({
- *   variables: {
- *      accountId: // value for 'accountId'
- *      limit: // value for 'limit'
- *      sortBy: // value for 'sortBy'
- *      sortOrder: // value for 'sortOrder'
- *   },
- * });
- */
-export function useBalanceChartQuery(baseOptions: Apollo.QueryHookOptions<BalanceChartQuery, BalanceChartQueryVariables> & ({ variables: BalanceChartQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<BalanceChartQuery, BalanceChartQueryVariables>(BalanceChartDocument, options);
-      }
-export function useBalanceChartLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<BalanceChartQuery, BalanceChartQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<BalanceChartQuery, BalanceChartQueryVariables>(BalanceChartDocument, options);
-        }
-export function useBalanceChartSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<BalanceChartQuery, BalanceChartQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<BalanceChartQuery, BalanceChartQueryVariables>(BalanceChartDocument, options);
-        }
-export type BalanceChartQueryHookResult = ReturnType<typeof useBalanceChartQuery>;
-export type BalanceChartLazyQueryHookResult = ReturnType<typeof useBalanceChartLazyQuery>;
-export type BalanceChartSuspenseQueryHookResult = ReturnType<typeof useBalanceChartSuspenseQuery>;
-export type BalanceChartQueryResult = Apollo.QueryResult<BalanceChartQuery, BalanceChartQueryVariables>;
 export const GetAccountInteractionsDocument = gql`
     query getAccountInteractions($address: String!, $limit: PositiveInt, $maxAmount: String, $minAmount: String, $orderDirection: queryInput_accountInteractions_orderDirection, $skip: NonNegativeInt) {
   accountInteractions(
