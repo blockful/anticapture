@@ -6,8 +6,8 @@ import { isAddress } from "viem";
 export type DBTransfer = typeof transfer.$inferSelect;
 
 export const TransfersRequestSchema = z.object({
-  limit: z.number().optional().default(10),
-  offset: z.number().optional().default(0),
+  limit: z.coerce.number().optional().default(10),
+  offset: z.coerce.number().optional().default(0),
   sortBy: z.enum(["timestamp", "amount"]).optional().default("timestamp"),
   sortOrder: z.enum(["asc", "desc"]).optional().default("asc"),
   from: z.string().refine(isAddress, { message: "Invalid address" }).optional(),
