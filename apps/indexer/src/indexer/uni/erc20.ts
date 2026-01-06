@@ -129,13 +129,7 @@ export function UNITokenIndexer(address: Address, decimals: number) {
       timestamp,
     );
 
-    await updateCirculatingSupply(
-      context,
-      MetricTypesEnum.CIRCULATING_SUPPLY,
-      daoId,
-      address,
-      timestamp,
-    );
+    await updateCirculatingSupply(context, daoId, address, timestamp);
 
     if (!event.transaction.to) return;
 

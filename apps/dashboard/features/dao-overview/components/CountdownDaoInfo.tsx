@@ -27,8 +27,8 @@ export const CountdownDaoInfo = ({
   if (!formattedCountdown) return null;
 
   return (
-    <div className="text-primary text-sm font-normal leading-5">
+    <p className="text-primary text-sm font-normal leading-5">
       {formattedCountdown.days}d {formattedCountdown.hours}h left
-    </div>
+    </p>
   );
 };

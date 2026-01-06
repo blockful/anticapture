@@ -68,9 +68,7 @@ export const ProgressBar = ({
           </div>
           <div className="flex flex-col items-end justify-center">
             <p className="text-secondary text-xs font-medium">Expiration</p>
-            <p className="text-primary text-sm font-normal">
-              <CountdownDaoInfo daoOverview={daoOverview} />
-            </p>
+            <CountdownDaoInfo daoOverview={daoOverview} />
           </div>
         </div>
       </div>

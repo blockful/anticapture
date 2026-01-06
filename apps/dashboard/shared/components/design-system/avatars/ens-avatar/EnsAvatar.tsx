@@ -6,15 +6,18 @@ import { cn } from "@/shared/utils/cn";
 import { Address } from "viem";
 import Image, { ImageProps } from "next/image";
 import { useState } from "react";
-import { UserIcon } from "@/shared/components/icons";
+import Blockies from "react-blockies";
+
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { formatAddress } from "@/shared/utils/formatAddress";
 
 export type AvatarSize = "xs" | "sm" | "md" | "lg";
 export type AvatarVariant = "square" | "rounded";
 
-interface EnsAvatarProps
-  extends Omit<ImageProps, "src" | "alt" | "fill" | "className" | "loading"> {
+interface EnsAvatarProps extends Omit<
+  ImageProps,
+  "src" | "alt" | "fill" | "className" | "loading"
+> {
   address?: Address;
   imageUrl?: string;
   size?: AvatarSize;
@@ -37,11 +40,11 @@ const sizeClasses: Record<AvatarSize, string> = {
   lg: "size-12", // 48px
 };
 
-const iconSizes: Record<AvatarSize, string> = {
-  xs: "size-3", // 12px
-  sm: "size-4", // 16px
-  md: "size-6", // 24px
-  lg: "size-8", // 32px
+const iconSizes: Record<AvatarSize, number> = {
+  xs: 12, // 12px
+  sm: 16, // 16px
+  md: 24, // 24px
+  lg: 32, // 32px
 };
 
 const variantClasses: Record<AvatarVariant, string> = {
@@ -70,7 +73,7 @@ export const EnsAvatar = ({
   // Only fetch ENS data if we have an address and either we need imageUrl or fetchEnsName is true
   const shouldFetchEns = address && !imageUrl;
   const { data: ensData, isLoading: ensLoading } = useEnsData(
-    shouldFetchEns ? address : ("" as Address),
+    shouldFetchEns ? address : null,
   );
 
   // Determine the final image URL to use
@@ -127,6 +130,7 @@ export const EnsAvatar = ({
             alt={finalAlt}
             fill
             className="object-cover"
+            unoptimized
             onError={() => setImageError(true)}
             {...imageProps}
           />
@@ -137,7 +141,14 @@ export const EnsAvatar = ({
     // Fallback: show user icon
     return (
       <div className={baseClasses}>
-        <UserIcon className={iconSizes[size]} />
+        <Blockies
+          seed={address as string}
+          size={iconSizes[size]}
+          scale={3}
+          color="#18181b"
+          bgColor="#ec762e"
+          spotColor="#ffffff"
+        />
       </div>
     );
   };

@@ -14,15 +14,12 @@ import { timestampToReadableDate } from "@/shared/utils";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { DelegationHistoryGraphItem } from "@/features/holders-and-delegates/hooks";
-import { useState } from "react";
 import { useDelegateDelegationHistoryGraph } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistoryGraph";
-import {
-  VotingPowerTimePeriodSwitcher,
-  VotingPowerTimePeriod,
-} from "@/features/holders-and-delegates/components/DelegatesDelegationHistory/VotingPowerTimePeriodSwitcher";
+import { TimePeriodSwitcher } from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
 import { ChartExceptionState } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
+import { parseAsStringEnum, useQueryState } from "nuqs";
 
 interface VotingPowerVariationGraphProps {
   accountId: string;
@@ -83,8 +80,10 @@ export const VotingPowerVariationGraph = ({
   accountId,
   daoId,
 }: VotingPowerVariationGraphProps) => {
-  const [selectedPeriod, setSelectedPeriod] =
-    useState<VotingPowerTimePeriod>("all");
+  const [selectedPeriod, setSelectedPeriod] = useQueryState(
+    "selectedPeriod",
+    parseAsStringEnum(["30d", "90d", "all"]).withDefault("all"),
+  );
 
   const { delegationHistory, loading, error } =
     useDelegateDelegationHistoryGraph(accountId, daoId, selectedPeriod);
@@ -96,7 +95,7 @@ export const VotingPowerVariationGraph = ({
           state="loading"
           title="VOTING POWER VARIATION"
           headerContent={
-            <VotingPowerTimePeriodSwitcher
+            <TimePeriodSwitcher
               value={selectedPeriod}
               setTimePeriod={setSelectedPeriod}
               isSmall={true}
@@ -115,7 +114,7 @@ export const VotingPowerVariationGraph = ({
           title="VOTING POWER VARIATION"
           errorMessage="Error loading data"
           headerContent={
-            <VotingPowerTimePeriodSwitcher
+            <TimePeriodSwitcher
               value={selectedPeriod}
               setTimePeriod={setSelectedPeriod}
               isSmall={true}
@@ -134,7 +133,7 @@ export const VotingPowerVariationGraph = ({
           title="VOTING POWER VARIATION"
           noDataMessage="No voting power data available"
           headerContent={
-            <VotingPowerTimePeriodSwitcher
+            <TimePeriodSwitcher
               value={selectedPeriod}
               setTimePeriod={setSelectedPeriod}
               isSmall={true}
@@ -157,6 +156,23 @@ export const VotingPowerVariationGraph = ({
       toAddress: dataPoint.toAddress,
     }))
     .sort((a, b) => a.timestamp - b.timestamp);
+
+  const extendedChartData =
+    chartData.length < 1000
+      ? [
+          {
+            timestamp: chartData[0]?.timestamp - 1000, // to avoid hover conflict with first point
+            votingPower: 0,
+            delta: "0",
+            type: "initial",
+            isGain: true,
+            transactionHash: "initial",
+            fromAddress: undefined,
+            toAddress: undefined,
+          },
+          ...chartData,
+        ]
+      : chartData;
 
   // Custom dot component to show each transfer/delegation point
   const CustomDot = (props: CustomDotProps) => {
@@ -181,7 +197,7 @@ export const VotingPowerVariationGraph = ({
         <h3 className="text-secondary font-mono text-[13px] font-medium uppercase">
           VOTING POWER VARIATION
         </h3>
-        <VotingPowerTimePeriodSwitcher
+        <TimePeriodSwitcher
           value={selectedPeriod}
           setTimePeriod={setSelectedPeriod}
           isSmall={true}
@@ -190,7 +206,7 @@ export const VotingPowerVariationGraph = ({
       <div className="relative h-[200px] w-full">
         <ChartContainer config={chartConfig} className="h-full w-full">
           <LineChart
-            data={chartData}
+            data={extendedChartData}
             margin={{ top: 25, right: 30, left: -20, bottom: 5 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="var(--base-border)" />
@@ -199,7 +215,7 @@ export const VotingPowerVariationGraph = ({
               type="number"
               scale="time"
               domain={["dataMin", "dataMax"]}
-              ticks={generateMonthlyTicks(chartData)}
+              ticks={generateMonthlyTicks(extendedChartData)}
               tickFormatter={(value: number) => {
                 const date = new Date(value);
                 const month = date.toLocaleDateString("en-US", {
@@ -234,6 +250,12 @@ export const VotingPowerVariationGraph = ({
                   };
 
                   const displayAddress = getDisplayAddress();
+                  const type =
+                    data.type === "delegation"
+                      ? "Delegation"
+                      : data.type === "transfer"
+                        ? "Transfer"
+                        : "Initial Voting Power";
                   const addressLabel =
                     data.type === "delegation"
                       ? "Delegated from"
@@ -248,16 +270,18 @@ export const VotingPowerVariationGraph = ({
                         Voting Power:{" "}
                         {formatNumberUserReadable(data.votingPower)}
                       </p>
-                      <p className="text-secondary text-xs">
-                        Type: {data.type}
-                      </p>
+                      <p className="text-secondary text-xs">Type: {type}</p>
                       <p
                         className={`text-xs ${data.isGain ? "text-success" : "text-error"}`}
                       >
                         {data.isGain && "+"}
                         {formatNumberUserReadable(parseFloat(data.delta))}
                       </p>
-                      <p className="text-secondary text-xs">{addressLabel}:</p>
+                      {displayAddress && (
+                        <p className="text-secondary text-xs">
+                          {addressLabel}:
+                        </p>
+                      )}
                       {displayAddress && (
                         <EnsAvatar
                           address={displayAddress as `0x${string}`}
@@ -275,7 +299,7 @@ export const VotingPowerVariationGraph = ({
               }}
             />
             <Line
-              type="monotone"
+              type="stepAfter"
               dataKey="votingPower"
               stroke="var(--base-primary)"
               strokeWidth={1}
