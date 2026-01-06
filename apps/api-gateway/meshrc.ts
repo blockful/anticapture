@@ -28,9 +28,10 @@ export default processConfig(
               },
               transforms: [
                 {
+                  // docs: https://developer.adobe.com/graphql-mesh-gateway/mesh/basic/transforms/filter-schema/
                   filterSchema: {
                     mode: "bare",
-                    filters: ["transfers", "transfer"],
+                    filters: ["Query.!transfer", "Query.!transfers"],
                   },
                 },
               ],

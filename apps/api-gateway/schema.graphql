@@ -24,8 +24,6 @@ type Query {
   votingPowerHistorys(where: votingPowerHistoryFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votingPowerHistoryPage!
   delegation(transactionHash: String!, delegatorAccountId: String!, delegateAccountId: String!): delegation
   delegations(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): delegationPage!
-  transfer(transactionHash: String!, fromAccountId: String!, toAccountId: String!): transfer
-  transfers(where: transferFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): transferPage!
   votesOnchain(voterAccountId: String!, proposalId: String!): votesOnchain
   votesOnchains(where: votesOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votesOnchainPage!
   proposalsOnchain(id: String!): proposalsOnchain
@@ -33,7 +31,30 @@ type Query {
   daoMetricsDayBucket(date: BigInt!, tokenId: String!, metricType: String!): daoMetricsDayBucket
   daoMetricsDayBuckets(where: daoMetricsDayBucketFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): daoMetricsDayBucketPage!
   transaction(transactionHash: String!): transaction
-  _(where: transactionFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): transactionPage!
+
+  """
+  Get transactions with their associated transfers and delegations, with optional filtering and sorting
+  """
+  transactions(
+    limit: PositiveInt = 50
+    offset: NonNegativeInt
+    sortBy: timestamp_const
+    sortOrder: queryInput_transactions_sortOrder = desc
+    fromDate: Int
+    toDate: Int
+    from: String
+    to: String
+    minAmount: String
+    maxAmount: String
+
+    """
+    Filter transactions by affected supply type. Can be: 'CEX', 'DEX', 'LENDING', or 'TOTAL'
+    """
+    affectedSupply: JSON
+
+    """Filter by transaction type. Can be one of: 'TRANSFER', 'DELEGATION'"""
+    includes: JSON
+  ): transactions_200_response
   tokenPrice(timestamp: BigInt!): tokenPrice
   tokenPrices(where: tokenPriceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPricePage!
   _meta: Meta
@@ -101,30 +122,6 @@ type Query {
   """
   historicalVotingPower(addresses: JSON!, days: queryInput_historicalVotingPower_days = _7d, fromDate: Float): [query_historicalVotingPower_items]
 
-  """
-  Get transactions with their associated transfers and delegations, with optional filtering and sorting
-  """
-  transactions(
-    limit: PositiveInt = 50
-    offset: NonNegativeInt
-    sortBy: timestamp_const
-    sortOrder: queryInput_transactions_sortOrder = desc
-    fromDate: Int
-    toDate: Int
-    from: String
-    to: String
-    minAmount: String
-    maxAmount: String
-
-    """
-    Filter transactions by affected supply type. Can be: 'CEX', 'DEX', 'LENDING', or 'TOTAL'
-    """
-    affectedSupply: JSON
-
-    """Filter by transaction type. Can be one of: 'TRANSFER', 'DELEGATION'"""
-    includes: JSON
-  ): transactions_200_response
-
   """Get the last update time"""
   lastUpdate(chart: queryInput_lastUpdate_chart!): lastUpdate_200_response
 
@@ -149,6 +146,9 @@ type Query {
   Positive amounts signify net token transfers FROM <accountId>, whilst negative amounts refer to net transfers TO <accountId>
   """
   accountInteractions(days: queryInput_accountInteractions_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountInteractions_orderDirection = desc, accountId: String!, minAmount: String, maxAmount: String, orderBy: queryInput_accountInteractions_orderBy = count, address: String): accountInteractions_200_response
+
+  """Get transfers, with optional filtering and sorting"""
+  transfers(limit: Float = 10, offset: Float, sortBy: timestamp_const, sortOrder: queryInput_transfers_sortOrder = asc, from: String, to: String, fromDate: Float, fromValue: String, toValue: String, conditional: queryInput_transfers_conditional = and): transfers_200_response
 
   """Returns current governance parameters for this DAO"""
   dao: dao_200_response
@@ -1919,6 +1919,36 @@ enum queryInput_accountInteractions_orderDirection {
 enum queryInput_accountInteractions_orderBy {
   volume
   count
+}
+
+type transfers_200_response {
+  items: [query_transfers_items_items]!
+  totalCount: Float!
+}
+
+type query_transfers_items_items {
+  transactionHash: String!
+  daoId: String!
+  tokenId: String!
+  amount: String!
+  fromAccountId: String!
+  toAccountId: String!
+  timestamp: String!
+  logIndex: Float!
+  isCex: Boolean!
+  isDex: Boolean!
+  isLending: Boolean!
+  isTotal: Boolean!
+}
+
+enum queryInput_transfers_sortOrder {
+  asc
+  desc
+}
+
+enum queryInput_transfers_conditional {
+  and
+  or
 }
 
 type dao_200_response {
