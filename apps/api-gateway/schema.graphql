@@ -24,6 +24,10 @@ type Query {
   votingPowerHistorys(where: votingPowerHistoryFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votingPowerHistoryPage!
   delegation(transactionHash: String!, delegatorAccountId: String!, delegateAccountId: String!): delegation
   delegations(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): delegationPage!
+  transfer(transactionHash: String!, fromAccountId: String!, toAccountId: String!): transfer
+
+  """Get transfers, with optional filtering and sorting"""
+  transfers(limit: Float = 10, offset: Float, sortBy: queryInput_transfers_sortBy = timestamp, sortOrder: queryInput_transfers_sortOrder = asc, from: String, to: String, fromDate: Float, fromValue: String, toValue: String, conditional: queryInput_transfers_conditional = and): transfers_200_response
   votesOnchain(voterAccountId: String!, proposalId: String!): votesOnchain
   votesOnchains(where: votesOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votesOnchainPage!
   proposalsOnchain(id: String!): proposalsOnchain
@@ -146,9 +150,6 @@ type Query {
   Positive amounts signify net token transfers FROM <accountId>, whilst negative amounts refer to net transfers TO <accountId>
   """
   accountInteractions(days: queryInput_accountInteractions_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountInteractions_orderDirection = desc, accountId: String!, minAmount: String, maxAmount: String, orderBy: queryInput_accountInteractions_orderBy = count, address: String): accountInteractions_200_response
-
-  """Get transfers, with optional filtering and sorting"""
-  transfers(limit: Float = 10, offset: Float, sortBy: timestamp_const, sortOrder: queryInput_transfers_sortOrder = asc, from: String, to: String, fromDate: Float, fromValue: String, toValue: String, conditional: queryInput_transfers_conditional = and): transfers_200_response
 
   """Returns current governance parameters for this DAO"""
   dao: dao_200_response
@@ -1939,6 +1940,11 @@ type query_transfers_items_items {
   isDex: Boolean!
   isLending: Boolean!
   isTotal: Boolean!
+}
+
+enum queryInput_transfers_sortBy {
+  timestamp
+  amount
 }
 
 enum queryInput_transfers_sortOrder {
