@@ -1,4 +1,5 @@
 query BalanceHistory(
+  $address: String!
   $offset: Float = 0
   $limit: Float = 10
   $sortBy: queryInput_transfers_sortBy
@@ -7,9 +8,9 @@ query BalanceHistory(
   $to: String
   $fromValue: String
   $toValue: String
-  $conditional: queryInput_transfers_conditional
 ) {
   transfers(
+    address: $address
     sortBy: $sortBy
     sortOrder: $sortOrder
     limit: $limit
@@ -18,7 +19,6 @@ query BalanceHistory(
     to: $to
     fromValue: $fromValue
     toValue: $toValue
-    conditional: $conditional
   ) {
     items {
       timestamp

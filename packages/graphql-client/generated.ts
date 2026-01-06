@@ -159,7 +159,7 @@ export type Query = {
   transaction?: Maybe<Transaction>;
   /** Get transactions with their associated transfers and delegations, with optional filtering and sorting */
   transactions?: Maybe<Transactions_200_Response>;
-  /** Get transfers, with optional filtering and sorting */
+  /** Get transfers of a given address */
   transfers?: Maybe<Transfers_200_Response>;
   votesOnchain?: Maybe<VotesOnchain>;
   votesOnchains: VotesOnchainPage;
@@ -497,6 +497,7 @@ export type QueryTransactionsArgs = {
 
 
 export type QueryTransfersArgs = {
+  address: Scalars['String']['input'];
   conditional?: InputMaybe<QueryInput_Transfers_Conditional>;
   from?: InputMaybe<Scalars['String']['input']>;
   fromDate?: InputMaybe<Scalars['Float']['input']>;
@@ -2504,6 +2505,7 @@ export type VotingPowers_200_Response = {
 };
 
 export type BalanceHistoryQueryVariables = Exact<{
+  address: Scalars['String']['input'];
   offset?: InputMaybe<Scalars['Float']['input']>;
   limit?: InputMaybe<Scalars['Float']['input']>;
   sortBy?: InputMaybe<QueryInput_Transfers_SortBy>;
@@ -2512,13 +2514,13 @@ export type BalanceHistoryQueryVariables = Exact<{
   to?: InputMaybe<Scalars['String']['input']>;
   fromValue?: InputMaybe<Scalars['String']['input']>;
   toValue?: InputMaybe<Scalars['String']['input']>;
-  conditional?: InputMaybe<QueryInput_Transfers_Conditional>;
 }>;
 
 
 export type BalanceHistoryQuery = { __typename?: 'Query', transfers?: { __typename?: 'transfers_200_response', totalCount: number, items: Array<{ __typename?: 'query_transfers_items_items', timestamp: string, amount: string, fromAccountId: string, toAccountId: string, transactionHash: string } | null> } | null };
 
 export type BalanceHistoryGraphQueryVariables = Exact<{
+  address: Scalars['String']['input'];
   accountId: Scalars['String']['input'];
   sortBy?: InputMaybe<QueryInput_Transfers_SortBy>;
   sortOrder?: InputMaybe<QueryInput_Transfers_SortOrder>;
@@ -2880,8 +2882,9 @@ export type VotingPowersQuery = { __typename?: 'Query', votingPowers?: { __typen
 
 
 export const BalanceHistoryDocument = gql`
-    query BalanceHistory($offset: Float = 0, $limit: Float = 10, $sortBy: queryInput_transfers_sortBy, $sortOrder: queryInput_transfers_sortOrder, $from: String, $to: String, $fromValue: String, $toValue: String, $conditional: queryInput_transfers_conditional) {
+    query BalanceHistory($address: String!, $offset: Float = 0, $limit: Float = 10, $sortBy: queryInput_transfers_sortBy, $sortOrder: queryInput_transfers_sortOrder, $from: String, $to: String, $fromValue: String, $toValue: String) {
   transfers(
+    address: $address
     sortBy: $sortBy
     sortOrder: $sortOrder
     limit: $limit
@@ -2890,7 +2893,6 @@ export const BalanceHistoryDocument = gql`
     to: $to
     fromValue: $fromValue
     toValue: $toValue
-    conditional: $conditional
   ) {
     items {
       timestamp
@@ -2916,6 +2918,7 @@ export const BalanceHistoryDocument = gql`
  * @example
  * const { data, loading, error } = useBalanceHistoryQuery({
  *   variables: {
+ *      address: // value for 'address'
  *      offset: // value for 'offset'
  *      limit: // value for 'limit'
  *      sortBy: // value for 'sortBy'
@@ -2924,11 +2927,10 @@ export const BalanceHistoryDocument = gql`
  *      to: // value for 'to'
  *      fromValue: // value for 'fromValue'
  *      toValue: // value for 'toValue'
- *      conditional: // value for 'conditional'
  *   },
  * });
  */
-export function useBalanceHistoryQuery(baseOptions?: Apollo.QueryHookOptions<BalanceHistoryQuery, BalanceHistoryQueryVariables>) {
+export function useBalanceHistoryQuery(baseOptions: Apollo.QueryHookOptions<BalanceHistoryQuery, BalanceHistoryQueryVariables> & ({ variables: BalanceHistoryQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<BalanceHistoryQuery, BalanceHistoryQueryVariables>(BalanceHistoryDocument, options);
       }
@@ -2945,8 +2947,9 @@ export type BalanceHistoryLazyQueryHookResult = ReturnType<typeof useBalanceHist
 export type BalanceHistorySuspenseQueryHookResult = ReturnType<typeof useBalanceHistorySuspenseQuery>;
 export type BalanceHistoryQueryResult = Apollo.QueryResult<BalanceHistoryQuery, BalanceHistoryQueryVariables>;
 export const BalanceHistoryGraphDocument = gql`
-    query BalanceHistoryGraph($accountId: String!, $sortBy: queryInput_transfers_sortBy, $sortOrder: queryInput_transfers_sortOrder, $fromDate: Float) {
+    query BalanceHistoryGraph($address: String!, $accountId: String!, $sortBy: queryInput_transfers_sortBy, $sortOrder: queryInput_transfers_sortOrder, $fromDate: Float) {
   transfers(
+    address: $address
     from: $accountId
     to: $accountId
     fromDate: $fromDate
@@ -2978,6 +2981,7 @@ export const BalanceHistoryGraphDocument = gql`
  * @example
  * const { data, loading, error } = useBalanceHistoryGraphQuery({
  *   variables: {
+ *      address: // value for 'address'
  *      accountId: // value for 'accountId'
  *      sortBy: // value for 'sortBy'
  *      sortOrder: // value for 'sortOrder'

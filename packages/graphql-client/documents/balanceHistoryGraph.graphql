@@ -1,14 +1,15 @@
 query BalanceHistoryGraph(
+  $address: String!
   $accountId: String!
   $sortBy: queryInput_transfers_sortBy
   $sortOrder: queryInput_transfers_sortOrder
   $fromDate: Float
 ) {
   transfers(
+    address: $address
     from: $accountId
     to: $accountId
     fromDate: $fromDate
-    # conditional: queryInput_transfers_conditional
     sortBy: $sortBy
     sortOrder: $sortOrder
     limit: 1000

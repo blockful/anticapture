@@ -1,7 +1,7 @@
 import { z } from "@hono/zod-openapi";
 
 import { transfer } from "ponder:schema";
-import { isAddress } from "viem";
+import { Address, isAddress } from "viem";
 
 export type DBTransfer = typeof transfer.$inferSelect;
 
@@ -24,7 +24,9 @@ export const TransfersRequestSchema = z.object({
   conditional: z.enum(["and", "or"]).optional().default("or"),
 });
 
-export type TransfersRequest = z.infer<typeof TransfersRequestSchema>;
+export type TransfersRequest = z.infer<typeof TransfersRequestSchema> & {
+  address: Address;
+};
 
 export const TransferResponseSchema = z.object({
   transactionHash: z.string(),

@@ -1,21 +1,22 @@
 import { db } from "ponder:api";
+import { asc, desc } from "drizzle-orm";
+import { transfer } from "ponder:schema";
 
 import { DBTransfer, TransfersRequest } from "@/api/mappers";
-import { and, or } from "drizzle-orm";
 
 export class TransfersRepository {
   async getTransfers(req: TransfersRequest): Promise<DBTransfer[]> {
-    const conditional = req.conditional === "and" ? and : or;
+    const sortBy =
+      req.sortBy === "timestamp" ? transfer.timestamp : transfer.amount;
+    const orderBy = req.sortOrder === "desc" ? desc(sortBy) : asc(sortBy);
 
     return await db.query.transfer.findMany({
-      where: (transfer, { eq, gte, lte, and }) =>
+      where: (transfer, { eq, gte, lte, and, or }) =>
         and(
-          req.from || req.to
-            ? conditional(
-                req.from ? eq(transfer.fromAccountId, req.from) : undefined,
-                req.to ? eq(transfer.toAccountId, req.to) : undefined,
-              )
-            : undefined,
+          or(
+            eq(transfer.fromAccountId, req.from || req.address),
+            eq(transfer.toAccountId, req.to || req.address),
+          ),
           req.fromDate
             ? gte(transfer.timestamp, BigInt(req.fromDate))
             : undefined,
@@ -24,7 +25,7 @@ export class TransfersRepository {
         ),
       limit: req.limit,
       offset: req.offset,
-      orderBy: (transfer, { desc }) => [desc(transfer.timestamp)],
+      orderBy,
     });
   }
 }

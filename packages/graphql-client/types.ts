@@ -156,7 +156,7 @@ export type Query = {
   transaction?: Maybe<Transaction>;
   /** Get transactions with their associated transfers and delegations, with optional filtering and sorting */
   transactions?: Maybe<Transactions_200_Response>;
-  /** Get transfers, with optional filtering and sorting */
+  /** Get transfers of a given address */
   transfers?: Maybe<Transfers_200_Response>;
   votesOnchain?: Maybe<VotesOnchain>;
   votesOnchains: VotesOnchainPage;
@@ -494,6 +494,7 @@ export type QueryTransactionsArgs = {
 
 
 export type QueryTransfersArgs = {
+  address: Scalars['String']['input'];
   conditional?: InputMaybe<QueryInput_Transfers_Conditional>;
   from?: InputMaybe<Scalars['String']['input']>;
   fromDate?: InputMaybe<Scalars['Float']['input']>;
@@ -2501,6 +2502,7 @@ export type VotingPowers_200_Response = {
 };
 
 export type BalanceHistoryQueryVariables = Exact<{
+  address: Scalars['String']['input'];
   offset?: InputMaybe<Scalars['Float']['input']>;
   limit?: InputMaybe<Scalars['Float']['input']>;
   sortBy?: InputMaybe<QueryInput_Transfers_SortBy>;
@@ -2509,13 +2511,13 @@ export type BalanceHistoryQueryVariables = Exact<{
   to?: InputMaybe<Scalars['String']['input']>;
   fromValue?: InputMaybe<Scalars['String']['input']>;
   toValue?: InputMaybe<Scalars['String']['input']>;
-  conditional?: InputMaybe<QueryInput_Transfers_Conditional>;
 }>;
 
 
 export type BalanceHistoryQuery = { __typename?: 'Query', transfers?: { __typename?: 'transfers_200_response', totalCount: number, items: Array<{ __typename?: 'query_transfers_items_items', timestamp: string, amount: string, fromAccountId: string, toAccountId: string, transactionHash: string } | null> } | null };
 
 export type BalanceHistoryGraphQueryVariables = Exact<{
+  address: Scalars['String']['input'];
   accountId: Scalars['String']['input'];
   sortBy?: InputMaybe<QueryInput_Transfers_SortBy>;
   sortOrder?: InputMaybe<QueryInput_Transfers_SortOrder>;
