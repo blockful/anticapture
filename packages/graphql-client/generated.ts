@@ -77,8 +77,6 @@ export type PageInfo = {
 
 export type Query = {
   __typename?: 'Query';
-  GQL_transfer?: Maybe<Transfer>;
-  GQL_transfers: TransferPage;
   _meta?: Maybe<Meta>;
   account?: Maybe<Account>;
   accountBalance?: Maybe<AccountBalance>;
@@ -169,23 +167,6 @@ export type Query = {
   votingPowerVariations?: Maybe<VotingPowerVariations_200_Response>;
   /** Returns a list of voting power changes */
   votingPowers?: Maybe<VotingPowers_200_Response>;
-};
-
-
-export type QueryGql_TransferArgs = {
-  fromAccountId: Scalars['String']['input'];
-  toAccountId: Scalars['String']['input'];
-  transactionHash: Scalars['String']['input'];
-};
-
-
-export type QueryGql_TransfersArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  where?: InputMaybe<TransferFilter>;
 };
 
 

@@ -24,8 +24,6 @@ type Query {
   votingPowerHistorys(where: votingPowerHistoryFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votingPowerHistoryPage!
   delegation(transactionHash: String!, delegatorAccountId: String!, delegateAccountId: String!): delegation
   delegations(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): delegationPage!
-  GQL_transfer(transactionHash: String!, fromAccountId: String!, toAccountId: String!): transfer
-  GQL_transfers(where: transferFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): transferPage!
   votesOnchain(voterAccountId: String!, proposalId: String!): votesOnchain
   votesOnchains(where: votesOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votesOnchainPage!
   proposalsOnchain(id: String!): proposalsOnchain

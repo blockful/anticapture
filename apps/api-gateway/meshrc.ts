@@ -28,20 +28,8 @@ export default processConfig(
               },
               transforms: [
                 {
-                  rename: {
-                    renames: [
-                      {
-                        useRegExpForFields: true,
-                        from: {
-                          type: "Query",
-                          field: "(transfers?)",
-                        },
-                        to: {
-                          type: "Query",
-                          field: "GQL_$1",
-                        },
-                      },
-                    ],
+                  filterSchema: {
+                    filters: ["Query.!{transfer}", "Query.!{transfers}"],
                   },
                 },
               ],
