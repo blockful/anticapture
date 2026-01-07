@@ -53,6 +53,13 @@ const sizeClasses: Record<AvatarSize, string> = {
   lg: "size-12", // 48px
 };
 
+const imageSizeClasses: Record<AvatarSize, number> = {
+  xs: 16, // 16px
+  sm: 24, // 24px
+  md: 36, // 36px
+  lg: 48, // 48px
+};
+
 const iconSizes: Record<AvatarSize, number> = {
   xs: 12, // 12px
   sm: 16, // 16px
@@ -132,7 +139,7 @@ export const EnsAvatar = ({
     if (isLoadingName) {
       return (
         <SkeletonRow
-          parentClassName="flex animate-pulse bg-pink-500"
+          parentClassName="flex animate-pulse"
           className={cn(sizeClasses[size], variantClasses[variant])}
         />
       );
@@ -145,7 +152,8 @@ export const EnsAvatar = ({
           <Image
             src={finalImageUrl}
             alt={finalAlt}
-            fill
+            width={imageSizeClasses[size]}
+            height={imageSizeClasses[size]}
             className="object-cover"
             onError={handleImageError}
             {...imageProps}
