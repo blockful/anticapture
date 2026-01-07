@@ -5,11 +5,24 @@ import { cn } from "@/shared/utils/cn";
 // import { formatAddress } from "@/shared/utils/formatAddress";
 import { Address } from "viem";
 import Image, { ImageProps } from "next/image";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Blockies from "react-blockies";
 
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { formatAddress } from "@/shared/utils/formatAddress";
+
+// LRU cache for failed avatar addresses - prevents re-fetching on infinite scroll
+const FAILED_CACHE_MAX = 500;
+const failedAvatars = new Map<string, true>();
+
+const markAvatarFailed = (address: string) => {
+  if (failedAvatars.size >= FAILED_CACHE_MAX) {
+    // Remove oldest entry (first key in Map maintains insertion order)
+    const firstKey = failedAvatars.keys().next().value;
+    if (firstKey) failedAvatars.delete(firstKey);
+  }
+  failedAvatars.set(address, true);
+};
 
 export type AvatarSize = "xs" | "sm" | "md" | "lg";
 export type AvatarVariant = "square" | "rounded";
@@ -68,13 +81,15 @@ export const EnsAvatar = ({
   isDashed = false,
   ...imageProps
 }: EnsAvatarProps) => {
-  const [imageError, setImageError] = useState<boolean>(false);
-
   // Only fetch ENS data if we have an address and either we need imageUrl or fetchEnsName is true
   const shouldFetchEns = address && !imageUrl;
   const { data: ensData, isLoading: ensLoading } = useEnsData(
     shouldFetchEns ? address : null,
   );
+
+  // Check cache on mount - if already failed, skip image entirely
+  const alreadyFailed = useRef(address ? failedAvatars.has(address) : false);
+  const [imageError, setImageError] = useState(alreadyFailed.current);
 
   // Determine the final image URL to use
   const finalImageUrl =
@@ -82,6 +97,11 @@ export const EnsAvatar = ({
     (ensData?.avatar && ensData.avatar.includes("http")
       ? ensData.avatar
       : ensData?.avatar_url);
+
+  const handleImageError = () => {
+    if (address) markAvatarFailed(address);
+    setImageError(true);
+  };
 
   // Determine alt text
   const finalAlt = alt || ensData?.ens || address || "Avatar";
@@ -108,20 +128,17 @@ export const EnsAvatar = ({
     className,
   );
 
-  // Show skeleton when loading (either external loading prop or ENS data loading)
-  const isLoading = loading || ensLoading;
-
   const avatarElement = () => {
-    if (isLoading) {
+    if (isLoadingName) {
       return (
         <SkeletonRow
-          parentClassName="flex animate-pulse"
+          parentClassName="flex animate-pulse bg-pink-500"
           className={cn(sizeClasses[size], variantClasses[variant])}
         />
       );
     }
 
-    // Show image if available and no error
+    // Show image if available and not previously failed
     if (finalImageUrl && !imageError) {
       return (
         <div className={baseClasses}>
@@ -130,7 +147,7 @@ export const EnsAvatar = ({
             alt={finalAlt}
             fill
             className="object-cover"
-            onError={() => setImageError(true)}
+            onError={handleImageError}
             {...imageProps}
           />
         </div>
