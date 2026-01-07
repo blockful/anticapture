@@ -3,7 +3,6 @@
 import { useQuery, useQueries } from "@tanstack/react-query";
 import { Address, isAddress } from "viem";
 import { normalize } from "viem/ens";
-import { publicClient } from "@/shared/services/wallet/wallet";
 import axios from "axios";
 
 type EnsData = {
@@ -78,15 +77,30 @@ export const fetchEnsDataFromAddress = async ({
   };
 };
 
+type AddressRecordsResponse = {
+  records?: {
+    addresses?: {
+      "60"?: Address;
+    };
+  };
+  accelerationRequested?: boolean;
+  accelerationAttempted?: boolean;
+};
+
 export const fetchAddressFromEnsName = async ({
   ensName,
 }: {
   ensName: `${string}.eth`;
 }): Promise<Address | null> => {
-  const address = await publicClient.getEnsAddress({
-    name: normalize(ensName),
-  });
-  return address || null;
+  try {
+    const normalizedName = normalize(ensName);
+    const url = `https://api.alpha.ensnode.io/api/resolve/records/${normalizedName}?addresses=60&accelerate=true`;
+    const response = await axios.get<AddressRecordsResponse>(url);
+    return response.data.records?.addresses?.["60"] || null;
+  } catch (error) {
+    console.warn(`Failed to fetch address for ${ensName}:`, error);
+    return null;
+  }
 };
 
 /**
