@@ -4,6 +4,7 @@ import { useQuery, useQueries } from "@tanstack/react-query";
 import { Address, isAddress } from "viem";
 import { normalize } from "viem/ens";
 import { publicClient } from "@/shared/services/wallet/wallet";
+import axios from "axios";
 
 type EnsData = {
   address: Address;
@@ -64,13 +65,9 @@ export const fetchEnsDataFromAddress = async ({
   try {
     // Fetch primary ENS name
     const primaryNameUrl = `https://api.alpha.ensnode.io/api/resolve/primary-name/${address}/1?accelerate=true`;
-    const primaryNameResponse = await fetch(primaryNameUrl);
-
-    if (primaryNameResponse.ok) {
-      const primaryNameData: PrimaryNameResponse =
-        await primaryNameResponse.json();
-      ensName = primaryNameData.name || null;
-    }
+    const primaryNameResponse =
+      await axios.get<PrimaryNameResponse>(primaryNameUrl);
+    ensName = primaryNameResponse.data.name || null;
   } catch (error) {
     // Silently fail and return empty data
     console.warn(`Failed to fetch ENS data for ${address}:`, error);
