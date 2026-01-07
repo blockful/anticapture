@@ -1,6 +1,9 @@
-import { SVGProps } from "react";
+import { DaoIconProps } from "@/shared/components/icons/types";
 
-export const CompoundIcon = (props: SVGProps<SVGSVGElement>) => {
+export const CompoundIcon = ({
+  showBackground = true,
+  ...props
+}: DaoIconProps) => {
   return (
     // TODO: Compound
     <svg
@@ -11,7 +14,7 @@ export const CompoundIcon = (props: SVGProps<SVGSVGElement>) => {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <rect width="40" height="40" fill="#070A0E" />
+      {showBackground && <rect width="40" height="40" fill="#070A0E" />}
       <path
         fillRule="evenodd"
         clipRule="evenodd"

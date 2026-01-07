@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import { parseAsStringEnum, useQueryState } from "nuqs";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { Address, formatUnits, zeroAddress } from "viem";
@@ -18,6 +19,8 @@ import { Table } from "@/shared/components/design-system/table/Table";
 import { Button } from "@/shared/components";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
 import daoConfig from "@/shared/dao-config";
+import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 
 interface TokenHolderTableData {
   address: Address;
@@ -34,9 +37,13 @@ export const TokenHolders = ({
   days: TimeInterval;
   daoId: DaoIdEnum;
 }) => {
-  const [selectedTokenHolder, setSelectedTokenHolder] = useState<string>("");
-  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
-  const [currentAddressFilter, setCurrentAddressFilter] = useState<string>("");
+  const [drawerAddress, setDrawerAddress] = useQueryState("drawerAddress");
+  const [currentAddressFilter, setCurrentAddressFilter] =
+    useQueryState("address");
+  const [sortOrder, setSortOrder] = useQueryState(
+    "sort",
+    parseAsStringEnum(["desc", "asc"]).withDefault("desc"),
+  );
   const pageLimit: number = 15;
   const { isMobile } = useScreenSize();
   const {
@@ -44,7 +51,7 @@ export const TokenHolders = ({
   } = daoConfig[daoId];
 
   const handleAddressFilterApply = (address: string | undefined) => {
-    setCurrentAddressFilter(address || "");
+    setCurrentAddressFilter(address || null);
   };
 
   const {
@@ -64,52 +71,46 @@ export const TokenHolders = ({
     days: days,
   });
 
-  const handleOpenDrawer = (address: string) => {
-    setSelectedTokenHolder(address);
-  };
+  const tableData: TokenHolderTableData[] = useMemo(() => {
+    const calculateVariation = (
+      currentBalance: string,
+      historicalBalance: string | undefined,
+    ): { percentageChange: number; absoluteChange: number } | null => {
+      if (!historicalBalance) return null;
 
-  const handleCloseDrawer = () => {
-    setSelectedTokenHolder("");
-  };
+      try {
+        const current =
+          token === "ERC20"
+            ? Number(formatUnits(BigInt(currentBalance), 18))
+            : Number(currentBalance);
+        const historical =
+          token === "ERC20"
+            ? Number(formatUnits(BigInt(historicalBalance), 18))
+            : Number(historicalBalance);
 
-  const calculateVariation = (
-    currentBalance: string,
-    historicalBalance: string | undefined,
-  ): { percentageChange: number; absoluteChange: number } | null => {
-    if (!historicalBalance) return null;
+        const absoluteChange = current - historical;
 
-    try {
-      const current =
-        token === "ERC20"
-          ? Number(formatUnits(BigInt(currentBalance), 18))
-          : Number(currentBalance);
-      const historical =
-        token === "ERC20"
-          ? Number(formatUnits(BigInt(historicalBalance), 18))
-          : Number(historicalBalance);
+        if (historical === 0) {
+          return {
+            percentageChange: 9999,
+            absoluteChange: Number(absoluteChange.toFixed(2)),
+          };
+        }
 
-      if (historical === 0) return { percentageChange: 0, absoluteChange: 0 };
+        const percentageChange = ((current - historical) / historical) * 100;
 
-      // Calculate absolute change in tokens
-      const absoluteChange = current - historical;
-      // Calculate percentage variation
-      const percentageChange = ((current - historical) / historical) * 100;
-
-      return {
-        percentageChange: Number(percentageChange.toFixed(2)),
-        absoluteChange: Number(absoluteChange.toFixed(2)),
-      };
-    } catch (error) {
-      console.error("Error calculating variation:", error);
-      return { percentageChange: 0, absoluteChange: 0 };
-    }
-  };
-
-  const tableData: TokenHolderTableData[] = useMemo(
-    () =>
+        return {
+          percentageChange: Number(percentageChange.toFixed(2)),
+          absoluteChange: Number(absoluteChange.toFixed(2)),
+        };
+      } catch (error) {
+        console.error("Error calculating variation:", error);
+        return { percentageChange: 0, absoluteChange: 0 };
+      }
+    };
+    return (
       tokenHoldersData?.map((holder) => {
         const historicalBalance = historicalBalancesCache.get(holder.accountId);
-
         const variation = calculateVariation(holder.balance, historicalBalance);
 
         return {
@@ -122,9 +123,9 @@ export const TokenHolders = ({
           variation,
           delegate: holder.delegate as Address,
         };
-      }) || [],
-    [tokenHoldersData, historicalBalancesCache, token],
-  );
+      }) || []
+    );
+  }, [tokenHoldersData, historicalBalancesCache, token]);
 
   const tokenHoldersColumns: ColumnDef<TokenHolderTableData>[] = [
     {
@@ -134,7 +135,7 @@ export const TokenHolders = ({
           <span>Address</span>
           <AddressFilter
             onApply={handleAddressFilterApply}
-            currentFilter={currentAddressFilter}
+            currentFilter={currentAddressFilter || undefined}
             className="ml-2"
           />
         </div>
@@ -158,7 +159,7 @@ export const TokenHolders = ({
         const addressValue: string = row.getValue("address");
 
         return (
-          <div className="group flex w-full items-center gap-2">
+          <div className="group flex w-full items-center">
             <EnsAvatar
               address={addressValue as Address}
               size="sm"
@@ -167,14 +168,21 @@ export const TokenHolders = ({
               nameClassName="[tr:hover_&]:border-primary"
             />
             {!isMobile && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="opacity-0 transition-opacity [tr:hover_&]:opacity-100"
-              >
-                <Plus className="size-3.5" />
-                <span className="text-sm font-medium">Details</span>
-              </Button>
+              <div className="flex items-center opacity-0 transition-opacity [tr:hover_&]:opacity-100">
+                <CopyAndPasteButton
+                  textToCopy={addressValue as `0x${string}`}
+                  customTooltipText={{
+                    default: "Copy address",
+                    copied: "Address copied!",
+                  }}
+                  className="mx-1 p-1"
+                  iconSize="md"
+                />
+                <Button variant="outline" size="sm">
+                  <Plus className="size-3.5" />
+                  <span className="text-sm font-medium">Details</span>
+                </Button>
+              </div>
             )}
           </div>
         );
@@ -185,7 +193,6 @@ export const TokenHolders = ({
     },
     {
       accessorKey: "balance",
-      size: 160,
       header: ({ column }) => {
         const handleSortToggle = () => {
           const newSortOrder = sortOrder === "desc" ? "asc" : "desc";
@@ -235,17 +242,16 @@ export const TokenHolders = ({
         );
       },
       meta: {
-        columnClassName: "w-48",
+        columnClassName: "w-20",
       },
     },
     {
       accessorKey: "variation",
       header: () => (
-        <div className="text-table-header flex w-full items-center justify-start">
-          Variation ({daoId})
+        <div className="text-table-header flex w-full items-center justify-center">
+          Change ({daoId})
         </div>
       ),
-      size: 250,
       cell: ({ row }) => {
         const addr = row.original.address;
 
@@ -258,7 +264,7 @@ export const TokenHolders = ({
 
         if (isHistoricalLoadingFor(addr) || loading) {
           return (
-            <div className="flex w-full items-center justify-start">
+            <div className="flex w-full items-center justify-center">
               <SkeletonRow
                 className="h-4 w-16"
                 parentClassName="flex animate-pulse"
@@ -268,19 +274,19 @@ export const TokenHolders = ({
         }
 
         return (
-          <div className="flex w-full items-center justify-start gap-2 text-sm">
+          <div className="flex w-full items-center justify-center gap-2 text-sm">
+            {(variation?.percentageChange || 0) < 0 ? "-" : ""}
             {formatNumberUserReadable(Math.abs(variation?.absoluteChange || 0))}
             <Percentage value={variation?.percentageChange || 0} />
           </div>
         );
       },
       meta: {
-        columnClassName: "w-72",
+        columnClassName: "w-80",
       },
     },
     {
       accessorKey: "delegate",
-      size: 160,
       header: () => (
         <div className="text-table-header flex w-full items-center justify-start">
           Delegate
@@ -306,94 +312,25 @@ export const TokenHolders = ({
 
         return (
           <div className="flex items-center gap-1.5">
-            <EnsAvatar
-              address={delegate as Address}
-              size="sm"
-              variant="rounded"
-            />
+            {delegate === zeroAddress ? (
+              <div className="flex items-center">
+                <BadgeStatus variant={"error"}>{"Not delegated"}</BadgeStatus>
+              </div>
+            ) : (
+              <EnsAvatar
+                address={delegate as Address}
+                size="sm"
+                variant="rounded"
+              />
+            )}
           </div>
         );
       },
       meta: {
-        columnClassName: "w-72",
+        columnClassName: "w-80",
       },
     },
   ];
-
-  if (loading) {
-    return (
-      <div className="w-full text-white">
-        <div className="flex flex-col gap-2">
-          <Table
-            size="sm"
-            columns={tokenHoldersColumns}
-            data={
-              Array.from({ length: 12 }, () => ({
-                address: zeroAddress,
-                type: "EOA" as string | undefined,
-                balance: 0,
-                variation: { percentageChange: 0, absoluteChange: 0 },
-                delegate: zeroAddress,
-              })) as TokenHolderTableData[]
-            }
-            withDownloadCSV={true}
-            onRowClick={() => {}}
-            className="h-[400px]"
-            wrapperClassName="h-[450px]"
-          />
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="w-full text-white">
-        <div className="flex flex-col gap-2">
-          <div className="md:border-light-dark relative w-full overflow-auto md:rounded-lg md:border">
-            <table className="bg-surface-background text-secondary md:bg-surface-default w-full table-auto caption-bottom text-sm">
-              <thead className="text-secondary sm:bg-surface-contrast text-xs font-semibold sm:font-medium [&_th:first-child]:border-r [&_th:first-child]:border-white/10 md:[&_th]:border-none [&_tr]:border-b">
-                <tr className="border-light-dark">
-                  {tokenHoldersColumns.map((column, index) => (
-                    <th
-                      key={index}
-                      className="text-left [&:has([role=checkbox])]:pr-0"
-                      style={{
-                        width: column.size ? column.size : "auto",
-                      }}
-                    >
-                      {typeof column.header === "function"
-                        ? column.header({
-                            column: {
-                              getIsSorted: () => false,
-                              toggleSorting: () => {},
-                            },
-                          } as Parameters<typeof column.header>[0])
-                        : column.header}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="scrollbar-none [&_tr:last-child]:border-0">
-                <tr className="hover:bg-surface-contrast transition-colors duration-300">
-                  <td
-                    colSpan={tokenHoldersColumns.length}
-                    className="bg-light h-[410px] p-0 text-center"
-                  >
-                    <div className="flex h-full items-center justify-center">
-                      <div className="text-error">
-                        {/* Error loading token holders: {error.message} */}
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <>
@@ -401,23 +338,24 @@ export const TokenHolders = ({
         <div className="flex flex-col gap-2">
           <Table
             columns={tokenHoldersColumns}
-            data={tableData}
+            data={loading ? Array(12).fill({}) : tableData}
             hasMore={pagination.hasNextPage}
             isLoadingMore={fetchingMore}
             onLoadMore={fetchNextPage}
-            onRowClick={(row) => handleOpenDrawer(row.address as Address)}
+            onRowClick={(row) => setDrawerAddress(row.address as Address)}
             size="sm"
             withDownloadCSV={true}
             wrapperClassName="h-[450px]"
             className="h-[400px]"
+            error={error}
           />
         </div>
       </div>
       <HoldersAndDelegatesDrawer
-        isOpen={!!selectedTokenHolder}
-        onClose={handleCloseDrawer}
+        isOpen={!!drawerAddress}
+        onClose={() => setDrawerAddress(null)}
         entityType="tokenHolder"
-        address={selectedTokenHolder || ""}
+        address={drawerAddress || ""}
         daoId={daoId}
       />
     </>
