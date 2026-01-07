@@ -2,30 +2,11 @@ import type { StorybookConfig } from "@storybook/nextjs";
 
 import { join, dirname } from "path";
 import { resolve } from "path";
-import { readFileSync, existsSync } from "fs";
+import dotenv from "dotenv";
 
-// Load environment variables from .env. local manually
-// This ensures FIGMA_TOKEN is available to Storybook
-// (dotenv might not be available, so we load manually)
-const envPath = resolve(__dirname, "../.env.local");
-if (existsSync(envPath)) {
-  try {
-    const envFile = readFileSync(envPath, "utf-8");
-    envFile.split("\n").forEach((line) => {
-      const match = line.match(/^([^=:#]+)=(.*)$/);
-      if (match) {
-        const key = match[1]. trim();
-        const value = match[2].trim().replace(/^["']|["']$/g, "");
-        if (! process.env[key]) {
-          process.env[key] = value;
-        }
-      }
-    });
-  } catch (error) {
-    // Failed to parse .env.local, log quietly
-    console.info("ℹ️  Could not parse .env.local file");
-  }
-}
+dotenv.config({
+  path: resolve(__dirname, "../.env.local"),
+});
 
 /**
  * This function is used to resolve the absolute path of a package.
@@ -69,7 +50,7 @@ const config: StorybookConfig = {
     };
 
     // Inject FIGMA_TOKEN into browser bundle for Storybook addon-designs
-    if (process.env. FIGMA_TOKEN) {
+    if (process.env.FIGMA_TOKEN) {
       // Token exists - inject it into the bundle
       const webpack = require("webpack");
       config.plugins = config.plugins || [];
