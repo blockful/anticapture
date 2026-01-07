@@ -18,16 +18,6 @@ type PrimaryNameResponse = {
   accelerationAttempted?: boolean;
 };
 
-type RecordsResponse = {
-  records?: {
-    texts?: {
-      avatar?: string;
-    };
-  };
-  accelerationRequested?: boolean;
-  accelerationAttempted?: boolean;
-};
-
 /**
  * Hook to fetch ENS data for a single address
  * @param address - Ethereum address (e.g., "0x123...")
@@ -61,7 +51,6 @@ export const fetchEnsDataFromAddress = async ({
   address: Address;
 }): Promise<EnsData> => {
   let ensName: string | null = null;
-  let avatarUrl: string | null = null;
 
   if (!isAddress(address)) {
     return {
@@ -82,22 +71,6 @@ export const fetchEnsDataFromAddress = async ({
         await primaryNameResponse.json();
       ensName = primaryNameData.name || null;
     }
-
-    // Fetch avatar if we have an ENS name
-    if (ensName) {
-      try {
-        const recordsUrl = `https://api.alpha.ensnode.io/api/resolve/records/${ensName}?texts=avatar&accelerate=true`;
-        const recordsResponse = await fetch(recordsUrl);
-
-        if (recordsResponse.ok) {
-          const recordsData: RecordsResponse = await recordsResponse.json();
-          avatarUrl = recordsData.records?.texts?.avatar || null;
-        }
-      } catch (error) {
-        // Silently fail avatar fetch, but continue with ENS name
-        console.warn(`Failed to fetch avatar for ${ensName}:`, error);
-      }
-    }
   } catch (error) {
     // Silently fail and return empty data
     console.warn(`Failed to fetch ENS data for ${address}:`, error);
@@ -105,9 +78,9 @@ export const fetchEnsDataFromAddress = async ({
 
   return {
     address: address,
-    avatar_url: avatarUrl,
+    avatar_url: `https://metadata.ens.domains/mainnet/avatar/${ensName}`,
     ens: ensName || "",
-    avatar: avatarUrl,
+    avatar: `https://metadata.ens.domains/mainnet/avatar/${ensName}`,
   };
 };
 
