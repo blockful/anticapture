@@ -130,21 +130,6 @@ const accountBalanceService = new BalanceVariationsService(
   accountInteractionRepo,
 );
 
-const tokenPriceProvider = new CoingeckoService(
-  env.COINGECKO_API_URL,
-  env.COINGECKO_API_KEY,
-  env.DAO_ID,
-);
-const treasuryService = createTreasuryService(
-  new TreasuryRepository(),
-  tokenPriceProvider,
-  env.DEFILLAMA_API_URL,
-  env.TREASURY_PROVIDER_PROTOCOL_ID,
-  env.DUNE_API_URL,
-  env.DUNE_API_KEY,
-);
-treasury(app, treasuryService);
-
 const tokenPriceClient =
   env.DAO_ID === DaoIdEnum.NOUNS
     ? new NFTPriceService(
@@ -157,6 +142,16 @@ const tokenPriceClient =
         env.COINGECKO_API_KEY,
         env.DAO_ID,
       );
+
+const treasuryService = createTreasuryService(
+  new TreasuryRepository(),
+  tokenPriceClient,
+  env.DEFILLAMA_API_URL,
+  env.TREASURY_PROVIDER_PROTOCOL_ID,
+  env.DUNE_API_URL,
+  env.DUNE_API_KEY,
+);
+treasury(app, treasuryService);
 
 tokenHistoricalData(app, tokenPriceClient);
 token(
