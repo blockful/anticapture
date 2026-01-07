@@ -40,6 +40,21 @@ export const useEnsData = (address: Address | null | undefined) => {
 };
 
 /**
+ * Checks if an ENS avatar exists using a HEAD request (no body download)
+ * @param ensName - ENS name to check avatar for
+ * @returns Promise resolving to avatar URL if exists, null otherwise
+ */
+const checkAvatarExists = async (ensName: string): Promise<string | null> => {
+  const avatarUrl = `https://metadata.ens.domains/mainnet/avatar/${ensName}`;
+  try {
+    const response = await axios.head(avatarUrl);
+    return response.status === 200 ? avatarUrl : null;
+  } catch {
+    return null;
+  }
+};
+
+/**
  * Fetches ENS data using ENS Node API for a single address
  * @param address - Ethereum address
  * @returns Promise resolving to EnsData
@@ -70,10 +85,13 @@ export const fetchEnsDataFromAddress = async ({
     console.warn(`Failed to fetch ENS data for ${address}:`, error);
   }
 
+  // Check if avatar exists (HEAD request, no body download)
+  const avatar = ensName ? await checkAvatarExists(ensName) : null;
+
   return {
     address: address,
     ens: ensName || "",
-    avatar: `https://metadata.ens.domains/mainnet/avatar/${ensName}`,
+    avatar,
   };
 };
 
