@@ -13,10 +13,10 @@ export const SupporterBadge = ({ address }: { address: Address }) => {
         "transition-all duration-200 hover:bg-gray-700",
       )}
     >
-      {ensData?.avatar_url ? (
+      {ensData?.avatar ? (
         <div className="bg-foreground size-4 overflow-hidden rounded-full">
           <Image
-            src={ensData.avatar_url}
+            src={ensData.avatar}
             alt={ensData?.ens ?? address}
             width={16}
             height={16}

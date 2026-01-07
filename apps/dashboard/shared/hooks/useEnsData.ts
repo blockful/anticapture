@@ -8,7 +8,6 @@ import axios from "axios";
 
 type EnsData = {
   address: Address;
-  avatar_url: string | null;
   ens: string;
   avatar: string | null;
 };
@@ -56,7 +55,6 @@ export const fetchEnsDataFromAddress = async ({
   if (!isAddress(address)) {
     return {
       address: address,
-      avatar_url: null,
       ens: "",
       avatar: null,
     };
@@ -75,7 +73,6 @@ export const fetchEnsDataFromAddress = async ({
 
   return {
     address: address,
-    avatar_url: `https://metadata.ens.domains/mainnet/avatar/${ensName}`,
     ens: ensName || "",
     avatar: `https://metadata.ens.domains/mainnet/avatar/${ensName}`,
   };

@@ -99,11 +99,7 @@ export const EnsAvatar = ({
   const [imageError, setImageError] = useState(alreadyFailed.current);
 
   // Determine the final image URL to use
-  const finalImageUrl =
-    imageUrl ||
-    (ensData?.avatar && ensData.avatar.includes("http")
-      ? ensData.avatar
-      : ensData?.avatar_url);
+  const finalImageUrl = imageUrl || ensData?.avatar;
 
   const handleImageError = () => {
     if (address) markAvatarFailed(address);
