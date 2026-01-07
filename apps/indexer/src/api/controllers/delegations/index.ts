@@ -27,7 +27,7 @@ import {
 
 // (where: { delegatorAccountId: $delegator })
 
-export function delegations(app: Hono) {
+export function delegations(app: Hono, service: DelegationsService) {
   app.openapi(
     createRoute({
       method: "get",

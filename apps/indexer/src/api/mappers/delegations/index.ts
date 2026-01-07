@@ -36,6 +36,8 @@ export const DelegationsRequestSchema = z.object({
   orderDirection: z.string().optional(),
 });
 
+export type DelegationsRequest = z.infer<typeof DelegationsRequestSchema>;
+
 // items{
 //     delegatorAccountId
 //     timestamp
@@ -66,3 +68,5 @@ export const DelegationsResponseSchema = z.object({
   skip: z.number(),
   limit: z.number(),
 });
+
+export type DelegationsResponse = z.infer<typeof DelegationsResponseSchema>;
