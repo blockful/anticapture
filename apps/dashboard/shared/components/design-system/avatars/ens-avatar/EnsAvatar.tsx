@@ -2,27 +2,13 @@
 
 import { useEnsData } from "@/shared/hooks/useEnsData";
 import { cn } from "@/shared/utils/cn";
-// import { formatAddress } from "@/shared/utils/formatAddress";
 import { Address } from "viem";
 import Image, { ImageProps } from "next/image";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import Blockies from "react-blockies";
 
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { formatAddress } from "@/shared/utils/formatAddress";
-
-// LRU cache for failed avatar addresses - prevents re-fetching on infinite scroll
-const FAILED_CACHE_MAX = 500;
-const failedAvatars = new Map<string, true>();
-
-const markAvatarFailed = (address: string) => {
-  if (failedAvatars.size >= FAILED_CACHE_MAX) {
-    // Remove oldest entry (first key in Map maintains insertion order)
-    const firstKey = failedAvatars.keys().next().value;
-    if (firstKey) failedAvatars.delete(firstKey);
-  }
-  failedAvatars.set(address, true);
-};
 
 export type AvatarSize = "xs" | "sm" | "md" | "lg";
 export type AvatarVariant = "square" | "rounded";
@@ -94,15 +80,12 @@ export const EnsAvatar = ({
     shouldFetchEns ? address : null,
   );
 
-  // Check cache on mount - if already failed, skip image entirely
-  const alreadyFailed = useRef(address ? failedAvatars.has(address) : false);
-  const [imageError, setImageError] = useState(alreadyFailed.current);
+  const [imageError, setImageError] = useState(false);
 
   // Determine the final image URL to use
   const finalImageUrl = imageUrl || ensData?.avatar;
 
   const handleImageError = () => {
-    if (address) markAvatarFailed(address);
     setImageError(true);
   };
 
