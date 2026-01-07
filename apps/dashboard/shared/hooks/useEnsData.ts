@@ -12,6 +12,22 @@ type EnsData = {
   avatar: string | null;
 };
 
+type PrimaryNameResponse = {
+  name?: string;
+  accelerationRequested?: boolean;
+  accelerationAttempted?: boolean;
+};
+
+type RecordsResponse = {
+  records?: {
+    texts?: {
+      avatar?: string;
+    };
+  };
+  accelerationRequested?: boolean;
+  accelerationAttempted?: boolean;
+};
+
 /**
  * Hook to fetch ENS data for a single address
  * @param address - Ethereum address (e.g., "0x123...")
@@ -35,7 +51,7 @@ export const useEnsData = (address: Address | null | undefined) => {
 };
 
 /**
- * Fetches ENS data using viem for a single address
+ * Fetches ENS data using ENS Node API for a single address
  * @param address - Ethereum address
  * @returns Promise resolving to EnsData
  */
@@ -47,13 +63,44 @@ export const fetchEnsDataFromAddress = async ({
   let ensName: string | null = null;
   let avatarUrl: string | null = null;
 
-  if (isAddress(address)) {
-    ensName = await publicClient.getEnsName({ address });
+  if (!isAddress(address)) {
+    return {
+      address: address,
+      avatar_url: null,
+      ens: "",
+      avatar: null,
+    };
   }
 
-  // Get avatar URL if we have an ENS name
-  if (ensName) {
-    avatarUrl = await publicClient.getEnsAvatar({ name: normalize(ensName) });
+  try {
+    // Fetch primary ENS name
+    const primaryNameUrl = `https://api.alpha.ensnode.io/api/resolve/primary-name/${address}/1?accelerate=true`;
+    const primaryNameResponse = await fetch(primaryNameUrl);
+
+    if (primaryNameResponse.ok) {
+      const primaryNameData: PrimaryNameResponse =
+        await primaryNameResponse.json();
+      ensName = primaryNameData.name || null;
+    }
+
+    // Fetch avatar if we have an ENS name
+    if (ensName) {
+      try {
+        const recordsUrl = `https://api.alpha.ensnode.io/api/resolve/records/${ensName}?texts=avatar&accelerate=true`;
+        const recordsResponse = await fetch(recordsUrl);
+
+        if (recordsResponse.ok) {
+          const recordsData: RecordsResponse = await recordsResponse.json();
+          avatarUrl = recordsData.records?.texts?.avatar || null;
+        }
+      } catch (error) {
+        // Silently fail avatar fetch, but continue with ENS name
+        console.warn(`Failed to fetch avatar for ${ensName}:`, error);
+      }
+    }
+  } catch (error) {
+    // Silently fail and return empty data
+    console.warn(`Failed to fetch ENS data for ${address}:`, error);
   }
 
   return {
