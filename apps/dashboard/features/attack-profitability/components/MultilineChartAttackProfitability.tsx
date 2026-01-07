@@ -136,9 +136,11 @@ export const MultilineChartAttackProfitability = ({
             ).map((datasetpoint) => ({
               ...datasetpoint,
               quorum:
-                datasetpoint.quorum *
-                (daoConfig?.attackProfitability?.dynamicQuorum?.percentage ??
-                  0),
+                datasetpoint.quorum !== null
+                  ? datasetpoint.quorum *
+                    (daoConfig?.attackProfitability?.dynamicQuorum
+                      ?.percentage ?? 0)
+                  : null,
             }))
           : quorumValue
             ? normalizeDataset(

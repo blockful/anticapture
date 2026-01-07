@@ -30,10 +30,13 @@ export function normalizeDataset(
     {} as Record<number, number>,
   );
 
-  // Multiply using the exact timestamp's multiplier (may be undefined if missing)
+  // Multiply using the exact timestamp's multiplier
   return [...tokenPrices].reverse().map(({ timestamp, price }) => ({
     date: timestamp,
-    [key]: Number(price) * (multipliersByTs[timestamp] ?? 0),
+    [key]:
+      multipliersByTs[timestamp] !== undefined
+        ? Number(price) * multipliersByTs[timestamp]
+        : null,
   }));
 }
 

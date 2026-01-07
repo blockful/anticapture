@@ -23,7 +23,7 @@ export type PriceEntry = { timestamp: number; price: string };
 
 export interface MultilineChartDataSetPoint {
   date: number;
-  [key: string]: number;
+  [key: string]: number | null;
 }
 
 export interface ChartDataSetPoint {
