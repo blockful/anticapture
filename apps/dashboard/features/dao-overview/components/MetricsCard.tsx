@@ -2,6 +2,7 @@ import { DaoOverviewMetricCard } from "@/features/dao-overview/components/DaoOve
 import { DaoConfiguration } from "@/shared/dao-config/types";
 import {
   formatBlocksToUserReadable,
+  formatNumberUserReadable,
   formatSecondsToReadable,
 } from "@/shared/utils";
 import { useDaoOverviewData } from "@/features/dao-overview/hooks/useDaoOverviewData";
@@ -76,7 +77,7 @@ export const MetricsCard = ({ daoId, daoConfig }: MetricsCardProps) => {
 
       <DaoOverviewMetricCard
         title="Quorum"
-        text={`${quorumValueFormatted} ${daoId}`}
+        text={`${formatNumberUserReadable(quorumValueFormatted)} ${daoId}`}
         subText={
           <span>
             Only{" "}
