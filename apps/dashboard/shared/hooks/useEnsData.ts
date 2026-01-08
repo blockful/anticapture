@@ -17,19 +17,17 @@ type PrimaryNameResponse = {
   accelerationAttempted?: boolean;
 };
 
+const ETH_COIN_TYPE = "60"; // ETH
+
 /**
  * Hook to fetch ENS data for a single address
  * @param address - Ethereum address (e.g., "0x123...")
  * @returns Object containing ENS data, error, and loading state
  */
-export const useEnsData = (
-  address: Address | null | undefined,
-  chainId: number,
-) => {
+export const useEnsData = (address: Address | null | undefined) => {
   const { data, error, isLoading } = useQuery<EnsData>({
     queryKey: ["ensData", address ?? null],
-    queryFn: () =>
-      fetchEnsDataFromAddress({ address: address!, chainId: chainId }),
+    queryFn: () => fetchEnsDataFromAddress({ address: address! }),
     enabled: !!address,
     refetchOnWindowFocus: false,
     retry: false,
@@ -65,16 +63,14 @@ const checkAvatarExists = async (ensName: string): Promise<string | null> => {
  */
 export const fetchEnsDataFromAddress = async ({
   address,
-  chainId = 1,
 }: {
   address: Address;
-  chainId: number;
 }): Promise<EnsData> => {
   let ensName: string | null = null;
 
   try {
     // Fetch primary ENS name
-    const primaryNameUrl = `https://api.alpha.ensnode.io/api/resolve/primary-name/${address}/${chainId}?accelerate=true`;
+    const primaryNameUrl = `https://api.alpha.ensnode.io/api/resolve/primary-name/${address}/1?accelerate=true`;
     const primaryNameResponse =
       await axios.get<PrimaryNameResponse>(primaryNameUrl);
     ensName = primaryNameResponse.data.name || null;
@@ -103,16 +99,14 @@ type AddressRecordsResponse = {
 
 export const fetchAddressFromEnsName = async ({
   ensName,
-  coinType = "60",
 }: {
   ensName: `${string}.eth`;
-  coinType: string;
 }): Promise<Address | null> => {
   try {
     const normalizedName = normalize(ensName);
     const url = `https://api.alpha.ensnode.io/api/resolve/records/${normalizedName}?addresses=60&accelerate=true`;
     const response = await axios.get<AddressRecordsResponse>(url);
-    return response.data.records?.addresses?.[coinType] || null;
+    return response.data.records?.addresses?.[ETH_COIN_TYPE] || null;
   } catch (error) {
     console.warn(`Failed to fetch address for ${ensName}:`, error);
     return null;
@@ -124,13 +118,13 @@ export const fetchAddressFromEnsName = async ({
  * @param addresses - Array of Ethereum addresses
  * @returns Object containing a map of addresses to ENS data, error, and loading state
  */
-export const useMultipleEnsData = (addresses: Address[], chainId: number) => {
+export const useMultipleEnsData = (addresses: Address[]) => {
   // Deduplicate addresses to avoid unnecessary queries
   const uniqueAddresses = Array.from(new Set(addresses));
   const queries = useQueries({
     queries: uniqueAddresses.map((address) => ({
       queryKey: ["addressEns", address],
-      queryFn: () => fetchEnsDataFromAddress({ address, chainId }),
+      queryFn: () => fetchEnsDataFromAddress({ address }),
       refetchOnWindowFocus: false,
       retry: false,
       staleTime: 1000 * 60 * 60 * 24, // Consider data fresh for 24 hours

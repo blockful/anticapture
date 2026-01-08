@@ -14,7 +14,6 @@ import {
   GetDelegationHistoryItemsDocument,
   GetVotingPowerCountingDocument,
 } from "@anticapture/graphql-client/hooks";
-import daoConfig from "@/shared/dao-config";
 
 interface UseTopAccountsChartDataParams {
   chartData: TopAccountChartData[];
@@ -54,12 +53,10 @@ export function useTopAccountsChartData({
       .filter((address): address is Address => !!address);
   }, [addresses, delegationData]);
 
-  const chainId = daoConfig[daoId].daoOverview.chain.id;
-
-  const { data: ensData } = useMultipleEnsData(
-    [...addresses, ...delegateAddresses],
-    chainId,
-  );
+  const { data: ensData } = useMultipleEnsData([
+    ...addresses,
+    ...delegateAddresses,
+  ]);
 
   useEffect(() => {
     let cancelled = false;

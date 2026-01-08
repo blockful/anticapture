@@ -52,9 +52,8 @@ export const useVotingPowerData = (
       ?.filter((delegator) => delegator.accountId && delegator.rawBalance > 0n)
       .map((delegator) => delegator.accountId as Address) || [];
 
-  const chainId = daoConfig[daoId].daoOverview.chain.id;
   // Fetch ENS data for all delegators
-  const { data: ensData } = useMultipleEnsData(delegatorAddresses, chainId);
+  const { data: ensData } = useMultipleEnsData(delegatorAddresses);
 
   // default Value when there is no data
   const defaultData: VotingPowerData = {
