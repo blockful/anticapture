@@ -28,6 +28,14 @@ export default processConfig(
               },
               transforms: [
                 {
+                  filterSchema: {
+                    filters: [
+                      'Query.!{accountBalance}',
+                      'Query.!{accountBalances}'
+                    ]
+                  }
+                },
+                {
                   rename: {
                     renames: [
                       {
@@ -57,7 +65,7 @@ export default processConfig(
           ];
         }),
     ],
-    additionalTypeDefs:`
+    additionalTypeDefs: `
       type AverageDelegationPercentageItem {
         date: String!
         high: String!
