@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useQueries } from "@tanstack/react-query";
-import { Address, isAddress } from "viem";
+import { Address } from "viem";
 import { normalize } from "viem/ens";
 import axios from "axios";
 
@@ -65,14 +65,6 @@ export const fetchEnsDataFromAddress = async ({
   address: Address;
 }): Promise<EnsData> => {
   let ensName: string | null = null;
-
-  if (!isAddress(address)) {
-    return {
-      address: address,
-      ens: "",
-      avatar: null,
-    };
-  }
 
   try {
     // Fetch primary ENS name
