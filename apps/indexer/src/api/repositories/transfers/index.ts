@@ -1,10 +1,28 @@
 import { db } from "ponder:api";
-import { and, asc, desc, eq, or } from "drizzle-orm";
+import { and, asc, desc, eq, gte, lte, or } from "drizzle-orm";
 import { transfer } from "ponder:schema";
 
 import { DBTransfer, TransfersRequest } from "@/api/mappers";
 
 export class TransfersRepository {
+  async getTransfersCount(req: TransfersRequest): Promise<number> {
+    const addressQuery = this.buildAddressQuery(req);
+    if (!addressQuery) return 0;
+
+    return await db.$count(
+      transfer,
+      and(
+        addressQuery,
+        req.fromDate
+          ? gte(transfer.timestamp, BigInt(req.fromDate))
+          : undefined,
+        req.toDate ? lte(transfer.timestamp, BigInt(req.toDate)) : undefined,
+        req.fromValue ? gte(transfer.amount, req.fromValue) : undefined,
+        req.toValue ? lte(transfer.amount, req.toValue) : undefined,
+      ),
+    );
+  }
+
   async getTransfers(req: TransfersRequest): Promise<DBTransfer[]> {
     const sortBy =
       req.sortBy === "timestamp" ? transfer.timestamp : transfer.amount;
