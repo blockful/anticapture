@@ -16,7 +16,7 @@ export const SkeletonRow = ({
         parentClassName,
       )}
     >
-      <div className={cn("bg-surface-contrast rounded-sm", className)} />
+      <div className={cn("bg-surface-contrast", className)} />
     </div>
   );
 };

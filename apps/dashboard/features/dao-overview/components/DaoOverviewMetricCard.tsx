@@ -29,7 +29,7 @@ export const DaoOverviewMetricCard = ({
     {isLoading ? (
       <SkeletonRow
         parentClassName="flex animate-pulse justify-start w-full"
-        className="bg-surface-hover h-4 w-20 rounded-full"
+        className="bg-surface-hover h-4 w-20"
       />
     ) : (
       <p className={cn("text-primary text-sm", textClassName)}>{text}</p>
@@ -37,7 +37,7 @@ export const DaoOverviewMetricCard = ({
     {isLoading ? (
       <SkeletonRow
         parentClassName="flex animate-pulse justify-start w-full"
-        className="bg-surface-hover mt-1 h-4 w-40 rounded-full"
+        className="bg-surface-hover mt-1 h-4 w-40"
       />
     ) : (
       <span className={cn("text-secondary inline-block w-fit text-xs")}>
