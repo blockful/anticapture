@@ -72,7 +72,7 @@ export function useBalanceHistoryGraph(
     if (!data?.transfers?.items) return [];
 
     return data.transfers.items
-      .filter((item) => item !== null)
+      .filter((item) => !!item)
       .map((item) => ({
         ...item,
         timestamp: new Date(Number(item.timestamp) * 1000).getTime(),
