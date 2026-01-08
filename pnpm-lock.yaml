@@ -18136,7 +18136,7 @@ snapshots:
       "@babel/core": 7.28.0
       "@babel/helper-compilation-targets": 7.27.2
       "@babel/helper-plugin-utils": 7.27.1
-      debug: 4.4.1
+      debug: 4.4.3
       lodash.debounce: 4.0.8
       resolve: 1.22.11
     transitivePeerDependencies:
@@ -19157,7 +19157,7 @@ snapshots:
       "@babel/parser": 7.28.0
       "@babel/template": 7.27.2
       "@babel/types": 7.28.1
-      debug: 4.4.1
+      debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
 
@@ -19794,12 +19794,12 @@ snapshots:
   "@eslint/eslintrc@2.1.4":
     dependencies:
       ajv: 6.12.6
-      debug: 4.4.1
+      debug: 4.4.3
       espree: 9.6.1
       globals: 13.24.0
       ignore: 5.3.2
       import-fresh: 3.3.1
-      js-yaml: 4.1.0
+      js-yaml: 4.1.1
       minimatch: 3.1.2
       strip-json-comments: 3.1.1
     transitivePeerDependencies:
@@ -21324,7 +21324,7 @@ snapshots:
   "@humanwhocodes/config-array@0.13.0":
     dependencies:
       "@humanwhocodes/object-schema": 2.0.3
-      debug: 4.4.1
+      debug: 4.4.3
       minimatch: 3.1.2
     transitivePeerDependencies:
       - supports-color
@@ -21830,7 +21830,7 @@ snapshots:
       "@noble/hashes": 1.8.0
       "@scure/base": 1.2.6
       "@types/debug": 4.1.12
-      debug: 4.3.4
+      debug: 4.4.3
       pony-cause: 2.1.11
       semver: 7.7.3
       uuid: 9.0.1
@@ -21844,7 +21844,7 @@ snapshots:
       "@noble/hashes": 1.8.0
       "@scure/base": 1.2.6
       "@types/debug": 4.1.12
-      debug: 4.3.4
+      debug: 4.4.3
       pony-cause: 2.1.11
       semver: 7.7.3
       uuid: 9.0.1
@@ -23837,7 +23837,7 @@ snapshots:
     dependencies:
       "@typescript-eslint/tsconfig-utils": 8.38.0(typescript@5.9.3)
       "@typescript-eslint/types": 8.38.0
-      debug: 4.4.1
+      debug: 4.4.3
       typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
@@ -23893,7 +23893,7 @@ snapshots:
       "@typescript-eslint/tsconfig-utils": 8.38.0(typescript@5.9.3)
       "@typescript-eslint/types": 8.38.0
       "@typescript-eslint/visitor-keys": 8.38.0
-      debug: 4.4.1
+      debug: 4.4.3
       fast-glob: 3.3.3
       is-glob: 4.0.3
       minimatch: 9.0.5
@@ -26699,7 +26699,7 @@ snapshots:
       ajv: 6.12.6
       chalk: 4.1.2
       cross-spawn: 7.0.6
-      debug: 4.4.1
+      debug: 4.4.3
       doctrine: 3.0.0
       escape-string-regexp: 4.0.0
       eslint-scope: 7.2.2
@@ -26717,7 +26717,7 @@ snapshots:
       imurmurhash: 0.1.4
       is-glob: 4.0.3
       is-path-inside: 3.0.3
-      js-yaml: 4.1.0
+      js-yaml: 4.1.1
       json-stable-stringify-without-jsonify: 1.0.1
       levn: 0.4.1
       lodash.merge: 4.6.2
@@ -27428,7 +27428,7 @@ snapshots:
   http-proxy-agent@7.0.2:
     dependencies:
       agent-base: 7.1.4
-      debug: 4.4.1
+      debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
 
@@ -27444,7 +27444,7 @@ snapshots:
   https-proxy-agent@7.0.6:
     dependencies:
       agent-base: 7.1.4
-      debug: 4.4.1
+      debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
 
@@ -27785,7 +27785,7 @@ snapshots:
 
   istanbul-lib-source-maps@4.0.1:
     dependencies:
-      debug: 4.4.1
+      debug: 4.4.3
       istanbul-lib-coverage: 3.2.2
       source-map: 0.6.1
     transitivePeerDependencies:

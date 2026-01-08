@@ -2,30 +2,28 @@ import { DaoOverviewMetricCard } from "@/features/dao-overview/components/DaoOve
 import { DaoConfiguration } from "@/shared/dao-config/types";
 import {
   formatBlocksToUserReadable,
+  formatNumberUserReadable,
   formatSecondsToReadable,
 } from "@/shared/utils";
+import { useDaoOverviewData } from "@/features/dao-overview/hooks/useDaoOverviewData";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 interface MetricsCardProps {
   daoId: string;
   daoConfig: DaoConfiguration;
-  proposalThresholdValue: string;
-  proposalThresholdPercentage: string | null;
-  quorumValueFormatted: string;
-  votingPeriod: number;
-  votingDelay: number;
-  timelockDelay: number;
 }
 
-export const MetricsCard = ({
-  daoId,
-  daoConfig,
-  proposalThresholdValue,
-  proposalThresholdPercentage,
-  quorumValueFormatted,
-  votingPeriod,
-  votingDelay,
-  timelockDelay,
-}: MetricsCardProps) => {
+export const MetricsCard = ({ daoId, daoConfig }: MetricsCardProps) => {
+  const {
+    proposalThresholdValue,
+    proposalThresholdPercentage,
+    quorumValueFormatted,
+    votingPeriod,
+    votingDelay,
+    timelockDelay,
+    isLoading,
+  } = useDaoOverviewData({ daoId: daoId as DaoIdEnum, daoConfig });
+
   const proposalThresholdPercentageFormatted = proposalThresholdPercentage
     ? `${parseFloat(proposalThresholdPercentage).toFixed(1)}%`
     : "N/A";
@@ -52,7 +50,8 @@ export const MetricsCard = ({
             : "Only Foundation Proposes"
         }
         subText={"Minimum voting power to submit"}
-        className="border-b-1 border-border-contrast border-dashed pb-4 md:border-none md:p-3"
+        className="border-border-contrast border-b border-dashed pb-4 md:border-none md:p-3"
+        isLoading={isLoading}
       />
 
       <DaoOverviewMetricCard
@@ -71,13 +70,14 @@ export const MetricsCard = ({
             delay
           </span>
         }
-        className="border-b-1 border-border-contrast border-dashed pb-4 md:border-none md:p-3"
+        isLoading={isLoading}
+        className="border-border-contrast border-b border-dashed pb-4 md:border-none md:p-3"
         textClassName="mb-1"
       />
 
       <DaoOverviewMetricCard
         title="Quorum"
-        text={`${quorumValueFormatted} ${daoId}`}
+        text={`${formatNumberUserReadable(quorumValueFormatted)} ${daoId}`}
         subText={
           <span>
             Only{" "}
@@ -87,8 +87,9 @@ export const MetricsCard = ({
             votes are counted
           </span>
         }
-        className="border-b-1 border-border-contrast border-dashed pb-4 md:border-none md:p-3"
+        className="border-border-contrast border-b border-dashed pb-4 md:border-none md:p-3"
         textClassName="mb-1"
+        isLoading={isLoading}
       />
 
       <DaoOverviewMetricCard
@@ -108,6 +109,7 @@ export const MetricsCard = ({
           )
         }
         textClassName="mb-1"
+        isLoading={isLoading}
       />
     </div>
   );
