@@ -27,6 +27,7 @@
     "*.config.js",
     "*.config.ts",
     "packages/graphql-client/generated.ts",
-    "packages/graphql-client/types.ts"
+    "packages/graphql-client/types.ts",
+    "apps/api-gateway/schema.graphql"
   ]
 }
