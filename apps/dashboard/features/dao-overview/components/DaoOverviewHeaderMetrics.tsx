@@ -1,10 +1,10 @@
-import { formatNumberUserReadable } from "@/shared/utils";
 import { DaoOverviewMetricCard } from "@/features/dao-overview/components/DaoOverviewMetricCard";
 import { useDaoOverviewData } from "@/features/dao-overview/hooks/useDaoOverviewData";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useQuorumGap } from "@/shared/hooks/useQuorumGap";
 import { DaoConfiguration } from "@/shared/dao-config/types";
 import { DaoOverviewHeader } from "@/features/dao-overview/components/DaoOverviewHeader";
+import { formatNumberUserReadable } from "@/shared/utils";
 
 interface DaoOverviewHeaderMetricsProps {
   daoId: string;
@@ -37,6 +37,13 @@ export const DaoOverviewHeaderMetrics = ({
   const activeSupplyValue = formatNumberUserReadable(activeSupply);
   const averageTurnoutValue = formatNumberUserReadable(averageTurnout);
 
+  const liquidTreasuryAllValueFormatted = formatNumberUserReadable(
+    liquidTreasuryAllValue,
+  );
+  const liquidTreasuryNonDaoValueFormatted = formatNumberUserReadable(
+    liquidTreasuryNonDaoValue,
+  );
+
   return (
     <div className="flex flex-1 flex-col">
       <DaoOverviewHeader
@@ -56,8 +63,8 @@ export const DaoOverviewHeaderMetrics = ({
 
         <DaoOverviewMetricCard
           title="Treasury"
-          text={`$${formatNumberUserReadable(liquidTreasuryAllValue)} (${liquidTreasuryAllPercent}% in ${daoId})`}
-          subText={`$${formatNumberUserReadable(liquidTreasuryNonDaoValue)} not counting ${daoId}`}
+          text={`$${liquidTreasuryAllValueFormatted} (${liquidTreasuryAllPercent}% in ${daoId})`}
+          subText={`$${liquidTreasuryNonDaoValueFormatted} not counting ${daoId}`}
           isLoading={isLoading}
         />
 
