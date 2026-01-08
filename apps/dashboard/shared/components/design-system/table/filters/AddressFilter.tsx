@@ -3,7 +3,6 @@
 import { ChangeEvent, useState } from "react";
 import { Filter, Loader2 } from "lucide-react";
 import { isAddress } from "viem";
-import { getEnsAddress } from "viem/actions";
 import { normalize } from "viem/ens";
 import {
   Popover,
@@ -14,8 +13,8 @@ import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/utils/";
 import SearchField from "@/shared/components/design-system/SearchField";
 import { ResetIcon } from "@radix-ui/react-icons";
-import { publicClient } from "@/shared/services/wallet/wallet";
 import { IconButton } from "@/shared/components/design-system/buttons/icon-button/IconButton";
+import { fetchAddressFromEnsName } from "@/shared/hooks/useEnsData";
 
 interface AddressFilterProps {
   onApply: (address: string | undefined) => void;
@@ -64,8 +63,8 @@ export function AddressFilter({
     if (isEnsAddress(trimmedAddress)) {
       setIsResolving(true);
       try {
-        const resolvedAddress = await getEnsAddress(publicClient, {
-          name: normalize(trimmedAddress),
+        const resolvedAddress = await fetchAddressFromEnsName({
+          ensName: trimmedAddress as `${string}.eth`,
         });
 
         if (resolvedAddress) {
