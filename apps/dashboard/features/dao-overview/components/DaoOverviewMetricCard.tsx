@@ -1,3 +1,4 @@
+import { SkeletonRow } from "@/shared/components";
 import { cn } from "@/shared/utils";
 import { ReactNode } from "react";
 
@@ -25,19 +26,23 @@ export const DaoOverviewMetricCard = ({
     <p className="text-secondary mb-2 font-mono text-xs font-medium uppercase tracking-wider">
       {title}
     </p>
-    <p
-      className={cn("text-primary text-sm", textClassName, {
-        "bg-secondary text-secondary animate-pulse": isLoading,
-      })}
-    >
-      {text}
-    </p>
-    <span
-      className={cn("text-secondary inline-block w-fit text-xs", {
-        "bg-secondary animate-pulse": isLoading,
-      })}
-    >
-      {subText}
-    </span>
+    {isLoading ? (
+      <SkeletonRow
+        parentClassName="flex animate-pulse justify-start w-full"
+        className="bg-surface-hover h-4 w-20 rounded-full"
+      />
+    ) : (
+      <p className={cn("text-primary text-sm", textClassName)}>{text}</p>
+    )}
+    {isLoading ? (
+      <SkeletonRow
+        parentClassName="flex animate-pulse justify-start w-full"
+        className="bg-surface-hover mt-1 h-4 w-40 rounded-full"
+      />
+    ) : (
+      <span className={cn("text-secondary inline-block w-fit text-xs")}>
+        {subText}
+      </span>
+    )}
   </div>
 );
