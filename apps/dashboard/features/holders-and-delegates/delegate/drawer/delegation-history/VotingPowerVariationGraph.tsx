@@ -20,6 +20,7 @@ import { ChartExceptionState } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 import { parseAsStringEnum, useQueryState } from "nuqs";
+import daoConfig from "@/shared/dao-config";
 
 interface VotingPowerVariationGraphProps {
   accountId: string;
@@ -191,6 +192,8 @@ export const VotingPowerVariationGraph = ({
     );
   };
 
+  const chainId = daoConfig[daoId].daoOverview.chain.id;
+
   return (
     <div className="w-full">
       <div className="flex items-center justify-between">
@@ -284,6 +287,7 @@ export const VotingPowerVariationGraph = ({
                       )}
                       {displayAddress && (
                         <EnsAvatar
+                          chainId={chainId}
                           address={displayAddress as `0x${string}`}
                           showAvatar={false}
                           size="xs"

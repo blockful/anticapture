@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { VotesTable } from "@/features/governance/components/proposal-overview/VotesTable";
+import daoConfig from "@/shared/dao-config";
 
 export const TabsVotedContent = ({
   proposal,
@@ -129,9 +130,12 @@ export const TabsVotedContent = ({
             return null; // This cell will be empty, the description will span all columns
           }
 
+          const chainId = daoConfig[daoId as DaoIdEnum].daoOverview.chain.id;
+
           return (
             <div className="flex h-10 w-full items-center gap-3 p-2">
               <EnsAvatar
+                chainId={chainId}
                 address={voterAddress as `0x${string}`}
                 size="sm"
                 variant="rounded"

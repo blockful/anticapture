@@ -157,10 +157,12 @@ export const TokenHolders = ({
         }
 
         const addressValue: string = row.getValue("address");
+        const chainId = daoConfig[daoId as DaoIdEnum].daoOverview.chain.id;
 
         return (
           <div className="group flex w-full items-center">
             <EnsAvatar
+              chainId={chainId}
               address={addressValue as Address}
               size="sm"
               variant="rounded"
@@ -309,6 +311,7 @@ export const TokenHolders = ({
         }
 
         const delegate: string = row.getValue("delegate");
+        const chainId = daoConfig[daoId as DaoIdEnum].daoOverview.chain.id;
 
         return (
           <div className="flex items-center gap-1.5">
@@ -318,6 +321,7 @@ export const TokenHolders = ({
               </div>
             ) : (
               <EnsAvatar
+                chainId={chainId}
                 address={delegate as Address}
                 size="sm"
                 variant="rounded"

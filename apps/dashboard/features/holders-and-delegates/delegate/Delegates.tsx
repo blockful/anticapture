@@ -208,9 +208,12 @@ export const Delegates = ({
           );
         }
 
+        const chainId = daoConfig[daoId].daoOverview.chain.id;
+
         return (
           <div className="group flex w-full items-center">
             <EnsAvatar
+              chainId={chainId}
               address={address as Address}
               size="sm"
               variant="rounded"

@@ -16,6 +16,7 @@ import { DelegateProposalsActivity } from "@/features/holders-and-delegates/dele
 import { IconButton } from "@/shared/components";
 import { TopInteractions } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/TopInteractions";
 import { parseAsString, useQueryState, useQueryStates } from "nuqs";
+import daoConfig from "@/shared/dao-config";
 
 export type EntityType = "delegate" | "tokenHolder";
 
@@ -34,6 +35,8 @@ export const HoldersAndDelegatesDrawer = ({
   address,
   daoId,
 }: HoldersAndDelegatesDrawerProps) => {
+  const chainId = daoConfig[daoId].daoOverview.chain.id;
+
   const entities = {
     delegate: {
       title: "Delegate",
@@ -151,6 +154,7 @@ export const HoldersAndDelegatesDrawer = ({
                   {/* Desktop */}
                   <div className="hidden sm:block">
                     <EnsAvatar
+                      chainId={chainId}
                       address={address as `0x${string}`}
                       size="sm"
                       variant="rounded"
@@ -163,6 +167,7 @@ export const HoldersAndDelegatesDrawer = ({
                   {/* Mobile */}
                   <div className="block sm:hidden">
                     <EnsAvatar
+                      chainId={chainId}
                       address={address as `0x${string}`}
                       size="sm"
                       variant="rounded"

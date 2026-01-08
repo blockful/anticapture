@@ -337,10 +337,13 @@ export const DelegateDelegationHistoryTable = ({
           delegatorAddress = accountId as Address;
         }
 
+        const chainId = daoConfig[daoId].daoOverview.chain.id;
+
         return (
           <div className="group flex items-center gap-3">
             <div className="overflow-truncate flex max-w-[140px] items-center gap-2">
               <EnsAvatar
+                chainId={chainId}
                 address={delegatorAddress as `0x${string}`}
                 size="sm"
                 variant="rounded"
@@ -445,10 +448,13 @@ export const DelegateDelegationHistoryTable = ({
           delegateAddress = accountId as Address;
         }
 
+        const chainId = daoConfig[daoId].daoOverview.chain.id;
+
         return (
           <div className="group flex items-center justify-between gap-3">
             <div className="flex max-w-[140px] items-center gap-2 overflow-hidden">
               <EnsAvatar
+                chainId={chainId}
                 address={delegateAddress as `0x${string}`}
                 size="sm"
                 variant="rounded"

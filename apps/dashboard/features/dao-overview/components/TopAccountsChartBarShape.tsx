@@ -14,6 +14,7 @@ export interface CustomBarShapeProps extends BarProps {
   height: number;
   value: number;
   payload: TopAccountChartData;
+  chainId: number;
 }
 
 export const CustomBarShape: React.FC<CustomBarShapeProps> = ({
@@ -23,6 +24,7 @@ export const CustomBarShape: React.FC<CustomBarShapeProps> = ({
   height,
   value,
   payload,
+  chainId,
 }) => {
   const isPositive = value >= 0;
   const color = isPositive ? "#45ca76" : "#e26868";
@@ -51,6 +53,7 @@ export const CustomBarShape: React.FC<CustomBarShapeProps> = ({
         >
           <EnsAvatar
             address={payload.address as Address}
+            chainId={chainId}
             size="sm"
             variant="rounded"
           />

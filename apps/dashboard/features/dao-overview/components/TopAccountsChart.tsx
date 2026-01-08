@@ -20,6 +20,7 @@ import {
 } from "@/features/dao-overview/components/TopAccountsChartBarShape";
 import { CustomTooltip } from "@/features/dao-overview/components/TopAccountsChartTooltip";
 import { useTopAccountsChartData } from "@/features/dao-overview/hooks/useTopAccountsChartData";
+import daoConfig from "@/shared/dao-config";
 
 export interface TopAccountChartData {
   address: string;
@@ -48,6 +49,7 @@ export const TopAccountsChart = ({
   );
 
   const handleCloseDrawer = useCallback(() => setSelectedAddress(null), []);
+  const chainId = daoConfig[daoId].daoOverview.chain.id;
 
   return (
     <div className="border-light-dark text-primary sm:bg-surface-default relative flex h-52 w-full items-center justify-center sm:rounded-lg">
@@ -61,7 +63,10 @@ export const TopAccountsChart = ({
           <Bar
             dataKey="value"
             shape={(props: BarProps) => (
-              <CustomBarShape {...(props as CustomBarShapeProps)} />
+              <CustomBarShape
+                {...(props as CustomBarShapeProps)}
+                chainId={chainId}
+              />
             )}
             onClick={handleOpenDrawer}
             cursor="pointer"

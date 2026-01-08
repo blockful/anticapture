@@ -113,9 +113,12 @@ export const TabsDidntVoteContent = ({
             );
           }
 
+          const chainId = daoConfig[daoIdEnum].daoOverview.chain.id;
+
           return (
             <div className="flex h-10 w-full items-center gap-3 p-2">
               <EnsAvatar
+                chainId={chainId}
                 address={voterAddress as `0x${string}`}
                 size="sm"
                 variant="rounded"

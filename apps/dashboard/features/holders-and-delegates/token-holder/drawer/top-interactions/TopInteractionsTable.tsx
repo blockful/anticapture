@@ -132,9 +132,12 @@ export const TopInteractionsTable = ({
           );
         }
         const addressValue: string = row.getValue("address");
+        const chainId = daoConfig[daoId as DaoIdEnum].daoOverview.chain.id;
+
         return (
           <div className="flex w-full items-center gap-2">
             <EnsAvatar
+              chainId={chainId}
               address={addressValue as Address}
               size="sm"
               variant="rounded"
