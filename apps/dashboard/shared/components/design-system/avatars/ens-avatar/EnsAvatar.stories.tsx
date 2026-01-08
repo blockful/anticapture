@@ -82,7 +82,6 @@ export const SizeVariants: Story = {
     <div className="flex items-center gap-4">
       <div className="flex flex-col items-center gap-2">
         <EnsAvatar
-          chainId={1}
           imageUrl="https://euc.li/duds.eth"
           size="xs"
           variant="rounded"
@@ -91,7 +90,6 @@ export const SizeVariants: Story = {
       </div>
       <div className="flex flex-col items-center gap-2">
         <EnsAvatar
-          chainId={1}
           imageUrl="https://euc.li/duds.eth"
           size="sm"
           variant="rounded"
@@ -100,7 +98,6 @@ export const SizeVariants: Story = {
       </div>
       <div className="flex flex-col items-center gap-2">
         <EnsAvatar
-          chainId={1}
           imageUrl="https://euc.li/duds.eth"
           size="md"
           variant="rounded"
@@ -109,7 +106,6 @@ export const SizeVariants: Story = {
       </div>
       <div className="flex flex-col items-center gap-2">
         <EnsAvatar
-          chainId={1}
           imageUrl="https://euc.li/duds.eth"
           size="lg"
           variant="rounded"
@@ -126,7 +122,6 @@ export const ShapeVariants: Story = {
     <div className="flex items-center gap-4">
       <div className="flex flex-col items-center gap-2">
         <EnsAvatar
-          chainId={1}
           imageUrl="https://euc.li/duds.eth"
           size="lg"
           variant="rounded"
@@ -135,7 +130,6 @@ export const ShapeVariants: Story = {
       </div>
       <div className="flex flex-col items-center gap-2">
         <EnsAvatar
-          chainId={1}
           imageUrl="https://euc.li/duds.eth"
           size="lg"
           variant="square"
@@ -151,19 +145,19 @@ export const LoadingStates: Story = {
   render: () => (
     <div className="flex items-center gap-4">
       <div className="flex flex-col items-center gap-2">
-        <EnsAvatar chainId={1} size="xs" variant="rounded" loading={true} />
+        <EnsAvatar size="xs" variant="rounded" loading={true} />
         <span className="text-xs text-gray-400">XS Loading</span>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <EnsAvatar chainId={1} size="sm" variant="rounded" loading={true} />
+        <EnsAvatar size="sm" variant="rounded" loading={true} />
         <span className="text-xs text-gray-400">SM Loading</span>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <EnsAvatar chainId={1} size="md" variant="rounded" loading={true} />
+        <EnsAvatar size="md" variant="rounded" loading={true} />
         <span className="text-xs text-gray-400">MD Loading</span>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <EnsAvatar chainId={1} size="lg" variant="rounded" loading={true} />
+        <EnsAvatar size="lg" variant="rounded" loading={true} />
         <span className="text-xs text-gray-400">LG Loading</span>
       </div>
     </div>
@@ -184,19 +178,19 @@ export const FallbackStates: Story = {
   render: () => (
     <div className="flex items-center gap-4">
       <div className="flex flex-col items-center gap-2">
-        <EnsAvatar chainId={1} size="xs" variant="rounded" />
+        <EnsAvatar size="xs" variant="rounded" />
         <span className="text-xs text-gray-400">XS Fallback</span>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <EnsAvatar chainId={1} size="sm" variant="rounded" />
+        <EnsAvatar size="sm" variant="rounded" />
         <span className="text-xs text-gray-400">SM Fallback</span>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <EnsAvatar chainId={1} size="md" variant="rounded" />
+        <EnsAvatar size="md" variant="rounded" />
         <span className="text-xs text-gray-400">MD Fallback</span>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <EnsAvatar chainId={1} size="lg" variant="rounded" />
+        <EnsAvatar size="lg" variant="rounded" />
         <span className="text-xs text-gray-400">LG Fallback</span>
       </div>
     </div>
@@ -208,11 +202,11 @@ export const FallbackShapes: Story = {
   render: () => (
     <div className="flex items-center gap-4">
       <div className="flex flex-col items-center gap-2">
-        <EnsAvatar chainId={1} size="lg" variant="rounded" />
+        <EnsAvatar size="lg" variant="rounded" />
         <span className="text-xs text-gray-400">Rounded Fallback</span>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <EnsAvatar chainId={1} size="lg" variant="square" />
+        <EnsAvatar size="lg" variant="square" />
         <span className="text-xs text-gray-400">Square Fallback</span>
       </div>
     </div>
@@ -235,7 +229,6 @@ export const RealENSExamples: Story = {
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-4">
         <EnsAvatar
-          chainId={1}
           address="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045" // vitalik.eth
           size="md"
           variant="rounded"
@@ -244,7 +237,6 @@ export const RealENSExamples: Story = {
       </div>
       <div className="flex items-center gap-4">
         <EnsAvatar
-          chainId={1}
           address="0x983110309620D911731Ac0932219af06091b6744" // brantly.eth
           size="md"
           variant="rounded"
@@ -253,7 +245,6 @@ export const RealENSExamples: Story = {
       </div>
       <div className="flex items-center gap-4">
         <EnsAvatar
-          chainId={1}
           address="0xb8c2C29ee19D8307cb7255e1Cd9CbDE883A267d5" // nick.eth
           size="md"
           variant="rounded"
