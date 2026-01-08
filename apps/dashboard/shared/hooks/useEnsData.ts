@@ -17,6 +17,8 @@ type PrimaryNameResponse = {
   accelerationAttempted?: boolean;
 };
 
+const ETH_COIN_TYPE = "60"; // ETH
+
 /**
  * Hook to fetch ENS data for a single address
  * @param address - Ethereum address (e.g., "0x123...")
@@ -89,9 +91,7 @@ export const fetchEnsDataFromAddress = async ({
 
 type AddressRecordsResponse = {
   records?: {
-    addresses?: {
-      "60"?: Address;
-    };
+    addresses?: Record<string, Address>;
   };
   accelerationRequested?: boolean;
   accelerationAttempted?: boolean;
@@ -106,7 +106,7 @@ export const fetchAddressFromEnsName = async ({
     const normalizedName = normalize(ensName);
     const url = `https://api.alpha.ensnode.io/api/resolve/records/${normalizedName}?addresses=60&accelerate=true`;
     const response = await axios.get<AddressRecordsResponse>(url);
-    return response.data.records?.addresses?.["60"] || null;
+    return response.data.records?.addresses?.[ETH_COIN_TYPE] || null;
   } catch (error) {
     console.warn(`Failed to fetch address for ${ensName}:`, error);
     return null;
