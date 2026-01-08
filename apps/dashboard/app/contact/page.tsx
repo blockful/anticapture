@@ -21,10 +21,10 @@ import {
   FormDescription,
   FormField,
   FormItem,
-  FormLabel,
 } from "@/shared/components/design-system/form";
 import {
   Checkbox,
+  FormLabel,
   Input,
   Textarea,
 } from "@/shared/components/design-system/form/fields";
@@ -86,9 +86,9 @@ export default function ContactPage() {
             description={PAGES_CONSTANTS.contact.description}
             className="border-b-0!"
           >
-            <div className="border-border-default flex border-t border-dashed md:hidden" />
+            <div className="border-border-default flex border-t border-dashed lg:hidden" />
             <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
-              <div className="bg-surface-default hidden flex-col space-y-6 p-5 md:flex">
+              <div className="bg-surface-default hidden flex-col space-y-6 p-5 lg:flex">
                 <div>
                   <h2 className="text-primary mb-4 flex font-mono text-lg font-medium">
                     WHY_TRANSMIT_DATA <span className="text-link">_</span>
@@ -116,7 +116,7 @@ export default function ContactPage() {
                   <div className="space-y-3 text-sm">
                     <div>
                       <p className="text-primary font-medium">Email</p>
-                      <p className="text-secondary">anticapture@blockful.io</p>
+                      <p className="text-secondary">hello@blockful.io</p>
                     </div>
                     <div>
                       <p className="text-primary font-medium">X</p>
@@ -135,7 +135,7 @@ export default function ContactPage() {
                 </div>
               </div>
 
-              <div className="md:bg-surface-default md:space-y-6 md:p-5">
+              <div className="lg:bg-surface-default lg:space-y-6 lg:p-5">
                 <h2 className="text-primary mb-4 flex font-mono text-lg font-medium">
                   MISSION_DATA_REQUEST <span className="text-link">_</span>
                 </h2>
@@ -143,7 +143,7 @@ export default function ContactPage() {
                 <Form {...form}>
                   <form
                     onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-6 md:space-y-4"
+                    className="space-y-6 lg:space-y-4"
                   >
                     <FormField
                       control={form.control}
@@ -218,7 +218,7 @@ export default function ContactPage() {
                                           }}
                                         />
                                       </FormControl>
-                                      <FormLabel className="font-normal">
+                                      <FormLabel className="text-sm font-normal leading-4">
                                         {item.label}
                                       </FormLabel>
                                     </FormItem>

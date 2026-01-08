@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
 
     const { data, error } = await resend.emails.send({
       from: process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev",
-      to: process.env.CONTACT_EMAIL || "anticapture@blockful.io",
+      to: process.env.CONTACT_EMAIL || "hello@blockful.io",
       subject: `Contact Request from ${validatedData.nameOrAlias} - ${validatedData.whichDao}`,
       html: `
         <h2>New Contact Request</h2>
