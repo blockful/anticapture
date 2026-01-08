@@ -110,7 +110,7 @@ export const fetchAddressFromEnsName = async ({
 }): Promise<Address | null> => {
   try {
     const normalizedName = normalize(ensName);
-    const url = `https://api.alpha.ensnode.io/api/resolve/records/${normalizedName}?addresses=${coinType}&accelerate=true`;
+    const url = `https://api.alpha.ensnode.io/api/resolve/records/${normalizedName}?addresses=60&accelerate=true`;
     const response = await axios.get<AddressRecordsResponse>(url);
     return response.data.records?.addresses?.[coinType] || null;
   } catch (error) {
