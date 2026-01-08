@@ -36,6 +36,7 @@ export class TransfersRepository {
           req.fromDate
             ? gte(transfer.timestamp, BigInt(req.fromDate))
             : undefined,
+          req.toDate ? lte(transfer.timestamp, BigInt(req.toDate)) : undefined,
           req.fromValue ? gte(transfer.amount, req.fromValue) : undefined,
           req.toValue ? lte(transfer.amount, req.toValue) : undefined,
         ),

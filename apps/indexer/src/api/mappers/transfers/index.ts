@@ -13,6 +13,7 @@ export const TransfersRequestSchema = z.object({
   from: z.string().refine(isAddress, { message: "Invalid address" }).optional(),
   to: z.string().refine(isAddress, { message: "Invalid address" }).optional(),
   fromDate: z.coerce.number().optional(),
+  toDate: z.coerce.number().optional(),
   fromValue: z
     .string()
     .transform((val) => BigInt(val))

@@ -36,8 +36,16 @@ export function transfers(app: Hono, service: TransfersService) {
     async (context) => {
       const { address } = context.req.valid("param");
       const { from, to } = context.req.valid("query");
-      const { limit, offset, sortBy, sortOrder, fromValue, toValue, fromDate } =
-        context.req.valid("query");
+      const {
+        limit,
+        offset,
+        sortBy,
+        sortOrder,
+        fromValue,
+        toValue,
+        fromDate,
+        toDate,
+      } = context.req.valid("query");
 
       const result = await service.getTransfers({
         address,
@@ -50,6 +58,7 @@ export function transfers(app: Hono, service: TransfersService) {
         fromValue,
         toValue,
         fromDate,
+        toDate,
       });
 
       return context.json(result);
