@@ -197,6 +197,7 @@ export interface GovernanceImplementationConfig extends GovernanceImplementation
 // Complete DAO configuration structure
 export interface DaoConfiguration extends BaseInfo {
   daoOverview: DaoOverviewConfig;
+  coinType: string;
   attackProfitability?: AttackProfitabilityConfig;
   governanceImplementation?: GovernanceImplementationConfig;
   resilienceStages?: boolean;

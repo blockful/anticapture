@@ -8,6 +8,7 @@ import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 export const SCR: DaoConfiguration = {
   name: "Scroll",
   decimals: 18,
+  coinType: "2148018000",
   color: {
     svgColor: "#ebc28e",
     svgBgColor: "#ffeeda",
