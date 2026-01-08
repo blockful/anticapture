@@ -18,7 +18,6 @@ export const FilterMaxMinInput = ({
   title,
   placeholderMin = "Min",
   placeholderMax = "Max",
-  inputType = "text",
   setFilter,
   initialMin = "",
   initialMax = "",
@@ -26,16 +25,49 @@ export const FilterMaxMinInput = ({
   const [minValue, setMinValue] = useState<string>(initialMin);
   const [maxValue, setMaxValue] = useState<string>(initialMax);
 
+  const formatNumber = (value: string): string => {
+    const cleanValue = value.replace(/[^\d.]/g, "");
+
+    if (!cleanValue) return "";
+
+    const parts = cleanValue.split(".");
+    const integerPart = parts[0];
+    const decimalPart = parts[1];
+
+    const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+    if (decimalPart !== undefined) {
+      return `${formattedInteger}.${decimalPart.slice(0, 2)}`;
+    }
+
+    return formattedInteger;
+  };
+
+  const unformatNumber = (value: string): string => {
+    return value.replace(/,/g, "");
+  };
+
   useEffect(() => {
-    setMinValue(initialMin);
+    setMinValue(formatNumber(initialMin));
   }, [initialMin]);
 
   useEffect(() => {
-    setMaxValue(initialMax);
+    setMaxValue(formatNumber(initialMax));
   }, [initialMax]);
 
+  const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = unformatNumber(e.target.value);
+    const formatted = formatNumber(rawValue);
+    setMinValue(formatted);
+  };
+
+  const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = unformatNumber(e.target.value);
+    const formatted = formatNumber(rawValue);
+    setMaxValue(formatted);
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // Permite números, teclas de navegação e edição
     const allowedKeys = [
       "Backspace",
       "Delete",
@@ -56,7 +88,6 @@ export const FilterMaxMinInput = ({
       "SelectAll",
     ];
 
-    // Permite teclas especiais, números, e ponto decimal
     if (
       allowedKeys.includes(e.key) ||
       /^[0-9.]$/.test(e.key) ||
@@ -70,7 +101,9 @@ export const FilterMaxMinInput = ({
   };
 
   const handleBlur = () => {
-    setFilter(minValue, maxValue);
+    const cleanMin = unformatNumber(minValue);
+    const cleanMax = unformatNumber(maxValue);
+    setFilter(cleanMin, cleanMax);
   };
 
   return (
@@ -85,10 +118,10 @@ export const FilterMaxMinInput = ({
       <div className="flex items-center gap-1">
         <div className="flex-1">
           <input
-            type={inputType}
+            type="text"
             placeholder={placeholderMin}
             value={minValue}
-            onChange={(e) => setMinValue(e.target.value)}
+            onChange={handleMinChange}
             onKeyDown={handleKeyDown}
             onBlur={handleBlur}
             className={cn(
@@ -101,10 +134,10 @@ export const FilterMaxMinInput = ({
         </div>
         <div className="flex-1">
           <input
-            type={inputType}
+            type="text"
             placeholder={placeholderMax}
             value={maxValue}
-            onChange={(e) => setMaxValue(e.currentTarget.value)}
+            onChange={handleMaxChange}
             onKeyDown={handleKeyDown}
             onBlur={handleBlur}
             className={cn(

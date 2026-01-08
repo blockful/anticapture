@@ -29,11 +29,11 @@ export const AccountBalancesRequestSchema = z.object({
     .array(z.string().refine((addr) => isAddress(addr)))
     .optional()
     .default([]),
-  balanceGreaterThan: z
+  fromValue: z
     .string()
     .transform((val) => BigInt(val))
     .optional(),
-  balanceLessThan: z
+  toValue: z
     .string()
     .transform((val) => BigInt(val))
     .optional(),

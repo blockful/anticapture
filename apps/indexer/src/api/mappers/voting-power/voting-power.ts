@@ -11,7 +11,24 @@ export type DBVotingPowerWithRelations = DBVotingPower & {
 };
 
 export const VotingPowerRequestSchema = z.object({
-  account: z.string().refine((addr) => isAddress(addr)),
+  fromAddresses: z
+    .union([
+      z
+        .string()
+        .refine(isAddress, "Invalid address")
+        .transform((addr) => [addr]),
+      z.array(z.string().refine(isAddress, "Invalid addresses")),
+    ])
+    .optional(),
+  toAddresses: z
+    .union([
+      z
+        .string()
+        .refine(isAddress, "Invalid address")
+        .transform((addr) => [addr]),
+      z.array(z.string().refine(isAddress, "Invalid addresses")),
+    ])
+    .optional(),
   skip: z.coerce
     .number()
     .int()
@@ -79,19 +96,19 @@ export const VotingPowerMapper = (
       logIndex: p.logIndex,
       delegation: p.delegations
         ? {
-          from: p.delegations.delegatorAccountId,
-          value: p.delegations.delegatedValue.toString(),
-          to: p.delegations.delegateAccountId,
-        }
+            from: p.delegations.delegatorAccountId,
+            value: p.delegations.delegatedValue.toString(),
+            to: p.delegations.delegateAccountId,
+          }
         : null,
       transfer: p.transfers
         ? {
-          value: p.transfers.amount.toString(),
-          from: p.transfers.fromAccountId,
-          to: p.transfers.toAccountId,
-        }
+            value: p.transfers.amount.toString(),
+            from: p.transfers.fromAccountId,
+            to: p.transfers.toAccountId,
+          }
         : null,
     })),
-    totalCount,
+    totalCount: Number(totalCount),
   };
 };

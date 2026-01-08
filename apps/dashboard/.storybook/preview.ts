@@ -1,5 +1,6 @@
 import type { Preview } from "@storybook/nextjs";
 import React, { useEffect } from "react";
+import { TooltipProvider } from "@radix-ui/react-tooltip";
 
 import "../app/globals.css";
 
@@ -33,9 +34,13 @@ const preview: Preview = {
       }, []);
 
       return React.createElement(
-        "div",
-        { className: "dark" },
-        React.createElement(Story),
+        TooltipProvider,
+        null,
+        React.createElement(
+          "div",
+          { className: "dark" },
+          React.createElement(Story),
+        ),
       );
     },
   ],

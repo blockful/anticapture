@@ -130,6 +130,12 @@ type Query {
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/account-balances`\nReturns account balances\n"
   accountBalances(limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalances_orderDirection = desc, addresses: [String] = [], delegates: [String] = [], balanceGreaterThan: String, balanceLessThan: String): accountBalances_200_response
 
+  """
+  Returns a mapping of the largest interactions between accounts. 
+  Positive amounts signify net token transfers FROM <accountId>, whilst negative amounts refer to net transfers TO <accountId>
+  """
+  accountInteractions(days: queryInput_accountInteractions_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountInteractions_orderDirection = desc, accountId: String!, minAmount: String, maxAmount: String, orderBy: queryInput_accountInteractions_orderBy = count, address: String): accountInteractions_200_response
+
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/account-balances/{args.accountId}`\nReturns account balance\n"
   accountBalanceByAccountId(accountId: String!): accountBalanceByAccountId_200_response
 

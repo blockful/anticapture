@@ -22,8 +22,8 @@ export function accountBalances(
       method: "get",
       operationId: "accountBalances",
       path: "/account-balances",
-      summary: "Get account balances",
-      description: "Returns account balances",
+      summary: "Get account balance records",
+      description: "Returns sorted and paginated account balance records",
       tags: ["account-balances"],
       request: {
         query: AccountBalancesRequestSchema,
@@ -43,8 +43,8 @@ export function accountBalances(
       const {
         addresses,
         delegates,
-        balanceLessThan,
-        balanceGreaterThan,
+        toValue,
+        fromValue,
         limit,
         skip,
         orderDirection,
@@ -58,8 +58,8 @@ export function accountBalances(
         addresses,
         delegates,
         {
-          minAmount: balanceGreaterThan,
-          maxAmount: balanceLessThan,
+          minAmount: fromValue,
+          maxAmount: toValue,
         },
       );
 
@@ -75,7 +75,8 @@ export function accountBalances(
       operationId: "accountBalanceByAccountId",
       path: "/account-balances/{accountId}",
       summary: "Get account balance",
-      description: "Returns account balance",
+      description:
+        "Returns account balance information for a specific address (account)",
       tags: ["account-balances"],
       request: {
         params: z.object({

@@ -1,20 +1,7 @@
-"use client";
-
 import { ReactNode } from "react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@radix-ui/react-tooltip";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@radix-ui/react-popover";
 import { RiskLevel } from "@/shared/types/enums/RiskLevel";
-import { useScreenSize } from "@/shared/hooks";
 import { RiskLevelCardSmall } from "@/shared/components/cards/RiskLevelCardSmall";
-import { cn } from "@/shared/utils";
+import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 
 interface RiskTooltipCardProps {
   title?: string;
@@ -32,7 +19,6 @@ export const RiskTooltipCard = ({
   riskLevel = RiskLevel.LOW,
   children,
 }: RiskTooltipCardProps) => {
-  const { isMobile } = useScreenSize();
   // Process description to handle both string and array of strings
   const descriptionArray = Array.isArray(description)
     ? description
@@ -40,17 +26,18 @@ export const RiskTooltipCard = ({
       ? [description]
       : [];
 
+  const titleComponent = (
+    <div className="flex items-center gap-2">
+      <h4 className="text-alternative-sm text-primary font-mono font-medium uppercase tracking-wider">
+        {title}
+      </h4>
+      {riskLevel && <RiskLevelCardSmall status={riskLevel} />}
+    </div>
+  );
+
   const content = (
     <div onClick={(e) => e.stopPropagation()} className="flex flex-col">
-      <div className="mb-2 flex items-center gap-2">
-        <h4 className="text-alternative-sm text-primary font-mono font-medium tracking-wider uppercase">
-          {title}
-        </h4>
-        {riskLevel && <RiskLevelCardSmall status={riskLevel} />}
-      </div>
-      {/* Divider */}
-      <div className="bg-surface-contrast mb-3 h-px" />
-      <div className="text-secondary text-sm leading-tight font-normal">
+      <div className="text-secondary text-sm font-normal leading-tight">
         {descriptionArray.map((paragraph, index) => (
           <p
             key={index}
@@ -63,49 +50,9 @@ export const RiskTooltipCard = ({
     </div>
   );
 
-  if (isMobile) {
-    return (
-      <Popover>
-        <PopoverTrigger asChild>
-          <div
-            className="focus:ring-0 focus:outline-hidden data-[state=open]:border-none data-[state=open]:shadow-none data-[state=open]:ring-0 data-[state=open]:outline-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {children}
-          </div>
-        </PopoverTrigger>
-        <PopoverContent
-          side="top"
-          align="center"
-          sideOffset={10}
-          className={cn(
-            "border-light-dark bg-surface-background z-50 rounded-md border p-3 text-left shadow-lg",
-            "w-fit max-w-[calc(100vw-2rem)] sm:max-w-md",
-            "break-words whitespace-normal",
-          )}
-        >
-          {content}
-        </PopoverContent>
-      </Popover>
-    );
-  }
-
   return (
-    <Tooltip>
-      <TooltipTrigger>{children}</TooltipTrigger>
-      <TooltipContent
-        side="top"
-        align="center"
-        sideOffset={10}
-        avoidCollisions={true}
-        className={cn(
-          "border-light-dark bg-surface-background z-50 rounded-md border p-3 text-left shadow-lg",
-          "w-fit max-w-[calc(100vw-2rem)] sm:max-w-md",
-          "break-words whitespace-normal",
-        )}
-      >
-        {content}
-      </TooltipContent>
+    <Tooltip title={titleComponent} tooltipContent={content}>
+      {children}
     </Tooltip>
   );
 };
