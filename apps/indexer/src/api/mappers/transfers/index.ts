@@ -1,11 +1,15 @@
 import { z } from "@hono/zod-openapi";
 
 import { transfer } from "ponder:schema";
-import { Address, isAddress } from "viem";
+import { isAddress } from "viem";
 
 export type DBTransfer = typeof transfer.$inferSelect;
 
-export const TransfersRequestSchema = z.object({
+export const TransfersRequestRouteSchema = z.object({
+  address: z.string().refine((addr) => isAddress(addr)),
+});
+
+export const TransfersRequestQuerySchema = z.object({
   limit: z.coerce.number().optional().default(10),
   offset: z.coerce.number().optional().default(0),
   sortBy: z.enum(["timestamp", "amount"]).optional().default("timestamp"),
@@ -24,9 +28,8 @@ export const TransfersRequestSchema = z.object({
     .optional(),
 });
 
-export type TransfersRequest = z.infer<typeof TransfersRequestSchema> & {
-  address: Address;
-};
+export type TransfersRequest = z.infer<typeof TransfersRequestQuerySchema> &
+  z.infer<typeof TransfersRequestRouteSchema>;
 
 export const TransferResponseSchema = z.object({
   transactionHash: z.string(),

@@ -1,11 +1,11 @@
-import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
+import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import { TransfersService } from "@/api/services";
 import {
-  TransfersRequestSchema,
+  TransfersRequestRouteSchema,
+  TransfersRequestQuerySchema,
   TransfersResponseSchema,
 } from "@/api/mappers/";
-import { isAddress } from "viem";
 
 export function transfers(app: Hono, service: TransfersService) {
   app.openapi(
@@ -17,10 +17,8 @@ export function transfers(app: Hono, service: TransfersService) {
       description: "Get transfers of a given address",
       tags: ["transfers"],
       request: {
-        params: z.object({
-          address: z.string().refine((addr) => isAddress(addr)),
-        }),
-        query: TransfersRequestSchema,
+        params: TransfersRequestRouteSchema,
+        query: TransfersRequestQuerySchema,
       },
       responses: {
         200: {
