@@ -116,7 +116,7 @@ export default function ContactPage() {
                   <div className="space-y-3 text-sm">
                     <div>
                       <p className="text-primary font-medium">Email</p>
-                      <p className="text-secondary">hello@blockful.io</p>
+                      <p className="text-secondary">contact@blockful.io</p>
                     </div>
                     <div>
                       <p className="text-primary font-medium">X</p>
@@ -236,12 +236,7 @@ export default function ContactPage() {
                       name="governorAddress"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>
-                            Governor Address{" "}
-                            <span className="text-secondary font-normal">
-                              (Optional)
-                            </span>
-                          </FormLabel>
+                          <FormLabel isOptional>Governor Address</FormLabel>
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
