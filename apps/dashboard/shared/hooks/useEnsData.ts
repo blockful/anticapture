@@ -8,7 +8,7 @@ import axios from "axios";
 type EnsData = {
   address: Address;
   ens: string;
-  avatar: string | null;
+  avatarUrl: string | null;
 };
 
 type PrimaryNameResponse = {
@@ -85,7 +85,7 @@ export const fetchEnsDataFromAddress = async ({
   return {
     address: address,
     ens: ensName || "",
-    avatar,
+    avatarUrl: avatar,
   };
 };
 

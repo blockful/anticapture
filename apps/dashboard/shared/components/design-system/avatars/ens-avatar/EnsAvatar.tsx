@@ -83,7 +83,7 @@ export const EnsAvatar = ({
   const [imageError, setImageError] = useState(false);
 
   // Determine the final image URL to use
-  const finalImageUrl = imageUrl || ensData?.avatar;
+  const finalImageUrl = imageUrl || ensData?.avatarUrl;
 
   const handleImageError = () => {
     setImageError(true);
