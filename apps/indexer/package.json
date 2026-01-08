@@ -29,7 +29,7 @@
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "@types/node": "^20.16.5",
-    "@types/pg": "^8.11.10",
+    "@types/pg": "^8.15.6",
     "dotenv": "^16.5.0",
     "eslint": "^8.53.0",
     "eslint-config-ponder": "^0.5.6",

@@ -60,7 +60,6 @@ export const ENS: DaoConfiguration = {
   },
   attackProfitability: {
     riskLevel: RiskLevel.HIGH,
-    supportsLiquidTreasuryCall: true,
     attackCostBarChart: {
       ENSTokenTimelock: "0xd7A029Db2585553978190dB5E85eC724Aa4dF23f",
       ENSDaoWallet: "0xFe89cc7aBB2C4183683ab71653C4cdc9B02D44b7",

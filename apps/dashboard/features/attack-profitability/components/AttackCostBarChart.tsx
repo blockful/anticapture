@@ -29,7 +29,7 @@ import { mockedAttackCostBarData } from "@/shared/constants/mocked-data/mocked-a
 import {
   useDaoTokenHistoricalData,
   useTopTokenHolderNonDao,
-  useTreasuryAssetNonDaoToken,
+  useTreasury,
   useVetoCouncilVotingPower,
 } from "@/features/attack-profitability/hooks";
 import daoConfigByDaoId from "@/shared/dao-config";
@@ -71,10 +71,8 @@ export const AttackCostBarChart = ({
   const selectedDaoId = daoId.toUpperCase() as DaoIdEnum;
   const timeInterval = TimeInterval.NINETY_DAYS;
 
-  const liquidTreasury = useTreasuryAssetNonDaoToken(
-    selectedDaoId,
-    timeInterval,
-  );
+  const { data: liquidTreasuryData, loading: liquidTreasuryLoading } =
+    useTreasury(selectedDaoId, "liquid", TimeInterval.SEVEN_DAYS);
   const delegatedSupply = useDelegatedSupply(selectedDaoId, timeInterval);
   const activeSupply = useActiveSupply(selectedDaoId, timeInterval);
   const averageTurnout = useAverageTurnout(selectedDaoId, timeInterval);
@@ -104,7 +102,7 @@ export const AttackCostBarChart = ({
   const { isMobile } = useScreenSize();
 
   const isLoading =
-    liquidTreasury.loading ||
+    liquidTreasuryLoading ||
     delegatedSupply.isLoading ||
     activeSupply.isLoading ||
     averageTurnout.isLoading ||
@@ -152,10 +150,10 @@ export const AttackCostBarChart = ({
               id: "liquidTreasury",
               name: "Liquid Treasury",
               type: BarChartEnum.REGULAR,
-              value: Number(liquidTreasury.data?.[0]?.totalAssets || 0),
+              value: Number(liquidTreasuryData?.[0]?.value || 0),
               customColor: "#EC762EFF",
               displayValue:
-                Number(liquidTreasury.data?.[0]?.totalAssets || 0) > 10000
+                Number(liquidTreasuryData?.[0]?.value || 0) > 10000
                   ? undefined
                   : "<$10,000",
             },
@@ -226,7 +224,7 @@ export const AttackCostBarChart = ({
     mocked,
     daoTokenPriceHistoricalData,
     valueMode,
-    liquidTreasury.data,
+    liquidTreasuryData,
     delegatedSupply.data?.currentDelegatedSupply,
     activeSupply.data?.activeSupply,
     averageTurnout.data?.currentAverageTurnout,
