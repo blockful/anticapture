@@ -4,6 +4,7 @@ import {
   useGetTopTokenHoldersQuery,
   useGetTokenHoldersCoutingQuery,
 } from "@anticapture/graphql-client/hooks";
+import { QueryInput_AccountBalances_OrderDirection } from "@anticapture/graphql-client";
 import { useMemo, useCallback, useState, useEffect } from "react";
 import { NetworkStatus } from "@apollo/client";
 import { useHistoricalBalances } from "@/shared/hooks/graphql-client/useHistoricalBalances";
@@ -49,7 +50,7 @@ interface UseTokenHoldersParams {
   daoId: DaoIdEnum;
   address: string | null;
   orderBy?: string;
-  orderDirection?: string;
+  orderDirection?: QueryInput_AccountBalances_OrderDirection;
   limit?: number;
   days: TimeInterval;
 }
@@ -57,7 +58,7 @@ interface UseTokenHoldersParams {
 export const useTokenHolders = ({
   daoId,
   orderBy = "balance",
-  orderDirection = "desc",
+  orderDirection = QueryInput_AccountBalances_OrderDirection.Desc,
   limit = 10,
   address,
   days,
