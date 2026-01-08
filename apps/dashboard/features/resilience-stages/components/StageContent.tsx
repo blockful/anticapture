@@ -76,10 +76,8 @@ export const StageContent = ({
             ))}
 
           {type === "requirements" ? (
-            <div className="flex flex-row gap-2">
-              <p className="text-secondary flex flex-wrap text-sm font-normal">
-                {requirementText}
-              </p>
+            <div className="text-secondary flex flex-row flex-wrap gap-2 text-sm font-normal">
+              {requirementText}
             </div>
           ) : (
             issues?.map((issue, index) => (

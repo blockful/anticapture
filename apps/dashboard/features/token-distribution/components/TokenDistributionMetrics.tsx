@@ -114,20 +114,15 @@ export const TokenDistributionMetrics = ({
                 return (
                   <div key={category} className="mb-4 flex flex-col gap-2">
                     <CardTitle className="flex items-center gap-2">
-                      <p className="!text-alternative-sm text-secondary font-mono font-medium uppercase tracking-wide">
+                      <p className="text-alternative-sm! text-secondary font-mono font-medium uppercase tracking-wide">
                         {category}
                       </p>
                       {category !== "GOVERNANCE" && category !== "MARKET" && (
-                        <p className="!text-alternative-sm text-secondary font-mono font-medium uppercase tracking-wide">
+                        <p className="text-alternative-sm! text-secondary font-mono font-medium uppercase tracking-wide">
                           ({daoId})
                         </p>
                       )}
-                      {tooltipText && (
-                        <TooltipInfo
-                          text={tooltipText}
-                          className="text-secondary"
-                        />
-                      )}
+                      {tooltipText && <TooltipInfo text={tooltipText} />}
                     </CardTitle>
                     <div className="grid grid-cols-2 gap-2 xl:flex xl:flex-col">
                       {metrics.map((metric: MetricWithKey) => {

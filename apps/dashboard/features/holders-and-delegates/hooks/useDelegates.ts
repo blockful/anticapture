@@ -52,12 +52,12 @@ interface UseDelegatesResult {
 }
 
 interface UseDelegatesParams {
+  address: string | null;
+  days: TimeInterval;
   fromDate: number;
   daoId: DaoIdEnum;
   orderBy?: string;
   orderDirection?: string;
-  days: TimeInterval;
-  address?: string;
   limit?: number;
 }
 
