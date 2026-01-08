@@ -110,7 +110,6 @@ export const TopInteractionsTable = ({
         <div className="text-table-header flex w-full items-center justify-start">
           <span>Address</span>
           <AddressFilter
-            coinType={daoConfig[daoId as DaoIdEnum].coinType}
             onApply={handleAddressFilterApply}
             currentFilter={currentAddressFilter ?? undefined}
             className="ml-2"

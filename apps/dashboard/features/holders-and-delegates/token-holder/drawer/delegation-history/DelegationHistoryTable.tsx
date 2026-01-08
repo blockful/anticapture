@@ -123,7 +123,6 @@ export const DelegationHistoryTable = ({
           <span>Delegate Address</span>
           <div className="ml-2 w-[180px]">
             <AddressFilter
-              coinType={daoConfig[daoId as DaoIdEnum].coinType}
               onApply={async (addr) => {
                 const coinType = daoConfig[daoId as DaoIdEnum].coinType;
                 if ((addr ?? "").indexOf(".eth") > 0) {

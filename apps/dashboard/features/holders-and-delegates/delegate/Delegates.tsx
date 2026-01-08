@@ -247,7 +247,6 @@ export const Delegates = ({
             onApply={handleAddressFilterApply}
             currentFilter={currentAddressFilter || undefined}
             className="ml-2"
-            coinType={daoConfig[daoId].coinType}
           />
         </div>
       ),

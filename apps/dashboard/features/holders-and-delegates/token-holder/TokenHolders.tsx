@@ -134,7 +134,6 @@ export const TokenHolders = ({
         <div className="text-table-header flex w-full items-center justify-start">
           <span>Address</span>
           <AddressFilter
-            coinType={daoConfig[daoId].coinType}
             onApply={handleAddressFilterApply}
             currentFilter={currentAddressFilter || undefined}
             className="ml-2"

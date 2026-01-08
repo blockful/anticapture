@@ -3,6 +3,7 @@
 import { ChangeEvent, useState } from "react";
 import { Filter, Loader2 } from "lucide-react";
 import { isAddress } from "viem";
+import { getEnsAddress } from "viem/actions";
 import { normalize } from "viem/ens";
 import {
   Popover,
@@ -13,14 +14,13 @@ import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/utils/";
 import SearchField from "@/shared/components/design-system/SearchField";
 import { ResetIcon } from "@radix-ui/react-icons";
+import { publicClient } from "@/shared/services/wallet/wallet";
 import { IconButton } from "@/shared/components/design-system/buttons/icon-button/IconButton";
-import { fetchAddressFromEnsName } from "@/shared/hooks/useEnsData";
 
 interface AddressFilterProps {
   onApply: (address: string | undefined) => void;
   currentFilter?: string;
   className?: string;
-  coinType: string;
 }
 
 const isEnsAddress = (address: string) => {
@@ -37,7 +37,6 @@ export function AddressFilter({
   onApply,
   currentFilter = "",
   className,
-  coinType,
 }: AddressFilterProps) {
   const [tempAddress, setTempAddress] = useState<string>(currentFilter);
   const [isResolving, setIsResolving] = useState<boolean>(false);
@@ -65,9 +64,8 @@ export function AddressFilter({
     if (isEnsAddress(trimmedAddress)) {
       setIsResolving(true);
       try {
-        const resolvedAddress = await fetchAddressFromEnsName({
-          ensName: trimmedAddress as `${string}.eth`,
-          coinType: coinType,
+        const resolvedAddress = await getEnsAddress(publicClient, {
+          name: normalize(trimmedAddress),
         });
 
         if (resolvedAddress) {
