@@ -9,7 +9,6 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { BulletDivider } from "@/features/governance/components/proposal-overview/BulletDivider";
-import daoConfig from "@/shared/dao-config";
 
 interface ProposalItemProps {
   proposal: Proposal;
@@ -97,8 +96,6 @@ export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
     ? (Number(proposal.quorum) / Number(proposal.votes.total)) * 100
     : 0;
 
-  const chainId = daoConfig[daoId].daoOverview.chain.id;
-
   return (
     <Link
       href={`/${daoId}/governance/proposal/${proposal.id}`}
@@ -127,7 +124,6 @@ export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
           <span>
             by{" "}
             <EnsAvatar
-              chainId={chainId}
               address={proposal.proposer as Address}
               showAvatar={false}
               nameClassName="text-secondary"

@@ -8,18 +8,12 @@ import { Address } from "viem";
 import { ProposalBadge } from "@/features/governance/components/proposal-overview/ProposalBadge";
 import { ProposalStatus } from "@/features/governance/types";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
-import { DaoIdEnum } from "@/shared/types/daos";
-import daoConfig from "@/shared/dao-config";
 
 export const TitleSection = ({
   proposal,
-  daoId,
 }: {
   proposal: NonNullable<GetProposalQuery["proposal"]>;
-  daoId: DaoIdEnum;
 }) => {
-  const chainId = daoConfig[daoId].daoOverview.chain.id;
-
   return (
     <div className="flex w-full flex-col gap-3">
       <div className="flex w-full items-center justify-start gap-2">
@@ -32,7 +26,6 @@ export const TitleSection = ({
 
         {/* Proposer  */}
         <EnsAvatar
-          chainId={chainId}
           size="xs"
           address={proposal?.proposerAccountId as Address}
           nameClassName="text-secondary"

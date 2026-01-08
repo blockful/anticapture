@@ -73,7 +73,7 @@ export const ProposalSection = () => {
 
         <div className="flex flex-col gap-6 p-5 lg:flex-row lg:pt-0">
           <div className="self-star left-0 top-5 flex h-fit w-full flex-col gap-6 lg:sticky lg:top-[85px] lg:w-[420px]">
-            <TitleSection daoId={daoId as DaoIdEnum} proposal={proposal} />
+            <TitleSection proposal={proposal} />
             <ProposalInfoSection proposal={proposal} decimals={decimals} />
             <ProposalStatusSection proposal={proposal} />
 

@@ -340,13 +340,10 @@ export const BalanceHistoryTable = ({
           );
         }
 
-        const chainId = daoConfig[daoId as DaoIdEnum].daoOverview.chain.id;
-
         return (
           <div className="group flex w-full items-center justify-between gap-3">
             <div className="text-primary flex max-w-40 items-center gap-2 overflow-hidden">
               <EnsAvatar
-                chainId={chainId}
                 address={fromAddress as `0x${string}`}
                 size="sm"
                 variant="rounded"
@@ -381,10 +378,8 @@ export const BalanceHistoryTable = ({
               setTypeFilter("all");
 
               if ((addr ?? "").indexOf(".eth") > 0) {
-                const coinType = daoConfig[daoId as DaoIdEnum].coinType;
                 const address = await fetchAddressFromEnsName({
                   ensName: addr as `${string}.eth`,
-                  coinType: coinType,
                 });
                 setCustomFromFilter(address);
                 setCustomToFilter(null);
@@ -421,13 +416,10 @@ export const BalanceHistoryTable = ({
           );
         }
 
-        const chainId = daoConfig[daoId as DaoIdEnum].daoOverview.chain.id;
-
         return (
           <div className="group flex w-full items-center justify-between gap-3">
             <div className="text-primary flex max-w-40 items-center gap-2 overflow-hidden">
               <EnsAvatar
-                chainId={chainId}
                 address={toAddress as `0x${string}`}
                 size="sm"
                 variant="rounded"
@@ -467,10 +459,8 @@ export const BalanceHistoryTable = ({
               setTypeFilter("all");
 
               if ((addr ?? "").indexOf(".eth") > 0) {
-                const coinType = daoConfig[daoId as DaoIdEnum].coinType;
                 const address = await fetchAddressFromEnsName({
                   ensName: addr as `${string}.eth`,
-                  coinType: coinType,
                 });
                 setCustomToFilter(address);
                 setCustomFromFilter(null);

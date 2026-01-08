@@ -124,11 +124,9 @@ export const DelegationHistoryTable = ({
           <div className="ml-2 w-[180px]">
             <AddressFilter
               onApply={async (addr) => {
-                const coinType = daoConfig[daoId as DaoIdEnum].coinType;
                 if ((addr ?? "").indexOf(".eth") > 0) {
                   const address = await fetchAddressFromEnsName({
                     ensName: addr as `${string}.eth`,
-                    coinType: coinType,
                   });
                   setAddressFilter(address);
                   return;
@@ -157,12 +155,9 @@ export const DelegationHistoryTable = ({
         }
 
         const addressValue: string = row.getValue("address");
-        const chainId = daoConfig[daoId as DaoIdEnum].daoOverview.chain.id;
-
         return (
           <div className="flex w-full items-center gap-2">
             <EnsAvatar
-              chainId={chainId}
               address={addressValue as Address}
               size="sm"
               variant="rounded"

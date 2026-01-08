@@ -30,7 +30,6 @@ interface EnsAvatarProps extends Omit<
   containerClassName?: string;
   isDashed?: boolean;
   showFullAddress?: boolean;
-  chainId: number;
 }
 
 const sizeClasses: Record<AvatarSize, string> = {
@@ -73,14 +72,12 @@ export const EnsAvatar = ({
   containerClassName,
   showFullAddress = false,
   isDashed = false,
-  chainId,
   ...imageProps
 }: EnsAvatarProps) => {
   // Only fetch ENS data if we have an address and either we need imageUrl or fetchEnsName is true
   const shouldFetchEns = address && !imageUrl;
   const { data: ensData, isLoading: ensLoading } = useEnsData(
     shouldFetchEns ? address : null,
-    chainId,
   );
 
   const [imageError, setImageError] = useState(false);

@@ -22,7 +22,6 @@ import { ChartExceptionState } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 import { parseAsStringEnum, useQueryState } from "nuqs";
-import daoConfig from "@/shared/dao-config";
 
 interface BalanceHistoryVariationGraphProps {
   accountId: string;
@@ -91,8 +90,6 @@ export const BalanceHistoryVariationGraph = ({
     daoId,
     selectedPeriod,
   );
-
-  const chainId = daoConfig[daoId].daoOverview.chain.id;
 
   if (loading) {
     return (
@@ -293,7 +290,6 @@ export const BalanceHistoryVariationGraph = ({
                       )}
                       {displayAddress && (
                         <EnsAvatar
-                          chainId={chainId}
                           address={displayAddress as `0x${string}`}
                           showAvatar={false}
                           size="xs"
