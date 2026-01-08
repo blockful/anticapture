@@ -377,6 +377,7 @@ export const BalanceHistoryTable = ({
         <div className="text-table-header flex w-full items-center justify-start gap-2">
           <span>From</span>
           <AddressFilter
+            coinType={daoConfig[daoId as DaoIdEnum].coinType}
             onApply={async (addr) => {
               setTypeFilter("all");
 
@@ -463,6 +464,7 @@ export const BalanceHistoryTable = ({
         <div className="text-table-header flex w-full items-center justify-start gap-2">
           <span>To</span>
           <AddressFilter
+            coinType={daoConfig[daoId as DaoIdEnum].coinType}
             onApply={async (addr) => {
               setTypeFilter("all");
 

@@ -183,6 +183,7 @@ export const getTransactionsColumns = ({
           <span>From</span>
           <div className="ml-2 w-[180px]">
             <AddressFilter
+              coinType={daoConfig[daoId].coinType}
               onApply={async (addr) => {
                 const coinType = daoConfig[daoId].coinType;
                 if ((addr ?? "").indexOf(".eth") > 0) {
@@ -260,6 +261,7 @@ export const getTransactionsColumns = ({
             <span>To</span>
             <div className="ml-2 w-[180px]">
               <AddressFilter
+                coinType={daoConfig[daoId].coinType}
                 onApply={async (addr) => {
                   if ((addr ?? "").indexOf(".eth") > 0) {
                     const address = await fetchAddressFromEnsName({
