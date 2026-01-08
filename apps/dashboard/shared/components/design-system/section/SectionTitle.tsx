@@ -1,5 +1,3 @@
-"use client";
-
 import { ReactNode } from "react";
 
 type SectionTitleProps = {
