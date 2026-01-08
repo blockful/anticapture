@@ -9,7 +9,6 @@ import { OptimismChainIcon } from "@/shared/components/icons/OptimismChainIcon";
 export const OP: DaoConfiguration = {
   name: "Optimism",
   decimals: 18,
-  coinType: "2147483658",
   color: {
     svgColor: "#ff0420",
     svgBgColor: "#FFF2FB",

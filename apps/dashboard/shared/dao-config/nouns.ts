@@ -8,7 +8,6 @@ import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
 export const NOUNS: DaoConfiguration = {
   name: "Nouns",
   decimals: 0,
-  coinType: "60",
   color: {
     svgColor: "#000000",
     svgBgColor: "#FFFFFF",

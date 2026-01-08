@@ -10,7 +10,6 @@ import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
 export const ENS: DaoConfiguration = {
   name: "ENS",
   decimals: 18,
-  coinType: "60",
   color: {
     svgColor: "#0080bc",
     svgBgColor: "#fff",
