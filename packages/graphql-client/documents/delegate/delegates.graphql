@@ -1,29 +1,21 @@
 query GetDelegates(
-  $after: String
-  $before: String
-  $orderBy: String = "votingPower"
+  $limit: Int = 10
+  $skip: Int = 0
   $orderDirection: String = "desc"
   $addresses: [String]
-  $limit: Int = 10
 ) {
-  accountPowers(
-    orderBy: $orderBy
-    orderDirection: $orderDirection
+  votingPowers(
     limit: $limit
-    after: $after
-    before: $before
-    where: { votingPower_gt: 0, accountId_in: $addresses }
+    skip: $skip
+    orderDirection: $orderDirection
+    fromValue: 0
+    addresses: $addresses 
   ) {
     items {
-      votingPower
       accountId
       delegationsCount
+      votingPower
     }
-    pageInfo {
-      endCursor
-      hasNextPage
-      hasPreviousPage
-      startCursor
-    }
+    totalCount
   }
 }

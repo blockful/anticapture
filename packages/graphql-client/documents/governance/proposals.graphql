@@ -142,9 +142,9 @@ query GetProposalNonVoters(
 
 # Get account power
 query GetAccountPower($address: String!, $proposalId: String!) {
-  accountPower(accountId: $address) {
-    votingPower
+  votingPowerByAccountId(accountId: $address) {
     accountId
+    votingPower
   }
   votesOnchain(proposalId: $proposalId, voterAccountId: $address) {
     support
