@@ -29,7 +29,18 @@ export default processConfig(
               transforms: [
                 {
                   filterSchema: {
-                    filters: ["Query.!{transfer}", "Query.!{transfers}"],
+                    filters: [
+                      "Query.!{account}",
+                      "Query.!{accounts}",
+                      "Query.!{proposalsOnchain}",
+                      "Query.!{proposalsOnchains}",
+                      "Query.!{tokenPrice}",
+                      "Query.!{tokenPrices}",
+                      "Query.!{transaction}",
+                      "Query.!{transactions}",
+                      "Query.!{transfer}",
+                      "Query.!{transfers}",
+                    ],
                   },
                 },
               ],
