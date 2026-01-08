@@ -21,7 +21,6 @@ export const TransfersRequestSchema = z.object({
     .string()
     .transform((val) => BigInt(val))
     .optional(),
-  conditional: z.enum(["and", "or"]).optional().default("or"),
 });
 
 export type TransfersRequest = z.infer<typeof TransfersRequestSchema> & {
