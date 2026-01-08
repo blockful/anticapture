@@ -101,7 +101,9 @@ export const useAccountInteractionsData = ({
       .filter((interaction) => interaction?.accountId)
       .map((interaction) => interaction?.accountId as Address) || [];
 
-  const { data: ensData } = useMultipleEnsData(interactionsAddresses);
+  const chainId = daoConfig[daoId].daoOverview.chain.id;
+
+  const { data: ensData } = useMultipleEnsData(interactionsAddresses, chainId);
 
   const defaultData = {
     topFive: [],

@@ -17,6 +17,7 @@ import { Address, zeroAddress } from "viem";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { cn } from "@/shared/utils";
 import { TransactionsParamsType } from "@/features/transactions/hooks/useTransactionParams";
+import daoConfig from "@/shared/dao-config";
 
 export const getTransactionsColumns = ({
   loading,
@@ -183,9 +184,11 @@ export const getTransactionsColumns = ({
           <div className="ml-2 w-[180px]">
             <AddressFilter
               onApply={async (addr) => {
+                const coinType = daoConfig[daoId].coinType;
                 if ((addr ?? "").indexOf(".eth") > 0) {
                   const address = await fetchAddressFromEnsName({
                     ensName: addr as `${string}.eth`,
+                    coinType: coinType,
                   });
                   setFrom(address || zeroAddress);
                   return;
@@ -215,11 +218,14 @@ export const getTransactionsColumns = ({
           );
         }
 
+        const chainId = daoConfig[daoId].daoOverview.chain.id;
+
         return (
           <div className="flex h-10 items-center gap-3 p-2">
             <div className="overflow-truncate flex max-w-[140px] items-center gap-2">
               <EnsAvatar
                 address={from as `0x${string}`}
+                chainId={chainId}
                 size="sm"
                 variant="rounded"
                 showName={true}
@@ -247,26 +253,30 @@ export const getTransactionsColumns = ({
     },
     {
       accessorKey: "to",
-      header: () => (
-        <div className="text-table-header flex h-8 w-full items-center justify-start px-4">
-          <span>To</span>
-          <div className="ml-2 w-[180px]">
-            <AddressFilter
-              onApply={async (addr) => {
-                if ((addr ?? "").indexOf(".eth") > 0) {
-                  const address = await fetchAddressFromEnsName({
-                    ensName: addr as `${string}.eth`,
-                  });
-                  setTo(address || zeroAddress);
-                  return;
-                }
-                setTo((addr as Address) || "");
-              }}
-              currentFilter={to ?? undefined}
-            />
+      header: () => {
+        const coinType = daoConfig[daoId].coinType;
+        return (
+          <div className="text-table-header flex h-8 w-full items-center justify-start px-4">
+            <span>To</span>
+            <div className="ml-2 w-[180px]">
+              <AddressFilter
+                onApply={async (addr) => {
+                  if ((addr ?? "").indexOf(".eth") > 0) {
+                    const address = await fetchAddressFromEnsName({
+                      ensName: addr as `${string}.eth`,
+                      coinType: coinType,
+                    });
+                    setTo(address || zeroAddress);
+                    return;
+                  }
+                  setTo((addr as Address) || "");
+                }}
+                currentFilter={to ?? undefined}
+              />
+            </div>
           </div>
-        </div>
-      ),
+        );
+      },
       cell: ({ row }) => {
         const to = row.getValue("to") as string;
 
@@ -285,11 +295,14 @@ export const getTransactionsColumns = ({
           );
         }
 
+        const chainId = daoConfig[daoId].daoOverview.chain.id;
+
         return (
           <div className="flex h-10 items-center gap-3 p-2">
             <div className="overflow-truncate flex max-w-[140px] items-center gap-2">
               <EnsAvatar
                 address={to as `0x${string}`}
+                chainId={chainId}
                 size="sm"
                 variant="rounded"
                 showName={true}
