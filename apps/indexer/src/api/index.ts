@@ -151,8 +151,9 @@ const treasuryService = createTreasuryService(
   env.DUNE_API_URL,
   env.DUNE_API_KEY,
 );
-treasury(app, treasuryService);
+const decimals = CONTRACT_ADDRESSES[env.DAO_ID].token.decimals;
 
+treasury(app, treasuryService, decimals);
 tokenHistoricalData(app, tokenPriceClient);
 token(
   app,

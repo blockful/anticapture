@@ -5,10 +5,12 @@ import {
   TreasuryResponseSchema,
   TreasuryQuerySchema,
 } from "@/api/mappers/treasury";
-import { CONTRACT_ADDRESSES } from "@/lib/constants";
-import { env } from "@/env";
 
-export function treasury(app: Hono, treasuryService: TreasuryService) {
+export function treasury(
+  app: Hono,
+  treasuryService: TreasuryService,
+  decimals: number,
+) {
   app.openapi(
     createRoute({
       method: "get",
@@ -67,7 +69,6 @@ export function treasury(app: Hono, treasuryService: TreasuryService) {
     }),
     async (context) => {
       const { days, order } = context.req.valid("query");
-      const decimals = CONTRACT_ADDRESSES[env.DAO_ID].token.decimals;
       const result = await treasuryService.getTokenTreasury(
         days,
         order,
@@ -105,7 +106,6 @@ export function treasury(app: Hono, treasuryService: TreasuryService) {
     }),
     async (context) => {
       const { days, order } = context.req.valid("query");
-      const decimals = CONTRACT_ADDRESSES[env.DAO_ID].token.decimals;
       const result = await treasuryService.getTotalTreasury(
         days,
         order,
