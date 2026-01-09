@@ -1,4 +1,4 @@
-import { DaysEnum, DaysOpts } from "@/lib/enums";
+import { DaysEnum } from "@/lib/enums";
 import { z } from "@hono/zod-openapi";
 import { PERCENTAGE_NO_BASELINE } from "../constants";
 import { PeriodResponseMapper, PeriodResponseSchema } from "../shared";
@@ -9,11 +9,14 @@ export const VotingPowerVariationsRequestSchema = z.object({
     .array(z.string().refine((addr) => isAddress(addr)))
     .optional()
     .default([]),
-  days: z
-    .enum(DaysOpts)
+  fromDate: z.coerce
+    .number()
     .optional()
-    .default("90d")
-    .transform((val) => DaysEnum[val]),
+    .default(Math.floor(Date.now() / 1000) - DaysEnum["90d"]),
+  toDate: z.coerce
+    .number()
+    .optional()
+    .default(Math.floor(Date.now() / 1000)),
   limit: z.coerce
     .number()
     .int()
@@ -31,11 +34,14 @@ export const VotingPowerVariationsRequestSchema = z.object({
 });
 
 export const VotingPowerVariationsByAccountIdRequestSchema = z.object({
-  days: z
-    .enum(DaysOpts)
+  fromDate: z.coerce
+    .number()
     .optional()
-    .default("90d")
-    .transform((val) => DaysEnum[val]),
+    .default(Math.floor(Date.now() / 1000) - DaysEnum["90d"]),
+  toDate: z.coerce
+    .number()
+    .optional()
+    .default(Math.floor(Date.now() / 1000)),
 });
 
 export const VotingPowersRequestSchema = z.object({

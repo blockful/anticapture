@@ -132,6 +132,7 @@ export class VotingPowerRepository {
   async getVotingPowerVariations(
     addresses: Address[],
     startTimestamp: number,
+    endTimestamp: number,
     limit: number,
     skip: number,
     orderDirection: "asc" | "desc",
@@ -146,6 +147,7 @@ export class VotingPowerRepository {
       .where(
         and(
           gte(votingPowerHistory.timestamp, BigInt(startTimestamp)),
+          lte(votingPowerHistory.timestamp, BigInt(endTimestamp)),
           addresses.length
             ? inArray(votingPowerHistory.accountId, addresses)
             : undefined,
@@ -195,6 +197,7 @@ export class VotingPowerRepository {
   async getVotingPowerVariationsByAccountId(
     accountId: Address,
     startTimestamp: number,
+    endTimestamp: number,
   ): Promise<DBVotingPowerVariation> {
     const history = db
       .select({
@@ -207,6 +210,7 @@ export class VotingPowerRepository {
         and(
           eq(votingPowerHistory.accountId, accountId),
           gte(votingPowerHistory.timestamp, BigInt(startTimestamp)),
+          lte(votingPowerHistory.timestamp, BigInt(endTimestamp)),
         ),
       )
       .as("history");
