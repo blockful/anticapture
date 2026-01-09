@@ -20,6 +20,10 @@ export const OP: DaoConfiguration = {
     token: "ERC20",
     chain: { ...optimism, icon: OptimismChainIcon },
     snapshot: "https://snapshot.box/#/s:citizenshouse.eth",
+    govPlatform: {
+      name: "Agora",
+      url: "https://vote.optimism.io/proposals/",
+    },
     contracts: {
       governor: "0xcDF27F107725988f2261Ce2256bDfCdE8B382B10",
       token: "0x4200000000000000000000000000000000000042",

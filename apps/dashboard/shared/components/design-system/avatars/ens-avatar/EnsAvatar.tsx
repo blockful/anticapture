@@ -2,19 +2,21 @@
 
 import { useEnsData } from "@/shared/hooks/useEnsData";
 import { cn } from "@/shared/utils/cn";
-// import { formatAddress } from "@/shared/utils/formatAddress";
 import { Address } from "viem";
 import Image, { ImageProps } from "next/image";
 import { useState } from "react";
-import { UserIcon } from "@/shared/components/icons";
+import Blockies from "react-blockies";
+
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { formatAddress } from "@/shared/utils/formatAddress";
 
 export type AvatarSize = "xs" | "sm" | "md" | "lg";
 export type AvatarVariant = "square" | "rounded";
 
-interface EnsAvatarProps
-  extends Omit<ImageProps, "src" | "alt" | "fill" | "className" | "loading"> {
+interface EnsAvatarProps extends Omit<
+  ImageProps,
+  "src" | "alt" | "fill" | "className" | "loading"
+> {
   address?: Address;
   imageUrl?: string;
   size?: AvatarSize;
@@ -37,11 +39,18 @@ const sizeClasses: Record<AvatarSize, string> = {
   lg: "size-12", // 48px
 };
 
-const iconSizes: Record<AvatarSize, string> = {
-  xs: "size-3", // 12px
-  sm: "size-4", // 16px
-  md: "size-6", // 24px
-  lg: "size-8", // 32px
+const imageSizeClasses: Record<AvatarSize, number> = {
+  xs: 16, // 16px
+  sm: 24, // 24px
+  md: 36, // 36px
+  lg: 48, // 48px
+};
+
+const iconSizes: Record<AvatarSize, number> = {
+  xs: 12, // 12px
+  sm: 16, // 16px
+  md: 24, // 24px
+  lg: 32, // 32px
 };
 
 const variantClasses: Record<AvatarVariant, string> = {
@@ -65,20 +74,20 @@ export const EnsAvatar = ({
   isDashed = false,
   ...imageProps
 }: EnsAvatarProps) => {
-  const [imageError, setImageError] = useState<boolean>(false);
-
   // Only fetch ENS data if we have an address and either we need imageUrl or fetchEnsName is true
   const shouldFetchEns = address && !imageUrl;
   const { data: ensData, isLoading: ensLoading } = useEnsData(
-    shouldFetchEns ? address : ("" as Address),
+    shouldFetchEns ? address : null,
   );
 
+  const [imageError, setImageError] = useState(false);
+
   // Determine the final image URL to use
-  const finalImageUrl =
-    imageUrl ||
-    (ensData?.avatar && ensData.avatar.includes("http")
-      ? ensData.avatar
-      : ensData?.avatar_url);
+  const finalImageUrl = imageUrl || ensData?.avatarUrl;
+
+  const handleImageError = () => {
+    setImageError(true);
+  };
 
   // Determine alt text
   const finalAlt = alt || ensData?.ens || address || "Avatar";
@@ -105,11 +114,8 @@ export const EnsAvatar = ({
     className,
   );
 
-  // Show skeleton when loading (either external loading prop or ENS data loading)
-  const isLoading = loading || ensLoading;
-
   const avatarElement = () => {
-    if (isLoading) {
+    if (isLoadingName) {
       return (
         <SkeletonRow
           parentClassName="flex animate-pulse"
@@ -118,16 +124,17 @@ export const EnsAvatar = ({
       );
     }
 
-    // Show image if available and no error
+    // Show image if available and not previously failed
     if (finalImageUrl && !imageError) {
       return (
         <div className={baseClasses}>
           <Image
             src={finalImageUrl}
             alt={finalAlt}
-            fill
+            width={imageSizeClasses[size]}
+            height={imageSizeClasses[size]}
             className="object-cover"
-            onError={() => setImageError(true)}
+            onError={handleImageError}
             {...imageProps}
           />
         </div>
@@ -137,7 +144,14 @@ export const EnsAvatar = ({
     // Fallback: show user icon
     return (
       <div className={baseClasses}>
-        <UserIcon className={iconSizes[size]} />
+        <Blockies
+          seed={address as string}
+          size={iconSizes[size]}
+          scale={3}
+          color="#18181b"
+          bgColor="#ec762e"
+          spotColor="#ffffff"
+        />
       </div>
     );
   };

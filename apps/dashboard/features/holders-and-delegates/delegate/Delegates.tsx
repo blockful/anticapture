@@ -1,0 +1,438 @@
+"use client";
+
+import { useMemo } from "react";
+import { ColumnDef } from "@tanstack/react-table";
+
+import {
+  useDelegates,
+  HoldersAndDelegatesDrawer,
+} from "@/features/holders-and-delegates";
+import { TimeInterval } from "@/shared/types/enums";
+import { SkeletonRow, Button } from "@/shared/components";
+import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
+import { formatNumberUserReadable } from "@/shared/utils";
+import { Plus } from "lucide-react";
+import { ProgressCircle } from "@/features/holders-and-delegates/components/ProgressCircle";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { useScreenSize } from "@/shared/hooks";
+import { Address, formatUnits } from "viem";
+import { Table } from "@/shared/components/design-system/table/Table";
+import { Percentage } from "@/shared/components/design-system/table/Percentage";
+import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
+import daoConfig from "@/shared/dao-config";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import { parseAsStringEnum, useQueryState } from "nuqs";
+interface DelegateTableData {
+  address: string;
+  votingPower: string;
+  variation?: { percentageChange: number; absoluteChange: number } | null;
+  activity?: string | null;
+  activityPercentage?: number | null;
+  delegators: number;
+}
+
+interface DelegatesProps {
+  timePeriod?: TimeInterval; // Use TimeInterval enum directly
+  daoId: DaoIdEnum;
+}
+
+// Helper function to convert time period to timestamp and block number
+export const getTimeDataFromPeriod = (period: TimeInterval) => {
+  const now = Date.now();
+  const msPerDay = 24 * 60 * 60 * 1000;
+
+  let daysBack: number;
+  switch (period) {
+    case TimeInterval.SEVEN_DAYS:
+      daysBack = 7;
+      break;
+    case TimeInterval.THIRTY_DAYS:
+      daysBack = 30;
+      break;
+    case TimeInterval.NINETY_DAYS:
+      daysBack = 90;
+      break;
+    case TimeInterval.ONE_YEAR:
+      daysBack = 365;
+      break;
+    default:
+      daysBack = 30;
+  }
+
+  return Math.floor((now - daysBack * msPerDay) / 1000);
+};
+
+export const Delegates = ({
+  timePeriod = TimeInterval.THIRTY_DAYS,
+  daoId,
+}: DelegatesProps) => {
+  const pageLimit: number = 15;
+
+  const [drawerAddress, setDrawerAddress] = useQueryState("drawerAddress");
+  const [currentAddressFilter, setCurrentAddressFilter] =
+    useQueryState("address");
+  const [sortOrder, setSortOrder] = useQueryState(
+    "sort",
+    parseAsStringEnum(["desc", "asc"]).withDefault("desc"),
+  );
+  const [sortBy, setSortBy] = useQueryState(
+    "sortBy",
+    parseAsStringEnum(["delegationsCount", "votingPower"]).withDefault(
+      "votingPower",
+    ),
+  );
+  const { decimals } = daoConfig[daoId];
+
+  const handleAddressFilterApply = (address: string | undefined) => {
+    setCurrentAddressFilter(address || "");
+  };
+
+  // Calculate time-based parameters
+  const fromDate = useMemo(
+    () => getTimeDataFromPeriod(timePeriod),
+    [timePeriod],
+  );
+
+  const {
+    data,
+    loading,
+    error,
+    pagination,
+    fetchNextPage,
+    fetchingMore,
+    isHistoricalLoadingFor,
+    isActivityLoadingFor,
+  } = useDelegates({
+    fromDate,
+    orderBy: sortBy,
+    orderDirection: sortOrder,
+    daoId,
+    days: timePeriod,
+    address: currentAddressFilter,
+    limit: pageLimit,
+  });
+
+  const { isMobile } = useScreenSize();
+
+  // Handle sorting for voting power and delegators
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      // Toggle direction if same field
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      // New field, default to desc for votingPower, asc for delegationsCount
+      setSortBy(field as "votingPower" | "delegationsCount");
+      setSortOrder(field === "votingPower" ? "desc" : "asc");
+    }
+  };
+
+  const tableData = useMemo(() => {
+    if (!data) return [];
+
+    return data.map((delegate): DelegateTableData => {
+      const votingPowerBigInt = BigInt(delegate.votingPower || "0");
+      const votingPowerFormatted = Number(
+        formatUnits(votingPowerBigInt, decimals),
+      );
+
+      const activity = delegate.proposalsActivity
+        ? `${delegate.proposalsActivity.votedProposals}/${delegate.proposalsActivity.totalProposals}`
+        : null;
+
+      const activityPercentage = delegate.proposalsActivity
+        ? (delegate.proposalsActivity.votedProposals /
+            delegate.proposalsActivity.totalProposals) *
+          100
+        : null;
+
+      let variation: {
+        percentageChange: number;
+        absoluteChange: number;
+      } | null = null;
+
+      if (delegate.historicalVotingPower !== undefined) {
+        const historicalVotingPowerBigInt = BigInt(
+          delegate.historicalVotingPower,
+        );
+        const historicalVotingPowerFormatted = Number(
+          formatUnits(historicalVotingPowerBigInt, decimals),
+        );
+
+        const absoluteChange =
+          votingPowerFormatted - historicalVotingPowerFormatted;
+
+        // If historical is 0, we can't calculate percentage (division by zero)
+        // Use a large number so the UI displays ">1000%"
+        const percentageChange =
+          historicalVotingPowerFormatted === 0
+            ? 9999
+            : ((votingPowerFormatted - historicalVotingPowerFormatted) /
+                historicalVotingPowerFormatted) *
+              100;
+
+        variation = {
+          percentageChange: Number(percentageChange.toFixed(2)),
+          absoluteChange: Number(absoluteChange.toFixed(2)),
+        };
+      }
+
+      return {
+        address: delegate.accountId || "",
+        votingPower: formatNumberUserReadable(votingPowerFormatted),
+        variation,
+        activity,
+        activityPercentage,
+        delegators: delegate.delegationsCount,
+      };
+    });
+  }, [data, decimals]);
+
+  const delegateColumns: ColumnDef<DelegateTableData>[] = [
+    {
+      accessorKey: "address",
+      cell: ({ row }) => {
+        const address = row.getValue("address") as string;
+        if (loading) {
+          return (
+            <div className="flex items-center gap-3">
+              <SkeletonRow
+                parentClassName="flex animate-pulse"
+                className="size-6 rounded-full"
+              />
+              <SkeletonRow
+                parentClassName="flex animate-pulse"
+                className="h-4 w-24"
+              />
+            </div>
+          );
+        }
+
+        return (
+          <div className="group flex w-full items-center">
+            <EnsAvatar
+              address={address as Address}
+              size="sm"
+              variant="rounded"
+              isDashed={true}
+              nameClassName="[tr:hover_&]:border-primary"
+            />
+            {!isMobile && (
+              <div className="flex items-center opacity-0 transition-opacity [tr:hover_&]:opacity-100">
+                <CopyAndPasteButton
+                  textToCopy={address as `0x${string}`}
+                  customTooltipText={{
+                    default: "Copy address",
+                    copied: "Address copied!",
+                  }}
+                  className="mx-1 p-1"
+                  iconSize="md"
+                />
+                <Button variant="outline" size="sm">
+                  <Plus className="size-3.5" />
+                  <span className="text-sm font-medium">Details</span>
+                </Button>
+              </div>
+            )}
+          </div>
+        );
+      },
+      header: () => (
+        <div className="text-table-header flex w-full items-center justify-start">
+          <p>Address</p>
+          <AddressFilter
+            onApply={handleAddressFilterApply}
+            currentFilter={currentAddressFilter || undefined}
+            className="ml-2"
+          />
+        </div>
+      ),
+      meta: {
+        columnClassName: "w-72",
+      },
+    },
+    {
+      accessorKey: "votingPower",
+      cell: ({ row }) => {
+        const votingPower = row.getValue("votingPower") as string;
+
+        if (loading) {
+          return (
+            <SkeletonRow
+              parentClassName="flex animate-pulse w-full items-center justify-end pr-4"
+              className="h-5 w-full max-w-20"
+            />
+          );
+        }
+
+        return (
+          <div className="text-secondary flex w-full items-center justify-end text-end text-sm font-normal">
+            {votingPower}
+          </div>
+        );
+      },
+      header: () => (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-secondary w-full justify-end p-0"
+          onClick={() => handleSort("votingPower")}
+        >
+          <h4 className="text-table-header whitespace-nowrap">
+            Voting Power ({daoId})
+          </h4>
+          <ArrowUpDown
+            props={{ className: "size-4" }}
+            activeState={
+              sortBy === "votingPower"
+                ? sortOrder === "asc"
+                  ? ArrowState.UP
+                  : ArrowState.DOWN
+                : ArrowState.DEFAULT
+            }
+          />
+        </Button>
+      ),
+      meta: {
+        columnClassName: "w-72",
+      },
+    },
+    {
+      accessorKey: "variation",
+      cell: ({ row }) => {
+        const addr = row.original.address;
+
+        const variation = row.getValue("variation") as
+          | {
+              percentageChange: number;
+              absoluteChange: number;
+            }
+          | undefined;
+
+        if (isHistoricalLoadingFor(addr) || loading) {
+          return (
+            <div className="flex w-full items-center justify-center">
+              <SkeletonRow
+                className="h-4 w-16"
+                parentClassName="flex animate-pulse"
+              />
+            </div>
+          );
+        }
+
+        return (
+          <div className="flex w-full items-center justify-center gap-2 text-sm">
+            {(variation?.percentageChange || 0) < 0 ? "-" : ""}
+            {formatNumberUserReadable(Math.abs(variation?.absoluteChange || 0))}
+            <Percentage value={variation?.percentageChange || 0} />
+          </div>
+        );
+      },
+      header: () => (
+        <h4 className="text-table-header flex w-full items-center justify-center">
+          Change ({daoId})
+        </h4>
+      ),
+      meta: {
+        columnClassName: "w-64",
+      },
+    },
+    {
+      accessorKey: "activity",
+      cell: ({ row }) => {
+        const activity = row.getValue("activity") as string | undefined;
+        const activityPercentage = row.original.activityPercentage;
+        const addr = row.original.address;
+        if (isActivityLoadingFor(addr) || loading) {
+          return (
+            <div className="flex items-center justify-start">
+              <SkeletonRow className="h-5 w-10" />
+            </div>
+          );
+        }
+
+        return (
+          <div className="flex items-center justify-start gap-2">
+            <ProgressCircle percentage={activityPercentage || 0} />
+            {activity || "0/0"}
+          </div>
+        );
+      },
+      header: () => (
+        <h4 className="text-table-header flex w-full items-center justify-start">
+          Activity
+        </h4>
+      ),
+    },
+    {
+      accessorKey: "delegators",
+      cell: ({ row }) => {
+        const delegators = row.getValue("delegators") as number;
+
+        if (loading) {
+          return (
+            <div className="flex items-center justify-start">
+              <SkeletonRow className="h-5 w-12" />
+            </div>
+          );
+        }
+
+        return (
+          <div className="text-secondary flex items-center justify-start text-end text-sm font-normal">
+            {delegators}
+          </div>
+        );
+      },
+      header: () => (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-secondary w-full justify-start p-0"
+          onClick={() => handleSort("delegationsCount")}
+        >
+          <h4 className="text-table-header">Delegators</h4>
+          <ArrowUpDown
+            props={{ className: "size-4" }}
+            activeState={
+              sortBy === "delegationsCount"
+                ? sortOrder === "asc"
+                  ? ArrowState.UP
+                  : ArrowState.DOWN
+                : ArrowState.DEFAULT
+            }
+          />
+        </Button>
+      ),
+      meta: {
+        columnClassName: "w-28",
+      },
+    },
+  ];
+
+  return (
+    <>
+      <div className="flex flex-col gap-2">
+        <Table
+          columns={delegateColumns}
+          data={loading ? Array(12).fill({}) : tableData}
+          onRowClick={(row) => setDrawerAddress(row.address as Address)}
+          size="sm"
+          hasMore={pagination.hasNextPage}
+          isLoadingMore={fetchingMore}
+          onLoadMore={fetchNextPage}
+          withDownloadCSV={true}
+          wrapperClassName="h-[450px]"
+          className="h-[400px]"
+          error={error}
+        />
+      </div>
+      <HoldersAndDelegatesDrawer
+        isOpen={!!drawerAddress}
+        onClose={() => setDrawerAddress(null)}
+        entityType="delegate"
+        address={drawerAddress || ""}
+        daoId={daoId}
+      />
+    </>
+  );
+};

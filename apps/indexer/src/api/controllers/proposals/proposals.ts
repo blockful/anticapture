@@ -41,8 +41,15 @@ export function proposals(
       },
     }),
     async (context) => {
-      const { skip, limit, orderDirection, status, fromDate, fromEndDate } =
-        context.req.valid("query");
+      const {
+        skip,
+        limit,
+        orderDirection,
+        status,
+        fromDate,
+        fromEndDate,
+        includeOptimisticProposals,
+      } = context.req.valid("query");
 
       const result = await service.getProposals({
         skip,
@@ -51,16 +58,17 @@ export function proposals(
         status,
         fromDate,
         fromEndDate,
+        includeOptimisticProposals,
       });
 
-      const [quorums, votingDelay] = await Promise.all([
+      const [quorums] = await Promise.all([
         Promise.all(result.map((p) => client.getQuorum(p.id))),
         client.getVotingDelay(),
       ]);
 
       return context.json({
         items: result.map((p, index) =>
-          ProposalMapper.toApi(p, quorums[index]!, blockTime, votingDelay),
+          ProposalMapper.toApi(p, quorums[index]!, blockTime),
         ),
         totalCount: await service.getProposalsCount(),
       });
@@ -101,13 +109,13 @@ export function proposals(
         return context.json({ error: "Proposal not found" }, 404);
       }
 
-      const [quorum, votingDelay] = await Promise.all([
+      const [quorum] = await Promise.all([
         client.getQuorum(id),
         client.getVotingDelay(),
       ]);
 
       return context.json(
-        ProposalMapper.toApi(proposal, quorum, blockTime, votingDelay),
+        ProposalMapper.toApi(proposal, quorum, blockTime),
         200,
       );
     },

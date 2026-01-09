@@ -103,6 +103,7 @@ export const proposalCreated = async (
     description: string;
     blockNumber: bigint;
     timestamp: bigint;
+    proposalType?: number;
   },
 ) => {
   const {
@@ -138,6 +139,7 @@ export const proposalCreated = async (
     timestamp,
     status: ProposalStatus.PENDING,
     endTimestamp: timestamp + BigInt(blockDelta * blockTime),
+    proposalType: args.proposalType,
   });
 
   // Update proposer's proposal count
@@ -165,4 +167,22 @@ export const updateProposalStatus = async (
   await context.db.update(proposalsOnchain, { id: proposalId }).set({
     status,
   });
+};
+
+/**
+ * ### Updates:
+ * - `proposalsOnchain`: Sets the new deadline (endBlock) and endTimestamp
+ */
+export const proposalExtended = async (
+  context: Context,
+  proposalId: string,
+  blockTime: number,
+  extendedDeadline: bigint,
+) => {
+  await context.db.update(proposalsOnchain, { id: proposalId }).set((row) => ({
+    endBlock: Number(extendedDeadline),
+    endTimestamp:
+      row.endTimestamp +
+      BigInt((Number(extendedDeadline) - row.endBlock) * blockTime),
+  }));
 };

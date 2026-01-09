@@ -24,7 +24,7 @@ import {
   TableRow,
 } from "@/shared/components/design-system/table/components";
 import { cn } from "@/shared/utils";
-import { DownloadIcon } from "lucide-react";
+import { DownloadIcon, Inbox } from "lucide-react";
 import {
   headerSizeVariants,
   rowSizeVariants,
@@ -37,6 +37,8 @@ import {
   ExpandableData,
   ExpandButton,
 } from "@/shared/components/design-system/table/ExpandButton";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 type ColumnMeta = {
   columnClassName?: string;
@@ -54,6 +56,7 @@ interface DataTableProps<TData, TValue> {
   disableRowClick?: (row: TData) => boolean;
   filterColumn?: string;
   hasMore?: boolean;
+  href?: (row: TData) => string | null | undefined;
   infiniteRootMargin?: string;
   isLoadingMore?: boolean;
   mobileTableFixed?: boolean;
@@ -68,6 +71,9 @@ interface DataTableProps<TData, TValue> {
   getRowCanExpand?: (row: Row<TData>) => boolean;
   renderSubComponent?: (row: Row<TData>) => ReactNode;
   getSubRows?: (originalRow: TData, index: number) => TData[] | undefined;
+  error?: Error | null;
+  emptyTitle?: string;
+  emptyDescription?: string;
 }
 
 export const Table = <TData, TValue>({
@@ -78,6 +84,7 @@ export const Table = <TData, TValue>({
   disableRowClick,
   filterColumn = "",
   hasMore = false,
+  href,
   infiniteRootMargin = "0px 0px 200px 0px",
   isLoadingMore = false,
   mobileTableFixed = false,
@@ -92,13 +99,22 @@ export const Table = <TData, TValue>({
   getRowCanExpand,
   renderSubComponent,
   getSubRows,
+  error,
+  emptyTitle = "Nothing to show yet",
+  emptyDescription = "No relevant governance signals were detected for this selection.",
 }: DataTableProps<TData, TValue>) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [expanded, setExpanded] = useState<ExpandedState>({});
+  const [isMounted, setIsMounted] = useState(false);
+  const router = useRouter();
 
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!onLoadMore || !hasMore) return;
@@ -158,21 +174,38 @@ export const Table = <TData, TValue>({
 
   const table = useReactTable(tableConfig);
 
-  const formatCsvData = (data: TData[]): object[] => {
-    return data.map((row) => {
-      const serialized: Record<string, string | number | null> = {};
-      Object.entries(row as Record<string, unknown>).forEach(([key, value]) => {
-        if (value === null || value === undefined) {
-          serialized[key] = "";
-        } else if (typeof value === "object") {
-          const json = JSON.stringify(value).replace(/"/g, '""');
-          serialized[key] = `"${json}"`;
-        } else {
-          serialized[key] = value as string | number;
-        }
-      });
-      return serialized;
-    });
+  const escapeCsv = (value: string) => value.replace(/"/g, '""');
+
+  const serializeValue = (value: unknown): string => {
+    const primitiveTypes = new Set(["string", "number", "boolean"]);
+
+    if (!value) return "";
+
+    if (primitiveTypes.has(typeof value)) {
+      return escapeCsv(String(value));
+    }
+
+    if (value instanceof Date) {
+      return value.toISOString();
+    }
+
+    try {
+      return escapeCsv(JSON.stringify(value));
+    } catch {
+      return "";
+    }
+  };
+
+  const formatCsvData = (data: TData[]): Record<string, string>[] => {
+    return data.map((row) =>
+      Object.entries(row as Record<string, unknown>).reduce<
+        Record<string, string>
+      >((acc, [key, value]) => {
+        const serialized = serializeValue(value);
+        acc[key] = /[",\n]/.test(serialized) ? `"${serialized}"` : serialized;
+        return acc;
+      }, {}),
+    );
   };
 
   return (
@@ -222,13 +255,16 @@ export const Table = <TData, TValue>({
                 const isLastNestedRow =
                   row.getParentRow()?.getLeafRows().slice(-1)[0].id === row.id;
 
+                const rowHref = href ? href(row.original) : null;
+
                 return (
                   <Fragment key={row.id}>
                     <TableRow
                       key={row.id}
                       className={cn(
                         "group border-transparent transition-colors duration-300",
-                        onRowClick && !disableRowClick?.(row.original)
+                        (onRowClick || rowHref) &&
+                          !disableRowClick?.(row.original)
                           ? "hover:bg-surface-contrast cursor-pointer"
                           : "cursor-default",
                         enableExpanding &&
@@ -237,15 +273,39 @@ export const Table = <TData, TValue>({
                         row.getIsExpanded() && "border-b-transparent",
                         isLastNestedRow && "border-b-light-dark",
                       )}
-                      onClick={() =>
-                        !disableRowClick?.(row.original) &&
-                        onRowClick?.(row.original)
-                      }
+                      onClick={(e) => {
+                        // Don't handle click if it came from a Link inside
+                        if ((e.target as HTMLElement).closest("a")) return;
+                        if (disableRowClick?.(row.original)) return;
+                        if (onRowClick) {
+                          onRowClick(row.original);
+                        } else if (rowHref) {
+                          router.push(rowHref);
+                        }
+                      }}
                     >
                       {row.getVisibleCells().map((cell, index) => {
                         const colMeta = (
                           cell.column.columnDef as { meta?: ColumnMeta }
                         ).meta;
+                        const cellContent = (
+                          <div className="flex w-full items-center gap-2">
+                            {index === 0 && enableExpanding && (
+                              <TreeLines row={row} />
+                            )}
+                            {index === 0 && (
+                              <ExpandButton
+                                row={row as unknown as Row<ExpandableData>}
+                                enableExpanding={enableExpanding}
+                              />
+                            )}
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext(),
+                            )}
+                          </div>
+                        );
+
                         return (
                           <TableCell
                             key={cell.id}
@@ -257,25 +317,27 @@ export const Table = <TData, TValue>({
                               colMeta?.columnClassName,
                             )}
                           >
-                            <div className="flex items-center gap-2">
-                              {index === 0 && enableExpanding && (
-                                <TreeLines row={row} />
-                              )}
-                              {index === 0 && (
-                                <ExpandButton
-                                  row={row as unknown as Row<ExpandableData>}
-                                  enableExpanding={enableExpanding}
-                                />
-                              )}
-                              {flexRender(
-                                cell.column.columnDef.cell,
-                                cell.getContext(),
-                              )}
-                            </div>
+                            {/* Wrap cell content with Link for prefetching and URL display - maintains valid HTML */}
+                            {rowHref && !disableRowClick?.(row.original) ? (
+                              <Link
+                                href={rowHref}
+                                prefetch={true}
+                                className="flex h-full w-full items-center justify-start"
+                                onClick={(e) => {
+                                  // Let Link handle navigation naturally
+                                  e.stopPropagation();
+                                }}
+                              >
+                                {cellContent}
+                              </Link>
+                            ) : (
+                              cellContent
+                            )}
                           </TableCell>
                         );
                       })}
                     </TableRow>
+
                     {row.getIsExpanded() && renderSubComponent && (
                       <TableRow>
                         <TableCell
@@ -290,7 +352,12 @@ export const Table = <TData, TValue>({
                 );
               })}
 
-              <div ref={sentinelRef} aria-hidden="true" />
+              {/* Sentinel for infinite scrolling */}
+              <tr>
+                <td colSpan={columns.length}>
+                  <div ref={sentinelRef} />
+                </td>
+              </tr>
 
               {isLoadingMore && (
                 <TableRow>
@@ -307,12 +374,25 @@ export const Table = <TData, TValue>({
               colSpan={columns.length}
               className={cn("text-center", className)}
             >
-              {customEmptyState || <EmptyState />}
+              {" "}
+              {customEmptyState ? (
+                customEmptyState
+              ) : error ? (
+                <EmptyState />
+              ) : (
+                data.length === 0 && (
+                  <EmptyState
+                    icon={<Inbox />}
+                    title={emptyTitle}
+                    description={emptyDescription}
+                  />
+                )
+              )}
             </TableCell>
           )}
         </TableBody>
       </TableContainer>
-      {withDownloadCSV && (
+      {withDownloadCSV && data.length > 0 && isMounted && (
         <p className="text-secondary mt-2 flex font-mono text-[13px] tracking-wider">
           [DOWNLOAD AS{" "}
           <CSVLink

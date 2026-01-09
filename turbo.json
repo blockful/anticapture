@@ -2,7 +2,10 @@
   "$schema": "https://turbo.build/schema.json",
   "globalEnv": [".env"],
   "tasks": {
-    "build": { "outputs": ["dist/**", ".next/**", ".next/cache/**"] },
+    "build": {
+      "outputs": ["dist/**", ".next/**", ".next/cache/**"],
+      "env": ["RESEND_API_KEY", "RESEND_FROM_EMAIL", "CONTACT_EMAIL"]
+    },
     "storybook": {
       "outputs": ["dist/**", ".next/**", ".next/cache/**"],
       "env": ["FIGMA_TOKEN", "VALIDATE_FIGMA_TOKEN_API"]

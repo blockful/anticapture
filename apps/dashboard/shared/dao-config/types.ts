@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, SVGProps } from "react";
 import { Address, Chain } from "viem";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
@@ -60,7 +60,7 @@ interface BaseInfo {
 }
 
 export interface ChainWithIcon extends Chain {
-  icon: (props: DaoIconProps) => ReactNode;
+  icon: (props: SVGProps<SVGSVGElement>) => ReactNode;
   blockTime: number;
 }
 
@@ -72,10 +72,13 @@ export interface DaoOverviewConfig {
     governor?: Address;
     timelock?: Address;
   };
+  govPlatform?: {
+    name: string;
+    url: string;
+  };
   token: "ERC20" | "ERC721";
   cancelFunction?: string;
   snapshot?: string;
-  tally?: string;
   priceDisclaimer?: string;
   rules: {
     delay: boolean;
@@ -189,8 +192,7 @@ export interface AttackProfitabilityConfig {
     percentage: number;
   };
 }
-export interface GovernanceImplementationConfig
-  extends GovernanceImplementation {}
+export interface GovernanceImplementationConfig extends GovernanceImplementation {}
 
 // Complete DAO configuration structure
 export interface DaoConfiguration extends BaseInfo {

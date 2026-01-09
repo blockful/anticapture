@@ -7,6 +7,7 @@ import {
   gte,
   gt,
   inArray,
+  notInArray,
   sql,
   isNull,
   count,
@@ -132,6 +133,7 @@ export class DrizzleRepository {
     status: string[] | undefined,
     fromDate: number | undefined,
     fromEndDate: number | undefined,
+    proposalTypeExclude?: number[],
   ): Promise<DBProposal[]> {
     const whereClauses: SQL<unknown>[] = [];
 
@@ -148,7 +150,11 @@ export class DrizzleRepository {
         gte(proposalsOnchain.endTimestamp, BigInt(fromEndDate)),
       );
     }
-
+    if (proposalTypeExclude && proposalTypeExclude.length > 0) {
+      whereClauses.push(
+        notInArray(proposalsOnchain.proposalType, proposalTypeExclude),
+      );
+    }
     return await db
       .select()
       .from(proposalsOnchain)

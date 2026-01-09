@@ -4,6 +4,7 @@ import {
   updateProposalStatus,
   proposalCreated,
   voteCast,
+  proposalExtended,
 } from "@/eventHandlers";
 import { DaoIdEnum } from "@/lib/enums";
 import { ProposalStatus } from "@/lib/constants";
@@ -53,6 +54,15 @@ export function GovernorIndexer(blockTime: number) {
       context,
       event.args.proposalId.toString(),
       ProposalStatus.EXECUTED,
+    );
+  });
+
+  ponder.on(`ZKGovernor:ProposalExtended`, async ({ event, context }) => {
+    await proposalExtended(
+      context,
+      event.args.proposalId.toString(),
+      blockTime,
+      event.args.extendedDeadline,
     );
   });
 

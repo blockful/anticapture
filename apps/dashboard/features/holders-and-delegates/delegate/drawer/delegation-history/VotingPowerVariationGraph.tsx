@@ -1,0 +1,317 @@
+"use client";
+
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Dot,
+} from "recharts";
+import { ChartContainer } from "@/shared/components/ui/chart";
+import { timestampToReadableDate } from "@/shared/utils";
+import { formatNumberUserReadable } from "@/shared/utils";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { DelegationHistoryGraphItem } from "@/features/holders-and-delegates/hooks";
+import { useDelegateDelegationHistoryGraph } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistoryGraph";
+import { TimePeriodSwitcher } from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
+import { ChartExceptionState } from "@/shared/components";
+import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
+import { parseAsStringEnum, useQueryState } from "nuqs";
+
+interface VotingPowerVariationGraphProps {
+  accountId: string;
+  daoId: DaoIdEnum;
+}
+
+interface CustomDotProps {
+  cx: number;
+  cy: number;
+  payload: {
+    timestamp: number;
+    votingPower: number;
+    delta: number;
+    type: string;
+    isGain: boolean;
+    transactionHash: string;
+    fromAddress?: string;
+    toAddress?: string;
+  };
+}
+
+const chartConfig = {
+  votingPower: {
+    label: "Voting Power",
+    color: "#3b82f6",
+  },
+};
+
+const generateMonthlyTicks = (chartData: Array<{ timestamp: number }>) => {
+  if (!chartData.length) return [];
+
+  const firstTimestamp = Math.min(...chartData.map((d) => d.timestamp));
+  const lastTimestamp = Math.max(...chartData.map((d) => d.timestamp));
+
+  const ticks: number[] = [];
+  const startDate = new Date(firstTimestamp);
+  const endDate = new Date(lastTimestamp);
+
+  // Ensure the first tick aligns with the first data point to avoid leading blank space
+  ticks.push(firstTimestamp);
+
+  // Then add monthly ticks starting from the first day of the next month
+  const current = new Date(
+    startDate.getFullYear(),
+    startDate.getMonth() + 1,
+    1,
+  );
+
+  while (current <= endDate) {
+    ticks.push(current.getTime());
+    current.setMonth(current.getMonth() + 1);
+  }
+
+  return Array.from(new Set(ticks));
+};
+
+export const VotingPowerVariationGraph = ({
+  accountId,
+  daoId,
+}: VotingPowerVariationGraphProps) => {
+  const [selectedPeriod, setSelectedPeriod] = useQueryState(
+    "selectedPeriod",
+    parseAsStringEnum(["30d", "90d", "all"]).withDefault("all"),
+  );
+
+  const { delegationHistory, loading, error } =
+    useDelegateDelegationHistoryGraph(accountId, daoId, selectedPeriod);
+
+  if (loading) {
+    return (
+      <div className="w-full">
+        <ChartExceptionState
+          state="loading"
+          title="VOTING POWER VARIATION"
+          headerContent={
+            <TimePeriodSwitcher
+              value={selectedPeriod}
+              setTimePeriod={setSelectedPeriod}
+              isSmall={true}
+            />
+          }
+        />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full">
+        <ChartExceptionState
+          state="error"
+          title="VOTING POWER VARIATION"
+          errorMessage="Error loading data"
+          headerContent={
+            <TimePeriodSwitcher
+              value={selectedPeriod}
+              setTimePeriod={setSelectedPeriod}
+              isSmall={true}
+            />
+          }
+        />
+      </div>
+    );
+  }
+
+  if (!delegationHistory || delegationHistory.length === 0) {
+    return (
+      <div className="w-full">
+        <ChartExceptionState
+          state="no-data"
+          title="VOTING POWER VARIATION"
+          noDataMessage="No voting power data available"
+          headerContent={
+            <TimePeriodSwitcher
+              value={selectedPeriod}
+              setTimePeriod={setSelectedPeriod}
+              isSmall={true}
+            />
+          }
+        />
+      </div>
+    );
+  }
+
+  const chartData = delegationHistory
+    .map((dataPoint) => ({
+      timestamp: dataPoint.timestamp,
+      votingPower: dataPoint.votingPower,
+      delta: dataPoint.delta,
+      type: dataPoint.type,
+      isGain: dataPoint.isGain,
+      transactionHash: dataPoint.transactionHash,
+      fromAddress: dataPoint.fromAddress,
+      toAddress: dataPoint.toAddress,
+    }))
+    .sort((a, b) => a.timestamp - b.timestamp);
+
+  const extendedChartData =
+    chartData.length < 1000
+      ? [
+          {
+            timestamp: chartData[0]?.timestamp - 1000, // to avoid hover conflict with first point
+            votingPower: 0,
+            delta: "0",
+            type: "initial",
+            isGain: true,
+            transactionHash: "initial",
+            fromAddress: undefined,
+            toAddress: undefined,
+          },
+          ...chartData,
+        ]
+      : chartData;
+
+  // Custom dot component to show each transfer/delegation point
+  const CustomDot = (props: CustomDotProps) => {
+    const { cx, cy, payload } = props;
+    return (
+      <Dot
+        key={payload.transactionHash}
+        cx={cx}
+        cy={cy}
+        r={4}
+        fill={payload.isGain ? "var(--base-success)" : "var(--base-error)"}
+        stroke={payload.isGain ? "var(--base-success)" : "var(--base-error)"}
+        strokeWidth={2}
+        className="cursor-pointer"
+      />
+    );
+  };
+
+  return (
+    <div className="w-full">
+      <div className="flex items-center justify-between">
+        <h3 className="text-secondary font-mono text-[13px] font-medium uppercase">
+          VOTING POWER VARIATION
+        </h3>
+        <TimePeriodSwitcher
+          value={selectedPeriod}
+          setTimePeriod={setSelectedPeriod}
+          isSmall={true}
+        />
+      </div>
+      <div className="relative h-[200px] w-full">
+        <ChartContainer config={chartConfig} className="h-full w-full">
+          <LineChart
+            data={extendedChartData}
+            margin={{ top: 25, right: 30, left: -20, bottom: 5 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--base-border)" />
+            <XAxis
+              dataKey="timestamp"
+              type="number"
+              scale="time"
+              domain={["dataMin", "dataMax"]}
+              ticks={generateMonthlyTicks(extendedChartData)}
+              tickFormatter={(value: number) => {
+                const date = new Date(value);
+                const month = date.toLocaleDateString("en-US", {
+                  month: "short",
+                });
+                const year = date.getFullYear().toString().slice(-2);
+                return `${month} '${year}`;
+              }}
+              stroke="var(--base-dimmed)"
+              fontSize={12}
+            />
+            <YAxis
+              tickFormatter={(value: number) => formatNumberUserReadable(value)}
+              stroke="var(--base-dimmed)"
+              fontSize={12}
+            />
+            <Tooltip
+              content={(props) => {
+                const { active, payload } = props;
+                if (active && payload && payload.length) {
+                  const data = payload[0]
+                    ?.payload as DelegationHistoryGraphItem;
+
+                  // Determine which address to show based on transaction type and direction
+                  const getDisplayAddress = () => {
+                    if (data.type === "delegation") {
+                      return data.isGain ? data.fromAddress : data.toAddress;
+                    } else if (data.type === "transfer") {
+                      return data.isGain ? data.fromAddress : data.toAddress;
+                    }
+                    return null;
+                  };
+
+                  const displayAddress = getDisplayAddress();
+                  const type =
+                    data.type === "delegation"
+                      ? "Delegation"
+                      : data.type === "transfer"
+                        ? "Transfer"
+                        : "Initial Voting Power";
+                  const addressLabel =
+                    data.type === "delegation"
+                      ? "Delegated from"
+                      : "Transferred from";
+
+                  return (
+                    <div className="bg-surface-contrast border-light-dark rounded-lg border p-3 shadow-lg">
+                      <p className="text-primary text-sm font-medium">
+                        {timestampToReadableDate(data.timestamp / 1000)}
+                      </p>
+                      <p className="text-secondary text-xs">
+                        Voting Power:{" "}
+                        {formatNumberUserReadable(data.votingPower)}
+                      </p>
+                      <p className="text-secondary text-xs">Type: {type}</p>
+                      <p
+                        className={`text-xs ${data.isGain ? "text-success" : "text-error"}`}
+                      >
+                        {data.isGain && "+"}
+                        {formatNumberUserReadable(parseFloat(data.delta))}
+                      </p>
+                      {displayAddress && (
+                        <p className="text-secondary text-xs">
+                          {addressLabel}:
+                        </p>
+                      )}
+                      {displayAddress && (
+                        <EnsAvatar
+                          address={displayAddress as `0x${string}`}
+                          showAvatar={false}
+                          size="xs"
+                          className="mt-2"
+                          nameClassName="text-xs"
+                          containerClassName="mt-2 flex h-10 items-center gap-2 bg-blue-400"
+                        />
+                      )}
+                    </div>
+                  );
+                }
+                return null;
+              }}
+            />
+            <Line
+              type="stepAfter"
+              dataKey="votingPower"
+              stroke="var(--base-primary)"
+              strokeWidth={1}
+              dot={CustomDot}
+              connectNulls={true}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </LineChart>
+        </ChartContainer>
+        <AnticaptureWatermark />
+      </div>
+    </div>
+  );
+};

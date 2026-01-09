@@ -1,8 +1,9 @@
+import { Address } from "viem";
 import { asc, desc, gte, sql, and, eq, or, lte } from "ponder";
 import { db } from "ponder:api";
 import { transfer, accountBalance } from "ponder:schema";
-import { AccountInteractions, AmountFilter } from "../../mappers";
-import { Address } from "viem";
+
+import { AccountInteractions, Filter } from "../../mappers";
 
 export class AccountInteractionsRepository {
   async getAccountInteractions(
@@ -10,8 +11,9 @@ export class AccountInteractionsRepository {
     startTimestamp: number,
     limit: number,
     skip: number,
+    orderBy: "volume" | "count",
     orderDirection: "asc" | "desc",
-    filter: AmountFilter,
+    filter: Filter,
   ): Promise<AccountInteractions> {
     // Aggregate outgoing transfers (negative amounts)
     const transferCriteria = [
@@ -30,18 +32,21 @@ export class AccountInteractionsRepository {
       transferCriteria.push(lte(transfer.amount, filter.maxAmount));
     }
 
+    if (filter.address) {
+      transferCriteria.push(
+        or(
+          eq(transfer.toAccountId, filter.address),
+          eq(transfer.fromAccountId, filter.address),
+        ),
+      );
+    }
+
     // Aggregate outgoing transfers (negative amounts)
     const scopedTransfers = db
       .select()
       .from(transfer)
       .where(and(...transferCriteria))
       .as("scoped_transfers");
-
-    const totalCountResult = await db
-      .select({
-        count: sql<number>`COUNT(*)`.as("count"),
-      })
-      .from(scopedTransfers);
 
     const transfersFrom = db
       .select({
@@ -92,11 +97,17 @@ export class AccountInteractionsRepository {
         sql`${accountBalance.accountId} = ${transfersTo.accountId}`,
       )
       .where(
-        sql`${transfersFrom.accountId} IS NOT NULL OR ${transfersTo.accountId} IS NOT NULL`,
+        sql`(${transfersFrom.accountId} IS NOT NULL OR ${transfersTo.accountId} IS NOT NULL) AND ${accountBalance.accountId} != ${accountId}`,
       )
       .as("combined");
 
-    const result = await db
+    const orderDirectionFn = orderDirection === "desc" ? desc : asc;
+    const orderByField =
+      orderBy === "count"
+        ? sql`${combined.fromCount} + ${combined.toCount}`
+        : sql`ABS(${combined.fromChange}) + ABS(${combined.toChange})`;
+
+    const baseQuery = db
       .select({
         accountId: combined.accountId,
         currentBalance: combined.currentBalance,
@@ -114,17 +125,21 @@ export class AccountInteractionsRepository {
           ),
       })
       .from(combined)
-      .orderBy(
-        orderDirection === "desc"
-          ? desc(sql`${combined.fromCount} + ${combined.toCount}`)
-          : asc(sql`${combined.fromCount} + ${combined.toCount}`),
-      )
-      .offset(skip)
-      .limit(limit);
+      .orderBy(orderDirectionFn(orderByField));
+
+    const totalCountResult = await db
+      .select({
+        count: sql<number>`COUNT(*)`.as("count"),
+      })
+      .from(baseQuery.as("subquery"));
+
+    const pagedResult = await baseQuery.offset(skip).limit(limit);
 
     return {
-      interactionCount: Number(totalCountResult[0]?.count) ?? 0,
-      interactions: result.map(
+      interactionCount: totalCountResult[0]?.count
+        ? Number(totalCountResult[0].count)
+        : 0,
+      interactions: pagedResult.map(
         ({
           accountId,
           currentBalance,
