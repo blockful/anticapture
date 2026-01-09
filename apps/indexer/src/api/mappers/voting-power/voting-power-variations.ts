@@ -5,6 +5,10 @@ import { PeriodResponseMapper, PeriodResponseSchema } from "../shared";
 import { Address, isAddress } from "viem";
 
 export const VotingPowerVariationsRequestSchema = z.object({
+  addresses: z
+    .array(z.string().refine((addr) => isAddress(addr)))
+    .optional()
+    .default([]),
   days: z
     .enum(DaysOpts)
     .optional()

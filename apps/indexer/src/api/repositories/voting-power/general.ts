@@ -1,5 +1,17 @@
 import { Address } from "viem";
-import { gte, and, lte, desc, eq, asc, sql, SQL, inArray } from "drizzle-orm";
+import {
+  and,
+  desc,
+  eq,
+  asc,
+  sql,
+  SQL,
+  inArray,
+  gt,
+  lt,
+  gte,
+  lte,
+} from "drizzle-orm";
 import { db } from "ponder:api";
 import {
   votingPowerHistory,
@@ -43,6 +55,8 @@ export class VotingPowerRepository {
     orderBy: "timestamp" | "delta",
     minDelta?: string,
     maxDelta?: string,
+    fromDate?: number,
+    toDate?: number,
   ): Promise<DBHistoricalVotingPowerWithRelations[]> {
     const result = await db
       .select()
@@ -55,6 +69,12 @@ export class VotingPowerRepository {
             : undefined,
           maxDelta
             ? lte(votingPowerHistory.deltaMod, BigInt(maxDelta))
+            : undefined,
+          fromDate
+            ? gte(votingPowerHistory.timestamp, BigInt(fromDate))
+            : undefined,
+          toDate
+            ? lte(votingPowerHistory.timestamp, BigInt(toDate))
             : undefined,
         ),
       )
@@ -110,6 +130,7 @@ export class VotingPowerRepository {
   }
 
   async getVotingPowerVariations(
+    addresses: Address[],
     startTimestamp: number,
     limit: number,
     skip: number,
@@ -122,7 +143,14 @@ export class VotingPowerRepository {
       })
       .from(votingPowerHistory)
       .orderBy(desc(votingPowerHistory.timestamp))
-      .where(gte(votingPowerHistory.timestamp, BigInt(startTimestamp)))
+      .where(
+        and(
+          gte(votingPowerHistory.timestamp, BigInt(startTimestamp)),
+          addresses.length
+            ? inArray(votingPowerHistory.accountId, addresses)
+            : undefined,
+        ),
+      )
       .as("history");
 
     const aggregate = db
@@ -285,10 +313,10 @@ export class VotingPowerRepository {
       conditions.push(inArray(accountPower.accountId, addresses));
     }
     if (amountfilter.minAmount) {
-      gte(accountPower.votingPower, BigInt(amountfilter.minAmount));
+      gt(accountPower.votingPower, BigInt(amountfilter.minAmount));
     }
     if (amountfilter.maxAmount) {
-      gte(accountPower.votingPower, BigInt(amountfilter.maxAmount));
+      lt(accountPower.votingPower, BigInt(amountfilter.maxAmount));
     }
 
     return conditions.length ? and(...conditions) : sql`true`;

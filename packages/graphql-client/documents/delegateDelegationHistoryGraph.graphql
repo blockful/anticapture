@@ -3,64 +3,35 @@ query GetDelegateDelegationHistoryGraph(
   $fromTimestamp: BigInt
   $toTimestamp: BigInt
   $orderBy: String = "timestamp"
-      $orderDirection: String = "desc"
+  $orderDirection: String = "desc"
 ) {
-  # Missing from historicalVotingPowers:
-  #  - Filtering by time period (timestamp before and after);
-  #  - `previousDelegate` attribute in delegation object
-  #
-  # historicalVotingPowers(
-  #   accountId: ""
-  #   orderBy: timestamp
-  #   orderDirection: asc
-  #   limit: ""
-  # ) {
-  #   items {
-  #     delta
-  #     transactionHash
-  #     timestamp
-  #     delegation {
-  #       from
-  #       to
-  #       value
-  #     }
-  #     transfer {
-  #       from
-  #       to
-  #       value
-  #     }
-  #     votingPower
-  #   }
-  #   totalCount
-  # }
-
-  votingPowerHistorys(
-    orderBy: $orderBy
-    orderDirection: $orderDirection
-    where: { 
+  query MyQuery {
+    historicalVotingPowers(
       accountId: $accountId
-      timestamp_gte: $fromTimestamp
-      timestamp_lte: $toTimestamp
-    }
-    limit: 1000
-  ) {
-    items {
-      delta
-      transactionHash
-      timestamp
-      delegation {
-        delegatorAccountId
-        delegatedValue
-        previousDelegate
-        delegateAccountId
+      orderBy: $orderBy
+      orderDirection: $orderDirection
+      fromDate: $fromTimestamp
+      toDate: $toTimestamp
+      limit: "1000"
+    ) {
+      items {
+        delta
+        transactionHash
+        timestamp
+        delegation {
+          from
+          previousDelegate
+          to
+          value
+        }
+        transfer {
+          from
+          to
+          value
+        }
+        votingPower
       }
-      transfer {
-        amount
-        fromAccountId
-        toAccountId
-      }
-      votingPower
+      totalCount
     }
-    totalCount
   }
 } 

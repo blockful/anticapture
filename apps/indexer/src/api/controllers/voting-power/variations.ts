@@ -35,10 +35,12 @@ export function votingPowerVariations(app: Hono, service: VotingPowerService) {
       },
     }),
     async (context) => {
-      const { days, limit, skip, orderDirection } = context.req.valid("query");
+      const { addresses, days, limit, skip, orderDirection } =
+        context.req.valid("query");
       const now = Math.floor(Date.now() / 1000);
 
       const result = await service.getVotingPowerVariations(
+        addresses,
         now - days,
         skip,
         limit,
