@@ -25,8 +25,10 @@ export const HistoricalVotingPowerRequestSchema = z.object({
     .default(10),
   orderBy: z.enum(["timestamp", "delta"]).optional().default("timestamp"),
   orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
-  minDelta: z.string().optional(),
-  maxDelta: z.string().optional(),
+  fromDate: z.coerce.number().optional(),
+  toDate: z.coerce.number().optional(),
+  fromValue: z.string().optional(),
+  toValue: z.string().optional(),
 });
 
 export type HistoricalVotingPowerRequest = z.infer<
@@ -48,6 +50,7 @@ export const HistoricalVotingPowerResponseSchema = z.object({
           from: z.string(),
           value: z.string(),
           to: z.string(),
+          previousDelegate: z.string().nullable(),
         })
         .nullable(),
       transfer: z
@@ -84,6 +87,7 @@ export const HistoricalVotingPowerMapper = (
             from: p.delegations.delegatorAccountId,
             value: p.delegations.delegatedValue.toString(),
             to: p.delegations.delegateAccountId,
+            previousDelegate: p.delegations.previousDelegate,
           }
         : null,
       transfer: p.transfers

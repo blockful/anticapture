@@ -33,6 +33,8 @@ export class NounsVotingPowerRepository {
     orderBy: "timestamp" | "delta",
     minDelta?: string,
     maxDelta?: string,
+    fromDate?: number,
+    toDate?: number,
   ): Promise<DBHistoricalVotingPowerWithRelations[]> {
     const result = await db
       .select()
@@ -45,6 +47,12 @@ export class NounsVotingPowerRepository {
             : undefined,
           maxDelta
             ? lte(votingPowerHistory.deltaMod, BigInt(maxDelta))
+            : undefined,
+          fromDate
+            ? gte(votingPowerHistory.timestamp, BigInt(fromDate))
+            : undefined,
+          toDate
+            ? lte(votingPowerHistory.timestamp, BigInt(toDate))
             : undefined,
         ),
       )

@@ -35,8 +35,16 @@ export function historicalVotingPowers(app: Hono, service: VotingPowerService) {
       },
     }),
     async (context) => {
-      const { skip, limit, orderDirection, orderBy, minDelta, maxDelta } =
-        context.req.valid("query");
+      const {
+        skip,
+        limit,
+        orderDirection,
+        orderBy,
+        fromValue,
+        toValue,
+        fromDate,
+        toDate,
+      } = context.req.valid("query");
       const { accountId } = context.req.valid("param");
 
       const { items, totalCount } = await service.getHistoricalVotingPowers(
@@ -45,8 +53,10 @@ export function historicalVotingPowers(app: Hono, service: VotingPowerService) {
         limit,
         orderDirection,
         orderBy,
-        minDelta,
-        maxDelta,
+        fromValue,
+        toValue,
+        fromDate,
+        toDate,
       );
       return context.json(HistoricalVotingPowerMapper(items, totalCount));
     },

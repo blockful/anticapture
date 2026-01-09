@@ -113,19 +113,19 @@ type Query {
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/delegation-percentage`\nGet delegation percentage day buckets with forward-fill\n"
   delegationPercentageByDay(startDate: String, endDate: String, orderDirection: queryInput_delegationPercentageByDay_orderDirection = asc, limit: NonNegativeInt = 365, after: String, before: String): delegationPercentageByDay_200_response
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/voting-powers/historical`\nReturns a list of voting power changes\n"
-  historicalVotingPowers(account: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_historicalVotingPowers_orderBy = timestamp, orderDirection: queryInput_historicalVotingPowers_orderDirection = desc, minDelta: String, maxDelta: String): historicalVotingPowers_200_response
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/voting-powers/{args.accountId}/historical`\nReturns a list of voting power changes\n"
+  historicalVotingPowers(accountId: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_historicalVotingPowers_orderBy = timestamp, orderDirection: queryInput_historicalVotingPowers_orderDirection = desc, fromDate: Float, toDate: Float, fromValue: String, toValue: String): historicalVotingPowers_200_response
 
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/voting-powers/variations`\nReturns a mapping of the biggest changes to voting power associated by delegate address\n"
-  votingPowerVariations(days: queryInput_votingPowerVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_votingPowerVariations_orderDirection = desc): votingPowerVariations_200_response
+  votingPowerVariations(addresses: [String] = [], fromDate: Float = 1760204526, toDate: Float = 1767980526, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_votingPowerVariations_orderDirection = desc): votingPowerVariations_200_response
 
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/voting-powers/{args.accountId}/variations`\nReturns a the changes to voting power by period and accountId\n"
-  votingPowerVariationsByAccountId(accountId: String!, days: queryInput_votingPowerVariationsByAccountId_days = _90d): votingPowerVariationsByAccountId_200_response
+  votingPowerVariationsByAccountId(accountId: String!, fromDate: Float = 1760204526, toDate: Float = 1767980526): votingPowerVariationsByAccountId_200_response
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/voting-powers`\nTODO\n"
-  votingPowers(limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_votingPowers_orderDirection = desc, addresses: [String] = [], powerGreaterThan: String, powerLessThan: String): votingPowers_200_response
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/voting-powers`\nReturns sorted and paginated account voting power records\n"
+  votingPowers(limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_votingPowers_orderDirection = desc, addresses: [String] = [], fromValue: String, toValue: String): votingPowers_200_response
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/voting-powers/{args.accountId}`\nTODO\n"
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/voting-powers/{args.accountId}`\nReturns voting power information for a specific address (account)\n"
   votingPowerByAccountId(accountId: String!): votingPowerByAccountId_200_response
 
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/account-balance/variations`\nReturns a mapping of the biggest variations to account balances associated by account address\n"
@@ -1760,6 +1760,7 @@ type query_historicalVotingPowers_items_items_delegation {
   from: String!
   value: String!
   to: String!
+  previousDelegate: String
 }
 
 type query_historicalVotingPowers_items_items_transfer {
@@ -1797,14 +1798,6 @@ type query_votingPowerVariations_items_items {
   percentageChange: String!
 }
 
-enum queryInput_votingPowerVariations_days {
-  _7d
-  _30d
-  _90d
-  _180d
-  _365d
-}
-
 enum queryInput_votingPowerVariations_orderDirection {
   asc
   desc
@@ -1827,14 +1820,6 @@ type query_votingPowerVariationsByAccountId_data {
   currentVotingPower: String!
   absoluteChange: String!
   percentageChange: String!
-}
-
-enum queryInput_votingPowerVariationsByAccountId_days {
-  _7d
-  _30d
-  _90d
-  _180d
-  _365d
 }
 
 type votingPowers_200_response {

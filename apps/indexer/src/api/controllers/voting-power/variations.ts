@@ -35,17 +35,21 @@ export function votingPowerVariations(app: Hono, service: VotingPowerService) {
       },
     }),
     async (context) => {
-      const { days, limit, skip, orderDirection } = context.req.valid("query");
-      const now = Math.floor(Date.now() / 1000);
+      const { addresses, fromDate, toDate, limit, skip, orderDirection } =
+        context.req.valid("query");
 
       const result = await service.getVotingPowerVariations(
-        now - days,
+        addresses,
+        fromDate,
+        toDate,
         skip,
         limit,
         orderDirection,
       );
 
-      return context.json(VotingPowerVariationsMapper(result, now, days));
+      return context.json(
+        VotingPowerVariationsMapper(result, toDate, toDate - fromDate),
+      );
     },
   );
 
@@ -78,16 +82,20 @@ export function votingPowerVariations(app: Hono, service: VotingPowerService) {
     }),
     async (context) => {
       const { accountId } = context.req.valid("param");
-      const { days } = context.req.valid("query");
-      const now = Math.floor(Date.now() / 1000);
+      const { fromDate, toDate } = context.req.valid("query");
 
       const result = await service.getVotingPowerVariationsByAccountId(
         accountId as Address,
-        now - days,
+        fromDate,
+        toDate,
       );
 
       return context.json(
-        VotingPowerVariationsByAccountIdMapper(result, now, days),
+        VotingPowerVariationsByAccountIdMapper(
+          result,
+          toDate,
+          toDate - fromDate,
+        ),
       );
     },
   );
