@@ -11,6 +11,8 @@ import { RiskAreaEnum } from "@/shared/types/enums";
 import { useScreenSize } from "@/shared/hooks";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { useParams } from "next/navigation";
+import daoConfig from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 export type RiskArea = {
   name: string;
@@ -368,15 +370,34 @@ export const RiskAreaCardWrapper = ({
           </div>
         ))}
       <div className={cn("", className)}>
-        {riskAreas.map((risk: RiskArea, index: number) => (
-          <RiskAreaCard
-            key={`${risk.name}-${index}`}
-            riskArea={risk}
-            isActive={activeRiskId === risk.name}
-            onClick={() => onRiskClick?.(risk.name as RiskAreaEnum)}
-            variant={variant}
-          />
-        ))}
+        {riskAreas.map((risk: RiskArea, index: number) => {
+          if (risk.name === RiskAreaEnum.ATTACK_PROFITABILITY) {
+            const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
+            const daoConstants = daoConfig[daoIdEnum];
+            const riskValue = daoConstants?.attackProfitability?.notSupported
+              ? { ...risk, level: RiskLevel.NONE }
+              : risk;
+            return (
+              <RiskAreaCard
+                key={`${risk.name}-${index}`}
+                riskArea={riskValue}
+                isActive={activeRiskId === risk.name}
+                onClick={() => onRiskClick?.(risk.name as RiskAreaEnum)}
+                variant={variant}
+              />
+            );
+          }
+
+          return (
+            <RiskAreaCard
+              key={`${risk.name}-${index}`}
+              riskArea={risk}
+              isActive={activeRiskId === risk.name}
+              onClick={() => onRiskClick?.(risk.name as RiskAreaEnum)}
+              variant={variant}
+            />
+          );
+        })}
       </div>
     </div>
   );

@@ -42,6 +42,7 @@ export const OP: DaoConfiguration = {
     },
   },
   attackProfitability: {
+    notSupported: true,
     riskLevel: RiskLevel.LOW,
     supportsLiquidTreasuryCall: false,
     attackCostBarChart: {
