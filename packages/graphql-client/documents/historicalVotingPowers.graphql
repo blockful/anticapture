@@ -1,0 +1,45 @@
+query HistoricalVotingPowers(
+  $account: String!
+  $skip: NonNegativeInt
+  $limit: PositiveInt = 10
+  $orderDirection: queryInput_votingPowers_orderDirection = desc
+  $maxDelta: String
+  $minDelta: String
+) {
+<<<<<<< Updated upstream:packages/graphql-client/documents/votingPowers.graphql
+  votingPowers(
+    accountId: $account
+||||||| Stash base:packages/graphql-client/documents/votingPowers.graphql
+  votingPowers(
+    account: $account
+=======
+  historicalVotingPowers(
+    account: $account
+>>>>>>> Stashed changes:packages/graphql-client/documents/historicalVotingPowers.graphql
+    skip: $skip
+    orderDirection: $orderDirection
+    limit: $limit
+    toValue: $maxDelta
+    fromValue: $minDelta
+  ) {
+    items {
+      accountId
+      votingPower
+      # transfer { MUST ADD
+      #   value
+      #   to
+      #   from
+      # }
+      # transactionHash
+      # timestamp
+      # logIndex
+      # delta
+      # delegation {
+      #   from
+      #   to
+      #   value
+      # }
+    }
+    totalCount
+  }
+}
