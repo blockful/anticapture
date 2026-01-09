@@ -103,14 +103,16 @@ query GetVotesOnchainsTotalCount($proposalId: String) {
 
 # Get voting power change
 query GetVotingPowerChange(
-  $address: JSON!
+  $address: String!
   $fromDate: PositiveInt!
   $toDate: PositiveInt!
 ) {
-  votingPowerVariations(
-    addresses: "", 
+  votingPowerVariationsByAccountId(
+    address: $address,
     fromDate: $fromDate,
-    toDate: $toDate
+    toDate: $toDate,
+    orderDirection: asc,
+    limit: "1"
   ) {
     items {
       accountId
