@@ -1,20 +1,14 @@
 query BalanceHistoryGraph(
-  $accountId: String!
-  $orderBy: String = "timestamp"
-  $orderDirection: String = "desc"
-  $fromTimestamp: BigInt
-  $toTimestamp: BigInt
+  $address: String!
+  $sortBy: queryInput_transfers_sortBy
+  $sortOrder: queryInput_transfers_sortOrder
+  $fromDate: Float
 ) {
   transfers(
-    where: {
-      AND: [
-        { OR: [{ fromAccountId: $accountId }, { toAccountId: $accountId }] }
-        { timestamp_gte: $fromTimestamp }
-        { timestamp_lte: $toTimestamp }
-      ]
-    }
-    orderBy: $orderBy
-    orderDirection: $orderDirection
+    address: $address
+    fromDate: $fromDate
+    sortBy: $sortBy
+    sortOrder: $sortOrder
     limit: 1000
   ) {
     items {
@@ -23,6 +17,7 @@ query BalanceHistoryGraph(
       fromAccountId
       toAccountId
       transactionHash
+      logIndex
     }
   }
 }

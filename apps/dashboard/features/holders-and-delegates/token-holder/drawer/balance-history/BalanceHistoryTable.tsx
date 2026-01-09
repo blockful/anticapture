@@ -91,23 +91,18 @@ export const BalanceHistoryTable = ({
   const transactionType = typeFilter as "all" | "buy" | "sell";
 
   // Use the balance history hook
-  const {
-    transfers,
-    loading,
-    paginationInfo,
-    fetchNextPage,
-    fetchingMore,
-    error,
-  } = useBalanceHistory({
-    accountId,
-    daoId,
-    orderBy,
-    orderDirection,
-    transactionType,
-    customFromFilter,
-    customToFilter,
-    filterVariables,
-  });
+  const { transfers, loading, fetchNextPage, error, hasNextPage } =
+    useBalanceHistory({
+      decimals,
+      accountId,
+      daoId,
+      orderBy,
+      orderDirection,
+      transactionType,
+      customFromFilter,
+      customToFilter,
+      filterVariables,
+    });
 
   const isInitialLoading = loading && (!transfers || transfers.length === 0);
 
@@ -145,10 +140,10 @@ export const BalanceHistoryTable = ({
       return {
         id: transfer.transactionHash,
         date: relativeTime,
-        amount: formatNumberUserReadable(parseFloat(transfer.amount)),
+        amount: formatNumberUserReadable(transfer.amount),
         type: transfer.direction === "in" ? "Buy" : ("Sell" as "Buy" | "Sell"),
-        fromAddress: transfer.fromAccountId || "",
-        toAddress: transfer.toAccountId || "",
+        fromAddress: transfer.fromAccountId,
+        toAddress: transfer.toAccountId,
       };
     });
   }, [transfers]);
@@ -246,10 +241,10 @@ export const BalanceHistoryTable = ({
               setFilterVariables(() => ({
                 minDelta: filterState.minAmount
                   ? parseUnits(filterState.minAmount, decimals).toString()
-                  : undefined,
+                  : "",
                 maxDelta: filterState.maxAmount
                   ? parseUnits(filterState.maxAmount, decimals).toString()
-                  : undefined,
+                  : "",
               }));
 
               setIsFilterActive(
@@ -263,8 +258,8 @@ export const BalanceHistoryTable = ({
               // Reset to default sorting
               setOrderBy("timestamp");
               setFilterVariables(() => ({
-                minDelta: undefined,
-                maxDelta: undefined,
+                minDelta: "",
+                maxDelta: "",
               }));
             }}
             isActive={isFilterActive}
@@ -382,11 +377,9 @@ export const BalanceHistoryTable = ({
                   ensName: addr as `${string}.eth`,
                 });
                 setCustomFromFilter(address);
-                setCustomToFilter(null);
                 return;
               }
               setCustomFromFilter(addr || null);
-              setCustomToFilter(null);
             }}
             currentFilter={customFromFilter || undefined}
           />
@@ -463,11 +456,9 @@ export const BalanceHistoryTable = ({
                   ensName: addr as `${string}.eth`,
                 });
                 setCustomToFilter(address);
-                setCustomFromFilter(null);
                 return;
               }
               setCustomToFilter(addr || null);
-              setCustomFromFilter(null);
             }}
             currentFilter={customToFilter || undefined}
           />
@@ -481,8 +472,8 @@ export const BalanceHistoryTable = ({
       columns={balanceHistoryColumns}
       data={isInitialLoading ? Array(12).fill({}) : transformedData}
       size="sm"
-      hasMore={paginationInfo.hasNextPage}
-      isLoadingMore={fetchingMore}
+      hasMore={hasNextPage}
+      isLoadingMore={loading}
       onLoadMore={fetchNextPage}
       wrapperClassName="h-[450px]"
       className="h-[400px]"

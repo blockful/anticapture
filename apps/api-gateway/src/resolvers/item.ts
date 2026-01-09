@@ -5,7 +5,6 @@ const daoItemQueries = [
   "daoMetricsDayBucket",
   "delegation",
   "proposalsOnchain",
-  "transfer",
   "votesOnchain",
   "votingPowerHistory",
 ];

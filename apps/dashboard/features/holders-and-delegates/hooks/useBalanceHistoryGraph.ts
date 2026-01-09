@@ -1,5 +1,9 @@
 import { useMemo } from "react";
-import { useBalanceHistoryGraphQuery } from "@anticapture/graphql-client/hooks";
+import {
+  QueryInput_Transfers_SortBy,
+  QueryInput_Transfers_SortOrder,
+  useBalanceHistoryGraphQuery,
+} from "@anticapture/graphql-client/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimePeriod } from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
 import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
@@ -13,6 +17,7 @@ export interface BalanceHistoryGraphItem {
   toAccountId: string | null;
   transactionHash: string;
   direction: "in" | "out";
+  logIndex: number;
 }
 
 // Interface for the hook result
@@ -27,19 +32,13 @@ export function useBalanceHistoryGraph(
   daoId: DaoIdEnum,
   timePeriod: TimePeriod = "all",
 ): UseBalanceHistoryGraphResult {
-  const {
-    decimals,
-    daoOverview: { token },
-  } = daoConfig[daoId];
+  const { decimals } = daoConfig[daoId];
 
-  // Calculate timestamp range based on time period
-  const { fromTimestamp, toTimestamp } = useMemo(() => {
+  const fromDate = useMemo(() => {
     const nowInSeconds = Date.now() / 1000;
 
     // For "all", treat as all time by not setting limits
-    if (timePeriod === "all") {
-      return { fromTimestamp: undefined, toTimestamp: undefined };
-    }
+    if (timePeriod === "all") return undefined;
 
     let daysInSeconds: number;
     switch (timePeriod) {
@@ -51,53 +50,39 @@ export function useBalanceHistoryGraph(
         break;
     }
 
-    const fromTimestamp = Math.floor(nowInSeconds - daysInSeconds);
-    const toTimestamp = Math.floor(nowInSeconds);
-
-    return { fromTimestamp, toTimestamp };
+    return Math.floor(nowInSeconds - daysInSeconds);
   }, [timePeriod]);
 
   const { data, loading, error } = useBalanceHistoryGraphQuery({
     variables: {
-      accountId,
-      fromTimestamp,
-      toTimestamp,
-      orderBy: "timestamp",
-      orderDirection: "desc",
+      address: accountId,
+      fromDate,
+      sortBy: QueryInput_Transfers_SortBy.Timestamp,
+      sortOrder: QueryInput_Transfers_SortOrder.Asc,
     },
     context: {
       headers: {
         "anticapture-dao-id": daoId,
       },
     },
-    skip: !accountId,
     fetchPolicy: "cache-and-network",
   });
 
   const balanceHistory = useMemo((): BalanceHistoryGraphItem[] => {
-    if (!data?.transfers?.items) {
-      return [];
-    }
+    if (!data?.transfers?.items) return [];
 
     return data.transfers.items
-      .map((item) => {
-        // Convert from wei to token units using Viem's formatUnits
-        const amount =
-          token === "ERC20"
-            ? Number(formatUnits(BigInt(item.amount.toString()), decimals))
-            : Number(item.amount.toString());
-
-        return {
-          ...item,
-          timestamp: new Date(Number(item.timestamp) * 1000).getTime(),
-          amount,
-          direction: (item.fromAccountId === accountId ? "out" : "in") as
-            | "in"
-            | "out",
-        };
-      })
-      .sort((a, b) => a.timestamp - b.timestamp); // Sort chronologically for chart display
-  }, [data, token, accountId]);
+      .filter((item) => !!item)
+      .map((item) => ({
+        ...item,
+        timestamp: new Date(Number(item.timestamp) * 1000).getTime(),
+        amount: Number(formatUnits(BigInt(item.amount), decimals)),
+        direction: (item.fromAccountId === accountId ? "out" : "in") as
+          | "in"
+          | "out",
+      }))
+      .sort((a, b) => a.timestamp - b.timestamp);
+  }, [data, accountId, decimals]);
 
   return {
     balanceHistory,
