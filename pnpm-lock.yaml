@@ -258,6 +258,9 @@ importers:
       "@types/react-dom":
         specifier: 19.1.5
         version: 19.1.5(@types/react@19.1.4)
+      dotenv:
+        specifier: ^16.6.1
+        version: 16.6.1
       eslint:
         specifier: ^8
         version: 8.57.1
@@ -417,7 +420,7 @@ importers:
         version: 4.9.6
       forge-std:
         specifier: github:foundry-rs/forge-std
-        version: https://codeload.github.com/foundry-rs/forge-std/tar.gz/27ba11c86ac93d8d4a50437ae26621468fe63c20
+        version: https://codeload.github.com/foundry-rs/forge-std/tar.gz/2f05b3001ed9d74b171d17eac80b3765ce186a76
 
 packages:
   "@adobe/css-tools@4.4.3":
@@ -10965,12 +10968,12 @@ packages:
       }
     engines: { node: ">=14" }
 
-  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/27ba11c86ac93d8d4a50437ae26621468fe63c20:
+  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/2f05b3001ed9d74b171d17eac80b3765ce186a76:
     resolution:
       {
-        tarball: https://codeload.github.com/foundry-rs/forge-std/tar.gz/27ba11c86ac93d8d4a50437ae26621468fe63c20,
+        tarball: https://codeload.github.com/foundry-rs/forge-std/tar.gz/2f05b3001ed9d74b171d17eac80b3765ce186a76,
       }
-    version: 1.12.0
+    version: 1.14.0
 
   fork-ts-checker-webpack-plugin@8.0.0:
     resolution:
@@ -26956,7 +26959,7 @@ snapshots:
       cross-spawn: 7.0.6
       signal-exit: 4.1.0
 
-  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/27ba11c86ac93d8d4a50437ae26621468fe63c20:
+  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/2f05b3001ed9d74b171d17eac80b3765ce186a76:
     {}
 
   fork-ts-checker-webpack-plugin@8.0.0(typescript@5.9.3)(webpack@5.103.0(esbuild@0.25.8)):
