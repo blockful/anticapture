@@ -25,8 +25,14 @@ export const HistoricalVotingPowerRequestSchema = z.object({
     .default(10),
   orderBy: z.enum(["timestamp", "delta"]).optional().default("timestamp"),
   orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
-  fromDate: z.coerce.number().optional(),
-  toDate: z.coerce.number().optional(),
+  fromDate: z
+    .string()
+    .optional()
+    .transform((val) => Number(val)),
+  toDate: z
+    .string()
+    .optional()
+    .transform((val) => Number(val)),
   fromValue: z.string().optional(),
   toValue: z.string().optional(),
 });

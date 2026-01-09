@@ -9,14 +9,16 @@ export const VotingPowerVariationsRequestSchema = z.object({
     .array(z.string().refine((addr) => isAddress(addr)))
     .optional()
     .default([]),
-  fromDate: z.coerce
-    .number()
+  fromDate: z
+    .string()
     .optional()
-    .default(Math.floor(Date.now() / 1000) - DaysEnum["90d"]),
-  toDate: z.coerce
-    .number()
+    .default((Math.floor(Date.now() / 1000) - DaysEnum["90d"]).toString())
+    .transform((val) => Number(val)),
+  toDate: z
+    .string()
     .optional()
-    .default(Math.floor(Date.now() / 1000)),
+    .default(Math.floor(Date.now() / 1000).toString())
+    .transform((val) => Number(val)),
   limit: z.coerce
     .number()
     .int()
@@ -34,14 +36,16 @@ export const VotingPowerVariationsRequestSchema = z.object({
 });
 
 export const VotingPowerVariationsByAccountIdRequestSchema = z.object({
-  fromDate: z.coerce
-    .number()
+  fromDate: z
+    .string()
     .optional()
-    .default(Math.floor(Date.now() / 1000) - DaysEnum["90d"]),
-  toDate: z.coerce
-    .number()
+    .default((Math.floor(Date.now() / 1000) - DaysEnum["90d"]).toString())
+    .transform((val) => Number(val)),
+  toDate: z
+    .string()
     .optional()
-    .default(Math.floor(Date.now() / 1000)),
+    .default(Math.floor(Date.now() / 1000).toString())
+    .transform((val) => Number(val)),
 });
 
 export const VotingPowersRequestSchema = z.object({
