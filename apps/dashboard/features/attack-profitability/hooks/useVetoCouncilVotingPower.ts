@@ -31,7 +31,7 @@ const fetchVetoCouncilVotingPower = async (
   const response = await api.post<VotingPowerResponse>("", {
     query: `
       query GetVetoCouncilVotingPower {
-        votingPowers(addresses: [${accountId}]) {
+        votingPowers(addresses: ["${accountId}"]) {
           items {
             votingPower
           }
