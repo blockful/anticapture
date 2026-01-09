@@ -16,16 +16,29 @@ import { Button } from "@/shared/components/design-system/buttons/button/Button"
 import { cn } from "@/shared/utils/cn";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { MetricWithKey } from "@/features/token-distribution/types";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 export const TokenDistributionDialog = ({
   appliedMetrics,
   metricsSchema,
   onApply,
+  daoId,
 }: {
   appliedMetrics: Record<string, MetricWithKey[]>;
   metricsSchema: Record<string, MetricWithKey[]>;
   onApply: (metric: (MetricTypesEnum | string)[]) => void;
+  daoId: DaoIdEnum;
 }) => {
+  let notSupportedMetrics: MetricTypesEnum[] = [];
+
+  if (daoId === DaoIdEnum.NOUNS) {
+    notSupportedMetrics = [
+      MetricTypesEnum.CEX_SUPPLY,
+      MetricTypesEnum.DEX_SUPPLY,
+      MetricTypesEnum.LENDING_SUPPLY,
+    ];
+  }
+
   const [selectedMetrics, setSelectedMetrics] = useState<
     (MetricTypesEnum | string)[]
   >([]);
@@ -107,6 +120,9 @@ export const TokenDistributionDialog = ({
                               isSelected
                                 ? "border-tangerine"
                                 : "border-transparent",
+                            )}
+                            disabled={notSupportedMetrics.includes(
+                              metric.key as MetricTypesEnum,
                             )}
                           >
                             {isSelected ? (

@@ -184,6 +184,7 @@ export interface DaoAddresses {
 }
 
 export interface AttackProfitabilityConfig {
+  notSupported?: boolean;
   riskLevel?: RiskLevel;
   liquidTreasury?: TreasuryAssetNonDaoToken; // FIXME(DEV-161): Remove once treasury fetching from Octav is operational
   supportsLiquidTreasuryCall?: boolean;
