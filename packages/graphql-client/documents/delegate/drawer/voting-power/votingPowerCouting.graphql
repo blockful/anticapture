@@ -1,5 +1,5 @@
-query GetVotingPowerCounting ($address: String!) {
-  accountBalances(where: {delegate: $address}) {
+query GetVotingPowerCounting($delegates: [String]) {
+  accountBalances(delegates: $delegates) {
     totalCount
   }
 }

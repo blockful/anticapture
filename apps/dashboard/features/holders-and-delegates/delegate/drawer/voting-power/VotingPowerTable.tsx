@@ -14,6 +14,7 @@ import { Table } from "@/shared/components/design-system/table/Table";
 import daoConfig from "@/shared/dao-config";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { parseAsStringEnum, useQueryState } from "nuqs";
+import { QueryInput_AccountBalances_OrderDirection } from "@anticapture/graphql-client";
 
 export const VotingPowerTable = ({
   address,
@@ -40,7 +41,7 @@ export const VotingPowerTable = ({
       daoId: daoId as DaoIdEnum,
       address: address,
       orderBy: sortBy,
-      orderDirection: sortOrder,
+      orderDirection: sortOrder as QueryInput_AccountBalances_OrderDirection,
     });
 
   useEffect(() => {

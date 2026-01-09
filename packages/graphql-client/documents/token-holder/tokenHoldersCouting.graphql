@@ -1,5 +1,5 @@
 query GetTokenHoldersCouting {
-  accountBalances(where: { balance_gt: 0 }) {
+  accountBalances(balanceGreaterThan: "0") {
     totalCount
   }
 }

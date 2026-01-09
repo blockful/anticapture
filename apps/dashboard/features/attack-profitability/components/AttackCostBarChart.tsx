@@ -88,15 +88,11 @@ export const AttackCostBarChart = ({
   });
 
   const daoConfig = daoConfigByDaoId[selectedDaoId];
-  const attackCostBarChart =
-    daoConfig?.attackProfitability?.attackCostBarChart || {};
-  const daoAddresses: string[] = Object.values(attackCostBarChart);
-  const tokenAddress = daoConfig?.daoOverview.contracts.token;
 
   const {
     data: daoTopTokenHolderExcludingTheDao,
     loading: daoTopTokenHolderExcludingTheDaoLoading,
-  } = useTopTokenHolderNonDao(selectedDaoId, tokenAddress, daoAddresses);
+  } = useTopTokenHolderNonDao(selectedDaoId);
 
   const { data: vetoCouncilVotingPower, isLoading: isVetoCouncilLoading } =
     useVetoCouncilVotingPower(selectedDaoId);
