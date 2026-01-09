@@ -1,9 +1,7 @@
-query GetHistoricalVotingAndActivity($address: String!, $fromDate: PositiveInt!, $fromDate: NonNegativeInt) {
+query GetHistoricalVotingAndActivity($address: String!, $fromDate: String!) {
   votingPowerVariationsByAccountId(
-      address: $address, # This change likely means that the query usage will have to change, as its not possible to query multiple addresses via this endpoint right now
+      accountId: $address, # This change likely means that the query usage will have to change, as its not possible to query multiple addresses via this endpoint right now
       fromDate: $fromDate,
-      orderDirection: asc,
-      limit: "1"
     ) {
     data {
       accountId

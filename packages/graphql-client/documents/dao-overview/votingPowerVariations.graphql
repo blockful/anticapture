@@ -1,5 +1,5 @@
 query VotingPowerVariations(
-  $fromDate: PositiveInt!
+  $fromDate: String!
   $limit: PositiveInt = 10
 ) {
   votingPowerVariations(fromDate: $fromDate, limit: $limit) {
