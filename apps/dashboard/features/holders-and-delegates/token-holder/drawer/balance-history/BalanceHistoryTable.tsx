@@ -241,10 +241,10 @@ export const BalanceHistoryTable = ({
               setFilterVariables(() => ({
                 minDelta: filterState.minAmount
                   ? parseUnits(filterState.minAmount, decimals).toString()
-                  : undefined,
+                  : "",
                 maxDelta: filterState.maxAmount
                   ? parseUnits(filterState.maxAmount, decimals).toString()
-                  : undefined,
+                  : "",
               }));
 
               setIsFilterActive(
@@ -258,8 +258,8 @@ export const BalanceHistoryTable = ({
               // Reset to default sorting
               setOrderBy("timestamp");
               setFilterVariables(() => ({
-                minDelta: undefined,
-                maxDelta: undefined,
+                minDelta: "",
+                maxDelta: "",
               }));
             }}
             isActive={isFilterActive}
