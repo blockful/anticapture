@@ -372,7 +372,7 @@ export const RiskAreaCardWrapper = ({
       <div className={cn("", className)}>
         {riskAreas.map((risk: RiskArea, index: number) => {
           if (risk.name === RiskAreaEnum.ATTACK_PROFITABILITY) {
-            const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
+            const daoIdEnum = daoId?.toUpperCase() as DaoIdEnum;
             const daoConstants = daoConfig[daoIdEnum];
             const riskValue = daoConstants?.attackProfitability?.notSupported
               ? { ...risk, level: RiskLevel.NONE }
