@@ -10,8 +10,8 @@ export const DaoOverviewMetricCard = ({
   textClassName,
   isLoading = false,
 }: {
-  title: string;
-  text: string;
+  title: string | ReactNode;
+  text: string | ReactNode;
   subText: string | ReactNode;
   className?: string;
   textClassName?: string;
