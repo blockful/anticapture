@@ -94,8 +94,6 @@ export const useTokenHolders = ({
     networkStatus,
   } = useGetTopTokenHoldersQuery({
     variables: {
-      after: undefined,
-      before: undefined,
       limit,
       orderDirection,
       ...(address && { addresses: [address] }),
@@ -120,7 +118,8 @@ export const useTokenHolders = ({
   const tokenHolderAddresses = useMemo(
     () =>
       tokenHoldersData?.accountBalances?.items
-        ?.map((tokenHolder) => tokenHolder.accountId)
+        ?.filter((tokenHolder) => tokenHolder !== null)
+        .map((tokenHolder) => tokenHolder.accountId)
         .filter(Boolean) || [],
     [tokenHoldersData],
   );
@@ -151,8 +150,6 @@ export const useTokenHolders = ({
   // Refetch data when sorting changes to ensure we start from page 1
   useEffect(() => {
     refetch({
-      after: undefined,
-      before: undefined,
       limit,
       orderDirection,
       ...(address && { addresses: [address] }),
@@ -162,12 +159,14 @@ export const useTokenHolders = ({
   const processedData = useMemo(() => {
     if (!tokenHoldersData?.accountBalances?.items) return null;
 
-    return tokenHoldersData.accountBalances.items.map((holder) => ({
-      accountId: holder.accountId,
-      balance: holder.balance,
-      delegate: holder.delegate,
-      tokenId: holder.tokenId,
-    }));
+    return tokenHoldersData.accountBalances.items
+      .filter((holder) => holder !== null)
+      .map((holder) => ({
+        accountId: holder.accountId,
+        balance: holder.balance,
+        delegate: holder.delegate,
+        tokenId: holder.tokenId,
+      }));
   }, [tokenHoldersData]);
 
   const isHistoricalLoadingFor = useCallback(
@@ -177,17 +176,16 @@ export const useTokenHolders = ({
 
   // Pagination info - combines GraphQL data with our page tracking
   const pagination = useMemo<PaginationInfo>(() => {
-    const pageInfo = tokenHoldersData?.accountBalances?.pageInfo;
     const totalCount = countingData?.accountBalances?.totalCount || 0;
     const currentItemsCount =
       tokenHoldersData?.accountBalances?.items?.length || 0;
     const totalPages = Math.ceil(totalCount / itemsPerPage);
 
     return {
-      hasNextPage: pageInfo?.hasNextPage ?? false,
-      hasPreviousPage: pageInfo?.hasPreviousPage ?? false,
-      endCursor: pageInfo?.endCursor,
-      startCursor: pageInfo?.startCursor,
+      hasNextPage: currentPage < totalPages,
+      hasPreviousPage: currentPage > 1,
+      endCursor: null,
+      startCursor: null,
       totalCount,
       currentPage,
       totalPages,
@@ -195,7 +193,6 @@ export const useTokenHolders = ({
       currentItemsCount,
     };
   }, [
-    tokenHoldersData?.accountBalances?.pageInfo,
     countingData?.accountBalances?.totalCount,
     tokenHoldersData?.accountBalances?.items?.length,
     currentPage,
@@ -218,20 +215,18 @@ export const useTokenHolders = ({
     try {
       await fetchMore({
         variables: {
-          after: pagination.endCursor,
-          before: undefined,
           limit,
           orderDirection,
           ...(address && { addresses: [address] }),
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
-          if (!fetchMoreResult) return previousResult;
-          const prevItems = previousResult.accountBalances.items ?? [];
+          if (!fetchMoreResult?.accountBalances) return previousResult;
+          const prevItems = previousResult.accountBalances?.items ?? [];
           const newItems = fetchMoreResult.accountBalances.items ?? [];
           const merged = [
             ...prevItems,
             ...newItems.filter(
-              (n) => !prevItems.some((p) => p.accountId === n.accountId),
+              (n) => n && !prevItems.some((p) => p?.accountId === n.accountId),
             ),
           ];
           return {
@@ -277,14 +272,12 @@ export const useTokenHolders = ({
     try {
       await fetchMore({
         variables: {
-          after: undefined,
-          before: pagination.startCursor,
           limit,
           orderDirection,
           ...(address && { addresses: [address] }),
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
-          if (!fetchMoreResult) return previousResult;
+          if (!fetchMoreResult?.accountBalances) return previousResult;
 
           // Replace the current data with the new page data
           return {
