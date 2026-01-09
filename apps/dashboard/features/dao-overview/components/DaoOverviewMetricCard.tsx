@@ -12,7 +12,7 @@ export const DaoOverviewMetricCard = ({
 }: {
   title: string | ReactNode;
   text: string | ReactNode;
-  subText: string | ReactNode;
+  subText?: string | ReactNode;
   className?: string;
   textClassName?: string;
   isLoading?: boolean;
@@ -40,9 +40,11 @@ export const DaoOverviewMetricCard = ({
         className="bg-surface-hover mt-1 h-4 w-40"
       />
     ) : (
-      <span className={cn("text-secondary inline-block w-fit text-xs")}>
-        {subText}
-      </span>
+      subText && (
+        <span className={cn("text-secondary inline-block w-fit text-xs")}>
+          {subText}
+        </span>
+      )
     )}
   </div>
 );

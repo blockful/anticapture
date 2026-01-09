@@ -14,7 +14,6 @@ interface DaoOverviewHeaderMetricsProps {
   daoConfig: DaoConfiguration;
 }
 
-// Constantes
 const TREASURY_TOOLTIPS = {
   MULTISIG_FULL:
     "The DAO treasury is managed via a multisig and does not have a single on-chain treasury contract. As a result, treasury-based risk and attack metrics are not applicable.",
