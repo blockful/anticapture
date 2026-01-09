@@ -1,37 +1,9 @@
 "use client";
 
 import { useQuery, useQueries } from "@tanstack/react-query";
-import axios from "axios";
-import { Address } from "viem";
-
-const getEnsUrl = (address: Address | `${string}.eth`) => {
-  return `https://api.ethfollow.xyz/api/v1/users/${address}/ens`;
-};
-
-type EnsRecords = {
-  avatar?: string;
-  "com.discord"?: string;
-  "com.github"?: string;
-  "com.twitter"?: string;
-  description?: string;
-  email?: string;
-  header?: string;
-  location?: string;
-  name?: string;
-  "org.telegram"?: string;
-  url?: string;
-  [key: string]: string | undefined;
-};
-
-type EnsApiResponse = {
-  ens: {
-    name: string;
-    address: Address;
-    avatar: string | null;
-    records: EnsRecords | null;
-    updated_at: string;
-  };
-};
+import { Address, isAddress } from "viem";
+import { normalize } from "viem/ens";
+import { publicClient } from "@/shared/services/wallet/wallet";
 
 type EnsData = {
   address: Address;
@@ -41,16 +13,14 @@ type EnsData = {
 };
 
 /**
- * Hook to fetch ENS data for a single address or ENS name
- * @param address - Ethereum address or ENS name (e.g., "0x123..." or "vitalik.eth")
+ * Hook to fetch ENS data for a single address
+ * @param address - Ethereum address (e.g., "0x123...")
  * @returns Object containing ENS data, error, and loading state
  */
-export const useEnsData = (
-  address: Address | `${string}.eth` | null | undefined,
-) => {
+export const useEnsData = (address: Address | null | undefined) => {
   const { data, error, isLoading } = useQuery<EnsData>({
     queryKey: ["ensData", address ?? null],
-    queryFn: () => fetchEnsData({ address: address! }),
+    queryFn: () => fetchEnsDataFromAddress({ address: address! }),
     enabled: !!address,
     refetchOnWindowFocus: false,
     retry: false,
@@ -65,36 +35,44 @@ export const useEnsData = (
 };
 
 /**
- * Fetches ENS data from the API for a single address or ENS name
- * @param address - Ethereum address or ENS name
+ * Fetches ENS data using viem for a single address
+ * @param address - Ethereum address
  * @returns Promise resolving to EnsData
- * @throws Error if the API request fails or response is invalid
  */
-export const fetchEnsData = async ({
+export const fetchEnsDataFromAddress = async ({
   address,
 }: {
-  address: Address | `${string}.eth`;
+  address: Address;
 }): Promise<EnsData> => {
-  const response = await axios.get<EnsApiResponse>(getEnsUrl(address));
-  const data = response.data;
+  let ensName: string | null = null;
+  let avatarUrl: string | null = null;
 
-  // Validate response structure
-  if (!data?.ens) {
-    throw new Error("Invalid ENS API response: missing ens field");
+  if (isAddress(address)) {
+    ensName = await publicClient.getEnsName({ address });
   }
 
-  if (!data.ens.address) {
-    throw new Error("Invalid ENS API response: missing address field");
+  // Get avatar URL if we have an ENS name
+  if (ensName) {
+    avatarUrl = await publicClient.getEnsAvatar({ name: normalize(ensName) });
   }
 
-  // Empty name is valid (means no ENS name exists for this address)
-  // Transform API response to match expected EnsData structure
   return {
-    address: data.ens.address,
-    avatar_url: data.ens.avatar,
-    ens: data.ens.name,
-    avatar: data.ens.avatar,
+    address: address,
+    avatar_url: avatarUrl,
+    ens: ensName || "",
+    avatar: avatarUrl,
   };
+};
+
+export const fetchAddressFromEnsName = async ({
+  ensName,
+}: {
+  ensName: `${string}.eth`;
+}): Promise<Address | null> => {
+  const address = await publicClient.getEnsAddress({
+    name: normalize(ensName),
+  });
+  return address || null;
 };
 
 /**
@@ -109,7 +87,7 @@ export const useMultipleEnsData = (addresses: Address[]) => {
   const queries = useQueries({
     queries: uniqueAddresses.map((address) => ({
       queryKey: ["addressEns", address],
-      queryFn: () => fetchEnsData({ address }),
+      queryFn: () => fetchEnsDataFromAddress({ address }),
       refetchOnWindowFocus: false,
       retry: false,
       staleTime: 1000 * 60 * 60 * 24, // Consider data fresh for 24 hours

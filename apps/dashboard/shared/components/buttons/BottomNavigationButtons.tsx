@@ -66,7 +66,14 @@ export const BottomNavigationButtons = ({
                 "text-secondary group-hover:text-primary": !item.isActive,
               })}
             />
-            <p className="text-secondary group-hover:text-primary font-inter text-xs font-medium transition-colors duration-300">
+            <p
+              className={cn(
+                "font-inter text-xs font-medium transition-colors duration-300",
+                {
+                  "text-secondary group-hover:text-primary": !item.isActive,
+                },
+              )}
+            >
               {item.label}
             </p>
           </Link>

@@ -20,7 +20,7 @@ import { AmountFilter } from "@/shared/components/design-system/table/filters/am
 import { parseUnits } from "viem";
 import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
 import { AddressFilter } from "@/shared/components/design-system/table/filters";
-import { fetchEnsData } from "@/shared/hooks/useEnsData";
+import { fetchAddressFromEnsName } from "@/shared/hooks/useEnsData";
 import daoConfig from "@/shared/dao-config";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -378,10 +378,10 @@ export const BalanceHistoryTable = ({
               setTypeFilter("all");
 
               if ((addr ?? "").indexOf(".eth") > 0) {
-                const { address } = await fetchEnsData({
-                  address: addr as `${string}.eth`,
+                const address = await fetchAddressFromEnsName({
+                  ensName: addr as `${string}.eth`,
                 });
-                setCustomFromFilter(address || null);
+                setCustomFromFilter(address);
                 setCustomToFilter(null);
                 return;
               }
@@ -459,10 +459,10 @@ export const BalanceHistoryTable = ({
               setTypeFilter("all");
 
               if ((addr ?? "").indexOf(".eth") > 0) {
-                const { address } = await fetchEnsData({
-                  address: addr as `${string}.eth`,
+                const address = await fetchAddressFromEnsName({
+                  ensName: addr as `${string}.eth`,
                 });
-                setCustomToFilter(address || null);
+                setCustomToFilter(address);
                 setCustomFromFilter(null);
                 return;
               }

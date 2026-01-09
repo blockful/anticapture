@@ -37,6 +37,8 @@ import {
   ExpandableData,
   ExpandButton,
 } from "@/shared/components/design-system/table/ExpandButton";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 type ColumnMeta = {
   columnClassName?: string;
@@ -54,6 +56,7 @@ interface DataTableProps<TData, TValue> {
   disableRowClick?: (row: TData) => boolean;
   filterColumn?: string;
   hasMore?: boolean;
+  href?: (row: TData) => string | null | undefined;
   infiniteRootMargin?: string;
   isLoadingMore?: boolean;
   mobileTableFixed?: boolean;
@@ -81,6 +84,7 @@ export const Table = <TData, TValue>({
   disableRowClick,
   filterColumn = "",
   hasMore = false,
+  href,
   infiniteRootMargin = "0px 0px 200px 0px",
   isLoadingMore = false,
   mobileTableFixed = false,
@@ -102,9 +106,15 @@ export const Table = <TData, TValue>({
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [expanded, setExpanded] = useState<ExpandedState>({});
+  const [isMounted, setIsMounted] = useState(false);
+  const router = useRouter();
 
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!onLoadMore || !hasMore) return;
@@ -245,13 +255,16 @@ export const Table = <TData, TValue>({
                 const isLastNestedRow =
                   row.getParentRow()?.getLeafRows().slice(-1)[0].id === row.id;
 
+                const rowHref = href ? href(row.original) : null;
+
                 return (
                   <Fragment key={row.id}>
                     <TableRow
                       key={row.id}
                       className={cn(
                         "group border-transparent transition-colors duration-300",
-                        onRowClick && !disableRowClick?.(row.original)
+                        (onRowClick || rowHref) &&
+                          !disableRowClick?.(row.original)
                           ? "hover:bg-surface-contrast cursor-pointer"
                           : "cursor-default",
                         enableExpanding &&
@@ -260,15 +273,39 @@ export const Table = <TData, TValue>({
                         row.getIsExpanded() && "border-b-transparent",
                         isLastNestedRow && "border-b-light-dark",
                       )}
-                      onClick={() =>
-                        !disableRowClick?.(row.original) &&
-                        onRowClick?.(row.original)
-                      }
+                      onClick={(e) => {
+                        // Don't handle click if it came from a Link inside
+                        if ((e.target as HTMLElement).closest("a")) return;
+                        if (disableRowClick?.(row.original)) return;
+                        if (onRowClick) {
+                          onRowClick(row.original);
+                        } else if (rowHref) {
+                          router.push(rowHref);
+                        }
+                      }}
                     >
                       {row.getVisibleCells().map((cell, index) => {
                         const colMeta = (
                           cell.column.columnDef as { meta?: ColumnMeta }
                         ).meta;
+                        const cellContent = (
+                          <div className="flex w-full items-center gap-2">
+                            {index === 0 && enableExpanding && (
+                              <TreeLines row={row} />
+                            )}
+                            {index === 0 && (
+                              <ExpandButton
+                                row={row as unknown as Row<ExpandableData>}
+                                enableExpanding={enableExpanding}
+                              />
+                            )}
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext(),
+                            )}
+                          </div>
+                        );
+
                         return (
                           <TableCell
                             key={cell.id}
@@ -280,25 +317,27 @@ export const Table = <TData, TValue>({
                               colMeta?.columnClassName,
                             )}
                           >
-                            <div className="flex items-center gap-2">
-                              {index === 0 && enableExpanding && (
-                                <TreeLines row={row} />
-                              )}
-                              {index === 0 && (
-                                <ExpandButton
-                                  row={row as unknown as Row<ExpandableData>}
-                                  enableExpanding={enableExpanding}
-                                />
-                              )}
-                              {flexRender(
-                                cell.column.columnDef.cell,
-                                cell.getContext(),
-                              )}
-                            </div>
+                            {/* Wrap cell content with Link for prefetching and URL display - maintains valid HTML */}
+                            {rowHref && !disableRowClick?.(row.original) ? (
+                              <Link
+                                href={rowHref}
+                                prefetch={true}
+                                className="flex h-full w-full items-center justify-start"
+                                onClick={(e) => {
+                                  // Let Link handle navigation naturally
+                                  e.stopPropagation();
+                                }}
+                              >
+                                {cellContent}
+                              </Link>
+                            ) : (
+                              cellContent
+                            )}
                           </TableCell>
                         );
                       })}
                     </TableRow>
+
                     {row.getIsExpanded() && renderSubComponent && (
                       <TableRow>
                         <TableCell
@@ -313,8 +352,9 @@ export const Table = <TData, TValue>({
                 );
               })}
 
-              <tr className="h-0! pointer-events-none border-none">
-                <td aria-hidden="true">
+              {/* Sentinel for infinite scrolling */}
+              <tr>
+                <td colSpan={columns.length}>
                   <div ref={sentinelRef} />
                 </td>
               </tr>
@@ -352,7 +392,7 @@ export const Table = <TData, TValue>({
           )}
         </TableBody>
       </TableContainer>
-      {withDownloadCSV && data.length > 0 && (
+      {withDownloadCSV && data.length > 0 && isMounted && (
         <p className="text-secondary mt-2 flex font-mono text-[13px] tracking-wider">
           [DOWNLOAD AS{" "}
           <CSVLink
