@@ -17,7 +17,7 @@ query GetHistoricalVotingAndActivity($address: String!, $fromDate: String!) {
 }
 
 # Simple query for individual delegate proposals activity
-query GetDelegateProposalsActivity($address: String!, $fromDate: NonNegativeInt) {
+query GetDelegateProposalsActivity($address: String!, $fromDate: String) {
   proposalsActivity(address: $address, fromDate: $fromDate) {
     address
     totalProposals

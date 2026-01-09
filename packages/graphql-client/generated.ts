@@ -81,16 +81,26 @@ export type Query = {
   _meta?: Maybe<Meta>;
   account?: Maybe<Account>;
   accountBalance?: Maybe<AccountBalance>;
-  /** Returns a mapping of the biggest variations to account balances associated by account address */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/account-balance/variations`
+   * Returns a mapping of the biggest variations to account balances associated by account address
+   *
+   */
   accountBalanceVariations?: Maybe<AccountBalanceVariations_200_Response>;
   accountBalances: AccountBalancePage;
   /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/account-balance/interactions`
    * Returns a mapping of the largest interactions between accounts.
    * Positive amounts signify net token transfers FROM <accountId>, whilst negative amounts refer to net transfers TO <accountId>
+   *
    */
   accountInteractions?: Maybe<AccountInteractions_200_Response>;
-  accountPower?: Maybe<AccountPower>;
-  accountPowers: AccountPowerPage;
   accounts: AccountPage;
   /**
    * Average delegation percentage across all supported DAOs by day.
@@ -98,75 +108,264 @@ export type Query = {
    * Only includes dates where ALL DAOs have data available.
    */
   averageDelegationPercentageByDay: AverageDelegationPercentagePage;
-  /** Get active token supply for DAO */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/active-supply/compare`
+   * Get active token supply for DAO
+   *
+   */
   compareActiveSupply?: Maybe<CompareActiveSupply_200_Response>;
-  /** Compare average turnout between time periods */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/average-turnout/compare`
+   * Compare average turnout between time periods
+   *
+   */
   compareAverageTurnout?: Maybe<CompareAverageTurnout_200_Response>;
-  /** Compare cex supply between periods */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/cex-supply/compare`
+   * Compare cex supply between periods
+   *
+   */
   compareCexSupply?: Maybe<CompareCexSupply_200_Response>;
-  /** Compare circulating supply between periods */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/circulating-supply/compare`
+   * Compare circulating supply between periods
+   *
+   */
   compareCirculatingSupply?: Maybe<CompareCirculatingSupply_200_Response>;
-  /** Compare delegated supply between periods */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/delegated-supply/compare`
+   * Compare delegated supply between periods
+   *
+   */
   compareDelegatedSupply?: Maybe<CompareDelegatedSupply_200_Response>;
-  /** Compare dex supply between periods */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/dex-supply/compare`
+   * Compare dex supply between periods
+   *
+   */
   compareDexSupply?: Maybe<CompareDexSupply_200_Response>;
-  /** Compare lending supply between periods */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/lending-supply/compare`
+   * Compare lending supply between periods
+   *
+   */
   compareLendingSupply?: Maybe<CompareLendingSupply_200_Response>;
-  /** Compare number of proposals between time periods */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/proposals/compare`
+   * Compare number of proposals between time periods
+   *
+   */
   compareProposals?: Maybe<CompareProposals_200_Response>;
-  /** Compare total supply between periods */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/total-supply/compare`
+   * Compare total supply between periods
+   *
+   */
   compareTotalSupply?: Maybe<CompareTotalSupply_200_Response>;
-  /** Compare treasury between periods */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/treasury/compare`
+   * Compare treasury between periods
+   *
+   */
   compareTreasury?: Maybe<CompareTreasury_200_Response>;
-  /** Compare number of votes between time periods */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/votes/compare`
+   * Compare number of votes between time periods
+   *
+   */
   compareVotes?: Maybe<CompareVotes_200_Response>;
-  /** Returns current governance parameters for this DAO */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/dao`
+   * Returns current governance parameters for this DAO
+   *
+   */
   dao?: Maybe<Dao_200_Response>;
   daoMetricsDayBucket?: Maybe<DaoMetricsDayBucket>;
   daoMetricsDayBuckets: DaoMetricsDayBucketPage;
   /** Get all DAOs */
   daos: DaoList;
   delegation?: Maybe<Delegation>;
-  /** Get delegation percentage day buckets with forward-fill */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/delegation-percentage`
+   * Get delegation percentage day buckets with forward-fill
+   *
+   */
   delegationPercentageByDay?: Maybe<DelegationPercentageByDay_200_Response>;
   delegations: DelegationPage;
-  /** Fetch historical token balances for multiple addresses at a specific time period using multicall */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/historical-balances`
+   * Fetch historical token balances for multiple addresses at a specific time period using multicall
+   *
+   */
   historicalBalances?: Maybe<Array<Maybe<Query_HistoricalBalances_Items>>>;
-  /** Get historical market data for a specific token */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/token/historical-data`
+   * Get historical market data for a specific token
+   *
+   */
   historicalTokenData?: Maybe<Array<Maybe<Query_HistoricalTokenData_Items>>>;
-  /** Fetch historical voting power for multiple addresses at a specific time period using multicall */
-  historicalVotingPower?: Maybe<Array<Maybe<Query_HistoricalVotingPower_Items>>>;
-  /** Get the last update time */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/voting-powers/{args.accountId}/historical`
+   * Returns a list of voting power changes
+   *
+   */
+  historicalVotingPowers?: Maybe<HistoricalVotingPowers_200_Response>;
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/last-update`
+   * Get the last update time
+   *
+   */
   lastUpdate?: Maybe<LastUpdate_200_Response>;
-  /** Returns a single proposal by its ID */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/proposals/{args.id}`
+   * Returns a single proposal by its ID
+   *
+   */
   proposal?: Maybe<Proposal_200_Response>;
-  /** Returns the active delegates that did not vote on a given proposal */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/proposals/{args.id}/non-voters`
+   * Returns the active delegates that did not vote on a given proposal
+   *
+   */
   proposalNonVoters?: Maybe<ProposalNonVoters_200_Response>;
-  /** Returns a list of proposal */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/proposals`
+   * Returns a list of proposal
+   *
+   */
   proposals?: Maybe<Proposals_200_Response>;
-  /** Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/proposals-activity`
+   * Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window
+   *
+   */
   proposalsActivity?: Maybe<ProposalsActivity_200_Response>;
   proposalsOnchain?: Maybe<ProposalsOnchain>;
   proposalsOnchains: ProposalsOnchainPage;
-  /** Get property data for a specific token */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/token`
+   * Get property data for a specific token
+   *
+   */
   token?: Maybe<Token_200_Response>;
   tokenPrice?: Maybe<TokenPrice>;
   tokenPrices: TokenPricePage;
   tokens: TokenPage;
-  /** Get total assets */
-  totalAssets?: Maybe<Array<Maybe<Query_TotalAssets_Items>>>;
   transaction?: Maybe<Transaction>;
-  /** Get transactions with their associated transfers and delegations, with optional filtering and sorting */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/transactions`
+   * Get transactions with their associated transfers and delegations, with optional filtering and sorting
+   *
+   */
   transactions?: Maybe<Transactions_200_Response>;
   transfer?: Maybe<Transfer>;
   transfers: TransferPage;
   votesOnchain?: Maybe<VotesOnchain>;
   votesOnchains: VotesOnchainPage;
-  votingPowerHistory?: Maybe<VotingPowerHistory>;
-  votingPowerHistorys: VotingPowerHistoryPage;
-  /** Returns a mapping of the biggest changes to voting power associated by delegate address */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/voting-powers/{args.accountId}`
+   * Returns voting power information for a specific address (account)
+   *
+   */
+  votingPowerByAccountId?: Maybe<VotingPowerByAccountId_200_Response>;
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/voting-powers/variations`
+   * Returns a mapping of the biggest changes to voting power associated by delegate address
+   *
+   */
   votingPowerVariations?: Maybe<VotingPowerVariations_200_Response>;
-  /** Returns a list of voting power changes */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/voting-powers/{args.accountId}/variations`
+   * Returns a the changes to voting power by period and accountId
+   *
+   */
+  votingPowerVariationsByAccountId?: Maybe<VotingPowerVariationsByAccountId_200_Response>;
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/voting-powers`
+   * Returns sorted and paginated account voting power records
+   *
+   */
   votingPowers?: Maybe<VotingPowers_200_Response>;
 };
 
@@ -220,21 +419,6 @@ export type QueryAccountInteractionsArgs = {
   orderBy?: InputMaybe<QueryInput_AccountInteractions_OrderBy>;
   orderDirection?: InputMaybe<QueryInput_AccountInteractions_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
-};
-
-
-export type QueryAccountPowerArgs = {
-  accountId: Scalars['String']['input'];
-};
-
-
-export type QueryAccountPowersArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  where?: InputMaybe<AccountPowerFilter>;
 };
 
 
@@ -369,10 +553,16 @@ export type QueryHistoricalTokenDataArgs = {
 };
 
 
-export type QueryHistoricalVotingPowerArgs = {
-  addresses: Scalars['JSON']['input'];
-  days?: InputMaybe<QueryInput_HistoricalVotingPower_Days>;
-  fromDate?: InputMaybe<Scalars['Float']['input']>;
+export type QueryHistoricalVotingPowersArgs = {
+  accountId: Scalars['String']['input'];
+  fromDate?: InputMaybe<Scalars['String']['input']>;
+  fromValue?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<QueryInput_HistoricalVotingPowers_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_HistoricalVotingPowers_OrderDirection>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  toDate?: InputMaybe<Scalars['String']['input']>;
+  toValue?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -408,7 +598,7 @@ export type QueryProposalsArgs = {
 
 export type QueryProposalsActivityArgs = {
   address: Scalars['String']['input'];
-  fromDate?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  fromDate?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   orderBy?: InputMaybe<QueryInput_ProposalsActivity_OrderBy>;
   orderDirection?: InputMaybe<QueryInput_ProposalsActivity_OrderDirection>;
@@ -459,11 +649,6 @@ export type QueryTokensArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   where?: InputMaybe<TokenFilter>;
-};
-
-
-export type QueryTotalAssetsArgs = {
-  days?: InputMaybe<QueryInput_TotalAssets_Days>;
 };
 
 
@@ -521,39 +706,35 @@ export type QueryVotesOnchainsArgs = {
 };
 
 
-export type QueryVotingPowerHistoryArgs = {
+export type QueryVotingPowerByAccountIdArgs = {
   accountId: Scalars['String']['input'];
-  logIndex: Scalars['Float']['input'];
-  transactionHash: Scalars['String']['input'];
-};
-
-
-export type QueryVotingPowerHistorysArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  where?: InputMaybe<VotingPowerHistoryFilter>;
 };
 
 
 export type QueryVotingPowerVariationsArgs = {
-  days?: InputMaybe<QueryInput_VotingPowerVariations_Days>;
+  addresses?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  fromDate?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   orderDirection?: InputMaybe<QueryInput_VotingPowerVariations_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  toDate?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryVotingPowerVariationsByAccountIdArgs = {
+  accountId: Scalars['String']['input'];
+  fromDate?: InputMaybe<Scalars['String']['input']>;
+  toDate?: InputMaybe<Scalars['String']['input']>;
 };
 
 
 export type QueryVotingPowersArgs = {
-  account: Scalars['String']['input'];
+  addresses?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  fromValue?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
-  maxDelta?: InputMaybe<Scalars['String']['input']>;
-  minDelta?: InputMaybe<Scalars['String']['input']>;
-  orderBy?: InputMaybe<QueryInput_VotingPowers_OrderBy>;
   orderDirection?: InputMaybe<QueryInput_VotingPowers_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  toValue?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type Account = {
@@ -1180,6 +1361,12 @@ export type DelegationPercentageByDay_200_Response = {
   totalCount: Scalars['Float']['output'];
 };
 
+export type HistoricalVotingPowers_200_Response = {
+  __typename?: 'historicalVotingPowers_200_response';
+  items: Array<Maybe<Query_HistoricalVotingPowers_Items_Items>>;
+  totalCount: Scalars['Float']['output'];
+};
+
 export type LastUpdate_200_Response = {
   __typename?: 'lastUpdate_200_response';
   lastUpdate: Scalars['String']['output'];
@@ -1545,12 +1732,14 @@ export enum QueryInput_HistoricalBalances_Days {
   '365d' = '_365d'
 }
 
-export enum QueryInput_HistoricalVotingPower_Days {
-  '7d' = '_7d',
-  '30d' = '_30d',
-  '90d' = '_90d',
-  '180d' = '_180d',
-  '365d' = '_365d'
+export enum QueryInput_HistoricalVotingPowers_OrderBy {
+  Delta = 'delta',
+  Timestamp = 'timestamp'
+}
+
+export enum QueryInput_HistoricalVotingPowers_OrderDirection {
+  Asc = 'asc',
+  Desc = 'desc'
 }
 
 export enum QueryInput_LastUpdate_Chart {
@@ -1598,35 +1787,14 @@ export enum QueryInput_Token_Currency {
   Usd = 'usd'
 }
 
-export enum QueryInput_TotalAssets_Days {
-  '7d' = '_7d',
-  '30d' = '_30d',
-  '90d' = '_90d',
-  '180d' = '_180d',
-  '365d' = '_365d'
-}
-
 export enum QueryInput_Transactions_SortOrder {
   Asc = 'asc',
   Desc = 'desc'
 }
 
-export enum QueryInput_VotingPowerVariations_Days {
-  '7d' = '_7d',
-  '30d' = '_30d',
-  '90d' = '_90d',
-  '180d' = '_180d',
-  '365d' = '_365d'
-}
-
 export enum QueryInput_VotingPowerVariations_OrderDirection {
   Asc = 'asc',
   Desc = 'desc'
-}
-
-export enum QueryInput_VotingPowers_OrderBy {
-  Delta = 'delta',
-  Timestamp = 'timestamp'
 }
 
 export enum QueryInput_VotingPowers_OrderDirection {
@@ -1692,10 +1860,32 @@ export type Query_HistoricalTokenData_Items = {
   timestamp: Scalars['Float']['output'];
 };
 
-export type Query_HistoricalVotingPower_Items = {
-  __typename?: 'query_historicalVotingPower_items';
-  address: Scalars['String']['output'];
+export type Query_HistoricalVotingPowers_Items_Items = {
+  __typename?: 'query_historicalVotingPowers_items_items';
+  accountId: Scalars['String']['output'];
+  daoId: Scalars['String']['output'];
+  delegation?: Maybe<Query_HistoricalVotingPowers_Items_Items_Delegation>;
+  delta: Scalars['String']['output'];
+  logIndex: Scalars['Float']['output'];
+  timestamp: Scalars['String']['output'];
+  transactionHash: Scalars['String']['output'];
+  transfer?: Maybe<Query_HistoricalVotingPowers_Items_Items_Transfer>;
   votingPower: Scalars['String']['output'];
+};
+
+export type Query_HistoricalVotingPowers_Items_Items_Delegation = {
+  __typename?: 'query_historicalVotingPowers_items_items_delegation';
+  from: Scalars['String']['output'];
+  previousDelegate?: Maybe<Scalars['String']['output']>;
+  to: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
+export type Query_HistoricalVotingPowers_Items_Items_Transfer = {
+  __typename?: 'query_historicalVotingPowers_items_items_transfer';
+  from: Scalars['String']['output'];
+  to: Scalars['String']['output'];
+  value: Scalars['String']['output'];
 };
 
 export type Query_ProposalNonVoters_Items_Items = {
@@ -1762,12 +1952,6 @@ export type Query_Proposals_Items_Items = {
   values: Array<Maybe<Scalars['String']['output']>>;
 };
 
-export type Query_TotalAssets_Items = {
-  __typename?: 'query_totalAssets_items';
-  date: Scalars['String']['output'];
-  totalAssets: Scalars['String']['output'];
-};
-
 export type Query_Transactions_Items_Items = {
   __typename?: 'query_transactions_items_items';
   delegations: Array<Maybe<Query_Transactions_Items_Items_Delegations_Items>>;
@@ -1814,6 +1998,22 @@ export type Query_Transactions_Items_Items_Transfers_Items = {
   transactionHash: Scalars['String']['output'];
 };
 
+export type Query_VotingPowerVariationsByAccountId_Data = {
+  __typename?: 'query_votingPowerVariationsByAccountId_data';
+  absoluteChange: Scalars['String']['output'];
+  accountId: Scalars['String']['output'];
+  currentVotingPower: Scalars['String']['output'];
+  percentageChange: Scalars['String']['output'];
+  previousVotingPower?: Maybe<Scalars['String']['output']>;
+};
+
+export type Query_VotingPowerVariationsByAccountId_Period = {
+  __typename?: 'query_votingPowerVariationsByAccountId_period';
+  days: Scalars['String']['output'];
+  endTimestamp: Scalars['String']['output'];
+  startTimestamp: Scalars['String']['output'];
+};
+
 export type Query_VotingPowerVariations_Items_Items = {
   __typename?: 'query_votingPowerVariations_items_items';
   absoluteChange: Scalars['String']['output'];
@@ -1833,28 +2033,10 @@ export type Query_VotingPowerVariations_Period = {
 export type Query_VotingPowers_Items_Items = {
   __typename?: 'query_votingPowers_items_items';
   accountId: Scalars['String']['output'];
-  daoId: Scalars['String']['output'];
-  delegation?: Maybe<Query_VotingPowers_Items_Items_Delegation>;
-  delta: Scalars['String']['output'];
-  logIndex: Scalars['Float']['output'];
-  timestamp: Scalars['String']['output'];
-  transactionHash: Scalars['String']['output'];
-  transfer?: Maybe<Query_VotingPowers_Items_Items_Transfer>;
+  delegationsCount: Scalars['Float']['output'];
+  proposalsCount: Scalars['Float']['output'];
+  votesCount: Scalars['Float']['output'];
   votingPower: Scalars['String']['output'];
-};
-
-export type Query_VotingPowers_Items_Items_Delegation = {
-  __typename?: 'query_votingPowers_items_items_delegation';
-  from: Scalars['String']['output'];
-  to: Scalars['String']['output'];
-  value: Scalars['String']['output'];
-};
-
-export type Query_VotingPowers_Items_Items_Transfer = {
-  __typename?: 'query_votingPowers_items_items_transfer';
-  from: Scalars['String']['output'];
-  to: Scalars['String']['output'];
-  value: Scalars['String']['output'];
 };
 
 export enum Timestamp_Const {
@@ -2350,6 +2532,15 @@ export type VotesOnchainPage = {
   totalCount: Scalars['Int']['output'];
 };
 
+export type VotingPowerByAccountId_200_Response = {
+  __typename?: 'votingPowerByAccountId_200_response';
+  accountId: Scalars['String']['output'];
+  delegationsCount: Scalars['Float']['output'];
+  proposalsCount: Scalars['Float']['output'];
+  votesCount: Scalars['Float']['output'];
+  votingPower: Scalars['String']['output'];
+};
+
 export type VotingPowerHistory = {
   __typename?: 'votingPowerHistory';
   account?: Maybe<Account>;
@@ -2447,6 +2638,12 @@ export type VotingPowerHistoryPage = {
   totalCount: Scalars['Int']['output'];
 };
 
+export type VotingPowerVariationsByAccountId_200_Response = {
+  __typename?: 'votingPowerVariationsByAccountId_200_response';
+  data: Query_VotingPowerVariationsByAccountId_Data;
+  period: Query_VotingPowerVariationsByAccountId_Period;
+};
+
 export type VotingPowerVariations_200_Response = {
   __typename?: 'votingPowerVariations_200_response';
   items: Array<Maybe<Query_VotingPowerVariations_Items_Items>>;
@@ -2505,7 +2702,7 @@ export type CompareTreasuryQueryVariables = Exact<{
 export type CompareTreasuryQuery = { __typename?: 'Query', compareTreasury?: { __typename?: 'compareTreasury_200_response', changeRate: number, currentTreasury: string, oldTreasury: string } | null };
 
 export type VotingPowerVariationsQueryVariables = Exact<{
-  days: QueryInput_VotingPowerVariations_Days;
+  fromDate: Scalars['String']['input'];
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
 }>;
 
@@ -2518,30 +2715,14 @@ export type GetDaoDataQueryVariables = Exact<{ [key: string]: never; }>;
 export type GetDaoDataQuery = { __typename?: 'Query', dao?: { __typename?: 'dao_200_response', id: string, chainId: number, quorum: string, proposalThreshold: string, votingDelay: string, votingPeriod: string, timelockDelay: string } | null };
 
 export type GetDelegatesQueryVariables = Exact<{
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  orderDirection?: InputMaybe<QueryInput_VotingPowers_OrderDirection>;
   addresses?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
-export type GetDelegatesQuery = { __typename?: 'Query', accountPowers: { __typename?: 'accountPowerPage', items: Array<{ __typename?: 'accountPower', votingPower: any, accountId: string, delegationsCount: number }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
-
-export type GetDelegateDelegationHistoryDeltaRangeQueryVariables = Exact<{
-  accountId: Scalars['String']['input'];
-  deltaMod_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  deltaMod_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type GetDelegateDelegationHistoryDeltaRangeQuery = { __typename?: 'Query', votingPowerHistorys: { __typename?: 'votingPowerHistoryPage', totalCount: number, items: Array<{ __typename?: 'votingPowerHistory', delta: any, deltaMod: any, transactionHash: string, timestamp: any, votingPower: any, delegation?: { __typename?: 'delegation', delegatorAccountId: string, delegatedValue: any, previousDelegate?: string | null, delegateAccountId: string } | null, transfer?: { __typename?: 'transfer', amount: any, fromAccountId: string, toAccountId: string } | null }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null } } };
+export type GetDelegatesQuery = { __typename?: 'Query', votingPowers?: { __typename?: 'votingPowers_200_response', totalCount: number, items: Array<{ __typename?: 'query_votingPowers_items_items', accountId: string, delegationsCount: number, votingPower: string } | null> } | null };
 
 export type GetDelegatorVotingPowerDetailsQueryVariables = Exact<{
   address: Scalars['String']['input'];
@@ -2553,7 +2734,7 @@ export type GetDelegatorVotingPowerDetailsQueryVariables = Exact<{
 }>;
 
 
-export type GetDelegatorVotingPowerDetailsQuery = { __typename?: 'Query', accountPower?: { __typename?: 'accountPower', votingPower: any, accountId: string } | null, accountBalances: { __typename?: 'accountBalancePage', items: Array<{ __typename?: 'accountBalance', accountId: string, balance: any }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null } } };
+export type GetDelegatorVotingPowerDetailsQuery = { __typename?: 'Query', votingPowerByAccountId?: { __typename?: 'votingPowerByAccountId_200_response', accountId: string, votingPower: string } | null, accountBalances: { __typename?: 'accountBalancePage', items: Array<{ __typename?: 'accountBalance', accountId: string, balance: any }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null } } };
 
 export type GetDelegationsTimestampQueryVariables = Exact<{
   delegator: Array<Scalars['String']['input']> | Scalars['String']['input'];
@@ -2579,38 +2760,16 @@ export type GetVotingPowerCountingQueryVariables = Exact<{
 
 export type GetVotingPowerCountingQuery = { __typename?: 'Query', accountBalances: { __typename?: 'accountBalancePage', totalCount: number } };
 
-export type GetVotingPowerChartQueryVariables = Exact<{
-  account: Scalars['String']['input'];
-  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
-  orderDirection?: InputMaybe<QueryInput_VotingPowers_OrderDirection>;
-  orderBy?: InputMaybe<QueryInput_VotingPowers_OrderBy>;
-}>;
-
-
-export type GetVotingPowerChartQuery = { __typename?: 'Query', votingPowers?: { __typename?: 'votingPowers_200_response', items: Array<{ __typename?: 'query_votingPowers_items_items', votingPower: string, timestamp: string } | null> } | null };
-
-export type GetDelegateDelegationHistoryQueryVariables = Exact<{
-  accountId: Scalars['String']['input'];
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type GetDelegateDelegationHistoryQuery = { __typename?: 'Query', votingPowerHistorys: { __typename?: 'votingPowerHistoryPage', totalCount: number, items: Array<{ __typename?: 'votingPowerHistory', delta: any, transactionHash: string, timestamp: any, votingPower: any, delegation?: { __typename?: 'delegation', delegatorAccountId: string, delegatedValue: any, previousDelegate?: string | null, delegateAccountId: string } | null, transfer?: { __typename?: 'transfer', amount: any, fromAccountId: string, toAccountId: string } | null }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null } } };
-
 export type GetDelegateDelegationHistoryGraphQueryVariables = Exact<{
   accountId: Scalars['String']['input'];
-  fromTimestamp?: InputMaybe<Scalars['BigInt']['input']>;
-  toTimestamp?: InputMaybe<Scalars['BigInt']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
+  fromTimestamp?: InputMaybe<Scalars['String']['input']>;
+  toTimestamp?: InputMaybe<Scalars['String']['input']>;
+  orderBy?: InputMaybe<QueryInput_HistoricalVotingPowers_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_HistoricalVotingPowers_OrderDirection>;
 }>;
 
 
-export type GetDelegateDelegationHistoryGraphQuery = { __typename?: 'Query', votingPowerHistorys: { __typename?: 'votingPowerHistoryPage', totalCount: number, items: Array<{ __typename?: 'votingPowerHistory', delta: any, transactionHash: string, timestamp: any, votingPower: any, delegation?: { __typename?: 'delegation', delegatorAccountId: string, delegatedValue: any, previousDelegate?: string | null, delegateAccountId: string } | null, transfer?: { __typename?: 'transfer', amount: any, fromAccountId: string, toAccountId: string } | null }> } };
+export type GetDelegateDelegationHistoryGraphQuery = { __typename?: 'Query', historicalVotingPowers?: { __typename?: 'historicalVotingPowers_200_response', totalCount: number, items: Array<{ __typename?: 'query_historicalVotingPowers_items_items', delta: string, transactionHash: string, timestamp: string, votingPower: string, delegation?: { __typename?: 'query_historicalVotingPowers_items_items_delegation', from: string, previousDelegate?: string | null, to: string, value: string } | null, transfer?: { __typename?: 'query_historicalVotingPowers_items_items_transfer', from: string, to: string, value: string } | null } | null> } | null };
 
 export type GetDelegatedSupplyHistoryQueryVariables = Exact<{
   startDate: Scalars['String']['input'];
@@ -2620,24 +2779,17 @@ export type GetDelegatedSupplyHistoryQueryVariables = Exact<{
 
 export type GetDelegatedSupplyHistoryQuery = { __typename?: 'Query', averageDelegationPercentageByDay: { __typename?: 'AverageDelegationPercentagePage', items: Array<{ __typename?: 'AverageDelegationPercentageItem', date: string, high: string }> } };
 
-export type GetDelegatesCountQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetDelegatesCountQuery = { __typename?: 'Query', accountPowers: { __typename?: 'accountPowerPage', totalCount: number } };
-
 export type GetHistoricalVotingAndActivityQueryVariables = Exact<{
-  addresses: Scalars['JSON']['input'];
   address: Scalars['String']['input'];
-  days: QueryInput_HistoricalVotingPower_Days;
-  fromDate?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  fromDate: Scalars['String']['input'];
 }>;
 
 
-export type GetHistoricalVotingAndActivityQuery = { __typename?: 'Query', historicalVotingPower?: Array<{ __typename?: 'query_historicalVotingPower_items', address: string, votingPower: string } | null> | null, proposalsActivity?: { __typename?: 'proposalsActivity_200_response', totalProposals: number, votedProposals: number, neverVoted: boolean } | null };
+export type GetHistoricalVotingAndActivityQuery = { __typename?: 'Query', votingPowerVariationsByAccountId?: { __typename?: 'votingPowerVariationsByAccountId_200_response', data: { __typename?: 'query_votingPowerVariationsByAccountId_data', accountId: string, previousVotingPower?: string | null } } | null, proposalsActivity?: { __typename?: 'proposalsActivity_200_response', totalProposals: number, votedProposals: number, neverVoted: boolean } | null };
 
 export type GetDelegateProposalsActivityQueryVariables = Exact<{
   address: Scalars['String']['input'];
-  fromDate?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  fromDate?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -2681,13 +2833,13 @@ export type GetVotesOnchainsTotalCountQueryVariables = Exact<{
 export type GetVotesOnchainsTotalCountQuery = { __typename?: 'Query', votesOnchains: { __typename?: 'votesOnchainPage', totalCount: number } };
 
 export type GetVotingPowerChangeQueryVariables = Exact<{
-  addresses: Scalars['JSON']['input'];
-  days: QueryInput_HistoricalVotingPower_Days;
-  fromDate?: InputMaybe<Scalars['Float']['input']>;
+  address: Scalars['String']['input'];
+  fromDate: Scalars['String']['input'];
+  toDate: Scalars['String']['input'];
 }>;
 
 
-export type GetVotingPowerChangeQuery = { __typename?: 'Query', historicalVotingPower?: Array<{ __typename?: 'query_historicalVotingPower_items', address: string, votingPower: string } | null> | null };
+export type GetVotingPowerChangeQuery = { __typename?: 'Query', votingPowerVariationsByAccountId?: { __typename?: 'votingPowerVariationsByAccountId_200_response', data: { __typename?: 'query_votingPowerVariationsByAccountId_data', accountId: string, previousVotingPower?: string | null } } | null };
 
 export type GetProposalNonVotersQueryVariables = Exact<{
   id: Scalars['String']['input'];
@@ -2705,7 +2857,7 @@ export type GetAccountPowerQueryVariables = Exact<{
 }>;
 
 
-export type GetAccountPowerQuery = { __typename?: 'Query', accountPower?: { __typename?: 'accountPower', votingPower: any, accountId: string } | null, votesOnchain?: { __typename?: 'votesOnchain', support: string, votingPower: any, reason?: string | null, timestamp: any, txHash: string, daoId: string } | null };
+export type GetAccountPowerQuery = { __typename?: 'Query', votingPowerByAccountId?: { __typename?: 'votingPowerByAccountId_200_response', accountId: string, votingPower: string } | null, votesOnchain?: { __typename?: 'votesOnchain', support: string, votingPower: any, reason?: string | null, timestamp: any, txHash: string, daoId: string } | null };
 
 export type GetUserVoteQueryVariables = Exact<{
   proposalId: Scalars['String']['input'];
@@ -2723,9 +2875,21 @@ export type GetHistoricalBalancesQueryVariables = Exact<{
 
 export type GetHistoricalBalancesQuery = { __typename?: 'Query', historicalBalances?: Array<{ __typename?: 'query_historicalBalances_items', address: string, balance: string, blockNumber: number, tokenAddress: string } | null> | null };
 
+export type HistoricalVotingPowersQueryVariables = Exact<{
+  account: Scalars['String']['input'];
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderDirection?: InputMaybe<QueryInput_HistoricalVotingPowers_OrderDirection>;
+  maxDelta?: InputMaybe<Scalars['String']['input']>;
+  minDelta?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type HistoricalVotingPowersQuery = { __typename?: 'Query', historicalVotingPowers?: { __typename?: 'historicalVotingPowers_200_response', totalCount: number, items: Array<{ __typename?: 'query_historicalVotingPowers_items_items', accountId: string, votingPower: string, transactionHash: string, timestamp: string, logIndex: number, delta: string, transfer?: { __typename?: 'query_historicalVotingPowers_items_items_transfer', value: string, to: string, from: string } | null, delegation?: { __typename?: 'query_historicalVotingPowers_items_items_delegation', from: string, to: string, value: string } | null } | null> } | null };
+
 export type GetProposalsActivityQueryVariables = Exact<{
   address: Scalars['String']['input'];
-  fromDate?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  fromDate?: InputMaybe<Scalars['String']['input']>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   orderBy?: InputMaybe<QueryInput_ProposalsActivity_OrderBy>;
@@ -2835,19 +2999,6 @@ export type TransactionsQueryVariables = Exact<{
 
 
 export type TransactionsQuery = { __typename?: 'Query', transactions?: { __typename?: 'transactions_200_response', totalCount: number, items: Array<{ __typename?: 'query_transactions_items_items', from?: string | null, isCex: boolean, isDex: boolean, isLending: boolean, isTotal: boolean, timestamp: string, to?: string | null, transactionHash: string, delegations: Array<{ __typename?: 'query_transactions_items_items_delegations_items', daoId: string, delegateAccountId: string, delegatedValue: string, delegatorAccountId: string, isCex: boolean, isDex: boolean, isTotal: boolean, isLending: boolean, logIndex: number, previousDelegate?: string | null, timestamp: string, transactionHash: string } | null>, transfers: Array<{ __typename?: 'query_transactions_items_items_transfers_items', amount: string, daoId: string, fromAccountId: string, isCex: boolean, isDex: boolean, isLending: boolean, isTotal: boolean, logIndex: number, timestamp: string, toAccountId: string, tokenId: string, transactionHash: string } | null> } | null> } | null };
-
-export type VotingPowersQueryVariables = Exact<{
-  account: Scalars['String']['input'];
-  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
-  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
-  orderDirection?: InputMaybe<QueryInput_VotingPowers_OrderDirection>;
-  orderBy?: InputMaybe<QueryInput_VotingPowers_OrderBy>;
-  maxDelta?: InputMaybe<Scalars['String']['input']>;
-  minDelta?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type VotingPowersQuery = { __typename?: 'Query', votingPowers?: { __typename?: 'votingPowers_200_response', totalCount: number, items: Array<{ __typename?: 'query_votingPowers_items_items', accountId: string, daoId: string, votingPower: string, transactionHash: string, timestamp: string, logIndex: number, delta: string, transfer?: { __typename?: 'query_votingPowers_items_items_transfer', value: string, to: string, from: string } | null, delegation?: { __typename?: 'query_votingPowers_items_items_delegation', from: string, to: string, value: string } | null } | null> } | null };
 
 
 export const BalanceHistoryDocument = gql`
@@ -3099,8 +3250,8 @@ export type CompareTreasuryLazyQueryHookResult = ReturnType<typeof useCompareTre
 export type CompareTreasurySuspenseQueryHookResult = ReturnType<typeof useCompareTreasurySuspenseQuery>;
 export type CompareTreasuryQueryResult = Apollo.QueryResult<CompareTreasuryQuery, CompareTreasuryQueryVariables>;
 export const VotingPowerVariationsDocument = gql`
-    query VotingPowerVariations($days: queryInput_votingPowerVariations_days!, $limit: PositiveInt = 10) {
-  votingPowerVariations(days: $days, limit: $limit) {
+    query VotingPowerVariations($fromDate: String!, $limit: PositiveInt = 10) {
+  votingPowerVariations(fromDate: $fromDate, limit: $limit) {
     items {
       absoluteChange
       accountId
@@ -3124,7 +3275,7 @@ export const VotingPowerVariationsDocument = gql`
  * @example
  * const { data, loading, error } = useVotingPowerVariationsQuery({
  *   variables: {
- *      days: // value for 'days'
+ *      fromDate: // value for 'fromDate'
  *      limit: // value for 'limit'
  *   },
  * });
@@ -3191,26 +3342,20 @@ export type GetDaoDataLazyQueryHookResult = ReturnType<typeof useGetDaoDataLazyQ
 export type GetDaoDataSuspenseQueryHookResult = ReturnType<typeof useGetDaoDataSuspenseQuery>;
 export type GetDaoDataQueryResult = Apollo.QueryResult<GetDaoDataQuery, GetDaoDataQueryVariables>;
 export const GetDelegatesDocument = gql`
-    query GetDelegates($after: String, $before: String, $orderBy: String = "votingPower", $orderDirection: String = "desc", $addresses: [String], $limit: Int = 10) {
-  accountPowers(
-    orderBy: $orderBy
-    orderDirection: $orderDirection
+    query GetDelegates($limit: PositiveInt = 10, $skip: NonNegativeInt = 0, $orderDirection: queryInput_votingPowers_orderDirection = desc, $addresses: [String]) {
+  votingPowers(
     limit: $limit
-    after: $after
-    before: $before
-    where: {votingPower_gt: 0, accountId_in: $addresses}
+    skip: $skip
+    orderDirection: $orderDirection
+    fromValue: "0"
+    addresses: $addresses
   ) {
     items {
-      votingPower
       accountId
       delegationsCount
+      votingPower
     }
-    pageInfo {
-      endCursor
-      hasNextPage
-      hasPreviousPage
-      startCursor
-    }
+    totalCount
   }
 }
     `;
@@ -3227,12 +3372,10 @@ export const GetDelegatesDocument = gql`
  * @example
  * const { data, loading, error } = useGetDelegatesQuery({
  *   variables: {
- *      after: // value for 'after'
- *      before: // value for 'before'
- *      orderBy: // value for 'orderBy'
+ *      limit: // value for 'limit'
+ *      skip: // value for 'skip'
  *      orderDirection: // value for 'orderDirection'
  *      addresses: // value for 'addresses'
- *      limit: // value for 'limit'
  *   },
  * });
  */
@@ -3252,89 +3395,11 @@ export type GetDelegatesQueryHookResult = ReturnType<typeof useGetDelegatesQuery
 export type GetDelegatesLazyQueryHookResult = ReturnType<typeof useGetDelegatesLazyQuery>;
 export type GetDelegatesSuspenseQueryHookResult = ReturnType<typeof useGetDelegatesSuspenseQuery>;
 export type GetDelegatesQueryResult = Apollo.QueryResult<GetDelegatesQuery, GetDelegatesQueryVariables>;
-export const GetDelegateDelegationHistoryDeltaRangeDocument = gql`
-    query GetDelegateDelegationHistoryDeltaRange($accountId: String!, $deltaMod_gte: BigInt, $deltaMod_lte: BigInt, $orderBy: String = "timestamp", $orderDirection: String = "desc", $limit: Int = 10, $after: String, $before: String) {
-  votingPowerHistorys(
-    orderBy: $orderBy
-    orderDirection: $orderDirection
-    where: {accountId: $accountId, deltaMod_gte: $deltaMod_gte, deltaMod_lte: $deltaMod_lte}
-    limit: $limit
-    after: $after
-    before: $before
-  ) {
-    items {
-      delta
-      deltaMod
-      transactionHash
-      timestamp
-      delegation {
-        delegatorAccountId
-        delegatedValue
-        previousDelegate
-        delegateAccountId
-      }
-      transfer {
-        amount
-        fromAccountId
-        toAccountId
-      }
-      votingPower
-    }
-    pageInfo {
-      hasNextPage
-      hasPreviousPage
-      startCursor
-      endCursor
-    }
-    totalCount
-  }
-}
-    `;
-
-/**
- * __useGetDelegateDelegationHistoryDeltaRangeQuery__
- *
- * To run a query within a React component, call `useGetDelegateDelegationHistoryDeltaRangeQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetDelegateDelegationHistoryDeltaRangeQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetDelegateDelegationHistoryDeltaRangeQuery({
- *   variables: {
- *      accountId: // value for 'accountId'
- *      deltaMod_gte: // value for 'deltaMod_gte'
- *      deltaMod_lte: // value for 'deltaMod_lte'
- *      orderBy: // value for 'orderBy'
- *      orderDirection: // value for 'orderDirection'
- *      limit: // value for 'limit'
- *      after: // value for 'after'
- *      before: // value for 'before'
- *   },
- * });
- */
-export function useGetDelegateDelegationHistoryDeltaRangeQuery(baseOptions: Apollo.QueryHookOptions<GetDelegateDelegationHistoryDeltaRangeQuery, GetDelegateDelegationHistoryDeltaRangeQueryVariables> & ({ variables: GetDelegateDelegationHistoryDeltaRangeQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetDelegateDelegationHistoryDeltaRangeQuery, GetDelegateDelegationHistoryDeltaRangeQueryVariables>(GetDelegateDelegationHistoryDeltaRangeDocument, options);
-      }
-export function useGetDelegateDelegationHistoryDeltaRangeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDelegateDelegationHistoryDeltaRangeQuery, GetDelegateDelegationHistoryDeltaRangeQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetDelegateDelegationHistoryDeltaRangeQuery, GetDelegateDelegationHistoryDeltaRangeQueryVariables>(GetDelegateDelegationHistoryDeltaRangeDocument, options);
-        }
-export function useGetDelegateDelegationHistoryDeltaRangeSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegateDelegationHistoryDeltaRangeQuery, GetDelegateDelegationHistoryDeltaRangeQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetDelegateDelegationHistoryDeltaRangeQuery, GetDelegateDelegationHistoryDeltaRangeQueryVariables>(GetDelegateDelegationHistoryDeltaRangeDocument, options);
-        }
-export type GetDelegateDelegationHistoryDeltaRangeQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryDeltaRangeQuery>;
-export type GetDelegateDelegationHistoryDeltaRangeLazyQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryDeltaRangeLazyQuery>;
-export type GetDelegateDelegationHistoryDeltaRangeSuspenseQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryDeltaRangeSuspenseQuery>;
-export type GetDelegateDelegationHistoryDeltaRangeQueryResult = Apollo.QueryResult<GetDelegateDelegationHistoryDeltaRangeQuery, GetDelegateDelegationHistoryDeltaRangeQueryVariables>;
 export const GetDelegatorVotingPowerDetailsDocument = gql`
     query GetDelegatorVotingPowerDetails($address: String!, $after: String, $before: String, $orderBy: String, $orderDirection: String, $limit: Int) {
-  accountPower(accountId: $address) {
-    votingPower
+  votingPowerByAccountId(accountId: $address) {
     accountId
+    votingPower
   }
   accountBalances(
     orderBy: $orderBy
@@ -3531,154 +3596,30 @@ export type GetVotingPowerCountingQueryHookResult = ReturnType<typeof useGetVoti
 export type GetVotingPowerCountingLazyQueryHookResult = ReturnType<typeof useGetVotingPowerCountingLazyQuery>;
 export type GetVotingPowerCountingSuspenseQueryHookResult = ReturnType<typeof useGetVotingPowerCountingSuspenseQuery>;
 export type GetVotingPowerCountingQueryResult = Apollo.QueryResult<GetVotingPowerCountingQuery, GetVotingPowerCountingQueryVariables>;
-export const GetVotingPowerChartDocument = gql`
-    query GetVotingPowerChart($account: String!, $limit: PositiveInt = 10, $orderDirection: queryInput_votingPowers_orderDirection = desc, $orderBy: queryInput_votingPowers_orderBy) {
-  votingPowers(
-    account: $account
-    orderBy: $orderBy
-    orderDirection: $orderDirection
-    limit: $limit
-  ) {
-    items {
-      votingPower
-      timestamp
-    }
-  }
-}
-    `;
-
-/**
- * __useGetVotingPowerChartQuery__
- *
- * To run a query within a React component, call `useGetVotingPowerChartQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetVotingPowerChartQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetVotingPowerChartQuery({
- *   variables: {
- *      account: // value for 'account'
- *      limit: // value for 'limit'
- *      orderDirection: // value for 'orderDirection'
- *      orderBy: // value for 'orderBy'
- *   },
- * });
- */
-export function useGetVotingPowerChartQuery(baseOptions: Apollo.QueryHookOptions<GetVotingPowerChartQuery, GetVotingPowerChartQueryVariables> & ({ variables: GetVotingPowerChartQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetVotingPowerChartQuery, GetVotingPowerChartQueryVariables>(GetVotingPowerChartDocument, options);
-      }
-export function useGetVotingPowerChartLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetVotingPowerChartQuery, GetVotingPowerChartQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetVotingPowerChartQuery, GetVotingPowerChartQueryVariables>(GetVotingPowerChartDocument, options);
-        }
-export function useGetVotingPowerChartSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetVotingPowerChartQuery, GetVotingPowerChartQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetVotingPowerChartQuery, GetVotingPowerChartQueryVariables>(GetVotingPowerChartDocument, options);
-        }
-export type GetVotingPowerChartQueryHookResult = ReturnType<typeof useGetVotingPowerChartQuery>;
-export type GetVotingPowerChartLazyQueryHookResult = ReturnType<typeof useGetVotingPowerChartLazyQuery>;
-export type GetVotingPowerChartSuspenseQueryHookResult = ReturnType<typeof useGetVotingPowerChartSuspenseQuery>;
-export type GetVotingPowerChartQueryResult = Apollo.QueryResult<GetVotingPowerChartQuery, GetVotingPowerChartQueryVariables>;
-export const GetDelegateDelegationHistoryDocument = gql`
-    query GetDelegateDelegationHistory($accountId: String!, $orderBy: String = "timestamp", $orderDirection: String = "desc", $limit: Int = 10, $after: String, $before: String) {
-  votingPowerHistorys(
-    orderBy: $orderBy
-    orderDirection: $orderDirection
-    where: {accountId: $accountId}
-    limit: $limit
-    after: $after
-    before: $before
-  ) {
-    items {
-      delta
-      transactionHash
-      timestamp
-      delegation {
-        delegatorAccountId
-        delegatedValue
-        previousDelegate
-        delegateAccountId
-      }
-      transfer {
-        amount
-        fromAccountId
-        toAccountId
-      }
-      votingPower
-    }
-    pageInfo {
-      hasNextPage
-      hasPreviousPage
-      startCursor
-      endCursor
-    }
-    totalCount
-  }
-}
-    `;
-
-/**
- * __useGetDelegateDelegationHistoryQuery__
- *
- * To run a query within a React component, call `useGetDelegateDelegationHistoryQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetDelegateDelegationHistoryQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetDelegateDelegationHistoryQuery({
- *   variables: {
- *      accountId: // value for 'accountId'
- *      orderBy: // value for 'orderBy'
- *      orderDirection: // value for 'orderDirection'
- *      limit: // value for 'limit'
- *      after: // value for 'after'
- *      before: // value for 'before'
- *   },
- * });
- */
-export function useGetDelegateDelegationHistoryQuery(baseOptions: Apollo.QueryHookOptions<GetDelegateDelegationHistoryQuery, GetDelegateDelegationHistoryQueryVariables> & ({ variables: GetDelegateDelegationHistoryQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetDelegateDelegationHistoryQuery, GetDelegateDelegationHistoryQueryVariables>(GetDelegateDelegationHistoryDocument, options);
-      }
-export function useGetDelegateDelegationHistoryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDelegateDelegationHistoryQuery, GetDelegateDelegationHistoryQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetDelegateDelegationHistoryQuery, GetDelegateDelegationHistoryQueryVariables>(GetDelegateDelegationHistoryDocument, options);
-        }
-export function useGetDelegateDelegationHistorySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegateDelegationHistoryQuery, GetDelegateDelegationHistoryQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetDelegateDelegationHistoryQuery, GetDelegateDelegationHistoryQueryVariables>(GetDelegateDelegationHistoryDocument, options);
-        }
-export type GetDelegateDelegationHistoryQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryQuery>;
-export type GetDelegateDelegationHistoryLazyQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryLazyQuery>;
-export type GetDelegateDelegationHistorySuspenseQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistorySuspenseQuery>;
-export type GetDelegateDelegationHistoryQueryResult = Apollo.QueryResult<GetDelegateDelegationHistoryQuery, GetDelegateDelegationHistoryQueryVariables>;
 export const GetDelegateDelegationHistoryGraphDocument = gql`
-    query GetDelegateDelegationHistoryGraph($accountId: String!, $fromTimestamp: BigInt, $toTimestamp: BigInt, $orderBy: String = "timestamp", $orderDirection: String = "desc") {
-  votingPowerHistorys(
+    query GetDelegateDelegationHistoryGraph($accountId: String!, $fromTimestamp: String, $toTimestamp: String, $orderBy: queryInput_historicalVotingPowers_orderBy = timestamp, $orderDirection: queryInput_historicalVotingPowers_orderDirection = desc) {
+  historicalVotingPowers(
+    accountId: $accountId
     orderBy: $orderBy
     orderDirection: $orderDirection
-    where: {accountId: $accountId, timestamp_gte: $fromTimestamp, timestamp_lte: $toTimestamp}
-    limit: 1000
+    fromDate: $fromTimestamp
+    toDate: $toTimestamp
+    limit: "1000"
   ) {
     items {
       delta
       transactionHash
       timestamp
       delegation {
-        delegatorAccountId
-        delegatedValue
+        from
         previousDelegate
-        delegateAccountId
+        to
+        value
       }
       transfer {
-        amount
-        fromAccountId
-        toAccountId
+        from
+        to
+        value
       }
       votingPower
     }
@@ -3771,50 +3712,13 @@ export type GetDelegatedSupplyHistoryQueryHookResult = ReturnType<typeof useGetD
 export type GetDelegatedSupplyHistoryLazyQueryHookResult = ReturnType<typeof useGetDelegatedSupplyHistoryLazyQuery>;
 export type GetDelegatedSupplyHistorySuspenseQueryHookResult = ReturnType<typeof useGetDelegatedSupplyHistorySuspenseQuery>;
 export type GetDelegatedSupplyHistoryQueryResult = Apollo.QueryResult<GetDelegatedSupplyHistoryQuery, GetDelegatedSupplyHistoryQueryVariables>;
-export const GetDelegatesCountDocument = gql`
-    query GetDelegatesCount {
-  accountPowers(where: {votingPower_gt: 0}) {
-    totalCount
-  }
-}
-    `;
-
-/**
- * __useGetDelegatesCountQuery__
- *
- * To run a query within a React component, call `useGetDelegatesCountQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetDelegatesCountQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetDelegatesCountQuery({
- *   variables: {
- *   },
- * });
- */
-export function useGetDelegatesCountQuery(baseOptions?: Apollo.QueryHookOptions<GetDelegatesCountQuery, GetDelegatesCountQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetDelegatesCountQuery, GetDelegatesCountQueryVariables>(GetDelegatesCountDocument, options);
-      }
-export function useGetDelegatesCountLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDelegatesCountQuery, GetDelegatesCountQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetDelegatesCountQuery, GetDelegatesCountQueryVariables>(GetDelegatesCountDocument, options);
-        }
-export function useGetDelegatesCountSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegatesCountQuery, GetDelegatesCountQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetDelegatesCountQuery, GetDelegatesCountQueryVariables>(GetDelegatesCountDocument, options);
-        }
-export type GetDelegatesCountQueryHookResult = ReturnType<typeof useGetDelegatesCountQuery>;
-export type GetDelegatesCountLazyQueryHookResult = ReturnType<typeof useGetDelegatesCountLazyQuery>;
-export type GetDelegatesCountSuspenseQueryHookResult = ReturnType<typeof useGetDelegatesCountSuspenseQuery>;
-export type GetDelegatesCountQueryResult = Apollo.QueryResult<GetDelegatesCountQuery, GetDelegatesCountQueryVariables>;
 export const GetHistoricalVotingAndActivityDocument = gql`
-    query GetHistoricalVotingAndActivity($addresses: JSON!, $address: String!, $days: queryInput_historicalVotingPower_days!, $fromDate: NonNegativeInt) {
-  historicalVotingPower(addresses: $addresses, days: $days) {
-    address
-    votingPower
+    query GetHistoricalVotingAndActivity($address: String!, $fromDate: String!) {
+  votingPowerVariationsByAccountId(accountId: $address, fromDate: $fromDate) {
+    data {
+      accountId
+      previousVotingPower
+    }
   }
   proposalsActivity(address: $address, fromDate: $fromDate) {
     totalProposals
@@ -3836,9 +3740,7 @@ export const GetHistoricalVotingAndActivityDocument = gql`
  * @example
  * const { data, loading, error } = useGetHistoricalVotingAndActivityQuery({
  *   variables: {
- *      addresses: // value for 'addresses'
  *      address: // value for 'address'
- *      days: // value for 'days'
  *      fromDate: // value for 'fromDate'
  *   },
  * });
@@ -3860,7 +3762,7 @@ export type GetHistoricalVotingAndActivityLazyQueryHookResult = ReturnType<typeo
 export type GetHistoricalVotingAndActivitySuspenseQueryHookResult = ReturnType<typeof useGetHistoricalVotingAndActivitySuspenseQuery>;
 export type GetHistoricalVotingAndActivityQueryResult = Apollo.QueryResult<GetHistoricalVotingAndActivityQuery, GetHistoricalVotingAndActivityQueryVariables>;
 export const GetDelegateProposalsActivityDocument = gql`
-    query GetDelegateProposalsActivity($address: String!, $fromDate: NonNegativeInt) {
+    query GetDelegateProposalsActivity($address: String!, $fromDate: String) {
   proposalsActivity(address: $address, fromDate: $fromDate) {
     address
     totalProposals
@@ -4137,10 +4039,16 @@ export type GetVotesOnchainsTotalCountLazyQueryHookResult = ReturnType<typeof us
 export type GetVotesOnchainsTotalCountSuspenseQueryHookResult = ReturnType<typeof useGetVotesOnchainsTotalCountSuspenseQuery>;
 export type GetVotesOnchainsTotalCountQueryResult = Apollo.QueryResult<GetVotesOnchainsTotalCountQuery, GetVotesOnchainsTotalCountQueryVariables>;
 export const GetVotingPowerChangeDocument = gql`
-    query GetVotingPowerChange($addresses: JSON!, $days: queryInput_historicalVotingPower_days!, $fromDate: Float) {
-  historicalVotingPower(addresses: $addresses, days: $days, fromDate: $fromDate) {
-    address
-    votingPower
+    query GetVotingPowerChange($address: String!, $fromDate: String!, $toDate: String!) {
+  votingPowerVariationsByAccountId(
+    accountId: $address
+    fromDate: $fromDate
+    toDate: $toDate
+  ) {
+    data {
+      accountId
+      previousVotingPower
+    }
   }
 }
     `;
@@ -4157,9 +4065,9 @@ export const GetVotingPowerChangeDocument = gql`
  * @example
  * const { data, loading, error } = useGetVotingPowerChangeQuery({
  *   variables: {
- *      addresses: // value for 'addresses'
- *      days: // value for 'days'
+ *      address: // value for 'address'
  *      fromDate: // value for 'fromDate'
+ *      toDate: // value for 'toDate'
  *   },
  * });
  */
@@ -4235,9 +4143,9 @@ export type GetProposalNonVotersSuspenseQueryHookResult = ReturnType<typeof useG
 export type GetProposalNonVotersQueryResult = Apollo.QueryResult<GetProposalNonVotersQuery, GetProposalNonVotersQueryVariables>;
 export const GetAccountPowerDocument = gql`
     query GetAccountPower($address: String!, $proposalId: String!) {
-  accountPower(accountId: $address) {
-    votingPower
+  votingPowerByAccountId(accountId: $address) {
     accountId
+    votingPower
   }
   votesOnchain(proposalId: $proposalId, voterAccountId: $address) {
     support
@@ -4373,8 +4281,78 @@ export type GetHistoricalBalancesQueryHookResult = ReturnType<typeof useGetHisto
 export type GetHistoricalBalancesLazyQueryHookResult = ReturnType<typeof useGetHistoricalBalancesLazyQuery>;
 export type GetHistoricalBalancesSuspenseQueryHookResult = ReturnType<typeof useGetHistoricalBalancesSuspenseQuery>;
 export type GetHistoricalBalancesQueryResult = Apollo.QueryResult<GetHistoricalBalancesQuery, GetHistoricalBalancesQueryVariables>;
+export const HistoricalVotingPowersDocument = gql`
+    query HistoricalVotingPowers($account: String!, $skip: NonNegativeInt, $limit: PositiveInt = 10, $orderDirection: queryInput_historicalVotingPowers_orderDirection = desc, $maxDelta: String, $minDelta: String) {
+  historicalVotingPowers(
+    accountId: $account
+    skip: $skip
+    orderDirection: $orderDirection
+    limit: $limit
+    toValue: $maxDelta
+    fromValue: $minDelta
+  ) {
+    items {
+      accountId
+      votingPower
+      transfer {
+        value
+        to
+        from
+      }
+      transactionHash
+      timestamp
+      logIndex
+      delta
+      delegation {
+        from
+        to
+        value
+      }
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useHistoricalVotingPowersQuery__
+ *
+ * To run a query within a React component, call `useHistoricalVotingPowersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHistoricalVotingPowersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHistoricalVotingPowersQuery({
+ *   variables: {
+ *      account: // value for 'account'
+ *      skip: // value for 'skip'
+ *      limit: // value for 'limit'
+ *      orderDirection: // value for 'orderDirection'
+ *      maxDelta: // value for 'maxDelta'
+ *      minDelta: // value for 'minDelta'
+ *   },
+ * });
+ */
+export function useHistoricalVotingPowersQuery(baseOptions: Apollo.QueryHookOptions<HistoricalVotingPowersQuery, HistoricalVotingPowersQueryVariables> & ({ variables: HistoricalVotingPowersQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<HistoricalVotingPowersQuery, HistoricalVotingPowersQueryVariables>(HistoricalVotingPowersDocument, options);
+      }
+export function useHistoricalVotingPowersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HistoricalVotingPowersQuery, HistoricalVotingPowersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<HistoricalVotingPowersQuery, HistoricalVotingPowersQueryVariables>(HistoricalVotingPowersDocument, options);
+        }
+export function useHistoricalVotingPowersSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<HistoricalVotingPowersQuery, HistoricalVotingPowersQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<HistoricalVotingPowersQuery, HistoricalVotingPowersQueryVariables>(HistoricalVotingPowersDocument, options);
+        }
+export type HistoricalVotingPowersQueryHookResult = ReturnType<typeof useHistoricalVotingPowersQuery>;
+export type HistoricalVotingPowersLazyQueryHookResult = ReturnType<typeof useHistoricalVotingPowersLazyQuery>;
+export type HistoricalVotingPowersSuspenseQueryHookResult = ReturnType<typeof useHistoricalVotingPowersSuspenseQuery>;
+export type HistoricalVotingPowersQueryResult = Apollo.QueryResult<HistoricalVotingPowersQuery, HistoricalVotingPowersQueryVariables>;
 export const GetProposalsActivityDocument = gql`
-    query GetProposalsActivity($address: String!, $fromDate: NonNegativeInt, $skip: NonNegativeInt, $limit: PositiveInt, $orderBy: queryInput_proposalsActivity_orderBy, $orderDirection: queryInput_proposalsActivity_orderDirection, $userVoteFilter: queryInput_proposalsActivity_userVoteFilter) {
+    query GetProposalsActivity($address: String!, $fromDate: String, $skip: NonNegativeInt, $limit: PositiveInt, $orderBy: queryInput_proposalsActivity_orderBy, $orderDirection: queryInput_proposalsActivity_orderDirection, $userVoteFilter: queryInput_proposalsActivity_userVoteFilter) {
   proposalsActivity(
     address: $address
     fromDate: $fromDate
@@ -5010,76 +4988,3 @@ export type TransactionsQueryHookResult = ReturnType<typeof useTransactionsQuery
 export type TransactionsLazyQueryHookResult = ReturnType<typeof useTransactionsLazyQuery>;
 export type TransactionsSuspenseQueryHookResult = ReturnType<typeof useTransactionsSuspenseQuery>;
 export type TransactionsQueryResult = Apollo.QueryResult<TransactionsQuery, TransactionsQueryVariables>;
-export const VotingPowersDocument = gql`
-    query VotingPowers($account: String!, $skip: NonNegativeInt, $limit: PositiveInt = 10, $orderDirection: queryInput_votingPowers_orderDirection = desc, $orderBy: queryInput_votingPowers_orderBy, $maxDelta: String, $minDelta: String) {
-  votingPowers(
-    account: $account
-    skip: $skip
-    orderDirection: $orderDirection
-    limit: $limit
-    orderBy: $orderBy
-    maxDelta: $maxDelta
-    minDelta: $minDelta
-  ) {
-    items {
-      accountId
-      daoId
-      votingPower
-      transfer {
-        value
-        to
-        from
-      }
-      transactionHash
-      timestamp
-      logIndex
-      delta
-      delegation {
-        from
-        to
-        value
-      }
-    }
-    totalCount
-  }
-}
-    `;
-
-/**
- * __useVotingPowersQuery__
- *
- * To run a query within a React component, call `useVotingPowersQuery` and pass it any options that fit your needs.
- * When your component renders, `useVotingPowersQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useVotingPowersQuery({
- *   variables: {
- *      account: // value for 'account'
- *      skip: // value for 'skip'
- *      limit: // value for 'limit'
- *      orderDirection: // value for 'orderDirection'
- *      orderBy: // value for 'orderBy'
- *      maxDelta: // value for 'maxDelta'
- *      minDelta: // value for 'minDelta'
- *   },
- * });
- */
-export function useVotingPowersQuery(baseOptions: Apollo.QueryHookOptions<VotingPowersQuery, VotingPowersQueryVariables> & ({ variables: VotingPowersQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<VotingPowersQuery, VotingPowersQueryVariables>(VotingPowersDocument, options);
-      }
-export function useVotingPowersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<VotingPowersQuery, VotingPowersQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<VotingPowersQuery, VotingPowersQueryVariables>(VotingPowersDocument, options);
-        }
-export function useVotingPowersSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<VotingPowersQuery, VotingPowersQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<VotingPowersQuery, VotingPowersQueryVariables>(VotingPowersDocument, options);
-        }
-export type VotingPowersQueryHookResult = ReturnType<typeof useVotingPowersQuery>;
-export type VotingPowersLazyQueryHookResult = ReturnType<typeof useVotingPowersLazyQuery>;
-export type VotingPowersSuspenseQueryHookResult = ReturnType<typeof useVotingPowersSuspenseQuery>;
-export type VotingPowersQueryResult = Apollo.QueryResult<VotingPowersQuery, VotingPowersQueryVariables>;

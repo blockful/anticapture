@@ -29,11 +29,10 @@ export function proposalsActivity(
           address: z
             .string()
             .refine((addr) => isAddress(addr), "Invalid Ethereum address"),
-          fromDate: z.coerce
-            .number()
-            .int()
-            .positive("From date must be a positive timestamp")
-            .optional(),
+          fromDate: z
+            .string()
+            .optional()
+            .transform((val) => Number(val)),
           skip: z.coerce
             .number()
             .int()
