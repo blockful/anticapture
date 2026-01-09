@@ -13,9 +13,12 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   BigInt: { input: any; output: any; }
+  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
+  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
+  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
 };
 
@@ -72,7 +75,6 @@ export type PageInfo = {
 export type Query = {
   __typename?: 'Query';
   _meta?: Maybe<Meta>;
-  account?: Maybe<Account>;
   accountBalance?: Maybe<AccountBalance>;
   /** Returns a mapping of the biggest variations to account balances associated by account address */
   accountBalanceVariations?: Maybe<AccountBalanceVariations_200_Response>;
@@ -84,7 +86,6 @@ export type Query = {
   accountInteractions?: Maybe<AccountInteractions_200_Response>;
   accountPower?: Maybe<AccountPower>;
   accountPowers: AccountPowerPage;
-  accounts: AccountPage;
   /**
    * Average delegation percentage across all supported DAOs by day.
    * Returns the mean delegation percentage for each day in the specified range.
@@ -139,16 +140,9 @@ export type Query = {
   proposals?: Maybe<Proposals_200_Response>;
   /** Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window */
   proposalsActivity?: Maybe<ProposalsActivity_200_Response>;
-  proposalsOnchain?: Maybe<ProposalsOnchain>;
-  proposalsOnchains: ProposalsOnchainPage;
   /** Get property data for a specific token */
   token?: Maybe<Token_200_Response>;
-  tokenPrice?: Maybe<TokenPrice>;
-  tokenPrices: TokenPricePage;
   tokens: TokenPage;
-  /** Get total assets */
-  totalAssets?: Maybe<Array<Maybe<Query_TotalAssets_Items>>>;
-  transaction?: Maybe<Transaction>;
   /** Get transactions with their associated transfers and delegations, with optional filtering and sorting */
   transactions?: Maybe<Transactions_200_Response>;
   /** Get transfers of a given address */
@@ -161,11 +155,6 @@ export type Query = {
   votingPowerVariations?: Maybe<VotingPowerVariations_200_Response>;
   /** Returns a list of voting power changes */
   votingPowers?: Maybe<VotingPowers_200_Response>;
-};
-
-
-export type QueryAccountArgs = {
-  id: Scalars['String']['input'];
 };
 
 
@@ -218,16 +207,6 @@ export type QueryAccountPowersArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   where?: InputMaybe<AccountPowerFilter>;
-};
-
-
-export type QueryAccountsArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  where?: InputMaybe<AccountFilter>;
 };
 
 
@@ -400,38 +379,8 @@ export type QueryProposalsActivityArgs = {
 };
 
 
-export type QueryProposalsOnchainArgs = {
-  id: Scalars['String']['input'];
-};
-
-
-export type QueryProposalsOnchainsArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  where?: InputMaybe<ProposalsOnchainFilter>;
-};
-
-
 export type QueryTokenArgs = {
   currency?: InputMaybe<QueryInput_Token_Currency>;
-};
-
-
-export type QueryTokenPriceArgs = {
-  timestamp: Scalars['BigInt']['input'];
-};
-
-
-export type QueryTokenPricesArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  where?: InputMaybe<TokenPriceFilter>;
 };
 
 
@@ -442,16 +391,6 @@ export type QueryTokensArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   where?: InputMaybe<TokenFilter>;
-};
-
-
-export type QueryTotalAssetsArgs = {
-  days?: InputMaybe<QueryInput_TotalAssets_Days>;
-};
-
-
-export type QueryTransactionArgs = {
-  transactionHash: Scalars['String']['input'];
 };
 
 
@@ -473,7 +412,6 @@ export type QueryTransactionsArgs = {
 
 export type QueryTransfersArgs = {
   address: Scalars['String']['input'];
-  conditional?: InputMaybe<QueryInput_Transfers_Conditional>;
   from?: InputMaybe<Scalars['String']['input']>;
   fromDate?: InputMaybe<Scalars['Float']['input']>;
   fromValue?: InputMaybe<Scalars['String']['input']>;
@@ -482,6 +420,7 @@ export type QueryTransfersArgs = {
   sortBy?: InputMaybe<QueryInput_Transfers_SortBy>;
   sortOrder?: InputMaybe<QueryInput_Transfers_SortOrder>;
   to?: InputMaybe<Scalars['String']['input']>;
+  toDate?: InputMaybe<Scalars['Float']['input']>;
   toValue?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -529,12 +468,14 @@ export type QueryVotingPowerVariationsArgs = {
 
 export type QueryVotingPowersArgs = {
   account: Scalars['String']['input'];
+  fromAddresses?: InputMaybe<Scalars['JSON']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   maxDelta?: InputMaybe<Scalars['String']['input']>;
   minDelta?: InputMaybe<Scalars['String']['input']>;
   orderBy?: InputMaybe<QueryInput_VotingPowers_OrderBy>;
   orderDirection?: InputMaybe<QueryInput_VotingPowers_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  toAddresses?: InputMaybe<Scalars['JSON']['input']>;
 };
 
 export type Account = {
@@ -1579,22 +1520,9 @@ export enum QueryInput_Token_Currency {
   Usd = 'usd'
 }
 
-export enum QueryInput_TotalAssets_Days {
-  '7d' = '_7d',
-  '30d' = '_30d',
-  '90d' = '_90d',
-  '180d' = '_180d',
-  '365d' = '_365d'
-}
-
 export enum QueryInput_Transactions_SortOrder {
   Asc = 'asc',
   Desc = 'desc'
-}
-
-export enum QueryInput_Transfers_Conditional {
-  And = 'and',
-  Or = 'or'
 }
 
 export enum QueryInput_Transfers_SortBy {
@@ -1756,12 +1684,6 @@ export type Query_Proposals_Items_Items = {
   title: Scalars['String']['output'];
   txHash: Scalars['String']['output'];
   values: Array<Maybe<Scalars['String']['output']>>;
-};
-
-export type Query_TotalAssets_Items = {
-  __typename?: 'query_totalAssets_items';
-  date: Scalars['String']['output'];
-  totalAssets: Scalars['String']['output'];
 };
 
 export type Query_Transactions_Items_Items = {
