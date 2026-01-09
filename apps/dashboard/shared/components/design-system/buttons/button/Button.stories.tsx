@@ -6,7 +6,7 @@ import {
 import { ButtonProps } from "@/shared/components/design-system/buttons/types";
 
 import type { Meta, StoryObj } from "@storybook/nextjs";
-import { getFigmaDesignConfig } from "@/shared/utils/figma-storybook";
+import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 // Extended type for stories that includes the custom showIcon property
 type ButtonStoryArgs = ButtonProps & {
@@ -18,9 +18,7 @@ const meta: Meta<ButtonStoryArgs> = {
   component: Button,
   parameters: {
     layout: "centered",
-    design: getFigmaDesignConfig(
-      "https://www.figma.com/design/DEKMQifA8YOb3oxznHboSY/%F0%9F%93%81-Orbit-UI?node-id=10053-62143",
-    ),
+    design: getFigmaDesignConfigByNodeId("10053-62143"),
   },
   tags: ["autodocs"],
   argTypes: {

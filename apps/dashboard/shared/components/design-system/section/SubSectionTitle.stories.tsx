@@ -1,16 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
 import { SubsectionTitle } from "@/shared/components/design-system/section/SubsectionTitle";
 import { Calendar, TrendingUp, Filter, RefreshCw } from "lucide-react";
-import { getFigmaDesignConfig } from "@/shared/utils/figma-storybook";
+import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta = {
   title: "Design System/Sections/SubsectionTitle",
   component: SubsectionTitle,
   parameters: {
     layout: "padded",
-    design: getFigmaDesignConfig(
-      "https://www.figma.com/design/DEKMQifA8YOb3oxznHboSY/%F0%9F%93%81-Orbit-UI?node-id=10101-29339",
-    ),
+    design: getFigmaDesignConfigByNodeId("10101-29339"),
   },
   tags: ["autodocs"],
   argTypes: {

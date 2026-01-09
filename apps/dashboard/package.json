@@ -73,6 +73,7 @@
     "@types/react": "19.1.4",
     "@types/react-csv": "^1.1.10",
     "@types/react-dom": "19.1.5",
+    "dotenv": "^16.6.1",
     "eslint": "^8",
     "eslint-config-next": "15.3.2",
     "eslint-plugin-storybook": "^9.1.10",

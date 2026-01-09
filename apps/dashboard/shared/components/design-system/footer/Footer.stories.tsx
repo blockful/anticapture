@@ -1,15 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
 import { Footer } from "@/shared/components/design-system/footer/Footer";
-import { getFigmaDesignConfig } from "@/shared/utils/figma-storybook";
+import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta = {
   title: "Design System/Layout/Footer",
   component: Footer,
   parameters: {
     layout: "fullscreen",
-    design: getFigmaDesignConfig(
-      "https://www.figma.com/design/DEKMQifA8YOb3oxznHboSY/%F0%9F%93%81-Orbit-UI?node-id=10339-57793",
-    ),
+    design: getFigmaDesignConfigByNodeId("10339-57793"),
   },
   tags: ["autodocs"],
   argTypes: {

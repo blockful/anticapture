@@ -1,16 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
 
 import { DefaultLink } from "@/shared/components/design-system/links/default-link/DefaultLink";
-import { getFigmaDesignConfig } from "@/shared/utils/figma-storybook";
+import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta: Meta<typeof DefaultLink> = {
   title: "Design System/Links/DefaultLink",
   component: DefaultLink,
   parameters: {
     layout: "centered",
-    design: getFigmaDesignConfig(
-      "https://www.figma.com/design/DEKMQifA8YOb3oxznHboSY/%F0%9F%93%81-Orbit-UI?node-id=10339-16196",
-    ),
+    design: getFigmaDesignConfigByNodeId("10339-16196"),
   },
   tags: ["autodocs"],
   argTypes: {

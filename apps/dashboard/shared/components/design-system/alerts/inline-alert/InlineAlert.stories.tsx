@@ -1,16 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
 
 import { InlineAlert } from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
-import { getFigmaDesignConfig } from "@/shared/utils/figma-storybook";
+import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta: Meta<typeof InlineAlert> = {
   title: "Design System/Alerts/InlineAlert",
   component: InlineAlert,
   parameters: {
     layout: "centered",
-    design: getFigmaDesignConfig(
-      "https://www.figma.com/design/DEKMQifA8YOb3oxznHboSY/%F0%9F%93%81-Orbit-UI?node-id=10150-19926",
-    ),
+    design: getFigmaDesignConfigByNodeId("10150-19926"),
   },
   tags: ["autodocs"],
   argTypes: {

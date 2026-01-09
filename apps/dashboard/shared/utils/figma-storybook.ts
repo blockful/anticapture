@@ -8,9 +8,46 @@
  *
  * Setup:
  * 1. Add FIGMA_TOKEN to your .env.local file (gitignored)
- * 2. Storybook will read it server-side during build/dev
- * 3. The token is never sent to the browser
+ * 2. Add FIGMA_FILE_URL to your .env.local file (e.g., https://www.figma.com/design/ABC123/My-Design)
+ * 3. Storybook will read it server-side during build/dev
+ * 4. The token is never sent to the browser
  */
+
+/**
+ * Gets the Figma design configuration for Storybook addon-designs using just the node ID.
+ *
+ * This function uses FIGMA_FILE_URL env variable as the base URL and appends the node ID.
+ * Much simpler than passing full URLs everywhere!
+ *
+ * Usage in Storybook stories:
+ * ```ts
+ * import { getFigmaDesignConfigByNodeId } from '@/shared/utils/figma-storybook';
+ *
+ * const meta = {
+ *   parameters: {
+ *     design: getFigmaDesignConfigByNodeId('10150-19926')
+ *   }
+ * }
+ * ```
+ *
+ * @param nodeId - Figma node ID (e.g., '10150-19926')
+ * @returns Configuration object for Storybook addon-designs
+ */
+export function getFigmaDesignConfigByNodeId(nodeId: string) {
+  const figmaFileUrl =
+    typeof process !== "undefined" && process.env
+      ? process.env.FIGMA_FILE_URL
+      : undefined;
+
+  if (!figmaFileUrl) {
+    console.warn(
+      "FIGMA_FILE_URL environment variable is not set. Using node ID without base URL.",
+    );
+    return getFigmaDesignConfig(`?node-id=${nodeId}`);
+  }
+
+  return getFigmaDesignConfig(`${figmaFileUrl}?node-id=${nodeId}`);
+}
 
 /**
  * Gets the Figma design configuration for Storybook addon-designs

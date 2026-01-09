@@ -10,16 +10,14 @@ import {
   Zap,
 } from "lucide-react";
 
-import { getFigmaDesignConfig } from "@/shared/utils/figma-storybook";
+import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta = {
   title: "Design System/Badges/BadgeStatus",
   component: BadgeStatus,
   parameters: {
     layout: "centered",
-    design: getFigmaDesignConfig(
-      "https://www.figma.com/design/DEKMQifA8YOb3oxznHboSY/%F0%9F%93%81-Orbit-UI?node-id=136-1178",
-    ),
+    design: getFigmaDesignConfigByNodeId("136-1178"),
   },
   tags: ["autodocs"],
   argTypes: {

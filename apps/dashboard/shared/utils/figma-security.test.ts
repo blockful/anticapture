@@ -4,9 +4,10 @@
  * Verifies that tokens are never exposed in client-side code
  */
 
-// eslint-disable-next-line no-restricted-imports
+import fs from "fs";
+import path from "path";
+
 import { getFigmaDesignConfig } from "./figma-storybook";
-// eslint-disable-next-line no-restricted-imports
 import { fetchFigmaFile } from "./figma";
 
 describe("Figma Utilities Security", () => {
@@ -55,12 +56,6 @@ describe("Figma Utilities Security", () => {
 
   describe("No Hardcoded Tokens", () => {
     it("should not contain hardcoded tokens in source code", () => {
-      // Read the actual source file
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const fs = require("fs");
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const path = require("path");
-
       const figmaStorybookPath = path.join(__dirname, "figma-storybook.ts");
       const figmaPath = path.join(__dirname, "figma.ts");
       const routePath = path.join(__dirname, "../../app/api/figma/route.ts");

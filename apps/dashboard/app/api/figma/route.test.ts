@@ -155,10 +155,8 @@ describe("Figma API Route Security", () => {
       const responses = await Promise.all(requests);
 
       // At least one should be rate limited (429)
-      const rateLimited = responses.some(
-        (r) => r.status === 429 || r.status === 200,
-      );
-      expect(rateLimited).toBe(true);
+      const has429 = responses.some((r) => r.status === 429);
+      expect(has429).toBe(true);
     });
   });
 
