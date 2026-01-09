@@ -1,5 +1,5 @@
 import { formatUnits } from "viem";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 
 import {
   BalanceHistoryQueryVariables,
@@ -7,6 +7,7 @@ import {
   QueryInput_Transfers_SortOrder,
   useBalanceHistoryQuery,
   QueryInput_Transfers_SortBy,
+  BalanceHistoryQuery,
 } from "@anticapture/graphql-client/hooks";
 
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -36,6 +37,7 @@ export function useBalanceHistory({
   itemsPerPage?: number;
 }) {
   const [currentPage, setCurrentPage] = useState(1);
+  const [isPaginationLoading, setIsPaginationLoading] = useState(false);
 
   // Reset page to 1 when filters change
   useEffect(() => {
@@ -57,6 +59,8 @@ export function useBalanceHistory({
       toValue: filterVariables?.maxDelta,
       from: customFromFilter,
       to: customToFilter,
+      offset: (currentPage - 1) * itemsPerPage,
+      limit: itemsPerPage,
     };
 
     switch (transactionType) {
@@ -78,9 +82,11 @@ export function useBalanceHistory({
     filterVariables,
     orderBy,
     orderDirection,
+    currentPage,
+    itemsPerPage,
   ]);
 
-  const { data, error, loading } = useBalanceHistoryQuery({
+  const { data, error, loading, fetchMore } = useBalanceHistoryQuery({
     variables,
     context: {
       headers: {
@@ -107,17 +113,61 @@ export function useBalanceHistory({
       }));
   }, [data, accountId, decimals]);
 
+  const hasNextPage = useMemo(() => {
+    return currentPage * itemsPerPage < (data?.transfers?.totalCount || 0);
+  }, [currentPage, itemsPerPage, data?.transfers?.totalCount]);
+
+  const fetchNextPage = useCallback(async () => {
+    if (!hasNextPage || isPaginationLoading) {
+      return;
+    }
+
+    setIsPaginationLoading(true);
+
+    try {
+      setCurrentPage((prev) => prev + 1);
+
+      await fetchMore({
+        variables: {
+          ...variables,
+          currentPage,
+          offset: currentPage * itemsPerPage,
+        },
+        updateQuery: (
+          previousResult: BalanceHistoryQuery,
+          { fetchMoreResult }: { fetchMoreResult: BalanceHistoryQuery },
+        ) => {
+          const prevItems = previousResult?.transfers?.items ?? [];
+          const newItems = fetchMoreResult?.transfers?.items ?? [];
+
+          return {
+            transfers: {
+              items: [...prevItems, ...newItems],
+              totalCount: fetchMoreResult?.transfers?.totalCount ?? 0,
+            },
+          };
+        },
+      });
+    } catch (error) {
+      console.error("Error fetching next page:", error);
+    } finally {
+      setIsPaginationLoading(false);
+    }
+  }, [
+    isPaginationLoading,
+    hasNextPage,
+    currentPage,
+    itemsPerPage,
+    variables,
+    fetchMore,
+  ]);
+
   return {
     transfers: transformedTransfers,
     loading,
     error,
-    fetchNextPage: () =>
-      currentPage * itemsPerPage < (data?.transfers?.totalCount || 0) &&
-      setCurrentPage((prev) => prev + 1),
-    fetchPreviousPage: () =>
-      currentPage > 1 && setCurrentPage((prev) => prev - 1),
-    hasNextPage:
-      currentPage * itemsPerPage < (data?.transfers?.totalCount || 0),
+    fetchNextPage,
+    hasNextPage,
     hasPreviousPage: currentPage > 1,
   };
 }
