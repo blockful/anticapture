@@ -48,6 +48,7 @@ export function useBalanceHistory({
     orderDirection,
     customFromFilter,
     customToFilter,
+    filterVariables,
   ]);
 
   const variables = useMemo(() => {
@@ -59,7 +60,7 @@ export function useBalanceHistory({
       toValue: filterVariables?.maxDelta,
       from: customFromFilter,
       to: customToFilter,
-      offset: (currentPage - 1) * itemsPerPage,
+      offset: 0,
       limit: itemsPerPage,
     };
 
@@ -82,7 +83,6 @@ export function useBalanceHistory({
     filterVariables,
     orderBy,
     orderDirection,
-    currentPage,
     itemsPerPage,
   ]);
 
@@ -95,7 +95,6 @@ export function useBalanceHistory({
     },
   });
 
-  // Transform raw transfers to our format
   const transformedTransfers = useMemo(() => {
     if (!data?.transfers?.items) return [];
 
@@ -118,48 +117,51 @@ export function useBalanceHistory({
   }, [currentPage, itemsPerPage, data?.transfers?.totalCount]);
 
   const fetchNextPage = useCallback(async () => {
-    if (!hasNextPage || isPaginationLoading) {
-      return;
-    }
+    if (!hasNextPage || isPaginationLoading) return;
 
     setIsPaginationLoading(true);
 
-    try {
-      setCurrentPage((prev) => prev + 1);
+    const nextPage = currentPage + 1;
+    const offset = (nextPage - 1) * itemsPerPage;
 
+    try {
       await fetchMore({
         variables: {
           ...variables,
-          currentPage,
-          offset: currentPage * itemsPerPage,
+          offset,
         },
         updateQuery: (
           previousResult: BalanceHistoryQuery,
           { fetchMoreResult }: { fetchMoreResult: BalanceHistoryQuery },
         ) => {
-          const prevItems = previousResult?.transfers?.items ?? [];
-          const newItems = fetchMoreResult?.transfers?.items ?? [];
+          if (!fetchMoreResult) return previousResult;
 
           return {
             transfers: {
-              items: [...prevItems, ...newItems],
+              ...fetchMoreResult.transfers,
+              items: [
+                ...(previousResult.transfers?.items ?? []),
+                ...(fetchMoreResult.transfers?.items ?? []),
+              ],
               totalCount: fetchMoreResult?.transfers?.totalCount ?? 0,
             },
           };
         },
       });
-    } catch (error) {
-      console.error("Error fetching next page:", error);
+
+      setCurrentPage(nextPage);
+    } catch (err) {
+      console.error("Error fetching next page:", err);
     } finally {
       setIsPaginationLoading(false);
     }
   }, [
-    isPaginationLoading,
-    hasNextPage,
     currentPage,
     itemsPerPage,
-    variables,
+    hasNextPage,
+    isPaginationLoading,
     fetchMore,
+    variables,
   ]);
 
   return {
