@@ -16,6 +16,8 @@ interface HistoricalVotingPowerRepository {
     orderBy: "timestamp" | "delta",
     minDelta?: string,
     maxDelta?: string,
+    fromDate?: number,
+    toDate?: number,
   ): Promise<DBHistoricalVotingPowerWithRelations[]>;
 
   getHistoricalVotingPowerCount(
@@ -27,6 +29,7 @@ interface HistoricalVotingPowerRepository {
 
 interface VotingPowersRepository {
   getVotingPowerVariations(
+    addresses: Address[],
     startTimestamp: number,
     limit: number,
     skip: number,
@@ -63,6 +66,8 @@ export class VotingPowerService {
     orderBy: "timestamp" | "delta" = "timestamp",
     minDelta?: string,
     maxDelta?: string,
+    fromDate?: number,
+    toDate?: number,
   ): Promise<{
     items: DBHistoricalVotingPowerWithRelations[];
     totalCount: number;
@@ -76,6 +81,8 @@ export class VotingPowerService {
         orderBy,
         minDelta,
         maxDelta,
+        fromDate,
+        toDate,
       );
 
     const totalCount =
@@ -88,12 +95,14 @@ export class VotingPowerService {
   }
 
   async getVotingPowerVariations(
+    addresses: Address[],
     startTimestamp: number,
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
   ): Promise<DBVotingPowerVariation[]> {
     return this.votingPowerRepository.getVotingPowerVariations(
+      addresses,
       startTimestamp,
       limit,
       skip,
