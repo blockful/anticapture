@@ -42,7 +42,6 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     },
   };
 }
-
 export default async function DaoPage({
   params,
 }: {
@@ -51,10 +50,8 @@ export default async function DaoPage({
   const { daoId } = await params;
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
   const daoConstants = daoConfigByDaoId[daoIdEnum];
-
   if (!daoConstants?.daoOverview) {
     return null;
   }
-
   return <DaoOverviewSection daoId={daoIdEnum} />;
 }

@@ -1,12 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
 
 import { DefaultLink } from "@/shared/components/design-system/links/default-link/DefaultLink";
+import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta: Meta<typeof DefaultLink> = {
   title: "Design System/Links/DefaultLink",
   component: DefaultLink,
   parameters: {
     layout: "centered",
+    design: getFigmaDesignConfigByNodeId("10339-16196"),
   },
   tags: ["autodocs"],
   argTypes: {

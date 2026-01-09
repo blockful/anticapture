@@ -10,12 +10,14 @@ import {
   Database,
   Settings,
 } from "lucide-react";
+import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta = {
   title: "Design System/Sections/SectionTitle",
   component: SectionTitle,
   parameters: {
     layout: "padded",
+    design: getFigmaDesignConfigByNodeId("10101-29339"),
   },
   tags: ["autodocs"],
   argTypes: {

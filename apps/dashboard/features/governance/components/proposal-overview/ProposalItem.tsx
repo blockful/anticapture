@@ -168,7 +168,7 @@ export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
 
             {quorumPercentage < 100 && (
               <div
-                className="bg-primary outline-surface-default absolute left-1/2 top-1/2 h-2 w-[2px] -translate-y-1/2 outline-[2px]"
+                className="bg-primary outline-surface-default absolute left-1/2 top-1/2 h-2 w-[2px] -translate-y-1/2 outline-2"
                 style={{
                   left: `${quorumPercentage}%`,
                 }}

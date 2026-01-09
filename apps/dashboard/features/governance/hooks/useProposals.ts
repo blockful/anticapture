@@ -30,8 +30,10 @@ export interface UseProposalsResult {
 }
 
 // Use the generated GraphQL arguments type and extend with pagination
-export interface UseProposalsParams
-  extends Omit<QueryProposalsArgs, "skip" | "limit"> {
+export interface UseProposalsParams extends Omit<
+  QueryProposalsArgs,
+  "skip" | "limit"
+> {
   itemsPerPage?: number;
   daoId?: DaoIdEnum;
 }

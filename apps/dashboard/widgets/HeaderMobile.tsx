@@ -12,6 +12,7 @@ import {
   Heart,
   HelpCircle,
   Bell,
+  Mail,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { AnticaptureIcon } from "@/shared/components/icons";
@@ -48,6 +49,12 @@ export const HeaderMobile = ({
   );
 
   const staticPages = [
+    {
+      page: "contact",
+      label: "Contact",
+      icon: Mail,
+      isGlobal: true,
+    },
     {
       page: "donate",
       label: "Donate",

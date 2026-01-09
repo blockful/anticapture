@@ -1,12 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
 
 import { InlineAlert } from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
+import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta: Meta<typeof InlineAlert> = {
   title: "Design System/Alerts/InlineAlert",
   component: InlineAlert,
   parameters: {
     layout: "centered",
+    design: getFigmaDesignConfigByNodeId("10150-19926"),
   },
   tags: ["autodocs"],
   argTypes: {

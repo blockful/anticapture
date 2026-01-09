@@ -32,7 +32,6 @@ interface StagesContainerProps {
   currentDaoStage: Stage;
   context?: "overview" | "section";
 }
-
 export const stageToRiskMapping: Record<Stage, RiskLevel> = {
   [Stage.ZERO]: RiskLevel.HIGH,
   [Stage.ONE]: RiskLevel.MEDIUM,
@@ -40,7 +39,6 @@ export const stageToRiskMapping: Record<Stage, RiskLevel> = {
   [Stage.NONE]: RiskLevel.NONE,
   [Stage.UNKNOWN]: RiskLevel.NONE,
 };
-
 export const StagesToBorderColor: Record<Stage, string> = {
   [Stage.ZERO]: "border-error",
   [Stage.ONE]: "border-warning",
@@ -48,7 +46,6 @@ export const StagesToBorderColor: Record<Stage, string> = {
   [Stage.NONE]: "",
   [Stage.UNKNOWN]: "",
 };
-
 export const StagesToLineWidth: Record<Stage, string> = {
   [Stage.ZERO]: "27%",
   [Stage.ONE]: "72%",
@@ -56,7 +53,6 @@ export const StagesToLineWidth: Record<Stage, string> = {
   [Stage.NONE]: "0%",
   [Stage.UNKNOWN]: "0%",
 };
-
 export const StagesToLineColor: Record<Stage, string> = {
   [Stage.ZERO]: "bg-error",
   [Stage.ONE]: "bg-warning",
@@ -64,7 +60,6 @@ export const StagesToLineColor: Record<Stage, string> = {
   [Stage.NONE]: "",
   [Stage.UNKNOWN]: "",
 };
-
 const CurrentDaoStageAvatar = ({
   daoId,
   currentDaoStage,
@@ -84,7 +79,6 @@ const CurrentDaoStageAvatar = ({
     <PointerIcon className="absolute -bottom-4 translate-y-px" />
   </>
 );
-
 export const StagesContainer = ({
   daoId,
   daoConfig,
@@ -99,24 +93,20 @@ export const StagesContainer = ({
     fieldsToArray(daoConfig.governanceImplementation?.fields),
     RiskLevel.HIGH,
   );
-
   const mediumRiskItems = filterFieldsByRiskLevel(
     fieldsToArray(daoConfig.governanceImplementation?.fields),
     RiskLevel.MEDIUM,
   );
-
   const lowRiskItems = filterFieldsByRiskLevel(
     fieldsToArray(daoConfig.governanceImplementation?.fields),
     RiskLevel.LOW,
   );
-
   const issues =
     highRiskItems.length > 0
       ? highRiskItems.map((item) => item.name)
       : mediumRiskItems.length > 0
         ? mediumRiskItems.map((item) => item.name)
         : undefined;
-
   const requirements =
     highRiskItems.length > 0
       ? highRiskItems.map((i) => i.name)
@@ -169,7 +159,6 @@ export const StagesContainer = ({
           >
             {/* Background Line */}
             <div className="bg-middle-dark absolute left-0 right-0 top-1/2 z-0 h-0.5 -translate-y-1/2" />
-
             {/* Horizontal Line */}
             <div
               className={cn(
@@ -178,7 +167,6 @@ export const StagesContainer = ({
               )}
               style={{ width: StagesToLineWidth[currentDaoStage] }}
             />
-
             <div className="z-10 flex h-full w-full items-center justify-between">
               {/* Stage 0 */}
               <div className="bg-surface-default">
@@ -188,7 +176,6 @@ export const StagesContainer = ({
                   showStageText
                 />
               </div>
-
               {/* Space between Stage 0 and 1 */}
               <div className="flex flex-1 items-center justify-center">
                 {currentDaoStage === Stage.ZERO && (
@@ -198,7 +185,6 @@ export const StagesContainer = ({
                   />
                 )}
               </div>
-
               {/* Stage 1 */}
               <div className="bg-surface-default">
                 <StageTag
@@ -207,7 +193,6 @@ export const StagesContainer = ({
                   showStageText
                 />
               </div>
-
               {/* Space between Stage 1 and 2 */}
               <div className="flex flex-1 items-center justify-center">
                 {currentDaoStage === Stage.ONE && (
@@ -217,7 +202,6 @@ export const StagesContainer = ({
                   />
                 )}
               </div>
-
               {/* Stage 2 */}
               <div className="bg-surface-default">
                 <StageTag
@@ -241,7 +225,7 @@ export const StagesContainer = ({
             daoStage={currentDaoStage}
             context={context}
             className={cn({
-              "border-border-contrast border-b-1 rounded-none p-3":
+              "border-border-contrast rounded-none border-b p-3":
                 context === "overview",
             })}
           />
@@ -294,7 +278,7 @@ export const StagesContainer = ({
                     variant={variant}
                     disabled={!isStageKnown}
                     className={cn("border-0 px-2 py-1", {
-                      "border-1": currentDaoStage === Stage.NONE,
+                      border: currentDaoStage === Stage.NONE,
                     })}
                     onClick={() => setShowTooltip((prev) => !prev)}
                     onMouseEnter={() => !isMobile && setShowTooltip(true)}

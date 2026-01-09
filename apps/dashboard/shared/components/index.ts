@@ -13,8 +13,6 @@ export * from "@/shared/components/skeletons/SkeletonDaoInfoCards";
 export * from "@/shared/components/skeletons/SkeletonRow";
 export * from "@/shared/components/lines/Sparkline";
 export * from "@/shared/components/tags/StageTagSimplified";
-export * from "@/shared/components/carroussels/SupportersCarroussel";
-export * from "@/shared/components/badges/SupporterBadge";
 export * from "@/shared/components/cards/SwitchCardDaoInfoItem";
 export * from "@/shared/components/charts/SwitcherChart";
 export * from "@/shared/components/charts/ChartExceptionState";

@@ -110,6 +110,7 @@ export const ButtonHeaderSidebar = ({
     <Link
       href={targetPath}
       onClick={onClick}
+      prefetch={true}
       {...props}
       className={baseClassName}
     >

@@ -11,7 +11,9 @@ import {
 import { ChartConfig, ChartContainer } from "@/shared/components/ui/chart";
 import { useDelegationPercentageByDay } from "@/shared/hooks";
 import { useMemo } from "react";
-import { SkeletonRow, TooltipInfo } from "@/shared/components";
+import { TooltipInfo } from "@/shared/components";
+import loadingAnimation from "@/public/loading-animation.json";
+import Lottie from "lottie-react";
 
 const chartConfig: ChartConfig = {
   delegatedSupply: {
@@ -129,7 +131,9 @@ export const DelegatedSupplyHistory = () => {
   if (loading) {
     return (
       <ContentWrapper>
-        <SkeletonRow className="h-full w-full" />
+        <div className="text-center">
+          <Lottie animationData={loadingAnimation} height={400} width={400} />
+        </div>
       </ContentWrapper>
     );
   }

@@ -13,14 +13,17 @@ export const showCustomToast = (message: string, type: "success" | "error") => {
         )}
       >
         <div className="flex items-center gap-3">
-          <CheckCircle2 className="size-6 flex-shrink-0" />
+          <CheckCircle2 className="size-6 shrink-0" />
           <span className="font-inter text-base font-normal leading-6">
             {message}
           </span>
         </div>
         <button
-          onClick={() => toast.dismiss(t.id)}
-          className="flex-shrink-0 transition-opacity hover:opacity-70"
+          onClick={(e) => {
+            e.stopPropagation();
+            toast.remove(t.id);
+          }}
+          className="shrink-0 transition-opacity hover:opacity-70"
           aria-label="Close notification"
         >
           <X className="size-5" />

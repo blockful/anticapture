@@ -43,6 +43,8 @@ import daoConfigByDaoId from "@/shared/dao-config";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 import { Data } from "react-csv/lib/core";
 import { formatUnits } from "viem";
+import Lottie from "lottie-react";
+import loadingAnimation from "@/public/loading-animation.json";
 
 interface MultilineChartAttackProfitabilityProps {
   days: string;
@@ -62,25 +64,29 @@ export const MultilineChartAttackProfitability = ({
   const { data: daoData } = useDaoData(daoEnum);
   const daoConfig = daoConfigByDaoId[daoEnum];
 
-  const { data: treasuryAssetNonDAOToken = [] } = useTreasuryAssetNonDaoToken(
-    daoEnum,
-    days,
-  );
+  const {
+    data: treasuryAssetNonDAOToken = [],
+    loading: isLoadingTreasuryAssetNonDAOToken,
+  } = useTreasuryAssetNonDaoToken(daoEnum, days);
 
-  const { data: daoTokenPriceHistoricalData } = useDaoTokenHistoricalData({
+  const {
+    data: daoTokenPriceHistoricalData,
+    loading: isLoadingDaoTokenPriceHistoricalData,
+  } = useDaoTokenHistoricalData({
     daoId: daoEnum,
     limit: Number(days.split("d")[0]) - 7,
   });
 
-  const { data: timeSeriesData } = useTimeSeriesData(
-    daoEnum,
-    [MetricTypesEnum.TREASURY, MetricTypesEnum.DELEGATED_SUPPLY],
-    days as TimeInterval,
-    {
-      refreshInterval: 300000,
-      revalidateOnFocus: false,
-    },
-  );
+  const { data: timeSeriesData, isLoading: isLoadingTimeSeriesData } =
+    useTimeSeriesData(
+      daoEnum,
+      [MetricTypesEnum.TREASURY, MetricTypesEnum.DELEGATED_SUPPLY],
+      days as TimeInterval,
+      {
+        refreshInterval: 300000,
+        revalidateOnFocus: false,
+      },
+    );
 
   const mocked = useMemo(
     () =>
@@ -211,6 +217,24 @@ export const MultilineChartAttackProfitability = ({
       setCsvData?.(chartData as Data);
     }
   }, [chartData, mocked, setCsvData]);
+
+  const isLoading =
+    isLoadingTreasuryAssetNonDAOToken ||
+    isLoadingDaoTokenPriceHistoricalData ||
+    isLoadingTimeSeriesData;
+
+  if (isLoading) {
+    return (
+      <div
+        className={cn("flex w-full items-center justify-center", {
+          "h-[170px]": context === "overview",
+          "h-[300px]": context === "section",
+        })}
+      >
+        <Lottie animationData={loadingAnimation} height={40} width={40} />
+      </div>
+    );
+  }
 
   return (
     <div

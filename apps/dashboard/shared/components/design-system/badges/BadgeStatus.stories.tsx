@@ -10,11 +10,14 @@ import {
   Zap,
 } from "lucide-react";
 
+import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
+
 const meta = {
   title: "Design System/Badges/BadgeStatus",
   component: BadgeStatus,
   parameters: {
     layout: "centered",
+    design: getFigmaDesignConfigByNodeId("136-1178"),
   },
   tags: ["autodocs"],
   argTypes: {
@@ -94,6 +97,7 @@ export const Error: Story = {
     children: "Error",
     variant: "error",
     icon: XCircle,
+    iconVariant: "error",
   },
 };
 

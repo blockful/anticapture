@@ -95,7 +95,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
     if (isLoading || !circulatingSupply || valueToShow == null) {
       return (
         <SkeletonRow
-          parentClassName="flex animate-pulse justify-end pr-4"
+          parentClassName="flex animate-pulse justify-end w-full"
           className="h-5 w-full max-w-20 md:max-w-32"
         />
       );
@@ -156,7 +156,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
     if (isLoading || !delegatedSupply || valueToShow == null) {
       return (
         <SkeletonRow
-          parentClassName="flex animate-pulse justify-end pr-4"
+          parentClassName="flex animate-pulse justify-end w-full"
           className="h-5 w-full max-w-20 md:max-w-32"
         />
       );
@@ -219,7 +219,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
     if (isLoading || !activeSupply || valueToShow == null) {
       return (
         <SkeletonRow
-          parentClassName="flex animate-pulse justify-end pr-4"
+          parentClassName="flex animate-pulse justify-end w-full"
           className="h-5 w-full max-w-20 md:max-w-32"
         />
       );
@@ -265,7 +265,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
     if (isLoading) {
       return (
         <SkeletonRow
-          parentClassName="flex animate-pulse justify-end pr-4"
+          parentClassName="flex animate-pulse justify-end w-full"
           className="h-5 w-full max-w-20 md:max-w-32"
         />
       );

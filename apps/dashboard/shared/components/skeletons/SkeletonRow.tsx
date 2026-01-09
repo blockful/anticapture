@@ -1,5 +1,7 @@
 "use client";
 
+import { cn } from "@/shared/utils";
+
 export const SkeletonRow = ({
   className,
   parentClassName,
@@ -9,9 +11,12 @@ export const SkeletonRow = ({
 }) => {
   return (
     <div
-      className={`${parentClassName || "flex animate-pulse justify-center space-x-2"} `}
+      className={cn(
+        "flex animate-pulse justify-center space-x-2",
+        parentClassName,
+      )}
     >
-      <div className={`${className} bg-surface-contrast rounded-sm`} />
+      <div className={cn("bg-surface-contrast", className)} />
     </div>
   );
 };

@@ -34,6 +34,7 @@ export const HeaderSidebar = () => {
     >
       <div className="flex h-full w-full flex-col items-start">
         <Link
+          prefetch={true}
           href="/"
           className="border-b-light-dark flex h-[65px] w-full shrink-0 items-center justify-center border-b"
         >

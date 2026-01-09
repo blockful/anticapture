@@ -1,12 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
 import { SubsectionTitle } from "@/shared/components/design-system/section/SubsectionTitle";
 import { Calendar, TrendingUp, Filter, RefreshCw } from "lucide-react";
+import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta = {
   title: "Design System/Sections/SubsectionTitle",
   component: SubsectionTitle,
   parameters: {
     layout: "padded",
+    design: getFigmaDesignConfigByNodeId("10101-29339"),
   },
   tags: ["autodocs"],
   argTypes: {

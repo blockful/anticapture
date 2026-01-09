@@ -1,16 +1,23 @@
 "use client";
 
 import { useQuery, useQueries } from "@tanstack/react-query";
-import { Address, isAddress } from "viem";
+import { Address } from "viem";
 import { normalize } from "viem/ens";
-import { publicClient } from "@/shared/services/wallet/wallet";
+import axios from "axios";
 
 type EnsData = {
   address: Address;
-  avatar_url: string | null;
   ens: string;
-  avatar: string | null;
+  avatarUrl: string | null;
 };
+
+type PrimaryNameResponse = {
+  name?: string;
+  accelerationRequested?: boolean;
+  accelerationAttempted?: boolean;
+};
+
+const ETH_COIN_TYPE = "60"; // ETH
 
 /**
  * Hook to fetch ENS data for a single address
@@ -35,7 +42,22 @@ export const useEnsData = (address: Address | null | undefined) => {
 };
 
 /**
- * Fetches ENS data using viem for a single address
+ * Checks if an ENS avatar exists using a HEAD request (no body download)
+ * @param ensName - ENS name to check avatar for
+ * @returns Promise resolving to avatar URL if exists, null otherwise
+ */
+const checkAvatarExists = async (ensName: string): Promise<string | null> => {
+  const avatarUrl = `https://metadata.ens.domains/mainnet/avatar/${ensName}`;
+  try {
+    const response = await axios.head(avatarUrl);
+    return response.status === 200 ? avatarUrl : null;
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Fetches ENS data using ENS Node API for a single address
  * @param address - Ethereum address
  * @returns Promise resolving to EnsData
  */
@@ -45,23 +67,34 @@ export const fetchEnsDataFromAddress = async ({
   address: Address;
 }): Promise<EnsData> => {
   let ensName: string | null = null;
-  let avatarUrl: string | null = null;
 
-  if (isAddress(address)) {
-    ensName = await publicClient.getEnsName({ address });
+  try {
+    // Fetch primary ENS name
+    const primaryNameUrl = `https://api.alpha.ensnode.io/api/resolve/primary-name/${address}/1?accelerate=true`;
+    const primaryNameResponse =
+      await axios.get<PrimaryNameResponse>(primaryNameUrl);
+    ensName = primaryNameResponse.data.name || null;
+  } catch (error) {
+    // Silently fail and return empty data
+    console.warn(`Failed to fetch ENS data for ${address}:`, error);
   }
 
-  // Get avatar URL if we have an ENS name
-  if (ensName) {
-    avatarUrl = await publicClient.getEnsAvatar({ name: normalize(ensName) });
-  }
+  // Check if avatar exists (HEAD request, no body download)
+  const avatar = ensName ? await checkAvatarExists(ensName) : null;
 
   return {
     address: address,
-    avatar_url: avatarUrl,
     ens: ensName || "",
-    avatar: avatarUrl,
+    avatarUrl: avatar,
   };
+};
+
+type AddressRecordsResponse = {
+  records?: {
+    addresses?: Record<string, Address>;
+  };
+  accelerationRequested?: boolean;
+  accelerationAttempted?: boolean;
 };
 
 export const fetchAddressFromEnsName = async ({
@@ -69,10 +102,15 @@ export const fetchAddressFromEnsName = async ({
 }: {
   ensName: `${string}.eth`;
 }): Promise<Address | null> => {
-  const address = await publicClient.getEnsAddress({
-    name: normalize(ensName),
-  });
-  return address || null;
+  try {
+    const normalizedName = normalize(ensName);
+    const url = `https://api.alpha.ensnode.io/api/resolve/records/${normalizedName}?addresses=${ETH_COIN_TYPE}&accelerate=true`;
+    const response = await axios.get<AddressRecordsResponse>(url);
+    return response.data.records?.addresses?.[ETH_COIN_TYPE] || null;
+  } catch (error) {
+    console.warn(`Failed to fetch address for ${ensName}:`, error);
+    return null;
+  }
 };
 
 /**
@@ -83,7 +121,6 @@ export const fetchAddressFromEnsName = async ({
 export const useMultipleEnsData = (addresses: Address[]) => {
   // Deduplicate addresses to avoid unnecessary queries
   const uniqueAddresses = Array.from(new Set(addresses));
-
   const queries = useQueries({
     queries: uniqueAddresses.map((address) => ({
       queryKey: ["addressEns", address],
@@ -94,7 +131,6 @@ export const useMultipleEnsData = (addresses: Address[]) => {
       gcTime: 1000 * 60 * 60 * 24, // Keep in cache for 24 hours
     })),
   });
-
   // Transform the array of query results into Record<Address, EnsData>
   const data: Record<Address, EnsData> = {};
   queries.forEach((query, index) => {
@@ -102,10 +138,8 @@ export const useMultipleEnsData = (addresses: Address[]) => {
       data[uniqueAddresses[index]] = query.data;
     }
   });
-
   const isLoading = queries.some((query) => query.isLoading);
   const error = queries.find((query) => query.error)?.error;
-
   return {
     data,
     error,
