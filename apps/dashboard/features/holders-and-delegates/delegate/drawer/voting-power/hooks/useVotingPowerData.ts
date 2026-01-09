@@ -40,11 +40,10 @@ export const useVotingPowerData = (
     decimals,
     daoOverview: { token },
   } = daoConfig[daoId];
-  const { topFiveDelegators, delegatorsVotingPowerDetails, loading } =
-    useVotingPower({
-      daoId,
-      address,
-    });
+  const { topFiveDelegators, loading } = useVotingPower({
+    daoId,
+    address,
+  });
 
   // Extract addresses for ENS lookup
   const delegatorAddresses: Address[] =
@@ -69,18 +68,15 @@ export const useVotingPowerData = (
   };
 
   // return default data when there is no valid data
-  if (
-    !topFiveDelegators ||
-    topFiveDelegators.length === 0 ||
-    !delegatorsVotingPowerDetails ||
-    !delegatorsVotingPowerDetails.accountPower ||
-    !delegatorsVotingPowerDetails.accountPower.votingPower
-  ) {
+  if (!topFiveDelegators || topFiveDelegators.length === 0) {
     return defaultData;
   }
 
-  const delegateCurrentVotingPower = BigInt(
-    delegatorsVotingPowerDetails?.accountPower?.votingPower,
+  // Calculate total voting power from top delegators
+  // Note: This is an approximation as accountPower query is not available
+  const delegateCurrentVotingPower = topFiveDelegators.reduce(
+    (acc, item) => acc + BigInt(item.rawBalance),
+    BigInt(0),
   );
 
   const currentVotingPowerNumber = Number(
