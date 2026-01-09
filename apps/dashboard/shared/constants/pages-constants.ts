@@ -74,6 +74,12 @@ export const PAGES_CONSTANTS = {
     description:
       "Find answers to common questions about DAO security and how Anticapture works.",
   },
+  contact: {
+    title: "Contact",
+    page: "contact",
+    description:
+      "Use this channel to initiate contact with the Anticapture team.",
+  },
   terms: {
     title: "Terms of Service",
     anchorId: "termsSection",

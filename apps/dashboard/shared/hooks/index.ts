@@ -1,5 +1,6 @@
 export * from "@/shared/hooks/useActiveSupply";
 export * from "@/shared/hooks/useAverageTurnout";
+export * from "@/shared/hooks/useContactForm";
 export * from "@/shared/hooks/useDaoData";
 export * from "@/shared/hooks/useDelegatedSupply";
 export * from "@/shared/hooks/useDelegationPercentageByDay";
