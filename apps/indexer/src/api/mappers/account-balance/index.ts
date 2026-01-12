@@ -6,7 +6,6 @@ import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { calculateHistoricalBlockNumber } from "@/lib/blockTime";
 
 export const AccountBalancesRequestSchema = z.object({
-  // TODO: Validate
   limit: z.coerce
     .number()
     .int()
@@ -22,13 +21,25 @@ export const AccountBalancesRequestSchema = z.object({
     .default(0),
   orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
   addresses: z
-    .array(z.string().refine((addr) => isAddress(addr)))
+    .union([
+      z
+        .string()
+        .refine(isAddress, "Invalid address")
+        .transform((addr) => [addr]),
+      z.array(z.string().refine(isAddress, "Invalid addresses")),
+    ])
     .optional()
-    .default([]),
+    .transform((val) => (val === undefined ? [] : val)),
   delegates: z
-    .array(z.string().refine((addr) => isAddress(addr)))
+    .union([
+      z
+        .string()
+        .refine(isAddress, "Invalid address")
+        .transform((addr) => [addr]),
+      z.array(z.string().refine(isAddress, "Invalid addresses")),
+    ])
     .optional()
-    .default([]),
+    .transform((val) => (val === undefined ? [] : val)),
   fromValue: z
     .string()
     .transform((val) => BigInt(val))
