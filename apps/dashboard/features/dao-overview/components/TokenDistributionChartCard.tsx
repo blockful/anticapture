@@ -13,15 +13,18 @@ import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { OverviewMetric } from "@/features/dao-overview/components/OverviewMetric";
 import daoConfig from "@/shared/dao-config";
 
-const OVERVIEW_TOKEN_DISTRIBUTION_METRICS = [
-  MetricTypesEnum.DELEGATED_SUPPLY,
-  MetricTypesEnum.CEX_SUPPLY,
-  MetricTypesEnum.DEX_SUPPLY,
-  MetricTypesEnum.LENDING_SUPPLY,
-];
-
 export const TokenDistributionChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
   const { decimals } = daoConfig[daoId];
+
+  const OVERVIEW_TOKEN_DISTRIBUTION_METRICS =
+    daoId === DaoIdEnum.NOUNS
+      ? [MetricTypesEnum.DELEGATED_SUPPLY]
+      : [
+          MetricTypesEnum.DELEGATED_SUPPLY,
+          MetricTypesEnum.CEX_SUPPLY,
+          MetricTypesEnum.DEX_SUPPLY,
+          MetricTypesEnum.LENDING_SUPPLY,
+        ];
 
   const {
     chartData: tokenDistributionChartData,

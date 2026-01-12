@@ -264,6 +264,7 @@ export const TokenDistributionMetrics = ({
         appliedMetrics={appliedMetricsFormatted}
         metricsSchema={metricsSchemaFormatted}
         onApply={handleApplyMetric}
+        daoId={daoId}
       />
     </div>
   );

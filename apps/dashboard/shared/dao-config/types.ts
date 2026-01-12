@@ -183,6 +183,7 @@ export interface DaoAddresses {
 }
 
 export interface AttackProfitabilityConfig {
+  notSupported?: boolean;
   riskLevel?: RiskLevel;
   attackCostBarChart: DaoAddresses[DaoIdEnum];
   dynamicQuorum?: {
