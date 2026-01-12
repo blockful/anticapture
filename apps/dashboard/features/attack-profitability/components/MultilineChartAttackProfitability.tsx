@@ -193,7 +193,12 @@ export const MultilineChartAttackProfitability = ({
       return dataPoint;
     });
 
-    return data;
+    const firstValidIndex = data.findIndex((point) => {
+      const values = Object.entries(point).filter(([key]) => key !== "date");
+      return values.some(([, value]) => value !== null);
+    });
+
+    return firstValidIndex === -1 ? data : data.slice(firstValidIndex);
   }, [
     filterData,
     chartConfig,
