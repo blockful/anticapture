@@ -28,6 +28,9 @@ const daoItemQueries = [
   "accountBalanceVariations",
   "delegationPercentageByDay",
   "dao",
+  "getLiquidTreasury",
+  "getDaoTokenTreasury",
+  "getTotalTreasury",
   "transfers",
 ];
 

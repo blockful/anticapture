@@ -16,13 +16,13 @@ import {
   transactions,
   proposals,
   lastUpdate,
-  totalAssets,
   votingPower,
   delegationPercentage,
   votingPowerVariations,
   accountBalanceVariations,
   dao,
   accountInteractions,
+  treasury,
   transfers,
 } from "@/api/controllers";
 import { docs } from "@/api/docs";
@@ -39,6 +39,7 @@ import {
   DrizzleProposalsActivityRepository,
   NounsVotingPowerRepository,
   AccountInteractionsRepository,
+  TreasuryRepository,
   TransfersRepository,
 } from "@/api/repositories";
 import { errorHandler } from "@/api/middlewares";
@@ -50,7 +51,6 @@ import {
   VotingPowerService,
   TransactionsService,
   ProposalsService,
-  DuneService,
   CoingeckoService,
   NFTPriceService,
   TokenService,
@@ -61,6 +61,7 @@ import {
 } from "@/api/services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
+import { createTreasuryService } from "./services/treasury/treasury-provider-factory";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -132,11 +133,6 @@ const accountBalanceService = new BalanceVariationsService(
   accountInteractionRepo,
 );
 
-if (env.DUNE_API_URL && env.DUNE_API_KEY) {
-  const duneClient = new DuneService(env.DUNE_API_URL, env.DUNE_API_KEY);
-  totalAssets(app, duneClient);
-}
-
 const tokenPriceClient =
   env.DAO_ID === DaoIdEnum.NOUNS
     ? new NFTPriceService(
@@ -150,6 +146,17 @@ const tokenPriceClient =
         env.DAO_ID,
       );
 
+const treasuryService = createTreasuryService(
+  new TreasuryRepository(),
+  tokenPriceClient,
+  env.DEFILLAMA_API_URL,
+  env.TREASURY_PROVIDER_PROTOCOL_ID,
+  env.DUNE_API_URL,
+  env.DUNE_API_KEY,
+);
+const decimals = CONTRACT_ADDRESSES[env.DAO_ID].token.decimals;
+
+treasury(app, treasuryService, decimals);
 tokenHistoricalData(app, tokenPriceClient);
 token(
   app,

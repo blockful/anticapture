@@ -4,7 +4,6 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
 import { DaoIconProps } from "@/shared/components/icons/types";
-import { TreasuryAssetNonDaoToken } from "@/features/attack-profitability/hooks";
 
 export type DaoMetricsDayBucket = {
   date: string;
@@ -24,7 +23,7 @@ export type PriceEntry = { timestamp: number; price: string };
 
 export interface MultilineChartDataSetPoint {
   date: number;
-  [key: string]: number;
+  [key: string]: number | null;
 }
 
 export interface ChartDataSetPoint {
@@ -185,8 +184,6 @@ export interface DaoAddresses {
 
 export interface AttackProfitabilityConfig {
   riskLevel?: RiskLevel;
-  liquidTreasury?: TreasuryAssetNonDaoToken; // FIXME(DEV-161): Remove once treasury fetching from Octav is operational
-  supportsLiquidTreasuryCall?: boolean;
   attackCostBarChart: DaoAddresses[DaoIdEnum];
   dynamicQuorum?: {
     percentage: number;

@@ -27,18 +27,14 @@ import { ResearchPendingChartBlur } from "@/shared/components/charts/ResearchPen
 import { AttackProfitabilityCustomTooltip } from "@/features/attack-profitability/components";
 import {
   useDaoTokenHistoricalData,
-  useTreasuryAssetNonDaoToken,
+  useTreasury,
 } from "@/features/attack-profitability/hooks";
 import {
   cn,
   formatNumberUserReadable,
   timestampToReadableDate,
 } from "@/shared/utils";
-import {
-  normalizeDataset,
-  normalizeDatasetTreasuryNonDaoToken,
-  normalizeDatasetAllTreasury,
-} from "@/features/attack-profitability/utils";
+import { normalizeDataset } from "@/features/attack-profitability/utils";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 import { Data } from "react-csv/lib/core";
@@ -64,17 +60,23 @@ export const MultilineChartAttackProfitability = ({
   const { data: daoData } = useDaoData(daoEnum);
   const daoConfig = daoConfigByDaoId[daoEnum];
 
-  const {
-    data: treasuryAssetNonDAOToken = [],
-    loading: isLoadingTreasuryAssetNonDAOToken,
-  } = useTreasuryAssetNonDaoToken(daoEnum, days);
+  const { data: liquidTreasuryData } = useTreasury(
+    daoEnum,
+    "liquid",
+    days as TimeInterval,
+  );
+  const { data: totalTreasuryData } = useTreasury(
+    daoEnum,
+    "total",
+    days as TimeInterval,
+  );
 
   const {
     data: daoTokenPriceHistoricalData,
     loading: isLoadingDaoTokenPriceHistoricalData,
   } = useDaoTokenHistoricalData({
     daoId: daoEnum,
-    limit: Number(days.split("d")[0]) - 7,
+    limit: Number(days.split("d")[0]),
   });
 
   const { data: timeSeriesData, isLoading: isLoadingTimeSeriesData } =
@@ -114,9 +116,7 @@ export const MultilineChartAttackProfitability = ({
 
   const chartData = useMemo(() => {
     let delegatedSupplyChart: DaoMetricsDayBucket[] = [];
-    let treasurySupplyChart: DaoMetricsDayBucket[] = [];
     if (timeSeriesData) {
-      treasurySupplyChart = timeSeriesData[MetricTypesEnum.TREASURY];
       delegatedSupplyChart = timeSeriesData[MetricTypesEnum.DELEGATED_SUPPLY];
     }
 
@@ -125,17 +125,14 @@ export const MultilineChartAttackProfitability = ({
       datasets = mockedAttackProfitabilityDatasets;
     } else {
       datasets = {
-        treasuryNonDAO: normalizeDatasetTreasuryNonDaoToken(
-          treasuryAssetNonDAOToken,
-          "treasuryNonDAO",
-        ).reverse(),
-        all: normalizeDatasetAllTreasury(
-          daoTokenPriceHistoricalData,
-          "all",
-          treasuryAssetNonDAOToken,
-          treasurySupplyChart,
-          daoConfig.decimals,
-        ),
+        treasuryNonDAO: liquidTreasuryData.map((item) => ({
+          date: item.date,
+          treasuryNonDAO: item.value,
+        })),
+        all: totalTreasuryData.map((item) => ({
+          date: item.date,
+          all: item.value,
+        })),
         quorum: daoConfig?.attackProfitability?.dynamicQuorum?.percentage
           ? normalizeDataset(
               daoTokenPriceHistoricalData,
@@ -145,9 +142,11 @@ export const MultilineChartAttackProfitability = ({
             ).map((datasetpoint) => ({
               ...datasetpoint,
               quorum:
-                datasetpoint.quorum *
-                (daoConfig?.attackProfitability?.dynamicQuorum?.percentage ??
-                  0),
+                datasetpoint.quorum !== null
+                  ? datasetpoint.quorum *
+                    (daoConfig?.attackProfitability?.dynamicQuorum
+                      ?.percentage ?? 0)
+                  : null,
             }))
           : quorumValue
             ? normalizeDataset(
@@ -201,7 +200,8 @@ export const MultilineChartAttackProfitability = ({
     mocked,
     quorumValue,
     daoTokenPriceHistoricalData,
-    treasuryAssetNonDAOToken,
+    liquidTreasuryData,
+    totalTreasuryData,
     timeSeriesData,
     daoConfig?.attackProfitability?.dynamicQuorum?.percentage,
     daoConfig.decimals,
@@ -219,9 +219,7 @@ export const MultilineChartAttackProfitability = ({
   }, [chartData, mocked, setCsvData]);
 
   const isLoading =
-    isLoadingTreasuryAssetNonDAOToken ||
-    isLoadingDaoTokenPriceHistoricalData ||
-    isLoadingTimeSeriesData;
+    isLoadingDaoTokenPriceHistoricalData || isLoadingTimeSeriesData;
 
   if (isLoading) {
     return (
