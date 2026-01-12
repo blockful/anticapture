@@ -1,5 +1,5 @@
 const daoItemQueries = [
-  'accountInteractions',
+  "accountInteractions",
   "compareActiveSupply",
   "compareAverageTurnout",
   "compareCexSupply",
@@ -28,6 +28,7 @@ const daoItemQueries = [
   "accountBalanceVariations",
   "delegationPercentageByDay",
   "dao",
+  "transfers",
 ];
 
 export const restResolvers = daoItemQueries.reduce((acc, fieldName) => {
@@ -52,13 +53,13 @@ export const restResolvers = daoItemQueries.reduce((acc, fieldName) => {
       const targetClient = context[`rest_${daoId.toUpperCase()}`]?.Query;
       if (!targetClient) {
         throw new Error(
-          `DAO "${daoId}" is not configured. Please set DAO_API_${daoId.toUpperCase()} environment variable.`
+          `DAO "${daoId}" is not configured. Please set DAO_API_${daoId.toUpperCase()} environment variable.`,
         );
       }
 
       if (typeof targetClient[fieldName] !== "function") {
         throw new Error(
-          `Endpoint "${fieldName}" is not available for DAO "${daoId}". The DAO API may not support this query.`
+          `Endpoint "${fieldName}" is not available for DAO "${daoId}". The DAO API may not support this query.`,
         );
       }
 
