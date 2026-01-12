@@ -4,7 +4,7 @@ query GetTopFiveDelegators(
 ) {
   accountBalances(
     delegates: $delegates
-    balanceGreaterThan: "0"
+    fromValue: "0"
     orderDirection: desc
     limit: $limit
   ) {

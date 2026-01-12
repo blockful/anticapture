@@ -77,13 +77,12 @@ export type Query = {
   _: TransactionPage;
   _meta?: Maybe<Meta>;
   account?: Maybe<Account>;
-  accountBalance?: Maybe<AccountBalance>;
   /**
    *
    * >**Method**: `GET`
    * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/account-balances/:accountId`
-   * Returns account balance
+   * >**Path**: `/account-balances/{args.accountId}`
+   * Returns account balance information for a specific address (account)
    *
    */
   accountBalanceByAccountId?: Maybe<AccountBalanceByAccountId_200_Response>;
@@ -101,7 +100,7 @@ export type Query = {
    * >**Method**: `GET`
    * >**Base URL**: `http://localhost:42069`
    * >**Path**: `/account-balances`
-   * Returns account balances
+   * Returns sorted and paginated account balance records
    *
    */
   accountBalances?: Maybe<AccountBalances_200_Response>;
@@ -251,7 +250,7 @@ export type Query = {
    *
    * >**Method**: `GET`
    * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/historical-balances`
+   * >**Path**: `/account-balances/historical`
    * Fetch historical token balances for multiple addresses at a specific time period using multicall
    *
    */
@@ -362,7 +361,7 @@ export type Query = {
    *
    * >**Method**: `GET`
    * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/voting-powers`
+   * >**Path**: `/voting-powers/{args.account}`
    * Returns a list of voting power changes
    *
    */
@@ -385,9 +384,8 @@ export type QueryAccountArgs = {
 };
 
 
-export type QueryAccountBalanceArgs = {
+export type QueryAccountBalanceByAccountIdArgs = {
   accountId: Scalars['String']['input'];
-  tokenId: Scalars['String']['input'];
 };
 
 
@@ -401,12 +399,12 @@ export type QueryAccountBalanceVariationsArgs = {
 
 export type QueryAccountBalancesArgs = {
   addresses?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  balanceGreaterThan?: InputMaybe<Scalars['String']['input']>;
-  balanceLessThan?: InputMaybe<Scalars['String']['input']>;
   delegates?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  fromValue?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   orderDirection?: InputMaybe<QueryInput_AccountBalances_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  toValue?: InputMaybe<Scalars['String']['input']>;
 };
 
 

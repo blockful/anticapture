@@ -6,7 +6,7 @@ query GetTopTokenHolders(
   accountBalances(
     orderDirection: $orderDirection
     limit: $limit
-    balanceGreaterThan: "0"
+    fromValue: "0"
     addresses: $addresses
   ) {
     items {
