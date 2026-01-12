@@ -73,11 +73,14 @@ const mockFetchPage = async ({
   };
 };
 
+import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
+
 const meta: Meta<typeof ExampleDataTable> = {
   title: "Data Display/Table",
   component: ExampleDataTable,
   parameters: {
     layout: "fullscreen",
+    design: getFigmaDesignConfigByNodeId("10706-9608"),
   },
   argTypes: {
     size: {

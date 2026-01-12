@@ -5,13 +5,10 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoAvatarIcon } from "@/shared/components/icons";
 import { DaoOverviewSkeleton } from "@/features/dao-overview/skeleton/DaoOverviewSkeleton";
-import { useDaoOverviewData } from "@/features/dao-overview/hooks/useDaoOverviewData";
-import { DaoOverviewHeader } from "@/features/dao-overview/components/DaoOverviewHeader";
 import { DaoOverviewHeaderMetrics } from "@/features/dao-overview/components/DaoOverviewHeaderMetrics";
 import { TokenDistributionChartCard } from "@/features/dao-overview/components/TokenDistributionChartCard";
 import { DaoOverviewHeaderBackground } from "@/features/dao-overview/components/DaoOverviewHeaderBackground";
 import { SecurityCouncilCard } from "@/features/dao-overview/components/SecurityCouncilCard";
-import { formatNumberUserReadable } from "@/shared/utils";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 import { StagesContainer } from "@/features/resilience-stages/components/StagesContainer";
 import {
@@ -25,7 +22,6 @@ import { VotingPowerChartCard } from "@/features/dao-overview/components/VotingP
 import { MetricsCard } from "@/features/dao-overview/components/MetricsCard";
 import { AttackProfitabilityChartCard } from "@/features/dao-overview/components/AttackProfitabilityChartCard";
 import { useRouter } from "next/navigation";
-import { useQuorumGap } from "@/shared/hooks/useQuorumGap";
 import { apolloClient } from "@/shared/providers/GlobalProviders";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
@@ -39,36 +35,6 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     //   https://github.com/apollographql/apollo-feature-requests/issues/326
     apolloClient.cache.reset();
   }, [daoId]);
-
-  const {
-    isLoading,
-    treasuryStats,
-    delegatedSupply,
-    activeSupply,
-    averageTurnout,
-    topDelegatesToPass,
-    proposalThresholdValue,
-    proposalThresholdPercentage,
-    quorumValueFormatted,
-    votingPeriod,
-    votingDelay,
-    timelockDelay,
-  } = useDaoOverviewData({ daoId, daoConfig });
-
-  const { data: quorumGap } = useQuorumGap(daoId);
-
-  const {
-    liquidTreasuryAllValue,
-    liquidTreasuryAllPercent,
-    liquidTreasuryNonDaoValue,
-    lastPrice,
-  } = treasuryStats;
-
-  if (isLoading) return <DaoOverviewSkeleton />;
-
-  const delegatedSupplyValue = formatNumberUserReadable(delegatedSupply);
-  const activeSupplyValue = formatNumberUserReadable(activeSupply);
-  const averageTurnoutValue = formatNumberUserReadable(averageTurnout);
 
   const currentDaoStage = getDaoStageFromFields({
     fields: fieldsToArray(daoConfig.governanceImplementation?.fields),
@@ -95,33 +61,16 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           <div className="border-inverted md:bg-inverted flex flex-col gap-1 md:flex-row md:border-2">
             <DaoAvatarIcon
               daoId={daoId}
-              className="border-inverted size-32 flex-shrink-0 rounded-none border-2 md:border-none"
+              className="border-inverted size-32 shrink-0 rounded-none border-2 md:border-none"
             />
-            <div className="flex flex-1 flex-col">
-              <DaoOverviewHeader
-                daoId={daoId}
-                daoConfig={daoConfig}
-                daoOverview={daoOverview}
-                lastPrice={lastPrice}
-              />
-              <DaoOverviewHeaderMetrics
-                daoId={daoId}
-                delegatedSupplyValue={delegatedSupplyValue}
-                activeSupplyValue={activeSupplyValue}
-                averageTurnoutValue={averageTurnoutValue}
-                quorumGap={quorumGap}
-                liquidTreasuryAllValue={liquidTreasuryAllValue}
-                liquidTreasuryAllPercent={liquidTreasuryAllPercent}
-                liquidTreasuryNonDaoValue={liquidTreasuryNonDaoValue}
-                topDelegatesToPass={topDelegatesToPass}
-              />
-            </div>
+
+            <DaoOverviewHeaderMetrics daoId={daoId} daoConfig={daoConfig} />
           </div>
         </div>
         <div className="block md:hidden">
           <DividerDefault isHorizontal />
         </div>
-        <div className="border-x-1 border-inverted grid grid-cols-1 gap-5 md:mx-5 md:grid-cols-2 md:gap-2">
+        <div className="border-inverted grid grid-cols-1 gap-5 border-x md:mx-5 md:grid-cols-2 md:gap-2">
           <div className="w-full px-5 md:px-0">
             <StagesContainer
               daoId={daoId}
@@ -146,25 +95,14 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             <DividerDefault isHorizontal />
           </div>
         </div>
-        <div className="border-x-1 border-inverted mx-5">
-          <MetricsCard
-            proposalThresholdValue={proposalThresholdValue}
-            proposalThresholdPercentage={proposalThresholdPercentage}
-            quorumValueFormatted={formatNumberUserReadable(
-              quorumValueFormatted,
-            )}
-            daoId={daoId}
-            daoConfig={daoConfig}
-            votingPeriod={votingPeriod}
-            votingDelay={votingDelay}
-            timelockDelay={timelockDelay}
-          />
+        <div className="border-inverted mx-5 border-x">
+          <MetricsCard daoId={daoId} daoConfig={daoConfig} />
         </div>
         <div className="block md:hidden">
           <DividerDefault isHorizontal />
         </div>
         <SecurityCouncilCard daoOverview={daoOverview} />
-        <div className="border-x-1 border-inverted grid grid-cols-1 gap-5 md:mx-5 md:grid-cols-2 md:gap-2">
+        <div className="border-inverted grid grid-cols-1 gap-5 border-x md:mx-5 md:grid-cols-2 md:gap-2">
           <AttackProfitabilityChartCard daoId={daoId} />
           <div className="block md:hidden">
             <DividerDefault isHorizontal />
@@ -174,7 +112,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         <div className="block md:hidden">
           <DividerDefault isHorizontal />
         </div>
-        <div className="border-x-1 border-inverted grid grid-cols-1 gap-5 md:mx-5 md:grid-cols-2 md:gap-2">
+        <div className="border-inverted grid grid-cols-1 gap-5 border-x md:mx-5 md:grid-cols-2 md:gap-2">
           <div className="w-full">
             <AccountBalanceChartCard daoId={daoId} />
           </div>

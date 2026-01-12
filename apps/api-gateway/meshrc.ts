@@ -28,18 +28,18 @@ export default processConfig(
               },
               transforms: [
                 {
-                  rename: {
-                    renames: [
-                      {
-                        from: {
-                          type: "Query",
-                          field: "transactions",
-                        },
-                        to: {
-                          type: "Query",
-                          field: "_",
-                        },
-                      },
+                  filterSchema: {
+                    filters: [
+                      "Query.!{account}",
+                      "Query.!{accounts}",
+                      "Query.!{proposalsOnchain}",
+                      "Query.!{proposalsOnchains}",
+                      "Query.!{tokenPrice}",
+                      "Query.!{tokenPrices}",
+                      "Query.!{transaction}",
+                      "Query.!{transactions}",
+                      "Query.!{transfer}",
+                      "Query.!{transfers}",
                     ],
                   },
                 },
@@ -57,7 +57,7 @@ export default processConfig(
           ];
         }),
     ],
-    additionalTypeDefs:`
+    additionalTypeDefs: `
       type AverageDelegationPercentageItem {
         date: String!
         high: String!

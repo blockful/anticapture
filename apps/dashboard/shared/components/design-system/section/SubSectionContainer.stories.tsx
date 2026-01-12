@@ -2,12 +2,14 @@ import type { Meta, StoryObj } from "@storybook/nextjs";
 import { SubSectionsContainer } from "@/shared/components/design-system/section/SubSectionsContainer";
 import { SubSection } from "@/shared/components/design-system/section/SubSection";
 import { Calendar, TrendingUp, Users } from "lucide-react";
+import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta = {
   title: "Design System/Sections/SubSectionsContainer",
   component: SubSectionsContainer,
   parameters: {
     layout: "fullscreen",
+    design: getFigmaDesignConfigByNodeId("10101-29339"),
   },
   tags: ["autodocs"],
   argTypes: {
