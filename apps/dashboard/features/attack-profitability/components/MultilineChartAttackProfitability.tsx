@@ -124,12 +124,19 @@ export const MultilineChartAttackProfitability = ({
     if (mocked) {
       datasets = mockedAttackProfitabilityDatasets;
     } else {
+      const nonZeroLiquidTreasuryData = liquidTreasuryData.filter(
+        (item) => item.value > 0,
+      );
+      const nonZeroTotalTreasuryData = totalTreasuryData.filter(
+        (item) => item.value > 0,
+      );
+
       datasets = {
-        treasuryNonDAO: liquidTreasuryData.map((item) => ({
+        treasuryNonDAO: nonZeroLiquidTreasuryData.map((item) => ({
           date: item.date,
           treasuryNonDAO: item.value,
         })),
-        all: totalTreasuryData.map((item) => ({
+        all: nonZeroTotalTreasuryData.map((item) => ({
           date: item.date,
           all: item.value,
         })),
