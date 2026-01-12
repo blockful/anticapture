@@ -31,6 +31,7 @@ const daoItemQueries = [
   "getLiquidTreasury",
   "getDaoTokenTreasury",
   "getTotalTreasury",
+  "transfers",
 ];
 
 export const restResolvers = daoItemQueries.reduce((acc, fieldName) => {

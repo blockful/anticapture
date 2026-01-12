@@ -23,6 +23,7 @@ import {
   dao,
   accountInteractions,
   treasury,
+  transfers,
 } from "@/api/controllers";
 import { docs } from "@/api/docs";
 import { env } from "@/env";
@@ -39,6 +40,7 @@ import {
   NounsVotingPowerRepository,
   AccountInteractionsRepository,
   TreasuryRepository,
+  TransfersRepository,
 } from "@/api/repositories";
 import { errorHandler } from "@/api/middlewares";
 import { getClient } from "@/lib/client";
@@ -55,6 +57,7 @@ import {
   BalanceVariationsService,
   HistoricalBalancesService,
   DaoService,
+  TransfersService,
 } from "@/api/services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
@@ -184,6 +187,7 @@ votingPower(app, votingPowerService);
 votingPowerVariations(app, votingPowerService);
 accountBalanceVariations(app, accountBalanceService);
 accountInteractions(app, accountBalanceService);
+transfers(app, new TransfersService(new TransfersRepository()));
 dao(app, daoService);
 docs(app);
 
