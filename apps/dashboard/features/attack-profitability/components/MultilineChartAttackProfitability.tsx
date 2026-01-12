@@ -70,10 +70,6 @@ export const MultilineChartAttackProfitability = ({
     "total",
     days as TimeInterval,
   );
-  const {
-    data: treasuryAssetNonDAOToken = [],
-    loading: isLoadingTreasuryAssetNonDAOToken,
-  } = useTreasuryAssetNonDaoToken(daoEnum, days);
 
   const {
     data: daoTokenPriceHistoricalData,
@@ -223,9 +219,7 @@ export const MultilineChartAttackProfitability = ({
   }, [chartData, mocked, setCsvData]);
 
   const isLoading =
-    isLoadingTreasuryAssetNonDAOToken ||
-    isLoadingDaoTokenPriceHistoricalData ||
-    isLoadingTimeSeriesData;
+    isLoadingDaoTokenPriceHistoricalData || isLoadingTimeSeriesData;
 
   if (isLoading) {
     return (
