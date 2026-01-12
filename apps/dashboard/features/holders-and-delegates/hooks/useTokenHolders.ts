@@ -95,6 +95,7 @@ export const useTokenHolders = ({
   } = useGetTopTokenHoldersQuery({
     variables: {
       limit,
+      skip: 0,
       orderDirection,
       ...(address && { addresses: [address] }),
     },
@@ -151,6 +152,7 @@ export const useTokenHolders = ({
   useEffect(() => {
     refetch({
       limit,
+      skip: 0,
       orderDirection,
       ...(address && { addresses: [address] }),
     });
@@ -201,11 +203,7 @@ export const useTokenHolders = ({
 
   // Fetch next page function
   const fetchNextPage = useCallback(async () => {
-    if (
-      !pagination.hasNextPage ||
-      !pagination.endCursor ||
-      isPaginationLoading
-    ) {
+    if (!pagination.hasNextPage || isPaginationLoading) {
       console.warn("No next page available or already loading");
       return;
     }
@@ -213,22 +211,33 @@ export const useTokenHolders = ({
     setIsPaginationLoading(true);
 
     try {
+      // Calculate skip based on current loaded items count
+      const currentItemsCount =
+        tokenHoldersData?.accountBalances?.items?.length || 0;
+      const skip = currentItemsCount;
+
       await fetchMore({
         variables: {
           limit,
+          skip,
           orderDirection,
           ...(address && { addresses: [address] }),
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult?.accountBalances) return previousResult;
+
+          // Append new items to existing ones (infinite scroll)
           const prevItems = previousResult.accountBalances?.items ?? [];
           const newItems = fetchMoreResult.accountBalances.items ?? [];
+
+          // Filter out duplicates based on accountId
           const merged = [
             ...prevItems,
             ...newItems.filter(
               (n) => n && !prevItems.some((p) => p?.accountId === n.accountId),
             ),
           ];
+
           return {
             ...fetchMoreResult,
             accountBalances: {
@@ -249,20 +258,16 @@ export const useTokenHolders = ({
   }, [
     fetchMore,
     pagination.hasNextPage,
-    pagination.endCursor,
     limit,
     orderDirection,
     address,
     isPaginationLoading,
+    tokenHoldersData?.accountBalances?.items?.length,
   ]);
 
   // Fetch previous page function
   const fetchPreviousPage = useCallback(async () => {
-    if (
-      !pagination.hasPreviousPage ||
-      !pagination.startCursor ||
-      isPaginationLoading
-    ) {
+    if (!pagination.hasPreviousPage || isPaginationLoading) {
       console.warn("No previous page available or already loading");
       return;
     }
@@ -270,9 +275,13 @@ export const useTokenHolders = ({
     setIsPaginationLoading(true);
 
     try {
+      // Calculate skip for the previous page
+      const skip = (currentPage - 2) * limit;
+
       await fetchMore({
         variables: {
           limit,
+          skip,
           orderDirection,
           ...(address && { addresses: [address] }),
         },
@@ -300,11 +309,11 @@ export const useTokenHolders = ({
   }, [
     fetchMore,
     pagination.hasPreviousPage,
-    pagination.startCursor,
     limit,
     orderDirection,
     address,
     isPaginationLoading,
+    currentPage,
   ]);
 
   // Enhanced refetch that resets pagination
