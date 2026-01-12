@@ -3,7 +3,16 @@
   "globalEnv": [".env"],
   "tasks": {
     "build": {
-      "outputs": ["dist/**", ".next/**", ".next/cache/**"]
+      "outputs": ["dist/**", ".next/**", ".next/cache/**"],
+      "env": ["RESEND_API_KEY", "RESEND_FROM_EMAIL", "CONTACT_EMAIL"]
+    },
+    "storybook": {
+      "outputs": ["dist/**", ".next/**", ".next/cache/**"],
+      "env": ["FIGMA_TOKEN", "VALIDATE_FIGMA_TOKEN_API"]
+    },
+    "build-storybook": {
+      "outputs": ["storybook-static/**"],
+      "env": ["FIGMA_TOKEN", "VALIDATE_FIGMA_TOKEN_API"]
     },
     "clean": {},
     "lint": {},
