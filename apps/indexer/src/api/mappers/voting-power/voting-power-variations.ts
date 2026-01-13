@@ -74,9 +74,15 @@ export const VotingPowersRequestSchema = z.object({
     .optional()
     .default("votingPower"),
   addresses: z
-    .array(z.string().refine((addr) => isAddress(addr)))
+    .union([
+      z
+        .string()
+        .refine(isAddress, "Invalid address")
+        .transform((addr) => [addr]),
+      z.array(z.string().refine(isAddress, "Invalid addresses")),
+    ])
     .optional()
-    .default([]),
+    .transform((val) => (val === undefined ? [] : val)),
   fromValue: z
     .string()
     .transform((val) => BigInt(val))
