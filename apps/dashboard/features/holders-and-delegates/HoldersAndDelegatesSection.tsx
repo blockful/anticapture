@@ -16,7 +16,7 @@ import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 type TabId = "tokenHolders" | "delegates";
 
 export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
-  const defaultDays = TimeInterval.ONE_YEAR;
+  const defaultDays = TimeInterval.NINETY_DAYS;
   const [days, setDays] = useQueryState(
     "days",
     parseAsStringEnum(Object.values(TimeInterval)).withDefault(defaultDays),
