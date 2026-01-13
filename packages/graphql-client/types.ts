@@ -77,7 +77,7 @@ export type Query = {
   _: TransactionPage;
   _meta?: Maybe<Meta>;
   account?: Maybe<Account>;
-  /** Returns account balance information for a specific address (account) */
+  /** Returns account balance information for a specific address */
   accountBalanceByAccountId?: Maybe<AccountBalanceByAccountId_200_Response>;
   /** Returns a mapping of the biggest variations to account balances associated by account address */
   accountBalanceVariations?: Maybe<AccountBalanceVariations_200_Response>;
@@ -85,7 +85,7 @@ export type Query = {
   accountBalances?: Maybe<AccountBalances_200_Response>;
   /**
    * Returns a mapping of the largest interactions between accounts.
-   * Positive amounts signify net token transfers FROM <accountId>, whilst negative amounts refer to net transfers TO <accountId>
+   * Positive amounts signify net token transfers FROM <address>, whilst negative amounts refer to net transfers TO <address>
    */
   accountInteractions?: Maybe<AccountInteractions_200_Response>;
   accountPower?: Maybe<AccountPower>;
@@ -184,7 +184,7 @@ export type QueryAccountArgs = {
 
 
 export type QueryAccountBalanceByAccountIdArgs = {
-  accountId: Scalars['String']['input'];
+  address: Scalars['String']['input'];
 };
 
 
@@ -208,9 +208,9 @@ export type QueryAccountBalancesArgs = {
 
 
 export type QueryAccountInteractionsArgs = {
-  accountId: Scalars['String']['input'];
-  address?: InputMaybe<Scalars['String']['input']>;
+  address: Scalars['String']['input'];
   days?: InputMaybe<QueryInput_AccountInteractions_Days>;
+  filterAddress?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   maxAmount?: InputMaybe<Scalars['String']['input']>;
   minAmount?: InputMaybe<Scalars['String']['input']>;

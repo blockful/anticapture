@@ -7,7 +7,7 @@ query getAccountInteractions(
   $skip: NonNegativeInt
 ) {
   accountInteractions(
-    accountId: $address
+    address: $address
     days: _90d
     limit: $limit
     maxAmount: $maxAmount
