@@ -13,11 +13,14 @@ import {
   WifiOff,
 } from "lucide-react";
 
+import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
+
 const meta = {
   title: "Design System/Feedback/BlankSlate",
   component: BlankSlate,
   parameters: {
     layout: "centered",
+    design: getFigmaDesignConfigByNodeId("10738-9717"),
   },
   tags: ["autodocs"],
   argTypes: {

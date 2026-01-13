@@ -1,15 +1,13 @@
-
 const daoListQueries = [
-  'accountPowers',
-  'accounts',
-  'daoMetricsDayBuckets',
-  'delegations',
-  'proposalsOnchains',
-  'tokens',
-  'transfers',
-  'votesOnchains',
-  'votingPowerHistorys',
-]
+  "accountPowers",
+  "accounts",
+  "daoMetricsDayBuckets",
+  "delegations",
+  "proposalsOnchains",
+  "tokens",
+  "votesOnchains",
+  "votingPowerHistorys",
+];
 
 export const listResolvers = daoListQueries.reduce((acc, fieldName) => {
   acc[fieldName] = {
@@ -29,8 +27,8 @@ export const listResolvers = daoListQueries.reduce((acc, fieldName) => {
 
       const targetClient = context[`graphql_${daoId.toUpperCase()}`]?.Query;
 
-      if (!targetClient || typeof targetClient[fieldName] !== 'function') {
-        return {}
+      if (!targetClient || typeof targetClient[fieldName] !== "function") {
+        return {};
       }
 
       if (args?.where?.daoId) {

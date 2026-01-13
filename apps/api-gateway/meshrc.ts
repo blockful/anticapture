@@ -30,24 +30,18 @@ export default processConfig(
                 {
                   filterSchema: {
                     filters: [
+                      "Query.!{account}",
+                      "Query.!{accounts}",
                       'Query.!{accountBalance}',
-                      'Query.!{accountBalances}'
-                    ]
-                  }
-                },
-                {
-                  rename: {
-                    renames: [
-                      {
-                        from: {
-                          type: "Query",
-                          field: "transactions",
-                        },
-                        to: {
-                          type: "Query",
-                          field: "_",
-                        },
-                      },
+                      'Query.!{accountBalances}',
+                      "Query.!{proposalsOnchain}",
+                      "Query.!{proposalsOnchains}",
+                      "Query.!{tokenPrice}",
+                      "Query.!{tokenPrices}",
+                      "Query.!{transaction}",
+                      "Query.!{transactions}",
+                      "Query.!{transfer}",
+                      "Query.!{transfers}",
                     ],
                   },
                 },

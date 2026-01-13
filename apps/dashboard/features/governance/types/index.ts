@@ -27,16 +27,17 @@ export interface ProposalVotes {
 }
 
 // Use the generated GraphQL type as base and extend with computed properties
-export interface Proposal
-  extends Omit<
-    Query_Proposals_Items_Items,
-    | "endBlock"
-    | "startBlock"
-    | "forVotes"
-    | "againstVotes"
-    | "abstainVotes"
-    | "quorum"
-  > {
+export interface Proposal extends Omit<
+  Query_Proposals_Items_Items,
+  | "endBlock"
+  | "startBlock"
+  | "forVotes"
+  | "againstVotes"
+  | "abstainVotes"
+  | "quorum"
+  | "description"
+  | "calldatas"
+> {
   title: string; // Add title field that's computed from description
   status: ProposalStatus;
   state: ProposalState;

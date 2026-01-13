@@ -69,7 +69,7 @@ export function GovernorIndexer(blockTime: number) {
   ponder.on(`NounsAuction:AuctionSettled`, async ({ event, context }) => {
     await context.db.insert(tokenPrice).values({
       price: event.args.amount,
-      timestamp: truncateTimestampTime(event.block.timestamp),
+      timestamp: BigInt(truncateTimestampTime(Number(event.block.timestamp))),
     });
   });
 }

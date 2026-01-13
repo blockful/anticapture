@@ -1,18 +1,24 @@
 query BalanceHistory(
-  $after: String
-  $before: String
-  $limit: Int = 10
-  $orderBy: String = "timestamp"
-  $orderDirection: String = "desc"
-  $where: transferFilter
+  $address: String!
+  $offset: Float = 0
+  $limit: Float = 10
+  $sortBy: queryInput_transfers_sortBy
+  $sortOrder: queryInput_transfers_sortOrder
+  $from: String
+  $to: String
+  $fromValue: String
+  $toValue: String
 ) {
   transfers(
-    where: $where
-    orderBy: $orderBy
-    orderDirection: $orderDirection
+    address: $address
+    sortBy: $sortBy
+    sortOrder: $sortOrder
     limit: $limit
-    after: $after
-    before: $before
+    offset: $offset
+    from: $from
+    to: $to
+    fromValue: $fromValue
+    toValue: $toValue
   ) {
     items {
       timestamp
@@ -21,19 +27,6 @@ query BalanceHistory(
       toAccountId
       transactionHash
     }
-    pageInfo {
-      endCursor
-      hasNextPage
-      hasPreviousPage
-      startCursor
-    }
-  }
-}
-
-query BalanceHistoryTotalCount($account: String!) {
-  transfers(
-    where: { OR: [{ fromAccountId: $account }, { toAccountId: $account }] }
-  ) {
     totalCount
   }
 }
