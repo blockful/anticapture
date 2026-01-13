@@ -111,13 +111,21 @@ export class DefiLlamaProvider implements TreasuryProvider {
       }
     }
 
-    // Convert map to array, filter by cutoff, and format
-    return Array.from(aggregatedByDate.entries())
-      .filter(([dayTimestamp]) => dayTimestamp >= cutoffTimestamp)
+    // Convert map to array and format
+    const allData = Array.from(aggregatedByDate.entries())
       .map(([dayTimestamp, values]) => ({
         date: dayTimestamp,
         liquidTreasury: values.withoutOwnToken, // Liquid Treasury
       }))
       .sort((a, b) => a.date - b.date); // Sort by timestamp ascending
+
+    const filteredData = allData.filter((item) => item.date >= cutoffTimestamp);
+    // If no data in the requested period, return the last available value as fallback
+    if (filteredData.length === 0 && allData.length > 0) {
+      const lastAvailable = allData.at(-1)!;
+      return [lastAvailable];
+    }
+
+    return filteredData;
   }
 }
