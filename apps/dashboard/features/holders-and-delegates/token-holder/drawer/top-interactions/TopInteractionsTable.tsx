@@ -177,10 +177,10 @@ export const TopInteractionsTable = ({
                 setFilterVariables(() => ({
                   minAmount: filterState.minAmount
                     ? parseUnits(filterState.minAmount, decimals).toString()
-                    : undefined,
+                    : null,
                   maxAmount: filterState.maxAmount
                     ? parseUnits(filterState.maxAmount, decimals).toString()
-                    : undefined,
+                    : null,
                 }));
 
                 setIsFilterActive(
@@ -194,8 +194,8 @@ export const TopInteractionsTable = ({
                 // Reset to default sorting
                 setSortBy("transferCount");
                 setFilterVariables(() => ({
-                  minAmount: undefined,
-                  maxAmount: undefined,
+                  minAmount: null,
+                  maxAmount: null,
                 }));
               }}
               isActive={isFilterActive}

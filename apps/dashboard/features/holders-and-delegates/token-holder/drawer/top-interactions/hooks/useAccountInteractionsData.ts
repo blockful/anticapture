@@ -69,11 +69,10 @@ export const useAccountInteractionsData = ({
   const { data, loading, error } = useGetAccountInteractionsQuery({
     variables: {
       address,
-      // orderBy: sortBy,
       orderDirection:
         sortDirection as QueryInput_AccountInteractions_OrderDirection,
-      minAmount: filterVariables?.minAmount ?? undefined,
-      maxAmount: filterVariables?.maxAmount ?? undefined,
+      minAmount: filterVariables?.minAmount,
+      maxAmount: filterVariables?.maxAmount,
       limit,
       filterAddress,
     },
