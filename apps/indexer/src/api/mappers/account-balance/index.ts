@@ -1,5 +1,6 @@
 import { z } from "@hono/zod-openapi";
 import { Address, isAddress } from "viem";
+import { accountBalance } from "ponder:schema";
 
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum, DaysEnum, DaysOpts } from "@/lib/enums";
@@ -187,12 +188,7 @@ export type DBAccountInteraction = DBAccountBalanceVariation & {
   transferCount: bigint;
 };
 
-export type DBAccountBalance = {
-  accountId: Address;
-  delegate: string;
-  tokenId: string;
-  balance: bigint;
-};
+export type DBAccountBalance = typeof accountBalance.$inferSelect;
 
 export interface AccountInteractions {
   interactionCount: number;
