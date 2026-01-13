@@ -1,5 +1,0 @@
-query GetTokenHoldersCouting {
-  accountBalances(fromValue: "0") {
-    totalCount
-  }
-}

@@ -11,6 +11,7 @@ query GetTopTokenHolders(
     fromValue: "0"
     addresses: $addresses
   ) {
+    totalCount
     items {
       accountId
       balance

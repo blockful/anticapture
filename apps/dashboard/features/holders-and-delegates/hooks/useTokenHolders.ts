@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  useGetTopTokenHoldersQuery,
-  useGetTokenHoldersCoutingQuery,
-} from "@anticapture/graphql-client/hooks";
+import { useGetTopTokenHoldersQuery } from "@anticapture/graphql-client/hooks";
 import { QueryInput_AccountBalances_OrderDirection } from "@anticapture/graphql-client";
 import { useMemo, useCallback, useState, useEffect } from "react";
 import { NetworkStatus } from "@apollo/client";
@@ -108,14 +105,6 @@ export const useTokenHolders = ({
     fetchPolicy: "cache-and-network", // Always check network for fresh data
   });
 
-  const { data: countingData } = useGetTokenHoldersCoutingQuery({
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
-      },
-    },
-  });
-
   const tokenHolderAddresses = useMemo(
     () =>
       tokenHoldersData?.accountBalances?.items
@@ -178,7 +167,7 @@ export const useTokenHolders = ({
 
   // Pagination info - combines GraphQL data with our page tracking
   const pagination = useMemo<PaginationInfo>(() => {
-    const totalCount = countingData?.accountBalances?.totalCount || 0;
+    const totalCount = tokenHoldersData?.accountBalances?.totalCount || 0;
     const currentItemsCount =
       tokenHoldersData?.accountBalances?.items?.length || 0;
     const totalPages = Math.ceil(totalCount / itemsPerPage);
@@ -195,7 +184,7 @@ export const useTokenHolders = ({
       currentItemsCount,
     };
   }, [
-    countingData?.accountBalances?.totalCount,
+    tokenHoldersData?.accountBalances?.totalCount,
     tokenHoldersData?.accountBalances?.items?.length,
     currentPage,
     itemsPerPage,
