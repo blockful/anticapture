@@ -9,7 +9,7 @@ import {
   AccountBalanceResponseMapper,
   AccountBalanceResponseSchema,
 } from "@/api/mappers";
-import { Address, isAddress } from "viem";
+import { isAddress } from "viem";
 import { DaoIdEnum } from "@/lib/enums";
 
 export function accountBalances(
@@ -21,7 +21,7 @@ export function accountBalances(
     createRoute({
       method: "get",
       operationId: "accountBalances",
-      path: "/account-balances",
+      path: "/balances",
       summary: "Get account balance records",
       description: "Returns sorted and paginated account balance records",
       tags: ["account-balances"],
@@ -73,14 +73,13 @@ export function accountBalances(
     createRoute({
       method: "get",
       operationId: "accountBalanceByAccountId",
-      path: "/account-balances/{accountId}",
+      path: "/accounts/{address}/balances",
       summary: "Get account balance",
-      description:
-        "Returns account balance information for a specific address (account)",
+      description: "Returns account balance information for a specific address",
       tags: ["account-balances"],
       request: {
         params: z.object({
-          accountId: z.string().refine((addr) => isAddress(addr)),
+          address: z.string().refine((addr) => isAddress(addr)),
         }),
       },
       responses: {
@@ -95,8 +94,8 @@ export function accountBalances(
       },
     }),
     async (context) => {
-      const accountId = context.req.param("accountId");
-      const result = await service.getAccountBalance(accountId as Address);
+      const { address } = context.req.valid("param");
+      const result = await service.getAccountBalance(address);
       return context.json(AccountBalanceResponseMapper(result));
     },
   );

@@ -1,8 +1,10 @@
-import { DaoIdEnum, DaysEnum, DaysOpts } from "@/lib/enums";
 import { z } from "@hono/zod-openapi";
 import { Address, isAddress } from "viem";
-import { PERCENTAGE_NO_BASELINE } from "@/api/mappers/constants";
+import { accountBalance } from "ponder:schema";
+
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
+import { DaoIdEnum, DaysEnum, DaysOpts } from "@/lib/enums";
+import { PERCENTAGE_NO_BASELINE } from "@/api/mappers/constants";
 import { calculateHistoricalBlockNumber } from "@/lib/blockTime";
 
 export const AccountBalancesRequestSchema = z.object({
@@ -130,24 +132,22 @@ export const AccountBalanceVariationsResponseSchema = z.object({
   ),
 });
 
-export const AccountInteractionsRequestSchema =
+export const AccountInteractionsParamsSchema = z.object({
+  address: z.string().refine(isAddress, "Invalid address"),
+});
+
+export const AccountInteractionsQuerySchema =
   AccountBalanceVariationsRequestSchema.extend({
-    accountId: z.string(),
     minAmount: z
       .string()
       .transform((val) => BigInt(val))
-      .optional(), //z.coerce.bigint().optional() doesn't work because of a bug with zod, zod asks for a string that satisfies REGEX ^d+$, when it should be ^\d+$
+      .optional(),
     maxAmount: z
       .string()
       .transform((val) => BigInt(val))
-      .optional(), //z.coerce.bigint().optional() doesn't work because of a bug with zod, zod asks for a string that satisfies REGEX ^d+$, when it should be ^\d+$
+      .optional(),
     orderBy: z.enum(["volume", "count"]).optional().default("count"),
-    address: z
-      .string()
-      .optional()
-      .transform((addr) =>
-        addr ? (isAddress(addr) ? addr : undefined) : undefined,
-      ),
+    filterAddress: z.string().refine(isAddress, "Invalid address").optional(),
   });
 
 export const AccountInteractionsResponseSchema = z.object({
@@ -188,12 +188,7 @@ export type DBAccountInteraction = DBAccountBalanceVariation & {
   transferCount: bigint;
 };
 
-export type DBAccountBalance = {
-  accountId: Address;
-  delegate: string;
-  tokenId: string;
-  balance: bigint;
-};
+export type DBAccountBalance = typeof accountBalance.$inferSelect;
 
 export interface AccountInteractions {
   interactionCount: number;

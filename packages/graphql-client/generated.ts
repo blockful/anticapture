@@ -80,7 +80,7 @@ export type Query = {
   _: TransactionPage;
   _meta?: Maybe<Meta>;
   account?: Maybe<Account>;
-  /** Returns account balance information for a specific address (account) */
+  /** Returns account balance information for a specific address */
   accountBalanceByAccountId?: Maybe<AccountBalanceByAccountId_200_Response>;
   /** Returns a mapping of the biggest variations to account balances associated by account address */
   accountBalanceVariations?: Maybe<AccountBalanceVariations_200_Response>;
@@ -88,7 +88,7 @@ export type Query = {
   accountBalances?: Maybe<AccountBalances_200_Response>;
   /**
    * Returns a mapping of the largest interactions between accounts.
-   * Positive amounts signify net token transfers FROM <accountId>, whilst negative amounts refer to net transfers TO <accountId>
+   * Positive amounts signify net token transfers FROM <address>, whilst negative amounts refer to net transfers TO <address>
    */
   accountInteractions?: Maybe<AccountInteractions_200_Response>;
   accountPower?: Maybe<AccountPower>;
@@ -187,7 +187,7 @@ export type QueryAccountArgs = {
 
 
 export type QueryAccountBalanceByAccountIdArgs = {
-  accountId: Scalars['String']['input'];
+  address: Scalars['String']['input'];
 };
 
 
@@ -211,9 +211,9 @@ export type QueryAccountBalancesArgs = {
 
 
 export type QueryAccountInteractionsArgs = {
-  accountId: Scalars['String']['input'];
-  address?: InputMaybe<Scalars['String']['input']>;
+  address: Scalars['String']['input'];
   days?: InputMaybe<QueryInput_AccountInteractions_Days>;
+  filterAddress?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   maxAmount?: InputMaybe<Scalars['String']['input']>;
   minAmount?: InputMaybe<Scalars['String']['input']>;
@@ -2775,6 +2775,7 @@ export type GetAccountInteractionsQueryVariables = Exact<{
   minAmount?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<QueryInput_AccountInteractions_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  filterAddress?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -4585,15 +4586,16 @@ export type BalanceChartLazyQueryHookResult = ReturnType<typeof useBalanceChartL
 export type BalanceChartSuspenseQueryHookResult = ReturnType<typeof useBalanceChartSuspenseQuery>;
 export type BalanceChartQueryResult = Apollo.QueryResult<BalanceChartQuery, BalanceChartQueryVariables>;
 export const GetAccountInteractionsDocument = gql`
-    query getAccountInteractions($address: String!, $limit: PositiveInt, $maxAmount: String, $minAmount: String, $orderDirection: queryInput_accountInteractions_orderDirection, $skip: NonNegativeInt) {
+    query getAccountInteractions($address: String!, $limit: PositiveInt, $maxAmount: String, $minAmount: String, $orderDirection: queryInput_accountInteractions_orderDirection, $skip: NonNegativeInt, $filterAddress: String) {
   accountInteractions(
-    accountId: $address
+    address: $address
     days: _90d
     limit: $limit
     maxAmount: $maxAmount
     minAmount: $minAmount
     orderDirection: $orderDirection
     skip: $skip
+    filterAddress: $filterAddress
   ) {
     totalCount
     items {
@@ -4624,6 +4626,7 @@ export const GetAccountInteractionsDocument = gql`
  *      minAmount: // value for 'minAmount'
  *      orderDirection: // value for 'orderDirection'
  *      skip: // value for 'skip'
+ *      filterAddress: // value for 'filterAddress'
  *   },
  * });
  */

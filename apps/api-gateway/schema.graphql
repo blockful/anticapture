@@ -142,14 +142,14 @@ type Query {
   """Returns sorted and paginated account balance records"""
   accountBalances(limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalances_orderDirection = desc, addresses: JSON, delegates: JSON, fromValue: String, toValue: String): accountBalances_200_response
 
-  """Returns account balance information for a specific address (account)"""
-  accountBalanceByAccountId(accountId: String!): accountBalanceByAccountId_200_response
+  """Returns account balance information for a specific address"""
+  accountBalanceByAccountId(address: String!): accountBalanceByAccountId_200_response
 
   """
   Returns a mapping of the largest interactions between accounts. 
-  Positive amounts signify net token transfers FROM <accountId>, whilst negative amounts refer to net transfers TO <accountId>
+  Positive amounts signify net token transfers FROM <address>, whilst negative amounts refer to net transfers TO <address>
   """
-  accountInteractions(days: queryInput_accountInteractions_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountInteractions_orderDirection = desc, accountId: String!, minAmount: String, maxAmount: String, orderBy: queryInput_accountInteractions_orderBy = count, address: String): accountInteractions_200_response
+  accountInteractions(address: String!, days: queryInput_accountInteractions_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountInteractions_orderDirection = desc, minAmount: String, maxAmount: String, orderBy: queryInput_accountInteractions_orderBy = count, filterAddress: String): accountInteractions_200_response
 
   """Returns current governance parameters for this DAO"""
   dao: dao_200_response
