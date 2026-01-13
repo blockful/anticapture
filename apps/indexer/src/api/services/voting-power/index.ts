@@ -47,6 +47,7 @@ interface VotingPowersRepository {
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
+    orderBy: "votingPower" | "delegationsCount",
     amountFilter: AmountFilter,
     addresses: Address[],
   ): Promise<{ items: DBAccountPower[]; totalCount: number }>;
@@ -130,6 +131,7 @@ export class VotingPowerService {
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
+    orderBy: "votingPower" | "delegationsCount",
     amountFilter: AmountFilter,
     addresses: Address[],
   ): Promise<{ items: DBAccountPower[]; totalCount: number }> {
@@ -137,6 +139,7 @@ export class VotingPowerService {
       skip,
       limit,
       orderDirection,
+      orderBy,
       amountFilter,
       addresses,
     );
