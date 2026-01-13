@@ -51,7 +51,7 @@ export class DuneProvider implements TreasuryProvider {
     data: DuneResponse,
     cutoffTimestamp: number,
   ): LiquidTreasuryDataPoint[] {
-    return data.result.rows
+    const allData = data.result.rows
       .map((row) => {
         // Parse date string "YYYY-MM-DD" and convert to Unix timestamp (seconds)
         const [year, month, day] = row.date.split("-").map(Number);
@@ -64,6 +64,15 @@ export class DuneProvider implements TreasuryProvider {
           liquidTreasury: row.totalAssets ?? 0,
         };
       })
-      .filter((item) => item.date >= cutoffTimestamp);
+      .sort((a, b) => a.date - b.date);
+
+    const filteredData = allData.filter((item) => item.date >= cutoffTimestamp);
+    // If no data in the requested period, return the last available value as fallback
+    if (filteredData.length === 0 && allData.length > 0) {
+      const lastAvailable = allData.at(-1)!;
+      return [lastAvailable];
+    }
+
+    return filteredData;
   }
 }
