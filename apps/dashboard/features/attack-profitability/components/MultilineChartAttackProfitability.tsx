@@ -182,7 +182,9 @@ export const MultilineChartAttackProfitability = ({
       ),
     );
 
-    const data = Array.from(allDates).map((date) => {
+    const sortedDates = Array.from(allDates).sort((a, b) => a - b);
+
+    const data = sortedDates.map((date) => {
       const dataPoint: Record<string, number | null> = { date };
 
       Object.entries(datasets).forEach(([key, dataset]) => {
