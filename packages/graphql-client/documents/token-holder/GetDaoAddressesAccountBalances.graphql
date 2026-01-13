@@ -1,8 +1,5 @@
 query GetDaoAddressesAccountBalances {
-  accountBalances(
-    orderDirection: desc
-    limit: "1"
-  ) {
+  accountBalances(orderDirection: desc, limit: 1) {
     items {
       accountId
       balance
