@@ -81,24 +81,12 @@ export type Query = {
   _meta?: Maybe<Meta>;
   account?: Maybe<Account>;
   accountBalance?: Maybe<AccountBalance>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/account-balance/variations`
-   * Returns a mapping of the biggest variations to account balances associated by account address
-   *
-   */
+  /** Returns a mapping of the biggest variations to account balances associated by account address */
   accountBalanceVariations?: Maybe<AccountBalanceVariations_200_Response>;
   accountBalances: AccountBalancePage;
   /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/account-balance/interactions`
    * Returns a mapping of the largest interactions between accounts.
    * Positive amounts signify net token transfers FROM <accountId>, whilst negative amounts refer to net transfers TO <accountId>
-   *
    */
   accountInteractions?: Maybe<AccountInteractions_200_Response>;
   accounts: AccountPage;
@@ -108,264 +96,75 @@ export type Query = {
    * Only includes dates where ALL DAOs have data available.
    */
   averageDelegationPercentageByDay: AverageDelegationPercentagePage;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/active-supply/compare`
-   * Get active token supply for DAO
-   *
-   */
+  /** Get active token supply for DAO */
   compareActiveSupply?: Maybe<CompareActiveSupply_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/average-turnout/compare`
-   * Compare average turnout between time periods
-   *
-   */
+  /** Compare average turnout between time periods */
   compareAverageTurnout?: Maybe<CompareAverageTurnout_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/cex-supply/compare`
-   * Compare cex supply between periods
-   *
-   */
+  /** Compare cex supply between periods */
   compareCexSupply?: Maybe<CompareCexSupply_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/circulating-supply/compare`
-   * Compare circulating supply between periods
-   *
-   */
+  /** Compare circulating supply between periods */
   compareCirculatingSupply?: Maybe<CompareCirculatingSupply_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/delegated-supply/compare`
-   * Compare delegated supply between periods
-   *
-   */
+  /** Compare delegated supply between periods */
   compareDelegatedSupply?: Maybe<CompareDelegatedSupply_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/dex-supply/compare`
-   * Compare dex supply between periods
-   *
-   */
+  /** Compare dex supply between periods */
   compareDexSupply?: Maybe<CompareDexSupply_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/lending-supply/compare`
-   * Compare lending supply between periods
-   *
-   */
+  /** Compare lending supply between periods */
   compareLendingSupply?: Maybe<CompareLendingSupply_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/proposals/compare`
-   * Compare number of proposals between time periods
-   *
-   */
+  /** Compare number of proposals between time periods */
   compareProposals?: Maybe<CompareProposals_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/total-supply/compare`
-   * Compare total supply between periods
-   *
-   */
+  /** Compare total supply between periods */
   compareTotalSupply?: Maybe<CompareTotalSupply_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/treasury/compare`
-   * Compare treasury between periods
-   *
-   */
+  /** Compare treasury between periods */
   compareTreasury?: Maybe<CompareTreasury_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/votes/compare`
-   * Compare number of votes between time periods
-   *
-   */
+  /** Compare number of votes between time periods */
   compareVotes?: Maybe<CompareVotes_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/dao`
-   * Returns current governance parameters for this DAO
-   *
-   */
+  /** Returns current governance parameters for this DAO */
   dao?: Maybe<Dao_200_Response>;
   daoMetricsDayBucket?: Maybe<DaoMetricsDayBucket>;
   daoMetricsDayBuckets: DaoMetricsDayBucketPage;
   /** Get all DAOs */
   daos: DaoList;
   delegation?: Maybe<Delegation>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/delegation-percentage`
-   * Get delegation percentage day buckets with forward-fill
-   *
-   */
+  /** Get delegation percentage day buckets with forward-fill */
   delegationPercentageByDay?: Maybe<DelegationPercentageByDay_200_Response>;
   delegations: DelegationPage;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/historical-balances`
-   * Fetch historical token balances for multiple addresses at a specific time period using multicall
-   *
-   */
+  /** Fetch historical token balances for multiple addresses at a specific time period using multicall */
   historicalBalances?: Maybe<Array<Maybe<Query_HistoricalBalances_Items>>>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/token/historical-data`
-   * Get historical market data for a specific token
-   *
-   */
+  /** Get historical market data for a specific token */
   historicalTokenData?: Maybe<Array<Maybe<Query_HistoricalTokenData_Items>>>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/voting-powers/{args.accountId}/historical`
-   * Returns a list of voting power changes
-   *
-   */
+  /** Returns a list of voting power changes */
   historicalVotingPowers?: Maybe<HistoricalVotingPowers_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/last-update`
-   * Get the last update time
-   *
-   */
+  /** Get the last update time */
   lastUpdate?: Maybe<LastUpdate_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/proposals/{args.id}`
-   * Returns a single proposal by its ID
-   *
-   */
+  /** Returns a single proposal by its ID */
   proposal?: Maybe<Proposal_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/proposals/{args.id}/non-voters`
-   * Returns the active delegates that did not vote on a given proposal
-   *
-   */
+  /** Returns the active delegates that did not vote on a given proposal */
   proposalNonVoters?: Maybe<ProposalNonVoters_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/proposals`
-   * Returns a list of proposal
-   *
-   */
+  /** Returns a list of proposal */
   proposals?: Maybe<Proposals_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/proposals-activity`
-   * Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window
-   *
-   */
+  /** Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window */
   proposalsActivity?: Maybe<ProposalsActivity_200_Response>;
   proposalsOnchain?: Maybe<ProposalsOnchain>;
   proposalsOnchains: ProposalsOnchainPage;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/token`
-   * Get property data for a specific token
-   *
-   */
+  /** Get property data for a specific token */
   token?: Maybe<Token_200_Response>;
   tokenPrice?: Maybe<TokenPrice>;
   tokenPrices: TokenPricePage;
   tokens: TokenPage;
   transaction?: Maybe<Transaction>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/transactions`
-   * Get transactions with their associated transfers and delegations, with optional filtering and sorting
-   *
-   */
+  /** Get transactions with their associated transfers and delegations, with optional filtering and sorting */
   transactions?: Maybe<Transactions_200_Response>;
   transfer?: Maybe<Transfer>;
   transfers: TransferPage;
   votesOnchain?: Maybe<VotesOnchain>;
   votesOnchains: VotesOnchainPage;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/voting-powers/{args.accountId}`
-   * Returns voting power information for a specific address (account)
-   *
-   */
+  /** Returns voting power information for a specific address (account) */
   votingPowerByAccountId?: Maybe<VotingPowerByAccountId_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/voting-powers/variations`
-   * Returns a mapping of the biggest changes to voting power associated by delegate address
-   *
-   */
+  /** Returns a mapping of the biggest changes to voting power associated by delegate address */
   votingPowerVariations?: Maybe<VotingPowerVariations_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/voting-powers/{args.accountId}/variations`
-   * Returns a the changes to voting power by period and accountId
-   *
-   */
+  /** Returns a the changes to voting power by period and accountId */
   votingPowerVariationsByAccountId?: Maybe<VotingPowerVariationsByAccountId_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/voting-powers`
-   * Returns sorted and paginated account voting power records
-   *
-   */
+  /** Returns sorted and paginated account voting power records */
   votingPowers?: Maybe<VotingPowers_200_Response>;
 };
 
@@ -732,6 +531,7 @@ export type QueryVotingPowersArgs = {
   addresses?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   fromValue?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<QueryInput_VotingPowers_OrderBy>;
   orderDirection?: InputMaybe<QueryInput_VotingPowers_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   toValue?: InputMaybe<Scalars['String']['input']>;
@@ -1797,6 +1597,11 @@ export enum QueryInput_VotingPowerVariations_OrderDirection {
   Desc = 'desc'
 }
 
+export enum QueryInput_VotingPowers_OrderBy {
+  DelegationsCount = 'delegationsCount',
+  VotingPower = 'votingPower'
+}
+
 export enum QueryInput_VotingPowers_OrderDirection {
   Asc = 'asc',
   Desc = 'desc'
@@ -2718,6 +2523,7 @@ export type GetDelegatesQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   orderDirection?: InputMaybe<QueryInput_VotingPowers_OrderDirection>;
+  orderBy?: InputMaybe<QueryInput_VotingPowers_OrderBy>;
   addresses?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
 }>;
 
@@ -2882,8 +2688,8 @@ export type HistoricalVotingPowersQueryVariables = Exact<{
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   orderDirection?: InputMaybe<QueryInput_HistoricalVotingPowers_OrderDirection>;
-  maxDelta?: InputMaybe<Scalars['String']['input']>;
-  minDelta?: InputMaybe<Scalars['String']['input']>;
+  toValue?: InputMaybe<Scalars['String']['input']>;
+  fromValue?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -2955,8 +2761,8 @@ export type GetDelegationHistoryItemsQueryVariables = Exact<{
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
-  minDelta?: InputMaybe<Scalars['BigInt']['input']>;
-  maxDelta?: InputMaybe<Scalars['BigInt']['input']>;
+  fromValue?: InputMaybe<Scalars['BigInt']['input']>;
+  toValue?: InputMaybe<Scalars['BigInt']['input']>;
 }>;
 
 
@@ -3344,11 +3150,12 @@ export type GetDaoDataLazyQueryHookResult = ReturnType<typeof useGetDaoDataLazyQ
 export type GetDaoDataSuspenseQueryHookResult = ReturnType<typeof useGetDaoDataSuspenseQuery>;
 export type GetDaoDataQueryResult = Apollo.QueryResult<GetDaoDataQuery, GetDaoDataQueryVariables>;
 export const GetDelegatesDocument = gql`
-    query GetDelegates($limit: PositiveInt = 10, $skip: NonNegativeInt = 0, $orderDirection: queryInput_votingPowers_orderDirection = desc, $addresses: [String]) {
+    query GetDelegates($limit: PositiveInt = 10, $skip: NonNegativeInt = 0, $orderDirection: queryInput_votingPowers_orderDirection = desc, $orderBy: queryInput_votingPowers_orderBy = votingPower, $addresses: [String]) {
   votingPowers(
     limit: $limit
     skip: $skip
     orderDirection: $orderDirection
+    orderBy: $orderBy
     fromValue: "0"
     addresses: $addresses
   ) {
@@ -3377,6 +3184,7 @@ export const GetDelegatesDocument = gql`
  *      limit: // value for 'limit'
  *      skip: // value for 'skip'
  *      orderDirection: // value for 'orderDirection'
+ *      orderBy: // value for 'orderBy'
  *      addresses: // value for 'addresses'
  *   },
  * });
@@ -4290,14 +4098,14 @@ export type GetHistoricalBalancesLazyQueryHookResult = ReturnType<typeof useGetH
 export type GetHistoricalBalancesSuspenseQueryHookResult = ReturnType<typeof useGetHistoricalBalancesSuspenseQuery>;
 export type GetHistoricalBalancesQueryResult = Apollo.QueryResult<GetHistoricalBalancesQuery, GetHistoricalBalancesQueryVariables>;
 export const HistoricalVotingPowersDocument = gql`
-    query HistoricalVotingPowers($account: String!, $skip: NonNegativeInt, $limit: PositiveInt = 10, $orderDirection: queryInput_historicalVotingPowers_orderDirection = desc, $maxDelta: String, $minDelta: String) {
+    query HistoricalVotingPowers($account: String!, $skip: NonNegativeInt, $limit: PositiveInt = 10, $orderDirection: queryInput_historicalVotingPowers_orderDirection = desc, $toValue: String, $fromValue: String) {
   historicalVotingPowers(
     accountId: $account
     skip: $skip
     orderDirection: $orderDirection
     limit: $limit
-    toValue: $maxDelta
-    fromValue: $minDelta
+    toValue: $toValue
+    fromValue: $fromValue
   ) {
     items {
       accountId
@@ -4338,8 +4146,8 @@ export const HistoricalVotingPowersDocument = gql`
  *      skip: // value for 'skip'
  *      limit: // value for 'limit'
  *      orderDirection: // value for 'orderDirection'
- *      maxDelta: // value for 'maxDelta'
- *      minDelta: // value for 'minDelta'
+ *      toValue: // value for 'toValue'
+ *      fromValue: // value for 'fromValue'
  *   },
  * });
  */
@@ -4686,9 +4494,9 @@ export type GetDelegationHistoryCountLazyQueryHookResult = ReturnType<typeof use
 export type GetDelegationHistoryCountSuspenseQueryHookResult = ReturnType<typeof useGetDelegationHistoryCountSuspenseQuery>;
 export type GetDelegationHistoryCountQueryResult = Apollo.QueryResult<GetDelegationHistoryCountQuery, GetDelegationHistoryCountQueryVariables>;
 export const GetDelegationHistoryItemsDocument = gql`
-    query GetDelegationHistoryItems($delegator: String!, $delegate: String, $after: String, $before: String, $orderBy: String = "timestamp", $orderDirection: String = "desc", $limit: Int = 10, $minDelta: BigInt = 0, $maxDelta: BigInt) {
+    query GetDelegationHistoryItems($delegator: String!, $delegate: String, $after: String, $before: String, $orderBy: String = "timestamp", $orderDirection: String = "desc", $limit: Int = 10, $fromValue: BigInt = 0, $toValue: BigInt) {
   delegations(
-    where: {delegatorAccountId: $delegator, delegateAccountId: $delegate, delegatedValue_gte: $minDelta, delegatedValue_lte: $maxDelta}
+    where: {delegatorAccountId: $delegator, delegateAccountId: $delegate, delegatedValue_gte: $fromValue, delegatedValue_lte: $toValue}
     orderBy: $orderBy
     orderDirection: $orderDirection
     limit: $limit
@@ -4730,8 +4538,8 @@ export const GetDelegationHistoryItemsDocument = gql`
  *      orderBy: // value for 'orderBy'
  *      orderDirection: // value for 'orderDirection'
  *      limit: // value for 'limit'
- *      minDelta: // value for 'minDelta'
- *      maxDelta: // value for 'maxDelta'
+ *      fromValue: // value for 'fromValue'
+ *      toValue: // value for 'toValue'
  *   },
  * });
  */

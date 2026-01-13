@@ -65,8 +65,8 @@ export const BalanceHistoryTable = ({
     parseAsStringEnum(["asc", "desc"]).withDefault("desc"),
   );
   const [filterVariables, setFilterVariables] = useQueryStates({
-    minDelta: parseAsString,
-    maxDelta: parseAsString,
+    fromValue: parseAsString,
+    toValue: parseAsString,
   });
   const [customFromFilter, setCustomFromFilter] = useQueryState("from");
   const [customToFilter, setCustomToFilter] = useQueryState("to");
@@ -244,16 +244,16 @@ export const BalanceHistoryTable = ({
               );
 
               setFilterVariables(() => ({
-                minDelta: filterState.minAmount
+                fromValue: filterState.minAmount
                   ? parseUnits(filterState.minAmount, decimals).toString()
                   : undefined,
-                maxDelta: filterState.maxAmount
+                toValue: filterState.maxAmount
                   ? parseUnits(filterState.maxAmount, decimals).toString()
                   : undefined,
               }));
 
               setIsFilterActive(
-                !!(filterVariables?.minDelta || filterVariables?.maxDelta),
+                !!(filterVariables?.fromValue || filterVariables?.toValue),
               );
 
               setOrderBy("amount");
@@ -263,8 +263,8 @@ export const BalanceHistoryTable = ({
               // Reset to default sorting
               setOrderBy("timestamp");
               setFilterVariables(() => ({
-                minDelta: undefined,
-                maxDelta: undefined,
+                fromValue: undefined,
+                toValue: undefined,
               }));
             }}
             isActive={isFilterActive}

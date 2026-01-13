@@ -89,8 +89,8 @@ export function useBalanceHistory({
       AND?: typeof and;
       OR?: typeof or;
     } = {
-      amount_gte: filterVariables?.minDelta || undefined,
-      amount_lte: filterVariables?.maxDelta || undefined,
+      amount_gte: filterVariables?.fromValue || undefined,
+      amount_lte: filterVariables?.toValue || undefined,
     };
 
     switch (transactionType) {

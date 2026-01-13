@@ -3,16 +3,16 @@ query HistoricalVotingPowers(
   $skip: NonNegativeInt
   $limit: PositiveInt = 10
   $orderDirection: queryInput_historicalVotingPowers_orderDirection = desc
-  $maxDelta: String
-  $minDelta: String
+  $toValue: String
+  $fromValue: String
 ) {
   historicalVotingPowers(
     accountId: $account
     skip: $skip
     orderDirection: $orderDirection
     limit: $limit
-    toValue: $maxDelta
-    fromValue: $minDelta
+    toValue: $toValue
+    fromValue: $fromValue
   ) {
     items {
       accountId

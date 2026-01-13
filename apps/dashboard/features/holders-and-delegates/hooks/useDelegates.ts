@@ -10,7 +10,10 @@ import { NetworkStatus } from "@apollo/client";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
 import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
-import { QueryInput_VotingPowers_OrderDirection } from "@anticapture/graphql-client";
+import {
+  QueryInput_VotingPowers_OrderBy,
+  QueryInput_VotingPowers_OrderDirection,
+} from "@anticapture/graphql-client";
 
 interface ProposalsActivity {
   totalProposals: number;
@@ -29,13 +32,7 @@ interface Delegate {
 interface PaginationInfo {
   hasNextPage: boolean;
   hasPreviousPage: boolean;
-  endCursor?: string | null;
-  startCursor?: string | null;
-  totalCount: number;
   currentPage: number;
-  totalPages: number;
-  itemsPerPage: number;
-  currentItemsCount: number;
 }
 
 interface UseDelegatesResult {
@@ -45,7 +42,6 @@ interface UseDelegatesResult {
   refetch: () => void;
   pagination: PaginationInfo;
   fetchNextPage: () => Promise<void>;
-  fetchPreviousPage: () => Promise<void>;
   fetchingMore: boolean;
   isHistoricalLoadingFor: (addr: string) => boolean;
   isActivityLoadingFor: (addr: string) => boolean;
@@ -56,6 +52,7 @@ interface UseDelegatesParams {
   days: TimeInterval;
   fromDate: number;
   daoId: DaoIdEnum;
+  orderBy?: QueryInput_VotingPowers_OrderBy;
   orderDirection?: QueryInput_VotingPowers_OrderDirection;
   limit?: number;
 }
@@ -63,13 +60,12 @@ interface UseDelegatesParams {
 export const useDelegates = ({
   fromDate,
   daoId,
+  orderBy,
   orderDirection = QueryInput_VotingPowers_OrderDirection.Desc,
   days,
   address,
   limit = 15,
 }: UseDelegatesParams): UseDelegatesResult => {
-  const itemsPerPage = limit; // This should match the limit in the GraphQL query
-
   // Track current page - this is the source of truth for page number
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -93,7 +89,7 @@ export const useDelegates = ({
     setHistoricalVPCache(new Map());
     setDelegateActivities(new Map());
     setLoadingActivityAddresses(new Set());
-  }, [orderDirection, address, days]);
+  }, [orderDirection, address, days, orderBy]);
 
   const {
     data: delegatesData,
@@ -104,6 +100,7 @@ export const useDelegates = ({
   } = useGetDelegatesQuery({
     variables: {
       orderDirection,
+      orderBy,
       limit,
       ...(address && { addresses: [address] }),
     },
@@ -116,9 +113,10 @@ export const useDelegates = ({
   useEffect(() => {
     refetch({
       orderDirection,
+      orderBy,
       ...(address && { addresses: [address] }),
     });
-  }, [orderDirection, address, refetch]);
+  }, [orderDirection, address, refetch, orderBy]);
 
   const delegateAddresses = useMemo(
     () =>
@@ -247,52 +245,22 @@ export const useDelegates = ({
     [loadingActivityAddresses],
   );
 
-  // Pagination info - combines GraphQL data with our page tracking
-  const pagination = useMemo<PaginationInfo>(() => {
-    const pageInfo = delegatesData?.votingPowers?.pageInfo; // TODO: adjust pagination to new model
-    const totalCount = delegatesData?.votingPowers?.totalCount || 0;
-    const currentItemsCount = finalData?.length || 0;
-    const totalPages = Math.ceil(totalCount / itemsPerPage);
-
-    return {
-      hasNextPage: pageInfo?.hasNextPage ?? false,
-      hasPreviousPage: pageInfo?.hasPreviousPage ?? false,
-      endCursor: pageInfo?.endCursor,
-      startCursor: pageInfo?.startCursor,
-      totalCount,
-      currentPage,
-      totalPages,
-      itemsPerPage,
-      currentItemsCount,
-    };
-  }, [
-    delegatesData?.votingPowers?.pageInfo,
-    delegatesData?.votingPowers?.totalCount,
-    finalData?.length,
-    itemsPerPage,
-    currentPage,
-  ]);
+  const totalCount = delegatesData?.votingPowers?.totalCount || 0;
+  const currentItemsCount = finalData?.length || 0;
+  const hasNextPage = currentItemsCount < totalCount;
 
   // Fetch next page function
   const fetchNextPage = useCallback(async () => {
-    if (
-      !pagination.hasNextPage ||
-      !pagination.endCursor ||
-      isPaginationLoading
-    ) {
-      console.warn("No next page available or already loading");
-      return;
-    }
-
+    if (isPaginationLoading || !hasNextPage) return;
     setIsPaginationLoading(true);
 
     try {
       await fetchMore({
         variables: {
-          after: pagination.endCursor,
-          before: undefined,
           orderDirection,
+          orderBy,
           ...(address && { addresses: [address] }),
+          skip: currentItemsCount,
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult?.votingPowers?.items) return previousResult;
@@ -313,36 +281,24 @@ export const useDelegates = ({
     } finally {
       setIsPaginationLoading(false);
     }
-  }, [fetchMore, pagination, isPaginationLoading, address, orderDirection]);
-
-  const fetchPreviousPage = useCallback(async () => {
-    if (
-      !pagination.hasPreviousPage ||
-      !pagination.startCursor ||
-      isPaginationLoading
-    )
-      return;
-    setIsPaginationLoading(true);
-    try {
-      await fetchMore({
-        variables: { after: undefined, before: pagination.startCursor },
-        updateQuery: (prev, { fetchMoreResult }) => fetchMoreResult || prev,
-      });
-      setCurrentPage((prev) => prev - 1);
-    } catch (error) {
-      console.error("Error fetching previous page:", error);
-    } finally {
-      setIsPaginationLoading(false);
-    }
-  }, [fetchMore, pagination, isPaginationLoading]);
+  }, [
+    fetchMore,
+    isPaginationLoading,
+    currentItemsCount,
+    hasNextPage,
+    address,
+    orderDirection,
+    orderBy,
+  ]);
 
   const handleRefetch = useCallback(() => {
     setCurrentPage(1);
     refetch({
       orderDirection,
+      orderBy,
       ...(address && { addresses: [address] }),
     });
-  }, [refetch, orderDirection, address]);
+  }, [refetch, orderDirection, address, orderBy]);
 
   const isLoading = useMemo(() => {
     return (
@@ -357,9 +313,12 @@ export const useDelegates = ({
     loading: isLoading,
     error: delegatesError || null,
     refetch: handleRefetch,
-    pagination,
+    pagination: {
+      currentPage,
+      hasNextPage: currentPage * limit < (totalCount || 0),
+      hasPreviousPage: currentPage > 1,
+    },
     fetchNextPage,
-    fetchPreviousPage,
     fetchingMore:
       isPaginationLoading || networkStatus === NetworkStatus.fetchMore,
     isHistoricalLoadingFor,
