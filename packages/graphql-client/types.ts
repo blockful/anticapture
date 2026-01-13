@@ -709,7 +709,7 @@ export type QueryVotingPowerByAccountIdArgs = {
 
 
 export type QueryVotingPowerVariationsArgs = {
-  addresses?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  addresses?: InputMaybe<Scalars['JSON']['input']>;
   fromDate?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   orderDirection?: InputMaybe<QueryInput_VotingPowerVariations_OrderDirection>;
@@ -2777,12 +2777,14 @@ export type GetDelegatedSupplyHistoryQueryVariables = Exact<{
 export type GetDelegatedSupplyHistoryQuery = { __typename?: 'Query', averageDelegationPercentageByDay: { __typename?: 'AverageDelegationPercentagePage', items: Array<{ __typename?: 'AverageDelegationPercentageItem', date: string, high: string }> } };
 
 export type GetHistoricalVotingAndActivityQueryVariables = Exact<{
+  addresses: Scalars['JSON']['input'];
   address: Scalars['String']['input'];
   fromDate: Scalars['String']['input'];
+  toDate: Scalars['String']['input'];
 }>;
 
 
-export type GetHistoricalVotingAndActivityQuery = { __typename?: 'Query', votingPowerVariationsByAccountId?: { __typename?: 'votingPowerVariationsByAccountId_200_response', data: { __typename?: 'query_votingPowerVariationsByAccountId_data', accountId: string, previousVotingPower?: string | null } } | null, proposalsActivity?: { __typename?: 'proposalsActivity_200_response', totalProposals: number, votedProposals: number, neverVoted: boolean } | null };
+export type GetHistoricalVotingAndActivityQuery = { __typename?: 'Query', votingPowerVariations?: { __typename?: 'votingPowerVariations_200_response', items: Array<{ __typename?: 'query_votingPowerVariations_items_items', accountId: string, previousVotingPower?: string | null } | null> } | null, proposalsActivity?: { __typename?: 'proposalsActivity_200_response', totalProposals: number, votedProposals: number, neverVoted: boolean } | null };
 
 export type GetDelegateProposalsActivityQueryVariables = Exact<{
   address: Scalars['String']['input'];
