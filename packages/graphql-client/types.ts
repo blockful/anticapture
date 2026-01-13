@@ -2770,6 +2770,7 @@ export type GetAccountInteractionsQueryVariables = Exact<{
   minAmount?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<QueryInput_AccountInteractions_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  filterAddress?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 

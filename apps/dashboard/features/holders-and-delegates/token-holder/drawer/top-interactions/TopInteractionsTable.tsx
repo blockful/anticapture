@@ -71,7 +71,7 @@ export const TopInteractionsTable = ({
     useAccountInteractionsData({
       daoId: daoId as DaoIdEnum,
       address: address,
-      accountId: currentAddressFilter ?? undefined,
+      filterAddress: currentAddressFilter ?? undefined,
       sortBy,
       sortDirection,
       filterVariables,
@@ -95,7 +95,7 @@ export const TopInteractionsTable = ({
   });
 
   const handleAddressFilterApply = (address: string | undefined) => {
-    setCurrentAddressFilter(address || "");
+    setCurrentAddressFilter(address || null);
   };
 
   const columns: ColumnDef<{

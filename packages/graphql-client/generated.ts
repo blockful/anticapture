@@ -2773,6 +2773,7 @@ export type GetAccountInteractionsQueryVariables = Exact<{
   minAmount?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<QueryInput_AccountInteractions_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  filterAddress?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -4581,7 +4582,7 @@ export type BalanceChartLazyQueryHookResult = ReturnType<typeof useBalanceChartL
 export type BalanceChartSuspenseQueryHookResult = ReturnType<typeof useBalanceChartSuspenseQuery>;
 export type BalanceChartQueryResult = Apollo.QueryResult<BalanceChartQuery, BalanceChartQueryVariables>;
 export const GetAccountInteractionsDocument = gql`
-    query getAccountInteractions($address: String!, $limit: PositiveInt, $maxAmount: String, $minAmount: String, $orderDirection: queryInput_accountInteractions_orderDirection, $skip: NonNegativeInt) {
+    query getAccountInteractions($address: String!, $limit: PositiveInt, $maxAmount: String, $minAmount: String, $orderDirection: queryInput_accountInteractions_orderDirection, $skip: NonNegativeInt, $filterAddress: String) {
   accountInteractions(
     address: $address
     days: _90d
@@ -4590,6 +4591,7 @@ export const GetAccountInteractionsDocument = gql`
     minAmount: $minAmount
     orderDirection: $orderDirection
     skip: $skip
+    filterAddress: $filterAddress
   ) {
     totalCount
     items {
@@ -4620,6 +4622,7 @@ export const GetAccountInteractionsDocument = gql`
  *      minAmount: // value for 'minAmount'
  *      orderDirection: // value for 'orderDirection'
  *      skip: // value for 'skip'
+ *      filterAddress: // value for 'filterAddress'
  *   },
  * });
  */
