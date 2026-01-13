@@ -2552,12 +2552,14 @@ export type GetDelegateDelegationHistoryDeltaRangeQuery = { __typename?: 'Query'
 
 export type GetDelegatorVotingPowerDetailsQueryVariables = Exact<{
   addresses?: InputMaybe<Scalars['JSON']['input']>;
+  address: Scalars['String']['input'];
   orderDirection?: InputMaybe<QueryInput_AccountBalances_OrderDirection>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
 }>;
 
 
-export type GetDelegatorVotingPowerDetailsQuery = { __typename?: 'Query', accountBalances?: { __typename?: 'accountBalances_200_response', items: Array<{ __typename?: 'query_accountBalances_items_items', accountId: string, balance: string } | null> } | null };
+export type GetDelegatorVotingPowerDetailsQuery = { __typename?: 'Query', accountPower?: { __typename?: 'accountPower', votingPower: any, accountId: string } | null, accountBalances?: { __typename?: 'accountBalances_200_response', items: Array<{ __typename?: 'query_accountBalances_items_items', accountId: string, balance: string } | null> } | null };
 
 export type GetDelegationsTimestampQueryVariables = Exact<{
   delegator: Array<Scalars['String']['input']> | Scalars['String']['input'];

@@ -1,15 +1,18 @@
 query GetDelegatorVotingPowerDetails(
   $addresses: JSON
+  $address: String!
   $orderDirection: queryInput_accountBalances_orderDirection
   $limit: PositiveInt
+  $skip: NonNegativeInt
 ) {
-  # accountPower(accountId: $address) {
-  #   votingPower
-  #   accountId
-  # }
+  accountPower(accountId: $address) {
+    votingPower
+    accountId
+  }
   accountBalances(
     orderDirection: $orderDirection
     limit: $limit
+    skip: $skip
     delegates: $addresses
   ) {
     items {

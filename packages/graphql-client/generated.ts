@@ -2555,12 +2555,14 @@ export type GetDelegateDelegationHistoryDeltaRangeQuery = { __typename?: 'Query'
 
 export type GetDelegatorVotingPowerDetailsQueryVariables = Exact<{
   addresses?: InputMaybe<Scalars['JSON']['input']>;
+  address: Scalars['String']['input'];
   orderDirection?: InputMaybe<QueryInput_AccountBalances_OrderDirection>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
 }>;
 
 
-export type GetDelegatorVotingPowerDetailsQuery = { __typename?: 'Query', accountBalances?: { __typename?: 'accountBalances_200_response', items: Array<{ __typename?: 'query_accountBalances_items_items', accountId: string, balance: string } | null> } | null };
+export type GetDelegatorVotingPowerDetailsQuery = { __typename?: 'Query', accountPower?: { __typename?: 'accountPower', votingPower: any, accountId: string } | null, accountBalances?: { __typename?: 'accountBalances_200_response', items: Array<{ __typename?: 'query_accountBalances_items_items', accountId: string, balance: string } | null> } | null };
 
 export type GetDelegationsTimestampQueryVariables = Exact<{
   delegator: Array<Scalars['String']['input']> | Scalars['String']['input'];
@@ -3329,10 +3331,15 @@ export type GetDelegateDelegationHistoryDeltaRangeLazyQueryHookResult = ReturnTy
 export type GetDelegateDelegationHistoryDeltaRangeSuspenseQueryHookResult = ReturnType<typeof useGetDelegateDelegationHistoryDeltaRangeSuspenseQuery>;
 export type GetDelegateDelegationHistoryDeltaRangeQueryResult = Apollo.QueryResult<GetDelegateDelegationHistoryDeltaRangeQuery, GetDelegateDelegationHistoryDeltaRangeQueryVariables>;
 export const GetDelegatorVotingPowerDetailsDocument = gql`
-    query GetDelegatorVotingPowerDetails($addresses: JSON, $orderDirection: queryInput_accountBalances_orderDirection, $limit: PositiveInt) {
+    query GetDelegatorVotingPowerDetails($addresses: JSON, $address: String!, $orderDirection: queryInput_accountBalances_orderDirection, $limit: PositiveInt, $skip: NonNegativeInt) {
+  accountPower(accountId: $address) {
+    votingPower
+    accountId
+  }
   accountBalances(
     orderDirection: $orderDirection
     limit: $limit
+    skip: $skip
     delegates: $addresses
   ) {
     items {
@@ -3356,12 +3363,14 @@ export const GetDelegatorVotingPowerDetailsDocument = gql`
  * const { data, loading, error } = useGetDelegatorVotingPowerDetailsQuery({
  *   variables: {
  *      addresses: // value for 'addresses'
+ *      address: // value for 'address'
  *      orderDirection: // value for 'orderDirection'
  *      limit: // value for 'limit'
+ *      skip: // value for 'skip'
  *   },
  * });
  */
-export function useGetDelegatorVotingPowerDetailsQuery(baseOptions?: Apollo.QueryHookOptions<GetDelegatorVotingPowerDetailsQuery, GetDelegatorVotingPowerDetailsQueryVariables>) {
+export function useGetDelegatorVotingPowerDetailsQuery(baseOptions: Apollo.QueryHookOptions<GetDelegatorVotingPowerDetailsQuery, GetDelegatorVotingPowerDetailsQueryVariables> & ({ variables: GetDelegatorVotingPowerDetailsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<GetDelegatorVotingPowerDetailsQuery, GetDelegatorVotingPowerDetailsQueryVariables>(GetDelegatorVotingPowerDetailsDocument, options);
       }
@@ -4485,7 +4494,7 @@ export type GetProposalsSuspenseQueryHookResult = ReturnType<typeof useGetPropos
 export type GetProposalsQueryResult = Apollo.QueryResult<GetProposalsQuery, GetProposalsQueryVariables>;
 export const GetDaoAddressesAccountBalancesDocument = gql`
     query GetDaoAddressesAccountBalances {
-  accountBalances(orderDirection: desc, limit: "1") {
+  accountBalances(orderDirection: desc, limit: 1) {
     items {
       accountId
       balance

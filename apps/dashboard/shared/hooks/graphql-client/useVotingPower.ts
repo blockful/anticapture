@@ -15,9 +15,6 @@ import daoConfig from "@/shared/dao-config";
 
 interface PaginationInfo {
   hasNextPage: boolean;
-  hasPreviousPage: boolean;
-  endCursor?: string | null;
-  startCursor?: string | null;
   totalCount: number;
   currentPage: number;
   totalPages: number;
@@ -56,7 +53,6 @@ interface UseVotingPowerResult {
   refetch: () => void;
   pagination: PaginationInfo;
   fetchNextPage: () => Promise<void>;
-  fetchPreviousPage: () => Promise<void>;
   fetchingMore: boolean;
   historicalDataLoading: boolean;
   totalCount: number;
@@ -104,8 +100,10 @@ export const useVotingPower = ({
     },
     variables: {
       addresses: [address],
+      address,
       orderDirection,
       limit: itemsPerPage,
+      skip: 0,
     },
     notifyOnNetworkStatusChange: true,
     fetchPolicy: "cache-and-network",
@@ -126,10 +124,13 @@ export const useVotingPower = ({
   // Refetch data when sorting changes to ensure we start from page 1
   useEffect(() => {
     refetch({
+      addresses: [address],
+      address,
       orderDirection,
       limit: itemsPerPage,
+      skip: 0,
     });
-  }, [orderBy, orderDirection, refetch, itemsPerPage]);
+  }, [orderBy, orderDirection, refetch, itemsPerPage, address]);
 
   const accountBalances = delegatorsVotingPowerDetails?.accountBalances?.items;
 
@@ -224,8 +225,6 @@ export const useVotingPower = ({
     return {
       hasNextPage: currentPage < totalPages,
       hasPreviousPage: currentPage > 1,
-      endCursor: null,
-      startCursor: null,
       totalCount,
       currentPage,
       totalPages,
@@ -241,11 +240,7 @@ export const useVotingPower = ({
 
   // Next page
   const fetchNextPage = useCallback(async () => {
-    if (
-      !pagination.hasNextPage ||
-      !pagination.endCursor ||
-      isPaginationLoading
-    ) {
+    if (!pagination.hasNextPage || isPaginationLoading) {
       console.warn("No next page available or already loading");
       return;
     }
@@ -253,10 +248,14 @@ export const useVotingPower = ({
     setIsPaginationLoading(true);
 
     try {
+      // Calculate skip based on current loaded items count
+      const currentItemsCount =
+        delegatorsVotingPowerDetails?.accountBalances?.items?.length || 0;
+      const skip = currentItemsCount;
+
       await fetchMore({
         variables: {
-          after: pagination.endCursor,
-          before: undefined,
+          skip,
           orderBy,
           orderDirection,
           limit: itemsPerPage,
@@ -291,62 +290,11 @@ export const useVotingPower = ({
   }, [
     fetchMore,
     pagination.hasNextPage,
-    pagination.endCursor,
     orderBy,
     orderDirection,
     isPaginationLoading,
     itemsPerPage,
-  ]);
-
-  // Previous page
-  const fetchPreviousPage = useCallback(async () => {
-    if (
-      !pagination.hasPreviousPage ||
-      !pagination.startCursor ||
-      isPaginationLoading
-    ) {
-      console.warn("No previous page available or already loading");
-      return;
-    }
-
-    setIsPaginationLoading(true);
-
-    try {
-      await fetchMore({
-        variables: {
-          after: undefined,
-          before: pagination.startCursor,
-          orderBy,
-          orderDirection,
-          limit: itemsPerPage,
-        },
-        updateQuery: (previousResult, { fetchMoreResult }) => {
-          if (!fetchMoreResult?.accountBalances) return previousResult;
-
-          return {
-            ...fetchMoreResult,
-            accountBalances: {
-              ...fetchMoreResult.accountBalances,
-              items: fetchMoreResult.accountBalances.items,
-            },
-          };
-        },
-      });
-
-      setCurrentPage((prev) => prev - 1);
-    } catch (err) {
-      console.error("Error fetching previous page:", err);
-    } finally {
-      setIsPaginationLoading(false);
-    }
-  }, [
-    fetchMore,
-    pagination.hasPreviousPage,
-    pagination.startCursor,
-    orderBy,
-    orderDirection,
-    isPaginationLoading,
-    itemsPerPage,
+    delegatorsVotingPowerDetails?.accountBalances?.items?.length,
   ]);
 
   // Reset pagination on refetch
@@ -384,7 +332,6 @@ export const useVotingPower = ({
     refetch: handleRefetch,
     pagination,
     fetchNextPage,
-    fetchPreviousPage,
     fetchingMore:
       networkStatus === NetworkStatus.fetchMore || isPaginationLoading,
     historicalDataLoading: tsLoading,
