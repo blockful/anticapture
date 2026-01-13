@@ -16,7 +16,6 @@ query GetProposalsFromDao(
       id
       daoId
       txHash
-      description
       quorum
       forVotes
       againstVotes
@@ -27,7 +26,6 @@ query GetProposalsFromDao(
       title
       startTimestamp
       endTimestamp
-      calldatas
       targets
       values
     }

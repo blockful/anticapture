@@ -12,8 +12,8 @@ import { Button } from "@/shared/components/ui/button";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 import { TransactionData } from "@/features/transactions/hooks/useTransactionsTableData";
 import Link from "next/link";
-import { fetchEnsData } from "@/shared/hooks/useEnsData";
-import { Address } from "viem";
+import { fetchAddressFromEnsName } from "@/shared/hooks/useEnsData";
+import { Address, zeroAddress } from "viem";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { cn } from "@/shared/utils";
 import { TransactionsParamsType } from "@/features/transactions/hooks/useTransactionParams";
@@ -140,7 +140,7 @@ export const getTransactionsColumns = ({
       header: () => (
         <Button
           variant="ghost"
-          className="!text-table-header w-full justify-start px-4 py-0 text-xs"
+          className="text-table-header! w-full justify-start px-4 py-0 text-xs"
           onClick={() => {
             setSort(sort === "asc" ? "desc" : "asc");
           }}
@@ -184,10 +184,10 @@ export const getTransactionsColumns = ({
             <AddressFilter
               onApply={async (addr) => {
                 if ((addr ?? "").indexOf(".eth") > 0) {
-                  const { address } = await fetchEnsData({
-                    address: addr as `${string}.eth`,
+                  const address = await fetchAddressFromEnsName({
+                    ensName: addr as `${string}.eth`,
                   });
-                  setFrom(address || "");
+                  setFrom(address || zeroAddress);
                   return;
                 }
                 setFrom((addr as Address) || "");
@@ -254,10 +254,10 @@ export const getTransactionsColumns = ({
             <AddressFilter
               onApply={async (addr) => {
                 if ((addr ?? "").indexOf(".eth") > 0) {
-                  const { address } = await fetchEnsData({
-                    address: addr as `${string}.eth`,
+                  const address = await fetchAddressFromEnsName({
+                    ensName: addr as `${string}.eth`,
                   });
-                  setTo(address || "");
+                  setTo(address || zeroAddress);
                   return;
                 }
                 setTo((addr as Address) || "");

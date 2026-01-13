@@ -1,9 +1,9 @@
 query GetDelegates(
+  $addresses: JSON
   $limit: PositiveInt = 10
   $skip: NonNegativeInt = 0
   $orderDirection: queryInput_votingPowers_orderDirection = desc
   $orderBy: queryInput_votingPowers_orderBy = votingPower
-  $addresses: [String]
 ) {
   votingPowers(
     limit: $limit

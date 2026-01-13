@@ -1,6 +1,9 @@
-import { SVGProps } from "react";
+import { DaoIconProps } from "@/shared/components/icons/types";
 
-export const GitcoinIcon = (props: SVGProps<SVGSVGElement>) => {
+export const GitcoinIcon = ({
+  showBackground = true,
+  ...props
+}: DaoIconProps) => {
   return (
     <svg
       {...props}
@@ -10,7 +13,7 @@ export const GitcoinIcon = (props: SVGProps<SVGSVGElement>) => {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <rect width="40" height="40" fill="#1E443F" />
+      {showBackground && <rect width="40" height="40" fill="#1E443F" />}
       <path
         fillRule="evenodd"
         clipRule="evenodd"

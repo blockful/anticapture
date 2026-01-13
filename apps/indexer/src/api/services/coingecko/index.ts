@@ -11,6 +11,8 @@ import {
 import { DAYS_IN_YEAR } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 import { TokenHistoricalPriceResponse } from "@/api/mappers";
+import { PriceProvider } from "@/api/services/treasury/types";
+import { truncateTimestampTimeMs } from "@/eventHandlers/shared";
 
 const createCoingeckoTokenPriceDataSchema = (
   tokenContractAddress: string,
@@ -22,7 +24,7 @@ const createCoingeckoTokenPriceDataSchema = (
     }),
   });
 
-export class CoingeckoService {
+export class CoingeckoService implements PriceProvider {
   private readonly client: AxiosInstance;
 
   constructor(
@@ -36,6 +38,18 @@ export class CoingeckoService {
         "x-cg-demo-api-key": coingeckoApiKey,
       },
     });
+  }
+
+  async getHistoricalPricesMap(days: number): Promise<Map<number, number>> {
+    const priceData = await this.getHistoricalTokenData(days);
+
+    const priceMap = new Map<number, number>();
+    priceData.forEach((item) => {
+      const normalizedTimestamp = truncateTimestampTimeMs(item.timestamp);
+      priceMap.set(normalizedTimestamp, Number(item.price));
+    });
+
+    return priceMap;
   }
 
   async getHistoricalTokenData(

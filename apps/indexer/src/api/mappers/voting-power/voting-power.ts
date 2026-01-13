@@ -1,7 +1,8 @@
 import { z } from "@hono/zod-openapi";
 import { votingPowerHistory } from "ponder:schema";
 
-import { DBDelegation, DBTransfer } from "../transactions";
+import { DBDelegation } from "../transactions";
+import { DBTransfer } from "../transfers";
 
 export type DBHistoricalVotingPower = typeof votingPowerHistory.$inferSelect;
 export type DBHistoricalVotingPowerWithRelations = DBHistoricalVotingPower & {
@@ -104,6 +105,6 @@ export const HistoricalVotingPowerMapper = (
           }
         : null,
     })),
-    totalCount,
+    totalCount: Number(totalCount),
   };
 };
