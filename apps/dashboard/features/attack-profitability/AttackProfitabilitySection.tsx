@@ -28,7 +28,7 @@ export const AttackProfitabilitySection = ({
 }) => {
   const defaultDays = TimeInterval.ONE_YEAR;
   const [days, setDays] = useState<TimeInterval>(defaultDays);
-  const [treasuryMetric, setTreasuryMetric] = useState<string>(`Non-${daoId}`);
+  const [treasuryMetric, setTreasuryMetric] = useState<string>(`All`);
   const [costMetric, setCostMetric] = useState<string>("Delegated");
   const [dropdownValue, setDropdownValue] = useState<Option>({
     value: "usd",
@@ -62,7 +62,7 @@ export const AttackProfitabilitySection = ({
             >
               Last updated: {attackUpdate.label}
             </BadgeStatus>
-            <div className="border-border-default border-1 hidden h-5 sm:block" />
+            <div className="border-border-default hidden h-5 border sm:block" />
 
             <AttackProfitabilityToggleHeader
               treasuryMetric={treasuryMetric}
