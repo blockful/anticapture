@@ -14,12 +14,11 @@ export function historicalBalances(
   votingPowerService: HistoricalVotingPowerService,
   balancesService: HistoricalBalancesService,
 ) {
-  // Historical Balances endpoint
   app.openapi(
     createRoute({
       method: "get",
       operationId: "historicalBalances",
-      path: "/account-balances/historical",
+      path: "/balances/historical",
       summary: "Get historical token balances",
       description:
         "Fetch historical token balances for multiple addresses at a specific time period using multicall",
