@@ -28,7 +28,7 @@ export const AttackProfitabilitySection = ({
 }) => {
   const defaultDays = TimeInterval.ONE_YEAR;
   const [days, setDays] = useState<TimeInterval>(defaultDays);
-  const [treasuryMetric, setTreasuryMetric] = useState<string>(`All`);
+  const [treasuryMetric, setTreasuryMetric] = useState<string>(`Non-${daoId}`);
   const [costMetric, setCostMetric] = useState<string>("Delegated");
   const [dropdownValue, setDropdownValue] = useState<Option>({
     value: "usd",
