@@ -33,13 +33,21 @@ export function votingPowers(app: Hono, service: VotingPowerService) {
       },
     }),
     async (context) => {
-      const { limit, skip, orderDirection, addresses, fromValue, toValue } =
-        context.req.valid("query");
+      const {
+        limit,
+        skip,
+        orderDirection,
+        orderBy,
+        addresses,
+        fromValue,
+        toValue,
+      } = context.req.valid("query");
 
       const { items, totalCount } = await service.getVotingPowers(
         skip,
         limit,
         orderDirection,
+        orderBy,
         {
           minAmount: fromValue,
           maxAmount: toValue,
