@@ -2832,13 +2832,13 @@ export type GetVotesOnchainsTotalCountQueryVariables = Exact<{
 export type GetVotesOnchainsTotalCountQuery = { __typename?: 'Query', votesOnchains: { __typename?: 'votesOnchainPage', totalCount: number } };
 
 export type GetVotingPowerChangeQueryVariables = Exact<{
-  address: Scalars['String']['input'];
+  addresses: Scalars['JSON']['input'];
   fromDate: Scalars['String']['input'];
   toDate: Scalars['String']['input'];
 }>;
 
 
-export type GetVotingPowerChangeQuery = { __typename?: 'Query', votingPowerVariationsByAccountId?: { __typename?: 'votingPowerVariationsByAccountId_200_response', data: { __typename?: 'query_votingPowerVariationsByAccountId_data', accountId: string, previousVotingPower?: string | null } } | null };
+export type GetVotingPowerChangeQuery = { __typename?: 'Query', votingPowerVariations?: { __typename?: 'votingPowerVariations_200_response', items: Array<{ __typename?: 'query_votingPowerVariations_items_items', accountId: string, previousVotingPower?: string | null } | null> } | null };
 
 export type GetProposalNonVotersQueryVariables = Exact<{
   id: Scalars['String']['input'];

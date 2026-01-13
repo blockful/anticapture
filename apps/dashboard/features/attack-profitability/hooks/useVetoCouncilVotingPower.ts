@@ -14,7 +14,7 @@ const api = axios.create({
 
 interface VotingPowerResponse {
   data: {
-    accountPowers: {
+    votingPowers: {
       items: {
         votingPower: string;
       }[];
@@ -40,7 +40,7 @@ const fetchVetoCouncilVotingPower = async (
     `,
   });
 
-  return response.data.data.accountPowers.items[0]?.votingPower || null;
+  return response.data.data.votingPowers.items[0]?.votingPower || null;
 };
 
 export const useVetoCouncilVotingPower = (daoId: DaoIdEnum) => {

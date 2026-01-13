@@ -3,14 +3,14 @@
 import {
   useGetDelegatesQuery,
   useGetHistoricalVotingAndActivityQuery,
-  useGetDelegatesCountQuery,
   useGetDelegateProposalsActivityLazyQuery,
-  QueryInput_HistoricalVotingPower_Days,
 } from "@anticapture/graphql-client/hooks";
 import { useMemo, useCallback, useState, useEffect } from "react";
 import { NetworkStatus } from "@apollo/client";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
+import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
+import { QueryInput_VotingPowers_OrderDirection } from "@anticapture/graphql-client";
 
 interface ProposalsActivity {
   totalProposals: number;
@@ -56,16 +56,14 @@ interface UseDelegatesParams {
   days: TimeInterval;
   fromDate: number;
   daoId: DaoIdEnum;
-  orderBy?: string;
-  orderDirection?: string;
+  orderDirection?: QueryInput_VotingPowers_OrderDirection;
   limit?: number;
 }
 
 export const useDelegates = ({
   fromDate,
   daoId,
-  orderBy = "votingPower",
-  orderDirection = "desc",
+  orderDirection = QueryInput_VotingPowers_OrderDirection.Desc,
   days,
   address,
   limit = 15,
@@ -95,7 +93,7 @@ export const useDelegates = ({
     setHistoricalVPCache(new Map());
     setDelegateActivities(new Map());
     setLoadingActivityAddresses(new Set());
-  }, [orderBy, orderDirection, address, days]);
+  }, [orderDirection, address, days]);
 
   const {
     data: delegatesData,
@@ -105,9 +103,6 @@ export const useDelegates = ({
     networkStatus,
   } = useGetDelegatesQuery({
     variables: {
-      after: undefined,
-      before: undefined,
-      orderBy,
       orderDirection,
       limit,
       ...(address && { addresses: [address] }),
@@ -117,31 +112,27 @@ export const useDelegates = ({
     fetchPolicy: "cache-and-network", // Always check network for fresh data
   });
 
-  const { data: countingData } = useGetDelegatesCountQuery({
-    context: { headers: { "anticapture-dao-id": daoId } },
-  });
-
   // Refetch data when sorting changes to ensure we start from page 1
   useEffect(() => {
     refetch({
-      after: undefined,
-      before: undefined,
-      orderBy,
       orderDirection,
       ...(address && { addresses: [address] }),
     });
-  }, [orderBy, orderDirection, address, refetch]);
+  }, [orderDirection, address, refetch]);
 
   const delegateAddresses = useMemo(
     () =>
-      delegatesData?.accountPowers?.items
-        ?.map((delegate) => delegate.accountId)
+      delegatesData?.votingPowers?.items
+        ?.map((delegate) => delegate?.accountId)
         .filter(Boolean) || [],
     [delegatesData],
   );
 
   const newAddressesForHistoricalVP = useMemo(
-    () => delegateAddresses.filter((addr) => !historicalVPCache.has(addr)),
+    () =>
+      delegateAddresses.filter(
+        (addr) => addr !== undefined && !historicalVPCache.has(addr),
+      ),
     [delegateAddresses, historicalVPCache],
   );
 
@@ -151,20 +142,20 @@ export const useDelegates = ({
       variables: {
         addresses: newAddressesForHistoricalVP,
         address: newAddressesForHistoricalVP[0] || "", // This is still needed for the query structure
-        fromDate,
-        days: QueryInput_HistoricalVotingPower_Days[days],
+        fromDate: fromDate.toString(),
+        toDate: (fromDate + DAYS_IN_SECONDS[days]).toString(),
       },
       context: { headers: { "anticapture-dao-id": daoId } },
       skip: newAddressesForHistoricalVP.length === 0,
     });
 
   useEffect(() => {
-    if (newHistoricalData?.historicalVotingPower) {
+    if (newHistoricalData?.votingPowerVariations) {
       setHistoricalVPCache((prevCache) => {
         const newCache = new Map(prevCache);
-        newHistoricalData.historicalVotingPower?.forEach((h) => {
-          if (h?.address && h.votingPower) {
-            newCache.set(h.address, h.votingPower);
+        newHistoricalData.votingPowerVariations?.items?.forEach((h) => {
+          if (h?.accountId && h.previousVotingPower) {
+            newCache.set(h.accountId, h.previousVotingPower);
           }
         });
         return newCache;
@@ -179,10 +170,12 @@ export const useDelegates = ({
 
   // Fetch proposals activity for all delegates using Promise.all
   useEffect(() => {
-    const newAddresses = delegateAddresses.filter(
-      (addr) =>
-        !delegateActivities.has(addr) && !loadingActivityAddresses.has(addr),
-    );
+    const newAddresses = delegateAddresses
+      .filter((addr) => addr !== undefined)
+      .filter(
+        (addr) =>
+          !delegateActivities.has(addr) && !loadingActivityAddresses.has(addr),
+      );
 
     if (newAddresses.length === 0) return;
 
@@ -193,7 +186,7 @@ export const useDelegates = ({
       try {
         const activityPromises = newAddresses.map(async (addr) => {
           const result = await getDelegateProposalsActivity({
-            variables: { address: addr, fromDate },
+            variables: { address: addr, fromDate: fromDate.toString() },
           });
           return {
             address: addr,
@@ -228,18 +221,20 @@ export const useDelegates = ({
   ]);
 
   const finalData = useMemo(() => {
-    if (!delegatesData?.accountPowers?.items) return null;
+    if (!delegatesData?.votingPowers?.items) return null;
 
-    return delegatesData.accountPowers.items.map((delegate) => {
-      const historicalVotingPower =
-        historicalVPCache.get(delegate.accountId) || "0";
-      const proposalsActivity = delegateActivities.get(delegate.accountId);
-      return {
-        ...delegate,
-        historicalVotingPower,
-        proposalsActivity,
-      };
-    });
+    return delegatesData.votingPowers.items
+      .filter((item) => item !== null)
+      .map((delegate) => {
+        const historicalVotingPower =
+          historicalVPCache.get(delegate.accountId) || "0";
+        const proposalsActivity = delegateActivities.get(delegate.accountId);
+        return {
+          ...delegate,
+          historicalVotingPower,
+          proposalsActivity,
+        };
+      });
   }, [delegatesData, historicalVPCache, delegateActivities]);
 
   const isHistoricalLoadingFor = useCallback(
@@ -254,8 +249,8 @@ export const useDelegates = ({
 
   // Pagination info - combines GraphQL data with our page tracking
   const pagination = useMemo<PaginationInfo>(() => {
-    const pageInfo = delegatesData?.accountPowers?.pageInfo;
-    const totalCount = countingData?.accountPowers?.totalCount || 0;
+    const pageInfo = delegatesData?.votingPowers?.pageInfo; // TODO: adjust pagination to new model
+    const totalCount = delegatesData?.votingPowers?.totalCount || 0;
     const currentItemsCount = finalData?.length || 0;
     const totalPages = Math.ceil(totalCount / itemsPerPage);
 
@@ -271,11 +266,11 @@ export const useDelegates = ({
       currentItemsCount,
     };
   }, [
-    delegatesData?.accountPowers?.pageInfo,
-    countingData?.accountPowers?.totalCount,
-    finalData,
-    currentPage,
+    delegatesData?.votingPowers?.pageInfo,
+    delegatesData?.votingPowers?.totalCount,
+    finalData?.length,
     itemsPerPage,
+    currentPage,
   ]);
 
   // Fetch next page function
@@ -296,18 +291,17 @@ export const useDelegates = ({
         variables: {
           after: pagination.endCursor,
           before: undefined,
-          orderBy,
           orderDirection,
           ...(address && { addresses: [address] }),
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
-          if (!fetchMoreResult?.accountPowers?.items) return previousResult;
-          const prevItems = previousResult.accountPowers.items ?? [];
-          const newItems = fetchMoreResult.accountPowers.items ?? [];
+          if (!fetchMoreResult?.votingPowers?.items) return previousResult;
+          const prevItems = previousResult?.votingPowers?.items ?? [];
+          const newItems = fetchMoreResult.votingPowers.items ?? [];
           return {
             ...fetchMoreResult,
-            accountPowers: {
-              ...fetchMoreResult.accountPowers,
+            votingPowers: {
+              ...fetchMoreResult.votingPowers,
               items: [...prevItems, ...newItems],
             },
           };
@@ -319,14 +313,7 @@ export const useDelegates = ({
     } finally {
       setIsPaginationLoading(false);
     }
-  }, [
-    fetchMore,
-    pagination,
-    isPaginationLoading,
-    address,
-    orderBy,
-    orderDirection,
-  ]);
+  }, [fetchMore, pagination, isPaginationLoading, address, orderDirection]);
 
   const fetchPreviousPage = useCallback(async () => {
     if (
@@ -352,13 +339,10 @@ export const useDelegates = ({
   const handleRefetch = useCallback(() => {
     setCurrentPage(1);
     refetch({
-      after: undefined,
-      before: undefined,
-      orderBy,
       orderDirection,
       ...(address && { addresses: [address] }),
     });
-  }, [refetch, orderBy, orderDirection, address]);
+  }, [refetch, orderDirection, address]);
 
   const isLoading = useMemo(() => {
     return (

@@ -2835,13 +2835,13 @@ export type GetVotesOnchainsTotalCountQueryVariables = Exact<{
 export type GetVotesOnchainsTotalCountQuery = { __typename?: 'Query', votesOnchains: { __typename?: 'votesOnchainPage', totalCount: number } };
 
 export type GetVotingPowerChangeQueryVariables = Exact<{
-  address: Scalars['String']['input'];
+  addresses: Scalars['JSON']['input'];
   fromDate: Scalars['String']['input'];
   toDate: Scalars['String']['input'];
 }>;
 
 
-export type GetVotingPowerChangeQuery = { __typename?: 'Query', votingPowerVariationsByAccountId?: { __typename?: 'votingPowerVariationsByAccountId_200_response', data: { __typename?: 'query_votingPowerVariationsByAccountId_data', accountId: string, previousVotingPower?: string | null } } | null };
+export type GetVotingPowerChangeQuery = { __typename?: 'Query', votingPowerVariations?: { __typename?: 'votingPowerVariations_200_response', items: Array<{ __typename?: 'query_votingPowerVariations_items_items', accountId: string, previousVotingPower?: string | null } | null> } | null };
 
 export type GetProposalNonVotersQueryVariables = Exact<{
   id: Scalars['String']['input'];
@@ -4047,13 +4047,13 @@ export type GetVotesOnchainsTotalCountLazyQueryHookResult = ReturnType<typeof us
 export type GetVotesOnchainsTotalCountSuspenseQueryHookResult = ReturnType<typeof useGetVotesOnchainsTotalCountSuspenseQuery>;
 export type GetVotesOnchainsTotalCountQueryResult = Apollo.QueryResult<GetVotesOnchainsTotalCountQuery, GetVotesOnchainsTotalCountQueryVariables>;
 export const GetVotingPowerChangeDocument = gql`
-    query GetVotingPowerChange($address: String!, $fromDate: String!, $toDate: String!) {
-  votingPowerVariationsByAccountId(
-    accountId: $address
+    query GetVotingPowerChange($addresses: JSON!, $fromDate: String!, $toDate: String!) {
+  votingPowerVariations(
+    addresses: $addresses
     fromDate: $fromDate
     toDate: $toDate
   ) {
-    data {
+    items {
       accountId
       previousVotingPower
     }
@@ -4073,7 +4073,7 @@ export const GetVotingPowerChangeDocument = gql`
  * @example
  * const { data, loading, error } = useGetVotingPowerChangeQuery({
  *   variables: {
- *      address: // value for 'address'
+ *      addresses: // value for 'addresses'
  *      fromDate: // value for 'fromDate'
  *      toDate: // value for 'toDate'
  *   },

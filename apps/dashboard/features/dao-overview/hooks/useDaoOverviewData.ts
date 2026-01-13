@@ -14,7 +14,10 @@ import { useTopDelegatesToPass } from "@/features/dao-overview/hooks/useTopDeleg
 import { useDaoTreasuryStats } from "@/features/dao-overview/hooks/useDaoTreasuryStats";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { DaoConfiguration } from "@/shared/dao-config/types";
-import { useGetDelegatesQuery } from "@anticapture/graphql-client/hooks";
+import {
+  QueryInput_VotingPowers_OrderDirection,
+  useGetDelegatesQuery,
+} from "@anticapture/graphql-client/hooks";
 
 export const useDaoOverviewData = ({
   daoId,
@@ -37,10 +40,7 @@ export const useDaoOverviewData = ({
 
   const delegates = useGetDelegatesQuery({
     variables: {
-      after: undefined,
-      before: undefined,
-      orderBy: "votingPower",
-      orderDirection: "desc",
+      orderDirection: QueryInput_VotingPowers_OrderDirection.Desc,
       limit: 20,
     },
     context: { headers: { "anticapture-dao-id": daoId } },
@@ -77,7 +77,10 @@ export const useDaoOverviewData = ({
   });
 
   const topDelegatesToPass = useTopDelegatesToPass({
-    topDelegates: delegates.data?.accountPowers?.items || [],
+    topDelegates:
+      delegates.data?.votingPowers?.items.filter(
+        (item) => item !== null && item !== undefined,
+      ) || [],
     quorumValue,
     decimals,
   });

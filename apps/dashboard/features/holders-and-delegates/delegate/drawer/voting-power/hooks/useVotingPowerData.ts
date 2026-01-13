@@ -73,14 +73,14 @@ export const useVotingPowerData = (
     !topFiveDelegators ||
     topFiveDelegators.length === 0 ||
     !delegatorsVotingPowerDetails ||
-    !delegatorsVotingPowerDetails.accountPower ||
-    !delegatorsVotingPowerDetails.accountPower.votingPower
+    !delegatorsVotingPowerDetails.votingPowerByAccountId ||
+    !delegatorsVotingPowerDetails.votingPowerByAccountId.votingPower
   ) {
     return defaultData;
   }
 
   const delegateCurrentVotingPower = BigInt(
-    delegatorsVotingPowerDetails?.accountPower?.votingPower,
+    delegatorsVotingPowerDetails?.votingPowerByAccountId?.votingPower,
   );
 
   const currentVotingPowerNumber = Number(

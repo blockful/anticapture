@@ -6,7 +6,7 @@ import {
   useGetVotesOnchainsQuery,
   useGetVotingPowerChangeLazyQuery,
 } from "@anticapture/graphql-client/hooks";
-import { QueryInput_HistoricalVotingPower_Days } from "@anticapture/graphql-client";
+import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 
 // Enhanced vote type with historical voting power
 export type VoteWithHistoricalPower =
@@ -93,7 +93,8 @@ export const useVotes = ({
         (vote) => !vote.historicalVotingPower,
       );
 
-      if (!votesNeedingData.length) return;
+      if (!votesNeedingData.length || proposalStartTimestamp === undefined)
+        return;
 
       try {
         const addresses = votesNeedingData.map((vote) => vote.voterAccountId);
@@ -101,8 +102,10 @@ export const useVotes = ({
         const result = await getVotingPowerChange({
           variables: {
             addresses,
-            days: QueryInput_HistoricalVotingPower_Days["30d"],
-            fromDate: proposalStartTimestamp,
+            fromDate: proposalStartTimestamp?.toString(),
+            toDate: (
+              proposalStartTimestamp + DAYS_IN_SECONDS["30d"]
+            ).toString(),
           },
           context: {
             headers: {
@@ -112,11 +115,11 @@ export const useVotes = ({
         });
 
         // Update votes with historical voting power
-        if (result.data?.historicalVotingPower) {
+        if (result.data?.votingPowerVariations) {
           const powerChanges: Record<string, string> = {};
-          result.data.historicalVotingPower.forEach((item) => {
-            if (item?.address && item?.votingPower) {
-              powerChanges[item.address] = item.votingPower;
+          result.data.votingPowerVariations.items?.forEach((item) => {
+            if (item?.accountId && item?.previousVotingPower) {
+              powerChanges[item.accountId] = item.previousVotingPower;
             }
           });
 
@@ -144,7 +147,7 @@ export const useVotes = ({
         console.error("Error fetching voting power changes:", error);
       }
     },
-    [getVotingPowerChange, daoId],
+    [daoId, getVotingPowerChange, proposalStartTimestamp],
   );
 
   // Reset accumulated votes when sorting parameters change

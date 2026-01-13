@@ -9,7 +9,7 @@ import { formatNumberUserReadable } from "@/shared/utils";
 import { formatUnits } from "viem";
 
 export interface UseAccountPowerResult {
-  accountPower: GetAccountPowerQuery["accountPower"] | null;
+  accountPower: GetAccountPowerQuery["votingPowerByAccountId"] | null;
   votingPower: string;
   votesOnchain: GetAccountPowerQuery["votesOnchain"] | null;
   hasVoted: boolean;
@@ -47,7 +47,7 @@ export const useVoterInfo = ({
 
   // Extract and transform voting power and votes onchain
   const { accountPower, votingPower, votesOnchain, hasVoted } = useMemo(() => {
-    if (!data?.accountPower) {
+    if (!data?.votingPowerByAccountId) {
       return {
         accountPower: null,
         votingPower: "0",
@@ -57,9 +57,14 @@ export const useVoterInfo = ({
     }
 
     return {
-      accountPower: data.accountPower,
+      accountPower: data.votingPowerByAccountId,
       votingPower: formatNumberUserReadable(
-        Number(formatUnits(BigInt(data.accountPower.votingPower), decimals)),
+        Number(
+          formatUnits(
+            BigInt(data.votingPowerByAccountId.votingPower),
+            decimals,
+          ),
+        ),
       ),
       votesOnchain: data.votesOnchain || null,
       hasVoted: !!data.votesOnchain,
