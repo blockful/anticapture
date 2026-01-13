@@ -1,4 +1,4 @@
-query GetVotingPowerCounting($delegates: [String]) {
+query GetVotingPowerCounting($delegates: JSON) {
   accountBalances(delegates: $delegates) {
     totalCount
   }

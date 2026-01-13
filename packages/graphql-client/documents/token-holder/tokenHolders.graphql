@@ -2,7 +2,7 @@ query GetTopTokenHolders(
   $limit: PositiveInt
   $skip: NonNegativeInt
   $orderDirection: queryInput_accountBalances_orderDirection
-  $addresses: [String]
+  $addresses: JSON
 ) {
   accountBalances(
     orderDirection: $orderDirection

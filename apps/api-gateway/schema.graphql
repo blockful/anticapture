@@ -140,7 +140,7 @@ type Query {
   accountBalanceVariations(days: queryInput_accountBalanceVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalanceVariations_orderDirection = desc): accountBalanceVariations_200_response
 
   """Returns sorted and paginated account balance records"""
-  accountBalances(limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalances_orderDirection = desc, addresses: [String] = [], delegates: [String] = [], fromValue: String, toValue: String): accountBalances_200_response
+  accountBalances(limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalances_orderDirection = desc, addresses: JSON, delegates: JSON, fromValue: String, toValue: String): accountBalances_200_response
 
   """Returns account balance information for a specific address (account)"""
   accountBalanceByAccountId(accountId: String!): accountBalanceByAccountId_200_response

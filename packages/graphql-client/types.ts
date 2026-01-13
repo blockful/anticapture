@@ -13,9 +13,12 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   BigInt: { input: any; output: any; }
+  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
+  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
+  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
 };
 
@@ -194,8 +197,8 @@ export type QueryAccountBalanceVariationsArgs = {
 
 
 export type QueryAccountBalancesArgs = {
-  addresses?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  delegates?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  addresses?: InputMaybe<Scalars['JSON']['input']>;
+  delegates?: InputMaybe<Scalars['JSON']['input']>;
   fromValue?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   orderDirection?: InputMaybe<QueryInput_AccountBalances_OrderDirection>;
@@ -2548,7 +2551,7 @@ export type GetDelegateDelegationHistoryDeltaRangeQueryVariables = Exact<{
 export type GetDelegateDelegationHistoryDeltaRangeQuery = { __typename?: 'Query', votingPowerHistorys: { __typename?: 'votingPowerHistoryPage', totalCount: number, items: Array<{ __typename?: 'votingPowerHistory', delta: any, deltaMod: any, transactionHash: string, timestamp: any, votingPower: any, delegation?: { __typename?: 'delegation', delegatorAccountId: string, delegatedValue: any, previousDelegate?: string | null, delegateAccountId: string } | null, transfer?: { __typename?: 'transfer', amount: any, fromAccountId: string, toAccountId: string } | null }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null } } };
 
 export type GetDelegatorVotingPowerDetailsQueryVariables = Exact<{
-  addresses?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
+  addresses?: InputMaybe<Scalars['JSON']['input']>;
   orderDirection?: InputMaybe<QueryInput_AccountBalances_OrderDirection>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
 }>;
@@ -2566,7 +2569,7 @@ export type GetDelegationsTimestampQueryVariables = Exact<{
 export type GetDelegationsTimestampQuery = { __typename?: 'Query', delegations: { __typename?: 'delegationPage', items: Array<{ __typename?: 'delegation', delegatorAccountId: string, timestamp: any }> } };
 
 export type GetTopFiveDelegatorsQueryVariables = Exact<{
-  delegates?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
+  delegates?: InputMaybe<Scalars['JSON']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
 }>;
 
@@ -2574,7 +2577,7 @@ export type GetTopFiveDelegatorsQueryVariables = Exact<{
 export type GetTopFiveDelegatorsQuery = { __typename?: 'Query', accountBalances?: { __typename?: 'accountBalances_200_response', items: Array<{ __typename?: 'query_accountBalances_items_items', accountId: string, balance: string } | null> } | null };
 
 export type GetVotingPowerCountingQueryVariables = Exact<{
-  delegates?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
+  delegates?: InputMaybe<Scalars['JSON']['input']>;
 }>;
 
 
@@ -2798,7 +2801,7 @@ export type GetTopTokenHoldersQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   orderDirection?: InputMaybe<QueryInput_AccountBalances_OrderDirection>;
-  addresses?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
+  addresses?: InputMaybe<Scalars['JSON']['input']>;
 }>;
 
 

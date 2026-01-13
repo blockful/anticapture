@@ -1,13 +1,20 @@
-query GetDelegatorVotingPowerDetails($addresses: [String], $orderDirection: queryInput_accountBalances_orderDirection, $limit: PositiveInt) {
+query GetDelegatorVotingPowerDetails(
+  $addresses: JSON
+  $orderDirection: queryInput_accountBalances_orderDirection
+  $limit: PositiveInt
+) {
   # accountPower(accountId: $address) {
   #   votingPower
   #   accountId
   # }
-  accountBalances(orderDirection: $orderDirection, limit: $limit, delegates: $addresses) {
+  accountBalances(
+    orderDirection: $orderDirection
+    limit: $limit
+    delegates: $addresses
+  ) {
     items {
       accountId
       balance
     }
   }
 }
-
