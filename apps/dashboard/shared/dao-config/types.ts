@@ -109,82 +109,8 @@ export interface DaoOverviewConfig {
   };
 }
 
-export interface DaoAddresses {
-  [DaoIdEnum.UNISWAP]: {
-    UniTimelock: string;
-    UniTokenDistributor: string;
-    Univ3Uni: string;
-  };
-  [DaoIdEnum.ENS]: {
-    ENSTokenTimelock: string;
-    ENSDaoWallet: string;
-    ENSColdWallet: string;
-  };
-  [DaoIdEnum.OPTIMISM]: {
-    OptimismTimelock: string;
-    OptimismTokenDistributor: string;
-    OptimismUniv3Uni: string;
-  };
-  [DaoIdEnum.GITCOIN]: {
-    GTCWallet: string;
-    GTCTimelock: string;
-    GTCUniv3Uni: string;
-  };
-  [DaoIdEnum.NOUNS]: {
-    NounsTimelock: string;
-    PayerContract: string;
-    ClientIncentivesRewardsProxy: string;
-  };
-  [DaoIdEnum.SCR]: Record<string, string>;
-  [DaoIdEnum.COMP]: {
-    Timelock: Address;
-    Comptroller: Address;
-    v2WBTC: Address;
-    v2USDC: Address;
-    v2DAI: Address;
-    v2USDT: Address;
-    v2ETH: Address;
-    v2UNI: Address;
-    v2BAT: Address;
-    v2LINK: Address;
-    v2TUSD: Address;
-    v2AAVE: Address;
-    v2COMP: Address;
-    mainnetETH: Address;
-    mainnetstETH: Address;
-    mainnetUSDT: Address;
-    mainnetUSDS: Address;
-    mainnetUSDC: Address;
-    mainnetWBTC: Address;
-    opETH: Address;
-    opUSDT: Address;
-    opUSDC: Address;
-    uniUSDC: Address;
-    uniETH: Address;
-    polyUSDT0: Address;
-    polyUSDC: Address;
-    ronWETH: Address;
-    ronRON: Address;
-    manUSDe: Address;
-    baseUSDbC: Address;
-    baseUSDC: Address;
-    baseAERO: Address;
-    baseUSDS: Address;
-    baseETH: Address;
-    arbUSDT0: Address;
-    arbUSDC: Address;
-    "arbUSDC.e": Address;
-    arbETH: Address;
-    linUSDC: Address;
-    linETH: Address;
-    scrUSDC: Address;
-  };
-  [DaoIdEnum.OBOL]: Record<string, string>;
-}
-
 export interface AttackProfitabilityConfig {
   riskLevel?: RiskLevel;
-  attackCostBarChart: DaoAddresses[DaoIdEnum];
   dynamicQuorum?: {
     percentage: number;
   };

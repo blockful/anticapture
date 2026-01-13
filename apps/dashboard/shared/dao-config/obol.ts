@@ -42,7 +42,6 @@ export const OBOL: DaoConfiguration = {
   },
   attackProfitability: {
     riskLevel: RiskLevel.LOW,
-    attackCostBarChart: {},
   },
   riskAnalysis: true,
   governanceImplementation: {

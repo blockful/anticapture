@@ -1,6 +1,5 @@
 const daoItemQueries = [
   "account",
-  "accountBalance",
   "accountPower",
   "daoMetricsDayBucket",
   "delegation",
