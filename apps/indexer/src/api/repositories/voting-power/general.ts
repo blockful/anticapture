@@ -252,18 +252,19 @@ export class VotingPowerRepository {
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
+    orderBy: "votingPower" | "delegationsCount",
     amountFilter: AmountFilter,
     addresses: Address[],
   ): Promise<{ items: DBAccountPower[]; totalCount: number }> {
+    const orderColumn =
+      orderBy === "votingPower"
+        ? accountPower.votingPower
+        : accountPower.delegationsCount;
     const result = await db
       .select()
       .from(accountPower)
       .where(this.filterToSql(addresses, amountFilter))
-      .orderBy(
-        orderDirection === "desc"
-          ? desc(accountPower.votingPower)
-          : asc(accountPower.votingPower),
-      )
+      .orderBy(orderDirection === "desc" ? desc(orderColumn) : asc(orderColumn))
       .offset(skip)
       .limit(limit);
 
