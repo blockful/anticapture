@@ -90,7 +90,7 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         <div className="flex h-full w-full items-center justify-between">
           <HoldersAndDelegatesLeftComponent />
           <SwitcherDateMobile
-            defaultValue={defaultDays}
+            defaultValue={days || defaultDays}
             setTimeInterval={setDays}
           />
         </div>
