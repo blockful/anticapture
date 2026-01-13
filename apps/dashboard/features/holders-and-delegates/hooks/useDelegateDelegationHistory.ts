@@ -4,15 +4,14 @@ import { useCallback, useMemo, useState, useEffect } from "react";
 import { ApolloError, NetworkStatus } from "@apollo/client";
 import { formatUnits } from "viem";
 
-import {
-  useVotingPowersQuery,
-  QueryInput_VotingPowers_OrderBy,
-  QueryInput_VotingPowers_OrderDirection,
-  VotingPowersQuery,
-  QueryVotingPowersArgs,
-} from "@anticapture/graphql-client/hooks";
+import { useHistoricalVotingPowersQuery } from "@anticapture/graphql-client/hooks";
 import daoConfig from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
+import {
+  HistoricalVotingPowersQuery,
+  QueryHistoricalVotingPowersArgs,
+  QueryInput_HistoricalVotingPowers_OrderDirection,
+} from "@anticapture/graphql-client";
 
 // Interface for a single delegation history item
 export interface DelegationHistoryItem {
@@ -55,8 +54,8 @@ export interface UseDelegateDelegationHistoryResult {
 }
 
 export type AmountFilterVariables = Pick<
-  QueryVotingPowersArgs,
-  "maxDelta" | "minDelta"
+  QueryHistoricalVotingPowersArgs,
+  "fromValue" | "toValue"
 >;
 
 export function useDelegateDelegationHistory({
@@ -115,17 +114,18 @@ export function useDelegateDelegationHistory({
     () => ({
       account: accountId,
       limit: itemsPerPage,
-      orderBy: orderBy as QueryInput_VotingPowers_OrderBy,
-      orderDirection: orderDirection as QueryInput_VotingPowers_OrderDirection,
-      ...(filterVariables?.maxDelta && { maxDelta: filterVariables.maxDelta }),
-      ...(filterVariables?.minDelta && { minDelta: filterVariables.minDelta }),
+      orderDirection:
+        orderDirection as QueryInput_HistoricalVotingPowers_OrderDirection,
+      ...(filterVariables?.toValue && { toValue: filterVariables.toValue }),
+      ...(filterVariables?.fromValue && {
+        fromValue: filterVariables.fromValue,
+      }),
       ...(fromFilter && { delegator: fromFilter }),
       ...(toFilter && { delegate: toFilter }),
     }),
     [
       accountId,
       itemsPerPage,
-      orderBy,
       orderDirection,
       filterVariables,
       fromFilter,
@@ -143,16 +143,17 @@ export function useDelegateDelegationHistory({
     fetchPolicy: "cache-and-network" as const,
   };
 
-  const { data, error, fetchMore, networkStatus } = useVotingPowersQuery({
-    variables: queryVariables,
-    ...queryOptions,
-  });
+  const { data, error, fetchMore, networkStatus } =
+    useHistoricalVotingPowersQuery({
+      variables: queryVariables,
+      ...queryOptions,
+    });
 
   // Transform raw data to our format
   const transformedData = useMemo(() => {
-    if (!data?.votingPowers?.items) return [];
+    if (!data?.historicalVotingPowers?.items) return [];
 
-    return data.votingPowers.items
+    return data.historicalVotingPowers.items
       .filter((item) => !!item)
       .map((item) => {
         // Determine the type, action, and direction based on the data and delta
@@ -203,7 +204,7 @@ export function useDelegateDelegationHistory({
       });
   }, [data, accountId, token]);
 
-  const totalCount = data?.votingPowers?.totalCount ?? 0;
+  const totalCount = data?.historicalVotingPowers?.totalCount ?? 0;
   const currentItemsCount = transformedData.length;
   const hasNextPage = currentItemsCount < totalCount;
 
@@ -219,12 +220,12 @@ export function useDelegateDelegationHistory({
           skip: currentItemsCount,
         },
         updateQuery: (
-          previousResult: VotingPowersQuery,
+          previousResult: HistoricalVotingPowersQuery,
           { fetchMoreResult },
-        ): VotingPowersQuery => {
+        ): HistoricalVotingPowersQuery => {
           if (!fetchMoreResult) return previousResult;
-          const prevItems = previousResult.votingPowers?.items ?? [];
-          const newItems = fetchMoreResult.votingPowers?.items ?? [];
+          const prevItems = previousResult.historicalVotingPowers?.items ?? [];
+          const newItems = fetchMoreResult.historicalVotingPowers?.items ?? [];
           const merged = [
             ...prevItems,
             ...newItems.filter(
@@ -237,10 +238,11 @@ export function useDelegateDelegationHistory({
 
           return {
             ...fetchMoreResult,
-            votingPowers: {
-              ...fetchMoreResult.votingPowers,
+            historicalVotingPowers: {
+              ...fetchMoreResult.historicalVotingPowers,
               items: merged,
-              totalCount: fetchMoreResult.votingPowers?.totalCount ?? 0,
+              totalCount:
+                fetchMoreResult.historicalVotingPowers?.totalCount ?? 0,
             },
           };
         },
@@ -302,10 +304,11 @@ export function useDelegateDelegationHistory({
     paginationInfo: {
       currentPage,
       totalPages: Math.ceil(
-        (data?.votingPowers?.totalCount || 0) / itemsPerPage,
+        (data?.historicalVotingPowers?.totalCount || 0) / itemsPerPage,
       ),
       hasNextPage:
-        currentPage * itemsPerPage < (data?.votingPowers?.totalCount || 0),
+        currentPage * itemsPerPage <
+        (data?.historicalVotingPowers?.totalCount || 0),
       hasPreviousPage: currentPage > 1,
     },
     error,
