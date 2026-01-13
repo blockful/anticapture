@@ -7,22 +7,23 @@ import { fromZodError } from "zod-validation-error";
 import { createPublicClient, http } from "viem";
 
 import {
-  governanceActivity,
-  tokenHistoricalData,
-  tokenDistribution,
-  token,
-  proposalsActivity,
-  historicalBalances,
-  transactions,
-  proposals,
-  lastUpdate,
-  totalAssets,
-  historicalVotingPowers,
-  delegationPercentage,
-  votingPowerVariations,
   accountBalanceVariations,
-  dao,
   accountInteractions,
+  dao,
+  delegationPercentage,
+  governanceActivity,
+  historicalBalances,
+  historicalVotingPowers,
+  lastUpdate,
+  proposals,
+  proposalsActivity,
+  token,
+  tokenDistribution,
+  tokenHistoricalData,
+  transactions,
+  transfers,
+  treasury,
+  votingPowerVariations,
   votingPowers,
 } from "@/api/controllers";
 import { docs } from "@/api/docs";
@@ -39,6 +40,8 @@ import {
   NounsVotingPowerRepository,
   AccountInteractionsRepository,
   AccountBalanceRepository,
+  TreasuryRepository,
+  TransfersRepository,
 } from "@/api/repositories";
 import { errorHandler } from "@/api/middlewares";
 import { getClient } from "@/lib/client";
@@ -48,16 +51,17 @@ import {
   VotingPowerService,
   TransactionsService,
   ProposalsService,
-  DuneService,
   CoingeckoService,
   NFTPriceService,
   TokenService,
   BalanceVariationsService,
   DaoService,
   HistoricalBalancesService,
+  TransfersService,
 } from "@/api/services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
+import { createTreasuryService } from "./services/treasury/treasury-provider-factory";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -129,11 +133,6 @@ const accountBalanceService = new BalanceVariationsService(
   accountInteractionRepo,
 );
 
-if (env.DUNE_API_URL && env.DUNE_API_KEY) {
-  const duneClient = new DuneService(env.DUNE_API_URL, env.DUNE_API_KEY);
-  totalAssets(app, duneClient);
-}
-
 const tokenPriceClient =
   env.DAO_ID === DaoIdEnum.NOUNS
     ? new NFTPriceService(
@@ -147,6 +146,17 @@ const tokenPriceClient =
         env.DAO_ID,
       );
 
+const treasuryService = createTreasuryService(
+  new TreasuryRepository(),
+  tokenPriceClient,
+  env.DEFILLAMA_API_URL,
+  env.TREASURY_PROVIDER_PROTOCOL_ID,
+  env.DUNE_API_URL,
+  env.DUNE_API_KEY,
+);
+const decimals = CONTRACT_ADDRESSES[env.DAO_ID].token.decimals;
+
+treasury(app, treasuryService, decimals);
 tokenHistoricalData(app, tokenPriceClient);
 token(
   app,
@@ -177,6 +187,7 @@ votingPowerVariations(app, votingPowerService);
 votingPowers(app, votingPowerService);
 accountBalanceVariations(app, accountBalanceService);
 accountInteractions(app, accountBalanceService);
+transfers(app, new TransfersService(new TransfersRepository()));
 dao(app, daoService);
 docs(app);
 

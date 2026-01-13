@@ -61,6 +61,26 @@ export class VotingPowerRepository {
     const result = await db
       .select()
       .from(votingPowerHistory)
+      .leftJoin(
+        delegation,
+        sql`${votingPowerHistory.transactionHash} = ${delegation.transactionHash} 
+          AND ${delegation.logIndex} = (
+            SELECT MAX(${delegation.logIndex}) 
+            FROM ${delegation} 
+            WHERE ${delegation.transactionHash} = ${votingPowerHistory.transactionHash} 
+            AND ${delegation.logIndex} < ${votingPowerHistory.logIndex}
+        )`,
+      )
+      .leftJoin(
+        transfer,
+        sql`${votingPowerHistory.transactionHash} = ${transfer.transactionHash} 
+          AND ${transfer.logIndex} = (
+            SELECT MAX(${transfer.logIndex}) 
+            FROM ${transfer}
+            WHERE ${transfer.transactionHash} = ${votingPowerHistory.transactionHash} 
+            AND ${transfer.logIndex} < ${votingPowerHistory.logIndex}
+        )`,
+      )
       .where(
         and(
           eq(votingPowerHistory.accountId, accountId),
@@ -77,26 +97,6 @@ export class VotingPowerRepository {
             ? lte(votingPowerHistory.timestamp, BigInt(toDate))
             : undefined,
         ),
-      )
-      .leftJoin(
-        delegation,
-        sql`${votingPowerHistory.transactionHash} = ${delegation.transactionHash} 
-          AND ${delegation.logIndex} = (
-            SELECT MAX(d2.log_index) 
-            FROM ${delegation} d2 
-            WHERE d2.transaction_hash = ${votingPowerHistory.transactionHash} 
-            AND d2.log_index < ${votingPowerHistory.logIndex}
-        )`,
-      )
-      .leftJoin(
-        transfer,
-        sql`${votingPowerHistory.transactionHash} = ${transfer.transactionHash} 
-          AND ${transfer.logIndex} = (
-            SELECT MAX(t2.log_index) 
-            FROM ${transfer} t2 
-            WHERE t2.transaction_hash = ${votingPowerHistory.transactionHash} 
-            AND t2.log_index < ${votingPowerHistory.logIndex}
-        )`,
       )
       .orderBy(
         orderDirection === "asc"

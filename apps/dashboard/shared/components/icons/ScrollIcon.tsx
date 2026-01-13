@@ -1,6 +1,9 @@
-import { SVGProps } from "react";
+import { DaoIconProps } from "@/shared/components/icons/types";
 
-export const ScrollIcon = (props: SVGProps<SVGSVGElement>) => {
+export const ScrollIcon = ({
+  showBackground = true,
+  ...props
+}: DaoIconProps) => {
   return (
     <svg
       {...props}
@@ -10,7 +13,7 @@ export const ScrollIcon = (props: SVGProps<SVGSVGElement>) => {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <rect width="444" height="444" fill="#FFEEDA" />
+      {showBackground && <rect width="444" height="444" fill="#FFEEDA" />}
       <path
         fill="#FFEEDA"
         d="M333.4,262V110.6c-0.2-12.7-10.3-22.9-23-22.9h-158c-34.1,0.5-61.5,28.4-61.5,62.6c0,11.5,3.1,21.4,7.8,30.1

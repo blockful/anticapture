@@ -5,13 +5,14 @@ import { DollarSign } from "lucide-react";
 import { DaoConfiguration, DaoOverviewConfig } from "@/shared/dao-config/types";
 import { OPMainnetIcon } from "@/shared/components/icons/OPMainnetIcon";
 import { cn } from "@/shared/utils";
-import { TooltipInfo } from "@/shared/components";
+import { SkeletonRow, TooltipInfo } from "@/shared/components";
 
 interface DaoOverviewHeaderProps {
   daoId: string;
   daoConfig: DaoConfiguration;
   daoOverview: DaoOverviewConfig;
   lastPrice: number;
+  isLoading: boolean;
 }
 
 const chainIconsSchema: Record<
@@ -27,6 +28,7 @@ export const DaoOverviewHeader = ({
   daoConfig,
   daoOverview,
   lastPrice,
+  isLoading,
 }: DaoOverviewHeaderProps) => {
   const baseLinkRoute = `${daoOverview.chain.blockExplorers?.default.url}/address`;
   const chainName = daoOverview.chain.name;
@@ -43,16 +45,23 @@ export const DaoOverviewHeader = ({
         >
           {chainName}
         </BadgeStatus>
-        <BadgeStatus
-          icon={DollarSign}
-          iconVariant="secondary"
-          className="bg-surface-opacity text-primary h-5 rounded-full text-xs"
-        >
-          1 {daoId} = ${lastPrice.toFixed(2)}
-          {daoOverview.priceDisclaimer && (
-            <TooltipInfo text={daoOverview.priceDisclaimer} />
-          )}
-        </BadgeStatus>
+        {isLoading ? (
+          <SkeletonRow
+            parentClassName="flex animate-pulse justify-end w-full"
+            className="bg-surface-hover h-5 w-20 rounded-full"
+          />
+        ) : (
+          <BadgeStatus
+            icon={DollarSign}
+            iconVariant="secondary"
+            className="bg-surface-opacity text-primary h-5 rounded-full text-xs"
+          >
+            1 {daoId} = ${lastPrice.toFixed(2)}
+            {daoOverview.priceDisclaimer && (
+              <TooltipInfo text={daoOverview.priceDisclaimer} />
+            )}
+          </BadgeStatus>
+        )}
       </div>
 
       <div className="flex items-center gap-2">

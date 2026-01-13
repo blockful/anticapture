@@ -14,27 +14,39 @@ type Query {
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/token`\nGet property data for a specific token\n"
   token(currency: queryInput_token_currency = usd): token_200_response
   tokens(where: tokenFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPage!
-  account(id: String!): account
-  accounts(where: accountFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountPage!
   accountBalance(accountId: String!, tokenId: String!): accountBalance
   accountBalances(where: accountBalanceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountBalancePage!
   delegation(transactionHash: String!, delegatorAccountId: String!, delegateAccountId: String!): delegation
   delegations(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): delegationPage!
-  transfer(transactionHash: String!, fromAccountId: String!, toAccountId: String!): transfer
-  transfers(where: transferFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): transferPage!
   votesOnchain(voterAccountId: String!, proposalId: String!): votesOnchain
   votesOnchains(where: votesOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votesOnchainPage!
-  proposalsOnchain(id: String!): proposalsOnchain
-  proposalsOnchains(where: proposalsOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): proposalsOnchainPage!
   daoMetricsDayBucket(date: BigInt!, tokenId: String!, metricType: String!): daoMetricsDayBucket
   daoMetricsDayBuckets(where: daoMetricsDayBucketFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): daoMetricsDayBucketPage!
-  transaction(transactionHash: String!): transaction
-  _(where: transactionFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): transactionPage!
-  tokenPrice(timestamp: BigInt!): tokenPrice
-  tokenPrices(where: tokenPriceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPricePage!
   _meta: Meta
 
+<<<<<<< HEAD
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/token/historical-data`\nGet historical market data for a specific token\n"
+||||||| 9f921dd8
+  """Get total assets"""
+  totalAssets(days: queryInput_totalAssets_days = _7d): [query_totalAssets_items]
+
+  """Get historical market data for a specific token"""
+=======
+  """
+  Get historical Liquid Treasury (treasury without DAO tokens) from external providers (DefiLlama/Dune)
+  """
+  getLiquidTreasury(days: queryInput_getLiquidTreasury_days = _365d, order: queryInput_getLiquidTreasury_order = asc): getLiquidTreasury_200_response
+
+  """
+  Get historical DAO Token Treasury value (governance token quantity × token price)
+  """
+  getDaoTokenTreasury(days: queryInput_getDaoTokenTreasury_days = _365d, order: queryInput_getDaoTokenTreasury_order = asc): getDaoTokenTreasury_200_response
+
+  """Get historical Total Treasury (liquid treasury + DAO token treasury)"""
+  getTotalTreasury(days: queryInput_getTotalTreasury_days = _365d, order: queryInput_getTotalTreasury_order = asc): getTotalTreasury_200_response
+
+  """Get historical market data for a specific token"""
+>>>>>>> dev
   historicalTokenData(skip: NonNegativeInt, limit: Float = 365): [query_historicalTokenData_items]
 
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/total-supply/compare`\nCompare total supply between periods\n"
@@ -113,8 +125,16 @@ type Query {
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/delegation-percentage`\nGet delegation percentage day buckets with forward-fill\n"
   delegationPercentageByDay(startDate: String, endDate: String, orderDirection: queryInput_delegationPercentageByDay_orderDirection = asc, limit: NonNegativeInt = 365, after: String, before: String): delegationPercentageByDay_200_response
 
+<<<<<<< HEAD
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/voting-powers/{args.accountId}/historical`\nReturns a list of voting power changes\n"
   historicalVotingPowers(accountId: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_historicalVotingPowers_orderBy = timestamp, orderDirection: queryInput_historicalVotingPowers_orderDirection = desc, fromDate: Float, toDate: Float, fromValue: String, toValue: String): historicalVotingPowers_200_response
+||||||| 9f921dd8
+  """Returns a list of voting power changes"""
+  votingPowers(account: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_votingPowers_orderBy = timestamp, orderDirection: queryInput_votingPowers_orderDirection = desc, minDelta: String, maxDelta: String): votingPowers_200_response
+=======
+  """Returns a list of voting power changes"""
+  votingPowers(account: String!, fromAddresses: JSON, toAddresses: JSON, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_votingPowers_orderBy = timestamp, orderDirection: queryInput_votingPowers_orderDirection = desc, minDelta: String, maxDelta: String): votingPowers_200_response
+>>>>>>> dev
 
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/voting-powers/variations`\nReturns a mapping of the biggest changes to voting power associated by delegate address\n"
   votingPowerVariations(addresses: [String] = [], fromDate: Float = 1760204526, toDate: Float = 1767980526, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_votingPowerVariations_orderDirection = desc): votingPowerVariations_200_response
@@ -134,7 +154,16 @@ type Query {
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/account-balance/interactions`\nReturns a mapping of the largest interactions between accounts. \nPositive amounts signify net token transfers FROM <accountId>, whilst negative amounts refer to net transfers TO <accountId>\n"
   accountInteractions(days: queryInput_accountInteractions_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountInteractions_orderDirection = desc, accountId: String!, minAmount: String, maxAmount: String, orderBy: queryInput_accountInteractions_orderBy = count, address: String): accountInteractions_200_response
 
+<<<<<<< HEAD
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/dao`\nReturns current governance parameters for this DAO\n"
+||||||| 9f921dd8
+  """Returns current governance parameters for this DAO"""
+=======
+  """Get transfers of a given address"""
+  transfers(address: String!, limit: Float = 10, offset: Float, sortBy: queryInput_transfers_sortBy = timestamp, sortOrder: queryInput_transfers_sortOrder = asc, from: String, to: String, fromDate: Float, toDate: Float, fromValue: String, toValue: String): transfers_200_response
+
+  """Returns current governance parameters for this DAO"""
+>>>>>>> dev
   dao: dao_200_response
 
   """
@@ -1314,6 +1343,107 @@ input tokenPriceFilter {
   timestamp_lte: BigInt
 }
 
+<<<<<<< HEAD
+||||||| 9f921dd8
+type query_totalAssets_items {
+  totalAssets: String!
+  date: String!
+}
+
+enum queryInput_totalAssets_days {
+  _7d
+  _30d
+  _90d
+  _180d
+  _365d
+}
+
+=======
+type getLiquidTreasury_200_response {
+  items: [query_getLiquidTreasury_items_items]!
+
+  """Total number of items"""
+  totalCount: Float!
+}
+
+type query_getLiquidTreasury_items_items {
+  """Treasury value in USD"""
+  value: Float!
+
+  """Unix timestamp in milliseconds"""
+  date: Float!
+}
+
+enum queryInput_getLiquidTreasury_days {
+  _7d
+  _30d
+  _90d
+  _180d
+  _365d
+}
+
+enum queryInput_getLiquidTreasury_order {
+  asc
+  desc
+}
+
+type getDaoTokenTreasury_200_response {
+  items: [query_getDaoTokenTreasury_items_items]!
+
+  """Total number of items"""
+  totalCount: Float!
+}
+
+type query_getDaoTokenTreasury_items_items {
+  """Treasury value in USD"""
+  value: Float!
+
+  """Unix timestamp in milliseconds"""
+  date: Float!
+}
+
+enum queryInput_getDaoTokenTreasury_days {
+  _7d
+  _30d
+  _90d
+  _180d
+  _365d
+}
+
+enum queryInput_getDaoTokenTreasury_order {
+  asc
+  desc
+}
+
+type getTotalTreasury_200_response {
+  items: [query_getTotalTreasury_items_items]!
+
+  """Total number of items"""
+  totalCount: Float!
+}
+
+type query_getTotalTreasury_items_items {
+  """Treasury value in USD"""
+  value: Float!
+
+  """Unix timestamp in milliseconds"""
+  date: Float!
+}
+
+enum queryInput_getTotalTreasury_days {
+  _7d
+  _30d
+  _90d
+  _180d
+  _365d
+}
+
+enum queryInput_getTotalTreasury_order {
+  asc
+  desc
+}
+
+>>>>>>> dev
 type query_historicalTokenData_items {
   price: String!
   timestamp: Float!
@@ -1915,6 +2045,36 @@ enum queryInput_accountInteractions_orderDirection {
 enum queryInput_accountInteractions_orderBy {
   volume
   count
+}
+
+type transfers_200_response {
+  items: [query_transfers_items_items]!
+  totalCount: Float!
+}
+
+type query_transfers_items_items {
+  transactionHash: String!
+  daoId: String!
+  tokenId: String!
+  amount: String!
+  fromAccountId: String!
+  toAccountId: String!
+  timestamp: String!
+  logIndex: Float!
+  isCex: Boolean!
+  isDex: Boolean!
+  isLending: Boolean!
+  isTotal: Boolean!
+}
+
+enum queryInput_transfers_sortBy {
+  timestamp
+  amount
+}
+
+enum queryInput_transfers_sortOrder {
+  asc
+  desc
 }
 
 type dao_200_response {

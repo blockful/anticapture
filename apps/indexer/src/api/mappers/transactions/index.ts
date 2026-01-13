@@ -1,13 +1,19 @@
-import { transfer, delegation, transaction } from "ponder:schema";
 import { isAddress } from "viem";
 import { z } from "@hono/zod-openapi";
+
+import { delegation, transaction } from "ponder:schema";
+
+import {
+  DBTransfer,
+  TransferMapper,
+  TransferResponseSchema,
+} from "../transfers";
 
 export type DBTransaction = typeof transaction.$inferSelect & {
   transfers: DBTransfer[];
   delegations: DBDelegation[];
 };
 
-export type DBTransfer = typeof transfer.$inferSelect;
 export type DBDelegation = typeof delegation.$inferSelect;
 
 export enum AffectedSupply {
@@ -115,21 +121,6 @@ export const TransactionsRequestSchema = z
 
 export type TransactionsRequest = z.infer<typeof TransactionsRequestSchema>;
 
-export const TransferResponseSchema = z.object({
-  transactionHash: z.string(),
-  daoId: z.string(),
-  tokenId: z.string(),
-  amount: z.string(),
-  fromAccountId: z.string(),
-  toAccountId: z.string(),
-  timestamp: z.string(),
-  logIndex: z.number(),
-  isCex: z.boolean(),
-  isDex: z.boolean(),
-  isLending: z.boolean(),
-  isTotal: z.boolean(),
-});
-
 export const DelegationResponseSchema = z.object({
   transactionHash: z.string(),
   daoId: z.string(),
@@ -165,27 +156,9 @@ export const TransactionsResponseSchema = z.object({
 
 export type TransactionsResponse = z.infer<typeof TransactionsResponseSchema>;
 export type TransactionResponse = z.infer<typeof TransactionResponseSchema>;
-export type TransferResponse = z.infer<typeof TransferResponseSchema>;
 export type DelegationResponse = z.infer<typeof DelegationResponseSchema>;
 
 export const TransactionMapper = {
-  transferToApi: (t: DBTransfer): TransferResponse => {
-    return {
-      transactionHash: t.transactionHash,
-      daoId: t.daoId,
-      tokenId: t.tokenId,
-      amount: t.amount.toString(),
-      fromAccountId: t.fromAccountId,
-      toAccountId: t.toAccountId,
-      timestamp: t.timestamp.toString(),
-      logIndex: t.logIndex,
-      isCex: t.isCex,
-      isDex: t.isDex,
-      isLending: t.isLending,
-      isTotal: t.isTotal,
-    };
-  },
-
   delegationToApi: (d: DBDelegation): DelegationResponse => {
     return {
       transactionHash: d.transactionHash,
@@ -213,7 +186,7 @@ export const TransactionMapper = {
       isLending: t.isLending,
       isTotal: t.isTotal,
       timestamp: t.timestamp.toString(),
-      transfers: t.transfers.map(TransactionMapper.transferToApi),
+      transfers: t.transfers.map(TransferMapper.toApi),
       delegations: t.delegations.map(TransactionMapper.delegationToApi),
     };
   },

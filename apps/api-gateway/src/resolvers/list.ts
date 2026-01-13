@@ -1,13 +1,13 @@
 const daoListQueries = [
-  'accountBalances',
-  'accounts',
-  'daoMetricsDayBuckets',
-  'delegations',
-  'proposalsOnchains',
-  'tokens',
-  'transfers',
-  'votesOnchains',
-]
+  "accountBalances",
+  "accounts",
+  "daoMetricsDayBuckets",
+  "delegations",
+  "proposalsOnchains",
+  "tokens",
+  "votesOnchains",
+  "votingPowerHistorys", // FIXME: Leave endpoint active for now as it is still used by the notification bot
+];
 
 export const listResolvers = daoListQueries.reduce((acc, fieldName) => {
   acc[fieldName] = {
@@ -27,8 +27,8 @@ export const listResolvers = daoListQueries.reduce((acc, fieldName) => {
 
       const targetClient = context[`graphql_${daoId.toUpperCase()}`]?.Query;
 
-      if (!targetClient || typeof targetClient[fieldName] !== 'function') {
-        return {}
+      if (!targetClient || typeof targetClient[fieldName] !== "function") {
+        return {};
       }
 
       if (args?.where?.daoId) {

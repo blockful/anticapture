@@ -30,27 +30,21 @@ export default processConfig(
                 {
                   filterSchema: {
                     filters: [
-                      'Query.!{accountPower}',
-                      'Query.!{accountPowers}',
-                      'Query.!{votingPowerHistory}',
-                      'Query.!{votingPowerHistorys}'
+                      "Query.!{accountPowers}",
+                      "Query.!{accountPower}",
+                      "Query.!{accounts}",
+                      "Query.!{account}",
+                      "Query.!{proposalsOnchains}",
+                      "Query.!{proposalsOnchain}",
+                      "Query.!{tokenPrices}",
+                      "Query.!{tokenPrice}",
+                      "Query.!{transactions}",
+                      "Query.!{transaction}",
+                      "Query.!{transfers}",
+                      "Query.!{transfer}",
+                      "Query.!{votingPowerHistory}",
+                      // 'Query.!{votingPowerHistorys}' FIXME: Leave endpoint active for now as it is still used by the notification bot
                     ]
-                  }
-                },
-                {
-                  rename: {
-                    renames: [
-                      {
-                        from: {
-                          type: "Query",
-                          field: "transactions",
-                        },
-                        to: {
-                          type: "Query",
-                          field: "_",
-                        },
-                      },
-                    ],
                   },
                 },
               ],
