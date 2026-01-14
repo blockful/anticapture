@@ -121,30 +121,61 @@ export function createDailyTimelineToToday(timestamps: number[]): number[] {
 }
 
 /**
- * Filter data with fallback to last available value.
+ * Filter data by cutoff date with fallback to last value before cutoff.
  *
- * When filter returns empty but data exists, returns the last item as fallback.
- * Useful for time-series data where you want the most recent value even if
- * it's outside the requested range.
+ * Returns items with date >= cutoffDate. If no items match, returns the last
+ * item before the cutoff as fallback (using getLastValueBefore).
  *
- * @param allData - Complete sorted dataset
- * @param filterFn - Predicate to filter data
- * @returns Filtered data, or last available item if filter returns empty
+ * @param sortedData - Array sorted by date ascending, items must have `date` property
+ * @param cutoffDate - Minimum date (inclusive)
+ * @returns Filtered data, or last value before cutoff if filter returns empty
  *
  * @example
- * const data = [{ date: 1, value: 10 }, { date: 2, value: 20 }];
- * const result = filterWithFallback(data, item => item.date >= 100);
- * // Result: [{ date: 2, value: 20 }] (fallback to last)
+ * const data = [{ date: 1, value: 10 }, { date: 5, value: 20 }];
+ * const result = filterWithFallback(data, 3);
+ * // Result: [{ date: 5, value: 20 }]
+ *
+ * const result2 = filterWithFallback(data, 100);
+ * // Result: [{ date: 5, value: 20 }] (fallback to last before cutoff)
  */
-export function filterWithFallback<T>(
-  allData: T[],
-  filterFn: (item: T) => boolean,
+export function filterWithFallback<T extends { date: number }>(
+  sortedData: T[],
+  cutoffDate: number,
 ): T[] {
-  const filtered = allData.filter(filterFn);
+  const filtered = sortedData.filter((item) => item.date >= cutoffDate);
 
-  if (filtered.length === 0 && allData.length > 0) {
-    return [allData.at(-1)!];
+  if (filtered.length === 0 && sortedData.length > 0) {
+    const lastBefore = getLastValueBefore(sortedData, cutoffDate);
+    return lastBefore ? [lastBefore] : [];
   }
 
   return filtered;
+}
+
+/**
+ * Get the last value before a given date from sorted data.
+ *
+ * Useful for finding the initial value for forward-fill when the requested
+ * time range starts after the first available data point.
+ *
+ * @param sortedData - Array sorted by date ascending, items must have `date` property
+ * @param beforeDate - The cutoff date (exclusive)
+ * @returns The last item before the date, or undefined if none exists
+ *
+ * @example
+ * const data = [{ date: 1, value: 10 }, { date: 5, value: 20 }];
+ * const result = getLastValueBefore(data, 3);
+ * // Result: { date: 1, value: 10 }
+ */
+export function getLastValueBefore<T extends { date: number }>(
+  sortedData: T[],
+  beforeDate: number,
+): T | undefined {
+  for (let i = sortedData.length - 1; i >= 0; i--) {
+    const item = sortedData[i];
+    if (item !== undefined && item.date < beforeDate) {
+      return item;
+    }
+  }
+  return undefined;
 }

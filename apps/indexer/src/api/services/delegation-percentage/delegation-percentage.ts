@@ -78,7 +78,7 @@ export class DelegationPercentageService {
     // 1. Get initial values for proper forward-fill
     const referenceDate = normalizedAfter || normalizedStartDate;
     const initialValues = referenceDate
-      ? await this.getInitialValuesBeforeDate(referenceDate)
+      ? await this.fetchLastDelegationValues(referenceDate)
       : { delegated: 0n, total: 0n };
 
     // 2. Fetch data from repository
@@ -153,8 +153,7 @@ export class DelegationPercentageService {
    * Gets the last known values at or before a given date for proper forward-fill
    * Returns { delegated: 0n, total: 0n } if no previous values exist
    */
-  private async getInitialValuesBeforeDate(
-    //TODO
+  private async fetchLastDelegationValues(
     beforeDate: string,
   ): Promise<{ delegated: bigint; total: bigint }> {
     try {

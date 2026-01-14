@@ -120,6 +120,6 @@ export class DefiLlamaProvider implements TreasuryProvider {
       }))
       .sort((a, b) => a.date - b.date); // Sort by timestamp ascending
 
-    return filterWithFallback(allData, (item) => item.date >= cutoffTimestamp);
+    return filterWithFallback(allData, cutoffTimestamp);
   }
 }

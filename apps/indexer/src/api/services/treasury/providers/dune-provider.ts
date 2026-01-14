@@ -67,6 +67,6 @@ export class DuneProvider implements TreasuryProvider {
       })
       .sort((a, b) => a.date - b.date);
 
-    return filterWithFallback(allData, (item) => item.date >= cutoffTimestamp);
+    return filterWithFallback(allData, cutoffTimestamp);
   }
 }
