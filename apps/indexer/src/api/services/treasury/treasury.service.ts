@@ -6,7 +6,7 @@ import { TreasuryRepository } from "../../repositories/treasury";
 import { forwardFill, createDailyTimelineToToday } from "@/lib/time-series";
 import {
   calculateCutoffTimestamp,
-  truncateTimestampTimeMs,
+  truncateTimestampTime,
   normalizeMapTimestamps,
 } from "@/eventHandlers/shared";
 
@@ -42,8 +42,8 @@ export class TreasuryService {
     // Convert to map with normalized timestamps (midnight UTC)
     const liquidMap = new Map<number, number>();
     data.forEach((item) => {
-      const timestampMs = truncateTimestampTimeMs(item.date * 1000);
-      liquidMap.set(timestampMs, item.liquidTreasury);
+      const timestamp = truncateTimestampTime(item.date);
+      liquidMap.set(timestamp, item.liquidTreasury);
     });
 
     // Create timeline from first data point to today

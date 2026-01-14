@@ -4,14 +4,7 @@
  * Forward-fill: Use the last known value for any missing data points.
  */
 
-import { ONE_DAY_MS, SECONDS_IN_DAY } from "./enums";
-
-/**
- * Truncate timestamp (milliseconds) to midnight UTC
- */
-const truncateToMidnightMs = (timestampMs: number): number => {
-  return Math.floor(timestampMs / ONE_DAY_MS) * ONE_DAY_MS;
-};
+import { SECONDS_IN_DAY } from "./enums";
 
 /**
  * Truncate timestamp (seconds) to midnight UTC
@@ -82,41 +75,20 @@ export function createDailyTimeline(
 }
 
 /**
- * Create daily timeline from first timestamp to last timestamp (milliseconds).
+ * Create daily timeline from sparse data timestamps to today (seconds).
  *
- * @param firstTimestamp - Start timestamp in milliseconds (will be truncated to midnight)
- * @param lastTimestamp - End timestamp in milliseconds (will be truncated to midnight)
- * @returns Array of daily timestamps (midnight UTC) in milliseconds
- */
-export function createDailyTimelineMs(
-  firstTimestamp: number,
-  lastTimestamp: number,
-): number[] {
-  if (firstTimestamp > lastTimestamp) return [];
-
-  const startMidnight = truncateToMidnightMs(firstTimestamp);
-  const endMidnight = truncateToMidnightMs(lastTimestamp);
-  const totalDays = Math.floor((endMidnight - startMidnight) / ONE_DAY_MS) + 1;
-
-  return Array.from(
-    { length: totalDays },
-    (_, i) => startMidnight + i * ONE_DAY_MS,
-  );
-}
-
-/**
- * Create daily timeline from sparse data timestamps to today (milliseconds).
- *
- * @param timestamps - Array of timestamps from sparse data (in milliseconds)
- * @returns Array of daily timestamps from first data point to today (in milliseconds)
+ * @param timestamps - Array of timestamps from sparse data (in seconds)
+ * @returns Array of daily timestamps from first data point to today (in seconds)
  */
 export function createDailyTimelineToToday(timestamps: number[]): number[] {
   if (timestamps.length === 0) return [];
 
   const firstTimestamp = Math.min(...timestamps);
-  const todayMidnight = truncateToMidnightMs(Date.now());
+  const todayMidnight = truncateToMidnightSeconds(
+    Math.floor(Date.now() / 1000),
+  );
 
-  return createDailyTimelineMs(firstTimestamp, todayMidnight);
+  return createDailyTimeline(firstTimestamp, todayMidnight);
 }
 
 /**

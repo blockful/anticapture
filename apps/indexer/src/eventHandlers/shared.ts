@@ -3,7 +3,7 @@ import { Context } from "ponder:registry";
 import { account, daoMetricsDayBucket, transaction } from "ponder:schema";
 
 import { MetricTypesEnum } from "@/lib/constants";
-import { SECONDS_IN_DAY, ONE_DAY_MS } from "@/lib/enums";
+import { SECONDS_IN_DAY } from "@/lib/enums";
 import { delta, max, min } from "@/lib/utils";
 
 export const ensureAccountExists = async (
@@ -153,13 +153,6 @@ export const truncateTimestampTime = (timestampSeconds: number): number => {
 };
 
 /**
- * Truncate timestamp (milliseconds) to midnight UTC
- */
-export const truncateTimestampTimeMs = (timestampMs: number): number => {
-  return Math.floor(timestampMs / ONE_DAY_MS) * ONE_DAY_MS;
-};
-
-/**
  * Calculate cutoff timestamp for filtering data by days
  */
 export const calculateCutoffTimestamp = (days: number): number => {
@@ -167,14 +160,14 @@ export const calculateCutoffTimestamp = (days: number): number => {
 };
 
 /**
- * Normalize all timestamps in a Map to midnight UTC
+ * Normalize all timestamps in a Map to midnight UTC (seconds)
  */
 export const normalizeMapTimestamps = <T>(
   map: Map<number, T>,
 ): Map<number, T> => {
   const normalized = new Map<number, T>();
   map.forEach((value, ts) => {
-    normalized.set(truncateTimestampTimeMs(ts), value);
+    normalized.set(truncateTimestampTime(ts), value);
   });
   return normalized;
 };

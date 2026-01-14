@@ -4,7 +4,7 @@ import axios, { AxiosInstance } from "axios";
 import { TokenHistoricalPriceResponse } from "@/api/mappers";
 import { PriceProvider } from "@/api/services/treasury/types";
 import {
-  truncateTimestampTimeMs,
+  truncateTimestampTime,
   calculateCutoffTimestamp,
 } from "@/eventHandlers/shared";
 import { forwardFill, createDailyTimelineToToday } from "@/lib/time-series";
@@ -60,13 +60,13 @@ export class NFTPriceService implements PriceProvider {
       price: (
         Number(formatEther(BigInt(price))) * ethPriceResponse[index]![1]
       ).toFixed(2),
-      timestamp: timestamp * 1000,
+      timestamp,
     }));
 
     // Create map with normalized timestamps (midnight UTC)
     const priceMap = new Map<number, string>();
     rawPrices.forEach((item) => {
-      const normalizedTs = truncateTimestampTimeMs(item.timestamp);
+      const normalizedTs = truncateTimestampTime(item.timestamp);
       priceMap.set(normalizedTs, item.price);
     });
 
@@ -75,8 +75,8 @@ export class NFTPriceService implements PriceProvider {
     const filledPrices = forwardFill(timeline, priceMap);
 
     // Filter to only include last `limit` days
-    const cutoffMs = calculateCutoffTimestamp(limit) * 1000;
-    const filteredTimeline = timeline.filter((ts) => ts >= cutoffMs);
+    const cutoff = calculateCutoffTimestamp(limit);
+    const filteredTimeline = timeline.filter((ts) => ts >= cutoff);
 
     return filteredTimeline.map((timestamp) => ({
       price: filledPrices.get(timestamp) ?? "0",
@@ -101,7 +101,7 @@ export class NFTPriceService implements PriceProvider {
 
     const priceMap = new Map<number, number>();
     priceData.forEach((item) => {
-      const normalizedTimestamp = truncateTimestampTimeMs(item.timestamp);
+      const normalizedTimestamp = truncateTimestampTime(item.timestamp);
       priceMap.set(normalizedTimestamp, Number(item.price));
     });
 
