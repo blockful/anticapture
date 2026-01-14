@@ -7,10 +7,7 @@ import {
   truncateTimestampTimeMs,
   calculateCutoffTimestamp,
 } from "@/eventHandlers/shared";
-import {
-  forwardFill,
-  createDailyTimelineFromData,
-} from "@/api/services/treasury/forward-fill"; // TODO: move to shared folder
+import { forwardFill, createDailyTimelineToToday } from "@/lib/time-series";
 
 interface Repository {
   getHistoricalNFTPrice(
@@ -74,7 +71,7 @@ export class NFTPriceService implements PriceProvider {
     });
 
     // Create timeline and forward-fill gaps
-    const timeline = createDailyTimelineFromData([...priceMap.keys()]);
+    const timeline = createDailyTimelineToToday([...priceMap.keys()]);
     const filledPrices = forwardFill(timeline, priceMap);
 
     // Filter to only include last `limit` days

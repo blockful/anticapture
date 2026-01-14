@@ -1,7 +1,8 @@
 import { HTTPException } from "hono/http-exception";
+import { AxiosInstance } from "axios";
 import { LiquidTreasuryDataPoint } from "../types";
 import { TreasuryProvider } from "./treasury-provider.interface";
-import { AxiosInstance } from "axios";
+import { filterWithFallback } from "@/lib/time-series";
 
 export interface DuneResponse {
   execution_id: string;
@@ -66,13 +67,6 @@ export class DuneProvider implements TreasuryProvider {
       })
       .sort((a, b) => a.date - b.date);
 
-    const filteredData = allData.filter((item) => item.date >= cutoffTimestamp);
-    // If no data in the requested period, return the last available value as fallback
-    if (filteredData.length === 0 && allData.length > 0) {
-      const lastAvailable = allData.at(-1)!;
-      return [lastAvailable];
-    }
-
-    return filteredData;
+    return filterWithFallback(allData, (item) => item.date >= cutoffTimestamp);
   }
 }

@@ -2,6 +2,7 @@ import { AxiosInstance } from "axios";
 import { TreasuryProvider } from "./treasury-provider.interface";
 import { LiquidTreasuryDataPoint } from "../types";
 import { truncateTimestampTime } from "@/eventHandlers/shared";
+import { filterWithFallback } from "@/lib/time-series";
 
 interface RawDefiLlamaResponse {
   chainTvls: Record<
@@ -119,13 +120,6 @@ export class DefiLlamaProvider implements TreasuryProvider {
       }))
       .sort((a, b) => a.date - b.date); // Sort by timestamp ascending
 
-    const filteredData = allData.filter((item) => item.date >= cutoffTimestamp);
-    // If no data in the requested period, return the last available value as fallback
-    if (filteredData.length === 0 && allData.length > 0) {
-      const lastAvailable = allData.at(-1)!;
-      return [lastAvailable];
-    }
-
-    return filteredData;
+    return filterWithFallback(allData, (item) => item.date >= cutoffTimestamp);
   }
 }
