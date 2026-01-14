@@ -82,7 +82,7 @@ export const DelegationHistoryTable = ({
   } = useDelegationHistory({
     daoId,
     delegatorAccountId: address,
-    delegateAccountId: addressFilter ?? undefined,
+    delegateAccountId: addressFilter ?? "",
     orderBy: sortBy,
     orderDirection: sortOrder,
     filterVariables,
@@ -133,7 +133,7 @@ export const DelegationHistoryTable = ({
                 }
                 setAddressFilter(addr || "");
               }}
-              currentFilter={addressFilter ?? undefined}
+              currentFilter={addressFilter ?? ""}
             />
           </div>
         </div>

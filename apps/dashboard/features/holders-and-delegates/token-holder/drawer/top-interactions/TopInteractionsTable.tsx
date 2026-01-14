@@ -71,7 +71,7 @@ export const TopInteractionsTable = ({
     useAccountInteractionsData({
       daoId: daoId as DaoIdEnum,
       address: address,
-      accountId: currentAddressFilter ?? undefined,
+      accountId: currentAddressFilter ?? "",
       sortBy,
       sortDirection,
       filterVariables,
@@ -111,7 +111,7 @@ export const TopInteractionsTable = ({
           <span>Address</span>
           <AddressFilter
             onApply={handleAddressFilterApply}
-            currentFilter={currentAddressFilter ?? undefined}
+            currentFilter={currentAddressFilter ?? ""}
             className="ml-2"
           />
         </div>

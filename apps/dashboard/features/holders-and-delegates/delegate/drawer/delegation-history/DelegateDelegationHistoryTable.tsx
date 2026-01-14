@@ -301,7 +301,7 @@ export const DelegateDelegationHistoryTable = ({
                 setFromFilter(addr);
               }
             }}
-            currentFilter={fromFilter ?? undefined}
+            currentFilter={fromFilter ?? ""}
           /> */}
         </div>
       ),
@@ -411,7 +411,7 @@ export const DelegateDelegationHistoryTable = ({
                 setToFilter(addr);
               }
             }}
-            currentFilter={toFilter ?? undefined}
+            currentFilter={toFilter ?? ""}
           /> */}
         </div>
       ),

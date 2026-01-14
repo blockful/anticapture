@@ -74,8 +74,8 @@ export const useAccountInteractionsData = ({
       // orderBy: sortBy,
       orderDirection:
         sortDirection as QueryInput_AccountInteractions_OrderDirection,
-      minAmount: filterVariables?.minAmount ?? undefined,
-      maxAmount: filterVariables?.maxAmount ?? undefined,
+      minAmount: filterVariables?.minAmount ?? "",
+      maxAmount: filterVariables?.maxAmount ?? "",
       limit,
     },
     context: {
