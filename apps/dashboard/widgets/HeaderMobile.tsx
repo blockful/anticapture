@@ -106,7 +106,7 @@ export const HeaderMobile = ({
   }, [lastScrollY]);
 
   return (
-    <>
+    <div className="relative z-50 w-full md:hidden">
       {/* Header */}
       <div className="border-light-dark bg-surface-background absolute left-0 right-0 top-0 z-50 border-b px-4 py-1.5">
         <div className="flex items-center justify-between">
@@ -127,7 +127,6 @@ export const HeaderMobile = ({
           </div>
         </div>
       </div>
-
       {/* Mobile Menu - Overlay */}
       <div
         className={cn(
@@ -180,6 +179,6 @@ export const HeaderMobile = ({
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
