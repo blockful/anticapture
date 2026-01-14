@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { cn } from "@/shared/utils/";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { CheckIcon, ChevronDown } from "lucide-react";
@@ -19,6 +19,10 @@ export const SwitcherDateMobile = ({
 }: SwitcherDateProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isSelected, setIsSelected] = useState<TimeInterval>(defaultValue);
+
+  useEffect(() => {
+    setIsSelected(defaultValue);
+  }, [defaultValue]);
 
   const activeTimeIntervals = useMemo(() => {
     const intervals = Object.values(TimeInterval);

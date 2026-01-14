@@ -71,7 +71,7 @@ importers:
         specifier: ^0.106.3
         version: 0.106.18(graphql@16.12.0)
       "@graphql-mesh/transform-filter-schema":
-        specifier: ^0.104.19
+        specifier: ^0.104.18
         version: 0.104.19(graphql@16.12.0)
       "@graphql-mesh/transform-rename":
         specifier: ^0.105.7

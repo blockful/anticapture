@@ -43,6 +43,8 @@ export default processConfig(
                       "Query.!{transfers}",
                       "Query.!{transfer}",
                       "Query.!{votingPowerHistory}",
+                      'Query.!{accountBalances}',
+                      'Query.!{accountBalance}',
                       // 'Query.!{votingPowerHistorys}' FIXME: Leave endpoint active for now as it is still used by the notification bot
                     ]
                   },

@@ -1,7 +1,7 @@
 import { DaysEnum } from "@/lib/enums";
 import { z } from "@hono/zod-openapi";
 import { PERCENTAGE_NO_BASELINE } from "../constants";
-import { PeriodResponseMapper, PeriodResponseSchema } from "../shared";
+import { PeriodResponseSchema, TimestampResponseMapper } from "../shared";
 import { Address, isAddress } from "viem";
 
 export const VotingPowerVariationsRequestSchema = z.object({
@@ -170,22 +170,28 @@ export const VotingPowerVariationResponseMapper = (
 
 export const VotingPowerVariationsMapper = (
   variations: DBVotingPowerVariation[],
+  startTimestamp: number,
   endTimestamp: number,
-  days: DaysEnum,
 ): VotingPowerVariationsResponse => {
   return VotingPowerVariationsResponseSchema.parse({
-    period: PeriodResponseMapper(endTimestamp, days),
+    period: PeriodResponseSchema.parse({
+      startTimestamp: TimestampResponseMapper(startTimestamp),
+      endTimestamp: TimestampResponseMapper(endTimestamp),
+    }),
     items: variations.map(VotingPowerVariationResponseMapper),
   });
 };
 
 export const VotingPowerVariationsByAccountIdMapper = (
   delta: DBVotingPowerVariation,
+  startTimestamp: number,
   endTimestamp: number,
-  days: DaysEnum,
 ): VotingPowerVariationsByAccountIdResponse => {
   return VotingPowerVariationsByAccountIdResponseSchema.parse({
-    period: PeriodResponseMapper(endTimestamp, days),
+    period: PeriodResponseSchema.parse({
+      startTimestamp: TimestampResponseMapper(startTimestamp),
+      endTimestamp: TimestampResponseMapper(endTimestamp),
+    }),
     data: VotingPowerVariationResponseMapper(delta),
   });
 };

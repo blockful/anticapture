@@ -48,7 +48,7 @@ export function votingPowerVariations(app: Hono, service: VotingPowerService) {
       );
 
       return context.json(
-        VotingPowerVariationsMapper(result, toDate, toDate - fromDate),
+        VotingPowerVariationsMapper(result, fromDate, toDate),
       );
     },
   );
@@ -91,11 +91,7 @@ export function votingPowerVariations(app: Hono, service: VotingPowerService) {
       );
 
       return context.json(
-        VotingPowerVariationsByAccountIdMapper(
-          result,
-          toDate,
-          toDate - fromDate,
-        ),
+        VotingPowerVariationsByAccountIdMapper(result, fromDate, toDate),
       );
     },
   );

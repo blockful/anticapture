@@ -8,6 +8,7 @@ import { createPublicClient, http } from "viem";
 
 import {
   accountBalanceVariations,
+  accountBalances,
   accountInteractions,
   dao,
   delegationPercentage,
@@ -30,34 +31,36 @@ import { docs } from "@/api/docs";
 import { env } from "@/env";
 import { DaoCache } from "@/api/cache/dao-cache";
 import {
+  AccountBalanceRepository,
+  AccountInteractionsRepository,
+  BalanceVariationsRepository,
   DelegationPercentageRepository,
+  DrizzleProposalsActivityRepository,
   DrizzleRepository,
   NFTPriceRepository,
+  NounsVotingPowerRepository,
   TokenRepository,
   TransactionsRepository,
-  VotingPowerRepository,
-  DrizzleProposalsActivityRepository,
-  NounsVotingPowerRepository,
-  AccountInteractionsRepository,
-  AccountBalanceRepository,
-  TreasuryRepository,
   TransfersRepository,
+  TreasuryRepository,
+  VotingPowerRepository,
 } from "@/api/repositories";
 import { errorHandler } from "@/api/middlewares";
 import { getClient } from "@/lib/client";
 import { getChain } from "@/lib/utils";
 import {
-  DelegationPercentageService,
-  VotingPowerService,
-  TransactionsService,
-  ProposalsService,
-  CoingeckoService,
-  NFTPriceService,
-  TokenService,
+  AccountBalanceService,
   BalanceVariationsService,
+  CoingeckoService,
   DaoService,
+  DelegationPercentageService,
   HistoricalBalancesService,
+  NFTPriceService,
+  ProposalsService,
+  TokenService,
+  TransactionsService,
   TransfersService,
+  VotingPowerService,
 } from "@/api/services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
@@ -110,7 +113,6 @@ const optimisticProposalType =
     : undefined;
 
 const repo = new DrizzleRepository();
-const accountBalanceRepo = new AccountBalanceRepository();
 const votingPowerRepo = new VotingPowerRepository();
 const proposalsRepo = new DrizzleProposalsActivityRepository();
 const transactionsRepo = new TransactionsRepository();
@@ -118,6 +120,8 @@ const delegationPercentageRepo = new DelegationPercentageRepository();
 const delegationPercentageService = new DelegationPercentageService(
   delegationPercentageRepo,
 );
+const balanceVariationsRepo = new BalanceVariationsRepository();
+const accountBalanceRepo = new AccountBalanceRepository();
 const accountInteractionRepo = new AccountInteractionsRepository();
 const transactionsService = new TransactionsService(transactionsRepo);
 const votingPowerService = new VotingPowerService(
@@ -128,10 +132,11 @@ const votingPowerService = new VotingPowerService(
 );
 const daoCache = new DaoCache();
 const daoService = new DaoService(daoClient, daoCache, env.CHAIN_ID);
-const accountBalanceService = new BalanceVariationsService(
-  accountBalanceRepo,
+const balanceVariationsService = new BalanceVariationsService(
+  balanceVariationsRepo,
   accountInteractionRepo,
 );
+const accountBalanceService = new AccountBalanceService(accountBalanceRepo);
 
 const tokenPriceClient =
   env.DAO_ID === DaoIdEnum.NOUNS
@@ -177,7 +182,7 @@ proposals(
 historicalBalances(
   app,
   env.DAO_ID,
-  new HistoricalBalancesService(accountBalanceRepo),
+  new HistoricalBalancesService(balanceVariationsRepo),
 );
 transactions(app, transactionsService);
 lastUpdate(app);
@@ -185,8 +190,9 @@ delegationPercentage(app, delegationPercentageService);
 historicalVotingPowers(app, votingPowerService);
 votingPowerVariations(app, votingPowerService);
 votingPowers(app, votingPowerService);
-accountBalanceVariations(app, accountBalanceService);
-accountInteractions(app, accountBalanceService);
+accountBalanceVariations(app, balanceVariationsService);
+accountBalances(app, env.DAO_ID, accountBalanceService);
+accountInteractions(app, balanceVariationsService);
 transfers(app, new TransfersService(new TransfersRepository()));
 dao(app, daoService);
 docs(app);

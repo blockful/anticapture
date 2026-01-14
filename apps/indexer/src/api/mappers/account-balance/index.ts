@@ -1,13 +1,101 @@
-import { DaoIdEnum, DaysEnum, DaysOpts } from "@/lib/enums";
 import { z } from "@hono/zod-openapi";
 import { Address, isAddress } from "viem";
-import { PERCENTAGE_NO_BASELINE } from "@/api/mappers/constants";
+import { accountBalance } from "ponder:schema";
+
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
+import { DaoIdEnum, DaysEnum, DaysOpts } from "@/lib/enums";
+import { PERCENTAGE_NO_BASELINE } from "@/api/mappers/constants";
 import { calculateHistoricalBlockNumber } from "@/lib/blockTime";
 import { PeriodResponseMapper, PeriodResponseSchema } from "../shared";
 
+export const AccountBalancesRequestSchema = z.object({
+  limit: z.coerce
+    .number()
+    .int()
+    .min(1, "Limit must be a positive integer")
+    .max(100, "Limit cannot exceed 100")
+    .optional()
+    .default(20),
+  skip: z.coerce
+    .number()
+    .int()
+    .min(0, "Skip must be a non-negative integer")
+    .optional()
+    .default(0),
+  orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
+  addresses: z
+    .union([
+      z
+        .string()
+        .refine(isAddress, "Invalid address")
+        .transform((addr) => [addr]),
+      z.array(z.string().refine(isAddress, "Invalid addresses")),
+    ])
+    .optional()
+    .transform((val) => (val === undefined ? [] : val)),
+  delegates: z
+    .union([
+      z
+        .string()
+        .refine(isAddress, "Invalid address")
+        .transform((addr) => [addr]),
+      z.array(z.string().refine(isAddress, "Invalid addresses")),
+    ])
+    .optional()
+    .transform((val) => (val === undefined ? [] : val)),
+  fromValue: z
+    .string()
+    .transform((val) => BigInt(val))
+    .optional(),
+  toValue: z
+    .string()
+    .transform((val) => BigInt(val))
+    .optional(),
+});
+
+export const AccountBalanceResponseSchema = z.object({
+  accountId: z.string(),
+  balance: z.string(),
+  tokenId: z.string(),
+  delegate: z.string(),
+});
+
+export const AccountBalancesResponseSchema = z.object({
+  items: z.array(AccountBalanceResponseSchema),
+  totalCount: z.number(),
+});
+
+export type AccountBalancesResponse = z.infer<
+  typeof AccountBalancesResponseSchema
+>;
+
+export type AccountBalanceResponse = z.infer<
+  typeof AccountBalanceResponseSchema
+>;
+
+export const AccountBalancesResponseMapper = (
+  items: DBAccountBalance[],
+  totalCount: bigint,
+): AccountBalancesResponse => {
+  return {
+    totalCount: Number(totalCount),
+    items: items.map((item) => AccountBalanceResponseMapper(item)),
+  };
+};
+
+export const AccountBalanceResponseMapper = (
+  item: DBAccountBalance,
+): AccountBalanceResponse => {
+  return {
+    accountId: item.accountId,
+    balance: item.balance.toString(),
+    tokenId: item.tokenId,
+    delegate: item.delegate,
+  };
+};
+
 export const AccountBalanceVariationsRequestSchema = z.object({
-  days: z
+  days: z // TODO: change to `fromDate` and `toDate` (TIMESTAMP)
     .enum(DaysOpts)
     .optional()
     .default("90d")
@@ -41,24 +129,22 @@ export const AccountBalanceVariationsResponseSchema = z.object({
   ),
 });
 
-export const AccountInteractionsRequestSchema =
+export const AccountInteractionsParamsSchema = z.object({
+  address: z.string().refine(isAddress, "Invalid address"),
+});
+
+export const AccountInteractionsQuerySchema =
   AccountBalanceVariationsRequestSchema.extend({
-    accountId: z.string(),
     minAmount: z
       .string()
       .transform((val) => BigInt(val))
-      .optional(), //z.coerce.bigint().optional() doesn't work because of a bug with zod, zod asks for a string that satisfies REGEX ^d+$, when it should be ^\d+$
+      .optional(),
     maxAmount: z
       .string()
       .transform((val) => BigInt(val))
-      .optional(), //z.coerce.bigint().optional() doesn't work because of a bug with zod, zod asks for a string that satisfies REGEX ^d+$, when it should be ^\d+$
+      .optional(),
     orderBy: z.enum(["volume", "count"]).optional().default("count"),
-    address: z
-      .string()
-      .optional()
-      .transform((addr) =>
-        addr ? (isAddress(addr) ? addr : undefined) : undefined,
-      ),
+    filterAddress: z.string().refine(isAddress, "Invalid address").optional(),
   });
 
 export const AccountInteractionsResponseSchema = z.object({
@@ -94,6 +180,8 @@ export type DBAccountInteraction = DBAccountBalanceVariation & {
   totalVolume: bigint;
   transferCount: bigint;
 };
+
+export type DBAccountBalance = typeof accountBalance.$inferSelect;
 
 export interface AccountInteractions {
   interactionCount: number;

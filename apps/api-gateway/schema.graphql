@@ -14,8 +14,6 @@ type Query {
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/token`\nGet property data for a specific token\n"
   token(currency: queryInput_token_currency = usd): token_200_response
   tokens(where: tokenFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPage!
-  accountBalance(accountId: String!, tokenId: String!): accountBalance
-  accountBalances(where: accountBalanceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountBalancePage!
   votingPowerHistorys(where: votingPowerHistoryFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votingPowerHistoryPage!
   delegation(transactionHash: String!, delegatorAccountId: String!, delegateAccountId: String!): delegation
   delegations(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): delegationPage!
@@ -82,7 +80,7 @@ type Query {
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/proposals/{args.id}/non-voters`\nReturns the active delegates that did not vote on a given proposal\n"
   proposalNonVoters(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposalNonVoters_orderDirection = desc, addresses: JSON): proposalNonVoters_200_response
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/historical-balances`\nFetch historical token balances for multiple addresses at a specific time period using multicall\n"
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/balances/historical`\nFetch historical token balances for multiple addresses at a specific time period using multicall\n"
   historicalBalances(addresses: JSON!, days: queryInput_historicalBalances_days = _7d): [query_historicalBalances_items]
 
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/transactions`\nGet transactions with their associated transfers and delegations, with optional filtering and sorting\n"
@@ -117,10 +115,10 @@ type Query {
   historicalVotingPowers(accountId: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_historicalVotingPowers_orderBy = timestamp, orderDirection: queryInput_historicalVotingPowers_orderDirection = desc, fromDate: String, toDate: String, fromValue: String, toValue: String): historicalVotingPowers_200_response
 
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/voting-powers/variations`\nReturns a mapping of the biggest changes to voting power associated by delegate address\n"
-  votingPowerVariations(addresses: JSON, fromDate: String = "1760552141", toDate: String = "1768328141", limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_votingPowerVariations_orderDirection = desc): votingPowerVariations_200_response
+  votingPowerVariations(addresses: JSON, fromDate: String = "1760647392", toDate: String = "1768423392", limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_votingPowerVariations_orderDirection = desc): votingPowerVariations_200_response
 
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/voting-powers/{args.accountId}/variations`\nReturns a the changes to voting power by period and accountId\n"
-  votingPowerVariationsByAccountId(accountId: String!, fromDate: String = "1760552141", toDate: String = "1768328141"): votingPowerVariationsByAccountId_200_response
+  votingPowerVariationsByAccountId(accountId: String!, fromDate: String = "1760647392", toDate: String = "1768423392"): votingPowerVariationsByAccountId_200_response
 
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/voting-powers`\nReturns sorted and paginated account voting power records\n"
   votingPowers(limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_votingPowers_orderDirection = desc, orderBy: queryInput_votingPowers_orderBy = votingPower, addresses: JSON, fromValue: String, toValue: String): votingPowers_200_response
@@ -128,11 +126,17 @@ type Query {
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/voting-powers/{args.accountId}`\nReturns voting power information for a specific address (account)\n"
   votingPowerByAccountId(accountId: String!): votingPowerByAccountId_200_response
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/account-balance/variations`\nReturns a mapping of the biggest variations to account balances associated by account address\n"
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/balances/variations`\nReturns a mapping of the biggest variations to account balances associated by account address\n"
   accountBalanceVariations(days: queryInput_accountBalanceVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalanceVariations_orderDirection = desc): accountBalanceVariations_200_response
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/account-balance/interactions`\nReturns a mapping of the largest interactions between accounts. \nPositive amounts signify net token transfers FROM <accountId>, whilst negative amounts refer to net transfers TO <accountId>\n"
-  accountInteractions(days: queryInput_accountInteractions_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountInteractions_orderDirection = desc, accountId: String!, minAmount: String, maxAmount: String, orderBy: queryInput_accountInteractions_orderBy = count, address: String): accountInteractions_200_response
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/balances`\nReturns sorted and paginated account balance records\n"
+  accountBalances(limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalances_orderDirection = desc, addresses: JSON, delegates: JSON, fromValue: String, toValue: String): accountBalances_200_response
+
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/accounts/{args.address}/balances`\nReturns account balance information for a specific address\n"
+  accountBalanceByAccountId(address: String!): accountBalanceByAccountId_200_response
+
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/balances/{args.address}/interactions`\nReturns a mapping of the largest interactions between accounts. \nPositive amounts signify net token transfers FROM <address>, whilst negative amounts refer to net transfers TO <address>\n"
+  accountInteractions(address: String!, days: queryInput_accountInteractions_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountInteractions_orderDirection = desc, minAmount: String, maxAmount: String, orderBy: queryInput_accountInteractions_orderBy = count, filterAddress: String): accountInteractions_200_response
 
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/accounts/{args.address}/transfers`\nGet transfers of a given address\n"
   transfers(address: String!, limit: Float = 10, offset: Float, sortBy: queryInput_transfers_sortBy = timestamp, sortOrder: queryInput_transfers_sortOrder = asc, from: String, to: String, fromDate: Float, toDate: Float, fromValue: String, toValue: String): transfers_200_response
@@ -1872,7 +1876,6 @@ type votingPowerVariations_200_response {
 }
 
 type query_votingPowerVariations_period {
-  days: String!
   startTimestamp: String!
   endTimestamp: String!
 }
@@ -1896,7 +1899,6 @@ type votingPowerVariationsByAccountId_200_response {
 }
 
 type query_votingPowerVariationsByAccountId_period {
-  days: String!
   startTimestamp: String!
   endTimestamp: String!
 }
@@ -1946,7 +1948,6 @@ type accountBalanceVariations_200_response {
 }
 
 type query_accountBalanceVariations_period {
-  days: String!
   startTimestamp: String!
   endTimestamp: String!
 }
@@ -1972,6 +1973,30 @@ enum queryInput_accountBalanceVariations_orderDirection {
   desc
 }
 
+type accountBalances_200_response {
+  items: [query_accountBalances_items_items]!
+  totalCount: Float!
+}
+
+type query_accountBalances_items_items {
+  accountId: String!
+  balance: String!
+  tokenId: String!
+  delegate: String!
+}
+
+enum queryInput_accountBalances_orderDirection {
+  asc
+  desc
+}
+
+type accountBalanceByAccountId_200_response {
+  accountId: String!
+  balance: String!
+  tokenId: String!
+  delegate: String!
+}
+
 type accountInteractions_200_response {
   period: query_accountInteractions_period!
   totalCount: Float!
@@ -1979,7 +2004,6 @@ type accountInteractions_200_response {
 }
 
 type query_accountInteractions_period {
-  days: String!
   startTimestamp: String!
   endTimestamp: String!
 }

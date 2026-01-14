@@ -68,20 +68,23 @@ export const useVotingPowerData = (
     othersPercentage: 0,
   };
 
+  // Get total voting power from accountPower query
+  const accountPowerVotingPower =
+    delegatorsVotingPowerDetails?.votingPowerByAccountId?.votingPower;
+
   // return default data when there is no valid data
-  if (
-    !topFiveDelegators ||
-    topFiveDelegators.length === 0 ||
-    !delegatorsVotingPowerDetails ||
-    !delegatorsVotingPowerDetails.votingPowerByAccountId ||
-    !delegatorsVotingPowerDetails.votingPowerByAccountId.votingPower
-  ) {
+  if (!topFiveDelegators || topFiveDelegators.length === 0) {
     return defaultData;
   }
 
-  const delegateCurrentVotingPower = BigInt(
-    delegatorsVotingPowerDetails?.votingPowerByAccountId?.votingPower,
-  );
+  // Use accountPower.votingPower as the total voting power (actual total)
+  // Fallback to sum of top 5 if accountPower is not available
+  const delegateCurrentVotingPower = accountPowerVotingPower
+    ? BigInt(accountPowerVotingPower)
+    : topFiveDelegators.reduce(
+        (acc, item) => acc + BigInt(item.rawBalance),
+        BigInt(0),
+      );
 
   const currentVotingPowerNumber = Number(
     token === "ERC20"
@@ -89,13 +92,14 @@ export const useVotingPowerData = (
       : Number(delegateCurrentVotingPower),
   );
 
-  // Calculate the total value of the delegators that will be shown individually (>= 1%)
+  // Calculate the total value of the delegators that will be shown individually (top 5)
   const totalIndividualDelegators = topFiveDelegators.reduce((acc, item) => {
     if (item.rawBalance === 0n) return acc;
     return acc + BigInt(item.rawBalance);
   }, BigInt(0));
 
   // Others is the remaining value that completes 100%
+  // This will be > 0 when there are more than 5 delegators
   const othersValue = delegateCurrentVotingPower - totalIndividualDelegators;
   const othersPercentage = Number(
     (Number(othersValue) / Number(delegateCurrentVotingPower)) * 100,

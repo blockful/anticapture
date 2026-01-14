@@ -48,15 +48,14 @@ interface InteractionResponse {
 export const useAccountInteractionsData = ({
   daoId,
   address,
-  // accountId,
-  // sortBy,
+  filterAddress,
   sortDirection,
   filterVariables,
   limit = 100,
 }: {
   daoId: DaoIdEnum;
   address: string;
-  accountId?: string;
+  filterAddress?: string;
   sortBy?: "transferCount" | "totalVolume";
   sortDirection?: "asc" | "desc";
   filterVariables?: {
@@ -69,14 +68,13 @@ export const useAccountInteractionsData = ({
 
   const { data, loading, error } = useGetAccountInteractionsQuery({
     variables: {
-      address: address,
-      // accountId: accountId,
-      // orderBy: sortBy,
+      address,
       orderDirection:
         sortDirection as QueryInput_AccountInteractions_OrderDirection,
-      minAmount: filterVariables?.minAmount ?? "",
-      maxAmount: filterVariables?.maxAmount ?? "",
+      minAmount: filterVariables?.minAmount,
+      maxAmount: filterVariables?.maxAmount,
       limit,
+      filterAddress,
     },
     context: {
       headers: {
