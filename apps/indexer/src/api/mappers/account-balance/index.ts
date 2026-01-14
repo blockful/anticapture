@@ -95,7 +95,7 @@ export const AccountBalanceResponseMapper = (
 };
 
 export const AccountBalanceVariationsRequestSchema = z.object({
-  days: z
+  days: z // TODO: change to `fromDate` and `toDate` (TIMESTAMP)
     .enum(DaysOpts)
     .optional()
     .default("90d")

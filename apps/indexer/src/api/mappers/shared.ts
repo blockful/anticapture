@@ -7,18 +7,19 @@ export type AmountFilter = {
 };
 
 export const PeriodResponseSchema = z.object({
-  days: z.string(),
   startTimestamp: z.string(),
   endTimestamp: z.string(),
 });
 
 export type PeriodResponse = z.infer<typeof PeriodResponseSchema>;
 
+export const TimestampResponseMapper = (timestamp: number): string =>
+  new Date(timestamp * 1000).toISOString();
+
 export const PeriodResponseMapper = (
   endTimestamp: number,
   days: DaysEnum,
 ): PeriodResponse => ({
-  days: DaysEnum[days] as string,
-  startTimestamp: new Date((endTimestamp - days) * 1000).toISOString(),
-  endTimestamp: new Date(endTimestamp * 1000).toISOString(),
+  startTimestamp: TimestampResponseMapper(endTimestamp - days),
+  endTimestamp: TimestampResponseMapper(endTimestamp),
 });
