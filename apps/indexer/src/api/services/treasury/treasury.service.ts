@@ -6,9 +6,9 @@ import { TreasuryRepository } from "../../repositories/treasury";
 import { forwardFill, createDailyTimelineToToday } from "@/lib/time-series";
 import {
   calculateCutoffTimestamp,
-  truncateTimestampTime,
   normalizeMapTimestamps,
-} from "@/eventHandlers/shared";
+  truncateToMidnightSeconds,
+} from "@/lib/time-series";
 
 /**
  * Treasury Service - Orchestrates treasury data retrieval and calculation.
@@ -42,7 +42,7 @@ export class TreasuryService {
     // Convert to map with normalized timestamps (midnight UTC)
     const liquidMap = new Map<number, number>();
     data.forEach((item) => {
-      const timestamp = truncateTimestampTime(item.date);
+      const timestamp = truncateToMidnightSeconds(item.date);
       liquidMap.set(timestamp, item.liquidTreasury);
     });
 

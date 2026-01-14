@@ -4,9 +4,9 @@ import axios, { AxiosInstance } from "axios";
 import { TokenHistoricalPriceResponse } from "@/api/mappers";
 import { PriceProvider } from "@/api/services/treasury/types";
 import {
-  truncateTimestampTime,
+  truncateToMidnightSeconds,
   calculateCutoffTimestamp,
-} from "@/eventHandlers/shared";
+} from "@/lib/time-series";
 import { forwardFill, createDailyTimelineToToday } from "@/lib/time-series";
 
 interface Repository {
@@ -66,7 +66,7 @@ export class NFTPriceService implements PriceProvider {
     // Create map with normalized timestamps (midnight UTC)
     const priceMap = new Map<number, string>();
     rawPrices.forEach((item) => {
-      const normalizedTs = truncateTimestampTime(item.timestamp);
+      const normalizedTs = truncateToMidnightSeconds(item.timestamp);
       priceMap.set(normalizedTs, item.price);
     });
 
@@ -101,7 +101,7 @@ export class NFTPriceService implements PriceProvider {
 
     const priceMap = new Map<number, number>();
     priceData.forEach((item) => {
-      const normalizedTimestamp = truncateTimestampTime(item.timestamp);
+      const normalizedTimestamp = truncateToMidnightSeconds(item.timestamp);
       priceMap.set(normalizedTimestamp, Number(item.price));
     });
 
