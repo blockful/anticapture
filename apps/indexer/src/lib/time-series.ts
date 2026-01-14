@@ -2,7 +2,6 @@
  * Time-series utilities for forward-fill, timeline creation, and data filtering.
  *
  * Forward-fill: Use the last known value for any missing data points.
- * Common in financial/blockchain data where values persist until they change.
  */
 
 import { ONE_DAY_MS, SECONDS_IN_DAY } from "./enums";
