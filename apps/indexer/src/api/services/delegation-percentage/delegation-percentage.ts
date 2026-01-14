@@ -27,8 +27,8 @@
  */
 
 import { MetricTypesEnum } from "@/lib/constants";
-import { SECONDS_IN_DAY, getCurrentDayTimestamp } from "@/lib/enums";
-import { forwardFill } from "@/lib/time-series";
+import { getCurrentDayTimestamp } from "@/lib/enums";
+import { createDailyTimeline, forwardFill } from "@/lib/time-series";
 import { DelegationPercentageRepository } from "@/api/repositories/";
 import {
   DelegationPercentageItem,
@@ -118,7 +118,7 @@ export class DelegationPercentageService {
     );
 
     // 6. Generate complete date range
-    const allDates = this.generateDateRange(
+    const allDates = this.getOrderedTimeline(
       dateMap,
       effectiveStartDate,
       normalizedEndDate,
@@ -201,11 +201,11 @@ export class DelegationPercentageService {
     }
 
     const datesFromDb = Array.from(dateMap.keys())
-      .map((d) => BigInt(d))
-      .sort((a, b) => Number(a - b));
+      .map((d) => Number(d))
+      .sort((a, b) => a - b);
     const firstRealDate = datesFromDb[0];
 
-    if (firstRealDate && BigInt(referenceDate) < firstRealDate) {
+    if (firstRealDate && Number(referenceDate) < firstRealDate) {
       return firstRealDate.toString();
     }
 
@@ -247,38 +247,30 @@ export class DelegationPercentageService {
    * Fills gaps between first and last date with all days
    * If endDate is not provided, uses current day (today) for forward-fill
    */
-  private generateDateRange(
-    //TODO
+  private getOrderedTimeline(
     dateMap: Map<string, DateData>,
     startDate?: string,
     endDate?: string,
     orderDirection?: "asc" | "desc",
-  ): bigint[] {
-    const allDates: bigint[] = [];
-
+  ): number[] {
     if (dateMap.size === 0) {
-      return allDates;
+      return [];
     }
 
     const datesFromDb = Array.from(dateMap.keys())
-      .map((d) => BigInt(d))
-      .sort((a, b) => Number(a - b));
+      .map((d) => Number(d))
+      .sort((a, b) => a - b);
 
-    const firstDate = startDate ? BigInt(startDate) : datesFromDb[0];
-    const lastDate = endDate ? BigInt(endDate) : getCurrentDayTimestamp();
+    const firstDate = startDate ? Number(startDate) : datesFromDb[0];
+    const lastDate = endDate
+      ? Number(endDate)
+      : Number(getCurrentDayTimestamp());
 
     if (!firstDate || !lastDate) {
-      return allDates;
+      return [];
     }
 
-    // Generate all days in range
-    for (
-      let date = firstDate;
-      date <= lastDate;
-      date += BigInt(SECONDS_IN_DAY)
-    ) {
-      allDates.push(date);
-    }
+    const allDates = createDailyTimeline(firstDate, lastDate);
 
     if (orderDirection === "desc") {
       allDates.reverse();
@@ -291,17 +283,17 @@ export class DelegationPercentageService {
    * Calculates delegation percentage
    */
   private calculateDelegationPercentage(
-    allDates: bigint[],
+    allDates: number[],
     dateMap: Map<string, DateData>,
     initialValues: { delegated: bigint; total: bigint } = {
       delegated: 0n,
       total: 0n,
     },
   ): DelegationPercentageItem[] {
-    const delegatedMap = new Map<bigint, bigint>();
-    const totalMap = new Map<bigint, bigint>();
+    const delegatedMap = new Map<number, bigint>();
+    const totalMap = new Map<number, bigint>();
     for (const [dateStr, data] of dateMap) {
-      const date = BigInt(dateStr);
+      const date = Number(dateStr);
       if (data.delegated !== undefined) delegatedMap.set(date, data.delegated);
       if (data.total !== undefined) totalMap.set(date, data.total);
     }
