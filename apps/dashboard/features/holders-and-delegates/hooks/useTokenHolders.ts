@@ -1,9 +1,7 @@
 "use client";
 
-import {
-  useGetTopTokenHoldersQuery,
-  useGetTokenHoldersCoutingQuery,
-} from "@anticapture/graphql-client/hooks";
+import { useGetTopTokenHoldersQuery } from "@anticapture/graphql-client/hooks";
+import { QueryInput_AccountBalances_OrderDirection } from "@anticapture/graphql-client";
 import { useMemo, useCallback, useState, useEffect } from "react";
 import { NetworkStatus } from "@apollo/client";
 import { useHistoricalBalances } from "@/shared/hooks/graphql-client/useHistoricalBalances";
@@ -49,7 +47,7 @@ interface UseTokenHoldersParams {
   daoId: DaoIdEnum;
   address: string | null;
   orderBy?: string;
-  orderDirection?: string;
+  orderDirection?: QueryInput_AccountBalances_OrderDirection;
   limit?: number;
   days: TimeInterval;
 }
@@ -57,7 +55,7 @@ interface UseTokenHoldersParams {
 export const useTokenHolders = ({
   daoId,
   orderBy = "balance",
-  orderDirection = "desc",
+  orderDirection = QueryInput_AccountBalances_OrderDirection.Desc,
   limit = 10,
   address,
   days,
@@ -93,9 +91,8 @@ export const useTokenHolders = ({
     networkStatus,
   } = useGetTopTokenHoldersQuery({
     variables: {
-      after: undefined,
-      before: undefined,
       limit,
+      skip: 0,
       orderDirection,
       ...(address && { addresses: [address] }),
     },
@@ -108,18 +105,11 @@ export const useTokenHolders = ({
     fetchPolicy: "cache-and-network", // Always check network for fresh data
   });
 
-  const { data: countingData } = useGetTokenHoldersCoutingQuery({
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
-      },
-    },
-  });
-
   const tokenHolderAddresses = useMemo(
     () =>
       tokenHoldersData?.accountBalances?.items
-        ?.map((tokenHolder) => tokenHolder.accountId)
+        ?.filter((tokenHolder) => tokenHolder !== null)
+        .map((tokenHolder) => tokenHolder.accountId)
         .filter(Boolean) || [],
     [tokenHoldersData],
   );
@@ -150,9 +140,8 @@ export const useTokenHolders = ({
   // Refetch data when sorting changes to ensure we start from page 1
   useEffect(() => {
     refetch({
-      after: undefined,
-      before: undefined,
       limit,
+      skip: 0,
       orderDirection,
       ...(address && { addresses: [address] }),
     });
@@ -161,12 +150,14 @@ export const useTokenHolders = ({
   const processedData = useMemo(() => {
     if (!tokenHoldersData?.accountBalances?.items) return null;
 
-    return tokenHoldersData.accountBalances.items.map((holder) => ({
-      accountId: holder.accountId,
-      balance: holder.balance,
-      delegate: holder.delegate,
-      tokenId: holder.tokenId,
-    }));
+    return tokenHoldersData.accountBalances.items
+      .filter((holder) => holder !== null)
+      .map((holder) => ({
+        accountId: holder.accountId,
+        balance: holder.balance,
+        delegate: holder.delegate,
+        tokenId: holder.tokenId,
+      }));
   }, [tokenHoldersData]);
 
   const isHistoricalLoadingFor = useCallback(
@@ -176,17 +167,16 @@ export const useTokenHolders = ({
 
   // Pagination info - combines GraphQL data with our page tracking
   const pagination = useMemo<PaginationInfo>(() => {
-    const pageInfo = tokenHoldersData?.accountBalances?.pageInfo;
-    const totalCount = countingData?.accountBalances?.totalCount || 0;
+    const totalCount = tokenHoldersData?.accountBalances?.totalCount || 0;
     const currentItemsCount =
       tokenHoldersData?.accountBalances?.items?.length || 0;
     const totalPages = Math.ceil(totalCount / itemsPerPage);
 
     return {
-      hasNextPage: pageInfo?.hasNextPage ?? false,
-      hasPreviousPage: pageInfo?.hasPreviousPage ?? false,
-      endCursor: pageInfo?.endCursor,
-      startCursor: pageInfo?.startCursor,
+      hasNextPage: currentPage < totalPages,
+      hasPreviousPage: currentPage > 1,
+      endCursor: null,
+      startCursor: null,
       totalCount,
       currentPage,
       totalPages,
@@ -194,8 +184,7 @@ export const useTokenHolders = ({
       currentItemsCount,
     };
   }, [
-    tokenHoldersData?.accountBalances?.pageInfo,
-    countingData?.accountBalances?.totalCount,
+    tokenHoldersData?.accountBalances?.totalCount,
     tokenHoldersData?.accountBalances?.items?.length,
     currentPage,
     itemsPerPage,
@@ -203,11 +192,7 @@ export const useTokenHolders = ({
 
   // Fetch next page function
   const fetchNextPage = useCallback(async () => {
-    if (
-      !pagination.hasNextPage ||
-      !pagination.endCursor ||
-      isPaginationLoading
-    ) {
+    if (!pagination.hasNextPage || isPaginationLoading) {
       console.warn("No next page available or already loading");
       return;
     }
@@ -215,24 +200,33 @@ export const useTokenHolders = ({
     setIsPaginationLoading(true);
 
     try {
+      // Calculate skip based on current loaded items count
+      const currentItemsCount =
+        tokenHoldersData?.accountBalances?.items?.length || 0;
+      const skip = currentItemsCount;
+
       await fetchMore({
         variables: {
-          after: pagination.endCursor,
-          before: undefined,
           limit,
+          skip,
           orderDirection,
           ...(address && { addresses: [address] }),
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
-          if (!fetchMoreResult) return previousResult;
-          const prevItems = previousResult.accountBalances.items ?? [];
+          if (!fetchMoreResult?.accountBalances) return previousResult;
+
+          // Append new items to existing ones (infinite scroll)
+          const prevItems = previousResult.accountBalances?.items ?? [];
           const newItems = fetchMoreResult.accountBalances.items ?? [];
+
+          // Filter out duplicates based on accountId
           const merged = [
             ...prevItems,
             ...newItems.filter(
-              (n) => !prevItems.some((p) => p.accountId === n.accountId),
+              (n) => n && !prevItems.some((p) => p?.accountId === n.accountId),
             ),
           ];
+
           return {
             ...fetchMoreResult,
             accountBalances: {
@@ -253,20 +247,16 @@ export const useTokenHolders = ({
   }, [
     fetchMore,
     pagination.hasNextPage,
-    pagination.endCursor,
     limit,
     orderDirection,
     address,
     isPaginationLoading,
+    tokenHoldersData?.accountBalances?.items?.length,
   ]);
 
   // Fetch previous page function
   const fetchPreviousPage = useCallback(async () => {
-    if (
-      !pagination.hasPreviousPage ||
-      !pagination.startCursor ||
-      isPaginationLoading
-    ) {
+    if (!pagination.hasPreviousPage || isPaginationLoading) {
       console.warn("No previous page available or already loading");
       return;
     }
@@ -274,16 +264,18 @@ export const useTokenHolders = ({
     setIsPaginationLoading(true);
 
     try {
+      // Calculate skip for the previous page
+      const skip = (currentPage - 2) * limit;
+
       await fetchMore({
         variables: {
-          after: undefined,
-          before: pagination.startCursor,
           limit,
+          skip,
           orderDirection,
           ...(address && { addresses: [address] }),
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
-          if (!fetchMoreResult) return previousResult;
+          if (!fetchMoreResult?.accountBalances) return previousResult;
 
           // Replace the current data with the new page data
           return {
@@ -306,11 +298,11 @@ export const useTokenHolders = ({
   }, [
     fetchMore,
     pagination.hasPreviousPage,
-    pagination.startCursor,
     limit,
     orderDirection,
     address,
     isPaginationLoading,
+    currentPage,
   ]);
 
   // Enhanced refetch that resets pagination

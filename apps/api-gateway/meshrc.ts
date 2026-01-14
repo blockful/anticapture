@@ -32,6 +32,8 @@ export default processConfig(
                     filters: [
                       "Query.!{account}",
                       "Query.!{accounts}",
+                      'Query.!{accountBalance}',
+                      'Query.!{accountBalances}',
                       "Query.!{proposalsOnchain}",
                       "Query.!{proposalsOnchains}",
                       "Query.!{tokenPrice}",

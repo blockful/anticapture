@@ -33,6 +33,7 @@ export class VotingPowerRepository {
       .orderBy(
         votingPowerHistory.accountId,
         desc(votingPowerHistory.timestamp),
+        desc(votingPowerHistory.logIndex),
       );
   }
 

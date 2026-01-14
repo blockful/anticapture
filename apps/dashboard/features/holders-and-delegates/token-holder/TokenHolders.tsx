@@ -10,6 +10,7 @@ import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { useTokenHolders } from "@/features/holders-and-delegates/hooks/useTokenHolders";
+import { QueryInput_AccountBalances_OrderDirection } from "@anticapture/graphql-client";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
@@ -66,7 +67,7 @@ export const TokenHolders = ({
   } = useTokenHolders({
     daoId: daoId,
     limit: pageLimit,
-    orderDirection: sortOrder,
+    orderDirection: sortOrder as QueryInput_AccountBalances_OrderDirection,
     address: currentAddressFilter,
     days: days,
   });

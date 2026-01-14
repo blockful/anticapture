@@ -71,7 +71,7 @@ export const TopInteractionsTable = ({
     useAccountInteractionsData({
       daoId: daoId as DaoIdEnum,
       address: address,
-      accountId: currentAddressFilter ?? undefined,
+      filterAddress: currentAddressFilter ?? undefined,
       sortBy,
       sortDirection,
       filterVariables,
@@ -95,7 +95,7 @@ export const TopInteractionsTable = ({
   });
 
   const handleAddressFilterApply = (address: string | undefined) => {
-    setCurrentAddressFilter(address || "");
+    setCurrentAddressFilter(address || null);
   };
 
   const columns: ColumnDef<{
@@ -177,10 +177,10 @@ export const TopInteractionsTable = ({
                 setFilterVariables(() => ({
                   minAmount: filterState.minAmount
                     ? parseUnits(filterState.minAmount, decimals).toString()
-                    : undefined,
+                    : null,
                   maxAmount: filterState.maxAmount
                     ? parseUnits(filterState.maxAmount, decimals).toString()
-                    : undefined,
+                    : null,
                 }));
 
                 setIsFilterActive(
@@ -194,8 +194,8 @@ export const TopInteractionsTable = ({
                 // Reset to default sorting
                 setSortBy("transferCount");
                 setFilterVariables(() => ({
-                  minAmount: undefined,
-                  maxAmount: undefined,
+                  minAmount: null,
+                  maxAmount: null,
                 }));
               }}
               isActive={isFilterActive}

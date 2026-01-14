@@ -123,7 +123,6 @@ export const delegateChanged = async (
       .values({
         accountId: previousDelegate,
         daoId,
-        delegationsCount: 0,
       })
       .onConflictDoUpdate((current) => ({
         delegationsCount: Math.max(0, current.delegationsCount - 1),
@@ -135,6 +134,7 @@ export const delegateChanged = async (
     .values({
       accountId: delegate,
       daoId,
+      delegationsCount: 1,
     })
     .onConflictDoUpdate((current) => ({
       delegationsCount: current.delegationsCount + 1,

@@ -7,6 +7,7 @@ import {
   useGetTopFiveDelegatorsQuery,
   GetTopFiveDelegatorsQuery,
 } from "@anticapture/graphql-client/hooks";
+import { QueryInput_AccountBalances_OrderDirection } from "@anticapture/graphql-client";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { NetworkStatus } from "@apollo/client";
@@ -14,9 +15,6 @@ import daoConfig from "@/shared/dao-config";
 
 interface PaginationInfo {
   hasNextPage: boolean;
-  hasPreviousPage: boolean;
-  endCursor?: string | null;
-  startCursor?: string | null;
   totalCount: number;
   currentPage: number;
   totalPages: number;
@@ -26,16 +24,24 @@ interface PaginationInfo {
 
 type DelegationItem =
   GetDelegationsTimestampQuery["delegations"]["items"][number];
-type AccountBalanceBase =
-  GetDelegatorVotingPowerDetailsQuery["accountBalances"]["items"][number];
+type AccountBalanceBase = NonNullable<
+  NonNullable<
+    GetDelegatorVotingPowerDetailsQuery["accountBalances"]
+  >["items"][number]
+>;
 type BalanceWithTimestamp = AccountBalanceBase & {
   timestamp?: string | number;
 };
 
-type TopFiveDelegatorsWithBalance =
-  GetTopFiveDelegatorsQuery["accountBalances"]["items"][number] & {
-    rawBalance: bigint;
-  };
+type TopFiveDelegatorsWithBalance = Omit<
+  NonNullable<
+    NonNullable<GetTopFiveDelegatorsQuery["accountBalances"]>["items"][number]
+  >,
+  "balance"
+> & {
+  balance: number;
+  rawBalance: bigint;
+};
 
 interface UseVotingPowerResult {
   topFiveDelegators: TopFiveDelegatorsWithBalance[] | null;
@@ -47,7 +53,6 @@ interface UseVotingPowerResult {
   refetch: () => void;
   pagination: PaginationInfo;
   fetchNextPage: () => Promise<void>;
-  fetchPreviousPage: () => Promise<void>;
   fetchingMore: boolean;
   historicalDataLoading: boolean;
   totalCount: number;
@@ -56,14 +61,14 @@ interface UseVotingPowerParams {
   daoId: DaoIdEnum;
   address: string;
   orderBy?: string;
-  orderDirection?: string;
+  orderDirection?: QueryInput_AccountBalances_OrderDirection;
 }
 
 export const useVotingPower = ({
   daoId,
   address,
   orderBy = "balance",
-  orderDirection = "desc",
+  orderDirection = QueryInput_AccountBalances_OrderDirection.Desc,
 }: UseVotingPowerParams): UseVotingPowerResult => {
   const itemsPerPage = 10;
   const {
@@ -94,12 +99,11 @@ export const useVotingPower = ({
       },
     },
     variables: {
+      addresses: [address],
       address,
-      after: undefined,
-      before: undefined,
-      orderBy,
       orderDirection,
       limit: itemsPerPage,
+      skip: 0,
     },
     notifyOnNetworkStatusChange: true,
     fetchPolicy: "cache-and-network",
@@ -108,7 +112,7 @@ export const useVotingPower = ({
   // Count query
   const { data: countingData } = useGetVotingPowerCountingQuery({
     variables: {
-      address,
+      delegates: [address],
     },
     context: {
       headers: {
@@ -120,13 +124,13 @@ export const useVotingPower = ({
   // Refetch data when sorting changes to ensure we start from page 1
   useEffect(() => {
     refetch({
-      after: undefined,
-      before: undefined,
-      orderBy,
+      addresses: [address],
+      address,
       orderDirection,
       limit: itemsPerPage,
+      skip: 0,
     });
-  }, [orderBy, orderDirection, refetch, itemsPerPage]);
+  }, [orderBy, orderDirection, refetch, itemsPerPage, address]);
 
   const accountBalances = delegatorsVotingPowerDetails?.accountBalances?.items;
 
@@ -134,7 +138,9 @@ export const useVotingPower = ({
   // Prepare the array of delegator addresses once balances are fetched
   // ------------------------------------------------------------------
   const delegatorAddresses: string[] = accountBalances
-    ? accountBalances.map((item) => item.accountId)
+    ? accountBalances
+        .filter((item) => item !== null)
+        .map((item) => item.accountId)
     : [];
 
   // ------------------------------------------------------------------
@@ -186,10 +192,12 @@ export const useVotingPower = ({
   // ------------------------------------------------------------------
   // Enrich balances with timestamp (fallback to undefined)
   // ------------------------------------------------------------------
-  const balancesWithTimestamp = (accountBalances || []).map((account) => ({
-    ...account,
-    timestamp: timestampMap[account.accountId.toLowerCase()],
-  }));
+  const balancesWithTimestamp = (accountBalances || [])
+    .filter((account) => account !== null)
+    .map((account) => ({
+      ...account,
+      timestamp: timestampMap[account.accountId.toLowerCase()],
+    }));
 
   const { data: topFiveDelegators } = useGetTopFiveDelegatorsQuery({
     context: {
@@ -198,7 +206,7 @@ export const useVotingPower = ({
       },
     },
     variables: {
-      delegate: address,
+      delegates: [address],
       limit: 5,
     },
   });
@@ -209,17 +217,14 @@ export const useVotingPower = ({
 
   // Build pagination info combining GraphQL and local state
   const pagination = useMemo<PaginationInfo>(() => {
-    const pageInfo = delegatorsVotingPowerDetails?.accountBalances?.pageInfo;
     const totalCount = countingData?.accountBalances?.totalCount || 0;
     const currentItemsCount =
       delegatorsVotingPowerDetails?.accountBalances?.items?.length || 0;
     const totalPages = Math.ceil(totalCount / itemsPerPage);
 
     return {
-      hasNextPage: pageInfo?.hasNextPage ?? false,
-      hasPreviousPage: pageInfo?.hasPreviousPage ?? false,
-      endCursor: pageInfo?.endCursor,
-      startCursor: pageInfo?.startCursor,
+      hasNextPage: currentPage < totalPages,
+      hasPreviousPage: currentPage > 1,
       totalCount,
       currentPage,
       totalPages,
@@ -227,7 +232,6 @@ export const useVotingPower = ({
       currentItemsCount,
     };
   }, [
-    delegatorsVotingPowerDetails?.accountBalances?.pageInfo,
     countingData?.accountBalances?.totalCount,
     delegatorsVotingPowerDetails?.accountBalances?.items?.length,
     currentPage,
@@ -236,11 +240,7 @@ export const useVotingPower = ({
 
   // Next page
   const fetchNextPage = useCallback(async () => {
-    if (
-      !pagination.hasNextPage ||
-      !pagination.endCursor ||
-      isPaginationLoading
-    ) {
+    if (!pagination.hasNextPage || isPaginationLoading) {
       console.warn("No next page available or already loading");
       return;
     }
@@ -248,22 +248,26 @@ export const useVotingPower = ({
     setIsPaginationLoading(true);
 
     try {
+      // Calculate skip based on current loaded items count
+      const currentItemsCount =
+        delegatorsVotingPowerDetails?.accountBalances?.items?.length || 0;
+      const skip = currentItemsCount;
+
       await fetchMore({
         variables: {
-          after: pagination.endCursor,
-          before: undefined,
+          skip,
           orderBy,
           orderDirection,
           limit: itemsPerPage,
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
-          if (!fetchMoreResult) return previousResult;
-          const prevItems = previousResult.accountBalances.items ?? [];
+          if (!fetchMoreResult?.accountBalances) return previousResult;
+          const prevItems = previousResult.accountBalances?.items ?? [];
           const newItems = fetchMoreResult.accountBalances.items ?? [];
           const merged = [
             ...prevItems,
             ...newItems.filter(
-              (n) => !prevItems.some((p) => p.accountId === n.accountId),
+              (n) => n && !prevItems.some((p) => p?.accountId === n.accountId),
             ),
           ];
 
@@ -286,62 +290,11 @@ export const useVotingPower = ({
   }, [
     fetchMore,
     pagination.hasNextPage,
-    pagination.endCursor,
     orderBy,
     orderDirection,
     isPaginationLoading,
     itemsPerPage,
-  ]);
-
-  // Previous page
-  const fetchPreviousPage = useCallback(async () => {
-    if (
-      !pagination.hasPreviousPage ||
-      !pagination.startCursor ||
-      isPaginationLoading
-    ) {
-      console.warn("No previous page available or already loading");
-      return;
-    }
-
-    setIsPaginationLoading(true);
-
-    try {
-      await fetchMore({
-        variables: {
-          after: undefined,
-          before: pagination.startCursor,
-          orderBy,
-          orderDirection,
-          limit: itemsPerPage,
-        },
-        updateQuery: (previousResult, { fetchMoreResult }) => {
-          if (!fetchMoreResult) return previousResult;
-
-          return {
-            ...fetchMoreResult,
-            accountBalances: {
-              ...fetchMoreResult.accountBalances,
-              items: fetchMoreResult.accountBalances.items,
-            },
-          };
-        },
-      });
-
-      setCurrentPage((prev) => prev - 1);
-    } catch (err) {
-      console.error("Error fetching previous page:", err);
-    } finally {
-      setIsPaginationLoading(false);
-    }
-  }, [
-    fetchMore,
-    pagination.hasPreviousPage,
-    pagination.startCursor,
-    orderBy,
-    orderDirection,
-    isPaginationLoading,
-    itemsPerPage,
+    delegatorsVotingPowerDetails?.accountBalances?.items?.length,
   ]);
 
   // Reset pagination on refetch
@@ -350,16 +303,16 @@ export const useVotingPower = ({
     refetch();
   }, [refetch]);
 
-  const topDelegatorsItems = topFiveDelegators?.accountBalances.items?.map(
-    (item) => ({
+  const topDelegatorsItems = topFiveDelegators?.accountBalances?.items
+    ?.filter((item) => item !== null)
+    .map((item) => ({
       ...item,
       balance:
         token === "ERC20"
           ? Number(BigInt(item.balance) / BigInt(10 ** 18))
           : Number(item.balance),
       rawBalance: BigInt(item.balance),
-    }),
-  );
+    }));
 
   const isLoading = useMemo(() => {
     return (
@@ -379,10 +332,9 @@ export const useVotingPower = ({
     refetch: handleRefetch,
     pagination,
     fetchNextPage,
-    fetchPreviousPage,
     fetchingMore:
       networkStatus === NetworkStatus.fetchMore || isPaginationLoading,
     historicalDataLoading: tsLoading,
-    totalCount: countingData?.accountBalances.totalCount || 0,
+    totalCount: countingData?.accountBalances?.totalCount || 0,
   };
 };

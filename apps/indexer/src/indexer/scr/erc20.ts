@@ -229,7 +229,7 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
           delegationsCount: 1,
         })
         .onConflictDoUpdate((current) => ({
-          delegationsCount: (current.delegationsCount ?? 0) + 1,
+          delegationsCount: current.delegationsCount + 1,
         }));
     }
 

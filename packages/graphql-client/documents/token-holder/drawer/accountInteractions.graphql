@@ -5,15 +5,17 @@ query getAccountInteractions(
   $minAmount: String
   $orderDirection: queryInput_accountInteractions_orderDirection
   $skip: NonNegativeInt
+  $filterAddress: String
 ) {
   accountInteractions(
-    accountId: $address
+    address: $address
     days: _90d
     limit: $limit
     maxAmount: $maxAmount
     minAmount: $minAmount
     orderDirection: $orderDirection
     skip: $skip
+    filterAddress: $filterAddress
   ) {
     totalCount
     items {

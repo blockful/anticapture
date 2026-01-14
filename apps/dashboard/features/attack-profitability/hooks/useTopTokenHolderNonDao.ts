@@ -4,11 +4,15 @@ import {
   useGetDaoAddressesAccountBalancesQuery,
 } from "@anticapture/graphql-client/hooks";
 import { ApolloError, ApolloQueryResult } from "@apollo/client";
-import { Address } from "viem";
 
 interface TopTokenHolderNonDaoResponse {
   data:
-    | GetDaoAddressesAccountBalancesQuery["accountBalances"]["items"][0]
+    | {
+        __typename?: "query_accountBalances_items_items";
+        accountId: string;
+        balance: string;
+      }
+    | null
     | undefined;
   loading: boolean;
   error: ApolloError | undefined;
@@ -23,8 +27,6 @@ interface TopTokenHolderNonDaoResponse {
  */
 export const useTopTokenHolderNonDao = (
   daoId: DaoIdEnum,
-  tokenAddress: Address,
-  daoAddresses: string[],
   options?: {
     refreshInterval?: number;
     revalidateOnFocus?: boolean;
@@ -38,10 +40,6 @@ export const useTopTokenHolderNonDao = (
           "anticapture-dao-id": daoId,
         },
       },
-      variables: {
-        tokenAddresses: tokenAddress,
-        daoAddresses: daoAddresses as string[],
-      },
       notifyOnNetworkStatusChange: true,
       fetchPolicy: "cache-and-network",
       pollInterval: options?.refreshInterval || 0,
@@ -49,7 +47,7 @@ export const useTopTokenHolderNonDao = (
     });
 
   return {
-    data: data?.accountBalances.items[0] || undefined,
+    data: data?.accountBalances?.items[0] || undefined,
     loading,
     error: error || undefined,
     refetch,

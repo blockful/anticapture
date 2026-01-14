@@ -16,7 +16,7 @@ import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 type TabId = "tokenHolders" | "delegates";
 
 export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
-  const defaultDays = TimeInterval.ONE_YEAR;
+  const defaultDays = TimeInterval.NINETY_DAYS;
   const [days, setDays] = useQueryState(
     "days",
     parseAsStringEnum(Object.values(TimeInterval)).withDefault(defaultDays),
@@ -90,7 +90,7 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         <div className="flex h-full w-full items-center justify-between">
           <HoldersAndDelegatesLeftComponent />
           <SwitcherDateMobile
-            defaultValue={defaultDays}
+            defaultValue={days || defaultDays}
             setTimeInterval={setDays}
           />
         </div>
