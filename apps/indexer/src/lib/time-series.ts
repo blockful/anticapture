@@ -24,7 +24,7 @@ export const truncateTimestampToMidnight = (timestampSec: number): number => {
  * @returns Map with values filled for all timeline keys
  *
  * @example
- * // With numbers (milliseconds)
+ * // With numbers
  * const filled = forwardFill([1000, 2000, 3000], new Map([[1000, 10]]), 0);
  * // Result: Map { 1000 => 10, 2000 => 10, 3000 => 10 }
  *
@@ -61,10 +61,10 @@ export function createDailyTimeline(
   firstTimestamp: number,
   lastTimestamp?: number,
 ): number[] {
-  if (lastTimestamp && firstTimestamp > lastTimestamp) return [];
   if (!lastTimestamp) {
     lastTimestamp = truncateTimestampToMidnight(Math.floor(Date.now() / 1000));
   }
+  if (firstTimestamp > lastTimestamp) return [];
   const startMidnight = truncateTimestampToMidnight(firstTimestamp);
   const endMidnight = truncateTimestampToMidnight(lastTimestamp);
   const totalDays =
