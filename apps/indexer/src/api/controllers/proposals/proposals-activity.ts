@@ -31,8 +31,8 @@ export function proposalsActivity(
             .refine((addr) => isAddress(addr), "Invalid Ethereum address"),
           fromDate: z
             .string()
-            .optional()
-            .transform((val) => Number(val)),
+            .transform((val) => Number(val))
+            .optional(),
           skip: z.coerce
             .number()
             .int()
