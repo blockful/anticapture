@@ -9,7 +9,7 @@ import { SECONDS_IN_DAY } from "./enums";
 /**
  * Truncate timestamp (seconds) to midnight UTC
  */
-export const truncateToMidnightSeconds = (timestampSec: number): number => {
+export const truncateTimestampToMidnight = (timestampSec: number): number => {
   return Math.floor(timestampSec / SECONDS_IN_DAY) * SECONDS_IN_DAY;
 };
 
@@ -63,8 +63,8 @@ export function createDailyTimeline(
 ): number[] {
   if (firstTimestamp > lastTimestamp) return [];
 
-  const startMidnight = truncateToMidnightSeconds(firstTimestamp);
-  const endMidnight = truncateToMidnightSeconds(lastTimestamp);
+  const startMidnight = truncateTimestampToMidnight(firstTimestamp);
+  const endMidnight = truncateTimestampToMidnight(lastTimestamp);
   const totalDays =
     Math.floor((endMidnight - startMidnight) / SECONDS_IN_DAY) + 1;
 
@@ -84,7 +84,7 @@ export function createDailyTimelineToToday(timestamps: number[]): number[] {
   if (timestamps.length === 0) return [];
 
   const firstTimestamp = Math.min(...timestamps);
-  const todayMidnight = truncateToMidnightSeconds(
+  const todayMidnight = truncateTimestampToMidnight(
     Math.floor(Date.now() / 1000),
   );
 
@@ -166,7 +166,7 @@ export const normalizeMapTimestamps = <T>(
 ): Map<number, T> => {
   const normalized = new Map<number, T>();
   map.forEach((value, ts) => {
-    normalized.set(truncateToMidnightSeconds(ts), value);
+    normalized.set(truncateTimestampToMidnight(ts), value);
   });
   return normalized;
 };

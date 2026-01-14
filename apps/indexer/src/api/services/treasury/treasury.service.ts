@@ -7,7 +7,7 @@ import { forwardFill, createDailyTimelineToToday } from "@/lib/time-series";
 import {
   calculateCutoffTimestamp,
   normalizeMapTimestamps,
-  truncateToMidnightSeconds,
+  truncateTimestampToMidnight,
 } from "@/lib/time-series";
 
 /**
@@ -42,7 +42,7 @@ export class TreasuryService {
     // Convert to map with normalized timestamps (midnight UTC)
     const liquidMap = new Map<number, number>();
     data.forEach((item) => {
-      const timestamp = truncateToMidnightSeconds(item.date);
+      const timestamp = truncateTimestampToMidnight(item.date);
       liquidMap.set(timestamp, item.liquidTreasury);
     });
 

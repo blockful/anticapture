@@ -8,7 +8,7 @@ import {
 } from "@/eventHandlers";
 import { DaoIdEnum } from "@/lib/enums";
 import { ProposalStatus } from "@/lib/constants";
-import { truncateToMidnightSeconds } from "@/lib/time-series";
+import { truncateTimestampToMidnight } from "@/lib/time-series";
 
 export function GovernorIndexer(blockTime: number) {
   const daoId = DaoIdEnum.NOUNS;
@@ -70,7 +70,7 @@ export function GovernorIndexer(blockTime: number) {
     await context.db.insert(tokenPrice).values({
       price: event.args.amount,
       timestamp: BigInt(
-        truncateToMidnightSeconds(Number(event.block.timestamp)),
+        truncateTimestampToMidnight(Number(event.block.timestamp)),
       ),
     });
   });

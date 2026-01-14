@@ -4,7 +4,7 @@ import { account, daoMetricsDayBucket, transaction } from "ponder:schema";
 
 import { MetricTypesEnum } from "@/lib/constants";
 import { delta, max, min } from "@/lib/utils";
-import { truncateToMidnightSeconds } from "@/lib/time-series";
+import { truncateTimestampToMidnight } from "@/lib/time-series";
 
 export const ensureAccountExists = async (
   context: Context,
@@ -43,7 +43,7 @@ export const storeDailyBucket = async (
   await context.db
     .insert(daoMetricsDayBucket)
     .values({
-      date: BigInt(truncateToMidnightSeconds(Number(timestamp))),
+      date: BigInt(truncateTimestampToMidnight(Number(timestamp))),
       tokenId: tokenAddress,
       metricType,
       daoId,
