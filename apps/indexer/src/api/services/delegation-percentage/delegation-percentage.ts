@@ -183,7 +183,6 @@ export class DelegationPercentageService {
    * Returns the original startDate if it's within or after available data range
    */
   private adjustStartDateToFirstRealData(
-    //TODO
     startDate: string | undefined,
     after: string | undefined,
     dateMap: Map<string, DateData>,
