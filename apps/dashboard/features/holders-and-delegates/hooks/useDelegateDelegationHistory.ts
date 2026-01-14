@@ -114,6 +114,7 @@ export function useDelegateDelegationHistory({
     () => ({
       account: accountId,
       limit: itemsPerPage,
+      orderBy: orderBy as QueryHistoricalVotingPowersArgs["orderBy"],
       orderDirection:
         orderDirection as QueryInput_HistoricalVotingPowers_OrderDirection,
       ...(filterVariables?.toValue && { toValue: filterVariables.toValue }),
@@ -126,6 +127,7 @@ export function useDelegateDelegationHistory({
     [
       accountId,
       itemsPerPage,
+      orderBy,
       orderDirection,
       filterVariables,
       fromFilter,

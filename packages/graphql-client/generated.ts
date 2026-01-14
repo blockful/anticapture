@@ -2992,6 +2992,7 @@ export type HistoricalVotingPowersQueryVariables = Exact<{
   account: Scalars['String']['input'];
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<QueryInput_HistoricalVotingPowers_OrderBy>;
   orderDirection?: InputMaybe<QueryInput_HistoricalVotingPowers_OrderDirection>;
   toValue?: InputMaybe<Scalars['String']['input']>;
   fromValue?: InputMaybe<Scalars['String']['input']>;
@@ -4353,10 +4354,11 @@ export type GetHistoricalBalancesLazyQueryHookResult = ReturnType<typeof useGetH
 export type GetHistoricalBalancesSuspenseQueryHookResult = ReturnType<typeof useGetHistoricalBalancesSuspenseQuery>;
 export type GetHistoricalBalancesQueryResult = Apollo.QueryResult<GetHistoricalBalancesQuery, GetHistoricalBalancesQueryVariables>;
 export const HistoricalVotingPowersDocument = gql`
-    query HistoricalVotingPowers($account: String!, $skip: NonNegativeInt, $limit: PositiveInt = 10, $orderDirection: queryInput_historicalVotingPowers_orderDirection = desc, $toValue: String, $fromValue: String) {
+    query HistoricalVotingPowers($account: String!, $skip: NonNegativeInt, $limit: PositiveInt = 10, $orderBy: queryInput_historicalVotingPowers_orderBy = timestamp, $orderDirection: queryInput_historicalVotingPowers_orderDirection = desc, $toValue: String, $fromValue: String) {
   historicalVotingPowers(
     accountId: $account
     skip: $skip
+    orderBy: $orderBy
     orderDirection: $orderDirection
     limit: $limit
     toValue: $toValue
@@ -4400,6 +4402,7 @@ export const HistoricalVotingPowersDocument = gql`
  *      account: // value for 'account'
  *      skip: // value for 'skip'
  *      limit: // value for 'limit'
+ *      orderBy: // value for 'orderBy'
  *      orderDirection: // value for 'orderDirection'
  *      toValue: // value for 'toValue'
  *      fromValue: // value for 'fromValue'

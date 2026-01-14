@@ -2989,6 +2989,7 @@ export type HistoricalVotingPowersQueryVariables = Exact<{
   account: Scalars['String']['input'];
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<QueryInput_HistoricalVotingPowers_OrderBy>;
   orderDirection?: InputMaybe<QueryInput_HistoricalVotingPowers_OrderDirection>;
   toValue?: InputMaybe<Scalars['String']['input']>;
   fromValue?: InputMaybe<Scalars['String']['input']>;
