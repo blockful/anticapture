@@ -40,13 +40,6 @@ export const NOUNS: DaoConfiguration = {
   },
   attackProfitability: {
     riskLevel: RiskLevel.LOW,
-    attackCostBarChart: {
-      NounsTimelock: "0xb1a32FC9F9D8b2cf86C068Cae13108809547ef71",
-      PayerContract: "0xd97Bcd9f47cEe35c0a9ec1dc40C1269afc9E8E1D",
-      ClientIncentivesRewardsProxy:
-        "0x883860178F95d0C82413eDc1D6De530cB4771d55",
-      //PayerContract and ClientIncentivesRewardsProxy are controlled by Timelock.
-    },
   },
   governanceImplementation: {
     // Fields are sorted alphabetically by GovernanceImplementationEnum for readability

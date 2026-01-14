@@ -10,16 +10,15 @@ export function historicalBalances(
   daoId: DaoIdEnum,
   balancesService: HistoricalBalancesService,
 ) {
-  // Historical Balances endpoint
   app.openapi(
     createRoute({
       method: "get",
       operationId: "historicalBalances",
-      path: "/historical-balances",
+      path: "/balances/historical",
       summary: "Get historical token balances",
       description:
         "Fetch historical token balances for multiple addresses at a specific time period using multicall",
-      tags: ["historical-onchain"],
+      tags: ["account-balances"],
       request: {
         query: z.object({
           addresses: z

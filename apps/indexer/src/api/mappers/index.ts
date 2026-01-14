@@ -4,6 +4,7 @@ export * from "./delegation-percentage";
 export * from "./last-update";
 export * from "./proposals";
 export * from "./shared";
+export * from "./shared";
 export * from "./token";
 export * from "./transactions";
 export * from "./transfers";

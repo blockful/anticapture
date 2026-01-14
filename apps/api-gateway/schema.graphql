@@ -14,8 +14,20 @@ type Query {
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/token`\nGet property data for a specific token\n"
   token(currency: queryInput_token_currency = usd): token_200_response
   tokens(where: tokenFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPage!
+<<<<<<< HEAD
   accountBalance(accountId: String!, tokenId: String!): accountBalance
   accountBalances(where: accountBalanceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountBalancePage!
+||||||| 1bcf8ee9
+  accountBalance(accountId: String!, tokenId: String!): accountBalance
+  accountBalances(where: accountBalanceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountBalancePage!
+  accountPower(accountId: String!): accountPower
+  accountPowers(where: accountPowerFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountPowerPage!
+  votingPowerHistory(transactionHash: String!, accountId: String!, logIndex: Float!): votingPowerHistory
+=======
+  accountPower(accountId: String!): accountPower
+  accountPowers(where: accountPowerFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountPowerPage!
+  votingPowerHistory(transactionHash: String!, accountId: String!, logIndex: Float!): votingPowerHistory
+>>>>>>> dev
   votingPowerHistorys(where: votingPowerHistoryFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votingPowerHistoryPage!
   delegation(transactionHash: String!, delegatorAccountId: String!, delegateAccountId: String!): delegation
   delegations(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): delegationPage!
@@ -131,8 +143,28 @@ type Query {
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/account-balance/variations`\nReturns a mapping of the biggest variations to account balances associated by account address\n"
   accountBalanceVariations(days: queryInput_accountBalanceVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalanceVariations_orderDirection = desc): accountBalanceVariations_200_response
 
+<<<<<<< HEAD
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/account-balance/interactions`\nReturns a mapping of the largest interactions between accounts. \nPositive amounts signify net token transfers FROM <accountId>, whilst negative amounts refer to net transfers TO <accountId>\n"
   accountInteractions(days: queryInput_accountInteractions_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountInteractions_orderDirection = desc, accountId: String!, minAmount: String, maxAmount: String, orderBy: queryInput_accountInteractions_orderBy = count, address: String): accountInteractions_200_response
+||||||| 1bcf8ee9
+  """
+  Returns a mapping of the largest interactions between accounts. 
+  Positive amounts signify net token transfers FROM <accountId>, whilst negative amounts refer to net transfers TO <accountId>
+  """
+  accountInteractions(days: queryInput_accountInteractions_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountInteractions_orderDirection = desc, accountId: String!, minAmount: String, maxAmount: String, orderBy: queryInput_accountInteractions_orderBy = count, address: String): accountInteractions_200_response
+=======
+  """Returns sorted and paginated account balance records"""
+  accountBalances(limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalances_orderDirection = desc, addresses: JSON, delegates: JSON, fromValue: String, toValue: String): accountBalances_200_response
+
+  """Returns account balance information for a specific address"""
+  accountBalanceByAccountId(address: String!): accountBalanceByAccountId_200_response
+
+  """
+  Returns a mapping of the largest interactions between accounts. 
+  Positive amounts signify net token transfers FROM <address>, whilst negative amounts refer to net transfers TO <address>
+  """
+  accountInteractions(address: String!, days: queryInput_accountInteractions_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountInteractions_orderDirection = desc, minAmount: String, maxAmount: String, orderBy: queryInput_accountInteractions_orderBy = count, filterAddress: String): accountInteractions_200_response
+>>>>>>> dev
 
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/accounts/{args.address}/transfers`\nGet transfers of a given address\n"
   transfers(address: String!, limit: Float = 10, offset: Float, sortBy: queryInput_transfers_sortBy = timestamp, sortOrder: queryInput_transfers_sortOrder = asc, from: String, to: String, fromDate: Float, toDate: Float, fromValue: String, toValue: String): transfers_200_response
@@ -1970,6 +2002,30 @@ enum queryInput_accountBalanceVariations_days {
 enum queryInput_accountBalanceVariations_orderDirection {
   asc
   desc
+}
+
+type accountBalances_200_response {
+  items: [query_accountBalances_items_items]!
+  totalCount: Float!
+}
+
+type query_accountBalances_items_items {
+  accountId: String!
+  balance: String!
+  tokenId: String!
+  delegate: String!
+}
+
+enum queryInput_accountBalances_orderDirection {
+  asc
+  desc
+}
+
+type accountBalanceByAccountId_200_response {
+  accountId: String!
+  balance: String!
+  tokenId: String!
+  delegate: String!
 }
 
 type accountInteractions_200_response {
