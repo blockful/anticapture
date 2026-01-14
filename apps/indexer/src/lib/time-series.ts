@@ -59,10 +59,12 @@ export function forwardFill<K, V>(
  */
 export function createDailyTimeline(
   firstTimestamp: number,
-  lastTimestamp: number,
+  lastTimestamp?: number,
 ): number[] {
-  if (firstTimestamp > lastTimestamp) return [];
-
+  if (lastTimestamp && firstTimestamp > lastTimestamp) return [];
+  if (!lastTimestamp) {
+    lastTimestamp = truncateTimestampToMidnight(Math.floor(Date.now() / 1000));
+  }
   const startMidnight = truncateTimestampToMidnight(firstTimestamp);
   const endMidnight = truncateTimestampToMidnight(lastTimestamp);
   const totalDays =
@@ -72,23 +74,6 @@ export function createDailyTimeline(
     { length: totalDays },
     (_, i) => startMidnight + i * SECONDS_IN_DAY,
   );
-}
-
-/**
- * Create daily timeline from sparse data timestamps to today (seconds).
- *
- * @param timestamps - Array of timestamps from sparse data (in seconds)
- * @returns Array of daily timestamps from first data point to today (in seconds)
- */
-export function createDailyTimelineToToday(timestamps: number[]): number[] {
-  if (timestamps.length === 0) return [];
-
-  const firstTimestamp = Math.min(...timestamps);
-  const todayMidnight = truncateTimestampToMidnight(
-    Math.floor(Date.now() / 1000),
-  );
-
-  return createDailyTimeline(firstTimestamp, todayMidnight);
 }
 
 /**

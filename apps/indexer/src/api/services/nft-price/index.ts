@@ -6,8 +6,9 @@ import { PriceProvider } from "@/api/services/treasury/types";
 import {
   truncateTimestampToMidnight,
   calculateCutoffTimestamp,
+  createDailyTimeline,
+  forwardFill,
 } from "@/lib/time-series";
-import { forwardFill, createDailyTimelineToToday } from "@/lib/time-series";
 
 interface Repository {
   getHistoricalNFTPrice(
@@ -71,7 +72,7 @@ export class NFTPriceService implements PriceProvider {
     });
 
     // Create timeline and forward-fill gaps
-    const timeline = createDailyTimelineToToday([...priceMap.keys()]);
+    const timeline = createDailyTimeline(Math.min(...priceMap.keys()));
     const filledPrices = forwardFill(timeline, priceMap);
 
     // Filter to only include last `limit` days

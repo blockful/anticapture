@@ -3,7 +3,7 @@ import { TreasuryProvider } from "./providers";
 import { PriceProvider } from "./types";
 import { TreasuryResponse } from "@/api/mappers/treasury";
 import { TreasuryRepository } from "../../repositories/treasury";
-import { forwardFill, createDailyTimelineToToday } from "@/lib/time-series";
+import { forwardFill, createDailyTimeline } from "@/lib/time-series";
 import {
   calculateCutoffTimestamp,
   normalizeMapTimestamps,
@@ -47,7 +47,7 @@ export class TreasuryService {
     });
 
     // Create timeline from first data point to today
-    const timeline = createDailyTimelineToToday([...liquidMap.keys()]);
+    const timeline = createDailyTimeline(Math.min(...liquidMap.keys()));
 
     // Forward-fill to remove gaps
     const filledValues = forwardFill(timeline, liquidMap);
@@ -92,10 +92,9 @@ export class TreasuryService {
     const normalizedPrices = normalizeMapTimestamps(historicalPrices);
 
     // Create timeline from first data point to today
-    const timeline = createDailyTimelineToToday([
-      ...normalizedQuantities.keys(),
-      ...normalizedPrices.keys(),
-    ]);
+    const timeline = createDailyTimeline(
+      Math.min(...[...normalizedQuantities.keys(), ...normalizedPrices.keys()]),
+    );
 
     // Get last known quantity before cutoff to use as initial value for forward-fill
     const lastKnownQuantity =
