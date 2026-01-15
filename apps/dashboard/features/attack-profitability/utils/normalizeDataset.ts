@@ -23,9 +23,7 @@ export function normalizeDataset(
   const multipliersByTs = multiplier.reduce(
     (acc, item) => ({
       ...acc,
-      [Number(item.date) * 1000]: Number(
-        formatUnits(BigInt(item.high), decimals),
-      ),
+      [Number(item.date)]: Number(formatUnits(BigInt(item.high), decimals)),
     }),
     {} as Record<number, number>,
   );
@@ -50,7 +48,7 @@ export function normalizeDataset(
  */
 export const getOnlyClosedData = (data: PriceEntry[]): PriceEntry[] => {
   return data.filter((entry) => {
-    const dateStr = new Date(entry.timestamp).toISOString();
+    const dateStr = new Date(entry.timestamp * 1000).toISOString();
     return dateStr.endsWith("T00:00:00.000Z");
   });
 };
