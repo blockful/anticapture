@@ -6,8 +6,8 @@ import {
   getLastValueBefore,
   calculateCutoffTimestamp,
   normalizeMapTimestamps,
-} from "./time-series";
-import { SECONDS_IN_DAY } from "./enums";
+} from "@/lib/time-series";
+import { SECONDS_IN_DAY } from "@/lib/enums";
 
 describe("time-series", () => {
   describe("truncateTimestampToMidnight", () => {
