@@ -25,6 +25,7 @@ import {
   accountBalances,
   treasury,
   transfers,
+  tokenMetrics,
 } from "@/api/controllers";
 import { docs } from "@/api/docs";
 import { env } from "@/env";
@@ -42,6 +43,7 @@ import {
   AccountInteractionsRepository,
   TreasuryRepository,
   TransfersRepository,
+  TokenMetricsRepository,
 } from "@/api/repositories";
 import { errorHandler } from "@/api/middlewares";
 import { getClient } from "@/lib/client";
@@ -60,6 +62,7 @@ import {
   DaoService,
   AccountBalanceService,
   TransfersService,
+  TokenMetricsService,
 } from "@/api/services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
@@ -120,6 +123,8 @@ const delegationPercentageRepo = new DelegationPercentageRepository();
 const delegationPercentageService = new DelegationPercentageService(
   delegationPercentageRepo,
 );
+const tokenMetricsRepo = new TokenMetricsRepository();
+const tokenMetricsService = new TokenMetricsService(tokenMetricsRepo);
 const balanceVariationsRepo = new BalanceVariationsRepository();
 const accountBalanceRepo = new AccountBalanceRepository();
 const accountInteractionRepo = new AccountInteractionsRepository();
@@ -196,5 +201,6 @@ accountInteractions(app, balanceVariationsService);
 transfers(app, new TransfersService(new TransfersRepository()));
 dao(app, daoService);
 docs(app);
+tokenMetrics(app, tokenMetricsService);
 
 export default app;
