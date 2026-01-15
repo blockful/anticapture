@@ -30,7 +30,7 @@ export const HeaderSidebar = () => {
 
   return (
     <header
-      className={`border-light-dark bg-surface-background fixed left-0 top-0 z-50 hidden h-screen w-[68px] border-r sm:block`}
+      className={`border-light-dark bg-surface-background z-50 hidden h-screen w-[68px] border-r sm:block`}
     >
       <div className="flex h-full w-full flex-col items-start">
         <Link

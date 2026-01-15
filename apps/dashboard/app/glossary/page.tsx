@@ -39,7 +39,7 @@ export default function GlossaryPage() {
     <div className="bg-surface-background dark flex h-screen">
       <HeaderSidebar />
 
-      <main className="flex-1 overflow-auto sm:ml-[72px]">
+      <main className="flex-1 overflow-auto">
         <div className="sm:hidden">
           <div className="h-[57px] w-full sm:hidden" />
           <HeaderMobile overlayClassName="top-[57px]" />

@@ -7,9 +7,9 @@ export default function Home() {
   return (
     <div className="bg-surface-background dark flex h-screen overflow-hidden">
       <HeaderSidebar />
-      <main className="flex-1 overflow-auto sm:ml-[72px]">
+      <main className="flex-1 overflow-auto">
         <div className="sm:hidden">
-          <HeaderMobile />
+          <HeaderMobile className="fixed! top-0" />
         </div>
         <div className="flex min-h-screen w-full flex-col items-center">
           <div className="w-full flex-1">

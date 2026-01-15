@@ -29,20 +29,24 @@ export const ResilienceStagesSection = ({
   });
 
   return (
-    <TheSectionLayout
-      title={PAGES_CONSTANTS.resilienceStages.title}
-      riskLevel={<RiskLevelCard status={stageToRiskMapping[currentDaoStage]} />}
-      icon={<BarChart className="section-layout-icon" />}
-      description={PAGES_CONSTANTS.resilienceStages.description}
-    >
-      <SubSectionsContainer>
-        <StagesContainer
-          daoId={daoId}
-          currentDaoStage={currentDaoStage}
-          daoConfig={daoConfig}
-          context="section"
-        />
-      </SubSectionsContainer>
-    </TheSectionLayout>
+    <div>
+      <TheSectionLayout
+        title={PAGES_CONSTANTS.resilienceStages.title}
+        riskLevel={
+          <RiskLevelCard status={stageToRiskMapping[currentDaoStage]} />
+        }
+        icon={<BarChart className="section-layout-icon" />}
+        description={PAGES_CONSTANTS.resilienceStages.description}
+      >
+        <SubSectionsContainer>
+          <StagesContainer
+            daoId={daoId}
+            currentDaoStage={currentDaoStage}
+            daoConfig={daoConfig}
+            context="section"
+          />
+        </SubSectionsContainer>
+      </TheSectionLayout>
+    </div>
   );
 };

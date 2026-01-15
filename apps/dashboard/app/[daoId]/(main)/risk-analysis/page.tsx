@@ -99,31 +99,33 @@ export default async function RiskAnalysisPage({
   };
 
   return (
-    <TheSectionLayout
-      title={PAGES_CONSTANTS.riskAnalysis.title}
-      icon={<Gauge className="section-layout-icon" />}
-      description={PAGES_CONSTANTS.riskAnalysis.description}
-      riskLevel={<RiskLevelCard status={getHighestRiskLevel()} />}
-    >
-      <SubSectionsContainer>
-        <SubSection
-          subsectionTitle={PAGES_CONSTANTS.riskAnalysis.subTitle}
-          subsectionDescription={PAGES_CONSTANTS.riskAnalysis.subDescription}
-          dateRange=""
-        >
-          <RiskAnalysisSection daoId={daoIdEnum} />
-        </SubSection>
-        <DividerDefault isHorizontal />
-        <SubSection
-          subsectionTitle={PAGES_CONSTANTS.governanceImplementation.subTitle}
-          subsectionDescription={
-            PAGES_CONSTANTS.governanceImplementation.subDescription
-          }
-          dateRange=""
-        >
-          <GovernanceImplementationSection daoId={daoIdEnum} />
-        </SubSection>
-      </SubSectionsContainer>
-    </TheSectionLayout>
+    <div>
+      <TheSectionLayout
+        title={PAGES_CONSTANTS.riskAnalysis.title}
+        icon={<Gauge className="section-layout-icon" />}
+        description={PAGES_CONSTANTS.riskAnalysis.description}
+        riskLevel={<RiskLevelCard status={getHighestRiskLevel()} />}
+      >
+        <SubSectionsContainer>
+          <SubSection
+            subsectionTitle={PAGES_CONSTANTS.riskAnalysis.subTitle}
+            subsectionDescription={PAGES_CONSTANTS.riskAnalysis.subDescription}
+            dateRange=""
+          >
+            <RiskAnalysisSection daoId={daoIdEnum} />
+          </SubSection>
+          <DividerDefault isHorizontal />
+          <SubSection
+            subsectionTitle={PAGES_CONSTANTS.governanceImplementation.subTitle}
+            subsectionDescription={
+              PAGES_CONSTANTS.governanceImplementation.subDescription
+            }
+            dateRange=""
+          >
+            <GovernanceImplementationSection daoId={daoIdEnum} />
+          </SubSection>
+        </SubSectionsContainer>
+      </TheSectionLayout>
+    </div>
   );
 }

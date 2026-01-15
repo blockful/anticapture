@@ -27,7 +27,7 @@ export const ProposalHeader = ({
 }: ProposalHeaderProps) => {
   return (
     <div className="text-primary bg-surface-background border-border-default sticky -top-[57px] z-20 flex h-[65px] w-full shrink-0 items-center justify-between gap-6 border-b py-2 sm:top-0">
-      <div className="mx-auto flex w-full max-w-7xl flex-1 items-center justify-between px-5">
+      <div className="mx-auto flex w-full flex-1 items-center justify-between px-5">
         <div className="flex items-center gap-2">
           <Link href={`/${daoId}/governance`}>
             <IconButton
