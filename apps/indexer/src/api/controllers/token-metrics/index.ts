@@ -4,8 +4,8 @@ import {
   TokenMetricsRequestSchema,
   TokenMetricsResponseSchema,
   toTokenMetricsApi,
-  ALLOWED_TOKEN_METRIC_TYPES,
 } from "@/api/mappers/token-metrics";
+import { metricTypeArray } from "@/lib/constants";
 
 export function tokenMetrics(app: Hono, service: TokenMetricsService) {
   app.openapi(
@@ -16,7 +16,7 @@ export function tokenMetrics(app: Hono, service: TokenMetricsService) {
       summary: "Get token related metrics",
       description: `Returns token related metrics.
         Supports multiple metric types in a single request.
-        Available types: ${ALLOWED_TOKEN_METRIC_TYPES.join(", ")}`,
+        Available types: ${metricTypeArray.join(", ")}`,
       tags: ["metrics"],
       request: {
         query: TokenMetricsRequestSchema,
