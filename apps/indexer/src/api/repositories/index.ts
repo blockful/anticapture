@@ -3,6 +3,7 @@ export * from "./last-update";
 export * from "./drizzle";
 export * from "./proposals-activity";
 export * from "./transactions";
+export * from "./token-metrics";
 export * from "./voting-power";
 export * from "./token";
 export * from "./account-balance";
