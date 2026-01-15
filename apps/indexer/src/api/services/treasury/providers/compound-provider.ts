@@ -2,6 +2,7 @@ import { HTTPException } from "hono/http-exception";
 import { LiquidTreasuryDataPoint } from "../types";
 import { TreasuryProvider } from "./treasury-provider.interface";
 import { AxiosInstance } from "axios";
+import { TreasuryProviderCache } from "./cache";
 
 const LIMIT = 36500; // Est. ~100 different assets * 365d, so as to not pull too much data (1y) for performance reasons
 const COMP_TOKEN_IDS = new Set([
@@ -26,17 +27,28 @@ export interface CompoundResponse {
 }
 
 export class CompoundProvider implements TreasuryProvider {
+  private readonly cache = new TreasuryProviderCache();
+
   constructor(private readonly client: AxiosInstance) {}
 
   async fetchTreasury(
     cutoffTimestamp: number,
   ): Promise<LiquidTreasuryDataPoint[]> {
+    const cached = this.cache.get();
+    if (cached !== null) {
+      console.log("Using cached data");
+      return cached;
+    }
+
     try {
+      console.log("Fetching data...");
       const response = await this.client.get<CompoundResponse>(
         `/treasury?order=DESC&limit=${LIMIT}`,
       );
+      const data = this.transformData(response.data, cutoffTimestamp);
+      this.cache.set(data);
 
-      return this.transformData(response.data, cutoffTimestamp);
+      return data;
     } catch (error) {
       throw new HTTPException(503, {
         message: "Failed to fetch total assets data",
