@@ -1,10 +1,8 @@
 import { useVotingPowerVariationsQuery } from "@anticapture/graphql-client/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
-import {
-  VotingPowerVariations_200_Response,
-  QueryInput_VotingPowerVariations_Days,
-} from "@anticapture/graphql-client";
+import { VotingPowerVariations_200_Response } from "@anticapture/graphql-client";
+import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 
 interface UseVotingPowerVariationsResult {
   data: VotingPowerVariations_200_Response | null;
@@ -19,7 +17,9 @@ export const useVotingPowerVariations = (
 ): UseVotingPowerVariationsResult => {
   const { data, loading, error, refetch } = useVotingPowerVariationsQuery({
     variables: {
-      days: QueryInput_VotingPowerVariations_Days[days],
+      fromDate: (
+        Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[days]
+      ).toString(),
     },
     context: {
       headers: {

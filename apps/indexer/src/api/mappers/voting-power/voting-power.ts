@@ -21,7 +21,7 @@ export const HistoricalVotingPowerRequestSchema = z.object({
     .number()
     .int()
     .min(1, "Limit must be a positive integer")
-    .max(100, "Limit cannot exceed 100")
+    .max(1000, "Limit cannot exceed 1000")
     .optional()
     .default(10),
   orderBy: z.enum(["timestamp", "delta"]).optional().default("timestamp"),

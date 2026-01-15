@@ -102,16 +102,18 @@ query GetVotesOnchainsTotalCount($proposalId: String) {
 # Get voting power change
 query GetVotingPowerChange(
   $addresses: JSON!
-  $days: queryInput_historicalVotingPower_days!
-  $fromDate: Float
+  $fromDate: String!
+  $toDate: String!
 ) {
-  historicalVotingPower(
-    addresses: $addresses
-    days: $days
-    fromDate: $fromDate
+  votingPowerVariations(
+    addresses: $addresses,
+    fromDate: $fromDate,
+    toDate: $toDate,
   ) {
-    address
-    votingPower
+    items {
+      accountId
+      previousVotingPower
+    }
   }
 }
 
@@ -140,9 +142,9 @@ query GetProposalNonVoters(
 
 # Get account power
 query GetAccountPower($address: String!, $proposalId: String!) {
-  accountPower(accountId: $address) {
-    votingPower
+  votingPowerByAccountId(accountId: $address) {
     accountId
+    votingPower
   }
   votesOnchain(proposalId: $proposalId, voterAccountId: $address) {
     support

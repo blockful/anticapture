@@ -23,6 +23,10 @@ import { AddressFilter } from "@/shared/components/design-system/table/filters/A
 import daoConfig from "@/shared/dao-config";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { parseAsStringEnum, useQueryState } from "nuqs";
+import {
+  QueryInput_VotingPowers_OrderBy,
+  QueryInput_VotingPowers_OrderDirection,
+} from "@anticapture/graphql-client";
 interface DelegateTableData {
   address: string;
   votingPower: string;
@@ -105,8 +109,8 @@ export const Delegates = ({
     isActivityLoadingFor,
   } = useDelegates({
     fromDate,
-    orderBy: sortBy,
-    orderDirection: sortOrder,
+    orderBy: sortBy as QueryInput_VotingPowers_OrderBy,
+    orderDirection: sortOrder as QueryInput_VotingPowers_OrderDirection,
     daoId,
     days: timePeriod,
     address: currentAddressFilter,
