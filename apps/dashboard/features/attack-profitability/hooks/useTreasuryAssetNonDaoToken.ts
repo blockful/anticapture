@@ -57,6 +57,7 @@ export const useTreasuryAssetNonDaoToken = (
   const { data, error, isValidating, mutate } = useSWR<
     TreasuryAssetNonDaoToken[]
   >(fetchKey, () => fetchTreasuryAssetNonDaoToken({ daoId, days }), {
+    fallbackData: [],
     revalidateOnFocus: false,
     shouldRetryOnError: false,
     ...config,
