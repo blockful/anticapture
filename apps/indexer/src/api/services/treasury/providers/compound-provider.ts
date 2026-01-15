@@ -3,7 +3,11 @@ import { LiquidTreasuryDataPoint } from "../types";
 import { TreasuryProvider } from "./treasury-provider.interface";
 import { AxiosInstance } from "axios";
 
-const LIMIT = 36500; // Est. ~100 different assets * 365d
+const LIMIT = 36500; // Est. ~100 different assets * 365d, so as to not pull too much data (1y) for performance reasons
+const COMP_TOKEN_IDS = new Set([
+  7, 12, 13, 17, 30, 40, 42, 43, 44, 50, 51, 52, 53, 54, 55, 56, 57, 58, 63, 69,
+  71, 78, 80, 84, 90, 92,
+]); // `sId`s relating to the COMP governance token on different plaforms
 
 export interface CompoundResponse {
   data: {
@@ -48,7 +52,9 @@ export class CompoundProvider implements TreasuryProvider {
     const map = new Map();
     data.data.forEach((row) => {
       const timestamp = row.d;
-      map.set(timestamp, (map.get(timestamp) || 0) + row.v);
+      if (!COMP_TOKEN_IDS.has(row.sId)) {
+        map.set(timestamp, (map.get(timestamp) || 0) + row.v);
+      }
     });
 
     const filteredData = Array.from(map, ([date, value]) => ({
