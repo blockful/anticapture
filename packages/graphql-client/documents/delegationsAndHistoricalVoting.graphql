@@ -1,20 +1,23 @@
 query GetHistoricalVotingAndActivity(
-  $addresses: JSON!,
-  $address: String!,
-  $fromDate: String!,
+  $addresses: JSON!
+  $address: String!
+  $fromDate: String!
   $toDate: String!
 ) {
   votingPowerVariations(
-      addresses: $addresses,
-      fromDate: $fromDate,
-      toDate: $toDate,
-    ) {
+    addresses: $addresses
+    fromDate: $fromDate
+    toDate: $toDate
+  ) {
     items {
       accountId
       previousVotingPower
+      currentVotingPower
+      percentageChange
+      absoluteChange
     }
   }
-  
+
   proposalsActivity(address: $address, fromDate: $fromDate) {
     totalProposals
     votedProposals

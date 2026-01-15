@@ -150,41 +150,18 @@ export const Delegates = ({
           100
         : null;
 
-      let variation: {
-        percentageChange: number;
-        absoluteChange: number;
-      } | null = null;
-
-      if (delegate.historicalVotingPower !== undefined) {
-        const historicalVotingPowerBigInt = BigInt(
-          delegate.historicalVotingPower,
-        );
-        const historicalVotingPowerFormatted = Number(
-          formatUnits(historicalVotingPowerBigInt, decimals),
-        );
-
-        const absoluteChange =
-          votingPowerFormatted - historicalVotingPowerFormatted;
-
-        // If historical is 0, we can't calculate percentage (division by zero)
-        // Use a large number so the UI displays ">1000%"
-        const percentageChange =
-          historicalVotingPowerFormatted === 0
-            ? 9999
-            : ((votingPowerFormatted - historicalVotingPowerFormatted) /
-                historicalVotingPowerFormatted) *
-              100;
-
-        variation = {
-          percentageChange: Number(percentageChange.toFixed(2)),
-          absoluteChange: Number(absoluteChange.toFixed(2)),
-        };
-      }
-
       return {
-        address: delegate.accountId || "",
+        address: delegate.accountId,
         votingPower: formatNumberUserReadable(votingPowerFormatted),
-        variation,
+        variation: {
+          percentageChange:
+            delegate.percentageChange === "NO BASELINE"
+              ? 9999
+              : Number(delegate.percentageChange),
+          absoluteChange: Number(
+            formatUnits(BigInt(delegate.absoluteChange), decimals),
+          ),
+        },
         activity,
         activityPercentage,
         delegators: delegate.delegationsCount,

@@ -1,4 +1,6 @@
+import { isAddress } from "viem";
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
+
 import { VotingPowerService } from "@/api/services";
 import {
   VotingPowerVariationsByAccountIdRequestSchema,
@@ -8,7 +10,6 @@ import {
   VotingPowerVariationsResponseSchema,
   VotingPowerVariationsMapper,
 } from "@/api/mappers/";
-import { Address, isAddress } from "viem";
 
 export function votingPowerVariations(app: Hono, service: VotingPowerService) {
   app.openapi(
@@ -19,7 +20,7 @@ export function votingPowerVariations(app: Hono, service: VotingPowerService) {
       summary: "Get top changes in voting power for a given period",
       description:
         "Returns a mapping of the biggest changes to voting power associated by delegate address",
-      tags: ["proposals"],
+      tags: ["voting-powers"],
       request: {
         query: VotingPowerVariationsRequestSchema,
       },
@@ -57,15 +58,15 @@ export function votingPowerVariations(app: Hono, service: VotingPowerService) {
     createRoute({
       method: "get",
       operationId: "votingPowerVariationsByAccountId",
-      path: "/voting-powers/{accountId}/variations",
+      path: "/accounts/{address}/voting-powers/variations",
       summary:
         "Get top changes in voting power for a given period for a single account",
       description:
         "Returns a the changes to voting power by period and accountId",
-      tags: ["proposals"],
+      tags: ["voting-powers"],
       request: {
         params: z.object({
-          accountId: z.string().refine((addr) => isAddress(addr)),
+          address: z.string().refine((addr) => isAddress(addr)),
         }),
         query: VotingPowerVariationsByAccountIdRequestSchema,
       },
@@ -81,11 +82,11 @@ export function votingPowerVariations(app: Hono, service: VotingPowerService) {
       },
     }),
     async (context) => {
-      const { accountId } = context.req.valid("param");
+      const { address } = context.req.valid("param");
       const { fromDate, toDate } = context.req.valid("query");
 
       const result = await service.getVotingPowerVariationsByAccountId(
-        accountId as Address,
+        address,
         fromDate,
         toDate,
       );

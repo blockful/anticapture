@@ -26,7 +26,10 @@ interface Delegate {
   delegationsCount: number;
   accountId: string;
   proposalsActivity?: ProposalsActivity;
-  historicalVotingPower?: string;
+  percentageChange: string;
+  absoluteChange: string;
+  previousVotingPower: string;
+  currentVotingPower: string;
 }
 
 interface PaginationInfo {
@@ -72,9 +75,16 @@ export const useDelegates = ({
   // Track pagination loading state to prevent rapid clicks
   const [isPaginationLoading, setIsPaginationLoading] = useState(false);
 
-  // Track proposals activity data for each delegate
   const [historicalVPCache, setHistoricalVPCache] = useState<
-    Map<string, string>
+    Map<
+      string,
+      {
+        previousVotingPower: string;
+        currentVotingPower: string;
+        percentageChange: string;
+        absoluteChange: string;
+      }
+    >
   >(new Map());
   const [delegateActivities, setDelegateActivities] = useState<
     Map<string, ProposalsActivity>
@@ -152,9 +162,7 @@ export const useDelegates = ({
       setHistoricalVPCache((prevCache) => {
         const newCache = new Map(prevCache);
         newHistoricalData.votingPowerVariations?.items?.forEach((h) => {
-          if (h?.accountId && h.previousVotingPower) {
-            newCache.set(h.accountId, h.previousVotingPower);
-          }
+          if (h) newCache.set(h.accountId, h);
         });
         return newCache;
       });
@@ -224,12 +232,19 @@ export const useDelegates = ({
     return delegatesData.votingPowers.items
       .filter((item) => item !== null)
       .map((delegate) => {
-        const historicalVotingPower =
-          historicalVPCache.get(delegate.accountId) || "0";
+        const votingPowerVariation = historicalVPCache.get(
+          delegate.accountId,
+        ) || {
+          previousVotingPower: "0",
+          currentVotingPower: "0",
+          percentageChange: "0",
+          absoluteChange: "0",
+        };
+
         const proposalsActivity = delegateActivities.get(delegate.accountId);
         return {
           ...delegate,
-          historicalVotingPower,
+          ...votingPowerVariation,
           proposalsActivity,
         };
       });

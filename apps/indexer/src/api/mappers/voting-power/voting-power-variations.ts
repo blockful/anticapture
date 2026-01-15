@@ -1,8 +1,10 @@
 import { DaysEnum } from "@/lib/enums";
 import { z } from "@hono/zod-openapi";
+import { Address, isAddress } from "viem";
+import { accountPower } from "ponder:schema";
+
 import { PERCENTAGE_NO_BASELINE } from "../constants";
 import { PeriodResponseSchema, TimestampResponseMapper } from "../shared";
-import { Address, isAddress } from "viem";
 
 export const VotingPowerVariationsRequestSchema = z.object({
   addresses: z
@@ -115,7 +117,7 @@ export const VotingPowersRequestSchema = z.object({
 
 export const VotingPowerVariationResponseSchema = z.object({
   accountId: z.string(),
-  previousVotingPower: z.string().nullish(),
+  previousVotingPower: z.string(),
   currentVotingPower: z.string(),
   absoluteChange: z.string(),
   percentageChange: z.string(),
@@ -161,20 +163,14 @@ export type VotingPowersResponse = z.infer<typeof VotingPowersResponseSchema>;
 export type VotingPowerResponse = z.infer<typeof VotingPowerResponseSchema>;
 
 export type DBVotingPowerVariation = {
-  accountId: `0x${string}`;
-  previousVotingPower: bigint | null;
+  accountId: Address;
+  previousVotingPower: bigint;
   currentVotingPower: bigint;
   absoluteChange: bigint;
   percentageChange: number;
 };
 
-export type DBAccountPower = {
-  accountId: Address;
-  votingPower: bigint;
-  votesCount: number;
-  proposalsCount: number;
-  delegationsCount: number;
-};
+export type DBAccountPower = typeof accountPower.$inferSelect;
 
 export const VotingPowerVariationResponseMapper = (
   delta: DBVotingPowerVariation,

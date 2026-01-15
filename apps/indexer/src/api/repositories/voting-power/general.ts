@@ -228,11 +228,9 @@ export class VotingPowerRepository {
       .from(accountPower)
       .where(eq(accountPower.accountId, accountId));
 
-    if (!(delta && currentAccountPower)) {
-      throw new Error("Account not found");
-    }
+    if (!currentAccountPower) throw new Error("Account not found");
 
-    const numericAbsoluteChange = BigInt(delta!.absoluteChange);
+    const numericAbsoluteChange = BigInt(delta?.absoluteChange || "0");
     const currentVotingPower = currentAccountPower.currentVotingPower;
     const oldVotingPower = currentVotingPower - numericAbsoluteChange;
     const percentageChange = oldVotingPower
@@ -260,7 +258,8 @@ export class VotingPowerRepository {
       orderBy === "votingPower"
         ? accountPower.votingPower
         : accountPower.delegationsCount;
-    const result = await db
+
+    const items = await db
       .select()
       .from(accountPower)
       .where(this.filterToSql(addresses, amountFilter))
@@ -276,13 +275,7 @@ export class VotingPowerRepository {
       .where(this.filterToSql(addresses, amountFilter));
 
     return {
-      items: result.map((r) => ({
-        accountId: r.accountId,
-        votingPower: r.votingPower,
-        delegationsCount: r.delegationsCount,
-        votesCount: r.votesCount,
-        proposalsCount: r.proposalsCount,
-      })),
+      items,
       totalCount: Number(totalCount?.count ?? 0),
     };
   }
@@ -305,6 +298,8 @@ export class VotingPowerRepository {
       delegationsCount: result.delegationsCount,
       votesCount: result.votesCount,
       proposalsCount: result.proposalsCount,
+      daoId: result.daoId,
+      lastVoteTimestamp: result.lastVoteTimestamp,
     };
   }
 
