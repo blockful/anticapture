@@ -1,7 +1,8 @@
 import { AxiosInstance } from "axios";
 import { TreasuryProvider } from "./treasury-provider.interface";
 import { LiquidTreasuryDataPoint } from "../types";
-import { truncateTimestampTime } from "@/eventHandlers/shared";
+import { truncateTimestampToMidnight } from "@/lib/time-series";
+import { filterWithFallback } from "@/lib/time-series";
 
 interface RawDefiLlamaResponse {
   chainTvls: Record<
@@ -69,7 +70,7 @@ export class DefiLlamaProvider implements TreasuryProvider {
       const dateMap = new Map<number, { timestamp: number; value: number }>();
 
       for (const dataPoint of chainData.tvl || []) {
-        const dayTimestamp = truncateTimestampTime(dataPoint.date);
+        const dayTimestamp = truncateTimestampToMidnight(dataPoint.date);
         const existing = dateMap.get(dayTimestamp);
 
         // Keep only the latest timestamp for each date
@@ -119,13 +120,6 @@ export class DefiLlamaProvider implements TreasuryProvider {
       }))
       .sort((a, b) => a.date - b.date); // Sort by timestamp ascending
 
-    const filteredData = allData.filter((item) => item.date >= cutoffTimestamp);
-    // If no data in the requested period, return the last available value as fallback
-    if (filteredData.length === 0 && allData.length > 0) {
-      const lastAvailable = allData.at(-1)!;
-      return [lastAvailable];
-    }
-
-    return filteredData;
+    return filterWithFallback(allData, cutoffTimestamp);
   }
 }

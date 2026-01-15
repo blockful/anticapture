@@ -3,12 +3,12 @@ import { TreasuryProvider } from "./providers";
 import { PriceProvider } from "./types";
 import { TreasuryResponse } from "@/api/mappers/treasury";
 import { TreasuryRepository } from "../../repositories/treasury";
-import { forwardFill, createDailyTimelineFromData } from "./forward-fill";
+import { forwardFill, createDailyTimeline } from "@/lib/time-series";
 import {
   calculateCutoffTimestamp,
-  truncateTimestampTimeMs,
   normalizeMapTimestamps,
-} from "@/eventHandlers/shared";
+  truncateTimestampToMidnight,
+} from "@/lib/time-series";
 
 /**
  * Treasury Service - Orchestrates treasury data retrieval and calculation.
@@ -42,12 +42,12 @@ export class TreasuryService {
     // Convert to map with normalized timestamps (midnight UTC)
     const liquidMap = new Map<number, number>();
     data.forEach((item) => {
-      const timestampMs = truncateTimestampTimeMs(item.date * 1000);
-      liquidMap.set(timestampMs, item.liquidTreasury);
+      const timestamp = truncateTimestampToMidnight(item.date);
+      liquidMap.set(timestamp, item.liquidTreasury);
     });
 
     // Create timeline from first data point to today
-    const timeline = createDailyTimelineFromData([...liquidMap.keys()]);
+    const timeline = createDailyTimeline(Math.min(...liquidMap.keys()));
 
     // Forward-fill to remove gaps
     const filledValues = forwardFill(timeline, liquidMap);
@@ -92,10 +92,9 @@ export class TreasuryService {
     const normalizedPrices = normalizeMapTimestamps(historicalPrices);
 
     // Create timeline from first data point to today
-    const timeline = createDailyTimelineFromData([
-      ...normalizedQuantities.keys(),
-      ...normalizedPrices.keys(),
-    ]);
+    const timeline = createDailyTimeline(
+      Math.min(...[...normalizedQuantities.keys(), ...normalizedPrices.keys()]),
+    );
 
     // Get last known quantity before cutoff to use as initial value for forward-fill
     const lastKnownQuantity =
