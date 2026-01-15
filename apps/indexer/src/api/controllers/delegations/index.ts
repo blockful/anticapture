@@ -4,28 +4,7 @@ import {
   DelegationsRequestSchema,
   DelegationsResponseSchema,
 } from "@/api/mappers/delegations";
-
-// where: {
-//     daoId: $daoId
-//     delegatorAccountId_in: $delegator
-//     delegateAccountId: $delegate
-//   }
-
-// (
-//     where: {
-//       delegatorAccountId: $delegator
-//       delegateAccountId: $delegate
-//       delegatedValue_gte: $minDelta
-//       delegatedValue_lte: $maxDelta
-//     }
-//     orderBy: $orderBy
-//     orderDirection: $orderDirection
-//     limit: $limit
-//     after: $after
-//     before: $before
-//   ) {
-
-// (where: { delegatorAccountId: $delegator })
+import { DelegationsService } from "@/api/services/delegations";
 
 export function delegations(app: Hono, service: DelegationsService) {
   app.openapi(
@@ -53,26 +32,26 @@ export function delegations(app: Hono, service: DelegationsService) {
     }),
     async (context) => {
       const {
-        limit,
         delegatorAccountId,
-        delegateAccountId,
-        minDelta,
-        maxDelta,
+        // delegateAccountId,
+        // minDelta,
+        // maxDelta,
         skip,
-        orderBy,
+        limit,
+        // orderBy,
         orderDirection,
       } = context.req.valid("query");
 
-      const result = await service.getDelegations({
+      const result = await service.getHistoricalDelegations(
         delegatorAccountId,
-        delegateAccountId,
-        minDelta,
-        maxDelta,
+        // delegateAccountId,
+        // minDelta,
+        // maxDelta,
+        orderDirection,
         skip,
         limit,
-        orderBy,
-        orderDirection,
-      });
+        // orderBy,
+      );
 
       return context.json(result);
     },
