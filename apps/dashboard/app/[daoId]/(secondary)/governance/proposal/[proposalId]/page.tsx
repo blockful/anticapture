@@ -61,11 +61,11 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
 export default function ProposalPage() {
   return (
-    <div className="bg-surface-background dark flex h-screen overflow-hidden">
+    <div className="bg-surface-background dark flex h-screen max-w-screen-2xl overflow-hidden">
       <BaseHeaderLayoutSidebar>
         <HeaderSidebar />
       </BaseHeaderLayoutSidebar>
-      <main className="relative flex-1 overflow-auto pt-[57px] sm:ml-[70px] sm:pt-0">
+      <main className="relative flex-1 overflow-auto pt-[57px] sm:pt-0">
         <div className="sm:hidden">
           <HeaderMobile />
         </div>
