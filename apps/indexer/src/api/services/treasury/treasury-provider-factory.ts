@@ -4,6 +4,7 @@ import { DuneProvider } from "./providers/dune-provider";
 import { TreasuryService } from "./treasury.service";
 import { TreasuryRepository } from "@/api/repositories/treasury";
 import { PriceProvider } from "./types";
+import { CompoundProvider } from "./providers";
 
 /**
  * Creates a treasury service with optional liquid treasury provider.
@@ -16,12 +17,14 @@ import { PriceProvider } from "./types";
 export function createTreasuryService(
   repository: TreasuryRepository,
   tokenPriceProvider: PriceProvider,
+  compoundApiUrl?: string,
   defiLlamaApiUrl?: string,
   defiLlamaProtocolId?: string,
   duneApiUrl?: string,
   duneApiKey?: string,
 ): TreasuryService {
-  let liquidProvider: DefiLlamaProvider | DuneProvider | undefined;
+  let liquidProvider: // TODO: improve this method/clean up code
+    DefiLlamaProvider | DuneProvider | CompoundProvider | undefined;
   if (defiLlamaProtocolId && defiLlamaApiUrl) {
     const axiosClient = axios.create({
       baseURL: defiLlamaApiUrl,
@@ -32,6 +35,11 @@ export function createTreasuryService(
       baseURL: duneApiUrl,
     });
     liquidProvider = new DuneProvider(axiosClient, duneApiKey);
+  } else if (compoundApiUrl) {
+    const axiosClient = axios.create({
+      baseURL: compoundApiUrl,
+    });
+    liquidProvider = new CompoundProvider(axiosClient);
   } else {
     console.warn(
       "Liquid treasury provider not configured. Only dao-token treasury will be available.",

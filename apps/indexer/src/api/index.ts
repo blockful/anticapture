@@ -154,6 +154,7 @@ const tokenPriceClient =
 const treasuryService = createTreasuryService(
   new TreasuryRepository(),
   tokenPriceClient,
+  env.COMPOUND_API_URL,
   env.DEFILLAMA_API_URL,
   env.TREASURY_PROVIDER_PROTOCOL_ID,
   env.DUNE_API_URL,

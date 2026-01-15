@@ -15,7 +15,7 @@ const envSchema = z.object({
   // Treasury provider configuration
   DEFILLAMA_API_URL: z.string().optional(),
   TREASURY_PROVIDER_PROTOCOL_ID: z.string().optional(),
-
+  COMPOUND_API_URL: z.string().optional(),
   DUNE_API_URL: z.string().optional(),
   DUNE_API_KEY: z.string().optional(),
   COINGECKO_API_URL: z.string(),
