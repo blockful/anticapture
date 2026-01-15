@@ -2,6 +2,7 @@ import { HTTPException } from "hono/http-exception";
 import { LiquidTreasuryDataPoint } from "../types";
 import { TreasuryProvider } from "./treasury-provider.interface";
 import { AxiosInstance } from "axios";
+import { TreasuryProviderCache } from "./provider-cache";
 
 export interface DuneResponse {
   execution_id: string;
@@ -23,6 +24,8 @@ export interface DuneResponse {
 }
 
 export class DuneProvider implements TreasuryProvider {
+  private readonly cache = new TreasuryProviderCache();
+
   constructor(
     private readonly client: AxiosInstance,
     private readonly apiKey: string,
@@ -31,14 +34,20 @@ export class DuneProvider implements TreasuryProvider {
   async fetchTreasury(
     cutoffTimestamp: number,
   ): Promise<LiquidTreasuryDataPoint[]> {
+    const cached = this.cache.get();
+
+    if (cached !== null) return cached;
+
     try {
       const response = await this.client.get<DuneResponse>("/", {
         headers: {
           "X-Dune-API-Key": this.apiKey,
         },
       });
+      const data = this.transformData(response.data, cutoffTimestamp);
+      this.cache.set(data);
 
-      return this.transformData(response.data, cutoffTimestamp);
+      return data;
     } catch (error) {
       throw new HTTPException(503, {
         message: "Failed to fetch total assets data",

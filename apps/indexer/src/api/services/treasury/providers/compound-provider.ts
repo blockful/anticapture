@@ -2,7 +2,7 @@ import { HTTPException } from "hono/http-exception";
 import { LiquidTreasuryDataPoint } from "../types";
 import { TreasuryProvider } from "./treasury-provider.interface";
 import { AxiosInstance } from "axios";
-import { TreasuryProviderCache } from "./cache";
+import { TreasuryProviderCache } from "./provider-cache";
 
 const LIMIT = 36500; // Est. ~100 different assets * 365d, so as to not pull too much data (1y) for performance reasons
 const COMP_TOKEN_IDS = new Set([
@@ -35,13 +35,10 @@ export class CompoundProvider implements TreasuryProvider {
     cutoffTimestamp: number,
   ): Promise<LiquidTreasuryDataPoint[]> {
     const cached = this.cache.get();
-    if (cached !== null) {
-      console.log("Using cached data");
-      return cached;
-    }
+
+    if (cached !== null) return cached;
 
     try {
-      console.log("Fetching data...");
       const response = await this.client.get<CompoundResponse>(
         `/treasury?order=DESC&limit=${LIMIT}`,
       );
