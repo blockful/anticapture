@@ -1,31 +1,34 @@
 import { DBDelegation } from "@/api/mappers";
-// import { DelegationsResponse } from "@/api/mappers/delegations";
 import { HistoricalDelegationsRepository } from "@/api/repositories/delegations";
 import { Address } from "viem";
 
-export class DelegationsService {
-  constructor(private delegationsRepository: HistoricalDelegationsRepository) {}
+export class HistoricalDelegationsService {
+  constructor(
+    private historicalDelegationsRepository: HistoricalDelegationsRepository,
+  ) {}
 
   async getHistoricalDelegations(
     address: Address,
+    fromValue: bigint | undefined,
+    toValue: bigint | undefined,
+    delegateAddressIn: Address[],
     orderDirection: "asc" | "desc",
+    orderBy: "timestamp",
     skip: number,
     limit: number,
-  ): Promise<DBDelegation[]> {
-    // const delegations = await Promise.all([
-    //   this.delegationsRepository.getHistoricalDelegationsCount(address),
-    // ]);
-
-    return this.delegationsRepository.getHistoricalDelegations(
+  ): Promise<{
+    items: DBDelegation[];
+    totalCount: number;
+  }> {
+    return this.historicalDelegationsRepository.getHistoricalDelegations(
       address,
       orderDirection,
       skip,
       limit,
+      fromValue,
+      toValue,
+      delegateAddressIn,
+      orderBy,
     );
-
-    // return {
-    //   items,
-    //   totalCount,
-    // };
   }
 }

@@ -1,38 +1,28 @@
 import { z } from "@hono/zod-openapi";
-import { isAddress } from "viem";
 import { delegation } from "ponder:schema";
+import { getAddress, isAddress } from "viem";
 
 type DBDelegation = typeof delegation.$inferSelect;
 
-// where: {
-//     daoId: $daoId
-//     delegatorAccountId_in: $delegator
-//     delegateAccountId: $delegate
-//   }
+export const DelegationsRequestParamsSchema = z.object({
+  address: z.string().refine((val) => isAddress(val, { strict: false })),
+});
 
-// (
-//     where: {
-//       delegatorAccountId: $delegator
-//       delegateAccountId: $delegate
-//       delegatedValue_gte: $minDelta
-//       delegatedValue_lte: $maxDelta
-//     }
-//     orderBy: $orderBy
-//     orderDirection: $orderDirection
-//     limit: $limit
-//     after: $after
-//     before: $before
-//   ) {
-
-// (where: { delegatorAccountId: $delegator })
-
-export const DelegationsRequestSchema = z.object({
-  delegatorAccountId: z.string().refine((val) => isAddress(val)),
-  // delegateAccountId: z.string().optional(),
-  // minDelta: z.number().optional(),
-  // maxDelta: z.number().optional(),
-
-  // pagination
+export const DelegationsRequestQuerySchema = z.object({
+  delegateAddressIn: z
+    .union([
+      z
+        .string()
+        .refine((val) => isAddress(val, { strict: false }))
+        .transform((val) => [getAddress(val)]),
+      z.array(
+        z
+          .string()
+          .refine((val) => isAddress(val, { strict: false }))
+          .transform((val) => getAddress(val)),
+      ),
+    ])
+    .optional(),
   skip: z.coerce
     .number()
     .int()
@@ -46,31 +36,21 @@ export const DelegationsRequestSchema = z.object({
     .max(100, "Limit cannot exceed 100")
     .optional()
     .default(10),
-
-  // orderBy: z.string().optional(),
+  fromValue: z
+    .string()
+    .transform((val) => BigInt(val))
+    .optional(),
+  toValue: z
+    .string()
+    .transform((val) => BigInt(val))
+    .optional(),
   orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
+  orderBy: z.enum(["timestamp"]).optional().default("timestamp"),
 });
 
-export type DelegationsRequest = z.infer<typeof DelegationsRequestSchema>;
-
-// items{
-//     delegatorAccountId
-//     timestamp
-// totalCount
-//       }
-
-// items {
-//     delegateAccountId
-//     delegatedValue
-//     timestamp
-//     transactionHash
-//   }
-//   pageInfo {
-//     hasNextPage
-//     hasPreviousPage
-//     startCursor
-//     endCursor
-//   }
+export type DelegationsRequestQuery = z.infer<
+  typeof DelegationsRequestQuerySchema
+>;
 
 export const DelegationItemSchema = z.object({
   delegatorAccountId: z.string(),
@@ -95,21 +75,29 @@ export const DelegationsResponseSchema = z.object({
 export type DelegationsResponse = z.infer<typeof DelegationsResponseSchema>;
 export type DelegationItem = z.infer<typeof DelegationItemSchema>;
 
-export const DelegationMapper = {
-  toApi: (d: DBDelegation): DelegationItem => {
-    return {
-      delegatorAccountId: d.delegatorAccountId,
-      delegateAccountId: d.delegateAccountId,
-      delegatedValue: d.delegatedValue.toString(),
-      transactionHash: d.transactionHash,
-      timestamp: d.timestamp.toString(),
-      daoId: d.daoId,
-      previousDelegate: d.previousDelegate,
-      logIndex: d.logIndex,
-      isCex: d.isCex,
-      isDex: d.isDex,
-      isLending: d.isLending,
-      isTotal: d.isTotal,
-    };
-  },
+const DelegationMapper = (d: DBDelegation): DelegationItem => {
+  return {
+    delegatorAccountId: d.delegatorAccountId,
+    delegateAccountId: d.delegateAccountId,
+    delegatedValue: d.delegatedValue.toString(),
+    transactionHash: d.transactionHash,
+    timestamp: d.timestamp.toString(),
+    daoId: d.daoId,
+    previousDelegate: d.previousDelegate,
+    logIndex: d.logIndex,
+    isCex: d.isCex,
+    isDex: d.isDex,
+    isLending: d.isLending,
+    isTotal: d.isTotal,
+  };
+};
+
+export const DelegationResponseMapper = (d: {
+  items: DBDelegation[];
+  totalCount: number;
+}): DelegationsResponse => {
+  return {
+    items: d.items.map(DelegationMapper),
+    totalCount: d.totalCount,
+  };
 };

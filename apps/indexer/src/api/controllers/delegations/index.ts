@@ -1,28 +1,33 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import {
-  DelegationMapper,
-  DelegationsRequestSchema,
+  DelegationResponseMapper,
+  DelegationsRequestParamsSchema,
+  DelegationsRequestQuerySchema,
   DelegationsResponseSchema,
 } from "@/api/mappers/delegations";
-import { DelegationsService } from "@/api/services/delegations";
+import { HistoricalDelegationsService } from "@/api/services/delegations";
 
-export function delegations(app: Hono, service: DelegationsService) {
+export function historicalDelegations(
+  app: Hono,
+  service: HistoricalDelegationsService,
+) {
   app.openapi(
     createRoute({
       method: "get",
-      operationId: "delegations",
-      path: "/delegations",
-      summary: "Get delegations",
-      description: "Get delegations, with optional filtering and sorting",
+      operationId: "historicalDelegations",
+      path: "/accounts/{address}/delegations/historical",
+      summary: "Get historical delegations",
+      description:
+        "Get historical delegations for an account, with optional filtering and sorting",
       tags: ["delegations"],
       request: {
-        query: DelegationsRequestSchema,
+        params: DelegationsRequestParamsSchema,
+        query: DelegationsRequestQuerySchema,
       },
       responses: {
         200: {
-          description:
-            "Returns transactions with their transfers and delegations",
+          description: "Returns historical delegations for an account",
           content: {
             "application/json": {
               schema: DelegationsResponseSchema,
@@ -31,33 +36,32 @@ export function delegations(app: Hono, service: DelegationsService) {
         },
       },
     }),
+
     async (context) => {
+      const { address } = context.req.valid("param");
+
       const {
-        delegatorAccountId,
-        // delegateAccountId,
-        // minDelta,
-        // maxDelta,
+        fromValue,
+        toValue,
+        delegateAddressIn,
         skip,
         limit,
-        // orderBy,
         orderDirection,
+        orderBy,
       } = context.req.valid("query");
 
       const result = await service.getHistoricalDelegations(
-        delegatorAccountId,
-        // delegateAccountId,
-        // minDelta,
-        // maxDelta,
+        address,
+        fromValue,
+        toValue,
+        delegateAddressIn,
         orderDirection,
+        orderBy,
         skip,
         limit,
-        // orderBy,
       );
 
-      return context.json({
-        items: result.map(DelegationMapper.toApi),
-        totalCount: 0,
-      });
+      return context.json(DelegationResponseMapper(result));
     },
   );
 }

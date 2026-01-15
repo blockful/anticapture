@@ -11,7 +11,7 @@ const daoItemQueries = [
   "compareTotalSupply",
   "compareTreasury",
   "compareVotes",
-  "delegations",
+  "historicalDelegations",
   "getTotalAssets",
   "getVotingPower",
   "historicalTokenData",
