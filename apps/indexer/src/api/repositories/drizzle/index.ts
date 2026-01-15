@@ -30,7 +30,7 @@ import {
   VotesCompareQueryResult,
 } from "@/api/controllers";
 import { DaysEnum } from "@/lib/enums";
-import { DBProposal } from "@/api/mappers";
+import { DBProposal, DBVote } from "@/api/mappers";
 
 export class DrizzleRepository {
   async getSupplyComparison(metricType: string, days: DaysEnum) {
@@ -306,6 +306,56 @@ export class DrizzleRepository {
       }),
       {},
     );
+  }
+
+  async getProposalVotes(
+    proposalId: string,
+    skip: number,
+    limit: number,
+    sortBy: "timestamp" | "votingPower",
+    sortOrder: "asc" | "desc",
+    account: Address,
+    reason?: number,
+  ): Promise<DBVote[]> {
+    const whereClauses: SQL<unknown>[] = [
+      eq(votesOnchain.proposalId, proposalId),
+      eq(votesOnchain.voterAccountId, account),
+    ];
+
+    if (reason !== undefined) {
+      whereClauses.push(eq(votesOnchain.support, reason.toString()));
+    }
+
+    const orderByColumn =
+      sortBy === "votingPower"
+        ? votesOnchain.votingPower
+        : votesOnchain.timestamp;
+    const orderFn = sortOrder === "asc" ? asc : desc;
+
+    return await db
+      .select()
+      .from(votesOnchain)
+      .where(and(...whereClauses))
+      .orderBy(orderFn(orderByColumn))
+      .limit(limit)
+      .offset(skip);
+  }
+
+  async getProposalVotesCount(
+    proposalId: string,
+    account: Address,
+    reason?: number,
+  ): Promise<number> {
+    const whereClauses: SQL<unknown>[] = [
+      eq(votesOnchain.proposalId, proposalId),
+      eq(votesOnchain.voterAccountId, account),
+    ];
+
+    if (reason !== undefined) {
+      whereClauses.push(eq(votesOnchain.support, reason.toString()));
+    }
+
+    return await db.$count(votesOnchain, and(...whereClauses));
   }
 
   now() {
