@@ -1,6 +1,7 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import {
+  DelegationMapper,
   DelegationsRequestSchema,
   DelegationsResponseSchema,
 } from "@/api/mappers/delegations";
@@ -53,7 +54,10 @@ export function delegations(app: Hono, service: DelegationsService) {
         // orderBy,
       );
 
-      return context.json(result);
+      return context.json({
+        items: result.map(DelegationMapper.toApi),
+        totalCount: 0,
+      });
     },
   );
 }
