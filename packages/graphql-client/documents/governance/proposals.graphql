@@ -55,50 +55,6 @@ query GetProposal($id: String!) {
   }
 }
 
-#  Get proposal votes
-query GetVotesOnchains(
-  $proposalId: String
-  $limit: Int
-  $after: String
-  $before: String
-  $orderBy: String = "timestamp"
-  $orderDirection: String = "desc"
-) {
-  votesOnchains(
-    limit: $limit
-    after: $after
-    before: $before
-    where: { proposalId: $proposalId }
-    orderBy: $orderBy
-    orderDirection: $orderDirection
-  ) {
-    pageInfo {
-      startCursor
-      endCursor
-      hasNextPage
-      hasPreviousPage
-    }
-    totalCount
-    items {
-      voterAccountId
-      txHash
-      daoId
-      proposalId
-      support
-      votingPower
-      reason
-      timestamp
-    }
-  }
-}
-
-#  Get proposal votes
-query GetVotesOnchainsTotalCount($proposalId: String) {
-  votesOnchains(where: { proposalId: $proposalId }) {
-    totalCount
-  }
-}
-
 # Get voting power change
 query GetVotingPowerChange(
   $addresses: JSON!
@@ -144,17 +100,6 @@ query GetAccountPower($address: String!, $proposalId: String!) {
     votingPower
     accountId
   }
-  votesOnchain(proposalId: $proposalId, voterAccountId: $address) {
-    support
-    votingPower
-    reason
-    timestamp
-    txHash
-    daoId
-  }
-}
-
-query GetUserVote($proposalId: String!, $address: String!) {
   votesOnchain(proposalId: $proposalId, voterAccountId: $address) {
     support
     votingPower

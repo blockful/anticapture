@@ -1,4 +1,10 @@
-import { DBProposal, ProposalsRequest, VotersResponse } from "@/api/mappers";
+import {
+  DBProposal,
+  ProposalsRequest,
+  VotersResponse,
+  VotesResponse,
+  DBVote,
+} from "@/api/mappers";
 import { DAOClient } from "@/interfaces/client";
 import { ProposalStatus } from "@/lib/constants";
 import { DaysEnum } from "@/lib/enums";
@@ -29,6 +35,20 @@ interface ProposalsRepository {
     voters: Address[],
     comparisonTimestamp: number,
   ): Promise<Record<Address, bigint>>;
+  getProposalVotes(
+    proposalId: string,
+    skip: number,
+    limit: number,
+    sortBy: "timestamp" | "votingPower",
+    sortOrder: "asc" | "desc",
+    account?: Address,
+    reason?: number,
+  ): Promise<DBVote[]>;
+  getProposalVotesCount(
+    proposalId: string,
+    account?: Address,
+    reason?: number,
+  ): Promise<number>;
 }
 
 export class ProposalsService {
@@ -167,6 +187,45 @@ export class ProposalsService {
         votingPower: v.votingPower.toString(),
         lastVoteTimestamp: Number(lastVotersTimestamp[v.voter] || 0),
         votingPowerVariation: votingPowerVariation[v.voter]?.toString() || "0",
+      })),
+    };
+  }
+
+  /**
+   * Returns the list of votes for a given proposal
+   */
+  async getProposalVotes(
+    proposalId: string,
+    skip: number = 0,
+    limit: number = 10,
+    sortBy: "timestamp" | "votingPower" = "timestamp",
+    sortOrder: "asc" | "desc" = "desc",
+    account?: Address,
+    reason?: number,
+  ): Promise<VotesResponse> {
+    const [votes, totalCount] = await Promise.all([
+      this.proposalsRepo.getProposalVotes(
+        proposalId,
+        skip,
+        limit,
+        sortBy,
+        sortOrder,
+        account,
+        reason,
+      ),
+      this.proposalsRepo.getProposalVotesCount(proposalId, account, reason),
+    ]);
+
+    return {
+      totalCount,
+      items: votes.map((vote) => ({
+        voter: vote.voterAccountId,
+        transactionHash: vote.txHash,
+        proposalId: vote.proposalId,
+        support: Number(vote.support),
+        votingPower: vote.votingPower.toString(),
+        reason: vote.reason || null,
+        timestamp: Number(vote.timestamp),
       })),
     };
   }
