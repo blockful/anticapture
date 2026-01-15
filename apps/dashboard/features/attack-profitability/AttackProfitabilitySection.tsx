@@ -62,7 +62,7 @@ export const AttackProfitabilitySection = ({
             >
               Last updated: {attackUpdate.label}
             </BadgeStatus>
-            <div className="border-border-default border-1 hidden h-5 sm:block" />
+            <div className="border-border-default hidden h-5 border sm:block" />
 
             <AttackProfitabilityToggleHeader
               treasuryMetric={treasuryMetric}
