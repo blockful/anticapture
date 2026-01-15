@@ -13,7 +13,9 @@ const envSchema = z.object({
   CHAIN_ID: z.coerce.number(),
 
   // Treasury provider configuration
-  TREASURY_DATA_PROVIDER: z.enum(["DUNE", "DEFILLAMA", "COMPOUND"]).optional(),
+  TREASURY_DATA_PROVIDER_ID: z
+    .enum(["DUNE", "DEFILLAMA", "COMPOUND"])
+    .optional(),
   TREASURY_DATA_PROVIDER_API_URL: z.string().optional(),
   TREASURY_DATA_PROVIDER_API_KEY: z.string().optional(),
 

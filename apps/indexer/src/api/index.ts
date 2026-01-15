@@ -158,7 +158,7 @@ const treasuryService = createTreasuryService(
   new TreasuryRepository(),
   tokenPriceClient,
   parseTreasuryProviderConfig(
-    env.TREASURY_DATA_PROVIDER,
+    env.TREASURY_DATA_PROVIDER_ID,
     env.TREASURY_DATA_PROVIDER_API_URL,
     env.TREASURY_DATA_PROVIDER_API_KEY,
   ),
