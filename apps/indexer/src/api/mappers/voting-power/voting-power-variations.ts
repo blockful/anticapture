@@ -18,13 +18,23 @@ export const VotingPowerVariationsRequestSchema = z.object({
   fromDate: z
     .string()
     .optional()
-    .default((Math.floor(Date.now() / 1000) - DaysEnum["90d"]).toString())
-    .transform((val) => Number(val)),
+    .transform((val) =>
+      Number(
+        val !== undefined
+          ? val
+          : (Math.floor(Date.now() / 1000) - DaysEnum["90d"]).toString(),
+      ),
+    ),
   toDate: z
     .string()
     .optional()
-    .default(Math.floor(Date.now() / 1000).toString())
-    .transform((val) => Number(val)),
+    .transform((val) =>
+      Number(
+        val !== undefined
+          ? val
+          : (Math.floor(Date.now() / 1000) - DaysEnum["90d"]).toString(),
+      ),
+    ),
   limit: z.coerce
     .number()
     .int()
@@ -45,13 +55,23 @@ export const VotingPowerVariationsByAccountIdRequestSchema = z.object({
   fromDate: z
     .string()
     .optional()
-    .default((Math.floor(Date.now() / 1000) - DaysEnum["90d"]).toString())
-    .transform((val) => Number(val)),
+    .transform((val) =>
+      Number(
+        val !== undefined
+          ? val
+          : (Math.floor(Date.now() / 1000) - DaysEnum["90d"]).toString(),
+      ),
+    ),
   toDate: z
     .string()
     .optional()
-    .default(Math.floor(Date.now() / 1000).toString())
-    .transform((val) => Number(val)),
+    .transform((val) =>
+      Number(
+        val !== undefined
+          ? val
+          : (Math.floor(Date.now() / 1000) - DaysEnum["90d"]).toString(),
+      ),
+    ),
 });
 
 export const VotingPowersRequestSchema = z.object({
