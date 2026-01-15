@@ -13,11 +13,10 @@ const envSchema = z.object({
   CHAIN_ID: z.coerce.number(),
 
   // Treasury provider configuration
-  DEFILLAMA_API_URL: z.string().optional(),
-  TREASURY_PROVIDER_PROTOCOL_ID: z.string().optional(),
-  COMPOUND_API_URL: z.string().optional(),
-  DUNE_API_URL: z.string().optional(),
-  DUNE_API_KEY: z.string().optional(),
+  TREASURY_DATA_PROVIDER: z.enum(["DUNE", "DEFILLAMA", "COMPOUND"]).optional(),
+  TREASURY_DATA_PROVIDER_API_URL: z.string().optional(),
+  TREASURY_DATA_PROVIDER_API_KEY: z.string().optional(),
+
   COINGECKO_API_URL: z.string(),
   COINGECKO_API_KEY: z.string(),
   REDIS_URL: z.string().optional(),

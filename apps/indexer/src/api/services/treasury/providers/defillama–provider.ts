@@ -19,25 +19,21 @@ interface RawDefiLlamaResponse {
 
 export class DefiLlamaProvider implements TreasuryProvider {
   private readonly client: AxiosInstance;
-  private readonly providerDaoId: string;
 
-  constructor(client: AxiosInstance, providerDaoId: string) {
+  constructor(client: AxiosInstance) {
     this.client = client;
-    this.providerDaoId = providerDaoId;
   }
 
   async fetchTreasury(
     cutoffTimestamp: number,
   ): Promise<LiquidTreasuryDataPoint[]> {
     try {
-      const response = await this.client.get<RawDefiLlamaResponse>(
-        `/${this.providerDaoId}`,
-      );
+      const response = await this.client.get<RawDefiLlamaResponse>(`/`);
 
       return this.transformData(response.data, cutoffTimestamp);
     } catch (error) {
       console.error(
-        `[DefiLlamaProvider] Failed to fetch treasury data for ${this.providerDaoId}:`,
+        `[DefiLlamaProvider] Failed to fetch treasury data:`,
         error,
       );
       return [];
