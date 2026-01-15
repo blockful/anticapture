@@ -57,6 +57,7 @@ interface BaseInfo {
   };
   icon?: (props: DaoIconProps) => ReactNode;
   disableDaoPage?: boolean;
+  notSupportedMetrics?: MetricTypesEnum[];
 }
 
 export interface ChainWithIcon extends Chain {

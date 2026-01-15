@@ -17,6 +17,7 @@ import { cn } from "@/shared/utils/cn";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { MetricWithKey } from "@/features/token-distribution/types";
 import { DaoIdEnum } from "@/shared/types/daos";
+import daoConfig from "@/shared/dao-config";
 
 export const TokenDistributionDialog = ({
   appliedMetrics,
@@ -31,12 +32,8 @@ export const TokenDistributionDialog = ({
 }) => {
   let notSupportedMetrics: MetricTypesEnum[] = [];
 
-  if (daoId === DaoIdEnum.NOUNS) {
-    notSupportedMetrics = [
-      MetricTypesEnum.CEX_SUPPLY,
-      MetricTypesEnum.DEX_SUPPLY,
-      MetricTypesEnum.LENDING_SUPPLY,
-    ];
+  if (daoConfig[daoId].notSupportedMetrics) {
+    notSupportedMetrics = daoConfig[daoId].notSupportedMetrics;
   }
 
   const [selectedMetrics, setSelectedMetrics] = useState<

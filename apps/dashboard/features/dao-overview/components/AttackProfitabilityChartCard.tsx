@@ -7,7 +7,7 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
 import { OverviewMetric } from "@/features/dao-overview/components/OverviewMetric";
 import daoConfig from "@/shared/dao-config";
-import { CircleSlash2 } from "lucide-react";
+import { CircleSlash } from "lucide-react";
 
 const metricsSchema = {
   all: { label: "Treasury", color: "#4ade80" },
@@ -19,23 +19,30 @@ export const AttackProfitabilityChartCard = ({
 }: {
   daoId: DaoIdEnum;
 }) => {
-  const featureNotIncluded = daoConfig[daoId].attackProfitability?.notSupported;
+  const featureNotIncluded =
+    !daoConfig[daoId].attackProfitability?.supportsLiquidTreasuryCall;
 
   return (
     <div className="sm:bg-surface-default flex w-full flex-col gap-4 px-5 md:p-4">
       <div className="flex h-5 items-center gap-2">
-        <DefaultLink
-          href={`${daoId.toLowerCase()}/attack-profitability`}
-          openInNewTab={false}
-          className="text-primary border-border-contrast hover:border-primary border-b border-dashed font-mono text-[13px] font-medium tracking-wider"
-        >
-          ATTACK PROFITABILITY
-        </DefaultLink>
+        {featureNotIncluded ? (
+          <span className="text-primary border-border-contrast border-b border-dashed font-mono text-[13px] font-medium tracking-wider">
+            ATTACK PROFITABILITY
+          </span>
+        ) : (
+          <DefaultLink
+            href={`${daoId.toLowerCase()}/attack-profitability`}
+            openInNewTab={false}
+            className="text-primary border-border-contrast hover:border-primary border-b border-dashed font-mono text-[13px] font-medium tracking-wider"
+          >
+            ATTACK PROFITABILITY
+          </DefaultLink>
+        )}
         <TooltipInfo text="Takes into account the maximum cost and the minimum profit possible. If it looks bad, it’s bad. If it looks good, it’s better, but it does not represent 100% safety. Remember that both getting votes and causing damage can take other formats beyond direct buying and selling assets." />
       </div>
       {featureNotIncluded ? (
         <div className="bg-surface-contrast flex h-full flex-col items-center justify-center px-3 py-4 text-center">
-          <CircleSlash2 className="text-secondary mb-2.5" />
+          <CircleSlash className="text-secondary mb-2.5" />
           <span className="text-primary font-mono text-[13px] font-medium uppercase tracking-wider">
             Not applicable for this DAO
           </span>
