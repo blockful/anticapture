@@ -58,6 +58,9 @@ import {
 } from "@/api/services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
+import { delegations } from "./controllers/delegations";
+import { DelegationsService } from "./services/delegations";
+import { HistoricalDelegationsRepository } from "./repositories/delegations";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -146,6 +149,8 @@ const tokenPriceClient =
         env.COINGECKO_API_KEY,
         env.DAO_ID,
       );
+
+delegations(app, new DelegationsService(new HistoricalDelegationsRepository()));
 
 tokenHistoricalData(app, tokenPriceClient);
 token(
