@@ -1,10 +1,10 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import {
-  HistoricalDelegationsRequestParamsSchema,
-  HistoricalDelegationsRequestQuerySchema,
   DelegationsResponseSchema,
   DelegationMapper,
+  DelegationsRequestQuerySchema,
+  DelegationsRequestParamsSchema,
 } from "@/api/mappers/delegations";
 import { DelegationsService } from "@/api/services/delegations";
 
@@ -18,8 +18,8 @@ export function delegations(app: Hono, service: DelegationsService) {
       description: "Get delegations for an account",
       tags: ["delegations"],
       request: {
-        params: HistoricalDelegationsRequestParamsSchema,
-        query: HistoricalDelegationsRequestQuerySchema,
+        params: DelegationsRequestParamsSchema,
+        query: DelegationsRequestQuerySchema,
       },
       responses: {
         200: {

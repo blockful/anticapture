@@ -73,13 +73,14 @@ export class HistoricalDelegationsRepository {
 
 export class DelegationsRepository {
   async getDelegations(address: Address): Promise<DBDelegation[]> {
-    const baseQuery = db
+    // Get only the latest delegation
+    const latestDelegation = await db
       .select()
       .from(delegation)
-      .where(eq(delegation.delegatorAccountId, address));
+      .where(eq(delegation.delegatorAccountId, address))
+      .orderBy(desc(delegation.timestamp), desc(delegation.logIndex))
+      .limit(1);
 
-    const items = await baseQuery;
-
-    return items;
+    return latestDelegation;
   }
 }
