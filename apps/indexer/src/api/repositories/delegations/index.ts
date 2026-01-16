@@ -46,7 +46,7 @@ export class HistoricalDelegationsRepository {
     address: Address,
     fromValue: bigint | undefined,
     toValue: bigint | undefined,
-    delegateAddressIn: Address[],
+    delegateAddressIn: Address[] | undefined,
   ): SQL | undefined => {
     const conditions = [eq(delegation.delegatorAccountId, address)];
 
