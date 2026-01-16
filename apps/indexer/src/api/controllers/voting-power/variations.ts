@@ -16,7 +16,7 @@ export function votingPowerVariations(app: Hono, service: VotingPowerService) {
     createRoute({
       method: "get",
       operationId: "votingPowerVariations",
-      path: "/voting-powers/variations",
+      path: "/accounts/voting-powers/variations",
       summary: "Get top changes in voting power for a given period",
       description:
         "Returns a mapping of the biggest changes to voting power associated by delegate address",
@@ -50,6 +50,7 @@ export function votingPowerVariations(app: Hono, service: VotingPowerService) {
 
       return context.json(
         VotingPowerVariationsMapper(result, fromDate, toDate),
+        200,
       );
     },
   );

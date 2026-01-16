@@ -16,26 +16,20 @@ export const VotingPowerVariationsRequestSchema = z.object({
       z.array(z.string().refine(isAddress, "Invalid addresses")),
     ])
     .optional()
-    .transform((val) => (val === undefined ? [] : val)),
+    .transform((val) => val ?? []),
   fromDate: z
     .string()
     .optional()
     .transform((val) =>
       Number(
-        val !== undefined
-          ? val
-          : (Math.floor(Date.now() / 1000) - DaysEnum["90d"]).toString(),
+        val ?? (Math.floor(Date.now() / 1000) - DaysEnum["90d"]).toString(),
       ),
     ),
   toDate: z
     .string()
     .optional()
     .transform((val) =>
-      Number(
-        val !== undefined
-          ? val
-          : (Math.floor(Date.now() / 1000) - DaysEnum["90d"]).toString(),
-      ),
+      Number(val ?? Math.floor(Date.now() / 1000).toString()),
     ),
   limit: z.coerce
     .number()
