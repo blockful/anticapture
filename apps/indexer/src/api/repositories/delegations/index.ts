@@ -70,3 +70,16 @@ export class HistoricalDelegationsRepository {
     return and(...conditions);
   };
 }
+
+export class DelegationsRepository {
+  async getDelegations(address: Address): Promise<DBDelegation[]> {
+    const baseQuery = db
+      .select()
+      .from(delegation)
+      .where(eq(delegation.delegatorAccountId, address));
+
+    const items = await baseQuery;
+
+    return items;
+  }
+}

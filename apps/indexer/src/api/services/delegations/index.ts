@@ -1,5 +1,8 @@
 import { DBDelegation } from "@/api/mappers";
-import { HistoricalDelegationsRepository } from "@/api/repositories/delegations";
+import {
+  DelegationsRepository,
+  HistoricalDelegationsRepository,
+} from "@/api/repositories/delegations";
 import { Address } from "viem";
 
 export class HistoricalDelegationsService {
@@ -28,5 +31,13 @@ export class HistoricalDelegationsService {
       toValue,
       delegateAddressIn,
     );
+  }
+}
+
+export class DelegationsService {
+  constructor(private delegationsRepository: DelegationsRepository) {}
+
+  async getDelegations(address: Address): Promise<DBDelegation[]> {
+    return this.delegationsRepository.getDelegations(address);
   }
 }

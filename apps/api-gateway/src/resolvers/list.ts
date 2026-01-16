@@ -4,7 +4,7 @@ const daoListQueries = [
   "accountPowers",
   "accounts",
   "daoMetricsDayBuckets",
-  "delegations",
+  // "delegations",
   "proposalsOnchains",
   "tokens",
   "votesOnchains",
