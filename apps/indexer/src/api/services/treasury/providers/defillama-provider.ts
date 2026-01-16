@@ -2,6 +2,7 @@ import { AxiosInstance } from "axios";
 import { TreasuryProvider } from "./treasury-provider.interface";
 import { LiquidTreasuryDataPoint } from "../types";
 import { truncateTimestampTime } from "@/eventHandlers/shared";
+import { TreasuryProviderCache } from "./provider-cache";
 
 interface RawDefiLlamaResponse {
   chainTvls: Record<
@@ -18,6 +19,7 @@ interface RawDefiLlamaResponse {
 }
 
 export class DefiLlamaProvider implements TreasuryProvider {
+  private readonly cache = new TreasuryProviderCache();
   private readonly client: AxiosInstance;
 
   constructor(client: AxiosInstance) {
@@ -27,10 +29,16 @@ export class DefiLlamaProvider implements TreasuryProvider {
   async fetchTreasury(
     cutoffTimestamp: number,
   ): Promise<LiquidTreasuryDataPoint[]> {
+    const cached = this.cache.get();
+
+    if (cached !== null) return cached;
+
     try {
       const response = await this.client.get<RawDefiLlamaResponse>(`/`);
+      const data = this.transformData(response.data, cutoffTimestamp);
+      this.cache.set(data);
 
-      return this.transformData(response.data, cutoffTimestamp);
+      return data;
     } catch (error) {
       console.error(
         `[DefiLlamaProvider] Failed to fetch treasury data:`,

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { DefiLlamaProvider } from "./providers/defillama–provider";
+import { DefiLlamaProvider } from "./providers/defillama-provider";
 import { DuneProvider } from "./providers/dune-provider";
 import { TreasuryService } from "./treasury.service";
 import { TreasuryRepository } from "@/api/repositories/treasury";
