@@ -106,13 +106,16 @@ query GetVotingPowerChange(
   $toDate: String!
 ) {
   votingPowerVariations(
-    addresses: $addresses,
-    fromDate: $fromDate,
-    toDate: $toDate,
+    addresses: $addresses
+    fromDate: $fromDate
+    toDate: $toDate
   ) {
     items {
       accountId
       previousVotingPower
+      currentVotingPower
+      absoluteChange
+      percentageChange
     }
   }
 }

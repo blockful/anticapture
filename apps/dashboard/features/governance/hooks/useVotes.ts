@@ -8,10 +8,17 @@ import {
 } from "@anticapture/graphql-client/hooks";
 import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 
+type VotingPowerVariation = {
+  previousVotingPower: string;
+  currentVotingPower: string;
+  absoluteChange: string;
+  percentageChange: string;
+};
+
 // Enhanced vote type with historical voting power
 export type VoteWithHistoricalPower =
   GetVotesOnchainsQuery["votesOnchains"]["items"][0] & {
-    historicalVotingPower?: string;
+    votingPowerVariation?: VotingPowerVariation;
     isSubRow?: boolean;
   };
 
@@ -90,7 +97,7 @@ export const useVotes = ({
 
       // Filter out votes that already have historical voting power
       const votesNeedingData = votes.filter(
-        (vote) => !vote.historicalVotingPower,
+        (vote) => !vote.votingPowerVariation,
       );
 
       if (!votesNeedingData.length || proposalStartTimestamp === undefined)
@@ -102,9 +109,10 @@ export const useVotes = ({
         const result = await getVotingPowerChange({
           variables: {
             addresses,
-            fromDate: proposalStartTimestamp?.toString(),
+            fromDate: (proposalStartTimestamp / 1000).toString(),
             toDate: (
-              proposalStartTimestamp + DAYS_IN_SECONDS["30d"]
+              proposalStartTimestamp / 1000 +
+              DAYS_IN_SECONDS["30d"]
             ).toString(),
           },
           context: {
@@ -116,12 +124,13 @@ export const useVotes = ({
 
         // Update votes with historical voting power
         if (result.data?.votingPowerVariations) {
-          const powerChanges: Record<string, string> = {};
-          result.data.votingPowerVariations.items?.forEach((item) => {
-            if (item?.accountId && item?.previousVotingPower) {
-              powerChanges[item.accountId] = item.previousVotingPower;
-            }
-          });
+          const powerChanges = result.data.votingPowerVariations.items?.reduce(
+            (acc, item) => {
+              if (item?.accountId) acc[item.accountId] = item;
+              return acc;
+            },
+            {} as Record<string, VotingPowerVariation>,
+          );
 
           // Update only the votes that were fetched and don't already have historical voting power
           setAllVotes((prevVotes) =>
@@ -131,11 +140,9 @@ export const useVotes = ({
                 (v) => v.voterAccountId === vote.voterAccountId,
               );
               if (wasFetched) {
-                // Set historical voting power to the returned value or "0" if not found
-                const historicalVP = powerChanges[vote.voterAccountId] || "0";
                 return {
                   ...vote,
-                  historicalVotingPower: historicalVP,
+                  votingPowerVariation: powerChanges[vote.voterAccountId],
                 };
               }
               // Return the vote unchanged
@@ -246,6 +253,8 @@ export const useVotes = ({
     limit,
     fetchVotingPowerForVotes,
   ]);
+
+  console.log({ votes });
 
   return {
     votes,

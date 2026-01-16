@@ -2744,7 +2744,7 @@ export type GetVotingPowerChangeQueryVariables = Exact<{
 }>;
 
 
-export type GetVotingPowerChangeQuery = { __typename?: 'Query', votingPowerVariations?: { __typename?: 'votingPowerVariations_200_response', items: Array<{ __typename?: 'query_votingPowerVariations_items_items', accountId: string, previousVotingPower: string } | null> } | null };
+export type GetVotingPowerChangeQuery = { __typename?: 'Query', votingPowerVariations?: { __typename?: 'votingPowerVariations_200_response', items: Array<{ __typename?: 'query_votingPowerVariations_items_items', accountId: string, previousVotingPower: string, currentVotingPower: string, absoluteChange: string, percentageChange: string } | null> } | null };
 
 export type GetProposalNonVotersQueryVariables = Exact<{
   id: Scalars['String']['input'];
