@@ -1,4 +1,4 @@
-import { asc, desc, eq, sql, gte, lte, SQL, inArray, and } from "drizzle-orm";
+import { asc, desc, eq, gte, lte, SQL, inArray, and } from "drizzle-orm";
 import { db } from "ponder:api";
 import { delegation } from "ponder:schema";
 import { Address } from "viem";
@@ -13,8 +13,7 @@ export class HistoricalDelegationsRepository {
     limit: number,
     fromValue: bigint | undefined,
     toValue: bigint | undefined,
-    delegateAddressIn: Address[],
-    orderBy: "timestamp",
+    delegateAddressIn: Address[] | undefined,
   ): Promise<{
     items: DBDelegation[];
     totalCount: number;
@@ -51,7 +50,7 @@ export class HistoricalDelegationsRepository {
     address: Address;
     fromValue: bigint | undefined;
     toValue: bigint | undefined;
-    delegateAddressIn: Address[];
+    delegateAddressIn: Address[] | undefined;
   }): SQL | undefined => {
     const conditions = [
       eq(delegation.delegatorAccountId, filter.address.toLowerCase()),
