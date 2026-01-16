@@ -3,10 +3,6 @@ import { Address, Chain } from "viem";
 import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
 import { DaoIconProps } from "@/shared/components/icons/types";
 
-/**
- * Simplified token metric item from the new tokenMetrics API endpoint.
- * Only contains the fields actually used by the frontend.
- */
 export type TokenMetricItem = {
   date: string;
   high: string;
