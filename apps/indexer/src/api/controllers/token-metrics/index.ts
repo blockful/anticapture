@@ -11,7 +11,7 @@ export function tokenMetrics(app: Hono, service: TokenMetricsService) {
   app.openapi(
     createRoute({
       method: "get",
-      operationId: "listTokenMetrics",
+      operationId: "tokenMetrics",
       path: "/token-metrics",
       summary: "Get token related metrics",
       description: `Returns token related metrics.
