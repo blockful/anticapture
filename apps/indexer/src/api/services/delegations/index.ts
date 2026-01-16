@@ -11,9 +11,8 @@ export class HistoricalDelegationsService {
     address: Address,
     fromValue: bigint | undefined,
     toValue: bigint | undefined,
-    delegateAddressIn: Address[],
+    delegateAddressIn: Address[] | undefined,
     orderDirection: "asc" | "desc",
-    orderBy: "timestamp",
     skip: number,
     limit: number,
   ): Promise<{
@@ -28,7 +27,6 @@ export class HistoricalDelegationsService {
       fromValue,
       toValue,
       delegateAddressIn,
-      orderBy,
     );
   }
 }

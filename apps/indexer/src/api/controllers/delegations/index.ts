@@ -47,7 +47,6 @@ export function historicalDelegations(
         skip,
         limit,
         orderDirection,
-        orderBy,
       } = context.req.valid("query");
 
       const result = await service.getHistoricalDelegations(
@@ -56,7 +55,6 @@ export function historicalDelegations(
         toValue,
         delegateAddressIn,
         orderDirection,
-        orderBy,
         skip,
         limit,
       );

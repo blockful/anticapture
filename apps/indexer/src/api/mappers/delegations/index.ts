@@ -45,7 +45,6 @@ export const DelegationsRequestQuerySchema = z.object({
     .transform((val) => BigInt(val))
     .optional(),
   orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
-  orderBy: z.enum(["timestamp"]).optional().default("timestamp"),
 });
 
 export type DelegationsRequestQuery = z.infer<
