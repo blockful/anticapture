@@ -2,7 +2,7 @@ import { HTTPException } from "hono/http-exception";
 import { AxiosInstance } from "axios";
 import { LiquidTreasuryDataPoint } from "../types";
 import { TreasuryProvider } from "./treasury-provider.interface";
-import { filterWithFallback } from "@/lib/time-series";
+import { filterWithFallback } from "@/lib/query-helpers";
 
 export interface DuneResponse {
   execution_id: string;

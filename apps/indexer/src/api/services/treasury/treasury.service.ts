@@ -8,7 +8,7 @@ import {
   calculateCutoffTimestamp,
   normalizeMapTimestamps,
   truncateTimestampToMidnight,
-} from "@/lib/time-series";
+} from "@/lib/date-helpers";
 
 /**
  * Treasury Service - Orchestrates treasury data retrieval and calculation.

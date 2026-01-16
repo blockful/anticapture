@@ -4,6 +4,7 @@ export * from "./governance-activity";
 export * from "./last-update";
 export * from "./proposals";
 export * from "./token";
+export * from "./token-metrics";
 export * from "./transactions";
 export * from "./voting-power";
 export * from "./dao";

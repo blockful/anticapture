@@ -12,7 +12,7 @@ import { DAYS_IN_YEAR } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 import { TokenHistoricalPriceResponse } from "@/api/mappers";
 import { PriceProvider } from "@/api/services/treasury/types";
-import { truncateTimestampToMidnight } from "@/lib/time-series";
+import { truncateTimestampToMidnight } from "@/lib/date-helpers";
 
 const createCoingeckoTokenPriceDataSchema = (
   tokenContractAddress: string,

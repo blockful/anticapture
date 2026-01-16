@@ -1,17 +1,11 @@
 /**
- * Time-series utilities for forward-fill, timeline creation, and data filtering.
+ * Core time-series utilities for forward-fill and timeline generation.
  *
  * Forward-fill: Use the last known value for any missing data points.
  */
 
 import { SECONDS_IN_DAY } from "./enums";
-
-/**
- * Truncate timestamp (seconds) to midnight UTC
- */
-export const truncateTimestampToMidnight = (timestampSec: number): number => {
-  return Math.floor(timestampSec / SECONDS_IN_DAY) * SECONDS_IN_DAY;
-};
+import { truncateTimestampToMidnight } from "./date-helpers";
 
 /**
  * Forward-fill sparse data across a master timeline.
@@ -77,81 +71,35 @@ export function createDailyTimeline(
 }
 
 /**
- * Filter data by cutoff date with fallback to last value before cutoff.
+ * Generate ordered daily timeline from dates array.
  *
- * Returns items with date >= cutoffDate. If no items match, returns the last
- * item before the cutoff as fallback (using getLastValueBefore).
+ * Creates a complete daily timeline from startDate (or first date in array)
+ * to endDate (or today), optionally reversed for descending order.
  *
- * @param sortedData - Array sorted by date ascending, items must have `date` property
- * @param cutoffDate - Minimum date (inclusive)
- * @returns Filtered data, or last value before cutoff if filter returns empty
- *
- * @example
- * const data = [{ date: 1, value: 10 }, { date: 5, value: 20 }];
- * const result = filterWithFallback(data, 3);
- * // Result: [{ date: 5, value: 20 }]
- *
- * const result2 = filterWithFallback(data, 100);
- * // Result: [{ date: 5, value: 20 }] (fallback to last before cutoff)
+ * @param params.datesFromDb - Array of timestamps from database (will be sorted)
+ * @param params.startDate - Optional start date override
+ * @param params.endDate - Optional end date (defaults to today)
+ * @param params.orderDirection - "asc" or "desc" ordering
+ * @returns Array of daily timestamps
  */
-export function filterWithFallback<T extends { date: number }>(
-  sortedData: T[],
-  cutoffDate: number,
-): T[] {
-  const filtered = sortedData.filter((item) => item.date >= cutoffDate);
+export function generateOrderedTimeline(params: {
+  datesFromDb: number[];
+  startDate?: number;
+  endDate?: number;
+  orderDirection?: "asc" | "desc";
+}): number[] {
+  const { datesFromDb, startDate, endDate, orderDirection } = params;
 
-  if (filtered.length === 0 && sortedData.length > 0) {
-    const lastBefore = getLastValueBefore(sortedData, cutoffDate);
-    return lastBefore ? [lastBefore] : [];
-  }
+  if (datesFromDb.length === 0 && !startDate) return [];
 
-  return filtered;
+  const sortedDates = [...datesFromDb].sort((a, b) => a - b);
+  const firstDate = startDate ?? sortedDates[0];
+  const lastDate =
+    endDate ?? truncateTimestampToMidnight(Math.floor(Date.now() / 1000));
+
+  if (!firstDate || !lastDate) return [];
+
+  const timeline = createDailyTimeline(firstDate, lastDate);
+  if (orderDirection === "desc") timeline.reverse();
+  return timeline;
 }
-
-/**
- * Get the last value before a given date from sorted data.
- *
- * Useful for finding the initial value for forward-fill when the requested
- * time range starts after the first available data point.
- *
- * @param sortedData - Array sorted by date ascending, items must have `date` property
- * @param beforeDate - The cutoff date (exclusive)
- * @returns The last item before the date, or undefined if none exists
- *
- * @example
- * const data = [{ date: 1, value: 10 }, { date: 5, value: 20 }];
- * const result = getLastValueBefore(data, 3);
- * // Result: { date: 1, value: 10 }
- */
-export function getLastValueBefore<T extends { date: number }>(
-  sortedData: T[],
-  beforeDate: number,
-): T | undefined {
-  for (let i = sortedData.length - 1; i >= 0; i--) {
-    const item = sortedData[i];
-    if (item !== undefined && item.date < beforeDate) {
-      return item;
-    }
-  }
-  return undefined;
-}
-
-/**
- * Calculate cutoff timestamp for filtering data by days
- */
-export const calculateCutoffTimestamp = (days: number): number => {
-  return Math.floor(Date.now() / 1000) - days * SECONDS_IN_DAY;
-};
-
-/**
- * Normalize all timestamps in a Map to midnight UTC (seconds)
- */
-export const normalizeMapTimestamps = <T>(
-  map: Map<number, T>,
-): Map<number, T> => {
-  const normalized = new Map<number, T>();
-  map.forEach((value, ts) => {
-    normalized.set(truncateTimestampToMidnight(ts), value);
-  });
-  return normalized;
-};

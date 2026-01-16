@@ -8,7 +8,7 @@ import {
 } from "@/eventHandlers";
 import { DaoIdEnum } from "@/lib/enums";
 import { ProposalStatus } from "@/lib/constants";
-import { truncateTimestampToMidnight } from "@/lib/time-series";
+import { truncateTimestampToMidnight } from "@/lib/date-helpers";
 
 export function GovernorIndexer(blockTime: number) {
   const daoId = DaoIdEnum.NOUNS;

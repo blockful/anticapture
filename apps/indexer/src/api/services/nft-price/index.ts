@@ -3,12 +3,11 @@ import axios, { AxiosInstance } from "axios";
 
 import { TokenHistoricalPriceResponse } from "@/api/mappers";
 import { PriceProvider } from "@/api/services/treasury/types";
+import { forwardFill, createDailyTimeline } from "@/lib/time-series";
 import {
   truncateTimestampToMidnight,
   calculateCutoffTimestamp,
-  createDailyTimeline,
-  forwardFill,
-} from "@/lib/time-series";
+} from "@/lib/date-helpers";
 
 interface Repository {
   getHistoricalNFTPrice(

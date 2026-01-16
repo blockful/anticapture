@@ -3,6 +3,7 @@ export * from "./last-update";
 export * from "./voting-power";
 export * from "./transactions";
 export * from "./token";
+export * from "./token-metrics";
 export * from "./delegation-percentage";
 export * from "./account-balance";
 export * from "./dao";
