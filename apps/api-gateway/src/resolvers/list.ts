@@ -1,11 +1,12 @@
 const daoListQueries = [
   "accountBalances",
+  "transfers",
   "accountPowers",
   "accounts",
   "daoMetricsDayBuckets",
+  "delegations",
   "proposalsOnchains",
   "tokens",
-  "transfers",
   "votesOnchains",
   "votingPowerHistorys",
 ];
