@@ -1,6 +1,6 @@
 import { z } from "@hono/zod-openapi";
 import { delegation } from "ponder:schema";
-import { getAddress, isAddress } from "viem";
+import { Address, getAddress, isAddress } from "viem";
 
 type DBDelegation = typeof delegation.$inferSelect;
 
@@ -52,18 +52,15 @@ export type DelegationsRequestQuery = z.infer<
 >;
 
 export const DelegationItemSchema = z.object({
-  delegatorAccountId: z.string(),
-  delegateAccountId: z.string(),
-  delegatedValue: z.string(),
-  transactionHash: z.string(),
+  delegatorAddress: z
+    .string()
+    .refine((val) => isAddress(val, { strict: false })),
+  delegateAddress: z
+    .string()
+    .refine((val) => isAddress(val, { strict: false })),
+  amount: z.string(),
   timestamp: z.string(),
-  daoId: z.string(),
-  previousDelegate: z.string().nullable(),
-  logIndex: z.number(),
-  isCex: z.boolean(),
-  isDex: z.boolean(),
-  isLending: z.boolean(),
-  isTotal: z.boolean(),
+  transactionHash: z.string(),
 });
 
 export const DelegationsResponseSchema = z.object({
@@ -76,18 +73,11 @@ export type DelegationItem = z.infer<typeof DelegationItemSchema>;
 
 const DelegationMapper = (d: DBDelegation): DelegationItem => {
   return {
-    delegatorAccountId: d.delegatorAccountId,
-    delegateAccountId: d.delegateAccountId,
-    delegatedValue: d.delegatedValue.toString(),
-    transactionHash: d.transactionHash,
+    delegatorAddress: d.delegatorAccountId as Address,
+    delegateAddress: d.delegateAccountId as Address,
+    amount: d.delegatedValue.toString(),
     timestamp: d.timestamp.toString(),
-    daoId: d.daoId,
-    previousDelegate: d.previousDelegate,
-    logIndex: d.logIndex,
-    isCex: d.isCex,
-    isDex: d.isDex,
-    isLending: d.isLending,
-    isTotal: d.isTotal,
+    transactionHash: d.transactionHash,
   };
 };
 
