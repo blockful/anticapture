@@ -1,6 +1,6 @@
 import {
   PriceEntry,
-  DaoMetricsDayBucket,
+  TokenMetricItem,
   MultilineChartDataSetPoint,
 } from "@/shared/dao-config/types";
 import { formatUnits } from "viem";
@@ -8,7 +8,7 @@ import { formatUnits } from "viem";
 export function normalizeDataset(
   tokenPrices: PriceEntry[],
   key: string,
-  multiplier: number | Pick<DaoMetricsDayBucket, "date" | "high">[],
+  multiplier: number | Pick<TokenMetricItem, "date" | "high">[],
   decimals: number,
 ): MultilineChartDataSetPoint[] {
   if (!Array.isArray(multiplier)) {

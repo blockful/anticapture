@@ -1,6 +1,6 @@
 import useSWR from "swr";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
-import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
+import { TokenMetricItem } from "@/shared/dao-config/types";
 import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
@@ -10,57 +10,69 @@ import {
 } from "@/shared/constants/time-related";
 import axios from "axios";
 
+interface TokenMetricsItem {
+  date: string;
+  high: string;
+  volume: string;
+}
+
+interface TokenMetricsResponse {
+  additionalProperties: Array<{
+    key: string;
+    value: {
+      items: TokenMetricsItem[];
+      pageInfo: {
+        hasNextPage: boolean;
+        startDate: string | null;
+        endDate: string | null;
+      };
+    };
+  }>;
+}
+
 const fetchTimeSeries = async (
   daoId: DaoIdEnum,
   days: TimeInterval,
   metricTypes: MetricTypesEnum[],
-): Promise<Record<MetricTypesEnum, DaoMetricsDayBucket[]>> => {
-  const fromDate = String(
-    Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[days] - SECONDS_PER_DAY,
-  ).slice(0, 10);
+): Promise<Record<MetricTypesEnum, TokenMetricItem[]>> => {
+  const startDate = Math.floor(
+    Date.now() / 1000 - DAYS_IN_SECONDS[days] - SECONDS_PER_DAY,
+  );
 
-  const whereConditions = metricTypes
-    .map(
-      (metricType) => `
-      ${metricType}: daoMetricsDayBuckets(
-        where: {
-          metricType: ${metricType},
-          date_gte: "${fromDate}",
-          daoId: "${daoId}"
-        },
-        orderBy: "date",
-        orderDirection: "asc",
-        limit: 370
-      ) {
-        items {
-          date
-          daoId
-          tokenId
-          metricType
-          open
-          close
-          low
-          high
-          average
-          volume
-          count
-          volume
+  const typeArray = JSON.stringify(metricTypes);
+  const query = `query TokenMetrics {
+    tokenMetrics(
+      type: ${typeArray}
+      startDate: ${startDate}
+      orderDirection: asc
+      limit: 365
+    ) {
+      additionalProperties {
+        key
+        value {
+          items {
+            date
+            high
+            volume
+          }
+          pageInfo {
+            hasNextPage
+            startDate
+            endDate
+          }
         }
       }
-    `,
-    )
-    .join("\n");
+    }
+  }`;
 
   const response = await axios.post<{
     data: {
-      [key in MetricTypesEnum]: {
-        items: DaoMetricsDayBucket[];
-      };
+      tokenMetrics: TokenMetricsResponse;
     };
   }>(
     `${BACKEND_ENDPOINT}`,
     {
-      query: `query DaoMetricsDayBuckets { ${whereConditions} }`,
+      query,
     },
     {
       headers: {
@@ -69,71 +81,32 @@ const fetchTimeSeries = async (
       },
     },
   );
-  const { data } = response.data;
-  const metricsByType: Record<MetricTypesEnum, DaoMetricsDayBucket[]> =
-    {} as Record<MetricTypesEnum, DaoMetricsDayBucket[]>;
 
+  const { tokenMetrics } = response.data.data;
+
+  // Transform the response from additionalProperties array to Record<MetricTypesEnum, TokenMetricItem[]>
+  const metricsByType: Record<MetricTypesEnum, TokenMetricItem[]> =
+    {} as Record<MetricTypesEnum, TokenMetricItem[]>;
+
+  // Initialize all requested metric types with empty arrays
   for (const metricType of metricTypes) {
-    metricsByType[metricType] = data?.[metricType]?.items || [];
+    metricsByType[metricType] = [];
+  }
+
+  // Map the additionalProperties array to the expected format
+  for (const entry of tokenMetrics.additionalProperties) {
+    const metricType = entry.key as MetricTypesEnum;
+    if (metricTypes.includes(metricType)) {
+      metricsByType[metricType] = entry.value.items;
+    }
   }
 
   return metricsByType;
 };
 
 /**
- * Fill the gaps in the dailyMetricBuckets using forward-fill logic.
- */
-const applyMetricsContinuity = (
-  data: Record<MetricTypesEnum, DaoMetricsDayBucket[]> | undefined,
-  metricTypes: MetricTypesEnum[],
-): Record<MetricTypesEnum, DaoMetricsDayBucket[]> | undefined => {
-  if (!data) return undefined;
-
-  const metricsWithContinuity: Record<MetricTypesEnum, DaoMetricsDayBucket[]> =
-    {} as Record<MetricTypesEnum, DaoMetricsDayBucket[]>;
-
-  const allDates = new Set<string>();
-  for (const metricType of metricTypes) {
-    if (data[metricType]) {
-      data[metricType].forEach((item) => {
-        allDates.add(item.date);
-      });
-    }
-  }
-  allDates.add(Math.floor(Date.now() / 1000).toString());
-
-  const sortedDates = Array.from(allDates).sort(
-    (a, b) => Number(a) - Number(b),
-  );
-
-  for (const metricType of metricTypes) {
-    metricsWithContinuity[metricType] = [];
-
-    if (data[metricType] && data[metricType].length > 0) {
-      let lastKnownEntry: DaoMetricsDayBucket = data[metricType][0];
-
-      for (const date of sortedDates) {
-        const entry = data[metricType].find((item) => item.date === date);
-
-        if (entry) {
-          metricsWithContinuity[metricType].push(entry);
-          lastKnownEntry = entry;
-        } else if (lastKnownEntry) {
-          metricsWithContinuity[metricType].push({
-            ...lastKnownEntry,
-            date: date,
-          });
-        }
-      }
-    }
-  }
-
-  return metricsWithContinuity;
-};
-
-/**
- * Hook for fetching time series data with optimized caching strategy
- * Now uses individual metric caching to prevent unnecessary refetches
+ * Hook for fetching time series data with optimized caching strategy.
+ * Now uses the new tokenMetrics API endpoint which returns simplified data.
  */
 export const useTimeSeriesData = (
   daoId: DaoIdEnum,
@@ -145,32 +118,26 @@ export const useTimeSeriesData = (
     revalidateOnReconnect?: boolean;
   },
 ) => {
-  // For backward compatibility, fall back to bulk fetch if needed
-  // But with optimized cache key that doesn't change on metric removal
-  const stableMetricTypes = [...metricTypes].sort(); // Stable sort for consistent cache key
+  const stableMetricTypes = [...metricTypes].sort();
 
   const fetchKey =
     daoId && stableMetricTypes.length > 0
       ? [`timeSeriesData-bulk`, daoId, stableMetricTypes.join(",")]
       : null;
 
-  const {
-    data: fullData,
-    error,
-    isLoading,
-  } = useSWR(fetchKey, () => fetchTimeSeries(daoId, days, stableMetricTypes), {
-    refreshInterval: options?.refreshInterval ?? 0,
-    revalidateOnFocus: options?.revalidateOnFocus ?? true,
-    revalidateOnMount: true,
-    revalidateOnReconnect: options?.revalidateOnReconnect ?? true,
-    revalidateIfStale: true,
-    dedupingInterval: 5000, // Increased for better caching
-    keepPreviousData: true, // Keep previous data while loading new
-  });
-
-  const data = fullData
-    ? applyMetricsContinuity(fullData, metricTypes)
-    : undefined;
+  const { data, error, isLoading } = useSWR(
+    fetchKey,
+    () => fetchTimeSeries(daoId, days, stableMetricTypes),
+    {
+      refreshInterval: options?.refreshInterval ?? 0,
+      revalidateOnFocus: options?.revalidateOnFocus ?? true,
+      revalidateOnMount: true,
+      revalidateOnReconnect: options?.revalidateOnReconnect ?? true,
+      revalidateIfStale: true,
+      dedupingInterval: 5000,
+      keepPreviousData: true,
+    },
+  );
 
   return {
     data,
