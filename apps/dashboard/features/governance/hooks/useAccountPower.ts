@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { ApolloError } from "@apollo/client";
 import { DaoIdEnum } from "@/shared/types/daos";
 import {
@@ -9,7 +8,7 @@ import { formatNumberUserReadable } from "@/shared/utils";
 import { formatUnits } from "viem";
 
 export interface UseAccountPowerResult {
-  accountPower: GetAccountPowerQuery["accountPower"] | null;
+  accountPower: GetAccountPowerQuery["votingPowerByAccountId"] | null;
   votingPower: string;
   votesOnchain: GetAccountPowerQuery["votesOnchain"] | null;
   hasVoted: boolean;
@@ -45,32 +44,27 @@ export const useVoterInfo = ({
     skip: !address || !proposalId, // Skip query if no address or proposalId provided
   });
 
-  // Extract and transform voting power and votes onchain
-  const { accountPower, votingPower, votesOnchain, hasVoted } = useMemo(() => {
-    if (!data?.accountPower) {
-      return {
-        accountPower: null,
-        votingPower: "0",
-        votesOnchain: null,
-        hasVoted: false,
-      };
-    }
-
+  if (!data?.votingPowerByAccountId) {
     return {
-      accountPower: data.accountPower,
-      votingPower: formatNumberUserReadable(
-        Number(formatUnits(BigInt(data.accountPower.votingPower), decimals)),
-      ),
-      votesOnchain: data.votesOnchain || null,
-      hasVoted: !!data.votesOnchain,
+      accountPower: null,
+      votingPower: "0",
+      votesOnchain: null,
+      hasVoted: false,
+      loading,
+      error,
+      refetch,
     };
-  }, [data, decimals]);
+  }
 
   return {
-    accountPower,
-    votingPower,
-    votesOnchain,
-    hasVoted,
+    accountPower: data.votingPowerByAccountId,
+    votingPower: formatNumberUserReadable(
+      Number(
+        formatUnits(BigInt(data.votingPowerByAccountId.votingPower), decimals),
+      ),
+    ),
+    votesOnchain: data.votesOnchain || null,
+    hasVoted: !!data.votesOnchain,
     loading,
     error,
     refetch,

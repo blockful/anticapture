@@ -1,9 +1,6 @@
 import { Address } from "viem";
 
-import {
-  DBVotingPowerWithRelations,
-  DBVotingPowerVariation,
-} from "@/api/mappers";
+import { DBVotingPowerVariation, DBAccountPower } from "@/api/mappers";
 
 interface VotingPowerRepository {
   getVotingPowers(
@@ -16,15 +13,7 @@ interface VotingPowerRepository {
     maxDelta?: string,
     fromAddresses?: Address[],
     toAddresses?: Address[],
-  ): Promise<DBVotingPowerWithRelations[]>;
-
-  getVotingPowerCount(
-    account: Address,
-    minDelta?: string,
-    maxDelta?: string,
-    fromAddresses?: Address[],
-    toAddresses?: Address[],
-  ): Promise<number>;
+  ): Promise<{ items: DBAccountPower[]; totalCount: number }>;
 }
 
 interface VotingPowerVariationRepository {
@@ -52,8 +41,8 @@ export class VotingPowerService {
     maxDelta?: string,
     fromAddresses?: Address[],
     toAddresses?: Address[],
-  ): Promise<{ items: DBVotingPowerWithRelations[]; totalCount: number }> {
-    const items = await this.votingRepository.getVotingPowers(
+  ): Promise<{ items: DBAccountPower[]; totalCount: number }> {
+    const { items, totalCount } = await this.votingRepository.getVotingPowers(
       account,
       skip,
       limit,
@@ -65,13 +54,6 @@ export class VotingPowerService {
       toAddresses,
     );
 
-    const totalCount = await this.votingRepository.getVotingPowerCount(
-      account,
-      minDelta,
-      maxDelta,
-      fromAddresses,
-      toAddresses,
-    );
     return { items, totalCount };
   }
 

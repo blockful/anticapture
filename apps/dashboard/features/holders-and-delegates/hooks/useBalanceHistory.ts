@@ -4,20 +4,22 @@ import { useMemo, useState, useEffect, useCallback } from "react";
 import {
   BalanceHistoryQueryVariables,
   Timestamp_Const,
-  QueryInput_Transfers_SortOrder,
   useBalanceHistoryQuery,
-  QueryInput_Transfers_SortBy,
   BalanceHistoryQuery,
 } from "@anticapture/graphql-client/hooks";
 
 import { DaoIdEnum } from "@/shared/types/daos";
 import { AmountFilterVariables } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
+import {
+  QueryInput_Transfers_SortBy,
+  QueryInput_Transfers_SortOrder,
+} from "@anticapture/graphql-client";
 
 export function useBalanceHistory({
   accountId,
   daoId,
   orderBy = Timestamp_Const.Timestamp,
-  orderDirection = QueryInput_Transfers_SortOrder.Desc,
+  orderDirection = "desc",
   transactionType = "all",
   customFromFilter,
   customToFilter,
@@ -56,8 +58,8 @@ export function useBalanceHistory({
       address: accountId,
       sortBy: orderBy as QueryInput_Transfers_SortBy,
       sortOrder: orderDirection as QueryInput_Transfers_SortOrder,
-      fromValue: filterVariables?.minDelta,
-      toValue: filterVariables?.maxDelta,
+      fromValue: filterVariables?.fromValue,
+      toValue: filterVariables?.toValue,
       from: customFromFilter,
       to: customToFilter,
       offset: 0,

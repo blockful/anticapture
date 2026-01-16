@@ -6,6 +6,7 @@ import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum, DaysEnum, DaysOpts } from "@/lib/enums";
 import { PERCENTAGE_NO_BASELINE } from "@/api/mappers/constants";
 import { calculateHistoricalBlockNumber } from "@/lib/blockTime";
+import { PeriodResponseMapper, PeriodResponseSchema } from "../shared";
 
 export const AccountBalancesRequestSchema = z.object({
   limit: z.coerce
@@ -94,7 +95,7 @@ export const AccountBalanceResponseMapper = (
 };
 
 export const AccountBalanceVariationsRequestSchema = z.object({
-  days: z
+  days: z // TODO: change to `fromDate` and `toDate` (TIMESTAMP)
     .enum(DaysOpts)
     .optional()
     .default("90d")
@@ -116,11 +117,7 @@ export const AccountBalanceVariationsRequestSchema = z.object({
 });
 
 export const AccountBalanceVariationsResponseSchema = z.object({
-  period: z.object({
-    days: z.string(),
-    startTimestamp: z.string(),
-    endTimestamp: z.string(),
-  }),
+  period: PeriodResponseSchema,
   items: z.array(
     z.object({
       accountId: z.string(),
@@ -151,11 +148,7 @@ export const AccountInteractionsQuerySchema =
   });
 
 export const AccountInteractionsResponseSchema = z.object({
-  period: z.object({
-    days: z.string(),
-    startTimestamp: z.string(),
-    endTimestamp: z.string(),
-  }),
+  period: PeriodResponseSchema,
   totalCount: z.number(),
   items: z.array(
     z.object({
@@ -236,11 +229,7 @@ export const AccountBalanceVariationsMapper = (
   days: DaysEnum,
 ): AccountBalanceVariationsResponse => {
   return AccountBalanceVariationsResponseSchema.parse({
-    period: {
-      days: DaysEnum[days] as string,
-      startTimestamp: new Date((endTimestamp - days) * 1000).toISOString(),
-      endTimestamp: new Date(endTimestamp * 1000).toISOString(),
-    },
+    period: PeriodResponseMapper(endTimestamp, days),
     items: variations.map(
       ({
         accountId,
@@ -267,11 +256,7 @@ export const AccountInteractionsMapper = (
   days: DaysEnum,
 ): AccountInteractionsResponse => {
   return AccountInteractionsResponseSchema.parse({
-    period: {
-      days: DaysEnum[days] as string,
-      startTimestamp: new Date((endTimestamp - days) * 1000).toISOString(),
-      endTimestamp: new Date(endTimestamp * 1000).toISOString(),
-    },
+    period: PeriodResponseMapper(endTimestamp, days),
     totalCount: interactions.interactionCount,
     items: interactions.interactions.map(
       ({ accountId, absoluteChange, totalVolume, transferCount }) => ({

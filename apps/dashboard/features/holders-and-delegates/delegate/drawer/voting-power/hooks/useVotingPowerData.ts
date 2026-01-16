@@ -70,7 +70,7 @@ export const useVotingPowerData = (
 
   // Get total voting power from accountPower query
   const accountPowerVotingPower =
-    delegatorsVotingPowerDetails?.accountPower?.votingPower;
+    delegatorsVotingPowerDetails?.votingPowerByAccountId?.votingPower;
 
   // return default data when there is no valid data
   if (!topFiveDelegators || topFiveDelegators.length === 0) {

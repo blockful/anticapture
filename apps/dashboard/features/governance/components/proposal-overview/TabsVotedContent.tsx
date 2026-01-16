@@ -347,9 +347,9 @@ export const TabsVotedContent = ({
 
           // Calculate percentage - you might need to get total voting power from proposal
           const totalVotingPower =
-            Number(proposal.forVotes || 0) +
-            Number(proposal.againstVotes || 0) +
-            Number(proposal.abstainVotes || 0);
+            Number(proposal.forVotes) +
+            Number(proposal.againstVotes) +
+            Number(proposal.abstainVotes);
           const percentage =
             totalVotingPower > 0
               ? ((votingPowerNum / (totalVotingPower / 1e18)) * 100).toFixed(1)
@@ -389,14 +389,16 @@ export const TabsVotedContent = ({
         ),
       },
       {
-        accessorKey: "historicalVotingPower",
+        accessorKey: "votingPowerVariation",
         size: 160,
         cell: ({ row }) => {
           const voterAddress = row.getValue("voterAccountId") as string;
-          const historicalVotingPower = row.getValue(
-            "historicalVotingPower",
-          ) as string | undefined;
-          const currentVotingPower = row.original.votingPower;
+          const votingPowerVariation = row.getValue("votingPowerVariation") as {
+            previousVotingPower: string;
+            currentVotingPower: string;
+            absoluteChange: string;
+            percentageChange: string;
+          };
           const vote = row.original;
 
           // Handle loading row
@@ -429,7 +431,9 @@ export const TabsVotedContent = ({
           }
 
           // If no historical voting power data yet, show loading state
-          if (!historicalVotingPower) {
+          if (!votingPowerVariation) {
+            console.log(voterAddress, { row: row.original });
+
             return (
               <div className="flex h-10 items-center p-2">
                 <span className="text-secondary text-sm">Loading...</span>
@@ -437,28 +441,20 @@ export const TabsVotedContent = ({
             );
           }
 
-          // Calculate the change
-          const currentVP = currentVotingPower
-            ? Number(currentVotingPower) / 1e18
-            : 0;
-          const historicalVP = Number(historicalVotingPower) / 1e18;
-          const change = currentVP - historicalVP;
-          const changePercentage =
-            historicalVP > 0 ? (change / historicalVP) * 100 : 0;
-
           // Determine the direction and color
-          const isPositive = change > 0;
-          const isNegative = change < 0;
-          const isNeutral = change === 0;
+          const isPositive =
+            Number(votingPowerVariation.percentageChange) > 0 ||
+            votingPowerVariation.percentageChange === "NO BASELINE";
+          const isNegative = Number(votingPowerVariation.percentageChange) < 0;
+          const isNeutral = Number(votingPowerVariation.percentageChange) === 0;
 
           // Get the appropriate arrow icon
           const getArrowIcon = () => {
             if (isPositive) {
               return <ArrowUp className="text-success h-4 w-4" />;
-            } else if (isNegative) {
+            }
+            if (isNegative) {
               return <ArrowDown className="text-error h-4 w-4" />;
-            } else {
-              return null;
             }
           };
 
@@ -474,7 +470,9 @@ export const TabsVotedContent = ({
                     isNeutral && "text-secondary",
                   )}
                 >
-                  {Math.abs(changePercentage).toFixed(1)}%
+                  {votingPowerVariation.percentageChange === "NO BASELINE"
+                    ? ">1000%"
+                    : `${votingPowerVariation.percentageChange}%`}
                 </span>
               </div>
             </div>
@@ -487,7 +485,7 @@ export const TabsVotedContent = ({
         ),
       },
     ],
-    [proposal, handleSort, sortBy, sortDirection],
+    [proposal, handleSort, sortBy, sortDirection, daoId],
   );
 
   // Prepare table data with description rows and loading row if needed
@@ -510,7 +508,6 @@ export const TabsVotedContent = ({
           votingPower: "",
           reason: vote.reason,
           timestamp: "",
-          historicalVotingPower: undefined,
           isSubRow: true,
         } as VoteWithHistoricalPower);
       }
@@ -527,7 +524,6 @@ export const TabsVotedContent = ({
         votingPower: "",
         reason: "",
         timestamp: "",
-        historicalVotingPower: undefined,
         isSubRow: false,
       } as VoteWithHistoricalPower);
     }

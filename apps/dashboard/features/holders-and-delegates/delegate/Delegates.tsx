@@ -23,6 +23,10 @@ import { AddressFilter } from "@/shared/components/design-system/table/filters/A
 import daoConfig from "@/shared/dao-config";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { parseAsStringEnum, useQueryState } from "nuqs";
+import {
+  QueryInput_VotingPowers_OrderBy,
+  QueryInput_VotingPowers_OrderDirection,
+} from "@anticapture/graphql-client";
 interface DelegateTableData {
   address: string;
   votingPower: string;
@@ -105,8 +109,8 @@ export const Delegates = ({
     isActivityLoadingFor,
   } = useDelegates({
     fromDate,
-    orderBy: sortBy,
-    orderDirection: sortOrder,
+    orderBy: sortBy as QueryInput_VotingPowers_OrderBy,
+    orderDirection: sortOrder as QueryInput_VotingPowers_OrderDirection,
     daoId,
     days: timePeriod,
     address: currentAddressFilter,
@@ -146,41 +150,18 @@ export const Delegates = ({
           100
         : null;
 
-      let variation: {
-        percentageChange: number;
-        absoluteChange: number;
-      } | null = null;
-
-      if (delegate.historicalVotingPower !== undefined) {
-        const historicalVotingPowerBigInt = BigInt(
-          delegate.historicalVotingPower,
-        );
-        const historicalVotingPowerFormatted = Number(
-          formatUnits(historicalVotingPowerBigInt, decimals),
-        );
-
-        const absoluteChange =
-          votingPowerFormatted - historicalVotingPowerFormatted;
-
-        // If historical is 0, we can't calculate percentage (division by zero)
-        // Use a large number so the UI displays ">1000%"
-        const percentageChange =
-          historicalVotingPowerFormatted === 0
-            ? 9999
-            : ((votingPowerFormatted - historicalVotingPowerFormatted) /
-                historicalVotingPowerFormatted) *
-              100;
-
-        variation = {
-          percentageChange: Number(percentageChange.toFixed(2)),
-          absoluteChange: Number(absoluteChange.toFixed(2)),
-        };
-      }
-
       return {
-        address: delegate.accountId || "",
+        address: delegate.accountId,
         votingPower: formatNumberUserReadable(votingPowerFormatted),
-        variation,
+        variation: {
+          percentageChange:
+            delegate.percentageChange === "NO BASELINE"
+              ? 9999
+              : Number(delegate.percentageChange),
+          absoluteChange: Number(
+            formatUnits(BigInt(delegate.absoluteChange), decimals),
+          ),
+        },
         activity,
         activityPercentage,
         delegators: delegate.delegationsCount,

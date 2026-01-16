@@ -33,14 +33,14 @@ export const ProposalSection = () => {
   const { decimals } = daoConfig[daoEnum];
 
   const { proposal, loading, error } = useProposal({
-    proposalId: proposalId as string,
+    proposalId,
     daoId: daoEnum,
   });
 
   const { votingPower, votesOnchain } = useVoterInfo({
     address: address ?? "",
     daoId: daoEnum,
-    proposalId: proposalId as string,
+    proposalId,
     decimals,
   });
 

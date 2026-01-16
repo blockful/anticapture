@@ -1,12 +1,11 @@
 const daoListQueries = [
-  "accountPowers",
   "accounts",
   "daoMetricsDayBuckets",
   "delegations",
   "proposalsOnchains",
   "tokens",
   "votesOnchains",
-  "votingPowerHistorys",
+  "votingPowerHistorys", // FIXME: Leave endpoint active for now as it is still used by the notification bot
 ];
 
 export const listResolvers = daoListQueries.reduce((acc, fieldName) => {

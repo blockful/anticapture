@@ -1,5 +1,6 @@
-query GetProposalsActivity($address: String!, 
- $fromDate: NonNegativeInt, 
+query GetProposalsActivity(
+  $address: String!, 
+ $fromDate: String, 
  $skip: NonNegativeInt,
   $limit: PositiveInt,
    $orderBy: queryInput_proposalsActivity_orderBy,

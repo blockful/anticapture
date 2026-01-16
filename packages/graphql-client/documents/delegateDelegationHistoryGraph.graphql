@@ -1,34 +1,32 @@
 query GetDelegateDelegationHistoryGraph(
   $accountId: String!
-  $fromTimestamp: BigInt
-  $toTimestamp: BigInt
-  $orderBy: String = "timestamp"
-      $orderDirection: String = "desc"
+  $fromTimestamp: String
+  $toTimestamp: String
+  $orderBy: queryInput_historicalVotingPowers_orderBy = timestamp
+  $orderDirection: queryInput_historicalVotingPowers_orderDirection = desc
 ) {
-  votingPowerHistorys(
+  historicalVotingPowers(
+    accountId: $accountId
     orderBy: $orderBy
     orderDirection: $orderDirection
-    where: { 
-      accountId: $accountId
-      timestamp_gte: $fromTimestamp
-      timestamp_lte: $toTimestamp
-    }
-    limit: 1000
+    fromDate: $fromTimestamp
+    toDate: $toTimestamp
+    limit: "1000"
   ) {
     items {
       delta
       transactionHash
       timestamp
       delegation {
-        delegatorAccountId
-        delegatedValue
+        from
         previousDelegate
-        delegateAccountId
+        to
+        value
       }
       transfer {
-        amount
-        fromAccountId
-        toAccountId
+        from
+        to
+        value
       }
       votingPower
     }
