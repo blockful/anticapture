@@ -26,13 +26,13 @@
  *    - Returns data starting from first available data point
  */
 
-import { getCurrentDayTimestamp } from "@/lib/enums";
+import { forwardFill, generateOrderedTimeline } from "@/lib/time-series";
+import { applyCursorPagination } from "@/lib/query-helpers";
 import {
-  createDailyTimeline,
-  forwardFill,
   truncateTimestampToMidnight,
   normalizeMapTimestamps,
-} from "@/lib/time-series";
+  getEffectiveStartDate,
+} from "@/lib/date-helpers";
 import { TokenMetricsRepository } from "@/api/repositories/token-metrics";
 import {
   TokenMetricsQuery,
@@ -169,20 +169,20 @@ export class TokenMetricsService {
     });
 
     // 5. Determine effective start date
-    const effectiveStartDate = this.getEffectiveStartDate(
-      startDate,
-      after,
-      dateMap,
-      initialValue,
-    );
+    const datesFromDb = Array.from(dateMap.keys());
+    const effectiveStartDate = getEffectiveStartDate({
+      referenceDate: after ?? startDate,
+      datesFromDb,
+      hasInitialValue: initialValue !== undefined,
+    });
 
     // 6. Generate timeline and apply forward-fill
-    const timeline = this.generateTimeline(
-      dateMap,
-      effectiveStartDate,
+    const timeline = generateOrderedTimeline({
+      datesFromDb,
+      startDate: effectiveStartDate,
       endDate,
       orderDirection,
-    );
+    });
 
     if (timeline.length === 0) {
       return {
@@ -197,13 +197,13 @@ export class TokenMetricsService {
     const filledItems = this.applyForwardFill(timeline, dateMap, initialValue);
 
     // 8. Apply cursor pagination
-    const { items, hasNextPage } = this.applyCursorPagination(
-      filledItems,
+    const { items, hasNextPage } = applyCursorPagination({
+      items: filledItems,
       after,
       before,
       limit,
       endDate,
-    );
+    });
 
     return {
       items,
@@ -237,71 +237,6 @@ export class TokenMetricsService {
       console.error("Error fetching initial value:", error);
       return undefined;
     }
-  }
-
-  /**
-   * Get effective start date, adjusting if needed based on available data
-   */
-  private getEffectiveStartDate(
-    startDate: number | undefined,
-    after: number | undefined,
-    dateMap: Map<number, MetricData>,
-    initialValue: MetricData | undefined,
-  ): number | undefined {
-    const referenceDate = after ?? startDate;
-    if (!referenceDate) return undefined;
-
-    // If we have initial value, use the reference date as is
-    if (initialValue) {
-      return referenceDate;
-    }
-
-    // If no initial value and no data, return first available date
-    if (dateMap.size === 0) {
-      return referenceDate;
-    }
-
-    // Find first date in data
-    const datesFromDb = Array.from(dateMap.keys()).sort((a, b) => a - b);
-    const firstRealDate = datesFromDb[0];
-
-    // If reference date is before first real data, use first real date
-    if (firstRealDate && referenceDate < firstRealDate) {
-      return firstRealDate;
-    }
-
-    return referenceDate;
-  }
-
-  /**
-   * Generate complete daily timeline
-   */
-  private generateTimeline(
-    dateMap: Map<number, MetricData>,
-    startDate?: number,
-    endDate?: number,
-    orderDirection?: "asc" | "desc",
-  ): number[] {
-    if (dateMap.size === 0 && !startDate) {
-      return [];
-    }
-
-    const datesFromDb = Array.from(dateMap.keys()).sort((a, b) => a - b);
-
-    const firstDate = startDate ?? datesFromDb[0];
-    const lastDate = endDate ?? Number(getCurrentDayTimestamp());
-
-    if (!firstDate || !lastDate) {
-      return [];
-    }
-
-    const timeline = createDailyTimeline(firstDate, lastDate);
-
-    if (orderDirection === "desc") {
-      timeline.reverse();
-    }
-
-    return timeline;
   }
 
   /**
@@ -345,37 +280,5 @@ export class TokenMetricsService {
         high: (filledHigh.get(date) ?? 0n).toString(),
         volume: (filledVolume.get(date) ?? 0n).toString(),
       }));
-  }
-
-  /**
-   * Apply cursor-based pagination
-   */
-  private applyCursorPagination(
-    allItems: TokenMetricItem[],
-    after?: number,
-    before?: number,
-    limit: number = 365,
-    endDate?: number,
-  ): { items: TokenMetricItem[]; hasNextPage: boolean } {
-    // Apply cursor filters
-    const filteredItems = allItems
-      .filter((item) => !after || Number(item.date) > after)
-      .filter((item) => !before || Number(item.date) < before);
-
-    // Apply limit
-    const items = filteredItems.slice(0, limit);
-
-    // Determine hasNextPage
-    let hasNextPage: boolean;
-    if (endDate) {
-      hasNextPage = filteredItems.length > limit;
-    } else {
-      const today = Number(getCurrentDayTimestamp());
-      const lastItem = items[items.length - 1];
-      const lastItemDate = lastItem ? Number(lastItem.date) : 0;
-      hasNextPage = filteredItems.length > limit && lastItemDate < today;
-    }
-
-    return { items, hasNextPage };
   }
 }

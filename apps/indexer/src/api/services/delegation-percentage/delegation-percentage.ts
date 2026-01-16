@@ -27,8 +27,9 @@
  */
 
 import { MetricTypesEnum } from "@/lib/constants";
-import { getCurrentDayTimestamp } from "@/lib/enums";
-import { createDailyTimeline, forwardFill } from "@/lib/time-series";
+import { forwardFill, generateOrderedTimeline } from "@/lib/time-series";
+import { applyCursorPagination } from "@/lib/query-helpers";
+import { getEffectiveStartDate } from "@/lib/date-helpers";
 import { DelegationPercentageRepository } from "@/api/repositories/";
 import {
   DelegationPercentageItem,
@@ -110,20 +111,25 @@ export class DelegationPercentageService {
 
     // 5. Adjust startDate if no previous values and startDate is before first data
     // This prevents returning 0% for dates before first real data
-    const effectiveStartDate = this.adjustStartDateToFirstRealData(
-      normalizedStartDate,
-      normalizedAfter,
-      dateMap,
-      initialValues,
-    );
+    const datesFromDb = Array.from(dateMap.keys()).map(Number);
+    const effectiveStartDate = getEffectiveStartDate({
+      referenceDate: normalizedAfter
+        ? Number(normalizedAfter)
+        : normalizedStartDate
+          ? Number(normalizedStartDate)
+          : undefined,
+      datesFromDb,
+      hasInitialValue:
+        initialValues.delegated !== 0n || initialValues.total !== 0n,
+    });
 
     // 6. Generate complete date range
-    const allDates = this.getOrderedTimeline(
-      dateMap,
-      effectiveStartDate,
-      normalizedEndDate,
+    const allDates = generateOrderedTimeline({
+      datesFromDb,
+      startDate: effectiveStartDate,
+      endDate: normalizedEndDate ? Number(normalizedEndDate) : undefined,
       orderDirection,
-    );
+    });
 
     // 7. Calculate delegation percentage
     const allItems = this.calculateDelegationPercentage(
@@ -133,13 +139,13 @@ export class DelegationPercentageService {
     );
 
     // 8. Apply cursor-based pagination
-    const { items, hasNextPage } = this.applyCursorPagination(
-      allItems,
-      normalizedAfter,
-      normalizedBefore,
+    const { items, hasNextPage } = applyCursorPagination({
+      items: allItems,
+      after: normalizedAfter ? Number(normalizedAfter) : undefined,
+      before: normalizedBefore ? Number(normalizedBefore) : undefined,
       limit,
-      normalizedEndDate,
-    );
+      endDate: normalizedEndDate ? Number(normalizedEndDate) : undefined,
+    });
     return {
       items,
       totalCount: items.length,
@@ -179,39 +185,6 @@ export class DelegationPercentageService {
   }
 
   /**
-   * Adjusts startDate to the first real data date if requested startDate is before any data
-   * Returns the original startDate if it's within or after available data range
-   */
-  private adjustStartDateToFirstRealData(
-    startDate: string | undefined,
-    after: string | undefined,
-    dateMap: Map<string, DateData>,
-    initialValues: { delegated: bigint; total: bigint },
-  ): string | undefined {
-    const referenceDate = after || startDate;
-    if (!referenceDate) return undefined;
-
-    if (
-      initialValues.delegated !== 0n ||
-      initialValues.total !== 0n ||
-      dateMap.size === 0
-    ) {
-      return referenceDate;
-    }
-
-    const datesFromDb = Array.from(dateMap.keys())
-      .map((d) => Number(d))
-      .sort((a, b) => a - b);
-    const firstRealDate = datesFromDb[0];
-
-    if (firstRealDate && Number(referenceDate) < firstRealDate) {
-      return firstRealDate.toString();
-    }
-
-    return referenceDate;
-  }
-
-  /**
    * Organizes database rows into a map by date
    * Separates DELEGATED_SUPPLY and TOTAL_SUPPLY metrics
    */
@@ -239,43 +212,6 @@ export class DelegationPercentageService {
     });
 
     return dateMap;
-  }
-
-  /**
-   * Generates a complete date range based on available data
-   * Fills gaps between first and last date with all days
-   * If endDate is not provided, uses current day (today) for forward-fill
-   */
-  private getOrderedTimeline(
-    dateMap: Map<string, DateData>,
-    startDate?: string,
-    endDate?: string,
-    orderDirection?: "asc" | "desc",
-  ): number[] {
-    if (dateMap.size === 0) {
-      return [];
-    }
-
-    const datesFromDb = Array.from(dateMap.keys())
-      .map((d) => Number(d))
-      .sort((a, b) => a - b);
-
-    const firstDate = startDate ? Number(startDate) : datesFromDb[0];
-    const lastDate = endDate
-      ? Number(endDate)
-      : Number(getCurrentDayTimestamp());
-
-    if (!firstDate || !lastDate) {
-      return [];
-    }
-
-    const allDates = createDailyTimeline(firstDate, lastDate);
-
-    if (orderDirection === "desc") {
-      allDates.reverse();
-    }
-
-    return allDates;
   }
 
   /**
@@ -315,41 +251,5 @@ export class DelegationPercentageService {
         high: percentage.toFixed(2),
       };
     });
-  }
-
-  /**
-   * Applies cursor-based pagination (after/before) and limit
-   * When endDate is not provided, hasNextPage considers if data reaches today
-   */
-  private applyCursorPagination(
-    allItems: DelegationPercentageItem[],
-    after?: string,
-    before?: string,
-    limit: number = 100,
-    endDate?: string,
-  ): { items: DelegationPercentageItem[]; hasNextPage: boolean } {
-    // Apply cursor filters
-    const filteredItems = allItems
-      .filter((item) => !after || BigInt(item.date) > BigInt(after))
-      .filter((item) => !before || BigInt(item.date) < BigInt(before));
-
-    // Apply limit
-    const items = filteredItems.slice(0, limit);
-
-    // Determine hasNextPage
-    let hasNextPage: boolean;
-    if (endDate) {
-      // If endDate is provided, use traditional pagination logic
-      hasNextPage = filteredItems.length > limit;
-    } else {
-      // If endDate is not provided, check if last item reached today
-      // hasNextPage = true only if we have more data AND haven't reached today yet
-      const today = getCurrentDayTimestamp();
-      const lastItem = items[items.length - 1];
-      const lastItemDate = lastItem ? BigInt(lastItem.date) : 0n;
-      hasNextPage = filteredItems.length > limit && lastItemDate < today;
-    }
-
-    return { items, hasNextPage };
   }
 }
