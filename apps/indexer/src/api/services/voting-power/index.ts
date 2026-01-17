@@ -32,8 +32,6 @@ interface VotingPowersRepository {
     addresses: Address[],
     startTimestamp: number,
     endTimestamp: number,
-    limit: number,
-    skip: number,
     orderDirection: "asc" | "desc",
   ): Promise<DBVotingPowerVariation[]>;
 
@@ -105,12 +103,11 @@ export class VotingPowerService {
     limit: number,
     orderDirection: "asc" | "desc",
   ): Promise<DBVotingPowerVariation[]> {
+    const filterAddresses = addresses.slice(skip, skip + limit);
     return this.votingPowerRepository.getVotingPowerVariations(
-      addresses,
+      filterAddresses,
       startTimestamp,
       endTimestamp,
-      limit,
-      skip,
       orderDirection,
     );
   }

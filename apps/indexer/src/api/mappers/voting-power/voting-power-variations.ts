@@ -161,7 +161,7 @@ export type DBVotingPowerVariation = {
   previousVotingPower: bigint;
   currentVotingPower: bigint;
   absoluteChange: bigint;
-  percentageChange: number;
+  percentageChange: string;
 };
 
 export type DBAccountPower = typeof accountPower.$inferSelect;
@@ -173,9 +173,10 @@ export const VotingPowerVariationResponseMapper = (
   previousVotingPower: delta.previousVotingPower?.toString(),
   currentVotingPower: delta.currentVotingPower.toString(),
   absoluteChange: delta.absoluteChange.toString(),
-  percentageChange: delta.previousVotingPower
-    ? delta.percentageChange.toString()
-    : PERCENTAGE_NO_BASELINE,
+  percentageChange:
+    delta.percentageChange === "Infinity"
+      ? PERCENTAGE_NO_BASELINE
+      : delta.percentageChange,
 });
 
 export const VotingPowerVariationsMapper = (

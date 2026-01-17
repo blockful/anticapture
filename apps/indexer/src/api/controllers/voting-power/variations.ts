@@ -17,9 +17,10 @@ export function votingPowerVariations(app: Hono, service: VotingPowerService) {
       method: "get",
       operationId: "votingPowerVariations",
       path: "/accounts/voting-powers/variations",
-      summary: "Get top changes in voting power for a given period",
+      summary:
+        "Get voting power changes within a time frame for the given addresses",
       description:
-        "Returns a mapping of the biggest changes to voting power associated by delegate address",
+        "Returns a mapping of the voting power changes within a time frame for the given addresses",
       tags: ["voting-powers"],
       request: {
         query: VotingPowerVariationsRequestSchema,
