@@ -31,9 +31,11 @@ const PostHogScript: FC = () => {
 
   if (process.env.NODE_ENV === "production") {
     return (
-      <Script id="posthog" strategy="afterInteractive">
-        {posthogScript}
-      </Script>
+      <Script
+        id="posthog"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{ __html: posthogScript }}
+      />
     );
   }
   return null;

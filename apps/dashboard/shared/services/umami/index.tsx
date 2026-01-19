@@ -12,6 +12,7 @@ const UmamiScript: FC = () => {
         data-website-id="d398045b-7a0c-4fc6-b448-565e1d753699"
         data-tag="umami-eu"
         strategy="afterInteractive"
+        onLoad={() => console.log("Umami loaded")}
       />
     );
   }

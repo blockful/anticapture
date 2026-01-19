@@ -92,9 +92,11 @@ const ConditionalPostHog = () => {
   // Only render PostHog script in production and when cookies are accepted
   if (process.env.NODE_ENV === "production" && shouldLoadPostHog) {
     return (
-      <Script id="posthog" strategy="afterInteractive">
-        {posthogScript}
-      </Script>
+      <Script
+        id="posthog"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{ __html: posthogScript }}
+      />
     );
   }
 
