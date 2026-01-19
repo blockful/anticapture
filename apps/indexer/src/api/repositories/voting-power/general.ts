@@ -204,6 +204,16 @@ export class VotingPowerRepository {
       );
   }
 
+  async getTopVotingPowerVariations(
+    _: number,
+    __: number,
+    ___: number,
+    ____: number,
+    _____: "asc" | "desc",
+  ): Promise<DBVotingPowerVariation[]> {
+    return [];
+  }
+
   async getVotingPowerVariationsByAccountId(
     accountId: Address,
     startTimestamp: number,

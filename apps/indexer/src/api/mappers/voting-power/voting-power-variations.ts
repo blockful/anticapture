@@ -23,18 +23,8 @@ export const VotingPowerVariationsByAccountIdRequestSchema = z.object({
     ),
 });
 
-export const VotingPowerVariationsRequestSchema = z
+export const TopVotingPowerVariationsRequestSchema = z
   .object({
-    addresses: z
-      .union([
-        z
-          .string()
-          .refine(isAddress, "Invalid address")
-          .transform((addr) => [addr]),
-        z.array(z.string().refine(isAddress, "Invalid addresses")),
-      ])
-      .optional()
-      .default([]),
     limit: z.coerce
       .number()
       .int()
@@ -51,6 +41,18 @@ export const VotingPowerVariationsRequestSchema = z
     orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
   })
   .extend(VotingPowerVariationsByAccountIdRequestSchema.shape);
+
+export const VotingPowerVariationsRequestSchema = z
+  .object({
+    addresses: z.union([
+      z
+        .string()
+        .refine(isAddress, "Invalid address")
+        .transform((addr) => [addr]),
+      z.array(z.string().refine(isAddress, "Invalid addresses")),
+    ]),
+  })
+  .extend(TopVotingPowerVariationsRequestSchema.shape);
 
 export const VotingPowersRequestSchema = z.object({
   limit: z.coerce

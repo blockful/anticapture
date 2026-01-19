@@ -9,6 +9,7 @@ import {
   VotingPowerVariationsRequestSchema,
   VotingPowerVariationsResponseSchema,
   VotingPowerVariationsMapper,
+  TopVotingPowerVariationsRequestSchema,
 } from "@/api/mappers/";
 
 export function votingPowerVariations(app: Hono, service: VotingPowerService) {
@@ -42,6 +43,48 @@ export function votingPowerVariations(app: Hono, service: VotingPowerService) {
 
       const result = await service.getVotingPowerVariations(
         addresses,
+        fromDate,
+        toDate,
+        skip,
+        limit,
+        orderDirection,
+      );
+
+      return context.json(
+        VotingPowerVariationsMapper(result, fromDate, toDate),
+        200,
+      );
+    },
+  );
+
+  app.openapi(
+    createRoute({
+      method: "get",
+      operationId: "topVotingPowerVariations",
+      path: "/accounts/voting-powers/variations/top",
+      summary: "Get top voting power changes within a time frame",
+      description:
+        "Returns a mapping of the top voting power changes within a time frame",
+      tags: ["voting-powers"],
+      request: {
+        query: TopVotingPowerVariationsRequestSchema,
+      },
+      responses: {
+        200: {
+          description: "Successfully retrieved voting power changes",
+          content: {
+            "application/json": {
+              schema: VotingPowerVariationsResponseSchema,
+            },
+          },
+        },
+      },
+    }),
+    async (context) => {
+      const { fromDate, toDate, limit, skip, orderDirection } =
+        context.req.valid("query");
+
+      const result = await service.getTopVotingPowerVariations(
         fromDate,
         toDate,
         skip,

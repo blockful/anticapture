@@ -35,6 +35,14 @@ interface VotingPowersRepository {
     orderDirection: "asc" | "desc",
   ): Promise<DBVotingPowerVariation[]>;
 
+  getTopVotingPowerVariations(
+    startTimestamp: number,
+    endTimestamp: number,
+    skip: number,
+    limit: number,
+    orderDirection: "asc" | "desc",
+  ): Promise<DBVotingPowerVariation[]>;
+
   getVotingPowerVariationsByAccountId(
     accountId: Address,
     startTimestamp: number,
@@ -108,6 +116,22 @@ export class VotingPowerService {
       filterAddresses,
       startTimestamp,
       endTimestamp,
+      orderDirection,
+    );
+  }
+
+  async getTopVotingPowerVariations(
+    startTimestamp: number,
+    endTimestamp: number,
+    skip: number,
+    limit: number,
+    orderDirection: "asc" | "desc",
+  ): Promise<DBVotingPowerVariation[]> {
+    return this.votingPowerRepository.getTopVotingPowerVariations(
+      startTimestamp,
+      endTimestamp,
+      skip,
+      limit,
       orderDirection,
     );
   }
