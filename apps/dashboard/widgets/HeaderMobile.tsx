@@ -109,7 +109,7 @@ export const HeaderMobile = ({
 
   return (
     <div
-      className={cn("relative left-0 top-0 z-50 w-full md:hidden", className)}
+      className={cn("relative left-0 top-0 z-50 w-full lg:hidden", className)}
     >
       {/* Header */}
       <div className="border-light-dark bg-surface-background absolute left-0 right-0 top-0 z-50 border-b px-4 py-1.5">

@@ -85,10 +85,10 @@ export const HeaderDAOSidebarDropdown = () => {
 
   return (
     <div
-      className="border-light-dark relative z-50 inline-block h-[57px] w-full shrink-0 border-b sm:h-[65px]"
+      className="border-light-dark relative z-50 inline-block h-[57px] w-full shrink-0 border-b lg:h-[65px]"
       ref={dropdownRef}
     >
-      <div className="flex h-full items-center justify-between px-3.5 py-3.5 sm:p-2">
+      <div className="flex h-full items-center justify-between px-3.5 py-3.5 lg:p-2">
         <Button
           variant="ghost"
           size="sm"
@@ -111,7 +111,7 @@ export const HeaderDAOSidebarDropdown = () => {
 
       {isOpen && (
         <div
-          className="border-light-dark bg-surface-default absolute left-0 right-0 z-50 mx-4 mt-1 w-auto rounded-lg border shadow-lg transition-all duration-200 ease-in-out sm:mx-0"
+          className="border-light-dark bg-surface-default absolute left-0 right-0 z-50 mx-4 mt-1 w-auto rounded-lg border shadow-lg transition-all duration-200 ease-in-out lg:mx-0"
           role="menu"
         >
           {dropdownItems.map((item) => (
@@ -124,10 +124,10 @@ export const HeaderDAOSidebarDropdown = () => {
               role="menuitemradio"
               aria-checked={item.id === selectedHeaderSidebarItem}
             >
-              <div className="flex w-full items-center gap-1.5 sm:gap-2">
+              <div className="flex w-full items-center gap-1.5 lg:gap-2">
                 <DaoAvatarIcon
                   daoId={item.name as DaoIdEnum}
-                  className={cn("size-icon-xxs sm:size-icon-sm")}
+                  className={cn("size-icon-xxs lg:size-icon-sm")}
                   isRounded
                 />
                 <h1 className={cn("text-primary text-sm font-normal")}>

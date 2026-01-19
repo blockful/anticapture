@@ -19,7 +19,7 @@ export const DaoOverviewMetricCard = ({
 }) => (
   <div
     className={cn(
-      "md:bg-surface-default flex flex-col justify-start md:p-3",
+      "lg:bg-surface-default flex flex-col justify-start lg:p-3",
       className,
     )}
   >
