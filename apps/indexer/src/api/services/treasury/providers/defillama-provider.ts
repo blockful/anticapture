@@ -2,6 +2,7 @@ import { AxiosInstance } from "axios";
 import { TreasuryProvider } from "./treasury-provider.interface";
 import { LiquidTreasuryDataPoint } from "../types";
 import { truncateTimestampTime } from "@/eventHandlers/shared";
+import { TreasuryProviderCache } from "./provider-cache";
 
 interface RawDefiLlamaResponse {
   chainTvls: Record<
@@ -18,26 +19,29 @@ interface RawDefiLlamaResponse {
 }
 
 export class DefiLlamaProvider implements TreasuryProvider {
+  private readonly cache = new TreasuryProviderCache();
   private readonly client: AxiosInstance;
-  private readonly providerDaoId: string;
 
-  constructor(client: AxiosInstance, providerDaoId: string) {
+  constructor(client: AxiosInstance) {
     this.client = client;
-    this.providerDaoId = providerDaoId;
   }
 
   async fetchTreasury(
     cutoffTimestamp: number,
   ): Promise<LiquidTreasuryDataPoint[]> {
-    try {
-      const response = await this.client.get<RawDefiLlamaResponse>(
-        `/${this.providerDaoId}`,
-      );
+    const cached = this.cache.get();
 
-      return this.transformData(response.data, cutoffTimestamp);
+    if (cached !== null) return this.filterData(cached, cutoffTimestamp);
+
+    try {
+      const response = await this.client.get<RawDefiLlamaResponse>(`/`);
+      const data = this.transformData(response.data);
+      this.cache.set(data);
+
+      return this.filterData(data, cutoffTimestamp);
     } catch (error) {
       console.error(
-        `[DefiLlamaProvider] Failed to fetch treasury data for ${this.providerDaoId}:`,
+        `[DefiLlamaProvider] Failed to fetch treasury data:`,
         error,
       );
       return [];
@@ -49,7 +53,6 @@ export class DefiLlamaProvider implements TreasuryProvider {
    */
   private transformData(
     rawData: RawDefiLlamaResponse,
-    cutoffTimestamp: number,
   ): LiquidTreasuryDataPoint[] {
     const { chainTvls } = rawData;
 
@@ -112,17 +115,21 @@ export class DefiLlamaProvider implements TreasuryProvider {
     }
 
     // Convert map to array and format
-    const allData = Array.from(aggregatedByDate.entries())
+    return Array.from(aggregatedByDate.entries())
       .map(([dayTimestamp, values]) => ({
         date: dayTimestamp,
         liquidTreasury: values.withoutOwnToken, // Liquid Treasury
       }))
       .sort((a, b) => a.date - b.date); // Sort by timestamp ascending
+  }
 
-    const filteredData = allData.filter((item) => item.date >= cutoffTimestamp);
-    // If no data in the requested period, return the last available value as fallback
-    if (filteredData.length === 0 && allData.length > 0) {
-      const lastAvailable = allData.at(-1)!;
+  private filterData(
+    data: LiquidTreasuryDataPoint[],
+    cutoffTimestamp: number,
+  ): LiquidTreasuryDataPoint[] {
+    const filteredData = data.filter((item) => item.date >= cutoffTimestamp);
+    if (filteredData.length === 0 && data.length > 0) {
+      const lastAvailable = data.at(-1)!;
       return [lastAvailable];
     }
 

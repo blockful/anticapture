@@ -64,7 +64,10 @@ import {
 } from "@/api/services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
-import { createTreasuryService } from "./services/treasury/treasury-provider-factory";
+import {
+  createTreasuryService,
+  parseTreasuryProviderConfig,
+} from "./services/treasury/treasury-provider-factory";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -154,10 +157,11 @@ const tokenPriceClient =
 const treasuryService = createTreasuryService(
   new TreasuryRepository(),
   tokenPriceClient,
-  env.DEFILLAMA_API_URL,
-  env.TREASURY_PROVIDER_PROTOCOL_ID,
-  env.DUNE_API_URL,
-  env.DUNE_API_KEY,
+  parseTreasuryProviderConfig(
+    env.TREASURY_DATA_PROVIDER_ID,
+    env.TREASURY_DATA_PROVIDER_API_URL,
+    env.TREASURY_DATA_PROVIDER_API_KEY,
+  ),
 );
 const decimals = CONTRACT_ADDRESSES[env.DAO_ID].token.decimals;
 
