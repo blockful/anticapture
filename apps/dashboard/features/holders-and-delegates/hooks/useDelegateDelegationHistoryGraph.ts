@@ -1,10 +1,14 @@
 import { useMemo } from "react";
-import { useGetDelegateDelegationHistoryGraphQuery } from "@anticapture/graphql-client/hooks";
+import {
+  QueryInput_HistoricalVotingPowers_OrderDirection,
+  useGetDelegateDelegationHistoryGraphQuery,
+} from "@anticapture/graphql-client/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimePeriod } from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
 import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
 import { formatUnits } from "viem";
 import daoConfig from "@/shared/dao-config";
+import { QueryInput_HistoricalVotingPowers_OrderBy } from "@anticapture/graphql-client";
 
 // Interface for a single delegation history item for the graph
 export interface DelegationHistoryGraphItem {
@@ -62,10 +66,10 @@ export function useDelegateDelegationHistoryGraph(
   const { data, loading, error } = useGetDelegateDelegationHistoryGraphQuery({
     variables: {
       accountId,
-      fromTimestamp,
-      toTimestamp,
-      orderBy: "timestamp",
-      orderDirection: "desc",
+      fromTimestamp: fromTimestamp?.toString(),
+      toTimestamp: toTimestamp?.toString(),
+      orderBy: QueryInput_HistoricalVotingPowers_OrderBy.Timestamp,
+      orderDirection: QueryInput_HistoricalVotingPowers_OrderDirection.Desc,
     },
     context: {
       headers: {
@@ -77,11 +81,12 @@ export function useDelegateDelegationHistoryGraph(
   });
 
   const delegationHistory = useMemo((): DelegationHistoryGraphItem[] => {
-    if (!data?.votingPowerHistorys?.items) {
+    if (!data?.historicalVotingPowers?.items) {
       return [];
     }
 
-    return data.votingPowerHistorys.items
+    return data.historicalVotingPowers.items
+      .filter((item) => item !== null && item !== undefined)
       .map((item) => {
         // Convert from wei to token units using Viem's formatUnits
         const votingPower =
@@ -104,12 +109,12 @@ export function useDelegateDelegationHistoryGraph(
 
         if (item.delegation) {
           // For delegation: delegatorAccountId is the one delegating to delegateAccountId
-          fromAddress = item.delegation.delegatorAccountId || undefined;
-          toAddress = item.delegation.delegateAccountId || undefined;
+          fromAddress = item.delegation.from || undefined;
+          toAddress = item.delegation.to || undefined;
         } else if (item.transfer) {
           // For transfer: fromAccountId is sending to toAccountId
-          fromAddress = item.transfer.fromAccountId || undefined;
-          toAddress = item.transfer.toAccountId || undefined;
+          fromAddress = item.transfer.from || undefined;
+          toAddress = item.transfer.to || undefined;
         }
 
         return {

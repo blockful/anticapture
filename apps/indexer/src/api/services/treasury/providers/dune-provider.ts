@@ -3,6 +3,7 @@ import { AxiosInstance } from "axios";
 import { LiquidTreasuryDataPoint } from "../types";
 import { TreasuryProvider } from "./treasury-provider.interface";
 import { filterWithFallback } from "@/lib/time-series";
+import { TreasuryProviderCache } from "./provider-cache";
 
 export interface DuneResponse {
   execution_id: string;
@@ -24,6 +25,8 @@ export interface DuneResponse {
 }
 
 export class DuneProvider implements TreasuryProvider {
+  private readonly cache = new TreasuryProviderCache();
+
   constructor(
     private readonly client: AxiosInstance,
     private readonly apiKey: string,
@@ -32,14 +35,20 @@ export class DuneProvider implements TreasuryProvider {
   async fetchTreasury(
     cutoffTimestamp: number,
   ): Promise<LiquidTreasuryDataPoint[]> {
+    const cached = this.cache.get();
+
+    if (cached !== null) return filterWithFallback(cached, cutoffTimestamp);
+
     try {
       const response = await this.client.get<DuneResponse>("/", {
         headers: {
           "X-Dune-API-Key": this.apiKey,
         },
       });
+      const data = this.transformData(response.data);
+      this.cache.set(data);
 
-      return this.transformData(response.data, cutoffTimestamp);
+      return filterWithFallback(data, cutoffTimestamp);
     } catch (error) {
       throw new HTTPException(503, {
         message: "Failed to fetch total assets data",
@@ -48,11 +57,8 @@ export class DuneProvider implements TreasuryProvider {
     }
   }
 
-  private transformData(
-    data: DuneResponse,
-    cutoffTimestamp: number,
-  ): LiquidTreasuryDataPoint[] {
-    const allData = data.result.rows
+  private transformData(data: DuneResponse): LiquidTreasuryDataPoint[] {
+    return data.result.rows
       .map((row) => {
         // Parse date string "YYYY-MM-DD" and convert to Unix timestamp (seconds)
         const [year, month, day] = row.date.split("-").map(Number);
@@ -66,7 +72,5 @@ export class DuneProvider implements TreasuryProvider {
         };
       })
       .sort((a, b) => a.date - b.date);
-
-    return filterWithFallback(allData, cutoffTimestamp);
   }
 }
