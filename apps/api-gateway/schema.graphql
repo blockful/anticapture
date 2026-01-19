@@ -127,10 +127,7 @@ type Query {
   """
   Returns a mapping of the voting power changes within a time frame for the given addresses
   """
-  votingPowerVariations(addresses: JSON!, limit: PositiveInt = 10, skip: NonNegativeInt, orderDirection: queryInput_votingPowerVariations_orderDirection = desc, fromDate: String, toDate: String): votingPowerVariations_200_response
-
-  """Returns a mapping of the top voting power changes within a time frame"""
-  topVotingPowerVariations(limit: PositiveInt = 10, skip: NonNegativeInt, orderDirection: queryInput_topVotingPowerVariations_orderDirection = desc, fromDate: String, toDate: String): topVotingPowerVariations_200_response
+  votingPowerVariations(addresses: JSON, limit: PositiveInt = 10, skip: NonNegativeInt, orderDirection: queryInput_votingPowerVariations_orderDirection = desc, fromDate: String, toDate: String): votingPowerVariations_200_response
 
   """Returns a the changes to voting power by period and accountId"""
   votingPowerVariationsByAccountId(address: String!, fromDate: String, toDate: String): votingPowerVariationsByAccountId_200_response
@@ -1909,29 +1906,6 @@ type query_votingPowerVariations_items_items {
 }
 
 enum queryInput_votingPowerVariations_orderDirection {
-  asc
-  desc
-}
-
-type topVotingPowerVariations_200_response {
-  period: query_topVotingPowerVariations_period!
-  items: [query_topVotingPowerVariations_items_items]!
-}
-
-type query_topVotingPowerVariations_period {
-  startTimestamp: String!
-  endTimestamp: String!
-}
-
-type query_topVotingPowerVariations_items_items {
-  accountId: String!
-  previousVotingPower: String!
-  currentVotingPower: String!
-  absoluteChange: String!
-  percentageChange: String!
-}
-
-enum queryInput_topVotingPowerVariations_orderDirection {
   asc
   desc
 }
