@@ -129,9 +129,6 @@ type Query {
   """
   votingPowerVariations(addresses: JSON!, limit: PositiveInt = 10, skip: NonNegativeInt, orderDirection: queryInput_votingPowerVariations_orderDirection = desc, fromDate: String, toDate: String): votingPowerVariations_200_response
 
-  """Returns a mapping of the top voting power changes within a time frame"""
-  topVotingPowerVariations(limit: PositiveInt = 10, skip: NonNegativeInt, orderDirection: queryInput_topVotingPowerVariations_orderDirection = desc, fromDate: String, toDate: String): topVotingPowerVariations_200_response
-
   """Returns a the changes to voting power by period and accountId"""
   votingPowerVariationsByAccountId(address: String!, fromDate: String, toDate: String): votingPowerVariationsByAccountId_200_response
 
@@ -163,6 +160,9 @@ type Query {
 
   """Returns current governance parameters for this DAO"""
   dao: dao_200_response
+
+  """Returns a mapping of the top voting power changes within a time frame"""
+  topVotingPowerVariations(limit: PositiveInt = 10, skip: NonNegativeInt, orderDirection: queryInput_topVotingPowerVariations_orderDirection = desc, fromDate: String, toDate: String): topVotingPowerVariations_200_response
 
   """
   Returns token related metrics for a single metric type.
@@ -1919,29 +1919,6 @@ enum queryInput_votingPowerVariations_orderDirection {
   desc
 }
 
-type topVotingPowerVariations_200_response {
-  period: query_topVotingPowerVariations_period!
-  items: [query_topVotingPowerVariations_items_items]!
-}
-
-type query_topVotingPowerVariations_period {
-  startTimestamp: String!
-  endTimestamp: String!
-}
-
-type query_topVotingPowerVariations_items_items {
-  accountId: String!
-  previousVotingPower: String!
-  currentVotingPower: String!
-  absoluteChange: String!
-  percentageChange: String!
-}
-
-enum queryInput_topVotingPowerVariations_orderDirection {
-  asc
-  desc
-}
-
 type votingPowerVariationsByAccountId_200_response {
   period: query_votingPowerVariationsByAccountId_period!
   data: query_votingPowerVariationsByAccountId_data!
@@ -2134,6 +2111,29 @@ enum HTTPMethod {
   OPTIONS
   TRACE
   PATCH
+}
+
+type topVotingPowerVariations_200_response {
+  period: query_topVotingPowerVariations_period!
+  items: [query_topVotingPowerVariations_items_items]!
+}
+
+type query_topVotingPowerVariations_period {
+  startTimestamp: String!
+  endTimestamp: String!
+}
+
+type query_topVotingPowerVariations_items_items {
+  accountId: String!
+  previousVotingPower: String!
+  currentVotingPower: String!
+  absoluteChange: String!
+  percentageChange: String!
+}
+
+enum queryInput_topVotingPowerVariations_orderDirection {
+  asc
+  desc
 }
 
 type tokenMetrics_200_response {
