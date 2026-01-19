@@ -19,6 +19,7 @@ const ConditionalPostHog = () => {
           // Only load PostHog if user accepted cookies and consent is still valid
           if (status === "accepted" && timestamp && timestamp > sixMonthsAgo) {
             setShouldLoadPostHog(true);
+            console.log("PostHog loaded");
           } else {
             setShouldLoadPostHog(false);
             // If consent expired or user declined, opt out of PostHog tracking
