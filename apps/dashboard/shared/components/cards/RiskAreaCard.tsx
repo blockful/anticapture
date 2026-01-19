@@ -374,7 +374,8 @@ export const RiskAreaCardWrapper = ({
           if (risk.name === RiskAreaEnum.ATTACK_PROFITABILITY) {
             const daoIdEnum = daoId?.toUpperCase() as DaoIdEnum;
             const daoConstants = daoConfig[daoIdEnum];
-            const riskValue = daoConstants?.attackProfitability?.notSupported
+            const riskValue = !daoConstants?.attackProfitability
+              ?.supportsLiquidTreasuryCall
               ? { ...risk, level: RiskLevel.NONE }
               : risk;
             return (
