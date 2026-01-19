@@ -24,7 +24,7 @@ export const CustomTooltip: React.FC<CustomTooltipProps> = ({
   const data = payload[0].payload;
   const variation = data.variation?.absoluteChange ?? 0;
   const isPositive = variation >= 0;
-  const valueLable = type === "tokenHolder" ? "Voting power" : "Balance";
+  const valueLable = type === "delegate" ? "Voting power" : "Balance";
   const variationClassName = isPositive
     ? "text-surface-solid-success"
     : "text-surface-solid-error";
