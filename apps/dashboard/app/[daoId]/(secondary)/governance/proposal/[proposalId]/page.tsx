@@ -65,8 +65,8 @@ export default function ProposalPage() {
       <BaseHeaderLayoutSidebar>
         <HeaderSidebar />
       </BaseHeaderLayoutSidebar>
-      <main className="relative flex-1 overflow-auto pt-[57px] sm:pt-0">
-        <div className="sm:hidden">
+      <main className="relative flex-1 overflow-auto pt-[57px] lg:pt-0">
+        <div className="lg:hidden">
           <HeaderMobile />
         </div>
         <div className="flex min-h-screen w-full flex-col items-center">

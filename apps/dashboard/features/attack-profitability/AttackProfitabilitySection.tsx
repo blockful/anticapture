@@ -52,7 +52,7 @@ export const AttackProfitabilitySection = ({
         title="Cost of Attack vs Profit"
         subtitle={getDateRange(days ?? "")}
         headerComponent={
-          <div className="flex w-full flex-col-reverse gap-3 pt-3 sm:flex-row sm:items-center">
+          <div className="flex w-full flex-col-reverse gap-3 pt-3 lg:flex-row lg:items-center">
             <BadgeStatus
               variant="outline"
               iconVariant={attackUpdate.hasData ? "success" : "warning"}
@@ -62,7 +62,7 @@ export const AttackProfitabilitySection = ({
             >
               Last updated: {attackUpdate.label}
             </BadgeStatus>
-            <div className="border-border-default hidden h-5 border sm:block" />
+            <div className="border-border-default hidden h-5 border lg:block" />
 
             <AttackProfitabilityToggleHeader
               treasuryMetric={treasuryMetric}
@@ -89,7 +89,7 @@ export const AttackProfitabilitySection = ({
         />
       </TheCardChartLayout>
       <div className="border-light-dark w-full border-t" />
-      <div className="grid w-full grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2">
+      <div className="grid w-full grid-cols-1 gap-5 lg:grid-cols-2 lg:gap-6">
         <TheCardChartLayout
           title="Cost Comparison"
           subtitle="All values reflect current data."

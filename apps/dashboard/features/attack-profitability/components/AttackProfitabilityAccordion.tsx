@@ -86,7 +86,7 @@ const AccordionData: AccordionDataProps[] = [
             proposal.
           </p>
         </div>
-        <div className="flex flex-col items-center gap-1 sm:flex-row">
+        <div className="flex flex-col items-center gap-1 lg:flex-row">
           <Badge className="group-hover:bg-surface-default">
             <p className="text-secondary text-xs font-semibold uppercase leading-none">
               Voting power in a proposal
@@ -122,7 +122,7 @@ const AccordionData: AccordionDataProps[] = [
             making it easier for an attacker to take control.
           </p>
         </div>
-        <div className="flex flex-col items-center gap-1 sm:flex-row">
+        <div className="flex flex-col items-center gap-1 lg:flex-row">
           <Badge className="group-hover:bg-surface-default">
             <ArrowDown className="text-secondary size-4" />
             <p className="text-secondary text-xs font-semibold uppercase leading-none">
@@ -155,7 +155,7 @@ const AccordionData: AccordionDataProps[] = [
           what an attacker would have as “minimum profit” from a well-executed
           capture.
         </div>
-        <div className="flex flex-col items-center gap-1 sm:flex-row">
+        <div className="flex flex-col items-center gap-1 lg:flex-row">
           <Badge className="group-hover:bg-surface-default">
             <p className="text-secondary text-xs font-semibold uppercase leading-none">
               Cost to attack
@@ -183,7 +183,7 @@ export const AttackProfitabilityAccordion = () => {
     <Accordion
       type="single"
       defaultValue="item-0"
-      className="text-primary flex h-full w-full flex-col gap-2 sm:gap-3"
+      className="text-primary flex h-full w-full flex-col gap-2 lg:gap-3"
     >
       {AccordionData.map((item, index) => (
         <AccordionItem

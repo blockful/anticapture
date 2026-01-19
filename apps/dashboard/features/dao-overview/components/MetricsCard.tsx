@@ -41,7 +41,7 @@ export const MetricsCard = ({ daoId, daoConfig }: MetricsCardProps) => {
     : 0;
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-4 md:justify-between md:gap-2 md:border-none">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-4 lg:justify-between lg:gap-2 lg:border-none">
       <DaoOverviewMetricCard
         title="Proposal Threshold"
         text={
@@ -50,7 +50,7 @@ export const MetricsCard = ({ daoId, daoConfig }: MetricsCardProps) => {
             : "Only Foundation Proposes"
         }
         subText={"Minimum voting power to submit"}
-        className="border-border-contrast border-b border-dashed pb-4 md:border-none md:p-3"
+        className="border-border-contrast border-b border-dashed pb-4 lg:border-none lg:p-3"
         isLoading={isLoading}
       />
 
@@ -71,7 +71,7 @@ export const MetricsCard = ({ daoId, daoConfig }: MetricsCardProps) => {
           </span>
         }
         isLoading={isLoading}
-        className="border-border-contrast border-b border-dashed pb-4 md:border-none md:p-3"
+        className="border-border-contrast border-b border-dashed pb-4 lg:border-none lg:p-3"
         textClassName="mb-1"
       />
 
@@ -87,7 +87,7 @@ export const MetricsCard = ({ daoId, daoConfig }: MetricsCardProps) => {
             votes are counted
           </span>
         }
-        className="border-border-contrast border-b border-dashed pb-4 md:border-none md:p-3"
+        className="border-border-contrast border-b border-dashed pb-4 lg:border-none lg:p-3"
         textClassName="mb-1"
         isLoading={isLoading}
       />

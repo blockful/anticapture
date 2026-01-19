@@ -116,8 +116,8 @@ export const VotesTable = <TData, TValue>({
     <div className="scrollbar-custom border-border-default relative w-full overflow-x-auto rounded-md border">
       <table
         className={cn(
-          "text-secondary md:bg-surface-default w-full caption-bottom border-separate border-spacing-0 bg-transparent text-sm",
-          mobileTableFixed ? "table-fixed" : "table-auto md:table-fixed",
+          "text-secondary lg:bg-surface-default w-full caption-bottom border-separate border-spacing-0 bg-transparent text-sm",
+          mobileTableFixed ? "table-fixed" : "table-auto lg:table-fixed",
           className,
         )}
       >

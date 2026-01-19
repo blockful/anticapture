@@ -100,7 +100,7 @@ export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
     <Link
       href={`/${daoId}/governance/proposal/${proposal.id}`}
       className={cn(
-        "text-primary bg-surface-default hover:bg-surface-contrast relative flex w-full cursor-pointer flex-col items-center justify-between gap-3 px-3 py-3 transition-colors duration-300 md:flex-row md:gap-6",
+        "text-primary bg-surface-default hover:bg-surface-contrast relative flex w-full cursor-pointer flex-col items-center justify-between gap-3 px-3 py-3 transition-colors duration-300 lg:flex-row lg:gap-6",
         className,
       )}
       id={proposal.id}
@@ -112,7 +112,7 @@ export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
         )}
       />
 
-      <div className="flex w-full flex-col items-start justify-between gap-0.5 md:w-auto">
+      <div className="flex w-full flex-col items-start justify-between gap-0.5 lg:w-auto">
         <h3 className="text-primary">{proposal.title}</h3>
         <div className="font-inter text-secondary flex items-center justify-center gap-2 text-[14px] font-normal not-italic leading-[20px]">
           <p className={getTextStatusColor(proposal.status)}>
@@ -132,7 +132,7 @@ export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
         </div>
       </div>
 
-      <div className="flex w-full shrink-0 flex-col items-center gap-1 md:w-[220px]">
+      <div className="flex w-full shrink-0 flex-col items-center gap-1 lg:w-[220px]">
         <div className="font-inter text-secondary flex w-full items-center justify-between gap-2 text-[14px] font-normal not-italic leading-5">
           <p>
             {" "}

@@ -26,7 +26,7 @@ export const AttackProfitabilityChartCard = ({
   );
 
   return (
-    <div className="sm:bg-surface-default flex w-full flex-col gap-4 px-5 md:p-4">
+    <div className="lg:bg-surface-default flex w-full flex-col gap-4 px-5 lg:p-4">
       <div className="flex h-5 items-center gap-2">
         <DefaultLink
           href={`${daoId.toLowerCase()}/attack-profitability`}

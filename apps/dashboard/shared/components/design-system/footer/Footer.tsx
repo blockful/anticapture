@@ -34,7 +34,7 @@ export const Footer = ({ variant, className }: FooterProps) => {
 
   return (
     <footer className={cn(footerVariant({ variant }), className)}>
-      <div className="flex flex-col items-center justify-center gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col items-center justify-center gap-2 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center gap-2">
           <DefaultLink
             href={releaseUrl}
@@ -56,7 +56,7 @@ export const Footer = ({ variant, className }: FooterProps) => {
             Blockful
           </DefaultLink>
         </div>
-        <div className="flex gap-2 sm:hidden">
+        <div className="flex gap-2 lg:hidden">
           <DefaultLink
             href="https://blockful.gitbook.io/anticapture/"
             openInNewTab
@@ -85,7 +85,7 @@ export const Footer = ({ variant, className }: FooterProps) => {
           </DefaultLink>
         </div>
         <div className="flex items-center gap-2">
-          <div className="hidden sm:flex">
+          <div className="hidden lg:flex">
             <DefaultLink
               href="https://blockful.gitbook.io/anticapture/"
               openInNewTab
@@ -94,7 +94,7 @@ export const Footer = ({ variant, className }: FooterProps) => {
             >
               Docs
             </DefaultLink>
-            <p className="text-dimmed mx-2 hidden items-center uppercase sm:flex">
+            <p className="text-dimmed mx-2 hidden items-center uppercase lg:flex">
               /
             </p>
             <DefaultLink
@@ -105,7 +105,7 @@ export const Footer = ({ variant, className }: FooterProps) => {
             >
               Terms of Service
             </DefaultLink>
-            <p className="text-dimmed mx-2 hidden items-center uppercase sm:flex">
+            <p className="text-dimmed mx-2 hidden items-center uppercase lg:flex">
               /
             </p>
             <DefaultLink
@@ -117,7 +117,7 @@ export const Footer = ({ variant, className }: FooterProps) => {
               Give Feedback
             </DefaultLink>
           </div>
-          <p className="text-dimmed hidden items-center uppercase sm:flex">/</p>
+          <p className="text-dimmed hidden items-center uppercase lg:flex">/</p>
           <Link
             href="https://github.com/blockful/anticapture"
             target="_blank"

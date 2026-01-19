@@ -16,7 +16,7 @@ const NotFound = () => {
     <div className="bg-surface-background dark flex h-screen overflow-hidden">
       <HeaderSidebar />
       <main className="flex-1 overflow-auto">
-        <div className="sm:hidden">
+        <div className="lg:hidden">
           <HeaderMobile />
         </div>
         <div className="flex min-h-screen w-full flex-col items-center">
@@ -42,11 +42,11 @@ const NotFound = () => {
                 </p>
               </div>
 
-              <div className="mt-4 flex w-full flex-col items-center justify-center gap-2 md:flex-row">
+              <div className="mt-4 flex w-full flex-col items-center justify-center gap-2 lg:flex-row">
                 <Button
                   asChild
                   variant="primary"
-                  className="w-full md:w-auto"
+                  className="w-full lg:w-auto"
                   size="md"
                 >
                   <Link href="/">Go to Dashboard</Link>
@@ -54,7 +54,7 @@ const NotFound = () => {
                 <Button
                   asChild
                   variant="outline"
-                  className="w-full md:w-auto"
+                  className="w-full lg:w-auto"
                   size="md"
                 >
                   <Link

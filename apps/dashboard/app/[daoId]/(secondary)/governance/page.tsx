@@ -64,12 +64,12 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 export default function DaoPage() {
   return (
     <div className="bg-surface-background dark flex h-screen overflow-hidden">
-      <div className="active relative hidden h-screen w-[325px] overflow-y-scroll bg-green-500 md:flex">
+      <div className="active relative hidden h-screen w-[325px] overflow-y-scroll bg-green-500 lg:flex">
         <HeaderSidebar />
         <HeaderDAOSidebar />
       </div>
       <main className="relative flex-1 overflow-auto">
-        <div className="sm:hidden">
+        <div className="lg:hidden">
           <HeaderMobile />
           <StickyPageHeader />
         </div>

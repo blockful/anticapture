@@ -13,14 +13,14 @@ interface IconButtonProps extends ButtonProps {
 }
 
 const boxSizeStyles: Record<ButtonSize, string> = {
-  sm: "p-1",
-  md: "p-2",
+  lg: "p-1",
+  lg: "p-2",
   lg: "p-3",
 };
 
 const iconSizeStyles: Record<ButtonSize, string> = {
-  sm: "size-3.5", // 14px
-  md: "size-3.5", // 14px
+  lg: "size-3.5", // 14px
+  lg: "size-3.5", // 14px
   lg: "size-4", // 16px
 };
 

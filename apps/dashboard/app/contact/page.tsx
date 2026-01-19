@@ -75,8 +75,8 @@ export default function ContactPage() {
     <div className="bg-surface-background dark flex h-screen">
       <HeaderSidebar />
       <main className="flex-1 overflow-auto">
-        <div className="sm:hidden">
-          <div className="h-[57px] w-full sm:hidden" />
+        <div className="lg:hidden">
+          <div className="h-[57px] w-full lg:hidden" />
           <HeaderMobile overlayClassName="top-[57px]" />
         </div>
         <div className="flex min-h-screen w-full flex-col items-center">

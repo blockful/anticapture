@@ -39,8 +39,8 @@ export const StageContent = ({
 
   return (
     <div className="flex w-full flex-col gap-2">
-      <div className="bg-surface-contrast flex w-full flex-col gap-4 rounded-md p-3 sm:flex-row">
-        <div className="flex flex-col gap-1 sm:max-w-[200px]">
+      <div className="bg-surface-contrast flex w-full flex-col gap-4 rounded-md p-3 lg:flex-row">
+        <div className="flex flex-col gap-1 lg:max-w-[200px]">
           <h3 className="text-alternative-sm text-primary font-mono font-medium uppercase tracking-wide">
             {title}
           </h3>
