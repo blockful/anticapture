@@ -42,12 +42,12 @@ interface ProposalsRepository {
     sortBy: "timestamp" | "votingPower",
     sortOrder: "asc" | "desc",
     account?: Address,
-    reason?: number,
+    support?: number,
   ): Promise<DBVote[]>;
   getProposalVotesCount(
     proposalId: string,
     account?: Address,
-    reason?: number,
+    support?: number,
   ): Promise<number>;
 }
 
@@ -201,7 +201,7 @@ export class ProposalsService {
     sortBy: "timestamp" | "votingPower" = "timestamp",
     sortOrder: "asc" | "desc" = "desc",
     account?: Address,
-    reason?: number,
+    support?: number,
   ): Promise<VotesResponse> {
     const [votes, totalCount] = await Promise.all([
       this.proposalsRepo.getProposalVotes(
@@ -211,9 +211,9 @@ export class ProposalsService {
         sortBy,
         sortOrder,
         account,
-        reason,
+        support,
       ),
-      this.proposalsRepo.getProposalVotesCount(proposalId, account, reason),
+      this.proposalsRepo.getProposalVotesCount(proposalId, account, support),
     ]);
 
     return {

@@ -344,15 +344,15 @@ export class DrizzleRepository {
   async getProposalVotesCount(
     proposalId: string,
     account: Address,
-    reason?: number,
+    support?: number,
   ): Promise<number> {
     const whereClauses: SQL<unknown>[] = [
       eq(votesOnchain.proposalId, proposalId),
       eq(votesOnchain.voterAccountId, account),
     ];
 
-    if (reason !== undefined) {
-      whereClauses.push(eq(votesOnchain.support, reason.toString()));
+    if (support !== undefined) {
+      whereClauses.push(eq(votesOnchain.support, support.toString()));
     }
 
     return await db.$count(votesOnchain, and(...whereClauses));

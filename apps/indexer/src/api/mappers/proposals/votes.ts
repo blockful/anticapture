@@ -16,12 +16,12 @@ export const VotesRequestSchema = z.object({
     .int()
     .min(1, "Limit must be a positive integer")
     .max(1000, "Limit cannot exceed 1000")
-    .default(10)
-    .optional(),
+    .optional()
+    .default(10),
   account: z.string().refine((val) => isAddress(val)),
   sortBy: z.enum(["timestamp", "votingPower"]).default("timestamp").optional(),
   sortOrder: z.enum(["asc", "desc"]).default("desc").optional(),
-  reason: z.coerce.number().int().optional(),
+  support: z.coerce.number().int().optional(),
 });
 
 export type VotesRequest = z.infer<typeof VotesRequestSchema>;
