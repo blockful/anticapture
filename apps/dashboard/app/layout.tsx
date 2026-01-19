@@ -67,7 +67,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <ConditionalHotjar />
       </head>
       <body
-        className={`${inter.className} ${roboto.variable} bg-surface-background mx-auto max-w-screen-2xl overflow-x-hidden xl:overflow-hidden`}
+        className={`${inter.className} ${roboto.variable} bg-surface-background border-light-dark mx-auto max-w-screen-2xl overflow-x-hidden border xl:overflow-hidden`}
       >
         <GlobalProviders>
           {children}

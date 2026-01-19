@@ -61,7 +61,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
 export default function ProposalPage() {
   return (
-    <div className="bg-surface-background dark flex h-screen max-w-screen-2xl overflow-hidden">
+    <div className="bg-surface-background border-light-dark dark flex h-screen max-w-screen-2xl overflow-hidden border">
       <BaseHeaderLayoutSidebar>
         <HeaderSidebar />
       </BaseHeaderLayoutSidebar>
