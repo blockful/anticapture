@@ -24,7 +24,7 @@ export const useTopVotingPowerVariations = (
   });
 
   return {
-    data: data?.topVotingPowerVariations?.items ?? [],
+    data: data?.votingPowerVariations?.items ?? [],
     loading,
     error: error || null,
     refetch: () => refetch(),
