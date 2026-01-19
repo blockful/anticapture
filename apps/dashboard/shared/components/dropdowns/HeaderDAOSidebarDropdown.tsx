@@ -87,6 +87,7 @@ export const HeaderDAOSidebarDropdown = () => {
     <div
       className="border-light-dark relative z-50 inline-block h-[57px] w-full shrink-0 border-b lg:h-[65px]"
       ref={dropdownRef}
+      onMouseLeave={() => setIsOpen(false)}
     >
       <div className="flex h-full items-center justify-between px-3.5 py-3.5 lg:p-2">
         <Button
@@ -111,7 +112,7 @@ export const HeaderDAOSidebarDropdown = () => {
 
       {isOpen && (
         <div
-          className="border-light-dark bg-surface-default absolute left-0 right-0 z-50 mx-4 mt-1 w-auto rounded-lg border shadow-lg transition-all duration-200 ease-in-out lg:mx-0"
+          className="border-light-dark bg-surface-default absolute left-0 right-0 z-50 mx-4 w-auto rounded-lg border shadow-lg transition-all duration-200 ease-in-out lg:mx-0"
           role="menu"
         >
           {dropdownItems.map((item) => (
