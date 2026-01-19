@@ -53,7 +53,14 @@ export const TokenDistributionDialog = ({
   return (
     <Root>
       <Trigger asChild>
-        <Button variant="outline" disabled={isAllMetricsApplied} size="sm">
+        <Button
+          data-ph-event="metric_added"
+          data-ph-source="token_distribution"
+          data-umami-event="metric_added"
+          variant="outline"
+          disabled={isAllMetricsApplied}
+          size="sm"
+        >
           {isAllMetricsApplied ? (
             <>
               <Check className="text-dimmed size-3.5" />

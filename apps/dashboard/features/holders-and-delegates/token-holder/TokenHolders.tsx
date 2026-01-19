@@ -178,7 +178,13 @@ export const TokenHolders = ({
                   className="mx-1 p-1"
                   iconSize="md"
                 />
-                <Button variant="outline" size="sm">
+                <Button
+                  data-ph-event="holder_details"
+                  data-ph-source="holders_table"
+                  data-umami-event="holder_details"
+                  variant="outline"
+                  size="sm"
+                >
                   <Plus className="size-3.5" />
                   <span className="text-sm font-medium">Details</span>
                 </Button>

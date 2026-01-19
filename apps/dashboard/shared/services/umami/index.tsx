@@ -13,6 +13,7 @@ const UmamiScript: FC = () => {
         data-tag="umami-eu"
         strategy="afterInteractive"
         onLoad={() => console.log("Umami loaded")}
+        onError={(error) => console.error("Error loading Umami:", error)}
       />
     );
   }
