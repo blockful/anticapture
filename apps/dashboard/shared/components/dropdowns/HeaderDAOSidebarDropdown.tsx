@@ -92,19 +92,19 @@ export const HeaderDAOSidebarDropdown = () => {
         <Button
           variant="ghost"
           size="sm"
-          className="w-full"
+          className="flex w-full items-center justify-start overflow-hidden"
           onClick={toggleDropdown}
           aria-expanded={isOpen}
           aria-haspopup="menu"
         >
           <div className="flex w-full items-center gap-2">
             <div>{currentItem?.icon}</div>
-            <p className="text-primary text-[18px] font-medium leading-6">
+            <p className="text-primary whitespace-nowrap text-[18px] font-medium leading-6 opacity-0 transition-all group-hover:block group-hover:opacity-100">
               {currentItem?.label}
             </p>
           </div>
           <div>
-            <ChevronsUpDown className="text-secondary size-5" />
+            <ChevronsUpDown className="text-secondary size-5 opacity-0 transition-all duration-300 group-hover:rotate-180 group-hover:opacity-100" />
           </div>
         </Button>
       </div>

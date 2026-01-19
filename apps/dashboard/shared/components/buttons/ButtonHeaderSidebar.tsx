@@ -75,16 +75,19 @@ export const ButtonHeaderSidebar = ({
   const content = (
     <>
       <Icon
-        className={cn("size-4", {
+        className={cn("size-4 shrink-0", {
           "text-inverted": isActive,
           "text-secondary group-hover:text-primary": !isActive,
         })}
       />
       <p
-        className={cn({
-          "text-inverted": isActive,
-          "text-secondary group-hover:text-primary": !isActive,
-        })}
+        className={cn(
+          "whitespace-nowrap opacity-0 transition-all group-hover:block group-hover:opacity-100",
+          {
+            "text-inverted": isActive,
+            "text-secondary group-hover:text-primary": !isActive,
+          },
+        )}
       >
         {label}
       </p>

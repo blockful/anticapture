@@ -23,10 +23,8 @@ export const HeaderDAOSidebar = () => {
   }
 
   return (
-    <aside
-      className={`border-light-dark bg-surface-background z-50 hidden h-screen w-[258px] border-r lg:block`}
-    >
-      <div className="flex h-full w-full flex-col">
+    <aside className="border-light-dark bg-surface-background group relative z-50 h-screen w-[68px] border-r transition-all duration-300 hover:w-[258px] lg:block">
+      <div className="z-50 flex h-full w-full flex-col hover:w-[258px]">
         <HeaderDAOSidebarDropdown />
         <div className="flex h-full flex-col justify-between">
           <div className="flex flex-col gap-3 p-4">
