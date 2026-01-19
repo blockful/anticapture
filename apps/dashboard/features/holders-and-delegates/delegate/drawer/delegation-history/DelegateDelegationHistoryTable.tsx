@@ -49,8 +49,8 @@ export const DelegateDelegationHistoryTable = ({
     parseAsStringEnum(["asc", "desc"]).withDefault("desc"),
   );
   const [filterVariables, setFilterVariables] = useQueryStates({
-    minDelta: parseAsString,
-    maxDelta: parseAsString,
+    fromValue: parseAsString,
+    toValue: parseAsString,
   });
   const [isFilterActive, setIsFilterActive] = useQueryState(
     "active",
@@ -207,16 +207,16 @@ export const DelegateDelegationHistoryTable = ({
               );
 
               setFilterVariables(() => ({
-                minDelta: filterState.minAmount
+                fromValue: filterState.minAmount
                   ? parseUnits(filterState.minAmount, decimals).toString()
                   : undefined,
-                maxDelta: filterState.maxAmount
+                toValue: filterState.maxAmount
                   ? parseUnits(filterState.maxAmount, decimals).toString()
                   : undefined,
               }));
 
               setIsFilterActive(
-                !!(filterVariables?.minDelta || filterVariables?.maxDelta),
+                !!(filterVariables?.fromValue || filterVariables?.toValue),
               );
               // Update sort to delta when filter is applied
               setSortBy("delta");
@@ -226,8 +226,8 @@ export const DelegateDelegationHistoryTable = ({
               // Reset to default sorting
               setSortBy("timestamp");
               setFilterVariables(() => ({
-                minDelta: undefined,
-                maxDelta: undefined,
+                fromValue: undefined,
+                toValue: undefined,
               }));
             }}
             isActive={isFilterActive}
@@ -301,7 +301,7 @@ export const DelegateDelegationHistoryTable = ({
                 setFromFilter(addr);
               }
             }}
-            currentFilter={fromFilter ?? undefined}
+            currentFilter={fromFilter ?? ""}
           /> */}
         </div>
       ),
@@ -411,7 +411,7 @@ export const DelegateDelegationHistoryTable = ({
                 setToFilter(addr);
               }
             }}
-            currentFilter={toFilter ?? undefined}
+            currentFilter={toFilter ?? ""}
           /> */}
         </div>
       ),

@@ -1,24 +1,23 @@
-query VotingPowers(
+query HistoricalVotingPowers(
   $account: String!
   $skip: NonNegativeInt
   $limit: PositiveInt = 10
-  $orderDirection: queryInput_votingPowers_orderDirection = desc
-  $orderBy: queryInput_votingPowers_orderBy
-  $maxDelta: String
-  $minDelta: String
+  $orderBy: queryInput_historicalVotingPowers_orderBy = timestamp
+  $orderDirection: queryInput_historicalVotingPowers_orderDirection = desc
+  $toValue: String
+  $fromValue: String
 ) {
-  votingPowers(
-    account: $account
+  historicalVotingPowers(
+    accountId: $account
     skip: $skip
+    orderBy: $orderBy
     orderDirection: $orderDirection
     limit: $limit
-    orderBy: $orderBy
-    maxDelta: $maxDelta
-    minDelta: $minDelta
+    toValue: $toValue
+    fromValue: $fromValue
   ) {
     items {
       accountId
-      daoId
       votingPower
       transfer {
         value
