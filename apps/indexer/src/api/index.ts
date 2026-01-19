@@ -63,18 +63,17 @@ import {
 } from "@/api/services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
-import {
-  DelegationsRepository,
-  HistoricalDelegationsRepository,
-} from "./repositories/delegations";
-import {
-  DelegationsService,
-  HistoricalDelegationsService,
-} from "./services/delegations";
+import { HistoricalDelegationsRepository } from "./repositories/delegations/historical";
+import { DelegationsService } from "./services/delegations/current";
 import { historicalDelegations } from "./controllers/delegations";
 import { AccountBalanceRepository } from "./repositories/account-balance/listing";
 import { createTreasuryService } from "./services/treasury/treasury-provider-factory";
 import { delegations } from "./controllers/delegations/delegations";
+import {
+  DelegationsRepository,
+  PartialDelegationsRepository,
+} from "./repositories/delegations";
+import { HistoricalDelegationsService } from "./services/delegations";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -166,7 +165,14 @@ historicalDelegations(
   new HistoricalDelegationsService(new HistoricalDelegationsRepository()),
 );
 
-delegations(app, new DelegationsService(new DelegationsRepository()));
+delegations(
+  app,
+  new DelegationsService(
+    env.DAO_ID === DaoIdEnum.SCR
+      ? new PartialDelegationsRepository()
+      : new DelegationsRepository(),
+  ),
+);
 
 const treasuryService = createTreasuryService(
   new TreasuryRepository(),

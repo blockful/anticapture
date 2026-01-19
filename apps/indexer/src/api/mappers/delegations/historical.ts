@@ -1,8 +1,6 @@
 import { z } from "@hono/zod-openapi";
-import { delegation } from "ponder:schema";
 import { Address, getAddress, isAddress } from "viem";
-
-type DBDelegation = typeof delegation.$inferSelect;
+import { DBDelegation } from "./delegations";
 
 export const HistoricalDelegationsRequestParamsSchema = z.object({
   address: z.string().refine((val) => isAddress(val, { strict: false })),

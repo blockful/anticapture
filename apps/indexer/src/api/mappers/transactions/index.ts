@@ -9,12 +9,12 @@ import {
   TransferResponseSchema,
 } from "../transfers";
 
+type DBDelegation = typeof delegation.$inferSelect;
+
 export type DBTransaction = typeof transaction.$inferSelect & {
   transfers: DBTransfer[];
   delegations: DBDelegation[];
 };
-
-export type DBDelegation = typeof delegation.$inferSelect;
 
 export enum AffectedSupply {
   CEX = "CEX",

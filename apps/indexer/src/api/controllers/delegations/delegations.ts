@@ -6,7 +6,7 @@ import {
   DelegationsRequestQuerySchema,
   DelegationsRequestParamsSchema,
 } from "@/api/mappers/delegations";
-import { DelegationsService } from "@/api/services/delegations";
+import { DelegationsService } from "@/api/services/delegations/current";
 
 export function delegations(app: Hono, service: DelegationsService) {
   app.openapi(
