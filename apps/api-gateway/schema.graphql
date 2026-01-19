@@ -14,9 +14,6 @@ type Query {
   """Get property data for a specific token"""
   token(currency: queryInput_token_currency = usd): token_200_response
   tokens(where: tokenFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPage!
-  accountPower(accountId: String!): accountPower
-  accountPowers(where: accountPowerFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountPowerPage!
-  votingPowerHistory(transactionHash: String!, accountId: String!, logIndex: Float!): votingPowerHistory
   votingPowerHistorys(where: votingPowerHistoryFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votingPowerHistoryPage!
   delegation(transactionHash: String!, delegatorAccountId: String!, delegateAccountId: String!): delegation
   delegations(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): delegationPage!
@@ -78,7 +75,7 @@ type Query {
   """
   Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window
   """
-  proposalsActivity(address: String!, fromDate: NonNegativeInt, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_proposalsActivity_orderBy = timestamp, orderDirection: queryInput_proposalsActivity_orderDirection = desc, userVoteFilter: queryInput_proposalsActivity_userVoteFilter): proposalsActivity_200_response
+  proposalsActivity(address: String!, fromDate: String, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_proposalsActivity_orderBy = timestamp, orderDirection: queryInput_proposalsActivity_orderDirection = desc, userVoteFilter: queryInput_proposalsActivity_userVoteFilter): proposalsActivity_200_response
 
   """Returns a list of proposal"""
   proposals(skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposals_orderDirection = desc, status: JSON, fromDate: Float, fromEndDate: Float, includeOptimisticProposals: queryInput_proposals_includeOptimisticProposals = TRUE): proposals_200_response
@@ -93,11 +90,6 @@ type Query {
   Fetch historical token balances for multiple addresses at a specific time period using multicall
   """
   historicalBalances(addresses: JSON!, days: queryInput_historicalBalances_days = _7d): [query_historicalBalances_items]
-
-  """
-  Fetch historical voting power for multiple addresses at a specific time period using multicall
-  """
-  historicalVotingPower(addresses: JSON!, days: queryInput_historicalVotingPower_days = _7d, fromDate: Float): [query_historicalVotingPower_items]
 
   """
   Get transactions with their associated transfers and delegations, with optional filtering and sorting
@@ -130,12 +122,21 @@ type Query {
   delegationPercentageByDay(startDate: String, endDate: String, orderDirection: queryInput_delegationPercentageByDay_orderDirection = asc, limit: NonNegativeInt = 365, after: String, before: String): delegationPercentageByDay_200_response
 
   """Returns a list of voting power changes"""
-  votingPowers(account: String!, fromAddresses: JSON, toAddresses: JSON, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_votingPowers_orderBy = timestamp, orderDirection: queryInput_votingPowers_orderDirection = desc, minDelta: String, maxDelta: String): votingPowers_200_response
+  historicalVotingPowers(accountId: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_historicalVotingPowers_orderBy = timestamp, orderDirection: queryInput_historicalVotingPowers_orderDirection = desc, fromDate: String, toDate: String, fromValue: String, toValue: String): historicalVotingPowers_200_response
 
   """
-  Returns a mapping of the biggest changes to voting power associated by delegate address
+  Returns a mapping of the voting power changes within a time frame for the given addresses
   """
-  votingPowerVariations(days: queryInput_votingPowerVariations_days = _90d, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_votingPowerVariations_orderDirection = desc): votingPowerVariations_200_response
+  votingPowerVariations(addresses: JSON, limit: PositiveInt = 10, skip: NonNegativeInt, orderDirection: queryInput_votingPowerVariations_orderDirection = desc, fromDate: String, toDate: String): votingPowerVariations_200_response
+
+  """Returns a the changes to voting power by period and accountId"""
+  votingPowerVariationsByAccountId(address: String!, fromDate: String, toDate: String): votingPowerVariationsByAccountId_200_response
+
+  """Returns sorted and paginated account voting power records"""
+  votingPowers(limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_votingPowers_orderDirection = desc, orderBy: queryInput_votingPowers_orderBy = votingPower, addresses: JSON, fromValue: String, toValue: String): votingPowers_200_response
+
+  """Returns voting power information for a specific address (account)"""
+  votingPowerByAccountId(accountId: String!): votingPowerByAccountId_200_response
 
   """
   Returns a mapping of the biggest variations to account balances associated by account address
@@ -1757,19 +1758,6 @@ enum queryInput_historicalBalances_days {
   _365d
 }
 
-type query_historicalVotingPower_items {
-  address: String!
-  votingPower: String!
-}
-
-enum queryInput_historicalVotingPower_days {
-  _7d
-  _30d
-  _90d
-  _180d
-  _365d
-}
-
 type transactions_200_response {
   items: [query_transactions_items_items]!
   totalCount: Float!
@@ -1859,12 +1847,12 @@ enum queryInput_delegationPercentageByDay_orderDirection {
   desc
 }
 
-type votingPowers_200_response {
-  items: [query_votingPowers_items_items]!
+type historicalVotingPowers_200_response {
+  items: [query_historicalVotingPowers_items_items]!
   totalCount: Float!
 }
 
-type query_votingPowers_items_items {
+type query_historicalVotingPowers_items_items {
   transactionHash: String!
   daoId: String!
   accountId: String!
@@ -1872,28 +1860,29 @@ type query_votingPowers_items_items {
   delta: String!
   timestamp: String!
   logIndex: Float!
-  delegation: query_votingPowers_items_items_delegation
-  transfer: query_votingPowers_items_items_transfer
+  delegation: query_historicalVotingPowers_items_items_delegation
+  transfer: query_historicalVotingPowers_items_items_transfer
 }
 
-type query_votingPowers_items_items_delegation {
+type query_historicalVotingPowers_items_items_delegation {
   from: String!
   value: String!
   to: String!
+  previousDelegate: String
 }
 
-type query_votingPowers_items_items_transfer {
+type query_historicalVotingPowers_items_items_transfer {
   value: String!
   from: String!
   to: String!
 }
 
-enum queryInput_votingPowers_orderBy {
+enum queryInput_historicalVotingPowers_orderBy {
   timestamp
   delta
 }
 
-enum queryInput_votingPowers_orderDirection {
+enum queryInput_historicalVotingPowers_orderDirection {
   asc
   desc
 }
@@ -1904,30 +1893,70 @@ type votingPowerVariations_200_response {
 }
 
 type query_votingPowerVariations_period {
-  days: String!
   startTimestamp: String!
   endTimestamp: String!
 }
 
 type query_votingPowerVariations_items_items {
   accountId: String!
-  previousVotingPower: String
+  previousVotingPower: String!
   currentVotingPower: String!
   absoluteChange: String!
   percentageChange: String!
 }
 
-enum queryInput_votingPowerVariations_days {
-  _7d
-  _30d
-  _90d
-  _180d
-  _365d
-}
-
 enum queryInput_votingPowerVariations_orderDirection {
   asc
   desc
+}
+
+type votingPowerVariationsByAccountId_200_response {
+  period: query_votingPowerVariationsByAccountId_period!
+  data: query_votingPowerVariationsByAccountId_data!
+}
+
+type query_votingPowerVariationsByAccountId_period {
+  startTimestamp: String!
+  endTimestamp: String!
+}
+
+type query_votingPowerVariationsByAccountId_data {
+  accountId: String!
+  previousVotingPower: String!
+  currentVotingPower: String!
+  absoluteChange: String!
+  percentageChange: String!
+}
+
+type votingPowers_200_response {
+  items: [query_votingPowers_items_items]!
+  totalCount: Float!
+}
+
+type query_votingPowers_items_items {
+  accountId: String!
+  votingPower: String!
+  votesCount: Float!
+  proposalsCount: Float!
+  delegationsCount: Float!
+}
+
+enum queryInput_votingPowers_orderDirection {
+  asc
+  desc
+}
+
+enum queryInput_votingPowers_orderBy {
+  votingPower
+  delegationsCount
+}
+
+type votingPowerByAccountId_200_response {
+  accountId: String!
+  votingPower: String!
+  votesCount: Float!
+  proposalsCount: Float!
+  delegationsCount: Float!
 }
 
 type accountBalanceVariations_200_response {
@@ -1936,7 +1965,6 @@ type accountBalanceVariations_200_response {
 }
 
 type query_accountBalanceVariations_period {
-  days: String!
   startTimestamp: String!
   endTimestamp: String!
 }
@@ -1993,7 +2021,6 @@ type accountInteractions_200_response {
 }
 
 type query_accountInteractions_period {
-  days: String!
   startTimestamp: String!
   endTimestamp: String!
 }
