@@ -36,16 +36,16 @@ export class CompoundProvider implements TreasuryProvider {
   ): Promise<LiquidTreasuryDataPoint[]> {
     const cached = this.cache.get();
 
-    if (cached !== null) return cached;
+    if (cached !== null) return this.filterData(cached, cutoffTimestamp);
 
     try {
       const response = await this.client.get<CompoundResponse>(
         `/treasury?order=DESC&limit=${LIMIT}`,
       );
-      const data = this.transformData(response.data, cutoffTimestamp);
+      const data = this.transformData(response.data);
       this.cache.set(data);
 
-      return data;
+      return this.filterData(data, cutoffTimestamp);
     } catch (error) {
       throw new HTTPException(503, {
         message: "Failed to fetch total assets data",
@@ -54,10 +54,7 @@ export class CompoundProvider implements TreasuryProvider {
     }
   }
 
-  private transformData(
-    data: CompoundResponse,
-    cutoffTimestamp: number,
-  ): LiquidTreasuryDataPoint[] {
+  private transformData(data: CompoundResponse): LiquidTreasuryDataPoint[] {
     const map = new Map();
     data.data.forEach((row) => {
       const timestamp = row.d;
@@ -66,12 +63,21 @@ export class CompoundProvider implements TreasuryProvider {
       }
     });
 
-    const filteredData = Array.from(map, ([date, value]) => ({
+    return Array.from(map, ([date, value]) => ({
       date,
       liquidTreasury: value,
-    }))
-      .filter((item) => item.date >= cutoffTimestamp)
-      .sort((a, b) => a.date - b.date);
+    })).sort((a, b) => a.date - b.date);
+  }
+
+  private filterData(
+    data: LiquidTreasuryDataPoint[],
+    cutoffTimestamp: number,
+  ): LiquidTreasuryDataPoint[] {
+    const filteredData = data.filter((item) => item.date >= cutoffTimestamp);
+    if (filteredData.length === 0 && data.length > 0) {
+      const lastAvailable = data.at(-1)!;
+      return [lastAvailable];
+    }
 
     return filteredData;
   }
