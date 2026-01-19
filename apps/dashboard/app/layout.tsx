@@ -5,7 +5,8 @@ import { Toaster } from "react-hot-toast";
 import type { Metadata } from "next";
 import { GlobalProviders } from "@/shared/providers/GlobalProviders";
 import { ReactNode } from "react";
-import ConditionalHotjar from "@/shared/services/hotjar/ConditionalHotjar";
+import ConditionalPostHog from "@/shared/services/posthog/ConditionalPostHog";
+import UmamiScript from "@/shared/services/umami";
 import { Inter, Roboto_Mono } from "next/font/google";
 import { CookieConsent } from "@/features/cookie";
 
@@ -64,7 +65,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           name="viewport"
           content="width=device-width, initial-scale=1, viewport-fit=cover"
         />
-        <ConditionalHotjar />
+        <ConditionalPostHog />
+        <UmamiScript />
       </head>
       <body
         className={`${inter.className} ${roboto.variable} overflow-x-hidden xl:overflow-hidden`}
