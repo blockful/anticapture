@@ -14,6 +14,7 @@ interface ButtonHeaderSidebarProps extends ButtonHTMLAttributes<
   className?: string;
   isGlobal?: boolean;
   isAction?: boolean;
+  isDaoNavigation?: boolean;
 }
 
 export const ButtonHeaderSidebar = ({
@@ -23,6 +24,7 @@ export const ButtonHeaderSidebar = ({
   className,
   isGlobal = false,
   isAction = false,
+  isDaoNavigation = false,
   onClick,
   ...props
 }: ButtonHeaderSidebarProps) => {
@@ -82,8 +84,9 @@ export const ButtonHeaderSidebar = ({
       />
       <p
         className={cn(
-          "whitespace-nowrap opacity-0 transition-all group-hover:block group-hover:opacity-100",
+          "whitespace-nowrap transition-all group-hover:block group-hover:opacity-100",
           {
+            "opacity-0 group-hover:opacity-100": !isDaoNavigation,
             "text-inverted": isActive,
             "text-secondary group-hover:text-primary": !isActive,
           },

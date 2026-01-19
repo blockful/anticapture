@@ -44,6 +44,7 @@ export const HeaderSidebar = () => {
           <div className="flex h-full flex-col gap-1.5 p-1.5">
             {headerItems.map((item) => (
               <ButtonHeaderSidebar
+                isDaoNavigation={true}
                 key={item.page || item.label}
                 page={item.page || ""}
                 icon={item.icon}
