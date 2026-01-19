@@ -24,6 +24,7 @@ export const CustomTooltip: React.FC<CustomTooltipProps> = ({
   const data = payload[0].payload;
   const variation = data.variation?.absoluteChange ?? 0;
   const isPositive = variation >= 0;
+  const valueLable = type === "tokenHolder" ? "Voting power" : "Balance";
   const variationClassName = isPositive
     ? "text-surface-solid-success"
     : "text-surface-solid-error";
@@ -38,7 +39,7 @@ export const CustomTooltip: React.FC<CustomTooltipProps> = ({
         {data.name || formatAddress(data.address)}
       </span>
       <span>
-        Balance: {formatNumberUserReadable(data.balance)} {daoId}
+        {valueLable}: {formatNumberUserReadable(data.balance)} {daoId}
       </span>
       <span>
         Variation:{" "}
