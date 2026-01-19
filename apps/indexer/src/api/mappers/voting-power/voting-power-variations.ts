@@ -31,7 +31,7 @@ export const TopVotingPowerVariationsRequestSchema = z
       .min(1, "Limit must be a positive integer")
       .max(100, "Limit cannot exceed 100")
       .optional()
-      .default(20),
+      .default(10),
     skip: z.coerce
       .number()
       .int()

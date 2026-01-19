@@ -130,10 +130,12 @@ export class VotingPowerRepository {
   }
 
   async getVotingPowerVariations(
-    addresses: Address[],
     startTimestamp: number,
     endTimestamp: number,
+    skip: number,
+    limit: number,
     orderDirection: "asc" | "desc",
+    addresses?: Address[],
   ): Promise<DBVotingPowerVariation[]> {
     const orderDirectionFn = orderDirection === "asc" ? asc : desc;
 
@@ -199,19 +201,11 @@ export class VotingPowerRepository {
       )
       .orderBy(
         orderDirectionFn(
-          sql<bigint>`(COALESCE(to_data.voting_power, 0) - COALESCE(from_data.voting_power, 0))`,
+          sql<bigint>`ABS(COALESCE(to_data.voting_power, 0) - COALESCE(from_data.voting_power, 0))`,
         ),
-      );
-  }
-
-  async getTopVotingPowerVariations(
-    _: number,
-    __: number,
-    ___: number,
-    ____: number,
-    _____: "asc" | "desc",
-  ): Promise<DBVotingPowerVariation[]> {
-    return [];
+      )
+      .limit(limit)
+      .offset(skip);
   }
 
   async getVotingPowerVariationsByAccountId(
