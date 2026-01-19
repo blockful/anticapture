@@ -1,5 +1,0 @@
-query GetDelegatesCount {
-  accountPowers(where: {votingPower_gt: 0}) {
-    totalCount
-  }
-} 

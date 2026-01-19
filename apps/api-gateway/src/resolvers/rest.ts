@@ -23,7 +23,7 @@ const daoItemQueries = [
   "getVotingPower",
   "historicalBalances",
   "historicalTokenData",
-  "historicalVotingPower",
+  "historicalVotingPowers",
   "lastUpdate",
   "proposal",
   "proposalNonVoters",
@@ -32,7 +32,10 @@ const daoItemQueries = [
   "token",
   "transactions",
   "transfers",
-  "votingPowerVariations",
+  "votingPowerByAccountId",
+  "topVotingPowerVariations",
+  "votingPowerVariationsByAccountId",
+  "votingPowers",
 ];
 
 export const restResolvers = daoItemQueries.reduce((acc, fieldName) => {
