@@ -105,14 +105,32 @@ export class VotingPowerService {
     limit: number,
     orderDirection: "asc" | "desc",
   ): Promise<DBVotingPowerVariation[]> {
-    return this.votingPowerRepository.getVotingPowerVariations(
-      startTimestamp,
-      endTimestamp,
-      skip,
-      limit,
-      orderDirection,
-      addresses,
-    );
+    const variations =
+      await this.votingPowerRepository.getVotingPowerVariations(
+        startTimestamp,
+        endTimestamp,
+        skip,
+        limit,
+        orderDirection,
+        addresses,
+      );
+
+    return addresses.map((address) => {
+      const dbVariation = variations.find(
+        (variation) => variation.accountId === address,
+      );
+
+      if (dbVariation) return dbVariation;
+
+      // handling addresses that have no delegations
+      return {
+        accountId: address,
+        previousVotingPower: 0n,
+        currentVotingPower: 0n,
+        absoluteChange: 0n,
+        percentageChange: "0",
+      };
+    });
   }
 
   async getTopVotingPowerVariations(
