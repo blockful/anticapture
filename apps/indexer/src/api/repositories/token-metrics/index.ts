@@ -1,9 +1,9 @@
 import { db } from "ponder:api";
 import { daoMetricsDayBucket } from "ponder:schema";
-import { and, gte, lte, lt, inArray, desc, asc } from "ponder";
+import { and, gte, lte, lt, eq, desc, asc } from "ponder";
 
 export interface TokenMetricsRepositoryFilters {
-  metricTypes: string[];
+  metricType: string;
   startDate?: string;
   endDate?: string;
   orderDirection: "asc" | "desc";
@@ -12,14 +12,14 @@ export interface TokenMetricsRepositoryFilters {
 
 export class TokenMetricsRepository {
   /**
-   * Fetches metrics by types and date range
-   * @param filters - Metric types, date range, and ordering filters
+   * Fetches metrics by type and date range
+   * @param filters - Metric type, date range, and ordering filters
    * @returns Array of metrics ordered by date
    */
   async getMetricsByDateRange(filters: TokenMetricsRepositoryFilters) {
-    const { metricTypes, startDate, endDate, orderDirection, limit } = filters;
+    const { metricType, startDate, endDate, orderDirection, limit } = filters;
 
-    const conditions = [inArray(daoMetricsDayBucket.metricType, metricTypes)];
+    const conditions = [eq(daoMetricsDayBucket.metricType, metricType)];
 
     if (startDate) {
       conditions.push(gte(daoMetricsDayBucket.date, BigInt(startDate)));
@@ -48,7 +48,7 @@ export class TokenMetricsRepository {
     return db.query.daoMetricsDayBucket.findFirst({
       where: and(
         lt(daoMetricsDayBucket.date, BigInt(beforeDate)),
-        inArray(daoMetricsDayBucket.metricType, [metricType]),
+        eq(daoMetricsDayBucket.metricType, metricType),
       ),
       orderBy: desc(daoMetricsDayBucket.date),
     });

@@ -14,8 +14,7 @@ export function tokenMetrics(app: Hono, service: TokenMetricsService) {
       operationId: "tokenMetrics",
       path: "/token-metrics",
       summary: "Get token related metrics",
-      description: `Returns token related metrics.
-        Supports multiple metric types in a single request.
+      description: `Returns token related metrics for a single metric type.
         Available types: ${metricTypeArray.join(", ")}`,
       tags: ["metrics"],
       request: {
@@ -31,7 +30,9 @@ export function tokenMetrics(app: Hono, service: TokenMetricsService) {
       },
     }),
     async (ctx) => {
-      const serviceResult = await service.getMetrics(ctx.req.valid("query"));
+      const serviceResult = await service.getMetricsForType(
+        ctx.req.valid("query"),
+      );
       const httpResponse = toTokenMetricsApi(serviceResult);
       return ctx.json(httpResponse);
     },

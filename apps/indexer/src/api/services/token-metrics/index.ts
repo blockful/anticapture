@@ -18,27 +18,19 @@
  * 1. **Forward-Fill for Missing Dates**
  *    - Carries forward previous values when no new data exists for a date
  *
- * 2. **Multiple Metric Types**
- *    - Handles comma-separated types in single request
- *    - Each type is processed and forward-filled independently
- *
- * 3. **No data before start date**
+ * 2. **No data before start date**
  *    - Returns data starting from first available data point
  */
 
 import { forwardFill, generateOrderedTimeline } from "@/lib/time-series";
 import { applyCursorPagination } from "@/lib/query-helpers";
 import {
-  truncateTimestampToMidnight,
   normalizeMapTimestamps,
   getEffectiveStartDate,
 } from "@/lib/date-helpers";
 import { TokenMetricsRepository } from "@/api/repositories/token-metrics";
-import {
-  TokenMetricsQuery,
-  TokenMetricItem,
-  TokenMetricsServiceResult,
-} from "@/api/mappers/token-metrics";
+import { TokenMetricItem } from "@/api/mappers/token-metrics";
+import { MetricTypesEnum } from "@/lib/constants";
 
 interface MetricData {
   high: bigint;
@@ -54,61 +46,10 @@ export class TokenMetricsService {
   constructor(private readonly repository: TokenMetricsRepository) {}
 
   /**
-   * Get metrics with forward-fill for multiple types
-   * Returns results keyed by metric type
-   */
-  async getMetrics(
-    filters: TokenMetricsQuery,
-  ): Promise<TokenMetricsServiceResult> {
-    const {
-      type: metricTypes,
-      startDate,
-      endDate,
-      orderDirection,
-      limit,
-      after,
-      before,
-    } = filters;
-
-    // Normalize all timestamps to midnight UTC
-    const normalizedStartDate = startDate
-      ? truncateTimestampToMidnight(startDate)
-      : undefined;
-    const normalizedEndDate = endDate
-      ? truncateTimestampToMidnight(endDate)
-      : undefined;
-    const normalizedAfter = after
-      ? truncateTimestampToMidnight(after)
-      : undefined;
-    const normalizedBefore = before
-      ? truncateTimestampToMidnight(before)
-      : undefined;
-
-    const result: TokenMetricsServiceResult = {};
-
-    // Process each metric type
-    for (const metricType of metricTypes) {
-      const typeResult = await this.getMetricsForType({
-        metricType,
-        startDate: normalizedStartDate,
-        endDate: normalizedEndDate,
-        orderDirection,
-        limit,
-        after: normalizedAfter,
-        before: normalizedBefore,
-      });
-
-      result[metricType] = typeResult;
-    }
-
-    return result;
-  }
-
-  /**
    * Get metrics for a single type with forward-fill
    */
-  private async getMetricsForType(params: {
-    metricType: string;
+  async getMetricsForType(params: {
+    metricType: MetricTypesEnum;
     startDate?: number;
     endDate?: number;
     orderDirection: "asc" | "desc";
@@ -141,7 +82,7 @@ export class TokenMetricsService {
 
     // 2. Fetch sparse data from repository
     const rows = await this.repository.getMetricsByDateRange({
-      metricTypes: [metricType],
+      metricType,
       startDate: referenceDate?.toString(),
       endDate: (before ?? endDate)?.toString(),
       orderDirection,

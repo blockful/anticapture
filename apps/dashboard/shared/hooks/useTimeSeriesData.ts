@@ -17,50 +17,35 @@ interface TokenMetricsItem {
 }
 
 interface TokenMetricsResponse {
-  additionalProperties: Array<{
-    key: string;
-    value: {
-      items: TokenMetricsItem[];
-      pageInfo: {
-        hasNextPage: boolean;
-        startDate: string | null;
-        endDate: string | null;
-      };
-    };
-  }>;
+  items: TokenMetricsItem[];
+  pageInfo: {
+    hasNextPage: boolean;
+    startDate: string | null;
+    endDate: string | null;
+  };
 }
 
-const fetchTimeSeries = async (
+const fetchSingleMetric = async (
   daoId: DaoIdEnum,
-  days: TimeInterval,
-  metricTypes: MetricTypesEnum[],
-): Promise<Record<MetricTypesEnum, TokenMetricItem[]>> => {
-  const startDate = Math.floor(
-    Date.now() / 1000 - DAYS_IN_SECONDS[days] - SECONDS_PER_DAY,
-  );
-
-  const typeArray = JSON.stringify(metricTypes);
+  metricType: MetricTypesEnum,
+  startDate: number,
+): Promise<TokenMetricItem[]> => {
   const query = `query TokenMetrics {
     tokenMetrics(
-      type: ${typeArray}
+      metricType: ${metricType}
       startDate: ${startDate}
       orderDirection: asc
       limit: 365
     ) {
-      additionalProperties {
-        key
-        value {
-          items {
-            date
-            high
-            volume
-          }
-          pageInfo {
-            hasNextPage
-            startDate
-            endDate
-          }
-        }
+      items {
+        date
+        high
+        volume
+      }
+      pageInfo {
+        hasNextPage
+        startDate
+        endDate
       }
     }
   }`;
@@ -71,9 +56,7 @@ const fetchTimeSeries = async (
     };
   }>(
     `${BACKEND_ENDPOINT}`,
-    {
-      query,
-    },
+    { query },
     {
       headers: {
         "Content-Type": "application/json",
@@ -82,23 +65,30 @@ const fetchTimeSeries = async (
     },
   );
 
-  const { tokenMetrics } = response.data.data;
+  return response.data.data.tokenMetrics.items;
+};
 
-  // Transform the response from additionalProperties array to Record<MetricTypesEnum, TokenMetricItem[]>
-  const metricsByType: Record<MetricTypesEnum, TokenMetricItem[]> =
-    {} as Record<MetricTypesEnum, TokenMetricItem[]>;
+const fetchTimeSeries = async (
+  daoId: DaoIdEnum,
+  days: TimeInterval,
+  metricTypes: MetricTypesEnum[],
+): Promise<Record<MetricTypesEnum, TokenMetricItem[]>> => {
+  const startDate = Math.floor(
+    Date.now() / 1000 - DAYS_IN_SECONDS[days] - SECONDS_PER_DAY,
+  );
 
-  // Initialize all requested metric types with empty arrays
-  for (const metricType of metricTypes) {
-    metricsByType[metricType] = [];
-  }
+  // Fetch all metric types in parallel
+  const results = await Promise.all(
+    metricTypes.map(async (metricType) => ({
+      metricType,
+      items: await fetchSingleMetric(daoId, metricType, startDate),
+    })),
+  );
 
-  // Map the additionalProperties array to the expected format
-  for (const entry of tokenMetrics.additionalProperties) {
-    const metricType = entry.key as MetricTypesEnum;
-    if (metricTypes.includes(metricType)) {
-      metricsByType[metricType] = entry.value.items;
-    }
+  // Transform results to Record<MetricTypesEnum, TokenMetricItem[]>
+  const metricsByType = {} as Record<MetricTypesEnum, TokenMetricItem[]>;
+  for (const { metricType, items } of results) {
+    metricsByType[metricType] = items;
   }
 
   return metricsByType;

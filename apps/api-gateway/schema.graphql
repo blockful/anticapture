@@ -1,5 +1,3 @@
-directive @dictionary(subgraph: String) on FIELD_DEFINITION
-
 directive @enum(subgraph: String, value: String) on ENUM_VALUE
 
 directive @resolveRoot(subgraph: String) on FIELD_DEFINITION
@@ -163,11 +161,10 @@ type Query {
   dao: dao_200_response
 
   """
-  Returns token related metrics.
-          Supports multiple metric types in a single request.
+  Returns token related metrics for a single metric type.
           Available types: TOTAL_SUPPLY, DELEGATED_SUPPLY, CEX_SUPPLY, DEX_SUPPLY, LENDING_SUPPLY, CIRCULATING_SUPPLY, TREASURY
   """
-  tokenMetrics(type: JSON!, startDate: Float, endDate: Float, orderDirection: queryInput_tokenMetrics_orderDirection = asc, limit: NonNegativeInt = 365, after: Float, before: Float): tokenMetrics_200_response
+  tokenMetrics(metricType: queryInput_tokenMetrics_metricType!, startDate: Float, endDate: Float, orderDirection: queryInput_tokenMetrics_orderDirection = asc, limit: NonNegativeInt = 365, after: Float, before: Float): tokenMetrics_200_response
 
   """
   Average delegation percentage across all supported DAOs by day.
@@ -2072,37 +2069,6 @@ type dao_200_response {
   timelockDelay: String!
 }
 
-type tokenMetrics_200_response {
-  additionalProperties: [query_tokenMetrics_additionalProperties_entry]
-}
-
-type query_tokenMetrics_additionalProperties_entry {
-  key: ID!
-  value: query_tokenMetrics_additionalProperties
-}
-
-type query_tokenMetrics_additionalProperties {
-  items: [query_tokenMetrics_additionalProperties_items_items]!
-  pageInfo: query_tokenMetrics_additionalProperties_pageInfo!
-}
-
-type query_tokenMetrics_additionalProperties_items_items {
-  date: String!
-  high: String!
-  volume: String!
-}
-
-type query_tokenMetrics_additionalProperties_pageInfo {
-  hasNextPage: Boolean!
-  startDate: String
-  endDate: String
-}
-
-enum queryInput_tokenMetrics_orderDirection {
-  asc
-  desc
-}
-
 scalar ObjMap
 
 enum HTTPMethod {
@@ -2115,6 +2081,38 @@ enum HTTPMethod {
   OPTIONS
   TRACE
   PATCH
+}
+
+type tokenMetrics_200_response {
+  items: [query_tokenMetrics_items_items]!
+  pageInfo: query_tokenMetrics_pageInfo!
+}
+
+type query_tokenMetrics_items_items {
+  date: String!
+  high: String!
+  volume: String!
+}
+
+type query_tokenMetrics_pageInfo {
+  hasNextPage: Boolean!
+  startDate: String
+  endDate: String
+}
+
+enum queryInput_tokenMetrics_metricType {
+  TOTAL_SUPPLY
+  DELEGATED_SUPPLY
+  CEX_SUPPLY
+  DEX_SUPPLY
+  LENDING_SUPPLY
+  CIRCULATING_SUPPLY
+  TREASURY
+}
+
+enum queryInput_tokenMetrics_orderDirection {
+  asc
+  desc
 }
 
 type AverageDelegationPercentageItem {
