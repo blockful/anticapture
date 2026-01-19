@@ -182,6 +182,7 @@ export class TokenMetricsService {
 
   /**
    * Apply forward-fill to create complete data series
+   * Volume is NOT forward-filled - days without activity have volume = 0.
    */
   private applyForwardFill(
     timeline: number[],
@@ -207,11 +208,6 @@ export class TokenMetricsService {
       normalizedHighMap,
       initialValue?.high,
     );
-    const filledVolume = forwardFill(
-      timeline,
-      normalizedVolumeMap,
-      initialValue?.volume,
-    );
 
     // Build result array
     return timeline
@@ -219,7 +215,7 @@ export class TokenMetricsService {
       .map((date) => ({
         date: date.toString(),
         high: (filledHigh.get(date) ?? 0n).toString(),
-        volume: (filledVolume.get(date) ?? 0n).toString(),
+        volume: (normalizedVolumeMap.get(date) ?? 0n).toString(),
       }));
   }
 }
