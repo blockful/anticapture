@@ -1,6 +1,6 @@
 import { z } from "@hono/zod-openapi";
 import { votesOnchain } from "ponder:schema";
-import { isAddress } from "viem";
+import { getAddress, isAddress } from "viem";
 
 export type DBVote = typeof votesOnchain.$inferSelect;
 
@@ -18,16 +18,29 @@ export const VotesRequestSchema = z.object({
     .max(1000, "Limit cannot exceed 1000")
     .optional()
     .default(10),
-  account: z.string().refine((val) => isAddress(val)),
-  sortBy: z.enum(["timestamp", "votingPower"]).default("timestamp").optional(),
-  sortOrder: z.enum(["asc", "desc"]).default("desc").optional(),
-  support: z.coerce.number().int().optional(),
+  voterAddressIn: z
+    .union([
+      z
+        .string()
+        .refine((val) => isAddress(val, { strict: false }))
+        .transform((val) => [getAddress(val)]),
+      z.array(
+        z
+          .string()
+          .refine((val) => isAddress(val, { strict: false }))
+          .transform((val) => getAddress(val)),
+      ),
+    ])
+    .optional(),
+  orderBy: z.enum(["timestamp", "votingPower"]).optional().default("timestamp"),
+  orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
+  support: z.coerce.number().int().optional(), // Support for the vote like For, Against, Abstain as number
 });
 
 export type VotesRequest = z.infer<typeof VotesRequestSchema>;
 
 export const VoteResponseSchema = z.object({
-  voter: z.string(),
+  voterAddress: z.string(),
   transactionHash: z.string(),
   proposalId: z.string(),
   support: z.number(),
@@ -48,7 +61,7 @@ export type VotesResponse = z.infer<typeof VotesResponseSchema>;
 export const VotesMapper = {
   toApi: (vote: DBVote): VoteResponse => {
     return {
-      voter: vote.voterAccountId,
+      voterAddress: vote.voterAccountId,
       transactionHash: vote.txHash,
       proposalId: vote.proposalId,
       support: Number(vote.support),

@@ -312,25 +312,28 @@ export class DrizzleRepository {
     proposalId: string,
     skip: number,
     limit: number,
-    sortBy: "timestamp" | "votingPower",
-    sortOrder: "asc" | "desc",
-    account: Address,
-    reason?: number,
+    orderBy: "timestamp" | "votingPower",
+    orderDirection: "asc" | "desc",
+    voterAddresses?: Address[],
+    support?: number,
   ): Promise<DBVote[]> {
     const whereClauses: SQL<unknown>[] = [
       eq(votesOnchain.proposalId, proposalId),
-      eq(votesOnchain.voterAccountId, account),
     ];
 
-    if (reason !== undefined) {
-      whereClauses.push(eq(votesOnchain.support, reason.toString()));
+    if (support !== undefined) {
+      whereClauses.push(eq(votesOnchain.support, support.toString()));
+    }
+
+    if (voterAddresses !== undefined && voterAddresses.length > 0) {
+      whereClauses.push(inArray(votesOnchain.voterAccountId, voterAddresses));
     }
 
     const orderByColumn =
-      sortBy === "votingPower"
+      orderBy === "votingPower"
         ? votesOnchain.votingPower
         : votesOnchain.timestamp;
-    const orderFn = sortOrder === "asc" ? asc : desc;
+    const orderFn = orderDirection === "asc" ? asc : desc;
 
     return await db
       .select()
@@ -343,16 +346,19 @@ export class DrizzleRepository {
 
   async getProposalVotesCount(
     proposalId: string,
-    account: Address,
+    voterAddressIn?: Address[],
     support?: number,
   ): Promise<number> {
     const whereClauses: SQL<unknown>[] = [
       eq(votesOnchain.proposalId, proposalId),
-      eq(votesOnchain.voterAccountId, account),
     ];
 
     if (support !== undefined) {
       whereClauses.push(eq(votesOnchain.support, support.toString()));
+    }
+
+    if (voterAddressIn !== undefined && voterAddressIn.length > 0) {
+      whereClauses.push(inArray(votesOnchain.voterAccountId, voterAddressIn));
     }
 
     return await db.$count(votesOnchain, and(...whereClauses));

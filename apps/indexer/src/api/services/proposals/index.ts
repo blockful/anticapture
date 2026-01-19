@@ -4,6 +4,7 @@ import {
   VotersResponse,
   VotesResponse,
   DBVote,
+  VotesMapper,
 } from "@/api/mappers";
 import { DAOClient } from "@/interfaces/client";
 import { ProposalStatus } from "@/lib/constants";
@@ -39,14 +40,14 @@ interface ProposalsRepository {
     proposalId: string,
     skip: number,
     limit: number,
-    sortBy: "timestamp" | "votingPower",
-    sortOrder: "asc" | "desc",
-    account?: Address,
+    orderBy: "timestamp" | "votingPower",
+    orderDirection: "asc" | "desc",
+    voterAddressIn?: Address[],
     support?: number,
   ): Promise<DBVote[]>;
   getProposalVotesCount(
     proposalId: string,
-    account?: Address,
+    voterAddressIn?: Address[],
     support?: number,
   ): Promise<number>;
 }
@@ -198,9 +199,9 @@ export class ProposalsService {
     proposalId: string,
     skip: number = 0,
     limit: number = 10,
-    sortBy: "timestamp" | "votingPower" = "timestamp",
-    sortOrder: "asc" | "desc" = "desc",
-    account?: Address,
+    orderBy: "timestamp" | "votingPower" = "timestamp",
+    orderDirection: "asc" | "desc" = "desc",
+    voterAddressIn?: Address[],
     support?: number,
   ): Promise<VotesResponse> {
     const [votes, totalCount] = await Promise.all([
@@ -208,25 +209,21 @@ export class ProposalsService {
         proposalId,
         skip,
         limit,
-        sortBy,
-        sortOrder,
-        account,
+        orderBy,
+        orderDirection,
+        voterAddressIn,
         support,
       ),
-      this.proposalsRepo.getProposalVotesCount(proposalId, account, support),
+      this.proposalsRepo.getProposalVotesCount(
+        proposalId,
+        voterAddressIn,
+        support,
+      ),
     ]);
 
     return {
       totalCount,
-      items: votes.map((vote) => ({
-        voter: vote.voterAccountId,
-        transactionHash: vote.txHash,
-        proposalId: vote.proposalId,
-        support: Number(vote.support),
-        votingPower: vote.votingPower.toString(),
-        reason: vote.reason || null,
-        timestamp: Number(vote.timestamp),
-      })),
+      items: votes.map(VotesMapper.toApi),
     };
   }
 }

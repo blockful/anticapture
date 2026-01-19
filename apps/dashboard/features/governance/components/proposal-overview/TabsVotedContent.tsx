@@ -83,10 +83,10 @@ export const TabsVotedContent = ({
   const columns: ColumnDef<VoteWithHistoricalPower>[] = useMemo(
     () => [
       {
-        accessorKey: "voterAccountId",
+        accessorKey: "voterAddress",
         size: 200,
         cell: ({ row }) => {
-          const voterAddress = row.getValue("voterAccountId") as string;
+          const voterAddress = row.getValue("voterAddress") as string;
           const vote = row.original;
 
           // Handle loading row
@@ -151,8 +151,8 @@ export const TabsVotedContent = ({
         accessorKey: "support",
         size: 120,
         cell: ({ row }) => {
-          const support = row.getValue("support") as string;
-          const voterAddress = row.getValue("voterAccountId") as string;
+          const support = row.getValue("support") as number;
+          const voterAddress = row.getValue("voterAddress") as string;
           const vote = row.original;
 
           // Handle loading row
@@ -184,19 +184,19 @@ export const TabsVotedContent = ({
             return <div className="flex h-10 items-center p-2" />;
           }
 
-          const getChoiceInfo = (support: string) => {
+          const getChoiceInfo = (support: number) => {
             switch (support) {
-              case "1":
+              case 1:
                 return {
                   label: "For",
                   icon: <CheckCircle2 className="text-success size-4" />,
                 };
-              case "0":
+              case 0:
                 return {
                   label: "Against",
                   icon: <XCircle className="text-error size-4" />,
                 };
-              case "2":
+              case 2:
                 return {
                   label: "Abstain",
                   icon: <CircleMinus className="text-secondary size-4" />,
@@ -235,7 +235,7 @@ export const TabsVotedContent = ({
         size: 120,
         cell: ({ row }) => {
           const timestamp = row.getValue("timestamp") as string;
-          const voterAddress = row.getValue("voterAccountId") as string;
+          const voterAddress = row.getValue("voterAddress") as string;
           const vote = row.original;
 
           // Handle loading row
@@ -310,7 +310,7 @@ export const TabsVotedContent = ({
         size: 160,
         cell: ({ row }) => {
           const votingPower = row.getValue("votingPower") as string;
-          const voterAddress = row.getValue("voterAccountId") as string;
+          const voterAddress = row.getValue("voterAddress") as string;
           const vote = row.original;
 
           // Handle loading row
@@ -392,7 +392,7 @@ export const TabsVotedContent = ({
         accessorKey: "historicalVotingPower",
         size: 160,
         cell: ({ row }) => {
-          const voterAddress = row.getValue("voterAccountId") as string;
+          const voterAddress = row.getValue("voterAddress") as string;
           const historicalVotingPower = row.getValue(
             "historicalVotingPower",
           ) as string | undefined;
@@ -502,14 +502,13 @@ export const TabsVotedContent = ({
       // Add description row if the vote has a reason
       if (vote.reason && vote.reason.trim() !== "") {
         data.push({
-          voterAccountId: `__DESCRIPTION_${vote.voterAccountId}__`,
-          txHash: "",
-          daoId: vote.daoId,
+          voterAddress: `__DESCRIPTION_${vote.voterAddress}__`,
+          transactionHash: "",
           proposalId: vote.proposalId,
-          support: "",
+          support: 0,
           votingPower: "",
           reason: vote.reason,
-          timestamp: "",
+          timestamp: 0,
           historicalVotingPower: undefined,
           isSubRow: true,
         } as VoteWithHistoricalPower);
@@ -519,14 +518,13 @@ export const TabsVotedContent = ({
     // Add loading row if there are more pages or currently loading
     if (hasNextPage || isLoadingMore) {
       data.push({
-        voterAccountId: "__LOADING_ROW__",
-        txHash: "",
-        daoId: "",
+        voterAddress: "__LOADING_ROW__",
+        transactionHash: "",
         proposalId: "",
-        support: "",
+        support: 0,
         votingPower: "",
         reason: "",
-        timestamp: "",
+        timestamp: 0,
         historicalVotingPower: undefined,
         isSubRow: false,
       } as VoteWithHistoricalPower);
@@ -539,8 +537,7 @@ export const TabsVotedContent = ({
   const hasValidData =
     votes.length > 0 &&
     votes.some(
-      (vote) =>
-        vote.voterAccountId && vote.voterAccountId !== "__LOADING_ROW__",
+      (vote) => vote.voterAddress && vote.voterAddress !== "__LOADING_ROW__",
     );
 
   if (error) {

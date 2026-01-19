@@ -193,16 +193,16 @@ export function proposals(
     }),
     async (context) => {
       const { id } = context.req.valid("param");
-      const { skip, limit, account, sortBy, sortOrder, support } =
+      const { skip, limit, voterAddressIn, orderBy, orderDirection, support } =
         context.req.valid("query");
 
       const { totalCount, items } = await service.getProposalVotes(
         id,
         skip,
         limit,
-        sortBy,
-        sortOrder,
-        account,
+        orderBy,
+        orderDirection,
+        voterAddressIn,
         support,
       );
 

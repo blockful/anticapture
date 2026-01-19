@@ -55,6 +55,39 @@ query GetProposal($id: String!) {
   }
 }
 
+#  Get proposal votes
+query GetProposalVotes(
+  $proposalId: String!
+  $limit: PositiveInt
+  $orderBy: queryInput_proposalVotes_orderBy = timestamp
+  $orderDirection: queryInput_proposalVotes_orderDirection = desc
+) {
+  proposalVotes(
+    limit: $limit
+    id: $proposalId
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+  ) {
+    totalCount
+    items {
+      voterAddress
+      transactionHash
+      proposalId
+      support
+      votingPower
+      reason
+      timestamp
+    }
+  }
+}
+
+#  Get proposal votes
+query GetProposalVotesTotalCount($proposalId: String!) {
+  proposalVotes(id: $proposalId) {
+    totalCount
+  }
+}
+
 # Get voting power change
 query GetVotingPowerChange(
   $addresses: JSON!

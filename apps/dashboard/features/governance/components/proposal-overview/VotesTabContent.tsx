@@ -8,7 +8,7 @@ import { TabsVotedContent } from "@/features/governance/components/proposal-over
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useParams } from "next/navigation";
 import {
-  useGetVotesOnchainsTotalCountQuery,
+  useGetProposalVotesTotalCountQuery,
   useGetProposalNonVotersQuery,
 } from "@anticapture/graphql-client/hooks";
 import { formatUnits } from "viem";
@@ -29,7 +29,7 @@ export const VotesTabContent = ({
   const TabsContent = TabsContentMapping[activeTab];
 
   // Get votes for this proposal
-  const { data } = useGetVotesOnchainsTotalCountQuery({
+  const { data } = useGetProposalVotesTotalCountQuery({
     variables: {
       proposalId: proposal.id,
     },
@@ -76,7 +76,7 @@ export const VotesTabContent = ({
         >
           Voted
           <div className="text-secondary font-inter hidden text-[12px] font-medium not-italic leading-[16px] lg:block">
-            {data?.votesOnchains?.totalCount} voters / {totalVotes} VP
+            {data?.proposalVotes?.totalCount} voters / {totalVotes} VP
           </div>
         </div>
         <div
