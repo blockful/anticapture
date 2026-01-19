@@ -8,14 +8,14 @@ import {
 import { variantStyles } from "@/shared/components/design-system/buttons/styles";
 
 const sizeStyles: Record<ButtonSize, string> = {
-  lg: "py-1 px-2",
-  lg: "py-2 px-4",
+  sm: "py-1 px-2",
+  md: "py-2 px-4",
   lg: "py-3 px-6",
 };
 
 const iconSizeStyles: Record<ButtonSize, string> = {
-  lg: "size-3.5", // 14px
-  lg: "size-3.5", // 14px
+  sm: "size-3.5", // 14px
+  md: "size-3.5", // 14px
   lg: "size-4", // 16px
 };
 
