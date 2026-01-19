@@ -43,12 +43,6 @@ export const OP: DaoConfiguration = {
   },
   attackProfitability: {
     riskLevel: RiskLevel.LOW,
-    supportsLiquidTreasuryCall: false,
-    attackCostBarChart: {
-      OptimismTimelock: "",
-      OptimismTokenDistributor: "",
-      OptimismUniv3Uni: "",
-    },
     dynamicQuorum: {
       percentage: 0.3,
     },

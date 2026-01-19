@@ -28,19 +28,25 @@ export default processConfig(
               },
               transforms: [
                 {
-                  rename: {
-                    renames: [
-                      {
-                        from: {
-                          type: "Query",
-                          field: "transactions",
-                        },
-                        to: {
-                          type: "Query",
-                          field: "_",
-                        },
-                      },
-                    ],
+                  filterSchema: {
+                    filters: [
+                      "Query.!{accountPowers}",
+                      "Query.!{accountPower}",
+                      "Query.!{accounts}",
+                      "Query.!{account}",
+                      "Query.!{proposalsOnchains}",
+                      "Query.!{proposalsOnchain}",
+                      "Query.!{tokenPrices}",
+                      "Query.!{tokenPrice}",
+                      "Query.!{transactions}",
+                      "Query.!{transaction}",
+                      "Query.!{transfers}",
+                      "Query.!{transfer}",
+                      "Query.!{votingPowerHistory}",
+                      'Query.!{accountBalances}',
+                      'Query.!{accountBalance}',
+                      // 'Query.!{votingPowerHistorys}' FIXME: Leave endpoint active for now as it is still used by the notification bot
+                    ]
                   },
                 },
               ],
@@ -57,7 +63,7 @@ export default processConfig(
           ];
         }),
     ],
-    additionalTypeDefs:`
+    additionalTypeDefs: `
       type AverageDelegationPercentageItem {
         date: String!
         high: String!

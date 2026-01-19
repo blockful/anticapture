@@ -1,5 +1,8 @@
 const daoItemQueries = [
-  'accountInteractions',
+  "accountBalanceByAccountId",
+  "accountBalanceVariations",
+  "accountBalances",
+  "accountInteractions",
   "compareActiveSupply",
   "compareAverageTurnout",
   "compareCexSupply",
@@ -11,23 +14,28 @@ const daoItemQueries = [
   "compareTotalSupply",
   "compareTreasury",
   "compareVotes",
+  "dao",
+  "delegationPercentageByDay",
+  "getDaoTokenTreasury",
+  "getLiquidTreasury",
   "getTotalAssets",
+  "getTotalTreasury",
   "getVotingPower",
-  "historicalTokenData",
-  "proposalsActivity",
   "historicalBalances",
-  "historicalVotingPower",
-  "proposals",
-  "transactions",
+  "historicalTokenData",
+  "historicalVotingPowers",
   "lastUpdate",
   "proposal",
-  "votingPowers",
   "proposalNonVoters",
+  "proposals",
+  "proposalsActivity",
   "token",
-  "votingPowerVariations",
-  "accountBalanceVariations",
-  "delegationPercentageByDay",
-  "dao",
+  "transactions",
+  "transfers",
+  "votingPowerByAccountId",
+  "topVotingPowerVariations",
+  "votingPowerVariationsByAccountId",
+  "votingPowers",
 ];
 
 export const restResolvers = daoItemQueries.reduce((acc, fieldName) => {
@@ -52,13 +60,13 @@ export const restResolvers = daoItemQueries.reduce((acc, fieldName) => {
       const targetClient = context[`rest_${daoId.toUpperCase()}`]?.Query;
       if (!targetClient) {
         throw new Error(
-          `DAO "${daoId}" is not configured. Please set DAO_API_${daoId.toUpperCase()} environment variable.`
+          `DAO "${daoId}" is not configured. Please set DAO_API_${daoId.toUpperCase()} environment variable.`,
         );
       }
 
       if (typeof targetClient[fieldName] !== "function") {
         throw new Error(
-          `Endpoint "${fieldName}" is not available for DAO "${daoId}". The DAO API may not support this query.`
+          `Endpoint "${fieldName}" is not available for DAO "${daoId}". The DAO API may not support this query.`,
         );
       }
 

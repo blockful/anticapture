@@ -1,11 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
 import { Footer } from "@/shared/components/design-system/footer/Footer";
+import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta = {
   title: "Design System/Layout/Footer",
   component: Footer,
   parameters: {
     layout: "fullscreen",
+    design: getFigmaDesignConfigByNodeId("10339-57793"),
   },
   tags: ["autodocs"],
   argTypes: {
