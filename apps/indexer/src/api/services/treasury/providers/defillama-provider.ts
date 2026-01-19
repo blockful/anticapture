@@ -3,6 +3,7 @@ import { TreasuryProvider } from "./treasury-provider.interface";
 import { LiquidTreasuryDataPoint } from "../types";
 import { truncateTimestampToMidnight } from "@/lib/date-helpers";
 import { filterWithFallback } from "@/lib/query-helpers";
+import { TreasuryProviderCache } from "./provider-cache";
 
 interface RawDefiLlamaResponse {
   chainTvls: Record<
@@ -19,26 +20,29 @@ interface RawDefiLlamaResponse {
 }
 
 export class DefiLlamaProvider implements TreasuryProvider {
+  private readonly cache = new TreasuryProviderCache();
   private readonly client: AxiosInstance;
-  private readonly providerDaoId: string;
 
-  constructor(client: AxiosInstance, providerDaoId: string) {
+  constructor(client: AxiosInstance) {
     this.client = client;
-    this.providerDaoId = providerDaoId;
   }
 
   async fetchTreasury(
     cutoffTimestamp: number,
   ): Promise<LiquidTreasuryDataPoint[]> {
-    try {
-      const response = await this.client.get<RawDefiLlamaResponse>(
-        `/${this.providerDaoId}`,
-      );
+    const cached = this.cache.get();
 
-      return this.transformData(response.data, cutoffTimestamp);
+    if (cached !== null) return filterWithFallback(cached, cutoffTimestamp);
+
+    try {
+      const response = await this.client.get<RawDefiLlamaResponse>(`/`);
+      const data = this.transformData(response.data);
+      this.cache.set(data);
+
+      return filterWithFallback(data, cutoffTimestamp);
     } catch (error) {
       console.error(
-        `[DefiLlamaProvider] Failed to fetch treasury data for ${this.providerDaoId}:`,
+        `[DefiLlamaProvider] Failed to fetch treasury data:`,
         error,
       );
       return [];
@@ -50,7 +54,6 @@ export class DefiLlamaProvider implements TreasuryProvider {
    */
   private transformData(
     rawData: RawDefiLlamaResponse,
-    cutoffTimestamp: number,
   ): LiquidTreasuryDataPoint[] {
     const { chainTvls } = rawData;
 
@@ -113,13 +116,11 @@ export class DefiLlamaProvider implements TreasuryProvider {
     }
 
     // Convert map to array and format
-    const allData = Array.from(aggregatedByDate.entries())
+    return Array.from(aggregatedByDate.entries())
       .map(([dayTimestamp, values]) => ({
         date: dayTimestamp,
         liquidTreasury: values.withoutOwnToken, // Liquid Treasury
       }))
       .sort((a, b) => a.date - b.date); // Sort by timestamp ascending
-
-    return filterWithFallback(allData, cutoffTimestamp);
   }
 }
