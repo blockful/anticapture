@@ -89,6 +89,9 @@ type Query {
   """Returns the active delegates that did not vote on a given proposal"""
   proposalNonVoters(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposalNonVoters_orderDirection = desc, addresses: JSON): proposalNonVoters_200_response
 
+  """Returns a paginated list of votes cast on a specific proposal"""
+  proposalVotes(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, account: String!, sortBy: queryInput_proposalVotes_sortBy = timestamp, sortOrder: queryInput_proposalVotes_sortOrder = desc, support: Int): proposalVotes_200_response
+
   """
   Fetch historical token balances for multiple addresses at a specific time period using multicall
   """
@@ -1738,6 +1741,31 @@ type query_proposalNonVoters_items_items {
 }
 
 enum queryInput_proposalNonVoters_orderDirection {
+  asc
+  desc
+}
+
+type proposalVotes_200_response {
+  items: [query_proposalVotes_items_items]!
+  totalCount: Float!
+}
+
+type query_proposalVotes_items_items {
+  voter: String!
+  transactionHash: String!
+  proposalId: String!
+  support: Float!
+  votingPower: String!
+  reason: String
+  timestamp: Float!
+}
+
+enum queryInput_proposalVotes_sortBy {
+  timestamp
+  votingPower
+}
+
+enum queryInput_proposalVotes_sortOrder {
   asc
   desc
 }
