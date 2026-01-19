@@ -21,13 +21,13 @@ const ConditionalPostHog = () => {
             console.log("PostHog loaded");
           } else {
             setShouldLoadPostHog(false);
-            // If consent expired or user declined, remove any existing PostHog
+            // If consent expired or user declined, opt out of PostHog tracking
             if (typeof window !== "undefined") {
               const windowWithPostHog = window as typeof window & {
-                posthog?: unknown;
+                posthog?: { opt_out_capturing: () => void };
               };
-              if (windowWithPostHog.posthog) {
-                delete windowWithPostHog.posthog;
+              if (windowWithPostHog.posthog?.opt_out_capturing) {
+                windowWithPostHog.posthog.opt_out_capturing();
               }
             }
           }

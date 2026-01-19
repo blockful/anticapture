@@ -65,8 +65,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           name="viewport"
           content="width=device-width, initial-scale=1, viewport-fit=cover"
         />
-        <ConditionalPostHog />
-        <UmamiScript />
       </head>
       <body
         className={`${inter.className} ${roboto.variable} overflow-x-hidden xl:overflow-hidden`}
@@ -76,6 +74,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <CookieConsent />
         </GlobalProviders>
         <Toaster position="bottom-left" reverseOrder={false} />
+        <ConditionalPostHog />
+        <UmamiScript />
       </body>
     </html>
   );
