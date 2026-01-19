@@ -42,7 +42,7 @@ export const COMP: DaoConfiguration = {
   },
   attackProfitability: {
     riskLevel: RiskLevel.HIGH,
-    supportsLiquidTreasuryCall: false,
+    supportsLiquidTreasuryCall: true,
     liquidTreasury: {
       date: (Date.now() / 1000).toString(),
       totalAssets: "150000000.00000000",
