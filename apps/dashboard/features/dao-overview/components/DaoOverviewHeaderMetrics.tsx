@@ -90,11 +90,17 @@ const getTreasuryMetrics = (
     );
   }
 
+  console.log(liquidTreasuryNonDaoValueFormatted);
+
   return (
     <DaoOverviewMetricCard
       title="Treasury"
       text={`$${liquidTreasuryAllValueFormatted} (${liquidTreasuryAllPercent}% in ${daoId})`}
-      subText={`$${liquidTreasuryNonDaoValueFormatted} not counting ${daoId}`}
+      subText={
+        liquidTreasuryNonDaoValueFormatted !== "0"
+          ? `$${liquidTreasuryNonDaoValueFormatted} not counting ${daoId}`
+          : undefined
+      }
       isLoading={isLoading}
     />
   );
