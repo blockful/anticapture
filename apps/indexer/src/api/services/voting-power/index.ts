@@ -29,12 +29,12 @@ interface HistoricalVotingPowerRepository {
 
 interface VotingPowersRepository {
   getVotingPowerVariations(
-    addresses: Address[],
     startTimestamp: number,
     endTimestamp: number,
-    limit: number,
     skip: number,
+    limit: number,
     orderDirection: "asc" | "desc",
+    addresses?: Address[],
   ): Promise<DBVotingPowerVariation[]>;
 
   getVotingPowerVariationsByAccountId(
@@ -105,12 +105,46 @@ export class VotingPowerService {
     limit: number,
     orderDirection: "asc" | "desc",
   ): Promise<DBVotingPowerVariation[]> {
+    const variations =
+      await this.votingPowerRepository.getVotingPowerVariations(
+        startTimestamp,
+        endTimestamp,
+        skip,
+        limit,
+        orderDirection,
+        addresses,
+      );
+
+    return addresses.map((address) => {
+      const dbVariation = variations.find(
+        (variation) => variation.accountId === address,
+      );
+
+      if (dbVariation) return dbVariation;
+
+      // handling addresses that have no delegations
+      return {
+        accountId: address,
+        previousVotingPower: 0n,
+        currentVotingPower: 0n,
+        absoluteChange: 0n,
+        percentageChange: "0",
+      };
+    });
+  }
+
+  async getTopVotingPowerVariations(
+    startTimestamp: number,
+    endTimestamp: number,
+    skip: number,
+    limit: number,
+    orderDirection: "asc" | "desc",
+  ): Promise<DBVotingPowerVariation[]> {
     return this.votingPowerRepository.getVotingPowerVariations(
-      addresses,
       startTimestamp,
       endTimestamp,
-      limit,
       skip,
+      limit,
       orderDirection,
     );
   }

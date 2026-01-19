@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { VotesTable } from "@/features/governance/components/proposal-overview/VotesTable";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 
 export const TabsVotedContent = ({
   proposal,
@@ -137,6 +138,10 @@ export const TabsVotedContent = ({
                 variant="rounded"
                 showName={true}
                 isDashed={true}
+              />
+              <CopyAndPasteButton
+                className="size-2"
+                textToCopy={voterAddress}
               />
             </div>
           );
@@ -432,8 +437,6 @@ export const TabsVotedContent = ({
 
           // If no historical voting power data yet, show loading state
           if (!votingPowerVariation) {
-            console.log(voterAddress, { row: row.original });
-
             return (
               <div className="flex h-10 items-center p-2">
                 <span className="text-secondary text-sm">Loading...</span>
@@ -472,7 +475,7 @@ export const TabsVotedContent = ({
                 >
                   {votingPowerVariation.percentageChange === "NO BASELINE"
                     ? ">1000%"
-                    : `${votingPowerVariation.percentageChange}%`}
+                    : `${Number(votingPowerVariation.percentageChange).toFixed(2)}%`}
                 </span>
               </div>
             </div>

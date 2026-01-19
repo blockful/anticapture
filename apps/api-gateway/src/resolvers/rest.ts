@@ -33,7 +33,7 @@ const daoItemQueries = [
   "transactions",
   "transfers",
   "votingPowerByAccountId",
-  "votingPowerVariations",
+  "topVotingPowerVariations",
   "votingPowerVariationsByAccountId",
   "votingPowers",
 ];

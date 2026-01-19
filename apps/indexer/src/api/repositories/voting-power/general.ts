@@ -130,68 +130,82 @@ export class VotingPowerRepository {
   }
 
   async getVotingPowerVariations(
-    addresses: Address[],
     startTimestamp: number,
     endTimestamp: number,
-    limit: number,
     skip: number,
+    limit: number,
     orderDirection: "asc" | "desc",
+    addresses?: Address[],
   ): Promise<DBVotingPowerVariation[]> {
-    const history = db
+    const orderDirectionFn = orderDirection === "asc" ? asc : desc;
+
+    const latestBeforeFrom = db
       .select({
-        delta: votingPowerHistory.delta,
         accountId: votingPowerHistory.accountId,
+        votingPower: votingPowerHistory.votingPower,
+        rn: sql<number>`ROW_NUMBER() OVER (
+        PARTITION BY ${votingPowerHistory.accountId} 
+        ORDER BY ${votingPowerHistory.timestamp} DESC, ${votingPowerHistory.logIndex} DESC
+      )`.as("rn"),
       })
       .from(votingPowerHistory)
-      .orderBy(desc(votingPowerHistory.timestamp))
       .where(
         and(
-          gte(votingPowerHistory.timestamp, BigInt(startTimestamp)),
-          lte(votingPowerHistory.timestamp, BigInt(endTimestamp)),
-          addresses.length
+          addresses
             ? inArray(votingPowerHistory.accountId, addresses)
             : undefined,
+          lt(votingPowerHistory.timestamp, BigInt(startTimestamp)),
         ),
       )
-      .as("history");
+      .as("latest_before_from");
 
-    const aggregate = db
+    const latestBeforeTo = db
       .select({
-        accountId: history.accountId,
-        absoluteChange: sql<bigint>`SUM(${history.delta})`.as("agg_delta"),
-        currentVotingPower: accountPower.votingPower,
+        accountId: votingPowerHistory.accountId,
+        votingPower: votingPowerHistory.votingPower,
+        rn: sql<number>`ROW_NUMBER() OVER (
+        PARTITION BY ${votingPowerHistory.accountId} 
+        ORDER BY ${votingPowerHistory.timestamp} DESC, ${votingPowerHistory.logIndex} DESC
+      )`.as("rn"),
       })
-      .from(history)
-      .innerJoin(accountPower, eq(accountPower.accountId, history.accountId))
-      .groupBy(history.accountId, accountPower.votingPower)
-      .as("aggregate");
+      .from(votingPowerHistory)
+      .where(
+        and(
+          addresses
+            ? inArray(votingPowerHistory.accountId, addresses)
+            : undefined,
+          lte(votingPowerHistory.timestamp, BigInt(endTimestamp)),
+        ),
+      )
+      .as("latest_before_to");
 
-    const result = await db
-      .select()
-      .from(aggregate)
+    return await db
+      .select({
+        accountId: sql<Address>`COALESCE(from_data.account_id, to_data.account_id)`,
+        previousVotingPower: sql<bigint>`COALESCE(from_data.voting_power, 0)`,
+        currentVotingPower: sql<bigint>`COALESCE(to_data.voting_power, 0)`,
+        absoluteChange: sql<bigint>`(COALESCE(to_data.voting_power, 0) - COALESCE(from_data.voting_power, 0))`,
+        percentageChange: sql<string>`
+        CASE 
+          WHEN COALESCE(from_data.voting_power, 0) = 0 THEN 
+            CASE WHEN COALESCE(to_data.voting_power, 0) = 0 THEN '0' ELSE 'Infinity' END
+          ELSE 
+            (((COALESCE(to_data.voting_power, 0) - from_data.voting_power)::numeric / from_data.voting_power::numeric) * 100)::text
+        END
+      `,
+      })
+      .from(sql`(SELECT * FROM ${latestBeforeFrom} WHERE rn = 1) as from_data`)
+      .fullJoin(
+        sql`(SELECT * FROM ${latestBeforeTo} WHERE rn = 1) as to_data`,
+        sql`from_data.account_id = to_data.account_id`,
+      )
       .orderBy(
-        orderDirection === "desc"
-          ? desc(sql`ABS(${aggregate.absoluteChange})`)
-          : asc(sql`ABS(${aggregate.absoluteChange})`),
+        orderDirectionFn(
+          sql<bigint>`ABS(COALESCE(to_data.voting_power, 0) - COALESCE(from_data.voting_power, 0))`,
+        ),
       )
       .limit(limit)
       .offset(skip);
-
-    return result.map(({ accountId, currentVotingPower, absoluteChange }) => {
-      const numericAbsoluteChange = BigInt(absoluteChange);
-      const oldVotingPower = currentVotingPower - numericAbsoluteChange;
-      const percentageChange = oldVotingPower
-        ? Number((numericAbsoluteChange * 10000n) / oldVotingPower) / 100
-        : 0;
-
-      return {
-        accountId: accountId,
-        previousVotingPower: currentVotingPower - numericAbsoluteChange,
-        currentVotingPower: currentVotingPower,
-        absoluteChange: numericAbsoluteChange,
-        percentageChange: percentageChange,
-      };
-    });
   }
 
   async getVotingPowerVariationsByAccountId(
@@ -234,8 +248,10 @@ export class VotingPowerRepository {
     const currentVotingPower = currentAccountPower.currentVotingPower;
     const oldVotingPower = currentVotingPower - numericAbsoluteChange;
     const percentageChange = oldVotingPower
-      ? Number((numericAbsoluteChange * 10000n) / oldVotingPower) / 100
-      : 0;
+      ? (
+          Number((numericAbsoluteChange * 10000n) / oldVotingPower) / 100
+        ).toFixed(2)
+      : "0";
 
     return {
       accountId: accountId,

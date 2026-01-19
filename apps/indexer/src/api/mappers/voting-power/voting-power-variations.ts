@@ -6,17 +6,7 @@ import { accountPower } from "ponder:schema";
 import { PERCENTAGE_NO_BASELINE } from "../constants";
 import { PeriodResponseSchema, TimestampResponseMapper } from "../shared";
 
-export const VotingPowerVariationsRequestSchema = z.object({
-  addresses: z
-    .union([
-      z
-        .string()
-        .refine(isAddress, "Invalid address")
-        .transform((addr) => [addr]),
-      z.array(z.string().refine(isAddress, "Invalid addresses")),
-    ])
-    .optional()
-    .transform((val) => val ?? []),
+export const VotingPowerVariationsByAccountIdRequestSchema = z.object({
   fromDate: z
     .string()
     .optional()
@@ -31,44 +21,38 @@ export const VotingPowerVariationsRequestSchema = z.object({
     .transform((val) =>
       Number(val ?? Math.floor(Date.now() / 1000).toString()),
     ),
-  limit: z.coerce
-    .number()
-    .int()
-    .min(1, "Limit must be a positive integer")
-    .max(100, "Limit cannot exceed 100")
-    .optional()
-    .default(20),
-  skip: z.coerce
-    .number()
-    .int()
-    .min(0, "Skip must be a non-negative integer")
-    .optional()
-    .default(0),
-  orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
 });
 
-export const VotingPowerVariationsByAccountIdRequestSchema = z.object({
-  fromDate: z
-    .string()
-    .optional()
-    .transform((val) =>
-      Number(
-        val !== undefined
-          ? val
-          : (Math.floor(Date.now() / 1000) - DaysEnum["90d"]).toString(),
-      ),
-    ),
-  toDate: z
-    .string()
-    .optional()
-    .transform((val) =>
-      Number(
-        val !== undefined
-          ? val
-          : (Math.floor(Date.now() / 1000) - DaysEnum["90d"]).toString(),
-      ),
-    ),
-});
+export const TopVotingPowerVariationsRequestSchema = z
+  .object({
+    limit: z.coerce
+      .number()
+      .int()
+      .min(1, "Limit must be a positive integer")
+      .max(100, "Limit cannot exceed 100")
+      .optional()
+      .default(10),
+    skip: z.coerce
+      .number()
+      .int()
+      .min(0, "Skip must be a non-negative integer")
+      .optional()
+      .default(0),
+    orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
+  })
+  .extend(VotingPowerVariationsByAccountIdRequestSchema.shape);
+
+export const VotingPowerVariationsRequestSchema = z
+  .object({
+    addresses: z.union([
+      z
+        .string()
+        .refine(isAddress, "Invalid address")
+        .transform((addr) => [addr]),
+      z.array(z.string().refine(isAddress, "Invalid addresses")),
+    ]),
+  })
+  .extend(TopVotingPowerVariationsRequestSchema.shape);
 
 export const VotingPowersRequestSchema = z.object({
   limit: z.coerce
@@ -98,7 +82,7 @@ export const VotingPowersRequestSchema = z.object({
       z.array(z.string().refine(isAddress, "Invalid addresses")),
     ])
     .optional()
-    .transform((val) => (val === undefined ? [] : val)),
+    .transform((val) => val ?? []),
   fromValue: z
     .string()
     .transform((val) => BigInt(val))
@@ -161,7 +145,7 @@ export type DBVotingPowerVariation = {
   previousVotingPower: bigint;
   currentVotingPower: bigint;
   absoluteChange: bigint;
-  percentageChange: number;
+  percentageChange: string;
 };
 
 export type DBAccountPower = typeof accountPower.$inferSelect;
@@ -173,9 +157,10 @@ export const VotingPowerVariationResponseMapper = (
   previousVotingPower: delta.previousVotingPower?.toString(),
   currentVotingPower: delta.currentVotingPower.toString(),
   absoluteChange: delta.absoluteChange.toString(),
-  percentageChange: delta.previousVotingPower
-    ? delta.percentageChange.toString()
-    : PERCENTAGE_NO_BASELINE,
+  percentageChange:
+    delta.percentageChange === "Infinity"
+      ? PERCENTAGE_NO_BASELINE
+      : delta.percentageChange,
 });
 
 export const VotingPowerVariationsMapper = (
