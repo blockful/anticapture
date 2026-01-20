@@ -89,7 +89,7 @@ export const HeaderDAOSidebarDropdown = () => {
       ref={dropdownRef}
       onMouseLeave={() => setIsOpen(false)}
     >
-      <div className="flex h-full items-center justify-between px-3.5 py-3.5 lg:p-2">
+      <div className="flex h-full items-center justify-between px-2 py-2">
         <Button
           variant="ghost"
           size="sm"
@@ -100,12 +100,12 @@ export const HeaderDAOSidebarDropdown = () => {
         >
           <div className="flex w-full items-center gap-2">
             <div>{currentItem?.icon}</div>
-            <p className="text-primary whitespace-nowrap text-[18px] font-medium leading-6 opacity-0 transition-all group-hover:block group-hover:opacity-100">
+            <p className="text-inverted whitespace-nowrap text-[18px] font-medium leading-6">
               {currentItem?.label}
             </p>
           </div>
           <div>
-            <ChevronsUpDown className="text-secondary size-5 opacity-0 transition-all duration-300 group-hover:rotate-180 group-hover:opacity-100" />
+            <ChevronsUpDown className="text-secondary size-5 transition-all duration-300" />
           </div>
         </Button>
       </div>

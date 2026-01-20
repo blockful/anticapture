@@ -14,7 +14,6 @@ interface ButtonHeaderSidebarProps extends ButtonHTMLAttributes<
   className?: string;
   isGlobal?: boolean;
   isAction?: boolean;
-  isDaoNavigation?: boolean;
 }
 
 export const ButtonHeaderSidebar = ({
@@ -24,7 +23,6 @@ export const ButtonHeaderSidebar = ({
   className,
   isGlobal = false,
   isAction = false,
-  isDaoNavigation = false,
   onClick,
   ...props
 }: ButtonHeaderSidebarProps) => {
@@ -66,10 +64,10 @@ export const ButtonHeaderSidebar = ({
   }
 
   const baseClassName = cn(
-    "group flex w-full cursor-pointer items-center gap-3 rounded-md border border-transparent p-2 text-sm font-medium",
+    "flex h-[33px] w-full cursor-pointer items-center gap-2 px-2 py-2 text-sm font-medium",
     {
-      "cursor-default bg-white": isActive,
-      "hover:border-light-dark hover:bg-surface-contrast": !isActive,
+      "bg-surface-default text-inverted": isActive,
+      "bg-surface-background text-secondary": !isActive,
     },
     className,
   );
@@ -79,16 +77,15 @@ export const ButtonHeaderSidebar = ({
       <Icon
         className={cn("size-4 shrink-0", {
           "text-inverted": isActive,
-          "text-secondary group-hover:text-primary": !isActive,
+          "text-secondary": !isActive,
         })}
       />
       <p
         className={cn(
-          "whitespace-nowrap transition-all group-hover:block group-hover:opacity-100",
+          "flex-1 whitespace-pre-wrap text-[14px] font-medium leading-[20px]",
           {
-            "opacity-0 group-hover:opacity-100": !isDaoNavigation,
             "text-inverted": isActive,
-            "text-secondary group-hover:text-primary": !isActive,
+            "text-secondary": !isActive,
           },
         )}
       >
