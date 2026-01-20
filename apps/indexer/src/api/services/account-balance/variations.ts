@@ -7,7 +7,17 @@ import { Address } from "viem";
 
 interface AccountBalanceRepository {
   getAccountBalanceVariations(
-    startTimestamp: number,
+    fromTimestamp: number,
+    toTimestamp: number,
+    limit: number,
+    skip: number,
+    orderDirection: "asc" | "desc",
+  ): Promise<DBAccountBalanceVariation[]>;
+
+  getAccountBalanceVariationsByAccountId(
+    address: Address,
+    fromTimestamp: number,
+    toTimestamp: number,
     limit: number,
     skip: number,
     orderDirection: "asc" | "desc",
@@ -17,7 +27,8 @@ interface AccountBalanceRepository {
 interface AccountInteractionsRepository {
   getAccountInteractions(
     accountId: Address,
-    startTimestamp: number,
+    fromTimestamp: number,
+    toTimestamp: number,
     limit: number,
     skip: number,
     orderBy: "volume" | "count",
@@ -30,16 +41,36 @@ export class BalanceVariationsService {
   constructor(
     private readonly balanceRepository: AccountBalanceRepository,
     private readonly interactionRepository: AccountInteractionsRepository,
-  ) {}
+  ) { }
 
   async getAccountBalanceVariations(
-    startTimestamp: number,
+    fromTimestamp: number,
+    toTimestamp: number,
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
   ): Promise<DBAccountBalanceVariation[]> {
     return this.balanceRepository.getAccountBalanceVariations(
-      startTimestamp,
+      fromTimestamp,
+      toTimestamp,
+      limit,
+      skip,
+      orderDirection,
+    );
+  }
+
+  async getAccountBalanceVariationsByAccountId(
+    address: Address,
+    fromTimestamp: number,
+    toTimestamp: number,
+    skip: number,
+    limit: number,
+    orderDirection: "asc" | "desc",
+  ): Promise<DBAccountBalanceVariation[]> {
+    return this.balanceRepository.getAccountBalanceVariationsByAccountId(
+      address,
+      fromTimestamp,
+      toTimestamp,
       limit,
       skip,
       orderDirection,
@@ -48,7 +79,8 @@ export class BalanceVariationsService {
 
   async getAccountInteractions(
     accountId: Address,
-    startTimestamp: number,
+    fromTimestamp: number,
+    toTimestamp: number,
     skip: number,
     limit: number,
     orderBy: "volume" | "count",
@@ -57,7 +89,8 @@ export class BalanceVariationsService {
   ): Promise<AccountInteractions> {
     return this.interactionRepository.getAccountInteractions(
       accountId,
-      startTimestamp,
+      fromTimestamp,
+      toTimestamp,
       limit,
       skip,
       orderBy,

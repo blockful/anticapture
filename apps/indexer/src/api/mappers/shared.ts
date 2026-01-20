@@ -1,4 +1,3 @@
-import { DaysEnum } from "@/lib/enums";
 import { z } from "@hono/zod-openapi";
 
 export type AmountFilter = {
@@ -15,11 +14,3 @@ export type PeriodResponse = z.infer<typeof PeriodResponseSchema>;
 
 export const TimestampResponseMapper = (timestamp: number): string =>
   new Date(timestamp * 1000).toISOString();
-
-export const PeriodResponseMapper = (
-  endTimestamp: number,
-  days: DaysEnum,
-): PeriodResponse => ({
-  startTimestamp: TimestampResponseMapper(endTimestamp - days),
-  endTimestamp: TimestampResponseMapper(endTimestamp),
-});

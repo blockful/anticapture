@@ -6,7 +6,7 @@ import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum, DaysEnum, DaysOpts } from "@/lib/enums";
 import { PERCENTAGE_NO_BASELINE } from "@/api/mappers/constants";
 import { calculateHistoricalBlockNumber } from "@/lib/blockTime";
-import { PeriodResponseMapper, PeriodResponseSchema } from "../shared";
+import { PeriodResponseSchema, TimestampResponseMapper } from "../shared";
 
 export const AccountBalancesRequestSchema = z.object({
   limit: z.coerce
@@ -94,12 +94,25 @@ export const AccountBalanceResponseMapper = (
   };
 };
 
-export const AccountBalanceVariationsRequestSchema = z.object({
-  days: z // TODO: change to `fromDate` and `toDate` (TIMESTAMP)
-    .enum(DaysOpts)
+export const AccountBalanceVariationsRequestParamsSchema = z.object({
+  address: z.string().refine(isAddress, "Invalid address"),
+});
+
+export const AccountBalanceVariationsRequestQuerySchema = z.object({
+  fromDate: z
+    .string()
     .optional()
-    .default("90d")
-    .transform((val) => DaysEnum[val]),
+    .transform((val) =>
+      Number(
+        val ?? (Math.floor(Date.now() / 1000) - DaysEnum["90d"]).toString(),
+      ),
+    ),
+  toDate: z
+    .string()
+    .optional()
+    .transform((val) =>
+      Number(val ?? Math.floor(Date.now() / 1000).toString()),
+    ),
   limit: z.coerce
     .number()
     .int()
@@ -134,7 +147,7 @@ export const AccountInteractionsParamsSchema = z.object({
 });
 
 export const AccountInteractionsQuerySchema =
-  AccountBalanceVariationsRequestSchema.extend({
+  AccountBalanceVariationsRequestQuerySchema.extend({
     minAmount: z
       .string()
       .transform((val) => BigInt(val))
@@ -225,11 +238,14 @@ export const HistoricalBalanceMapper = (
 
 export const AccountBalanceVariationsMapper = (
   variations: DBAccountBalanceVariation[],
+  startTimestamp: number,
   endTimestamp: number,
-  days: DaysEnum,
 ): AccountBalanceVariationsResponse => {
   return AccountBalanceVariationsResponseSchema.parse({
-    period: PeriodResponseMapper(endTimestamp, days),
+    period: PeriodResponseSchema.parse({
+      startTimestamp: TimestampResponseMapper(startTimestamp),
+      endTimestamp: TimestampResponseMapper(endTimestamp),
+    }),
     items: variations.map(
       ({
         accountId,
@@ -252,11 +268,14 @@ export const AccountBalanceVariationsMapper = (
 
 export const AccountInteractionsMapper = (
   interactions: AccountInteractions,
+  startTimestamp: number,
   endTimestamp: number,
-  days: DaysEnum,
 ): AccountInteractionsResponse => {
   return AccountInteractionsResponseSchema.parse({
-    period: PeriodResponseMapper(endTimestamp, days),
+    period: PeriodResponseSchema.parse({
+      startTimestamp: TimestampResponseMapper(startTimestamp),
+      endTimestamp: TimestampResponseMapper(endTimestamp),
+    }),
     totalCount: interactions.interactionCount,
     items: interactions.interactions.map(
       ({ accountId, absoluteChange, totalVolume, transferCount }) => ({

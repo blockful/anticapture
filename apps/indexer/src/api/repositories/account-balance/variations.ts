@@ -1,4 +1,4 @@
-import { asc, desc, gte, sql, and, inArray } from "ponder";
+import { asc, desc, gte, sql, and, inArray, between } from "ponder";
 import { db } from "ponder:api";
 import { transfer, accountBalance } from "ponder:schema";
 import { DBAccountBalanceVariation, DBHistoricalBalance } from "@/api/mappers";
@@ -78,7 +78,8 @@ export class BalanceVariationsRepository {
   }
 
   async getAccountBalanceVariations(
-    startTimestamp: number,
+    fromTimestamp: number,
+    toTimestamp: number,
     limit: number,
     skip: number,
     orderDirection: "asc" | "desc",
@@ -87,7 +88,9 @@ export class BalanceVariationsRepository {
     const scopedTransfers = db
       .select()
       .from(transfer)
-      .where(gte(transfer.timestamp, BigInt(startTimestamp)))
+      .where(
+        between(transfer.timestamp, BigInt(fromTimestamp), BigInt(toTimestamp)),
+      )
       .as("scoped_transfers");
 
     const transfersFrom = db
@@ -162,9 +165,9 @@ export class BalanceVariationsRepository {
       percentageChange:
         currentBalance - BigInt(absoluteChange)
           ? Number(
-              (BigInt(absoluteChange) * 10000n) /
-                (currentBalance - BigInt(absoluteChange)),
-            ) / 100
+            (BigInt(absoluteChange) * 10000n) /
+            (currentBalance - BigInt(absoluteChange)),
+          ) / 100
           : 0,
     }));
   }
