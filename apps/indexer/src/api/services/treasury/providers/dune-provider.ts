@@ -1,7 +1,8 @@
 import { HTTPException } from "hono/http-exception";
+import { AxiosInstance } from "axios";
 import { LiquidTreasuryDataPoint } from "../types";
 import { TreasuryProvider } from "./treasury-provider.interface";
-import { AxiosInstance } from "axios";
+import { filterWithFallback } from "@/lib/time-series";
 import { TreasuryProviderCache } from "./provider-cache";
 
 export interface DuneResponse {
@@ -36,7 +37,7 @@ export class DuneProvider implements TreasuryProvider {
   ): Promise<LiquidTreasuryDataPoint[]> {
     const cached = this.cache.get();
 
-    if (cached !== null) return this.filterData(cached, cutoffTimestamp);
+    if (cached !== null) return filterWithFallback(cached, cutoffTimestamp);
 
     try {
       const response = await this.client.get<DuneResponse>("/", {
@@ -47,7 +48,7 @@ export class DuneProvider implements TreasuryProvider {
       const data = this.transformData(response.data);
       this.cache.set(data);
 
-      return this.filterData(data, cutoffTimestamp);
+      return filterWithFallback(data, cutoffTimestamp);
     } catch (error) {
       throw new HTTPException(503, {
         message: "Failed to fetch total assets data",
@@ -71,18 +72,5 @@ export class DuneProvider implements TreasuryProvider {
         };
       })
       .sort((a, b) => a.date - b.date);
-  }
-
-  private filterData(
-    data: LiquidTreasuryDataPoint[],
-    cutoffTimestamp: number,
-  ): LiquidTreasuryDataPoint[] {
-    const filteredData = data.filter((item) => item.date >= cutoffTimestamp);
-    if (filteredData.length === 0 && data.length > 0) {
-      const lastAvailable = data.at(-1)!;
-      return [lastAvailable];
-    }
-
-    return filteredData;
   }
 }

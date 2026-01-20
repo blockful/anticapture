@@ -27,7 +27,8 @@
  */
 
 import { MetricTypesEnum } from "@/lib/constants";
-import { SECONDS_IN_DAY, getCurrentDayTimestamp } from "@/lib/enums";
+import { getCurrentDayTimestamp } from "@/lib/enums";
+import { createDailyTimeline, forwardFill } from "@/lib/time-series";
 import { DelegationPercentageRepository } from "@/api/repositories/";
 import {
   DelegationPercentageItem,
@@ -77,7 +78,7 @@ export class DelegationPercentageService {
     // 1. Get initial values for proper forward-fill
     const referenceDate = normalizedAfter || normalizedStartDate;
     const initialValues = referenceDate
-      ? await this.getInitialValuesBeforeDate(referenceDate)
+      ? await this.fetchLastDelegationValues(referenceDate)
       : { delegated: 0n, total: 0n };
 
     // 2. Fetch data from repository
@@ -117,15 +118,19 @@ export class DelegationPercentageService {
     );
 
     // 6. Generate complete date range
-    const allDates = this.generateDateRange(
+    const allDates = this.getOrderedTimeline(
       dateMap,
       effectiveStartDate,
       normalizedEndDate,
       orderDirection,
     );
 
-    // 7. Apply forward-fill and calculate percentage
-    const allItems = this.applyForwardFill(allDates, dateMap, initialValues);
+    // 7. Calculate delegation percentage
+    const allItems = this.calculateDelegationPercentage(
+      allDates,
+      dateMap,
+      initialValues,
+    );
 
     // 8. Apply cursor-based pagination
     const { items, hasNextPage } = this.applyCursorPagination(
@@ -148,7 +153,7 @@ export class DelegationPercentageService {
    * Gets the last known values at or before a given date for proper forward-fill
    * Returns { delegated: 0n, total: 0n } if no previous values exist
    */
-  private async getInitialValuesBeforeDate(
+  private async fetchLastDelegationValues(
     beforeDate: string,
   ): Promise<{ delegated: bigint; total: bigint }> {
     try {
@@ -195,11 +200,11 @@ export class DelegationPercentageService {
     }
 
     const datesFromDb = Array.from(dateMap.keys())
-      .map((d) => BigInt(d))
-      .sort((a, b) => Number(a - b));
+      .map((d) => Number(d))
+      .sort((a, b) => a - b);
     const firstRealDate = datesFromDb[0];
 
-    if (firstRealDate && BigInt(referenceDate) < firstRealDate) {
+    if (firstRealDate && Number(referenceDate) < firstRealDate) {
       return firstRealDate.toString();
     }
 
@@ -241,37 +246,30 @@ export class DelegationPercentageService {
    * Fills gaps between first and last date with all days
    * If endDate is not provided, uses current day (today) for forward-fill
    */
-  private generateDateRange(
+  private getOrderedTimeline(
     dateMap: Map<string, DateData>,
     startDate?: string,
     endDate?: string,
     orderDirection?: "asc" | "desc",
-  ): bigint[] {
-    const allDates: bigint[] = [];
-
+  ): number[] {
     if (dateMap.size === 0) {
-      return allDates;
+      return [];
     }
 
     const datesFromDb = Array.from(dateMap.keys())
-      .map((d) => BigInt(d))
-      .sort((a, b) => Number(a - b));
+      .map((d) => Number(d))
+      .sort((a, b) => a - b);
 
-    const firstDate = startDate ? BigInt(startDate) : datesFromDb[0];
-    const lastDate = endDate ? BigInt(endDate) : getCurrentDayTimestamp();
+    const firstDate = startDate ? Number(startDate) : datesFromDb[0];
+    const lastDate = endDate
+      ? Number(endDate)
+      : Number(getCurrentDayTimestamp());
 
     if (!firstDate || !lastDate) {
-      return allDates;
+      return [];
     }
 
-    // Generate all days in range
-    for (
-      let date = firstDate;
-      date <= lastDate;
-      date += BigInt(SECONDS_IN_DAY)
-    ) {
-      allDates.push(date);
-    }
+    const allDates = createDailyTimeline(firstDate, lastDate);
 
     if (orderDirection === "desc") {
       allDates.reverse();
@@ -281,35 +279,39 @@ export class DelegationPercentageService {
   }
 
   /**
-   * Applies forward-fill logic and calculates delegation percentage
-   * Forward-fill: carries forward the last known value for missing dates
+   * Calculates delegation percentage
    */
-  private applyForwardFill(
-    allDates: bigint[],
+  private calculateDelegationPercentage(
+    allDates: number[],
     dateMap: Map<string, DateData>,
     initialValues: { delegated: bigint; total: bigint } = {
       delegated: 0n,
       total: 0n,
     },
   ): DelegationPercentageItem[] {
-    let lastDelegated = initialValues.delegated;
-    let lastTotal = initialValues.total;
+    const delegatedMap = new Map<number, bigint>();
+    const totalMap = new Map<number, bigint>();
+    for (const [dateStr, data] of dateMap) {
+      const date = Number(dateStr);
+      if (data.delegated !== undefined) delegatedMap.set(date, data.delegated);
+      if (data.total !== undefined) totalMap.set(date, data.total);
+    }
+    const filledDelegated = forwardFill(
+      allDates,
+      delegatedMap,
+      initialValues.delegated,
+    );
+    const filledTotal = forwardFill(allDates, totalMap, initialValues.total);
 
+    // Calculate percentage for each date
     return allDates.map((date) => {
-      const dateStr = date.toString();
-      const data = dateMap.get(dateStr);
-
-      // Update known values (forward-fill)
-      if (data?.delegated !== undefined) lastDelegated = data.delegated;
-      if (data?.total !== undefined) lastTotal = data.total;
-
-      // Calculate percentage (avoid division by zero)
-      // Returns as string with 2 decimal places (e.g., "11.74" for 11.74%)
+      const delegated = filledDelegated.get(date) ?? 0n;
+      const total = filledTotal.get(date) ?? 0n;
       const percentage =
-        lastTotal > 0n ? Number((lastDelegated * 10000n) / lastTotal) / 100 : 0;
+        total > 0n ? Number((delegated * 10000n) / total) / 100 : 0;
 
       return {
-        date: dateStr,
+        date: date.toString(),
         high: percentage.toFixed(2),
       };
     });
