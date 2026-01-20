@@ -98,12 +98,12 @@ export class VotingPowerService {
   }
 
   async getVotingPowerVariations(
-    addresses: Address[],
     startTimestamp: number,
     endTimestamp: number,
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
+    addresses?: Address[],
   ): Promise<DBVotingPowerVariation[]> {
     const variations =
       await this.votingPowerRepository.getVotingPowerVariations(
@@ -114,6 +114,8 @@ export class VotingPowerService {
         orderDirection,
         addresses,
       );
+
+    if (!addresses) return variations;
 
     return addresses.map((address) => {
       const dbVariation = variations.find(
