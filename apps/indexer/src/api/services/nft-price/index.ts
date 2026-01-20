@@ -4,13 +4,11 @@ import axios, { AxiosInstance } from "axios";
 import { TokenHistoricalPriceResponse } from "@/api/mappers";
 import { PriceProvider } from "@/api/services/treasury/types";
 import {
-  truncateTimestampTimeMs,
+  truncateTimestampToMidnight,
   calculateCutoffTimestamp,
-} from "@/eventHandlers/shared";
-import {
+  createDailyTimeline,
   forwardFill,
-  createDailyTimelineFromData,
-} from "@/api/services/treasury/forward-fill"; // TODO: move to shared folder
+} from "@/lib/time-series";
 
 interface Repository {
   getHistoricalNFTPrice(
@@ -63,23 +61,23 @@ export class NFTPriceService implements PriceProvider {
       price: (
         Number(formatEther(BigInt(price))) * ethPriceResponse[index]![1]
       ).toFixed(2),
-      timestamp: timestamp * 1000,
+      timestamp,
     }));
 
     // Create map with normalized timestamps (midnight UTC)
     const priceMap = new Map<number, string>();
     rawPrices.forEach((item) => {
-      const normalizedTs = truncateTimestampTimeMs(item.timestamp);
+      const normalizedTs = truncateTimestampToMidnight(item.timestamp);
       priceMap.set(normalizedTs, item.price);
     });
 
     // Create timeline and forward-fill gaps
-    const timeline = createDailyTimelineFromData([...priceMap.keys()]);
+    const timeline = createDailyTimeline(Math.min(...priceMap.keys()));
     const filledPrices = forwardFill(timeline, priceMap);
 
     // Filter to only include last `limit` days
-    const cutoffMs = calculateCutoffTimestamp(limit) * 1000;
-    const filteredTimeline = timeline.filter((ts) => ts >= cutoffMs);
+    const cutoff = calculateCutoffTimestamp(limit);
+    const filteredTimeline = timeline.filter((ts) => ts >= cutoff);
 
     return filteredTimeline.map((timestamp) => ({
       price: filledPrices.get(timestamp) ?? "0",
@@ -104,7 +102,7 @@ export class NFTPriceService implements PriceProvider {
 
     const priceMap = new Map<number, number>();
     priceData.forEach((item) => {
-      const normalizedTimestamp = truncateTimestampTimeMs(item.timestamp);
+      const normalizedTimestamp = truncateTimestampToMidnight(item.timestamp);
       priceMap.set(normalizedTimestamp, Number(item.price));
     });
 

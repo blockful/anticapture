@@ -1,7 +1,10 @@
 import { AxiosInstance } from "axios";
 import { TreasuryProvider } from "./treasury-provider.interface";
 import { LiquidTreasuryDataPoint } from "../types";
-import { truncateTimestampTime } from "@/eventHandlers/shared";
+import {
+  truncateTimestampToMidnight,
+  filterWithFallback,
+} from "@/lib/time-series";
 import { TreasuryProviderCache } from "./provider-cache";
 
 interface RawDefiLlamaResponse {
@@ -31,14 +34,14 @@ export class DefiLlamaProvider implements TreasuryProvider {
   ): Promise<LiquidTreasuryDataPoint[]> {
     const cached = this.cache.get();
 
-    if (cached !== null) return this.filterData(cached, cutoffTimestamp);
+    if (cached !== null) return filterWithFallback(cached, cutoffTimestamp);
 
     try {
-      const response = await this.client.get<RawDefiLlamaResponse>(`/`);
+      const response = await this.client.get<RawDefiLlamaResponse>("");
       const data = this.transformData(response.data);
       this.cache.set(data);
 
-      return this.filterData(data, cutoffTimestamp);
+      return filterWithFallback(data, cutoffTimestamp);
     } catch (error) {
       console.error(
         `[DefiLlamaProvider] Failed to fetch treasury data:`,
@@ -72,7 +75,7 @@ export class DefiLlamaProvider implements TreasuryProvider {
       const dateMap = new Map<number, { timestamp: number; value: number }>();
 
       for (const dataPoint of chainData.tvl || []) {
-        const dayTimestamp = truncateTimestampTime(dataPoint.date);
+        const dayTimestamp = truncateTimestampToMidnight(dataPoint.date);
         const existing = dateMap.get(dayTimestamp);
 
         // Keep only the latest timestamp for each date
@@ -121,18 +124,5 @@ export class DefiLlamaProvider implements TreasuryProvider {
         liquidTreasury: values.withoutOwnToken, // Liquid Treasury
       }))
       .sort((a, b) => a.date - b.date); // Sort by timestamp ascending
-  }
-
-  private filterData(
-    data: LiquidTreasuryDataPoint[],
-    cutoffTimestamp: number,
-  ): LiquidTreasuryDataPoint[] {
-    const filteredData = data.filter((item) => item.date >= cutoffTimestamp);
-    if (filteredData.length === 0 && data.length > 0) {
-      const lastAvailable = data.at(-1)!;
-      return [lastAvailable];
-    }
-
-    return filteredData;
   }
 }
