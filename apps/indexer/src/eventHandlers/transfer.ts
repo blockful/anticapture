@@ -1,6 +1,6 @@
 import { Context } from "ponder:registry";
 import { Address, Hex, zeroAddress } from "viem";
-import { accountBalance, transfer } from "ponder:schema";
+import { accountBalance, balanceHistory, transfer } from "ponder:schema";
 
 import { DaoIdEnum } from "@/lib/enums";
 import { ensureAccountExists } from "./shared";
@@ -61,7 +61,7 @@ export const tokenTransfer = async (
   await ensureAccountExists(context, to);
   await ensureAccountExists(context, from);
 
-  await context.db
+  const { balance: currentReceiverBalance } = await context.db
     .insert(accountBalance)
     .values({
       accountId: to,
@@ -73,8 +73,22 @@ export const tokenTransfer = async (
       balance: current.balance + value,
     }));
 
+  await context.db
+    .insert(balanceHistory)
+    .values({
+      daoId,
+      transactionHash: transactionHash,
+      accountId: to,
+      balance: currentReceiverBalance,
+      delta: value,
+      deltaMod: value > 0n ? value : -value,
+      timestamp,
+      logIndex,
+    })
+    .onConflictDoNothing();
+
   if (from !== zeroAddress) {
-    await context.db
+    const { balance: currentSenderBalance } = await context.db
       .insert(accountBalance)
       .values({
         accountId: from,
@@ -85,6 +99,20 @@ export const tokenTransfer = async (
       .onConflictDoUpdate((current) => ({
         balance: current.balance - value,
       }));
+
+    await context.db
+      .insert(balanceHistory)
+      .values({
+        daoId,
+        transactionHash: transactionHash,
+        accountId: from,
+        balance: currentSenderBalance,
+        delta: -value,
+        deltaMod: value > 0n ? value : -value,
+        timestamp,
+        logIndex,
+      })
+      .onConflictDoNothing();
   }
 
   await context.db
