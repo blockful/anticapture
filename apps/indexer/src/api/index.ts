@@ -35,7 +35,7 @@ import {
   AccountBalanceRepository,
   AccountInteractionsRepository,
   BalanceVariationsRepository,
-  DelegationPercentageRepository,
+  DaoMetricsDayBucketRepository,
   DrizzleProposalsActivityRepository,
   DrizzleRepository,
   NFTPriceRepository,
@@ -43,7 +43,6 @@ import {
   TokenRepository,
   TransactionsRepository,
   TransfersRepository,
-  TokenMetricsRepository,
   TreasuryRepository,
   VotingPowerRepository,
 } from "@/api/repositories";
@@ -122,12 +121,11 @@ const repo = new DrizzleRepository();
 const votingPowerRepo = new VotingPowerRepository();
 const proposalsRepo = new DrizzleProposalsActivityRepository();
 const transactionsRepo = new TransactionsRepository();
-const delegationPercentageRepo = new DelegationPercentageRepository();
+const daoMetricsDayBucketRepo = new DaoMetricsDayBucketRepository();
 const delegationPercentageService = new DelegationPercentageService(
-  delegationPercentageRepo,
+  daoMetricsDayBucketRepo,
 );
-const tokenMetricsRepo = new TokenMetricsRepository();
-const tokenMetricsService = new TokenMetricsService(tokenMetricsRepo);
+const tokenMetricsService = new TokenMetricsService(daoMetricsDayBucketRepo);
 const balanceVariationsRepo = new BalanceVariationsRepository();
 const accountBalanceRepo = new AccountBalanceRepository();
 const accountInteractionRepo = new AccountInteractionsRepository();

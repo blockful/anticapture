@@ -28,7 +28,7 @@ import {
   normalizeMapTimestamps,
   getEffectiveStartDate,
 } from "@/lib/date-helpers";
-import { TokenMetricsRepository } from "@/api/repositories/token-metrics";
+import { DaoMetricsDayBucketRepository } from "@/api/repositories/daoMetricsDayBucket";
 import { TokenMetricItem } from "@/api/mappers/token-metrics";
 import { MetricTypesEnum } from "@/lib/constants";
 
@@ -43,7 +43,7 @@ interface MetricData {
 }
 
 export class TokenMetricsService {
-  constructor(private readonly repository: TokenMetricsRepository) {}
+  constructor(private readonly repository: DaoMetricsDayBucketRepository) {}
 
   /**
    * Get metrics for a single type with forward-fill
@@ -82,7 +82,7 @@ export class TokenMetricsService {
 
     // 2. Fetch sparse data from repository
     const rows = await this.repository.getMetricsByDateRange({
-      metricType,
+      metricTypes: [metricType],
       startDate: referenceDate?.toString(),
       endDate: (before ?? endDate)?.toString(),
       orderDirection,

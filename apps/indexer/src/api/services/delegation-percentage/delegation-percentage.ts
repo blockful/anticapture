@@ -30,7 +30,7 @@ import { MetricTypesEnum } from "@/lib/constants";
 import { forwardFill, generateOrderedTimeline } from "@/lib/time-series";
 import { applyCursorPagination } from "@/lib/query-helpers";
 import { getEffectiveStartDate } from "@/lib/date-helpers";
-import { DelegationPercentageRepository } from "@/api/repositories/";
+import { DaoMetricsDayBucketRepository } from "@/api/repositories/";
 import {
   DelegationPercentageItem,
   DelegationPercentageQuery,
@@ -57,7 +57,7 @@ interface DateData {
 }
 
 export class DelegationPercentageService {
-  constructor(private readonly repository: DelegationPercentageRepository) {}
+  constructor(private readonly repository: DaoMetricsDayBucketRepository) {}
 
   /**
    * Main method to get delegation percentage data with forward-fill and pagination
@@ -83,7 +83,11 @@ export class DelegationPercentageService {
       : { delegated: 0n, total: 0n };
 
     // 2. Fetch data from repository
-    const rows = await this.repository.getDaoMetricsByDateRange({
+    const rows = await this.repository.getMetricsByDateRange({
+      metricTypes: [
+        MetricTypesEnum.DELEGATED_SUPPLY,
+        MetricTypesEnum.TOTAL_SUPPLY,
+      ],
       startDate: referenceDate,
       endDate: normalizedBefore || normalizedEndDate,
       orderDirection,
@@ -190,7 +194,7 @@ export class DelegationPercentageService {
    */
   private organizeDateMap(
     rows: Awaited<
-      ReturnType<DelegationPercentageRepository["getDaoMetricsByDateRange"]>
+      ReturnType<DaoMetricsDayBucketRepository["getMetricsByDateRange"]>
     >,
   ): Map<string, DateData> {
     const dateMap = new Map<string, DateData>();

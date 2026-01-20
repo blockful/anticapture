@@ -1,25 +1,23 @@
 import { db } from "ponder:api";
 import { daoMetricsDayBucket } from "ponder:schema";
-import { and, gte, lte, lt, eq, desc, asc } from "ponder";
+import { and, gte, lte, desc, asc, eq, lt, inArray } from "ponder";
 
-export interface TokenMetricsRepositoryFilters {
-  metricType: string;
-  startDate?: string;
-  endDate?: string;
-  orderDirection: "asc" | "desc";
-  limit: number;
-}
-
-export class TokenMetricsRepository {
+export class DaoMetricsDayBucketRepository {
   /**
    * Fetches metrics by type and date range
-   * @param filters - Metric type, date range, and ordering filters
+   * @param filters - Metric types, date range, and ordering filters
    * @returns Array of metrics ordered by date
    */
-  async getMetricsByDateRange(filters: TokenMetricsRepositoryFilters) {
-    const { metricType, startDate, endDate, orderDirection, limit } = filters;
+  async getMetricsByDateRange(filters: {
+    metricTypes: string[];
+    startDate?: string;
+    endDate?: string;
+    orderDirection: "asc" | "desc";
+    limit: number;
+  }) {
+    const { metricTypes, startDate, endDate, orderDirection, limit } = filters;
 
-    const conditions = [eq(daoMetricsDayBucket.metricType, metricType)];
+    const conditions = [inArray(daoMetricsDayBucket.metricType, metricTypes)];
 
     if (startDate) {
       conditions.push(gte(daoMetricsDayBucket.date, BigInt(startDate)));
@@ -41,7 +39,7 @@ export class TokenMetricsRepository {
   /**
    * Fetches the last value of a specific metric type before a given date
    * @param metricType - The metric type to search for
-   * @param beforeDate - The date to search before (exclusive)
+   * @param beforeDate - The date to search before
    * @returns The most recent metric row or null if not found
    */
   async getLastMetricBeforeDate(metricType: string, beforeDate: string) {
