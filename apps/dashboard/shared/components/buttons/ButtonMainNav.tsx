@@ -53,7 +53,7 @@ export const ButtonMainNav = ({
   const baseClassName = cn(
     "flex flex-col items-center justify-center gap-1 w-[56px] rounded-md py-2 transition-colors",
     {
-      "bg-surface-default rounded-md": isActive,
+      "bg-primary rounded-md": isActive,
       "rounded-md hover:bg-surface-contrast": !isActive,
     },
     className,
@@ -63,7 +63,7 @@ export const ButtonMainNav = ({
     <>
       <Icon
         className={cn("size-4 shrink-0 transition-colors", {
-          "text-primary": isActive,
+          "text-inverted": isActive,
           "text-secondary group-hover:text-primary": !isActive,
         })}
       />
@@ -71,7 +71,7 @@ export const ButtonMainNav = ({
         className={cn(
           "whitespace-pre-wrap text-center text-[12px] font-medium leading-[16px] transition-colors",
           {
-            "text-primary": isActive,
+            "text-inverted": isActive,
             "text-secondary group-hover:text-primary": !isActive,
           },
         )}
