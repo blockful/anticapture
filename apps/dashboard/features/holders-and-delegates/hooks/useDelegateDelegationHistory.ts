@@ -6,6 +6,7 @@ import { formatUnits } from "viem";
 
 import {
   useVotingPowersQuery,
+  QueryInput_VotingPowers_OrderBy,
   QueryInput_VotingPowers_OrderDirection,
   VotingPowersQuery,
   QueryVotingPowersArgs,
@@ -113,7 +114,7 @@ export function useDelegateDelegationHistory({
     () => ({
       account: accountId,
       limit: itemsPerPage,
-      orderBy: orderBy as QueryVotingPowersArgs["orderBy"],
+      orderBy: orderBy as QueryInput_VotingPowers_OrderBy,
       orderDirection: orderDirection as QueryInput_VotingPowers_OrderDirection,
       ...(filterVariables?.maxDelta && { maxDelta: filterVariables.maxDelta }),
       ...(filterVariables?.minDelta && {
