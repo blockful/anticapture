@@ -30,7 +30,7 @@ export const HeaderDAOSidebar = () => {
     <aside
       className={cn(
         "bg-surface-background border-light-dark relative z-50 h-screen border-r transition-all duration-300 lg:block",
-        isCollapsed ? "w-[68px]" : "w-[258px]",
+        isCollapsed ? "w-[68px] overflow-visible" : "w-[258px]",
       )}
     >
       <div className="z-50 flex h-full w-full flex-col">
