@@ -14,6 +14,7 @@ interface ButtonHeaderSidebarProps extends ButtonHTMLAttributes<
   className?: string;
   isGlobal?: boolean;
   isAction?: boolean;
+  isCollapsed?: boolean;
 }
 
 export const ButtonHeaderSidebar = ({
@@ -23,6 +24,7 @@ export const ButtonHeaderSidebar = ({
   className,
   isGlobal = false,
   isAction = false,
+  isCollapsed = false,
   onClick,
   ...props
 }: ButtonHeaderSidebarProps) => {
@@ -64,10 +66,11 @@ export const ButtonHeaderSidebar = ({
   }
 
   const baseClassName = cn(
-    "flex h-[33px] w-full cursor-pointer items-center gap-2 px-2 py-2 text-sm font-medium",
+    "flex h-[33px] w-full cursor-pointer items-center gap-2 px-2 py-2 text-sm font-medium transition-all",
     {
       "bg-surface-default text-inverted": isActive,
       "bg-surface-background text-secondary": !isActive,
+      "justify-center": isCollapsed,
     },
     className,
   );
@@ -80,17 +83,19 @@ export const ButtonHeaderSidebar = ({
           "text-secondary": !isActive,
         })}
       />
-      <p
-        className={cn(
-          "flex-1 whitespace-pre-wrap text-[14px] font-medium leading-[20px]",
-          {
-            "text-primary": isActive,
-            "text-secondary": !isActive,
-          },
-        )}
-      >
-        {label}
-      </p>
+      {!isCollapsed && (
+        <p
+          className={cn(
+            "flex-1 whitespace-nowrap text-[14px] font-medium leading-[20px] transition-opacity",
+            {
+              "text-primary": isActive,
+              "text-secondary": !isActive,
+            },
+          )}
+        >
+          {label}
+        </p>
+      )}
     </>
   );
 

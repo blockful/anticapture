@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/shared/components";
 import { useParams, useRouter } from "next/navigation";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown, ChevronsRight, ChevronsLeft } from "lucide-react";
 import { cn } from "@/shared/utils/";
 import { DaoAvatarIcon } from "@/shared/components/icons";
 import daoConfigByDaoId from "@/shared/dao-config";
@@ -17,7 +17,15 @@ type Item = {
   name: string;
 };
 
-export const HeaderDAOSidebarDropdown = () => {
+interface HeaderDAOSidebarDropdownProps {
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
+}
+
+export const HeaderDAOSidebarDropdown = ({
+  isCollapsed = false,
+  onToggleCollapse,
+}: HeaderDAOSidebarDropdownProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [selectedHeaderSidebarItem, setSelectedHeaderSidebarItem] =
     useState<number>(0);
@@ -89,26 +97,43 @@ export const HeaderDAOSidebarDropdown = () => {
       ref={dropdownRef}
       onMouseLeave={() => setIsOpen(false)}
     >
-      <div className="flex h-full items-center justify-between px-2 py-2">
+      <div className="flex h-full items-center px-2 py-2">
         <Button
           variant="ghost"
           size="sm"
-          className="flex w-full items-center justify-start overflow-hidden"
+          className="flex flex-1 items-center justify-start overflow-hidden transition-all"
           onClick={toggleDropdown}
           aria-expanded={isOpen}
           aria-haspopup="menu"
         >
-          <div className="flex w-full items-center gap-2">
-            <div>{currentItem?.icon}</div>
-            <p className="text-inverted whitespace-nowrap text-[18px] font-medium leading-6">
-              {currentItem?.label}
-            </p>
+          <div className="flex min-w-0 items-center gap-2">
+            <div className="shrink-0">{currentItem?.icon}</div>
+            {!isCollapsed && (
+              <p className="text-primary truncate whitespace-nowrap text-[18px] font-medium leading-6">
+                {currentItem?.label}
+              </p>
+            )}
           </div>
-          <div>
-            <ChevronsUpDown className="text-secondary size-5 transition-all duration-300" />
-          </div>
+          {!isCollapsed && (
+            <div className="shrink-0">
+              <ChevronsUpDown className="text-secondary size-5 transition-all duration-300" />
+            </div>
+          )}
         </Button>
       </div>
+      {onToggleCollapse && (
+        <button
+          onClick={onToggleCollapse}
+          className="bg-surface-default border-light-dark hover:bg-surface-contrast absolute right-0 top-1/2 z-50 -translate-y-1/2 translate-x-[65%] cursor-pointer border p-1 transition-colors"
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {isCollapsed ? (
+            <ChevronsRight className="text-primary size-[14px]" />
+          ) : (
+            <ChevronsLeft className="text-primary size-[14px]" />
+          )}
+        </button>
+      )}
 
       {isOpen && (
         <div

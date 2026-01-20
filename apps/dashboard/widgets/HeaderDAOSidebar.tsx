@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { DaoIdEnum } from "@/shared/types/daos";
 import {
@@ -11,8 +12,11 @@ import daoConfigByDaoId from "@/shared/dao-config";
 import { ArrowRightLeft, PieChart } from "lucide-react";
 import { Crosshair2Icon } from "@radix-ui/react-icons";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
+import { cn } from "@/shared/utils/";
+
 export const HeaderDAOSidebar = () => {
   const pathname = usePathname();
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const isDefault = pathname === "/";
   const daoId = isDefault ? null : pathname.split("/")[1]?.toUpperCase();
@@ -23,9 +27,17 @@ export const HeaderDAOSidebar = () => {
   }
 
   return (
-    <aside className="bg-surface-background border-light-dark relative z-50 h-screen w-[258px] border-r lg:block">
+    <aside
+      className={cn(
+        "bg-surface-background border-light-dark relative z-50 h-screen border-r transition-all duration-300 lg:block",
+        isCollapsed ? "w-[68px]" : "w-[258px]",
+      )}
+    >
       <div className="z-50 flex h-full w-full flex-col">
-        <HeaderDAOSidebarDropdown />
+        <HeaderDAOSidebarDropdown
+          isCollapsed={isCollapsed}
+          onToggleCollapse={() => setIsCollapsed(!isCollapsed)}
+        />
         <div className="flex h-full flex-col justify-between">
           <div className="flex flex-col gap-[12px] p-2">
             {daoConfig.daoOverview && (
@@ -34,6 +46,7 @@ export const HeaderDAOSidebar = () => {
                 icon={PieChart}
                 label={PAGES_CONSTANTS.daoOverview.title}
                 key={PAGES_CONSTANTS.daoOverview.title}
+                isCollapsed={isCollapsed}
               />
             )}
             {daoConfig.attackProfitability && (
@@ -42,6 +55,7 @@ export const HeaderDAOSidebar = () => {
                 icon={Crosshair2Icon}
                 label={PAGES_CONSTANTS.attackProfitability.title}
                 key={PAGES_CONSTANTS.attackProfitability.title}
+                isCollapsed={isCollapsed}
               />
             )}
             {daoConfig.riskAnalysis && (
@@ -50,6 +64,7 @@ export const HeaderDAOSidebar = () => {
                 icon={Gauge}
                 label={PAGES_CONSTANTS.riskAnalysis.title}
                 key={PAGES_CONSTANTS.riskAnalysis.title}
+                isCollapsed={isCollapsed}
               />
             )}
             {daoConfig.resilienceStages && (
@@ -58,6 +73,7 @@ export const HeaderDAOSidebar = () => {
                 icon={BarChart}
                 label={PAGES_CONSTANTS.resilienceStages.title}
                 key={PAGES_CONSTANTS.resilienceStages.title}
+                isCollapsed={isCollapsed}
               />
             )}
             {daoConfig.tokenDistribution && (
@@ -66,6 +82,7 @@ export const HeaderDAOSidebar = () => {
                 icon={ArrowRightLeft}
                 label={PAGES_CONSTANTS.tokenDistribution.title}
                 key={PAGES_CONSTANTS.tokenDistribution.title}
+                isCollapsed={isCollapsed}
               />
             )}
             {daoConfig.dataTables && (
@@ -74,6 +91,7 @@ export const HeaderDAOSidebar = () => {
                 icon={UserCheck}
                 label={PAGES_CONSTANTS.holdersAndDelegates.title}
                 key={PAGES_CONSTANTS.holdersAndDelegates.title}
+                isCollapsed={isCollapsed}
               />
             )}
 
@@ -83,6 +101,7 @@ export const HeaderDAOSidebar = () => {
                 icon={Landmark}
                 label="Governance"
                 key="Governance"
+                isCollapsed={isCollapsed}
               />
             )}
           </div>
