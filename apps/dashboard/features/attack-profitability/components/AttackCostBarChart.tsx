@@ -30,7 +30,6 @@ import {
   useDaoTokenHistoricalData,
   useTopTokenHolderNonDao,
   useTreasury,
-  useVetoCouncilVotingPower,
 } from "@/features/attack-profitability/hooks";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
@@ -92,9 +91,6 @@ export const AttackCostBarChart = ({
     loading: daoTopTokenHolderExcludingTheDaoLoading,
   } = useTopTokenHolderNonDao(selectedDaoId);
 
-  const { data: vetoCouncilVotingPower, isLoading: isVetoCouncilLoading } =
-    useVetoCouncilVotingPower(selectedDaoId);
-
   const { isMobile } = useScreenSize();
 
   const isLoading =
@@ -103,23 +99,20 @@ export const AttackCostBarChart = ({
     activeSupply.isLoading ||
     averageTurnout.isLoading ||
     daoTokenPriceHistoricalDataLoading ||
-    daoTopTokenHolderExcludingTheDaoLoading ||
-    isVetoCouncilLoading;
+    daoTopTokenHolderExcludingTheDaoLoading;
 
   const mocked = useMemo(() => {
     return (
       delegatedSupply.data?.currentDelegatedSupply === undefined &&
       activeSupply.data?.activeSupply === undefined &&
       averageTurnout.data?.currentAverageTurnout === undefined &&
-      daoTopTokenHolderExcludingTheDao?.balance === undefined &&
-      vetoCouncilVotingPower === undefined
+      daoTopTokenHolderExcludingTheDao?.balance === undefined
     );
   }, [
     delegatedSupply.data?.currentDelegatedSupply,
     activeSupply.data?.activeSupply,
     averageTurnout.data?.currentAverageTurnout,
     daoTopTokenHolderExcludingTheDao?.balance,
-    vetoCouncilVotingPower,
   ]);
 
   const chartData: ChartDataItem[] = useMemo(() => {
