@@ -101,7 +101,7 @@ export const HeaderDAOSidebarDropdown = ({
         <Button
           variant="ghost"
           size="sm"
-          className="flex flex-1 items-center justify-between overflow-hidden transition-all"
+          className="flex flex-1 items-center justify-between overflow-hidden rounded-none transition-all"
           onClick={toggleDropdown}
           aria-expanded={isOpen}
           aria-haspopup="menu"
