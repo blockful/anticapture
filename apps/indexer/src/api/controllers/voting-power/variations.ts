@@ -1,15 +1,14 @@
-import { isAddress } from "viem";
-import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
+import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import { VotingPowerService } from "@/api/services";
 import {
-  VotingPowerVariationsByAccountIdRequestSchema,
+  VotingPowerVariationsByAccountIdRequestQuerySchema,
   VotingPowerVariationsByAccountIdResponseSchema,
-  VotingPowerVariationsByAccountIdMapper,
-  VotingPowerVariationsRequestSchema,
+  VotingPowerVariationsByAccountIdResponseMapper,
   VotingPowerVariationsResponseSchema,
-  VotingPowerVariationsMapper,
-  TopVotingPowerVariationsRequestSchema,
+  VotingPowerVariationsResponseMapper,
+  VotingPowerVariationsRequestQuerySchema,
+  VotingPowerVariationsByAccountIdRequestParamsSchema,
 } from "@/api/mappers/";
 
 export function votingPowerVariations(app: Hono, service: VotingPowerService) {
@@ -24,7 +23,7 @@ export function votingPowerVariations(app: Hono, service: VotingPowerService) {
         "Returns a mapping of the voting power changes within a time frame for the given addresses",
       tags: ["voting-powers"],
       request: {
-        query: VotingPowerVariationsRequestSchema,
+        query: VotingPowerVariationsRequestQuerySchema,
       },
       responses: {
         200: {
@@ -42,58 +41,16 @@ export function votingPowerVariations(app: Hono, service: VotingPowerService) {
         context.req.valid("query");
 
       const result = await service.getVotingPowerVariations(
+        fromDate,
+        toDate,
+        skip,
+        limit,
+        orderDirection,
         addresses,
-        fromDate,
-        toDate,
-        skip,
-        limit,
-        orderDirection,
       );
 
       return context.json(
-        VotingPowerVariationsMapper(result, fromDate, toDate),
-        200,
-      );
-    },
-  );
-
-  app.openapi(
-    createRoute({
-      method: "get",
-      operationId: "topVotingPowerVariations",
-      path: "/accounts/voting-powers/variations/top",
-      summary: "Get top voting power changes within a time frame",
-      description:
-        "Returns a mapping of the top voting power changes within a time frame",
-      tags: ["voting-powers"],
-      request: {
-        query: TopVotingPowerVariationsRequestSchema,
-      },
-      responses: {
-        200: {
-          description: "Successfully retrieved voting power changes",
-          content: {
-            "application/json": {
-              schema: VotingPowerVariationsResponseSchema,
-            },
-          },
-        },
-      },
-    }),
-    async (context) => {
-      const { fromDate, toDate, limit, skip, orderDirection } =
-        context.req.valid("query");
-
-      const result = await service.getTopVotingPowerVariations(
-        fromDate,
-        toDate,
-        skip,
-        limit,
-        orderDirection,
-      );
-
-      return context.json(
-        VotingPowerVariationsMapper(result, fromDate, toDate),
+        VotingPowerVariationsResponseMapper(result, fromDate, toDate),
         200,
       );
     },
@@ -110,10 +67,8 @@ export function votingPowerVariations(app: Hono, service: VotingPowerService) {
         "Returns a the changes to voting power by period and accountId",
       tags: ["voting-powers"],
       request: {
-        params: z.object({
-          address: z.string().refine((addr) => isAddress(addr)),
-        }),
-        query: VotingPowerVariationsByAccountIdRequestSchema,
+        params: VotingPowerVariationsByAccountIdRequestParamsSchema,
+        query: VotingPowerVariationsByAccountIdRequestQuerySchema,
       },
       responses: {
         200: {
@@ -137,7 +92,11 @@ export function votingPowerVariations(app: Hono, service: VotingPowerService) {
       );
 
       return context.json(
-        VotingPowerVariationsByAccountIdMapper(result, fromDate, toDate),
+        VotingPowerVariationsByAccountIdResponseMapper(
+          result,
+          fromDate,
+          toDate,
+        ),
       );
     },
   );

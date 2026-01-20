@@ -7,7 +7,7 @@ import {
   VotingPowerResponseSchema,
 } from "@/api/mappers/";
 import { isAddress } from "viem";
-import { VotingPowerMapper } from "@/api/mappers/voting-power/voting-power-variations";
+import { VotingPowerMapper } from "@/api/mappers/voting-power/variations";
 
 export function votingPowers(app: Hono, service: VotingPowerService) {
   app.openapi(

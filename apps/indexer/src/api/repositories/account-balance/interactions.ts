@@ -1,5 +1,5 @@
 import { Address } from "viem";
-import { asc, desc, gte, sql, and, eq, or, lte } from "ponder";
+import { asc, desc, gte, sql, and, eq, or, lte, between } from "ponder";
 import { db } from "ponder:api";
 import { transfer, accountBalance } from "ponder:schema";
 
@@ -8,7 +8,8 @@ import { AccountInteractions, Filter } from "../../mappers";
 export class AccountInteractionsRepository {
   async getAccountInteractions(
     accountId: Address,
-    startTimestamp: number,
+    fromTimestamp: number,
+    toTimestamp: number,
     limit: number,
     skip: number,
     orderBy: "volume" | "count",
@@ -17,7 +18,7 @@ export class AccountInteractionsRepository {
   ): Promise<AccountInteractions> {
     // Aggregate outgoing transfers (negative amounts)
     const transferCriteria = [
-      gte(transfer.timestamp, BigInt(startTimestamp)),
+      between(transfer.timestamp, BigInt(fromTimestamp), BigInt(toTimestamp)),
       or(
         eq(transfer.toAccountId, accountId),
         eq(transfer.fromAccountId, accountId),
@@ -153,13 +154,13 @@ export class AccountInteractionsRepository {
           absoluteChange: BigInt(absoluteChange),
           totalVolume: BigInt(totalVolume),
           transferCount: BigInt(transferCount),
-          percentageChange:
-            currentBalance - BigInt(absoluteChange)
-              ? Number(
-                  (BigInt(absoluteChange) * 10000n) /
-                    (currentBalance - BigInt(absoluteChange)),
-                ) / 100
-              : 0,
+          percentageChange: (currentBalance - BigInt(absoluteChange)
+            ? Number(
+                (BigInt(absoluteChange) * 10000n) /
+                  (currentBalance - BigInt(absoluteChange)),
+              ) / 100
+            : 0
+          ).toString(),
         }),
       ),
     };

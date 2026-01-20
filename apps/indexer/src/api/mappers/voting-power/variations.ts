@@ -6,7 +6,11 @@ import { accountPower } from "ponder:schema";
 import { PERCENTAGE_NO_BASELINE } from "../constants";
 import { PeriodResponseSchema, TimestampResponseMapper } from "../shared";
 
-export const VotingPowerVariationsByAccountIdRequestSchema = z.object({
+export const VotingPowerVariationsByAccountIdRequestParamsSchema = z.object({
+  address: z.string().refine(isAddress, "Invalid address"),
+});
+
+export const VotingPowerVariationsByAccountIdRequestQuerySchema = z.object({
   fromDate: z
     .string()
     .optional()
@@ -23,7 +27,7 @@ export const VotingPowerVariationsByAccountIdRequestSchema = z.object({
     ),
 });
 
-export const TopVotingPowerVariationsRequestSchema = z
+export const VotingPowerVariationsRequestQuerySchema = z
   .object({
     limit: z.coerce
       .number()
@@ -39,20 +43,17 @@ export const TopVotingPowerVariationsRequestSchema = z
       .optional()
       .default(0),
     orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
+    addresses: z
+      .union([
+        z
+          .string()
+          .refine(isAddress, "Invalid address")
+          .transform((addr) => [addr]),
+        z.array(z.string().refine(isAddress, "Invalid addresses")),
+      ])
+      .optional(),
   })
-  .extend(VotingPowerVariationsByAccountIdRequestSchema.shape);
-
-export const VotingPowerVariationsRequestSchema = z
-  .object({
-    addresses: z.union([
-      z
-        .string()
-        .refine(isAddress, "Invalid address")
-        .transform((addr) => [addr]),
-      z.array(z.string().refine(isAddress, "Invalid addresses")),
-    ]),
-  })
-  .extend(TopVotingPowerVariationsRequestSchema.shape);
+  .extend(VotingPowerVariationsByAccountIdRequestQuerySchema.shape);
 
 export const VotingPowersRequestSchema = z.object({
   limit: z.coerce
@@ -163,7 +164,7 @@ export const VotingPowerVariationResponseMapper = (
       : delta.percentageChange,
 });
 
-export const VotingPowerVariationsMapper = (
+export const VotingPowerVariationsResponseMapper = (
   variations: DBVotingPowerVariation[],
   startTimestamp: number,
   endTimestamp: number,
@@ -177,7 +178,7 @@ export const VotingPowerVariationsMapper = (
   });
 };
 
-export const VotingPowerVariationsByAccountIdMapper = (
+export const VotingPowerVariationsByAccountIdResponseMapper = (
   delta: DBVotingPowerVariation,
   startTimestamp: number,
   endTimestamp: number,

@@ -1,2 +1,2 @@
-export * from "./voting-power";
-export * from "./voting-power-variations";
+export * from "./historical";
+export * from "./variations";
