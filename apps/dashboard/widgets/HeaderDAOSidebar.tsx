@@ -23,7 +23,7 @@ export const HeaderDAOSidebar = () => {
   }
 
   return (
-    <aside className="bg-surface-background relative z-50 h-screen w-[258px] lg:block">
+    <aside className="bg-surface-background border-light-dark relative z-50 h-screen w-[258px] border-r lg:block">
       <div className="z-50 flex h-full w-full flex-col">
         <HeaderDAOSidebarDropdown />
         <div className="flex h-full flex-col justify-between">
