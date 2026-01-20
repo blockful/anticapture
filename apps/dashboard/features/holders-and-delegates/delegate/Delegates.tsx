@@ -30,7 +30,7 @@ import {
 interface DelegateTableData {
   address: string;
   votingPower: string;
-  variation?: { percentageChange: number; absoluteChange: number } | null;
+  variation?: { percentageChange: number; absoluteChange: number };
   activity?: string | null;
   activityPercentage?: number | null;
   delegators: number;
@@ -157,7 +157,7 @@ export const Delegates = ({
           percentageChange:
             delegate.percentageChange === "NO BASELINE"
               ? 9999
-              : Number(delegate.percentageChange),
+              : Number(Number(delegate.percentageChange).toFixed(2)),
           absoluteChange: Number(
             formatUnits(BigInt(delegate.absoluteChange), decimals),
           ),
