@@ -97,8 +97,8 @@ export function applyCursorPagination<T extends { date: string }>(params: {
   const lastItemDate = Number(items[items.length - 1]?.date ?? 0);
 
   const hasNextPage = endDate
-    ? items.length > limit
-    : items.length > limit && lastItemDate < today;
+    ? allItems.length > limit
+    : allItems.length > limit && lastItemDate < today;
 
   return { items, hasNextPage };
 }

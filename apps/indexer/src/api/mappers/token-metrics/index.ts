@@ -9,7 +9,7 @@ export const TokenMetricsRequestSchema = z.object({
   endDate: z.coerce.number().optional(),
   orderDirection: z.enum(["asc", "desc"]).default("asc"),
   limit: z.coerce.number().int().positive().max(1000).default(365),
-  skip: z.coerce.number().int().positive().optional().default(0),
+  skip: z.coerce.number().int().min(0).optional().default(0),
 });
 
 /**
