@@ -76,7 +76,7 @@ export const ButtonHeaderSidebar = ({
     <>
       <Icon
         className={cn("size-4 shrink-0", {
-          "text-inverted": isActive,
+          "text-primary": isActive,
           "text-secondary": !isActive,
         })}
       />
@@ -84,7 +84,7 @@ export const ButtonHeaderSidebar = ({
         className={cn(
           "flex-1 whitespace-pre-wrap text-[14px] font-medium leading-[20px]",
           {
-            "text-inverted": isActive,
+            "text-primary": isActive,
             "text-secondary": !isActive,
           },
         )}
