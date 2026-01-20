@@ -89,7 +89,7 @@ export const balanceHistory = onchainTable(
     transactionHash: drizzle.text("transaction_hash").notNull(),
     daoId: drizzle.text("dao_id").notNull(),
     accountId: drizzle.text("account_id").$type<Address>().notNull(),
-    balance: drizzle.bigint("voting_power").notNull(),
+    balance: drizzle.bigint("balance").notNull(),
     delta: drizzle.bigint("delta").notNull(),
     deltaMod: drizzle.bigint("delta_mod").notNull(),
     timestamp: drizzle.bigint().notNull(),
