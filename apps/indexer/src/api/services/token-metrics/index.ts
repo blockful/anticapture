@@ -54,26 +54,18 @@ export class TokenMetricsService {
     endDate?: number;
     orderDirection: "asc" | "desc";
     limit: number;
-    after?: number;
-    before?: number;
+    skip?: number;
   }): Promise<{
     items: TokenMetricItem[];
     hasNextPage: boolean;
     startDate: string | null;
     endDate: string | null;
   }> {
-    const {
-      metricType,
-      startDate,
-      endDate,
-      orderDirection,
-      limit,
-      after,
-      before,
-    } = params;
+    const { metricType, startDate, endDate, orderDirection, limit, skip } =
+      params;
 
     // Determine reference date for initial values
-    const referenceDate = after ?? startDate;
+    const referenceDate = skip ?? startDate;
 
     // 1. Get initial value for proper forward-fill
     const initialValue = referenceDate
@@ -84,7 +76,7 @@ export class TokenMetricsService {
     const rows = await this.repository.getMetricsByDateRange({
       metricTypes: [metricType],
       startDate: referenceDate?.toString(),
-      endDate: (before ?? endDate)?.toString(),
+      endDate: endDate?.toString(),
       orderDirection,
       limit: limit + 1, // Fetch one extra to check hasNextPage
     });
@@ -112,7 +104,7 @@ export class TokenMetricsService {
     // 5. Determine effective start date
     const datesFromDb = Array.from(dateMap.keys());
     const effectiveStartDate = getEffectiveStartDate({
-      referenceDate: after ?? startDate,
+      referenceDate: skip ?? startDate,
       datesFromDb,
       hasInitialValue: initialValue !== undefined,
     });
@@ -140,8 +132,7 @@ export class TokenMetricsService {
     // 8. Apply cursor pagination
     const { items, hasNextPage } = applyCursorPagination({
       items: filledItems,
-      after,
-      before,
+      skip,
       limit,
       endDate,
     });

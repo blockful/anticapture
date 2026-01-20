@@ -82,10 +82,17 @@ export function applyCursorPagination<T extends { date: string }>(params: {
   items: T[];
   after?: number;
   before?: number;
+  skip?: number;
   limit: number;
   endDate?: number;
 }): { items: T[]; hasNextPage: boolean } {
-  const { items: allItems, after, before, limit, endDate } = params;
+  const { items: allItems, after, before, skip, limit, endDate } = params;
+
+  if (skip !== undefined && skip > 0) {
+    const items = allItems.slice(skip, skip + limit);
+    const hasNextPage = allItems.length > skip + limit;
+    return { items, hasNextPage };
+  }
 
   const filteredItems = allItems
     .filter((item) => !after || Number(item.date) > after)
