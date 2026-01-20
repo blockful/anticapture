@@ -145,8 +145,6 @@ export class DelegationPercentageService {
     // 8. Apply cursor-based pagination
     const { items, hasNextPage } = applyCursorPagination({
       items: allItems,
-      after: normalizedAfter ? Number(normalizedAfter) : undefined,
-      before: normalizedBefore ? Number(normalizedBefore) : undefined,
       limit,
       endDate: normalizedEndDate ? Number(normalizedEndDate) : undefined,
     });

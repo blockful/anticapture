@@ -80,13 +80,11 @@ export function getLastValueBefore<T extends { date: number }>(
  */
 export function applyCursorPagination<T extends { date: string }>(params: {
   items: T[];
-  after?: number;
-  before?: number;
   skip?: number;
   limit: number;
   endDate?: number;
 }): { items: T[]; hasNextPage: boolean } {
-  const { items: allItems, after, before, skip, limit, endDate } = params;
+  const { items: allItems, skip, limit, endDate } = params;
 
   if (skip !== undefined && skip > 0) {
     const items = allItems.slice(skip, skip + limit);
@@ -94,18 +92,13 @@ export function applyCursorPagination<T extends { date: string }>(params: {
     return { items, hasNextPage };
   }
 
-  const filteredItems = allItems
-    .filter((item) => !after || Number(item.date) > after)
-    .filter((item) => !before || Number(item.date) < before);
-
-  const items = filteredItems.slice(0, limit);
-
+  const items = allItems.slice(0, limit);
   const today = truncateTimestampToMidnight(Math.floor(Date.now() / 1000));
   const lastItemDate = Number(items[items.length - 1]?.date ?? 0);
 
   const hasNextPage = endDate
-    ? filteredItems.length > limit
-    : filteredItems.length > limit && lastItemDate < today;
+    ? items.length > limit
+    : items.length > limit && lastItemDate < today;
 
   return { items, hasNextPage };
 }
