@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import Link from "next/link";
 import { BarChart4, Bell } from "lucide-react";
 import {
-  ButtonHeaderSidebar,
+  ButtonMainNav,
   ConnectWallet,
   BottomNavigationButtons,
 } from "@/shared/components";
@@ -43,13 +43,11 @@ export const HeaderSidebar = () => {
         <div className="flex h-full w-full flex-col items-center justify-between">
           <div className="flex h-full flex-col gap-1.5 p-1.5">
             {headerItems.map((item) => (
-              <ButtonHeaderSidebar
-                isDaoNavigation={true}
+              <ButtonMainNav
                 key={item.page || item.label}
                 page={item.page || ""}
                 icon={item.icon}
                 label={item.label}
-                className="text-xs! font-medium! flex-col gap-1"
                 isGlobal={item.isGlobal}
               />
             ))}

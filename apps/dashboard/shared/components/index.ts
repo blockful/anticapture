@@ -4,6 +4,7 @@ export * from "@/shared/components/cards/BaseCardDaoInfo";
 export * from "@/shared/components/header/BaseHeaderLayoutSidebar";
 export * from "@/shared/components/buttons/ButtonHeaderSidebar";
 export * from "@/shared/components/buttons/ButtonHeaderDAOSidebarMobile";
+export * from "@/shared/components/buttons/ButtonMainNav";
 export * from "@/shared/components/dropdowns/HeaderDAOSidebarDropdown";
 export * from "@/shared/components/wallet/ConnectWallet";
 export * from "@/shared/components/cards/RiskLevelCard";
