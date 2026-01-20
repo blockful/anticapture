@@ -1,11 +1,48 @@
 "use client";
 
 import Script from "next/script";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { posthogScript } from "@/shared/services/posthog";
+
+type WindowWithPostHog = typeof window & {
+  posthog?: {
+    opt_out_capturing: () => void;
+    capture: (
+      event: string,
+      properties: Record<string, string | undefined>,
+    ) => void;
+  };
+};
 
 const ConditionalPostHog = () => {
   const [shouldLoadPostHog, setShouldLoadPostHog] = useState(false);
+
+  // Click handler for data-ph-event elements
+  const handlePostHogClick = useCallback((e: MouseEvent) => {
+    const target = e.target as HTMLElement;
+    const link = target.closest<HTMLAnchorElement>("[data-ph-event]");
+    if (!link) return;
+
+    const windowWithPostHog = window as WindowWithPostHog;
+    if (windowWithPostHog.posthog?.capture) {
+      windowWithPostHog.posthog.capture(link.dataset.phEvent || "", {
+        source: link.dataset.phSource,
+        href: link.href,
+        page: window.location.pathname,
+      });
+    }
+  }, []);
+
+  // Register click event listener when PostHog is loaded
+  useEffect(() => {
+    if (!shouldLoadPostHog) return;
+
+    document.addEventListener("click", handlePostHogClick);
+
+    return () => {
+      document.removeEventListener("click", handlePostHogClick);
+    };
+  }, [shouldLoadPostHog, handlePostHogClick]);
 
   useEffect(() => {
     const checkCookieConsent = () => {
@@ -24,9 +61,7 @@ const ConditionalPostHog = () => {
             setShouldLoadPostHog(false);
             // If consent expired or user declined, opt out of PostHog tracking
             if (typeof window !== "undefined") {
-              const windowWithPostHog = window as typeof window & {
-                posthog?: { opt_out_capturing: () => void };
-              };
+              const windowWithPostHog = window as WindowWithPostHog;
 
               if (windowWithPostHog.posthog?.opt_out_capturing) {
                 windowWithPostHog.posthog.opt_out_capturing();
