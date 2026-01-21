@@ -15,22 +15,12 @@ import { SubSectionsContainer } from "@/shared/components/design-system/section"
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { BulletDivider } from "@/shared/components/design-system/section";
 import { Newspaper } from "lucide-react";
-import {
-  ActivityFeedFilterState,
-  FeedEvent,
-} from "@/features/activity-feed/types";
+import { FeedEvent } from "@/features/activity-feed/types";
+import { useActivityFeedParams } from "@/features/activity-feed/hooks/useActivityFeedParams";
 
 interface ActivityFeedSectionProps {
   className?: string;
 }
-
-const DEFAULT_FILTERS: ActivityFeedFilterState = {
-  sortOrder: "desc",
-  types: [],
-  relevances: [],
-  fromDate: "",
-  toDate: "",
-};
 
 // Helper to get local date key (YYYY-MM-DD in local timezone)
 const getLocalDateKey = (date: Date): string => {
@@ -118,8 +108,7 @@ export const ActivityFeedSection = ({
 }: ActivityFeedSectionProps) => {
   const { daoId } = useParams<{ daoId: DaoIdEnum }>();
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
-  const [filters, setFilters] =
-    useState<ActivityFeedFilterState>(DEFAULT_FILTERS);
+  const { filters, setFilters, clearFilters } = useActivityFeedParams();
 
   // Convert date strings to timestamps
   const fromTimestamp = useMemo(() => {
@@ -156,20 +145,12 @@ export const ActivityFeedSection = ({
     },
   });
 
-  const handleApplyFilters = (newFilters: ActivityFeedFilterState) => {
-    setFilters(newFilters);
-  };
-
   const activeFiltersCount =
     filters.types.length +
     filters.relevances.length +
     (filters.fromDate ? 1 : 0) +
     (filters.toDate ? 1 : 0) +
     (filters.sortOrder !== "desc" ? 1 : 0);
-
-  const clearFilters = () => {
-    setFilters(DEFAULT_FILTERS);
-  };
 
   // Group events by date
   const groupedEvents = useMemo(() => groupEventsByDate(events), [events]);
@@ -235,7 +216,7 @@ export const ActivityFeedSection = ({
           isOpen={isFilterDrawerOpen}
           onClose={() => setIsFilterDrawerOpen(false)}
           filters={filters}
-          onApplyFilters={handleApplyFilters}
+          onApplyFilters={setFilters}
         />
 
         {/* Feed content */}
