@@ -49,15 +49,16 @@ export const HeaderDAOSidebar = () => {
                 isCollapsed={isCollapsed}
               />
             )}
-            {daoConfig.attackProfitability && (
-              <ButtonHeaderSidebar
-                page={PAGES_CONSTANTS.attackProfitability.page}
-                icon={Crosshair2Icon}
-                label={PAGES_CONSTANTS.attackProfitability.title}
-                key={PAGES_CONSTANTS.attackProfitability.title}
-                isCollapsed={isCollapsed}
-              />
-            )}
+            {daoConfig.attackProfitability &&
+              daoConfig.attackProfitability.supportsLiquidTreasuryCall && (
+                <ButtonHeaderSidebar
+                  page={PAGES_CONSTANTS.attackProfitability.page}
+                  icon={Crosshair2Icon}
+                  label={PAGES_CONSTANTS.attackProfitability.title}
+                  key={PAGES_CONSTANTS.attackProfitability.title}
+                  isCollapsed={isCollapsed}
+                />
+              )}
             {daoConfig.riskAnalysis && (
               <ButtonHeaderSidebar
                 page={PAGES_CONSTANTS.riskAnalysis.page}

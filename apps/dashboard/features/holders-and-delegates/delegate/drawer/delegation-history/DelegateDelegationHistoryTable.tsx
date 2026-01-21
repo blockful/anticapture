@@ -63,20 +63,17 @@ export const DelegateDelegationHistoryTable = ({
     { value: "smallest-first", label: "Smallest first" },
   ];
 
-  const {
-    delegationHistory,
-    loading,
-    paginationInfo,
-    fetchNextPage,
-    fetchingMore,
-    error,
-  } = useDelegateDelegationHistory({
-    accountId,
-    daoId,
-    orderBy: sortBy,
-    orderDirection: sortDirection,
-    filterVariables,
-  });
+  const { delegationHistory, loading, fetchNextPage, error, hasNextPage } =
+    useDelegateDelegationHistory({
+      accountId,
+      daoId,
+      orderBy: sortBy,
+      orderDirection: sortDirection,
+      filterVariables,
+    });
+
+  const isInitialLoading =
+    loading && (!delegationHistory || delegationHistory.length === 0);
 
   // Handle sorting
   const handleSort = (field: "timestamp" | "delta") => {
@@ -174,7 +171,7 @@ export const DelegateDelegationHistoryTable = ({
       cell: ({ row }) => {
         const timestamp = row.getValue("timestamp") as string;
 
-        if (loading) {
+        if (isInitialLoading) {
           return (
             <div className="flex items-center justify-start px-4">
               <SkeletonRow className="h-5 w-20" />
@@ -239,7 +236,7 @@ export const DelegateDelegationHistoryTable = ({
         const item = row.original;
         const delegationType = getDelegationType(item);
 
-        if (loading) {
+        if (isInitialLoading) {
           return (
             <div className="flex items-center justify-start">
               <SkeletonRow className="h-5 w-16" />
@@ -308,7 +305,7 @@ export const DelegateDelegationHistoryTable = ({
       cell: ({ row }) => {
         const item = row.original;
 
-        if (loading) {
+        if (isInitialLoading) {
           return (
             <div className="flex items-center gap-3">
               <SkeletonRow
@@ -375,7 +372,7 @@ export const DelegateDelegationHistoryTable = ({
       accessorKey: "arrow",
       header: () => <div className="w-full"></div>,
       cell: () => {
-        if (loading) {
+        if (isInitialLoading) {
           return <div className="flex items-center justify-center"></div>;
         }
 
@@ -418,7 +415,7 @@ export const DelegateDelegationHistoryTable = ({
       cell: ({ row }) => {
         const item = row.original;
 
-        if (loading) {
+        if (isInitialLoading) {
           return (
             <div className="flex items-center gap-3">
               <SkeletonRow
@@ -493,10 +490,10 @@ export const DelegateDelegationHistoryTable = ({
     <div className="flex w-full flex-col gap-2 p-4">
       <Table
         columns={columns}
-        data={loading ? Array(12).fill({}) : delegationHistory}
+        data={isInitialLoading ? Array(12).fill({}) : delegationHistory}
         size="sm"
-        hasMore={paginationInfo.hasNextPage}
-        isLoadingMore={fetchingMore}
+        hasMore={hasNextPage}
+        isLoadingMore={loading}
         onLoadMore={fetchNextPage}
         wrapperClassName="h-[450px]"
         className="h-[400px]"
