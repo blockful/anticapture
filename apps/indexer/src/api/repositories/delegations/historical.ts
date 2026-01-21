@@ -11,9 +11,9 @@ export class HistoricalDelegationsRepository {
     orderDirection: "asc" | "desc",
     skip: number,
     limit: number,
-    fromValue: bigint | undefined,
-    toValue: bigint | undefined,
-    delegateAddressIn: Address[] | undefined,
+    fromValue?: bigint,
+    toValue?: bigint,
+    delegateAddressIn?: Address[],
   ): Promise<{
     items: DBDelegation[];
     totalCount: number;
