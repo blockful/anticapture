@@ -1,7 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import useSWR from "swr";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
@@ -81,6 +80,21 @@ interface PaginationInfo {
   itemsPerPage: number;
 }
 
+// Helper to create unique key for deduplication
+const getEventKey = (event: FeedEvent): string =>
+  `${event.txHash}-${event.logIndex}`;
+
+// Helper to deduplicate events
+const deduplicateEvents = (events: FeedEvent[]): FeedEvent[] => {
+  const seen = new Set<string>();
+  return events.filter((event) => {
+    const key = getEventKey(event);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+};
+
 export const useActivityFeed = ({
   daoId,
   filters = {},
@@ -88,70 +102,78 @@ export const useActivityFeed = ({
 }: UseActivityFeedParams) => {
   const limit = filters.limit ?? 20;
   const [allItems, setAllItems] = useState<FeedEvent[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const isFetchingRef = useRef(false);
 
-  // Create a stable key for SWR
-  const swrKey = useMemo(() => {
-    if (!enabled) return null;
-    return [
-      "activity-feed",
-      daoId,
-      JSON.stringify({ ...filters, limit, offset: 0 }),
-    ];
-  }, [daoId, filters, limit, enabled]);
-
-  const { data, error, isLoading, mutate } = useSWR(
-    swrKey,
-    () => fetchActivityFeed(daoId, { ...filters, limit, offset: 0 }),
-    {
-      revalidateOnFocus: false,
-      dedupingInterval: 30000,
-    },
-  );
-
-  // Reset state when filters change
+  // Create a stable filters hash for resetting
   const filtersHash = useMemo(
     () =>
       JSON.stringify({
+        daoId,
         types: filters.types,
         relevances: filters.relevances,
         fromTimestamp: filters.fromTimestamp,
         toTimestamp: filters.toTimestamp,
         sortOrder: filters.sortOrder,
       }),
-    [filters],
+    [daoId, filters],
   );
 
+  // Reset when filters change
   useEffect(() => {
     setAllItems([]);
-    setCurrentPage(1);
-  }, [filtersHash, daoId]);
+    setTotalCount(0);
+    setIsInitialLoad(true);
+    isFetchingRef.current = false;
+  }, [filtersHash]);
 
-  // Update allItems when initial data loads
+  // Fetch initial data
   useEffect(() => {
-    if (data?.items) {
-      setAllItems(data.items);
-    }
-  }, [data]);
+    if (!enabled || !isInitialLoad) return;
 
-  const totalCount = data?.totalCount ?? 0;
+    const fetchInitial = async () => {
+      if (isFetchingRef.current) return;
+      isFetchingRef.current = true;
+
+      try {
+        const data = await fetchActivityFeed(daoId, {
+          ...filters,
+          limit,
+          offset: 0,
+        });
+        setAllItems(deduplicateEvents(data.items));
+        setTotalCount(data.totalCount);
+      } catch (err) {
+        console.error("Error fetching activity feed:", err);
+      } finally {
+        setIsInitialLoad(false);
+        isFetchingRef.current = false;
+      }
+    };
+
+    fetchInitial();
+  }, [daoId, filters, limit, enabled, isInitialLoad]);
 
   const pagination: PaginationInfo = useMemo(() => {
     const hasNextPage = totalCount > allItems.length;
     return {
       totalCount,
       hasNextPage,
-      hasPreviousPage: currentPage > 1,
-      currentPage,
+      hasPreviousPage: false,
+      currentPage: Math.ceil(allItems.length / limit) || 1,
       itemsPerPage: limit,
     };
-  }, [totalCount, allItems.length, currentPage, limit]);
+  }, [totalCount, allItems.length, limit]);
 
   const fetchNextPage = useCallback(async () => {
-    if (!pagination.hasNextPage || isLoadingMore) return;
+    if (!pagination.hasNextPage || isLoadingMore || isFetchingRef.current)
+      return;
 
+    isFetchingRef.current = true;
     setIsLoadingMore(true);
+
     try {
       const nextOffset = allItems.length;
       const moreData = await fetchActivityFeed(daoId, {
@@ -160,12 +182,12 @@ export const useActivityFeed = ({
         offset: nextOffset,
       });
 
-      setAllItems((prev) => [...prev, ...moreData.items]);
-      setCurrentPage((p) => p + 1);
+      setAllItems((prev) => deduplicateEvents([...prev, ...moreData.items]));
     } catch (err) {
       console.error("Error fetching next page:", err);
     } finally {
       setIsLoadingMore(false);
+      isFetchingRef.current = false;
     }
   }, [
     daoId,
@@ -178,15 +200,16 @@ export const useActivityFeed = ({
 
   const refetch = useCallback(() => {
     setAllItems([]);
-    setCurrentPage(1);
-    mutate();
-  }, [mutate]);
+    setTotalCount(0);
+    setIsInitialLoad(true);
+    isFetchingRef.current = false;
+  }, []);
 
   return {
     data: allItems,
     totalCount,
-    loading: isLoading,
-    error,
+    loading: isInitialLoad,
+    error: null,
     refetch,
     pagination,
     fetchNextPage,
