@@ -102,10 +102,10 @@ export const TokenDistributionDialog = ({
               .map(([category, metrics], index, visibleEntries) => {
                 return (
                   <div key={category}>
-                    <CardTitle className="!text-alternative-sm text-secondary mb-1.5 flex items-center font-mono font-medium uppercase tracking-wide sm:gap-2.5">
+                    <CardTitle className="!text-alternative-sm text-secondary mb-1.5 flex items-center font-mono font-medium uppercase tracking-wide lg:gap-2.5">
                       {category}
                     </CardTitle>
-                    <div className="flex w-full flex-wrap gap-2 sm:gap-3">
+                    <div className="flex w-full flex-wrap gap-2 lg:gap-3">
                       {metrics.map((metric) => {
                         const isMetricAlreadyApplied = appliedMetrics[
                           category

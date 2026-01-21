@@ -46,7 +46,7 @@ export const AttackProfitabilityChartCard = ({ daoId }: Props) => {
   const metrics = useMemo(() => Object.values(METRICS_SCHEMA), []);
 
   return (
-    <div className="sm:bg-surface-default flex w-full flex-col gap-4 px-5 md:p-4">
+    <div className="lg:bg-surface-default flex w-full flex-col gap-4 px-5 lg:p-4">
       <CardHeader daoId={daoId} disabled={featureNotIncluded} />
 
       {featureNotIncluded ? (

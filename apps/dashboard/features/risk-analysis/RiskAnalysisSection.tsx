@@ -97,20 +97,20 @@ export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   });
 
   return (
-    <div className="flex flex-col gap-[13px] md:flex-row">
-      <div className="md:w-2/5">
+    <div className="flex flex-col gap-[13px] lg:flex-row">
+      <div className="lg:w-2/5">
         <RiskAreaCardWrapper
           title="Risk Areas"
           riskAreas={customizedRiskAreas}
           activeRiskId={activeRisk}
           onRiskClick={handleRiskClick}
-          className="grid-cols-2 sm:grid-cols-1"
+          className="grid-cols-2 lg:grid-cols-1"
           variant={RiskAreaCardEnum.RISK_ANALYSIS}
           withTitle={false}
         />
       </div>
 
-      <div className="md:w-3/5">
+      <div className="lg:w-3/5">
         {activeRisk ? (
           riskDescriptions[activeRisk]
         ) : (

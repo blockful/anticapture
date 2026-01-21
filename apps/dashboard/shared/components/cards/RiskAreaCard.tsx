@@ -134,7 +134,7 @@ const RiskAreaCardInternal = ({
         >
           <span
             className={cn(
-              "block font-mono font-medium text-black sm:tracking-wider",
+              "block font-mono font-medium text-black lg:tracking-wider",
               {
                 "!text-secondary": risk.level === RiskLevel.NONE,
                 "!text-success":
@@ -164,7 +164,7 @@ const RiskAreaCardInternal = ({
             riskLevelIcons[risk.level as RiskLevel]
           ) : (
             <div className="flex items-center justify-center font-mono text-xs">
-              <CounterClockwiseClockIcon className="text-secondary size-4 sm:size-5" />
+              <CounterClockwiseClockIcon className="text-secondary size-4 lg:size-5" />
             </div>
           )}
         </div>
@@ -283,7 +283,7 @@ export const RiskAreaCard = ({
           className={cn(
             "w-full p-1.5",
             isActive &&
-              "border-middle-dark bg-surface-background sm:bg-surface-default border-2",
+              "border-middle-dark bg-surface-background lg:bg-surface-default border-2",
           )}
         >
           <RiskAreaCardInternal
@@ -293,7 +293,7 @@ export const RiskAreaCard = ({
             variant={variant}
           />
         </div>
-        <div className="hidden h-full w-[13px] items-center justify-center sm:flex">
+        <div className="hidden h-full w-[13px] items-center justify-center lg:flex">
           {isActive && (
             <div className="border-l-middle-dark border-y-13 border-l-13 size-0 border-y-transparent" />
           )}
@@ -347,18 +347,18 @@ export const RiskAreaCardWrapper = ({
   return (
     <div
       className={cn("flex w-full flex-col gap-1", {
-        "sm:bg-surface-default gap-4 md:p-4":
+        "lg:bg-surface-default gap-4 lg:p-4":
           variant === RiskAreaCardEnum.DAO_OVERVIEW,
       })}
     >
       {/* Desktop title */}
       {withTitle &&
         (variant !== RiskAreaCardEnum.DAO_OVERVIEW ? (
-          <h3 className="text-primary mb-3 hidden font-mono text-xs font-medium tracking-wider sm:block">
+          <h3 className="text-primary mb-3 hidden font-mono text-xs font-medium tracking-wider lg:block">
             {title}
           </h3>
         ) : (
-          <div className="flex h-5 items-center gap-2 px-5 sm:px-0">
+          <div className="flex h-5 items-center gap-2 px-5 lg:px-0">
             <DefaultLink
               href={`${daoId.toLowerCase()}/risk-analysis`}
               openInNewTab={false}

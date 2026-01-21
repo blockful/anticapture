@@ -15,7 +15,7 @@ interface MetricsCardProps {
 }
 
 const COMMON_CARD_CLASSES =
-  "border-border-contrast border-b border-dashed pb-4 md:border-none md:p-3";
+  "border-border-contrast border-b border-dashed pb-4 lg:border-none lg:p-3";
 const TEXT_CLASSES = "mb-1";
 const BADGE_CLASSES = "bg-surface-opacity rounded-full px-1.5 py-0.5";
 
@@ -210,7 +210,7 @@ export const MetricsCard = ({ daoId, daoConfig }: MetricsCardProps) => {
   );
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-4 md:justify-between md:gap-2 md:border-none">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-4 lg:justify-between lg:gap-2 lg:border-none">
       <ProposalThresholdMetric
         daoId={daoId}
         proposalThresholdValue={proposalThresholdValue}

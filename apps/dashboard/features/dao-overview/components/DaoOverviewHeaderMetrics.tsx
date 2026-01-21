@@ -196,7 +196,7 @@ export const DaoOverviewHeaderMetrics = ({
         lastPrice={lastPrice}
         isLoading={isLoading}
       />
-      <div className="border-t-border-default md:bg-surface-default grid grid-cols-2 gap-4 border-t border-dashed pt-4 md:grid-cols-4 md:gap-0.5 md:border-none md:pt-0">
+      <div className="border-t-border-default lg:bg-surface-default grid grid-cols-2 gap-4 border-t border-dashed pt-4 lg:grid-cols-4 lg:gap-0.5 lg:border-none lg:pt-0">
         <DaoOverviewMetricCard
           title="Votable Supply"
           text={`${formattedValues.delegatedSupply} ${daoId} delegated`}
