@@ -1,49 +1,61 @@
-import { Address, createPublicClient, http, PublicClient } from "viem";
+import { Address } from "viem";
 
-import { getChain } from "@/lib/utils";
-import { env } from "@/env";
 import { DBHistoricalBalance } from "@/api/mappers";
 
-interface AccountBalanceRepository {
+interface Repository {
   getHistoricalBalances(
-    addresses: Address[],
-    timestamp: number,
+    accountId: Address,
+    skip: number,
+    limit: number,
+    orderDirection: "asc" | "desc",
+    orderBy: "timestamp" | "delta",
+    minDelta?: string,
+    maxDelta?: string,
+    fromDate?: number,
+    toDate?: number,
   ): Promise<DBHistoricalBalance[]>;
+
+  getHistoricalBalanceCount(
+    accountId: Address,
+    minDelta?: string,
+    maxDelta?: string,
+  ): Promise<number>;
 }
 
 export class HistoricalBalancesService {
-  private client: PublicClient;
+  constructor(private readonly repository: Repository) {}
 
-  constructor(private readonly repository: AccountBalanceRepository) {
-    const { CHAIN_ID: chainId, RPC_URL: rpcUrl } = env;
-    const chain = getChain(chainId);
-
-    if (!chain) {
-      throw new Error(`Chain with ID ${chainId} not found`);
-    }
-
-    this.client = createPublicClient({
-      chain,
-      transport: http(rpcUrl),
-    });
-  }
-
-  /**
-   * Fetches historical balances for multiple addresses at a specific time period
-   */
   async getHistoricalBalances(
-    addresses: Address[],
-    timestamp: number,
-  ): Promise<DBHistoricalBalance[]> {
-    return await this.repository.getHistoricalBalances(addresses, timestamp);
-  }
+    account: Address,
+    skip: number,
+    limit: number,
+    orderDirection: "asc" | "desc" = "desc",
+    orderBy: "timestamp" | "delta" = "timestamp",
+    minDelta?: string,
+    maxDelta?: string,
+    fromDate?: number,
+    toDate?: number,
+  ): Promise<{
+    items: DBHistoricalBalance[];
+    totalCount: number;
+  }> {
+    const items = await this.repository.getHistoricalBalances(
+      account,
+      skip,
+      limit,
+      orderDirection,
+      orderBy,
+      minDelta,
+      maxDelta,
+      fromDate,
+      toDate,
+    );
 
-  /**
-   * Get current block number
-   * @returns The current block number
-   */
-  async getCurrentBlockNumber(): Promise<number> {
-    const blockNumber = await this.client.getBlockNumber();
-    return Number(blockNumber);
+    const totalCount = await this.repository.getHistoricalBalanceCount(
+      account,
+      minDelta,
+      maxDelta,
+    );
+    return { items, totalCount };
   }
 }

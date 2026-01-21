@@ -24,17 +24,17 @@ export const AccountInteractionsQuerySchema =
     filterAddress: z.string().refine(isAddress, "Invalid address").optional(),
   });
 
+export const AccountInteractionResponseSchema = z.object({
+  accountId: z.string(),
+  amountTransferred: z.string(),
+  totalVolume: z.string(),
+  transferCount: z.string(),
+});
+
 export const AccountInteractionsResponseSchema = z.object({
   period: PeriodResponseSchema,
   totalCount: z.number(),
-  items: z.array(
-    z.object({
-      accountId: z.string(),
-      amountTransferred: z.string(),
-      totalVolume: z.string(),
-      transferCount: z.string(),
-    }),
-  ),
+  items: z.array(AccountInteractionResponseSchema),
 });
 
 export type AccountInteractionsResponse = z.infer<

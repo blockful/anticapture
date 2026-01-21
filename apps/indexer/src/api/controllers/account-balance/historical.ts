@@ -1,80 +1,66 @@
-import { isAddress } from "viem";
-import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
+import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
-import { DaysOpts, DaysEnum, DaoIdEnum } from "@/lib/enums";
 import { HistoricalBalancesService } from "@/api/services";
-import { HistoricalBalanceMapper } from "@/api/mappers";
+import {
+  HistoricalBalancesResponseMapper,
+  HistoricalBalanceRequestParamsSchema,
+  HistoricalBalanceRequestQuerySchema,
+  HistoricalBalancesResponseSchema,
+} from "@/api/mappers";
 
 export function historicalBalances(
   app: Hono,
-  daoId: DaoIdEnum,
-  balancesService: HistoricalBalancesService,
+  service: HistoricalBalancesService,
 ) {
   app.openapi(
     createRoute({
       method: "get",
       operationId: "historicalBalances",
-      path: "/balances/historical",
+      path: "/accounts/{address}/balances/historical",
       summary: "Get historical token balances",
-      description:
-        "Fetch historical token balances for multiple addresses at a specific time period using multicall",
+      description: "TODO",
       tags: ["account-balances"],
       request: {
-        query: z.object({
-          addresses: z
-            .array(z.string())
-            .min(1, "At least one address is required")
-            .refine((addresses) =>
-              addresses.every((address) => isAddress(address)),
-            )
-            .or(
-              z
-                .string()
-                .refine((addr) => isAddress(addr), "Invalid Ethereum address")
-                .transform((addr) => [addr]),
-            ),
-          days: z
-            .enum(DaysOpts)
-            .default("7d")
-            .transform((val) => DaysEnum[val]),
-        }),
+        params: HistoricalBalanceRequestParamsSchema,
+        query: HistoricalBalanceRequestQuerySchema,
       },
       responses: {
         200: {
           description: "Successfully retrieved historical balances",
           content: {
             "application/json": {
-              schema: z.array(
-                z.object({
-                  address: z.string(),
-                  balance: z.string(), // BigInt serialized as string
-                  blockNumber: z.number(),
-                  tokenAddress: z.string(),
-                }),
-              ),
+              schema: HistoricalBalancesResponseSchema,
             },
           },
         },
       },
     }),
     async (context) => {
-      const { addresses, days } = context.req.valid("query");
-      const now = Math.floor(Date.now() / 1000);
+      const { address } = context.req.valid("param");
+      const {
+        skip,
+        limit,
+        orderDirection,
+        orderBy,
+        fromValue,
+        toValue,
+        fromDate,
+        toDate,
+      } = context.req.valid("query");
 
-      const balances = await balancesService.getHistoricalBalances(
-        addresses,
-        now - days,
+      const { items, totalCount } = await service.getHistoricalBalances(
+        address,
+        skip,
+        limit,
+        orderDirection,
+        orderBy,
+        fromValue,
+        toValue,
+        fromDate,
+        toDate,
       );
 
-      return context.json(
-        HistoricalBalanceMapper(
-          daoId,
-          balances,
-          await balancesService.getCurrentBlockNumber(),
-          days,
-        ),
-        200,
-      );
+      return context.json(HistoricalBalancesResponseMapper(items, totalCount));
     },
   );
 }

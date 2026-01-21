@@ -37,6 +37,7 @@ import {
   DelegationPercentageRepository,
   DrizzleProposalsActivityRepository,
   DrizzleRepository,
+  HistoricalBalanceRepository,
   NFTPriceRepository,
   NounsVotingPowerRepository,
   TokenRepository,
@@ -124,6 +125,7 @@ const delegationPercentageService = new DelegationPercentageService(
   delegationPercentageRepo,
 );
 const balanceVariationsRepo = new BalanceVariationsRepository();
+const historicalBalancesRepo = new HistoricalBalanceRepository();
 const accountBalanceRepo = new AccountBalanceRepository();
 const accountInteractionRepo = new AccountInteractionsRepository();
 const transactionsService = new TransactionsService(transactionsRepo);
@@ -183,11 +185,7 @@ proposals(
   daoClient,
   blockTime,
 );
-historicalBalances(
-  app,
-  env.DAO_ID,
-  new HistoricalBalancesService(balanceVariationsRepo),
-);
+historicalBalances(app, new HistoricalBalancesService(historicalBalancesRepo));
 transactions(app, transactionsService);
 lastUpdate(app);
 delegationPercentage(app, delegationPercentageService);

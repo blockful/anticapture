@@ -3,6 +3,7 @@ import { votingPowerHistory } from "ponder:schema";
 
 import { DBDelegation } from "../transactions";
 import { DBTransfer } from "../transfers";
+import { isAddress } from "viem";
 
 export type DBHistoricalVotingPower = typeof votingPowerHistory.$inferSelect;
 export type DBHistoricalVotingPowerWithRelations = DBHistoricalVotingPower & {
@@ -10,7 +11,11 @@ export type DBHistoricalVotingPowerWithRelations = DBHistoricalVotingPower & {
   transfers: DBTransfer | null;
 };
 
-export const HistoricalVotingPowerRequestSchema = z.object({
+export const HistoricalVotingPowerRequestParamsSchema = z.object({
+  address: z.string().refine((addr) => isAddress(addr)),
+});
+
+export const HistoricalVotingPowerRequestQuerySchema = z.object({
   skip: z.coerce
     .number()
     .int()
@@ -39,36 +44,36 @@ export const HistoricalVotingPowerRequestSchema = z.object({
 });
 
 export type HistoricalVotingPowerRequest = z.infer<
-  typeof HistoricalVotingPowerRequestSchema
+  typeof HistoricalVotingPowerRequestQuerySchema
 >;
 
 export const HistoricalVotingPowerResponseSchema = z.object({
-  items: z.array(
-    z.object({
-      transactionHash: z.string(),
-      daoId: z.string(),
-      accountId: z.string(),
-      votingPower: z.string(),
-      delta: z.string(),
-      timestamp: z.string(),
-      logIndex: z.number(),
-      delegation: z
-        .object({
-          from: z.string(),
-          value: z.string(),
-          to: z.string(),
-          previousDelegate: z.string().nullable(),
-        })
-        .nullable(),
-      transfer: z
-        .object({
-          value: z.string(),
-          from: z.string(),
-          to: z.string(),
-        })
-        .nullable(),
-    }),
-  ),
+  transactionHash: z.string(),
+  daoId: z.string(),
+  accountId: z.string(),
+  votingPower: z.string(),
+  delta: z.string(),
+  timestamp: z.string(),
+  logIndex: z.number(),
+  delegation: z
+    .object({
+      from: z.string(),
+      value: z.string(),
+      to: z.string(),
+      previousDelegate: z.string().nullable(),
+    })
+    .nullable(),
+  transfer: z
+    .object({
+      value: z.string(),
+      from: z.string(),
+      to: z.string(),
+    })
+    .nullable(),
+});
+
+export const HistoricalVotingPowersResponseSchema = z.object({
+  items: z.array(HistoricalVotingPowerResponseSchema),
   totalCount: z.number(),
 });
 
@@ -76,35 +81,45 @@ export type HistoricalVotingPowerResponse = z.infer<
   typeof HistoricalVotingPowerResponseSchema
 >;
 
-export const HistoricalVotingPowerMapper = (
-  p: DBHistoricalVotingPowerWithRelations[],
-  totalCount: number,
+export type HistoricalVotingPowersResponse = z.infer<
+  typeof HistoricalVotingPowersResponseSchema
+>;
+
+export const HistoricalVotingPowerResponseMapper = (
+  p: DBHistoricalVotingPowerWithRelations,
 ): HistoricalVotingPowerResponse => {
   return {
-    items: p.map((p) => ({
-      transactionHash: p.transactionHash,
-      daoId: p.daoId,
-      accountId: p.accountId,
-      votingPower: p.votingPower.toString(),
-      delta: p.delta.toString(),
-      timestamp: p.timestamp.toString(),
-      logIndex: p.logIndex,
-      delegation: p.delegations
-        ? {
-            from: p.delegations.delegatorAccountId,
-            value: p.delegations.delegatedValue.toString(),
-            to: p.delegations.delegateAccountId,
-            previousDelegate: p.delegations.previousDelegate,
-          }
-        : null,
-      transfer: p.transfers
-        ? {
-            value: p.transfers.amount.toString(),
-            from: p.transfers.fromAccountId,
-            to: p.transfers.toAccountId,
-          }
-        : null,
-    })),
+    transactionHash: p.transactionHash,
+    daoId: p.daoId,
+    accountId: p.accountId,
+    votingPower: p.votingPower.toString(),
+    delta: p.delta.toString(),
+    timestamp: p.timestamp.toString(),
+    logIndex: p.logIndex,
+    delegation: p.delegations
+      ? {
+          from: p.delegations.delegatorAccountId,
+          value: p.delegations.delegatedValue.toString(),
+          to: p.delegations.delegateAccountId,
+          previousDelegate: p.delegations.previousDelegate,
+        }
+      : null,
+    transfer: p.transfers
+      ? {
+          value: p.transfers.amount.toString(),
+          from: p.transfers.fromAccountId,
+          to: p.transfers.toAccountId,
+        }
+      : null,
+  };
+};
+
+export const HistoricalVotingPowersResponseMapper = (
+  p: DBHistoricalVotingPowerWithRelations[],
+  totalCount: number,
+): HistoricalVotingPowersResponse => {
+  return {
+    items: p.map(HistoricalVotingPowerResponseMapper),
     totalCount: Number(totalCount),
   };
 };

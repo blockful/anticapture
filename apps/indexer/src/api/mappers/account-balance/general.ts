@@ -1,6 +1,3 @@
-import { calculateHistoricalBlockNumber } from "@/lib/blockTime";
-import { CONTRACT_ADDRESSES } from "@/lib/constants";
-import { DaoIdEnum, DaysEnum } from "@/lib/enums";
 import { z } from "@hono/zod-openapi";
 import { accountBalance } from "ponder:schema";
 import { Address, isAddress } from "viem";
@@ -93,37 +90,8 @@ export const AccountBalanceResponseMapper = (
 
 export type DBAccountBalance = typeof accountBalance.$inferSelect;
 
-export interface DBHistoricalBalance {
-  address: Address;
-  balance: string;
-}
-
-export type HistoricalBalance = DBHistoricalBalance & {
-  blockNumber: number;
-  tokenAddress: Address;
-};
-
 export interface Filter {
   address?: Address;
   minAmount?: bigint;
   maxAmount?: bigint;
 }
-
-export const HistoricalBalanceMapper = (
-  daoId: DaoIdEnum,
-  balances: DBHistoricalBalance[],
-  currentBlockNumber: number,
-  days: DaysEnum,
-): HistoricalBalance[] => {
-  const blockNumber = calculateHistoricalBlockNumber(
-    days,
-    currentBlockNumber,
-    CONTRACT_ADDRESSES[daoId].blockTime,
-  );
-
-  return balances.map((b) => ({
-    ...b,
-    blockNumber: blockNumber,
-    tokenAddress: CONTRACT_ADDRESSES[daoId].token.address,
-  }));
-};
