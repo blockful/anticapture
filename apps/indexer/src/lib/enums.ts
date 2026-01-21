@@ -12,6 +12,29 @@ export enum DaoIdEnum {
   ZK = "ZK",
 }
 
+export enum FeedEventTypeEnum {
+  VOTE = "vote",
+  PROPOSAL = "proposal",
+  TRANSFER = "transfer",
+  DELEGATION = "delegation",
+}
+
+export const feedEventTypeValues = Object.values(FeedEventTypeEnum) as [
+  string,
+  ...string[],
+];
+
+export enum FeedEventRelevanceEnum {
+  NONE = "none",
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+}
+
+export const feedEventRelevanceValues = Object.values(
+  FeedEventRelevanceEnum,
+) as [string, ...string[]];
+
 export const SECONDS_IN_DAY = 24 * 60 * 60;
 
 /**

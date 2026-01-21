@@ -24,6 +24,7 @@ import {
   dao,
   accountInteractions,
   transfers,
+  feedEvents,
 } from "@/api/controllers";
 import { docs } from "@/api/docs";
 import { env } from "@/env";
@@ -40,6 +41,7 @@ import {
   NounsVotingPowerRepository,
   AccountInteractionsRepository,
   TransfersRepository,
+  FeedEventRepository,
 } from "@/api/repositories";
 import { errorHandler } from "@/api/middlewares";
 import { getClient } from "@/lib/client";
@@ -58,6 +60,7 @@ import {
   HistoricalBalancesService,
   DaoService,
   TransfersService,
+  FeedEventService,
 } from "@/api/services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
@@ -181,6 +184,7 @@ votingPowerVariations(app, votingPowerService);
 accountBalanceVariations(app, accountBalanceService);
 accountInteractions(app, accountBalanceService);
 transfers(app, new TransfersService(new TransfersRepository()));
+feedEvents(app, new FeedEventService(new FeedEventRepository()));
 dao(app, daoService);
 docs(app);
 

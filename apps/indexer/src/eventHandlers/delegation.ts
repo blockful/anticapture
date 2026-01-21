@@ -3,15 +3,17 @@ import {
   accountBalance,
   accountPower,
   delegation,
+  feedEvent,
   votingPowerHistory,
 } from "ponder:schema";
 import { Address, Hex, zeroAddress } from "viem";
 
 import { ensureAccountExists, ensureAccountsExist } from "./shared";
-import { DaoIdEnum } from "@/lib/enums";
+import { DaoIdEnum, FeedEventTypeEnum } from "@/lib/enums";
 import {
   BurningAddresses,
   CEXAddresses,
+  computeRelevance,
   DEXAddresses,
   LendingAddresses,
 } from "@/lib/constants";
@@ -23,6 +25,7 @@ import {
  * - New `AccountBalance` record (if delegator doesn't have one for this token)
  * - New `AccountPower` record (if delegate doesn't have one for this DAO)
  * - New `Transaction` record (if this transaction hasn't been processed)
+ * - New `feedEvent` record for activity feed tracking
  *
  * ### Updates:
  * - `Delegation`: Adds to existing delegated value if record already exists
@@ -139,6 +142,22 @@ export const delegateChanged = async (
     .onConflictDoUpdate((current) => ({
       delegationsCount: current.delegationsCount + 1,
     }));
+
+  // Insert feed event for activity feed
+  const delegatedValue = delegatorBalance?.balance ?? 0n;
+  const relevance = computeRelevance(
+    daoId,
+    FeedEventTypeEnum.DELEGATION,
+    delegatedValue,
+  );
+  await context.db.insert(feedEvent).values({
+    txHash,
+    logIndex,
+    daoId,
+    type: FeedEventTypeEnum.DELEGATION,
+    relevance,
+    timestamp,
+  });
 };
 
 /**

@@ -733,3 +733,106 @@ export enum MetricTypesEnum {
 }
 
 export const metricTypeArray = Object.values(MetricTypesEnum);
+
+import { FeedEventRelevanceEnum, FeedEventTypeEnum } from "./enums";
+
+// Relevance thresholds configuration per DAO
+// Values are in token units (not wei) - will be converted to wei when comparing
+export type RelevanceThresholds = {
+  [FeedEventTypeEnum.TRANSFER]: { low: bigint; medium: bigint; high: bigint };
+  [FeedEventTypeEnum.DELEGATION]: { low: bigint; medium: bigint; high: bigint };
+  [FeedEventTypeEnum.VOTE]: { low: bigint; medium: bigint; high: bigint };
+};
+
+// Token decimals multiplier (10^18 for most ERC20 tokens)
+const DECIMALS_MULTIPLIER = 10n ** 18n;
+
+export const RELEVANCE_THRESHOLDS: Partial<
+  Record<DaoIdEnum, RelevanceThresholds>
+> = {
+  [DaoIdEnum.ENS]: {
+    [FeedEventTypeEnum.TRANSFER]: {
+      low: 1_000n * DECIMALS_MULTIPLIER,
+      medium: 100_000n * DECIMALS_MULTIPLIER,
+      high: 1_000_000n * DECIMALS_MULTIPLIER,
+    },
+    [FeedEventTypeEnum.DELEGATION]: {
+      low: 1_000n * DECIMALS_MULTIPLIER,
+      medium: 100_000n * DECIMALS_MULTIPLIER,
+      high: 500_000n * DECIMALS_MULTIPLIER,
+    },
+    [FeedEventTypeEnum.VOTE]: {
+      low: 10_000n * DECIMALS_MULTIPLIER,
+      medium: 100_000n * DECIMALS_MULTIPLIER,
+      high: 500_000n * DECIMALS_MULTIPLIER,
+    },
+  },
+  [DaoIdEnum.UNI]: {
+    [FeedEventTypeEnum.TRANSFER]: {
+      low: 1_000n * DECIMALS_MULTIPLIER,
+      medium: 100_000n * DECIMALS_MULTIPLIER,
+      high: 1_000_000n * DECIMALS_MULTIPLIER,
+    },
+    [FeedEventTypeEnum.DELEGATION]: {
+      low: 1_000n * DECIMALS_MULTIPLIER,
+      medium: 100_000n * DECIMALS_MULTIPLIER,
+      high: 500_000n * DECIMALS_MULTIPLIER,
+    },
+    [FeedEventTypeEnum.VOTE]: {
+      low: 10_000n * DECIMALS_MULTIPLIER,
+      medium: 100_000n * DECIMALS_MULTIPLIER,
+      high: 500_000n * DECIMALS_MULTIPLIER,
+    },
+  },
+  [DaoIdEnum.TEST]: {
+    [FeedEventTypeEnum.TRANSFER]: {
+      low: 100n * DECIMALS_MULTIPLIER,
+      medium: 1_000n * DECIMALS_MULTIPLIER,
+      high: 10_000n * DECIMALS_MULTIPLIER,
+    },
+    [FeedEventTypeEnum.DELEGATION]: {
+      low: 100n * DECIMALS_MULTIPLIER,
+      medium: 1_000n * DECIMALS_MULTIPLIER,
+      high: 5_000n * DECIMALS_MULTIPLIER,
+    },
+    [FeedEventTypeEnum.VOTE]: {
+      low: 100n * DECIMALS_MULTIPLIER,
+      medium: 1_000n * DECIMALS_MULTIPLIER,
+      high: 5_000n * DECIMALS_MULTIPLIER,
+    },
+  },
+};
+
+/**
+ * Computes the relevance level for a feed event based on the value and DAO thresholds.
+ * If thresholds are not configured for the DAO, returns "none".
+ */
+export function computeRelevance(
+  daoId: DaoIdEnum,
+  eventType:
+    | FeedEventTypeEnum.TRANSFER
+    | FeedEventTypeEnum.DELEGATION
+    | FeedEventTypeEnum.VOTE,
+  value: bigint,
+): FeedEventRelevanceEnum {
+  const thresholds = RELEVANCE_THRESHOLDS[daoId];
+  if (!thresholds) {
+    return FeedEventRelevanceEnum.NONE;
+  }
+
+  const eventThresholds = thresholds[eventType];
+  if (!eventThresholds) {
+    return FeedEventRelevanceEnum.NONE;
+  }
+
+  if (value >= eventThresholds.high) {
+    return FeedEventRelevanceEnum.HIGH;
+  }
+  if (value >= eventThresholds.medium) {
+    return FeedEventRelevanceEnum.MEDIUM;
+  }
+  if (value >= eventThresholds.low) {
+    return FeedEventRelevanceEnum.LOW;
+  }
+  return FeedEventRelevanceEnum.NONE;
+}

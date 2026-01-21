@@ -1,8 +1,9 @@
 import { Context } from "ponder:registry";
 import { Address, Hex, zeroAddress } from "viem";
-import { accountBalance, transfer } from "ponder:schema";
+import { accountBalance, feedEvent, transfer } from "ponder:schema";
 
-import { DaoIdEnum } from "@/lib/enums";
+import { DaoIdEnum, FeedEventTypeEnum } from "@/lib/enums";
+import { computeRelevance } from "@/lib/constants";
 import { ensureAccountExists } from "./shared";
 
 /**
@@ -12,6 +13,7 @@ import { ensureAccountExists } from "./shared";
  * - New `accountBalance` record (for sender if it doesn't exist and not minting)
  * - New `transfer` record with transaction details and classification flags
  * - New daily metric records for supply tracking (via `updateSupplyMetric` calls)
+ * - New `feedEvent` record for activity feed tracking
  *
  * ### Updates:
  * - `accountBalance`: Increments receiver's token balance by transfer value
@@ -106,4 +108,15 @@ export const tokenTransfer = async (
     .onConflictDoUpdate((current) => ({
       amount: current.amount + value,
     }));
+
+  // Insert feed event for activity feed
+  const relevance = computeRelevance(daoId, FeedEventTypeEnum.TRANSFER, value);
+  await context.db.insert(feedEvent).values({
+    txHash: transactionHash,
+    logIndex,
+    daoId,
+    type: FeedEventTypeEnum.TRANSFER,
+    relevance,
+    timestamp,
+  });
 };

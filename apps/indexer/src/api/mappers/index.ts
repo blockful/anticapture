@@ -7,3 +7,4 @@ export * from "./delegation-percentage";
 export * from "./account-balance";
 export * from "./dao";
 export * from "./transfers";
+export * from "./feed-event";

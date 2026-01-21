@@ -7,3 +7,4 @@ export * from "./voting-power";
 export * from "./token";
 export * from "./account-balance";
 export * from "./transfers";
+export * from "./feed-event";

@@ -1,15 +1,26 @@
 import { Context } from "ponder:registry";
-import { accountPower, proposalsOnchain, votesOnchain } from "ponder:schema";
+import {
+  accountPower,
+  feedEvent,
+  proposalsOnchain,
+  votesOnchain,
+} from "ponder:schema";
 import { Address, Hex } from "viem";
 
 import { ensureAccountExists } from "./shared";
-import { ProposalStatus } from "@/lib/constants";
+import { computeRelevance, ProposalStatus } from "@/lib/constants";
+import {
+  DaoIdEnum,
+  FeedEventRelevanceEnum,
+  FeedEventTypeEnum,
+} from "@/lib/enums";
 
 /**
  * ### Creates:
  * - New `Account` record (for voter if it doesn't exist)
  * - New `AccountPower` record (if voter doesn't have one for this DAO)
  * - New `votesOnchain` record with vote details (transaction hash, support, voting power, reason)
+ * - New `feedEvent` record for activity feed tracking
  *
  * ### Updates:
  * - `AccountPower`: Increments voter's total vote count by 1
@@ -30,10 +41,19 @@ export const voteCast = async (
     timestamp: bigint;
     txHash: Hex;
     votingPower: bigint;
+    logIndex: number;
   },
 ) => {
-  const { voter, timestamp, txHash, proposalId, support, votingPower, reason } =
-    args;
+  const {
+    voter,
+    timestamp,
+    txHash,
+    proposalId,
+    support,
+    votingPower,
+    reason,
+    logIndex,
+  } = args;
 
   await ensureAccountExists(context, voter);
 
@@ -71,6 +91,21 @@ export const voteCast = async (
       forVotes: current.forVotes + (support === 1 ? votingPower : 0n),
       abstainVotes: current.abstainVotes + (support === 2 ? votingPower : 0n),
     }));
+
+  // Insert feed event for activity feed
+  const relevance = computeRelevance(
+    daoId as DaoIdEnum,
+    FeedEventTypeEnum.VOTE,
+    votingPower,
+  );
+  await context.db.insert(feedEvent).values({
+    txHash,
+    logIndex,
+    daoId,
+    type: FeedEventTypeEnum.VOTE,
+    relevance,
+    timestamp,
+  });
 };
 
 /**
@@ -78,6 +113,7 @@ export const voteCast = async (
  * - New `Account` record (for proposer if it doesn't exist)
  * - New `proposalsOnchain` record with proposal details (targets, values, signatures, calldatas, blocks, description, status)
  * - New `AccountPower` record (if proposer doesn't have one for this DAO)
+ * - New `feedEvent` record for activity feed tracking
  *
  * ### Updates:
  * - `AccountPower`: Increments proposer's total proposals count by 1
@@ -104,6 +140,7 @@ export const proposalCreated = async (
     blockNumber: bigint;
     timestamp: bigint;
     proposalType?: number;
+    logIndex: number;
   },
 ) => {
   const {
@@ -119,6 +156,7 @@ export const proposalCreated = async (
     description,
     blockNumber,
     timestamp,
+    logIndex,
   } = args;
 
   await ensureAccountExists(context, proposer);
@@ -153,6 +191,17 @@ export const proposalCreated = async (
     .onConflictDoUpdate((current) => ({
       proposalsCount: current.proposalsCount + 1,
     }));
+
+  // Insert feed event for activity feed
+  // Proposals are always high relevance as they are significant governance actions
+  await context.db.insert(feedEvent).values({
+    txHash,
+    logIndex,
+    daoId,
+    type: FeedEventTypeEnum.PROPOSAL,
+    relevance: FeedEventRelevanceEnum.HIGH,
+    timestamp,
+  });
 };
 
 /**
