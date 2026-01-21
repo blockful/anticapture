@@ -15,7 +15,7 @@ export function delegations(app: Hono, service: DelegationsService) {
       operationId: "delegations",
       path: "/accounts/{address}/delegations",
       summary: "Get delegations",
-      description: "Get delegations for an account",
+      description: "Get current delegators of an account",
       tags: ["delegations"],
       request: {
         params: DelegationsRequestParamsSchema,
