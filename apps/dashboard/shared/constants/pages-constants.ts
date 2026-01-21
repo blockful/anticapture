@@ -30,7 +30,7 @@ export const PAGES_CONSTANTS = {
     title: "Activity Feed",
     page: "activity-feed",
     description:
-      "Real-time feed of governance activity including votes, proposals, transfers, and delegations.",
+      "Surfaces governance activity that helps assess DAO health, power shifts, and emerging risks.",
   },
   tokenDistribution: {
     title: "Token Distribution",

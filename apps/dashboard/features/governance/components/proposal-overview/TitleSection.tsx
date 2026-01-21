@@ -1,5 +1,5 @@
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { BulletDivider } from "@/features/governance/components/proposal-overview/BulletDivider";
+import { BulletDivider } from "@/shared/components/design-system/section";
 
 import { ChatBubbleIcon } from "@radix-ui/react-icons";
 import { Share2 } from "lucide-react";

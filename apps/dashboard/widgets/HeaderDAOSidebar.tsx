@@ -6,7 +6,7 @@ import {
   HeaderDAOSidebarDropdown,
   ButtonHeaderSidebar,
 } from "@/shared/components";
-import { Activity, BarChart, Gauge, Landmark, UserCheck } from "lucide-react";
+import { BarChart, Gauge, Landmark, Newspaper, UserCheck } from "lucide-react";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { ArrowRightLeft, PieChart } from "lucide-react";
 import { Crosshair2Icon } from "@radix-ui/react-icons";
@@ -90,7 +90,7 @@ export const HeaderDAOSidebar = () => {
 
             <ButtonHeaderSidebar
               page={PAGES_CONSTANTS.activityFeed.page}
-              icon={Activity}
+              icon={Newspaper}
               label={PAGES_CONSTANTS.activityFeed.title}
               key={PAGES_CONSTANTS.activityFeed.title}
             />

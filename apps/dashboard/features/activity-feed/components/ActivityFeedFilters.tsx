@@ -128,10 +128,7 @@ export const ActivityFeedFiltersDrawer = ({
       <DrawerContent className="flex h-full flex-col">
         <div className="bg-surface-default flex h-full flex-col overflow-y-auto">
           {/* Header */}
-          <div className="bg-surface-contrast px-4 pb-4 pt-2">
-            <div className="text-secondary mb-2 font-mono text-xs font-medium uppercase tracking-wider">
-              Drawer / Filters
-            </div>
+          <div className="bg-surface-contrast px-4 pb-4 pt-4">
             <div className="flex items-center justify-between">
               <h2 className="text-primary text-lg font-semibold">
                 Filter Activity
@@ -236,7 +233,7 @@ export const ActivityFeedFiltersDrawer = ({
                     value={localFilters.fromDate}
                     onChange={(e) => handleFromDateChange(e.target.value)}
                     placeholder="MM/DD/YYYY"
-                    className="pl-9"
+                    className="pl-9 [&::-webkit-calendar-picker-indicator]:hidden"
                   />
                 </div>
                 <span className="text-dimmed">–</span>
@@ -247,7 +244,7 @@ export const ActivityFeedFiltersDrawer = ({
                     value={localFilters.toDate}
                     onChange={(e) => handleToDateChange(e.target.value)}
                     placeholder="MM/DD/YYYY"
-                    className="pl-9"
+                    className="pl-9 [&::-webkit-calendar-picker-indicator]:hidden"
                   />
                 </div>
               </div>

@@ -1,12 +1,12 @@
 "use client";
 
 import {
-  Vote,
   FileText,
-  ArrowRightLeft,
-  Users,
   ExternalLink,
   CheckCircle2,
+  ArrowLeftRight,
+  Inbox,
+  HeartHandshake,
 } from "lucide-react";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
@@ -20,35 +20,39 @@ import {
   FeedEventType,
 } from "@/features/activity-feed/types";
 import daoConfig from "@/shared/dao-config";
+import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
+import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
+import { BulletDivider } from "@/shared/components/design-system/section";
 
 interface FeedEventItemProps {
   event: FeedEvent;
   className?: string;
+  isLast?: boolean;
 }
 
-const getEventIcon = (type: FeedEventType) => {
+const getBadgeIcon = (type: FeedEventType) => {
   switch (type) {
     case "vote":
-      return Vote;
+      return Inbox;
     case "proposal":
       return FileText;
     case "transfer":
-      return ArrowRightLeft;
+      return ArrowLeftRight;
     case "delegation":
-      return Users;
+      return HeartHandshake;
   }
 };
 
-const getEventIconColor = (type: FeedEventType) => {
-  switch (type) {
-    case "vote":
-      return "text-dimmed";
-    case "proposal":
-      return "text-dimmed";
-    case "transfer":
-      return "text-dimmed";
-    case "delegation":
-      return "text-dimmed";
+const getBadgeVariant = (relevance: FeedEventRelevance) => {
+  switch (relevance) {
+    case "high":
+      return "error";
+    case "medium":
+      return "warning";
+    case "low":
+      return "success";
+    case "none":
+      return "secondary";
   }
 };
 
@@ -100,12 +104,16 @@ const formatTime = (timestamp: number) => {
   });
 };
 
-export const FeedEventItem = ({ event, className }: FeedEventItemProps) => {
+export const FeedEventItem = ({
+  event,
+  className,
+  isLast = false,
+}: FeedEventItemProps) => {
   const { daoId } = useParams<{ daoId: DaoIdEnum }>();
   const config = daoConfig[daoId.toUpperCase() as DaoIdEnum];
 
-  const Icon = getEventIcon(event.type);
-  const iconColor = getEventIconColor(event.type);
+  const BadgeIcon = getBadgeIcon(event.type);
+  const badgeVariant = getBadgeVariant(event.relevance);
 
   const formatAmount = (amount: string) => {
     const value = Number(amount) / Math.pow(10, config?.decimals ?? 18);
@@ -128,7 +136,7 @@ export const FeedEventItem = ({ event, className }: FeedEventItemProps) => {
             <EnsAvatar
               address={event.vote.voter as Address}
               showAvatar={true}
-              size="xs"
+              size="sm"
               nameClassName="text-primary font-medium"
             />
             <span className="text-dimmed">
@@ -169,7 +177,7 @@ export const FeedEventItem = ({ event, className }: FeedEventItemProps) => {
             <EnsAvatar
               address={event.proposal.proposer as Address}
               showAvatar={true}
-              size="xs"
+              size="sm"
               nameClassName="text-primary font-medium"
             />
             <span className="text-dimmed">
@@ -201,18 +209,18 @@ export const FeedEventItem = ({ event, className }: FeedEventItemProps) => {
             <EnsAvatar
               address={event.transfer.from as Address}
               showAvatar={true}
-              size="xs"
+              size="sm"
               nameClassName="text-primary font-medium"
             />
             <span className="text-secondary">transferred</span>
-            <span className="text-success font-medium">
+            <span className="text-primary font-medium">
               {formatAmount(event.transfer.amount)} {tokenSymbol}
             </span>
             <span className="text-secondary">to</span>
             <EnsAvatar
               address={event.transfer.to as Address}
               showAvatar={true}
-              size="xs"
+              size="sm"
               nameClassName="text-primary font-medium"
             />
             <a
@@ -238,7 +246,7 @@ export const FeedEventItem = ({ event, className }: FeedEventItemProps) => {
             <EnsAvatar
               address={event.delegation.delegator as Address}
               showAvatar={true}
-              size="xs"
+              size="sm"
               nameClassName="text-primary font-medium"
             />
             <span className="text-secondary">
@@ -253,7 +261,7 @@ export const FeedEventItem = ({ event, className }: FeedEventItemProps) => {
                 <EnsAvatar
                   address={event.delegation.previousDelegate as Address}
                   showAvatar={true}
-                  size="xs"
+                  size="sm"
                   nameClassName="text-primary font-medium"
                 />
               </>
@@ -262,7 +270,7 @@ export const FeedEventItem = ({ event, className }: FeedEventItemProps) => {
             <EnsAvatar
               address={event.delegation.delegate as Address}
               showAvatar={true}
-              size="xs"
+              size="sm"
               nameClassName="text-primary font-medium"
             />
             <a
@@ -280,17 +288,24 @@ export const FeedEventItem = ({ event, className }: FeedEventItemProps) => {
   };
 
   return (
-    <div
-      className={cn(
-        "hover:bg-surface-contrast flex items-start gap-2 py-2 transition-colors",
-        className,
-      )}
-    >
-      {/* Icon */}
-      <Icon className={cn("mt-0.5 size-4 shrink-0", iconColor)} />
+    <div className={cn("flex items-start gap-4 pb-1", className)}>
+      {/* Badge and Connector */}
+      <div>
+        <BadgeStatus
+          variant={badgeVariant}
+          icon={BadgeIcon}
+          className="size-6"
+          iconVariant={badgeVariant}
+        />
+        {!isLast && (
+          <div className="mt-1 flex w-6 justify-center">
+            <DividerDefault isVertical className="h-10" />
+          </div>
+        )}
+      </div>
 
       {/* Content */}
-      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
         {/* Main action line */}
         <div className="text-sm">{renderEventContent()}</div>
 
@@ -301,11 +316,11 @@ export const FeedEventItem = ({ event, className }: FeedEventItemProps) => {
           >
             {getRelevanceLabel(event.relevance)}
           </span>
-          <span className="text-dimmed">•</span>
+          <BulletDivider></BulletDivider>
           <span className="text-secondary">
             {getEventTypeLabel(event.type)}
           </span>
-          <span className="text-dimmed">•</span>
+          <BulletDivider></BulletDivider>
           <span className="text-secondary">
             {formatTime(Number(event.timestamp))}
           </span>

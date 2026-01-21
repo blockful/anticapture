@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { formatUnits } from "viem";
-import { BulletDivider } from "@/features/governance/components/proposal-overview/BulletDivider";
+import { BulletDivider } from "@/shared/components/design-system/section";
 import { ProposalInfoText } from "@/features/governance/components/proposal-overview/ProposalInfoText";
 
 export const ProposalInfoSection = ({

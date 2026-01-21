@@ -171,7 +171,7 @@ export const EnsAvatar = ({
 
   // Return avatar with name
   return (
-    <div className={cn("flex min-w-0 items-center gap-3", containerClassName)}>
+    <div className={cn("flex min-w-0 items-center gap-2", containerClassName)}>
       {avatarElement()}
 
       <div className="flex min-w-0 flex-col">

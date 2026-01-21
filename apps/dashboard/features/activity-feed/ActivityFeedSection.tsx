@@ -5,11 +5,16 @@ import { useParams } from "next/navigation";
 import { Activity, Filter } from "lucide-react";
 import { cn } from "@/shared/utils";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { Button } from "@/shared/components";
+import { Button, BlankSlate } from "@/shared/components";
 import { useActivityFeed } from "@/features/activity-feed/hooks/useActivityFeed";
 import { FeedEventItem } from "@/features/activity-feed/components/FeedEventItem";
 import { FeedEventSkeleton } from "@/features/activity-feed/components/FeedEventSkeleton";
 import { ActivityFeedFiltersDrawer } from "@/features/activity-feed/components/ActivityFeedFilters";
+import { TheSectionLayout } from "@/shared/components";
+import { SubSectionsContainer } from "@/shared/components/design-system/section";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
+import { BulletDivider } from "@/shared/components/design-system/section";
+import { Newspaper } from "lucide-react";
 import {
   ActivityFeedFilterState,
   FeedEvent,
@@ -170,126 +175,124 @@ export const ActivityFeedSection = ({
   const groupedEvents = useMemo(() => groupEventsByDate(events), [events]);
 
   return (
-    <section className={cn("flex flex-col gap-6", className)}>
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-start gap-3">
-          <div className="bg-surface-contrast mt-1 flex size-10 items-center justify-center rounded-lg">
-            <Activity className="text-primary size-5" />
-          </div>
-          <div className="flex flex-col gap-1">
-            <h1 className="text-primary text-2xl font-semibold">
-              Activity Feed
-            </h1>
-            <p className="text-secondary text-sm">
-              Surfaces governance activity that helps assess DAO health, power
-              shifts, and emerging risks.
-            </p>
-          </div>
-        </div>
-
-        {/* Filter button */}
-        <Button
-          variant="outline"
-          onClick={() => setIsFilterDrawerOpen(true)}
-          className="shrink-0 gap-2"
-        >
-          <Filter className="size-4" />
-          Filters
-          {activeFiltersCount > 0 && (
-            <span className="text-primary">({activeFiltersCount})</span>
-          )}
-        </Button>
-      </div>
-
-      {/* Filter Drawer */}
-      <ActivityFeedFiltersDrawer
-        isOpen={isFilterDrawerOpen}
-        onClose={() => setIsFilterDrawerOpen(false)}
-        filters={filters}
-        onApplyFilters={handleApplyFilters}
-      />
-
-      {/* Feed content */}
-      <div className="flex flex-col">
-        {error && (
-          <div className="flex flex-col items-center justify-center gap-2 px-4 py-8">
-            <p className="text-error text-sm">Failed to load activity feed</p>
-            <button
-              onClick={refetch}
-              className="text-link hover:text-link-hover text-sm underline"
-            >
-              Try again
-            </button>
-          </div>
-        )}
-
-        {loading && events.length === 0 && (
-          <div className="flex flex-col">
-            {Array.from({ length: 10 }).map((_, i) => (
-              <FeedEventSkeleton key={i} />
-            ))}
-          </div>
-        )}
-
-        {!loading && events.length === 0 && !error && (
-          <div className="flex flex-col items-center justify-center gap-2 px-4 py-8">
-            <Activity className="text-secondary size-8" />
-            <p className="text-secondary text-sm">No activity found</p>
+    <>
+      <TheSectionLayout
+        title={PAGES_CONSTANTS.activityFeed.title}
+        subtitle={"Activity Feed"}
+        icon={<Newspaper className="section-layout-icon" />}
+        description={PAGES_CONSTANTS.activityFeed.description}
+        headerAction={
+          <Button
+            variant="primary"
+            onClick={() => setIsFilterDrawerOpen(true)}
+            className="shrink-0 gap-1"
+          >
+            <Filter className="size-4" />
+            Filters
             {activeFiltersCount > 0 && (
-              <button
-                onClick={clearFilters}
-                className="text-link hover:text-link-hover text-sm underline"
-              >
-                Clear filters
-              </button>
+              <span className="text-inverted">({activeFiltersCount})</span>
             )}
-          </div>
-        )}
+          </Button>
+        }
+      >
+        {/* Filter Drawer */}
+        <ActivityFeedFiltersDrawer
+          isOpen={isFilterDrawerOpen}
+          onClose={() => setIsFilterDrawerOpen(false)}
+          filters={filters}
+          onApplyFilters={handleApplyFilters}
+        />
 
-        {groupedEvents.length > 0 && (
-          <div className="flex flex-col">
-            {groupedEvents.map((group) => (
-              <div key={group.date} className="flex flex-col">
-                {/* Date header */}
-                <div className="flex items-center gap-2 py-3">
-                  <span className="text-secondary font-mono text-xs font-medium tracking-wider">
+        {/* Feed content */}
+        <div className={cn("flex flex-col gap-6", className)}>
+          {error && (
+            <SubSectionsContainer>
+              <div className="flex flex-col items-center justify-center gap-2 px-4 py-8">
+                <p className="text-error text-sm">
+                  Failed to load activity feed
+                </p>
+                <button
+                  onClick={refetch}
+                  className="text-link hover:text-link-hover text-sm underline"
+                >
+                  Try again
+                </button>
+              </div>
+            </SubSectionsContainer>
+          )}
+
+          {loading && events.length === 0 && (
+            <SubSectionsContainer>
+              <div className="flex flex-col">
+                {Array.from({ length: 10 }).map((_, i) => (
+                  <FeedEventSkeleton key={i} />
+                ))}
+              </div>
+            </SubSectionsContainer>
+          )}
+
+          {!loading && events.length === 0 && !error && (
+            <SubSectionsContainer>
+              <BlankSlate
+                variant="default"
+                icon={Activity}
+                description="No activity found"
+              >
+                {activeFiltersCount > 0 && (
+                  <button
+                    onClick={clearFilters}
+                    className="text-link hover:text-link-hover text-sm underline"
+                  >
+                    Clear filters
+                  </button>
+                )}
+              </BlankSlate>
+            </SubSectionsContainer>
+          )}
+
+          {groupedEvents.map((group) => (
+            <SubSectionsContainer className="sm:pt-0" key={group.date}>
+              {/* Sticky date header */}
+              <div className="sm:bg-surface-contrast sticky top-0 z-10 py-4 sm:-mx-5 sm:px-5">
+                <div className="flex items-center gap-2">
+                  <span className="text-primary font-mono text-sm font-medium uppercase">
                     {group.label}
                   </span>
-                  <span className="text-dimmed">•</span>
-                  <span className="text-dimmed font-mono text-xs">
+                  <BulletDivider />
+                  <span className="text-secondary font-mono text-sm">
                     {group.highRelevanceCount} HIGH RELEVANCE{" "}
                     {group.highRelevanceCount === 1 ? "ACTIVITY" : "ACTIVITIES"}
                   </span>
                 </div>
-
-                {/* Events */}
-                <div className="flex flex-col">
-                  {group.events.map((event) => (
-                    <FeedEventItem
-                      key={`${event.txHash}-${event.logIndex}`}
-                      event={event}
-                    />
-                  ))}
-                </div>
               </div>
-            ))}
 
-            {/* Load more */}
-            {pagination.hasNextPage && (
-              <div className="flex justify-center py-4">
-                <Button
-                  variant="outline"
-                  onClick={fetchNextPage}
-                  disabled={isLoadingMore}
-                >
-                  {isLoadingMore ? "Loading..." : "Load more"}
-                </Button>
+              {/* Events */}
+              <div className="flex flex-col">
+                {group.events.map((event, index) => (
+                  <FeedEventItem
+                    key={`${event.txHash}-${event.logIndex}`}
+                    event={event}
+                    isLast={index === group.events.length - 1}
+                  />
+                ))}
               </div>
-            )}
-          </div>
-        )}
-      </div>
-    </section>
+            </SubSectionsContainer>
+          ))}
+
+          {/* Load more */}
+          {pagination.hasNextPage && (
+            <div className="flex justify-center py-4">
+              <Button
+                variant="outline"
+                onClick={fetchNextPage}
+                disabled={isLoadingMore}
+              >
+                {isLoadingMore ? "Loading..." : "Load more"}
+              </Button>
+            </div>
+          )}
+        </div>
+      </TheSectionLayout>
+    </>
   );
 };
