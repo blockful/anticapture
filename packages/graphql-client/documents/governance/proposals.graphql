@@ -159,13 +159,3 @@ query GetAccountPower($address: String!, $proposalId: String!) {
   }
 }
 
-query GetUserVote($proposalId: String!, $address: String!) {
-  votesOnchain(proposalId: $proposalId, voterAccountId: $address) {
-    support
-    votingPower
-    reason
-    timestamp
-    txHash
-    daoId
-  }
-}

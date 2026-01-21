@@ -1,10 +1,4 @@
-const daoItemQueries = [
-  "account",
-  "daoMetricsDayBucket",
-  "delegation",
-  "proposalsOnchain",
-  "votesOnchain",
-];
+const daoItemQueries = ["votesOnchain"];
 
 export const itemResolvers = daoItemQueries.reduce((acc, fieldName) => {
   acc[fieldName] = {
