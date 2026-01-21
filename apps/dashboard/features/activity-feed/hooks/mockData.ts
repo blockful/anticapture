@@ -1,7 +1,7 @@
 import { FeedEventListResponse } from "@/features/activity-feed/types";
 
 // Set to true to use mock data instead of real API
-export const USE_MOCK_DATA = true;
+export const USE_MOCK_DATA = false;
 
 export const MOCK_FEED_DATA: FeedEventListResponse = {
   items: [

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
-import { Activity, Filter } from "lucide-react";
+import { Activity, Filter, Loader2 } from "lucide-react";
 import { cn } from "@/shared/utils";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { Button, BlankSlate } from "@/shared/components";
@@ -174,6 +174,41 @@ export const ActivityFeedSection = ({
   // Group events by date
   const groupedEvents = useMemo(() => groupEventsByDate(events), [events]);
 
+  // Infinite scroll with Intersection Observer
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  const handleIntersection = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      const [entry] = entries;
+      if (
+        entry.isIntersecting &&
+        pagination.hasNextPage &&
+        !isLoadingMore &&
+        !loading
+      ) {
+        fetchNextPage();
+      }
+    },
+    [pagination.hasNextPage, isLoadingMore, loading, fetchNextPage],
+  );
+
+  useEffect(() => {
+    const sentinel = loadMoreRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(handleIntersection, {
+      root: null,
+      rootMargin: "200px", // Start loading before reaching the bottom
+      threshold: 0,
+    });
+
+    observer.observe(sentinel);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [handleIntersection]);
+
   return (
     <>
       <TheSectionLayout
@@ -279,16 +314,13 @@ export const ActivityFeedSection = ({
             </SubSectionsContainer>
           ))}
 
-          {/* Load more */}
-          {pagination.hasNextPage && (
+          {/* Infinite scroll sentinel */}
+          <div ref={loadMoreRef} className="h-1" />
+
+          {/* Loading indicator */}
+          {isLoadingMore && (
             <div className="flex justify-center py-4">
-              <Button
-                variant="outline"
-                onClick={fetchNextPage}
-                disabled={isLoadingMore}
-              >
-                {isLoadingMore ? "Loading..." : "Load more"}
-              </Button>
+              <Loader2 className="text-secondary size-6 animate-spin" />
             </div>
           )}
         </div>
