@@ -29,6 +29,7 @@ const daoItemQueries = [
   "delegationPercentageByDay",
   "dao",
   "transfers",
+  "getFeedEvents",
 ];
 
 export const restResolvers = daoItemQueries.reduce((acc, fieldName) => {
