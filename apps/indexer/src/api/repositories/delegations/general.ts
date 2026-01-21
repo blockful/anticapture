@@ -5,9 +5,12 @@ import { delegation } from "ponder:schema";
 import { Address } from "viem";
 
 export class DelegationsRepository {
-    async getDelegations(address: Address): Promise<DBDelegation[]> {
-    return [await db.query.delegation.findOne({
+  async getDelegations(address: Address): Promise<DBDelegation[]> {
+    const result = await db.query.delegation.findFirst({
       where: eq(delegation.delegatorAccountId, address),
       orderBy: [desc(delegation.timestamp), desc(delegation.logIndex)],
-    })];
+    });
+
+    return result ? [result] : [];
+  }
 }

@@ -97,10 +97,7 @@ export const delegation = onchainTable(
       .$type<Address>()
       .notNull(),
     delegatedValue: drizzle.bigint("delegated_value").notNull().default(0n),
-    previousDelegate: drizzle
-      .text("previous_delegate")
-      .$type<Address>()
-      .notNull(),
+    previousDelegate: drizzle.text("previous_delegate"),
     timestamp: drizzle.bigint().notNull(),
     logIndex: drizzle.integer("log_index").notNull(),
     isCex: drizzle.boolean().notNull().default(false),
