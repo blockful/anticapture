@@ -39,29 +39,16 @@ const getEventIcon = (type: FeedEventType) => {
   }
 };
 
-const getEventColor = (type: FeedEventType) => {
+const getEventIconColor = (type: FeedEventType) => {
   switch (type) {
     case "vote":
-      return "text-chart-1";
+      return "text-dimmed";
     case "proposal":
-      return "text-chart-4";
+      return "text-dimmed";
     case "transfer":
-      return "text-chart-3";
+      return "text-dimmed";
     case "delegation":
-      return "text-chart-5";
-  }
-};
-
-const getEventBgColor = (type: FeedEventType) => {
-  switch (type) {
-    case "vote":
-      return "bg-chart-1/10";
-    case "proposal":
-      return "bg-chart-4/10";
-    case "transfer":
-      return "bg-chart-3/10";
-    case "delegation":
-      return "bg-chart-5/10";
+      return "text-dimmed";
   }
 };
 
@@ -118,8 +105,7 @@ export const FeedEventItem = ({ event, className }: FeedEventItemProps) => {
   const config = daoConfig[daoId.toUpperCase() as DaoIdEnum];
 
   const Icon = getEventIcon(event.type);
-  const iconColor = getEventColor(event.type);
-  const iconBgColor = getEventBgColor(event.type);
+  const iconColor = getEventIconColor(event.type);
 
   const formatAmount = (amount: string) => {
     const value = Number(amount) / Math.pow(10, config?.decimals ?? 18);
@@ -296,22 +282,15 @@ export const FeedEventItem = ({ event, className }: FeedEventItemProps) => {
   return (
     <div
       className={cn(
-        "hover:bg-surface-contrast flex items-start gap-3 px-4 py-3 transition-colors",
+        "hover:bg-surface-contrast flex items-start gap-2 py-2 transition-colors",
         className,
       )}
     >
       {/* Icon */}
-      <div
-        className={cn(
-          "mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full",
-          iconBgColor,
-        )}
-      >
-        <Icon className={cn("size-4", iconColor)} />
-      </div>
+      <Icon className={cn("mt-0.5 size-4 shrink-0", iconColor)} />
 
       {/* Content */}
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         {/* Main action line */}
         <div className="text-sm">{renderEventContent()}</div>
 

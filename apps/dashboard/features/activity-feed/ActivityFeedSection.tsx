@@ -209,7 +209,7 @@ export const ActivityFeedSection = ({
         )}
 
         {loading && events.length === 0 && (
-          <div className="border-border-default bg-surface-default overflow-hidden rounded-lg border">
+          <div className="flex flex-col">
             {Array.from({ length: 10 }).map((_, i) => (
               <FeedEventSkeleton key={i} />
             ))}
@@ -232,11 +232,11 @@ export const ActivityFeedSection = ({
         )}
 
         {groupedEvents.length > 0 && (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col">
             {groupedEvents.map((group) => (
               <div key={group.date} className="flex flex-col">
                 {/* Date header */}
-                <div className="flex items-center gap-2 px-4 py-3">
+                <div className="flex items-center gap-2 py-3">
                   <span className="text-secondary font-mono text-xs font-medium tracking-wider">
                     {group.label}
                   </span>
@@ -248,12 +248,11 @@ export const ActivityFeedSection = ({
                 </div>
 
                 {/* Events */}
-                <div className="border-border-default bg-surface-default overflow-hidden rounded-lg border">
+                <div className="flex flex-col">
                   {group.events.map((event) => (
                     <FeedEventItem
                       key={`${event.txHash}-${event.logIndex}`}
                       event={event}
-                      className="border-border-default border-b last:border-b-0"
                     />
                   ))}
                 </div>
