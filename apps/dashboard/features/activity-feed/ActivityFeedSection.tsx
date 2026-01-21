@@ -2,15 +2,18 @@
 
 import { useState, useMemo } from "react";
 import { useParams } from "next/navigation";
-import { Activity, RefreshCw, SlidersHorizontal } from "lucide-react";
+import { Activity, Filter } from "lucide-react";
 import { cn } from "@/shared/utils";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { IconButton } from "@/shared/components";
+import { Button } from "@/shared/components";
 import { useActivityFeed } from "@/features/activity-feed/hooks/useActivityFeed";
 import { FeedEventItem } from "@/features/activity-feed/components/FeedEventItem";
 import { FeedEventSkeleton } from "@/features/activity-feed/components/FeedEventSkeleton";
 import { ActivityFeedFiltersDrawer } from "@/features/activity-feed/components/ActivityFeedFilters";
-import { ActivityFeedFilterState } from "@/features/activity-feed/types";
+import {
+  ActivityFeedFilterState,
+  FeedEvent,
+} from "@/features/activity-feed/types";
 
 interface ActivityFeedSectionProps {
   className?: string;
@@ -22,6 +25,71 @@ const DEFAULT_FILTERS: ActivityFeedFilterState = {
   relevances: [],
   fromDate: "",
   toDate: "",
+};
+
+// Helper to group events by date
+const groupEventsByDate = (events: FeedEvent[]) => {
+  const groups: {
+    label: string;
+    date: string;
+    events: FeedEvent[];
+    highRelevanceCount: number;
+  }[] = [];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  const eventsByDate = new Map<string, FeedEvent[]>();
+
+  events.forEach((event) => {
+    const eventDate = new Date(Number(event.timestamp) * 1000);
+    eventDate.setHours(0, 0, 0, 0);
+    const dateKey = eventDate.toISOString().split("T")[0];
+
+    if (!eventsByDate.has(dateKey)) {
+      eventsByDate.set(dateKey, []);
+    }
+    eventsByDate.get(dateKey)!.push(event);
+  });
+
+  // Sort dates in descending order
+  const sortedDates = Array.from(eventsByDate.keys()).sort(
+    (a, b) => new Date(b).getTime() - new Date(a).getTime(),
+  );
+
+  sortedDates.forEach((dateKey) => {
+    const dateEvents = eventsByDate.get(dateKey)!;
+    const eventDate = new Date(dateKey);
+
+    let label: string;
+    if (eventDate.getTime() === today.getTime()) {
+      label = "TODAY";
+    } else if (eventDate.getTime() === yesterday.getTime()) {
+      label = "YESTERDAY";
+    } else {
+      label = eventDate
+        .toLocaleDateString("en-US", {
+          weekday: "long",
+          month: "short",
+          day: "numeric",
+        })
+        .toUpperCase();
+    }
+
+    const highRelevanceCount = dateEvents.filter(
+      (e) => e.relevance === "high",
+    ).length;
+
+    groups.push({
+      label,
+      date: dateKey,
+      events: dateEvents,
+      highRelevanceCount,
+    });
+  });
+
+  return groups;
 };
 
 export const ActivityFeedSection = ({
@@ -42,14 +110,12 @@ export const ActivityFeedSection = ({
   const toTimestamp = useMemo(() => {
     if (!filters.toDate) return undefined;
     const date = new Date(filters.toDate);
-    // Set to end of day
     date.setHours(23, 59, 59, 999);
     return Math.floor(date.getTime() / 1000);
   }, [filters.toDate]);
 
   const {
     data: events,
-    totalCount,
     loading,
     error,
     refetch,
@@ -84,48 +150,40 @@ export const ActivityFeedSection = ({
     setFilters(DEFAULT_FILTERS);
   };
 
+  // Group events by date
+  const groupedEvents = useMemo(() => groupEventsByDate(events), [events]);
+
   return (
-    <section className={cn("flex flex-col gap-4", className)}>
+    <section className={cn("flex flex-col gap-6", className)}>
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Activity className="text-brand size-5" />
-          <h2 className="text-primary text-xl font-semibold">Activity Feed</h2>
-          {!loading && (
-            <span className="text-secondary text-sm">
-              ({totalCount} events)
-            </span>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2">
-          {/* Filter button */}
-          <div className="relative">
-            <IconButton
-              variant="outline"
-              size="md"
-              icon={SlidersHorizontal}
-              onClick={() => setIsFilterDrawerOpen(true)}
-              aria-label="Open filters"
-            />
-            {activeFiltersCount > 0 && (
-              <span className="bg-highlight text-surface-background absolute -right-1 -top-1 flex size-4 items-center justify-center rounded-full text-[10px] font-semibold">
-                {activeFiltersCount}
-              </span>
-            )}
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start gap-3">
+          <div className="bg-surface-contrast mt-1 flex size-10 items-center justify-center rounded-lg">
+            <Activity className="text-primary size-5" />
           </div>
-
-          {/* Refresh button */}
-          <IconButton
-            variant="outline"
-            size="md"
-            icon={RefreshCw}
-            iconClassName={cn(loading && "animate-spin")}
-            onClick={refetch}
-            disabled={loading}
-            aria-label="Refresh"
-          />
+          <div className="flex flex-col gap-1">
+            <h1 className="text-primary text-2xl font-semibold">
+              Activity Feed
+            </h1>
+            <p className="text-secondary text-sm">
+              Surfaces governance activity that helps assess DAO health, power
+              shifts, and emerging risks.
+            </p>
+          </div>
         </div>
+
+        {/* Filter button */}
+        <Button
+          variant="outline"
+          onClick={() => setIsFilterDrawerOpen(true)}
+          className="shrink-0 gap-2"
+        >
+          <Filter className="size-4" />
+          Filters
+          {activeFiltersCount > 0 && (
+            <span className="text-primary">({activeFiltersCount})</span>
+          )}
+        </Button>
       </div>
 
       {/* Filter Drawer */}
@@ -137,7 +195,7 @@ export const ActivityFeedSection = ({
       />
 
       {/* Feed content */}
-      <div className="border-border-default bg-surface-default overflow-hidden rounded-lg border">
+      <div className="flex flex-col">
         {error && (
           <div className="flex flex-col items-center justify-center gap-2 px-4 py-8">
             <p className="text-error text-sm">Failed to load activity feed</p>
@@ -151,11 +209,11 @@ export const ActivityFeedSection = ({
         )}
 
         {loading && events.length === 0 && (
-          <>
+          <div className="border-border-default bg-surface-default overflow-hidden rounded-lg border">
             {Array.from({ length: 10 }).map((_, i) => (
               <FeedEventSkeleton key={i} />
             ))}
-          </>
+          </div>
         )}
 
         {!loading && events.length === 0 && !error && (
@@ -173,28 +231,48 @@ export const ActivityFeedSection = ({
           </div>
         )}
 
-        {events.length > 0 && (
-          <>
-            {events.map((event) => (
-              <FeedEventItem
-                key={`${event.txHash}-${event.logIndex}`}
-                event={event}
-              />
+        {groupedEvents.length > 0 && (
+          <div className="flex flex-col gap-4">
+            {groupedEvents.map((group) => (
+              <div key={group.date} className="flex flex-col">
+                {/* Date header */}
+                <div className="flex items-center gap-2 px-4 py-3">
+                  <span className="text-secondary font-mono text-xs font-medium tracking-wider">
+                    {group.label}
+                  </span>
+                  <span className="text-dimmed">•</span>
+                  <span className="text-dimmed font-mono text-xs">
+                    {group.highRelevanceCount} HIGH RELEVANCE{" "}
+                    {group.highRelevanceCount === 1 ? "ACTIVITY" : "ACTIVITIES"}
+                  </span>
+                </div>
+
+                {/* Events */}
+                <div className="border-border-default bg-surface-default overflow-hidden rounded-lg border">
+                  {group.events.map((event) => (
+                    <FeedEventItem
+                      key={`${event.txHash}-${event.logIndex}`}
+                      event={event}
+                      className="border-border-default border-b last:border-b-0"
+                    />
+                  ))}
+                </div>
+              </div>
             ))}
 
             {/* Load more */}
             {pagination.hasNextPage && (
-              <div className="flex justify-center px-4 py-4">
-                <button
+              <div className="flex justify-center py-4">
+                <Button
+                  variant="outline"
                   onClick={fetchNextPage}
                   disabled={isLoadingMore}
-                  className="bg-surface-contrast hover:bg-surface-hover text-secondary hover:text-primary rounded-md px-4 py-2 text-sm transition-colors disabled:opacity-50"
                 >
                   {isLoadingMore ? "Loading..." : "Load more"}
-                </button>
+                </Button>
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
     </section>

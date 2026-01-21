@@ -753,8 +753,8 @@ export const RELEVANCE_THRESHOLDS: Partial<
   [DaoIdEnum.ENS]: {
     [FeedEventTypeEnum.TRANSFER]: {
       low: 1_000n * DECIMALS_MULTIPLIER,
-      medium: 100_000n * DECIMALS_MULTIPLIER,
-      high: 1_000_000n * DECIMALS_MULTIPLIER,
+      medium: 10_000n * DECIMALS_MULTIPLIER,
+      high: 100_000n * DECIMALS_MULTIPLIER,
     },
     [FeedEventTypeEnum.DELEGATION]: {
       low: 1_000n * DECIMALS_MULTIPLIER,
