@@ -22,6 +22,8 @@ import { ChartExceptionState } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 import { parseAsStringEnum, useQueryState } from "nuqs";
+import { useMemo } from "react";
+import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
 
 interface BalanceHistoryVariationGraphProps {
   accountId: string;
@@ -34,11 +36,11 @@ interface CustomDotProps {
   payload: {
     timestamp: number;
     amount: number;
-    direction: "in" | "out";
-    transactionHash: string;
-    fromAccountId: string | null;
-    toAccountId: string | null;
-    logIndex: number;
+    direction?: "in" | "out";
+    transactionHash?: string;
+    fromAccountId?: string;
+    toAccountId?: string;
+    logIndex?: number;
   };
 }
 
@@ -86,10 +88,29 @@ export const BalanceHistoryVariationGraph = ({
     parseAsStringEnum(["30d", "90d", "all"]).withDefault("all"),
   );
 
+  const fromDate = useMemo(() => {
+    const nowInSeconds = Date.now() / 1000;
+
+    // For "all", treat as all time by not setting limits
+    if (selectedPeriod === "all") return undefined;
+
+    let daysInSeconds: number;
+    switch (selectedPeriod) {
+      case "90d":
+        daysInSeconds = 90 * SECONDS_PER_DAY;
+        break;
+      default:
+        daysInSeconds = 30 * SECONDS_PER_DAY;
+        break;
+    }
+
+    return Math.floor(nowInSeconds - daysInSeconds);
+  }, [selectedPeriod]);
+
   const { balanceHistory, loading, error } = useBalanceHistoryGraph(
     accountId,
     daoId,
-    selectedPeriod,
+    fromDate,
   );
 
   if (loading) {
@@ -148,20 +169,20 @@ export const BalanceHistoryVariationGraph = ({
     );
   }
 
-  const extendedChartData =
-    balanceHistory.length < 1000
-      ? [
-          {
-            timestamp: balanceHistory[0]?.timestamp - 1000, // to avoid hover conflict with first point
-            amount: 0,
-            direction: "none",
-            transactionHash: "initial",
-            fromAccountId: null,
-            toAccountId: null,
-          },
-          ...balanceHistory,
-        ]
-      : balanceHistory;
+  const extendedChartData = [
+    {
+      timestamp: fromDate
+        ? fromDate * 1000
+        : // 1 day in milliseconds to avoid hover conflict when max data is selected
+          balanceHistory[0]?.timestamp - 86400000,
+      amount: 0, // TODO set the balance at the start of the period
+    },
+    ...balanceHistory,
+    {
+      timestamp: Date.now(),
+      amount: balanceHistory[balanceHistory.length - 1]?.amount,
+    },
+  ];
 
   // Custom dot component to show each transfer/delegation point
   const CustomDot = (props: CustomDotProps) => {
@@ -239,21 +260,13 @@ export const BalanceHistoryVariationGraph = ({
                   const getDisplayAddress = () => {
                     if (data.direction === "in") {
                       return data.fromAccountId;
-                    } else if (data.direction === "out") {
+                    }
+                    if (data.direction === "out") {
                       return data.toAccountId;
                     }
-                    return null;
                   };
 
                   const displayAddress = getDisplayAddress();
-                  const type =
-                    data.direction === "in"
-                      ? "Buy"
-                      : data.direction === "out"
-                        ? "Sell"
-                        : "Initial Balance";
-                  const addressLabel =
-                    data.direction === "in" ? "Buy from" : "Sell to";
 
                   return (
                     <div className="bg-surface-contrast border-light-dark rounded-lg border p-3 shadow-lg">
@@ -262,20 +275,24 @@ export const BalanceHistoryVariationGraph = ({
                       </p>
                       <p className="text-secondary flex gap-1 text-xs">
                         Balance:
-                        {formatNumberUserReadable(Number(data.amount))}
+                        {data.amount > 0
+                          ? ` ${formatNumberUserReadable(Number(data.amount))}`
+                          : " Initial Balance"}
                       </p>
-                      <p className="text-secondary flex gap-1 text-xs">
-                        Type:
-                        <p
-                          className={`text-xs ${data.direction === "in" ? "text-success" : data.direction === "out" ? "text-error" : "text-primary"}`}
-                        >
-                          {type}
+                      {data.direction && (
+                        <p className="text-secondary flex gap-1 text-xs">
+                          Type:
+                          <p
+                            className={`text-xs ${data.direction === "in" ? "text-success" : data.direction === "out" ? "text-error" : "text-primary"}`}
+                          >
+                            {data.direction === "in" ? "Buy" : "Sell"}
+                          </p>
                         </p>
-                      </p>
+                      )}
 
                       {displayAddress && (
                         <p className="text-secondary text-xs">
-                          {addressLabel}:
+                          {data.direction === "in" ? "Buy from" : "Sell to"}:
                         </p>
                       )}
                       {displayAddress && (
