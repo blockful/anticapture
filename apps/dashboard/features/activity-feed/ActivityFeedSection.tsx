@@ -39,6 +39,7 @@ const groupEventsByDate = (events: FeedEvent[]) => {
   today.setHours(0, 0, 0, 0);
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
+  const currentYear = today.getFullYear();
 
   const eventsByDate = new Map<string, FeedEvent[]>();
 
@@ -61,6 +62,7 @@ const groupEventsByDate = (events: FeedEvent[]) => {
   sortedDates.forEach((dateKey) => {
     const dateEvents = eventsByDate.get(dateKey)!;
     const eventDate = new Date(dateKey);
+    const isCurrentYear = eventDate.getFullYear() === currentYear;
 
     let label: string;
     if (eventDate.getTime() === today.getTime()) {
@@ -68,12 +70,14 @@ const groupEventsByDate = (events: FeedEvent[]) => {
     } else if (eventDate.getTime() === yesterday.getTime()) {
       label = "YESTERDAY";
     } else {
+      const formatOptions: Intl.DateTimeFormatOptions = {
+        weekday: "long",
+        month: "short",
+        day: "numeric",
+        ...(isCurrentYear ? {} : { year: "numeric" }),
+      };
       label = eventDate
-        .toLocaleDateString("en-US", {
-          weekday: "long",
-          month: "short",
-          day: "numeric",
-        })
+        .toLocaleDateString("en-US", formatOptions)
         .toUpperCase();
     }
 
