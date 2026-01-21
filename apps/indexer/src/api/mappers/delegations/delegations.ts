@@ -1,5 +1,5 @@
 import { z } from "@hono/zod-openapi";
-import { Address, isAddress } from "viem";
+import { isAddress } from "viem";
 import { DelegationItem, DelegationsResponse } from "./historical";
 import { delegation } from "ponder:schema";
 
@@ -33,22 +33,22 @@ export type DelegationsRequestQuery = z.infer<
   typeof DelegationsRequestQuerySchema
 >;
 
-export const DelegationMapper = (d: DBDelegation): DelegationItem => {
+export const delegationMapper = (d: DBDelegation): DelegationItem => {
   return {
-    delegatorAddress: d.delegatorAccountId as Address,
-    delegateAddress: d.delegateAccountId as Address,
+    delegatorAddress: d.delegatorAccountId,
+    delegateAddress: d.delegateAccountId,
     amount: d.delegatedValue.toString(),
     timestamp: d.timestamp.toString(),
     transactionHash: d.transactionHash,
   };
 };
 
-export const DelegationsResponseMapper = (d: {
+export const delegationsResponseMapper = (d: {
   items: DBDelegation[];
   totalCount: number;
 }): DelegationsResponse => {
   return {
-    items: d.items.map(DelegationMapper),
+    items: d.items.map(delegationMapper),
     totalCount: d.totalCount,
   };
 };
