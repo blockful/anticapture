@@ -127,7 +127,7 @@ type Query {
   """
   Returns a mapping of the voting power changes within a time frame for the given addresses
   """
-  votingPowerVariations(addresses: JSON!, limit: PositiveInt = 10, skip: NonNegativeInt, orderDirection: queryInput_votingPowerVariations_orderDirection = desc, fromDate: String, toDate: String): votingPowerVariations_200_response
+  votingPowerVariations(addresses: JSON, limit: PositiveInt = 10, skip: NonNegativeInt, orderDirection: queryInput_votingPowerVariations_orderDirection = desc, fromDate: String, toDate: String): votingPowerVariations_200_response
 
   """Returns a the changes to voting power by period and accountId"""
   votingPowerVariationsByAccountId(address: String!, fromDate: String, toDate: String): votingPowerVariationsByAccountId_200_response

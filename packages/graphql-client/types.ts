@@ -149,8 +149,6 @@ export type Query = {
   /** Get property data for a specific token */
   token?: Maybe<Token_200_Response>;
   tokens: TokenPage;
-  /** Returns a mapping of the top voting power changes within a time frame */
-  topVotingPowerVariations?: Maybe<TopVotingPowerVariations_200_Response>;
   /** Get transactions with their associated transfers and delegations, with optional filtering and sorting */
   transactions?: Maybe<Transactions_200_Response>;
   /** Get transfers of a given address */
@@ -414,15 +412,6 @@ export type QueryTokensArgs = {
 };
 
 
-export type QueryTopVotingPowerVariationsArgs = {
-  fromDate?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
-  orderDirection?: InputMaybe<QueryInput_TopVotingPowerVariations_OrderDirection>;
-  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
-  toDate?: InputMaybe<Scalars['String']['input']>;
-};
-
-
 export type QueryTransactionsArgs = {
   affectedSupply?: InputMaybe<Scalars['JSON']['input']>;
   from?: InputMaybe<Scalars['String']['input']>;
@@ -486,7 +475,7 @@ export type QueryVotingPowerHistorysArgs = {
 
 
 export type QueryVotingPowerVariationsArgs = {
-  addresses: Scalars['JSON']['input'];
+  addresses?: InputMaybe<Scalars['JSON']['input']>;
   fromDate?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   orderDirection?: InputMaybe<QueryInput_VotingPowerVariations_OrderDirection>;
@@ -1641,11 +1630,6 @@ export enum QueryInput_Token_Currency {
   Usd = 'usd'
 }
 
-export enum QueryInput_TopVotingPowerVariations_OrderDirection {
-  Asc = 'asc',
-  Desc = 'desc'
-}
-
 export enum QueryInput_Transactions_SortOrder {
   Asc = 'asc',
   Desc = 'desc'
@@ -1854,21 +1838,6 @@ export type Query_Proposals_Items_Items = {
   title: Scalars['String']['output'];
   txHash: Scalars['String']['output'];
   values: Array<Maybe<Scalars['String']['output']>>;
-};
-
-export type Query_TopVotingPowerVariations_Items_Items = {
-  __typename?: 'query_topVotingPowerVariations_items_items';
-  absoluteChange: Scalars['String']['output'];
-  accountId: Scalars['String']['output'];
-  currentVotingPower: Scalars['String']['output'];
-  percentageChange: Scalars['String']['output'];
-  previousVotingPower: Scalars['String']['output'];
-};
-
-export type Query_TopVotingPowerVariations_Period = {
-  __typename?: 'query_topVotingPowerVariations_period';
-  endTimestamp: Scalars['String']['output'];
-  startTimestamp: Scalars['String']['output'];
 };
 
 export type Query_Transactions_Items_Items = {
@@ -2133,12 +2102,6 @@ export type Token_200_Response = {
   price: Scalars['String']['output'];
   totalSupply: Scalars['String']['output'];
   treasury: Scalars['String']['output'];
-};
-
-export type TopVotingPowerVariations_200_Response = {
-  __typename?: 'topVotingPowerVariations_200_response';
-  items: Array<Maybe<Query_TopVotingPowerVariations_Items_Items>>;
-  period: Query_TopVotingPowerVariations_Period;
 };
 
 export type Transaction = {
@@ -2647,7 +2610,7 @@ export type TopVotingPowerVariationsQueryVariables = Exact<{
 }>;
 
 
-export type TopVotingPowerVariationsQuery = { __typename?: 'Query', topVotingPowerVariations?: { __typename?: 'topVotingPowerVariations_200_response', items: Array<{ __typename?: 'query_topVotingPowerVariations_items_items', absoluteChange: string, accountId: string, currentVotingPower: string, percentageChange: string, previousVotingPower: string } | null> } | null };
+export type TopVotingPowerVariationsQuery = { __typename?: 'Query', votingPowerVariations?: { __typename?: 'votingPowerVariations_200_response', items: Array<{ __typename?: 'query_votingPowerVariations_items_items', absoluteChange: string, accountId: string, currentVotingPower: string, percentageChange: string, previousVotingPower: string } | null> } | null };
 
 export type GetDaoDataQueryVariables = Exact<{ [key: string]: never; }>;
 
