@@ -1,8 +1,12 @@
 import { z } from "@hono/zod-openapi";
 import { balanceHistory } from "ponder:schema";
 import { isAddress } from "viem";
+import { DBTransfer } from "../transfers";
 
 export type DBHistoricalBalance = typeof balanceHistory.$inferSelect;
+export type DBHistoricalBalanceWithRelations = DBHistoricalBalance & {
+  transfer: DBTransfer;
+};
 
 export const HistoricalBalanceRequestParamsSchema = z.object({
   address: z.string().refine((addr) => isAddress(addr)),
@@ -48,6 +52,11 @@ export const HistoricalBalanceResponseSchema = z.object({
   delta: z.string(),
   timestamp: z.string(),
   logIndex: z.number(),
+  transfer: z.object({
+    value: z.string(),
+    from: z.string(),
+    to: z.string(),
+  }),
 });
 
 export const HistoricalBalancesResponseSchema = z.object({
@@ -64,7 +73,7 @@ export type HistoricalBalancesResponse = z.infer<
 >;
 
 export const HistoricalBalanceResponseMapper = (
-  value: DBHistoricalBalance,
+  value: DBHistoricalBalanceWithRelations,
 ): HistoricalBalanceResponse => {
   return {
     transactionHash: value.transactionHash,
@@ -74,11 +83,16 @@ export const HistoricalBalanceResponseMapper = (
     delta: value.delta.toString(),
     timestamp: value.timestamp.toString(),
     logIndex: value.logIndex,
+    transfer: {
+      value: value.transfer.amount.toString(),
+      from: value.transfer.fromAccountId,
+      to: value.transfer.toAccountId,
+    },
   };
 };
 
 export const HistoricalBalancesResponseMapper = (
-  values: DBHistoricalBalance[],
+  values: DBHistoricalBalanceWithRelations[],
   totalCount: number,
 ): HistoricalBalancesResponse => {
   return {

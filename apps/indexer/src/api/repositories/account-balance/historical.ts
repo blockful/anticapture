@@ -1,9 +1,9 @@
 import { Address } from "viem";
-import { gte, and, lte, desc, eq, asc } from "drizzle-orm";
+import { gte, and, lte, desc, eq, asc, sql } from "drizzle-orm";
 import { db } from "ponder:api";
 
-import { DBHistoricalBalance } from "@/api/mappers";
-import { balanceHistory } from "ponder:schema";
+import { DBHistoricalBalanceWithRelations } from "@/api/mappers";
+import { balanceHistory, transfer } from "ponder:schema";
 
 export class HistoricalBalanceRepository {
   async getHistoricalBalances(
@@ -16,10 +16,20 @@ export class HistoricalBalanceRepository {
     maxDelta?: string,
     fromDate?: number,
     toDate?: number,
-  ): Promise<DBHistoricalBalance[]> {
-    return await db
+  ): Promise<DBHistoricalBalanceWithRelations[]> {
+    const result = await db
       .select()
       .from(balanceHistory)
+      .innerJoin(
+        transfer,
+        sql`${balanceHistory.transactionHash} = ${transfer.transactionHash} 
+          AND ${transfer.logIndex} = (
+            SELECT MAX(${transfer.logIndex}) 
+            FROM ${transfer}
+            WHERE ${transfer.transactionHash} = ${balanceHistory.transactionHash} 
+            AND ${transfer.logIndex} < ${balanceHistory.logIndex}
+        )`,
+      )
       .where(
         and(
           eq(balanceHistory.accountId, accountId),
@@ -46,6 +56,11 @@ export class HistoricalBalanceRepository {
       )
       .limit(limit)
       .offset(skip);
+
+    return result.map((row) => ({
+      ...row.balance_history,
+      transfer: row.transfers,
+    }));
   }
 
   async getHistoricalBalanceCount(

@@ -1,6 +1,6 @@
 import { Address } from "viem";
 
-import { DBHistoricalBalance } from "@/api/mappers";
+import { DBHistoricalBalanceWithRelations } from "@/api/mappers";
 
 interface Repository {
   getHistoricalBalances(
@@ -13,7 +13,7 @@ interface Repository {
     maxDelta?: string,
     fromDate?: number,
     toDate?: number,
-  ): Promise<DBHistoricalBalance[]>;
+  ): Promise<DBHistoricalBalanceWithRelations[]>;
 
   getHistoricalBalanceCount(
     accountId: Address,
@@ -36,7 +36,7 @@ export class HistoricalBalancesService {
     fromDate?: number,
     toDate?: number,
   ): Promise<{
-    items: DBHistoricalBalance[];
+    items: DBHistoricalBalanceWithRelations[];
     totalCount: number;
   }> {
     const items = await this.repository.getHistoricalBalances(
