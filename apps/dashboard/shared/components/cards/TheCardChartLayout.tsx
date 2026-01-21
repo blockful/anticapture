@@ -32,13 +32,13 @@ export const TheCardChartLayout = ({
   infoText,
 }: TheCardChartLayoutProps) => {
   return (
-    <Card className="sm:border-light-dark sm:bg-surface-default xl4k:max-w-full flex flex-col gap-4 rounded-lg border-none sm:max-w-full sm:gap-0 sm:border">
+    <Card className="lg:border-light-dark lg:bg-surface-default xl4k:max-w-full flex flex-col gap-4 rounded-lg border-none lg:max-w-full lg:gap-0 lg:border">
       <CardContent className="flex h-full w-full flex-col gap-6 p-0">
         {title && (
           <div className="flex h-full w-full items-center">
             <div className="flex h-full w-full flex-col">
               <div className="flex h-full w-full gap-1.5">
-                <CardTitle className="!text-alternative-sm text-primary flex items-center text-nowrap font-mono font-medium uppercase tracking-wide sm:gap-2.5">
+                <CardTitle className="!text-alternative-sm text-primary flex items-center text-nowrap font-mono font-medium uppercase tracking-wide lg:gap-2.5">
                   {title}
                 </CardTitle>
                 {csvData && (
@@ -65,8 +65,8 @@ export const TheCardChartLayout = ({
           </div>
         )}
         {infoText && (
-          <CardDescription className="bg-surface-contrast flex w-full items-start gap-2 rounded-lg p-2 sm:items-center">
-            <div className="mt-0.5 sm:mt-0">
+          <CardDescription className="bg-surface-contrast flex w-full items-start gap-2 rounded-lg p-2 lg:items-center">
+            <div className="mt-0.5 lg:mt-0">
               <Info className="text-primary size-4 w-fit" />
             </div>
             <p className="text-secondary text-sm font-normal">{infoText}</p>

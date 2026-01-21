@@ -42,9 +42,9 @@ export const StageTag = ({
     >
       <span className="text-alternative-sm whitespace-nowrap font-mono text-[13px] font-medium leading-[20px]">
         {showNoTag && "NO "}
-        <span className="hidden sm:inline">STAGE </span>
+        <span className="hidden lg:inline">STAGE </span>
 
-        {showStageText && <span className="inline sm:hidden">STAGE </span>}
+        {showStageText && <span className="inline lg:hidden">STAGE </span>}
         {tagStage === Stage.UNKNOWN ? "?" : !showNoTag && tagStage}
       </span>
     </div>

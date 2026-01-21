@@ -37,7 +37,7 @@ export const GovernanceImplementationCard = ({
       rightContent={<RiskLevelCardSmall status={field.riskLevel} />}
       isOpen={isOpen}
       onToggle={onToggle}
-      className="md:w-[calc(50%-10px)]"
+      className="lg:w-[calc(50%-10px)]"
       showCorners={true}
     >
       <div className="flex flex-col gap-3">

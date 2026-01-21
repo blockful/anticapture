@@ -111,7 +111,7 @@ export const TopInteractionsTable = ({
           <span>Address</span>
           <AddressFilter
             onApply={handleAddressFilterApply}
-            currentFilter={currentAddressFilter ?? undefined}
+            currentFilter={currentAddressFilter ?? ""}
             className="ml-2"
           />
         </div>

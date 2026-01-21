@@ -32,6 +32,7 @@ directive @transport(
 ) repeatable on SCHEMA
 
 type Query {
+<<<<<<< HEAD
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/token`\nGet property data for a specific token\n"
   token(currency: queryInput_token_currency = usd): token_200_response
   tokens(
@@ -99,6 +100,13 @@ type Query {
     after: String
     limit: Int
   ): daoMetricsDayBucketPage!
+=======
+  votingPowerHistorys(where: votingPowerHistoryFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votingPowerHistoryPage!
+  delegations(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): delegationPage!
+  votesOnchain(voterAccountId: String!, proposalId: String!): votesOnchain
+  votesOnchains(where: votesOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votesOnchainPage!
+  daoMetricsDayBuckets(where: daoMetricsDayBucketFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): daoMetricsDayBucketPage!
+>>>>>>> dev
   _meta: Meta
 
   """
@@ -112,18 +120,68 @@ type Query {
   """
   Get historical DAO Token Treasury value (governance token quantity × token price)
   """
+<<<<<<< HEAD
   getDaoTokenTreasury(
     days: queryInput_getDaoTokenTreasury_days = _365d
     order: queryInput_getDaoTokenTreasury_order = asc
   ): getDaoTokenTreasury_200_response
+=======
+  getDaoTokenTreasury(days: queryInput_getDaoTokenTreasury_days = _365d, order: queryInput_getDaoTokenTreasury_order = asc): getDaoTokenTreasury_200_response
+
+  """Get historical Total Treasury (liquid treasury + DAO token treasury)"""
+  getTotalTreasury(days: queryInput_getTotalTreasury_days = _365d, order: queryInput_getTotalTreasury_order = asc): getTotalTreasury_200_response
+
+  """Get historical market data for a specific token"""
+  historicalTokenData(skip: NonNegativeInt, limit: Float = 365): [query_historicalTokenData_items]
+
+  """Get property data for a specific token"""
+  token(currency: queryInput_token_currency = usd): token_200_response
+
+  """Compare total supply between periods"""
+  compareTotalSupply(days: queryInput_compareTotalSupply_days = _90d): compareTotalSupply_200_response
+
+  """Compare delegated supply between periods"""
+  compareDelegatedSupply(days: queryInput_compareDelegatedSupply_days = _90d): compareDelegatedSupply_200_response
+
+  """Compare circulating supply between periods"""
+  compareCirculatingSupply(days: queryInput_compareCirculatingSupply_days = _90d): compareCirculatingSupply_200_response
+
+  """Compare treasury between periods"""
+  compareTreasury(days: queryInput_compareTreasury_days = _90d): compareTreasury_200_response
+
+  """Compare cex supply between periods"""
+  compareCexSupply(days: queryInput_compareCexSupply_days = _90d): compareCexSupply_200_response
+
+  """Compare dex supply between periods"""
+  compareDexSupply(days: queryInput_compareDexSupply_days = _90d): compareDexSupply_200_response
+
+  """Compare lending supply between periods"""
+  compareLendingSupply(days: queryInput_compareLendingSupply_days = _90d): compareLendingSupply_200_response
+
+  """Get active token supply for DAO"""
+  compareActiveSupply(days: queryInput_compareActiveSupply_days = _90d): compareActiveSupply_200_response
+
+  """Compare number of proposals between time periods"""
+  compareProposals(days: queryInput_compareProposals_days = _90d): compareProposals_200_response
+
+  """Compare number of votes between time periods"""
+  compareVotes(days: queryInput_compareVotes_days = _90d): compareVotes_200_response
+
+  """Compare average turnout between time periods"""
+  compareAverageTurnout(days: queryInput_compareAverageTurnout_days = _90d): compareAverageTurnout_200_response
+>>>>>>> dev
 
   """
   Get historical Total Treasury (liquid treasury + DAO token treasury)
   """
+<<<<<<< HEAD
   getTotalTreasury(
     days: queryInput_getTotalTreasury_days = _365d
     order: queryInput_getTotalTreasury_order = asc
   ): getTotalTreasury_200_response
+=======
+  proposalsActivity(address: String!, fromDate: String, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_proposalsActivity_orderBy = timestamp, orderDirection: queryInput_proposalsActivity_orderDirection = desc, userVoteFilter: queryInput_proposalsActivity_userVoteFilter): proposalsActivity_200_response
+>>>>>>> dev
 
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/token/historical-data`\nGet historical market data for a specific token\n"
   historicalTokenData(
@@ -270,6 +328,7 @@ type Query {
     before: String
   ): delegationPercentageByDay_200_response
 
+<<<<<<< HEAD
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/voting-powers/{args.account}`\nReturns a list of voting power changes\n"
   votingPowers(
     account: String!
@@ -311,6 +370,24 @@ type Query {
     fromValue: String
     toValue: String
   ): accountBalances_200_response
+=======
+  """Returns a list of voting power changes"""
+  historicalVotingPowers(accountId: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_historicalVotingPowers_orderBy = timestamp, orderDirection: queryInput_historicalVotingPowers_orderDirection = desc, fromDate: String, toDate: String, fromValue: String, toValue: String): historicalVotingPowers_200_response
+
+  """
+  Returns a mapping of the voting power changes within a time frame for the given addresses
+  """
+  votingPowerVariations(addresses: JSON, limit: PositiveInt = 10, skip: NonNegativeInt, orderDirection: queryInput_votingPowerVariations_orderDirection = desc, fromDate: String, toDate: String): votingPowerVariations_200_response
+
+  """Returns a the changes to voting power by period and accountId"""
+  votingPowerVariationsByAccountId(address: String!, fromDate: String, toDate: String): votingPowerVariationsByAccountId_200_response
+
+  """Returns sorted and paginated account voting power records"""
+  votingPowers(limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_votingPowers_orderDirection = desc, orderBy: queryInput_votingPowers_orderBy = votingPower, addresses: JSON, fromValue: String, toValue: String): votingPowers_200_response
+
+  """Returns voting power information for a specific address (account)"""
+  votingPowerByAccountId(accountId: String!): votingPowerByAccountId_200_response
+>>>>>>> dev
 
   """
   Returns account balance information for a specific address
@@ -2059,19 +2136,6 @@ enum queryInput_historicalBalances_days {
   _365d
 }
 
-type query_historicalVotingPower_items {
-  address: String!
-  votingPower: String!
-}
-
-enum queryInput_historicalVotingPower_days {
-  _7d
-  _30d
-  _90d
-  _180d
-  _365d
-}
-
 type transactions_200_response {
   items: [query_transactions_items_items]!
   totalCount: Float!
@@ -2157,12 +2221,12 @@ enum queryInput_delegationPercentageByDay_orderDirection {
   desc
 }
 
-type votingPowers_200_response {
-  items: [query_votingPowers_items_items]!
+type historicalVotingPowers_200_response {
+  items: [query_historicalVotingPowers_items_items]!
   totalCount: Float!
 }
 
-type query_votingPowers_items_items {
+type query_historicalVotingPowers_items_items {
   transactionHash: String!
   daoId: String!
   accountId: String!
@@ -2170,28 +2234,29 @@ type query_votingPowers_items_items {
   delta: String!
   timestamp: String!
   logIndex: Float!
-  delegation: query_votingPowers_items_items_delegation
-  transfer: query_votingPowers_items_items_transfer
+  delegation: query_historicalVotingPowers_items_items_delegation
+  transfer: query_historicalVotingPowers_items_items_transfer
 }
 
-type query_votingPowers_items_items_delegation {
+type query_historicalVotingPowers_items_items_delegation {
   from: String!
   value: String!
   to: String!
+  previousDelegate: String
 }
 
-type query_votingPowers_items_items_transfer {
+type query_historicalVotingPowers_items_items_transfer {
   value: String!
   from: String!
   to: String!
 }
 
-enum queryInput_votingPowers_orderBy {
+enum queryInput_historicalVotingPowers_orderBy {
   timestamp
   delta
 }
 
-enum queryInput_votingPowers_orderDirection {
+enum queryInput_historicalVotingPowers_orderDirection {
   asc
   desc
 }
@@ -2202,30 +2267,70 @@ type votingPowerVariations_200_response {
 }
 
 type query_votingPowerVariations_period {
-  days: String!
   startTimestamp: String!
   endTimestamp: String!
 }
 
 type query_votingPowerVariations_items_items {
   accountId: String!
-  previousVotingPower: String
+  previousVotingPower: String!
   currentVotingPower: String!
   absoluteChange: String!
   percentageChange: String!
 }
 
-enum queryInput_votingPowerVariations_days {
-  _7d
-  _30d
-  _90d
-  _180d
-  _365d
-}
-
 enum queryInput_votingPowerVariations_orderDirection {
   asc
   desc
+}
+
+type votingPowerVariationsByAccountId_200_response {
+  period: query_votingPowerVariationsByAccountId_period!
+  data: query_votingPowerVariationsByAccountId_data!
+}
+
+type query_votingPowerVariationsByAccountId_period {
+  startTimestamp: String!
+  endTimestamp: String!
+}
+
+type query_votingPowerVariationsByAccountId_data {
+  accountId: String!
+  previousVotingPower: String!
+  currentVotingPower: String!
+  absoluteChange: String!
+  percentageChange: String!
+}
+
+type votingPowers_200_response {
+  items: [query_votingPowers_items_items]!
+  totalCount: Float!
+}
+
+type query_votingPowers_items_items {
+  accountId: String!
+  votingPower: String!
+  votesCount: Float!
+  proposalsCount: Float!
+  delegationsCount: Float!
+}
+
+enum queryInput_votingPowers_orderDirection {
+  asc
+  desc
+}
+
+enum queryInput_votingPowers_orderBy {
+  votingPower
+  delegationsCount
+}
+
+type votingPowerByAccountId_200_response {
+  accountId: String!
+  votingPower: String!
+  votesCount: Float!
+  proposalsCount: Float!
+  delegationsCount: Float!
 }
 
 type accountBalanceVariations_200_response {
@@ -2234,7 +2339,6 @@ type accountBalanceVariations_200_response {
 }
 
 type query_accountBalanceVariations_period {
-  days: String!
   startTimestamp: String!
   endTimestamp: String!
 }
@@ -2291,7 +2395,6 @@ type accountInteractions_200_response {
 }
 
 type query_accountInteractions_period {
-  days: String!
   startTimestamp: String!
   endTimestamp: String!
 }

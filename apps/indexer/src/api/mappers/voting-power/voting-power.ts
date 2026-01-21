@@ -2,35 +2,15 @@ import { z } from "@hono/zod-openapi";
 import { delegation, votingPowerHistory } from "ponder:schema";
 
 import { DBTransfer } from "../transfers";
-import { isAddress } from "viem";
-
 type DBDelegation = typeof delegation.$inferSelect;
 
-export type DBVotingPower = typeof votingPowerHistory.$inferSelect;
-export type DBVotingPowerWithRelations = DBVotingPower & {
+export type DBHistoricalVotingPower = typeof votingPowerHistory.$inferSelect;
+export type DBHistoricalVotingPowerWithRelations = DBHistoricalVotingPower & {
   delegations: DBDelegation | null;
   transfers: DBTransfer | null;
 };
 
-export const VotingPowerRequestSchema = z.object({
-  fromAddresses: z
-    .union([
-      z
-        .string()
-        .refine(isAddress, "Invalid address")
-        .transform((addr) => [addr]),
-      z.array(z.string().refine(isAddress, "Invalid addresses")),
-    ])
-    .optional(),
-  toAddresses: z
-    .union([
-      z
-        .string()
-        .refine(isAddress, "Invalid address")
-        .transform((addr) => [addr]),
-      z.array(z.string().refine(isAddress, "Invalid addresses")),
-    ])
-    .optional(),
+export const HistoricalVotingPowerRequestSchema = z.object({
   skip: z.coerce
     .number()
     .int()
@@ -41,18 +21,28 @@ export const VotingPowerRequestSchema = z.object({
     .number()
     .int()
     .min(1, "Limit must be a positive integer")
-    .max(100, "Limit cannot exceed 100")
+    .max(1000, "Limit cannot exceed 1000")
     .optional()
     .default(10),
   orderBy: z.enum(["timestamp", "delta"]).optional().default("timestamp"),
   orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
-  minDelta: z.string().optional(),
-  maxDelta: z.string().optional(),
+  fromDate: z
+    .string()
+    .optional()
+    .transform((val) => Number(val)),
+  toDate: z
+    .string()
+    .optional()
+    .transform((val) => Number(val)),
+  fromValue: z.string().optional(),
+  toValue: z.string().optional(),
 });
 
-export type VotingPowerRequest = z.infer<typeof VotingPowerRequestSchema>;
+export type HistoricalVotingPowerRequest = z.infer<
+  typeof HistoricalVotingPowerRequestSchema
+>;
 
-export const VotingPowerResponseSchema = z.object({
+export const HistoricalVotingPowerResponseSchema = z.object({
   items: z.array(
     z.object({
       transactionHash: z.string(),
@@ -67,6 +57,7 @@ export const VotingPowerResponseSchema = z.object({
           from: z.string(),
           value: z.string(),
           to: z.string(),
+          previousDelegate: z.string().nullable(),
         })
         .nullable(),
       transfer: z
@@ -81,12 +72,14 @@ export const VotingPowerResponseSchema = z.object({
   totalCount: z.number(),
 });
 
-export type VotingPowerResponse = z.infer<typeof VotingPowerResponseSchema>;
+export type HistoricalVotingPowerResponse = z.infer<
+  typeof HistoricalVotingPowerResponseSchema
+>;
 
-export const VotingPowerMapper = (
-  p: DBVotingPowerWithRelations[],
+export const HistoricalVotingPowerMapper = (
+  p: DBHistoricalVotingPowerWithRelations[],
   totalCount: number,
-): VotingPowerResponse => {
+): HistoricalVotingPowerResponse => {
   return {
     items: p.map((p) => ({
       transactionHash: p.transactionHash,
@@ -101,6 +94,7 @@ export const VotingPowerMapper = (
             from: p.delegations.delegatorAccountId,
             value: p.delegations.delegatedValue.toString(),
             to: p.delegations.delegateAccountId,
+            previousDelegate: p.delegations.previousDelegate,
           }
         : null,
       transfer: p.transfers

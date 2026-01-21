@@ -32,7 +32,7 @@ export const AccordionContentArea = ({
   return (
     <Card
       className={cn(
-        "border-light-dark bg-surface-default xl4k:max-w-full relative flex w-full flex-col flex-wrap rounded-none border shadow-sm transition-all duration-200 hover:cursor-pointer sm:gap-0 sm:gap-3.5",
+        "border-light-dark bg-surface-default xl4k:max-w-full relative flex w-full flex-col flex-wrap rounded-none border shadow-sm transition-all duration-200 hover:cursor-pointer lg:gap-0 lg:gap-3.5",
         isOpen ? "border-middle-dark z-20" : "hover:bg-middle-dark",
         className,
       )}
@@ -66,7 +66,7 @@ export const AccordionContentArea = ({
               -
             </span>
           </div>
-          <div className="flex items-center gap-2 sm:flex-col md:flex-row md:text-center">
+          <div className="flex items-center gap-2 lg:flex-row lg:flex-col lg:text-center">
             <h3 className="text-primary truncate text-sm font-medium">
               {title}
             </h3>
@@ -84,11 +84,11 @@ export const AccordionContentArea = ({
       </div>
       <div
         className={cn(
-          "border-middle-dark sm:bg-surface-default z-20 border-t p-3 sm:absolute sm:border",
+          "border-middle-dark lg:bg-surface-default z-20 border-t p-3 lg:absolute lg:border",
           "-left-px top-full w-[calc(100%+2px)]",
           isOpen
             ? "visible h-auto transition-all duration-500 ease-in-out"
-            : "hidden transition-all duration-300 ease-in-out sm:h-0",
+            : "hidden transition-all duration-300 ease-in-out lg:h-0",
         )}
         onClick={(e) => {
           if (isDesktop || isTablet) {

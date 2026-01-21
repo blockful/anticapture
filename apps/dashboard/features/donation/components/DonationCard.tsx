@@ -17,8 +17,8 @@ export const DonationCard = ({
   chainLinks = {},
 }: DonationCardProps) => {
   return (
-    <Card className="bg-surface-background md:bg-surface-default w-full rounded-none border-0 shadow-sm">
-      <CardContent className="px-0 py-5 md:p-5">
+    <Card className="bg-surface-background lg:bg-surface-default w-full rounded-none border-0 shadow-sm">
+      <CardContent className="px-0 py-5 lg:p-5">
         <div className="flex flex-col gap-4 lg:flex-row">
           <div className="flex-1 space-y-6">
             {/* Title and Description */}
@@ -69,7 +69,7 @@ export const DonationCard = ({
                     <p className="text-primary !text-alternative-sm font-mono font-medium uppercase tracking-wider">
                       Donate Through Any EVM
                     </p>
-                    <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+                    <div className="grid grid-cols-2 gap-2 lg:flex lg:flex-wrap">
                       {supportedChains.map((chain, index) => {
                         const chainLink = chainLinks[chain];
                         return (
@@ -78,7 +78,7 @@ export const DonationCard = ({
                             href={chainLink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className={`inline-block ${index === 0 ? "col-span-2 sm:col-span-1" : ""}`}
+                            className={`inline-block ${index === 0 ? "col-span-2 lg:col-span-1" : ""}`}
                           >
                             <Button variant="outline" size="sm">
                               <ExternalLink className="size-4" />

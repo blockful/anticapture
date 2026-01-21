@@ -11,8 +11,8 @@ export const FundingSourcesCard = ({
   sources,
 }: FundingSourcesCardProps) => {
   return (
-    <Card className="bg-surface-background sm:bg-surface-default w-full rounded-none border-0 shadow-sm">
-      <CardContent className="px-0 py-5 sm:p-5">
+    <Card className="bg-surface-background lg:bg-surface-default w-full rounded-none border-0 shadow-sm">
+      <CardContent className="px-0 py-5 lg:p-5">
         <div className="flex flex-col gap-4">
           <div>
             <h3 className="text-primary !text-alternative-sm font-mono font-medium uppercase">
@@ -24,7 +24,7 @@ export const FundingSourcesCard = ({
           </div>
 
           {/* Horizontal layout for funding sources */}
-          <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-2 lg:grid-cols-3">
             {sources.map((source, index) => (
               <Link
                 key={index}
@@ -33,7 +33,7 @@ export const FundingSourcesCard = ({
                 rel="noopener noreferrer"
                 className="block h-full cursor-pointer"
               >
-                <div className="bg-surface-default text-primary border-light-dark flex h-full items-center gap-3 border p-3 transition-colors hover:bg-[#27272A] sm:bg-transparent">
+                <div className="bg-surface-default text-primary border-light-dark flex h-full items-center gap-3 border p-3 transition-colors hover:bg-[#27272A] lg:bg-transparent">
                   <DaoAvatarIcon
                     daoId={source.daoId}
                     className="size-9"

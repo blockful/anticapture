@@ -52,26 +52,26 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
 
   return (
     <Suspense fallback={<DaoOverviewSkeleton />}>
-      <div className="relative flex flex-col gap-5 md:gap-2">
+      <div className="relative flex flex-col gap-5 lg:gap-2">
         <DaoOverviewHeaderBackground
           color={daoConfig.color.svgColor}
           bgColor={daoConfig.color.svgBgColor}
         />
         <div className="relative z-10 mx-5 flex flex-col gap-4 pt-5">
-          <div className="border-inverted md:bg-inverted flex flex-col gap-1 md:flex-row md:border-2">
+          <div className="border-inverted lg:bg-inverted flex flex-col gap-1 lg:flex-row lg:border-2">
             <DaoAvatarIcon
               daoId={daoId}
-              className="border-inverted size-32 shrink-0 rounded-none border-2 md:border-none"
+              className="border-inverted size-32 shrink-0 rounded-none border-2 lg:border-none"
             />
 
             <DaoOverviewHeaderMetrics daoId={daoId} daoConfig={daoConfig} />
           </div>
         </div>
-        <div className="block md:hidden">
+        <div className="block lg:hidden">
           <DividerDefault isHorizontal />
         </div>
-        <div className="border-inverted grid grid-cols-1 gap-5 border-x md:mx-5 md:grid-cols-2 md:gap-2">
-          <div className="w-full px-5 md:px-0">
+        <div className="border-inverted grid grid-cols-1 gap-5 border-x lg:mx-5 lg:grid-cols-2 lg:gap-2">
+          <div className="w-full px-5 lg:px-0">
             <StagesContainer
               daoId={daoId}
               currentDaoStage={currentDaoStage}
@@ -79,7 +79,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               context="overview"
             />
           </div>
-          <div className="block md:hidden">
+          <div className="block lg:hidden">
             <DividerDefault isHorizontal />
           </div>
           <RiskAreaCardWrapper
@@ -89,34 +89,34 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               router.push(`/${daoId.toLowerCase()}/risk-analysis`);
             }}
             variant={RiskAreaCardEnum.DAO_OVERVIEW}
-            className="grid h-full grid-cols-2 gap-2 px-5 md:px-0"
+            className="grid h-full grid-cols-2 gap-2 px-5 lg:px-0"
           />
-          <div className="block md:hidden">
+          <div className="block lg:hidden">
             <DividerDefault isHorizontal />
           </div>
         </div>
         <div className="border-inverted mx-5 border-x">
           <MetricsCard daoId={daoId} daoConfig={daoConfig} />
         </div>
-        <div className="block md:hidden">
+        <div className="block lg:hidden">
           <DividerDefault isHorizontal />
         </div>
         <SecurityCouncilCard daoOverview={daoOverview} />
-        <div className="border-inverted grid grid-cols-1 gap-5 border-x md:mx-5 md:grid-cols-2 md:gap-2">
+        <div className="border-inverted grid grid-cols-1 gap-5 border-x lg:mx-5 lg:grid-cols-2 lg:gap-2">
           <AttackProfitabilityChartCard daoId={daoId} />
-          <div className="block md:hidden">
+          <div className="block lg:hidden">
             <DividerDefault isHorizontal />
           </div>
           <TokenDistributionChartCard daoId={daoId} />
         </div>
-        <div className="block md:hidden">
+        <div className="block lg:hidden">
           <DividerDefault isHorizontal />
         </div>
-        <div className="border-inverted grid grid-cols-1 gap-5 border-x md:mx-5 md:grid-cols-2 md:gap-2">
+        <div className="border-inverted grid grid-cols-1 gap-5 border-x lg:mx-5 lg:grid-cols-2 lg:gap-2">
           <div className="w-full">
             <AccountBalanceChartCard daoId={daoId} />
           </div>
-          <div className="block md:hidden">
+          <div className="block lg:hidden">
             <DividerDefault isHorizontal />
           </div>
           <div className="w-full">
