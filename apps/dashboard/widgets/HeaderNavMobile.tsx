@@ -50,6 +50,11 @@ export const HeaderNavMobile = () => {
       title: PAGES_CONSTANTS.holdersAndDelegates.title,
       enabled: true,
     },
+    {
+      page: PAGES_CONSTANTS.activityFeed.page,
+      title: PAGES_CONSTANTS.activityFeed.title,
+      enabled: true,
+    },
   ];
 
   return (

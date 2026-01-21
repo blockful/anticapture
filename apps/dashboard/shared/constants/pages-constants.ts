@@ -26,6 +26,12 @@ export const PAGES_CONSTANTS = {
     description:
       "Explore top token holders and high-power delegates. Click on any row to view more details.",
   },
+  activityFeed: {
+    title: "Activity Feed",
+    page: "activity-feed",
+    description:
+      "Real-time feed of governance activity including votes, proposals, transfers, and delegations.",
+  },
   tokenDistribution: {
     title: "Token Distribution",
     page: "token-distribution",
