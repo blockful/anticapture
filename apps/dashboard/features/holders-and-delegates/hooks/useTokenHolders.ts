@@ -128,8 +128,8 @@ export const useTokenHolders = ({
       setHistoricalBalancesCache((prevCache) => {
         const newCache = new Map(prevCache);
         newHistoricalData?.forEach((h) => {
-          if (h?.address && h.balance) {
-            newCache.set(h.address, h.balance);
+          if (h?.accountId && h.previousBalance) {
+            newCache.set(h.accountId, h.previousBalance);
           }
         });
         return newCache;

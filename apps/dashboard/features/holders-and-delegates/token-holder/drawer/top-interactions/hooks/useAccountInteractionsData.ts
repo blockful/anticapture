@@ -9,6 +9,8 @@ import {
   Query_AccountInteractions_Items_Items,
   QueryInput_AccountInteractions_OrderDirection,
 } from "@anticapture/graphql-client";
+import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
+import { TimeInterval } from "@/shared/types/enums";
 
 interface Interaction {
   accountId: string;
@@ -69,6 +71,10 @@ export const useAccountInteractionsData = ({
   const { data, loading, error } = useGetAccountInteractionsQuery({
     variables: {
       address,
+      fromDate: (
+        Math.floor(Date.now() / 1000) -
+        DAYS_IN_SECONDS[TimeInterval.NINETY_DAYS]
+      ).toString(),
       orderDirection:
         sortDirection as QueryInput_AccountInteractions_OrderDirection,
       minAmount: filterVariables?.minAmount,

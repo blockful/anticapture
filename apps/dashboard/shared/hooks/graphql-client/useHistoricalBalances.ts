@@ -1,15 +1,11 @@
-import {
-  QueryInput_HistoricalBalances_Days,
-  useGetHistoricalBalancesQuery,
-} from "@anticapture/graphql-client/hooks";
+import { useGetHistoricalBalancesQuery } from "@anticapture/graphql-client/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
+import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 
 interface HistoricalBalance {
-  address: string;
-  balance: string;
-  blockNumber: string;
-  tokenAddress: string;
+  accountId: string;
+  previousBalance: string;
 }
 
 interface UseHistoricalBalancesResult {
@@ -27,7 +23,9 @@ export const useHistoricalBalances = (
   const { data, loading, error, refetch } = useGetHistoricalBalancesQuery({
     variables: {
       addresses,
-      days: QueryInput_HistoricalBalances_Days[days],
+      fromDate: (
+        Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[days]
+      ).toString(),
     },
     context: {
       headers: {
@@ -38,7 +36,7 @@ export const useHistoricalBalances = (
   });
 
   return {
-    data: data?.historicalBalances as HistoricalBalance[] | null,
+    data: data?.accountBalanceVariations as HistoricalBalance[] | null,
     loading,
     error: error || null,
     refetch: () => refetch(),
