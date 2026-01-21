@@ -64,18 +64,15 @@ export class TokenMetricsService {
     const { metricType, startDate, endDate, orderDirection, limit, skip } =
       params;
 
-    // Determine reference date for initial values
-    const referenceDate = skip ?? startDate;
-
-    // 1. Get initial value for proper forward-fill
-    const initialValue = referenceDate
-      ? await this.fetchLastMetricValue(metricType, referenceDate)
+    // 1. Get initial value for proper forward-fill (before startDate)
+    const initialValue = startDate
+      ? await this.fetchLastMetricValue(metricType, startDate)
       : undefined;
 
     // 2. Fetch sparse data from repository
     const rows = await this.repository.getMetricsByDateRange({
       metricTypes: [metricType],
-      startDate: referenceDate?.toString(),
+      startDate: startDate?.toString(),
       endDate: endDate?.toString(),
       orderDirection,
       limit: limit + 1, // Fetch one extra to check hasNextPage
@@ -104,7 +101,7 @@ export class TokenMetricsService {
     // 5. Determine effective start date
     const datesFromDb = Array.from(dateMap.keys());
     const effectiveStartDate = getEffectiveStartDate({
-      referenceDate: skip ?? startDate,
+      referenceDate: startDate,
       datesFromDb,
       hasInitialValue: initialValue !== undefined,
     });
