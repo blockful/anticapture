@@ -44,8 +44,8 @@ export function accountBalanceVariations(
       const result = await service.getAccountBalanceVariations(
         fromDate,
         toDate,
-        skip,
         limit,
+        skip,
         orderDirection,
         addresses,
       );

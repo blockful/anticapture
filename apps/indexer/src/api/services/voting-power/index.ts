@@ -115,23 +115,23 @@ export class VotingPowerService {
         addresses,
       );
 
-    return addresses
-      ? addresses.map((address) => {
-          const dbVariation = variations.find(
-            (variation) => variation.accountId === address,
-          );
+    if (!addresses) return variations;
 
-          if (dbVariation) return dbVariation;
+    return addresses.map((address) => {
+      const dbVariation = variations.find(
+        (variation) => variation.accountId === address,
+      );
 
-          return {
-            accountId: address,
-            previousVotingPower: 0n,
-            currentVotingPower: 0n,
-            absoluteChange: 0n,
-            percentageChange: "0",
-          };
-        })
-      : variations;
+      if (dbVariation) return dbVariation;
+
+      return {
+        accountId: address,
+        previousVotingPower: 0n,
+        currentVotingPower: 0n,
+        absoluteChange: 0n,
+        percentageChange: "0",
+      };
+    });
   }
 
   async getVotingPowerVariationsByAccountId(
