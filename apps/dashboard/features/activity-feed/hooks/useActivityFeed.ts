@@ -10,6 +10,7 @@ import {
   FeedEvent,
   FeedEventListResponse,
 } from "@/features/activity-feed/types";
+import { USE_MOCK_DATA, MOCK_FEED_DATA } from "./mockData";
 
 const buildQueryParams = (filters: ActivityFeedFilters): string => {
   const params = new URLSearchParams();
@@ -39,6 +40,21 @@ const fetchActivityFeed = async (
   daoId: DaoIdEnum,
   filters: ActivityFeedFilters,
 ): Promise<FeedEventListResponse> => {
+  // Return mock data if enabled
+  if (USE_MOCK_DATA) {
+    // Simulate network delay
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    const offset = filters.offset ?? 0;
+    const limit = filters.limit ?? 20;
+    const items = MOCK_FEED_DATA.items.slice(offset, offset + limit);
+
+    return {
+      items,
+      totalCount: MOCK_FEED_DATA.totalCount,
+    };
+  }
+
   const queryString = buildQueryParams(filters);
   const url = `${BACKEND_ENDPOINT}/feed${queryString ? `?${queryString}` : ""}`;
 
