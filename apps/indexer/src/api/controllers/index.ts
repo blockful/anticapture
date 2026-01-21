@@ -1,5 +1,4 @@
 export * from "./account-balance";
-export * from "./assets";
 export * from "./delegation-percentage";
 export * from "./governance-activity";
 export * from "./last-update";
@@ -8,4 +7,5 @@ export * from "./token";
 export * from "./transactions";
 export * from "./voting-power";
 export * from "./dao";
+export * from "./treasury";
 export * from "./transfers";

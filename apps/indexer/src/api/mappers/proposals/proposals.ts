@@ -8,15 +8,15 @@ export const ProposalsRequestSchema = z.object({
     .number()
     .int()
     .min(0, "Skip must be a non-negative integer")
-    .default(0)
-    .optional(),
+    .optional()
+    .default(0),
   limit: z.coerce
     .number()
     .int()
     .min(1, "Limit must be a positive integer")
     .max(1000, "Limit cannot exceed 1000")
-    .default(10)
-    .optional(),
+    .optional()
+    .default(10),
   orderDirection: z.enum(["asc", "desc"]).default("desc").optional(),
   status: z
     .union([z.string(), z.array(z.string())])
