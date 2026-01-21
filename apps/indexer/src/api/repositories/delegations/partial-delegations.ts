@@ -12,7 +12,7 @@ export class PartialDelegationsRepository {
         delegatorAccountId: delegation.delegatorAccountId,
         timestamp: delegation.timestamp,
         previousDelegate: delegation.previousDelegate,
-        partials: sql<{ delegate: string; value: bigint }[]>`jsonb_agg(
+        partials: sql<{ delegate: Address; value: bigint }[]>`jsonb_agg(
           jsonb_build_object(
             'delegate', ${delegation.delegateAccountId}, 
             'value', ${delegation.delegatedValue}
