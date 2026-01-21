@@ -8,12 +8,13 @@ import {
 import { Address, Hex } from "viem";
 
 import { ensureAccountExists } from "./shared";
-import { computeRelevance, ProposalStatus } from "@/lib/constants";
+import { ProposalStatus } from "@/lib/constants";
 import {
   DaoIdEnum,
   FeedEventRelevanceEnum,
   FeedEventTypeEnum,
 } from "@/lib/enums";
+import { computeRelevance } from "@/lib/utils";
 
 /**
  * ### Creates:

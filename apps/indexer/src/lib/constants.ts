@@ -734,7 +734,7 @@ export enum MetricTypesEnum {
 
 export const metricTypeArray = Object.values(MetricTypesEnum);
 
-import { FeedEventRelevanceEnum, FeedEventTypeEnum } from "./enums";
+import { FeedEventTypeEnum } from "./enums";
 
 // Relevance thresholds configuration per DAO
 // Values are in token units (not wei) - will be converted to wei when comparing
@@ -758,13 +758,13 @@ export const RELEVANCE_THRESHOLDS: Partial<
     },
     [FeedEventTypeEnum.DELEGATION]: {
       low: 1_000n * DECIMALS_MULTIPLIER,
-      medium: 100_000n * DECIMALS_MULTIPLIER,
-      high: 500_000n * DECIMALS_MULTIPLIER,
+      medium: 10_000n * DECIMALS_MULTIPLIER,
+      high: 100_000n * DECIMALS_MULTIPLIER,
     },
     [FeedEventTypeEnum.VOTE]: {
-      low: 10_000n * DECIMALS_MULTIPLIER,
-      medium: 100_000n * DECIMALS_MULTIPLIER,
-      high: 500_000n * DECIMALS_MULTIPLIER,
+      low: 1_000n * DECIMALS_MULTIPLIER,
+      medium: 10_000n * DECIMALS_MULTIPLIER,
+      high: 100_000n * DECIMALS_MULTIPLIER,
     },
   },
   [DaoIdEnum.UNI]: {
@@ -802,37 +802,3 @@ export const RELEVANCE_THRESHOLDS: Partial<
     },
   },
 };
-
-/**
- * Computes the relevance level for a feed event based on the value and DAO thresholds.
- * If thresholds are not configured for the DAO, returns "none".
- */
-export function computeRelevance(
-  daoId: DaoIdEnum,
-  eventType:
-    | FeedEventTypeEnum.TRANSFER
-    | FeedEventTypeEnum.DELEGATION
-    | FeedEventTypeEnum.VOTE,
-  value: bigint,
-): FeedEventRelevanceEnum {
-  const thresholds = RELEVANCE_THRESHOLDS[daoId];
-  if (!thresholds) {
-    return FeedEventRelevanceEnum.NONE;
-  }
-
-  const eventThresholds = thresholds[eventType];
-  if (!eventThresholds) {
-    return FeedEventRelevanceEnum.NONE;
-  }
-
-  if (value >= eventThresholds.high) {
-    return FeedEventRelevanceEnum.HIGH;
-  }
-  if (value >= eventThresholds.medium) {
-    return FeedEventRelevanceEnum.MEDIUM;
-  }
-  if (value >= eventThresholds.low) {
-    return FeedEventRelevanceEnum.LOW;
-  }
-  return FeedEventRelevanceEnum.NONE;
-}

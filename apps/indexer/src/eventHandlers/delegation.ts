@@ -13,10 +13,10 @@ import { DaoIdEnum, FeedEventTypeEnum } from "@/lib/enums";
 import {
   BurningAddresses,
   CEXAddresses,
-  computeRelevance,
   DEXAddresses,
   LendingAddresses,
 } from "@/lib/constants";
+import { computeRelevance } from "@/lib/utils";
 
 /**
  * ### Creates:

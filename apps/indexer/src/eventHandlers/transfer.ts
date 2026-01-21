@@ -3,7 +3,7 @@ import { Address, Hex, zeroAddress } from "viem";
 import { accountBalance, feedEvent, transfer } from "ponder:schema";
 
 import { DaoIdEnum, FeedEventTypeEnum } from "@/lib/enums";
-import { computeRelevance } from "@/lib/constants";
+import { computeRelevance } from "@/lib/utils";
 import { ensureAccountExists } from "./shared";
 
 /**
