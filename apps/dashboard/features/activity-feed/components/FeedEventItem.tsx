@@ -112,7 +112,7 @@ export const FeedEventItem = ({ event, className }: FeedEventItemProps) => {
     return formatNumberUserReadable(value);
   };
 
-  const tokenSymbol = config?.daoOverview?.token?.symbol ?? "tokens";
+  const tokenSymbol = config?.name ?? daoId.toUpperCase();
 
   const baseExplorerUrl =
     config?.daoOverview?.chain?.blockExplorers?.default?.url ??
