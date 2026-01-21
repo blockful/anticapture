@@ -1,5 +1,5 @@
 import { z } from "@hono/zod-openapi";
-import { Address, isAddress } from "viem";
+import { isAddress } from "viem";
 import { DBDelegation } from "./delegations";
 
 export const HistoricalDelegationsRequestParamsSchema = z.object({
@@ -66,8 +66,8 @@ export type DelegationItem = z.infer<typeof DelegationItemSchema>;
 
 const DelegationMapper = (d: DBDelegation): DelegationItem => {
   return {
-    delegatorAddress: d.delegatorAccountId as Address,
-    delegateAddress: d.delegateAccountId as Address,
+    delegatorAddress: d.delegatorAccountId,
+    delegateAddress: d.delegateAccountId,
     amount: d.delegatedValue.toString(),
     timestamp: d.timestamp.toString(),
     transactionHash: d.transactionHash,
