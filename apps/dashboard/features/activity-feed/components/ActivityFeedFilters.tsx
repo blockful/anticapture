@@ -1,157 +1,270 @@
 "use client";
 
 import { useState } from "react";
-import { Vote, FileText, ArrowRightLeft, Users, Filter, X } from "lucide-react";
+import { Calendar, X } from "lucide-react";
 import { cn } from "@/shared/utils";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerClose,
+} from "@/shared/components/ui/drawer";
+import { Checkbox } from "@/shared/components/design-system/form/fields/checkbox/Checkbox";
+import { RadioButton } from "@/shared/components/design-system/buttons/RadioButton";
+import { Button, IconButton } from "@/shared/components";
+import { Input } from "@/shared/components/design-system/form/fields/input/Input";
+import { useScreenSize } from "@/shared/hooks";
 import {
   FeedEventType,
   FeedEventRelevance,
+  ActivityFeedFilterState,
 } from "@/features/activity-feed/types";
 
-interface ActivityFeedFiltersProps {
-  selectedTypes: FeedEventType[];
-  selectedRelevances: FeedEventRelevance[];
-  onTypesChange: (types: FeedEventType[]) => void;
-  onRelevancesChange: (relevances: FeedEventRelevance[]) => void;
-  className?: string;
+interface ActivityFeedFiltersDrawerProps {
+  isOpen: boolean;
+  onClose: () => void;
+  filters: ActivityFeedFilterState;
+  onApplyFilters: (filters: ActivityFeedFilterState) => void;
 }
 
-const eventTypes: { value: FeedEventType; label: string; icon: typeof Vote }[] =
-  [
-    { value: "vote", label: "Votes", icon: Vote },
-    { value: "proposal", label: "Proposals", icon: FileText },
-    { value: "transfer", label: "Transfers", icon: ArrowRightLeft },
-    { value: "delegation", label: "Delegations", icon: Users },
-  ];
-
-const relevances: {
-  value: FeedEventRelevance;
-  label: string;
-  color: string;
-}[] = [
-  { value: "high", label: "High", color: "bg-surface-solid-error" },
-  { value: "medium", label: "Medium", color: "bg-surface-solid-warning" },
-  { value: "low", label: "Low", color: "bg-surface-solid-success" },
+const eventTypes: { value: FeedEventType; label: string }[] = [
+  { value: "delegation", label: "Delegation" },
+  { value: "transfer", label: "Transfer" },
+  { value: "vote", label: "Vote" },
+  { value: "proposal", label: "Proposal Creation" },
 ];
 
-export const ActivityFeedFilters = ({
-  selectedTypes,
-  selectedRelevances,
-  onTypesChange,
-  onRelevancesChange,
-  className,
-}: ActivityFeedFiltersProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+const relevances: { value: FeedEventRelevance; label: string }[] = [
+  { value: "high", label: "High" },
+  { value: "medium", label: "Medium" },
+  { value: "low", label: "Low" },
+];
 
-  const toggleType = (type: FeedEventType) => {
-    if (selectedTypes.includes(type)) {
-      onTypesChange(selectedTypes.filter((t) => t !== type));
-    } else {
-      onTypesChange([...selectedTypes, type]);
+const SectionDivider = () => (
+  <div className="border-border-default w-full border-t border-dashed" />
+);
+
+const SectionLabel = ({ children }: { children: React.ReactNode }) => (
+  <span className="text-secondary font-mono text-xs font-medium uppercase tracking-wider">
+    {children}
+  </span>
+);
+
+export const ActivityFeedFiltersDrawer = ({
+  isOpen,
+  onClose,
+  filters,
+  onApplyFilters,
+}: ActivityFeedFiltersDrawerProps) => {
+  const { isMobile } = useScreenSize();
+  const [localFilters, setLocalFilters] =
+    useState<ActivityFeedFilterState>(filters);
+
+  const handleSortOrderChange = (sortOrder: "desc" | "asc") => {
+    setLocalFilters((prev) => ({ ...prev, sortOrder }));
+  };
+
+  const handleTypeToggle = (type: FeedEventType) => {
+    setLocalFilters((prev) => ({
+      ...prev,
+      types: prev.types.includes(type)
+        ? prev.types.filter((t) => t !== type)
+        : [...prev.types, type],
+    }));
+  };
+
+  const handleRelevanceToggle = (relevance: FeedEventRelevance) => {
+    setLocalFilters((prev) => ({
+      ...prev,
+      relevances: prev.relevances.includes(relevance)
+        ? prev.relevances.filter((r) => r !== relevance)
+        : [...prev.relevances, relevance],
+    }));
+  };
+
+  const handleFromDateChange = (value: string) => {
+    setLocalFilters((prev) => ({ ...prev, fromDate: value }));
+  };
+
+  const handleToDateChange = (value: string) => {
+    setLocalFilters((prev) => ({ ...prev, toDate: value }));
+  };
+
+  const handleApply = () => {
+    onApplyFilters(localFilters);
+    onClose();
+  };
+
+  const handleClear = () => {
+    const clearedFilters: ActivityFeedFilterState = {
+      sortOrder: "desc",
+      types: [],
+      relevances: [],
+      fromDate: "",
+      toDate: "",
+    };
+    setLocalFilters(clearedFilters);
+  };
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      onClose();
     }
   };
 
-  const toggleRelevance = (relevance: FeedEventRelevance) => {
-    if (selectedRelevances.includes(relevance)) {
-      onRelevancesChange(selectedRelevances.filter((r) => r !== relevance));
-    } else {
-      onRelevancesChange([...selectedRelevances, relevance]);
-    }
+  // Sync local state when drawer opens
+  const handleDrawerOpen = () => {
+    setLocalFilters(filters);
   };
-
-  const clearFilters = () => {
-    onTypesChange([]);
-    onRelevancesChange([]);
-  };
-
-  const hasActiveFilters =
-    selectedTypes.length > 0 || selectedRelevances.length > 0;
 
   return (
-    <div className={cn("flex flex-col gap-2", className)}>
-      {/* Mobile toggle button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={cn(
-          "bg-surface-contrast hover:bg-surface-hover text-primary flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors md:hidden",
-          hasActiveFilters && "bg-surface-opacity-brand",
-        )}
-      >
-        <Filter className="size-4" />
-        Filters
-        {hasActiveFilters && (
-          <span className="bg-brand text-primary-foreground rounded-full px-2 py-0.5 text-xs">
-            {selectedTypes.length + selectedRelevances.length}
-          </span>
-        )}
-      </button>
+    <Drawer
+      open={isOpen}
+      onOpenChange={handleOpenChange}
+      direction={isMobile ? "bottom" : "right"}
+      onAnimationEnd={(open) => {
+        if (open) handleDrawerOpen();
+      }}
+    >
+      <DrawerContent className="flex h-full flex-col">
+        <div className="bg-surface-default flex h-full flex-col overflow-y-auto">
+          {/* Header */}
+          <div className="bg-surface-contrast px-4 pb-4 pt-2">
+            <div className="text-secondary mb-2 font-mono text-xs font-medium uppercase tracking-wider">
+              Drawer / Filters
+            </div>
+            <div className="flex items-center justify-between">
+              <h2 className="text-primary text-lg font-semibold">
+                Filter Activity
+              </h2>
+              <DrawerClose asChild>
+                <IconButton variant="outline" size="sm" icon={X} />
+              </DrawerClose>
+            </div>
+          </div>
 
-      {/* Filter content */}
-      <div
-        className={cn(
-          "flex flex-col gap-4 md:flex-row md:items-center md:gap-6",
-          !isOpen && "hidden md:flex",
-        )}
-      >
-        {/* Event type filters */}
-        <div className="flex flex-col gap-2">
-          <span className="text-secondary text-xs font-medium uppercase tracking-wider">
-            Event Type
-          </span>
-          <div className="flex flex-wrap gap-2">
-            {eventTypes.map(({ value, label, icon: Icon }) => (
-              <button
-                key={value}
-                onClick={() => toggleType(value)}
-                className={cn(
-                  "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors",
-                  selectedTypes.includes(value)
-                    ? "bg-surface-action text-primary-foreground"
-                    : "bg-surface-contrast text-secondary hover:bg-surface-hover hover:text-primary",
-                )}
-              >
-                <Icon className="size-4" />
-                {label}
-              </button>
-            ))}
+          {/* Content */}
+          <div className="flex flex-1 flex-col gap-6 px-4 py-6">
+            {/* Sort by Date */}
+            <div className="flex flex-col gap-3">
+              <SectionLabel>Sort by Date</SectionLabel>
+              <div className="flex items-center gap-6">
+                <RadioButton
+                  label="Newest first"
+                  checked={localFilters.sortOrder === "desc"}
+                  onChange={() => handleSortOrderChange("desc")}
+                  name="sortOrder"
+                />
+                <RadioButton
+                  label="Oldest first"
+                  checked={localFilters.sortOrder === "asc"}
+                  onChange={() => handleSortOrderChange("asc")}
+                  name="sortOrder"
+                />
+              </div>
+            </div>
+
+            <SectionDivider />
+
+            {/* Type */}
+            <div className="flex flex-col gap-3">
+              <SectionLabel>Type</SectionLabel>
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+                {eventTypes.map(({ value, label }) => (
+                  <label
+                    key={value}
+                    className="flex cursor-pointer items-center gap-2"
+                  >
+                    <Checkbox
+                      checked={localFilters.types.includes(value)}
+                      onCheckedChange={() => handleTypeToggle(value)}
+                    />
+                    <span
+                      className={cn(
+                        "text-sm transition-colors",
+                        localFilters.types.includes(value)
+                          ? "text-primary"
+                          : "text-secondary",
+                      )}
+                    >
+                      {label}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <SectionDivider />
+
+            {/* Relevance */}
+            <div className="flex flex-col gap-3">
+              <SectionLabel>Relevance</SectionLabel>
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+                {relevances.map(({ value, label }) => (
+                  <label
+                    key={value}
+                    className="flex cursor-pointer items-center gap-2"
+                  >
+                    <Checkbox
+                      checked={localFilters.relevances.includes(value)}
+                      onCheckedChange={() => handleRelevanceToggle(value)}
+                    />
+                    <span
+                      className={cn(
+                        "text-sm transition-colors",
+                        localFilters.relevances.includes(value)
+                          ? "text-primary"
+                          : "text-secondary",
+                      )}
+                    >
+                      {label}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <SectionDivider />
+
+            {/* Time Frame */}
+            <div className="flex flex-col gap-3">
+              <SectionLabel>Time Frame</SectionLabel>
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1">
+                  <Calendar className="text-dimmed pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2" />
+                  <Input
+                    type="date"
+                    value={localFilters.fromDate}
+                    onChange={(e) => handleFromDateChange(e.target.value)}
+                    placeholder="MM/DD/YYYY"
+                    className="pl-9"
+                  />
+                </div>
+                <span className="text-dimmed">–</span>
+                <div className="relative flex-1">
+                  <Calendar className="text-dimmed pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2" />
+                  <Input
+                    type="date"
+                    value={localFilters.toDate}
+                    onChange={(e) => handleToDateChange(e.target.value)}
+                    placeholder="MM/DD/YYYY"
+                    className="pl-9"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="bg-surface-contrast mt-auto flex gap-3 px-4 py-4">
+            <Button variant="primary" onClick={handleApply}>
+              Apply filters
+            </Button>
+            <Button variant="outline" onClick={handleClear}>
+              Clear filters
+            </Button>
           </div>
         </div>
-
-        {/* Relevance filters */}
-        <div className="flex flex-col gap-2">
-          <span className="text-secondary text-xs font-medium uppercase tracking-wider">
-            Relevance
-          </span>
-          <div className="flex flex-wrap gap-2">
-            {relevances.map(({ value, label, color }) => (
-              <button
-                key={value}
-                onClick={() => toggleRelevance(value)}
-                className={cn(
-                  "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors",
-                  selectedRelevances.includes(value)
-                    ? "bg-surface-action text-primary-foreground"
-                    : "bg-surface-contrast text-secondary hover:bg-surface-hover hover:text-primary",
-                )}
-              >
-                <span className={cn("size-2 rounded-full", color)} />
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Clear filters */}
-        {hasActiveFilters && (
-          <button
-            onClick={clearFilters}
-            className="text-secondary hover:text-primary flex items-center gap-1 text-sm transition-colors"
-          >
-            <X className="size-4" />
-            Clear filters
-          </button>
-        )}
-      </div>
-    </div>
+      </DrawerContent>
+    </Drawer>
   );
 };

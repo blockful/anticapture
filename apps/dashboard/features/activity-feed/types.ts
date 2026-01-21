@@ -57,3 +57,11 @@ export interface ActivityFeedFilters {
   types?: FeedEventType[];
   relevances?: FeedEventRelevance[];
 }
+
+export interface ActivityFeedFilterState {
+  sortOrder: "desc" | "asc";
+  types: FeedEventType[];
+  relevances: FeedEventRelevance[];
+  fromDate: string;
+  toDate: string;
+}

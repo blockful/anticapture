@@ -10,9 +10,10 @@ export type {
   DelegationDetail,
   FeedEventListResponse,
   ActivityFeedFilters,
+  ActivityFeedFilterState,
 } from "./types";
 export {
   FeedEventItem,
   FeedEventSkeleton,
-  ActivityFeedFilters as ActivityFeedFiltersComponent,
+  ActivityFeedFiltersDrawer,
 } from "./components";
