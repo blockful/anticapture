@@ -42,6 +42,7 @@ export const COMP: DaoConfiguration = {
   },
   attackProfitability: {
     riskLevel: RiskLevel.HIGH,
+    supportsLiquidTreasuryCall: true,
   },
   governanceImplementation: {
     // Fields are sorted alphabetically by GovernanceImplementationEnum for readability

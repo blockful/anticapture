@@ -38,14 +38,15 @@ export const HeaderDAOSidebar = () => {
                 key={PAGES_CONSTANTS.daoOverview.title}
               />
             )}
-            {daoConfig.attackProfitability && (
-              <ButtonHeaderSidebar
-                page={PAGES_CONSTANTS.attackProfitability.page}
-                icon={Crosshair2Icon}
-                label={PAGES_CONSTANTS.attackProfitability.title}
-                key={PAGES_CONSTANTS.attackProfitability.title}
-              />
-            )}
+            {daoConfig.attackProfitability &&
+              daoConfig.attackProfitability.supportsLiquidTreasuryCall && (
+                <ButtonHeaderSidebar
+                  page={PAGES_CONSTANTS.attackProfitability.page}
+                  icon={Crosshair2Icon}
+                  label={PAGES_CONSTANTS.attackProfitability.title}
+                  key={PAGES_CONSTANTS.attackProfitability.title}
+                />
+              )}
             {daoConfig.riskAnalysis && (
               <ButtonHeaderSidebar
                 page={PAGES_CONSTANTS.riskAnalysis.page}
