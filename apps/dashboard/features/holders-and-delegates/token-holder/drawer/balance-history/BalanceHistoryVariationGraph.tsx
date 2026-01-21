@@ -238,9 +238,9 @@ export const BalanceHistoryVariationGraph = ({
                   // Determine which address to show based on transaction type and direction
                   const getDisplayAddress = () => {
                     if (data.direction === "in") {
-                      return data.fromAccountId;
+                      return data.from;
                     } else if (data.direction === "out") {
-                      return data.toAccountId;
+                      return data.to;
                     }
                     return null;
                   };
@@ -262,7 +262,7 @@ export const BalanceHistoryVariationGraph = ({
                       </p>
                       <p className="text-secondary flex gap-1 text-xs">
                         Balance:
-                        {formatNumberUserReadable(Number(data.amount))}
+                        {formatNumberUserReadable(Number(data.balance))}
                       </p>
                       <p className="text-secondary flex gap-1 text-xs">
                         Type:

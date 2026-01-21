@@ -1836,6 +1836,13 @@ type query_historicalBalances_items_items {
   delta: String!
   timestamp: String!
   logIndex: Float!
+  transfer: query_historicalBalances_items_items_transfer!
+}
+
+type query_historicalBalances_items_items_transfer {
+  value: String!
+  from: String!
+  to: String!
 }
 
 enum queryInput_historicalBalances_orderBy {

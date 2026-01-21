@@ -2139,6 +2139,14 @@ export type Query_HistoricalBalances_Items_Items = {
   logIndex: Scalars['Float']['output'];
   timestamp: Scalars['String']['output'];
   transactionHash: Scalars['String']['output'];
+  transfer: Query_HistoricalBalances_Items_Items_Transfer;
+};
+
+export type Query_HistoricalBalances_Items_Items_Transfer = {
+  __typename?: 'query_historicalBalances_items_items_transfer';
+  from: Scalars['String']['output'];
+  to: Scalars['String']['output'];
+  value: Scalars['String']['output'];
 };
 
 export type Query_HistoricalTokenData_Items = {
@@ -2980,13 +2988,13 @@ export type BalanceHistoryQuery = { __typename?: 'Query', transfers?: { __typena
 
 export type BalanceHistoryGraphQueryVariables = Exact<{
   address: Scalars['String']['input'];
-  sortBy?: InputMaybe<QueryInput_Transfers_SortBy>;
-  sortOrder?: InputMaybe<QueryInput_Transfers_SortOrder>;
-  fromDate?: InputMaybe<Scalars['Float']['input']>;
+  orderBy?: InputMaybe<QueryInput_HistoricalBalances_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_HistoricalBalances_OrderDirection>;
+  fromDate?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type BalanceHistoryGraphQuery = { __typename?: 'Query', transfers?: { __typename?: 'transfers_200_response', items: Array<{ __typename?: 'query_transfers_items_items', timestamp: string, amount: string, fromAccountId: string, toAccountId: string, transactionHash: string, logIndex: number } | null> } | null };
+export type BalanceHistoryGraphQuery = { __typename?: 'Query', historicalBalances?: { __typename?: 'historicalBalances_200_response', items: Array<{ __typename?: 'query_historicalBalances_items_items', balance: string, logIndex: number, timestamp: string, transactionHash: string, transfer: { __typename?: 'query_historicalBalances_items_items_transfer', from: string, to: string, value: string } } | null> } | null };
 
 export type AccountBalanceVariationsQueryVariables = Exact<{
   fromDate: Scalars['String']['input'];

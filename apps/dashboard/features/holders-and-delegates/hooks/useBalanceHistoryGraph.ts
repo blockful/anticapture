@@ -1,20 +1,20 @@
 import { useMemo } from "react";
-import {
-  QueryInput_Transfers_SortBy,
-  QueryInput_Transfers_SortOrder,
-  useBalanceHistoryGraphQuery,
-} from "@anticapture/graphql-client/hooks";
+import { useBalanceHistoryGraphQuery } from "@anticapture/graphql-client/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimePeriod } from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
 import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
 import { formatUnits } from "viem";
 import daoConfig from "@/shared/dao-config";
+import {
+  QueryInput_HistoricalBalances_OrderBy,
+  QueryInput_HistoricalBalances_OrderDirection,
+} from "@anticapture/graphql-client";
 
 export interface BalanceHistoryGraphItem {
   timestamp: number;
-  amount: number;
-  fromAccountId: string | null;
-  toAccountId: string | null;
+  balance: number;
+  from: string | null;
+  to: string | null;
   transactionHash: string;
   direction: "in" | "out";
   logIndex: number;
@@ -50,15 +50,15 @@ export function useBalanceHistoryGraph(
         break;
     }
 
-    return Math.floor(nowInSeconds - daysInSeconds);
+    return Math.floor(nowInSeconds - daysInSeconds).toString();
   }, [timePeriod]);
 
   const { data, loading, error } = useBalanceHistoryGraphQuery({
     variables: {
       address: accountId,
       fromDate,
-      sortBy: QueryInput_Transfers_SortBy.Timestamp,
-      sortOrder: QueryInput_Transfers_SortOrder.Asc,
+      orderBy: QueryInput_HistoricalBalances_OrderBy.Timestamp,
+      orderDirection: QueryInput_HistoricalBalances_OrderDirection.Asc,
     },
     context: {
       headers: {
@@ -69,17 +69,19 @@ export function useBalanceHistoryGraph(
   });
 
   const balanceHistory = useMemo((): BalanceHistoryGraphItem[] => {
-    if (!data?.transfers?.items) return [];
+    if (!data?.historicalBalances?.items) return [];
 
-    return data.transfers.items
+    return data.historicalBalances.items
       .filter((item) => !!item)
       .map((item) => ({
         ...item,
         timestamp: new Date(Number(item.timestamp) * 1000).getTime(),
-        amount: Number(formatUnits(BigInt(item.amount), decimals)),
-        direction: (item.fromAccountId === accountId ? "out" : "in") as
+        balance: Number(formatUnits(BigInt(item.balance), decimals)),
+        direction: (item.transfer.from === accountId ? "out" : "in") as
           | "in"
           | "out",
+        from: item.transfer.from,
+        to: item.transfer.to,
       }))
       .sort((a, b) => a.timestamp - b.timestamp);
   }, [data, accountId, decimals]);

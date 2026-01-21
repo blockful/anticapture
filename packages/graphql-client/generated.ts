@@ -2142,6 +2142,14 @@ export type Query_HistoricalBalances_Items_Items = {
   logIndex: Scalars['Float']['output'];
   timestamp: Scalars['String']['output'];
   transactionHash: Scalars['String']['output'];
+  transfer: Query_HistoricalBalances_Items_Items_Transfer;
+};
+
+export type Query_HistoricalBalances_Items_Items_Transfer = {
+  __typename?: 'query_historicalBalances_items_items_transfer';
+  from: Scalars['String']['output'];
+  to: Scalars['String']['output'];
+  value: Scalars['String']['output'];
 };
 
 export type Query_HistoricalTokenData_Items = {
@@ -2983,13 +2991,13 @@ export type BalanceHistoryQuery = { __typename?: 'Query', transfers?: { __typena
 
 export type BalanceHistoryGraphQueryVariables = Exact<{
   address: Scalars['String']['input'];
-  sortBy?: InputMaybe<QueryInput_Transfers_SortBy>;
-  sortOrder?: InputMaybe<QueryInput_Transfers_SortOrder>;
-  fromDate?: InputMaybe<Scalars['Float']['input']>;
+  orderBy?: InputMaybe<QueryInput_HistoricalBalances_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_HistoricalBalances_OrderDirection>;
+  fromDate?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type BalanceHistoryGraphQuery = { __typename?: 'Query', transfers?: { __typename?: 'transfers_200_response', items: Array<{ __typename?: 'query_transfers_items_items', timestamp: string, amount: string, fromAccountId: string, toAccountId: string, transactionHash: string, logIndex: number } | null> } | null };
+export type BalanceHistoryGraphQuery = { __typename?: 'Query', historicalBalances?: { __typename?: 'historicalBalances_200_response', items: Array<{ __typename?: 'query_historicalBalances_items_items', balance: string, logIndex: number, timestamp: string, transactionHash: string, transfer: { __typename?: 'query_historicalBalances_items_items_transfer', from: string, to: string, value: string } } | null> } | null };
 
 export type AccountBalanceVariationsQueryVariables = Exact<{
   fromDate: Scalars['String']['input'];
@@ -3358,21 +3366,24 @@ export type BalanceHistoryLazyQueryHookResult = ReturnType<typeof useBalanceHist
 export type BalanceHistorySuspenseQueryHookResult = ReturnType<typeof useBalanceHistorySuspenseQuery>;
 export type BalanceHistoryQueryResult = Apollo.QueryResult<BalanceHistoryQuery, BalanceHistoryQueryVariables>;
 export const BalanceHistoryGraphDocument = gql`
-    query BalanceHistoryGraph($address: String!, $sortBy: queryInput_transfers_sortBy, $sortOrder: queryInput_transfers_sortOrder, $fromDate: Float) {
-  transfers(
+    query BalanceHistoryGraph($address: String!, $orderBy: queryInput_historicalBalances_orderBy, $orderDirection: queryInput_historicalBalances_orderDirection, $fromDate: String) {
+  historicalBalances(
     address: $address
     fromDate: $fromDate
-    sortBy: $sortBy
-    sortOrder: $sortOrder
+    orderBy: $orderBy
+    orderDirection: $orderDirection
     limit: 1000
   ) {
     items {
-      timestamp
-      amount
-      fromAccountId
-      toAccountId
-      transactionHash
+      balance
       logIndex
+      timestamp
+      transactionHash
+      transfer {
+        from
+        to
+        value
+      }
     }
   }
 }
@@ -3391,8 +3402,8 @@ export const BalanceHistoryGraphDocument = gql`
  * const { data, loading, error } = useBalanceHistoryGraphQuery({
  *   variables: {
  *      address: // value for 'address'
- *      sortBy: // value for 'sortBy'
- *      sortOrder: // value for 'sortOrder'
+ *      orderBy: // value for 'orderBy'
+ *      orderDirection: // value for 'orderDirection'
  *      fromDate: // value for 'fromDate'
  *   },
  * });
