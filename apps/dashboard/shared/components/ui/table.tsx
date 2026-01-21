@@ -7,7 +7,7 @@ function Table({
   ...props
 }: React.HTMLAttributes<HTMLTableElement>) {
   return (
-    <div className="md:border-light-dark relative w-full overflow-auto md:rounded-lg md:border">
+    <div className="lg:border-light-dark relative w-full overflow-auto lg:rounded-lg lg:border">
       <table
         data-slot="table"
         className={cn("w-full caption-bottom text-sm", className)}
@@ -25,8 +25,8 @@ function TableHeader({
     <thead
       data-slot="table-header"
       className={cn(
-        "bg-surface-contrast font-medium [&_th:first-child]:border-r [&_th:first-child]:border-white/10 md:[&_th]:border-none [&_tr]:border-b",
-        // "[&_th:first-child]:shadow-[2px_0px_8px_2px_rgba(0,0,0,1.00)] sm:[&_th:first-child]:shadow-none",
+        "bg-surface-contrast font-medium [&_th:first-child]:border-r [&_th:first-child]:border-white/10 lg:[&_th]:border-none [&_tr]:border-b",
+        // "[&_th:first-child]:shadow-[2px_0px_8px_2px_rgba(0,0,0,1.00)] lg:[&_th:first-child]:shadow-none",
         className,
       )}
       {...props}
@@ -71,9 +71,9 @@ function TableRow({
     <tr
       data-slot="table-row"
       className={cn(
-        "hover:bg-accent data-[state=selected]:bg-muted [&_td]:border-b-light-dark transition-colors [&_td:first-child]:border-r [&_td:first-child]:border-r-white/10 md:[&_td:first-child]:border-r-0 [&_td]:border-b",
+        "hover:bg-accent data-[state=selected]:bg-muted [&_td]:border-b-light-dark transition-colors [&_td:first-child]:border-r [&_td:first-child]:border-r-white/10 lg:[&_td:first-child]:border-r-0 [&_td]:border-b",
         // "[&_td:first-child]:sticky [&_td:first-child]:left-0 [&_td:first-child]:z-10",
-        // "[&_td:first-child]:shadow-[2px_0px_8px_2px_rgba(0,0,0,1.00)] sm:[&_td:first-child]:shadow-none",
+        // "[&_td:first-child]:shadow-[2px_0px_8px_2px_rgba(0,0,0,1.00)] lg:[&_td:first-child]:shadow-none",
         className,
       )}
       {...props}

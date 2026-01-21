@@ -55,13 +55,13 @@ export const SecurityCouncilCard = ({
     <div className="flex flex-col gap-5">
       <div className="border-x-1 border-inverted mx-5">
         <div
-          className={"sm:bg-surface-default flex w-full flex-col gap-4 md:p-4"}
+          className={"lg:bg-surface-default flex w-full flex-col gap-4 lg:p-4"}
         >
-          <div className="flex w-full flex-col text-[13px] sm:flex-row sm:items-center sm:gap-2">
-            <p className="text-primary flex items-center gap-2 font-mono font-medium tracking-wider sm:px-0">
+          <div className="flex w-full flex-col text-[13px] lg:flex-row lg:items-center lg:gap-2">
+            <p className="text-primary flex items-center gap-2 font-mono font-medium tracking-wider lg:px-0">
               SECURITY COUNCIL
             </p>
-            <div className="hidden size-1 items-center rounded-full bg-[#3F3F46] sm:flex" />
+            <div className="hidden size-1 items-center rounded-full bg-[#3F3F46] lg:flex" />
             <div className="flex items-center gap-1.5">
               <UnderlinedLink
                 href={securityCouncil.multisig.externalLink}
@@ -75,13 +75,13 @@ export const SecurityCouncilCard = ({
                     {securityCouncil.multisig.threshold}/
                     {securityCouncil.multisig.signers}
                   </span>
-                  <span className="hidden sm:inline">
+                  <span className="hidden lg:inline">
                     required for transactions
                   </span>
-                  <span className="inline sm:hidden">required</span>
+                  <span className="inline lg:hidden">required</span>
                 </div>
               </UnderlinedLink>
-              <div className="hidden sm:flex">
+              <div className="hidden lg:flex">
                 <TooltipInfo text="The security council is set up as a multisig with eight signers, needing the signature of 4 out of 8 to execute a cancel transaction for an approved proposal in the Timelock contract." />
               </div>
             </div>
@@ -96,7 +96,7 @@ export const SecurityCouncilCard = ({
           </div>
         </div>
       </div>
-      <div className="block md:hidden">
+      <div className="block lg:hidden">
         <DividerDefault isHorizontal />
       </div>
     </div>

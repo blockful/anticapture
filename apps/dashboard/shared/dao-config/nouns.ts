@@ -4,6 +4,7 @@ import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governan
 import { NounsIcon } from "@/shared/components/icons";
 import { mainnet } from "viem/chains";
 import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
+import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 
 export const NOUNS: DaoConfiguration = {
   name: "Nouns",
@@ -13,6 +14,11 @@ export const NOUNS: DaoConfiguration = {
     svgBgColor: "#FFFFFF",
   },
   icon: NounsIcon,
+  notSupportedMetrics: [
+    MetricTypesEnum.CEX_SUPPLY,
+    MetricTypesEnum.DEX_SUPPLY,
+    MetricTypesEnum.LENDING_SUPPLY,
+  ],
   daoOverview: {
     token: "ERC721",
     chain: { ...mainnet, icon: MainnetIcon },
@@ -40,14 +46,7 @@ export const NOUNS: DaoConfiguration = {
   },
   attackProfitability: {
     riskLevel: RiskLevel.LOW,
-    supportsLiquidTreasuryCall: false,
-    attackCostBarChart: {
-      NounsTimelock: "0xb1a32FC9F9D8b2cf86C068Cae13108809547ef71",
-      PayerContract: "0xd97Bcd9f47cEe35c0a9ec1dc40C1269afc9E8E1D",
-      ClientIncentivesRewardsProxy:
-        "0x883860178F95d0C82413eDc1D6De530cB4771d55",
-      //PayerContract and ClientIncentivesRewardsProxy are controlled by Timelock.
-    },
+    supportsLiquidTreasuryCall: true,
   },
   governanceImplementation: {
     // Fields are sorted alphabetically by GovernanceImplementationEnum for readability

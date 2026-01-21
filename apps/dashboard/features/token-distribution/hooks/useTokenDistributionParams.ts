@@ -6,8 +6,13 @@ import { useTokenDistributionStore } from "@/features/token-distribution/store/u
 import { useBrushStore } from "@/features/token-distribution/store/useBrushStore";
 import { ChartDataSetPoint } from "@/shared/dao-config/types";
 import { parseAsInteger, useQueryState } from "nuqs";
+import { DaoIdEnum } from "@/shared/types/daos";
+import daoConfig from "@/shared/dao-config";
 
-export function useTokenDistributionParams(chartData: ChartDataSetPoint[]) {
+export function useTokenDistributionParams(
+  chartData: ChartDataSetPoint[],
+  daoId: DaoIdEnum,
+) {
   const [metrics, setMetrics] = useQueryState("metrics");
   const [hasTransfer, setHasTransfer] = useQueryState("hasTransfer");
   const [startDate, setStartDate] = useQueryState("startDate", parseAsInteger);
@@ -27,8 +32,14 @@ export function useTokenDistributionParams(chartData: ChartDataSetPoint[]) {
   useEffect(() => {
     if (isInitialized.current) return;
 
+    const filteredMetrics = daoConfig[daoId].notSupportedMetrics
+      ? initialMetrics.filter(
+          (metric) => !daoConfig[daoId].notSupportedMetrics?.includes(metric),
+        )
+      : initialMetrics;
+
     if (!storeMetrics || storeMetrics.length === 0) {
-      setStoreMetrics(metrics ? metrics.split(",") : initialMetrics);
+      setStoreMetrics(metrics ? metrics.split(",") : filteredMetrics);
     }
 
     setStoreHasTransfer(hasTransfer === "true");

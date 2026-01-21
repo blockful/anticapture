@@ -6,12 +6,19 @@ import {
   useGetVotesOnchainsQuery,
   useGetVotingPowerChangeLazyQuery,
 } from "@anticapture/graphql-client/hooks";
-import { QueryInput_HistoricalVotingPower_Days } from "@anticapture/graphql-client";
+import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
+
+type VotingPowerVariation = {
+  previousVotingPower: string;
+  currentVotingPower: string;
+  absoluteChange: string;
+  percentageChange: string;
+};
 
 // Enhanced vote type with historical voting power
 export type VoteWithHistoricalPower =
   GetVotesOnchainsQuery["votesOnchains"]["items"][0] & {
-    historicalVotingPower?: string;
+    votingPowerVariation?: VotingPowerVariation;
     isSubRow?: boolean;
   };
 
@@ -90,10 +97,11 @@ export const useVotes = ({
 
       // Filter out votes that already have historical voting power
       const votesNeedingData = votes.filter(
-        (vote) => !vote.historicalVotingPower,
+        (vote) => !vote.votingPowerVariation,
       );
 
-      if (!votesNeedingData.length) return;
+      if (!votesNeedingData.length || proposalStartTimestamp === undefined)
+        return;
 
       try {
         const addresses = votesNeedingData.map((vote) => vote.voterAccountId);
@@ -101,8 +109,11 @@ export const useVotes = ({
         const result = await getVotingPowerChange({
           variables: {
             addresses,
-            days: QueryInput_HistoricalVotingPower_Days["30d"],
-            fromDate: proposalStartTimestamp,
+            fromDate: (
+              proposalStartTimestamp / 1000 -
+              DAYS_IN_SECONDS["30d"]
+            ).toString(),
+            toDate: (proposalStartTimestamp / 1000).toString(),
           },
           context: {
             headers: {
@@ -112,13 +123,14 @@ export const useVotes = ({
         });
 
         // Update votes with historical voting power
-        if (result.data?.historicalVotingPower) {
-          const powerChanges: Record<string, string> = {};
-          result.data.historicalVotingPower.forEach((item) => {
-            if (item?.address && item?.votingPower) {
-              powerChanges[item.address] = item.votingPower;
-            }
-          });
+        if (result.data?.votingPowerVariations) {
+          const powerChanges = result.data.votingPowerVariations.items?.reduce(
+            (acc, item) => {
+              if (item?.accountId) acc[item.accountId] = item;
+              return acc;
+            },
+            {} as Record<string, VotingPowerVariation>,
+          );
 
           // Update only the votes that were fetched and don't already have historical voting power
           setAllVotes((prevVotes) =>
@@ -128,11 +140,9 @@ export const useVotes = ({
                 (v) => v.voterAccountId === vote.voterAccountId,
               );
               if (wasFetched) {
-                // Set historical voting power to the returned value or "0" if not found
-                const historicalVP = powerChanges[vote.voterAccountId] || "0";
                 return {
                   ...vote,
-                  historicalVotingPower: historicalVP,
+                  votingPowerVariation: powerChanges[vote.voterAccountId],
                 };
               }
               // Return the vote unchanged
@@ -144,7 +154,7 @@ export const useVotes = ({
         console.error("Error fetching voting power changes:", error);
       }
     },
-    [getVotingPowerChange, daoId],
+    [daoId, getVotingPowerChange, proposalStartTimestamp],
   );
 
   // Reset accumulated votes when sorting parameters change

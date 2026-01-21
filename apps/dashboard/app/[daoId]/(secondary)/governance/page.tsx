@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { BaseHeaderLayoutSidebar } from "@/shared/components/";
 
 import { HeaderMobile } from "@/widgets/HeaderMobile";
 import { HeaderDAOSidebar, HeaderSidebar, StickyPageHeader } from "@/widgets";
@@ -65,14 +64,18 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 export default function DaoPage() {
   return (
     <div className="bg-surface-background dark flex h-screen overflow-hidden">
-      <BaseHeaderLayoutSidebar>
-        <HeaderSidebar />
-        <HeaderDAOSidebar />
-      </BaseHeaderLayoutSidebar>
-      <main className="relative flex-1 overflow-auto lg:ml-[330px]">
-        <div className="sm:hidden">
-          <StickyPageHeader />
+      <div className="active relative hidden h-screen lg:flex">
+        <div className="h-full w-[68px] shrink-0 overflow-y-auto">
+          <HeaderSidebar />
+        </div>
+        <div className="h-full shrink-0">
+          <HeaderDAOSidebar />
+        </div>
+      </div>
+      <main className="relative flex-1 overflow-auto">
+        <div className="lg:hidden">
           <HeaderMobile />
+          <StickyPageHeader />
         </div>
         <div className="flex min-h-screen w-full flex-col items-center">
           <div className="xl4k:max-w-7xl w-full flex-1">

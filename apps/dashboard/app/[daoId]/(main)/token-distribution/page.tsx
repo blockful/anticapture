@@ -73,14 +73,16 @@ export default async function TokenDistributionPage({
   }
 
   return (
-    <TheSectionLayout
-      title={PAGES_CONSTANTS.tokenDistribution.title}
-      icon={<ArrowRightLeft className="section-layout-icon" />}
-      description={PAGES_CONSTANTS.tokenDistribution.description}
-    >
-      <SubSectionsContainer>
-        <TokenDistributionSection daoId={daoIdEnum} />
-      </SubSectionsContainer>
-    </TheSectionLayout>
+    <div>
+      <TheSectionLayout
+        title={PAGES_CONSTANTS.tokenDistribution.title}
+        icon={<ArrowRightLeft className="section-layout-icon" />}
+        description={PAGES_CONSTANTS.tokenDistribution.description}
+      >
+        <SubSectionsContainer>
+          <TokenDistributionSection daoId={daoIdEnum} />
+        </SubSectionsContainer>
+      </TheSectionLayout>
+    </div>
   );
 }

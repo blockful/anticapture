@@ -60,8 +60,8 @@ export const WithIconAndResponsiveText: Story = {
       <>
         <Key className="text-tangerine size-3.5" />
         <span className="text-white">3/5</span>
-        <span className="hidden sm:inline">required for transactions</span>
-        <span className="inline sm:hidden"> required</span>
+        <span className="hidden lg:inline">required for transactions</span>
+        <span className="inline lg:hidden"> required</span>
       </>
     ),
   },

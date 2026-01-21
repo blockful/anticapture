@@ -14,7 +14,7 @@ export function accountBalanceVariations(
     createRoute({
       method: "get",
       operationId: "accountBalanceVariations",
-      path: "/account-balance/variations",
+      path: "/balances/variations",
       summary: "Get top variations in account balances for a given period",
       description:
         "Returns a mapping of the biggest variations to account balances associated by account address",

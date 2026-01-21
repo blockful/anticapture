@@ -16,16 +16,26 @@ import { Button } from "@/shared/components/design-system/buttons/button/Button"
 import { cn } from "@/shared/utils/cn";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { MetricWithKey } from "@/features/token-distribution/types";
+import { DaoIdEnum } from "@/shared/types/daos";
+import daoConfig from "@/shared/dao-config";
 
 export const TokenDistributionDialog = ({
   appliedMetrics,
   metricsSchema,
   onApply,
+  daoId,
 }: {
   appliedMetrics: Record<string, MetricWithKey[]>;
   metricsSchema: Record<string, MetricWithKey[]>;
   onApply: (metric: (MetricTypesEnum | string)[]) => void;
+  daoId: DaoIdEnum;
 }) => {
+  let notSupportedMetrics: MetricTypesEnum[] = [];
+
+  if (daoConfig[daoId].notSupportedMetrics) {
+    notSupportedMetrics = daoConfig[daoId].notSupportedMetrics;
+  }
+
   const [selectedMetrics, setSelectedMetrics] = useState<
     (MetricTypesEnum | string)[]
   >([]);
@@ -53,7 +63,14 @@ export const TokenDistributionDialog = ({
   return (
     <Root>
       <Trigger asChild>
-        <Button variant="outline" disabled={isAllMetricsApplied} size="sm">
+        <Button
+          data-ph-event="metric_added"
+          data-ph-source="token_distribution"
+          data-umami-event="metric_added"
+          variant="outline"
+          disabled={isAllMetricsApplied}
+          size="sm"
+        >
           {isAllMetricsApplied ? (
             <>
               <Check className="text-dimmed size-3.5" />
@@ -85,10 +102,10 @@ export const TokenDistributionDialog = ({
               .map(([category, metrics], index, visibleEntries) => {
                 return (
                   <div key={category}>
-                    <CardTitle className="!text-alternative-sm text-secondary mb-1.5 flex items-center font-mono font-medium uppercase tracking-wide sm:gap-2.5">
+                    <CardTitle className="!text-alternative-sm text-secondary mb-1.5 flex items-center font-mono font-medium uppercase tracking-wide lg:gap-2.5">
                       {category}
                     </CardTitle>
-                    <div className="flex w-full flex-wrap gap-2 sm:gap-3">
+                    <div className="flex w-full flex-wrap gap-2 lg:gap-3">
                       {metrics.map((metric) => {
                         const isMetricAlreadyApplied = appliedMetrics[
                           category
@@ -107,6 +124,9 @@ export const TokenDistributionDialog = ({
                               isSelected
                                 ? "border-tangerine"
                                 : "border-transparent",
+                            )}
+                            disabled={notSupportedMetrics.includes(
+                              metric.key as MetricTypesEnum,
                             )}
                           >
                             {isSelected ? (

@@ -2,7 +2,7 @@
 
 export const PageSkeleton = () => {
   return (
-    <div className="flex min-h-screen w-full flex-col gap-8 border-b-2 border-b-white/10 px-4 sm:gap-6 sm:border-none sm:p-5">
+    <div className="flex min-h-screen w-full flex-col gap-8 border-b-2 border-b-white/10 px-4 lg:gap-6 lg:border-none lg:p-5">
       {/* Section Title Skeleton */}
       <div className="flex w-full flex-col gap-2">
         <div className="flex h-full w-full flex-col gap-6">

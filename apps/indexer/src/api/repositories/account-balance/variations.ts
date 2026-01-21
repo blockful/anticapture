@@ -4,7 +4,7 @@ import { transfer, accountBalance } from "ponder:schema";
 import { DBAccountBalanceVariation, DBHistoricalBalance } from "@/api/mappers";
 import { Address } from "viem";
 
-export class AccountBalanceRepository {
+export class BalanceVariationsRepository {
   async getHistoricalBalances(
     addresses: Address[],
     timestamp: number,

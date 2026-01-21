@@ -27,18 +27,14 @@ import { ResearchPendingChartBlur } from "@/shared/components/charts/ResearchPen
 import { AttackProfitabilityCustomTooltip } from "@/features/attack-profitability/components";
 import {
   useDaoTokenHistoricalData,
-  useTreasuryAssetNonDaoToken,
+  useTreasury,
 } from "@/features/attack-profitability/hooks";
 import {
   cn,
   formatNumberUserReadable,
   timestampToReadableDate,
 } from "@/shared/utils";
-import {
-  normalizeDataset,
-  normalizeDatasetTreasuryNonDaoToken,
-  normalizeDatasetAllTreasury,
-} from "@/features/attack-profitability/utils";
+import { normalizeDataset } from "@/features/attack-profitability/utils";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 import { Data } from "react-csv/lib/core";
@@ -64,17 +60,23 @@ export const MultilineChartAttackProfitability = ({
   const { data: daoData } = useDaoData(daoEnum);
   const daoConfig = daoConfigByDaoId[daoEnum];
 
-  const {
-    data: treasuryAssetNonDAOToken = [],
-    loading: isLoadingTreasuryAssetNonDAOToken,
-  } = useTreasuryAssetNonDaoToken(daoEnum, days);
+  const { data: liquidTreasuryData } = useTreasury(
+    daoEnum,
+    "liquid",
+    days as TimeInterval,
+  );
+  const { data: totalTreasuryData } = useTreasury(
+    daoEnum,
+    "total",
+    days as TimeInterval,
+  );
 
   const {
     data: daoTokenPriceHistoricalData,
     loading: isLoadingDaoTokenPriceHistoricalData,
   } = useDaoTokenHistoricalData({
     daoId: daoEnum,
-    limit: Number(days.split("d")[0]) - 7,
+    limit: Number(days.split("d")[0]),
   });
 
   const { data: timeSeriesData, isLoading: isLoadingTimeSeriesData } =
@@ -114,9 +116,7 @@ export const MultilineChartAttackProfitability = ({
 
   const chartData = useMemo(() => {
     let delegatedSupplyChart: DaoMetricsDayBucket[] = [];
-    let treasurySupplyChart: DaoMetricsDayBucket[] = [];
     if (timeSeriesData) {
-      treasurySupplyChart = timeSeriesData[MetricTypesEnum.TREASURY];
       delegatedSupplyChart = timeSeriesData[MetricTypesEnum.DELEGATED_SUPPLY];
     }
 
@@ -124,18 +124,22 @@ export const MultilineChartAttackProfitability = ({
     if (mocked) {
       datasets = mockedAttackProfitabilityDatasets;
     } else {
+      const nonZeroLiquidTreasuryData = liquidTreasuryData.filter(
+        (item) => item.value > 0,
+      );
+      const nonZeroTotalTreasuryData = totalTreasuryData.filter(
+        (item) => item.value > 0,
+      );
+
       datasets = {
-        treasuryNonDAO: normalizeDatasetTreasuryNonDaoToken(
-          treasuryAssetNonDAOToken,
-          "treasuryNonDAO",
-        ).reverse(),
-        all: normalizeDatasetAllTreasury(
-          daoTokenPriceHistoricalData,
-          "all",
-          treasuryAssetNonDAOToken,
-          treasurySupplyChart,
-          daoConfig.decimals,
-        ),
+        treasuryNonDAO: nonZeroLiquidTreasuryData.map((item) => ({
+          date: item.date,
+          treasuryNonDAO: item.value,
+        })),
+        all: nonZeroTotalTreasuryData.map((item) => ({
+          date: item.date,
+          all: item.value,
+        })),
         quorum: daoConfig?.attackProfitability?.dynamicQuorum?.percentage
           ? normalizeDataset(
               daoTokenPriceHistoricalData,
@@ -145,9 +149,11 @@ export const MultilineChartAttackProfitability = ({
             ).map((datasetpoint) => ({
               ...datasetpoint,
               quorum:
-                datasetpoint.quorum *
-                (daoConfig?.attackProfitability?.dynamicQuorum?.percentage ??
-                  0),
+                datasetpoint.quorum !== null
+                  ? datasetpoint.quorum *
+                    (daoConfig?.attackProfitability?.dynamicQuorum
+                      ?.percentage ?? 0)
+                  : null,
             }))
           : quorumValue
             ? normalizeDataset(
@@ -176,7 +182,9 @@ export const MultilineChartAttackProfitability = ({
       ),
     );
 
-    const data = Array.from(allDates).map((date) => {
+    const sortedDates = Array.from(allDates).sort((a, b) => a - b);
+
+    const data = sortedDates.map((date) => {
       const dataPoint: Record<string, number | null> = { date };
 
       Object.entries(datasets).forEach(([key, dataset]) => {
@@ -194,14 +202,20 @@ export const MultilineChartAttackProfitability = ({
       return dataPoint;
     });
 
-    return data;
+    const firstValidIndex = data.findIndex((point) => {
+      const values = Object.entries(point).filter(([key]) => key !== "date");
+      return values.some(([, value]) => value !== null);
+    });
+
+    return firstValidIndex === -1 ? data : data.slice(firstValidIndex);
   }, [
     filterData,
     chartConfig,
     mocked,
     quorumValue,
     daoTokenPriceHistoricalData,
-    treasuryAssetNonDAOToken,
+    liquidTreasuryData,
+    totalTreasuryData,
     timeSeriesData,
     daoConfig?.attackProfitability?.dynamicQuorum?.percentage,
     daoConfig.decimals,
@@ -219,9 +233,7 @@ export const MultilineChartAttackProfitability = ({
   }, [chartData, mocked, setCsvData]);
 
   const isLoading =
-    isLoadingTreasuryAssetNonDAOToken ||
-    isLoadingDaoTokenPriceHistoricalData ||
-    isLoadingTimeSeriesData;
+    isLoadingDaoTokenPriceHistoricalData || isLoadingTimeSeriesData;
 
   if (isLoading) {
     return (
@@ -239,7 +251,7 @@ export const MultilineChartAttackProfitability = ({
   return (
     <div
       className={cn(
-        "sm:border-light-dark sm:bg-surface-default text-primary relative flex h-[300px] w-full items-center justify-center rounded-lg",
+        "lg:border-light-dark lg:bg-surface-default text-primary relative flex h-[300px] w-full items-center justify-center rounded-lg",
         {
           "-mb-1 h-44": context === "overview",
         },

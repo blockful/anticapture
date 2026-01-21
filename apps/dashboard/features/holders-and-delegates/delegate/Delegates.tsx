@@ -23,10 +23,14 @@ import { AddressFilter } from "@/shared/components/design-system/table/filters/A
 import daoConfig from "@/shared/dao-config";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { parseAsStringEnum, useQueryState } from "nuqs";
+import {
+  QueryInput_VotingPowers_OrderBy,
+  QueryInput_VotingPowers_OrderDirection,
+} from "@anticapture/graphql-client";
 interface DelegateTableData {
   address: string;
   votingPower: string;
-  variation?: { percentageChange: number; absoluteChange: number } | null;
+  variation?: { percentageChange: number; absoluteChange: number };
   activity?: string | null;
   activityPercentage?: number | null;
   delegators: number;
@@ -105,8 +109,8 @@ export const Delegates = ({
     isActivityLoadingFor,
   } = useDelegates({
     fromDate,
-    orderBy: sortBy,
-    orderDirection: sortOrder,
+    orderBy: sortBy as QueryInput_VotingPowers_OrderBy,
+    orderDirection: sortOrder as QueryInput_VotingPowers_OrderDirection,
     daoId,
     days: timePeriod,
     address: currentAddressFilter,
@@ -146,41 +150,18 @@ export const Delegates = ({
           100
         : null;
 
-      let variation: {
-        percentageChange: number;
-        absoluteChange: number;
-      } | null = null;
-
-      if (delegate.historicalVotingPower !== undefined) {
-        const historicalVotingPowerBigInt = BigInt(
-          delegate.historicalVotingPower,
-        );
-        const historicalVotingPowerFormatted = Number(
-          formatUnits(historicalVotingPowerBigInt, decimals),
-        );
-
-        const absoluteChange =
-          votingPowerFormatted - historicalVotingPowerFormatted;
-
-        // If historical is 0, we can't calculate percentage (division by zero)
-        // Use a large number so the UI displays ">1000%"
-        const percentageChange =
-          historicalVotingPowerFormatted === 0
-            ? 9999
-            : ((votingPowerFormatted - historicalVotingPowerFormatted) /
-                historicalVotingPowerFormatted) *
-              100;
-
-        variation = {
-          percentageChange: Number(percentageChange.toFixed(2)),
-          absoluteChange: Number(absoluteChange.toFixed(2)),
-        };
-      }
-
       return {
-        address: delegate.accountId || "",
+        address: delegate.accountId,
         votingPower: formatNumberUserReadable(votingPowerFormatted),
-        variation,
+        variation: {
+          percentageChange:
+            delegate.percentageChange === "NO BASELINE"
+              ? 9999
+              : Number(Number(delegate.percentageChange).toFixed(2)),
+          absoluteChange: Number(
+            formatUnits(BigInt(delegate.absoluteChange), decimals),
+          ),
+        },
         activity,
         activityPercentage,
         delegators: delegate.delegationsCount,
@@ -228,7 +209,13 @@ export const Delegates = ({
                   className="mx-1 p-1"
                   iconSize="md"
                 />
-                <Button variant="outline" size="sm">
+                <Button
+                  data-ph-event="delegate_details"
+                  data-ph-source="delegates_table"
+                  data-umami-event="delegate_details"
+                  variant="outline"
+                  size="sm"
+                >
                   <Plus className="size-3.5" />
                   <span className="text-sm font-medium">Details</span>
                 </Button>
