@@ -294,6 +294,9 @@ export default function ContactPage() {
                       className="w-full"
                       disabled={isPending}
                       loading={isPending}
+                      data-ph-event="contact_submitted"
+                      data-ph-source="contact_form"
+                      data-umami-event="cta_notification"
                     >
                       Send Transmission <Rocket size={16} />
                     </Button>

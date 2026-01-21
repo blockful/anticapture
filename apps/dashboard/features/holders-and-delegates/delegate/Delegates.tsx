@@ -209,7 +209,13 @@ export const Delegates = ({
                   className="mx-1 p-1"
                   iconSize="md"
                 />
-                <Button variant="outline" size="sm">
+                <Button
+                  data-ph-event="delegate_details"
+                  data-ph-source="delegates_table"
+                  data-umami-event="delegate_details"
+                  variant="outline"
+                  size="sm"
+                >
                   <Plus className="size-3.5" />
                   <span className="text-sm font-medium">Details</span>
                 </Button>
