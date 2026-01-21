@@ -23,12 +23,11 @@ export const DelegationsRequestQuerySchema = z.object({
       z
         .string()
         .refine((val) => isAddress(val, { strict: false }))
-        .transform((val) => [getAddress(val)]),
+        .transform((val) => [val]),
       z.array(
         z
           .string()
-          .refine((val) => isAddress(val, { strict: false }))
-          .transform((val) => getAddress(val)),
+          .refine((val) => isAddress(val, { strict: false })),
       ),
     ])
     .optional(),
