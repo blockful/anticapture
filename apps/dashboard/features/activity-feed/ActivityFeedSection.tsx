@@ -27,6 +27,14 @@ const DEFAULT_FILTERS: ActivityFeedFilterState = {
   toDate: "",
 };
 
+// Helper to get local date key (YYYY-MM-DD in local timezone)
+const getLocalDateKey = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
 // Helper to group events by date
 const groupEventsByDate = (events: FeedEvent[]) => {
   const groups: {
@@ -41,12 +49,14 @@ const groupEventsByDate = (events: FeedEvent[]) => {
   yesterday.setDate(yesterday.getDate() - 1);
   const currentYear = today.getFullYear();
 
+  const todayKey = getLocalDateKey(today);
+  const yesterdayKey = getLocalDateKey(yesterday);
+
   const eventsByDate = new Map<string, FeedEvent[]>();
 
   events.forEach((event) => {
     const eventDate = new Date(Number(event.timestamp) * 1000);
-    eventDate.setHours(0, 0, 0, 0);
-    const dateKey = eventDate.toISOString().split("T")[0];
+    const dateKey = getLocalDateKey(eventDate);
 
     if (!eventsByDate.has(dateKey)) {
       eventsByDate.set(dateKey, []);
@@ -54,20 +64,22 @@ const groupEventsByDate = (events: FeedEvent[]) => {
     eventsByDate.get(dateKey)!.push(event);
   });
 
-  // Sort dates in descending order
-  const sortedDates = Array.from(eventsByDate.keys()).sort(
-    (a, b) => new Date(b).getTime() - new Date(a).getTime(),
+  // Sort dates in descending order (comparing date strings works for YYYY-MM-DD format)
+  const sortedDates = Array.from(eventsByDate.keys()).sort((a, b) =>
+    b.localeCompare(a),
   );
 
   sortedDates.forEach((dateKey) => {
     const dateEvents = eventsByDate.get(dateKey)!;
-    const eventDate = new Date(dateKey);
-    const isCurrentYear = eventDate.getFullYear() === currentYear;
+    // Parse the local date key back to a date at midnight local time
+    const [year, month, day] = dateKey.split("-").map(Number);
+    const eventDate = new Date(year, month - 1, day);
+    const isCurrentYear = year === currentYear;
 
     let label: string;
-    if (eventDate.getTime() === today.getTime()) {
+    if (dateKey === todayKey) {
       label = "TODAY";
-    } else if (eventDate.getTime() === yesterday.getTime()) {
+    } else if (dateKey === yesterdayKey) {
       label = "YESTERDAY";
     } else {
       const formatOptions: Intl.DateTimeFormatOptions = {
