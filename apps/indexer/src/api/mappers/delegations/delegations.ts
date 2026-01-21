@@ -1,5 +1,5 @@
 import { z } from "@hono/zod-openapi";
-import { Address, getAddress, isAddress } from "viem";
+import { Address, isAddress } from "viem";
 import { DelegationItem, DelegationsResponse } from "./historical";
 import { delegation } from "ponder:schema";
 
@@ -24,11 +24,7 @@ export const DelegationsRequestQuerySchema = z.object({
         .string()
         .refine((val) => isAddress(val, { strict: false }))
         .transform((val) => [val]),
-      z.array(
-        z
-          .string()
-          .refine((val) => isAddress(val, { strict: false })),
-      ),
+      z.array(z.string().refine((val) => isAddress(val, { strict: false }))),
     ])
     .optional(),
 });
