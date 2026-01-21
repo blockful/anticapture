@@ -57,8 +57,6 @@ export const TransferDetailSchema = z.object({
   from: z.string(),
   to: z.string(),
   amount: z.string(),
-  fromType: z.enum(["cex", "dex", "lending", "wallet"]),
-  toType: z.enum(["cex", "dex", "lending", "wallet"]),
 });
 
 export const DelegationDetailSchema = z.object({
@@ -128,9 +126,6 @@ export interface DBFeedEventWithTransfer {
   fromAccountId: string;
   toAccountId: string;
   amount: bigint;
-  isCex: boolean;
-  isDex: boolean;
-  isLending: boolean;
 }
 
 export interface DBFeedEventWithDelegation {
@@ -151,19 +146,6 @@ export type DBFeedEvent =
   | DBFeedEventWithProposal
   | DBFeedEventWithTransfer
   | DBFeedEventWithDelegation;
-
-// Helper to determine address type
-function getAddressType(
-  address: string,
-  isCex: boolean,
-  isDex: boolean,
-  isLending: boolean,
-): "cex" | "dex" | "lending" | "wallet" {
-  if (isCex) return "cex";
-  if (isDex) return "dex";
-  if (isLending) return "lending";
-  return "wallet";
-}
 
 // Helper to get support label
 function getSupportLabel(support: string): "for" | "against" | "abstain" {
@@ -232,18 +214,6 @@ export const FeedEventMapper = {
             from: event.fromAccountId,
             to: event.toAccountId,
             amount: event.amount.toString(),
-            fromType: getAddressType(
-              event.fromAccountId,
-              event.isCex,
-              event.isDex,
-              event.isLending,
-            ),
-            toType: getAddressType(
-              event.toAccountId,
-              event.isCex,
-              event.isDex,
-              event.isLending,
-            ),
           },
         };
 

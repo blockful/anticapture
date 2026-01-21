@@ -20,8 +20,6 @@ export interface TransferDetail {
   from: string;
   to: string;
   amount: string;
-  fromType: "cex" | "dex" | "lending" | "wallet";
-  toType: "cex" | "dex" | "lending" | "wallet";
 }
 
 export interface DelegationDetail {

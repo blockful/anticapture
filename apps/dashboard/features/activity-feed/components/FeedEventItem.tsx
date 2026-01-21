@@ -92,21 +92,6 @@ const getSupportIcon = (support: "for" | "against" | "abstain") => {
   }
 };
 
-const getAddressTypeLabel = (
-  type: "cex" | "dex" | "lending" | "wallet",
-): string => {
-  switch (type) {
-    case "cex":
-      return "CEX";
-    case "dex":
-      return "DEX";
-    case "lending":
-      return "Lending";
-    case "wallet":
-      return "Wallet";
-  }
-};
-
 export const FeedEventItem = ({ event, className }: FeedEventItemProps) => {
   const { daoId } = useParams<{ daoId: DaoIdEnum }>();
   const config = daoConfig[daoId.toUpperCase() as DaoIdEnum];
@@ -202,9 +187,6 @@ export const FeedEventItem = ({ event, className }: FeedEventItemProps) => {
                 showAvatar={false}
                 nameClassName="text-primary font-medium"
               />
-              <span className="text-dimmed text-xs">
-                ({getAddressTypeLabel(event.transfer.fromType)})
-              </span>
             </div>
             <div className="flex flex-wrap items-center gap-1">
               <span className="text-secondary">to</span>
@@ -213,9 +195,6 @@ export const FeedEventItem = ({ event, className }: FeedEventItemProps) => {
                 showAvatar={false}
                 nameClassName="text-primary font-medium"
               />
-              <span className="text-dimmed text-xs">
-                ({getAddressTypeLabel(event.transfer.toType)})
-              </span>
             </div>
           </div>
         );

@@ -268,9 +268,6 @@ export class FeedEventRepository {
         fromAccountId: t.fromAccountId as string,
         toAccountId: t.toAccountId as string,
         amount: t.amount,
-        isCex: t.isCex,
-        isDex: t.isDex,
-        isLending: t.isLending,
       });
     }
     return results;
