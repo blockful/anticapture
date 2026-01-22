@@ -3,6 +3,9 @@ query getHistoricalBalances($addresses:  JSON!, $fromDate: String!) {
     items {
       accountId
       previousBalance
+      currentBalance
+      absoluteChange
+      percentageChange
     }
   }
 }

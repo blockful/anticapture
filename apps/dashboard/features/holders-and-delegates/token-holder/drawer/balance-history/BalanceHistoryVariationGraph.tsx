@@ -278,9 +278,7 @@ export const BalanceHistoryVariationGraph = ({
                       </p>
                       <p className="text-secondary flex gap-1 text-xs">
                         Balance:
-                        {data.balance > 0
-                          ? ` ${formatNumberUserReadable(Number(data.balance))}`
-                          : " Initial Balance"}
+                        {` ${formatNumberUserReadable(Number(data.balance))}`}
                       </p>
                       {data.direction && (
                         <p className="text-secondary flex gap-1 text-xs">

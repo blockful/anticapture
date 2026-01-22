@@ -2938,7 +2938,7 @@ export type GetHistoricalBalancesQueryVariables = Exact<{
 }>;
 
 
-export type GetHistoricalBalancesQuery = { __typename?: 'Query', accountBalanceVariations?: { __typename?: 'accountBalanceVariations_200_response', items: Array<{ __typename?: 'query_accountBalanceVariations_items_items', accountId: string, previousBalance: string } | null> } | null };
+export type GetHistoricalBalancesQuery = { __typename?: 'Query', accountBalanceVariations?: { __typename?: 'accountBalanceVariations_200_response', items: Array<{ __typename?: 'query_accountBalanceVariations_items_items', accountId: string, previousBalance: string, currentBalance: string, absoluteChange: string, percentageChange: string } | null> } | null };
 
 export type HistoricalVotingPowersQueryVariables = Exact<{
   account: Scalars['String']['input'];
