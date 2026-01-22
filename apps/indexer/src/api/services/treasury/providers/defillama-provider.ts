@@ -1,10 +1,8 @@
 import { AxiosInstance } from "axios";
 import { TreasuryProvider } from "./treasury-provider.interface";
 import { LiquidTreasuryDataPoint } from "../types";
-import {
-  truncateTimestampToMidnight,
-  filterWithFallback,
-} from "@/lib/time-series";
+import { truncateTimestampToMidnight } from "@/lib/date-helpers";
+import { filterWithFallback } from "@/lib/query-helpers";
 import { TreasuryProviderCache } from "./provider-cache";
 
 interface RawDefiLlamaResponse {
