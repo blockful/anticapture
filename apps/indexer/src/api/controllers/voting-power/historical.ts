@@ -75,8 +75,7 @@ export function historicalVotingPower(app: Hono, service: VotingPowerService) {
       operationId: "historicalVotingPower",
       path: "/voting-powers/historical",
       summary: "Get voting power changes",
-      description:
-        "Returns a list of voting power changes. Optionally filter by accountId.",
+      description: "Returns a list of voting power changes.",
       tags: ["proposals"],
       request: {
         query: HistoricalVotingPowerGlobalQuerySchema,
