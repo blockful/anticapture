@@ -3,15 +3,7 @@ import { isAddress } from "viem";
 import { DelegationItem, DelegationsResponse } from "./historical";
 import { delegation } from "ponder:schema";
 
-export type DBDelegation = Pick<
-  typeof delegation.$inferSelect,
-  | "timestamp"
-  | "transactionHash"
-  | "delegateAccountId"
-  | "delegatorAccountId"
-  | "delegatedValue"
-  | "previousDelegate"
->;
+export type DBDelegation = typeof delegation.$inferSelect;
 
 export const DelegationsRequestParamsSchema = z.object({
   address: z.string().refine((val) => isAddress(val, { strict: false })),
