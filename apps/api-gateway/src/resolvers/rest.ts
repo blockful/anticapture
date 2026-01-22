@@ -14,7 +14,6 @@ const daoItemQueries = [
   "compareTotalSupply",
   "compareTreasury",
   "compareVotes",
-  "historicalDelegations",
   "delegations",
   "dao",
   "delegationPercentageByDay",
