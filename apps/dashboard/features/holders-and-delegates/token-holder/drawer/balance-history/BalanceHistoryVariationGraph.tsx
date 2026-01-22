@@ -74,6 +74,8 @@ const generateMonthlyTicks = (chartData: Array<{ timestamp: number }>) => {
     current.setMonth(current.getMonth() + 1);
   }
 
+  console.log({ ticks: ticks });
+
   return Array.from(new Set(ticks));
 };
 
@@ -147,6 +149,8 @@ export const BalanceHistoryVariationGraph = ({
       </div>
     );
   }
+
+  console.log({ history: balanceHistory[0] });
 
   const extendedChartData =
     balanceHistory.length < 1000

@@ -75,7 +75,7 @@ export function useBalanceHistoryGraph(
       .filter((item) => !!item)
       .map((item) => ({
         ...item,
-        timestamp: new Date(Number(item.timestamp) * 1000).getTime(),
+        timestamp: Number(item.timestamp),
         balance: Number(formatUnits(BigInt(item.balance), decimals)),
         direction: (item.transfer.from === accountId ? "out" : "in") as
           | "in"

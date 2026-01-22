@@ -14,6 +14,15 @@ export class BalanceVariationsRepository {
     orderDirection: "asc" | "desc",
     addresses?: Address[],
   ): Promise<DBAccountBalanceVariation[]> {
+    console.log({
+      fromTimestamp,
+      toTimestamp,
+      limit,
+      skip,
+      orderDirection,
+      addresses,
+    });
+
     const orderDirectionFn = orderDirection === "asc" ? asc : desc;
 
     const latestBeforeFrom = db
@@ -61,7 +70,7 @@ export class BalanceVariationsRepository {
         percentageChange: sql<string>`
         CASE 
           WHEN COALESCE(from_data.balance, 0) = 0 THEN 
-            CASE WHEN COALESCE(to_data.balance, 0) = 0 THEN '0' ELSE '${PERCENTAGE_NO_BASELINE}' END
+            CASE WHEN COALESCE(to_data.balance, 0) = 0 THEN '0' ELSE ${PERCENTAGE_NO_BASELINE} END
           ELSE 
             (((COALESCE(to_data.balance, 0) - from_data.balance)::numeric / from_data.balance::numeric) * 100)::text
         END

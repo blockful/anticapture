@@ -189,7 +189,7 @@ export class VotingPowerRepository {
         percentageChange: sql<string>`
         CASE 
           WHEN COALESCE(from_data.voting_power, 0) = 0 THEN 
-            CASE WHEN COALESCE(to_data.voting_power, 0) = 0 THEN '0' ELSE '${PERCENTAGE_NO_BASELINE}' END
+            CASE WHEN COALESCE(to_data.voting_power, 0) = 0 THEN '0' ELSE ${PERCENTAGE_NO_BASELINE} END
           ELSE 
             (((COALESCE(to_data.voting_power, 0) - from_data.voting_power)::numeric / from_data.voting_power::numeric) * 100)::text
         END

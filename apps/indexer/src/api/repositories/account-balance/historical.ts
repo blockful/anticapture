@@ -20,7 +20,7 @@ export class HistoricalBalanceRepository {
     const result = await db
       .select()
       .from(balanceHistory)
-      .leftJoin(
+      .innerJoin(
         transfer,
         sql`${balanceHistory.transactionHash} = ${transfer.transactionHash} AND ${balanceHistory.logIndex} = ${transfer.logIndex}`,
       )

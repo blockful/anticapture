@@ -123,10 +123,13 @@ export const useTokenHolders = ({
   const { data: newHistoricalData, loading: historicalLoading } =
     useHistoricalBalances(daoId, newAddressesForHistoricalVP, days);
 
+  console.log(newHistoricalData);
+
   useEffect(() => {
     if (newHistoricalData) {
       setHistoricalBalancesCache((prevCache) => {
         const newCache = new Map(prevCache);
+        console.log(newHistoricalData);
         newHistoricalData?.forEach((h) => {
           if (h?.accountId && h.previousBalance) {
             newCache.set(h.accountId, h.previousBalance);

@@ -1,42 +1,26 @@
 import { z } from "@hono/zod-openapi";
 import { isAddress } from "viem";
-import { PeriodResponseSchema, TimestampResponseMapper } from "../shared";
+import {
+  FromDateStandardRequestParam,
+  LimitStandardRequestParam,
+  OffsetStandardRequestParam,
+  OrderDirectionStandardRequestParam,
+  PeriodResponseSchema,
+  TimestampResponseMapper,
+  ToDateStandardRequestParam,
+} from "../shared";
 import { DBAccountBalanceVariation } from "./variations";
-import { DaysEnum } from "@/lib/enums";
 
 export const AccountInteractionsParamsSchema = z.object({
   address: z.string().refine(isAddress, "Invalid address"),
 });
 
 export const AccountInteractionsQuerySchema = z.object({
-  fromDate: z
-    .string()
-    .optional()
-    .transform((val) =>
-      Number(
-        val ?? (Math.floor(Date.now() / 1000) - DaysEnum["90d"]).toString(),
-      ),
-    ),
-  toDate: z
-    .string()
-    .optional()
-    .transform((val) =>
-      Number(val ?? Math.floor(Date.now() / 1000).toString()),
-    ),
-  limit: z.coerce
-    .number()
-    .int()
-    .min(1, "Limit must be a positive integer")
-    .max(100, "Limit cannot exceed 100")
-    .optional()
-    .default(20),
-  skip: z.coerce
-    .number()
-    .int()
-    .min(0, "Skip must be a non-negative integer")
-    .optional()
-    .default(0),
-  orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
+  fromDate: FromDateStandardRequestParam,
+  toDate: ToDateStandardRequestParam,
+  limit: LimitStandardRequestParam,
+  skip: OffsetStandardRequestParam,
+  orderDirection: OrderDirectionStandardRequestParam,
   minAmount: z
     .string()
     .transform((val) => BigInt(val))

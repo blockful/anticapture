@@ -1,7 +1,15 @@
 import { Address, isAddress } from "viem";
 import { z } from "@hono/zod-openapi";
-import { DaysEnum } from "@/lib/enums";
-import { PeriodResponseSchema, TimestampResponseMapper } from "../shared";
+import {
+  AddressSetStandardRequestParam,
+  FromDateStandardRequestParam,
+  LimitStandardRequestParam,
+  OffsetStandardRequestParam,
+  OrderDirectionStandardRequestParam,
+  PeriodResponseSchema,
+  TimestampResponseMapper,
+  ToDateStandardRequestParam,
+} from "../shared";
 import { PERCENTAGE_NO_BASELINE } from "../constants";
 
 export const AccountBalanceVariationsByAccountIdRequestParamsSchema = z.object({
@@ -9,48 +17,16 @@ export const AccountBalanceVariationsByAccountIdRequestParamsSchema = z.object({
 });
 
 export const AccountBalanceVariationsByAccountIdRequestQuerySchema = z.object({
-  // TODO: unify standard query structure across codebase
-  fromDate: z
-    .string()
-    .optional()
-    .transform((val) =>
-      Number(
-        val ?? (Math.floor(Date.now() / 1000) - DaysEnum["90d"]).toString(),
-      ),
-    ),
-  toDate: z
-    .string()
-    .optional()
-    .transform((val) =>
-      Number(val ?? Math.floor(Date.now() / 1000).toString()),
-    ),
+  fromDate: FromDateStandardRequestParam,
+  toDate: ToDateStandardRequestParam,
 });
 
 export const AccountBalanceVariationsRequestQuerySchema =
   AccountBalanceVariationsByAccountIdRequestQuerySchema.extend({
-    limit: z.coerce
-      .number()
-      .int()
-      .min(1, "Limit must be a positive integer")
-      .max(100, "Limit cannot exceed 100")
-      .optional()
-      .default(20),
-    skip: z.coerce
-      .number()
-      .int()
-      .min(0, "Skip must be a non-negative integer")
-      .optional()
-      .default(0),
-    orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
-    addresses: z
-      .union([
-        z
-          .string()
-          .refine(isAddress, "Invalid address")
-          .transform((addr) => [addr]),
-        z.array(z.string().refine(isAddress, "Invalid addresses")),
-      ])
-      .optional(),
+    limit: LimitStandardRequestParam,
+    skip: OffsetStandardRequestParam,
+    orderDirection: OrderDirectionStandardRequestParam,
+    addresses: AddressSetStandardRequestParam.optional(),
   });
 
 export const AccountBalanceVariationSchema = z.object({
