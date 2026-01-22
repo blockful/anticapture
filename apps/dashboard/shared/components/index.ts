@@ -1,7 +1,6 @@
 export * from "@/shared/components/badges/Badge";
 export * from "@/shared/components/badges/SupplyLabel";
 export * from "@/shared/components/cards/BaseCardDaoInfo";
-export * from "@/shared/components/header/BaseHeaderLayoutSidebar";
 export * from "@/shared/components/buttons/ButtonHeaderSidebar";
 export * from "@/shared/components/buttons/ButtonHeaderDAOSidebarMobile";
 export * from "@/shared/components/buttons/ButtonMainNav";
