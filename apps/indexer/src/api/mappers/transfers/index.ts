@@ -2,6 +2,7 @@ import { z } from "@hono/zod-openapi";
 
 import { transfer } from "ponder:schema";
 import { isAddress } from "viem";
+import { DatetimeStandardRequestParam } from "../shared";
 
 export type DBTransfer = typeof transfer.$inferSelect;
 
@@ -16,8 +17,8 @@ export const TransfersRequestQuerySchema = z.object({
   sortOrder: z.enum(["asc", "desc"]).optional().default("asc"),
   from: z.string().refine(isAddress, { message: "Invalid address" }).optional(),
   to: z.string().refine(isAddress, { message: "Invalid address" }).optional(),
-  fromDate: z.coerce.number().optional(),
-  toDate: z.coerce.number().optional(),
+  fromDate: DatetimeStandardRequestParam.optional(),
+  toDate: DatetimeStandardRequestParam.optional(),
   fromValue: z
     .string()
     .transform((val) => BigInt(val))

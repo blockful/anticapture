@@ -1,5 +1,6 @@
 import { z } from "@hono/zod-openapi";
 import { proposalsOnchain } from "ponder:schema";
+import { DatetimeStandardRequestParam } from "../shared";
 
 export type DBProposal = typeof proposalsOnchain.$inferSelect;
 
@@ -27,8 +28,8 @@ export const ProposalsRequestSchema = z.object({
       const normalized = typeof val === "string" ? [val] : val;
       return normalized.map((v) => v.toUpperCase());
     }),
-  fromDate: z.coerce.number().optional(),
-  fromEndDate: z.coerce.number().optional(),
+  fromDate: DatetimeStandardRequestParam.optional(),
+  fromEndDate: DatetimeStandardRequestParam.optional(),
   includeOptimisticProposals: z
     .enum(["true", "false"])
     .default("true")

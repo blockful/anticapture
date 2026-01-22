@@ -1,6 +1,7 @@
 import { DaysEnum } from "@/lib/enums";
 import { z } from "@hono/zod-openapi";
-import { isAddress } from "viem";
+import { getAddress, isAddress } from "viem";
+import { PERIOD_UNBOUND } from "./constants";
 
 export type AmountFilter = {
   minAmount: number | bigint | undefined;
@@ -14,8 +15,23 @@ export const PeriodResponseSchema = z.object({
 
 export type PeriodResponse = z.infer<typeof PeriodResponseSchema>;
 
-export const TimestampResponseMapper = (timestamp: number): string =>
-  new Date(timestamp * 1000).toISOString();
+export const TimestampResponseMapper = (
+  timestamp: number | undefined,
+): string => {
+  return timestamp ? new Date(timestamp * 1000).toISOString() : PERIOD_UNBOUND;
+};
+
+export const AddressStandardRequestParam = z
+  .string()
+  .refine(
+    (addr) => isAddress(addr, { strict: false }),
+    "Invalid Ethereum address",
+  )
+  .transform((addr) => getAddress(addr));
+
+export const DatetimeStandardRequestParam = z
+  .string()
+  .transform((val) => Number(val));
 
 // TODO: Comprehensive refactor to eliminate repetitions throughout codebase
 export const FromDateStandardRequestParam = z
@@ -57,9 +73,6 @@ export const OrderDirectionStandardRequestParam = z
   .default("desc");
 
 export const AddressSetStandardRequestParam = z.union([
-  z
-    .string()
-    .refine(isAddress, "Invalid address")
-    .transform((addr) => [addr]),
-  z.array(z.string().refine(isAddress, "Invalid addresses")),
+  AddressStandardRequestParam.transform((val) => [val]),
+  z.array(AddressStandardRequestParam),
 ]);

@@ -4,7 +4,7 @@ import { accountPower } from "ponder:schema";
 
 import {
   AddressSetStandardRequestParam,
-  FromDateStandardRequestParam,
+  DatetimeStandardRequestParam,
   LimitStandardRequestParam,
   OffsetStandardRequestParam,
   OrderDirectionStandardRequestParam,
@@ -18,7 +18,7 @@ export const VotingPowerVariationsByAccountIdRequestParamsSchema = z.object({
 });
 
 export const VotingPowerVariationsByAccountIdRequestQuerySchema = z.object({
-  fromDate: FromDateStandardRequestParam,
+  fromDate: DatetimeStandardRequestParam.optional(),
   toDate: ToDateStandardRequestParam,
 });
 
@@ -121,8 +121,8 @@ export const VotingPowerVariationResponseMapper = (
 
 export const VotingPowerVariationsResponseMapper = (
   variations: DBVotingPowerVariation[],
-  startTimestamp: number,
-  endTimestamp: number,
+  startTimestamp: number | undefined,
+  endTimestamp: number | undefined,
 ): VotingPowerVariationsResponse => {
   return VotingPowerVariationsResponseSchema.parse({
     period: PeriodResponseSchema.parse({
@@ -135,8 +135,8 @@ export const VotingPowerVariationsResponseMapper = (
 
 export const VotingPowerVariationsByAccountIdResponseMapper = (
   delta: DBVotingPowerVariation,
-  startTimestamp: number,
-  endTimestamp: number,
+  startTimestamp: number | undefined,
+  endTimestamp: number | undefined,
 ): VotingPowerVariationsByAccountIdResponse => {
   return VotingPowerVariationsByAccountIdResponseSchema.parse({
     period: PeriodResponseSchema.parse({

@@ -2,13 +2,12 @@ import { Address, isAddress } from "viem";
 import { z } from "@hono/zod-openapi";
 import {
   AddressSetStandardRequestParam,
-  FromDateStandardRequestParam,
+  DatetimeStandardRequestParam,
   LimitStandardRequestParam,
   OffsetStandardRequestParam,
   OrderDirectionStandardRequestParam,
   PeriodResponseSchema,
   TimestampResponseMapper,
-  ToDateStandardRequestParam,
 } from "../shared";
 import { PERCENTAGE_NO_BASELINE } from "../constants";
 
@@ -17,8 +16,8 @@ export const AccountBalanceVariationsByAccountIdRequestParamsSchema = z.object({
 });
 
 export const AccountBalanceVariationsByAccountIdRequestQuerySchema = z.object({
-  fromDate: FromDateStandardRequestParam,
-  toDate: ToDateStandardRequestParam,
+  fromDate: DatetimeStandardRequestParam.optional(),
+  toDate: DatetimeStandardRequestParam.optional(),
 });
 
 export const AccountBalanceVariationsRequestQuerySchema =
@@ -81,8 +80,8 @@ export const AccountBalanceVariationMapper = (
 
 export const AccountBalanceVariationsByAccountIdResponseMapper = (
   variation: DBAccountBalanceVariation,
-  startTimestamp: number,
-  endTimestamp: number,
+  startTimestamp: number | undefined,
+  endTimestamp: number | undefined,
 ): AccountBalanceVariationResponse => {
   return AccountBalanceVariationsByAccountIdResponseSchema.parse({
     period: PeriodResponseSchema.parse({
@@ -95,8 +94,8 @@ export const AccountBalanceVariationsByAccountIdResponseMapper = (
 
 export const AccountBalanceVariationsResponseMapper = (
   variations: DBAccountBalanceVariation[],
-  startTimestamp: number,
-  endTimestamp: number,
+  startTimestamp: number | undefined,
+  endTimestamp: number | undefined,
 ): AccountBalanceVariationsResponse => {
   return AccountBalanceVariationsResponseSchema.parse({
     period: PeriodResponseSchema.parse({

@@ -1,13 +1,12 @@
 import { z } from "@hono/zod-openapi";
 import { isAddress } from "viem";
 import {
-  FromDateStandardRequestParam,
+  DatetimeStandardRequestParam,
   LimitStandardRequestParam,
   OffsetStandardRequestParam,
   OrderDirectionStandardRequestParam,
   PeriodResponseSchema,
   TimestampResponseMapper,
-  ToDateStandardRequestParam,
 } from "../shared";
 import { DBAccountBalanceVariation } from "./variations";
 
@@ -16,8 +15,8 @@ export const AccountInteractionsParamsSchema = z.object({
 });
 
 export const AccountInteractionsQuerySchema = z.object({
-  fromDate: FromDateStandardRequestParam,
-  toDate: ToDateStandardRequestParam,
+  fromDate: DatetimeStandardRequestParam.optional(),
+  toDate: DatetimeStandardRequestParam.optional(),
   limit: LimitStandardRequestParam,
   skip: OffsetStandardRequestParam,
   orderDirection: OrderDirectionStandardRequestParam,
@@ -62,8 +61,8 @@ export interface AccountInteractions {
 
 export const AccountInteractionsMapper = (
   interactions: AccountInteractions,
-  startTimestamp: number,
-  endTimestamp: number,
+  startTimestamp: number | undefined,
+  endTimestamp: number | undefined,
 ): AccountInteractionsResponse => {
   return AccountInteractionsResponseSchema.parse({
     period: PeriodResponseSchema.parse({

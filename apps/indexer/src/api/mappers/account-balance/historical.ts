@@ -3,10 +3,9 @@ import { balanceHistory } from "ponder:schema";
 import { isAddress } from "viem";
 import { DBTransfer } from "../transfers";
 import {
-  FromDateStandardRequestParam,
+  DatetimeStandardRequestParam,
   OffsetStandardRequestParam,
   OrderDirectionStandardRequestParam,
-  ToDateStandardRequestParam,
 } from "../shared";
 
 export type DBHistoricalBalance = typeof balanceHistory.$inferSelect;
@@ -29,8 +28,8 @@ export const HistoricalBalanceRequestQuerySchema = z.object({
     .default(10),
   orderBy: z.enum(["timestamp", "delta"]).optional().default("timestamp"),
   orderDirection: OrderDirectionStandardRequestParam,
-  fromDate: FromDateStandardRequestParam,
-  toDate: ToDateStandardRequestParam,
+  fromDate: DatetimeStandardRequestParam.optional(),
+  toDate: DatetimeStandardRequestParam.optional(),
   fromValue: z.string().optional(),
   toValue: z.string().optional(),
 });

@@ -1,11 +1,14 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
-import { isAddress } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
 import { ProposalsActivityService } from "@/api/services";
 import { ProposalsActivityRepository, VoteFilter } from "@/api/repositories/";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DAOClient } from "@/interfaces/client";
+import {
+  AddressStandardRequestParam,
+  DatetimeStandardRequestParam,
+} from "@/api/mappers";
 
 export function proposalsActivity(
   app: Hono,
@@ -26,13 +29,8 @@ export function proposalsActivity(
       tags: ["proposals-activity"],
       request: {
         query: z.object({
-          address: z
-            .string()
-            .refine((addr) => isAddress(addr), "Invalid Ethereum address"),
-          fromDate: z
-            .string()
-            .transform((val) => Number(val))
-            .optional(),
+          address: AddressStandardRequestParam,
+          fromDate: DatetimeStandardRequestParam.optional(),
           skip: z.coerce
             .number()
             .int()

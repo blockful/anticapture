@@ -8,6 +8,7 @@ import {
   TransferMapper,
   TransferResponseSchema,
 } from "../transfers";
+import { DatetimeStandardRequestParam } from "../shared";
 
 export type DBTransaction = typeof transaction.$inferSelect & {
   transfers: DBTransfer[];
@@ -46,8 +47,8 @@ export const TransactionsRequestSchema = z
       .default(0),
     sortBy: z.enum(["timestamp"]).optional().default("timestamp"),
     sortOrder: z.enum(["asc", "desc"]).optional().default("desc"),
-    fromDate: z.coerce.number().int("fromDate must be an integer").optional(),
-    toDate: z.coerce.number().int("toDate must be an integer").optional(),
+    fromDate: DatetimeStandardRequestParam.optional(),
+    toDate: DatetimeStandardRequestParam.optional(),
     from: z
       .string()
       .refine((addr) => isAddress(addr))

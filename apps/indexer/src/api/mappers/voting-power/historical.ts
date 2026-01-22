@@ -4,6 +4,7 @@ import { votingPowerHistory } from "ponder:schema";
 import { DBDelegation } from "../transactions";
 import { DBTransfer } from "../transfers";
 import { isAddress } from "viem";
+import { DatetimeStandardRequestParam } from "../shared";
 
 export type DBHistoricalVotingPower = typeof votingPowerHistory.$inferSelect;
 export type DBHistoricalVotingPowerWithRelations = DBHistoricalVotingPower & {
@@ -31,14 +32,8 @@ export const HistoricalVotingPowerRequestQuerySchema = z.object({
     .default(10),
   orderBy: z.enum(["timestamp", "delta"]).optional().default("timestamp"),
   orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
-  fromDate: z
-    .string()
-    .optional()
-    .transform((val) => Number(val)),
-  toDate: z
-    .string()
-    .optional()
-    .transform((val) => Number(val)),
+  fromDate: DatetimeStandardRequestParam.optional(),
+  toDate: DatetimeStandardRequestParam.optional(),
   fromValue: z.string().optional(),
   toValue: z.string().optional(),
 });
