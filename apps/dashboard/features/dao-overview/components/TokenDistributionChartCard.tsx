@@ -8,7 +8,7 @@ import {
   metricsSchema,
 } from "@/features/token-distribution/utils";
 import { TooltipInfo } from "@/shared/components";
-import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import { DefaultLink } from "@/shared/design-system/links/default-link";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { OverviewMetric } from "@/features/dao-overview/components/OverviewMetric";
 import daoConfig from "@/shared/dao-config";

@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { Footer } from "@/shared/components/design-system/footer";
+import { Footer } from "@/shared/design-system/footer";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
 import { HeaderSidebar } from "@/widgets";
 import { Button, TheSectionLayout } from "@/shared/components";
@@ -21,13 +21,13 @@ import {
   FormDescription,
   FormField,
   FormItem,
-} from "@/shared/components/design-system/form";
+} from "@/shared/design-system/form";
 import {
   Checkbox,
   FormLabel,
   Input,
   Textarea,
-} from "@/shared/components/design-system/form/fields";
+} from "@/shared/design-system/form/fields";
 
 type ContactFormValues = z.infer<typeof contactFormSchema>;
 

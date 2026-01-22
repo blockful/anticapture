@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, IconButton, SkeletonRow } from "@/shared/components";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { EnsAvatar } from "@/shared/design-system/avatars/ens-avatar/EnsAvatar";
 import { ColumnDef } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
 import { Address, parseUnits } from "viem";
@@ -15,12 +15,12 @@ import { ExternalLink } from "lucide-react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { Table } from "@/shared/components/design-system/table/Table";
+import { Table } from "@/shared/design-system/table/Table";
 import daoConfig from "@/shared/dao-config";
-import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
-import { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
-import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
-import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
+import { SortOption } from "@/shared/design-system/table/filters/amount-filter/components";
+import { AmountFilterState } from "@/shared/design-system/table/filters/amount-filter/store/amount-filter-store";
+import { AmountFilter } from "@/shared/design-system/table/filters/amount-filter/AmountFilter";
+import { AddressFilter } from "@/shared/design-system/table/filters/AddressFilter";
 import { fetchAddressFromEnsName } from "@/shared/hooks/useEnsData";
 import Link from "next/link";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";

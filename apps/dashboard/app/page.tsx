@@ -1,7 +1,7 @@
 import { HeaderMobile } from "@/widgets/HeaderMobile";
 import { HomeTemplate } from "@/templates";
 import { HeaderSidebar } from "@/widgets";
-import { Footer } from "@/shared/components/design-system/footer/Footer";
+import { Footer } from "@/shared/design-system/footer/Footer";
 
 export default function Home() {
   return (

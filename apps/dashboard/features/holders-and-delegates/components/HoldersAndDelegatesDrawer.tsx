@@ -1,7 +1,7 @@
 "use client";
 
 import { Drawer, DrawerContent } from "@/shared/components/ui/drawer";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { EnsAvatar } from "@/shared/design-system/avatars/ens-avatar/EnsAvatar";
 import { X } from "lucide-react";
 import { cn } from "@/shared/utils";
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";

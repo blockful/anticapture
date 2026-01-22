@@ -11,9 +11,9 @@ import {
   getDaoStageFromFields,
 } from "@/shared/dao-config/utils";
 import { useMemo } from "react";
-import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
+import { DividerDefault } from "@/shared/design-system/divider/DividerDefault";
 import { DaoProtectionLevelsTooltip } from "@/features/panel/components/DaoProtectionLevelsTooltip";
-import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import { DefaultLink } from "@/shared/design-system/links/default-link";
 
 const chartConfig: ChartConfig = {
   value: {

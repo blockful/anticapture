@@ -18,7 +18,7 @@ import { DelegationHistoryGraphItem } from "@/features/holders-and-delegates/hoo
 import { useDelegateDelegationHistoryGraph } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistoryGraph";
 import { TimePeriodSwitcher } from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
 import { ChartExceptionState } from "@/shared/components";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { EnsAvatar } from "@/shared/design-system/avatars/ens-avatar/EnsAvatar";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { SECONDS_PER_DAY } from "@/shared/constants/time-related";

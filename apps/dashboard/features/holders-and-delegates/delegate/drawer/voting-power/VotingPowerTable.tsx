@@ -3,14 +3,14 @@
 import { useEffect, useState } from "react";
 
 import { Button, SkeletonRow } from "@/shared/components";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { EnsAvatar } from "@/shared/design-system/avatars/ens-avatar/EnsAvatar";
 import { ColumnDef } from "@tanstack/react-table";
 import { Address } from "viem";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { useVotingPower } from "@/shared/hooks/graphql-client/useVotingPower";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils";
-import { Table } from "@/shared/components/design-system/table/Table";
+import { Table } from "@/shared/design-system/table/Table";
 import daoConfig from "@/shared/dao-config";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { parseAsStringEnum, useQueryState } from "nuqs";

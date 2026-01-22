@@ -1,7 +1,7 @@
 "use client";
 
 import { TooltipInfo } from "@/shared/components";
-import { InlineAlert } from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
+import { InlineAlert } from "@/shared/design-system/alerts/inline-alert/InlineAlert";
 import { formatNumberUserReadable } from "@/shared/utils";
 
 // Fake data for now

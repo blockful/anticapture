@@ -1,6 +1,6 @@
 import { HeaderSidebar } from "@/widgets";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
-import { Footer } from "@/shared/components/design-system/footer/Footer";
+import { Footer } from "@/shared/design-system/footer/Footer";
 import { TermsSection } from "@/features/terms/TermsSection";
 
 export default function TermsPage() {

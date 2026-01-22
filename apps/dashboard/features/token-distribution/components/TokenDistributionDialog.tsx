@@ -12,7 +12,7 @@ import {
 import { CardTitle } from "@/shared/components/ui/card";
 import { X, Plus, PlusIcon, Check } from "lucide-react";
 import React, { useState } from "react";
-import { Button } from "@/shared/components/design-system/buttons/button/Button";
+import { Button } from "@/shared/design-system/buttons/button/Button";
 import { cn } from "@/shared/utils/cn";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { MetricWithKey } from "@/features/token-distribution/types";

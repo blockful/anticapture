@@ -13,7 +13,7 @@ import {
   StagesContainer,
   stageToRiskMapping,
 } from "@/features/resilience-stages/components/StagesContainer";
-import { SubSectionsContainer } from "@/shared/components/design-system/section";
+import { SubSectionsContainer } from "@/shared/design-system/section";
 interface ResilienceStagesSectionProps {
   daoId: DaoIdEnum;
 }

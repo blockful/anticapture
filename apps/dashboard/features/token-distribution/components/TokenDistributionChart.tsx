@@ -8,7 +8,7 @@ import Lottie from "lottie-react";
 import loadingAnimation from "@/public/loading-animation.json";
 import { useEffect, useMemo, useRef } from "react";
 import { AlertOctagon } from "lucide-react";
-import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
+import { BlankSlate } from "@/shared/design-system/blank-slate/BlankSlate";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useScreenSize } from "@/shared/hooks/useScreenSize";

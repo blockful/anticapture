@@ -9,8 +9,8 @@ import { RiskLevelCard, TheSectionLayout } from "@/shared/components";
 import {
   SubSection,
   SubSectionsContainer,
-} from "@/shared/components/design-system/section";
-import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
+} from "@/shared/design-system/section";
+import { DividerDefault } from "@/shared/design-system/divider/DividerDefault";
 import { RiskLevel } from "@/shared/types/enums";
 import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
 

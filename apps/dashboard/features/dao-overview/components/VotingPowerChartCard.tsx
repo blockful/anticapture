@@ -1,7 +1,7 @@
 "use client";
 
 import { SkeletonRow, TooltipInfo } from "@/shared/components";
-import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import { DefaultLink } from "@/shared/design-system/links/default-link";
 import { DaoIdEnum } from "@/shared/types/daos";
 import {
   TopAccountChartData,

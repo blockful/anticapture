@@ -1,9 +1,9 @@
 "use client";
 
-import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components/FilterSort";
+import { SortOption } from "@/shared/design-system/table/filters/amount-filter/components/FilterSort";
 import { ColumnDef } from "@tanstack/react-table";
 import { SkeletonRow, Button, IconButton } from "@/shared/components";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { EnsAvatar } from "@/shared/design-system/avatars/ens-avatar/EnsAvatar";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
@@ -16,9 +16,9 @@ import {
   DelegationHistoryItem,
 } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { Table } from "@/shared/components/design-system/table/Table";
-import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
-import { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
+import { Table } from "@/shared/design-system/table/Table";
+import { AmountFilter } from "@/shared/design-system/table/filters/amount-filter/AmountFilter";
+import { AmountFilterState } from "@/shared/design-system/table/filters/amount-filter/store/amount-filter-store";
 import daoConfig from "@/shared/dao-config";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import {

@@ -6,7 +6,7 @@ import { useTransactionsTableData } from "@/features/transactions";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useParams } from "next/navigation";
 import { AffectedSupplyType } from "@/features/transactions/hooks/useTransactionsTableData";
-import { Table } from "@/shared/components/design-system/table/Table";
+import { Table } from "@/shared/design-system/table/Table";
 import { getTransactionsColumns } from "@/features/transactions/utils/getTransactionsColumns";
 import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
 import { useTransactionsTableParams } from "@/features/transactions/hooks/useTransactionParams";

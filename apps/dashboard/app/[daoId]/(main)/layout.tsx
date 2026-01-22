@@ -3,7 +3,7 @@ import { ALL_DAOS, DaoIdEnum } from "@/shared/types/daos";
 import NotFound from "@/app/not-found";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
 import { HeaderDAOSidebar, HeaderSidebar, StickyPageHeader } from "@/widgets";
-import { Footer } from "@/shared/components/design-system/footer/Footer";
+import { Footer } from "@/shared/design-system/footer/Footer";
 // import { BaseHeaderLayoutSidebar } from "@/shared/components";
 
 type DaoParams = {

@@ -9,7 +9,7 @@ import {
 import {
   SubSection,
   SubSectionsContainer,
-} from "@/shared/components/design-system/section";
+} from "@/shared/design-system/section";
 import { useState } from "react";
 import { Tabs } from "@radix-ui/react-tabs";
 import { TabsList, TabsTrigger } from "@/shared/components/ui/tabs";

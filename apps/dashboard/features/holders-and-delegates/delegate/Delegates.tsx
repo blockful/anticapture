@@ -9,7 +9,7 @@ import {
 } from "@/features/holders-and-delegates";
 import { TimeInterval } from "@/shared/types/enums";
 import { SkeletonRow, Button } from "@/shared/components";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { EnsAvatar } from "@/shared/design-system/avatars/ens-avatar/EnsAvatar";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { Plus } from "lucide-react";
@@ -17,9 +17,9 @@ import { ProgressCircle } from "@/features/holders-and-delegates/components/Prog
 import { DaoIdEnum } from "@/shared/types/daos";
 import { useScreenSize } from "@/shared/hooks";
 import { Address, formatUnits } from "viem";
-import { Table } from "@/shared/components/design-system/table/Table";
-import { Percentage } from "@/shared/components/design-system/table/Percentage";
-import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
+import { Table } from "@/shared/design-system/table/Table";
+import { Percentage } from "@/shared/design-system/table/Percentage";
+import { AddressFilter } from "@/shared/design-system/table/filters/AddressFilter";
 import daoConfig from "@/shared/dao-config";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { parseAsStringEnum, useQueryState } from "nuqs";

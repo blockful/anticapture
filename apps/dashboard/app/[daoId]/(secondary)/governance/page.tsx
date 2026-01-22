@@ -3,7 +3,7 @@ import { DaoIdEnum } from "@/shared/types/daos";
 
 import { HeaderMobile } from "@/widgets/HeaderMobile";
 import { HeaderDAOSidebar, HeaderSidebar, StickyPageHeader } from "@/widgets";
-import { Footer } from "@/shared/components/design-system/footer/Footer";
+import { Footer } from "@/shared/design-system/footer/Footer";
 import { GovernanceSection } from "@/features/governance";
 
 type Props = {

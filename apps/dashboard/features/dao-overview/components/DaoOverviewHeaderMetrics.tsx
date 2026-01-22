@@ -7,7 +7,7 @@ import { DaoConfiguration } from "@/shared/dao-config/types";
 import { DaoOverviewHeader } from "@/features/dao-overview/components/DaoOverviewHeader";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { TooltipInfo } from "@/shared/components";
-import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
+import { Tooltip } from "@/shared/design-system/tooltips/Tooltip";
 
 interface DaoOverviewHeaderMetricsProps {
   daoId: string;

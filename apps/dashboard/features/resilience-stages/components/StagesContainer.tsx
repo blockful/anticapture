@@ -24,7 +24,7 @@ import { useCallback, useState } from "react";
 import { useScreenSize } from "@/shared/hooks";
 import { StageRequirementsTooltip } from "@/features/dao-overview/components/StageRequirementsTooltip";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
-import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import { DefaultLink } from "@/shared/design-system/links/default-link";
 
 interface StagesContainerProps {
   daoId: DaoIdEnum;

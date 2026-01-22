@@ -9,7 +9,7 @@ import { DaoOverviewHeaderMetrics } from "@/features/dao-overview/components/Dao
 import { TokenDistributionChartCard } from "@/features/dao-overview/components/TokenDistributionChartCard";
 import { DaoOverviewHeaderBackground } from "@/features/dao-overview/components/DaoOverviewHeaderBackground";
 import { SecurityCouncilCard } from "@/features/dao-overview/components/SecurityCouncilCard";
-import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
+import { DividerDefault } from "@/shared/design-system/divider/DividerDefault";
 import { StagesContainer } from "@/features/resilience-stages/components/StagesContainer";
 import {
   fieldsToArray,

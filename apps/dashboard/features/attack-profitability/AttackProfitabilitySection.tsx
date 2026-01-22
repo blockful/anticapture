@@ -12,7 +12,7 @@ import {
   AttackProfitabilityToggleHeader,
 } from "@/features/attack-profitability/components";
 import { Data } from "react-csv/lib/core";
-import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
+import { BadgeStatus } from "@/shared/design-system/badges/BadgeStatus";
 import { useLastUpdateLabel } from "@/features/attack-profitability/hooks/useLastUpdateLabel";
 import { ChartType } from "@/shared/hooks/useLastUpdate";
 import { getDateRange } from "@/shared/utils";
