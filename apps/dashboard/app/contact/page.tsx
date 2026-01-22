@@ -74,9 +74,9 @@ export default function ContactPage() {
   return (
     <div className="bg-surface-background dark flex h-screen">
       <HeaderSidebar />
-      <main className="flex-1 overflow-auto sm:ml-[72px]">
-        <div className="sm:hidden">
-          <div className="h-[57px] w-full sm:hidden" />
+      <main className="flex-1 overflow-auto">
+        <div className="lg:hidden">
+          <div className="h-[57px] w-full lg:hidden" />
           <HeaderMobile overlayClassName="top-[57px]" />
         </div>
         <div className="flex min-h-screen w-full flex-col items-center">
@@ -294,6 +294,9 @@ export default function ContactPage() {
                       className="w-full"
                       disabled={isPending}
                       loading={isPending}
+                      data-ph-event="contact_submitted"
+                      data-ph-source="contact_form"
+                      data-umami-event="cta_notification"
                     >
                       Send Transmission <Rocket size={16} />
                     </Button>

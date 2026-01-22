@@ -46,6 +46,7 @@ interface BaseInfo {
   };
   icon?: (props: DaoIconProps) => ReactNode;
   disableDaoPage?: boolean;
+  notSupportedMetrics?: MetricTypesEnum[];
 }
 
 export interface ChainWithIcon extends Chain {
@@ -100,6 +101,7 @@ export interface DaoOverviewConfig {
 }
 
 export interface AttackProfitabilityConfig {
+  supportsLiquidTreasuryCall?: boolean;
   riskLevel?: RiskLevel;
   dynamicQuorum?: {
     percentage: number;

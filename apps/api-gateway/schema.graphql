@@ -11,15 +11,10 @@ directive @httpOperation(subgraph: String, path: String, operationSpecificHeader
 directive @transport(subgraph: String, kind: String, location: String, headers: [[String]], queryStringOptions: ObjMap, queryParams: [[String]]) repeatable on SCHEMA
 
 type Query {
-  """Get property data for a specific token"""
-  token(currency: queryInput_token_currency = usd): token_200_response
-  tokens(where: tokenFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPage!
   votingPowerHistorys(where: votingPowerHistoryFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votingPowerHistoryPage!
-  delegation(transactionHash: String!, delegatorAccountId: String!, delegateAccountId: String!): delegation
   delegations(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): delegationPage!
   votesOnchain(voterAccountId: String!, proposalId: String!): votesOnchain
   votesOnchains(where: votesOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votesOnchainPage!
-  daoMetricsDayBucket(date: BigInt!, tokenId: String!, metricType: String!): daoMetricsDayBucket
   daoMetricsDayBuckets(where: daoMetricsDayBucketFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): daoMetricsDayBucketPage!
   _meta: Meta
 
@@ -38,6 +33,9 @@ type Query {
 
   """Get historical market data for a specific token"""
   historicalTokenData(skip: NonNegativeInt, limit: Float = 365): [query_historicalTokenData_items]
+
+  """Get property data for a specific token"""
+  token(currency: queryInput_token_currency = usd): token_200_response
 
   """Compare total supply between periods"""
   compareTotalSupply(days: queryInput_compareTotalSupply_days = _90d): compareTotalSupply_200_response

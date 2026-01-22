@@ -251,7 +251,7 @@ export const MultilineChartAttackProfitability = ({
   return (
     <div
       className={cn(
-        "sm:border-light-dark sm:bg-surface-default text-primary relative flex h-[300px] w-full items-center justify-center rounded-lg",
+        "lg:border-light-dark lg:bg-surface-default text-primary relative flex h-[300px] w-full items-center justify-center rounded-lg",
         {
           "-mb-1 h-44": context === "overview",
         },

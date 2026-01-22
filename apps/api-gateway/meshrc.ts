@@ -34,6 +34,7 @@ export default processConfig(
                       "Query.!{accountPower}",
                       "Query.!{accounts}",
                       "Query.!{account}",
+                      "Query.!{daoMetricsDayBucket}",
                       "Query.!{proposalsOnchains}",
                       "Query.!{proposalsOnchain}",
                       "Query.!{tokenPrices}",
@@ -45,6 +46,9 @@ export default processConfig(
                       "Query.!{votingPowerHistory}",
                       'Query.!{accountBalances}',
                       'Query.!{accountBalance}',
+                      'Query.!{delegation}',
+                      'Query.!{tokens}',
+                      'Query.!{token}',
                       // 'Query.!{votingPowerHistorys}' FIXME: Leave endpoint active for now as it is still used by the notification bot
                     ]
                   },

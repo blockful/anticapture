@@ -73,20 +73,22 @@ export default async function AttackProfitabilityPage({
   }
 
   return (
-    <TheSectionLayout
-      title={PAGES_CONSTANTS.attackProfitability.title}
-      icon={<Crosshair2Icon className="section-layout-icon" />}
-      description={PAGES_CONSTANTS.attackProfitability.description}
-      riskLevel={
-        <RiskLevelCard status={daoConstants.attackProfitability?.riskLevel} />
-      }
-    >
-      <SubSectionsContainer>
-        <AttackProfitabilitySection
-          daoId={daoIdEnum}
-          attackProfitability={daoConstants.attackProfitability}
-        />
-      </SubSectionsContainer>
-    </TheSectionLayout>
+    <div>
+      <TheSectionLayout
+        title={PAGES_CONSTANTS.attackProfitability.title}
+        icon={<Crosshair2Icon className="section-layout-icon" />}
+        description={PAGES_CONSTANTS.attackProfitability.description}
+        riskLevel={
+          <RiskLevelCard status={daoConstants.attackProfitability?.riskLevel} />
+        }
+      >
+        <SubSectionsContainer>
+          <AttackProfitabilitySection
+            daoId={daoIdEnum}
+            attackProfitability={daoConstants.attackProfitability}
+          />
+        </SubSectionsContainer>
+      </TheSectionLayout>
+    </div>
   );
 }

@@ -96,7 +96,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
       return (
         <SkeletonRow
           parentClassName="flex animate-pulse justify-end w-full"
-          className="h-5 w-full max-w-20 md:max-w-32"
+          className="h-5 w-full max-w-20 lg:max-w-32"
         />
       );
     }
@@ -157,7 +157,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
       return (
         <SkeletonRow
           parentClassName="flex animate-pulse justify-end w-full"
-          className="h-5 w-full max-w-20 md:max-w-32"
+          className="h-5 w-full max-w-20 lg:max-w-32"
         />
       );
     }
@@ -220,7 +220,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
       return (
         <SkeletonRow
           parentClassName="flex animate-pulse justify-end w-full"
-          className="h-5 w-full max-w-20 md:max-w-32"
+          className="h-5 w-full max-w-20 lg:max-w-32"
         />
       );
     }
@@ -266,7 +266,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
       return (
         <SkeletonRow
           parentClassName="flex animate-pulse justify-end w-full"
-          className="h-5 w-full max-w-20 md:max-w-32"
+          className="h-5 w-full max-w-20 lg:max-w-32"
         />
       );
     }

@@ -1,9 +1,6 @@
 const daoListQueries = [
-  "accounts",
   "daoMetricsDayBuckets",
   "delegations",
-  "proposalsOnchains",
-  "tokens",
   "votesOnchains",
   "votingPowerHistorys", // FIXME: Leave endpoint active for now as it is still used by the notification bot
 ];
