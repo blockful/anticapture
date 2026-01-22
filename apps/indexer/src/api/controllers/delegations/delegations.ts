@@ -3,7 +3,6 @@ import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 import {
   DelegationsResponseSchema,
   delegationMapper,
-  DelegationsRequestQuerySchema,
   DelegationsRequestParamsSchema,
 } from "@/api/mappers/delegations";
 import { DelegationsService } from "@/api/services/delegations/current";
@@ -19,7 +18,6 @@ export function delegations(app: Hono, service: DelegationsService) {
       tags: ["delegations"],
       request: {
         params: DelegationsRequestParamsSchema,
-        query: DelegationsRequestQuerySchema,
       },
       responses: {
         200: {

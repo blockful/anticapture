@@ -9,22 +9,6 @@ export const DelegationsRequestParamsSchema = z.object({
   address: z.string().refine((val) => isAddress(val, { strict: false })),
 });
 
-export const DelegationsRequestQuerySchema = z.object({
-  delegateAddressIn: z
-    .union([
-      z
-        .string()
-        .refine((val) => isAddress(val, { strict: false }))
-        .transform((val) => [val]),
-      z.array(z.string().refine((val) => isAddress(val, { strict: false }))),
-    ])
-    .optional(),
-});
-
-export type DelegationsRequestQuery = z.infer<
-  typeof DelegationsRequestQuerySchema
->;
-
 export const delegationMapper = (d: DBDelegation): DelegationItem => {
   return {
     delegatorAddress: d.delegatorAccountId,
