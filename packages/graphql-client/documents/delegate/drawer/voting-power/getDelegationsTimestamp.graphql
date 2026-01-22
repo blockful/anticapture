@@ -1,12 +1,10 @@
-query getDelegationsTimestamp($delegator: [String!]!, $delegate: String!, $daoId: String!) {
-  delegations(where: {
-    daoId: $daoId
-    delegatorAccountId_in: $delegator
-    delegateAccountId: $delegate
-  }){
-    items{
-      delegatorAccountId
+query getDelegationsTimestamp($delegator: String!) {
+  delegations(address: $delegator) {
+    items {
+      delegatorAddress
+      delegateAddress
       timestamp
-		}
+    }
+    totalCount
   }
 }

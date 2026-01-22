@@ -1,5 +1,5 @@
 query GetDelegationHistoryCount($delegator: String!) {
-  delegations(where: {delegatorAccountId: $delegator}) {
+  delegations(address: $delegator) {
     totalCount
   }
 } 
