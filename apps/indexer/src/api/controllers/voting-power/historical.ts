@@ -110,7 +110,7 @@ export function historicalVotingPower(app: Hono, service: VotingPowerService) {
         limit,
         orderDirection,
         orderBy,
-        accountId as Address | undefined,
+        accountId,
         fromValue,
         toValue,
         fromDate,
