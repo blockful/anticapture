@@ -3,7 +3,6 @@ import { z } from "@hono/zod-openapi";
 import { Address, isAddress } from "viem";
 import { accountPower } from "ponder:schema";
 
-import { PERCENTAGE_NO_BASELINE } from "../constants";
 import { PeriodResponseSchema, TimestampResponseMapper } from "../shared";
 
 export const VotingPowerVariationsByAccountIdRequestParamsSchema = z.object({
@@ -158,10 +157,7 @@ export const VotingPowerVariationResponseMapper = (
   previousVotingPower: delta.previousVotingPower?.toString(),
   currentVotingPower: delta.currentVotingPower.toString(),
   absoluteChange: delta.absoluteChange.toString(),
-  percentageChange:
-    delta.percentageChange === "Infinity"
-      ? PERCENTAGE_NO_BASELINE
-      : delta.percentageChange,
+  percentageChange: delta.percentageChange,
 });
 
 export const VotingPowerVariationsResponseMapper = (

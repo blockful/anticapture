@@ -9,6 +9,7 @@ export const AccountBalanceVariationsByAccountIdRequestParamsSchema = z.object({
 });
 
 export const AccountBalanceVariationsByAccountIdRequestQuerySchema = z.object({
+  // TODO: unify standard query structure across codebase
   fromDate: z
     .string()
     .optional()

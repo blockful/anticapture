@@ -3,6 +3,7 @@ import { db } from "ponder:api";
 import { accountBalance, balanceHistory } from "ponder:schema";
 import { DBAccountBalanceVariation } from "@/api/mappers";
 import { Address } from "viem";
+import { PERCENTAGE_NO_BASELINE } from "@/api/mappers/constants";
 
 export class BalanceVariationsRepository {
   async getAccountBalanceVariations(
@@ -60,7 +61,7 @@ export class BalanceVariationsRepository {
         percentageChange: sql<string>`
         CASE 
           WHEN COALESCE(from_data.balance, 0) = 0 THEN 
-            CASE WHEN COALESCE(to_data.balance, 0) = 0 THEN '0' ELSE 'Infinity' END
+            CASE WHEN COALESCE(to_data.balance, 0) = 0 THEN '0' ELSE '${PERCENTAGE_NO_BASELINE}' END
           ELSE 
             (((COALESCE(to_data.balance, 0) - from_data.balance)::numeric / from_data.balance::numeric) * 100)::text
         END
