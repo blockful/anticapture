@@ -22,8 +22,9 @@ interface PaginationInfo {
   currentItemsCount: number;
 }
 
-type DelegationItem =
-  GetDelegationsTimestampQuery["delegations"]["items"][number];
+type DelegationItem = NonNullable<
+  NonNullable<GetDelegationsTimestampQuery["delegations"]>["items"][number]
+>;
 type AccountBalanceBase = NonNullable<
   NonNullable<
     GetDelegatorVotingPowerDetailsQuery["accountBalances"]
@@ -145,6 +146,7 @@ export const useVotingPower = ({
 
   // ------------------------------------------------------------------
   // Fetch delegation timestamps (skipped until we have delegatorAddresses)
+  // Note: We query delegations for each delegator individually and filter client-side
   // ------------------------------------------------------------------
   const {
     data: delegationsTimestampData,
@@ -157,36 +159,41 @@ export const useVotingPower = ({
       },
     },
     variables: {
-      delegate: address,
-      delegator: delegatorAddresses,
-      daoId: daoId,
+      delegator: delegatorAddresses[0] || "",
     },
     skip: delegatorAddresses.length === 0,
   });
 
   // ------------------------------------------------------------------
-  // Build timestamp lookup <delegatorAccountId> -> timestamp
+  // Build timestamp lookup <delegatorAddress> -> timestamp
+  // Filter by delegate address client-side since backend doesn't support it
   // ------------------------------------------------------------------
   useEffect(() => {
-    if (delegationsTimestampData?.delegations.items) {
+    if (delegationsTimestampData?.delegations?.items) {
+      const filteredItems = delegationsTimestampData.delegations.items
+        .filter((d): d is NonNullable<typeof d> => d !== null)
+        .filter(
+          (d) => d.delegateAddress?.toLowerCase() === address.toLowerCase(),
+        );
       setAllDelegations((prev) => {
         const merged = [
           ...prev,
-          ...delegationsTimestampData.delegations.items.filter(
+          ...filteredItems.filter(
             (d) =>
-              !prev.some((p) => p.delegatorAccountId === d.delegatorAccountId),
+              !prev.some(
+                (p) =>
+                  p.delegatorAddress?.toLowerCase() ===
+                  d.delegatorAddress?.toLowerCase(),
+              ),
           ),
         ];
         return merged;
       });
     }
-  }, [delegationsTimestampData]);
+  }, [delegationsTimestampData, address]);
 
   const timestampMap = Object.fromEntries(
-    allDelegations.map((d) => [
-      d.delegatorAccountId?.toLowerCase(),
-      d.timestamp,
-    ]),
+    allDelegations.map((d) => [d.delegatorAddress?.toLowerCase(), d.timestamp]),
   );
 
   // ------------------------------------------------------------------
@@ -325,7 +332,10 @@ export const useVotingPower = ({
   return {
     topFiveDelegators: topDelegatorsItems || null,
     delegatorsVotingPowerDetails: delegatorsVotingPowerDetails || null,
-    votingPowerHistoryData: delegationsTimestampData?.delegations.items || [],
+    votingPowerHistoryData:
+      delegationsTimestampData?.delegations?.items?.filter(
+        (item): item is NonNullable<typeof item> => item !== null,
+      ) || [],
     balances: balancesWithTimestamp,
     loading: isLoading,
     error: error || tsError || null,

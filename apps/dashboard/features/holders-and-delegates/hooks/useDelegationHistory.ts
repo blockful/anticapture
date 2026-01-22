@@ -4,7 +4,10 @@ import {
   useGetDelegationHistoryItemsQuery,
   useGetDelegationHistoryCountQuery,
 } from "@anticapture/graphql-client/hooks";
-import { GetDelegationHistoryItemsQuery } from "@anticapture/graphql-client";
+import {
+  GetDelegationHistoryItemsQuery,
+  QueryInput_HistoricalDelegations_OrderDirection,
+} from "@anticapture/graphql-client";
 import { useMemo, useCallback, useState, useEffect } from "react";
 import { NetworkStatus } from "@apollo/client";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -23,7 +26,11 @@ interface PaginationInfo {
 }
 
 interface UseDelegationHistoryResult {
-  data: GetDelegationHistoryItemsQuery["delegations"]["items"] | null;
+  data:
+    | NonNullable<
+        GetDelegationHistoryItemsQuery["historicalDelegations"]
+      >["items"]
+    | null;
   loading: boolean;
   error: Error | null;
   refetch: () => void;
@@ -72,14 +79,19 @@ export const useDelegationHistory = ({
   } = useGetDelegationHistoryItemsQuery({
     variables: {
       delegator: delegatorAccountId,
-      after: undefined,
-      before: undefined,
-      orderBy,
-      orderDirection,
+      skip: (currentPage - 1) * itemsPerPage,
       limit: itemsPerPage,
-      ...(delegateAccountId && { delegate: delegateAccountId }),
-      fromValue: filterVariables?.fromValue ?? "",
-      toValue: filterVariables?.toValue ?? "",
+      orderDirection:
+        orderDirection === "asc"
+          ? QueryInput_HistoricalDelegations_OrderDirection.Asc
+          : QueryInput_HistoricalDelegations_OrderDirection.Desc,
+      ...(delegateAccountId && { delegate: [delegateAccountId] }),
+      ...(filterVariables?.fromValue && {
+        fromValue: filterVariables.fromValue.toString(),
+      }),
+      ...(filterVariables?.toValue && {
+        toValue: filterVariables.toValue.toString(),
+      }),
     },
     context: {
       headers: {
@@ -92,17 +104,23 @@ export const useDelegationHistory = ({
 
   // Refetch data when sorting changes to ensure we start from page 1
   useEffect(() => {
+    setCurrentPage(1);
     refetch({
-      after: undefined,
-      before: undefined,
-      orderBy,
-      orderDirection,
+      skip: 0,
       limit: itemsPerPage,
+      orderDirection:
+        orderDirection === "asc"
+          ? QueryInput_HistoricalDelegations_OrderDirection.Asc
+          : QueryInput_HistoricalDelegations_OrderDirection.Desc,
     });
-  }, [orderBy, orderDirection, refetch]);
+  }, [orderDirection, refetch, itemsPerPage]);
 
   const processedData = useMemo(() => {
-    return delegationHistoryData?.delegations?.items ?? [];
+    return (
+      delegationHistoryData?.historicalDelegations?.items?.filter(
+        (item): item is NonNullable<typeof item> => item !== null,
+      ) ?? []
+    );
   }, [delegationHistoryData]);
 
   // Fetch totalCount with separate lightweight query
@@ -116,17 +134,18 @@ export const useDelegationHistory = ({
   });
 
   const pagination = useMemo<PaginationInfo>(() => {
-    const pageInfo = delegationHistoryData?.delegations?.pageInfo;
     const totalCount = countData?.delegations?.totalCount || 0;
     const currentItemsCount =
-      delegationHistoryData?.delegations?.items?.length || 0;
+      delegationHistoryData?.historicalDelegations?.items?.length || 0;
     const totalPages = Math.ceil(totalCount / itemsPerPage);
+    const hasNextPage = currentPage < totalPages;
+    const hasPreviousPage = currentPage > 1;
 
     return {
-      hasNextPage: pageInfo?.hasNextPage || false,
-      hasPreviousPage: pageInfo?.hasPreviousPage || false,
-      endCursor: pageInfo?.endCursor,
-      startCursor: pageInfo?.startCursor,
+      hasNextPage,
+      hasPreviousPage,
+      endCursor: undefined,
+      startCursor: undefined,
       totalCount,
       currentPage,
       totalPages,
@@ -134,8 +153,7 @@ export const useDelegationHistory = ({
       currentItemsCount,
     };
   }, [
-    delegationHistoryData?.delegations?.pageInfo,
-    delegationHistoryData?.delegations?.items?.length,
+    delegationHistoryData?.historicalDelegations?.items?.length,
     currentPage,
     itemsPerPage,
     countData?.delegations?.totalCount,
@@ -143,11 +161,7 @@ export const useDelegationHistory = ({
 
   // Fetch next page function
   const fetchNextPage = useCallback(async () => {
-    if (
-      !pagination.hasNextPage ||
-      !pagination.endCursor ||
-      isPaginationLoading
-    ) {
+    if (!pagination.hasNextPage || isPaginationLoading) {
       console.warn("No next page available");
       return;
     }
@@ -155,14 +169,23 @@ export const useDelegationHistory = ({
     setIsPaginationLoading(true);
 
     try {
+      const skip = currentPage * itemsPerPage;
       await fetchMore({
         variables: {
           delegator: delegatorAccountId,
-          after: pagination.endCursor,
-          before: undefined,
-          orderBy,
-          orderDirection,
+          skip,
           limit: itemsPerPage,
+          orderDirection:
+            orderDirection === "asc"
+              ? QueryInput_HistoricalDelegations_OrderDirection.Asc
+              : QueryInput_HistoricalDelegations_OrderDirection.Desc,
+          ...(delegateAccountId && { delegate: [delegateAccountId] }),
+          ...(filterVariables?.fromValue && {
+            fromValue: filterVariables.fromValue.toString(),
+          }),
+          ...(filterVariables?.toValue && {
+            toValue: filterVariables.toValue.toString(),
+          }),
         },
         updateQuery: (
           previousResult: GetDelegationHistoryItemsQuery,
@@ -170,21 +193,27 @@ export const useDelegationHistory = ({
             fetchMoreResult,
           }: { fetchMoreResult?: GetDelegationHistoryItemsQuery },
         ) => {
-          if (!fetchMoreResult) return previousResult;
-          const prevItems = previousResult.delegations.items ?? [];
-          const newItems = fetchMoreResult.delegations.items ?? [];
+          if (!fetchMoreResult?.historicalDelegations) return previousResult;
+          const prevItems =
+            previousResult.historicalDelegations?.items?.filter(
+              (item): item is NonNullable<typeof item> => item !== null,
+            ) ?? [];
+          const newItems =
+            fetchMoreResult.historicalDelegations.items?.filter(
+              (item): item is NonNullable<typeof item> => item !== null,
+            ) ?? [];
           const merged = [
             ...prevItems,
             ...newItems.filter(
               (n) => !prevItems.some((p) => p.timestamp === n.timestamp),
             ),
           ];
-          // Replace the current data with the new page data
           return {
             ...fetchMoreResult,
-            delegations: {
-              ...fetchMoreResult.delegations,
+            historicalDelegations: {
+              ...fetchMoreResult.historicalDelegations,
               items: merged,
+              totalCount: fetchMoreResult.historicalDelegations.totalCount ?? 0,
             },
           };
         },
@@ -199,20 +228,18 @@ export const useDelegationHistory = ({
   }, [
     fetchMore,
     pagination.hasNextPage,
-    pagination.endCursor,
-    orderBy,
+    currentPage,
+    itemsPerPage,
     orderDirection,
     delegatorAccountId,
+    delegateAccountId,
+    filterVariables,
     isPaginationLoading,
   ]);
 
   // Fetch previous page function
   const fetchPreviousPage = useCallback(async () => {
-    if (
-      !pagination.hasPreviousPage ||
-      !pagination.startCursor ||
-      isPaginationLoading
-    ) {
+    if (!pagination.hasPreviousPage || isPaginationLoading) {
       console.warn("No previous page available or already loading");
       return;
     }
@@ -220,13 +247,23 @@ export const useDelegationHistory = ({
     setIsPaginationLoading(true);
 
     try {
+      const skip = Math.max(0, (currentPage - 2) * itemsPerPage);
       await fetchMore({
         variables: {
-          after: undefined,
-          before: pagination.startCursor,
-          orderBy,
-          orderDirection,
+          delegator: delegatorAccountId,
+          skip,
           limit: itemsPerPage,
+          orderDirection:
+            orderDirection === "asc"
+              ? QueryInput_HistoricalDelegations_OrderDirection.Asc
+              : QueryInput_HistoricalDelegations_OrderDirection.Desc,
+          ...(delegateAccountId && { delegate: [delegateAccountId] }),
+          ...(filterVariables?.fromValue && {
+            fromValue: filterVariables.fromValue.toString(),
+          }),
+          ...(filterVariables?.toValue && {
+            toValue: filterVariables.toValue.toString(),
+          }),
         },
         updateQuery: (
           previousResult: GetDelegationHistoryItemsQuery,
@@ -234,14 +271,14 @@ export const useDelegationHistory = ({
             fetchMoreResult,
           }: { fetchMoreResult?: GetDelegationHistoryItemsQuery },
         ) => {
-          if (!fetchMoreResult) return previousResult;
-
+          if (!fetchMoreResult?.historicalDelegations) return previousResult;
           // Replace the current data with the new page data
           return {
             ...fetchMoreResult,
-            delegations: {
-              ...fetchMoreResult.delegations,
-              items: fetchMoreResult.delegations.items,
+            historicalDelegations: {
+              ...fetchMoreResult.historicalDelegations,
+              items: fetchMoreResult.historicalDelegations.items,
+              totalCount: fetchMoreResult.historicalDelegations.totalCount ?? 0,
             },
           };
         },
@@ -257,9 +294,12 @@ export const useDelegationHistory = ({
   }, [
     fetchMore,
     pagination.hasPreviousPage,
-    pagination.startCursor,
-    orderBy,
+    currentPage,
+    itemsPerPage,
     orderDirection,
+    delegatorAccountId,
+    delegateAccountId,
+    filterVariables,
     isPaginationLoading,
   ]);
 
