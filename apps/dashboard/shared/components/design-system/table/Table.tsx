@@ -215,8 +215,8 @@ export const Table = <TData, TValue>({
     >
       <TableContainer
         className={cn(
-          "text-secondary md:bg-surface-default border-separate border-spacing-0 bg-transparent",
-          mobileTableFixed ? "table-fixed" : "table-auto md:table-fixed",
+          "text-secondary lg:bg-surface-default border-separate border-spacing-0 bg-transparent",
+          mobileTableFixed ? "table-fixed" : "table-auto lg:table-fixed",
         )}
       >
         <TableHeader className="bg-surface-contrast text-secondary sticky -top-px z-30 text-xs font-medium">
@@ -231,7 +231,7 @@ export const Table = <TData, TValue>({
                     className={cn(
                       header.column.getIndex() === 0 &&
                         stickyFirstColumn &&
-                        "bg-surface-contrast sticky-border-r sticky left-0 z-20 md:relative",
+                        "bg-surface-contrast sticky-border-r sticky left-0 z-20 lg:relative",
                       headerSizeVariants[size],
                       columnMeta?.columnClassName,
                     )}
@@ -312,7 +312,7 @@ export const Table = <TData, TValue>({
                             className={cn(
                               cell.column.getIndex() === 0 &&
                                 stickyFirstColumn &&
-                                "bg-surface-background sticky-border-r sm:bg-surface-default sticky left-0 z-20 shadow-md shadow-black md:relative md:bg-transparent",
+                                "bg-surface-background sticky-border-r lg:bg-surface-default sticky left-0 z-20 shadow-md shadow-black lg:relative lg:bg-transparent",
                               rowSizeVariants[size],
                               colMeta?.columnClassName,
                             )}

@@ -149,7 +149,7 @@ export const HoldersAndDelegatesDrawer = ({
                 </div>
                 <div className="flex items-center justify-center gap-2">
                   {/* Desktop */}
-                  <div className="hidden sm:block">
+                  <div className="hidden lg:block">
                     <EnsAvatar
                       address={address as `0x${string}`}
                       size="sm"
@@ -161,7 +161,7 @@ export const HoldersAndDelegatesDrawer = ({
                   </div>
 
                   {/* Mobile */}
-                  <div className="block sm:hidden">
+                  <div className="block lg:hidden">
                     <EnsAvatar
                       address={address as `0x${string}`}
                       size="sm"

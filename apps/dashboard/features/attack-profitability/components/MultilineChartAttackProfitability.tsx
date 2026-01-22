@@ -15,7 +15,7 @@ import { useParams } from "next/navigation";
 
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import {
-  DaoMetricsDayBucket,
+  TokenMetricItem,
   MultilineChartDataSetPoint,
 } from "@/shared/dao-config/types";
 import { useDaoData, useTimeSeriesData } from "@/shared/hooks";
@@ -115,7 +115,7 @@ export const MultilineChartAttackProfitability = ({
   ) satisfies ChartConfig;
 
   const chartData = useMemo(() => {
-    let delegatedSupplyChart: DaoMetricsDayBucket[] = [];
+    let delegatedSupplyChart: TokenMetricItem[] = [];
     if (timeSeriesData) {
       delegatedSupplyChart = timeSeriesData[MetricTypesEnum.DELEGATED_SUPPLY];
     }
@@ -251,7 +251,7 @@ export const MultilineChartAttackProfitability = ({
   return (
     <div
       className={cn(
-        "sm:border-light-dark sm:bg-surface-default text-primary relative flex h-[300px] w-full items-center justify-center rounded-lg",
+        "lg:border-light-dark lg:bg-surface-default text-primary relative flex h-[300px] w-full items-center justify-center rounded-lg",
         {
           "-mb-1 h-44": context === "overview",
         },

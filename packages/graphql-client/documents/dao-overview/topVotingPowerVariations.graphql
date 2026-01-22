@@ -1,8 +1,8 @@
-query VotingPowerVariations(
-  $days: queryInput_votingPowerVariations_days!
+query TopVotingPowerVariations(
+  $fromDate: String!
   $limit: PositiveInt = 10
 ) {
-  votingPowerVariations(days: $days, limit: $limit) {
+  votingPowerVariations(fromDate: $fromDate, limit: $limit, orderDirection: desc) {
     items {
       absoluteChange
       accountId

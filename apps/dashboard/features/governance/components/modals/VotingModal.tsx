@@ -195,6 +195,9 @@ export const VotingModal = ({
             Close
           </Button>
           <Button
+            data-ph-event="vote_submit"
+            data-ph-source="gov_fe"
+            data-umami-event="vote_submit"
             disabled={!address || !chain || !vote || !walletClient || isLoading}
             loading={isLoading}
             onClick={async () => {

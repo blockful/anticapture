@@ -14,6 +14,7 @@ interface ButtonHeaderSidebarProps extends ButtonHTMLAttributes<
   className?: string;
   isGlobal?: boolean;
   isAction?: boolean;
+  isCollapsed?: boolean;
 }
 
 export const ButtonHeaderSidebar = ({
@@ -23,6 +24,7 @@ export const ButtonHeaderSidebar = ({
   className,
   isGlobal = false,
   isAction = false,
+  isCollapsed = false,
   onClick,
   ...props
 }: ButtonHeaderSidebarProps) => {
@@ -64,10 +66,12 @@ export const ButtonHeaderSidebar = ({
   }
 
   const baseClassName = cn(
-    "group flex w-full cursor-pointer items-center gap-3 rounded-md border border-transparent p-2 text-sm font-medium",
+    "flex h-[33px] w-full cursor-pointer items-center gap-2 px-2 py-2 text-sm font-medium transition-all",
     {
-      "cursor-default bg-white": isActive,
-      "hover:border-light-dark hover:bg-surface-contrast": !isActive,
+      "bg-primary text-inverted": isActive,
+      "bg-surface-background text-secondary hover:bg-surface-contrast":
+        !isActive,
+      "justify-center": isCollapsed,
     },
     className,
   );
@@ -75,19 +79,24 @@ export const ButtonHeaderSidebar = ({
   const content = (
     <>
       <Icon
-        className={cn("size-4", {
+        className={cn("size-4 shrink-0 transition-colors", {
           "text-inverted": isActive,
           "text-secondary group-hover:text-primary": !isActive,
         })}
       />
-      <p
-        className={cn({
-          "text-inverted": isActive,
-          "text-secondary group-hover:text-primary": !isActive,
-        })}
-      >
-        {label}
-      </p>
+      {!isCollapsed && (
+        <p
+          className={cn(
+            "flex-1 whitespace-nowrap text-[14px] font-medium leading-[20px] transition-colors",
+            {
+              "text-inverted": isActive,
+              "text-secondary group-hover:text-primary": !isActive,
+            },
+          )}
+        >
+          {label}
+        </p>
+      )}
     </>
   );
 
@@ -97,7 +106,7 @@ export const ButtonHeaderSidebar = ({
       <button
         type="button"
         onClick={onClick}
-        className={baseClassName}
+        className={cn(baseClassName, "group")}
         {...props}
       >
         {content}
@@ -112,7 +121,7 @@ export const ButtonHeaderSidebar = ({
       onClick={onClick}
       prefetch={true}
       {...props}
-      className={baseClassName}
+      className={cn(baseClassName, "group")}
     >
       {content}
     </Link>

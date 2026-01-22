@@ -38,11 +38,11 @@ export const StageRequirementsTooltip = ({
   ])[Number(nextStage) % 3] as "text-error" | "text-warning" | "text-success";
   return (
     <div
-      className="sm:translate-x absolute left-0 top-[calc(100%-8px)] z-50 mt-2"
+      className="lg:translate-x absolute left-0 top-[calc(100%-8px)] z-50 mt-2"
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      <div className="stage-tooltip-box-shadow border-light-dark bg-surface-background relative w-[calc(100vw-44px)] rounded-lg border sm:w-[25vw]">
+      <div className="stage-tooltip-box-shadow border-light-dark bg-surface-background relative w-[calc(100vw-44px)] rounded-lg border lg:w-[25vw]">
         {/* Header */}
         <div className="p-4">
           <div className="flex justify-start">

@@ -5,9 +5,9 @@ query GetDelegatorVotingPowerDetails(
   $limit: PositiveInt
   $skip: NonNegativeInt
 ) {
-  accountPower(accountId: $address) {
-    votingPower
+  votingPowerByAccountId(accountId: $address) {
     accountId
+    votingPower
   }
   accountBalances(
     orderDirection: $orderDirection

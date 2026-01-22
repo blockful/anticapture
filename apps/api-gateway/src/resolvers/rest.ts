@@ -15,8 +15,6 @@ const daoItemQueries = [
   "compareTreasury",
   "compareVotes",
   "dao",
-  "dao",
-  "delegationPercentageByDay",
   "delegationPercentageByDay",
   "getDaoTokenTreasury",
   "getLiquidTreasury",
@@ -25,7 +23,7 @@ const daoItemQueries = [
   "getVotingPower",
   "historicalBalances",
   "historicalTokenData",
-  "historicalVotingPower",
+  "historicalVotingPowers",
   "lastUpdate",
   "proposal",
   "proposalNonVoters",
@@ -33,9 +31,13 @@ const daoItemQueries = [
   "votes",
   "proposalsActivity",
   "token",
+  "tokenMetrics",
   "transactions",
   "transfers",
+  "votingPowerByAccountId",
   "votingPowerVariations",
+  "votingPowerVariationsByAccountId",
+  "votingPowers",
 ];
 
 export const restResolvers = daoItemQueries.reduce((acc, fieldName) => {

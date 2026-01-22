@@ -12,7 +12,7 @@ import { DAYS_IN_YEAR } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 import { TokenHistoricalPriceResponse } from "@/api/mappers";
 import { PriceProvider } from "@/api/services/treasury/types";
-import { truncateTimestampTimeMs } from "@/eventHandlers/shared";
+import { truncateTimestampToMidnight } from "@/lib/date-helpers";
 
 const createCoingeckoTokenPriceDataSchema = (
   tokenContractAddress: string,
@@ -45,7 +45,7 @@ export class CoingeckoService implements PriceProvider {
 
     const priceMap = new Map<number, number>();
     priceData.forEach((item) => {
-      const normalizedTimestamp = truncateTimestampTimeMs(item.timestamp);
+      const normalizedTimestamp = truncateTimestampToMidnight(item.timestamp);
       priceMap.set(normalizedTimestamp, Number(item.price));
     });
 
@@ -78,9 +78,10 @@ export class CoingeckoService implements PriceProvider {
       });
     }
 
-    return data.prices.map(([timestamp, price]) => ({
+    // CoinGecko returns timestamps in milliseconds, convert to seconds
+    return data.prices.map(([timestampMs, price]) => ({
       price: price.toFixed(2),
-      timestamp: timestamp,
+      timestamp: Math.floor(timestampMs / 1000),
     }));
   }
 

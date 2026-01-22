@@ -134,7 +134,7 @@ export const StagesContainer = ({
   return (
     <div
       className={cn("flex h-full w-full flex-col gap-1", {
-        "sm:bg-surface-default gap-4 md:p-4": context === "overview",
+        "lg:bg-surface-default gap-4 lg:p-4": context === "overview",
       })}
     >
       {context === "overview" && (
@@ -231,7 +231,7 @@ export const StagesContainer = ({
           />
           {context === "overview" && (
             <div
-              className="border-light-dark bg-surface-contrast relative flex items-center justify-between gap-1 border-b p-2 sm:border-none sm:p-3"
+              className="border-light-dark bg-surface-contrast relative flex items-center justify-between gap-1 border-b p-2 lg:border-none lg:p-3"
               onMouseLeave={() => !isMobile && setShowTooltip(false)}
             >
               {currentDaoStage === Stage.NONE ? (

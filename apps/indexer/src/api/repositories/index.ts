@@ -1,4 +1,4 @@
-export * from "./delegation-percentage";
+export * from "./daoMetricsDayBucket";
 export * from "./last-update";
 export * from "./drizzle";
 export * from "./proposals-activity";

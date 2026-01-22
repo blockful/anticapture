@@ -60,6 +60,7 @@ export const ENS: DaoConfiguration = {
   },
   attackProfitability: {
     riskLevel: RiskLevel.HIGH,
+    supportsLiquidTreasuryCall: true,
   },
   riskAnalysis: true,
   governanceImplementation: {

@@ -19,11 +19,11 @@ export const AttackProfitabilityToggleHeader = ({
   const { daoId }: { daoId: string } = useParams();
 
   return (
-    <div className="flex items-start gap-1 sm:w-fit sm:items-end sm:gap-2 sm:pt-0 lg:flex-row lg:gap-3">
+    <div className="flex items-start gap-1 lg:w-fit lg:flex-row lg:items-end lg:gap-2 lg:gap-3 lg:pt-0">
       <div className="flex flex-row flex-wrap items-center gap-2 lg:gap-3">
         <div className="flex items-center gap-3">
           <div className="bg-surface-solid-success rounded-xs size-2" />
-          <p className="text-secondary hidden text-sm font-medium leading-normal sm:flex">
+          <p className="text-secondary hidden text-sm font-medium leading-normal lg:flex">
             Treasury
           </p>
         </div>
@@ -38,7 +38,7 @@ export const AttackProfitabilityToggleHeader = ({
       <div className="flex flex-row flex-wrap items-center gap-2 lg:gap-3">
         <div className="flex items-center gap-3">
           <div className="bg-surface-solid-error rounded-xs size-2" />
-          <p className="text-secondary hidden text-sm font-medium leading-normal sm:flex">
+          <p className="text-secondary hidden text-sm font-medium leading-normal lg:flex">
             Cost
           </p>
         </div>

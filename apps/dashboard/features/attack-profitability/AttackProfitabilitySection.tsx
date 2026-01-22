@@ -17,7 +17,6 @@ import { useLastUpdateLabel } from "@/features/attack-profitability/hooks/useLas
 import { ChartType } from "@/shared/hooks/useLastUpdate";
 import { getDateRange } from "@/shared/utils";
 import { Dropdown, Option } from "@/shared/components/dropdowns/Dropdown";
-import { InlineAlert } from "@/shared/components/alerts/InlineAlert";
 
 export const AttackProfitabilitySection = ({
   daoId,
@@ -52,7 +51,7 @@ export const AttackProfitabilitySection = ({
         title="Cost of Attack vs Profit"
         subtitle={getDateRange(days ?? "")}
         headerComponent={
-          <div className="flex w-full flex-col-reverse gap-3 pt-3 sm:flex-row sm:items-center">
+          <div className="flex w-full flex-col-reverse gap-3 pt-3 lg:flex-row lg:items-center">
             <BadgeStatus
               variant="outline"
               iconVariant={attackUpdate.hasData ? "success" : "warning"}
@@ -62,7 +61,7 @@ export const AttackProfitabilitySection = ({
             >
               Last updated: {attackUpdate.label}
             </BadgeStatus>
-            <div className="border-border-default hidden h-5 border sm:block" />
+            <div className="border-border-default hidden h-5 border lg:block" />
 
             <AttackProfitabilityToggleHeader
               treasuryMetric={treasuryMetric}
@@ -89,7 +88,7 @@ export const AttackProfitabilitySection = ({
         />
       </TheCardChartLayout>
       <div className="border-light-dark w-full border-t" />
-      <div className="grid w-full grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2">
+      <div className="grid w-full grid-cols-1 gap-5 lg:grid-cols-2 lg:gap-6">
         <TheCardChartLayout
           title="Cost Comparison"
           subtitle="All values reflect current data."
@@ -124,14 +123,6 @@ export const AttackProfitabilitySection = ({
         <div className="flex flex-col gap-2">
           <AttackProfitabilityAccordion />
         </div>
-        {daoId === DaoIdEnum.COMP && (
-          <div className="flex flex-col gap-2">
-            <InlineAlert
-              variant="info"
-              label="The ‘Liquid Treasury’ value is an estimate derived from data recorded on 10/03/25."
-            />
-          </div>
-        )}
       </div>
     </div>
   );
