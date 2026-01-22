@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import {
   CartesianGrid,
   Line,
@@ -20,6 +21,7 @@ import { ChartExceptionState } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 import { parseAsStringEnum, useQueryState } from "nuqs";
+import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
 
 interface VotingPowerVariationGraphProps {
   accountId: string;
@@ -32,10 +34,10 @@ interface CustomDotProps {
   payload: {
     timestamp: number;
     votingPower: number;
-    delta: number;
-    type: string;
-    isGain: boolean;
-    transactionHash: string;
+    delta?: number;
+    type?: string;
+    isGain?: boolean;
+    transactionHash?: string;
     fromAddress?: string;
     toAddress?: string;
   };
@@ -85,8 +87,59 @@ export const VotingPowerVariationGraph = ({
     parseAsStringEnum(["30d", "90d", "all"]).withDefault("all"),
   );
 
+  // Calculate timestamp range based on time period
+  const { fromTimestamp, toTimestamp } = useMemo(() => {
+    const nowInSeconds = Date.now() / 1000;
+
+    // For "all", treat as all time by not setting limits
+    if (selectedPeriod === "all") {
+      return { fromTimestamp: undefined, toTimestamp: undefined };
+    }
+
+    let daysInSeconds: number;
+    switch (selectedPeriod) {
+      case "90d":
+        daysInSeconds = 90 * SECONDS_PER_DAY;
+        break;
+      default:
+        daysInSeconds = 30 * SECONDS_PER_DAY;
+        break;
+    }
+
+    return {
+      fromTimestamp: Math.floor(nowInSeconds - daysInSeconds),
+      toTimestamp: Math.floor(nowInSeconds),
+    };
+  }, [selectedPeriod]);
+
   const { delegationHistory, loading, error } =
-    useDelegateDelegationHistoryGraph(accountId, daoId, selectedPeriod);
+    useDelegateDelegationHistoryGraph(
+      accountId,
+      daoId,
+      fromTimestamp?.toString(),
+      toTimestamp?.toString(),
+    );
+
+  const extendedChartData = useMemo(
+    () => [
+      {
+        timestamp: fromTimestamp
+          ? fromTimestamp * 1000
+          : delegationHistory[0]?.timestamp - 10000,
+        votingPower:
+          delegationHistory[0]?.votingPower - delegationHistory[0]?.delta,
+        isGain: true,
+      },
+      ...delegationHistory,
+      {
+        timestamp: toTimestamp ? toTimestamp * 1000 : Date.now(),
+        votingPower:
+          delegationHistory[delegationHistory.length - 1]?.votingPower,
+        isGain: true,
+      },
+    ],
+    [delegationHistory, fromTimestamp, toTimestamp],
+  );
 
   if (loading) {
     return (
@@ -143,36 +196,6 @@ export const VotingPowerVariationGraph = ({
       </div>
     );
   }
-
-  const chartData = delegationHistory
-    .map((dataPoint) => ({
-      timestamp: dataPoint.timestamp,
-      votingPower: dataPoint.votingPower,
-      delta: dataPoint.delta,
-      type: dataPoint.type,
-      isGain: dataPoint.isGain,
-      transactionHash: dataPoint.transactionHash,
-      fromAddress: dataPoint.fromAddress,
-      toAddress: dataPoint.toAddress,
-    }))
-    .sort((a, b) => a.timestamp - b.timestamp);
-
-  const extendedChartData =
-    chartData.length < 1000
-      ? [
-          {
-            timestamp: chartData[0]?.timestamp - 1000, // to avoid hover conflict with first point
-            votingPower: 0,
-            delta: "0",
-            type: "initial",
-            isGain: true,
-            transactionHash: "initial",
-            fromAddress: undefined,
-            toAddress: undefined,
-          },
-          ...chartData,
-        ]
-      : chartData;
 
   // Custom dot component to show each transfer/delegation point
   const CustomDot = (props: CustomDotProps) => {
@@ -255,7 +278,7 @@ export const VotingPowerVariationGraph = ({
                       ? "Delegation"
                       : data.type === "transfer"
                         ? "Transfer"
-                        : "Initial Voting Power";
+                        : undefined;
                   const addressLabel =
                     data.type === "delegation"
                       ? "Delegated from"
@@ -270,13 +293,19 @@ export const VotingPowerVariationGraph = ({
                         Voting Power:{" "}
                         {formatNumberUserReadable(data.votingPower)}
                       </p>
-                      <p className="text-secondary text-xs">Type: {type}</p>
-                      <p
-                        className={`text-xs ${data.isGain ? "text-success" : "text-error"}`}
-                      >
-                        {data.isGain && "+"}
-                        {formatNumberUserReadable(parseFloat(data.delta))}
-                      </p>
+                      {data.delta && (
+                        <>
+                          <p className="text-secondary text-xs">Type: {type}</p>
+                          <p
+                            className={`text-xs ${data.isGain ? "text-success" : "text-error"}`}
+                          >
+                            {data.isGain &&
+                              data.transactionHash !== "initial" &&
+                              "+"}
+                            {formatNumberUserReadable(data.delta)}
+                          </p>
+                        </>
+                      )}
                       {displayAddress && (
                         <p className="text-secondary text-xs">
                           {addressLabel}:

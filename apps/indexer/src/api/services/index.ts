@@ -1,4 +1,5 @@
 export * from "./delegation-percentage";
+export * from "./token-metrics";
 export * from "./voting-power";
 export * from "./coingecko";
 export * from "./dune";

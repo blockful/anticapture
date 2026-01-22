@@ -1,24 +1,23 @@
 import { db } from "ponder:api";
 import { daoMetricsDayBucket } from "ponder:schema";
-import { and, gte, lte, inArray, desc, asc } from "ponder";
-import { MetricTypesEnum } from "@/lib/constants";
-import type { RepositoryFilters } from "@/api/mappers/";
+import { and, gte, lte, desc, asc, eq, lt, inArray } from "ponder";
 
-export class DelegationPercentageRepository {
+export class DaoMetricsDayBucketRepository {
   /**
-   * Fetches DELEGATED_SUPPLY and TOTAL_SUPPLY metrics from database
-   * @param filters - Date range and ordering filters
+   * Fetches metrics by type and date range
+   * @param filters - Metric types, date range, and ordering filters
    * @returns Array of metrics ordered by date
    */
-  async getDaoMetricsByDateRange(filters: RepositoryFilters) {
-    const { startDate, endDate, orderDirection, limit } = filters;
+  async getMetricsByDateRange(filters: {
+    metricTypes: string[];
+    startDate?: string;
+    endDate?: string;
+    orderDirection: "asc" | "desc";
+    limit: number;
+  }) {
+    const { metricTypes, startDate, endDate, orderDirection, limit } = filters;
 
-    const conditions = [
-      inArray(daoMetricsDayBucket.metricType, [
-        MetricTypesEnum.DELEGATED_SUPPLY,
-        MetricTypesEnum.TOTAL_SUPPLY,
-      ]),
-    ];
+    const conditions = [inArray(daoMetricsDayBucket.metricType, metricTypes)];
 
     if (startDate) {
       conditions.push(gte(daoMetricsDayBucket.date, BigInt(startDate)));
@@ -44,10 +43,10 @@ export class DelegationPercentageRepository {
    * @returns The most recent metric row or null if not found
    */
   async getLastMetricBeforeDate(metricType: string, beforeDate: string) {
-    return await db.query.daoMetricsDayBucket.findFirst({
+    return db.query.daoMetricsDayBucket.findFirst({
       where: and(
-        lte(daoMetricsDayBucket.date, BigInt(beforeDate)),
-        inArray(daoMetricsDayBucket.metricType, [metricType]),
+        lt(daoMetricsDayBucket.date, BigInt(beforeDate)),
+        eq(daoMetricsDayBucket.metricType, metricType),
       ),
       orderBy: desc(daoMetricsDayBucket.date),
     });

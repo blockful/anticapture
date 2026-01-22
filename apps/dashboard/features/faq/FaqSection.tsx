@@ -47,15 +47,15 @@ export const FaqSection = () => {
     >
       <div className="flex flex-col gap-6">
         {/* Mobile-only dashed line separator */}
-        <div className="border-light-dark -mx-4 border-t border-dashed sm:hidden" />
+        <div className="border-light-dark -mx-4 border-t border-dashed lg:hidden" />
 
         {/* FAQ Items */}
         <div className="relative flex flex-wrap gap-2">
           <div
             className={cn(
-              "absolute inset-0 z-10 transition-all duration-200 ease-in-out sm:bg-black sm:transition-opacity",
+              "absolute inset-0 z-10 transition-all duration-200 ease-in-out lg:bg-black lg:transition-opacity",
               openCardIds.length > 0
-                ? "hidden sm:block sm:opacity-50"
+                ? "hidden lg:block lg:opacity-50"
                 : "pointer-events-none opacity-0",
             )}
             onClick={() => setOpenCardIds([])}
@@ -66,7 +66,7 @@ export const FaqSection = () => {
             const isOpen = openCardIds.includes(cardId);
 
             return (
-              <div key={index} className="w-full md:w-[calc(50%-4px)]">
+              <div key={index} className="w-full lg:w-[calc(50%-4px)]">
                 <FaqCard
                   faqItem={faqItem}
                   isOpen={isOpen}

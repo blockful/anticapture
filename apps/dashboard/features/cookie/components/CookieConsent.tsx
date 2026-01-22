@@ -82,11 +82,11 @@ export const CookieConsent = ({ className }: CookieConsentProps) => {
   return (
     <div
       className={cn(
-        "fixed bottom-7 left-1/2 right-auto z-50 flex w-full -translate-x-1/2 flex-col gap-6 rounded-lg p-4 sm:max-w-[974px] sm:flex-row sm:items-center",
+        "fixed bottom-7 left-1/2 right-auto z-50 flex w-full -translate-x-1/2 flex-col gap-6 rounded-lg p-4 lg:max-w-[974px] lg:flex-row lg:items-center",
         className,
       )}
     >
-      <div className="border-border-default bg-surface-default relative z-50 flex w-full flex-col items-start gap-4 overflow-hidden rounded-lg border p-4 shadow-lg sm:flex-row sm:items-center sm:gap-6">
+      <div className="border-border-default bg-surface-default relative z-50 flex w-full flex-col items-start gap-4 overflow-hidden rounded-lg border p-4 shadow-lg lg:flex-row lg:items-center lg:gap-6">
         <Image
           className="absolute right-0 top-0 h-full w-[330px] object-cover opacity-50"
           src="/images/cookie.svg"
@@ -94,8 +94,8 @@ export const CookieConsent = ({ className }: CookieConsentProps) => {
           width={330}
           height={116}
         />
-        <div className="z-40 flex w-full items-start gap-6 sm:items-center">
-          <div className="relative hidden size-[116px] flex-shrink-0 items-center justify-center sm:flex">
+        <div className="z-40 flex w-full items-start gap-6 lg:items-center">
+          <div className="relative hidden size-[116px] flex-shrink-0 items-center justify-center lg:flex">
             <CookieBackground className="text-brand size-[116px]" />
             <CookieIcon className="text-brand absolute inset-0 left-1/2 top-1/2 size-[56px] -translate-x-1/2 -translate-y-1/2" />
           </div>
@@ -120,7 +120,7 @@ export const CookieConsent = ({ className }: CookieConsentProps) => {
             </DefaultLink>
           </div>
         </div>
-        <div className="z-50 flex w-full flex-shrink-0 gap-2 sm:w-auto">
+        <div className="z-50 flex w-full flex-shrink-0 gap-2 lg:w-auto">
           <Button onClick={handleAccept} variant="primary" size="sm">
             [Accept]
           </Button>

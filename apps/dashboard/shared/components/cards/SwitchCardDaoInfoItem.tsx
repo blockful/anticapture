@@ -37,7 +37,7 @@ const CustomBadge = ({ switched, icon, href }: CustomBadgeProps) => {
   return (
     <Badge
       className={cn(
-        "!bg-surface-contrast/20 sm:bg-surface-contrast! gap-1.5! px-2.5! py-1! flex h-full w-full lg:w-fit",
+        "!bg-surface-contrast/20 lg:bg-surface-contrast! gap-1.5! px-2.5! py-1! flex h-full w-full lg:w-fit",
         {
           "hover:bg-middle-dark! cursor-pointer! transition-all duration-300":
             href,

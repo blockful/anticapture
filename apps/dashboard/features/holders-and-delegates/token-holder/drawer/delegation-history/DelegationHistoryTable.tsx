@@ -58,8 +58,8 @@ export const DelegationHistoryTable = ({
     parseAsStringEnum(["asc", "desc"]).withDefault("desc"),
   );
   const [filterVariables, setFilterVariables] = useQueryStates({
-    minDelta: parseAsString,
-    maxDelta: parseAsString,
+    fromValue: parseAsString,
+    toValue: parseAsString,
   });
   const [isFilterActive, setIsFilterActive] = useQueryState(
     "active",
@@ -82,7 +82,7 @@ export const DelegationHistoryTable = ({
   } = useDelegationHistory({
     daoId,
     delegatorAccountId: address,
-    delegateAccountId: addressFilter ?? undefined,
+    delegateAccountId: addressFilter ?? "",
     orderBy: sortBy,
     orderDirection: sortOrder,
     filterVariables,
@@ -133,7 +133,7 @@ export const DelegationHistoryTable = ({
                 }
                 setAddressFilter(addr || "");
               }}
-              currentFilter={addressFilter ?? undefined}
+              currentFilter={addressFilter ?? ""}
             />
           </div>
         </div>
@@ -193,16 +193,16 @@ export const DelegationHistoryTable = ({
               );
 
               setFilterVariables(() => ({
-                minDelta: filterState.minAmount
+                fromValue: filterState.minAmount
                   ? parseUnits(filterState.minAmount, decimals).toString()
-                  : undefined,
-                maxDelta: filterState.maxAmount
+                  : "",
+                toValue: filterState.maxAmount
                   ? parseUnits(filterState.maxAmount, decimals).toString()
-                  : undefined,
+                  : "",
               }));
 
               setIsFilterActive(
-                !!(filterVariables?.minDelta || filterVariables?.maxDelta),
+                !!(filterVariables?.fromValue || filterVariables?.toValue),
               );
               // Update sort to delegatedValue when filter is applied
               setSortBy("delegatedValue");
@@ -212,8 +212,8 @@ export const DelegationHistoryTable = ({
               // Reset to default sorting
               setSortBy("timestamp");
               setFilterVariables(() => ({
-                minDelta: undefined,
-                maxDelta: undefined,
+                fromValue: "",
+                toValue: "",
               }));
             }}
             isActive={isFilterActive}

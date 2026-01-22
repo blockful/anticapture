@@ -194,6 +194,7 @@ export const UNI: DaoConfiguration = {
   },
   attackProfitability: {
     riskLevel: RiskLevel.LOW,
+    supportsLiquidTreasuryCall: true,
   },
   riskAnalysis: true,
   tokenDistribution: true,

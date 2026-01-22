@@ -1,5 +1,5 @@
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
-import { DaoMetricsDayBucket } from "@/shared/dao-config/types";
+import { TokenMetricItem } from "@/shared/dao-config/types";
 
 export interface MetricData {
   value: string | undefined | null;
@@ -10,17 +10,17 @@ export interface TokenDistributionContextProps {
   days: TimeInterval;
   setDays: (days: TimeInterval) => void;
   totalSupply: MetricData;
-  totalSupplyChart: DaoMetricsDayBucket[];
+  totalSupplyChart: TokenMetricItem[];
   circulatingSupply: MetricData;
-  circulatingSupplyChart: DaoMetricsDayBucket[];
+  circulatingSupplyChart: TokenMetricItem[];
   delegatedSupply: MetricData;
-  delegatedSupplyChart: DaoMetricsDayBucket[];
+  delegatedSupplyChart: TokenMetricItem[];
   cexSupply: MetricData;
-  cexSupplyChart: DaoMetricsDayBucket[];
+  cexSupplyChart: TokenMetricItem[];
   dexSupply: MetricData;
-  dexSupplyChart: DaoMetricsDayBucket[];
+  dexSupplyChart: TokenMetricItem[];
   lendingSupply: MetricData;
-  lendingSupplyChart: DaoMetricsDayBucket[];
+  lendingSupplyChart: TokenMetricItem[];
 }
 
 export interface GovernanceActivityContextProps {
@@ -28,8 +28,8 @@ export interface GovernanceActivityContextProps {
   setDays: (days: TimeInterval) => void;
   treasury: MetricData;
   setTreasury: (treasury: MetricData) => void;
-  treasurySupplyChart: DaoMetricsDayBucket[];
-  setTreasurySupplyChart: (treasurySupplyChart: DaoMetricsDayBucket[]) => void;
+  treasurySupplyChart: TokenMetricItem[];
+  setTreasurySupplyChart: (treasurySupplyChart: TokenMetricItem[]) => void;
   proposals: MetricData;
   activeSupply: MetricData;
   votes: MetricData;

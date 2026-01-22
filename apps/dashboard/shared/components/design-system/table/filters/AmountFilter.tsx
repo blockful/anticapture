@@ -123,7 +123,7 @@ export function AmountFilter({
           <div className="px-3 pb-3">
             <Button
               onClick={handleApply}
-              className="hover:bg-surface-hover h-[28px] w-full bg-white px-2 py-1 text-sm leading-[20px] text-black"
+              className="hover:bg-surface-hover h-7 w-full bg-white px-2 py-1 text-sm leading-[20px] text-black"
             >
               Apply
             </Button>
