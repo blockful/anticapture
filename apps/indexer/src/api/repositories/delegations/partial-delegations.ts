@@ -9,13 +9,19 @@ export class PartialDelegationsRepository {
     const delegations = await db
       .select({
         transactionHash: delegation.transactionHash,
+        daoId: delegation.daoId,
+        logIndex: delegation.logIndex,
+        isCex: delegation.isCex,
+        isDex: delegation.isDex,
+        isLending: delegation.isLending,
+        isTotal: delegation.isTotal,
         delegatorAccountId: delegation.delegatorAccountId,
         timestamp: delegation.timestamp,
         previousDelegate: delegation.previousDelegate,
         partials: sql<{ delegate: Address; value: bigint }[]>`jsonb_agg(
           jsonb_build_object(
             'delegate', ${delegation.delegateAccountId}, 
-            'value', ${delegation.delegatedValue}
+            'value', ${delegation.delegatedValue},
           )
         )`.as("partials"),
       })
@@ -37,10 +43,16 @@ export class PartialDelegationsRepository {
     return current.partials.map((partial) => ({
       timestamp: current.timestamp,
       transactionHash: current.transactionHash,
+      daoId: current.daoId,
       delegateAccountId: partial.delegate,
       delegatorAccountId: current.delegatorAccountId,
       delegatedValue: partial.value,
       previousDelegate: current.previousDelegate,
+      logIndex: current.logIndex,
+      isCex: current.isCex,
+      isDex: current.isDex,
+      isLending: current.isLending,
+      isTotal: current.isTotal,
     }));
   }
 }
