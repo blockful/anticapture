@@ -200,10 +200,10 @@ export const DelegationHistoryTable = ({
               setFilterVariables(() => ({
                 fromValue: filterState.minAmount
                   ? parseUnits(filterState.minAmount, decimals).toString()
-                  : undefined,
+                  : "",
                 toValue: filterState.maxAmount
                   ? parseUnits(filterState.maxAmount, decimals).toString()
-                  : undefined,
+                  : "",
               }));
 
               setIsFilterActive(
@@ -217,8 +217,8 @@ export const DelegationHistoryTable = ({
               // Reset to default sorting
               setSortBy("timestamp");
               setFilterVariables(() => ({
-                fromValue: undefined,
-                toValue: undefined,
+                fromValue: "",
+                toValue: "",
               }));
             }}
             isActive={isFilterActive}
