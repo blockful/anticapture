@@ -2,7 +2,7 @@ query TopVotingPowerVariations(
   $fromDate: String!
   $limit: PositiveInt = 10
 ) {
-  votingPowerVariations(fromDate: $fromDate, limit: $limit) {
+  votingPowerVariations(fromDate: $fromDate, limit: $limit, orderDirection: desc) {
     items {
       absoluteChange
       accountId

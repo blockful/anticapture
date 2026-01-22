@@ -1,89 +1,47 @@
-import { DaysEnum } from "@/lib/enums";
 import { z } from "@hono/zod-openapi";
 import { Address, isAddress } from "viem";
 import { accountPower } from "ponder:schema";
 
-import { PERCENTAGE_NO_BASELINE } from "../constants";
-import { PeriodResponseSchema, TimestampResponseMapper } from "../shared";
+import {
+  AddressSetStandardRequestParam,
+  FromDateStandardRequestParam,
+  LimitStandardRequestParam,
+  OffsetStandardRequestParam,
+  OrderDirectionStandardRequestParam,
+  PeriodResponseSchema,
+  TimestampResponseMapper,
+  ToDateStandardRequestParam,
+} from "../shared";
 
 export const VotingPowerVariationsByAccountIdRequestParamsSchema = z.object({
   address: z.string().refine(isAddress, "Invalid address"),
 });
 
 export const VotingPowerVariationsByAccountIdRequestQuerySchema = z.object({
-  fromDate: z
-    .string()
-    .optional()
-    .transform((val) =>
-      Number(
-        val ?? (Math.floor(Date.now() / 1000) - DaysEnum["90d"]).toString(),
-      ),
-    ),
-  toDate: z
-    .string()
-    .optional()
-    .transform((val) =>
-      Number(val ?? Math.floor(Date.now() / 1000).toString()),
-    ),
+  fromDate: FromDateStandardRequestParam,
+  toDate: ToDateStandardRequestParam,
 });
 
 export const VotingPowerVariationsRequestQuerySchema = z
   .object({
-    limit: z.coerce
-      .number()
-      .int()
-      .min(1, "Limit must be a positive integer")
-      .max(100, "Limit cannot exceed 100")
-      .optional()
-      .default(10),
-    skip: z.coerce
-      .number()
-      .int()
-      .min(0, "Skip must be a non-negative integer")
-      .optional()
-      .default(0),
-    orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
-    addresses: z
-      .union([
-        z
-          .string()
-          .refine(isAddress, "Invalid address")
-          .transform((addr) => [addr]),
-        z.array(z.string().refine(isAddress, "Invalid addresses")),
-      ])
-      .optional(),
+    limit: LimitStandardRequestParam,
+    skip: OffsetStandardRequestParam,
+    orderDirection: OrderDirectionStandardRequestParam,
+    addresses: AddressSetStandardRequestParam.optional(),
   })
   .extend(VotingPowerVariationsByAccountIdRequestQuerySchema.shape);
 
 export const VotingPowersRequestSchema = z.object({
-  limit: z.coerce
-    .number()
-    .int()
-    .min(1, "Limit must be a positive integer")
-    .max(100, "Limit cannot exceed 100")
-    .optional()
-    .default(20),
-  skip: z.coerce
-    .number()
-    .int()
-    .min(0, "Skip must be a non-negative integer")
-    .optional()
-    .default(0),
-  orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
+  limit: LimitStandardRequestParam,
+  skip: OffsetStandardRequestParam,
+  orderDirection: OrderDirectionStandardRequestParam,
   orderBy: z
     .enum(["votingPower", "delegationsCount"])
     .optional()
     .default("votingPower"),
-  addresses: z
-    .union([
-      z
-        .string()
-        .refine(isAddress, "Invalid address")
-        .transform((addr) => [addr]),
-      z.array(z.string().refine(isAddress, "Invalid addresses")),
-    ])
-    .optional()
-    .transform((val) => val ?? []),
+  addresses: AddressSetStandardRequestParam.optional().transform(
+    (val) => val ?? [],
+  ),
   fromValue: z
     .string()
     .transform((val) => BigInt(val))
@@ -158,10 +116,7 @@ export const VotingPowerVariationResponseMapper = (
   previousVotingPower: delta.previousVotingPower?.toString(),
   currentVotingPower: delta.currentVotingPower.toString(),
   absoluteChange: delta.absoluteChange.toString(),
-  percentageChange:
-    delta.percentageChange === "Infinity"
-      ? PERCENTAGE_NO_BASELINE
-      : delta.percentageChange,
+  percentageChange: delta.percentageChange,
 });
 
 export const VotingPowerVariationsResponseMapper = (

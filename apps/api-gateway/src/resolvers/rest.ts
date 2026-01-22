@@ -32,10 +32,11 @@ const daoItemQueries = [
   "proposals",
   "proposalsActivity",
   "token",
+  "tokenMetrics",
   "transactions",
   "transfers",
   "votingPowerByAccountId",
-  "topVotingPowerVariations",
+  "votingPowerVariations",
   "votingPowerVariationsByAccountId",
   "votingPowers",
 ];

@@ -1,10 +1,10 @@
 import { ReactNode } from "react";
 import { ALL_DAOS, DaoIdEnum } from "@/shared/types/daos";
 import NotFound from "@/app/not-found";
-import { BaseHeaderLayoutSidebar } from "@/shared/components/";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
 import { HeaderDAOSidebar, HeaderSidebar, StickyPageHeader } from "@/widgets";
 import { Footer } from "@/shared/components/design-system/footer/Footer";
+// import { BaseHeaderLayoutSidebar } from "@/shared/components";
 
 type DaoParams = {
   daoId: string;
@@ -26,17 +26,21 @@ export default async function DaoLayout({ children, params }: DaoLayoutProps) {
 
   // For FULL, IN_ANALYSIS and ELECTION stages, render the layout with appropriate providers
   return (
-    <div className="bg-surface-background dark flex h-screen overflow-hidden">
-      <BaseHeaderLayoutSidebar>
-        <HeaderSidebar />
-        <HeaderDAOSidebar />
-      </BaseHeaderLayoutSidebar>
-      <main className="relative flex-1 overflow-auto lg:ml-[330px]">
-        <div className="md:hidden">
-          <StickyPageHeader />
-          <HeaderMobile />
+    <div className="bg-surface-background dark relative mx-auto flex h-screen max-w-screen-2xl">
+      <div className="active relative hidden h-screen lg:flex">
+        <div className="h-full w-[68px] shrink-0 overflow-y-auto">
+          <HeaderSidebar />
         </div>
-        <div className="flex min-h-screen w-full flex-col items-center">
+        <div className="h-full shrink-0">
+          <HeaderDAOSidebar />
+        </div>
+      </div>
+      <main className="h-screen flex-1 overflow-auto">
+        <div className="lg:hidden">
+          <HeaderMobile />
+          <StickyPageHeader />
+        </div>
+        <div className="flex w-full flex-col items-center overflow-y-scroll lg:h-screen">
           <div className="w-full flex-1">{children}</div>
           <Footer />
         </div>

@@ -17,12 +17,9 @@ type Query {
   votingPowerHistorys(where: votingPowerHistoryFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votingPowerHistoryPage!
   balanceHistory(transactionHash: String!, accountId: String!, logIndex: Float!): balanceHistory
   balanceHistorys(where: balanceHistoryFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): balanceHistoryPage!
-  delegation(transactionHash: String!, delegatorAccountId: String!, delegateAccountId: String!): delegation
   delegations(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): delegationPage!
   votesOnchain(voterAccountId: String!, proposalId: String!): votesOnchain
   votesOnchains(where: votesOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votesOnchainPage!
-  daoMetricsDayBucket(date: BigInt!, tokenId: String!, metricType: String!): daoMetricsDayBucket
-  daoMetricsDayBuckets(where: daoMetricsDayBucketFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): daoMetricsDayBucketPage!
   _meta: Meta
 
   """
@@ -168,6 +165,12 @@ type Query {
 
   """Returns current governance parameters for this DAO"""
   dao: dao_200_response
+
+  """
+  Returns token related metrics for a single metric type.
+          Available types: TOTAL_SUPPLY, DELEGATED_SUPPLY, CEX_SUPPLY, DEX_SUPPLY, LENDING_SUPPLY, CIRCULATING_SUPPLY, TREASURY
+  """
+  tokenMetrics(metricType: queryInput_tokenMetrics_metricType!, startDate: Float, endDate: Float, orderDirection: queryInput_tokenMetrics_orderDirection = asc, limit: NonNegativeInt = 365, skip: NonNegativeInt): tokenMetrics_200_response
 
   """
   Average delegation percentage across all supported DAOs by day.
@@ -2247,6 +2250,38 @@ type dao_200_response {
   votingDelay: String!
   votingPeriod: String!
   timelockDelay: String!
+}
+
+type tokenMetrics_200_response {
+  items: [query_tokenMetrics_items_items]!
+  pageInfo: query_tokenMetrics_pageInfo!
+}
+
+type query_tokenMetrics_items_items {
+  date: String!
+  high: String!
+  volume: String!
+}
+
+type query_tokenMetrics_pageInfo {
+  hasNextPage: Boolean!
+  startDate: String
+  endDate: String
+}
+
+enum queryInput_tokenMetrics_metricType {
+  TOTAL_SUPPLY
+  DELEGATED_SUPPLY
+  CEX_SUPPLY
+  DEX_SUPPLY
+  LENDING_SUPPLY
+  CIRCULATING_SUPPLY
+  TREASURY
+}
+
+enum queryInput_tokenMetrics_orderDirection {
+  asc
+  desc
 }
 
 scalar ObjMap

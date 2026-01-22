@@ -34,7 +34,7 @@ export const DaoOverviewHeader = ({
   const chainName = daoOverview.chain.name;
 
   return (
-    <div className="md:bg-border-default flex flex-col gap-3 pb-4 pt-2.5 md:flex-row md:items-center md:justify-between md:px-4 md:py-2.5">
+    <div className="lg:bg-border-default flex flex-col gap-3 pb-4 pt-2.5 lg:flex-row lg:items-center lg:justify-between lg:px-4 lg:py-2.5">
       <div className="flex items-center gap-3">
         <h3 className="text-primary font-mono text-lg font-medium uppercase leading-6">
           {daoConfig.name}

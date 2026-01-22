@@ -19,7 +19,7 @@ export const SubsectionTitle = ({
   return (
     <div
       className={cn("flex h-full w-full flex-col justify-between gap-2", {
-        "sm:flex-row": switcherComponent,
+        "lg:flex-row": switcherComponent,
       })}
     >
       <div className="flex flex-col items-start">

@@ -36,7 +36,7 @@ export const useHistoricalBalances = (
   });
 
   return {
-    data: data?.accountBalanceVariations as HistoricalBalance[] | null,
+    data: data?.accountBalanceVariations?.items as HistoricalBalance[] | null,
     loading,
     error: error || null,
     refetch: () => refetch(),

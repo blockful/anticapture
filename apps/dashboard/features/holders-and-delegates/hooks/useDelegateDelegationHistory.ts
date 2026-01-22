@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState, useEffect } from "react";
-import { ApolloError, NetworkStatus } from "@apollo/client";
+import { ApolloError } from "@apollo/client";
 import { formatUnits } from "viem";
 
 import { useHistoricalVotingPowerByAccountQuery } from "@anticapture/graphql-client/hooks";
@@ -47,10 +47,9 @@ export interface UseDelegateDelegationHistoryResult {
   delegationHistory: DelegationHistoryItem[];
   loading: boolean;
   error: ApolloError | undefined;
-  paginationInfo: PaginationInfo;
   fetchNextPage: () => Promise<void>;
-  fetchPreviousPage: () => Promise<void>;
-  fetchingMore: boolean;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
 }
 
 export type AmountFilterVariables = Pick<
@@ -146,7 +145,7 @@ export function useDelegateDelegationHistory({
     fetchPolicy: "cache-and-network" as const,
   };
 
-  const { data, error, fetchMore, networkStatus } =
+  const { data, error, loading, fetchMore } =
     useHistoricalVotingPowerByAccountQuery({
       variables: queryVariables,
       ...queryOptions,
@@ -207,119 +206,67 @@ export function useDelegateDelegationHistory({
       });
   }, [data, accountId, token]);
 
-  const totalCount = data?.historicalVotingPowerByAccount?.totalCount ?? 0;
-  const currentItemsCount = transformedData.length;
-  const hasNextPage = currentItemsCount < totalCount;
+  const hasNextPage = useMemo(() => {
+    return (
+      currentPage * itemsPerPage <
+      (data?.historicalVotingPowerByAccount?.totalCount || 0)
+    );
+  }, [
+    currentPage,
+    itemsPerPage,
+    data?.historicalVotingPowerByAccount?.totalCount,
+  ]);
 
   // Fetch next page function
   const fetchNextPage = useCallback(async () => {
     if (isPaginationLoading || !hasNextPage) return;
     setIsPaginationLoading(true);
 
+    const nextPage = currentPage + 1;
+    const skip = (nextPage - 1) * itemsPerPage;
+
     try {
       await fetchMore({
         variables: {
           ...queryVariables,
-          skip: currentItemsCount,
+          skip,
         },
         updateQuery: (
           previousResult: HistoricalVotingPowerByAccountQuery,
           { fetchMoreResult },
         ): HistoricalVotingPowerByAccountQuery => {
           if (!fetchMoreResult) return previousResult;
-          const prevItems =
-            previousResult.historicalVotingPowerByAccount?.items ?? [];
-          const newItems =
-            fetchMoreResult.historicalVotingPowerByAccount?.items ?? [];
-          const merged = [
-            ...prevItems,
-            ...newItems.filter(
-              (n) =>
-                !prevItems.some(
-                  (p) => p?.transactionHash === n?.transactionHash,
-                ),
-            ),
-          ];
 
           return {
-            ...fetchMoreResult,
             historicalVotingPowerByAccount: {
               ...fetchMoreResult.historicalVotingPowerByAccount,
-              items: merged,
+              items: [
+                ...(previousResult.historicalVotingPowerByAccount?.items ?? []),
+                ...(fetchMoreResult.historicalVotingPowerByAccount?.items ??
+                  []),
+              ],
               totalCount:
-                fetchMoreResult.historicalVotingPowerByAccount?.totalCount ?? 0,
+                fetchMoreResult?.historicalVotingPowerByAccount?.totalCount ??
+                0,
             },
           };
         },
       });
 
-      setCurrentPage((prev) => prev + 1);
+      setCurrentPage(nextPage);
     } catch (error) {
       console.error("Error fetching next page:", error);
     } finally {
       setIsPaginationLoading(false);
     }
-  }, [
-    fetchMore,
-    isPaginationLoading,
-    queryVariables,
-    currentItemsCount,
-    hasNextPage,
-  ]);
-
-  // Fetch previous page function
-  const fetchPreviousPage = useCallback(async () => {
-    if (isPaginationLoading) return;
-    setIsPaginationLoading(true);
-
-    try {
-      await fetchMore({
-        variables: {
-          ...queryVariables,
-          skip: (currentPage - 2) * itemsPerPage,
-        },
-        updateQuery: (_, { fetchMoreResult }) => fetchMoreResult,
-      });
-
-      setCurrentPage((prev) => prev - 1);
-    } catch (error) {
-      console.error("Error fetching previous page:", error);
-    } finally {
-      setIsPaginationLoading(false);
-    }
-  }, [
-    fetchMore,
-    isPaginationLoading,
-    queryVariables,
-    currentPage,
-    itemsPerPage,
-  ]);
-
-  const isLoading = useMemo(() => {
-    return (
-      networkStatus === NetworkStatus.loading ||
-      networkStatus === NetworkStatus.setVariables ||
-      networkStatus === NetworkStatus.refetch
-    );
-  }, [networkStatus]);
+  }, [currentPage, itemsPerPage, hasNextPage, isPaginationLoading, fetchMore]);
 
   return {
     delegationHistory: transformedData,
-    loading: isLoading,
-    paginationInfo: {
-      currentPage,
-      totalPages: Math.ceil(
-        (data?.historicalVotingPowerByAccount?.totalCount || 0) / itemsPerPage,
-      ),
-      hasNextPage:
-        currentPage * itemsPerPage <
-        (data?.historicalVotingPowerByAccount?.totalCount || 0),
-      hasPreviousPage: currentPage > 1,
-    },
+    loading,
     error,
     fetchNextPage,
-    fetchPreviousPage,
-    fetchingMore:
-      networkStatus === NetworkStatus.fetchMore || isPaginationLoading,
+    hasNextPage,
+    hasPreviousPage: currentPage > 1,
   };
 }

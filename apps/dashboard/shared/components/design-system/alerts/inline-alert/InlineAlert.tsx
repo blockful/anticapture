@@ -34,7 +34,7 @@ export const InlineAlert = ({ text, variant = "info" }: InlineAlertProps) => {
           mapVariantToIcon[variant].bgColor,
         )}
       >
-        <div className="mt-0.5 sm:mt-0">{mapVariantToIcon[variant].icon}</div>
+        <div className="mt-0.5 lg:mt-0">{mapVariantToIcon[variant].icon}</div>
         <p className="text-secondary text-sm font-normal">{text}</p>
       </CardDescription>
     </div>

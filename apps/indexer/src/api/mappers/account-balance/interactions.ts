@@ -1,28 +1,37 @@
 import { z } from "@hono/zod-openapi";
 import { isAddress } from "viem";
-import { PeriodResponseSchema, TimestampResponseMapper } from "../shared";
 import {
-  AccountBalanceVariationsRequestQuerySchema,
-  DBAccountBalanceVariation,
-} from "./variations";
+  FromDateStandardRequestParam,
+  LimitStandardRequestParam,
+  OffsetStandardRequestParam,
+  OrderDirectionStandardRequestParam,
+  PeriodResponseSchema,
+  TimestampResponseMapper,
+  ToDateStandardRequestParam,
+} from "../shared";
+import { DBAccountBalanceVariation } from "./variations";
 
 export const AccountInteractionsParamsSchema = z.object({
   address: z.string().refine(isAddress, "Invalid address"),
 });
 
-export const AccountInteractionsQuerySchema =
-  AccountBalanceVariationsRequestQuerySchema.extend({
-    minAmount: z
-      .string()
-      .transform((val) => BigInt(val))
-      .optional(),
-    maxAmount: z
-      .string()
-      .transform((val) => BigInt(val))
-      .optional(),
-    orderBy: z.enum(["volume", "count"]).optional().default("count"),
-    filterAddress: z.string().refine(isAddress, "Invalid address").optional(),
-  });
+export const AccountInteractionsQuerySchema = z.object({
+  fromDate: FromDateStandardRequestParam,
+  toDate: ToDateStandardRequestParam,
+  limit: LimitStandardRequestParam,
+  skip: OffsetStandardRequestParam,
+  orderDirection: OrderDirectionStandardRequestParam,
+  minAmount: z
+    .string()
+    .transform((val) => BigInt(val))
+    .optional(),
+  maxAmount: z
+    .string()
+    .transform((val) => BigInt(val))
+    .optional(),
+  orderBy: z.enum(["volume", "count"]).optional().default("count"),
+  filterAddress: z.string().refine(isAddress, "Invalid address").optional(),
+});
 
 export const AccountInteractionResponseSchema = z.object({
   accountId: z.string(),
