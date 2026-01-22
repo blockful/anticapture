@@ -9,11 +9,26 @@ import {
   QueryInput_HistoricalBalances_OrderDirection,
 } from "@anticapture/graphql-client";
 
+export interface BalanceHistoryGraphItem {
+  timestamp: number;
+  balance: number;
+  from: string | null;
+  to: string | null;
+  amount: number;
+  transactionHash: string;
+  direction: string;
+  logIndex: number;
+}
+
 export function useBalanceHistoryGraph(
   accountId: string,
   daoId: DaoIdEnum,
   fromDate?: number,
-) {
+): {
+  balanceHistory: BalanceHistoryGraphItem[];
+  loading: boolean;
+  error: boolean;
+} {
   const { decimals } = daoConfig[daoId];
 
   const { data, loading, error } = useBalanceHistoryGraphQuery({
@@ -28,7 +43,6 @@ export function useBalanceHistoryGraph(
         "anticapture-dao-id": daoId,
       },
     },
-    fetchPolicy: "cache-and-network",
   });
 
   const balanceHistory = useMemo(() => {
@@ -51,6 +65,6 @@ export function useBalanceHistoryGraph(
   return {
     balanceHistory,
     loading,
-    error,
+    error: !!error,
   };
 }

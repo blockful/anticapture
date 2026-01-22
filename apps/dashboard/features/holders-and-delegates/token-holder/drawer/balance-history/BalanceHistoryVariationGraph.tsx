@@ -92,7 +92,11 @@ export const BalanceHistoryVariationGraph = ({
     // For "all", treat as all time by not setting limits
     if (selectedPeriod === "all") return undefined;
 
-    const nowInSeconds = Date.now() / 1000;
+    // Use start of today for a stable reference that won't change on each render
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayInSeconds = today.getTime() / 1000;
+
     let daysInSeconds: number;
     switch (selectedPeriod) {
       case "90d":
@@ -103,7 +107,7 @@ export const BalanceHistoryVariationGraph = ({
         break;
     }
 
-    return Math.floor(nowInSeconds - daysInSeconds);
+    return Math.floor(todayInSeconds - daysInSeconds);
   }, [selectedPeriod]);
 
   const { balanceHistory, loading, error } = useBalanceHistoryGraph(
