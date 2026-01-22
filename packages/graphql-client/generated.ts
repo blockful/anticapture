@@ -459,7 +459,6 @@ export type QueryAccountBalancesArgs = {
 
 export type QueryAccountInteractionsArgs = {
   address: Scalars['String']['input'];
-  addresses?: InputMaybe<Scalars['JSON']['input']>;
   filterAddress?: InputMaybe<Scalars['String']['input']>;
   fromDate?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
@@ -2142,7 +2141,7 @@ export type Query_HistoricalBalances_Items_Items = {
   logIndex: Scalars['Float']['output'];
   timestamp: Scalars['String']['output'];
   transactionHash: Scalars['String']['output'];
-  transfer: Query_HistoricalBalances_Items_Items_Transfer;
+  transfer?: Maybe<Query_HistoricalBalances_Items_Items_Transfer>;
 };
 
 export type Query_HistoricalBalances_Items_Items_Transfer = {
@@ -2997,7 +2996,7 @@ export type BalanceHistoryGraphQueryVariables = Exact<{
 }>;
 
 
-export type BalanceHistoryGraphQuery = { __typename?: 'Query', historicalBalances?: { __typename?: 'historicalBalances_200_response', items: Array<{ __typename?: 'query_historicalBalances_items_items', balance: string, logIndex: number, timestamp: string, transactionHash: string, transfer: { __typename?: 'query_historicalBalances_items_items_transfer', from: string, to: string, value: string } } | null> } | null };
+export type BalanceHistoryGraphQuery = { __typename?: 'Query', historicalBalances?: { __typename?: 'historicalBalances_200_response', items: Array<{ __typename?: 'query_historicalBalances_items_items', balance: string, logIndex: number, timestamp: string, transactionHash: string, transfer?: { __typename?: 'query_historicalBalances_items_items_transfer', from: string, to: string, value: string } | null } | null> } | null };
 
 export type AccountBalanceVariationsQueryVariables = Exact<{
   fromDate: Scalars['String']['input'];
