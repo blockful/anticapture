@@ -9,28 +9,11 @@ import {
   QueryInput_HistoricalBalances_OrderDirection,
 } from "@anticapture/graphql-client";
 
-export interface BalanceHistoryGraphItem {
-  timestamp: number;
-  balance: number;
-  from: string | null;
-  to: string | null;
-  transactionHash: string;
-  direction: "in" | "out";
-  logIndex: number;
-}
-
-// Interface for the hook result
-export interface UseBalanceHistoryGraphResult {
-  balanceHistory: BalanceHistoryGraphItem[];
-  loading: boolean;
-  error: unknown;
-}
-
 export function useBalanceHistoryGraph(
   accountId: string,
   daoId: DaoIdEnum,
   fromDate?: number,
-): UseBalanceHistoryGraphResult {
+) {
   const { decimals } = daoConfig[daoId];
 
   const { data, loading, error } = useBalanceHistoryGraphQuery({
@@ -38,7 +21,7 @@ export function useBalanceHistoryGraph(
       address: accountId,
       fromDate: fromDate?.toString(),
       orderBy: QueryInput_HistoricalBalances_OrderBy.Timestamp,
-      orderDirection: QueryInput_HistoricalBalances_OrderDirection.Asc,
+      orderDirection: QueryInput_HistoricalBalances_OrderDirection.Desc,
     },
     context: {
       headers: {
@@ -48,19 +31,21 @@ export function useBalanceHistoryGraph(
     fetchPolicy: "cache-and-network",
   });
 
-  const balanceHistory = useMemo((): BalanceHistoryGraphItem[] => {
+  const balanceHistory = useMemo(() => {
     if (!data?.historicalBalances?.items) return [];
 
     return data.historicalBalances.items
       .filter((item) => !!item)
       .map((item) => ({
         ...item,
-        timestamp: new Date(Number(item.timestamp) * 1000).getTime(),
+        timestamp: Number(item.timestamp) * 1000,
         balance: Number(formatUnits(BigInt(item.balance), decimals)),
         direction: item.transfer.from === accountId ? "out" : "in",
         from: item.transfer.from,
         to: item.transfer.to,
-      }));
+        amount: Number(formatUnits(BigInt(item.transfer.value), decimals)),
+      }))
+      .sort((a, b) => a.timestamp - b.timestamp);
   }, [data, accountId, decimals]);
 
   return {

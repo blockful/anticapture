@@ -174,16 +174,14 @@ export const BalanceHistoryVariationGraph = ({
         ? fromDate * 1000
         : // 1 day in milliseconds to avoid hover conflict when max data is selected
           balanceHistory[0]?.timestamp - 86400000,
-      amount: 0, // TODO set the balance at the start of the period
+      balance: balanceHistory[0]?.balance - balanceHistory[0]?.amount,
     },
     ...balanceHistory,
     {
       timestamp: Date.now(),
-      amount: balanceHistory[balanceHistory.length - 1]?.balance,
+      balance: balanceHistory[balanceHistory.length - 1]?.balance,
     },
   ];
-
-  console.log({ extendedChartData });
 
   // Custom dot component to show each transfer/delegation point
   const CustomDot = (props: CustomDotProps) => {
@@ -314,7 +312,7 @@ export const BalanceHistoryVariationGraph = ({
             />
             <Line
               type="stepAfter"
-              dataKey="amount"
+              dataKey="balance"
               stroke="var(--base-primary)"
               strokeWidth={1}
               dot={CustomDot}
