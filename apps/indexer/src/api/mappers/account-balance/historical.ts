@@ -52,11 +52,13 @@ export const HistoricalBalanceResponseSchema = z.object({
   delta: z.string(),
   timestamp: z.string(),
   logIndex: z.number(),
-  transfer: z.object({
-    value: z.string(),
-    from: z.string(),
-    to: z.string(),
-  }),
+  transfer: z
+    .object({
+      value: z.string(),
+      from: z.string(),
+      to: z.string(),
+    })
+    .nullable(),
 });
 
 export const HistoricalBalancesResponseSchema = z.object({
@@ -84,9 +86,9 @@ export const HistoricalBalanceResponseMapper = (
     timestamp: value.timestamp.toString(),
     logIndex: value.logIndex,
     transfer: {
-      value: value.transfer.amount.toString(),
-      from: value.transfer.fromAccountId,
-      to: value.transfer.toAccountId,
+      value: value.transfer?.amount?.toString(),
+      from: value.transfer?.fromAccountId,
+      to: value.transfer?.toAccountId,
     },
   };
 };

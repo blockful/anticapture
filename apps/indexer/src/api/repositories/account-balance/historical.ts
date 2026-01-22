@@ -20,15 +20,9 @@ export class HistoricalBalanceRepository {
     const result = await db
       .select()
       .from(balanceHistory)
-      .innerJoin(
+      .leftJoin(
         transfer,
-        sql`${balanceHistory.transactionHash} = ${transfer.transactionHash} 
-          AND ${transfer.logIndex} = (
-            SELECT MAX(${transfer.logIndex}) 
-            FROM ${transfer}
-            WHERE ${transfer.transactionHash} = ${balanceHistory.transactionHash} 
-            AND ${transfer.logIndex} < ${balanceHistory.logIndex}
-        )`,
+        sql`${balanceHistory.transactionHash} = ${transfer.transactionHash} AND ${balanceHistory.logIndex} = ${transfer.logIndex}`,
       )
       .where(
         and(
