@@ -7,30 +7,36 @@ import { DBHistoricalVotingPowerWithRelations } from "@/api/mappers";
 
 export class NounsVotingPowerRepository {
   async getHistoricalVotingPowerCount(
-    accountId: Address,
+    accountId?: Address,
     minDelta?: string,
     maxDelta?: string,
+    fromDate?: number,
+    toDate?: number,
   ): Promise<number> {
     return await db.$count(
       votingPowerHistory,
       and(
-        eq(votingPowerHistory.accountId, accountId),
+        accountId ? eq(votingPowerHistory.accountId, accountId) : undefined,
         minDelta
           ? gte(votingPowerHistory.deltaMod, BigInt(minDelta))
           : undefined,
         maxDelta
           ? lte(votingPowerHistory.deltaMod, BigInt(maxDelta))
           : undefined,
+        fromDate
+          ? gte(votingPowerHistory.timestamp, BigInt(fromDate))
+          : undefined,
+        toDate ? lte(votingPowerHistory.timestamp, BigInt(toDate)) : undefined,
       ),
     );
   }
 
   async getHistoricalVotingPowers(
-    accountId: Address,
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
     orderBy: "timestamp" | "delta",
+    accountId?: Address,
     minDelta?: string,
     maxDelta?: string,
     fromDate?: number,
@@ -41,7 +47,7 @@ export class NounsVotingPowerRepository {
       .from(votingPowerHistory)
       .where(
         and(
-          eq(votingPowerHistory.accountId, accountId),
+          accountId ? eq(votingPowerHistory.accountId, accountId) : undefined,
           minDelta
             ? gte(votingPowerHistory.deltaMod, BigInt(minDelta))
             : undefined,

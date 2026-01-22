@@ -123,3 +123,11 @@ export const HistoricalVotingPowersResponseMapper = (
     totalCount: Number(totalCount),
   };
 };
+
+export const HistoricalVotingPowerGlobalQuerySchema =
+  HistoricalVotingPowerRequestQuerySchema.extend({
+    accountId: z
+      .string()
+      .refine((addr) => isAddress(addr))
+      .optional(),
+  });
