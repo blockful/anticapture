@@ -79,9 +79,9 @@ export const HistoricalBalanceResponseMapper = (
     timestamp: value.timestamp.toString(),
     logIndex: value.logIndex,
     transfer: {
-      value: value.transfer?.amount?.toString(),
-      from: value.transfer?.fromAccountId,
-      to: value.transfer?.toAccountId,
+      value: value.transfer.amount.toString(),
+      from: value.transfer.fromAccountId,
+      to: value.transfer.toAccountId,
     },
   };
 };

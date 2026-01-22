@@ -17,7 +17,7 @@ export type PeriodResponse = z.infer<typeof PeriodResponseSchema>;
 export const TimestampResponseMapper = (timestamp: number): string =>
   new Date(timestamp * 1000).toISOString();
 
-// TODO: Comprehensive refactor to eliminate repetitions througout codebase
+// TODO: Comprehensive refactor to eliminate repetitions throughout codebase
 export const FromDateStandardRequestParam = z
   .string()
   .optional()

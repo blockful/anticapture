@@ -75,50 +75,17 @@ export type PageInfo = {
 export type Query = {
   __typename?: 'Query';
   _meta?: Maybe<Meta>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/accounts/{args.address}/balances`
-   * Returns account balance information for a specific address
-   *
-   */
+  /** Returns account balance information for a specific address */
   accountBalanceByAccountId?: Maybe<AccountBalanceByAccountId_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/balances/variations`
-   * Returns a mapping of the biggest variations to account balances associated by account address
-   *
-   */
+  /** Returns a mapping of the biggest variations to account balances associated by account address */
   accountBalanceVariations?: Maybe<AccountBalanceVariations_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/balances/{args.address}/variations`
-   * Returns a the changes to voting power by period and accountId
-   *
-   */
+  /** Returns a the changes to voting power by period and accountId */
   accountBalanceVariationsByAccountId?: Maybe<AccountBalanceVariationsByAccountId_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/balances`
-   * Returns sorted and paginated account balance records
-   *
-   */
+  /** Returns sorted and paginated account balance records */
   accountBalances?: Maybe<AccountBalances_200_Response>;
   /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/balances/{args.address}/interactions`
    * Returns a mapping of the largest interactions between accounts.
    * Positive amounts signify net token transfers FROM <address>, whilst negative amounts refer to net transfers TO <address>
-   *
    */
   accountInteractions?: Maybe<AccountInteractions_200_Response>;
   /**
@@ -129,294 +96,77 @@ export type Query = {
   averageDelegationPercentageByDay: AverageDelegationPercentagePage;
   balanceHistory?: Maybe<BalanceHistory>;
   balanceHistorys: BalanceHistoryPage;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/active-supply/compare`
-   * Get active token supply for DAO
-   *
-   */
+  /** Get active token supply for DAO */
   compareActiveSupply?: Maybe<CompareActiveSupply_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/average-turnout/compare`
-   * Compare average turnout between time periods
-   *
-   */
+  /** Compare average turnout between time periods */
   compareAverageTurnout?: Maybe<CompareAverageTurnout_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/cex-supply/compare`
-   * Compare cex supply between periods
-   *
-   */
+  /** Compare cex supply between periods */
   compareCexSupply?: Maybe<CompareCexSupply_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/circulating-supply/compare`
-   * Compare circulating supply between periods
-   *
-   */
+  /** Compare circulating supply between periods */
   compareCirculatingSupply?: Maybe<CompareCirculatingSupply_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/delegated-supply/compare`
-   * Compare delegated supply between periods
-   *
-   */
+  /** Compare delegated supply between periods */
   compareDelegatedSupply?: Maybe<CompareDelegatedSupply_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/dex-supply/compare`
-   * Compare dex supply between periods
-   *
-   */
+  /** Compare dex supply between periods */
   compareDexSupply?: Maybe<CompareDexSupply_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/lending-supply/compare`
-   * Compare lending supply between periods
-   *
-   */
+  /** Compare lending supply between periods */
   compareLendingSupply?: Maybe<CompareLendingSupply_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/proposals/compare`
-   * Compare number of proposals between time periods
-   *
-   */
+  /** Compare number of proposals between time periods */
   compareProposals?: Maybe<CompareProposals_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/total-supply/compare`
-   * Compare total supply between periods
-   *
-   */
+  /** Compare total supply between periods */
   compareTotalSupply?: Maybe<CompareTotalSupply_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/treasury/compare`
-   * Compare treasury between periods
-   *
-   */
+  /** Compare treasury between periods */
   compareTreasury?: Maybe<CompareTreasury_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/votes/compare`
-   * Compare number of votes between time periods
-   *
-   */
+  /** Compare number of votes between time periods */
   compareVotes?: Maybe<CompareVotes_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/dao`
-   * Returns current governance parameters for this DAO
-   *
-   */
+  /** Returns current governance parameters for this DAO */
   dao?: Maybe<Dao_200_Response>;
   daoMetricsDayBucket?: Maybe<DaoMetricsDayBucket>;
   daoMetricsDayBuckets: DaoMetricsDayBucketPage;
   /** Get all DAOs */
   daos: DaoList;
   delegation?: Maybe<Delegation>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/delegation-percentage`
-   * Get delegation percentage day buckets with forward-fill
-   *
-   */
+  /** Get delegation percentage day buckets with forward-fill */
   delegationPercentageByDay?: Maybe<DelegationPercentageByDay_200_Response>;
   delegations: DelegationPage;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/treasury/dao-token`
-   * Get historical DAO Token Treasury value (governance token quantity × token price)
-   *
-   */
+  /** Get historical DAO Token Treasury value (governance token quantity × token price) */
   getDaoTokenTreasury?: Maybe<GetDaoTokenTreasury_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/treasury/liquid`
-   * Get historical Liquid Treasury (treasury without DAO tokens) from external providers (DefiLlama/Dune)
-   *
-   */
+  /** Get historical Liquid Treasury (treasury without DAO tokens) from external providers (DefiLlama/Dune) */
   getLiquidTreasury?: Maybe<GetLiquidTreasury_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/treasury/total`
-   * Get historical Total Treasury (liquid treasury + DAO token treasury)
-   *
-   */
+  /** Get historical Total Treasury (liquid treasury + DAO token treasury) */
   getTotalTreasury?: Maybe<GetTotalTreasury_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/accounts/{args.address}/balances/historical`
-   * TODO
-   *
-   */
+  /** TODO */
   historicalBalances?: Maybe<HistoricalBalances_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/token/historical-data`
-   * Get historical market data for a specific token
-   *
-   */
+  /** Get historical market data for a specific token */
   historicalTokenData?: Maybe<Array<Maybe<Query_HistoricalTokenData_Items>>>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/accounts/{args.address}/voting-powers/historical`
-   * Returns a list of voting power changes
-   *
-   */
+  /** Returns a list of voting power changes */
   historicalVotingPowers?: Maybe<HistoricalVotingPowers_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/last-update`
-   * Get the last update time
-   *
-   */
+  /** Get the last update time */
   lastUpdate?: Maybe<LastUpdate_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/proposals/{args.id}`
-   * Returns a single proposal by its ID
-   *
-   */
+  /** Returns a single proposal by its ID */
   proposal?: Maybe<Proposal_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/proposals/{args.id}/non-voters`
-   * Returns the active delegates that did not vote on a given proposal
-   *
-   */
+  /** Returns the active delegates that did not vote on a given proposal */
   proposalNonVoters?: Maybe<ProposalNonVoters_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/proposals`
-   * Returns a list of proposal
-   *
-   */
+  /** Returns a list of proposal */
   proposals?: Maybe<Proposals_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/proposals-activity`
-   * Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window
-   *
-   */
+  /** Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window */
   proposalsActivity?: Maybe<ProposalsActivity_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/token`
-   * Get property data for a specific token
-   *
-   */
+  /** Get property data for a specific token */
   token?: Maybe<Token_200_Response>;
   tokens: TokenPage;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/transactions`
-   * Get transactions with their associated transfers and delegations, with optional filtering and sorting
-   *
-   */
+  /** Get transactions with their associated transfers and delegations, with optional filtering and sorting */
   transactions?: Maybe<Transactions_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/accounts/{args.address}/transfers`
-   * Get transfers of a given address
-   *
-   */
+  /** Get transfers of a given address */
   transfers?: Maybe<Transfers_200_Response>;
   votesOnchain?: Maybe<VotesOnchain>;
   votesOnchains: VotesOnchainPage;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/voting-powers/{args.accountId}`
-   * Returns voting power information for a specific address (account)
-   *
-   */
+  /** Returns voting power information for a specific address (account) */
   votingPowerByAccountId?: Maybe<VotingPowerByAccountId_200_Response>;
   votingPowerHistorys: VotingPowerHistoryPage;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/accounts/voting-powers/variations`
-   * Returns a mapping of the voting power changes within a time frame for the given addresses
-   *
-   */
+  /** Returns a mapping of the voting power changes within a time frame for the given addresses */
   votingPowerVariations?: Maybe<VotingPowerVariations_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/accounts/{args.address}/voting-powers/variations`
-   * Returns a the changes to voting power by period and accountId
-   *
-   */
+  /** Returns a the changes to voting power by period and accountId */
   votingPowerVariationsByAccountId?: Maybe<VotingPowerVariationsByAccountId_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/voting-powers`
-   * Returns sorted and paginated account voting power records
-   *
-   */
+  /** Returns sorted and paginated account voting power records */
   votingPowers?: Maybe<VotingPowers_200_Response>;
 };
 
