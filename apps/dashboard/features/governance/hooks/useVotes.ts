@@ -2,19 +2,19 @@ import { useMemo, useState, useCallback, useEffect } from "react";
 import { ApolloError } from "@apollo/client";
 import { DaoIdEnum } from "@/shared/types/daos";
 import {
-  GetProposalVotesQuery,
-  useGetProposalVotesQuery,
+  GetVotesQuery,
+  useGetVotesQuery,
   useGetVotingPowerChangeLazyQuery,
 } from "@anticapture/graphql-client/hooks";
 import {
   QueryInput_HistoricalVotingPower_Days,
-  QueryInput_ProposalVotes_OrderBy,
-  QueryInput_ProposalVotes_OrderDirection,
+  QueryInput_Votes_OrderBy,
+  QueryInput_Votes_OrderDirection,
 } from "@anticapture/graphql-client";
 
 // Enhanced vote type with historical voting power
 export type VoteWithHistoricalPower = NonNullable<
-  NonNullable<GetProposalVotesQuery["proposalVotes"]>["items"][number]
+  NonNullable<GetVotesQuery["votes"]>["items"][number]
 > & {
   historicalVotingPower?: string;
   isSubRow?: boolean;
@@ -58,13 +58,13 @@ export const useVotes = ({
       proposalId: proposalId!,
       limit,
       skip: 0, // Always fetch from beginning, we'll handle append in fetchMore
-      orderBy: orderBy as QueryInput_ProposalVotes_OrderBy,
-      orderDirection: orderDirection as QueryInput_ProposalVotes_OrderDirection,
+      orderBy: orderBy as QueryInput_Votes_OrderBy,
+      orderDirection: orderDirection as QueryInput_Votes_OrderDirection,
     };
   }, [proposalId, limit, orderBy, orderDirection]);
 
   // Main votes query
-  const { data, loading, error, fetchMore } = useGetProposalVotesQuery({
+  const { data, loading, error, fetchMore } = useGetVotesQuery({
     variables: queryVariables,
     context: {
       headers: {
@@ -149,22 +149,21 @@ export const useVotes = ({
 
   // Initialize allVotes on first load or when data changes after reset
   useEffect(() => {
-    if (data?.proposalVotes?.items && allVotes.length === 0) {
-      const initialVotes = data.proposalVotes
-        .items as VoteWithHistoricalPower[];
+    if (data?.votes?.items && allVotes.length === 0) {
+      const initialVotes = data.votes.items as VoteWithHistoricalPower[];
       setAllVotes(initialVotes);
       // Fetch voting power for initial votes
       fetchVotingPowerForVotes(initialVotes);
     }
-  }, [data?.proposalVotes?.items, allVotes.length, fetchVotingPowerForVotes]);
+  }, [data?.votes?.items, allVotes.length, fetchVotingPowerForVotes]);
 
   // Use accumulated votes for infinite scroll
   const votes = allVotes;
 
   // Extract total count
   const totalCount = useMemo(() => {
-    return data?.proposalVotes?.totalCount || 0;
-  }, [data?.proposalVotes?.totalCount]);
+    return data?.votes?.totalCount || 0;
+  }, [data?.votes?.totalCount]);
 
   // Calculate if there are more pages
   const hasNextPage = useMemo(() => {
@@ -185,10 +184,10 @@ export const useVotes = ({
           skip: allVotes.length, // Skip already loaded votes
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
-          if (!fetchMoreResult?.proposalVotes?.items) return previousResult;
+          if (!fetchMoreResult?.votes?.items) return previousResult;
 
           // Append new votes to existing ones in the GraphQL cache
-          const newVotes = fetchMoreResult.proposalVotes
+          const newVotes = fetchMoreResult.votes
             .items as VoteWithHistoricalPower[];
           setAllVotes((prev) => [...prev, ...newVotes]);
 
@@ -197,13 +196,10 @@ export const useVotes = ({
 
           // Return the merged result for the cache
           return {
-            proposalVotes: {
-              ...fetchMoreResult.proposalVotes,
-              items: [
-                ...(previousResult.proposalVotes?.items || []),
-                ...newVotes,
-              ],
-              totalCount: fetchMoreResult.proposalVotes.totalCount || 0,
+            votes: {
+              ...fetchMoreResult.votes,
+              items: [...(previousResult.votes?.items || []), ...newVotes],
+              totalCount: fetchMoreResult.votes.totalCount || 0,
             },
           };
         },

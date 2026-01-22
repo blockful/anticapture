@@ -36,19 +36,19 @@ interface ProposalsRepository {
     voters: Address[],
     comparisonTimestamp: number,
   ): Promise<Record<Address, bigint>>;
-  getProposalVotes(
+  getVotes(
     proposalId: string,
     skip: number,
     limit: number,
     orderBy: "timestamp" | "votingPower",
     orderDirection: "asc" | "desc",
-    voterAddressIn?: Address[],
-    support?: number,
+    voterAddressIn?: Address[] | Address,
+    support?: string,
   ): Promise<DBVote[]>;
-  getProposalVotesCount(
+  getVotesCount(
     proposalId: string,
-    voterAddressIn?: Address[],
-    support?: number,
+    voterAddressIn?: Address[] | Address,
+    support?: string,
   ): Promise<number>;
 }
 
@@ -195,17 +195,17 @@ export class ProposalsService {
   /**
    * Returns the list of votes for a given proposal
    */
-  async getProposalVotes(
+  async getVotes(
     proposalId: string,
     skip: number = 0,
     limit: number = 10,
     orderBy: "timestamp" | "votingPower" = "timestamp",
     orderDirection: "asc" | "desc" = "desc",
-    voterAddressIn?: Address[],
-    support?: number,
+    voterAddressIn?: Address[] | Address,
+    support?: string,
   ): Promise<VotesResponse> {
     const [votes, totalCount] = await Promise.all([
-      this.proposalsRepo.getProposalVotes(
+      this.proposalsRepo.getVotes(
         proposalId,
         skip,
         limit,
@@ -214,11 +214,7 @@ export class ProposalsService {
         voterAddressIn,
         support,
       ),
-      this.proposalsRepo.getProposalVotesCount(
-        proposalId,
-        voterAddressIn,
-        support,
-      ),
+      this.proposalsRepo.getVotesCount(proposalId, voterAddressIn, support),
     ]);
 
     return {

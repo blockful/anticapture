@@ -168,7 +168,7 @@ export function proposals(
   app.openapi(
     createRoute({
       method: "get",
-      operationId: "proposalVotes",
+      operationId: "votes",
       path: "/proposals/{id}/votes",
       summary: "List of votes for a given proposal",
       description:
@@ -196,7 +196,7 @@ export function proposals(
       const { skip, limit, voterAddressIn, orderBy, orderDirection, support } =
         context.req.valid("query");
 
-      const { totalCount, items } = await service.getProposalVotes(
+      const { totalCount, items } = await service.getVotes(
         id,
         skip,
         limit,

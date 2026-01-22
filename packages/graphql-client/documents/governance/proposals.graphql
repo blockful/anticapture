@@ -56,14 +56,16 @@ query GetProposal($id: String!) {
 }
 
 #  Get proposal votes
-query GetProposalVotes(
+query GetVotes(
   $proposalId: String!
   $limit: PositiveInt
-  $orderBy: queryInput_proposalVotes_orderBy = timestamp
-  $orderDirection: queryInput_proposalVotes_orderDirection = desc
+  $skip: NonNegativeInt
+  $orderBy: queryInput_votes_orderBy = timestamp
+  $orderDirection: queryInput_votes_orderDirection = desc
 ) {
-  proposalVotes(
+  votes(
     limit: $limit
+    skip: $skip
     id: $proposalId
     orderBy: $orderBy
     orderDirection: $orderDirection
@@ -78,13 +80,6 @@ query GetProposalVotes(
       reason
       timestamp
     }
-  }
-}
-
-#  Get proposal votes
-query GetProposalVotesTotalCount($proposalId: String!) {
-  proposalVotes(id: $proposalId) {
-    totalCount
   }
 }
 

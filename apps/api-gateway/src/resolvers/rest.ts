@@ -30,7 +30,7 @@ const daoItemQueries = [
   "proposal",
   "proposalNonVoters",
   "proposals",
-  "proposalVotes",
+  "votes",
   "proposalsActivity",
   "token",
   "transactions",

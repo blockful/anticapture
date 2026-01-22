@@ -308,25 +308,32 @@ export class DrizzleRepository {
     );
   }
 
-  async getProposalVotes(
+  async getVotes(
     proposalId: string,
     skip: number,
     limit: number,
     orderBy: "timestamp" | "votingPower",
     orderDirection: "asc" | "desc",
-    voterAddresses?: Address[],
-    support?: number,
+    voterAddresses?: Address[] | Address,
+    support?: string,
   ): Promise<DBVote[]> {
     const whereClauses: SQL<unknown>[] = [
       eq(votesOnchain.proposalId, proposalId),
     ];
 
     if (support !== undefined) {
-      whereClauses.push(eq(votesOnchain.support, support.toString()));
+      whereClauses.push(eq(votesOnchain.support, support));
     }
 
-    if (voterAddresses !== undefined && voterAddresses.length > 0) {
-      whereClauses.push(inArray(votesOnchain.voterAccountId, voterAddresses));
+    // Normalize voterAddresses to array
+    const addressArray = voterAddresses
+      ? Array.isArray(voterAddresses)
+        ? voterAddresses
+        : [voterAddresses]
+      : undefined;
+
+    if (addressArray !== undefined && addressArray.length > 0) {
+      whereClauses.push(inArray(votesOnchain.voterAccountId, addressArray));
     }
 
     const orderByColumn =
@@ -344,21 +351,28 @@ export class DrizzleRepository {
       .offset(skip);
   }
 
-  async getProposalVotesCount(
+  async getVotesCount(
     proposalId: string,
-    voterAddressIn?: Address[],
-    support?: number,
+    voterAddressIn?: Address[] | Address,
+    support?: string,
   ): Promise<number> {
     const whereClauses: SQL<unknown>[] = [
       eq(votesOnchain.proposalId, proposalId),
     ];
 
     if (support !== undefined) {
-      whereClauses.push(eq(votesOnchain.support, support.toString()));
+      whereClauses.push(eq(votesOnchain.support, support));
     }
 
-    if (voterAddressIn !== undefined && voterAddressIn.length > 0) {
-      whereClauses.push(inArray(votesOnchain.voterAccountId, voterAddressIn));
+    // Normalize voterAddressIn to array
+    const addressArray = voterAddressIn
+      ? Array.isArray(voterAddressIn)
+        ? voterAddressIn
+        : [voterAddressIn]
+      : undefined;
+
+    if (addressArray !== undefined && addressArray.length > 0) {
+      whereClauses.push(inArray(votesOnchain.voterAccountId, addressArray));
     }
 
     return await db.$count(votesOnchain, and(...whereClauses));

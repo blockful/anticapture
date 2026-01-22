@@ -84,7 +84,7 @@ type Query {
   proposalNonVoters(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposalNonVoters_orderDirection = desc, addresses: JSON): proposalNonVoters_200_response
 
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/proposals/{args.id}/votes`\nReturns a paginated list of votes cast on a specific proposal\n"
-  proposalVotes(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, voterAddressIn: JSON, orderBy: queryInput_proposalVotes_orderBy = timestamp, orderDirection: queryInput_proposalVotes_orderDirection = desc, support: Int): proposalVotes_200_response
+  votes(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, voterAddressIn: JSON, orderBy: queryInput_votes_orderBy = timestamp, orderDirection: queryInput_votes_orderDirection = desc, support: Float): votes_200_response
 
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/balances/historical`\nFetch historical token balances for multiple addresses at a specific time period using multicall\n"
   historicalBalances(addresses: JSON!, days: queryInput_historicalBalances_days = _7d): [query_historicalBalances_items]
@@ -1726,12 +1726,12 @@ enum queryInput_proposalNonVoters_orderDirection {
   desc
 }
 
-type proposalVotes_200_response {
-  items: [query_proposalVotes_items_items]!
+type votes_200_response {
+  items: [query_votes_items_items]!
   totalCount: Float!
 }
 
-type query_proposalVotes_items_items {
+type query_votes_items_items {
   voterAddress: String!
   transactionHash: String!
   proposalId: String!
@@ -1741,12 +1741,12 @@ type query_proposalVotes_items_items {
   timestamp: Float!
 }
 
-enum queryInput_proposalVotes_orderBy {
+enum queryInput_votes_orderBy {
   timestamp
   votingPower
 }
 
-enum queryInput_proposalVotes_orderDirection {
+enum queryInput_votes_orderDirection {
   asc
   desc
 }
