@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import {
-  QueryInput_HistoricalVotingPowers_OrderDirection,
+  QueryInput_HistoricalVotingPowerByAccount_OrderDirection,
+  QueryInput_HistoricalVotingPowerByAccount_OrderBy,
   useGetDelegateDelegationHistoryGraphQuery,
 } from "@anticapture/graphql-client/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -8,7 +9,6 @@ import { TimePeriod } from "@/features/holders-and-delegates/components/TimePeri
 import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
 import { formatUnits } from "viem";
 import daoConfig from "@/shared/dao-config";
-import { QueryInput_HistoricalVotingPowers_OrderBy } from "@anticapture/graphql-client";
 
 // Interface for a single delegation history item for the graph
 export interface DelegationHistoryGraphItem {
@@ -68,8 +68,9 @@ export function useDelegateDelegationHistoryGraph(
       accountId,
       fromTimestamp: fromTimestamp?.toString(),
       toTimestamp: toTimestamp?.toString(),
-      orderBy: QueryInput_HistoricalVotingPowers_OrderBy.Timestamp,
-      orderDirection: QueryInput_HistoricalVotingPowers_OrderDirection.Desc,
+      orderBy: QueryInput_HistoricalVotingPowerByAccount_OrderBy.Timestamp,
+      orderDirection:
+        QueryInput_HistoricalVotingPowerByAccount_OrderDirection.Desc,
     },
     context: {
       headers: {
@@ -81,11 +82,11 @@ export function useDelegateDelegationHistoryGraph(
   });
 
   const delegationHistory = useMemo((): DelegationHistoryGraphItem[] => {
-    if (!data?.historicalVotingPowers?.items) {
+    if (!data?.historicalVotingPowerByAccount?.items) {
       return [];
     }
 
-    return data.historicalVotingPowers.items
+    return data.historicalVotingPowerByAccount.items
       .filter((item) => item !== null && item !== undefined)
       .map((item) => {
         // Convert from wei to token units using Viem's formatUnits
