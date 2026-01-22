@@ -1,0 +1,15 @@
+# Database
+DATABASE_URL=postgresql://user:password@localhost:5432/address_enrichment
+
+# Arkham Intel API
+ARKHAM_API_KEY=your_arkham_api_key
+ARKHAM_API_URL=https://api.arkhamintelligence.com
+
+# Ethereum RPC (for EOA/contract detection fallback)
+RPC_URL=https://eth-mainnet.g.alchemy.com/v2/your_key
+
+# Anticapture API (for sync command)
+ANTICAPTURE_API_URL=http://localhost:4000/graphql
+
+# Server
+PORT=3001
