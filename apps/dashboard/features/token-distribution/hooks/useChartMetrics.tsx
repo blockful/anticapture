@@ -7,7 +7,7 @@ import { useProposals } from "@/features/token-distribution/hooks/useProposals";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
-import { DaoMetricsDayBucket, PriceEntry } from "@/shared/dao-config/types";
+import { TokenMetricItem, PriceEntry } from "@/shared/dao-config/types";
 import { ChartDataSetPoint } from "@/shared/dao-config/types";
 import { MetricSchema } from "@/features/token-distribution/utils/metrics";
 import { normalizeTimestamp } from "@/features/token-distribution/utils/chart";
@@ -155,7 +155,7 @@ export const useChartMetrics = ({
         }
 
         if (timeSeriesData[dataSourceKey]) {
-          timeSeriesData[dataSourceKey].forEach((item: DaoMetricsDayBucket) => {
+          timeSeriesData[dataSourceKey].forEach((item: TokenMetricItem) => {
             const value = valueField === "volume" ? item.volume : item.high;
 
             result[normalizeTimestamp(item.date)] = {

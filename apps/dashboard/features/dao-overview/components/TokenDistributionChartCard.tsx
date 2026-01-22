@@ -3,25 +3,25 @@
 import { TokenDistributionChart } from "@/features/token-distribution/components";
 import { useChartMetrics } from "@/features/token-distribution/hooks/useChartMetrics";
 import {
+  initialMetrics,
   MetricSchema,
   metricsSchema,
 } from "@/features/token-distribution/utils";
 import { TooltipInfo } from "@/shared/components";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { OverviewMetric } from "@/features/dao-overview/components/OverviewMetric";
 import daoConfig from "@/shared/dao-config";
 
-const OVERVIEW_TOKEN_DISTRIBUTION_METRICS = [
-  MetricTypesEnum.DELEGATED_SUPPLY,
-  MetricTypesEnum.CEX_SUPPLY,
-  MetricTypesEnum.DEX_SUPPLY,
-  MetricTypesEnum.LENDING_SUPPLY,
-];
-
 export const TokenDistributionChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
   const { decimals } = daoConfig[daoId];
+
+  const OVERVIEW_TOKEN_DISTRIBUTION_METRICS = daoConfig[daoId]
+    .notSupportedMetrics
+    ? initialMetrics.filter(
+        (metric) => !daoConfig[daoId].notSupportedMetrics?.includes(metric),
+      )
+    : initialMetrics;
 
   const {
     chartData: tokenDistributionChartData,
@@ -42,7 +42,7 @@ export const TokenDistributionChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
   ) as Record<string, MetricSchema>;
 
   return (
-    <div className="sm:bg-surface-default flex w-full flex-col gap-4 px-5 md:p-4">
+    <div className="lg:bg-surface-default flex w-full flex-col gap-4 px-5 lg:p-4">
       <div className="flex h-5 items-center gap-2">
         <DefaultLink
           href={`${daoId.toLowerCase()}/token-distribution`}

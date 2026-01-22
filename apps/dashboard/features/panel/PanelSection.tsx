@@ -19,7 +19,7 @@ export const PanelSection = () => {
   const [currency, setCurrency] = useState<"usd" | "eth">("usd");
 
   return (
-    <div className="flex flex-col gap-8 p-4 pt-[70px] sm:gap-2 sm:pt-5">
+    <div className="flex flex-col gap-8 p-4 pt-[70px] lg:gap-2 lg:pt-5">
       <div className="grid grid-cols-1 gap-2 lg:grid-cols-3">
         <DaoProtectionLevels />
         <TreasuryMonitoring />
@@ -60,14 +60,14 @@ const SwitcherCurrency = ({
   return (
     <Tabs
       defaultValue={currency}
-      className="mt-4 w-full gap-1 sm:mt-0 sm:w-auto"
+      className="mt-4 w-full gap-1 lg:mt-0 lg:w-auto"
     >
       <TabsList>
         {currencies.map((currency) => (
           <TabsTrigger
             key={currency}
             className={cn(
-              "w-full cursor-pointer px-2 text-sm font-medium sm:w-auto",
+              "w-full cursor-pointer px-2 text-sm font-medium lg:w-auto",
               isSmall
                 ? "min-w-[60px] px-1.5 py-0.5"
                 : "min-w-[84px] px-3 py-1.5",

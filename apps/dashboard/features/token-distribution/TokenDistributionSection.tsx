@@ -31,7 +31,7 @@ export const TokenDistributionSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     decimals,
   });
 
-  useTokenDistributionParams(chartData);
+  useTokenDistributionParams(chartData, daoId);
 
   const buildCsvData = (
     points: ChartDataSetPoint[] | undefined,

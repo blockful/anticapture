@@ -5,7 +5,7 @@ import { cva } from "class-variance-authority";
 import { cn } from "@/shared/utils/cn";
 
 const blankSlateVariants = cva(
-  "rounded-md w-full flex items-center justify-center text-secondary px-3 py-4 gap-2 bg-surface-contrast",
+  "w-full flex items-center justify-center text-secondary p-4 gap-2 bg-surface-contrast",
   {
     variants: {
       variant: {
@@ -62,9 +62,12 @@ export const BlankSlate = ({
           </div>
         )}
         <div
-          className={cn("text-secondary font-regular flex text-sm", {
-            "font-normal": variant === "small",
-          })}
+          className={cn(
+            "text-secondary font-regular flex text-center text-sm",
+            {
+              "font-normal": variant === "small",
+            },
+          )}
         >
           {description}
         </div>

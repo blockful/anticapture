@@ -145,7 +145,7 @@ export const TermsSection = () => {
     <div className="flex w-full justify-center">
       <TheSectionLayout
         title={PAGES_CONSTANTS.terms.title}
-        className="bg-surface-background! mt-[56px]! sm:mt-0! max-w-[770px] gap-4"
+        className="bg-surface-background! mt-[56px]! lg:mt-0! max-w-[770px] gap-4"
       >
         <div className="flex w-full flex-col items-center justify-center gap-2 px-2">
           <span className="text-secondary text-sm">

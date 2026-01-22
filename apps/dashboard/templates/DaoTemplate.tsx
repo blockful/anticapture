@@ -38,9 +38,9 @@ export const DaoTemplate = () => {
         text={"Currently in beta. Some data inconsistencies may occur."}
         storageKey={`beta-banner-dismissed-${daoIdEnum}`}
       /> */}
-      <div className="flex w-full flex-col items-center py-4 sm:gap-2 sm:p-3">
+      <div className="flex w-full flex-col items-center py-4 lg:gap-2 lg:p-3">
         <BannerAlert
-          icon={<Send className="hidden size-4 text-white sm:block" />}
+          icon={<Send className="hidden size-4 text-white lg:block" />}
           text={bannerAlertMessage}
           link={{
             url: ANTICAPTURE_TELEGRAM_BOT,
@@ -49,7 +49,7 @@ export const DaoTemplate = () => {
           storageKey={`banner-dismissed-${daoIdEnum}`}
         />
         {/* <BannerAlert
-          icon={<Info className="hidden size-4 text-white sm:block" />}
+          icon={<Info className="hidden size-4 text-white lg:block" />}
           text={bannerAlertMessage}
           storageKey={`banner-dismissed-${daoIdEnum}`}
           variant="highlight"

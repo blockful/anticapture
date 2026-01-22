@@ -33,14 +33,14 @@ export const ProposalSection = () => {
   const { decimals } = daoConfig[daoEnum];
 
   const { proposal, loading, error } = useProposal({
-    proposalId: proposalId as string,
+    proposalId,
     daoId: daoEnum,
   });
 
   const { votingPower, votesOnchain } = useVoterInfo({
     address: address ?? "",
     daoId: daoEnum,
-    proposalId: proposalId as string,
+    proposalId,
     decimals,
   });
 
@@ -68,7 +68,7 @@ export const ProposalSection = () => {
         address={address}
         proposalStatus={proposal.status}
       />
-      <div className="mx-auto w-full max-w-7xl">
+      <div className="mx-auto w-full">
         <div className="bg-surface-background sticky top-[65px] z-10 hidden h-5 w-full lg:block" />
 
         <div className="flex flex-col gap-6 p-5 lg:flex-row lg:pt-0">

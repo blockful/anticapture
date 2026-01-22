@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/shared/components";
 import { useParams, useRouter } from "next/navigation";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown, ChevronsRight, ChevronsLeft } from "lucide-react";
 import { cn } from "@/shared/utils/";
 import { DaoAvatarIcon } from "@/shared/components/icons";
 import daoConfigByDaoId from "@/shared/dao-config";
@@ -17,7 +17,15 @@ type Item = {
   name: string;
 };
 
-export const HeaderDAOSidebarDropdown = () => {
+interface HeaderDAOSidebarDropdownProps {
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
+}
+
+export const HeaderDAOSidebarDropdown = ({
+  isCollapsed = false,
+  onToggleCollapse,
+}: HeaderDAOSidebarDropdownProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [selectedHeaderSidebarItem, setSelectedHeaderSidebarItem] =
     useState<number>(0);
@@ -85,33 +93,56 @@ export const HeaderDAOSidebarDropdown = () => {
 
   return (
     <div
-      className="border-light-dark relative z-50 inline-block h-[57px] w-full shrink-0 border-b sm:h-[65px]"
+      className="border-light-dark relative z-50 inline-block h-[57px] w-full shrink-0 border-b lg:h-[65px]"
       ref={dropdownRef}
+      onMouseLeave={() => setIsOpen(false)}
     >
-      <div className="flex h-full items-center justify-between px-3.5 py-3.5 sm:p-2">
+      <div className="flex h-full items-center px-2 py-2">
         <Button
           variant="ghost"
           size="sm"
-          className="w-full"
+          className="flex flex-1 items-center justify-between overflow-hidden rounded-none transition-all"
           onClick={toggleDropdown}
           aria-expanded={isOpen}
           aria-haspopup="menu"
         >
-          <div className="flex w-full items-center gap-2">
-            <div>{currentItem?.icon}</div>
-            <p className="text-primary text-[18px] font-medium leading-6">
-              {currentItem?.label}
-            </p>
+          <div className="flex min-w-0 items-center gap-2">
+            <div className="shrink-0">{currentItem?.icon}</div>
+            {!isCollapsed && (
+              <p className="text-primary truncate whitespace-nowrap text-[18px] font-medium leading-6">
+                {currentItem?.label}
+              </p>
+            )}
           </div>
-          <div>
-            <ChevronsUpDown className="text-secondary size-5" />
-          </div>
+          {!isCollapsed && (
+            <div className="shrink-0">
+              <ChevronsUpDown className="text-secondary size-5 transition-all duration-300" />
+            </div>
+          )}
         </Button>
       </div>
+      {onToggleCollapse && (
+        <button
+          onClick={onToggleCollapse}
+          className="bg-surface-default border-light-dark hover:bg-surface-contrast absolute right-0 top-1/2 z-50 -translate-y-1/2 translate-x-[65%] cursor-pointer border p-1 transition-colors"
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {isCollapsed ? (
+            <ChevronsRight className="text-primary size-[14px]" />
+          ) : (
+            <ChevronsLeft className="text-primary size-[14px]" />
+          )}
+        </button>
+      )}
 
       {isOpen && (
         <div
-          className="border-light-dark bg-surface-default absolute left-0 right-0 z-50 mx-4 mt-1 w-auto rounded-lg border shadow-lg transition-all duration-200 ease-in-out sm:mx-0"
+          className={cn(
+            "border-light-dark bg-surface-default absolute z-50 rounded-lg border shadow-lg transition-all duration-200 ease-in-out",
+            isCollapsed
+              ? "left-0 top-full w-[200px]"
+              : "left-0 right-0 mx-4 w-auto lg:mx-0",
+          )}
           role="menu"
         >
           {dropdownItems.map((item) => (
@@ -124,10 +155,10 @@ export const HeaderDAOSidebarDropdown = () => {
               role="menuitemradio"
               aria-checked={item.id === selectedHeaderSidebarItem}
             >
-              <div className="flex w-full items-center gap-1.5 sm:gap-2">
+              <div className="flex w-full items-center gap-1.5 lg:gap-2">
                 <DaoAvatarIcon
                   daoId={item.name as DaoIdEnum}
-                  className={cn("size-icon-xxs sm:size-icon-sm")}
+                  className={cn("size-icon-xxs lg:size-icon-sm")}
                   isRounded
                 />
                 <h1 className={cn("text-primary text-sm font-normal")}>

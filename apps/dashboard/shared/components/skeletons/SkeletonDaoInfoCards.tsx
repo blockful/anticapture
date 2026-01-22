@@ -9,10 +9,10 @@ import {
 
 export const SkeletonDaoInfoCards = () => {
   return (
-    <Card className="sm:bg-surface-default xl4k:max-w-full flex w-[342px]! flex-col border-none sm:w-full! sm:max-w-full">
+    <Card className="lg:bg-surface-default xl4k:max-w-full w-[342px]! lg:w-full! flex flex-col border-none lg:max-w-full">
       <CardHeader
         id="daoinfo-basecard-header"
-        className="min-h-[32px] px-0 py-2! sm:p-2"
+        className="py-2! min-h-[32px] px-0 lg:p-2"
       >
         <div className="flex w-full items-center justify-start">
           <CardTitle className="text-primary flex items-center gap-2 text-xs font-semibold uppercase">
@@ -22,11 +22,11 @@ export const SkeletonDaoInfoCards = () => {
         </div>
       </CardHeader>
 
-      <CardContent className="flex min-h-[71px] w-full flex-col gap-4 p-0 sm:gap-5 sm:p-2">
+      <CardContent className="flex min-h-[71px] w-full flex-col gap-4 p-0 lg:gap-5 lg:p-2">
         {[1, 2].map((_, index) => (
           <div
             key={index}
-            className="flex min-h-[32px] justify-between gap-2 sm:flex-col"
+            className="flex min-h-[32px] justify-between gap-2 lg:flex-col"
           >
             <div className="flex w-full items-center gap-1.5">
               <h1 className="text-secondary text-sm font-normal">
@@ -35,7 +35,7 @@ export const SkeletonDaoInfoCards = () => {
               <div className="size-3 animate-pulse rounded-full bg-gray-700/50" />
             </div>
 
-            <div className="flex h-full w-full justify-end gap-2 sm:justify-start">
+            <div className="flex h-full w-full justify-end gap-2 lg:justify-start">
               {[1, 2].map((_, itemIndex) => (
                 <div key={itemIndex} className="flex">
                   <div className="h-6 w-16 animate-pulse rounded-full bg-gray-700/50" />

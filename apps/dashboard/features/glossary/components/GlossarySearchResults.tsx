@@ -19,13 +19,13 @@ export function GlossarySearchResults({ results }: GlossarySearchResultsProps) {
           results.map((result, index) => (
             <div
               key={index}
-              className="bg-surface-secondary grid grid-cols-1 p-4 md:grid-cols-5"
+              className="bg-surface-secondary grid grid-cols-1 p-4 lg:grid-cols-5"
             >
               <h5 className="text-primary font-roboto-mono text-alternative-sm pr-4 font-medium uppercase leading-[20px] tracking-[0.78px]">
                 {result.term.title}
               </h5>
               <p
-                className="font-inter text-secondary text-alternative-sm font-normal leading-[20px] md:col-span-4"
+                className="font-inter text-secondary text-alternative-sm font-normal leading-[20px] lg:col-span-4"
                 style={{ fontStyle: "normal" }}
               >
                 {result.term.definition}

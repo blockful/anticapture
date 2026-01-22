@@ -36,6 +36,7 @@ export const feedEventRelevanceValues = Object.values(
 ) as [string, ...string[]];
 
 export const SECONDS_IN_DAY = 24 * 60 * 60;
+export const ONE_DAY_MS = SECONDS_IN_DAY * 1000;
 
 /**
  * Gets the current day timestamp (midnight UTC)

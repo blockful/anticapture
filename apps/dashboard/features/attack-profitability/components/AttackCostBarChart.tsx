@@ -29,8 +29,7 @@ import { mockedAttackCostBarData } from "@/shared/constants/mocked-data/mocked-a
 import {
   useDaoTokenHistoricalData,
   useTopTokenHolderNonDao,
-  useTreasuryAssetNonDaoToken,
-  useVetoCouncilVotingPower,
+  useTreasury,
 } from "@/features/attack-profitability/hooks";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
@@ -71,10 +70,8 @@ export const AttackCostBarChart = ({
   const selectedDaoId = daoId.toUpperCase() as DaoIdEnum;
   const timeInterval = TimeInterval.NINETY_DAYS;
 
-  const liquidTreasury = useTreasuryAssetNonDaoToken(
-    selectedDaoId,
-    timeInterval,
-  );
+  const { data: liquidTreasuryData, loading: liquidTreasuryLoading } =
+    useTreasury(selectedDaoId, "liquid", TimeInterval.SEVEN_DAYS);
   const delegatedSupply = useDelegatedSupply(selectedDaoId, timeInterval);
   const activeSupply = useActiveSupply(selectedDaoId, timeInterval);
   const averageTurnout = useAverageTurnout(selectedDaoId, timeInterval);
@@ -88,44 +85,34 @@ export const AttackCostBarChart = ({
   });
 
   const daoConfig = daoConfigByDaoId[selectedDaoId];
-  const attackCostBarChart =
-    daoConfig?.attackProfitability?.attackCostBarChart || {};
-  const daoAddresses: string[] = Object.values(attackCostBarChart);
-  const tokenAddress = daoConfig?.daoOverview.contracts.token;
 
   const {
     data: daoTopTokenHolderExcludingTheDao,
     loading: daoTopTokenHolderExcludingTheDaoLoading,
-  } = useTopTokenHolderNonDao(selectedDaoId, tokenAddress, daoAddresses);
-
-  const { data: vetoCouncilVotingPower, isLoading: isVetoCouncilLoading } =
-    useVetoCouncilVotingPower(selectedDaoId);
+  } = useTopTokenHolderNonDao(selectedDaoId);
 
   const { isMobile } = useScreenSize();
 
   const isLoading =
-    liquidTreasury.loading ||
+    liquidTreasuryLoading ||
     delegatedSupply.isLoading ||
     activeSupply.isLoading ||
     averageTurnout.isLoading ||
     daoTokenPriceHistoricalDataLoading ||
-    daoTopTokenHolderExcludingTheDaoLoading ||
-    isVetoCouncilLoading;
+    daoTopTokenHolderExcludingTheDaoLoading;
 
   const mocked = useMemo(() => {
     return (
       delegatedSupply.data?.currentDelegatedSupply === undefined &&
       activeSupply.data?.activeSupply === undefined &&
       averageTurnout.data?.currentAverageTurnout === undefined &&
-      daoTopTokenHolderExcludingTheDao?.balance === undefined &&
-      vetoCouncilVotingPower === undefined
+      daoTopTokenHolderExcludingTheDao?.balance === undefined
     );
   }, [
     delegatedSupply.data?.currentDelegatedSupply,
     activeSupply.data?.activeSupply,
     averageTurnout.data?.currentAverageTurnout,
     daoTopTokenHolderExcludingTheDao?.balance,
-    vetoCouncilVotingPower,
   ]);
 
   const chartData: ChartDataItem[] = useMemo(() => {
@@ -152,10 +139,10 @@ export const AttackCostBarChart = ({
               id: "liquidTreasury",
               name: "Liquid Treasury",
               type: BarChartEnum.REGULAR,
-              value: Number(liquidTreasury.data?.[0]?.totalAssets || 0),
+              value: Number(liquidTreasuryData?.[0]?.value || 0),
               customColor: "#EC762EFF",
               displayValue:
-                Number(liquidTreasury.data?.[0]?.totalAssets || 0) > 10000
+                Number(liquidTreasuryData?.[0]?.value || 0) > 10000
                   ? undefined
                   : "<$10,000",
             },
@@ -226,7 +213,7 @@ export const AttackCostBarChart = ({
     mocked,
     daoTokenPriceHistoricalData,
     valueMode,
-    liquidTreasury.data,
+    liquidTreasuryData,
     delegatedSupply.data?.currentDelegatedSupply,
     activeSupply.data?.activeSupply,
     averageTurnout.data?.currentAverageTurnout,
@@ -503,7 +490,7 @@ const CustomXAxisTick = ({ x, y, payload }: AxisTickProps) => {
         dy={10}
         textAnchor="middle"
         fill="#A1A1AA"
-        className="text-[12px] font-medium leading-4 sm:text-xs"
+        className="text-[12px] font-medium leading-4 lg:text-xs"
       >
         {firstLine}
       </text>
@@ -514,7 +501,7 @@ const CustomXAxisTick = ({ x, y, payload }: AxisTickProps) => {
           dy={28}
           textAnchor="middle"
           fill="#A1A1AA"
-          className="text-[12px] font-medium leading-4 sm:text-xs"
+          className="text-[12px] font-medium leading-4 lg:text-xs"
         >
           {secondLine}
         </text>

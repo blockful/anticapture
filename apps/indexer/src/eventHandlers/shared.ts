@@ -4,6 +4,7 @@ import { account, daoMetricsDayBucket, transaction } from "ponder:schema";
 
 import { MetricTypesEnum } from "@/lib/constants";
 import { delta, max, min } from "@/lib/utils";
+import { truncateTimestampToMidnight } from "@/lib/date-helpers";
 
 export const ensureAccountExists = async (
   context: Context,
@@ -42,7 +43,7 @@ export const storeDailyBucket = async (
   await context.db
     .insert(daoMetricsDayBucket)
     .values({
-      date: truncateTimestampTime(timestamp),
+      date: BigInt(truncateTimestampToMidnight(Number(timestamp))),
       tokenId: tokenAddress,
       metricType,
       daoId,
@@ -142,9 +143,4 @@ export const handleTransaction = async (
     addresses.some((addr) => lending.includes(addr)),
     addresses.some((addr) => burning.includes(addr)),
   );
-};
-
-export const truncateTimestampTime = (timestampSeconds: bigint): bigint => {
-  const SECONDS_IN_DAY = BigInt(86400); // 24 * 60 * 60
-  return (timestampSeconds / SECONDS_IN_DAY) * SECONDS_IN_DAY;
 };
