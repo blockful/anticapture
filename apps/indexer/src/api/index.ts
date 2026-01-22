@@ -23,6 +23,7 @@ import {
   tokenHistoricalData,
   transactions,
   transfers,
+  tokenMetrics,
   treasury,
   votingPowerVariations,
   votingPowers,
@@ -34,7 +35,7 @@ import {
   AccountBalanceRepository,
   AccountInteractionsRepository,
   BalanceVariationsRepository,
-  DelegationPercentageRepository,
+  DaoMetricsDayBucketRepository,
   DrizzleProposalsActivityRepository,
   DrizzleRepository,
   NFTPriceRepository,
@@ -60,6 +61,7 @@ import {
   TokenService,
   TransactionsService,
   TransfersService,
+  TokenMetricsService,
   VotingPowerService,
 } from "@/api/services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
@@ -128,10 +130,11 @@ const repo = new DrizzleRepository();
 const votingPowerRepo = new VotingPowerRepository();
 const proposalsRepo = new DrizzleProposalsActivityRepository();
 const transactionsRepo = new TransactionsRepository();
-const delegationPercentageRepo = new DelegationPercentageRepository();
+const daoMetricsDayBucketRepo = new DaoMetricsDayBucketRepository();
 const delegationPercentageService = new DelegationPercentageService(
-  delegationPercentageRepo,
+  daoMetricsDayBucketRepo,
 );
+const tokenMetricsService = new TokenMetricsService(daoMetricsDayBucketRepo);
 const balanceVariationsRepo = new BalanceVariationsRepository();
 const accountBalanceRepo = new AccountBalanceRepository();
 const accountInteractionRepo = new AccountInteractionsRepository();
@@ -223,5 +226,6 @@ accountInteractions(app, balanceVariationsService);
 transfers(app, new TransfersService(new TransfersRepository()));
 dao(app, daoService);
 docs(app);
+tokenMetrics(app, tokenMetricsService);
 
 export default app;
