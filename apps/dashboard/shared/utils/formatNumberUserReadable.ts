@@ -11,11 +11,6 @@ export function formatNumberUserReadable(
   if (num >= 1e9) return format(num / 1e9, "B", fixed); // Billion
   if (num >= 1e6) return format(num / 1e6, "M", fixed); // Million
   if (num >= 1e3) return format(num / 1e3, "K", fixed); // Thousand
-  console.log({
-    userReadable: Number(num)
-      .toFixed(fixed)
-      .replace(/\.?0+$/, ""),
-  });
   return Number(num)
     .toFixed(fixed)
     .replace(/\.?0+$/, "");

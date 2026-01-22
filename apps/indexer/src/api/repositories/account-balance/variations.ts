@@ -14,15 +14,6 @@ export class BalanceVariationsRepository {
     orderDirection: "asc" | "desc",
     addresses?: Address[],
   ): Promise<DBAccountBalanceVariation[]> {
-    console.log({
-      fromTimestamp,
-      toTimestamp,
-      limit,
-      skip,
-      orderDirection,
-      addresses,
-    });
-
     const orderDirectionFn = orderDirection === "asc" ? asc : desc;
 
     const latestBeforeFrom = db

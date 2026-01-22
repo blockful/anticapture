@@ -14,11 +14,9 @@ type Query {
   votingPowerHistorys(where: votingPowerHistoryFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votingPowerHistoryPage!
   balanceHistory(transactionHash: String!, accountId: String!, logIndex: Float!): balanceHistory
   balanceHistorys(where: balanceHistoryFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): balanceHistoryPage!
-  delegation(transactionHash: String!, delegatorAccountId: String!, delegateAccountId: String!): delegation
   delegations(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): delegationPage!
   votesOnchain(voterAccountId: String!, proposalId: String!): votesOnchain
   votesOnchains(where: votesOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votesOnchainPage!
-  daoMetricsDayBuckets(where: daoMetricsDayBucketFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): daoMetricsDayBucketPage!
   _meta: Meta
 
   """
@@ -162,9 +160,6 @@ type Query {
 
   """Returns current governance parameters for this DAO"""
   dao: dao_200_response
-
-  """Returns a mapping of the top voting power changes within a time frame"""
-  topVotingPowerVariations(limit: PositiveInt = 10, skip: NonNegativeInt, orderDirection: queryInput_topVotingPowerVariations_orderDirection = desc, fromDate: String, toDate: String): topVotingPowerVariations_200_response
 
   """
   Returns token related metrics for a single metric type.
@@ -2212,43 +2207,6 @@ type dao_200_response {
   timelockDelay: String!
 }
 
-scalar ObjMap
-
-enum HTTPMethod {
-  GET
-  HEAD
-  POST
-  PUT
-  DELETE
-  CONNECT
-  OPTIONS
-  TRACE
-  PATCH
-}
-
-type topVotingPowerVariations_200_response {
-  period: query_topVotingPowerVariations_period!
-  items: [query_topVotingPowerVariations_items_items]!
-}
-
-type query_topVotingPowerVariations_period {
-  startTimestamp: String!
-  endTimestamp: String!
-}
-
-type query_topVotingPowerVariations_items_items {
-  accountId: String!
-  previousVotingPower: String!
-  currentVotingPower: String!
-  absoluteChange: String!
-  percentageChange: String!
-}
-
-enum queryInput_topVotingPowerVariations_orderDirection {
-  asc
-  desc
-}
-
 type tokenMetrics_200_response {
   items: [query_tokenMetrics_items_items]!
   pageInfo: query_tokenMetrics_pageInfo!
@@ -2279,6 +2237,20 @@ enum queryInput_tokenMetrics_metricType {
 enum queryInput_tokenMetrics_orderDirection {
   asc
   desc
+}
+
+scalar ObjMap
+
+enum HTTPMethod {
+  GET
+  HEAD
+  POST
+  PUT
+  DELETE
+  CONNECT
+  OPTIONS
+  TRACE
+  PATCH
 }
 
 type AverageDelegationPercentageItem {

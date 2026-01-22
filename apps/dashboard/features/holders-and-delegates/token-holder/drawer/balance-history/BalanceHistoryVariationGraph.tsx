@@ -76,8 +76,6 @@ const generateMonthlyTicks = (chartData: Array<{ timestamp: number }>) => {
     current.setMonth(current.getMonth() + 1);
   }
 
-  console.log({ ticks: ticks });
-
   return Array.from(new Set(ticks));
 };
 
@@ -91,11 +89,10 @@ export const BalanceHistoryVariationGraph = ({
   );
 
   const fromDate = useMemo(() => {
-    const nowInSeconds = Date.now() / 1000;
-
     // For "all", treat as all time by not setting limits
     if (selectedPeriod === "all") return undefined;
 
+    const nowInSeconds = Date.now() / 1000;
     let daysInSeconds: number;
     switch (selectedPeriod) {
       case "90d":
@@ -185,6 +182,8 @@ export const BalanceHistoryVariationGraph = ({
       amount: balanceHistory[balanceHistory.length - 1]?.balance,
     },
   ];
+
+  console.log({ extendedChartData });
 
   // Custom dot component to show each transfer/delegation point
   const CustomDot = (props: CustomDotProps) => {
