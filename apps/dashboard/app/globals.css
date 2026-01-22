@@ -42,6 +42,9 @@
   --animate-scroll-left: scroll-left 20s linear infinite;
   --animate-fade-in: fade-in 0.5s ease-in;
 
+  /* Shadow Styles */
+  --shadow-focus-ring: 0px 0px 0px 2px rgba(82, 82, 91, 0.3);
+
   /* DEV: TODO: Remove these colors once the new design system is fully implemented. 
    * Check the border colors and gradients as well.
    */
