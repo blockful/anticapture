@@ -4,7 +4,7 @@ import { account, daoMetricsDayBucket, transaction } from "ponder:schema";
 
 import { MetricTypesEnum } from "@/lib/constants";
 import { delta, max, min } from "@/lib/utils";
-import { truncateTimestampToMidnight } from "@/lib/time-series";
+import { truncateTimestampToMidnight } from "@/lib/date-helpers";
 
 export const ensureAccountExists = async (
   context: Context,
