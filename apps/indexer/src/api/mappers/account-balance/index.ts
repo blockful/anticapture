@@ -1,5 +1,5 @@
 import { z } from "@hono/zod-openapi";
-import { Address, isAddress } from "viem";
+import { Address, getAddress, isAddress } from "viem";
 import { accountBalance } from "ponder:schema";
 
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
@@ -27,9 +27,17 @@ export const AccountBalancesRequestSchema = z.object({
     .union([
       z
         .string()
-        .refine(isAddress, "Invalid address")
-        .transform((addr) => [addr]),
-      z.array(z.string().refine(isAddress, "Invalid addresses")),
+        .refine((addr) => isAddress(addr, { strict: false }), "Invalid address")
+        .transform((addr) => [getAddress(addr)]),
+      z.array(
+        z
+          .string()
+          .refine(
+            (addr) => isAddress(addr, { strict: false }),
+            "Invalid addresses",
+          )
+          .transform((addr) => getAddress(addr)),
+      ),
     ])
     .optional()
     .transform((val) => (val === undefined ? [] : val)),
@@ -37,9 +45,17 @@ export const AccountBalancesRequestSchema = z.object({
     .union([
       z
         .string()
-        .refine(isAddress, "Invalid address")
-        .transform((addr) => [addr]),
-      z.array(z.string().refine(isAddress, "Invalid addresses")),
+        .refine((addr) => isAddress(addr, { strict: false }), "Invalid address")
+        .transform((addr) => [getAddress(addr)]),
+      z.array(
+        z
+          .string()
+          .refine(
+            (addr) => isAddress(addr, { strict: false }),
+            "Invalid addresses",
+          )
+          .transform((addr) => getAddress(addr)),
+      ),
     ])
     .optional()
     .transform((val) => (val === undefined ? [] : val)),
@@ -130,7 +146,10 @@ export const AccountBalanceVariationsResponseSchema = z.object({
 });
 
 export const AccountInteractionsParamsSchema = z.object({
-  address: z.string().refine(isAddress, "Invalid address"),
+  address: z
+    .string()
+    .refine((addr) => isAddress(addr, { strict: false }), "Invalid address")
+    .transform((addr) => getAddress(addr)),
 });
 
 export const AccountInteractionsQuerySchema =
@@ -144,7 +163,11 @@ export const AccountInteractionsQuerySchema =
       .transform((val) => BigInt(val))
       .optional(),
     orderBy: z.enum(["volume", "count"]).optional().default("count"),
-    filterAddress: z.string().refine(isAddress, "Invalid address").optional(),
+    filterAddress: z
+      .string()
+      .refine((addr) => isAddress(addr, { strict: false }), "Invalid address")
+      .transform((addr) => getAddress(addr))
+      .optional(),
   });
 
 export const AccountInteractionsResponseSchema = z.object({

@@ -1,4 +1,4 @@
-import { isAddress } from "viem";
+import { getAddress, isAddress } from "viem";
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 
 import { VotingPowerService } from "@/api/services";
@@ -68,7 +68,10 @@ export function votingPowerVariations(app: Hono, service: VotingPowerService) {
       tags: ["voting-powers"],
       request: {
         params: z.object({
-          address: z.string().refine((addr) => isAddress(addr)),
+          address: z
+            .string()
+            .refine((addr) => isAddress(addr, { strict: false }))
+            .transform((addr) => getAddress(addr)),
         }),
         query: VotingPowerVariationsByAccountIdRequestSchema,
       },
