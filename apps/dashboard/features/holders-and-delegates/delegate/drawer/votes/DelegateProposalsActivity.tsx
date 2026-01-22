@@ -102,7 +102,7 @@ export const DelegateProposalsActivity = ({
   return (
     <>
       <div className="p-4">
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           <MetricCard
             icon={<Hand className="size-3.5" />}
             title="Voted Proposals"

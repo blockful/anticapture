@@ -81,7 +81,7 @@ export const GovernanceSection = () => {
         title="Governance"
         icon={<Landmark className="section-layout-icon" />}
         description="View and vote on executable proposals from this DAO."
-        className="sm:bg-transparent"
+        className="lg:bg-transparent"
       >
         <div className="flex-1">
           {loading && proposals.length === 0 ? (
@@ -124,10 +124,10 @@ export const GovernanceSection = () => {
 
 const ProposalItemSkeleton = () => {
   return (
-    <div className="bg-surface-default relative flex w-full flex-col items-center justify-between gap-3 px-3 py-3 md:flex-row md:gap-6">
+    <div className="bg-surface-default relative flex w-full flex-col items-center justify-between gap-3 px-3 py-3 lg:flex-row lg:gap-6">
       <div className="bg-surface-hover absolute left-0 top-1/2 h-[calc(100%-24px)] w-[2px] -translate-y-1/2 animate-pulse" />
 
-      <div className="flex w-full flex-col items-start justify-between gap-2 md:w-auto">
+      <div className="flex w-full flex-col items-start justify-between gap-2 lg:w-auto">
         <SkeletonRow
           parentClassName="flex animate-pulse"
           className="h-5 w-64"
@@ -148,7 +148,7 @@ const ProposalItemSkeleton = () => {
         </div>
       </div>
 
-      <div className="flex w-full shrink-0 flex-col items-center gap-1 md:w-[220px]">
+      <div className="flex w-full shrink-0 flex-col items-center gap-1 lg:w-[220px]">
         <div className="flex w-full items-center justify-between gap-2">
           <SkeletonRow
             parentClassName="flex animate-pulse"

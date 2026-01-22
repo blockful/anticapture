@@ -44,7 +44,7 @@ export const MessageStacker = ({ messages }: MessageStackerProps) => {
   }
 
   return (
-    <div className="w-full gap-2 px-4 pt-4 sm:px-3 sm:py-2">
+    <div className="w-full gap-2 px-4 pt-4 lg:px-3 lg:py-2">
       <div className="flex w-full flex-col gap-2">
         {visibleMessages.map((message) => (
           <MessageItem

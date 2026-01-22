@@ -1,5 +1,5 @@
 import { DelegationPercentageService } from "./delegation-percentage";
-import { DelegationPercentageRepository } from "@/api/repositories/";
+import { DaoMetricsDayBucketRepository } from "@/api/repositories/";
 import { MetricTypesEnum } from "@/lib/constants";
 
 /**
@@ -46,20 +46,20 @@ const createMockRow = (
 
 describe("DelegationPercentageService", () => {
   let service: DelegationPercentageService;
-  let mockRepository: jest.Mocked<DelegationPercentageRepository>;
+  let mockRepository: jest.Mocked<DaoMetricsDayBucketRepository>;
 
   beforeEach(() => {
     mockRepository = {
-      getDaoMetricsByDateRange: jest.fn(),
+      getMetricsByDateRange: jest.fn(),
       getLastMetricBeforeDate: jest.fn(),
-    } as jest.Mocked<DelegationPercentageRepository>;
+    } as jest.Mocked<DaoMetricsDayBucketRepository>;
 
     service = new DelegationPercentageService(mockRepository);
   });
 
   describe("delegationPercentageByDay", () => {
     it("should return empty response when no data is available", async () => {
-      mockRepository.getDaoMetricsByDateRange.mockResolvedValue([]);
+      mockRepository.getMetricsByDateRange.mockResolvedValue([]);
 
       const result = await service.delegationPercentageByDay({
         limit: 365,
@@ -87,7 +87,7 @@ describe("DelegationPercentageService", () => {
         }),
       ];
 
-      mockRepository.getDaoMetricsByDateRange.mockResolvedValue(mockRows);
+      mockRepository.getMetricsByDateRange.mockResolvedValue(mockRows);
 
       const result = await service.delegationPercentageByDay({
         startDate: "1600041600",
@@ -133,7 +133,7 @@ describe("DelegationPercentageService", () => {
         }),
       ];
 
-      mockRepository.getDaoMetricsByDateRange.mockResolvedValue(mockRows);
+      mockRepository.getMetricsByDateRange.mockResolvedValue(mockRows);
 
       const result = await service.delegationPercentageByDay({
         startDate: day1.toString(),
@@ -166,7 +166,7 @@ describe("DelegationPercentageService", () => {
         }),
       ];
 
-      mockRepository.getDaoMetricsByDateRange.mockResolvedValue(mockRows);
+      mockRepository.getMetricsByDateRange.mockResolvedValue(mockRows);
 
       const result = await service.delegationPercentageByDay({
         startDate: "1600041600",
@@ -200,7 +200,7 @@ describe("DelegationPercentageService", () => {
         );
       }
 
-      mockRepository.getDaoMetricsByDateRange.mockResolvedValue(mockRows);
+      mockRepository.getMetricsByDateRange.mockResolvedValue(mockRows);
 
       const result = await service.delegationPercentageByDay({
         startDate: "1600041600",
@@ -236,7 +236,7 @@ describe("DelegationPercentageService", () => {
         );
       }
 
-      mockRepository.getDaoMetricsByDateRange.mockResolvedValue(mockRows);
+      mockRepository.getMetricsByDateRange.mockResolvedValue(mockRows);
 
       const result = await service.delegationPercentageByDay({
         startDate: "1600041600",
@@ -272,7 +272,7 @@ describe("DelegationPercentageService", () => {
         );
       }
 
-      mockRepository.getDaoMetricsByDateRange.mockResolvedValue(mockRows);
+      mockRepository.getMetricsByDateRange.mockResolvedValue(mockRows);
 
       const result = await service.delegationPercentageByDay({
         startDate: "1600041600",
@@ -308,7 +308,7 @@ describe("DelegationPercentageService", () => {
         );
       }
 
-      mockRepository.getDaoMetricsByDateRange.mockResolvedValue(mockRows);
+      mockRepository.getMetricsByDateRange.mockResolvedValue(mockRows);
 
       const result = await service.delegationPercentageByDay({
         startDate: "1600041600",
@@ -325,14 +325,18 @@ describe("DelegationPercentageService", () => {
     });
 
     it("should use default values when optional parameters are not provided", async () => {
-      mockRepository.getDaoMetricsByDateRange.mockResolvedValue([]);
+      mockRepository.getMetricsByDateRange.mockResolvedValue([]);
 
       const result = await service.delegationPercentageByDay({
         limit: 365,
         orderDirection: "asc" as const,
       });
 
-      expect(mockRepository.getDaoMetricsByDateRange).toHaveBeenCalledWith({
+      expect(mockRepository.getMetricsByDateRange).toHaveBeenCalledWith({
+        metricTypes: [
+          MetricTypesEnum.DELEGATED_SUPPLY,
+          MetricTypesEnum.TOTAL_SUPPLY,
+        ],
         startDate: undefined,
         endDate: undefined,
         orderDirection: "asc",
@@ -375,7 +379,7 @@ describe("DelegationPercentageService", () => {
         // Day 4: no changes -> forward fill 50/200 = 25%
       ];
 
-      mockRepository.getDaoMetricsByDateRange.mockResolvedValue(mockRows);
+      mockRepository.getMetricsByDateRange.mockResolvedValue(mockRows);
 
       const result = await service.delegationPercentageByDay({
         startDate: day1.toString(),
@@ -417,7 +421,7 @@ describe("DelegationPercentageService", () => {
           }),
         );
 
-      mockRepository.getDaoMetricsByDateRange.mockResolvedValue([
+      mockRepository.getMetricsByDateRange.mockResolvedValue([
         createMockRow({
           date: day105,
           metricType: MetricTypesEnum.DELEGATED_SUPPLY,
@@ -462,7 +466,7 @@ describe("DelegationPercentageService", () => {
         .mockResolvedValueOnce(undefined);
 
       // Main data: TOTAL_SUPPLY appears on day 100
-      mockRepository.getDaoMetricsByDateRange.mockResolvedValue([
+      mockRepository.getMetricsByDateRange.mockResolvedValue([
         createMockRow({
           date: day100,
           metricType: MetricTypesEnum.TOTAL_SUPPLY,
@@ -490,7 +494,7 @@ describe("DelegationPercentageService", () => {
         .mockResolvedValueOnce(undefined);
 
       // Main data: appears only on day 100
-      mockRepository.getDaoMetricsByDateRange.mockResolvedValue([
+      mockRepository.getMetricsByDateRange.mockResolvedValue([
         createMockRow({
           date: day100,
           metricType: MetricTypesEnum.DELEGATED_SUPPLY,
@@ -515,7 +519,7 @@ describe("DelegationPercentageService", () => {
     });
 
     it("should not fetch previous values when neither startDate nor after is provided", async () => {
-      mockRepository.getDaoMetricsByDateRange.mockResolvedValue([]);
+      mockRepository.getMetricsByDateRange.mockResolvedValue([]);
 
       await service.delegationPercentageByDay({
         limit: 365,
@@ -540,7 +544,7 @@ describe("DelegationPercentageService", () => {
       );
 
       // Main data
-      mockRepository.getDaoMetricsByDateRange.mockResolvedValue([
+      mockRepository.getMetricsByDateRange.mockResolvedValue([
         createMockRow({
           date: day100,
           metricType: MetricTypesEnum.DELEGATED_SUPPLY,
@@ -585,7 +589,7 @@ describe("DelegationPercentageService", () => {
         .mockResolvedValueOnce(undefined);
 
       // Real data starts on day 10
-      mockRepository.getDaoMetricsByDateRange.mockResolvedValue([
+      mockRepository.getMetricsByDateRange.mockResolvedValue([
         createMockRow({
           date: day10,
           metricType: MetricTypesEnum.DELEGATED_SUPPLY,
@@ -637,7 +641,7 @@ describe("DelegationPercentageService", () => {
         .mockResolvedValueOnce(undefined);
 
       // Mock: no data >= day 100
-      mockRepository.getDaoMetricsByDateRange.mockResolvedValue([]);
+      mockRepository.getMetricsByDateRange.mockResolvedValue([]);
 
       const result = await service.delegationPercentageByDay({
         startDate: day100.toString(),
@@ -675,7 +679,7 @@ describe("DelegationPercentageService", () => {
         );
 
       // Mock: data from day50 onwards (query should be optimized)
-      mockRepository.getDaoMetricsByDateRange.mockResolvedValue([
+      mockRepository.getMetricsByDateRange.mockResolvedValue([
         createMockRow({
           date: day100,
           metricType: MetricTypesEnum.DELEGATED_SUPPLY,
@@ -695,7 +699,11 @@ describe("DelegationPercentageService", () => {
       });
 
       // Verify query was optimized (used after as startDate)
-      expect(mockRepository.getDaoMetricsByDateRange).toHaveBeenCalledWith({
+      expect(mockRepository.getMetricsByDateRange).toHaveBeenCalledWith({
+        metricTypes: [
+          MetricTypesEnum.DELEGATED_SUPPLY,
+          MetricTypesEnum.TOTAL_SUPPLY,
+        ],
         startDate: day50.toString(),
         endDate: undefined,
         orderDirection: "asc",
@@ -713,7 +721,7 @@ describe("DelegationPercentageService", () => {
       const day1 = 1599955200n;
       const day50 = day1 + BigInt(86400 * 50);
 
-      mockRepository.getDaoMetricsByDateRange.mockResolvedValue([
+      mockRepository.getMetricsByDateRange.mockResolvedValue([
         createMockRow({
           date: day1,
           metricType: MetricTypesEnum.DELEGATED_SUPPLY,
@@ -734,7 +742,11 @@ describe("DelegationPercentageService", () => {
       });
 
       // Verify query was optimized (used before as endDate)
-      expect(mockRepository.getDaoMetricsByDateRange).toHaveBeenCalledWith({
+      expect(mockRepository.getMetricsByDateRange).toHaveBeenCalledWith({
+        metricTypes: [
+          MetricTypesEnum.DELEGATED_SUPPLY,
+          MetricTypesEnum.TOTAL_SUPPLY,
+        ],
         startDate: undefined,
         endDate: day50.toString(),
         orderDirection: "asc",
@@ -773,7 +785,7 @@ describe("DelegationPercentageService", () => {
         }),
       ];
 
-      mockRepository.getDaoMetricsByDateRange.mockResolvedValue(mockRows);
+      mockRepository.getMetricsByDateRange.mockResolvedValue(mockRows);
 
       const result = await service.delegationPercentageByDay({
         startDate: threeDaysAgoMidnight.toString(),
@@ -816,7 +828,7 @@ describe("DelegationPercentageService", () => {
         }),
       ];
 
-      mockRepository.getDaoMetricsByDateRange.mockResolvedValue(mockRows);
+      mockRepository.getMetricsByDateRange.mockResolvedValue(mockRows);
 
       const result = await service.delegationPercentageByDay({
         startDate: twoDaysAgoMidnight.toString(),
@@ -847,7 +859,7 @@ describe("DelegationPercentageService", () => {
         }),
       ];
 
-      mockRepository.getDaoMetricsByDateRange.mockResolvedValue(mockRows);
+      mockRepository.getMetricsByDateRange.mockResolvedValue(mockRows);
 
       const result = await service.delegationPercentageByDay({
         startDate: tenDaysAgoMidnight.toString(),

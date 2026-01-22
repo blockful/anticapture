@@ -120,11 +120,9 @@ export type Query = {
   compareVotes?: Maybe<CompareVotes_200_Response>;
   /** Returns current governance parameters for this DAO */
   dao?: Maybe<Dao_200_Response>;
-  daoMetricsDayBucket?: Maybe<DaoMetricsDayBucket>;
   daoMetricsDayBuckets: DaoMetricsDayBucketPage;
   /** Get all DAOs */
   daos: DaoList;
-  delegation?: Maybe<Delegation>;
   /** Get delegation percentage day buckets with forward-fill */
   delegationPercentageByDay?: Maybe<DelegationPercentageByDay_200_Response>;
   delegations: DelegationPage;
@@ -152,7 +150,6 @@ export type Query = {
   proposalsActivity?: Maybe<ProposalsActivity_200_Response>;
   /** Get property data for a specific token */
   token?: Maybe<Token_200_Response>;
-  tokens: TokenPage;
   /** Get transactions with their associated transfers and delegations, with optional filtering and sorting */
   transactions?: Maybe<Transactions_200_Response>;
   /** Get transfers of a given address */
@@ -300,13 +297,6 @@ export type QueryCompareVotesArgs = {
 };
 
 
-export type QueryDaoMetricsDayBucketArgs = {
-  date: Scalars['BigInt']['input'];
-  metricType: Scalars['String']['input'];
-  tokenId: Scalars['String']['input'];
-};
-
-
 export type QueryDaoMetricsDayBucketsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -314,13 +304,6 @@ export type QueryDaoMetricsDayBucketsArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   where?: InputMaybe<DaoMetricsDayBucketFilter>;
-};
-
-
-export type QueryDelegationArgs = {
-  delegateAccountId: Scalars['String']['input'];
-  delegatorAccountId: Scalars['String']['input'];
-  transactionHash: Scalars['String']['input'];
 };
 
 
@@ -437,16 +420,6 @@ export type QueryProposalsActivityArgs = {
 
 export type QueryTokenArgs = {
   currency?: InputMaybe<QueryInput_Token_Currency>;
-};
-
-
-export type QueryTokensArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  where?: InputMaybe<TokenFilter>;
 };
 
 
@@ -2919,14 +2892,6 @@ export type GetAccountPowerQueryVariables = Exact<{
 
 
 export type GetAccountPowerQuery = { __typename?: 'Query', votingPowerByAccountId?: { __typename?: 'votingPowerByAccountId_200_response', accountId: string, votingPower: string } | null, votesOnchain?: { __typename?: 'votesOnchain', support: string, votingPower: any, reason?: string | null, timestamp: any, txHash: string, daoId: string } | null };
-
-export type GetUserVoteQueryVariables = Exact<{
-  proposalId: Scalars['String']['input'];
-  address: Scalars['String']['input'];
-}>;
-
-
-export type GetUserVoteQuery = { __typename?: 'Query', votesOnchain?: { __typename?: 'votesOnchain', support: string, votingPower: any, reason?: string | null, timestamp: any, txHash: string, daoId: string } | null };
 
 export type GetHistoricalBalancesQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];

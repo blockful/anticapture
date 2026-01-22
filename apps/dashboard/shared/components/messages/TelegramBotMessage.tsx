@@ -9,16 +9,16 @@ import { ANTICAPTURE_TELEGRAM_BOT } from "@/shared/constants/social-media";
 export const TelegramBotMessage = () => {
   const { daoId } = useParams() as { daoId: string };
   return (
-    <div className="flex items-center gap-3 tracking-wider sm:flex-row">
-      <Send className="text-primary hidden size-4 sm:block" />
-      <div className="flex flex-col gap-3 sm:flex-row">
+    <div className="flex items-center gap-3 tracking-wider lg:flex-row">
+      <Send className="text-primary hidden size-4 lg:block" />
+      <div className="flex flex-col gap-3 lg:flex-row">
         <div className="flex gap-3">
           <span className="text-primary font-mono font-normal">
             RECEIVE REAL-TIME{" "}
             {daoConfigByDaoId[
               daoId.toUpperCase() as DaoIdEnum
             ].name.toUpperCase()}{" "}
-            <span className="hidden sm:inline">SECURITY</span> UPDATES.
+            <span className="hidden lg:inline">SECURITY</span> UPDATES.
           </span>
         </div>
         <div className="flex items-center gap-3">

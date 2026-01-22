@@ -29,8 +29,8 @@ interface BaseCardDaoInfoProps {
 
 export const BaseCardDaoInfo = ({ data }: BaseCardDaoInfoProps) => {
   return (
-    <Card className="sm:bg-surface-default xl4k:max-w-full w-full! flex flex-col border-none sm:max-w-full">
-      <CardHeader id="daoinfo-basecard-header" className="py-2! px-0 sm:p-2">
+    <Card className="lg:bg-surface-default xl4k:max-w-full w-full! flex flex-col border-none lg:max-w-full">
+      <CardHeader id="daoinfo-basecard-header" className="py-2! px-0 lg:p-2">
         <div
           className={cn(
             "flex w-full items-center",
@@ -42,7 +42,7 @@ export const BaseCardDaoInfo = ({ data }: BaseCardDaoInfoProps) => {
             {data.title}
             {data.optionalHeaderValue && (
               <>
-                <div className="hidden size-1 rounded-full bg-gray-600 sm:flex" />
+                <div className="hidden size-1 rounded-full bg-gray-600 lg:flex" />
                 {data.optionalHeaderValue}
               </>
             )}
@@ -50,9 +50,9 @@ export const BaseCardDaoInfo = ({ data }: BaseCardDaoInfoProps) => {
         </div>
       </CardHeader>
 
-      <CardContent className="flex h-full w-full flex-col gap-4 p-0 sm:gap-5 sm:p-2">
+      <CardContent className="flex h-full w-full flex-col gap-4 p-0 lg:gap-5 lg:p-2">
         {data.sections.map((section, index) => (
-          <div key={index} className="flex justify-between gap-2 sm:flex-col">
+          <div key={index} className="flex justify-between gap-2 lg:flex-col">
             <div className="flex w-full items-center gap-1.5">
               <p className="text-secondary text-sm font-normal">
                 {section.title}
@@ -60,7 +60,7 @@ export const BaseCardDaoInfo = ({ data }: BaseCardDaoInfoProps) => {
               {section.tooltip && <TooltipInfo text={section.tooltip} />}
             </div>
 
-            <div className="flex h-full w-full justify-end gap-2 sm:justify-start">
+            <div className="flex h-full w-full justify-end gap-2 lg:justify-start">
               {section.items.map((item, index) => (
                 <div key={index} className="flex">
                   {item}

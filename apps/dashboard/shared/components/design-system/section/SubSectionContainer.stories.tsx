@@ -186,7 +186,7 @@ export const WithMixedContent = {
         </div>
       </SubSection>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <SubSection subsectionTitle="Total Users" dateRange="Last 30 days">
           <div className="bg-surface-hover mt-4 rounded-lg p-4 text-center">
             <Users className="text-primary mx-auto mb-2 size-8" />

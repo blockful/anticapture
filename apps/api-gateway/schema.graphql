@@ -11,9 +11,6 @@ directive @httpOperation(subgraph: String, path: String, operationSpecificHeader
 directive @transport(subgraph: String, kind: String, location: String, headers: [[String]], queryStringOptions: ObjMap, queryParams: [[String]]) repeatable on SCHEMA
 
 type Query {
-  """Get property data for a specific token"""
-  token(currency: queryInput_token_currency = usd): token_200_response
-  tokens(where: tokenFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): tokenPage!
   votingPowerHistorys(where: votingPowerHistoryFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votingPowerHistoryPage!
   balanceHistory(transactionHash: String!, accountId: String!, logIndex: Float!): balanceHistory
   balanceHistorys(where: balanceHistoryFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): balanceHistoryPage!
@@ -21,7 +18,6 @@ type Query {
   delegations(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): delegationPage!
   votesOnchain(voterAccountId: String!, proposalId: String!): votesOnchain
   votesOnchains(where: votesOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votesOnchainPage!
-  daoMetricsDayBucket(date: BigInt!, tokenId: String!, metricType: String!): daoMetricsDayBucket
   daoMetricsDayBuckets(where: daoMetricsDayBucketFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): daoMetricsDayBucketPage!
   _meta: Meta
 
@@ -40,6 +36,9 @@ type Query {
 
   """Get historical market data for a specific token"""
   historicalTokenData(skip: NonNegativeInt, limit: Float = 365): [query_historicalTokenData_items]
+
+  """Get property data for a specific token"""
+  token(currency: queryInput_token_currency = usd): token_200_response
 
   """Compare total supply between periods"""
   compareTotalSupply(days: queryInput_compareTotalSupply_days = _90d): compareTotalSupply_200_response
@@ -163,6 +162,15 @@ type Query {
 
   """Returns current governance parameters for this DAO"""
   dao: dao_200_response
+
+  """Returns a mapping of the top voting power changes within a time frame"""
+  topVotingPowerVariations(limit: PositiveInt = 10, skip: NonNegativeInt, orderDirection: queryInput_topVotingPowerVariations_orderDirection = desc, fromDate: String, toDate: String): topVotingPowerVariations_200_response
+
+  """
+  Returns token related metrics for a single metric type.
+          Available types: TOTAL_SUPPLY, DELEGATED_SUPPLY, CEX_SUPPLY, DEX_SUPPLY, LENDING_SUPPLY, CIRCULATING_SUPPLY, TREASURY
+  """
+  tokenMetrics(metricType: queryInput_tokenMetrics_metricType!, startDate: Float, endDate: Float, orderDirection: queryInput_tokenMetrics_orderDirection = asc, limit: NonNegativeInt = 365, skip: NonNegativeInt): tokenMetrics_200_response
 
   """
   Average delegation percentage across all supported DAOs by day.
@@ -2216,6 +2224,61 @@ enum HTTPMethod {
   OPTIONS
   TRACE
   PATCH
+}
+
+type topVotingPowerVariations_200_response {
+  period: query_topVotingPowerVariations_period!
+  items: [query_topVotingPowerVariations_items_items]!
+}
+
+type query_topVotingPowerVariations_period {
+  startTimestamp: String!
+  endTimestamp: String!
+}
+
+type query_topVotingPowerVariations_items_items {
+  accountId: String!
+  previousVotingPower: String!
+  currentVotingPower: String!
+  absoluteChange: String!
+  percentageChange: String!
+}
+
+enum queryInput_topVotingPowerVariations_orderDirection {
+  asc
+  desc
+}
+
+type tokenMetrics_200_response {
+  items: [query_tokenMetrics_items_items]!
+  pageInfo: query_tokenMetrics_pageInfo!
+}
+
+type query_tokenMetrics_items_items {
+  date: String!
+  high: String!
+  volume: String!
+}
+
+type query_tokenMetrics_pageInfo {
+  hasNextPage: Boolean!
+  startDate: String
+  endDate: String
+}
+
+enum queryInput_tokenMetrics_metricType {
+  TOTAL_SUPPLY
+  DELEGATED_SUPPLY
+  CEX_SUPPLY
+  DEX_SUPPLY
+  LENDING_SUPPLY
+  CIRCULATING_SUPPLY
+  TREASURY
+}
+
+enum queryInput_tokenMetrics_orderDirection {
+  asc
+  desc
 }
 
 type AverageDelegationPercentageItem {

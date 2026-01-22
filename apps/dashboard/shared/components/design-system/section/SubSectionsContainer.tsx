@@ -15,7 +15,7 @@ export const SubSectionsContainer = ({
   return (
     <div
       className={cn(
-        "sm:bg-surface-default flex h-full flex-col gap-6 sm:p-5",
+        "lg:bg-surface-default flex h-full flex-col gap-6 lg:p-5",
         className,
       )}
     >

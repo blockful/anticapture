@@ -18,9 +18,11 @@ import { usePathname } from "next/navigation";
 import { AnticaptureIcon } from "@/shared/components/icons";
 
 export const HeaderMobile = ({
+  className,
   overlayClassName,
 }: {
   overlayClassName?: string;
+  className?: string;
 }) => {
   const [lastScrollY, setLastScrollY] = useState<number>(0);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
@@ -106,7 +108,9 @@ export const HeaderMobile = ({
   }, [lastScrollY]);
 
   return (
-    <>
+    <div
+      className={cn("relative left-0 top-0 z-50 w-full lg:hidden", className)}
+    >
       {/* Header */}
       <div className="border-light-dark bg-surface-background absolute left-0 right-0 top-0 z-50 border-b px-4 py-1.5">
         <div className="flex items-center justify-between">
@@ -127,7 +131,6 @@ export const HeaderMobile = ({
           </div>
         </div>
       </div>
-
       {/* Mobile Menu - Overlay */}
       <div
         className={cn(
@@ -180,6 +183,6 @@ export const HeaderMobile = ({
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };

@@ -9,7 +9,7 @@ export const TableContainer = forwardRef<
     <div
       ref={ref}
       className={cn(
-        "md:border-light-dark scrollbar-thin relative w-full overflow-y-auto md:rounded-lg md:border",
+        "lg:border-light-dark scrollbar-thin relative w-full overflow-y-auto lg:rounded-lg lg:border",
         className,
       )}
       style={{

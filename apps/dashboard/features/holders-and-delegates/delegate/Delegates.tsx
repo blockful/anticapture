@@ -30,7 +30,7 @@ import {
 interface DelegateTableData {
   address: string;
   votingPower: string;
-  variation?: { percentageChange: number; absoluteChange: number } | null;
+  variation?: { percentageChange: number; absoluteChange: number };
   activity?: string | null;
   activityPercentage?: number | null;
   delegators: number;
@@ -157,7 +157,7 @@ export const Delegates = ({
           percentageChange:
             delegate.percentageChange === "NO BASELINE"
               ? 9999
-              : Number(delegate.percentageChange),
+              : Number(Number(delegate.percentageChange).toFixed(2)),
           absoluteChange: Number(
             formatUnits(BigInt(delegate.absoluteChange), decimals),
           ),
@@ -209,7 +209,13 @@ export const Delegates = ({
                   className="mx-1 p-1"
                   iconSize="md"
                 />
-                <Button variant="outline" size="sm">
+                <Button
+                  data-ph-event="delegate_details"
+                  data-ph-source="delegates_table"
+                  data-umami-event="delegate_details"
+                  variant="outline"
+                  size="sm"
+                >
                   <Plus className="size-3.5" />
                   <span className="text-sm font-medium">Details</span>
                 </Button>

@@ -115,8 +115,8 @@ export const TheTable = <TData, TValue>({
   return (
     <Table
       className={cn(
-        "text-secondary md:bg-surface-default border-separate border-spacing-0 bg-transparent",
-        mobileTableFixed ? "table-fixed" : "table-auto md:table-fixed",
+        "text-secondary lg:bg-surface-default border-separate border-spacing-0 bg-transparent",
+        mobileTableFixed ? "table-fixed" : "table-auto lg:table-fixed",
         className,
       )}
     >
