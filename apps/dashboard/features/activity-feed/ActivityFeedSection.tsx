@@ -220,7 +220,7 @@ export const ActivityFeedSection = ({
         />
 
         {/* Feed content */}
-        <div className={cn("flex flex-col gap-6", className)}>
+        <div className={cn("flex flex-col gap-2", className)}>
           {error && (
             <SubSectionsContainer>
               <div className="flex flex-col items-center justify-center gap-2 px-4 py-8">
@@ -267,15 +267,18 @@ export const ActivityFeedSection = ({
           )}
 
           {groupedEvents.map((group) => (
-            <SubSectionsContainer className="sm:pt-0" key={group.date}>
+            <SubSectionsContainer
+              className="py-0 sm:py-0 lg:py-0"
+              key={group.date}
+            >
               {/* Sticky date header */}
-              <div className="sm:bg-surface-contrast sticky top-0 z-10 py-4 sm:-mx-5 sm:px-5">
+              <div className="bg-surface-contrast sticky top-0 z-10 px-5 py-3 sm:-mx-5">
                 <div className="flex items-center gap-2">
-                  <span className="text-primary font-mono text-sm font-medium uppercase">
+                  <span className="text-primary font-mono text-xs font-medium uppercase">
                     {group.label}
                   </span>
                   <BulletDivider />
-                  <span className="text-secondary font-mono text-sm">
+                  <span className="text-secondary font-mono text-xs">
                     {group.highRelevanceCount} HIGH RELEVANCE{" "}
                     {group.highRelevanceCount === 1 ? "ACTIVITY" : "ACTIVITIES"}
                   </span>

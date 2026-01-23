@@ -132,106 +132,120 @@ export const FeedEventItem = ({
       case "vote":
         if (!event.vote) return null;
         return (
-          <div className="flex flex-wrap items-center gap-1.5">
-            <EnsAvatar
-              address={event.vote.voter as Address}
-              showAvatar={true}
-              size="sm"
-              nameClassName="text-primary font-medium"
-            />
-            <span className="text-dimmed">
-              ({formatAmount(event.vote.votingPower)} {tokenSymbol} voting
-              power)
-            </span>
-            <span className="text-secondary">voted</span>
-            <CheckCircle2 className="text-success size-4" />
+          <p className="leading-relaxed">
+            <span className="inline-flex items-center gap-1.5 align-middle">
+              <EnsAvatar
+                address={event.vote.voter as Address}
+                showAvatar={true}
+                size="xs"
+                nameClassName="text-primary font-medium"
+              />
+            </span>{" "}
+            <span className="text-secondary">
+              (
+              <span className="text-primary">
+                {formatAmount(event.vote.votingPower)} {tokenSymbol}
+              </span>{" "}
+              voting power)
+            </span>{" "}
+            <span className="text-secondary">voted</span>{" "}
+            <CheckCircle2 className="text-success inline size-4 align-middle" />{" "}
             <span className="text-success font-medium capitalize">
               {event.vote.support === "for"
                 ? "Yes"
                 : event.vote.support === "against"
                   ? "No"
                   : "Abstain"}
-            </span>
-            <span className="text-secondary">on proposal</span>
+            </span>{" "}
+            <span className="text-secondary">on proposal</span>{" "}
             <Link
               href={`/${daoId}/governance/proposal/${event.vote.proposalId}`}
-              className="text-primary hover:text-link line-clamp-1 font-medium transition-colors"
+              className="text-primary hover:text-link font-medium transition-colors"
             >
-              {event.vote.proposalTitle}
-            </Link>
+              {event.vote.proposalTitle?.replace(/^#\s*/, "")}
+            </Link>{" "}
             <a
               href={explorerUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-secondary hover:text-primary ml-1 transition-colors"
+              className="text-secondary hover:text-primary inline-flex align-middle transition-colors"
             >
               <ExternalLink className="size-3.5" />
             </a>
-          </div>
+          </p>
         );
 
       case "proposal":
         if (!event.proposal) return null;
         return (
-          <div className="flex flex-wrap items-center gap-1.5">
-            <EnsAvatar
-              address={event.proposal.proposer as Address}
-              showAvatar={true}
-              size="sm"
-              nameClassName="text-primary font-medium"
-            />
-            <span className="text-dimmed">
-              ({formatAmount(event.proposal.votingPower)} {tokenSymbol} voting
-              power)
-            </span>
-            <span className="text-secondary">created the proposal</span>
+          <p className="leading-relaxed">
+            <span className="inline-flex items-center gap-1.5 align-middle">
+              <EnsAvatar
+                address={event.proposal.proposer as Address}
+                showAvatar={true}
+                size="xs"
+                nameClassName="text-primary font-medium"
+              />
+            </span>{" "}
+            <span className="text-secondary">
+              (
+              <span className="text-primary">
+                {formatAmount(event.proposal.votingPower)} {tokenSymbol}
+              </span>{" "}
+              voting power)
+            </span>{" "}
+            <span className="text-secondary">created the proposal</span>{" "}
             <Link
               href={`/${daoId}/governance/proposal/${event.proposal.proposalId}`}
-              className="text-primary hover:text-link line-clamp-1 font-medium transition-colors"
+              className="text-primary hover:text-link font-medium transition-colors"
             >
-              {event.proposal.proposalTitle}
-            </Link>
+              {event.proposal.proposalTitle?.replace(/^#\s*/, "")}
+            </Link>{" "}
             <a
               href={explorerUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-secondary hover:text-primary ml-1 transition-colors"
+              className="text-secondary hover:text-primary inline-flex align-middle transition-colors"
             >
               <ExternalLink className="size-3.5" />
             </a>
-          </div>
+          </p>
         );
 
       case "transfer":
         if (!event.transfer) return null;
         return (
-          <div className="flex flex-wrap items-center gap-1.5">
-            <EnsAvatar
-              address={event.transfer.from as Address}
-              showAvatar={true}
-              size="sm"
-              nameClassName="text-primary font-medium"
-            />
-            <span className="text-secondary">transferred</span>
+          <p className="leading-relaxed">
+            <span className="inline-flex items-center gap-1.5 align-middle">
+              <EnsAvatar
+                address={event.transfer.from as Address}
+                showAvatar={true}
+                size="xs"
+                nameClassName="text-primary font-medium"
+              />
+            </span>{" "}
+            <span className="text-secondary">transferred</span>{" "}
             <span className="text-primary font-medium">
               {formatAmount(event.transfer.amount)} {tokenSymbol}
-            </span>
-            <span className="text-secondary">to</span>
-            <EnsAvatar
-              address={event.transfer.to as Address}
-              showAvatar={true}
-              size="sm"
-              nameClassName="text-primary font-medium"
-            />
+            </span>{" "}
+            <span className="text-secondary">to</span>{" "}
+            <span className="inline-flex items-center gap-1.5 align-middle">
+              <EnsAvatar
+                address={event.transfer.to as Address}
+                showAvatar={true}
+                size="xs"
+                nameClassName="text-primary font-medium"
+              />
+            </span>{" "}
             <a
               href={explorerUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-secondary hover:text-primary ml-1 transition-colors"
+              className="text-secondary hover:text-primary inline-flex align-middle transition-colors"
             >
               <ExternalLink className="size-3.5" />
             </a>
-          </div>
+          </p>
         );
 
       case "delegation": {
@@ -242,70 +256,81 @@ export const FeedEventItem = ({
             "0x0000000000000000000000000000000000000000";
 
         return (
-          <div className="flex flex-wrap items-center gap-1.5">
-            <EnsAvatar
-              address={event.delegation.delegator as Address}
-              showAvatar={true}
-              size="sm"
-              nameClassName="text-primary font-medium"
-            />
+          <p className="leading-relaxed">
+            <span className="inline-flex items-center gap-1.5 align-middle">
+              <EnsAvatar
+                address={event.delegation.delegator as Address}
+                showAvatar={true}
+                size="xs"
+                nameClassName="text-primary font-medium"
+              />
+            </span>{" "}
             <span className="text-secondary">
               {hasRedelegation ? "redelegated" : "delegated"}
-            </span>
+            </span>{" "}
             <span className="text-success font-medium">
               {formatAmount(event.delegation.amount)} {tokenSymbol}
-            </span>
+            </span>{" "}
             {hasRedelegation && (
               <>
-                <span className="text-secondary">from</span>
-                <EnsAvatar
-                  address={event.delegation.previousDelegate as Address}
-                  showAvatar={true}
-                  size="sm"
-                  nameClassName="text-primary font-medium"
-                />
+                <span className="text-secondary">from</span>{" "}
+                <span className="inline-flex items-center gap-1.5 align-middle">
+                  <EnsAvatar
+                    address={event.delegation.previousDelegate as Address}
+                    showAvatar={true}
+                    size="xs"
+                    nameClassName="text-primary font-medium"
+                  />
+                </span>{" "}
               </>
             )}
-            <span className="text-secondary">to</span>
-            <EnsAvatar
-              address={event.delegation.delegate as Address}
-              showAvatar={true}
-              size="sm"
-              nameClassName="text-primary font-medium"
-            />
+            <span className="text-secondary">to</span>{" "}
+            <span className="inline-flex items-center gap-1.5 align-middle">
+              <EnsAvatar
+                address={event.delegation.delegate as Address}
+                showAvatar={true}
+                size="xs"
+                nameClassName="text-primary font-medium"
+              />
+            </span>{" "}
             <a
               href={explorerUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-secondary hover:text-primary ml-1 transition-colors"
+              className="text-secondary hover:text-primary inline-flex align-middle transition-colors"
             >
               <ExternalLink className="size-3.5" />
             </a>
-          </div>
+          </p>
         );
       }
     }
   };
 
   return (
-    <div className={cn("flex items-start gap-4 pb-1", className)}>
+    <div className={cn("flex items-stretch gap-4", className)}>
       {/* Badge and Connector */}
-      <div>
+      <div className="flex flex-col items-center">
         <BadgeStatus
           variant={badgeVariant}
           icon={BadgeIcon}
-          className="size-6"
+          className="size-6 shrink-0"
           iconVariant={badgeVariant}
         />
         {!isLast && (
-          <div className="mt-1 flex w-6 justify-center">
-            <DividerDefault isVertical className="h-10" />
+          <div className="mt-1 flex w-6 flex-1 justify-center">
+            <DividerDefault isVertical className="h-14/15" />
           </div>
         )}
       </div>
 
       {/* Content */}
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
+      <div
+        className={cn(
+          "flex min-w-0 flex-1 flex-col gap-1",
+          isLast ? "pb-6" : "pb-8",
+        )}
+      >
         {/* Main action line */}
         <div className="text-sm">{renderEventContent()}</div>
 

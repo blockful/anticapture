@@ -103,6 +103,8 @@ export const ActivityFeedFiltersDrawer = ({
       toDate: "",
     };
     setLocalFilters(clearedFilters);
+    onApplyFilters(clearedFilters);
+    onClose();
   };
 
   const handleOpenChange = (open: boolean) => {

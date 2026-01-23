@@ -111,6 +111,7 @@ export const HeaderDAOSidebar = () => {
               icon={Newspaper}
               label={PAGES_CONSTANTS.activityFeed.title}
               key={PAGES_CONSTANTS.activityFeed.title}
+              isCollapsed={isCollapsed}
             />
           </div>
         </div>
