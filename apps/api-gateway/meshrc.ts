@@ -12,6 +12,21 @@ export default processConfig(
       },
     },
     sources: [
+      // Address Enrichment Service (Arkham integration)
+      ...(process.env.ADDRESS_ENRICHMENT_API_URL
+        ? [
+            {
+              name: "address_enrichment",
+              handler: {
+                openapi: {
+                  source: `${process.env.ADDRESS_ENRICHMENT_API_URL}/docs/json`,
+                  endpoint: process.env.ADDRESS_ENRICHMENT_API_URL,
+                },
+              },
+            },
+          ]
+        : []),
+      // DAO-specific APIs
       ...Object.entries(process.env)
         .filter(([key]) => key.startsWith("DAO_API_"))
         .flatMap(([key, value]) => {
@@ -44,13 +59,13 @@ export default processConfig(
                       "Query.!{transfers}",
                       "Query.!{transfer}",
                       "Query.!{votingPowerHistory}",
-                      'Query.!{accountBalances}',
-                      'Query.!{accountBalance}',
-                      'Query.!{delegation}',
-                      'Query.!{tokens}',
-                      'Query.!{token}',
+                      "Query.!{accountBalances}",
+                      "Query.!{accountBalance}",
+                      "Query.!{delegation}",
+                      "Query.!{tokens}",
+                      "Query.!{token}",
                       // 'Query.!{votingPowerHistorys}' FIXME: Leave endpoint active for now as it is still used by the notification bot
-                    ]
+                    ],
                   },
                 },
               ],
