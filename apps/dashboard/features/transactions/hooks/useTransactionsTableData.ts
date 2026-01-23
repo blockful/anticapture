@@ -86,8 +86,8 @@ export const useTransactionsTableData = ({
         ...(filters?.affectedSupply && {
           affectedSupply: filters?.affectedSupply,
         }),
-        ...(filters?.fromDate && { fromDate: filters?.fromDate }),
-        ...(filters?.toDate && { toDate: filters?.toDate }),
+        ...(filters?.fromDate && { fromDate: filters?.fromDate.toString() }),
+        ...(filters?.toDate && { toDate: filters?.toDate.toString() }),
         ...(filters?.includes && { includes: filters?.includes }),
       },
       context: {

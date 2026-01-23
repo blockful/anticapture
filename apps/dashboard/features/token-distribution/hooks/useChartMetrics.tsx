@@ -98,7 +98,7 @@ export const useChartMetrics = ({
   // Fetch proposals data (for proposals metric) - only when needed
   const { data: proposals, loading: proposalsLoading } = useProposals(
     daoId,
-    oneYearAgo,
+    oneYearAgo.toString(),
   );
 
   // Apply conditional loading based on applied metrics
