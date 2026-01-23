@@ -3,17 +3,15 @@
  * Fetches top token holders and delegates
  */
 
-interface AccountPower {
+export interface DelegateInfo {
   accountId: string;
   votingPower: string;
   delegationsCount: number;
 }
 
-interface AccountBalance {
+export interface TokenHolderInfo {
   accountId: string;
   balance: string;
-  delegate: string;
-  tokenId: string;
 }
 
 interface GraphQLResponse<T> {
@@ -31,14 +29,14 @@ export class AnticaptureClient {
   /**
    * Fetches top delegates by voting power
    */
-  async getTopDelegates(limit: number = 100): Promise<string[]> {
+  async getTopDelegates(limit: number = 100): Promise<DelegateInfo[]> {
     const query = `
       query GetTopDelegates($limit: Int!) {
         accountPowers(
           orderBy: "votingPower"
           orderDirection: "desc"
           limit: $limit
-          where: { votingPower_gt: 0 }
+          where: { votingPower_gt: "0" }
         ) {
           items {
             accountId
@@ -50,23 +48,23 @@ export class AnticaptureClient {
     `;
 
     const response = await this.executeQuery<{
-      accountPowers: { items: AccountPower[] };
+      accountPowers: { items: DelegateInfo[] };
     }>(query, { limit });
 
-    return response.accountPowers.items.map((item) => item.accountId);
+    return response.accountPowers.items;
   }
 
   /**
    * Fetches top token holders by balance
    */
-  async getTopTokenHolders(limit: number = 100): Promise<string[]> {
+  async getTopTokenHolders(limit: number = 100): Promise<TokenHolderInfo[]> {
     const query = `
       query GetTopTokenHolders($limit: Int!) {
         accountBalances(
           orderBy: "balance"
           orderDirection: "desc"
           limit: $limit
-          where: { balance_gt: 0 }
+          where: { balance_gt: "0" }
         ) {
           items {
             accountId
@@ -77,10 +75,10 @@ export class AnticaptureClient {
     `;
 
     const response = await this.executeQuery<{
-      accountBalances: { items: AccountBalance[] };
+      accountBalances: { items: TokenHolderInfo[] };
     }>(query, { limit });
 
-    return response.accountBalances.items.map((item) => item.accountId);
+    return response.accountBalances.items;
   }
 
   private async executeQuery<T>(
