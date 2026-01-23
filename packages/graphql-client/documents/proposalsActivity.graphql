@@ -1,11 +1,12 @@
 query GetProposalsActivity(
   $address: String!, 
- $fromDate: String, 
- $skip: NonNegativeInt,
+  $fromDate: String, 
+  $skip: NonNegativeInt,
   $limit: PositiveInt,
-   $orderBy: queryInput_proposalsActivity_orderBy,
- $orderDirection: queryInput_proposalsActivity_orderDirection, 
- $userVoteFilter: queryInput_proposalsActivity_userVoteFilter) {
+  $orderBy: queryInput_proposalsActivity_orderBy,
+  $orderDirection: queryInput_proposalsActivity_orderDirection, 
+  $userVoteFilter: queryInput_proposalsActivity_userVoteFilter
+) {
   proposalsActivity(address: $address, fromDate: $fromDate, skip: $skip, limit: $limit, orderBy: $orderBy, orderDirection: $orderDirection, userVoteFilter: $userVoteFilter) {
     totalProposals
     votedProposals
