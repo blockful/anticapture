@@ -7,8 +7,8 @@ query Transactions(
   $maxAmount: String
   $sortOrder: queryInput_transactions_sortOrder
   $affectedSupply: JSON
-  $fromDate: Int
-  $toDate: Int
+  $fromDate: String
+  $toDate: String
   $includes: JSON
 ) {
   transactions(
