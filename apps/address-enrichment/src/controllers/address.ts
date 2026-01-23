@@ -22,6 +22,27 @@ const EnrichmentResponseSchema = z.object({
   createdAt: z.string(),
 });
 
+const BatchRequestSchema = z.object({
+  addresses: z
+    .array(
+      z.string().refine((addr) => isAddress(addr), {
+        message: "Invalid Ethereum address",
+      }),
+    )
+    .min(1, "At least one address is required")
+    .max(100, "Maximum 100 addresses per request"),
+});
+
+const BatchResponseSchema = z.object({
+  results: z.array(EnrichmentResponseSchema),
+  errors: z.array(
+    z.object({
+      address: z.string(),
+      error: z.string(),
+    }),
+  ),
+});
+
 const ErrorResponseSchema = z.object({
   error: z.string(),
   message: z.string().optional(),
@@ -84,6 +105,91 @@ export function addressController(app: Hono, service: EnrichmentService) {
           500,
         );
       }
+    },
+  );
+
+  // Batch endpoint
+  app.openapi(
+    createRoute({
+      method: "post",
+      operationId: "batchAddressEnrichment",
+      path: "/addresses",
+      summary: "Get enriched data for multiple addresses",
+      description:
+        "Returns label information from Arkham and address type for multiple addresses. Maximum 100 addresses per request. Data is permanently stored after first fetch.",
+      tags: ["address"],
+      request: {
+        body: {
+          content: {
+            "application/json": {
+              schema: BatchRequestSchema,
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: "Successfully retrieved batch enrichment data",
+          content: {
+            "application/json": {
+              schema: BatchResponseSchema,
+            },
+          },
+        },
+        400: {
+          description: "Invalid request body",
+          content: {
+            "application/json": {
+              schema: ErrorResponseSchema,
+            },
+          },
+        },
+        500: {
+          description: "Internal server error",
+          content: {
+            "application/json": {
+              schema: ErrorResponseSchema,
+            },
+          },
+        },
+      },
+    }),
+    async (context) => {
+      const { addresses } = context.req.valid("json");
+
+      // Deduplicate addresses
+      const uniqueAddresses = [
+        ...new Set(addresses.map((a) => a.toLowerCase())),
+      ];
+
+      const results: z.infer<typeof EnrichmentResponseSchema>[] = [];
+      const errors: { address: string; error: string }[] = [];
+
+      // Process in parallel with concurrency limit
+      const CONCURRENCY = 10;
+      for (let i = 0; i < uniqueAddresses.length; i += CONCURRENCY) {
+        const batch = uniqueAddresses.slice(i, i + CONCURRENCY);
+        const batchResults = await Promise.allSettled(
+          batch.map((address) => service.getAddressEnrichment(address)),
+        );
+
+        batchResults.forEach((result, index) => {
+          const address = batch[index]!;
+          if (result.status === "fulfilled") {
+            results.push(result.value);
+          } else {
+            errors.push({
+              address,
+              error:
+                result.reason instanceof Error
+                  ? result.reason.message
+                  : "Unknown error",
+            });
+          }
+        });
+      }
+
+      return context.json({ results, errors }, 200);
     },
   );
 }

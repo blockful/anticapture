@@ -13,7 +13,7 @@ A service that enriches Ethereum addresses with labels from Arkham Intel API and
 
 ### `GET /address/:address`
 
-Returns enriched data for an Ethereum address.
+Returns enriched data for a single Ethereum address.
 
 **Response:**
 
@@ -27,6 +27,46 @@ Returns enriched data for an Ethereum address.
     "label": "Cold Wallet"
   },
   "createdAt": "2024-01-20T10:30:00.000Z"
+}
+```
+
+### `POST /addresses`
+
+Batch endpoint for resolving multiple addresses at once (max 100 per request).
+
+**Request:**
+
+```json
+{
+  "addresses": [
+    "0x245445940b317e509002eb682e03f4429184059d",
+    "0x1234567890abcdef1234567890abcdef12345678"
+  ]
+}
+```
+
+**Response:**
+
+```json
+{
+  "results": [
+    {
+      "address": "0x245445940b317e509002eb682e03f4429184059d",
+      "isContract": false,
+      "arkham": {
+        "entity": "Upbit",
+        "entityType": "cex",
+        "label": "Cold Wallet"
+      },
+      "createdAt": "2024-01-20T10:30:00.000Z"
+    }
+  ],
+  "errors": [
+    {
+      "address": "0x1234567890abcdef1234567890abcdef12345678",
+      "error": "Failed to fetch from Arkham API"
+    }
+  ]
 }
 ```
 
