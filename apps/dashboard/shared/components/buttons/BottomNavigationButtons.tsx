@@ -51,7 +51,7 @@ export const BottomNavigationButtons = ({
             key={item.label}
             href={item.href}
             className={cn(
-              "group flex w-full cursor-pointer items-center gap-3 rounded-md border border-transparent py-1.5 text-sm font-medium transition-colors",
+              "radius-none group flex w-full cursor-pointer items-center gap-3 border border-transparent py-1.5 text-sm font-medium transition-colors",
               {
                 "cursor-default bg-white": item.isActive,
                 "hover:border-light-dark hover:bg-surface-contrast":

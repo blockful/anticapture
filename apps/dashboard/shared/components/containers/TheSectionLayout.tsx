@@ -20,6 +20,7 @@ interface TheSectionLayoutProps {
   leftContent?: ReactNode;
   subsectionTitle?: string;
   subsectionDescription?: string;
+  headerAction?: ReactNode;
 }
 
 export const TheSectionLayout = ({
@@ -32,6 +33,7 @@ export const TheSectionLayout = ({
   className,
   subsectionTitle,
   subsectionDescription,
+  headerAction,
 }: TheSectionLayoutProps) => {
   return (
     <div
@@ -40,12 +42,15 @@ export const TheSectionLayout = ({
         className,
       )}
     >
-      <SectionTitle
-        icon={icon}
-        title={title}
-        riskLevel={riskLevel}
-        description={description ?? ""}
-      />
+      <div className="flex w-full items-start justify-between gap-4">
+        <SectionTitle
+          icon={icon}
+          title={title}
+          riskLevel={riskLevel}
+          description={description ?? ""}
+        />
+        {headerAction}
+      </div>
       {subsectionTitle ? (
         <SubSection
           subsectionTitle={subsectionTitle}

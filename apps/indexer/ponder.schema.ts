@@ -1,4 +1,5 @@
 import { metricTypeArray } from "@/lib/constants";
+import { feedEventRelevanceValues, feedEventTypeValues } from "@/lib/enums";
 import {
   onchainTable,
   index,
@@ -195,6 +196,38 @@ export const proposalsOnchain = onchainTable(
 export const metricType = onchainEnum(
   "metricType",
   metricTypeArray as [string, ...string[]],
+);
+
+// Feed Event enums and table
+export const feedEventType = onchainEnum(
+  "feed_event_type",
+  feedEventTypeValues,
+);
+
+export const feedEventRelevance = onchainEnum(
+  "feed_event_relevance",
+  feedEventRelevanceValues,
+);
+
+export const feedEvent = onchainTable(
+  "feed_event",
+  (drizzle) => ({
+    txHash: drizzle.text("tx_hash").notNull(),
+    logIndex: drizzle.integer("log_index").notNull(),
+    daoId: drizzle.text("dao_id").notNull(),
+    type: feedEventType("type").notNull(),
+    relevance: feedEventRelevance("relevance").notNull(),
+    timestamp: drizzle.bigint().notNull(),
+  }),
+  (table) => ({
+    pk: primaryKey({
+      columns: [table.txHash, table.logIndex],
+    }),
+    feedEventTimestampIdx: index().on(table.timestamp),
+    feedEventTypeIdx: index().on(table.type),
+    feedEventRelevanceIdx: index().on(table.relevance),
+    feedEventDaoIdIdx: index().on(table.daoId),
+  }),
 );
 
 export const daoMetricsDayBucket = onchainTable(
@@ -399,5 +432,29 @@ export const accountRelations = relations(account, ({ many }) => ({
   }),
   delegatedFromBalances: many(accountBalance, {
     relationName: "delegatedBalances",
+  }),
+}));
+
+// Feed Event relations
+export const feedEventRelations = relations(feedEvent, ({ one }) => ({
+  vote: one(votesOnchain, {
+    fields: [feedEvent.txHash],
+    references: [votesOnchain.txHash],
+    relationName: "feedEventVote",
+  }),
+  proposal: one(proposalsOnchain, {
+    fields: [feedEvent.txHash],
+    references: [proposalsOnchain.txHash],
+    relationName: "feedEventProposal",
+  }),
+  transferRecord: one(transfer, {
+    fields: [feedEvent.txHash, feedEvent.logIndex],
+    references: [transfer.transactionHash, transfer.logIndex],
+    relationName: "feedEventTransfer",
+  }),
+  delegationRecord: one(delegation, {
+    fields: [feedEvent.txHash, feedEvent.logIndex],
+    references: [delegation.transactionHash, delegation.logIndex],
+    relationName: "feedEventDelegation",
   }),
 }));

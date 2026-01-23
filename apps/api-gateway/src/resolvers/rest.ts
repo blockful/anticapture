@@ -33,6 +33,7 @@ const daoItemQueries = [
   "tokenMetrics",
   "transactions",
   "transfers",
+  "getFeedEvents",
   "votingPowerByAccountId",
   "votingPowerVariations",
   "votingPowerVariationsByAccountId",

@@ -8,5 +8,6 @@ export * from "./proposals";
 export * from "./shared";
 export * from "./transactions";
 export * from "./transfers";
+export * from "./feed-event";
 export * from "./treasury";
 export * from "./voting-power";

@@ -23,6 +23,7 @@ import {
   tokenHistoricalData,
   transactions,
   transfers,
+  feedEvents,
   tokenMetrics,
   treasury,
   votingPowerVariations,
@@ -43,6 +44,7 @@ import {
   TokenRepository,
   TransactionsRepository,
   TransfersRepository,
+  FeedEventRepository,
   TreasuryRepository,
   VotingPowerRepository,
 } from "@/api/repositories";
@@ -61,6 +63,7 @@ import {
   TokenService,
   TransactionsService,
   TransfersService,
+  FeedEventService,
   TokenMetricsService,
   VotingPowerService,
 } from "@/api/services";
@@ -201,6 +204,7 @@ accountBalanceVariations(app, balanceVariationsService);
 accountBalances(app, env.DAO_ID, accountBalanceService);
 accountInteractions(app, balanceVariationsService);
 transfers(app, new TransfersService(new TransfersRepository()));
+feedEvents(app, new FeedEventService(new FeedEventRepository()));
 dao(app, daoService);
 docs(app);
 tokenMetrics(app, tokenMetricsService);
