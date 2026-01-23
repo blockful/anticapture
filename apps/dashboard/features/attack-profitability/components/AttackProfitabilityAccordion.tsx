@@ -20,7 +20,7 @@ import {
   Plus,
   Users,
 } from "lucide-react";
-import { Badge } from "@/shared/components/badges/Badge";
+import { BadgeStatus } from "@/shared/design-system/badges/BadgeStatus";
 
 interface AccordionDataProps {
   title: string;
@@ -87,17 +87,17 @@ const AccordionData: AccordionDataProps[] = [
           </p>
         </div>
         <div className="flex flex-col items-center gap-1 lg:flex-row">
-          <Badge className="group-hover:bg-surface-default">
+          <BadgeStatus variant={"dimmed"}>
             <p className="text-secondary text-xs font-semibold uppercase leading-none">
               Voting power in a proposal
             </p>
-          </Badge>
+          </BadgeStatus>
           <Equal className="text-primary size-4" />
-          <Badge className="group-hover:bg-surface-default">
+          <BadgeStatus variant={"dimmed"}>
             <p className="text-secondary text-xs font-semibold uppercase leading-none">
               Delegated cap at snapshot
             </p>
-          </Badge>
+          </BadgeStatus>
         </div>
       </div>
     ),
@@ -123,19 +123,19 @@ const AccordionData: AccordionDataProps[] = [
           </p>
         </div>
         <div className="flex flex-col items-center gap-1 lg:flex-row">
-          <Badge className="group-hover:bg-surface-default">
+          <BadgeStatus variant={"dimmed"}>
             <ArrowDown className="text-secondary size-4" />
             <p className="text-secondary text-xs font-semibold uppercase leading-none">
               Lower Participation
             </p>
-          </Badge>
+          </BadgeStatus>
           <Equal className="text-primary size-4" />
-          <Badge className="group-hover:bg-surface-default">
+          <BadgeStatus variant={"dimmed"}>
             <ArrowUp className="text-secondary size-4" />
             <p className="text-secondary text-xs font-semibold uppercase leading-none">
               Easier to attack
             </p>
-          </Badge>
+          </BadgeStatus>
         </div>
       </div>
     ),
@@ -156,7 +156,7 @@ const AccordionData: AccordionDataProps[] = [
           capture.
         </div>
         <div className="flex flex-col items-center gap-1 lg:flex-row">
-          <Badge className="group-hover:bg-surface-default">
+          <BadgeStatus variant={"dimmed"}>
             <p className="text-secondary text-xs font-semibold uppercase leading-none">
               Cost to attack
             </p>
@@ -164,14 +164,14 @@ const AccordionData: AccordionDataProps[] = [
             <p className="text-secondary text-xs font-semibold uppercase leading-none">
               treasury funds
             </p>
-          </Badge>
+          </BadgeStatus>
           <Equal className="text-primary size-4" />
-          <Badge className="group-hover:bg-surface-default">
+          <BadgeStatus variant={"dimmed"}>
             <AlertTriangle className="text-secondary size-4" />
             <p className="text-secondary text-xs font-semibold uppercase leading-none">
               DAO AT RISK
             </p>
-          </Badge>
+          </BadgeStatus>
         </div>
       </div>
     ),

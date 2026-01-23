@@ -3,7 +3,7 @@
 import { CheckCircle2, XCircle } from "lucide-react";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { Proposal, ProposalStatus } from "@/features/governance/types";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { EnsAvatar } from "@/shared/design-system/avatars/ens-avatar/EnsAvatar";
 import { Address } from "viem";
 import Link from "next/link";
 import { useParams } from "next/navigation";

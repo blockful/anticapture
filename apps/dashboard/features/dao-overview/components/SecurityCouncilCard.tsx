@@ -4,9 +4,9 @@ import { Key } from "lucide-react";
 import { TooltipInfo } from "@/shared/components";
 import { DaoOverviewConfig } from "@/shared/dao-config/types";
 import { ProgressBar } from "@/features/dao-overview/components";
-import { UnderlinedLink } from "@/shared/components/design-system/links/underlined-link/UnderlinedLink";
+import { UnderlinedLink } from "@/shared/design-system/links/underlined-link/UnderlinedLink";
 import { useMemo } from "react";
-import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
+import { DividerDefault } from "@/shared/design-system/divider/DividerDefault";
 
 export const SecurityCouncilCard = ({
   daoOverview,

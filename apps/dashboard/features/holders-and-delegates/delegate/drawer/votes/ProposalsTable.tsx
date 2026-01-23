@@ -27,7 +27,7 @@ import {
   getVoteTimingData,
   proposalsFinalResultMapping,
 } from "@/features/holders-and-delegates/utils/proposalsTableUtils";
-import { Table } from "@/shared/components/design-system/table/Table";
+import { Table } from "@/shared/design-system/table/Table";
 import daoConfig from "@/shared/dao-config";
 
 interface ProposalTableData {

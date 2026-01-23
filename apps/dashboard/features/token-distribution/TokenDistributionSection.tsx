@@ -12,7 +12,7 @@ import { metricsSchema } from "@/features/token-distribution/utils";
 import { useChartMetrics } from "@/features/token-distribution/hooks/useChartMetrics";
 import { useTokenDistributionStore } from "@/features/token-distribution/store/useTokenDistributionStore";
 import { CSVLink } from "react-csv";
-import { defaultLinkVariants } from "@/shared/components/design-system/links/default-link";
+import { defaultLinkVariants } from "@/shared/design-system/links/default-link";
 import { ChartDataSetPoint } from "@/shared/dao-config/types";
 import daoConfig from "@/shared/dao-config";
 import { useTokenDistributionParams } from "@/features/token-distribution/hooks/useTokenDistributionParams";

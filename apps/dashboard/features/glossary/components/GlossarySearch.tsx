@@ -6,7 +6,7 @@ import {
   searchGlossary,
   GlossarySearchResult,
 } from "@/features/glossary/glossary";
-import SearchField from "@/shared/components/design-system/SearchField";
+import SearchField from "@/shared/design-system/SearchField";
 
 interface GlossarySearchProps {
   glossaryData: GlossaryData;

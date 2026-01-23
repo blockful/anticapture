@@ -10,7 +10,7 @@ import {
 } from "@/features/governance/hooks/useNonVoters";
 import { SkeletonRow, Button } from "@/shared/components";
 import { ColumnDef } from "@tanstack/react-table";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { EnsAvatar } from "@/shared/design-system/avatars/ens-avatar/EnsAvatar";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";

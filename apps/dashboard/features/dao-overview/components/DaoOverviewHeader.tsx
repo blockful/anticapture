@@ -1,5 +1,5 @@
-import { DefaultLink } from "@/shared/components/design-system/links/default-link";
-import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
+import { DefaultLink } from "@/shared/design-system/links/default-link";
+import { BadgeStatus } from "@/shared/design-system/badges/BadgeStatus";
 import { EthereumIcon } from "@/shared/components/icons/EthereumIcon";
 import { DollarSign } from "lucide-react";
 import { DaoConfiguration, DaoOverviewConfig } from "@/shared/dao-config/types";

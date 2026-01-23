@@ -7,8 +7,8 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Address, formatUnits, zeroAddress } from "viem";
 import { Plus } from "lucide-react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { Percentage } from "@/shared/components/design-system/table/Percentage";
+import { EnsAvatar } from "@/shared/design-system/avatars/ens-avatar/EnsAvatar";
+import { Percentage } from "@/shared/design-system/table/Percentage";
 import { useTokenHolders } from "@/features/holders-and-delegates/hooks/useTokenHolders";
 import { QueryInput_AccountBalances_OrderDirection } from "@anticapture/graphql-client";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -16,11 +16,11 @@ import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 import { useScreenSize } from "@/shared/hooks";
-import { Table } from "@/shared/components/design-system/table/Table";
+import { Table } from "@/shared/design-system/table/Table";
 import { Button } from "@/shared/components";
-import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
+import { AddressFilter } from "@/shared/design-system/table/filters/AddressFilter";
 import daoConfig from "@/shared/dao-config";
-import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
+import { BadgeStatus } from "@/shared/design-system/badges/BadgeStatus";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 
 interface TokenHolderTableData {

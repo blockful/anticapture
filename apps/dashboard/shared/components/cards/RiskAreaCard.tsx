@@ -9,7 +9,7 @@ import { RiskTooltipCard, TooltipInfo } from "@/shared/components";
 import { RISK_AREAS } from "@/shared/constants/risk-areas";
 import { RiskAreaEnum } from "@/shared/types/enums";
 import { useScreenSize } from "@/shared/hooks";
-import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import { DefaultLink } from "@/shared/design-system/links/default-link";
 import { useParams } from "next/navigation";
 import daoConfig from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";

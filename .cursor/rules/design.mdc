@@ -33,12 +33,12 @@ shared/
 
 **Design System Components (always prefer these):**
 
-- TheButton → `import { TheButton } from "@/shared/components/design-system/buttons/TheButton"`
-- BlankSlate → `import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate"`
-- TextIconLeft → `import { TextIconLeft } from "@/shared/components/design-system/TextIconLeft"`
-- SearchField → `import { SearchField } from "@/shared/components/design-system/SearchField"`
-- ActivityIndicator → `import { ActivityIndicator } from "@/shared/components/design-system/ActivityIndicator"`
-- SimpleProgressBar → `import { SimpleProgressBar } from "@/shared/components/design-system/SimpleProgressBar"`
+- TheButton → `import { TheButton } from "@/shared/design-system/buttons/TheButton"`
+- BlankSlate → `import { BlankSlate } from "@/shared/design-system/blank-slate/BlankSlate"`
+- TextIconLeft → `import { TextIconLeft } from "@/shared/design-system/TextIconLeft"`
+- SearchField → `import { SearchField } from "@/shared/design-system/SearchField"`
+- ActivityIndicator → `import { ActivityIndicator } from "@/shared/design-system/ActivityIndicator"`
+- SimpleProgressBar → `import { SimpleProgressBar } from "@/shared/design-system/SimpleProgressBar"`
 
 **Shared Components (for specific use cases):**
 

@@ -2,7 +2,7 @@ import { Button } from "@/shared/components";
 import { NotFoundPageIcon } from "@/shared/components/icons/NotFoundPageIcon";
 import { HeaderSidebar } from "@/widgets";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
-import { Footer } from "@/shared/components/design-system/footer/Footer";
+import { Footer } from "@/shared/design-system/footer/Footer";
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";

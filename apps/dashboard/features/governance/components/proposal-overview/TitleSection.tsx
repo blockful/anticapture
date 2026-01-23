@@ -1,4 +1,4 @@
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { EnsAvatar } from "@/shared/design-system/avatars/ens-avatar/EnsAvatar";
 import { BulletDivider } from "@/features/governance/components/proposal-overview/BulletDivider";
 
 import { ChatBubbleIcon } from "@radix-ui/react-icons";
@@ -7,7 +7,7 @@ import { GetProposalQuery } from "@anticapture/graphql-client";
 import { Address } from "viem";
 import { ProposalBadge } from "@/features/governance/components/proposal-overview/ProposalBadge";
 import { ProposalStatus } from "@/features/governance/types";
-import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import { DefaultLink } from "@/shared/design-system/links/default-link";
 
 export const TitleSection = ({
   proposal,

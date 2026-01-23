@@ -5,8 +5,8 @@ import {
 } from "@/shared/components/badges/SupplyLabel";
 import { ArrowUp, ArrowDown, ExternalLink, ArrowRight } from "lucide-react";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
-import { AmountFilter } from "@/shared/components/design-system/table/filters/AmountFilter";
+import { AddressFilter } from "@/shared/design-system/table/filters/AddressFilter";
+import { AmountFilter } from "@/shared/design-system/table/filters/AmountFilter";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/shared/components/ui/button";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
@@ -14,7 +14,7 @@ import { TransactionData } from "@/features/transactions/hooks/useTransactionsTa
 import Link from "next/link";
 import { fetchAddressFromEnsName } from "@/shared/hooks/useEnsData";
 import { Address, zeroAddress } from "viem";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { EnsAvatar } from "@/shared/design-system/avatars/ens-avatar/EnsAvatar";
 import { cn } from "@/shared/utils";
 import { TransactionsParamsType } from "@/features/transactions/hooks/useTransactionParams";
 

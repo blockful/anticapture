@@ -8,7 +8,7 @@ import {
 } from "@/features/governance/hooks/useVotes";
 import { SkeletonRow, Button, BlankSlate } from "@/shared/components";
 import { ColumnDef } from "@tanstack/react-table";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { EnsAvatar } from "@/shared/design-system/avatars/ens-avatar/EnsAvatar";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 import {
   CheckCircle2,

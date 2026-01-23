@@ -27,9 +27,9 @@ import {
   getDaoStageFromFields,
 } from "@/shared/dao-config/utils";
 import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
-import { Table } from "@/shared/components/design-system/table/Table";
+import { Table } from "@/shared/design-system/table/Table";
 import { useQuorumGap } from "@/shared/hooks/useQuorumGap";
-import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
+import { Tooltip } from "@/shared/design-system/tooltips/Tooltip";
 
 type PanelDao = {
   dao: string;

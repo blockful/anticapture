@@ -3,7 +3,7 @@ import { cn } from "@/shared/utils";
 import { AlertItem } from "@/features/alerts/utils/alerts-constants";
 import { AlertAvailability } from "@/features/alerts/utils/alerts-constants";
 import Link from "next/link";
-import { Badge } from "@/shared/components";
+import { BadgeStatus } from "@/shared/design-system/badges/BadgeStatus";
 
 export const AlertCard = ({
   title,
@@ -32,15 +32,15 @@ export const AlertCard = ({
               </div>
             </div>
 
-            <Badge
+            <BadgeStatus
               variant={
                 availability === AlertAvailability.AVAILABLE
                   ? "success"
-                  : "default"
+                  : "dimmed"
               }
             >
               {availability}
-            </Badge>
+            </BadgeStatus>
           </div>
 
           <div className="text-secondary text-sm leading-relaxed">

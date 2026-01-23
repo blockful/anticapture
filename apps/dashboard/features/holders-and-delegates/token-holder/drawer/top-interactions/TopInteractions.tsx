@@ -3,7 +3,7 @@
 import { DaoIdEnum } from "@/shared/types/daos";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
-import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
+import { BlankSlate } from "@/shared/design-system/blank-slate/BlankSlate";
 import { ArrowDown, ArrowUp, Inbox } from "lucide-react";
 import { useAccountInteractionsData } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/hooks/useAccountInteractionsData";
 import { TopInteractionsChart } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/TopInteractionsChart";

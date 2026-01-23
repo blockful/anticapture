@@ -9,7 +9,7 @@ import { Delegates } from "@/features/holders-and-delegates/components";
 import { TabButton } from "@/features/holders-and-delegates/components/TabButton";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TokenHolders } from "@/features/holders-and-delegates/token-holder";
-import { SubSectionsContainer } from "@/shared/components/design-system/section";
+import { SubSectionsContainer } from "@/shared/design-system/section";
 import { SwitcherDateMobile } from "@/shared/components/switchers/SwitcherDateMobile";
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 

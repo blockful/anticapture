@@ -3,8 +3,8 @@
 import { useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { SkeletonRow, Button, IconButton } from "@/shared/components";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
+import { EnsAvatar } from "@/shared/design-system/avatars/ens-avatar/EnsAvatar";
+import { BadgeStatus } from "@/shared/design-system/badges/BadgeStatus";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
 import { ArrowRight, ExternalLink } from "lucide-react";
@@ -15,11 +15,11 @@ import {
   FilterOption,
 } from "@/shared/components/dropdowns/FilterDropdown";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { Table } from "@/shared/components/design-system/table/Table";
-import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
+import { Table } from "@/shared/design-system/table/Table";
+import { AmountFilter } from "@/shared/design-system/table/filters/amount-filter/AmountFilter";
 import { parseUnits } from "viem";
-import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
-import { AddressFilter } from "@/shared/components/design-system/table/filters";
+import { SortOption } from "@/shared/design-system/table/filters/amount-filter/components";
+import { AddressFilter } from "@/shared/design-system/table/filters";
 import { fetchAddressFromEnsName } from "@/shared/hooks/useEnsData";
 import daoConfig from "@/shared/dao-config";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";

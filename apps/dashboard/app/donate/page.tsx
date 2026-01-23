@@ -1,7 +1,7 @@
 import { HeaderSidebar } from "@/widgets";
 import { DonationSection } from "@/features/donation";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
-import { Footer } from "@/shared/components/design-system/footer/Footer";
+import { Footer } from "@/shared/design-system/footer/Footer";
 
 export default function DonatePage() {
   return (

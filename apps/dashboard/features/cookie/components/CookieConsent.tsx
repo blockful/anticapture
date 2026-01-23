@@ -6,7 +6,7 @@ import { cn } from "@/shared/utils";
 import { CookieBackground } from "@/shared/components/icons";
 import Image from "next/image";
 import { Button } from "@/shared/components";
-import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import { DefaultLink } from "@/shared/design-system/links/default-link";
 
 interface CookieConsentProps {
   className?: string;
