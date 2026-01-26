@@ -9,7 +9,7 @@ import {
   AccountBalanceResponseMapper,
   AccountBalanceResponseSchema,
 } from "@/api/mappers";
-import { getAddress, isAddress } from "viem";
+import { toLowerCaseAddress } from "@/lib/utils";
 import { DaoIdEnum } from "@/lib/enums";
 
 export function accountBalances(
@@ -79,10 +79,7 @@ export function accountBalances(
       tags: ["account-balances"],
       request: {
         params: z.object({
-          address: z
-            .string()
-            .refine((addr) => isAddress(addr, { strict: false }))
-            .transform((addr) => getAddress(addr)),
+          address: z.string().transform((addr) => toLowerCaseAddress(addr)),
         }),
       },
       responses: {

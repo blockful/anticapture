@@ -1,4 +1,3 @@
-import { getAddress, isAddress } from "viem";
 import { z } from "@hono/zod-openapi";
 
 import { delegation, transaction } from "ponder:schema";
@@ -8,6 +7,7 @@ import {
   TransferMapper,
   TransferResponseSchema,
 } from "../transfers";
+import { toLowerCaseAddress } from "@/lib/utils";
 
 export type DBTransaction = typeof transaction.$inferSelect & {
   transfers: DBTransfer[];
@@ -50,13 +50,11 @@ export const TransactionsRequestSchema = z
     toDate: z.coerce.number().int("toDate must be an integer").optional(),
     from: z
       .string()
-      .refine((addr) => isAddress(addr, { strict: false }))
-      .transform((addr) => getAddress(addr))
+      .transform((addr) => toLowerCaseAddress(addr))
       .optional(),
     to: z
       .string()
-      .refine((addr) => isAddress(addr, { strict: false }))
-      .transform((addr) => getAddress(addr))
+      .transform((addr) => toLowerCaseAddress(addr))
       .optional(),
     minAmount: z
       .string()

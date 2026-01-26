@@ -6,7 +6,7 @@ import {
   HistoricalVotingPowerRequestSchema,
   HistoricalVotingPowerMapper,
 } from "@/api/mappers";
-import { getAddress, isAddress } from "viem";
+import { toLowerCaseAddress } from "@/lib/utils";
 
 export function historicalVotingPowers(app: Hono, service: VotingPowerService) {
   app.openapi(
@@ -19,10 +19,7 @@ export function historicalVotingPowers(app: Hono, service: VotingPowerService) {
       tags: ["proposals"],
       request: {
         params: z.object({
-          accountId: z
-            .string()
-            .refine((addr) => isAddress(addr, { strict: false }))
-            .transform((addr) => getAddress(addr)),
+          accountId: z.string().transform((addr) => toLowerCaseAddress(addr)),
         }),
         query: HistoricalVotingPowerRequestSchema,
       },

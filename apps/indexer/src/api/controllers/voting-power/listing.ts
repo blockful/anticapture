@@ -6,8 +6,8 @@ import {
   VotingPowersMapper,
   VotingPowerResponseSchema,
 } from "@/api/mappers/";
-import { getAddress, isAddress } from "viem";
 import { VotingPowerMapper } from "@/api/mappers/voting-power/voting-power-variations";
+import { toLowerCaseAddress } from "@/lib/utils";
 
 export function votingPowers(app: Hono, service: VotingPowerService) {
   app.openapi(
@@ -70,10 +70,7 @@ export function votingPowers(app: Hono, service: VotingPowerService) {
       tags: ["proposals"],
       request: {
         params: z.object({
-          accountId: z
-            .string()
-            .refine((addr) => isAddress(addr, { strict: false }))
-            .transform((addr) => getAddress(addr)),
+          accountId: z.string().transform((addr) => toLowerCaseAddress(addr)),
         }),
       },
       responses: {
