@@ -1,4 +1,5 @@
 import * as chains from "viem/chains";
+import { Address, isAddress } from "viem";
 
 /**
  * Calculates the absolute difference between two numbers
@@ -29,4 +30,14 @@ export function max(...values: bigint[]): bigint {
 
 export function getChain(chainId: number): chains.Chain | undefined {
   return Object.values(chains).find((chain) => chain.id === chainId);
+}
+
+/**
+ * Converts an address to lowercase
+ */
+export function toLowerCaseAddress(address: string): Address {
+  if (!isAddress(address, { strict: false })) {
+    throw new Error(`Invalid address: ${address}`);
+  }
+  return address.toLowerCase() as Address;
 }
