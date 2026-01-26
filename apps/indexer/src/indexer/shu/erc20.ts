@@ -113,7 +113,6 @@ export function SHUTokenIndexer(address: Address, decimals: number) {
 
     await updateCirculatingSupply(
       context,
-      MetricTypesEnum.CIRCULATING_SUPPLY,
       daoId,
       address,
       event.block.timestamp,
