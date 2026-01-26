@@ -93,16 +93,14 @@ export class AccountInteractionsRepository {
       )
       .as("combined");
 
-    const orderDirectionFn = orderDirection === "desc" ? desc : asc;
-    const orderByField =
-      orderBy === "count"
-        ? sql`${combined.fromCount} + ${combined.toCount}`
-        : sql`ABS(${combined.fromChange}) + ABS(${combined.toChange})`;
-
     const subquery = db
       .select({
         accountId: combined.accountId,
         currentBalance: combined.currentBalance,
+        fromChange: combined.fromChange,
+        toChange: combined.toChange,
+        fromCount: combined.fromCount,
+        toCount: combined.toCount,
         totalVolume:
           sql<bigint>`ABS(${combined.fromChange}) + ABS(${combined.toChange})`.as(
             "total_volume",
@@ -118,6 +116,12 @@ export class AccountInteractionsRepository {
       })
       .from(combined)
       .as("subquery");
+
+    const orderDirectionFn = orderDirection === "desc" ? desc : asc;
+    const orderByField =
+      orderBy === "count"
+        ? sql`${subquery.fromCount} + ${subquery.toCount}`
+        : sql`ABS(${subquery.fromChange}) + ABS(${subquery.toChange})`;
 
     const baseQuery = db
       .select()
