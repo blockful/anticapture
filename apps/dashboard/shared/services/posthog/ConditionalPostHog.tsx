@@ -20,16 +20,25 @@ const ConditionalPostHog = () => {
   // Click handler for data-ph-event elements
   const handlePostHogClick = useCallback((e: MouseEvent) => {
     const target = e.target as HTMLElement;
-    const link = target.closest<HTMLAnchorElement>("[data-ph-event]");
-    if (!link) return;
+    const element = target.closest<HTMLElement>("[data-ph-event]");
+    if (!element) return;
 
     const windowWithPostHog = window as WindowWithPostHog;
     if (windowWithPostHog.posthog?.capture) {
-      windowWithPostHog.posthog.capture(link.dataset.phEvent || "", {
-        source: link.dataset.phSource,
-        href: link.href,
+      const properties: Record<string, string | undefined> = {
+        source: element.dataset.phSource,
         page: window.location.pathname,
-      });
+      };
+
+      // Only add href if the element is an anchor tag
+      if (element instanceof HTMLAnchorElement) {
+        properties.href = element.href;
+      }
+
+      windowWithPostHog.posthog.capture(
+        element.dataset.phEvent || "",
+        properties,
+      );
     }
   }, []);
 

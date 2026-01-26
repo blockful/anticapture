@@ -44,7 +44,7 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
       <button
         ref={ref}
         className={cn(
-          "disabled:text-dimmed disabled:bg-surface-disabled disabled:border-border-contrast flex h-fit shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md text-sm/tight font-medium transition-colors duration-300",
+          "disabled:text-dimmed disabled:bg-surface-disabled disabled:border-border-contrast flex h-fit shrink-0 cursor-pointer items-center justify-center gap-2 text-sm/tight font-medium transition-colors duration-300",
           variantStyles[variant],
           boxSizeStyles[size],
           className,

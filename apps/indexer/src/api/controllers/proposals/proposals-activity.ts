@@ -1,5 +1,5 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
-import { isAddress } from "viem";
+import { getAddress, isAddress } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
 import { ProposalsActivityService } from "@/api/services";
@@ -28,7 +28,11 @@ export function proposalsActivity(
         query: z.object({
           address: z
             .string()
-            .refine((addr) => isAddress(addr), "Invalid Ethereum address"),
+            .refine(
+              (addr) => isAddress(addr, { strict: false }),
+              "Invalid Ethereum address",
+            )
+            .transform((addr) => getAddress(addr)),
           fromDate: z
             .string()
             .transform((val) => Number(val))
