@@ -1,5 +1,5 @@
 import { Address } from "viem";
-import { asc, desc, gte, sql, and, eq, or, lte } from "ponder";
+import { asc, desc, gte, sql, and, eq, or, gt, lt } from "ponder";
 import { db } from "ponder:api";
 import { transfer, accountBalance } from "ponder:schema";
 
@@ -23,14 +23,6 @@ export class AccountInteractionsRepository {
         eq(transfer.fromAccountId, accountId),
       ),
     ];
-
-    if (filter.minAmount !== undefined) {
-      transferCriteria.push(gte(transfer.amount, filter.minAmount));
-    }
-
-    if (filter.maxAmount !== undefined) {
-      transferCriteria.push(lte(transfer.amount, filter.maxAmount));
-    }
 
     if (filter.address) {
       transferCriteria.push(
@@ -107,12 +99,12 @@ export class AccountInteractionsRepository {
         ? sql`${combined.fromCount} + ${combined.toCount}`
         : sql`ABS(${combined.fromChange}) + ABS(${combined.toChange})`;
 
-    const baseQuery = db
+    const subquery = db
       .select({
         accountId: combined.accountId,
         currentBalance: combined.currentBalance,
         totalVolume:
-          sql<string>`ABS(${combined.fromChange}) + ABS(${combined.toChange})`.as(
+          sql<bigint>`ABS(${combined.fromChange}) + ABS(${combined.toChange})`.as(
             "total_volume",
           ),
         absoluteChange:
@@ -125,6 +117,21 @@ export class AccountInteractionsRepository {
           ),
       })
       .from(combined)
+      .as("subquery");
+
+    const baseQuery = db
+      .select()
+      .from(subquery)
+      .where(
+        and(
+          filter.minAmount
+            ? gt(subquery.totalVolume, filter.minAmount)
+            : undefined,
+          filter.maxAmount
+            ? lt(subquery.totalVolume, filter.maxAmount)
+            : undefined,
+        ),
+      )
       .orderBy(orderDirectionFn(orderByField));
 
     const totalCountResult = await db
