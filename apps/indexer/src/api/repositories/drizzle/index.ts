@@ -314,7 +314,7 @@ export class DrizzleRepository {
     limit: number,
     orderBy: "timestamp" | "votingPower",
     orderDirection: "asc" | "desc",
-    voterAddresses?: Address[] | Address,
+    voterAddresses?: Address[],
     support?: string,
   ): Promise<DBVote[]> {
     const whereClauses: SQL<unknown>[] = [
@@ -325,15 +325,8 @@ export class DrizzleRepository {
       whereClauses.push(eq(votesOnchain.support, support));
     }
 
-    // Normalize voterAddresses to array
-    const addressArray = voterAddresses
-      ? Array.isArray(voterAddresses)
-        ? voterAddresses
-        : [voterAddresses]
-      : undefined;
-
-    if (addressArray !== undefined && addressArray.length > 0) {
-      whereClauses.push(inArray(votesOnchain.voterAccountId, addressArray));
+    if (voterAddresses !== undefined && voterAddresses.length > 0) {
+      whereClauses.push(inArray(votesOnchain.voterAccountId, voterAddresses));
     }
 
     const orderByColumn =
@@ -353,7 +346,7 @@ export class DrizzleRepository {
 
   async getVotesCount(
     proposalId: string,
-    voterAddressIn?: Address[] | Address,
+    voterAddressIn?: Address[],
     support?: string,
   ): Promise<number> {
     const whereClauses: SQL<unknown>[] = [
@@ -364,15 +357,8 @@ export class DrizzleRepository {
       whereClauses.push(eq(votesOnchain.support, support));
     }
 
-    // Normalize voterAddressIn to array
-    const addressArray = voterAddressIn
-      ? Array.isArray(voterAddressIn)
-        ? voterAddressIn
-        : [voterAddressIn]
-      : undefined;
-
-    if (addressArray !== undefined && addressArray.length > 0) {
-      whereClauses.push(inArray(votesOnchain.voterAccountId, addressArray));
+    if (voterAddressIn !== undefined && voterAddressIn.length > 0) {
+      whereClauses.push(inArray(votesOnchain.voterAccountId, voterAddressIn));
     }
 
     return await db.$count(votesOnchain, and(...whereClauses));

@@ -42,12 +42,12 @@ interface ProposalsRepository {
     limit: number,
     orderBy: "timestamp" | "votingPower",
     orderDirection: "asc" | "desc",
-    voterAddressIn?: Address[] | Address,
+    voterAddressIn?: Address[],
     support?: string,
   ): Promise<DBVote[]>;
   getVotesCount(
     proposalId: string,
-    voterAddressIn?: Address[] | Address,
+    voterAddressIn?: Address[],
     support?: string,
   ): Promise<number>;
 }
@@ -201,7 +201,7 @@ export class ProposalsService {
     limit: number = 10,
     orderBy: "timestamp" | "votingPower" = "timestamp",
     orderDirection: "asc" | "desc" = "desc",
-    voterAddressIn?: Address[] | Address,
+    voterAddressIn?: Address[],
     support?: string,
   ): Promise<VotesResponse> {
     const [votes, totalCount] = await Promise.all([

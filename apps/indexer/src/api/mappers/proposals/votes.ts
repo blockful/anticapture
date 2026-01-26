@@ -1,6 +1,6 @@
 import { z } from "@hono/zod-openapi";
 import { votesOnchain } from "ponder:schema";
-import { isAddress } from "viem";
+import { getAddress, isAddress } from "viem";
 
 export type DBVote = typeof votesOnchain.$inferSelect;
 
@@ -20,8 +20,16 @@ export const VotesRequestSchema = z.object({
     .default(10),
   voterAddressIn: z
     .union([
-      z.string().refine((val) => isAddress(val, { strict: false })),
-      z.array(z.string().refine((val) => isAddress(val, { strict: false }))),
+      z
+        .string()
+        .refine((val) => isAddress(val, { strict: false }))
+        .transform((val) => [getAddress(val)]),
+      z.array(
+        z
+          .string()
+          .refine((val) => isAddress(val, { strict: false }))
+          .transform((val) => getAddress(val)),
+      ),
     ])
     .optional(),
   orderBy: z.enum(["timestamp", "votingPower"]).optional().default("timestamp"),
