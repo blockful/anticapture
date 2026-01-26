@@ -1,0 +1,61 @@
+import { serve } from "@hono/node-server";
+import { OpenAPIHono as Hono } from "@hono/zod-openapi";
+import { swaggerUI } from "@hono/swagger-ui";
+import { logger } from "hono/logger";
+import { cors } from "hono/cors";
+
+import { env } from "@/env";
+import { initDb } from "@/db";
+import { ArkhamClient } from "@/clients/arkham";
+import { EnrichmentService } from "@/services/enrichment";
+import { addressController } from "@/controllers/address";
+
+// Initialize database
+initDb(env.DATABASE_URL);
+
+// Initialize clients and services
+const arkhamClient = new ArkhamClient(env.ARKHAM_API_URL, env.ARKHAM_API_KEY);
+const enrichmentService = new EnrichmentService(arkhamClient, env.RPC_URL);
+
+// Create Hono app
+const app = new Hono();
+
+// Middleware
+app.use(logger());
+app.use(
+  cors({
+    origin: "*",
+  }),
+);
+
+// Health check
+app.get("/health", (c) => {
+  return c.json({ status: "ok", timestamp: new Date().toISOString() });
+});
+
+// Register controllers
+addressController(app, enrichmentService);
+
+// OpenAPI documentation
+app.doc("/docs/json", {
+  openapi: "3.0.0",
+  info: {
+    title: "Address Enrichment API",
+    version: "0.1.0",
+    description:
+      "API for enriching Ethereum addresses with labels and type information",
+  },
+});
+
+app.get("/docs", swaggerUI({ url: "/docs/json" }));
+
+// Start server
+console.log(`🚀 Address Enrichment API starting on port ${env.PORT}`);
+serve({
+  fetch: app.fetch,
+  port: env.PORT,
+});
+
+console.log(
+  `📚 API documentation available at http://localhost:${env.PORT}/docs`,
+);
