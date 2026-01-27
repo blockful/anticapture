@@ -1,5 +1,5 @@
-query getDelegationsTimestamp($delegator: String!) {
-  delegations(address: $delegator) {
+query getDelegationsTimestamp($delegate: String!) {
+  delegations(address: $delegate) {
     items {
       delegatorAddress
       delegateAddress

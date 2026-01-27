@@ -2693,7 +2693,7 @@ export type GetDelegatorVotingPowerDetailsQueryVariables = Exact<{
 export type GetDelegatorVotingPowerDetailsQuery = { __typename?: 'Query', votingPowerByAccountId?: { __typename?: 'votingPowerByAccountId_200_response', accountId: string, votingPower: string } | null, accountBalances?: { __typename?: 'accountBalances_200_response', totalCount: number, items: Array<{ __typename?: 'query_accountBalances_items_items', accountId: string, balance: string } | null> } | null };
 
 export type GetDelegationsTimestampQueryVariables = Exact<{
-  delegator: Scalars['String']['input'];
+  delegate: Scalars['String']['input'];
 }>;
 
 

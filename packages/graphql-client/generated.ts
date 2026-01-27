@@ -2696,7 +2696,7 @@ export type GetDelegatorVotingPowerDetailsQueryVariables = Exact<{
 export type GetDelegatorVotingPowerDetailsQuery = { __typename?: 'Query', votingPowerByAccountId?: { __typename?: 'votingPowerByAccountId_200_response', accountId: string, votingPower: string } | null, accountBalances?: { __typename?: 'accountBalances_200_response', totalCount: number, items: Array<{ __typename?: 'query_accountBalances_items_items', accountId: string, balance: string } | null> } | null };
 
 export type GetDelegationsTimestampQueryVariables = Exact<{
-  delegator: Scalars['String']['input'];
+  delegate: Scalars['String']['input'];
 }>;
 
 
@@ -3342,8 +3342,8 @@ export type GetDelegatorVotingPowerDetailsLazyQueryHookResult = ReturnType<typeo
 export type GetDelegatorVotingPowerDetailsSuspenseQueryHookResult = ReturnType<typeof useGetDelegatorVotingPowerDetailsSuspenseQuery>;
 export type GetDelegatorVotingPowerDetailsQueryResult = Apollo.QueryResult<GetDelegatorVotingPowerDetailsQuery, GetDelegatorVotingPowerDetailsQueryVariables>;
 export const GetDelegationsTimestampDocument = gql`
-    query getDelegationsTimestamp($delegator: String!) {
-  delegations(address: $delegator) {
+    query getDelegationsTimestamp($delegate: String!) {
+  delegations(address: $delegate) {
     items {
       delegatorAddress
       delegateAddress
@@ -3366,7 +3366,7 @@ export const GetDelegationsTimestampDocument = gql`
  * @example
  * const { data, loading, error } = useGetDelegationsTimestampQuery({
  *   variables: {
- *      delegator: // value for 'delegator'
+ *      delegate: // value for 'delegate'
  *   },
  * });
  */

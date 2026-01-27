@@ -6,11 +6,11 @@ import { Address } from "viem";
 
 export class DelegationsRepository {
   async getDelegations(address: Address): Promise<DBDelegation[]> {
-    const result = await db.query.delegation.findFirst({
-      where: eq(delegation.delegatorAccountId, address),
+    const result = await db.query.delegation.findMany({
+      where: eq(delegation.delegateAccountId, address),
       orderBy: [desc(delegation.timestamp), desc(delegation.logIndex)],
     });
 
-    return result ? [result] : [];
+    return result;
   }
 }

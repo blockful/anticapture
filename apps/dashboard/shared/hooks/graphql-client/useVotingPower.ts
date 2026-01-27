@@ -123,17 +123,7 @@ export const useVotingPower = ({
   const accountBalances = delegatorsVotingPowerDetails?.accountBalances?.items;
 
   // ------------------------------------------------------------------
-  // Prepare the array of delegator addresses once balances are fetched
-  // ------------------------------------------------------------------
-  const delegatorAddresses: string[] = accountBalances
-    ? accountBalances
-        .filter((item) => item !== null)
-        .map((item) => item.accountId)
-    : [];
-
-  // ------------------------------------------------------------------
-  // Fetch delegation timestamps (skipped until we have delegatorAddresses)
-  // Note: We query delegations for each delegator individually and filter client-side
+  // Fetch delegation timestamps for all delegators TO this delegate
   // ------------------------------------------------------------------
   const {
     data: delegationsTimestampData,
@@ -146,38 +136,20 @@ export const useVotingPower = ({
       },
     },
     variables: {
-      delegator: delegatorAddresses[0] || "",
+      delegate: address,
     },
-    skip: delegatorAddresses.length === 0,
+    skip: !address,
   });
 
-  // ------------------------------------------------------------------
-  // Build timestamp lookup <delegatorAddress> -> timestamp
-  // Filter by delegate address client-side since backend doesn't support it
-  // ------------------------------------------------------------------
   useEffect(() => {
     if (delegationsTimestampData?.delegations?.items) {
-      const filteredItems = delegationsTimestampData.delegations.items
-        .filter((d): d is NonNullable<typeof d> => d !== null)
-        .filter(
-          (d) => d.delegateAddress?.toLowerCase() === address.toLowerCase(),
-        );
-      setAllDelegations((prev) => {
-        const merged = [
-          ...prev,
-          ...filteredItems.filter(
-            (d) =>
-              !prev.some(
-                (p) =>
-                  p.delegatorAddress?.toLowerCase() ===
-                  d.delegatorAddress?.toLowerCase(),
-              ),
-          ),
-        ];
-        return merged;
-      });
+      setAllDelegations(
+        delegationsTimestampData.delegations.items.filter(
+          (d): d is NonNullable<typeof d> => d !== null,
+        ),
+      );
     }
-  }, [delegationsTimestampData, address]);
+  }, [delegationsTimestampData]);
 
   const timestampMap = Object.fromEntries(
     allDelegations.map((d) => [d.delegatorAddress?.toLowerCase(), d.timestamp]),
