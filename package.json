@@ -5,6 +5,7 @@
   "scripts": {
     "dashboard": "dotenv -- pnpm run --filter=@anticapture/dashboard",
     "indexer": "dotenv -- pnpm run --filter=@anticapture/indexer",
+    "api": "dotenv -- pnpm run --filter=@anticapture/api",
     "gateway": "dotenv -- pnpm run --filter=@anticapture/api-gateway",
     "petition": "dotenv -- pnpm run --filter=@anticapture/petition",
     "indexer-metrics": "dotenv -- pnpm run --filter=@anticapture/indexer-metrics",

@@ -1,6 +1,6 @@
 import { db } from "ponder:api";
 import { inArray } from "drizzle-orm";
-import { daoMetricsDayBucket } from "ponder:schema";
+import { daoMetricsDayBucket } from "@/db/schema";
 
 import { ChartType } from "@/mappers/";
 import { MetricTypesEnum } from "@/lib/constants";

@@ -1,5 +1,5 @@
 import { db } from "ponder:api";
-import { daoMetricsDayBucket } from "ponder:schema";
+import { daoMetricsDayBucket } from "@/db/schema";
 import { and, gte, lte, desc, asc, eq, lt, inArray } from "drizzle-orm";
 
 export class DaoMetricsDayBucketRepository {

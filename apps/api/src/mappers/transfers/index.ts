@@ -1,6 +1,6 @@
 import { z } from "@hono/zod-openapi";
 
-import { transfer } from "ponder:schema";
+import { transfer } from "@/db/schema";
 import { getAddress, isAddress } from "viem";
 
 export type DBTransfer = typeof transfer.$inferSelect;

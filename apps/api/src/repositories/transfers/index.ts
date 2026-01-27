@@ -1,6 +1,6 @@
 import { db } from "ponder:api";
 import { and, asc, desc, eq, gte, lte, or } from "drizzle-orm";
-import { transfer } from "ponder:schema";
+import { transfer } from "@/db/schema";
 
 import { DBTransfer, TransfersRequest } from "@/mappers";
 

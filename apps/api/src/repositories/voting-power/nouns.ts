@@ -1,7 +1,7 @@
 import { Address } from "viem";
 import { gte, and, lte, desc, eq, asc, sql } from "drizzle-orm";
 import { db } from "ponder:api";
-import { votingPowerHistory, delegation, transfer } from "ponder:schema";
+import { votingPowerHistory, delegation, transfer } from "@/db/schema";
 
 import { DBHistoricalVotingPowerWithRelations } from "@/mappers";
 

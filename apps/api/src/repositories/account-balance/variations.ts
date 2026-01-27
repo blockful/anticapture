@@ -1,6 +1,6 @@
 import { asc, desc, gte, sql, and, inArray } from "drizzle-orm";
 import { db } from "ponder:api";
-import { transfer, accountBalance } from "ponder:schema";
+import { transfer, accountBalance } from "@/db/schema";
 import { DBAccountBalanceVariation, DBHistoricalBalance } from "@/mappers";
 import { Address } from "viem";
 

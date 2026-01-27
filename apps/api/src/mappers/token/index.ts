@@ -1,5 +1,5 @@
 import { z } from "@hono/zod-openapi";
-import { token } from "ponder:schema";
+import { token } from "@/db/schema";
 
 export const TokenHistoricalPriceRequest = z.object({
   skip: z.coerce

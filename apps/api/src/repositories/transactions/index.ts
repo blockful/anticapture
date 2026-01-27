@@ -1,7 +1,7 @@
 import { DBTransaction, TransactionsRequest } from "@/mappers";
 import { sql, eq, or, countDistinct, SQLChunk } from "drizzle-orm";
 import { db } from "ponder:api";
-import { delegation, transaction, transfer } from "ponder:schema";
+import { delegation, transaction, transfer } from "@/db/schema";
 
 export class TransactionsRepository {
   async getFilteredAggregateTransactions(

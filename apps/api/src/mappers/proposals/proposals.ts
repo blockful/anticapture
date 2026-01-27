@@ -1,5 +1,5 @@
 import { z } from "@hono/zod-openapi";
-import { proposalsOnchain } from "ponder:schema";
+import { proposalsOnchain } from "@/db/schema";
 
 export type DBProposal = typeof proposalsOnchain.$inferSelect;
 

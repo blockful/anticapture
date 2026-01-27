@@ -2,7 +2,7 @@ import { Address } from "viem";
 import { asc, desc, gte, sql, and, eq, or, gt, lt } from "drizzle-orm";
 
 import { db } from "ponder:api";
-import { transfer, accountBalance } from "ponder:schema";
+import { transfer, accountBalance } from "@/db/schema";
 
 import { AccountInteractions, Filter } from "../../mappers";
 

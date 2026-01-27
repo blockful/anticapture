@@ -18,7 +18,7 @@ import {
   delegation,
   transfer,
   accountPower,
-} from "ponder:schema";
+} from "@/db/schema";
 
 import {
   AmountFilter,

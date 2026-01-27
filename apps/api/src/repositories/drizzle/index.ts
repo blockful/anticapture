@@ -19,7 +19,7 @@ import {
   proposalsOnchain,
   votesOnchain,
   votingPowerHistory,
-} from "ponder:schema";
+} from "@/db/schema";
 import { SQL } from "drizzle-orm";
 import { Address } from "viem";
 

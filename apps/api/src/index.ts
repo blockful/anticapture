@@ -1,6 +1,6 @@
 import { db } from "ponder:api";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
-import schema from "ponder:schema";
+
 import { logger } from "hono/logger";
 import { fromZodError } from "zod-validation-error";
 import { createPublicClient, http } from "viem";
@@ -47,7 +47,7 @@ import {
 } from "@/repositories";
 import { errorHandler } from "@/middlewares";
 import { getClient } from "@/lib/client";
-import {} from "@/lib/utils";
+import { getChain } from "@/lib/utils";
 import {
   AccountBalanceService,
   BalanceVariationsService,

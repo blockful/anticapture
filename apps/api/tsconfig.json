@@ -20,7 +20,8 @@
     "skipLibCheck": true,
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "outDir": "./dist"
   },
   "include": ["./**/*.ts"],
   "exclude": ["node_modules", "test"]

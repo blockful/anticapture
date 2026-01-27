@@ -1,7 +1,7 @@
 import { DaysEnum } from "@/lib/enums";
 import { z } from "@hono/zod-openapi";
 import { Address, getAddress, isAddress } from "viem";
-import { accountPower } from "ponder:schema";
+import { accountPower } from "@/db/schema";
 
 import { PERCENTAGE_NO_BASELINE } from "../constants";
 import { PeriodResponseSchema, TimestampResponseMapper } from "../shared";

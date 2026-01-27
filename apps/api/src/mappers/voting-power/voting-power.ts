@@ -1,5 +1,5 @@
 import { z } from "@hono/zod-openapi";
-import { votingPowerHistory } from "ponder:schema";
+import { votingPowerHistory } from "@/db/schema";
 
 import { DBDelegation } from "../transactions";
 import { DBTransfer } from "../transfers";

@@ -1,7 +1,7 @@
 import { getAddress, isAddress } from "viem";
 import { z } from "@hono/zod-openapi";
 
-import { delegation, transaction } from "ponder:schema";
+import { delegation, transaction } from "@/db/schema";
 
 import {
   DBTransfer,

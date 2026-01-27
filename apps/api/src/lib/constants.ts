@@ -1,8 +1,6 @@
-import { Address, zeroAddress } from "viem";
+import { Address } from "viem";
 
 import { DaoIdEnum } from "./enums";
-
-export const DAYS_IN_YEAR = 365;
 
 export const CONTRACT_ADDRESSES = {
   [DaoIdEnum.UNI]: {
@@ -343,4 +341,7 @@ export enum MetricTypesEnum {
   TREASURY = "TREASURY",
 }
 
-export const metricTypeArray = Object.values(MetricTypesEnum);
+export const MetricTypesArray = Object.values(MetricTypesEnum) as [
+  string,
+  ...string[],
+];

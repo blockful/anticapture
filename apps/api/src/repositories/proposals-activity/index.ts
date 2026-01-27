@@ -2,7 +2,7 @@ import { Address } from "viem";
 import { DaoIdEnum } from "@/lib/enums";
 import { asc, eq, sql } from "drizzle-orm";
 import { db } from "ponder:api";
-import { votesOnchain } from "ponder:schema";
+import { votesOnchain } from "@/db/schema";
 
 export type DbProposal = {
   id: string;

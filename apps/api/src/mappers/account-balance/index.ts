@@ -1,6 +1,6 @@
 import { z } from "@hono/zod-openapi";
 import { Address, getAddress, isAddress } from "viem";
-import { accountBalance } from "ponder:schema";
+import { accountBalance } from "@/db/schema";
 
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum, DaysEnum, DaysOpts } from "@/lib/enums";

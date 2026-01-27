@@ -12,7 +12,7 @@ import {
   sql,
 } from "drizzle-orm";
 import { db } from "ponder:api";
-import { accountBalance } from "ponder:schema";
+import { accountBalance } from "@/db/schema";
 import { Address } from "viem";
 
 export class AccountBalanceRepository {

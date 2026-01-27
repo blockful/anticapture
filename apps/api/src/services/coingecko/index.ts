@@ -53,7 +53,7 @@ export class CoingeckoService implements PriceProvider {
   }
 
   async getHistoricalTokenData(
-    days: number = DAYS_IN_YEAR,
+    days: number = 365,
   ): Promise<TokenHistoricalPriceResponse> {
     const tokenId = CoingeckoTokenIdEnum[this.daoId];
 

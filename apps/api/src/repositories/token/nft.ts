@@ -1,5 +1,5 @@
 import { db } from "ponder:api";
-import { tokenPrice } from "ponder:schema";
+import { tokenPrice } from "@/db/schema";
 import { desc, sql } from "drizzle-orm";
 
 import { TokenHistoricalPriceResponse } from "@/mappers";

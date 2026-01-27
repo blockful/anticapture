@@ -1,5 +1,5 @@
 import { db } from "ponder:api";
-import { daoMetricsDayBucket } from "ponder:schema";
+import { daoMetricsDayBucket } from "@/db/schema";
 import { and, eq, gte, lte, desc } from "drizzle-orm";
 import { MetricTypesEnum } from "@/lib/constants";
 
