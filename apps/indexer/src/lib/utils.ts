@@ -1,5 +1,3 @@
-import * as chains from "viem/chains";
-
 /**
  * Calculates the absolute difference between two numbers
  */
@@ -25,8 +23,4 @@ export function max(...values: bigint[]): bigint {
     throw new Error("At least one value must be provided");
   }
   return values.reduce((max, value) => (value > max ? value : max));
-}
-
-export function getChain(chainId: number): chains.Chain | undefined {
-  return Object.values(chains).find((chain) => chain.id === chainId);
 }
