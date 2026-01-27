@@ -2130,7 +2130,7 @@ type accountBalances_200_response {
 }
 
 type query_accountBalances_items_items {
-  accountId: String!
+  address: String!
   balance: String!
   tokenId: String!
   delegate: String!
@@ -2142,7 +2142,7 @@ enum queryInput_accountBalances_orderDirection {
 }
 
 type accountBalanceByAccountId_200_response {
-  accountId: String!
+  address: String!
   balance: String!
   tokenId: String!
   delegate: String!

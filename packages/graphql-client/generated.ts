@@ -906,7 +906,7 @@ export type AccountBalance = {
 
 export type AccountBalanceByAccountId_200_Response = {
   __typename?: 'accountBalanceByAccountId_200_response';
-  accountId: Scalars['String']['output'];
+  address: Scalars['String']['output'];
   balance: Scalars['String']['output'];
   delegate: Scalars['String']['output'];
   tokenId: Scalars['String']['output'];
@@ -2095,7 +2095,7 @@ export type Query_AccountBalanceVariations_Period = {
 
 export type Query_AccountBalances_Items_Items = {
   __typename?: 'query_accountBalances_items_items';
-  accountId: Scalars['String']['output'];
+  address: Scalars['String']['output'];
   balance: Scalars['String']['output'];
   delegate: Scalars['String']['output'];
   tokenId: Scalars['String']['output'];
@@ -3111,7 +3111,7 @@ export type GetDelegatorVotingPowerDetailsQueryVariables = Exact<{
 }>;
 
 
-export type GetDelegatorVotingPowerDetailsQuery = { __typename?: 'Query', votingPowerByAccountId?: { __typename?: 'votingPowerByAccountId_200_response', accountId: string, votingPower: string } | null, accountBalances?: { __typename?: 'accountBalances_200_response', items: Array<{ __typename?: 'query_accountBalances_items_items', accountId: string, balance: string } | null> } | null };
+export type GetDelegatorVotingPowerDetailsQuery = { __typename?: 'Query', votingPowerByAccountId?: { __typename?: 'votingPowerByAccountId_200_response', accountId: string, votingPower: string } | null, accountBalances?: { __typename?: 'accountBalances_200_response', items: Array<{ __typename?: 'query_accountBalances_items_items', address: string, balance: string } | null> } | null };
 
 export type GetDelegationsTimestampQueryVariables = Exact<{
   delegator: Array<Scalars['String']['input']> | Scalars['String']['input'];
@@ -3128,7 +3128,7 @@ export type GetTopFiveDelegatorsQueryVariables = Exact<{
 }>;
 
 
-export type GetTopFiveDelegatorsQuery = { __typename?: 'Query', accountBalances?: { __typename?: 'accountBalances_200_response', items: Array<{ __typename?: 'query_accountBalances_items_items', accountId: string, balance: string } | null> } | null };
+export type GetTopFiveDelegatorsQuery = { __typename?: 'Query', accountBalances?: { __typename?: 'accountBalances_200_response', items: Array<{ __typename?: 'query_accountBalances_items_items', address: string, balance: string } | null> } | null };
 
 export type GetVotingPowerCountingQueryVariables = Exact<{
   delegates?: InputMaybe<Scalars['JSON']['input']>;
@@ -3268,7 +3268,7 @@ export type GetProposalsQuery = { __typename?: 'Query', proposals?: { __typename
 export type GetDaoAddressesAccountBalancesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetDaoAddressesAccountBalancesQuery = { __typename?: 'Query', accountBalances?: { __typename?: 'accountBalances_200_response', items: Array<{ __typename?: 'query_accountBalances_items_items', accountId: string, balance: string } | null> } | null };
+export type GetDaoAddressesAccountBalancesQuery = { __typename?: 'Query', accountBalances?: { __typename?: 'accountBalances_200_response', items: Array<{ __typename?: 'query_accountBalances_items_items', address: string, balance: string } | null> } | null };
 
 export type GetAccountInteractionsQueryVariables = Exact<{
   address: Scalars['String']['input'];
@@ -3314,7 +3314,7 @@ export type GetTopTokenHoldersQueryVariables = Exact<{
 }>;
 
 
-export type GetTopTokenHoldersQuery = { __typename?: 'Query', accountBalances?: { __typename?: 'accountBalances_200_response', totalCount: number, items: Array<{ __typename?: 'query_accountBalances_items_items', accountId: string, balance: string, delegate: string, tokenId: string } | null> } | null };
+export type GetTopTokenHoldersQuery = { __typename?: 'Query', accountBalances?: { __typename?: 'accountBalances_200_response', totalCount: number, items: Array<{ __typename?: 'query_accountBalances_items_items', address: string, balance: string, delegate: string, tokenId: string } | null> } | null };
 
 export type TokenInfoQueryVariables = Exact<{
   currency?: InputMaybe<QueryInput_Token_Currency>;
@@ -3762,7 +3762,7 @@ export const GetDelegatorVotingPowerDetailsDocument = gql`
     delegates: $addresses
   ) {
     items {
-      accountId
+      address
       balance
     }
   }
@@ -3861,7 +3861,7 @@ export const GetTopFiveDelegatorsDocument = gql`
     limit: $limit
   ) {
     items {
-      accountId
+      address
       balance
     }
   }
@@ -4704,7 +4704,7 @@ export const GetDaoAddressesAccountBalancesDocument = gql`
     query GetDaoAddressesAccountBalances {
   accountBalances(orderDirection: desc, limit: 1) {
     items {
-      accountId
+      address
       balance
     }
   }
@@ -4921,7 +4921,7 @@ export const GetTopTokenHoldersDocument = gql`
   ) {
     totalCount
     items {
-      accountId
+      address
       balance
       delegate
       tokenId

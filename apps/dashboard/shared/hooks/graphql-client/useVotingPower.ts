@@ -139,8 +139,8 @@ export const useVotingPower = ({
   // ------------------------------------------------------------------
   const delegatorAddresses: string[] = accountBalances
     ? accountBalances
-        .filter((item) => item !== null)
-        .map((item) => item.accountId)
+      .filter((item) => item !== null)
+      .map((item) => item.address)
     : [];
 
   // ------------------------------------------------------------------
@@ -196,7 +196,7 @@ export const useVotingPower = ({
     .filter((account) => account !== null)
     .map((account) => ({
       ...account,
-      timestamp: timestampMap[account.accountId.toLowerCase()],
+      timestamp: timestampMap[account.address.toLowerCase()],
     }));
 
   const { data: topFiveDelegators } = useGetTopFiveDelegatorsQuery({
@@ -267,7 +267,7 @@ export const useVotingPower = ({
           const merged = [
             ...prevItems,
             ...newItems.filter(
-              (n) => n && !prevItems.some((p) => p?.accountId === n.accountId),
+              (n) => n && !prevItems.some((p) => p?.address === n.address),
             ),
           ];
 

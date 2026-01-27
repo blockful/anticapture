@@ -55,7 +55,7 @@ export const AccountBalancesRequestSchema = z.object({
 });
 
 export const AccountBalanceResponseSchema = z.object({
-  accountId: z.string(),
+  address: z.string(),
   balance: z.string(),
   tokenId: z.string(),
   delegate: z.string(),
@@ -88,7 +88,7 @@ export const AccountBalanceResponseMapper = (
   item: DBAccountBalance,
 ): AccountBalanceResponse => {
   return {
-    accountId: item.accountId,
+    address: item.accountId,
     balance: item.balance.toString(),
     tokenId: item.tokenId,
     delegate: item.delegate,
