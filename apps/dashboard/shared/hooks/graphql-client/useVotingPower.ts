@@ -3,7 +3,6 @@ import {
   GetDelegationsTimestampQuery,
   useGetDelegationsTimestampQuery,
   useGetDelegatorVotingPowerDetailsQuery,
-  useGetVotingPowerCountingQuery,
   useGetTopFiveDelegatorsQuery,
   GetTopFiveDelegatorsQuery,
 } from "@anticapture/graphql-client/hooks";
@@ -110,18 +109,6 @@ export const useVotingPower = ({
     fetchPolicy: "cache-and-network",
   });
 
-  // Count query
-  const { data: countingData } = useGetVotingPowerCountingQuery({
-    variables: {
-      delegates: [address],
-    },
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
-      },
-    },
-  });
-
   // Refetch data when sorting changes to ensure we start from page 1
   useEffect(() => {
     refetch({
@@ -206,6 +193,7 @@ export const useVotingPower = ({
       timestamp: timestampMap[account.accountId.toLowerCase()],
     }));
 
+  // Fetch top 5 delegators
   const { data: topFiveDelegators } = useGetTopFiveDelegatorsQuery({
     context: {
       headers: {
@@ -224,7 +212,8 @@ export const useVotingPower = ({
 
   // Build pagination info combining GraphQL and local state
   const pagination = useMemo<PaginationInfo>(() => {
-    const totalCount = countingData?.accountBalances?.totalCount || 0;
+    const totalCount =
+      delegatorsVotingPowerDetails?.accountBalances?.totalCount || 0;
     const currentItemsCount =
       delegatorsVotingPowerDetails?.accountBalances?.items?.length || 0;
     const totalPages = Math.ceil(totalCount / itemsPerPage);
@@ -239,7 +228,7 @@ export const useVotingPower = ({
       currentItemsCount,
     };
   }, [
-    countingData?.accountBalances?.totalCount,
+    delegatorsVotingPowerDetails?.accountBalances?.totalCount,
     delegatorsVotingPowerDetails?.accountBalances?.items?.length,
     currentPage,
     itemsPerPage,
@@ -345,6 +334,6 @@ export const useVotingPower = ({
     fetchingMore:
       networkStatus === NetworkStatus.fetchMore || isPaginationLoading,
     historicalDataLoading: tsLoading,
-    totalCount: countingData?.accountBalances?.totalCount || 0,
+    totalCount: delegatorsVotingPowerDetails?.accountBalances?.totalCount || 0,
   };
 };
