@@ -2878,13 +2878,6 @@ export type GetAccountInteractionsQueryVariables = Exact<{
 
 export type GetAccountInteractionsQuery = { __typename?: 'Query', accountInteractions?: { __typename?: 'accountInteractions_200_response', totalCount: number, items: Array<{ __typename?: 'query_accountInteractions_items_items', accountId: string, amountTransferred: string, totalVolume: string, transferCount: string } | null> } | null };
 
-export type GetDelegationHistoryCountQueryVariables = Exact<{
-  delegator: Scalars['String']['input'];
-}>;
-
-
-export type GetDelegationHistoryCountQuery = { __typename?: 'Query', delegations?: { __typename?: 'delegations_200_response', totalCount: number } | null };
-
 export type GetDelegationHistoryItemsQueryVariables = Exact<{
   delegator: Scalars['String']['input'];
   delegate?: InputMaybe<Scalars['JSON']['input']>;

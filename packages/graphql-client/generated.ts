@@ -2881,13 +2881,6 @@ export type GetAccountInteractionsQueryVariables = Exact<{
 
 export type GetAccountInteractionsQuery = { __typename?: 'Query', accountInteractions?: { __typename?: 'accountInteractions_200_response', totalCount: number, items: Array<{ __typename?: 'query_accountInteractions_items_items', accountId: string, amountTransferred: string, totalVolume: string, transferCount: string } | null> } | null };
 
-export type GetDelegationHistoryCountQueryVariables = Exact<{
-  delegator: Scalars['String']['input'];
-}>;
-
-
-export type GetDelegationHistoryCountQuery = { __typename?: 'Query', delegations?: { __typename?: 'delegations_200_response', totalCount: number } | null };
-
 export type GetDelegationHistoryItemsQueryVariables = Exact<{
   delegator: Scalars['String']['input'];
   delegate?: InputMaybe<Scalars['JSON']['input']>;
@@ -4436,46 +4429,6 @@ export type GetAccountInteractionsQueryHookResult = ReturnType<typeof useGetAcco
 export type GetAccountInteractionsLazyQueryHookResult = ReturnType<typeof useGetAccountInteractionsLazyQuery>;
 export type GetAccountInteractionsSuspenseQueryHookResult = ReturnType<typeof useGetAccountInteractionsSuspenseQuery>;
 export type GetAccountInteractionsQueryResult = Apollo.QueryResult<GetAccountInteractionsQuery, GetAccountInteractionsQueryVariables>;
-export const GetDelegationHistoryCountDocument = gql`
-    query GetDelegationHistoryCount($delegator: String!) {
-  delegations(address: $delegator) {
-    totalCount
-  }
-}
-    `;
-
-/**
- * __useGetDelegationHistoryCountQuery__
- *
- * To run a query within a React component, call `useGetDelegationHistoryCountQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetDelegationHistoryCountQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetDelegationHistoryCountQuery({
- *   variables: {
- *      delegator: // value for 'delegator'
- *   },
- * });
- */
-export function useGetDelegationHistoryCountQuery(baseOptions: Apollo.QueryHookOptions<GetDelegationHistoryCountQuery, GetDelegationHistoryCountQueryVariables> & ({ variables: GetDelegationHistoryCountQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetDelegationHistoryCountQuery, GetDelegationHistoryCountQueryVariables>(GetDelegationHistoryCountDocument, options);
-      }
-export function useGetDelegationHistoryCountLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDelegationHistoryCountQuery, GetDelegationHistoryCountQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetDelegationHistoryCountQuery, GetDelegationHistoryCountQueryVariables>(GetDelegationHistoryCountDocument, options);
-        }
-export function useGetDelegationHistoryCountSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegationHistoryCountQuery, GetDelegationHistoryCountQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetDelegationHistoryCountQuery, GetDelegationHistoryCountQueryVariables>(GetDelegationHistoryCountDocument, options);
-        }
-export type GetDelegationHistoryCountQueryHookResult = ReturnType<typeof useGetDelegationHistoryCountQuery>;
-export type GetDelegationHistoryCountLazyQueryHookResult = ReturnType<typeof useGetDelegationHistoryCountLazyQuery>;
-export type GetDelegationHistoryCountSuspenseQueryHookResult = ReturnType<typeof useGetDelegationHistoryCountSuspenseQuery>;
-export type GetDelegationHistoryCountQueryResult = Apollo.QueryResult<GetDelegationHistoryCountQuery, GetDelegationHistoryCountQueryVariables>;
 export const GetDelegationHistoryItemsDocument = gql`
     query GetDelegationHistoryItems($delegator: String!, $delegate: JSON, $skip: NonNegativeInt, $limit: PositiveInt = 10, $fromValue: String, $toValue: String, $orderDirection: queryInput_historicalDelegations_orderDirection = desc) {
   historicalDelegations(
