@@ -55,13 +55,16 @@ export const delegateChanged = async (
     delegatorBalance: _delegatorBalance,
   } = args;
 
+  const normalizedDelegator = getAddress(delegator);
+  const normalizedDelegate = getAddress(delegate);
+
   // Ensure all required accounts exist in parallel
   await ensureAccountsExist(context, [delegator, delegate]);
 
   const delegatorBalance = _delegatorBalance
     ? { balance: _delegatorBalance }
     : await context.db.find(accountBalance, {
-        accountId: getAddress(delegator),
+        accountId: normalizedDelegator,
         tokenId: getAddress(tokenId),
       });
 
@@ -81,17 +84,17 @@ export const delegateChanged = async (
 
   // Determine flags for the delegation
   const isCex =
-    cexAddressList.includes(getAddress(delegator)) ||
-    cexAddressList.includes(getAddress(delegate));
+    cexAddressList.includes(normalizedDelegator) ||
+    cexAddressList.includes(normalizedDelegate);
   const isDex =
-    dexAddressList.includes(getAddress(delegator)) ||
-    dexAddressList.includes(getAddress(delegate));
+    dexAddressList.includes(normalizedDelegator) ||
+    dexAddressList.includes(normalizedDelegate);
   const isLending =
-    lendingAddressList.includes(getAddress(delegator)) ||
-    lendingAddressList.includes(getAddress(delegate));
+    lendingAddressList.includes(normalizedDelegator) ||
+    lendingAddressList.includes(normalizedDelegate);
   const isBurning =
-    burningAddressList.includes(getAddress(delegator)) ||
-    burningAddressList.includes(getAddress(delegate));
+    burningAddressList.includes(normalizedDelegator) ||
+    burningAddressList.includes(normalizedDelegate);
   const isTotal = isBurning;
 
   await context.db
@@ -99,8 +102,8 @@ export const delegateChanged = async (
     .values({
       transactionHash: txHash,
       daoId,
-      delegateAccountId: getAddress(delegate),
-      delegatorAccountId: getAddress(delegator),
+      delegateAccountId: normalizedDelegate,
+      delegatorAccountId: normalizedDelegator,
       delegatedValue: delegatorBalance?.balance ?? 0n,
       previousDelegate: getAddress(previousDelegate),
       timestamp,
@@ -118,13 +121,13 @@ export const delegateChanged = async (
   await context.db
     .insert(accountBalance)
     .values({
-      accountId: getAddress(delegator),
+      accountId: normalizedDelegator,
       tokenId: getAddress(tokenId),
-      delegate: getAddress(delegate),
+      delegate: normalizedDelegate,
       balance: BigInt(0),
     })
     .onConflictDoUpdate({
-      delegate: getAddress(delegate),
+      delegate: normalizedDelegate,
     });
 
   if (previousDelegate !== zeroAddress) {
@@ -142,7 +145,7 @@ export const delegateChanged = async (
   await context.db
     .insert(accountPower)
     .values({
-      accountId: getAddress(delegate),
+      accountId: normalizedDelegate,
       daoId,
       delegationsCount: 1,
     })
@@ -178,6 +181,8 @@ export const delegatedVotesChanged = async (
   const { delegate, txHash, newBalance, oldBalance, timestamp, logIndex } =
     args;
 
+  const normalizedDelegate = getAddress(delegate);
+
   await ensureAccountExists(context, delegate);
 
   const deltaMod = newBalance - oldBalance;
@@ -187,7 +192,7 @@ export const delegatedVotesChanged = async (
     .values({
       daoId,
       transactionHash: txHash,
-      accountId: getAddress(delegate),
+      accountId: normalizedDelegate,
       votingPower: newBalance,
       delta: newBalance - oldBalance,
       deltaMod: deltaMod > 0n ? deltaMod : -deltaMod,
@@ -199,7 +204,7 @@ export const delegatedVotesChanged = async (
   await context.db
     .insert(accountPower)
     .values({
-      accountId: getAddress(delegate),
+      accountId: normalizedDelegate,
       daoId,
       votingPower: newBalance,
     })

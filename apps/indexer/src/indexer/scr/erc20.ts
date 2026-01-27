@@ -143,6 +143,14 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
     // TODO: Adjust delegation data model to allow for partial delegation natively
     // Process the delegation change
 
+    const { delegator } = event.args;
+    const { address: tokenId, logIndex } = event.log;
+    const { hash: txHash } = event.transaction;
+    const { timestamp } = event.block;
+
+    const normalizedDelegator = getAddress(delegator);
+    const normalizedTokenId = getAddress(tokenId);
+
     // Pre-compute address lists for flag determination
     const lendingAddressList = Object.values(LendingAddresses[daoId] || {}).map(
       getAddress,
@@ -159,18 +167,15 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
 
     for (const { _delegatee: delegate, _numerator: percentage } of event.args
       .newDelegatees) {
-      const { delegator } = event.args;
-      const { address: tokenId, logIndex: logIndex } = event.log;
-      const { hash: txHash } = event.transaction;
-      const { timestamp } = event.block;
+      const normalizedDelegate = getAddress(delegate);
 
       // Ensure all required accounts exist in parallel
       await ensureAccountsExist(context, [delegator, delegate]);
 
       // Get the delegator's current balance
       const delegatorBalance = await context.db.find(accountBalance, {
-        accountId: getAddress(delegator),
-        tokenId: getAddress(tokenId),
+        accountId: normalizedDelegator,
+        tokenId: normalizedTokenId,
       });
 
       if (!delegatorBalance && delegator !== zeroAddress /* token coinbase */) {
@@ -183,17 +188,17 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
 
       // Determine flags for the delegation
       const isCex =
-        cexAddressList.includes(getAddress(delegator)) ||
-        cexAddressList.includes(getAddress(delegate));
+        cexAddressList.includes(normalizedDelegator) ||
+        cexAddressList.includes(normalizedDelegate);
       const isDex =
-        dexAddressList.includes(getAddress(delegator)) ||
-        dexAddressList.includes(getAddress(delegate));
+        dexAddressList.includes(normalizedDelegator) ||
+        dexAddressList.includes(normalizedDelegate);
       const isLending =
-        lendingAddressList.includes(getAddress(delegator)) ||
-        lendingAddressList.includes(getAddress(delegate));
+        lendingAddressList.includes(normalizedDelegator) ||
+        lendingAddressList.includes(normalizedDelegate);
       const isBurning =
-        burningAddressList.includes(getAddress(delegator)) ||
-        burningAddressList.includes(getAddress(delegate));
+        burningAddressList.includes(normalizedDelegator) ||
+        burningAddressList.includes(normalizedDelegate);
       const isTotal = isBurning;
 
       await context.db
@@ -201,8 +206,8 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
         .values({
           transactionHash: txHash,
           daoId,
-          delegateAccountId: getAddress(delegate),
-          delegatorAccountId: getAddress(delegator),
+          delegateAccountId: normalizedDelegate,
+          delegatorAccountId: normalizedDelegator,
           delegatedValue: (delegatorBalanceValue * BigInt(percentage)) / 10000n, // `percentage` is informed in basis points, wherein 100% (percentage) = 1 (decimal) = 10000 (basis)
           timestamp,
           logIndex,
@@ -221,20 +226,20 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
       await context.db
         .insert(accountBalance)
         .values({
-          accountId: getAddress(delegator),
-          tokenId: getAddress(tokenId),
-          delegate: getAddress(delegate),
+          accountId: normalizedDelegator,
+          tokenId: normalizedTokenId,
+          delegate: normalizedDelegate,
           balance: delegatorBalanceValue,
         })
         .onConflictDoUpdate({
-          delegate: getAddress(delegate),
+          delegate: normalizedDelegate,
         });
 
       // Update the delegate's delegations count
       await context.db
         .insert(accountPower)
         .values({
-          accountId: getAddress(delegate),
+          accountId: normalizedDelegate,
           daoId,
           delegationsCount: 1,
         })

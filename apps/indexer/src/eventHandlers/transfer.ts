@@ -58,14 +58,18 @@ export const tokenTransfer = async (
     logIndex,
   } = args;
 
+  const normalizedFrom = getAddress(from);
+  const normalizedTo = getAddress(to);
+  const normalizedTokenId = getAddress(tokenId);
+
   await ensureAccountExists(context, to);
   await ensureAccountExists(context, from);
 
   await context.db
     .insert(accountBalance)
     .values({
-      accountId: getAddress(to),
-      tokenId: getAddress(tokenId),
+      accountId: normalizedTo,
+      tokenId: normalizedTokenId,
       balance: value,
       delegate: zeroAddress,
     })
@@ -77,8 +81,8 @@ export const tokenTransfer = async (
     await context.db
       .insert(accountBalance)
       .values({
-        accountId: getAddress(from),
-        tokenId: getAddress(tokenId),
+        accountId: normalizedFrom,
+        tokenId: normalizedTokenId,
         balance: -value,
         delegate: zeroAddress,
       })
@@ -97,24 +101,24 @@ export const tokenTransfer = async (
     .values({
       transactionHash,
       daoId,
-      tokenId: getAddress(tokenId),
+      tokenId: normalizedTokenId,
       amount: value,
-      fromAccountId: getAddress(from),
-      toAccountId: getAddress(to),
+      fromAccountId: normalizedFrom,
+      toAccountId: normalizedTo,
       timestamp,
       logIndex,
       isCex:
-        normalizedCex.includes(getAddress(from)) ||
-        normalizedCex.includes(getAddress(to)),
+        normalizedCex.includes(normalizedFrom) ||
+        normalizedCex.includes(normalizedTo),
       isDex:
-        normalizedDex.includes(getAddress(from)) ||
-        normalizedDex.includes(getAddress(to)),
+        normalizedDex.includes(normalizedFrom) ||
+        normalizedDex.includes(normalizedTo),
       isLending:
-        normalizedLending.includes(getAddress(from)) ||
-        normalizedLending.includes(getAddress(to)),
+        normalizedLending.includes(normalizedFrom) ||
+        normalizedLending.includes(normalizedTo),
       isTotal:
-        normalizedBurning.includes(getAddress(from)) ||
-        normalizedBurning.includes(getAddress(to)),
+        normalizedBurning.includes(normalizedFrom) ||
+        normalizedBurning.includes(normalizedTo),
     })
     .onConflictDoUpdate((current) => ({
       amount: current.amount + value,
