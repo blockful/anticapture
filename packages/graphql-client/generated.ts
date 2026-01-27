@@ -130,8 +130,6 @@ export type Query = {
    * Only includes dates where ALL DAOs have data available.
    */
   averageDelegationPercentageByDay: AverageDelegationPercentagePage;
-  balanceHistory?: Maybe<BalanceHistory>;
-  balanceHistorys: BalanceHistoryPage;
   /**
    *
    * >**Method**: `GET`
@@ -492,23 +490,6 @@ export type QueryAverageDelegationPercentageByDayArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   startDate: Scalars['String']['input'];
-};
-
-
-export type QueryBalanceHistoryArgs = {
-  accountId: Scalars['String']['input'];
-  logIndex: Scalars['Float']['input'];
-  transactionHash: Scalars['String']['input'];
-};
-
-
-export type QueryBalanceHistorysArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  where?: InputMaybe<BalanceHistoryFilter>;
 };
 
 
