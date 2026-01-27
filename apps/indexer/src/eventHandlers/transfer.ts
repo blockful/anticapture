@@ -1,5 +1,5 @@
 import { Context } from "ponder:registry";
-import { Address, Hex, zeroAddress } from "viem";
+import { Address, getAddress, Hex, zeroAddress } from "viem";
 import { accountBalance, transfer } from "ponder:schema";
 
 import { DaoIdEnum } from "@/lib/enums";
@@ -58,14 +58,18 @@ export const tokenTransfer = async (
     logIndex,
   } = args;
 
+  const normalizedFrom = getAddress(from);
+  const normalizedTo = getAddress(to);
+  const normalizedTokenId = getAddress(tokenId);
+
   await ensureAccountExists(context, to);
   await ensureAccountExists(context, from);
 
   await context.db
     .insert(accountBalance)
     .values({
-      accountId: to,
-      tokenId,
+      accountId: normalizedTo,
+      tokenId: normalizedTokenId,
       balance: value,
       delegate: zeroAddress,
     })
@@ -77,8 +81,8 @@ export const tokenTransfer = async (
     await context.db
       .insert(accountBalance)
       .values({
-        accountId: from,
-        tokenId,
+        accountId: normalizedFrom,
+        tokenId: normalizedTokenId,
         balance: -value,
         delegate: zeroAddress,
       })
@@ -87,21 +91,34 @@ export const tokenTransfer = async (
       }));
   }
 
+  const normalizedCex = cex.map(getAddress);
+  const normalizedDex = dex.map(getAddress);
+  const normalizedLending = lending.map(getAddress);
+  const normalizedBurning = burning.map(getAddress);
+
   await context.db
     .insert(transfer)
     .values({
       transactionHash,
       daoId,
-      tokenId,
+      tokenId: normalizedTokenId,
       amount: value,
-      fromAccountId: from,
-      toAccountId: to,
+      fromAccountId: normalizedFrom,
+      toAccountId: normalizedTo,
       timestamp,
       logIndex,
-      isCex: cex.includes(from) || cex.includes(to),
-      isDex: dex.includes(from) || dex.includes(to),
-      isLending: lending.includes(from) || lending.includes(to),
-      isTotal: burning.includes(from) || burning.includes(to),
+      isCex:
+        normalizedCex.includes(normalizedFrom) ||
+        normalizedCex.includes(normalizedTo),
+      isDex:
+        normalizedDex.includes(normalizedFrom) ||
+        normalizedDex.includes(normalizedTo),
+      isLending:
+        normalizedLending.includes(normalizedFrom) ||
+        normalizedLending.includes(normalizedTo),
+      isTotal:
+        normalizedBurning.includes(normalizedFrom) ||
+        normalizedBurning.includes(normalizedTo),
     })
     .onConflictDoUpdate((current) => ({
       amount: current.amount + value,
