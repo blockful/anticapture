@@ -385,7 +385,15 @@ export type Query = {
    *
    */
   transfers?: Maybe<Transfers_200_Response>;
-  votesOnchain?: Maybe<VotesOnchain>;
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/proposals/{args.id}/votes`
+   * Returns a paginated list of votes cast on a specific proposal
+   *
+   */
+  votes?: Maybe<Votes_200_Response>;
   votesOnchains: VotesOnchainPage;
   /**
    *
@@ -713,9 +721,14 @@ export type QueryTransfersArgs = {
 };
 
 
-export type QueryVotesOnchainArgs = {
-  proposalId: Scalars['String']['input'];
-  voterAccountId: Scalars['String']['input'];
+export type QueryVotesArgs = {
+  id: Scalars['String']['input'];
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<QueryInput_Votes_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_Votes_OrderDirection>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  support?: InputMaybe<Scalars['Float']['input']>;
+  voterAddressIn?: InputMaybe<Scalars['JSON']['input']>;
 };
 
 
@@ -2022,6 +2035,16 @@ export enum QueryInput_Transfers_SortOrder {
   Desc = 'desc'
 }
 
+export enum QueryInput_Votes_OrderBy {
+  Timestamp = 'timestamp',
+  VotingPower = 'votingPower'
+}
+
+export enum QueryInput_Votes_OrderDirection {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
 export enum QueryInput_VotingPowerVariations_OrderDirection {
   Asc = 'asc',
   Desc = 'desc'
@@ -2317,6 +2340,17 @@ export type Query_Transfers_Items_Items = {
   toAccountId: Scalars['String']['output'];
   tokenId: Scalars['String']['output'];
   transactionHash: Scalars['String']['output'];
+};
+
+export type Query_Votes_Items_Items = {
+  __typename?: 'query_votes_items_items';
+  proposalId: Scalars['String']['output'];
+  reason?: Maybe<Scalars['String']['output']>;
+  support: Scalars['Float']['output'];
+  timestamp: Scalars['Float']['output'];
+  transactionHash: Scalars['String']['output'];
+  voterAddress: Scalars['String']['output'];
+  votingPower: Scalars['String']['output'];
 };
 
 export type Query_VotingPowerVariationsByAccountId_Data = {
@@ -2863,6 +2897,12 @@ export type VotesOnchainPage = {
   totalCount: Scalars['Int']['output'];
 };
 
+export type Votes_200_Response = {
+  __typename?: 'votes_200_response';
+  items: Array<Maybe<Query_Votes_Items_Items>>;
+  totalCount: Scalars['Float']['output'];
+};
+
 export type VotingPowerByAccountId_200_Response = {
   __typename?: 'votingPowerByAccountId_200_response';
   accountId: Scalars['String']['output'];
@@ -3149,24 +3189,16 @@ export type GetProposalQueryVariables = Exact<{
 
 export type GetProposalQuery = { __typename?: 'Query', proposal?: { __typename?: 'proposal_200_response', id: string, daoId: string, txHash: string, proposerAccountId: string, title: string, description: string, quorum: string, timestamp: string, status: string, forVotes: string, againstVotes: string, abstainVotes: string, startTimestamp: string, endTimestamp: string, calldatas: Array<string | null>, targets: Array<string | null>, values: Array<string | null> } | null };
 
-export type GetVotesOnchainsQueryVariables = Exact<{
-  proposalId?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
+export type GetVotesQueryVariables = Exact<{
+  proposalId: Scalars['String']['input'];
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  orderBy?: InputMaybe<QueryInput_Votes_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_Votes_OrderDirection>;
 }>;
 
 
-export type GetVotesOnchainsQuery = { __typename?: 'Query', votesOnchains: { __typename?: 'votesOnchainPage', totalCount: number, pageInfo: { __typename?: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, items: Array<{ __typename?: 'votesOnchain', voterAccountId: string, txHash: string, daoId: string, proposalId: string, support: string, votingPower: any, reason?: string | null, timestamp: any }> } };
-
-export type GetVotesOnchainsTotalCountQueryVariables = Exact<{
-  proposalId?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type GetVotesOnchainsTotalCountQuery = { __typename?: 'Query', votesOnchains: { __typename?: 'votesOnchainPage', totalCount: number } };
+export type GetVotesQuery = { __typename?: 'Query', votes?: { __typename?: 'votes_200_response', totalCount: number, items: Array<{ __typename?: 'query_votes_items_items', voterAddress: string, transactionHash: string, proposalId: string, support: number, votingPower: string, reason?: string | null, timestamp: number } | null> } | null };
 
 export type GetVotingPowerChangeQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];
@@ -3189,11 +3221,12 @@ export type GetProposalNonVotersQuery = { __typename?: 'Query', proposalNonVoter
 
 export type GetAccountPowerQueryVariables = Exact<{
   address: Scalars['String']['input'];
+  addresses: Scalars['JSON']['input'];
   proposalId: Scalars['String']['input'];
 }>;
 
 
-export type GetAccountPowerQuery = { __typename?: 'Query', votingPowerByAccountId?: { __typename?: 'votingPowerByAccountId_200_response', accountId: string, votingPower: string } | null, votesOnchain?: { __typename?: 'votesOnchain', support: string, votingPower: any, reason?: string | null, timestamp: any, txHash: string, daoId: string } | null };
+export type GetAccountPowerQuery = { __typename?: 'Query', votingPowerByAccountId?: { __typename?: 'votingPowerByAccountId_200_response', accountId: string, votingPower: string } | null, votes?: { __typename?: 'votes_200_response', totalCount: number, items: Array<{ __typename?: 'query_votes_items_items', support: number, votingPower: string, reason?: string | null, timestamp: number, transactionHash: string } | null> } | null };
 
 export type HistoricalVotingPowersQueryVariables = Exact<{
   account: Scalars['String']['input'];

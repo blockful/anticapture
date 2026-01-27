@@ -5,7 +5,10 @@ import { accountPower } from "ponder:schema";
 import { PeriodResponseSchema, TimestampResponseMapper } from "../shared";
 
 export const VotingPowerVariationsByAccountIdRequestParamsSchema = z.object({
-  address: z.string().refine(isAddress, "Invalid address"),
+  address: z
+    .string()
+    .refine((addr) => isAddress(addr, { strict: false }))
+    .transform((addr) => getAddress(addr)),
 });
 
 export const VotingPowerVariationsByAccountIdRequestQuerySchema = z.object({
@@ -39,12 +42,18 @@ export const VotingPowerVariationsRequestQuerySchema = z
       .union([
         z
           .string()
-          .refine(isAddress, "Invalid address")
+          .refine(
+            (addr) => isAddress(addr, { strict: false }),
+            "Invalid address",
+          )
           .transform((addr) => [getAddress(addr)]),
         z.array(
           z
             .string()
-            .refine(isAddress, "Invalid addresses")
+            .refine(
+              (addr) => isAddress(addr, { strict: false }),
+              "Invalid addresses",
+            )
             .transform((addr) => getAddress(addr)),
         ),
       ])
@@ -75,12 +84,15 @@ export const VotingPowersRequestSchema = z.object({
     .union([
       z
         .string()
-        .refine(isAddress, "Invalid address")
+        .refine((addr) => isAddress(addr, { strict: false }), "Invalid address")
         .transform((addr) => [getAddress(addr)]),
       z.array(
         z
           .string()
-          .refine(isAddress, "Invalid addresses")
+          .refine(
+            (addr) => isAddress(addr, { strict: false }),
+            "Invalid addresses",
+          )
           .transform((addr) => getAddress(addr)),
       ),
     ])

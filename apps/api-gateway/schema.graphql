@@ -15,7 +15,6 @@ type Query {
   balanceHistory(transactionHash: String!, accountId: String!, logIndex: Float!): balanceHistory
   balanceHistorys(where: balanceHistoryFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): balanceHistoryPage!
   delegations(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): delegationPage!
-  votesOnchain(voterAccountId: String!, proposalId: String!): votesOnchain
   votesOnchains(where: votesOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votesOnchainPage!
   _meta: Meta
 
@@ -78,6 +77,9 @@ type Query {
 
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/proposals/{args.id}/non-voters`\nReturns the active delegates that did not vote on a given proposal\n"
   proposalNonVoters(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposalNonVoters_orderDirection = desc, addresses: JSON): proposalNonVoters_200_response
+
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/proposals/{args.id}/votes`\nReturns a paginated list of votes cast on a specific proposal\n"
+  votes(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, voterAddressIn: JSON, orderBy: queryInput_votes_orderBy = timestamp, orderDirection: queryInput_votes_orderDirection = desc, support: Float): votes_200_response
 
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/accounts/{args.address}/balances/historical`\nTODO\n"
   historicalBalances(address: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_historicalBalances_orderBy = timestamp, orderDirection: queryInput_historicalBalances_orderDirection = desc, fromDate: String, toDate: String, fromValue: String, toValue: String): historicalBalances_200_response
@@ -1819,6 +1821,31 @@ type query_proposalNonVoters_items_items {
 }
 
 enum queryInput_proposalNonVoters_orderDirection {
+  asc
+  desc
+}
+
+type votes_200_response {
+  items: [query_votes_items_items]!
+  totalCount: Float!
+}
+
+type query_votes_items_items {
+  voterAddress: String!
+  transactionHash: String!
+  proposalId: String!
+  support: Float!
+  votingPower: String!
+  reason: String
+  timestamp: Float!
+}
+
+enum queryInput_votes_orderBy {
+  timestamp
+  votingPower
+}
+
+enum queryInput_votes_orderDirection {
   asc
   desc
 }

@@ -1,12 +1,15 @@
 import { z } from "@hono/zod-openapi";
 
 import { transfer } from "ponder:schema";
-import { isAddress } from "viem";
+import { getAddress, isAddress } from "viem";
 
 export type DBTransfer = typeof transfer.$inferSelect;
 
 export const TransfersRequestRouteSchema = z.object({
-  address: z.string().refine((addr) => isAddress(addr)),
+  address: z
+    .string()
+    .refine((addr) => isAddress(addr, { strict: false }))
+    .transform((addr) => getAddress(addr)),
 });
 
 export const TransfersRequestQuerySchema = z.object({
@@ -14,8 +17,20 @@ export const TransfersRequestQuerySchema = z.object({
   offset: z.coerce.number().optional().default(0),
   sortBy: z.enum(["timestamp", "amount"]).optional().default("timestamp"),
   sortOrder: z.enum(["asc", "desc"]).optional().default("asc"),
-  from: z.string().refine(isAddress, { message: "Invalid address" }).optional(),
-  to: z.string().refine(isAddress, { message: "Invalid address" }).optional(),
+  from: z
+    .string()
+    .refine((addr) => isAddress(addr, { strict: false }), {
+      message: "Invalid address",
+    })
+    .transform((addr) => getAddress(addr))
+    .optional(),
+  to: z
+    .string()
+    .refine((addr) => isAddress(addr, { strict: false }), {
+      message: "Invalid address",
+    })
+    .transform((addr) => getAddress(addr))
+    .optional(),
   fromDate: z.coerce.number().optional(),
   toDate: z.coerce.number().optional(),
   fromValue: z

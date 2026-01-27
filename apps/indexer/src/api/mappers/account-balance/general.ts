@@ -1,6 +1,6 @@
 import { z } from "@hono/zod-openapi";
 import { accountBalance } from "ponder:schema";
-import { Address, isAddress } from "viem";
+import { Address, getAddress, isAddress } from "viem";
 
 export const AccountBalancesRequestSchema = z.object({
   limit: z.coerce
@@ -22,8 +22,11 @@ export const AccountBalancesRequestSchema = z.object({
       z
         .string()
         .refine(isAddress, "Invalid address")
-        .transform((addr) => [addr]),
-      z.array(z.string().refine(isAddress, "Invalid addresses")),
+        .transform((addr) => [getAddress(addr)]),
+      z.array(z
+        .string()
+        .refine(isAddress, "Invalid addresses")
+        .transform((addr) => getAddress(addr))),
     ])
     .optional()
     .transform((val) => (val === undefined ? [] : val)),
@@ -32,8 +35,12 @@ export const AccountBalancesRequestSchema = z.object({
       z
         .string()
         .refine(isAddress, "Invalid address")
-        .transform((addr) => [addr]),
-      z.array(z.string().refine(isAddress, "Invalid addresses")),
+        .transform((addr) => [getAddress(addr)]),
+      z.array(z
+        .string()
+        .refine(isAddress, "Invalid addresses")
+        .transform((addr) => getAddress(addr)),
+      ),
     ])
     .optional()
     .transform((val) => (val === undefined ? [] : val)),

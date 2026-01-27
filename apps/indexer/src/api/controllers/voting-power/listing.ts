@@ -6,7 +6,7 @@ import {
   VotingPowersMapper,
   VotingPowerResponseSchema,
 } from "@/api/mappers/";
-import { isAddress } from "viem";
+import { getAddress, isAddress } from "viem";
 import { VotingPowerMapper } from "@/api/mappers/voting-power/variations";
 
 export function votingPowers(app: Hono, service: VotingPowerService) {
@@ -70,7 +70,10 @@ export function votingPowers(app: Hono, service: VotingPowerService) {
       tags: ["proposals"],
       request: {
         params: z.object({
-          accountId: z.string().refine((addr) => isAddress(addr)),
+          accountId: z
+            .string()
+            .refine((addr) => isAddress(addr, { strict: false }))
+            .transform((addr) => getAddress(addr)),
         }),
       },
       responses: {

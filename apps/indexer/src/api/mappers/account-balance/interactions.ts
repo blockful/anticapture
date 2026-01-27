@@ -1,10 +1,13 @@
 import { z } from "@hono/zod-openapi";
-import { isAddress } from "viem";
+import { getAddress, isAddress } from "viem";
 import { PeriodResponseSchema, TimestampResponseMapper } from "../shared";
 import { DBAccountBalanceVariation } from "./variations";
 
 export const AccountInteractionsParamsSchema = z.object({
-  address: z.string().refine(isAddress, "Invalid address"),
+  address: z
+    .string()
+    .refine(isAddress, "Invalid address")
+    .transform((addr) => getAddress(addr))
 });
 
 export const AccountInteractionsQuerySchema = z.object({
@@ -39,7 +42,11 @@ export const AccountInteractionsQuerySchema = z.object({
     .transform((val) => BigInt(val))
     .optional(),
   orderBy: z.enum(["volume", "count"]).optional().default("count"),
-  filterAddress: z.string().refine(isAddress, "Invalid address").optional(),
+  filterAddress: z
+    .string()
+    .refine(isAddress, "Invalid address")
+    .transform((addr) => getAddress(addr))
+    .optional(),
 });
 
 export const AccountInteractionResponseSchema = z.object({

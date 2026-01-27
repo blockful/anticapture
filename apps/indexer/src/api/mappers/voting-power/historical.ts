@@ -3,7 +3,7 @@ import { votingPowerHistory } from "ponder:schema";
 
 import { DBDelegation } from "../transactions";
 import { DBTransfer } from "../transfers";
-import { isAddress } from "viem";
+import { getAddress, isAddress } from "viem";
 
 export type DBHistoricalVotingPower = typeof votingPowerHistory.$inferSelect;
 export type DBHistoricalVotingPowerWithRelations = DBHistoricalVotingPower & {
@@ -12,7 +12,10 @@ export type DBHistoricalVotingPowerWithRelations = DBHistoricalVotingPower & {
 };
 
 export const HistoricalVotingPowerRequestParamsSchema = z.object({
-  address: z.string().refine((addr) => isAddress(addr)),
+  address: z
+    .string()
+    .refine((addr) => isAddress(addr, { strict: false }))
+    .transform((addr) => getAddress(addr)),
 });
 
 export const HistoricalVotingPowerRequestQuerySchema = z.object({
@@ -98,18 +101,18 @@ export const HistoricalVotingPowerResponseMapper = (
     logIndex: p.logIndex,
     delegation: p.delegations
       ? {
-          from: p.delegations.delegatorAccountId,
-          value: p.delegations.delegatedValue.toString(),
-          to: p.delegations.delegateAccountId,
-          previousDelegate: p.delegations.previousDelegate,
-        }
+        from: p.delegations.delegatorAccountId,
+        value: p.delegations.delegatedValue.toString(),
+        to: p.delegations.delegateAccountId,
+        previousDelegate: p.delegations.previousDelegate,
+      }
       : null,
     transfer: p.transfers
       ? {
-          value: p.transfers.amount.toString(),
-          from: p.transfers.fromAccountId,
-          to: p.transfers.toAccountId,
-        }
+        value: p.transfers.amount.toString(),
+        from: p.transfers.fromAccountId,
+        to: p.transfers.toAccountId,
+      }
       : null,
   };
 };

@@ -1,6 +1,6 @@
 import { z } from "@hono/zod-openapi";
 import { balanceHistory } from "ponder:schema";
-import { isAddress } from "viem";
+import { getAddress, isAddress } from "viem";
 import { DBTransfer } from "../transfers";
 
 export type DBHistoricalBalance = typeof balanceHistory.$inferSelect;
@@ -9,7 +9,10 @@ export type DBHistoricalBalanceWithRelations = DBHistoricalBalance & {
 };
 
 export const HistoricalBalanceRequestParamsSchema = z.object({
-  address: z.string().refine((addr) => isAddress(addr)),
+  address: z
+    .string()
+    .refine((addr) => isAddress(addr))
+    .transform((addr) => getAddress(addr))
 });
 
 export const HistoricalBalanceRequestQuerySchema = z.object({

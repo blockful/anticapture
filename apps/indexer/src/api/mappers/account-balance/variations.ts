@@ -4,7 +4,10 @@ import { PeriodResponseSchema, TimestampResponseMapper } from "../shared";
 import { PERCENTAGE_NO_BASELINE } from "../constants";
 
 export const AccountBalanceVariationsByAccountIdRequestParamsSchema = z.object({
-  address: z.string().refine(isAddress, "Invalid address"),
+  address: z
+    .string()
+    .refine(isAddress, "Invalid address")
+    .transform((addr) => getAddress(addr))
 });
 
 export const AccountBalanceVariationsByAccountIdRequestQuerySchema = z.object({
