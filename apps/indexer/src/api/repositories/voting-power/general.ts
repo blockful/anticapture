@@ -101,15 +101,15 @@ export class VotingPowerRepository {
       .orderBy(
         orderDirection === "asc"
           ? asc(
-              orderBy === "timestamp"
-                ? votingPowerHistory.timestamp
-                : votingPowerHistory.deltaMod,
-            )
+            orderBy === "timestamp"
+              ? votingPowerHistory.timestamp
+              : votingPowerHistory.deltaMod,
+          )
           : desc(
-              orderBy === "timestamp"
-                ? votingPowerHistory.timestamp
-                : votingPowerHistory.deltaMod,
-            ),
+            orderBy === "timestamp"
+              ? votingPowerHistory.timestamp
+              : votingPowerHistory.deltaMod,
+          ),
       )
       .limit(limit)
       .offset(skip);
@@ -118,12 +118,12 @@ export class VotingPowerRepository {
       ...row.voting_power_history,
       delegations:
         row.transfers &&
-        row.transfers?.logIndex > (row.delegations?.logIndex || 0)
+          row.transfers?.logIndex > (row.delegations?.logIndex || 0)
           ? null
           : row.delegations,
       transfers:
         row.delegations &&
-        row.delegations?.logIndex > (row.transfers?.logIndex || 0)
+          row.delegations?.logIndex > (row.transfers?.logIndex || 0)
           ? null
           : row.transfers,
     }));
@@ -249,8 +249,8 @@ export class VotingPowerRepository {
     const oldVotingPower = currentVotingPower - numericAbsoluteChange;
     const percentageChange = oldVotingPower
       ? (
-          Number((numericAbsoluteChange * 10000n) / oldVotingPower) / 100
-        ).toFixed(2)
+        Number((numericAbsoluteChange * 10000n) / oldVotingPower) / 100
+      ).toFixed(2)
       : "0";
 
     return {
@@ -304,11 +304,7 @@ export class VotingPowerRepository {
       .from(accountPower)
       .where(eq(accountPower.accountId, accountId));
 
-    if (!result) {
-      throw new Error("Account not found");
-    }
-
-    return {
+    return result ? {
       accountId: result.accountId,
       votingPower: result.votingPower,
       delegationsCount: result.delegationsCount,
@@ -316,6 +312,14 @@ export class VotingPowerRepository {
       proposalsCount: result.proposalsCount,
       daoId: result.daoId,
       lastVoteTimestamp: result.lastVoteTimestamp,
+    } : {
+      accountId: accountId,
+      votingPower: 0n,
+      delegationsCount: 0,
+      votesCount: 0,
+      proposalsCount: 0,
+      daoId: "",
+      lastVoteTimestamp: 0n,
     };
   }
 
