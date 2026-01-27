@@ -9,6 +9,7 @@ import ConditionalPostHog from "@/shared/services/posthog/ConditionalPostHog";
 import UmamiScript from "@/shared/services/umami";
 import { Inter, Roboto_Mono } from "next/font/google";
 import { CookieConsent } from "@/features/cookie";
+import { HelpPopover } from "@/shared/components";
 
 const inter = Inter({ weight: ["400", "500", "600"], subsets: ["latin"] });
 
@@ -72,6 +73,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <GlobalProviders>
           {children}
           <CookieConsent />
+          <HelpPopover />
         </GlobalProviders>
         <Toaster position="bottom-left" reverseOrder={false} />
         <ConditionalPostHog />
