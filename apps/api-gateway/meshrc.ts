@@ -45,13 +45,15 @@ export default processConfig(
                       "Query.!{transfers}",
                       "Query.!{transfer}",
                       "Query.!{votingPowerHistory}",
-                      'Query.!{accountBalances}',
-                      'Query.!{accountBalance}',
-                      'Query.!{delegation}',
-                      'Query.!{tokens}',
-                      'Query.!{token}',
-                      // 'Query.!{votingPowerHistorys}' FIXME: Leave endpoint active for now as it is still used by the notification bot
-                    ]
+                      "Query.!{accountBalances}",
+                      "Query.!{accountBalance}",
+                      "Query.!{delegation}",
+                      "Query.!{tokens}",
+                      "Query.!{token}",
+                      "Query.!{votesOnchain}",
+                      // "Query.!{votesOnchains}", TODO: Leave endpoint active for now as it is still used by the [notification bot](https://github.com/blockful/notification-system/blob/main/packages/anticapture-client/queries/votes.graphql)
+                      // 'Query.!{votingPowerHistorys}' TODO: Leave endpoint active for now as it is still used by the notification bot
+                    ],
                   },
                 },
               ],
