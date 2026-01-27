@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  useGetDelegationHistoryItemsQuery,
-  useGetDelegationHistoryCountQuery,
-} from "@anticapture/graphql-client/hooks";
+import { useGetDelegationHistoryItemsQuery } from "@anticapture/graphql-client/hooks";
 import {
   GetDelegationHistoryItemsQuery,
   QueryInput_HistoricalDelegations_OrderDirection,
@@ -123,18 +120,9 @@ export const useDelegationHistory = ({
     );
   }, [delegationHistoryData]);
 
-  // Fetch totalCount with separate lightweight query
-  const { data: countData } = useGetDelegationHistoryCountQuery({
-    variables: { delegator: delegatorAccountId },
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
-      },
-    },
-  });
-
   const pagination = useMemo<PaginationInfo>(() => {
-    const totalCount = countData?.delegations?.totalCount || 0;
+    const totalCount =
+      delegationHistoryData?.historicalDelegations?.totalCount || 0;
     const currentItemsCount =
       delegationHistoryData?.historicalDelegations?.items?.length || 0;
     const totalPages = Math.ceil(totalCount / itemsPerPage);
@@ -154,9 +142,9 @@ export const useDelegationHistory = ({
     };
   }, [
     delegationHistoryData?.historicalDelegations?.items?.length,
+    delegationHistoryData?.historicalDelegations?.totalCount,
     currentPage,
     itemsPerPage,
-    countData?.delegations?.totalCount,
   ]);
 
   // Fetch next page function

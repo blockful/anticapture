@@ -1,5 +1,0 @@
-query GetDelegationHistoryCount($delegator: String!) {
-  delegations(address: $delegator) {
-    totalCount
-  }
-} 
