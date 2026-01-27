@@ -78,8 +78,10 @@ export const useDelegationHistory = ({
       orderDirection,
       limit: itemsPerPage,
       ...(delegateAccountId && { delegate: delegateAccountId }),
-      fromValue: filterVariables?.fromValue ?? "",
-      toValue: filterVariables?.toValue ?? "",
+      ...(filterVariables?.fromValue && {
+        fromValue: filterVariables.fromValue,
+      }),
+      ...(filterVariables?.toValue && { toValue: filterVariables.toValue }),
     },
     context: {
       headers: {
