@@ -1,5 +1,5 @@
 import { Context } from "ponder:registry";
-import { Address, Hex, zeroAddress } from "viem";
+import { Address, getAddress, Hex, zeroAddress } from "viem";
 import { accountBalance, transfer } from "ponder:schema";
 
 import { DaoIdEnum } from "@/lib/enums";
@@ -64,8 +64,8 @@ export const tokenTransfer = async (
   await context.db
     .insert(accountBalance)
     .values({
-      accountId: to,
-      tokenId,
+      accountId: getAddress(to),
+      tokenId: getAddress(tokenId),
       balance: value,
       delegate: zeroAddress,
     })
@@ -77,8 +77,8 @@ export const tokenTransfer = async (
     await context.db
       .insert(accountBalance)
       .values({
-        accountId: from,
-        tokenId,
+        accountId: getAddress(from),
+        tokenId: getAddress(tokenId),
         balance: -value,
         delegate: zeroAddress,
       })
@@ -92,16 +92,18 @@ export const tokenTransfer = async (
     .values({
       transactionHash,
       daoId,
-      tokenId,
+      tokenId: getAddress(tokenId),
       amount: value,
-      fromAccountId: from,
-      toAccountId: to,
+      fromAccountId: getAddress(from),
+      toAccountId: getAddress(to),
       timestamp,
       logIndex,
-      isCex: cex.includes(from) || cex.includes(to),
-      isDex: dex.includes(from) || dex.includes(to),
-      isLending: lending.includes(from) || lending.includes(to),
-      isTotal: burning.includes(from) || burning.includes(to),
+      isCex: cex.includes(getAddress(from)) || cex.includes(getAddress(to)),
+      isDex: dex.includes(getAddress(from)) || dex.includes(getAddress(to)),
+      isLending:
+        lending.includes(getAddress(from)) || lending.includes(getAddress(to)),
+      isTotal:
+        burning.includes(getAddress(from)) || burning.includes(getAddress(to)),
     })
     .onConflictDoUpdate((current) => ({
       amount: current.amount + value,

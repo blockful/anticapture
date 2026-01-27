@@ -1,4 +1,4 @@
-import { Address } from "viem";
+import { Address, getAddress } from "viem";
 import { Context } from "ponder:registry";
 import { account, daoMetricsDayBucket, transaction } from "ponder:schema";
 
@@ -13,7 +13,7 @@ export const ensureAccountExists = async (
   await context.db
     .insert(account)
     .values({
-      id: address,
+      id: getAddress(address),
     })
     .onConflictDoNothing();
 };
@@ -44,7 +44,7 @@ export const storeDailyBucket = async (
     .insert(daoMetricsDayBucket)
     .values({
       date: BigInt(truncateTimestampToMidnight(Number(timestamp))),
-      tokenId: tokenAddress,
+      tokenId: getAddress(tokenAddress),
       metricType,
       daoId,
       average: newValue,
@@ -79,8 +79,8 @@ export const createOrUpdateTransaction = async (
     .insert(transaction)
     .values({
       transactionHash,
-      fromAddress: from,
-      toAddress: to,
+      fromAddress: getAddress(from),
+      toAddress: getAddress(to),
       timestamp,
     })
     .onConflictDoNothing(); // Only create if doesn't exist
@@ -138,9 +138,9 @@ export const handleTransaction = async (
   await updateTransactionFlags(
     context,
     transactionHash,
-    addresses.some((addr) => cex.includes(addr)),
-    addresses.some((addr) => dex.includes(addr)),
-    addresses.some((addr) => lending.includes(addr)),
-    addresses.some((addr) => burning.includes(addr)),
+    addresses.some((addr) => cex.includes(getAddress(addr))),
+    addresses.some((addr) => dex.includes(getAddress(addr))),
+    addresses.some((addr) => lending.includes(getAddress(addr))),
+    addresses.some((addr) => burning.includes(getAddress(addr))),
   );
 };
