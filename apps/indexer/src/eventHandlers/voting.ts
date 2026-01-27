@@ -1,6 +1,6 @@
 import { Context } from "ponder:registry";
 import { accountPower, proposalsOnchain, votesOnchain } from "ponder:schema";
-import { Address, Hex } from "viem";
+import { Address, getAddress, Hex } from "viem";
 
 import { ensureAccountExists } from "./shared";
 import { ProposalStatus } from "@/lib/constants";
@@ -41,7 +41,7 @@ export const voteCast = async (
   await context.db
     .insert(accountPower)
     .values({
-      accountId: voter,
+      accountId: getAddress(voter),
       daoId,
       votesCount: 1,
       lastVoteTimestamp: timestamp,
@@ -56,7 +56,7 @@ export const voteCast = async (
     txHash: txHash,
     daoId,
     proposalId,
-    voterAccountId: voter,
+    voterAccountId: getAddress(voter),
     support: support.toString(),
     votingPower,
     reason,
@@ -128,8 +128,8 @@ export const proposalCreated = async (
     id: proposalId,
     txHash,
     daoId,
-    proposerAccountId: proposer,
-    targets,
+    proposerAccountId: getAddress(proposer),
+    targets: targets.map(getAddress),
     values,
     signatures,
     calldatas,
@@ -146,7 +146,7 @@ export const proposalCreated = async (
   await context.db
     .insert(accountPower)
     .values({
-      accountId: proposer,
+      accountId: getAddress(proposer),
       daoId,
       proposalsCount: 1,
     })
