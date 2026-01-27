@@ -48,7 +48,6 @@ import {
   TreasuryRepository,
   VotingPowerRepository,
   DelegationsRepository,
-  PartialDelegationsRepository,
   HistoricalDelegationsRepository,
 } from "@/api/repositories";
 import { errorHandler } from "@/api/middlewares";
@@ -167,13 +166,10 @@ historicalDelegations(
   new HistoricalDelegationsService(new HistoricalDelegationsRepository()),
 );
 
+// TODO: add support to partial delegations at some point
 delegations(
   app,
-  new DelegationsService(
-    env.DAO_ID === DaoIdEnum.SCR
-      ? new PartialDelegationsRepository()
-      : new DelegationsRepository(),
-  ),
+  new DelegationsService(new DelegationsRepository()),
 );
 
 const treasuryService = createTreasuryService(
