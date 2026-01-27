@@ -1,6 +1,5 @@
 import { z } from "@hono/zod-openapi";
-import { isAddress } from "viem";
-import { toLowerCaseAddress } from "@/lib/utils";
+import { getAddress, isAddress } from "viem";
 
 export const VotersRequestSchema = z.object({
   skip: z.coerce
@@ -19,8 +18,16 @@ export const VotersRequestSchema = z.object({
   orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
   addresses: z
     .union([
-      z.string().transform((val) => [toLowerCaseAddress(val)]),
-      z.array(z.string().transform((val) => toLowerCaseAddress(val))),
+      z
+        .string()
+        .refine((val) => isAddress(val, { strict: false }))
+        .transform((val) => [getAddress(val)]),
+      z.array(
+        z
+          .string()
+          .refine((val) => isAddress(val, { strict: false }))
+          .transform((val) => getAddress(val)),
+      ),
     ])
     .optional(),
 });

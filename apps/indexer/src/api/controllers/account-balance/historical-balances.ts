@@ -1,9 +1,9 @@
+import { getAddress, isAddress } from "viem";
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 
 import { DaysOpts, DaysEnum, DaoIdEnum } from "@/lib/enums";
 import { HistoricalBalancesService } from "@/api/services";
 import { HistoricalBalanceMapper } from "@/api/mappers";
-import { toLowerCaseAddress } from "@/lib/utils";
 
 export function historicalBalances(
   app: Hono,
@@ -22,9 +22,25 @@ export function historicalBalances(
       request: {
         query: z.object({
           addresses: z
-            .array(z.string().transform((addr) => toLowerCaseAddress(addr)))
+            .array(
+              z
+                .string()
+                .refine(
+                  (addr) => isAddress(addr, { strict: false }),
+                  "Invalid Ethereum address",
+                )
+                .transform((addr) => getAddress(addr)),
+            )
             .min(1, "At least one address is required")
-            .or(z.string().transform((addr) => [toLowerCaseAddress(addr)])),
+            .or(
+              z
+                .string()
+                .refine(
+                  (addr) => isAddress(addr, { strict: false }),
+                  "Invalid Ethereum address",
+                )
+                .transform((addr) => [getAddress(addr)]),
+            ),
           days: z
             .enum(DaysOpts)
             .default("7d")

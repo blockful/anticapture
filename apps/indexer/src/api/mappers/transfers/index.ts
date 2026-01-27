@@ -1,12 +1,15 @@
 import { z } from "@hono/zod-openapi";
 
 import { transfer } from "ponder:schema";
-import { toLowerCaseAddress } from "@/lib/utils";
+import { getAddress, isAddress } from "viem";
 
 export type DBTransfer = typeof transfer.$inferSelect;
 
 export const TransfersRequestRouteSchema = z.object({
-  address: z.string().transform((addr) => toLowerCaseAddress(addr)),
+  address: z
+    .string()
+    .refine((addr) => isAddress(addr, { strict: false }))
+    .transform((addr) => getAddress(addr)),
 });
 
 export const TransfersRequestQuerySchema = z.object({
@@ -16,11 +19,17 @@ export const TransfersRequestQuerySchema = z.object({
   sortOrder: z.enum(["asc", "desc"]).optional().default("asc"),
   from: z
     .string()
-    .transform((addr) => toLowerCaseAddress(addr))
+    .refine((addr) => isAddress(addr, { strict: false }), {
+      message: "Invalid address",
+    })
+    .transform((addr) => getAddress(addr))
     .optional(),
   to: z
     .string()
-    .transform((addr) => toLowerCaseAddress(addr))
+    .refine((addr) => isAddress(addr, { strict: false }), {
+      message: "Invalid address",
+    })
+    .transform((addr) => getAddress(addr))
     .optional(),
   fromDate: z.coerce.number().optional(),
   toDate: z.coerce.number().optional(),

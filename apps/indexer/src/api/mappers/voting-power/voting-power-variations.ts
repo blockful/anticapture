@@ -1,11 +1,10 @@
 import { DaysEnum } from "@/lib/enums";
 import { z } from "@hono/zod-openapi";
-import { Address } from "viem";
+import { Address, getAddress, isAddress } from "viem";
 import { accountPower } from "ponder:schema";
 
 import { PERCENTAGE_NO_BASELINE } from "../constants";
 import { PeriodResponseSchema, TimestampResponseMapper } from "../shared";
-import { toLowerCaseAddress } from "@/lib/utils";
 
 export const VotingPowerVariationsByAccountIdRequestSchema = z.object({
   fromDate: z
@@ -28,8 +27,22 @@ export const VotingPowerVariationsRequestSchema = z
   .object({
     addresses: z
       .union([
-        z.string().transform((addr) => [toLowerCaseAddress(addr)]),
-        z.array(z.string().transform((addr) => toLowerCaseAddress(addr))),
+        z
+          .string()
+          .refine(
+            (addr) => isAddress(addr, { strict: false }),
+            "Invalid address",
+          )
+          .transform((addr) => [getAddress(addr)]),
+        z.array(
+          z
+            .string()
+            .refine(
+              (addr) => isAddress(addr, { strict: false }),
+              "Invalid addresses",
+            )
+            .transform((addr) => getAddress(addr)),
+        ),
       ])
       .optional(),
     limit: z.coerce
@@ -70,8 +83,19 @@ export const VotingPowersRequestSchema = z.object({
     .default("votingPower"),
   addresses: z
     .union([
-      z.string().transform((addr) => [toLowerCaseAddress(addr)]),
-      z.array(z.string().transform((addr) => toLowerCaseAddress(addr))),
+      z
+        .string()
+        .refine((addr) => isAddress(addr, { strict: false }), "Invalid address")
+        .transform((addr) => [getAddress(addr)]),
+      z.array(
+        z
+          .string()
+          .refine(
+            (addr) => isAddress(addr, { strict: false }),
+            "Invalid addresses",
+          )
+          .transform((addr) => getAddress(addr)),
+      ),
     ])
     .optional()
     .transform((val) => val ?? []),

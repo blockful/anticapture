@@ -1,5 +1,5 @@
 import { z } from "@hono/zod-openapi";
-import { Address } from "viem";
+import { Address, getAddress, isAddress } from "viem";
 import { accountBalance } from "ponder:schema";
 
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
@@ -7,7 +7,6 @@ import { DaoIdEnum, DaysEnum, DaysOpts } from "@/lib/enums";
 import { PERCENTAGE_NO_BASELINE } from "@/api/mappers/constants";
 import { calculateHistoricalBlockNumber } from "@/lib/blockTime";
 import { PeriodResponseMapper, PeriodResponseSchema } from "../shared";
-import { toLowerCaseAddress } from "@/lib/utils";
 
 export const AccountBalancesRequestSchema = z.object({
   limit: z.coerce
@@ -26,15 +25,37 @@ export const AccountBalancesRequestSchema = z.object({
   orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
   addresses: z
     .union([
-      z.string().transform((addr) => [toLowerCaseAddress(addr)]),
-      z.array(z.string().transform((addr) => toLowerCaseAddress(addr))),
+      z
+        .string()
+        .refine((addr) => isAddress(addr, { strict: false }), "Invalid address")
+        .transform((addr) => [getAddress(addr)]),
+      z.array(
+        z
+          .string()
+          .refine(
+            (addr) => isAddress(addr, { strict: false }),
+            "Invalid addresses",
+          )
+          .transform((addr) => getAddress(addr)),
+      ),
     ])
     .optional()
     .transform((val) => (val === undefined ? [] : val)),
   delegates: z
     .union([
-      z.string().transform((addr) => [toLowerCaseAddress(addr)]),
-      z.array(z.string().transform((addr) => toLowerCaseAddress(addr))),
+      z
+        .string()
+        .refine((addr) => isAddress(addr, { strict: false }), "Invalid address")
+        .transform((addr) => [getAddress(addr)]),
+      z.array(
+        z
+          .string()
+          .refine(
+            (addr) => isAddress(addr, { strict: false }),
+            "Invalid addresses",
+          )
+          .transform((addr) => getAddress(addr)),
+      ),
     ])
     .optional()
     .transform((val) => (val === undefined ? [] : val)),
@@ -125,7 +146,10 @@ export const AccountBalanceVariationsResponseSchema = z.object({
 });
 
 export const AccountInteractionsParamsSchema = z.object({
-  address: z.string().transform((addr) => toLowerCaseAddress(addr)),
+  address: z
+    .string()
+    .refine((addr) => isAddress(addr, { strict: false }), "Invalid address")
+    .transform((addr) => getAddress(addr)),
 });
 
 export const AccountInteractionsQuerySchema =
@@ -141,7 +165,8 @@ export const AccountInteractionsQuerySchema =
     orderBy: z.enum(["volume", "count"]).optional().default("count"),
     filterAddress: z
       .string()
-      .transform((addr) => toLowerCaseAddress(addr))
+      .refine((addr) => isAddress(addr, { strict: false }), "Invalid address")
+      .transform((addr) => getAddress(addr))
       .optional(),
   });
 

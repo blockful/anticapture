@@ -1,3 +1,4 @@
+import { getAddress, isAddress } from "viem";
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 
 import { VotingPowerService } from "@/api/services";
@@ -9,7 +10,6 @@ import {
   VotingPowerVariationsResponseSchema,
   VotingPowerVariationsMapper,
 } from "@/api/mappers/";
-import { toLowerCaseAddress } from "@/lib/utils";
 
 export function votingPowerVariations(app: Hono, service: VotingPowerService) {
   app.openapi(
@@ -68,7 +68,10 @@ export function votingPowerVariations(app: Hono, service: VotingPowerService) {
       tags: ["voting-powers"],
       request: {
         params: z.object({
-          address: z.string().transform((addr) => toLowerCaseAddress(addr)),
+          address: z
+            .string()
+            .refine((addr) => isAddress(addr, { strict: false }))
+            .transform((addr) => getAddress(addr)),
         }),
         query: VotingPowerVariationsByAccountIdRequestSchema,
       },
