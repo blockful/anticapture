@@ -34,7 +34,7 @@ export const useVoterInfo = ({
   const { data, loading, error, refetch } = useGetAccountPowerQuery({
     variables: {
       address,
-      addressArray: [address],
+      addresses: [address],
       proposalId,
     },
     context: {

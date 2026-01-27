@@ -3053,7 +3053,7 @@ export type GetProposalNonVotersQuery = { __typename?: 'Query', proposalNonVoter
 
 export type GetAccountPowerQueryVariables = Exact<{
   address: Scalars['String']['input'];
-  addressArray: Scalars['JSON']['input'];
+  addresses: Scalars['JSON']['input'];
   proposalId: Scalars['String']['input'];
 }>;
 
@@ -4234,12 +4234,12 @@ export type GetProposalNonVotersLazyQueryHookResult = ReturnType<typeof useGetPr
 export type GetProposalNonVotersSuspenseQueryHookResult = ReturnType<typeof useGetProposalNonVotersSuspenseQuery>;
 export type GetProposalNonVotersQueryResult = Apollo.QueryResult<GetProposalNonVotersQuery, GetProposalNonVotersQueryVariables>;
 export const GetAccountPowerDocument = gql`
-    query GetAccountPower($address: String!, $addressArray: JSON!, $proposalId: String!) {
+    query GetAccountPower($address: String!, $addresses: JSON!, $proposalId: String!) {
   votingPowerByAccountId(accountId: $address) {
     accountId
     votingPower
   }
-  votes(id: $proposalId, voterAddressIn: $addressArray) {
+  votes(id: $proposalId, voterAddressIn: $addresses) {
     items {
       support
       votingPower
@@ -4265,7 +4265,7 @@ export const GetAccountPowerDocument = gql`
  * const { data, loading, error } = useGetAccountPowerQuery({
  *   variables: {
  *      address: // value for 'address'
- *      addressArray: // value for 'addressArray'
+ *      addresses: // value for 'addresses'
  *      proposalId: // value for 'proposalId'
  *   },
  * });

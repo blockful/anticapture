@@ -130,14 +130,14 @@ query GetProposalNonVoters(
 # Get account power
 query GetAccountPower(
   $address: String!
-  $addressArray: JSON!
+  $addresses: JSON!
   $proposalId: String!
 ) {
   votingPowerByAccountId(accountId: $address) {
     accountId
     votingPower
   }
-  votes(id: $proposalId, voterAddressIn: $addressArray) {
+  votes(id: $proposalId, voterAddressIn: $addresses) {
     items {
       support
       votingPower
