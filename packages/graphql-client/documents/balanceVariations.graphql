@@ -1,4 +1,4 @@
-query getHistoricalBalances($addresses:  JSON!, $fromDate: String!) {
+query BalanceVariations($addresses:  JSON!, $fromDate: String!) {
   accountBalanceVariations(addresses: $addresses, fromDate: $fromDate) {
     items {
       accountId

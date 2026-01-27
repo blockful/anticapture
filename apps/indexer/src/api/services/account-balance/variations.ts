@@ -7,8 +7,8 @@ import { Address } from "viem";
 
 interface AccountBalanceRepository {
   getAccountBalanceVariations(
-    fromTimestamp: number,
-    toTimestamp: number,
+    fromTimestamp: number | undefined,
+    toTimestamp: number | undefined,
     limit: number,
     skip: number,
     orderDirection: "asc" | "desc",
@@ -17,16 +17,16 @@ interface AccountBalanceRepository {
 
   getAccountBalanceVariationsByAccountId(
     address: Address,
-    fromTimestamp: number,
-    toTimestamp: number,
+    fromTimestamp: number | undefined,
+    toTimestamp: number | undefined,
   ): Promise<DBAccountBalanceVariation>;
 }
 
 interface AccountInteractionsRepository {
   getAccountInteractions(
     accountId: Address,
-    fromTimestamp: number,
-    toTimestamp: number,
+    fromTimestamp: number | undefined,
+    toTimestamp: number | undefined,
     limit: number,
     skip: number,
     orderBy: "volume" | "count",
@@ -42,8 +42,8 @@ export class BalanceVariationsService {
   ) {}
 
   async getAccountBalanceVariations(
-    fromTimestamp: number,
-    toTimestamp: number,
+    fromTimestamp: number | undefined,
+    toTimestamp: number | undefined,
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
@@ -79,8 +79,8 @@ export class BalanceVariationsService {
 
   async getAccountBalanceVariationsByAccountId(
     address: Address,
-    fromTimestamp: number,
-    toTimestamp: number,
+    fromTimestamp: number | undefined,
+    toTimestamp: number | undefined,
   ): Promise<DBAccountBalanceVariation> {
     return this.balanceRepository.getAccountBalanceVariationsByAccountId(
       address,
@@ -91,8 +91,8 @@ export class BalanceVariationsService {
 
   async getAccountInteractions(
     accountId: Address,
-    fromTimestamp: number,
-    toTimestamp: number,
+    fromTimestamp: number | undefined,
+    toTimestamp: number | undefined,
     skip: number,
     limit: number,
     orderBy: "volume" | "count",

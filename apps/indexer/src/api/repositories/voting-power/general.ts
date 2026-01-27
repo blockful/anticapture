@@ -131,8 +131,8 @@ export class VotingPowerRepository {
   }
 
   async getVotingPowerVariations(
-    startTimestamp: number,
-    endTimestamp: number,
+    startTimestamp: number | undefined,
+    endTimestamp: number | undefined,
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
@@ -155,7 +155,9 @@ export class VotingPowerRepository {
           addresses
             ? inArray(votingPowerHistory.accountId, addresses)
             : undefined,
-          lt(votingPowerHistory.timestamp, BigInt(startTimestamp)),
+          startTimestamp
+            ? lte(votingPowerHistory.timestamp, BigInt(startTimestamp))
+            : undefined,
         ),
       )
       .as("latest_before_from");
@@ -175,7 +177,9 @@ export class VotingPowerRepository {
           addresses
             ? inArray(votingPowerHistory.accountId, addresses)
             : undefined,
-          lte(votingPowerHistory.timestamp, BigInt(endTimestamp)),
+          endTimestamp
+            ? lte(votingPowerHistory.timestamp, BigInt(endTimestamp))
+            : undefined,
         ),
       )
       .as("latest_before_to");
@@ -211,8 +215,8 @@ export class VotingPowerRepository {
 
   async getVotingPowerVariationsByAccountId(
     accountId: Address,
-    startTimestamp: number,
-    endTimestamp: number,
+    startTimestamp: number | undefined,
+    endTimestamp: number | undefined,
   ): Promise<DBVotingPowerVariation> {
     const history = db
       .select({
@@ -224,8 +228,12 @@ export class VotingPowerRepository {
       .where(
         and(
           eq(votingPowerHistory.accountId, accountId),
-          gte(votingPowerHistory.timestamp, BigInt(startTimestamp)),
-          lte(votingPowerHistory.timestamp, BigInt(endTimestamp)),
+          startTimestamp
+            ? gte(votingPowerHistory.timestamp, BigInt(startTimestamp))
+            : undefined,
+          endTimestamp
+            ? lte(votingPowerHistory.timestamp, BigInt(endTimestamp))
+            : undefined,
         ),
       )
       .as("history");

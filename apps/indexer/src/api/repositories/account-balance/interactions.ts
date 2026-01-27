@@ -1,5 +1,5 @@
 import { Address } from "viem";
-import { asc, desc, gte, sql, and, eq, or, lte, between } from "ponder";
+import { asc, desc, gte, sql, and, eq, or, lte } from "ponder";
 import { db } from "ponder:api";
 import { transfer, accountBalance } from "ponder:schema";
 
@@ -8,8 +8,8 @@ import { AccountInteractions, Filter } from "../../mappers";
 export class AccountInteractionsRepository {
   async getAccountInteractions(
     accountId: Address,
-    fromTimestamp: number,
-    toTimestamp: number,
+    fromTimestamp: number | undefined,
+    toTimestamp: number | undefined,
     limit: number,
     skip: number,
     orderBy: "volume" | "count",
@@ -18,7 +18,10 @@ export class AccountInteractionsRepository {
   ): Promise<AccountInteractions> {
     // Aggregate outgoing transfers (negative amounts)
     const transferCriteria = [
-      between(transfer.timestamp, BigInt(fromTimestamp), BigInt(toTimestamp)),
+      fromTimestamp
+        ? gte(transfer.timestamp, BigInt(fromTimestamp))
+        : undefined,
+      toTimestamp ? lte(transfer.timestamp, BigInt(toTimestamp)) : undefined,
       or(
         eq(transfer.toAccountId, accountId),
         eq(transfer.fromAccountId, accountId),

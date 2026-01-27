@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 
-import { useGetHistoricalBalancesQuery } from "@anticapture/graphql-client/hooks";
+import { useBalanceVariationsQuery } from "@anticapture/graphql-client/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
 import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
@@ -14,7 +14,7 @@ export const useHistoricalBalances = (
     return (Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[days]).toString();
   }, [days]);
 
-  const { data, loading, error, refetch } = useGetHistoricalBalancesQuery({
+  const { data, loading, error, refetch } = useBalanceVariationsQuery({
     variables: {
       addresses,
       fromDate,
