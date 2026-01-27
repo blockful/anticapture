@@ -135,12 +135,17 @@ export const handleTransaction = async (
     timestamp,
   );
 
+  const normalizedCex = cex.map(getAddress);
+  const normalizedDex = dex.map(getAddress);
+  const normalizedLending = lending.map(getAddress);
+  const normalizedBurning = burning.map(getAddress);
+
   await updateTransactionFlags(
     context,
     transactionHash,
-    addresses.some((addr) => cex.includes(getAddress(addr))),
-    addresses.some((addr) => dex.includes(getAddress(addr))),
-    addresses.some((addr) => lending.includes(getAddress(addr))),
-    addresses.some((addr) => burning.includes(getAddress(addr))),
+    addresses.some((addr) => normalizedCex.includes(getAddress(addr))),
+    addresses.some((addr) => normalizedDex.includes(getAddress(addr))),
+    addresses.some((addr) => normalizedLending.includes(getAddress(addr))),
+    addresses.some((addr) => normalizedBurning.includes(getAddress(addr))),
   );
 };

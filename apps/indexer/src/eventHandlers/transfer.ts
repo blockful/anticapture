@@ -87,6 +87,11 @@ export const tokenTransfer = async (
       }));
   }
 
+  const normalizedCex = cex.map(getAddress);
+  const normalizedDex = dex.map(getAddress);
+  const normalizedLending = lending.map(getAddress);
+  const normalizedBurning = burning.map(getAddress);
+
   await context.db
     .insert(transfer)
     .values({
@@ -98,12 +103,18 @@ export const tokenTransfer = async (
       toAccountId: getAddress(to),
       timestamp,
       logIndex,
-      isCex: cex.includes(getAddress(from)) || cex.includes(getAddress(to)),
-      isDex: dex.includes(getAddress(from)) || dex.includes(getAddress(to)),
+      isCex:
+        normalizedCex.includes(getAddress(from)) ||
+        normalizedCex.includes(getAddress(to)),
+      isDex:
+        normalizedDex.includes(getAddress(from)) ||
+        normalizedDex.includes(getAddress(to)),
       isLending:
-        lending.includes(getAddress(from)) || lending.includes(getAddress(to)),
+        normalizedLending.includes(getAddress(from)) ||
+        normalizedLending.includes(getAddress(to)),
       isTotal:
-        burning.includes(getAddress(from)) || burning.includes(getAddress(to)),
+        normalizedBurning.includes(getAddress(from)) ||
+        normalizedBurning.includes(getAddress(to)),
     })
     .onConflictDoUpdate((current) => ({
       amount: current.amount + value,

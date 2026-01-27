@@ -17,8 +17,9 @@ export const updateSupplyMetric = async (
   tokenAddress: Address,
   timestamp: bigint,
 ) => {
-  const isToRelevant = addressList.includes(getAddress(to));
-  const isFromRelevant = addressList.includes(getAddress(from));
+  const normalizedAddressList = addressList.map(getAddress);
+  const isToRelevant = normalizedAddressList.includes(getAddress(to));
+  const isFromRelevant = normalizedAddressList.includes(getAddress(from));
 
   if ((isToRelevant || isFromRelevant) && !(isToRelevant && isFromRelevant)) {
     let currentSupply: bigint = 0n;

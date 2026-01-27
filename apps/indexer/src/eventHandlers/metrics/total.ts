@@ -17,14 +17,15 @@ export const updateTotalSupply = async (
   tokenAddress: Address,
   timestamp: bigint,
 ) => {
-  const isToBurningAddress = addressList.includes(getAddress(to));
-  const isFromBurningAddress = addressList.includes(getAddress(from));
+  const normalizedAddressList = addressList.map(getAddress);
+  const isToBurningAddress = normalizedAddressList.includes(getAddress(to));
+  const isFromBurningAddress = normalizedAddressList.includes(getAddress(from));
   const isTotalSupplyTransaction =
     (isToBurningAddress || isFromBurningAddress) &&
     !(isToBurningAddress && isFromBurningAddress);
 
   if (isTotalSupplyTransaction) {
-    const isBurningTokens = addressList.includes(getAddress(to));
+    const isBurningTokens = normalizedAddressList.includes(getAddress(to));
     let currentTotalSupply = 0n;
     const newTotalSupply = (
       await context.db

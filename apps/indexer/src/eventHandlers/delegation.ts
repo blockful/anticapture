@@ -65,11 +65,19 @@ export const delegateChanged = async (
         tokenId: getAddress(tokenId),
       });
 
-  // Pre-compute address lists for flag determination
-  const lendingAddressList = Object.values(LendingAddresses[daoId] || {});
-  const cexAddressList = Object.values(CEXAddresses[daoId] || {});
-  const dexAddressList = Object.values(DEXAddresses[daoId] || {});
-  const burningAddressList = Object.values(BurningAddresses[daoId] || {});
+  // Pre-compute address lists for flag determination (normalized to checksum)
+  const lendingAddressList = Object.values(LendingAddresses[daoId] || {}).map(
+    getAddress,
+  );
+  const cexAddressList = Object.values(CEXAddresses[daoId] || {}).map(
+    getAddress,
+  );
+  const dexAddressList = Object.values(DEXAddresses[daoId] || {}).map(
+    getAddress,
+  );
+  const burningAddressList = Object.values(BurningAddresses[daoId] || {}).map(
+    getAddress,
+  );
 
   // Determine flags for the delegation
   const isCex =
