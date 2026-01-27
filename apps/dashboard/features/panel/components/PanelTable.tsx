@@ -419,6 +419,7 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
         return (
           <div className="scrollbar-none text-primary flex w-full items-center overflow-auto">
             <RiskAreaCardWrapper
+              daoId={daoId}
               riskAreas={riskAreas.risks}
               variant={RiskAreaCardEnum.PANEL_TABLE}
               className="flex w-full flex-row gap-1"
