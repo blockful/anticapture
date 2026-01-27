@@ -1,0 +1,22 @@
+# Batch query for multiple addresses' account balances with delegate info
+query GetBatchAccountBalances($addresses: JSON!) {
+  accountBalances(addresses: $addresses, limit: 1000) {
+    items {
+      accountId
+      balance
+      delegate
+    }
+    totalCount
+  }
+}
+
+# Query to get delegator counts for multiple delegates
+query GetBatchDelegatorCounts($delegates: JSON!) {
+  accountBalances(delegates: $delegates, limit: 1000) {
+    items {
+      accountId
+      delegate
+    }
+    totalCount
+  }
+}

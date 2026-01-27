@@ -78,15 +78,41 @@ export type PageInfo = {
 export type Query = {
   __typename?: 'Query';
   _meta?: Maybe<Meta>;
-  /** Returns account balance information for a specific address */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/accounts/{args.address}/balances`
+   * Returns account balance information for a specific address
+   *
+   */
   accountBalanceByAccountId?: Maybe<AccountBalanceByAccountId_200_Response>;
-  /** Returns a mapping of the biggest variations to account balances associated by account address */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/balances/variations`
+   * Returns a mapping of the biggest variations to account balances associated by account address
+   *
+   */
   accountBalanceVariations?: Maybe<AccountBalanceVariations_200_Response>;
-  /** Returns sorted and paginated account balance records */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/balances`
+   * Returns sorted and paginated account balance records
+   *
+   */
   accountBalances?: Maybe<AccountBalances_200_Response>;
   /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/balances/{args.address}/interactions`
    * Returns a mapping of the largest interactions between accounts.
    * Positive amounts signify net token transfers FROM <address>, whilst negative amounts refer to net transfers TO <address>
+   *
    */
   accountInteractions?: Maybe<AccountInteractions_200_Response>;
   /**
@@ -95,74 +121,309 @@ export type Query = {
    * Only includes dates where ALL DAOs have data available.
    */
   averageDelegationPercentageByDay: AverageDelegationPercentagePage;
-  /** Get active token supply for DAO */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/active-supply/compare`
+   * Get active token supply for DAO
+   *
+   */
   compareActiveSupply?: Maybe<CompareActiveSupply_200_Response>;
-  /** Compare average turnout between time periods */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/average-turnout/compare`
+   * Compare average turnout between time periods
+   *
+   */
   compareAverageTurnout?: Maybe<CompareAverageTurnout_200_Response>;
-  /** Compare cex supply between periods */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/cex-supply/compare`
+   * Compare cex supply between periods
+   *
+   */
   compareCexSupply?: Maybe<CompareCexSupply_200_Response>;
-  /** Compare circulating supply between periods */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/circulating-supply/compare`
+   * Compare circulating supply between periods
+   *
+   */
   compareCirculatingSupply?: Maybe<CompareCirculatingSupply_200_Response>;
-  /** Compare delegated supply between periods */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/delegated-supply/compare`
+   * Compare delegated supply between periods
+   *
+   */
   compareDelegatedSupply?: Maybe<CompareDelegatedSupply_200_Response>;
-  /** Compare dex supply between periods */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/dex-supply/compare`
+   * Compare dex supply between periods
+   *
+   */
   compareDexSupply?: Maybe<CompareDexSupply_200_Response>;
-  /** Compare lending supply between periods */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/lending-supply/compare`
+   * Compare lending supply between periods
+   *
+   */
   compareLendingSupply?: Maybe<CompareLendingSupply_200_Response>;
-  /** Compare number of proposals between time periods */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/proposals/compare`
+   * Compare number of proposals between time periods
+   *
+   */
   compareProposals?: Maybe<CompareProposals_200_Response>;
-  /** Compare total supply between periods */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/total-supply/compare`
+   * Compare total supply between periods
+   *
+   */
   compareTotalSupply?: Maybe<CompareTotalSupply_200_Response>;
-  /** Compare treasury between periods */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/treasury/compare`
+   * Compare treasury between periods
+   *
+   */
   compareTreasury?: Maybe<CompareTreasury_200_Response>;
-  /** Compare number of votes between time periods */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/votes/compare`
+   * Compare number of votes between time periods
+   *
+   */
   compareVotes?: Maybe<CompareVotes_200_Response>;
-  /** Returns current governance parameters for this DAO */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/dao`
+   * Returns current governance parameters for this DAO
+   *
+   */
   dao?: Maybe<Dao_200_Response>;
-  daoMetricsDayBuckets: DaoMetricsDayBucketPage;
   /** Get all DAOs */
   daos: DaoList;
-  /** Get delegation percentage day buckets with forward-fill */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/delegation-percentage`
+   * Get delegation percentage day buckets with forward-fill
+   *
+   */
   delegationPercentageByDay?: Maybe<DelegationPercentageByDay_200_Response>;
   delegations: DelegationPage;
-  /** Get historical DAO Token Treasury value (governance token quantity × token price) */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/treasury/dao-token`
+   * Get historical DAO Token Treasury value (governance token quantity × token price)
+   *
+   */
   getDaoTokenTreasury?: Maybe<GetDaoTokenTreasury_200_Response>;
-  /** Get historical Liquid Treasury (treasury without DAO tokens) from external providers (DefiLlama/Dune) */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/treasury/liquid`
+   * Get historical Liquid Treasury (treasury without DAO tokens) from external providers (DefiLlama/Dune)
+   *
+   */
   getLiquidTreasury?: Maybe<GetLiquidTreasury_200_Response>;
-  /** Get historical Total Treasury (liquid treasury + DAO token treasury) */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/treasury/total`
+   * Get historical Total Treasury (liquid treasury + DAO token treasury)
+   *
+   */
   getTotalTreasury?: Maybe<GetTotalTreasury_200_Response>;
-  /** Fetch historical token balances for multiple addresses at a specific time period using multicall */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/balances/historical`
+   * Fetch historical token balances for multiple addresses at a specific time period using multicall
+   *
+   */
   historicalBalances?: Maybe<Array<Maybe<Query_HistoricalBalances_Items>>>;
-  /** Get historical market data for a specific token */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/token/historical-data`
+   * Get historical market data for a specific token
+   *
+   */
   historicalTokenData?: Maybe<Array<Maybe<Query_HistoricalTokenData_Items>>>;
-  /** Returns a list of voting power changes */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/voting-powers/{args.accountId}/historical`
+   * Returns a list of voting power changes
+   *
+   */
   historicalVotingPowers?: Maybe<HistoricalVotingPowers_200_Response>;
-  /** Get the last update time */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/last-update`
+   * Get the last update time
+   *
+   */
   lastUpdate?: Maybe<LastUpdate_200_Response>;
-  /** Returns a single proposal by its ID */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/proposals/{args.id}`
+   * Returns a single proposal by its ID
+   *
+   */
   proposal?: Maybe<Proposal_200_Response>;
-  /** Returns the active delegates that did not vote on a given proposal */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/proposals/{args.id}/non-voters`
+   * Returns the active delegates that did not vote on a given proposal
+   *
+   */
   proposalNonVoters?: Maybe<ProposalNonVoters_200_Response>;
-  /** Returns a list of proposal */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/proposals`
+   * Returns a list of proposal
+   *
+   */
   proposals?: Maybe<Proposals_200_Response>;
-  /** Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/proposals-activity`
+   * Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window
+   *
+   */
   proposalsActivity?: Maybe<ProposalsActivity_200_Response>;
-  /** Get property data for a specific token */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/token`
+   * Get property data for a specific token
+   *
+   */
   token?: Maybe<Token_200_Response>;
-  /** Get transactions with their associated transfers and delegations, with optional filtering and sorting */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/token-metrics`
+   * Returns token related metrics for a single metric type.
+   *         Available types: TOTAL_SUPPLY, DELEGATED_SUPPLY, CEX_SUPPLY, DEX_SUPPLY, LENDING_SUPPLY, CIRCULATING_SUPPLY, TREASURY
+   *
+   */
+  tokenMetrics?: Maybe<TokenMetrics_200_Response>;
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/transactions`
+   * Get transactions with their associated transfers and delegations, with optional filtering and sorting
+   *
+   */
   transactions?: Maybe<Transactions_200_Response>;
-  /** Get transfers of a given address */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/accounts/{args.address}/transfers`
+   * Get transfers of a given address
+   *
+   */
   transfers?: Maybe<Transfers_200_Response>;
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/proposals/{args.id}/votes`
+   * Returns a paginated list of votes cast on a specific proposal
+   *
+   */
+  votes?: Maybe<Votes_200_Response>;
   votesOnchain?: Maybe<VotesOnchain>;
   votesOnchains: VotesOnchainPage;
-  /** Returns voting power information for a specific address (account) */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/voting-powers/{args.accountId}`
+   * Returns voting power information for a specific address (account)
+   *
+   */
   votingPowerByAccountId?: Maybe<VotingPowerByAccountId_200_Response>;
   votingPowerHistorys: VotingPowerHistoryPage;
-  /** Returns a mapping of the voting power changes within a time frame for the given addresses */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/accounts/voting-powers/variations`
+   * Returns a mapping of the voting power changes within a time frame for the given addresses
+   *
+   */
   votingPowerVariations?: Maybe<VotingPowerVariations_200_Response>;
-  /** Returns a the changes to voting power by period and accountId */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/accounts/{args.address}/voting-powers/variations`
+   * Returns a the changes to voting power by period and accountId
+   *
+   */
   votingPowerVariationsByAccountId?: Maybe<VotingPowerVariationsByAccountId_200_Response>;
-  /** Returns sorted and paginated account voting power records */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/voting-powers`
+   * Returns sorted and paginated account voting power records
+   *
+   */
   votingPowers?: Maybe<VotingPowers_200_Response>;
 };
 
@@ -266,16 +527,6 @@ export type QueryCompareTreasuryArgs = {
 
 export type QueryCompareVotesArgs = {
   days?: InputMaybe<QueryInput_CompareVotes_Days>;
-};
-
-
-export type QueryDaoMetricsDayBucketsArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  where?: InputMaybe<DaoMetricsDayBucketFilter>;
 };
 
 
@@ -388,6 +639,16 @@ export type QueryTokenArgs = {
 };
 
 
+export type QueryTokenMetricsArgs = {
+  endDate?: InputMaybe<Scalars['Float']['input']>;
+  limit?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  metricType: QueryInput_TokenMetrics_MetricType;
+  orderDirection?: InputMaybe<QueryInput_TokenMetrics_OrderDirection>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  startDate?: InputMaybe<Scalars['Float']['input']>;
+};
+
+
 export type QueryTransactionsArgs = {
   affectedSupply?: InputMaybe<Scalars['JSON']['input']>;
   from?: InputMaybe<Scalars['String']['input']>;
@@ -416,6 +677,17 @@ export type QueryTransfersArgs = {
   to?: InputMaybe<Scalars['String']['input']>;
   toDate?: InputMaybe<Scalars['Float']['input']>;
   toValue?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryVotesArgs = {
+  id: Scalars['String']['input'];
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<QueryInput_Votes_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_Votes_OrderDirection>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  support?: InputMaybe<Scalars['Float']['input']>;
+  voterAddressIn?: InputMaybe<Scalars['JSON']['input']>;
 };
 
 
@@ -1601,6 +1873,21 @@ export enum QueryInput_Proposals_OrderDirection {
   Desc = 'desc'
 }
 
+export enum QueryInput_TokenMetrics_MetricType {
+  CexSupply = 'CEX_SUPPLY',
+  CirculatingSupply = 'CIRCULATING_SUPPLY',
+  DelegatedSupply = 'DELEGATED_SUPPLY',
+  DexSupply = 'DEX_SUPPLY',
+  LendingSupply = 'LENDING_SUPPLY',
+  TotalSupply = 'TOTAL_SUPPLY',
+  Treasury = 'TREASURY'
+}
+
+export enum QueryInput_TokenMetrics_OrderDirection {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
 export enum QueryInput_Token_Currency {
   Eth = 'eth',
   Usd = 'usd'
@@ -1617,6 +1904,16 @@ export enum QueryInput_Transfers_SortBy {
 }
 
 export enum QueryInput_Transfers_SortOrder {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
+export enum QueryInput_Votes_OrderBy {
+  Timestamp = 'timestamp',
+  VotingPower = 'votingPower'
+}
+
+export enum QueryInput_Votes_OrderDirection {
   Asc = 'asc',
   Desc = 'desc'
 }
@@ -1816,6 +2113,20 @@ export type Query_Proposals_Items_Items = {
   values: Array<Maybe<Scalars['String']['output']>>;
 };
 
+export type Query_TokenMetrics_Items_Items = {
+  __typename?: 'query_tokenMetrics_items_items';
+  date: Scalars['String']['output'];
+  high: Scalars['String']['output'];
+  volume: Scalars['String']['output'];
+};
+
+export type Query_TokenMetrics_PageInfo = {
+  __typename?: 'query_tokenMetrics_pageInfo';
+  endDate?: Maybe<Scalars['String']['output']>;
+  hasNextPage: Scalars['Boolean']['output'];
+  startDate?: Maybe<Scalars['String']['output']>;
+};
+
 export type Query_Transactions_Items_Items = {
   __typename?: 'query_transactions_items_items';
   delegations: Array<Maybe<Query_Transactions_Items_Items_Delegations_Items>>;
@@ -1876,6 +2187,17 @@ export type Query_Transfers_Items_Items = {
   toAccountId: Scalars['String']['output'];
   tokenId: Scalars['String']['output'];
   transactionHash: Scalars['String']['output'];
+};
+
+export type Query_Votes_Items_Items = {
+  __typename?: 'query_votes_items_items';
+  proposalId: Scalars['String']['output'];
+  reason?: Maybe<Scalars['String']['output']>;
+  support: Scalars['Float']['output'];
+  timestamp: Scalars['Float']['output'];
+  transactionHash: Scalars['String']['output'];
+  voterAddress: Scalars['String']['output'];
+  votingPower: Scalars['String']['output'];
 };
 
 export type Query_VotingPowerVariationsByAccountId_Data = {
@@ -2022,6 +2344,12 @@ export type TokenFilter = {
   treasury_lte?: InputMaybe<Scalars['BigInt']['input']>;
   treasury_not?: InputMaybe<Scalars['BigInt']['input']>;
   treasury_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
+};
+
+export type TokenMetrics_200_Response = {
+  __typename?: 'tokenMetrics_200_response';
+  items: Array<Maybe<Query_TokenMetrics_Items_Items>>;
+  pageInfo: Query_TokenMetrics_PageInfo;
 };
 
 export type TokenPage = {
@@ -2416,6 +2744,12 @@ export type VotesOnchainPage = {
   totalCount: Scalars['Int']['output'];
 };
 
+export type Votes_200_Response = {
+  __typename?: 'votes_200_response';
+  items: Array<Maybe<Query_Votes_Items_Items>>;
+  totalCount: Scalars['Float']['output'];
+};
+
 export type VotingPowerByAccountId_200_Response = {
   __typename?: 'votingPowerByAccountId_200_response';
   accountId: Scalars['String']['output'];
@@ -2572,6 +2906,20 @@ export type AccountBalanceVariationsQueryVariables = Exact<{
 
 
 export type AccountBalanceVariationsQuery = { __typename?: 'Query', accountBalanceVariations?: { __typename?: 'accountBalanceVariations_200_response', items: Array<{ __typename?: 'query_accountBalanceVariations_items_items', accountId: string, previousBalance: string, currentBalance: string, absoluteChange: string, percentageChange: string } | null> } | null };
+
+export type GetBatchAccountBalancesQueryVariables = Exact<{
+  addresses: Scalars['JSON']['input'];
+}>;
+
+
+export type GetBatchAccountBalancesQuery = { __typename?: 'Query', accountBalances?: { __typename?: 'accountBalances_200_response', totalCount: number, items: Array<{ __typename?: 'query_accountBalances_items_items', accountId: string, balance: string, delegate: string } | null> } | null };
+
+export type GetBatchDelegatorCountsQueryVariables = Exact<{
+  delegates: Scalars['JSON']['input'];
+}>;
+
+
+export type GetBatchDelegatorCountsQuery = { __typename?: 'Query', accountBalances?: { __typename?: 'accountBalances_200_response', totalCount: number, items: Array<{ __typename?: 'query_accountBalances_items_items', accountId: string, delegate: string } | null> } | null };
 
 export type CompareTreasuryQueryVariables = Exact<{
   days: QueryInput_CompareTreasury_Days;
@@ -3025,6 +3373,95 @@ export type AccountBalanceVariationsQueryHookResult = ReturnType<typeof useAccou
 export type AccountBalanceVariationsLazyQueryHookResult = ReturnType<typeof useAccountBalanceVariationsLazyQuery>;
 export type AccountBalanceVariationsSuspenseQueryHookResult = ReturnType<typeof useAccountBalanceVariationsSuspenseQuery>;
 export type AccountBalanceVariationsQueryResult = Apollo.QueryResult<AccountBalanceVariationsQuery, AccountBalanceVariationsQueryVariables>;
+export const GetBatchAccountBalancesDocument = gql`
+    query GetBatchAccountBalances($addresses: JSON!) {
+  accountBalances(addresses: $addresses, limit: 1000) {
+    items {
+      accountId
+      balance
+      delegate
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useGetBatchAccountBalancesQuery__
+ *
+ * To run a query within a React component, call `useGetBatchAccountBalancesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetBatchAccountBalancesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetBatchAccountBalancesQuery({
+ *   variables: {
+ *      addresses: // value for 'addresses'
+ *   },
+ * });
+ */
+export function useGetBatchAccountBalancesQuery(baseOptions: Apollo.QueryHookOptions<GetBatchAccountBalancesQuery, GetBatchAccountBalancesQueryVariables> & ({ variables: GetBatchAccountBalancesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetBatchAccountBalancesQuery, GetBatchAccountBalancesQueryVariables>(GetBatchAccountBalancesDocument, options);
+      }
+export function useGetBatchAccountBalancesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetBatchAccountBalancesQuery, GetBatchAccountBalancesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetBatchAccountBalancesQuery, GetBatchAccountBalancesQueryVariables>(GetBatchAccountBalancesDocument, options);
+        }
+export function useGetBatchAccountBalancesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetBatchAccountBalancesQuery, GetBatchAccountBalancesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetBatchAccountBalancesQuery, GetBatchAccountBalancesQueryVariables>(GetBatchAccountBalancesDocument, options);
+        }
+export type GetBatchAccountBalancesQueryHookResult = ReturnType<typeof useGetBatchAccountBalancesQuery>;
+export type GetBatchAccountBalancesLazyQueryHookResult = ReturnType<typeof useGetBatchAccountBalancesLazyQuery>;
+export type GetBatchAccountBalancesSuspenseQueryHookResult = ReturnType<typeof useGetBatchAccountBalancesSuspenseQuery>;
+export type GetBatchAccountBalancesQueryResult = Apollo.QueryResult<GetBatchAccountBalancesQuery, GetBatchAccountBalancesQueryVariables>;
+export const GetBatchDelegatorCountsDocument = gql`
+    query GetBatchDelegatorCounts($delegates: JSON!) {
+  accountBalances(delegates: $delegates, limit: 1000) {
+    items {
+      accountId
+      delegate
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useGetBatchDelegatorCountsQuery__
+ *
+ * To run a query within a React component, call `useGetBatchDelegatorCountsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetBatchDelegatorCountsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetBatchDelegatorCountsQuery({
+ *   variables: {
+ *      delegates: // value for 'delegates'
+ *   },
+ * });
+ */
+export function useGetBatchDelegatorCountsQuery(baseOptions: Apollo.QueryHookOptions<GetBatchDelegatorCountsQuery, GetBatchDelegatorCountsQueryVariables> & ({ variables: GetBatchDelegatorCountsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetBatchDelegatorCountsQuery, GetBatchDelegatorCountsQueryVariables>(GetBatchDelegatorCountsDocument, options);
+      }
+export function useGetBatchDelegatorCountsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetBatchDelegatorCountsQuery, GetBatchDelegatorCountsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetBatchDelegatorCountsQuery, GetBatchDelegatorCountsQueryVariables>(GetBatchDelegatorCountsDocument, options);
+        }
+export function useGetBatchDelegatorCountsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetBatchDelegatorCountsQuery, GetBatchDelegatorCountsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetBatchDelegatorCountsQuery, GetBatchDelegatorCountsQueryVariables>(GetBatchDelegatorCountsDocument, options);
+        }
+export type GetBatchDelegatorCountsQueryHookResult = ReturnType<typeof useGetBatchDelegatorCountsQuery>;
+export type GetBatchDelegatorCountsLazyQueryHookResult = ReturnType<typeof useGetBatchDelegatorCountsLazyQuery>;
+export type GetBatchDelegatorCountsSuspenseQueryHookResult = ReturnType<typeof useGetBatchDelegatorCountsSuspenseQuery>;
+export type GetBatchDelegatorCountsQueryResult = Apollo.QueryResult<GetBatchDelegatorCountsQuery, GetBatchDelegatorCountsQueryVariables>;
 export const CompareTreasuryDocument = gql`
     query CompareTreasury($days: queryInput_compareTreasury_days!) {
   compareTreasury(days: $days) {
