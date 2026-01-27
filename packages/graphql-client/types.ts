@@ -383,7 +383,6 @@ export type Query = {
    *
    */
   votes?: Maybe<Votes_200_Response>;
-  votesOnchain?: Maybe<VotesOnchain>;
   votesOnchains: VotesOnchainPage;
   /**
    *
@@ -685,12 +684,6 @@ export type QueryVotesArgs = {
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   support?: InputMaybe<Scalars['Float']['input']>;
   voterAddressIn?: InputMaybe<Scalars['JSON']['input']>;
-};
-
-
-export type QueryVotesOnchainArgs = {
-  proposalId: Scalars['String']['input'];
-  voterAccountId: Scalars['String']['input'];
 };
 
 
@@ -3057,11 +3050,12 @@ export type GetProposalNonVotersQuery = { __typename?: 'Query', proposalNonVoter
 
 export type GetAccountPowerQueryVariables = Exact<{
   address: Scalars['String']['input'];
+  addressArray: Scalars['JSON']['input'];
   proposalId: Scalars['String']['input'];
 }>;
 
 
-export type GetAccountPowerQuery = { __typename?: 'Query', votingPowerByAccountId?: { __typename?: 'votingPowerByAccountId_200_response', accountId: string, votingPower: string } | null, votesOnchain?: { __typename?: 'votesOnchain', support: string, votingPower: any, reason?: string | null, timestamp: any, txHash: string, daoId: string } | null };
+export type GetAccountPowerQuery = { __typename?: 'Query', votingPowerByAccountId?: { __typename?: 'votingPowerByAccountId_200_response', accountId: string, votingPower: string } | null, votes?: { __typename?: 'votes_200_response', totalCount: number, items: Array<{ __typename?: 'query_votes_items_items', support: number, votingPower: string, reason?: string | null, timestamp: number, transactionHash: string } | null> } | null };
 
 export type GetHistoricalBalancesQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];

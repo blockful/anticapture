@@ -128,17 +128,23 @@ query GetProposalNonVoters(
 }
 
 # Get account power
-query GetAccountPower($address: String!, $proposalId: String!) {
+query GetAccountPower(
+  $address: String!
+  $addressArray: JSON!
+  $proposalId: String!
+) {
   votingPowerByAccountId(accountId: $address) {
     accountId
     votingPower
   }
-  votesOnchain(proposalId: $proposalId, voterAccountId: $address) {
-    support
-    votingPower
-    reason
-    timestamp
-    txHash
-    daoId
+  votes(id: $proposalId, voterAddressIn: $addressArray) {
+    items {
+      support
+      votingPower
+      reason
+      timestamp
+      transactionHash
+    }
+    totalCount
   }
 }
