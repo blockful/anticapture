@@ -19,9 +19,18 @@ export const ProposalActivityResponseSchema = z.object({
         endBlock: z.number(),
         timestamp: z.bigint().transform((val) => val.toString()),
         status: z.string(),
-        forVotes: z.bigint().transform((val) => val.toString()),
-        againstVotes: z.bigint().transform((val) => val.toString()),
-        abstainVotes: z.bigint().transform((val) => val.toString()),
+        forVotes: z
+          .bigint()
+          .transform((val) => val.toString())
+          .openapi({ type: "string" }),
+        againstVotes: z
+          .bigint()
+          .transform((val) => val.toString())
+          .openapi({ type: "string" }),
+        abstainVotes: z
+          .bigint()
+          .transform((val) => val.toString())
+          .openapi({ type: "string" }),
       }),
       userVote: z
         .object({

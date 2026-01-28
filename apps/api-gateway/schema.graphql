@@ -1679,18 +1679,12 @@ type query_proposalsActivity_proposals_items_proposal {
   endBlock: Float!
   timestamp: query_proposalsActivity_proposals_items_proposal_timestamp!
   status: String!
-  forVotes: query_proposalsActivity_proposals_items_proposal_forVotes!
-  againstVotes: query_proposalsActivity_proposals_items_proposal_againstVotes!
-  abstainVotes: query_proposalsActivity_proposals_items_proposal_abstainVotes!
+  forVotes: String!
+  againstVotes: String!
+  abstainVotes: String!
 }
 
 scalar query_proposalsActivity_proposals_items_proposal_timestamp
-
-scalar query_proposalsActivity_proposals_items_proposal_forVotes
-
-scalar query_proposalsActivity_proposals_items_proposal_againstVotes
-
-scalar query_proposalsActivity_proposals_items_proposal_abstainVotes
 
 type query_proposalsActivity_proposals_items_userVote {
   id: String!
