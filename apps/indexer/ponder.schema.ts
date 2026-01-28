@@ -83,13 +83,38 @@ export const votingPowerHistory = onchainTable(
   }),
 );
 
+export const balanceHistory = onchainTable(
+  "balance_history",
+  (drizzle) => ({
+    transactionHash: drizzle.text("transaction_hash").notNull(),
+    daoId: drizzle.text("dao_id").notNull(),
+    accountId: drizzle.text("account_id").$type<Address>().notNull(),
+    balance: drizzle.bigint("balance").notNull(),
+    delta: drizzle.bigint("delta").notNull(),
+    deltaMod: drizzle.bigint("delta_mod").notNull(),
+    timestamp: drizzle.bigint().notNull(),
+    logIndex: drizzle.integer("log_index").notNull(),
+  }),
+  (table) => ({
+    pk: primaryKey({
+      columns: [table.transactionHash, table.accountId, table.logIndex],
+    }),
+  }),
+);
+
 export const delegation = onchainTable(
   "delegations",
   (drizzle) => ({
     transactionHash: drizzle.text("transaction_hash").notNull(),
     daoId: drizzle.text("dao_id").notNull(),
-    delegateAccountId: drizzle.text("delegate_account_id").notNull(),
-    delegatorAccountId: drizzle.text("delegator_account_id").notNull(),
+    delegateAccountId: drizzle
+      .text("delegate_account_id")
+      .$type<Address>()
+      .notNull(),
+    delegatorAccountId: drizzle
+      .text("delegator_account_id")
+      .$type<Address>()
+      .notNull(),
     delegatedValue: drizzle.bigint("delegated_value").notNull().default(0n),
     previousDelegate: drizzle.text("previous_delegate"),
     timestamp: drizzle.bigint().notNull(),

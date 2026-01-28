@@ -50,7 +50,7 @@ export const VotingPowerTable = ({
 
   const tableData = balances.map((account) => {
     return {
-      address: account.accountId,
+      address: account.address,
       amount: Number(account.balance) || 0,
       date: account.timestamp,
     };
@@ -61,152 +61,152 @@ export const VotingPowerTable = ({
     amount: number;
     date: string;
   }>[] = [
-    {
-      accessorKey: "address",
-      header: () => (
-        <div className="text-table-header flex w-full items-center justify-start">
-          Address
-        </div>
-      ),
-      cell: ({ row }) => {
-        if (!isMounted || loading) {
+      {
+        accessorKey: "address",
+        header: () => (
+          <div className="text-table-header flex w-full items-center justify-start">
+            Address
+          </div>
+        ),
+        cell: ({ row }) => {
+          if (!isMounted || loading) {
+            return (
+              <div className="flex w-full items-center gap-3">
+                <SkeletonRow
+                  parentClassName="flex animate-pulse"
+                  className="size-6 rounded-full"
+                />
+                <SkeletonRow
+                  parentClassName="flex animate-pulse"
+                  className="h-4 w-24"
+                />
+              </div>
+            );
+          }
+          const addressValue: string = row.getValue("address");
           return (
-            <div className="flex w-full items-center gap-3">
-              <SkeletonRow
-                parentClassName="flex animate-pulse"
-                className="size-6 rounded-full"
+            <div className="flex w-full items-center gap-2">
+              <EnsAvatar
+                address={addressValue as Address}
+                size="sm"
+                variant="rounded"
               />
-              <SkeletonRow
-                parentClassName="flex animate-pulse"
-                className="h-4 w-24"
-              />
+              <div className="flex items-center opacity-0 transition-opacity [tr:hover_&]:opacity-100">
+                <CopyAndPasteButton
+                  textToCopy={addressValue as `0x${string}`}
+                  customTooltipText={{
+                    default: "Copy address",
+                    copied: "Address copied!",
+                  }}
+                  className="p-1"
+                  iconSize="md"
+                />
+              </div>
             </div>
           );
-        }
-        const addressValue: string = row.getValue("address");
-        return (
-          <div className="flex w-full items-center gap-2">
-            <EnsAvatar
-              address={addressValue as Address}
-              size="sm"
-              variant="rounded"
-            />
-            <div className="flex items-center opacity-0 transition-opacity [tr:hover_&]:opacity-100">
-              <CopyAndPasteButton
-                textToCopy={addressValue as `0x${string}`}
-                customTooltipText={{
-                  default: "Copy address",
-                  copied: "Address copied!",
-                }}
-                className="p-1"
-                iconSize="md"
-              />
+        },
+        meta: {
+          columnClassName: "w-72",
+        },
+      },
+      {
+        accessorKey: "amount",
+        header: ({ column }) => {
+          const handleSortToggle = () => {
+            const newSortOrder = sortOrder === "desc" ? "asc" : "desc";
+            setSortBy("balance");
+            setSortOrder(newSortOrder);
+            column.toggleSorting(newSortOrder === "desc");
+          };
+          return (
+            <div className="text-table-header flex w-full items-center justify-end whitespace-nowrap">
+              Amount ({daoId})
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-secondary justify-end p-0"
+                onClick={handleSortToggle}
+              >
+                <ArrowUpDown
+                  props={{ className: "size-4" }}
+                  activeState={
+                    sortBy === "balance" && sortOrder === "asc"
+                      ? ArrowState.UP
+                      : sortBy === "balance" && sortOrder === "desc"
+                        ? ArrowState.DOWN
+                        : ArrowState.DEFAULT
+                  }
+                />
+              </Button>
             </div>
-          </div>
-        );
-      },
-      meta: {
-        columnClassName: "w-72",
-      },
-    },
-    {
-      accessorKey: "amount",
-      header: ({ column }) => {
-        const handleSortToggle = () => {
-          const newSortOrder = sortOrder === "desc" ? "asc" : "desc";
-          setSortBy("balance");
-          setSortOrder(newSortOrder);
-          column.toggleSorting(newSortOrder === "desc");
-        };
-        return (
-          <div className="text-table-header flex w-full items-center justify-end whitespace-nowrap">
-            Amount ({daoId})
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-secondary justify-end p-0"
-              onClick={handleSortToggle}
-            >
-              <ArrowUpDown
-                props={{ className: "size-4" }}
-                activeState={
-                  sortBy === "balance" && sortOrder === "asc"
-                    ? ArrowState.UP
-                    : sortBy === "balance" && sortOrder === "desc"
-                      ? ArrowState.DOWN
-                      : ArrowState.DEFAULT
-                }
-              />
-            </Button>
-          </div>
-        );
-      },
-      cell: ({ row }) => {
-        if (!isMounted || loading) {
+          );
+        },
+        cell: ({ row }) => {
+          if (!isMounted || loading) {
+            return (
+              <div className="flex w-full items-center justify-end text-sm">
+                <SkeletonRow
+                  parentClassName="flex animate-pulse justify-end"
+                  className="h-4 w-16"
+                />
+              </div>
+            );
+          }
+          const amount: number = row.getValue("amount");
           return (
             <div className="flex w-full items-center justify-end text-sm">
-              <SkeletonRow
-                parentClassName="flex animate-pulse justify-end"
-                className="h-4 w-16"
-              />
+              {formatNumberUserReadable(
+                token === "ERC20"
+                  ? Number(BigInt(amount)) / Number(BigInt(10 ** 18)) || 0
+                  : Number(amount) || 0,
+              )}
             </div>
           );
-        }
-        const amount: number = row.getValue("amount");
-        return (
-          <div className="flex w-full items-center justify-end text-sm">
-            {formatNumberUserReadable(
-              token === "ERC20"
-                ? Number(BigInt(amount)) / Number(BigInt(10 ** 18)) || 0
-                : Number(amount) || 0,
-            )}
-          </div>
-        );
+        },
+        meta: {
+          columnClassName: "w-72",
+        },
       },
-      meta: {
-        columnClassName: "w-72",
-      },
-    },
-    {
-      accessorKey: "date",
-      header: () => {
-        return (
-          <div className="text-table-header flex w-full items-center justify-start">
-            Date
-          </div>
-        );
-      },
-      cell: ({ row }) => {
-        const date: string = row.getValue("date");
-
-        if (!isMounted || loading) {
+      {
+        accessorKey: "date",
+        header: () => {
           return (
-            <div className="flex w-full">
-              <SkeletonRow
-                parentClassName="flex animate-pulse"
-                className="h-4 w-20"
-              />
+            <div className="text-table-header flex w-full items-center justify-start">
+              Date
             </div>
           );
-        }
+        },
+        cell: ({ row }) => {
+          const date: string = row.getValue("date");
 
-        return (
-          <div className="ext-sm flex w-full items-center justify-start whitespace-nowrap">
-            {date
-              ? new Date(Number(date) * 1000).toLocaleDateString("en-US", {
+          if (!isMounted || loading) {
+            return (
+              <div className="flex w-full">
+                <SkeletonRow
+                  parentClassName="flex animate-pulse"
+                  className="h-4 w-20"
+                />
+              </div>
+            );
+          }
+
+          return (
+            <div className="ext-sm flex w-full items-center justify-start whitespace-nowrap">
+              {date
+                ? new Date(Number(date) * 1000).toLocaleDateString("en-US", {
                   year: "numeric",
                   month: "long",
                   day: "numeric",
                 })
-              : "N/A"}
-          </div>
-        );
+                : "N/A"}
+            </div>
+          );
+        },
+        meta: {
+          columnClassName: "w-72",
+        },
       },
-      meta: {
-        columnClassName: "w-72",
-      },
-    },
-  ];
+    ];
 
   return (
     <div className="flex w-full flex-col gap-2">

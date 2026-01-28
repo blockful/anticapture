@@ -39,7 +39,8 @@ Positive amounts signify net token transfers FROM <address>, whilst negative amo
     async (context) => {
       const { address } = context.req.valid("param");
       const {
-        days,
+        fromDate,
+        toDate,
         limit,
         skip,
         orderBy,
@@ -48,11 +49,11 @@ Positive amounts signify net token transfers FROM <address>, whilst negative amo
         maxAmount,
         filterAddress,
       } = context.req.valid("query");
-      const now = Math.floor(Date.now() / 1000);
 
       const result = await service.getAccountInteractions(
         address,
-        now - days,
+        fromDate,
+        toDate,
         skip,
         limit,
         orderBy,
@@ -64,7 +65,7 @@ Positive amounts signify net token transfers FROM <address>, whilst negative amo
         },
       );
 
-      return context.json(AccountInteractionsMapper(result, now, days));
+      return context.json(AccountInteractionsMapper(result, fromDate, toDate));
     },
   );
 }

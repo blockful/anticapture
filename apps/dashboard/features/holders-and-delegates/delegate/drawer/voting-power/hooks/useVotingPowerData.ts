@@ -49,8 +49,8 @@ export const useVotingPowerData = (
   // Extract addresses for ENS lookup
   const delegatorAddresses: Address[] =
     topFiveDelegators
-      ?.filter((delegator) => delegator.accountId && delegator.rawBalance > 0n)
-      .map((delegator) => delegator.accountId as Address) || [];
+      ?.filter((delegator) => delegator.address && delegator.rawBalance > 0n)
+      .map((delegator) => delegator.address as Address) || [];
 
   // Fetch ENS data for all delegators
   const { data: ensData } = useMultipleEnsData(delegatorAddresses);
@@ -82,9 +82,9 @@ export const useVotingPowerData = (
   const delegateCurrentVotingPower = accountPowerVotingPower
     ? BigInt(accountPowerVotingPower)
     : topFiveDelegators.reduce(
-        (acc, item) => acc + BigInt(item.rawBalance),
-        BigInt(0),
-      );
+      (acc, item) => acc + BigInt(item.rawBalance),
+      BigInt(0),
+    );
 
   const currentVotingPowerNumber = Number(
     token === "ERC20"
@@ -119,13 +119,13 @@ export const useVotingPowerData = (
     const percentage = Number(
       (Number(BigInt(delegator.rawBalance)) /
         Number(delegateCurrentVotingPower)) *
-        100,
+      100,
     );
 
-    const ensName = ensData?.[delegator.accountId as Address]?.ens;
-    const displayLabel = ensName || formatAddress(delegator.accountId) || "";
+    const ensName = ensData?.[delegator.address as Address]?.ens;
+    const displayLabel = ensName || formatAddress(delegator.address) || "";
 
-    chartConfig[delegator.accountId || `delegator-${index}`] = {
+    chartConfig[delegator.address || `delegator-${index}`] = {
       label: displayLabel,
       color: PIE_CHART_COLORS[index % PIE_CHART_COLORS.length],
       percentage: percentage.toFixed(2),
@@ -133,7 +133,7 @@ export const useVotingPowerData = (
     };
 
     pieData.push({
-      name: delegator.accountId || "",
+      name: delegator.address || "",
       label: displayLabel,
       value:
         token === "ERC20"

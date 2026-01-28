@@ -68,16 +68,21 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         />
       </head>
       <body
-        className={`${inter.className} ${roboto.variable} bg-surface-background border-light-dark mx-auto max-w-screen-2xl overflow-x-hidden border xl:overflow-hidden`}
+        className={`${inter.className} ${roboto.variable} bg-surface-background`}
       >
-        <GlobalProviders>
-          {children}
-          <CookieConsent />
-          <HelpPopover />
-        </GlobalProviders>
-        <Toaster position="bottom-left" reverseOrder={false} />
-        <ConditionalPostHog />
-        <UmamiScript />
+        <div
+          data-vaul-drawer-wrapper=""
+          className="border-light-dark mx-auto max-w-screen-2xl overflow-x-hidden border xl:overflow-hidden"
+        >
+          <GlobalProviders>
+            {children}
+            <CookieConsent />
+            <HelpPopover />
+          </GlobalProviders>
+          <Toaster position="bottom-left" reverseOrder={false} />
+          <ConditionalPostHog />
+          <UmamiScript />
+        </div>
       </body>
     </html>
   );

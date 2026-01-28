@@ -26,6 +26,7 @@ import {
   DBVotingPowerVariation,
   DBHistoricalVotingPowerWithRelations,
 } from "@/api/mappers";
+import { PERCENTAGE_NO_BASELINE } from "@/api/mappers/constants";
 
 export class VotingPowerRepository {
   async getHistoricalVotingPowerCount(
@@ -101,15 +102,15 @@ export class VotingPowerRepository {
       .orderBy(
         orderDirection === "asc"
           ? asc(
-              orderBy === "timestamp"
-                ? votingPowerHistory.timestamp
-                : votingPowerHistory.deltaMod,
-            )
+            orderBy === "timestamp"
+              ? votingPowerHistory.timestamp
+              : votingPowerHistory.deltaMod,
+          )
           : desc(
-              orderBy === "timestamp"
-                ? votingPowerHistory.timestamp
-                : votingPowerHistory.deltaMod,
-            ),
+            orderBy === "timestamp"
+              ? votingPowerHistory.timestamp
+              : votingPowerHistory.deltaMod,
+          ),
       )
       .limit(limit)
       .offset(skip);
@@ -118,20 +119,20 @@ export class VotingPowerRepository {
       ...row.voting_power_history,
       delegations:
         row.transfers &&
-        row.transfers?.logIndex > (row.delegations?.logIndex || 0)
+          row.transfers?.logIndex > (row.delegations?.logIndex || 0)
           ? null
           : row.delegations,
       transfers:
         row.delegations &&
-        row.delegations?.logIndex > (row.transfers?.logIndex || 0)
+          row.delegations?.logIndex > (row.transfers?.logIndex || 0)
           ? null
           : row.transfers,
     }));
   }
 
   async getVotingPowerVariations(
-    startTimestamp: number,
-    endTimestamp: number,
+    startTimestamp: number | undefined,
+    endTimestamp: number | undefined,
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
@@ -154,7 +155,9 @@ export class VotingPowerRepository {
           addresses
             ? inArray(votingPowerHistory.accountId, addresses)
             : undefined,
-          lt(votingPowerHistory.timestamp, BigInt(startTimestamp)),
+          startTimestamp
+            ? lte(votingPowerHistory.timestamp, BigInt(startTimestamp))
+            : undefined,
         ),
       )
       .as("latest_before_from");
@@ -174,7 +177,9 @@ export class VotingPowerRepository {
           addresses
             ? inArray(votingPowerHistory.accountId, addresses)
             : undefined,
-          lte(votingPowerHistory.timestamp, BigInt(endTimestamp)),
+          endTimestamp
+            ? lte(votingPowerHistory.timestamp, BigInt(endTimestamp))
+            : undefined,
         ),
       )
       .as("latest_before_to");
@@ -188,7 +193,7 @@ export class VotingPowerRepository {
         percentageChange: sql<string>`
         CASE 
           WHEN COALESCE(from_data.voting_power, 0) = 0 THEN 
-            CASE WHEN COALESCE(to_data.voting_power, 0) = 0 THEN '0' ELSE 'Infinity' END
+            CASE WHEN COALESCE(to_data.voting_power, 0) = 0 THEN '0' ELSE ${PERCENTAGE_NO_BASELINE} END
           ELSE 
             (((COALESCE(to_data.voting_power, 0) - from_data.voting_power)::numeric / from_data.voting_power::numeric) * 100)::text
         END
@@ -210,8 +215,8 @@ export class VotingPowerRepository {
 
   async getVotingPowerVariationsByAccountId(
     accountId: Address,
-    startTimestamp: number,
-    endTimestamp: number,
+    startTimestamp: number | undefined,
+    endTimestamp: number | undefined,
   ): Promise<DBVotingPowerVariation> {
     const history = db
       .select({
@@ -223,8 +228,12 @@ export class VotingPowerRepository {
       .where(
         and(
           eq(votingPowerHistory.accountId, accountId),
-          gte(votingPowerHistory.timestamp, BigInt(startTimestamp)),
-          lte(votingPowerHistory.timestamp, BigInt(endTimestamp)),
+          startTimestamp
+            ? gte(votingPowerHistory.timestamp, BigInt(startTimestamp))
+            : undefined,
+          endTimestamp
+            ? lte(votingPowerHistory.timestamp, BigInt(endTimestamp))
+            : undefined,
         ),
       )
       .as("history");
@@ -249,8 +258,8 @@ export class VotingPowerRepository {
     const oldVotingPower = currentVotingPower - numericAbsoluteChange;
     const percentageChange = oldVotingPower
       ? (
-          Number((numericAbsoluteChange * 10000n) / oldVotingPower) / 100
-        ).toFixed(2)
+        Number((numericAbsoluteChange * 10000n) / oldVotingPower) / 100
+      ).toFixed(2)
       : "0";
 
     return {
@@ -304,11 +313,7 @@ export class VotingPowerRepository {
       .from(accountPower)
       .where(eq(accountPower.accountId, accountId));
 
-    if (!result) {
-      throw new Error("Account not found");
-    }
-
-    return {
+    return result ? {
       accountId: result.accountId,
       votingPower: result.votingPower,
       delegationsCount: result.delegationsCount,
@@ -316,6 +321,14 @@ export class VotingPowerRepository {
       proposalsCount: result.proposalsCount,
       daoId: result.daoId,
       lastVoteTimestamp: result.lastVoteTimestamp,
+    } : {
+      accountId: accountId,
+      votingPower: 0n,
+      delegationsCount: 0,
+      votesCount: 0,
+      proposalsCount: 0,
+      daoId: "",
+      lastVoteTimestamp: 0n,
     };
   }
 

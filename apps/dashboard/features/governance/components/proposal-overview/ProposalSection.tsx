@@ -37,7 +37,7 @@ export const ProposalSection = () => {
     daoId: daoEnum,
   });
 
-  const { votingPower, votesOnchain } = useVoterInfo({
+  const { votingPower, votes } = useVoterInfo({
     address: address ?? "",
     daoId: daoEnum,
     proposalId,
@@ -58,13 +58,15 @@ export const ProposalSection = () => {
     return <div className="text-primary p-4">Proposal not found</div>;
   }
 
+  const supportValue = votes?.items[0]?.support;
+
   return (
     <div className="w-full">
       <ProposalHeader
         daoId={daoId as string}
         setIsVotingModalOpen={setIsVotingModalOpen}
         votingPower={votingPower}
-        votesOnchain={votesOnchain}
+        votes={votes}
         address={address}
         proposalStatus={proposal.status}
       />
@@ -78,16 +80,16 @@ export const ProposalSection = () => {
             <ProposalStatusSection proposal={proposal} />
 
             {address ? (
-              !votesOnchain?.support ? (
+              !supportValue ? (
                 <Button
                   className="flex w-full lg:hidden"
                   onClick={() => setIsVotingModalOpen(true)}
                 >
                   Cast your vote
-                  <ArrowRight className="size-[14px]" />
+                  <ArrowRight className="size-3.5" />
                 </Button>
               ) : (
-                <VotedBadge vote={Number(votesOnchain?.support)} />
+                <VotedBadge vote={Number(supportValue)} />
               )
             ) : (
               <div className="flex w-full lg:hidden">
@@ -114,7 +116,7 @@ export const ProposalSection = () => {
 export const VotedBadge = ({ vote }: { vote: number }) => {
   return (
     <div className="flex w-full items-center justify-center gap-2 lg:hidden">
-      <p className="text-secondary flex items-center gap-2 text-[12px] font-medium leading-[16px]">
+      <p className="text-secondary flex items-center gap-2 text-[12px] font-medium leading-4">
         You voted
       </p>
       {getVoteText(vote)}

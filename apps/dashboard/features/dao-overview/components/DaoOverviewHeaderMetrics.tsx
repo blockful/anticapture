@@ -90,8 +90,6 @@ const getTreasuryMetrics = (
     );
   }
 
-  console.log(liquidTreasuryNonDaoValueFormatted);
-
   return (
     <DaoOverviewMetricCard
       title="Treasury"

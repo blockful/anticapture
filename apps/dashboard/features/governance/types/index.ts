@@ -18,7 +18,7 @@ export enum ProposalState {
   COMPLETED = "completed",
 }
 
-export interface ProposalVotes {
+export interface Votes {
   for: string;
   against: string;
   total: string;
@@ -42,7 +42,7 @@ export interface Proposal extends Omit<
   status: ProposalStatus;
   state: ProposalState;
   proposer: string; // Alias for proposerAccountId
-  votes: ProposalVotes;
+  votes: Votes;
   quorum: string;
   timeText?: string;
   timeRemaining?: string;

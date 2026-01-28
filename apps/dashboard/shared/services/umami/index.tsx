@@ -10,7 +10,7 @@ const UmamiScript: FC = () => {
   if (process.env.NODE_ENV === "production") {
     if (!UMAMI_WEBSITE_ID) {
       console.error(
-        "Umami website ID is not configured. Set NEXT_PUBLIC_UMAMI_WEBSITE_ID."
+        "Umami website ID is not configured. Set NEXT_PUBLIC_UMAMI_WEBSITE_ID.",
       );
       return null;
     }

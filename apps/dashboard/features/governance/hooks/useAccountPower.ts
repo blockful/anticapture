@@ -10,7 +10,7 @@ import { formatUnits } from "viem";
 export interface UseAccountPowerResult {
   accountPower: GetAccountPowerQuery["votingPowerByAccountId"] | null;
   votingPower: string;
-  votesOnchain: GetAccountPowerQuery["votesOnchain"] | null;
+  votes: GetAccountPowerQuery["votes"] | null;
   hasVoted: boolean;
   loading: boolean;
   error: ApolloError | undefined;
@@ -34,6 +34,7 @@ export const useVoterInfo = ({
   const { data, loading, error, refetch } = useGetAccountPowerQuery({
     variables: {
       address,
+      addresses: [address],
       proposalId,
     },
     context: {
@@ -48,7 +49,7 @@ export const useVoterInfo = ({
     return {
       accountPower: null,
       votingPower: "0",
-      votesOnchain: null,
+      votes: null,
       hasVoted: false,
       loading,
       error,
@@ -63,8 +64,8 @@ export const useVoterInfo = ({
         formatUnits(BigInt(data.votingPowerByAccountId.votingPower), decimals),
       ),
     ),
-    votesOnchain: data.votesOnchain || null,
-    hasVoted: !!data.votesOnchain,
+    votes: data.votes || null,
+    hasVoted: !!data.votes,
     loading,
     error,
     refetch,

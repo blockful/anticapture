@@ -6,7 +6,7 @@ query GetDelegateDelegationHistoryGraph(
   $orderDirection: queryInput_historicalVotingPowers_orderDirection = desc
 ) {
   historicalVotingPowers(
-    accountId: $accountId
+    address: $accountId
     orderBy: $orderBy
     orderDirection: $orderDirection
     fromDate: $fromTimestamp

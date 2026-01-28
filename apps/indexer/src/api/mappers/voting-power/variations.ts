@@ -1,30 +1,43 @@
-import { DaysEnum } from "@/lib/enums";
 import { z } from "@hono/zod-openapi";
 import { Address, getAddress, isAddress } from "viem";
 import { accountPower } from "ponder:schema";
 
-import { PERCENTAGE_NO_BASELINE } from "../constants";
 import { PeriodResponseSchema, TimestampResponseMapper } from "../shared";
 
-export const VotingPowerVariationsByAccountIdRequestSchema = z.object({
-  fromDate: z
+export const VotingPowerVariationsByAccountIdRequestParamsSchema = z.object({
+  address: z
     .string()
-    .optional()
-    .transform((val) =>
-      Number(
-        val ?? (Math.floor(Date.now() / 1000) - DaysEnum["90d"]).toString(),
-      ),
-    ),
-  toDate: z
-    .string()
-    .optional()
-    .transform((val) =>
-      Number(val ?? Math.floor(Date.now() / 1000).toString()),
-    ),
+    .refine((addr) => isAddress(addr, { strict: false }))
+    .transform((addr) => getAddress(addr)),
 });
 
-export const VotingPowerVariationsRequestSchema = z
+export const VotingPowerVariationsByAccountIdRequestQuerySchema = z.object({
+  fromDate: z
+    .string()
+    .transform((val) => Number(val))
+    .optional(),
+  toDate: z
+    .string()
+    .transform((val) => Number(val))
+    .optional(),
+});
+
+export const VotingPowerVariationsRequestQuerySchema = z
   .object({
+    limit: z.coerce
+      .number()
+      .int()
+      .min(1, "Limit must be a positive integer")
+      .max(100, "Limit cannot exceed 100")
+      .optional()
+      .default(20),
+    skip: z.coerce
+      .number()
+      .int()
+      .min(0, "Skip must be a non-negative integer")
+      .optional()
+      .default(0),
+    orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
     addresses: z
       .union([
         z
@@ -45,22 +58,8 @@ export const VotingPowerVariationsRequestSchema = z
         ),
       ])
       .optional(),
-    limit: z.coerce
-      .number()
-      .int()
-      .min(1, "Limit must be a positive integer")
-      .max(100, "Limit cannot exceed 100")
-      .optional()
-      .default(10),
-    skip: z.coerce
-      .number()
-      .int()
-      .min(0, "Skip must be a non-negative integer")
-      .optional()
-      .default(0),
-    orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
   })
-  .extend(VotingPowerVariationsByAccountIdRequestSchema.shape);
+  .extend(VotingPowerVariationsByAccountIdRequestQuerySchema.shape);
 
 export const VotingPowersRequestSchema = z.object({
   limit: z.coerce
@@ -173,16 +172,13 @@ export const VotingPowerVariationResponseMapper = (
   previousVotingPower: delta.previousVotingPower?.toString(),
   currentVotingPower: delta.currentVotingPower.toString(),
   absoluteChange: delta.absoluteChange.toString(),
-  percentageChange:
-    delta.percentageChange === "Infinity"
-      ? PERCENTAGE_NO_BASELINE
-      : delta.percentageChange,
+  percentageChange: delta.percentageChange,
 });
 
-export const VotingPowerVariationsMapper = (
+export const VotingPowerVariationsResponseMapper = (
   variations: DBVotingPowerVariation[],
-  startTimestamp: number,
-  endTimestamp: number,
+  startTimestamp: number | undefined,
+  endTimestamp: number | undefined,
 ): VotingPowerVariationsResponse => {
   return VotingPowerVariationsResponseSchema.parse({
     period: PeriodResponseSchema.parse({
@@ -193,10 +189,10 @@ export const VotingPowerVariationsMapper = (
   });
 };
 
-export const VotingPowerVariationsByAccountIdMapper = (
+export const VotingPowerVariationsByAccountIdResponseMapper = (
   delta: DBVotingPowerVariation,
-  startTimestamp: number,
-  endTimestamp: number,
+  startTimestamp: number | undefined,
+  endTimestamp: number | undefined,
 ): VotingPowerVariationsByAccountIdResponse => {
   return VotingPowerVariationsByAccountIdResponseSchema.parse({
     period: PeriodResponseSchema.parse({

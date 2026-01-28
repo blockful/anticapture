@@ -100,6 +100,7 @@ export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     <div className="flex flex-col gap-[13px] lg:flex-row">
       <div className="lg:w-2/5">
         <RiskAreaCardWrapper
+          daoId={daoId}
           title="Risk Areas"
           riskAreas={customizedRiskAreas}
           activeRiskId={activeRisk}
