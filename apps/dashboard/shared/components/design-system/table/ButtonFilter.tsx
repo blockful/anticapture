@@ -3,20 +3,20 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { Filter } from "lucide-react";
 
 const buttonFilterVariants = cva(
-  "group flex cursor-pointer items-center rounded-sm border p-1 transition-colors",
+  "group flex cursor-pointer items-center border p-1 transition-colors bg-surface-hover",
   {
     variants: {
       variant: {
         default: "text-primary",
       },
-      isActive: {
-        true: "border-highlight bg-surface-hover",
-        false: "border-transparent hover:border-highlight bg-surface-hover",
+      isOpen: {
+        true: "border-highlight",
+        false: "border-transparent hover:border-highlight",
       },
     },
     defaultVariants: {
       variant: "default",
-      isActive: false,
+      isOpen: false,
     },
   },
 );
@@ -24,23 +24,32 @@ const buttonFilterVariants = cva(
 type ButtonFilterProps = VariantProps<typeof buttonFilterVariants> & {
   className?: string;
   onClick: () => void;
-  isActive?: boolean;
+  isOpen?: boolean;
+  hasFilters?: boolean;
 };
 
 export const ButtonFilter = ({
   variant,
   className,
   onClick,
-  isActive,
+  isOpen,
+  hasFilters,
   ...props
 }: ButtonFilterProps) => {
   return (
-    <button
-      className={cn(buttonFilterVariants({ variant, isActive }), className)}
-      {...props}
-      onClick={onClick}
-    >
-      <Filter className="text-primary size-3" />
-    </button>
+    <div className="relative inline-block">
+      <button
+        className={cn(buttonFilterVariants({ variant, isOpen }), className)}
+        {...props}
+        onClick={onClick}
+      >
+        <Filter className="text-primary size-3" />
+      </button>
+      {hasFilters && (
+        <div className="pointer-events-none absolute left-3 top-0.5 size-4">
+          <div className="bg-highlight size-2 rounded-full" />
+        </div>
+      )}
+    </div>
   );
 };

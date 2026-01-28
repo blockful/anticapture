@@ -106,16 +106,19 @@ export const FilterMaxMinInput = ({
     setFilter(cleanMin, cleanMax);
   };
 
+  const inputClassName =
+    "w-28 bg-surface-default border-border-contrast text-primary placeholder:text-dimmed h-9 w-full border px-2.5 py-2 text-sm font-normal leading-5 transition-colors focus:outline-none";
+
   return (
-    <div className="px-3 pb-3">
+    <div className="border-border-contrast flex items-center gap-1 overflow-hidden border-b px-3 pb-3">
       {title && (
         <div className="flex px-0 py-2">
-          <h4 className="text-secondary text-alternative-xs font-medium uppercase">
+          <h4 className="text-secondary font-mono text-xs font-medium uppercase tracking-wider">
             {title}
           </h4>
         </div>
       )}
-      <div className="flex items-center gap-1">
+      <div className="flex flex-1 items-center gap-1">
         <div className="flex-1">
           <input
             type="text"
@@ -124,14 +127,10 @@ export const FilterMaxMinInput = ({
             onChange={handleMinChange}
             onKeyDown={handleKeyDown}
             onBlur={handleBlur}
-            className={cn(
-              "bg-surface-default border-border-default text-primary placeholder:text-dimmed focus:border-border-contrast h-10 w-full rounded border px-2.5 py-2 text-sm transition-colors focus:outline-none",
-            )}
+            className={inputClassName}
           />
         </div>
-        <div className="text-dimmed">
-          <ArrowRightIcon className="size-3.5" />
-        </div>
+        <ArrowRightIcon className="text-dimmed size-3.5" />
         <div className="flex-1">
           <input
             type="text"
@@ -140,9 +139,7 @@ export const FilterMaxMinInput = ({
             onChange={handleMaxChange}
             onKeyDown={handleKeyDown}
             onBlur={handleBlur}
-            className={cn(
-              "bg-surface-default border-border-default text-primary placeholder:text-dimmed focus:border-border-contrast h-10 w-full rounded border px-2.5 py-2 text-sm transition-colors focus:outline-none",
-            )}
+            className={inputClassName}
           />
         </div>
       </div>

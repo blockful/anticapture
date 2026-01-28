@@ -84,7 +84,7 @@ export const RadioButton = forwardRef<HTMLInputElement, RadioButtonProps>(
         >
           {checked && !disabled && (
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="bg-surface-background size-2 rounded-full" />
+              <div className="bg-surface-highlight border-surface-default size-3 rounded-full border-2" />
             </div>
           )}
         </div>
