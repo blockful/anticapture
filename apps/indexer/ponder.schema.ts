@@ -107,8 +107,14 @@ export const delegation = onchainTable(
   (drizzle) => ({
     transactionHash: drizzle.text("transaction_hash").notNull(),
     daoId: drizzle.text("dao_id").notNull(),
-    delegateAccountId: drizzle.text("delegate_account_id").notNull(),
-    delegatorAccountId: drizzle.text("delegator_account_id").notNull(),
+    delegateAccountId: drizzle
+      .text("delegate_account_id")
+      .$type<Address>()
+      .notNull(),
+    delegatorAccountId: drizzle
+      .text("delegator_account_id")
+      .$type<Address>()
+      .notNull(),
     delegatedValue: drizzle.bigint("delegated_value").notNull().default(0n),
     previousDelegate: drizzle.text("previous_delegate"),
     timestamp: drizzle.bigint().notNull(),

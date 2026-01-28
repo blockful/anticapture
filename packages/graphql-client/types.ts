@@ -75,50 +75,17 @@ export type PageInfo = {
 export type Query = {
   __typename?: 'Query';
   _meta?: Maybe<Meta>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/accounts/{args.address}/balances`
-   * Returns account balance information for a specific address
-   *
-   */
+  /** Returns account balance information for a specific address */
   accountBalanceByAccountId?: Maybe<AccountBalanceByAccountId_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/balances/variations`
-   * Returns a mapping of the biggest variations to account balances associated by account address
-   *
-   */
+  /** Returns a mapping of the biggest variations to account balances associated by account address */
   accountBalanceVariations?: Maybe<AccountBalanceVariations_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/accounts/{args.address}/balances/variations`
-   * Returns a the changes to balance by period and accountId
-   *
-   */
+  /** Returns a the changes to balance by period and accountId */
   accountBalanceVariationsByAccountId?: Maybe<AccountBalanceVariationsByAccountId_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/balances`
-   * Returns sorted and paginated account balance records
-   *
-   */
+  /** Returns sorted and paginated account balance records */
   accountBalances?: Maybe<AccountBalances_200_Response>;
   /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/balances/{args.address}/interactions`
    * Returns a mapping of the largest interactions between accounts.
    * Positive amounts signify net token transfers FROM <address>, whilst negative amounts refer to net transfers TO <address>
-   *
    */
   accountInteractions?: Maybe<AccountInteractions_200_Response>;
   /**
@@ -127,308 +94,83 @@ export type Query = {
    * Only includes dates where ALL DAOs have data available.
    */
   averageDelegationPercentageByDay: AverageDelegationPercentagePage;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/active-supply/compare`
-   * Get active token supply for DAO
-   *
-   */
+  /** Get active token supply for DAO */
   compareActiveSupply?: Maybe<CompareActiveSupply_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/average-turnout/compare`
-   * Compare average turnout between time periods
-   *
-   */
+  /** Compare average turnout between time periods */
   compareAverageTurnout?: Maybe<CompareAverageTurnout_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/cex-supply/compare`
-   * Compare cex supply between periods
-   *
-   */
+  /** Compare cex supply between periods */
   compareCexSupply?: Maybe<CompareCexSupply_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/circulating-supply/compare`
-   * Compare circulating supply between periods
-   *
-   */
+  /** Compare circulating supply between periods */
   compareCirculatingSupply?: Maybe<CompareCirculatingSupply_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/delegated-supply/compare`
-   * Compare delegated supply between periods
-   *
-   */
+  /** Compare delegated supply between periods */
   compareDelegatedSupply?: Maybe<CompareDelegatedSupply_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/dex-supply/compare`
-   * Compare dex supply between periods
-   *
-   */
+  /** Compare dex supply between periods */
   compareDexSupply?: Maybe<CompareDexSupply_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/lending-supply/compare`
-   * Compare lending supply between periods
-   *
-   */
+  /** Compare lending supply between periods */
   compareLendingSupply?: Maybe<CompareLendingSupply_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/proposals/compare`
-   * Compare number of proposals between time periods
-   *
-   */
+  /** Compare number of proposals between time periods */
   compareProposals?: Maybe<CompareProposals_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/total-supply/compare`
-   * Compare total supply between periods
-   *
-   */
+  /** Compare total supply between periods */
   compareTotalSupply?: Maybe<CompareTotalSupply_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/treasury/compare`
-   * Compare treasury between periods
-   *
-   */
+  /** Compare treasury between periods */
   compareTreasury?: Maybe<CompareTreasury_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/votes/compare`
-   * Compare number of votes between time periods
-   *
-   */
+  /** Compare number of votes between time periods */
   compareVotes?: Maybe<CompareVotes_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/dao`
-   * Returns current governance parameters for this DAO
-   *
-   */
+  /** Returns current governance parameters for this DAO */
   dao?: Maybe<Dao_200_Response>;
+  daoMetricsDayBucket?: Maybe<DaoMetricsDayBucket>;
   /** Get all DAOs */
   daos: DaoList;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/delegation-percentage`
-   * Get delegation percentage day buckets with forward-fill
-   *
-   */
+  /** Get delegation percentage day buckets with forward-fill */
   delegationPercentageByDay?: Maybe<DelegationPercentageByDay_200_Response>;
-  delegations: DelegationPage;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/treasury/dao-token`
-   * Get historical DAO Token Treasury value (governance token quantity × token price)
-   *
-   */
+  /** Get current delegators of an account */
+  delegations?: Maybe<Delegations_200_Response>;
+  /** Get historical DAO Token Treasury value (governance token quantity × token price) */
   getDaoTokenTreasury?: Maybe<GetDaoTokenTreasury_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/treasury/liquid`
-   * Get historical Liquid Treasury (treasury without DAO tokens) from external providers (DefiLlama/Dune)
-   *
-   */
+  /** Get historical Liquid Treasury (treasury without DAO tokens) from external providers (DefiLlama/Dune) */
   getLiquidTreasury?: Maybe<GetLiquidTreasury_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/treasury/total`
-   * Get historical Total Treasury (liquid treasury + DAO token treasury)
-   *
-   */
+  /** Get historical Total Treasury (liquid treasury + DAO token treasury) */
   getTotalTreasury?: Maybe<GetTotalTreasury_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/accounts/{args.address}/balances/historical`
-   * TODO
-   *
-   */
+  /** TODO */
   historicalBalances?: Maybe<HistoricalBalances_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/token/historical-data`
-   * Get historical market data for a specific token
-   *
-   */
+  /** Get historical delegations for an account, with optional filtering and sorting */
+  historicalDelegations?: Maybe<HistoricalDelegations_200_Response>;
+  /** Get historical market data for a specific token */
   historicalTokenData?: Maybe<Array<Maybe<Query_HistoricalTokenData_Items>>>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/accounts/{args.address}/voting-powers/historical`
-   * Returns a list of voting power changes
-   *
-   */
+  /** Returns a list of voting power changes */
   historicalVotingPowers?: Maybe<HistoricalVotingPowers_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/last-update`
-   * Get the last update time
-   *
-   */
+  /** Get the last update time */
   lastUpdate?: Maybe<LastUpdate_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/proposals/{args.id}`
-   * Returns a single proposal by its ID
-   *
-   */
+  /** Returns a single proposal by its ID */
   proposal?: Maybe<Proposal_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/proposals/{args.id}/non-voters`
-   * Returns the active delegates that did not vote on a given proposal
-   *
-   */
+  /** Returns the active delegates that did not vote on a given proposal */
   proposalNonVoters?: Maybe<ProposalNonVoters_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/proposals`
-   * Returns a list of proposal
-   *
-   */
+  /** Returns a list of proposal */
   proposals?: Maybe<Proposals_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/proposals-activity`
-   * Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window
-   *
-   */
+  /** Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window */
   proposalsActivity?: Maybe<ProposalsActivity_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/token`
-   * Get property data for a specific token
-   *
-   */
+  /** Get property data for a specific token */
   token?: Maybe<Token_200_Response>;
   /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/token-metrics`
    * Returns token related metrics for a single metric type.
    *         Available types: TOTAL_SUPPLY, DELEGATED_SUPPLY, CEX_SUPPLY, DEX_SUPPLY, LENDING_SUPPLY, CIRCULATING_SUPPLY, TREASURY
-   *
    */
   tokenMetrics?: Maybe<TokenMetrics_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/transactions`
-   * Get transactions with their associated transfers and delegations, with optional filtering and sorting
-   *
-   */
+  /** Get transactions with their associated transfers and delegations, with optional filtering and sorting */
   transactions?: Maybe<Transactions_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/accounts/{args.address}/transfers`
-   * Get transfers of a given address
-   *
-   */
+  /** Get transfers of a given address */
   transfers?: Maybe<Transfers_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/proposals/{args.id}/votes`
-   * Returns a paginated list of votes cast on a specific proposal
-   *
-   */
+  /** Returns a paginated list of votes cast on a specific proposal */
   votes?: Maybe<Votes_200_Response>;
   votesOnchains: VotesOnchainPage;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/voting-powers/{args.accountId}`
-   * Returns voting power information for a specific address (account)
-   *
-   */
+  /** Returns voting power information for a specific address (account) */
   votingPowerByAccountId?: Maybe<VotingPowerByAccountId_200_Response>;
   votingPowerHistorys: VotingPowerHistoryPage;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/accounts/voting-powers/variations`
-   * Returns a mapping of the voting power changes within a time frame for the given addresses
-   *
-   */
+  /** Returns a mapping of the voting power changes within a time frame for the given addresses */
   votingPowerVariations?: Maybe<VotingPowerVariations_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/accounts/{args.address}/voting-powers/variations`
-   * Returns a the changes to voting power by period and accountId
-   *
-   */
+  /** Returns a the changes to voting power by period and accountId */
   votingPowerVariationsByAccountId?: Maybe<VotingPowerVariationsByAccountId_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/voting-powers`
-   * Returns sorted and paginated account voting power records
-   *
-   */
+  /** Returns sorted and paginated account voting power records */
   votingPowers?: Maybe<VotingPowers_200_Response>;
 };
 
@@ -545,6 +287,13 @@ export type QueryCompareVotesArgs = {
 };
 
 
+export type QueryDaoMetricsDayBucketArgs = {
+  date: Scalars['BigInt']['input'];
+  metricType: Scalars['String']['input'];
+  tokenId: Scalars['String']['input'];
+};
+
+
 export type QueryDelegationPercentageByDayArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -556,12 +305,7 @@ export type QueryDelegationPercentageByDayArgs = {
 
 
 export type QueryDelegationsArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  where?: InputMaybe<DelegationFilter>;
+  address: Scalars['String']['input'];
 };
 
 
@@ -592,6 +336,17 @@ export type QueryHistoricalBalancesArgs = {
   orderDirection?: InputMaybe<QueryInput_HistoricalBalances_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   toDate?: InputMaybe<Scalars['String']['input']>;
+  toValue?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHistoricalDelegationsArgs = {
+  address: Scalars['String']['input'];
+  delegateAddressIn?: InputMaybe<Scalars['JSON']['input']>;
+  fromValue?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderDirection?: InputMaybe<QueryInput_HistoricalDelegations_OrderDirection>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   toValue?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -717,6 +472,7 @@ export type QueryVotesOnchainsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   where?: InputMaybe<VotesOnchainFilter>;
@@ -732,6 +488,7 @@ export type QueryVotingPowerHistorysArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   where?: InputMaybe<VotingPowerHistoryFilter>;
@@ -765,6 +522,12 @@ export type QueryVotingPowersArgs = {
   toValue?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type ViewPageInfo = {
+  __typename?: 'ViewPageInfo';
+  hasNextPage: Scalars['Boolean']['output'];
+  hasPreviousPage: Scalars['Boolean']['output'];
+};
+
 export type Account = {
   __typename?: 'account';
   balances?: Maybe<AccountBalancePage>;
@@ -784,6 +547,7 @@ export type AccountBalancesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   where?: InputMaybe<AccountBalanceFilter>;
@@ -794,6 +558,7 @@ export type AccountDelegatedFromBalancesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   where?: InputMaybe<AccountBalanceFilter>;
@@ -804,6 +569,7 @@ export type AccountDelegationsFromArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   where?: InputMaybe<DelegationFilter>;
@@ -814,6 +580,7 @@ export type AccountDelegationsToArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   where?: InputMaybe<DelegationFilter>;
@@ -824,6 +591,7 @@ export type AccountPowersArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   where?: InputMaybe<AccountPowerFilter>;
@@ -834,6 +602,7 @@ export type AccountProposalsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   where?: InputMaybe<ProposalsOnchainFilter>;
@@ -844,6 +613,7 @@ export type AccountReceivedTransfersArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   where?: InputMaybe<TransferFilter>;
@@ -854,6 +624,7 @@ export type AccountSentTransfersArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   where?: InputMaybe<TransferFilter>;
@@ -864,6 +635,7 @@ export type AccountVotesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   where?: InputMaybe<VotesOnchainFilter>;
@@ -1503,6 +1275,12 @@ export type DelegationPercentageByDay_200_Response = {
   totalCount: Scalars['Float']['output'];
 };
 
+export type Delegations_200_Response = {
+  __typename?: 'delegations_200_response';
+  items: Array<Maybe<Query_Delegations_Items_Items>>;
+  totalCount: Scalars['Float']['output'];
+};
+
 export type GetDaoTokenTreasury_200_Response = {
   __typename?: 'getDaoTokenTreasury_200_response';
   items: Array<Maybe<Query_GetDaoTokenTreasury_Items_Items>>;
@@ -1527,6 +1305,12 @@ export type GetTotalTreasury_200_Response = {
 export type HistoricalBalances_200_Response = {
   __typename?: 'historicalBalances_200_response';
   items: Array<Maybe<Query_HistoricalBalances_Items_Items>>;
+  totalCount: Scalars['Float']['output'];
+};
+
+export type HistoricalDelegations_200_Response = {
+  __typename?: 'historicalDelegations_200_response';
+  items: Array<Maybe<Query_HistoricalDelegations_Items_Items>>;
   totalCount: Scalars['Float']['output'];
 };
 
@@ -1622,6 +1406,7 @@ export type ProposalsOnchainVotesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   where?: InputMaybe<VotesOnchainFilter>;
@@ -1931,6 +1716,11 @@ export enum QueryInput_HistoricalBalances_OrderDirection {
   Desc = 'desc'
 }
 
+export enum QueryInput_HistoricalDelegations_OrderDirection {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
 export enum QueryInput_HistoricalVotingPowers_OrderBy {
   Delta = 'delta',
   Timestamp = 'timestamp'
@@ -2106,6 +1896,15 @@ export type Query_DelegationPercentageByDay_PageInfo = {
   startDate?: Maybe<Scalars['String']['output']>;
 };
 
+export type Query_Delegations_Items_Items = {
+  __typename?: 'query_delegations_items_items';
+  amount: Scalars['String']['output'];
+  delegateAddress: Scalars['String']['output'];
+  delegatorAddress: Scalars['String']['output'];
+  timestamp: Scalars['String']['output'];
+  transactionHash: Scalars['String']['output'];
+};
+
 export type Query_GetDaoTokenTreasury_Items_Items = {
   __typename?: 'query_getDaoTokenTreasury_items_items';
   /** Unix timestamp in milliseconds */
@@ -2147,6 +1946,15 @@ export type Query_HistoricalBalances_Items_Items_Transfer = {
   from: Scalars['String']['output'];
   to: Scalars['String']['output'];
   value: Scalars['String']['output'];
+};
+
+export type Query_HistoricalDelegations_Items_Items = {
+  __typename?: 'query_historicalDelegations_items_items';
+  amount: Scalars['String']['output'];
+  delegateAddress: Scalars['String']['output'];
+  delegatorAddress: Scalars['String']['output'];
+  timestamp: Scalars['String']['output'];
+  transactionHash: Scalars['String']['output'];
 };
 
 export type Query_HistoricalTokenData_Items = {
@@ -2561,6 +2369,7 @@ export type TransactionDelegationsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   where?: InputMaybe<DelegationFilter>;
@@ -2571,6 +2380,7 @@ export type TransactionTransfersArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
   orderDirection?: InputMaybe<Scalars['String']['input']>;
   where?: InputMaybe<TransferFilter>;
@@ -3089,16 +2899,14 @@ export type GetDelegatorVotingPowerDetailsQueryVariables = Exact<{
 }>;
 
 
-export type GetDelegatorVotingPowerDetailsQuery = { __typename?: 'Query', votingPowerByAccountId?: { __typename?: 'votingPowerByAccountId_200_response', accountId: string, votingPower: string } | null, accountBalances?: { __typename?: 'accountBalances_200_response', items: Array<{ __typename?: 'query_accountBalances_items_items', address: string, balance: string } | null> } | null };
+export type GetDelegatorVotingPowerDetailsQuery = { __typename?: 'Query', votingPowerByAccountId?: { __typename?: 'votingPowerByAccountId_200_response', accountId: string, votingPower: string } | null, accountBalances?: { __typename?: 'accountBalances_200_response', totalCount: number, items: Array<{ __typename?: 'query_accountBalances_items_items', address: string, balance: string } | null> } | null };
 
 export type GetDelegationsTimestampQueryVariables = Exact<{
-  delegator: Array<Scalars['String']['input']> | Scalars['String']['input'];
   delegate: Scalars['String']['input'];
-  daoId: Scalars['String']['input'];
 }>;
 
 
-export type GetDelegationsTimestampQuery = { __typename?: 'Query', delegations: { __typename?: 'delegationPage', items: Array<{ __typename?: 'delegation', delegatorAccountId: string, timestamp: any }> } };
+export type GetDelegationsTimestampQuery = { __typename?: 'Query', delegations?: { __typename?: 'delegations_200_response', totalCount: number, items: Array<{ __typename?: 'query_delegations_items_items', delegatorAddress: string, delegateAddress: string, timestamp: string } | null> } | null };
 
 export type GetTopFiveDelegatorsQueryVariables = Exact<{
   delegates?: InputMaybe<Scalars['JSON']['input']>;
@@ -3262,27 +3070,18 @@ export type GetAccountInteractionsQueryVariables = Exact<{
 
 export type GetAccountInteractionsQuery = { __typename?: 'Query', accountInteractions?: { __typename?: 'accountInteractions_200_response', totalCount: number, items: Array<{ __typename?: 'query_accountInteractions_items_items', accountId: string, amountTransferred: string, totalVolume: string, transferCount: string } | null> } | null };
 
-export type GetDelegationHistoryCountQueryVariables = Exact<{
-  delegator: Scalars['String']['input'];
-}>;
-
-
-export type GetDelegationHistoryCountQuery = { __typename?: 'Query', delegations: { __typename?: 'delegationPage', totalCount: number } };
-
 export type GetDelegationHistoryItemsQueryVariables = Exact<{
   delegator: Scalars['String']['input'];
-  delegate?: InputMaybe<Scalars['String']['input']>;
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  fromValue?: InputMaybe<Scalars['BigInt']['input']>;
-  toValue?: InputMaybe<Scalars['BigInt']['input']>;
+  delegate?: InputMaybe<Scalars['JSON']['input']>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  fromValue?: InputMaybe<Scalars['String']['input']>;
+  toValue?: InputMaybe<Scalars['String']['input']>;
+  orderDirection?: InputMaybe<QueryInput_HistoricalDelegations_OrderDirection>;
 }>;
 
 
-export type GetDelegationHistoryItemsQuery = { __typename?: 'Query', delegations: { __typename?: 'delegationPage', items: Array<{ __typename?: 'delegation', delegateAccountId: string, delegatedValue: any, timestamp: any, transactionHash: string }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null } } };
+export type GetDelegationHistoryItemsQuery = { __typename?: 'Query', historicalDelegations?: { __typename?: 'historicalDelegations_200_response', totalCount: number, items: Array<{ __typename?: 'query_historicalDelegations_items_items', delegatorAddress: string, delegateAddress: string, amount: string, timestamp: string, transactionHash: string } | null> } | null };
 
 export type GetTopTokenHoldersQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;

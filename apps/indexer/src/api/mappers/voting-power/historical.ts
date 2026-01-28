@@ -1,9 +1,10 @@
 import { z } from "@hono/zod-openapi";
-import { votingPowerHistory } from "ponder:schema";
+import { delegation, votingPowerHistory } from "ponder:schema";
 
-import { DBDelegation } from "../transactions";
 import { DBTransfer } from "../transfers";
 import { getAddress, isAddress } from "viem";
+
+type DBDelegation = typeof delegation.$inferSelect;
 
 export type DBHistoricalVotingPower = typeof votingPowerHistory.$inferSelect;
 export type DBHistoricalVotingPowerWithRelations = DBHistoricalVotingPower & {
@@ -101,18 +102,18 @@ export const HistoricalVotingPowerResponseMapper = (
     logIndex: p.logIndex,
     delegation: p.delegations
       ? {
-        from: p.delegations.delegatorAccountId,
-        value: p.delegations.delegatedValue.toString(),
-        to: p.delegations.delegateAccountId,
-        previousDelegate: p.delegations.previousDelegate,
-      }
+          from: p.delegations.delegatorAccountId,
+          value: p.delegations.delegatedValue.toString(),
+          to: p.delegations.delegateAccountId,
+          previousDelegate: p.delegations.previousDelegate,
+        }
       : null,
     transfer: p.transfers
       ? {
-        value: p.transfers.amount.toString(),
-        from: p.transfers.fromAccountId,
-        to: p.transfers.toAccountId,
-      }
+          value: p.transfers.amount.toString(),
+          from: p.transfers.fromAccountId,
+          to: p.transfers.toAccountId,
+        }
       : null,
   };
 };

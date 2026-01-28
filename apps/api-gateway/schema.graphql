@@ -12,16 +12,17 @@ directive @transport(subgraph: String, kind: String, location: String, headers: 
 
 type Query {
   votingPowerHistorys(where: votingPowerHistoryFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): votingPowerHistoryPage!
-
-  """Get current delegators of an account"""
-  delegations(address: String!): delegations_200_response
   votesOnchains(where: votesOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): votesOnchainPage!
+  daoMetricsDayBucket(date: BigInt!, tokenId: String!, metricType: String!): daoMetricsDayBucket
   _meta: Meta
 
   """
   Get historical delegations for an account, with optional filtering and sorting
   """
   historicalDelegations(address: String!, delegateAddressIn: JSON, skip: NonNegativeInt, limit: PositiveInt = 10, fromValue: String, toValue: String, orderDirection: queryInput_historicalDelegations_orderDirection = desc): historicalDelegations_200_response
+
+  """Get current delegators of an account"""
+  delegations(address: String!): delegations_200_response
 
   """
   Get historical Liquid Treasury (treasury without DAO tokens) from external providers (DefiLlama/Dune)

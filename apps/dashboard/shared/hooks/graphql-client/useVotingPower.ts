@@ -3,7 +3,6 @@ import {
   GetDelegationsTimestampQuery,
   useGetDelegationsTimestampQuery,
   useGetDelegatorVotingPowerDetailsQuery,
-  useGetVotingPowerCountingQuery,
   useGetTopFiveDelegatorsQuery,
   GetTopFiveDelegatorsQuery,
 } from "@anticapture/graphql-client/hooks";
@@ -22,8 +21,9 @@ interface PaginationInfo {
   currentItemsCount: number;
 }
 
-type DelegationItem =
-  GetDelegationsTimestampQuery["delegations"]["items"][number];
+type DelegationItem = NonNullable<
+  NonNullable<GetDelegationsTimestampQuery["delegations"]>["items"][number]
+>;
 type AccountBalanceBase = NonNullable<
   NonNullable<
     GetDelegatorVotingPowerDetailsQuery["accountBalances"]
@@ -109,18 +109,6 @@ export const useVotingPower = ({
     fetchPolicy: "cache-and-network",
   });
 
-  // Count query
-  const { data: countingData } = useGetVotingPowerCountingQuery({
-    variables: {
-      delegates: [address],
-    },
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
-      },
-    },
-  });
-
   // Refetch data when sorting changes to ensure we start from page 1
   useEffect(() => {
     refetch({
@@ -135,16 +123,7 @@ export const useVotingPower = ({
   const accountBalances = delegatorsVotingPowerDetails?.accountBalances?.items;
 
   // ------------------------------------------------------------------
-  // Prepare the array of delegator addresses once balances are fetched
-  // ------------------------------------------------------------------
-  const delegatorAddresses: string[] = accountBalances
-    ? accountBalances
-      .filter((item) => item !== null)
-      .map((item) => item.address)
-    : [];
-
-  // ------------------------------------------------------------------
-  // Fetch delegation timestamps (skipped until we have delegatorAddresses)
+  // Fetch delegation timestamps for all delegators TO this delegate
   // ------------------------------------------------------------------
   const {
     data: delegationsTimestampData,
@@ -158,35 +137,22 @@ export const useVotingPower = ({
     },
     variables: {
       delegate: address,
-      delegator: delegatorAddresses,
-      daoId: daoId,
     },
-    skip: delegatorAddresses.length === 0,
+    skip: !address,
   });
 
-  // ------------------------------------------------------------------
-  // Build timestamp lookup <delegatorAccountId> -> timestamp
-  // ------------------------------------------------------------------
   useEffect(() => {
-    if (delegationsTimestampData?.delegations.items) {
-      setAllDelegations((prev) => {
-        const merged = [
-          ...prev,
-          ...delegationsTimestampData.delegations.items.filter(
-            (d) =>
-              !prev.some((p) => p.delegatorAccountId === d.delegatorAccountId),
-          ),
-        ];
-        return merged;
-      });
+    if (delegationsTimestampData?.delegations?.items) {
+      setAllDelegations(
+        delegationsTimestampData.delegations.items.filter(
+          (d): d is NonNullable<typeof d> => d !== null,
+        ),
+      );
     }
   }, [delegationsTimestampData]);
 
   const timestampMap = Object.fromEntries(
-    allDelegations.map((d) => [
-      d.delegatorAccountId?.toLowerCase(),
-      d.timestamp,
-    ]),
+    allDelegations.map((d) => [d.delegatorAddress?.toLowerCase(), d.timestamp]),
   );
 
   // ------------------------------------------------------------------
@@ -199,6 +165,7 @@ export const useVotingPower = ({
       timestamp: timestampMap[account.address.toLowerCase()],
     }));
 
+  // Fetch top 5 delegators
   const { data: topFiveDelegators } = useGetTopFiveDelegatorsQuery({
     context: {
       headers: {
@@ -217,7 +184,8 @@ export const useVotingPower = ({
 
   // Build pagination info combining GraphQL and local state
   const pagination = useMemo<PaginationInfo>(() => {
-    const totalCount = countingData?.accountBalances?.totalCount || 0;
+    const totalCount =
+      delegatorsVotingPowerDetails?.accountBalances?.totalCount || 0;
     const currentItemsCount =
       delegatorsVotingPowerDetails?.accountBalances?.items?.length || 0;
     const totalPages = Math.ceil(totalCount / itemsPerPage);
@@ -232,7 +200,7 @@ export const useVotingPower = ({
       currentItemsCount,
     };
   }, [
-    countingData?.accountBalances?.totalCount,
+    delegatorsVotingPowerDetails?.accountBalances?.totalCount,
     delegatorsVotingPowerDetails?.accountBalances?.items?.length,
     currentPage,
     itemsPerPage,
@@ -325,7 +293,10 @@ export const useVotingPower = ({
   return {
     topFiveDelegators: topDelegatorsItems || null,
     delegatorsVotingPowerDetails: delegatorsVotingPowerDetails || null,
-    votingPowerHistoryData: delegationsTimestampData?.delegations.items || [],
+    votingPowerHistoryData:
+      delegationsTimestampData?.delegations?.items?.filter(
+        (item): item is NonNullable<typeof item> => item !== null,
+      ) || [],
     balances: balancesWithTimestamp,
     loading: isLoading,
     error: error || tsError || null,
@@ -335,6 +306,6 @@ export const useVotingPower = ({
     fetchingMore:
       networkStatus === NetworkStatus.fetchMore || isPaginationLoading,
     historicalDataLoading: tsLoading,
-    totalCount: countingData?.accountBalances?.totalCount || 0,
+    totalCount: delegatorsVotingPowerDetails?.accountBalances?.totalCount || 0,
   };
 };
