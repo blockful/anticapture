@@ -137,7 +137,7 @@ export type Query = {
   historicalDelegations?: Maybe<HistoricalDelegations_200_Response>;
   /** Get historical market data for a specific token */
   historicalTokenData?: Maybe<Array<Maybe<Query_HistoricalTokenData_Items>>>;
-  /** Returns a list of voting power changes. Optionally filter by accountId. */
+  /** Returns a list of voting power changes. */
   historicalVotingPower?: Maybe<HistoricalVotingPower_200_Response>;
   /** Returns a list of voting power changes for a specific account */
   historicalVotingPowerByAccountId?: Maybe<HistoricalVotingPowerByAccountId_200_Response>;
@@ -353,7 +353,7 @@ export type QueryHistoricalTokenDataArgs = {
 
 
 export type QueryHistoricalVotingPowerArgs = {
-  accountId?: InputMaybe<Scalars['String']['input']>;
+  address?: InputMaybe<Scalars['String']['input']>;
   fromDate?: InputMaybe<Scalars['String']['input']>;
   fromValue?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
@@ -1322,9 +1322,15 @@ export type HistoricalDelegations_200_Response = {
   totalCount: Scalars['Float']['output'];
 };
 
-export type HistoricalVotingPowers_200_Response = {
-  __typename?: 'historicalVotingPowers_200_response';
-  items: Array<Maybe<Query_HistoricalVotingPowers_Items_Items>>;
+export type HistoricalVotingPowerByAccountId_200_Response = {
+  __typename?: 'historicalVotingPowerByAccountId_200_response';
+  items: Array<Maybe<Query_HistoricalVotingPowerByAccountId_Items_Items>>;
+  totalCount: Scalars['Float']['output'];
+};
+
+export type HistoricalVotingPower_200_Response = {
+  __typename?: 'historicalVotingPower_200_response';
+  items: Array<Maybe<Query_HistoricalVotingPower_Items_Items>>;
   totalCount: Scalars['Float']['output'];
 };
 
@@ -1729,7 +1735,7 @@ export enum QueryInput_HistoricalDelegations_OrderDirection {
   Desc = 'desc'
 }
 
-export enum QueryInput_HistoricalVotingPowers_OrderBy {
+export enum QueryInput_HistoricalVotingPowerByAccountId_OrderBy {
   Delta = 'delta',
   Timestamp = 'timestamp'
 }
@@ -3064,7 +3070,7 @@ export type GetAccountPowerQueryVariables = Exact<{
 export type GetAccountPowerQuery = { __typename?: 'Query', votingPowerByAccountId?: { __typename?: 'votingPowerByAccountId_200_response', accountId: string, votingPower: string } | null, votes?: { __typename?: 'votes_200_response', totalCount: number, items: Array<{ __typename?: 'query_votes_items_items', support: number, votingPower: string, reason?: string | null, timestamp: number, transactionHash: string } | null> } | null };
 
 export type HistoricalVotingPowerQueryVariables = Exact<{
-  accountId?: InputMaybe<Scalars['String']['input']>;
+  address?: InputMaybe<Scalars['String']['input']>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   orderBy?: InputMaybe<QueryInput_HistoricalVotingPower_OrderBy>;

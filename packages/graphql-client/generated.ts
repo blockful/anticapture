@@ -140,7 +140,7 @@ export type Query = {
   historicalDelegations?: Maybe<HistoricalDelegations_200_Response>;
   /** Get historical market data for a specific token */
   historicalTokenData?: Maybe<Array<Maybe<Query_HistoricalTokenData_Items>>>;
-  /** Returns a list of voting power changes. Optionally filter by accountId. */
+  /** Returns a list of voting power changes. */
   historicalVotingPower?: Maybe<HistoricalVotingPower_200_Response>;
   /** Returns a list of voting power changes for a specific account */
   historicalVotingPowerByAccountId?: Maybe<HistoricalVotingPowerByAccountId_200_Response>;
@@ -356,7 +356,7 @@ export type QueryHistoricalTokenDataArgs = {
 
 
 export type QueryHistoricalVotingPowerArgs = {
-  accountId?: InputMaybe<Scalars['String']['input']>;
+  address?: InputMaybe<Scalars['String']['input']>;
   fromDate?: InputMaybe<Scalars['String']['input']>;
   fromValue?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
@@ -1325,9 +1325,15 @@ export type HistoricalDelegations_200_Response = {
   totalCount: Scalars['Float']['output'];
 };
 
-export type HistoricalVotingPowers_200_Response = {
-  __typename?: 'historicalVotingPowers_200_response';
-  items: Array<Maybe<Query_HistoricalVotingPowers_Items_Items>>;
+export type HistoricalVotingPowerByAccountId_200_Response = {
+  __typename?: 'historicalVotingPowerByAccountId_200_response';
+  items: Array<Maybe<Query_HistoricalVotingPowerByAccountId_Items_Items>>;
+  totalCount: Scalars['Float']['output'];
+};
+
+export type HistoricalVotingPower_200_Response = {
+  __typename?: 'historicalVotingPower_200_response';
+  items: Array<Maybe<Query_HistoricalVotingPower_Items_Items>>;
   totalCount: Scalars['Float']['output'];
 };
 
@@ -1732,7 +1738,7 @@ export enum QueryInput_HistoricalDelegations_OrderDirection {
   Desc = 'desc'
 }
 
-export enum QueryInput_HistoricalVotingPowers_OrderBy {
+export enum QueryInput_HistoricalVotingPowerByAccountId_OrderBy {
   Delta = 'delta',
   Timestamp = 'timestamp'
 }
@@ -3067,7 +3073,7 @@ export type GetAccountPowerQueryVariables = Exact<{
 export type GetAccountPowerQuery = { __typename?: 'Query', votingPowerByAccountId?: { __typename?: 'votingPowerByAccountId_200_response', accountId: string, votingPower: string } | null, votes?: { __typename?: 'votes_200_response', totalCount: number, items: Array<{ __typename?: 'query_votes_items_items', support: number, votingPower: string, reason?: string | null, timestamp: number, transactionHash: string } | null> } | null };
 
 export type HistoricalVotingPowerQueryVariables = Exact<{
-  accountId?: InputMaybe<Scalars['String']['input']>;
+  address?: InputMaybe<Scalars['String']['input']>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   orderBy?: InputMaybe<QueryInput_HistoricalVotingPower_OrderBy>;
@@ -4340,9 +4346,85 @@ export type GetAccountPowerQueryHookResult = ReturnType<typeof useGetAccountPowe
 export type GetAccountPowerLazyQueryHookResult = ReturnType<typeof useGetAccountPowerLazyQuery>;
 export type GetAccountPowerSuspenseQueryHookResult = ReturnType<typeof useGetAccountPowerSuspenseQuery>;
 export type GetAccountPowerQueryResult = Apollo.QueryResult<GetAccountPowerQuery, GetAccountPowerQueryVariables>;
-export const HistoricalVotingPowersDocument = gql`
-    query HistoricalVotingPowers($account: String!, $skip: NonNegativeInt, $limit: PositiveInt = 10, $orderBy: queryInput_historicalVotingPowers_orderBy = timestamp, $orderDirection: queryInput_historicalVotingPowers_orderDirection = desc, $toValue: String, $fromValue: String) {
-  historicalVotingPowers(
+export const HistoricalVotingPowerDocument = gql`
+    query HistoricalVotingPower($address: String, $skip: NonNegativeInt, $limit: PositiveInt = 10, $orderBy: queryInput_historicalVotingPower_orderBy = timestamp, $orderDirection: queryInput_historicalVotingPower_orderDirection = desc, $toValue: String, $fromValue: String, $fromDate: String, $toDate: String) {
+  historicalVotingPower(
+    address: $address
+    skip: $skip
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+    limit: $limit
+    toValue: $toValue
+    fromValue: $fromValue
+    fromDate: $fromDate
+    toDate: $toDate
+  ) {
+    items {
+      accountId
+      votingPower
+      transfer {
+        value
+        to
+        from
+      }
+      transactionHash
+      timestamp
+      logIndex
+      delta
+      delegation {
+        from
+        to
+        value
+      }
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useHistoricalVotingPowerQuery__
+ *
+ * To run a query within a React component, call `useHistoricalVotingPowerQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHistoricalVotingPowerQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHistoricalVotingPowerQuery({
+ *   variables: {
+ *      address: // value for 'address'
+ *      skip: // value for 'skip'
+ *      limit: // value for 'limit'
+ *      orderBy: // value for 'orderBy'
+ *      orderDirection: // value for 'orderDirection'
+ *      toValue: // value for 'toValue'
+ *      fromValue: // value for 'fromValue'
+ *      fromDate: // value for 'fromDate'
+ *      toDate: // value for 'toDate'
+ *   },
+ * });
+ */
+export function useHistoricalVotingPowerQuery(baseOptions?: Apollo.QueryHookOptions<HistoricalVotingPowerQuery, HistoricalVotingPowerQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<HistoricalVotingPowerQuery, HistoricalVotingPowerQueryVariables>(HistoricalVotingPowerDocument, options);
+      }
+export function useHistoricalVotingPowerLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HistoricalVotingPowerQuery, HistoricalVotingPowerQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<HistoricalVotingPowerQuery, HistoricalVotingPowerQueryVariables>(HistoricalVotingPowerDocument, options);
+        }
+export function useHistoricalVotingPowerSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<HistoricalVotingPowerQuery, HistoricalVotingPowerQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<HistoricalVotingPowerQuery, HistoricalVotingPowerQueryVariables>(HistoricalVotingPowerDocument, options);
+        }
+export type HistoricalVotingPowerQueryHookResult = ReturnType<typeof useHistoricalVotingPowerQuery>;
+export type HistoricalVotingPowerLazyQueryHookResult = ReturnType<typeof useHistoricalVotingPowerLazyQuery>;
+export type HistoricalVotingPowerSuspenseQueryHookResult = ReturnType<typeof useHistoricalVotingPowerSuspenseQuery>;
+export type HistoricalVotingPowerQueryResult = Apollo.QueryResult<HistoricalVotingPowerQuery, HistoricalVotingPowerQueryVariables>;
+export const HistoricalVotingPowerByAccountDocument = gql`
+    query HistoricalVotingPowerByAccount($account: String!, $skip: NonNegativeInt, $limit: PositiveInt = 10, $orderBy: queryInput_historicalVotingPowerByAccountId_orderBy = timestamp, $orderDirection: queryInput_historicalVotingPowerByAccountId_orderDirection = desc, $toValue: String, $fromValue: String) {
+  historicalVotingPowerByAccountId(
     address: $account
     skip: $skip
     orderBy: $orderBy
