@@ -1,32 +1,56 @@
-import { Address, isAddress } from "viem";
+import { Address, getAddress, isAddress } from "viem";
 import { z } from "@hono/zod-openapi";
-import {
-  AddressSetStandardRequestParam,
-  FromDateStandardRequestParam,
-  LimitStandardRequestParam,
-  OffsetStandardRequestParam,
-  OrderDirectionStandardRequestParam,
-  PeriodResponseSchema,
-  TimestampResponseMapper,
-  ToDateStandardRequestParam,
-} from "../shared";
+import { PeriodResponseSchema, TimestampResponseMapper } from "../shared";
 import { PERCENTAGE_NO_BASELINE } from "../constants";
 
 export const AccountBalanceVariationsByAccountIdRequestParamsSchema = z.object({
-  address: z.string().refine(isAddress, "Invalid address"),
+  address: z
+    .string()
+    .refine(isAddress, "Invalid address")
+    .transform((addr) => getAddress(addr))
 });
 
 export const AccountBalanceVariationsByAccountIdRequestQuerySchema = z.object({
-  fromDate: FromDateStandardRequestParam,
-  toDate: ToDateStandardRequestParam,
+  fromDate: z
+    .string()
+    .transform((val) => Number(val))
+    .optional(),
+  toDate: z
+    .string()
+    .transform((val) => Number(val))
+    .optional(),
 });
 
 export const AccountBalanceVariationsRequestQuerySchema =
   AccountBalanceVariationsByAccountIdRequestQuerySchema.extend({
-    limit: LimitStandardRequestParam,
-    skip: OffsetStandardRequestParam,
-    orderDirection: OrderDirectionStandardRequestParam,
-    addresses: AddressSetStandardRequestParam.optional(),
+    limit: z.coerce
+      .number()
+      .int()
+      .min(1, "Limit must be a positive integer")
+      .max(100, "Limit cannot exceed 100")
+      .optional()
+      .default(20),
+    skip: z.coerce
+      .number()
+      .int()
+      .min(0, "Skip must be a non-negative integer")
+      .optional()
+      .default(0),
+    orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
+    addresses: z
+      .union([
+        z
+          .string()
+          .refine(isAddress, "Invalid address")
+          .transform((addr) => [getAddress(addr)]),
+        z.array(
+          z
+            .string()
+            .refine(isAddress, "Invalid addresses")
+            .transform((addr) => getAddress(addr)),
+        ),
+      ])
+      .optional(),
   });
 
 export const AccountBalanceVariationSchema = z.object({
@@ -81,8 +105,8 @@ export const AccountBalanceVariationMapper = (
 
 export const AccountBalanceVariationsByAccountIdResponseMapper = (
   variation: DBAccountBalanceVariation,
-  startTimestamp: number,
-  endTimestamp: number,
+  startTimestamp: number | undefined,
+  endTimestamp: number | undefined,
 ): AccountBalanceVariationResponse => {
   return AccountBalanceVariationsByAccountIdResponseSchema.parse({
     period: PeriodResponseSchema.parse({
@@ -95,8 +119,8 @@ export const AccountBalanceVariationsByAccountIdResponseMapper = (
 
 export const AccountBalanceVariationsResponseMapper = (
   variations: DBAccountBalanceVariation[],
-  startTimestamp: number,
-  endTimestamp: number,
+  startTimestamp: number | undefined,
+  endTimestamp: number | undefined,
 ): AccountBalanceVariationsResponse => {
   return AccountBalanceVariationsResponseSchema.parse({
     period: PeriodResponseSchema.parse({

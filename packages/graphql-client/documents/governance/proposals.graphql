@@ -56,46 +56,30 @@ query GetProposal($id: String!) {
 }
 
 #  Get proposal votes
-query GetVotesOnchains(
-  $proposalId: String
-  $limit: Int
-  $after: String
-  $before: String
-  $orderBy: String = "timestamp"
-  $orderDirection: String = "desc"
+query GetVotes(
+  $proposalId: String!
+  $limit: PositiveInt
+  $skip: NonNegativeInt
+  $orderBy: queryInput_votes_orderBy = timestamp
+  $orderDirection: queryInput_votes_orderDirection = desc
 ) {
-  votesOnchains(
+  votes(
     limit: $limit
-    after: $after
-    before: $before
-    where: { proposalId: $proposalId }
+    skip: $skip
+    id: $proposalId
     orderBy: $orderBy
     orderDirection: $orderDirection
   ) {
-    pageInfo {
-      startCursor
-      endCursor
-      hasNextPage
-      hasPreviousPage
-    }
     totalCount
     items {
-      voterAccountId
-      txHash
-      daoId
+      voterAddress
+      transactionHash
       proposalId
       support
       votingPower
       reason
       timestamp
     }
-  }
-}
-
-#  Get proposal votes
-query GetVotesOnchainsTotalCount($proposalId: String) {
-  votesOnchains(where: { proposalId: $proposalId }) {
-    totalCount
   }
 }
 
@@ -144,18 +128,23 @@ query GetProposalNonVoters(
 }
 
 # Get account power
-query GetAccountPower($address: String!, $proposalId: String!) {
+query GetAccountPower(
+  $address: String!
+  $addresses: JSON!
+  $proposalId: String!
+) {
   votingPowerByAccountId(accountId: $address) {
     accountId
     votingPower
   }
-  votesOnchain(proposalId: $proposalId, voterAccountId: $address) {
-    support
-    votingPower
-    reason
-    timestamp
-    txHash
-    daoId
+  votes(id: $proposalId, voterAddressIn: $addresses) {
+    items {
+      support
+      votingPower
+      reason
+      timestamp
+      transactionHash
+    }
+    totalCount
   }
 }
-

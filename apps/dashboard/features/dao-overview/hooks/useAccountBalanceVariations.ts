@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+
 import { useAccountBalanceVariationsQuery } from "@anticapture/graphql-client/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
@@ -15,11 +17,13 @@ export const useAccountBalanceVariations = (
   daoId: DaoIdEnum,
   days: TimeInterval,
 ): UseAccountBalanceVariationsResult => {
+  const fromDate = useMemo(() => {
+    return (Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[days]).toString();
+  }, [days]);
+
   const { data, loading, error, refetch } = useAccountBalanceVariationsQuery({
     variables: {
-      fromDate: (
-        Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[days]
-      ).toString(),
+      fromDate,
     },
     context: {
       headers: {

@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+
 import { DaoIdEnum } from "@/shared/types/daos";
 import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
 import { useMultipleEnsData } from "@/shared/hooks/useEnsData";
@@ -68,13 +70,16 @@ export const useAccountInteractionsData = ({
 }): InteractionResponse => {
   const { decimals } = daoConfig[daoId];
 
+  const fromDate = useMemo(() => {
+    return (
+      Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[TimeInterval.NINETY_DAYS]
+    ).toString();
+  }, []);
+
   const { data, loading, error } = useGetAccountInteractionsQuery({
     variables: {
       address,
-      fromDate: (
-        Math.floor(Date.now() / 1000) -
-        DAYS_IN_SECONDS[TimeInterval.NINETY_DAYS]
-      ).toString(),
+      fromDate,
       orderDirection:
         sortDirection as QueryInput_AccountInteractions_OrderDirection,
       minAmount: filterVariables?.minAmount,

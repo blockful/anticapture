@@ -1,9 +1,10 @@
 import { z } from "@hono/zod-openapi";
-import { votingPowerHistory } from "ponder:schema";
+import { delegation, votingPowerHistory } from "ponder:schema";
 
-import { DBDelegation } from "../transactions";
 import { DBTransfer } from "../transfers";
 import { getAddress, isAddress } from "viem";
+
+type DBDelegation = typeof delegation.$inferSelect;
 
 export type DBHistoricalVotingPower = typeof votingPowerHistory.$inferSelect;
 export type DBHistoricalVotingPowerWithRelations = DBHistoricalVotingPower & {
@@ -12,7 +13,10 @@ export type DBHistoricalVotingPowerWithRelations = DBHistoricalVotingPower & {
 };
 
 export const HistoricalVotingPowerRequestParamsSchema = z.object({
-  address: z.string().refine((addr) => isAddress(addr)),
+  address: z
+    .string()
+    .refine((addr) => isAddress(addr, { strict: false }))
+    .transform((addr) => getAddress(addr)),
 });
 
 export const HistoricalVotingPowerRequestQuerySchema = z.object({

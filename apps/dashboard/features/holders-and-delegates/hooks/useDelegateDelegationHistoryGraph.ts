@@ -42,7 +42,7 @@ export function useDelegateDelegationHistoryGraph(
       toTimestamp,
       orderBy: QueryInput_HistoricalVotingPowerByAccountId_OrderBy.Timestamp,
       orderDirection:
-        QueryInput_HistoricalVotingPowerByAccountId_OrderDirection.Asc,
+        QueryInput_HistoricalVotingPowerByAccountId_OrderDirection.Desc,
     },
     context: {
       headers: {
@@ -58,25 +58,32 @@ export function useDelegateDelegationHistoryGraph(
       return [];
     }
 
-    return data.historicalVotingPowerByAccountId.items
-      .filter((item) => !!item)
-      .map((item) => {
-        const delta = Number(
-          formatUnits(BigInt(item.delta.toString()), decimals),
-        );
-        return {
-          timestamp: new Date(Number(item.timestamp) * 1000).getTime(),
-          votingPower: Number(
-            formatUnits(BigInt(item.votingPower.toString()), decimals),
-          ),
-          delta,
-          type: item.delegation ? "delegation" : "transfer",
-          isGain: delta > 0,
-          transactionHash: item.transactionHash,
-          fromAddress: item.delegation?.from || item.transfer?.from,
-          toAddress: item.delegation?.to || item.transfer?.to,
-        };
-      });
+    return (
+      data.historicalVotingPowerByAccountId.items
+        .filter((item) => !!item)
+        .map((item) => {
+          const delta = Number(
+            formatUnits(BigInt(item.delta.toString()), decimals),
+          );
+          return {
+            timestamp: new Date(Number(item.timestamp) * 1000).getTime(),
+            votingPower: Number(
+              formatUnits(BigInt(item.votingPower.toString()), decimals),
+            ),
+            delta,
+            type: item.delegation
+              ? "delegation"
+              : ("transfer" as "delegation" | "transfer"),
+            isGain: delta > 0,
+            transactionHash: item.transactionHash,
+            fromAddress: item.delegation?.from || item.transfer?.from,
+            toAddress: item.delegation?.to || item.transfer?.to,
+          };
+        })
+        // this is needed to ensure the graph is displayed in the ascending order
+        // although the query should be sorted by timestamp in descending order
+        .sort((a, b) => a.timestamp - b.timestamp)
+    );
   }, [data, decimals]);
 
   return {

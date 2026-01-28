@@ -83,6 +83,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             <DividerDefault isHorizontal />
           </div>
           <RiskAreaCardWrapper
+            daoId={daoId}
             title={riskAreas.title}
             riskAreas={riskAreas.risks}
             onRiskClick={() => {

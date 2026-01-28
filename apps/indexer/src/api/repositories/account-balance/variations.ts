@@ -1,4 +1,4 @@
-import { asc, desc, gte, sql, and, inArray, eq, lte, lt } from "ponder";
+import { asc, desc, gte, sql, and, inArray, eq, lte } from "ponder";
 import { db } from "ponder:api";
 import { accountBalance, balanceHistory } from "ponder:schema";
 import { DBAccountBalanceVariation } from "@/api/mappers";
@@ -7,8 +7,8 @@ import { PERCENTAGE_NO_BASELINE } from "@/api/mappers/constants";
 
 export class BalanceVariationsRepository {
   async getAccountBalanceVariations(
-    fromTimestamp: number,
-    toTimestamp: number,
+    fromTimestamp: number | undefined,
+    toTimestamp: number | undefined,
     limit: number,
     skip: number,
     orderDirection: "asc" | "desc",
@@ -29,7 +29,9 @@ export class BalanceVariationsRepository {
       .where(
         and(
           addresses ? inArray(balanceHistory.accountId, addresses) : undefined,
-          lt(balanceHistory.timestamp, BigInt(fromTimestamp)),
+          fromTimestamp
+            ? gte(balanceHistory.timestamp, BigInt(fromTimestamp))
+            : undefined,
         ),
       )
       .as("latest_before_from");
@@ -47,7 +49,9 @@ export class BalanceVariationsRepository {
       .where(
         and(
           addresses ? inArray(balanceHistory.accountId, addresses) : undefined,
-          lte(balanceHistory.timestamp, BigInt(toTimestamp)),
+          toTimestamp
+            ? lte(balanceHistory.timestamp, BigInt(toTimestamp))
+            : undefined,
         ),
       )
       .as("latest_before_to");
@@ -83,8 +87,8 @@ export class BalanceVariationsRepository {
 
   async getAccountBalanceVariationsByAccountId(
     address: Address,
-    fromTimestamp: number,
-    toTimestamp: number,
+    fromTimestamp: number | undefined,
+    toTimestamp: number | undefined,
   ): Promise<DBAccountBalanceVariation> {
     const history = db
       .select({
@@ -96,8 +100,12 @@ export class BalanceVariationsRepository {
       .where(
         and(
           eq(balanceHistory.accountId, address),
-          gte(balanceHistory.timestamp, BigInt(fromTimestamp)),
-          lte(balanceHistory.timestamp, BigInt(toTimestamp)),
+          fromTimestamp
+            ? gte(balanceHistory.timestamp, BigInt(fromTimestamp))
+            : undefined,
+          toTimestamp
+            ? lte(balanceHistory.timestamp, BigInt(toTimestamp))
+            : undefined,
         ),
       )
       .as("history");

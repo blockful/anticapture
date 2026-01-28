@@ -1,11 +1,12 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
-import { isAddress } from "viem";
+import { getAddress, isAddress } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
 import { ProposalsActivityService } from "@/api/services";
 import { ProposalsActivityRepository, VoteFilter } from "@/api/repositories/";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DAOClient } from "@/interfaces/client";
+import { ProposalActivityResponseSchema } from "@/api/mappers";
 
 export function proposalsActivity(
   app: Hono,
@@ -28,7 +29,11 @@ export function proposalsActivity(
         query: z.object({
           address: z
             .string()
-            .refine((addr) => isAddress(addr), "Invalid Ethereum address"),
+            .refine(
+              (addr) => isAddress(addr, { strict: false }),
+              "Invalid Ethereum address",
+            )
+            .transform((addr) => getAddress(addr)),
           fromDate: z
             .string()
             .transform((val) => Number(val))
@@ -37,20 +42,20 @@ export function proposalsActivity(
             .number()
             .int()
             .min(0, "Skip must be a non-negative integer")
-            .default(0)
-            .optional(),
+            .optional()
+            .default(0),
           limit: z.coerce
             .number()
             .int()
             .min(1, "Limit must be a positive integer")
             .max(100, "Limit cannot exceed 100")
-            .default(10)
-            .optional(),
+            .optional()
+            .default(10),
           orderBy: z
             .enum(["timestamp", "votingPower", "voteTiming"])
-            .default("timestamp")
-            .optional(),
-          orderDirection: z.enum(["asc", "desc"]).default("desc").optional(),
+            .optional()
+            .default("timestamp"),
+          orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
           userVoteFilter: z
             .nativeEnum(VoteFilter)
             .optional()
@@ -64,43 +69,7 @@ export function proposalsActivity(
           description: "Successfully retrieved proposals activity",
           content: {
             "application/json": {
-              schema: z.object({
-                address: z.string(),
-                totalProposals: z.number(),
-                votedProposals: z.number(),
-                neverVoted: z.boolean(),
-                winRate: z.number(),
-                yesRate: z.number(),
-                avgTimeBeforeEnd: z.number(),
-                proposals: z.array(
-                  z.object({
-                    proposal: z.object({
-                      id: z.string(),
-                      daoId: z.string(),
-                      proposerAccountId: z.string(),
-                      description: z.string().nullable(),
-                      startBlock: z.number(),
-                      endBlock: z.number(),
-                      timestamp: z.string(),
-                      status: z.string(),
-                      forVotes: z.string(),
-                      againstVotes: z.string(),
-                      abstainVotes: z.string(),
-                    }),
-                    userVote: z
-                      .object({
-                        id: z.string(),
-                        voterAccountId: z.string(),
-                        proposalId: z.string(),
-                        support: z.string().nullable(),
-                        votingPower: z.string().default("0"),
-                        reason: z.string().nullable(),
-                        timestamp: z.string(),
-                      })
-                      .nullable(),
-                  }),
-                ),
-              }),
+              schema: ProposalActivityResponseSchema,
             },
           },
         },
@@ -131,7 +100,7 @@ export function proposalsActivity(
         userVoteFilter,
       });
 
-      return context.json(result, 200);
+      return context.json(ProposalActivityResponseSchema.parse(result));
     },
   );
 }

@@ -1,13 +1,7 @@
 import { z } from "@hono/zod-openapi";
 import { balanceHistory } from "ponder:schema";
-import { isAddress } from "viem";
+import { getAddress, isAddress } from "viem";
 import { DBTransfer } from "../transfers";
-import {
-  FromDateStandardRequestParam,
-  OffsetStandardRequestParam,
-  OrderDirectionStandardRequestParam,
-  ToDateStandardRequestParam,
-} from "../shared";
 
 export type DBHistoricalBalance = typeof balanceHistory.$inferSelect;
 export type DBHistoricalBalanceWithRelations = DBHistoricalBalance & {
@@ -15,11 +9,19 @@ export type DBHistoricalBalanceWithRelations = DBHistoricalBalance & {
 };
 
 export const HistoricalBalanceRequestParamsSchema = z.object({
-  address: z.string().refine((addr) => isAddress(addr)),
+  address: z
+    .string()
+    .refine((addr) => isAddress(addr))
+    .transform((addr) => getAddress(addr))
 });
 
 export const HistoricalBalanceRequestQuerySchema = z.object({
-  skip: OffsetStandardRequestParam,
+  skip: z.coerce
+    .number()
+    .int()
+    .min(0, "Skip must be a non-negative integer")
+    .optional()
+    .default(0),
   limit: z.coerce
     .number()
     .int()
@@ -28,9 +30,15 @@ export const HistoricalBalanceRequestQuerySchema = z.object({
     .optional()
     .default(10),
   orderBy: z.enum(["timestamp", "delta"]).optional().default("timestamp"),
-  orderDirection: OrderDirectionStandardRequestParam,
-  fromDate: FromDateStandardRequestParam,
-  toDate: ToDateStandardRequestParam,
+  orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
+  fromDate: z
+    .string()
+    .transform((val) => Number(val))
+    .optional(),
+  toDate: z
+    .string()
+    .transform((val) => Number(val))
+    .optional(),
   fromValue: z.string().optional(),
   toValue: z.string().optional(),
 });

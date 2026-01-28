@@ -92,7 +92,11 @@ export const BalanceHistoryVariationGraph = ({
     // For "all", treat as all time by not setting limits
     if (selectedPeriod === "all") return undefined;
 
-    const nowInSeconds = Date.now() / 1000;
+    // Use start of today for a stable reference that won't change on each render
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayInSeconds = today.getTime() / 1000;
+
     let daysInSeconds: number;
     switch (selectedPeriod) {
       case "90d":
@@ -103,7 +107,7 @@ export const BalanceHistoryVariationGraph = ({
         break;
     }
 
-    return Math.floor(nowInSeconds - daysInSeconds);
+    return Math.floor(todayInSeconds - daysInSeconds);
   }, [selectedPeriod]);
 
   const { balanceHistory, loading, error } = useBalanceHistoryGraph(
@@ -174,16 +178,14 @@ export const BalanceHistoryVariationGraph = ({
         ? fromDate * 1000
         : // 1 day in milliseconds to avoid hover conflict when max data is selected
           balanceHistory[0]?.timestamp - 86400000,
-      amount: 0, // TODO set the balance at the start of the period
+      balance: balanceHistory[0]?.balance - balanceHistory[0]?.amount,
     },
     ...balanceHistory,
     {
       timestamp: Date.now(),
-      amount: balanceHistory[balanceHistory.length - 1]?.balance,
+      balance: balanceHistory[balanceHistory.length - 1]?.balance,
     },
   ];
-
-  console.log({ extendedChartData });
 
   // Custom dot component to show each transfer/delegation point
   const CustomDot = (props: CustomDotProps) => {
@@ -276,9 +278,7 @@ export const BalanceHistoryVariationGraph = ({
                       </p>
                       <p className="text-secondary flex gap-1 text-xs">
                         Balance:
-                        {data.balance > 0
-                          ? ` ${formatNumberUserReadable(Number(data.balance))}`
-                          : " Initial Balance"}
+                        {` ${formatNumberUserReadable(Number(data.balance))}`}
                       </p>
                       {data.direction && (
                         <p className="text-secondary flex gap-1 text-xs">
@@ -314,7 +314,7 @@ export const BalanceHistoryVariationGraph = ({
             />
             <Line
               type="stepAfter"
-              dataKey="amount"
+              dataKey="balance"
               stroke="var(--base-primary)"
               strokeWidth={1}
               dot={CustomDot}

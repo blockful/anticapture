@@ -27,6 +27,8 @@ import {
   treasury,
   votingPowerVariations,
   votingPowers,
+  delegations,
+  historicalDelegations,
 } from "@/api/controllers";
 import { docs } from "@/api/docs";
 import { env } from "@/env";
@@ -46,6 +48,8 @@ import {
   TransfersRepository,
   TreasuryRepository,
   VotingPowerRepository,
+  DelegationsRepository,
+  HistoricalDelegationsRepository,
 } from "@/api/repositories";
 import { errorHandler } from "@/api/middlewares";
 import { getClient } from "@/lib/client";
@@ -64,13 +68,13 @@ import {
   TransfersService,
   TokenMetricsService,
   VotingPowerService,
+  createTreasuryService,
+  parseTreasuryProviderConfig,
+  HistoricalDelegationsService,
+  DelegationsService,
 } from "@/api/services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
-import {
-  createTreasuryService,
-  parseTreasuryProviderConfig,
-} from "./services/treasury/treasury-provider-factory";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -158,6 +162,17 @@ const tokenPriceClient =
         env.COINGECKO_API_KEY,
         env.DAO_ID,
       );
+
+historicalDelegations(
+  app,
+  new HistoricalDelegationsService(new HistoricalDelegationsRepository()),
+);
+
+// TODO: add support to partial delegations at some point
+delegations(
+  app,
+  new DelegationsService(new DelegationsRepository()),
+);
 
 const treasuryService = createTreasuryService(
   new TreasuryRepository(),

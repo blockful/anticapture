@@ -31,8 +31,8 @@ interface HistoricalVotingPowerRepository {
 
 interface VotingPowersRepository {
   getVotingPowerVariations(
-    startTimestamp: number,
-    endTimestamp: number,
+    startTimestamp: number | undefined,
+    endTimestamp: number | undefined,
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
@@ -41,8 +41,8 @@ interface VotingPowersRepository {
 
   getVotingPowerVariationsByAccountId(
     accountId: Address,
-    startTimestamp: number,
-    endTimestamp: number,
+    startTimestamp: number | undefined,
+    endTimestamp: number | undefined,
   ): Promise<DBVotingPowerVariation>;
 
   getVotingPowers(
@@ -102,8 +102,8 @@ export class VotingPowerService {
   }
 
   async getVotingPowerVariations(
-    startTimestamp: number,
-    endTimestamp: number,
+    startTimestamp: number | undefined,
+    endTimestamp: number | undefined,
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
@@ -140,8 +140,8 @@ export class VotingPowerService {
 
   async getVotingPowerVariationsByAccountId(
     accountId: Address,
-    startTimestamp: number,
-    endTimestamp: number,
+    startTimestamp: number | undefined,
+    endTimestamp: number | undefined,
   ): Promise<DBVotingPowerVariation> {
     return this.votingPowerRepository.getVotingPowerVariationsByAccountId(
       accountId,

@@ -109,7 +109,7 @@ export const useTokenHolders = ({
     () =>
       tokenHoldersData?.accountBalances?.items
         ?.filter((tokenHolder) => tokenHolder !== null)
-        .map((tokenHolder) => tokenHolder.accountId)
+        .map((tokenHolder) => tokenHolder.address)
         .filter(Boolean) || [],
     [tokenHoldersData],
   );
@@ -153,7 +153,7 @@ export const useTokenHolders = ({
     return tokenHoldersData.accountBalances.items
       .filter((holder) => holder !== null)
       .map((holder) => ({
-        accountId: holder.accountId,
+        accountId: holder.address,
         balance: holder.balance,
         delegate: holder.delegate,
         tokenId: holder.tokenId,
@@ -223,7 +223,7 @@ export const useTokenHolders = ({
           const merged = [
             ...prevItems,
             ...newItems.filter(
-              (n) => n && !prevItems.some((p) => p?.accountId === n.accountId),
+              (n) => n && !prevItems.some((p) => p?.address === n.address),
             ),
           ];
 

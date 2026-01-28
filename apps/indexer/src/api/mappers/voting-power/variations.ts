@@ -1,47 +1,103 @@
 import { z } from "@hono/zod-openapi";
-import { Address, isAddress } from "viem";
+import { Address, getAddress, isAddress } from "viem";
 import { accountPower } from "ponder:schema";
 
-import {
-  AddressSetStandardRequestParam,
-  FromDateStandardRequestParam,
-  LimitStandardRequestParam,
-  OffsetStandardRequestParam,
-  OrderDirectionStandardRequestParam,
-  PeriodResponseSchema,
-  TimestampResponseMapper,
-  ToDateStandardRequestParam,
-} from "../shared";
+import { PeriodResponseSchema, TimestampResponseMapper } from "../shared";
 
 export const VotingPowerVariationsByAccountIdRequestParamsSchema = z.object({
-  address: z.string().refine(isAddress, "Invalid address"),
+  address: z
+    .string()
+    .refine((addr) => isAddress(addr, { strict: false }))
+    .transform((addr) => getAddress(addr)),
 });
 
 export const VotingPowerVariationsByAccountIdRequestQuerySchema = z.object({
-  fromDate: FromDateStandardRequestParam,
-  toDate: ToDateStandardRequestParam,
+  fromDate: z
+    .string()
+    .transform((val) => Number(val))
+    .optional(),
+  toDate: z
+    .string()
+    .transform((val) => Number(val))
+    .optional(),
 });
 
 export const VotingPowerVariationsRequestQuerySchema = z
   .object({
-    limit: LimitStandardRequestParam,
-    skip: OffsetStandardRequestParam,
-    orderDirection: OrderDirectionStandardRequestParam,
-    addresses: AddressSetStandardRequestParam.optional(),
+    limit: z.coerce
+      .number()
+      .int()
+      .min(1, "Limit must be a positive integer")
+      .max(100, "Limit cannot exceed 100")
+      .optional()
+      .default(20),
+    skip: z.coerce
+      .number()
+      .int()
+      .min(0, "Skip must be a non-negative integer")
+      .optional()
+      .default(0),
+    orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
+    addresses: z
+      .union([
+        z
+          .string()
+          .refine(
+            (addr) => isAddress(addr, { strict: false }),
+            "Invalid address",
+          )
+          .transform((addr) => [getAddress(addr)]),
+        z.array(
+          z
+            .string()
+            .refine(
+              (addr) => isAddress(addr, { strict: false }),
+              "Invalid addresses",
+            )
+            .transform((addr) => getAddress(addr)),
+        ),
+      ])
+      .optional(),
   })
   .extend(VotingPowerVariationsByAccountIdRequestQuerySchema.shape);
 
 export const VotingPowersRequestSchema = z.object({
-  limit: LimitStandardRequestParam,
-  skip: OffsetStandardRequestParam,
-  orderDirection: OrderDirectionStandardRequestParam,
+  limit: z.coerce
+    .number()
+    .int()
+    .min(1, "Limit must be a positive integer")
+    .max(100, "Limit cannot exceed 100")
+    .optional()
+    .default(20),
+  skip: z.coerce
+    .number()
+    .int()
+    .min(0, "Skip must be a non-negative integer")
+    .optional()
+    .default(0),
+  orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
   orderBy: z
     .enum(["votingPower", "delegationsCount"])
     .optional()
     .default("votingPower"),
-  addresses: AddressSetStandardRequestParam.optional().transform(
-    (val) => val ?? [],
-  ),
+  addresses: z
+    .union([
+      z
+        .string()
+        .refine((addr) => isAddress(addr, { strict: false }), "Invalid address")
+        .transform((addr) => [getAddress(addr)]),
+      z.array(
+        z
+          .string()
+          .refine(
+            (addr) => isAddress(addr, { strict: false }),
+            "Invalid addresses",
+          )
+          .transform((addr) => getAddress(addr)),
+      ),
+    ])
+    .optional()
+    .transform((val) => val ?? []),
   fromValue: z
     .string()
     .transform((val) => BigInt(val))
@@ -121,8 +177,8 @@ export const VotingPowerVariationResponseMapper = (
 
 export const VotingPowerVariationsResponseMapper = (
   variations: DBVotingPowerVariation[],
-  startTimestamp: number,
-  endTimestamp: number,
+  startTimestamp: number | undefined,
+  endTimestamp: number | undefined,
 ): VotingPowerVariationsResponse => {
   return VotingPowerVariationsResponseSchema.parse({
     period: PeriodResponseSchema.parse({
@@ -135,8 +191,8 @@ export const VotingPowerVariationsResponseMapper = (
 
 export const VotingPowerVariationsByAccountIdResponseMapper = (
   delta: DBVotingPowerVariation,
-  startTimestamp: number,
-  endTimestamp: number,
+  startTimestamp: number | undefined,
+  endTimestamp: number | undefined,
 ): VotingPowerVariationsByAccountIdResponse => {
   return VotingPowerVariationsByAccountIdResponseSchema.parse({
     period: PeriodResponseSchema.parse({

@@ -1,8 +1,10 @@
-directive @enum(subgraph: String, value: String) on ENUM_VALUE
+directive @regexp(subgraph: String, pattern: String) on SCALAR
+
+directive @typescript(subgraph: String, type: String) on SCALAR | ENUM
 
 directive @resolveRoot(subgraph: String) on FIELD_DEFINITION
 
-directive @typescript(subgraph: String, type: String) on SCALAR | ENUM
+directive @enum(subgraph: String, value: String) on ENUM_VALUE
 
 directive @example(subgraph: String, value: ObjMap) repeatable on FIELD_DEFINITION | OBJECT | INPUT_OBJECT | ENUM | SCALAR
 
@@ -12,12 +14,16 @@ directive @transport(subgraph: String, kind: String, location: String, headers: 
 
 type Query {
   votingPowerHistorys(where: votingPowerHistoryFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): votingPowerHistoryPage!
-  balanceHistory(transactionHash: String!, accountId: String!, logIndex: Float!): balanceHistory
-  balanceHistorys(where: balanceHistoryFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): balanceHistoryPage!
-  delegations(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): delegationPage!
-  votesOnchain(voterAccountId: String!, proposalId: String!): votesOnchain
   votesOnchains(where: votesOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): votesOnchainPage!
   _meta: Meta
+
+  """
+  Get historical delegations for an account, with optional filtering and sorting
+  """
+  historicalDelegations(address: String!, delegateAddressIn: JSON, skip: NonNegativeInt, limit: PositiveInt = 10, fromValue: String, toValue: String, orderDirection: queryInput_historicalDelegations_orderDirection = desc): historicalDelegations_200_response
+
+  """Get current delegators of an account"""
+  delegations(address: String!): delegations_200_response
 
   """
   Get historical Liquid Treasury (treasury without DAO tokens) from external providers (DefiLlama/Dune)
@@ -85,6 +91,9 @@ type Query {
   """Returns the active delegates that did not vote on a given proposal"""
   proposalNonVoters(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposalNonVoters_orderDirection = desc, addresses: JSON): proposalNonVoters_200_response
 
+  """Returns a paginated list of votes cast on a specific proposal"""
+  votes(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, voterAddressIn: JSON, orderBy: queryInput_votes_orderBy = timestamp, orderDirection: queryInput_votes_orderDirection = desc, support: Float): votes_200_response
+
   """TODO"""
   historicalBalances(address: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_historicalBalances_orderBy = timestamp, orderDirection: queryInput_historicalBalances_orderDirection = desc, fromDate: String, toDate: String, fromValue: String, toValue: String): historicalBalances_200_response
 
@@ -143,7 +152,7 @@ type Query {
   """
   accountBalanceVariations(fromDate: String, toDate: String, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalanceVariations_orderDirection = desc, addresses: JSON): accountBalanceVariations_200_response
 
-  """Returns a the changes to voting power by period and accountId"""
+  """Returns a the changes to balance by period and accountId"""
   accountBalanceVariationsByAccountId(address: String!, fromDate: String, toDate: String): accountBalanceVariationsByAccountId_200_response
 
   """Returns sorted and paginated account balance records"""
@@ -1444,6 +1453,43 @@ input tokenPriceFilter {
   timestamp_lte: BigInt
 }
 
+type historicalDelegations_200_response {
+  items: [query_historicalDelegations_items_items]!
+  totalCount: Float!
+}
+
+type query_historicalDelegations_items_items {
+  delegatorAddress: String!
+  delegateAddress: String!
+  amount: String!
+  timestamp: String!
+  transactionHash: String!
+}
+
+"""Integers that will have a value of 0 or more."""
+scalar NonNegativeInt
+
+"""Integers that will have a value greater than 0."""
+scalar PositiveInt
+
+enum queryInput_historicalDelegations_orderDirection {
+  asc
+  desc
+}
+
+type delegations_200_response {
+  items: [query_delegations_items_items]!
+  totalCount: Float!
+}
+
+type query_delegations_items_items {
+  delegatorAddress: String!
+  delegateAddress: String!
+  amount: String!
+  timestamp: String!
+  transactionHash: String!
+}
+
 type getLiquidTreasury_200_response {
   items: [query_getLiquidTreasury_items_items]!
 
@@ -1532,9 +1578,6 @@ type query_historicalTokenData_items {
   price: String!
   timestamp: Float!
 }
-
-"""Integers that will have a value of 0 or more."""
-scalar NonNegativeInt
 
 type token_200_response {
   id: String!
@@ -1730,25 +1773,24 @@ type query_proposalsActivity_proposals_items_proposal {
   description: String
   startBlock: Float!
   endBlock: Float!
-  timestamp: String!
+  timestamp: query_proposalsActivity_proposals_items_proposal_timestamp!
   status: String!
   forVotes: String!
   againstVotes: String!
   abstainVotes: String!
 }
 
+scalar query_proposalsActivity_proposals_items_proposal_timestamp
+
 type query_proposalsActivity_proposals_items_userVote {
   id: String!
   voterAccountId: String!
   proposalId: String!
   support: String
-  votingPower: String
+  votingPower: String!
   reason: String
   timestamp: String!
 }
-
-"""Integers that will have a value greater than 0."""
-scalar PositiveInt
 
 enum queryInput_proposalsActivity_orderBy {
   timestamp
@@ -1845,6 +1887,31 @@ type query_proposalNonVoters_items_items {
 }
 
 enum queryInput_proposalNonVoters_orderDirection {
+  asc
+  desc
+}
+
+type votes_200_response {
+  items: [query_votes_items_items]!
+  totalCount: Float!
+}
+
+type query_votes_items_items {
+  voterAddress: String!
+  transactionHash: String!
+  proposalId: String!
+  support: Float!
+  votingPower: String!
+  reason: String
+  timestamp: Float!
+}
+
+enum queryInput_votes_orderBy {
+  timestamp
+  votingPower
+}
+
+enum queryInput_votes_orderDirection {
   asc
   desc
 }
@@ -2169,7 +2236,7 @@ type accountBalances_200_response {
 }
 
 type query_accountBalances_items_items {
-  accountId: String!
+  address: String!
   balance: String!
   tokenId: String!
   delegate: String!
@@ -2181,7 +2248,7 @@ enum queryInput_accountBalances_orderDirection {
 }
 
 type accountBalanceByAccountId_200_response {
-  accountId: String!
+  address: String!
   balance: String!
   tokenId: String!
   delegate: String!
