@@ -20,6 +20,7 @@ export type Scalars = {
   ObjMap: { input: any; output: any; }
   /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
+  query_proposalsActivity_proposals_items_proposal_timestamp: { input: any; output: any; }
 };
 
 export type AverageDelegationPercentageItem = {
@@ -118,7 +119,6 @@ export type Query = {
   compareVotes?: Maybe<CompareVotes_200_Response>;
   /** Returns current governance parameters for this DAO */
   dao?: Maybe<Dao_200_Response>;
-  daoMetricsDayBucket?: Maybe<DaoMetricsDayBucket>;
   /** Get all DAOs */
   daos: DaoList;
   /** Get delegation percentage day buckets with forward-fill */
@@ -284,13 +284,6 @@ export type QueryCompareTreasuryArgs = {
 
 export type QueryCompareVotesArgs = {
   days?: InputMaybe<QueryInput_CompareVotes_Days>;
-};
-
-
-export type QueryDaoMetricsDayBucketArgs = {
-  date: Scalars['BigInt']['input'];
-  metricType: Scalars['String']['input'];
-  tokenId: Scalars['String']['input'];
 };
 
 
@@ -2017,7 +2010,7 @@ export type Query_ProposalsActivity_Proposals_Items_Proposal = {
   proposerAccountId: Scalars['String']['output'];
   startBlock: Scalars['Float']['output'];
   status: Scalars['String']['output'];
-  timestamp: Scalars['String']['output'];
+  timestamp: Scalars['query_proposalsActivity_proposals_items_proposal_timestamp']['output'];
 };
 
 export type Query_ProposalsActivity_Proposals_Items_UserVote = {
@@ -2028,7 +2021,7 @@ export type Query_ProposalsActivity_Proposals_Items_UserVote = {
   support?: Maybe<Scalars['String']['output']>;
   timestamp: Scalars['String']['output'];
   voterAccountId: Scalars['String']['output'];
-  votingPower?: Maybe<Scalars['String']['output']>;
+  votingPower: Scalars['String']['output'];
 };
 
 export type Query_Proposals_Items_Items = {
@@ -3041,7 +3034,7 @@ export type GetProposalsActivityQueryVariables = Exact<{
 }>;
 
 
-export type GetProposalsActivityQuery = { __typename?: 'Query', proposalsActivity?: { __typename?: 'proposalsActivity_200_response', totalProposals: number, votedProposals: number, neverVoted: boolean, winRate: number, yesRate: number, avgTimeBeforeEnd: number, proposals: Array<{ __typename?: 'query_proposalsActivity_proposals_items', proposal: { __typename?: 'query_proposalsActivity_proposals_items_proposal', id: string, description?: string | null, startBlock: number, endBlock: number, status: string, againstVotes: string, forVotes: string, abstainVotes: string, timestamp: string, proposerAccountId: string, daoId: string }, userVote?: { __typename?: 'query_proposalsActivity_proposals_items_userVote', id: string, support?: string | null, votingPower?: string | null, reason?: string | null, timestamp: string, proposalId: string, voterAccountId: string } | null } | null> } | null };
+export type GetProposalsActivityQuery = { __typename?: 'Query', proposalsActivity?: { __typename?: 'proposalsActivity_200_response', totalProposals: number, votedProposals: number, neverVoted: boolean, winRate: number, yesRate: number, avgTimeBeforeEnd: number, proposals: Array<{ __typename?: 'query_proposalsActivity_proposals_items', proposal: { __typename?: 'query_proposalsActivity_proposals_items_proposal', id: string, description?: string | null, startBlock: number, endBlock: number, status: string, againstVotes: string, forVotes: string, abstainVotes: string, timestamp: any, proposerAccountId: string, daoId: string }, userVote?: { __typename?: 'query_proposalsActivity_proposals_items_userVote', id: string, support?: string | null, votingPower: string, reason?: string | null, timestamp: string, proposalId: string, voterAccountId: string } | null } | null> } | null };
 
 export type GetProposalsQueryVariables = Exact<{
   fromDate?: InputMaybe<Scalars['Float']['input']>;

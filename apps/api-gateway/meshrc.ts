@@ -38,6 +38,7 @@ export default processConfig(
                       "Query.!{account}",
                       "Query.!{balanceHistorys}",
                       "Query.!{balanceHistory}",
+                      "Query.!{daoMetricsDayBucket}",
                       "Query.!{daoMetricsDayBuckets}",
                       "Query.!{delegation}",
                       "Query.!{delegations}",

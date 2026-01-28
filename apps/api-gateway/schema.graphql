@@ -1,8 +1,10 @@
+directive @regexp(subgraph: String, pattern: String) on SCALAR
+
+directive @typescript(subgraph: String, type: String) on SCALAR | ENUM
+
 directive @resolveRoot(subgraph: String) on FIELD_DEFINITION
 
 directive @enum(subgraph: String, value: String) on ENUM_VALUE
-
-directive @typescript(subgraph: String, type: String) on SCALAR | ENUM
 
 directive @example(subgraph: String, value: ObjMap) repeatable on FIELD_DEFINITION | OBJECT | INPUT_OBJECT | ENUM | SCALAR
 
@@ -13,7 +15,6 @@ directive @transport(subgraph: String, kind: String, location: String, headers: 
 type Query {
   votingPowerHistorys(where: votingPowerHistoryFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): votingPowerHistoryPage!
   votesOnchains(where: votesOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): votesOnchainPage!
-  daoMetricsDayBucket(date: BigInt!, tokenId: String!, metricType: String!): daoMetricsDayBucket
   _meta: Meta
 
   """
@@ -1769,19 +1770,21 @@ type query_proposalsActivity_proposals_items_proposal {
   description: String
   startBlock: Float!
   endBlock: Float!
-  timestamp: String!
+  timestamp: query_proposalsActivity_proposals_items_proposal_timestamp!
   status: String!
   forVotes: String!
   againstVotes: String!
   abstainVotes: String!
 }
 
+scalar query_proposalsActivity_proposals_items_proposal_timestamp
+
 type query_proposalsActivity_proposals_items_userVote {
   id: String!
   voterAccountId: String!
   proposalId: String!
   support: String
-  votingPower: String
+  votingPower: String!
   reason: String
   timestamp: String!
 }
