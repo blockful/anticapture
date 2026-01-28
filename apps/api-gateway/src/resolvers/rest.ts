@@ -1,6 +1,7 @@
 const daoItemQueries = [
   "accountBalanceByAccountId",
   "accountBalanceVariations",
+  "accountBalanceVariationsByAccountId",
   "accountBalances",
   "accountInteractions",
   "compareActiveSupply",

@@ -89,13 +89,12 @@ export const VotingPowerVariationGraph = ({
 
   // Calculate timestamp range based on time period
   const { fromTimestamp, toTimestamp } = useMemo(() => {
-    const nowInSeconds = Date.now() / 1000;
-
     // For "all", treat as all time by not setting limits
     if (selectedPeriod === "all") {
       return { fromTimestamp: undefined, toTimestamp: undefined };
     }
 
+    const nowInSeconds = Date.now() / 1000;
     let daysInSeconds: number;
     switch (selectedPeriod) {
       case "90d":

@@ -1,8 +1,8 @@
 query AccountBalanceVariations(
-  $days: queryInput_accountBalanceVariations_days!
+  $fromDate: String!
   $limit: PositiveInt = 10
 ) {
-  accountBalanceVariations(days: $days, limit: $limit) {
+  accountBalanceVariations(fromDate: $fromDate, limit: $limit) {
     items {
       accountId
       previousBalance

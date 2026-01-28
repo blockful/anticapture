@@ -30,11 +30,14 @@ export default processConfig(
                 {
                   filterSchema: {
                     filters: [
+                      "Query.!{accountBalances}",
+                      "Query.!{accountBalance}",
                       "Query.!{accountPowers}",
                       "Query.!{accountPower}",
                       "Query.!{accounts}",
                       "Query.!{account}",
-                      "Query.!{daoMetricsDayBucket}",
+                      "Query.!{balanceHistorys}",
+                      "Query.!{balanceHistory}",
                       "Query.!{daoMetricsDayBuckets}",
                       "Query.!{delegation}",
                       "Query.!{delegations}",
@@ -42,17 +45,14 @@ export default processConfig(
                       "Query.!{proposalsOnchain}",
                       "Query.!{tokenPrices}",
                       "Query.!{tokenPrice}",
+                      "Query.!{tokens}",
+                      "Query.!{token}",
                       "Query.!{transactions}",
                       "Query.!{transaction}",
                       "Query.!{transfers}",
                       "Query.!{transfer}",
-                      "Query.!{votingPowerHistory}",
-                      "Query.!{accountBalances}",
-                      "Query.!{accountBalance}",
-                      "Query.!{delegation}",
-                      "Query.!{tokens}",
-                      "Query.!{token}",
                       "Query.!{votesOnchain}",
+                      "Query.!{votingPowerHistory}",
                       // "Query.!{votesOnchains}", TODO: Leave endpoint active for now as it is still used by the [notification bot](https://github.com/blockful/notification-system/blob/main/packages/anticapture-client/queries/votes.graphql)
                       // 'Query.!{votingPowerHistorys}' TODO: Leave endpoint active for now as it is still used by the notification bot
                     ],

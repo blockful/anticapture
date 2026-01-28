@@ -8,7 +8,7 @@ query HistoricalVotingPowers(
   $fromValue: String
 ) {
   historicalVotingPowers(
-    accountId: $account
+    address: $account
     skip: $skip
     orderBy: $orderBy
     orderDirection: $orderDirection

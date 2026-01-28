@@ -47,9 +47,7 @@ export const TokenHolders = ({
   );
   const pageLimit: number = 15;
   const { isMobile } = useScreenSize();
-  const {
-    daoOverview: { token },
-  } = daoConfig[daoId];
+  const { decimals } = daoConfig[daoId];
 
   const handleAddressFilterApply = (address: string | undefined) => {
     setCurrentAddressFilter(address || null);
@@ -80,14 +78,10 @@ export const TokenHolders = ({
       if (!historicalBalance) return null;
 
       try {
-        const current =
-          token === "ERC20"
-            ? Number(formatUnits(BigInt(currentBalance), 18))
-            : Number(currentBalance);
-        const historical =
-          token === "ERC20"
-            ? Number(formatUnits(BigInt(historicalBalance), 18))
-            : Number(historicalBalance);
+        const current = Number(formatUnits(BigInt(currentBalance), decimals));
+        const historical = Number(
+          formatUnits(BigInt(historicalBalance), decimals),
+        );
 
         const absoluteChange = current - historical;
 
@@ -117,16 +111,13 @@ export const TokenHolders = ({
         return {
           address: holder.accountId as Address,
           type: holder.account?.type,
-          balance:
-            token === "ERC20"
-              ? Number(formatUnits(BigInt(holder.balance), 18))
-              : Number(holder.balance),
+          balance: Number(formatUnits(BigInt(holder.balance), decimals)),
           variation,
           delegate: holder.delegate as Address,
         };
       }) || []
     );
-  }, [tokenHoldersData, historicalBalancesCache, token]);
+  }, [tokenHoldersData, historicalBalancesCache, decimals]);
 
   const tokenHoldersColumns: ColumnDef<TokenHolderTableData>[] = [
     {
