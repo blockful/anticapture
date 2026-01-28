@@ -14,7 +14,6 @@ import {
   delegationPercentage,
   governanceActivity,
   historicalBalances,
-  historicalVotingPowerByAccountId,
   historicalVotingPower,
   lastUpdate,
   proposals,
@@ -193,7 +192,6 @@ historicalBalances(app, new HistoricalBalancesService(historicalBalancesRepo));
 transactions(app, transactionsService);
 lastUpdate(app);
 delegationPercentage(app, delegationPercentageService);
-historicalVotingPowerByAccountId(app, votingPowerService);
 historicalVotingPower(app, votingPowerService);
 votingPowerVariations(app, votingPowerService);
 votingPowers(app, votingPowerService);

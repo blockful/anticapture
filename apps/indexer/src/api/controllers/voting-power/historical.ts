@@ -9,10 +9,7 @@ import {
   HistoricalVotingPowerGlobalQuerySchema,
 } from "@/api/mappers";
 
-export function historicalVotingPowerByAccountId(
-  app: Hono,
-  service: VotingPowerService,
-) {
+export function historicalVotingPower(app: Hono, service: VotingPowerService) {
   app.openapi(
     createRoute({
       method: "get",
@@ -66,9 +63,7 @@ export function historicalVotingPowerByAccountId(
       );
     },
   );
-}
 
-export function historicalVotingPower(app: Hono, service: VotingPowerService) {
   app.openapi(
     createRoute({
       method: "get",
