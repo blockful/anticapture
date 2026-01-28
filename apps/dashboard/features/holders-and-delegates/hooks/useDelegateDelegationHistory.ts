@@ -153,9 +153,9 @@ export function useDelegateDelegationHistory({
 
   // Transform raw data to our format
   const transformedData = useMemo(() => {
-    if (!data?.historicalVotingPowerByAccount?.items) return [];
+    if (!data?.historicalVotingPowerByAccountId?.items) return [];
 
-    return data.historicalVotingPowerByAccount.items
+    return data.historicalVotingPowerByAccountId.items
       .filter((item) => !!item)
       .map((item) => {
         // Determine the type, action, and direction based on the data and delta
@@ -209,12 +209,12 @@ export function useDelegateDelegationHistory({
   const hasNextPage = useMemo(() => {
     return (
       currentPage * itemsPerPage <
-      (data?.historicalVotingPowerByAccount?.totalCount || 0)
+      (data?.historicalVotingPowerByAccountId?.totalCount || 0)
     );
   }, [
     currentPage,
     itemsPerPage,
-    data?.historicalVotingPowerByAccount?.totalCount,
+    data?.historicalVotingPowerByAccountId?.totalCount,
   ]);
 
   // Fetch next page function
@@ -238,15 +238,16 @@ export function useDelegateDelegationHistory({
           if (!fetchMoreResult) return previousResult;
 
           return {
-            historicalVotingPowerByAccount: {
-              ...fetchMoreResult.historicalVotingPowerByAccount,
+            historicalVotingPowerByAccountId: {
+              ...fetchMoreResult.historicalVotingPowerByAccountId,
               items: [
-                ...(previousResult.historicalVotingPowerByAccount?.items ?? []),
-                ...(fetchMoreResult.historicalVotingPowerByAccount?.items ??
+                ...(previousResult.historicalVotingPowerByAccountId?.items ??
+                  []),
+                ...(fetchMoreResult.historicalVotingPowerByAccountId?.items ??
                   []),
               ],
               totalCount:
-                fetchMoreResult?.historicalVotingPowerByAccount?.totalCount ??
+                fetchMoreResult?.historicalVotingPowerByAccountId?.totalCount ??
                 0,
             },
           };

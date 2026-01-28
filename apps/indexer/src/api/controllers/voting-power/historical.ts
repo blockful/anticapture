@@ -9,14 +9,14 @@ import {
   HistoricalVotingPowerGlobalQuerySchema,
 } from "@/api/mappers";
 
-export function historicalVotingPowerByAccount(
+export function historicalVotingPowerByAccountId(
   app: Hono,
   service: VotingPowerService,
 ) {
   app.openapi(
     createRoute({
       method: "get",
-      operationId: "historicalVotingPowerByAccount",
+      operationId: "historicalVotingPowerByAccountId",
       path: "/accounts/{address}/voting-powers/historical",
       summary: "Get voting power changes by account",
       description:

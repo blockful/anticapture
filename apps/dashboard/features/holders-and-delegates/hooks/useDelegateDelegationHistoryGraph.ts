@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import {
-  QueryInput_HistoricalVotingPowerByAccount_OrderDirection,
-  QueryInput_HistoricalVotingPowerByAccount_OrderBy,
+  QueryInput_HistoricalVotingPowerByAccountId_OrderDirection,
+  QueryInput_HistoricalVotingPowerByAccountId_OrderBy,
   useGetDelegateDelegationHistoryGraphQuery,
 } from "@anticapture/graphql-client/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -40,9 +40,9 @@ export function useDelegateDelegationHistoryGraph(
       accountId,
       fromTimestamp,
       toTimestamp,
-      orderBy: QueryInput_HistoricalVotingPowerByAccount_OrderBy.Timestamp,
+      orderBy: QueryInput_HistoricalVotingPowerByAccountId_OrderBy.Timestamp,
       orderDirection:
-        QueryInput_HistoricalVotingPowerByAccount_OrderDirection.Asc,
+        QueryInput_HistoricalVotingPowerByAccountId_OrderDirection.Asc,
     },
     context: {
       headers: {
@@ -54,11 +54,11 @@ export function useDelegateDelegationHistoryGraph(
   });
 
   const delegationHistory = useMemo((): DelegationHistoryGraphItem[] => {
-    if (!data?.historicalVotingPowerByAccount?.items) {
+    if (!data?.historicalVotingPowerByAccountId?.items) {
       return [];
     }
 
-    return data.historicalVotingPowerByAccount.items
+    return data.historicalVotingPowerByAccountId.items
       .filter((item) => !!item)
       .map((item) => {
         const delta = Number(

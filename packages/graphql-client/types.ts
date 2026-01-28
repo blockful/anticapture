@@ -122,7 +122,6 @@ export type Query = {
   dao?: Maybe<Dao_200_Response>;
   /** Get all DAOs */
   daos: DaoList;
-  delegation?: Maybe<Delegation>;
   /** Get delegation percentage day buckets with forward-fill */
   delegationPercentageByDay?: Maybe<DelegationPercentageByDay_200_Response>;
   delegations: DelegationPage;
@@ -139,7 +138,7 @@ export type Query = {
   /** Returns a list of voting power changes. Optionally filter by accountId. */
   historicalVotingPower?: Maybe<HistoricalVotingPower_200_Response>;
   /** Returns a list of voting power changes for a specific account */
-  historicalVotingPowerByAccount?: Maybe<HistoricalVotingPowerByAccount_200_Response>;
+  historicalVotingPowerByAccountId?: Maybe<HistoricalVotingPowerByAccountId_200_Response>;
   /** Get the last update time */
   lastUpdate?: Maybe<LastUpdate_200_Response>;
   /** Returns a single proposal by its ID */
@@ -374,13 +373,13 @@ export type QueryHistoricalVotingPowerArgs = {
 };
 
 
-export type QueryHistoricalVotingPowerByAccountArgs = {
+export type QueryHistoricalVotingPowerByAccountIdArgs = {
   address: Scalars['String']['input'];
   fromDate?: InputMaybe<Scalars['String']['input']>;
   fromValue?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
-  orderBy?: InputMaybe<QueryInput_HistoricalVotingPowerByAccount_OrderBy>;
-  orderDirection?: InputMaybe<QueryInput_HistoricalVotingPowerByAccount_OrderDirection>;
+  orderBy?: InputMaybe<QueryInput_HistoricalVotingPowerByAccountId_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_HistoricalVotingPowerByAccountId_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   toDate?: InputMaybe<Scalars['String']['input']>;
   toValue?: InputMaybe<Scalars['String']['input']>;
@@ -1297,9 +1296,9 @@ export type HistoricalBalances_200_Response = {
   totalCount: Scalars['Float']['output'];
 };
 
-export type HistoricalVotingPowerByAccount_200_Response = {
-  __typename?: 'historicalVotingPowerByAccount_200_response';
-  items: Array<Maybe<Query_HistoricalVotingPowerByAccount_Items_Items>>;
+export type HistoricalVotingPowerByAccountId_200_Response = {
+  __typename?: 'historicalVotingPowerByAccountId_200_response';
+  items: Array<Maybe<Query_HistoricalVotingPowerByAccountId_Items_Items>>;
   totalCount: Scalars['Float']['output'];
 };
 
@@ -1704,12 +1703,12 @@ export enum QueryInput_HistoricalBalances_OrderDirection {
   Desc = 'desc'
 }
 
-export enum QueryInput_HistoricalVotingPowerByAccount_OrderBy {
+export enum QueryInput_HistoricalVotingPowerByAccountId_OrderBy {
   Delta = 'delta',
   Timestamp = 'timestamp'
 }
 
-export enum QueryInput_HistoricalVotingPowerByAccount_OrderDirection {
+export enum QueryInput_HistoricalVotingPowerByAccountId_OrderDirection {
   Asc = 'asc',
   Desc = 'desc'
 }
@@ -1928,29 +1927,29 @@ export type Query_HistoricalTokenData_Items = {
   timestamp: Scalars['Float']['output'];
 };
 
-export type Query_HistoricalVotingPowerByAccount_Items_Items = {
-  __typename?: 'query_historicalVotingPowerByAccount_items_items';
+export type Query_HistoricalVotingPowerByAccountId_Items_Items = {
+  __typename?: 'query_historicalVotingPowerByAccountId_items_items';
   accountId: Scalars['String']['output'];
   daoId: Scalars['String']['output'];
-  delegation?: Maybe<Query_HistoricalVotingPowerByAccount_Items_Items_Delegation>;
+  delegation?: Maybe<Query_HistoricalVotingPowerByAccountId_Items_Items_Delegation>;
   delta: Scalars['String']['output'];
   logIndex: Scalars['Float']['output'];
   timestamp: Scalars['String']['output'];
   transactionHash: Scalars['String']['output'];
-  transfer?: Maybe<Query_HistoricalVotingPowerByAccount_Items_Items_Transfer>;
+  transfer?: Maybe<Query_HistoricalVotingPowerByAccountId_Items_Items_Transfer>;
   votingPower: Scalars['String']['output'];
 };
 
-export type Query_HistoricalVotingPowerByAccount_Items_Items_Delegation = {
-  __typename?: 'query_historicalVotingPowerByAccount_items_items_delegation';
+export type Query_HistoricalVotingPowerByAccountId_Items_Items_Delegation = {
+  __typename?: 'query_historicalVotingPowerByAccountId_items_items_delegation';
   from: Scalars['String']['output'];
   previousDelegate?: Maybe<Scalars['String']['output']>;
   to: Scalars['String']['output'];
   value: Scalars['String']['output'];
 };
 
-export type Query_HistoricalVotingPowerByAccount_Items_Items_Transfer = {
-  __typename?: 'query_historicalVotingPowerByAccount_items_items_transfer';
+export type Query_HistoricalVotingPowerByAccountId_Items_Items_Transfer = {
+  __typename?: 'query_historicalVotingPowerByAccountId_items_items_transfer';
   from: Scalars['String']['output'];
   to: Scalars['String']['output'];
   value: Scalars['String']['output'];
@@ -2895,12 +2894,12 @@ export type GetDelegateDelegationHistoryGraphQueryVariables = Exact<{
   accountId: Scalars['String']['input'];
   fromTimestamp?: InputMaybe<Scalars['String']['input']>;
   toTimestamp?: InputMaybe<Scalars['String']['input']>;
-  orderBy?: InputMaybe<QueryInput_HistoricalVotingPowerByAccount_OrderBy>;
-  orderDirection?: InputMaybe<QueryInput_HistoricalVotingPowerByAccount_OrderDirection>;
+  orderBy?: InputMaybe<QueryInput_HistoricalVotingPowerByAccountId_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_HistoricalVotingPowerByAccountId_OrderDirection>;
 }>;
 
 
-export type GetDelegateDelegationHistoryGraphQuery = { __typename?: 'Query', historicalVotingPowerByAccount?: { __typename?: 'historicalVotingPowerByAccount_200_response', totalCount: number, items: Array<{ __typename?: 'query_historicalVotingPowerByAccount_items_items', delta: string, transactionHash: string, timestamp: string, votingPower: string, delegation?: { __typename?: 'query_historicalVotingPowerByAccount_items_items_delegation', from: string, previousDelegate?: string | null, to: string, value: string } | null, transfer?: { __typename?: 'query_historicalVotingPowerByAccount_items_items_transfer', from: string, to: string, value: string } | null } | null> } | null };
+export type GetDelegateDelegationHistoryGraphQuery = { __typename?: 'Query', historicalVotingPowerByAccountId?: { __typename?: 'historicalVotingPowerByAccountId_200_response', totalCount: number, items: Array<{ __typename?: 'query_historicalVotingPowerByAccountId_items_items', delta: string, transactionHash: string, timestamp: string, votingPower: string, delegation?: { __typename?: 'query_historicalVotingPowerByAccountId_items_items_delegation', from: string, previousDelegate?: string | null, to: string, value: string } | null, transfer?: { __typename?: 'query_historicalVotingPowerByAccountId_items_items_transfer', from: string, to: string, value: string } | null } | null> } | null };
 
 export type GetDelegatedSupplyHistoryQueryVariables = Exact<{
   startDate: Scalars['String']['input'];
@@ -3019,14 +3018,14 @@ export type HistoricalVotingPowerByAccountQueryVariables = Exact<{
   account: Scalars['String']['input'];
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
-  orderBy?: InputMaybe<QueryInput_HistoricalVotingPowerByAccount_OrderBy>;
-  orderDirection?: InputMaybe<QueryInput_HistoricalVotingPowerByAccount_OrderDirection>;
+  orderBy?: InputMaybe<QueryInput_HistoricalVotingPowerByAccountId_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_HistoricalVotingPowerByAccountId_OrderDirection>;
   toValue?: InputMaybe<Scalars['String']['input']>;
   fromValue?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type HistoricalVotingPowerByAccountQuery = { __typename?: 'Query', historicalVotingPowerByAccount?: { __typename?: 'historicalVotingPowerByAccount_200_response', totalCount: number, items: Array<{ __typename?: 'query_historicalVotingPowerByAccount_items_items', accountId: string, votingPower: string, transactionHash: string, timestamp: string, logIndex: number, delta: string, transfer?: { __typename?: 'query_historicalVotingPowerByAccount_items_items_transfer', value: string, to: string, from: string } | null, delegation?: { __typename?: 'query_historicalVotingPowerByAccount_items_items_delegation', from: string, to: string, value: string } | null } | null> } | null };
+export type HistoricalVotingPowerByAccountQuery = { __typename?: 'Query', historicalVotingPowerByAccountId?: { __typename?: 'historicalVotingPowerByAccountId_200_response', totalCount: number, items: Array<{ __typename?: 'query_historicalVotingPowerByAccountId_items_items', accountId: string, votingPower: string, transactionHash: string, timestamp: string, logIndex: number, delta: string, transfer?: { __typename?: 'query_historicalVotingPowerByAccountId_items_items_transfer', value: string, to: string, from: string } | null, delegation?: { __typename?: 'query_historicalVotingPowerByAccountId_items_items_delegation', from: string, to: string, value: string } | null } | null> } | null };
 
 export type GetProposalsActivityQueryVariables = Exact<{
   address: Scalars['String']['input'];

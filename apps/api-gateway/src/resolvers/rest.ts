@@ -24,7 +24,7 @@ const daoItemQueries = [
   "getVotingPower",
   "historicalBalances",
   "historicalTokenData",
-  "historicalVotingPowerByAccount",
+  "historicalVotingPowerByAccountId",
   "historicalVotingPower",
   "lastUpdate",
   "proposal",

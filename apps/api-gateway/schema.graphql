@@ -119,7 +119,7 @@ type Query {
   delegationPercentageByDay(startDate: String, endDate: String, orderDirection: queryInput_delegationPercentageByDay_orderDirection = asc, limit: NonNegativeInt = 365, after: String, before: String): delegationPercentageByDay_200_response
 
   """Returns a list of voting power changes for a specific account"""
-  historicalVotingPowerByAccount(address: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_historicalVotingPowerByAccount_orderBy = timestamp, orderDirection: queryInput_historicalVotingPowerByAccount_orderDirection = desc, fromDate: String, toDate: String, fromValue: String, toValue: String): historicalVotingPowerByAccount_200_response
+  historicalVotingPowerByAccountId(address: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_historicalVotingPowerByAccountId_orderBy = timestamp, orderDirection: queryInput_historicalVotingPowerByAccountId_orderDirection = desc, fromDate: String, toDate: String, fromValue: String, toValue: String): historicalVotingPowerByAccountId_200_response
 
   """
   Returns a list of voting power changes. Optionally filter by accountId.
@@ -1967,12 +1967,12 @@ enum queryInput_delegationPercentageByDay_orderDirection {
   desc
 }
 
-type historicalVotingPowerByAccount_200_response {
-  items: [query_historicalVotingPowerByAccount_items_items]!
+type historicalVotingPowerByAccountId_200_response {
+  items: [query_historicalVotingPowerByAccountId_items_items]!
   totalCount: Float!
 }
 
-type query_historicalVotingPowerByAccount_items_items {
+type query_historicalVotingPowerByAccountId_items_items {
   transactionHash: String!
   daoId: String!
   accountId: String!
@@ -1980,29 +1980,29 @@ type query_historicalVotingPowerByAccount_items_items {
   delta: String!
   timestamp: String!
   logIndex: Float!
-  delegation: query_historicalVotingPowerByAccount_items_items_delegation
-  transfer: query_historicalVotingPowerByAccount_items_items_transfer
+  delegation: query_historicalVotingPowerByAccountId_items_items_delegation
+  transfer: query_historicalVotingPowerByAccountId_items_items_transfer
 }
 
-type query_historicalVotingPowerByAccount_items_items_delegation {
+type query_historicalVotingPowerByAccountId_items_items_delegation {
   from: String!
   value: String!
   to: String!
   previousDelegate: String
 }
 
-type query_historicalVotingPowerByAccount_items_items_transfer {
+type query_historicalVotingPowerByAccountId_items_items_transfer {
   value: String!
   from: String!
   to: String!
 }
 
-enum queryInput_historicalVotingPowerByAccount_orderBy {
+enum queryInput_historicalVotingPowerByAccountId_orderBy {
   timestamp
   delta
 }
 
-enum queryInput_historicalVotingPowerByAccount_orderDirection {
+enum queryInput_historicalVotingPowerByAccountId_orderDirection {
   asc
   desc
 }
