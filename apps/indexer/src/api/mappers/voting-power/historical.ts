@@ -3,7 +3,7 @@ import { votingPowerHistory } from "ponder:schema";
 
 import { DBDelegation } from "../transactions";
 import { DBTransfer } from "../transfers";
-import { isAddress } from "viem";
+import { getAddress, isAddress } from "viem";
 
 export type DBHistoricalVotingPower = typeof votingPowerHistory.$inferSelect;
 export type DBHistoricalVotingPowerWithRelations = DBHistoricalVotingPower & {
@@ -126,8 +126,9 @@ export const HistoricalVotingPowersResponseMapper = (
 
 export const HistoricalVotingPowerGlobalQuerySchema =
   HistoricalVotingPowerRequestQuerySchema.extend({
-    accountId: z
+    address: z
       .string()
-      .refine((addr) => isAddress(addr))
+      .refine((addr) => isAddress(addr, { strict: false }))
+      .transform((addr) => getAddress(addr))
       .optional(),
   });

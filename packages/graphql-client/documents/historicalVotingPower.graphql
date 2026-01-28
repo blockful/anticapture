@@ -1,5 +1,5 @@
 query HistoricalVotingPower(
-  $accountId: String
+  $address: String
   $skip: NonNegativeInt
   $limit: PositiveInt = 10
   $orderBy: queryInput_historicalVotingPower_orderBy = timestamp
@@ -10,7 +10,7 @@ query HistoricalVotingPower(
   $toDate: String
 ) {
   historicalVotingPower(
-    accountId: $accountId
+    address: $address
     skip: $skip
     orderBy: $orderBy
     orderDirection: $orderDirection

@@ -96,7 +96,7 @@ export function historicalVotingPower(app: Hono, service: VotingPowerService) {
         toValue,
         fromDate,
         toDate,
-        accountId,
+        address,
       } = context.req.valid("query");
 
       const { items, totalCount } = await service.getHistoricalVotingPowers(
@@ -104,7 +104,7 @@ export function historicalVotingPower(app: Hono, service: VotingPowerService) {
         limit,
         orderDirection,
         orderBy,
-        accountId,
+        address,
         fromValue,
         toValue,
         fromDate,
