@@ -10,7 +10,7 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import {
   HistoricalVotingPowerByAccountQuery,
   HistoricalVotingPowerByAccountQueryVariables,
-  QueryInput_HistoricalVotingPowerByAccount_OrderDirection,
+  QueryInput_HistoricalVotingPowerByAccountId_OrderDirection,
 } from "@anticapture/graphql-client";
 
 // Interface for a single delegation history item
@@ -116,7 +116,7 @@ export function useDelegateDelegationHistory({
       orderBy:
         orderBy as HistoricalVotingPowerByAccountQueryVariables["orderBy"],
       orderDirection:
-        orderDirection as QueryInput_HistoricalVotingPowerByAccount_OrderDirection,
+        orderDirection as QueryInput_HistoricalVotingPowerByAccountId_OrderDirection,
       ...(filterVariables?.toValue && { toValue: filterVariables.toValue }),
       ...(filterVariables?.fromValue && {
         fromValue: filterVariables.fromValue,
