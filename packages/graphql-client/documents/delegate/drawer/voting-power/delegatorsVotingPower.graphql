@@ -6,7 +6,7 @@ query GetDelegatorVotingPowerDetails(
   $skip: NonNegativeInt
 ) {
   votingPowerByAccountId(accountId: $address) {
-    accountId
+    accountId 
     votingPower
   }
   accountBalances(
@@ -17,7 +17,7 @@ query GetDelegatorVotingPowerDetails(
   ) {
     totalCount
     items {
-      accountId
+      address
       balance
     }
   }

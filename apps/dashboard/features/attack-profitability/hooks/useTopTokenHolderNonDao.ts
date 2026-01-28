@@ -7,13 +7,13 @@ import { ApolloError, ApolloQueryResult } from "@apollo/client";
 
 interface TopTokenHolderNonDaoResponse {
   data:
-    | {
-        __typename?: "query_accountBalances_items_items";
-        accountId: string;
-        balance: string;
-      }
-    | null
-    | undefined;
+  | {
+    __typename?: "query_accountBalances_items_items";
+    address: string;
+    balance: string;
+  }
+  | null
+  | undefined;
   loading: boolean;
   error: ApolloError | undefined;
   refetch: () => Promise<

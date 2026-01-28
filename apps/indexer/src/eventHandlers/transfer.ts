@@ -1,6 +1,6 @@
 import { Context } from "ponder:registry";
 import { Address, getAddress, Hex, zeroAddress } from "viem";
-import { accountBalance, transfer } from "ponder:schema";
+import { accountBalance, balanceHistory, transfer } from "ponder:schema";
 
 import { DaoIdEnum } from "@/lib/enums";
 import { ensureAccountExists } from "./shared";
@@ -65,7 +65,7 @@ export const tokenTransfer = async (
   await ensureAccountExists(context, to);
   await ensureAccountExists(context, from);
 
-  await context.db
+  const { balance: currentReceiverBalance } = await context.db
     .insert(accountBalance)
     .values({
       accountId: normalizedTo,
@@ -77,8 +77,22 @@ export const tokenTransfer = async (
       balance: current.balance + value,
     }));
 
+  await context.db
+    .insert(balanceHistory)
+    .values({
+      daoId,
+      transactionHash: transactionHash,
+      accountId: normalizedTo,
+      balance: currentReceiverBalance,
+      delta: value,
+      deltaMod: value > 0n ? value : -value,
+      timestamp,
+      logIndex,
+    })
+    .onConflictDoNothing();
+
   if (from !== zeroAddress) {
-    await context.db
+    const { balance: currentSenderBalance } = await context.db
       .insert(accountBalance)
       .values({
         accountId: normalizedFrom,
@@ -89,6 +103,20 @@ export const tokenTransfer = async (
       .onConflictDoUpdate((current) => ({
         balance: current.balance - value,
       }));
+
+    await context.db
+      .insert(balanceHistory)
+      .values({
+        daoId,
+        transactionHash: transactionHash,
+        accountId: normalizedFrom,
+        balance: currentSenderBalance,
+        delta: -value,
+        deltaMod: value > 0n ? value : -value,
+        timestamp,
+        logIndex,
+      })
+      .onConflictDoNothing();
   }
 
   const normalizedCex = cex.map(getAddress);
