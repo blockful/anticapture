@@ -9,11 +9,11 @@ import {
 
 interface HistoricalVotingPowerRepository {
   getHistoricalVotingPowers(
-    accountId: Address,
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
     orderBy: "timestamp" | "delta",
+    accountId?: Address,
     minDelta?: string,
     maxDelta?: string,
     fromDate?: number,
@@ -21,9 +21,11 @@ interface HistoricalVotingPowerRepository {
   ): Promise<DBHistoricalVotingPowerWithRelations[]>;
 
   getHistoricalVotingPowerCount(
-    account: Address,
+    accountId?: Address,
     minDelta?: string,
     maxDelta?: string,
+    fromDate?: number,
+    toDate?: number,
   ): Promise<number>;
 }
 
@@ -62,11 +64,11 @@ export class VotingPowerService {
   ) {}
 
   async getHistoricalVotingPowers(
-    account: Address,
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc" = "desc",
     orderBy: "timestamp" | "delta" = "timestamp",
+    accountId?: Address,
     minDelta?: string,
     maxDelta?: string,
     fromDate?: number,
@@ -77,11 +79,11 @@ export class VotingPowerService {
   }> {
     const items =
       await this.historicalVotingRepository.getHistoricalVotingPowers(
-        account,
         skip,
         limit,
         orderDirection,
         orderBy,
+        accountId,
         minDelta,
         maxDelta,
         fromDate,
@@ -90,9 +92,11 @@ export class VotingPowerService {
 
     const totalCount =
       await this.historicalVotingRepository.getHistoricalVotingPowerCount(
-        account,
+        accountId,
         minDelta,
         maxDelta,
+        fromDate,
+        toDate,
       );
     return { items, totalCount };
   }

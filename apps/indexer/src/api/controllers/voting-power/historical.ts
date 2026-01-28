@@ -6,16 +6,18 @@ import {
   HistoricalVotingPowerRequestQuerySchema,
   HistoricalVotingPowersResponseMapper,
   HistoricalVotingPowerRequestParamsSchema,
+  HistoricalVotingPowerGlobalQuerySchema,
 } from "@/api/mappers";
 
-export function historicalVotingPowers(app: Hono, service: VotingPowerService) {
+export function historicalVotingPower(app: Hono, service: VotingPowerService) {
   app.openapi(
     createRoute({
       method: "get",
-      operationId: "historicalVotingPowers",
+      operationId: "historicalVotingPowerByAccountId",
       path: "/accounts/{address}/voting-powers/historical",
-      summary: "Get voting power changes",
-      description: "Returns a list of voting power changes",
+      summary: "Get voting power changes by account",
+      description:
+        "Returns a list of voting power changes for a specific account",
       tags: ["proposals"],
       request: {
         params: HistoricalVotingPowerRequestParamsSchema,
@@ -46,11 +48,63 @@ export function historicalVotingPowers(app: Hono, service: VotingPowerService) {
       } = context.req.valid("query");
 
       const { items, totalCount } = await service.getHistoricalVotingPowers(
-        address,
         skip,
         limit,
         orderDirection,
         orderBy,
+        address,
+        fromValue,
+        toValue,
+        fromDate,
+        toDate,
+      );
+      return context.json(
+        HistoricalVotingPowersResponseMapper(items, totalCount),
+      );
+    },
+  );
+
+  app.openapi(
+    createRoute({
+      method: "get",
+      operationId: "historicalVotingPower",
+      path: "/voting-powers/historical",
+      summary: "Get voting power changes",
+      description: "Returns a list of voting power changes.",
+      tags: ["proposals"],
+      request: {
+        query: HistoricalVotingPowerGlobalQuerySchema,
+      },
+      responses: {
+        200: {
+          description: "Successfully retrieved voting power changes",
+          content: {
+            "application/json": {
+              schema: HistoricalVotingPowersResponseSchema,
+            },
+          },
+        },
+      },
+    }),
+    async (context) => {
+      const {
+        skip,
+        limit,
+        orderDirection,
+        orderBy,
+        fromValue,
+        toValue,
+        fromDate,
+        toDate,
+        address,
+      } = context.req.valid("query");
+
+      const { items, totalCount } = await service.getHistoricalVotingPowers(
+        skip,
+        limit,
+        orderDirection,
+        orderBy,
+        address,
         fromValue,
         toValue,
         fromDate,

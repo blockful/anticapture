@@ -127,3 +127,12 @@ export const HistoricalVotingPowersResponseMapper = (
     totalCount: Number(totalCount),
   };
 };
+
+export const HistoricalVotingPowerGlobalQuerySchema =
+  HistoricalVotingPowerRequestQuerySchema.extend({
+    address: z
+      .string()
+      .refine((addr) => isAddress(addr, { strict: false }))
+      .transform((addr) => getAddress(addr))
+      .optional(),
+  });
