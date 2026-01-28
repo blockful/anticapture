@@ -50,28 +50,29 @@ export const FilterBox = <T,>({
       <PopoverTrigger asChild>
         <ButtonFilter
           onClick={() => setIsOpen(!isOpen)}
-          isActive={isActive || isOpen}
+          isOpen={isOpen}
+          hasFilters={isActive}
           className={className}
         />
       </PopoverTrigger>
       <PopoverContent
-        className="border-border-contrast w-72 p-0"
+        className="border-border-contrast w-72 border p-0"
         align="start"
         sideOffset={4}
       >
-        <div className="bg-surface-contrast flex flex-col gap-1 rounded-lg py-1">
+        <div className="bg-surface-contrast flex flex-col gap-1 py-1">
           {/* Header */}
           {(headerTitle || onReset) && (
             <div className="flex items-center justify-between px-3 py-2">
               {headerTitle && (
-                <h3 className="text-secondary text-alternative-xs font-medium uppercase">
+                <h3 className="text-secondary font-mono text-xs font-medium uppercase tracking-wider">
                   {headerTitle}
                 </h3>
               )}
               {onReset && (
                 <button
                   onClick={handleReset}
-                  className="text-secondary hover:text-primary text-alternative-xs flex cursor-pointer items-center gap-1 uppercase transition-colors"
+                  className="text-secondary hover:text-primary flex cursor-pointer items-center gap-1 font-mono text-xs font-medium uppercase tracking-wider transition-colors"
                 >
                   <ResetIcon className="size-4" />
                   {resetTitle}
@@ -86,10 +87,10 @@ export const FilterBox = <T,>({
           <div className="flex px-3 py-2">
             <Button
               variant="primary"
-              size="sm"
               onClick={handleApply}
               disabled={disabled}
-              className="text-inverted w-full cursor-pointer rounded-md bg-[#FAFAFA] px-2 py-1 text-sm font-normal transition-all hover:bg-[#FAFAFA]/80 disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full"
+              size="sm"
             >
               {buttonTitle}
             </Button>
