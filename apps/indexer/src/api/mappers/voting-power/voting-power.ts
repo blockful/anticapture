@@ -1,8 +1,8 @@
 import { z } from "@hono/zod-openapi";
-import { votingPowerHistory } from "ponder:schema";
+import { delegation, votingPowerHistory } from "ponder:schema";
 
-import { DBDelegation } from "../transactions";
 import { DBTransfer } from "../transfers";
+type DBDelegation = typeof delegation.$inferSelect;
 
 export type DBHistoricalVotingPower = typeof votingPowerHistory.$inferSelect;
 export type DBHistoricalVotingPowerWithRelations = DBHistoricalVotingPower & {

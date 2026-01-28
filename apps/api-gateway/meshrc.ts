@@ -36,6 +36,8 @@ export default processConfig(
                       "Query.!{account}",
                       "Query.!{daoMetricsDayBucket}",
                       "Query.!{daoMetricsDayBuckets}",
+                      "Query.!{delegation}",
+                      "Query.!{delegations}",
                       "Query.!{proposalsOnchains}",
                       "Query.!{proposalsOnchain}",
                       "Query.!{tokenPrices}",
