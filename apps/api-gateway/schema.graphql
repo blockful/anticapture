@@ -127,8 +127,11 @@ type Query {
   """Get delegation percentage day buckets with forward-fill"""
   delegationPercentageByDay(startDate: String, endDate: String, orderDirection: queryInput_delegationPercentageByDay_orderDirection = asc, limit: NonNegativeInt = 365, after: String, before: String): delegationPercentageByDay_200_response
 
-  """Returns a list of voting power changes"""
-  historicalVotingPowers(address: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_historicalVotingPowers_orderBy = timestamp, orderDirection: queryInput_historicalVotingPowers_orderDirection = desc, fromDate: String, toDate: String, fromValue: String, toValue: String): historicalVotingPowers_200_response
+  """Returns a list of voting power changes for a specific account"""
+  historicalVotingPowerByAccountId(address: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_historicalVotingPowerByAccountId_orderBy = timestamp, orderDirection: queryInput_historicalVotingPowerByAccountId_orderDirection = desc, fromDate: String, toDate: String, fromValue: String, toValue: String): historicalVotingPowerByAccountId_200_response
+
+  """Returns a list of voting power changes."""
+  historicalVotingPower(skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_historicalVotingPower_orderBy = timestamp, orderDirection: queryInput_historicalVotingPower_orderDirection = desc, fromDate: String, toDate: String, fromValue: String, toValue: String, address: String): historicalVotingPower_200_response
 
   """
   Returns a mapping of the voting power changes within a time frame for the given addresses
@@ -2034,12 +2037,12 @@ enum queryInput_delegationPercentageByDay_orderDirection {
   desc
 }
 
-type historicalVotingPowers_200_response {
-  items: [query_historicalVotingPowers_items_items]!
+type historicalVotingPowerByAccountId_200_response {
+  items: [query_historicalVotingPowerByAccountId_items_items]!
   totalCount: Float!
 }
 
-type query_historicalVotingPowers_items_items {
+type query_historicalVotingPowerByAccountId_items_items {
   transactionHash: String!
   daoId: String!
   accountId: String!
@@ -2047,29 +2050,69 @@ type query_historicalVotingPowers_items_items {
   delta: String!
   timestamp: String!
   logIndex: Float!
-  delegation: query_historicalVotingPowers_items_items_delegation
-  transfer: query_historicalVotingPowers_items_items_transfer
+  delegation: query_historicalVotingPowerByAccountId_items_items_delegation
+  transfer: query_historicalVotingPowerByAccountId_items_items_transfer
 }
 
-type query_historicalVotingPowers_items_items_delegation {
+type query_historicalVotingPowerByAccountId_items_items_delegation {
   from: String!
   value: String!
   to: String!
   previousDelegate: String
 }
 
-type query_historicalVotingPowers_items_items_transfer {
+type query_historicalVotingPowerByAccountId_items_items_transfer {
   value: String!
   from: String!
   to: String!
 }
 
-enum queryInput_historicalVotingPowers_orderBy {
+enum queryInput_historicalVotingPowerByAccountId_orderBy {
   timestamp
   delta
 }
 
-enum queryInput_historicalVotingPowers_orderDirection {
+enum queryInput_historicalVotingPowerByAccountId_orderDirection {
+  asc
+  desc
+}
+
+type historicalVotingPower_200_response {
+  items: [query_historicalVotingPower_items_items]!
+  totalCount: Float!
+}
+
+type query_historicalVotingPower_items_items {
+  transactionHash: String!
+  daoId: String!
+  accountId: String!
+  votingPower: String!
+  delta: String!
+  timestamp: String!
+  logIndex: Float!
+  delegation: query_historicalVotingPower_items_items_delegation
+  transfer: query_historicalVotingPower_items_items_transfer
+}
+
+type query_historicalVotingPower_items_items_delegation {
+  from: String!
+  value: String!
+  to: String!
+  previousDelegate: String
+}
+
+type query_historicalVotingPower_items_items_transfer {
+  value: String!
+  from: String!
+  to: String!
+}
+
+enum queryInput_historicalVotingPower_orderBy {
+  timestamp
+  delta
+}
+
+enum queryInput_historicalVotingPower_orderDirection {
   asc
   desc
 }
