@@ -26,15 +26,11 @@ export const DescriptionTabContent = ({
   return (
     <div className="text-primary overflow-hidden p-4">
       <Markdown
-        className="overflow-wrap-anywhere break-words"
+        className="overflow-wrap-anywhere wrap-break-word"
         options={{
           overrides: {
             h1: {
-              component: "h1",
-              props: {
-                className:
-                  "text-primary break-words font-inter text-[24px] font-medium not-italic leading-[32px] tracking-[-0.144px] mb-3 mt-4",
-              },
+              component: () => null,
             },
             h2: {
               component: "h2",
