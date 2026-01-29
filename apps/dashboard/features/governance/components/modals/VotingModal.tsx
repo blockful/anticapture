@@ -98,7 +98,7 @@ export const VotingModal = ({
       />
 
       {/* Modal content */}
-      <div className="border-border-default bg-surface-default relative z-10 mx-4 w-full max-w-[600px] rounded-lg border shadow-lg">
+      <div className="border-border-default bg-surface-default relative z-10 mx-4 w-full max-w-[600px] border shadow-lg">
         {/* Header */}
         <div className="border-border-default mb-4 flex items-start justify-between border-b px-4 py-3">
           <div className="flex flex-col items-start">
