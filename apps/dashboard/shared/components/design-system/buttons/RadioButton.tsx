@@ -18,14 +18,14 @@ const radioButtonVariants = cva(
 );
 
 const radioIndicatorVariants = cva(
-  "size-4 rounded-full border-2 transition-all duration-200 relative",
+  "size-4 rounded-full border-2 transition-all duration-200 relative bg-transparent",
   {
     variants: {
       state: {
-        default: "border-border-default bg-transparent",
-        hover: "border-highlight bg-transparent",
-        active: "border-highlight bg-highlight",
-        disabled: "border-border-default bg-surface-disabled",
+        default: "border-secondary",
+        hover: "border-highlight",
+        active: "border-highlight",
+        disabled: "bg-surface-disabled border-transparent",
       },
     },
     defaultVariants: {
@@ -79,12 +79,11 @@ export const RadioButton = forwardRef<HTMLInputElement, RadioButtonProps>(
           className={cn(
             radioIndicatorVariants({ state: getState() }),
             !disabled && "group-hover:border-highlight",
-            !disabled && !checked && "group-hover:bg-transparent",
           )}
         >
           {checked && !disabled && (
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="bg-surface-background size-2 rounded-full" />
+              <div className="bg-highlight size-2 rounded-full" />
             </div>
           )}
         </div>

@@ -26,16 +26,36 @@ export const VoteOption = ({
 
   return (
     <div className="flex flex-col">
-      <label className="border-border-default flex cursor-pointer hover:bg-surface-contrast transition-colors duration-300 items-center justify-between border px-[10px] py-2">
+      <label
+        className={cn(
+          "group flex cursor-pointer items-center justify-between border px-[10px] py-2 transition-colors duration-300 hover:bg-surface-contrast",
+          checked ? "border-highlight" : "border-border-default",
+        )}
+      >
         <div className="flex w-full items-center gap-2">
           <div className="flex w-[100px] items-center gap-2">
             <input
-              className="border-primary checked:border-primary checked:bg-primary box-border h-4 w-4 cursor-pointer appearance-none rounded-full border-2 bg-transparent"
+              className="sr-only"
               type="radio"
               name="vote"
               checked={checked}
               onChange={() => onChange(vote)}
             />
+            {/* Radio indicator following DS pattern */}
+            <div
+              className={cn(
+                "relative size-4 shrink-0 rounded-full border-2 bg-transparent transition-all duration-200",
+                checked
+                  ? "border-highlight"
+                  : "border-secondary group-hover:border-highlight",
+              )}
+            >
+              {checked && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="bg-highlight size-2 rounded-full" />
+                </div>
+              )}
+            </div>
             <span
               className={cn(
                 "font-inter text-[14px] font-normal not-italic leading-[20px]",
