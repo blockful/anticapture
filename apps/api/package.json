@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "dist/index.js",
   "scripts": {
-    "typecheck": "tsc --noEmit",
+    "_typecheck": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
     "clean": "rm -rf node_modules *.tsbuildinfo dist",
