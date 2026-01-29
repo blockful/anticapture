@@ -86,10 +86,12 @@ export const VotingModal = ({
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center transition-colors  ${
+        isOpen ? "visible opacity-100" : "invisible opacity-0"
+      }`}
+    >
       {/* Backdrop with blur */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
@@ -98,7 +100,11 @@ export const VotingModal = ({
       />
 
       {/* Modal content */}
-      <div className="border-border-default bg-surface-default relative z-10 mx-4 w-full max-w-[600px] border shadow-lg">
+      <div
+        className={`border-border-default bg-surface-default relative z-10 mx-4 w-full max-w-[600px] border shadow-lg transition-all duration-200 ${
+          isOpen ? "translate-y-0 scale-100" : "translate-y-4 scale-95"
+        }`}
+      >
         {/* Header */}
         <div className="border-border-default mb-4 flex items-start justify-between border-b px-4 py-3">
           <div className="flex flex-col items-start">
