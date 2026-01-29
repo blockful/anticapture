@@ -44,7 +44,7 @@ const ActionItem = ({ target, value, calldata, index }: ActionItemProps) => {
       <div className="bg-surface-contrast flex w-full items-center justify-between gap-2 p-3">
         <div>
           <p className="text-primary font-roboto-mono text-[12px] font-medium uppercase not-italic leading-[16px] tracking-[0.72px]">
-            Action {index + 1}
+            // Action {index + 1}
           </p>
         </div>
         <DefaultLink
