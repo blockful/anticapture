@@ -37,7 +37,7 @@ export const ProposalInfoSection = ({
     totalVotes === 0 ? 0 : (Number(proposal.abstainVotes) / totalVotes) * 100;
 
   return (
-    <div className="border-surface-default flex w-full flex-col border lg:w-[420px]">
+    <div className="border-border-default flex w-full flex-col border lg:w-[420px]">
       <div className="flex w-full flex-col p-3 lg:w-[420px]">
         <ProposalInfoText className="pb-4">
           <BarChart4 className="text-secondary size-4" /> Current Results
@@ -70,6 +70,7 @@ export const ProposalInfoSection = ({
                     Number(
                       formatUnits(BigInt(proposal.forVotes || "0"), decimals),
                     ),
+                    0,
                   )}
                 </p>
               </div>
@@ -112,6 +113,7 @@ export const ProposalInfoSection = ({
                         decimals,
                       ),
                     ),
+                    0,
                   )}
                 </p>
               </div>
@@ -154,6 +156,7 @@ export const ProposalInfoSection = ({
                         decimals,
                       ),
                     ),
+                    0,
                   )}
                 </p>
               </div>
