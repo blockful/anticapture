@@ -1,4 +1,5 @@
 import { env } from "@/env";
+
 import { DaoIdEnum } from "@/lib/enums";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import {
@@ -32,6 +33,7 @@ import {
   ZKTokenIndexer,
   GovernorIndexer as ZKGovernorIndexer,
 } from "./indexer/zk";
+import { SHUGovernorIndexer, SHUTokenIndexer } from "./indexer/shu";
 
 const { DAO_ID: daoId } = env;
 
@@ -101,6 +103,12 @@ switch (daoId) {
     const { token } = CONTRACT_ADDRESSES[daoId];
     ZKTokenIndexer(token.address, token.decimals);
     ZKGovernorIndexer(blockTime);
+    break;
+  }
+  case DaoIdEnum.SHU: {
+    const { token } = CONTRACT_ADDRESSES[daoId];
+    SHUTokenIndexer(token.address, token.decimals);
+    SHUGovernorIndexer(blockTime);
     break;
   }
   default:
