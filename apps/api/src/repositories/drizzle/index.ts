@@ -179,7 +179,7 @@ export class DrizzleRepository {
   }
 
   async getProposalsCount(): Promise<number> {
-    return db.$count(proposalsOnchain);
+    return this.db.$count(proposalsOnchain);
   }
 
   async getProposalNonVoters(
@@ -261,7 +261,7 @@ export class DrizzleRepository {
     comparisonTimestamp: number,
   ): Promise<Record<Address, bigint>> {
     const currentPower = this.db.$with("current_power").as(
-      db
+      this.db
         .selectDistinctOn([votingPowerHistory.accountId], {
           accountId: votingPowerHistory.accountId,
           votingPower: votingPowerHistory.votingPower,
@@ -275,7 +275,7 @@ export class DrizzleRepository {
     );
 
     const oldPower = this.db.$with("old_power").as(
-      db
+      this.db
         .selectDistinctOn([votingPowerHistory.accountId], {
           accountId: votingPowerHistory.accountId,
           votingPower: votingPowerHistory.votingPower,

@@ -3,9 +3,6 @@ import { Address } from "viem";
 import { DBHistoricalBalanceWithRelations } from "@/mappers";
 
 interface Repository {
-
-constructor(private readonly db: Drizzle) {}
-
   getHistoricalBalances(
     accountId: Address,
     skip: number,

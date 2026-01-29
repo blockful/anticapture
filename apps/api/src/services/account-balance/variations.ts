@@ -6,9 +6,6 @@ import {
 import { Address } from "viem";
 
 interface AccountBalanceRepository {
-
-constructor(private readonly db: Drizzle) {}
-
   getAccountBalanceVariations(
     fromTimestamp: number | undefined,
     toTimestamp: number | undefined,
@@ -26,9 +23,6 @@ constructor(private readonly db: Drizzle) {}
 }
 
 interface AccountInteractionsRepository {
-
-constructor(private readonly db: Drizzle) {}
-
   getAccountInteractions(
     accountId: Address,
     fromTimestamp: number | undefined,

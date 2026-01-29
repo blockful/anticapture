@@ -8,7 +8,7 @@ import {
   Transport,
 } from "viem";
 
-import { DAOClient } from "@/interfaces/client";
+import { DAOClient } from "@/clients";
 import { GovernorBase } from "../governor.base";
 import { COMPGovernorAbi } from "./abi";
 import { getBlockNumber, readContract } from "viem/actions";

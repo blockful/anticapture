@@ -1,6 +1,5 @@
 import { Account, Chain, Client, Transport } from "viem";
 
-import { DBProposal } from "../api/mappers";
 import { ProposalStatus } from "../lib/constants";
 
 /**
@@ -26,18 +25,15 @@ export abstract class GovernorBase<
 
   abstract getQuorum(proposalId: string | null): Promise<bigint>;
 
-  async getProposalStatus(
-    proposal: Pick<
-      DBProposal,
-      | "id"
-      | "status"
-      | "startBlock"
-      | "endBlock"
-      | "forVotes"
-      | "againstVotes"
-      | "abstainVotes"
-    >,
-  ): Promise<string> {
+  async getProposalStatus(proposal: {
+    id: string;
+    status: string;
+    startBlock: number;
+    endBlock: number;
+    forVotes: bigint;
+    againstVotes: bigint;
+    abstainVotes: bigint;
+  }): Promise<string> {
     const currentBlock = await this.getCurrentBlockNumber();
 
     // Skip proposals already finalized via event

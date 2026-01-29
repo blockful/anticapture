@@ -3,9 +3,6 @@ import { Address } from "viem";
 import { DBVotingPowerVariation, DBAccountPower } from "@/mappers";
 
 interface VotingPowerRepository {
-
-constructor(private readonly db: Drizzle) {}
-
   getVotingPowers(
     accountId: Address,
     skip: number,
@@ -20,9 +17,6 @@ constructor(private readonly db: Drizzle) {}
 }
 
 interface VotingPowerVariationRepository {
-
-constructor(private readonly db: Drizzle) {}
-
   getVotingPowerChanges(
     startTimestamp: number,
     limit: number,

@@ -1,14 +1,14 @@
 import { Address } from "viem";
 import { DaoIdEnum } from "@/lib/enums";
 import {
-  ProposalsActivityRepository,
   DbProposal,
   DbVote,
   OrderByField,
   OrderDirection,
   VoteFilter,
+  DbProposalWithVote,
 } from "@/repositories/";
-import { DAOClient } from "@/interfaces/client";
+import { DAOClient } from "@/clients";
 import { DBProposal } from "@/mappers";
 
 const FINAL_PROPOSAL_STATUSES = ["EXECUTED", "DEFEATED", "CANCELED", "EXPIRED"];
@@ -60,6 +60,36 @@ export interface DelegateProposalActivity {
   yesRate: number;
   avgTimeBeforeEnd: number;
   proposals: ProposalWithUserVote[];
+}
+
+export interface ProposalsActivityRepository {
+  getFirstVoteTimestamp(address: Address): Promise<number | null>;
+
+  getProposals(
+    daoId: DaoIdEnum,
+    activityStart: number,
+    votingPeriodSeconds: number,
+  ): Promise<DbProposal[]>;
+
+  getUserVotes(
+    address: Address,
+    daoId: DaoIdEnum,
+    proposalIds: string[],
+  ): Promise<DbVote[]>;
+
+  getProposalsWithVotesAndPagination(
+    address: Address,
+    activityStart: number,
+    votingPeriodSeconds: number,
+    skip: number,
+    limit: number,
+    orderBy: OrderByField,
+    orderDirection: OrderDirection,
+    userVoteFilter?: VoteFilter,
+  ): Promise<{
+    proposals: DbProposalWithVote[];
+    totalCount: number;
+  }>;
 }
 
 export class ProposalsActivityService {

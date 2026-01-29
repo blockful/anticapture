@@ -6,9 +6,6 @@ import {
 } from "@/mappers";
 
 interface TransfersRepository {
-
-constructor(private readonly db: Drizzle) {}
-
   getTransfersCount(req: TransfersRequest): Promise<number>;
   getTransfers(req: TransfersRequest): Promise<DBTransfer[]>;
 }

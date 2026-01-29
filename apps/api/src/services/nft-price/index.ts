@@ -10,9 +10,6 @@ import {
 } from "@/lib/date-helpers";
 
 interface Repository {
-
-constructor(private readonly db: Drizzle) {}
-
   getHistoricalNFTPrice(
     limit: number,
     offset: number,

@@ -43,43 +43,9 @@ export enum VoteFilter {
 export type OrderByField = "votingPower" | "voteTiming" | "timestamp";
 export type OrderDirection = "asc" | "desc";
 
-export interface ProposalsActivityRepository {
-
-constructor(private readonly db: Drizzle) {}
-
-  getFirstVoteTimestamp(address: Address): Promise<number | null>;
-
-  getProposals(
-    daoId: DaoIdEnum,
-    activityStart: number,
-    votingPeriodSeconds: number,
-  ): Promise<DbProposal[]>;
-
-  getUserVotes(
-    address: Address,
-    daoId: DaoIdEnum,
-    proposalIds: string[],
-  ): Promise<DbVote[]>;
-
-  getProposalsWithVotesAndPagination(
-    address: Address,
-    activityStart: number,
-    votingPeriodSeconds: number,
-    skip: number,
-    limit: number,
-    orderBy: OrderByField,
-    orderDirection: OrderDirection,
-    userVoteFilter?: VoteFilter,
-  ): Promise<{
-    proposals: DbProposalWithVote[];
-    totalCount: number;
-  }>;
-}
-
 /* eslint-disable */
-export class DrizzleProposalsActivityRepository implements ProposalsActivityRepository {
-
-constructor(private readonly db: Drizzle) {}
+export class DrizzleProposalsActivityRepository {
+  constructor(private readonly db: Drizzle) {}
 
   /* eslint-enable */
 
@@ -201,7 +167,7 @@ constructor(private readonly db: Drizzle) {}
     `;
 
     const [result, countResult] = await Promise.all([
-      db.execute<{
+      this.db.execute<{
         id: string;
         dao_id: string;
         proposer_account_id: string;
@@ -222,7 +188,7 @@ constructor(private readonly db: Drizzle) {}
         reason: string | null;
         vote_timestamp: string | null;
       }>(query),
-      db.execute<{ total_count: string }>(countQuery),
+      this.db.execute<{ total_count: string }>(countQuery),
     ]);
 
     const totalCount = Number(countResult.rows[0]?.total_count || 0);

@@ -4,7 +4,7 @@ import { getAddress, isAddress } from "viem";
 import { DBTransfer } from "../transfers";
 
 export type DBHistoricalBalance = typeof balanceHistory.$inferSelect;
-export type DBHistoricalBalanceWithRelations = this.dbHistoricalBalance & {
+export type DBHistoricalBalanceWithRelations = DBHistoricalBalance & {
   transfer: DBTransfer;
 };
 

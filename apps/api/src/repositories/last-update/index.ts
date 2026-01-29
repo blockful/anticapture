@@ -6,15 +6,11 @@ import { ChartType } from "@/mappers/";
 import { MetricTypesEnum } from "@/lib/constants";
 
 export interface LastUpdateRepository {
-
-constructor(private readonly db: Drizzle) {}
-
   getLastUpdate(chart: ChartType): Promise<bigint | undefined>;
 }
 
 export class LastUpdateRepositoryImpl implements LastUpdateRepository {
-
-constructor(private readonly db: Drizzle) {}
+  constructor(private readonly db: Drizzle) {}
 
   async getLastUpdate(chart: ChartType) {
     let metricsToCheck: MetricTypesEnum[] = [];

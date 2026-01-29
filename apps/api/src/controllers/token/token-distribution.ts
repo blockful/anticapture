@@ -5,9 +5,6 @@ import { DaysEnum, DaysOpts } from "@/lib/enums";
 import { MetricTypesEnum } from "@/lib/constants";
 
 interface TokenDistributionRepository {
-
-constructor(private readonly db: Drizzle) {}
-
   getSupplyComparison(
     metricType: string,
     days: DaysEnum,
@@ -138,7 +135,7 @@ export function tokenDistribution(
         const changeRate =
           parseInt(oldValue) &&
           (BigInt(currentValue) * parseEther("1")) / BigInt(oldValue) -
-          parseEther("1");
+            parseEther("1");
         /* eslint-enable */
 
         return ctx.json(

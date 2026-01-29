@@ -6,15 +6,12 @@ import {
   DBVote,
   VotesMapper,
 } from "@/mappers";
-import { DAOClient } from "@/interfaces/client";
+import { DAOClient } from "@/clients";
 import { ProposalStatus } from "@/lib/constants";
 import { DaysEnum } from "@/lib/enums";
 import { Address } from "viem";
 
 interface ProposalsRepository {
-
-constructor(private readonly db: Drizzle) {}
-
   getProposals(
     skip: number,
     limit: number,

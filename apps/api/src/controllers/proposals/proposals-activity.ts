@@ -5,7 +5,7 @@ import { DaoIdEnum } from "@/lib/enums";
 import { ProposalsActivityService } from "@/services";
 import { ProposalsActivityRepository, VoteFilter } from "@/repositories/";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
-import { DAOClient } from "@/interfaces/client";
+import { DAOClient } from "@/clients";
 import { ProposalActivityResponseSchema } from "@/mappers";
 
 export function proposalsActivity(

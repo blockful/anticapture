@@ -7,7 +7,7 @@ export const AccountInteractionsParamsSchema = z.object({
   address: z
     .string()
     .refine(isAddress, "Invalid address")
-    .transform((addr) => getAddress(addr))
+    .transform((addr) => getAddress(addr)),
 });
 
 export const AccountInteractionsQuerySchema = z.object({
@@ -66,7 +66,7 @@ export type AccountInteractionsResponse = z.infer<
   typeof AccountInteractionsResponseSchema
 >;
 
-export type DBAccountInteraction = this.dbAccountBalanceVariation & {
+export type DBAccountInteraction = DBAccountBalanceVariation & {
   totalVolume: bigint;
   transferCount: bigint;
 };

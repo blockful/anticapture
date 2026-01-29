@@ -28,7 +28,7 @@ export class DaoMetricsDayBucketRepository {
       conditions.push(lte(daoMetricsDayBucket.date, BigInt(endDate)));
     }
 
-    return db.query.daoMetricsDayBucket.findMany({
+    return this.db.query.daoMetricsDayBucket.findMany({
       where: and(...conditions),
       limit,
       orderBy:
@@ -45,7 +45,7 @@ export class DaoMetricsDayBucketRepository {
    * @returns The most recent metric row or null if not found
    */
   async getLastMetricBeforeDate(metricType: string, beforeDate: string) {
-    return db.query.daoMetricsDayBucket.findFirst({
+    return this.db.query.daoMetricsDayBucket.findFirst({
       where: and(
         lt(daoMetricsDayBucket.date, BigInt(beforeDate)),
         eq(daoMetricsDayBucket.metricType, metricType),

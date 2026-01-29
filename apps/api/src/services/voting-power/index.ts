@@ -8,9 +8,6 @@ import {
 } from "@/mappers";
 
 interface HistoricalVotingPowerRepository {
-
-constructor(private readonly db: Drizzle) {}
-
   getHistoricalVotingPowers(
     skip: number,
     limit: number,
@@ -33,9 +30,6 @@ constructor(private readonly db: Drizzle) {}
 }
 
 interface VotingPowersRepository {
-
-constructor(private readonly db: Drizzle) {}
-
   getVotingPowerVariations(
     startTimestamp: number | undefined,
     endTimestamp: number | undefined,

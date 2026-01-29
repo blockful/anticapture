@@ -8,16 +8,16 @@ import {
   Transport,
 } from "viem";
 
-import { DAOClient } from "@/interfaces/client";
+import { DAOClient } from "@/clients";
 import { GovernorBase } from "../governor.base";
 import { GovernorAbi } from "./abi";
 import { readContract } from "viem/actions";
 
 export class ZKClient<
-    TTransport extends Transport = Transport,
-    TChain extends Chain = Chain,
-    TAccount extends Account | undefined = Account | undefined,
-  >
+  TTransport extends Transport = Transport,
+  TChain extends Chain = Chain,
+  TAccount extends Account | undefined = Account | undefined,
+>
   extends GovernorBase
   implements DAOClient
 {

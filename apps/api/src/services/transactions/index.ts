@@ -6,9 +6,6 @@ import {
 } from "@/mappers/";
 
 interface TransactionsRepository {
-
-constructor(private readonly db: Drizzle) {}
-
   getFilteredAggregateTransactions(
     req: TransactionsRequest,
   ): Promise<DBTransaction[]>;

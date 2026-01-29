@@ -9,15 +9,15 @@ import {
 } from "viem";
 import { readContract } from "viem/actions";
 
-import { DAOClient } from "@/interfaces/client";
+import { DAOClient } from "@/clients";
 import { GovernorAbi } from "./abi";
 import { GovernorBase } from "../governor.base";
 
 export class OPClient<
-    TTransport extends Transport = Transport,
-    TChain extends Chain = Chain,
-    TAccount extends Account | undefined = Account | undefined,
-  >
+  TTransport extends Transport = Transport,
+  TChain extends Chain = Chain,
+  TAccount extends Account | undefined = Account | undefined,
+>
   extends GovernorBase
   implements DAOClient
 {

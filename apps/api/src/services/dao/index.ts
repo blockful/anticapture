@@ -1,4 +1,4 @@
-import { DAOClient } from "@/interfaces/client";
+import { DAOClient } from "@/clients";
 import { DaoDataCache } from "@/cache/dao-cache.interface";
 import { DaoResponse } from "@/mappers";
 

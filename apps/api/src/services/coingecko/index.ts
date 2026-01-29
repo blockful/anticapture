@@ -8,7 +8,6 @@ import {
   CoingeckoIdToAssetPlatformId,
   CoingeckoTokenIdEnum,
 } from "./types";
-import { DAYS_IN_YEAR } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 import { TokenHistoricalPriceResponse } from "@/mappers";
 import { PriceProvider } from "@/services/treasury/types";
@@ -53,7 +52,7 @@ export class CoingeckoService implements PriceProvider {
   }
 
   async getHistoricalTokenData(
-    days: number = DAYS_IN_YEAR,
+    days: number = 365,
   ): Promise<TokenHistoricalPriceResponse> {
     const tokenId = CoingeckoTokenIdEnum[this.daoId];
 

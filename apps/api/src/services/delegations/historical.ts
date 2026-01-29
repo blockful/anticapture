@@ -2,9 +2,6 @@ import { DBDelegation } from "@/mappers";
 import { Address } from "viem";
 
 interface Repository {
-
-constructor(private readonly db: Drizzle) {}
-
   getHistoricalDelegations(
     address: Address,
     orderDirection: "asc" | "desc",

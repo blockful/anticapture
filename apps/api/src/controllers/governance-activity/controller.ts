@@ -10,9 +10,6 @@ import {
 import { formatEther } from "viem";
 
 interface GovernanceActivityRepository {
-
-constructor(private readonly db: Drizzle) {}
-
   getActiveSupply(days: DaysEnum): Promise<ActiveSupplyQueryResult | undefined>;
   getProposalsCompare(
     days: DaysEnum,

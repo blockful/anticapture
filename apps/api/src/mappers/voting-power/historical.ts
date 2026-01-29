@@ -7,7 +7,7 @@ import { getAddress, isAddress } from "viem";
 type DBDelegation = typeof delegation.$inferSelect;
 
 export type DBHistoricalVotingPower = typeof votingPowerHistory.$inferSelect;
-export type DBHistoricalVotingPowerWithRelations = this.dbHistoricalVotingPower & {
+export type DBHistoricalVotingPowerWithRelations = DBHistoricalVotingPower & {
   delegations: DBDelegation | null;
   transfers: DBTransfer | null;
 };

@@ -4,9 +4,6 @@ import { DaoIdEnum } from "@/lib/enums";
 import { Address } from "viem";
 
 interface AccountBalanceRepository {
-
-constructor(private readonly db: Drizzle) {}
-
   getAccountBalances(
     skip: number,
     limit: number,

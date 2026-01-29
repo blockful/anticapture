@@ -2,9 +2,6 @@ import { DBDelegation } from "@/mappers";
 import { Address } from "viem";
 
 interface Repository {
-
-constructor(private readonly db: Drizzle) {}
-
   getDelegations(address: Address): Promise<DBDelegation[]>;
 }
 
