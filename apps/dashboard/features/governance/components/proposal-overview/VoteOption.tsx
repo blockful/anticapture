@@ -26,7 +26,7 @@ export const VoteOption = ({
 
   return (
     <div className="flex flex-col">
-      <label className="border-border-default flex cursor-pointer items-center justify-between border px-[10px] py-2">
+      <label className="border-border-default flex cursor-pointer hover:bg-surface-contrast transition-colors duration-300 items-center justify-between border px-[10px] py-2">
         <div className="flex w-full items-center gap-2">
           <div className="flex w-[100px] items-center gap-2">
             <input
