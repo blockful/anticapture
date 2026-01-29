@@ -22,7 +22,7 @@ export const TitleSection = ({
           status={proposal.status.toLowerCase() as ProposalStatus}
         />
 
-        <BulletDivider />
+        <BulletDivider className="bg-border-contrast" />
 
         {/* Proposer  */}
         <EnsAvatar
@@ -45,7 +45,7 @@ export const TitleSection = ({
           Forum
         </DefaultLink>
 
-        <BulletDivider />
+        <BulletDivider className="bg-border-contrast" />
 
         {/* @todo - add the correct link */}
         <DefaultLink href={`https://x.com/home`} openInNewTab>
