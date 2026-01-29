@@ -43,14 +43,14 @@ const ActionItem = ({ target, value, calldata, index }: ActionItemProps) => {
     <div className="border-border-default flex w-full flex-col gap-2 border">
       <div className="bg-surface-contrast flex w-full items-center justify-between gap-2 p-3">
         <div>
-          <p className="text-primary font-roboto-mono text-[12px] font-medium uppercase not-italic leading-[16px] tracking-wider">
+          <p className="text-primary font-mono text-[12px] font-medium uppercase not-italic leading-[16px] tracking-wider">
             // Action {index + 1}
           </p>
         </div>
         <DefaultLink
           href={`https://etherscan.io/address/${target}`}
           openInNewTab
-          className="text-secondary font-roboto-mono text-[12px] font-medium uppercase not-italic leading-[16px] tracking-wider"
+          className="text-secondary font-mono text-[12px] font-medium uppercase not-italic leading-[16px] tracking-wider"
         >
           Contract
         </DefaultLink>
@@ -58,28 +58,28 @@ const ActionItem = ({ target, value, calldata, index }: ActionItemProps) => {
 
       <div className="flex w-full flex-col gap-2 p-3">
         <div className="flex w-full gap-2">
-          <p className="font-roboto-mono min-w-[88px] text-[14px] font-normal not-italic leading-[20px]">
+          <p className="font-mono min-w-[88px] text-[14px] font-normal not-italic leading-[20px]">
             Target:
           </p>
-          <p className="text-secondary font-roboto-mono text-[14px] font-normal not-italic leading-[20px]">
+          <p className="text-secondary font-mono text-[14px] font-normal not-italic leading-[20px]">
             {target}
           </p>
         </div>
 
         <div className="flex w-full gap-2">
-          <p className="font-roboto-mono min-w-[88px] text-[14px] font-normal not-italic leading-[20px]">
+          <p className="font-mono min-w-[88px] text-[14px] font-normal not-italic leading-[20px]">
             Calldata:
           </p>
-          <p className="text-secondary font-roboto-mono overflow-wrap-anywhere break-all text-[14px] font-normal not-italic leading-[20px]">
+          <p className="text-secondary font-mono overflow-wrap-anywhere break-all text-[14px] font-normal not-italic leading-[20px]">
             {calldata}
           </p>
         </div>
 
         <div className="flex w-full gap-2">
-          <p className="font-roboto-mono min-w-[88px] text-[14px] font-normal not-italic leading-[20px]">
+          <p className="font-mono min-w-[88px] text-[14px] font-normal not-italic leading-[20px]">
             Value:
           </p>
-          <p className="text-secondary font-roboto-mono text-[14px] font-normal not-italic leading-[20px]">
+          <p className="text-secondary font-mono text-[14px] font-normal not-italic leading-[20px]">
             {value}
           </p>
         </div>
