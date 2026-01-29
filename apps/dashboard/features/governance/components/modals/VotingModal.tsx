@@ -202,7 +202,7 @@ export const VotingModal = ({
 
         <div className="border-border-default flex justify-end gap-2 border-t px-4 py-3">
           <Button variant="ghost" onClick={onClose}>
-            Close
+            Cancel
           </Button>
           <Button
             data-ph-event="vote_submit"
