@@ -1,2 +1,2 @@
-export * from "./token.ts";
-export * from "./governor.ts";
+export * from "./token";
+export * from "./governor";
