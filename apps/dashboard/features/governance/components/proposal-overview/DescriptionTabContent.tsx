@@ -144,7 +144,7 @@ export const DescriptionTabContent = ({
             tr: {
               component: "tr",
               props: {
-                className: "hover:bg-muted/50",
+                className: "hover:bg-muted/50 border-b border-border-default",
               },
             },
             th: {
