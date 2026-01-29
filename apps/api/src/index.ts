@@ -1,5 +1,6 @@
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { drizzle } from "drizzle-orm/node-postgres";
+import { serve } from "@hono/node-server";
 
 import { logger } from "hono/logger";
 import * as schema from "@/database/schema";
@@ -216,4 +217,12 @@ dao(app, daoService);
 docs(app);
 tokenMetrics(app, tokenMetricsService);
 
-export default app;
+serve(
+  {
+    fetch: app.fetch,
+    port: env.PORT,
+  },
+  (info) => {
+    console.log(`Server running at http://localhost:${info.port}`);
+  },
+);

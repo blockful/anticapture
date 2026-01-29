@@ -2,6 +2,7 @@
   "name": "@anticapture/api",
   "version": "1.0.0",
   "main": "dist/index.js",
+  "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "jest",
@@ -10,13 +11,14 @@
     "start": "node dist/index.js",
     "build": "tsc",
     "build:watch": "tsc --watch",
-    "dev": "tsc src/index.ts --watch"
+    "dev": "tsx src/index.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@hono/node-server": "^1.19.9",
     "@hono/zod-openapi": "^0.19.6",
     "axios": "^1.9.0",
     "drizzle-kit": "^0.31.4",
@@ -38,6 +40,7 @@
     "prettier": "^3.5.3",
     "ts-jest": "^29.4.1",
     "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.8.3"
   }
 }

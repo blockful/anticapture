@@ -11,7 +11,6 @@
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     // Language and environment
-    "moduleResolution": "bundler",
     "module": "ESNext",
     "noEmit": true,
     "lib": ["ES2022"],
@@ -21,7 +20,8 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "moduleResolution": "node"
   },
   "include": ["./**/*.ts"],
   "exclude": ["node_modules", "test"]
