@@ -30,7 +30,7 @@ export class BalanceVariationsRepository {
         and(
           addresses ? inArray(balanceHistory.accountId, addresses) : undefined,
           fromTimestamp
-            ? gte(balanceHistory.timestamp, BigInt(fromTimestamp))
+            ? lte(balanceHistory.timestamp, BigInt(fromTimestamp))
             : undefined,
         ),
       )
