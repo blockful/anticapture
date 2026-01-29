@@ -163,7 +163,7 @@ export const TabsVotedContent = ({
           // Handle loading row
           if (voterAddress === "__LOADING_ROW__") {
             return (
-              <div className="flex h-10 items-center p-2">
+              <div className="flex items-center gap-2 p-2">
                 <SkeletonRow
                   parentClassName="flex animate-pulse"
                   className="h-6 w-16"
@@ -175,7 +175,7 @@ export const TabsVotedContent = ({
           // Handle skeleton data (empty objects from initial load)
           if (!voterAddress) {
             return (
-              <div className="flex h-10 items-center p-2">
+              <div className="flex items-center gap-2 p-2">
                 <SkeletonRow
                   parentClassName="flex animate-pulse"
                   className="h-6 w-16"
@@ -186,7 +186,7 @@ export const TabsVotedContent = ({
 
           // Handle description sub-row - show empty for other columns
           if (vote.isSubRow && voterAddress.startsWith("__DESCRIPTION_")) {
-            return <div className="flex h-10 items-center p-2" />;
+            return <div className="flex items-center gap-2 p-2" />;
           }
 
           const getChoiceInfo = (support: number) => {
@@ -217,15 +217,11 @@ export const TabsVotedContent = ({
           const choiceInfo = getChoiceInfo(support);
 
           return (
-            <div className="flex items-center p-2">
-              <div
-                className={cn("flex items-center gap-2 rounded-full px-3 py-1")}
-              >
-                {choiceInfo.icon}
-                <span className={cn("text-sm font-medium")}>
-                  {choiceInfo.label}
-                </span>
-              </div>
+            <div className="flex items-center gap-2 p-2">
+              {choiceInfo.icon}
+              <span className={cn("text-sm font-medium")}>
+                {choiceInfo.label}
+              </span>
             </div>
           );
         },
