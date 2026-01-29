@@ -7,7 +7,7 @@ dotenv.config();
 
 const envSchema = z.object({
   RPC_URL: z.string(),
-  DATABASE_URL: z.string().optional(),
+  DATABASE_URL: z.string(),
   DAO_ID: z.nativeEnum(DaoIdEnum),
   CHAIN_ID: z.coerce.number(),
 

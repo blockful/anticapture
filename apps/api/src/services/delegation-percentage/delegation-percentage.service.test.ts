@@ -1,25 +1,7 @@
 import { DelegationPercentageService } from "./delegation-percentage";
 import { DaoMetricsDayBucketRepository } from "@/repositories/";
 import { MetricTypesEnum } from "@/lib/constants";
-
-/**
- * Type representing a DAO metric row from the database
- * Used for type-safe mocking in tests
- */
-export type DaoMetricRow = {
-  date: bigint;
-  daoId: string;
-  tokenId: string;
-  metricType: string;
-  open: bigint;
-  close: bigint;
-  low: bigint;
-  high: bigint;
-  average: bigint;
-  volume: bigint;
-  count: number;
-  lastUpdate: bigint;
-};
+import { DBTokenMetric } from "@/mappers/delegation-percentage";
 
 /**
  * Mock Factory Pattern for type-safe test data
@@ -27,8 +9,8 @@ export type DaoMetricRow = {
  * Only requires specifying fields relevant to each test case
  */
 const createMockRow = (
-  overwrites: Partial<DaoMetricRow> = {},
-): DaoMetricRow => ({
+  overwrites: Partial<DBTokenMetric> = {},
+): DBTokenMetric => ({
   date: 0n,
   daoId: "uniswap",
   tokenId: "uni",
@@ -46,13 +28,23 @@ const createMockRow = (
 
 describe("DelegationPercentageService", () => {
   let service: DelegationPercentageService;
-  let mockRepository: jest.Mocked<DaoMetricsDayBucketRepository>;
+  let mockRepository: jest.Mocked<
+    Pick<
+      DaoMetricsDayBucketRepository,
+      "getMetricsByDateRange" | "getLastMetricBeforeDate"
+    >
+  >;
 
   beforeEach(() => {
     mockRepository = {
       getMetricsByDateRange: jest.fn(),
       getLastMetricBeforeDate: jest.fn(),
-    } as jest.Mocked<DaoMetricsDayBucketRepository>;
+    } as jest.Mocked<
+      Pick<
+        DaoMetricsDayBucketRepository,
+        "getMetricsByDateRange" | "getLastMetricBeforeDate"
+      >
+    >;
 
     service = new DelegationPercentageService(mockRepository);
   });

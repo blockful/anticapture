@@ -1,5 +1,8 @@
 import { z } from "zod";
 import { SECONDS_IN_DAY } from "@/lib/enums";
+import { daoMetricsDayBucket } from "@/database";
+
+export type DBTokenMetric = typeof daoMetricsDayBucket.$inferSelect;
 
 // === ZOD SCHEMAS ===
 

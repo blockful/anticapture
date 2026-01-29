@@ -12,7 +12,7 @@ import {
   VotesRequestSchema,
   VotesResponseSchema,
 } from "@/mappers";
-import { DAOClient } from "@/interfaces";
+import { DAOClient } from "@/clients";
 
 export function proposals(
   app: Hono,

@@ -1,6 +1,8 @@
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
+import { drizzle } from "drizzle-orm/node-postgres";
 
 import { logger } from "hono/logger";
+import * as schema from "@/database/schema";
 import { fromZodError } from "zod-validation-error";
 import { createPublicClient, http } from "viem";
 
@@ -110,6 +112,8 @@ if (!daoClient) {
   throw new Error(`Client not found for DAO ${env.DAO_ID}`);
 }
 
+const pgClient = drizzle(env.DATABASE_URL, { schema });
+
 const daoConfig = CONTRACT_ADDRESSES[env.DAO_ID];
 const { blockTime, tokenType } = daoConfig;
 const optimisticProposalType =
@@ -117,23 +121,23 @@ const optimisticProposalType =
     ? daoConfig.optimisticProposalType
     : undefined;
 
-const repo = new DrizzleRepository();
-const votingPowerRepo = new VotingPowerRepository();
-const proposalsRepo = new DrizzleProposalsActivityRepository();
-const transactionsRepo = new TransactionsRepository();
-const daoMetricsDayBucketRepo = new DaoMetricsDayBucketRepository();
+const repo = new DrizzleRepository(pgClient);
+const votingPowerRepo = new VotingPowerRepository(pgClient);
+const proposalsRepo = new DrizzleProposalsActivityRepository(pgClient);
+const transactionsRepo = new TransactionsRepository(pgClient);
+const daoMetricsDayBucketRepo = new DaoMetricsDayBucketRepository(pgClient);
 const delegationPercentageService = new DelegationPercentageService(
   daoMetricsDayBucketRepo,
 );
 const tokenMetricsService = new TokenMetricsService(daoMetricsDayBucketRepo);
-const balanceVariationsRepo = new BalanceVariationsRepository();
-const historicalBalancesRepo = new HistoricalBalanceRepository();
-const accountBalanceRepo = new AccountBalanceRepository();
-const accountInteractionRepo = new AccountInteractionsRepository();
+const balanceVariationsRepo = new BalanceVariationsRepository(pgClient);
+const historicalBalancesRepo = new HistoricalBalanceRepository(pgClient);
+const accountBalanceRepo = new AccountBalanceRepository(pgClient);
+const accountInteractionRepo = new AccountInteractionsRepository(pgClient);
 const transactionsService = new TransactionsService(transactionsRepo);
 const votingPowerService = new VotingPowerService(
   env.DAO_ID === DaoIdEnum.NOUNS
-    ? new NounsVotingPowerRepository()
+    ? new NounsVotingPowerRepository(pgClient)
     : votingPowerRepo,
   votingPowerRepo,
 );
@@ -148,7 +152,7 @@ const accountBalanceService = new AccountBalanceService(accountBalanceRepo);
 const tokenPriceClient =
   env.DAO_ID === DaoIdEnum.NOUNS
     ? new NFTPriceService(
-        new NFTPriceRepository(),
+        new NFTPriceRepository(pgClient),
         env.COINGECKO_API_URL,
         env.COINGECKO_API_KEY,
       )
@@ -160,14 +164,16 @@ const tokenPriceClient =
 
 historicalDelegations(
   app,
-  new HistoricalDelegationsService(new HistoricalDelegationsRepository()),
+  new HistoricalDelegationsService(
+    new HistoricalDelegationsRepository(pgClient),
+  ),
 );
 
 // TODO: add support to partial delegations at some point
-delegations(app, new DelegationsService(new DelegationsRepository()));
+delegations(app, new DelegationsService(new DelegationsRepository(pgClient)));
 
 const treasuryService = createTreasuryService(
-  new TreasuryRepository(),
+  new TreasuryRepository(pgClient),
   tokenPriceClient,
   parseTreasuryProviderConfig(
     env.TREASURY_DATA_PROVIDER_ID,
@@ -182,7 +188,7 @@ tokenHistoricalData(app, tokenPriceClient);
 token(
   app,
   tokenPriceClient,
-  new TokenService(new TokenRepository()),
+  new TokenService(new TokenRepository(pgClient)),
   env.DAO_ID,
 );
 
@@ -197,7 +203,7 @@ proposals(
 );
 historicalBalances(app, new HistoricalBalancesService(historicalBalancesRepo));
 transactions(app, transactionsService);
-lastUpdate(app);
+lastUpdate(app, pgClient);
 delegationPercentage(app, delegationPercentageService);
 historicalVotingPower(app, votingPowerService);
 votingPowerVariations(app, votingPowerService);
@@ -205,7 +211,7 @@ votingPowers(app, votingPowerService);
 accountBalanceVariations(app, balanceVariationsService);
 accountBalances(app, env.DAO_ID, accountBalanceService);
 accountInteractions(app, balanceVariationsService);
-transfers(app, new TransfersService(new TransfersRepository()));
+transfers(app, new TransfersService(new TransfersRepository(pgClient)));
 dao(app, daoService);
 docs(app);
 tokenMetrics(app, tokenMetricsService);

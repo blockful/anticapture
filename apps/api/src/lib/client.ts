@@ -12,8 +12,8 @@ import {
   OPClient,
   GTCClient,
   Client as NounsClient,
+  DAOClient,
 } from "@/clients";
-import { DAOClient } from "@/interfaces";
 
 export function getClient<
   TTransport extends Transport = Transport,
