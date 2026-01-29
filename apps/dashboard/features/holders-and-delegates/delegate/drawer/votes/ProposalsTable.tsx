@@ -29,6 +29,7 @@ import {
 } from "@/features/holders-and-delegates/utils/proposalsTableUtils";
 import { Table } from "@/shared/components/design-system/table/Table";
 import daoConfig from "@/shared/dao-config";
+import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 
 interface ProposalTableData {
   proposalId: string;
@@ -328,32 +329,38 @@ export const ProposalsTable = ({
         );
       },
       header: () => (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-secondary w-full justify-start p-0"
-          onClick={() => {
-            if (onSortChange) {
-              const newDirection =
-                orderBy === "voteTiming" && orderDirection === "desc"
-                  ? "asc"
-                  : "desc";
-              onSortChange("voteTiming", newDirection);
-            }
-          }}
-        >
-          <h4 className="text-table-header">Vote Timing</h4>
-          <ArrowUpDown
-            props={{ className: "size-4" }}
-            activeState={
-              orderBy === "voteTiming"
-                ? orderDirection === "asc"
-                  ? ArrowState.UP
-                  : ArrowState.DOWN
-                : ArrowState.DEFAULT
-            }
-          />
-        </Button>
+        <div className="flex items-center gap-1.5">
+          <Tooltip tooltipContent="Measures how close to the proposal deadline a vote is cast. Delegates who vote late may be influenced by prior votes or ongoing discussion.">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-secondary w-full justify-start p-0"
+              onClick={() => {
+                if (onSortChange) {
+                  const newDirection =
+                    orderBy === "voteTiming" && orderDirection === "desc"
+                      ? "asc"
+                      : "desc";
+                  onSortChange("voteTiming", newDirection);
+                }
+              }}
+            >
+              <h4 className="text-table-header decoration-secondary/20 group-hover:decoration-primary hover:decoration-primary underline decoration-dashed underline-offset-[6px] transition-colors duration-300">
+                Vote Timing
+              </h4>
+              <ArrowUpDown
+                props={{ className: "size-4" }}
+                activeState={
+                  orderBy === "voteTiming"
+                    ? orderDirection === "asc"
+                      ? ArrowState.UP
+                      : ArrowState.DOWN
+                    : ArrowState.DEFAULT
+                }
+              />
+            </Button>
+          </Tooltip>
+        </div>
       ),
     },
     {

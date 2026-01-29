@@ -19,7 +19,7 @@ const ChartLegend = ({
   if (loading) {
     return (
       <div className="flex w-full flex-wrap items-center justify-between gap-2 lg:justify-normal lg:gap-3">
-        {Array.from({ length: 10 }, (_, i) => (
+        {Array.from({ length: 6 }, (_, i) => (
           <div key={i} className="flex items-center gap-2">
             <SkeletonRow
               parentClassName="flex animate-pulse"
@@ -27,7 +27,7 @@ const ChartLegend = ({
             />
             <SkeletonRow
               parentClassName="flex animate-pulse"
-              className="h-4 w-16"
+              className="h-4 w-32"
             />
           </div>
         ))}
@@ -72,20 +72,50 @@ export const TopInteractions = ({
   const {
     topFive,
     totalCount,
-    netBalanceChange,
     legendItems,
     pieData,
     chartConfig,
+    netBalanceChange,
     loading: loadingVotingPowerData,
   } = useAccountInteractionsData({ daoId, address });
 
-  if (!topFive || (topFive.length === 0 && !loadingVotingPowerData)) {
+  if (!topFive || topFive.length === 0) {
+    if (loadingVotingPowerData) {
+      // Show loading skeleton instead of "no interactions found"
+      return (
+        <div className="flex w-full flex-col gap-4 p-4">
+          <div className="border-light-dark text-primary flex h-fit w-full flex-col gap-4 overflow-y-auto border p-4 lg:flex-row">
+            <div className="flex h-full w-full flex-col">
+              <div className="flex w-full flex-col gap-4 lg:flex-row">
+                <div>
+                  <SkeletonRow
+                    parentClassName="flex animate-pulse"
+                    className="h-40 w-40"
+                  />
+                </div>
+                <div className="flex w-full flex-col gap-6">
+                  <div className="flex flex-col gap-1">
+                    <p className="text-secondary text-alternative-xs font-mono font-medium uppercase">
+                      Net Tokens In/Out (90D)
+                    </p>
+                    <SkeletonRow
+                      parentClassName="flex animate-pulse"
+                      className="h-6 w-24"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="flex w-full flex-col gap-4 p-4">
         <BlankSlate
           variant="default"
           icon={Inbox}
-          description="No interactions found in 90 days."
+          description="No interactions found."
         />
       </div>
     );
@@ -109,12 +139,12 @@ export const TopInteractions = ({
             <div className="flex w-full flex-col gap-6">
               <div className="flex flex-col gap-1">
                 <p className="text-secondary text-alternative-xs font-mono font-medium uppercase">
-                  Net Tokens In/Out (90D)
+                  Net Tokens In/Out
                 </p>
                 <div className="text-md font-normal">
                   {!netBalanceChange ? (
                     <SkeletonRow
-                      parentClassName="flex animate-pulse"
+                      parentClassName="justify-start flex animate-pulse items-start"
                       className="h-6 w-24"
                     />
                   ) : (

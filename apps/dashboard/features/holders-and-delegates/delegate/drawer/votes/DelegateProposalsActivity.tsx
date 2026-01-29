@@ -20,6 +20,22 @@ interface DelegateProposalsActivityProps {
   daoId: DaoIdEnum;
 }
 
+export const formatAvgTime = (
+  avgTimeBeforeEndSeconds: number,
+  votedProposals: number,
+): string => {
+  const avgTimeBeforeEndDays = avgTimeBeforeEndSeconds / SECONDS_PER_DAY;
+
+  if (!votedProposals) {
+    return "-";
+  }
+
+  if (avgTimeBeforeEndDays < 1) {
+    return "< 1d before the end";
+  }
+  return `${Math.round(avgTimeBeforeEndDays)}d before the end`;
+};
+
 export const DelegateProposalsActivity = ({
   address,
   daoId,
@@ -64,23 +80,6 @@ export const DelegateProposalsActivity = ({
           : (userVoteFilter as QueryInput_ProposalsActivity_UserVoteFilter),
       itemsPerPage,
     });
-
-  // Helper function to format average time (convert seconds to days)
-  const formatAvgTime = (
-    avgTimeBeforeEndSeconds: number,
-    votedProposals: number,
-  ): string => {
-    const avgTimeBeforeEndDays = avgTimeBeforeEndSeconds / SECONDS_PER_DAY;
-
-    if (!votedProposals) {
-      return "-";
-    }
-
-    if (avgTimeBeforeEndDays < 1) {
-      return "< 1d before the end";
-    }
-    return `${Math.round(avgTimeBeforeEndDays)}d before the end`;
-  };
 
   // Prepare values - undefined when loading/error, actual values when data is available
   const votedProposalsValue =

@@ -7,15 +7,16 @@ import {
   useDelegates,
   HoldersAndDelegatesDrawer,
 } from "@/features/holders-and-delegates";
+import { getAvgVoteTimingData } from "@/features/holders-and-delegates/utils";
 import { TimeInterval } from "@/shared/types/enums";
-import { SkeletonRow, Button } from "@/shared/components";
+import { SkeletonRow, Button, SimpleProgressBar } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
-import { formatNumberUserReadable } from "@/shared/utils";
+import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { Plus } from "lucide-react";
 import { ProgressCircle } from "@/features/holders-and-delegates/components/ProgressCircle";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { useScreenSize } from "@/shared/hooks";
+import { useScreenSize, useDaoData } from "@/shared/hooks";
 import { Address, formatUnits } from "viem";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
@@ -27,13 +28,20 @@ import {
   QueryInput_VotingPowers_OrderBy,
   QueryInput_VotingPowers_OrderDirection,
 } from "@anticapture/graphql-client";
+import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
+import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 interface DelegateTableData {
   address: string;
   votingPower: string;
-  variation?: { percentageChange: number; absoluteChange: number };
+  variation?: {
+    percentageChange: number;
+    absoluteChange: number;
+    isNewDelegate: boolean;
+  };
   activity?: string | null;
   activityPercentage?: number | null;
   delegators: number;
+  avgVoteTiming?: { text: string; percentage: number } | null;
 }
 
 interface DelegatesProps {
@@ -87,6 +95,13 @@ export const Delegates = ({
     ),
   );
   const { decimals } = daoConfig[daoId];
+  const { data: daoData } = useDaoData(daoId);
+
+  const votingPeriodSeconds = useMemo(() => {
+    if (!daoData?.votingPeriod) return 0;
+    const blockTime = daoConfig[daoId].daoOverview.chain.blockTime;
+    return (Number(daoData.votingPeriod) * blockTime) / 1000;
+  }, [daoData?.votingPeriod, daoId]);
 
   const handleAddressFilterApply = (address: string | undefined) => {
     setCurrentAddressFilter(address || "");
@@ -150,6 +165,16 @@ export const Delegates = ({
           100
         : null;
 
+      const isNewDelegate =
+        delegate.previousVotingPower === "0" &&
+        BigInt(delegate.votingPower || "0") > BigInt(0);
+
+      const avgVoteTiming = getAvgVoteTimingData(
+        delegate.proposalsActivity?.avgTimeBeforeEnd,
+        votingPeriodSeconds,
+        delegate.proposalsActivity?.votedProposals,
+      );
+
       return {
         address: delegate.accountId,
         votingPower: formatNumberUserReadable(votingPowerFormatted),
@@ -161,13 +186,15 @@ export const Delegates = ({
           absoluteChange: Number(
             formatUnits(BigInt(delegate.absoluteChange), decimals),
           ),
+          isNewDelegate,
         },
         activity,
         activityPercentage,
         delegators: delegate.delegationsCount,
+        avgVoteTiming,
       };
     });
-  }, [data, decimals]);
+  }, [data, decimals, votingPeriodSeconds]);
 
   const delegateColumns: ColumnDef<DelegateTableData>[] = [
     {
@@ -281,7 +308,7 @@ export const Delegates = ({
         </Button>
       ),
       meta: {
-        columnClassName: "w-72",
+        columnClassName: "w-40",
       },
     },
     {
@@ -293,6 +320,7 @@ export const Delegates = ({
           | {
               percentageChange: number;
               absoluteChange: number;
+              isNewDelegate: boolean;
             }
           | undefined;
 
@@ -311,7 +339,11 @@ export const Delegates = ({
           <div className="flex w-full items-center justify-center gap-2 text-sm">
             {(variation?.percentageChange || 0) < 0 ? "-" : ""}
             {formatNumberUserReadable(Math.abs(variation?.absoluteChange || 0))}
-            <Percentage value={variation?.percentageChange || 0} />
+            {variation?.isNewDelegate ? (
+              <BadgeStatus variant="success">New</BadgeStatus>
+            ) : (
+              <Percentage value={variation?.percentageChange || 0} />
+            )}
           </div>
         );
       },
@@ -350,6 +382,54 @@ export const Delegates = ({
           Activity
         </h4>
       ),
+    },
+    {
+      accessorKey: "avgVoteTiming",
+      cell: ({ row }) => {
+        const avgVoteTiming = row.getValue("avgVoteTiming") as {
+          text: string;
+          percentage: number;
+        } | null;
+
+        if (loading) {
+          return (
+            <div className="flex items-center justify-start">
+              <SkeletonRow className="h-5 w-20" />
+            </div>
+          );
+        }
+
+        if (!avgVoteTiming) {
+          return <div className="text-secondary text-sm">-</div>;
+        }
+
+        return (
+          <div className="flex flex-col justify-center gap-1">
+            <div
+              className={cn("text-secondary text-xs font-normal", {
+                "text-end text-sm": avgVoteTiming.text === "-",
+              })}
+            >
+              {avgVoteTiming.text}
+            </div>
+            {avgVoteTiming.text !== "-" && (
+              <SimpleProgressBar percentage={avgVoteTiming.percentage} />
+            )}
+          </div>
+        );
+      },
+      header: () => (
+        <div className="flex items-center gap-1.5">
+          <Tooltip tooltipContent="Measures the average of how close to the proposal deadline a vote is cast. Delegates who vote late may be influenced by prior votes or ongoing discussion.">
+            <h4 className="text-table-header decoration-secondary/20 group-hover:decoration-primary hover:decoration-primary whitespace-nowrap underline decoration-dashed underline-offset-[6px] transition-colors duration-300">
+              Avg Vote Timing
+            </h4>
+          </Tooltip>
+        </div>
+      ),
+      meta: {
+        columnClassName: "w-40",
+      },
     },
     {
       accessorKey: "delegators",

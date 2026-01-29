@@ -66,6 +66,8 @@ export function useDelegateDelegationHistory({
   customFromFilter,
   customToFilter,
   itemsPerPage = 10,
+  fromTimestamp,
+  toTimestamp,
 }: {
   accountId: string;
   daoId: DaoIdEnum;
@@ -76,6 +78,8 @@ export function useDelegateDelegationHistory({
   customToFilter?: string;
   filterVariables?: AmountFilterVariables;
   itemsPerPage?: number;
+  fromTimestamp?: number;
+  toTimestamp?: number;
 }): UseDelegateDelegationHistoryResult {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isPaginationLoading, setIsPaginationLoading] =
@@ -123,6 +127,8 @@ export function useDelegateDelegationHistory({
       }),
       ...(fromFilter && { delegator: fromFilter }),
       ...(toFilter && { delegate: toFilter }),
+      ...(fromTimestamp && { fromDate: fromTimestamp.toString() }),
+      ...(toTimestamp && { toDate: toTimestamp.toString() }),
     }),
     [
       accountId,
@@ -132,6 +138,8 @@ export function useDelegateDelegationHistory({
       filterVariables,
       fromFilter,
       toFilter,
+      fromTimestamp,
+      toTimestamp,
     ],
   );
 

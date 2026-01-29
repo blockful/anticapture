@@ -26,6 +26,8 @@ export function useBalanceHistory({
   filterVariables,
   itemsPerPage = 10,
   decimals,
+  fromTimestamp,
+  toTimestamp,
 }: {
   accountId: string;
   daoId: DaoIdEnum;
@@ -37,6 +39,8 @@ export function useBalanceHistory({
   transactionType?: "all" | "buy" | "sell";
   filterVariables?: AmountFilterVariables;
   itemsPerPage?: number;
+  fromTimestamp?: number;
+  toTimestamp?: number;
 }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [isPaginationLoading, setIsPaginationLoading] = useState(false);
@@ -51,6 +55,8 @@ export function useBalanceHistory({
     customFromFilter,
     customToFilter,
     filterVariables,
+    fromTimestamp,
+    toTimestamp,
   ]);
 
   const variables = useMemo(() => {
@@ -64,6 +70,8 @@ export function useBalanceHistory({
       to: customToFilter,
       offset: 0,
       limit: itemsPerPage,
+      fromDate: fromTimestamp,
+      toDate: toTimestamp,
     };
 
     switch (transactionType) {
@@ -86,6 +94,8 @@ export function useBalanceHistory({
     orderBy,
     orderDirection,
     itemsPerPage,
+    fromTimestamp,
+    toTimestamp,
   ]);
 
   const { data, error, loading, fetchMore } = useBalanceHistoryQuery({

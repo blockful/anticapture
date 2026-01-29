@@ -46,9 +46,13 @@ interface BalanceHistoryData {
 export const BalanceHistoryTable = ({
   accountId,
   daoId,
+  fromTimestamp,
+  toTimestamp,
 }: {
   accountId: string;
   daoId: DaoIdEnum;
+  fromTimestamp?: number;
+  toTimestamp?: number;
 }) => {
   const { decimals } = daoConfig[daoId];
 
@@ -102,6 +106,8 @@ export const BalanceHistoryTable = ({
       customFromFilter,
       customToFilter,
       filterVariables,
+      fromTimestamp,
+      toTimestamp,
     });
 
   const isInitialLoading = loading && (!transfers || transfers.length === 0);
