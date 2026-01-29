@@ -32,7 +32,7 @@ export const TabsVotedContent = ({
   const { daoId } = useParams();
 
   // State for managing sort order
-  const [sortBy, setSortBy] = useState<string>("timestamp");
+  const [sortBy, setSortBy] = useState<string>("votingPower");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
   // Handle sorting
