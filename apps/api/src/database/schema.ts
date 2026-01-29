@@ -224,7 +224,7 @@ export const daoMetricsDayBucket = pgTable(
     date: bigint({ mode: "bigint" }).notNull(),
     daoId: drizzle.text("dao_id").notNull(),
     tokenId: drizzle.text("token_id").notNull(),
-    metricType: metricType().notNull(),
+    metricType: metricType("metricType").notNull(),
     open: bigint({ mode: "bigint" }).notNull(),
     close: bigint({ mode: "bigint" }).notNull(),
     low: bigint({ mode: "bigint" }).notNull(),
