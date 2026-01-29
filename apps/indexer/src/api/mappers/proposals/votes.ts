@@ -38,6 +38,8 @@ export const VotesRequestSchema = z.object({
     .number()
     .transform((val) => String(val)) // Support for the vote like For, Against, Abstain
     .optional(),
+  fromDate: z.coerce.number().optional(),
+  toDate: z.coerce.number().optional(),
 });
 
 export type VotesRequest = z.infer<typeof VotesRequestSchema>;

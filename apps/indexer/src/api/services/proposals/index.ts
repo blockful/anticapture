@@ -1,14 +1,6 @@
-import {
-  DBProposal,
-  ProposalsRequest,
-  VotersResponse,
-  VotesResponse,
-  DBVote,
-  VotesMapper,
-} from "@/api/mappers";
+import { DBProposal, ProposalsRequest, DBVote } from "@/api/mappers";
 import { DAOClient } from "@/interfaces/client";
 import { ProposalStatus } from "@/lib/constants";
-import { DaysEnum } from "@/lib/enums";
 import { Address } from "viem";
 
 interface ProposalsRepository {
@@ -23,14 +15,6 @@ interface ProposalsRepository {
   ): Promise<DBProposal[]>;
   getProposalsCount(): Promise<number>;
   getProposalById(proposalId: string): Promise<DBProposal | undefined>;
-  getProposalNonVoters(
-    proposalId: string,
-    skip: number,
-    limit: number,
-    orderDirection: "asc" | "desc",
-    addresses?: Address[],
-  ): Promise<{ voter: Address; votingPower: bigint }[]>;
-  getProposalNonVotersCount(proposalId: string): Promise<number>;
   getLastVotersTimestamp(voters: Address[]): Promise<Record<Address, bigint>>;
   getVotingPowerVariation(
     voters: Address[],
@@ -147,79 +131,5 @@ export class ProposalsService {
     const status = await this.daoClient.getProposalStatus(proposal);
 
     return { ...proposal, status };
-  }
-
-  /**
-   * Returns the delegates with active delegations that didn't vote on a given proposal
-   */
-  async getProposalNonVoters(
-    proposalId: string,
-    skip: number = 0,
-    limit: number,
-    orderDirection: "asc" | "desc",
-    addresses?: Address[],
-  ): Promise<VotersResponse> {
-    const nonVoters = await this.proposalsRepo.getProposalNonVoters(
-      proposalId,
-      skip,
-      limit,
-      orderDirection,
-      addresses,
-    );
-
-    const _addresses = addresses ? addresses : nonVoters.map((v) => v.voter);
-
-    const comparisonTimestamp = Math.floor(Date.now() / 1000 - DaysEnum["30d"]);
-
-    const [lastVotersTimestamp, votingPowerVariation] = await Promise.all([
-      this.proposalsRepo.getLastVotersTimestamp(_addresses),
-      this.proposalsRepo.getVotingPowerVariation(
-        _addresses,
-        comparisonTimestamp,
-      ),
-    ]);
-
-    return {
-      totalCount: addresses
-        ? _addresses.length
-        : await this.proposalsRepo.getProposalNonVotersCount(proposalId),
-      items: nonVoters.map((v) => ({
-        voter: v.voter,
-        votingPower: v.votingPower.toString(),
-        lastVoteTimestamp: Number(lastVotersTimestamp[v.voter] || 0),
-        votingPowerVariation: votingPowerVariation[v.voter]?.toString() || "0",
-      })),
-    };
-  }
-
-  /**
-   * Returns the list of votes for a given proposal
-   */
-  async getVotes(
-    proposalId: string,
-    skip: number = 0,
-    limit: number = 10,
-    orderBy: "timestamp" | "votingPower" = "timestamp",
-    orderDirection: "asc" | "desc" = "desc",
-    voterAddressIn?: Address[],
-    support?: string,
-  ): Promise<VotesResponse> {
-    const [votes, totalCount] = await Promise.all([
-      this.proposalsRepo.getVotes(
-        proposalId,
-        skip,
-        limit,
-        orderBy,
-        orderDirection,
-        voterAddressIn,
-        support,
-      ),
-      this.proposalsRepo.getVotesCount(proposalId, voterAddressIn, support),
-    ]);
-
-    return {
-      totalCount,
-      items: votes.map(VotesMapper.toApi),
-    };
   }
 }
