@@ -8,7 +8,7 @@ export const ProposalStatusSection = ({
   proposal: NonNullable<GetProposalQuery["proposal"]>;
 }) => {
   return (
-    <div className="border-surface-default flex w-full flex-col gap-3 border p-3">
+    <div className="border-border-default flex w-full flex-col gap-3 border p-3">
       <div className="flex items-center gap-2">
         <Loader className="text-secondary size-4" />
         <p className="text-secondary font-mono text-[14px] font-normal uppercase not-italic leading-[20px]">
