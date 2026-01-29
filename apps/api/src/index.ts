@@ -113,7 +113,7 @@ if (!daoClient) {
   throw new Error(`Client not found for DAO ${env.DAO_ID}`);
 }
 
-const pgClient = drizzle(env.DATABASE_URL, { schema });
+const pgClient = drizzle(env.DATABASE_URL, { schema, casing: "snake_case" });
 
 const daoConfig = CONTRACT_ADDRESSES[env.DAO_ID];
 const { blockTime, tokenType } = daoConfig;
