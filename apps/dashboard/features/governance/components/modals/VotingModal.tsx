@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@/shared/components";
-import { User2Icon, X } from "lucide-react";
+import { BadgeStatus, Button } from "@/shared/components";
+import { Check, User2Icon, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Query_Proposals_Items_Items } from "@anticapture/graphql-client/hooks";
 
@@ -49,6 +49,8 @@ export const VotingModal = ({
     (Number(proposal?.againstVotes) / Number(totalVotes)) * 100;
   const abstainPercentage =
     (Number(proposal?.abstainVotes) / Number(totalVotes)) * 100;
+
+  const isQuorumReached = totalVotes >= Number(proposal?.quorum || 0);
 
   const { address, chain } = useAccount();
   const { data: walletClient } = useWalletClient();
@@ -164,7 +166,7 @@ export const VotingModal = ({
                 decimals={decimals}
               />
 
-              <div className="border-border-default flex items-center justify-start gap-2 border px-[10px] py-2">
+              <div className="border-border-default bg-surface-contrast flex items-center justify-start gap-2 border px-[10px] py-2">
                 <User2Icon className="text-secondary size-3.5" />
                 <p className="font-inter text-primary text-[14px] font-normal not-italic leading-[20px]">
                   Quorum
@@ -172,7 +174,15 @@ export const VotingModal = ({
                 <p className="font-inter text-secondary text-[14px] font-normal not-italic leading-[20px]">
                   {userReadableTotalVotes} / {userReadableQuorum}
                 </p>
+                {isQuorumReached ? (
+                  <BadgeStatus variant="success" icon={Check}>
+                    Reached
+                  </BadgeStatus>
+                ) : (
+                  <BadgeStatus variant="dimmed">Not Reached</BadgeStatus>
+                )}
               </div>
+            
             </div>
 
             {/* Comment  */}
