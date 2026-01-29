@@ -75,7 +75,7 @@ export const VotesTabContent = ({
           )}
         >
           Voted
-          <div className="text-secondary font-inter hidden text-[12px] font-medium not-italic leading-[16px] lg:block">
+          <div className="text-secondary font-inter hidden text-[12px] font-normal not-italic leading-[16px] lg:block">
             {data?.votes?.totalCount} voters / {totalVotes} VP
           </div>
         </div>
@@ -87,7 +87,7 @@ export const VotesTabContent = ({
           )}
         >
           Didn&apos;t vote
-          <div className="text-secondary font-inter hidden text-[12px] font-medium not-italic leading-[16px] lg:block">
+          <div className="text-secondary font-inter hidden text-[12px] font-normal not-italic leading-[16px] lg:block">
             {nonVotersData?.proposalNonVoters?.totalCount || 0} voters
           </div>
         </div>
