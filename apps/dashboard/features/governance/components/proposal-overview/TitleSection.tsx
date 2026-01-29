@@ -33,7 +33,7 @@ export const TitleSection = ({
       </div>
 
       <div className="flex w-full flex-col gap-2">
-        <h4 className="text-primary">{proposal?.title}</h4>
+        <h4 className="text-primary text-xl">{proposal?.title}</h4>
       </div>
 
       <div className="flex w-full items-center justify-start gap-2">
