@@ -48,27 +48,23 @@ export const ProposalTimeline = ({
   ];
 
   const getTimelineItemBgColor = (index: number) => {
-    // Created is always primary
-    if (index === 0) return "bg-primary";
-
-    // Find the first pending item (after created)
-    const firstPendingIndex = timelineItems.findIndex(
-      (item, i) => i > 0 && item.status === "pending",
-    );
-
-    if (firstPendingIndex === -1) {
-      // All items are completed
-      return "bg-primary";
+    // Find the last completed item index (this is the current state)
+    let lastCompletedIndex = -1;
+    for (let i = timelineItems.length - 1; i >= 0; i--) {
+      if (timelineItems[i].status === "completed") {
+        lastCompletedIndex = i;
+        break;
+      }
     }
 
-    if (index < firstPendingIndex) {
-      // Completed items
+    if (index < lastCompletedIndex) {
+      // Past completed items
       return "bg-primary";
-    } else if (index === firstPendingIndex) {
-      // Next item to be completed
+    } else if (index === lastCompletedIndex) {
+      // Current state (last completed item) - highlighted
       return "bg-link";
     } else {
-      // Future items
+      // Future pending items
       return "bg-secondary";
     }
   };
