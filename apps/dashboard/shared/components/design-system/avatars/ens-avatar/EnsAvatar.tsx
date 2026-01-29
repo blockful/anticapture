@@ -104,8 +104,9 @@ export const EnsAvatar = ({
   };
 
   const displayName = getDisplayName();
-  const isLoadingName = loading || ensLoading;
+  const isLoadingName = loading || (ensLoading && !address);
   const isEnsName = Boolean(ensData?.ens);
+  const isResolvingEns = ensLoading && address;
 
   const baseClasses = cn(
     sizeClasses[size],
@@ -115,7 +116,7 @@ export const EnsAvatar = ({
   );
 
   const avatarElement = () => {
-    if (isLoadingName) {
+    if (loading || (ensLoading && !address)) {
       return (
         <SkeletonRow
           parentClassName="flex animate-pulse"
@@ -141,7 +142,6 @@ export const EnsAvatar = ({
       );
     }
 
-    // Fallback: show user icon
     return (
       <div className={baseClasses}>
         <Blockies
@@ -187,6 +187,7 @@ export const EnsAvatar = ({
                 "text-primary inline-block text-sm",
                 isEnsName && "overflow-hidden truncate whitespace-nowrap",
                 isDashed && "border-b border-dashed border-[#3F3F46]",
+                isResolvingEns && "animate-pulse",
                 nameClassName,
               )}
             >
