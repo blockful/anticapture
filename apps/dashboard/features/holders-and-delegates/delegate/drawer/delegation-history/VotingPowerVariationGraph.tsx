@@ -16,12 +16,15 @@ import { formatNumberUserReadable } from "@/shared/utils";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { DelegationHistoryGraphItem } from "@/features/holders-and-delegates/hooks";
 import { useDelegateDelegationHistoryGraph } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistoryGraph";
-import { TimePeriodSwitcher } from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
+import {
+  TimePeriod,
+  TimePeriodSwitcher,
+} from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
 import { ChartExceptionState } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 import { parseAsStringEnum, useQueryState } from "nuqs";
-import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
+import { getTimestampRangeFromPeriod } from "@/features/holders-and-delegates/utils";
 
 interface VotingPowerVariationGraphProps {
   accountId: string;
@@ -84,32 +87,13 @@ export const VotingPowerVariationGraph = ({
 }: VotingPowerVariationGraphProps) => {
   const [selectedPeriod, setSelectedPeriod] = useQueryState(
     "selectedPeriod",
-    parseAsStringEnum(["30d", "90d", "all"]).withDefault("all"),
+    parseAsStringEnum<TimePeriod>(["30d", "90d", "all"]).withDefault("all"),
   );
 
-  // Calculate timestamp range based on time period
-  const { fromTimestamp, toTimestamp } = useMemo(() => {
-    // For "all", treat as all time by not setting limits
-    if (selectedPeriod === "all") {
-      return { fromTimestamp: undefined, toTimestamp: undefined };
-    }
-
-    const nowInSeconds = Date.now() / 1000;
-    let daysInSeconds: number;
-    switch (selectedPeriod) {
-      case "90d":
-        daysInSeconds = 90 * SECONDS_PER_DAY;
-        break;
-      default:
-        daysInSeconds = 30 * SECONDS_PER_DAY;
-        break;
-    }
-
-    return {
-      fromTimestamp: Math.floor(nowInSeconds - daysInSeconds),
-      toTimestamp: Math.floor(nowInSeconds),
-    };
-  }, [selectedPeriod]);
+  const { fromTimestamp, toTimestamp } = useMemo(
+    () => getTimestampRangeFromPeriod(selectedPeriod),
+    [selectedPeriod],
+  );
 
   const { delegationHistory, loading, error } =
     useDelegateDelegationHistoryGraph(

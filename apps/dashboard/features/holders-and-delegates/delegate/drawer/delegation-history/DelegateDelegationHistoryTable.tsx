@@ -15,6 +15,7 @@ import {
   useDelegateDelegationHistory,
   DelegationHistoryItem,
 } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
+import { formatRelativeTime } from "@/features/holders-and-delegates/utils";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
@@ -60,8 +61,7 @@ export const DelegateDelegationHistoryTable = ({
     "active",
     parseAsBoolean.withDefault(false),
   );
-  // const [fromFilter, setFromFilter] = useQueryState("from", parseAsAddress);
-  // const [toFilter, setToFilter] = useQueryState("to", parseAsAddress);
+
   const sortOptions: SortOption[] = [
     { value: "largest-first", label: "Largest first" },
     { value: "smallest-first", label: "Smallest first" },
@@ -81,41 +81,15 @@ export const DelegateDelegationHistoryTable = ({
   const isInitialLoading =
     loading && (!delegationHistory || delegationHistory.length === 0);
 
-  // Handle sorting
   const handleSort = (field: "timestamp" | "delta") => {
     if (sortBy === field) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
       setSortBy(field);
-      setSortDirection("desc"); // Always start with desc for new sort field
+      setSortDirection("desc");
     }
   };
 
-  // Format timestamp to relative time in days
-  const formatRelativeTime = (timestamp: string) => {
-    const date = new Date(parseInt(timestamp) * 1000);
-    const now = new Date();
-    const diffInMs = now.getTime() - date.getTime();
-    const diffInSeconds = Math.floor(diffInMs / 1000);
-    const diffInMinutes = Math.floor(diffInSeconds / 60);
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    const diffInDays = Math.floor(diffInHours / 24);
-    const diffInYears = Math.floor(diffInDays / 365);
-
-    if (diffInYears > 0) {
-      return `${diffInYears} year${diffInYears > 1 ? "s" : ""} ago`;
-    } else if (diffInDays > 0) {
-      return `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
-    } else if (diffInHours > 0) {
-      return `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
-    } else if (diffInMinutes > 0) {
-      return `${diffInMinutes} minute${diffInMinutes > 1 ? "s" : ""} ago`;
-    } else {
-      return "Just now";
-    }
-  };
-
-  // Determine delegation type and color based on gain/loss
   const getDelegationType = (item: DelegationHistoryItem) => {
     let statusText = "";
 

@@ -30,6 +30,7 @@ import {
 } from "@anticapture/graphql-client";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
+import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 interface DelegateTableData {
   address: string;
   votingPower: string;
@@ -49,30 +50,9 @@ interface DelegatesProps {
   daoId: DaoIdEnum;
 }
 
-// Helper function to convert time period to timestamp and block number
-export const getTimeDataFromPeriod = (period: TimeInterval) => {
-  const now = Date.now();
-  const msPerDay = 24 * 60 * 60 * 1000;
-
-  let daysBack: number;
-  switch (period) {
-    case TimeInterval.SEVEN_DAYS:
-      daysBack = 7;
-      break;
-    case TimeInterval.THIRTY_DAYS:
-      daysBack = 30;
-      break;
-    case TimeInterval.NINETY_DAYS:
-      daysBack = 90;
-      break;
-    case TimeInterval.ONE_YEAR:
-      daysBack = 365;
-      break;
-    default:
-      daysBack = 30;
-  }
-
-  return Math.floor((now - daysBack * msPerDay) / 1000);
+// Converts a TimeInterval to a timestamp (in seconds) representing the start date.
+const getFromTimestamp = (period: TimeInterval): number => {
+  return Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[period];
 };
 
 export const Delegates = ({
@@ -108,10 +88,7 @@ export const Delegates = ({
   };
 
   // Calculate time-based parameters
-  const fromDate = useMemo(
-    () => getTimeDataFromPeriod(timePeriod),
-    [timePeriod],
-  );
+  const fromDate = useMemo(() => getFromTimestamp(timePeriod), [timePeriod]);
 
   const {
     data,

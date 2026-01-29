@@ -1,3 +1,5 @@
+"use client";
+
 import { formatUnits } from "viem";
 import { useMemo, useState, useEffect, useCallback } from "react";
 
@@ -9,7 +11,7 @@ import {
 } from "@anticapture/graphql-client/hooks";
 
 import { DaoIdEnum } from "@/shared/types/daos";
-import { AmountFilterVariables } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
+import { AmountFilterVariables } from "./types";
 import {
   QueryInput_Transfers_SortBy,
   QueryInput_Transfers_SortOrder,
