@@ -12,6 +12,7 @@ import {
   HistoricalVotingPowerByAccountQueryVariables,
   QueryInput_HistoricalVotingPowerByAccountId_OrderDirection,
 } from "@anticapture/graphql-client";
+import { AmountFilterVariables } from "./types";
 
 // Interface for a single delegation history item
 export interface DelegationHistoryItem {
@@ -52,10 +53,18 @@ export interface UseDelegateDelegationHistoryResult {
   hasPreviousPage: boolean;
 }
 
-export type AmountFilterVariables = Pick<
-  HistoricalVotingPowerByAccountQueryVariables,
-  "fromValue" | "toValue"
->;
+interface UseDelegateDelegationHistoryParams {
+  accountId: string;
+  daoId: DaoIdEnum;
+  orderBy?: string;
+  orderDirection?: "asc" | "desc";
+  customFromFilter?: string;
+  customToFilter?: string;
+  filterVariables?: AmountFilterVariables;
+  itemsPerPage?: number;
+  fromTimestamp?: number;
+  toTimestamp?: number;
+}
 
 export function useDelegateDelegationHistory({
   accountId,
@@ -66,17 +75,9 @@ export function useDelegateDelegationHistory({
   customFromFilter,
   customToFilter,
   itemsPerPage = 10,
-}: {
-  accountId: string;
-  daoId: DaoIdEnum;
-  orderBy?: string;
-  orderDirection?: "asc" | "desc";
-  transactionType?: "all" | "buy" | "sell";
-  customFromFilter?: string;
-  customToFilter?: string;
-  filterVariables?: AmountFilterVariables;
-  itemsPerPage?: number;
-}): UseDelegateDelegationHistoryResult {
+  fromTimestamp,
+  toTimestamp,
+}: UseDelegateDelegationHistoryParams): UseDelegateDelegationHistoryResult {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isPaginationLoading, setIsPaginationLoading] =
     useState<boolean>(false);
@@ -123,6 +124,8 @@ export function useDelegateDelegationHistory({
       }),
       ...(fromFilter && { delegator: fromFilter }),
       ...(toFilter && { delegate: toFilter }),
+      ...(fromTimestamp && { fromDate: fromTimestamp.toString() }),
+      ...(toTimestamp && { toDate: toTimestamp.toString() }),
     }),
     [
       accountId,
@@ -132,6 +135,8 @@ export function useDelegateDelegationHistory({
       filterVariables,
       fromFilter,
       toFilter,
+      fromTimestamp,
+      toTimestamp,
     ],
   );
 

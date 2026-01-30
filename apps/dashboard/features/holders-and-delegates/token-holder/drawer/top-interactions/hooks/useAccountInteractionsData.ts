@@ -79,7 +79,6 @@ export const useAccountInteractionsData = ({
   const { data, loading, error } = useGetAccountInteractionsQuery({
     variables: {
       address,
-      fromDate,
       orderDirection:
         sortDirection as QueryInput_AccountInteractions_OrderDirection,
       minAmount: filterVariables?.minAmount,

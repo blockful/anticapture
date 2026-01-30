@@ -47,12 +47,12 @@ export const HoldersAndDelegatesDrawer = ({
         },
         {
           id: "votingPower",
-          label: "Voting Power",
+          label: "Vote Composition",
           content: <VotingPower address={address} daoId={daoId} />,
         },
         {
           id: "delegationHistory",
-          label: "Delegation History",
+          label: "Voting Power History",
           content: (
             <DelegateDelegationsHistory accountId={address} daoId={daoId} />
           ),

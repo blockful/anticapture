@@ -2882,6 +2882,8 @@ export type BalanceHistoryQueryVariables = Exact<{
   to?: InputMaybe<Scalars['String']['input']>;
   fromValue?: InputMaybe<Scalars['String']['input']>;
   toValue?: InputMaybe<Scalars['String']['input']>;
+  fromDate?: InputMaybe<Scalars['Float']['input']>;
+  toDate?: InputMaybe<Scalars['Float']['input']>;
 }>;
 
 
@@ -3004,7 +3006,7 @@ export type GetHistoricalVotingAndActivityQueryVariables = Exact<{
 }>;
 
 
-export type GetHistoricalVotingAndActivityQuery = { __typename?: 'Query', votingPowerVariations?: { __typename?: 'votingPowerVariations_200_response', items: Array<{ __typename?: 'query_votingPowerVariations_items_items', accountId: string, previousVotingPower: string, currentVotingPower: string, percentageChange: string, absoluteChange: string } | null> } | null, proposalsActivity?: { __typename?: 'proposalsActivity_200_response', totalProposals: number, votedProposals: number, neverVoted: boolean } | null };
+export type GetHistoricalVotingAndActivityQuery = { __typename?: 'Query', votingPowerVariations?: { __typename?: 'votingPowerVariations_200_response', items: Array<{ __typename?: 'query_votingPowerVariations_items_items', accountId: string, previousVotingPower: string, currentVotingPower: string, percentageChange: string, absoluteChange: string } | null> } | null, proposalsActivity?: { __typename?: 'proposalsActivity_200_response', totalProposals: number, votedProposals: number, neverVoted: boolean, avgTimeBeforeEnd: number } | null };
 
 export type GetDelegateProposalsActivityQueryVariables = Exact<{
   address: Scalars['String']['input'];
@@ -3012,7 +3014,7 @@ export type GetDelegateProposalsActivityQueryVariables = Exact<{
 }>;
 
 
-export type GetDelegateProposalsActivityQuery = { __typename?: 'Query', proposalsActivity?: { __typename?: 'proposalsActivity_200_response', address: string, totalProposals: number, votedProposals: number, neverVoted: boolean } | null };
+export type GetDelegateProposalsActivityQuery = { __typename?: 'Query', proposalsActivity?: { __typename?: 'proposalsActivity_200_response', address: string, totalProposals: number, votedProposals: number, neverVoted: boolean, avgTimeBeforeEnd: number } | null };
 
 export type GetProposalsFromDaoQueryVariables = Exact<{
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
@@ -3094,6 +3096,8 @@ export type HistoricalVotingPowerByAccountQueryVariables = Exact<{
   orderDirection?: InputMaybe<QueryInput_HistoricalVotingPowerByAccountId_OrderDirection>;
   toValue?: InputMaybe<Scalars['String']['input']>;
   fromValue?: InputMaybe<Scalars['String']['input']>;
+  fromDate?: InputMaybe<Scalars['String']['input']>;
+  toDate?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -3127,7 +3131,6 @@ export type GetDaoAddressesAccountBalancesQuery = { __typename?: 'Query', accoun
 
 export type GetAccountInteractionsQueryVariables = Exact<{
   address: Scalars['String']['input'];
-  fromDate?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   maxAmount?: InputMaybe<Scalars['String']['input']>;
   minAmount?: InputMaybe<Scalars['String']['input']>;
@@ -3188,7 +3191,7 @@ export type TransactionsQuery = { __typename?: 'Query', transactions?: { __typen
 
 
 export const BalanceHistoryDocument = gql`
-    query BalanceHistory($address: String!, $offset: Float = 0, $limit: Float = 10, $sortBy: queryInput_transfers_sortBy, $sortOrder: queryInput_transfers_sortOrder, $from: String, $to: String, $fromValue: String, $toValue: String) {
+    query BalanceHistory($address: String!, $offset: Float = 0, $limit: Float = 10, $sortBy: queryInput_transfers_sortBy, $sortOrder: queryInput_transfers_sortOrder, $from: String, $to: String, $fromValue: String, $toValue: String, $fromDate: Float, $toDate: Float) {
   transfers(
     address: $address
     sortBy: $sortBy
@@ -3199,6 +3202,8 @@ export const BalanceHistoryDocument = gql`
     to: $to
     fromValue: $fromValue
     toValue: $toValue
+    fromDate: $fromDate
+    toDate: $toDate
   ) {
     items {
       timestamp
@@ -3233,6 +3238,8 @@ export const BalanceHistoryDocument = gql`
  *      to: // value for 'to'
  *      fromValue: // value for 'fromValue'
  *      toValue: // value for 'toValue'
+ *      fromDate: // value for 'fromDate'
+ *      toDate: // value for 'toDate'
  *   },
  * });
  */
@@ -3921,6 +3928,7 @@ export const GetHistoricalVotingAndActivityDocument = gql`
     totalProposals
     votedProposals
     neverVoted
+    avgTimeBeforeEnd
   }
 }
     `;
@@ -3967,6 +3975,7 @@ export const GetDelegateProposalsActivityDocument = gql`
     totalProposals
     votedProposals
     neverVoted
+    avgTimeBeforeEnd
   }
 }
     `;
@@ -4422,7 +4431,7 @@ export type HistoricalVotingPowerLazyQueryHookResult = ReturnType<typeof useHist
 export type HistoricalVotingPowerSuspenseQueryHookResult = ReturnType<typeof useHistoricalVotingPowerSuspenseQuery>;
 export type HistoricalVotingPowerQueryResult = Apollo.QueryResult<HistoricalVotingPowerQuery, HistoricalVotingPowerQueryVariables>;
 export const HistoricalVotingPowerByAccountDocument = gql`
-    query HistoricalVotingPowerByAccount($account: String!, $skip: NonNegativeInt, $limit: PositiveInt = 10, $orderBy: queryInput_historicalVotingPowerByAccountId_orderBy = timestamp, $orderDirection: queryInput_historicalVotingPowerByAccountId_orderDirection = desc, $toValue: String, $fromValue: String) {
+    query HistoricalVotingPowerByAccount($account: String!, $skip: NonNegativeInt, $limit: PositiveInt = 10, $orderBy: queryInput_historicalVotingPowerByAccountId_orderBy = timestamp, $orderDirection: queryInput_historicalVotingPowerByAccountId_orderDirection = desc, $toValue: String, $fromValue: String, $fromDate: String, $toDate: String) {
   historicalVotingPowerByAccountId(
     address: $account
     skip: $skip
@@ -4431,6 +4440,8 @@ export const HistoricalVotingPowerByAccountDocument = gql`
     limit: $limit
     toValue: $toValue
     fromValue: $fromValue
+    fromDate: $fromDate
+    toDate: $toDate
   ) {
     items {
       accountId
@@ -4474,6 +4485,8 @@ export const HistoricalVotingPowerByAccountDocument = gql`
  *      orderDirection: // value for 'orderDirection'
  *      toValue: // value for 'toValue'
  *      fromValue: // value for 'fromValue'
+ *      fromDate: // value for 'fromDate'
+ *      toDate: // value for 'toDate'
  *   },
  * });
  */
@@ -4664,10 +4677,9 @@ export type GetDaoAddressesAccountBalancesLazyQueryHookResult = ReturnType<typeo
 export type GetDaoAddressesAccountBalancesSuspenseQueryHookResult = ReturnType<typeof useGetDaoAddressesAccountBalancesSuspenseQuery>;
 export type GetDaoAddressesAccountBalancesQueryResult = Apollo.QueryResult<GetDaoAddressesAccountBalancesQuery, GetDaoAddressesAccountBalancesQueryVariables>;
 export const GetAccountInteractionsDocument = gql`
-    query getAccountInteractions($address: String!, $fromDate: String, $limit: PositiveInt, $maxAmount: String, $minAmount: String, $orderDirection: queryInput_accountInteractions_orderDirection, $skip: NonNegativeInt, $filterAddress: String) {
+    query getAccountInteractions($address: String!, $limit: PositiveInt, $maxAmount: String, $minAmount: String, $orderDirection: queryInput_accountInteractions_orderDirection, $skip: NonNegativeInt, $filterAddress: String) {
   accountInteractions(
     address: $address
-    fromDate: $fromDate
     limit: $limit
     maxAmount: $maxAmount
     minAmount: $minAmount
@@ -4699,7 +4711,6 @@ export const GetAccountInteractionsDocument = gql`
  * const { data, loading, error } = useGetAccountInteractionsQuery({
  *   variables: {
  *      address: // value for 'address'
- *      fromDate: // value for 'fromDate'
  *      limit: // value for 'limit'
  *      maxAmount: // value for 'maxAmount'
  *      minAmount: // value for 'minAmount'

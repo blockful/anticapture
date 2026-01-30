@@ -60,6 +60,8 @@ const formatRelativeTime = (timestampSec: string): string => {
   const minutes = Math.floor(diff / 60);
   const hours = Math.floor(diff / 3600);
   const days = Math.floor(diff / 86400);
+  const years = Math.floor(days / 365);
+  if (years > 0) return `${years} year${years > 1 ? "s" : ""} ago`;
   if (days > 0) return `${days} day${days > 1 ? "s" : ""} ago`;
   if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
   if (minutes > 0) return `${minutes} min ago`;

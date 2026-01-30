@@ -1,3 +1,5 @@
+"use client";
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useGetProposalsActivityQuery } from "@anticapture/graphql-client/hooks";
@@ -8,8 +10,7 @@ import {
 import { DaoIdEnum } from "@/shared/types/daos";
 import { NetworkStatus } from "@apollo/client";
 
-interface UseProposalsActivityParams
-  extends GetProposalsActivityQueryVariables {
+interface UseProposalsActivityParams extends GetProposalsActivityQueryVariables {
   itemsPerPage: number;
   daoId: DaoIdEnum;
 }
