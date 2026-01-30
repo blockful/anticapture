@@ -1,8 +1,12 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 import {
-  AccountBalanceVariationsMapper,
-  AccountBalanceVariationsRequestSchema,
+  AccountBalanceVariationsByAccountIdRequestQuerySchema,
+  AccountBalanceVariationsResponseMapper,
+  AccountBalanceVariationsByAccountIdRequestParamsSchema,
+  AccountBalanceVariationsRequestQuerySchema,
   AccountBalanceVariationsResponseSchema,
+  AccountBalanceVariationsByAccountIdResponseMapper,
+  AccountBalanceVariationsByAccountIdResponseSchema,
 } from "@/api/mappers";
 import { BalanceVariationsService } from "@/api/services";
 
@@ -18,9 +22,9 @@ export function accountBalanceVariations(
       summary: "Get top variations in account balances for a given period",
       description:
         "Returns a mapping of the biggest variations to account balances associated by account address",
-      tags: ["transactions"],
+      tags: ["balances"],
       request: {
-        query: AccountBalanceVariationsRequestSchema,
+        query: AccountBalanceVariationsRequestQuerySchema,
       },
       responses: {
         200: {
@@ -34,17 +38,65 @@ export function accountBalanceVariations(
       },
     }),
     async (context) => {
-      const { days, limit, skip, orderDirection } = context.req.valid("query");
-      const now = Math.floor(Date.now() / 1000);
+      const { fromDate, toDate, limit, skip, orderDirection, addresses } =
+        context.req.valid("query");
 
       const result = await service.getAccountBalanceVariations(
-        now - days,
-        skip,
+        fromDate,
+        toDate,
         limit,
+        skip,
         orderDirection,
+        addresses,
       );
 
-      return context.json(AccountBalanceVariationsMapper(result, now, days));
+      return context.json(
+        AccountBalanceVariationsResponseMapper(result, fromDate, toDate),
+      );
+    },
+  );
+
+  app.openapi(
+    createRoute({
+      method: "get",
+      operationId: "accountBalanceVariationsByAccountId",
+      path: "/accounts/{address}/balances/variations",
+      summary:
+        "Get top changes in balance for a given period for a single account",
+      description: "Returns a the changes to balance by period and accountId",
+      tags: ["balances"],
+      request: {
+        params: AccountBalanceVariationsByAccountIdRequestParamsSchema,
+        query: AccountBalanceVariationsByAccountIdRequestQuerySchema,
+      },
+      responses: {
+        200: {
+          description: "Successfully retrieved account balance variations",
+          content: {
+            "application/json": {
+              schema: AccountBalanceVariationsByAccountIdResponseSchema,
+            },
+          },
+        },
+      },
+    }),
+    async (context) => {
+      const { address } = context.req.valid("param");
+      const { fromDate, toDate } = context.req.valid("query");
+
+      const result = await service.getAccountBalanceVariationsByAccountId(
+        address,
+        fromDate,
+        toDate,
+      );
+
+      return context.json(
+        AccountBalanceVariationsByAccountIdResponseMapper(
+          result,
+          fromDate,
+          toDate,
+        ),
+      );
     },
   );
 }

@@ -51,7 +51,7 @@ export const DelegationHistoryTable = ({
 
   const [sortBy, setSortBy] = useQueryState(
     "orderBy",
-    parseAsStringEnum(["timestamp", "delegatedValue"]).withDefault("timestamp"),
+    parseAsStringEnum(["timestamp", "amount"]).withDefault("timestamp"),
   );
   const [sortOrder, setSortOrder] = useQueryState(
     "orderDirection",
@@ -93,27 +93,32 @@ export const DelegationHistoryTable = ({
   }, []);
 
   const data: DelegationData[] =
-    delegationHistory?.map((delegation) => {
-      const delegateAddress = delegation.delegateAccountId || "";
-      const delegatedValue = delegation.delegatedValue || "0";
-      const timestamp = delegation.timestamp || 0;
+    delegationHistory
+      ?.filter(
+        (delegation): delegation is NonNullable<typeof delegation> =>
+          delegation !== null,
+      )
+      .map((delegation) => {
+        const delegateAddress = delegation.delegateAddress || "";
+        const delegatedValue = delegation.amount || "0";
+        const timestamp = delegation.timestamp || 0;
 
-      const formattedAmount = Number(
-        formatUnits(BigInt(delegatedValue), decimals),
-      ).toFixed(2);
+        const formattedAmount = Number(
+          formatUnits(BigInt(delegatedValue), decimals),
+        ).toFixed(2);
 
-      const date = timestamp
-        ? formatDateUserReadable(new Date(Number(timestamp) * 1000))
-        : "Unknown";
+        const date = timestamp
+          ? formatDateUserReadable(new Date(Number(timestamp) * 1000))
+          : "Unknown";
 
-      return {
-        address: delegateAddress,
-        amount: formattedAmount,
-        transactionHash: delegation.transactionHash,
-        date,
-        timestamp: Number(timestamp),
-      };
-    }) || [];
+        return {
+          address: delegateAddress,
+          amount: formattedAmount,
+          transactionHash: delegation.transactionHash,
+          date,
+          timestamp: Number(timestamp),
+        };
+      }) || [];
 
   const delegationHistoryColumns: ColumnDef<DelegationData>[] = [
     {
@@ -192,7 +197,7 @@ export const DelegationHistoryTable = ({
                 setSortOrder(
                   filterState.sortOrder === "largest-first" ? "desc" : "asc",
                 );
-                setSortBy("delegatedValue");
+                setSortBy("amount");
               } else {
                 setSortBy("timestamp");
                 setSortOrder("desc");

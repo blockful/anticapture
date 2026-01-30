@@ -1,171 +1,143 @@
-import { asc, desc, gte, sql, and, inArray } from "ponder";
+import { asc, desc, gte, sql, and, inArray, eq, lte } from "ponder";
 import { db } from "ponder:api";
-import { transfer, accountBalance } from "ponder:schema";
-import { DBAccountBalanceVariation, DBHistoricalBalance } from "@/api/mappers";
+import { accountBalance, balanceHistory } from "ponder:schema";
+import { DBAccountBalanceVariation } from "@/api/mappers";
 import { Address } from "viem";
+import { PERCENTAGE_NO_BASELINE } from "@/api/mappers/constants";
 
 export class BalanceVariationsRepository {
-  async getHistoricalBalances(
-    addresses: Address[],
-    timestamp: number,
-  ): Promise<DBHistoricalBalance[]> {
-    const transfersFrom = db
-      .select({
-        accountId: transfer.fromAccountId,
-        fromAmount: sql<string>`-SUM(${transfer.amount})`.as("from_amount"),
-      })
-      .from(transfer)
-      .where(
-        and(
-          gte(transfer.timestamp, BigInt(timestamp)),
-          inArray(transfer.fromAccountId, addresses),
-        ),
-      )
-      .groupBy(transfer.fromAccountId)
-      .as("transfers_from");
-
-    // Aggregate incoming transfers (positive amounts)
-    const transfersTo = db
-      .select({
-        accountId: transfer.toAccountId,
-        toAmount: sql<string>`SUM(${transfer.amount})`.as("to_amount"),
-      })
-      .from(transfer)
-      .where(
-        and(
-          gte(transfer.timestamp, BigInt(timestamp)),
-          inArray(transfer.toAccountId, addresses),
-        ),
-      )
-      .groupBy(transfer.toAccountId)
-      .as("transfers_to");
-
-    // Combine both aggregations
-    const combined = db
-      .select({
-        accountId: accountBalance.accountId,
-        currentBalance: accountBalance.balance,
-        fromChange: sql<string>`COALESCE(${transfersFrom.fromAmount}, 0)`.as(
-          "from_change",
-        ),
-        toChange: sql<string>`COALESCE(${transfersTo.toAmount}, 0)`.as(
-          "to_change",
-        ),
-      })
-      .from(accountBalance)
-      .leftJoin(
-        transfersFrom,
-        sql`${accountBalance.accountId} = ${transfersFrom.accountId}`,
-      )
-      .leftJoin(
-        transfersTo,
-        sql`${accountBalance.accountId} = ${transfersTo.accountId}`,
-      )
-      .where(inArray(accountBalance.accountId, addresses))
-      .as("combined");
-
-    const result = await db
-      .select({
-        address: combined.accountId,
-        balance:
-          sql<string>`${combined.currentBalance} - (${combined.fromChange} + ${combined.toChange})`.as(
-            "balance",
-          ),
-      })
-      .from(combined);
-
-    return result;
-  }
-
   async getAccountBalanceVariations(
-    startTimestamp: number,
+    fromTimestamp: number | undefined,
+    toTimestamp: number | undefined,
     limit: number,
     skip: number,
     orderDirection: "asc" | "desc",
+    addresses?: Address[],
   ): Promise<DBAccountBalanceVariation[]> {
-    // Aggregate outgoing transfers (negative amounts)
-    const scopedTransfers = db
-      .select()
-      .from(transfer)
-      .where(gte(transfer.timestamp, BigInt(startTimestamp)))
-      .as("scoped_transfers");
+    const orderDirectionFn = orderDirection === "asc" ? asc : desc;
 
-    const transfersFrom = db
+    const latestBeforeFrom = db
       .select({
-        accountId: scopedTransfers.fromAccountId,
-        fromAmount: sql<string>`-SUM(${transfer.amount})`.as("from_amount"),
+        accountId: balanceHistory.accountId,
+        balance: balanceHistory.balance,
+        rn: sql<number>`ROW_NUMBER() OVER (
+        PARTITION BY ${balanceHistory.accountId} 
+        ORDER BY ${balanceHistory.timestamp} DESC, ${balanceHistory.logIndex} DESC
+      )`.as("rn"),
       })
-      .from(scopedTransfers)
-      .groupBy(scopedTransfers.fromAccountId)
-      .as("transfers_from");
-
-    // Aggregate incoming transfers (positive amounts)
-    const transfersTo = db
-      .select({
-        accountId: scopedTransfers.toAccountId,
-        toAmount: sql<string>`SUM(${transfer.amount})`.as("to_amount"),
-      })
-      .from(scopedTransfers)
-      .groupBy(scopedTransfers.toAccountId)
-      .as("transfers_to");
-
-    // Combine both aggregations
-    const combined = db
-      .select({
-        accountId: accountBalance.accountId,
-        currentBalance: accountBalance.balance,
-        fromChange: sql<string>`COALESCE(${transfersFrom.fromAmount}, 0)`.as(
-          "from_change",
-        ),
-        toChange: sql<string>`COALESCE(${transfersTo.toAmount}, 0)`.as(
-          "to_change",
-        ),
-      })
-      .from(accountBalance)
-      .leftJoin(
-        transfersFrom,
-        sql`${accountBalance.accountId} = ${transfersFrom.accountId}`,
-      )
-      .leftJoin(
-        transfersTo,
-        sql`${accountBalance.accountId} = ${transfersTo.accountId}`,
-      )
+      .from(balanceHistory)
       .where(
-        sql`${transfersFrom.accountId} IS NOT NULL OR ${transfersTo.accountId} IS NOT NULL`,
+        and(
+          addresses ? inArray(balanceHistory.accountId, addresses) : undefined,
+          fromTimestamp
+            ? gte(balanceHistory.timestamp, BigInt(fromTimestamp))
+            : undefined,
+        ),
       )
-      .as("combined");
+      .as("latest_before_from");
 
-    const result = await db
+    const latestBeforeTo = db
       .select({
-        accountId: combined.accountId,
-        currentBalance: combined.currentBalance,
-        absoluteChange:
-          sql<string>`${combined.fromChange} + ${combined.toChange}`.as(
-            "absolute_change",
-          ),
+        accountId: balanceHistory.accountId,
+        balance: balanceHistory.balance,
+        rn: sql<number>`ROW_NUMBER() OVER (
+        PARTITION BY ${balanceHistory.accountId} 
+        ORDER BY ${balanceHistory.timestamp} DESC, ${balanceHistory.logIndex} DESC
+      )`.as("rn"),
       })
-      .from(combined)
-      .where(sql`(${combined.fromChange} + ${combined.toChange}) != 0`)
-      .orderBy(
-        orderDirection === "desc"
-          ? desc(sql`ABS(${combined.fromChange} + ${combined.toChange})`)
-          : asc(sql`ABS(${combined.fromChange} + ${combined.toChange})`),
+      .from(balanceHistory)
+      .where(
+        and(
+          addresses ? inArray(balanceHistory.accountId, addresses) : undefined,
+          toTimestamp
+            ? lte(balanceHistory.timestamp, BigInt(toTimestamp))
+            : undefined,
+        ),
       )
-      .offset(skip)
-      .limit(limit);
+      .as("latest_before_to");
 
-    return result.map(({ accountId, currentBalance, absoluteChange }) => ({
-      accountId: accountId,
-      previousBalance: currentBalance - BigInt(absoluteChange),
-      currentBalance: currentBalance,
-      absoluteChange: BigInt(absoluteChange),
-      percentageChange:
-        currentBalance - BigInt(absoluteChange)
-          ? Number(
-              (BigInt(absoluteChange) * 10000n) /
-                (currentBalance - BigInt(absoluteChange)),
-            ) / 100
-          : 0,
-    }));
+    return await db
+      .select({
+        accountId: sql<Address>`COALESCE(from_data.account_id, to_data.account_id)`,
+        previousBalance: sql<bigint>`COALESCE(from_data.balance, 0)`,
+        currentBalance: sql<bigint>`COALESCE(to_data.balance, 0)`,
+        absoluteChange: sql<bigint>`(COALESCE(to_data.balance, 0) - COALESCE(from_data.balance, 0))`,
+        percentageChange: sql<string>`
+        CASE 
+          WHEN COALESCE(from_data.balance, 0) = 0 THEN 
+            CASE WHEN COALESCE(to_data.balance, 0) = 0 THEN '0' ELSE ${PERCENTAGE_NO_BASELINE} END
+          ELSE 
+            (((COALESCE(to_data.balance, 0) - from_data.balance)::numeric / from_data.balance::numeric) * 100)::text
+        END
+      `,
+      })
+      .from(sql`(SELECT * FROM ${latestBeforeFrom} WHERE rn = 1) as from_data`)
+      .fullJoin(
+        sql`(SELECT * FROM ${latestBeforeTo} WHERE rn = 1) as to_data`,
+        sql`from_data.account_id = to_data.account_id`,
+      )
+      .orderBy(
+        orderDirectionFn(
+          sql<bigint>`ABS(COALESCE(to_data.balance, 0) - COALESCE(from_data.balance, 0))`,
+        ),
+      )
+      .limit(limit)
+      .offset(skip);
+  }
+
+  async getAccountBalanceVariationsByAccountId(
+    address: Address,
+    fromTimestamp: number | undefined,
+    toTimestamp: number | undefined,
+  ): Promise<DBAccountBalanceVariation> {
+    const history = db
+      .select({
+        accountId: balanceHistory.accountId,
+        delta: balanceHistory.delta,
+      })
+      .from(balanceHistory)
+      .orderBy(desc(balanceHistory.timestamp))
+      .where(
+        and(
+          eq(balanceHistory.accountId, address),
+          fromTimestamp
+            ? gte(balanceHistory.timestamp, BigInt(fromTimestamp))
+            : undefined,
+          toTimestamp
+            ? lte(balanceHistory.timestamp, BigInt(toTimestamp))
+            : undefined,
+        ),
+      )
+      .as("history");
+
+    const [delta] = await db
+      .select({
+        accountId: history.accountId,
+        absoluteChange: sql<bigint>`SUM(${history.delta})`.as("agg_delta"),
+      })
+      .from(history)
+      .groupBy(history.accountId);
+
+    const [currentBalance] = await db
+      .select({ value: accountBalance.balance })
+      .from(accountBalance)
+      .where(eq(accountBalance.accountId, address));
+
+    if (!currentBalance) throw new Error("Account not found");
+
+    const numericAbsoluteChange = BigInt(delta?.absoluteChange || "0");
+    const currentBalanceValue = currentBalance.value;
+    const oldBalance = currentBalance.value - numericAbsoluteChange;
+    const percentageChange = oldBalance
+      ? (Number((numericAbsoluteChange * 10000n) / oldBalance) / 100).toFixed(2)
+      : "0";
+
+    return {
+      accountId: address,
+      previousBalance: currentBalanceValue - numericAbsoluteChange,
+      currentBalance: currentBalanceValue,
+      absoluteChange: numericAbsoluteChange,
+      percentageChange: percentageChange,
+    };
   }
 }

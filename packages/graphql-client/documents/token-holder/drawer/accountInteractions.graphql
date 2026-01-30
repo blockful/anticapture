@@ -1,5 +1,6 @@
 query getAccountInteractions(
   $address: String!
+  $fromDate: String
   $limit: PositiveInt
   $maxAmount: String
   $minAmount: String
@@ -9,7 +10,7 @@ query getAccountInteractions(
 ) {
   accountInteractions(
     address: $address
-    days: _90d
+    fromDate: $fromDate
     limit: $limit
     maxAmount: $maxAmount
     minAmount: $minAmount

@@ -34,6 +34,7 @@ interface RiskAreaCardProps {
 }
 
 interface RiskAreaCardWrapperProps {
+  daoId: DaoIdEnum;
   title?: string;
   riskAreas: RiskArea[];
   activeRiskId?: string;
@@ -335,6 +336,7 @@ export const RiskAreaCard = ({
  * Wrapper component that organizes multiple RiskAreaCards into columns
  */
 export const RiskAreaCardWrapper = ({
+  daoId,
   title,
   riskAreas,
   activeRiskId,
@@ -343,7 +345,6 @@ export const RiskAreaCardWrapper = ({
   variant = RiskAreaCardEnum.DAO_OVERVIEW,
   withTitle = true,
 }: RiskAreaCardWrapperProps) => {
-  const { daoId }: { daoId: string } = useParams();
   return (
     <div
       className={cn("flex w-full flex-col gap-1", {
@@ -378,6 +379,7 @@ export const RiskAreaCardWrapper = ({
               ?.supportsLiquidTreasuryCall
               ? { ...risk, level: RiskLevel.NONE }
               : risk;
+
             return (
               <RiskAreaCard
                 key={`${risk.name}-${index}`}

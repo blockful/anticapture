@@ -12,3 +12,5 @@ export * from "./nft-price";
 export * from "./token";
 export * from "./dao";
 export * from "./transfers";
+export * from "./delegations";
+export * from "./treasury";
