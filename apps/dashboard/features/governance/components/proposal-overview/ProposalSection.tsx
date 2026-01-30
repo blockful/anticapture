@@ -61,7 +61,7 @@ export const ProposalSection = () => {
   const supportValue = votes?.items[0]?.support;
 
   return (
-    <div className="w-full">
+    <div className="w-full pb-20 lg:pb-0">
       <ProposalHeader
         daoId={daoId as string}
         setIsVotingModalOpen={setIsVotingModalOpen}
@@ -74,28 +74,10 @@ export const ProposalSection = () => {
         <div className="bg-surface-background sticky top-[65px] z-10 hidden h-5 w-full lg:block" />
 
         <div className="flex flex-col gap-6 p-5 lg:flex-row lg:pt-0">
-          <div className="self-star left-0 top-5 flex h-fit w-full flex-col gap-6 lg:sticky lg:top-[85px] lg:w-[420px]">
+          <div className="self-star left-0 top-5 flex h-fit w-full flex-col gap-4 lg:sticky lg:top-[85px] lg:w-[420px]">
             <TitleSection proposal={proposal} />
             <ProposalInfoSection proposal={proposal} decimals={decimals} />
             <ProposalStatusSection proposal={proposal} />
-
-            {address ? (
-              !supportValue ? (
-                <Button
-                  className="flex w-full lg:hidden"
-                  onClick={() => setIsVotingModalOpen(true)}
-                >
-                  Cast your vote
-                  <ArrowRight className="size-3.5" />
-                </Button>
-              ) : (
-                <VotedBadge vote={Number(supportValue)} />
-              )
-            ) : (
-              <div className="flex w-full lg:hidden">
-                <ConnectWalletCustom className="w-full" />
-              </div>
-            )}
           </div>
 
           <TabsSection proposal={proposal} />
@@ -109,13 +91,32 @@ export const ProposalSection = () => {
           decimals={decimals}
         />
       </div>
+
+      {/* Fixed bottom bar for mobile voting */}
+      <div className="bg-surface-background fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 p-4 lg:hidden dark:border-gray-800">
+        {address ? (
+          !supportValue ? (
+            <Button
+              className="flex w-full"
+              onClick={() => setIsVotingModalOpen(true)}
+            >
+              Cast your vote
+              <ArrowRight className="size-3.5" />
+            </Button>
+          ) : (
+            <VotedBadge vote={Number(supportValue)} />
+          )
+        ) : (
+          <ConnectWalletCustom className="w-full" />
+        )}
+      </div>
     </div>
   );
 };
 
 export const VotedBadge = ({ vote }: { vote: number }) => {
   return (
-    <div className="flex w-full items-center justify-center gap-2 lg:hidden">
+    <div className="flex w-full items-center justify-center gap-2">
       <p className="text-secondary flex items-center gap-2 text-[12px] font-medium leading-4">
         You voted
       </p>

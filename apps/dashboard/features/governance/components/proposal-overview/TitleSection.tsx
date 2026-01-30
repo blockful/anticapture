@@ -22,7 +22,7 @@ export const TitleSection = ({
           status={proposal.status.toLowerCase() as ProposalStatus}
         />
 
-        <BulletDivider />
+        <BulletDivider className="bg-border-contrast" />
 
         {/* Proposer  */}
         <EnsAvatar
@@ -33,7 +33,7 @@ export const TitleSection = ({
       </div>
 
       <div className="flex w-full flex-col gap-2">
-        <h4 className="text-primary">{proposal?.title}</h4>
+        <h4 className="text-primary text-xl">{proposal?.title}</h4>
       </div>
 
       <div className="flex w-full items-center justify-start gap-2">
@@ -45,7 +45,7 @@ export const TitleSection = ({
           Forum
         </DefaultLink>
 
-        <BulletDivider />
+        <BulletDivider className="bg-border-contrast" />
 
         {/* @todo - add the correct link */}
         <DefaultLink href={`https://x.com/home`} openInNewTab>

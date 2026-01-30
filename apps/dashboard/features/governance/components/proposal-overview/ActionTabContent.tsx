@@ -2,6 +2,7 @@ import { BlankSlate } from "@/shared/components";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { GetProposalQuery } from "@anticapture/graphql-client";
 import { Inbox } from "lucide-react";
+import { useState } from "react";
 
 export const ActionsTabContent = ({
   proposal,
@@ -38,19 +39,25 @@ interface ActionItemProps {
   index: number;
 }
 
+// Approximate threshold for 5 lines of monospace hex data
+const CALLDATA_TRUNCATE_LENGTH = 200;
+
 const ActionItem = ({ target, value, calldata, index }: ActionItemProps) => {
+  const [isCalldataExpanded, setIsCalldataExpanded] = useState(false);
+  const isCalldataLong = (calldata?.length ?? 0) > CALLDATA_TRUNCATE_LENGTH;
+
   return (
     <div className="border-border-default flex w-full flex-col gap-2 border">
       <div className="bg-surface-contrast flex w-full items-center justify-between gap-2 p-3">
         <div>
-          <p className="text-primary font-roboto-mono text-[12px] font-medium uppercase not-italic leading-[16px] tracking-[0.72px]">
-            Action {index + 1}
+          <p className="text-primary font-mono text-[12px] font-medium uppercase not-italic leading-[16px] tracking-wider">
+            // Action {index + 1}
           </p>
         </div>
         <DefaultLink
           href={`https://etherscan.io/address/${target}`}
           openInNewTab
-          className="text-secondary font-roboto-mono text-[12px] font-medium uppercase not-italic leading-[16px] tracking-[0.72px]"
+          className="text-secondary font-mono text-[12px] font-medium uppercase not-italic leading-[16px] tracking-wider"
         >
           Contract
         </DefaultLink>
@@ -58,28 +65,42 @@ const ActionItem = ({ target, value, calldata, index }: ActionItemProps) => {
 
       <div className="flex w-full flex-col gap-2 p-3">
         <div className="flex w-full gap-2">
-          <p className="font-menlo min-w-[88px] text-[14px] font-normal not-italic leading-[20px]">
+          <p className="font-mono min-w-[88px] text-[14px] font-normal not-italic leading-[20px]">
             Target:
           </p>
-          <p className="text-secondary font-menlo text-[14px] font-normal not-italic leading-[20px]">
+          <p className="text-secondary font-mono text-[14px] font-normal not-italic leading-[20px]">
             {target}
           </p>
         </div>
 
-        <div className="flex w-full gap-2">
-          <p className="font-menlo min-w-[88px] text-[14px] font-normal not-italic leading-[20px]">
-            Calldata:
-          </p>
-          <p className="text-secondary font-menlo overflow-wrap-anywhere break-all text-[14px] font-normal not-italic leading-[20px]">
-            {calldata}
-          </p>
+        <div className="flex w-full flex-col gap-2">
+          <div className="flex w-full gap-2">
+            <p className="font-mono min-w-[88px] text-[14px] font-normal not-italic leading-[20px]">
+              Calldata:
+            </p>
+            <p
+              className={`text-secondary font-mono overflow-wrap-anywhere break-all text-[14px] font-normal not-italic leading-[20px] ${
+                isCalldataLong && !isCalldataExpanded ? "line-clamp-5" : ""
+              }`}
+            >
+              {calldata}
+            </p>
+          </div>
+          {isCalldataLong && (
+            <button
+              onClick={() => setIsCalldataExpanded(!isCalldataExpanded)}
+              className="text-link hover:text-link/80 ml-[96px] cursor-pointer self-start font-mono text-[13px] font-medium uppercase leading-none tracking-wider transition-colors duration-300"
+            >
+              {isCalldataExpanded ? "See less" : "See more"}
+            </button>
+          )}
         </div>
 
         <div className="flex w-full gap-2">
-          <p className="font-menlo min-w-[88px] text-[14px] font-normal not-italic leading-[20px]">
+          <p className="font-mono min-w-[88px] text-[14px] font-normal not-italic leading-[20px]">
             Value:
           </p>
-          <p className="text-secondary font-menlo text-[14px] font-normal not-italic leading-[20px]">
+          <p className="text-secondary font-mono text-[14px] font-normal not-italic leading-[20px]">
             {value}
           </p>
         </div>

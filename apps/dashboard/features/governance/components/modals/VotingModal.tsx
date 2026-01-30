@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@/shared/components";
-import { User2Icon, X } from "lucide-react";
+import { BadgeStatus, Button } from "@/shared/components";
+import { Check, User2Icon, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Query_Proposals_Items_Items } from "@anticapture/graphql-client/hooks";
 
@@ -50,6 +50,8 @@ export const VotingModal = ({
   const abstainPercentage =
     (Number(proposal?.abstainVotes) / Number(totalVotes)) * 100;
 
+  const isQuorumReached = totalVotes >= Number(proposal?.quorum || 0);
+
   const { address, chain } = useAccount();
   const { data: walletClient } = useWalletClient();
 
@@ -84,10 +86,12 @@ export const VotingModal = ({
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center transition-colors  ${
+        isOpen ? "visible opacity-100" : "invisible opacity-0"
+      }`}
+    >
       {/* Backdrop with blur */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
@@ -96,7 +100,11 @@ export const VotingModal = ({
       />
 
       {/* Modal content */}
-      <div className="border-border-default bg-surface-default relative z-10 mx-4 w-full max-w-[600px] rounded-lg border shadow-lg">
+      <div
+        className={`border-border-default bg-surface-default relative z-10 mx-4 w-full max-w-[600px] border shadow-lg transition-all duration-200 ${
+          isOpen ? "translate-y-0 scale-100" : "translate-y-4 scale-95"
+        }`}
+      >
         {/* Header */}
         <div className="border-border-default mb-4 flex items-start justify-between border-b px-4 py-3">
           <div className="flex flex-col items-start">
@@ -164,7 +172,7 @@ export const VotingModal = ({
                 decimals={decimals}
               />
 
-              <div className="border-border-default flex items-center justify-start gap-2 border px-[10px] py-2">
+              <div className="border-border-default bg-surface-contrast flex items-center justify-start gap-2 border px-[10px] py-2">
                 <User2Icon className="text-secondary size-3.5" />
                 <p className="font-inter text-primary text-[14px] font-normal not-italic leading-[20px]">
                   Quorum
@@ -172,7 +180,15 @@ export const VotingModal = ({
                 <p className="font-inter text-secondary text-[14px] font-normal not-italic leading-[20px]">
                   {userReadableTotalVotes} / {userReadableQuorum}
                 </p>
+                {isQuorumReached ? (
+                  <BadgeStatus variant="success" icon={Check}>
+                    Reached
+                  </BadgeStatus>
+                ) : (
+                  <BadgeStatus variant="dimmed">Not Reached</BadgeStatus>
+                )}
               </div>
+            
             </div>
 
             {/* Comment  */}
@@ -181,7 +197,7 @@ export const VotingModal = ({
                 Comment <span className="text-secondary">(optional)</span>
               </p>
               <textarea
-                className="border-border-default text-primary flex h-[100px] w-full items-start gap-[var(--components-input-inner-gap,10px)] self-stretch rounded-md border bg-transparent px-[var(--components-input-padding-x,10px)] py-[var(--components-input-padding-y,8px)] focus:outline-none"
+                className="border-border-default text-primary flex h-[100px] w-full items-start gap-2.5 self-stretch rounded-md border bg-transparent px-2.5 py-2 text-[14px] focus:outline-none"
                 placeholder="Enter your comment"
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
@@ -191,8 +207,8 @@ export const VotingModal = ({
         )}
 
         <div className="border-border-default flex justify-end gap-2 border-t px-4 py-3">
-          <Button variant="ghost" onClick={onClose}>
-            Close
+          <Button variant="outline" onClick={onClose}>
+            Cancel
           </Button>
           <Button
             data-ph-event="vote_submit"
