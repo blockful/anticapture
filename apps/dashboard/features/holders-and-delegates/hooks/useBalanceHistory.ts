@@ -24,7 +24,7 @@ export function useBalanceHistory({
   customFromFilter,
   customToFilter,
   filterVariables,
-  itemsPerPage = 10,
+  limit = 10,
   decimals,
 }: {
   accountId: string;
@@ -36,7 +36,7 @@ export function useBalanceHistory({
   orderDirection?: "asc" | "desc";
   transactionType?: "all" | "buy" | "sell";
   filterVariables?: AmountFilterVariables;
-  itemsPerPage?: number;
+  limit?: number;
 }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [isPaginationLoading, setIsPaginationLoading] = useState(false);
@@ -63,7 +63,7 @@ export function useBalanceHistory({
       from: customFromFilter,
       to: customToFilter,
       offset: 0,
-      limit: itemsPerPage,
+      limit,
     };
 
     switch (transactionType) {
@@ -85,7 +85,7 @@ export function useBalanceHistory({
     filterVariables,
     orderBy,
     orderDirection,
-    itemsPerPage,
+    limit,
   ]);
 
   const { data, error, loading, fetchMore } = useBalanceHistoryQuery({
@@ -115,8 +115,8 @@ export function useBalanceHistory({
   }, [data, accountId, decimals]);
 
   const hasNextPage = useMemo(() => {
-    return currentPage * itemsPerPage < (data?.transfers?.totalCount || 0);
-  }, [currentPage, itemsPerPage, data?.transfers?.totalCount]);
+    return currentPage * limit < (data?.transfers?.totalCount || 0);
+  }, [currentPage, limit, data?.transfers?.totalCount]);
 
   const fetchNextPage = useCallback(async () => {
     if (!hasNextPage || isPaginationLoading) return;
@@ -124,7 +124,7 @@ export function useBalanceHistory({
     setIsPaginationLoading(true);
 
     const nextPage = currentPage + 1;
-    const offset = (nextPage - 1) * itemsPerPage;
+    const offset = (nextPage - 1) * limit;
 
     try {
       await fetchMore({
@@ -159,7 +159,7 @@ export function useBalanceHistory({
     }
   }, [
     currentPage,
-    itemsPerPage,
+    limit,
     hasNextPage,
     isPaginationLoading,
     fetchMore,

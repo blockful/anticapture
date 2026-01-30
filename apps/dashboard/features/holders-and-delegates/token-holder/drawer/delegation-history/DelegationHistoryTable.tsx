@@ -39,13 +39,16 @@ interface DelegationData {
   timestamp: number;
 }
 
+interface DelegationHistoryTableProps {
+  address: string;
+  daoId: DaoIdEnum;
+}
+
 export const DelegationHistoryTable = ({
   address,
   daoId,
-}: {
-  address: string;
-  daoId: DaoIdEnum;
-}) => {
+}: DelegationHistoryTableProps) => {
+  const limit: number = 20;
   const { decimals } = daoConfig[daoId];
   const [isMounted, setIsMounted] = useState<boolean>(false);
 
@@ -86,6 +89,7 @@ export const DelegationHistoryTable = ({
     orderBy: sortBy,
     orderDirection: sortOrder,
     filterVariables,
+    limit,
   });
 
   useEffect(() => {
@@ -339,22 +343,19 @@ export const DelegationHistoryTable = ({
   ];
 
   return (
-    <div className="flex h-full w-full flex-col gap-4 p-4">
-      <div className="h-full w-full overflow-y-auto">
-        <Table
-          size="sm"
-          columns={delegationHistoryColumns}
-          data={loading ? Array(12).fill({}) : data}
-          filterColumn="address"
-          hasMore={pagination.hasNextPage}
-          isLoadingMore={fetchingMore}
-          onLoadMore={fetchNextPage}
-          withDownloadCSV={true}
-          wrapperClassName="h-[450px]"
-          className="h-[400px]"
-          error={error}
-        />
-      </div>
+    <div className="flex h-full w-full flex-col overflow-hidden">
+      <Table
+        size="sm"
+        columns={delegationHistoryColumns}
+        data={loading ? Array(limit).fill({}) : data}
+        filterColumn="address"
+        hasMore={pagination.hasNextPage}
+        isLoadingMore={fetchingMore}
+        onLoadMore={fetchNextPage}
+        withDownloadCSV={true}
+        wrapperClassName="h-full overflow-y-auto"
+        error={error}
+      />
     </div>
   );
 };

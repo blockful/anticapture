@@ -38,6 +38,7 @@ export const TopInteractionsTable = ({
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const [currentAddressFilter, setCurrentAddressFilter] =
     useQueryState("tabAddress");
+
   const [sortBy, setSortBy] = useQueryState(
     "orderBy",
     parseAsStringEnum(["transferCount", "totalVolume"]).withDefault(
@@ -359,15 +360,14 @@ export const TopInteractionsTable = ({
   ];
 
   return (
-    <div className="flex w-full flex-col gap-2">
+    <div className="flex h-full w-full flex-col overflow-hidden">
       <Table
         columns={columns}
-        data={loading ? Array(12).fill({}) : tableData}
+        data={loading ? Array(20).fill({}) : tableData}
         filterColumn="address"
         size="sm"
         withDownloadCSV={true}
-        wrapperClassName="h-[450px]"
-        className="h-[400px]"
+        wrapperClassName="h-full overflow-y-auto"
         error={error}
       />
     </div>

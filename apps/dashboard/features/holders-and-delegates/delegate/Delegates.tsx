@@ -71,7 +71,7 @@ export const Delegates = ({
   timePeriod = TimeInterval.THIRTY_DAYS,
   daoId,
 }: DelegatesProps) => {
-  const pageLimit: number = 15;
+  const pageLimit: number = 20;
 
   const [drawerAddress, setDrawerAddress] = useQueryState("drawerAddress");
   const [currentAddressFilter, setCurrentAddressFilter] =
@@ -398,18 +398,17 @@ export const Delegates = ({
 
   return (
     <>
-      <div className="flex flex-col gap-2">
+      <div className="flex h-[calc(100vh-16rem)] min-h-[300px] w-full flex-col">
         <Table
           columns={delegateColumns}
-          data={loading ? Array(12).fill({}) : tableData}
+          data={loading ? Array(pageLimit).fill({}) : tableData}
           onRowClick={(row) => setDrawerAddress(row.address as Address)}
           size="sm"
           hasMore={pagination.hasNextPage}
           isLoadingMore={fetchingMore}
           onLoadMore={fetchNextPage}
           withDownloadCSV={true}
-          wrapperClassName="h-[450px]"
-          className="h-[400px]"
+          wrapperClassName="h-full overflow-y-auto"
           error={error}
         />
       </div>

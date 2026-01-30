@@ -17,7 +17,7 @@ interface PaginationInfo {
   totalCount: number;
   currentPage: number;
   totalPages: number;
-  itemsPerPage: number;
+  limit: number;
   currentItemsCount: number;
 }
 
@@ -62,6 +62,7 @@ interface UseVotingPowerParams {
   address: string;
   orderBy?: string;
   orderDirection?: QueryInput_AccountBalances_OrderDirection;
+  limit?: number;
 }
 
 export const useVotingPower = ({
@@ -69,8 +70,8 @@ export const useVotingPower = ({
   address,
   orderBy = "balance",
   orderDirection = QueryInput_AccountBalances_OrderDirection.Desc,
+  limit = 15,
 }: UseVotingPowerParams): UseVotingPowerResult => {
-  const itemsPerPage = 10;
   const {
     daoOverview: { token },
   } = daoConfig[daoId];
@@ -102,7 +103,7 @@ export const useVotingPower = ({
       addresses: [address],
       address,
       orderDirection,
-      limit: itemsPerPage,
+      limit,
       skip: 0,
     },
     notifyOnNetworkStatusChange: true,
@@ -115,10 +116,10 @@ export const useVotingPower = ({
       addresses: [address],
       address,
       orderDirection,
-      limit: itemsPerPage,
+      limit,
       skip: 0,
     });
-  }, [orderBy, orderDirection, refetch, itemsPerPage, address]);
+  }, [orderBy, orderDirection, refetch, limit, address]);
 
   const accountBalances = delegatorsVotingPowerDetails?.accountBalances?.items;
 
@@ -188,7 +189,7 @@ export const useVotingPower = ({
       delegatorsVotingPowerDetails?.accountBalances?.totalCount || 0;
     const currentItemsCount =
       delegatorsVotingPowerDetails?.accountBalances?.items?.length || 0;
-    const totalPages = Math.ceil(totalCount / itemsPerPage);
+    const totalPages = Math.ceil(totalCount / limit);
 
     return {
       hasNextPage: currentPage < totalPages,
@@ -196,14 +197,14 @@ export const useVotingPower = ({
       totalCount,
       currentPage,
       totalPages,
-      itemsPerPage,
+      limit,
       currentItemsCount,
     };
   }, [
     delegatorsVotingPowerDetails?.accountBalances?.totalCount,
     delegatorsVotingPowerDetails?.accountBalances?.items?.length,
     currentPage,
-    itemsPerPage,
+    limit,
   ]);
 
   // Next page
@@ -226,7 +227,7 @@ export const useVotingPower = ({
           skip,
           orderBy,
           orderDirection,
-          limit: itemsPerPage,
+          limit,
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult?.accountBalances) return previousResult;
@@ -261,7 +262,7 @@ export const useVotingPower = ({
     orderBy,
     orderDirection,
     isPaginationLoading,
-    itemsPerPage,
+    limit,
     delegatorsVotingPowerDetails?.accountBalances?.items?.length,
   ]);
 

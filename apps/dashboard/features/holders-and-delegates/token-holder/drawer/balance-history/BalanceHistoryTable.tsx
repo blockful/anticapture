@@ -50,6 +50,7 @@ export const BalanceHistoryTable = ({
   accountId: string;
   daoId: DaoIdEnum;
 }) => {
+  const limit: number = 20;
   const { decimals } = daoConfig[daoId];
 
   const [typeFilter, setTypeFilter] = useQueryState(
@@ -102,6 +103,7 @@ export const BalanceHistoryTable = ({
       customFromFilter,
       customToFilter,
       filterVariables,
+      limit,
     });
 
   const isInitialLoading = loading && (!transfers || transfers.length === 0);
@@ -468,17 +470,18 @@ export const BalanceHistoryTable = ({
   ];
 
   return (
-    <Table
-      columns={balanceHistoryColumns}
-      data={isInitialLoading ? Array(12).fill({}) : transformedData}
-      size="sm"
-      hasMore={hasNextPage}
-      isLoadingMore={loading}
-      onLoadMore={fetchNextPage}
-      wrapperClassName="h-[450px]"
-      className="h-[400px]"
-      withDownloadCSV={true}
-      error={error}
-    />
+    <div className="flex h-full w-full flex-col overflow-hidden">
+      <Table
+        columns={balanceHistoryColumns}
+        data={isInitialLoading ? Array(limit).fill({}) : transformedData}
+        size="sm"
+        hasMore={hasNextPage}
+        isLoadingMore={loading}
+        onLoadMore={fetchNextPage}
+        wrapperClassName="h-full overflow-y-auto"
+        withDownloadCSV={true}
+        error={error}
+      />
+    </div>
   );
 };

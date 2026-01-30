@@ -63,7 +63,7 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     ];
 
     return (
-      <div className="flex h-full w-full items-center justify-between">
+      <div className="flex w-full items-center justify-between">
         <div className="flex gap-2">
           {tabs.map((tab) => (
             <TabButton
@@ -80,24 +80,23 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   };
 
   return (
-    <div>
-      <TheSectionLayout
-        title={PAGES_CONSTANTS.holdersAndDelegates.title}
-        subtitle={"Holders & Delegates"}
-        icon={<UserCheck className="section-layout-icon" />}
-        description={PAGES_CONSTANTS.holdersAndDelegates.description}
-      >
-        <SubSectionsContainer>
-          <div className="flex h-full w-full items-center justify-between">
-            <HoldersAndDelegatesLeftComponent />
-            <SwitcherDateMobile
-              defaultValue={days || defaultDays}
-              setTimeInterval={setDays}
-            />
-          </div>
-          {tabComponentMap[activeTab as TabId]}
-        </SubSectionsContainer>
-      </TheSectionLayout>
-    </div>
+    <TheSectionLayout
+      title={PAGES_CONSTANTS.holdersAndDelegates.title}
+      subtitle={"Holders & Delegates"}
+      icon={<UserCheck className="section-layout-icon" />}
+      description={PAGES_CONSTANTS.holdersAndDelegates.description}
+      className="lg:pb-0"
+    >
+      <SubSectionsContainer>
+        <div className="flex w-full items-center justify-between">
+          <HoldersAndDelegatesLeftComponent />
+          <SwitcherDateMobile
+            defaultValue={days || defaultDays}
+            setTimeInterval={setDays}
+          />
+        </div>
+        {tabComponentMap[activeTab as TabId]}
+      </SubSectionsContainer>
+    </TheSectionLayout>
   );
 };

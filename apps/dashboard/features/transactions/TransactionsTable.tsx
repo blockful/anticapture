@@ -26,6 +26,7 @@ export const TransactionsTable = ({
   startDate: number;
   endDate: number;
 }) => {
+  const pageLimit: number = 20;
   const { daoId } = useParams<{ daoId: DaoIdEnum }>();
   const filterParams = useTransactionsTableParams();
 
@@ -71,6 +72,7 @@ export const TransactionsTable = ({
       affectedSupply: buildFilters(hasTransfer, affectedSupply),
       includes,
     },
+    limit: pageLimit,
   });
 
   const columns = getTransactionsColumns({
@@ -81,10 +83,10 @@ export const TransactionsTable = ({
 
   if (loading && (!tableData || tableData.length === 0)) {
     return (
-      <div className="flex flex-col gap-2">
+      <div className="flex h-[calc(100vh-20rem)] min-h-[300px] w-full flex-col">
         <Table
           columns={columns}
-          data={Array.from({ length: 12 }, () => ({
+          data={Array.from({ length: pageLimit }, () => ({
             id: "loading-row",
             affectedSupply: ["CEX", "DEX"] as SupplyType[],
             amount: "1000000",
@@ -102,31 +104,27 @@ export const TransactionsTable = ({
           size="sm"
           mobileTableFixed={true}
           withDownloadCSV={true}
-          wrapperClassName="h-[450px]"
-          className="h-[400px]"
+          wrapperClassName="h-full overflow-y-auto"
         />
       </div>
     );
   }
 
   return (
-    <div className="w-full text-white">
-      <div className="flex flex-col gap-2">
-        <Table
-          columns={columns}
-          data={tableData}
-          size="sm"
-          hasMore={pagination.hasNextPage}
-          isLoadingMore={fetchingMore}
-          onLoadMore={fetchNextPage}
-          wrapperClassName="h-[450px]"
-          className="h-[400px]"
-          enableExpanding={true}
-          getSubRows={(row) => row.subRows}
-          withSorting={true}
-          mobileTableFixed={true}
-        />
-      </div>
+    <div className="flex h-[calc(100vh-20rem)] min-h-[300px] w-full flex-col text-white">
+      <Table
+        columns={columns}
+        data={tableData}
+        size="sm"
+        hasMore={pagination.hasNextPage}
+        isLoadingMore={fetchingMore}
+        onLoadMore={fetchNextPage}
+        wrapperClassName="h-full overflow-y-auto"
+        enableExpanding={true}
+        getSubRows={(row) => row.subRows}
+        withSorting={true}
+        mobileTableFixed={true}
+      />
     </div>
   );
 };

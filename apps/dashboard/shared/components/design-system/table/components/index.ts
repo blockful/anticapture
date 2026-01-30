@@ -6,3 +6,4 @@ export * from "@/shared/components/design-system/table/components/TableHead";
 export * from "@/shared/components/design-system/table/components/TableHeader";
 export * from "@/shared/components/design-system/table/components/TableRow";
 export * from "@/shared/components/design-system/table/components/TableContainer";
+export * from "@/shared/components/design-system/table/components/EmptyState";

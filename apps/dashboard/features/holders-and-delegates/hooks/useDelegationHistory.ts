@@ -18,7 +18,7 @@ interface PaginationInfo {
   totalCount: number;
   currentPage: number;
   totalPages: number;
-  itemsPerPage: number;
+  limit: number;
   currentItemsCount: number;
 }
 
@@ -44,6 +44,7 @@ interface UseDelegationHistoryParams {
   orderBy?: string;
   orderDirection?: string;
   filterVariables?: AmountFilterVariables;
+  limit?: number;
 }
 
 export const useDelegationHistory = ({
@@ -53,9 +54,8 @@ export const useDelegationHistory = ({
   orderBy = "timestamp",
   orderDirection = "desc",
   filterVariables,
+  limit = 15,
 }: UseDelegationHistoryParams): UseDelegationHistoryResult => {
-  const itemsPerPage = 10; // This should match the limit in the GraphQL query
-
   // Track current page - this is the source of truth for page number
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -76,8 +76,8 @@ export const useDelegationHistory = ({
   } = useGetDelegationHistoryItemsQuery({
     variables: {
       delegator: delegatorAccountId,
-      skip: (currentPage - 1) * itemsPerPage,
-      limit: itemsPerPage,
+      skip: (currentPage - 1) * limit,
+      limit,
       orderDirection:
         orderDirection === "asc"
           ? QueryInput_HistoricalDelegations_OrderDirection.Asc
@@ -104,13 +104,13 @@ export const useDelegationHistory = ({
     setCurrentPage(1);
     refetch({
       skip: 0,
-      limit: itemsPerPage,
+      limit,
       orderDirection:
         orderDirection === "asc"
           ? QueryInput_HistoricalDelegations_OrderDirection.Asc
           : QueryInput_HistoricalDelegations_OrderDirection.Desc,
     });
-  }, [orderDirection, refetch, itemsPerPage]);
+  }, [orderDirection, refetch, limit]);
 
   const processedData = useMemo(() => {
     return (
@@ -125,7 +125,7 @@ export const useDelegationHistory = ({
       delegationHistoryData?.historicalDelegations?.totalCount || 0;
     const currentItemsCount =
       delegationHistoryData?.historicalDelegations?.items?.length || 0;
-    const totalPages = Math.ceil(totalCount / itemsPerPage);
+    const totalPages = Math.ceil(totalCount / limit);
     const hasNextPage = currentPage < totalPages;
     const hasPreviousPage = currentPage > 1;
 
@@ -137,14 +137,14 @@ export const useDelegationHistory = ({
       totalCount,
       currentPage,
       totalPages,
-      itemsPerPage,
+      limit,
       currentItemsCount,
     };
   }, [
     delegationHistoryData?.historicalDelegations?.items?.length,
     delegationHistoryData?.historicalDelegations?.totalCount,
     currentPage,
-    itemsPerPage,
+    limit,
   ]);
 
   // Fetch next page function
@@ -157,12 +157,12 @@ export const useDelegationHistory = ({
     setIsPaginationLoading(true);
 
     try {
-      const skip = currentPage * itemsPerPage;
+      const skip = currentPage * limit;
       await fetchMore({
         variables: {
           delegator: delegatorAccountId,
           skip,
-          limit: itemsPerPage,
+          limit,
           orderDirection:
             orderDirection === "asc"
               ? QueryInput_HistoricalDelegations_OrderDirection.Asc
@@ -217,7 +217,7 @@ export const useDelegationHistory = ({
     fetchMore,
     pagination.hasNextPage,
     currentPage,
-    itemsPerPage,
+    limit,
     orderDirection,
     delegatorAccountId,
     delegateAccountId,
@@ -235,12 +235,12 @@ export const useDelegationHistory = ({
     setIsPaginationLoading(true);
 
     try {
-      const skip = Math.max(0, (currentPage - 2) * itemsPerPage);
+      const skip = Math.max(0, (currentPage - 2) * limit);
       await fetchMore({
         variables: {
           delegator: delegatorAccountId,
           skip,
-          limit: itemsPerPage,
+          limit,
           orderDirection:
             orderDirection === "asc"
               ? QueryInput_HistoricalDelegations_OrderDirection.Asc
@@ -283,7 +283,7 @@ export const useDelegationHistory = ({
     fetchMore,
     pagination.hasPreviousPage,
     currentPage,
-    itemsPerPage,
+    limit,
     orderDirection,
     delegatorAccountId,
     delegateAccountId,

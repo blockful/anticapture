@@ -11,7 +11,7 @@ import { DelegateDelegationsHistory } from "@/features/holders-and-delegates/del
 import { DaoIdEnum } from "@/shared/types/daos";
 import { VotingPower } from "@/features/holders-and-delegates/delegate/drawer/voting-power/VotingPower";
 import { BalanceHistory } from "@/features/holders-and-delegates/token-holder/drawer/balance-history/BalanceHistory";
-import { DelegationHistoryTable } from "@/features/holders-and-delegates/token-holder/drawer/delegation-history/DelegationHistoryTable";
+import { DelegationHistory } from "@/features/holders-and-delegates/token-holder/drawer/delegation-history/DelegationHistory";
 import { DelegateProposalsActivity } from "@/features/holders-and-delegates/delegate/drawer/votes/DelegateProposalsActivity";
 import { IconButton } from "@/shared/components";
 import { TopInteractions } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/TopInteractions";
@@ -65,7 +65,7 @@ export const HoldersAndDelegatesDrawer = ({
         {
           id: "delegationHistory",
           label: "Delegation History",
-          content: <DelegationHistoryTable address={address} daoId={daoId} />,
+          content: <DelegationHistory address={address} daoId={daoId} />,
         },
         {
           id: "topInteractions",
@@ -138,8 +138,8 @@ export const HoldersAndDelegatesDrawer = ({
       direction={isMobile ? "bottom" : "right"}
     >
       <DrawerContent>
-        <div className="bg-surface-default h-full w-full overflow-y-auto">
-          <div className="bg-surface-contrast w-full">
+        <div className="bg-surface-default flex h-full w-full flex-col overflow-hidden">
+          <div className="bg-surface-contrast w-full shrink-0">
             {/* Header */}
             <div className="bg-surface-contrast flex justify-between px-4 pb-2 pt-4">
               <div className="flex flex-col gap-1">
@@ -215,7 +215,9 @@ export const HoldersAndDelegatesDrawer = ({
               </TabsList>
             </Tabs>
           </div>
-          {renderTabContent(activeTab)}
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+            {renderTabContent(activeTab)}
+          </div>
         </div>
       </DrawerContent>
     </Drawer>

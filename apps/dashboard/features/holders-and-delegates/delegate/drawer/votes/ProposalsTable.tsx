@@ -400,17 +400,16 @@ export const ProposalsTable = ({
   ];
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex h-full w-full flex-col gap-4 overflow-hidden">
       <Table
         columns={proposalColumns}
-        data={loading ? Array(12).fill({}) : tableData}
+        data={loading ? Array(20).fill({}) : tableData}
         size="sm"
         hasMore={pagination.hasNextPage}
         isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}
         withDownloadCSV={true}
-        wrapperClassName="h-[450px]"
-        className="h-[400px]"
+        wrapperClassName="h-full overflow-y-auto"
         error={error}
       />
     </div>

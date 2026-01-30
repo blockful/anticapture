@@ -8,9 +8,8 @@ import {
 import { DaoIdEnum } from "@/shared/types/daos";
 import { NetworkStatus } from "@apollo/client";
 
-interface UseProposalsActivityParams
-  extends GetProposalsActivityQueryVariables {
-  itemsPerPage: number;
+interface UseProposalsActivityParams extends GetProposalsActivityQueryVariables {
+  limit: number;
   daoId: DaoIdEnum;
 }
 
@@ -44,11 +43,10 @@ export const useProposalsActivity = ({
   daoId,
   fromDate,
   skip,
-  limit,
   orderBy,
   orderDirection,
   userVoteFilter,
-  itemsPerPage,
+  limit,
 }: UseProposalsActivityParams): UseProposalsActivityResult => {
   const [accumulatedProposals, setAccumulatedProposals] = useState<
     Query_ProposalsActivity_Proposals_Items[]
@@ -98,9 +96,9 @@ export const useProposalsActivity = ({
   // Calculate pagination values
   const pagination = useMemo(() => {
     const totalPages = data?.proposalsActivity?.totalProposals
-      ? Math.ceil(data.proposalsActivity.totalProposals / itemsPerPage)
+      ? Math.ceil(data.proposalsActivity.totalProposals / limit)
       : 1;
-    const currentPageCalc = skip ? Math.floor(skip / itemsPerPage) + 1 : 1;
+    const currentPageCalc = skip ? Math.floor(skip / limit) + 1 : 1;
     const hasNextPage = currentPageCalc < totalPages;
     const hasPreviousPage = currentPageCalc > 1;
 
@@ -110,12 +108,10 @@ export const useProposalsActivity = ({
       hasPreviousPage,
       currentPage: currentPageCalc,
     };
-  }, [data?.proposalsActivity?.totalProposals, skip, itemsPerPage]);
+  }, [data?.proposalsActivity?.totalProposals, skip, limit]);
 
   const totalProposals = data?.proposalsActivity?.totalProposals || 0;
-  const totalPages = totalProposals
-    ? Math.ceil(totalProposals / itemsPerPage)
-    : 1;
+  const totalPages = totalProposals ? Math.ceil(totalProposals / limit) : 1;
   const hasNextPage = currentPage < totalPages;
 
   const fetchNextPage = useCallback(async () => {
