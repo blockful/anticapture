@@ -172,13 +172,18 @@ export const BalanceHistoryVariationGraph = ({
     );
   }
 
+  const head = balanceHistory[0]
   const extendedChartData = [
     {
       timestamp: fromDate
         ? fromDate * 1000
         : // 1 day in milliseconds to avoid hover conflict when max data is selected
-          balanceHistory[0]?.timestamp - 86400000,
-      balance: balanceHistory[0]?.balance - balanceHistory[0]?.amount,
+        head?.timestamp - 86400000,
+      balance: head?.balance + (
+        head?.direction === "out" ?
+          - head?.amount :
+          + head?.amount
+      ),
     },
     ...balanceHistory,
     {
