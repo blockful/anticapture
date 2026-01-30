@@ -24,7 +24,7 @@ export const DelegateProposalsActivity = ({
   address,
   daoId,
 }: DelegateProposalsActivityProps) => {
-  const itemsPerPage: number = 20;
+  const limit: number = 20;
 
   const [userVoteFilter, setUserVoteFilter] = useState<string>("all");
   const [orderBy, setOrderBy] = useQueryState(
@@ -62,7 +62,7 @@ export const DelegateProposalsActivity = ({
         userVoteFilter === "all"
           ? undefined
           : (userVoteFilter as QueryInput_ProposalsActivity_UserVoteFilter),
-      itemsPerPage,
+      limit,
     });
 
   // Helper function to format average time (convert seconds to days)

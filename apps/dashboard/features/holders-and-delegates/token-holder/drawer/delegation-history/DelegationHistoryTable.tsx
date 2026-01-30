@@ -48,7 +48,7 @@ export const DelegationHistoryTable = ({
   address,
   daoId,
 }: DelegationHistoryTableProps) => {
-  const itemsPerPage: number = 20;
+  const limit: number = 20;
   const { decimals } = daoConfig[daoId];
   const [isMounted, setIsMounted] = useState<boolean>(false);
 
@@ -89,7 +89,7 @@ export const DelegationHistoryTable = ({
     orderBy: sortBy,
     orderDirection: sortOrder,
     filterVariables,
-    limit: itemsPerPage,
+    limit,
   });
 
   useEffect(() => {
@@ -347,7 +347,7 @@ export const DelegationHistoryTable = ({
       <Table
         size="sm"
         columns={delegationHistoryColumns}
-        data={loading ? Array(itemsPerPage).fill({}) : data}
+        data={loading ? Array(limit).fill({}) : data}
         filterColumn="address"
         hasMore={pagination.hasNextPage}
         isLoadingMore={fetchingMore}

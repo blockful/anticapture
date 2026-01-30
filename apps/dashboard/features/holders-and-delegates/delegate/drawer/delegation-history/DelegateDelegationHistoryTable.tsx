@@ -38,7 +38,7 @@ export const DelegateDelegationHistoryTable = ({
   accountId,
   daoId,
 }: DelegateDelegationHistoryTableProps) => {
-  const itemsPerPage: number = 20;
+  const limit: number = 20;
   const { decimals } = daoConfig[daoId];
 
   const [sortBy, setSortBy] = useQueryState(
@@ -71,7 +71,7 @@ export const DelegateDelegationHistoryTable = ({
       orderBy: sortBy,
       orderDirection: sortDirection,
       filterVariables,
-      itemsPerPage,
+      limit,
     });
 
   const isInitialLoading =
@@ -492,9 +492,7 @@ export const DelegateDelegationHistoryTable = ({
     <div className="flex h-full w-full flex-col gap-2 overflow-hidden p-4">
       <Table
         columns={columns}
-        data={
-          isInitialLoading ? Array(itemsPerPage).fill({}) : delegationHistory
-        }
+        data={isInitialLoading ? Array(limit).fill({}) : delegationHistory}
         size="sm"
         hasMore={hasNextPage}
         isLoadingMore={loading}

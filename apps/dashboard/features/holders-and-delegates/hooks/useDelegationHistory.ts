@@ -104,7 +104,7 @@ export const useDelegationHistory = ({
     setCurrentPage(1);
     refetch({
       skip: 0,
-      limit: limit,
+      limit,
       orderDirection:
         orderDirection === "asc"
           ? QueryInput_HistoricalDelegations_OrderDirection.Asc
@@ -162,7 +162,7 @@ export const useDelegationHistory = ({
         variables: {
           delegator: delegatorAccountId,
           skip,
-          limit: limit,
+          limit,
           orderDirection:
             orderDirection === "asc"
               ? QueryInput_HistoricalDelegations_OrderDirection.Asc
@@ -240,7 +240,7 @@ export const useDelegationHistory = ({
         variables: {
           delegator: delegatorAccountId,
           skip,
-          limit: limit,
+          limit,
           orderDirection:
             orderDirection === "asc"
               ? QueryInput_HistoricalDelegations_OrderDirection.Asc

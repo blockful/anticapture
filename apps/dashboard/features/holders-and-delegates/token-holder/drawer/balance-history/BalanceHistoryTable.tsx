@@ -50,7 +50,7 @@ export const BalanceHistoryTable = ({
   accountId: string;
   daoId: DaoIdEnum;
 }) => {
-  const itemsPerPage: number = 20;
+  const limit: number = 20;
   const { decimals } = daoConfig[daoId];
 
   const [typeFilter, setTypeFilter] = useQueryState(
@@ -103,7 +103,7 @@ export const BalanceHistoryTable = ({
       customFromFilter,
       customToFilter,
       filterVariables,
-      itemsPerPage,
+      limit,
     });
 
   const isInitialLoading = loading && (!transfers || transfers.length === 0);
@@ -473,7 +473,7 @@ export const BalanceHistoryTable = ({
     <div className="flex h-full w-full flex-col overflow-hidden">
       <Table
         columns={balanceHistoryColumns}
-        data={isInitialLoading ? Array(itemsPerPage).fill({}) : transformedData}
+        data={isInitialLoading ? Array(limit).fill({}) : transformedData}
         size="sm"
         hasMore={hasNextPage}
         isLoadingMore={loading}

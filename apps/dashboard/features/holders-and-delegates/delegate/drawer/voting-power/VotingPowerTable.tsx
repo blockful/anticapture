@@ -23,7 +23,7 @@ export const VotingPowerTable = ({
   address: string;
   daoId: string;
 }) => {
-  const itemsPerPage: number = 20;
+  const limit: number = 20;
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const [sortBy, setSortBy] = useQueryState(
     "orderBy",
@@ -43,7 +43,7 @@ export const VotingPowerTable = ({
       address: address,
       orderBy: sortBy,
       orderDirection: sortOrder as QueryInput_AccountBalances_OrderDirection,
-      limit: itemsPerPage,
+      limit,
     });
 
   useEffect(() => {
@@ -214,7 +214,7 @@ export const VotingPowerTable = ({
     <div className="flex h-full w-full flex-col gap-2 overflow-hidden">
       <Table
         columns={columns}
-        data={loading ? Array(itemsPerPage).fill({}) : tableData}
+        data={loading ? Array(limit).fill({}) : tableData}
         filterColumn="address"
         size="sm"
         hasMore={pagination.hasNextPage}
