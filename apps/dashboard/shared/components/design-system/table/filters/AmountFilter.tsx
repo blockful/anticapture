@@ -1,7 +1,6 @@
 "use client";
 
 import { ChangeEvent, useState } from "react";
-import { Filter } from "lucide-react";
 import {
   Popover,
   PopoverTrigger,
@@ -11,6 +10,7 @@ import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/utils/";
 import SearchField from "@/shared/components/design-system/SearchField";
 import { ResetIcon } from "@radix-ui/react-icons";
+import { ButtonFilter } from "@/shared/components/design-system/table/ButtonFilter";
 
 interface AmountFilterProps {
   onApply: (params: { min?: number; max?: number }) => void;
@@ -31,14 +31,17 @@ export function AmountFilter({
   const [tempMax, setTempMax] = useState<string>(
     currentMax !== undefined ? String(currentMax) : "",
   );
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const handleReset = () => {
     setTempMin("");
     setTempMax("");
     onApply({});
+    setIsOpen(false);
   };
 
   const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
     if (open) {
       setTempMin(currentMin !== undefined ? String(currentMin) : "");
       setTempMax(currentMax !== undefined ? String(currentMax) : "");
@@ -53,23 +56,20 @@ export function AmountFilter({
 
   const handleApply = () => {
     onApply({ min: parseNum(tempMin), max: parseNum(tempMax) });
+    setIsOpen(false);
   };
 
+  const hasFilters = currentMin !== undefined || currentMax !== undefined;
+
   return (
-    <Popover onOpenChange={handleOpenChange}>
+    <Popover open={isOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
-        <button
-          aria-label="Filter amount"
-          className={cn(
-            "group flex cursor-pointer items-center rounded-sm border p-1 transition-colors",
-            "hover:border-highlight bg-surface-hover border-transparent",
-            (currentMin !== undefined || currentMax !== undefined) &&
-              "border-highlight bg-surface-hover",
-            className,
-          )}
-        >
-          <Filter className="text-primary size-3" />
-        </button>
+        <ButtonFilter
+          onClick={() => setIsOpen(!isOpen)}
+          isOpen={isOpen}
+          hasFilters={hasFilters}
+          className={className}
+        />
       </PopoverTrigger>
       <PopoverContent
         side="bottom"
@@ -123,7 +123,7 @@ export function AmountFilter({
           <div className="px-3 pb-3">
             <Button
               onClick={handleApply}
-              className="hover:bg-surface-hover h-7 w-full bg-white px-2 py-1 text-sm leading-[20px] text-black"
+              className="bg-surface-action-primary hover:bg-surface-action-primary/80 text-inverted h-7 w-full px-2 py-1 text-sm font-medium leading-5"
             >
               Apply
             </Button>

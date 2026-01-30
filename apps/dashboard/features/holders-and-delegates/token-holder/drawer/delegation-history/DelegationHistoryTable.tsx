@@ -193,9 +193,15 @@ export const DelegationHistoryTable = ({
           <AmountFilter
             filterId="delegation-amount-filter"
             onApply={(filterState: AmountFilterState) => {
-              setSortOrder(
-                filterState.sortOrder === "largest-first" ? "desc" : "asc",
-              );
+              if (filterState.sortOrder) {
+                setSortOrder(
+                  filterState.sortOrder === "largest-first" ? "desc" : "asc",
+                );
+                setSortBy("amount");
+              } else {
+                setSortBy("timestamp");
+                setSortOrder("desc");
+              }
 
               setFilterVariables(() => ({
                 fromValue: filterState.minAmount
@@ -207,14 +213,15 @@ export const DelegationHistoryTable = ({
               }));
 
               setIsFilterActive(
-                !!(filterVariables?.fromValue || filterVariables?.toValue),
+                !!(
+                  filterState.minAmount ||
+                  filterState.maxAmount ||
+                  filterState.sortOrder
+                ),
               );
-              // Update sort to amount when filter is applied
-              setSortBy("amount");
             }}
             onReset={() => {
               setIsFilterActive(false);
-              // Reset to default sorting
               setSortBy("timestamp");
               setFilterVariables(() => ({
                 fromValue: "",

@@ -123,12 +123,11 @@ export const TokenHolders = ({
     {
       accessorKey: "address",
       header: () => (
-        <div className="text-table-header flex w-full items-center justify-start">
+        <div className="text-table-header flex w-full items-center justify-start gap-2">
           <span>Address</span>
           <AddressFilter
             onApply={handleAddressFilterApply}
             currentFilter={currentAddressFilter || undefined}
-            className="ml-2"
           />
         </div>
       ),

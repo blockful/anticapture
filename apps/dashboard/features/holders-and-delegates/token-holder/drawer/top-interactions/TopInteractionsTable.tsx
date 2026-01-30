@@ -107,12 +107,11 @@ export const TopInteractionsTable = ({
     {
       accessorKey: "address",
       header: () => (
-        <div className="text-table-header flex w-full items-center justify-start">
+        <div className="text-table-header flex w-full items-center justify-start gap-2">
           <span>Address</span>
           <AddressFilter
             onApply={handleAddressFilterApply}
             currentFilter={currentAddressFilter ?? ""}
-            className="ml-2"
           />
         </div>
       ),
@@ -170,9 +169,15 @@ export const TopInteractionsTable = ({
             <AmountFilter
               filterId="top-interactions-volume-filter"
               onApply={(filterState: AmountFilterState) => {
-                setSortDirection(
-                  filterState.sortOrder === "largest-first" ? "desc" : "asc",
-                );
+                if (filterState.sortOrder) {
+                  setSortDirection(
+                    filterState.sortOrder === "largest-first" ? "desc" : "asc",
+                  );
+                  setSortBy("totalVolume");
+                } else {
+                  setSortBy("transferCount");
+                  setSortDirection("desc");
+                }
 
                 setFilterVariables(() => ({
                   minAmount: filterState.minAmount
@@ -184,14 +189,15 @@ export const TopInteractionsTable = ({
                 }));
 
                 setIsFilterActive(
-                  !!(filterVariables?.minAmount || filterVariables?.maxAmount),
+                  !!(
+                    filterState.minAmount ||
+                    filterState.maxAmount ||
+                    filterState.sortOrder
+                  ),
                 );
-
-                setSortBy("totalVolume");
               }}
               onReset={() => {
                 setIsFilterActive(false);
-                // Reset to default sorting
                 setSortBy("transferCount");
                 setFilterVariables(() => ({
                   minAmount: null,
