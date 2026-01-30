@@ -1,10 +1,8 @@
-directive @regexp(subgraph: String, pattern: String) on SCALAR
-
-directive @typescript(subgraph: String, type: String) on SCALAR | ENUM
-
 directive @resolveRoot(subgraph: String) on FIELD_DEFINITION
 
 directive @enum(subgraph: String, value: String) on ENUM_VALUE
+
+directive @typescript(subgraph: String, type: String) on SCALAR | ENUM
 
 directive @example(subgraph: String, value: ObjMap) repeatable on FIELD_DEFINITION | OBJECT | INPUT_OBJECT | ENUM | SCALAR
 
@@ -1773,14 +1771,12 @@ type query_proposalsActivity_proposals_items_proposal {
   description: String
   startBlock: Float!
   endBlock: Float!
-  timestamp: query_proposalsActivity_proposals_items_proposal_timestamp!
+  timestamp: String
   status: String!
   forVotes: String!
   againstVotes: String!
   abstainVotes: String!
 }
-
-scalar query_proposalsActivity_proposals_items_proposal_timestamp
 
 type query_proposalsActivity_proposals_items_userVote {
   id: String!
