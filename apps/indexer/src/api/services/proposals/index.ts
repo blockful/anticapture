@@ -1,4 +1,11 @@
-import { DBProposal, ProposalsRequest, VotersResponse } from "@/api/mappers";
+import {
+  DBProposal,
+  ProposalsRequest,
+  VotersResponse,
+  VotesResponse,
+  DBVote,
+  VotesMapper,
+} from "@/api/mappers";
 import { DAOClient } from "@/interfaces/client";
 import { ProposalStatus } from "@/lib/constants";
 import { DaysEnum } from "@/lib/enums";
@@ -29,6 +36,20 @@ interface ProposalsRepository {
     voters: Address[],
     comparisonTimestamp: number,
   ): Promise<Record<Address, bigint>>;
+  getVotes(
+    proposalId: string,
+    skip: number,
+    limit: number,
+    orderBy: "timestamp" | "votingPower",
+    orderDirection: "asc" | "desc",
+    voterAddressIn?: Address[],
+    support?: string,
+  ): Promise<DBVote[]>;
+  getVotesCount(
+    proposalId: string,
+    voterAddressIn?: Address[],
+    support?: string,
+  ): Promise<number>;
 }
 
 export class ProposalsService {
@@ -168,6 +189,37 @@ export class ProposalsService {
         lastVoteTimestamp: Number(lastVotersTimestamp[v.voter] || 0),
         votingPowerVariation: votingPowerVariation[v.voter]?.toString() || "0",
       })),
+    };
+  }
+
+  /**
+   * Returns the list of votes for a given proposal
+   */
+  async getVotes(
+    proposalId: string,
+    skip: number = 0,
+    limit: number = 10,
+    orderBy: "timestamp" | "votingPower" = "timestamp",
+    orderDirection: "asc" | "desc" = "desc",
+    voterAddressIn?: Address[],
+    support?: string,
+  ): Promise<VotesResponse> {
+    const [votes, totalCount] = await Promise.all([
+      this.proposalsRepo.getVotes(
+        proposalId,
+        skip,
+        limit,
+        orderBy,
+        orderDirection,
+        voterAddressIn,
+        support,
+      ),
+      this.proposalsRepo.getVotesCount(proposalId, voterAddressIn, support),
+    ]);
+
+    return {
+      totalCount,
+      items: votes.map(VotesMapper.toApi),
     };
   }
 }

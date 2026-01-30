@@ -1,37 +1,86 @@
-import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
+import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import { VotingPowerService } from "@/api/services";
 import {
-  HistoricalVotingPowerResponseSchema,
-  HistoricalVotingPowerRequestSchema,
-  HistoricalVotingPowerMapper,
+  HistoricalVotingPowersResponseSchema,
+  HistoricalVotingPowerRequestQuerySchema,
+  HistoricalVotingPowersResponseMapper,
+  HistoricalVotingPowerRequestParamsSchema,
+  HistoricalVotingPowerGlobalQuerySchema,
 } from "@/api/mappers";
-import { getAddress, isAddress } from "viem";
 
-export function historicalVotingPowers(app: Hono, service: VotingPowerService) {
+export function historicalVotingPower(app: Hono, service: VotingPowerService) {
   app.openapi(
     createRoute({
       method: "get",
-      operationId: "historicalVotingPowers",
-      path: "/voting-powers/{accountId}/historical",
-      summary: "Get voting power changes",
-      description: "Returns a list of voting power changes",
+      operationId: "historicalVotingPowerByAccountId",
+      path: "/accounts/{address}/voting-powers/historical",
+      summary: "Get voting power changes by account",
+      description:
+        "Returns a list of voting power changes for a specific account",
       tags: ["proposals"],
       request: {
-        params: z.object({
-          accountId: z
-            .string()
-            .refine((addr) => isAddress(addr, { strict: false }))
-            .transform((addr) => getAddress(addr)),
-        }),
-        query: HistoricalVotingPowerRequestSchema,
+        params: HistoricalVotingPowerRequestParamsSchema,
+        query: HistoricalVotingPowerRequestQuerySchema,
       },
       responses: {
         200: {
           description: "Successfully retrieved voting power changes",
           content: {
             "application/json": {
-              schema: HistoricalVotingPowerResponseSchema,
+              schema: HistoricalVotingPowersResponseSchema,
+            },
+          },
+        },
+      },
+    }),
+    async (context) => {
+      const { address } = context.req.valid("param");
+      const {
+        skip,
+        limit,
+        orderDirection,
+        orderBy,
+        fromValue,
+        toValue,
+        fromDate,
+        toDate,
+      } = context.req.valid("query");
+
+      const { items, totalCount } = await service.getHistoricalVotingPowers(
+        skip,
+        limit,
+        orderDirection,
+        orderBy,
+        address,
+        fromValue,
+        toValue,
+        fromDate,
+        toDate,
+      );
+      return context.json(
+        HistoricalVotingPowersResponseMapper(items, totalCount),
+      );
+    },
+  );
+
+  app.openapi(
+    createRoute({
+      method: "get",
+      operationId: "historicalVotingPower",
+      path: "/voting-powers/historical",
+      summary: "Get voting power changes",
+      description: "Returns a list of voting power changes.",
+      tags: ["proposals"],
+      request: {
+        query: HistoricalVotingPowerGlobalQuerySchema,
+      },
+      responses: {
+        200: {
+          description: "Successfully retrieved voting power changes",
+          content: {
+            "application/json": {
+              schema: HistoricalVotingPowersResponseSchema,
             },
           },
         },
@@ -47,21 +96,23 @@ export function historicalVotingPowers(app: Hono, service: VotingPowerService) {
         toValue,
         fromDate,
         toDate,
+        address,
       } = context.req.valid("query");
-      const { accountId } = context.req.valid("param");
 
       const { items, totalCount } = await service.getHistoricalVotingPowers(
-        accountId,
         skip,
         limit,
         orderDirection,
         orderBy,
+        address,
         fromValue,
         toValue,
         fromDate,
         toDate,
       );
-      return context.json(HistoricalVotingPowerMapper(items, totalCount));
+      return context.json(
+        HistoricalVotingPowersResponseMapper(items, totalCount),
+      );
     },
   );
 }

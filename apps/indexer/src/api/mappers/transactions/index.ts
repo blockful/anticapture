@@ -1,7 +1,7 @@
 import { getAddress, isAddress } from "viem";
 import { z } from "@hono/zod-openapi";
 
-import { delegation, transaction } from "ponder:schema";
+import { transaction } from "ponder:schema";
 
 import {
   DBTransfer,
@@ -9,12 +9,12 @@ import {
   TransferResponseSchema,
 } from "../transfers";
 
+import { DBDelegation } from "../delegations";
+
 export type DBTransaction = typeof transaction.$inferSelect & {
   transfers: DBTransfer[];
   delegations: DBDelegation[];
 };
-
-export type DBDelegation = typeof delegation.$inferSelect;
 
 export enum AffectedSupply {
   CEX = "CEX",

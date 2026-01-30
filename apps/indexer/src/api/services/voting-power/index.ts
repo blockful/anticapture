@@ -9,11 +9,11 @@ import {
 
 interface HistoricalVotingPowerRepository {
   getHistoricalVotingPowers(
-    accountId: Address,
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
     orderBy: "timestamp" | "delta",
+    accountId?: Address,
     minDelta?: string,
     maxDelta?: string,
     fromDate?: number,
@@ -21,16 +21,18 @@ interface HistoricalVotingPowerRepository {
   ): Promise<DBHistoricalVotingPowerWithRelations[]>;
 
   getHistoricalVotingPowerCount(
-    account: Address,
+    accountId?: Address,
     minDelta?: string,
     maxDelta?: string,
+    fromDate?: number,
+    toDate?: number,
   ): Promise<number>;
 }
 
 interface VotingPowersRepository {
   getVotingPowerVariations(
-    startTimestamp: number,
-    endTimestamp: number,
+    startTimestamp: number | undefined,
+    endTimestamp: number | undefined,
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
@@ -39,8 +41,8 @@ interface VotingPowersRepository {
 
   getVotingPowerVariationsByAccountId(
     accountId: Address,
-    startTimestamp: number,
-    endTimestamp: number,
+    startTimestamp: number | undefined,
+    endTimestamp: number | undefined,
   ): Promise<DBVotingPowerVariation>;
 
   getVotingPowers(
@@ -62,11 +64,11 @@ export class VotingPowerService {
   ) {}
 
   async getHistoricalVotingPowers(
-    account: Address,
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc" = "desc",
     orderBy: "timestamp" | "delta" = "timestamp",
+    accountId?: Address,
     minDelta?: string,
     maxDelta?: string,
     fromDate?: number,
@@ -77,11 +79,11 @@ export class VotingPowerService {
   }> {
     const items =
       await this.historicalVotingRepository.getHistoricalVotingPowers(
-        account,
         skip,
         limit,
         orderDirection,
         orderBy,
+        accountId,
         minDelta,
         maxDelta,
         fromDate,
@@ -90,16 +92,18 @@ export class VotingPowerService {
 
     const totalCount =
       await this.historicalVotingRepository.getHistoricalVotingPowerCount(
-        account,
+        accountId,
         minDelta,
         maxDelta,
+        fromDate,
+        toDate,
       );
     return { items, totalCount };
   }
 
   async getVotingPowerVariations(
-    startTimestamp: number,
-    endTimestamp: number,
+    startTimestamp: number | undefined,
+    endTimestamp: number | undefined,
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
@@ -124,7 +128,6 @@ export class VotingPowerService {
 
       if (dbVariation) return dbVariation;
 
-      // handling addresses that have no delegations
       return {
         accountId: address,
         previousVotingPower: 0n,
@@ -135,26 +138,10 @@ export class VotingPowerService {
     });
   }
 
-  async getTopVotingPowerVariations(
-    startTimestamp: number,
-    endTimestamp: number,
-    skip: number,
-    limit: number,
-    orderDirection: "asc" | "desc",
-  ): Promise<DBVotingPowerVariation[]> {
-    return this.votingPowerRepository.getVotingPowerVariations(
-      startTimestamp,
-      endTimestamp,
-      skip,
-      limit,
-      orderDirection,
-    );
-  }
-
   async getVotingPowerVariationsByAccountId(
     accountId: Address,
-    startTimestamp: number,
-    endTimestamp: number,
+    startTimestamp: number | undefined,
+    endTimestamp: number | undefined,
   ): Promise<DBVotingPowerVariation> {
     return this.votingPowerRepository.getVotingPowerVariationsByAccountId(
       accountId,

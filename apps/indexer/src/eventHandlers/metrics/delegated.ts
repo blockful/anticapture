@@ -1,4 +1,4 @@
-import { Address } from "viem";
+import { Address, getAddress } from "viem";
 import { token } from "ponder:schema";
 import { Context } from "ponder:registry";
 
@@ -16,7 +16,7 @@ export const updateDelegatedSupply = async (
   let currentDelegatedSupply = 0n;
 
   const { delegatedSupply: newDelegatedSupply } = await context.db
-    .update(token, { id: tokenId })
+    .update(token, { id: getAddress(tokenId) })
     .set((current) => {
       currentDelegatedSupply = current.delegatedSupply;
       return {

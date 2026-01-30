@@ -1,38 +1,28 @@
 query GetDelegationHistoryItems(
   $delegator: String!
-  $delegate: String
-  $after: String
-  $before: String
-  $orderBy: String = "timestamp"
-  $orderDirection: String = "desc"
-  $limit: Int = 10
-  $fromValue: BigInt = 0
-  $toValue: BigInt
+  $delegate: JSON
+  $skip: NonNegativeInt
+  $limit: PositiveInt = 10
+  $fromValue: String
+  $toValue: String
+  $orderDirection: queryInput_historicalDelegations_orderDirection = desc
 ) {
-  delegations(
-    where: {
-      delegatorAccountId: $delegator
-      delegateAccountId: $delegate
-      delegatedValue_gte: $fromValue
-      delegatedValue_lte: $toValue
-    }
-    orderBy: $orderBy
-    orderDirection: $orderDirection
+  historicalDelegations(
+    address: $delegator
+    delegateAddressIn: $delegate
+    skip: $skip
     limit: $limit
-    after: $after
-    before: $before
+    fromValue: $fromValue
+    toValue: $toValue
+    orderDirection: $orderDirection
   ) {
     items {
-      delegateAccountId
-      delegatedValue
+      delegatorAddress
+      delegateAddress
+      amount
       timestamp
       transactionHash
     }
-    pageInfo {
-      hasNextPage
-      hasPreviousPage
-      startCursor
-      endCursor
-    }
+    totalCount
   }
 }

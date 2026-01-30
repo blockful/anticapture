@@ -1,4 +1,4 @@
-import { Address } from "viem";
+import { Address, getAddress } from "viem";
 import { token } from "ponder:schema";
 import { Context } from "ponder:registry";
 
@@ -13,13 +13,15 @@ export const updateCirculatingSupply = async (
 ) => {
   let currentCirculatingSupply = 0n;
   let newCirculatingSupply = 0n;
-  await context.db.update(token, { id: tokenAddress }).set((current) => {
-    currentCirculatingSupply = current.circulatingSupply;
-    newCirculatingSupply = current.totalSupply - current.treasury;
-    return {
-      circulatingSupply: newCirculatingSupply,
-    };
-  });
+  await context.db
+    .update(token, { id: getAddress(tokenAddress) })
+    .set((current) => {
+      currentCirculatingSupply = current.circulatingSupply;
+      newCirculatingSupply = current.totalSupply - current.treasury;
+      return {
+        circulatingSupply: newCirculatingSupply,
+      };
+    });
 
   await storeDailyBucket(
     context,

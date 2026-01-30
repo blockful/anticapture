@@ -13,7 +13,7 @@ query GetTopTokenHolders(
   ) {
     totalCount
     items {
-      accountId
+      address
       balance
       delegate
       tokenId

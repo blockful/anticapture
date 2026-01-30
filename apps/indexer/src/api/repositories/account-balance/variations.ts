@@ -1,93 +1,64 @@
-import { asc, desc, gte, sql, and, inArray } from "ponder";
+import { asc, desc, gte, sql, and, inArray, lte, or } from "ponder";
 import { db } from "ponder:api";
-import { transfer, accountBalance } from "ponder:schema";
-import { DBAccountBalanceVariation, DBHistoricalBalance } from "@/api/mappers";
+import { accountBalance, transfer } from "ponder:schema";
+import { DBAccountBalanceVariation } from "@/api/mappers";
 import { Address } from "viem";
 
 export class BalanceVariationsRepository {
-  async getHistoricalBalances(
-    addresses: Address[],
-    timestamp: number,
-  ): Promise<DBHistoricalBalance[]> {
-    const transfersFrom = db
-      .select({
-        accountId: transfer.fromAccountId,
-        fromAmount: sql<string>`-SUM(${transfer.amount})`.as("from_amount"),
-      })
-      .from(transfer)
-      .where(
-        and(
-          gte(transfer.timestamp, BigInt(timestamp)),
-          inArray(transfer.fromAccountId, addresses),
-        ),
-      )
-      .groupBy(transfer.fromAccountId)
-      .as("transfers_from");
-
-    // Aggregate incoming transfers (positive amounts)
-    const transfersTo = db
-      .select({
-        accountId: transfer.toAccountId,
-        toAmount: sql<string>`SUM(${transfer.amount})`.as("to_amount"),
-      })
-      .from(transfer)
-      .where(
-        and(
-          gte(transfer.timestamp, BigInt(timestamp)),
-          inArray(transfer.toAccountId, addresses),
-        ),
-      )
-      .groupBy(transfer.toAccountId)
-      .as("transfers_to");
-
-    // Combine both aggregations
-    const combined = db
-      .select({
-        accountId: accountBalance.accountId,
-        currentBalance: accountBalance.balance,
-        fromChange: sql<string>`COALESCE(${transfersFrom.fromAmount}, 0)`.as(
-          "from_change",
-        ),
-        toChange: sql<string>`COALESCE(${transfersTo.toAmount}, 0)`.as(
-          "to_change",
-        ),
-      })
-      .from(accountBalance)
-      .leftJoin(
-        transfersFrom,
-        sql`${accountBalance.accountId} = ${transfersFrom.accountId}`,
-      )
-      .leftJoin(
-        transfersTo,
-        sql`${accountBalance.accountId} = ${transfersTo.accountId}`,
-      )
-      .where(inArray(accountBalance.accountId, addresses))
-      .as("combined");
-
-    const result = await db
-      .select({
-        address: combined.accountId,
-        balance:
-          sql<string>`${combined.currentBalance} - (${combined.fromChange} + ${combined.toChange})`.as(
-            "balance",
-          ),
-      })
-      .from(combined);
-
-    return result;
-  }
-
   async getAccountBalanceVariations(
-    startTimestamp: number,
+    fromTimestamp: number | undefined,
+    toTimestamp: number | undefined,
     limit: number,
     skip: number,
     orderDirection: "asc" | "desc",
+    addresses?: Address[],
   ): Promise<DBAccountBalanceVariation[]> {
-    // Aggregate outgoing transfers (negative amounts)
+    return this.commonQuery(
+      fromTimestamp,
+      toTimestamp,
+      limit,
+      skip,
+      orderDirection,
+      addresses
+    )
+  }
+
+  async getAccountBalanceVariationsByAccountId(
+    address: Address,
+    fromTimestamp: number | undefined,
+    toTimestamp: number | undefined,
+  ): Promise<DBAccountBalanceVariation> {
+    const [result] = await this.commonQuery(fromTimestamp, toTimestamp, 1, 0, "desc", [address])
+    if (result) return result
+    return {
+      accountId: address,
+      previousBalance: 0n,
+      currentBalance: 0n,
+      absoluteChange: 0n,
+      percentageChange: "0",
+    }
+  }
+
+  private async commonQuery(
+    fromTimestamp: number | undefined,
+    toTimestamp: number | undefined,
+    limit: number,
+    skip: number,
+    orderDirection: "asc" | "desc",
+    addresses?: Address[],
+  ): Promise<DBAccountBalanceVariation[]> {
     const scopedTransfers = db
       .select()
       .from(transfer)
-      .where(gte(transfer.timestamp, BigInt(startTimestamp)))
+      .where(
+        and(
+          fromTimestamp ? gte(transfer.timestamp, BigInt(fromTimestamp)) : undefined,
+          toTimestamp ? lte(transfer.timestamp, BigInt(toTimestamp)) : undefined,
+          addresses ? or(
+            inArray(transfer.fromAccountId, addresses),
+            inArray(transfer.toAccountId, addresses),
+          ) : undefined,
+        ))
       .as("scoped_transfers");
 
     const transfersFrom = db
@@ -99,7 +70,6 @@ export class BalanceVariationsRepository {
       .groupBy(scopedTransfers.fromAccountId)
       .as("transfers_from");
 
-    // Aggregate incoming transfers (positive amounts)
     const transfersTo = db
       .select({
         accountId: scopedTransfers.toAccountId,
@@ -109,7 +79,6 @@ export class BalanceVariationsRepository {
       .groupBy(scopedTransfers.toAccountId)
       .as("transfers_to");
 
-    // Combine both aggregations
     const combined = db
       .select({
         accountId: accountBalance.accountId,
@@ -160,12 +129,12 @@ export class BalanceVariationsRepository {
       currentBalance: currentBalance,
       absoluteChange: BigInt(absoluteChange),
       percentageChange:
-        currentBalance - BigInt(absoluteChange)
+        (currentBalance - BigInt(absoluteChange)
           ? Number(
-              (BigInt(absoluteChange) * 10000n) /
-                (currentBalance - BigInt(absoluteChange)),
-            ) / 100
-          : 0,
+            (BigInt(absoluteChange) * 10000n) /
+            (currentBalance - BigInt(absoluteChange)),
+          ) / 100
+          : 0).toString(),
     }));
   }
 }

@@ -9,6 +9,8 @@ import {
   ProposalMapper,
   VotersRequestSchema,
   VotersResponseSchema,
+  VotesRequestSchema,
+  VotesResponseSchema,
 } from "@/api/mappers";
 import { DAOClient } from "@/interfaces";
 
@@ -159,6 +161,51 @@ export function proposals(
         orderDirection,
         addresses,
       );
+      return context.json({ totalCount, items });
+    },
+  );
+
+  app.openapi(
+    createRoute({
+      method: "get",
+      operationId: "votes",
+      path: "/proposals/{id}/votes",
+      summary: "List of votes for a given proposal",
+      description:
+        "Returns a paginated list of votes cast on a specific proposal",
+      tags: ["proposals"],
+      request: {
+        params: z.object({
+          id: z.string(),
+        }),
+        query: VotesRequestSchema,
+      },
+      responses: {
+        200: {
+          description: "Successfully retrieved votes",
+          content: {
+            "application/json": {
+              schema: VotesResponseSchema,
+            },
+          },
+        },
+      },
+    }),
+    async (context) => {
+      const { id } = context.req.valid("param");
+      const { skip, limit, voterAddressIn, orderBy, orderDirection, support } =
+        context.req.valid("query");
+
+      const { totalCount, items } = await service.getVotes(
+        id,
+        skip,
+        limit,
+        orderBy,
+        orderDirection,
+        voterAddressIn,
+        support,
+      );
+
       return context.json({ totalCount, items });
     },
   );

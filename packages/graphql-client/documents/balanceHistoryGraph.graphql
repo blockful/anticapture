@@ -1,23 +1,26 @@
 query BalanceHistoryGraph(
   $address: String!
-  $sortBy: queryInput_transfers_sortBy
-  $sortOrder: queryInput_transfers_sortOrder
-  $fromDate: Float
+  $orderBy: queryInput_historicalBalances_orderBy
+  $orderDirection: queryInput_historicalBalances_orderDirection
+  $fromDate: String
 ) {
-  transfers(
+  historicalBalances(
     address: $address
     fromDate: $fromDate
-    sortBy: $sortBy
-    sortOrder: $sortOrder
+    orderBy: $orderBy
+    orderDirection: $orderDirection
     limit: 1000
   ) {
     items {
-      timestamp
-      amount
-      fromAccountId
-      toAccountId
-      transactionHash
+      balance 
       logIndex
+      timestamp
+      transactionHash
+      transfer {
+        from
+        to
+        value
+      }
     }
   }
 }

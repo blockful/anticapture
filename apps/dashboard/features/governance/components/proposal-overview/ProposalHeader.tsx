@@ -12,7 +12,7 @@ interface ProposalHeaderProps {
   daoId: string;
   setIsVotingModalOpen: (isOpen: boolean) => void;
   votingPower: string;
-  votesOnchain: GetAccountPowerQuery["votesOnchain"] | null;
+  votes: GetAccountPowerQuery["votes"] | null;
   address: string | undefined;
   proposalStatus: string;
 }
@@ -20,11 +20,13 @@ interface ProposalHeaderProps {
 export const ProposalHeader = ({
   daoId,
   votingPower,
-  votesOnchain,
+  votes,
   setIsVotingModalOpen,
   address,
   proposalStatus,
 }: ProposalHeaderProps) => {
+  const supportValue = votes?.items[0]?.support;
+
   return (
     <div className="text-primary bg-surface-background border-border-default sticky -top-[57px] z-20 flex h-[65px] w-full shrink-0 items-center justify-between gap-6 border-b py-2 lg:top-0">
       <div className="mx-auto flex w-full flex-1 items-center justify-between px-5">
@@ -53,7 +55,7 @@ export const ProposalHeader = ({
 
           <p className="text-secondary flex items-center gap-2 whitespace-nowrap text-[14px] font-normal leading-[20px] lg:hidden">
             Your VP: <span className="text-primary">{votingPower}</span>{" "}
-            {/* {daoId.toUpperCase()} voted {votesOnchain?.support} on this proposal */}
+            {/* {daoId.toUpperCase()} voted {votes?.support} on this proposal */}
           </p>
 
           {address && (
@@ -69,7 +71,7 @@ export const ProposalHeader = ({
 
           {/* If already voted: show voted badge */}
           {address ? (
-            !votesOnchain?.support ? (
+            !supportValue ? (
               proposalStatus.toLowerCase() === "ongoing" && (
                 <Button
                   className="hidden lg:flex"
@@ -82,7 +84,7 @@ export const ProposalHeader = ({
             ) : (
               <div className="hidden items-center gap-4 lg:flex">
                 <div className="bg-secondary ml-4 h-[28px] w-px shrink-0" />
-                <VotedBadge vote={Number(votesOnchain?.support)} />
+                <VotedBadge vote={Number(supportValue)} />
               </div>
             )
           ) : proposalStatus.toLowerCase() === "ongoing" ? (

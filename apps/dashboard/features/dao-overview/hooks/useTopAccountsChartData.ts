@@ -20,7 +20,11 @@ interface UseTopAccountsChartDataParams {
   daoId: DaoIdEnum;
 }
 
-type DelegationItems = GetDelegationHistoryItemsQuery["delegations"]["items"];
+type DelegationItems = NonNullable<
+  NonNullable<
+    GetDelegationHistoryItemsQuery["historicalDelegations"]
+  >["items"][number]
+>[];
 
 export function useTopAccountsChartData({
   chartData,
@@ -46,9 +50,9 @@ export function useTopAccountsChartData({
     return addresses
       .map((address) => {
         const latestDelegation = delegationData[address]?.find(
-          (item) => item.delegateAccountId !== zeroAddress,
+          (item) => item.delegateAddress !== zeroAddress,
         );
-        return latestDelegation?.delegateAccountId as Address | undefined;
+        return latestDelegation?.delegateAddress as Address | undefined;
       })
       .filter((address): address is Address => !!address);
   }, [addresses, delegationData]);
@@ -79,9 +83,9 @@ export function useTopAccountsChartData({
                 query: GetDelegationHistoryItemsDocument,
                 variables: {
                   delegator: address,
-                  orderBy: "timestamp",
                   orderDirection: "desc",
                   limit: 10,
+                  skip: 0,
                 },
                 context: {
                   headers: {
@@ -114,7 +118,11 @@ export function useTopAccountsChartData({
         const dataByAddress = addresses.reduce(
           (acc, address, index) => {
             acc[address] =
-              delegationResults[index].data?.delegations?.items || [];
+              delegationResults[
+                index
+              ].data?.historicalDelegations?.items?.filter(
+                (item): item is NonNullable<typeof item> => item !== null,
+              ) || [];
             return acc;
           },
           {} as Record<string, DelegationItems>,
@@ -154,12 +162,11 @@ export function useTopAccountsChartData({
   const processedData = useMemo(() => {
     return chartData.map((item) => {
       const latestDelegation = delegationData[item.address]?.find(
-        (delegation) => delegation.delegateAccountId !== zeroAddress,
+        (delegation) => delegation.delegateAddress !== zeroAddress,
       );
 
-      const delegateAddress = latestDelegation?.delegateAccountId as
-        | Address
-        | undefined;
+      const delegateAddress =
+        (latestDelegation?.delegateAddress as Address | undefined) || undefined;
 
       return {
         ...item,

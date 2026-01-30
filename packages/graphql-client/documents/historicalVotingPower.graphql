@@ -1,20 +1,24 @@
-query HistoricalVotingPowers(
-  $account: String!
+query HistoricalVotingPower(
+  $address: String
   $skip: NonNegativeInt
   $limit: PositiveInt = 10
-  $orderBy: queryInput_historicalVotingPowers_orderBy = timestamp
-  $orderDirection: queryInput_historicalVotingPowers_orderDirection = desc
+  $orderBy: queryInput_historicalVotingPower_orderBy = timestamp
+  $orderDirection: queryInput_historicalVotingPower_orderDirection = desc
   $toValue: String
   $fromValue: String
+  $fromDate: String
+  $toDate: String
 ) {
-  historicalVotingPowers(
-    accountId: $account
+  historicalVotingPower(
+    address: $address
     skip: $skip
     orderBy: $orderBy
     orderDirection: $orderDirection
     limit: $limit
     toValue: $toValue
     fromValue: $fromValue
+    fromDate: $fromDate
+    toDate: $toDate
   ) {
     items {
       accountId
