@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/shared/utils";
 import { ArrowRightIcon } from "@radix-ui/react-icons";
+import { Input } from "@/shared/components/design-system/form/fields";
 
 interface FilterMaxMinInputProps {
   title?: string;
@@ -106,9 +107,6 @@ export const FilterMaxMinInput = ({
     setFilter(cleanMin, cleanMax);
   };
 
-  const inputClassName =
-    "w-28 bg-surface-default border-border-contrast text-primary placeholder:text-dimmed h-9 w-full border px-2.5 py-2 text-sm font-normal leading-5 transition-colors focus:outline-none";
-
   return (
     <div className="border-border-contrast flex items-center gap-1 overflow-hidden border-b px-3 pb-3">
       {title && (
@@ -120,26 +118,24 @@ export const FilterMaxMinInput = ({
       )}
       <div className="flex flex-1 items-center gap-1">
         <div className="flex-1">
-          <input
+          <Input
             type="text"
             placeholder={placeholderMin}
             value={minValue}
             onChange={handleMinChange}
             onKeyDown={handleKeyDown}
             onBlur={handleBlur}
-            className={inputClassName}
           />
         </div>
         <ArrowRightIcon className="text-dimmed size-3.5" />
         <div className="flex-1">
-          <input
+          <Input
             type="text"
             placeholder={placeholderMax}
             value={maxValue}
             onChange={handleMaxChange}
             onKeyDown={handleKeyDown}
             onBlur={handleBlur}
-            className={inputClassName}
           />
         </div>
       </div>

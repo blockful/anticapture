@@ -7,7 +7,7 @@ import {
   PopoverTrigger,
 } from "@/shared/components/ui/popover";
 import { ButtonFilter } from "@/shared/components/design-system/table/ButtonFilter";
-import { Button } from "../../buttons/button/Button";
+import { Button } from "@/shared/components/design-system/buttons/button/Button";
 
 export interface FilterOption {
   value: string;
