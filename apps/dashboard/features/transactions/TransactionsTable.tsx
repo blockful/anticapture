@@ -10,6 +10,7 @@ import { Table } from "@/shared/components/design-system/table/Table";
 import { getTransactionsColumns } from "@/features/transactions/utils/getTransactionsColumns";
 import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
 import { useTransactionsTableParams } from "@/features/transactions/hooks/useTransactionParams";
+import { useTableHeight } from "@/shared/hooks";
 
 type Supply = "CEX" | "DEX" | "LENDING" | "TOTAL" | "UNASSIGNED";
 
@@ -28,6 +29,11 @@ export const TransactionsTable = ({
 }) => {
   const { daoId } = useParams<{ daoId: DaoIdEnum }>();
   const filterParams = useTransactionsTableParams();
+
+  const { containerRef, height, itemsPerPage } = useTableHeight({
+    minHeight: 300,
+    bottomOffset: 80,
+  });
 
   const affectedSupply = useMemo(
     () =>
@@ -71,6 +77,7 @@ export const TransactionsTable = ({
       affectedSupply: buildFilters(hasTransfer, affectedSupply),
       includes,
     },
+    limit: itemsPerPage,
   });
 
   const columns = getTransactionsColumns({
@@ -81,10 +88,14 @@ export const TransactionsTable = ({
 
   if (loading && (!tableData || tableData.length === 0)) {
     return (
-      <div className="flex flex-col gap-2">
+      <div
+        ref={containerRef}
+        style={{ height }}
+        className="flex w-full flex-col"
+      >
         <Table
           columns={columns}
-          data={Array.from({ length: 12 }, () => ({
+          data={Array.from({ length: itemsPerPage }, () => ({
             id: "loading-row",
             affectedSupply: ["CEX", "DEX"] as SupplyType[],
             amount: "1000000",
@@ -102,31 +113,31 @@ export const TransactionsTable = ({
           size="sm"
           mobileTableFixed={true}
           withDownloadCSV={true}
-          wrapperClassName="h-[450px]"
-          className="h-[400px]"
+          wrapperClassName="h-full overflow-y-auto"
         />
       </div>
     );
   }
 
   return (
-    <div className="w-full text-white">
-      <div className="flex flex-col gap-2">
-        <Table
-          columns={columns}
-          data={tableData}
-          size="sm"
-          hasMore={pagination.hasNextPage}
-          isLoadingMore={fetchingMore}
-          onLoadMore={fetchNextPage}
-          wrapperClassName="h-[450px]"
-          className="h-[400px]"
-          enableExpanding={true}
-          getSubRows={(row) => row.subRows}
-          withSorting={true}
-          mobileTableFixed={true}
-        />
-      </div>
+    <div
+      ref={containerRef}
+      style={{ height }}
+      className="flex w-full flex-col text-white"
+    >
+      <Table
+        columns={columns}
+        data={tableData}
+        size="sm"
+        hasMore={pagination.hasNextPage}
+        isLoadingMore={fetchingMore}
+        onLoadMore={fetchNextPage}
+        wrapperClassName="h-full overflow-y-auto"
+        enableExpanding={true}
+        getSubRows={(row) => row.subRows}
+        withSorting={true}
+        mobileTableFixed={true}
+      />
     </div>
   );
 };

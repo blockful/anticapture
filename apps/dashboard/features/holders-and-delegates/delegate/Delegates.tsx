@@ -15,7 +15,7 @@ import { formatNumberUserReadable } from "@/shared/utils";
 import { Plus } from "lucide-react";
 import { ProgressCircle } from "@/features/holders-and-delegates/components/ProgressCircle";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { useScreenSize } from "@/shared/hooks";
+import { useScreenSize, useTableHeight } from "@/shared/hooks";
 import { Address, formatUnits } from "viem";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
@@ -118,6 +118,13 @@ export const Delegates = ({
   });
 
   const { isMobile } = useScreenSize();
+
+  const { containerRef, height } = useTableHeight({
+    minHeight: 300,
+    bottomOffset: 80,
+  });
+
+  const skeletonRowCount = Math.max(Math.floor((height - 50) / 40), 5);
 
   // Handle sorting for voting power and delegators
   const handleSort = (field: string) => {
@@ -398,18 +405,21 @@ export const Delegates = ({
 
   return (
     <>
-      <div className="flex flex-col gap-2">
+      <div
+        ref={containerRef}
+        style={{ height }}
+        className="flex w-full flex-col"
+      >
         <Table
           columns={delegateColumns}
-          data={loading ? Array(12).fill({}) : tableData}
+          data={loading ? Array(skeletonRowCount).fill({}) : tableData}
           onRowClick={(row) => setDrawerAddress(row.address as Address)}
           size="sm"
           hasMore={pagination.hasNextPage}
           isLoadingMore={fetchingMore}
           onLoadMore={fetchNextPage}
           withDownloadCSV={true}
-          wrapperClassName="h-[450px]"
-          className="h-[400px]"
+          wrapperClassName="h-full overflow-y-auto"
           error={error}
         />
       </div>

@@ -54,6 +54,7 @@ interface ProposalsTableProps {
   pagination: { hasNextPage: boolean; totalPages: number; currentPage: number };
   fetchingMore: boolean;
   fetchNextPage: () => void;
+  itemsPerPage: number;
 }
 
 export const ProposalsTable = ({
@@ -70,6 +71,7 @@ export const ProposalsTable = ({
   pagination,
   fetchingMore,
   fetchNextPage,
+  itemsPerPage,
 }: ProposalsTableProps) => {
   const { data: daoData } = useDaoData(daoIdEnum);
   const {
@@ -400,17 +402,16 @@ export const ProposalsTable = ({
   ];
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex h-full w-full flex-col gap-4 overflow-hidden">
       <Table
         columns={proposalColumns}
-        data={loading ? Array(12).fill({}) : tableData}
+        data={loading ? Array(itemsPerPage).fill({}) : tableData}
         size="sm"
         hasMore={pagination.hasNextPage}
         isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}
         withDownloadCSV={true}
-        wrapperClassName="h-[450px]"
-        className="h-[400px]"
+        wrapperClassName="h-full overflow-y-auto"
         error={error}
       />
     </div>

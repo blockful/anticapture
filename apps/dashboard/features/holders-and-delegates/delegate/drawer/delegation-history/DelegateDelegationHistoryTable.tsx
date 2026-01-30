@@ -32,11 +32,13 @@ import {
 interface DelegateDelegationHistoryTableProps {
   accountId: string;
   daoId: DaoIdEnum;
+  itemsPerPage: number;
 }
 
 export const DelegateDelegationHistoryTable = ({
   accountId,
   daoId,
+  itemsPerPage,
 }: DelegateDelegationHistoryTableProps) => {
   const { decimals } = daoConfig[daoId];
 
@@ -70,6 +72,7 @@ export const DelegateDelegationHistoryTable = ({
       orderBy: sortBy,
       orderDirection: sortDirection,
       filterVariables,
+      itemsPerPage,
     });
 
   const isInitialLoading =
@@ -487,16 +490,17 @@ export const DelegateDelegationHistoryTable = ({
   ];
 
   return (
-    <div className="flex w-full flex-col gap-2 p-4">
+    <div className="flex h-full w-full flex-col gap-2 overflow-hidden p-4">
       <Table
         columns={columns}
-        data={isInitialLoading ? Array(12).fill({}) : delegationHistory}
+        data={
+          isInitialLoading ? Array(itemsPerPage).fill({}) : delegationHistory
+        }
         size="sm"
         hasMore={hasNextPage}
         isLoadingMore={loading}
         onLoadMore={fetchNextPage}
-        wrapperClassName="h-[450px]"
-        className="h-[400px]"
+        wrapperClassName="h-full overflow-y-auto"
         withDownloadCSV={true}
         error={error}
       />

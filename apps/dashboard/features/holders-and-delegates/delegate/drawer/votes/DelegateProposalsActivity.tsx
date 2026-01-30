@@ -14,6 +14,7 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import { FilterOption } from "@/shared/components/dropdowns/FilterDropdown";
 import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
 import { parseAsStringEnum, useQueryState } from "nuqs";
+import { useTableHeight } from "@/shared/hooks";
 
 interface DelegateProposalsActivityProps {
   address: string;
@@ -33,7 +34,12 @@ export const DelegateProposalsActivity = ({
     "orderDirection",
     parseAsStringEnum(["asc", "desc"]).withDefault("desc"),
   );
-  const itemsPerPage = 10;
+
+  const { containerRef, height, itemsPerPage } = useTableHeight({
+    minHeight: 300,
+    bottomOffset: 40,
+    rowHeight: 52,
+  });
 
   // Filter options for user vote
   const userVoteFilterOptions: FilterOption[] = [
@@ -100,8 +106,8 @@ export const DelegateProposalsActivity = ({
       : formatAvgTime(data.avgTimeBeforeEnd, data.votedProposals);
 
   return (
-    <>
-      <div className="p-4">
+    <div className="flex h-full flex-col overflow-hidden">
+      <div className="shrink-0 p-4">
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           <MetricCard
             icon={<Hand className="size-3.5" />}
@@ -127,8 +133,12 @@ export const DelegateProposalsActivity = ({
       </div>
 
       {/* Proposals Table */}
-      <div className="px-4 pb-4">
-        <div className="flex flex-col gap-2">
+      <div
+        ref={containerRef}
+        style={{ height }}
+        className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 pb-4"
+      >
+        <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden">
           <ProposalsTable
             proposals={data?.proposals || []}
             loading={loading}
@@ -143,9 +153,10 @@ export const DelegateProposalsActivity = ({
             pagination={pagination}
             fetchingMore={fetchingMore}
             fetchNextPage={fetchNextPage}
+            itemsPerPage={itemsPerPage}
           />
         </div>
       </div>
-    </>
+    </div>
   );
 };

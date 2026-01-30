@@ -8,6 +8,7 @@ import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { useVotingPowerData } from "@/features/holders-and-delegates/delegate/drawer/voting-power/hooks/useVotingPowerData";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 import { Inbox } from "lucide-react";
+import { useTableHeight } from "@/shared/hooks";
 
 const ChartLegend = ({
   items,
@@ -78,6 +79,12 @@ export const VotingPower = ({
     loading: loadingVotingPowerData,
   } = useVotingPowerData(daoId, address);
 
+  const { containerRef, height, itemsPerPage } = useTableHeight({
+    minHeight: 300,
+    bottomOffset: 40,
+    rowHeight: 40,
+  });
+
   if (
     !topFiveDelegators ||
     (topFiveDelegators.length === 0 && !loadingVotingPowerData)
@@ -91,8 +98,8 @@ export const VotingPower = ({
     );
   }
   return (
-    <div className="flex w-full flex-col gap-4 p-4">
-      <div className="border-light-dark text-primary flex h-fit w-full flex-col gap-4 overflow-y-auto border p-4 lg:flex-row">
+    <div className="flex h-full w-full flex-col gap-4 overflow-hidden p-4">
+      <div className="border-light-dark text-primary flex h-fit w-full shrink-0 flex-col gap-4 overflow-y-auto border p-4 lg:flex-row">
         <div className="flex h-full w-full flex-col">
           <div className="flex w-full flex-col gap-4 lg:flex-row">
             <div>
@@ -148,8 +155,16 @@ export const VotingPower = ({
           </div>
         </div>
       </div>
-      <div className="flex w-full flex-col gap-4">
-        <VotingPowerTable address={address} daoId={daoId} />
+      <div
+        ref={containerRef}
+        style={{ height }}
+        className="flex min-h-0 w-full flex-1 flex-col gap-4 overflow-hidden"
+      >
+        <VotingPowerTable
+          address={address}
+          daoId={daoId}
+          itemsPerPage={itemsPerPage}
+        />
       </div>
     </div>
   );

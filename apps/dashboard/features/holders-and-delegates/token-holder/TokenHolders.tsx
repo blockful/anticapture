@@ -15,7 +15,7 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
-import { useScreenSize } from "@/shared/hooks";
+import { useScreenSize, useTableHeight } from "@/shared/hooks";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { Button } from "@/shared/components";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
@@ -45,9 +45,13 @@ export const TokenHolders = ({
     "sort",
     parseAsStringEnum(["desc", "asc"]).withDefault("desc"),
   );
-  const pageLimit: number = 15;
   const { isMobile } = useScreenSize();
   const { decimals } = daoConfig[daoId];
+
+  const { containerRef, height, itemsPerPage } = useTableHeight({
+    minHeight: 300,
+    bottomOffset: 80,
+  });
 
   const handleAddressFilterApply = (address: string | undefined) => {
     setCurrentAddressFilter(address || null);
@@ -64,7 +68,7 @@ export const TokenHolders = ({
     historicalBalancesCache,
   } = useTokenHolders({
     daoId: daoId,
-    limit: pageLimit,
+    limit: itemsPerPage,
     orderDirection: sortOrder as QueryInput_AccountBalances_OrderDirection,
     address: currentAddressFilter,
     days: days,
@@ -332,22 +336,23 @@ export const TokenHolders = ({
 
   return (
     <>
-      <div className="w-full text-white">
-        <div className="flex flex-col gap-2">
-          <Table
-            columns={tokenHoldersColumns}
-            data={loading ? Array(12).fill({}) : tableData}
-            hasMore={pagination.hasNextPage}
-            isLoadingMore={fetchingMore}
-            onLoadMore={fetchNextPage}
-            onRowClick={(row) => setDrawerAddress(row.address as Address)}
-            size="sm"
-            withDownloadCSV={true}
-            wrapperClassName="h-[450px]"
-            className="h-[400px]"
-            error={error}
-          />
-        </div>
+      <div
+        ref={containerRef}
+        style={{ height }}
+        className="flex w-full flex-col text-white"
+      >
+        <Table
+          columns={tokenHoldersColumns}
+          data={loading ? Array(itemsPerPage).fill({}) : tableData}
+          hasMore={pagination.hasNextPage}
+          isLoadingMore={fetchingMore}
+          onLoadMore={fetchNextPage}
+          onRowClick={(row) => setDrawerAddress(row.address as Address)}
+          size="sm"
+          withDownloadCSV={true}
+          wrapperClassName="h-full overflow-y-auto"
+          error={error}
+        />
       </div>
       <HoldersAndDelegatesDrawer
         isOpen={!!drawerAddress}
