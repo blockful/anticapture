@@ -5,15 +5,60 @@ import {
   VotersRequestSchema,
   VotersResponseSchema,
   VotesRequestQuerySchema,
-  VotesRequestSchema,
-  VotesResponseSchema,
+  VotesByProposalRequestSchema,
+  VotesByProposalResponseSchema,
 } from "@/api/mappers";
 
 export function votes(app: Hono, service: VotesService) {
   app.openapi(
     createRoute({
       method: "get",
-      operationId: "votesTimestamp",
+      operationId: "votesByProposalId",
+      path: "/proposals/{id}/votes",
+      summary: "List of votes for a given proposal",
+      description:
+        "Returns a paginated list of votes cast on a specific proposal",
+      tags: ["proposals"],
+      request: {
+        params: z.object({
+          id: z.string(),
+        }),
+        query: VotesByProposalRequestSchema,
+      },
+      responses: {
+        200: {
+          description: "Successfully retrieved votes",
+          content: {
+            "application/json": {
+              schema: VotesByProposalResponseSchema,
+            },
+          },
+        },
+      },
+    }),
+    async (context) => {
+      const { id } = context.req.valid("param");
+      const { skip, limit, voterAddressIn, orderBy, orderDirection, support } =
+        context.req.valid("query");
+
+      const { totalCount, items } = await service.getVotesByProposal(
+        id,
+        skip,
+        limit,
+        orderBy,
+        orderDirection,
+        voterAddressIn,
+        support,
+      );
+
+      return context.json({ totalCount, items });
+    },
+  );
+
+  app.openapi(
+    createRoute({
+      method: "get",
+      operationId: "votes",
       path: "/votes",
       summary: "Get all votes",
       description: "Get all votes ordered by timestamp or voting power",
@@ -26,7 +71,7 @@ export function votes(app: Hono, service: VotesService) {
           description: "Returns votes",
           content: {
             "application/json": {
-              schema: VotesResponseSchema,
+              schema: VotesByProposalResponseSchema,
             },
           },
         },
@@ -45,7 +90,7 @@ export function votes(app: Hono, service: VotesService) {
         toDate,
       });
 
-      return context.json(VotesResponseSchema.parse(result));
+      return context.json(VotesByProposalResponseSchema.parse(result));
     },
   );
 
@@ -87,51 +132,6 @@ export function votes(app: Hono, service: VotesService) {
         orderDirection,
         addresses,
       );
-      return context.json({ totalCount, items });
-    },
-  );
-
-  app.openapi(
-    createRoute({
-      method: "get",
-      operationId: "votesByProposalId",
-      path: "/proposals/{id}/votes",
-      summary: "List of votes for a given proposal",
-      description:
-        "Returns a paginated list of votes cast on a specific proposal",
-      tags: ["proposals"],
-      request: {
-        params: z.object({
-          id: z.string(),
-        }),
-        query: VotesRequestSchema,
-      },
-      responses: {
-        200: {
-          description: "Successfully retrieved votes",
-          content: {
-            "application/json": {
-              schema: VotesResponseSchema,
-            },
-          },
-        },
-      },
-    }),
-    async (context) => {
-      const { id } = context.req.valid("param");
-      const { skip, limit, voterAddressIn, orderBy, orderDirection, support } =
-        context.req.valid("query");
-
-      const { totalCount, items } = await service.getVotesByProposal(
-        id,
-        skip,
-        limit,
-        orderBy,
-        orderDirection,
-        voterAddressIn,
-        support,
-      );
-
       return context.json({ totalCount, items });
     },
   );

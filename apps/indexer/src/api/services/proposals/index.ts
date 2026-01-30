@@ -15,25 +15,6 @@ interface ProposalsRepository {
   ): Promise<DBProposal[]>;
   getProposalsCount(): Promise<number>;
   getProposalById(proposalId: string): Promise<DBProposal | undefined>;
-  getLastVotersTimestamp(voters: Address[]): Promise<Record<Address, bigint>>;
-  getVotingPowerVariation(
-    voters: Address[],
-    comparisonTimestamp: number,
-  ): Promise<Record<Address, bigint>>;
-  getVotes(
-    proposalId: string,
-    skip: number,
-    limit: number,
-    orderBy: "timestamp" | "votingPower",
-    orderDirection: "asc" | "desc",
-    voterAddressIn?: Address[],
-    support?: string,
-  ): Promise<DBVote[]>;
-  getVotesCount(
-    proposalId: string,
-    voterAddressIn?: Address[],
-    support?: string,
-  ): Promise<number>;
 }
 
 export class ProposalsService {

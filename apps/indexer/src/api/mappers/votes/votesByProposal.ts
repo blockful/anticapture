@@ -4,7 +4,7 @@ import { getAddress, isAddress } from "viem";
 
 export type DBVote = typeof votesOnchain.$inferSelect;
 
-export const VotesRequestSchema = z.object({
+export const VotesByProposalRequestSchema = z.object({
   skip: z.coerce
     .number()
     .int()
@@ -42,9 +42,11 @@ export const VotesRequestSchema = z.object({
   toDate: z.coerce.number().optional(),
 });
 
-export type VotesRequest = z.infer<typeof VotesRequestSchema>;
+export type VotesByProposalRequest = z.infer<
+  typeof VotesByProposalRequestSchema
+>;
 
-export const VoteResponseSchema = z.object({
+export const VoteByProposalResponseSchema = z.object({
   voterAddress: z.string(),
   transactionHash: z.string(),
   proposalId: z.string(),
@@ -54,25 +56,15 @@ export const VoteResponseSchema = z.object({
   timestamp: z.number(),
 });
 
-export type VoteResponse = z.infer<typeof VoteResponseSchema>;
+export type VoteByProposalResponse = z.infer<
+  typeof VoteByProposalResponseSchema
+>;
 
-export const VotesResponseSchema = z.object({
-  items: z.array(VoteResponseSchema),
+export const VotesByProposalResponseSchema = z.object({
+  items: z.array(VoteByProposalResponseSchema),
   totalCount: z.number(),
 });
 
-export type VotesResponse = z.infer<typeof VotesResponseSchema>;
-
-export const VotesMapper = {
-  toApi: (vote: DBVote): VoteResponse => {
-    return {
-      voterAddress: vote.voterAccountId,
-      transactionHash: vote.txHash,
-      proposalId: vote.proposalId,
-      support: Number(vote.support),
-      votingPower: vote.votingPower.toString(),
-      reason: vote.reason || null,
-      timestamp: Number(vote.timestamp),
-    };
-  },
-};
+export type VotesByProposalResponse = z.infer<
+  typeof VotesByProposalResponseSchema
+>;

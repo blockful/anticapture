@@ -63,7 +63,7 @@ query GetVotes(
   $orderBy: queryInput_votes_orderBy = timestamp
   $orderDirection: queryInput_votes_orderDirection = desc
 ) {
-  votes(
+  votesByProposalId(
     limit: $limit
     skip: $skip
     id: $proposalId
@@ -137,7 +137,7 @@ query GetAccountPower(
     accountId
     votingPower
   }
-  votes(id: $proposalId, voterAddressIn: $addresses) {
+  votesByProposalId(id: $proposalId, voterAddressIn: $addresses) {
     items {
       support
       votingPower

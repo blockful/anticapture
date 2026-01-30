@@ -1,9 +1,11 @@
 import {
-  VotesRequest,
+  VotesByProposalRequest,
   DBVote,
-  VotesResponse,
-  parseVoteToResponse,
+  VotesByProposalResponse,
+  VotesByProposalResponseSchema,
+  VotersResponse,
 } from "@/api/mappers";
+import { DaysEnum } from "@/lib/enums";
 import { Address } from "viem";
 
 interface VotesRepository {
@@ -15,18 +17,33 @@ interface VotesRepository {
     addresses?: Address[],
   ): Promise<{ voter: Address; votingPower: bigint }[]>;
   getProposalNonVotersCount(proposalId: string): Promise<number>;
-
-  getVotes(req: VotesRequest): Promise<{ items: DBVote[]; totalCount: number }>;
+  getVotes(
+    req: VotesByProposalRequest,
+  ): Promise<{ items: DBVote[]; totalCount: number }>;
   getVotesByProposalId(
     proposalId: string,
-    req: VotesRequest,
+    skip: number,
+    limit: number,
+    orderBy: "timestamp" | "votingPower",
+    orderDirection: "asc" | "desc",
+    voterAddressIn?: Address[],
+    support?: string,
   ): Promise<{ items: DBVote[]; totalCount: number }>;
+
+  getLastVotersTimestamp(voters: Address[]): Promise<Record<Address, bigint>>;
+  getVotingPowerVariation(
+    voters: Address[],
+    comparisonTimestamp: number,
+  ): Promise<Record<Address, bigint>>;
 }
 
 export class VotesService {
   constructor(private votesRepository: VotesRepository) {}
-  async getVotes(params: VotesRequest): Promise<VotesResponse> {
-    return this.votesRepository.getVotes(params);
+  async getVotes(
+    params: VotesByProposalRequest,
+  ): Promise<VotesByProposalResponse> {
+    const response = await this.votesRepository.getVotes(params);
+    return VotesByProposalResponseSchema.parse(response);
   }
 
   /**
@@ -83,23 +100,17 @@ export class VotesService {
     orderDirection: "asc" | "desc" = "desc",
     voterAddressIn?: Address[],
     support?: string,
-  ): Promise<VotesResponse> {
-    const [items, totalCount] = await Promise.all([
-      this.votesRepository.getVotes(
-        proposalId,
-        skip,
-        limit,
-        orderBy,
-        orderDirection,
-        voterAddressIn,
-        support,
-      ),
-      this.votesRepository.getVotesCount(proposalId, voterAddressIn, support),
-    ]);
+  ): Promise<VotesByProposalResponse> {
+    const response = await this.votesRepository.getVotesByProposalId(
+      proposalId,
+      skip,
+      limit,
+      orderBy,
+      orderDirection,
+      voterAddressIn,
+      support,
+    );
 
-    return VotesResponseSchema.parse({
-      totalCount,
-      items,
-    });
+    return VotesByProposalResponseSchema.parse(response);
   }
 }
