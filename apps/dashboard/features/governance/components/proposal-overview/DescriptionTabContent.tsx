@@ -24,7 +24,7 @@ export const DescriptionTabContent = ({
   proposal,
 }: DescriptionTabContentProps) => {
   return (
-    <div className="text-primary overflow-hidden p-4">
+    <div className="text-primary overflow-hidden p-0 lg:p-4 py-4">
       <Markdown
         className="overflow-wrap-anywhere wrap-break-word"
         options={{
