@@ -1,8 +1,8 @@
 * @pikonha @alextnetto
    
-apps/indexer/* @LeonardoVieira1630 @PedroBinotto
-apps/api-gateway/* @LeonardoVieira1630 @PedroBinotto
+apps/indexer/ @LeonardoVieira1630 @PedroBinotto
+apps/api-gateway/ @LeonardoVieira1630 @PedroBinotto
 
-apps/dashboard/* @isadorable-png @brunod-e @edulennert
+apps/dashboard/ @isadorable-png @brunod-e @edulennert
 
-packages/* @pikonha @alextnetto @LeonardoVieira1630 @PedroBinotto @brunod-e @edulennert
+packages/ @pikonha @alextnetto @LeonardoVieira1630 @PedroBinotto @brunod-e @edulennert
