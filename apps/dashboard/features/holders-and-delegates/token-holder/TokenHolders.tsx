@@ -15,7 +15,7 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
-import { useScreenSize, useTableHeight } from "@/shared/hooks";
+import { useScreenSize } from "@/shared/hooks";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { Button } from "@/shared/components";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
@@ -38,6 +38,7 @@ export const TokenHolders = ({
   days: TimeInterval;
   daoId: DaoIdEnum;
 }) => {
+  const pageLimit: number = 20;
   const [drawerAddress, setDrawerAddress] = useQueryState("drawerAddress");
   const [currentAddressFilter, setCurrentAddressFilter] =
     useQueryState("address");
@@ -47,11 +48,6 @@ export const TokenHolders = ({
   );
   const { isMobile } = useScreenSize();
   const { decimals } = daoConfig[daoId];
-
-  const { containerRef, height, itemsPerPage } = useTableHeight({
-    minHeight: 300,
-    bottomOffset: 80,
-  });
 
   const handleAddressFilterApply = (address: string | undefined) => {
     setCurrentAddressFilter(address || null);
@@ -68,7 +64,7 @@ export const TokenHolders = ({
     historicalBalancesCache,
   } = useTokenHolders({
     daoId: daoId,
-    limit: itemsPerPage,
+    limit: pageLimit,
     orderDirection: sortOrder as QueryInput_AccountBalances_OrderDirection,
     address: currentAddressFilter,
     days: days,
@@ -336,14 +332,10 @@ export const TokenHolders = ({
 
   return (
     <>
-      <div
-        ref={containerRef}
-        style={{ height }}
-        className="flex w-full flex-col text-white"
-      >
+      <div className="flex h-[calc(100vh-16rem)] min-h-[300px] w-full flex-col text-white">
         <Table
           columns={tokenHoldersColumns}
-          data={loading ? Array(itemsPerPage).fill({}) : tableData}
+          data={loading ? Array(pageLimit).fill({}) : tableData}
           hasMore={pagination.hasNextPage}
           isLoadingMore={fetchingMore}
           onLoadMore={fetchNextPage}

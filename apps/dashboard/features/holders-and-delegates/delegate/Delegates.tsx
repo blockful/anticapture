@@ -15,7 +15,7 @@ import { formatNumberUserReadable } from "@/shared/utils";
 import { Plus } from "lucide-react";
 import { ProgressCircle } from "@/features/holders-and-delegates/components/ProgressCircle";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { useScreenSize, useTableHeight } from "@/shared/hooks";
+import { useScreenSize } from "@/shared/hooks";
 import { Address, formatUnits } from "viem";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
@@ -71,7 +71,7 @@ export const Delegates = ({
   timePeriod = TimeInterval.THIRTY_DAYS,
   daoId,
 }: DelegatesProps) => {
-  const pageLimit: number = 15;
+  const pageLimit: number = 20;
 
   const [drawerAddress, setDrawerAddress] = useQueryState("drawerAddress");
   const [currentAddressFilter, setCurrentAddressFilter] =
@@ -118,13 +118,6 @@ export const Delegates = ({
   });
 
   const { isMobile } = useScreenSize();
-
-  const { containerRef, height } = useTableHeight({
-    minHeight: 300,
-    bottomOffset: 80,
-  });
-
-  const skeletonRowCount = Math.max(Math.floor((height - 50) / 40), 5);
 
   // Handle sorting for voting power and delegators
   const handleSort = (field: string) => {
@@ -405,14 +398,10 @@ export const Delegates = ({
 
   return (
     <>
-      <div
-        ref={containerRef}
-        style={{ height }}
-        className="flex w-full flex-col"
-      >
+      <div className="flex h-[calc(100vh-16rem)] min-h-[300px] w-full flex-col">
         <Table
           columns={delegateColumns}
-          data={loading ? Array(skeletonRowCount).fill({}) : tableData}
+          data={loading ? Array(pageLimit).fill({}) : tableData}
           onRowClick={(row) => setDrawerAddress(row.address as Address)}
           size="sm"
           hasMore={pagination.hasNextPage}

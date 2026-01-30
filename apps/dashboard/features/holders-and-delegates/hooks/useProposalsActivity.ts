@@ -8,8 +8,7 @@ import {
 import { DaoIdEnum } from "@/shared/types/daos";
 import { NetworkStatus } from "@apollo/client";
 
-interface UseProposalsActivityParams
-  extends GetProposalsActivityQueryVariables {
+interface UseProposalsActivityParams extends GetProposalsActivityQueryVariables {
   itemsPerPage: number;
   daoId: DaoIdEnum;
 }
@@ -44,7 +43,6 @@ export const useProposalsActivity = ({
   daoId,
   fromDate,
   skip,
-  limit,
   orderBy,
   orderDirection,
   userVoteFilter,
@@ -71,7 +69,7 @@ export const useProposalsActivity = ({
         address,
         fromDate,
         skip,
-        limit,
+        limit: itemsPerPage,
         orderBy,
         orderDirection,
         userVoteFilter,
@@ -126,7 +124,7 @@ export const useProposalsActivity = ({
           address,
           fromDate,
           skip: accumulatedProposals.length,
-          limit,
+          limit: itemsPerPage,
           orderBy,
           orderDirection,
           userVoteFilter,
@@ -172,7 +170,7 @@ export const useProposalsActivity = ({
     networkStatus,
     address,
     fromDate,
-    limit,
+    itemsPerPage,
     orderBy,
     orderDirection,
     userVoteFilter,

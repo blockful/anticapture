@@ -19,12 +19,11 @@ import { QueryInput_AccountBalances_OrderDirection } from "@anticapture/graphql-
 export const VotingPowerTable = ({
   address,
   daoId,
-  itemsPerPage,
 }: {
   address: string;
   daoId: string;
-  itemsPerPage: number;
 }) => {
+  const itemsPerPage: number = 20;
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const [sortBy, setSortBy] = useQueryState(
     "orderBy",

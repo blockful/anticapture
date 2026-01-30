@@ -32,14 +32,13 @@ import {
 interface DelegateDelegationHistoryTableProps {
   accountId: string;
   daoId: DaoIdEnum;
-  itemsPerPage: number;
 }
 
 export const DelegateDelegationHistoryTable = ({
   accountId,
   daoId,
-  itemsPerPage,
 }: DelegateDelegationHistoryTableProps) => {
+  const itemsPerPage: number = 20;
   const { decimals } = daoConfig[daoId];
 
   const [sortBy, setSortBy] = useQueryState(

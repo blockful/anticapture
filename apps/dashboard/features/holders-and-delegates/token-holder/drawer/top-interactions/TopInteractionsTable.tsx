@@ -31,11 +31,9 @@ import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 export const TopInteractionsTable = ({
   address,
   daoId,
-  itemsPerPage,
 }: {
   address: string;
   daoId: string;
-  itemsPerPage: number;
 }) => {
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const [currentAddressFilter, setCurrentAddressFilter] =
@@ -365,7 +363,7 @@ export const TopInteractionsTable = ({
     <div className="flex h-full w-full flex-col overflow-hidden">
       <Table
         columns={columns}
-        data={loading ? Array(itemsPerPage).fill({}) : tableData}
+        data={loading ? Array(20).fill({}) : tableData}
         filterColumn="address"
         size="sm"
         withDownloadCSV={true}

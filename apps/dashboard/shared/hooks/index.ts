@@ -9,4 +9,3 @@ export * from "@/shared/hooks/useVotes";
 export * from "@/shared/hooks/useScreenSize";
 export * from "@/shared/hooks/useTokenData";
 export * from "@/shared/hooks/useGitHubRelease";
-export * from "@/shared/hooks/useTableHeight";

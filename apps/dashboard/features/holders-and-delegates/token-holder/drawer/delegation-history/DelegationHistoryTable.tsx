@@ -42,14 +42,13 @@ interface DelegationData {
 interface DelegationHistoryTableProps {
   address: string;
   daoId: DaoIdEnum;
-  itemsPerPage: number;
 }
 
 export const DelegationHistoryTable = ({
   address,
   daoId,
-  itemsPerPage,
 }: DelegationHistoryTableProps) => {
+  const itemsPerPage: number = 20;
   const { decimals } = daoConfig[daoId];
   const [isMounted, setIsMounted] = useState<boolean>(false);
 

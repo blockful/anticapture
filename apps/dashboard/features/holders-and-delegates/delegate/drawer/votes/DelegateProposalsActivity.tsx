@@ -14,7 +14,6 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import { FilterOption } from "@/shared/components/dropdowns/FilterDropdown";
 import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
 import { parseAsStringEnum, useQueryState } from "nuqs";
-import { useTableHeight } from "@/shared/hooks";
 
 interface DelegateProposalsActivityProps {
   address: string;
@@ -25,6 +24,8 @@ export const DelegateProposalsActivity = ({
   address,
   daoId,
 }: DelegateProposalsActivityProps) => {
+  const itemsPerPage: number = 20;
+
   const [userVoteFilter, setUserVoteFilter] = useState<string>("all");
   const [orderBy, setOrderBy] = useQueryState(
     "orderBy",
@@ -34,12 +35,6 @@ export const DelegateProposalsActivity = ({
     "orderDirection",
     parseAsStringEnum(["asc", "desc"]).withDefault("desc"),
   );
-
-  const { containerRef, height, itemsPerPage } = useTableHeight({
-    minHeight: 300,
-    bottomOffset: 40,
-    rowHeight: 52,
-  });
 
   // Filter options for user vote
   const userVoteFilterOptions: FilterOption[] = [
@@ -60,7 +55,6 @@ export const DelegateProposalsActivity = ({
     useProposalsActivity({
       address,
       daoId,
-      limit: itemsPerPage,
       orderBy: orderBy as QueryInput_ProposalsActivity_OrderBy,
       orderDirection:
         orderDirection as QueryInput_ProposalsActivity_OrderDirection,
@@ -133,11 +127,7 @@ export const DelegateProposalsActivity = ({
       </div>
 
       {/* Proposals Table */}
-      <div
-        ref={containerRef}
-        style={{ height }}
-        className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 pb-4"
-      >
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 pb-4">
         <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden">
           <ProposalsTable
             proposals={data?.proposals || []}
@@ -153,7 +143,6 @@ export const DelegateProposalsActivity = ({
             pagination={pagination}
             fetchingMore={fetchingMore}
             fetchNextPage={fetchNextPage}
-            itemsPerPage={itemsPerPage}
           />
         </div>
       </div>

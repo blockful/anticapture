@@ -8,7 +8,6 @@ import { ArrowDown, ArrowUp, Inbox } from "lucide-react";
 import { useAccountInteractionsData } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/hooks/useAccountInteractionsData";
 import { TopInteractionsChart } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/TopInteractionsChart";
 import { TopInteractionsTable } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/TopInteractionsTable";
-import { useTableHeight } from "@/shared/hooks";
 
 const ChartLegend = ({
   items,
@@ -79,12 +78,6 @@ export const TopInteractions = ({
     chartConfig,
     loading: loadingVotingPowerData,
   } = useAccountInteractionsData({ daoId, address });
-
-  const { containerRef, height, itemsPerPage } = useTableHeight({
-    minHeight: 300,
-    bottomOffset: 40,
-    rowHeight: 40,
-  });
 
   if (!topFive || (topFive.length === 0 && !loadingVotingPowerData)) {
     return (
@@ -181,16 +174,8 @@ export const TopInteractions = ({
           </div>
         </div>
       </div>
-      <div
-        ref={containerRef}
-        style={{ height }}
-        className="flex min-h-0 w-full flex-1 flex-col gap-4 overflow-hidden"
-      >
-        <TopInteractionsTable
-          address={address}
-          daoId={daoId}
-          itemsPerPage={itemsPerPage}
-        />
+      <div className="flex min-h-0 w-full flex-1 flex-col gap-4 overflow-hidden">
+        <TopInteractionsTable address={address} daoId={daoId} />
       </div>
     </div>
   );

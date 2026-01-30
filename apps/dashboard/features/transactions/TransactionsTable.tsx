@@ -10,7 +10,6 @@ import { Table } from "@/shared/components/design-system/table/Table";
 import { getTransactionsColumns } from "@/features/transactions/utils/getTransactionsColumns";
 import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
 import { useTransactionsTableParams } from "@/features/transactions/hooks/useTransactionParams";
-import { useTableHeight } from "@/shared/hooks";
 
 type Supply = "CEX" | "DEX" | "LENDING" | "TOTAL" | "UNASSIGNED";
 
@@ -27,13 +26,9 @@ export const TransactionsTable = ({
   startDate: number;
   endDate: number;
 }) => {
+  const pageLimit: number = 20;
   const { daoId } = useParams<{ daoId: DaoIdEnum }>();
   const filterParams = useTransactionsTableParams();
-
-  const { containerRef, height, itemsPerPage } = useTableHeight({
-    minHeight: 300,
-    bottomOffset: 80,
-  });
 
   const affectedSupply = useMemo(
     () =>
@@ -77,7 +72,7 @@ export const TransactionsTable = ({
       affectedSupply: buildFilters(hasTransfer, affectedSupply),
       includes,
     },
-    limit: itemsPerPage,
+    limit: pageLimit,
   });
 
   const columns = getTransactionsColumns({
@@ -88,14 +83,10 @@ export const TransactionsTable = ({
 
   if (loading && (!tableData || tableData.length === 0)) {
     return (
-      <div
-        ref={containerRef}
-        style={{ height }}
-        className="flex w-full flex-col"
-      >
+      <div className="flex h-[calc(100vh-20rem)] min-h-[300px] w-full flex-col">
         <Table
           columns={columns}
-          data={Array.from({ length: itemsPerPage }, () => ({
+          data={Array.from({ length: pageLimit }, () => ({
             id: "loading-row",
             affectedSupply: ["CEX", "DEX"] as SupplyType[],
             amount: "1000000",
@@ -120,11 +111,7 @@ export const TransactionsTable = ({
   }
 
   return (
-    <div
-      ref={containerRef}
-      style={{ height }}
-      className="flex w-full flex-col text-white"
-    >
+    <div className="flex h-[calc(100vh-20rem)] min-h-[300px] w-full flex-col text-white">
       <Table
         columns={columns}
         data={tableData}

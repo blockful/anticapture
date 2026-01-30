@@ -46,12 +46,11 @@ interface BalanceHistoryData {
 export const BalanceHistoryTable = ({
   accountId,
   daoId,
-  itemsPerPage,
 }: {
   accountId: string;
   daoId: DaoIdEnum;
-  itemsPerPage: number;
 }) => {
+  const itemsPerPage: number = 20;
   const { decimals } = daoConfig[daoId];
 
   const [typeFilter, setTypeFilter] = useQueryState(
