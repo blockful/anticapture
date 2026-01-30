@@ -180,7 +180,7 @@ export const BalanceHistoryVariationGraph = ({
         : // 1 day in milliseconds to avoid hover conflict when max data is selected
         head?.timestamp - 86400000,
       balance: head?.balance + (
-        head?.direction === "out" ?
+        head?.direction === "in" ?
           - head?.amount :
           + head?.amount
       ),
