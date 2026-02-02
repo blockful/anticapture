@@ -40,6 +40,31 @@ export const getTextStatusColor = (status: ProposalStatus) => {
   }
 };
 
+export const getStatusColorBar = (status: ProposalStatus) => {
+  switch (status) {
+    case ProposalStatus.PENDING:
+      return "bg-warning";
+    case ProposalStatus.ONGOING:
+      return "bg-link";
+    case ProposalStatus.EXECUTED:
+      return "bg-success";
+    case ProposalStatus.DEFEATED:
+      return "bg-error";
+    case ProposalStatus.CANCELLED:
+      return "bg-error";
+    case ProposalStatus.QUEUED:
+      return "bg-primary";
+    case ProposalStatus.SUCCEEDED:
+      return "bg-success";
+    case ProposalStatus.EXPIRED:
+      return "bg-error";
+    case ProposalStatus.NO_QUORUM:
+      return "bg-secondary";
+    default:
+      return "bg-secondary";
+  }
+};
+
 export const getBackgroundStatusColor = (status: ProposalStatus) => {
   switch (status) {
     case ProposalStatus.PENDING:
@@ -108,7 +133,7 @@ export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
       <div
         className={cn(
           "absolute left-0 top-1/2 h-[calc(100%-24px)] w-[2px] -translate-y-1/2",
-          getBackgroundStatusColor(proposal.status),
+          getStatusColorBar(proposal.status),
         )}
       />
 
