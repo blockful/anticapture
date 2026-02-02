@@ -15,7 +15,6 @@ import {
   useDelegateDelegationHistory,
   DelegationHistoryItem,
 } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
-import { formatRelativeTime } from "@/features/holders-and-delegates/utils";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
@@ -29,6 +28,7 @@ import {
   useQueryState,
   useQueryStates,
 } from "nuqs";
+import { formatRelativeTime } from "@/shared/utils/formatRelativeTime";
 
 interface DelegateDelegationHistoryTableProps {
   accountId: string;

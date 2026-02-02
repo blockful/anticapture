@@ -31,7 +31,7 @@ import {
   useQueryState,
   useQueryStates,
 } from "nuqs";
-import { formatRelativeTime } from "@/features/holders-and-delegates/utils";
+import { formatRelativeTime } from "@/shared/utils/formatRelativeTime";
 
 interface BalanceHistoryData {
   id: string;

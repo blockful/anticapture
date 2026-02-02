@@ -2,6 +2,7 @@ import { SupplyType } from "@/shared/components/badges/SupplyLabel";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { formatUnits } from "viem";
 import { TransactionData } from "@/features/transactions/hooks/useTransactionsTableData";
+import { formatRelativeTime } from "@/shared/utils/formatRelativeTime";
 
 export type GraphTransaction = {
   from: string;
@@ -50,22 +51,6 @@ const deduceSupplyTypes = (tx: GraphTransaction): SupplyType[] => {
   if (tx.delegations && tx.delegations.length > 0) types.push("Delegation");
   if (types.length === 0) types.push("Other");
   return types;
-};
-
-const formatRelativeTime = (timestampSec: string): string => {
-  const ts = Number(timestampSec);
-  if (!ts) return "";
-  const now = Math.floor(Date.now() / 1000);
-  const diff = Math.max(0, now - ts);
-  const minutes = Math.floor(diff / 60);
-  const hours = Math.floor(diff / 3600);
-  const days = Math.floor(diff / 86400);
-  const years = Math.floor(days / 365);
-  if (years > 0) return `${years} year${years > 1 ? "s" : ""} ago`;
-  if (days > 0) return `${days} day${days > 1 ? "s" : ""} ago`;
-  if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
-  if (minutes > 0) return `${minutes} min ago`;
-  return "just now";
 };
 
 const toBigIntSafe = (val: string | number | undefined | null): bigint => {
