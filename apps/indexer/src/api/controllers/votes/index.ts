@@ -38,8 +38,16 @@ export function votes(app: Hono, service: VotesService) {
     }),
     async (context) => {
       const { id } = context.req.valid("param");
-      const { skip, limit, voterAddressIn, orderBy, orderDirection, support } =
-        context.req.valid("query");
+      const {
+        skip,
+        limit,
+        voterAddressIn,
+        orderBy,
+        orderDirection,
+        support,
+        fromDate,
+        toDate,
+      } = context.req.valid("query");
 
       const { totalCount, items } = await service.getVotesByProposal(
         id,
@@ -49,6 +57,8 @@ export function votes(app: Hono, service: VotesService) {
         orderDirection,
         voterAddressIn,
         support,
+        fromDate,
+        toDate,
       );
 
       return context.json({ totalCount, items });

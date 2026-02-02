@@ -185,6 +185,8 @@ export class VotesRepository {
     orderDirection: "asc" | "desc",
     voterAddresses?: Address[],
     support?: string,
+    fromDate?: number,
+    toDate?: number,
   ): Promise<{ items: DBVote[]; totalCount: number }> {
     const whereClauses: SQL<unknown>[] = [
       eq(votesOnchain.proposalId, proposalId),
@@ -196,6 +198,14 @@ export class VotesRepository {
 
     if (voterAddresses !== undefined && voterAddresses.length > 0) {
       whereClauses.push(inArray(votesOnchain.voterAccountId, voterAddresses));
+    }
+
+    if (fromDate !== undefined) {
+      whereClauses.push(gte(votesOnchain.timestamp, BigInt(fromDate)));
+    }
+
+    if (toDate !== undefined) {
+      whereClauses.push(lte(votesOnchain.timestamp, BigInt(toDate)));
     }
 
     const orderByColumn =

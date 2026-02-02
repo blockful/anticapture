@@ -28,6 +28,8 @@ interface VotesRepository {
     orderDirection: "asc" | "desc",
     voterAddressIn?: Address[],
     support?: string,
+    fromDate?: number,
+    toDate?: number,
   ): Promise<{ items: DBVote[]; totalCount: number }>;
 
   getLastVotersTimestamp(voters: Address[]): Promise<Record<Address, bigint>>;
@@ -111,6 +113,8 @@ export class VotesService {
     orderDirection: "asc" | "desc" = "desc",
     voterAddressIn?: Address[],
     support?: string,
+    fromDate?: number,
+    toDate?: number,
   ): Promise<VotesByProposalResponse> {
     const response = await this.votesRepository.getVotesByProposalId(
       proposalId,
@@ -120,8 +124,21 @@ export class VotesService {
       orderDirection,
       voterAddressIn,
       support,
+      fromDate,
+      toDate,
     );
 
-    return VotesByProposalResponseSchema.parse(response);
+    return VotesByProposalResponseSchema.parse({
+      items: response.items.map((item) => ({
+        voterAddress: item.voterAccountId,
+        transactionHash: item.txHash,
+        proposalId: item.proposalId,
+        support: Number(item.support),
+        votingPower: item.votingPower.toString(),
+        reason: item.reason ? item.reason : undefined,
+        timestamp: Number(item.timestamp),
+      })),
+      totalCount: response.totalCount,
+    });
   }
 }
