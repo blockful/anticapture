@@ -5,7 +5,7 @@ export const ProposalSectionSkeleton = () => {
     <div>
       {/* Header Skeleton */}
       <div className="mx-auto flex h-[65px] w-full shrink-0 items-center justify-between gap-6 px-5 py-2">
-        <div className="m-auto flex w-full max-w-screen-2xl items-center justify-between border">
+        <div className="m-auto flex w-full max-w-screen-2xl items-center justify-between">
           <div className="flex items-center gap-2">
             <SkeletonRow
               parentClassName="flex animate-pulse"
