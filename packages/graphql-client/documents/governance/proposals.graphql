@@ -60,8 +60,8 @@ query GetVotes(
   $proposalId: String!
   $limit: PositiveInt
   $skip: NonNegativeInt
-  $orderBy: queryInput_votes_orderBy = timestamp
-  $orderDirection: queryInput_votes_orderDirection = desc
+  $orderBy: queryInput_votesByProposalId_orderBy = timestamp
+  $orderDirection: queryInput_votesByProposalId_orderDirection = desc
 ) {
   votesByProposalId(
     limit: $limit
