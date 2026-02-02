@@ -43,7 +43,18 @@ export class VotesService {
     params: VotesByProposalRequest,
   ): Promise<VotesByProposalResponse> {
     const response = await this.votesRepository.getVotes(params);
-    return VotesByProposalResponseSchema.parse(response);
+    return VotesByProposalResponseSchema.parse({
+      items: response.items.map((item) => ({
+        voterAddress: item.voterAccountId,
+        transactionHash: item.txHash,
+        proposalId: item.proposalId,
+        support: Number(item.support),
+        votingPower: item.votingPower.toString(),
+        reason: item.reason ? item.reason : undefined,
+        timestamp: Number(item.timestamp),
+      })),
+      totalCount: response.totalCount,
+    });
   }
 
   /**

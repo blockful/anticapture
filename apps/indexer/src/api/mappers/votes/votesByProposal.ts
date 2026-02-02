@@ -52,7 +52,7 @@ export const VoteByProposalResponseSchema = z.object({
   proposalId: z.string(),
   support: z.number(),
   votingPower: z.string(),
-  reason: z.string().nullable(),
+  reason: z.string().optional(),
   timestamp: z.number(),
 });
 
