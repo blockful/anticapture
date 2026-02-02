@@ -18,10 +18,13 @@ import {
   ArrowUp,
   ArrowDown,
   Inbox,
+  ExternalLink,
 } from "lucide-react";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { VotesTable } from "@/features/governance/components/proposal-overview/VotesTable";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import daoConfigByDaoId from "@/shared/dao-config";
+import Link from "next/link";
 
 export const TabsVotedContent = ({
   proposal,
@@ -481,6 +484,46 @@ export const TabsVotedContent = ({
           <div className="text-table-header flex h-8 w-full shrink-0 items-center justify-start whitespace-nowrap px-2">
             <p>VP Change (Last 30d)</p>
           </div>
+        ),
+      },
+      {
+        accessorKey: "transactionHash",
+        size: 40,
+        cell: ({ row }) => {
+          const transactionHash = row.getValue("transactionHash") as string;
+
+          // Handle skeleton data (empty objects from initial load)
+          if (!transactionHash) {
+            return (
+              <div className="flex h-10 items-center justify-center p-2">
+                <SkeletonRow
+                  parentClassName="flex animate-pulse"
+                  className="size-3.5"
+                />
+              </div>
+            );
+          }
+
+          const daoIdKey = (daoId as string)?.toUpperCase() as DaoIdEnum;
+          const blockExplorerUrl =
+            daoConfigByDaoId[daoIdKey]?.daoOverview?.chain?.blockExplorers
+              ?.default?.url ?? "https://etherscan.io";
+
+          return (
+            <div className="flex h-10 items-center justify-center p-2">
+              <Link
+                href={`${blockExplorerUrl}/tx/${transactionHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:bg-surface-contrast flex h-fit cursor-pointer items-center justify-center rounded-md bg-transparent p-1.5 transition-colors duration-300"
+              >
+                <ExternalLink className="text-secondary size-3.5" />
+              </Link>
+            </div>
+          );
+        },
+        header: () => (
+          <div className="flex h-8 w-full items-center justify-center px-2" />
         ),
       },
     ],
