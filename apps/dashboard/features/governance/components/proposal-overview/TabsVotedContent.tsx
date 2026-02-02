@@ -280,12 +280,25 @@ export const TabsVotedContent = ({
                 year: "numeric",
               })
             : "Unknown";
+          
+          const formattedTime = date
+            ? date.toLocaleTimeString("en-US", {
+                hour: "numeric",
+                minute: "2-digit",
+                hour12: true,
+              }).toLowerCase()
+            : null;
 
           return (
-            <div className="flex h-10 items-center p-2">
-              <span className="text-secondary whitespace-nowrap text-sm">
+            <div className="flex h-10 flex-col items-start justify-center gap-0 p-2">
+              <span className="text-secondary leading-5 text-sm">
                 {formattedDate}
               </span>
+              {formattedTime && (
+                <span className="text-secondary leading-[18px] text-xs">
+                  {formattedTime}
+                </span>
+              )}
             </div>
           );
         },
