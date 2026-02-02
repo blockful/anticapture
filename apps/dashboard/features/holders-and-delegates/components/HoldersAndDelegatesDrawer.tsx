@@ -7,9 +7,9 @@ import { cn } from "@/shared/utils";
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { useScreenSize } from "@/shared/hooks";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { DelegateDelegationsHistory } from "@/features/holders-and-delegates/delegate/drawer/delegation-history/DelegateDelegationsHistory";
+import { VotingPowerHistory } from "@/features/holders-and-delegates/delegate/drawer/voting-power-history/VotingPowerHistory";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { VotingPower } from "@/features/holders-and-delegates/delegate/drawer/voting-power/VotingPower";
+import { VoteComposition } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/VoteComposition";
 import { BalanceHistory } from "@/features/holders-and-delegates/token-holder/drawer/balance-history/BalanceHistory";
 import { DelegationHistoryTable } from "@/features/holders-and-delegates/token-holder/drawer/delegation-history/DelegationHistoryTable";
 import { DelegateProposalsActivity } from "@/features/holders-and-delegates/delegate/drawer/votes/DelegateProposalsActivity";
@@ -46,16 +46,14 @@ export const HoldersAndDelegatesDrawer = ({
           ),
         },
         {
-          id: "votingPower",
+          id: "voteComposition",
           label: "Vote Composition",
-          content: <VotingPower address={address} daoId={daoId} />,
+          content: <VoteComposition address={address} daoId={daoId} />,
         },
         {
-          id: "delegationHistory",
+          id: "votingPowerHistory",
           label: "Voting Power History",
-          content: (
-            <DelegateDelegationsHistory accountId={address} daoId={daoId} />
-          ),
+          content: <VotingPowerHistory accountId={address} daoId={daoId} />,
         },
       ],
     },

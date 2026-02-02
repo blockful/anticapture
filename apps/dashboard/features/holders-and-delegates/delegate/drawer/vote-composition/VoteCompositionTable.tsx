@@ -16,7 +16,7 @@ import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButt
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { QueryInput_AccountBalances_OrderDirection } from "@anticapture/graphql-client";
 
-export const VotingPowerTable = ({
+export const VoteCompositionTable = ({
   address,
   daoId,
 }: {
@@ -170,15 +170,15 @@ export const VotingPowerTable = ({
     {
       accessorKey: "date",
       header: () => {
-        const handleSortToggle = () => {
-          const newSortOrder = sortOrder === "desc" ? "asc" : "desc";
-          setSortBy("timestamp");
-          setSortOrder(newSortOrder);
-        };
+        // const handleSortToggle = () => {
+        //   const newSortOrder = sortOrder === "desc" ? "asc" : "desc";
+        //   setSortBy("timestamp");
+        //   setSortOrder(newSortOrder);
+        // };
         return (
           <div className="text-table-header flex w-full items-center justify-start gap-1">
             Date
-            <Button
+            {/* <Button
               variant="ghost"
               size="sm"
               className="text-secondary justify-start p-0"
@@ -194,7 +194,7 @@ export const VotingPowerTable = ({
                       : ArrowState.DEFAULT
                 }
               />
-            </Button>
+            </Button> */}
           </div>
         );
       },

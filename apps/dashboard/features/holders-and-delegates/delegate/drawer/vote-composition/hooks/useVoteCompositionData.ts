@@ -6,7 +6,7 @@ import { Address, formatUnits } from "viem";
 import { formatAddress } from "@/shared/utils/formatAddress";
 import daoConfig from "@/shared/dao-config";
 
-export interface VotingPowerData {
+export interface VoteCompositionData {
   // Dados básicos
   topFiveDelegators: unknown[];
   currentVotingPower: number;
@@ -27,15 +27,15 @@ export interface VotingPowerData {
 }
 
 /**
- * Hook to get the voting power data for a delegate and pass to VotingPower component and ThePieChart component
+ * Hook to get the vote composition data for a delegate
  * @param daoId - The ID of the DAO
  * @param address - The address of the delegate
- * @returns The voting power data
+ * @returns The vote composition data
  */
-export const useVotingPowerData = (
+export const useVoteCompositionData = (
   daoId: DaoIdEnum,
   address: string,
-): VotingPowerData => {
+): VoteCompositionData => {
   const {
     decimals,
     daoOverview: { token },
@@ -56,7 +56,7 @@ export const useVotingPowerData = (
   const { data: ensData } = useMultipleEnsData(delegatorAddresses);
 
   // default Value when there is no data
-  const defaultData: VotingPowerData = {
+  const defaultData: VoteCompositionData = {
     topFiveDelegators: [],
     currentVotingPower: 0,
     loading,
@@ -82,9 +82,9 @@ export const useVotingPowerData = (
   const delegateCurrentVotingPower = accountPowerVotingPower
     ? BigInt(accountPowerVotingPower)
     : topFiveDelegators.reduce(
-      (acc, item) => acc + BigInt(item.rawBalance),
-      BigInt(0),
-    );
+        (acc, item) => acc + BigInt(item.rawBalance),
+        BigInt(0),
+      );
 
   const currentVotingPowerNumber = Number(
     token === "ERC20"
@@ -119,7 +119,7 @@ export const useVotingPowerData = (
     const percentage = Number(
       (Number(BigInt(delegator.rawBalance)) /
         Number(delegateCurrentVotingPower)) *
-      100,
+        100,
     );
 
     const ensName = ensData?.[delegator.address as Address]?.ens;

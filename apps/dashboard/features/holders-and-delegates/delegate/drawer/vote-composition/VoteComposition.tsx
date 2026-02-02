@@ -1,11 +1,11 @@
 "use client";
 
-import { ThePieChart } from "@/features/holders-and-delegates/delegate/drawer/voting-power/ThePieChart";
-import { VotingPowerTable } from "@/features/holders-and-delegates/delegate/drawer/voting-power/VotingPowerTable";
+import { ThePieChart } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/ThePieChart";
+import { VoteCompositionTable } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/VoteCompositionTable";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
-import { useVotingPowerData } from "@/features/holders-and-delegates/delegate/drawer/voting-power/hooks/useVotingPowerData";
+import { useVoteCompositionData } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/hooks/useVoteCompositionData";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 import { Inbox } from "lucide-react";
 
@@ -62,7 +62,7 @@ const ChartLegend = ({
   );
 };
 
-export const VotingPower = ({
+export const VoteComposition = ({
   address,
   daoId,
 }: {
@@ -76,7 +76,7 @@ export const VotingPower = ({
     pieData,
     chartConfig,
     loading: loadingVotingPowerData,
-  } = useVotingPowerData(daoId, address);
+  } = useVoteCompositionData(daoId, address);
 
   if (
     !topFiveDelegators ||
@@ -149,7 +149,7 @@ export const VotingPower = ({
         </div>
       </div>
       <div className="flex w-full flex-col gap-4">
-        <VotingPowerTable address={address} daoId={daoId} />
+        <VoteCompositionTable address={address} daoId={daoId} />
       </div>
     </div>
   );

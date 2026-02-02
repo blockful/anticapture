@@ -30,19 +30,19 @@ import {
 } from "nuqs";
 import { formatRelativeTime } from "@/shared/utils/formatRelativeTime";
 
-interface DelegateDelegationHistoryTableProps {
+interface VotingPowerHistoryTableProps {
   accountId: string;
   daoId: DaoIdEnum;
   fromTimestamp?: number;
   toTimestamp?: number;
 }
 
-export const DelegateDelegationHistoryTable = ({
+export const VotingPowerHistoryTable = ({
   accountId,
   daoId,
   fromTimestamp,
   toTimestamp,
-}: DelegateDelegationHistoryTableProps) => {
+}: VotingPowerHistoryTableProps) => {
   const { decimals } = daoConfig[daoId];
 
   const [sortBy, setSortBy] = useQueryState(

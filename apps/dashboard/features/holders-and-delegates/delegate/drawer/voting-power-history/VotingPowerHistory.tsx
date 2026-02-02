@@ -1,20 +1,20 @@
 import { DaoIdEnum } from "@/shared/types/daos";
-import { DelegateDelegationHistoryTable } from "@/features/holders-and-delegates/delegate/drawer/delegation-history/DelegateDelegationHistoryTable";
-import { VotingPowerVariationGraph } from "@/features/holders-and-delegates/delegate/drawer/delegation-history/VotingPowerVariationGraph";
+import { VotingPowerHistoryTable } from "@/features/holders-and-delegates/delegate/drawer/voting-power-history/VotingPowerHistoryTable";
+import { VotingPowerVariationGraph } from "@/features/holders-and-delegates/delegate/drawer/voting-power-history/VotingPowerVariationGraph";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { useMemo } from "react";
 import { getTimestampRangeFromPeriod } from "@/features/holders-and-delegates/utils";
 import { TimePeriod } from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
 
-interface DelegateDelegationsHistoryProps {
+interface VotingPowerHistoryProps {
   accountId: string;
   daoId: DaoIdEnum;
 }
 
-export const DelegateDelegationsHistory = ({
+export const VotingPowerHistory = ({
   accountId,
   daoId,
-}: DelegateDelegationsHistoryProps) => {
+}: VotingPowerHistoryProps) => {
   const [selectedPeriod] = useQueryState(
     "selectedPeriod",
     parseAsStringEnum<TimePeriod>(["30d", "90d", "all"]).withDefault("all"),
@@ -34,7 +34,7 @@ export const DelegateDelegationsHistory = ({
 
       {/* Table Section */}
       <div className="flex flex-col">
-        <DelegateDelegationHistoryTable
+        <VotingPowerHistoryTable
           accountId={accountId}
           daoId={daoId}
           fromTimestamp={fromTimestamp}
