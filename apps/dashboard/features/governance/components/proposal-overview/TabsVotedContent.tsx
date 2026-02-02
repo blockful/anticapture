@@ -25,6 +25,7 @@ import { VotesTable } from "@/features/governance/components/proposal-overview/V
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import daoConfigByDaoId from "@/shared/dao-config";
 import Link from "next/link";
+import { formatUnits } from "viem";
 
 export const TabsVotedContent = ({
   proposal,
@@ -460,8 +461,22 @@ export const TabsVotedContent = ({
             }
           };
 
+          // Format absolute change
+          const daoIdKey = (daoId as string)?.toUpperCase() as DaoIdEnum;
+          const decimals = daoConfigByDaoId[daoIdKey]?.decimals ?? 18;
+          const absoluteChangeNum = votingPowerVariation.absoluteChange
+            ? Number(formatUnits(BigInt(votingPowerVariation.absoluteChange), decimals))
+            : 0;
+          const formattedAbsoluteChange = formatNumberUserReadable(
+            absoluteChangeNum,
+            1,
+          );
+
           return (
-            <div className="flex h-10 items-center p-2">
+            <div className="flex h-10 items-center justify-between gap-2 p-2">
+              <span className="text-secondary whitespace-nowrap text-right text-sm">
+                {formattedAbsoluteChange}
+              </span>
               <div className="flex items-center gap-1">
                 {getArrowIcon()}
                 <span
@@ -474,7 +489,7 @@ export const TabsVotedContent = ({
                 >
                   {votingPowerVariation.percentageChange === "NO BASELINE"
                     ? ">1000%"
-                    : `${Number(votingPowerVariation.percentageChange).toFixed(2)}%`}
+                    : `${Number(votingPowerVariation.percentageChange).toFixed(1)}%`}
                 </span>
               </div>
             </div>
