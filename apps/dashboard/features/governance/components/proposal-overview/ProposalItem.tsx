@@ -53,7 +53,7 @@ export const getBackgroundStatusColor = (status: ProposalStatus) => {
     case ProposalStatus.CANCELLED:
       return "bg-error";
     case ProposalStatus.QUEUED:
-      return "bg-primary";
+      return "bg-success";
     case ProposalStatus.SUCCEEDED:
       return "bg-success";
     case ProposalStatus.EXPIRED:
