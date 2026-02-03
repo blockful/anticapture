@@ -170,31 +170,9 @@ export const VoteCompositionTable = ({
     {
       accessorKey: "date",
       header: () => {
-        // const handleSortToggle = () => {
-        //   const newSortOrder = sortOrder === "desc" ? "asc" : "desc";
-        //   setSortBy("timestamp");
-        //   setSortOrder(newSortOrder);
-        // };
         return (
           <div className="text-table-header flex w-full items-center justify-start gap-1">
             Date
-            {/* <Button
-              variant="ghost"
-              size="sm"
-              className="text-secondary justify-start p-0"
-              onClick={handleSortToggle}
-            >
-              <ArrowUpDown
-                props={{ className: "size-4" }}
-                activeState={
-                  sortBy === "timestamp" && sortOrder === "asc"
-                    ? ArrowState.UP
-                    : sortBy === "timestamp" && sortOrder === "desc"
-                      ? ArrowState.DOWN
-                      : ArrowState.DEFAULT
-                }
-              />
-            </Button> */}
           </div>
         );
       },

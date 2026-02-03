@@ -159,7 +159,9 @@ export const VotingPowerHistoryTable = ({
         return (
           <div className="flex items-center justify-start">
             <span className="text-primary whitespace-nowrap text-sm font-medium">
-              {formatRelativeTime(timestamp)}
+              {formatRelativeTime(timestamp, {
+                skipMonthsAndWeeks: true,
+              })}
             </span>
           </div>
         );

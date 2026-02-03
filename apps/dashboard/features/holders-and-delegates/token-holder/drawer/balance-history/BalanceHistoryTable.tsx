@@ -117,7 +117,9 @@ export const BalanceHistoryTable = ({
   const transformedData = useMemo(() => {
     return transfers.map((transfer) => {
       const timestampSeconds = parseInt(transfer.timestamp);
-      const relativeTime = formatRelativeTime(timestampSeconds);
+      const relativeTime = formatRelativeTime(timestampSeconds, {
+        skipMonthsAndWeeks: true,
+      });
 
       return {
         id: transfer.transactionHash,
