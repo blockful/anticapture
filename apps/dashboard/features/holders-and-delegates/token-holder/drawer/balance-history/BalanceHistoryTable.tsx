@@ -11,9 +11,9 @@ import { ArrowRight, ExternalLink } from "lucide-react";
 import { useBalanceHistory } from "@/features/holders-and-delegates/hooks/useBalanceHistory";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 import {
-  FilterDropdown,
+  CategoriesFilter,
   FilterOption,
-} from "@/shared/components/dropdowns/FilterDropdown";
+} from "@/shared/components/design-system/table/filters/CategoriesFilter";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
@@ -32,6 +32,7 @@ import {
   useQueryStates,
 } from "nuqs";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
+import { useAmountFilterStore } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 
 interface BalanceHistoryData {
   id: string;
@@ -183,6 +184,11 @@ export const BalanceHistoryTable = ({
           setOrderBy("timestamp");
           setOrderDirection(newSortOrder);
           column.toggleSorting(newSortOrder === "desc");
+
+          useAmountFilterStore
+            .getState()
+            .reset("balance-history-amount-filter");
+          setIsFilterActive(false);
         };
         return (
           <Button
@@ -237,9 +243,15 @@ export const BalanceHistoryTable = ({
           <AmountFilter
             filterId="balance-history-amount-filter"
             onApply={(filterState) => {
-              setOrderDirection(
-                filterState.sortOrder === "largest-first" ? "desc" : "asc",
-              );
+              if (filterState.sortOrder) {
+                setOrderDirection(
+                  filterState.sortOrder === "largest-first" ? "desc" : "asc",
+                );
+                setOrderBy("amount");
+              } else {
+                setOrderBy("timestamp");
+                setOrderDirection("desc");
+              }
 
               setFilterVariables(() => ({
                 fromValue: filterState.minAmount
@@ -251,14 +263,15 @@ export const BalanceHistoryTable = ({
               }));
 
               setIsFilterActive(
-                !!(filterVariables?.fromValue || filterVariables?.toValue),
+                !!(
+                  filterState.minAmount ||
+                  filterState.maxAmount ||
+                  filterState.sortOrder
+                ),
               );
-
-              setOrderBy("amount");
             }}
             onReset={() => {
               setIsFilterActive(false);
-              // Reset to default sorting
               setOrderBy("timestamp");
               setFilterVariables(() => ({
                 fromValue: "",
@@ -301,7 +314,7 @@ export const BalanceHistoryTable = ({
       header: () => (
         <div className="flex items-center gap-2">
           <h4 className="text-table-header text-xs">Type</h4>
-          <FilterDropdown
+          <CategoriesFilter
             options={typeFilterOptions}
             selectedValue={typeFilter}
             onValueChange={(value) => {
@@ -373,8 +386,6 @@ export const BalanceHistoryTable = ({
           <span>From</span>
           <AddressFilter
             onApply={async (addr) => {
-              setTypeFilter("all");
-
               if ((addr ?? "").indexOf(".eth") > 0) {
                 const address = await fetchAddressFromEnsName({
                   ensName: addr as `${string}.eth`,
@@ -452,8 +463,6 @@ export const BalanceHistoryTable = ({
           <span>To</span>
           <AddressFilter
             onApply={async (addr) => {
-              setTypeFilter("all");
-
               if ((addr ?? "").indexOf(".eth") > 0) {
                 const address = await fetchAddressFromEnsName({
                   ensName: addr as `${string}.eth`,

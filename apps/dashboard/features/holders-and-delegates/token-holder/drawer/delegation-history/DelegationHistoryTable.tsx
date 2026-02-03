@@ -32,6 +32,7 @@ import {
   useQueryStates,
 } from "nuqs";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
+import { useAmountFilterStore } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 
 interface DelegationData {
   address: string;
@@ -198,9 +199,15 @@ export const DelegationHistoryTable = ({
           <AmountFilter
             filterId="delegation-amount-filter"
             onApply={(filterState: AmountFilterState) => {
-              setSortOrder(
-                filterState.sortOrder === "largest-first" ? "desc" : "asc",
-              );
+              if (filterState.sortOrder) {
+                setSortOrder(
+                  filterState.sortOrder === "largest-first" ? "desc" : "asc",
+                );
+                setSortBy("amount");
+              } else {
+                setSortBy("timestamp");
+                setSortOrder("desc");
+              }
 
               setFilterVariables(() => ({
                 fromValue: filterState.minAmount
@@ -212,14 +219,15 @@ export const DelegationHistoryTable = ({
               }));
 
               setIsFilterActive(
-                !!(filterVariables?.fromValue || filterVariables?.toValue),
+                !!(
+                  filterState.minAmount ||
+                  filterState.maxAmount ||
+                  filterState.sortOrder
+                ),
               );
-              // Update sort to amount when filter is applied
-              setSortBy("amount");
             }}
             onReset={() => {
               setIsFilterActive(false);
-              // Reset to default sorting
               setSortBy("timestamp");
               setFilterVariables(() => ({
                 fromValue: "",
@@ -263,6 +271,9 @@ export const DelegationHistoryTable = ({
           setSortBy("timestamp");
           setSortOrder(newSortOrder);
           column.toggleSorting(newSortOrder === "desc");
+
+          useAmountFilterStore.getState().reset("delegation-amount-filter");
+          setIsFilterActive(false);
         };
         return (
           <div className="text-table-header flex w-full items-center justify-start">

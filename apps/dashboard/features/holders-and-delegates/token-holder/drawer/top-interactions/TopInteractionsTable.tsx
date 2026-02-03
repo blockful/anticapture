@@ -15,7 +15,10 @@ import { useAccountInteractionsData } from "@/features/holders-and-delegates/tok
 import { AddressFilter } from "@/shared/components/design-system/table/filters";
 import { percentageVariants } from "@/shared/components/design-system/table/Percentage";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
-import { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
+import {
+  AmountFilterState,
+  useAmountFilterStore,
+} from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
@@ -109,12 +112,11 @@ export const TopInteractionsTable = ({
     {
       accessorKey: "address",
       header: () => (
-        <div className="text-table-header flex w-full items-center justify-start">
+        <div className="text-table-header flex w-full items-center justify-start gap-2">
           <span>Address</span>
           <AddressFilter
             onApply={handleAddressFilterApply}
             currentFilter={currentAddressFilter ?? ""}
-            className="ml-2"
           />
         </div>
       ),
@@ -170,11 +172,17 @@ export const TopInteractionsTable = ({
               </h4>
             </Tooltip>
             <AmountFilter
-              filterId="top-interactions-volume-filter"
+              filterId="top-interactions-amount-filter"
               onApply={(filterState: AmountFilterState) => {
-                setSortDirection(
-                  filterState.sortOrder === "largest-first" ? "desc" : "asc",
-                );
+                if (filterState.sortOrder) {
+                  setSortDirection(
+                    filterState.sortOrder === "largest-first" ? "desc" : "asc",
+                  );
+                  setSortBy("totalVolume");
+                } else {
+                  setSortBy("transferCount");
+                  setSortDirection("desc");
+                }
 
                 setFilterVariables(() => ({
                   minAmount: filterState.minAmount
@@ -186,14 +194,15 @@ export const TopInteractionsTable = ({
                 }));
 
                 setIsFilterActive(
-                  !!(filterVariables?.minAmount || filterVariables?.maxAmount),
+                  !!(
+                    filterState.minAmount ||
+                    filterState.maxAmount ||
+                    filterState.sortOrder
+                  ),
                 );
-
-                setSortBy("totalVolume");
               }}
               onReset={() => {
                 setIsFilterActive(false);
-                // Reset to default sorting
                 setSortBy("transferCount");
                 setFilterVariables(() => ({
                   minAmount: null,
@@ -307,6 +316,11 @@ export const TopInteractionsTable = ({
           const newSortOrder = sortDirection === "desc" ? "asc" : "desc";
           setSortDirection(newSortOrder);
           column.toggleSorting(newSortOrder === "desc");
+
+          useAmountFilterStore
+            .getState()
+            .reset("top-interactions-amount-filter");
+          setIsFilterActive(false);
         };
 
         return (

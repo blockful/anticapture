@@ -16,9 +16,9 @@ import { useDaoData } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { Query_ProposalsActivity_Proposals_Items } from "@anticapture/graphql-client";
 import {
-  FilterDropdown,
+  CategoriesFilter,
   FilterOption,
-} from "@/shared/components/dropdowns/FilterDropdown";
+} from "@/shared/components/design-system/table/filters/CategoriesFilter";
 import daoConfigByDaoId from "@/shared/dao-config";
 import Link from "next/link";
 import {
@@ -230,7 +230,7 @@ export const ProposalsTable = ({
         <div className="flex items-center gap-2 font-medium">
           User Vote
           {userVoteFilterOptions && onUserVoteFilterChange && (
-            <FilterDropdown
+            <CategoriesFilter
               options={userVoteFilterOptions}
               selectedValue={userVoteFilter || "all"}
               onValueChange={onUserVoteFilterChange}
