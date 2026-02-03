@@ -486,7 +486,7 @@ export const TabsVotedContent = ({
 
           // Format absolute change
           const daoIdKey = (daoId as string)?.toUpperCase() as DaoIdEnum;
-          const decimals = daoConfigByDaoId[daoIdKey]?.decimals ?? 18;
+          const decimals = daoConfigByDaoId[daoIdKey]?.decimals;
           const absoluteChangeNum = votingPowerVariation.absoluteChange
             ? Number(formatUnits(BigInt(votingPowerVariation.absoluteChange), decimals))
             : 0;
