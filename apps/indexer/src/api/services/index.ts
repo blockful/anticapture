@@ -14,3 +14,4 @@ export * from "./dao";
 export * from "./transfers";
 export * from "./delegations";
 export * from "./treasury";
+export * from "./votes";
