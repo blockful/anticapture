@@ -15,6 +15,7 @@ import daoConfig from "@/shared/dao-config";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { QueryInput_AccountBalances_OrderDirection } from "@anticapture/graphql-client";
+import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 
 export const VotingPowerTable = ({
   address,
@@ -214,15 +215,15 @@ export const VotingPowerTable = ({
     <div className="flex h-full w-full flex-col gap-2 overflow-hidden">
       <Table
         columns={columns}
-        data={loading ? Array(limit).fill({}) : tableData}
+        data={loading ? Array(DEFAULT_ITEMS_PER_PAGE).fill({}) : tableData}
         filterColumn="address"
         size="sm"
         hasMore={pagination.hasNextPage}
         isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}
         withDownloadCSV={true}
-        wrapperClassName="h-full overflow-y-auto"
         error={error}
+        fillHeight
       />
     </div>
   );

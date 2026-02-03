@@ -29,7 +29,7 @@ import {
 } from "@/features/holders-and-delegates/utils/proposalsTableUtils";
 import { Table } from "@/shared/components/design-system/table/Table";
 import daoConfig from "@/shared/dao-config";
-
+import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 interface ProposalTableData {
   proposalId: string;
   proposalName: string;
@@ -403,14 +403,14 @@ export const ProposalsTable = ({
     <div className="flex h-full w-full flex-col gap-4 overflow-hidden">
       <Table
         columns={proposalColumns}
-        data={loading ? Array(20).fill({}) : tableData}
+        data={loading ? Array(DEFAULT_ITEMS_PER_PAGE).fill({}) : tableData}
         size="sm"
         hasMore={pagination.hasNextPage}
         isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}
         withDownloadCSV={true}
-        wrapperClassName="h-full overflow-y-auto"
         error={error}
+        fillHeight
       />
     </div>
   );

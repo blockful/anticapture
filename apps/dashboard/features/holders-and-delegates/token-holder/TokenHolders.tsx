@@ -22,6 +22,7 @@ import { AddressFilter } from "@/shared/components/design-system/table/filters/A
 import daoConfig from "@/shared/dao-config";
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 
 interface TokenHolderTableData {
   address: Address;
@@ -335,15 +336,15 @@ export const TokenHolders = ({
       <div className="flex h-[calc(100vh-16rem)] min-h-[300px] w-full flex-col text-white">
         <Table
           columns={tokenHoldersColumns}
-          data={loading ? Array(pageLimit).fill({}) : tableData}
+          data={loading ? Array(DEFAULT_ITEMS_PER_PAGE).fill({}) : tableData}
           hasMore={pagination.hasNextPage}
           isLoadingMore={fetchingMore}
           onLoadMore={fetchNextPage}
           onRowClick={(row) => setDrawerAddress(row.address as Address)}
           size="sm"
           withDownloadCSV={true}
-          wrapperClassName="h-full overflow-y-auto"
           error={error}
+          fillHeight
         />
       </div>
       <HoldersAndDelegatesDrawer

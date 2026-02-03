@@ -27,6 +27,7 @@ import {
   useQueryStates,
 } from "nuqs";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
+import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 
 export const TopInteractionsTable = ({
   address,
@@ -363,12 +364,12 @@ export const TopInteractionsTable = ({
     <div className="flex h-full w-full flex-col overflow-hidden">
       <Table
         columns={columns}
-        data={loading ? Array(20).fill({}) : tableData}
+        data={loading ? Array(DEFAULT_ITEMS_PER_PAGE).fill({}) : tableData}
         filterColumn="address"
         size="sm"
         withDownloadCSV={true}
-        wrapperClassName="h-full overflow-y-auto"
         error={error}
+        fillHeight
       />
     </div>
   );

@@ -27,6 +27,7 @@ import {
   QueryInput_VotingPowers_OrderBy,
   QueryInput_VotingPowers_OrderDirection,
 } from "@anticapture/graphql-client";
+import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 interface DelegateTableData {
   address: string;
   votingPower: string;
@@ -401,15 +402,15 @@ export const Delegates = ({
       <div className="flex h-[calc(100vh-16rem)] min-h-[300px] w-full flex-col">
         <Table
           columns={delegateColumns}
-          data={loading ? Array(pageLimit).fill({}) : tableData}
+          data={loading ? Array(DEFAULT_ITEMS_PER_PAGE).fill({}) : tableData}
           onRowClick={(row) => setDrawerAddress(row.address as Address)}
           size="sm"
           hasMore={pagination.hasNextPage}
           isLoadingMore={fetchingMore}
           onLoadMore={fetchNextPage}
           withDownloadCSV={true}
-          wrapperClassName="h-full overflow-y-auto"
           error={error}
+          fillHeight
         />
       </div>
       <HoldersAndDelegatesDrawer

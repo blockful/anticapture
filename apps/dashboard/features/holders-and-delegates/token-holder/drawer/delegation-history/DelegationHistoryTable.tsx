@@ -31,6 +31,7 @@ import {
   useQueryState,
   useQueryStates,
 } from "nuqs";
+import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 
 interface DelegationData {
   address: string;
@@ -347,14 +348,14 @@ export const DelegationHistoryTable = ({
       <Table
         size="sm"
         columns={delegationHistoryColumns}
-        data={loading ? Array(limit).fill({}) : data}
+        data={loading ? Array(DEFAULT_ITEMS_PER_PAGE).fill({}) : data}
         filterColumn="address"
         hasMore={pagination.hasNextPage}
         isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}
         withDownloadCSV={true}
-        wrapperClassName="h-full overflow-y-auto"
         error={error}
+        fillHeight
       />
     </div>
   );

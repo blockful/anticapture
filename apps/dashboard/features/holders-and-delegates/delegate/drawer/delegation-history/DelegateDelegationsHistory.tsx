@@ -1,5 +1,3 @@
-"use client";
-
 import { DaoIdEnum } from "@/shared/types/daos";
 import { DelegateDelegationHistoryTable } from "@/features/holders-and-delegates/delegate/drawer/delegation-history/DelegateDelegationHistoryTable";
 import { VotingPowerVariationGraph } from "@/features/holders-and-delegates/delegate/drawer/delegation-history/VotingPowerVariationGraph";

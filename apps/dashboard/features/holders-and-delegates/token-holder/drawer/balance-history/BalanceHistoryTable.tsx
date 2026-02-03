@@ -31,6 +31,7 @@ import {
   useQueryState,
   useQueryStates,
 } from "nuqs";
+import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 
 interface BalanceHistoryData {
   id: string;
@@ -473,14 +474,18 @@ export const BalanceHistoryTable = ({
     <div className="flex h-full w-full flex-col overflow-hidden">
       <Table
         columns={balanceHistoryColumns}
-        data={isInitialLoading ? Array(limit).fill({}) : transformedData}
+        data={
+          isInitialLoading
+            ? Array(DEFAULT_ITEMS_PER_PAGE).fill({})
+            : transformedData
+        }
         size="sm"
         hasMore={hasNextPage}
         isLoadingMore={loading}
         onLoadMore={fetchNextPage}
-        wrapperClassName="h-full overflow-y-auto"
         withDownloadCSV={true}
         error={error}
+        fillHeight
       />
     </div>
   );

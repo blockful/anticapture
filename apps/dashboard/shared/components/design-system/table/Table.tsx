@@ -54,6 +54,7 @@ interface DataTableProps<TData, TValue> {
   customEmptyState?: ReactNode;
   data: TData[];
   disableRowClick?: (row: TData) => boolean;
+  fillHeight?: boolean;
   filterColumn?: string;
   hasMore?: boolean;
   href?: (row: TData) => string | null | undefined;
@@ -82,6 +83,7 @@ export const Table = <TData, TValue>({
   customEmptyState,
   data,
   disableRowClick,
+  fillHeight = false,
   filterColumn = "",
   hasMore = false,
   href,
@@ -210,13 +212,18 @@ export const Table = <TData, TValue>({
 
   return (
     <div
-      className={cn("flex w-full flex-col", wrapperClassName)}
+      className={cn(
+        "flex w-full flex-col",
+        fillHeight && "h-full",
+        wrapperClassName,
+      )}
       ref={wrapperRef}
     >
       <TableContainer
         className={cn(
           "text-secondary lg:bg-surface-default border-separate border-spacing-0 bg-transparent",
           mobileTableFixed ? "table-fixed" : "table-auto lg:table-fixed",
+          fillHeight && "flex h-full flex-col",
         )}
       >
         <TableHeader className="bg-surface-contrast text-secondary sticky -top-px z-30 text-xs font-medium">
@@ -248,7 +255,7 @@ export const Table = <TData, TValue>({
             </TableRow>
           ))}
         </TableHeader>
-        <TableBody className={className}>
+        <TableBody className={cn(className, fillHeight && "flex-1")}>
           {table.getRowModel().rows.length > 0 ? (
             <>
               {table.getRowModel().rows.map((row) => {
@@ -370,25 +377,35 @@ export const Table = <TData, TValue>({
               )}
             </>
           ) : (
-            <TableCell
-              colSpan={columns.length}
-              className={cn("text-center", className)}
-            >
-              {" "}
-              {customEmptyState ? (
-                customEmptyState
-              ) : error ? (
-                <EmptyState />
-              ) : (
-                data.length === 0 && (
-                  <EmptyState
-                    icon={<Inbox />}
-                    title={emptyTitle}
-                    description={emptyDescription}
-                  />
-                )
-              )}
-            </TableCell>
+            <TableRow className={cn(fillHeight && "h-full")}>
+              <TableCell
+                colSpan={columns.length}
+                className={cn(
+                  "text-center",
+                  fillHeight && "h-full p-0",
+                  className,
+                )}
+              >
+                <div
+                  className={cn(fillHeight && "relative flex h-full flex-col")}
+                >
+                  {customEmptyState ? (
+                    customEmptyState
+                  ) : error ? (
+                    <EmptyState fillHeight={fillHeight} />
+                  ) : (
+                    data.length === 0 && (
+                      <EmptyState
+                        icon={<Inbox />}
+                        title={emptyTitle}
+                        description={emptyDescription}
+                        fillHeight={fillHeight}
+                      />
+                    )
+                  )}
+                </div>
+              </TableCell>
+            </TableRow>
           )}
         </TableBody>
       </TableContainer>

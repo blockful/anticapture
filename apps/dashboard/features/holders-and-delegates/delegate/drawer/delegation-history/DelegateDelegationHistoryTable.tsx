@@ -28,6 +28,7 @@ import {
   useQueryState,
   useQueryStates,
 } from "nuqs";
+import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 
 interface DelegateDelegationHistoryTableProps {
   accountId: string;
@@ -492,14 +493,18 @@ export const DelegateDelegationHistoryTable = ({
     <div className="flex h-full w-full flex-col gap-2 overflow-hidden p-4">
       <Table
         columns={columns}
-        data={isInitialLoading ? Array(limit).fill({}) : delegationHistory}
+        data={
+          isInitialLoading
+            ? Array(DEFAULT_ITEMS_PER_PAGE).fill({})
+            : delegationHistory
+        }
         size="sm"
         hasMore={hasNextPage}
         isLoadingMore={loading}
         onLoadMore={fetchNextPage}
-        wrapperClassName="h-full overflow-y-auto"
         withDownloadCSV={true}
         error={error}
+        fillHeight
       />
     </div>
   );
