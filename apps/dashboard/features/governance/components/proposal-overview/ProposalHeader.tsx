@@ -12,7 +12,7 @@ interface ProposalHeaderProps {
   daoId: string;
   setIsVotingModalOpen: (isOpen: boolean) => void;
   votingPower: string;
-  votes: GetAccountPowerQuery["votes"] | null;
+  votes: GetAccountPowerQuery["votesByProposalId"] | null;
   address: string | undefined;
   proposalStatus: string;
 }
