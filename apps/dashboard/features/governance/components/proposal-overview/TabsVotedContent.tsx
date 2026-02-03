@@ -27,11 +27,15 @@ import daoConfigByDaoId from "@/shared/dao-config";
 import Link from "next/link";
 import { formatUnits } from "viem";
 
+interface TabsVotedContentProps {
+  proposal: NonNullable<GetProposalQuery["proposal"]>;
+  onAddressClick?: (address: string) => void;
+}
+
 export const TabsVotedContent = ({
   proposal,
-}: {
-  proposal: NonNullable<GetProposalQuery["proposal"]>;
-}) => {
+  onAddressClick,
+}: TabsVotedContentProps) => {
   const loadingRowRef = useRef<HTMLTableRowElement>(null);
   const { daoId } = useParams();
 
@@ -136,13 +140,19 @@ export const TabsVotedContent = ({
 
           return (
             <div className="flex h-10 w-full items-center gap-3 p-2">
-              <EnsAvatar
-                address={voterAddress as `0x${string}`}
-                size="sm"
-                variant="rounded"
-                showName={true}
-                isDashed={true}
-              />
+              <button
+                onClick={() => onAddressClick?.(voterAddress)}
+                className="group cursor-pointer"
+              >
+                <EnsAvatar
+                  address={voterAddress as `0x${string}`}
+                  size="sm"
+                  variant="rounded"
+                  showName={true}
+                  isDashed={true}
+                  nameClassName="group-hover:border-primary transition-colors duration-200"
+                />
+              </button>
               <CopyAndPasteButton
                 className="size-2"
                 textToCopy={voterAddress}

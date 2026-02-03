@@ -15,18 +15,35 @@ import { formatUnits } from "viem";
 import { TabsDidntVoteContent } from "@/features/governance/components/proposal-overview/TabsDidntVoteContent";
 import daoConfig from "@/shared/dao-config";
 
+interface VotesTabContentProps {
+  proposal: NonNullable<GetProposalQuery["proposal"]>;
+  onAddressClick?: (address: string) => void;
+}
+
 export const VotesTabContent = ({
   proposal,
-}: {
-  proposal: NonNullable<GetProposalQuery["proposal"]>;
-}) => {
+  onAddressClick,
+}: VotesTabContentProps) => {
   const [activeTab, setActiveTab] = useState<"voted" | "didntVote">("voted");
 
   const { daoId } = useParams<{ daoId: string }>();
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
   const { decimals } = daoConfig[daoIdEnum];
 
-  const TabsContent = TabsContentMapping[activeTab];
+  const TabsContent =
+    activeTab === "voted"
+      ? () => (
+          <TabsVotedContent
+            proposal={proposal}
+            onAddressClick={onAddressClick}
+          />
+        )
+      : () => (
+          <TabsDidntVoteContent
+            proposal={proposal}
+            onAddressClick={onAddressClick}
+          />
+        );
 
   // Get votes for this proposal
   const { data } = useGetVotesQuery({
@@ -94,21 +111,8 @@ export const VotesTabContent = ({
       </div>
 
       <div className="flex flex-col gap-3">
-        <TabsContent proposal={proposal} />
+        <TabsContent />
       </div>
     </div>
   );
-};
-
-interface TabContentProps {
-  proposal: NonNullable<GetProposalQuery["proposal"]>;
-}
-
-const TabsContentMapping = {
-  voted: (props: TabContentProps) => (
-    <TabsVotedContent proposal={props.proposal} />
-  ),
-  didntVote: (props: TabContentProps) => (
-    <TabsDidntVoteContent proposal={props.proposal} />
-  ),
 };

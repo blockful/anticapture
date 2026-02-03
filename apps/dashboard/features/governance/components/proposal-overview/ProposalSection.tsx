@@ -16,11 +16,12 @@ import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCus
 import { ArrowRight } from "lucide-react";
 import { useAccount } from "wagmi";
 import { ProposalSectionSkeleton } from "@/features/governance/components/proposal-overview/ProposalSectionSkeleton";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { VotingModal } from "@/features/governance/components/modals/VotingModal";
 import { useVoterInfo } from "@/features/governance/hooks/useAccountPower";
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfig from "@/shared/dao-config";
+import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 
 export const ProposalSection = () => {
   const { proposalId, daoId } = useParams<{
@@ -29,8 +30,17 @@ export const ProposalSection = () => {
   }>();
   const { address } = useAccount();
   const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
+  const [drawerAddress, setDrawerAddress] = useState<string | null>(null);
   const daoEnum = daoId.toUpperCase() as DaoIdEnum;
   const { decimals } = daoConfig[daoEnum];
+
+  const handleAddressClick = useCallback((address: string) => {
+    setDrawerAddress(address);
+  }, []);
+
+  const handleCloseDrawer = useCallback(() => {
+    setDrawerAddress(null);
+  }, []);
 
   const { proposal, loading, error } = useProposal({
     proposalId,
@@ -75,12 +85,18 @@ export const ProposalSection = () => {
 
         <div className="flex flex-col gap-6 p-5 lg:flex-row lg:pt-0">
           <div className="self-star left-0 top-5 flex h-fit w-full flex-col gap-4 lg:sticky lg:top-[85px] lg:w-[420px]">
-            <TitleSection proposal={proposal} />
+            <TitleSection
+              proposal={proposal}
+              onAddressClick={handleAddressClick}
+            />
             <ProposalInfoSection proposal={proposal} decimals={decimals} />
             <ProposalStatusSection proposal={proposal} />
           </div>
 
-          <TabsSection proposal={proposal} />
+          <TabsSection
+            proposal={proposal}
+            onAddressClick={handleAddressClick}
+          />
         </div>
 
         <VotingModal
@@ -89,6 +105,14 @@ export const ProposalSection = () => {
           proposal={proposal as Query_Proposals_Items_Items}
           votingPower={votingPower}
           decimals={decimals}
+        />
+
+        <HoldersAndDelegatesDrawer
+          isOpen={!!drawerAddress}
+          onClose={handleCloseDrawer}
+          entityType="delegate"
+          address={drawerAddress || ""}
+          daoId={daoEnum}
         />
       </div>
 

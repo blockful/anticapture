@@ -17,11 +17,15 @@ import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { VotesTable } from "@/features/governance/components/proposal-overview/VotesTable";
 import daoConfig from "@/shared/dao-config";
 
+interface TabsDidntVoteContentProps {
+  proposal: NonNullable<GetProposalQuery["proposal"]>;
+  onAddressClick?: (address: string) => void;
+}
+
 export const TabsDidntVoteContent = ({
   proposal,
-}: {
-  proposal: NonNullable<GetProposalQuery["proposal"]>;
-}) => {
+  onAddressClick,
+}: TabsDidntVoteContentProps) => {
   const loadingRowRef = useRef<HTMLTableRowElement>(null);
   const { daoId } = useParams<{ daoId: string }>();
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
@@ -115,13 +119,19 @@ export const TabsDidntVoteContent = ({
 
           return (
             <div className="flex h-10 w-full items-center gap-3 p-2">
-              <EnsAvatar
-                address={voterAddress as `0x${string}`}
-                size="sm"
-                variant="rounded"
-                showName={true}
-                isDashed={true}
-              />
+              <button
+                onClick={() => onAddressClick?.(voterAddress)}
+                className="group cursor-pointer"
+              >
+                <EnsAvatar
+                  address={voterAddress as `0x${string}`}
+                  size="sm"
+                  variant="rounded"
+                  showName={true}
+                  isDashed={true}
+                  nameClassName="group-hover:border-primary transition-colors duration-200"
+                />
+              </button>
             </div>
           );
         },

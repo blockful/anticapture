@@ -11,12 +11,24 @@ type TabId = "description" | "votes" | "actions";
 
 interface TabsSectionProps {
   proposal: NonNullable<GetProposalQuery["proposal"]>;
+  onAddressClick?: (address: string) => void;
 }
 
-export const TabsSection = ({ proposal }: TabsSectionProps) => {
+export const TabsSection = ({ proposal, onAddressClick }: TabsSectionProps) => {
   const [activeTab, setActiveTab] = useState<TabId>("description");
 
-  const ActiveTabComponent = TabToContentMap[activeTab];
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "description":
+        return <DescriptionTabContent proposal={proposal} />;
+      case "votes":
+        return (
+          <VotesTabContent proposal={proposal} onAddressClick={onAddressClick} />
+        );
+      case "actions":
+        return <ActionsTabContent proposal={proposal} />;
+    }
+  };
 
   return (
     <div className="flex flex-1 flex-col lg:min-w-0 lg:bg-surface-default">
@@ -42,9 +54,7 @@ export const TabsSection = ({ proposal }: TabsSectionProps) => {
         </Tab>
       </div>
 
-      <div className="flex-1">
-        <ActiveTabComponent proposal={proposal} />
-      </div>
+      <div className="flex-1">{renderTabContent()}</div>
     </div>
   );
 };
@@ -68,9 +78,3 @@ export const Tab = ({ children, isActive = false, onClick }: TabProps) => {
     </button>
   );
 };
-
-const TabToContentMap = {
-  description: DescriptionTabContent,
-  votes: VotesTabContent,
-  actions: ActionsTabContent,
-} as const;

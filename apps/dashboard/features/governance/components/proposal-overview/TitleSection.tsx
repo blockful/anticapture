@@ -1,3 +1,5 @@
+"use client";
+
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { BulletDivider } from "@/features/governance/components/proposal-overview/BulletDivider";
 
@@ -9,11 +11,21 @@ import { ProposalBadge } from "@/features/governance/components/proposal-overvie
 import { ProposalStatus } from "@/features/governance/types";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 
+interface TitleSectionProps {
+  proposal: NonNullable<GetProposalQuery["proposal"]>;
+  onAddressClick?: (address: string) => void;
+}
+
 export const TitleSection = ({
   proposal,
-}: {
-  proposal: NonNullable<GetProposalQuery["proposal"]>;
-}) => {
+  onAddressClick,
+}: TitleSectionProps) => {
+  const handleOpenDrawer = () => {
+    if (proposal?.proposerAccountId) {
+      onAddressClick?.(proposal.proposerAccountId);
+    }
+  };
+
   return (
     <div className="flex w-full flex-col gap-3">
       <div className="flex w-full items-center justify-start gap-2">
@@ -24,12 +36,18 @@ export const TitleSection = ({
 
         <BulletDivider className="bg-border-contrast" />
 
-        {/* Proposer  */}
-        <EnsAvatar
-          size="xs"
-          address={proposal?.proposerAccountId as Address}
-          nameClassName="text-secondary"
-        />
+        {/* Proposer - Clickable to open delegate drawer */}
+        <button
+          onClick={handleOpenDrawer}
+          className="group cursor-pointer rounded-md p-1"
+        >
+          <EnsAvatar
+            size="xs"
+            address={proposal?.proposerAccountId as Address}
+            nameClassName="text-secondary group-hover:border-primary transition-colors duration-200"
+            isDashed
+          />
+        </button>
       </div>
 
       <div className="flex w-full flex-col gap-2">
