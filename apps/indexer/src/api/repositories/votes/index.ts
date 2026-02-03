@@ -19,9 +19,10 @@ import { DBVote, VotesRequest } from "@/api/mappers";
 import { Address } from "viem";
 
 export class VotesRepository {
-  async getVotes(
-    req: VotesRequest,
-  ): Promise<{ items: DBVote[]; totalCount: number }> {
+  async getVotes(req: VotesRequest): Promise<{
+    items: (DBVote & { description: string })[];
+    totalCount: number;
+  }> {
     const sortBy =
       req.orderBy === "timestamp"
         ? votesOnchain.timestamp
@@ -41,10 +42,23 @@ export class VotesRepository {
         limit: req.limit,
         offset: req.skip,
         orderBy,
+        with: {
+          proposal: {
+            columns: {
+              description: true,
+            },
+          },
+        },
       }),
       db.$count(votesOnchain, where),
     ]);
-    return { items, totalCount };
+    return {
+      items: items.map((item) => ({
+        ...item,
+        description: item.proposal.description,
+      })),
+      totalCount,
+    };
   }
 
   async getProposalNonVoters(
@@ -187,7 +201,7 @@ export class VotesRepository {
     support?: string,
     fromDate?: number,
     toDate?: number,
-  ): Promise<{ items: DBVote[]; totalCount: number }> {
+  ): Promise<{ items: (DBVote & { description: string })[]; totalCount: number }> {
     const whereClauses: SQL<unknown>[] = [
       eq(votesOnchain.proposalId, proposalId),
     ];
@@ -214,16 +228,31 @@ export class VotesRepository {
         : votesOnchain.timestamp;
     const orderFn = orderDirection === "asc" ? asc : desc;
 
-    const [items, totalCount] = await Promise.all([
-      db
-        .select()
-        .from(votesOnchain)
-        .where(and(...whereClauses))
-        .orderBy(orderFn(orderByColumn))
-        .limit(limit)
-        .offset(skip),
-      db.$count(votesOnchain, and(...whereClauses)),
+    const where = and(...whereClauses);
+
+    const [queryItems, totalCount] = await Promise.all([
+      db.query.votesOnchain.findMany({
+        where,
+        limit,
+        offset: skip,
+        orderBy: orderFn(orderByColumn),
+        with: {
+          proposal: {
+            columns: {
+              description: true,
+            },
+          },
+        },
+      }),
+      db.$count(votesOnchain, where),
     ]);
-    return { items, totalCount };
+
+    return {
+      items: queryItems.map((item) => ({
+        ...item,
+        description: item.proposal.description,
+      })),
+      totalCount,
+    };
   }
 }

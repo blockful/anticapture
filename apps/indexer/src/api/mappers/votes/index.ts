@@ -50,10 +50,10 @@ export const VoteResponseSchema = z.object({
   votingPower: z.string(),
   reason: z.string().optional(),
   timestamp: z.number(),
-  proposalTitle: z.string().optional(),
+  proposalTitle: z.string(),
 });
 
-export type VoteByProposalResponse = z.infer<typeof VoteResponseSchema>;
+export type VoteResponse = z.infer<typeof VoteResponseSchema>;
 
 export const VotesResponseSchema = z.object({
   items: z.array(VoteResponseSchema),
