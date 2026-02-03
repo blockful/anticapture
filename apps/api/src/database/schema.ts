@@ -5,6 +5,7 @@ import {
   pgEnum,
   primaryKey,
 } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 import { Address, zeroAddress } from "viem";
 
 import { MetricTypesArray } from "@/lib/constants";
@@ -215,6 +216,13 @@ export const proposalsOnchain = pgTable(
   }),
   (table) => [index().on(table.proposerAccountId)],
 );
+
+export const votesOnchainRelations = relations(votesOnchain, ({ one }) => ({
+  proposal: one(proposalsOnchain, {
+    fields: [votesOnchain.proposalId],
+    references: [proposalsOnchain.id],
+  }),
+}));
 
 export const metricType = pgEnum("metricType", MetricTypesArray);
 
