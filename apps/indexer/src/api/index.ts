@@ -29,6 +29,7 @@ import {
   votingPowers,
   delegations,
   historicalDelegations,
+  votes,
 } from "@/api/controllers";
 import { docs } from "@/api/docs";
 import { env } from "@/env";
@@ -50,6 +51,7 @@ import {
   VotingPowerRepository,
   DelegationsRepository,
   HistoricalDelegationsRepository,
+  VotesRepository,
 } from "@/api/repositories";
 import { errorHandler } from "@/api/middlewares";
 import { getClient } from "@/lib/client";
@@ -72,6 +74,7 @@ import {
   parseTreasuryProviderConfig,
   HistoricalDelegationsService,
   DelegationsService,
+  VotesService,
 } from "@/api/services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
@@ -169,10 +172,7 @@ historicalDelegations(
 );
 
 // TODO: add support to partial delegations at some point
-delegations(
-  app,
-  new DelegationsService(new DelegationsRepository()),
-);
+delegations(app, new DelegationsService(new DelegationsRepository()));
 
 const treasuryService = createTreasuryService(
   new TreasuryRepository(),
@@ -214,6 +214,7 @@ accountBalanceVariations(app, balanceVariationsService);
 accountBalances(app, env.DAO_ID, accountBalanceService);
 accountInteractions(app, balanceVariationsService);
 transfers(app, new TransfersService(new TransfersRepository()));
+votes(app, new VotesService(new VotesRepository()));
 dao(app, daoService);
 docs(app);
 tokenMetrics(app, tokenMetricsService);

@@ -58,12 +58,12 @@ query GetProposal($id: String!) {
 #  Get proposal votes
 query GetVotes(
   $proposalId: String!
-  $limit: PositiveInt
+  $limit: Float
   $skip: NonNegativeInt
-  $orderBy: queryInput_votes_orderBy = timestamp
-  $orderDirection: queryInput_votes_orderDirection = desc
+  $orderBy: queryInput_votesByProposalId_orderBy = timestamp
+  $orderDirection: queryInput_votesByProposalId_orderDirection = desc
 ) {
-  votes(
+  votesByProposalId(
     limit: $limit
     skip: $skip
     id: $proposalId
@@ -137,7 +137,7 @@ query GetAccountPower(
     accountId
     votingPower
   }
-  votes(id: $proposalId, voterAddressIn: $addresses) {
+  votesByProposalId(id: $proposalId, voterAddressIn: $addresses) {
     items {
       support
       votingPower
