@@ -37,7 +37,6 @@ interface DelegateTableData {
   variation?: {
     percentageChange: number;
     absoluteChange: number;
-    isNewDelegate: boolean;
   };
   activity?: string | null;
   activityPercentage?: number | null;
@@ -142,10 +141,6 @@ export const Delegates = ({
           100
         : null;
 
-      const isNewDelegate =
-        delegate.previousVotingPower === "0" &&
-        BigInt(delegate.votingPower || "0") > BigInt(0);
-
       const avgVoteTiming = getAvgVoteTimingData(
         delegate.proposalsActivity?.avgTimeBeforeEnd,
         votingPeriodSeconds,
@@ -163,7 +158,6 @@ export const Delegates = ({
           absoluteChange: Number(
             formatUnits(BigInt(delegate.absoluteChange), decimals),
           ),
-          isNewDelegate,
         },
         activity,
         activityPercentage,
@@ -297,7 +291,6 @@ export const Delegates = ({
           | {
               percentageChange: number;
               absoluteChange: number;
-              isNewDelegate: boolean;
             }
           | undefined;
 
@@ -316,11 +309,7 @@ export const Delegates = ({
           <div className="flex w-full items-center justify-center gap-2 text-sm">
             {(variation?.percentageChange || 0) < 0 ? "-" : ""}
             {formatNumberUserReadable(Math.abs(variation?.absoluteChange || 0))}
-            {variation?.isNewDelegate ? (
-              <BadgeStatus variant="success">New</BadgeStatus>
-            ) : (
-              <Percentage value={variation?.percentageChange || 0} />
-            )}
+            <Percentage value={variation?.percentageChange || 0} />
           </div>
         );
       },
