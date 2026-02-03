@@ -9,6 +9,7 @@ import { useGetAccountInteractionsQuery } from "@anticapture/graphql-client/hook
 import daoConfig from "@/shared/dao-config";
 import {
   Query_AccountInteractions_Items_Items,
+  QueryInput_AccountInteractions_OrderBy,
   QueryInput_AccountInteractions_OrderDirection,
 } from "@anticapture/graphql-client";
 import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
@@ -53,6 +54,7 @@ export const useAccountInteractionsData = ({
   daoId,
   address,
   filterAddress,
+  sortBy,
   sortDirection,
   filterVariables,
   limit = 100,
@@ -60,7 +62,7 @@ export const useAccountInteractionsData = ({
   daoId: DaoIdEnum;
   address: string;
   filterAddress?: string;
-  sortBy?: "transferCount" | "totalVolume";
+  sortBy?: "count" | "volume";
   sortDirection?: "asc" | "desc";
   filterVariables?: {
     minAmount: string | null;
@@ -79,6 +81,7 @@ export const useAccountInteractionsData = ({
   const { data, loading, error } = useGetAccountInteractionsQuery({
     variables: {
       address,
+      orderBy: sortBy as QueryInput_AccountInteractions_OrderBy,
       orderDirection:
         sortDirection as QueryInput_AccountInteractions_OrderDirection,
       minAmount: filterVariables?.minAmount,

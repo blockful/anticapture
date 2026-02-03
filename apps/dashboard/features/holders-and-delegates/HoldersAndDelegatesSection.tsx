@@ -85,7 +85,7 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         description={PAGES_CONSTANTS.holdersAndDelegates.description}
       >
         <SubSectionsContainer>
-          <div className="flex h-full w-full items-center justify-between">
+          <div className="flex w-full items-center justify-between">
             <TabsHeader />
             <SwitcherDateMobile
               defaultValue={days || defaultDays}

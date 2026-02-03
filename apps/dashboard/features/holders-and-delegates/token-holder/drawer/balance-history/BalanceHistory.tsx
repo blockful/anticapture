@@ -25,14 +25,14 @@ export const BalanceHistory = ({ accountId, daoId }: BalanceHistoryProps) => {
   );
 
   return (
-    <div className="bg-surface-default flex flex-col">
+    <div className="bg-surface-default flex h-full flex-col overflow-hidden">
       {/* Graph Section */}
       <div className="shrink-0 p-4 pb-2">
         <BalanceHistoryVariationGraph accountId={accountId} daoId={daoId} />
       </div>
 
       {/* Table Section */}
-      <div className="flex w-full flex-col gap-2 p-4">
+      <div className="flex min-h-0 w-full flex-1 flex-col gap-2 overflow-hidden p-4">
         <BalanceHistoryTable
           accountId={accountId}
           daoId={daoId}

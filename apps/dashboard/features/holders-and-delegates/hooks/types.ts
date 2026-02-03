@@ -4,7 +4,6 @@ export interface PaginationInfo {
   currentPage: number;
   totalPages: number;
   totalCount: number;
-  itemsPerPage: number;
   currentItemsCount: number;
 }
 

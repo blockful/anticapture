@@ -18,10 +18,7 @@ import {
 import daoConfigByDaoId from "@/shared/dao-config";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
-import {
-  AmountFilterState,
-  useAmountFilterStore,
-} from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
+import { useAmountFilterStore } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 import daoConfig from "@/shared/dao-config";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import {
@@ -32,6 +29,7 @@ import {
   useQueryStates,
 } from "nuqs";
 import { formatRelativeTime } from "@/shared/utils/formatRelativeTime";
+import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 
 interface VotingPowerHistoryTableProps {
   accountId: string;
@@ -46,6 +44,7 @@ export const VotingPowerHistoryTable = ({
   fromTimestamp,
   toTimestamp,
 }: VotingPowerHistoryTableProps) => {
+  const limit: number = 20;
   const { decimals } = daoConfig[daoId];
 
   const [sortBy, setSortBy] = useQueryState(
@@ -79,6 +78,7 @@ export const VotingPowerHistoryTable = ({
       filterVariables,
       fromTimestamp,
       toTimestamp,
+      limit,
     });
 
   const isInitialLoading =
@@ -182,7 +182,7 @@ export const VotingPowerHistoryTable = ({
           <h4 className="text-table-header">Amount ({daoId})</h4>
           <AmountFilter
             filterId="delegation-amount-filter"
-            onApply={(filterState: AmountFilterState) => {
+            onApply={(filterState) => {
               if (filterState.sortOrder) {
                 setSortDirection(
                   filterState.sortOrder === "largest-first" ? "desc" : "asc",
@@ -479,18 +479,21 @@ export const VotingPowerHistoryTable = ({
   ];
 
   return (
-    <div className="flex w-full flex-col gap-2 p-4">
+    <div className="flex h-full w-full flex-col gap-2 overflow-hidden p-4">
       <Table
         columns={columns}
-        data={isInitialLoading ? Array(12).fill({}) : delegationHistory}
+        data={
+          isInitialLoading
+            ? Array(DEFAULT_ITEMS_PER_PAGE).fill({})
+            : delegationHistory
+        }
         size="sm"
         hasMore={hasNextPage}
         isLoadingMore={loading}
         onLoadMore={fetchNextPage}
-        wrapperClassName="h-[450px]"
-        className="h-[400px]"
         withDownloadCSV={true}
         error={error}
+        fillHeight
       />
     </div>
   );

@@ -3,6 +3,7 @@ query getAccountInteractions(
   $limit: PositiveInt
   $maxAmount: String
   $minAmount: String
+  $orderBy: queryInput_accountInteractions_orderBy
   $orderDirection: queryInput_accountInteractions_orderDirection
   $skip: NonNegativeInt
   $filterAddress: String
@@ -12,6 +13,7 @@ query getAccountInteractions(
     limit: $limit
     maxAmount: $maxAmount
     minAmount: $minAmount
+    orderBy: $orderBy
     orderDirection: $orderDirection
     skip: $skip
     filterAddress: $filterAddress

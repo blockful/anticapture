@@ -40,6 +40,8 @@ export const DelegateProposalsActivity = ({
   address,
   daoId,
 }: DelegateProposalsActivityProps) => {
+  const limit: number = 20;
+
   const [userVoteFilter, setUserVoteFilter] = useState<string>("all");
   const [orderBy, setOrderBy] = useQueryState(
     "orderBy",
@@ -49,7 +51,6 @@ export const DelegateProposalsActivity = ({
     "orderDirection",
     parseAsStringEnum(["asc", "desc"]).withDefault("desc"),
   );
-  const itemsPerPage = 10;
 
   // Filter options for user vote
   const userVoteFilterOptions: FilterOption[] = [
@@ -70,7 +71,6 @@ export const DelegateProposalsActivity = ({
     useProposalsActivity({
       address,
       daoId,
-      limit: itemsPerPage,
       orderBy: orderBy as QueryInput_ProposalsActivity_OrderBy,
       orderDirection:
         orderDirection as QueryInput_ProposalsActivity_OrderDirection,
@@ -78,7 +78,7 @@ export const DelegateProposalsActivity = ({
         userVoteFilter === "all"
           ? undefined
           : (userVoteFilter as QueryInput_ProposalsActivity_UserVoteFilter),
-      itemsPerPage,
+      limit,
     });
 
   // Prepare values - undefined when loading/error, actual values when data is available
@@ -99,8 +99,8 @@ export const DelegateProposalsActivity = ({
       : formatAvgTime(data.avgTimeBeforeEnd, data.votedProposals);
 
   return (
-    <>
-      <div className="p-4">
+    <div className="flex h-full flex-col overflow-hidden">
+      <div className="shrink-0 p-4">
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           <MetricCard
             icon={<Hand className="size-3.5" />}
@@ -126,8 +126,8 @@ export const DelegateProposalsActivity = ({
       </div>
 
       {/* Proposals Table */}
-      <div className="px-4 pb-4">
-        <div className="flex flex-col gap-2">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 pb-4">
+        <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden">
           <ProposalsTable
             proposals={data?.proposals || []}
             loading={loading}
@@ -145,6 +145,6 @@ export const DelegateProposalsActivity = ({
           />
         </div>
       </div>
-    </>
+    </div>
   );
 };
