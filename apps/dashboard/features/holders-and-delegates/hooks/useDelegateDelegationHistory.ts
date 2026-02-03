@@ -4,13 +4,13 @@ import { useCallback, useMemo, useState, useEffect } from "react";
 import { ApolloError } from "@apollo/client";
 import { formatUnits } from "viem";
 
-import { useHistoricalVotingPowersQuery } from "@anticapture/graphql-client/hooks";
+import { useHistoricalVotingPowerByAccountQuery } from "@anticapture/graphql-client/hooks";
 import daoConfig from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
 import {
-  HistoricalVotingPowersQuery,
-  QueryHistoricalVotingPowersArgs,
-  QueryInput_HistoricalVotingPowers_OrderDirection,
+  HistoricalVotingPowerByAccountQuery,
+  HistoricalVotingPowerByAccountQueryVariables,
+  QueryInput_HistoricalVotingPowerByAccountId_OrderDirection,
 } from "@anticapture/graphql-client";
 
 // Interface for a single delegation history item
@@ -53,7 +53,7 @@ export interface UseDelegateDelegationHistoryResult {
 }
 
 export type AmountFilterVariables = Pick<
-  QueryHistoricalVotingPowersArgs,
+  HistoricalVotingPowerByAccountQueryVariables,
   "fromValue" | "toValue"
 >;
 
@@ -113,9 +113,10 @@ export function useDelegateDelegationHistory({
     () => ({
       account: accountId,
       limit: itemsPerPage,
-      orderBy: orderBy as QueryHistoricalVotingPowersArgs["orderBy"],
+      orderBy:
+        orderBy as HistoricalVotingPowerByAccountQueryVariables["orderBy"],
       orderDirection:
-        orderDirection as QueryInput_HistoricalVotingPowers_OrderDirection,
+        orderDirection as QueryInput_HistoricalVotingPowerByAccountId_OrderDirection,
       ...(filterVariables?.toValue && { toValue: filterVariables.toValue }),
       ...(filterVariables?.fromValue && {
         fromValue: filterVariables.fromValue,
@@ -144,16 +145,17 @@ export function useDelegateDelegationHistory({
     fetchPolicy: "cache-and-network" as const,
   };
 
-  const { data, error, loading, fetchMore } = useHistoricalVotingPowersQuery({
-    variables: queryVariables,
-    ...queryOptions,
-  });
+  const { data, error, loading, fetchMore } =
+    useHistoricalVotingPowerByAccountQuery({
+      variables: queryVariables,
+      ...queryOptions,
+    });
 
   // Transform raw data to our format
   const transformedData = useMemo(() => {
-    if (!data?.historicalVotingPowers?.items) return [];
+    if (!data?.historicalVotingPowerByAccountId?.items) return [];
 
-    return data.historicalVotingPowers.items
+    return data.historicalVotingPowerByAccountId.items
       .filter((item) => !!item)
       .map((item) => {
         // Determine the type, action, and direction based on the data and delta
@@ -207,9 +209,13 @@ export function useDelegateDelegationHistory({
   const hasNextPage = useMemo(() => {
     return (
       currentPage * itemsPerPage <
-      (data?.historicalVotingPowers?.totalCount || 0)
+      (data?.historicalVotingPowerByAccountId?.totalCount || 0)
     );
-  }, [currentPage, itemsPerPage, data?.historicalVotingPowers?.totalCount]);
+  }, [
+    currentPage,
+    itemsPerPage,
+    data?.historicalVotingPowerByAccountId?.totalCount,
+  ]);
 
   // Fetch next page function
   const fetchNextPage = useCallback(async () => {
@@ -226,20 +232,23 @@ export function useDelegateDelegationHistory({
           skip,
         },
         updateQuery: (
-          previousResult: HistoricalVotingPowersQuery,
+          previousResult: HistoricalVotingPowerByAccountQuery,
           { fetchMoreResult },
-        ): HistoricalVotingPowersQuery => {
+        ): HistoricalVotingPowerByAccountQuery => {
           if (!fetchMoreResult) return previousResult;
 
           return {
-            historicalVotingPowers: {
-              ...fetchMoreResult.historicalVotingPowers,
+            historicalVotingPowerByAccountId: {
+              ...fetchMoreResult.historicalVotingPowerByAccountId,
               items: [
-                ...(previousResult.historicalVotingPowers?.items ?? []),
-                ...(fetchMoreResult.historicalVotingPowers?.items ?? []),
+                ...(previousResult.historicalVotingPowerByAccountId?.items ??
+                  []),
+                ...(fetchMoreResult.historicalVotingPowerByAccountId?.items ??
+                  []),
               ],
               totalCount:
-                fetchMoreResult?.historicalVotingPowers?.totalCount ?? 0,
+                fetchMoreResult?.historicalVotingPowerByAccountId?.totalCount ??
+                0,
             },
           };
         },

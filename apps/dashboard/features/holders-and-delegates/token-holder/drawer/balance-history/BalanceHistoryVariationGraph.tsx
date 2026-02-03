@@ -89,10 +89,13 @@ export const BalanceHistoryVariationGraph = ({
   );
 
   const fromDate = useMemo(() => {
-    const nowInSeconds = Date.now() / 1000;
-
     // For "all", treat as all time by not setting limits
     if (selectedPeriod === "all") return undefined;
+
+    // Use start of today for a stable reference that won't change on each render
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayInSeconds = today.getTime() / 1000;
 
     let daysInSeconds: number;
     switch (selectedPeriod) {
@@ -104,7 +107,7 @@ export const BalanceHistoryVariationGraph = ({
         break;
     }
 
-    return Math.floor(nowInSeconds - daysInSeconds);
+    return Math.floor(todayInSeconds - daysInSeconds);
   }, [selectedPeriod]);
 
   const { balanceHistory, loading, error } = useBalanceHistoryGraph(
@@ -169,18 +172,23 @@ export const BalanceHistoryVariationGraph = ({
     );
   }
 
+  const head = balanceHistory[0]
   const extendedChartData = [
     {
       timestamp: fromDate
         ? fromDate * 1000
         : // 1 day in milliseconds to avoid hover conflict when max data is selected
-          balanceHistory[0]?.timestamp - 86400000,
-      amount: 0, // TODO set the balance at the start of the period
+        head?.timestamp - 86400000,
+      balance: head?.balance + (
+        head?.direction === "in" ?
+          - head?.amount :
+          + head?.amount
+      ),
     },
     ...balanceHistory,
     {
       timestamp: Date.now(),
-      amount: balanceHistory[balanceHistory.length - 1]?.amount,
+      balance: balanceHistory[balanceHistory.length - 1]?.balance,
     },
   ];
 
@@ -259,10 +267,10 @@ export const BalanceHistoryVariationGraph = ({
                   // Determine which address to show based on transaction type and direction
                   const getDisplayAddress = () => {
                     if (data.direction === "in") {
-                      return data.fromAccountId;
+                      return data.from;
                     }
                     if (data.direction === "out") {
-                      return data.toAccountId;
+                      return data.to;
                     }
                   };
 
@@ -275,9 +283,7 @@ export const BalanceHistoryVariationGraph = ({
                       </p>
                       <p className="text-secondary flex gap-1 text-xs">
                         Balance:
-                        {data.amount > 0
-                          ? ` ${formatNumberUserReadable(Number(data.amount))}`
-                          : " Initial Balance"}
+                        {` ${formatNumberUserReadable(Number(data.balance))}`}
                       </p>
                       {data.direction && (
                         <p className="text-secondary flex gap-1 text-xs">
@@ -313,7 +319,7 @@ export const BalanceHistoryVariationGraph = ({
             />
             <Line
               type="stepAfter"
-              dataKey="amount"
+              dataKey="balance"
               stroke="var(--base-primary)"
               strokeWidth={1}
               dot={CustomDot}
