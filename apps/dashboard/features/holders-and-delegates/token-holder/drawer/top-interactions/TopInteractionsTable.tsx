@@ -15,7 +15,10 @@ import { useAccountInteractionsData } from "@/features/holders-and-delegates/tok
 import { AddressFilter } from "@/shared/components/design-system/table/filters";
 import { percentageVariants } from "@/shared/components/design-system/table/Percentage";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
-import { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
+import {
+  AmountFilterState,
+  useAmountFilterStore,
+} from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
@@ -167,7 +170,7 @@ export const TopInteractionsTable = ({
               </h4>
             </Tooltip>
             <AmountFilter
-              filterId="top-interactions-volume-filter"
+              filterId="top-interactions-amount-filter"
               onApply={(filterState: AmountFilterState) => {
                 if (filterState.sortOrder) {
                   setSortDirection(
@@ -311,6 +314,11 @@ export const TopInteractionsTable = ({
           const newSortOrder = sortDirection === "desc" ? "asc" : "desc";
           setSortDirection(newSortOrder);
           column.toggleSorting(newSortOrder === "desc");
+
+          useAmountFilterStore
+            .getState()
+            .reset("top-interactions-amount-filter");
+          setIsFilterActive(false);
         };
 
         return (

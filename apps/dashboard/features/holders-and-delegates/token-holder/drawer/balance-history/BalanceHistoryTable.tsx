@@ -31,6 +31,7 @@ import {
   useQueryState,
   useQueryStates,
 } from "nuqs";
+import { useAmountFilterStore } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 
 interface BalanceHistoryData {
   id: string;
@@ -180,6 +181,11 @@ export const BalanceHistoryTable = ({
           setOrderBy("timestamp");
           setOrderDirection(newSortOrder);
           column.toggleSorting(newSortOrder === "desc");
+
+          useAmountFilterStore
+            .getState()
+            .reset("balance-history-amount-filter");
+          setIsFilterActive(false);
         };
         return (
           <Button
@@ -377,8 +383,6 @@ export const BalanceHistoryTable = ({
           <span>From</span>
           <AddressFilter
             onApply={async (addr) => {
-              setTypeFilter("all");
-
               if ((addr ?? "").indexOf(".eth") > 0) {
                 const address = await fetchAddressFromEnsName({
                   ensName: addr as `${string}.eth`,
@@ -456,8 +460,6 @@ export const BalanceHistoryTable = ({
           <span>To</span>
           <AddressFilter
             onApply={async (addr) => {
-              setTypeFilter("all");
-
               if ((addr ?? "").indexOf(".eth") > 0) {
                 const address = await fetchAddressFromEnsName({
                   ensName: addr as `${string}.eth`,

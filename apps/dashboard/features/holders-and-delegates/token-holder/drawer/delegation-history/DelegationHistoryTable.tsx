@@ -31,6 +31,7 @@ import {
   useQueryState,
   useQueryStates,
 } from "nuqs";
+import { useAmountFilterStore } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 
 interface DelegationData {
   address: string;
@@ -265,6 +266,9 @@ export const DelegationHistoryTable = ({
           setSortBy("timestamp");
           setSortOrder(newSortOrder);
           column.toggleSorting(newSortOrder === "desc");
+
+          useAmountFilterStore.getState().reset("delegation-amount-filter");
+          setIsFilterActive(false);
         };
         return (
           <div className="text-table-header flex w-full items-center justify-start">
