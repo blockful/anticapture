@@ -36,12 +36,12 @@ export const accountBalance = pgTable(
     // This field represents for who the account is delegating their voting power to
     delegate: drizzle.text().default(zeroAddress).notNull(),
   }),
-  (table) => ({
-    pk: primaryKey({
+  (table) => [
+    primaryKey({
       columns: [table.accountId, table.tokenId],
     }),
-    accountBalanceDelegateIdx: index().on(table.delegate),
-  }),
+    index().on(table.delegate),
+  ],
 );
 
 export const accountPower = pgTable(
@@ -58,12 +58,12 @@ export const accountPower = pgTable(
       .default(BigInt(0))
       .notNull(),
   }),
-  (table) => ({
-    pk: primaryKey({
+  (table) => [
+    primaryKey({
       columns: [table.accountId],
     }),
-    lastVoteTimestamp: index().on(table.lastVoteTimestamp),
-  }),
+    index().on(table.lastVoteTimestamp),
+  ],
 );
 
 export const votingPowerHistory = pgTable(
@@ -78,11 +78,11 @@ export const votingPowerHistory = pgTable(
     timestamp: bigint({ mode: "bigint" }).notNull(),
     logIndex: drizzle.integer("log_index").notNull(),
   }),
-  (table) => ({
-    pk: primaryKey({
+  (table) => [
+    primaryKey({
       columns: [table.transactionHash, table.accountId, table.logIndex],
     }),
-  }),
+  ],
 );
 
 export const balanceHistory = pgTable(
@@ -97,11 +97,11 @@ export const balanceHistory = pgTable(
     timestamp: bigint({ mode: "bigint" }).notNull(),
     logIndex: drizzle.integer("log_index").notNull(),
   }),
-  (table) => ({
-    pk: primaryKey({
+  (table) => [
+    primaryKey({
       columns: [table.transactionHash, table.accountId, table.logIndex],
     }),
-  }),
+  ],
 );
 
 export const delegation = pgTable(
@@ -126,20 +126,20 @@ export const delegation = pgTable(
     isLending: drizzle.boolean().notNull().default(false),
     isTotal: drizzle.boolean().notNull().default(false),
   }),
-  (table) => ({
-    pk: primaryKey({
+  (table) => [
+    primaryKey({
       columns: [
         table.transactionHash,
         table.delegatorAccountId,
         table.delegateAccountId,
       ],
     }),
-    delegationTransactionHashIdx: index().on(table.transactionHash),
-    delegationTimestampIdx: index().on(table.timestamp),
-    delegationDelegatorAccountIdIdx: index().on(table.delegatorAccountId),
-    delegationDelegateAccountIdIdx: index().on(table.delegateAccountId),
-    delegationDelegatedValueIdx: index().on(table.delegatedValue),
-  }),
+    index().on(table.transactionHash),
+    index().on(table.timestamp),
+    index().on(table.delegatorAccountId),
+    index().on(table.delegateAccountId),
+    index().on(table.delegatedValue),
+  ],
 );
 
 export const transfer = pgTable(
@@ -158,16 +158,16 @@ export const transfer = pgTable(
     isLending: drizzle.boolean().notNull().default(false),
     isTotal: drizzle.boolean().notNull().default(false),
   }),
-  (table) => ({
-    pk: primaryKey({
+  (table) => [
+    primaryKey({
       columns: [table.transactionHash, table.fromAccountId, table.toAccountId],
     }),
-    transferTransactionHashIdx: index().on(table.transactionHash),
-    transferTimestampIdx: index().on(table.timestamp),
-    transferFromAccountIdIdx: index().on(table.fromAccountId),
-    transferToAccountIdIdx: index().on(table.toAccountId),
-    transferAmountIdx: index().on(table.amount),
-  }),
+    index().on(table.transactionHash),
+    index().on(table.timestamp),
+    index().on(table.fromAccountId),
+    index().on(table.toAccountId),
+    index().on(table.amount),
+  ],
 );
 
 export const votesOnchain = pgTable(
@@ -182,11 +182,11 @@ export const votesOnchain = pgTable(
     reason: drizzle.text(),
     timestamp: bigint({ mode: "bigint" }).notNull(),
   }),
-  (table) => ({
-    pk: primaryKey({
+  (table) => [
+    primaryKey({
       columns: [table.voterAccountId, table.proposalId],
     }),
-  }),
+  ],
 );
 
 export const proposalsOnchain = pgTable(
@@ -242,11 +242,11 @@ export const daoMetricsDayBucket = pgTable(
     count: drizzle.integer().notNull(),
     lastUpdate: bigint({ mode: "bigint" }).notNull(),
   }),
-  (table) => ({
-    pk: primaryKey({
+  (table) => [
+    primaryKey({
       columns: [table.date, table.tokenId, table.metricType],
     }),
-  }),
+  ],
 );
 
 export const transaction = pgTable("transaction", (drizzle) => ({
