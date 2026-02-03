@@ -1,10 +1,8 @@
-directive @regexp(subgraph: String, pattern: String) on SCALAR
-
-directive @typescript(subgraph: String, type: String) on SCALAR | ENUM
-
 directive @resolveRoot(subgraph: String) on FIELD_DEFINITION
 
 directive @enum(subgraph: String, value: String) on ENUM_VALUE
+
+directive @typescript(subgraph: String, type: String) on SCALAR | ENUM
 
 directive @example(subgraph: String, value: ObjMap) repeatable on FIELD_DEFINITION | OBJECT | INPUT_OBJECT | ENUM | SCALAR
 
@@ -13,8 +11,8 @@ directive @httpOperation(subgraph: String, path: String, operationSpecificHeader
 directive @transport(subgraph: String, kind: String, location: String, headers: [[String]], queryStringOptions: ObjMap, queryParams: [[String]]) repeatable on SCHEMA
 
 type Query {
-  votingPowerHistorys(where: votingPowerHistoryFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): votingPowerHistoryPage!
-  votesOnchains(where: votesOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): votesOnchainPage!
+  votingPowerHistorys(where: votingPowerHistoryFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votingPowerHistoryPage!
+  votesOnchains(where: votesOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votesOnchainPage!
   _meta: Meta
 
   """
@@ -87,12 +85,6 @@ type Query {
 
   """Returns a single proposal by its ID"""
   proposal(id: String!): proposal_200_response
-
-  """Returns the active delegates that did not vote on a given proposal"""
-  proposalNonVoters(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposalNonVoters_orderDirection = desc, addresses: JSON): proposalNonVoters_200_response
-
-  """Returns a paginated list of votes cast on a specific proposal"""
-  votes(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, voterAddressIn: JSON, orderBy: queryInput_votes_orderBy = timestamp, orderDirection: queryInput_votes_orderDirection = desc, support: Float): votes_200_response
 
   """TODO"""
   historicalBalances(address: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_historicalBalances_orderBy = timestamp, orderDirection: queryInput_historicalBalances_orderDirection = desc, fromDate: String, toDate: String, fromValue: String, toValue: String): historicalBalances_200_response
@@ -170,6 +162,15 @@ type Query {
   """Get transfers of a given address"""
   transfers(address: String!, limit: Float = 10, offset: Float, sortBy: queryInput_transfers_sortBy = timestamp, sortOrder: queryInput_transfers_sortOrder = asc, from: String, to: String, fromDate: Float, toDate: Float, fromValue: String, toValue: String): transfers_200_response
 
+  """Returns a paginated list of votes cast on a specific proposal"""
+  votesByProposalId(id: String!, skip: NonNegativeInt, limit: Float = 10, voterAddressIn: JSON, orderBy: queryInput_votesByProposalId_orderBy = timestamp, orderDirection: queryInput_votesByProposalId_orderDirection = desc, support: Float, fromDate: Float, toDate: Float): votesByProposalId_200_response
+
+  """Get all votes ordered by timestamp or voting power"""
+  votes(skip: NonNegativeInt, limit: Float = 10, voterAddressIn: JSON, orderBy: queryInput_votes_orderBy = timestamp, orderDirection: queryInput_votes_orderDirection = desc, support: Float, fromDate: Float, toDate: Float): votes_200_response
+
+  """Returns the active delegates that did not vote on a given proposal"""
+  proposalNonVoters(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposalNonVoters_orderDirection = desc, addresses: JSON): proposalNonVoters_200_response
+
   """Returns current governance parameters for this DAO"""
   dao: dao_200_response
 
@@ -231,11 +232,6 @@ type PageInfo {
   endCursor: String
   endDate: String
   startDate: String
-}
-
-type ViewPageInfo {
-  hasNextPage: Boolean!
-  hasPreviousPage: Boolean!
 }
 
 type Meta {
@@ -352,15 +348,15 @@ input tokenFilter {
 
 type account {
   id: String!
-  balances(where: accountBalanceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): accountBalancePage
-  powers(where: accountPowerFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): accountPowerPage
-  delegationsFrom(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): delegationPage
-  delegationsTo(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): delegationPage
-  sentTransfers(where: transferFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): transferPage
-  receivedTransfers(where: transferFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): transferPage
-  proposals(where: proposalsOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): proposalsOnchainPage
-  votes(where: votesOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): votesOnchainPage
-  delegatedFromBalances(where: accountBalanceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): accountBalancePage
+  balances(where: accountBalanceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountBalancePage
+  powers(where: accountPowerFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountPowerPage
+  delegationsFrom(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): delegationPage
+  delegationsTo(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): delegationPage
+  sentTransfers(where: transferFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): transferPage
+  receivedTransfers(where: transferFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): transferPage
+  proposals(where: proposalsOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): proposalsOnchainPage
+  votes(where: votesOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votesOnchainPage
+  delegatedFromBalances(where: accountBalanceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): accountBalancePage
 }
 
 type accountBalancePage {
@@ -539,8 +535,8 @@ type transaction {
   isLending: Boolean!
   isTotal: Boolean!
   timestamp: BigInt!
-  transfers(where: transferFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): transferPage
-  delegations(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): delegationPage
+  transfers(where: transferFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): transferPage
+  delegations(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): delegationPage
 }
 
 type transferPage {
@@ -783,7 +779,7 @@ type proposalsOnchain {
   againstVotes: BigInt!
   abstainVotes: BigInt!
   proposalType: Int
-  votes(where: votesOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): votesOnchainPage
+  votes(where: votesOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): votesOnchainPage
   proposer: account
 }
 
@@ -1773,14 +1769,12 @@ type query_proposalsActivity_proposals_items_proposal {
   description: String
   startBlock: Float!
   endBlock: Float!
-  timestamp: query_proposalsActivity_proposals_items_proposal_timestamp!
+  timestamp: String
   status: String!
   forVotes: String!
   againstVotes: String!
   abstainVotes: String!
 }
-
-scalar query_proposalsActivity_proposals_items_proposal_timestamp
 
 type query_proposalsActivity_proposals_items_userVote {
   id: String!
@@ -1789,7 +1783,7 @@ type query_proposalsActivity_proposals_items_userVote {
   support: String
   votingPower: String!
   reason: String
-  timestamp: String!
+  timestamp: String
 }
 
 enum queryInput_proposalsActivity_orderBy {
@@ -1872,48 +1866,6 @@ type proposal_200_response {
   values: [String]!
   targets: [String]!
   proposalType: Float
-}
-
-type proposalNonVoters_200_response {
-  items: [query_proposalNonVoters_items_items]!
-  totalCount: Float!
-}
-
-type query_proposalNonVoters_items_items {
-  voter: String!
-  votingPower: String!
-  lastVoteTimestamp: Float!
-  votingPowerVariation: String!
-}
-
-enum queryInput_proposalNonVoters_orderDirection {
-  asc
-  desc
-}
-
-type votes_200_response {
-  items: [query_votes_items_items]!
-  totalCount: Float!
-}
-
-type query_votes_items_items {
-  voterAddress: String!
-  transactionHash: String!
-  proposalId: String!
-  support: Float!
-  votingPower: String!
-  reason: String
-  timestamp: Float!
-}
-
-enum queryInput_votes_orderBy {
-  timestamp
-  votingPower
-}
-
-enum queryInput_votes_orderDirection {
-  asc
-  desc
 }
 
 type historicalBalances_200_response {
@@ -2308,6 +2260,75 @@ enum queryInput_transfers_sortBy {
 }
 
 enum queryInput_transfers_sortOrder {
+  asc
+  desc
+}
+
+type votesByProposalId_200_response {
+  items: [query_votesByProposalId_items_items]!
+  totalCount: Float!
+}
+
+type query_votesByProposalId_items_items {
+  voterAddress: String!
+  transactionHash: String!
+  proposalId: String!
+  support: Float!
+  votingPower: String!
+  reason: String
+  timestamp: Float!
+  proposalTitle: String!
+}
+
+enum queryInput_votesByProposalId_orderBy {
+  timestamp
+  votingPower
+}
+
+enum queryInput_votesByProposalId_orderDirection {
+  asc
+  desc
+}
+
+type votes_200_response {
+  items: [query_votes_items_items]!
+  totalCount: Float!
+}
+
+type query_votes_items_items {
+  voterAddress: String!
+  transactionHash: String!
+  proposalId: String!
+  support: Float!
+  votingPower: String!
+  reason: String
+  timestamp: Float!
+  proposalTitle: String!
+}
+
+enum queryInput_votes_orderBy {
+  timestamp
+  votingPower
+}
+
+enum queryInput_votes_orderDirection {
+  asc
+  desc
+}
+
+type proposalNonVoters_200_response {
+  items: [query_proposalNonVoters_items_items]!
+  totalCount: Float!
+}
+
+type query_proposalNonVoters_items_items {
+  voter: String!
+  votingPower: String!
+  lastVoteTimestamp: Float!
+  votingPowerVariation: String!
+}
+
+enum queryInput_proposalNonVoters_orderDirection {
   asc
   desc
 }

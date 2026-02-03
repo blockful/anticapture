@@ -1,9 +1,8 @@
-import { asc, desc, gte, sql, and, inArray, eq, lte } from "drizzle-orm";
+import { asc, desc, gte, sql, and, inArray, lte, or } from "drizzle-orm";
 import { Drizzle } from "@/database";
-import { accountBalance, balanceHistory } from "@/database";
+import { accountBalance, transfer } from "@/database";
 import { DBAccountBalanceVariation } from "@/mappers";
 import { Address } from "viem";
-import { PERCENTAGE_NO_BASELINE } from "@/mappers/constants";
 
 export class BalanceVariationsRepository {
   constructor(private readonly db: Drizzle) {}
@@ -16,75 +15,14 @@ export class BalanceVariationsRepository {
     orderDirection: "asc" | "desc",
     addresses?: Address[],
   ): Promise<DBAccountBalanceVariation[]> {
-    const orderDirectionFn = orderDirection === "asc" ? asc : desc;
-
-    const latestBeforeFrom = this.db
-      .select({
-        accountId: balanceHistory.accountId,
-        balance: balanceHistory.balance,
-        rn: sql<number>`ROW_NUMBER() OVER (
-        PARTITION BY ${balanceHistory.accountId} 
-        ORDER BY ${balanceHistory.timestamp} DESC, ${balanceHistory.logIndex} DESC
-      )`.as("rn"),
-      })
-      .from(balanceHistory)
-      .where(
-        and(
-          addresses ? inArray(balanceHistory.accountId, addresses) : undefined,
-          fromTimestamp
-            ? gte(balanceHistory.timestamp, BigInt(fromTimestamp))
-            : undefined,
-        ),
-      )
-      .as("latest_before_from");
-
-    const latestBeforeTo = this.db
-      .select({
-        accountId: balanceHistory.accountId,
-        balance: balanceHistory.balance,
-        rn: sql<number>`ROW_NUMBER() OVER (
-        PARTITION BY ${balanceHistory.accountId} 
-        ORDER BY ${balanceHistory.timestamp} DESC, ${balanceHistory.logIndex} DESC
-      )`.as("rn"),
-      })
-      .from(balanceHistory)
-      .where(
-        and(
-          addresses ? inArray(balanceHistory.accountId, addresses) : undefined,
-          toTimestamp
-            ? lte(balanceHistory.timestamp, BigInt(toTimestamp))
-            : undefined,
-        ),
-      )
-      .as("latest_before_to");
-
-    return await this.db
-      .select({
-        accountId: sql<Address>`COALESCE(from_data.account_id, to_data.account_id)`,
-        previousBalance: sql<bigint>`COALESCE(from_data.balance, 0)`,
-        currentBalance: sql<bigint>`COALESCE(to_data.balance, 0)`,
-        absoluteChange: sql<bigint>`(COALESCE(to_data.balance, 0) - COALESCE(from_data.balance, 0))`,
-        percentageChange: sql<string>`
-        CASE 
-          WHEN COALESCE(from_data.balance, 0) = 0 THEN 
-            CASE WHEN COALESCE(to_data.balance, 0) = 0 THEN '0' ELSE ${PERCENTAGE_NO_BASELINE} END
-          ELSE 
-            (((COALESCE(to_data.balance, 0) - from_data.balance)::numeric / from_data.balance::numeric) * 100)::text
-        END
-      `,
-      })
-      .from(sql`(SELECT * FROM ${latestBeforeFrom} WHERE rn = 1) as from_data`)
-      .fullJoin(
-        sql`(SELECT * FROM ${latestBeforeTo} WHERE rn = 1) as to_data`,
-        sql`from_data.account_id = to_data.account_id`,
-      )
-      .orderBy(
-        orderDirectionFn(
-          sql<bigint>`ABS(COALESCE(to_data.balance, 0) - COALESCE(from_data.balance, 0))`,
-        ),
-      )
-      .limit(limit)
-      .offset(skip);
+    return this.commonQuery(
+      fromTimestamp,
+      toTimestamp,
+      limit,
+      skip,
+      orderDirection,
+      addresses,
+    );
   }
 
   async getAccountBalanceVariationsByAccountId(
@@ -92,54 +30,127 @@ export class BalanceVariationsRepository {
     fromTimestamp: number | undefined,
     toTimestamp: number | undefined,
   ): Promise<DBAccountBalanceVariation> {
-    const history = this.db
-      .select({
-        accountId: balanceHistory.accountId,
-        delta: balanceHistory.delta,
-      })
-      .from(balanceHistory)
-      .orderBy(desc(balanceHistory.timestamp))
+    const [result] = await this.commonQuery(
+      fromTimestamp,
+      toTimestamp,
+      1,
+      0,
+      "desc",
+      [address],
+    );
+    if (result) return result;
+    return {
+      accountId: address,
+      previousBalance: 0n,
+      currentBalance: 0n,
+      absoluteChange: 0n,
+      percentageChange: "0",
+    };
+  }
+
+  private async commonQuery(
+    fromTimestamp: number | undefined,
+    toTimestamp: number | undefined,
+    limit: number,
+    skip: number,
+    orderDirection: "asc" | "desc",
+    addresses?: Address[],
+  ): Promise<DBAccountBalanceVariation[]> {
+    const scopedTransfers = this.db
+      .select()
+      .from(transfer)
       .where(
         and(
-          eq(balanceHistory.accountId, address),
           fromTimestamp
-            ? gte(balanceHistory.timestamp, BigInt(fromTimestamp))
+            ? gte(transfer.timestamp, BigInt(fromTimestamp))
             : undefined,
           toTimestamp
-            ? lte(balanceHistory.timestamp, BigInt(toTimestamp))
+            ? lte(transfer.timestamp, BigInt(toTimestamp))
+            : undefined,
+          addresses
+            ? or(
+                inArray(transfer.fromAccountId, addresses),
+                inArray(transfer.toAccountId, addresses),
+              )
             : undefined,
         ),
       )
-      .as("history");
+      .as("scoped_transfers");
 
-    const [delta] = await this.db
+    const transfersFrom = this.db
       .select({
-        accountId: history.accountId,
-        absoluteChange: sql<bigint>`SUM(${history.delta})`.as("agg_delta"),
+        accountId: scopedTransfers.fromAccountId,
+        fromAmount: sql<string>`-SUM(${transfer.amount})`.as("from_amount"),
       })
-      .from(history)
-      .groupBy(history.accountId);
+      .from(scopedTransfers)
+      .groupBy(scopedTransfers.fromAccountId)
+      .as("transfers_from");
 
-    const [currentBalance] = await this.db
-      .select({ value: accountBalance.balance })
+    const transfersTo = this.db
+      .select({
+        accountId: scopedTransfers.toAccountId,
+        toAmount: sql<string>`SUM(${transfer.amount})`.as("to_amount"),
+      })
+      .from(scopedTransfers)
+      .groupBy(scopedTransfers.toAccountId)
+      .as("transfers_to");
+
+    const combined = this.db
+      .select({
+        accountId: accountBalance.accountId,
+        currentBalance: accountBalance.balance,
+        fromChange: sql<string>`COALESCE(${transfersFrom.fromAmount}, 0)`.as(
+          "from_change",
+        ),
+        toChange: sql<string>`COALESCE(${transfersTo.toAmount}, 0)`.as(
+          "to_change",
+        ),
+      })
       .from(accountBalance)
-      .where(eq(accountBalance.accountId, address));
+      .leftJoin(
+        transfersFrom,
+        sql`${accountBalance.accountId} = ${transfersFrom.accountId}`,
+      )
+      .leftJoin(
+        transfersTo,
+        sql`${accountBalance.accountId} = ${transfersTo.accountId}`,
+      )
+      .where(
+        sql`${transfersFrom.accountId} IS NOT NULL OR ${transfersTo.accountId} IS NOT NULL`,
+      )
+      .as("combined");
 
-    if (!currentBalance) throw new Error("Account not found");
+    const result = await this.db
+      .select({
+        accountId: combined.accountId,
+        currentBalance: combined.currentBalance,
+        absoluteChange:
+          sql<string>`${combined.fromChange} + ${combined.toChange}`.as(
+            "absolute_change",
+          ),
+      })
+      .from(combined)
+      .where(sql`(${combined.fromChange} + ${combined.toChange}) != 0`)
+      .orderBy(
+        orderDirection === "desc"
+          ? desc(sql`ABS(${combined.fromChange} + ${combined.toChange})`)
+          : asc(sql`ABS(${combined.fromChange} + ${combined.toChange})`),
+      )
+      .offset(skip)
+      .limit(limit);
 
-    const numericAbsoluteChange = BigInt(delta?.absoluteChange || "0");
-    const currentBalanceValue = currentBalance.value;
-    const oldBalance = currentBalance.value - numericAbsoluteChange;
-    const percentageChange = oldBalance
-      ? (Number((numericAbsoluteChange * 10000n) / oldBalance) / 100).toFixed(2)
-      : "0";
-
-    return {
-      accountId: address,
-      previousBalance: currentBalanceValue - numericAbsoluteChange,
-      currentBalance: currentBalanceValue,
-      absoluteChange: numericAbsoluteChange,
-      percentageChange: percentageChange,
-    };
+    return result.map(({ accountId, currentBalance, absoluteChange }) => ({
+      accountId: accountId,
+      previousBalance: currentBalance - BigInt(absoluteChange),
+      currentBalance: currentBalance,
+      absoluteChange: BigInt(absoluteChange),
+      percentageChange: (currentBalance - BigInt(absoluteChange)
+        ? Number(
+            (BigInt(absoluteChange) * 10000n) /
+              (currentBalance - BigInt(absoluteChange)),
+          ) / 100
+        : 0
+      ).toString(),
+    }));
   }
 }

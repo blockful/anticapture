@@ -18,7 +18,10 @@ import {
 import daoConfigByDaoId from "@/shared/dao-config";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
-import { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
+import {
+  AmountFilterState,
+  useAmountFilterStore,
+} from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 import daoConfig from "@/shared/dao-config";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import {
@@ -74,16 +77,6 @@ export const DelegateDelegationHistoryTable = ({
 
   const isInitialLoading =
     loading && (!delegationHistory || delegationHistory.length === 0);
-
-  // Handle sorting
-  const handleSort = (field: "timestamp" | "delta") => {
-    if (sortBy === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortBy(field);
-      setSortDirection("desc"); // Always start with desc for new sort field
-    }
-  };
 
   // Format timestamp to relative time
   const formatRelativeTime = (timestamp: string) => {
@@ -148,26 +141,37 @@ export const DelegateDelegationHistoryTable = ({
   const columns: ColumnDef<DelegationHistoryItem>[] = [
     {
       accessorKey: "timestamp",
-      header: () => (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-secondary w-full justify-start p-0"
-          onClick={() => handleSort("timestamp")}
-        >
-          <h4 className="text-table-header">Date</h4>
-          <ArrowUpDown
-            props={{ className: "size-4" }}
-            activeState={
-              sortBy === "timestamp"
-                ? sortDirection === "asc"
-                  ? ArrowState.UP
-                  : ArrowState.DOWN
-                : ArrowState.DEFAULT
-            }
-          />
-        </Button>
-      ),
+      header: ({ column }) => {
+        const handleSort = () => {
+          const newSortOrder = sortDirection === "desc" ? "asc" : "desc";
+          setSortBy("timestamp");
+          setSortDirection(newSortOrder);
+          column.toggleSorting(newSortOrder === "desc");
+
+          useAmountFilterStore.getState().reset("delegation-amount-filter");
+          setIsFilterActive(false);
+        };
+        return (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-secondary w-full justify-start p-0"
+            onClick={handleSort}
+          >
+            <h4 className="text-table-header">Date</h4>
+            <ArrowUpDown
+              props={{ className: "size-4" }}
+              activeState={
+                sortBy === "timestamp"
+                  ? sortDirection === "asc"
+                    ? ArrowState.UP
+                    : ArrowState.DOWN
+                  : ArrowState.DEFAULT
+              }
+            />
+          </Button>
+        );
+      },
       cell: ({ row }) => {
         const timestamp = row.getValue("timestamp") as string;
 
@@ -199,9 +203,15 @@ export const DelegateDelegationHistoryTable = ({
           <AmountFilter
             filterId="delegation-amount-filter"
             onApply={(filterState: AmountFilterState) => {
-              setSortDirection(
-                filterState.sortOrder === "largest-first" ? "desc" : "asc",
-              );
+              if (filterState.sortOrder) {
+                setSortDirection(
+                  filterState.sortOrder === "largest-first" ? "desc" : "asc",
+                );
+                setSortBy("delta");
+              } else {
+                setSortBy("timestamp");
+                setSortDirection("desc");
+              }
 
               setFilterVariables(() => ({
                 fromValue: filterState.minAmount
@@ -213,15 +223,17 @@ export const DelegateDelegationHistoryTable = ({
               }));
 
               setIsFilterActive(
-                !!(filterVariables?.fromValue || filterVariables?.toValue),
+                !!(
+                  filterState.minAmount ||
+                  filterState.maxAmount ||
+                  filterState.sortOrder
+                ),
               );
-              // Update sort to delta when filter is applied
-              setSortBy("delta");
             }}
             onReset={() => {
               setIsFilterActive(false);
-              // Reset to default sorting
               setSortBy("timestamp");
+              setSortDirection("desc");
               setFilterVariables(() => ({
                 fromValue: "",
                 toValue: "",

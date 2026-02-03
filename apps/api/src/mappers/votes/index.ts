@@ -13,8 +13,6 @@ export const VotesRequestSchema = z.object({
     .default(0),
   limit: z.coerce
     .number()
-    .int()
-    .min(1, "Limit must be a positive integer")
     .max(1000, "Limit cannot exceed 1000")
     .optional()
     .default(10),
@@ -38,6 +36,8 @@ export const VotesRequestSchema = z.object({
     .number()
     .transform((val) => String(val)) // Support for the vote like For, Against, Abstain
     .optional(),
+  fromDate: z.coerce.number().optional(),
+  toDate: z.coerce.number().optional(),
 });
 
 export type VotesRequest = z.infer<typeof VotesRequestSchema>;
@@ -48,8 +48,9 @@ export const VoteResponseSchema = z.object({
   proposalId: z.string(),
   support: z.number(),
   votingPower: z.string(),
-  reason: z.string().nullable(),
+  reason: z.string().optional(),
   timestamp: z.number(),
+  proposalTitle: z.string(),
 });
 
 export type VoteResponse = z.infer<typeof VoteResponseSchema>;
@@ -60,17 +61,3 @@ export const VotesResponseSchema = z.object({
 });
 
 export type VotesResponse = z.infer<typeof VotesResponseSchema>;
-
-export const VotesMapper = {
-  toApi: (vote: DBVote): VoteResponse => {
-    return {
-      voterAddress: vote.voterAccountId,
-      transactionHash: vote.txHash,
-      proposalId: vote.proposalId,
-      support: Number(vote.support),
-      votingPower: vote.votingPower.toString(),
-      reason: vote.reason || null,
-      timestamp: Number(vote.timestamp),
-    };
-  },
-};

@@ -30,6 +30,7 @@ import {
   votingPowers,
   delegations,
   historicalDelegations,
+  votes,
 } from "@/controllers";
 import { docs } from "@/docs";
 import { env } from "@/env";
@@ -51,6 +52,7 @@ import {
   VotingPowerRepository,
   DelegationsRepository,
   HistoricalDelegationsRepository,
+  VotesRepository,
 } from "@/repositories";
 import { errorHandler } from "@/middlewares";
 import { getClient } from "@/lib/client";
@@ -73,6 +75,7 @@ import {
   parseTreasuryProviderConfig,
   HistoricalDelegationsService,
   DelegationsService,
+  VotesService,
 } from "@/services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
@@ -213,6 +216,7 @@ accountBalanceVariations(app, balanceVariationsService);
 accountBalances(app, env.DAO_ID, accountBalanceService);
 accountInteractions(app, balanceVariationsService);
 transfers(app, new TransfersService(new TransfersRepository(pgClient)));
+votes(app, new VotesService(new VotesRepository(pgClient)));
 dao(app, daoService);
 docs(app);
 tokenMetrics(app, tokenMetricsService);
