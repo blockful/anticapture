@@ -58,7 +58,7 @@ query GetProposal($id: String!) {
 #  Get proposal votes
 query GetVotes(
   $proposalId: String!
-  $limit: PositiveInt
+  $limit: Float
   $skip: NonNegativeInt
   $orderBy: queryInput_votesByProposalId_orderBy = timestamp
   $orderDirection: queryInput_votesByProposalId_orderDirection = desc
