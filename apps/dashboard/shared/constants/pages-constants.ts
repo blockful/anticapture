@@ -34,8 +34,8 @@ export const PAGES_CONSTANTS = {
   },
   governanceImplementation: {
     title: "",
-    titleAbbreviation: "Gov Implementation",
-    page: "governance-implementation",
+    titleAbbreviation: "Governance",
+    page: "governance",
     description: undefined,
     subTitle: "Governance Implementation",
     subDescription:
