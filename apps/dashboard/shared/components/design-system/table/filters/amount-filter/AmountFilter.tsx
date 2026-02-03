@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
 import {
   FilterBox,
   FilterMaxMinInput,
@@ -33,12 +32,6 @@ export const AmountFilter = ({
 
   const { minAmount, maxAmount, sortOrder } = store.getState(filterId);
 
-  useEffect(() => {
-    if (sortOptions && sortOptions[0]?.value && sortOrder === "") {
-      store.initialize(filterId, sortOptions[0].value);
-    }
-  }, [sortOptions, sortOrder, filterId, store]);
-
   const handleMinMaxChange = (min: string, max: string) => {
     store.setMinAmount(filterId, min);
     store.setMaxAmount(filterId, max);
@@ -53,7 +46,7 @@ export const AmountFilter = ({
   };
 
   const handleReset = () => {
-    store.reset(filterId, sortOptions?.[0]?.value || "");
+    store.reset(filterId, "");
     onReset();
   };
 
@@ -76,15 +69,12 @@ export const AmountFilter = ({
         initialMax={maxAmount}
       />
       {sortOptions && (
-        <>
-          <div className="border-border-contrast border-b" />
-          <FilterSort
-            title="Sort"
-            options={sortOptions}
-            setFilter={handleSortChange}
-            initialValue={sortOrder}
-          />
-        </>
+        <FilterSort
+          title="Sort"
+          options={sortOptions}
+          setFilter={handleSortChange}
+          initialValue={sortOrder}
+        />
       )}
     </FilterBox>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { ChangeEvent, useState } from "react";
-import { Filter, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { isAddress } from "viem";
 import { normalize } from "viem/ens";
 import {
@@ -9,12 +9,13 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from "@/shared/components/ui/popover";
-import { Button } from "@/shared/components/ui/button";
-import { cn } from "@/shared/utils/";
 import SearchField from "@/shared/components/design-system/SearchField";
+
+import { cn } from "@/shared/utils/";
 import { ResetIcon } from "@radix-ui/react-icons";
-import { IconButton } from "@/shared/components/design-system/buttons/icon-button/IconButton";
 import { fetchAddressFromEnsName } from "@/shared/hooks/useEnsData";
+import { Button } from "@/shared/components/design-system/buttons/button/Button";
+import { ButtonFilter } from "@/shared/components/design-system/table/ButtonFilter";
 
 interface AddressFilterProps {
   onApply: (address: string | undefined) => void;
@@ -40,6 +41,7 @@ export function AddressFilter({
   const [tempAddress, setTempAddress] = useState<string>(currentFilter);
   const [isResolving, setIsResolving] = useState<boolean>(false);
   const [ensAddressError, setEnsAddressError] = useState<string | null>(null);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const isValidAddress =
     tempAddress.trim() &&
@@ -50,12 +52,14 @@ export function AddressFilter({
 
     if (!trimmedAddress) {
       onApply(undefined);
+      setIsOpen(false);
       return;
     }
 
     // If it's already a valid Ethereum address, use it directly
     if (isAddress(trimmedAddress)) {
       onApply(trimmedAddress);
+      setIsOpen(false);
       return;
     }
 
@@ -69,6 +73,7 @@ export function AddressFilter({
 
         if (resolvedAddress) {
           onApply(resolvedAddress);
+          setIsOpen(false);
         } else {
           // ENS name doesn't resolve to an address
           onApply(undefined);
@@ -88,29 +93,24 @@ export function AddressFilter({
   const handleReset = () => {
     setTempAddress("");
     onApply(undefined);
+    setIsOpen(false);
   };
 
   const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
     if (open) {
       setTempAddress(currentFilter);
     }
   };
 
   return (
-    <Popover onOpenChange={handleOpenChange}>
+    <Popover open={isOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
-        <IconButton
-          aria-label="Filter by address"
-          variant="ghost"
-          className={cn(
-            "group border border-transparent",
-            "hover:border-highlight bg-surface-hover border-transparent",
-            currentFilter && "border-highlight bg-surface-hover",
-            className,
-          )}
-          iconClassName="size-3"
-          size="sm"
-          icon={Filter}
+        <ButtonFilter
+          onClick={() => setIsOpen(!isOpen)}
+          isOpen={isOpen}
+          hasFilters={!!currentFilter}
+          className={className}
         />
       </PopoverTrigger>
       <PopoverContent
@@ -119,7 +119,7 @@ export function AddressFilter({
         sideOffset={8}
         avoidCollisions={true}
         className={cn(
-          "border-border-contrast bg-surface-contrast z-50 w-[260px] rounded-lg border p-0 shadow-lg",
+          "border-border-contrast bg-surface-contrast z-50 w-[262px] border p-0 shadow-lg",
         )}
       >
         <div className="flex flex-col gap-1 py-1">
@@ -142,12 +142,13 @@ export function AddressFilter({
           {/* Input Section */}
           <div className="px-3">
             <SearchField
-              placeholder="Search by address or ENS"
+              placeholder="Paste the address"
               value={tempAddress}
               onChange={(e: ChangeEvent<HTMLInputElement>) => {
                 setTempAddress(e.target.value);
                 setEnsAddressError(null);
               }}
+              className="text-dimmed placeholder:text-dimmed w-full bg-transparent text-sm font-normal leading-5 outline-none"
             />
             {tempAddress.trim() && !isValidAddress && (
               <p className="text-error mt-2 text-xs">
@@ -166,7 +167,9 @@ export function AddressFilter({
               disabled={
                 (tempAddress.trim() !== "" && !isValidAddress) || isResolving
               }
-              className="hover:bg-surface-hover h-[28px] w-full bg-white px-2 py-1 text-sm leading-[20px] text-black disabled:bg-gray-600 disabled:text-gray-400"
+              size="sm"
+              variant="primary"
+              className="w-full"
             >
               {isResolving ? (
                 <>

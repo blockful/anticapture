@@ -11,7 +11,7 @@ import { MetricCard } from "@/shared/components";
 import { ProposalsTable } from "@/features/holders-and-delegates";
 import { Hand, Trophy, Check, Zap } from "lucide-react";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { FilterOption } from "@/shared/components/dropdowns/FilterDropdown";
+import { FilterOption } from "@/shared/components/design-system/table/filters/CategoriesFilter";
 import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 
