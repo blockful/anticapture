@@ -26,7 +26,7 @@ export const DescriptionTabContent = ({
   return (
     <div className="text-primary p-0 lg:p-4 py-4">
       <Markdown
-        className="overflow-wrap-anywhere wrap-break-word"
+        className="overflow-wrap-anywhere break-words"
         options={{
           overrides: {
             h1: {
