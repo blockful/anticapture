@@ -1,11 +1,11 @@
 "use client";
 
 import { cn } from "@/shared/utils";
-import { useState } from "react";
 import { DescriptionTabContent } from "@/features/governance/components/proposal-overview/DescriptionTabContent";
 import { GetProposalQuery } from "@anticapture/graphql-client";
 import { ActionsTabContent } from "@/features/governance/components/proposal-overview/ActionTabContent";
 import { VotesTabContent } from "@/features/governance/components/proposal-overview/VotesTabContent";
+import { parseAsStringEnum, useQueryState } from "nuqs";
 
 type TabId = "description" | "votes" | "actions";
 
@@ -15,7 +15,12 @@ interface TabsSectionProps {
 }
 
 export const TabsSection = ({ proposal, onAddressClick }: TabsSectionProps) => {
-  const [activeTab, setActiveTab] = useState<TabId>("description");
+  const [activeTab, setActiveTab] = useQueryState(
+    "tab",
+    parseAsStringEnum<TabId>(["description", "votes", "actions"]).withDefault(
+      "description",
+    ),
+  );
 
   const renderTabContent = () => {
     switch (activeTab) {

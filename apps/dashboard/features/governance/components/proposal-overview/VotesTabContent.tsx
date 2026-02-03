@@ -2,7 +2,6 @@
 
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { GetProposalQuery } from "@anticapture/graphql-client";
-import { useState } from "react";
 
 import { TabsVotedContent } from "@/features/governance/components/proposal-overview/TabsVotedContent";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -14,6 +13,9 @@ import {
 import { formatUnits } from "viem";
 import { TabsDidntVoteContent } from "@/features/governance/components/proposal-overview/TabsDidntVoteContent";
 import daoConfig from "@/shared/dao-config";
+import { parseAsStringEnum, useQueryState } from "nuqs";
+
+type VoteTabId = "voted" | "didntVote";
 
 interface VotesTabContentProps {
   proposal: NonNullable<GetProposalQuery["proposal"]>;
@@ -24,7 +26,10 @@ export const VotesTabContent = ({
   proposal,
   onAddressClick,
 }: VotesTabContentProps) => {
-  const [activeTab, setActiveTab] = useState<"voted" | "didntVote">("voted");
+  const [activeTab, setActiveTab] = useQueryState(
+    "voteTab",
+    parseAsStringEnum<VoteTabId>(["voted", "didntVote"]).withDefault("voted"),
+  );
 
   const { daoId } = useParams<{ daoId: string }>();
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
