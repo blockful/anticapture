@@ -49,13 +49,9 @@ export const ProposalTimeline = ({
 
   const getTimelineItemBgColor = (index: number) => {
     // Find the last completed item index (this is the current state)
-    let lastCompletedIndex = -1;
-    for (let i = timelineItems.length - 1; i >= 0; i--) {
-      if (timelineItems[i].status === "completed") {
-        lastCompletedIndex = i;
-        break;
-      }
-    }
+    const lastCompletedIndex = timelineItems.findLastIndex(
+      (item) => item.status === "completed"
+    );
 
     if (index < lastCompletedIndex) {
       // Past completed items
