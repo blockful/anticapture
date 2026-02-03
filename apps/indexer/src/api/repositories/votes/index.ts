@@ -15,12 +15,12 @@ import {
 } from "drizzle-orm";
 import { accountPower, votesOnchain, votingPowerHistory } from "ponder:schema";
 
-import { DBVote, VotesByProposalRequest } from "@/api/mappers";
+import { DBVote, VotesRequest } from "@/api/mappers";
 import { Address } from "viem";
 
 export class VotesRepository {
   async getVotes(
-    req: VotesByProposalRequest,
+    req: VotesRequest,
   ): Promise<{ items: DBVote[]; totalCount: number }> {
     const sortBy =
       req.orderBy === "timestamp"

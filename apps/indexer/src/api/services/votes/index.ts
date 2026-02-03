@@ -1,8 +1,8 @@
 import {
-  VotesByProposalRequest,
+  VotesRequest,
   DBVote,
-  VotesByProposalResponse,
-  VotesByProposalResponseSchema,
+  VotesResponse,
+  VotesResponseSchema,
   VotersResponse,
 } from "@/api/mappers";
 import { DaysEnum } from "@/lib/enums";
@@ -17,9 +17,7 @@ interface VotesRepository {
     addresses?: Address[],
   ): Promise<{ voter: Address; votingPower: bigint }[]>;
   getProposalNonVotersCount(proposalId: string): Promise<number>;
-  getVotes(
-    req: VotesByProposalRequest,
-  ): Promise<{ items: DBVote[]; totalCount: number }>;
+  getVotes(req: VotesRequest): Promise<{ items: DBVote[]; totalCount: number }>;
   getVotesByProposalId(
     proposalId: string,
     skip: number,
@@ -41,11 +39,9 @@ interface VotesRepository {
 
 export class VotesService {
   constructor(private votesRepository: VotesRepository) {}
-  async getVotes(
-    params: VotesByProposalRequest,
-  ): Promise<VotesByProposalResponse> {
+  async getVotes(params: VotesRequest): Promise<VotesResponse> {
     const response = await this.votesRepository.getVotes(params);
-    return VotesByProposalResponseSchema.parse({
+    return VotesResponseSchema.parse({
       items: response.items.map((item) => ({
         voterAddress: item.voterAccountId,
         transactionHash: item.txHash,
@@ -115,7 +111,7 @@ export class VotesService {
     support?: string,
     fromDate?: number,
     toDate?: number,
-  ): Promise<VotesByProposalResponse> {
+  ): Promise<VotesResponse> {
     const response = await this.votesRepository.getVotesByProposalId(
       proposalId,
       skip,
@@ -128,7 +124,7 @@ export class VotesService {
       toDate,
     );
 
-    return VotesByProposalResponseSchema.parse({
+    return VotesResponseSchema.parse({
       items: response.items.map((item) => ({
         voterAddress: item.voterAccountId,
         transactionHash: item.txHash,

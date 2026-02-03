@@ -4,9 +4,8 @@ import { VotesService } from "@/api/services";
 import {
   VotersRequestSchema,
   VotersResponseSchema,
-  VotesRequestQuerySchema,
-  VotesByProposalRequestSchema,
-  VotesByProposalResponseSchema,
+  VotesRequestSchema,
+  VotesResponseSchema,
 } from "@/api/mappers";
 
 export function votes(app: Hono, service: VotesService) {
@@ -23,14 +22,14 @@ export function votes(app: Hono, service: VotesService) {
         params: z.object({
           id: z.string(),
         }),
-        query: VotesByProposalRequestSchema,
+        query: VotesRequestSchema,
       },
       responses: {
         200: {
           description: "Successfully retrieved votes",
           content: {
             "application/json": {
-              schema: VotesByProposalResponseSchema,
+              schema: VotesResponseSchema,
             },
           },
         },
@@ -74,14 +73,14 @@ export function votes(app: Hono, service: VotesService) {
       description: "Get all votes ordered by timestamp or voting power",
       tags: ["votes"],
       request: {
-        query: VotesRequestQuerySchema,
+        query: VotesRequestSchema,
       },
       responses: {
         200: {
           description: "Returns votes",
           content: {
             "application/json": {
-              schema: VotesByProposalResponseSchema,
+              schema: VotesResponseSchema,
             },
           },
         },
@@ -100,7 +99,7 @@ export function votes(app: Hono, service: VotesService) {
         toDate,
       });
 
-      return context.json(VotesByProposalResponseSchema.parse(result));
+      return context.json(VotesResponseSchema.parse(result));
     },
   );
 
