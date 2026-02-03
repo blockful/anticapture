@@ -50,14 +50,14 @@ const ActionItem = ({ target, value, calldata, index }: ActionItemProps) => {
     <div className="border-border-default flex w-full flex-col gap-2 border">
       <div className="bg-surface-contrast flex w-full items-center justify-between gap-2 p-3">
         <div>
-          <p className="text-primary font-mono text-[12px] font-medium uppercase not-italic leading-[16px] tracking-wider">
+          <p className="text-primary font-mono text-xs font-medium uppercase not-italic leading-4 tracking-wider">
             // Action {index + 1}
           </p>
         </div>
         <DefaultLink
           href={`https://etherscan.io/address/${target}`}
           openInNewTab
-          className="text-secondary font-mono text-[12px] font-medium uppercase not-italic leading-[16px] tracking-wider"
+          className="text-secondary font-mono text-xs font-medium uppercase not-italic leading-4 tracking-wider"
         >
           Contract
         </DefaultLink>
@@ -65,21 +65,21 @@ const ActionItem = ({ target, value, calldata, index }: ActionItemProps) => {
 
       <div className="flex w-full flex-col gap-2 p-3">
         <div className="flex w-full gap-2">
-          <p className="font-mono min-w-[88px] text-[14px] font-normal not-italic leading-[20px]">
+          <p className="font-mono min-w-[88px] text-sm font-normal not-italic leading-5">
             Target:
           </p>
-          <p className="text-secondary font-mono text-[14px] font-normal not-italic leading-[20px]">
+          <p className="text-secondary font-mono text-sm font-normal not-italic leading-5">
             {target}
           </p>
         </div>
 
         <div className="flex w-full flex-col gap-2">
           <div className="flex w-full gap-2">
-            <p className="font-mono min-w-[88px] text-[14px] font-normal not-italic leading-[20px]">
+            <p className="font-mono min-w-[88px] text-sm font-normal not-italic leading-5">
               Calldata:
             </p>
             <p
-              className={`text-secondary font-mono overflow-wrap-anywhere break-all text-[14px] font-normal not-italic leading-[20px] ${
+              className={`text-secondary font-mono overflow-wrap-anywhere break-all text-sm font-normal not-italic leading-5 ${
                 isCalldataLong && !isCalldataExpanded ? "line-clamp-5" : ""
               }`}
             >
@@ -97,10 +97,10 @@ const ActionItem = ({ target, value, calldata, index }: ActionItemProps) => {
         </div>
 
         <div className="flex w-full gap-2">
-          <p className="font-mono min-w-[88px] text-[14px] font-normal not-italic leading-[20px]">
+          <p className="font-mono min-w-[88px] text-sm font-normal not-italic leading-5">
             Value:
           </p>
-          <p className="text-secondary font-mono text-[14px] font-normal not-italic leading-[20px]">
+          <p className="text-secondary font-mono text-sm font-normal not-italic leading-5">
             {value}
           </p>
         </div>
