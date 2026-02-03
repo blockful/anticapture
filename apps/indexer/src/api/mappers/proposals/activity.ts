@@ -17,7 +17,7 @@ export const ProposalActivityResponseSchema = z.object({
         description: z.string().nullable(),
         startBlock: z.number(),
         endBlock: z.number(),
-        timestamp: z.bigint().transform((val) => val.toString()),
+        timestamp: z.coerce.string(),
         status: z.string(),
         forVotes: z
           .bigint()
@@ -40,7 +40,7 @@ export const ProposalActivityResponseSchema = z.object({
           support: z.string().nullable(),
           votingPower: z.string(),
           reason: z.string().nullable(),
-          timestamp: z.string(),
+          timestamp: z.coerce.string(),
         })
         .nullable(),
     }),
