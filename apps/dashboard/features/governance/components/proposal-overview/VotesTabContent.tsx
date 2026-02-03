@@ -35,21 +35,6 @@ export const VotesTabContent = ({
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
   const { decimals } = daoConfig[daoIdEnum];
 
-  const TabsContent =
-    activeTab === "voted"
-      ? () => (
-          <TabsVotedContent
-            proposal={proposal}
-            onAddressClick={onAddressClick}
-          />
-        )
-      : () => (
-          <TabsDidntVoteContent
-            proposal={proposal}
-            onAddressClick={onAddressClick}
-          />
-        );
-
   // Get votes for this proposal
   const { data } = useGetVotesQuery({
     variables: {
@@ -116,7 +101,17 @@ export const VotesTabContent = ({
       </div>
 
       <div className="flex flex-col gap-3">
-        <TabsContent />
+        {activeTab === "voted" ? (
+          <TabsVotedContent
+            proposal={proposal}
+            onAddressClick={onAddressClick}
+          />
+        ) : (
+          <TabsDidntVoteContent
+            proposal={proposal}
+            onAddressClick={onAddressClick}
+          />
+        )}
       </div>
     </div>
   );
