@@ -31,6 +31,7 @@ import {
   useQueryState,
   useQueryStates,
 } from "nuqs";
+import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 
 interface DelegateDelegationHistoryTableProps {
   accountId: string;
@@ -41,6 +42,7 @@ export const DelegateDelegationHistoryTable = ({
   accountId,
   daoId,
 }: DelegateDelegationHistoryTableProps) => {
+  const limit: number = 20;
   const { decimals } = daoConfig[daoId];
 
   const [sortBy, setSortBy] = useQueryState(
@@ -73,6 +75,7 @@ export const DelegateDelegationHistoryTable = ({
       orderBy: sortBy,
       orderDirection: sortDirection,
       filterVariables,
+      limit,
     });
 
   const isInitialLoading =
@@ -499,18 +502,21 @@ export const DelegateDelegationHistoryTable = ({
   ];
 
   return (
-    <div className="flex w-full flex-col gap-2 p-4">
+    <div className="flex h-full w-full flex-col gap-2 overflow-hidden p-4">
       <Table
         columns={columns}
-        data={isInitialLoading ? Array(12).fill({}) : delegationHistory}
+        data={
+          isInitialLoading
+            ? Array(DEFAULT_ITEMS_PER_PAGE).fill({})
+            : delegationHistory
+        }
         size="sm"
         hasMore={hasNextPage}
         isLoadingMore={loading}
         onLoadMore={fetchNextPage}
-        wrapperClassName="h-[450px]"
-        className="h-[400px]"
         withDownloadCSV={true}
         error={error}
+        fillHeight
       />
     </div>
   );

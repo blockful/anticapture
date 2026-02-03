@@ -12,14 +12,14 @@ export const DelegateDelegationsHistory = ({
   daoId,
 }: DelegateDelegationsHistoryProps) => {
   return (
-    <div className="bg-surface-default flex flex-col">
+    <div className="bg-surface-default flex h-full flex-col overflow-hidden">
       {/* Graph Section */}
       <div className="shrink-0 p-4 pb-2">
         <VotingPowerVariationGraph accountId={accountId} daoId={daoId} />
       </div>
 
       {/* Table Section */}
-      <div className="flex flex-col">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
         <DelegateDelegationHistoryTable accountId={accountId} daoId={daoId} />
       </div>
     </div>

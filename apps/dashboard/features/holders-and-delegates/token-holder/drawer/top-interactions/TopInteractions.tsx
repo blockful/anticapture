@@ -94,8 +94,8 @@ export const TopInteractions = ({
   const variant = netBalanceChange >= 0 ? "positive" : "negative";
 
   return (
-    <div className="flex w-full flex-col gap-4 p-4">
-      <div className="border-light-dark text-primary flex h-fit w-full flex-col gap-4 overflow-y-auto border p-4 lg:flex-row">
+    <div className="flex h-full w-full flex-col gap-4 overflow-hidden p-4">
+      <div className="border-light-dark text-primary flex h-fit w-full shrink-0 flex-col gap-4 overflow-y-auto border p-4 lg:flex-row">
         <div className="flex h-full w-full flex-col">
           <div className="flex w-full flex-col gap-4 lg:flex-row">
             <div>
@@ -174,7 +174,7 @@ export const TopInteractions = ({
           </div>
         </div>
       </div>
-      <div className="flex w-full flex-col gap-4">
+      <div className="flex min-h-0 w-full flex-1 flex-col gap-4 overflow-hidden">
         <TopInteractionsTable address={address} daoId={daoId} />
       </div>
     </div>
