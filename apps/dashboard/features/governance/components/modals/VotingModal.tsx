@@ -57,8 +57,11 @@ export const VotingModal = ({
   const simulatedTotalVotes =
     simulatedForVotes + simulatedAgainstVotes + simulatedAbstainVotes;
 
-  const userReadableTotalVotes = formatNumberUserReadable(
-    Number(formatUnits(simulatedTotalVotes || BigInt(0), decimals)),
+  // Calculate simulated quorum votes (for + abstain only, against votes don't count toward quorum)
+  const simulatedQuorumVotes = simulatedForVotes + simulatedAbstainVotes;
+
+  const userReadableQuorumVotes = formatNumberUserReadable(
+    Number(formatUnits(simulatedQuorumVotes || BigInt(0), decimals)),
   );
   const userReadableQuorum = formatNumberUserReadable(
     Number(formatUnits(BigInt(proposal?.quorum || 0), decimals)),
@@ -79,7 +82,7 @@ export const VotingModal = ({
       : 0;
 
   const isQuorumReached =
-    Number(simulatedTotalVotes) >= Number(proposal?.quorum || 0);
+    Number(simulatedQuorumVotes) >= Number(proposal?.quorum || 0);
 
   const { address, chain } = useAccount();
   const { data: walletClient } = useWalletClient();
@@ -207,7 +210,7 @@ export const VotingModal = ({
                   Quorum
                 </p>
                 <p className="font-inter text-secondary text-[14px] font-normal not-italic leading-[20px]">
-                  {userReadableTotalVotes} / {userReadableQuorum}
+                  {userReadableQuorumVotes} / {userReadableQuorum}
                 </p>
                 {isQuorumReached ? (
                   <BadgeStatus variant="success" iconClassName="text-success!" icon={Check}>
