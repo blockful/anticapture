@@ -9,3 +9,4 @@ export * from "./account-balance";
 export * from "./treasury/index";
 export * from "./transfers";
 export * from "./delegations";
+export * from "./votes";
