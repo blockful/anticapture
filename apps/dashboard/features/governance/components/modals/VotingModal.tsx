@@ -33,24 +33,53 @@ export const VotingModal = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [transactionhash, setTransactionhash] = useState<string>("");
 
-  const totalVotes =
-    Number(proposal?.forVotes) +
-    Number(proposal?.againstVotes) +
-    Number(proposal?.abstainVotes);
+  // Parse user's voting power to BigInt for calculations
+  const userVotingPowerBigInt = BigInt(votingPower || "0");
+
+  // Calculate base votes from proposal
+  const baseForVotes = BigInt(proposal?.forVotes || "0");
+  const baseAgainstVotes = BigInt(proposal?.againstVotes || "0");
+  const baseAbstainVotes = BigInt(proposal?.abstainVotes || "0");
+
+  // Calculate simulated votes based on user's selection
+  const simulatedForVotes =
+    vote === "for" ? baseForVotes + userVotingPowerBigInt : baseForVotes;
+  const simulatedAgainstVotes =
+    vote === "against"
+      ? baseAgainstVotes + userVotingPowerBigInt
+      : baseAgainstVotes;
+  const simulatedAbstainVotes =
+    vote === "abstain"
+      ? baseAbstainVotes + userVotingPowerBigInt
+      : baseAbstainVotes;
+
+  // Calculate simulated total (includes user's voting power if any option is selected)
+  const simulatedTotalVotes =
+    simulatedForVotes + simulatedAgainstVotes + simulatedAbstainVotes;
 
   const userReadableTotalVotes = formatNumberUserReadable(
-    Number(formatUnits(BigInt(totalVotes || 0), decimals)),
+    Number(formatUnits(simulatedTotalVotes || BigInt(0), decimals)),
   );
   const userReadableQuorum = formatNumberUserReadable(
     Number(formatUnits(BigInt(proposal?.quorum || 0), decimals)),
   );
-  const forPercentage = (Number(proposal?.forVotes) / Number(totalVotes)) * 100;
-  const againstPercentage =
-    (Number(proposal?.againstVotes) / Number(totalVotes)) * 100;
-  const abstainPercentage =
-    (Number(proposal?.abstainVotes) / Number(totalVotes)) * 100;
 
-  const isQuorumReached = totalVotes >= Number(proposal?.quorum || 0);
+  // Calculate percentages based on simulated values
+  const forPercentage =
+    simulatedTotalVotes > BigInt(0)
+      ? (Number(simulatedForVotes) / Number(simulatedTotalVotes)) * 100
+      : 0;
+  const againstPercentage =
+    simulatedTotalVotes > BigInt(0)
+      ? (Number(simulatedAgainstVotes) / Number(simulatedTotalVotes)) * 100
+      : 0;
+  const abstainPercentage =
+    simulatedTotalVotes > BigInt(0)
+      ? (Number(simulatedAbstainVotes) / Number(simulatedTotalVotes)) * 100
+      : 0;
+
+  const isQuorumReached =
+    Number(simulatedTotalVotes) >= Number(proposal?.quorum || 0);
 
   const { address, chain } = useAccount();
   const { data: walletClient } = useWalletClient();
@@ -146,7 +175,7 @@ export const VotingModal = ({
               <VoteOption
                 vote="for"
                 optionPercentage={forPercentage}
-                votingPower={proposal?.forVotes}
+                votingPower={simulatedForVotes.toString()}
                 onChange={setVote}
                 checked={vote === "for"}
                 decimals={decimals}
@@ -156,7 +185,7 @@ export const VotingModal = ({
               <VoteOption
                 vote="against"
                 optionPercentage={againstPercentage}
-                votingPower={proposal?.againstVotes}
+                votingPower={simulatedAgainstVotes.toString()}
                 onChange={setVote}
                 checked={vote === "against"}
                 decimals={decimals}
@@ -166,7 +195,7 @@ export const VotingModal = ({
               <VoteOption
                 vote="abstain"
                 optionPercentage={abstainPercentage}
-                votingPower={proposal?.abstainVotes}
+                votingPower={simulatedAbstainVotes.toString()}
                 onChange={setVote}
                 checked={vote === "abstain"}
                 decimals={decimals}
@@ -181,7 +210,7 @@ export const VotingModal = ({
                   {userReadableTotalVotes} / {userReadableQuorum}
                 </p>
                 {isQuorumReached ? (
-                  <BadgeStatus variant="success" icon={Check}>
+                  <BadgeStatus variant="success" iconClassName="text-success!" icon={Check}>
                     Reached
                   </BadgeStatus>
                 ) : (
