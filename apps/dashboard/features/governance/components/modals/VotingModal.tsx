@@ -87,6 +87,16 @@ export const VotingModal = ({
   const { address, chain } = useAccount();
   const { data: walletClient } = useWalletClient();
 
+  // Reset state when modal opens to prevent stale data from previous sessions
+  useEffect(() => {
+    if (isOpen) {
+      setVote("");
+      setComment("");
+      setIsLoading(false);
+      setTransactionhash("");
+    }
+  }, [isOpen]);
+
   // Prevent body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
