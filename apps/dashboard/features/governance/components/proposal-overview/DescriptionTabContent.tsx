@@ -24,7 +24,7 @@ export const DescriptionTabContent = ({
   proposal,
 }: DescriptionTabContentProps) => {
   return (
-    <div className="text-primary overflow-hidden p-0 lg:p-4 py-4">
+    <div className="text-primary p-0 lg:p-4 py-4">
       <Markdown
         className="overflow-wrap-anywhere wrap-break-word"
         options={{
@@ -91,7 +91,7 @@ export const DescriptionTabContent = ({
               component: "code",
               props: {
                 className:
-                  "break-all bg-surface-contrast px-1 rounded-[4px] text-sm",
+                  "break-words bg-surface-contrast px-1 rounded-[4px] text-sm",
               },
             },
             ul: {
@@ -120,10 +120,16 @@ export const DescriptionTabContent = ({
               },
             },
             table: {
-              component: "table",
-              props: {
-                className: "w-full mt-4 mb-4",
-              },
+              component: ({
+                children,
+                ...props
+              }: React.HTMLAttributes<HTMLTableElement>) => (
+                <div className="overflow-x-auto mt-4 mb-4 max-w-full">
+                  <table className="min-w-full" {...props}>
+                    {children}
+                  </table>
+                </div>
+              ),
             },
             thead: {
               component: "thead",
@@ -147,14 +153,14 @@ export const DescriptionTabContent = ({
               component: "th",
               props: {
                 className:
-                  "text-left p-3 text-primary h-[40px] px-2 text-[12px] font-medium leading-[20px] font-inter text-secondary",
+                  "text-left p-3 text-primary h-[40px] px-2 text-[12px] font-medium leading-[20px] font-inter text-secondary whitespace-nowrap",
               },
             },
             td: {
               component: "td",
               props: {
                 className:
-                  "p-3 text-secondary text-[14px] leading-[20px] break-words",
+                  "p-3 text-secondary text-[14px] leading-[20px] whitespace-nowrap",
               },
             },
             a: {
