@@ -77,7 +77,7 @@ export const VoteOption = ({
           <div className="bg-surface-hover relative h-1 w-full max-w-[270px] flex-1">
             <div
               className={cn(
-                "h-1",
+                "h-1 transition-all duration-300 ease-out",
                 vote === "for"
                   ? "bg-success"
                   : vote === "against"
