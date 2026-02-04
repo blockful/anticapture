@@ -5,7 +5,7 @@ import { DBAccountBalanceVariation } from "@/mappers";
 import { Address } from "viem";
 
 export class BalanceVariationsRepository {
-  constructor(private readonly db: Drizzle) {}
+  constructor(private readonly db: Drizzle) { }
 
   async getAccountBalanceVariations(
     fromTimestamp: number | undefined,
@@ -29,7 +29,7 @@ export class BalanceVariationsRepository {
     address: Address,
     fromTimestamp: number | undefined,
     toTimestamp: number | undefined,
-  ): Promise<DBAccountBalanceVariation> {
+  ): Promise<DBAccountBalanceVariation | undefined> {
     const [result] = await this.commonQuery(
       fromTimestamp,
       toTimestamp,
@@ -38,14 +38,8 @@ export class BalanceVariationsRepository {
       "desc",
       [address],
     );
-    if (result) return result;
-    return {
-      accountId: address,
-      previousBalance: 0n,
-      currentBalance: 0n,
-      absoluteChange: 0n,
-      percentageChange: "0",
-    };
+
+    return result;
   }
 
   private async commonQuery(
@@ -69,9 +63,9 @@ export class BalanceVariationsRepository {
             : undefined,
           addresses
             ? or(
-                inArray(transfer.fromAccountId, addresses),
-                inArray(transfer.toAccountId, addresses),
-              )
+              inArray(transfer.fromAccountId, addresses),
+              inArray(transfer.toAccountId, addresses),
+            )
             : undefined,
         ),
       )
@@ -146,9 +140,9 @@ export class BalanceVariationsRepository {
       absoluteChange: BigInt(absoluteChange),
       percentageChange: (currentBalance - BigInt(absoluteChange)
         ? Number(
-            (BigInt(absoluteChange) * 10000n) /
-              (currentBalance - BigInt(absoluteChange)),
-          ) / 100
+          (BigInt(absoluteChange) * 10000n) /
+          (currentBalance - BigInt(absoluteChange)),
+        ) / 100
         : 0
       ).toString(),
     }));

@@ -2,10 +2,15 @@ import {
   DBAccountBalanceVariation,
   AccountInteractions,
   Filter,
+  DBAccountBalance,
 } from "@/mappers";
 import { Address } from "viem";
 
 interface AccountBalanceRepository {
+  getAccountBalance(accountId: Address): Promise<DBAccountBalance | undefined>;
+}
+
+interface BalanceVariationsRepository {
   getAccountBalanceVariations(
     fromTimestamp: number | undefined,
     toTimestamp: number | undefined,
@@ -19,7 +24,7 @@ interface AccountBalanceRepository {
     address: Address,
     fromTimestamp: number | undefined,
     toTimestamp: number | undefined,
-  ): Promise<DBAccountBalanceVariation>;
+  ): Promise<DBAccountBalanceVariation | undefined>;
 }
 
 interface AccountInteractionsRepository {
@@ -37,9 +42,10 @@ interface AccountInteractionsRepository {
 
 export class BalanceVariationsService {
   constructor(
-    private readonly balanceRepository: AccountBalanceRepository,
+    private readonly variationsRepository: BalanceVariationsRepository,
     private readonly interactionRepository: AccountInteractionsRepository,
-  ) {}
+    private readonly balanceRepository: AccountBalanceRepository,
+  ) { }
 
   async getAccountBalanceVariations(
     fromTimestamp: number | undefined,
@@ -49,7 +55,7 @@ export class BalanceVariationsService {
     orderDirection: "asc" | "desc",
     addresses?: Address[],
   ): Promise<DBAccountBalanceVariation[]> {
-    const variations = await this.balanceRepository.getAccountBalanceVariations(
+    const variations = await this.variationsRepository.getAccountBalanceVariations(
       fromTimestamp,
       toTimestamp,
       skip,
@@ -82,11 +88,24 @@ export class BalanceVariationsService {
     fromTimestamp: number | undefined,
     toTimestamp: number | undefined,
   ): Promise<DBAccountBalanceVariation> {
-    return this.balanceRepository.getAccountBalanceVariationsByAccountId(
+    const variation = await this.variationsRepository.getAccountBalanceVariationsByAccountId(
       address,
       fromTimestamp,
       toTimestamp,
     );
+
+    if (variation) return variation
+
+    const accountBalance = await this.balanceRepository.getAccountBalance(address);
+    const balance = accountBalance?.balance ?? 0n;
+
+    return {
+      accountId: address,
+      previousBalance: balance,
+      currentBalance: balance,
+      absoluteChange: 0n,
+      percentageChange: "0",
+    }
   }
 
   async getAccountInteractions(
