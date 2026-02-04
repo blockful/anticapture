@@ -12,6 +12,7 @@ interface BannerAlertProps {
   link?: {
     url: string;
     text: string;
+    openInNewTab?: boolean;
   };
   storageKey: string;
   variant?: "default" | "highlight";
@@ -62,7 +63,7 @@ export const BannerAlert = ({
               {link && (
                 <DefaultLink
                   href={link.url}
-                  openInNewTab
+                  openInNewTab={link.openInNewTab ?? true}
                   variant="highlight"
                   className="flex items-center gap-1"
                 >
