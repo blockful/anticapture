@@ -50,11 +50,6 @@ export const HeaderNavMobile = () => {
       title: "Governance",
       enabled: !!daoConfig.governancePage,
     },
-    {
-      page: PAGES_CONSTANTS.governanceImplementation.page,
-      title: PAGES_CONSTANTS.governanceImplementation.titleAbbreviation,
-      enabled: !!daoConfig.governanceImplementation,
-    },
   ];
 
   return (
