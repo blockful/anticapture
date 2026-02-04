@@ -11,10 +11,6 @@ directive @httpOperation(subgraph: String, path: String, operationSpecificHeader
 directive @transport(subgraph: String, kind: String, location: String, headers: [[String]], queryStringOptions: ObjMap, queryParams: [[String]]) repeatable on SCHEMA
 
 type Query {
-  votingPowerHistorys(where: votingPowerHistoryFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): votingPowerHistoryPage!
-  votesOnchains(where: votesOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): votesOnchainPage!
-  _meta: Meta
-
   """
   Get historical delegations for an account, with optional filtering and sorting
   """
@@ -85,12 +81,6 @@ type Query {
 
   """Returns a single proposal by its ID"""
   proposal(id: String!): proposal_200_response
-
-  """Returns the active delegates that did not vote on a given proposal"""
-  proposalNonVoters(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposalNonVoters_orderDirection = desc, addresses: JSON): proposalNonVoters_200_response
-
-  """Returns a paginated list of votes cast on a specific proposal"""
-  votes(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, voterAddressIn: JSON, orderBy: queryInput_votes_orderBy = timestamp, orderDirection: queryInput_votes_orderDirection = desc, support: Float): votes_200_response
 
   """TODO"""
   historicalBalances(address: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_historicalBalances_orderBy = timestamp, orderDirection: queryInput_historicalBalances_orderDirection = desc, fromDate: String, toDate: String, fromValue: String, toValue: String): historicalBalances_200_response
@@ -168,13 +158,19 @@ type Query {
   """Get transfers of a given address"""
   transfers(address: String!, limit: Float = 10, offset: Float, sortBy: queryInput_transfers_sortBy = timestamp, sortOrder: queryInput_transfers_sortOrder = asc, from: String, to: String, fromDate: Float, toDate: Float, fromValue: String, toValue: String): transfers_200_response
 
+  """Returns a paginated list of votes cast on a specific proposal"""
+  votesByProposalId(id: String!, skip: NonNegativeInt, limit: Float = 10, voterAddressIn: JSON, orderBy: queryInput_votesByProposalId_orderBy = timestamp, orderDirection: queryInput_votesByProposalId_orderDirection = desc, support: Float, fromDate: Float, toDate: Float): votesByProposalId_200_response
+
+  """Get all votes ordered by timestamp or voting power"""
+  votes(skip: NonNegativeInt, limit: Float = 10, voterAddressIn: JSON, orderBy: queryInput_votes_orderBy = timestamp, orderDirection: queryInput_votes_orderDirection = desc, support: Float, fromDate: Float, toDate: Float): votes_200_response
+
+  """Returns the active delegates that did not vote on a given proposal"""
+  proposalNonVoters(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposalNonVoters_orderDirection = desc, addresses: JSON): proposalNonVoters_200_response
+
   """Returns current governance parameters for this DAO"""
   dao: dao_200_response
 
-  """
-  Returns token related metrics for a single metric type.
-          Available types: TOTAL_SUPPLY, DELEGATED_SUPPLY, CEX_SUPPLY, DEX_SUPPLY, LENDING_SUPPLY, CIRCULATING_SUPPLY, TREASURY
-  """
+  """Returns token related metrics for a single metric type."""
   tokenMetrics(metricType: queryInput_tokenMetrics_metricType!, startDate: Float, endDate: Float, orderDirection: queryInput_tokenMetrics_orderDirection = asc, limit: NonNegativeInt = 365, skip: NonNegativeInt): tokenMetrics_200_response
 
   """
@@ -215,1242 +211,6 @@ type Query {
   daos: DAOList!
 }
 
-"""
-The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
-"""
-scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
-
-scalar BigInt
-
-type PageInfo {
-  hasNextPage: Boolean!
-  hasPreviousPage: Boolean!
-  startCursor: String
-  endCursor: String
-  endDate: String
-  startDate: String
-}
-
-type ViewPageInfo {
-  hasNextPage: Boolean!
-  hasPreviousPage: Boolean!
-}
-
-type Meta {
-  status: JSON
-}
-
-type token {
-  id: String!
-  name: String
-  decimals: Int!
-  totalSupply: BigInt!
-  delegatedSupply: BigInt!
-  cexSupply: BigInt!
-  dexSupply: BigInt!
-  lendingSupply: BigInt!
-  circulatingSupply: BigInt!
-  treasury: BigInt!
-}
-
-type tokenPage {
-  items: [token!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-input tokenFilter {
-  AND: [tokenFilter]
-  OR: [tokenFilter]
-  id: String
-  id_not: String
-  id_in: [String]
-  id_not_in: [String]
-  id_contains: String
-  id_not_contains: String
-  id_starts_with: String
-  id_ends_with: String
-  id_not_starts_with: String
-  id_not_ends_with: String
-  name: String
-  name_not: String
-  name_in: [String]
-  name_not_in: [String]
-  name_contains: String
-  name_not_contains: String
-  name_starts_with: String
-  name_ends_with: String
-  name_not_starts_with: String
-  name_not_ends_with: String
-  decimals: Int
-  decimals_not: Int
-  decimals_in: [Int]
-  decimals_not_in: [Int]
-  decimals_gt: Int
-  decimals_lt: Int
-  decimals_gte: Int
-  decimals_lte: Int
-  totalSupply: BigInt
-  totalSupply_not: BigInt
-  totalSupply_in: [BigInt]
-  totalSupply_not_in: [BigInt]
-  totalSupply_gt: BigInt
-  totalSupply_lt: BigInt
-  totalSupply_gte: BigInt
-  totalSupply_lte: BigInt
-  delegatedSupply: BigInt
-  delegatedSupply_not: BigInt
-  delegatedSupply_in: [BigInt]
-  delegatedSupply_not_in: [BigInt]
-  delegatedSupply_gt: BigInt
-  delegatedSupply_lt: BigInt
-  delegatedSupply_gte: BigInt
-  delegatedSupply_lte: BigInt
-  cexSupply: BigInt
-  cexSupply_not: BigInt
-  cexSupply_in: [BigInt]
-  cexSupply_not_in: [BigInt]
-  cexSupply_gt: BigInt
-  cexSupply_lt: BigInt
-  cexSupply_gte: BigInt
-  cexSupply_lte: BigInt
-  dexSupply: BigInt
-  dexSupply_not: BigInt
-  dexSupply_in: [BigInt]
-  dexSupply_not_in: [BigInt]
-  dexSupply_gt: BigInt
-  dexSupply_lt: BigInt
-  dexSupply_gte: BigInt
-  dexSupply_lte: BigInt
-  lendingSupply: BigInt
-  lendingSupply_not: BigInt
-  lendingSupply_in: [BigInt]
-  lendingSupply_not_in: [BigInt]
-  lendingSupply_gt: BigInt
-  lendingSupply_lt: BigInt
-  lendingSupply_gte: BigInt
-  lendingSupply_lte: BigInt
-  circulatingSupply: BigInt
-  circulatingSupply_not: BigInt
-  circulatingSupply_in: [BigInt]
-  circulatingSupply_not_in: [BigInt]
-  circulatingSupply_gt: BigInt
-  circulatingSupply_lt: BigInt
-  circulatingSupply_gte: BigInt
-  circulatingSupply_lte: BigInt
-  treasury: BigInt
-  treasury_not: BigInt
-  treasury_in: [BigInt]
-  treasury_not_in: [BigInt]
-  treasury_gt: BigInt
-  treasury_lt: BigInt
-  treasury_gte: BigInt
-  treasury_lte: BigInt
-}
-
-type account {
-  id: String!
-  balances(where: accountBalanceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): accountBalancePage
-  powers(where: accountPowerFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): accountPowerPage
-  delegationsFrom(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): delegationPage
-  delegationsTo(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): delegationPage
-  sentTransfers(where: transferFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): transferPage
-  receivedTransfers(where: transferFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): transferPage
-  proposals(where: proposalsOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): proposalsOnchainPage
-  votes(where: votesOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): votesOnchainPage
-  delegatedFromBalances(where: accountBalanceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): accountBalancePage
-}
-
-type accountBalancePage {
-  items: [accountBalance!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type accountBalance {
-  accountId: String!
-  tokenId: String!
-  balance: BigInt!
-  delegate: String!
-  delegatePower: accountPower
-  account: account
-  delegateAccount: account
-  delegatedTo: accountPower
-  token: token
-}
-
-type accountPower {
-  accountId: String!
-  daoId: String!
-  votingPower: BigInt!
-  votesCount: Int!
-  proposalsCount: Int!
-  delegationsCount: Int!
-  lastVoteTimestamp: BigInt!
-  account: account
-}
-
-input accountBalanceFilter {
-  AND: [accountBalanceFilter]
-  OR: [accountBalanceFilter]
-  accountId: String
-  accountId_not: String
-  accountId_in: [String]
-  accountId_not_in: [String]
-  accountId_contains: String
-  accountId_not_contains: String
-  accountId_starts_with: String
-  accountId_ends_with: String
-  accountId_not_starts_with: String
-  accountId_not_ends_with: String
-  tokenId: String
-  tokenId_not: String
-  tokenId_in: [String]
-  tokenId_not_in: [String]
-  tokenId_contains: String
-  tokenId_not_contains: String
-  tokenId_starts_with: String
-  tokenId_ends_with: String
-  tokenId_not_starts_with: String
-  tokenId_not_ends_with: String
-  balance: BigInt
-  balance_not: BigInt
-  balance_in: [BigInt]
-  balance_not_in: [BigInt]
-  balance_gt: BigInt
-  balance_lt: BigInt
-  balance_gte: BigInt
-  balance_lte: BigInt
-  delegate: String
-  delegate_not: String
-  delegate_in: [String]
-  delegate_not_in: [String]
-  delegate_contains: String
-  delegate_not_contains: String
-  delegate_starts_with: String
-  delegate_ends_with: String
-  delegate_not_starts_with: String
-  delegate_not_ends_with: String
-}
-
-type accountPowerPage {
-  items: [accountPower!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-input accountPowerFilter {
-  AND: [accountPowerFilter]
-  OR: [accountPowerFilter]
-  accountId: String
-  accountId_not: String
-  accountId_in: [String]
-  accountId_not_in: [String]
-  accountId_contains: String
-  accountId_not_contains: String
-  accountId_starts_with: String
-  accountId_ends_with: String
-  accountId_not_starts_with: String
-  accountId_not_ends_with: String
-  daoId: String
-  daoId_not: String
-  daoId_in: [String]
-  daoId_not_in: [String]
-  daoId_contains: String
-  daoId_not_contains: String
-  daoId_starts_with: String
-  daoId_ends_with: String
-  daoId_not_starts_with: String
-  daoId_not_ends_with: String
-  votingPower: BigInt
-  votingPower_not: BigInt
-  votingPower_in: [BigInt]
-  votingPower_not_in: [BigInt]
-  votingPower_gt: BigInt
-  votingPower_lt: BigInt
-  votingPower_gte: BigInt
-  votingPower_lte: BigInt
-  votesCount: Int
-  votesCount_not: Int
-  votesCount_in: [Int]
-  votesCount_not_in: [Int]
-  votesCount_gt: Int
-  votesCount_lt: Int
-  votesCount_gte: Int
-  votesCount_lte: Int
-  proposalsCount: Int
-  proposalsCount_not: Int
-  proposalsCount_in: [Int]
-  proposalsCount_not_in: [Int]
-  proposalsCount_gt: Int
-  proposalsCount_lt: Int
-  proposalsCount_gte: Int
-  proposalsCount_lte: Int
-  delegationsCount: Int
-  delegationsCount_not: Int
-  delegationsCount_in: [Int]
-  delegationsCount_not_in: [Int]
-  delegationsCount_gt: Int
-  delegationsCount_lt: Int
-  delegationsCount_gte: Int
-  delegationsCount_lte: Int
-  lastVoteTimestamp: BigInt
-  lastVoteTimestamp_not: BigInt
-  lastVoteTimestamp_in: [BigInt]
-  lastVoteTimestamp_not_in: [BigInt]
-  lastVoteTimestamp_gt: BigInt
-  lastVoteTimestamp_lt: BigInt
-  lastVoteTimestamp_gte: BigInt
-  lastVoteTimestamp_lte: BigInt
-}
-
-type delegationPage {
-  items: [delegation!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type delegation {
-  transactionHash: String!
-  daoId: String!
-  delegateAccountId: String!
-  delegatorAccountId: String!
-  delegatedValue: BigInt!
-  previousDelegate: String
-  timestamp: BigInt!
-  logIndex: Int!
-  isCex: Boolean!
-  isDex: Boolean!
-  isLending: Boolean!
-  isTotal: Boolean!
-  delegate: account
-  delegator: account
-  transaction: transaction
-}
-
-type transaction {
-  transactionHash: String!
-  fromAddress: String
-  toAddress: String
-  isCex: Boolean!
-  isDex: Boolean!
-  isLending: Boolean!
-  isTotal: Boolean!
-  timestamp: BigInt!
-  transfers(where: transferFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): transferPage
-  delegations(where: delegationFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): delegationPage
-}
-
-type transferPage {
-  items: [transfer!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type transfer {
-  transactionHash: String!
-  daoId: String!
-  tokenId: String!
-  amount: BigInt!
-  fromAccountId: String!
-  toAccountId: String!
-  timestamp: BigInt!
-  logIndex: Int!
-  isCex: Boolean!
-  isDex: Boolean!
-  isLending: Boolean!
-  isTotal: Boolean!
-  from: account
-  to: account
-  token: token
-  transaction: transaction
-}
-
-input transferFilter {
-  AND: [transferFilter]
-  OR: [transferFilter]
-  transactionHash: String
-  transactionHash_not: String
-  transactionHash_in: [String]
-  transactionHash_not_in: [String]
-  transactionHash_contains: String
-  transactionHash_not_contains: String
-  transactionHash_starts_with: String
-  transactionHash_ends_with: String
-  transactionHash_not_starts_with: String
-  transactionHash_not_ends_with: String
-  daoId: String
-  daoId_not: String
-  daoId_in: [String]
-  daoId_not_in: [String]
-  daoId_contains: String
-  daoId_not_contains: String
-  daoId_starts_with: String
-  daoId_ends_with: String
-  daoId_not_starts_with: String
-  daoId_not_ends_with: String
-  tokenId: String
-  tokenId_not: String
-  tokenId_in: [String]
-  tokenId_not_in: [String]
-  tokenId_contains: String
-  tokenId_not_contains: String
-  tokenId_starts_with: String
-  tokenId_ends_with: String
-  tokenId_not_starts_with: String
-  tokenId_not_ends_with: String
-  amount: BigInt
-  amount_not: BigInt
-  amount_in: [BigInt]
-  amount_not_in: [BigInt]
-  amount_gt: BigInt
-  amount_lt: BigInt
-  amount_gte: BigInt
-  amount_lte: BigInt
-  fromAccountId: String
-  fromAccountId_not: String
-  fromAccountId_in: [String]
-  fromAccountId_not_in: [String]
-  fromAccountId_contains: String
-  fromAccountId_not_contains: String
-  fromAccountId_starts_with: String
-  fromAccountId_ends_with: String
-  fromAccountId_not_starts_with: String
-  fromAccountId_not_ends_with: String
-  toAccountId: String
-  toAccountId_not: String
-  toAccountId_in: [String]
-  toAccountId_not_in: [String]
-  toAccountId_contains: String
-  toAccountId_not_contains: String
-  toAccountId_starts_with: String
-  toAccountId_ends_with: String
-  toAccountId_not_starts_with: String
-  toAccountId_not_ends_with: String
-  timestamp: BigInt
-  timestamp_not: BigInt
-  timestamp_in: [BigInt]
-  timestamp_not_in: [BigInt]
-  timestamp_gt: BigInt
-  timestamp_lt: BigInt
-  timestamp_gte: BigInt
-  timestamp_lte: BigInt
-  logIndex: Int
-  logIndex_not: Int
-  logIndex_in: [Int]
-  logIndex_not_in: [Int]
-  logIndex_gt: Int
-  logIndex_lt: Int
-  logIndex_gte: Int
-  logIndex_lte: Int
-  isCex: Boolean
-  isCex_not: Boolean
-  isCex_in: [Boolean]
-  isCex_not_in: [Boolean]
-  isDex: Boolean
-  isDex_not: Boolean
-  isDex_in: [Boolean]
-  isDex_not_in: [Boolean]
-  isLending: Boolean
-  isLending_not: Boolean
-  isLending_in: [Boolean]
-  isLending_not_in: [Boolean]
-  isTotal: Boolean
-  isTotal_not: Boolean
-  isTotal_in: [Boolean]
-  isTotal_not_in: [Boolean]
-}
-
-input delegationFilter {
-  AND: [delegationFilter]
-  OR: [delegationFilter]
-  transactionHash: String
-  transactionHash_not: String
-  transactionHash_in: [String]
-  transactionHash_not_in: [String]
-  transactionHash_contains: String
-  transactionHash_not_contains: String
-  transactionHash_starts_with: String
-  transactionHash_ends_with: String
-  transactionHash_not_starts_with: String
-  transactionHash_not_ends_with: String
-  daoId: String
-  daoId_not: String
-  daoId_in: [String]
-  daoId_not_in: [String]
-  daoId_contains: String
-  daoId_not_contains: String
-  daoId_starts_with: String
-  daoId_ends_with: String
-  daoId_not_starts_with: String
-  daoId_not_ends_with: String
-  delegateAccountId: String
-  delegateAccountId_not: String
-  delegateAccountId_in: [String]
-  delegateAccountId_not_in: [String]
-  delegateAccountId_contains: String
-  delegateAccountId_not_contains: String
-  delegateAccountId_starts_with: String
-  delegateAccountId_ends_with: String
-  delegateAccountId_not_starts_with: String
-  delegateAccountId_not_ends_with: String
-  delegatorAccountId: String
-  delegatorAccountId_not: String
-  delegatorAccountId_in: [String]
-  delegatorAccountId_not_in: [String]
-  delegatorAccountId_contains: String
-  delegatorAccountId_not_contains: String
-  delegatorAccountId_starts_with: String
-  delegatorAccountId_ends_with: String
-  delegatorAccountId_not_starts_with: String
-  delegatorAccountId_not_ends_with: String
-  delegatedValue: BigInt
-  delegatedValue_not: BigInt
-  delegatedValue_in: [BigInt]
-  delegatedValue_not_in: [BigInt]
-  delegatedValue_gt: BigInt
-  delegatedValue_lt: BigInt
-  delegatedValue_gte: BigInt
-  delegatedValue_lte: BigInt
-  previousDelegate: String
-  previousDelegate_not: String
-  previousDelegate_in: [String]
-  previousDelegate_not_in: [String]
-  previousDelegate_contains: String
-  previousDelegate_not_contains: String
-  previousDelegate_starts_with: String
-  previousDelegate_ends_with: String
-  previousDelegate_not_starts_with: String
-  previousDelegate_not_ends_with: String
-  timestamp: BigInt
-  timestamp_not: BigInt
-  timestamp_in: [BigInt]
-  timestamp_not_in: [BigInt]
-  timestamp_gt: BigInt
-  timestamp_lt: BigInt
-  timestamp_gte: BigInt
-  timestamp_lte: BigInt
-  logIndex: Int
-  logIndex_not: Int
-  logIndex_in: [Int]
-  logIndex_not_in: [Int]
-  logIndex_gt: Int
-  logIndex_lt: Int
-  logIndex_gte: Int
-  logIndex_lte: Int
-  isCex: Boolean
-  isCex_not: Boolean
-  isCex_in: [Boolean]
-  isCex_not_in: [Boolean]
-  isDex: Boolean
-  isDex_not: Boolean
-  isDex_in: [Boolean]
-  isDex_not_in: [Boolean]
-  isLending: Boolean
-  isLending_not: Boolean
-  isLending_in: [Boolean]
-  isLending_not_in: [Boolean]
-  isTotal: Boolean
-  isTotal_not: Boolean
-  isTotal_in: [Boolean]
-  isTotal_not_in: [Boolean]
-}
-
-type proposalsOnchainPage {
-  items: [proposalsOnchain!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type proposalsOnchain {
-  id: String!
-  txHash: String!
-  daoId: String!
-  proposerAccountId: String!
-  targets: JSON!
-  values: JSON!
-  signatures: JSON!
-  calldatas: JSON!
-  startBlock: Int!
-  endBlock: Int!
-  description: String!
-  timestamp: BigInt!
-  endTimestamp: BigInt!
-  status: String!
-  forVotes: BigInt!
-  againstVotes: BigInt!
-  abstainVotes: BigInt!
-  proposalType: Int
-  votes(where: votesOnchainFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): votesOnchainPage
-  proposer: account
-}
-
-type votesOnchainPage {
-  items: [votesOnchain!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type votesOnchain {
-  txHash: String!
-  daoId: String!
-  voterAccountId: String!
-  proposalId: String!
-  support: String!
-  votingPower: BigInt!
-  reason: String
-  timestamp: BigInt!
-  proposal: proposalsOnchain
-  voter: account
-}
-
-input votesOnchainFilter {
-  AND: [votesOnchainFilter]
-  OR: [votesOnchainFilter]
-  txHash: String
-  txHash_not: String
-  txHash_in: [String]
-  txHash_not_in: [String]
-  txHash_contains: String
-  txHash_not_contains: String
-  txHash_starts_with: String
-  txHash_ends_with: String
-  txHash_not_starts_with: String
-  txHash_not_ends_with: String
-  daoId: String
-  daoId_not: String
-  daoId_in: [String]
-  daoId_not_in: [String]
-  daoId_contains: String
-  daoId_not_contains: String
-  daoId_starts_with: String
-  daoId_ends_with: String
-  daoId_not_starts_with: String
-  daoId_not_ends_with: String
-  voterAccountId: String
-  voterAccountId_not: String
-  voterAccountId_in: [String]
-  voterAccountId_not_in: [String]
-  voterAccountId_contains: String
-  voterAccountId_not_contains: String
-  voterAccountId_starts_with: String
-  voterAccountId_ends_with: String
-  voterAccountId_not_starts_with: String
-  voterAccountId_not_ends_with: String
-  proposalId: String
-  proposalId_not: String
-  proposalId_in: [String]
-  proposalId_not_in: [String]
-  proposalId_contains: String
-  proposalId_not_contains: String
-  proposalId_starts_with: String
-  proposalId_ends_with: String
-  proposalId_not_starts_with: String
-  proposalId_not_ends_with: String
-  support: String
-  support_not: String
-  support_in: [String]
-  support_not_in: [String]
-  support_contains: String
-  support_not_contains: String
-  support_starts_with: String
-  support_ends_with: String
-  support_not_starts_with: String
-  support_not_ends_with: String
-  votingPower: BigInt
-  votingPower_not: BigInt
-  votingPower_in: [BigInt]
-  votingPower_not_in: [BigInt]
-  votingPower_gt: BigInt
-  votingPower_lt: BigInt
-  votingPower_gte: BigInt
-  votingPower_lte: BigInt
-  reason: String
-  reason_not: String
-  reason_in: [String]
-  reason_not_in: [String]
-  reason_contains: String
-  reason_not_contains: String
-  reason_starts_with: String
-  reason_ends_with: String
-  reason_not_starts_with: String
-  reason_not_ends_with: String
-  timestamp: BigInt
-  timestamp_not: BigInt
-  timestamp_in: [BigInt]
-  timestamp_not_in: [BigInt]
-  timestamp_gt: BigInt
-  timestamp_lt: BigInt
-  timestamp_gte: BigInt
-  timestamp_lte: BigInt
-}
-
-input proposalsOnchainFilter {
-  AND: [proposalsOnchainFilter]
-  OR: [proposalsOnchainFilter]
-  id: String
-  id_not: String
-  id_in: [String]
-  id_not_in: [String]
-  id_contains: String
-  id_not_contains: String
-  id_starts_with: String
-  id_ends_with: String
-  id_not_starts_with: String
-  id_not_ends_with: String
-  txHash: String
-  txHash_not: String
-  txHash_in: [String]
-  txHash_not_in: [String]
-  txHash_contains: String
-  txHash_not_contains: String
-  txHash_starts_with: String
-  txHash_ends_with: String
-  txHash_not_starts_with: String
-  txHash_not_ends_with: String
-  daoId: String
-  daoId_not: String
-  daoId_in: [String]
-  daoId_not_in: [String]
-  daoId_contains: String
-  daoId_not_contains: String
-  daoId_starts_with: String
-  daoId_ends_with: String
-  daoId_not_starts_with: String
-  daoId_not_ends_with: String
-  proposerAccountId: String
-  proposerAccountId_not: String
-  proposerAccountId_in: [String]
-  proposerAccountId_not_in: [String]
-  proposerAccountId_contains: String
-  proposerAccountId_not_contains: String
-  proposerAccountId_starts_with: String
-  proposerAccountId_ends_with: String
-  proposerAccountId_not_starts_with: String
-  proposerAccountId_not_ends_with: String
-  startBlock: Int
-  startBlock_not: Int
-  startBlock_in: [Int]
-  startBlock_not_in: [Int]
-  startBlock_gt: Int
-  startBlock_lt: Int
-  startBlock_gte: Int
-  startBlock_lte: Int
-  endBlock: Int
-  endBlock_not: Int
-  endBlock_in: [Int]
-  endBlock_not_in: [Int]
-  endBlock_gt: Int
-  endBlock_lt: Int
-  endBlock_gte: Int
-  endBlock_lte: Int
-  description: String
-  description_not: String
-  description_in: [String]
-  description_not_in: [String]
-  description_contains: String
-  description_not_contains: String
-  description_starts_with: String
-  description_ends_with: String
-  description_not_starts_with: String
-  description_not_ends_with: String
-  timestamp: BigInt
-  timestamp_not: BigInt
-  timestamp_in: [BigInt]
-  timestamp_not_in: [BigInt]
-  timestamp_gt: BigInt
-  timestamp_lt: BigInt
-  timestamp_gte: BigInt
-  timestamp_lte: BigInt
-  endTimestamp: BigInt
-  endTimestamp_not: BigInt
-  endTimestamp_in: [BigInt]
-  endTimestamp_not_in: [BigInt]
-  endTimestamp_gt: BigInt
-  endTimestamp_lt: BigInt
-  endTimestamp_gte: BigInt
-  endTimestamp_lte: BigInt
-  status: String
-  status_not: String
-  status_in: [String]
-  status_not_in: [String]
-  status_contains: String
-  status_not_contains: String
-  status_starts_with: String
-  status_ends_with: String
-  status_not_starts_with: String
-  status_not_ends_with: String
-  forVotes: BigInt
-  forVotes_not: BigInt
-  forVotes_in: [BigInt]
-  forVotes_not_in: [BigInt]
-  forVotes_gt: BigInt
-  forVotes_lt: BigInt
-  forVotes_gte: BigInt
-  forVotes_lte: BigInt
-  againstVotes: BigInt
-  againstVotes_not: BigInt
-  againstVotes_in: [BigInt]
-  againstVotes_not_in: [BigInt]
-  againstVotes_gt: BigInt
-  againstVotes_lt: BigInt
-  againstVotes_gte: BigInt
-  againstVotes_lte: BigInt
-  abstainVotes: BigInt
-  abstainVotes_not: BigInt
-  abstainVotes_in: [BigInt]
-  abstainVotes_not_in: [BigInt]
-  abstainVotes_gt: BigInt
-  abstainVotes_lt: BigInt
-  abstainVotes_gte: BigInt
-  abstainVotes_lte: BigInt
-  proposalType: Int
-  proposalType_not: Int
-  proposalType_in: [Int]
-  proposalType_not_in: [Int]
-  proposalType_gt: Int
-  proposalType_lt: Int
-  proposalType_gte: Int
-  proposalType_lte: Int
-}
-
-type accountPage {
-  items: [account!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-input accountFilter {
-  AND: [accountFilter]
-  OR: [accountFilter]
-  id: String
-  id_not: String
-  id_in: [String]
-  id_not_in: [String]
-  id_contains: String
-  id_not_contains: String
-  id_starts_with: String
-  id_ends_with: String
-  id_not_starts_with: String
-  id_not_ends_with: String
-}
-
-type votingPowerHistory {
-  transactionHash: String!
-  daoId: String!
-  accountId: String!
-  votingPower: BigInt!
-  delta: BigInt!
-  deltaMod: BigInt!
-  timestamp: BigInt!
-  logIndex: Int!
-  transfer: transfer
-  delegation: delegation
-  account: account
-}
-
-type votingPowerHistoryPage {
-  items: [votingPowerHistory!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-input votingPowerHistoryFilter {
-  AND: [votingPowerHistoryFilter]
-  OR: [votingPowerHistoryFilter]
-  transactionHash: String
-  transactionHash_not: String
-  transactionHash_in: [String]
-  transactionHash_not_in: [String]
-  transactionHash_contains: String
-  transactionHash_not_contains: String
-  transactionHash_starts_with: String
-  transactionHash_ends_with: String
-  transactionHash_not_starts_with: String
-  transactionHash_not_ends_with: String
-  daoId: String
-  daoId_not: String
-  daoId_in: [String]
-  daoId_not_in: [String]
-  daoId_contains: String
-  daoId_not_contains: String
-  daoId_starts_with: String
-  daoId_ends_with: String
-  daoId_not_starts_with: String
-  daoId_not_ends_with: String
-  accountId: String
-  accountId_not: String
-  accountId_in: [String]
-  accountId_not_in: [String]
-  accountId_contains: String
-  accountId_not_contains: String
-  accountId_starts_with: String
-  accountId_ends_with: String
-  accountId_not_starts_with: String
-  accountId_not_ends_with: String
-  votingPower: BigInt
-  votingPower_not: BigInt
-  votingPower_in: [BigInt]
-  votingPower_not_in: [BigInt]
-  votingPower_gt: BigInt
-  votingPower_lt: BigInt
-  votingPower_gte: BigInt
-  votingPower_lte: BigInt
-  delta: BigInt
-  delta_not: BigInt
-  delta_in: [BigInt]
-  delta_not_in: [BigInt]
-  delta_gt: BigInt
-  delta_lt: BigInt
-  delta_gte: BigInt
-  delta_lte: BigInt
-  deltaMod: BigInt
-  deltaMod_not: BigInt
-  deltaMod_in: [BigInt]
-  deltaMod_not_in: [BigInt]
-  deltaMod_gt: BigInt
-  deltaMod_lt: BigInt
-  deltaMod_gte: BigInt
-  deltaMod_lte: BigInt
-  timestamp: BigInt
-  timestamp_not: BigInt
-  timestamp_in: [BigInt]
-  timestamp_not_in: [BigInt]
-  timestamp_gt: BigInt
-  timestamp_lt: BigInt
-  timestamp_gte: BigInt
-  timestamp_lte: BigInt
-  logIndex: Int
-  logIndex_not: Int
-  logIndex_in: [Int]
-  logIndex_not_in: [Int]
-  logIndex_gt: Int
-  logIndex_lt: Int
-  logIndex_gte: Int
-  logIndex_lte: Int
-}
-
-type balanceHistory {
-  transactionHash: String!
-  daoId: String!
-  accountId: String!
-  balance: BigInt!
-  delta: BigInt!
-  deltaMod: BigInt!
-  timestamp: BigInt!
-  logIndex: Int!
-}
-
-type balanceHistoryPage {
-  items: [balanceHistory!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-input balanceHistoryFilter {
-  AND: [balanceHistoryFilter]
-  OR: [balanceHistoryFilter]
-  transactionHash: String
-  transactionHash_not: String
-  transactionHash_in: [String]
-  transactionHash_not_in: [String]
-  transactionHash_contains: String
-  transactionHash_not_contains: String
-  transactionHash_starts_with: String
-  transactionHash_ends_with: String
-  transactionHash_not_starts_with: String
-  transactionHash_not_ends_with: String
-  daoId: String
-  daoId_not: String
-  daoId_in: [String]
-  daoId_not_in: [String]
-  daoId_contains: String
-  daoId_not_contains: String
-  daoId_starts_with: String
-  daoId_ends_with: String
-  daoId_not_starts_with: String
-  daoId_not_ends_with: String
-  accountId: String
-  accountId_not: String
-  accountId_in: [String]
-  accountId_not_in: [String]
-  accountId_contains: String
-  accountId_not_contains: String
-  accountId_starts_with: String
-  accountId_ends_with: String
-  accountId_not_starts_with: String
-  accountId_not_ends_with: String
-  balance: BigInt
-  balance_not: BigInt
-  balance_in: [BigInt]
-  balance_not_in: [BigInt]
-  balance_gt: BigInt
-  balance_lt: BigInt
-  balance_gte: BigInt
-  balance_lte: BigInt
-  delta: BigInt
-  delta_not: BigInt
-  delta_in: [BigInt]
-  delta_not_in: [BigInt]
-  delta_gt: BigInt
-  delta_lt: BigInt
-  delta_gte: BigInt
-  delta_lte: BigInt
-  deltaMod: BigInt
-  deltaMod_not: BigInt
-  deltaMod_in: [BigInt]
-  deltaMod_not_in: [BigInt]
-  deltaMod_gt: BigInt
-  deltaMod_lt: BigInt
-  deltaMod_gte: BigInt
-  deltaMod_lte: BigInt
-  timestamp: BigInt
-  timestamp_not: BigInt
-  timestamp_in: [BigInt]
-  timestamp_not_in: [BigInt]
-  timestamp_gt: BigInt
-  timestamp_lt: BigInt
-  timestamp_gte: BigInt
-  timestamp_lte: BigInt
-  logIndex: Int
-  logIndex_not: Int
-  logIndex_in: [Int]
-  logIndex_not_in: [Int]
-  logIndex_gt: Int
-  logIndex_lt: Int
-  logIndex_gte: Int
-  logIndex_lte: Int
-}
-
-type daoMetricsDayBucket {
-  date: BigInt!
-  daoId: String!
-  tokenId: String!
-  metricType: metricType!
-  open: BigInt!
-  close: BigInt!
-  low: BigInt!
-  high: BigInt!
-  average: BigInt!
-  volume: BigInt!
-  count: Int!
-  lastUpdate: BigInt!
-}
-
-enum metricType {
-  TOTAL_SUPPLY
-  DELEGATED_SUPPLY
-  CEX_SUPPLY
-  DEX_SUPPLY
-  LENDING_SUPPLY
-  CIRCULATING_SUPPLY
-  TREASURY
-}
-
-type daoMetricsDayBucketPage {
-  items: [daoMetricsDayBucket!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-input daoMetricsDayBucketFilter {
-  AND: [daoMetricsDayBucketFilter]
-  OR: [daoMetricsDayBucketFilter]
-  date: BigInt
-  date_not: BigInt
-  date_in: [BigInt]
-  date_not_in: [BigInt]
-  date_gt: BigInt
-  date_lt: BigInt
-  date_gte: BigInt
-  date_lte: BigInt
-  daoId: String
-  daoId_not: String
-  daoId_in: [String]
-  daoId_not_in: [String]
-  daoId_contains: String
-  daoId_not_contains: String
-  daoId_starts_with: String
-  daoId_ends_with: String
-  daoId_not_starts_with: String
-  daoId_not_ends_with: String
-  tokenId: String
-  tokenId_not: String
-  tokenId_in: [String]
-  tokenId_not_in: [String]
-  tokenId_contains: String
-  tokenId_not_contains: String
-  tokenId_starts_with: String
-  tokenId_ends_with: String
-  tokenId_not_starts_with: String
-  tokenId_not_ends_with: String
-  metricType: metricType
-  metricType_not: metricType
-  metricType_in: [metricType]
-  metricType_not_in: [metricType]
-  open: BigInt
-  open_not: BigInt
-  open_in: [BigInt]
-  open_not_in: [BigInt]
-  open_gt: BigInt
-  open_lt: BigInt
-  open_gte: BigInt
-  open_lte: BigInt
-  close: BigInt
-  close_not: BigInt
-  close_in: [BigInt]
-  close_not_in: [BigInt]
-  close_gt: BigInt
-  close_lt: BigInt
-  close_gte: BigInt
-  close_lte: BigInt
-  low: BigInt
-  low_not: BigInt
-  low_in: [BigInt]
-  low_not_in: [BigInt]
-  low_gt: BigInt
-  low_lt: BigInt
-  low_gte: BigInt
-  low_lte: BigInt
-  high: BigInt
-  high_not: BigInt
-  high_in: [BigInt]
-  high_not_in: [BigInt]
-  high_gt: BigInt
-  high_lt: BigInt
-  high_gte: BigInt
-  high_lte: BigInt
-  average: BigInt
-  average_not: BigInt
-  average_in: [BigInt]
-  average_not_in: [BigInt]
-  average_gt: BigInt
-  average_lt: BigInt
-  average_gte: BigInt
-  average_lte: BigInt
-  volume: BigInt
-  volume_not: BigInt
-  volume_in: [BigInt]
-  volume_not_in: [BigInt]
-  volume_gt: BigInt
-  volume_lt: BigInt
-  volume_gte: BigInt
-  volume_lte: BigInt
-  count: Int
-  count_not: Int
-  count_in: [Int]
-  count_not_in: [Int]
-  count_gt: Int
-  count_lt: Int
-  count_gte: Int
-  count_lte: Int
-  lastUpdate: BigInt
-  lastUpdate_not: BigInt
-  lastUpdate_in: [BigInt]
-  lastUpdate_not_in: [BigInt]
-  lastUpdate_gt: BigInt
-  lastUpdate_lt: BigInt
-  lastUpdate_gte: BigInt
-  lastUpdate_lte: BigInt
-}
-
-type transactionPage {
-  items: [transaction!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-input transactionFilter {
-  AND: [transactionFilter]
-  OR: [transactionFilter]
-  transactionHash: String
-  transactionHash_not: String
-  transactionHash_in: [String]
-  transactionHash_not_in: [String]
-  transactionHash_contains: String
-  transactionHash_not_contains: String
-  transactionHash_starts_with: String
-  transactionHash_ends_with: String
-  transactionHash_not_starts_with: String
-  transactionHash_not_ends_with: String
-  fromAddress: String
-  fromAddress_not: String
-  fromAddress_in: [String]
-  fromAddress_not_in: [String]
-  fromAddress_contains: String
-  fromAddress_not_contains: String
-  fromAddress_starts_with: String
-  fromAddress_ends_with: String
-  fromAddress_not_starts_with: String
-  fromAddress_not_ends_with: String
-  toAddress: String
-  toAddress_not: String
-  toAddress_in: [String]
-  toAddress_not_in: [String]
-  toAddress_contains: String
-  toAddress_not_contains: String
-  toAddress_starts_with: String
-  toAddress_ends_with: String
-  toAddress_not_starts_with: String
-  toAddress_not_ends_with: String
-  isCex: Boolean
-  isCex_not: Boolean
-  isCex_in: [Boolean]
-  isCex_not_in: [Boolean]
-  isDex: Boolean
-  isDex_not: Boolean
-  isDex_in: [Boolean]
-  isDex_not_in: [Boolean]
-  isLending: Boolean
-  isLending_not: Boolean
-  isLending_in: [Boolean]
-  isLending_not_in: [Boolean]
-  isTotal: Boolean
-  isTotal_not: Boolean
-  isTotal_in: [Boolean]
-  isTotal_not_in: [Boolean]
-  timestamp: BigInt
-  timestamp_not: BigInt
-  timestamp_in: [BigInt]
-  timestamp_not_in: [BigInt]
-  timestamp_gt: BigInt
-  timestamp_lt: BigInt
-  timestamp_gte: BigInt
-  timestamp_lte: BigInt
-}
-
-type tokenPrice {
-  price: BigInt!
-  timestamp: BigInt!
-}
-
-type tokenPricePage {
-  items: [tokenPrice!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-input tokenPriceFilter {
-  AND: [tokenPriceFilter]
-  OR: [tokenPriceFilter]
-  price: BigInt
-  price_not: BigInt
-  price_in: [BigInt]
-  price_not_in: [BigInt]
-  price_gt: BigInt
-  price_lt: BigInt
-  price_gte: BigInt
-  price_lte: BigInt
-  timestamp: BigInt
-  timestamp_not: BigInt
-  timestamp_in: [BigInt]
-  timestamp_not_in: [BigInt]
-  timestamp_gt: BigInt
-  timestamp_lt: BigInt
-  timestamp_gte: BigInt
-  timestamp_lte: BigInt
-}
-
 type historicalDelegations_200_response {
   items: [query_historicalDelegations_items_items]!
   totalCount: Float!
@@ -1463,6 +223,11 @@ type query_historicalDelegations_items_items {
   timestamp: String!
   transactionHash: String!
 }
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
 
 """Integers that will have a value of 0 or more."""
 scalar NonNegativeInt
@@ -1785,7 +550,7 @@ type query_proposalsActivity_proposals_items_userVote {
   support: String
   votingPower: String!
   reason: String
-  timestamp: String!
+  timestamp: String
 }
 
 enum queryInput_proposalsActivity_orderBy {
@@ -1868,48 +633,6 @@ type proposal_200_response {
   values: [String]!
   targets: [String]!
   proposalType: Float
-}
-
-type proposalNonVoters_200_response {
-  items: [query_proposalNonVoters_items_items]!
-  totalCount: Float!
-}
-
-type query_proposalNonVoters_items_items {
-  voter: String!
-  votingPower: String!
-  lastVoteTimestamp: Float!
-  votingPowerVariation: String!
-}
-
-enum queryInput_proposalNonVoters_orderDirection {
-  asc
-  desc
-}
-
-type votes_200_response {
-  items: [query_votes_items_items]!
-  totalCount: Float!
-}
-
-type query_votes_items_items {
-  voterAddress: String!
-  transactionHash: String!
-  proposalId: String!
-  support: Float!
-  votingPower: String!
-  reason: String
-  timestamp: Float!
-}
-
-enum queryInput_votes_orderBy {
-  timestamp
-  votingPower
-}
-
-enum queryInput_votes_orderDirection {
-  asc
-  desc
 }
 
 type historicalBalances_200_response {
@@ -2308,6 +1031,75 @@ enum queryInput_transfers_sortOrder {
   desc
 }
 
+type votesByProposalId_200_response {
+  items: [query_votesByProposalId_items_items]!
+  totalCount: Float!
+}
+
+type query_votesByProposalId_items_items {
+  voterAddress: String!
+  transactionHash: String!
+  proposalId: String!
+  support: Float!
+  votingPower: String!
+  reason: String
+  timestamp: Float!
+  proposalTitle: String!
+}
+
+enum queryInput_votesByProposalId_orderBy {
+  timestamp
+  votingPower
+}
+
+enum queryInput_votesByProposalId_orderDirection {
+  asc
+  desc
+}
+
+type votes_200_response {
+  items: [query_votes_items_items]!
+  totalCount: Float!
+}
+
+type query_votes_items_items {
+  voterAddress: String!
+  transactionHash: String!
+  proposalId: String!
+  support: Float!
+  votingPower: String!
+  reason: String
+  timestamp: Float!
+  proposalTitle: String!
+}
+
+enum queryInput_votes_orderBy {
+  timestamp
+  votingPower
+}
+
+enum queryInput_votes_orderDirection {
+  asc
+  desc
+}
+
+type proposalNonVoters_200_response {
+  items: [query_proposalNonVoters_items_items]!
+  totalCount: Float!
+}
+
+type query_proposalNonVoters_items_items {
+  voter: String!
+  votingPower: String!
+  lastVoteTimestamp: Float!
+  votingPowerVariation: String!
+}
+
+enum queryInput_proposalNonVoters_orderDirection {
+  asc
+  desc
+}
+
 type dao_200_response {
   id: String!
   chainId: Float!
@@ -2367,6 +1159,13 @@ enum HTTPMethod {
 type AverageDelegationPercentageItem {
   date: String!
   high: String!
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  endDate: String
+  startDate: String
 }
 
 type AverageDelegationPercentagePage {

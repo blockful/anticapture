@@ -6,3 +6,5 @@ export const PIE_CHART_COLORS = [
   "#F472B6", // Surface-Solid-Brand-Pink/400
   "#9CA3AF", // Surface-Solid-Brand-Grey/400
 ];
+
+export const DEFAULT_ITEMS_PER_PAGE = 20;

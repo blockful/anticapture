@@ -83,7 +83,7 @@ export const VotesTabContent = ({
         >
           Voted
           <div className="text-secondary font-inter hidden text-[12px] font-normal not-italic leading-[16px] lg:block">
-            {data?.votes?.totalCount} voters / {totalVotes} VP
+            {data?.votesByProposalId?.totalCount} voters / {totalVotes} VP
           </div>
         </div>
         <div

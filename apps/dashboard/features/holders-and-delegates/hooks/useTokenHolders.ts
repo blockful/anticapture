@@ -26,7 +26,7 @@ interface PaginationInfo {
   totalCount: number;
   currentPage: number;
   totalPages: number;
-  itemsPerPage: number;
+  limit: number;
   currentItemsCount: number;
 }
 
@@ -60,8 +60,6 @@ export const useTokenHolders = ({
   address,
   days,
 }: UseTokenHoldersParams): UseTokenHoldersResult => {
-  const itemsPerPage = limit;
-
   // Track current page - this is the source of truth for page number
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [historicalBalancesCache, setHistoricalBalancesCache] = useState<
@@ -170,7 +168,7 @@ export const useTokenHolders = ({
     const totalCount = tokenHoldersData?.accountBalances?.totalCount || 0;
     const currentItemsCount =
       tokenHoldersData?.accountBalances?.items?.length || 0;
-    const totalPages = Math.ceil(totalCount / itemsPerPage);
+    const totalPages = Math.ceil(totalCount / limit);
 
     return {
       hasNextPage: currentPage < totalPages,
@@ -180,14 +178,14 @@ export const useTokenHolders = ({
       totalCount,
       currentPage,
       totalPages,
-      itemsPerPage,
+      limit,
       currentItemsCount,
     };
   }, [
     tokenHoldersData?.accountBalances?.totalCount,
     tokenHoldersData?.accountBalances?.items?.length,
     currentPage,
-    itemsPerPage,
+    limit,
   ]);
 
   // Fetch next page function

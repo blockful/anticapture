@@ -7,8 +7,8 @@ import {
   useGetVotingPowerChangeLazyQuery,
 } from "@anticapture/graphql-client/hooks";
 import {
-  QueryInput_Votes_OrderBy,
-  QueryInput_Votes_OrderDirection,
+  QueryInput_VotesByProposalId_OrderBy,
+  QueryInput_VotesByProposalId_OrderDirection,
 } from "@anticapture/graphql-client";
 
 import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
@@ -22,7 +22,7 @@ type VotingPowerVariation = {
 
 // Enhanced vote type with historical voting power
 export type VoteWithHistoricalPower = NonNullable<
-  NonNullable<GetVotesQuery["votes"]>["items"][number]
+  NonNullable<GetVotesQuery["votesByProposalId"]>["items"][number]
 > & {
   votingPowerVariation?: VotingPowerVariation;
   isSubRow?: boolean;
@@ -66,8 +66,9 @@ export const useVotes = ({
       proposalId: proposalId!,
       limit,
       skip: 0, // Always fetch from beginning, we'll handle append in fetchMore
-      orderBy: orderBy as QueryInput_Votes_OrderBy,
-      orderDirection: orderDirection as QueryInput_Votes_OrderDirection,
+      orderBy: orderBy as QueryInput_VotesByProposalId_OrderBy,
+      orderDirection:
+        orderDirection as QueryInput_VotesByProposalId_OrderDirection,
     };
   }, [proposalId, limit, orderBy, orderDirection]);
 
@@ -160,21 +161,26 @@ export const useVotes = ({
 
   // Initialize allVotes on first load or when data changes after reset
   useEffect(() => {
-    if (data?.votes?.items && allVotes.length === 0) {
-      const initialVotes = data.votes.items as VoteWithHistoricalPower[];
+    if (data?.votesByProposalId?.items && allVotes.length === 0) {
+      const initialVotes = data.votesByProposalId
+        .items as VoteWithHistoricalPower[];
       setAllVotes(initialVotes);
       // Fetch voting power for initial votes
       fetchVotingPowerForVotes(initialVotes);
     }
-  }, [data?.votes?.items, allVotes.length, fetchVotingPowerForVotes]);
+  }, [
+    data?.votesByProposalId?.items,
+    allVotes.length,
+    fetchVotingPowerForVotes,
+  ]);
 
   // Use accumulated votes for infinite scroll
   const votes = allVotes;
 
   // Extract total count
   const totalCount = useMemo(() => {
-    return data?.votes?.totalCount || 0;
-  }, [data?.votes?.totalCount]);
+    return data?.votesByProposalId?.totalCount || 0;
+  }, [data?.votesByProposalId?.totalCount]);
 
   // Calculate if there are more pages
   const hasNextPage = useMemo(() => {
@@ -195,10 +201,10 @@ export const useVotes = ({
           skip: allVotes.length, // Skip already loaded votes
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
-          if (!fetchMoreResult?.votes?.items) return previousResult;
+          if (!fetchMoreResult?.votesByProposalId?.items) return previousResult;
 
           // Append new votes to existing ones in the GraphQL cache
-          const newVotes = fetchMoreResult.votes
+          const newVotes = fetchMoreResult.votesByProposalId
             .items as VoteWithHistoricalPower[];
           setAllVotes((prev) => [...prev, ...newVotes]);
 
@@ -207,10 +213,13 @@ export const useVotes = ({
 
           // Return the merged result for the cache
           return {
-            votes: {
-              ...fetchMoreResult.votes,
-              items: [...(previousResult.votes?.items || []), ...newVotes],
-              totalCount: fetchMoreResult.votes.totalCount || 0,
+            votesByProposalId: {
+              ...fetchMoreResult.votesByProposalId,
+              items: [
+                ...(previousResult.votesByProposalId?.items || []),
+                ...newVotes,
+              ],
+              totalCount: fetchMoreResult.votesByProposalId.totalCount || 0,
             },
           };
         },

@@ -15,6 +15,7 @@ import daoConfig from "@/shared/dao-config";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { QueryInput_AccountBalances_OrderDirection } from "@anticapture/graphql-client";
+import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 
 export const VotingPowerTable = ({
   address,
@@ -23,6 +24,7 @@ export const VotingPowerTable = ({
   address: string;
   daoId: string;
 }) => {
+  const limit: number = 20;
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const [sortBy, setSortBy] = useQueryState(
     "orderBy",
@@ -42,6 +44,7 @@ export const VotingPowerTable = ({
       address: address,
       orderBy: sortBy,
       orderDirection: sortOrder as QueryInput_AccountBalances_OrderDirection,
+      limit,
     });
 
   useEffect(() => {
@@ -61,167 +64,166 @@ export const VotingPowerTable = ({
     amount: number;
     date: string;
   }>[] = [
-      {
-        accessorKey: "address",
-        header: () => (
-          <div className="text-table-header flex w-full items-center justify-start">
-            Address
-          </div>
-        ),
-        cell: ({ row }) => {
-          if (!isMounted || loading) {
-            return (
-              <div className="flex w-full items-center gap-3">
-                <SkeletonRow
-                  parentClassName="flex animate-pulse"
-                  className="size-6 rounded-full"
-                />
-                <SkeletonRow
-                  parentClassName="flex animate-pulse"
-                  className="h-4 w-24"
-                />
-              </div>
-            );
-          }
-          const addressValue: string = row.getValue("address");
+    {
+      accessorKey: "address",
+      header: () => (
+        <div className="text-table-header flex w-full items-center justify-start">
+          Address
+        </div>
+      ),
+      cell: ({ row }) => {
+        if (!isMounted || loading) {
           return (
-            <div className="flex w-full items-center gap-2">
-              <EnsAvatar
-                address={addressValue as Address}
-                size="sm"
-                variant="rounded"
+            <div className="flex w-full items-center gap-3">
+              <SkeletonRow
+                parentClassName="flex animate-pulse"
+                className="size-6 rounded-full"
               />
-              <div className="flex items-center opacity-0 transition-opacity [tr:hover_&]:opacity-100">
-                <CopyAndPasteButton
-                  textToCopy={addressValue as `0x${string}`}
-                  customTooltipText={{
-                    default: "Copy address",
-                    copied: "Address copied!",
-                  }}
-                  className="p-1"
-                  iconSize="md"
-                />
-              </div>
+              <SkeletonRow
+                parentClassName="flex animate-pulse"
+                className="h-4 w-24"
+              />
             </div>
           );
-        },
-        meta: {
-          columnClassName: "w-72",
-        },
+        }
+        const addressValue: string = row.getValue("address");
+        return (
+          <div className="flex w-full items-center gap-2">
+            <EnsAvatar
+              address={addressValue as Address}
+              size="sm"
+              variant="rounded"
+            />
+            <div className="flex items-center opacity-0 transition-opacity [tr:hover_&]:opacity-100">
+              <CopyAndPasteButton
+                textToCopy={addressValue as `0x${string}`}
+                customTooltipText={{
+                  default: "Copy address",
+                  copied: "Address copied!",
+                }}
+                className="p-1"
+                iconSize="md"
+              />
+            </div>
+          </div>
+        );
       },
-      {
-        accessorKey: "amount",
-        header: ({ column }) => {
-          const handleSortToggle = () => {
-            const newSortOrder = sortOrder === "desc" ? "asc" : "desc";
-            setSortBy("balance");
-            setSortOrder(newSortOrder);
-            column.toggleSorting(newSortOrder === "desc");
-          };
-          return (
-            <div className="text-table-header flex w-full items-center justify-end whitespace-nowrap">
-              Amount ({daoId})
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-secondary justify-end p-0"
-                onClick={handleSortToggle}
-              >
-                <ArrowUpDown
-                  props={{ className: "size-4" }}
-                  activeState={
-                    sortBy === "balance" && sortOrder === "asc"
-                      ? ArrowState.UP
-                      : sortBy === "balance" && sortOrder === "desc"
-                        ? ArrowState.DOWN
-                        : ArrowState.DEFAULT
-                  }
-                />
-              </Button>
-            </div>
-          );
-        },
-        cell: ({ row }) => {
-          if (!isMounted || loading) {
-            return (
-              <div className="flex w-full items-center justify-end text-sm">
-                <SkeletonRow
-                  parentClassName="flex animate-pulse justify-end"
-                  className="h-4 w-16"
-                />
-              </div>
-            );
-          }
-          const amount: number = row.getValue("amount");
+      meta: {
+        columnClassName: "w-72",
+      },
+    },
+    {
+      accessorKey: "amount",
+      header: ({ column }) => {
+        const handleSortToggle = () => {
+          const newSortOrder = sortOrder === "desc" ? "asc" : "desc";
+          setSortBy("balance");
+          setSortOrder(newSortOrder);
+          column.toggleSorting(newSortOrder === "desc");
+        };
+        return (
+          <div className="text-table-header flex w-full items-center justify-end whitespace-nowrap">
+            Amount ({daoId})
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-secondary justify-end p-0"
+              onClick={handleSortToggle}
+            >
+              <ArrowUpDown
+                props={{ className: "size-4" }}
+                activeState={
+                  sortBy === "balance" && sortOrder === "asc"
+                    ? ArrowState.UP
+                    : sortBy === "balance" && sortOrder === "desc"
+                      ? ArrowState.DOWN
+                      : ArrowState.DEFAULT
+                }
+              />
+            </Button>
+          </div>
+        );
+      },
+      cell: ({ row }) => {
+        if (!isMounted || loading) {
           return (
             <div className="flex w-full items-center justify-end text-sm">
-              {formatNumberUserReadable(
-                token === "ERC20"
-                  ? Number(BigInt(amount)) / Number(BigInt(10 ** 18)) || 0
-                  : Number(amount) || 0,
-              )}
+              <SkeletonRow
+                parentClassName="flex animate-pulse justify-end"
+                className="h-4 w-16"
+              />
             </div>
           );
-        },
-        meta: {
-          columnClassName: "w-72",
-        },
+        }
+        const amount: number = row.getValue("amount");
+        return (
+          <div className="flex w-full items-center justify-end text-sm">
+            {formatNumberUserReadable(
+              token === "ERC20"
+                ? Number(BigInt(amount)) / Number(BigInt(10 ** 18)) || 0
+                : Number(amount) || 0,
+            )}
+          </div>
+        );
       },
-      {
-        accessorKey: "date",
-        header: () => {
+      meta: {
+        columnClassName: "w-72",
+      },
+    },
+    {
+      accessorKey: "date",
+      header: () => {
+        return (
+          <div className="text-table-header flex w-full items-center justify-start">
+            Date
+          </div>
+        );
+      },
+      cell: ({ row }) => {
+        const date: string = row.getValue("date");
+
+        if (!isMounted || loading) {
           return (
-            <div className="text-table-header flex w-full items-center justify-start">
-              Date
+            <div className="flex w-full">
+              <SkeletonRow
+                parentClassName="flex animate-pulse"
+                className="h-4 w-20"
+              />
             </div>
           );
-        },
-        cell: ({ row }) => {
-          const date: string = row.getValue("date");
+        }
 
-          if (!isMounted || loading) {
-            return (
-              <div className="flex w-full">
-                <SkeletonRow
-                  parentClassName="flex animate-pulse"
-                  className="h-4 w-20"
-                />
-              </div>
-            );
-          }
-
-          return (
-            <div className="ext-sm flex w-full items-center justify-start whitespace-nowrap">
-              {date
-                ? new Date(Number(date) * 1000).toLocaleDateString("en-US", {
+        return (
+          <div className="ext-sm flex w-full items-center justify-start whitespace-nowrap">
+            {date
+              ? new Date(Number(date) * 1000).toLocaleDateString("en-US", {
                   year: "numeric",
                   month: "long",
                   day: "numeric",
                 })
-                : "N/A"}
-            </div>
-          );
-        },
-        meta: {
-          columnClassName: "w-72",
-        },
+              : "N/A"}
+          </div>
+        );
       },
-    ];
+      meta: {
+        columnClassName: "w-72",
+      },
+    },
+  ];
 
   return (
-    <div className="flex w-full flex-col gap-2">
+    <div className="flex h-full w-full flex-col gap-2 overflow-hidden">
       <Table
         columns={columns}
-        data={loading ? Array(12).fill({}) : tableData}
+        data={loading ? Array(DEFAULT_ITEMS_PER_PAGE).fill({}) : tableData}
         filterColumn="address"
         size="sm"
         hasMore={pagination.hasNextPage}
         isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}
         withDownloadCSV={true}
-        wrapperClassName="h-[450px]"
-        className="h-[400px]"
         error={error}
+        fillHeight
       />
     </div>
   );

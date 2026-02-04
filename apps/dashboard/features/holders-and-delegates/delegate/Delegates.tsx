@@ -27,6 +27,7 @@ import {
   QueryInput_VotingPowers_OrderBy,
   QueryInput_VotingPowers_OrderDirection,
 } from "@anticapture/graphql-client";
+import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 interface DelegateTableData {
   address: string;
   votingPower: string;
@@ -71,7 +72,7 @@ export const Delegates = ({
   timePeriod = TimeInterval.THIRTY_DAYS,
   daoId,
 }: DelegatesProps) => {
-  const pageLimit: number = 15;
+  const pageLimit: number = 20;
 
   const [drawerAddress, setDrawerAddress] = useQueryState("drawerAddress");
   const [currentAddressFilter, setCurrentAddressFilter] =
@@ -225,12 +226,11 @@ export const Delegates = ({
         );
       },
       header: () => (
-        <div className="text-table-header flex w-full items-center justify-start">
-          <p>Address</p>
+        <div className="text-table-header flex w-full items-center justify-start gap-2">
+          <span>Address</span>
           <AddressFilter
             onApply={handleAddressFilterApply}
             currentFilter={currentAddressFilter || undefined}
-            className="ml-2"
           />
         </div>
       ),
@@ -398,19 +398,18 @@ export const Delegates = ({
 
   return (
     <>
-      <div className="flex flex-col gap-2">
+      <div className="flex h-[calc(100vh-16rem)] min-h-[300px] w-full flex-col">
         <Table
           columns={delegateColumns}
-          data={loading ? Array(12).fill({}) : tableData}
+          data={loading ? Array(DEFAULT_ITEMS_PER_PAGE).fill({}) : tableData}
           onRowClick={(row) => setDrawerAddress(row.address as Address)}
           size="sm"
           hasMore={pagination.hasNextPage}
           isLoadingMore={fetchingMore}
           onLoadMore={fetchNextPage}
           withDownloadCSV={true}
-          wrapperClassName="h-[450px]"
-          className="h-[400px]"
           error={error}
+          fillHeight
         />
       </div>
       <HoldersAndDelegatesDrawer

@@ -16,9 +16,9 @@ import { useDaoData } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { Query_ProposalsActivity_Proposals_Items } from "@anticapture/graphql-client";
 import {
-  FilterDropdown,
+  CategoriesFilter,
   FilterOption,
-} from "@/shared/components/dropdowns/FilterDropdown";
+} from "@/shared/components/design-system/table/filters/CategoriesFilter";
 import daoConfigByDaoId from "@/shared/dao-config";
 import Link from "next/link";
 import {
@@ -29,7 +29,7 @@ import {
 } from "@/features/holders-and-delegates/utils/proposalsTableUtils";
 import { Table } from "@/shared/components/design-system/table/Table";
 import daoConfig from "@/shared/dao-config";
-
+import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 interface ProposalTableData {
   proposalId: string;
   proposalName: string;
@@ -230,7 +230,7 @@ export const ProposalsTable = ({
         <div className="flex items-center gap-2 font-medium">
           User Vote
           {userVoteFilterOptions && onUserVoteFilterChange && (
-            <FilterDropdown
+            <CategoriesFilter
               options={userVoteFilterOptions}
               selectedValue={userVoteFilter || "all"}
               onValueChange={onUserVoteFilterChange}
@@ -400,18 +400,17 @@ export const ProposalsTable = ({
   ];
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex h-full w-full flex-col gap-4 overflow-hidden">
       <Table
         columns={proposalColumns}
-        data={loading ? Array(12).fill({}) : tableData}
+        data={loading ? Array(DEFAULT_ITEMS_PER_PAGE).fill({}) : tableData}
         size="sm"
         hasMore={pagination.hasNextPage}
         isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}
         withDownloadCSV={true}
-        wrapperClassName="h-[450px]"
-        className="h-[400px]"
         error={error}
+        fillHeight
       />
     </div>
   );
