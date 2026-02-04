@@ -10,7 +10,7 @@ export const ActionsTabContent = ({
   proposal: NonNullable<GetProposalQuery["proposal"]>;
 }) => {
   return (
-    <div className="text-primary flex flex-col gap-3 p-4">
+    <div className="text-primary flex flex-col gap-3 lg:p-4 py-4">
       {proposal.targets.length === 0 ? (
         <BlankSlate
           variant="default"
