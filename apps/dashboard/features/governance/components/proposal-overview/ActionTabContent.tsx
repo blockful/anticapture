@@ -7,8 +7,8 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import { GetProposalQuery } from "@anticapture/graphql-client";
 import { Inbox } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useState, useCallback } from "react";
-import { slice, isHex, decodeFunctionData, parseAbiItem } from "viem";
+import { useState } from "react";
+import { useDecodeCalldata } from "@/features/governance/hooks/useDecodeCalldata";
 export const ActionsTabContent = ({
   proposal,
 }: {
@@ -58,54 +58,18 @@ const ActionItem = ({
   blockExplorerUrl,
 }: ActionItemProps) => {
   const [isDecoded, setIsDecoded] = useState(false);
-  const [decodedCalldataStr, setDecodedCalldataStr] = useState<string | null>(
-    null,
-  );
-  const [isLoading, setIsLoading] = useState(false);
 
-  const performDecode = useCallback(async () => {
-    if (!calldata || !isHex(calldata)) return;
-    setIsLoading(true);
-    try {
-      const selector = slice(calldata, 0, 4);
-      const res = await fetch(
-        `https://api.openchain.xyz/signature-database/v1/lookup?function=${selector}`,
-      );
-      const json = await res.json();
-      const signatures = json.result?.function?.[selector];
-      if (!signatures || signatures.length === 0) {
-        setDecodedCalldataStr("Unknown function signature");
-        return;
-      }
-      const textSig = signatures[0].name;
-      const abiItem = parseAbiItem(`function ${textSig}`);
-      const decoded = decodeFunctionData({
-        abi: [abiItem],
-        data: calldata,
-      });
-      const argsStr = decoded.args
-        ? decoded.args
-            .map((arg, i) => `  [${i}]: ${String(arg)}`)
-            .join("\n")
-        : "  (no args)";
-      setDecodedCalldataStr(`${decoded.functionName}(\n${argsStr}\n)`);
-    } catch {
-      setDecodedCalldataStr("Failed to decode calldata");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [calldata]);
+  const { data: decodedCalldata, isLoading } = useDecodeCalldata({
+    calldata,
+    enabled: isDecoded,
+  });
 
-  const handleToggleDecode = useCallback(() => {
-    if (!isDecoded && !decodedCalldataStr) {
-      // First time decoding - fetch and decode
-      performDecode();
-    }
+  const handleToggleDecode = () => {
     setIsDecoded(!isDecoded);
-  }, [isDecoded, decodedCalldataStr, performDecode]);
-  
+  };
+
   const displayCalldata =
-    isDecoded && decodedCalldataStr ? decodedCalldataStr : calldata;
+    isDecoded && decodedCalldata ? decodedCalldata : calldata;
   return (
     <div className="border-border-default flex w-full flex-col gap-2 border">
       <div className="bg-surface-contrast flex w-full items-center justify-between gap-2 p-3">
