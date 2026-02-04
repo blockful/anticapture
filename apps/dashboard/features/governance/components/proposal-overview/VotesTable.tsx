@@ -113,7 +113,7 @@ export const VotesTable = <TData, TValue>({
   const table = useReactTable(tableConfig);
 
   return (
-    <div className="scrollbar-custom border-border-default relative w-full overflow-x-auto rounded-md border">
+    <div className="scrollbar-custom border-border-default relative w-full overflow-x-auto border">
       <table
         className={cn(
           "text-secondary lg:bg-surface-default w-full caption-bottom border-separate border-spacing-0 bg-transparent text-sm",
@@ -209,7 +209,7 @@ export const VotesTable = <TData, TValue>({
                       if (rowData.isSubRow && rowData.reason) {
                         return (
                           <TableCell colSpan={columns.length} className="p-0">
-                            <div className="flex h-auto min-h-10 items-start gap-3 p-2 pl-7">
+                            <div className="flex h-auto min-h-10 items-start gap-3 p-2 pl-5">
                               <div className="flex w-full flex-row">
                                 <div className="border-secondary mr-2 h-6 w-4 -translate-y-3 border-b border-l"></div>
                                 <span className="text-secondary whitespace-pre-wrap break-words font-sans text-[14px] font-normal leading-[20px]">

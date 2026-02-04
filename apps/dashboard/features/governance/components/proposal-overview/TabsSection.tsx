@@ -1,27 +1,44 @@
 "use client";
 
 import { cn } from "@/shared/utils";
-import { useState } from "react";
 import { DescriptionTabContent } from "@/features/governance/components/proposal-overview/DescriptionTabContent";
 import { GetProposalQuery } from "@anticapture/graphql-client";
 import { ActionsTabContent } from "@/features/governance/components/proposal-overview/ActionTabContent";
 import { VotesTabContent } from "@/features/governance/components/proposal-overview/VotesTabContent";
+import { parseAsStringEnum, useQueryState } from "nuqs";
 
 type TabId = "description" | "votes" | "actions";
 
 interface TabsSectionProps {
   proposal: NonNullable<GetProposalQuery["proposal"]>;
+  onAddressClick?: (address: string) => void;
 }
 
-export const TabsSection = ({ proposal }: TabsSectionProps) => {
-  const [activeTab, setActiveTab] = useState<TabId>("description");
+export const TabsSection = ({ proposal, onAddressClick }: TabsSectionProps) => {
+  const [activeTab, setActiveTab] = useQueryState(
+    "tab",
+    parseAsStringEnum<TabId>(["description", "votes", "actions"]).withDefault(
+      "description",
+    ),
+  );
 
-  const ActiveTabComponent = TabToContentMap[activeTab];
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "description":
+        return <DescriptionTabContent proposal={proposal} />;
+      case "votes":
+        return (
+          <VotesTabContent proposal={proposal} onAddressClick={onAddressClick} />
+        );
+      case "actions":
+        return <ActionsTabContent proposal={proposal} />;
+    }
+  };
 
   return (
-    <div className="bg-surface-default flex flex-1 flex-col lg:min-w-0">
+    <div className="flex flex-1 flex-col lg:min-w-0 lg:bg-surface-default">
       {/* Tabs Section */}
-      <div className="bg-surface-default border-border-default sticky left-0 top-[7px] z-10 flex w-full shrink-0 gap-2 border-b px-4 lg:top-[65px] lg:top-[85px]">
+      <div className="border-border-default sticky left-0 top-[7px] z-10 flex w-full shrink-0 gap-2 border-b lg:top-[85px] lg:bg-surface-default lg:px-4">
         <Tab
           isActive={activeTab === "description"}
           onClick={() => setActiveTab("description")}
@@ -42,9 +59,7 @@ export const TabsSection = ({ proposal }: TabsSectionProps) => {
         </Tab>
       </div>
 
-      <div className="flex-1">
-        <ActiveTabComponent proposal={proposal} />
-      </div>
+      <div className="flex-1">{renderTabContent()}</div>
     </div>
   );
 };
@@ -68,9 +83,3 @@ export const Tab = ({ children, isActive = false, onClick }: TabProps) => {
     </button>
   );
 };
-
-const TabToContentMap = {
-  description: DescriptionTabContent,
-  votes: VotesTabContent,
-  actions: ActionsTabContent,
-} as const;
