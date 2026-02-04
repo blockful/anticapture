@@ -65,8 +65,10 @@ export const TitleSection = ({
 
         <BulletDivider className="bg-border-contrast" />
 
-        {/* @todo - add the correct link */}
-        <DefaultLink href={`https://x.com/home`} openInNewTab>
+        <DefaultLink
+          href={`https://x.com/intent/tweet?text=${encodeURIComponent(`See this new proposal at Anticapture! https://anticapture.com/${proposal.daoId.toLowerCase()}/governance/proposal/${proposal.id}`)}`}
+          openInNewTab
+        >
           <Share2 className="size-4" /> Share
         </DefaultLink>
       </div>
