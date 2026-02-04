@@ -71,7 +71,7 @@ export const ProposalHeader = ({
 
           {/* If already voted: show voted badge */}
           {address ? (
-            !supportValue ? (
+            supportValue === undefined ? (
               proposalStatus.toLowerCase() === "ongoing" && (
                 <Button
                   className="hidden lg:flex"

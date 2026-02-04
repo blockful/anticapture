@@ -119,7 +119,7 @@ export const ProposalSection = () => {
       {/* Fixed bottom bar for mobile voting */}
       <div className="bg-surface-background fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 p-4 lg:hidden dark:border-gray-800">
         {address ? (
-          !supportValue ? (
+          supportValue === undefined ? (
             <Button
               className="flex w-full"
               onClick={() => setIsVotingModalOpen(true)}
