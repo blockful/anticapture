@@ -1,7 +1,12 @@
+"use client";
+
 import { BlankSlate, Button } from "@/shared/components";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
 import { GetProposalQuery } from "@anticapture/graphql-client";
 import { Inbox } from "lucide-react";
+import { useParams } from "next/navigation";
 import { useState, useCallback } from "react";
 import { slice, isHex, decodeFunctionData, parseAbiItem } from "viem";
 export const ActionsTabContent = ({
@@ -9,6 +14,12 @@ export const ActionsTabContent = ({
 }: {
   proposal: NonNullable<GetProposalQuery["proposal"]>;
 }) => {
+  const { daoId } = useParams<{ daoId: string }>();
+  const daoIdKey = daoId?.toUpperCase() as DaoIdEnum;
+  const blockExplorerUrl =
+    daoConfigByDaoId[daoIdKey]?.daoOverview?.chain?.blockExplorers?.default
+      ?.url ?? "https://etherscan.io";
+
   return (
     <div className="text-primary flex flex-col gap-3 py-4 lg:p-4">
       {proposal.targets.length === 0 ? (
@@ -25,6 +36,7 @@ export const ActionsTabContent = ({
             target={proposal.targets[index]}
             value={proposal.values[index]}
             calldata={proposal.calldatas[index]}
+            blockExplorerUrl={blockExplorerUrl}
           />
         ))
       )}
@@ -36,8 +48,15 @@ interface ActionItemProps {
   value: string | null;
   calldata: string | null;
   index: number;
+  blockExplorerUrl: string;
 }
-const ActionItem = ({ target, value, calldata, index }: ActionItemProps) => {
+const ActionItem = ({
+  target,
+  value,
+  calldata,
+  index,
+  blockExplorerUrl,
+}: ActionItemProps) => {
   const [isDecoded, setIsDecoded] = useState(false);
   const [decodedCalldataStr, setDecodedCalldataStr] = useState<string | null>(
     null,
@@ -93,7 +112,7 @@ const ActionItem = ({ target, value, calldata, index }: ActionItemProps) => {
           </p>
         </div>
         <DefaultLink
-          href={`https://etherscan.io/address/${target}`}
+          href={`${blockExplorerUrl}/address/${target}`}
           openInNewTab
           className="text-secondary font-mono text-xs font-medium uppercase not-italic leading-4 tracking-wider"
         >
@@ -105,9 +124,13 @@ const ActionItem = ({ target, value, calldata, index }: ActionItemProps) => {
           <p className="min-w-[88px] font-mono text-sm font-normal not-italic leading-5">
             target:
           </p>
-          <p className="text-secondary font-mono text-sm font-normal not-italic leading-5">
+          <DefaultLink
+            href={`${blockExplorerUrl}/address/${target}`}
+            openInNewTab
+            className="text-secondary font-mono text-sm font-normal not-italic leading-5"
+          >
             {target}
-          </p>
+          </DefaultLink>
         </div>
         <div className="flex w-full gap-2">
           <p className="min-w-[88px] shrink-0 font-mono text-sm font-normal not-italic leading-5">
