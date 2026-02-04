@@ -62,6 +62,7 @@ const ActionItem = ({
     null,
   );
   const [isLoading, setIsLoading] = useState(false);
+
   const performDecode = useCallback(async () => {
     if (!calldata || !isHex(calldata)) return;
     setIsLoading(true);
@@ -94,6 +95,7 @@ const ActionItem = ({
       setIsLoading(false);
     }
   }, [calldata]);
+
   const handleToggleDecode = useCallback(() => {
     if (!isDecoded && !decodedCalldataStr) {
       // First time decoding - fetch and decode
@@ -101,6 +103,7 @@ const ActionItem = ({
     }
     setIsDecoded(!isDecoded);
   }, [isDecoded, decodedCalldataStr, performDecode]);
+  
   const displayCalldata =
     isDecoded && decodedCalldataStr ? decodedCalldataStr : calldata;
   return (
