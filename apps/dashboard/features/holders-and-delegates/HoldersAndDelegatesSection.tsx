@@ -15,6 +15,16 @@ import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 
 type TabId = "tokenHolders" | "delegates";
 
+interface TabConfig {
+  id: TabId;
+  label: string;
+}
+
+const TABS: TabConfig[] = [
+  { id: "tokenHolders", label: "TOKEN HOLDERS" },
+  { id: "delegates", label: "DELEGATES" },
+] as const;
+
 export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const defaultDays = TimeInterval.NINETY_DAYS;
   const [days, setDays] = useQueryState(
@@ -50,53 +60,41 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     delegates: <Delegates daoId={daoId} timePeriod={days || defaultDays} />,
   };
 
-  const HoldersAndDelegatesLeftComponent = () => {
-    const tabs: Array<{ id: TabId; label: string }> = [
-      {
-        id: "tokenHolders",
-        label: "TOKEN HOLDERS",
-      },
-      {
-        id: "delegates",
-        label: "DELEGATES",
-      },
-    ];
-
-    return (
-      <div className="flex w-full items-center justify-between">
-        <div className="flex gap-2">
-          {tabs.map((tab) => (
-            <TabButton
-              key={tab.id}
-              id={tab.id}
-              label={tab.label}
-              activeTab={activeTab as TabId}
-              setActiveTab={handleTabChange}
-            />
-          ))}
-        </div>
+  const TabsHeader = () => (
+    <div className="flex h-full w-full items-center justify-between">
+      <div className="flex gap-2">
+        {TABS.map((tab) => (
+          <TabButton
+            key={tab.id}
+            id={tab.id}
+            label={tab.label}
+            activeTab={activeTab as TabId}
+            setActiveTab={handleTabChange}
+          />
+        ))}
       </div>
-    );
-  };
+    </div>
+  );
 
   return (
-    <TheSectionLayout
-      title={PAGES_CONSTANTS.holdersAndDelegates.title}
-      subtitle={"Holders & Delegates"}
-      icon={<UserCheck className="section-layout-icon" />}
-      description={PAGES_CONSTANTS.holdersAndDelegates.description}
-      className="lg:pb-0"
-    >
-      <SubSectionsContainer>
-        <div className="flex w-full items-center justify-between">
-          <HoldersAndDelegatesLeftComponent />
-          <SwitcherDateMobile
-            defaultValue={days || defaultDays}
-            setTimeInterval={setDays}
-          />
-        </div>
-        {tabComponentMap[activeTab as TabId]}
-      </SubSectionsContainer>
-    </TheSectionLayout>
+    <div>
+      <TheSectionLayout
+        title={PAGES_CONSTANTS.holdersAndDelegates.title}
+        subtitle={"Holders & Delegates"}
+        icon={<UserCheck className="section-layout-icon" />}
+        description={PAGES_CONSTANTS.holdersAndDelegates.description}
+      >
+        <SubSectionsContainer>
+          <div className="flex w-full items-center justify-between">
+            <TabsHeader />
+            <SwitcherDateMobile
+              defaultValue={days || defaultDays}
+              setTimeInterval={setDays}
+            />
+          </div>
+          {tabComponentMap[activeTab as TabId]}
+        </SubSectionsContainer>
+      </TheSectionLayout>
+    </div>
   );
 };

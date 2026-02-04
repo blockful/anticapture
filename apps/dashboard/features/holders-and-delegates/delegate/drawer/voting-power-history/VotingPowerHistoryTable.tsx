@@ -18,10 +18,7 @@ import {
 import daoConfigByDaoId from "@/shared/dao-config";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
-import {
-  AmountFilterState,
-  useAmountFilterStore,
-} from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
+import { useAmountFilterStore } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 import daoConfig from "@/shared/dao-config";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import {
@@ -32,16 +29,21 @@ import {
   useQueryStates,
 } from "nuqs";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
+import { DateCell } from "@/shared/components/design-system/table/cells/DateCell";
 
-interface DelegateDelegationHistoryTableProps {
+interface VotingPowerHistoryTableProps {
   accountId: string;
   daoId: DaoIdEnum;
+  fromTimestamp?: number;
+  toTimestamp?: number;
 }
 
-export const DelegateDelegationHistoryTable = ({
+export const VotingPowerHistoryTable = ({
   accountId,
   daoId,
-}: DelegateDelegationHistoryTableProps) => {
+  fromTimestamp,
+  toTimestamp,
+}: VotingPowerHistoryTableProps) => {
   const limit: number = 20;
   const { decimals } = daoConfig[daoId];
 
@@ -61,8 +63,7 @@ export const DelegateDelegationHistoryTable = ({
     "active",
     parseAsBoolean.withDefault(false),
   );
-  // const [fromFilter, setFromFilter] = useQueryState("from", parseAsAddress);
-  // const [toFilter, setToFilter] = useQueryState("to", parseAsAddress);
+
   const sortOptions: SortOption[] = [
     { value: "largest-first", label: "Largest first" },
     { value: "smallest-first", label: "Smallest first" },
@@ -75,40 +76,14 @@ export const DelegateDelegationHistoryTable = ({
       orderBy: sortBy,
       orderDirection: sortDirection,
       filterVariables,
+      fromTimestamp,
+      toTimestamp,
       limit,
     });
 
   const isInitialLoading =
     loading && (!delegationHistory || delegationHistory.length === 0);
 
-  // Format timestamp to relative time
-  const formatRelativeTime = (timestamp: string) => {
-    const date = new Date(parseInt(timestamp) * 1000);
-    const now = new Date();
-    const diffInMs = now.getTime() - date.getTime();
-    const diffInSeconds = Math.floor(diffInMs / 1000);
-    const diffInMinutes = Math.floor(diffInSeconds / 60);
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    const diffInDays = Math.floor(diffInHours / 24);
-    const diffInWeeks = Math.floor(diffInDays / 7);
-    const diffInMonths = Math.floor(diffInDays / 30);
-
-    if (diffInMonths > 0) {
-      return `${diffInMonths} month${diffInMonths > 1 ? "s" : ""} ago`;
-    } else if (diffInWeeks > 0) {
-      return `${diffInWeeks} week${diffInWeeks > 1 ? "s" : ""} ago`;
-    } else if (diffInDays > 0) {
-      return `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
-    } else if (diffInHours > 0) {
-      return `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
-    } else if (diffInMinutes > 0) {
-      return `${diffInMinutes} minute${diffInMinutes > 1 ? "s" : ""} ago`;
-    } else {
-      return "Just now";
-    }
-  };
-
-  // Determine delegation type and color based on gain/loss
   const getDelegationType = (item: DelegationHistoryItem) => {
     let statusText = "";
 
@@ -188,9 +163,7 @@ export const DelegateDelegationHistoryTable = ({
 
         return (
           <div className="flex items-center justify-start">
-            <span className="text-primary whitespace-nowrap text-sm font-medium">
-              {formatRelativeTime(timestamp)}
-            </span>
+            <DateCell timestampSeconds={timestamp} className="font-medium" />
           </div>
         );
       },
@@ -205,7 +178,7 @@ export const DelegateDelegationHistoryTable = ({
           <h4 className="text-table-header">Amount ({daoId})</h4>
           <AmountFilter
             filterId="delegation-amount-filter"
-            onApply={(filterState: AmountFilterState) => {
+            onApply={(filterState) => {
               if (filterState.sortOrder) {
                 setSortDirection(
                   filterState.sortOrder === "largest-first" ? "desc" : "asc",
@@ -236,7 +209,6 @@ export const DelegateDelegationHistoryTable = ({
             onReset={() => {
               setIsFilterActive(false);
               setSortBy("timestamp");
-              setSortDirection("desc");
               setFilterVariables(() => ({
                 fromValue: "",
                 toValue: "",
@@ -502,7 +474,7 @@ export const DelegateDelegationHistoryTable = ({
   ];
 
   return (
-    <div className="flex h-full w-full flex-col gap-2 overflow-hidden p-4">
+    <div className="flex h-full w-full flex-col overflow-hidden">
       <Table
         columns={columns}
         data={
