@@ -28,7 +28,7 @@ export const getTextStatusColor = (status: ProposalStatus) => {
     case ProposalStatus.CANCELLED:
       return "text-error";
     case ProposalStatus.QUEUED:
-      return "text-primary";
+      return "text-success";
     case ProposalStatus.SUCCEEDED:
       return "text-success";
     case ProposalStatus.EXPIRED:
@@ -78,7 +78,7 @@ export const getBackgroundStatusColor = (status: ProposalStatus) => {
     case ProposalStatus.CANCELLED:
       return "bg-surface-opacity-error";
     case ProposalStatus.QUEUED:
-      return "bg-surface-opacity-brand";
+      return "bg-surface-opacity-success";
     case ProposalStatus.SUCCEEDED:
       return "bg-surface-opacity-success";
     case ProposalStatus.EXPIRED:
