@@ -130,7 +130,7 @@ const ActionItem = ({
           <DefaultLink
             href={`${blockExplorerUrl}/address/${target}`}
             openInNewTab
-            className="text-secondary font-mono text-sm font-normal not-italic leading-5"
+            className="text-secondary font-mono break-all text-sm font-normal not-italic leading-5"
           >
             {target}
           </DefaultLink>
