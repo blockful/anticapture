@@ -16,6 +16,7 @@ import { ArrowUp, ArrowDown } from "lucide-react";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { VotesTable } from "@/features/governance/components/proposal-overview/VotesTable";
 import daoConfig from "@/shared/dao-config";
+import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 
 interface TabsDidntVoteContentProps {
   proposal: NonNullable<GetProposalQuery["proposal"]>;
@@ -346,9 +347,11 @@ export const TabsDidntVoteContent = ({
           );
         },
         header: () => (
-          <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
-            <p className="shrink-0 whitespace-nowrap">VP Change (Last 30d)</p>
-          </div>
+          <Tooltip tooltipContent="Shows the voting power change within 30 days before voting starts">
+              <p className="border-border-contrast hover:border-primary border-b border-dashed transition-colors duration-300">
+                VP Change (Last 30d)
+              </p>
+          </Tooltip>
         ),
       },
     ],
