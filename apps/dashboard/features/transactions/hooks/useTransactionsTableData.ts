@@ -33,7 +33,7 @@ export interface TransactionsFilters extends TransactionsParamsType {
 export interface TransactionData {
   id: string;
   amount: string;
-  date: string;
+  timestamp: string;
   from: string;
   to: string;
   affectedSupply?: SupplyType[];

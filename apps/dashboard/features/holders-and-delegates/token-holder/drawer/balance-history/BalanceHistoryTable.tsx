@@ -31,13 +31,13 @@ import {
   useQueryState,
   useQueryStates,
 } from "nuqs";
-import { formatRelativeTime } from "@/shared/utils/formatRelativeTime";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 import { useAmountFilterStore } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
+import { DateCell } from "@/shared/components/design-system/table/cells/DateCell";
 
 interface BalanceHistoryData {
   id: string;
-  date: string;
+  timestamp: string;
   amount: string;
   type: "Buy" | "Sell";
   fromAddress: string;
@@ -120,14 +120,9 @@ export const BalanceHistoryTable = ({
   // Transform transfers to table data format
   const transformedData = useMemo(() => {
     return transfers.map((transfer) => {
-      const timestampSeconds = parseInt(transfer.timestamp);
-      const relativeTime = formatRelativeTime(timestampSeconds, {
-        skipMonthsAndWeeks: true,
-      });
-
       return {
         id: transfer.transactionHash,
-        date: relativeTime,
+        timestamp: transfer.timestamp,
         amount: formatNumberUserReadable(transfer.amount),
         type: transfer.direction === "in" ? "Buy" : ("Sell" as "Buy" | "Sell"),
         fromAddress: transfer.fromAccountId,
@@ -138,12 +133,12 @@ export const BalanceHistoryTable = ({
 
   const balanceHistoryColumns: ColumnDef<BalanceHistoryData>[] = [
     {
-      accessorKey: "date",
+      accessorKey: "timestamp",
       meta: {
         columnClassName: "w-32",
       },
       cell: ({ row }) => {
-        const date = row.getValue("date") as string;
+        const timestamp = row.getValue("timestamp") as string;
 
         if (isInitialLoading) {
           return (
@@ -158,7 +153,7 @@ export const BalanceHistoryTable = ({
 
         return (
           <div className="flex items-center whitespace-nowrap">
-            <span className="text-primary text-sm">{date}</span>
+            <DateCell timestampSeconds={timestamp} />
           </div>
         );
       },

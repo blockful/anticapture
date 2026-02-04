@@ -2,7 +2,6 @@ import { SupplyType } from "@/shared/components/badges/SupplyLabel";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { formatUnits } from "viem";
 import { TransactionData } from "@/features/transactions/hooks/useTransactionsTableData";
-import { formatRelativeTime } from "@/shared/utils/formatRelativeTime";
 
 export type GraphTransaction = {
   from: string;
@@ -98,7 +97,7 @@ export const adaptTransactionsToTableData = (
         Number(formatUnits(toBigIntSafe(t.amount || 0), decimals)),
         2,
       ),
-      date: formatRelativeTime(t.timestamp),
+      timestamp: t.timestamp,
       from: t.fromAccountId,
       to: t.toAccountId,
     }));
@@ -109,19 +108,19 @@ export const adaptTransactionsToTableData = (
         Number(formatUnits(toBigIntSafe(d.delegatedValue), decimals)) || 0,
         2,
       ),
-      date: formatRelativeTime(d.timestamp),
+      timestamp: d.timestamp,
       from: d.delegatorAccountId,
       to: d.delegateAccountId,
     }));
     const subRows = [...transfersSubRows, ...delegationsSubRows].sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+      (a, b) => Number(a.timestamp) - Number(b.timestamp),
     );
 
     return {
       id: String(idx + 1),
       affectedSupply,
       amount: amount,
-      date: formatRelativeTime(tx.timestamp),
+      timestamp: tx.timestamp,
       from: tx.from,
       to: tx.to,
       txHash: tx.transactionHash,

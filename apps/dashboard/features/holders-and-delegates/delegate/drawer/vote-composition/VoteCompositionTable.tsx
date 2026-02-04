@@ -16,6 +16,7 @@ import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButt
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { QueryInput_AccountBalances_OrderDirection } from "@anticapture/graphql-client";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
+import { DateCell } from "@/shared/components/design-system/table/cells/DateCell";
 
 export const VoteCompositionTable = ({
   address,
@@ -55,14 +56,14 @@ export const VoteCompositionTable = ({
     return {
       address: account.address,
       amount: Number(account.balance) || 0,
-      date: account.timestamp,
+      timestamp: account.timestamp,
     };
   });
 
   const columns: ColumnDef<{
     address: string;
     amount: number;
-    date: string;
+    timestamp: string;
   }>[] = [
     {
       accessorKey: "address",
@@ -171,7 +172,7 @@ export const VoteCompositionTable = ({
       },
     },
     {
-      accessorKey: "date",
+      accessorKey: "timestamp",
       header: () => {
         return (
           <div className="text-table-header flex w-full items-center justify-start gap-1">
@@ -180,7 +181,7 @@ export const VoteCompositionTable = ({
         );
       },
       cell: ({ row }) => {
-        const date: string = row.getValue("date");
+        const timestamp: string = row.getValue("timestamp");
 
         if (!isMounted || loading) {
           return (
@@ -194,14 +195,8 @@ export const VoteCompositionTable = ({
         }
 
         return (
-          <div className="ext-sm flex w-full items-center justify-start whitespace-nowrap">
-            {date
-              ? new Date(Number(date) * 1000).toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })
-              : "N/A"}
+          <div className="flex w-full items-center justify-start whitespace-nowrap">
+            {timestamp ? <DateCell timestampSeconds={timestamp} /> : "N/A"}
           </div>
         );
       },

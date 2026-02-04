@@ -28,8 +28,8 @@ import {
   useQueryState,
   useQueryStates,
 } from "nuqs";
-import { formatRelativeTime } from "@/shared/utils/formatRelativeTime";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
+import { DateCell } from "@/shared/components/design-system/table/cells/DateCell";
 
 interface VotingPowerHistoryTableProps {
   accountId: string;
@@ -163,11 +163,7 @@ export const VotingPowerHistoryTable = ({
 
         return (
           <div className="flex items-center justify-start">
-            <span className="text-primary whitespace-nowrap text-sm font-medium">
-              {formatRelativeTime(timestamp, {
-                skipMonthsAndWeeks: true,
-              })}
-            </span>
+            <DateCell timestampSeconds={timestamp} className="font-medium" />
           </div>
         );
       },
