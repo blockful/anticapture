@@ -178,18 +178,18 @@ export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
           </div>
         </div>
         <div className="flex w-full items-center justify-center gap-2">
-          <div className="bg-surface-hover relative flex h-1 w-full rounded-full">
+          <div className="bg-surface-hover relative flex h-1 w-full">
             <div
               style={{
                 width: `${proposal.votes.forPercentage}%`,
               }}
-              className={cn("bg-success h-full rounded-l-full")}
+              className={cn("bg-success h-full")}
             />
             <div
               style={{
                 width: `${proposal.votes.againstPercentage}%`,
               }}
-              className={cn("bg-error h-full rounded-r-full")}
+              className={cn("bg-error h-full")}
             />
 
             {quorumPercentage < 100 && (
