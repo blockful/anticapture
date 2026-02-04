@@ -3,7 +3,8 @@ import { DefaultLink } from "@/shared/components/design-system/links/default-lin
 import { GetProposalQuery } from "@anticapture/graphql-client";
 import { Inbox } from "lucide-react";
 import { useState, useCallback } from "react";
-import { slice, Hex, isHex, decodeFunctionData, parseAbiItem } from "viem";
+import {  Hex, isHex, decodeFunctionData, parseAbiItem, decodeAbiParameters } from "viem";
+import { EnsGovernorAbi } from "../../abis/ens-governor";
 
 export const ActionsTabContent = ({
   proposal,
@@ -182,28 +183,6 @@ const formatDecodedCalldata = (decoded: DecodedCalldata): string => {
   return lines.join("\n");
 };
 
-/**
- * Fallback: chunks the calldata into 32-byte words for readability
- */
-const formatCalldataFallback = (calldata: Hex): string => {
-  const selector = slice(calldata, 0, 4);
-  const params = slice(calldata, 4);
-
-  if (params.length <= 2) {
-    return `Function Selector: ${selector}`;
-  }
-
-  const paramsHex = params.slice(2);
-  const chunks: string[] = [];
-
-  for (let i = 0; i < paramsHex.length; i += 64) {
-    const chunk = paramsHex.slice(i, i + 64);
-    const wordIndex = Math.floor(i / 64);
-    chunks.push(`[${wordIndex}] 0x${chunk}`);
-  }
-
-  return `Function Selector: ${selector}\n\nParameters:\n${chunks.join("\n")}`;
-};
 
 const ActionItem = ({ target, value, calldata, index }: ActionItemProps) => {
   const [isDecoded, setIsDecoded] = useState(false);
@@ -219,33 +198,14 @@ const ActionItem = ({ target, value, calldata, index }: ActionItemProps) => {
 
     setIsLoading(true);
 
-    try {
-      const hexData = calldata as Hex;
-      const selector = slice(hexData, 0, 4);
 
-      // Fetch the function signature from 4byte.directory
-      const signature = await fetchFunctionSignature(selector);
+    debugger;
+    const calldataDecoded = decodeAbiParameters(EnsGovernorAbi, calldata)
 
-      if (signature) {
-        const decoded = decodeCalldataWithSignature(hexData, signature);
-        if (decoded) {
-          setDecodedCalldataStr(formatDecodedCalldata(decoded));
-        } else {
-          // Fallback to chunked hex if decoding fails
-          setDecodedCalldataStr(formatCalldataFallback(hexData));
-        }
-      } else {
-        // Fallback to chunked hex if signature not found
-        setDecodedCalldataStr(formatCalldataFallback(hexData));
-      }
-    } catch {
-      // Fallback on any error
-      if (isHex(calldata)) {
-        setDecodedCalldataStr(formatCalldataFallback(calldata as Hex));
-      }
-    } finally {
-      setIsLoading(false);
-    }
+    console.log(calldataDecoded);
+
+    setIsLoading(false);
+
   }, [calldata]);
 
   const handleToggleDecode = useCallback(() => {
