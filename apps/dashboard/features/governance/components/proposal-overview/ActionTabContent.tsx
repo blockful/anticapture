@@ -66,7 +66,7 @@ const ActionItem = ({ target, value, calldata, index }: ActionItemProps) => {
       <div className="flex w-full flex-col gap-2 p-3">
         <div className="flex w-full gap-2">
           <p className="font-mono min-w-[88px] text-sm font-normal not-italic leading-5">
-            Target:
+            target:
           </p>
           <p className="text-secondary font-mono text-sm font-normal not-italic leading-5">
             {target}
@@ -76,7 +76,7 @@ const ActionItem = ({ target, value, calldata, index }: ActionItemProps) => {
         <div className="flex w-full flex-col gap-2">
           <div className="flex w-full gap-2">
             <p className="font-mono min-w-[88px] text-sm font-normal not-italic leading-5">
-              Calldata:
+              calldata:
             </p>
             <p
               className={`text-secondary font-mono overflow-wrap-anywhere break-all text-sm font-normal not-italic leading-5 ${
@@ -98,7 +98,7 @@ const ActionItem = ({ target, value, calldata, index }: ActionItemProps) => {
 
         <div className="flex w-full gap-2">
           <p className="font-mono min-w-[88px] text-sm font-normal not-italic leading-5">
-            Value:
+            value:
           </p>
           <p className="text-secondary font-mono text-sm font-normal not-italic leading-5">
             {value}
