@@ -20,7 +20,7 @@ export default processConfig(
           const daoName = key.replace("DAO_API_", "");
           return [
             {
-              name: daoName,
+              name: `rest_${daoName}`,
               handler: {
                 openapi: {
                   source: `${value}/docs`,
