@@ -16,19 +16,20 @@ import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButt
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { QueryInput_AccountBalances_OrderDirection } from "@anticapture/graphql-client";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
+import { DateCell } from "@/shared/components/design-system/table/cells/DateCell";
 
-export const VotingPowerTable = ({
+export const VoteCompositionTable = ({
   address,
   daoId,
 }: {
   address: string;
   daoId: string;
 }) => {
-  const limit: number = 20;
+  const limit: number = DEFAULT_ITEMS_PER_PAGE;
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const [sortBy, setSortBy] = useQueryState(
     "orderBy",
-    parseAsStringEnum(["balance"]).withDefault("balance"),
+    parseAsStringEnum(["balance", "timestamp"]).withDefault("balance"),
   );
   const [sortOrder, setSortOrder] = useQueryState(
     "orderDirection",
@@ -42,7 +43,7 @@ export const VotingPowerTable = ({
     useVotingPower({
       daoId: daoId as DaoIdEnum,
       address: address,
-      orderBy: sortBy,
+      orderBy: sortBy as "balance" | "timestamp",
       orderDirection: sortOrder as QueryInput_AccountBalances_OrderDirection,
       limit,
     });
@@ -55,14 +56,14 @@ export const VotingPowerTable = ({
     return {
       address: account.address,
       amount: Number(account.balance) || 0,
-      date: account.timestamp,
+      timestamp: account.timestamp,
     };
   });
 
   const columns: ColumnDef<{
     address: string;
     amount: number;
-    date: string;
+    timestamp: string;
   }>[] = [
     {
       accessorKey: "address",
@@ -171,16 +172,16 @@ export const VotingPowerTable = ({
       },
     },
     {
-      accessorKey: "date",
+      accessorKey: "timestamp",
       header: () => {
         return (
-          <div className="text-table-header flex w-full items-center justify-start">
+          <div className="text-table-header flex w-full items-center justify-start gap-1">
             Date
           </div>
         );
       },
       cell: ({ row }) => {
-        const date: string = row.getValue("date");
+        const timestamp: string = row.getValue("timestamp");
 
         if (!isMounted || loading) {
           return (
@@ -194,14 +195,8 @@ export const VotingPowerTable = ({
         }
 
         return (
-          <div className="ext-sm flex w-full items-center justify-start whitespace-nowrap">
-            {date
-              ? new Date(Number(date) * 1000).toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })
-              : "N/A"}
+          <div className="flex w-full items-center justify-start whitespace-nowrap">
+            {timestamp ? <DateCell timestampSeconds={timestamp} /> : "N/A"}
           </div>
         );
       },
@@ -212,7 +207,7 @@ export const VotingPowerTable = ({
   ];
 
   return (
-    <div className="flex h-full w-full flex-col gap-2 overflow-hidden">
+    <div className="flex h-full w-full flex-col overflow-hidden">
       <Table
         columns={columns}
         data={loading ? Array(DEFAULT_ITEMS_PER_PAGE).fill({}) : tableData}

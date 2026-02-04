@@ -45,9 +45,7 @@ export const TopInteractionsTable = ({
 
   const [sortBy, setSortBy] = useQueryState(
     "orderBy",
-    parseAsStringEnum(["transferCount", "totalVolume"]).withDefault(
-      "transferCount",
-    ),
+    parseAsStringEnum(["count", "volume"]).withDefault("count"),
   );
   const [sortDirection, setSortDirection] = useQueryState(
     "orderDirection",
@@ -178,9 +176,9 @@ export const TopInteractionsTable = ({
                   setSortDirection(
                     filterState.sortOrder === "largest-first" ? "desc" : "asc",
                   );
-                  setSortBy("totalVolume");
+                  setSortBy("volume");
                 } else {
-                  setSortBy("transferCount");
+                  setSortBy("count");
                   setSortDirection("desc");
                 }
 
@@ -203,7 +201,7 @@ export const TopInteractionsTable = ({
               }}
               onReset={() => {
                 setIsFilterActive(false);
-                setSortBy("transferCount");
+                setSortBy("count");
                 setFilterVariables(() => ({
                   minAmount: null,
                   maxAmount: null,

@@ -7,10 +7,7 @@ import { useEffect, useState } from "react";
 import { Address, parseUnits } from "viem";
 import { useDelegationHistory } from "@/features/holders-and-delegates/hooks/useDelegationHistory";
 import { formatUnits } from "viem";
-import {
-  formatNumberUserReadable,
-  formatDateUserReadable,
-} from "@/shared/utils/";
+import { formatNumberUserReadable } from "@/shared/utils/";
 import { ExternalLink } from "lucide-react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import daoConfigByDaoId from "@/shared/dao-config";
@@ -33,12 +30,12 @@ import {
 } from "nuqs";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 import { useAmountFilterStore } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
+import { DateCell } from "@/shared/components/design-system/table/cells/DateCell";
 
 interface DelegationData {
   address: string;
   amount: string;
-  date: string;
-  timestamp: number;
+  timestamp: string;
 }
 
 interface DelegationHistoryTableProps {
@@ -107,22 +104,17 @@ export const DelegationHistoryTable = ({
       .map((delegation) => {
         const delegateAddress = delegation.delegateAddress || "";
         const delegatedValue = delegation.amount || "0";
-        const timestamp = delegation.timestamp || 0;
+        const timestamp = delegation.timestamp || "0";
 
         const formattedAmount = Number(
           formatUnits(BigInt(delegatedValue), decimals),
         ).toFixed(2);
 
-        const date = timestamp
-          ? formatDateUserReadable(new Date(Number(timestamp) * 1000))
-          : "Unknown";
-
         return {
           address: delegateAddress,
           amount: formattedAmount,
           transactionHash: delegation.transactionHash,
-          date,
-          timestamp: Number(timestamp),
+          timestamp: String(timestamp),
         };
       }) || [];
 
@@ -264,7 +256,7 @@ export const DelegationHistoryTable = ({
       },
     },
     {
-      accessorKey: "date",
+      accessorKey: "timestamp",
       header: ({ column }) => {
         const handleSortToggle = () => {
           const newSortOrder = sortOrder === "desc" ? "asc" : "desc";
@@ -308,11 +300,11 @@ export const DelegationHistoryTable = ({
           );
         }
 
-        const date: string = row.getValue("date");
+        const timestamp: string = row.getValue("timestamp");
 
         return (
           <div className="flex w-full items-center justify-start text-sm">
-            {date}
+            <DateCell timestampSeconds={timestamp} />
           </div>
         );
       },

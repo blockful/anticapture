@@ -8,19 +8,10 @@ import {
 import { useMemo, useCallback, useState, useEffect } from "react";
 import { NetworkStatus } from "@apollo/client";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { AmountFilterVariables } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
-
-interface PaginationInfo {
-  hasNextPage: boolean;
-  hasPreviousPage: boolean;
-  endCursor?: string | null;
-  startCursor?: string | null;
-  totalCount: number;
-  currentPage: number;
-  totalPages: number;
-  limit: number;
-  currentItemsCount: number;
-}
+import {
+  AmountFilterVariables,
+  PaginationInfo,
+} from "@/features/holders-and-delegates/hooks/types";
 
 interface UseDelegationHistoryResult {
   data:

@@ -6,6 +6,8 @@ query HistoricalVotingPowerByAccount(
   $orderDirection: queryInput_historicalVotingPowerByAccountId_orderDirection = desc
   $toValue: String
   $fromValue: String
+  $fromDate: String
+  $toDate: String
 ) {
   historicalVotingPowerByAccountId(
     address: $account
@@ -15,6 +17,8 @@ query HistoricalVotingPowerByAccount(
     limit: $limit
     toValue: $toValue
     fromValue: $fromValue
+    fromDate: $fromDate
+    toDate: $toDate
   ) {
     items {
       accountId
