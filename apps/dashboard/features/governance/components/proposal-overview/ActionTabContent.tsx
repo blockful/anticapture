@@ -117,8 +117,8 @@ const ActionItem = ({ target, value, calldata, index }: ActionItemProps) => {
             <div className="scrollbar-thin max-h-[248px] overflow-y-auto p-3">
               <p
                 className={`text-secondary font-mono text-sm font-normal not-italic leading-5 ${
-                  isDecoded ? "whitespace-pre-wrap" : "break-all"
-                }`}
+                  isDecoded  && !isLoading ? "whitespace-pre-wrap" : "break-all"
+                } ${isLoading ? "animate-pulse" : ""}`}
               >
                 {displayCalldata}
               </p>
