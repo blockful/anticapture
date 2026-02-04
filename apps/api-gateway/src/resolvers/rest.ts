@@ -64,7 +64,7 @@ export const restResolvers = daoItemQueries.reduce((acc, fieldName) => {
         throw new Error(`Missing where.daoId in query for ${fieldName}`);
       }
 
-      const targetClient = context[daoId.toUpperCase()]?.Query;
+      const targetClient = context[`rest_${daoId.toUpperCase()}`]?.Query;
       if (!targetClient) {
         throw new Error(
           `DAO "${daoId}" is not configured. Please set DAO_API_${daoId.toUpperCase()} environment variable.`,
