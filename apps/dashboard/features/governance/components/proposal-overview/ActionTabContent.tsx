@@ -1,8 +1,9 @@
-import { BlankSlate } from "@/shared/components";
+import { BlankSlate, Button } from "@/shared/components";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { GetProposalQuery } from "@anticapture/graphql-client";
 import { Inbox } from "lucide-react";
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { slice, Hex, isHex, decodeFunctionData, parseAbiItem } from "viem";
 
 export const ActionsTabContent = ({
   proposal,
@@ -39,12 +40,224 @@ interface ActionItemProps {
   index: number;
 }
 
-// Approximate threshold for 5 lines of monospace hex data
-const CALLDATA_TRUNCATE_LENGTH = 200;
+interface FourByteSignature {
+  id: number;
+  text_signature: string;
+  hex_signature: string;
+}
+
+interface FourByteResponse {
+  count: number;
+  results: FourByteSignature[];
+}
+
+interface DecodedCalldata {
+  functionName: string;
+  signature: string;
+  args: { name: string; type: string; value: string }[];
+}
+
+/**
+ * Formats a value for display (handles BigInt, arrays, objects, etc.)
+ */
+const formatArgValue = (value: unknown): string => {
+  if (value === null || value === undefined) {
+    return String(value);
+  }
+  if (typeof value === "bigint") {
+    return value.toString();
+  }
+  if (typeof value === "boolean") {
+    return value.toString();
+  }
+  if (Array.isArray(value)) {
+    return `[${value.map(formatArgValue).join(", ")}]`;
+  }
+  if (typeof value === "object") {
+    return JSON.stringify(
+      value,
+      (_, v) => (typeof v === "bigint" ? v.toString() : v),
+      2,
+    );
+  }
+  return String(value);
+};
+
+/**
+ * Fetches function signature from 4byte.directory API
+ */
+const fetchFunctionSignature = async (
+  selector: string,
+): Promise<string | null> => {
+  try {
+    const response = await fetch(
+      `https://www.4byte.directory/api/v1/signatures/?hex_signature=${selector}`,
+    );
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data: FourByteResponse = await response.json();
+
+    if (data.count > 0 && data.results.length > 0) {
+      // Return the first (most common) signature
+      return data.results[0].text_signature;
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Decodes calldata using the function signature from 4byte.directory
+ */
+const decodeCalldataWithSignature = (
+  calldata: Hex,
+  signature: string,
+): DecodedCalldata | null => {
+  try {
+    // Parse the signature to extract function name and parameter types
+    const match = signature.match(/^(\w+)\((.*)\)$/);
+    if (!match) return null;
+
+    const [, functionName, paramsString] = match;
+
+    // Parse the ABI item from the signature
+    const abiItem = parseAbiItem(`function ${signature}`);
+    if (abiItem.type !== "function") return null;
+
+    // Decode the function data
+    const decoded = decodeFunctionData({
+      abi: [abiItem],
+      data: calldata,
+    });
+
+    // Parse parameter types from signature
+    const paramTypes = paramsString
+      ? paramsString.split(",").map((p) => p.trim())
+      : [];
+
+    const args = decoded.args
+      ? (decoded.args as unknown[]).map((arg, index) => {
+          const type = paramTypes[index] || "unknown";
+          return {
+            name: `param${index}`,
+            type,
+            value: formatArgValue(arg),
+          };
+        })
+      : [];
+
+    return {
+      functionName,
+      signature,
+      args,
+    };
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Formats decoded calldata for display
+ */
+const formatDecodedCalldata = (decoded: DecodedCalldata): string => {
+  const lines: string[] = [];
+
+  lines.push(`Function: ${decoded.functionName}`);
+  lines.push(`Signature: ${decoded.signature}`);
+
+  if (decoded.args.length > 0) {
+    lines.push("");
+    lines.push("Parameters:");
+
+    decoded.args.forEach((arg, index) => {
+      lines.push(`  [${index}] ${arg.type} ${arg.name}: ${arg.value}`);
+    });
+  }
+
+  return lines.join("\n");
+};
+
+/**
+ * Fallback: chunks the calldata into 32-byte words for readability
+ */
+const formatCalldataFallback = (calldata: Hex): string => {
+  const selector = slice(calldata, 0, 4);
+  const params = slice(calldata, 4);
+
+  if (params.length <= 2) {
+    return `Function Selector: ${selector}`;
+  }
+
+  const paramsHex = params.slice(2);
+  const chunks: string[] = [];
+
+  for (let i = 0; i < paramsHex.length; i += 64) {
+    const chunk = paramsHex.slice(i, i + 64);
+    const wordIndex = Math.floor(i / 64);
+    chunks.push(`[${wordIndex}] 0x${chunk}`);
+  }
+
+  return `Function Selector: ${selector}\n\nParameters:\n${chunks.join("\n")}`;
+};
 
 const ActionItem = ({ target, value, calldata, index }: ActionItemProps) => {
-  const [isCalldataExpanded, setIsCalldataExpanded] = useState(false);
-  const isCalldataLong = (calldata?.length ?? 0) > CALLDATA_TRUNCATE_LENGTH;
+  const [isDecoded, setIsDecoded] = useState(false);
+  const [decodedCalldataStr, setDecodedCalldataStr] = useState<string | null>(
+    null,
+  );
+  const [isLoading, setIsLoading] = useState(false);
+
+  const performDecode = useCallback(async () => {
+    if (!calldata || !isHex(calldata)) {
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const hexData = calldata as Hex;
+      const selector = slice(hexData, 0, 4);
+
+      // Fetch the function signature from 4byte.directory
+      const signature = await fetchFunctionSignature(selector);
+
+      if (signature) {
+        const decoded = decodeCalldataWithSignature(hexData, signature);
+        if (decoded) {
+          setDecodedCalldataStr(formatDecodedCalldata(decoded));
+        } else {
+          // Fallback to chunked hex if decoding fails
+          setDecodedCalldataStr(formatCalldataFallback(hexData));
+        }
+      } else {
+        // Fallback to chunked hex if signature not found
+        setDecodedCalldataStr(formatCalldataFallback(hexData));
+      }
+    } catch {
+      // Fallback on any error
+      if (isHex(calldata)) {
+        setDecodedCalldataStr(formatCalldataFallback(calldata as Hex));
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, [calldata]);
+
+  const handleToggleDecode = useCallback(() => {
+    if (!isDecoded && !decodedCalldataStr) {
+      // First time decoding - fetch and decode
+      performDecode();
+    }
+    setIsDecoded(!isDecoded);
+  }, [isDecoded, decodedCalldataStr, performDecode]);
+
+  const displayCalldata =
+    isDecoded && decodedCalldataStr ? decodedCalldataStr : calldata;
 
   return (
     <div className="border-border-default flex w-full flex-col gap-2 border">
@@ -63,7 +276,7 @@ const ActionItem = ({ target, value, calldata, index }: ActionItemProps) => {
         </DefaultLink>
       </div>
 
-      <div className="flex w-full flex-col gap-2 p-3">
+      <div className="flex w-full flex-col gap-3 p-3">
         <div className="flex w-full gap-2">
           <p className="font-mono min-w-[88px] text-sm font-normal not-italic leading-5">
             target:
@@ -73,27 +286,32 @@ const ActionItem = ({ target, value, calldata, index }: ActionItemProps) => {
           </p>
         </div>
 
-        <div className="flex w-full flex-col gap-2">
-          <div className="flex w-full gap-2">
-            <p className="font-mono min-w-[88px] text-sm font-normal not-italic leading-5">
-              calldata:
-            </p>
-            <p
-              className={`text-secondary font-mono overflow-wrap-anywhere break-all text-sm font-normal not-italic leading-5 ${
-                isCalldataLong && !isCalldataExpanded ? "line-clamp-5" : ""
-              }`}
-            >
-              {calldata}
-            </p>
+        <div className="flex w-full gap-2">
+          <p className="font-mono min-w-[88px] shrink-0 text-sm font-normal not-italic leading-5">
+            calldata:
+          </p>
+          <div className="border-border-contrast relative min-w-0 flex-1 border">
+            <div className="scrollbar-thin max-h-[248px] overflow-y-auto p-3">
+              <p
+                className={`text-secondary font-mono text-sm font-normal not-italic leading-5 ${
+                  isDecoded ? "whitespace-pre-wrap" : "break-all"
+                }`}
+              >
+                {displayCalldata}
+              </p>
+            </div>
+            {calldata && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleToggleDecode}
+                loading={isLoading}
+                className="bg-surface-default border-border-contrast absolute -right-px -bottom-px border"
+              >
+                {isDecoded ? "Encode" : "Decode"}
+              </Button>
+            )}
           </div>
-          {isCalldataLong && (
-            <button
-              onClick={() => setIsCalldataExpanded(!isCalldataExpanded)}
-              className="text-link hover:text-link/80 ml-[96px] cursor-pointer self-start font-mono text-[13px] font-medium uppercase leading-none tracking-wider transition-colors duration-300"
-            >
-              {isCalldataExpanded ? "See less" : "See more"}
-            </button>
-          )}
         </div>
 
         <div className="flex w-full gap-2">
