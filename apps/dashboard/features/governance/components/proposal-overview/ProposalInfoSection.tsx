@@ -12,6 +12,7 @@ import { formatNumberUserReadable } from "@/shared/utils";
 import { formatUnits } from "viem";
 import { BulletDivider } from "@/features/governance/components/proposal-overview/BulletDivider";
 import { ProposalInfoText } from "@/features/governance/components/proposal-overview/ProposalInfoText";
+import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 
 const VotingProgressBar = ({
   startTimestamp,
@@ -223,12 +224,11 @@ export const ProposalInfoSection = ({
         {/* Quorum */}
         <div className="flex items-center gap-2">
           <Users className="text-secondary size-3.5" />
-          <p
-            className="text-secondary font-mono text-[13px] font-medium uppercase not-italic leading-[20px] tracking-[0.78px]"
-            style={{ fontStyle: "normal" }}
-          >
-            Quorum
-          </p>
+          <Tooltip tooltipContent='Only "For" and "Abstain" votes are counted'>
+            <p className="text-secondary border-border-contrast hover:border-primary transition-colors duration-300 border-b border-dashed font-mono text-[13px] font-medium uppercase not-italic leading-[20px] tracking-[0.78px]">
+              Quorum
+            </p>
+          </Tooltip>
           <BulletDivider />
           <p className="font-inter text-secondary text-[14px] font-normal not-italic leading-[20px]">
             {formatNumberUserReadable(
