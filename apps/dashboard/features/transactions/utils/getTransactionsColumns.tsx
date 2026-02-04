@@ -17,6 +17,7 @@ import { Address, zeroAddress } from "viem";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { cn } from "@/shared/utils";
 import { TransactionsParamsType } from "@/features/transactions/hooks/useTransactionParams";
+import { DateCell } from "@/shared/components/design-system/table/cells/DateCell";
 
 export const getTransactionsColumns = ({
   loading,
@@ -136,7 +137,7 @@ export const getTransactionsColumns = ({
       size: 162,
     },
     {
-      accessorKey: "date",
+      accessorKey: "timestamp",
       header: () => (
         <Button
           variant="ghost"
@@ -159,7 +160,7 @@ export const getTransactionsColumns = ({
         </Button>
       ),
       cell: ({ row }) => {
-        const date = row.getValue("date") as string;
+        const timestamp = row.getValue("timestamp") as string;
 
         if (loading) {
           return (
@@ -169,8 +170,10 @@ export const getTransactionsColumns = ({
           );
         }
 
-        return date ? (
-          <span className="text-secondary w-full px-4 text-sm">{date}</span>
+        return timestamp ? (
+          <div className="w-full px-4">
+            <DateCell timestampSeconds={timestamp} className="text-secondary" />
+          </div>
         ) : null;
       },
       size: 162,

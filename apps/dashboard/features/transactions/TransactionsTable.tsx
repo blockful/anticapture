@@ -90,7 +90,7 @@ export const TransactionsTable = ({
             id: "loading-row",
             affectedSupply: ["CEX", "DEX"] as SupplyType[],
             amount: "1000000",
-            date: "2 hours ago",
+            timestamp: "0",
             from: "0x1234567890abcdef",
             to: "0xabcdef1234567890",
             txHash:
