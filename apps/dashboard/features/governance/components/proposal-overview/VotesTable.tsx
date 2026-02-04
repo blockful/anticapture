@@ -113,7 +113,7 @@ export const VotesTable = <TData, TValue>({
   const table = useReactTable(tableConfig);
 
   return (
-    <div className="scrollbar-custom border-border-default relative w-full overflow-x-auto rounded-md border">
+    <div className="scrollbar-custom border-border-default relative w-full overflow-x-auto border">
       <table
         className={cn(
           "text-secondary lg:bg-surface-default w-full caption-bottom border-separate border-spacing-0 bg-transparent text-sm",
