@@ -35,6 +35,7 @@ export const OngoingProposalBanner = ({ daoId }: { daoId: string }) => {
       link={{
         url: `/${daoId.toLowerCase()}/governance`,
         text: "View proposals",
+        openInNewTab: false,
       }}
     />
   );
