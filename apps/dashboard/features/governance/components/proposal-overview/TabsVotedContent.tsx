@@ -302,7 +302,7 @@ export const TabsVotedContent = ({
 
           return (
             <div className="flex h-10 flex-col items-start justify-center gap-0 p-2">
-              <span className="text-secondary leading-5 text-sm">
+              <span className="text-secondary leading-5 text-sm whitespace-nowrap">
                 {formattedDate}
               </span>
               {formattedTime && (
