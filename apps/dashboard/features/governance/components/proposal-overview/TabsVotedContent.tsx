@@ -553,9 +553,9 @@ export const TabsVotedContent = ({
                 href={`${blockExplorerUrl}/tx/${transactionHash}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:bg-surface-contrast flex h-fit cursor-pointer items-center justify-center rounded-md bg-transparent p-1.5 transition-colors duration-300"
+                className="flex h-fit cursor-pointer items-center justify-center border border-transparent bg-transparent p-1 text-primary transition-colors duration-300 hover:bg-surface-contrast"
               >
-                <ExternalLink className="text-secondary size-3.5" />
+                <ExternalLink className="size-3.5 shrink-0" />
               </Link>
             </div>
           );
