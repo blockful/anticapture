@@ -25,6 +25,7 @@ import { VotesTable } from "@/features/governance/components/proposal-overview/V
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import daoConfigByDaoId from "@/shared/dao-config";
 import Link from "next/link";
+import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { formatUnits } from "viem";
 
 interface TabsVotedContentProps {
@@ -520,7 +521,11 @@ export const TabsVotedContent = ({
         },
         header: () => (
           <div className="text-table-header flex h-8 w-full shrink-0 items-center justify-start whitespace-nowrap px-2">
-            <p>VP Change (Last 30d)</p>
+            <Tooltip tooltipContent="Shows the voting power change within 30 days before voting starts">
+              <p className="border-border-contrast hover:border-primary border-b border-dashed transition-colors duration-300">
+                VP Change (Last 30d)
+              </p>
+            </Tooltip>
           </div>
         ),
       },
