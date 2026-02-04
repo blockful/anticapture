@@ -15,6 +15,7 @@ import daoConfig from "@/shared/dao-config";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { QueryInput_AccountBalances_OrderDirection } from "@anticapture/graphql-client";
+import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 
 export const VoteCompositionTable = ({
   address,
@@ -23,6 +24,7 @@ export const VoteCompositionTable = ({
   address: string;
   daoId: string;
 }) => {
+  const limit: number = DEFAULT_ITEMS_PER_PAGE;
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const [sortBy, setSortBy] = useQueryState(
     "orderBy",
@@ -42,6 +44,7 @@ export const VoteCompositionTable = ({
       address: address,
       orderBy: sortBy as "balance" | "timestamp",
       orderDirection: sortOrder as QueryInput_AccountBalances_OrderDirection,
+      limit,
     });
 
   useEffect(() => {
@@ -209,19 +212,18 @@ export const VoteCompositionTable = ({
   ];
 
   return (
-    <div className="flex w-full flex-col gap-2">
+    <div className="flex h-full w-full flex-col overflow-hidden">
       <Table
         columns={columns}
-        data={loading ? Array(12).fill({}) : tableData}
+        data={loading ? Array(DEFAULT_ITEMS_PER_PAGE).fill({}) : tableData}
         filterColumn="address"
         size="sm"
         hasMore={pagination.hasNextPage}
         isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}
         withDownloadCSV={true}
-        wrapperClassName="h-[450px]"
-        className="h-[400px]"
         error={error}
+        fillHeight
       />
     </div>
   );

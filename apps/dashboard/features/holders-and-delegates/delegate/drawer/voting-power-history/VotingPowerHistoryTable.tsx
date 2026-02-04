@@ -213,7 +213,6 @@ export const VotingPowerHistoryTable = ({
             onReset={() => {
               setIsFilterActive(false);
               setSortBy("timestamp");
-              setSortDirection("desc");
               setFilterVariables(() => ({
                 fromValue: "",
                 toValue: "",
@@ -479,7 +478,7 @@ export const VotingPowerHistoryTable = ({
   ];
 
   return (
-    <div className="flex h-full w-full flex-col gap-2 overflow-hidden p-4">
+    <div className="flex h-full w-full flex-col overflow-hidden">
       <Table
         columns={columns}
         data={

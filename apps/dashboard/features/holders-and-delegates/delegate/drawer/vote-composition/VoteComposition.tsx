@@ -37,27 +37,31 @@ const ChartLegend = ({
 
   return (
     <div className="flex w-full flex-wrap items-center justify-between gap-2 lg:justify-normal lg:gap-3">
-      {items.map((item) => {
-        return (
-          <div key={item.label} className="flex items-center gap-2">
-            <span
-              className="rounded-xs size-2"
-              style={{ backgroundColor: item.color }}
-            />
-            <span className="text-secondary flex flex-row gap-2 text-sm font-medium">
-              {item.label}
+      {items.length === 0 ? (
+        <div className="text-secondary text-sm">No delegators found</div>
+      ) : (
+        items.map((item) => {
+          return (
+            <div key={item.label} className="flex items-center gap-2">
               <span
-                className="text-secondary text-sm font-medium"
-                style={{
-                  color: item.color,
-                }}
-              >
-                {item.percentage}%
+                className="rounded-xs size-2"
+                style={{ backgroundColor: item.color }}
+              />
+              <span className="text-secondary flex flex-row gap-2 text-sm font-medium">
+                {item.label}
+                <span
+                  className="text-secondary text-sm font-medium"
+                  style={{
+                    color: item.color,
+                  }}
+                >
+                  {item.percentage}%
+                </span>
               </span>
-            </span>
-          </div>
-        );
-      })}
+            </div>
+          );
+        })
+      )}
     </div>
   );
 };
@@ -77,19 +81,6 @@ export const VoteComposition = ({
     chartConfig,
     loading: loadingVotingPowerData,
   } = useVoteCompositionData(daoId, address);
-
-  if (
-    !topFiveDelegators ||
-    (topFiveDelegators.length === 0 && !loadingVotingPowerData)
-  ) {
-    return (
-      <BlankSlate
-        variant="default"
-        icon={Inbox}
-        description="No delegators found"
-      />
-    );
-  }
   return (
     <div className="flex h-full w-full flex-col gap-4 overflow-hidden p-4">
       <div className="border-light-dark text-primary flex h-fit w-full shrink-0 flex-col gap-4 overflow-y-auto border p-4 lg:flex-row">
@@ -129,19 +120,10 @@ export const VoteComposition = ({
                 </p>
 
                 <div className="scrollbar-none flex flex-col gap-4 overflow-y-auto">
-                  {!legendItems || !topFiveDelegators ? (
-                    <ChartLegend items={[]} loading={true} />
-                  ) : !topFiveDelegators ? (
-                    <div className="text-secondary text-sm">
-                      Loading delegators...
-                    </div>
-                  ) : topFiveDelegators && topFiveDelegators.length > 0 ? (
-                    <ChartLegend items={legendItems} />
-                  ) : (
-                    <div className="text-secondary text-sm">
-                      No delegators found
-                    </div>
-                  )}
+                  <ChartLegend
+                    items={legendItems}
+                    loading={loadingVotingPowerData}
+                  />
                 </div>
               </div>
             </div>

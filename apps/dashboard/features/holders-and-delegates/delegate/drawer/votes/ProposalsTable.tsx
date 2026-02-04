@@ -228,7 +228,7 @@ export const ProposalsTable = ({
         );
       },
       header: () => (
-        <div className="flex items-center gap-2 font-medium">
+        <div className="flex items-center gap-2 whitespace-nowrap font-medium">
           User Vote
           {userVoteFilterOptions && onUserVoteFilterChange && (
             <CategoriesFilter

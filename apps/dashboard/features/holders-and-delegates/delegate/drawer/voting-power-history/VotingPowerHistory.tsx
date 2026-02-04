@@ -26,14 +26,14 @@ export const VotingPowerHistory = ({
   );
 
   return (
-    <div className="bg-surface-default flex flex-col">
+    <div className="bg-surface-default flex h-full flex-col overflow-hidden">
       {/* Graph Section */}
       <div className="shrink-0 p-4 pb-2">
         <VotingPowerVariationGraph accountId={accountId} daoId={daoId} />
       </div>
 
       {/* Table Section */}
-      <div className="flex flex-col">
+      <div className="flex min-h-0 w-full flex-1 flex-col gap-2 overflow-hidden p-4">
         <VotingPowerHistoryTable
           accountId={accountId}
           daoId={daoId}
