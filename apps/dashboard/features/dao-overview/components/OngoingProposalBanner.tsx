@@ -9,9 +9,7 @@ export const OngoingProposalBanner = ({ daoId }: { daoId: string }) => {
   const { data, loading } = useGetProposalsFromDaoQuery({
     variables: {
       limit: 1,
-      status: {
-        in: [ProposalStatus.ONGOING],
-      },
+      status: ProposalStatus.ONGOING,
     },
     context: {
       headers: {

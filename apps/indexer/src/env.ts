@@ -4,32 +4,13 @@ import { DaoIdEnum } from "@/lib/enums";
 
 dotenv.config();
 
-const envSchema = z.object({
-  RPC_URL: z.string(),
-  DATABASE_URL: z.string().optional(),
-  POLLING_INTERVAL: z.coerce.number().default(10000), // 10s
-  MAX_REQUESTS_PER_SECOND: z.coerce.number().default(20),
-  DAO_ID: z.nativeEnum(DaoIdEnum),
-  CHAIN_ID: z.coerce.number(),
-
-  // Treasury provider configuration
-  TREASURY_DATA_PROVIDER_ID: z
-    .enum(["DUNE", "DEFILLAMA", "COMPOUND"])
-    .optional(),
-  TREASURY_DATA_PROVIDER_API_URL: z.string().optional(),
-  TREASURY_DATA_PROVIDER_API_KEY: z.string().optional(),
-
-  COINGECKO_API_URL: z.string(),
-  COINGECKO_API_KEY: z.string(),
-  REDIS_URL: z.string().optional(),
-  PORT: z.coerce.number().default(42069),
-});
-
-const _env = envSchema.safeParse(process.env);
-
-if (_env.success === false) {
-  console.error("Invalid environment variables", _env.error.format());
-  throw new Error("Invalid environment variables");
-}
-
-export const env = _env.data;
+export const env = z
+  .object({
+    RPC_URL: z.string(),
+    DATABASE_URL: z.string().optional(),
+    POLLING_INTERVAL: z.coerce.number().default(10000), // 10s
+    MAX_REQUESTS_PER_SECOND: z.coerce.number().default(20),
+    DAO_ID: z.nativeEnum(DaoIdEnum),
+    CHAIN_ID: z.coerce.number(),
+  })
+  .parse(process.env);

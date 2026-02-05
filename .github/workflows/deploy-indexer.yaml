@@ -4,9 +4,10 @@ on:
   push:
     branches: [dev, main]
     paths:
-      - "apps/indexer/**/*.ts"
-      - "apps/api-gateway/**/*.ts"
-      - "infra/**"
+      - "apps/indexer/**/*"
+      - "apps/api-gateway/**/*"
+      - "infra/**/*"
+      - "apps/api/**/*"
 
 jobs:
   changes:
@@ -22,14 +23,9 @@ jobs:
           base: ${{ github.ref_name }}
           filters: |
             api:
-              - 'apps/indexer/src/api/**'
+              - 'apps/api/src/**'
             indexer:
-              - 'apps/indexer/src/eventHandlers/**'
-              - 'apps/indexer/src/indexer/**'
-              - 'apps/indexer/src/interfaces/**'
-              - 'apps/indexer/src/lib/**'
-              - 'apps/indexer/src/*.ts'
-              - 'apps/indexer/*.ts'
+              - 'apps/indexer/**/*'
 
   get-daos:
     runs-on: ubuntu-latest
