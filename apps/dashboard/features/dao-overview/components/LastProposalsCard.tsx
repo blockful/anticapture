@@ -64,16 +64,12 @@ export const LastProposalsCard = ({ daoId }: { daoId: DaoIdEnum }) => {
 
     return (
       <div className="flex flex-col">
-        {proposals.map((proposal, index) => (
-          <div key={proposal.id}>
-            <ProposalItem
-              proposal={proposal}
-              className="border-border-default border-b last:border-b-0"
-            />
-            {index < proposals.length - 1 && (
-              <div className="border-border-default border-b" />
-            )}
-          </div>
+        {proposals.map((proposal) => (
+          <ProposalItem
+            key={proposal.id}
+            proposal={proposal}
+            className="border-border-default border-b last:border-b-0"
+          />
         ))}
       </div>
     );
