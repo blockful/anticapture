@@ -31,6 +31,7 @@ import {
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
+import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
 interface DelegateTableData {
   address: string;
   votingPower: string;
@@ -137,8 +138,8 @@ export const Delegates = ({
 
       const activityPercentage = delegate.proposalsActivity
         ? (delegate.proposalsActivity.votedProposals /
-            delegate.proposalsActivity.totalProposals) *
-          100
+          delegate.proposalsActivity.totalProposals) *
+        100
         : null;
 
       const avgVoteTiming = getAvgVoteTimingData(
@@ -152,7 +153,7 @@ export const Delegates = ({
         votingPower: formatNumberUserReadable(votingPowerFormatted),
         variation: {
           percentageChange:
-            delegate.percentageChange === "NO BASELINE"
+            delegate.percentageChange === PERCENTAGE_NO_BASELINE
               ? 9999
               : Number(Number(delegate.percentageChange).toFixed(2)),
           absoluteChange: Number(
@@ -288,9 +289,9 @@ export const Delegates = ({
 
         const variation = row.getValue("variation") as
           | {
-              percentageChange: number;
-              absoluteChange: number;
-            }
+            percentageChange: number;
+            absoluteChange: number;
+          }
           | undefined;
 
         if (isHistoricalLoadingFor(addr) || loading) {

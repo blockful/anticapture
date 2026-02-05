@@ -12,6 +12,7 @@ import { TimeInterval } from "@/shared/types/enums";
 import { useMemo } from "react";
 import { useTopVotingPowerVariations } from "@/features/dao-overview/hooks/useTopVotingPowerVariations";
 import daoConfig from "@/shared/dao-config";
+import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
 
 export const VotingPowerChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
   const votingPowerVariations = useTopVotingPowerVariations(
@@ -30,7 +31,7 @@ export const VotingPowerChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
         );
 
         const percentageChange =
-          item?.percentageChange === "NO BASELINE"
+          item?.percentageChange === PERCENTAGE_NO_BASELINE
             ? 0
             : Number(item?.percentageChange);
 
