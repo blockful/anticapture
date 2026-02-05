@@ -17,6 +17,7 @@ const EnrichmentResponseSchema = z.object({
       entity: z.string().nullable(),
       entityType: z.string().nullable(),
       label: z.string().nullable(),
+      twitter: z.string().nullable(),
     })
     .nullable(),
   ens: z

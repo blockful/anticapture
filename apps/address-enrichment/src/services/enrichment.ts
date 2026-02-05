@@ -14,6 +14,7 @@ export interface EnrichmentResult {
     entity: string | null;
     entityType: string | null;
     label: string | null;
+    twitter: string | null;
   } | null;
   ens: {
     name: string | null;
@@ -110,6 +111,7 @@ export class EnrichmentService {
       arkhamEntity: arkhamData?.entity ?? null,
       arkhamEntityType: arkhamData?.entityType ?? null,
       arkhamLabel: arkhamData?.label ?? null,
+      arkhamTwitter: arkhamData?.twitter ?? null,
       ensName: ensData?.name ?? null,
       ensAvatar: ensData?.avatar ?? null,
       ensBanner: ensData?.banner ?? null,
@@ -139,6 +141,7 @@ export class EnrichmentService {
               entity: arkhamData.entity,
               entityType: arkhamData.entityType,
               label: arkhamData.label,
+              twitter: arkhamData.twitter,
             }
           : null,
         ens: ensData,
@@ -172,6 +175,7 @@ export class EnrichmentService {
         entity: record.arkhamEntity,
         entityType: record.arkhamEntityType,
         label: record.arkhamLabel,
+        twitter: record.arkhamTwitter,
       },
       ens: hasEnsData
         ? {

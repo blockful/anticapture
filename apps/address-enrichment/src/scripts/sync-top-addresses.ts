@@ -102,6 +102,7 @@ interface EnrichResult {
   entity: string | null;
   entityType: string | null;
   label: string | null;
+  twitter: string | null;
   isContract: boolean;
 }
 
@@ -125,6 +126,7 @@ async function enrichAddress(
       entity: existing.arkhamEntity,
       entityType: existing.arkhamEntityType,
       label: existing.arkhamLabel,
+      twitter: existing.arkhamTwitter,
       isContract: existing.isContract,
     };
   }
@@ -153,6 +155,7 @@ async function enrichAddress(
       arkhamEntity: arkhamData?.entity ?? null,
       arkhamEntityType: arkhamData?.entityType ?? null,
       arkhamLabel: arkhamData?.label ?? null,
+      arkhamTwitter: arkhamData?.twitter ?? null,
     })
     .onConflictDoNothing();
 
@@ -162,6 +165,7 @@ async function enrichAddress(
     entity: arkhamData?.entity ?? null,
     entityType: arkhamData?.entityType ?? null,
     label: arkhamData?.label ?? null,
+    twitter: arkhamData?.twitter ?? null,
     isContract: isContractAddress,
   };
 }
@@ -272,6 +276,7 @@ async function main() {
       if (result.entity) arkhamParts.push(result.entity);
       if (result.label) arkhamParts.push(`"${result.label}"`);
       if (result.entityType) arkhamParts.push(`[${result.entityType}]`);
+      if (result.twitter) arkhamParts.push(`@${result.twitter}`);
       if (result.isContract) arkhamParts.push("📜 contract");
       const arkhamStr =
         arkhamParts.length > 0 ? `→ ${arkhamParts.join(" ")}` : "→ unknown";

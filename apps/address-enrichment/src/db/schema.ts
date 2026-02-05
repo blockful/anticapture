@@ -17,6 +17,7 @@ export const addressEnrichment = pgTable("address_enrichment", {
   arkhamEntity: varchar("arkham_entity", { length: 255 }),
   arkhamEntityType: varchar("arkham_entity_type", { length: 100 }), // e.g., "cex", "dex", "defi"
   arkhamLabel: varchar("arkham_label", { length: 255 }),
+  arkhamTwitter: varchar("arkham_twitter", { length: 255 }),
   ensName: varchar("ens_name", { length: 255 }),
   ensAvatar: text("ens_avatar"),
   ensBanner: text("ens_banner"),

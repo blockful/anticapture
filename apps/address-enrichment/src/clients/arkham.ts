@@ -39,6 +39,7 @@ export interface ArkhamData {
   entity: string | null;
   entityType: string | null; // e.g., "cex", "dex", "defi"
   label: string | null;
+  twitter: string | null;
   isContract: boolean | null; // null if Arkham doesn't know
 }
 
@@ -76,6 +77,7 @@ export class ArkhamClient {
             entity: null,
             entityType: null,
             label: null,
+            twitter: null,
             isContract: null,
           };
         }
@@ -97,6 +99,7 @@ export class ArkhamClient {
         entity: parsed.data.arkhamEntity?.name ?? null,
         entityType: parsed.data.arkhamEntity?.type ?? null,
         label: parsed.data.arkhamLabel?.name ?? null,
+        twitter: parsed.data.arkhamEntity?.twitter ?? null,
         isContract: parsed.data.contract ?? null,
       };
     } catch (error) {

@@ -25,7 +25,8 @@ Returns enriched data for a single Ethereum address.
   "arkham": {
     "entity": "Upbit",
     "entityType": "cex",
-    "label": "Cold Wallet"
+    "label": "Cold Wallet",
+    "twitter": "Upbit_Global"
   },
   "ens": {
     "name": "example.eth",
@@ -64,7 +65,8 @@ Batch endpoint for resolving multiple addresses at once (max 100 per request).
       "arkham": {
         "entity": "Upbit",
         "entityType": "cex",
-        "label": "Cold Wallet"
+        "label": "Cold Wallet",
+        "twitter": "Upbit_Global"
       },
       "ens": {
         "name": "example.eth",
@@ -149,6 +151,7 @@ The service uses a single table `address_enrichment`:
 - `arkham_entity`: Entity name from Arkham (e.g., "Upbit", "Binance")
 - `arkham_entity_type`: Entity type from Arkham (e.g., "cex", "dex", "defi")
 - `arkham_label`: Specific label from Arkham (e.g., "Cold Wallet", "Hot Wallet")
+- `arkham_twitter`: Twitter/X handle from Arkham (e.g., "Upbit_Global")
 - `ens_name`: ENS name (e.g., "vitalik.eth")
 - `ens_avatar`: ENS avatar URL
 - `ens_banner`: ENS banner/header URL
