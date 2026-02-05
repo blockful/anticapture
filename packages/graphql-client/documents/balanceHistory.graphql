@@ -8,6 +8,8 @@ query BalanceHistory(
   $to: String
   $fromValue: String
   $toValue: String
+  $fromDate: Float
+  $toDate: Float
 ) {
   transfers(
     address: $address
@@ -19,6 +21,8 @@ query BalanceHistory(
     to: $to
     fromValue: $fromValue
     toValue: $toValue
+    fromDate: $fromDate
+    toDate: $toDate
   ) {
     items {
       timestamp

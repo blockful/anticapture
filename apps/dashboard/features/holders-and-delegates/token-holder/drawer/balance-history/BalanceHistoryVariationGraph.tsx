@@ -17,13 +17,16 @@ import {
   BalanceHistoryGraphItem,
   useBalanceHistoryGraph,
 } from "@/features/holders-and-delegates/hooks/useBalanceHistoryGraph";
-import { TimePeriodSwitcher } from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
+import {
+  TimePeriod,
+  TimePeriodSwitcher,
+} from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
 import { ChartExceptionState } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { useMemo } from "react";
-import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
+import { getTimestampRangeFromPeriod } from "@/features/holders-and-delegates/utils";
 
 interface BalanceHistoryVariationGraphProps {
   accountId: string;
@@ -85,30 +88,13 @@ export const BalanceHistoryVariationGraph = ({
 }: BalanceHistoryVariationGraphProps) => {
   const [selectedPeriod, setSelectedPeriod] = useQueryState(
     "selectedPeriod",
-    parseAsStringEnum(["30d", "90d", "all"]).withDefault("all"),
+    parseAsStringEnum<TimePeriod>(["30d", "90d", "all"]).withDefault("all"),
   );
 
-  const fromDate = useMemo(() => {
-    // For "all", treat as all time by not setting limits
-    if (selectedPeriod === "all") return undefined;
-
-    // Use start of today for a stable reference that won't change on each render
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const todayInSeconds = today.getTime() / 1000;
-
-    let daysInSeconds: number;
-    switch (selectedPeriod) {
-      case "90d":
-        daysInSeconds = 90 * SECONDS_PER_DAY;
-        break;
-      default:
-        daysInSeconds = 30 * SECONDS_PER_DAY;
-        break;
-    }
-
-    return Math.floor(todayInSeconds - daysInSeconds);
-  }, [selectedPeriod]);
+  const { fromTimestamp: fromDate } = useMemo(
+    () => getTimestampRangeFromPeriod(selectedPeriod),
+    [selectedPeriod],
+  );
 
   const { balanceHistory, loading, error } = useBalanceHistoryGraph(
     accountId,

@@ -46,6 +46,7 @@ export const TheSectionLayout = ({
         riskLevel={riskLevel}
         description={description ?? ""}
       />
+      <div className="border-border-default w-full border-b border-dashed lg:hidden" />
       {subsectionTitle ? (
         <SubSection
           subsectionTitle={subsectionTitle}

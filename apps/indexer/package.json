@@ -13,6 +13,7 @@
     "clean": "rm -rf node_modules generated .ponder dump *.tsbuildinfo"
   },
   "dependencies": {
+    "hono": "^4.10.7",
     "ponder": "^0.16.2",
     "viem": "^2.37.11",
     "zod": "^3.25.3"

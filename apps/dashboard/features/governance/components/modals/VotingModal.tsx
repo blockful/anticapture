@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@/shared/components";
-import { User2Icon, X } from "lucide-react";
+import { BadgeStatus, Button } from "@/shared/components";
+import { Check, User2Icon, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Query_Proposals_Items_Items } from "@anticapture/graphql-client/hooks";
 
@@ -33,25 +33,69 @@ export const VotingModal = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [transactionhash, setTransactionhash] = useState<string>("");
 
-  const totalVotes =
-    Number(proposal?.forVotes) +
-    Number(proposal?.againstVotes) +
-    Number(proposal?.abstainVotes);
+  // Parse user's voting power to BigInt for calculations
+  const userVotingPowerBigInt = BigInt(votingPower || "0");
 
-  const userReadableTotalVotes = formatNumberUserReadable(
-    Number(formatUnits(BigInt(totalVotes || 0), decimals)),
+  // Calculate base votes from proposal
+  const baseForVotes = BigInt(proposal?.forVotes || "0");
+  const baseAgainstVotes = BigInt(proposal?.againstVotes || "0");
+  const baseAbstainVotes = BigInt(proposal?.abstainVotes || "0");
+
+  // Calculate simulated votes based on user's selection
+  const simulatedForVotes =
+    vote === "for" ? baseForVotes + userVotingPowerBigInt : baseForVotes;
+  const simulatedAgainstVotes =
+    vote === "against"
+      ? baseAgainstVotes + userVotingPowerBigInt
+      : baseAgainstVotes;
+  const simulatedAbstainVotes =
+    vote === "abstain"
+      ? baseAbstainVotes + userVotingPowerBigInt
+      : baseAbstainVotes;
+
+  // Calculate simulated total (includes user's voting power if any option is selected)
+  const simulatedTotalVotes =
+    simulatedForVotes + simulatedAgainstVotes + simulatedAbstainVotes;
+
+  // Calculate simulated quorum votes (for + abstain only, against votes don't count toward quorum)
+  const simulatedQuorumVotes = simulatedForVotes + simulatedAbstainVotes;
+
+  const userReadableQuorumVotes = formatNumberUserReadable(
+    Number(formatUnits(simulatedQuorumVotes || BigInt(0), decimals)),
   );
   const userReadableQuorum = formatNumberUserReadable(
     Number(formatUnits(BigInt(proposal?.quorum || 0), decimals)),
   );
-  const forPercentage = (Number(proposal?.forVotes) / Number(totalVotes)) * 100;
+
+  // Calculate percentages based on simulated values
+  const forPercentage =
+    simulatedTotalVotes > BigInt(0)
+      ? (Number(simulatedForVotes) / Number(simulatedTotalVotes)) * 100
+      : 0;
   const againstPercentage =
-    (Number(proposal?.againstVotes) / Number(totalVotes)) * 100;
+    simulatedTotalVotes > BigInt(0)
+      ? (Number(simulatedAgainstVotes) / Number(simulatedTotalVotes)) * 100
+      : 0;
   const abstainPercentage =
-    (Number(proposal?.abstainVotes) / Number(totalVotes)) * 100;
+    simulatedTotalVotes > BigInt(0)
+      ? (Number(simulatedAbstainVotes) / Number(simulatedTotalVotes)) * 100
+      : 0;
+
+  const isQuorumReached =
+    Number(simulatedQuorumVotes) >= Number(proposal?.quorum || 0);
 
   const { address, chain } = useAccount();
   const { data: walletClient } = useWalletClient();
+
+  // Reset state when modal opens to prevent stale data from previous sessions
+  useEffect(() => {
+    if (isOpen) {
+      setVote("");
+      setComment("");
+      setIsLoading(false);
+      setTransactionhash("");
+    }
+  }, [isOpen]);
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -84,10 +128,12 @@ export const VotingModal = ({
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center transition-colors  ${
+        isOpen ? "visible opacity-100" : "invisible opacity-0"
+      }`}
+    >
       {/* Backdrop with blur */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
@@ -96,7 +142,11 @@ export const VotingModal = ({
       />
 
       {/* Modal content */}
-      <div className="border-border-default bg-surface-default relative z-10 mx-4 w-full max-w-[600px] rounded-lg border shadow-lg">
+      <div
+        className={`border-border-default bg-surface-default relative z-10 mx-4 w-full max-w-[600px] border shadow-lg transition-all duration-200 ${
+          isOpen ? "translate-y-0 scale-100" : "translate-y-4 scale-95"
+        }`}
+      >
         {/* Header */}
         <div className="border-border-default mb-4 flex items-start justify-between border-b px-4 py-3">
           <div className="flex flex-col items-start">
@@ -138,7 +188,7 @@ export const VotingModal = ({
               <VoteOption
                 vote="for"
                 optionPercentage={forPercentage}
-                votingPower={proposal?.forVotes}
+                votingPower={simulatedForVotes.toString()}
                 onChange={setVote}
                 checked={vote === "for"}
                 decimals={decimals}
@@ -148,7 +198,7 @@ export const VotingModal = ({
               <VoteOption
                 vote="against"
                 optionPercentage={againstPercentage}
-                votingPower={proposal?.againstVotes}
+                votingPower={simulatedAgainstVotes.toString()}
                 onChange={setVote}
                 checked={vote === "against"}
                 decimals={decimals}
@@ -158,21 +208,29 @@ export const VotingModal = ({
               <VoteOption
                 vote="abstain"
                 optionPercentage={abstainPercentage}
-                votingPower={proposal?.abstainVotes}
+                votingPower={simulatedAbstainVotes.toString()}
                 onChange={setVote}
                 checked={vote === "abstain"}
                 decimals={decimals}
               />
 
-              <div className="border-border-default flex items-center justify-start gap-2 border px-[10px] py-2">
+              <div className="border-border-default bg-surface-contrast flex items-center justify-start gap-2 border px-[10px] py-2">
                 <User2Icon className="text-secondary size-3.5" />
                 <p className="font-inter text-primary text-[14px] font-normal not-italic leading-[20px]">
                   Quorum
                 </p>
                 <p className="font-inter text-secondary text-[14px] font-normal not-italic leading-[20px]">
-                  {userReadableTotalVotes} / {userReadableQuorum}
+                  {userReadableQuorumVotes} / {userReadableQuorum}
                 </p>
+                {isQuorumReached ? (
+                  <BadgeStatus variant="success" iconClassName="text-success!" icon={Check}>
+                    Reached
+                  </BadgeStatus>
+                ) : (
+                  <BadgeStatus variant="dimmed">Not Reached</BadgeStatus>
+                )}
               </div>
+            
             </div>
 
             {/* Comment  */}
@@ -181,7 +239,7 @@ export const VotingModal = ({
                 Comment <span className="text-secondary">(optional)</span>
               </p>
               <textarea
-                className="border-border-default text-primary flex h-[100px] w-full items-start gap-[var(--components-input-inner-gap,10px)] self-stretch rounded-md border bg-transparent px-[var(--components-input-padding-x,10px)] py-[var(--components-input-padding-y,8px)] focus:outline-none"
+                className="border-border-default text-primary flex h-[100px] w-full items-start gap-2.5 self-stretch rounded-md border bg-transparent px-2.5 py-2 text-[14px] focus:outline-none"
                 placeholder="Enter your comment"
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
@@ -191,8 +249,8 @@ export const VotingModal = ({
         )}
 
         <div className="border-border-default flex justify-end gap-2 border-t px-4 py-3">
-          <Button variant="ghost" onClick={onClose}>
-            Close
+          <Button variant="outline" onClick={onClose}>
+            Cancel
           </Button>
           <Button
             data-ph-event="vote_submit"

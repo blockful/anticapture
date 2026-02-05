@@ -28,7 +28,7 @@ export const getTextStatusColor = (status: ProposalStatus) => {
     case ProposalStatus.CANCELLED:
       return "text-error";
     case ProposalStatus.QUEUED:
-      return "text-primary";
+      return "text-success";
     case ProposalStatus.SUCCEEDED:
       return "text-success";
     case ProposalStatus.EXPIRED:
@@ -37,6 +37,31 @@ export const getTextStatusColor = (status: ProposalStatus) => {
       return "text-secondary";
     default:
       return "text-secondary";
+  }
+};
+
+export const getStatusColorBar = (status: ProposalStatus) => {
+  switch (status) {
+    case ProposalStatus.PENDING:
+      return "bg-warning";
+    case ProposalStatus.ONGOING:
+      return "bg-link";
+    case ProposalStatus.EXECUTED:
+      return "bg-success";
+    case ProposalStatus.DEFEATED:
+      return "bg-error";
+    case ProposalStatus.CANCELLED:
+      return "bg-error";
+    case ProposalStatus.QUEUED:
+      return "bg-success";
+    case ProposalStatus.SUCCEEDED:
+      return "bg-success";
+    case ProposalStatus.EXPIRED:
+      return "bg-error";
+    case ProposalStatus.NO_QUORUM:
+      return "bg-secondary";
+    default:
+      return "bg-secondary";
   }
 };
 
@@ -53,7 +78,7 @@ export const getBackgroundStatusColor = (status: ProposalStatus) => {
     case ProposalStatus.CANCELLED:
       return "bg-surface-opacity-error";
     case ProposalStatus.QUEUED:
-      return "bg-surface-opacity-brand";
+      return "bg-surface-opacity-success";
     case ProposalStatus.SUCCEEDED:
       return "bg-surface-opacity-success";
     case ProposalStatus.EXPIRED:
@@ -103,12 +128,13 @@ export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
         "text-primary bg-surface-default hover:bg-surface-contrast relative flex w-full cursor-pointer flex-col items-center justify-between gap-3 px-3 py-3 transition-colors duration-300 lg:flex-row lg:gap-6",
         className,
       )}
+      prefetch={true}
       id={proposal.id}
     >
       <div
         className={cn(
           "absolute left-0 top-1/2 h-[calc(100%-24px)] w-[2px] -translate-y-1/2",
-          getBackgroundStatusColor(proposal.status),
+          getStatusColorBar(proposal.status),
         )}
       />
 
@@ -152,18 +178,18 @@ export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
           </div>
         </div>
         <div className="flex w-full items-center justify-center gap-2">
-          <div className="bg-surface-hover relative flex h-1 w-full rounded-full">
+          <div className="bg-surface-hover relative flex h-1 w-full">
             <div
               style={{
                 width: `${proposal.votes.forPercentage}%`,
               }}
-              className={cn("bg-success h-full rounded-l-full")}
+              className={cn("bg-success h-full")}
             />
             <div
               style={{
                 width: `${proposal.votes.againstPercentage}%`,
               }}
-              className={cn("bg-error h-full rounded-r-full")}
+              className={cn("bg-error h-full")}
             />
 
             {quorumPercentage < 100 && (
@@ -180,8 +206,11 @@ export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
           {quorumPercentage < 100 && (
             <>
               <div
-                style={{ left: `${quorumPercentage}%` }}
-                className="font-inter text-secondary absolute flex -translate-x-1/2 items-center justify-center gap-2 whitespace-nowrap text-xs font-medium not-italic leading-4"
+                style={{
+                  left: `${quorumPercentage}%`,
+                  transform: `translateX(-${quorumPercentage}%)`,
+                }}
+                className="font-inter text-secondary absolute flex items-center justify-center gap-2 whitespace-nowrap text-xs font-medium not-italic leading-4"
               >
                 Quorum: {formatNumberUserReadable(Number(proposal.quorum))}
               </div>
