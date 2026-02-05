@@ -71,9 +71,13 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         <div className="block lg:hidden">
           <DividerDefault isHorizontal />
         </div>
-        <div className="mx-5">
-          <OngoingProposalBanner daoId={daoId} />
-        </div>
+
+        {daoConfig.governancePage && (
+          <div className="mx-5">
+            <OngoingProposalBanner daoId={daoId} />
+          </div>
+        )}
+
         <div className="border-inverted grid grid-cols-1 gap-5 border-x lg:mx-5 lg:grid-cols-2 lg:gap-2">
           <div className="w-full px-5 lg:px-0">
             <StagesContainer
