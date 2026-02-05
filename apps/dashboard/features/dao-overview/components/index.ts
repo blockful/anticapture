@@ -7,3 +7,4 @@ export * from "@/features/dao-overview/components/TopAccountsChart";
 export * from "@/features/dao-overview/components/DaoOverviewMetricCard";
 export * from "@/features/dao-overview/components/AttackProfitabilityChartCard";
 export * from "@/features/dao-overview/components/OverviewMetric";
+export * from "@/features/dao-overview/components/LastProposalsCard";
