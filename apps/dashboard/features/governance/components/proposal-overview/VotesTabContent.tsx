@@ -2,7 +2,6 @@
 
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { GetProposalQuery } from "@anticapture/graphql-client";
-import { useState } from "react";
 
 import { TabsVotedContent } from "@/features/governance/components/proposal-overview/TabsVotedContent";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -14,19 +13,27 @@ import {
 import { formatUnits } from "viem";
 import { TabsDidntVoteContent } from "@/features/governance/components/proposal-overview/TabsDidntVoteContent";
 import daoConfig from "@/shared/dao-config";
+import { parseAsStringEnum, useQueryState } from "nuqs";
+
+type VoteTabId = "voted" | "didntVote";
+
+interface VotesTabContentProps {
+  proposal: NonNullable<GetProposalQuery["proposal"]>;
+  onAddressClick?: (address: string) => void;
+}
 
 export const VotesTabContent = ({
   proposal,
-}: {
-  proposal: NonNullable<GetProposalQuery["proposal"]>;
-}) => {
-  const [activeTab, setActiveTab] = useState<"voted" | "didntVote">("voted");
+  onAddressClick,
+}: VotesTabContentProps) => {
+  const [activeTab, setActiveTab] = useQueryState(
+    "voteTab",
+    parseAsStringEnum<VoteTabId>(["voted", "didntVote"]).withDefault("voted"),
+  );
 
   const { daoId } = useParams<{ daoId: string }>();
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
   const { decimals } = daoConfig[daoIdEnum];
-
-  const TabsContent = TabsContentMapping[activeTab];
 
   // Get votes for this proposal
   const { data } = useGetVotesQuery({
@@ -65,7 +72,7 @@ export const VotesTabContent = ({
   );
 
   return (
-    <div className="text-primary flex w-full flex-col gap-3 p-4">
+    <div className="text-primary flex w-full flex-col gap-3 lg:p-4 py-4">
       <div className="grid grid-cols-2 gap-4">
         <div
           onClick={() => setActiveTab("voted")}
@@ -75,7 +82,7 @@ export const VotesTabContent = ({
           )}
         >
           Voted
-          <div className="text-secondary font-inter hidden text-[12px] font-medium not-italic leading-[16px] lg:block">
+          <div className="text-secondary font-inter hidden text-[12px] font-normal not-italic leading-[16px] lg:block">
             {data?.votesByProposalId?.totalCount} voters / {totalVotes} VP
           </div>
         </div>
@@ -87,28 +94,25 @@ export const VotesTabContent = ({
           )}
         >
           Didn&apos;t vote
-          <div className="text-secondary font-inter hidden text-[12px] font-medium not-italic leading-[16px] lg:block">
+          <div className="text-secondary font-inter hidden text-[12px] font-normal not-italic leading-[16px] lg:block">
             {nonVotersData?.proposalNonVoters?.totalCount || 0} voters
           </div>
         </div>
       </div>
 
       <div className="flex flex-col gap-3">
-        <TabsContent proposal={proposal} />
+        {activeTab === "voted" ? (
+          <TabsVotedContent
+            proposal={proposal}
+            onAddressClick={onAddressClick}
+          />
+        ) : (
+          <TabsDidntVoteContent
+            proposal={proposal}
+            onAddressClick={onAddressClick}
+          />
+        )}
       </div>
     </div>
   );
-};
-
-interface TabContentProps {
-  proposal: NonNullable<GetProposalQuery["proposal"]>;
-}
-
-const TabsContentMapping = {
-  voted: (props: TabContentProps) => (
-    <TabsVotedContent proposal={props.proposal} />
-  ),
-  didntVote: (props: TabContentProps) => (
-    <TabsDidntVoteContent proposal={props.proposal} />
-  ),
 };

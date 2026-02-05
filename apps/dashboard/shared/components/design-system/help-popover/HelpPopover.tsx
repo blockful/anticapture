@@ -84,7 +84,7 @@ export const HelpPopover = ({ className }: HelpPopoverProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className={cn("fixed bottom-4 right-4 z-50", className)}>
+    <div className={cn("fixed bottom-4 right-4 z-10", className)}>
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <Button

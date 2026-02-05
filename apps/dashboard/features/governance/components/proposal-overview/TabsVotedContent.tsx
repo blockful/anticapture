@@ -18,21 +18,30 @@ import {
   ArrowUp,
   ArrowDown,
   Inbox,
+  ExternalLink,
 } from "lucide-react";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { VotesTable } from "@/features/governance/components/proposal-overview/VotesTable";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import daoConfigByDaoId from "@/shared/dao-config";
+import Link from "next/link";
+import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
+import { formatUnits } from "viem";
+
+interface TabsVotedContentProps {
+  proposal: NonNullable<GetProposalQuery["proposal"]>;
+  onAddressClick?: (address: string) => void;
+}
 
 export const TabsVotedContent = ({
   proposal,
-}: {
-  proposal: NonNullable<GetProposalQuery["proposal"]>;
-}) => {
+  onAddressClick,
+}: TabsVotedContentProps) => {
   const loadingRowRef = useRef<HTMLTableRowElement>(null);
   const { daoId } = useParams();
 
   // State for managing sort order
-  const [sortBy, setSortBy] = useState<string>("timestamp");
+  const [sortBy, setSortBy] = useState<string>("votingPower");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
   // Handle sorting
@@ -132,13 +141,19 @@ export const TabsVotedContent = ({
 
           return (
             <div className="flex h-10 w-full items-center gap-3 p-2">
-              <EnsAvatar
-                address={voterAddress as `0x${string}`}
-                size="sm"
-                variant="rounded"
-                showName={true}
-                isDashed={true}
-              />
+              <button
+                onClick={() => onAddressClick?.(voterAddress)}
+                className="group cursor-pointer"
+              >
+                <EnsAvatar
+                  address={voterAddress as `0x${string}`}
+                  size="sm"
+                  variant="rounded"
+                  showName={true}
+                  isDashed={true}
+                  nameClassName="group-hover:border-primary transition-colors duration-200"
+                />
+              </button>
               <CopyAndPasteButton
                 className="size-2"
                 textToCopy={voterAddress}
@@ -163,7 +178,7 @@ export const TabsVotedContent = ({
           // Handle loading row
           if (voterAddress === "__LOADING_ROW__") {
             return (
-              <div className="flex h-10 items-center p-2">
+              <div className="flex items-center gap-2 p-2">
                 <SkeletonRow
                   parentClassName="flex animate-pulse"
                   className="h-6 w-16"
@@ -175,7 +190,7 @@ export const TabsVotedContent = ({
           // Handle skeleton data (empty objects from initial load)
           if (!voterAddress) {
             return (
-              <div className="flex h-10 items-center p-2">
+              <div className="flex items-center gap-2 p-2">
                 <SkeletonRow
                   parentClassName="flex animate-pulse"
                   className="h-6 w-16"
@@ -186,7 +201,7 @@ export const TabsVotedContent = ({
 
           // Handle description sub-row - show empty for other columns
           if (vote.isSubRow && voterAddress.startsWith("__DESCRIPTION_")) {
-            return <div className="flex h-10 items-center p-2" />;
+            return <div className="flex items-center gap-2 p-2" />;
           }
 
           const getChoiceInfo = (support: number) => {
@@ -217,15 +232,11 @@ export const TabsVotedContent = ({
           const choiceInfo = getChoiceInfo(support);
 
           return (
-            <div className="flex items-center p-2">
-              <div
-                className={cn("flex items-center gap-2 rounded-full px-3 py-1")}
-              >
-                {choiceInfo.icon}
-                <span className={cn("text-sm font-medium")}>
-                  {choiceInfo.label}
-                </span>
-              </div>
+            <div className="flex items-center gap-2 p-2">
+              {choiceInfo.icon}
+              <span className={cn("text-sm font-medium")}>
+                {choiceInfo.label}
+              </span>
             </div>
           );
         },
@@ -280,12 +291,25 @@ export const TabsVotedContent = ({
                 year: "numeric",
               })
             : "Unknown";
+          
+          const formattedTime = date
+            ? date.toLocaleTimeString("en-US", {
+                hour: "numeric",
+                minute: "2-digit",
+                hour12: true,
+              }).toLowerCase()
+            : null;
 
           return (
-            <div className="flex h-10 items-center p-2">
-              <span className="text-secondary whitespace-nowrap text-sm">
+            <div className="flex h-10 flex-col items-start justify-center gap-0 p-2">
+              <span className="text-secondary leading-5 text-sm whitespace-nowrap">
                 {formattedDate}
               </span>
+              {formattedTime && (
+                <span className="text-secondary leading-[18px] text-xs">
+                  {formattedTime}
+                </span>
+              )}
             </div>
           );
         },
@@ -461,8 +485,22 @@ export const TabsVotedContent = ({
             }
           };
 
+          // Format absolute change
+          const daoIdKey = (daoId as string)?.toUpperCase() as DaoIdEnum;
+          const decimals = daoConfigByDaoId[daoIdKey]?.decimals;
+          const absoluteChangeNum = votingPowerVariation.absoluteChange
+            ? Number(formatUnits(BigInt(votingPowerVariation.absoluteChange), decimals))
+            : 0;
+          const formattedAbsoluteChange = formatNumberUserReadable(
+            absoluteChangeNum,
+            1,
+          );
+
           return (
-            <div className="flex h-10 items-center p-2">
+            <div className="flex h-10 items-center justify-between gap-2 p-2">
+              <span className="text-secondary whitespace-nowrap text-right text-sm">
+                {formattedAbsoluteChange}
+              </span>
               <div className="flex items-center gap-1">
                 {getArrowIcon()}
                 <span
@@ -475,7 +513,7 @@ export const TabsVotedContent = ({
                 >
                   {votingPowerVariation.percentageChange === "NO BASELINE"
                     ? ">1000%"
-                    : `${Number(votingPowerVariation.percentageChange).toFixed(2)}%`}
+                    : `${Number(votingPowerVariation.percentageChange).toFixed(1)}%`}
                 </span>
               </div>
             </div>
@@ -483,8 +521,52 @@ export const TabsVotedContent = ({
         },
         header: () => (
           <div className="text-table-header flex h-8 w-full shrink-0 items-center justify-start whitespace-nowrap px-2">
-            <p>VP Change (Last 30d)</p>
+            <Tooltip tooltipContent="Shows the voting power change within 30 days before voting starts">
+              <p className="border-border-contrast hover:border-primary border-b border-dashed transition-colors duration-300">
+                VP Change (Last 30d)
+              </p>
+            </Tooltip>
           </div>
+        ),
+      },
+      {
+        accessorKey: "transactionHash",
+        size: 40,
+        cell: ({ row }) => {
+          const transactionHash = row.getValue("transactionHash") as string;
+
+          // Handle skeleton data (empty objects from initial load)
+          if (!transactionHash) {
+            return (
+              <div className="flex h-10 items-center justify-center p-2">
+                <SkeletonRow
+                  parentClassName="flex animate-pulse"
+                  className="size-3.5"
+                />
+              </div>
+            );
+          }
+
+          const daoIdKey = (daoId as string)?.toUpperCase() as DaoIdEnum;
+          const blockExplorerUrl =
+            daoConfigByDaoId[daoIdKey]?.daoOverview?.chain?.blockExplorers
+              ?.default?.url ?? "https://etherscan.io";
+
+          return (
+            <div className="flex h-10 items-center justify-center p-2">
+              <Link
+                href={`${blockExplorerUrl}/tx/${transactionHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex h-fit cursor-pointer items-center justify-center border border-transparent bg-transparent p-1 text-primary transition-colors duration-300 hover:bg-surface-contrast"
+              >
+                <ExternalLink className="size-3.5 shrink-0" />
+              </Link>
+            </div>
+          );
+        },
+        header: () => (
+          <div className="flex h-8 w-full items-center justify-center px-2" />
         ),
       },
     ],
