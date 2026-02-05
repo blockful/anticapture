@@ -9,6 +9,7 @@ import { DaoOverviewHeaderMetrics } from "@/features/dao-overview/components/Dao
 import { TokenDistributionChartCard } from "@/features/dao-overview/components/TokenDistributionChartCard";
 import { DaoOverviewHeaderBackground } from "@/features/dao-overview/components/DaoOverviewHeaderBackground";
 import { SecurityCouncilCard } from "@/features/dao-overview/components/SecurityCouncilCard";
+import { LastProposalsCard } from "@/features/dao-overview/components/LastProposalsCard";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 import { StagesContainer } from "@/features/resilience-stages/components/StagesContainer";
 import {
@@ -103,6 +104,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           <DividerDefault isHorizontal />
         </div>
         <SecurityCouncilCard daoOverview={daoOverview} />
+        <LastProposalsCard daoId={daoId} />
         <div className="border-inverted grid grid-cols-1 gap-5 border-x lg:mx-5 lg:grid-cols-2 lg:gap-2">
           <AttackProfitabilityChartCard daoId={daoId} />
           <div className="block lg:hidden">
