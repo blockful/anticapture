@@ -16,6 +16,10 @@ export interface TokenHolder {
   account?: {
     type: string;
   } | null;
+  variation?: {
+    percentageChange: number;
+    absoluteChange: string;
+  };
 }
 
 interface PaginationInfo {
@@ -40,7 +44,6 @@ interface UseTokenHoldersResult {
   fetchPreviousPage: () => Promise<void>;
   fetchingMore: boolean;
   isHistoricalLoadingFor: (address: string) => boolean;
-  historicalBalancesCache: Map<string, string>;
 }
 
 interface UseTokenHoldersParams {
@@ -62,13 +65,12 @@ export const useTokenHolders = ({
 }: UseTokenHoldersParams): UseTokenHoldersResult => {
   // Track current page - this is the source of truth for page number
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [historicalBalancesCache, setHistoricalBalancesCache] = useState<
-    Map<string, string>
-  >(new Map());
+  const [historicalBalancesCache, setHistoricalBalancesCache] = useState(
+    new Map<string, { percentageChange: number; absoluteChange: string }>(),
+  );
 
   // Track pagination loading state to prevent rapid clicks
-  const [isPaginationLoading, setIsPaginationLoading] =
-    useState<boolean>(false);
+  const [isPaginationLoading, setIsPaginationLoading] = useState(false);
 
   // Reset to page 1 and refetch when sorting changes (new query)
   useEffect(() => {
@@ -125,11 +127,14 @@ export const useTokenHolders = ({
     if (newHistoricalData) {
       setHistoricalBalancesCache((prevCache) => {
         const newCache = new Map(prevCache);
-        newHistoricalData?.forEach((h) => {
-          if (h?.accountId && h.previousBalance) {
-            newCache.set(h.accountId, h.previousBalance);
-          }
-        });
+        newHistoricalData
+          ?.filter((h) => !!h)
+          .forEach((h) => {
+            newCache.set(h.accountId, {
+              percentageChange: Number(h.percentageChange),
+              absoluteChange: h.absoluteChange,
+            });
+          });
         return newCache;
       });
     }
@@ -155,6 +160,7 @@ export const useTokenHolders = ({
         balance: holder.balance,
         delegate: holder.delegate,
         tokenId: holder.tokenId,
+        variation: historicalBalancesCache.get(holder.address),
       }));
   }, [tokenHoldersData]);
 
@@ -328,6 +334,5 @@ export const useTokenHolders = ({
     fetchingMore:
       networkStatus === NetworkStatus.fetchMore || isPaginationLoading,
     isHistoricalLoadingFor,
-    historicalBalancesCache,
   };
 };

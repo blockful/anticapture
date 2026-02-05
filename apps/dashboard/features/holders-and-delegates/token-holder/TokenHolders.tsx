@@ -6,6 +6,7 @@ import { formatNumberUserReadable } from "@/shared/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { Address, formatUnits, zeroAddress } from "viem";
 import { Plus } from "lucide-react";
+
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
@@ -26,9 +27,12 @@ import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 
 interface TokenHolderTableData {
   address: Address;
-  type: string | undefined;
+  type?: string;
   balance: number;
-  variation: { percentageChange: number; absoluteChange: number } | null;
+  variation?: {
+    percentageChange: number;
+    absoluteChange: string;
+  };
   delegate: Address;
 }
 
@@ -62,7 +66,6 @@ export const TokenHolders = ({
     fetchNextPage,
     fetchingMore,
     isHistoricalLoadingFor,
-    historicalBalancesCache,
   } = useTokenHolders({
     daoId: daoId,
     limit: pageLimit,
@@ -71,54 +74,21 @@ export const TokenHolders = ({
     days: days,
   });
 
+  console.log({ tokenHoldersData });
+
   const tableData: TokenHolderTableData[] = useMemo(() => {
-    const calculateVariation = (
-      currentBalance: string,
-      historicalBalance: string | undefined,
-    ): { percentageChange: number; absoluteChange: number } | null => {
-      if (!historicalBalance) return null;
-
-      try {
-        const current = Number(formatUnits(BigInt(currentBalance), decimals));
-        const historical = Number(
-          formatUnits(BigInt(historicalBalance), decimals),
-        );
-
-        const absoluteChange = current - historical;
-
-        if (historical === 0) {
-          return {
-            percentageChange: 9999,
-            absoluteChange: Number(absoluteChange.toFixed(2)),
-          };
-        }
-
-        const percentageChange = ((current - historical) / historical) * 100;
-
-        return {
-          percentageChange: Number(percentageChange.toFixed(2)),
-          absoluteChange: Number(absoluteChange.toFixed(2)),
-        };
-      } catch (error) {
-        console.error("Error calculating variation:", error);
-        return { percentageChange: 0, absoluteChange: 0 };
-      }
-    };
     return (
       tokenHoldersData?.map((holder) => {
-        const historicalBalance = historicalBalancesCache.get(holder.accountId);
-        const variation = calculateVariation(holder.balance, historicalBalance);
-
         return {
           address: holder.accountId as Address,
           type: holder.account?.type,
           balance: Number(formatUnits(BigInt(holder.balance), decimals)),
-          variation,
+          variation: holder.variation,
           delegate: holder.delegate as Address,
         };
       }) || []
     );
-  }, [tokenHoldersData, historicalBalancesCache, decimals]);
+  }, [tokenHoldersData, decimals]);
 
   const tokenHoldersColumns: ColumnDef<TokenHolderTableData>[] = [
     {
@@ -256,7 +226,7 @@ export const TokenHolders = ({
         const variation = row.getValue("variation") as
           | {
               percentageChange: number;
-              absoluteChange: number;
+              absoluteChange: string;
             }
           | undefined;
 
@@ -271,11 +241,13 @@ export const TokenHolders = ({
           );
         }
 
+        console.log(addr, { variation });
+
         return (
           <div className="flex w-full items-center justify-center gap-2 text-sm">
-            {(variation?.percentageChange || 0) < 0 ? "-" : ""}
+            {/* {(variation?.percentageChange || 0) < 0 ? "-" : ""}
             {formatNumberUserReadable(Math.abs(variation?.absoluteChange || 0))}
-            <Percentage value={variation?.percentageChange || 0} />
+            <Percentage value={variation?.percentageChange || 0} /> */}
           </div>
         );
       },

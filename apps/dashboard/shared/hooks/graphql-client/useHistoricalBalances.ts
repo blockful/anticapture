@@ -27,6 +27,8 @@ export const useHistoricalBalances = (
     skip: !addresses.length,
   });
 
+  console.log({ data });
+
   return {
     data: data?.accountBalanceVariations?.items,
     loading,
