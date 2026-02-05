@@ -72,7 +72,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           <DividerDefault isHorizontal />
         </div>
 
-        {daoConfig.governanceImplementation && (
+        {daoConfig.governancePage && (
           <div className="mx-5">
             <OngoingProposalBanner daoId={daoId} />
           </div>
