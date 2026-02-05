@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { Code2 } from "lucide-react";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TooltipInfo } from "@/shared/components";
 import { useLastProposals } from "@/features/dao-overview/hooks/useLastProposals";
@@ -47,23 +46,6 @@ const ErrorState = ({ message }: { message: string }) => {
   );
 };
 
-interface HasCalldataBadgeProps {
-  hasCalldata: boolean;
-}
-
-/**
- * Badge to indicate a proposal has calldata (smart contract interactions)
- */
-export const HasCalldataBadge = ({ hasCalldata }: HasCalldataBadgeProps) => {
-  if (!hasCalldata) return null;
-
-  return (
-    <div className="bg-surface-solid-brand relative flex size-3.5 shrink-0 items-center justify-center rounded-full shadow-sm">
-      <Code2 className="text-inverted size-2.5" />
-    </div>
-  );
-};
-
 export const LastProposalsCard = ({ daoId }: { daoId: DaoIdEnum }) => {
   const { proposals, loading, error } = useLastProposals(daoId);
 
@@ -104,6 +86,7 @@ export const LastProposalsCard = ({ daoId }: { daoId: DaoIdEnum }) => {
           {/* Header */}
           <div className="flex items-center gap-2">
             <Link
+              prefetch={true}
               href={`/${daoId.toLowerCase()}/governance`}
               className="border-border-contrast text-secondary hover:text-primary flex items-center gap-1 border-b border-dashed font-mono text-[13px] font-medium uppercase tracking-wider transition-colors"
             >

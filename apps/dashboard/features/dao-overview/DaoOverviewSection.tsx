@@ -112,7 +112,6 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           <DividerDefault isHorizontal />
         </div>
         <SecurityCouncilCard daoOverview={daoOverview} />
-        <LastProposalsCard daoId={daoId} />
         <div className="border-inverted grid grid-cols-1 gap-5 border-x lg:mx-5 lg:grid-cols-2 lg:gap-2">
           <AttackProfitabilityChartCard daoId={daoId} />
           <div className="block lg:hidden">
@@ -133,7 +132,9 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           <div className="w-full">
             <VotingPowerChartCard daoId={daoId} />
           </div>
+          
         </div>
+        <LastProposalsCard daoId={daoId} />
       </div>
     </Suspense>
   );
