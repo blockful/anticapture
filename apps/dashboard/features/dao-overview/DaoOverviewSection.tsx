@@ -134,7 +134,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           </div>
           
         </div>
-        <LastProposalsCard daoId={daoId} />
+        {daoConfig.governancePage && (<LastProposalsCard daoId={daoId} />)}
       </div>
     </Suspense>
   );
