@@ -11,9 +11,9 @@ import { ArrowRight, ExternalLink } from "lucide-react";
 import { useBalanceHistory } from "@/features/holders-and-delegates/hooks/useBalanceHistory";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 import {
-  FilterDropdown,
+  CategoriesFilter,
   FilterOption,
-} from "@/shared/components/dropdowns/FilterDropdown";
+} from "@/shared/components/design-system/table/filters/CategoriesFilter";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
@@ -31,10 +31,13 @@ import {
   useQueryState,
   useQueryStates,
 } from "nuqs";
+import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
+import { useAmountFilterStore } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
+import { DateCell } from "@/shared/components/design-system/table/cells/DateCell";
 
 interface BalanceHistoryData {
   id: string;
-  date: string;
+  timestamp: string;
   amount: string;
   type: "Buy" | "Sell";
   fromAddress: string;
@@ -46,10 +49,15 @@ interface BalanceHistoryData {
 export const BalanceHistoryTable = ({
   accountId,
   daoId,
+  fromTimestamp,
+  toTimestamp,
 }: {
   accountId: string;
   daoId: DaoIdEnum;
+  fromTimestamp?: number;
+  toTimestamp?: number;
 }) => {
+  const limit: number = 20;
   const { decimals } = daoConfig[daoId];
 
   const [typeFilter, setTypeFilter] = useQueryState(
@@ -102,6 +110,9 @@ export const BalanceHistoryTable = ({
       customFromFilter,
       customToFilter,
       filterVariables,
+      fromTimestamp,
+      toTimestamp,
+      limit,
     });
 
   const isInitialLoading = loading && (!transfers || transfers.length === 0);
@@ -109,37 +120,9 @@ export const BalanceHistoryTable = ({
   // Transform transfers to table data format
   const transformedData = useMemo(() => {
     return transfers.map((transfer) => {
-      const transferDate = new Date(parseInt(transfer.timestamp) * 1000);
-      const now = new Date();
-      const diffInMs = now.getTime() - transferDate.getTime();
-      const diffInSeconds = Math.floor(diffInMs / 1000);
-      const diffInMinutes = Math.floor(diffInSeconds / 60);
-      const diffInHours = Math.floor(diffInMinutes / 60);
-      const diffInDays = Math.floor(diffInHours / 24);
-      const diffInWeeks = Math.floor(diffInDays / 7);
-      const diffInMonths = Math.floor(diffInDays / 30);
-      const diffInYears = Math.floor(diffInDays / 365);
-
-      let relativeTime;
-      if (diffInYears > 0) {
-        relativeTime = `${diffInYears} year${diffInYears > 1 ? "s" : ""} ago`;
-      } else if (diffInMonths > 0) {
-        relativeTime = `${diffInMonths} month${diffInMonths > 1 ? "s" : ""} ago`;
-      } else if (diffInWeeks > 0) {
-        relativeTime = `${diffInWeeks} week${diffInWeeks > 1 ? "s" : ""} ago`;
-      } else if (diffInDays > 0) {
-        relativeTime = `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
-      } else if (diffInHours > 0) {
-        relativeTime = `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
-      } else if (diffInMinutes > 0) {
-        relativeTime = `${diffInMinutes} minute${diffInMinutes > 1 ? "s" : ""} ago`;
-      } else {
-        relativeTime = "Just now";
-      }
-
       return {
         id: transfer.transactionHash,
-        date: relativeTime,
+        timestamp: transfer.timestamp,
         amount: formatNumberUserReadable(transfer.amount),
         type: transfer.direction === "in" ? "Buy" : ("Sell" as "Buy" | "Sell"),
         fromAddress: transfer.fromAccountId,
@@ -150,12 +133,12 @@ export const BalanceHistoryTable = ({
 
   const balanceHistoryColumns: ColumnDef<BalanceHistoryData>[] = [
     {
-      accessorKey: "date",
+      accessorKey: "timestamp",
       meta: {
         columnClassName: "w-32",
       },
       cell: ({ row }) => {
-        const date = row.getValue("date") as string;
+        const timestamp = row.getValue("timestamp") as string;
 
         if (isInitialLoading) {
           return (
@@ -170,7 +153,7 @@ export const BalanceHistoryTable = ({
 
         return (
           <div className="flex items-center whitespace-nowrap">
-            <span className="text-primary text-sm">{date}</span>
+            <DateCell timestampSeconds={timestamp} />
           </div>
         );
       },
@@ -180,6 +163,11 @@ export const BalanceHistoryTable = ({
           setOrderBy("timestamp");
           setOrderDirection(newSortOrder);
           column.toggleSorting(newSortOrder === "desc");
+
+          useAmountFilterStore
+            .getState()
+            .reset("balance-history-amount-filter");
+          setIsFilterActive(false);
         };
         return (
           <Button
@@ -234,9 +222,15 @@ export const BalanceHistoryTable = ({
           <AmountFilter
             filterId="balance-history-amount-filter"
             onApply={(filterState) => {
-              setOrderDirection(
-                filterState.sortOrder === "largest-first" ? "desc" : "asc",
-              );
+              if (filterState.sortOrder) {
+                setOrderDirection(
+                  filterState.sortOrder === "largest-first" ? "desc" : "asc",
+                );
+                setOrderBy("amount");
+              } else {
+                setOrderBy("timestamp");
+                setOrderDirection("desc");
+              }
 
               setFilterVariables(() => ({
                 fromValue: filterState.minAmount
@@ -248,14 +242,15 @@ export const BalanceHistoryTable = ({
               }));
 
               setIsFilterActive(
-                !!(filterVariables?.fromValue || filterVariables?.toValue),
+                !!(
+                  filterState.minAmount ||
+                  filterState.maxAmount ||
+                  filterState.sortOrder
+                ),
               );
-
-              setOrderBy("amount");
             }}
             onReset={() => {
               setIsFilterActive(false);
-              // Reset to default sorting
               setOrderBy("timestamp");
               setFilterVariables(() => ({
                 fromValue: "",
@@ -298,7 +293,7 @@ export const BalanceHistoryTable = ({
       header: () => (
         <div className="flex items-center gap-2">
           <h4 className="text-table-header text-xs">Type</h4>
-          <FilterDropdown
+          <CategoriesFilter
             options={typeFilterOptions}
             selectedValue={typeFilter}
             onValueChange={(value) => {
@@ -370,8 +365,6 @@ export const BalanceHistoryTable = ({
           <span>From</span>
           <AddressFilter
             onApply={async (addr) => {
-              setTypeFilter("all");
-
               if ((addr ?? "").indexOf(".eth") > 0) {
                 const address = await fetchAddressFromEnsName({
                   ensName: addr as `${string}.eth`,
@@ -449,8 +442,6 @@ export const BalanceHistoryTable = ({
           <span>To</span>
           <AddressFilter
             onApply={async (addr) => {
-              setTypeFilter("all");
-
               if ((addr ?? "").indexOf(".eth") > 0) {
                 const address = await fetchAddressFromEnsName({
                   ensName: addr as `${string}.eth`,
@@ -468,17 +459,22 @@ export const BalanceHistoryTable = ({
   ];
 
   return (
-    <Table
-      columns={balanceHistoryColumns}
-      data={isInitialLoading ? Array(12).fill({}) : transformedData}
-      size="sm"
-      hasMore={hasNextPage}
-      isLoadingMore={loading}
-      onLoadMore={fetchNextPage}
-      wrapperClassName="h-[450px]"
-      className="h-[400px]"
-      withDownloadCSV={true}
-      error={error}
-    />
+    <div className="flex h-full w-full flex-col overflow-hidden">
+      <Table
+        columns={balanceHistoryColumns}
+        data={
+          isInitialLoading
+            ? Array(DEFAULT_ITEMS_PER_PAGE).fill({})
+            : transformedData
+        }
+        size="sm"
+        hasMore={hasNextPage}
+        isLoadingMore={loading}
+        onLoadMore={fetchNextPage}
+        withDownloadCSV={true}
+        error={error}
+        fillHeight
+      />
+    </div>
   );
 };

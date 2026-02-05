@@ -133,6 +133,27 @@ export const isProposalFinished = (finalResultStatus: string): boolean => {
   return status !== "ongoing" && status !== "pending";
 };
 
+const formatVoteTiming = (
+  timeBeforeEnd: number,
+  votingPeriod: number,
+  suffix: "left" | "avg",
+): { text: string; percentage: number } => {
+  const timeElapsed = votingPeriod - timeBeforeEnd;
+  const percentage = Math.max(
+    0,
+    Math.min(100, (timeElapsed / votingPeriod) * 100),
+  );
+
+  const daysLeft = Math.floor(timeBeforeEnd / (24 * 60 * 60));
+
+  if (daysLeft >= 4) {
+    return { text: `Early (${daysLeft}d ${suffix})`, percentage };
+  } else if (daysLeft < 1) {
+    return { text: `Late (<1d ${suffix})`, percentage };
+  }
+  return { text: `Late (${daysLeft}d ${suffix})`, percentage };
+};
+
 // Helper function to format vote timing and calculate percentage
 export const getVoteTimingData = (
   userVote: Query_ProposalsActivity_Proposals_Items_UserVote | null | undefined,
@@ -159,22 +180,18 @@ export const getVoteTimingData = (
     return { text: "Expired", percentage: 100 };
   }
 
-  // Calculate how much time has passed as a percentage
-  const timeElapsed = voteTime - startTime;
-  const percentage = Math.max(
-    0,
-    Math.min(100, (timeElapsed / daoVotingPeriod) * 100),
-  );
+  const timeBeforeEnd = endTime - voteTime;
+  return formatVoteTiming(timeBeforeEnd, daoVotingPeriod, "left");
+};
 
-  const timeDiff = endTime - voteTime;
-  const daysLeft = Math.floor(timeDiff / (24 * 60 * 60));
-
-  if (daysLeft >= 4) {
-    return { text: `Early (${daysLeft}d left)`, percentage };
-  } else {
-    if (daysLeft == 0) {
-      return { text: `Late (<1d left)`, percentage };
-    }
-    return { text: `Late (${daysLeft}d left)`, percentage };
+export const getAvgVoteTimingData = (
+  avgTimeBeforeEnd: number | undefined | null,
+  votingPeriodSeconds: number,
+  votedProposals: number = 0,
+): { text: string; percentage: number } => {
+  if (!avgTimeBeforeEnd || votedProposals === 0) {
+    return { text: "-", percentage: 0 };
   }
+
+  return formatVoteTiming(avgTimeBeforeEnd, votingPeriodSeconds, "avg");
 };

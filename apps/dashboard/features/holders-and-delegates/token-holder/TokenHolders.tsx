@@ -22,6 +22,7 @@ import { AddressFilter } from "@/shared/components/design-system/table/filters/A
 import daoConfig from "@/shared/dao-config";
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 
 interface TokenHolderTableData {
   address: Address;
@@ -38,6 +39,7 @@ export const TokenHolders = ({
   days: TimeInterval;
   daoId: DaoIdEnum;
 }) => {
+  const pageLimit: number = 20;
   const [drawerAddress, setDrawerAddress] = useQueryState("drawerAddress");
   const [currentAddressFilter, setCurrentAddressFilter] =
     useQueryState("address");
@@ -45,7 +47,6 @@ export const TokenHolders = ({
     "sort",
     parseAsStringEnum(["desc", "asc"]).withDefault("desc"),
   );
-  const pageLimit: number = 15;
   const { isMobile } = useScreenSize();
   const { decimals } = daoConfig[daoId];
 
@@ -123,12 +124,11 @@ export const TokenHolders = ({
     {
       accessorKey: "address",
       header: () => (
-        <div className="text-table-header flex w-full items-center justify-start">
+        <div className="text-table-header flex w-full items-center justify-start gap-2">
           <span>Address</span>
           <AddressFilter
             onApply={handleAddressFilterApply}
             currentFilter={currentAddressFilter || undefined}
-            className="ml-2"
           />
         </div>
       ),
@@ -332,22 +332,19 @@ export const TokenHolders = ({
 
   return (
     <>
-      <div className="w-full text-white">
-        <div className="flex flex-col gap-2">
-          <Table
-            columns={tokenHoldersColumns}
-            data={loading ? Array(12).fill({}) : tableData}
-            hasMore={pagination.hasNextPage}
-            isLoadingMore={fetchingMore}
-            onLoadMore={fetchNextPage}
-            onRowClick={(row) => setDrawerAddress(row.address as Address)}
-            size="sm"
-            withDownloadCSV={true}
-            wrapperClassName="h-[450px]"
-            className="h-[400px]"
-            error={error}
-          />
-        </div>
+      <div className="flex h-[calc(100vh-16rem)] min-h-[300px] w-full flex-col text-white">
+        <Table
+          columns={tokenHoldersColumns}
+          data={loading ? Array(DEFAULT_ITEMS_PER_PAGE).fill({}) : tableData}
+          hasMore={pagination.hasNextPage}
+          isLoadingMore={fetchingMore}
+          onLoadMore={fetchNextPage}
+          onRowClick={(row) => setDrawerAddress(row.address as Address)}
+          size="sm"
+          withDownloadCSV={true}
+          error={error}
+          fillHeight
+        />
       </div>
       <HoldersAndDelegatesDrawer
         isOpen={!!drawerAddress}

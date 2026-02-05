@@ -5,29 +5,20 @@
   "scripts": {
     "dev": "ponder dev --schema public",
     "start": "ponder start --views-schema=anticapture --schema=$RAILWAY_DEPLOYMENT_ID",
-    "serve": "ponder serve --schema=anticapture",
     "db:list": "ponder db list",
     "db:prune": "ponder db prune",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "typecheck": "tsc --noEmit",
-    "test": "jest",
-    "test:watch": "jest --watch",
     "clean": "rm -rf node_modules generated .ponder dump *.tsbuildinfo"
   },
   "dependencies": {
-    "@hono/zod-openapi": "^0.19.6",
-    "axios": "^1.9.0",
-    "drizzle-kit": "^0.31.4",
-    "drizzle-orm": "~0.41.0",
-    "hono": "^4.7.10",
+    "hono": "^4.10.7",
     "ponder": "^0.16.2",
     "viem": "^2.37.11",
-    "zod": "^3.25.3",
-    "zod-validation-error": "^3.4.1"
+    "zod": "^3.25.3"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.14",
     "@types/node": "^20.16.5",
     "@types/pg": "^8.15.6",
     "dotenv": "^16.5.0",
@@ -35,9 +26,7 @@
     "eslint-config-ponder": "^0.5.6",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
-    "jest": "^29.7.0",
     "prettier": "^3.5.3",
-    "ts-jest": "^29.4.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },

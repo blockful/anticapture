@@ -20,48 +20,6 @@ export default processConfig(
           const daoName = key.replace("DAO_API_", "");
           return [
             {
-              name: `graphql_${daoName}`,
-              handler: {
-                graphql: {
-                  endpoint: value,
-                },
-              },
-              transforms: [
-                {
-                  filterSchema: {
-                    filters: [
-                      "Query.!{accountBalances}",
-                      "Query.!{accountBalance}",
-                      "Query.!{accountPowers}",
-                      "Query.!{accountPower}",
-                      "Query.!{accounts}",
-                      "Query.!{account}",
-                      "Query.!{balanceHistorys}",
-                      "Query.!{balanceHistory}",
-                      "Query.!{daoMetricsDayBucket}",
-                      "Query.!{daoMetricsDayBuckets}",
-                      "Query.!{delegation}",
-                      "Query.!{delegations}",
-                      "Query.!{proposalsOnchains}",
-                      "Query.!{proposalsOnchain}",
-                      "Query.!{tokenPrices}",
-                      "Query.!{tokenPrice}",
-                      "Query.!{tokens}",
-                      "Query.!{token}",
-                      "Query.!{transactions}",
-                      "Query.!{transaction}",
-                      "Query.!{transfers}",
-                      "Query.!{transfer}",
-                      "Query.!{votesOnchain}",
-                      "Query.!{votingPowerHistory}",
-                      // "Query.!{votesOnchains}", TODO: Leave endpoint active for now as it is still used by the [notification bot](https://github.com/blockful/notification-system/blob/main/packages/anticapture-client/queries/votes.graphql)
-                      // 'Query.!{votingPowerHistorys}' TODO: Leave endpoint active for now as it is still used by the notification bot
-                    ],
-                  },
-                },
-              ],
-            },
-            {
               name: `rest_${daoName}`,
               handler: {
                 openapi: {

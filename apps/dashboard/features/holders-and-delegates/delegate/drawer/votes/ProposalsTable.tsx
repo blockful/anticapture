@@ -16,9 +16,9 @@ import { useDaoData } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { Query_ProposalsActivity_Proposals_Items } from "@anticapture/graphql-client";
 import {
-  FilterDropdown,
+  CategoriesFilter,
   FilterOption,
-} from "@/shared/components/dropdowns/FilterDropdown";
+} from "@/shared/components/design-system/table/filters/CategoriesFilter";
 import daoConfigByDaoId from "@/shared/dao-config";
 import Link from "next/link";
 import {
@@ -29,7 +29,8 @@ import {
 } from "@/features/holders-and-delegates/utils/proposalsTableUtils";
 import { Table } from "@/shared/components/design-system/table/Table";
 import daoConfig from "@/shared/dao-config";
-
+import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
+import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 interface ProposalTableData {
   proposalId: string;
   proposalName: string;
@@ -227,10 +228,10 @@ export const ProposalsTable = ({
         );
       },
       header: () => (
-        <div className="flex items-center gap-2 font-medium">
+        <div className="flex items-center gap-2 whitespace-nowrap font-medium">
           User Vote
           {userVoteFilterOptions && onUserVoteFilterChange && (
-            <FilterDropdown
+            <CategoriesFilter
               options={userVoteFilterOptions}
               selectedValue={userVoteFilter || "all"}
               onValueChange={onUserVoteFilterChange}
@@ -328,32 +329,38 @@ export const ProposalsTable = ({
         );
       },
       header: () => (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-secondary w-full justify-start p-0"
-          onClick={() => {
-            if (onSortChange) {
-              const newDirection =
-                orderBy === "voteTiming" && orderDirection === "desc"
-                  ? "asc"
-                  : "desc";
-              onSortChange("voteTiming", newDirection);
-            }
-          }}
-        >
-          <h4 className="text-table-header">Vote Timing</h4>
-          <ArrowUpDown
-            props={{ className: "size-4" }}
-            activeState={
-              orderBy === "voteTiming"
-                ? orderDirection === "asc"
-                  ? ArrowState.UP
-                  : ArrowState.DOWN
-                : ArrowState.DEFAULT
-            }
-          />
-        </Button>
+        <div className="flex items-center gap-1.5">
+          <Tooltip tooltipContent="Measures how close to the proposal deadline a vote is cast. Delegates who vote late may be influenced by prior votes or ongoing discussion.">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-secondary w-full justify-start p-0"
+              onClick={() => {
+                if (onSortChange) {
+                  const newDirection =
+                    orderBy === "voteTiming" && orderDirection === "desc"
+                      ? "asc"
+                      : "desc";
+                  onSortChange("voteTiming", newDirection);
+                }
+              }}
+            >
+              <h4 className="text-table-header decoration-secondary/20 group-hover:decoration-primary hover:decoration-primary underline decoration-dashed underline-offset-[6px] transition-colors duration-300">
+                Vote Timing
+              </h4>
+              <ArrowUpDown
+                props={{ className: "size-4" }}
+                activeState={
+                  orderBy === "voteTiming"
+                    ? orderDirection === "asc"
+                      ? ArrowState.UP
+                      : ArrowState.DOWN
+                    : ArrowState.DEFAULT
+                }
+              />
+            </Button>
+          </Tooltip>
+        </div>
       ),
     },
     {
@@ -400,18 +407,17 @@ export const ProposalsTable = ({
   ];
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex h-full w-full flex-col gap-4 overflow-hidden">
       <Table
         columns={proposalColumns}
-        data={loading ? Array(12).fill({}) : tableData}
+        data={loading ? Array(DEFAULT_ITEMS_PER_PAGE).fill({}) : tableData}
         size="sm"
         hasMore={pagination.hasNextPage}
         isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}
         withDownloadCSV={true}
-        wrapperClassName="h-[450px]"
-        className="h-[400px]"
         error={error}
+        fillHeight
       />
     </div>
   );

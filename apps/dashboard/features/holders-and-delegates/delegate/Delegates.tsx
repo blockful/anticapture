@@ -7,15 +7,16 @@ import {
   useDelegates,
   HoldersAndDelegatesDrawer,
 } from "@/features/holders-and-delegates";
+import { getAvgVoteTimingData } from "@/features/holders-and-delegates/utils";
 import { TimeInterval } from "@/shared/types/enums";
-import { SkeletonRow, Button } from "@/shared/components";
+import { SkeletonRow, Button, SimpleProgressBar } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
-import { formatNumberUserReadable } from "@/shared/utils";
+import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { Plus } from "lucide-react";
 import { ProgressCircle } from "@/features/holders-and-delegates/components/ProgressCircle";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { useScreenSize } from "@/shared/hooks";
+import { useScreenSize, useDaoData } from "@/shared/hooks";
 import { Address, formatUnits } from "viem";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
@@ -27,13 +28,20 @@ import {
   QueryInput_VotingPowers_OrderBy,
   QueryInput_VotingPowers_OrderDirection,
 } from "@anticapture/graphql-client";
+import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
+import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
+import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 interface DelegateTableData {
   address: string;
   votingPower: string;
-  variation?: { percentageChange: number; absoluteChange: number };
+  variation?: {
+    percentageChange: number;
+    absoluteChange: number;
+  };
   activity?: string | null;
   activityPercentage?: number | null;
   delegators: number;
+  avgVoteTiming?: { text: string; percentage: number } | null;
 }
 
 interface DelegatesProps {
@@ -41,37 +49,16 @@ interface DelegatesProps {
   daoId: DaoIdEnum;
 }
 
-// Helper function to convert time period to timestamp and block number
-export const getTimeDataFromPeriod = (period: TimeInterval) => {
-  const now = Date.now();
-  const msPerDay = 24 * 60 * 60 * 1000;
-
-  let daysBack: number;
-  switch (period) {
-    case TimeInterval.SEVEN_DAYS:
-      daysBack = 7;
-      break;
-    case TimeInterval.THIRTY_DAYS:
-      daysBack = 30;
-      break;
-    case TimeInterval.NINETY_DAYS:
-      daysBack = 90;
-      break;
-    case TimeInterval.ONE_YEAR:
-      daysBack = 365;
-      break;
-    default:
-      daysBack = 30;
-  }
-
-  return Math.floor((now - daysBack * msPerDay) / 1000);
+// Converts a TimeInterval to a timestamp (in seconds) representing the start date.
+const getFromTimestamp = (period: TimeInterval): number => {
+  return Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[period];
 };
 
 export const Delegates = ({
   timePeriod = TimeInterval.THIRTY_DAYS,
   daoId,
 }: DelegatesProps) => {
-  const pageLimit: number = 15;
+  const pageLimit: number = 20;
 
   const [drawerAddress, setDrawerAddress] = useQueryState("drawerAddress");
   const [currentAddressFilter, setCurrentAddressFilter] =
@@ -87,16 +74,20 @@ export const Delegates = ({
     ),
   );
   const { decimals } = daoConfig[daoId];
+  const { data: daoData } = useDaoData(daoId);
+
+  const votingPeriodSeconds = useMemo(() => {
+    if (!daoData?.votingPeriod) return 0;
+    const blockTime = daoConfig[daoId].daoOverview.chain.blockTime;
+    return (Number(daoData.votingPeriod) * blockTime) / 1000;
+  }, [daoData?.votingPeriod, daoId]);
 
   const handleAddressFilterApply = (address: string | undefined) => {
     setCurrentAddressFilter(address || "");
   };
 
   // Calculate time-based parameters
-  const fromDate = useMemo(
-    () => getTimeDataFromPeriod(timePeriod),
-    [timePeriod],
-  );
+  const fromDate = useMemo(() => getFromTimestamp(timePeriod), [timePeriod]);
 
   const {
     data,
@@ -150,6 +141,12 @@ export const Delegates = ({
           100
         : null;
 
+      const avgVoteTiming = getAvgVoteTimingData(
+        delegate.proposalsActivity?.avgTimeBeforeEnd,
+        votingPeriodSeconds,
+        delegate.proposalsActivity?.votedProposals,
+      );
+
       return {
         address: delegate.accountId,
         votingPower: formatNumberUserReadable(votingPowerFormatted),
@@ -165,9 +162,10 @@ export const Delegates = ({
         activity,
         activityPercentage,
         delegators: delegate.delegationsCount,
+        avgVoteTiming,
       };
     });
-  }, [data, decimals]);
+  }, [data, decimals, votingPeriodSeconds]);
 
   const delegateColumns: ColumnDef<DelegateTableData>[] = [
     {
@@ -225,12 +223,11 @@ export const Delegates = ({
         );
       },
       header: () => (
-        <div className="text-table-header flex w-full items-center justify-start">
-          <p>Address</p>
+        <div className="text-table-header flex w-full items-center justify-start gap-2">
+          <span>Address</span>
           <AddressFilter
             onApply={handleAddressFilterApply}
             currentFilter={currentAddressFilter || undefined}
-            className="ml-2"
           />
         </div>
       ),
@@ -281,7 +278,7 @@ export const Delegates = ({
         </Button>
       ),
       meta: {
-        columnClassName: "w-72",
+        columnClassName: "w-40",
       },
     },
     {
@@ -352,6 +349,54 @@ export const Delegates = ({
       ),
     },
     {
+      accessorKey: "avgVoteTiming",
+      cell: ({ row }) => {
+        const avgVoteTiming = row.getValue("avgVoteTiming") as {
+          text: string;
+          percentage: number;
+        } | null;
+
+        if (loading) {
+          return (
+            <div className="flex items-center justify-start">
+              <SkeletonRow className="h-5 w-20" />
+            </div>
+          );
+        }
+
+        if (!avgVoteTiming) {
+          return <div className="text-secondary text-sm">-</div>;
+        }
+
+        return (
+          <div className="flex flex-col justify-center gap-1">
+            <div
+              className={cn("text-secondary text-xs font-normal", {
+                "text-end text-sm": avgVoteTiming.text === "-",
+              })}
+            >
+              {avgVoteTiming.text}
+            </div>
+            {avgVoteTiming.text !== "-" && (
+              <SimpleProgressBar percentage={avgVoteTiming.percentage} />
+            )}
+          </div>
+        );
+      },
+      header: () => (
+        <div className="flex items-center gap-1.5">
+          <Tooltip tooltipContent="Measures the average of how close to the proposal deadline a vote is cast. Delegates who vote late may be influenced by prior votes or ongoing discussion.">
+            <h4 className="text-table-header decoration-secondary/20 group-hover:decoration-primary hover:decoration-primary whitespace-nowrap underline decoration-dashed underline-offset-[6px] transition-colors duration-300">
+              Avg Vote Timing
+            </h4>
+          </Tooltip>
+        </div>
+      ),
+      meta: {
+        columnClassName: "w-40",
+      },
+    },
+    {
       accessorKey: "delegators",
       cell: ({ row }) => {
         const delegators = row.getValue("delegators") as number;
@@ -398,19 +443,18 @@ export const Delegates = ({
 
   return (
     <>
-      <div className="flex flex-col gap-2">
+      <div className="flex h-[calc(100vh-16rem)] min-h-[300px] w-full flex-col">
         <Table
           columns={delegateColumns}
-          data={loading ? Array(12).fill({}) : tableData}
+          data={loading ? Array(DEFAULT_ITEMS_PER_PAGE).fill({}) : tableData}
           onRowClick={(row) => setDrawerAddress(row.address as Address)}
           size="sm"
           hasMore={pagination.hasNextPage}
           isLoadingMore={fetchingMore}
           onLoadMore={fetchNextPage}
           withDownloadCSV={true}
-          wrapperClassName="h-[450px]"
-          className="h-[400px]"
           error={error}
+          fillHeight
         />
       </div>
       <HoldersAndDelegatesDrawer

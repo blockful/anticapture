@@ -12,6 +12,52 @@ import { formatNumberUserReadable } from "@/shared/utils";
 import { formatUnits } from "viem";
 import { BulletDivider } from "@/features/governance/components/proposal-overview/BulletDivider";
 import { ProposalInfoText } from "@/features/governance/components/proposal-overview/ProposalInfoText";
+import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
+
+const VotingProgressBar = ({
+  startTimestamp,
+  endTimestamp,
+  timeLeftText,
+}: {
+  startTimestamp: string;
+  endTimestamp: string;
+  timeLeftText: string;
+}) => {
+  const now = Date.now() / 1000;
+  const startTime = parseInt(startTimestamp);
+  const endTime = parseInt(endTimestamp);
+
+  // Calculate progress percentage (how much time has elapsed)
+  const totalDuration = endTime - startTime;
+  const elapsedTime = now - startTime;
+  const progressPercentage = Math.min(
+    Math.max((elapsedTime / totalDuration) * 100, 0),
+    100
+  );
+
+  return (
+    <div className="bg-surface-opacity-brand relative flex w-full items-center gap-1 overflow-hidden px-2 py-1.5">
+      {/* Progress bar fill - positioned at bottom */}
+      <div
+        className="bg-link/30 absolute bottom-0 left-0 h-full"
+        style={{ width: `${progressPercentage}%` }}
+      />
+
+      {/* Pulsing indicator */}
+      <div className="relative flex size-4 shrink-0 items-center justify-center">
+        {/* Pulse ring animation */}
+        <div className="bg-link absolute size-1 animate-pulse-ring rounded-full" />
+        {/* Static center dot */}
+        <div className="bg-link relative size-1 rounded-full" />
+      </div>
+
+      {/* Time left text */}
+      <p className="text-link font-mono text-[12px] font-medium uppercase not-italic leading-4 tracking-wider">
+        {timeLeftText}
+      </p>
+    </div>
+  );
+};
 
 export const ProposalInfoSection = ({
   proposal,
@@ -37,7 +83,7 @@ export const ProposalInfoSection = ({
     totalVotes === 0 ? 0 : (Number(proposal.abstainVotes) / totalVotes) * 100;
 
   return (
-    <div className="border-surface-default flex w-full flex-col border lg:w-[420px]">
+    <div className="border-border-default flex w-full flex-col border lg:w-[420px]">
       <div className="flex w-full flex-col p-3 lg:w-[420px]">
         <ProposalInfoText className="pb-4">
           <BarChart4 className="text-secondary size-4" /> Current Results
@@ -70,6 +116,7 @@ export const ProposalInfoSection = ({
                     Number(
                       formatUnits(BigInt(proposal.forVotes || "0"), decimals),
                     ),
+                    0,
                   )}
                 </p>
               </div>
@@ -112,6 +159,7 @@ export const ProposalInfoSection = ({
                         decimals,
                       ),
                     ),
+                    0,
                   )}
                 </p>
               </div>
@@ -154,6 +202,7 @@ export const ProposalInfoSection = ({
                         decimals,
                       ),
                     ),
+                    0,
                   )}
                 </p>
               </div>
@@ -175,12 +224,11 @@ export const ProposalInfoSection = ({
         {/* Quorum */}
         <div className="flex items-center gap-2">
           <Users className="text-secondary size-3.5" />
-          <p
-            className="text-secondary font-mono text-[13px] font-medium uppercase not-italic leading-[20px] tracking-[0.78px]"
-            style={{ fontStyle: "normal" }}
-          >
-            Quorum
-          </p>
+          <Tooltip tooltipContent='Only "For" and "Abstain" votes are counted'>
+            <p className="text-secondary border-border-contrast hover:border-primary transition-colors duration-300 border-b border-dashed font-mono text-[13px] font-medium uppercase not-italic leading-[20px] tracking-[0.78px]">
+              Quorum
+            </p>
+          </Tooltip>
           <BulletDivider />
           <p className="font-inter text-secondary text-[14px] font-normal not-italic leading-[20px]">
             {formatNumberUserReadable(
@@ -202,14 +250,13 @@ export const ProposalInfoSection = ({
         </div>
       </div>
 
-      {/* Time Left  */}
-      {proposal.status.toLowerCase() === "active" && (
-        <div className="bg-surface-opacity-brand flex w-full items-center gap-2 p-3">
-          <BulletDivider className="bg-link" />
-          <p className="text-link font-mono text-[12px] font-medium uppercase not-italic leading-4 tracking-[0.72px]">
-            {timeLeftText}
-          </p>
-        </div>
+      {/* Time Left Progress Bar */}
+      {proposal.status.toLowerCase() === "ongoing" && (
+        <VotingProgressBar
+          startTimestamp={proposal.startTimestamp}
+          endTimestamp={proposal.endTimestamp}
+          timeLeftText={timeLeftText}
+        />
       )}
     </div>
   );

@@ -12,6 +12,7 @@ import {
   HistoricalVotingPowerByAccountQueryVariables,
   QueryInput_HistoricalVotingPowerByAccountId_OrderDirection,
 } from "@anticapture/graphql-client";
+import { AmountFilterVariables } from "./types";
 
 // Interface for a single delegation history item
 export interface DelegationHistoryItem {
@@ -52,10 +53,19 @@ export interface UseDelegateDelegationHistoryResult {
   hasPreviousPage: boolean;
 }
 
-export type AmountFilterVariables = Pick<
-  HistoricalVotingPowerByAccountQueryVariables,
-  "fromValue" | "toValue"
->;
+interface UseDelegateDelegationHistoryParams {
+  accountId: string;
+  daoId: DaoIdEnum;
+  orderBy?: string;
+  orderDirection?: "asc" | "desc";
+  customFromFilter?: string;
+  customToFilter?: string;
+  filterVariables?: AmountFilterVariables;
+  itemsPerPage?: number;
+  fromTimestamp?: number;
+  toTimestamp?: number;
+  limit?: number;
+}
 
 export function useDelegateDelegationHistory({
   accountId,
@@ -65,18 +75,10 @@ export function useDelegateDelegationHistory({
   filterVariables,
   customFromFilter,
   customToFilter,
-  itemsPerPage = 10,
-}: {
-  accountId: string;
-  daoId: DaoIdEnum;
-  orderBy?: string;
-  orderDirection?: "asc" | "desc";
-  transactionType?: "all" | "buy" | "sell";
-  customFromFilter?: string;
-  customToFilter?: string;
-  filterVariables?: AmountFilterVariables;
-  itemsPerPage?: number;
-}): UseDelegateDelegationHistoryResult {
+  fromTimestamp,
+  toTimestamp,
+  limit = 10,
+}: UseDelegateDelegationHistoryParams): UseDelegateDelegationHistoryResult {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isPaginationLoading, setIsPaginationLoading] =
     useState<boolean>(false);
@@ -112,7 +114,7 @@ export function useDelegateDelegationHistory({
   const queryVariables = useMemo(
     () => ({
       account: accountId,
-      limit: itemsPerPage,
+      limit,
       orderBy:
         orderBy as HistoricalVotingPowerByAccountQueryVariables["orderBy"],
       orderDirection:
@@ -123,15 +125,19 @@ export function useDelegateDelegationHistory({
       }),
       ...(fromFilter && { delegator: fromFilter }),
       ...(toFilter && { delegate: toFilter }),
+      ...(fromTimestamp && { fromDate: fromTimestamp.toString() }),
+      ...(toTimestamp && { toDate: toTimestamp.toString() }),
     }),
     [
       accountId,
-      itemsPerPage,
+      limit,
       orderBy,
       orderDirection,
       filterVariables,
       fromFilter,
       toFilter,
+      fromTimestamp,
+      toTimestamp,
     ],
   );
 
@@ -208,14 +214,10 @@ export function useDelegateDelegationHistory({
 
   const hasNextPage = useMemo(() => {
     return (
-      currentPage * itemsPerPage <
+      currentPage * limit <
       (data?.historicalVotingPowerByAccountId?.totalCount || 0)
     );
-  }, [
-    currentPage,
-    itemsPerPage,
-    data?.historicalVotingPowerByAccountId?.totalCount,
-  ]);
+  }, [currentPage, limit, data?.historicalVotingPowerByAccountId?.totalCount]);
 
   // Fetch next page function
   const fetchNextPage = useCallback(async () => {
@@ -223,7 +225,7 @@ export function useDelegateDelegationHistory({
     setIsPaginationLoading(true);
 
     const nextPage = currentPage + 1;
-    const skip = (nextPage - 1) * itemsPerPage;
+    const skip = (nextPage - 1) * limit;
 
     try {
       await fetchMore({
@@ -260,7 +262,7 @@ export function useDelegateDelegationHistory({
     } finally {
       setIsPaginationLoading(false);
     }
-  }, [currentPage, itemsPerPage, hasNextPage, isPaginationLoading, fetchMore]);
+  }, [currentPage, limit, hasNextPage, isPaginationLoading, fetchMore]);
 
   return {
     delegationHistory: transformedData,

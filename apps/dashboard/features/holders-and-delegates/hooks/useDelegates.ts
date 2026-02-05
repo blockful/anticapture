@@ -19,6 +19,7 @@ interface ProposalsActivity {
   totalProposals: number;
   votedProposals: number;
   neverVoted: boolean;
+  avgTimeBeforeEnd?: number;
 }
 
 interface Delegate {
@@ -242,6 +243,7 @@ export const useDelegates = ({
         };
 
         const proposalsActivity = delegateActivities.get(delegate.accountId);
+
         return {
           ...delegate,
           ...votingPowerVariation,

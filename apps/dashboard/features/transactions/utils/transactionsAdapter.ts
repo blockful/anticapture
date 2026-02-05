@@ -52,20 +52,6 @@ const deduceSupplyTypes = (tx: GraphTransaction): SupplyType[] => {
   return types;
 };
 
-const formatRelativeTime = (timestampSec: string): string => {
-  const ts = Number(timestampSec);
-  if (!ts) return "";
-  const now = Math.floor(Date.now() / 1000);
-  const diff = Math.max(0, now - ts);
-  const minutes = Math.floor(diff / 60);
-  const hours = Math.floor(diff / 3600);
-  const days = Math.floor(diff / 86400);
-  if (days > 0) return `${days} day${days > 1 ? "s" : ""} ago`;
-  if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
-  if (minutes > 0) return `${minutes} min ago`;
-  return "just now";
-};
-
 const toBigIntSafe = (val: string | number | undefined | null): bigint => {
   if (val == null || val === "") return 0n;
   if (typeof val === "bigint") return val;
@@ -111,7 +97,7 @@ export const adaptTransactionsToTableData = (
         Number(formatUnits(toBigIntSafe(t.amount || 0), decimals)),
         2,
       ),
-      date: formatRelativeTime(t.timestamp),
+      timestamp: t.timestamp,
       from: t.fromAccountId,
       to: t.toAccountId,
     }));
@@ -122,19 +108,19 @@ export const adaptTransactionsToTableData = (
         Number(formatUnits(toBigIntSafe(d.delegatedValue), decimals)) || 0,
         2,
       ),
-      date: formatRelativeTime(d.timestamp),
+      timestamp: d.timestamp,
       from: d.delegatorAccountId,
       to: d.delegateAccountId,
     }));
     const subRows = [...transfersSubRows, ...delegationsSubRows].sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+      (a, b) => Number(a.timestamp) - Number(b.timestamp),
     );
 
     return {
       id: String(idx + 1),
       affectedSupply,
       amount: amount,
-      date: formatRelativeTime(tx.timestamp),
+      timestamp: tx.timestamp,
       from: tx.from,
       to: tx.to,
       txHash: tx.transactionHash,

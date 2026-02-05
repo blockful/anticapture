@@ -12,7 +12,7 @@ interface ProposalHeaderProps {
   daoId: string;
   setIsVotingModalOpen: (isOpen: boolean) => void;
   votingPower: string;
-  votes: GetAccountPowerQuery["votes"] | null;
+  votes: GetAccountPowerQuery["votesByProposalId"] | null;
   address: string | undefined;
   proposalStatus: string;
 }
@@ -71,7 +71,7 @@ export const ProposalHeader = ({
 
           {/* If already voted: show voted badge */}
           {address ? (
-            !supportValue ? (
+            supportValue === undefined ? (
               proposalStatus.toLowerCase() === "ongoing" && (
                 <Button
                   className="hidden lg:flex"
