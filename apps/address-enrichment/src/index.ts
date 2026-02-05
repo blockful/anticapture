@@ -7,6 +7,7 @@ import { cors } from "hono/cors";
 import { env } from "@/env";
 import { initDb } from "@/db";
 import { ArkhamClient } from "@/clients/arkham";
+import { ENSClient } from "@/clients/ens";
 import { EnrichmentService } from "@/services/enrichment";
 import { addressController } from "@/controllers/address";
 
@@ -15,7 +16,13 @@ initDb(env.DATABASE_URL);
 
 // Initialize clients and services
 const arkhamClient = new ArkhamClient(env.ARKHAM_API_URL, env.ARKHAM_API_KEY);
-const enrichmentService = new EnrichmentService(arkhamClient, env.RPC_URL);
+const ensClient = new ENSClient();
+const enrichmentService = new EnrichmentService(
+  arkhamClient,
+  ensClient,
+  env.RPC_URL,
+  env.ENS_CACHE_TTL_MINUTES,
+);
 
 // Create Hono app
 const app = new Hono();

@@ -4,6 +4,7 @@ import type { Address } from "viem";
 import { getDb, schema } from "@/db";
 import type { AddressEnrichment } from "@/db/schema";
 import { ArkhamClient } from "@/clients/arkham";
+import { ENSClient } from "@/clients/ens";
 import { isContract, createRpcClient } from "@/utils/address-type";
 
 export interface EnrichmentResult {
@@ -14,22 +15,36 @@ export interface EnrichmentResult {
     entityType: string | null;
     label: string | null;
   } | null;
+  ens: {
+    name: string | null;
+    avatar: string | null;
+    banner: string | null;
+  } | null;
   createdAt: string;
 }
 
 export class EnrichmentService {
   private arkhamClient: ArkhamClient;
+  private ensClient: ENSClient;
   private rpcClient: ReturnType<typeof createRpcClient>;
+  private ensCacheTtlMinutes: number;
 
-  constructor(arkhamClient: ArkhamClient, rpcUrl: string) {
+  constructor(
+    arkhamClient: ArkhamClient,
+    ensClient: ENSClient,
+    rpcUrl: string,
+    ensCacheTtlMinutes: number,
+  ) {
     this.arkhamClient = arkhamClient;
+    this.ensClient = ensClient;
     this.rpcClient = createRpcClient(rpcUrl);
+    this.ensCacheTtlMinutes = ensCacheTtlMinutes;
   }
 
   /**
    * Get enriched data for an address.
-   * If data exists in DB, return it.
-   * If not, fetch from Arkham API (and RPC if needed), store permanently, then return.
+   * - Arkham data is permanent (fetched once, stored forever).
+   * - ENS data is cached with a configurable TTL and refetched when stale.
    */
   async getAddressEnrichment(address: string): Promise<EnrichmentResult> {
     const normalizedAddress = address.toLowerCase() as Address;
@@ -41,12 +56,39 @@ export class EnrichmentService {
     });
 
     if (existing) {
-      return this.mapToResult(existing);
+      // Arkham data is permanent, but ENS may need refreshing
+      if (this.isEnsFresh(existing)) {
+        return this.mapToResult(existing);
+      }
+
+      // ENS data is stale or missing — refetch
+      const ensData = await this.ensClient.getEnsData(normalizedAddress);
+      const now = new Date();
+
+      await db
+        .update(schema.addressEnrichment)
+        .set({
+          ensName: ensData?.name ?? null,
+          ensAvatar: ensData?.avatar ?? null,
+          ensBanner: ensData?.banner ?? null,
+          ensUpdatedAt: now,
+        })
+        .where(eq(schema.addressEnrichment.address, normalizedAddress));
+
+      return this.mapToResult({
+        ...existing,
+        ensName: ensData?.name ?? null,
+        ensAvatar: ensData?.avatar ?? null,
+        ensBanner: ensData?.banner ?? null,
+        ensUpdatedAt: now,
+      });
     }
 
-    // Fetch from Arkham first
-    const arkhamData =
-      await this.arkhamClient.getAddressIntelligence(normalizedAddress);
+    // Address not in DB — fetch Arkham + ENS in parallel
+    const [arkhamData, ensData] = await Promise.all([
+      this.arkhamClient.getAddressIntelligence(normalizedAddress),
+      this.ensClient.getEnsData(normalizedAddress),
+    ]);
 
     // Use Arkham's contract info if available, otherwise fall back to RPC
     let isContractAddress: boolean;
@@ -59,13 +101,19 @@ export class EnrichmentService {
       isContractAddress = await isContract(this.rpcClient, normalizedAddress);
     }
 
-    // Store permanently in database
+    const now = new Date();
+
+    // Store in database
     const newRecord: typeof schema.addressEnrichment.$inferInsert = {
       address: normalizedAddress,
       isContract: isContractAddress,
       arkhamEntity: arkhamData?.entity ?? null,
       arkhamEntityType: arkhamData?.entityType ?? null,
       arkhamLabel: arkhamData?.label ?? null,
+      ensName: ensData?.name ?? null,
+      ensAvatar: ensData?.avatar ?? null,
+      ensBanner: ensData?.banner ?? null,
+      ensUpdatedAt: now,
     };
 
     const [inserted] = await db
@@ -93,6 +141,7 @@ export class EnrichmentService {
               label: arkhamData.label,
             }
           : null,
+        ens: ensData,
         createdAt: new Date().toISOString(),
       };
     }
@@ -100,7 +149,22 @@ export class EnrichmentService {
     return this.mapToResult(inserted);
   }
 
+  /**
+   * Check if ENS data is still fresh based on the configured TTL.
+   */
+  private isEnsFresh(record: AddressEnrichment): boolean {
+    if (!record.ensUpdatedAt) {
+      return false;
+    }
+
+    const ttlMs = this.ensCacheTtlMinutes * 60 * 1000;
+    const age = Date.now() - record.ensUpdatedAt.getTime();
+    return age < ttlMs;
+  }
+
   private mapToResult(record: AddressEnrichment): EnrichmentResult {
+    const hasEnsData = record.ensName !== null;
+
     return {
       address: record.address,
       isContract: record.isContract,
@@ -109,6 +173,13 @@ export class EnrichmentService {
         entityType: record.arkhamEntityType,
         label: record.arkhamLabel,
       },
+      ens: hasEnsData
+        ? {
+            name: record.ensName,
+            avatar: record.ensAvatar,
+            banner: record.ensBanner,
+          }
+        : null,
       createdAt: record.createdAt.toISOString(),
     };
   }

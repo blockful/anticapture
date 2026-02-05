@@ -19,6 +19,13 @@ const EnrichmentResponseSchema = z.object({
       label: z.string().nullable(),
     })
     .nullable(),
+  ens: z
+    .object({
+      name: z.string().nullable(),
+      avatar: z.string().nullable(),
+      banner: z.string().nullable(),
+    })
+    .nullable(),
   createdAt: z.string(),
 });
 
@@ -56,7 +63,7 @@ export function addressController(app: Hono, service: EnrichmentService) {
       path: "/address/{address}",
       summary: "Get enriched data for an address",
       description:
-        "Returns label information from Arkham and whether the address is an EOA or contract. Data is permanently stored after first fetch.",
+        "Returns label information from Arkham, ENS data, and whether the address is an EOA or contract. Arkham data is stored permanently. ENS data is cached with a configurable TTL.",
       tags: ["address"],
       request: {
         params: AddressParamSchema,
@@ -116,7 +123,7 @@ export function addressController(app: Hono, service: EnrichmentService) {
       path: "/addresses",
       summary: "Get enriched data for multiple addresses",
       description:
-        "Returns label information from Arkham and address type for multiple addresses. Maximum 100 addresses per request. Data is permanently stored after first fetch.",
+        "Returns label information from Arkham, ENS data, and address type for multiple addresses. Maximum 100 addresses per request. Arkham data is stored permanently. ENS data is cached with a configurable TTL.",
       tags: ["address"],
       request: {
         body: {
