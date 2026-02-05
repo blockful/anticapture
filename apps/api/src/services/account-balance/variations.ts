@@ -3,11 +3,25 @@ import {
   AccountInteractions,
   Filter,
   DBAccountBalance,
+  AmountFilter,
 } from "@/mappers";
 import { Address } from "viem";
 
 interface AccountBalanceRepository {
   getAccountBalance(accountId: Address): Promise<DBAccountBalance | undefined>;
+
+  getAccountBalances(
+    skip: number,
+    limit: number,
+    orderDirection: "asc" | "desc",
+    addresses: Address[],
+    delegates: Address[],
+    excludeAddresses: Address[],
+    amountfilter: AmountFilter,
+  ): Promise<{
+    items: DBAccountBalance[];
+    totalCount: bigint;
+  }>;
 }
 
 interface BalanceVariationsRepository {
@@ -66,6 +80,12 @@ export class BalanceVariationsService {
 
     if (!addresses) return variations;
 
+    const found = new Set(variations.map((v) => v.accountId))
+    const missingResults = addresses.filter((addr) => !found.has(addr))
+    const { items: balances } = await this.balanceRepository.getAccountBalances(
+      0, missingResults.length, "desc", missingResults, [], [], { maxAmount: undefined, minAmount: undefined }
+    )
+
     return addresses.map((address) => {
       const dbVariation = variations.find(
         (variation) => variation.accountId === address,
@@ -73,10 +93,12 @@ export class BalanceVariationsService {
 
       if (dbVariation) return dbVariation;
 
+      const balance = balances.find((balance) => balance.accountId === address)
+
       return {
         accountId: address,
-        previousBalance: 0n,
-        currentBalance: 0n,
+        previousBalance: balance?.balance ?? 0n,
+        currentBalance: balance?.balance ?? 0n,
         absoluteChange: 0n,
         percentageChange: "0",
       };
