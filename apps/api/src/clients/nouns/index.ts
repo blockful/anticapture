@@ -3,8 +3,6 @@ import {
   Address,
   Chain,
   Client as vClient,
-  fromHex,
-  toHex,
   Transport,
 } from "viem";
 import { readContract } from "viem/actions";
@@ -98,21 +96,6 @@ export class Client<
       address: timelockAddress,
       functionName: "delay",
     });
-  }
-
-  async getCurrentBlockNumber(): Promise<number> {
-    const result = await this.client.request({
-      method: "eth_blockNumber",
-    });
-    return fromHex(result, "number");
-  }
-
-  async getBlockTime(blockNumber: number): Promise<number | null> {
-    const block = await this.client.request({
-      method: "eth_getBlockByNumber",
-      params: [toHex(blockNumber), false],
-    });
-    return block?.timestamp ? fromHex(block.timestamp, "number") : null;
   }
 
   calculateQuorum(votes: {

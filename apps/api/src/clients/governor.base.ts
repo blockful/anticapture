@@ -1,4 +1,4 @@
-import { Account, Chain, Client, Transport } from "viem";
+import { Account, Chain, Client, fromHex, toHex, Transport } from "viem";
 
 import { ProposalStatus } from "../lib/constants";
 
@@ -13,6 +13,14 @@ export abstract class GovernorBase<
   TChain extends Chain = Chain,
   TAccount extends Account | undefined = Account | undefined,
 > {
+  protected cache: {
+    quorum?: bigint;
+    proposalThreshold?: bigint;
+    votingDelay?: bigint;
+    votingPeriod?: bigint;
+    timelockDelay?: bigint;
+  } = {};
+
   constructor(protected client: Client<TTransport, TChain, TAccount>) {}
 
   abstract calculateQuorum(votes: {
@@ -20,8 +28,6 @@ export abstract class GovernorBase<
     againstVotes: bigint;
     abstainVotes: bigint;
   }): bigint;
-
-  abstract getCurrentBlockNumber(): Promise<number>;
 
   abstract getQuorum(proposalId: string | null): Promise<bigint>;
 
@@ -80,5 +86,20 @@ export abstract class GovernorBase<
     }
 
     return proposal.status;
+  }
+
+  async getCurrentBlockNumber(): Promise<number> {
+    const result = await this.client.request({
+      method: "eth_blockNumber",
+    });
+    return fromHex(result, "number");
+  }
+
+  async getBlockTime(blockNumber: number): Promise<number | null> {
+    const block = await this.client.request({
+      method: "eth_getBlockByNumber",
+      params: [toHex(blockNumber), false],
+    });
+    return block?.timestamp ? fromHex(block.timestamp, "number") : null;
   }
 }

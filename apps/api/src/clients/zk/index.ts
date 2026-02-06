@@ -1,12 +1,4 @@
-import {
-  Account,
-  Address,
-  Chain,
-  Client,
-  fromHex,
-  toHex,
-  Transport,
-} from "viem";
+import { Account, Address, Chain, Client, Transport } from "viem";
 
 import { DAOClient } from "@/clients";
 import { GovernorBase } from "../governor.base";
@@ -92,21 +84,6 @@ export class ZKClient<
       address: timelockAddress,
       functionName: "getMinDelay",
     });
-  }
-
-  async getCurrentBlockNumber(): Promise<number> {
-    const result = await this.client.request({
-      method: "eth_blockNumber",
-    });
-    return fromHex(result, "number");
-  }
-
-  async getBlockTime(blockNumber: number): Promise<number | null> {
-    const block = await this.client.request({
-      method: "eth_getBlockByNumber",
-      params: [toHex(blockNumber), false],
-    });
-    return block?.timestamp ? fromHex(block.timestamp, "number") : null;
   }
 
   calculateQuorum(votes: {

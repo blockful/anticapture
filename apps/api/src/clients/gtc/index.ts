@@ -96,21 +96,6 @@ export class GTCClient<
     });
   }
 
-  async getCurrentBlockNumber(): Promise<number> {
-    const result = await this.client.request({
-      method: "eth_blockNumber",
-    });
-    return fromHex(result, "number");
-  }
-
-  async getBlockTime(blockNumber: number): Promise<number | null> {
-    const block = await this.client.request({
-      method: "eth_getBlockByNumber",
-      params: [toHex(blockNumber), false],
-    });
-    return block?.timestamp ? fromHex(block.timestamp, "number") : null;
-  }
-
   calculateQuorum(votes: {
     forVotes: bigint;
     againstVotes: bigint;
