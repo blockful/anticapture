@@ -3,8 +3,6 @@ import {
   Address,
   Chain,
   Client as vClient,
-  fromHex,
-  toHex,
   Transport,
 } from "viem";
 import { readContract } from "viem/actions";
@@ -21,8 +19,8 @@ export class Client<
   extends GovernorBase
   implements DAOClient
 {
-  private abi: typeof GovernorAbi;
-  private address: Address;
+  protected abi: typeof GovernorAbi;
+  protected address: Address;
 
   constructor(client: vClient<TTransport, TChain, TAccount>, address: Address) {
     super(client);
@@ -46,30 +44,6 @@ export class Client<
       address: this.address,
       functionName: "quorumVotes",
       args: [lastProposalId],
-    });
-  }
-
-  async getProposalThreshold(): Promise<bigint> {
-    return readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "proposalThreshold",
-    });
-  }
-
-  async getVotingDelay(): Promise<bigint> {
-    return readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "votingDelay",
-    });
-  }
-
-  async getVotingPeriod(): Promise<bigint> {
-    return readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "votingPeriod",
     });
   }
 
@@ -98,21 +72,6 @@ export class Client<
       address: timelockAddress,
       functionName: "delay",
     });
-  }
-
-  async getCurrentBlockNumber(): Promise<number> {
-    const result = await this.client.request({
-      method: "eth_blockNumber",
-    });
-    return fromHex(result, "number");
-  }
-
-  async getBlockTime(blockNumber: number): Promise<number | null> {
-    const block = await this.client.request({
-      method: "eth_getBlockByNumber",
-      params: [toHex(blockNumber), false],
-    });
-    return block?.timestamp ? fromHex(block.timestamp, "number") : null;
   }
 
   calculateQuorum(votes: {

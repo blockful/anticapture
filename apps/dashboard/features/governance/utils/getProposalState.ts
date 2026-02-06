@@ -9,6 +9,7 @@ export const getProposalState = (status: string): ProposalState => {
     case "succeeded":
     case "executed":
     case "defeated":
+    case "pending_execution":
     case "cancelled":
       return ProposalState.COMPLETED;
     case "pending":
