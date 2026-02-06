@@ -34,14 +34,16 @@ export type GovernanceImplementation = {
 
 export type GovernanceImplementationField = {
   riskLevel: RiskLevel;
-  currentSetting?: string;
   description: string;
+
+  value?: string; // Remove this when update Risk Analysis and Stages to not rely on it
+  requirements?: string[]; // Remove this when update Risk Analysis and Stages to not rely on it
+  riskExplanation?: string; // Remove this when update Risk Analysis and Stages to not rely on it
+
+  currentSetting?: string;
   impact?: string;
   recommendedSetting?: string;
   nextStep?: string;
-  value?: string;
-  requirements?: string[];
-  riskExplanation?: string;
 };
 
 // Base DAO information
