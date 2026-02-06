@@ -1,7 +1,12 @@
 import { DaoConfiguration } from "@/shared/dao-config/types";
-import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
+import {
+  RiskLevel,
+  GovernanceImplementationEnum,
+  RiskAreaEnum,
+} from "@/shared/types/enums";
 import { calculateMonthsBefore } from "@/shared/utils";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
+import { RECOMMENDED_SETTINGS } from "@/shared/constants/recommended-settings";
 import { EnsIcon } from "@/shared/components/icons";
 import { mainnet } from "viem/chains";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
@@ -62,47 +67,54 @@ export const ENS: DaoConfiguration = {
     riskLevel: RiskLevel.HIGH,
     supportsLiquidTreasuryCall: true,
   },
-  riskAnalysis: true,
   governanceImplementation: {
     // Fields are sorted alphabetically by GovernanceImplementationEnum for readability
     fields: {
       [GovernanceImplementationEnum.AUDITED_CONTRACTS]: {
-        value: "Yes",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.AUDITED_CONTRACTS
           ].description,
+        currentSetting:
+          "The ENS DAO contracts have been audited, and the audit is publicly available.",
+        impact:
+          "With its governance contracts audited, the risk of vulnerabilities in them is minimized.",
+        recommendedSetting:
+          RECOMMENDED_SETTINGS[GovernanceImplementationEnum.AUDITED_CONTRACTS],
+        nextStep: "The parameter is in its lowest-risk condition.",
       },
       [GovernanceImplementationEnum.INTERFACE_HIJACK]: {
-        value: "No",
         riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.INTERFACE_HIJACK
           ].description,
-        requirements: [
-          "For maximum security, the DAO should have its frontend reviewed by the DAO or audit and then made verifiably immutable",
-          "A solution could look like a frontend made available on IPFS through eth.limo, with their code hashed and put on chain by the DAO, then verified for subresource integrity",
-          "The governance interface used (Tally) has the standard protections to prevent external tampering with the frontend accessed",
-          "The platform is still exposed to any malicious or compromised actors inside the interface provider team",
-        ],
-        riskExplanation: `Although protected from spoofing or hijacking, the service used for voting could still be internally compromised.\n
-          A change in the voting interface could be used to manipulate the results of the vote, hiding malicious txns, or even changing selection of votes.`,
+        currentSetting:
+          "The ENS governance interface has a secure HTTPS connection and is signed with DNSSEC.",
+        impact:
+          "The governance interface domain cannot be hijacked, but without IPFS it is not censorship-resistant or fully on-chain.",
+        recommendedSetting:
+          RECOMMENDED_SETTINGS[GovernanceImplementationEnum.INTERFACE_HIJACK],
+        nextStep:
+          "The ENS governance interface domain should be hosted on IPFS.",
       },
       [GovernanceImplementationEnum.ATTACK_PROFITABILITY]: {
-        value: "~100M USD",
         riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.ATTACK_PROFITABILITY
           ].description,
-        requirements: [
-          "Once a proposal snapshot block has passed, if any single address or group has over 50% of the delegated supply, they can approve the proposal without the need of of any other support.",
-          "Currently, the active supply in ENS DAO - meaning the voting power of delegates who have voted in recent proposals - is a little below 20% of the delegated supply.",
-          "Even without 50% of the delegated supply, an address with over 50% of the active supply could present a big risk to the DAO if not for the Security Council, active until July 2026.",
-          "The DAO should dedicate effort to the increase of governance participation, aiming at an active supply worth at least double the amount of liquid assets under governance management.",
-        ],
+        currentSetting:
+          "Because ENS has a large liquid treasury (over $100M), attacking the DAO would be highly profitable. In this case, the Veto Strategy/Security Council is necessary.",
+        impact:
+          "The large liquid treasury makes it highly appealing for attackers to try gaining control of the DAO.",
+        recommendedSetting:
+          RECOMMENDED_SETTINGS[
+            GovernanceImplementationEnum.ATTACK_PROFITABILITY
+          ],
+        nextStep:
+          "The Delegated Cap should increase, incentivizing delegation to ENS delegates. This raises the cost of attacking the DAO and reduces the potential profitability of an attack.",
       },
       [GovernanceImplementationEnum.PROPOSAL_FLASHLOAN_PROTECTION]: {
         value: "Yes",
@@ -111,6 +123,15 @@ export const ENS: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.PROPOSAL_FLASHLOAN_PROTECTION
           ].description,
+        currentSetting:
+          "It protects the DAO from a flash loan aimed at reaching the Proposal Threshold and submitting a proposal, by taking a snapshot of the governance power from delegates/holders one block before the proposal submission.",
+        impact:
+          "It is not possible to use a flash loan to reach the amount required to submit a proposal.",
+        recommendedSetting:
+          RECOMMENDED_SETTINGS[
+            GovernanceImplementationEnum.PROPOSAL_FLASHLOAN_PROTECTION
+          ],
+        nextStep: "The parameter is in its lowest-risk condition.",
       },
       [GovernanceImplementationEnum.PROPOSAL_THRESHOLD]: {
         value: "100k ENS",
@@ -119,6 +140,14 @@ export const ENS: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.PROPOSAL_THRESHOLD
           ].description,
+        currentSetting:
+          "The Proposal Threshold is set to 100K $ENS (0,1% Total Supply)",
+        impact:
+          "$ENS has higher liquidity, making it easier for a large attacker to reach the Proposal Threshold and submit a proposal.",
+        recommendedSetting:
+          RECOMMENDED_SETTINGS[GovernanceImplementationEnum.PROPOSAL_THRESHOLD],
+        nextStep:
+          "The Proposal Threshold can be increased to a value above 1% market supply, in order to raise the cost of submitting proposals in governance and reduce the likelihood of spam.",
         requirements: [
           "A low proposal threshold lets attackers or small coalitions submit governance actions too easily, forcing the DAO to vote on spam or malicious items.",
           "The DAO should set the proposal threshold at ≥ 1 % of circulating market supply (CEX + DEX + lending pools) so that only wallets with meaningful economic stake can create proposals.",
@@ -131,6 +160,14 @@ export const ENS: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL
           ].description,
+        currentSetting:
+          "There is no ability to cancel a proposal if the proposer's balance falls below the Proposal Threshold after submitting it.",
+        impact: "To be defined",
+        recommendedSetting:
+          RECOMMENDED_SETTINGS[
+            GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL
+          ],
+        nextStep: "To be defined",
         requirements: [
           "Once a proposal is submitted, the proposer can immediately dump their tokens, reducing their financial risk in case of an attack.",
           "The DAO must enforce a permissionless way to cancel any live proposal if the proposer's voting power drops below the proposal-creation threshold.",
@@ -143,6 +180,16 @@ export const ENS: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.PROPOSER_BALANCE_CANCEL
           ].description,
+        currentSetting:
+          "There is no ability to cancel a proposal if the proposer's balance falls below the Proposal Threshold after submitting it.",
+        impact:
+          "An attacker can buy tokens to submit a proposal in the DAO, vote with them, and sell them during the voting period. There is nothing in ENS governance that protects against this or prevents the attacker from doing so.",
+        recommendedSetting:
+          RECOMMENDED_SETTINGS[
+            GovernanceImplementationEnum.PROPOSER_BALANCE_CANCEL
+          ],
+        nextStep:
+          "The governance contract should cancel a proposal if the address that submitted it has a governance token balance below the Proposal Threshold.",
         requirements: [
           "Once a proposal is submitted, the proposer can immediately dump their tokens, reducing their financial risk in case of an attack.",
           "The DAO must enforce a permissionless way to cancel any live proposal if the proposer's voting power drops below the proposal-creation threshold.",
@@ -155,6 +202,12 @@ export const ENS: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.SECURITY_COUNCIL
           ].description,
+        currentSetting:
+          "ENS has a Security Council, managed by a 4/8 multisig, whose authority to cancel proposals must be renewed every two years (and will expire in July 2026).",
+        impact: "ENS can veto malicious proposals with the Security Council",
+        recommendedSetting:
+          RECOMMENDED_SETTINGS[GovernanceImplementationEnum.SECURITY_COUNCIL],
+        nextStep: "The parameter is in its lowest-risk condition.",
       },
       [GovernanceImplementationEnum.SPAM_RESISTANCE]: {
         value: "No",
@@ -163,6 +216,14 @@ export const ENS: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.SPAM_RESISTANCE
           ].description,
+        currentSetting:
+          "There is no limit to the number of proposals that a single address can submit in the DAO.",
+        impact:
+          "A single address can submit multiple proposals, potentially masking an attack within one of them.",
+        recommendedSetting:
+          RECOMMENDED_SETTINGS[GovernanceImplementationEnum.SPAM_RESISTANCE],
+        nextStep:
+          "It is necessary to limit the number of proposals that can be submitted by a single address.",
         requirements: [
           "An attacker can swamp the system with simultaneous proposals, overwhelming voters to approve an attack through a war of attrition",
           "The DAO should impose—and automatically enforce—a hard cap on the number of active proposals any single address can have at once.",
@@ -175,6 +236,12 @@ export const ENS: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.TIMELOCK_ADMIN
           ].description,
+        currentSetting: "Governor has Admin role on timelock",
+        impact:
+          "Since the Governor is the administrator of the Timelock, only the DAO can control it - decentralizing its governance.",
+        recommendedSetting:
+          RECOMMENDED_SETTINGS[GovernanceImplementationEnum.TIMELOCK_ADMIN],
+        nextStep: "The parameter is in its lowest-risk condition.",
         requirements: [
           "The timelock admin can control execution, canceling, upgrades or critical parameter changes; if this power sits outside audited, DAO-approved contracts, attackers or insiders can sidestep on-chain voting.",
           "Admin rights should rest only with DAO governance plus contracts it explicitly approves after a public audit.",
@@ -187,6 +254,13 @@ export const ENS: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.TIMELOCK_DELAY
           ].description,
+        currentSetting:
+          "The Timelock execution delay for an approved proposal is 2 days.",
+        impact:
+          "There is a protected delay between proposal approval and execution.",
+        recommendedSetting:
+          RECOMMENDED_SETTINGS[GovernanceImplementationEnum.TIMELOCK_DELAY],
+        nextStep: "The parameter is in its lowest-risk condition.",
       },
       [GovernanceImplementationEnum.VETO_STRATEGY]: {
         value: "Yes",
@@ -195,6 +269,12 @@ export const ENS: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VETO_STRATEGY
           ].description,
+        currentSetting:
+          "ENS has a Security Council that is able to veto malicious proposals.",
+        impact: "ENS can veto malicious proposals with the Security Council",
+        recommendedSetting:
+          RECOMMENDED_SETTINGS[GovernanceImplementationEnum.VETO_STRATEGY],
+        nextStep: "The parameter is in its lowest-risk condition.",
       },
       [GovernanceImplementationEnum.VOTE_MUTABILITY]: {
         value: "No",
@@ -203,6 +283,14 @@ export const ENS: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTE_MUTABILITY
           ].description,
+        currentSetting:
+          "The DAO does not allow changing votes once they have been cast.",
+        impact:
+          "Governance participants cannot change their votes after casting them. In the event of a governance interface hijack, they may be manipulated into voting for the opposite of their intended choice, enabling an attack on the DAO.",
+        recommendedSetting:
+          RECOMMENDED_SETTINGS[GovernanceImplementationEnum.VOTE_MUTABILITY],
+        nextStep:
+          "Allow voters to change their vote until the Voting Period ends.",
         requirements: [
           "If voters cannot revise their ballots, a last-minute interface exploit or late discovery of malicious code can trap delegates in a choice that now favors an attacker, weakening the DAO’s defense.",
           "The governance contract should let any voter overwrite their previous vote while the voting window is open—ideally through a single castVoteWithReasonAndParams call or equivalent.",
@@ -215,6 +303,13 @@ export const ENS: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_DELAY
           ].description,
+        currentSetting: "The Voting Delay is set to 12 seconds.",
+        impact:
+          "The Voting Delay period is extremely short. This gives delegates and stakeholders little time to coordinate their votes and for the DAO to protect itself against an attack. This poses a governance risk.",
+        recommendedSetting:
+          RECOMMENDED_SETTINGS[GovernanceImplementationEnum.VOTING_DELAY],
+        nextStep:
+          "The Voting Delay needs to be increased to at least 2 days in order to be considered Medium Risk.",
         requirements: [
           "Voting delay is the time between proposal submission and the snapshot that fixes voting power. The current one-block delay lets attackers rush proposals before token-holders or delegates can react.",
           "The DAO should enforce a delay of at least two full days and have an automatic alert plan that notifies major voters the moment a proposal is posted.",
@@ -227,6 +322,15 @@ export const ENS: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION
           ].description,
+        currentSetting:
+          "It protects the DAO from a flash loan aimed to increase their voting power, by taking a snapshot of the governance power from delegates/holders one block before the Voting Period sarts",
+        impact:
+          "It is not possible to use a flash loan to increase voting power and approve a proposal.",
+        recommendedSetting:
+          RECOMMENDED_SETTINGS[
+            GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION
+          ],
+        nextStep: "The parameter is in its lowest-risk condition.",
       },
       [GovernanceImplementationEnum.VOTING_PERIOD]: {
         value: "7 days",
@@ -235,6 +339,12 @@ export const ENS: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_PERIOD
           ].description,
+        currentSetting: "The Voting Period is set to 7 days",
+        impact:
+          "The current Voting Period is sufficient for governance participants to cast their votes.",
+        recommendedSetting:
+          RECOMMENDED_SETTINGS[GovernanceImplementationEnum.VOTING_PERIOD],
+        nextStep: "The parameter is in its lowest-risk condition.",
       },
       [GovernanceImplementationEnum.VOTING_SUBSIDY]: {
         value: "Yes",
@@ -243,6 +353,40 @@ export const ENS: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_SUBSIDY
           ].description,
+        currentSetting:
+          "There is a subsidy to help voters participate in governance voting.",
+        impact:
+          "By subsidizing governance participants' voting costs, there is greater participation and stronger incentives for delegates to protect the DAO, since they do not incur gas fees to vote.",
+        recommendedSetting:
+          RECOMMENDED_SETTINGS[GovernanceImplementationEnum.VOTING_SUBSIDY],
+        nextStep: "The parameter is in its lowest-risk condition.",
+      },
+    },
+  },
+  attackExposure: {
+    defenseAreas: {
+      [RiskAreaEnum.SPAM_RESISTANCE]: {
+        description:
+          "Proposal threshold is below the ideal level and proposal submissions are unrestricted, significantly reducing resistance to sustained proposal spam.",
+      },
+      [RiskAreaEnum.ECONOMIC_SECURITY]: {
+        description:
+          "A large treasury held in non-native assets increases attack profitability, requiring additional veto or council mechanisms to keep economic risk at moderate levels.",
+      },
+      [RiskAreaEnum.SAFEGUARDS]: {
+        description:
+          "Proposals cannot be cancelled when the proposer's balance drops below the threshold, enabling spam, governance distraction, and low-cost attack experimentation.",
+      },
+      [RiskAreaEnum.CONTRACT_SAFETY]: {
+        description: "All metrics in this defense are currently in low risk.",
+      },
+      [RiskAreaEnum.RESPONSE_TIME]: {
+        description:
+          "An extremely short voting delay leaves little time for review or coordination, increasing the risk of rushed or unchallenged governance decisions.",
+      },
+      [RiskAreaEnum.GOV_FRONTEND_RESILIENCE]: {
+        description:
+          "Interface protections are present but not fully hardened, and immutable votes limit recovery from front-end compromise, resulting in moderate governance interface risk.",
       },
     },
   },

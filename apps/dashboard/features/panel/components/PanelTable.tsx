@@ -435,14 +435,14 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
               <div className="text-center">
                 <p>
                   Assess critical vulnerabilities in the DAO&apos;s governance
-                  setup. Each item highlights a specific risk area, showing
-                  which issues are resolved and which still expose the system to
-                  threats.
+                  setup. Each item highlights a specific attack exposure,
+                  showing which issues are resolved and which still expose the
+                  system to threats.
                 </p>
               </div>
             }
           >
-            <TitleUnderlined title="Risk Areas" className="text-left" />
+            <TitleUnderlined title="Attack Exposure" className="text-left" />
           </Tooltip>
         </div>
       ),

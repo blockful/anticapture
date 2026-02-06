@@ -41,14 +41,11 @@ export const PAGES_CONSTANTS = {
     subDescription:
       "When combined, these requirements determine the risk level of each area above. Here, you can explore each one individually and see why it's considered high risk—or not.",
   },
-  riskAnalysis: {
-    title: "Risk Analysis",
+  attackExposure: {
+    title: "Attack Exposure",
     page: "risk-analysis",
     description:
-      "Assess critical vulnerabilities in the DAO's governance setup.",
-    subTitle: "Risk Areas",
-    subDescription:
-      "Each item highlights a specific risk area, showing which issues are resolved and which still expose the system to threats.",
+      "Core safeguards determine a DAO’s exposure to governance attacks. Overall defense risk is set by the weakest metric, where higher risk signals greater attack feasibility and impact.",
   },
   resilienceStages: {
     title: "Resilience Stages",

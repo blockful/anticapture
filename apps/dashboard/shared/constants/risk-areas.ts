@@ -14,19 +14,23 @@ import {
 export interface RiskAreaConstants {
   title: string;
   titleAbbreviation: string;
-  description: string;
+  description: string | string[];
   requirements: GovernanceImplementationEnum[];
 }
 
 /**
- * Complete mapping of risk areas with their titles, descriptions and requirements
+ * Complete mapping of defense areas with their titles, abbreviations and requirements
+ * Description field contains general defense definition (what the area protects against)
+ * DAO-specific risk exposures are stored in daoConfig.attackExposure.defenseAreas
  */
 export const RISK_AREAS: Record<RiskAreaEnum, RiskAreaConstants> = {
-  [RiskAreaEnum.SPAM_VULNERABLE]: {
-    title: "Spam Vulnerable",
-    titleAbbreviation: "SV",
-    description:
-      "Means the system can be overwhelmed by fake or low-quality proposals. This clutters governance, wastes resources, and discourages real participation.",
+  [RiskAreaEnum.SPAM_RESISTANCE]: {
+    title: "Spam Resistance",
+    titleAbbreviation: "SR",
+    description: [
+      "Protects the system from being overwhelmed by malicious or low-quality proposals, which can waste resources, discourage meaningful participation, and expose the DAO to a war of attrition.",
+      "This risk typically arises when there are no checks to submit proposals, or when existing safeguards can be bypassed or ignored.",
+    ],
     requirements: [
       GovernanceImplementationEnum.SPAM_RESISTANCE,
       GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION,
@@ -36,18 +40,18 @@ export const RISK_AREAS: Record<RiskAreaEnum, RiskAreaConstants> = {
       GovernanceImplementationEnum.VOTING_SUBSIDY,
     ],
   },
-  [RiskAreaEnum.ATTACK_PROFITABILITY]: {
-    title: "Attack Profitability",
-    titleAbbreviation: "AP",
+  [RiskAreaEnum.ECONOMIC_SECURITY]: {
+    title: "Economic Security",
+    titleAbbreviation: "ES",
     description:
-      "It's the profit someone can take from a system by exploiting its design or timing. In DAOs, this might mean using voting power or insider info for personal gain.",
+      "Ensures the cost of attacking the DAO exceeds potential gains, making governance attacks economically unfeasible.",
     requirements: [GovernanceImplementationEnum.ATTACK_PROFITABILITY],
   },
   [RiskAreaEnum.SAFEGUARDS]: {
     title: "Safeguards",
     titleAbbreviation: "SG",
     description:
-      "Protection mechanisms that prevent malicious actions or mistakes from causing harm to the DAO.",
+      "Emergency mechanisms and checks to prevent or cancel malicious proposals before they can be executed.",
     requirements: [
       GovernanceImplementationEnum.VETO_STRATEGY,
       GovernanceImplementationEnum.SECURITY_COUNCIL,
@@ -55,11 +59,11 @@ export const RISK_AREAS: Record<RiskAreaEnum, RiskAreaConstants> = {
       GovernanceImplementationEnum.VOTING_SUBSIDY,
     ],
   },
-  [RiskAreaEnum.HACKABLE]: {
-    title: "Hackable",
-    titleAbbreviation: "H",
+  [RiskAreaEnum.CONTRACT_SAFETY]: {
+    title: "Contract Safety",
+    titleAbbreviation: "CS",
     description:
-      "Vulnerability to exploits that could compromise the DAO's smart contracts or governance processes.",
+      "Ensures governance contracts are secure, audited, and protected from exploits or vulnerabilities.",
     requirements: [
       GovernanceImplementationEnum.AUDITED_CONTRACTS,
       GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION,
@@ -70,18 +74,18 @@ export const RISK_AREAS: Record<RiskAreaEnum, RiskAreaConstants> = {
     title: "Response Time",
     titleAbbreviation: "RT",
     description:
-      "How quickly the DAO can react to threats, opportunities, or governance proposals.",
+      "Provides sufficient time windows for the community to detect, react to, and mobilize against malicious proposals.",
     requirements: [
       GovernanceImplementationEnum.TIMELOCK_DELAY,
       GovernanceImplementationEnum.VOTING_DELAY,
       GovernanceImplementationEnum.VOTING_PERIOD,
     ],
   },
-  [RiskAreaEnum.GOV_FRONTEND_VULNERABILITY]: {
-    title: "Gov Front-end Vulnerability",
-    titleAbbreviation: "GV",
+  [RiskAreaEnum.GOV_FRONTEND_RESILIENCE]: {
+    title: "Gov Front-end Resilience",
+    titleAbbreviation: "GFR",
     description:
-      "Weaknesses in the interfaces used for governance participation that could be exploited or lead to governance failures.",
+      "Protects the governance interface from being compromised, hijacked, or manipulated to mislead voters.",
     requirements: [
       GovernanceImplementationEnum.INTERFACE_HIJACK,
       GovernanceImplementationEnum.VOTE_MUTABILITY,
