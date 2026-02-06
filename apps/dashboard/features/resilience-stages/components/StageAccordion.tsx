@@ -106,7 +106,6 @@ const stageTwoEmptyContent: (GovernanceImplementationField & {
 })[] = [
   {
     name: "This Governance has solved all issues identified as High Risk and met the requirements for Stage 1 qualification.",
-    value: "no",
     description:
       "This does not guarantee safety, but it shows the DAO has its security basics in place. Check the dependencies left for Stage 2 to keep advancing towards resilient governance!",
     riskLevel: RiskLevel.LOW,

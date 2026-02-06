@@ -33,5 +33,6 @@ export * from "@/shared/components/design-system/ActivityIndicator";
 export * from "@/shared/components/design-system/buttons/button/Button";
 export * from "@/shared/components/design-system/buttons/icon-button/IconButton";
 export * from "@/shared/components/design-system/help-popover";
+export * from "@/shared/components/design-system/drawer";
 
 export { StagesCardRequirements } from "@/shared/components/cards/StagesCardRequirements";
