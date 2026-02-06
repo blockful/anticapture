@@ -117,7 +117,6 @@ export const ENS: DaoConfiguration = {
           "The Delegated Cap should increase, incentivizing delegation to ENS delegates. This raises the cost of attacking the DAO and reduces the potential profitability of an attack.",
       },
       [GovernanceImplementationEnum.PROPOSAL_FLASHLOAN_PROTECTION]: {
-        value: "Yes",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -134,7 +133,6 @@ export const ENS: DaoConfiguration = {
         nextStep: "The parameter is in its lowest-risk condition.",
       },
       [GovernanceImplementationEnum.PROPOSAL_THRESHOLD]: {
-        value: "100k ENS",
         riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -154,7 +152,6 @@ export const ENS: DaoConfiguration = {
         ],
       },
       [GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL]: {
-        value: "No",
         riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -174,7 +171,6 @@ export const ENS: DaoConfiguration = {
         ],
       },
       [GovernanceImplementationEnum.PROPOSER_BALANCE_CANCEL]: {
-        value: "No",
         riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -196,7 +192,6 @@ export const ENS: DaoConfiguration = {
         ],
       },
       [GovernanceImplementationEnum.SECURITY_COUNCIL]: {
-        value: "Yes",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -210,7 +205,6 @@ export const ENS: DaoConfiguration = {
         nextStep: "The parameter is in its lowest-risk condition.",
       },
       [GovernanceImplementationEnum.SPAM_RESISTANCE]: {
-        value: "No",
         riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -230,7 +224,6 @@ export const ENS: DaoConfiguration = {
         ],
       },
       [GovernanceImplementationEnum.TIMELOCK_ADMIN]: {
-        value: "No",
         riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -248,7 +241,6 @@ export const ENS: DaoConfiguration = {
         ],
       },
       [GovernanceImplementationEnum.TIMELOCK_DELAY]: {
-        value: "2 days",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -263,7 +255,6 @@ export const ENS: DaoConfiguration = {
         nextStep: "The parameter is in its lowest-risk condition.",
       },
       [GovernanceImplementationEnum.VETO_STRATEGY]: {
-        value: "Yes",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -277,7 +268,6 @@ export const ENS: DaoConfiguration = {
         nextStep: "The parameter is in its lowest-risk condition.",
       },
       [GovernanceImplementationEnum.VOTE_MUTABILITY]: {
-        value: "No",
         riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -297,7 +287,6 @@ export const ENS: DaoConfiguration = {
         ],
       },
       [GovernanceImplementationEnum.VOTING_DELAY]: {
-        value: "12 seconds",
         riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -316,7 +305,6 @@ export const ENS: DaoConfiguration = {
         ],
       },
       [GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION]: {
-        value: "Yes(default)",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -333,7 +321,6 @@ export const ENS: DaoConfiguration = {
         nextStep: "The parameter is in its lowest-risk condition.",
       },
       [GovernanceImplementationEnum.VOTING_PERIOD]: {
-        value: "7 days",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -347,7 +334,6 @@ export const ENS: DaoConfiguration = {
         nextStep: "The parameter is in its lowest-risk condition.",
       },
       [GovernanceImplementationEnum.VOTING_SUBSIDY]: {
-        value: "Yes",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[

@@ -36,9 +36,7 @@ export type GovernanceImplementationField = {
   riskLevel: RiskLevel;
   description: string;
 
-  value?: string; // Remove this when update Risk Analysis and Stages to not rely on it
   requirements?: string[]; // Remove this when update Risk Analysis and Stages to not rely on it
-  riskExplanation?: string; // Remove this when update Risk Analysis and Stages to not rely on it
 
   currentSetting?: string;
   impact?: string;

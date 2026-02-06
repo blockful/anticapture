@@ -46,7 +46,6 @@ export const UNI: DaoConfiguration = {
     // Fields are sorted alphabetically by GovernanceImplementationEnum for readability
     fields: {
       [GovernanceImplementationEnum.AUDITED_CONTRACTS]: {
-        value: "Yes",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -61,7 +60,6 @@ export const UNI: DaoConfiguration = {
         nextStep: "The parameter is in its lowest-risk condition.",
       },
       [GovernanceImplementationEnum.INTERFACE_HIJACK]: {
-        value: "No",
         riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -81,11 +79,8 @@ export const UNI: DaoConfiguration = {
           "The governance interface used (Tally) has the standard protections to prevent external tampering with the frontend accessed",
           "The platform is still exposed to any malicious or compromised actors inside the interface provider team",
         ],
-        riskExplanation: `Although protected from spoofing or hijacking, the service used for voting could still be internally compromised.\n
-          A change in the voting interface could be used to manipulate the results of the vote, hiding malicious txns, or even changing selection of votes.`,
       },
       [GovernanceImplementationEnum.ATTACK_PROFITABILITY]: {
-        value: "<10k USD",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -102,7 +97,6 @@ export const UNI: DaoConfiguration = {
         nextStep: "The parameter is in its lowest-risk condition.",
       },
       [GovernanceImplementationEnum.PROPOSAL_FLASHLOAN_PROTECTION]: {
-        value: "Yes",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -119,7 +113,6 @@ export const UNI: DaoConfiguration = {
         nextStep: "The parameter is in its lowest-risk condition.",
       },
       [GovernanceImplementationEnum.PROPOSAL_THRESHOLD]: {
-        value: "1M UNI",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -134,7 +127,6 @@ export const UNI: DaoConfiguration = {
         nextStep: "The parameter is in its lowest-risk condition.",
       },
       [GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL]: {
-        value: "Yes",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -152,7 +144,6 @@ export const UNI: DaoConfiguration = {
           "Continue maintaining threshold-based cancellation mechanism.",
       },
       [GovernanceImplementationEnum.PROPOSER_BALANCE_CANCEL]: {
-        value: "Yes",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -169,7 +160,6 @@ export const UNI: DaoConfiguration = {
         nextStep: "The parameter is in its lowest-risk condition.",
       },
       [GovernanceImplementationEnum.SECURITY_COUNCIL]: {
-        value: "No",
         riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -183,7 +173,6 @@ export const UNI: DaoConfiguration = {
         nextStep: "-",
       },
       [GovernanceImplementationEnum.SPAM_RESISTANCE]: {
-        value: "No",
         riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -199,7 +188,6 @@ export const UNI: DaoConfiguration = {
           "It is necessary to limit the number of proposals that can be submitted by a single address.",
       },
       [GovernanceImplementationEnum.TIMELOCK_ADMIN]: {
-        value: "Only Governor",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -217,7 +205,6 @@ export const UNI: DaoConfiguration = {
         ],
       },
       [GovernanceImplementationEnum.TIMELOCK_DELAY]: {
-        value: "2 days",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -232,7 +219,6 @@ export const UNI: DaoConfiguration = {
         nextStep: "The parameter is in its lowest-risk condition.",
       },
       [GovernanceImplementationEnum.VETO_STRATEGY]: {
-        value: "No",
         riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -247,7 +233,6 @@ export const UNI: DaoConfiguration = {
         nextStep: "-",
       },
       [GovernanceImplementationEnum.VOTE_MUTABILITY]: {
-        value: "No",
         riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -268,7 +253,6 @@ export const UNI: DaoConfiguration = {
         ],
       },
       [GovernanceImplementationEnum.VOTING_DELAY]: {
-        value: "44h",
         riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -287,7 +271,6 @@ export const UNI: DaoConfiguration = {
         ],
       },
       [GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION]: {
-        value: "Yes",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -304,7 +287,6 @@ export const UNI: DaoConfiguration = {
         nextStep: "The parameter is in its lowest-risk condition.",
       },
       [GovernanceImplementationEnum.VOTING_PERIOD]: {
-        value: "5d 6h",
         riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -323,7 +305,6 @@ export const UNI: DaoConfiguration = {
         ],
       },
       [GovernanceImplementationEnum.VOTING_SUBSIDY]: {
-        value: "No",
         riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[

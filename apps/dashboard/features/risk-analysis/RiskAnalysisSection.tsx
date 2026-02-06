@@ -88,7 +88,6 @@ export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       return {
         name: metricEnum,
         riskLevel: field?.riskLevel || RiskLevel.NONE,
-        value: field?.value || "",
         description: field?.description || "",
       };
     });

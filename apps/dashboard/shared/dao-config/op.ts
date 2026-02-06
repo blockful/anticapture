@@ -65,8 +65,6 @@ export const OP: DaoConfiguration = {
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.AUDITED_CONTRACTS],
         nextStep: "The parameter is in its lowest-risk condition.",
-        riskExplanation:
-          "The contracts, provided by Agora.xyz, have been audited for smart contract security.",
       },
       [GovernanceImplementationEnum.INTERFACE_HIJACK]: {
         riskLevel: RiskLevel.HIGH,
@@ -87,8 +85,6 @@ export const OP: DaoConfiguration = {
           "Currently, the DAO’s domains have no publicly verifiable DNS-level protections (High Risk).",
           "Secure every DAO‑owned domain with Industry standard and publish a security‑contact record.",
         ],
-        riskExplanation:
-          "The DAO's domains have no publicly verifiable DNS-level protections we are aware of.",
       },
       [GovernanceImplementationEnum.ATTACK_PROFITABILITY]: {
         riskLevel: RiskLevel.LOW,
@@ -109,8 +105,6 @@ export const OP: DaoConfiguration = {
           "The DAO has no treasury directly controllable by governance, so there is no risk of attack profitability.",
           "The treasury risks in the Collective are related to mistakes or malicious actions by the Foundation.",
         ],
-        riskExplanation:
-          "The DAO has no treasury directly controllable by governance, so there is no way to calculate attack profitability.",
       },
       [GovernanceImplementationEnum.PROPOSAL_FLASHLOAN_PROTECTION]: {
         riskLevel: RiskLevel.LOW,
@@ -131,8 +125,6 @@ export const OP: DaoConfiguration = {
           "The Foundation, as manager of the contract, is the only one that can propose, so there's no risk of proposal flashloan attacks.",
           "The flashloan protection in the contract is commented out, due to the onlyManagerOrTimelock bein used on the propose() function.",
         ],
-        riskExplanation:
-          "The Foundation, as manager of the contract, is the only one that can propose, so there's no risk of proposal flashloan attacks.",
       },
       [GovernanceImplementationEnum.PROPOSAL_THRESHOLD]: {
         riskLevel: RiskLevel.LOW,
@@ -150,8 +142,6 @@ export const OP: DaoConfiguration = {
         requirements: [
           "The proposal threshold is 0, but the propose() function is only callable by the manager, which is the Foundation.",
         ],
-        riskExplanation:
-          "The proposal threshold is 0, but the propose() function is only callable by the manager, which is the Foundation. All proposals are made in the forum and brought onchain by a centralized manager.",
       },
       [GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL]: {
         riskLevel: RiskLevel.LOW,
@@ -171,8 +161,6 @@ export const OP: DaoConfiguration = {
         requirements: [
           "Only the manager, timelock or proposer can cancel a proposal. As the manager is also the only possible proposer, this means only the manager (OP Foundation) can propose or cancel proposals.",
         ],
-        riskExplanation:
-          "The proposal cancel function is only callable by the manager, which is the Foundation.",
       },
       [GovernanceImplementationEnum.SECURITY_COUNCIL]: {
         riskLevel: RiskLevel.LOW,
@@ -187,8 +175,6 @@ export const OP: DaoConfiguration = {
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.SECURITY_COUNCIL],
         nextStep: "The parameter is in its lowest-risk condition.",
-        riskExplanation:
-          "The Security Council is elected in 2 separate cohorts of members that are responsible for the security of the DAO. The Security Council is not active on DAO governance, but directly on protocol upgrades.",
       },
       [GovernanceImplementationEnum.SPAM_RESISTANCE]: {
         riskLevel: RiskLevel.LOW,
@@ -204,8 +190,6 @@ export const OP: DaoConfiguration = {
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.SPAM_RESISTANCE],
         nextStep:
           "It is necessary to limit the number of proposals that can be submitted by a single address.",
-        riskExplanation:
-          "The Foundation is both the only allowed proposer and the treasury manager, so there's no risk of a spam attack given that any compromise to the foundation would lead directly to a treasury drain.",
       },
       [GovernanceImplementationEnum.TIMELOCK_ADMIN]: {
         riskLevel: RiskLevel.LOW,
@@ -219,8 +203,6 @@ export const OP: DaoConfiguration = {
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.TIMELOCK_ADMIN],
         nextStep: "The parameter is in its lowest-risk condition.",
-        riskExplanation:
-          "The timelock holds no assets and is not used for governance execution.",
       },
       [GovernanceImplementationEnum.TIMELOCK_DELAY]: {
         riskLevel: RiskLevel.LOW,
@@ -235,7 +217,6 @@ export const OP: DaoConfiguration = {
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.TIMELOCK_DELAY],
         nextStep: "The parameter is in its lowest-risk condition.",
-        riskExplanation: "The timelock is not used for governance execution.",
       },
       [GovernanceImplementationEnum.VETO_STRATEGY]: {
         riskLevel: RiskLevel.LOW,
@@ -250,8 +231,6 @@ export const OP: DaoConfiguration = {
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.VETO_STRATEGY],
         nextStep: "The parameter is in its lowest-risk condition.",
-        riskExplanation:
-          "Proposals are not executed by the timelock, but by the Foundation's multisig, so the Foundation can veto proposals by calling the cancel() function during voting, or by just not executing the proposal after approved.",
       },
       [GovernanceImplementationEnum.VOTE_MUTABILITY]: {
         riskLevel: RiskLevel.MEDIUM,
@@ -271,8 +250,6 @@ export const OP: DaoConfiguration = {
           "If voters cannot revise their ballots, a last-minute interface exploit or late discovery of malicious code can trap delegates in a choice that now favors an attacker, weakening the DAO’s defense.",
           "The governance contract should let any voter overwrite their previous vote while the voting window is open—ideally through an adapted castVoteWithReasonAndParams call or equivalent.",
         ],
-        riskExplanation:
-          "In case of an exploit that affects the voting platforms, immutable votes can leave delegates stuck with a incorrect vote made in a compromised interface.",
       },
       [GovernanceImplementationEnum.VOTING_DELAY]: {
         riskLevel: RiskLevel.LOW,
@@ -292,8 +269,6 @@ export const OP: DaoConfiguration = {
           "The DAO should enforce a delay of at least two full days and have an automatic alert plan that notifies major voters the moment a proposal is posted.",
           "The Foundation is the only allowed proposer, and it follows a voting schedule, so there's no reason to have a voting delay.",
         ],
-        riskExplanation:
-          "The Foundation is the only allowed proposer, and it follows a voting schedule, so there's no reason to have a voting delay.",
       },
       [GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION]: {
         riskLevel: RiskLevel.LOW,
@@ -310,8 +285,6 @@ export const OP: DaoConfiguration = {
             GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION
           ],
         nextStep: "The parameter is in its lowest-risk condition.",
-        riskExplanation:
-          "Delegates voting power are based on its delegation on block previous to when they could first cast a vote, making flashloan votes impossible.",
       },
       [GovernanceImplementationEnum.VOTING_PERIOD]: {
         riskLevel: RiskLevel.MEDIUM,
@@ -329,8 +302,6 @@ export const OP: DaoConfiguration = {
           "The voting period is 6 days, with the recommended safety being of 7 or more for a low level of risk.",
           "The Foundation is the only allowed proposer, and it follows a voting schedule, reducing the impact of this risk.",
         ],
-        riskExplanation:
-          "The voting period is 6 days, with the recommended safety being of 7 or more for a low level of risk.",
       },
       [GovernanceImplementationEnum.VOTING_SUBSIDY]: {
         riskLevel: RiskLevel.HIGH,
@@ -351,8 +322,6 @@ export const OP: DaoConfiguration = {
           "With no voting subsidy, the structure is more vulnerable to spam attacks, as it's more costly for the defense than the attacker",
           "The Foundation is the only allowed proposer, so the risk of spam attacks are low. Still, the DAO should consider applying a voting subsidy to make its structure more resilient.",
         ],
-        riskExplanation:
-          "The voting subsidy is not applied, requiring delegates to pay gas on the proposals they vote on.",
       },
     },
   },

@@ -54,7 +54,6 @@ export const NOUNS: DaoConfiguration = {
     // Fields are sorted alphabetically by GovernanceImplementationEnum for readability
     fields: {
       [GovernanceImplementationEnum.AUDITED_CONTRACTS]: {
-        value: "Yes",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -67,10 +66,8 @@ export const NOUNS: DaoConfiguration = {
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.AUDITED_CONTRACTS],
         nextStep: "The parameter is in its lowest-risk condition.",
-        riskExplanation: "Nouns contracts are audited.",
       },
       [GovernanceImplementationEnum.INTERFACE_HIJACK]: {
-        value: "No",
         riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -87,12 +84,9 @@ export const NOUNS: DaoConfiguration = {
         requirements: [
           "Without the proper protections(DNSSEC/SPF/DKIM/DMARC), attackers can spoof governance UIs by hijacking unprotected domains.",
         ],
-        riskExplanation:
-          "The domain is not signed with a valid signature (DNSSEC) and it is not possible to establish a secure connection to it (HTTPS).",
       },
       // Quantify the profitability of an attack on Nouns.
       [GovernanceImplementationEnum.ATTACK_PROFITABILITY]: {
-        value: "",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -108,10 +102,8 @@ export const NOUNS: DaoConfiguration = {
           ],
         nextStep: "The parameter is in its lowest-risk condition.",
         requirements: [""],
-        riskExplanation: "",
       },
       [GovernanceImplementationEnum.PROPOSAL_FLASHLOAN_PROTECTION]: {
-        value: "Yes",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -126,11 +118,8 @@ export const NOUNS: DaoConfiguration = {
             GovernanceImplementationEnum.PROPOSAL_FLASHLOAN_PROTECTION
           ],
         nextStep: "The parameter is in its lowest-risk condition.",
-        riskExplanation:
-          "Voting power are based on block previous to when voters could first cast a vote, making flashloan votes impossible.",
       },
       [GovernanceImplementationEnum.PROPOSAL_THRESHOLD]: {
-        value: "30% Market Supply",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -143,11 +132,8 @@ export const NOUNS: DaoConfiguration = {
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.PROPOSAL_THRESHOLD],
         nextStep: "The parameter is in its lowest-risk condition.",
-        riskExplanation:
-          "The supply available for purchase of governance tokens is extremely low—and the proposal threshold is high in relation to it.",
       },
       [GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL]: {
-        value: "Yes",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -162,11 +148,8 @@ export const NOUNS: DaoConfiguration = {
             GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL
           ],
         nextStep: "The parameter is in its lowest-risk condition.",
-        riskExplanation:
-          "Nouns has a cancellation mechanism in place in case the balance of the person submitting a proposal falls below the proposal threshold.",
       },
       [GovernanceImplementationEnum.SECURITY_COUNCIL]: {
-        value: "No",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -179,11 +162,8 @@ export const NOUNS: DaoConfiguration = {
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.SECURITY_COUNCIL],
         nextStep: "The parameter is in its lowest-risk condition.",
-        riskExplanation:
-          "Nouns does not have a Security Council, but it does have protection mechanisms—a Veto Strategy and the Proposal Threshold Cancel.",
       },
       [GovernanceImplementationEnum.SPAM_RESISTANCE]: {
-        value: "YES",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -196,11 +176,8 @@ export const NOUNS: DaoConfiguration = {
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.SPAM_RESISTANCE],
         nextStep: "The parameter is in its lowest-risk condition.",
-        riskExplanation:
-          "Nouns prevents the same address from submitting multiple proposals in governance.",
       },
       [GovernanceImplementationEnum.TIMELOCK_ADMIN]: {
-        value: "Yes",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -212,10 +189,8 @@ export const NOUNS: DaoConfiguration = {
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.TIMELOCK_ADMIN],
         nextStep: "The parameter is in its lowest-risk condition.",
-        riskExplanation: "The Timelock is controlled by the Governor.",
       },
       [GovernanceImplementationEnum.TIMELOCK_DELAY]: {
-        value: "2 days",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -228,10 +203,8 @@ export const NOUNS: DaoConfiguration = {
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.TIMELOCK_DELAY],
         nextStep: "The parameter is in its lowest-risk condition.",
-        riskExplanation: "Two days is a sufficient delay for Timelock.",
       },
       [GovernanceImplementationEnum.VETO_STRATEGY]: {
-        value: "Yes",
         riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -247,11 +220,8 @@ export const NOUNS: DaoConfiguration = {
         requirements: [
           "To move up to Stage 2 (low risk), the veto strategy needs to be controlled by the DAO, not by a Foundation/DUNA. ",
         ],
-        riskExplanation:
-          "Nouns has a veto strategy in place, but only the Foundation can veto proposals. In the documentation, the veto is attributed to DUNA, but no one responsible for the veto has been named yet.",
       },
       [GovernanceImplementationEnum.VOTE_MUTABILITY]: {
-        value: "No",
         riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -268,12 +238,9 @@ export const NOUNS: DaoConfiguration = {
         requirements: [
           "Nouns must allow votes to be changed even after they have been cast in order to reach Stage 2. .",
         ],
-        riskExplanation:
-          "The lack of vote mutability jeopardizes DAO decisions if its main voting interface is attacked.",
       },
       // Review this
       [GovernanceImplementationEnum.VOTING_DELAY]: {
-        value: "12 hours",
         riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -288,11 +255,8 @@ export const NOUNS: DaoConfiguration = {
         requirements: [
           "Nouns must have a voting delay of at least 2 days to be classified as Stage 1 (medium risk).",
         ],
-        riskExplanation:
-          "The 12-hour voting delay is too short for the DAO to protect itself from an attack before voting begins.",
       },
       [GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION]: {
-        value: "Yes",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -307,11 +271,8 @@ export const NOUNS: DaoConfiguration = {
             GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION
           ],
         nextStep: "The parameter is in its lowest-risk condition.",
-        riskExplanation:
-          "Voting power are based on block previous to when voters could first cast a vote, making flashloan votes impossible.",
       },
       [GovernanceImplementationEnum.VOTING_PERIOD]: {
-        value: "4 days",
         riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -326,11 +287,8 @@ export const NOUNS: DaoConfiguration = {
         requirements: [
           "The voting period is 4 days, with the recommended safety being of 7 or more for a low level of risk.",
         ],
-        riskExplanation:
-          "The voting period is 4 days, with the recommended safety being of 7 or more for a low level of risk.",
       },
       [GovernanceImplementationEnum.VOTING_SUBSIDY]: {
-        value: "Yes",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -343,8 +301,6 @@ export const NOUNS: DaoConfiguration = {
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.VOTING_SUBSIDY],
         nextStep: "The parameter is in its lowest-risk condition.",
-        riskExplanation:
-          "Nouns subsidizes the cost of votes for participants in governance.",
       },
     },
   },

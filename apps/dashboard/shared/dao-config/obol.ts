@@ -48,7 +48,6 @@ export const OBOL: DaoConfiguration = {
   governanceImplementation: {
     fields: {
       [GovernanceImplementationEnum.AUDITED_CONTRACTS]: {
-        value: "No",
         riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -65,11 +64,8 @@ export const OBOL: DaoConfiguration = {
         requirements: [
           "Governance contracts must be audited by a reputable third-party security firm and the audit report should be publicly available.",
         ],
-        riskExplanation:
-          "Governance contracts are not audited, or not publicly disclosed.",
       },
       [GovernanceImplementationEnum.INTERFACE_HIJACK]: {
-        value: "Insufficient Protections",
         riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -86,11 +82,8 @@ export const OBOL: DaoConfiguration = {
         requirements: [
           "Voting domain must have CAA set up to prevent domain hijacking.",
         ],
-        riskExplanation:
-          "While a domain can function without a CAA record, but it is less secure because any certificate authority (CA) can issue certificates for that domain, creating a risk of fraudulent certificates, impersonation, and man-in-the-middle attacks.",
       },
       [GovernanceImplementationEnum.ATTACK_PROFITABILITY]: {
-        value: "No Treasury Control",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -105,11 +98,8 @@ export const OBOL: DaoConfiguration = {
             GovernanceImplementationEnum.ATTACK_PROFITABILITY
           ],
         nextStep: "The parameter is in its lowest-risk condition.",
-        riskExplanation:
-          "The DAO has no treasury directly controllable by governance, so there is no risk of attack profitability.",
       },
       [GovernanceImplementationEnum.PROPOSAL_FLASHLOAN_PROTECTION]: {
-        value: "Yes",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -124,11 +114,8 @@ export const OBOL: DaoConfiguration = {
             GovernanceImplementationEnum.PROPOSAL_FLASHLOAN_PROTECTION
           ],
         nextStep: "The parameter is in its lowest-risk condition.",
-        riskExplanation:
-          "Voting power is based on block previous to when voters could first cast a vote, making flashloan votes impossible.",
       },
       [GovernanceImplementationEnum.PROPOSAL_THRESHOLD]: {
-        value: "30K $OBOL (0.006% Total Supply)",
         riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -145,11 +132,8 @@ export const OBOL: DaoConfiguration = {
         requirements: [
           "Proposal threshold should be at least 1% of the active market supply to provide adequate protection against spam and malicious proposals.",
         ],
-        riskExplanation:
-          "The proposal threshold is less than 1% of the active market supply of $OBOL.",
       },
       [GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL]: {
-        value: "No",
         riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -168,11 +152,8 @@ export const OBOL: DaoConfiguration = {
         requirements: [
           "The DAO must enforce a permissionless way to cancel any live proposal if the proposer's voting power drops below the proposal-creation threshold.",
         ],
-        riskExplanation:
-          "Once a proposal is submitted, the proposer can immediately dump their tokens, reducing their financial risk in case of an attack.",
       },
       [GovernanceImplementationEnum.SECURITY_COUNCIL]: {
-        value: "Yes",
         riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -189,11 +170,8 @@ export const OBOL: DaoConfiguration = {
         requirements: [
           "The Obol Security Council must upgrade its multisig to the highest standard, with at least 8 signers and a 75% approval threshold for transactions.",
         ],
-        riskExplanation:
-          "As of now, Obol Collective functions with a small committee multi-sig (2/3) but intends to develop towards a full Security Council structure. Treasury is not controlled by governance, but malicious proposals may still pose a risk to the protocol and its users.",
       },
       [GovernanceImplementationEnum.SPAM_RESISTANCE]: {
-        value: "No",
         riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -210,10 +188,8 @@ export const OBOL: DaoConfiguration = {
         requirements: [
           "Obol has no limit on active proposals or proposals submitted per address. Thus, it is susceptible to spam in its governance.",
         ],
-        riskExplanation: "Obol governance is vulnerable to spam.",
       },
       [GovernanceImplementationEnum.TIMELOCK_ADMIN]: {
-        value: "Obol Governor",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -225,11 +201,8 @@ export const OBOL: DaoConfiguration = {
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.TIMELOCK_ADMIN],
         nextStep: "The parameter is in its lowest-risk condition.",
-        riskExplanation:
-          "Obol Governor has admin rights for proposing, executing, and cancelling proposals, which is a standard and secure setup for DAO governance.",
       },
       [GovernanceImplementationEnum.TIMELOCK_DELAY]: {
-        value: "5 days",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -242,10 +215,8 @@ export const OBOL: DaoConfiguration = {
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.TIMELOCK_DELAY],
         nextStep: "The parameter is in its lowest-risk condition.",
-        riskExplanation: "The timelock delay is longer than 1 day",
       },
       [GovernanceImplementationEnum.VETO_STRATEGY]: {
-        value: "Yes",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -258,11 +229,8 @@ export const OBOL: DaoConfiguration = {
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.VETO_STRATEGY],
         nextStep: "The parameter is in its lowest-risk condition.",
-        riskExplanation:
-          "Governor has veto powers over the timelock, providing an additional layer of security against malicious proposals.",
       },
       [GovernanceImplementationEnum.VOTE_MUTABILITY]: {
-        value: "No",
         riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -279,11 +247,8 @@ export const OBOL: DaoConfiguration = {
         requirements: [
           "Without the ability to change votes, voters cannot correct mistakes or respond to new information, potentially leading to suboptimal governance outcomes.",
         ],
-        riskExplanation:
-          "Votes cannot be changed once cast, which can lead to suboptimal governance outcomes if voters make mistakes or if new information arises after voting has begun.",
       },
       [GovernanceImplementationEnum.VOTING_DELAY]: {
-        value: "1 day",
         riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -299,11 +264,8 @@ export const OBOL: DaoConfiguration = {
         requirements: [
           "A minimum of 2 days of Voting Delay is required for a DAO to be considered secure in this parameter.",
         ],
-        riskExplanation:
-          "With such a low voting delay, the DAO does not have time to mobilize voters to protect itself from a potential attack.",
       },
       [GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION]: {
-        value: "Yes",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -318,11 +280,8 @@ export const OBOL: DaoConfiguration = {
             GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION
           ],
         nextStep: "The parameter is in its lowest-risk condition.",
-        riskExplanation:
-          "Voting power is based on the proposal snapshot timepoint, making flashloan votes impossible.",
       },
       [GovernanceImplementationEnum.VOTING_PERIOD]: {
-        value: "5 days",
         riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -338,11 +297,8 @@ export const OBOL: DaoConfiguration = {
         requirements: [
           "Voting period should be at least 7 days to allow adequate time for community discussion and participation.",
         ],
-        riskExplanation:
-          "Short voting period may compromise quality of governance decisions by limiting time available for community-wide discussion and participation.",
       },
       [GovernanceImplementationEnum.VOTING_SUBSIDY]: {
-        value: "Yes",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -355,8 +311,6 @@ export const OBOL: DaoConfiguration = {
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.VOTING_SUBSIDY],
         nextStep: "The parameter is in its lowest-risk condition.",
-        riskExplanation:
-          "Obol Collective has a voting subsidy mechanism in place to reimburse voters for gas costs incurred when voting on proposals, but it is not active as of now.",
       },
     },
   },
