@@ -5,7 +5,6 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { AttackProfitabilitySection } from "@/features/attack-profitability";
 import { RiskAnalysisSection } from "@/features/risk-analysis";
-import { GovernanceImplementationSection } from "@/features/governance-implementation";
 import { ResilienceStagesSection } from "@/features/resilience-stages";
 import { DaoOverviewSection } from "@/features/dao-overview";
 import { TokenDistributionSection } from "@/features/token-distribution";
@@ -65,9 +64,6 @@ export const DaoTemplate = () => {
         )}
         {daoConstants.attackExposure && (
           <RiskAnalysisSection daoId={daoIdEnum} />
-        )}
-        {daoConstants.governanceImplementation && (
-          <GovernanceImplementationSection daoId={daoIdEnum} />
         )}
         {daoConstants.resilienceStages && (
           <ResilienceStagesSection daoId={daoIdEnum} />
