@@ -35,7 +35,7 @@ export type GovernanceImplementation = {
 export type GovernanceImplementationField = {
   riskLevel: RiskLevel;
   currentSetting?: string;
-  description?: string;
+  description: string;
   impact?: string;
   recommendedSetting?: string;
   nextStep?: string;
