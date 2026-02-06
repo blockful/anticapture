@@ -1,5 +1,10 @@
 import { Context } from "ponder:registry";
-import { accountPower, proposalsOnchain, votesOnchain } from "ponder:schema";
+import {
+  accountPower,
+  feedEvent,
+  proposalsOnchain,
+  votesOnchain,
+} from "ponder:schema";
 import { Address, getAddress, Hex } from "viem";
 
 import { ensureAccountExists } from "./shared";
@@ -30,10 +35,19 @@ export const voteCast = async (
     timestamp: bigint;
     txHash: Hex;
     votingPower: bigint;
+    logIndex: number;
   },
 ) => {
-  const { voter, timestamp, txHash, proposalId, support, votingPower, reason } =
-    args;
+  const {
+    voter,
+    timestamp,
+    txHash,
+    proposalId,
+    support,
+    votingPower,
+    reason,
+    logIndex,
+  } = args;
 
   await ensureAccountExists(context, voter);
 
@@ -71,6 +85,14 @@ export const voteCast = async (
       forVotes: current.forVotes + (support === 1 ? votingPower : 0n),
       abstainVotes: current.abstainVotes + (support === 2 ? votingPower : 0n),
     }));
+
+  await context.db.insert(feedEvent).values({
+    txHash,
+    logIndex,
+    type: "VOTE",
+    value: votingPower,
+    timestamp,
+  });
 };
 
 /**
@@ -104,6 +126,7 @@ export const proposalCreated = async (
     blockNumber: bigint;
     timestamp: bigint;
     proposalType?: number;
+    logIndex: number;
   },
 ) => {
   const {
@@ -119,6 +142,7 @@ export const proposalCreated = async (
     description,
     blockNumber,
     timestamp,
+    logIndex,
   } = args;
 
   await ensureAccountExists(context, proposer);
@@ -153,6 +177,16 @@ export const proposalCreated = async (
     .onConflictDoUpdate((current) => ({
       proposalsCount: current.proposalsCount + 1,
     }));
+
+  // Insert feed event for activity feed
+  // Proposals are always high relevance as they are significant governance actions
+  await context.db.insert(feedEvent).values({
+    txHash,
+    logIndex,
+    type: "PROPOSAL",
+    value: 0n,
+    timestamp,
+  });
 };
 
 /**

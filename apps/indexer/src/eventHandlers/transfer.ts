@@ -1,6 +1,11 @@
 import { Context } from "ponder:registry";
 import { Address, getAddress, Hex, zeroAddress } from "viem";
-import { accountBalance, balanceHistory, transfer } from "ponder:schema";
+import {
+  accountBalance,
+  balanceHistory,
+  feedEvent,
+  transfer,
+} from "ponder:schema";
 
 import { DaoIdEnum } from "@/lib/enums";
 import { ensureAccountExists } from "./shared";
@@ -151,4 +156,13 @@ export const tokenTransfer = async (
     .onConflictDoUpdate((current) => ({
       amount: current.amount + value,
     }));
+
+  // Insert feed event for activity feed
+  await context.db.insert(feedEvent).values({
+    txHash: transactionHash,
+    logIndex,
+    type: "TRANSFER",
+    value,
+    timestamp,
+  });
 };

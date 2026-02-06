@@ -426,3 +426,29 @@ export const accountRelations = relations(account, ({ many }) => ({
     relationName: "delegatedBalances",
   }),
 }));
+
+export const rolesEnum = onchainEnum("event_type", [
+  "VOTE",
+  "PROPOSAL",
+  "DELEGATION",
+  "TRANSFER",
+]);
+
+export const feedEvent = onchainTable(
+  "feed_event",
+  (drizzle) => ({
+    txHash: drizzle.text("tx_hash").notNull(),
+    logIndex: drizzle.integer("log_index").notNull(),
+    type: rolesEnum("type").notNull(),
+    value: drizzle.bigint().notNull(),
+    timestamp: drizzle.bigint().notNull(),
+  }),
+  (table) => ({
+    pk: primaryKey({
+      columns: [table.txHash, table.logIndex],
+    }),
+    feedEventTimestampIdx: index().on(table.timestamp),
+    feedEventTypeIdx: index().on(table.type),
+    feedEventValueIdx: index().on(table.value),
+  }),
+);
