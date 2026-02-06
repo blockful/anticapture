@@ -345,3 +345,17 @@ export const MetricTypesArray = Object.values(MetricTypesEnum) as [
   string,
   ...string[],
 ];
+
+export enum FeedRelevance {
+  HIGH = "HIGH",
+  MEDIUM = "MEDIUM",
+  LOW = "LOW",
+  ALL = "ALL",
+}
+
+export enum FeedEventType {
+  VOTE = "VOTE",
+  PROPOSAL = "PROPOSAL",
+  DELEGATION = "DELEGATION",
+  TRANSFER = "TRANSFER",
+}

@@ -53,6 +53,7 @@ import {
   DelegationsRepository,
   HistoricalDelegationsRepository,
   VotesRepository,
+  FeedRepository,
 } from "@/repositories";
 import { errorHandler } from "@/middlewares";
 import { getClient } from "@/lib/client";
@@ -76,9 +77,11 @@ import {
   HistoricalDelegationsService,
   DelegationsService,
   VotesService,
+  FeedService,
 } from "@/services";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
+import { feed } from "./controllers/feed";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -196,6 +199,7 @@ token(
   env.DAO_ID,
 );
 
+feed(app, new FeedService(new FeedRepository(pgClient)));
 tokenDistribution(app, repo);
 governanceActivity(app, repo, tokenType);
 proposalsActivity(app, proposalsRepo, env.DAO_ID, daoClient);
