@@ -80,6 +80,8 @@ export abstract class GovernorBase<
 
   abstract getQuorum(proposalId: string | null): Promise<bigint>;
 
+  abstract getTimelockDelay(): Promise<bigint>;
+
   async getProposalStatus(proposal: {
     id: string;
     status: string;
@@ -88,10 +90,18 @@ export abstract class GovernorBase<
     forVotes: bigint;
     againstVotes: bigint;
     abstainVotes: bigint;
+    endTimestamp: bigint;
   }): Promise<string> {
     const currentBlock = await this.getCurrentBlockNumber();
+    const currentTimestamp = await this.getBlockTime(currentBlock);
+    const timelockDelay = await this.getTimelockDelay();
 
-    if (proposal.status === ProposalStatus.QUEUED) {
+    if (
+      proposal.status === ProposalStatus.QUEUED &&
+      currentTimestamp &&
+      BigInt(currentTimestamp) >= proposal.endTimestamp + timelockDelay
+    ) {
+      return ProposalStatus.PENDING_EXECUTION;
     }
 
     // Skip proposals already finalized via event
