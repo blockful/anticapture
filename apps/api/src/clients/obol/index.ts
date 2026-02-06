@@ -13,8 +13,8 @@ export class ObolClient<
   extends GovernorBase
   implements DAOClient
 {
-  private abi: typeof ObolGovernorAbi;
-  private address: Address;
+  protected abi: typeof ObolGovernorAbi;
+  protected address: Address;
 
   constructor(client: Client<TTransport, TChain, TAccount>, address: Address) {
     super(client);
@@ -34,30 +34,6 @@ export class ObolClient<
       address: this.address,
       functionName: "quorum",
       args: [targetBlock < 0n ? 0n : targetBlock],
-    });
-  }
-
-  async getProposalThreshold(): Promise<bigint> {
-    return readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "proposalThreshold",
-    });
-  }
-
-  async getVotingDelay(): Promise<bigint> {
-    return readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "votingDelay",
-    });
-  }
-
-  async getVotingPeriod(): Promise<bigint> {
-    return readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "votingPeriod",
     });
   }
 

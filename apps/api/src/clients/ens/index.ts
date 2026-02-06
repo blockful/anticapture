@@ -13,8 +13,8 @@ export class ENSClient<
   extends GovernorBase
   implements DAOClient
 {
-  private abi: typeof ENSGovernorAbi;
-  private address: Address;
+  protected abi: typeof ENSGovernorAbi;
+  protected address: Address;
 
   constructor(client: Client<TTransport, TChain, TAccount>, address: Address) {
     super(client);
@@ -38,39 +38,6 @@ export class ENSClient<
       });
     }
     return this.cache.quorum;
-  }
-
-  async getProposalThreshold(): Promise<bigint> {
-    if (!this.cache.proposalThreshold) {
-      this.cache.proposalThreshold = await readContract(this.client, {
-        abi: this.abi,
-        address: this.address,
-        functionName: "proposalThreshold",
-      });
-    }
-    return this.cache.proposalThreshold;
-  }
-
-  async getVotingDelay(): Promise<bigint> {
-    if (!this.cache.votingDelay) {
-      this.cache.votingDelay = await readContract(this.client, {
-        abi: this.abi,
-        address: this.address,
-        functionName: "votingDelay",
-      });
-    }
-    return this.cache.votingDelay;
-  }
-
-  async getVotingPeriod(): Promise<bigint> {
-    if (!this.cache.votingPeriod) {
-      this.cache.votingPeriod = await readContract(this.client, {
-        abi: this.abi,
-        address: this.address,
-        functionName: "votingPeriod",
-      });
-    }
-    return this.cache.votingPeriod;
   }
 
   async getTimelockDelay(): Promise<bigint> {

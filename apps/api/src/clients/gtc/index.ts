@@ -1,12 +1,4 @@
-import {
-  Account,
-  Address,
-  Chain,
-  Client,
-  fromHex,
-  toHex,
-  Transport,
-} from "viem";
+import { Account, Address, Chain, Client, Transport } from "viem";
 import { getBlockNumber, readContract } from "viem/actions";
 
 import { DAOClient } from "@/clients";
@@ -21,8 +13,8 @@ export class GTCClient<
   extends GovernorBase
   implements DAOClient
 {
-  private abi: typeof GovernorAbi;
-  private address: Address;
+  protected abi: typeof GovernorAbi;
+  protected address: Address;
 
   constructor(client: Client<TTransport, TChain, TAccount>, address: Address) {
     super(client);
@@ -42,30 +34,6 @@ export class GTCClient<
       address: this.address,
       functionName: "quorum",
       args: [targetBlock < 0n ? 0n : targetBlock],
-    });
-  }
-
-  async getProposalThreshold(): Promise<bigint> {
-    return readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "proposalThreshold",
-    });
-  }
-
-  async getVotingDelay(): Promise<bigint> {
-    return readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "votingDelay",
-    });
-  }
-
-  async getVotingPeriod(): Promise<bigint> {
-    return readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "votingPeriod",
     });
   }
 

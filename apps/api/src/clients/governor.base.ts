@@ -1,4 +1,14 @@
-import { Account, Chain, Client, fromHex, toHex, Transport } from "viem";
+import {
+  Abi,
+  Account,
+  Address,
+  Chain,
+  Client,
+  fromHex,
+  toHex,
+  Transport,
+} from "viem";
+import { readContract } from "viem/actions";
 
 import { ProposalStatus } from "../lib/constants";
 
@@ -21,7 +31,46 @@ export abstract class GovernorBase<
     timelockDelay?: bigint;
   } = {};
 
+  protected abstract address: Address;
+  protected abstract abi: Abi;
+
   constructor(protected client: Client<TTransport, TChain, TAccount>) {}
+
+  async getProposalThreshold(): Promise<bigint> {
+    if (!this.cache.proposalThreshold) {
+      this.cache.proposalThreshold = (await readContract(this.client, {
+        abi: this.abi,
+        address: this.address,
+        functionName: "proposalThreshold",
+        args: [],
+      })) as bigint;
+    }
+    return this.cache.proposalThreshold!;
+  }
+
+  async getVotingDelay(): Promise<bigint> {
+    if (!this.cache.votingDelay) {
+      this.cache.votingDelay = (await readContract(this.client, {
+        abi: this.abi,
+        address: this.address,
+        functionName: "votingDelay",
+        args: [],
+      })) as bigint;
+    }
+    return this.cache.votingDelay!;
+  }
+
+  async getVotingPeriod(): Promise<bigint> {
+    if (!this.cache.votingPeriod) {
+      this.cache.votingPeriod = (await readContract(this.client, {
+        abi: this.abi,
+        address: this.address,
+        functionName: "votingPeriod",
+        args: [],
+      })) as bigint;
+    }
+    return this.cache.votingPeriod!;
+  }
 
   abstract calculateQuorum(votes: {
     forVotes: bigint;
@@ -41,6 +90,9 @@ export abstract class GovernorBase<
     abstainVotes: bigint;
   }): Promise<string> {
     const currentBlock = await this.getCurrentBlockNumber();
+
+    if (proposal.status === ProposalStatus.QUEUED) {
+    }
 
     // Skip proposals already finalized via event
     if (

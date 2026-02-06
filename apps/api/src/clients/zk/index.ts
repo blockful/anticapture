@@ -13,8 +13,8 @@ export class ZKClient<
   extends GovernorBase
   implements DAOClient
 {
-  private abi: typeof GovernorAbi;
-  private address: Address;
+  protected abi: typeof GovernorAbi;
+  protected address: Address;
 
   constructor(client: Client<TTransport, TChain, TAccount>, address: Address) {
     super(client);
@@ -32,30 +32,6 @@ export class ZKClient<
       address: this.address,
       functionName: "quorum",
       args: [BigInt(Math.floor(Date.now() / 1000))],
-    });
-  }
-
-  async getProposalThreshold(): Promise<bigint> {
-    return readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "proposalThreshold",
-    });
-  }
-
-  async getVotingDelay(): Promise<bigint> {
-    return readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "votingDelay",
-    });
-  }
-
-  async getVotingPeriod(): Promise<bigint> {
-    return readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "votingPeriod",
     });
   }
 

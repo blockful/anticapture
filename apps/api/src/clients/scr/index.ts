@@ -20,8 +20,8 @@ export class SCRClient<
   extends GovernorBase
   implements DAOClient
 {
-  private abi: typeof GovernorAbi;
-  private address: Address;
+  protected abi: typeof GovernorAbi;
+  protected address: Address;
 
   constructor(client: Client<TTransport, TChain, TAccount>, address: Address) {
     super(client);
@@ -35,30 +35,6 @@ export class SCRClient<
 
   async getQuorum(_: string | null): Promise<bigint> {
     return parseEther("2100000"); // 2.1M $SCR (0.21% Total Supply)
-  }
-
-  async getProposalThreshold(): Promise<bigint> {
-    return readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "proposalThreshold",
-    });
-  }
-
-  async getVotingDelay(): Promise<bigint> {
-    return readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "votingDelay",
-    });
-  }
-
-  async getVotingPeriod(): Promise<bigint> {
-    return readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "votingPeriod",
-    });
   }
 
   async getTimelockDelay(): Promise<bigint> {

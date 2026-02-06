@@ -13,8 +13,8 @@ export class UNIClient<
   extends GovernorBase
   implements DAOClient
 {
-  private abi: typeof GovernorAbi;
-  private address: Address;
+  protected abi: typeof GovernorAbi;
+  protected address: Address;
 
   constructor(client: Client<TTransport, TChain, TAccount>, address: Address) {
     super(client);
@@ -32,30 +32,6 @@ export class UNIClient<
       address: this.address,
       functionName: "quorumVotes",
       args: [],
-    });
-  }
-
-  async getProposalThreshold(): Promise<bigint> {
-    return readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "proposalThreshold",
-    });
-  }
-
-  async getVotingDelay(): Promise<bigint> {
-    return readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "votingDelay",
-    });
-  }
-
-  async getVotingPeriod(): Promise<bigint> {
-    return readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "votingPeriod",
     });
   }
 
