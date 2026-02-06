@@ -55,6 +55,10 @@ class FakeTreasuryRepository {
 
 /**
  * Creates a test app with treasury routes
+ *
+ * Note: testClient(app) returns 'unknown' because Hono can't infer types
+ * when routes are added dynamically. We use 'as any' as a workaround.
+ * See: https://github.com/honojs/hono/issues/3148
  */
 function createTestApp(
   treasuryService: TreasuryService,
@@ -100,7 +104,7 @@ describe("Treasury Controller - Integration Tests", () => {
         undefined,
       );
       const app = createTestApp(service);
-      const client = testClient(app);
+      const client = testClient(app) as any;
 
       const res = await client["treasury"]["liquid"].$get({
         query: { days: "7d", order: "asc" },
@@ -126,7 +130,7 @@ describe("Treasury Controller - Integration Tests", () => {
         undefined,
       );
       const app = createTestApp(service);
-      const client = testClient(app);
+      const client = testClient(app) as any;
 
       const res = await client["treasury"]["liquid"].$get({
         query: { days: "7d" },
@@ -152,7 +156,7 @@ describe("Treasury Controller - Integration Tests", () => {
         undefined,
       );
       const app = createTestApp(service);
-      const client = testClient(app);
+      const client = testClient(app) as any;
 
       const res = await client["treasury"]["liquid"].$get({
         query: {},
@@ -170,7 +174,7 @@ describe("Treasury Controller - Integration Tests", () => {
         undefined,
       );
       const app = createTestApp(service);
-      const client = testClient(app);
+      const client = testClient(app) as any;
 
       const res = await client["treasury"]["liquid"].$get({
         query: { days: "7d" },
@@ -200,7 +204,7 @@ describe("Treasury Controller - Integration Tests", () => {
         undefined,
       );
       const app = createTestApp(service);
-      const client = testClient(app);
+      const client = testClient(app) as any;
 
       const resAsc = await client["treasury"]["liquid"].$get({
         query: { days: "7d", order: "asc" },
@@ -231,7 +235,7 @@ describe("Treasury Controller - Integration Tests", () => {
         fakePriceProvider,
       );
       const app = createTestApp(service, 18);
-      const client = testClient(app);
+      const client = testClient(app) as any;
 
       const res = await client["treasury"]["dao-token"].$get({
         query: { days: "7d" },
@@ -254,7 +258,7 @@ describe("Treasury Controller - Integration Tests", () => {
         undefined,
       );
       const app = createTestApp(service);
-      const client = testClient(app);
+      const client = testClient(app) as any;
 
       const res = await client["treasury"]["dao-token"].$get({
         query: { days: "7d" },
@@ -285,7 +289,7 @@ describe("Treasury Controller - Integration Tests", () => {
         fakePriceProvider,
       );
       const app = createTestApp(service, 18);
-      const client = testClient(app);
+      const client = testClient(app) as any;
 
       const res = await client["treasury"]["total"].$get({
         query: { days: "7d" },
@@ -313,7 +317,7 @@ describe("Treasury Controller - Integration Tests", () => {
         fakePriceProvider,
       );
       const app = createTestApp(service);
-      const client = testClient(app);
+      const client = testClient(app) as any;
 
       const res = await client["treasury"]["total"].$get({
         query: { days: "7d" },
@@ -335,7 +339,7 @@ describe("Treasury Controller - Integration Tests", () => {
         undefined,
       );
       const app = createTestApp(service);
-      const client = testClient(app);
+      const client = testClient(app) as any;
 
       const validDays = ["7d", "30d", "90d", "180d", "365d"] as const;
 
@@ -355,7 +359,7 @@ describe("Treasury Controller - Integration Tests", () => {
         undefined,
       );
       const app = createTestApp(service);
-      const client = testClient(app);
+      const client = testClient(app) as any;
 
       const resAsc = await client["treasury"]["liquid"].$get({
         query: { days: "7d", order: "asc" },
