@@ -27,6 +27,7 @@ import daoConfigByDaoId from "@/shared/dao-config";
 import Link from "next/link";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { formatUnits } from "viem";
+import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
 
 interface TabsVotedContentProps {
   proposal: NonNullable<GetProposalQuery["proposal"]>;
@@ -286,18 +287,18 @@ export const TabsVotedContent = ({
           const date = timestamp ? new Date(Number(timestamp) * 1000) : null;
           const formattedDate = date
             ? date.toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })
             : "Unknown";
-          
+
           const formattedTime = date
             ? date.toLocaleTimeString("en-US", {
-                hour: "numeric",
-                minute: "2-digit",
-                hour12: true,
-              }).toLowerCase()
+              hour: "numeric",
+              minute: "2-digit",
+              hour12: true,
+            }).toLowerCase()
             : null;
 
           return (
@@ -471,7 +472,7 @@ export const TabsVotedContent = ({
           // Determine the direction and color
           const isPositive =
             Number(votingPowerVariation.percentageChange) > 0 ||
-            votingPowerVariation.percentageChange === "NO BASELINE";
+            votingPowerVariation.percentageChange === PERCENTAGE_NO_BASELINE;
           const isNegative = Number(votingPowerVariation.percentageChange) < 0;
           const isNeutral = Number(votingPowerVariation.percentageChange) === 0;
 
@@ -511,7 +512,7 @@ export const TabsVotedContent = ({
                     isNeutral && "text-secondary",
                   )}
                 >
-                  {votingPowerVariation.percentageChange === "NO BASELINE"
+                  {votingPowerVariation.percentageChange === PERCENTAGE_NO_BASELINE
                     ? ">1000%"
                     : `${Number(votingPowerVariation.percentageChange).toFixed(1)}%`}
                 </span>

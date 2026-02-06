@@ -9,6 +9,7 @@ import { DaoOverviewHeaderMetrics } from "@/features/dao-overview/components/Dao
 import { TokenDistributionChartCard } from "@/features/dao-overview/components/TokenDistributionChartCard";
 import { DaoOverviewHeaderBackground } from "@/features/dao-overview/components/DaoOverviewHeaderBackground";
 import { SecurityCouncilCard } from "@/features/dao-overview/components/SecurityCouncilCard";
+import { LastProposalsCard } from "@/features/dao-overview/components/LastProposalsCard";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 import { StagesContainer } from "@/features/resilience-stages/components/StagesContainer";
 import {
@@ -131,7 +132,9 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           <div className="w-full">
             <VotingPowerChartCard daoId={daoId} />
           </div>
+          
         </div>
+        {daoConfig.governancePage && (<LastProposalsCard daoId={daoId} />)}
       </div>
     </Suspense>
   );
