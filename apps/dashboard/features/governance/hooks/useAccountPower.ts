@@ -10,6 +10,7 @@ import { formatUnits } from "viem";
 export interface UseAccountPowerResult {
   accountPower: GetAccountPowerQuery["votingPowerByAccountId"] | null;
   votingPower: string;
+  rawVotingPower: string;
   votes: GetAccountPowerQuery["votesByProposalId"] | null;
   hasVoted: boolean;
   loading: boolean;
@@ -49,6 +50,7 @@ export const useVoterInfo = ({
     return {
       accountPower: null,
       votingPower: "0",
+      rawVotingPower: "0",
       votes: null,
       hasVoted: false,
       loading,
@@ -57,13 +59,16 @@ export const useVoterInfo = ({
     };
   }
 
+  const rawVotingPower = data.votingPowerByAccountId.votingPower;
+
   return {
     accountPower: data.votingPowerByAccountId,
     votingPower: formatNumberUserReadable(
       Number(
-        formatUnits(BigInt(data.votingPowerByAccountId.votingPower), decimals),
+        formatUnits(BigInt(rawVotingPower), decimals),
       ),
     ),
+    rawVotingPower,
     votes: data.votesByProposalId || null,
     hasVoted: !!data.votesByProposalId,
     loading,
