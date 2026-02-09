@@ -351,7 +351,6 @@ export enum FeedRelevance {
   HIGH = "HIGH",
   MEDIUM = "MEDIUM",
   LOW = "LOW",
-  ALL = "ALL",
 }
 
 export enum FeedEventType {

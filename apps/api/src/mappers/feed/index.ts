@@ -9,7 +9,10 @@ export const FeedRequestSchema = z.object({
   limit: z.coerce.number().optional().default(10),
   orderBy: z.enum(["timestamp", "value"]).optional().default("timestamp"),
   orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
-  relevance: z.nativeEnum(FeedRelevance).optional().default(FeedRelevance.ALL),
+  relevance: z
+    .nativeEnum(FeedRelevance)
+    .optional()
+    .default(FeedRelevance.MEDIUM),
   type: z.nativeEnum(FeedEventType).optional(),
   fromDate: z.coerce.number().optional(),
   toDate: z.coerce.number().optional(),
@@ -19,8 +22,9 @@ export const FeedItemSchema = z.object({
   txHash: z.string(),
   logIndex: z.number(),
   type: z.string(),
-  value: z.bigint().transform((val) => val.toString()),
+  value: z.string(),
   timestamp: z.number(),
+  relevance: z.nativeEnum(FeedRelevance),
 });
 
 export const FeedResponseSchema = z.object({

@@ -160,15 +160,15 @@ const accountBalanceService = new AccountBalanceService(accountBalanceRepo);
 const tokenPriceClient =
   env.DAO_ID === DaoIdEnum.NOUNS
     ? new NFTPriceService(
-      new NFTPriceRepository(pgClient),
-      env.COINGECKO_API_URL,
-      env.COINGECKO_API_KEY,
-    )
+        new NFTPriceRepository(pgClient),
+        env.COINGECKO_API_URL,
+        env.COINGECKO_API_KEY,
+      )
     : new CoingeckoService(
-      env.COINGECKO_API_URL,
-      env.COINGECKO_API_KEY,
-      env.DAO_ID,
-    );
+        env.COINGECKO_API_URL,
+        env.COINGECKO_API_KEY,
+        env.DAO_ID,
+      );
 
 historicalDelegations(
   app,
@@ -200,7 +200,7 @@ token(
   env.DAO_ID,
 );
 
-feed(app, new FeedService(new FeedRepository(pgClient)));
+feed(app, new FeedService(env.DAO_ID, new FeedRepository(pgClient)));
 tokenDistribution(app, repo);
 governanceActivity(app, repo, tokenType);
 proposalsActivity(app, proposalsRepo, env.DAO_ID, daoClient);
