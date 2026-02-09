@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "jest",
-    "test:watch": "jest --watch",
+    "test": "NODE_OPTIONS='--experimental-vm-modules' jest",
+    "test:watch": "NODE_OPTIONS='--experimental-vm-modules' jest --watch",
     "clean": "rm -rf node_modules *.tsbuildinfo dist",
     "start": "node dist/index.js",
     "build": "tsup",
@@ -31,6 +31,7 @@
     "zod-validation-error": "^3.4.1"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.3.15",
     "@types/jest": "^29.5.14",
     "@types/node": "^20.16.5",
     "@types/pg": "^8.15.6",

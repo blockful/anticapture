@@ -72,7 +72,7 @@ importers:
         version: 0.31.7
       drizzle-orm:
         specifier: ~0.41.0
-        version: 0.41.0(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0)(@types/pg@8.15.6)(kysely@0.26.3)(pg@8.17.2)
+        version: 0.41.0(@electric-sql/pglite@0.3.15)(@opentelemetry/api@1.9.0)(@types/pg@8.15.6)(kysely@0.26.3)(pg@8.17.2)
       hono:
         specifier: ^4.7.10
         version: 4.10.7
@@ -89,6 +89,9 @@ importers:
         specifier: ^3.4.1
         version: 3.5.4(zod@3.25.76)
     devDependencies:
+      "@electric-sql/pglite":
+        specifier: ^0.3.15
+        version: 0.3.15
       "@types/jest":
         specifier: ^29.5.14
         version: 29.5.14
@@ -496,7 +499,7 @@ importers:
         version: 4.9.6
       forge-std:
         specifier: github:foundry-rs/forge-std
-        version: https://codeload.github.com/foundry-rs/forge-std/tar.gz/8e7bbe65b08aa71a0c93b50dc707da716a2ac1ff
+        version: https://codeload.github.com/foundry-rs/forge-std/tar.gz/aeb45e9f32ef8ca78f0aeda17596e9c46374da41
 
 packages:
   "@adobe/css-tools@4.4.3":
@@ -2066,6 +2069,12 @@ packages:
     resolution:
       {
         integrity: sha512-YRY806NnScVqa21/1L1vaysSQ+0/cAva50z7vlwzaGiBOTS9JhdzIRHN0KfgMhobFAphbznZJ7urMso4RtMBIQ==,
+      }
+
+  "@electric-sql/pglite@0.3.15":
+    resolution:
+      {
+        integrity: sha512-Cj++n1Mekf9ETfdc16TlDi+cDDQF0W7EcbyRHYOAeZdsAe8M/FJg18itDTSwyHfar2WIezawM9o0EKaRGVKygQ==,
       }
 
   "@emnapi/core@1.4.5":
@@ -11455,10 +11464,10 @@ packages:
       }
     engines: { node: ">=14" }
 
-  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/8e7bbe65b08aa71a0c93b50dc707da716a2ac1ff:
+  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/aeb45e9f32ef8ca78f0aeda17596e9c46374da41:
     resolution:
       {
-        tarball: https://codeload.github.com/foundry-rs/forge-std/tar.gz/8e7bbe65b08aa71a0c93b50dc707da716a2ac1ff,
+        tarball: https://codeload.github.com/foundry-rs/forge-std/tar.gz/aeb45e9f32ef8ca78f0aeda17596e9c46374da41,
       }
     version: 1.14.0
 
@@ -20070,6 +20079,8 @@ snapshots:
 
   "@electric-sql/pglite@0.2.13": {}
 
+  "@electric-sql/pglite@0.3.15": {}
+
   "@emnapi/core@1.4.5":
     dependencies:
       "@emnapi/wasi-threads": 1.0.4
@@ -27113,9 +27124,9 @@ snapshots:
       kysely: 0.26.3
       pg: 8.16.3
 
-  drizzle-orm@0.41.0(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0)(@types/pg@8.15.6)(kysely@0.26.3)(pg@8.17.2):
+  drizzle-orm@0.41.0(@electric-sql/pglite@0.3.15)(@opentelemetry/api@1.9.0)(@types/pg@8.15.6)(kysely@0.26.3)(pg@8.17.2):
     optionalDependencies:
-      "@electric-sql/pglite": 0.2.13
+      "@electric-sql/pglite": 0.3.15
       "@opentelemetry/api": 1.9.0
       "@types/pg": 8.15.6
       kysely: 0.26.3
@@ -28043,7 +28054,7 @@ snapshots:
       cross-spawn: 7.0.6
       signal-exit: 4.1.0
 
-  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/8e7bbe65b08aa71a0c93b50dc707da716a2ac1ff:
+  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/aeb45e9f32ef8ca78f0aeda17596e9c46374da41:
     {}
 
   fork-ts-checker-webpack-plugin@9.1.0(typescript@5.9.3)(webpack@5.103.0):
