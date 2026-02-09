@@ -1,12 +1,4 @@
-import {
-  Account,
-  Address,
-  Chain,
-  Client,
-  fromHex,
-  toHex,
-  Transport,
-} from "viem";
+import { Account, Address, Chain, Client, Transport } from "viem";
 import { getBlockNumber, readContract } from "viem/actions";
 
 import { DAOClient } from "@/clients";
@@ -21,8 +13,8 @@ export class ENSClient<
   extends GovernorBase
   implements DAOClient
 {
-  private abi: typeof ENSGovernorAbi;
-  private address: Address;
+  protected abi: typeof ENSGovernorAbi;
+  protected address: Address;
 
   constructor(client: Client<TTransport, TChain, TAccount>, address: Address) {
     super(client);
@@ -35,76 +27,43 @@ export class ENSClient<
   }
 
   async getQuorum(): Promise<bigint> {
-    const blockNumber = await getBlockNumber(this.client);
-    const targetBlock = blockNumber - 10n;
-    return readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "quorum",
-      args: [targetBlock < 0n ? 0n : targetBlock],
-    });
-  }
-
-  async getProposalThreshold(): Promise<bigint> {
-    return readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "proposalThreshold",
-    });
-  }
-
-  async getVotingDelay(): Promise<bigint> {
-    return readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "votingDelay",
-    });
-  }
-
-  async getVotingPeriod(): Promise<bigint> {
-    return readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "votingPeriod",
-    });
+    if (!this.cache.quorum) {
+      const blockNumber = await getBlockNumber(this.client);
+      const targetBlock = blockNumber - 10n;
+      this.cache.quorum = await readContract(this.client, {
+        abi: this.abi,
+        address: this.address,
+        functionName: "quorum",
+        args: [targetBlock < 0n ? 0n : targetBlock],
+      });
+    }
+    return this.cache.quorum;
   }
 
   async getTimelockDelay(): Promise<bigint> {
-    const timelockAddress = await readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "timelock",
-    });
-    return readContract(this.client, {
-      abi: [
-        {
-          constant: true,
-          inputs: [],
-          outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-          payable: false,
-          stateMutability: "view",
-          type: "function",
-          name: "getMinDelay",
-        },
-      ],
-      address: timelockAddress,
-      functionName: "getMinDelay",
-    });
-  }
-
-  async getCurrentBlockNumber(): Promise<number> {
-    const result = await this.client.request({
-      method: "eth_blockNumber",
-    });
-    return fromHex(result, "number");
-  }
-
-  async getBlockTime(blockNumber: number): Promise<number | null> {
-    const block = await this.client.request({
-      method: "eth_getBlockByNumber",
-      params: [toHex(blockNumber), false],
-    });
-    return block?.timestamp ? fromHex(block.timestamp, "number") : null;
+    if (!this.cache.timelockDelay) {
+      const timelockAddress = await readContract(this.client, {
+        abi: this.abi,
+        address: this.address,
+        functionName: "timelock",
+      });
+      this.cache.timelockDelay = await readContract(this.client, {
+        abi: [
+          {
+            constant: true,
+            inputs: [],
+            outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+            payable: false,
+            stateMutability: "view",
+            type: "function",
+            name: "getMinDelay",
+          },
+        ],
+        address: timelockAddress,
+        functionName: "getMinDelay",
+      });
+    }
+    return this.cache.timelockDelay;
   }
 
   calculateQuorum(votes: {

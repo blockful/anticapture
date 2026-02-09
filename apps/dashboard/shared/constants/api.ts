@@ -1,0 +1,2 @@
+export const PERCENTAGE_NO_BASELINE = "NO BASELINE";
+export const PERIOD_UNBOUND = "UNBOUND";
