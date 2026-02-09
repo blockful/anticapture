@@ -5,21 +5,21 @@ import { FeedEventType, FeedRelevance } from "@/lib/constants";
 export type DBFeedEvent = typeof feedEvent.$inferSelect;
 
 export const FeedRequestSchema = z.object({
-  skip: z.number().optional().default(0),
-  limit: z.number().optional().default(10),
+  skip: z.coerce.number().optional().default(0),
+  limit: z.coerce.number().optional().default(10),
   orderBy: z.enum(["timestamp", "value"]).optional().default("timestamp"),
   orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
   relevance: z.nativeEnum(FeedRelevance).optional().default(FeedRelevance.ALL),
   type: z.nativeEnum(FeedEventType).optional(),
-  fromDate: z.number().optional(),
-  toDate: z.number().optional(),
+  fromDate: z.coerce.number().optional(),
+  toDate: z.coerce.number().optional(),
 });
 
 export const FeedItemSchema = z.object({
   txHash: z.string(),
   logIndex: z.number(),
   type: z.string(),
-  value: z.string(),
+  value: z.bigint().transform((val) => val.toString()),
   timestamp: z.number(),
 });
 
