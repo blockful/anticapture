@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { testClient } from "hono/testing";
 import { treasury } from "./index";
@@ -79,8 +80,8 @@ describe("Treasury Controller - Integration Tests", () => {
   let fakeRepository: FakeTreasuryRepository;
 
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(FIXED_DATE);
+    vi.useFakeTimers();
+    vi.setSystemTime(FIXED_DATE);
 
     fakeProvider = new FakeTreasuryProvider();
     fakePriceProvider = new FakePriceProvider();
@@ -88,7 +89,7 @@ describe("Treasury Controller - Integration Tests", () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe("GET /treasury/liquid", () => {

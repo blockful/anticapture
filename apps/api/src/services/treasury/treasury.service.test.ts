@@ -1,3 +1,4 @@
+import { afterEach, beforeEach, vi, describe, it, expect } from "vitest";
 import { TreasuryService } from "./treasury.service";
 import { TreasuryProvider } from "./providers";
 import { PriceProvider, LiquidTreasuryDataPoint } from "./types";
@@ -61,8 +62,8 @@ describe("TreasuryService", () => {
   let fakeRepository: FakeTreasuryRepository;
 
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(FIXED_DATE);
+    vi.useFakeTimers();
+    vi.setSystemTime(FIXED_DATE);
 
     fakeProvider = new FakeTreasuryProvider();
     fakePriceProvider = new FakePriceProvider();
@@ -70,7 +71,7 @@ describe("TreasuryService", () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe("getLiquidTreasury", () => {

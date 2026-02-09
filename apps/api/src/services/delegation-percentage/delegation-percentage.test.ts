@@ -1,5 +1,5 @@
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { DelegationPercentageService } from "./delegation-percentage";
-import { DaoMetricsDayBucketRepository } from "@/repositories/";
 import { MetricTypesEnum } from "@/lib/constants";
 import { DBTokenMetric } from "@/mappers/delegation-percentage";
 
@@ -28,23 +28,16 @@ const createMockRow = (
 
 describe("DelegationPercentageService", () => {
   let service: DelegationPercentageService;
-  let mockRepository: jest.Mocked<
-    Pick<
-      DaoMetricsDayBucketRepository,
-      "getMetricsByDateRange" | "getLastMetricBeforeDate"
-    >
-  >;
+  let mockRepository: {
+    getMetricsByDateRange: ReturnType<typeof vi.fn>;
+    getLastMetricBeforeDate: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     mockRepository = {
-      getMetricsByDateRange: jest.fn(),
-      getLastMetricBeforeDate: jest.fn(),
-    } as jest.Mocked<
-      Pick<
-        DaoMetricsDayBucketRepository,
-        "getMetricsByDateRange" | "getLastMetricBeforeDate"
-      >
-    >;
+      getMetricsByDateRange: vi.fn(),
+      getLastMetricBeforeDate: vi.fn(),
+    };
 
     service = new DelegationPercentageService(mockRepository);
   });
@@ -454,7 +447,7 @@ describe("DelegationPercentageService", () => {
       const day100 = 1599955200n;
 
       // Mock console.error to suppress test output
-      const consoleErrorSpy = jest
+      const consoleErrorSpy = vi
         .spyOn(console, "error")
         .mockImplementation(() => {});
 

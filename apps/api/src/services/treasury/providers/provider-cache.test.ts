@@ -1,3 +1,4 @@
+import { expect, afterEach, beforeEach, vi, describe, it } from "vitest";
 import { TreasuryProviderCache } from "./provider-cache";
 import { LiquidTreasuryDataPoint } from "../types";
 
@@ -15,13 +16,13 @@ describe("TreasuryProviderCache", () => {
   let cache: TreasuryProviderCache;
 
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date("2025-01-15T12:00:00Z"));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2025-01-15T12:00:00Z"));
     cache = new TreasuryProviderCache();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe("get", () => {
@@ -43,7 +44,7 @@ describe("TreasuryProviderCache", () => {
     it("should return null when cache is expired", () => {
       const data = [createDataPoint()];
       cache.set(data);
-      jest.advanceTimersByTime(25 * 60 * 60 * 1000);
+      vi.advanceTimersByTime(25 * 60 * 60 * 1000);
 
       const result = cache.get();
 
@@ -53,11 +54,11 @@ describe("TreasuryProviderCache", () => {
     it("should clear cache when expired", () => {
       const data = [createDataPoint()];
       cache.set(data);
-      jest.advanceTimersByTime(25 * 60 * 60 * 1000);
+      vi.advanceTimersByTime(25 * 60 * 60 * 1000);
 
       cache.get();
 
-      jest.setSystemTime(new Date("2025-01-16T13:00:00Z"));
+      vi.setSystemTime(new Date("2025-01-16T13:00:00Z"));
       const newData = [createDataPoint({ liquidTreasury: 2000000 })];
       cache.set(newData);
 
@@ -67,7 +68,7 @@ describe("TreasuryProviderCache", () => {
     it("should return data at exactly 24 hours (boundary)", () => {
       const data = [createDataPoint()];
       cache.set(data);
-      jest.advanceTimersByTime(24 * 60 * 60 * 1000);
+      vi.advanceTimersByTime(24 * 60 * 60 * 1000);
 
       const result = cache.get();
 
@@ -77,7 +78,7 @@ describe("TreasuryProviderCache", () => {
     it("should return null at 24 hours + 1ms (just expired)", () => {
       const data = [createDataPoint()];
       cache.set(data);
-      jest.advanceTimersByTime(24 * 60 * 60 * 1000 + 1);
+      vi.advanceTimersByTime(24 * 60 * 60 * 1000 + 1);
 
       const result = cache.get();
 
@@ -109,11 +110,11 @@ describe("TreasuryProviderCache", () => {
     it("should reset TTL when setting new data", () => {
       const oldData = [createDataPoint({ liquidTreasury: 100 })];
       cache.set(oldData);
-      jest.advanceTimersByTime(23 * 60 * 60 * 1000);
+      vi.advanceTimersByTime(23 * 60 * 60 * 1000);
 
       const newData = [createDataPoint({ liquidTreasury: 200 })];
       cache.set(newData);
-      jest.advanceTimersByTime(23 * 60 * 60 * 1000);
+      vi.advanceTimersByTime(23 * 60 * 60 * 1000);
 
       const result = cache.get();
 
