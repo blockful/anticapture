@@ -47,7 +47,7 @@ export const ProposalSection = () => {
     daoId: daoEnum,
   });
 
-  const { votingPower, votes } = useVoterInfo({
+  const { votingPower, rawVotingPower, votes } = useVoterInfo({
     address: address ?? "",
     daoId: daoEnum,
     proposalId,
@@ -104,6 +104,7 @@ export const ProposalSection = () => {
           onClose={() => setIsVotingModalOpen(false)}
           proposal={proposal as Query_Proposals_Items_Items}
           votingPower={votingPower}
+          rawVotingPower={rawVotingPower}
           decimals={decimals}
         />
 

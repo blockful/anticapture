@@ -29,7 +29,7 @@ export class BalanceVariationsRepository {
     address: Address,
     fromTimestamp: number | undefined,
     toTimestamp: number | undefined,
-  ): Promise<DBAccountBalanceVariation> {
+  ): Promise<DBAccountBalanceVariation | undefined> {
     const [result] = await this.commonQuery(
       fromTimestamp,
       toTimestamp,
@@ -38,14 +38,8 @@ export class BalanceVariationsRepository {
       "desc",
       [address],
     );
-    if (result) return result;
-    return {
-      accountId: address,
-      previousBalance: 0n,
-      currentBalance: 0n,
-      absoluteChange: 0n,
-      percentageChange: "0",
-    };
+
+    return result;
   }
 
   private async commonQuery(
