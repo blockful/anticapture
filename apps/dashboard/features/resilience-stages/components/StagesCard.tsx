@@ -35,7 +35,7 @@ interface StagesCardProps {
 
 export const StagesCard = ({ currentDaoStage }: StagesCardProps) => {
   return (
-    <div className="bg-surface-default flex h-[86px] w-full items-start gap-1 p-4">
+    <div className="bg-surface-default flex w-full items-start gap-1 p-4">
       {STAGE_CONFIG.map((config, index) => {
         const isCurrentStage = currentDaoStage === config.stage;
         const isKnownStage = ![Stage.NONE, Stage.UNKNOWN].includes(
