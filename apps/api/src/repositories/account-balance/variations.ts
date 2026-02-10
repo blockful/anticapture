@@ -104,9 +104,12 @@ export class BalanceVariationsRepository {
         sql`${accountBalance.accountId} = ${transfersTo.accountId}`,
       )
       .where(
-        addresses
-          ? inArray(accountBalance.accountId, addresses)
-          : undefined,
+        and(
+          addresses
+            ? inArray(accountBalance.accountId, addresses)
+            : undefined,
+          sql`${transfersFrom.accountId} IS NOT NULL OR ${transfersTo.accountId} IS NOT NULL`,
+        )
       )
       .as("combined");
 
