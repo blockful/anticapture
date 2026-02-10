@@ -30,5 +30,6 @@ export interface DAOClient {
     forVotes: bigint;
     againstVotes: bigint;
     abstainVotes: bigint;
+    endTimestamp: bigint;
   }) => Promise<string>;
 }
