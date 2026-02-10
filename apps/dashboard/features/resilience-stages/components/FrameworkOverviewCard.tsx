@@ -3,6 +3,7 @@ import { RiskLevel } from "@/shared/types/enums/RiskLevel";
 import { ArrowUpRight, KeyRound } from "lucide-react";
 import { DotFilledIcon } from "@radix-ui/react-icons";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
+import { UnderlinedButton } from "@/shared/components/design-system/links/underlined-link";
 import { cn } from "@/shared/utils";
 
 const RISK_GROUP_CONFIG = [
@@ -98,14 +99,12 @@ export const FrameworkOverviewCard = ({
                       <DotFilledIcon
                         className={cn("size-4 shrink-0", group.config.dotColor)}
                       />
-                      <button
-                        type="button"
+                      <UnderlinedButton
                         onClick={() => onMetricClick?.(field)}
-                        className="border-foreground text-secondary hover:text-primary flex cursor-pointer items-center gap-1 border-b border-dashed font-mono text-[13px] leading-[18px] font-medium uppercase tracking-wide duration-300 hover:border-white"
                       >
                         <KeyRound className="size-6" />
                         {field.name}
-                      </button>
+                      </UnderlinedButton>
                     </div>
                   ))}
                 </div>
