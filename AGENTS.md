@@ -415,6 +415,51 @@ When creating a PR, ensure it:
 5. Includes screenshots for UI changes
 6. Keeps the PR focused on a single concern
 
+## Shared Agent Configuration
+
+All agent configuration (MCP servers, skills, rules) lives in `.agents/` as the single source of truth, symlinked into each tool's config directory.
+
+```text
+.agents/
+├── mcp.json              # MCP server definitions
+├── skills/               # Agent skills (e.g. Railway)
+└── rules/                # Service-specific .mdc rules
+    └── <service>/
+
+.claude/
+├── mcp.json        → ../.agents/mcp.json
+├── skills/<skill>  → ../../.agents/skills/<skill>
+└── rules/<service> → ../../.agents/rules/<service>
+
+.cursor/
+├── mcp.json        → ../.agents/mcp.json
+├── skills/<skill>  → ../../.agents/skills/<skill>
+└── rules/<service> → ../../.agents/rules/<service>
+```
+
+### Adding new configuration
+
+When adding a new MCP server, skill, or rule:
+
+1. Add the source file in `.agents/`
+2. Symlink it into both `.claude/` and `.cursor/`:
+
+```bash
+# MCP config (already symlinked once)
+ln -s ../.agents/mcp.json .claude/mcp.json
+ln -s ../.agents/mcp.json .cursor/mcp.json
+
+# New skill
+ln -s ../../.agents/skills/<skill> .claude/skills/<skill>
+ln -s ../../.agents/skills/<skill> .cursor/skills/<skill>
+
+# New rule directory
+ln -s ../../../.agents/rules/<service> .claude/rules/<service>
+ln -s ../../../.agents/rules/<service> .cursor/rules/<service>
+```
+
+Never place tool-specific config directly in `.claude/` or `.cursor/` — always go through `.agents/`.
+
 ## Self-Improvement
 
 When you make significant changes to the codebase:
