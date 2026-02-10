@@ -40,7 +40,7 @@ export class ProposalsService {
         status === ProposalStatus.DEFEATED ||
         status === ProposalStatus.SUCCEEDED
       ) {
-        return ProposalStatus.PENDING;
+        return ProposalStatus.PENDING_EXECUTION;
       }
       return status;
     });
