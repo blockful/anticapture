@@ -70,6 +70,7 @@ railway run -s <service-id> -e dev <cmd>  # Run commands with Railway env vars, 
   - **Railway Skills**: 13 specialized agent skills installed from [railwayapp/railway-skills](https://github.com/railwayapp/railway-skills) for deployment operations. See [Railway agent guidelines](https://docs.railway.com/ai/agent-skills) for best practices.
   - Use `/deploy`, `/deployment`, `/status`, `/environment`, `/metrics`, `/service`, `/domain`, `/database`, `/projects`, `/new`, `/templates`, `/railway-docs`, or `/central-station` skills when working with Railway infrastructure.
 - **ClickUp**: Issues and task tracking on [ClickUp](https://app.clickup.com/).
+  - See `.agents/rules/clickup/clickup.mdc` for detailed configuration and best practices
 
 ## Components
 
