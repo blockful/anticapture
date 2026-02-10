@@ -320,7 +320,6 @@ export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
 };
 
 export enum ProposalStatus {
-  PENDING = "PENDING",
   ACTIVE = "ACTIVE",
   CANCELED = "CANCELED",
   DEFEATED = "DEFEATED",

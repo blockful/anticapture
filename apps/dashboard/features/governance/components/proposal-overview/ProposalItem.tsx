@@ -17,8 +17,6 @@ interface ProposalItemProps {
 
 export const getTextStatusColor = (status: ProposalStatus) => {
   switch (status) {
-    case ProposalStatus.PENDING:
-      return "text-warning";
     case ProposalStatus.ONGOING:
       return "text-link";
     case ProposalStatus.EXECUTED:
@@ -44,8 +42,6 @@ export const getTextStatusColor = (status: ProposalStatus) => {
 
 export const getStatusColorBar = (status: ProposalStatus) => {
   switch (status) {
-    case ProposalStatus.PENDING:
-      return "bg-warning";
     case ProposalStatus.ONGOING:
       return "bg-link";
     case ProposalStatus.EXECUTED:
@@ -71,8 +67,6 @@ export const getStatusColorBar = (status: ProposalStatus) => {
 
 export const getBackgroundStatusColor = (status: ProposalStatus) => {
   switch (status) {
-    case ProposalStatus.PENDING:
-      return "bg-surface-opacity-warning";
     case ProposalStatus.ONGOING:
       return "bg-surface-opacity-brand";
     case ProposalStatus.EXECUTED:
@@ -98,8 +92,6 @@ export const getBackgroundStatusColor = (status: ProposalStatus) => {
 
 export const getStatusText = (status: ProposalStatus) => {
   switch (status) {
-    case ProposalStatus.PENDING:
-      return "Pending";
     case ProposalStatus.ONGOING:
       return "Ongoing";
     case ProposalStatus.EXECUTED:

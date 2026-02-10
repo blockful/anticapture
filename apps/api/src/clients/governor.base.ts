@@ -116,7 +116,7 @@ export abstract class GovernorBase<
     }
 
     if (currentBlock < proposal.startBlock) {
-      return ProposalStatus.PENDING;
+      return ProposalStatus.PENDING_EXECUTION;
     }
 
     if (

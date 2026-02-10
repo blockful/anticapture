@@ -44,7 +44,7 @@ export const proposalsUserVoteMapping = {
 
 // Final result mapping object
 export const proposalsFinalResultMapping = {
-  PENDING: {
+  PENDING_EXECUTION: {
     text: "Pending",
     icon: <Clock10 className="text-secondary size-4" />,
   },

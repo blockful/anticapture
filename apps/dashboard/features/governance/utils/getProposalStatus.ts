@@ -2,7 +2,7 @@ import { ProposalStatus } from "@/features/governance/types";
 
 // Map GraphQL status to our enum
 export const getProposalStatus = (status: string): ProposalStatus => {
-  if (!status) return ProposalStatus.PENDING;
+  if (!status) return ProposalStatus.PENDING_EXECUTION;
 
   switch (status?.toLowerCase()) {
     case "active":
@@ -15,7 +15,7 @@ export const getProposalStatus = (status: string): ProposalStatus => {
     case "cancelled":
       return ProposalStatus.CANCELLED;
     case "pending":
-      return ProposalStatus.PENDING;
+      return ProposalStatus.PENDING_EXECUTION;
     case "no_quorum":
       return ProposalStatus.NO_QUORUM;
     case "queued":
@@ -25,6 +25,6 @@ export const getProposalStatus = (status: string): ProposalStatus => {
     case "pending_execution":
       return ProposalStatus.PENDING_EXECUTION;
     default:
-      return ProposalStatus.PENDING;
+      return ProposalStatus.PENDING_EXECUTION;
   }
 };

@@ -137,7 +137,7 @@ export const proposalCreated = async (
     endBlock: parseInt(endBlock),
     description,
     timestamp,
-    status: ProposalStatus.PENDING,
+    status: ProposalStatus.PENDING_EXECUTION,
     endTimestamp: timestamp + BigInt(blockDelta * blockTime),
     proposalType: args.proposalType,
   });

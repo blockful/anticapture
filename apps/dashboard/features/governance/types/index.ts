@@ -1,7 +1,6 @@
 import type { Query_Proposals_Items_Items } from "@anticapture/graphql-client/hooks";
 
 export enum ProposalStatus {
-  PENDING = "pending",
   ONGOING = "ongoing",
   EXECUTED = "executed",
   DEFEATED = "defeated",

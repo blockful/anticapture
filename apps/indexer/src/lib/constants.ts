@@ -711,7 +711,7 @@ export const BurningAddresses: Record<
 };
 
 export enum ProposalStatus {
-  PENDING = "PENDING",
+  PENDING_EXECUTION = "PENDING_EXECUTION",
   ACTIVE = "ACTIVE",
   CANCELED = "CANCELED",
   DEFEATED = "DEFEATED",
