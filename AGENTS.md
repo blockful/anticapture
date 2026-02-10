@@ -67,6 +67,8 @@ railway run -s <service-id> -e dev <cmd>  # Run commands with Railway env vars, 
 ## External Tools
 
 - **Railway**: Infrastructure is deployed on [Railway](https://railway.com/). Prioritize the `dev` environment for all backend services (indexer, api, gateway).
+  - **Railway Skills**: 13 specialized agent skills installed from [railwayapp/railway-skills](https://github.com/railwayapp/railway-skills) for deployment operations. See [Railway agent guidelines](https://docs.railway.com/ai/agent-skills) for best practices.
+  - Use `/deploy`, `/deployment`, `/status`, `/environment`, `/metrics`, `/service`, `/domain`, `/database`, `/projects`, `/new`, `/templates`, `/railway-docs`, or `/central-station` skills when working with Railway infrastructure.
 - **ClickUp**: Issues and task tracking on [ClickUp](https://app.clickup.com/).
 
 ## Components
