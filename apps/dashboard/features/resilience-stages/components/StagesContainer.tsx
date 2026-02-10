@@ -13,7 +13,6 @@ import {
 import { RiskLevel } from "@/shared/types/enums";
 import { DaoIdEnum } from "@/shared/types/daos";
 import {
-  StageAccordion,
   StageTag,
 } from "@/features/resilience-stages/components";
 import { DaoAvatarIcon, PointerIcon } from "@/shared/components/icons";
@@ -30,7 +29,7 @@ interface StagesContainerProps {
   daoId: DaoIdEnum;
   daoConfig: DaoConfiguration;
   currentDaoStage: Stage;
-  context?: "overview" | "section";
+  context?: "overview";
 }
 export const stageToRiskMapping: Record<Stage, RiskLevel> = {
   [Stage.ZERO]: RiskLevel.HIGH,
@@ -138,7 +137,6 @@ export const StagesContainer = ({
         "lg:bg-surface-default gap-4 lg:p-4": context === "overview",
       })}
     >
-      {context === "overview" && (
         <div className="flex h-5 items-center gap-2">
           <DefaultLink
             href={`${daoId.toLowerCase()}/resilience-stages`}
@@ -149,7 +147,6 @@ export const StagesContainer = ({
           </DefaultLink>
           <TooltipInfo text="Resilience Stages are based on governance mechanisms, considering the riskiest exposed vector as criteria for progression." />
         </div>
-      )}
       <div className="flex flex-col gap-5">
         <div className={cn("flex flex-col")}>
           {/* Timeline Component */}
@@ -230,7 +227,6 @@ export const StagesContainer = ({
                 context === "overview",
             })}
           />
-          {context === "overview" && (
             <div
               className="border-light-dark bg-surface-contrast relative flex items-center justify-between gap-1 border-b p-2 lg:border-none lg:p-3"
               onMouseLeave={() => !isMobile && setShowTooltip(false)}
@@ -298,15 +294,7 @@ export const StagesContainer = ({
                 />
               )}
             </div>
-          )}
         </div>
-        {context === "section" && (
-          <StageAccordion
-            daoStage={currentDaoStage}
-            highRiskFields={highRiskItems}
-            mediumRiskFields={mediumRiskItems}
-          />
-        )}
       </div>
     </div>
   );
