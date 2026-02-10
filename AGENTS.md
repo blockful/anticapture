@@ -40,7 +40,9 @@ Ethereum RPC ┘         │
 - **Framework**: [Ponder](https://ponder.sh)
 - **Depends on**: PostgreSQL and Ethereum RPC
 - **Dev command**: `pnpm indexer dev --config config/<dao>.config`
-- **Caveats**: Every code change triggers a full reindex of the DAO contracts, avoid unnecessary changes.
+- **Caveats**:
+  - Every code change triggers a full reindex of the DAO contracts.
+  - Only run it when explicit asked to and avoid unnecessary changes.
 
 ### 2. API (`@anticapture/api`)
 
