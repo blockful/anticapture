@@ -1,27 +1,15 @@
 import {
   and,
-  lte,
   asc,
   desc,
   eq,
   gte,
-  gt,
   inArray,
   notInArray,
   sql,
-  isNull,
-  count,
-  max,
+  SQL,
 } from "drizzle-orm";
-import { Drizzle } from "@/database";
-import {
-  accountPower,
-  proposalsOnchain,
-  votesOnchain,
-  votingPowerHistory,
-} from "@/database";
-import { SQL } from "drizzle-orm";
-import { Address } from "viem";
+import { Drizzle, proposalsOnchain } from "@/database";
 
 import {
   ActiveSupplyQueryResult,

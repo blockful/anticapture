@@ -9,7 +9,12 @@ import {
   tokenTransfer,
 } from "@/eventHandlers";
 import { handleTransaction } from "@/eventHandlers/shared";
-import { updateDelegatedSupply } from "@/eventHandlers/metrics";
+import {
+  updateDelegatedSupply,
+  updateCirculatingSupply,
+  updateSupplyMetric,
+  updateTotalSupply,
+} from "@/eventHandlers/metrics";
 import {
   MetricTypesEnum,
   BurningAddresses,
@@ -18,11 +23,6 @@ import {
   LendingAddresses,
   TreasuryAddresses,
 } from "@/lib/constants";
-import {
-  updateCirculatingSupply,
-  updateSupplyMetric,
-  updateTotalSupply,
-} from "@/eventHandlers/metrics";
 
 export function UNITokenIndexer(address: Address, decimals: number) {
   const daoId = DaoIdEnum.UNI;

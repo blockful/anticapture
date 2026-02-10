@@ -1,4 +1,4 @@
-import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
+import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import { ProposalsService } from "@/services";
 import {

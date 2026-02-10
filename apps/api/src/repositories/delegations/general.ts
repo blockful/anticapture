@@ -1,7 +1,6 @@
 import { DBDelegation } from "@/mappers";
 import { desc, eq } from "drizzle-orm";
-import { Drizzle } from "@/database";
-import { delegation } from "@/database";
+import { Drizzle, delegation } from "@/database";
 import { Address } from "viem";
 
 export class DelegationsRepository {
