@@ -39,7 +39,7 @@ export class BalanceVariationsService {
   constructor(
     private readonly balanceRepository: AccountBalanceRepository,
     private readonly interactionRepository: AccountInteractionsRepository,
-  ) {}
+  ) { }
 
   async getAccountBalanceVariations(
     fromTimestamp: number | undefined,
