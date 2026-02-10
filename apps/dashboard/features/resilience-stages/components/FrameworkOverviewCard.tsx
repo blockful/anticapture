@@ -3,7 +3,6 @@ import { RiskLevel } from "@/shared/types/enums/RiskLevel";
 import { ArrowUpRight, KeyRound } from "lucide-react";
 import { DotFilledIcon } from "@radix-ui/react-icons";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
-import { UnderlinedLink } from "@/shared/components/design-system/links/underlined-link";
 import { cn } from "@/shared/utils";
 
 const RISK_GROUP_CONFIG = [
@@ -31,12 +30,16 @@ interface FrameworkOverviewCardProps {
   highRiskFields: (GovernanceImplementationField & { name: string })[];
   mediumRiskFields: (GovernanceImplementationField & { name: string })[];
   lowRiskFields: (GovernanceImplementationField & { name: string })[];
+  onMetricClick?: (
+    field: GovernanceImplementationField & { name: string },
+  ) => void;
 }
 
 export const FrameworkOverviewCard = ({
   highRiskFields,
   mediumRiskFields,
   lowRiskFields,
+  onMetricClick,
 }: FrameworkOverviewCardProps) => {
   const groups = [
     { config: RISK_GROUP_CONFIG[0], fields: highRiskFields },
@@ -95,10 +98,14 @@ export const FrameworkOverviewCard = ({
                       <DotFilledIcon
                         className={cn("size-4 shrink-0", group.config.dotColor)}
                       />
-                      <UnderlinedLink href="#" openInNewTab={false}>
+                      <button
+                        type="button"
+                        onClick={() => onMetricClick?.(field)}
+                        className="border-foreground text-secondary hover:text-primary flex cursor-pointer items-center gap-1 border-b border-dashed font-mono text-[13px] leading-[18px] font-medium uppercase tracking-wide duration-300 hover:border-white"
+                      >
                         <KeyRound className="size-6" />
                         {field.name}
-                      </UnderlinedLink>
+                      </button>
                     </div>
                   ))}
                 </div>

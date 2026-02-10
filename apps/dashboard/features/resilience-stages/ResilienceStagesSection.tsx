@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useCallback } from "react";
 import { RiskLevelCard, TheSectionLayout } from "@/shared/components";
 import daoConfigByDaoId from "@/shared/dao-config";
 import {
@@ -7,8 +8,12 @@ import {
   fieldsToArray,
   filterFieldsByRiskLevel,
 } from "@/shared/dao-config/utils";
+import { GovernanceImplementationField } from "@/shared/dao-config/types";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { RiskLevel } from "@/shared/types/enums";
+import {
+  RiskLevel,
+  GovernanceImplementationEnum,
+} from "@/shared/types/enums";
 import { Stage } from "@/shared/types/enums/Stage";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { BarChart } from "lucide-react";
@@ -16,6 +21,7 @@ import { stageToRiskMapping } from "@/features/resilience-stages/components/Stag
 import { StagesCard } from "@/features/resilience-stages/components/StagesCard";
 import { PendingCriteriaCard } from "@/features/resilience-stages/components/PendingCriteriaCard";
 import { FrameworkOverviewCard } from "@/features/resilience-stages/components/FrameworkOverviewCard";
+import { GovernanceImplementationDrawer } from "@/features/risk-analysis/components/GovernanceImplementationDrawer";
 
 interface ResilienceStagesSectionProps {
   daoId: DaoIdEnum;
@@ -25,6 +31,11 @@ export const ResilienceStagesSection = ({
   daoId,
 }: ResilienceStagesSectionProps) => {
   const daoConfig = daoConfigByDaoId[daoId];
+
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [selectedMetric, setSelectedMetric] = useState<
+    (GovernanceImplementationField & { name: string }) | null
+  >(null);
 
   const allFields = fieldsToArray(
     daoConfig.governanceImplementation?.fields,
@@ -50,6 +61,22 @@ export const ResilienceStagesSection = ({
         ? mediumRiskFields
         : [];
 
+  const handleMetricClick = useCallback(
+    (field: GovernanceImplementationField & { name: string }) => {
+      setSelectedMetric(field);
+      setIsDrawerOpen(true);
+    },
+    [],
+  );
+
+  const handleCloseDrawer = useCallback(() => {
+    setIsDrawerOpen(false);
+    setSelectedMetric(null);
+  }, []);
+
+  const metricEnum =
+    selectedMetric?.name as GovernanceImplementationEnum | null;
+
   return (
     <div>
       <TheSectionLayout
@@ -69,15 +96,24 @@ export const ResilienceStagesSection = ({
             <PendingCriteriaCard
               pendingFields={pendingFields}
               currentDaoStage={currentDaoStage}
+              onMetricClick={handleMetricClick}
             />
             <FrameworkOverviewCard
               highRiskFields={highRiskFields}
               mediumRiskFields={mediumRiskFields}
               lowRiskFields={lowRiskFields}
+              onMetricClick={handleMetricClick}
             />
           </div>
         </div>
       </TheSectionLayout>
+
+      <GovernanceImplementationDrawer
+        isOpen={isDrawerOpen}
+        onClose={handleCloseDrawer}
+        metricType={metricEnum}
+        metricData={selectedMetric}
+      />
     </div>
   );
 };

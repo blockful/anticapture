@@ -4,9 +4,15 @@ import { DotFilledIcon } from "@radix-ui/react-icons";
 
 interface PendingCriteriaItemProps {
   field: GovernanceImplementationField & { name: string };
+  onDetailsClick?: (
+    field: GovernanceImplementationField & { name: string },
+  ) => void;
 }
 
-export const PendingCriteriaItem = ({ field }: PendingCriteriaItemProps) => {
+export const PendingCriteriaItem = ({
+  field,
+  onDetailsClick,
+}: PendingCriteriaItemProps) => {
   return (
     <div className="border-border-default bg-surface-default flex flex-col overflow-clip border">
       {/* Header */}
@@ -17,13 +23,14 @@ export const PendingCriteriaItem = ({ field }: PendingCriteriaItemProps) => {
             {field.name}
           </p>
         </div>
-        <a
-          href="#"
-          className="text-secondary flex shrink-0 items-center gap-1 font-mono text-[13px] font-medium uppercase tracking-wider transition-colors duration-300 hover:text-white"
+        <button
+          type="button"
+          onClick={() => onDetailsClick?.(field)}
+          className="text-secondary flex shrink-0 cursor-pointer items-center gap-1 font-mono text-[13px] font-medium uppercase tracking-wider transition-colors duration-300 hover:text-white"
         >
           details
           <ChevronRight className="size-4" />
-        </a>
+        </button>
       </div>
 
       {/* Body */}

@@ -15,11 +15,15 @@ const NEXT_STAGE_CONFIG: Record<
 interface PendingCriteriaCardProps {
   pendingFields: (GovernanceImplementationField & { name: string })[];
   currentDaoStage: Stage;
+  onMetricClick?: (
+    field: GovernanceImplementationField & { name: string },
+  ) => void;
 }
 
 export const PendingCriteriaCard = ({
   pendingFields,
   currentDaoStage,
+  onMetricClick,
 }: PendingCriteriaCardProps) => {
   const nextStage = NEXT_STAGE_CONFIG[currentDaoStage];
   const fixCount = pendingFields.length;
@@ -51,7 +55,11 @@ export const PendingCriteriaCard = ({
       <div className="flex flex-1 flex-col overflow-y-auto p-4">
         <div className="flex flex-col gap-3">
           {pendingFields.map((field) => (
-            <PendingCriteriaItem key={field.name} field={field} />
+            <PendingCriteriaItem
+              key={field.name}
+              field={field}
+              onDetailsClick={onMetricClick}
+            />
           ))}
         </div>
       </div>
