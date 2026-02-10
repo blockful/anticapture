@@ -35,19 +35,19 @@ export const PendingCriteriaItem = ({
 
       {/* Body */}
       <div className="flex flex-col gap-3 px-3 py-2.5 leading-5">
-        <div className="flex items-start gap-2">
-          <p className="text-secondary w-[80px] shrink-0 font-mono text-[13px] font-medium uppercase tracking-wider">
+        <div className="flex flex-col gap-1">
+          <p className="text-secondary font-mono text-[13px] font-medium uppercase tracking-wider">
             Current
           </p>
-          <p className="text-error flex-1 text-sm font-normal">
+          <p className="text-error text-sm font-normal">
             {field.currentSetting ?? "No protections"}
           </p>
         </div>
-        <div className="flex items-start gap-2">
-          <p className="text-secondary w-[80px] shrink-0 font-mono text-[13px] font-medium uppercase tracking-wider">
+        <div className="flex flex-col gap-1">
+          <p className="text-secondary font-mono text-[13px] font-medium uppercase tracking-wider">
             Fix
           </p>
-          <p className="text-primary flex-1 text-sm font-normal">
+          <p className="text-primary text-sm font-normal">
             {field.recommendedSetting ?? field.description}
           </p>
         </div>
