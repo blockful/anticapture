@@ -15,7 +15,8 @@
       "@/*": ["./src/*"]
     },
     "outDir": "./dist",
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "types": ["vitest/globals"]
   },
   "include": ["./**/*.ts"],
   "exclude": ["node_modules", "test"]
