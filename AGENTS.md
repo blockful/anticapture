@@ -412,3 +412,7 @@ When creating a PR, ensure it:
 4. Passes all tests
 5. Includes screenshots for UI changes
 6. Keeps the PR focused on a single concern
+
+## Self improvement
+
+- When something changes always update this file to document the new structure
