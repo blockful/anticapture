@@ -4,8 +4,8 @@ description: >
   Goal: generate components that import DS primitives, use tokens, and meet a11y/testing standards.
 globs:
   - "apps/dashboard/**/*.{ts,tsx,mdx}"
-  - "shared/**/*.{ts,tsx,mdx}"
-  - "features/**/*.{ts,tsx,mdx}"
+  - "apps/dashboard/shared/**/*.{ts,tsx,mdx}"
+  - "apps/dashboard/features/**/*.{ts,tsx,mdx}"
 alwaysApply: false
 ---
 

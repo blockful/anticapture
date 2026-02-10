@@ -415,6 +415,19 @@ When creating a PR, ensure it:
 5. Includes screenshots for UI changes
 6. Keeps the PR focused on a single concern
 
-## Self improvement
+## Self-Improvement
 
-- When something changes always update this file to document the new structure
+When you make significant changes to the codebase:
+
+1. **Update AGENTS.md** if you change:
+   - Architecture (add/remove services, change dependency graph)
+   - Commands or workflows
+   - File structure conventions
+   - Code style patterns or examples
+
+2. **Update service-specific rules** in `.agents/rules/<service>/` if you change:
+   - Design system tokens or components (dashboard)
+   - Service-specific conventions
+   - Domain-specific patterns
+
+3. **Do NOT duplicate** — if it's already in AGENTS.md, don't add it to rules
