@@ -89,7 +89,20 @@ export const ResilienceStagesSection = ({
       >
         <div className="flex flex-col gap-2">
           {/* Stages horizontal bar */}
-          <StagesCard currentDaoStage={currentDaoStage} />
+          <div className="flex flex-col">
+            {(currentDaoStage === Stage.NONE ||
+              currentDaoStage === Stage.UNKNOWN) && (
+              <div className="bg-surface-contrast flex items-center px-4 py-2.5">
+                <p className="font-mono text-[13px] font-medium uppercase tracking-wider">
+                  <span className="text-secondary">[no stage]</span>{" "}
+                  <span className="text-primary">
+                    DAO not yet eligible for staging
+                  </span>
+                </p>
+              </div>
+            )}
+            <StagesCard currentDaoStage={currentDaoStage} />
+          </div>
 
           {/* Two-column content */}
           <div className="flex flex-col gap-2 lg:flex-row">

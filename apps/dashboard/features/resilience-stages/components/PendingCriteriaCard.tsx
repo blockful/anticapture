@@ -7,6 +7,7 @@ const NEXT_STAGE_CONFIG: Record<
   string,
   { label: string; colorClass: string }
 > = {
+  [Stage.NONE]: { label: "eligibility", colorClass: "text-error" },
   [Stage.ZERO]: { label: "Stage 1", colorClass: "text-warning" },
   [Stage.ONE]: { label: "Stage 2", colorClass: "text-success" },
   [Stage.TWO]: { label: "Stage 2", colorClass: "text-success" },
@@ -25,8 +26,9 @@ export const PendingCriteriaCard = ({
   currentDaoStage,
   onMetricClick,
 }: PendingCriteriaCardProps) => {
+  const isNoStage = currentDaoStage === Stage.NONE;
   const nextStage = NEXT_STAGE_CONFIG[currentDaoStage];
-  const fixCount = pendingFields.length;
+  const fixCount = isNoStage ? 1 : pendingFields.length;
 
   return (
     <div className="bg-surface-default flex flex-1 flex-col overflow-clip">
@@ -37,8 +39,8 @@ export const PendingCriteriaCard = ({
         </p>
         <div className="flex flex-col gap-0.5">
           <p className="text-primary text-xl font-medium leading-7 tracking-[-0.1px]">
-            {fixCount}{" "}
-            {fixCount === 1 ? "fix" : "fixes"} to reach{" "}
+            {fixCount} {fixCount === 1 ? "fix" : "fixes"}{" "}
+            {isNoStage ? "needed for" : "to reach"}{" "}
             {nextStage && (
               <span className={cn(nextStage.colorClass)}>
                 {nextStage.label}
@@ -54,13 +56,36 @@ export const PendingCriteriaCard = ({
       {/* Scrollable body */}
       <div className="flex flex-1 flex-col overflow-y-auto p-4">
         <div className="flex flex-col gap-3">
-          {pendingFields.map((field) => (
-            <PendingCriteriaItem
-              key={field.name}
-              field={field}
-              onDetailsClick={onMetricClick}
-            />
-          ))}
+          {isNoStage ? (
+            <div className="border-border-default flex flex-col gap-3 border px-3 py-2.5 leading-5">
+              <div className="flex items-start gap-2">
+                <p className="text-secondary w-[80px] shrink-0 font-mono text-[13px] font-medium uppercase tracking-wider">
+                  Current
+                </p>
+                <p className="text-error flex-1 text-sm font-normal">
+                  The DAO still relies on a centralized entity to execute
+                  proposals, instead of its governor and timelock.
+                </p>
+              </div>
+              <div className="flex items-start gap-2">
+                <p className="text-secondary w-[80px] shrink-0 font-mono text-[13px] font-medium uppercase tracking-wider">
+                  Fix
+                </p>
+                <p className="text-primary flex-1 text-sm font-normal">
+                  Enable autonomous proposal execution and implement a timelock
+                  to ensure decentralized operations.
+                </p>
+              </div>
+            </div>
+          ) : (
+            pendingFields.map((field) => (
+              <PendingCriteriaItem
+                key={field.name}
+                field={field}
+                onDetailsClick={onMetricClick}
+              />
+            ))
+          )}
         </div>
       </div>
     </div>

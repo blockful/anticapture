@@ -79,6 +79,7 @@ const CurrentDaoStageAvatar = ({
     <PointerIcon className="absolute -bottom-4 translate-y-px" />
   </>
 );
+
 export const StagesContainer = ({
   daoId,
   daoConfig,

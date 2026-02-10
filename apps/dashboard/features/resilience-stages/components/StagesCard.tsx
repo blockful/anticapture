@@ -34,13 +34,13 @@ interface StagesCardProps {
 }
 
 export const StagesCard = ({ currentDaoStage }: StagesCardProps) => {
+  const isNoStage = [Stage.NONE, Stage.UNKNOWN].includes(currentDaoStage);
+
   return (
     <div className="bg-surface-default flex w-full items-start gap-1 p-4">
       {STAGE_CONFIG.map((config, index) => {
         const isCurrentStage = currentDaoStage === config.stage;
-        const isKnownStage = ![Stage.NONE, Stage.UNKNOWN].includes(
-          currentDaoStage,
-        );
+        const isKnownStage = !isNoStage;
         const isPastStage =
           isKnownStage &&
           typeof currentDaoStage === "number" &&
@@ -56,16 +56,24 @@ export const StagesCard = ({ currentDaoStage }: StagesCardProps) => {
             >
               {/* Color bar with optional pointer */}
               <div
-                className={cn("relative w-full", config.barColor, {
-                  [config.glowShadow]: isCurrentStage,
-                })}
+                className={cn(
+                  "relative w-full",
+                  isNoStage ? "bg-secondary" : config.barColor,
+                  {
+                    [config.glowShadow]: isCurrentStage,
+                  },
+                )}
               >
                 {isCurrentStage && (
                   <div className="absolute left-1/2 top-[-6px] text-primary flex -translate-x-1/2 items-center justify-center">
                     <PointerIcon className="rotate-180 text-primary" />
                   </div>
                 )}
-                <div className={cn("h-1.5 w-full", { "opacity-50": !isCurrentStage })} />
+                <div
+                  className={cn("h-1.5 w-full", {
+                    "opacity-50": !isCurrentStage,
+                  })}
+                />
               </div>
 
               {/* Stage label and description */}
@@ -73,7 +81,7 @@ export const StagesCard = ({ currentDaoStage }: StagesCardProps) => {
                 <p
                   className={cn(
                     "font-mono text-[13px] font-medium uppercase tracking-wider",
-                    config.textColor,
+                    isNoStage ? "text-secondary" : config.textColor,
                   )}
                 >
                   {config.label}
