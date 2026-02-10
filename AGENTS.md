@@ -113,6 +113,7 @@ Ethereum RPC ─┘         │
 - **Depends on**: PostgreSQL (with data from Indexer), Ethereum RPC
 - **Dev command**: `pnpm api dev`
 - **Test command**: `pnpm api test`
+- **Database schema**: ALl the schema is a mapping from the @apps/indexer/ponder.schema.ts syntax to the Drizzle version of it. Whenever something is needed, it should be changed on the original file first, and then translated to the drizzle format.
 
 ### 3. API Gateway (`@anticapture/api-gateway`)
 
@@ -177,6 +178,11 @@ For a full local stack, start services in this order:
 2. `pnpm gateway dev`
 3. `pnpm client codegen`
 4. `pnpm dashboard dev`
+
+Common flows:
+
+- **UI implementation**: run the client and dashboard pointing to the dev `api-gateway`
+- **API feature**: run the API with the dev envs, then gateway and then client + dashboard (only run the gateway and frontend when asked)
 
 ## File Structure Conventions
 
