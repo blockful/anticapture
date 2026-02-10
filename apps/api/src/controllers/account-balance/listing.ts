@@ -4,8 +4,6 @@ import {
   AccountBalancesRequestSchema,
   AccountBalancesResponseMapper,
   AccountBalancesResponseSchema,
-} from "@/mappers";
-import {
   AccountBalanceResponseMapper,
   AccountBalanceResponseSchema,
 } from "@/mappers";

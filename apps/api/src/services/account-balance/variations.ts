@@ -59,7 +59,7 @@ export class BalanceVariationsService {
     private readonly variationsRepository: BalanceVariationsRepository,
     private readonly interactionRepository: AccountInteractionsRepository,
     private readonly balanceRepository: AccountBalanceRepository,
-  ) { }
+  ) {}
 
   async getAccountBalanceVariations(
     fromTimestamp: number | undefined,
@@ -69,22 +69,29 @@ export class BalanceVariationsService {
     orderDirection: "asc" | "desc",
     addresses?: Address[],
   ): Promise<DBAccountBalanceVariation[]> {
-    const variations = await this.variationsRepository.getAccountBalanceVariations(
-      fromTimestamp,
-      toTimestamp,
-      skip,
-      limit,
-      orderDirection,
-      addresses,
-    );
+    const variations =
+      await this.variationsRepository.getAccountBalanceVariations(
+        fromTimestamp,
+        toTimestamp,
+        skip,
+        limit,
+        orderDirection,
+        addresses,
+      );
 
     if (!addresses) return variations;
 
-    const found = new Set(variations.map((v) => v.accountId))
-    const missingResults = addresses.filter((addr) => !found.has(addr))
+    const found = new Set(variations.map((v) => v.accountId));
+    const missingResults = addresses.filter((addr) => !found.has(addr));
     const { items: balances } = await this.balanceRepository.getAccountBalances(
-      0, missingResults.length, "desc", missingResults, [], [], { maxAmount: undefined, minAmount: undefined }
-    )
+      0,
+      missingResults.length,
+      "desc",
+      missingResults,
+      [],
+      [],
+      { maxAmount: undefined, minAmount: undefined },
+    );
 
     return addresses.map((address) => {
       const dbVariation = variations.find(
@@ -93,7 +100,7 @@ export class BalanceVariationsService {
 
       if (dbVariation) return dbVariation;
 
-      const balance = balances.find((balance) => balance.accountId === address)
+      const balance = balances.find((balance) => balance.accountId === address);
 
       return {
         accountId: address,
@@ -110,15 +117,17 @@ export class BalanceVariationsService {
     fromTimestamp: number | undefined,
     toTimestamp: number | undefined,
   ): Promise<DBAccountBalanceVariation> {
-    const variation = await this.variationsRepository.getAccountBalanceVariationsByAccountId(
-      address,
-      fromTimestamp,
-      toTimestamp,
-    );
+    const variation =
+      await this.variationsRepository.getAccountBalanceVariationsByAccountId(
+        address,
+        fromTimestamp,
+        toTimestamp,
+      );
 
-    if (variation) return variation
+    if (variation) return variation;
 
-    const accountBalance = await this.balanceRepository.getAccountBalance(address);
+    const accountBalance =
+      await this.balanceRepository.getAccountBalance(address);
     const balance = accountBalance?.balance ?? 0n;
 
     return {
@@ -127,7 +136,7 @@ export class BalanceVariationsService {
       currentBalance: balance,
       absoluteChange: 0n,
       percentageChange: "0",
-    }
+    };
   }
 
   async getAccountInteractions(

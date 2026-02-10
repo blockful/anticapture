@@ -33,4 +33,4 @@ export default createConfig({
       startBlock: SCR_CONTRACTS.governor.startBlock,
     },
   },
-})
+});

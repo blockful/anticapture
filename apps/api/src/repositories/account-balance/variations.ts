@@ -1,11 +1,10 @@
 import { asc, desc, gte, sql, and, inArray, lte, or } from "drizzle-orm";
-import { Drizzle } from "@/database";
-import { accountBalance, transfer } from "@/database";
+import { Drizzle, accountBalance, transfer } from "@/database";
 import { DBAccountBalanceVariation } from "@/mappers";
 import { Address } from "viem";
 
 export class BalanceVariationsRepository {
-  constructor(private readonly db: Drizzle) { }
+  constructor(private readonly db: Drizzle) {}
 
   async getAccountBalanceVariations(
     fromTimestamp: number | undefined,
@@ -63,9 +62,9 @@ export class BalanceVariationsRepository {
             : undefined,
           addresses
             ? or(
-              inArray(transfer.fromAccountId, addresses),
-              inArray(transfer.toAccountId, addresses),
-            )
+                inArray(transfer.fromAccountId, addresses),
+                inArray(transfer.toAccountId, addresses),
+              )
             : undefined,
         ),
       )
@@ -140,9 +139,9 @@ export class BalanceVariationsRepository {
       absoluteChange: BigInt(absoluteChange),
       percentageChange: (currentBalance - BigInt(absoluteChange)
         ? Number(
-          (BigInt(absoluteChange) * 10000n) /
-          (currentBalance - BigInt(absoluteChange)),
-        ) / 100
+            (BigInt(absoluteChange) * 10000n) /
+              (currentBalance - BigInt(absoluteChange)),
+          ) / 100
         : 0
       ).toString(),
     }));
