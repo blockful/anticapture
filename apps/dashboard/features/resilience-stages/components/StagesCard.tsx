@@ -61,8 +61,8 @@ export const StagesCard = ({ currentDaoStage }: StagesCardProps) => {
                 })}
               >
                 {isCurrentStage && (
-                  <div className="absolute left-1/2 top-[-6px] flex -translate-x-1/2 items-center justify-center">
-                    <PointerIcon className="rotate-180" />
+                  <div className="absolute left-1/2 top-[-6px] text-primary flex -translate-x-1/2 items-center justify-center">
+                    <PointerIcon className="rotate-180 text-primary" />
                   </div>
                 )}
                 <div className={cn("h-1.5 w-full", { "opacity-50": !isCurrentStage })} />
