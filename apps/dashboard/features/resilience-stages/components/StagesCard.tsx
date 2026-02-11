@@ -51,7 +51,7 @@ export const StagesCard = ({ currentDaoStage }: StagesCardProps) => {
           <div key={config.stage} className="flex flex-1 items-start gap-1">
             <div
               className={cn("flex flex-1 flex-col gap-2", {
-                "opacity-50": !isCurrentStage && !isPastStage,
+                "opacity-40": !isCurrentStage && !isPastStage,
               })}
             >
               {/* Color bar with optional pointer */}
@@ -65,8 +65,8 @@ export const StagesCard = ({ currentDaoStage }: StagesCardProps) => {
                 )}
               >
                 {isCurrentStage && (
-                  <div className="absolute left-1/2 top-[-6px] text-primary flex -translate-x-1/2 items-center justify-center">
-                    <PointerIcon className="rotate-180 text-primary" />
+                  <div className="text-primary absolute left-1/2 top-[-6px] flex -translate-x-1/2 items-center justify-center">
+                    <PointerIcon className="text-primary rotate-180" />
                   </div>
                 )}
                 <div
