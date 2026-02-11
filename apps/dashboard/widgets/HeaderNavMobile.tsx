@@ -26,14 +26,14 @@ export const HeaderNavMobile = () => {
       enabled: !!daoConfig.attackProfitability,
     },
     {
-      page: PAGES_CONSTANTS.attackExposure.page,
-      title: PAGES_CONSTANTS.attackExposure.title,
-      enabled: !!daoConfig.attackExposure,
-    },
-    {
       page: PAGES_CONSTANTS.resilienceStages.page,
       title: PAGES_CONSTANTS.resilienceStages.title,
       enabled: !!daoConfig.resilienceStages,
+    },
+    {
+      page: PAGES_CONSTANTS.attackExposure.page,
+      title: PAGES_CONSTANTS.attackExposure.title,
+      enabled: !!daoConfig.attackExposure,
     },
     {
       page: PAGES_CONSTANTS.tokenDistribution.page,
