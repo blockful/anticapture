@@ -38,7 +38,8 @@ describe("TreasuryRepository - Integration", () => {
     };
 
     client = new PGlite();
-    db = drizzle(client as any, { schema });
+    db = drizzle(client, { schema });
+    repository = new TreasuryRepository(db);
 
     const { apply } = await pushSchema(schema, db as any);
     await apply();
@@ -50,15 +51,16 @@ describe("TreasuryRepository - Integration", () => {
 
   beforeEach(async () => {
     await db.delete(daoMetricsDayBucket);
-    repository = new TreasuryRepository(db);
   });
 
   describe("getTokenQuantities", () => {
     it("returns correct Map with timestamp keys and close values", async () => {
-      await db.insert(daoMetricsDayBucket).values([
-        createMetricRow({ date: 1000n, close: 500n }),
-        createMetricRow({ date: 2000n, close: 700n, tokenId: "ENS-token-2" }),
-      ]);
+      await db
+        .insert(daoMetricsDayBucket)
+        .values([
+          createMetricRow({ date: 1000n, close: 500n }),
+          createMetricRow({ date: 2000n, close: 700n, tokenId: "ENS-token-2" }),
+        ]);
 
       const result = await repository.getTokenQuantities(0);
 
@@ -68,11 +70,13 @@ describe("TreasuryRepository - Integration", () => {
     });
 
     it("filters by cutoff timestamp (date >= cutoff)", async () => {
-      await db.insert(daoMetricsDayBucket).values([
-        createMetricRow({ date: 100n, close: 10n }),
-        createMetricRow({ date: 200n, close: 20n, tokenId: "ENS-token-2" }),
-        createMetricRow({ date: 300n, close: 30n, tokenId: "ENS-token-3" }),
-      ]);
+      await db
+        .insert(daoMetricsDayBucket)
+        .values([
+          createMetricRow({ date: 100n, close: 10n }),
+          createMetricRow({ date: 200n, close: 20n, tokenId: "ENS-token-2" }),
+          createMetricRow({ date: 300n, close: 30n, tokenId: "ENS-token-3" }),
+        ]);
 
       const result = await repository.getTokenQuantities(200);
 
@@ -84,7 +88,11 @@ describe("TreasuryRepository - Integration", () => {
 
     it("filters by metricType (only TREASURY rows)", async () => {
       await db.insert(daoMetricsDayBucket).values([
-        createMetricRow({ date: 100n, close: 10n }),
+        createMetricRow({
+          date: 100n,
+          close: 10n,
+          metricType: MetricTypesEnum.TREASURY,
+        }),
         createMetricRow({
           date: 100n,
           close: 99n,
@@ -99,11 +107,13 @@ describe("TreasuryRepository - Integration", () => {
     });
 
     it("returns results in ascending date order regardless of insertion order", async () => {
-      await db.insert(daoMetricsDayBucket).values([
-        createMetricRow({ date: 300n, close: 30n }),
-        createMetricRow({ date: 100n, close: 10n, tokenId: "ENS-token-2" }),
-        createMetricRow({ date: 200n, close: 20n, tokenId: "ENS-token-3" }),
-      ]);
+      await db
+        .insert(daoMetricsDayBucket)
+        .values([
+          createMetricRow({ date: 300n, close: 30n }),
+          createMetricRow({ date: 100n, close: 10n, tokenId: "ENS-token-2" }),
+          createMetricRow({ date: 200n, close: 20n, tokenId: "ENS-token-3" }),
+        ]);
 
       const result = await repository.getTokenQuantities(0);
       const keys = [...result.keys()];
@@ -140,7 +150,6 @@ describe("TreasuryRepository - Integration", () => {
   });
 
   describe("getLastTokenQuantityBeforeDate", () => {
-
     it("returns null when no rows exist", async () => {
       const result = await repository.getLastTokenQuantityBeforeDate(999);
 
@@ -168,11 +177,13 @@ describe("TreasuryRepository - Integration", () => {
     });
 
     it("returns most recent when multiple rows exist before cutoff", async () => {
-      await db.insert(daoMetricsDayBucket).values([
-        createMetricRow({ date: 100n, close: 10n }),
-        createMetricRow({ date: 200n, close: 20n, tokenId: "ENS-token-2" }),
-        createMetricRow({ date: 300n, close: 30n, tokenId: "ENS-token-3" }),
-      ]);
+      await db
+        .insert(daoMetricsDayBucket)
+        .values([
+          createMetricRow({ date: 100n, close: 10n }),
+          createMetricRow({ date: 200n, close: 20n, tokenId: "ENS-token-2" }),
+          createMetricRow({ date: 300n, close: 30n, tokenId: "ENS-token-3" }),
+        ]);
 
       const result = await repository.getLastTokenQuantityBeforeDate(400);
 
@@ -186,7 +197,11 @@ describe("TreasuryRepository - Integration", () => {
           close: 99n,
           metricType: MetricTypesEnum.TOTAL_SUPPLY,
         }),
-        createMetricRow({ date: 100n, close: 10n }),
+        createMetricRow({
+          date: 100n,
+          close: 10n,
+          metricType: MetricTypesEnum.TREASURY,
+        }),
       ]);
 
       const result = await repository.getLastTokenQuantityBeforeDate(300);
