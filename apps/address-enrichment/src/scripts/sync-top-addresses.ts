@@ -15,6 +15,9 @@ import { initDb, getDb, schema } from "@/db";
 import { ArkhamClient } from "@/clients/arkham";
 import { AnticaptureClient } from "@/clients/anticapture";
 import { isContract, createRpcClient } from "@/utils/address-type";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 interface AddressInfo {
   address: string;
@@ -179,6 +182,7 @@ async function main() {
   // Initialize connections
   const databaseUrl = getEnv("DATABASE_URL");
   const arkhamApiKey = getEnv("ARKHAM_API_KEY");
+  const daoId = getEnv("DAO_ID");
   const arkhamApiUrl = getEnv(
     "ARKHAM_API_URL",
     "https://api.arkhamintelligence.com",
@@ -190,7 +194,7 @@ async function main() {
   const db = getDb();
 
   const arkhamClient = new ArkhamClient(arkhamApiUrl, arkhamApiKey);
-  const anticaptureClient = new AnticaptureClient(anticaptureApiUrl);
+  const anticaptureClient = new AnticaptureClient(anticaptureApiUrl, daoId);
   const rpcClient = createRpcClient(rpcUrl);
 
   // Collect addresses with their info
@@ -223,7 +227,7 @@ async function main() {
     try {
       const holders = await anticaptureClient.getTopTokenHolders(options.limit);
       holders.forEach((h) => {
-        const addr = h.accountId.toLowerCase();
+        const addr = h.address.toLowerCase();
         const existing = addressMap.get(addr);
         addressMap.set(addr, {
           address: addr,

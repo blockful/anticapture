@@ -10,7 +10,7 @@ export interface DelegateInfo {
 }
 
 export interface TokenHolderInfo {
-  accountId: string;
+  address: string;
   balance: string;
 }
 
@@ -21,9 +21,11 @@ interface GraphQLResponse<T> {
 
 export class AnticaptureClient {
   private readonly baseUrl: string;
+  private readonly daoId: string;
 
-  constructor(baseUrl: string) {
+  constructor(baseUrl: string, daoId: string) {
     this.baseUrl = baseUrl;
+    this.daoId = daoId;
   }
 
   /**
@@ -31,12 +33,11 @@ export class AnticaptureClient {
    */
   async getTopDelegates(limit: number = 100): Promise<DelegateInfo[]> {
     const query = `
-      query GetTopDelegates($limit: Int!) {
-        accountPowers(
-          orderBy: "votingPower"
-          orderDirection: "desc"
+      query GetTopDelegates($limit: PositiveInt!) {
+        votingPowers(
+          orderDirection: desc
           limit: $limit
-          where: { votingPower_gt: "0" }
+          fromValue: "0" 
         ) {
           items {
             accountId
@@ -48,10 +49,10 @@ export class AnticaptureClient {
     `;
 
     const response = await this.executeQuery<{
-      accountPowers: { items: DelegateInfo[] };
+      votingPowers: { items: DelegateInfo[] };
     }>(query, { limit });
 
-    return response.accountPowers.items;
+    return response.votingPowers.items;
   }
 
   /**
@@ -59,15 +60,14 @@ export class AnticaptureClient {
    */
   async getTopTokenHolders(limit: number = 100): Promise<TokenHolderInfo[]> {
     const query = `
-      query GetTopTokenHolders($limit: Int!) {
+      query GetTopTokenHolders($limit: PositiveInt!) {
         accountBalances(
-          orderBy: "balance"
-          orderDirection: "desc"
+          orderDirection: desc
           limit: $limit
-          where: { balance_gt: "0" }
+          fromValue: "0"
         ) {
           items {
-            accountId
+            address
             balance
           }
         }
@@ -89,6 +89,7 @@ export class AnticaptureClient {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "anticapture-dao-id": this.daoId,
       },
       body: JSON.stringify({ query, variables }),
     });

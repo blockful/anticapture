@@ -1,5 +1,6 @@
 import { z } from "zod";
 import dotenv from "dotenv";
+import { DaoIdEnum } from "./utils/types";
 
 dotenv.config();
 
@@ -13,6 +14,7 @@ const envSchema = z.object({
   RPC_URL: z.string().url("RPC_URL must be a valid URL"),
   ANTICAPTURE_API_URL: z.string().url().optional(),
   ENS_CACHE_TTL_MINUTES: z.coerce.number().default(60),
+  DAO_ID: z.nativeEnum(DaoIdEnum),
   PORT: z.coerce.number().default(3001),
 });
 
