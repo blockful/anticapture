@@ -5,6 +5,7 @@ import { DotFilledIcon } from "@radix-ui/react-icons";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 import { UnderlinedButton } from "@/shared/components/design-system/links/underlined-link";
 import { cn } from "@/shared/utils";
+import Link from "next/link";
 
 const RISK_GROUP_CONFIG = [
   {
@@ -56,13 +57,15 @@ export const FrameworkOverviewCard = ({
           <p className="text-primary font-mono text-[13px] font-medium uppercase tracking-wider">
             Framework Overview
           </p>
-          <a
-            href="#"
+          <Link
+            href="https://blockful.gitbook.io/anticapture/anticapture/framework"
+            target="_blank"
+            rel="noopener noreferrer"
             className="text-secondary flex items-center gap-1 font-mono text-[13px] font-medium uppercase tracking-wider transition-colors duration-300 hover:text-white"
           >
             details
-            <ArrowUpRight className="size-6" />
-          </a>
+            <ArrowUpRight className="size-[14px]" />
+          </Link>
         </div>
         <p className="text-secondary text-sm font-normal leading-5">
           These metrics define the DAO&apos;s risk level. Select a metric to
