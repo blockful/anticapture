@@ -14,6 +14,7 @@ function createDataPoint(
 
 describe("TreasuryProviderCache", () => {
   let cache: TreasuryProviderCache;
+  const ONE_DAY = 24 * 60 * 60 * 1000;
 
   beforeEach(() => {
     vi.useFakeTimers();
@@ -54,7 +55,7 @@ describe("TreasuryProviderCache", () => {
     it("should return null at 24 hours + 1ms (just expired)", () => {
       const data = [createDataPoint()];
       cache.set(data);
-      vi.advanceTimersByTime(24 * 60 * 60 * 1000 + 1);
+      vi.advanceTimersByTime(ONE_DAY + 1);
 
       const result = cache.get();
 
