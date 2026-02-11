@@ -102,6 +102,9 @@ export const useDelegates = ({
     setLoadingActivityAddresses(new Set());
   }, [orderDirection, address, days, orderBy]);
 
+  // Calculate toDate for the time period
+  const toDate = useMemo(() => fromDate + DAYS_IN_SECONDS[days], [fromDate, days]);
+
   const {
     data: delegatesData,
     error: delegatesError,
@@ -114,6 +117,8 @@ export const useDelegates = ({
       orderBy,
       limit,
       ...(address && { addresses: [address] }),
+      fromDate: fromDate.toString(),
+      toDate: toDate.toString(),
     },
     context: { headers: { "anticapture-dao-id": daoId } },
     notifyOnNetworkStatusChange: true,
@@ -126,8 +131,10 @@ export const useDelegates = ({
       orderDirection,
       orderBy,
       ...(address && { addresses: [address] }),
+      fromDate: fromDate.toString(),
+      toDate: toDate.toString(),
     });
-  }, [orderDirection, address, refetch, orderBy]);
+  }, [orderDirection, address, refetch, orderBy, fromDate, toDate]);
 
   const delegateAddresses = useMemo(
     () =>
@@ -278,6 +285,8 @@ export const useDelegates = ({
           orderBy,
           ...(address && { addresses: [address] }),
           skip: currentItemsCount,
+          fromDate: fromDate.toString(),
+          toDate: toDate.toString(),
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult?.votingPowers?.items) return previousResult;
@@ -306,6 +315,8 @@ export const useDelegates = ({
     address,
     orderDirection,
     orderBy,
+    fromDate,
+    toDate,
   ]);
 
   const handleRefetch = useCallback(() => {
@@ -314,8 +325,10 @@ export const useDelegates = ({
       orderDirection,
       orderBy,
       ...(address && { addresses: [address] }),
+      fromDate: fromDate.toString(),
+      toDate: toDate.toString(),
     });
-  }, [refetch, orderDirection, address, orderBy]);
+  }, [refetch, orderDirection, address, orderBy, fromDate, toDate]);
 
   const isLoading = useMemo(() => {
     return (

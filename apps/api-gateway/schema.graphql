@@ -118,7 +118,7 @@ type Query {
   votingPowerVariationsByAccountId(address: String!, fromDate: String, toDate: String): votingPowerVariationsByAccountId_200_response
 
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/voting-powers`\nReturns sorted and paginated account voting power records\n"
-  votingPowers(limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_votingPowers_orderDirection = desc, orderBy: queryInput_votingPowers_orderBy = votingPower, addresses: JSON, fromValue: String, toValue: String): votingPowers_200_response
+  votingPowers(limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_votingPowers_orderDirection = desc, orderBy: queryInput_votingPowers_orderBy = votingPower, addresses: JSON, fromValue: String, toValue: String, fromDate: String, toDate: String): votingPowers_200_response
 
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/voting-powers/{args.accountId}`\nReturns voting power information for a specific address (account)\n"
   votingPowerByAccountId(accountId: String!): votingPowerByAccountId_200_response
@@ -871,6 +871,8 @@ type query_votingPowers_items_items {
   votesCount: Float!
   proposalsCount: Float!
   delegationsCount: Float!
+  absoluteChange: String!
+  percentageChange: String!
 }
 
 enum queryInput_votingPowers_orderDirection {
@@ -881,6 +883,8 @@ enum queryInput_votingPowers_orderDirection {
 enum queryInput_votingPowers_orderBy {
   votingPower
   delegationsCount
+  absoluteChange
+  percentageChange
 }
 
 type votingPowerByAccountId_200_response {
