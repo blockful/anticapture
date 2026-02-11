@@ -7,6 +7,7 @@ export enum ProposalStatus {
   DEFEATED = "defeated",
   CANCELLED = "cancelled",
   QUEUED = "queued",
+  PENDING_EXECUTION = "pending_execution",
   SUCCEEDED = "succeeded",
   EXPIRED = "expired",
   NO_QUORUM = "no_quorum",
@@ -18,7 +19,7 @@ export enum ProposalState {
   COMPLETED = "completed",
 }
 
-export interface ProposalVotes {
+export interface Votes {
   for: string;
   against: string;
   total: string;
@@ -42,7 +43,7 @@ export interface Proposal extends Omit<
   status: ProposalStatus;
   state: ProposalState;
   proposer: string; // Alias for proposerAccountId
-  votes: ProposalVotes;
+  votes: Votes;
   quorum: string;
   timeText?: string;
   timeRemaining?: string;

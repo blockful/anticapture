@@ -33,7 +33,7 @@ export interface TransactionsFilters extends TransactionsParamsType {
 export interface TransactionData {
   id: string;
   amount: string;
-  date: string;
+  timestamp: string;
   from: string;
   to: string;
   affectedSupply?: SupplyType[];
@@ -48,7 +48,7 @@ interface PaginationInfo {
   hasNextPage: boolean;
   hasPreviousPage: boolean;
   currentPage: number;
-  itemsPerPage: number;
+  limit: number;
 }
 
 interface UseTransactionsTableDataParams {
@@ -130,7 +130,7 @@ export const useTransactionsTableData = ({
       hasNextPage,
       hasPreviousPage: currentPage > 1,
       currentPage,
-      itemsPerPage: limit,
+      limit,
     };
   }, [totalCount, currentPage, limit]);
 

@@ -15,16 +15,16 @@ export default processConfig(
       // Address Enrichment Service (Arkham integration)
       ...(process.env.ADDRESS_ENRICHMENT_API_URL
         ? [
-            {
-              name: "address_enrichment",
-              handler: {
-                openapi: {
-                  source: `${process.env.ADDRESS_ENRICHMENT_API_URL}/docs/json`,
-                  endpoint: process.env.ADDRESS_ENRICHMENT_API_URL,
-                },
+          {
+            name: "address_enrichment",
+            handler: {
+              openapi: {
+                source: `${process.env.ADDRESS_ENRICHMENT_API_URL}/docs/json`,
+                endpoint: process.env.ADDRESS_ENRICHMENT_API_URL,
               },
             },
-          ]
+          },
+        ]
         : []),
       // DAO-specific APIs
       ...Object.entries(process.env)
@@ -34,42 +34,6 @@ export default processConfig(
 
           const daoName = key.replace("DAO_API_", "");
           return [
-            {
-              name: `graphql_${daoName}`,
-              handler: {
-                graphql: {
-                  endpoint: value,
-                },
-              },
-              transforms: [
-                {
-                  filterSchema: {
-                    filters: [
-                      "Query.!{accountPowers}",
-                      "Query.!{accountPower}",
-                      "Query.!{accounts}",
-                      "Query.!{account}",
-                      "Query.!{daoMetricsDayBucket}",
-                      "Query.!{proposalsOnchains}",
-                      "Query.!{proposalsOnchain}",
-                      "Query.!{tokenPrices}",
-                      "Query.!{tokenPrice}",
-                      "Query.!{transactions}",
-                      "Query.!{transaction}",
-                      "Query.!{transfers}",
-                      "Query.!{transfer}",
-                      "Query.!{votingPowerHistory}",
-                      "Query.!{accountBalances}",
-                      "Query.!{accountBalance}",
-                      "Query.!{delegation}",
-                      "Query.!{tokens}",
-                      "Query.!{token}",
-                      // 'Query.!{votingPowerHistorys}' FIXME: Leave endpoint active for now as it is still used by the notification bot
-                    ],
-                  },
-                },
-              ],
-            },
             {
               name: `rest_${daoName}`,
               handler: {

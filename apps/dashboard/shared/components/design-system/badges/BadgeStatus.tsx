@@ -45,6 +45,7 @@ type BadgeStatusProps = VariantProps<typeof badgeStatusVariants> & {
   className?: string;
   icon?: ElementType;
   iconVariant?: VariantProps<typeof iconVariants>["variant"];
+  iconClassName?: string;
   isLoading?: boolean;
 };
 
@@ -54,6 +55,7 @@ export const BadgeStatus = ({
   className,
   icon: Icon,
   iconVariant,
+  iconClassName,
   isLoading = false,
   ...props
 }: BadgeStatusProps) => {
@@ -73,7 +75,11 @@ export const BadgeStatus = ({
       className={cn(badgeStatusVariants({ variant }), className)}
       {...props}
     >
-      {Icon && <Icon className={cn(iconVariants({ variant: iconVariant }))} />}
+      {Icon && (
+        <Icon
+          className={cn(iconVariants({ variant: iconVariant }), iconClassName)}
+        />
+      )}
       {children}
     </span>
   );

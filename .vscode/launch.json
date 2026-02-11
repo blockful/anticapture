@@ -23,16 +23,16 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "indexer",
+      "name": "api",
       "skipFiles": ["<node_internals>/**"],
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["run", "serve", "--config", "config/compound.config.ts"],
+      "runtimeArgs": ["run", "dev:watch"],
       "env": {
         "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json",
-        "ENV_FILE": "${workspaceFolder}/apps/indexer/.env"
+        "ENV_FILE": "${workspaceFolder}/apps/api/.env"
       },
       "outFiles": ["${workspaceFolder}/**/*.js", "!**/node_modules/**"],
-      "cwd": "${workspaceFolder}/apps/indexer"
+      "cwd": "${workspaceFolder}/apps/api"
     }
   ]
 }

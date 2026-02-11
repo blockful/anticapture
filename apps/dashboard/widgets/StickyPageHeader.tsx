@@ -11,7 +11,9 @@ import { useRouter } from "next/navigation";
 import { HeaderNavMobile } from "@/widgets";
 import { TelegramIcon } from "@/shared/components/icons";
 import { ANTICAPTURE_TELEGRAM_BOT } from "@/shared/constants/social-media";
-export const StickyPageHeader = () => {
+
+
+export const StickyPageHeader = ({ withMobileMenu = true }: { withMobileMenu?: boolean }) => {
   const [lastScrollY, setLastScrollY] = useState<number>(0);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
@@ -75,7 +77,7 @@ export const StickyPageHeader = () => {
   }, [lastScrollY]);
 
   return (
-    <div className="h-[98px]">
+    <div className={cn(withMobileMenu ? "h-[98px]" : "h-[57px]")}>
       <header
         className={cn(
           "bg-surface-background fixed left-0 right-0 top-0 z-30 w-full shadow-md transition-transform duration-300",
@@ -83,7 +85,7 @@ export const StickyPageHeader = () => {
       >
         <HeaderDAOSidebarDropdown />
 
-        <HeaderNavMobile />
+        {withMobileMenu && <HeaderNavMobile />}
       </header>
 
       <div

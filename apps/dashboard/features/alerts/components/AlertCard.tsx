@@ -24,7 +24,7 @@ export const AlertCard = ({
         <div className="flex flex-col items-start gap-2">
           <div className="flex w-full items-center justify-between gap-2">
             <div className="flex items-center justify-center gap-2">
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 <Icon className="size-6" />
               </div>
               <div className="flex items-center gap-2">

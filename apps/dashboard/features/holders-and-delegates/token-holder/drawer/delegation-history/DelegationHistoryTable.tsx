@@ -7,10 +7,7 @@ import { useEffect, useState } from "react";
 import { Address, parseUnits } from "viem";
 import { useDelegationHistory } from "@/features/holders-and-delegates/hooks/useDelegationHistory";
 import { formatUnits } from "viem";
-import {
-  formatNumberUserReadable,
-  formatDateUserReadable,
-} from "@/shared/utils/";
+import { formatNumberUserReadable } from "@/shared/utils/";
 import { ExternalLink } from "lucide-react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import daoConfigByDaoId from "@/shared/dao-config";
@@ -31,27 +28,32 @@ import {
   useQueryState,
   useQueryStates,
 } from "nuqs";
+import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
+import { useAmountFilterStore } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
+import { DateCell } from "@/shared/components/design-system/table/cells/DateCell";
 
 interface DelegationData {
   address: string;
   amount: string;
-  date: string;
-  timestamp: number;
+  timestamp: string;
+}
+
+interface DelegationHistoryTableProps {
+  address: string;
+  daoId: DaoIdEnum;
 }
 
 export const DelegationHistoryTable = ({
   address,
   daoId,
-}: {
-  address: string;
-  daoId: DaoIdEnum;
-}) => {
+}: DelegationHistoryTableProps) => {
+  const limit: number = 20;
   const { decimals } = daoConfig[daoId];
   const [isMounted, setIsMounted] = useState<boolean>(false);
 
   const [sortBy, setSortBy] = useQueryState(
     "orderBy",
-    parseAsStringEnum(["timestamp", "delegatedValue"]).withDefault("timestamp"),
+    parseAsStringEnum(["timestamp", "amount"]).withDefault("timestamp"),
   );
   const [sortOrder, setSortOrder] = useQueryState(
     "orderDirection",
@@ -86,6 +88,7 @@ export const DelegationHistoryTable = ({
     orderBy: sortBy,
     orderDirection: sortOrder,
     filterVariables,
+    limit,
   });
 
   useEffect(() => {
@@ -93,27 +96,27 @@ export const DelegationHistoryTable = ({
   }, []);
 
   const data: DelegationData[] =
-    delegationHistory?.map((delegation) => {
-      const delegateAddress = delegation.delegateAccountId || "";
-      const delegatedValue = delegation.delegatedValue || "0";
-      const timestamp = delegation.timestamp || 0;
+    delegationHistory
+      ?.filter(
+        (delegation): delegation is NonNullable<typeof delegation> =>
+          delegation !== null,
+      )
+      .map((delegation) => {
+        const delegateAddress = delegation.delegateAddress || "";
+        const delegatedValue = delegation.amount || "0";
+        const timestamp = delegation.timestamp || "0";
 
-      const formattedAmount = Number(
-        formatUnits(BigInt(delegatedValue), decimals),
-      ).toFixed(2);
+        const formattedAmount = Number(
+          formatUnits(BigInt(delegatedValue), decimals),
+        ).toFixed(2);
 
-      const date = timestamp
-        ? formatDateUserReadable(new Date(Number(timestamp) * 1000))
-        : "Unknown";
-
-      return {
-        address: delegateAddress,
-        amount: formattedAmount,
-        transactionHash: delegation.transactionHash,
-        date,
-        timestamp: Number(timestamp),
-      };
-    }) || [];
+        return {
+          address: delegateAddress,
+          amount: formattedAmount,
+          transactionHash: delegation.transactionHash,
+          timestamp: String(timestamp),
+        };
+      }) || [];
 
   const delegationHistoryColumns: ColumnDef<DelegationData>[] = [
     {
@@ -188,32 +191,39 @@ export const DelegationHistoryTable = ({
           <AmountFilter
             filterId="delegation-amount-filter"
             onApply={(filterState: AmountFilterState) => {
-              setSortOrder(
-                filterState.sortOrder === "largest-first" ? "desc" : "asc",
-              );
+              if (filterState.sortOrder) {
+                setSortOrder(
+                  filterState.sortOrder === "largest-first" ? "desc" : "asc",
+                );
+                setSortBy("amount");
+              } else {
+                setSortBy("timestamp");
+                setSortOrder("desc");
+              }
 
               setFilterVariables(() => ({
                 fromValue: filterState.minAmount
                   ? parseUnits(filterState.minAmount, decimals).toString()
-                  : undefined,
+                  : "",
                 toValue: filterState.maxAmount
                   ? parseUnits(filterState.maxAmount, decimals).toString()
-                  : undefined,
+                  : "",
               }));
 
               setIsFilterActive(
-                !!(filterVariables?.fromValue || filterVariables?.toValue),
+                !!(
+                  filterState.minAmount ||
+                  filterState.maxAmount ||
+                  filterState.sortOrder
+                ),
               );
-              // Update sort to delegatedValue when filter is applied
-              setSortBy("delegatedValue");
             }}
             onReset={() => {
               setIsFilterActive(false);
-              // Reset to default sorting
               setSortBy("timestamp");
               setFilterVariables(() => ({
-                fromValue: undefined,
-                toValue: undefined,
+                fromValue: "",
+                toValue: "",
               }));
             }}
             isActive={isFilterActive}
@@ -246,13 +256,16 @@ export const DelegationHistoryTable = ({
       },
     },
     {
-      accessorKey: "date",
+      accessorKey: "timestamp",
       header: ({ column }) => {
         const handleSortToggle = () => {
           const newSortOrder = sortOrder === "desc" ? "asc" : "desc";
           setSortBy("timestamp");
           setSortOrder(newSortOrder);
           column.toggleSorting(newSortOrder === "desc");
+
+          useAmountFilterStore.getState().reset("delegation-amount-filter");
+          setIsFilterActive(false);
         };
         return (
           <div className="text-table-header flex w-full items-center justify-start">
@@ -287,11 +300,11 @@ export const DelegationHistoryTable = ({
           );
         }
 
-        const date: string = row.getValue("date");
+        const timestamp: string = row.getValue("timestamp");
 
         return (
           <div className="flex w-full items-center justify-start text-sm">
-            {date}
+            <DateCell timestampSeconds={timestamp} />
           </div>
         );
       },
@@ -334,22 +347,19 @@ export const DelegationHistoryTable = ({
   ];
 
   return (
-    <div className="flex h-full w-full flex-col gap-4 p-4">
-      <div className="h-full w-full overflow-y-auto">
-        <Table
-          size="sm"
-          columns={delegationHistoryColumns}
-          data={loading ? Array(12).fill({}) : data}
-          filterColumn="address"
-          hasMore={pagination.hasNextPage}
-          isLoadingMore={fetchingMore}
-          onLoadMore={fetchNextPage}
-          withDownloadCSV={true}
-          wrapperClassName="h-[450px]"
-          className="h-[400px]"
-          error={error}
-        />
-      </div>
+    <div className="flex h-full w-full flex-col overflow-hidden">
+      <Table
+        size="sm"
+        columns={delegationHistoryColumns}
+        data={loading ? Array(DEFAULT_ITEMS_PER_PAGE).fill({}) : data}
+        filterColumn="address"
+        hasMore={pagination.hasNextPage}
+        isLoadingMore={fetchingMore}
+        onLoadMore={fetchNextPage}
+        withDownloadCSV={true}
+        error={error}
+        fillHeight
+      />
     </div>
   );
 };

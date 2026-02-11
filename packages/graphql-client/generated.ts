@@ -15,13 +15,9 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
-  BigInt: { input: any; output: any; }
-  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
-  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
-  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
 };
 
@@ -60,28 +56,22 @@ export enum HttpMethod {
   Trace = 'TRACE'
 }
 
-export type Meta = {
-  __typename?: 'Meta';
-  status?: Maybe<Scalars['JSON']['output']>;
-};
-
 export type PageInfo = {
   __typename?: 'PageInfo';
-  endCursor?: Maybe<Scalars['String']['output']>;
   endDate?: Maybe<Scalars['String']['output']>;
   hasNextPage: Scalars['Boolean']['output'];
   hasPreviousPage: Scalars['Boolean']['output'];
-  startCursor?: Maybe<Scalars['String']['output']>;
   startDate?: Maybe<Scalars['String']['output']>;
 };
 
 export type Query = {
   __typename?: 'Query';
-  _meta?: Maybe<Meta>;
   /** Returns account balance information for a specific address */
   accountBalanceByAccountId?: Maybe<AccountBalanceByAccountId_200_Response>;
   /** Returns a mapping of the biggest variations to account balances associated by account address */
   accountBalanceVariations?: Maybe<AccountBalanceVariations_200_Response>;
+  /** Returns a the changes to balance by period and accountId */
+  accountBalanceVariationsByAccountId?: Maybe<AccountBalanceVariationsByAccountId_200_Response>;
   /** Returns sorted and paginated account balance records */
   accountBalances?: Maybe<AccountBalances_200_Response>;
   /**
@@ -119,24 +109,28 @@ export type Query = {
   compareVotes?: Maybe<CompareVotes_200_Response>;
   /** Returns current governance parameters for this DAO */
   dao?: Maybe<Dao_200_Response>;
-  daoMetricsDayBuckets: DaoMetricsDayBucketPage;
   /** Get all DAOs */
   daos: DaoList;
   /** Get delegation percentage day buckets with forward-fill */
   delegationPercentageByDay?: Maybe<DelegationPercentageByDay_200_Response>;
-  delegations: DelegationPage;
+  /** Get current delegators of an account */
+  delegations?: Maybe<Delegations_200_Response>;
   /** Get historical DAO Token Treasury value (governance token quantity × token price) */
   getDaoTokenTreasury?: Maybe<GetDaoTokenTreasury_200_Response>;
   /** Get historical Liquid Treasury (treasury without DAO tokens) from external providers (DefiLlama/Dune) */
   getLiquidTreasury?: Maybe<GetLiquidTreasury_200_Response>;
   /** Get historical Total Treasury (liquid treasury + DAO token treasury) */
   getTotalTreasury?: Maybe<GetTotalTreasury_200_Response>;
-  /** Fetch historical token balances for multiple addresses at a specific time period using multicall */
-  historicalBalances?: Maybe<Array<Maybe<Query_HistoricalBalances_Items>>>;
+  /** TODO */
+  historicalBalances?: Maybe<HistoricalBalances_200_Response>;
+  /** Get historical delegations for an account, with optional filtering and sorting */
+  historicalDelegations?: Maybe<HistoricalDelegations_200_Response>;
   /** Get historical market data for a specific token */
   historicalTokenData?: Maybe<Array<Maybe<Query_HistoricalTokenData_Items>>>;
-  /** Returns a list of voting power changes */
-  historicalVotingPowers?: Maybe<HistoricalVotingPowers_200_Response>;
+  /** Returns a list of voting power changes. */
+  historicalVotingPower?: Maybe<HistoricalVotingPower_200_Response>;
+  /** Returns a list of voting power changes for a specific account */
+  historicalVotingPowerByAccountId?: Maybe<HistoricalVotingPowerByAccountId_200_Response>;
   /** Get the last update time */
   lastUpdate?: Maybe<LastUpdate_200_Response>;
   /** Returns a single proposal by its ID */
@@ -149,15 +143,18 @@ export type Query = {
   proposalsActivity?: Maybe<ProposalsActivity_200_Response>;
   /** Get property data for a specific token */
   token?: Maybe<Token_200_Response>;
+  /** Returns token related metrics for a single metric type. */
+  tokenMetrics?: Maybe<TokenMetrics_200_Response>;
   /** Get transactions with their associated transfers and delegations, with optional filtering and sorting */
   transactions?: Maybe<Transactions_200_Response>;
   /** Get transfers of a given address */
   transfers?: Maybe<Transfers_200_Response>;
-  votesOnchain?: Maybe<VotesOnchain>;
-  votesOnchains: VotesOnchainPage;
+  /** Get all votes ordered by timestamp or voting power */
+  votes?: Maybe<Votes_200_Response>;
+  /** Returns a paginated list of votes cast on a specific proposal */
+  votesByProposalId?: Maybe<VotesByProposalId_200_Response>;
   /** Returns voting power information for a specific address (account) */
   votingPowerByAccountId?: Maybe<VotingPowerByAccountId_200_Response>;
-  votingPowerHistorys: VotingPowerHistoryPage;
   /** Returns a mapping of the voting power changes within a time frame for the given addresses */
   votingPowerVariations?: Maybe<VotingPowerVariations_200_Response>;
   /** Returns a the changes to voting power by period and accountId */
@@ -173,10 +170,19 @@ export type QueryAccountBalanceByAccountIdArgs = {
 
 
 export type QueryAccountBalanceVariationsArgs = {
-  days?: InputMaybe<QueryInput_AccountBalanceVariations_Days>;
+  addresses?: InputMaybe<Scalars['JSON']['input']>;
+  fromDate?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   orderDirection?: InputMaybe<QueryInput_AccountBalanceVariations_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  toDate?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryAccountBalanceVariationsByAccountIdArgs = {
+  address: Scalars['String']['input'];
+  fromDate?: InputMaybe<Scalars['String']['input']>;
+  toDate?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -193,14 +199,15 @@ export type QueryAccountBalancesArgs = {
 
 export type QueryAccountInteractionsArgs = {
   address: Scalars['String']['input'];
-  days?: InputMaybe<QueryInput_AccountInteractions_Days>;
   filterAddress?: InputMaybe<Scalars['String']['input']>;
+  fromDate?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   maxAmount?: InputMaybe<Scalars['String']['input']>;
   minAmount?: InputMaybe<Scalars['String']['input']>;
   orderBy?: InputMaybe<QueryInput_AccountInteractions_OrderBy>;
   orderDirection?: InputMaybe<QueryInput_AccountInteractions_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  toDate?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -269,16 +276,6 @@ export type QueryCompareVotesArgs = {
 };
 
 
-export type QueryDaoMetricsDayBucketsArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  where?: InputMaybe<DaoMetricsDayBucketFilter>;
-};
-
-
 export type QueryDelegationPercentageByDayArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -290,12 +287,7 @@ export type QueryDelegationPercentageByDayArgs = {
 
 
 export type QueryDelegationsArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  where?: InputMaybe<DelegationFilter>;
+  address: Scalars['String']['input'];
 };
 
 
@@ -318,8 +310,26 @@ export type QueryGetTotalTreasuryArgs = {
 
 
 export type QueryHistoricalBalancesArgs = {
-  addresses: Scalars['JSON']['input'];
-  days?: InputMaybe<QueryInput_HistoricalBalances_Days>;
+  address: Scalars['String']['input'];
+  fromDate?: InputMaybe<Scalars['String']['input']>;
+  fromValue?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<QueryInput_HistoricalBalances_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_HistoricalBalances_OrderDirection>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  toDate?: InputMaybe<Scalars['String']['input']>;
+  toValue?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHistoricalDelegationsArgs = {
+  address: Scalars['String']['input'];
+  delegateAddressIn?: InputMaybe<Scalars['JSON']['input']>;
+  fromValue?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderDirection?: InputMaybe<QueryInput_HistoricalDelegations_OrderDirection>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  toValue?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -329,13 +339,26 @@ export type QueryHistoricalTokenDataArgs = {
 };
 
 
-export type QueryHistoricalVotingPowersArgs = {
-  accountId: Scalars['String']['input'];
+export type QueryHistoricalVotingPowerArgs = {
+  address?: InputMaybe<Scalars['String']['input']>;
   fromDate?: InputMaybe<Scalars['String']['input']>;
   fromValue?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
-  orderBy?: InputMaybe<QueryInput_HistoricalVotingPowers_OrderBy>;
-  orderDirection?: InputMaybe<QueryInput_HistoricalVotingPowers_OrderDirection>;
+  orderBy?: InputMaybe<QueryInput_HistoricalVotingPower_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_HistoricalVotingPower_OrderDirection>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  toDate?: InputMaybe<Scalars['String']['input']>;
+  toValue?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHistoricalVotingPowerByAccountIdArgs = {
+  address: Scalars['String']['input'];
+  fromDate?: InputMaybe<Scalars['String']['input']>;
+  fromValue?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<QueryInput_HistoricalVotingPowerByAccountId_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_HistoricalVotingPowerByAccountId_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   toDate?: InputMaybe<Scalars['String']['input']>;
   toValue?: InputMaybe<Scalars['String']['input']>;
@@ -388,6 +411,16 @@ export type QueryTokenArgs = {
 };
 
 
+export type QueryTokenMetricsArgs = {
+  endDate?: InputMaybe<Scalars['Float']['input']>;
+  limit?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  metricType: QueryInput_TokenMetrics_MetricType;
+  orderDirection?: InputMaybe<QueryInput_TokenMetrics_OrderDirection>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  startDate?: InputMaybe<Scalars['Float']['input']>;
+};
+
+
 export type QueryTransactionsArgs = {
   affectedSupply?: InputMaybe<Scalars['JSON']['input']>;
   from?: InputMaybe<Scalars['String']['input']>;
@@ -419,34 +452,33 @@ export type QueryTransfersArgs = {
 };
 
 
-export type QueryVotesOnchainArgs = {
-  proposalId: Scalars['String']['input'];
-  voterAccountId: Scalars['String']['input'];
+export type QueryVotesArgs = {
+  fromDate?: InputMaybe<Scalars['Float']['input']>;
+  limit?: InputMaybe<Scalars['Float']['input']>;
+  orderBy?: InputMaybe<QueryInput_Votes_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_Votes_OrderDirection>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  support?: InputMaybe<Scalars['Float']['input']>;
+  toDate?: InputMaybe<Scalars['Float']['input']>;
+  voterAddressIn?: InputMaybe<Scalars['JSON']['input']>;
 };
 
 
-export type QueryVotesOnchainsArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  where?: InputMaybe<VotesOnchainFilter>;
+export type QueryVotesByProposalIdArgs = {
+  fromDate?: InputMaybe<Scalars['Float']['input']>;
+  id: Scalars['String']['input'];
+  limit?: InputMaybe<Scalars['Float']['input']>;
+  orderBy?: InputMaybe<QueryInput_VotesByProposalId_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_VotesByProposalId_OrderDirection>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  support?: InputMaybe<Scalars['Float']['input']>;
+  toDate?: InputMaybe<Scalars['Float']['input']>;
+  voterAddressIn?: InputMaybe<Scalars['JSON']['input']>;
 };
 
 
 export type QueryVotingPowerByAccountIdArgs = {
   accountId: Scalars['String']['input'];
-};
-
-
-export type QueryVotingPowerHistorysArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  where?: InputMaybe<VotingPowerHistoryFilter>;
 };
 
 
@@ -477,179 +509,18 @@ export type QueryVotingPowersArgs = {
   toValue?: InputMaybe<Scalars['String']['input']>;
 };
 
-export type Account = {
-  __typename?: 'account';
-  balances?: Maybe<AccountBalancePage>;
-  delegatedFromBalances?: Maybe<AccountBalancePage>;
-  delegationsFrom?: Maybe<DelegationPage>;
-  delegationsTo?: Maybe<DelegationPage>;
-  id: Scalars['String']['output'];
-  powers?: Maybe<AccountPowerPage>;
-  proposals?: Maybe<ProposalsOnchainPage>;
-  receivedTransfers?: Maybe<TransferPage>;
-  sentTransfers?: Maybe<TransferPage>;
-  votes?: Maybe<VotesOnchainPage>;
-};
-
-
-export type AccountBalancesArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  where?: InputMaybe<AccountBalanceFilter>;
-};
-
-
-export type AccountDelegatedFromBalancesArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  where?: InputMaybe<AccountBalanceFilter>;
-};
-
-
-export type AccountDelegationsFromArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  where?: InputMaybe<DelegationFilter>;
-};
-
-
-export type AccountDelegationsToArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  where?: InputMaybe<DelegationFilter>;
-};
-
-
-export type AccountPowersArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  where?: InputMaybe<AccountPowerFilter>;
-};
-
-
-export type AccountProposalsArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  where?: InputMaybe<ProposalsOnchainFilter>;
-};
-
-
-export type AccountReceivedTransfersArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  where?: InputMaybe<TransferFilter>;
-};
-
-
-export type AccountSentTransfersArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  where?: InputMaybe<TransferFilter>;
-};
-
-
-export type AccountVotesArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  where?: InputMaybe<VotesOnchainFilter>;
-};
-
-export type AccountBalance = {
-  __typename?: 'accountBalance';
-  account?: Maybe<Account>;
-  accountId: Scalars['String']['output'];
-  balance: Scalars['BigInt']['output'];
-  delegate: Scalars['String']['output'];
-  delegateAccount?: Maybe<Account>;
-  delegatePower?: Maybe<AccountPower>;
-  delegatedTo?: Maybe<AccountPower>;
-  token?: Maybe<Token>;
-  tokenId: Scalars['String']['output'];
-};
-
 export type AccountBalanceByAccountId_200_Response = {
   __typename?: 'accountBalanceByAccountId_200_response';
-  accountId: Scalars['String']['output'];
+  address: Scalars['String']['output'];
   balance: Scalars['String']['output'];
   delegate: Scalars['String']['output'];
   tokenId: Scalars['String']['output'];
 };
 
-export type AccountBalanceFilter = {
-  AND?: InputMaybe<Array<InputMaybe<AccountBalanceFilter>>>;
-  OR?: InputMaybe<Array<InputMaybe<AccountBalanceFilter>>>;
-  accountId?: InputMaybe<Scalars['String']['input']>;
-  accountId_contains?: InputMaybe<Scalars['String']['input']>;
-  accountId_ends_with?: InputMaybe<Scalars['String']['input']>;
-  accountId_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  accountId_not?: InputMaybe<Scalars['String']['input']>;
-  accountId_not_contains?: InputMaybe<Scalars['String']['input']>;
-  accountId_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  accountId_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  accountId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  accountId_starts_with?: InputMaybe<Scalars['String']['input']>;
-  balance?: InputMaybe<Scalars['BigInt']['input']>;
-  balance_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  balance_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  balance_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  balance_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  balance_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  balance_not?: InputMaybe<Scalars['BigInt']['input']>;
-  balance_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  delegate?: InputMaybe<Scalars['String']['input']>;
-  delegate_contains?: InputMaybe<Scalars['String']['input']>;
-  delegate_ends_with?: InputMaybe<Scalars['String']['input']>;
-  delegate_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  delegate_not?: InputMaybe<Scalars['String']['input']>;
-  delegate_not_contains?: InputMaybe<Scalars['String']['input']>;
-  delegate_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  delegate_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  delegate_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  delegate_starts_with?: InputMaybe<Scalars['String']['input']>;
-  tokenId?: InputMaybe<Scalars['String']['input']>;
-  tokenId_contains?: InputMaybe<Scalars['String']['input']>;
-  tokenId_ends_with?: InputMaybe<Scalars['String']['input']>;
-  tokenId_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  tokenId_not?: InputMaybe<Scalars['String']['input']>;
-  tokenId_not_contains?: InputMaybe<Scalars['String']['input']>;
-  tokenId_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  tokenId_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  tokenId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  tokenId_starts_with?: InputMaybe<Scalars['String']['input']>;
-};
-
-export type AccountBalancePage = {
-  __typename?: 'accountBalancePage';
-  items: Array<AccountBalance>;
-  pageInfo: PageInfo;
-  totalCount: Scalars['Int']['output'];
+export type AccountBalanceVariationsByAccountId_200_Response = {
+  __typename?: 'accountBalanceVariationsByAccountId_200_response';
+  data: Query_AccountBalanceVariationsByAccountId_Data;
+  period: Query_AccountBalanceVariationsByAccountId_Period;
 };
 
 export type AccountBalanceVariations_200_Response = {
@@ -664,117 +535,11 @@ export type AccountBalances_200_Response = {
   totalCount: Scalars['Float']['output'];
 };
 
-export type AccountFilter = {
-  AND?: InputMaybe<Array<InputMaybe<AccountFilter>>>;
-  OR?: InputMaybe<Array<InputMaybe<AccountFilter>>>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  id_contains?: InputMaybe<Scalars['String']['input']>;
-  id_ends_with?: InputMaybe<Scalars['String']['input']>;
-  id_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  id_not?: InputMaybe<Scalars['String']['input']>;
-  id_not_contains?: InputMaybe<Scalars['String']['input']>;
-  id_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  id_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  id_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  id_starts_with?: InputMaybe<Scalars['String']['input']>;
-};
-
 export type AccountInteractions_200_Response = {
   __typename?: 'accountInteractions_200_response';
   items: Array<Maybe<Query_AccountInteractions_Items_Items>>;
   period: Query_AccountInteractions_Period;
   totalCount: Scalars['Float']['output'];
-};
-
-export type AccountPage = {
-  __typename?: 'accountPage';
-  items: Array<Account>;
-  pageInfo: PageInfo;
-  totalCount: Scalars['Int']['output'];
-};
-
-export type AccountPower = {
-  __typename?: 'accountPower';
-  account?: Maybe<Account>;
-  accountId: Scalars['String']['output'];
-  daoId: Scalars['String']['output'];
-  delegationsCount: Scalars['Int']['output'];
-  lastVoteTimestamp: Scalars['BigInt']['output'];
-  proposalsCount: Scalars['Int']['output'];
-  votesCount: Scalars['Int']['output'];
-  votingPower: Scalars['BigInt']['output'];
-};
-
-export type AccountPowerFilter = {
-  AND?: InputMaybe<Array<InputMaybe<AccountPowerFilter>>>;
-  OR?: InputMaybe<Array<InputMaybe<AccountPowerFilter>>>;
-  accountId?: InputMaybe<Scalars['String']['input']>;
-  accountId_contains?: InputMaybe<Scalars['String']['input']>;
-  accountId_ends_with?: InputMaybe<Scalars['String']['input']>;
-  accountId_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  accountId_not?: InputMaybe<Scalars['String']['input']>;
-  accountId_not_contains?: InputMaybe<Scalars['String']['input']>;
-  accountId_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  accountId_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  accountId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  accountId_starts_with?: InputMaybe<Scalars['String']['input']>;
-  daoId?: InputMaybe<Scalars['String']['input']>;
-  daoId_contains?: InputMaybe<Scalars['String']['input']>;
-  daoId_ends_with?: InputMaybe<Scalars['String']['input']>;
-  daoId_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  daoId_not?: InputMaybe<Scalars['String']['input']>;
-  daoId_not_contains?: InputMaybe<Scalars['String']['input']>;
-  daoId_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  daoId_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  daoId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  daoId_starts_with?: InputMaybe<Scalars['String']['input']>;
-  delegationsCount?: InputMaybe<Scalars['Int']['input']>;
-  delegationsCount_gt?: InputMaybe<Scalars['Int']['input']>;
-  delegationsCount_gte?: InputMaybe<Scalars['Int']['input']>;
-  delegationsCount_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
-  delegationsCount_lt?: InputMaybe<Scalars['Int']['input']>;
-  delegationsCount_lte?: InputMaybe<Scalars['Int']['input']>;
-  delegationsCount_not?: InputMaybe<Scalars['Int']['input']>;
-  delegationsCount_not_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
-  lastVoteTimestamp?: InputMaybe<Scalars['BigInt']['input']>;
-  lastVoteTimestamp_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  lastVoteTimestamp_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  lastVoteTimestamp_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  lastVoteTimestamp_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  lastVoteTimestamp_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  lastVoteTimestamp_not?: InputMaybe<Scalars['BigInt']['input']>;
-  lastVoteTimestamp_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  proposalsCount?: InputMaybe<Scalars['Int']['input']>;
-  proposalsCount_gt?: InputMaybe<Scalars['Int']['input']>;
-  proposalsCount_gte?: InputMaybe<Scalars['Int']['input']>;
-  proposalsCount_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
-  proposalsCount_lt?: InputMaybe<Scalars['Int']['input']>;
-  proposalsCount_lte?: InputMaybe<Scalars['Int']['input']>;
-  proposalsCount_not?: InputMaybe<Scalars['Int']['input']>;
-  proposalsCount_not_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
-  votesCount?: InputMaybe<Scalars['Int']['input']>;
-  votesCount_gt?: InputMaybe<Scalars['Int']['input']>;
-  votesCount_gte?: InputMaybe<Scalars['Int']['input']>;
-  votesCount_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
-  votesCount_lt?: InputMaybe<Scalars['Int']['input']>;
-  votesCount_lte?: InputMaybe<Scalars['Int']['input']>;
-  votesCount_not?: InputMaybe<Scalars['Int']['input']>;
-  votesCount_not_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
-  votingPower?: InputMaybe<Scalars['BigInt']['input']>;
-  votingPower_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  votingPower_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  votingPower_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  votingPower_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  votingPower_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  votingPower_not?: InputMaybe<Scalars['BigInt']['input']>;
-  votingPower_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-};
-
-export type AccountPowerPage = {
-  __typename?: 'accountPowerPage';
-  items: Array<AccountPower>;
-  pageInfo: PageInfo;
-  totalCount: Scalars['Int']['output'];
 };
 
 export type CompareActiveSupply_200_Response = {
@@ -852,130 +617,6 @@ export type CompareVotes_200_Response = {
   oldVotes: Scalars['Float']['output'];
 };
 
-export type DaoMetricsDayBucket = {
-  __typename?: 'daoMetricsDayBucket';
-  average: Scalars['BigInt']['output'];
-  close: Scalars['BigInt']['output'];
-  count: Scalars['Int']['output'];
-  daoId: Scalars['String']['output'];
-  date: Scalars['BigInt']['output'];
-  high: Scalars['BigInt']['output'];
-  lastUpdate: Scalars['BigInt']['output'];
-  low: Scalars['BigInt']['output'];
-  metricType: MetricType;
-  open: Scalars['BigInt']['output'];
-  tokenId: Scalars['String']['output'];
-  volume: Scalars['BigInt']['output'];
-};
-
-export type DaoMetricsDayBucketFilter = {
-  AND?: InputMaybe<Array<InputMaybe<DaoMetricsDayBucketFilter>>>;
-  OR?: InputMaybe<Array<InputMaybe<DaoMetricsDayBucketFilter>>>;
-  average?: InputMaybe<Scalars['BigInt']['input']>;
-  average_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  average_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  average_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  average_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  average_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  average_not?: InputMaybe<Scalars['BigInt']['input']>;
-  average_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  close?: InputMaybe<Scalars['BigInt']['input']>;
-  close_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  close_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  close_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  close_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  close_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  close_not?: InputMaybe<Scalars['BigInt']['input']>;
-  close_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  count?: InputMaybe<Scalars['Int']['input']>;
-  count_gt?: InputMaybe<Scalars['Int']['input']>;
-  count_gte?: InputMaybe<Scalars['Int']['input']>;
-  count_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
-  count_lt?: InputMaybe<Scalars['Int']['input']>;
-  count_lte?: InputMaybe<Scalars['Int']['input']>;
-  count_not?: InputMaybe<Scalars['Int']['input']>;
-  count_not_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
-  daoId?: InputMaybe<Scalars['String']['input']>;
-  daoId_contains?: InputMaybe<Scalars['String']['input']>;
-  daoId_ends_with?: InputMaybe<Scalars['String']['input']>;
-  daoId_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  daoId_not?: InputMaybe<Scalars['String']['input']>;
-  daoId_not_contains?: InputMaybe<Scalars['String']['input']>;
-  daoId_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  daoId_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  daoId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  daoId_starts_with?: InputMaybe<Scalars['String']['input']>;
-  date?: InputMaybe<Scalars['BigInt']['input']>;
-  date_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  date_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  date_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  date_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  date_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  date_not?: InputMaybe<Scalars['BigInt']['input']>;
-  date_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  high?: InputMaybe<Scalars['BigInt']['input']>;
-  high_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  high_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  high_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  high_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  high_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  high_not?: InputMaybe<Scalars['BigInt']['input']>;
-  high_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  lastUpdate?: InputMaybe<Scalars['BigInt']['input']>;
-  lastUpdate_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  lastUpdate_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  lastUpdate_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  lastUpdate_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  lastUpdate_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  lastUpdate_not?: InputMaybe<Scalars['BigInt']['input']>;
-  lastUpdate_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  low?: InputMaybe<Scalars['BigInt']['input']>;
-  low_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  low_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  low_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  low_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  low_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  low_not?: InputMaybe<Scalars['BigInt']['input']>;
-  low_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  metricType?: InputMaybe<MetricType>;
-  metricType_in?: InputMaybe<Array<InputMaybe<MetricType>>>;
-  metricType_not?: InputMaybe<MetricType>;
-  metricType_not_in?: InputMaybe<Array<InputMaybe<MetricType>>>;
-  open?: InputMaybe<Scalars['BigInt']['input']>;
-  open_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  open_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  open_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  open_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  open_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  open_not?: InputMaybe<Scalars['BigInt']['input']>;
-  open_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  tokenId?: InputMaybe<Scalars['String']['input']>;
-  tokenId_contains?: InputMaybe<Scalars['String']['input']>;
-  tokenId_ends_with?: InputMaybe<Scalars['String']['input']>;
-  tokenId_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  tokenId_not?: InputMaybe<Scalars['String']['input']>;
-  tokenId_not_contains?: InputMaybe<Scalars['String']['input']>;
-  tokenId_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  tokenId_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  tokenId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  tokenId_starts_with?: InputMaybe<Scalars['String']['input']>;
-  volume?: InputMaybe<Scalars['BigInt']['input']>;
-  volume_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  volume_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  volume_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  volume_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  volume_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  volume_not?: InputMaybe<Scalars['BigInt']['input']>;
-  volume_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-};
-
-export type DaoMetricsDayBucketPage = {
-  __typename?: 'daoMetricsDayBucketPage';
-  items: Array<DaoMetricsDayBucket>;
-  pageInfo: PageInfo;
-  totalCount: Scalars['Int']['output'];
-};
-
 export type Dao_200_Response = {
   __typename?: 'dao_200_response';
   chainId: Scalars['Float']['output'];
@@ -987,131 +628,16 @@ export type Dao_200_Response = {
   votingPeriod: Scalars['String']['output'];
 };
 
-export type Delegation = {
-  __typename?: 'delegation';
-  daoId: Scalars['String']['output'];
-  delegate?: Maybe<Account>;
-  delegateAccountId: Scalars['String']['output'];
-  delegatedValue: Scalars['BigInt']['output'];
-  delegator?: Maybe<Account>;
-  delegatorAccountId: Scalars['String']['output'];
-  isCex: Scalars['Boolean']['output'];
-  isDex: Scalars['Boolean']['output'];
-  isLending: Scalars['Boolean']['output'];
-  isTotal: Scalars['Boolean']['output'];
-  logIndex: Scalars['Int']['output'];
-  previousDelegate?: Maybe<Scalars['String']['output']>;
-  timestamp: Scalars['BigInt']['output'];
-  transaction?: Maybe<Transaction>;
-  transactionHash: Scalars['String']['output'];
-};
-
-export type DelegationFilter = {
-  AND?: InputMaybe<Array<InputMaybe<DelegationFilter>>>;
-  OR?: InputMaybe<Array<InputMaybe<DelegationFilter>>>;
-  daoId?: InputMaybe<Scalars['String']['input']>;
-  daoId_contains?: InputMaybe<Scalars['String']['input']>;
-  daoId_ends_with?: InputMaybe<Scalars['String']['input']>;
-  daoId_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  daoId_not?: InputMaybe<Scalars['String']['input']>;
-  daoId_not_contains?: InputMaybe<Scalars['String']['input']>;
-  daoId_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  daoId_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  daoId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  daoId_starts_with?: InputMaybe<Scalars['String']['input']>;
-  delegateAccountId?: InputMaybe<Scalars['String']['input']>;
-  delegateAccountId_contains?: InputMaybe<Scalars['String']['input']>;
-  delegateAccountId_ends_with?: InputMaybe<Scalars['String']['input']>;
-  delegateAccountId_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  delegateAccountId_not?: InputMaybe<Scalars['String']['input']>;
-  delegateAccountId_not_contains?: InputMaybe<Scalars['String']['input']>;
-  delegateAccountId_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  delegateAccountId_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  delegateAccountId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  delegateAccountId_starts_with?: InputMaybe<Scalars['String']['input']>;
-  delegatedValue?: InputMaybe<Scalars['BigInt']['input']>;
-  delegatedValue_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  delegatedValue_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  delegatedValue_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  delegatedValue_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  delegatedValue_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  delegatedValue_not?: InputMaybe<Scalars['BigInt']['input']>;
-  delegatedValue_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  delegatorAccountId?: InputMaybe<Scalars['String']['input']>;
-  delegatorAccountId_contains?: InputMaybe<Scalars['String']['input']>;
-  delegatorAccountId_ends_with?: InputMaybe<Scalars['String']['input']>;
-  delegatorAccountId_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  delegatorAccountId_not?: InputMaybe<Scalars['String']['input']>;
-  delegatorAccountId_not_contains?: InputMaybe<Scalars['String']['input']>;
-  delegatorAccountId_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  delegatorAccountId_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  delegatorAccountId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  delegatorAccountId_starts_with?: InputMaybe<Scalars['String']['input']>;
-  isCex?: InputMaybe<Scalars['Boolean']['input']>;
-  isCex_in?: InputMaybe<Array<InputMaybe<Scalars['Boolean']['input']>>>;
-  isCex_not?: InputMaybe<Scalars['Boolean']['input']>;
-  isCex_not_in?: InputMaybe<Array<InputMaybe<Scalars['Boolean']['input']>>>;
-  isDex?: InputMaybe<Scalars['Boolean']['input']>;
-  isDex_in?: InputMaybe<Array<InputMaybe<Scalars['Boolean']['input']>>>;
-  isDex_not?: InputMaybe<Scalars['Boolean']['input']>;
-  isDex_not_in?: InputMaybe<Array<InputMaybe<Scalars['Boolean']['input']>>>;
-  isLending?: InputMaybe<Scalars['Boolean']['input']>;
-  isLending_in?: InputMaybe<Array<InputMaybe<Scalars['Boolean']['input']>>>;
-  isLending_not?: InputMaybe<Scalars['Boolean']['input']>;
-  isLending_not_in?: InputMaybe<Array<InputMaybe<Scalars['Boolean']['input']>>>;
-  isTotal?: InputMaybe<Scalars['Boolean']['input']>;
-  isTotal_in?: InputMaybe<Array<InputMaybe<Scalars['Boolean']['input']>>>;
-  isTotal_not?: InputMaybe<Scalars['Boolean']['input']>;
-  isTotal_not_in?: InputMaybe<Array<InputMaybe<Scalars['Boolean']['input']>>>;
-  logIndex?: InputMaybe<Scalars['Int']['input']>;
-  logIndex_gt?: InputMaybe<Scalars['Int']['input']>;
-  logIndex_gte?: InputMaybe<Scalars['Int']['input']>;
-  logIndex_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
-  logIndex_lt?: InputMaybe<Scalars['Int']['input']>;
-  logIndex_lte?: InputMaybe<Scalars['Int']['input']>;
-  logIndex_not?: InputMaybe<Scalars['Int']['input']>;
-  logIndex_not_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
-  previousDelegate?: InputMaybe<Scalars['String']['input']>;
-  previousDelegate_contains?: InputMaybe<Scalars['String']['input']>;
-  previousDelegate_ends_with?: InputMaybe<Scalars['String']['input']>;
-  previousDelegate_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  previousDelegate_not?: InputMaybe<Scalars['String']['input']>;
-  previousDelegate_not_contains?: InputMaybe<Scalars['String']['input']>;
-  previousDelegate_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  previousDelegate_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  previousDelegate_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  previousDelegate_starts_with?: InputMaybe<Scalars['String']['input']>;
-  timestamp?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_not?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  transactionHash?: InputMaybe<Scalars['String']['input']>;
-  transactionHash_contains?: InputMaybe<Scalars['String']['input']>;
-  transactionHash_ends_with?: InputMaybe<Scalars['String']['input']>;
-  transactionHash_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  transactionHash_not?: InputMaybe<Scalars['String']['input']>;
-  transactionHash_not_contains?: InputMaybe<Scalars['String']['input']>;
-  transactionHash_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  transactionHash_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  transactionHash_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  transactionHash_starts_with?: InputMaybe<Scalars['String']['input']>;
-};
-
-export type DelegationPage = {
-  __typename?: 'delegationPage';
-  items: Array<Delegation>;
-  pageInfo: PageInfo;
-  totalCount: Scalars['Int']['output'];
-};
-
 export type DelegationPercentageByDay_200_Response = {
   __typename?: 'delegationPercentageByDay_200_response';
   items: Array<Maybe<Query_DelegationPercentageByDay_Items_Items>>;
   pageInfo: Query_DelegationPercentageByDay_PageInfo;
+  totalCount: Scalars['Float']['output'];
+};
+
+export type Delegations_200_Response = {
+  __typename?: 'delegations_200_response';
+  items: Array<Maybe<Query_Delegations_Items_Items>>;
   totalCount: Scalars['Float']['output'];
 };
 
@@ -1136,9 +662,27 @@ export type GetTotalTreasury_200_Response = {
   totalCount: Scalars['Float']['output'];
 };
 
-export type HistoricalVotingPowers_200_Response = {
-  __typename?: 'historicalVotingPowers_200_response';
-  items: Array<Maybe<Query_HistoricalVotingPowers_Items_Items>>;
+export type HistoricalBalances_200_Response = {
+  __typename?: 'historicalBalances_200_response';
+  items: Array<Maybe<Query_HistoricalBalances_Items_Items>>;
+  totalCount: Scalars['Float']['output'];
+};
+
+export type HistoricalDelegations_200_Response = {
+  __typename?: 'historicalDelegations_200_response';
+  items: Array<Maybe<Query_HistoricalDelegations_Items_Items>>;
+  totalCount: Scalars['Float']['output'];
+};
+
+export type HistoricalVotingPowerByAccountId_200_Response = {
+  __typename?: 'historicalVotingPowerByAccountId_200_response';
+  items: Array<Maybe<Query_HistoricalVotingPowerByAccountId_Items_Items>>;
+  totalCount: Scalars['Float']['output'];
+};
+
+export type HistoricalVotingPower_200_Response = {
+  __typename?: 'historicalVotingPower_200_response';
+  items: Array<Maybe<Query_HistoricalVotingPower_Items_Items>>;
   totalCount: Scalars['Float']['output'];
 };
 
@@ -1146,16 +690,6 @@ export type LastUpdate_200_Response = {
   __typename?: 'lastUpdate_200_response';
   lastUpdate: Scalars['String']['output'];
 };
-
-export enum MetricType {
-  CexSupply = 'CEX_SUPPLY',
-  CirculatingSupply = 'CIRCULATING_SUPPLY',
-  DelegatedSupply = 'DELEGATED_SUPPLY',
-  DexSupply = 'DEX_SUPPLY',
-  LendingSupply = 'LENDING_SUPPLY',
-  TotalSupply = 'TOTAL_SUPPLY',
-  Treasury = 'TREASURY'
-}
 
 export type ProposalNonVoters_200_Response = {
   __typename?: 'proposalNonVoters_200_response';
@@ -1199,189 +733,11 @@ export type ProposalsActivity_200_Response = {
   yesRate: Scalars['Float']['output'];
 };
 
-export type ProposalsOnchain = {
-  __typename?: 'proposalsOnchain';
-  abstainVotes: Scalars['BigInt']['output'];
-  againstVotes: Scalars['BigInt']['output'];
-  calldatas: Scalars['JSON']['output'];
-  daoId: Scalars['String']['output'];
-  description: Scalars['String']['output'];
-  endBlock: Scalars['Int']['output'];
-  endTimestamp: Scalars['BigInt']['output'];
-  forVotes: Scalars['BigInt']['output'];
-  id: Scalars['String']['output'];
-  proposalType?: Maybe<Scalars['Int']['output']>;
-  proposer?: Maybe<Account>;
-  proposerAccountId: Scalars['String']['output'];
-  signatures: Scalars['JSON']['output'];
-  startBlock: Scalars['Int']['output'];
-  status: Scalars['String']['output'];
-  targets: Scalars['JSON']['output'];
-  timestamp: Scalars['BigInt']['output'];
-  txHash: Scalars['String']['output'];
-  values: Scalars['JSON']['output'];
-  votes?: Maybe<VotesOnchainPage>;
-};
-
-
-export type ProposalsOnchainVotesArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  where?: InputMaybe<VotesOnchainFilter>;
-};
-
-export type ProposalsOnchainFilter = {
-  AND?: InputMaybe<Array<InputMaybe<ProposalsOnchainFilter>>>;
-  OR?: InputMaybe<Array<InputMaybe<ProposalsOnchainFilter>>>;
-  abstainVotes?: InputMaybe<Scalars['BigInt']['input']>;
-  abstainVotes_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  abstainVotes_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  abstainVotes_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  abstainVotes_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  abstainVotes_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  abstainVotes_not?: InputMaybe<Scalars['BigInt']['input']>;
-  abstainVotes_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  againstVotes?: InputMaybe<Scalars['BigInt']['input']>;
-  againstVotes_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  againstVotes_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  againstVotes_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  againstVotes_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  againstVotes_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  againstVotes_not?: InputMaybe<Scalars['BigInt']['input']>;
-  againstVotes_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  daoId?: InputMaybe<Scalars['String']['input']>;
-  daoId_contains?: InputMaybe<Scalars['String']['input']>;
-  daoId_ends_with?: InputMaybe<Scalars['String']['input']>;
-  daoId_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  daoId_not?: InputMaybe<Scalars['String']['input']>;
-  daoId_not_contains?: InputMaybe<Scalars['String']['input']>;
-  daoId_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  daoId_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  daoId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  daoId_starts_with?: InputMaybe<Scalars['String']['input']>;
-  description?: InputMaybe<Scalars['String']['input']>;
-  description_contains?: InputMaybe<Scalars['String']['input']>;
-  description_ends_with?: InputMaybe<Scalars['String']['input']>;
-  description_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  description_not?: InputMaybe<Scalars['String']['input']>;
-  description_not_contains?: InputMaybe<Scalars['String']['input']>;
-  description_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  description_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  description_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  description_starts_with?: InputMaybe<Scalars['String']['input']>;
-  endBlock?: InputMaybe<Scalars['Int']['input']>;
-  endBlock_gt?: InputMaybe<Scalars['Int']['input']>;
-  endBlock_gte?: InputMaybe<Scalars['Int']['input']>;
-  endBlock_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
-  endBlock_lt?: InputMaybe<Scalars['Int']['input']>;
-  endBlock_lte?: InputMaybe<Scalars['Int']['input']>;
-  endBlock_not?: InputMaybe<Scalars['Int']['input']>;
-  endBlock_not_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
-  endTimestamp?: InputMaybe<Scalars['BigInt']['input']>;
-  endTimestamp_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  endTimestamp_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  endTimestamp_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  endTimestamp_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  endTimestamp_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  endTimestamp_not?: InputMaybe<Scalars['BigInt']['input']>;
-  endTimestamp_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  forVotes?: InputMaybe<Scalars['BigInt']['input']>;
-  forVotes_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  forVotes_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  forVotes_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  forVotes_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  forVotes_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  forVotes_not?: InputMaybe<Scalars['BigInt']['input']>;
-  forVotes_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  id_contains?: InputMaybe<Scalars['String']['input']>;
-  id_ends_with?: InputMaybe<Scalars['String']['input']>;
-  id_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  id_not?: InputMaybe<Scalars['String']['input']>;
-  id_not_contains?: InputMaybe<Scalars['String']['input']>;
-  id_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  id_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  id_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  id_starts_with?: InputMaybe<Scalars['String']['input']>;
-  proposalType?: InputMaybe<Scalars['Int']['input']>;
-  proposalType_gt?: InputMaybe<Scalars['Int']['input']>;
-  proposalType_gte?: InputMaybe<Scalars['Int']['input']>;
-  proposalType_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
-  proposalType_lt?: InputMaybe<Scalars['Int']['input']>;
-  proposalType_lte?: InputMaybe<Scalars['Int']['input']>;
-  proposalType_not?: InputMaybe<Scalars['Int']['input']>;
-  proposalType_not_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
-  proposerAccountId?: InputMaybe<Scalars['String']['input']>;
-  proposerAccountId_contains?: InputMaybe<Scalars['String']['input']>;
-  proposerAccountId_ends_with?: InputMaybe<Scalars['String']['input']>;
-  proposerAccountId_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  proposerAccountId_not?: InputMaybe<Scalars['String']['input']>;
-  proposerAccountId_not_contains?: InputMaybe<Scalars['String']['input']>;
-  proposerAccountId_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  proposerAccountId_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  proposerAccountId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  proposerAccountId_starts_with?: InputMaybe<Scalars['String']['input']>;
-  startBlock?: InputMaybe<Scalars['Int']['input']>;
-  startBlock_gt?: InputMaybe<Scalars['Int']['input']>;
-  startBlock_gte?: InputMaybe<Scalars['Int']['input']>;
-  startBlock_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
-  startBlock_lt?: InputMaybe<Scalars['Int']['input']>;
-  startBlock_lte?: InputMaybe<Scalars['Int']['input']>;
-  startBlock_not?: InputMaybe<Scalars['Int']['input']>;
-  startBlock_not_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
-  status?: InputMaybe<Scalars['String']['input']>;
-  status_contains?: InputMaybe<Scalars['String']['input']>;
-  status_ends_with?: InputMaybe<Scalars['String']['input']>;
-  status_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  status_not?: InputMaybe<Scalars['String']['input']>;
-  status_not_contains?: InputMaybe<Scalars['String']['input']>;
-  status_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  status_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  status_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  status_starts_with?: InputMaybe<Scalars['String']['input']>;
-  timestamp?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_not?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  txHash?: InputMaybe<Scalars['String']['input']>;
-  txHash_contains?: InputMaybe<Scalars['String']['input']>;
-  txHash_ends_with?: InputMaybe<Scalars['String']['input']>;
-  txHash_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  txHash_not?: InputMaybe<Scalars['String']['input']>;
-  txHash_not_contains?: InputMaybe<Scalars['String']['input']>;
-  txHash_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  txHash_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  txHash_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  txHash_starts_with?: InputMaybe<Scalars['String']['input']>;
-};
-
-export type ProposalsOnchainPage = {
-  __typename?: 'proposalsOnchainPage';
-  items: Array<ProposalsOnchain>;
-  pageInfo: PageInfo;
-  totalCount: Scalars['Int']['output'];
-};
-
 export type Proposals_200_Response = {
   __typename?: 'proposals_200_response';
   items: Array<Maybe<Query_Proposals_Items_Items>>;
   totalCount: Scalars['Float']['output'];
 };
-
-export enum QueryInput_AccountBalanceVariations_Days {
-  '7d' = '_7d',
-  '30d' = '_30d',
-  '90d' = '_90d',
-  '180d' = '_180d',
-  '365d' = '_365d'
-}
 
 export enum QueryInput_AccountBalanceVariations_OrderDirection {
   Asc = 'asc',
@@ -1391,14 +747,6 @@ export enum QueryInput_AccountBalanceVariations_OrderDirection {
 export enum QueryInput_AccountBalances_OrderDirection {
   Asc = 'asc',
   Desc = 'desc'
-}
-
-export enum QueryInput_AccountInteractions_Days {
-  '7d' = '_7d',
-  '30d' = '_30d',
-  '90d' = '_90d',
-  '180d' = '_180d',
-  '365d' = '_365d'
 }
 
 export enum QueryInput_AccountInteractions_OrderBy {
@@ -1543,20 +891,37 @@ export enum QueryInput_GetTotalTreasury_Order {
   Desc = 'desc'
 }
 
-export enum QueryInput_HistoricalBalances_Days {
-  '7d' = '_7d',
-  '30d' = '_30d',
-  '90d' = '_90d',
-  '180d' = '_180d',
-  '365d' = '_365d'
-}
-
-export enum QueryInput_HistoricalVotingPowers_OrderBy {
+export enum QueryInput_HistoricalBalances_OrderBy {
   Delta = 'delta',
   Timestamp = 'timestamp'
 }
 
-export enum QueryInput_HistoricalVotingPowers_OrderDirection {
+export enum QueryInput_HistoricalBalances_OrderDirection {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
+export enum QueryInput_HistoricalDelegations_OrderDirection {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
+export enum QueryInput_HistoricalVotingPowerByAccountId_OrderBy {
+  Delta = 'delta',
+  Timestamp = 'timestamp'
+}
+
+export enum QueryInput_HistoricalVotingPowerByAccountId_OrderDirection {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
+export enum QueryInput_HistoricalVotingPower_OrderBy {
+  Delta = 'delta',
+  Timestamp = 'timestamp'
+}
+
+export enum QueryInput_HistoricalVotingPower_OrderDirection {
   Asc = 'asc',
   Desc = 'desc'
 }
@@ -1601,6 +966,21 @@ export enum QueryInput_Proposals_OrderDirection {
   Desc = 'desc'
 }
 
+export enum QueryInput_TokenMetrics_MetricType {
+  CexSupply = 'CEX_SUPPLY',
+  CirculatingSupply = 'CIRCULATING_SUPPLY',
+  DelegatedSupply = 'DELEGATED_SUPPLY',
+  DexSupply = 'DEX_SUPPLY',
+  LendingSupply = 'LENDING_SUPPLY',
+  TotalSupply = 'TOTAL_SUPPLY',
+  Treasury = 'TREASURY'
+}
+
+export enum QueryInput_TokenMetrics_OrderDirection {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
 export enum QueryInput_Token_Currency {
   Eth = 'eth',
   Usd = 'usd'
@@ -1621,6 +1001,26 @@ export enum QueryInput_Transfers_SortOrder {
   Desc = 'desc'
 }
 
+export enum QueryInput_VotesByProposalId_OrderBy {
+  Timestamp = 'timestamp',
+  VotingPower = 'votingPower'
+}
+
+export enum QueryInput_VotesByProposalId_OrderDirection {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
+export enum QueryInput_Votes_OrderBy {
+  Timestamp = 'timestamp',
+  VotingPower = 'votingPower'
+}
+
+export enum QueryInput_Votes_OrderDirection {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
 export enum QueryInput_VotingPowerVariations_OrderDirection {
   Asc = 'asc',
   Desc = 'desc'
@@ -1635,6 +1035,21 @@ export enum QueryInput_VotingPowers_OrderDirection {
   Asc = 'asc',
   Desc = 'desc'
 }
+
+export type Query_AccountBalanceVariationsByAccountId_Data = {
+  __typename?: 'query_accountBalanceVariationsByAccountId_data';
+  absoluteChange: Scalars['String']['output'];
+  accountId: Scalars['String']['output'];
+  currentBalance: Scalars['String']['output'];
+  percentageChange: Scalars['String']['output'];
+  previousBalance: Scalars['String']['output'];
+};
+
+export type Query_AccountBalanceVariationsByAccountId_Period = {
+  __typename?: 'query_accountBalanceVariationsByAccountId_period';
+  endTimestamp: Scalars['String']['output'];
+  startTimestamp: Scalars['String']['output'];
+};
 
 export type Query_AccountBalanceVariations_Items_Items = {
   __typename?: 'query_accountBalanceVariations_items_items';
@@ -1653,7 +1068,7 @@ export type Query_AccountBalanceVariations_Period = {
 
 export type Query_AccountBalances_Items_Items = {
   __typename?: 'query_accountBalances_items_items';
-  accountId: Scalars['String']['output'];
+  address: Scalars['String']['output'];
   balance: Scalars['String']['output'];
   delegate: Scalars['String']['output'];
   tokenId: Scalars['String']['output'];
@@ -1686,6 +1101,15 @@ export type Query_DelegationPercentageByDay_PageInfo = {
   startDate?: Maybe<Scalars['String']['output']>;
 };
 
+export type Query_Delegations_Items_Items = {
+  __typename?: 'query_delegations_items_items';
+  amount: Scalars['String']['output'];
+  delegateAddress: Scalars['String']['output'];
+  delegatorAddress: Scalars['String']['output'];
+  timestamp: Scalars['String']['output'];
+  transactionHash: Scalars['String']['output'];
+};
+
 export type Query_GetDaoTokenTreasury_Items_Items = {
   __typename?: 'query_getDaoTokenTreasury_items_items';
   /** Unix timestamp in milliseconds */
@@ -1710,12 +1134,32 @@ export type Query_GetTotalTreasury_Items_Items = {
   value: Scalars['Float']['output'];
 };
 
-export type Query_HistoricalBalances_Items = {
-  __typename?: 'query_historicalBalances_items';
-  address: Scalars['String']['output'];
+export type Query_HistoricalBalances_Items_Items = {
+  __typename?: 'query_historicalBalances_items_items';
+  accountId: Scalars['String']['output'];
   balance: Scalars['String']['output'];
-  blockNumber: Scalars['Float']['output'];
-  tokenAddress: Scalars['String']['output'];
+  daoId: Scalars['String']['output'];
+  delta: Scalars['String']['output'];
+  logIndex: Scalars['Float']['output'];
+  timestamp: Scalars['String']['output'];
+  transactionHash: Scalars['String']['output'];
+  transfer: Query_HistoricalBalances_Items_Items_Transfer;
+};
+
+export type Query_HistoricalBalances_Items_Items_Transfer = {
+  __typename?: 'query_historicalBalances_items_items_transfer';
+  from: Scalars['String']['output'];
+  to: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
+export type Query_HistoricalDelegations_Items_Items = {
+  __typename?: 'query_historicalDelegations_items_items';
+  amount: Scalars['String']['output'];
+  delegateAddress: Scalars['String']['output'];
+  delegatorAddress: Scalars['String']['output'];
+  timestamp: Scalars['String']['output'];
+  transactionHash: Scalars['String']['output'];
 };
 
 export type Query_HistoricalTokenData_Items = {
@@ -1724,29 +1168,57 @@ export type Query_HistoricalTokenData_Items = {
   timestamp: Scalars['Float']['output'];
 };
 
-export type Query_HistoricalVotingPowers_Items_Items = {
-  __typename?: 'query_historicalVotingPowers_items_items';
+export type Query_HistoricalVotingPowerByAccountId_Items_Items = {
+  __typename?: 'query_historicalVotingPowerByAccountId_items_items';
   accountId: Scalars['String']['output'];
   daoId: Scalars['String']['output'];
-  delegation?: Maybe<Query_HistoricalVotingPowers_Items_Items_Delegation>;
+  delegation?: Maybe<Query_HistoricalVotingPowerByAccountId_Items_Items_Delegation>;
   delta: Scalars['String']['output'];
   logIndex: Scalars['Float']['output'];
   timestamp: Scalars['String']['output'];
   transactionHash: Scalars['String']['output'];
-  transfer?: Maybe<Query_HistoricalVotingPowers_Items_Items_Transfer>;
+  transfer?: Maybe<Query_HistoricalVotingPowerByAccountId_Items_Items_Transfer>;
   votingPower: Scalars['String']['output'];
 };
 
-export type Query_HistoricalVotingPowers_Items_Items_Delegation = {
-  __typename?: 'query_historicalVotingPowers_items_items_delegation';
+export type Query_HistoricalVotingPowerByAccountId_Items_Items_Delegation = {
+  __typename?: 'query_historicalVotingPowerByAccountId_items_items_delegation';
   from: Scalars['String']['output'];
   previousDelegate?: Maybe<Scalars['String']['output']>;
   to: Scalars['String']['output'];
   value: Scalars['String']['output'];
 };
 
-export type Query_HistoricalVotingPowers_Items_Items_Transfer = {
-  __typename?: 'query_historicalVotingPowers_items_items_transfer';
+export type Query_HistoricalVotingPowerByAccountId_Items_Items_Transfer = {
+  __typename?: 'query_historicalVotingPowerByAccountId_items_items_transfer';
+  from: Scalars['String']['output'];
+  to: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
+export type Query_HistoricalVotingPower_Items_Items = {
+  __typename?: 'query_historicalVotingPower_items_items';
+  accountId: Scalars['String']['output'];
+  daoId: Scalars['String']['output'];
+  delegation?: Maybe<Query_HistoricalVotingPower_Items_Items_Delegation>;
+  delta: Scalars['String']['output'];
+  logIndex: Scalars['Float']['output'];
+  timestamp: Scalars['String']['output'];
+  transactionHash: Scalars['String']['output'];
+  transfer?: Maybe<Query_HistoricalVotingPower_Items_Items_Transfer>;
+  votingPower: Scalars['String']['output'];
+};
+
+export type Query_HistoricalVotingPower_Items_Items_Delegation = {
+  __typename?: 'query_historicalVotingPower_items_items_delegation';
+  from: Scalars['String']['output'];
+  previousDelegate?: Maybe<Scalars['String']['output']>;
+  to: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
+export type Query_HistoricalVotingPower_Items_Items_Transfer = {
+  __typename?: 'query_historicalVotingPower_items_items_transfer';
   from: Scalars['String']['output'];
   to: Scalars['String']['output'];
   value: Scalars['String']['output'];
@@ -1778,7 +1250,7 @@ export type Query_ProposalsActivity_Proposals_Items_Proposal = {
   proposerAccountId: Scalars['String']['output'];
   startBlock: Scalars['Float']['output'];
   status: Scalars['String']['output'];
-  timestamp: Scalars['String']['output'];
+  timestamp?: Maybe<Scalars['String']['output']>;
 };
 
 export type Query_ProposalsActivity_Proposals_Items_UserVote = {
@@ -1787,9 +1259,9 @@ export type Query_ProposalsActivity_Proposals_Items_UserVote = {
   proposalId: Scalars['String']['output'];
   reason?: Maybe<Scalars['String']['output']>;
   support?: Maybe<Scalars['String']['output']>;
-  timestamp: Scalars['String']['output'];
+  timestamp?: Maybe<Scalars['String']['output']>;
   voterAccountId: Scalars['String']['output'];
-  votingPower?: Maybe<Scalars['String']['output']>;
+  votingPower: Scalars['String']['output'];
 };
 
 export type Query_Proposals_Items_Items = {
@@ -1814,6 +1286,20 @@ export type Query_Proposals_Items_Items = {
   title: Scalars['String']['output'];
   txHash: Scalars['String']['output'];
   values: Array<Maybe<Scalars['String']['output']>>;
+};
+
+export type Query_TokenMetrics_Items_Items = {
+  __typename?: 'query_tokenMetrics_items_items';
+  date: Scalars['String']['output'];
+  high: Scalars['String']['output'];
+  volume: Scalars['String']['output'];
+};
+
+export type Query_TokenMetrics_PageInfo = {
+  __typename?: 'query_tokenMetrics_pageInfo';
+  endDate?: Maybe<Scalars['String']['output']>;
+  hasNextPage: Scalars['Boolean']['output'];
+  startDate?: Maybe<Scalars['String']['output']>;
 };
 
 export type Query_Transactions_Items_Items = {
@@ -1878,6 +1364,30 @@ export type Query_Transfers_Items_Items = {
   transactionHash: Scalars['String']['output'];
 };
 
+export type Query_VotesByProposalId_Items_Items = {
+  __typename?: 'query_votesByProposalId_items_items';
+  proposalId: Scalars['String']['output'];
+  proposalTitle: Scalars['String']['output'];
+  reason?: Maybe<Scalars['String']['output']>;
+  support: Scalars['Float']['output'];
+  timestamp: Scalars['Float']['output'];
+  transactionHash: Scalars['String']['output'];
+  voterAddress: Scalars['String']['output'];
+  votingPower: Scalars['String']['output'];
+};
+
+export type Query_Votes_Items_Items = {
+  __typename?: 'query_votes_items_items';
+  proposalId: Scalars['String']['output'];
+  proposalTitle: Scalars['String']['output'];
+  reason?: Maybe<Scalars['String']['output']>;
+  support: Scalars['Float']['output'];
+  timestamp: Scalars['Float']['output'];
+  transactionHash: Scalars['String']['output'];
+  voterAddress: Scalars['String']['output'];
+  votingPower: Scalars['String']['output'];
+};
+
 export type Query_VotingPowerVariationsByAccountId_Data = {
   __typename?: 'query_votingPowerVariationsByAccountId_data';
   absoluteChange: Scalars['String']['output'];
@@ -1921,148 +1431,10 @@ export enum Timestamp_Const {
   Timestamp = 'timestamp'
 }
 
-export type Token = {
-  __typename?: 'token';
-  cexSupply: Scalars['BigInt']['output'];
-  circulatingSupply: Scalars['BigInt']['output'];
-  decimals: Scalars['Int']['output'];
-  delegatedSupply: Scalars['BigInt']['output'];
-  dexSupply: Scalars['BigInt']['output'];
-  id: Scalars['String']['output'];
-  lendingSupply: Scalars['BigInt']['output'];
-  name?: Maybe<Scalars['String']['output']>;
-  totalSupply: Scalars['BigInt']['output'];
-  treasury: Scalars['BigInt']['output'];
-};
-
-export type TokenFilter = {
-  AND?: InputMaybe<Array<InputMaybe<TokenFilter>>>;
-  OR?: InputMaybe<Array<InputMaybe<TokenFilter>>>;
-  cexSupply?: InputMaybe<Scalars['BigInt']['input']>;
-  cexSupply_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  cexSupply_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  cexSupply_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  cexSupply_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  cexSupply_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  cexSupply_not?: InputMaybe<Scalars['BigInt']['input']>;
-  cexSupply_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  circulatingSupply?: InputMaybe<Scalars['BigInt']['input']>;
-  circulatingSupply_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  circulatingSupply_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  circulatingSupply_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  circulatingSupply_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  circulatingSupply_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  circulatingSupply_not?: InputMaybe<Scalars['BigInt']['input']>;
-  circulatingSupply_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  decimals?: InputMaybe<Scalars['Int']['input']>;
-  decimals_gt?: InputMaybe<Scalars['Int']['input']>;
-  decimals_gte?: InputMaybe<Scalars['Int']['input']>;
-  decimals_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
-  decimals_lt?: InputMaybe<Scalars['Int']['input']>;
-  decimals_lte?: InputMaybe<Scalars['Int']['input']>;
-  decimals_not?: InputMaybe<Scalars['Int']['input']>;
-  decimals_not_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
-  delegatedSupply?: InputMaybe<Scalars['BigInt']['input']>;
-  delegatedSupply_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  delegatedSupply_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  delegatedSupply_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  delegatedSupply_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  delegatedSupply_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  delegatedSupply_not?: InputMaybe<Scalars['BigInt']['input']>;
-  delegatedSupply_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  dexSupply?: InputMaybe<Scalars['BigInt']['input']>;
-  dexSupply_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  dexSupply_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  dexSupply_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  dexSupply_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  dexSupply_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  dexSupply_not?: InputMaybe<Scalars['BigInt']['input']>;
-  dexSupply_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  id_contains?: InputMaybe<Scalars['String']['input']>;
-  id_ends_with?: InputMaybe<Scalars['String']['input']>;
-  id_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  id_not?: InputMaybe<Scalars['String']['input']>;
-  id_not_contains?: InputMaybe<Scalars['String']['input']>;
-  id_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  id_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  id_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  id_starts_with?: InputMaybe<Scalars['String']['input']>;
-  lendingSupply?: InputMaybe<Scalars['BigInt']['input']>;
-  lendingSupply_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  lendingSupply_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  lendingSupply_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  lendingSupply_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  lendingSupply_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  lendingSupply_not?: InputMaybe<Scalars['BigInt']['input']>;
-  lendingSupply_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  name?: InputMaybe<Scalars['String']['input']>;
-  name_contains?: InputMaybe<Scalars['String']['input']>;
-  name_ends_with?: InputMaybe<Scalars['String']['input']>;
-  name_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  name_not?: InputMaybe<Scalars['String']['input']>;
-  name_not_contains?: InputMaybe<Scalars['String']['input']>;
-  name_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  name_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  name_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  name_starts_with?: InputMaybe<Scalars['String']['input']>;
-  totalSupply?: InputMaybe<Scalars['BigInt']['input']>;
-  totalSupply_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  totalSupply_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  totalSupply_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  totalSupply_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  totalSupply_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  totalSupply_not?: InputMaybe<Scalars['BigInt']['input']>;
-  totalSupply_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  treasury?: InputMaybe<Scalars['BigInt']['input']>;
-  treasury_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  treasury_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  treasury_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  treasury_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  treasury_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  treasury_not?: InputMaybe<Scalars['BigInt']['input']>;
-  treasury_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-};
-
-export type TokenPage = {
-  __typename?: 'tokenPage';
-  items: Array<Token>;
-  pageInfo: PageInfo;
-  totalCount: Scalars['Int']['output'];
-};
-
-export type TokenPrice = {
-  __typename?: 'tokenPrice';
-  price: Scalars['BigInt']['output'];
-  timestamp: Scalars['BigInt']['output'];
-};
-
-export type TokenPriceFilter = {
-  AND?: InputMaybe<Array<InputMaybe<TokenPriceFilter>>>;
-  OR?: InputMaybe<Array<InputMaybe<TokenPriceFilter>>>;
-  price?: InputMaybe<Scalars['BigInt']['input']>;
-  price_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  price_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  price_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  price_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  price_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  price_not?: InputMaybe<Scalars['BigInt']['input']>;
-  price_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  timestamp?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_not?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-};
-
-export type TokenPricePage = {
-  __typename?: 'tokenPricePage';
-  items: Array<TokenPrice>;
-  pageInfo: PageInfo;
-  totalCount: Scalars['Int']['output'];
+export type TokenMetrics_200_Response = {
+  __typename?: 'tokenMetrics_200_response';
+  items: Array<Maybe<Query_TokenMetrics_Items_Items>>;
+  pageInfo: Query_TokenMetrics_PageInfo;
 };
 
 export type Token_200_Response = {
@@ -2080,232 +1452,10 @@ export type Token_200_Response = {
   treasury: Scalars['String']['output'];
 };
 
-export type Transaction = {
-  __typename?: 'transaction';
-  delegations?: Maybe<DelegationPage>;
-  fromAddress?: Maybe<Scalars['String']['output']>;
-  isCex: Scalars['Boolean']['output'];
-  isDex: Scalars['Boolean']['output'];
-  isLending: Scalars['Boolean']['output'];
-  isTotal: Scalars['Boolean']['output'];
-  timestamp: Scalars['BigInt']['output'];
-  toAddress?: Maybe<Scalars['String']['output']>;
-  transactionHash: Scalars['String']['output'];
-  transfers?: Maybe<TransferPage>;
-};
-
-
-export type TransactionDelegationsArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  where?: InputMaybe<DelegationFilter>;
-};
-
-
-export type TransactionTransfersArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  where?: InputMaybe<TransferFilter>;
-};
-
-export type TransactionFilter = {
-  AND?: InputMaybe<Array<InputMaybe<TransactionFilter>>>;
-  OR?: InputMaybe<Array<InputMaybe<TransactionFilter>>>;
-  fromAddress?: InputMaybe<Scalars['String']['input']>;
-  fromAddress_contains?: InputMaybe<Scalars['String']['input']>;
-  fromAddress_ends_with?: InputMaybe<Scalars['String']['input']>;
-  fromAddress_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  fromAddress_not?: InputMaybe<Scalars['String']['input']>;
-  fromAddress_not_contains?: InputMaybe<Scalars['String']['input']>;
-  fromAddress_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  fromAddress_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  fromAddress_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  fromAddress_starts_with?: InputMaybe<Scalars['String']['input']>;
-  isCex?: InputMaybe<Scalars['Boolean']['input']>;
-  isCex_in?: InputMaybe<Array<InputMaybe<Scalars['Boolean']['input']>>>;
-  isCex_not?: InputMaybe<Scalars['Boolean']['input']>;
-  isCex_not_in?: InputMaybe<Array<InputMaybe<Scalars['Boolean']['input']>>>;
-  isDex?: InputMaybe<Scalars['Boolean']['input']>;
-  isDex_in?: InputMaybe<Array<InputMaybe<Scalars['Boolean']['input']>>>;
-  isDex_not?: InputMaybe<Scalars['Boolean']['input']>;
-  isDex_not_in?: InputMaybe<Array<InputMaybe<Scalars['Boolean']['input']>>>;
-  isLending?: InputMaybe<Scalars['Boolean']['input']>;
-  isLending_in?: InputMaybe<Array<InputMaybe<Scalars['Boolean']['input']>>>;
-  isLending_not?: InputMaybe<Scalars['Boolean']['input']>;
-  isLending_not_in?: InputMaybe<Array<InputMaybe<Scalars['Boolean']['input']>>>;
-  isTotal?: InputMaybe<Scalars['Boolean']['input']>;
-  isTotal_in?: InputMaybe<Array<InputMaybe<Scalars['Boolean']['input']>>>;
-  isTotal_not?: InputMaybe<Scalars['Boolean']['input']>;
-  isTotal_not_in?: InputMaybe<Array<InputMaybe<Scalars['Boolean']['input']>>>;
-  timestamp?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_not?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  toAddress?: InputMaybe<Scalars['String']['input']>;
-  toAddress_contains?: InputMaybe<Scalars['String']['input']>;
-  toAddress_ends_with?: InputMaybe<Scalars['String']['input']>;
-  toAddress_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  toAddress_not?: InputMaybe<Scalars['String']['input']>;
-  toAddress_not_contains?: InputMaybe<Scalars['String']['input']>;
-  toAddress_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  toAddress_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  toAddress_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  toAddress_starts_with?: InputMaybe<Scalars['String']['input']>;
-  transactionHash?: InputMaybe<Scalars['String']['input']>;
-  transactionHash_contains?: InputMaybe<Scalars['String']['input']>;
-  transactionHash_ends_with?: InputMaybe<Scalars['String']['input']>;
-  transactionHash_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  transactionHash_not?: InputMaybe<Scalars['String']['input']>;
-  transactionHash_not_contains?: InputMaybe<Scalars['String']['input']>;
-  transactionHash_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  transactionHash_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  transactionHash_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  transactionHash_starts_with?: InputMaybe<Scalars['String']['input']>;
-};
-
-export type TransactionPage = {
-  __typename?: 'transactionPage';
-  items: Array<Transaction>;
-  pageInfo: PageInfo;
-  totalCount: Scalars['Int']['output'];
-};
-
 export type Transactions_200_Response = {
   __typename?: 'transactions_200_response';
   items: Array<Maybe<Query_Transactions_Items_Items>>;
   totalCount: Scalars['Float']['output'];
-};
-
-export type Transfer = {
-  __typename?: 'transfer';
-  amount: Scalars['BigInt']['output'];
-  daoId: Scalars['String']['output'];
-  from?: Maybe<Account>;
-  fromAccountId: Scalars['String']['output'];
-  isCex: Scalars['Boolean']['output'];
-  isDex: Scalars['Boolean']['output'];
-  isLending: Scalars['Boolean']['output'];
-  isTotal: Scalars['Boolean']['output'];
-  logIndex: Scalars['Int']['output'];
-  timestamp: Scalars['BigInt']['output'];
-  to?: Maybe<Account>;
-  toAccountId: Scalars['String']['output'];
-  token?: Maybe<Token>;
-  tokenId: Scalars['String']['output'];
-  transaction?: Maybe<Transaction>;
-  transactionHash: Scalars['String']['output'];
-};
-
-export type TransferFilter = {
-  AND?: InputMaybe<Array<InputMaybe<TransferFilter>>>;
-  OR?: InputMaybe<Array<InputMaybe<TransferFilter>>>;
-  amount?: InputMaybe<Scalars['BigInt']['input']>;
-  amount_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  amount_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  amount_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  amount_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  amount_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  amount_not?: InputMaybe<Scalars['BigInt']['input']>;
-  amount_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  daoId?: InputMaybe<Scalars['String']['input']>;
-  daoId_contains?: InputMaybe<Scalars['String']['input']>;
-  daoId_ends_with?: InputMaybe<Scalars['String']['input']>;
-  daoId_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  daoId_not?: InputMaybe<Scalars['String']['input']>;
-  daoId_not_contains?: InputMaybe<Scalars['String']['input']>;
-  daoId_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  daoId_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  daoId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  daoId_starts_with?: InputMaybe<Scalars['String']['input']>;
-  fromAccountId?: InputMaybe<Scalars['String']['input']>;
-  fromAccountId_contains?: InputMaybe<Scalars['String']['input']>;
-  fromAccountId_ends_with?: InputMaybe<Scalars['String']['input']>;
-  fromAccountId_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  fromAccountId_not?: InputMaybe<Scalars['String']['input']>;
-  fromAccountId_not_contains?: InputMaybe<Scalars['String']['input']>;
-  fromAccountId_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  fromAccountId_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  fromAccountId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  fromAccountId_starts_with?: InputMaybe<Scalars['String']['input']>;
-  isCex?: InputMaybe<Scalars['Boolean']['input']>;
-  isCex_in?: InputMaybe<Array<InputMaybe<Scalars['Boolean']['input']>>>;
-  isCex_not?: InputMaybe<Scalars['Boolean']['input']>;
-  isCex_not_in?: InputMaybe<Array<InputMaybe<Scalars['Boolean']['input']>>>;
-  isDex?: InputMaybe<Scalars['Boolean']['input']>;
-  isDex_in?: InputMaybe<Array<InputMaybe<Scalars['Boolean']['input']>>>;
-  isDex_not?: InputMaybe<Scalars['Boolean']['input']>;
-  isDex_not_in?: InputMaybe<Array<InputMaybe<Scalars['Boolean']['input']>>>;
-  isLending?: InputMaybe<Scalars['Boolean']['input']>;
-  isLending_in?: InputMaybe<Array<InputMaybe<Scalars['Boolean']['input']>>>;
-  isLending_not?: InputMaybe<Scalars['Boolean']['input']>;
-  isLending_not_in?: InputMaybe<Array<InputMaybe<Scalars['Boolean']['input']>>>;
-  isTotal?: InputMaybe<Scalars['Boolean']['input']>;
-  isTotal_in?: InputMaybe<Array<InputMaybe<Scalars['Boolean']['input']>>>;
-  isTotal_not?: InputMaybe<Scalars['Boolean']['input']>;
-  isTotal_not_in?: InputMaybe<Array<InputMaybe<Scalars['Boolean']['input']>>>;
-  logIndex?: InputMaybe<Scalars['Int']['input']>;
-  logIndex_gt?: InputMaybe<Scalars['Int']['input']>;
-  logIndex_gte?: InputMaybe<Scalars['Int']['input']>;
-  logIndex_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
-  logIndex_lt?: InputMaybe<Scalars['Int']['input']>;
-  logIndex_lte?: InputMaybe<Scalars['Int']['input']>;
-  logIndex_not?: InputMaybe<Scalars['Int']['input']>;
-  logIndex_not_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
-  timestamp?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_not?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  toAccountId?: InputMaybe<Scalars['String']['input']>;
-  toAccountId_contains?: InputMaybe<Scalars['String']['input']>;
-  toAccountId_ends_with?: InputMaybe<Scalars['String']['input']>;
-  toAccountId_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  toAccountId_not?: InputMaybe<Scalars['String']['input']>;
-  toAccountId_not_contains?: InputMaybe<Scalars['String']['input']>;
-  toAccountId_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  toAccountId_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  toAccountId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  toAccountId_starts_with?: InputMaybe<Scalars['String']['input']>;
-  tokenId?: InputMaybe<Scalars['String']['input']>;
-  tokenId_contains?: InputMaybe<Scalars['String']['input']>;
-  tokenId_ends_with?: InputMaybe<Scalars['String']['input']>;
-  tokenId_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  tokenId_not?: InputMaybe<Scalars['String']['input']>;
-  tokenId_not_contains?: InputMaybe<Scalars['String']['input']>;
-  tokenId_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  tokenId_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  tokenId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  tokenId_starts_with?: InputMaybe<Scalars['String']['input']>;
-  transactionHash?: InputMaybe<Scalars['String']['input']>;
-  transactionHash_contains?: InputMaybe<Scalars['String']['input']>;
-  transactionHash_ends_with?: InputMaybe<Scalars['String']['input']>;
-  transactionHash_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  transactionHash_not?: InputMaybe<Scalars['String']['input']>;
-  transactionHash_not_contains?: InputMaybe<Scalars['String']['input']>;
-  transactionHash_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  transactionHash_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  transactionHash_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  transactionHash_starts_with?: InputMaybe<Scalars['String']['input']>;
-};
-
-export type TransferPage = {
-  __typename?: 'transferPage';
-  items: Array<Transfer>;
-  pageInfo: PageInfo;
-  totalCount: Scalars['Int']['output'];
 };
 
 export type Transfers_200_Response = {
@@ -2314,106 +1464,16 @@ export type Transfers_200_Response = {
   totalCount: Scalars['Float']['output'];
 };
 
-export type VotesOnchain = {
-  __typename?: 'votesOnchain';
-  daoId: Scalars['String']['output'];
-  proposal?: Maybe<ProposalsOnchain>;
-  proposalId: Scalars['String']['output'];
-  reason?: Maybe<Scalars['String']['output']>;
-  support: Scalars['String']['output'];
-  timestamp: Scalars['BigInt']['output'];
-  txHash: Scalars['String']['output'];
-  voter?: Maybe<Account>;
-  voterAccountId: Scalars['String']['output'];
-  votingPower: Scalars['BigInt']['output'];
+export type VotesByProposalId_200_Response = {
+  __typename?: 'votesByProposalId_200_response';
+  items: Array<Maybe<Query_VotesByProposalId_Items_Items>>;
+  totalCount: Scalars['Float']['output'];
 };
 
-export type VotesOnchainFilter = {
-  AND?: InputMaybe<Array<InputMaybe<VotesOnchainFilter>>>;
-  OR?: InputMaybe<Array<InputMaybe<VotesOnchainFilter>>>;
-  daoId?: InputMaybe<Scalars['String']['input']>;
-  daoId_contains?: InputMaybe<Scalars['String']['input']>;
-  daoId_ends_with?: InputMaybe<Scalars['String']['input']>;
-  daoId_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  daoId_not?: InputMaybe<Scalars['String']['input']>;
-  daoId_not_contains?: InputMaybe<Scalars['String']['input']>;
-  daoId_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  daoId_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  daoId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  daoId_starts_with?: InputMaybe<Scalars['String']['input']>;
-  proposalId?: InputMaybe<Scalars['String']['input']>;
-  proposalId_contains?: InputMaybe<Scalars['String']['input']>;
-  proposalId_ends_with?: InputMaybe<Scalars['String']['input']>;
-  proposalId_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  proposalId_not?: InputMaybe<Scalars['String']['input']>;
-  proposalId_not_contains?: InputMaybe<Scalars['String']['input']>;
-  proposalId_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  proposalId_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  proposalId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  proposalId_starts_with?: InputMaybe<Scalars['String']['input']>;
-  reason?: InputMaybe<Scalars['String']['input']>;
-  reason_contains?: InputMaybe<Scalars['String']['input']>;
-  reason_ends_with?: InputMaybe<Scalars['String']['input']>;
-  reason_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  reason_not?: InputMaybe<Scalars['String']['input']>;
-  reason_not_contains?: InputMaybe<Scalars['String']['input']>;
-  reason_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  reason_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  reason_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  reason_starts_with?: InputMaybe<Scalars['String']['input']>;
-  support?: InputMaybe<Scalars['String']['input']>;
-  support_contains?: InputMaybe<Scalars['String']['input']>;
-  support_ends_with?: InputMaybe<Scalars['String']['input']>;
-  support_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  support_not?: InputMaybe<Scalars['String']['input']>;
-  support_not_contains?: InputMaybe<Scalars['String']['input']>;
-  support_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  support_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  support_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  support_starts_with?: InputMaybe<Scalars['String']['input']>;
-  timestamp?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_not?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  txHash?: InputMaybe<Scalars['String']['input']>;
-  txHash_contains?: InputMaybe<Scalars['String']['input']>;
-  txHash_ends_with?: InputMaybe<Scalars['String']['input']>;
-  txHash_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  txHash_not?: InputMaybe<Scalars['String']['input']>;
-  txHash_not_contains?: InputMaybe<Scalars['String']['input']>;
-  txHash_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  txHash_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  txHash_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  txHash_starts_with?: InputMaybe<Scalars['String']['input']>;
-  voterAccountId?: InputMaybe<Scalars['String']['input']>;
-  voterAccountId_contains?: InputMaybe<Scalars['String']['input']>;
-  voterAccountId_ends_with?: InputMaybe<Scalars['String']['input']>;
-  voterAccountId_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  voterAccountId_not?: InputMaybe<Scalars['String']['input']>;
-  voterAccountId_not_contains?: InputMaybe<Scalars['String']['input']>;
-  voterAccountId_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  voterAccountId_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  voterAccountId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  voterAccountId_starts_with?: InputMaybe<Scalars['String']['input']>;
-  votingPower?: InputMaybe<Scalars['BigInt']['input']>;
-  votingPower_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  votingPower_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  votingPower_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  votingPower_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  votingPower_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  votingPower_not?: InputMaybe<Scalars['BigInt']['input']>;
-  votingPower_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-};
-
-export type VotesOnchainPage = {
-  __typename?: 'votesOnchainPage';
-  items: Array<VotesOnchain>;
-  pageInfo: PageInfo;
-  totalCount: Scalars['Int']['output'];
+export type Votes_200_Response = {
+  __typename?: 'votes_200_response';
+  items: Array<Maybe<Query_Votes_Items_Items>>;
+  totalCount: Scalars['Float']['output'];
 };
 
 export type VotingPowerByAccountId_200_Response = {
@@ -2423,103 +1483,6 @@ export type VotingPowerByAccountId_200_Response = {
   proposalsCount: Scalars['Float']['output'];
   votesCount: Scalars['Float']['output'];
   votingPower: Scalars['String']['output'];
-};
-
-export type VotingPowerHistory = {
-  __typename?: 'votingPowerHistory';
-  account?: Maybe<Account>;
-  accountId: Scalars['String']['output'];
-  daoId: Scalars['String']['output'];
-  delegation?: Maybe<Delegation>;
-  delta: Scalars['BigInt']['output'];
-  deltaMod: Scalars['BigInt']['output'];
-  logIndex: Scalars['Int']['output'];
-  timestamp: Scalars['BigInt']['output'];
-  transactionHash: Scalars['String']['output'];
-  transfer?: Maybe<Transfer>;
-  votingPower: Scalars['BigInt']['output'];
-};
-
-export type VotingPowerHistoryFilter = {
-  AND?: InputMaybe<Array<InputMaybe<VotingPowerHistoryFilter>>>;
-  OR?: InputMaybe<Array<InputMaybe<VotingPowerHistoryFilter>>>;
-  accountId?: InputMaybe<Scalars['String']['input']>;
-  accountId_contains?: InputMaybe<Scalars['String']['input']>;
-  accountId_ends_with?: InputMaybe<Scalars['String']['input']>;
-  accountId_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  accountId_not?: InputMaybe<Scalars['String']['input']>;
-  accountId_not_contains?: InputMaybe<Scalars['String']['input']>;
-  accountId_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  accountId_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  accountId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  accountId_starts_with?: InputMaybe<Scalars['String']['input']>;
-  daoId?: InputMaybe<Scalars['String']['input']>;
-  daoId_contains?: InputMaybe<Scalars['String']['input']>;
-  daoId_ends_with?: InputMaybe<Scalars['String']['input']>;
-  daoId_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  daoId_not?: InputMaybe<Scalars['String']['input']>;
-  daoId_not_contains?: InputMaybe<Scalars['String']['input']>;
-  daoId_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  daoId_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  daoId_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  daoId_starts_with?: InputMaybe<Scalars['String']['input']>;
-  delta?: InputMaybe<Scalars['BigInt']['input']>;
-  deltaMod?: InputMaybe<Scalars['BigInt']['input']>;
-  deltaMod_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  deltaMod_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  deltaMod_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  deltaMod_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  deltaMod_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  deltaMod_not?: InputMaybe<Scalars['BigInt']['input']>;
-  deltaMod_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  delta_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  delta_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  delta_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  delta_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  delta_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  delta_not?: InputMaybe<Scalars['BigInt']['input']>;
-  delta_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  logIndex?: InputMaybe<Scalars['Int']['input']>;
-  logIndex_gt?: InputMaybe<Scalars['Int']['input']>;
-  logIndex_gte?: InputMaybe<Scalars['Int']['input']>;
-  logIndex_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
-  logIndex_lt?: InputMaybe<Scalars['Int']['input']>;
-  logIndex_lte?: InputMaybe<Scalars['Int']['input']>;
-  logIndex_not?: InputMaybe<Scalars['Int']['input']>;
-  logIndex_not_in?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
-  timestamp?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_not?: InputMaybe<Scalars['BigInt']['input']>;
-  timestamp_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  transactionHash?: InputMaybe<Scalars['String']['input']>;
-  transactionHash_contains?: InputMaybe<Scalars['String']['input']>;
-  transactionHash_ends_with?: InputMaybe<Scalars['String']['input']>;
-  transactionHash_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  transactionHash_not?: InputMaybe<Scalars['String']['input']>;
-  transactionHash_not_contains?: InputMaybe<Scalars['String']['input']>;
-  transactionHash_not_ends_with?: InputMaybe<Scalars['String']['input']>;
-  transactionHash_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  transactionHash_not_starts_with?: InputMaybe<Scalars['String']['input']>;
-  transactionHash_starts_with?: InputMaybe<Scalars['String']['input']>;
-  votingPower?: InputMaybe<Scalars['BigInt']['input']>;
-  votingPower_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  votingPower_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  votingPower_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-  votingPower_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  votingPower_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  votingPower_not?: InputMaybe<Scalars['BigInt']['input']>;
-  votingPower_not_in?: InputMaybe<Array<InputMaybe<Scalars['BigInt']['input']>>>;
-};
-
-export type VotingPowerHistoryPage = {
-  __typename?: 'votingPowerHistoryPage';
-  items: Array<VotingPowerHistory>;
-  pageInfo: PageInfo;
-  totalCount: Scalars['Int']['output'];
 };
 
 export type VotingPowerVariationsByAccountId_200_Response = {
@@ -2550,6 +1513,8 @@ export type BalanceHistoryQueryVariables = Exact<{
   to?: InputMaybe<Scalars['String']['input']>;
   fromValue?: InputMaybe<Scalars['String']['input']>;
   toValue?: InputMaybe<Scalars['String']['input']>;
+  fromDate?: InputMaybe<Scalars['Float']['input']>;
+  toDate?: InputMaybe<Scalars['Float']['input']>;
 }>;
 
 
@@ -2557,16 +1522,24 @@ export type BalanceHistoryQuery = { __typename?: 'Query', transfers?: { __typena
 
 export type BalanceHistoryGraphQueryVariables = Exact<{
   address: Scalars['String']['input'];
-  sortBy?: InputMaybe<QueryInput_Transfers_SortBy>;
-  sortOrder?: InputMaybe<QueryInput_Transfers_SortOrder>;
-  fromDate?: InputMaybe<Scalars['Float']['input']>;
+  orderBy?: InputMaybe<QueryInput_HistoricalBalances_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_HistoricalBalances_OrderDirection>;
+  fromDate?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type BalanceHistoryGraphQuery = { __typename?: 'Query', transfers?: { __typename?: 'transfers_200_response', items: Array<{ __typename?: 'query_transfers_items_items', timestamp: string, amount: string, fromAccountId: string, toAccountId: string, transactionHash: string, logIndex: number } | null> } | null };
+export type BalanceHistoryGraphQuery = { __typename?: 'Query', historicalBalances?: { __typename?: 'historicalBalances_200_response', items: Array<{ __typename?: 'query_historicalBalances_items_items', balance: string, logIndex: number, timestamp: string, transactionHash: string, transfer: { __typename?: 'query_historicalBalances_items_items_transfer', from: string, to: string, value: string } } | null> } | null };
+
+export type BalanceVariationsQueryVariables = Exact<{
+  addresses: Scalars['JSON']['input'];
+  fromDate: Scalars['String']['input'];
+}>;
+
+
+export type BalanceVariationsQuery = { __typename?: 'Query', accountBalanceVariations?: { __typename?: 'accountBalanceVariations_200_response', items: Array<{ __typename?: 'query_accountBalanceVariations_items_items', accountId: string, previousBalance: string, currentBalance: string, absoluteChange: string, percentageChange: string } | null> } | null };
 
 export type AccountBalanceVariationsQueryVariables = Exact<{
-  days: QueryInput_AccountBalanceVariations_Days;
+  fromDate: Scalars['String']['input'];
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
 }>;
 
@@ -2613,16 +1586,14 @@ export type GetDelegatorVotingPowerDetailsQueryVariables = Exact<{
 }>;
 
 
-export type GetDelegatorVotingPowerDetailsQuery = { __typename?: 'Query', votingPowerByAccountId?: { __typename?: 'votingPowerByAccountId_200_response', accountId: string, votingPower: string } | null, accountBalances?: { __typename?: 'accountBalances_200_response', items: Array<{ __typename?: 'query_accountBalances_items_items', accountId: string, balance: string } | null> } | null };
+export type GetDelegatorVotingPowerDetailsQuery = { __typename?: 'Query', votingPowerByAccountId?: { __typename?: 'votingPowerByAccountId_200_response', accountId: string, votingPower: string } | null, accountBalances?: { __typename?: 'accountBalances_200_response', totalCount: number, items: Array<{ __typename?: 'query_accountBalances_items_items', address: string, balance: string } | null> } | null };
 
 export type GetDelegationsTimestampQueryVariables = Exact<{
-  delegator: Array<Scalars['String']['input']> | Scalars['String']['input'];
   delegate: Scalars['String']['input'];
-  daoId: Scalars['String']['input'];
 }>;
 
 
-export type GetDelegationsTimestampQuery = { __typename?: 'Query', delegations: { __typename?: 'delegationPage', items: Array<{ __typename?: 'delegation', delegatorAccountId: string, timestamp: any }> } };
+export type GetDelegationsTimestampQuery = { __typename?: 'Query', delegations?: { __typename?: 'delegations_200_response', totalCount: number, items: Array<{ __typename?: 'query_delegations_items_items', delegatorAddress: string, delegateAddress: string, timestamp: string } | null> } | null };
 
 export type GetTopFiveDelegatorsQueryVariables = Exact<{
   delegates?: InputMaybe<Scalars['JSON']['input']>;
@@ -2630,7 +1601,7 @@ export type GetTopFiveDelegatorsQueryVariables = Exact<{
 }>;
 
 
-export type GetTopFiveDelegatorsQuery = { __typename?: 'Query', accountBalances?: { __typename?: 'accountBalances_200_response', items: Array<{ __typename?: 'query_accountBalances_items_items', accountId: string, balance: string } | null> } | null };
+export type GetTopFiveDelegatorsQuery = { __typename?: 'Query', accountBalances?: { __typename?: 'accountBalances_200_response', items: Array<{ __typename?: 'query_accountBalances_items_items', address: string, balance: string } | null> } | null };
 
 export type GetVotingPowerCountingQueryVariables = Exact<{
   delegates?: InputMaybe<Scalars['JSON']['input']>;
@@ -2643,12 +1614,12 @@ export type GetDelegateDelegationHistoryGraphQueryVariables = Exact<{
   accountId: Scalars['String']['input'];
   fromTimestamp?: InputMaybe<Scalars['String']['input']>;
   toTimestamp?: InputMaybe<Scalars['String']['input']>;
-  orderBy?: InputMaybe<QueryInput_HistoricalVotingPowers_OrderBy>;
-  orderDirection?: InputMaybe<QueryInput_HistoricalVotingPowers_OrderDirection>;
+  orderBy?: InputMaybe<QueryInput_HistoricalVotingPowerByAccountId_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_HistoricalVotingPowerByAccountId_OrderDirection>;
 }>;
 
 
-export type GetDelegateDelegationHistoryGraphQuery = { __typename?: 'Query', historicalVotingPowers?: { __typename?: 'historicalVotingPowers_200_response', totalCount: number, items: Array<{ __typename?: 'query_historicalVotingPowers_items_items', delta: string, transactionHash: string, timestamp: string, votingPower: string, delegation?: { __typename?: 'query_historicalVotingPowers_items_items_delegation', from: string, previousDelegate?: string | null, to: string, value: string } | null, transfer?: { __typename?: 'query_historicalVotingPowers_items_items_transfer', from: string, to: string, value: string } | null } | null> } | null };
+export type GetDelegateDelegationHistoryGraphQuery = { __typename?: 'Query', historicalVotingPowerByAccountId?: { __typename?: 'historicalVotingPowerByAccountId_200_response', totalCount: number, items: Array<{ __typename?: 'query_historicalVotingPowerByAccountId_items_items', delta: string, transactionHash: string, timestamp: string, votingPower: string, delegation?: { __typename?: 'query_historicalVotingPowerByAccountId_items_items_delegation', from: string, previousDelegate?: string | null, to: string, value: string } | null, transfer?: { __typename?: 'query_historicalVotingPowerByAccountId_items_items_transfer', from: string, to: string, value: string } | null } | null> } | null };
 
 export type GetDelegatedSupplyHistoryQueryVariables = Exact<{
   startDate: Scalars['String']['input'];
@@ -2666,7 +1637,7 @@ export type GetHistoricalVotingAndActivityQueryVariables = Exact<{
 }>;
 
 
-export type GetHistoricalVotingAndActivityQuery = { __typename?: 'Query', votingPowerVariations?: { __typename?: 'votingPowerVariations_200_response', items: Array<{ __typename?: 'query_votingPowerVariations_items_items', accountId: string, previousVotingPower: string, currentVotingPower: string, percentageChange: string, absoluteChange: string } | null> } | null, proposalsActivity?: { __typename?: 'proposalsActivity_200_response', totalProposals: number, votedProposals: number, neverVoted: boolean } | null };
+export type GetHistoricalVotingAndActivityQuery = { __typename?: 'Query', votingPowerVariations?: { __typename?: 'votingPowerVariations_200_response', items: Array<{ __typename?: 'query_votingPowerVariations_items_items', accountId: string, previousVotingPower: string, currentVotingPower: string, percentageChange: string, absoluteChange: string } | null> } | null, proposalsActivity?: { __typename?: 'proposalsActivity_200_response', totalProposals: number, votedProposals: number, neverVoted: boolean, avgTimeBeforeEnd: number } | null };
 
 export type GetDelegateProposalsActivityQueryVariables = Exact<{
   address: Scalars['String']['input'];
@@ -2674,7 +1645,7 @@ export type GetDelegateProposalsActivityQueryVariables = Exact<{
 }>;
 
 
-export type GetDelegateProposalsActivityQuery = { __typename?: 'Query', proposalsActivity?: { __typename?: 'proposalsActivity_200_response', address: string, totalProposals: number, votedProposals: number, neverVoted: boolean } | null };
+export type GetDelegateProposalsActivityQuery = { __typename?: 'Query', proposalsActivity?: { __typename?: 'proposalsActivity_200_response', address: string, totalProposals: number, votedProposals: number, neverVoted: boolean, avgTimeBeforeEnd: number } | null };
 
 export type GetProposalsFromDaoQueryVariables = Exact<{
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
@@ -2694,24 +1665,16 @@ export type GetProposalQueryVariables = Exact<{
 
 export type GetProposalQuery = { __typename?: 'Query', proposal?: { __typename?: 'proposal_200_response', id: string, daoId: string, txHash: string, proposerAccountId: string, title: string, description: string, quorum: string, timestamp: string, status: string, forVotes: string, againstVotes: string, abstainVotes: string, startTimestamp: string, endTimestamp: string, calldatas: Array<string | null>, targets: Array<string | null>, values: Array<string | null> } | null };
 
-export type GetVotesOnchainsQueryVariables = Exact<{
-  proposalId?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
+export type GetVotesQueryVariables = Exact<{
+  proposalId: Scalars['String']['input'];
+  limit?: InputMaybe<Scalars['Float']['input']>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  orderBy?: InputMaybe<QueryInput_VotesByProposalId_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_VotesByProposalId_OrderDirection>;
 }>;
 
 
-export type GetVotesOnchainsQuery = { __typename?: 'Query', votesOnchains: { __typename?: 'votesOnchainPage', totalCount: number, pageInfo: { __typename?: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, items: Array<{ __typename?: 'votesOnchain', voterAccountId: string, txHash: string, daoId: string, proposalId: string, support: string, votingPower: any, reason?: string | null, timestamp: any }> } };
-
-export type GetVotesOnchainsTotalCountQueryVariables = Exact<{
-  proposalId?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type GetVotesOnchainsTotalCountQuery = { __typename?: 'Query', votesOnchains: { __typename?: 'votesOnchainPage', totalCount: number } };
+export type GetVotesQuery = { __typename?: 'Query', votesByProposalId?: { __typename?: 'votesByProposalId_200_response', totalCount: number, items: Array<{ __typename?: 'query_votesByProposalId_items_items', voterAddress: string, transactionHash: string, proposalId: string, support: number, votingPower: string, reason?: string | null, timestamp: number } | null> } | null };
 
 export type GetVotingPowerChangeQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];
@@ -2734,32 +1697,42 @@ export type GetProposalNonVotersQuery = { __typename?: 'Query', proposalNonVoter
 
 export type GetAccountPowerQueryVariables = Exact<{
   address: Scalars['String']['input'];
+  addresses: Scalars['JSON']['input'];
   proposalId: Scalars['String']['input'];
 }>;
 
 
-export type GetAccountPowerQuery = { __typename?: 'Query', votingPowerByAccountId?: { __typename?: 'votingPowerByAccountId_200_response', accountId: string, votingPower: string } | null, votesOnchain?: { __typename?: 'votesOnchain', support: string, votingPower: any, reason?: string | null, timestamp: any, txHash: string, daoId: string } | null };
+export type GetAccountPowerQuery = { __typename?: 'Query', votingPowerByAccountId?: { __typename?: 'votingPowerByAccountId_200_response', accountId: string, votingPower: string } | null, votesByProposalId?: { __typename?: 'votesByProposalId_200_response', totalCount: number, items: Array<{ __typename?: 'query_votesByProposalId_items_items', support: number, votingPower: string, reason?: string | null, timestamp: number, transactionHash: string } | null> } | null };
 
-export type GetHistoricalBalancesQueryVariables = Exact<{
-  addresses: Scalars['JSON']['input'];
-  days: QueryInput_HistoricalBalances_Days;
+export type HistoricalVotingPowerQueryVariables = Exact<{
+  address?: InputMaybe<Scalars['String']['input']>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<QueryInput_HistoricalVotingPower_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_HistoricalVotingPower_OrderDirection>;
+  toValue?: InputMaybe<Scalars['String']['input']>;
+  fromValue?: InputMaybe<Scalars['String']['input']>;
+  fromDate?: InputMaybe<Scalars['String']['input']>;
+  toDate?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type GetHistoricalBalancesQuery = { __typename?: 'Query', historicalBalances?: Array<{ __typename?: 'query_historicalBalances_items', address: string, balance: string, blockNumber: number, tokenAddress: string } | null> | null };
+export type HistoricalVotingPowerQuery = { __typename?: 'Query', historicalVotingPower?: { __typename?: 'historicalVotingPower_200_response', totalCount: number, items: Array<{ __typename?: 'query_historicalVotingPower_items_items', accountId: string, votingPower: string, transactionHash: string, timestamp: string, logIndex: number, delta: string, transfer?: { __typename?: 'query_historicalVotingPower_items_items_transfer', value: string, to: string, from: string } | null, delegation?: { __typename?: 'query_historicalVotingPower_items_items_delegation', from: string, to: string, value: string } | null } | null> } | null };
 
-export type HistoricalVotingPowersQueryVariables = Exact<{
+export type HistoricalVotingPowerByAccountQueryVariables = Exact<{
   account: Scalars['String']['input'];
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
-  orderBy?: InputMaybe<QueryInput_HistoricalVotingPowers_OrderBy>;
-  orderDirection?: InputMaybe<QueryInput_HistoricalVotingPowers_OrderDirection>;
+  orderBy?: InputMaybe<QueryInput_HistoricalVotingPowerByAccountId_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_HistoricalVotingPowerByAccountId_OrderDirection>;
   toValue?: InputMaybe<Scalars['String']['input']>;
   fromValue?: InputMaybe<Scalars['String']['input']>;
+  fromDate?: InputMaybe<Scalars['String']['input']>;
+  toDate?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type HistoricalVotingPowersQuery = { __typename?: 'Query', historicalVotingPowers?: { __typename?: 'historicalVotingPowers_200_response', totalCount: number, items: Array<{ __typename?: 'query_historicalVotingPowers_items_items', accountId: string, votingPower: string, transactionHash: string, timestamp: string, logIndex: number, delta: string, transfer?: { __typename?: 'query_historicalVotingPowers_items_items_transfer', value: string, to: string, from: string } | null, delegation?: { __typename?: 'query_historicalVotingPowers_items_items_delegation', from: string, to: string, value: string } | null } | null> } | null };
+export type HistoricalVotingPowerByAccountQuery = { __typename?: 'Query', historicalVotingPowerByAccountId?: { __typename?: 'historicalVotingPowerByAccountId_200_response', totalCount: number, items: Array<{ __typename?: 'query_historicalVotingPowerByAccountId_items_items', accountId: string, votingPower: string, transactionHash: string, timestamp: string, logIndex: number, delta: string, transfer?: { __typename?: 'query_historicalVotingPowerByAccountId_items_items_transfer', value: string, to: string, from: string } | null, delegation?: { __typename?: 'query_historicalVotingPowerByAccountId_items_items_delegation', from: string, to: string, value: string } | null } | null> } | null };
 
 export type GetProposalsActivityQueryVariables = Exact<{
   address: Scalars['String']['input'];
@@ -2772,7 +1745,7 @@ export type GetProposalsActivityQueryVariables = Exact<{
 }>;
 
 
-export type GetProposalsActivityQuery = { __typename?: 'Query', proposalsActivity?: { __typename?: 'proposalsActivity_200_response', totalProposals: number, votedProposals: number, neverVoted: boolean, winRate: number, yesRate: number, avgTimeBeforeEnd: number, proposals: Array<{ __typename?: 'query_proposalsActivity_proposals_items', proposal: { __typename?: 'query_proposalsActivity_proposals_items_proposal', id: string, description?: string | null, startBlock: number, endBlock: number, status: string, againstVotes: string, forVotes: string, abstainVotes: string, timestamp: string, proposerAccountId: string, daoId: string }, userVote?: { __typename?: 'query_proposalsActivity_proposals_items_userVote', id: string, support?: string | null, votingPower?: string | null, reason?: string | null, timestamp: string, proposalId: string, voterAccountId: string } | null } | null> } | null };
+export type GetProposalsActivityQuery = { __typename?: 'Query', proposalsActivity?: { __typename?: 'proposalsActivity_200_response', totalProposals: number, votedProposals: number, neverVoted: boolean, winRate: number, yesRate: number, avgTimeBeforeEnd: number, proposals: Array<{ __typename?: 'query_proposalsActivity_proposals_items', proposal: { __typename?: 'query_proposalsActivity_proposals_items_proposal', id: string, description?: string | null, startBlock: number, endBlock: number, status: string, againstVotes: string, forVotes: string, abstainVotes: string, timestamp?: string | null, proposerAccountId: string, daoId: string }, userVote?: { __typename?: 'query_proposalsActivity_proposals_items_userVote', id: string, support?: string | null, votingPower: string, reason?: string | null, timestamp?: string | null, proposalId: string, voterAccountId: string } | null } | null> } | null };
 
 export type GetProposalsQueryVariables = Exact<{
   fromDate?: InputMaybe<Scalars['Float']['input']>;
@@ -2785,13 +1758,14 @@ export type GetProposalsQuery = { __typename?: 'Query', proposals?: { __typename
 export type GetDaoAddressesAccountBalancesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetDaoAddressesAccountBalancesQuery = { __typename?: 'Query', accountBalances?: { __typename?: 'accountBalances_200_response', items: Array<{ __typename?: 'query_accountBalances_items_items', accountId: string, balance: string } | null> } | null };
+export type GetDaoAddressesAccountBalancesQuery = { __typename?: 'Query', accountBalances?: { __typename?: 'accountBalances_200_response', items: Array<{ __typename?: 'query_accountBalances_items_items', address: string, balance: string } | null> } | null };
 
 export type GetAccountInteractionsQueryVariables = Exact<{
   address: Scalars['String']['input'];
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   maxAmount?: InputMaybe<Scalars['String']['input']>;
   minAmount?: InputMaybe<Scalars['String']['input']>;
+  orderBy?: InputMaybe<QueryInput_AccountInteractions_OrderBy>;
   orderDirection?: InputMaybe<QueryInput_AccountInteractions_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   filterAddress?: InputMaybe<Scalars['String']['input']>;
@@ -2800,27 +1774,18 @@ export type GetAccountInteractionsQueryVariables = Exact<{
 
 export type GetAccountInteractionsQuery = { __typename?: 'Query', accountInteractions?: { __typename?: 'accountInteractions_200_response', totalCount: number, items: Array<{ __typename?: 'query_accountInteractions_items_items', accountId: string, amountTransferred: string, totalVolume: string, transferCount: string } | null> } | null };
 
-export type GetDelegationHistoryCountQueryVariables = Exact<{
-  delegator: Scalars['String']['input'];
-}>;
-
-
-export type GetDelegationHistoryCountQuery = { __typename?: 'Query', delegations: { __typename?: 'delegationPage', totalCount: number } };
-
 export type GetDelegationHistoryItemsQueryVariables = Exact<{
   delegator: Scalars['String']['input'];
-  delegate?: InputMaybe<Scalars['String']['input']>;
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  orderDirection?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  fromValue?: InputMaybe<Scalars['BigInt']['input']>;
-  toValue?: InputMaybe<Scalars['BigInt']['input']>;
+  delegate?: InputMaybe<Scalars['JSON']['input']>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  fromValue?: InputMaybe<Scalars['String']['input']>;
+  toValue?: InputMaybe<Scalars['String']['input']>;
+  orderDirection?: InputMaybe<QueryInput_HistoricalDelegations_OrderDirection>;
 }>;
 
 
-export type GetDelegationHistoryItemsQuery = { __typename?: 'Query', delegations: { __typename?: 'delegationPage', items: Array<{ __typename?: 'delegation', delegateAccountId: string, delegatedValue: any, timestamp: any, transactionHash: string }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null } } };
+export type GetDelegationHistoryItemsQuery = { __typename?: 'Query', historicalDelegations?: { __typename?: 'historicalDelegations_200_response', totalCount: number, items: Array<{ __typename?: 'query_historicalDelegations_items_items', delegatorAddress: string, delegateAddress: string, amount: string, timestamp: string, transactionHash: string } | null> } | null };
 
 export type GetTopTokenHoldersQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
@@ -2830,7 +1795,7 @@ export type GetTopTokenHoldersQueryVariables = Exact<{
 }>;
 
 
-export type GetTopTokenHoldersQuery = { __typename?: 'Query', accountBalances?: { __typename?: 'accountBalances_200_response', totalCount: number, items: Array<{ __typename?: 'query_accountBalances_items_items', accountId: string, balance: string, delegate: string, tokenId: string } | null> } | null };
+export type GetTopTokenHoldersQuery = { __typename?: 'Query', accountBalances?: { __typename?: 'accountBalances_200_response', totalCount: number, items: Array<{ __typename?: 'query_accountBalances_items_items', address: string, balance: string, delegate: string, tokenId: string } | null> } | null };
 
 export type TokenInfoQueryVariables = Exact<{
   currency?: InputMaybe<QueryInput_Token_Currency>;
@@ -2858,7 +1823,7 @@ export type TransactionsQuery = { __typename?: 'Query', transactions?: { __typen
 
 
 export const BalanceHistoryDocument = gql`
-    query BalanceHistory($address: String!, $offset: Float = 0, $limit: Float = 10, $sortBy: queryInput_transfers_sortBy, $sortOrder: queryInput_transfers_sortOrder, $from: String, $to: String, $fromValue: String, $toValue: String) {
+    query BalanceHistory($address: String!, $offset: Float = 0, $limit: Float = 10, $sortBy: queryInput_transfers_sortBy, $sortOrder: queryInput_transfers_sortOrder, $from: String, $to: String, $fromValue: String, $toValue: String, $fromDate: Float, $toDate: Float) {
   transfers(
     address: $address
     sortBy: $sortBy
@@ -2869,6 +1834,8 @@ export const BalanceHistoryDocument = gql`
     to: $to
     fromValue: $fromValue
     toValue: $toValue
+    fromDate: $fromDate
+    toDate: $toDate
   ) {
     items {
       timestamp
@@ -2903,6 +1870,8 @@ export const BalanceHistoryDocument = gql`
  *      to: // value for 'to'
  *      fromValue: // value for 'fromValue'
  *      toValue: // value for 'toValue'
+ *      fromDate: // value for 'fromDate'
+ *      toDate: // value for 'toDate'
  *   },
  * });
  */
@@ -2923,21 +1892,24 @@ export type BalanceHistoryLazyQueryHookResult = ReturnType<typeof useBalanceHist
 export type BalanceHistorySuspenseQueryHookResult = ReturnType<typeof useBalanceHistorySuspenseQuery>;
 export type BalanceHistoryQueryResult = Apollo.QueryResult<BalanceHistoryQuery, BalanceHistoryQueryVariables>;
 export const BalanceHistoryGraphDocument = gql`
-    query BalanceHistoryGraph($address: String!, $sortBy: queryInput_transfers_sortBy, $sortOrder: queryInput_transfers_sortOrder, $fromDate: Float) {
-  transfers(
+    query BalanceHistoryGraph($address: String!, $orderBy: queryInput_historicalBalances_orderBy, $orderDirection: queryInput_historicalBalances_orderDirection, $fromDate: String) {
+  historicalBalances(
     address: $address
     fromDate: $fromDate
-    sortBy: $sortBy
-    sortOrder: $sortOrder
+    orderBy: $orderBy
+    orderDirection: $orderDirection
     limit: 1000
   ) {
     items {
-      timestamp
-      amount
-      fromAccountId
-      toAccountId
-      transactionHash
+      balance
       logIndex
+      timestamp
+      transactionHash
+      transfer {
+        from
+        to
+        value
+      }
     }
   }
 }
@@ -2956,8 +1928,8 @@ export const BalanceHistoryGraphDocument = gql`
  * const { data, loading, error } = useBalanceHistoryGraphQuery({
  *   variables: {
  *      address: // value for 'address'
- *      sortBy: // value for 'sortBy'
- *      sortOrder: // value for 'sortOrder'
+ *      orderBy: // value for 'orderBy'
+ *      orderDirection: // value for 'orderDirection'
  *      fromDate: // value for 'fromDate'
  *   },
  * });
@@ -2978,9 +1950,56 @@ export type BalanceHistoryGraphQueryHookResult = ReturnType<typeof useBalanceHis
 export type BalanceHistoryGraphLazyQueryHookResult = ReturnType<typeof useBalanceHistoryGraphLazyQuery>;
 export type BalanceHistoryGraphSuspenseQueryHookResult = ReturnType<typeof useBalanceHistoryGraphSuspenseQuery>;
 export type BalanceHistoryGraphQueryResult = Apollo.QueryResult<BalanceHistoryGraphQuery, BalanceHistoryGraphQueryVariables>;
+export const BalanceVariationsDocument = gql`
+    query BalanceVariations($addresses: JSON!, $fromDate: String!) {
+  accountBalanceVariations(addresses: $addresses, fromDate: $fromDate) {
+    items {
+      accountId
+      previousBalance
+      currentBalance
+      absoluteChange
+      percentageChange
+    }
+  }
+}
+    `;
+
+/**
+ * __useBalanceVariationsQuery__
+ *
+ * To run a query within a React component, call `useBalanceVariationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useBalanceVariationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useBalanceVariationsQuery({
+ *   variables: {
+ *      addresses: // value for 'addresses'
+ *      fromDate: // value for 'fromDate'
+ *   },
+ * });
+ */
+export function useBalanceVariationsQuery(baseOptions: Apollo.QueryHookOptions<BalanceVariationsQuery, BalanceVariationsQueryVariables> & ({ variables: BalanceVariationsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<BalanceVariationsQuery, BalanceVariationsQueryVariables>(BalanceVariationsDocument, options);
+      }
+export function useBalanceVariationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<BalanceVariationsQuery, BalanceVariationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<BalanceVariationsQuery, BalanceVariationsQueryVariables>(BalanceVariationsDocument, options);
+        }
+export function useBalanceVariationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<BalanceVariationsQuery, BalanceVariationsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<BalanceVariationsQuery, BalanceVariationsQueryVariables>(BalanceVariationsDocument, options);
+        }
+export type BalanceVariationsQueryHookResult = ReturnType<typeof useBalanceVariationsQuery>;
+export type BalanceVariationsLazyQueryHookResult = ReturnType<typeof useBalanceVariationsLazyQuery>;
+export type BalanceVariationsSuspenseQueryHookResult = ReturnType<typeof useBalanceVariationsSuspenseQuery>;
+export type BalanceVariationsQueryResult = Apollo.QueryResult<BalanceVariationsQuery, BalanceVariationsQueryVariables>;
 export const AccountBalanceVariationsDocument = gql`
-    query AccountBalanceVariations($days: queryInput_accountBalanceVariations_days!, $limit: PositiveInt = 10) {
-  accountBalanceVariations(days: $days, limit: $limit) {
+    query AccountBalanceVariations($fromDate: String!, $limit: PositiveInt = 10) {
+  accountBalanceVariations(fromDate: $fromDate, limit: $limit) {
     items {
       accountId
       previousBalance
@@ -3004,7 +2023,7 @@ export const AccountBalanceVariationsDocument = gql`
  * @example
  * const { data, loading, error } = useAccountBalanceVariationsQuery({
  *   variables: {
- *      days: // value for 'days'
+ *      fromDate: // value for 'fromDate'
  *      limit: // value for 'limit'
  *   },
  * });
@@ -3227,8 +2246,9 @@ export const GetDelegatorVotingPowerDetailsDocument = gql`
     skip: $skip
     delegates: $addresses
   ) {
+    totalCount
     items {
-      accountId
+      address
       balance
     }
   }
@@ -3272,14 +2292,14 @@ export type GetDelegatorVotingPowerDetailsLazyQueryHookResult = ReturnType<typeo
 export type GetDelegatorVotingPowerDetailsSuspenseQueryHookResult = ReturnType<typeof useGetDelegatorVotingPowerDetailsSuspenseQuery>;
 export type GetDelegatorVotingPowerDetailsQueryResult = Apollo.QueryResult<GetDelegatorVotingPowerDetailsQuery, GetDelegatorVotingPowerDetailsQueryVariables>;
 export const GetDelegationsTimestampDocument = gql`
-    query getDelegationsTimestamp($delegator: [String!]!, $delegate: String!, $daoId: String!) {
-  delegations(
-    where: {daoId: $daoId, delegatorAccountId_in: $delegator, delegateAccountId: $delegate}
-  ) {
+    query getDelegationsTimestamp($delegate: String!) {
+  delegations(address: $delegate) {
     items {
-      delegatorAccountId
+      delegatorAddress
+      delegateAddress
       timestamp
     }
+    totalCount
   }
 }
     `;
@@ -3296,9 +2316,7 @@ export const GetDelegationsTimestampDocument = gql`
  * @example
  * const { data, loading, error } = useGetDelegationsTimestampQuery({
  *   variables: {
- *      delegator: // value for 'delegator'
  *      delegate: // value for 'delegate'
- *      daoId: // value for 'daoId'
  *   },
  * });
  */
@@ -3327,7 +2345,7 @@ export const GetTopFiveDelegatorsDocument = gql`
     limit: $limit
   ) {
     items {
-      accountId
+      address
       balance
     }
   }
@@ -3408,9 +2426,9 @@ export type GetVotingPowerCountingLazyQueryHookResult = ReturnType<typeof useGet
 export type GetVotingPowerCountingSuspenseQueryHookResult = ReturnType<typeof useGetVotingPowerCountingSuspenseQuery>;
 export type GetVotingPowerCountingQueryResult = Apollo.QueryResult<GetVotingPowerCountingQuery, GetVotingPowerCountingQueryVariables>;
 export const GetDelegateDelegationHistoryGraphDocument = gql`
-    query GetDelegateDelegationHistoryGraph($accountId: String!, $fromTimestamp: String, $toTimestamp: String, $orderBy: queryInput_historicalVotingPowers_orderBy = timestamp, $orderDirection: queryInput_historicalVotingPowers_orderDirection = desc) {
-  historicalVotingPowers(
-    accountId: $accountId
+    query GetDelegateDelegationHistoryGraph($accountId: String!, $fromTimestamp: String, $toTimestamp: String, $orderBy: queryInput_historicalVotingPowerByAccountId_orderBy = timestamp, $orderDirection: queryInput_historicalVotingPowerByAccountId_orderDirection = desc) {
+  historicalVotingPowerByAccountId(
+    address: $accountId
     orderBy: $orderBy
     orderDirection: $orderDirection
     fromDate: $fromTimestamp
@@ -3542,6 +2560,7 @@ export const GetHistoricalVotingAndActivityDocument = gql`
     totalProposals
     votedProposals
     neverVoted
+    avgTimeBeforeEnd
   }
 }
     `;
@@ -3588,6 +2607,7 @@ export const GetDelegateProposalsActivityDocument = gql`
     totalProposals
     votedProposals
     neverVoted
+    avgTimeBeforeEnd
   }
 }
     `;
@@ -3748,27 +2768,19 @@ export type GetProposalQueryHookResult = ReturnType<typeof useGetProposalQuery>;
 export type GetProposalLazyQueryHookResult = ReturnType<typeof useGetProposalLazyQuery>;
 export type GetProposalSuspenseQueryHookResult = ReturnType<typeof useGetProposalSuspenseQuery>;
 export type GetProposalQueryResult = Apollo.QueryResult<GetProposalQuery, GetProposalQueryVariables>;
-export const GetVotesOnchainsDocument = gql`
-    query GetVotesOnchains($proposalId: String, $limit: Int, $after: String, $before: String, $orderBy: String = "timestamp", $orderDirection: String = "desc") {
-  votesOnchains(
+export const GetVotesDocument = gql`
+    query GetVotes($proposalId: String!, $limit: Float, $skip: NonNegativeInt, $orderBy: queryInput_votesByProposalId_orderBy = timestamp, $orderDirection: queryInput_votesByProposalId_orderDirection = desc) {
+  votesByProposalId(
     limit: $limit
-    after: $after
-    before: $before
-    where: {proposalId: $proposalId}
+    skip: $skip
+    id: $proposalId
     orderBy: $orderBy
     orderDirection: $orderDirection
   ) {
-    pageInfo {
-      startCursor
-      endCursor
-      hasNextPage
-      hasPreviousPage
-    }
     totalCount
     items {
-      voterAccountId
-      txHash
-      daoId
+      voterAddress
+      transactionHash
       proposalId
       support
       votingPower
@@ -3780,82 +2792,41 @@ export const GetVotesOnchainsDocument = gql`
     `;
 
 /**
- * __useGetVotesOnchainsQuery__
+ * __useGetVotesQuery__
  *
- * To run a query within a React component, call `useGetVotesOnchainsQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetVotesOnchainsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGetVotesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetVotesQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useGetVotesOnchainsQuery({
+ * const { data, loading, error } = useGetVotesQuery({
  *   variables: {
  *      proposalId: // value for 'proposalId'
  *      limit: // value for 'limit'
- *      after: // value for 'after'
- *      before: // value for 'before'
+ *      skip: // value for 'skip'
  *      orderBy: // value for 'orderBy'
  *      orderDirection: // value for 'orderDirection'
  *   },
  * });
  */
-export function useGetVotesOnchainsQuery(baseOptions?: Apollo.QueryHookOptions<GetVotesOnchainsQuery, GetVotesOnchainsQueryVariables>) {
+export function useGetVotesQuery(baseOptions: Apollo.QueryHookOptions<GetVotesQuery, GetVotesQueryVariables> & ({ variables: GetVotesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetVotesOnchainsQuery, GetVotesOnchainsQueryVariables>(GetVotesOnchainsDocument, options);
+        return Apollo.useQuery<GetVotesQuery, GetVotesQueryVariables>(GetVotesDocument, options);
       }
-export function useGetVotesOnchainsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetVotesOnchainsQuery, GetVotesOnchainsQueryVariables>) {
+export function useGetVotesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetVotesQuery, GetVotesQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetVotesOnchainsQuery, GetVotesOnchainsQueryVariables>(GetVotesOnchainsDocument, options);
+          return Apollo.useLazyQuery<GetVotesQuery, GetVotesQueryVariables>(GetVotesDocument, options);
         }
-export function useGetVotesOnchainsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetVotesOnchainsQuery, GetVotesOnchainsQueryVariables>) {
+export function useGetVotesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetVotesQuery, GetVotesQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetVotesOnchainsQuery, GetVotesOnchainsQueryVariables>(GetVotesOnchainsDocument, options);
+          return Apollo.useSuspenseQuery<GetVotesQuery, GetVotesQueryVariables>(GetVotesDocument, options);
         }
-export type GetVotesOnchainsQueryHookResult = ReturnType<typeof useGetVotesOnchainsQuery>;
-export type GetVotesOnchainsLazyQueryHookResult = ReturnType<typeof useGetVotesOnchainsLazyQuery>;
-export type GetVotesOnchainsSuspenseQueryHookResult = ReturnType<typeof useGetVotesOnchainsSuspenseQuery>;
-export type GetVotesOnchainsQueryResult = Apollo.QueryResult<GetVotesOnchainsQuery, GetVotesOnchainsQueryVariables>;
-export const GetVotesOnchainsTotalCountDocument = gql`
-    query GetVotesOnchainsTotalCount($proposalId: String) {
-  votesOnchains(where: {proposalId: $proposalId}) {
-    totalCount
-  }
-}
-    `;
-
-/**
- * __useGetVotesOnchainsTotalCountQuery__
- *
- * To run a query within a React component, call `useGetVotesOnchainsTotalCountQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetVotesOnchainsTotalCountQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetVotesOnchainsTotalCountQuery({
- *   variables: {
- *      proposalId: // value for 'proposalId'
- *   },
- * });
- */
-export function useGetVotesOnchainsTotalCountQuery(baseOptions?: Apollo.QueryHookOptions<GetVotesOnchainsTotalCountQuery, GetVotesOnchainsTotalCountQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetVotesOnchainsTotalCountQuery, GetVotesOnchainsTotalCountQueryVariables>(GetVotesOnchainsTotalCountDocument, options);
-      }
-export function useGetVotesOnchainsTotalCountLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetVotesOnchainsTotalCountQuery, GetVotesOnchainsTotalCountQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetVotesOnchainsTotalCountQuery, GetVotesOnchainsTotalCountQueryVariables>(GetVotesOnchainsTotalCountDocument, options);
-        }
-export function useGetVotesOnchainsTotalCountSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetVotesOnchainsTotalCountQuery, GetVotesOnchainsTotalCountQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetVotesOnchainsTotalCountQuery, GetVotesOnchainsTotalCountQueryVariables>(GetVotesOnchainsTotalCountDocument, options);
-        }
-export type GetVotesOnchainsTotalCountQueryHookResult = ReturnType<typeof useGetVotesOnchainsTotalCountQuery>;
-export type GetVotesOnchainsTotalCountLazyQueryHookResult = ReturnType<typeof useGetVotesOnchainsTotalCountLazyQuery>;
-export type GetVotesOnchainsTotalCountSuspenseQueryHookResult = ReturnType<typeof useGetVotesOnchainsTotalCountSuspenseQuery>;
-export type GetVotesOnchainsTotalCountQueryResult = Apollo.QueryResult<GetVotesOnchainsTotalCountQuery, GetVotesOnchainsTotalCountQueryVariables>;
+export type GetVotesQueryHookResult = ReturnType<typeof useGetVotesQuery>;
+export type GetVotesLazyQueryHookResult = ReturnType<typeof useGetVotesLazyQuery>;
+export type GetVotesSuspenseQueryHookResult = ReturnType<typeof useGetVotesSuspenseQuery>;
+export type GetVotesQueryResult = Apollo.QueryResult<GetVotesQuery, GetVotesQueryVariables>;
 export const GetVotingPowerChangeDocument = gql`
     query GetVotingPowerChange($addresses: JSON!, $fromDate: String!, $toDate: String!) {
   votingPowerVariations(
@@ -3963,18 +2934,20 @@ export type GetProposalNonVotersLazyQueryHookResult = ReturnType<typeof useGetPr
 export type GetProposalNonVotersSuspenseQueryHookResult = ReturnType<typeof useGetProposalNonVotersSuspenseQuery>;
 export type GetProposalNonVotersQueryResult = Apollo.QueryResult<GetProposalNonVotersQuery, GetProposalNonVotersQueryVariables>;
 export const GetAccountPowerDocument = gql`
-    query GetAccountPower($address: String!, $proposalId: String!) {
+    query GetAccountPower($address: String!, $addresses: JSON!, $proposalId: String!) {
   votingPowerByAccountId(accountId: $address) {
     accountId
     votingPower
   }
-  votesOnchain(proposalId: $proposalId, voterAccountId: $address) {
-    support
-    votingPower
-    reason
-    timestamp
-    txHash
-    daoId
+  votesByProposalId(id: $proposalId, voterAddressIn: $addresses) {
+    items {
+      support
+      votingPower
+      reason
+      timestamp
+      transactionHash
+    }
+    totalCount
   }
 }
     `;
@@ -3992,6 +2965,7 @@ export const GetAccountPowerDocument = gql`
  * const { data, loading, error } = useGetAccountPowerQuery({
  *   variables: {
  *      address: // value for 'address'
+ *      addresses: // value for 'addresses'
  *      proposalId: // value for 'proposalId'
  *   },
  * });
@@ -4012,60 +2986,18 @@ export type GetAccountPowerQueryHookResult = ReturnType<typeof useGetAccountPowe
 export type GetAccountPowerLazyQueryHookResult = ReturnType<typeof useGetAccountPowerLazyQuery>;
 export type GetAccountPowerSuspenseQueryHookResult = ReturnType<typeof useGetAccountPowerSuspenseQuery>;
 export type GetAccountPowerQueryResult = Apollo.QueryResult<GetAccountPowerQuery, GetAccountPowerQueryVariables>;
-export const GetHistoricalBalancesDocument = gql`
-    query getHistoricalBalances($addresses: JSON!, $days: queryInput_historicalBalances_days!) {
-  historicalBalances(addresses: $addresses, days: $days) {
-    address
-    balance
-    blockNumber
-    tokenAddress
-  }
-}
-    `;
-
-/**
- * __useGetHistoricalBalancesQuery__
- *
- * To run a query within a React component, call `useGetHistoricalBalancesQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetHistoricalBalancesQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetHistoricalBalancesQuery({
- *   variables: {
- *      addresses: // value for 'addresses'
- *      days: // value for 'days'
- *   },
- * });
- */
-export function useGetHistoricalBalancesQuery(baseOptions: Apollo.QueryHookOptions<GetHistoricalBalancesQuery, GetHistoricalBalancesQueryVariables> & ({ variables: GetHistoricalBalancesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetHistoricalBalancesQuery, GetHistoricalBalancesQueryVariables>(GetHistoricalBalancesDocument, options);
-      }
-export function useGetHistoricalBalancesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetHistoricalBalancesQuery, GetHistoricalBalancesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetHistoricalBalancesQuery, GetHistoricalBalancesQueryVariables>(GetHistoricalBalancesDocument, options);
-        }
-export function useGetHistoricalBalancesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetHistoricalBalancesQuery, GetHistoricalBalancesQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetHistoricalBalancesQuery, GetHistoricalBalancesQueryVariables>(GetHistoricalBalancesDocument, options);
-        }
-export type GetHistoricalBalancesQueryHookResult = ReturnType<typeof useGetHistoricalBalancesQuery>;
-export type GetHistoricalBalancesLazyQueryHookResult = ReturnType<typeof useGetHistoricalBalancesLazyQuery>;
-export type GetHistoricalBalancesSuspenseQueryHookResult = ReturnType<typeof useGetHistoricalBalancesSuspenseQuery>;
-export type GetHistoricalBalancesQueryResult = Apollo.QueryResult<GetHistoricalBalancesQuery, GetHistoricalBalancesQueryVariables>;
-export const HistoricalVotingPowersDocument = gql`
-    query HistoricalVotingPowers($account: String!, $skip: NonNegativeInt, $limit: PositiveInt = 10, $orderBy: queryInput_historicalVotingPowers_orderBy = timestamp, $orderDirection: queryInput_historicalVotingPowers_orderDirection = desc, $toValue: String, $fromValue: String) {
-  historicalVotingPowers(
-    accountId: $account
+export const HistoricalVotingPowerDocument = gql`
+    query HistoricalVotingPower($address: String, $skip: NonNegativeInt, $limit: PositiveInt = 10, $orderBy: queryInput_historicalVotingPower_orderBy = timestamp, $orderDirection: queryInput_historicalVotingPower_orderDirection = desc, $toValue: String, $fromValue: String, $fromDate: String, $toDate: String) {
+  historicalVotingPower(
+    address: $address
     skip: $skip
     orderBy: $orderBy
     orderDirection: $orderDirection
     limit: $limit
     toValue: $toValue
     fromValue: $fromValue
+    fromDate: $fromDate
+    toDate: $toDate
   ) {
     items {
       accountId
@@ -4091,16 +3023,92 @@ export const HistoricalVotingPowersDocument = gql`
     `;
 
 /**
- * __useHistoricalVotingPowersQuery__
+ * __useHistoricalVotingPowerQuery__
  *
- * To run a query within a React component, call `useHistoricalVotingPowersQuery` and pass it any options that fit your needs.
- * When your component renders, `useHistoricalVotingPowersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useHistoricalVotingPowerQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHistoricalVotingPowerQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useHistoricalVotingPowersQuery({
+ * const { data, loading, error } = useHistoricalVotingPowerQuery({
+ *   variables: {
+ *      address: // value for 'address'
+ *      skip: // value for 'skip'
+ *      limit: // value for 'limit'
+ *      orderBy: // value for 'orderBy'
+ *      orderDirection: // value for 'orderDirection'
+ *      toValue: // value for 'toValue'
+ *      fromValue: // value for 'fromValue'
+ *      fromDate: // value for 'fromDate'
+ *      toDate: // value for 'toDate'
+ *   },
+ * });
+ */
+export function useHistoricalVotingPowerQuery(baseOptions?: Apollo.QueryHookOptions<HistoricalVotingPowerQuery, HistoricalVotingPowerQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<HistoricalVotingPowerQuery, HistoricalVotingPowerQueryVariables>(HistoricalVotingPowerDocument, options);
+      }
+export function useHistoricalVotingPowerLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HistoricalVotingPowerQuery, HistoricalVotingPowerQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<HistoricalVotingPowerQuery, HistoricalVotingPowerQueryVariables>(HistoricalVotingPowerDocument, options);
+        }
+export function useHistoricalVotingPowerSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<HistoricalVotingPowerQuery, HistoricalVotingPowerQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<HistoricalVotingPowerQuery, HistoricalVotingPowerQueryVariables>(HistoricalVotingPowerDocument, options);
+        }
+export type HistoricalVotingPowerQueryHookResult = ReturnType<typeof useHistoricalVotingPowerQuery>;
+export type HistoricalVotingPowerLazyQueryHookResult = ReturnType<typeof useHistoricalVotingPowerLazyQuery>;
+export type HistoricalVotingPowerSuspenseQueryHookResult = ReturnType<typeof useHistoricalVotingPowerSuspenseQuery>;
+export type HistoricalVotingPowerQueryResult = Apollo.QueryResult<HistoricalVotingPowerQuery, HistoricalVotingPowerQueryVariables>;
+export const HistoricalVotingPowerByAccountDocument = gql`
+    query HistoricalVotingPowerByAccount($account: String!, $skip: NonNegativeInt, $limit: PositiveInt = 10, $orderBy: queryInput_historicalVotingPowerByAccountId_orderBy = timestamp, $orderDirection: queryInput_historicalVotingPowerByAccountId_orderDirection = desc, $toValue: String, $fromValue: String, $fromDate: String, $toDate: String) {
+  historicalVotingPowerByAccountId(
+    address: $account
+    skip: $skip
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+    limit: $limit
+    toValue: $toValue
+    fromValue: $fromValue
+    fromDate: $fromDate
+    toDate: $toDate
+  ) {
+    items {
+      accountId
+      votingPower
+      transfer {
+        value
+        to
+        from
+      }
+      transactionHash
+      timestamp
+      logIndex
+      delta
+      delegation {
+        from
+        to
+        value
+      }
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useHistoricalVotingPowerByAccountQuery__
+ *
+ * To run a query within a React component, call `useHistoricalVotingPowerByAccountQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHistoricalVotingPowerByAccountQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHistoricalVotingPowerByAccountQuery({
  *   variables: {
  *      account: // value for 'account'
  *      skip: // value for 'skip'
@@ -4109,25 +3117,27 @@ export const HistoricalVotingPowersDocument = gql`
  *      orderDirection: // value for 'orderDirection'
  *      toValue: // value for 'toValue'
  *      fromValue: // value for 'fromValue'
+ *      fromDate: // value for 'fromDate'
+ *      toDate: // value for 'toDate'
  *   },
  * });
  */
-export function useHistoricalVotingPowersQuery(baseOptions: Apollo.QueryHookOptions<HistoricalVotingPowersQuery, HistoricalVotingPowersQueryVariables> & ({ variables: HistoricalVotingPowersQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useHistoricalVotingPowerByAccountQuery(baseOptions: Apollo.QueryHookOptions<HistoricalVotingPowerByAccountQuery, HistoricalVotingPowerByAccountQueryVariables> & ({ variables: HistoricalVotingPowerByAccountQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<HistoricalVotingPowersQuery, HistoricalVotingPowersQueryVariables>(HistoricalVotingPowersDocument, options);
+        return Apollo.useQuery<HistoricalVotingPowerByAccountQuery, HistoricalVotingPowerByAccountQueryVariables>(HistoricalVotingPowerByAccountDocument, options);
       }
-export function useHistoricalVotingPowersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HistoricalVotingPowersQuery, HistoricalVotingPowersQueryVariables>) {
+export function useHistoricalVotingPowerByAccountLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HistoricalVotingPowerByAccountQuery, HistoricalVotingPowerByAccountQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<HistoricalVotingPowersQuery, HistoricalVotingPowersQueryVariables>(HistoricalVotingPowersDocument, options);
+          return Apollo.useLazyQuery<HistoricalVotingPowerByAccountQuery, HistoricalVotingPowerByAccountQueryVariables>(HistoricalVotingPowerByAccountDocument, options);
         }
-export function useHistoricalVotingPowersSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<HistoricalVotingPowersQuery, HistoricalVotingPowersQueryVariables>) {
+export function useHistoricalVotingPowerByAccountSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<HistoricalVotingPowerByAccountQuery, HistoricalVotingPowerByAccountQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<HistoricalVotingPowersQuery, HistoricalVotingPowersQueryVariables>(HistoricalVotingPowersDocument, options);
+          return Apollo.useSuspenseQuery<HistoricalVotingPowerByAccountQuery, HistoricalVotingPowerByAccountQueryVariables>(HistoricalVotingPowerByAccountDocument, options);
         }
-export type HistoricalVotingPowersQueryHookResult = ReturnType<typeof useHistoricalVotingPowersQuery>;
-export type HistoricalVotingPowersLazyQueryHookResult = ReturnType<typeof useHistoricalVotingPowersLazyQuery>;
-export type HistoricalVotingPowersSuspenseQueryHookResult = ReturnType<typeof useHistoricalVotingPowersSuspenseQuery>;
-export type HistoricalVotingPowersQueryResult = Apollo.QueryResult<HistoricalVotingPowersQuery, HistoricalVotingPowersQueryVariables>;
+export type HistoricalVotingPowerByAccountQueryHookResult = ReturnType<typeof useHistoricalVotingPowerByAccountQuery>;
+export type HistoricalVotingPowerByAccountLazyQueryHookResult = ReturnType<typeof useHistoricalVotingPowerByAccountLazyQuery>;
+export type HistoricalVotingPowerByAccountSuspenseQueryHookResult = ReturnType<typeof useHistoricalVotingPowerByAccountSuspenseQuery>;
+export type HistoricalVotingPowerByAccountQueryResult = Apollo.QueryResult<HistoricalVotingPowerByAccountQuery, HistoricalVotingPowerByAccountQueryVariables>;
 export const GetProposalsActivityDocument = gql`
     query GetProposalsActivity($address: String!, $fromDate: String, $skip: NonNegativeInt, $limit: PositiveInt, $orderBy: queryInput_proposalsActivity_orderBy, $orderDirection: queryInput_proposalsActivity_orderDirection, $userVoteFilter: queryInput_proposalsActivity_userVoteFilter) {
   proposalsActivity(
@@ -4260,7 +3270,7 @@ export const GetDaoAddressesAccountBalancesDocument = gql`
     query GetDaoAddressesAccountBalances {
   accountBalances(orderDirection: desc, limit: 1) {
     items {
-      accountId
+      address
       balance
     }
   }
@@ -4299,13 +3309,13 @@ export type GetDaoAddressesAccountBalancesLazyQueryHookResult = ReturnType<typeo
 export type GetDaoAddressesAccountBalancesSuspenseQueryHookResult = ReturnType<typeof useGetDaoAddressesAccountBalancesSuspenseQuery>;
 export type GetDaoAddressesAccountBalancesQueryResult = Apollo.QueryResult<GetDaoAddressesAccountBalancesQuery, GetDaoAddressesAccountBalancesQueryVariables>;
 export const GetAccountInteractionsDocument = gql`
-    query getAccountInteractions($address: String!, $limit: PositiveInt, $maxAmount: String, $minAmount: String, $orderDirection: queryInput_accountInteractions_orderDirection, $skip: NonNegativeInt, $filterAddress: String) {
+    query getAccountInteractions($address: String!, $limit: PositiveInt, $maxAmount: String, $minAmount: String, $orderBy: queryInput_accountInteractions_orderBy, $orderDirection: queryInput_accountInteractions_orderDirection, $skip: NonNegativeInt, $filterAddress: String) {
   accountInteractions(
     address: $address
-    days: _90d
     limit: $limit
     maxAmount: $maxAmount
     minAmount: $minAmount
+    orderBy: $orderBy
     orderDirection: $orderDirection
     skip: $skip
     filterAddress: $filterAddress
@@ -4337,6 +3347,7 @@ export const GetAccountInteractionsDocument = gql`
  *      limit: // value for 'limit'
  *      maxAmount: // value for 'maxAmount'
  *      minAmount: // value for 'minAmount'
+ *      orderBy: // value for 'orderBy'
  *      orderDirection: // value for 'orderDirection'
  *      skip: // value for 'skip'
  *      filterAddress: // value for 'filterAddress'
@@ -4359,68 +3370,25 @@ export type GetAccountInteractionsQueryHookResult = ReturnType<typeof useGetAcco
 export type GetAccountInteractionsLazyQueryHookResult = ReturnType<typeof useGetAccountInteractionsLazyQuery>;
 export type GetAccountInteractionsSuspenseQueryHookResult = ReturnType<typeof useGetAccountInteractionsSuspenseQuery>;
 export type GetAccountInteractionsQueryResult = Apollo.QueryResult<GetAccountInteractionsQuery, GetAccountInteractionsQueryVariables>;
-export const GetDelegationHistoryCountDocument = gql`
-    query GetDelegationHistoryCount($delegator: String!) {
-  delegations(where: {delegatorAccountId: $delegator}) {
-    totalCount
-  }
-}
-    `;
-
-/**
- * __useGetDelegationHistoryCountQuery__
- *
- * To run a query within a React component, call `useGetDelegationHistoryCountQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetDelegationHistoryCountQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetDelegationHistoryCountQuery({
- *   variables: {
- *      delegator: // value for 'delegator'
- *   },
- * });
- */
-export function useGetDelegationHistoryCountQuery(baseOptions: Apollo.QueryHookOptions<GetDelegationHistoryCountQuery, GetDelegationHistoryCountQueryVariables> & ({ variables: GetDelegationHistoryCountQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetDelegationHistoryCountQuery, GetDelegationHistoryCountQueryVariables>(GetDelegationHistoryCountDocument, options);
-      }
-export function useGetDelegationHistoryCountLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDelegationHistoryCountQuery, GetDelegationHistoryCountQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetDelegationHistoryCountQuery, GetDelegationHistoryCountQueryVariables>(GetDelegationHistoryCountDocument, options);
-        }
-export function useGetDelegationHistoryCountSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegationHistoryCountQuery, GetDelegationHistoryCountQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetDelegationHistoryCountQuery, GetDelegationHistoryCountQueryVariables>(GetDelegationHistoryCountDocument, options);
-        }
-export type GetDelegationHistoryCountQueryHookResult = ReturnType<typeof useGetDelegationHistoryCountQuery>;
-export type GetDelegationHistoryCountLazyQueryHookResult = ReturnType<typeof useGetDelegationHistoryCountLazyQuery>;
-export type GetDelegationHistoryCountSuspenseQueryHookResult = ReturnType<typeof useGetDelegationHistoryCountSuspenseQuery>;
-export type GetDelegationHistoryCountQueryResult = Apollo.QueryResult<GetDelegationHistoryCountQuery, GetDelegationHistoryCountQueryVariables>;
 export const GetDelegationHistoryItemsDocument = gql`
-    query GetDelegationHistoryItems($delegator: String!, $delegate: String, $after: String, $before: String, $orderBy: String = "timestamp", $orderDirection: String = "desc", $limit: Int = 10, $fromValue: BigInt = 0, $toValue: BigInt) {
-  delegations(
-    where: {delegatorAccountId: $delegator, delegateAccountId: $delegate, delegatedValue_gte: $fromValue, delegatedValue_lte: $toValue}
-    orderBy: $orderBy
-    orderDirection: $orderDirection
+    query GetDelegationHistoryItems($delegator: String!, $delegate: JSON, $skip: NonNegativeInt, $limit: PositiveInt = 10, $fromValue: String, $toValue: String, $orderDirection: queryInput_historicalDelegations_orderDirection = desc) {
+  historicalDelegations(
+    address: $delegator
+    delegateAddressIn: $delegate
+    skip: $skip
     limit: $limit
-    after: $after
-    before: $before
+    fromValue: $fromValue
+    toValue: $toValue
+    orderDirection: $orderDirection
   ) {
     items {
-      delegateAccountId
-      delegatedValue
+      delegatorAddress
+      delegateAddress
+      amount
       timestamp
       transactionHash
     }
-    pageInfo {
-      hasNextPage
-      hasPreviousPage
-      startCursor
-      endCursor
-    }
+    totalCount
   }
 }
     `;
@@ -4439,13 +3407,11 @@ export const GetDelegationHistoryItemsDocument = gql`
  *   variables: {
  *      delegator: // value for 'delegator'
  *      delegate: // value for 'delegate'
- *      after: // value for 'after'
- *      before: // value for 'before'
- *      orderBy: // value for 'orderBy'
- *      orderDirection: // value for 'orderDirection'
+ *      skip: // value for 'skip'
  *      limit: // value for 'limit'
  *      fromValue: // value for 'fromValue'
  *      toValue: // value for 'toValue'
+ *      orderDirection: // value for 'orderDirection'
  *   },
  * });
  */
@@ -4476,7 +3442,7 @@ export const GetTopTokenHoldersDocument = gql`
   ) {
     totalCount
     items {
-      accountId
+      address
       balance
       delegate
       tokenId

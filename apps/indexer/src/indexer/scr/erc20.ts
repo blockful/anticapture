@@ -1,6 +1,6 @@
 import { accountBalance, accountPower, delegation, token } from "ponder:schema";
 import { ponder } from "ponder:registry";
-import { Address, zeroAddress } from "viem";
+import { Address, getAddress, zeroAddress } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
 import { delegatedVotesChanged, tokenTransfer } from "@/eventHandlers";
@@ -143,26 +143,39 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
     // TODO: Adjust delegation data model to allow for partial delegation natively
     // Process the delegation change
 
+    const { delegator } = event.args;
+    const { address: tokenId, logIndex } = event.log;
+    const { hash: txHash } = event.transaction;
+    const { timestamp } = event.block;
+
+    const normalizedDelegator = getAddress(delegator);
+    const normalizedTokenId = getAddress(tokenId);
+
     // Pre-compute address lists for flag determination
-    const lendingAddressList = Object.values(LendingAddresses[daoId] || {});
-    const cexAddressList = Object.values(CEXAddresses[daoId] || {});
-    const dexAddressList = Object.values(DEXAddresses[daoId] || {});
-    const burningAddressList = Object.values(BurningAddresses[daoId] || {});
+    const lendingAddressList = Object.values(LendingAddresses[daoId] || {}).map(
+      getAddress,
+    );
+    const cexAddressList = Object.values(CEXAddresses[daoId] || {}).map(
+      getAddress,
+    );
+    const dexAddressList = Object.values(DEXAddresses[daoId] || {}).map(
+      getAddress,
+    );
+    const burningAddressList = Object.values(BurningAddresses[daoId] || {}).map(
+      getAddress,
+    );
 
     for (const { _delegatee: delegate, _numerator: percentage } of event.args
       .newDelegatees) {
-      const { delegator } = event.args;
-      const { address: tokenId, logIndex: logIndex } = event.log;
-      const { hash: txHash } = event.transaction;
-      const { timestamp } = event.block;
+      const normalizedDelegate = getAddress(delegate);
 
       // Ensure all required accounts exist in parallel
       await ensureAccountsExist(context, [delegator, delegate]);
 
       // Get the delegator's current balance
       const delegatorBalance = await context.db.find(accountBalance, {
-        accountId: delegator,
-        tokenId,
+        accountId: normalizedDelegator,
+        tokenId: normalizedTokenId,
       });
 
       if (!delegatorBalance && delegator !== zeroAddress /* token coinbase */) {
@@ -175,15 +188,17 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
 
       // Determine flags for the delegation
       const isCex =
-        cexAddressList.includes(delegator) || cexAddressList.includes(delegate);
+        cexAddressList.includes(normalizedDelegator) ||
+        cexAddressList.includes(normalizedDelegate);
       const isDex =
-        dexAddressList.includes(delegator) || dexAddressList.includes(delegate);
+        dexAddressList.includes(normalizedDelegator) ||
+        dexAddressList.includes(normalizedDelegate);
       const isLending =
-        lendingAddressList.includes(delegator) ||
-        lendingAddressList.includes(delegate);
+        lendingAddressList.includes(normalizedDelegator) ||
+        lendingAddressList.includes(normalizedDelegate);
       const isBurning =
-        burningAddressList.includes(delegator) ||
-        burningAddressList.includes(delegate);
+        burningAddressList.includes(normalizedDelegator) ||
+        burningAddressList.includes(normalizedDelegate);
       const isTotal = isBurning;
 
       await context.db
@@ -191,8 +206,8 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
         .values({
           transactionHash: txHash,
           daoId,
-          delegateAccountId: delegate,
-          delegatorAccountId: delegator,
+          delegateAccountId: normalizedDelegate,
+          delegatorAccountId: normalizedDelegator,
           delegatedValue: (delegatorBalanceValue * BigInt(percentage)) / 10000n, // `percentage` is informed in basis points, wherein 100% (percentage) = 1 (decimal) = 10000 (basis)
           timestamp,
           logIndex,
@@ -211,20 +226,20 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
       await context.db
         .insert(accountBalance)
         .values({
-          accountId: delegator,
-          tokenId,
-          delegate: delegate,
+          accountId: normalizedDelegator,
+          tokenId: normalizedTokenId,
+          delegate: normalizedDelegate,
           balance: delegatorBalanceValue,
         })
         .onConflictDoUpdate({
-          delegate: delegate,
+          delegate: normalizedDelegate,
         });
 
       // Update the delegate's delegations count
       await context.db
         .insert(accountPower)
         .values({
-          accountId: delegate,
+          accountId: normalizedDelegate,
           daoId,
           delegationsCount: 1,
         })

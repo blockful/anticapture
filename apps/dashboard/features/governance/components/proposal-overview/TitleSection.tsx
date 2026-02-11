@@ -1,3 +1,5 @@
+"use client";
+
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { BulletDivider } from "@/features/governance/components/proposal-overview/BulletDivider";
 
@@ -9,11 +11,21 @@ import { ProposalBadge } from "@/features/governance/components/proposal-overvie
 import { ProposalStatus } from "@/features/governance/types";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 
+interface TitleSectionProps {
+  proposal: NonNullable<GetProposalQuery["proposal"]>;
+  onAddressClick?: (address: string) => void;
+}
+
 export const TitleSection = ({
   proposal,
-}: {
-  proposal: NonNullable<GetProposalQuery["proposal"]>;
-}) => {
+  onAddressClick,
+}: TitleSectionProps) => {
+  const handleOpenDrawer = () => {
+    if (proposal?.proposerAccountId) {
+      onAddressClick?.(proposal.proposerAccountId);
+    }
+  };
+
   return (
     <div className="flex w-full flex-col gap-3">
       <div className="flex w-full items-center justify-start gap-2">
@@ -22,18 +34,24 @@ export const TitleSection = ({
           status={proposal.status.toLowerCase() as ProposalStatus}
         />
 
-        <BulletDivider />
+        <BulletDivider className="bg-border-contrast" />
 
-        {/* Proposer  */}
-        <EnsAvatar
-          size="xs"
-          address={proposal?.proposerAccountId as Address}
-          nameClassName="text-secondary"
-        />
+        {/* Proposer - Clickable to open delegate drawer */}
+        <button
+          onClick={handleOpenDrawer}
+          className="group cursor-pointer rounded-md p-1"
+        >
+          <EnsAvatar
+            size="xs"
+            address={proposal?.proposerAccountId as Address}
+            nameClassName="text-secondary group-hover:border-primary transition-colors duration-200"
+            isDashed
+          />
+        </button>
       </div>
 
       <div className="flex w-full flex-col gap-2">
-        <h4 className="text-primary">{proposal?.title}</h4>
+        <h4 className="text-primary text-xl">{proposal?.title}</h4>
       </div>
 
       <div className="flex w-full items-center justify-start gap-2">
@@ -45,10 +63,12 @@ export const TitleSection = ({
           Forum
         </DefaultLink>
 
-        <BulletDivider />
+        <BulletDivider className="bg-border-contrast" />
 
-        {/* @todo - add the correct link */}
-        <DefaultLink href={`https://x.com/home`} openInNewTab>
+        <DefaultLink
+          href={`https://x.com/intent/tweet?text=${encodeURIComponent(`See this new proposal at Anticapture! https://anticapture.com/${proposal.daoId.toLowerCase()}/governance/proposal/${proposal.id}`)}`}
+          openInNewTab
+        >
           <Share2 className="size-4" /> Share
         </DefaultLink>
       </div>

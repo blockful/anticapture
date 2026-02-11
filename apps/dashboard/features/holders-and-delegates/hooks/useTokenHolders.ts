@@ -26,7 +26,7 @@ interface PaginationInfo {
   totalCount: number;
   currentPage: number;
   totalPages: number;
-  itemsPerPage: number;
+  limit: number;
   currentItemsCount: number;
 }
 
@@ -60,8 +60,6 @@ export const useTokenHolders = ({
   address,
   days,
 }: UseTokenHoldersParams): UseTokenHoldersResult => {
-  const itemsPerPage = limit;
-
   // Track current page - this is the source of truth for page number
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [historicalBalancesCache, setHistoricalBalancesCache] = useState<
@@ -109,7 +107,7 @@ export const useTokenHolders = ({
     () =>
       tokenHoldersData?.accountBalances?.items
         ?.filter((tokenHolder) => tokenHolder !== null)
-        .map((tokenHolder) => tokenHolder.accountId)
+        .map((tokenHolder) => tokenHolder.address)
         .filter(Boolean) || [],
     [tokenHoldersData],
   );
@@ -128,8 +126,8 @@ export const useTokenHolders = ({
       setHistoricalBalancesCache((prevCache) => {
         const newCache = new Map(prevCache);
         newHistoricalData?.forEach((h) => {
-          if (h?.address && h.balance) {
-            newCache.set(h.address, h.balance);
+          if (h?.accountId && h.previousBalance) {
+            newCache.set(h.accountId, h.previousBalance);
           }
         });
         return newCache;
@@ -153,7 +151,7 @@ export const useTokenHolders = ({
     return tokenHoldersData.accountBalances.items
       .filter((holder) => holder !== null)
       .map((holder) => ({
-        accountId: holder.accountId,
+        accountId: holder.address,
         balance: holder.balance,
         delegate: holder.delegate,
         tokenId: holder.tokenId,
@@ -170,7 +168,7 @@ export const useTokenHolders = ({
     const totalCount = tokenHoldersData?.accountBalances?.totalCount || 0;
     const currentItemsCount =
       tokenHoldersData?.accountBalances?.items?.length || 0;
-    const totalPages = Math.ceil(totalCount / itemsPerPage);
+    const totalPages = Math.ceil(totalCount / limit);
 
     return {
       hasNextPage: currentPage < totalPages,
@@ -180,14 +178,14 @@ export const useTokenHolders = ({
       totalCount,
       currentPage,
       totalPages,
-      itemsPerPage,
+      limit,
       currentItemsCount,
     };
   }, [
     tokenHoldersData?.accountBalances?.totalCount,
     tokenHoldersData?.accountBalances?.items?.length,
     currentPage,
-    itemsPerPage,
+    limit,
   ]);
 
   // Fetch next page function
@@ -223,7 +221,7 @@ export const useTokenHolders = ({
           const merged = [
             ...prevItems,
             ...newItems.filter(
-              (n) => n && !prevItems.some((p) => p?.accountId === n.accountId),
+              (n) => n && !prevItems.some((p) => p?.address === n.address),
             ),
           ];
 

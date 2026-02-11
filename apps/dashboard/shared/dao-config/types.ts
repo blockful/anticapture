@@ -1,22 +1,13 @@
 import { ReactNode, SVGProps } from "react";
 import { Address, Chain } from "viem";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
 import { DaoIconProps } from "@/shared/components/icons/types";
+import { MetricTypesEnum } from "../types/enums/metric-type";
 
-export type DaoMetricsDayBucket = {
+export type TokenMetricItem = {
   date: string;
-  daoId: DaoIdEnum;
-  tokenId: Address;
-  metricType: MetricTypesEnum;
-  open: string;
-  close: string;
-  low: string;
   high: string;
-  average: string;
   volume: string;
-  count: number;
 };
 
 export type PriceEntry = { timestamp: number; price: string };

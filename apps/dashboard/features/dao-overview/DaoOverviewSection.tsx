@@ -9,6 +9,7 @@ import { DaoOverviewHeaderMetrics } from "@/features/dao-overview/components/Dao
 import { TokenDistributionChartCard } from "@/features/dao-overview/components/TokenDistributionChartCard";
 import { DaoOverviewHeaderBackground } from "@/features/dao-overview/components/DaoOverviewHeaderBackground";
 import { SecurityCouncilCard } from "@/features/dao-overview/components/SecurityCouncilCard";
+import { LastProposalsCard } from "@/features/dao-overview/components/LastProposalsCard";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 import { StagesContainer } from "@/features/resilience-stages/components/StagesContainer";
 import {
@@ -23,6 +24,7 @@ import { MetricsCard } from "@/features/dao-overview/components/MetricsCard";
 import { AttackProfitabilityChartCard } from "@/features/dao-overview/components/AttackProfitabilityChartCard";
 import { useRouter } from "next/navigation";
 import { apolloClient } from "@/shared/providers/GlobalProviders";
+import { OngoingProposalBanner } from "./components/OngoingProposalBanner";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const router = useRouter();
@@ -70,6 +72,13 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         <div className="block lg:hidden">
           <DividerDefault isHorizontal />
         </div>
+
+        {daoConfig.governancePage && (
+          <div className="mx-5">
+            <OngoingProposalBanner daoId={daoId} />
+          </div>
+        )}
+
         <div className="border-inverted grid grid-cols-1 gap-5 border-x lg:mx-5 lg:grid-cols-2 lg:gap-2">
           <div className="w-full px-5 lg:px-0">
             <StagesContainer
@@ -83,6 +92,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             <DividerDefault isHorizontal />
           </div>
           <RiskAreaCardWrapper
+            daoId={daoId}
             title={riskAreas.title}
             riskAreas={riskAreas.risks}
             onRiskClick={() => {
@@ -122,7 +132,9 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           <div className="w-full">
             <VotingPowerChartCard daoId={daoId} />
           </div>
+          
         </div>
+        {daoConfig.governancePage && (<LastProposalsCard daoId={daoId} />)}
       </div>
     </Suspense>
   );

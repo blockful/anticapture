@@ -43,7 +43,7 @@ export const Button = ({
   return (
     <Comp
       className={cn(
-        "disabled:text-dimmed disabled:bg-surface-disabled disabled:border-border-contrast flex h-fit cursor-pointer items-center justify-center gap-1.5 rounded-md text-sm/tight font-medium transition-colors duration-300 disabled:cursor-not-allowed",
+        "disabled:text-dimmed disabled:bg-surface-disabled disabled:border-border-contrast flex h-fit cursor-pointer items-center justify-center gap-1.5 text-sm/tight font-medium transition-colors duration-300 disabled:cursor-not-allowed",
         variantStyles[variant],
         sizeStyles[size],
         isDisabled && !asChild && "pointer-events-none opacity-50",

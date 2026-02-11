@@ -33,7 +33,7 @@ const projectId = process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID ?? "";
 
 if (!projectId) throw new Error("Missing WalletConnect project ID");
 
-export const appName = "Governance Dashboard";
+export const appName = "Anticapture";
 
 const connectors = connectorsForWallets(
   [

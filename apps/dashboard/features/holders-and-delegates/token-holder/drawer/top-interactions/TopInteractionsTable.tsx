@@ -15,7 +15,10 @@ import { useAccountInteractionsData } from "@/features/holders-and-delegates/tok
 import { AddressFilter } from "@/shared/components/design-system/table/filters";
 import { percentageVariants } from "@/shared/components/design-system/table/Percentage";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
-import { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
+import {
+  AmountFilterState,
+  useAmountFilterStore,
+} from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
@@ -27,6 +30,7 @@ import {
   useQueryStates,
 } from "nuqs";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
+import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 
 export const TopInteractionsTable = ({
   address,
@@ -38,11 +42,10 @@ export const TopInteractionsTable = ({
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const [currentAddressFilter, setCurrentAddressFilter] =
     useQueryState("tabAddress");
+
   const [sortBy, setSortBy] = useQueryState(
     "orderBy",
-    parseAsStringEnum(["transferCount", "totalVolume"]).withDefault(
-      "transferCount",
-    ),
+    parseAsStringEnum(["count", "volume"]).withDefault("count"),
   );
   const [sortDirection, setSortDirection] = useQueryState(
     "orderDirection",
@@ -107,12 +110,11 @@ export const TopInteractionsTable = ({
     {
       accessorKey: "address",
       header: () => (
-        <div className="text-table-header flex w-full items-center justify-start">
+        <div className="text-table-header flex w-full items-center justify-start gap-2">
           <span>Address</span>
           <AddressFilter
             onApply={handleAddressFilterApply}
             currentFilter={currentAddressFilter ?? ""}
-            className="ml-2"
           />
         </div>
       ),
@@ -168,11 +170,17 @@ export const TopInteractionsTable = ({
               </h4>
             </Tooltip>
             <AmountFilter
-              filterId="top-interactions-volume-filter"
+              filterId="top-interactions-amount-filter"
               onApply={(filterState: AmountFilterState) => {
-                setSortDirection(
-                  filterState.sortOrder === "largest-first" ? "desc" : "asc",
-                );
+                if (filterState.sortOrder) {
+                  setSortDirection(
+                    filterState.sortOrder === "largest-first" ? "desc" : "asc",
+                  );
+                  setSortBy("volume");
+                } else {
+                  setSortBy("count");
+                  setSortDirection("desc");
+                }
 
                 setFilterVariables(() => ({
                   minAmount: filterState.minAmount
@@ -184,15 +192,16 @@ export const TopInteractionsTable = ({
                 }));
 
                 setIsFilterActive(
-                  !!(filterVariables?.minAmount || filterVariables?.maxAmount),
+                  !!(
+                    filterState.minAmount ||
+                    filterState.maxAmount ||
+                    filterState.sortOrder
+                  ),
                 );
-
-                setSortBy("totalVolume");
               }}
               onReset={() => {
                 setIsFilterActive(false);
-                // Reset to default sorting
-                setSortBy("transferCount");
+                setSortBy("count");
                 setFilterVariables(() => ({
                   minAmount: null,
                   maxAmount: null,
@@ -305,6 +314,11 @@ export const TopInteractionsTable = ({
           const newSortOrder = sortDirection === "desc" ? "asc" : "desc";
           setSortDirection(newSortOrder);
           column.toggleSorting(newSortOrder === "desc");
+
+          useAmountFilterStore
+            .getState()
+            .reset("top-interactions-amount-filter");
+          setIsFilterActive(false);
         };
 
         return (
@@ -359,16 +373,15 @@ export const TopInteractionsTable = ({
   ];
 
   return (
-    <div className="flex w-full flex-col gap-2">
+    <div className="flex h-full w-full flex-col overflow-hidden">
       <Table
         columns={columns}
-        data={loading ? Array(12).fill({}) : tableData}
+        data={loading ? Array(DEFAULT_ITEMS_PER_PAGE).fill({}) : tableData}
         filterColumn="address"
         size="sm"
         withDownloadCSV={true}
-        wrapperClassName="h-[450px]"
-        className="h-[400px]"
         error={error}
+        fillHeight
       />
     </div>
   );

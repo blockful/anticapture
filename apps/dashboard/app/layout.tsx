@@ -9,6 +9,7 @@ import ConditionalPostHog from "@/shared/services/posthog/ConditionalPostHog";
 import UmamiScript from "@/shared/services/umami";
 import { Inter, Roboto_Mono } from "next/font/google";
 import { CookieConsent } from "@/features/cookie";
+import { HelpPopover } from "@/shared/components";
 
 const inter = Inter({ weight: ["400", "500", "600"], subsets: ["latin"] });
 
@@ -67,15 +68,21 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         />
       </head>
       <body
-        className={`${inter.className} ${roboto.variable} bg-surface-background border-light-dark mx-auto max-w-screen-2xl overflow-x-hidden border xl:overflow-hidden`}
+        className={`${inter.className} ${roboto.variable} bg-surface-background`}
       >
-        <GlobalProviders>
-          {children}
-          <CookieConsent />
-        </GlobalProviders>
-        <Toaster position="bottom-left" reverseOrder={false} />
-        <ConditionalPostHog />
-        <UmamiScript />
+        <div
+          data-vaul-drawer-wrapper=""
+          className="border-light-dark mx-auto max-w-screen-2xl overflow-x-hidden border xl:overflow-hidden"
+        >
+          <GlobalProviders>
+            {children}
+            <CookieConsent />
+            <HelpPopover />
+          </GlobalProviders>
+          <Toaster position="bottom-left" reverseOrder={false} />
+          <ConditionalPostHog />
+          <UmamiScript />
+        </div>
       </body>
     </html>
   );

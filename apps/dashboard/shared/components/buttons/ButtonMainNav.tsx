@@ -51,10 +51,10 @@ export const ButtonMainNav = ({
   }
 
   const baseClassName = cn(
-    "flex flex-col items-center justify-center gap-1 w-[56px] rounded-md py-2 transition-colors",
+    "flex flex-col items-center justify-center gap-1 w-[56px] py-2 transition-colors",
     {
-      "bg-primary rounded-md": isActive,
-      "rounded-md hover:bg-surface-contrast": !isActive,
+      "bg-primary": isActive,
+      "hover:bg-surface-contrast": !isActive,
     },
     className,
   );

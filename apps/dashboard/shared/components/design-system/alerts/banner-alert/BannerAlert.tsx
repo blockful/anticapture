@@ -12,6 +12,7 @@ interface BannerAlertProps {
   link?: {
     url: string;
     text: string;
+    openInNewTab?: boolean;
   };
   storageKey: string;
   variant?: "default" | "highlight";
@@ -56,13 +57,13 @@ export const BannerAlert = ({
       <div className="flex items-center gap-2 tracking-wider lg:flex-row">
         <div className="flex flex-wrap items-center gap-1 lg:flex-row">
           <div className="flex gap-2 font-mono text-xs uppercase text-white">
-            <div className="flex-shrink-0">{icon}</div>
+            <div className="shrink-0">{icon}</div>
             <div className="flex flex-wrap gap-1">
               {text}
               {link && (
                 <DefaultLink
                   href={link.url}
-                  openInNewTab
+                  openInNewTab={link.openInNewTab ?? true}
                   variant="highlight"
                   className="flex items-center gap-1"
                 >

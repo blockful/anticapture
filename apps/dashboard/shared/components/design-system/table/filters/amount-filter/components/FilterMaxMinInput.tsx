@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/shared/utils";
 import { ArrowRightIcon } from "@radix-ui/react-icons";
+import { Input } from "@/shared/components/design-system/form/fields";
 
 interface FilterMaxMinInputProps {
   title?: string;
@@ -107,42 +108,34 @@ export const FilterMaxMinInput = ({
   };
 
   return (
-    <div className="px-3 pb-3">
+    <div className="border-border-contrast flex items-center gap-1 overflow-hidden border-b px-3 pb-3">
       {title && (
         <div className="flex px-0 py-2">
-          <h4 className="text-secondary text-alternative-xs font-medium uppercase">
+          <h4 className="text-secondary font-mono text-xs font-medium uppercase tracking-wider">
             {title}
           </h4>
         </div>
       )}
-      <div className="flex items-center gap-1">
+      <div className="flex flex-1 items-center gap-1">
         <div className="flex-1">
-          <input
+          <Input
             type="text"
             placeholder={placeholderMin}
             value={minValue}
             onChange={handleMinChange}
             onKeyDown={handleKeyDown}
             onBlur={handleBlur}
-            className={cn(
-              "bg-surface-default border-border-default text-primary placeholder:text-dimmed focus:border-border-contrast h-10 w-full rounded border px-2.5 py-2 text-sm transition-colors focus:outline-none",
-            )}
           />
         </div>
-        <div className="text-dimmed">
-          <ArrowRightIcon className="size-3.5" />
-        </div>
+        <ArrowRightIcon className="text-dimmed size-3.5" />
         <div className="flex-1">
-          <input
+          <Input
             type="text"
             placeholder={placeholderMax}
             value={maxValue}
             onChange={handleMaxChange}
             onKeyDown={handleKeyDown}
             onBlur={handleBlur}
-            className={cn(
-              "bg-surface-default border-border-default text-primary placeholder:text-dimmed focus:border-border-contrast h-10 w-full rounded border px-2.5 py-2 text-sm transition-colors focus:outline-none",
-            )}
           />
         </div>
       </div>

@@ -1,5 +1,6 @@
 export * from "@/shared/components/badges/Badge";
 export * from "@/shared/components/badges/SupplyLabel";
+export * from "@/shared/components/design-system/badges/BadgeStatus";
 export * from "@/shared/components/cards/BaseCardDaoInfo";
 export * from "@/shared/components/buttons/ButtonHeaderSidebar";
 export * from "@/shared/components/buttons/ButtonHeaderDAOSidebarMobile";
@@ -31,5 +32,6 @@ export * from "@/shared/components/design-system/SimpleProgressBar";
 export * from "@/shared/components/design-system/ActivityIndicator";
 export * from "@/shared/components/design-system/buttons/button/Button";
 export * from "@/shared/components/design-system/buttons/icon-button/IconButton";
+export * from "@/shared/components/design-system/help-popover";
 
 export { StagesCardRequirements } from "@/shared/components/cards/StagesCardRequirements";

@@ -48,29 +48,32 @@ export const ProposalTimeline = ({
   ];
 
   const getTimelineItemBgColor = (index: number) => {
-    // Created is always primary
-    if (index === 0) return "bg-primary";
-
-    // Find the first pending item (after created)
-    const firstPendingIndex = timelineItems.findIndex(
-      (item, i) => i > 0 && item.status === "pending",
+    // Find the last completed item index (this is the current state)
+    const lastCompletedIndex = timelineItems.findLastIndex(
+      (item) => item.status === "completed"
     );
 
-    if (firstPendingIndex === -1) {
-      // All items are completed
-      return "bg-primary";
-    }
-
-    if (index < firstPendingIndex) {
-      // Completed items
-      return "bg-primary";
-    } else if (index === firstPendingIndex) {
-      // Next item to be completed
+    if (index < lastCompletedIndex) {
+      // Past completed items - white
+      return "bg-surface-action";
+    } else if (index === lastCompletedIndex) {
+      // Current state (last completed item) - orange/brand
       return "bg-link";
     } else {
-      // Future items
-      return "bg-secondary";
+      // Future pending items - gray
+      return "bg-surface-hover";
     }
+  };
+
+  const getTimelineLineBgColor = (index: number) => {
+    // The line at index i connects item[i] to item[i+1]
+    // If the next item is completed, the line should be white (surface-action)
+    // If the next item is pending (future), the line should be gray (surface-hover)
+    const nextItem = timelineItems[index + 1];
+    if (nextItem && nextItem.status === "completed") {
+      return "bg-surface-action";
+    }
+    return "bg-surface-hover";
   };
 
   return (
@@ -94,7 +97,7 @@ export const ProposalTimeline = ({
             </div>
           </div>
           {index < timelineItems.length - 1 && (
-            <div className="bg-secondary ml-[3px] h-5 w-0.5" />
+            <div className={`${getTimelineLineBgColor(index)} ml-[3px] h-5 w-0.5`} />
           )}
         </div>
       ))}

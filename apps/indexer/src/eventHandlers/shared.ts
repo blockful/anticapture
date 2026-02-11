@@ -1,10 +1,10 @@
-import { Address } from "viem";
+import { Address, getAddress } from "viem";
 import { Context } from "ponder:registry";
 import { account, daoMetricsDayBucket, transaction } from "ponder:schema";
 
 import { MetricTypesEnum } from "@/lib/constants";
 import { delta, max, min } from "@/lib/utils";
-import { truncateTimestampToMidnight } from "@/lib/time-series";
+import { truncateTimestampToMidnight } from "@/lib/date-helpers";
 
 export const ensureAccountExists = async (
   context: Context,
@@ -13,7 +13,7 @@ export const ensureAccountExists = async (
   await context.db
     .insert(account)
     .values({
-      id: address,
+      id: getAddress(address),
     })
     .onConflictDoNothing();
 };
@@ -44,7 +44,7 @@ export const storeDailyBucket = async (
     .insert(daoMetricsDayBucket)
     .values({
       date: BigInt(truncateTimestampToMidnight(Number(timestamp))),
-      tokenId: tokenAddress,
+      tokenId: getAddress(tokenAddress),
       metricType,
       daoId,
       average: newValue,
@@ -79,8 +79,8 @@ export const createOrUpdateTransaction = async (
     .insert(transaction)
     .values({
       transactionHash,
-      fromAddress: from,
-      toAddress: to,
+      fromAddress: getAddress(from),
+      toAddress: getAddress(to),
       timestamp,
     })
     .onConflictDoNothing(); // Only create if doesn't exist
@@ -135,12 +135,18 @@ export const handleTransaction = async (
     timestamp,
   );
 
+  const normalizedAddresses = addresses.map(getAddress);
+  const normalizedCex = cex.map(getAddress);
+  const normalizedDex = dex.map(getAddress);
+  const normalizedLending = lending.map(getAddress);
+  const normalizedBurning = burning.map(getAddress);
+
   await updateTransactionFlags(
     context,
     transactionHash,
-    addresses.some((addr) => cex.includes(addr)),
-    addresses.some((addr) => dex.includes(addr)),
-    addresses.some((addr) => lending.includes(addr)),
-    addresses.some((addr) => burning.includes(addr)),
+    normalizedAddresses.some((addr) => normalizedCex.includes(addr)),
+    normalizedAddresses.some((addr) => normalizedDex.includes(addr)),
+    normalizedAddresses.some((addr) => normalizedLending.includes(addr)),
+    normalizedAddresses.some((addr) => normalizedBurning.includes(addr)),
   );
 };

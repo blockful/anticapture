@@ -68,8 +68,8 @@ export default function ProposalPage() {
       </div>
       <main className="relative flex-1 overflow-auto">
         <div className="lg:hidden">
-          <HeaderMobile />
-          <StickyPageHeader />
+          <HeaderMobile withMobileMenu={false} />
+          <StickyPageHeader withMobileMenu={false} />
         </div>
         <div className="flex min-h-screen w-full flex-col items-center">
           <div className="w-full flex-1">

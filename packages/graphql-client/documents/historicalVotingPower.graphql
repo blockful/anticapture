@@ -1,0 +1,43 @@
+query HistoricalVotingPower(
+  $address: String
+  $skip: NonNegativeInt
+  $limit: PositiveInt = 10
+  $orderBy: queryInput_historicalVotingPower_orderBy = timestamp
+  $orderDirection: queryInput_historicalVotingPower_orderDirection = desc
+  $toValue: String
+  $fromValue: String
+  $fromDate: String
+  $toDate: String
+) {
+  historicalVotingPower(
+    address: $address
+    skip: $skip
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+    limit: $limit
+    toValue: $toValue
+    fromValue: $fromValue
+    fromDate: $fromDate
+    toDate: $toDate
+  ) {
+    items {
+      accountId
+      votingPower
+      transfer {
+        value
+        to
+        from
+      }
+      transactionHash
+      timestamp
+      logIndex
+      delta
+      delegation {
+        from
+        to
+        value
+      }
+    }
+    totalCount
+  }
+}

@@ -1,1 +1,0 @@
-export const PERCENTAGE_NO_BASELINE = "NO BASELINE";

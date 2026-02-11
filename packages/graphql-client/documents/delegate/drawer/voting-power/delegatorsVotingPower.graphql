@@ -15,8 +15,9 @@ query GetDelegatorVotingPowerDetails(
     skip: $skip
     delegates: $addresses
   ) {
+    totalCount
     items {
-      accountId
+      address
       balance
     }
   }

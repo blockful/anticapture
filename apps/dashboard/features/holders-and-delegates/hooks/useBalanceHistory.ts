@@ -1,3 +1,5 @@
+"use client";
+
 import { formatUnits } from "viem";
 import { useMemo, useState, useEffect, useCallback } from "react";
 
@@ -9,7 +11,7 @@ import {
 } from "@anticapture/graphql-client/hooks";
 
 import { DaoIdEnum } from "@/shared/types/daos";
-import { AmountFilterVariables } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
+import { AmountFilterVariables } from "./types";
 import {
   QueryInput_Transfers_SortBy,
   QueryInput_Transfers_SortOrder,
@@ -24,8 +26,10 @@ export function useBalanceHistory({
   customFromFilter,
   customToFilter,
   filterVariables,
-  itemsPerPage = 10,
+  limit = 10,
   decimals,
+  fromTimestamp,
+  toTimestamp,
 }: {
   accountId: string;
   daoId: DaoIdEnum;
@@ -37,6 +41,9 @@ export function useBalanceHistory({
   transactionType?: "all" | "buy" | "sell";
   filterVariables?: AmountFilterVariables;
   itemsPerPage?: number;
+  fromTimestamp?: number;
+  toTimestamp?: number;
+  limit?: number;
 }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [isPaginationLoading, setIsPaginationLoading] = useState(false);
@@ -51,6 +58,8 @@ export function useBalanceHistory({
     customFromFilter,
     customToFilter,
     filterVariables,
+    fromTimestamp,
+    toTimestamp,
   ]);
 
   const variables = useMemo(() => {
@@ -63,7 +72,9 @@ export function useBalanceHistory({
       from: customFromFilter,
       to: customToFilter,
       offset: 0,
-      limit: itemsPerPage,
+      fromDate: fromTimestamp,
+      toDate: toTimestamp,
+      limit,
     };
 
     switch (transactionType) {
@@ -85,7 +96,9 @@ export function useBalanceHistory({
     filterVariables,
     orderBy,
     orderDirection,
-    itemsPerPage,
+    fromTimestamp,
+    toTimestamp,
+    limit,
   ]);
 
   const { data, error, loading, fetchMore } = useBalanceHistoryQuery({
@@ -115,8 +128,8 @@ export function useBalanceHistory({
   }, [data, accountId, decimals]);
 
   const hasNextPage = useMemo(() => {
-    return currentPage * itemsPerPage < (data?.transfers?.totalCount || 0);
-  }, [currentPage, itemsPerPage, data?.transfers?.totalCount]);
+    return currentPage * limit < (data?.transfers?.totalCount || 0);
+  }, [currentPage, limit, data?.transfers?.totalCount]);
 
   const fetchNextPage = useCallback(async () => {
     if (!hasNextPage || isPaginationLoading) return;
@@ -124,7 +137,7 @@ export function useBalanceHistory({
     setIsPaginationLoading(true);
 
     const nextPage = currentPage + 1;
-    const offset = (nextPage - 1) * itemsPerPage;
+    const offset = (nextPage - 1) * limit;
 
     try {
       await fetchMore({
@@ -159,7 +172,7 @@ export function useBalanceHistory({
     }
   }, [
     currentPage,
-    itemsPerPage,
+    limit,
     hasNextPage,
     isPaginationLoading,
     fetchMore,
