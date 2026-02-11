@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { RiskLevelCard, TheSectionLayout } from "@/shared/components";
+import { TheSectionLayout } from "@/shared/components";
 import daoConfigByDaoId from "@/shared/dao-config";
 import {
   getDaoStageFromFields,
@@ -10,10 +10,7 @@ import {
 } from "@/shared/dao-config/utils";
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
 import { DaoIdEnum } from "@/shared/types/daos";
-import {
-  RiskLevel,
-  GovernanceImplementationEnum,
-} from "@/shared/types/enums";
+import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
 import { Stage } from "@/shared/types/enums/Stage";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { BarChart } from "lucide-react";
@@ -37,9 +34,7 @@ export const ResilienceStagesSection = ({
     (GovernanceImplementationField & { name: string }) | null
   >(null);
 
-  const allFields = fieldsToArray(
-    daoConfig.governanceImplementation?.fields,
-  );
+  const allFields = fieldsToArray(daoConfig.governanceImplementation?.fields);
 
   const currentDaoStage = getDaoStageFromFields({
     fields: allFields,
@@ -47,10 +42,7 @@ export const ResilienceStagesSection = ({
   });
 
   const highRiskFields = filterFieldsByRiskLevel(allFields, RiskLevel.HIGH);
-  const mediumRiskFields = filterFieldsByRiskLevel(
-    allFields,
-    RiskLevel.MEDIUM,
-  );
+  const mediumRiskFields = filterFieldsByRiskLevel(allFields, RiskLevel.MEDIUM);
   const lowRiskFields = filterFieldsByRiskLevel(allFields, RiskLevel.LOW);
 
   // Pending fields are the ones blocking progression to the next stage
@@ -81,9 +73,6 @@ export const ResilienceStagesSection = ({
     <div>
       <TheSectionLayout
         title={PAGES_CONSTANTS.resilienceStages.title}
-        riskLevel={
-          <RiskLevelCard status={stageToRiskMapping[currentDaoStage]} />
-        }
         icon={<BarChart className="section-layout-icon" />}
         description={PAGES_CONSTANTS.resilienceStages.description}
       >
