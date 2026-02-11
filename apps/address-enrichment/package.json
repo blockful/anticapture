@@ -19,6 +19,7 @@
     "@hono/node-server": "^1.13.7",
     "@hono/swagger-ui": "^0.5.1",
     "@hono/zod-openapi": "^0.19.6",
+    "dotenv": "^17.2.4",
     "drizzle-orm": "~0.41.0",
     "hono": "^4.7.10",
     "pg": "^8.13.1",
