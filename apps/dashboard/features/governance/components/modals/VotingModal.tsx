@@ -18,6 +18,7 @@ interface VotingModalProps {
   onClose: () => void;
   proposal: Query_Proposals_Items_Items;
   votingPower: string;
+  rawVotingPower: string;
   decimals: number;
 }
 
@@ -26,6 +27,7 @@ export const VotingModal = ({
   onClose,
   proposal,
   votingPower,
+  rawVotingPower,
   decimals,
 }: VotingModalProps) => {
   const [vote, setVote] = useState<string>("");
@@ -34,7 +36,7 @@ export const VotingModal = ({
   const [transactionhash, setTransactionhash] = useState<string>("");
 
   // Parse user's voting power to BigInt for calculations
-  const userVotingPowerBigInt = BigInt(votingPower || "0");
+  const userVotingPowerBigInt = BigInt(rawVotingPower || "0");
 
   // Calculate base votes from proposal
   const baseForVotes = BigInt(proposal?.forVotes || "0");

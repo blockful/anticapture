@@ -1,0 +1,10 @@
+---
+description: Tool-specific hints for Cursor usage
+globs:
+alwaysApply: true
+---
+
+# Cursor-Specific Guidance
+
+## When to Use Sequential Thinking MCP
+If you are dealing with complex problems and making mistakes frequently, use the sequential thinking MCP to break down the problem step by step.

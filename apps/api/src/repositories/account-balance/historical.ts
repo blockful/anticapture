@@ -6,7 +6,7 @@ import { DBHistoricalBalanceWithRelations } from "@/mappers";
 import { balanceHistory, transfer } from "@/database";
 
 export class HistoricalBalanceRepository {
-  constructor(private readonly db: Drizzle) {}
+  constructor(private readonly db: Drizzle) { }
 
   async getHistoricalBalances(
     accountId: Address,
@@ -40,15 +40,15 @@ export class HistoricalBalanceRepository {
       .orderBy(
         orderDirection === "asc"
           ? asc(
-              orderBy === "timestamp"
-                ? balanceHistory.timestamp
-                : balanceHistory.deltaMod,
-            )
+            orderBy === "timestamp"
+              ? balanceHistory.timestamp
+              : balanceHistory.deltaMod,
+          )
           : desc(
-              orderBy === "timestamp"
-                ? balanceHistory.timestamp
-                : balanceHistory.deltaMod,
-            ),
+            orderBy === "timestamp"
+              ? balanceHistory.timestamp
+              : balanceHistory.deltaMod,
+          ),
       )
       .limit(limit)
       .offset(skip);

@@ -98,9 +98,9 @@ export const AccountBalanceVariationMapper = (
   previousBalance: variation.previousBalance.toString(),
   currentBalance: variation.currentBalance.toString(),
   absoluteChange: variation.absoluteChange.toString(),
-  percentageChange: variation.previousBalance
-    ? variation.percentageChange.toString()
-    : PERCENTAGE_NO_BASELINE,
+  percentageChange: (!variation.previousBalance && variation.currentBalance)
+    ? PERCENTAGE_NO_BASELINE
+    : variation.percentageChange.toString()
 });
 
 export const AccountBalanceVariationsByAccountIdResponseMapper = (
