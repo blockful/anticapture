@@ -1,6 +1,6 @@
 import { PGlite } from "@electric-sql/pglite";
 import { drizzle } from "drizzle-orm/pglite";
-import { sql } from "drizzle-orm";
+import { pushSchema } from "drizzle-kit/api";
 import * as schema from "@/database/schema";
 import { daoMetricsDayBucket } from "@/database/schema";
 import { MetricTypesEnum } from "@/lib/constants";
@@ -32,33 +32,16 @@ describe("TreasuryRepository - Integration", () => {
   let repository: TreasuryRepository;
 
   beforeAll(async () => {
+    // pushSchema uses JSON.stringify internally, which doesn't handle BigInt
+    (BigInt.prototype as any).toJSON = function () {
+      return this.toString();
+    };
+
     client = new PGlite();
     db = drizzle(client as any, { schema });
 
-    await db.execute(sql`
-      CREATE TYPE "metricType" AS ENUM (
-        'TOTAL_SUPPLY', 'DELEGATED_SUPPLY', 'CEX_SUPPLY',
-        'DEX_SUPPLY', 'LENDING_SUPPLY', 'CIRCULATING_SUPPLY', 'TREASURY'
-      );
-    `);
-
-    await db.execute(sql`
-      CREATE TABLE "dao_metrics_day_buckets" (
-        "date" BIGINT NOT NULL,
-        "dao_id" TEXT NOT NULL,
-        "token_id" TEXT NOT NULL,
-        "metricType" "metricType" NOT NULL,
-        "open" BIGINT NOT NULL,
-        "close" BIGINT NOT NULL,
-        "low" BIGINT NOT NULL,
-        "high" BIGINT NOT NULL,
-        "average" BIGINT NOT NULL,
-        "volume" BIGINT NOT NULL,
-        "count" INTEGER NOT NULL,
-        "lastUpdate" BIGINT NOT NULL,
-        PRIMARY KEY ("date", "token_id", "metricType")
-      );
-    `);
+    const { apply } = await pushSchema(schema, db as any);
+    await apply();
   });
 
   afterAll(async () => {
