@@ -8,7 +8,7 @@
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "module": "ESNext",
-    "lib": ["ES2022"],
+    "lib": ["ES2022", "DOM"],
     "target": "ES2022",
     "skipLibCheck": true,
     "paths": {
