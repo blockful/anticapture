@@ -70,7 +70,7 @@ export const Delegates = ({
   );
   const [sortBy, setSortBy] = useQueryState(
     "sortBy",
-    parseAsStringEnum(["delegationsCount", "votingPower"]).withDefault(
+    parseAsStringEnum(["delegationsCount", "votingPower", "absoluteChange", "percentageChange"]).withDefault(
       "votingPower",
     ),
   );
@@ -111,15 +111,15 @@ export const Delegates = ({
 
   const { isMobile } = useScreenSize();
 
-  // Handle sorting for voting power and delegators
+  // Handle sorting for voting power, delegators, and change fields
   const handleSort = (field: string) => {
     if (sortBy === field) {
       // Toggle direction if same field
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
-      // New field, default to desc for votingPower, asc for delegationsCount
-      setSortBy(field as "votingPower" | "delegationsCount");
-      setSortOrder(field === "votingPower" ? "desc" : "asc");
+      // New field, default to desc for votingPower and change fields, asc for delegationsCount
+      setSortBy(field as "votingPower" | "delegationsCount" | "absoluteChange" | "percentageChange");
+      setSortOrder(field === "delegationsCount" ? "asc" : "desc");
     }
   };
 
@@ -314,9 +314,26 @@ export const Delegates = ({
         );
       },
       header: () => (
-        <h4 className="text-table-header flex w-full items-center justify-center">
-          Change ({daoId})
-        </h4>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-secondary w-full justify-center p-0"
+          onClick={() => handleSort("absoluteChange")}
+        >
+          <h4 className="text-table-header whitespace-nowrap">
+            Change ({daoId})
+          </h4>
+          <ArrowUpDown
+            props={{ className: "size-4" }}
+            activeState={
+              sortBy === "absoluteChange" || sortBy === "percentageChange"
+                ? sortOrder === "asc"
+                  ? ArrowState.UP
+                  : ArrowState.DOWN
+                : ArrowState.DEFAULT
+            }
+          />
+        </Button>
       ),
       meta: {
         columnClassName: "w-64",

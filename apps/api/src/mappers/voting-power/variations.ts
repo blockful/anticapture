@@ -77,7 +77,7 @@ export const VotingPowersRequestSchema = z.object({
     .default(0),
   orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
   orderBy: z
-    .enum(["votingPower", "delegationsCount"])
+    .enum(["votingPower", "delegationsCount", "absoluteChange", "percentageChange"])
     .optional()
     .default("votingPower"),
   addresses: z
@@ -106,6 +106,14 @@ export const VotingPowersRequestSchema = z.object({
     .string()
     .transform((val) => BigInt(val))
     .optional(),
+  fromDate: z.coerce
+    .number()
+    .int()
+    .optional(),
+  toDate: z.coerce
+    .number()
+    .int()
+    .optional(),
 });
 
 export const VotingPowerVariationResponseSchema = z.object({
@@ -122,6 +130,8 @@ export const VotingPowerResponseSchema = z.object({
   votesCount: z.number(),
   proposalsCount: z.number(),
   delegationsCount: z.number(),
+  absoluteChange: z.string(),
+  percentageChange: z.string(),
 });
 
 export const VotingPowersResponseSchema = z.object({
@@ -165,6 +175,11 @@ export type DBVotingPowerVariation = {
 
 export type DBAccountPower = typeof accountPower.$inferSelect;
 
+export type DBAccountPowerWithChanges = DBAccountPower & {
+  absoluteChange: bigint;
+  percentageChange: string;
+};
+
 export const VotingPowerVariationResponseMapper = (
   delta: DBVotingPowerVariation,
 ): VotingPowerVariationResponse => ({
@@ -204,19 +219,22 @@ export const VotingPowerVariationsByAccountIdResponseMapper = (
 };
 
 export const VotingPowerMapper = (
-  data: DBAccountPower,
+  data: DBAccountPower | DBAccountPowerWithChanges,
 ): VotingPowerResponse => {
+  const hasChanges = 'absoluteChange' in data && 'percentageChange' in data;
   return VotingPowerResponseSchema.parse({
     accountId: data.accountId,
     votingPower: data.votingPower.toString(),
     votesCount: data.votesCount,
     proposalsCount: data.proposalsCount,
     delegationsCount: data.delegationsCount,
+    absoluteChange: hasChanges ? data.absoluteChange.toString() : "0",
+    percentageChange: hasChanges ? data.percentageChange : "0",
   });
 };
 
 export const VotingPowersMapper = (
-  items: DBAccountPower[],
+  items: (DBAccountPower | DBAccountPowerWithChanges)[],
   totalCount: number,
 ): VotingPowersResponse => {
   return VotingPowersResponseSchema.parse({

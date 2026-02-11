@@ -1028,7 +1028,9 @@ export enum QueryInput_VotingPowerVariations_OrderDirection {
 
 export enum QueryInput_VotingPowers_OrderBy {
   DelegationsCount = 'delegationsCount',
-  VotingPower = 'votingPower'
+  VotingPower = 'votingPower',
+  AbsoluteChange = 'absoluteChange',
+  PercentageChange = 'percentageChange'
 }
 
 export enum QueryInput_VotingPowers_OrderDirection {

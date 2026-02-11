@@ -5,6 +5,7 @@ import {
   DBVotingPowerVariation,
   AmountFilter,
   DBAccountPower,
+  DBAccountPowerWithChanges,
 } from "@/mappers";
 
 interface HistoricalVotingPowerRepository {
@@ -154,10 +155,12 @@ export class VotingPowerService {
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
-    orderBy: "votingPower" | "delegationsCount",
+    orderBy: "votingPower" | "delegationsCount" | "absoluteChange" | "percentageChange",
     amountFilter: AmountFilter,
     addresses: Address[],
-  ): Promise<{ items: DBAccountPower[]; totalCount: number }> {
+    fromDate?: number,
+    toDate?: number,
+  ): Promise<{ items: (DBAccountPower | DBAccountPowerWithChanges)[]; totalCount: number }> {
     return this.votingPowerRepository.getVotingPowers(
       skip,
       limit,
@@ -165,6 +168,8 @@ export class VotingPowerService {
       orderBy,
       amountFilter,
       addresses,
+      fromDate,
+      toDate,
     );
   }
 

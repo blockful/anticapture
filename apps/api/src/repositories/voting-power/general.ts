@@ -23,6 +23,7 @@ import {
 import {
   AmountFilter,
   DBAccountPower,
+  DBAccountPowerWithChanges,
   DBVotingPowerVariation,
   DBHistoricalVotingPowerWithRelations,
 } from "@/mappers";
@@ -283,10 +284,29 @@ export class VotingPowerRepository {
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
-    orderBy: "votingPower" | "delegationsCount",
+    orderBy: "votingPower" | "delegationsCount" | "absoluteChange" | "percentageChange",
     amountFilter: AmountFilter,
     addresses: Address[],
-  ): Promise<{ items: DBAccountPower[]; totalCount: number }> {
+    fromDate?: number,
+    toDate?: number,
+  ): Promise<{ items: (DBAccountPower | DBAccountPowerWithChanges)[]; totalCount: number }> {
+    const needsHistoricalData = orderBy === "absoluteChange" || orderBy === "percentageChange";
+
+    // If sorting by change fields, we need to calculate changes using historical data
+    if (needsHistoricalData && fromDate !== undefined && toDate !== undefined) {
+      return this.getVotingPowersWithChanges(
+        skip,
+        limit,
+        orderDirection,
+        orderBy as "absoluteChange" | "percentageChange",
+        amountFilter,
+        addresses,
+        fromDate,
+        toDate,
+      );
+    }
+
+    // Standard query without change calculations
     const orderColumn =
       orderBy === "votingPower"
         ? accountPower.votingPower
@@ -300,6 +320,157 @@ export class VotingPowerRepository {
       .offset(skip)
       .limit(limit);
 
+    const [totalCount] = await this.db
+      .select({
+        count: sql<number>`COUNT(*)`.as("count"),
+      })
+      .from(accountPower)
+      .where(this.filterToSql(addresses, amountFilter));
+
+    // Add default change values of 0
+    const itemsWithChanges = items.map(item => ({
+      ...item,
+      absoluteChange: BigInt(0),
+      percentageChange: "0",
+    }));
+
+    return {
+      items: itemsWithChanges,
+      totalCount: Number(totalCount?.count ?? 0),
+    };
+  }
+
+  private async getVotingPowersWithChanges(
+    skip: number,
+    limit: number,
+    orderDirection: "asc" | "desc",
+    orderBy: "absoluteChange" | "percentageChange",
+    amountFilter: AmountFilter,
+    addresses: Address[],
+    fromDate: number,
+    toDate: number,
+  ): Promise<{ items: DBAccountPowerWithChanges[]; totalCount: number }> {
+    const orderDirectionFn = orderDirection === "asc" ? asc : desc;
+
+    // Subquery for latest voting power before fromDate
+    const latestBeforeFrom = this.db
+      .select({
+        accountId: votingPowerHistory.accountId,
+        votingPower: votingPowerHistory.votingPower,
+        rn: sql<number>`ROW_NUMBER() OVER (
+          PARTITION BY ${votingPowerHistory.accountId}
+          ORDER BY ${votingPowerHistory.timestamp} DESC, ${votingPowerHistory.logIndex} DESC
+        )`.as("rn"),
+      })
+      .from(votingPowerHistory)
+      .where(
+        and(
+          addresses.length > 0
+            ? inArray(votingPowerHistory.accountId, addresses)
+            : undefined,
+          lte(votingPowerHistory.timestamp, BigInt(fromDate)),
+        ),
+      )
+      .as("latest_before_from");
+
+    // Subquery for latest voting power before toDate
+    const latestBeforeTo = this.db
+      .select({
+        accountId: votingPowerHistory.accountId,
+        votingPower: votingPowerHistory.votingPower,
+        rn: sql<number>`ROW_NUMBER() OVER (
+          PARTITION BY ${votingPowerHistory.accountId}
+          ORDER BY ${votingPowerHistory.timestamp} DESC, ${votingPowerHistory.logIndex} DESC
+        )`.as("rn"),
+      })
+      .from(votingPowerHistory)
+      .where(
+        and(
+          addresses.length > 0
+            ? inArray(votingPowerHistory.accountId, addresses)
+            : undefined,
+          lte(votingPowerHistory.timestamp, BigInt(toDate)),
+        ),
+      )
+      .as("latest_before_to");
+
+    // Determine order column based on orderBy parameter
+    const orderColumn =
+      orderBy === "absoluteChange"
+        ? sql<bigint>`ABS(COALESCE(to_data.voting_power, 0) - COALESCE(from_data.voting_power, 0))`
+        : sql<string>`
+          CASE
+            WHEN COALESCE(from_data.voting_power, 0) = 0 THEN
+              CASE WHEN COALESCE(to_data.voting_power, 0) = 0 THEN '0' ELSE ${PERCENTAGE_NO_BASELINE} END
+            ELSE
+              ABS(((COALESCE(to_data.voting_power, 0) - from_data.voting_power)::numeric / from_data.voting_power::numeric) * 100)
+          END`;
+
+    // Main query with changes
+    const itemsWithHistoricalData = await this.db
+      .select({
+        accountId: sql<Address>`COALESCE(from_data.account_id, to_data.account_id)`,
+        previousVotingPower: sql<bigint>`COALESCE(from_data.voting_power, 0)`,
+        currentVotingPower: sql<bigint>`COALESCE(to_data.voting_power, 0)`,
+        absoluteChange: sql<bigint>`(COALESCE(to_data.voting_power, 0) - COALESCE(from_data.voting_power, 0))`,
+        percentageChange: sql<string>`
+          CASE
+            WHEN COALESCE(from_data.voting_power, 0) = 0 THEN
+              CASE WHEN COALESCE(to_data.voting_power, 0) = 0 THEN '0' ELSE ${PERCENTAGE_NO_BASELINE} END
+            ELSE
+              (((COALESCE(to_data.voting_power, 0) - from_data.voting_power)::numeric / from_data.voting_power::numeric) * 100)::text
+          END
+        `,
+      })
+      .from(sql`(SELECT * FROM ${latestBeforeFrom} WHERE rn = 1) as from_data`)
+      .fullJoin(
+        sql`(SELECT * FROM ${latestBeforeTo} WHERE rn = 1) as to_data`,
+        sql`from_data.account_id = to_data.account_id`,
+      )
+      .orderBy(orderDirectionFn(orderColumn))
+      .offset(skip)
+      .limit(limit);
+
+    // Get current account power data for these accounts
+    const accountIds = itemsWithHistoricalData.map((item) => item.accountId);
+
+    const currentAccountPowers = await this.db
+      .select()
+      .from(accountPower)
+      .where(inArray(accountPower.accountId, accountIds));
+
+    // Create a map for quick lookup
+    const accountPowerMap = new Map(
+      currentAccountPowers.map((ap) => [ap.accountId, ap]),
+    );
+
+    // Merge the data
+    const items: DBAccountPowerWithChanges[] = itemsWithHistoricalData.map(
+      (item) => {
+        const baseData = accountPowerMap.get(item.accountId);
+        if (!baseData) {
+          // Fallback if account power data not found
+          return {
+            accountId: item.accountId,
+            daoId: "",
+            votingPower: item.currentVotingPower,
+            votesCount: 0,
+            proposalsCount: 0,
+            delegationsCount: 0,
+            lastVoteTimestamp: BigInt(0),
+            absoluteChange: item.absoluteChange,
+            percentageChange: item.percentageChange,
+          };
+        }
+        return {
+          ...baseData,
+          absoluteChange: item.absoluteChange,
+          percentageChange: item.percentageChange,
+        };
+      },
+    );
+
+    // Get total count (this is approximate for performance)
     const [totalCount] = await this.db
       .select({
         count: sql<number>`COUNT(*)`.as("count"),
