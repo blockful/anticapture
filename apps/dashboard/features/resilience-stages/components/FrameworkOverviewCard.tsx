@@ -92,17 +92,14 @@ export const FrameworkOverviewCard = ({
                 </p>
                 <div className="flex flex-col gap-4">
                   {group.fields.map((field) => (
-                    <div
-                      key={field.name}
-                      className="flex items-center gap-2"
-                    >
+                    <div key={field.name} className="flex items-center gap-2">
                       <DotFilledIcon
                         className={cn("size-4 shrink-0", group.config.dotColor)}
                       />
                       <UnderlinedButton
+                        className="text-primary border-border-contrast"
                         onClick={() => onMetricClick?.(field)}
                       >
-                        <KeyRound className="size-6" />
                         {field.name}
                       </UnderlinedButton>
                     </div>
