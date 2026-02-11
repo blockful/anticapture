@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "start": "node dist/index.js",
-    "build": "tsc",
+    "build": "tsup src/index.ts --format esm --clean",
+    "start": "node dist/index.mjs",
     "sync": "tsx src/scripts/sync-top-addresses.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
@@ -34,6 +34,7 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
     "prettier": "^3.5.3",
+    "tsup": "^8.5.1",
     "tsx": "^4.19.4",
     "typescript": "^5.8.3"
   },
