@@ -77,7 +77,7 @@ export const StagesCard = ({ currentDaoStage }: StagesCardProps) => {
               </div>
 
               {/* Stage label and description */}
-              <div className="flex flex-col px-1.5 leading-5">
+              <div className="flex flex-col leading-5 lg:px-1.5">
                 <p
                   className={cn(
                     "font-mono text-[13px] font-medium uppercase tracking-wider",
