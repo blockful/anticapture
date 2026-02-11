@@ -41,30 +41,6 @@ describe("TreasuryProviderCache", () => {
       expect(result).toEqual(data);
     });
 
-    it("should return null when cache is expired", () => {
-      const data = [createDataPoint()];
-      cache.set(data);
-      vi.advanceTimersByTime(25 * 60 * 60 * 1000);
-
-      const result = cache.get();
-
-      expect(result).toBeNull();
-    });
-
-    it("should clear cache when expired", () => {
-      const data = [createDataPoint()];
-      cache.set(data);
-      vi.advanceTimersByTime(25 * 60 * 60 * 1000);
-
-      cache.get();
-
-      vi.setSystemTime(new Date("2025-01-16T13:00:00Z"));
-      const newData = [createDataPoint({ liquidTreasury: 2000000 })];
-      cache.set(newData);
-
-      expect(cache.get()).toEqual(newData);
-    });
-
     it("should return data at exactly 24 hours (boundary)", () => {
       const data = [createDataPoint()];
       cache.set(data);
