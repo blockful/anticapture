@@ -17,6 +17,7 @@
     "clean": {},
     "lint": {},
     "lint:fix": {},
-    "typecheck": {}
+    "typecheck": {},
+    "test": {}
   }
 }
