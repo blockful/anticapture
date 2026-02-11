@@ -3,6 +3,7 @@ import { TreasuryService } from "./treasury.service";
 import { TreasuryProvider } from "./providers";
 import { PriceProvider, LiquidTreasuryDataPoint } from "./types";
 import { TreasuryRepository } from "@/repositories/treasury";
+import { parseEther } from "viem";
 
 /**
  * Fakes for dependency injection
@@ -10,11 +11,16 @@ import { TreasuryRepository } from "@/repositories/treasury";
 class FakeTreasuryProvider implements TreasuryProvider {
   private data: LiquidTreasuryDataPoint[] = [];
 
-  setData(data: LiquidTreasuryDataPoint[]) {
-    this.data = data;
+  setData(data: { date: number; value: number }[]) {
+    this.data = data.map((item) => ({
+      date: item.date,
+      liquidTreasury: item.value,
+    }));
   }
 
-  async fetchTreasury(_cutoffTimestamp: number): Promise<LiquidTreasuryDataPoint[]> {
+  async fetchTreasury(
+    _cutoffTimestamp: number,
+  ): Promise<LiquidTreasuryDataPoint[]> {
     return this.data;
   }
 }
@@ -33,22 +39,21 @@ class FakePriceProvider implements PriceProvider {
 
 class FakeTreasuryRepository {
   private tokenQuantities: Map<number, bigint> = new Map();
-  private lastKnownQuantity: bigint | null = null;
 
   setTokenQuantities(quantities: Map<number, bigint>) {
     this.tokenQuantities = quantities;
   }
 
-  setLastKnownQuantity(quantity: bigint | null) {
-    this.lastKnownQuantity = quantity;
-  }
-
-  async getTokenQuantities(_cutoffTimestamp: number): Promise<Map<number, bigint>> {
+  async getTokenQuantities(
+    _cutoffTimestamp: number,
+  ): Promise<Map<number, bigint>> {
     return this.tokenQuantities;
   }
 
-  async getLastTokenQuantityBeforeDate(_cutoffTimestamp: number): Promise<bigint | null> {
-    return this.lastKnownQuantity;
+  async getLastTokenQuantityBeforeDate(
+    _cutoffTimestamp: number,
+  ): Promise<bigint | null> {
+    return null;
   }
 }
 
@@ -57,17 +62,17 @@ describe("TreasuryService", () => {
   const FIXED_TIMESTAMP = Math.floor(FIXED_DATE.getTime() / 1000); // 1736937600
   const ONE_DAY = 86400;
 
-  let fakeProvider: FakeTreasuryProvider;
-  let fakePriceProvider: FakePriceProvider;
-  let fakeRepository: FakeTreasuryRepository;
+  let liquidProvider: FakeTreasuryProvider;
+  let priceProvider: FakePriceProvider;
+  let metricRepo: FakeTreasuryRepository;
 
   beforeEach(() => {
     vi.useFakeTimers();
     vi.setSystemTime(FIXED_DATE);
 
-    fakeProvider = new FakeTreasuryProvider();
-    fakePriceProvider = new FakePriceProvider();
-    fakeRepository = new FakeTreasuryRepository();
+    liquidProvider = new FakeTreasuryProvider();
+    priceProvider = new FakePriceProvider();
+    metricRepo = new FakeTreasuryRepository();
   });
 
   afterEach(() => {
@@ -77,7 +82,7 @@ describe("TreasuryService", () => {
   describe("getLiquidTreasury", () => {
     it("should return empty when provider is undefined", async () => {
       const service = new TreasuryService(
-        fakeRepository as unknown as TreasuryRepository,
+        metricRepo as unknown as TreasuryRepository,
         undefined,
         undefined,
       );
@@ -89,10 +94,10 @@ describe("TreasuryService", () => {
     });
 
     it("should return empty when provider returns empty array", async () => {
-      fakeProvider.setData([]);
+      liquidProvider.setData([]);
       const service = new TreasuryService(
-        fakeRepository as unknown as TreasuryRepository,
-        fakeProvider,
+        metricRepo as unknown as TreasuryRepository,
+        liquidProvider,
         undefined,
       );
 
@@ -103,57 +108,54 @@ describe("TreasuryService", () => {
     });
 
     it("should return items sorted ascending", async () => {
-      const day1 = FIXED_TIMESTAMP - ONE_DAY * 2;
-      const day2 = FIXED_TIMESTAMP - ONE_DAY;
-      const day3 = FIXED_TIMESTAMP;
-
-      fakeProvider.setData([
-        { date: day1, liquidTreasury: 1000 },
-        { date: day2, liquidTreasury: 2000 },
-        { date: day3, liquidTreasury: 3000 },
-      ]);
+      const expected = [
+        { date: FIXED_TIMESTAMP - ONE_DAY * 2, value: 1000 },
+        { date: FIXED_TIMESTAMP - ONE_DAY, value: 2000 },
+        { date: FIXED_TIMESTAMP, value: 3000 },
+      ];
+      liquidProvider.setData(expected);
 
       const service = new TreasuryService(
-        fakeRepository as unknown as TreasuryRepository,
-        fakeProvider,
+        metricRepo as unknown as TreasuryRepository,
+        liquidProvider,
         undefined,
       );
 
       const result = await service.getLiquidTreasury(7, "asc");
 
-      expect(result.items.length).toBeGreaterThanOrEqual(3);
-      expect(result.items[0]?.date).toBeLessThan(result.items[1]?.date ?? 0);
-      expect(result.totalCount).toBe(result.items.length);
+      expect(result).toEqual({
+        items: expected,
+        totalCount: expected.length,
+      });
     });
 
     it("should return items sorted descending", async () => {
-      const day1 = FIXED_TIMESTAMP - ONE_DAY * 2;
-      const day2 = FIXED_TIMESTAMP - ONE_DAY;
-      const day3 = FIXED_TIMESTAMP;
-
-      fakeProvider.setData([
-        { date: day1, liquidTreasury: 1000 },
-        { date: day2, liquidTreasury: 2000 },
-        { date: day3, liquidTreasury: 3000 },
-      ]);
+      const expected = [
+        { date: FIXED_TIMESTAMP - ONE_DAY * 2, value: 1000 },
+        { date: FIXED_TIMESTAMP - ONE_DAY, value: 2000 },
+        { date: FIXED_TIMESTAMP, value: 3000 },
+      ];
+      liquidProvider.setData(expected);
 
       const service = new TreasuryService(
-        fakeRepository as unknown as TreasuryRepository,
-        fakeProvider,
+        metricRepo as unknown as TreasuryRepository,
+        liquidProvider,
         undefined,
       );
 
       const result = await service.getLiquidTreasury(7, "desc");
 
-      expect(result.items.length).toBeGreaterThanOrEqual(3);
-      expect(result.items[0]?.date).toBeGreaterThan(result.items[1]?.date ?? 0);
+      expect(result).toEqual({
+        items: expected.sort((a, b) => b.date - a.date),
+        totalCount: expected.length,
+      });
     });
   });
 
   describe("getTokenTreasury", () => {
     it("should return empty when priceProvider is undefined", async () => {
       const service = new TreasuryService(
-        fakeRepository as unknown as TreasuryRepository,
+        metricRepo as unknown as TreasuryRepository,
         undefined,
         undefined,
       );
@@ -165,13 +167,13 @@ describe("TreasuryService", () => {
     });
 
     it("should return empty when repository and priceProvider return empty", async () => {
-      fakeRepository.setTokenQuantities(new Map());
-      fakePriceProvider.setPrices(new Map());
+      metricRepo.setTokenQuantities(new Map());
+      priceProvider.setPrices(new Map());
 
       const service = new TreasuryService(
-        fakeRepository as unknown as TreasuryRepository,
+        metricRepo as unknown as TreasuryRepository,
         undefined,
-        fakePriceProvider,
+        priceProvider,
       );
 
       const result = await service.getTokenTreasury(7, "asc", 18);
@@ -181,40 +183,39 @@ describe("TreasuryService", () => {
     });
 
     it("should calculate value correctly with decimals", async () => {
-      // Both repository and priceProvider return timestamps in seconds (normalized to midnight)
-      const dayTimestamp = FIXED_TIMESTAMP;
-
-      // 100 tokens with 18 decimals = 100 * 10^18
-      const quantity = 100n * 10n ** 18n;
+      const quantity = 100;
       const price = 10; // $10 per token
 
-      fakeRepository.setTokenQuantities(new Map([[dayTimestamp, quantity]]));
-      fakePriceProvider.setPrices(new Map([[dayTimestamp, price]]));
+      metricRepo.setTokenQuantities(
+        new Map([[FIXED_TIMESTAMP, parseEther(quantity.toString())]]),
+      );
+      priceProvider.setPrices(new Map([[FIXED_TIMESTAMP, price]]));
 
       const service = new TreasuryService(
-        fakeRepository as unknown as TreasuryRepository,
+        metricRepo as unknown as TreasuryRepository,
         undefined,
-        fakePriceProvider,
+        priceProvider,
       );
 
       const result = await service.getTokenTreasury(7, "asc", 18);
 
-      // 100 tokens * $10 = $1000
-      const todayItem = result.items.find((item) => item.value > 0);
-      expect(todayItem?.value).toBe(1000);
+      expect(result).toEqual({
+        items: [{ date: FIXED_TIMESTAMP, value: quantity * price }],
+        totalCount: 1,
+      });
     });
 
     it("should return items sorted ascending", async () => {
       const day1 = FIXED_TIMESTAMP - ONE_DAY * 2;
       const day2 = FIXED_TIMESTAMP - ONE_DAY;
 
-      fakeRepository.setTokenQuantities(
+      metricRepo.setTokenQuantities(
         new Map([
-          [day1, 100n * 10n ** 18n],
-          [day2, 200n * 10n ** 18n],
+          [day1, parseEther("100")],
+          [day2, parseEther("200")],
         ]),
       );
-      fakePriceProvider.setPrices(
+      priceProvider.setPrices(
         new Map([
           [day1, 10],
           [day2, 10],
@@ -222,28 +223,34 @@ describe("TreasuryService", () => {
       );
 
       const service = new TreasuryService(
-        fakeRepository as unknown as TreasuryRepository,
+        metricRepo as unknown as TreasuryRepository,
         undefined,
-        fakePriceProvider,
+        priceProvider,
       );
 
       const result = await service.getTokenTreasury(7, "asc", 18);
 
-      expect(result.items.length).toBeGreaterThanOrEqual(2);
-      expect(result.items[0]?.date).toBeLessThan(result.items[1]?.date ?? 0);
+      expect(result).toEqual({
+        items: [
+          { date: day1, value: 1000 },
+          { date: day2, value: 2000 },
+          { date: FIXED_TIMESTAMP, value: 2000 }, // forward-filled value
+        ],
+        totalCount: 3,
+      });
     });
 
     it("should return items sorted descending", async () => {
       const day1 = FIXED_TIMESTAMP - ONE_DAY * 2;
       const day2 = FIXED_TIMESTAMP - ONE_DAY;
 
-      fakeRepository.setTokenQuantities(
+      metricRepo.setTokenQuantities(
         new Map([
-          [day1, 100n * 10n ** 18n],
-          [day2, 200n * 10n ** 18n],
+          [day1, parseEther("100")],
+          [day2, parseEther("200")],
         ]),
       );
-      fakePriceProvider.setPrices(
+      priceProvider.setPrices(
         new Map([
           [day1, 10],
           [day2, 10],
@@ -251,51 +258,69 @@ describe("TreasuryService", () => {
       );
 
       const service = new TreasuryService(
-        fakeRepository as unknown as TreasuryRepository,
+        metricRepo as unknown as TreasuryRepository,
         undefined,
-        fakePriceProvider,
+        priceProvider,
       );
 
       const result = await service.getTokenTreasury(7, "desc", 18);
 
-      expect(result.items.length).toBeGreaterThanOrEqual(2);
-      expect(result.items[0]?.date).toBeGreaterThan(result.items[1]?.date ?? 0);
+      expect(result).toEqual({
+        items: [
+          { date: FIXED_TIMESTAMP, value: 2000 }, // forward-filled value
+          { date: day2, value: 2000 },
+          { date: day1, value: 1000 },
+        ],
+        totalCount: 3,
+      });
     });
 
-    it("should use lastKnownQuantity from repository", async () => {
-      const dayTimestamp = FIXED_TIMESTAMP;
+    it("should return forward-filled values", async () => {
+      const fourDaysAgo = FIXED_TIMESTAMP - ONE_DAY * 4;
 
-      // No quantities in range, but has last known value
-      fakeRepository.setTokenQuantities(new Map());
-      fakeRepository.setLastKnownQuantity(50n * 10n ** 18n); // 50 tokens
-      fakePriceProvider.setPrices(new Map([[dayTimestamp, 20]])); // $20 per token
+      metricRepo.setTokenQuantities(
+        new Map([[fourDaysAgo, parseEther("100")]]),
+      );
+      priceProvider.setPrices(new Map([[fourDaysAgo, 10]]));
 
       const service = new TreasuryService(
-        fakeRepository as unknown as TreasuryRepository,
+        metricRepo as unknown as TreasuryRepository,
         undefined,
-        fakePriceProvider,
+        priceProvider,
       );
 
       const result = await service.getTokenTreasury(7, "asc", 18);
 
-      // Should use last known quantity: 50 * $20 = $1000
-      const itemWithValue = result.items.find((item) => item.value > 0);
-      expect(itemWithValue?.value).toBe(1000);
+      expect(result).toEqual({
+        items: [
+          { date: fourDaysAgo, value: 1000 },
+          /* forward-filled values */
+          { date: FIXED_TIMESTAMP - ONE_DAY * 3, value: 1000 },
+          { date: FIXED_TIMESTAMP - ONE_DAY * 2, value: 1000 },
+          { date: FIXED_TIMESTAMP - ONE_DAY, value: 1000 },
+          { date: FIXED_TIMESTAMP, value: 1000 },
+          /* */
+        ],
+        totalCount: 5,
+      });
     });
   });
 
   describe("getTotalTreasury", () => {
-    it("should return empty when both liquid and token are empty", async () => {
-      fakeProvider.setData([]);
-      fakeRepository.setTokenQuantities(new Map());
-      fakePriceProvider.setPrices(new Map());
+    let service: TreasuryService;
 
-      const service = new TreasuryService(
-        fakeRepository as unknown as TreasuryRepository,
-        fakeProvider,
-        fakePriceProvider,
+    beforeEach(() => {
+      liquidProvider.setData([]);
+      metricRepo.setTokenQuantities(new Map());
+      priceProvider.setPrices(new Map());
+      service = new TreasuryService(
+        metricRepo as unknown as TreasuryRepository,
+        liquidProvider,
+        priceProvider,
       );
+    });
 
+    it("should return empty when both liquid and token are empty", async () => {
       const result = await service.getTotalTreasury(7, "asc", 18);
 
       expect(result.items).toHaveLength(0);
@@ -306,62 +331,54 @@ describe("TreasuryService", () => {
       const dayTimestamp = FIXED_TIMESTAMP;
 
       // Liquid: $5000
-      fakeProvider.setData([{ date: dayTimestamp, liquidTreasury: 5000 }]);
+      liquidProvider.setData([{ date: dayTimestamp, value: 5000 }]);
 
       // Token: 100 tokens * $30 = $3000
-      fakeRepository.setTokenQuantities(new Map([[dayTimestamp, 100n * 10n ** 18n]]));
-      fakePriceProvider.setPrices(new Map([[dayTimestamp, 30]]));
-
-      const service = new TreasuryService(
-        fakeRepository as unknown as TreasuryRepository,
-        fakeProvider,
-        fakePriceProvider,
+      metricRepo.setTokenQuantities(
+        new Map([[dayTimestamp, parseEther("100")]]),
       );
+      priceProvider.setPrices(new Map([[dayTimestamp, 30]]));
 
       const result = await service.getTotalTreasury(7, "asc", 18);
 
-      // Total = $5000 + $3000 = $8000
-      const todayItem = result.items.find((item) => item.date === dayTimestamp);
-      expect(todayItem?.value).toBe(8000);
+      expect(result).toEqual({
+        items: [{ date: FIXED_TIMESTAMP, value: 8000 }],
+        totalCount: 1,
+      });
     });
 
     it("should work when only liquid has data", async () => {
-      fakeProvider.setData([{ date: FIXED_TIMESTAMP, liquidTreasury: 5000 }]);
-      fakeRepository.setTokenQuantities(new Map());
-      fakePriceProvider.setPrices(new Map());
-
-      const service = new TreasuryService(
-        fakeRepository as unknown as TreasuryRepository,
-        fakeProvider,
-        fakePriceProvider,
-      );
+      liquidProvider.setData([{ date: FIXED_TIMESTAMP, value: 5000 }]);
 
       const result = await service.getTotalTreasury(7, "asc", 18);
 
-      expect(result.items.length).toBeGreaterThan(0);
-      const todayItem = result.items.find((item) => item.date === FIXED_TIMESTAMP);
-      expect(todayItem?.value).toBe(5000);
+      expect(result).toEqual({
+        items: [{ date: FIXED_TIMESTAMP, value: 5000 }],
+        totalCount: 1,
+      });
     });
 
     it("should work when only token has data", async () => {
       const dayTimestamp = FIXED_TIMESTAMP;
 
-      fakeProvider.setData([]);
-      fakeRepository.setTokenQuantities(new Map([[dayTimestamp, 100n * 10n ** 18n]]));
-      fakePriceProvider.setPrices(new Map([[dayTimestamp, 25]]));
+      liquidProvider.setData([]);
+      metricRepo.setTokenQuantities(
+        new Map([[dayTimestamp, parseEther("100")]]),
+      );
+      priceProvider.setPrices(new Map([[dayTimestamp, 25]]));
 
       const service = new TreasuryService(
-        fakeRepository as unknown as TreasuryRepository,
+        metricRepo as unknown as TreasuryRepository,
         undefined, // no liquid provider
-        fakePriceProvider,
+        priceProvider,
       );
 
       const result = await service.getTotalTreasury(7, "asc", 18);
 
-      expect(result.items.length).toBeGreaterThan(0);
-      // 100 tokens * $25 = $2500
-      const itemWithValue = result.items.find((item) => item.value > 0);
-      expect(itemWithValue?.value).toBe(2500);
+      expect(result).toEqual({
+        items: [{ date: FIXED_TIMESTAMP, value: 2500 }],
+        totalCount: 1,
+      });
     });
   });
 });

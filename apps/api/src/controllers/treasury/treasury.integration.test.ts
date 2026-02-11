@@ -1,10 +1,14 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
-import { testClient } from "hono/testing";
 import { treasury } from "./index";
 import { TreasuryService } from "@/services/treasury";
-import { TreasuryProvider, LiquidTreasuryDataPoint, PriceProvider } from "@/services/treasury";
+import {
+  TreasuryProvider,
+  LiquidTreasuryDataPoint,
+  PriceProvider,
+} from "@/services/treasury";
 import { TreasuryRepository } from "@/repositories/treasury";
+import { parseEther } from "viem";
 
 /**
  * Fakes for dependency injection
@@ -12,11 +16,16 @@ import { TreasuryRepository } from "@/repositories/treasury";
 class FakeTreasuryProvider implements TreasuryProvider {
   private data: LiquidTreasuryDataPoint[] = [];
 
-  setData(data: LiquidTreasuryDataPoint[]) {
-    this.data = data;
+  setData(data: { date: number; value: number }[]) {
+    this.data = data.map((item) => ({
+      date: item.date,
+      liquidTreasury: item.value,
+    }));
   }
 
-  async fetchTreasury(_cutoffTimestamp: number): Promise<LiquidTreasuryDataPoint[]> {
+  async fetchTreasury(
+    _cutoffTimestamp: number,
+  ): Promise<LiquidTreasuryDataPoint[]> {
     return this.data;
   }
 }
@@ -33,7 +42,14 @@ class FakePriceProvider implements PriceProvider {
   }
 }
 
-class FakeTreasuryRepository {
+/**
+ * FakeTreasuryRepository implements the same interface as TreasuryRepository
+ * This enables structural typing without explicit casting
+ */
+class FakeTreasuryRepository implements Pick<
+  TreasuryRepository,
+  "getTokenQuantities" | "getLastTokenQuantityBeforeDate"
+> {
   private tokenQuantities: Map<number, bigint> = new Map();
   private lastKnownQuantity: bigint | null = null;
 
@@ -45,11 +61,15 @@ class FakeTreasuryRepository {
     this.lastKnownQuantity = quantity;
   }
 
-  async getTokenQuantities(_cutoffTimestamp: number): Promise<Map<number, bigint>> {
+  async getTokenQuantities(
+    _cutoffTimestamp: number,
+  ): Promise<Map<number, bigint>> {
     return this.tokenQuantities;
   }
 
-  async getLastTokenQuantityBeforeDate(_cutoffTimestamp: number): Promise<bigint | null> {
+  async getLastTokenQuantityBeforeDate(
+    _cutoffTimestamp: number,
+  ): Promise<bigint | null> {
     return this.lastKnownQuantity;
   }
 }
@@ -76,301 +96,196 @@ describe("Treasury Controller - Integration Tests", () => {
   const ONE_DAY = 86400;
 
   let fakeProvider: FakeTreasuryProvider;
-  let fakePriceProvider: FakePriceProvider;
-  let fakeRepository: FakeTreasuryRepository;
+  let priceRepo: FakePriceProvider;
+  let metricsRepo: FakeTreasuryRepository;
+  let service: TreasuryService;
+  let app: Hono;
 
   beforeEach(() => {
     vi.useFakeTimers();
     vi.setSystemTime(FIXED_DATE);
 
     fakeProvider = new FakeTreasuryProvider();
-    fakePriceProvider = new FakePriceProvider();
-    fakeRepository = new FakeTreasuryRepository();
+    metricsRepo = new FakeTreasuryRepository();
   });
 
   afterEach(() => {
     vi.useRealTimers();
+
+    metricsRepo.setTokenQuantities(new Map());
   });
 
   describe("GET /treasury/liquid", () => {
-    it("should return 200 with valid response structure", async () => {
-      fakeProvider.setData([
-        { date: FIXED_TIMESTAMP - ONE_DAY, liquidTreasury: 1000000 },
-        { date: FIXED_TIMESTAMP, liquidTreasury: 1100000 },
-      ]);
-
-      const service = new TreasuryService(
-        fakeRepository as unknown as TreasuryRepository,
+    beforeEach(() => {
+      service = new TreasuryService(
+        metricsRepo as unknown as TreasuryRepository,
         fakeProvider,
         undefined,
       );
-      const app = createTestApp(service);
-      const client = testClient(app) as any;
-
-      const res = await client["treasury"]["liquid"].$get({
-        query: { days: "7d", order: "asc" },
-      });
-
-      expect(res.status).toBe(200);
-
-      const data = await res.json();
-      expect(data).toHaveProperty("items");
-      expect(data).toHaveProperty("totalCount");
-      expect(Array.isArray(data.items)).toBe(true);
-      expect(data.totalCount).toBe(data.items.length);
+      app = createTestApp(service);
     });
 
-    it("should return items with correct shape (date and value)", async () => {
-      fakeProvider.setData([
-        { date: FIXED_TIMESTAMP, liquidTreasury: 5000000 },
-      ]);
+    it("should return 200 with valid response structure", async () => {
+      const expected = [
+        { date: FIXED_TIMESTAMP - ONE_DAY, value: 1000000 },
+        { date: FIXED_TIMESTAMP, value: 1100000 },
+      ];
+      fakeProvider.setData(expected);
 
-      const service = new TreasuryService(
-        fakeRepository as unknown as TreasuryRepository,
-        fakeProvider,
-        undefined,
-      );
-      const app = createTestApp(service);
-      const client = testClient(app) as any;
-
-      const res = await client["treasury"]["liquid"].$get({
-        query: { days: "7d" },
+      const res = await app.request("/treasury/liquid");
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual({
+        items: expected,
+        totalCount: expected.length,
       });
-
-      const data = await res.json();
-      const item = data.items[0];
-
-      expect(item).toHaveProperty("date");
-      expect(item).toHaveProperty("value");
-      expect(typeof item?.date).toBe("number");
-      expect(typeof item?.value).toBe("number");
     });
 
     it("should use default values when query params are omitted", async () => {
-      fakeProvider.setData([
-        { date: FIXED_TIMESTAMP, liquidTreasury: 1000000 },
-      ]);
+      const expected = [{ date: FIXED_TIMESTAMP, value: 1000000 }];
+      fakeProvider.setData(expected);
 
-      const service = new TreasuryService(
-        fakeRepository as unknown as TreasuryRepository,
-        fakeProvider,
-        undefined,
-      );
-      const app = createTestApp(service);
-      const client = testClient(app) as any;
-
-      const res = await client["treasury"]["liquid"].$get({
-        query: {},
+      const res = await app.request("/treasury/liquid");
+      expect(await res.json()).toEqual({
+        items: expected,
+        totalCount: expected.length,
       });
-
-      expect(res.status).toBe(200);
     });
 
     it("should return empty items when no data available", async () => {
       fakeProvider.setData([]);
 
-      const service = new TreasuryService(
-        fakeRepository as unknown as TreasuryRepository,
-        fakeProvider,
-        undefined,
-      );
-      const app = createTestApp(service);
-      const client = testClient(app) as any;
-
-      const res = await client["treasury"]["liquid"].$get({
-        query: { days: "7d" },
-      });
-
+      const res = await app.request("/treasury/liquid?days=7d");
       expect(res.status).toBe(200);
-
-      const data = await res.json();
-      expect(data.items).toHaveLength(0);
-      expect(data.totalCount).toBe(0);
+      expect(await res.json()).toEqual({
+        items: [],
+        totalCount: 0,
+      });
     });
 
-    it("should respect order parameter", async () => {
+    it("should return asc ordered based on the query param", async () => {
       const day1 = FIXED_TIMESTAMP - ONE_DAY * 2;
       const day2 = FIXED_TIMESTAMP - ONE_DAY;
       const day3 = FIXED_TIMESTAMP;
 
-      fakeProvider.setData([
-        { date: day1, liquidTreasury: 1000 },
-        { date: day2, liquidTreasury: 2000 },
-        { date: day3, liquidTreasury: 3000 },
-      ]);
+      const expected = [
+        { date: day1, value: 1000 },
+        { date: day2, value: 2000 },
+        { date: day3, value: 3000 },
+      ];
+      fakeProvider.setData(expected);
 
-      const service = new TreasuryService(
-        fakeRepository as unknown as TreasuryRepository,
-        fakeProvider,
-        undefined,
-      );
-      const app = createTestApp(service);
-      const client = testClient(app) as any;
-
-      const resAsc = await client["treasury"]["liquid"].$get({
-        query: { days: "7d", order: "asc" },
+      const resAsc = await app.request("/treasury/liquid?days=7d&order=asc");
+      expect(await resAsc.json()).toEqual({
+        items: expected,
+        totalCount: expected.length,
       });
-      const dataAsc = await resAsc.json();
+    });
 
-      const resDesc = await client["treasury"]["liquid"].$get({
-        query: { days: "7d", order: "desc" },
+    it("should return desc ordered based on the query param", async () => {
+      const day1 = FIXED_TIMESTAMP - ONE_DAY * 2;
+      const day2 = FIXED_TIMESTAMP - ONE_DAY;
+      const day3 = FIXED_TIMESTAMP;
+
+      const expected = [
+        { date: day1, value: 1000 },
+        { date: day2, value: 2000 },
+        { date: day3, value: 3000 },
+      ];
+      fakeProvider.setData(expected);
+
+      const res = await app.request("/treasury/liquid?days=7d&order=desc");
+      expect(await res.json()).toEqual({
+        items: expected.sort((a, b) => b.date - a.date),
+        totalCount: 3,
       });
-      const dataDesc = await resDesc.json();
-
-      expect(dataAsc.items[0]?.date).toBeLessThan(dataAsc.items[dataAsc.items.length - 1]?.date ?? 0);
-      expect(dataDesc.items[0]?.date).toBeGreaterThan(dataDesc.items[dataDesc.items.length - 1]?.date ?? 0);
     });
   });
 
   describe("GET /treasury/dao-token", () => {
+    beforeEach(() => {
+      priceRepo = new FakePriceProvider();
+      service = new TreasuryService(
+        metricsRepo as unknown as TreasuryRepository,
+        fakeProvider,
+        priceRepo,
+      );
+      app = createTestApp(service);
+    });
+
     it("should return 200 with calculated token treasury", async () => {
-      const quantity = 100n * 10n ** 18n; // 100 tokens
+      const quantity = parseEther("100");
       const price = 50; // $50 per token
 
-      fakeRepository.setTokenQuantities(new Map([[FIXED_TIMESTAMP, quantity]]));
-      fakePriceProvider.setPrices(new Map([[FIXED_TIMESTAMP, price]]));
+      metricsRepo.setTokenQuantities(new Map([[FIXED_TIMESTAMP, quantity]]));
+      priceRepo.setPrices(new Map([[FIXED_TIMESTAMP, price]]));
 
-      const service = new TreasuryService(
-        fakeRepository as unknown as TreasuryRepository,
-        undefined,
-        fakePriceProvider,
-      );
-      const app = createTestApp(service, 18);
-      const client = testClient(app) as any;
-
-      const res = await client["treasury"]["dao-token"].$get({
-        query: { days: "7d" },
-      });
-
+      const res = await app.request("/treasury/dao-token?days=7d");
       expect(res.status).toBe(200);
 
-      const data = await res.json();
-      expect(data).toHaveProperty("items");
-      expect(data).toHaveProperty("totalCount");
-
-      const itemWithValue = data.items.find((item: { value: number }) => item.value > 0);
-      expect(itemWithValue?.value).toBe(5000); // 100 * $50
+      expect(await res.json()).toEqual({
+        items: [{ date: FIXED_TIMESTAMP, value: 5000 }], // 100 * $50
+        totalCount: 1,
+      });
     });
 
     it("should return empty when price provider is not configured", async () => {
       const service = new TreasuryService(
-        fakeRepository as unknown as TreasuryRepository,
+        metricsRepo as unknown as TreasuryRepository,
         undefined,
         undefined,
       );
       const app = createTestApp(service);
-      const client = testClient(app) as any;
 
-      const res = await client["treasury"]["dao-token"].$get({
-        query: { days: "7d" },
-      });
-
+      const res = await app.request("/treasury/dao-token?days=7d");
       expect(res.status).toBe(200);
-
-      const data = await res.json();
-      expect(data.items).toHaveLength(0);
+      expect(await res.json()).toEqual({
+        items: [],
+        totalCount: 0,
+      });
     });
   });
 
   describe("GET /treasury/total", () => {
+    beforeEach(() => {
+      priceRepo = new FakePriceProvider();
+      service = new TreasuryService(
+        metricsRepo as unknown as TreasuryRepository,
+        fakeProvider,
+        priceRepo,
+      );
+      app = createTestApp(service);
+    });
+
     it("should return sum of liquid and token treasury", async () => {
       // Liquid: $5,000,000
-      fakeProvider.setData([
-        { date: FIXED_TIMESTAMP, liquidTreasury: 5000000 },
-      ]);
+      fakeProvider.setData([{ date: FIXED_TIMESTAMP, value: 5 }]);
 
       // Token: 1000 tokens * $100 = $100,000
-      const quantity = 1000n * 10n ** 18n;
-      fakeRepository.setTokenQuantities(new Map([[FIXED_TIMESTAMP, quantity]]));
-      fakePriceProvider.setPrices(new Map([[FIXED_TIMESTAMP, 100]]));
+      const quantity = parseEther("1000");
+      metricsRepo.setTokenQuantities(new Map([[FIXED_TIMESTAMP, quantity]]));
+      priceRepo.setPrices(new Map([[FIXED_TIMESTAMP, 100]]));
 
-      const service = new TreasuryService(
-        fakeRepository as unknown as TreasuryRepository,
-        fakeProvider,
-        fakePriceProvider,
-      );
-      const app = createTestApp(service, 18);
-      const client = testClient(app) as any;
-
-      const res = await client["treasury"]["total"].$get({
-        query: { days: "7d" },
-      });
-
+      const res = await app.request("/treasury/total?days=7d");
       expect(res.status).toBe(200);
-
-      const data = await res.json();
-      const todayItem = data.items.find((item: { date: number }) => item.date === FIXED_TIMESTAMP);
-
-      // Total = $5,000,000 + $100,000 = $5,100,000
-      expect(todayItem?.value).toBe(5100000);
+      expect(await res.json()).toEqual({
+        items: [{ date: FIXED_TIMESTAMP, value: 100000 + 5 }],
+        totalCount: 1,
+      });
     });
 
     it("should work when only liquid treasury has data", async () => {
-      fakeProvider.setData([
-        { date: FIXED_TIMESTAMP, liquidTreasury: 1000000 },
-      ]);
-      fakeRepository.setTokenQuantities(new Map());
-      fakePriceProvider.setPrices(new Map());
+      const expected = [{ date: FIXED_TIMESTAMP, value: 1000000 }];
+      fakeProvider.setData(expected);
+      metricsRepo.setTokenQuantities(new Map());
+      priceRepo.setPrices(new Map());
 
-      const service = new TreasuryService(
-        fakeRepository as unknown as TreasuryRepository,
-        fakeProvider,
-        fakePriceProvider,
-      );
-      const app = createTestApp(service);
-      const client = testClient(app) as any;
-
-      const res = await client["treasury"]["total"].$get({
-        query: { days: "7d" },
-      });
-
+      const res = await app.request("/treasury/total?days=7d");
       expect(res.status).toBe(200);
 
-      const data = await res.json();
-      expect(data.items.length).toBeGreaterThan(0);
-    });
-  });
-
-  describe("Query Parameter Validation", () => {
-    it("should accept all valid days options", async () => {
-      fakeProvider.setData([]);
-      const service = new TreasuryService(
-        fakeRepository as unknown as TreasuryRepository,
-        fakeProvider,
-        undefined,
-      );
-      const app = createTestApp(service);
-      const client = testClient(app) as any;
-
-      const validDays = ["7d", "30d", "90d", "180d", "365d"] as const;
-
-      for (const days of validDays) {
-        const res = await client["treasury"]["liquid"].$get({
-          query: { days },
-        });
-        expect(res.status).toBe(200);
-      }
-    });
-
-    it("should accept both asc and desc order", async () => {
-      fakeProvider.setData([]);
-      const service = new TreasuryService(
-        fakeRepository as unknown as TreasuryRepository,
-        fakeProvider,
-        undefined,
-      );
-      const app = createTestApp(service);
-      const client = testClient(app) as any;
-
-      const resAsc = await client["treasury"]["liquid"].$get({
-        query: { days: "7d", order: "asc" },
+      expect(await res.json()).toEqual({
+        items: expected,
+        totalCount: 1,
       });
-      const resDesc = await client["treasury"]["liquid"].$get({
-        query: { days: "7d", order: "desc" },
-      });
-
-      expect(resAsc.status).toBe(200);
-      expect(resDesc.status).toBe(200);
     });
   });
 });

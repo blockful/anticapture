@@ -32,6 +32,7 @@
 - Remove or skip failing tests without explanation
 - Commit `node_modules`, `.env`, or generated files
 - Leak private variables
+- Cast types to `any` or `unknown` without explicitly asked to
 
 ## Commands
 
