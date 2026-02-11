@@ -11,8 +11,11 @@ export const PointerIcon = (props: SVGProps<SVGSVGElement>) => {
       {...props}
     >
       <path
+        className="stroke-border-contrast"
         d="M4.76314 0.5C5.14804 -0.166667 6.11029 -0.166667 6.49519 0.5L11.2583 8.75H0L4.76314 0.5Z"
         fill="currentColor"
+        strokeWidth={1}
+        strokeLinejoin="round"
       />
     </svg>
   );
