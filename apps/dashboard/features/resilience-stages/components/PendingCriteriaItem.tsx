@@ -1,6 +1,15 @@
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
+import { RiskLevel } from "@/shared/types/enums/RiskLevel";
 import { ChevronRight } from "lucide-react";
 import { DotFilledIcon } from "@radix-ui/react-icons";
+import { cn } from "@/shared/utils";
+
+const RISK_LEVEL_DOT_COLOR: Record<RiskLevel, string> = {
+  [RiskLevel.HIGH]: "text-error",
+  [RiskLevel.MEDIUM]: "text-warning",
+  [RiskLevel.LOW]: "text-success",
+  [RiskLevel.NONE]: "text-error",
+};
 
 interface PendingCriteriaItemProps {
   field: GovernanceImplementationField & { name: string };
@@ -18,7 +27,12 @@ export const PendingCriteriaItem = ({
       {/* Header */}
       <div className="bg-surface-contrast border-border-default flex items-center gap-6 border-b px-3 py-2.5">
         <div className="flex flex-1 items-center gap-1">
-          <DotFilledIcon className="text-primary size-4 shrink-0" />
+          <DotFilledIcon
+            className={cn(
+              "size-4 shrink-0",
+              RISK_LEVEL_DOT_COLOR[field.riskLevel],
+            )}
+          />
           <p className="text-primary font-mono text-[13px] font-medium uppercase tracking-wider">
             {field.name}
           </p>
