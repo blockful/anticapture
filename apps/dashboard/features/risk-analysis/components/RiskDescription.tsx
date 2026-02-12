@@ -4,16 +4,12 @@ import {
   ChevronsRight,
   TriangleAlert,
 } from "lucide-react";
-import { ReactNode } from "react";
+import { ReactNode, useMemo } from "react";
 import { RiskLevel } from "@/shared/types/enums/RiskLevel";
-import { GovernanceImplementationEnum } from "@/shared/types/enums";
 import { RiskLevelCardSmall } from "@/shared/components";
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
 import { CorneredBox } from "@/features/risk-analysis/components/CorneredBox";
 
-/**
- * Props for the RiskDescription component
- */
 export interface RequirementMetric extends GovernanceImplementationField {
   name: string;
 }
@@ -28,12 +24,47 @@ export interface RiskDescriptionProps {
   onMetricClick?: (requirement: RequirementMetric) => void;
 }
 
-export const iconsMapping: Record<RiskLevel, ReactNode> = {
+export const iconsMapping = {
   [RiskLevel.LOW]: <CheckCircle2 className="text-success size-5" />,
   [RiskLevel.MEDIUM]: <AlertCircle className="text-warning size-5" />,
   [RiskLevel.HIGH]: <TriangleAlert className="text-error size-5" />,
   [RiskLevel.NONE]: <></>,
-};
+} as const satisfies Record<RiskLevel, ReactNode>;
+
+const normalizeToArray = (value: string | string[]): string[] =>
+  Array.isArray(value) ? value : [value];
+
+const ParagraphList = ({ items }: { items: string[] }) => (
+  <>
+    {items.map((paragraph, index) => (
+      <p key={index} className={"text-primary text-sm leading-5"}>
+        {paragraph}
+      </p>
+    ))}
+  </>
+);
+
+const MetricButton = ({
+  metric,
+  onClick,
+}: {
+  metric: RequirementMetric;
+  onClick?: (metric: RequirementMetric) => void;
+}) => (
+  <li className="flex items-center gap-2">
+    {iconsMapping[metric.riskLevel]}
+    <button
+      onClick={() => onClick?.(metric)}
+      className={
+        "text-primary border-border-contrast hover:border-primary border-b border-dashed font-mono text-[13px] font-medium uppercase tracking-wider transition-colors"
+      }
+      aria-label={`View details for ${metric.name}`}
+      type="button"
+    >
+      {metric.name}
+    </button>
+  </li>
+);
 
 const RiskInfoContainer = ({
   children,
@@ -45,22 +76,23 @@ const RiskInfoContainer = ({
   rightContent?: ReactNode;
 }) => {
   return (
-    <div className="flex flex-col gap-2">
+    <section className="flex flex-col gap-2">
       {title && (
-        <h3 className="text-secondary flex items-center gap-2 font-mono text-[13px] font-medium leading-5">
+        <h3
+          className={
+            "text-secondary flex items-center gap-2 font-mono text-[13px] font-medium leading-5"
+          }
+        >
           <ChevronsRight className="size-4" />
           {title}
         </h3>
       )}
       {rightContent && <div>{rightContent}</div>}
       <div className="ml-6 flex flex-col gap-2">{children}</div>
-    </div>
+    </section>
   );
 };
 
-/**
- * Component for displaying standardized risk descriptions
- */
 export const RiskDescription = ({
   title,
   defenseDefinition,
@@ -69,59 +101,53 @@ export const RiskDescription = ({
   riskLevel,
   onMetricClick,
 }: RiskDescriptionProps) => {
-  // Convert description to array if it's a string
-  const defenseDefinitionArray = Array.isArray(defenseDefinition)
-    ? defenseDefinition
-    : [defenseDefinition];
+  const defenseDefinitionArray = useMemo(
+    () => normalizeToArray(defenseDefinition),
+    [defenseDefinition],
+  );
 
-  const riskExposureArray = Array.isArray(riskExposure)
-    ? riskExposure
-    : [riskExposure];
+  const riskExposureArray = useMemo(
+    () => normalizeToArray(riskExposure),
+    [riskExposure],
+  );
 
   return (
-    <CorneredBox className="bg-surface-background lg:bg-surface-default">
-      <div className="flex flex-col">
-        {/* Header with title and risk level */}
-        <div className="flex w-full items-center justify-between gap-2 p-4">
+    <CorneredBox className="bg-surface-background lg:bg-surface-default lg:flex lg:h-full lg:flex-col">
+      <div className="flex flex-col lg:h-full lg:overflow-hidden">
+        <header className="flex w-full flex-col justify-between gap-2 pb-5 lg:shrink-0 lg:flex-row lg:items-center lg:p-4">
           <h2 className="text-primary text-lg font-medium">{title}</h2>
           <RiskLevelCardSmall status={riskLevel} />
-        </div>
+        </header>
 
-        <div className="bg-surface-contrast h-px w-full" />
+        <div
+          className={"border-border-default h-px w-full border border-dashed"}
+        />
 
-        <div className="flex flex-col gap-4 p-4">
+        <div className="flex flex-col gap-4 p-4 lg:flex-1 lg:overflow-y-auto">
           <RiskInfoContainer title="DEFENSE DEFINITION">
-            {defenseDefinitionArray.map((paragraph, index) => (
-              <p key={index} className="text-primary text-sm leading-5">
-                {paragraph}
-              </p>
-            ))}
+            <ParagraphList items={defenseDefinitionArray} />
           </RiskInfoContainer>
 
-          <div className="border-border-default h-px w-full border border-dashed" />
+          <div
+            className={"border-border-default h-px w-full border border-dashed"}
+          />
 
           <RiskInfoContainer title="RISK EXPOSURE">
-            {riskExposureArray.map((paragraph, index) => (
-              <p key={index} className="text-primary text-sm leading-5">
-                {paragraph}
-              </p>
-            ))}
+            <ParagraphList items={riskExposureArray} />
           </RiskInfoContainer>
 
-          <div className="border-border-default h-px w-full border border-dashed" />
+          <div
+            className={"border-border-default h-px w-full border border-dashed"}
+          />
 
           <RiskInfoContainer title="FRAMEWORK METRICS IN THIS AREA">
-            <ul className="space-y-3">
+            <ul className="space-y-3" role="list">
               {requirements.map((requirement, index) => (
-                <li key={index} className="flex items-center gap-2">
-                  {iconsMapping[requirement.riskLevel]}
-                  <button
-                    onClick={() => onMetricClick?.(requirement)}
-                    className="text-primary border-border-contrast hover:border-primary border-b border-dashed font-mono text-[13px] font-medium uppercase tracking-wider transition-colors"
-                  >
-                    {requirement.name}
-                  </button>
-                </li>
+                <MetricButton
+                  key={requirement.name || index}
+                  metric={requirement}
+                  onClick={onMetricClick}
+                />
               ))}
             </ul>
           </RiskInfoContainer>
