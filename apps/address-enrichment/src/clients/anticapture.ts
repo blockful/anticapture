@@ -1,6 +1,6 @@
 /**
  * GraphQL client for Anticapture API
- * Fetches top token holders and delegates
+ * Fetches top token hlders and delegates
  */
 
 export interface DelegateInfo {
@@ -29,54 +29,110 @@ export class AnticaptureClient {
   /**
    * Fetches top delegates by voting power
    */
-  async getTopDelegates(daoId: string, limit: number = 100): Promise<DelegateInfo[]> {
+  async *streamTopDelegates(
+    daoId: string,
+    pageSize: number = 100
+  ) {
     const query = `
-      query GetTopDelegates($limit: PositiveInt!) {
-        votingPowers(
-          orderDirection: desc
-          limit: $limit
-          fromValue: "0" 
-        ) {
-          items {
-            accountId
-            votingPower
-            delegationsCount
-          }
+    query GetTopDelegates(
+      $limit: PositiveInt!,
+      $skip: NonNegativeInt!,
+    ) {
+      votingPowers(
+        orderDirection: desc
+        limit: $limit
+        skip: $skip
+      ) {
+        items {
+          accountId
+          votingPower
+          delegationsCount
         }
       }
-    `;
+    }
+  `;
 
-    const response = await this.executeQuery<{
-      votingPowers: { items: DelegateInfo[] };
-    }>(query, { limit }, daoId);
+    let skip = 0;
 
-    return response.votingPowers.items;
+    while (true) {
+      const response = await this.executeQuery<{
+        votingPowers: { items: DelegateInfo[] };
+      }>(
+        query,
+        {
+          limit: pageSize,
+          skip,
+          orderDirection: "desc",
+        },
+        daoId
+      );
+
+      const items = response.votingPowers.items;
+
+      if (items.length === 0) return;
+
+      for (const item of items) {
+        yield item;
+      }
+
+      if (items.length < pageSize) return;
+
+      skip += pageSize;
+    }
   }
 
   /**
-   * Fetches top token holders by balance
+   * Streams top token holders by balance using offset pagination
    */
-  async getTopTokenHolders(daoId: string, limit: number = 100): Promise<TokenHolderInfo[]> {
+  async *streamTopTokenHolders(
+    daoId: string,
+    pageSize: number = 100
+  ) {
     const query = `
-      query GetTopTokenHolders($limit: PositiveInt!) {
-        accountBalances(
-          orderDirection: desc
-          limit: $limit
-          fromValue: "0"
-        ) {
-          items {
-            address
-            balance
-          }
+    query GetTopTokenHolders(
+      $limit: PositiveInt!,
+      $skip: NonNegativeInt!,
+    ) {
+      accountBalances(
+        orderDirection: desc
+        limit: $limit
+        skip: $skip
+      ) {
+        items {
+          address
+          balance
         }
       }
-    `;
+    }
+  `;
 
-    const response = await this.executeQuery<{
-      accountBalances: { items: TokenHolderInfo[] };
-    }>(query, { limit }, daoId);
+    let skip = 0;
 
-    return response.accountBalances.items;
+    while (true) {
+      const response = await this.executeQuery<{
+        accountBalances: { items: TokenHolderInfo[] };
+      }>(
+        query,
+        {
+          limit: pageSize,
+          skip,
+          orderDirection: "desc",
+        },
+        daoId
+      );
+
+      const items = response.accountBalances.items;
+
+      if (items.length === 0) return;
+
+      for (const item of items) {
+        yield item;
+      }
+
+      if (items.length < pageSize) return;
+
+      skip += pageSize;
+    }
   }
 
   private async executeQuery<T>(

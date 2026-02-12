@@ -181,9 +181,11 @@ const fetchDelegates = async (
 ): Promise<Map<string, AddressInfo>> => {
   const addressMap = new Map<string, AddressInfo>();
   console.log(`\n📊 Fetching top ${limit} delegates...`);
+
   try {
-    const delegates = await anticaptureClient.getTopDelegates(daoId, limit);
-    delegates.forEach((d) => {
+    let count = 0;
+    for await (const d of anticaptureClient.streamTopDelegates(daoId)) {
+      if (count >= limit) break;
       const addr = d.accountId.toLowerCase();
       const existing = addressMap.get(addr);
       addressMap.set(addr, {
@@ -194,14 +196,15 @@ const fetchDelegates = async (
         delegationsCount: d.delegationsCount,
         balance: existing?.balance,
       });
-    });
-    console.log(`   Found ${delegates.length} delegates`);
+      count++;
+    }
+    console.log(`   Found ${addressMap.size} delegates`);
   } catch (error) {
     console.error("   ❌ Failed to fetch delegates:", error);
   }
 
   return addressMap;
-}
+};
 
 const fetchHolders = async (
   anticaptureClient: AnticaptureClient,
@@ -210,10 +213,11 @@ const fetchHolders = async (
 ): Promise<Map<string, AddressInfo>> => {
   const addressMap = new Map<string, AddressInfo>();
   console.log(`\n💰 Fetching top ${limit} token holders...`);
+
   try {
-    const holders = await anticaptureClient.getTopTokenHolders(daoId, limit);
-    console.log({ holders })
-    holders.forEach((h) => {
+    let count = 0;
+    for await (const h of anticaptureClient.streamTopTokenHolders(daoId)) {
+      if (count >= limit) break;
       const addr = h.address.toLowerCase();
       const existing = addressMap.get(addr);
       addressMap.set(addr, {
@@ -224,14 +228,15 @@ const fetchHolders = async (
         delegationsCount: existing?.delegationsCount,
         balance: h.balance,
       });
-    });
-    console.log(`   Found ${holders.length} token holders`);
+      count++;
+    }
+    console.log(`   Found ${addressMap.size} token holders`);
   } catch (error) {
     console.error("   ❌ Failed to fetch token holders:", error);
   }
 
   return addressMap;
-}
+};
 
 async function main() {
   const options = parseArgs();
