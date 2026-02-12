@@ -430,7 +430,9 @@ export const accountRelations = relations(account, ({ many }) => ({
 export const rolesEnum = onchainEnum("event_type", [
   "VOTE",
   "PROPOSAL",
+  "PROPOSAL_EXTENDED",
   "DELEGATION",
+  "DELEGATION_VOTES_CHANGED",
   "TRANSFER",
 ]);
 
@@ -442,6 +444,7 @@ export const feedEvent = onchainTable(
     type: rolesEnum("type").notNull(),
     value: drizzle.bigint().notNull(),
     timestamp: drizzle.bigint().notNull(),
+    metadata: drizzle.json().$type<Record<string, unknown>>(),
   }),
   (table) => ({
     pk: primaryKey({

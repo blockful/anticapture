@@ -164,5 +164,9 @@ export const tokenTransfer = async (
     type: "TRANSFER",
     value,
     timestamp,
+    metadata: {
+      from: normalizedFrom,
+      to: normalizedTo,
+    },
   });
 };

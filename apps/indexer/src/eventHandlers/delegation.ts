@@ -153,6 +153,19 @@ export const delegateChanged = async (
     .onConflictDoUpdate((current) => ({
       delegationsCount: current.delegationsCount + 1,
     }));
+
+    await context.db.insert(feedEvent).values({
+      txHash,
+      logIndex,
+      type: "DELEGATION",
+      value: delegatorBalance?.balance ?? 0n,
+      timestamp,
+      metadata: {
+        delegator: normalizedDelegator,
+        delegate: normalizedDelegate,
+        previousDelegate: getAddress(previousDelegate),
+      },
+    });
 };
 
 /**

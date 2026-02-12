@@ -92,6 +92,12 @@ export const voteCast = async (
     type: "VOTE",
     value: votingPower,
     timestamp,
+    metadata: {
+      reason,
+      support,
+      votingPower,
+      proposalId,
+    },
   });
 };
 
@@ -186,6 +192,11 @@ export const proposalCreated = async (
     type: "PROPOSAL",
     value: 0n,
     timestamp,
+    metadata: {
+      id: proposalId,
+      proposer: getAddress(proposer),
+      title: description.split("\n")[0]?.replace(/^#+\s*/, "") || "Untitled Proposal",
+    },
   });
 };
 
