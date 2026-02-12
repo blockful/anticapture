@@ -223,6 +223,9 @@ export const proposalExtended = async (
   proposalId: string,
   blockTime: number,
   extendedDeadline: bigint,
+  txHash: Hex,
+  logIndex: number,
+  timestamp: bigint,
 ) => {
   await context.db.update(proposalsOnchain, { id: proposalId }).set((row) => ({
     endBlock: Number(extendedDeadline),
@@ -230,4 +233,15 @@ export const proposalExtended = async (
       row.endTimestamp +
       BigInt((Number(extendedDeadline) - row.endBlock) * blockTime),
   }));
+
+  await context.db.insert(feedEvent).values({
+    txHash,
+    logIndex,
+    type: "PROPOSAL_EXTENDED",
+    value: 0n,
+    timestamp,
+    metadata: {
+      proposalId,
+    },
+  });
 };

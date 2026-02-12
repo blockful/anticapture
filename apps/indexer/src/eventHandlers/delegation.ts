@@ -227,11 +227,16 @@ export const delegatedVotesChanged = async (
       votingPower: newBalance,
     }));
 
-  await context.db.insert(feedEvent).values({
-    txHash,
-    logIndex,
-    type: "DELEGATION",
-    value: deltaMod,
-    timestamp,
-  });
+    await context.db.insert(feedEvent).values({
+      txHash,
+      logIndex,
+      type: "DELEGATION_VOTES_CHANGED",
+      value: deltaMod,
+      timestamp,
+      metadata: {
+        delta,
+        deltaMod,
+        delegate: normalizedDelegate,
+      },
+    });
 };

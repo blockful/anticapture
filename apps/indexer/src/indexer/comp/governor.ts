@@ -65,6 +65,9 @@ export function COMPGovernorIndexer(blockTime: number) {
       event.args.proposalId.toString(),
       blockTime,
       event.args.extendedDeadline,
+      event.transaction.hash,
+      event.log.logIndex,
+      event.block.timestamp,
     );
   });
 
