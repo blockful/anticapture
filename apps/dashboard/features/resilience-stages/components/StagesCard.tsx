@@ -86,7 +86,7 @@ export const StagesCard = ({ currentDaoStage }: StagesCardProps) => {
                 >
                   {config.label}
                 </p>
-                <p className="text-secondary text-sm font-normal">
+                <p className="text-secondary hidden text-sm font-normal lg:block">
                   {config.description}
                 </p>
               </div>
