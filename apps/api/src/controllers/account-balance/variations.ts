@@ -51,7 +51,7 @@ export function accountBalanceVariations(
       );
 
       return context.json(
-        AccountBalanceVariationsResponseMapper(result, fromDate, toDate),
+        AccountBalanceVariationsResponseMapper(result, fromDate, toDate)
       );
     },
   );
