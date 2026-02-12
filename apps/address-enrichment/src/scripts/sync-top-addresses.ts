@@ -296,7 +296,6 @@ async function main() {
     }
   }
   const addressList = Array.from(addressMap.values());
-  console.log({ addressList })
   console.log(`\n🔄 Syncing ${addressList.length} unique addresses...`);
 
   let newCount = 0;
