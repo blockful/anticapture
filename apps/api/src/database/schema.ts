@@ -280,6 +280,7 @@ export const feedEvent = pgTable(
     type: rolesEnum("type").notNull(),
     value: bigint({ mode: "bigint" }).notNull(),
     timestamp: drizzle.integer().notNull(),
+    metadata: drizzle.json().$type<Record<string, unknown>>(),
   }),
   (table) => [
     primaryKey({

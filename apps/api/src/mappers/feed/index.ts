@@ -25,6 +25,7 @@ export const FeedItemSchema = z.object({
   value: z.string(),
   timestamp: z.number(),
   relevance: z.nativeEnum(FeedRelevance),
+  metadata: z.record(z.string(), z.unknown()).nullable(),
 });
 
 export const FeedResponseSchema = z.object({
