@@ -19,7 +19,7 @@ export const SectionTitle = ({
         <div className="flex flex-col items-center gap-2 lg:flex-row">
           <div className="flex items-center gap-2">
             {icon}
-            <h4 className="text-primary text-sm font-medium leading-7 tracking-[-0.5%] lg:text-left lg:text-xl">
+            <h4 className="text-primary text-xl font-medium leading-7 tracking-[-0.5%] lg:text-left">
               {title}
             </h4>
           </div>
@@ -27,7 +27,7 @@ export const SectionTitle = ({
         </div>
       </div>
       <div>
-        <p className="text-secondary flex w-full flex-col text-justify font-normal lg:text-sm">
+        <p className="text-secondary flex w-full flex-col text-justify text-sm font-normal">
           {description}
         </p>
       </div>
