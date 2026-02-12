@@ -37,12 +37,12 @@ export const DONATION_CONSTANTS = {
       daoId: DaoIdEnum.UNISWAP,
       link: "https://uniswapfoundation.mirror.xyz/SAPBIdMcJpo_gUUyHdMNuH8r7qpCqRtxFbDrui7Na-I",
     },
-    {
-      name: "Optimism",
-      amount: "$15k+",
-      date: "June, 2024",
-      daoId: DaoIdEnum.OPTIMISM,
-      link: "https://app.charmverse.io/op-grants/governance-audit-and-dashboard-by-blockful-22656444457292424",
-    },
+    // {
+    //   name: "Optimism",
+    //   amount: "$15k+",
+    //   date: "June, 2024",
+    //   daoId: DaoIdEnum.OPTIMISM,
+    //   link: "https://app.charmverse.io/op-grants/governance-audit-and-dashboard-by-blockful-22656444457292424",
+    // },
   ],
 };
