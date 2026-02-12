@@ -133,26 +133,6 @@ export const OBOL: DaoConfiguration = {
           "Proposal threshold should be at least 1% of the active market supply to provide adequate protection against spam and malicious proposals.",
         ],
       },
-      [GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL]: {
-        riskLevel: RiskLevel.HIGH,
-        description:
-          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
-            GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL
-          ].description,
-        currentSetting:
-          "There is no ability to cancel a proposal if the proposer's balance falls below the Proposal Threshold after submitting it.",
-        impact:
-          "An attacker can buy tokens to submit a proposal in the DAO, vote with them, and sell them during the voting period. There is nothing in ENS governance that protects against this or prevents the attacker from doing so.",
-        recommendedSetting:
-          RECOMMENDED_SETTINGS[
-            GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL
-          ],
-        nextStep:
-          "The governance contract should cancel a proposal if the address that submitted it has a governance token balance below the Proposal Threshold.",
-        requirements: [
-          "The DAO must enforce a permissionless way to cancel any live proposal if the proposer's voting power drops below the proposal-creation threshold.",
-        ],
-      },
       [GovernanceImplementationEnum.SECURITY_COUNCIL]: {
         riskLevel: RiskLevel.HIGH,
         description:

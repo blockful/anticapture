@@ -143,25 +143,6 @@ export const OP: DaoConfiguration = {
           "The proposal threshold is 0, but the propose() function is only callable by the manager, which is the Foundation.",
         ],
       },
-      [GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL]: {
-        riskLevel: RiskLevel.LOW,
-        description:
-          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
-            GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL
-          ].description,
-        currentSetting:
-          "Since only the Foundation can submit and execute proposals, there is no need for a Proposal Balance Cancel",
-        impact:
-          "There is no impact from not having Proposer Balance Cancel, as long as the Foundation is the only entity that can submit and execute proposals.",
-        recommendedSetting:
-          RECOMMENDED_SETTINGS[
-            GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL
-          ],
-        nextStep: "The parameter is in its lowest-risk condition.",
-        requirements: [
-          "Only the manager, timelock or proposer can cancel a proposal. As the manager is also the only possible proposer, this means only the manager (OP Foundation) can propose or cancel proposals.",
-        ],
-      },
       [GovernanceImplementationEnum.SECURITY_COUNCIL]: {
         riskLevel: RiskLevel.LOW,
         description:

@@ -33,7 +33,7 @@ export const RECOMMENDED_SETTINGS: Record<
     "A safeguard to veto malicious proposals submitted through on-chain governance must be controlled by the DAO itself to achieve the highest Anticapture security standard.",
 
   [GovernanceImplementationEnum.PROPOSER_BALANCE_CANCEL]:
-    "Upon submitting a proposal, a governance participant must be required to maintain their voting power above the Proposal Threshold; otherwise, the proposal shall be automatically canceled.",
+    "Upon submitting a proposal, a governance participant must be required to maintain their voting power above the Proposal Threshold; otherwise, the proposal shall be permissionless to cancel.",
 
   [GovernanceImplementationEnum.VOTING_PERIOD]:
     "The period between the start and end of a proposal must be at least seven days.",
@@ -51,7 +51,7 @@ export const RECOMMENDED_SETTINGS: Record<
     "All governance contracts should be audited by reputable security firms and audit reports should be publicly available.",
 
   [GovernanceImplementationEnum.INTERFACE_HIJACK]:
-    "Governance interfaces should implement DNS protection (DNSSEC), secure HTTPS connections, and ideally be hosted on IPFS for censorship resistance.",
+    "The domain should be protected with standard security certificates, made public by its provider. Ideal security here includes a verified front-end, deployed in a immutable manner, linked to an ENS record by the DAO in a domain like vote.DAO.eth and made available through .limo or .link or equivalent.",
 
   [GovernanceImplementationEnum.ATTACK_PROFITABILITY]:
     "The cost of acquiring voting power should exceed the potential profit from attacking the treasury. Security councils or veto mechanisms are recommended when treasury value is high.",
@@ -61,7 +61,4 @@ export const RECOMMENDED_SETTINGS: Record<
 
   [GovernanceImplementationEnum.TIMELOCK_ADMIN]:
     "The control of the Timelock must be carried out solely by the DAO.",
-
-  [GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL]:
-    "Proposals should be automatically canceled if the proposer's balance falls below the Proposal Threshold.",
 };

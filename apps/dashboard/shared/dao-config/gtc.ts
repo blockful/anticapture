@@ -126,33 +126,12 @@ export const GTC: DaoConfiguration = {
             GovernanceImplementationEnum.PROPOSAL_THRESHOLD
           ].description,
         currentSetting:
-          "The Proposal Threshold is set to 150 $GTC (0,2% Total Supply)",
+          "The Proposal Threshold is set to 150K $GTC (0,5% Total Supply)",
         impact:
-          "The Proposal Threshold can be increased to a value above 100K $ENS, in order to raise the cost of submitting proposals in governance and reduce the likelihood of spam.",
+          "With the current Proposal Threshold, the cost of submitting a proposal to the DAO makes spam attacks more difficult for attackers.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.PROPOSAL_THRESHOLD],
-        nextStep:
-          "The Proposal Threshold can be increased to a value above 100K $ENS, in order to raise the cost of submitting proposals in governance and reduce the likelihood of spam.",
-      },
-      [GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL]: {
-        riskLevel: RiskLevel.HIGH,
-        description:
-          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
-            GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL
-          ].description,
-        currentSetting:
-          "There is no ability to cancel a proposal if the proposer's balance falls below the Proposal Threshold after submitting it.",
-        impact:
-          "An attacker can buy tokens to submit a proposal in the DAO, vote with them, and sell them during the voting period. There is nothing in ENS governance that protects against this or prevents the attacker from doing so.",
-        recommendedSetting:
-          RECOMMENDED_SETTINGS[
-            GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL
-          ],
-        nextStep:
-          "The governance contract should cancel a proposal if the address that submitted it has a governance token balance below the Proposal Threshold.",
-        requirements: [
-          "Stablish a defense system that allows the DAO to cancel proposals if the original proposer doesn't have the required amount of GTC to meet threshold any longer.",
-        ],
+        nextStep: "To be defined",
       },
       [GovernanceImplementationEnum.SECURITY_COUNCIL]: {
         riskLevel: RiskLevel.NONE,

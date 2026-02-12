@@ -93,7 +93,7 @@ export const ENS: DaoConfiguration = {
         currentSetting:
           "The ENS governance interface has a secure HTTPS connection and is signed with DNSSEC.",
         impact:
-          "The governance interface domain cannot be hijacked, but without IPFS it is not censorship-resistant or fully on-chain.",
+          "The governance interface domain shows the basic security certificates, but without immutable decentralized storage it is not censorship-resistant or verifiable.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.INTERFACE_HIJACK],
         nextStep:
@@ -108,7 +108,7 @@ export const ENS: DaoConfiguration = {
         currentSetting:
           "Because ENS has a large liquid treasury (over $100M), attacking the DAO would be highly profitable. In this case, the Veto Strategy/Security Council is necessary.",
         impact:
-          "The large liquid treasury makes it highly appealing for attackers to try gaining control of the DAO.",
+          "An attacker has fewer incentives to capture the DAO given the difference between liquid assets and treasury size, and attacker has financial incentives to takeover governance power.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[
             GovernanceImplementationEnum.ATTACK_PROFITABILITY
@@ -141,7 +141,7 @@ export const ENS: DaoConfiguration = {
         currentSetting:
           "The Proposal Threshold is set to 100K $ENS (0,1% Total Supply)",
         impact:
-          "$ENS has higher liquidity, making it easier for a large attacker to reach the Proposal Threshold and submit a proposal.",
+          "ENS has a proposal threshold that makes it harder for attackers to be able to create proposals without reaching a significant level of accumulation first.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.PROPOSAL_THRESHOLD],
         nextStep:
@@ -149,25 +149,6 @@ export const ENS: DaoConfiguration = {
         requirements: [
           "A low proposal threshold lets attackers or small coalitions submit governance actions too easily, forcing the DAO to vote on spam or malicious items.",
           "The DAO should set the proposal threshold at ≥ 1 % of circulating market supply (CEX + DEX + lending pools) so that only wallets with meaningful economic stake can create proposals.",
-        ],
-      },
-      [GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL]: {
-        riskLevel: RiskLevel.HIGH,
-        description:
-          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
-            GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL
-          ].description,
-        currentSetting:
-          "There is no ability to cancel a proposal if the proposer's balance falls below the Proposal Threshold after submitting it.",
-        impact: "To be defined",
-        recommendedSetting:
-          RECOMMENDED_SETTINGS[
-            GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL
-          ],
-        nextStep: "To be defined",
-        requirements: [
-          "Once a proposal is submitted, the proposer can immediately dump their tokens, reducing their financial risk in case of an attack.",
-          "The DAO must enforce a permissionless way to cancel any live proposal if the proposer's voting power drops below the proposal-creation threshold.",
         ],
       },
       [GovernanceImplementationEnum.PROPOSER_BALANCE_CANCEL]: {
@@ -213,7 +194,7 @@ export const ENS: DaoConfiguration = {
         currentSetting:
           "There is no limit to the number of proposals that a single address can submit in the DAO.",
         impact:
-          "A single address can submit multiple proposals, potentially masking an attack within one of them.",
+          "A single address can submit multiple proposals, potentially masking an attack within one of them or make multiple malicious proposals.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.SPAM_RESISTANCE],
         nextStep:
@@ -229,9 +210,9 @@ export const ENS: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.TIMELOCK_ADMIN
           ].description,
-        currentSetting: "Governor has Admin role on timelock",
+        currentSetting: "Governor is the only Admin role on timelock.",
         impact:
-          "Since the Governor is the administrator of the Timelock, only the DAO can control it - decentralizing its governance.",
+          "Since the Governor is the only administrator of the Timelock, only the DAO can control it - decentralizing its governance.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.TIMELOCK_ADMIN],
         nextStep: "The parameter is in its lowest-risk condition.",
@@ -276,7 +257,7 @@ export const ENS: DaoConfiguration = {
         currentSetting:
           "The DAO does not allow changing votes once they have been cast.",
         impact:
-          "Governance participants cannot change their votes after casting them. In the event of a governance interface hijack, they may be manipulated into voting for the opposite of their intended choice, enabling an attack on the DAO.",
+          "Governance participants cannot change their votes after casting them. In the event of an interface hijack on the voting platform to support the attack, voters cannot revert their vote.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.VOTE_MUTABILITY],
         nextStep:
@@ -326,7 +307,7 @@ export const ENS: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_PERIOD
           ].description,
-        currentSetting: "The Voting Period is set to 7 days",
+        currentSetting: "The Voting Period is set to 5d 14h 24min.",
         impact:
           "The current Voting Period is sufficient for governance participants to cast their votes.",
         recommendedSetting:
