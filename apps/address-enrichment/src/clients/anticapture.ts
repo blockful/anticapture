@@ -42,6 +42,7 @@ export class AnticaptureClient {
         orderDirection: desc
         limit: $limit
         skip: $skip
+        fromValue: "0"
       ) {
         items {
           accountId
@@ -96,6 +97,7 @@ export class AnticaptureClient {
         orderDirection: desc
         limit: $limit
         skip: $skip
+        fromValue: "0"
       ) {
         items {
           address
