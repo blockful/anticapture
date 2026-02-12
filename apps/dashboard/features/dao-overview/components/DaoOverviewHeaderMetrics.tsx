@@ -58,21 +58,21 @@ const getTreasuryMetrics = (
   liquidTreasuryAllPercent: number,
   liquidTreasuryNonDaoValueFormatted: string,
 ) => {
-  if (daoId === DaoIdEnum.OPTIMISM) {
-    return (
-      <DaoOverviewMetricCard
-        title="Treasury"
-        text={
-          <p className="flex items-center gap-1.5">
-            Multisig Governed{" "}
-            <TooltipInfo text={TREASURY_TOOLTIPS.MULTISIG_FULL} />
-          </p>
-        }
-        subText="Not on-chain identifiable"
-        isLoading={isLoading}
-      />
-    );
-  }
+  // if (daoId === DaoIdEnum.OPTIMISM) {
+  //   return (
+  //     <DaoOverviewMetricCard
+  //       title="Treasury"
+  //       text={
+  //         <p className="flex items-center gap-1.5">
+  //           Multisig Governed{" "}
+  //           <TooltipInfo text={TREASURY_TOOLTIPS.MULTISIG_FULL} />
+  //         </p>
+  //       }
+  //       subText="Not on-chain identifiable"
+  //       isLoading={isLoading}
+  //     />
+  //   );
+  // }
 
   if (daoId === DaoIdEnum.OBOL) {
     return (
@@ -109,16 +109,16 @@ const getDelegatesToPass = (
   topDelegatesToPass: number | null,
   isLoading: boolean,
 ) => {
-  if (daoId === DaoIdEnum.OPTIMISM) {
-    return (
-      <DaoOverviewMetricCard
-        title={<DelegateToPassTitle />}
-        text="Varies per proposal"
-        subText="Depends on active delegation"
-        isLoading={isLoading}
-      />
-    );
-  }
+  // if (daoId === DaoIdEnum.OPTIMISM) {
+  //   return (
+  //     <DaoOverviewMetricCard
+  //       title={<DelegateToPassTitle />}
+  //       text="Varies per proposal"
+  //       subText="Depends on active delegation"
+  //       isLoading={isLoading}
+  //     />
+  //   );
+  // }
 
   return (
     <DaoOverviewMetricCard

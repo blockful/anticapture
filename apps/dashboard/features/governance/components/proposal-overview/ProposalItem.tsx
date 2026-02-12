@@ -29,6 +29,8 @@ export const getTextStatusColor = (status: ProposalStatus) => {
       return "text-error";
     case ProposalStatus.QUEUED:
       return "text-success";
+    case ProposalStatus.PENDING_EXECUTION:
+      return "text-warning";
     case ProposalStatus.SUCCEEDED:
       return "text-success";
     case ProposalStatus.EXPIRED:
@@ -54,6 +56,8 @@ export const getStatusColorBar = (status: ProposalStatus) => {
       return "bg-error";
     case ProposalStatus.QUEUED:
       return "bg-success";
+    case ProposalStatus.PENDING_EXECUTION:
+      return "bg-warning";
     case ProposalStatus.SUCCEEDED:
       return "bg-success";
     case ProposalStatus.EXPIRED:
@@ -79,6 +83,8 @@ export const getBackgroundStatusColor = (status: ProposalStatus) => {
       return "bg-surface-opacity-error";
     case ProposalStatus.QUEUED:
       return "bg-surface-opacity-success";
+    case ProposalStatus.PENDING_EXECUTION:
+      return "bg-surface-opacity-warning";
     case ProposalStatus.SUCCEEDED:
       return "bg-surface-opacity-success";
     case ProposalStatus.EXPIRED:
@@ -104,6 +110,8 @@ export const getStatusText = (status: ProposalStatus) => {
       return "Cancelled";
     case ProposalStatus.QUEUED:
       return "Queued";
+    case ProposalStatus.PENDING_EXECUTION:
+      return "Pending Execution";
     case ProposalStatus.SUCCEEDED:
       return "Succeeded";
     case ProposalStatus.EXPIRED:

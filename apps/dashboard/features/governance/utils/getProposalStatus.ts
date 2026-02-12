@@ -22,6 +22,8 @@ export const getProposalStatus = (status: string): ProposalStatus => {
       return ProposalStatus.QUEUED;
     case "expired":
       return ProposalStatus.EXPIRED;
+    case "pending_execution":
+      return ProposalStatus.PENDING_EXECUTION;
     default:
       return ProposalStatus.PENDING;
   }
