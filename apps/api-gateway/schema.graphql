@@ -1,6 +1,6 @@
-directive @resolveRoot(subgraph: String) on FIELD_DEFINITION
-
 directive @enum(subgraph: String, value: String) on ENUM_VALUE
+
+directive @resolveRoot(subgraph: String) on FIELD_DEFINITION
 
 directive @typescript(subgraph: String, type: String) on SCALAR | ENUM
 
@@ -37,6 +37,9 @@ type Query {
 
   """Get property data for a specific token"""
   token(currency: queryInput_token_currency = usd): token_200_response
+
+  """Get feed events"""
+  feedEvents(skip: Float, limit: Float = 10, orderBy: queryInput_feedEvents_orderBy = timestamp, orderDirection: queryInput_feedEvents_orderDirection = desc, relevance: queryInput_feedEvents_relevance = MEDIUM, type: queryInput_feedEvents_type, fromDate: Float, toDate: Float): feedEvents_200_response
 
   """Compare total supply between periods"""
   compareTotalSupply(days: queryInput_compareTotalSupply_days = _90d): compareTotalSupply_200_response
@@ -172,9 +175,6 @@ type Query {
 
   """Returns token related metrics for a single metric type."""
   tokenMetrics(metricType: queryInput_tokenMetrics_metricType!, startDate: Float, endDate: Float, orderDirection: queryInput_tokenMetrics_orderDirection = asc, limit: NonNegativeInt = 365, skip: NonNegativeInt): tokenMetrics_200_response
-
-  """Get feed events"""
-  feedEvents(skip: Float, limit: Float = 10, orderBy: queryInput_feedEvents_orderBy = timestamp, orderDirection: queryInput_feedEvents_orderDirection = desc, relevance: queryInput_feedEvents_relevance = MEDIUM, type: queryInput_feedEvents_type, fromDate: Float, toDate: Float): feedEvents_200_response
 
   """
   Average delegation percentage across all supported DAOs by day.
@@ -362,6 +362,52 @@ type token_200_response {
 enum queryInput_token_currency {
   eth
   usd
+}
+
+type feedEvents_200_response {
+  items: [query_feedEvents_items_items]!
+  totalCount: Float!
+}
+
+type query_feedEvents_items_items {
+  txHash: String!
+  logIndex: Float!
+  type: String!
+  value: String!
+  timestamp: Float!
+  relevance: query_feedEvents_items_items_relevance!
+  metadata: JSON
+}
+
+enum query_feedEvents_items_items_relevance {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum queryInput_feedEvents_orderBy {
+  timestamp
+  value
+}
+
+enum queryInput_feedEvents_orderDirection {
+  asc
+  desc
+}
+
+enum queryInput_feedEvents_relevance {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum queryInput_feedEvents_type {
+  VOTE
+  PROPOSAL
+  DELEGATION
+  TRANSFER
+  DELEGATION_VOTES_CHANGED
+  PROPOSAL_EXTENDED
 }
 
 type compareTotalSupply_200_response {
@@ -1157,50 +1203,6 @@ enum HTTPMethod {
   OPTIONS
   TRACE
   PATCH
-}
-
-type feedEvents_200_response {
-  items: [query_feedEvents_items_items]!
-  totalCount: Float!
-}
-
-type query_feedEvents_items_items {
-  txHash: String!
-  logIndex: Float!
-  type: String!
-  value: String!
-  timestamp: Float!
-  relevance: query_feedEvents_items_items_relevance!
-  metadata: JSON
-}
-
-enum query_feedEvents_items_items_relevance {
-  HIGH
-  MEDIUM
-  LOW
-}
-
-enum queryInput_feedEvents_orderBy {
-  timestamp
-  value
-}
-
-enum queryInput_feedEvents_orderDirection {
-  asc
-  desc
-}
-
-enum queryInput_feedEvents_relevance {
-  HIGH
-  MEDIUM
-  LOW
-}
-
-enum queryInput_feedEvents_type {
-  VOTE
-  PROPOSAL
-  DELEGATION
-  TRANSFER
 }
 
 type AverageDelegationPercentageItem {
