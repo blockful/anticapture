@@ -11,12 +11,14 @@ const decimals = {
   [DaoIdEnum.OBOL]: CONTRACT_ADDRESSES[DaoIdEnum.OBOL].token.decimals,
   [DaoIdEnum.ZK]: CONTRACT_ADDRESSES[DaoIdEnum.ZK].token.decimals,
   [DaoIdEnum.NOUNS]: CONTRACT_ADDRESSES[DaoIdEnum.NOUNS].token.decimals,
+  [DaoIdEnum.GTC]: CONTRACT_ADDRESSES[DaoIdEnum.GTC].token.decimals,
+  [DaoIdEnum.ARB]: CONTRACT_ADDRESSES[DaoIdEnum.ARB].token.decimals,
 } as const;
 
 export const EventRelevanceThresholds: Record<
   DaoIdEnum,
   {
-    [type in keyof Omit<Record<FeedEventType, bigint>, "PROPOSAL">]: {
+    [type in keyof Omit<Record<FeedEventType, bigint>, "PROPOSAL" | "PROPOSAL_EXTENDED">]: {
       [FeedRelevance.LOW]: bigint;
       [FeedRelevance.MEDIUM]: bigint;
       [FeedRelevance.HIGH]: bigint;
@@ -39,6 +41,11 @@ export const EventRelevanceThresholds: Record<
       [FeedRelevance.MEDIUM]: parseUnits("10000", decimals[DaoIdEnum.ENS]),
       [FeedRelevance.HIGH]: parseUnits("100000", decimals[DaoIdEnum.ENS]),
     },
+    [FeedEventType.DELEGATION_VOTES_CHANGED]: {
+      [FeedRelevance.LOW]: parseUnits("1000", decimals[DaoIdEnum.ENS]),
+      [FeedRelevance.MEDIUM]: parseUnits("10000", decimals[DaoIdEnum.ENS]),
+      [FeedRelevance.HIGH]: parseUnits("100000", decimals[DaoIdEnum.ENS]),
+    },
   },
   [DaoIdEnum.UNI]: {
     [FeedEventType.TRANSFER]: {
@@ -55,6 +62,11 @@ export const EventRelevanceThresholds: Record<
       [FeedRelevance.LOW]: parseUnits("10000", decimals[DaoIdEnum.UNI]),
       [FeedRelevance.MEDIUM]: parseUnits("100000", decimals[DaoIdEnum.UNI]),
       [FeedRelevance.HIGH]: parseUnits("500000", decimals[DaoIdEnum.UNI]),
+    },
+    [FeedEventType.DELEGATION_VOTES_CHANGED]: {
+      [FeedRelevance.LOW]: parseUnits("1000", decimals[DaoIdEnum.UNI]),
+      [FeedRelevance.MEDIUM]: parseUnits("10000", decimals[DaoIdEnum.UNI]),
+      [FeedRelevance.HIGH]: parseUnits("100000", decimals[DaoIdEnum.UNI]),
     },
   },
   [DaoIdEnum.OBOL]: {
@@ -73,6 +85,11 @@ export const EventRelevanceThresholds: Record<
       [FeedRelevance.MEDIUM]: parseUnits("100000", decimals[DaoIdEnum.OBOL]),
       [FeedRelevance.HIGH]: parseUnits("500000", decimals[DaoIdEnum.OBOL]),
     },
+    [FeedEventType.DELEGATION_VOTES_CHANGED]: {
+      [FeedRelevance.LOW]: parseUnits("1000", decimals[DaoIdEnum.OBOL]),
+      [FeedRelevance.MEDIUM]: parseUnits("10000", decimals[DaoIdEnum.OBOL]),
+      [FeedRelevance.HIGH]: parseUnits("100000", decimals[DaoIdEnum.OBOL]),
+    },
   },
   [DaoIdEnum.OP]: {
     [FeedEventType.TRANSFER]: {
@@ -89,6 +106,11 @@ export const EventRelevanceThresholds: Record<
       [FeedRelevance.LOW]: parseUnits("10000", decimals[DaoIdEnum.OBOL]),
       [FeedRelevance.MEDIUM]: parseUnits("100000", decimals[DaoIdEnum.OBOL]),
       [FeedRelevance.HIGH]: parseUnits("500000", decimals[DaoIdEnum.OBOL]),
+    },
+    [FeedEventType.DELEGATION_VOTES_CHANGED]: {
+      [FeedRelevance.LOW]: parseUnits("1000", decimals[DaoIdEnum.OP]),
+      [FeedRelevance.MEDIUM]: parseUnits("10000", decimals[DaoIdEnum.OP]),
+      [FeedRelevance.HIGH]: parseUnits("100000", decimals[DaoIdEnum.OP]),
     },
   },
   [DaoIdEnum.SCR]: {
@@ -107,6 +129,11 @@ export const EventRelevanceThresholds: Record<
       [FeedRelevance.MEDIUM]: parseUnits("100000", decimals[DaoIdEnum.OBOL]),
       [FeedRelevance.HIGH]: parseUnits("500000", decimals[DaoIdEnum.OBOL]),
     },
+    [FeedEventType.DELEGATION_VOTES_CHANGED]: {
+      [FeedRelevance.LOW]: parseUnits("1000", decimals[DaoIdEnum.SCR]),
+      [FeedRelevance.MEDIUM]: parseUnits("10000", decimals[DaoIdEnum.SCR]),
+      [FeedRelevance.HIGH]: parseUnits("100000", decimals[DaoIdEnum.SCR]),
+    },
   },
   [DaoIdEnum.COMP]: {
     [FeedEventType.TRANSFER]: {
@@ -124,23 +151,32 @@ export const EventRelevanceThresholds: Record<
       [FeedRelevance.MEDIUM]: parseUnits("100000", decimals[DaoIdEnum.OBOL]),
       [FeedRelevance.HIGH]: parseUnits("500000", decimals[DaoIdEnum.OBOL]),
     },
+    [FeedEventType.DELEGATION_VOTES_CHANGED]: {
+      [FeedRelevance.LOW]: parseUnits("1000", decimals[DaoIdEnum.COMP]),
+      [FeedRelevance.MEDIUM]: parseUnits("10000", decimals[DaoIdEnum.COMP]),
+      [FeedRelevance.HIGH]: parseUnits("100000", decimals[DaoIdEnum.COMP]),
+    },
   },
-
   [DaoIdEnum.ZK]: {
     [FeedEventType.TRANSFER]: {
-      [FeedRelevance.LOW]: parseUnits("1000", decimals[DaoIdEnum.OBOL]),
-      [FeedRelevance.MEDIUM]: parseUnits("100000", decimals[DaoIdEnum.OBOL]),
-      [FeedRelevance.HIGH]: parseUnits("1000000", decimals[DaoIdEnum.OBOL]),
+      [FeedRelevance.LOW]: parseUnits("1000", decimals[DaoIdEnum.ZK]),
+      [FeedRelevance.MEDIUM]: parseUnits("100000", decimals[DaoIdEnum.ZK]),
+      [FeedRelevance.HIGH]: parseUnits("1000000", decimals[DaoIdEnum.ZK]),
     },
     [FeedEventType.DELEGATION]: {
-      [FeedRelevance.LOW]: parseUnits("1000", decimals[DaoIdEnum.OBOL]),
-      [FeedRelevance.MEDIUM]: parseUnits("100000", decimals[DaoIdEnum.OBOL]),
-      [FeedRelevance.HIGH]: parseUnits("500000", decimals[DaoIdEnum.OBOL]),
+      [FeedRelevance.LOW]: parseUnits("1000", decimals[DaoIdEnum.ZK]),
+      [FeedRelevance.MEDIUM]: parseUnits("100000", decimals[DaoIdEnum.ZK]),
+      [FeedRelevance.HIGH]: parseUnits("500000", decimals[DaoIdEnum.ZK]),
     },
     [FeedEventType.VOTE]: {
-      [FeedRelevance.LOW]: parseUnits("10000", decimals[DaoIdEnum.OBOL]),
-      [FeedRelevance.MEDIUM]: parseUnits("100000", decimals[DaoIdEnum.OBOL]),
-      [FeedRelevance.HIGH]: parseUnits("500000", decimals[DaoIdEnum.OBOL]),
+      [FeedRelevance.LOW]: parseUnits("10000", decimals[DaoIdEnum.ZK]),
+      [FeedRelevance.MEDIUM]: parseUnits("100000", decimals[DaoIdEnum.ZK]),
+      [FeedRelevance.HIGH]: parseUnits("500000", decimals[DaoIdEnum.ZK]),
+    },
+    [FeedEventType.DELEGATION_VOTES_CHANGED]: {
+      [FeedRelevance.LOW]: parseUnits("1000", decimals[DaoIdEnum.ZK]),
+      [FeedRelevance.MEDIUM]: parseUnits("10000", decimals[DaoIdEnum.ZK]),
+      [FeedRelevance.HIGH]: parseUnits("100000", decimals[DaoIdEnum.ZK]),
     },
   },
   [DaoIdEnum.NOUNS]: {
@@ -159,6 +195,11 @@ export const EventRelevanceThresholds: Record<
       [FeedRelevance.MEDIUM]: parseUnits("100000", decimals[DaoIdEnum.NOUNS]),
       [FeedRelevance.HIGH]: parseUnits("1000000", decimals[DaoIdEnum.NOUNS]),
     },
+    [FeedEventType.DELEGATION_VOTES_CHANGED]: {
+      [FeedRelevance.LOW]: parseUnits("1000", decimals[DaoIdEnum.NOUNS]),
+      [FeedRelevance.MEDIUM]: parseUnits("10000", decimals[DaoIdEnum.NOUNS]),
+      [FeedRelevance.HIGH]: parseUnits("100000", decimals[DaoIdEnum.NOUNS]),
+    },
   },
   [DaoIdEnum.GTC]: {
     [FeedEventType.TRANSFER]: {
@@ -175,6 +216,11 @@ export const EventRelevanceThresholds: Record<
       [FeedRelevance.LOW]: parseUnits("10000", decimals[DaoIdEnum.OBOL]),
       [FeedRelevance.MEDIUM]: parseUnits("100000", decimals[DaoIdEnum.OBOL]),
       [FeedRelevance.HIGH]: parseUnits("500000", decimals[DaoIdEnum.OBOL]),
+    },  
+    [FeedEventType.DELEGATION_VOTES_CHANGED]: {
+      [FeedRelevance.LOW]: parseUnits("1000", decimals[DaoIdEnum.GTC]),
+      [FeedRelevance.MEDIUM]: parseUnits("10000", decimals[DaoIdEnum.GTC]),
+      [FeedRelevance.HIGH]: parseUnits("100000", decimals[DaoIdEnum.GTC]),
     },
   },
   [DaoIdEnum.ARB]: {
@@ -193,22 +239,10 @@ export const EventRelevanceThresholds: Record<
       [FeedRelevance.MEDIUM]: parseUnits("100000", decimals[DaoIdEnum.OBOL]),
       [FeedRelevance.HIGH]: parseUnits("500000", decimals[DaoIdEnum.OBOL]),
     },
-  },
-  [DaoIdEnum.TEST]: {
-    [FeedEventType.TRANSFER]: {
-      [FeedRelevance.LOW]: parseUnits("1000", decimals[DaoIdEnum.OBOL]),
-      [FeedRelevance.MEDIUM]: parseUnits("100000", decimals[DaoIdEnum.OBOL]),
-      [FeedRelevance.HIGH]: parseUnits("1000000", decimals[DaoIdEnum.OBOL]),
-    },
-    [FeedEventType.DELEGATION]: {
-      [FeedRelevance.LOW]: parseUnits("1000", decimals[DaoIdEnum.OBOL]),
-      [FeedRelevance.MEDIUM]: parseUnits("100000", decimals[DaoIdEnum.OBOL]),
-      [FeedRelevance.HIGH]: parseUnits("500000", decimals[DaoIdEnum.OBOL]),
-    },
-    [FeedEventType.VOTE]: {
-      [FeedRelevance.LOW]: parseUnits("10000", decimals[DaoIdEnum.OBOL]),
-      [FeedRelevance.MEDIUM]: parseUnits("100000", decimals[DaoIdEnum.OBOL]),
-      [FeedRelevance.HIGH]: parseUnits("500000", decimals[DaoIdEnum.OBOL]),
+    [FeedEventType.DELEGATION_VOTES_CHANGED]: {
+      [FeedRelevance.LOW]: parseUnits("1000", decimals[DaoIdEnum.ARB]),
+      [FeedRelevance.MEDIUM]: parseUnits("10000", decimals[DaoIdEnum.ARB]),
+      [FeedRelevance.HIGH]: parseUnits("100000", decimals[DaoIdEnum.ARB]),
     },
   },
 };
