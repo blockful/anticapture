@@ -16,6 +16,7 @@ import { ArkhamClient } from "@/clients/arkham";
 import { AnticaptureClient } from "@/clients/anticapture";
 import { isContract, createRpcClient } from "@/utils/address-type";
 import dotenv from "dotenv";
+import { DaoIdEnum } from "@/utils/types";
 
 dotenv.config();
 
@@ -173,6 +174,65 @@ async function enrichAddress(
   };
 }
 
+const fetchDelegates = async (
+  anticaptureClient: AnticaptureClient,
+  limit: number,
+  daoId: string,
+): Promise<Map<string, AddressInfo>> => {
+  const addressMap = new Map<string, AddressInfo>();
+  console.log(`\n📊 Fetching top ${limit} delegates...`);
+  try {
+    const delegates = await anticaptureClient.getTopDelegates(daoId, limit);
+    delegates.forEach((d) => {
+      const addr = d.accountId.toLowerCase();
+      const existing = addressMap.get(addr);
+      addressMap.set(addr, {
+        address: addr,
+        isDelegate: true,
+        isHolder: existing?.isHolder ?? false,
+        votingPower: d.votingPower,
+        delegationsCount: d.delegationsCount,
+        balance: existing?.balance,
+      });
+    });
+    console.log(`   Found ${delegates.length} delegates`);
+  } catch (error) {
+    console.error("   ❌ Failed to fetch delegates:", error);
+  }
+
+  return addressMap;
+}
+
+const fetchHolders = async (
+  anticaptureClient: AnticaptureClient,
+  limit: number,
+  daoId: string,
+): Promise<Map<string, AddressInfo>> => {
+  const addressMap = new Map<string, AddressInfo>();
+  console.log(`\n💰 Fetching top ${limit} token holders...`);
+  try {
+    const holders = await anticaptureClient.getTopTokenHolders(daoId, limit);
+    console.log({ holders })
+    holders.forEach((h) => {
+      const addr = h.address.toLowerCase();
+      const existing = addressMap.get(addr);
+      addressMap.set(addr, {
+        address: addr,
+        isDelegate: existing?.isDelegate ?? false,
+        isHolder: true,
+        votingPower: existing?.votingPower,
+        delegationsCount: existing?.delegationsCount,
+        balance: h.balance,
+      });
+    });
+    console.log(`   Found ${holders.length} token holders`);
+  } catch (error) {
+    console.error("   ❌ Failed to fetch token holders:", error);
+  }
+
+  return addressMap;
+}
+
 async function main() {
   const options = parseArgs();
 
@@ -182,7 +242,6 @@ async function main() {
   // Initialize connections
   const databaseUrl = getEnv("DATABASE_URL");
   const arkhamApiKey = getEnv("ARKHAM_API_KEY");
-  const daoId = getEnv("DAO_ID");
   const arkhamApiUrl = getEnv(
     "ARKHAM_API_URL",
     "https://api.arkhamintelligence.com",
@@ -194,57 +253,45 @@ async function main() {
   const db = getDb();
 
   const arkhamClient = new ArkhamClient(arkhamApiUrl, arkhamApiKey);
-  const anticaptureClient = new AnticaptureClient(anticaptureApiUrl, daoId);
+  const anticaptureClient = new AnticaptureClient(anticaptureApiUrl);
   const rpcClient = createRpcClient(rpcUrl);
 
   // Collect addresses with their info
+  const mapPromises: Promise<Map<string, AddressInfo>>[] = [];
+
+  for (const daoId of Object.values(DaoIdEnum)) {
+    if (!options.holdersOnly) {
+      mapPromises.push(
+        fetchDelegates(anticaptureClient, options.limit, daoId)
+      );
+    }
+
+    if (!options.delegatesOnly) {
+      mapPromises.push(
+        fetchHolders(anticaptureClient, options.limit, daoId)
+      );
+    }
+  }
+
+  const maps = await Promise.all(mapPromises);
   const addressMap = new Map<string, AddressInfo>();
 
-  if (!options.holdersOnly) {
-    console.log(`\n📊 Fetching top ${options.limit} delegates...`);
-    try {
-      const delegates = await anticaptureClient.getTopDelegates(options.limit);
-      delegates.forEach((d) => {
-        const addr = d.accountId.toLowerCase();
-        const existing = addressMap.get(addr);
-        addressMap.set(addr, {
-          address: addr,
-          isDelegate: true,
-          isHolder: existing?.isHolder ?? false,
-          votingPower: d.votingPower,
-          delegationsCount: d.delegationsCount,
-          balance: existing?.balance,
-        });
+  for (const map of maps) {
+    for (const [key, value] of map) {
+      const existing = addressMap.get(key);
+
+      addressMap.set(key, {
+        address: key,
+        isDelegate: existing?.isDelegate || value.isDelegate,
+        isHolder: existing?.isHolder || value.isHolder,
+        votingPower: value.votingPower ?? existing?.votingPower,
+        balance: value.balance ?? existing?.balance,
+        delegationsCount: value.delegationsCount ?? existing?.delegationsCount,
       });
-      console.log(`   Found ${delegates.length} delegates`);
-    } catch (error) {
-      console.error("   ❌ Failed to fetch delegates:", error);
     }
   }
-
-  if (!options.delegatesOnly) {
-    console.log(`\n💰 Fetching top ${options.limit} token holders...`);
-    try {
-      const holders = await anticaptureClient.getTopTokenHolders(options.limit);
-      holders.forEach((h) => {
-        const addr = h.address.toLowerCase();
-        const existing = addressMap.get(addr);
-        addressMap.set(addr, {
-          address: addr,
-          isDelegate: existing?.isDelegate ?? false,
-          isHolder: true,
-          votingPower: existing?.votingPower,
-          delegationsCount: existing?.delegationsCount,
-          balance: h.balance,
-        });
-      });
-      console.log(`   Found ${holders.length} token holders`);
-    } catch (error) {
-      console.error("   ❌ Failed to fetch token holders:", error);
-    }
-  }
-
   const addressList = Array.from(addressMap.values());
+  console.log({ addressList })
   console.log(`\n🔄 Syncing ${addressList.length} unique addresses...`);
 
   let newCount = 0;

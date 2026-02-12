@@ -21,17 +21,15 @@ interface GraphQLResponse<T> {
 
 export class AnticaptureClient {
   private readonly baseUrl: string;
-  private readonly daoId: string;
 
-  constructor(baseUrl: string, daoId: string) {
+  constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
-    this.daoId = daoId;
   }
 
   /**
    * Fetches top delegates by voting power
    */
-  async getTopDelegates(limit: number = 100): Promise<DelegateInfo[]> {
+  async getTopDelegates(daoId: string, limit: number = 100): Promise<DelegateInfo[]> {
     const query = `
       query GetTopDelegates($limit: PositiveInt!) {
         votingPowers(
@@ -50,7 +48,7 @@ export class AnticaptureClient {
 
     const response = await this.executeQuery<{
       votingPowers: { items: DelegateInfo[] };
-    }>(query, { limit });
+    }>(query, { limit }, daoId);
 
     return response.votingPowers.items;
   }
@@ -58,7 +56,7 @@ export class AnticaptureClient {
   /**
    * Fetches top token holders by balance
    */
-  async getTopTokenHolders(limit: number = 100): Promise<TokenHolderInfo[]> {
+  async getTopTokenHolders(daoId: string, limit: number = 100): Promise<TokenHolderInfo[]> {
     const query = `
       query GetTopTokenHolders($limit: PositiveInt!) {
         accountBalances(
@@ -76,7 +74,7 @@ export class AnticaptureClient {
 
     const response = await this.executeQuery<{
       accountBalances: { items: TokenHolderInfo[] };
-    }>(query, { limit });
+    }>(query, { limit }, daoId);
 
     return response.accountBalances.items;
   }
@@ -84,12 +82,13 @@ export class AnticaptureClient {
   private async executeQuery<T>(
     query: string,
     variables: Record<string, unknown>,
+    daoId: string,
   ): Promise<T> {
     const response = await fetch(this.baseUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "anticapture-dao-id": this.daoId,
+        "anticapture-dao-id": daoId,
       },
       body: JSON.stringify({ query, variables }),
     });
