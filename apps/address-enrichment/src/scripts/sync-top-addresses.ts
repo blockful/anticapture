@@ -174,75 +174,135 @@ async function enrichAddress(
   };
 }
 
-const fetchDelegates = async (
+/**
+ * Process addresses as they stream in, enriching immediately
+ */
+const processAndEnrichDelegates = async (
   anticaptureClient: AnticaptureClient,
-  limit: number,
+  arkhamClient: ArkhamClient,
+  rpcClient: ReturnType<typeof createRpcClient>,
+  db: ReturnType<typeof getDb>,
   daoId: string,
-): Promise<Map<string, AddressInfo>> => {
-  const addressMap = new Map<string, AddressInfo>();
-  console.log(`\n📊 Fetching top ${limit} delegates...`);
+): Promise<{ newCount: number; existingCount: number; errorCount: number }> => {
+  console.log(`\n📊 Fetching and enriching delegates for ${daoId}...`);
+
+  let newCount = 0;
+  let existingCount = 0;
+  let errorCount = 0;
+  let processedCount = 0;
 
   try {
-    let count = 0;
     for await (const d of anticaptureClient.streamTopDelegates(daoId)) {
-      if (count >= limit) break;
+      processedCount++;
       const addr = d.accountId.toLowerCase();
-      const existing = addressMap.get(addr);
-      addressMap.set(addr, {
-        address: addr,
-        isDelegate: true,
-        isHolder: existing?.isHolder ?? false,
-        votingPower: d.votingPower,
-        delegationsCount: d.delegationsCount,
-        balance: existing?.balance,
-      });
-      count++;
+      const progress = `[${daoId} delegate ${processedCount}]`;
+
+      const vpFormatted = formatLargeNumber(d.votingPower, 18);
+      const roleStr = `(delegate: ${vpFormatted} VP)`;
+
+      try {
+        const result = await enrichAddress(addr, arkhamClient, rpcClient, db);
+
+        const arkhamParts: string[] = [];
+        if (result.entity) arkhamParts.push(result.entity);
+        if (result.label) arkhamParts.push(`"${result.label}"`);
+        if (result.entityType) arkhamParts.push(`[${result.entityType}]`);
+        if (result.twitter) arkhamParts.push(`@${result.twitter}`);
+        if (result.isContract) arkhamParts.push("📜 contract");
+        const arkhamStr =
+          arkhamParts.length > 0 ? `→ ${arkhamParts.join(" ")}` : "→ unknown";
+
+        if (result.isNew) {
+          newCount++;
+          console.log(`   ${progress} ✅ ${addr} ${roleStr} ${arkhamStr}`);
+        } else {
+          existingCount++;
+          console.log(`   ${progress} ⏭️  ${addr} ${roleStr} ${arkhamStr}`);
+        }
+      } catch (error) {
+        errorCount++;
+        console.error(
+          `   ${progress} ❌ ${addr} ${roleStr}:`,
+          error instanceof Error ? error.message : error,
+        );
+      }
+
+      // Rate limiting
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
-    console.log(`   Found ${addressMap.size} delegates`);
   } catch (error) {
-    console.error("   ❌ Failed to fetch delegates:", error);
+    console.error(`   ❌ Failed to fetch delegates for ${daoId}:`, error);
   }
 
-  return addressMap;
+  console.log(`   Processed ${processedCount} delegates`);
+  return { newCount, existingCount, errorCount };
 };
 
-const fetchHolders = async (
+const processAndEnrichHolders = async (
   anticaptureClient: AnticaptureClient,
-  limit: number,
+  arkhamClient: ArkhamClient,
+  rpcClient: ReturnType<typeof createRpcClient>,
+  db: ReturnType<typeof getDb>,
   daoId: string,
-): Promise<Map<string, AddressInfo>> => {
-  const addressMap = new Map<string, AddressInfo>();
-  console.log(`\n💰 Fetching top ${limit} token holders...`);
+): Promise<{ newCount: number; existingCount: number; errorCount: number }> => {
+  console.log(`\n💰 Fetching and enriching token holders for ${daoId}...`);
+
+  let newCount = 0;
+  let existingCount = 0;
+  let errorCount = 0;
+  let processedCount = 0;
 
   try {
-    let count = 0;
     for await (const h of anticaptureClient.streamTopTokenHolders(daoId)) {
-      if (count >= limit) break;
+      processedCount++;
       const addr = h.address.toLowerCase();
-      const existing = addressMap.get(addr);
-      addressMap.set(addr, {
-        address: addr,
-        isDelegate: existing?.isDelegate ?? false,
-        isHolder: true,
-        votingPower: existing?.votingPower,
-        delegationsCount: existing?.delegationsCount,
-        balance: h.balance,
-      });
-      count++;
+      const progress = `[${daoId} holder ${processedCount}]`;
+
+      const balFormatted = formatLargeNumber(h.balance, 18);
+      const roleStr = `(holder: ${balFormatted})`;
+
+      try {
+        const result = await enrichAddress(addr, arkhamClient, rpcClient, db);
+
+        const arkhamParts: string[] = [];
+        if (result.entity) arkhamParts.push(result.entity);
+        if (result.label) arkhamParts.push(`"${result.label}"`);
+        if (result.entityType) arkhamParts.push(`[${result.entityType}]`);
+        if (result.twitter) arkhamParts.push(`@${result.twitter}`);
+        if (result.isContract) arkhamParts.push("📜 contract");
+        const arkhamStr =
+          arkhamParts.length > 0 ? `→ ${arkhamParts.join(" ")}` : "→ unknown";
+
+        if (result.isNew) {
+          newCount++;
+          console.log(`   ${progress} ✅ ${addr} ${roleStr} ${arkhamStr}`);
+        } else {
+          existingCount++;
+          console.log(`   ${progress} ⏭️  ${addr} ${roleStr} ${arkhamStr}`);
+        }
+      } catch (error) {
+        errorCount++;
+        console.error(
+          `   ${progress} ❌ ${addr} ${roleStr}:`,
+          error instanceof Error ? error.message : error,
+        );
+      }
+
+      // Rate limiting
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
-    console.log(`   Found ${addressMap.size} token holders`);
   } catch (error) {
-    console.error("   ❌ Failed to fetch token holders:", error);
+    console.error(`   ❌ Failed to fetch holders for ${daoId}:`, error);
   }
 
-  return addressMap;
+  console.log(`   Processed ${processedCount} holders`);
+  return { newCount, existingCount, errorCount };
 };
 
 async function main() {
   const options = parseArgs();
 
   console.log("🚀 Starting address sync...");
-  console.log(`   Limit: ${options.limit} per category`);
 
   // Initialize connections
   const databaseUrl = getEnv("DATABASE_URL");
@@ -261,110 +321,42 @@ async function main() {
   const anticaptureClient = new AnticaptureClient(anticaptureApiUrl);
   const rpcClient = createRpcClient(rpcUrl);
 
-  // Collect addresses with their info
-  const mapPromises: Promise<Map<string, AddressInfo>>[] = [];
+  let totalNew = 0;
+  let totalExisting = 0;
+  let totalErrors = 0;
 
   for (const daoId of Object.values(DaoIdEnum)) {
     if (!options.holdersOnly) {
-      mapPromises.push(
-        fetchDelegates(anticaptureClient, options.limit, daoId)
-      );
-    }
-
-    if (!options.delegatesOnly) {
-      mapPromises.push(
-        fetchHolders(anticaptureClient, options.limit, daoId)
-      );
-    }
-  }
-
-  const maps = await Promise.all(mapPromises);
-  const addressMap = new Map<string, AddressInfo>();
-
-  for (const map of maps) {
-    for (const [key, value] of map) {
-      const existing = addressMap.get(key);
-
-      addressMap.set(key, {
-        address: key,
-        isDelegate: existing?.isDelegate || value.isDelegate,
-        isHolder: existing?.isHolder || value.isHolder,
-        votingPower: value.votingPower ?? existing?.votingPower,
-        balance: value.balance ?? existing?.balance,
-        delegationsCount: value.delegationsCount ?? existing?.delegationsCount,
-      });
-    }
-  }
-  const addressList = Array.from(addressMap.values());
-  console.log(`\n🔄 Syncing ${addressList.length} unique addresses...`);
-
-  let newCount = 0;
-  let existingCount = 0;
-  let errorCount = 0;
-
-  for (let i = 0; i < addressList.length; i++) {
-    const info = addressList[i]!;
-    const progress = `[${i + 1}/${addressList.length}]`;
-
-    // Build role description
-    const roles: string[] = [];
-    if (info.isDelegate && info.votingPower) {
-      const vpFormatted = formatLargeNumber(info.votingPower, 18);
-      roles.push(`delegate: ${vpFormatted} VP`);
-    }
-    if (info.isHolder && info.balance) {
-      const balFormatted = formatLargeNumber(info.balance, 18);
-      roles.push(`holder: ${balFormatted}`);
-    }
-    const roleStr = roles.length > 0 ? `(${roles.join(", ")})` : "";
-
-    try {
-      const result = await enrichAddress(
-        info.address,
+      const results = await processAndEnrichDelegates(
+        anticaptureClient,
         arkhamClient,
         rpcClient,
         db,
+        daoId,
       );
-
-      // Build Arkham info string
-      const arkhamParts: string[] = [];
-      if (result.entity) arkhamParts.push(result.entity);
-      if (result.label) arkhamParts.push(`"${result.label}"`);
-      if (result.entityType) arkhamParts.push(`[${result.entityType}]`);
-      if (result.twitter) arkhamParts.push(`@${result.twitter}`);
-      if (result.isContract) arkhamParts.push("📜 contract");
-      const arkhamStr =
-        arkhamParts.length > 0 ? `→ ${arkhamParts.join(" ")}` : "→ unknown";
-
-      if (result.isNew) {
-        newCount++;
-        console.log(
-          `   ${progress} ✅ ${info.address} ${roleStr} ${arkhamStr}`,
-        );
-      } else {
-        existingCount++;
-        console.log(
-          `   ${progress} ⏭️  ${info.address} ${roleStr} ${arkhamStr}`,
-        );
-      }
-    } catch (error) {
-      errorCount++;
-      console.error(
-        `   ${progress} ❌ ${info.address} ${roleStr}:`,
-        error instanceof Error ? error.message : error,
-      );
+      totalNew += results.newCount;
+      totalExisting += results.existingCount;
+      totalErrors += results.errorCount;
     }
 
-    // Small delay to avoid rate limiting
-    if (i < addressList.length - 1) {
-      await new Promise((resolve) => setTimeout(resolve, 100));
+    if (!options.delegatesOnly) {
+      const results = await processAndEnrichHolders(
+        anticaptureClient,
+        arkhamClient,
+        rpcClient,
+        db,
+        daoId,
+      );
+      totalNew += results.newCount;
+      totalExisting += results.existingCount;
+      totalErrors += results.errorCount;
     }
   }
 
   console.log(`\n✨ Sync complete!`);
-  console.log(`   New addresses: ${newCount}`);
-  console.log(`   Already existed: ${existingCount}`);
-  console.log(`   Errors: ${errorCount}`);
+  console.log(`   New addresses: ${totalNew}`);
+  console.log(`   Already existed: ${totalExisting}`);
+  console.log(`   Errors: ${totalErrors}`);
 
   process.exit(0);
 }

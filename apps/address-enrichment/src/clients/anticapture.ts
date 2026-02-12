@@ -62,7 +62,6 @@ export class AnticaptureClient {
         {
           limit: pageSize,
           skip,
-          orderDirection: "desc",
         },
         daoId
       );
@@ -116,7 +115,6 @@ export class AnticaptureClient {
         {
           limit: pageSize,
           skip,
-          orderDirection: "desc",
         },
         daoId
       );
