@@ -416,7 +416,7 @@ All agent configuration (MCP servers, skills, rules) lives in `.agents/` as the 
 └── rules/<service> → ../../.agents/rules/<service>
 ```
 
-Each packages hae their own AGENTS.md file, take them into consideration.
+Each package has its own AGENTS.md file, take them into consideration.
 
 ### Adding new configuration
 
