@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import {
   DrawerRoot,
   DrawerContent,
@@ -22,12 +23,31 @@ interface GovernanceImplementationDrawerProps {
     | null;
 }
 
+const SECTION_LABEL_CLASS =
+  "text-secondary min-w-44 whitespace-nowrap font-mono text-[13px] font-medium uppercase leading-5 tracking-wider";
+const SECTION_CONTENT_CLASS = "text-primary col-span-4 text-sm leading-5";
+const DIVIDER_CLASS =
+  "border-border-default h-px w-full border-t border-dashed";
+
 const riskTextColors: Record<RiskLevel, string> = {
   [RiskLevel.HIGH]: "text-error",
   [RiskLevel.MEDIUM]: "text-warning",
   [RiskLevel.LOW]: "text-success",
   [RiskLevel.NONE]: "text-foreground",
 };
+
+interface DetailSectionProps {
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+}
+
+const DetailSection = ({ label, children, className }: DetailSectionProps) => (
+  <div className="flex flex-col gap-2 lg:flex-row">
+    <h3 className={SECTION_LABEL_CLASS}>{label}</h3>
+    <div className={cn(SECTION_CONTENT_CLASS, className)}>{children}</div>
+  </div>
+);
 
 export const GovernanceImplementationDrawer = ({
   isOpen,
@@ -36,6 +56,28 @@ export const GovernanceImplementationDrawer = ({
   metricData,
 }: GovernanceImplementationDrawerProps) => {
   if (!metricType || !metricData) return null;
+
+  const sections = [
+    { label: "Definition", content: metricData.description },
+    {
+      label: "Risk Level",
+      content: (
+        <p
+          className={cn(
+            "flex items-center gap-2 font-mono text-[13px]",
+            riskTextColors[metricData.riskLevel],
+          )}
+        >
+          {iconsMapping[metricData.riskLevel]}
+          {metricData.riskLevel}
+        </p>
+      ),
+    },
+    { label: "Current Setting", content: metricData.currentSetting },
+    { label: "Impact", content: metricData.impact },
+    { label: "Recommended Setting", content: metricData.recommendedSetting },
+    { label: "Next Step", content: metricData.nextStep },
+  ];
 
   return (
     <DrawerRoot open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -47,81 +89,16 @@ export const GovernanceImplementationDrawer = ({
         />
         <DrawerBody className="overflow-y-auto px-6 py-6">
           <div className="flex flex-col gap-3">
-            {/* Definition */}
-            <div className="flex gap-2">
-              <h3 className="text-secondary min-w-44 whitespace-nowrap font-mono text-[13px] font-medium uppercase leading-5 tracking-wider">
-                Definition
-              </h3>
-              <p className="text-primary col-span-4 text-sm leading-5">
-                {metricData.description}
-              </p>
-            </div>
-
-            <div className="border-border-default h-px w-full border-t border-dashed" />
-
-            {/* Risk Level */}
-            <div className="flex gap-2">
-              <h3 className="text-secondary min-w-44 whitespace-nowrap font-mono text-[13px] font-medium uppercase leading-5 tracking-wider">
-                Risk Level
-              </h3>
-              <p
-                className={cn(
-                  "text-primary col-span-4 flex items-center gap-2 font-mono text-[13px] leading-5",
-                  riskTextColors[metricData.riskLevel],
+            {sections.map((section, index) => (
+              <React.Fragment key={section.label}>
+                <DetailSection label={section.label}>
+                  {section.content}
+                </DetailSection>
+                {index < sections.length - 1 && (
+                  <div className={DIVIDER_CLASS} />
                 )}
-              >
-                {iconsMapping[metricData.riskLevel]}
-                {metricData.riskLevel}
-              </p>
-            </div>
-
-            <div className="border-border-default h-px w-full border-t border-dashed" />
-
-            {/* Current Setting */}
-            <div className="flex gap-2">
-              <h3 className="text-secondary min-w-44 whitespace-nowrap font-mono text-[13px] font-medium uppercase leading-5 tracking-wider">
-                Current Setting
-              </h3>
-              <p className="text-primary col-span-4 text-sm leading-5">
-                {metricData.currentSetting}
-              </p>
-            </div>
-
-            <div className="border-border-default h-px w-full border-t border-dashed" />
-
-            {/* Impact */}
-            <div className="flex gap-2">
-              <h3 className="text-secondary min-w-44 whitespace-nowrap font-mono text-[13px] font-medium uppercase leading-5 tracking-wider">
-                Impact
-              </h3>
-              <p className="text-primary col-span-4 text-sm leading-5">
-                {metricData.impact}
-              </p>
-            </div>
-
-            <div className="border-border-default h-px w-full border-t border-dashed" />
-
-            {/* Recommended Setting */}
-            <div className="flex gap-2">
-              <h3 className="text-secondary min-w-44 whitespace-nowrap font-mono text-[13px] font-medium uppercase leading-5 tracking-wider">
-                Recommended Setting
-              </h3>
-              <p className="text-primary col-span-4 text-sm leading-5">
-                {metricData.recommendedSetting}
-              </p>
-            </div>
-
-            <div className="border-border-default h-px w-full border-t border-dashed" />
-
-            {/* Next Step */}
-            <div className="flex gap-2">
-              <h3 className="text-secondary min-w-44 whitespace-nowrap font-mono text-[13px] font-medium uppercase leading-5 tracking-wider">
-                Next Step
-              </h3>
-              <p className="text-primary col-span-4 text-sm leading-5">
-                {metricData.nextStep}
-              </p>
-            </div>
+              </React.Fragment>
+            ))}
           </div>
         </DrawerBody>
       </DrawerContent>

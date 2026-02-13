@@ -133,22 +133,6 @@ export const NOUNS: DaoConfiguration = {
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.PROPOSAL_THRESHOLD],
         nextStep: "The parameter is in its lowest-risk condition.",
       },
-      [GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL]: {
-        riskLevel: RiskLevel.LOW,
-        description:
-          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
-            GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL
-          ].description,
-        currentSetting:
-          "Nouns has a cancellation mechanism: if the proposer sells their tokens and their balance falls below the Proposal Threshold, the proposal is automatically canceled.",
-        impact:
-          "If the proposer sells their tokens and their balance falls below the Proposal Threshold, the proposal is automatically canceled.",
-        recommendedSetting:
-          RECOMMENDED_SETTINGS[
-            GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL
-          ],
-        nextStep: "The parameter is in its lowest-risk condition.",
-      },
       [GovernanceImplementationEnum.SECURITY_COUNCIL]: {
         riskLevel: RiskLevel.LOW,
         description:
@@ -309,12 +293,28 @@ export const NOUNS: DaoConfiguration = {
   dataTables: true,
   attackExposure: {
     defenseAreas: {
-      [RiskAreaEnum.SPAM_RESISTANCE]: { description: "To be defined" },
-      [RiskAreaEnum.ECONOMIC_SECURITY]: { description: "To be defined" },
-      [RiskAreaEnum.SAFEGUARDS]: { description: "To be defined" },
-      [RiskAreaEnum.CONTRACT_SAFETY]: { description: "To be defined" },
-      [RiskAreaEnum.RESPONSE_TIME]: { description: "To be defined" },
-      [RiskAreaEnum.GOV_FRONTEND_RESILIENCE]: { description: "To be defined" },
+      [RiskAreaEnum.SPAM_RESISTANCE]: {
+        description:
+          "Voting period is below the ideal length, moderately reducing resistance to sustained proposal spam.",
+      },
+      [RiskAreaEnum.ECONOMIC_SECURITY]: {
+        description: "All metrics in this defense are currently in low risk.",
+      },
+      [RiskAreaEnum.SAFEGUARDS]: {
+        description:
+          "Veto authority exists but is centralized in the Foundation, creating moderate centralization and transparency risk.",
+      },
+      [RiskAreaEnum.CONTRACT_SAFETY]: {
+        description: "All metrics in this defense are currently in low risk.",
+      },
+      [RiskAreaEnum.RESPONSE_TIME]: {
+        description:
+          "A 12-hour voting delay and a 4-day voting period limit the time available for coordination and response, increasing the risk of rushed or insufficiently reviewed governance decisions.",
+      },
+      [RiskAreaEnum.GOV_FRONTEND_RESILIENCE]: {
+        description:
+          "Interface protections are largely present but not fully hardened, and immutable votes limit recovery in the event of front-end compromise, resulting in moderate governance interface risk.",
+      },
     },
   },
 };

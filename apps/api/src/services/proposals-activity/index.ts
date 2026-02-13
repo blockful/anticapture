@@ -159,7 +159,7 @@ export class ProposalsActivityService {
           forVotes: item.proposal.for_votes,
           againstVotes: item.proposal.against_votes,
           abstainVotes: item.proposal.abstain_votes,
-          proposalEndTimestamp: item.proposal.proposal_end_timestamp,
+          endTimestamp: BigInt(item.proposal.proposal_end_timestamp),
         };
         proposal.status = await this.daoClient.getProposalStatus(proposal);
         return {

@@ -109,7 +109,7 @@ const RiskAreaCardInternal = ({
     >
       <div
         className={cn(
-          "flex h-full items-center px-2 py-5",
+          "flex h-full items-center px-2 py-3 lg:py-5",
           !isPanelTable ? "flex-1 justify-between" : "size-7 p-0 text-center",
           {
             "bg-surface-contrast": risk.level === RiskLevel.NONE,
@@ -279,7 +279,7 @@ export const RiskAreaCard = ({
       </RiskTooltipCard>
     ),
     [RiskAreaCardEnum.RISK_ANALYSIS]: (
-      <div className="flex w-full">
+      <div className="flex min-w-60 lg:w-full">
         <div
           className={cn(
             "w-full p-1.5",

@@ -173,7 +173,7 @@ docker-compose up -d  # Start PostgreSQL and local blockchain
   - Functions: camelCase
 - **Git**: Conventional Commits with commitlint
 - **Type Safety**: Full TypeScript coverage
-- **Testing**: Jest, Vitest, Playwright for different layers
+- **Testing**: Jest, Vitest, Playwright for different layers (see @.claude/rules/testing.md for guidelines)
 
 ## Configuration Files
 

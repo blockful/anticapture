@@ -55,18 +55,18 @@ const QuorumMetric = ({
   quorumLogic: string | undefined;
   isLoading: boolean;
 }) => {
-  if (daoId === DaoIdEnum.OPTIMISM) {
-    return (
-      <DaoOverviewMetricCard
-        title="Quorum"
-        text="Dynamic quorum"
-        subText="Calculated per proposal"
-        className={COMMON_CARD_CLASSES}
-        textClassName={TEXT_CLASSES}
-        isLoading={isLoading}
-      />
-    );
-  }
+  // if (daoId === DaoIdEnum.OPTIMISM) {
+  //   return (
+  //     <DaoOverviewMetricCard
+  //       title="Quorum"
+  //       text="Dynamic quorum"
+  //       subText="Calculated per proposal"
+  //       className={COMMON_CARD_CLASSES}
+  //       textClassName={TEXT_CLASSES}
+  //       isLoading={isLoading}
+  //     />
+  //   );
+  // }
 
   return (
     <DaoOverviewMetricCard
@@ -95,16 +95,16 @@ const ExecutionRulesMetric = ({
   timelockDelay: number;
   isLoading: boolean;
 }) => {
-  if (daoId === DaoIdEnum.OPTIMISM) {
-    return (
-      <DaoOverviewMetricCard
-        title="Execution Rules"
-        text="Executed by multisig"
-        textClassName={TEXT_CLASSES}
-        isLoading={isLoading}
-      />
-    );
-  }
+  // if (daoId === DaoIdEnum.OPTIMISM) {
+  //   return (
+  //     <DaoOverviewMetricCard
+  //       title="Execution Rules"
+  //       text="Executed by multisig"
+  //       textClassName={TEXT_CLASSES}
+  //       isLoading={isLoading}
+  //     />
+  //   );
+  // }
 
   const subText =
     executionRules === "Timelock" ? (

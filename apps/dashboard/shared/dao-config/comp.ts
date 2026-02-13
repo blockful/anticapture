@@ -100,7 +100,6 @@ export const COMP: DaoConfiguration = {
           "An attack on Compound doesn’t just put its treasury at risk — it also endangers users’ funds. The Governor can authorize a malicious address to move money across all its markets, whether in v2 or v3.",
           "To reduce the profitability of an attack, Compound needs to remove that permission from the Governor.",
         ],
-
       },
       [GovernanceImplementationEnum.PROPOSAL_FLASHLOAN_PROTECTION]: {
         riskLevel: RiskLevel.LOW,
@@ -136,23 +135,6 @@ export const COMP: DaoConfiguration = {
         requirements: [
           "The proposal threshold should be increased based on the amount of $COMP market supply.",
         ],
-      },
-      [GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL]: {
-        riskLevel: RiskLevel.HIGH,
-        description:
-          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
-            GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL
-          ].description,
-        currentSetting:
-          "There is no ability to cancel a proposal if the proposer's balance falls below the Proposal Threshold after submitting it.",
-        impact:
-          "An attacker can buy tokens to submit a proposal in the DAO, vote with them, and sell them during the voting period. There is nothing in ENS governance that protects against this or prevents the attacker from doing so.",
-        recommendedSetting:
-          RECOMMENDED_SETTINGS[
-            GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL
-          ],
-        nextStep:
-          "The governance contract should cancel a proposal if the address that submitted it has a governance token balance below the Proposal Threshold.",
       },
       [GovernanceImplementationEnum.SECURITY_COUNCIL]: {
         riskLevel: RiskLevel.MEDIUM,
@@ -314,22 +296,27 @@ export const COMP: DaoConfiguration = {
   attackExposure: {
     defenseAreas: {
       [RiskAreaEnum.SPAM_RESISTANCE]: {
-        description: "To be defined",
+        description:
+          "A moderate proposal threshold combined with governance vulnerability to spam reduces the cost of flooding the system, while a short 2-day and 17-hour voting period limits reaction time, resulting in high exposure to governance spam.",
       },
       [RiskAreaEnum.ECONOMIC_SECURITY]: {
-        description: "To be defined",
+        description:
+          "If Compound governance is captured, the protocol’s entire TVL — including users’ deposited funds — could be at risk. The high potential financial upside makes governance attacks economically attractive.",
       },
       [RiskAreaEnum.SAFEGUARDS]: {
-        description: "To be defined",
+        description:
+          "A Proposal Guardian multisig exists and can cancel malicious proposals, providing a layer of protection. However, this safeguard is limited in scope and introduces moderate centralization risk.",
       },
       [RiskAreaEnum.CONTRACT_SAFETY]: {
-        description: "To be defined",
+        description: "All metrics in this defense are currently in low risk.",
       },
       [RiskAreaEnum.RESPONSE_TIME]: {
-        description: "To be defined",
+        description:
+          "A 1-day and 19-hour voting delay combined with a 2-day and 17-hour voting period limits the time available for coordination and defensive action, increasing the risk of rushed or insufficiently defended governance decisions.",
       },
       [RiskAreaEnum.GOV_FRONTEND_RESILIENCE]: {
-        description: "To be defined",
+        description:
+          "Interface protections are absent or not properly hardened, and immutable votes limit recovery in the event of front-end compromise, resulting in high governance interface risk.",
       },
     },
   },
