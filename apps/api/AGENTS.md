@@ -21,7 +21,7 @@
 pnpm api dev                    # Start dev server on :42069
 
 # Testing
-pnpm api test                   # Run Jest unit tests
+pnpm api test                   # Run Vitest unit tests
 pnpm api test:watch             # Run tests in watch mode
 
 # Verification (run after every change)
@@ -77,8 +77,8 @@ apps/api/
 │   │   └── schema/             # Drizzle ORM schema definitions
 │   ├── config/                 # Configuration files
 │   └── index.ts                # Application entry point
-├── tests/                      # Jest test files
-└── jest.config.js              # Jest configuration
+├── tests/                      # Vitest test files
+└── vitest.config.ts            # Vitest configuration
 ```
 
 ## Where to Put New Code
@@ -172,13 +172,13 @@ export class DaoRepository {
 
 - **Unit tests**: Test services and repositories in isolation
 - **Integration tests**: Test full request/response flow
-- **Mocking**: Use Jest mocks for external dependencies
+- **Mocking**: Use Vitest mocks for external dependencies
 
 ```typescript
 // Example test
 describe("DaoService", () => {
   it("should return DAO parameters", async () => {
-    const mockRepo = { getDaoConfig: jest.fn().mockResolvedValue({...}) };
+    const mockRepo = { getDaoConfig: vi.fn().mockResolvedValue({...}) };
     const service = new DaoService(mockRepo);
 
     const result = await service.getDaoParameters();
@@ -191,18 +191,18 @@ describe("DaoService", () => {
 
 ## Development Workflow
 
-1. **Define OpenAPI schema** in controller
-2. **Implement service logic** with business rules
-3. **Create repository** for database queries
-4. **Add mapper** for data transformation
+1. **Define OpenAPI schema** in mappers using Zod
+2. **Create repository** for database queries
+3. **Implement service logic** with business rules injecting an abstraction of the repository
+4. **Add the route** as a controller
 5. **Write tests** for new functionality
 6. **Verify**: `pnpm api typecheck && pnpm api lint && pnpm api test`
-7. **Test manually**: Visit `http://localhost:42069/docs` for Swagger UI
+7. **Test manually**:
+   1. Run `pnpm api dev`
+   2. Make requests varying the parameters to see how the API responds
 
 ## Common Issues
 
-- **Database connection errors**: Ensure PostgreSQL is running with indexer data
-- **OpenAPI validation errors**: Check schema definitions match response types
 - **Type errors**: Ensure Drizzle schema matches Ponder schema structure
 
 ## Related Documentation
