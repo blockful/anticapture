@@ -40,7 +40,7 @@ export default async function DaoLayout({ children, params }: DaoLayoutProps) {
           <HeaderMobile />
           <StickyPageHeader />
         </div>
-        <div className="flex w-full flex-col items-center overflow-y-scroll lg:h-screen">
+        <div className="flex w-full flex-col items-center lg:h-screen">
           <div className="w-full flex-1">{children}</div>
           <Footer />
         </div>
