@@ -144,18 +144,18 @@ function ScrollOgIcon({ size }: { size: number }) {
 function NounsOgIcon({ size }: { size: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 40 40" fill="none">
-      <path d="M12 16.0127H16V24.063H12V16.0127Z" fill={FILL} />
       <path
-        d="M16 16.0127H20V24.063H16V16.0127Z"
+        d="M12 16.0127H16V24.063H12V16.0127Z"
         fill={FILL}
         opacity="0.5"
       />
-      <path d="M26 16.0127H30V24.063H26V16.0127Z" fill={FILL} />
+      <path d="M16 16.0127H20V24.063H16V16.0127Z" fill="#09090B" />
       <path
-        d="M30 16.0127H34V24.063H30V16.0127Z"
+        d="M26 16.0127H30V24.063H26V16.0127Z"
         fill={FILL}
         opacity="0.5"
       />
+      <path d="M30 16.0127H34V24.063H30V16.0127Z" fill="#09090B" />
       <path
         fillRule="evenodd"
         clipRule="evenodd"
