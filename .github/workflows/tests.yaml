@@ -1,11 +1,8 @@
-name: API Tests
+name: Tests
 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    paths:
-      - "apps/api/**"
-      - ".github/workflows/api-tests.yaml"
 
 jobs:
   test:
