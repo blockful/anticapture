@@ -80,12 +80,6 @@ export function getFigmaDesignConfig(figmaUrl: string) {
       : undefined;
 
   if (!figmaToken) {
-    console.warn(
-      "FIGMA_TOKEN environment variable is not set. Figma design integration will not work.",
-    );
-    console.warn(
-      "Please add FIGMA_TOKEN to apps/dashboard/.env.local file and restart Storybook",
-    );
     // Return config without token - addon will fail gracefully
     return {
       type: "figspec" as const,
