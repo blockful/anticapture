@@ -270,6 +270,8 @@ export const rolesEnum = pgEnum("event_type", [
   "PROPOSAL",
   "DELEGATION",
   "TRANSFER",
+  "DELEGATION_VOTES_CHANGED",
+  "PROPOSAL_EXTENDED",
 ]);
 
 export const feedEvent = pgTable(
