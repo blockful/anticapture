@@ -32,6 +32,7 @@
 - Remove or skip failing tests without explanation
 - Commit `node_modules`, `.env`, or generated files
 - Leak private variables
+- Cast types to `any` or `unknown` without explicitly asked to
 
 ## Commands
 
@@ -60,8 +61,7 @@ pnpm api test:watch                       # Jest watch mode for API
 pnpm gateway test                         # Jest unit tests for gateway
 
 # Infrastructure
-pnpm indexer dev --config config/<dao>    # Only when explicitly asked
-railway run -s <service-id> -e dev <cmd>  # Run commands with Railway env vars, prioritize this command.
+pnpm indexer dev --config config/<dao>      # Only when explicitly asked
 ```
 
 ## External Tools
@@ -244,26 +244,6 @@ Controller (route + validation) → Service (business logic) → Repository (DB 
 | Gateway   | Jest 29 + ts-jest       | `apps/api-gateway/jest.config.js` |
 | Dashboard | Storybook 10 + Vitest 3 | `apps/dashboard/vitest.config.ts` |
 
-### Conventions
-
-- Test files live next to the code they test: `foo.ts` → `foo.test.ts`
-- Use `describe` / `it` blocks with clear descriptions
-- Example:
-
-```typescript
-describe("truncateTimestampToMidnight", () => {
-  it("should return same timestamp when already at midnight UTC", () => {
-    const result = truncateTimestampToMidnight(1600041600);
-    expect(result).toBe(1600041600);
-  });
-
-  it("should truncate timestamp from middle of day to midnight UTC", () => {
-    const result = truncateTimestampToMidnight(1600084800);
-    expect(result).toBe(1600041600);
-  });
-});
-```
-
 ## Code Style
 
 ### Rules (enforced via Prettier + ESLint)
@@ -364,21 +344,11 @@ export function dao(app: Hono, service: DaoService) {
 
 Types: `feat/`, `fix/`, `chore/`, `refactor/`, `hotfix/`, `docs/`, `test/`
 
-Examples: `feat/activity-feed`, `fix/proposal-state`, `hotfix/voting-modal-crash`
-
 ### Commit messages (Conventional Commits, enforced via commitlint + husky)
 
 ```text
 <type>(<optional scope>): <description>
 ```
-
-Types: `feat`, `fix`, `chore`, `refactor`, `docs`, `style`, `test`, `perf`, `ci`, `build`, `revert`
-
-Examples:
-
-- `feat: event feed dashboard`
-- `fix: prevent BigInt crash from formatted voting power string`
-- `chore(deps): update graphql-mesh to 0.100`
 
 ### Main branches
 
@@ -391,16 +361,14 @@ After every implementation, run typecheck and lint on the affected packages befo
 
 ```bash
 # Prefer scoped checks when changes are limited to one package
-pnpm dashboard typecheck
-pnpm dashboard lint
-pnpm api typecheck
-pnpm api lint
-pnpm indexer typecheck
-pnpm gateway typecheck
+pnpm <service> typecheck
+pnpm <service> lint
+pnpm <service> lint:fix
 
 # Full monorepo (use when changes span multiple packages)
 pnpm typecheck
 pnpm lint
+pnpm lint:fix
 ```
 
 If either command fails, fix the reported issues before committing.
@@ -409,57 +377,14 @@ If either command fails, fix the reported issues before committing.
 
 When creating a PR, ensure it:
 
-1. Includes a clear description of the changes
-2. References any related ClickUp issues it addresses
-3. Passes all typecheck and lint checks
-4. Passes all tests
+1. All PR should target the `dev` branch by default
+2. Includes a clear description of the changes
+3. References any related ClickUp issues it addresses
+4. Passes all typecheck and lint checks
 5. Includes screenshots for UI changes
 6. Keeps the PR focused on a single concern
 
-## Shared Agent Configuration
-
-All agent configuration (MCP servers, skills, rules) lives in `.agents/` as the single source of truth, symlinked into each tool's config directory.
-
-```text
-.agents/
-├── mcp.json              # MCP server definitions
-├── skills/               # Agent skills (e.g. Railway)
-└── rules/                # Service-specific .mdc rules
-    └── <service>/
-
-.claude/
-├── mcp.json        → ../.agents/mcp.json
-├── skills/<skill>  → ../../.agents/skills/<skill>
-└── rules/<service> → ../../.agents/rules/<service>
-
-.cursor/
-├── mcp.json        → ../.agents/mcp.json
-├── skills/<skill>  → ../../.agents/skills/<skill>
-└── rules/<service> → ../../.agents/rules/<service>
-```
-
-### Adding new configuration
-
-When adding a new MCP server, skill, or rule:
-
-1. Add the source file in `.agents/`
-2. Symlink it into both `.claude/` and `.cursor/`:
-
-```bash
-# MCP config (already symlinked once)
-ln -s ../.agents/mcp.json .claude/mcp.json
-ln -s ../.agents/mcp.json .cursor/mcp.json
-
-# New skill
-ln -s ../../.agents/skills/<skill> .claude/skills/<skill>
-ln -s ../../.agents/skills/<skill> .cursor/skills/<skill>
-
-# New rule directory
-ln -s ../../../.agents/rules/<service> .claude/rules/<service>
-ln -s ../../../.agents/rules/<service> .cursor/rules/<service>
-```
-
-Never place tool-specific config directly in `.claude/` or `.cursor/` — always go through `.agents/`.
+Each package has its own AGENTS.md file, take them into consideration.
 
 ## Self-Improvement
 
@@ -471,9 +396,4 @@ When you make significant changes to the codebase:
    - File structure conventions
    - Code style patterns or examples
 
-2. **Update service-specific rules** in `.agents/rules/<service>/` if you change:
-   - Design system tokens or components (dashboard)
-   - Service-specific conventions
-   - Domain-specific patterns
-
-3. **Do NOT duplicate** — if it's already in AGENTS.md, don't add it to rules
+2. **Do NOT duplicate** — if it's already in AGENTS.md, don't add it to rules
