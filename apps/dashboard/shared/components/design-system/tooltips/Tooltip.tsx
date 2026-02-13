@@ -10,7 +10,9 @@ interface TooltipProps {
   children: ReactNode;
   tooltipContent: ReactNode;
   className?: string;
+  triggerClassName?: string;
   title?: ReactNode;
+  titleRight?: ReactNode;
   asChild?: boolean;
 }
 
@@ -18,7 +20,9 @@ export function Tooltip({
   children,
   tooltipContent,
   className,
+  triggerClassName,
   title,
+  titleRight,
   asChild = false,
 }: TooltipProps) {
   const [open, setOpen] = useState<boolean>(false);
@@ -48,6 +52,7 @@ export function Tooltip({
         asChild={asChild}
         role="button"
         aria-label="tooltip-info"
+        className={triggerClassName}
         onClick={onClick}
       >
         {children}
@@ -56,13 +61,13 @@ export function Tooltip({
         <Content
           data-slot="tooltip-content"
           className={cn(
-            "tooltip-content-animate bg-surface-contrast border-border-contrast text-primary font-inter flex max-w-[380px] flex-col overflow-hidden rounded-md border px-3 py-1.5 text-center text-sm font-normal not-italic leading-5 shadow-md",
+            "tooltip-content-animate bg-surface-contrast border-border-contrast text-primary font-inter flex max-w-[384px] flex-col overflow-hidden border px-3 py-1.5 text-center text-sm font-normal not-italic leading-5 shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]",
             title ? "text-secondary text-left" : "text-primary",
             className,
           )}
           side="top"
           align="center"
-          sideOffset={10}
+          sideOffset={5}
           avoidCollisions={true}
           style={{
             zIndex: 9999,
@@ -74,6 +79,12 @@ export function Tooltip({
           {title && (
             <div className="text-primary flex w-full items-center justify-start gap-2 whitespace-nowrap text-start font-mono text-[13px] font-medium uppercase not-italic leading-5 tracking-[0.78px]">
               {title}
+              {titleRight && (
+                <>
+                  <div className="bg-secondary/20 h-1 w-1 shrink-0 rounded-full" />
+                  {titleRight}
+                </>
+              )}
             </div>
           )}
           {title && <DividerDefault className="bg-border-contrast my-2" />}
