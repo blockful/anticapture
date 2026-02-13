@@ -57,7 +57,7 @@ const ActionItem = ({
   index,
   blockExplorerUrl,
 }: ActionItemProps) => {
-  const [isDecoded, setIsDecoded] = useState(false);
+  const [isDecoded, setIsDecoded] = useState(true);
 
   const { data: decodedCalldata, isLoading } = useDecodeCalldata({
     calldata,

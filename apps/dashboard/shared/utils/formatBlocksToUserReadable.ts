@@ -15,8 +15,8 @@ export function formatBlocksToUserReadable(
   // Convert blocks to seconds
   const totalSeconds = num * blockTime;
 
-  // For small block counts, just show seconds
-  if (num < 5) {
+  // For short durations, just show seconds
+  if (totalSeconds < 60) {
     return formatPlural(Math.round(totalSeconds), "sec");
   }
 

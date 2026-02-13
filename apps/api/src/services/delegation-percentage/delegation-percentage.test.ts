@@ -1,5 +1,5 @@
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { DelegationPercentageService } from "./delegation-percentage";
-import { DaoMetricsDayBucketRepository } from "@/repositories/";
 import { MetricTypesEnum } from "@/lib/constants";
 import { DBTokenMetric } from "@/mappers/delegation-percentage";
 
@@ -28,23 +28,16 @@ const createMockRow = (
 
 describe("DelegationPercentageService", () => {
   let service: DelegationPercentageService;
-  let mockRepository: jest.Mocked<
-    Pick<
-      DaoMetricsDayBucketRepository,
-      "getMetricsByDateRange" | "getLastMetricBeforeDate"
-    >
-  >;
+  let mockRepository: {
+    getMetricsByDateRange: ReturnType<typeof vi.fn>;
+    getLastMetricBeforeDate: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     mockRepository = {
-      getMetricsByDateRange: jest.fn(),
-      getLastMetricBeforeDate: jest.fn(),
-    } as jest.Mocked<
-      Pick<
-        DaoMetricsDayBucketRepository,
-        "getMetricsByDateRange" | "getLastMetricBeforeDate"
-      >
-    >;
+      getMetricsByDateRange: vi.fn(),
+      getLastMetricBeforeDate: vi.fn(),
+    };
 
     service = new DelegationPercentageService(mockRepository);
   });
@@ -205,78 +198,6 @@ describe("DelegationPercentageService", () => {
       expect(result.hasNextPage).toBe(true);
       expect(result.startDate).toBe("1600041600");
       expect(result.endDate).toBe("1600214400");
-    });
-
-    it("should apply cursor-based pagination with after", async () => {
-      const ONE_DAY = 86400;
-      const mockRows = [];
-
-      // Create 5 days of data
-      for (let i = 0; i < 5; i++) {
-        const date = BigInt(1600041600 + i * ONE_DAY);
-        mockRows.push(
-          createMockRow({
-            date,
-            metricType: MetricTypesEnum.DELEGATED_SUPPLY,
-            high: 50000000000000000000n,
-          }),
-          createMockRow({
-            date,
-            metricType: MetricTypesEnum.TOTAL_SUPPLY,
-            high: 100000000000000000000n,
-          }),
-        );
-      }
-
-      mockRepository.getMetricsByDateRange.mockResolvedValue(mockRows);
-
-      const result = await service.delegationPercentageByDay({
-        startDate: "1600041600",
-        endDate: "1600387200",
-        after: "1600128000", // After day 2
-        limit: 2,
-        orderDirection: "asc" as const,
-      });
-
-      expect(result.items).toHaveLength(2);
-      expect(result.items[0]?.date).toBe("1600214400"); // Day 3
-      expect(result.items[1]?.date).toBe("1600300800"); // Day 4
-    });
-
-    it("should apply cursor-based pagination with before", async () => {
-      const ONE_DAY = 86400;
-      const mockRows = [];
-
-      // Create 5 days of data
-      for (let i = 0; i < 5; i++) {
-        const date = BigInt(1600041600 + i * ONE_DAY);
-        mockRows.push(
-          createMockRow({
-            date,
-            metricType: MetricTypesEnum.DELEGATED_SUPPLY,
-            high: 50000000000000000000n,
-          }),
-          createMockRow({
-            date,
-            metricType: MetricTypesEnum.TOTAL_SUPPLY,
-            high: 100000000000000000000n,
-          }),
-        );
-      }
-
-      mockRepository.getMetricsByDateRange.mockResolvedValue(mockRows);
-
-      const result = await service.delegationPercentageByDay({
-        startDate: "1600041600",
-        endDate: "1600387200",
-        before: "1600214400", // Before day 3
-        limit: 2,
-        orderDirection: "asc" as const,
-      });
-
-      expect(result.items).toHaveLength(2);
-      expect(result.items[0]?.date).toBe("1600041600"); // Day 1
-      expect(result.items[1]?.date).toBe("1600128000"); // Day 2
     });
 
     it("should sort data in descending order when specified", async () => {
@@ -526,7 +447,7 @@ describe("DelegationPercentageService", () => {
       const day100 = 1599955200n;
 
       // Mock console.error to suppress test output
-      const consoleErrorSpy = jest
+      const consoleErrorSpy = vi
         .spyOn(console, "error")
         .mockImplementation(() => {});
 

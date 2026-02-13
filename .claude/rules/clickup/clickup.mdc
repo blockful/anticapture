@@ -1,1 +1,64 @@
-../../../.agents/rules/clickup/clickup.mdc
+# ClickUp Configuration
+
+## Default Settings
+
+- **Default List ID**: `90132341641`
+- **Workspace**: Auto-detected from authenticated workspace
+
+## Usage Guidelines
+
+### Creating Tasks
+
+When creating tasks via ClickUp MCP, always use the default list ID unless explicitly asked otherwise:
+
+```typescript
+// Use this list_id by default
+list_id: "90132341641"
+```
+
+### Task Creation Best Practices
+
+1. **Always specify the list_id** - Use `90132341641` to avoid search overhead
+2. **Ask for assignees** - Don't automatically assign tasks unless explicitly requested
+3. **Use meaningful task names** - Keep them concise but descriptive
+4. **Include markdown descriptions** - Use `markdown_description` for rich formatting
+5. **Set priority appropriately** - Use 'urgent', 'high', 'normal', or 'low' based on context
+
+### Example Task Creation
+
+```typescript
+clickup_create_task({
+  name: "Implement user authentication flow",
+  list_id: "90132341641",
+  markdown_description: "## Requirements\n- Add login/signup forms\n- Implement JWT auth\n- Add protected routes",
+  priority: "high",
+  assignees: ["user@example.com"], // Only if specified
+  tags: ["backend", "auth"]
+})
+```
+
+### When to Ask First
+
+Before creating tasks, ask the user for:
+- Task name and description
+- Priority level
+- Assignees (if any)
+- Tags to apply
+- Due date (if applicable)
+
+### When to Use Search
+
+Only search for list IDs when:
+- User explicitly requests a different list
+- User asks to create task in a specific project/folder
+- Default list ID fails (e.g., permissions issue)
+
+## Quick Reference
+
+| Operation | List ID Required | Use Default |
+|-----------|------------------|-------------|
+| Create task | Yes | `90132341641` |
+| Update task | No (uses task_id) | N/A |
+| Get task | No (uses task_id) | N/A |
+| List tasks | Optional | `90132341641` |
+| Add comment | No (uses task_id) | N/A |
