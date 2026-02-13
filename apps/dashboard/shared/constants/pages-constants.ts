@@ -51,7 +51,7 @@ export const PAGES_CONSTANTS = {
     title: "Resilience Stages",
     page: "resilience-stages",
     description:
-      "Resilience Stages are based on governance mechanisms, using the riskiest exposed vector as the criterion for progression.",
+      "A DAO's resilience level is determined by the framework, which evaluates the risk of its core governance protections — the weakest one defines the stage.",
   },
   donate: {
     title: "Donate",

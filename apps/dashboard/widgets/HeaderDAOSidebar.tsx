@@ -59,21 +59,21 @@ export const HeaderDAOSidebar = () => {
                   isCollapsed={isCollapsed}
                 />
               )}
-            {daoConfig.attackExposure && (
-              <ButtonHeaderSidebar
-                page={PAGES_CONSTANTS.attackExposure.page}
-                icon={Bomb}
-                label={PAGES_CONSTANTS.attackExposure.title}
-                key={PAGES_CONSTANTS.attackExposure.title}
-                isCollapsed={isCollapsed}
-              />
-            )}
             {daoConfig.resilienceStages && (
               <ButtonHeaderSidebar
                 page={PAGES_CONSTANTS.resilienceStages.page}
                 icon={BarChart}
                 label={PAGES_CONSTANTS.resilienceStages.title}
                 key={PAGES_CONSTANTS.resilienceStages.title}
+                isCollapsed={isCollapsed}
+              />
+            )}
+            {daoConfig.attackExposure && (
+              <ButtonHeaderSidebar
+                page={PAGES_CONSTANTS.attackExposure.page}
+                icon={Bomb}
+                label={PAGES_CONSTANTS.attackExposure.title}
+                key={PAGES_CONSTANTS.attackExposure.title}
                 isCollapsed={isCollapsed}
               />
             )}
