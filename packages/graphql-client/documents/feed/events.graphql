@@ -1,0 +1,32 @@
+query GetFeedEvents(
+  $skip: Float
+  $limit: Float = 10
+  $orderBy: queryInput_feedEvents_orderBy = timestamp
+  $orderDirection: queryInput_feedEvents_orderDirection = desc
+  $relevance: queryInput_feedEvents_relevance = MEDIUM
+  $type: queryInput_feedEvents_type
+  $fromDate: Float
+  $toDate: Float
+) {
+  feedEvents(
+    skip: $skip
+    limit: $limit
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+    relevance: $relevance
+    type: $type
+    fromDate: $fromDate
+    toDate: $toDate
+  ) {
+    items {
+      txHash
+      logIndex
+      type
+      value
+      timestamp
+      relevance
+      metadata
+    }
+    totalCount
+  }
+}

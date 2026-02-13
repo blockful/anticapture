@@ -3,6 +3,7 @@ import {
   accountBalance,
   accountPower,
   delegation,
+  feedEvent,
   votingPowerHistory,
 } from "ponder:schema";
 import { Address, getAddress, Hex, zeroAddress } from "viem";
@@ -152,6 +153,19 @@ export const delegateChanged = async (
     .onConflictDoUpdate((current) => ({
       delegationsCount: current.delegationsCount + 1,
     }));
+
+    await context.db.insert(feedEvent).values({
+      txHash,
+      logIndex,
+      type: "DELEGATION",
+      value: delegatorBalance?.balance ?? 0n,
+      timestamp,
+      metadata: {
+        delegator: normalizedDelegator,
+        delegate: normalizedDelegate,
+        previousDelegate: getAddress(previousDelegate),
+      },
+    });
 };
 
 /**
@@ -185,7 +199,8 @@ export const delegatedVotesChanged = async (
 
   await ensureAccountExists(context, delegate);
 
-  const deltaMod = newBalance - oldBalance;
+  const delta = newBalance - oldBalance;
+  const deltaMod = delta > 0n ? delta : -delta;
 
   await context.db
     .insert(votingPowerHistory)
@@ -194,8 +209,8 @@ export const delegatedVotesChanged = async (
       transactionHash: txHash,
       accountId: normalizedDelegate,
       votingPower: newBalance,
-      delta: newBalance - oldBalance,
-      deltaMod: deltaMod > 0n ? deltaMod : -deltaMod,
+      delta,
+      deltaMod,
       timestamp,
       logIndex,
     })
@@ -211,4 +226,17 @@ export const delegatedVotesChanged = async (
     .onConflictDoUpdate(() => ({
       votingPower: newBalance,
     }));
+
+    await context.db.insert(feedEvent).values({
+      txHash,
+      logIndex,
+      type: "DELEGATION_VOTES_CHANGED",
+      value: deltaMod,
+      timestamp,
+      metadata: {
+        delta,
+        deltaMod,
+        delegate: normalizedDelegate,
+      },
+    });
 };
