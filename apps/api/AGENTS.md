@@ -1,309 +1,221 @@
-# API Test Samples
+# API Package Guide
 
-Reference samples for writing tests in the API app. Follow the conventions in the root [testing rules](../../.claude/rules/testing.md).
+## Overview
 
----
+- **Service ID**: `<dao>-api`
+- **Port**: 42069 (configurable via `PORT` env var)
+- **Stack**: Hono 4.7, Drizzle ORM 0.41, @hono/zod-openapi 0.19, pg 8.17
+- **Purpose**: REST API serving governance data from the indexer with OpenAPI documentation
 
-## Service Test (Unit)
+## What It Does
 
-Services contain business logic. Use **fakes** for all dependencies (repositories, providers). No database or network access.
+- Serves governance data indexed by the Indexer
+- Exposes RESTful endpoints with OpenAPI/Swagger documentation
+- Consumed by the API Gateway to create a unified GraphQL API
+- Provides `/docs` endpoint with interactive OpenAPI spec
 
-```ts
-/**
- * Fakes for dependency injection
- */
-class FakeTreasuryProvider implements TreasuryProvider {
-  private data: LiquidTreasuryDataPoint[] = [];
+## Commands
 
-  setData(data: { date: number; value: number }[]) {
-    this.data = data.map((item) => ({
-      date: item.date,
-      liquidTreasury: item.value,
-    }));
-  }
+```bash
+# Development
+pnpm api dev                    # Start dev server on :42069
 
-  async fetchTreasury(
-    _cutoffTimestamp: number,
-  ): Promise<LiquidTreasuryDataPoint[]> {
-    return this.data;
+# Testing
+pnpm api test                   # Run Vitest unit tests
+pnpm api test:watch             # Run tests in watch mode
+
+# Verification (run after every change)
+pnpm api typecheck              # Type checking
+pnpm api lint                   # Lint checking
+pnpm api lint:fix               # Auto-fix lint issues
+```
+
+## Dependencies
+
+- **PostgreSQL**: With data populated by the Indexer
+- **Ethereum RPC**: For some real-time queries
+- **Indexer**: Must have run to populate database
+
+## Architecture
+
+The API follows a **layered architecture**:
+
+```
+Controller (route + validation)
+    ↓
+Service (business logic)
+    ↓
+Repository (DB queries) ← → Client (external APIs)
+    ↓
+Mapper (DB → API response)
+```
+
+### Layer Responsibilities
+
+- **Controllers**: Define routes, validate requests, handle responses
+- **Services**: Implement business logic, orchestrate repositories and clients
+- **Repositories**: Execute database queries using Drizzle ORM
+- **Clients**: Interact with external APIs (CoinGecko, Dune, etc.)
+- **Mappers**: Transform database models to API response DTOs
+
+## File Structure
+
+```
+apps/api/
+├── src/
+│   ├── controllers/
+│   │   └── <domain>/           # Route definitions + OpenAPI specs
+│   ├── services/
+│   │   └── <domain>/           # Business logic
+│   ├── repositories/
+│   │   └── <domain>/           # Database queries
+│   ├── mappers/
+│   │   └── <domain>/           # Data transformation
+│   ├── clients/
+│   │   └── <service>/          # External API integrations
+│   ├── database/
+│   │   └── schema/             # Drizzle ORM schema definitions
+│   ├── config/                 # Configuration files
+│   └── index.ts                # Application entry point
+├── tests/                      # Vitest test files
+└── vitest.config.ts            # Vitest configuration
+```
+
+## Where to Put New Code
+
+| What you're adding       | Where it goes                |
+| ------------------------ | ---------------------------- |
+| New API endpoint         | `src/controllers/<domain>/`  |
+| Business logic           | `src/services/<domain>/`     |
+| Database query           | `src/repositories/<domain>/` |
+| Data transformation      | `src/mappers/<domain>/`      |
+| External API integration | `src/clients/<service>/`     |
+| Database schema          | `src/database/schema/`       |
+
+## Database Schema
+
+⚠️ **Important**: This schema is a **mapping** from the Indexer's Ponder schema.
+
+**Workflow for schema changes**:
+
+1. Change must originate in `apps/indexer/src/ponder.schema.ts`
+2. Get approval (triggers reindex + API changes)
+3. Translate Ponder syntax to Drizzle format in `src/database/schema/`
+4. Update relevant repositories and mappers
+5. Update OpenAPI schemas in controllers
+
+## Code Examples
+
+### Controller (Hono + OpenAPI)
+
+```typescript
+import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
+import { DaoService } from "@/services";
+import { DaoResponseSchema } from "@/mappers";
+
+export function dao(app: Hono, service: DaoService) {
+  app.openapi(
+    createRoute({
+      method: "get",
+      operationId: "dao",
+      path: "/dao",
+      summary: "Get DAO governance parameters",
+      tags: ["governance"],
+      responses: {
+        200: {
+          description: "DAO governance parameters",
+          content: {
+            "application/json": { schema: DaoResponseSchema },
+          },
+        },
+      },
+    }),
+    async (context) => {
+      const daoData = await service.getDaoParameters();
+      return context.json(daoData, 200);
+    },
+  );
+}
+```
+
+### Service
+
+```typescript
+import { DaoRepository } from "@/repositories";
+import { mapDaoToResponse } from "@/mappers";
+
+export class DaoService {
+  constructor(private repository: DaoRepository) {}
+
+  async getDaoParameters() {
+    const daoData = await this.repository.getDaoConfig();
+    return mapDaoToResponse(daoData);
   }
 }
+```
 
-class FakePriceProvider implements PriceProvider {
-  private prices: Map<number, number> = new Map();
+### Repository
 
-  setPrices(prices: Map<number, number>) {
-    this.prices = prices;
-  }
+```typescript
+import { db } from "@/database";
+import { daoConfig } from "@/database/schema";
+import { eq } from "drizzle-orm";
 
-  async getHistoricalPricesMap(_days: number): Promise<Map<number, number>> {
-    return this.prices;
-  }
-}
-
-class FakeTreasuryRepository {
-  private tokenQuantities: Map<number, bigint> = new Map();
-
-  setTokenQuantities(quantities: Map<number, bigint>) {
-    this.tokenQuantities = quantities;
-  }
-
-  async getTokenQuantities(
-    _cutoffTimestamp: number,
-  ): Promise<Map<number, bigint>> {
-    return this.tokenQuantities;
-  }
-
-  async getLastTokenQuantityBeforeDate(
-    _cutoffTimestamp: number,
-  ): Promise<bigint | null> {
-    return null;
+export class DaoRepository {
+  async getDaoConfig() {
+    return await db.select().from(daoConfig).limit(1);
   }
 }
+```
 
-describe("TreasuryService", () => {
-  const FIXED_DATE = new Date("2026-01-15T00:00:00Z");
-  const FIXED_TIMESTAMP = Math.floor(FIXED_DATE.getTime() / 1000);
-  const ONE_DAY = 86400;
+## Testing Strategy
 
-  let liquidProvider: FakeTreasuryProvider;
-  let priceProvider: FakePriceProvider;
-  let metricRepo: FakeTreasuryRepository;
+- **Unit tests**: Test services and repositories in isolation
+- **Integration tests**: Test full request/response flow
+- **Mocking**: Use Vitest mocks for external dependencies
 
-  beforeEach(() => {
-    vi.useFakeTimers();
-    vi.setSystemTime(FIXED_DATE);
+```typescript
+// Example test
+describe("DaoService", () => {
+  it("should return DAO parameters", async () => {
+    const mockRepo = { getDaoConfig: vi.fn().mockResolvedValue({...}) };
+    const service = new DaoService(mockRepo);
 
-    liquidProvider = new FakeTreasuryProvider();
-    priceProvider = new FakePriceProvider();
-    metricRepo = new FakeTreasuryRepository();
-  });
+    const result = await service.getDaoParameters();
 
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
-  describe("getLiquidTreasury", () => {
-    it("should return items sorted ascending", async () => {
-      const expected = [
-        { date: FIXED_TIMESTAMP - ONE_DAY * 2, value: 1000 },
-        { date: FIXED_TIMESTAMP - ONE_DAY, value: 2000 },
-        { date: FIXED_TIMESTAMP, value: 3000 },
-      ];
-      liquidProvider.setData(expected);
-
-      const service = new TreasuryService(
-        metricRepo as TreasuryRepository,
-        liquidProvider,
-        undefined,
-      );
-
-      const result = await service.getLiquidTreasury(7, "asc");
-
-      expect(result).toEqual({
-        items: expected,
-        totalCount: expected.length,
-      });
-    });
+    expect(result).toBeDefined();
+    expect(mockRepo.getDaoConfig).toHaveBeenCalled();
   });
 });
 ```
 
-**Key patterns:**
+## Development Workflow
 
-- Fake classes implement the same interface as the real dependency
-- Fakes expose `setX()` methods to configure return values per test
-- `vi.useFakeTimers()` + `vi.setSystemTime()` for deterministic dates
-- No mocks unless verifying a call IS the behavior
+1. **Define OpenAPI schema** in mappers using Zod
+2. **Create repository** for database queries
+3. **Implement service logic** with business rules injecting an abstraction of the repository
+4. **Add the route** as a controller
+5. **Write tests** for new functionality
+6. **Verify**: `pnpm api typecheck && pnpm api lint && pnpm api test`
+7. **Test manually**:
+   1. Run `pnpm api dev`
+   2. Make requests varying the parameters to see how the API responds
 
----
+Every time a new endpoint/parameter is added/changed, the codegen files should be updated:
 
-## Repository Test (Integration)
+1. run the API locally
+2. run the gateway pointing to the given API
+3. run the client pointing to the local gateway
+4. commit the generated files
 
-Repositories interact with the database. Use **PGlite** (in-memory PostgreSQL) with **Drizzle ORM** for real SQL execution.
+## Common Issues
 
-```ts
-import { PGlite } from "@electric-sql/pglite";
-import { drizzle } from "drizzle-orm/pglite";
-import { pushSchema } from "drizzle-kit/api";
-import * as schema from "@/database/schema";
-import { daoMetricsDayBucket } from "@/database/schema";
-import { MetricTypesEnum } from "@/lib/constants";
-import { TreasuryRepository } from ".";
+- **Type errors**: Ensure Drizzle schema matches Ponder schema structure
 
-type DaoMetricInsert = typeof daoMetricsDayBucket.$inferInsert;
+## Related Documentation
 
-const createMetricRow = (
-  overrides: Partial<DaoMetricInsert> = {},
-): DaoMetricInsert => ({
-  date: 1600041600n,
-  daoId: "ENS",
-  tokenId: "ENS-token",
-  metricType: MetricTypesEnum.TREASURY,
-  open: 0n,
-  close: 1000n,
-  low: 0n,
-  high: 1000n,
-  average: 500n,
-  volume: 100n,
-  count: 1,
-  lastUpdate: 1600041600n,
-  ...overrides,
-});
-
-describe("TreasuryRepository - Integration", () => {
-  let client: PGlite;
-  let db: ReturnType<typeof drizzle<typeof schema>>;
-  let repository: TreasuryRepository;
-
-  beforeAll(async () => {
-    // pushSchema uses JSON.stringify internally, which doesn't handle BigInt
-    (BigInt.prototype as any).toJSON = function () {
-      return this.toString();
-    };
-
-    client = new PGlite();
-    db = drizzle(client, { schema });
-    repository = new TreasuryRepository(db);
-
-    const { apply } = await pushSchema(schema, db as any);
-    await apply();
-  });
-
-  afterAll(async () => {
-    await client.close();
-  });
-
-  beforeEach(async () => {
-    await db.delete(daoMetricsDayBucket);
-  });
-
-  describe("getTokenQuantities", () => {
-    it("returns correct Map with timestamp keys and close values", async () => {
-      await db
-        .insert(daoMetricsDayBucket)
-        .values([
-          createMetricRow({ date: 1000n, close: 500n }),
-          createMetricRow({ date: 2000n, close: 700n, tokenId: "ENS-token-2" }),
-        ]);
-
-      const result = await repository.getTokenQuantities(0);
-
-      expect(result.size).toBe(2);
-      expect(result.get(1000 * 1000)).toBe(500n);
-      expect(result.get(2000 * 1000)).toBe(700n);
-    });
-  });
-
-  describe("getLastTokenQuantityBeforeDate", () => {
-    it("returns null when no rows exist", async () => {
-      const result = await repository.getLastTokenQuantityBeforeDate(999);
-
-      expect(result).toBeNull();
-    });
-
-    it("returns most recent when multiple rows exist before cutoff", async () => {
-      await db
-        .insert(daoMetricsDayBucket)
-        .values([
-          createMetricRow({ date: 100n, close: 10n }),
-          createMetricRow({ date: 200n, close: 20n, tokenId: "ENS-token-2" }),
-          createMetricRow({ date: 300n, close: 30n, tokenId: "ENS-token-3" }),
-        ]);
-
-      const result = await repository.getLastTokenQuantityBeforeDate(400);
-
-      expect(result).toBe(30n);
-    });
-  });
-});
-```
-
-**Key patterns:**
-
-- `PGlite` provides an in-memory PostgreSQL instance (no Docker needed)
-- `pushSchema` applies the Drizzle schema automatically
-- `beforeEach` cleans the table to ensure test isolation
-- Factory function `createXRow()` with sensible defaults and overrides
-- Test boundary conditions (exact cutoff, empty tables, ordering)
-
----
-
-## Controller Test (Integration)
-
-Controllers wire routes to services. Use **fakes injected into the real service** and test via HTTP with `app.request()`.
-
-```ts
-function createTestApp(
-  treasuryService: TreasuryService,
-  decimals: number = 18,
-) {
-  const app = new Hono();
-  treasury(app, treasuryService, decimals);
-  return app;
-}
-
-describe("Treasury Controller - Integration Tests", () => {
-  const FIXED_DATE = new Date("2026-01-15T00:00:00Z");
-  const FIXED_TIMESTAMP = Math.floor(FIXED_DATE.getTime() / 1000);
-  const ONE_DAY = 86400;
-
-  let fakeProvider: FakeTreasuryProvider;
-  let priceRepo: FakePriceProvider;
-  let metricsRepo: FakeTreasuryRepository;
-  let service: TreasuryService;
-  let app: Hono;
-
-  beforeEach(() => {
-    vi.useFakeTimers();
-    vi.setSystemTime(FIXED_DATE);
-
-    fakeProvider = new FakeTreasuryProvider();
-    metricsRepo = new FakeTreasuryRepository();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-    metricsRepo.setTokenQuantities(new Map());
-  });
-
-  describe("GET /treasury/liquid", () => {
-    beforeEach(() => {
-      service = new TreasuryService(
-        metricsRepo as TreasuryRepository,
-        fakeProvider,
-        undefined,
-      );
-      app = createTestApp(service);
-    });
-
-    it("should return desc ordered based on the query param", async () => {
-      const day1 = FIXED_TIMESTAMP - ONE_DAY * 2;
-      const day2 = FIXED_TIMESTAMP - ONE_DAY;
-      const day3 = FIXED_TIMESTAMP;
-
-      const expected = [
-        { date: day1, value: 1000 },
-        { date: day2, value: 2000 },
-        { date: day3, value: 3000 },
-      ];
-      fakeProvider.setData(expected);
-
-      const res = await app.request("/treasury/liquid?days=7d&order=desc");
-
-      expect(await res.json()).toEqual({
-        items: expected.sort((a, b) => b.date - a.date),
-        totalCount: 3,
-      });
-    });
-  });
-});
-```
-
-**Key patterns:**
-
-- Create a real Hono app with `createTestApp()` and inject a real service with fake dependencies
-- Use `app.request()` to send HTTP requests (no test server needed)
-- Assert on HTTP status codes and JSON response bodies
-- Test query parameter handling gathered from the given mapper schema
-- Controller tests verify the full route -> service -> response pipeline
+- [Hono Documentation](https://hono.dev)
+- [Drizzle ORM Documentation](https://orm.drizzle.team)
+- Root `AGENTS.md` for general guidelines
+- `apps/indexer/AGENTS.md` for source schema
+- `apps/api-gateway/AGENTS.md` for OpenAPI consumption
