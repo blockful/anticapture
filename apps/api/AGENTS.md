@@ -201,6 +201,13 @@ describe("DaoService", () => {
    1. Run `pnpm api dev`
    2. Make requests varying the parameters to see how the API responds
 
+Every time a new endpoint/parameter is added/changed, the codegen files should be updated:
+
+1. run the API locally
+2. run the gateway pointing to the given API
+3. run the client pointing to the local gateway
+4. commit the generated files
+
 ## Common Issues
 
 - **Type errors**: Ensure Drizzle schema matches Ponder schema structure
