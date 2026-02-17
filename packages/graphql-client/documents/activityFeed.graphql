@@ -1,0 +1,30 @@
+query MyQuery(
+  $fromDate: Float = 1.5
+  $limit: Float = 1.5
+  $orderDirection: queryInput_feedEvents_orderDirection = asc
+  $relevance: queryInput_feedEvents_relevance = HIGH
+  $skip: Float = 1.5
+  $toDate: Float = 1.5
+  $type: queryInput_feedEvents_type = VOTE
+) {
+  feedEvents(
+    fromDate: $fromDate
+    limit: $limit
+    orderDirection: $orderDirection
+    skip: $skip
+    toDate: $toDate
+    type: $type
+    relevance: $relevance
+  ) {
+    totalCount
+    items {
+      logIndex
+      relevance
+      metadata
+      timestamp
+      txHash
+      type
+      value
+    }
+  }
+}

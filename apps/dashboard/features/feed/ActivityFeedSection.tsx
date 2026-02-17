@@ -197,19 +197,19 @@ export const ActivityFeedSection = ({
         subtitle={"Activity Feed"}
         icon={<Newspaper className="section-layout-icon" />}
         description={PAGES_CONSTANTS.activityFeed.description}
-        headerAction={
-          <Button
-            variant="primary"
-            onClick={() => setIsFilterDrawerOpen(true)}
-            className="shrink-0 gap-1"
-          >
-            <Filter className="size-4" />
-            Filters
-            {activeFiltersCount > 0 && (
-              <span className="text-inverted">({activeFiltersCount})</span>
-            )}
-          </Button>
-        }
+        // headerAction={
+        //   <Button
+        //     variant="primary"
+        //     onClick={() => setIsFilterDrawerOpen(true)}
+        //     className="shrink-0 gap-1"
+        //   >
+        //     <Filter className="size-4" />
+        //     Filters
+        //     {activeFiltersCount > 0 && (
+        //       <span className="text-inverted">({activeFiltersCount})</span>
+        //     )}
+        //   </Button>
+        // }
       >
         {/* Filter Drawer */}
         <ActivityFeedFiltersDrawer

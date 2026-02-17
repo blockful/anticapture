@@ -1,69 +1,121 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import axios from "axios";
+import { useCallback, useMemo, useState, useEffect } from "react";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
+import {
+  GetFeedEventsQuery,
+  QueryInput_FeedEvents_OrderDirection,
+  QueryInput_FeedEvents_OrderBy,
+  QueryInput_FeedEvents_Relevance,
+  QueryInput_FeedEvents_Type,
+  Query_FeedEvents_Items_Items_Relevance,
+  useGetFeedEventsQuery,
+} from "@anticapture/graphql-client/hooks";
 import {
   ActivityFeedFilters,
   FeedEvent,
-  FeedEventListResponse,
+  FeedEventRelevance,
+  FeedEventType,
 } from "@/features/feed/types";
-import { USE_MOCK_DATA, MOCK_FEED_DATA } from "./mockData";
 
-const buildQueryParams = (filters: ActivityFeedFilters): string => {
-  const params = new URLSearchParams();
-
-  if (filters.limit) params.append("limit", filters.limit.toString());
-  if (filters.offset) params.append("offset", filters.offset.toString());
-  if (filters.sortOrder) params.append("sortOrder", filters.sortOrder);
-  if (filters.fromTimestamp)
-    params.append("fromTimestamp", filters.fromTimestamp.toString());
-  if (filters.toTimestamp)
-    params.append("toTimestamp", filters.toTimestamp.toString());
-
-  if (filters.types && filters.types.length > 0) {
-    filters.types.forEach((type) => params.append("types", type));
+const mapRelevance = (
+  relevance: Query_FeedEvents_Items_Items_Relevance,
+): FeedEventRelevance => {
+  switch (relevance) {
+    case Query_FeedEvents_Items_Items_Relevance.High:
+      return "high";
+    case Query_FeedEvents_Items_Items_Relevance.Medium:
+      return "medium";
+    case Query_FeedEvents_Items_Items_Relevance.Low:
+      return "low";
+    default:
+      return "none";
   }
-
-  if (filters.relevances && filters.relevances.length > 0) {
-    filters.relevances.forEach((relevance) =>
-      params.append("relevances", relevance),
-    );
-  }
-
-  return params.toString();
 };
 
-const fetchActivityFeed = async (
-  daoId: DaoIdEnum,
-  filters: ActivityFeedFilters,
-): Promise<FeedEventListResponse> => {
-  // Return mock data if enabled
-  if (USE_MOCK_DATA) {
-    // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
-    const offset = filters.offset ?? 0;
-    const limit = filters.limit ?? 20;
-    const items = MOCK_FEED_DATA.items.slice(offset, offset + limit);
-
-    return {
-      items,
-      totalCount: MOCK_FEED_DATA.totalCount,
-    };
+const mapType = (type: string): FeedEventType => {
+  switch (type) {
+    case "VOTE":
+      return "vote";
+    case "PROPOSAL":
+    case "PROPOSAL_EXTENDED":
+      return "proposal";
+    case "TRANSFER":
+      return "transfer";
+    case "DELEGATION":
+    case "DELEGATION_VOTES_CHANGED":
+      return "delegation";
+    default:
+      return "vote";
   }
+};
 
-  const queryString = buildQueryParams(filters);
-  const url = `${BACKEND_ENDPOINT}/feed${queryString ? `?${queryString}` : ""}`;
+const mapTypeFilter = (
+  types?: FeedEventType[],
+): QueryInput_FeedEvents_Type | undefined => {
+  if (!types || types.length === 0) return undefined;
+  switch (types[0]) {
+    case "vote":
+      return QueryInput_FeedEvents_Type.Vote;
+    case "proposal":
+      return QueryInput_FeedEvents_Type.Proposal;
+    case "transfer":
+      return QueryInput_FeedEvents_Type.Transfer;
+    case "delegation":
+      return QueryInput_FeedEvents_Type.Delegation;
+    default:
+      return undefined;
+  }
+};
 
-  const response = await axios.get<FeedEventListResponse>(url, {
-    headers: {
-      "anticapture-dao-id": daoId,
-    },
+const mapRelevanceFilter = (
+  relevances?: FeedEventRelevance[],
+): QueryInput_FeedEvents_Relevance | undefined => {
+  if (!relevances || relevances.length === 0) return undefined;
+  switch (relevances[0]) {
+    case "high":
+      return QueryInput_FeedEvents_Relevance.High;
+    case "medium":
+      return QueryInput_FeedEvents_Relevance.Medium;
+    case "low":
+      return QueryInput_FeedEvents_Relevance.Low;
+    default:
+      return undefined;
+  }
+};
+
+type RawFeedItem = NonNullable<
+  NonNullable<GetFeedEventsQuery["feedEvents"]>["items"][number]
+>;
+
+const transformFeedEvent = (item: RawFeedItem): FeedEvent => {
+  const type = mapType(item.type);
+  const metadata = item.metadata ?? {};
+
+  return {
+    txHash: item.txHash,
+    logIndex: item.logIndex,
+    timestamp: String(item.timestamp),
+    relevance: mapRelevance(item.relevance),
+    type,
+    ...(type === "vote" && { vote: metadata }),
+    ...(type === "proposal" && { proposal: metadata }),
+    ...(type === "transfer" && { transfer: metadata }),
+    ...(type === "delegation" && { delegation: metadata }),
+  };
+};
+
+const getEventKey = (event: FeedEvent): string =>
+  `${event.txHash}-${event.logIndex}`;
+
+const deduplicateEvents = (events: FeedEvent[]): FeedEvent[] => {
+  const seen = new Set<string>();
+  return events.filter((event) => {
+    const key = getEventKey(event);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
   });
-
-  return response.data;
 };
 
 interface UseActivityFeedParams {
@@ -80,21 +132,6 @@ interface PaginationInfo {
   itemsPerPage: number;
 }
 
-// Helper to create unique key for deduplication
-const getEventKey = (event: FeedEvent): string =>
-  `${event.txHash}-${event.logIndex}`;
-
-// Helper to deduplicate events
-const deduplicateEvents = (events: FeedEvent[]): FeedEvent[] => {
-  const seen = new Set<string>();
-  return events.filter((event) => {
-    const key = getEventKey(event);
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-};
-
 export const useActivityFeed = ({
   daoId,
   filters = {},
@@ -102,114 +139,119 @@ export const useActivityFeed = ({
 }: UseActivityFeedParams) => {
   const limit = filters.limit ?? 20;
   const [allItems, setAllItems] = useState<FeedEvent[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const isFetchingRef = useRef(false);
 
-  // Create a stable filters hash for resetting
-  const filtersHash = useMemo(
-    () =>
-      JSON.stringify({
-        daoId,
-        types: filters.types,
-        relevances: filters.relevances,
-        fromTimestamp: filters.fromTimestamp,
-        toTimestamp: filters.toTimestamp,
-        sortOrder: filters.sortOrder,
-      }),
-    [daoId, filters],
+  const queryVariables = useMemo(
+    () => ({
+      skip: 0,
+      limit,
+      orderBy: QueryInput_FeedEvents_OrderBy.Timestamp,
+      orderDirection:
+        filters.sortOrder === "asc"
+          ? QueryInput_FeedEvents_OrderDirection.Asc
+          : QueryInput_FeedEvents_OrderDirection.Desc,
+      type: mapTypeFilter(filters.types),
+      relevance: mapRelevanceFilter(filters.relevances),
+      fromDate: filters.fromTimestamp,
+      toDate: filters.toTimestamp,
+    }),
+    [
+      limit,
+      filters.sortOrder,
+      filters.types,
+      filters.relevances,
+      filters.fromTimestamp,
+      filters.toTimestamp,
+    ],
   );
 
-  // Reset when filters change
+  const { data, loading, error, fetchMore, refetch: apolloRefetch } =
+    useGetFeedEventsQuery({
+      variables: queryVariables,
+      skip: !enabled,
+      notifyOnNetworkStatusChange: true,
+      context: {
+        headers: {
+          "anticapture-dao-id": daoId,
+        },
+      },
+    });
+
   useEffect(() => {
-    setAllItems([]);
-    setTotalCount(0);
-    setIsInitialLoad(true);
-    isFetchingRef.current = false;
-  }, [filtersHash]);
+    const rawItems = data?.feedEvents?.items ?? [];
+    const events = rawItems
+      .filter((item): item is RawFeedItem => item !== null)
+      .map(transformFeedEvent);
+    setAllItems(deduplicateEvents(events));
+  }, [data]);
 
-  // Fetch initial data
-  useEffect(() => {
-    if (!enabled || !isInitialLoad) return;
+  const totalCount = data?.feedEvents?.totalCount ?? 0;
 
-    const fetchInitial = async () => {
-      if (isFetchingRef.current) return;
-      isFetchingRef.current = true;
-
-      try {
-        const data = await fetchActivityFeed(daoId, {
-          ...filters,
-          limit,
-          offset: 0,
-        });
-        setAllItems(deduplicateEvents(data.items));
-        setTotalCount(data.totalCount);
-      } catch (err) {
-        console.error("Error fetching activity feed:", err);
-      } finally {
-        setIsInitialLoad(false);
-        isFetchingRef.current = false;
-      }
-    };
-
-    fetchInitial();
-  }, [daoId, filters, limit, enabled, isInitialLoad]);
-
-  const pagination: PaginationInfo = useMemo(() => {
-    const hasNextPage = totalCount > allItems.length;
-    return {
+  const pagination: PaginationInfo = useMemo(
+    () => ({
       totalCount,
-      hasNextPage,
+      hasNextPage: allItems.length < totalCount,
       hasPreviousPage: false,
       currentPage: Math.ceil(allItems.length / limit) || 1,
       itemsPerPage: limit,
-    };
-  }, [totalCount, allItems.length, limit]);
+    }),
+    [totalCount, allItems.length, limit],
+  );
 
   const fetchNextPage = useCallback(async () => {
-    if (!pagination.hasNextPage || isLoadingMore || isFetchingRef.current)
-      return;
+    if (!pagination.hasNextPage || isLoadingMore) return;
 
-    isFetchingRef.current = true;
     setIsLoadingMore(true);
 
     try {
-      const nextOffset = allItems.length;
-      const moreData = await fetchActivityFeed(daoId, {
-        ...filters,
-        limit,
-        offset: nextOffset,
-      });
+      await fetchMore({
+        variables: {
+          ...queryVariables,
+          skip: allItems.length,
+        },
+        updateQuery: (
+          previousResult: GetFeedEventsQuery,
+          { fetchMoreResult }: { fetchMoreResult: GetFeedEventsQuery },
+        ) => {
+          if (!fetchMoreResult?.feedEvents?.items?.length) {
+            return previousResult;
+          }
 
-      setAllItems((prev) => deduplicateEvents([...prev, ...moreData.items]));
+          return {
+            ...fetchMoreResult,
+            feedEvents: {
+              ...fetchMoreResult.feedEvents,
+              items: [
+                ...(previousResult.feedEvents?.items ?? []),
+                ...(fetchMoreResult.feedEvents.items ?? []),
+              ],
+            },
+          };
+        },
+      });
     } catch (err) {
       console.error("Error fetching next page:", err);
     } finally {
       setIsLoadingMore(false);
-      isFetchingRef.current = false;
     }
   }, [
-    daoId,
-    filters,
-    limit,
+    fetchMore,
     pagination.hasNextPage,
     isLoadingMore,
+    queryVariables,
     allItems.length,
   ]);
 
   const refetch = useCallback(() => {
     setAllItems([]);
-    setTotalCount(0);
-    setIsInitialLoad(true);
-    isFetchingRef.current = false;
-  }, []);
+    apolloRefetch();
+  }, [apolloRefetch]);
 
   return {
     data: allItems,
     totalCount,
-    loading: isInitialLoad,
-    error: null,
+    loading,
+    error,
     refetch,
     pagination,
     fetchNextPage,

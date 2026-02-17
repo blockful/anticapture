@@ -1568,6 +1568,19 @@ export type VotingPowers_200_Response = {
   totalCount: Scalars['Float']['output'];
 };
 
+export type MyQueryQueryVariables = Exact<{
+  fromDate?: InputMaybe<Scalars['Float']['input']>;
+  limit?: InputMaybe<Scalars['Float']['input']>;
+  orderDirection?: InputMaybe<QueryInput_FeedEvents_OrderDirection>;
+  relevance?: InputMaybe<QueryInput_FeedEvents_Relevance>;
+  skip?: InputMaybe<Scalars['Float']['input']>;
+  toDate?: InputMaybe<Scalars['Float']['input']>;
+  type?: InputMaybe<QueryInput_FeedEvents_Type>;
+}>;
+
+
+export type MyQueryQuery = { __typename?: 'Query', feedEvents?: { __typename?: 'feedEvents_200_response', totalCount: number, items: Array<{ __typename?: 'query_feedEvents_items_items', logIndex: number, relevance: Query_FeedEvents_Items_Items_Relevance, metadata?: any | null, timestamp: number, txHash: string, type: string, value: string } | null> } | null };
+
 export type BalanceHistoryQueryVariables = Exact<{
   address: Scalars['String']['input'];
   offset?: InputMaybe<Scalars['Float']['input']>;
@@ -1901,6 +1914,72 @@ export type TransactionsQueryVariables = Exact<{
 export type TransactionsQuery = { __typename?: 'Query', transactions?: { __typename?: 'transactions_200_response', totalCount: number, items: Array<{ __typename?: 'query_transactions_items_items', from?: string | null, isCex: boolean, isDex: boolean, isLending: boolean, isTotal: boolean, timestamp: string, to?: string | null, transactionHash: string, delegations: Array<{ __typename?: 'query_transactions_items_items_delegations_items', daoId: string, delegateAccountId: string, delegatedValue: string, delegatorAccountId: string, isCex: boolean, isDex: boolean, isTotal: boolean, isLending: boolean, logIndex: number, previousDelegate?: string | null, timestamp: string, transactionHash: string } | null>, transfers: Array<{ __typename?: 'query_transactions_items_items_transfers_items', amount: string, daoId: string, fromAccountId: string, isCex: boolean, isDex: boolean, isLending: boolean, isTotal: boolean, logIndex: number, timestamp: string, toAccountId: string, tokenId: string, transactionHash: string } | null> } | null> } | null };
 
 
+export const MyQueryDocument = gql`
+    query MyQuery($fromDate: Float = 1.5, $limit: Float = 1.5, $orderDirection: queryInput_feedEvents_orderDirection = asc, $relevance: queryInput_feedEvents_relevance = HIGH, $skip: Float = 1.5, $toDate: Float = 1.5, $type: queryInput_feedEvents_type = VOTE) {
+  feedEvents(
+    fromDate: $fromDate
+    limit: $limit
+    orderDirection: $orderDirection
+    skip: $skip
+    toDate: $toDate
+    type: $type
+    relevance: $relevance
+  ) {
+    totalCount
+    items {
+      logIndex
+      relevance
+      metadata
+      timestamp
+      txHash
+      type
+      value
+    }
+  }
+}
+    `;
+
+/**
+ * __useMyQueryQuery__
+ *
+ * To run a query within a React component, call `useMyQueryQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMyQueryQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMyQueryQuery({
+ *   variables: {
+ *      fromDate: // value for 'fromDate'
+ *      limit: // value for 'limit'
+ *      orderDirection: // value for 'orderDirection'
+ *      relevance: // value for 'relevance'
+ *      skip: // value for 'skip'
+ *      toDate: // value for 'toDate'
+ *      type: // value for 'type'
+ *   },
+ * });
+ */
+export function useMyQueryQuery(baseOptions?: Apollo.QueryHookOptions<MyQueryQuery, MyQueryQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<MyQueryQuery, MyQueryQueryVariables>(MyQueryDocument, options);
+      }
+export function useMyQueryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MyQueryQuery, MyQueryQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<MyQueryQuery, MyQueryQueryVariables>(MyQueryDocument, options);
+        }
+// @ts-ignore
+export function useMyQuerySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<MyQueryQuery, MyQueryQueryVariables>): Apollo.UseSuspenseQueryResult<MyQueryQuery, MyQueryQueryVariables>;
+export function useMyQuerySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<MyQueryQuery, MyQueryQueryVariables>): Apollo.UseSuspenseQueryResult<MyQueryQuery | undefined, MyQueryQueryVariables>;
+export function useMyQuerySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<MyQueryQuery, MyQueryQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<MyQueryQuery, MyQueryQueryVariables>(MyQueryDocument, options);
+        }
+export type MyQueryQueryHookResult = ReturnType<typeof useMyQueryQuery>;
+export type MyQueryLazyQueryHookResult = ReturnType<typeof useMyQueryLazyQuery>;
+export type MyQuerySuspenseQueryHookResult = ReturnType<typeof useMyQuerySuspenseQuery>;
+export type MyQueryQueryResult = Apollo.QueryResult<MyQueryQuery, MyQueryQueryVariables>;
 export const BalanceHistoryDocument = gql`
     query BalanceHistory($address: String!, $offset: Float = 0, $limit: Float = 10, $sortBy: queryInput_transfers_sortBy, $sortOrder: queryInput_transfers_sortOrder, $from: String, $to: String, $fromValue: String, $toValue: String, $fromDate: Float, $toDate: Float) {
   transfers(
