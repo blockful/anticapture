@@ -17,7 +17,7 @@ export const updateTotalSupply = async (
   tokenAddress: Address,
   timestamp: bigint,
 ) => {
-  const normalizedAddressList = addressList.map(getAddress);
+  const normalizedAddressList = addressList.map((a) => getAddress(a));
   const isToBurningAddress = normalizedAddressList.includes(getAddress(to));
   const isFromBurningAddress = normalizedAddressList.includes(getAddress(from));
   const isTotalSupplyTransaction =
