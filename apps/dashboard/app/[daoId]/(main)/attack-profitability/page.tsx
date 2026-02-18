@@ -3,7 +3,7 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { AttackProfitabilitySection } from "@/features/attack-profitability";
 import { SubSectionsContainer } from "@/shared/components/design-system/section";
-import { RiskLevelCard, TheSectionLayout } from "@/shared/components";
+import { TheSectionLayout } from "@/shared/components";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { Crosshair2Icon } from "@radix-ui/react-icons";
 
@@ -78,9 +78,6 @@ export default async function AttackProfitabilityPage({
         title={PAGES_CONSTANTS.attackProfitability.title}
         icon={<Crosshair2Icon className="section-layout-icon" />}
         description={PAGES_CONSTANTS.attackProfitability.description}
-        riskLevel={
-          <RiskLevelCard status={daoConstants.attackProfitability?.riskLevel} />
-        }
       >
         <SubSectionsContainer>
           <AttackProfitabilitySection

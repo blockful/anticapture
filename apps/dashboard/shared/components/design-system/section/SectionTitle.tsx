@@ -27,7 +27,7 @@ export const SectionTitle = ({
         </div>
       </div>
       <div>
-        <p className="text-secondary flex w-full flex-col text-justify font-normal lg:text-sm">
+        <p className="text-secondary flex w-full flex-col text-justify text-sm font-normal">
           {description}
         </p>
       </div>
