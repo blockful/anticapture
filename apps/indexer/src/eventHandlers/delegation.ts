@@ -154,18 +154,19 @@ export const delegateChanged = async (
       delegationsCount: current.delegationsCount + 1,
     }));
 
-    await context.db.insert(feedEvent).values({
-      txHash,
-      logIndex,
-      type: "DELEGATION",
-      value: delegatorBalance?.balance ?? 0n,
-      timestamp,
-      metadata: {
-        delegator: normalizedDelegator,
-        delegate: normalizedDelegate,
-        previousDelegate: getAddress(previousDelegate),
-      },
-    });
+  await context.db.insert(feedEvent).values({
+    txHash,
+    logIndex,
+    type: "DELEGATION",
+    value: delegatorBalance?.balance ?? 0n,
+    timestamp,
+    metadata: {
+      delegator: normalizedDelegator,
+      delegate: normalizedDelegate,
+      previousDelegate: getAddress(previousDelegate),
+      amount: delegatorBalance?.balance ?? 0n,
+    },
+  });
 };
 
 /**
@@ -227,16 +228,16 @@ export const delegatedVotesChanged = async (
       votingPower: newBalance,
     }));
 
-    await context.db.insert(feedEvent).values({
-      txHash,
-      logIndex,
-      type: "DELEGATION_VOTES_CHANGED",
-      value: deltaMod,
-      timestamp,
-      metadata: {
-        delta,
-        deltaMod,
-        delegate: normalizedDelegate,
-      },
-    });
+  await context.db.insert(feedEvent).values({
+    txHash,
+    logIndex,
+    type: "DELEGATION_VOTES_CHANGED",
+    value: deltaMod,
+    timestamp,
+    metadata: {
+      delta,
+      deltaMod,
+      delegate: normalizedDelegate,
+    },
+  });
 };

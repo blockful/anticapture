@@ -167,6 +167,7 @@ export const tokenTransfer = async (
     metadata: {
       from: normalizedFrom,
       to: normalizedTo,
+      amount: value,
     },
   });
 };
