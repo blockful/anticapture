@@ -96,7 +96,6 @@ export async function GET(request: NextRequest) {
     // Get token from server environment (never exposed to client)
     const figmaToken = process.env.FIGMA_TOKEN;
     if (!figmaToken) {
-      console.error("FIGMA_TOKEN environment variable is not set");
       return NextResponse.json(
         { error: "Figma service is not configured" },
         { status: 500 },

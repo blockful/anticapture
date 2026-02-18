@@ -146,3 +146,6 @@ dist
 
 .sst/
 .vercel
+
+.github/skills/*
+.github/copilot-instructions.md
