@@ -12,7 +12,7 @@ const createMockEvent = (
   txHash: "0xabc123",
   logIndex: 0,
   type: "VOTE",
-  value: parseEther("50000"),
+  value: parseEther("100000"),
   timestamp: 1700000000,
   metadata: null,
   ...overrides,
