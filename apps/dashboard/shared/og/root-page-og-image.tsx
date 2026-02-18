@@ -1,7 +1,6 @@
 import { ImageResponse } from "next/og";
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
 import { AnticaptureGlobeLogoSvg } from "./anticapture-globe-logo-svg";
+import { loadLocalFonts } from "./fonts";
 
 /** Figma design tokens */
 const OG_COLORS = {
@@ -122,20 +121,4 @@ export async function createRootPageOgImage({
       fonts: await loadLocalFonts(),
     },
   );
-}
-
-async function loadLocalFonts() {
-  try {
-    const fontsDir = join(process.cwd(), "public", "fonts");
-    const [medium, regular] = await Promise.all([
-      readFile(join(fontsDir, "RobotoMono-Medium.ttf")),
-      readFile(join(fontsDir, "RobotoMono-Regular.ttf")),
-    ]);
-    return [
-      { name: "Roboto Mono", data: medium, weight: 500 as const, style: "normal" as const },
-      { name: "Roboto Mono", data: regular, weight: 400 as const, style: "normal" as const },
-    ];
-  } catch {
-    return [];
-  }
 }

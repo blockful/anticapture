@@ -1,9 +1,8 @@
 import { ImageResponse } from "next/og";
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
 import { ALL_DAOS, DaoIdEnum } from "@/shared/types/daos";
 import daoConfig from "@/shared/dao-config";
 import { AnticaptureGlobeLogoSvg } from "./anticapture-globe-logo-svg";
+import { loadLocalFonts } from "./fonts";
 
 const DAO_ICON_SIZE = 300;
 
@@ -190,30 +189,4 @@ export async function createDaoSectionOgImage({
       fonts: await loadLocalFonts(),
     },
   );
-}
-
-async function loadLocalFonts() {
-  try {
-    const fontsDir = join(process.cwd(), "public", "fonts");
-    const [medium, regular] = await Promise.all([
-      readFile(join(fontsDir, "RobotoMono-Medium.ttf")),
-      readFile(join(fontsDir, "RobotoMono-Regular.ttf")),
-    ]);
-    return [
-      {
-        name: "Roboto Mono",
-        data: medium,
-        weight: 500 as const,
-        style: "normal" as const,
-      },
-      {
-        name: "Roboto Mono",
-        data: regular,
-        weight: 400 as const,
-        style: "normal" as const,
-      },
-    ];
-  } catch {
-    return [];
-  }
 }
