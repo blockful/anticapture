@@ -1,7 +1,6 @@
 import { DaoIdEnum } from "@/shared/types/daos";
 import { createDaoSectionOgImage } from "@/shared/og";
 import { SECTION_OG_CONFIG } from "@/shared/og/section-config";
-import { getBaseUrl } from "@/shared/og/get-base-url";
 
 export const alt = "Anticapture Attack Profitability";
 export const size = { width: 1200, height: 630 };
@@ -14,12 +13,11 @@ export default async function OpengraphImage({
 }) {
   const { daoId } = await params;
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
-  const baseUrl = getBaseUrl();
-  const sectionTitle = SECTION_OG_CONFIG["attack-profitability"] ?? "Attack Profitability";
+  const sectionTitle =
+    SECTION_OG_CONFIG["attack-profitability"] ?? "Attack Profitability";
 
   return await createDaoSectionOgImage({
     daoId: daoIdEnum,
     sectionTitle,
-    baseUrl,
   });
 }

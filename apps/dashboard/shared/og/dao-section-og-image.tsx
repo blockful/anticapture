@@ -2,20 +2,9 @@ import { ImageResponse } from "next/og";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { DAO_LOGO_MAP } from "./dao-logo-map";
+import daoConfig from "@/shared/dao-config";
 import { getDaoOgIcon } from "./dao-og-icons";
 import { AnticaptureGlobeLogoSvg } from "./anticapture-globe-logo-svg";
-
-/** Simple name map – avoids importing daoConfig (which pulls in client components) */
-const DAO_NAME_MAP: Record<string, string> = {
-  [DaoIdEnum.UNISWAP]: "Uniswap",
-  [DaoIdEnum.ENS]: "ENS",
-  [DaoIdEnum.GITCOIN]: "Gitcoin",
-  [DaoIdEnum.SCR]: "Scroll",
-  [DaoIdEnum.NOUNS]: "Nouns",
-  [DaoIdEnum.OBOL]: "Obol",
-  [DaoIdEnum.COMP]: "Compound",
-};
 
 const DAO_ICON_SIZE = 300;
 
@@ -30,29 +19,6 @@ const OG_DIMENSIONS = { width: 1200, height: 630 } as const;
 export interface DaoSectionOgImageProps {
   daoId: DaoIdEnum;
   sectionTitle: string;
-  baseUrl: string;
-}
-
-function arrayBufferToBase64(buffer: ArrayBuffer): string {
-  const bytes = new Uint8Array(buffer);
-  let binary = "";
-  for (let i = 0; i < bytes.length; i++) {
-    binary += String.fromCharCode(bytes[i]!);
-  }
-  return btoa(binary);
-}
-
-async function fetchDaoLogoAsDataUrl(logoUrl: string): Promise<string | null> {
-  try {
-    const res = await fetch(logoUrl);
-    if (!res.ok) return null;
-    const buf = await res.arrayBuffer();
-    const base64 = arrayBufferToBase64(buf);
-    const contentType = res.headers.get("content-type") ?? "image/png";
-    return `data:${contentType};base64,${base64}`;
-  } catch {
-    return null;
-  }
 }
 
 /**
@@ -67,14 +33,11 @@ async function fetchDaoLogoAsDataUrl(logoUrl: string): Promise<string | null> {
 export async function createDaoSectionOgImage({
   daoId,
   sectionTitle,
-  baseUrl,
 }: DaoSectionOgImageProps) {
-  const daoName = DAO_NAME_MAP[daoId] ?? daoId;
+  const config = daoConfig[daoId];
+  const daoName = config.name;
   const daoDisplayName = `${daoName.toUpperCase()} DAO`;
   const daoOgIcon = getDaoOgIcon(daoId, DAO_ICON_SIZE);
-  const logoPath = DAO_LOGO_MAP[daoId];
-  const logoUrl = !daoOgIcon && logoPath ? `${baseUrl}${logoPath}` : null;
-  const daoLogoDataUrl = logoUrl ? await fetchDaoLogoAsDataUrl(logoUrl) : null;
 
   return new ImageResponse(
     <div
@@ -156,14 +119,6 @@ export async function createDaoSectionOgImage({
           >
             {daoOgIcon}
           </div>
-        ) : daoLogoDataUrl ? (
-          <img
-            src={daoLogoDataUrl}
-            alt=""
-            width={DAO_ICON_SIZE}
-            height={DAO_ICON_SIZE}
-            style={{ objectFit: "contain" }}
-          />
         ) : (
           <div
             style={{
