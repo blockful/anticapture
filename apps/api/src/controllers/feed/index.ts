@@ -16,7 +16,7 @@ export function feed(app: Hono, service: FeedService) {
       },
       responses: {
         200: {
-          description: "Successfully retrieved historical balances",
+          description: "Successfully retrieved feed events",
           content: {
             "application/json": {
               schema: FeedResponseSchema,

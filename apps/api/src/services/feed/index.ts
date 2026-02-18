@@ -1,6 +1,6 @@
 import { DaoIdEnum } from "@/lib/enums";
 import { DBFeedEvent, FeedRequest, FeedResponse } from "@/mappers";
-import { EventRelevanceThresholds } from "@/lib/eventRelevance";
+import { getDaoRelevanceThreshold } from "@/lib/eventRelevance";
 import { FeedEventType, FeedRelevance } from "@/lib/constants";
 
 interface FeedRepository {
@@ -33,7 +33,7 @@ export class FeedService {
   }
 
   private getItemRelevance(item: DBFeedEvent): FeedRelevance {
-    const daoThresholds = EventRelevanceThresholds[this.daoId];
+    const daoThresholds = getDaoRelevanceThreshold(this.daoId);
     const typeThresholds =
       daoThresholds[item.type as keyof typeof daoThresholds];
 
@@ -53,7 +53,7 @@ export class FeedService {
   private getValueThresholds(
     relevance: FeedRelevance,
   ): Partial<Record<FeedEventType, bigint>> {
-    const daoThresholds = EventRelevanceThresholds[this.daoId];
+    const daoThresholds = getDaoRelevanceThreshold(this.daoId);
     const result: Partial<Record<FeedEventType, bigint>> = {};
 
     for (const [type, levels] of Object.entries(daoThresholds)) {

@@ -52,7 +52,10 @@ export class FeedRepository {
     const conditions: SQL[] = [];
 
     if (type) {
-      if (type === FeedEventType.PROPOSAL) {
+      if (
+        type === FeedEventType.PROPOSAL ||
+        type === FeedEventType.PROPOSAL_EXTENDED
+      ) {
         conditions.push(eq(feedEvent.type, type));
       } else {
         const threshold = valueThresholds[type];
@@ -75,6 +78,9 @@ export class FeedRepository {
       // Always include PROPOSAL (no value threshold)
       if (!(FeedEventType.PROPOSAL in valueThresholds)) {
         conditions.push(eq(feedEvent.type, FeedEventType.PROPOSAL));
+      }
+      if (!(FeedEventType.PROPOSAL_EXTENDED in valueThresholds)) {
+        conditions.push(eq(feedEvent.type, FeedEventType.PROPOSAL_EXTENDED));
       }
     }
 

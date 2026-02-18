@@ -265,7 +265,7 @@ export const tokenPrice = pgTable("token_price", (drizzle) => ({
   timestamp: bigint({ mode: "bigint" }).primaryKey(),
 }));
 
-export const rolesEnum = pgEnum("event_type", [
+export const evenTypeEnum = pgEnum("event_type", [
   "VOTE",
   "PROPOSAL",
   "DELEGATION",
@@ -279,9 +279,9 @@ export const feedEvent = pgTable(
   (drizzle) => ({
     txHash: drizzle.text().notNull(),
     logIndex: drizzle.integer().notNull(),
-    type: rolesEnum("type").notNull(),
+    type: evenTypeEnum("type").notNull(),
     value: bigint({ mode: "bigint" }).notNull(),
-    timestamp: drizzle.integer().notNull(),
+    timestamp: bigint({ mode: "number" }).notNull(),
     metadata: drizzle.json().$type<Record<string, unknown>>(),
   }),
   (table) => [
