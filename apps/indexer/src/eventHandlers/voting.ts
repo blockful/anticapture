@@ -159,7 +159,7 @@ export const proposalCreated = async (
     txHash,
     daoId,
     proposerAccountId: getAddress(proposer),
-    targets: targets.map(getAddress),
+    targets: targets.map((a) => getAddress(a)),
     values,
     signatures,
     calldatas,
