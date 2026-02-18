@@ -42,6 +42,7 @@ export const GTC: DaoConfiguration = {
   },
   attackProfitability: {
     riskLevel: RiskLevel.HIGH,
+    supportsLiquidTreasuryCall: true,
   },
   riskAnalysis: true,
   governanceImplementation: {
