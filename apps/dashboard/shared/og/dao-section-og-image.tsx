@@ -35,7 +35,7 @@ export async function createDaoSectionOgImage({
 }: DaoSectionOgImageProps) {
   const config = daoConfig[daoId];
   const daoName = config.name;
-  const daoDisplayName = `${daoName.toUpperCase()} DAO`;
+  const daoDisplayName = `${daoName.split(" ")[0].toUpperCase()} DAO`;
   const DaoOgIcon = config.ogIcon;
   const daoOgIcon = <DaoOgIcon size={DAO_ICON_SIZE} />;
 
