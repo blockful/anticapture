@@ -3,7 +3,6 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfig from "@/shared/dao-config";
-import { getDaoOgIcon } from "./dao-og-icons";
 import { AnticaptureGlobeLogoSvg } from "./anticapture-globe-logo-svg";
 
 const DAO_ICON_SIZE = 300;
@@ -37,7 +36,8 @@ export async function createDaoSectionOgImage({
   const config = daoConfig[daoId];
   const daoName = config.name;
   const daoDisplayName = `${daoName.toUpperCase()} DAO`;
-  const daoOgIcon = getDaoOgIcon(daoId, DAO_ICON_SIZE);
+  const DaoOgIcon = config.ogIcon;
+  const daoOgIcon = <DaoOgIcon size={DAO_ICON_SIZE} />;
 
   return new ImageResponse(
     <div
@@ -109,34 +109,15 @@ export async function createDaoSectionOgImage({
           width: "100%",
         }}
       >
-        {daoOgIcon ? (
-          <div
-            style={{
-              width: DAO_ICON_SIZE,
-              height: DAO_ICON_SIZE,
-              display: "flex",
-            }}
-          >
-            {daoOgIcon}
-          </div>
-        ) : (
-          <div
-            style={{
-              width: DAO_ICON_SIZE,
-              height: DAO_ICON_SIZE,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: OG_COLORS.accent,
-              borderRadius: 12,
-              color: OG_COLORS.background,
-              fontSize: 28,
-              fontWeight: 700,
-            }}
-          >
-            {daoName.slice(0, 2).toUpperCase()}
-          </div>
-        )}
+        <div
+          style={{
+            width: DAO_ICON_SIZE,
+            height: DAO_ICON_SIZE,
+            display: "flex",
+          }}
+        >
+          {daoOgIcon}
+        </div>
         <AnticaptureGlobeLogoSvg width={260} />
       </div>
 

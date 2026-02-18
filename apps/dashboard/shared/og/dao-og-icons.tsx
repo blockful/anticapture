@@ -5,11 +5,9 @@
  * Satori (ImageResponse) doesn't support CSS filters, so we need
  * explicit fill overrides on every SVG path.
  */
-import { DaoIdEnum } from "@/shared/types/daos";
-
 const FILL = "#EC762E";
 
-function EnsOgIcon({ size }: { size: number }) {
+export function EnsOgIcon({ size }: { size: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 40 40" fill="none">
       <path
@@ -32,7 +30,7 @@ function EnsOgIcon({ size }: { size: number }) {
   );
 }
 
-function UniswapOgIcon({ size }: { size: number }) {
+export function UniswapOgIcon({ size }: { size: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 400 400" fill="none">
       <path
@@ -79,7 +77,7 @@ function UniswapOgIcon({ size }: { size: number }) {
   );
 }
 
-function GitcoinOgIcon({ size }: { size: number }) {
+export function GitcoinOgIcon({ size }: { size: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 40 40" fill="none">
       <path
@@ -98,7 +96,7 @@ function GitcoinOgIcon({ size }: { size: number }) {
   );
 }
 
-function ScrollOgIcon({ size }: { size: number }) {
+export function ScrollOgIcon({ size }: { size: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 444 444" fill="none">
       <path
@@ -141,7 +139,7 @@ function ScrollOgIcon({ size }: { size: number }) {
   );
 }
 
-function NounsOgIcon({ size }: { size: number }) {
+export function NounsOgIcon({ size }: { size: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 40 40" fill="none">
       <path
@@ -166,7 +164,7 @@ function NounsOgIcon({ size }: { size: number }) {
   );
 }
 
-function ObolOgIcon({ size }: { size: number }) {
+export function ObolOgIcon({ size }: { size: number }) {
   return (
     <svg
       width={size}
@@ -185,7 +183,7 @@ function ObolOgIcon({ size }: { size: number }) {
   );
 }
 
-function CompoundOgIcon({ size }: { size: number }) {
+export function CompoundOgIcon({ size }: { size: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 40 40" fill="none">
       <path
@@ -198,30 +196,21 @@ function CompoundOgIcon({ size }: { size: number }) {
   );
 }
 
-/**
- * Returns a monochrome orange (#EC762E) SVG icon for the given DAO,
- * suitable for use inside ImageResponse (Satori).
- */
-export function getDaoOgIcon(
-  daoId: DaoIdEnum,
-  size: number,
-): React.JSX.Element | null {
-  switch (daoId) {
-    case DaoIdEnum.ENS:
-      return <EnsOgIcon size={size} />;
-    case DaoIdEnum.UNISWAP:
-      return <UniswapOgIcon size={size} />;
-    case DaoIdEnum.GITCOIN:
-      return <GitcoinOgIcon size={size} />;
-    case DaoIdEnum.SCR:
-      return <ScrollOgIcon size={size} />;
-    case DaoIdEnum.NOUNS:
-      return <NounsOgIcon size={size} />;
-    case DaoIdEnum.OBOL:
-      return <ObolOgIcon size={size} />;
-    case DaoIdEnum.COMP:
-      return <CompoundOgIcon size={size} />;
-    default:
-      return null;
-  }
+export function OptimismOgIcon({ size }: { size: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 40 40" fill="none">
+      <path
+        d="M19.95 35.1C28.3172 35.1 35.1 28.3172 35.1 19.95C35.1 11.5829 28.3172 4.80005 19.95 4.80005C11.5829 4.80005 4.80005 11.5829 4.80005 19.95C4.80005 28.3172 11.5829 35.1 19.95 35.1Z"
+        fill={FILL}
+      />
+      <path
+        d="M14.5547 23.5547C13.7109 23.5547 13.0234 23.3672 12.4922 22.9922C11.9688 22.6094 11.6016 22.0781 11.3906 21.3984C11.1875 20.7188 11.1406 19.9297 11.25 19.0312C11.3594 18.1406 11.5859 17.3594 11.9297 16.6875C12.2812 16.0078 12.7344 15.4844 13.2891 15.1172C13.8516 14.7422 14.4922 14.5547 15.2109 14.5547C15.7578 14.5547 16.2344 14.6562 16.6406 14.8594C17.0547 15.0547 17.3828 15.3438 17.625 15.7266C17.875 16.1016 18.0234 16.5625 18.0703 17.1094H16.3594C16.2891 16.7656 16.1406 16.4844 15.9141 16.2656C15.6953 16.0391 15.3984 15.9258 15.0234 15.9258C14.6328 15.9258 14.2812 16.0547 13.9688 16.3125C13.6641 16.5625 13.4219 16.9219 13.2422 17.3906C13.0625 17.8594 12.9609 18.4141 12.9375 19.0547C12.9141 19.7031 12.9844 20.2422 13.1484 20.6719C13.3125 21.0938 13.5547 21.4141 13.875 21.6328C14.1953 21.8438 14.5703 21.9492 15 21.9492C15.3281 21.9492 15.6172 21.8906 15.8672 21.7734C16.125 21.6484 16.3359 21.4688 16.5 21.2344C16.6719 20.9922 16.7891 20.7031 16.8516 20.3672H18.5625C18.4766 20.9531 18.2734 21.4688 17.9531 21.9141C17.6328 22.3516 17.2188 22.6953 16.7109 22.9453C16.2031 23.1953 15.4609 23.5547 14.5547 23.5547Z"
+        fill="#09090B"
+      />
+      <path
+        d="M20.6484 23.4375L21.8203 15.0234H24.5625C25.1797 15.0234 25.6875 15.1328 26.0859 15.3516C26.4922 15.5625 26.7812 15.8594 26.9531 16.2422C27.125 16.6172 27.1719 17.0547 27.0938 17.5547C27.0078 18.0547 26.8125 18.4922 26.5078 18.8672C26.2031 19.2422 25.8125 19.5312 25.3359 19.7344C24.8594 19.9375 24.3125 20.0391 23.6953 20.0391H22.1719L21.7266 23.4375H20.6484ZM22.3125 19.1016H23.7656C24.1562 19.1016 24.5 19.0312 24.7969 18.8906C25.1016 18.75 25.3438 18.5547 25.5234 18.3047C25.7109 18.0469 25.8281 17.75 25.875 17.4141C25.9375 16.9609 25.8438 16.6016 25.5938 16.3359C25.3438 16.0703 24.9688 15.9375 24.4688 15.9375H23.1328L22.3125 19.1016Z"
+        fill="#09090B"
+      />
+    </svg>
+  );
 }
