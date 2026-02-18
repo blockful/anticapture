@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { DaoIdEnum } from "@/shared/types/daos";
+import { ALL_DAOS, DaoIdEnum } from "@/shared/types/daos";
 import daoConfig from "@/shared/dao-config";
 import { AnticaptureGlobeLogoSvg } from "./anticapture-globe-logo-svg";
 
@@ -20,6 +20,10 @@ export interface DaoSectionOgImageProps {
   sectionTitle: string;
 }
 
+function isValidDaoId(id: string): id is DaoIdEnum {
+  return (ALL_DAOS as readonly string[]).includes(id);
+}
+
 /**
  * Renders the OG image per Figma design:
  * - Black background (#09090B)
@@ -33,6 +37,29 @@ export async function createDaoSectionOgImage({
   daoId,
   sectionTitle,
 }: DaoSectionOgImageProps) {
+  if (!isValidDaoId(daoId)) {
+    return new ImageResponse(
+      (
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: OG_COLORS.background,
+            color: OG_COLORS.accent,
+            fontFamily: "monospace",
+            fontSize: 48,
+          }}
+        >
+          Unknown DAO
+        </div>
+      ),
+      OG_DIMENSIONS,
+    );
+  }
+
   const config = daoConfig[daoId];
   const daoName = config.name;
   const daoDisplayName = `${daoName.split(" ")[0].toUpperCase()} DAO`;
