@@ -1,10 +1,8 @@
-directive @regexp(subgraph: String, pattern: String) on SCALAR
-
-directive @typescript(subgraph: String, type: String) on SCALAR | ENUM
-
 directive @enum(subgraph: String, value: String) on ENUM_VALUE
 
 directive @resolveRoot(subgraph: String) on FIELD_DEFINITION
+
+directive @typescript(subgraph: String, type: String) on SCALAR | ENUM
 
 directive @example(subgraph: String, value: ObjMap) repeatable on FIELD_DEFINITION | OBJECT | INPUT_OBJECT | ENUM | SCALAR
 
@@ -278,13 +276,9 @@ type delegators_200_response {
 
 type query_delegators_items_items {
   delegatorAddress: String!
-  amount: query_delegators_items_items_amount!
-  timestamp: query_delegators_items_items_timestamp!
+  amount: String!
+  timestamp: String!
 }
-
-scalar query_delegators_items_items_amount
-
-scalar query_delegators_items_items_timestamp
 
 enum queryInput_delegators_orderBy {
   amount

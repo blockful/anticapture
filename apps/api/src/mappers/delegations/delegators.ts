@@ -40,8 +40,12 @@ export const DelegatorItemSchema = z.object({
   delegatorAddress: z
     .string()
     .refine((val) => isAddress(val, { strict: false })),
-  amount: z.bigint().transform((val) => val.toString()),
-  timestamp: z.bigint().transform((val) => val.toString()),
+  amount: z
+    .union([z.bigint().transform((val) => val.toString()), z.string()])
+    .openapi({ type: "string" }),
+  timestamp: z
+    .union([z.bigint().transform((val) => val.toString()), z.string()])
+    .openapi({ type: "string" }),
 });
 
 export const DelegatorsResponseSchema = z.object({
