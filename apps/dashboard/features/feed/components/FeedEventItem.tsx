@@ -7,10 +7,12 @@ import {
   ArrowLeftRight,
   Inbox,
   HeartHandshake,
+  ArrowUpDown,
+  Clock,
 } from "lucide-react";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { Address } from "viem";
+import { Address, formatUnits, zeroAddress } from "viem";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -32,66 +34,74 @@ interface FeedEventItemProps {
 
 const getBadgeIcon = (type: FeedEventType) => {
   switch (type) {
-    case "vote":
+    case FeedEventType.Vote:
       return Inbox;
-    case "proposal":
+    case FeedEventType.Proposal:
       return FileText;
-    case "transfer":
+    case FeedEventType.Transfer:
       return ArrowLeftRight;
-    case "delegation":
+    case FeedEventType.Delegation:
       return HeartHandshake;
+    case FeedEventType.DelegationVotesChanged:
+      return ArrowUpDown;
+    case FeedEventType.ProposalExtended:
+      return Clock;
   }
 };
 
 const getBadgeVariant = (relevance: FeedEventRelevance) => {
   switch (relevance) {
-    case "high":
+    case FeedEventRelevance.High:
       return "error";
-    case "medium":
+    case FeedEventRelevance.Medium:
       return "warning";
-    case "low":
+    case FeedEventRelevance.Low:
       return "success";
-    case "none":
+    default:
       return "secondary";
   }
 };
 
 const getRelevanceLabel = (relevance: FeedEventRelevance) => {
   switch (relevance) {
-    case "high":
+    case FeedEventRelevance.High:
       return "High Relevance";
-    case "medium":
+    case FeedEventRelevance.Medium:
       return "Medium Relevance";
-    case "low":
+    case FeedEventRelevance.Low:
       return "Low Relevance";
-    case "none":
+    default:
       return "No Relevance";
   }
 };
 
 const getRelevanceColor = (relevance: FeedEventRelevance) => {
   switch (relevance) {
-    case "high":
+    case FeedEventRelevance.High:
       return "text-error";
-    case "medium":
+    case FeedEventRelevance.Medium:
       return "text-warning";
-    case "low":
+    case FeedEventRelevance.Low:
       return "text-success";
-    case "none":
+    default:
       return "text-secondary";
   }
 };
 
 const getEventTypeLabel = (type: FeedEventType) => {
   switch (type) {
-    case "vote":
+    case FeedEventType.Vote:
       return "Vote";
-    case "proposal":
+    case FeedEventType.Proposal:
       return "Proposal Creation";
-    case "transfer":
+    case FeedEventType.Transfer:
       return "Transfer";
-    case "delegation":
+    case FeedEventType.Delegation:
       return "Delegation";
+    case FeedEventType.DelegationVotesChanged:
+      return "Delegation Votes Changed";
+    case FeedEventType.ProposalExtended:
+      return "Proposal Extended";
   }
 };
 
@@ -116,8 +126,8 @@ export const FeedEventItem = ({
   const badgeVariant = getBadgeVariant(event.relevance);
 
   const formatAmount = (amount: string) => {
-    const value = Number(amount) / Math.pow(10, config?.decimals ?? 18);
-    return formatNumberUserReadable(value);
+    const value = formatUnits(BigInt(amount), config.decimals);
+    return formatNumberUserReadable(Number(value));
   };
 
   const tokenSymbol = config?.name ?? daoId.toUpperCase();
@@ -129,13 +139,13 @@ export const FeedEventItem = ({
 
   const renderEventContent = () => {
     switch (event.type) {
-      case "vote":
-        if (!event.vote) return null;
+      case FeedEventType.Vote:
+        if (!event.metadata) return null;
         return (
           <p className="leading-relaxed">
             <span className="inline-flex items-center gap-1.5 align-middle">
               <EnsAvatar
-                address={event.vote.voter as Address}
+                address={event.metadata.voter}
                 showAvatar={true}
                 size="xs"
                 nameClassName="text-primary font-medium"
@@ -144,25 +154,29 @@ export const FeedEventItem = ({
             <span className="text-secondary">
               (
               <span className="text-primary">
-                {formatAmount(event.vote.votingPower)} {tokenSymbol}
+                {formatAmount(event.metadata.votingPower)} {tokenSymbol}
               </span>{" "}
               voting power)
             </span>{" "}
             <span className="text-secondary">voted</span>{" "}
             <CheckCircle2 className="text-success inline size-4 align-middle" />{" "}
             <span className="text-success font-medium capitalize">
-              {event.vote.support === "for"
+              {event.metadata.support === "for"
                 ? "Yes"
-                : event.vote.support === "against"
+                : event.metadata.support === "against"
                   ? "No"
                   : "Abstain"}
             </span>{" "}
             <span className="text-secondary">on proposal</span>{" "}
             <Link
-              href={`/${daoId}/governance/proposal/${event.vote.proposalId}`}
+              href={
+                config?.governancePage
+                  ? `/${daoId}/governance/proposal/${event.metadata.proposalId}`
+                  : `https://tally.xyz/proposal/${event.metadata.proposalId}`
+              }
               className="text-primary hover:text-link font-medium transition-colors"
             >
-              {event.vote.proposalTitle?.replace(/^#\s*/, "")}
+              {event.metadata.proposalTitle?.replace(/^#\s*/, "")}
             </Link>{" "}
             <a
               href={explorerUrl}
@@ -175,13 +189,13 @@ export const FeedEventItem = ({
           </p>
         );
 
-      case "proposal":
-        if (!event.proposal) return null;
+      case FeedEventType.Proposal:
+        if (!event.metadata) return null;
         return (
           <p className="leading-relaxed">
             <span className="inline-flex items-center gap-1.5 align-middle">
               <EnsAvatar
-                address={event.proposal.proposer as Address}
+                address={event.metadata.proposer}
                 showAvatar={true}
                 size="xs"
                 nameClassName="text-primary font-medium"
@@ -190,16 +204,16 @@ export const FeedEventItem = ({
             <span className="text-secondary">
               (
               <span className="text-primary">
-                {formatAmount(event.proposal.votingPower)} {tokenSymbol}
+                {formatAmount(event.metadata.votingPower)} {tokenSymbol}
               </span>{" "}
               voting power)
             </span>{" "}
             <span className="text-secondary">created the proposal</span>{" "}
             <Link
-              href={`/${daoId}/governance/proposal/${event.proposal.proposalId}`}
+              href={`/${daoId}/governance/proposal/${event.metadata.id}`}
               className="text-primary hover:text-link font-medium transition-colors"
             >
-              {event.proposal.proposalTitle?.replace(/^#\s*/, "")}
+              {event.metadata.title}
             </Link>{" "}
             <a
               href={explorerUrl}
@@ -212,13 +226,13 @@ export const FeedEventItem = ({
           </p>
         );
 
-      case "transfer":
-        if (!event.transfer) return null;
+      case FeedEventType.Transfer:
+        if (!event.metadata) return null;
         return (
           <p className="leading-relaxed">
             <span className="inline-flex items-center gap-1.5 align-middle">
               <EnsAvatar
-                address={event.transfer.from as Address}
+                address={event.metadata.from}
                 showAvatar={true}
                 size="xs"
                 nameClassName="text-primary font-medium"
@@ -226,12 +240,12 @@ export const FeedEventItem = ({
             </span>{" "}
             <span className="text-secondary">transferred</span>{" "}
             <span className="text-primary font-medium">
-              {formatAmount(event.transfer.amount)} {tokenSymbol}
+              {formatAmount(event.metadata.amount)} {tokenSymbol}
             </span>{" "}
             <span className="text-secondary">to</span>{" "}
             <span className="inline-flex items-center gap-1.5 align-middle">
               <EnsAvatar
-                address={event.transfer.to as Address}
+                address={event.metadata.to}
                 showAvatar={true}
                 size="xs"
                 nameClassName="text-primary font-medium"
@@ -248,18 +262,15 @@ export const FeedEventItem = ({
           </p>
         );
 
-      case "delegation": {
-        if (!event.delegation) return null;
-        const hasRedelegation =
-          event.delegation.previousDelegate &&
-          event.delegation.previousDelegate !==
-            "0x0000000000000000000000000000000000000000";
+      case FeedEventType.Delegation: {
+        if (!event.metadata) return null;
+        const hasRedelegation = event.metadata.previousDelegate !== zeroAddress;
 
         return (
           <p className="leading-relaxed">
             <span className="inline-flex items-center gap-1.5 align-middle">
               <EnsAvatar
-                address={event.delegation.delegator as Address}
+                address={event.metadata.delegator}
                 showAvatar={true}
                 size="xs"
                 nameClassName="text-primary font-medium"
@@ -269,14 +280,14 @@ export const FeedEventItem = ({
               {hasRedelegation ? "redelegated" : "delegated"}
             </span>{" "}
             <span className="text-success font-medium">
-              {formatAmount(event.delegation.amount)} {tokenSymbol}
+              {formatAmount(event.metadata.amount)} {tokenSymbol}
             </span>{" "}
             {hasRedelegation && (
               <>
                 <span className="text-secondary">from</span>{" "}
                 <span className="inline-flex items-center gap-1.5 align-middle">
                   <EnsAvatar
-                    address={event.delegation.previousDelegate as Address}
+                    address={event.metadata.previousDelegate!}
                     showAvatar={true}
                     size="xs"
                     nameClassName="text-primary font-medium"
@@ -287,7 +298,41 @@ export const FeedEventItem = ({
             <span className="text-secondary">to</span>{" "}
             <span className="inline-flex items-center gap-1.5 align-middle">
               <EnsAvatar
-                address={event.delegation.delegate as Address}
+                address={event.metadata.delegate}
+                showAvatar={true}
+                size="xs"
+                nameClassName="text-primary font-medium"
+              />
+            </span>{" "}
+            <a
+              href={explorerUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-secondary hover:text-primary inline-flex align-middle transition-colors"
+            >
+              <ExternalLink className="size-3.5" />
+            </a>
+          </p>
+        );
+      }
+      case FeedEventType.DelegationVotesChanged: {
+        if (!event.metadata) return null;
+        return (
+          <p className="leading-relaxed">
+            <span
+              className={cn(
+                "font-medium",
+                BigInt(event.metadata.delta) > 0n
+                  ? "text-success"
+                  : "text-error",
+              )}
+            >
+              {formatAmount(event.metadata.delta)} {tokenSymbol}
+            </span>{" "}
+            <span className="text-secondary">from</span>{" "}
+            <span className="inline-flex items-center gap-1.5 align-middle">
+              <EnsAvatar
+                address={event.metadata.delegate}
                 showAvatar={true}
                 size="xs"
                 nameClassName="text-primary font-medium"

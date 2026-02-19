@@ -4,22 +4,22 @@ import { useQueryState, parseAsStringEnum, parseAsString } from "nuqs";
 import { useCallback, useMemo } from "react";
 import {
   ActivityFeedFilterState,
-  FeedEventType,
-  FeedEventRelevance,
+  // FeedEventType,
+  // FeedEventRelevance,
 } from "@/features/feed/types";
 
-const VALID_TYPES: FeedEventType[] = [
-  "vote",
-  "proposal",
-  "transfer",
-  "delegation",
-];
-const VALID_RELEVANCES: FeedEventRelevance[] = [
-  "none",
-  "low",
-  "medium",
-  "high",
-];
+// const VALID_TYPES: FeedEventType[] = [
+//   "vote",
+//   "proposal",
+//   "transfer",
+//   "delegation",
+// ];
+// const VALID_RELEVANCES: FeedEventRelevance[] = [
+//   "none",
+//   "low",
+//   "medium",
+//   "high",
+// ];
 
 // Parse comma-separated string to array, filtering invalid values
 const parseArrayParam = <T extends string>(
@@ -57,8 +57,8 @@ export function useActivityFeedParams(): UseActivityFeedParamsReturn {
   const filters: ActivityFeedFilterState = useMemo(
     () => ({
       sortOrder: sortOrder as "asc" | "desc",
-      types: parseArrayParam(typesParam, VALID_TYPES),
-      relevances: parseArrayParam(relevancesParam, VALID_RELEVANCES),
+      // types: parseArrayParam(typesParam, VALID_TYPES),
+      // relevances: parseArrayParam(relevancesParam, VALID_RELEVANCES),
       fromDate: fromDate ?? "",
       toDate: toDate ?? "",
     }),
@@ -68,8 +68,8 @@ export function useActivityFeedParams(): UseActivityFeedParamsReturn {
   const setFilters = useCallback(
     (newFilters: ActivityFeedFilterState) => {
       setSortOrder(newFilters.sortOrder);
-      setTypesParam(serializeArrayParam(newFilters.types));
-      setRelevancesParam(serializeArrayParam(newFilters.relevances));
+      // setTypesParam(serializeArrayParam(newFilters.types));
+      // setRelevancesParam(serializeArrayParam(newFilters.relevances));
       setFromDate(newFilters.fromDate || null);
       setToDate(newFilters.toDate || null);
     },

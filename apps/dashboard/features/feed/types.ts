@@ -1,8 +1,17 @@
-export type FeedEventType = "vote" | "proposal" | "transfer" | "delegation";
-export type FeedEventRelevance = "none" | "low" | "medium" | "high";
+import { Address } from "viem";
+
+import {
+  Query_FeedEvents_Items_Items_Relevance,
+  Query_FeedEvents_Items_Items_Type,
+} from "@anticapture/graphql-client";
+
+export type FeedEventRelevance = Query_FeedEvents_Items_Items_Relevance;
+export const FeedEventRelevance = Query_FeedEvents_Items_Items_Relevance;
+export type FeedEventType = Query_FeedEvents_Items_Items_Type;
+export const FeedEventType = Query_FeedEvents_Items_Items_Type;
 
 export interface VoteDetail {
-  voter: string;
+  voter: Address;
   votingPower: string;
   proposalId: string;
   proposalTitle: string;
@@ -10,41 +19,72 @@ export interface VoteDetail {
 }
 
 export interface ProposalDetail {
-  proposer: string;
-  proposalId: string;
-  proposalTitle: string;
+  id: string;
+  title: string;
+  proposer: Address;
   votingPower: string;
 }
 
+export interface ProposalExtendedDetail {
+  id: string;
+  title: string;
+  endBlock: number;
+  endTimestamp: number;
+  proposer: Address;
+}
+
 export interface TransferDetail {
-  from: string;
-  to: string;
+  from: Address;
+  to: Address;
   amount: string;
 }
 
 export interface DelegationDetail {
-  delegator: string;
-  delegate: string;
-  previousDelegate: string | null;
+  delegator: Address;
+  delegate: Address;
+  previousDelegate: Address | null;
   amount: string;
 }
 
-export interface FeedEvent {
-  txHash: string;
-  logIndex: number;
-  timestamp: string;
-  relevance: FeedEventRelevance;
-  type: FeedEventType;
-  vote?: VoteDetail;
-  proposal?: ProposalDetail;
-  transfer?: TransferDetail;
-  delegation?: DelegationDetail;
+export interface DelegationVotesChangedDetail {
+  delta: string;
+  deltaMod: string;
+  delegate: Address;
 }
 
-export interface FeedEventListResponse {
-  items: FeedEvent[];
-  totalCount: number;
-}
+type FeedEventBase = {
+  logIndex: Number;
+  relevance: Query_FeedEvents_Items_Items_Relevance;
+  timestamp: number;
+  txHash: string;
+  value: string;
+};
+
+export type FeedEvent =
+  | (FeedEventBase & {
+      type: Query_FeedEvents_Items_Items_Type.Vote;
+      metadata?: VoteDetail;
+    })
+  | (FeedEventBase & {
+      type: Query_FeedEvents_Items_Items_Type.Proposal;
+      metadata?: ProposalDetail;
+    })
+  | (FeedEventBase & {
+      type: Query_FeedEvents_Items_Items_Type.ProposalExtended;
+      metadata?: ProposalExtendedDetail;
+    })
+  | (FeedEventBase & {
+      type: Query_FeedEvents_Items_Items_Type.Transfer;
+      metadata?: TransferDetail;
+    })
+  | (FeedEventBase & {
+      type: Query_FeedEvents_Items_Items_Type.Delegation;
+      metadata?: DelegationDetail;
+    })
+  | (FeedEventBase & {
+      type: Query_FeedEvents_Items_Items_Type.DelegationVotesChanged;
+      metadata?: DelegationVotesChangedDetail;
+    });
 
 export interface ActivityFeedFilters {
   limit?: number;
@@ -52,14 +92,14 @@ export interface ActivityFeedFilters {
   sortOrder?: "asc" | "desc";
   fromTimestamp?: number;
   toTimestamp?: number;
-  types?: FeedEventType[];
-  relevances?: FeedEventRelevance[];
+  type?: Query_FeedEvents_Items_Items_Type;
+  relevance?: Query_FeedEvents_Items_Items_Relevance;
 }
 
 export interface ActivityFeedFilterState {
   sortOrder: "desc" | "asc";
-  types: FeedEventType[];
-  relevances: FeedEventRelevance[];
+  type?: Query_FeedEvents_Items_Items_Type;
+  relevance?: Query_FeedEvents_Items_Items_Relevance;
   fromDate: string;
   toDate: string;
 }

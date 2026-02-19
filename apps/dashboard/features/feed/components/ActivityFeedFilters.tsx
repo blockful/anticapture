@@ -14,8 +14,8 @@ import { Button, IconButton } from "@/shared/components";
 import { Input } from "@/shared/components/design-system/form/fields/input/Input";
 import { useScreenSize } from "@/shared/hooks";
 import {
-  FeedEventType,
-  FeedEventRelevance,
+  // FeedEventType,
+  // FeedEventRelevance,
   ActivityFeedFilterState,
 } from "@/features/feed/types";
 
@@ -26,18 +26,18 @@ interface ActivityFeedFiltersDrawerProps {
   onApplyFilters: (filters: ActivityFeedFilterState) => void;
 }
 
-const eventTypes: { value: FeedEventType; label: string }[] = [
-  { value: "delegation", label: "Delegation" },
-  { value: "transfer", label: "Transfer" },
-  { value: "vote", label: "Vote" },
-  { value: "proposal", label: "Proposal Creation" },
-];
+// const eventTypes: { value: FeedEventType; label: string }[] = [
+//   { value: "delegation", label: "Delegation" },
+//   { value: "transfer", label: "Transfer" },
+//   { value: "vote", label: "Vote" },
+//   { value: "proposal", label: "Proposal Creation" },
+// ];
 
-const relevances: { value: FeedEventRelevance; label: string }[] = [
-  { value: "high", label: "High" },
-  { value: "medium", label: "Medium" },
-  { value: "low", label: "Low" },
-];
+// const relevances: { value: FeedEventRelevance; label: string }[] = [
+//   { value: "high", label: "High" },
+//   { value: "medium", label: "Medium" },
+//   { value: "low", label: "Low" },
+// ];
 
 const SectionDivider = () => (
   <div className="border-border-default w-full border-t border-dashed" />
@@ -63,23 +63,23 @@ export const ActivityFeedFiltersDrawer = ({
     setLocalFilters((prev) => ({ ...prev, sortOrder }));
   };
 
-  const handleTypeToggle = (type: FeedEventType) => {
-    setLocalFilters((prev) => ({
-      ...prev,
-      types: prev.types.includes(type)
-        ? prev.types.filter((t) => t !== type)
-        : [...prev.types, type],
-    }));
-  };
+  // const handleTypeToggle = (type: FeedEventType) => {
+  //   setLocalFilters((prev) => ({
+  //     ...prev,
+  //     types: prev.types.includes(type)
+  //       ? prev.types.filter((t) => t !== type)
+  //       : [...prev.types, type],
+  //   }));
+  // };
 
-  const handleRelevanceToggle = (relevance: FeedEventRelevance) => {
-    setLocalFilters((prev) => ({
-      ...prev,
-      relevances: prev.relevances.includes(relevance)
-        ? prev.relevances.filter((r) => r !== relevance)
-        : [...prev.relevances, relevance],
-    }));
-  };
+  // const handleRelevanceToggle = (relevance: FeedEventRelevance) => {
+  //   setLocalFilters((prev) => ({
+  //     ...prev,
+  //     relevances: prev.relevances.includes(relevance)
+  //       ? prev.relevances.filter((r) => r !== relevance)
+  //       : [...prev.relevances, relevance],
+  //   }));
+  // };
 
   const handleFromDateChange = (value: string) => {
     setLocalFilters((prev) => ({ ...prev, fromDate: value }));
@@ -97,8 +97,8 @@ export const ActivityFeedFiltersDrawer = ({
   const handleClear = () => {
     const clearedFilters: ActivityFeedFilterState = {
       sortOrder: "desc",
-      types: [],
-      relevances: [],
+      // types: [],
+      // relevances: [],
       fromDate: "",
       toDate: "",
     };
@@ -165,7 +165,7 @@ export const ActivityFeedFiltersDrawer = ({
             <SectionDivider />
 
             {/* Type */}
-            <div className="flex flex-col gap-3">
+            {/* <div className="flex flex-col gap-3">
               <SectionLabel>Type</SectionLabel>
               <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
                 {eventTypes.map(({ value, label }) => (
@@ -190,12 +190,12 @@ export const ActivityFeedFiltersDrawer = ({
                   </label>
                 ))}
               </div>
-            </div>
+            </div> */}
 
             <SectionDivider />
 
             {/* Relevance */}
-            <div className="flex flex-col gap-3">
+            {/* <div className="flex flex-col gap-3">
               <SectionLabel>Relevance</SectionLabel>
               <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
                 {relevances.map(({ value, label }) => (
@@ -220,7 +220,7 @@ export const ActivityFeedFiltersDrawer = ({
                   </label>
                 ))}
               </div>
-            </div>
+            </div> */}
 
             <SectionDivider />
 

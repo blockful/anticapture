@@ -15,7 +15,11 @@ import { SubSectionsContainer } from "@/shared/components/design-system/section"
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { BulletDivider } from "@/shared/components/design-system/section";
 import { Newspaper } from "lucide-react";
-import { FeedEvent } from "@/features/feed/types";
+import {
+  FeedEvent,
+  FeedEventType,
+  FeedEventRelevance,
+} from "@/features/feed/types";
 import { useActivityFeedParams } from "@/features/feed/hooks/useActivityFeedParams";
 
 interface ActivityFeedSectionProps {
@@ -89,7 +93,7 @@ const groupEventsByDate = (events: FeedEvent[]) => {
     }
 
     const highRelevanceCount = dateEvents.filter(
-      (e) => e.relevance === "high",
+      (e) => e.relevance === FeedEventRelevance.High,
     ).length;
 
     groups.push({
@@ -137,17 +141,17 @@ export const ActivityFeedSection = ({
     filters: {
       limit: 20,
       sortOrder: filters.sortOrder,
-      types: filters.types.length > 0 ? filters.types : undefined,
-      relevances:
-        filters.relevances.length > 0 ? filters.relevances : undefined,
+      // types: filters.types.length > 0 ? filters.types : undefined,
+      // relevances:
+      //   filters.relevances.length > 0 ? filters.relevances : undefined,
       fromTimestamp,
       toTimestamp,
     },
   });
 
   const activeFiltersCount =
-    filters.types.length +
-    filters.relevances.length +
+    // filters.types.length +
+    // filters.relevances.length +
     (filters.fromDate ? 1 : 0) +
     (filters.toDate ? 1 : 0) +
     (filters.sortOrder !== "desc" ? 1 : 0);
