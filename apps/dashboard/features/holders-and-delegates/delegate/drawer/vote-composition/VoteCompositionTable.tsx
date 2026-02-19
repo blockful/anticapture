@@ -7,14 +7,17 @@ import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/
 import { ColumnDef } from "@tanstack/react-table";
 import { Address } from "viem";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
-import { useVotingPower } from "@/shared/hooks/graphql-client/useVotingPower";
+import { useDelegators } from "@/shared/hooks/graphql-client/useDelegators";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { Table } from "@/shared/components/design-system/table/Table";
 import daoConfig from "@/shared/dao-config";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { parseAsStringEnum, useQueryState } from "nuqs";
-import { QueryInput_AccountBalances_OrderDirection } from "@anticapture/graphql-client";
+import {
+  QueryInput_Delegators_OrderBy,
+  QueryInput_Delegators_OrderDirection,
+} from "@anticapture/graphql-client";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 import { DateCell } from "@/shared/components/design-system/table/cells/DateCell";
 
@@ -29,7 +32,7 @@ export const VoteCompositionTable = ({
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const [sortBy, setSortBy] = useQueryState(
     "orderBy",
-    parseAsStringEnum(["balance", "timestamp"]).withDefault("balance"),
+    parseAsStringEnum(["amount", "timestamp"]).withDefault("amount"),
   );
   const [sortOrder, setSortOrder] = useQueryState(
     "orderDirection",
@@ -39,26 +42,30 @@ export const VoteCompositionTable = ({
     daoOverview: { token },
   } = daoConfig[daoId as DaoIdEnum];
 
-  const { balances, loading, error, pagination, fetchNextPage, fetchingMore } =
-    useVotingPower({
-      daoId: daoId as DaoIdEnum,
-      address: address,
-      orderBy: sortBy as "balance" | "timestamp",
-      orderDirection: sortOrder as QueryInput_AccountBalances_OrderDirection,
-      limit,
-    });
+  const {
+    delegators,
+    loading,
+    error,
+    pagination,
+    fetchNextPage,
+    fetchingMore,
+  } = useDelegators({
+    daoId: daoId as DaoIdEnum,
+    address: address,
+    orderBy: sortBy as QueryInput_Delegators_OrderBy,
+    orderDirection: sortOrder as QueryInput_Delegators_OrderDirection,
+    limit,
+  });
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  const tableData = balances.map((account) => {
-    return {
-      address: account.address,
-      amount: Number(account.balance) || 0,
-      timestamp: account.timestamp,
-    };
-  });
+  const tableData = delegators.map((delegator) => ({
+    address: delegator.delegatorAddress,
+    amount: Number(delegator.amount) || 0,
+    timestamp: delegator.timestamp,
+  }));
 
   const columns: ColumnDef<{
     address: string;
@@ -118,7 +125,7 @@ export const VoteCompositionTable = ({
       header: ({ column }) => {
         const handleSortToggle = () => {
           const newSortOrder = sortOrder === "desc" ? "asc" : "desc";
-          setSortBy("balance");
+          setSortBy("amount");
           setSortOrder(newSortOrder);
           column.toggleSorting(newSortOrder === "desc");
         };
@@ -134,9 +141,9 @@ export const VoteCompositionTable = ({
               <ArrowUpDown
                 props={{ className: "size-4" }}
                 activeState={
-                  sortBy === "balance" && sortOrder === "asc"
+                  sortBy === "amount" && sortOrder === "asc"
                     ? ArrowState.UP
-                    : sortBy === "balance" && sortOrder === "desc"
+                    : sortBy === "amount" && sortOrder === "desc"
                       ? ArrowState.DOWN
                       : ArrowState.DEFAULT
                 }
@@ -173,10 +180,33 @@ export const VoteCompositionTable = ({
     },
     {
       accessorKey: "timestamp",
-      header: () => {
+      header: ({ column }) => {
+        const handleSortToggle = () => {
+          const newSortOrder = sortOrder === "desc" ? "asc" : "desc";
+          setSortBy("timestamp");
+          setSortOrder(newSortOrder);
+          column.toggleSorting(newSortOrder === "desc");
+        };
         return (
           <div className="text-table-header flex w-full items-center justify-start gap-1">
             Date
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-secondary justify-end p-0"
+              onClick={handleSortToggle}
+            >
+              <ArrowUpDown
+                props={{ className: "size-4" }}
+                activeState={
+                  sortBy === "timestamp" && sortOrder === "asc"
+                    ? ArrowState.UP
+                    : sortBy === "timestamp" && sortOrder === "desc"
+                      ? ArrowState.DOWN
+                      : ArrowState.DEFAULT
+                }
+              />
+            </Button>
           </div>
         );
       },

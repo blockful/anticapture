@@ -19,8 +19,6 @@ export type Scalars = {
   ObjMap: { input: any; output: any; }
   /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
-  query_delegators_items_items_amount: { input: any; output: any; }
-  query_delegators_items_items_timestamp: { input: any; output: any; }
 };
 
 export type AverageDelegationPercentageItem = {
@@ -1198,9 +1196,9 @@ export type Query_Delegations_Items_Items = {
 
 export type Query_Delegators_Items_Items = {
   __typename?: 'query_delegators_items_items';
-  amount: Scalars['query_delegators_items_items_amount']['output'];
+  amount: Scalars['String']['output'];
   delegatorAddress: Scalars['String']['output'];
-  timestamp: Scalars['query_delegators_items_items_timestamp']['output'];
+  timestamp: Scalars['String']['output'];
 };
 
 export type Query_FeedEvents_Items_Items = {
@@ -1705,18 +1703,7 @@ export type GetDelegatorsQueryVariables = Exact<{
 }>;
 
 
-export type GetDelegatorsQuery = { __typename?: 'Query', delegators?: { __typename?: 'delegators_200_response', totalCount: number, items: Array<{ __typename?: 'query_delegators_items_items', delegatorAddress: string, amount: any, timestamp: any } | null> } | null };
-
-export type GetDelegatorVotingPowerDetailsQueryVariables = Exact<{
-  addresses?: InputMaybe<Scalars['JSON']['input']>;
-  address: Scalars['String']['input'];
-  orderDirection?: InputMaybe<QueryInput_AccountBalances_OrderDirection>;
-  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
-  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
-}>;
-
-
-export type GetDelegatorVotingPowerDetailsQuery = { __typename?: 'Query', votingPowerByAccountId?: { __typename?: 'votingPowerByAccountId_200_response', accountId: string, votingPower: string } | null, accountBalances?: { __typename?: 'accountBalances_200_response', totalCount: number, items: Array<{ __typename?: 'query_accountBalances_items_items', address: string, balance: string } | null> } | null };
+export type GetDelegatorsQuery = { __typename?: 'Query', delegators?: { __typename?: 'delegators_200_response', totalCount: number, items: Array<{ __typename?: 'query_delegators_items_items', delegatorAddress: string, amount: string, timestamp: string } | null> } | null };
 
 export type GetDelegationsTimestampQueryVariables = Exact<{
   delegate: Scalars['String']['input'];
@@ -1734,6 +1721,13 @@ export type GetTopFiveDelegatorsQueryVariables = Exact<{
 
 
 export type GetTopFiveDelegatorsQuery = { __typename?: 'Query', accountBalances?: { __typename?: 'accountBalances_200_response', items: Array<{ __typename?: 'query_accountBalances_items_items', address: string, balance: string } | null> } | null };
+
+export type GetVotingPowerQueryVariables = Exact<{
+  address: Scalars['String']['input'];
+}>;
+
+
+export type GetVotingPowerQuery = { __typename?: 'Query', votingPowerByAccountId?: { __typename?: 'votingPowerByAccountId_200_response', accountId: string, votingPower: string } | null };
 
 export type GetVotingPowerCountingQueryVariables = Exact<{
   delegates?: InputMaybe<Scalars['JSON']['input']>;
