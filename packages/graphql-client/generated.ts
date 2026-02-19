@@ -15,10 +15,15 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
+  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
+  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
+  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
+  query_delegators_items_items_amount: { input: any; output: any; }
+  query_delegators_items_items_timestamp: { input: any; output: any; }
 };
 
 export type AverageDelegationPercentageItem = {
@@ -115,6 +120,8 @@ export type Query = {
   delegationPercentageByDay?: Maybe<DelegationPercentageByDay_200_Response>;
   /** Get current delegators of an account */
   delegations?: Maybe<Delegations_200_Response>;
+  /** Get current delegators of an account with voting power */
+  delegators?: Maybe<Delegators_200_Response>;
   /** Get feed events */
   feedEvents?: Maybe<FeedEvents_200_Response>;
   /** Get historical DAO Token Treasury value (governance token quantity × token price) */
@@ -290,6 +297,17 @@ export type QueryDelegationPercentageByDayArgs = {
 
 export type QueryDelegationsArgs = {
   address: Scalars['String']['input'];
+  orderBy?: InputMaybe<QueryInput_Delegations_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_Delegations_OrderDirection>;
+};
+
+
+export type QueryDelegatorsArgs = {
+  address: Scalars['String']['input'];
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<QueryInput_Delegators_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_Delegators_OrderDirection>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
 };
 
 
@@ -655,6 +673,12 @@ export type Delegations_200_Response = {
   totalCount: Scalars['Float']['output'];
 };
 
+export type Delegators_200_Response = {
+  __typename?: 'delegators_200_response';
+  items: Array<Maybe<Query_Delegators_Items_Items>>;
+  totalCount: Scalars['Float']['output'];
+};
+
 export type FeedEvents_200_Response = {
   __typename?: 'feedEvents_200_response';
   items: Array<Maybe<Query_FeedEvents_Items_Items>>;
@@ -868,6 +892,26 @@ export enum QueryInput_CompareVotes_Days {
 }
 
 export enum QueryInput_DelegationPercentageByDay_OrderDirection {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
+export enum QueryInput_Delegations_OrderBy {
+  Amount = 'amount',
+  Timestamp = 'timestamp'
+}
+
+export enum QueryInput_Delegations_OrderDirection {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
+export enum QueryInput_Delegators_OrderBy {
+  Amount = 'amount',
+  Timestamp = 'timestamp'
+}
+
+export enum QueryInput_Delegators_OrderDirection {
   Asc = 'asc',
   Desc = 'desc'
 }
@@ -1153,6 +1197,13 @@ export type Query_Delegations_Items_Items = {
   delegatorAddress: Scalars['String']['output'];
   timestamp: Scalars['String']['output'];
   transactionHash: Scalars['String']['output'];
+};
+
+export type Query_Delegators_Items_Items = {
+  __typename?: 'query_delegators_items_items';
+  amount: Scalars['query_delegators_items_items_amount']['output'];
+  delegatorAddress: Scalars['String']['output'];
+  timestamp: Scalars['query_delegators_items_items_timestamp']['output'];
 };
 
 export type Query_FeedEvents_Items_Items = {
@@ -1648,6 +1699,17 @@ export type GetDelegatesQueryVariables = Exact<{
 
 export type GetDelegatesQuery = { __typename?: 'Query', votingPowers?: { __typename?: 'votingPowers_200_response', totalCount: number, items: Array<{ __typename?: 'query_votingPowers_items_items', accountId: string, delegationsCount: number, votingPower: string } | null> } | null };
 
+export type GetDelegatorsQueryVariables = Exact<{
+  address: Scalars['String']['input'];
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<QueryInput_Delegators_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_Delegators_OrderDirection>;
+}>;
+
+
+export type GetDelegatorsQuery = { __typename?: 'Query', delegators?: { __typename?: 'delegators_200_response', totalCount: number, items: Array<{ __typename?: 'query_delegators_items_items', delegatorAddress: string, amount: any, timestamp: any } | null> } | null };
+
 export type GetDelegatorVotingPowerDetailsQueryVariables = Exact<{
   addresses?: InputMaybe<Scalars['JSON']['input']>;
   address: Scalars['String']['input'];
@@ -1661,6 +1723,8 @@ export type GetDelegatorVotingPowerDetailsQuery = { __typename?: 'Query', voting
 
 export type GetDelegationsTimestampQueryVariables = Exact<{
   delegate: Scalars['String']['input'];
+  orderBy?: InputMaybe<QueryInput_Delegations_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_Delegations_OrderDirection>;
 }>;
 
 
@@ -2343,6 +2407,64 @@ export type GetDelegatesQueryHookResult = ReturnType<typeof useGetDelegatesQuery
 export type GetDelegatesLazyQueryHookResult = ReturnType<typeof useGetDelegatesLazyQuery>;
 export type GetDelegatesSuspenseQueryHookResult = ReturnType<typeof useGetDelegatesSuspenseQuery>;
 export type GetDelegatesQueryResult = Apollo.QueryResult<GetDelegatesQuery, GetDelegatesQueryVariables>;
+export const GetDelegatorsDocument = gql`
+    query GetDelegators($address: String!, $skip: NonNegativeInt, $limit: PositiveInt = 10, $orderBy: queryInput_delegators_orderBy = amount, $orderDirection: queryInput_delegators_orderDirection = desc) {
+  delegators(
+    address: $address
+    skip: $skip
+    limit: $limit
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+  ) {
+    items {
+      delegatorAddress
+      amount
+      timestamp
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useGetDelegatorsQuery__
+ *
+ * To run a query within a React component, call `useGetDelegatorsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetDelegatorsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetDelegatorsQuery({
+ *   variables: {
+ *      address: // value for 'address'
+ *      skip: // value for 'skip'
+ *      limit: // value for 'limit'
+ *      orderBy: // value for 'orderBy'
+ *      orderDirection: // value for 'orderDirection'
+ *   },
+ * });
+ */
+export function useGetDelegatorsQuery(baseOptions: Apollo.QueryHookOptions<GetDelegatorsQuery, GetDelegatorsQueryVariables> & ({ variables: GetDelegatorsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetDelegatorsQuery, GetDelegatorsQueryVariables>(GetDelegatorsDocument, options);
+      }
+export function useGetDelegatorsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDelegatorsQuery, GetDelegatorsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetDelegatorsQuery, GetDelegatorsQueryVariables>(GetDelegatorsDocument, options);
+        }
+// @ts-ignore
+export function useGetDelegatorsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetDelegatorsQuery, GetDelegatorsQueryVariables>): Apollo.UseSuspenseQueryResult<GetDelegatorsQuery, GetDelegatorsQueryVariables>;
+export function useGetDelegatorsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegatorsQuery, GetDelegatorsQueryVariables>): Apollo.UseSuspenseQueryResult<GetDelegatorsQuery | undefined, GetDelegatorsQueryVariables>;
+export function useGetDelegatorsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegatorsQuery, GetDelegatorsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetDelegatorsQuery, GetDelegatorsQueryVariables>(GetDelegatorsDocument, options);
+        }
+export type GetDelegatorsQueryHookResult = ReturnType<typeof useGetDelegatorsQuery>;
+export type GetDelegatorsLazyQueryHookResult = ReturnType<typeof useGetDelegatorsLazyQuery>;
+export type GetDelegatorsSuspenseQueryHookResult = ReturnType<typeof useGetDelegatorsSuspenseQuery>;
+export type GetDelegatorsQueryResult = Apollo.QueryResult<GetDelegatorsQuery, GetDelegatorsQueryVariables>;
 export const GetDelegatorVotingPowerDetailsDocument = gql`
     query GetDelegatorVotingPowerDetails($addresses: JSON, $address: String!, $orderDirection: queryInput_accountBalances_orderDirection, $limit: PositiveInt, $skip: NonNegativeInt) {
   votingPowerByAccountId(accountId: $address) {
@@ -2404,8 +2526,12 @@ export type GetDelegatorVotingPowerDetailsLazyQueryHookResult = ReturnType<typeo
 export type GetDelegatorVotingPowerDetailsSuspenseQueryHookResult = ReturnType<typeof useGetDelegatorVotingPowerDetailsSuspenseQuery>;
 export type GetDelegatorVotingPowerDetailsQueryResult = Apollo.QueryResult<GetDelegatorVotingPowerDetailsQuery, GetDelegatorVotingPowerDetailsQueryVariables>;
 export const GetDelegationsTimestampDocument = gql`
-    query getDelegationsTimestamp($delegate: String!) {
-  delegations(address: $delegate) {
+    query getDelegationsTimestamp($delegate: String!, $orderBy: queryInput_delegations_orderBy = timestamp, $orderDirection: queryInput_delegations_orderDirection = desc) {
+  delegations(
+    address: $delegate
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+  ) {
     items {
       delegatorAddress
       delegateAddress
@@ -2429,6 +2555,8 @@ export const GetDelegationsTimestampDocument = gql`
  * const { data, loading, error } = useGetDelegationsTimestampQuery({
  *   variables: {
  *      delegate: // value for 'delegate'
+ *      orderBy: // value for 'orderBy'
+ *      orderDirection: // value for 'orderDirection'
  *   },
  * });
  */

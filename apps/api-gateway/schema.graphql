@@ -1,8 +1,10 @@
+directive @regexp(subgraph: String, pattern: String) on SCALAR
+
+directive @typescript(subgraph: String, type: String) on SCALAR | ENUM
+
 directive @enum(subgraph: String, value: String) on ENUM_VALUE
 
 directive @resolveRoot(subgraph: String) on FIELD_DEFINITION
-
-directive @typescript(subgraph: String, type: String) on SCALAR | ENUM
 
 directive @example(subgraph: String, value: ObjMap) repeatable on FIELD_DEFINITION | OBJECT | INPUT_OBJECT | ENUM | SCALAR
 
@@ -17,7 +19,10 @@ type Query {
   historicalDelegations(address: String!, delegateAddressIn: JSON, skip: NonNegativeInt, limit: PositiveInt = 10, fromValue: String, toValue: String, orderDirection: queryInput_historicalDelegations_orderDirection = desc): historicalDelegations_200_response
 
   """Get current delegators of an account"""
-  delegations(address: String!): delegations_200_response
+  delegations(address: String!, orderBy: queryInput_delegations_orderBy = timestamp, orderDirection: queryInput_delegations_orderDirection = desc): delegations_200_response
+
+  """Get current delegators of an account with voting power"""
+  delegators(address: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_delegators_orderBy = amount, orderDirection: queryInput_delegators_orderDirection = desc): delegators_200_response
 
   """
   Get historical Liquid Treasury (treasury without DAO tokens) from external providers (DefiLlama/Dune)
@@ -256,6 +261,41 @@ type query_delegations_items_items {
   transactionHash: String!
 }
 
+enum queryInput_delegations_orderBy {
+  amount
+  timestamp
+}
+
+enum queryInput_delegations_orderDirection {
+  asc
+  desc
+}
+
+type delegators_200_response {
+  items: [query_delegators_items_items]!
+  totalCount: Float!
+}
+
+type query_delegators_items_items {
+  delegatorAddress: String!
+  amount: query_delegators_items_items_amount!
+  timestamp: query_delegators_items_items_timestamp!
+}
+
+scalar query_delegators_items_items_amount
+
+scalar query_delegators_items_items_timestamp
+
+enum queryInput_delegators_orderBy {
+  amount
+  timestamp
+}
+
+enum queryInput_delegators_orderDirection {
+  asc
+  desc
+}
+
 type getLiquidTreasury_200_response {
   items: [query_getLiquidTreasury_items_items]!
 
@@ -373,7 +413,7 @@ type query_feedEvents_items_items {
   txHash: String!
   logIndex: Float!
   type: query_feedEvents_items_items_type!
-  value: String!
+  value: String
   timestamp: Float!
   relevance: query_feedEvents_items_items_relevance!
   metadata: JSON
