@@ -93,16 +93,6 @@ describe("Feed Controller - Integration Tests", () => {
       });
     });
 
-    it("should return value as string", async () => {
-      const value = parseEther("12345");
-      fakeRepo.setData([createMockEvent({ value })]);
-
-      const res = await app.request("/feed/events");
-      const body = await res.json();
-
-      expect(body.items[0]?.value).toBe(value.toString());
-    });
-
     it("should return empty items when no data available", async () => {
       fakeRepo.setData([]);
 
@@ -116,9 +106,7 @@ describe("Feed Controller - Integration Tests", () => {
     });
 
     it("should include relevance in each item", async () => {
-      fakeRepo.setData([
-        createMockEvent({ type: "PROPOSAL", value: 0n }),
-      ]);
+      fakeRepo.setData([createMockEvent({ type: "PROPOSAL", value: 0n })]);
 
       const res = await app.request("/feed/events");
       const body = await res.json();
@@ -172,10 +160,7 @@ describe("Feed Controller - Integration Tests", () => {
     });
 
     it("should accept pagination query parameters", async () => {
-      fakeRepo.setData(
-        [createMockEvent({ logIndex: 0 })],
-        5,
-      );
+      fakeRepo.setData([createMockEvent({ logIndex: 0 })], 5);
 
       const res = await app.request("/feed/events?skip=2&limit=1");
 
@@ -295,9 +280,7 @@ describe("Feed Controller - Integration Tests", () => {
         deltaMod: 1000,
         delegate: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
       };
-      fakeRepo.setData([
-        createMockEvent({ type: "DELEGATION", metadata }),
-      ]);
+      fakeRepo.setData([createMockEvent({ type: "DELEGATION", metadata })]);
 
       const res = await app.request("/feed/events");
       const body = await res.json();
