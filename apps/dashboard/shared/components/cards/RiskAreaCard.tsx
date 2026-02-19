@@ -109,7 +109,7 @@ const RiskAreaCardInternal = ({
     >
       <div
         className={cn(
-          "flex h-full items-center px-2 py-3 lg:py-5",
+          "flex h-full items-center px-2 py-2 lg:py-5",
           !isPanelTable ? "flex-1 justify-between" : "size-7 p-0 text-center",
           {
             "bg-surface-contrast": risk.level === RiskLevel.NONE,
@@ -137,14 +137,14 @@ const RiskAreaCardInternal = ({
             className={cn(
               "block font-mono font-medium text-black lg:tracking-wider",
               {
-                "!text-secondary": risk.level === RiskLevel.NONE,
-                "!text-success":
+                "text-secondary!": risk.level === RiskLevel.NONE,
+                "text-success!":
                   risk.level === RiskLevel.LOW && !isActive && !isHovered,
-                "!text-warning":
+                "text-warning!":
                   risk.level === RiskLevel.MEDIUM && !isActive && !isHovered,
-                "!text-error":
+                "text-error!":
                   risk.level === RiskLevel.HIGH && !isActive && !isHovered,
-                "!text-inverted":
+                "text-inverted!":
                   isActive && risk.level !== RiskLevel.NONE && isHovered,
                 "text-alternative-sm": isRiskAnalysis,
                 "text-xs": !isRiskAnalysis,
@@ -268,7 +268,7 @@ export const RiskAreaCard = ({
         description={riskInfo.description}
         riskLevel={riskArea.level}
       >
-        <div className="px- relative h-[48px]">
+        <div className="relative h-12">
           <RiskAreaCardInternal
             risk={riskArea}
             isActive={isActive}
@@ -279,7 +279,7 @@ export const RiskAreaCard = ({
       </RiskTooltipCard>
     ),
     [RiskAreaCardEnum.RISK_ANALYSIS]: (
-      <div className="flex min-w-60 lg:w-full">
+      <div className="flex min-w-40 lg:w-full">
         <div
           className={cn(
             "w-full p-1.5",

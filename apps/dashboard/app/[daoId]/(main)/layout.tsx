@@ -35,7 +35,7 @@ export default async function DaoLayout({ children, params }: DaoLayoutProps) {
           <HeaderDAOSidebar />
         </div>
       </div>
-      <main className="h-screen flex-1 overflow-auto">
+      <main className="h-screen flex-1 overflow-auto lg:overflow-hidden">
         <div className="lg:hidden">
           <HeaderMobile />
           <StickyPageHeader />

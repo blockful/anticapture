@@ -5,6 +5,7 @@ import { AlertTriangle, AlertCircle, CheckCircle2 } from "lucide-react";
 import { cn } from "@/shared/utils/";
 import { RiskLevel } from "@/shared/types/enums/RiskLevel";
 import { CounterClockwiseClockIcon } from "@radix-ui/react-icons";
+import { BadgeStatus } from "../design-system/badges/BadgeStatus";
 
 type RiskConfig = {
   color: string;
@@ -44,7 +45,7 @@ const RiskLabel = ({
   color,
   icon,
 }: {
-  status: RiskLevel | undefined;
+  status: RiskLevel;
   color: string;
   icon: ReactNode;
 }) => (
@@ -52,7 +53,7 @@ const RiskLabel = ({
     <p
       className={`items-center gap-1 text-${color} flex font-mono text-xs font-medium`}
     >
-      {status ?? "------"}
+      {status} RISK
       {icon}
     </p>
   </div>
@@ -67,7 +68,7 @@ const RiskDots = ({ pattern }: { pattern: RiskConfig["pattern"] }) => (
 );
 
 interface RiskLevelCardSmallProps {
-  status?: RiskLevel;
+  status: RiskLevel;
   className?: string;
 }
 
@@ -78,14 +79,9 @@ export const RiskLevelCardSmall = ({
   const config = riskConfigs[status ?? RiskLevel.NONE];
 
   return (
-    <div
-      className={cn(
-        "bg-surface-opacity flex h-full w-fit gap-1 rounded-full px-2 py-0.5",
-        className,
-      )}
-    >
+    <BadgeStatus variant="dimmed" className="w-fit px-2 py-1">
       <RiskLabel status={status} color={config.color} icon={config.icon} />
       <RiskDots pattern={config.pattern} />
-    </div>
+    </BadgeStatus>
   );
 };

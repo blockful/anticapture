@@ -16,7 +16,7 @@ export const DrawerHeader = ({
 }: DrawerHeaderProps) => {
   return (
     <div className="bg-surface-contrast w-full shrink-0">
-      <div className="bg-surface-contrast flex justify-between px-4 pb-2 pt-4">
+      <div className="bg-surface-contrast flex justify-between p-4">
         <div className="flex flex-col gap-1">
           <DrawerSubtitle>{subtitle}</DrawerSubtitle>
           <DrawerTitle>{title}</DrawerTitle>

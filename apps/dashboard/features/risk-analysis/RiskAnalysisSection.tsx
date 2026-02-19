@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useState, useMemo, useCallback } from "react";
+import { ReactNode, useState, useMemo, useCallback, useRef } from "react";
 import {
   RiskAreaCardEnum,
   RiskAreaCardWrapper,
@@ -69,7 +69,7 @@ const generateRiskDescriptions = (
         defenseDefinition={riskAreaInfo.description}
         riskExposure={riskExposure}
         requirements={createRequirementsFromMetrics(riskArea, daoId)}
-        riskLevel={daoRiskAreas[riskArea]?.riskLevel}
+        riskLevel={daoRiskAreas[riskArea].riskLevel}
         onMetricClick={onMetricClick}
       />
     );
@@ -82,6 +82,12 @@ export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const [activeRisk, setActiveRisk] = useState<RiskAreaEnum | undefined>(
     RiskAreaEnum.SPAM_RESISTANCE,
   );
+  const [displayedRisk, setDisplayedRisk] = useState<RiskAreaEnum | undefined>(
+    activeRisk,
+  );
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const transitionTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const [drawerState, setDrawerState] = useState<DrawerState>({
     isOpen: false,
     metric: null,
@@ -94,6 +100,16 @@ export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
 
   const handleRiskClick = useCallback((riskName: RiskAreaEnum) => {
     setActiveRisk(riskName);
+
+    if (transitionTimeoutRef.current) {
+      clearTimeout(transitionTimeoutRef.current);
+    }
+
+    setIsTransitioning(true);
+    transitionTimeoutRef.current = setTimeout(() => {
+      setDisplayedRisk(riskName);
+      setIsTransitioning(false);
+    }, 150);
   }, []);
 
   const handleMetricClick = useCallback((requirement: RequirementMetric) => {
@@ -135,20 +151,25 @@ export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             riskAreas={customizedRiskAreas}
             activeRiskId={activeRisk}
             onRiskClick={handleRiskClick}
-            className="scrollbar-none flex gap-2 overflow-x-auto lg:grid lg:grid-cols-1 lg:gap-0"
+            className="scrollbar-none flex overflow-x-auto lg:grid lg:grid-cols-1"
             variant={RiskAreaCardEnum.RISK_ANALYSIS}
             withTitle={false}
           />
         </div>
 
         {/* Mobile Divider */}
-        <div className="block pb-4 pt-4 lg:hidden lg:p-0">
+        <div className="block py-5 lg:hidden lg:p-0">
           <DividerDefault isHorizontal />
         </div>
 
         {/* Risk Description Content */}
         <div className="lg:w-3/5">
-          {activeRisk ? riskDescriptions[activeRisk] : EmptyRiskState}
+          <div
+            ref={contentRef}
+            className={`h-full transition-opacity duration-150 ${isTransitioning ? "opacity-0" : "opacity-100"}`}
+          >
+            {displayedRisk ? riskDescriptions[displayedRisk] : EmptyRiskState}
+          </div>
         </div>
       </div>
 

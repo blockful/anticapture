@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useRef } from "react";
 import {
   DrawerRoot,
   DrawerContent,
@@ -55,28 +55,38 @@ export const GovernanceImplementationDrawer = ({
   metricType,
   metricData,
 }: GovernanceImplementationDrawerProps) => {
-  if (!metricType || !metricData) return null;
+  // Keep last valid data in refs so content stays visible during the close animation.
+  const prevMetricTypeRef = useRef(metricType);
+  const prevMetricDataRef = useRef(metricData);
+
+  if (metricType) prevMetricTypeRef.current = metricType;
+  if (metricData) prevMetricDataRef.current = metricData;
+
+  const displayType = prevMetricTypeRef.current;
+  const displayData = prevMetricDataRef.current;
+
+  if (!displayType || !displayData) return null;
 
   const sections = [
-    { label: "Definition", content: metricData.description },
+    { label: "Definition", content: displayData.description },
     {
       label: "Risk Level",
       content: (
         <p
           className={cn(
             "flex items-center gap-2 font-mono text-[13px]",
-            riskTextColors[metricData.riskLevel],
+            riskTextColors[displayData.riskLevel],
           )}
         >
-          {iconsMapping[metricData.riskLevel]}
-          {metricData.riskLevel}
+          {iconsMapping[displayData.riskLevel]}
+          {displayData.riskLevel}
         </p>
       ),
     },
-    { label: "Current Setting", content: metricData.currentSetting },
-    { label: "Impact", content: metricData.impact },
-    { label: "Recommended Setting", content: metricData.recommendedSetting },
-    { label: "Next Step", content: metricData.nextStep },
+    { label: "Current Setting", content: displayData.currentSetting },
+    { label: "Impact", content: displayData.impact },
+    { label: "Recommended Setting", content: displayData.recommendedSetting },
+    { label: "Next Step", content: displayData.nextStep },
   ];
 
   return (
@@ -84,7 +94,7 @@ export const GovernanceImplementationDrawer = ({
       <DrawerContent>
         <DrawerHeader
           subtitle="ISSUE DETAILS"
-          title={metricData.name}
+          title={displayData.name}
           onClose={onClose}
         />
         <DrawerBody className="overflow-y-auto px-6 py-6">

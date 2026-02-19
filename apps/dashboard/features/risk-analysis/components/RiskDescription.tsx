@@ -18,9 +18,9 @@ export interface RiskDescriptionProps {
   title: string;
   defenseDefinition: string | string[];
   riskExposure: string | string[];
+  riskLevel: RiskLevel;
   requirements?: RequirementMetric[];
   children?: ReactNode;
-  riskLevel?: RiskLevel;
   onMetricClick?: (requirement: RequirementMetric) => void;
 }
 
@@ -115,15 +115,15 @@ export const RiskDescription = ({
     <CorneredBox className="bg-surface-background lg:bg-surface-default lg:flex lg:h-full lg:flex-col">
       <div className="flex flex-col lg:h-full lg:overflow-hidden">
         <header className="flex w-full flex-col justify-between gap-2 pb-5 lg:shrink-0 lg:flex-row lg:items-center lg:p-4">
-          <h2 className="text-primary text-lg font-medium">{title}</h2>
+          <h2 className="text-primary font-mono text-lg font-medium">
+            {title}
+          </h2>
           <RiskLevelCardSmall status={riskLevel} />
         </header>
 
-        <div
-          className={"border-border-default h-px w-full border border-dashed"}
-        />
+        <div className={"border-border-default h-px w-full border"} />
 
-        <div className="flex flex-col gap-4 p-4 lg:flex-1 lg:overflow-y-auto">
+        <div className="scrollbar-custom flex flex-col gap-4 py-4 lg:flex-1 lg:overflow-y-auto lg:p-4">
           <RiskInfoContainer title="DEFENSE DEFINITION">
             <ParagraphList items={defenseDefinitionArray} />
           </RiskInfoContainer>

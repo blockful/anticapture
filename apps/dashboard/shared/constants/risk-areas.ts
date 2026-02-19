@@ -83,7 +83,7 @@ export const RISK_AREAS: Record<RiskAreaEnum, RiskAreaConstants> = {
   },
   [RiskAreaEnum.GOV_FRONTEND_RESILIENCE]: {
     title: "Gov Front-end Resilience",
-    titleAbbreviation: "GFR",
+    titleAbbreviation: "GR",
     description:
       "Protects the governance interface from being compromised, hijacked, or manipulated to mislead voters.",
     requirements: [

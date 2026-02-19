@@ -70,6 +70,7 @@ export default async function RiskAnalysisPage({
         title={PAGES_CONSTANTS.attackExposure.title}
         icon={<Bomb className="section-layout-icon" />}
         description={PAGES_CONSTANTS.attackExposure.description}
+        className="gap-5"
       >
         <SubSectionsContainer>
           <RiskAnalysisSection daoId={daoIdEnum} />
