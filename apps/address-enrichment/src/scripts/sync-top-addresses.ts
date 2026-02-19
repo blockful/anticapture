@@ -29,23 +29,6 @@ interface AddressInfo {
   delegationsCount?: number;
 }
 
-/**
- * Format large numbers with K, M, B suffixes
- */
-function formatLargeNumber(value: string, decimals: number = 18): string {
-  const num = Number(formatUnits(BigInt(value), decimals));
-  if (num >= 1_000_000_000) {
-    return `${(num / 1_000_000_000).toFixed(2)}B`;
-  }
-  if (num >= 1_000_000) {
-    return `${(num / 1_000_000).toFixed(2)}M`;
-  }
-  if (num >= 1_000) {
-    return `${(num / 1_000).toFixed(2)}K`;
-  }
-  return num.toFixed(2);
-}
-
 // Parse environment variables (simplified for CLI)
 function getEnv(key: string, defaultValue?: string): string {
   const value = process.env[key] ?? defaultValue;
@@ -196,9 +179,7 @@ const processAndEnrichDelegates = async (
       processedCount++;
       const addr = d.accountId.toLowerCase();
       const progress = `[${daoId} delegate ${processedCount}]`;
-
-      const vpFormatted = formatLargeNumber(d.votingPower, 18);
-      const roleStr = `(delegate: ${vpFormatted} VP)`;
+      const roleStr = `(delegate)`;
 
       try {
         const result = await enrichAddress(addr, arkhamClient, rpcClient, db);
@@ -257,9 +238,7 @@ const processAndEnrichHolders = async (
       processedCount++;
       const addr = h.address.toLowerCase();
       const progress = `[${daoId} holder ${processedCount}]`;
-
-      const balFormatted = formatLargeNumber(h.balance, 18);
-      const roleStr = `(holder: ${balFormatted})`;
+      const roleStr = `(holder)`;
 
       try {
         const result = await enrichAddress(addr, arkhamClient, rpcClient, db);
