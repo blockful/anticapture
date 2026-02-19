@@ -25,6 +25,7 @@ import daoConfig from "@/shared/dao-config";
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 import { BulletDivider } from "@/shared/components/design-system/section";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 
 interface FeedEventItemProps {
   event: FeedEvent;
@@ -167,16 +168,16 @@ export const FeedEventItem = ({
                   ? "No"
                   : "Abstain"}
             </span>{" "}
-            <span className="text-secondary">on proposal</span>{" "}
             <Link
               href={
                 config?.governancePage
                   ? `/${daoId}/governance/proposal/${event.metadata.proposalId}`
                   : `https://tally.xyz/proposal/${event.metadata.proposalId}`
               }
-              className="text-primary hover:text-link font-medium transition-colors"
+              className="text-primary font-medium transition-colors"
             >
-              {event.metadata.proposalTitle?.replace(/^#\s*/, "")}
+              {event.metadata.proposalId.slice(0, 6)}...
+              {event.metadata.proposalId.slice(-4)}
             </Link>{" "}
             <a
               href={explorerUrl}
@@ -251,6 +252,11 @@ export const FeedEventItem = ({
                 nameClassName="text-primary font-medium"
               />
             </span>{" "}
+            <CopyAndPasteButton
+              textToCopy={event.metadata.to}
+              className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
+              iconSize="md"
+            />
             <a
               href={explorerUrl}
               target="_blank"

@@ -6,117 +6,9 @@ import {
   GetFeedEventsQuery,
   QueryInput_FeedEvents_OrderDirection,
   QueryInput_FeedEvents_OrderBy,
-  QueryInput_FeedEvents_Relevance,
-  QueryInput_FeedEvents_Type,
-  Query_FeedEvents_Items_Items_Relevance,
   useGetFeedEventsQuery,
 } from "@anticapture/graphql-client/hooks";
-import {
-  ActivityFeedFilters,
-  FeedEvent,
-  // FeedEventRelevance,
-  // FeedEventType,
-} from "@/features/feed/types";
-
-// const mapRelevance = (
-//   relevance: Query_FeedEvents_Items_Items_Relevance,
-// ): FeedEventRelevance => {
-//   switch (relevance) {
-//     case Query_FeedEvents_Items_Items_Relevance.High:
-//       return "high";
-//     case Query_FeedEvents_Items_Items_Relevance.Medium:
-//       return "medium";
-//     case Query_FeedEvents_Items_Items_Relevance.Low:
-//       return "low";
-//     default:
-//       return "none";
-//   }
-// };
-
-// const mapType = (type: string): FeedEventType => {
-//   switch (type) {
-//     case "VOTE":
-//       return "vote";
-//     case "PROPOSAL":
-//     case "PROPOSAL_EXTENDED":
-//       return "proposal";
-//     case "TRANSFER":
-//       return "transfer";
-//     case "DELEGATION":
-//     case "DELEGATION_VOTES_CHANGED":
-//       return "delegation";
-//     default:
-//       return "vote";
-//   }
-// };
-
-// const mapTypeFilter = (
-//   types?: QueryInput_FeedEvents_Type[],
-// ): QueryInput_FeedEvents_Type | undefined => {
-//   if (!types || types.length === 0) return undefined;
-//   switch (types[0]) {
-//     case "vote":
-//       return QueryInput_FeedEvents_Type.Vote;
-//     case "proposal":
-//       return QueryInput_FeedEvents_Type.Proposal;
-//     case "transfer":
-//       return QueryInput_FeedEvents_Type.Transfer;
-//     case "delegation":
-//       return QueryInput_FeedEvents_Type.Delegation;
-//     default:
-//       return undefined;
-//   }
-// };
-
-// const mapRelevanceFilter = (
-//   relevances?: FeedEventRelevance[],
-// ): QueryInput_FeedEvents_Relevance | undefined => {
-//   if (!relevances || relevances.length === 0) return undefined;
-//   switch (relevances[0]) {
-//     case "high":
-//       return QueryInput_FeedEvents_Relevance.High;
-//     case "medium":
-//       return QueryInput_FeedEvents_Relevance.Medium;
-//     case "low":
-//       return QueryInput_FeedEvents_Relevance.Low;
-//     default:
-//       return undefined;
-//   }
-// };
-
-// type RawFeedItem = NonNullable<
-//   NonNullable<GetFeedEventsQuery["feedEvents"]>["items"][number]
-// >;
-
-// const transformFeedEvent = (item: RawFeedItem): FeedEvent => {
-//   const type = mapType(item.type);
-//   const metadata = item.metadata ?? {};
-
-//   return {
-//     txHash: item.txHash,
-//     logIndex: item.logIndex,
-//     timestamp: String(item.timestamp),
-//     relevance: mapRelevance(item.relevance),
-//     type,
-//     ...(type === "vote" && { vote: metadata }),
-//     ...(type === "proposal" && { proposal: metadata }),
-//     ...(type === "transfer" && { transfer: metadata }),
-//     ...(type === "delegation" && { delegation: metadata }),
-//   };
-// };
-
-// const getEventKey = (event: FeedEvent): string =>
-//   `${event.txHash}-${event.logIndex}`;
-
-// const deduplicateEvents = (events: FeedEvent[]): FeedEvent[] => {
-//   const seen = new Set<string>();
-//   return events.filter((event) => {
-//     const key = getEventKey(event);
-//     if (seen.has(key)) return false;
-//     seen.add(key);
-//     return true;
-//   });
-// };
+import { ActivityFeedFilters } from "@/features/feed/types";
 
 interface UseActivityFeedParams {
   daoId: DaoIdEnum;
@@ -137,8 +29,7 @@ export const useActivityFeed = ({
   filters = {},
   enabled = true,
 }: UseActivityFeedParams) => {
-  const limit = filters.limit ?? 20;
-  const [allItems, setAllItems] = useState<FeedEvent[]>([]);
+  const limit = filters.limit ?? 10;
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const queryVariables = useMemo(
@@ -176,28 +67,18 @@ export const useActivityFeed = ({
     },
   });
 
-  console.log({ data });
-
-  // useEffect(() => {
-  // const rawItems = data?.feedEvents?.items ?? [];
-  // const events = rawItems
-  //   .filter((item) => item !== null)
-  //   .map(transformFeedEvent);
-  // setAllItems(deduplicateEvents(events));
-  //   setAllItems(data?.feedEvents?.items ?? []);
-  // }, [data]);
-
   const totalCount = data?.feedEvents?.totalCount ?? 0;
 
   const pagination: PaginationInfo = useMemo(
     () => ({
       totalCount,
-      hasNextPage: allItems.length < totalCount,
+      hasNextPage: (data?.feedEvents?.items?.length ?? 0) < totalCount,
       hasPreviousPage: false,
-      currentPage: Math.ceil(allItems.length / limit) || 1,
+      currentPage:
+        Math.ceil((data?.feedEvents?.items?.length ?? 0) / limit) || 1,
       itemsPerPage: limit,
     }),
-    [totalCount, allItems.length, limit],
+    [totalCount, data?.feedEvents?.items?.length, limit],
   );
 
   const fetchNextPage = useCallback(async () => {
@@ -209,7 +90,7 @@ export const useActivityFeed = ({
       await fetchMore({
         variables: {
           ...queryVariables,
-          skip: allItems.length,
+          skip: data?.feedEvents?.items?.length ?? 0,
         },
         updateQuery: (
           previousResult: GetFeedEventsQuery,
@@ -241,13 +122,8 @@ export const useActivityFeed = ({
     pagination.hasNextPage,
     isLoadingMore,
     queryVariables,
-    allItems.length,
+    data?.feedEvents?.items?.length,
   ]);
-
-  // const refetch = useCallback(() => {
-  //   setAllItems([]);
-  //   apolloRefetch();
-  // }, [apolloRefetch]);
 
   return {
     data: data?.feedEvents?.items.filter((item) => item !== null) ?? [],
