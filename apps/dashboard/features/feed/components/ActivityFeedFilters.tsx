@@ -2,20 +2,17 @@
 
 import { useState } from "react";
 import { Calendar, X } from "lucide-react";
-import { cn } from "@/shared/utils";
 import {
   Drawer,
   DrawerContent,
   DrawerClose,
 } from "@/shared/components/ui/drawer";
-import { Checkbox } from "@/shared/components/design-system/form/fields/checkbox/Checkbox";
 import { RadioButton } from "@/shared/components/design-system/buttons/RadioButton";
 import { Button, IconButton } from "@/shared/components";
 import { Input } from "@/shared/components/design-system/form/fields/input/Input";
 import { useScreenSize } from "@/shared/hooks";
 import {
-  // FeedEventType,
-  // FeedEventRelevance,
+  FeedEventRelevance,
   ActivityFeedFilterState,
 } from "@/features/feed/types";
 
@@ -26,18 +23,11 @@ interface ActivityFeedFiltersDrawerProps {
   onApplyFilters: (filters: ActivityFeedFilterState) => void;
 }
 
-// const eventTypes: { value: FeedEventType; label: string }[] = [
-//   { value: "delegation", label: "Delegation" },
-//   { value: "transfer", label: "Transfer" },
-//   { value: "vote", label: "Vote" },
-//   { value: "proposal", label: "Proposal Creation" },
-// ];
-
-// const relevances: { value: FeedEventRelevance; label: string }[] = [
-//   { value: "high", label: "High" },
-//   { value: "medium", label: "Medium" },
-//   { value: "low", label: "Low" },
-// ];
+const relevanceOptions: { value: FeedEventRelevance; label: string }[] = [
+  { value: FeedEventRelevance.Low, label: "Low" },
+  { value: FeedEventRelevance.Medium, label: "Medium" },
+  { value: FeedEventRelevance.High, label: "High" },
+];
 
 const SectionDivider = () => (
   <div className="border-border-default w-full border-t border-dashed" />
@@ -63,23 +53,9 @@ export const ActivityFeedFiltersDrawer = ({
     setLocalFilters((prev) => ({ ...prev, sortOrder }));
   };
 
-  // const handleTypeToggle = (type: FeedEventType) => {
-  //   setLocalFilters((prev) => ({
-  //     ...prev,
-  //     types: prev.types.includes(type)
-  //       ? prev.types.filter((t) => t !== type)
-  //       : [...prev.types, type],
-  //   }));
-  // };
-
-  // const handleRelevanceToggle = (relevance: FeedEventRelevance) => {
-  //   setLocalFilters((prev) => ({
-  //     ...prev,
-  //     relevances: prev.relevances.includes(relevance)
-  //       ? prev.relevances.filter((r) => r !== relevance)
-  //       : [...prev.relevances, relevance],
-  //   }));
-  // };
+  const handleRelevanceChange = (relevance: FeedEventRelevance) => {
+    setLocalFilters((prev) => ({ ...prev, relevance }));
+  };
 
   const handleFromDateChange = (value: string) => {
     setLocalFilters((prev) => ({ ...prev, fromDate: value }));
@@ -97,8 +73,7 @@ export const ActivityFeedFiltersDrawer = ({
   const handleClear = () => {
     const clearedFilters: ActivityFeedFilterState = {
       sortOrder: "desc",
-      // types: [],
-      // relevances: [],
+      relevance: FeedEventRelevance.Medium,
       fromDate: "",
       toDate: "",
     };
@@ -164,63 +139,21 @@ export const ActivityFeedFiltersDrawer = ({
 
             <SectionDivider />
 
-            {/* Type */}
-            {/* <div className="flex flex-col gap-3">
-              <SectionLabel>Type</SectionLabel>
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-                {eventTypes.map(({ value, label }) => (
-                  <label
-                    key={value}
-                    className="flex cursor-pointer items-center gap-2"
-                  >
-                    <Checkbox
-                      checked={localFilters.types.includes(value)}
-                      onCheckedChange={() => handleTypeToggle(value)}
-                    />
-                    <span
-                      className={cn(
-                        "text-sm transition-colors",
-                        localFilters.types.includes(value)
-                          ? "text-primary"
-                          : "text-secondary",
-                      )}
-                    >
-                      {label}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </div> */}
-
-            <SectionDivider />
-
             {/* Relevance */}
-            {/* <div className="flex flex-col gap-3">
-              <SectionLabel>Relevance</SectionLabel>
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-                {relevances.map(({ value, label }) => (
-                  <label
+            <div className="flex flex-col gap-3">
+              <SectionLabel>Min. Relevance</SectionLabel>
+              <div className="flex flex-col gap-3">
+                {relevanceOptions.map(({ value, label }) => (
+                  <RadioButton
                     key={value}
-                    className="flex cursor-pointer items-center gap-2"
-                  >
-                    <Checkbox
-                      checked={localFilters.relevances.includes(value)}
-                      onCheckedChange={() => handleRelevanceToggle(value)}
-                    />
-                    <span
-                      className={cn(
-                        "text-sm transition-colors",
-                        localFilters.relevances.includes(value)
-                          ? "text-primary"
-                          : "text-secondary",
-                      )}
-                    >
-                      {label}
-                    </span>
-                  </label>
+                    label={label}
+                    checked={localFilters.relevance === value}
+                    onChange={() => handleRelevanceChange(value)}
+                    name="relevance"
+                  />
                 ))}
               </div>
-            </div> */}
+            </div>
 
             <SectionDivider />
 

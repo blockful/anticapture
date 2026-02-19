@@ -18,6 +18,7 @@ interface TheSectionLayoutProps {
   className?: string;
   subHeader?: ReactNode;
   leftContent?: ReactNode;
+  headerAction?: ReactNode;
   subsectionTitle?: string;
   subsectionDescription?: string;
 }
@@ -30,6 +31,7 @@ export const TheSectionLayout = ({
   riskLevel,
   children,
   className,
+  headerAction,
   subsectionTitle,
   subsectionDescription,
 }: TheSectionLayoutProps) => {
@@ -40,12 +42,15 @@ export const TheSectionLayout = ({
         className,
       )}
     >
-      <SectionTitle
-        icon={icon}
-        title={title}
-        riskLevel={riskLevel}
-        description={description ?? ""}
-      />
+      <div className="flex items-start justify-between gap-4">
+        <SectionTitle
+          icon={icon}
+          title={title}
+          riskLevel={riskLevel}
+          description={description ?? ""}
+        />
+        {headerAction}
+      </div>
       <div className="border-border-default w-full border-b border-dashed lg:hidden" />
       {subsectionTitle ? (
         <SubSection

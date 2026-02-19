@@ -141,20 +141,17 @@ export const ActivityFeedSection = ({
     filters: {
       limit: 20,
       sortOrder: filters.sortOrder,
-      // types: filters.types.length > 0 ? filters.types : undefined,
-      // relevances:
-      //   filters.relevances.length > 0 ? filters.relevances : undefined,
+      relevance: filters.relevance,
       fromTimestamp,
       toTimestamp,
     },
   });
 
   const activeFiltersCount =
-    // filters.types.length +
-    // filters.relevances.length +
     (filters.fromDate ? 1 : 0) +
     (filters.toDate ? 1 : 0) +
-    (filters.sortOrder !== "desc" ? 1 : 0);
+    (filters.sortOrder !== "desc" ? 1 : 0) +
+    (filters.relevance !== FeedEventRelevance.Medium ? 1 : 0);
 
   // Group events by date
   const groupedEvents = useMemo(() => groupEventsByDate(events), [events]);

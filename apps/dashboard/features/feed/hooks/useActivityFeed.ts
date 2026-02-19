@@ -6,9 +6,10 @@ import {
   GetFeedEventsQuery,
   QueryInput_FeedEvents_OrderDirection,
   QueryInput_FeedEvents_OrderBy,
+  QueryInput_FeedEvents_Relevance,
   useGetFeedEventsQuery,
 } from "@anticapture/graphql-client/hooks";
-import { ActivityFeedFilters } from "@/features/feed/types";
+import { ActivityFeedFilters, FeedEventType } from "@/features/feed/types";
 
 interface UseActivityFeedParams {
   daoId: DaoIdEnum;
@@ -41,16 +42,16 @@ export const useActivityFeed = ({
         filters.sortOrder === "asc"
           ? QueryInput_FeedEvents_OrderDirection.Asc
           : QueryInput_FeedEvents_OrderDirection.Desc,
-      // type: mapTypeFilter(filters.types),
-      // relevance: mapRelevanceFilter(filters.relevances),
+      relevance: filters.relevance as unknown as
+        | QueryInput_FeedEvents_Relevance
+        | undefined,
       fromDate: filters.fromTimestamp,
       toDate: filters.toTimestamp,
     }),
     [
       limit,
       filters.sortOrder,
-      // filters.types,
-      // filters.relevances,
+      filters.relevance,
       filters.fromTimestamp,
       filters.toTimestamp,
     ],

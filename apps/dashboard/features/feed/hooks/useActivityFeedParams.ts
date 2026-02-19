@@ -4,36 +4,9 @@ import { useQueryState, parseAsStringEnum, parseAsString } from "nuqs";
 import { useCallback, useMemo } from "react";
 import {
   ActivityFeedFilterState,
-  // FeedEventType,
-  // FeedEventRelevance,
+  FeedEventRelevance,
 } from "@/features/feed/types";
-
-// const VALID_TYPES: FeedEventType[] = [
-//   "vote",
-//   "proposal",
-//   "transfer",
-//   "delegation",
-// ];
-// const VALID_RELEVANCES: FeedEventRelevance[] = [
-//   "none",
-//   "low",
-//   "medium",
-//   "high",
-// ];
-
-// Parse comma-separated string to array, filtering invalid values
-const parseArrayParam = <T extends string>(
-  value: string | null,
-  validValues: T[],
-): T[] => {
-  if (!value) return [];
-  return value.split(",").filter((v): v is T => validValues.includes(v as T));
-};
-
-// Convert array to comma-separated string, or null if empty
-const serializeArrayParam = (values: string[]): string | null => {
-  return values.length > 0 ? values.join(",") : null;
-};
+import { QueryInput_FeedEvents_Relevance } from "@anticapture/graphql-client";
 
 export interface UseActivityFeedParamsReturn {
   filters: ActivityFeedFilterState;
@@ -46,10 +19,13 @@ export function useActivityFeedParams(): UseActivityFeedParamsReturn {
     "sort",
     parseAsStringEnum(["asc", "desc"]).withDefault("desc"),
   );
-  const [typesParam, setTypesParam] = useQueryState("types", parseAsString);
-  const [relevancesParam, setRelevancesParam] = useQueryState(
-    "relevances",
-    parseAsString,
+  const [relevance, setRelevance] = useQueryState(
+    "relevance",
+    parseAsStringEnum([
+      QueryInput_FeedEvents_Relevance.Low,
+      QueryInput_FeedEvents_Relevance.Medium,
+      QueryInput_FeedEvents_Relevance.High,
+    ]).withDefault(QueryInput_FeedEvents_Relevance.Medium),
   );
   const [fromDate, setFromDate] = useQueryState("from", parseAsString);
   const [toDate, setToDate] = useQueryState("to", parseAsString);
@@ -57,32 +33,31 @@ export function useActivityFeedParams(): UseActivityFeedParamsReturn {
   const filters: ActivityFeedFilterState = useMemo(
     () => ({
       sortOrder: sortOrder as "asc" | "desc",
-      // types: parseArrayParam(typesParam, VALID_TYPES),
-      // relevances: parseArrayParam(relevancesParam, VALID_RELEVANCES),
+      relevance: relevance as unknown as FeedEventRelevance,
       fromDate: fromDate ?? "",
       toDate: toDate ?? "",
     }),
-    [sortOrder, typesParam, relevancesParam, fromDate, toDate],
+    [sortOrder, relevance, fromDate, toDate],
   );
 
   const setFilters = useCallback(
     (newFilters: ActivityFeedFilterState) => {
       setSortOrder(newFilters.sortOrder);
-      // setTypesParam(serializeArrayParam(newFilters.types));
-      // setRelevancesParam(serializeArrayParam(newFilters.relevances));
+      setRelevance(
+        newFilters.relevance as unknown as QueryInput_FeedEvents_Relevance,
+      );
       setFromDate(newFilters.fromDate || null);
       setToDate(newFilters.toDate || null);
     },
-    [setSortOrder, setTypesParam, setRelevancesParam, setFromDate, setToDate],
+    [setSortOrder, setRelevance, setFromDate, setToDate],
   );
 
   const clearFilters = useCallback(() => {
     setSortOrder("desc");
-    setTypesParam(null);
-    setRelevancesParam(null);
+    setRelevance(QueryInput_FeedEvents_Relevance.Medium);
     setFromDate(null);
     setToDate(null);
-  }, [setSortOrder, setTypesParam, setRelevancesParam, setFromDate, setToDate]);
+  }, [setSortOrder, setRelevance, setFromDate, setToDate]);
 
   return { filters, setFilters, clearFilters };
 }
