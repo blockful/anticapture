@@ -25,7 +25,11 @@ export class FeedService {
     return {
       items: response.items.map((item) => ({
         ...item,
-        value: item.value.toString(),
+        value:
+          item.type === FeedEventType.PROPOSAL ||
+          item.type === FeedEventType.PROPOSAL_EXTENDED
+            ? undefined
+            : item.value.toString(),
         relevance: this.getItemRelevance(item),
         type: item.type as FeedEventType,
       })),

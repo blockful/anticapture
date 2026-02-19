@@ -427,7 +427,7 @@ export const accountRelations = relations(account, ({ many }) => ({
   }),
 }));
 
-export const rolesEnum = onchainEnum("event_type", [
+export const eventTypeEnum = onchainEnum("event_type", [
   "VOTE",
   "PROPOSAL",
   "PROPOSAL_EXTENDED",
@@ -441,8 +441,8 @@ export const feedEvent = onchainTable(
   (drizzle) => ({
     txHash: drizzle.text("tx_hash").notNull(),
     logIndex: drizzle.integer("log_index").notNull(),
-    type: rolesEnum("type").notNull(),
-    value: drizzle.bigint().notNull(),
+    type: eventTypeEnum("type").notNull(),
+    value: drizzle.bigint().notNull().default(0n),
     timestamp: drizzle.bigint().notNull(),
     metadata: drizzle.json().$type<Record<string, unknown>>(),
   }),

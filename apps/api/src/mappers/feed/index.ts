@@ -22,7 +22,7 @@ export const FeedItemSchema = z.object({
   txHash: z.string(),
   logIndex: z.number(),
   type: z.nativeEnum(FeedEventType),
-  value: z.string(),
+  value: z.string().optional(),
   timestamp: z.number(),
   relevance: z.nativeEnum(FeedRelevance),
   metadata: z.record(z.string(), z.unknown()).nullable(),

@@ -3,10 +3,7 @@ import { FeedEventType, FeedRelevance } from "./constants";
 import { DaoIdEnum } from "./enums";
 
 export function getDaoRelevanceThreshold(daoId: DaoIdEnum): {
-  [type in keyof Omit<
-    Record<FeedEventType, bigint>,
-    "PROPOSAL" | "PROPOSAL_EXTENDED"
-  >]: {
+  [type in keyof Record<FeedEventType, bigint>]: {
     [FeedRelevance.LOW]: bigint;
     [FeedRelevance.MEDIUM]: bigint;
     [FeedRelevance.HIGH]: bigint;
@@ -16,6 +13,7 @@ export function getDaoRelevanceThreshold(daoId: DaoIdEnum): {
     case DaoIdEnum.NOUNS:
       return {
         [FeedEventType.TRANSFER]: {
+          // TODO: NFT transfers emit 1 event per token, so it will never be considered above MEDIUM relevance
           [FeedRelevance.LOW]: 1n,
           [FeedRelevance.MEDIUM]: 3n,
           [FeedRelevance.HIGH]: 10n,
@@ -34,6 +32,16 @@ export function getDaoRelevanceThreshold(daoId: DaoIdEnum): {
           [FeedRelevance.LOW]: 1n,
           [FeedRelevance.MEDIUM]: 3n,
           [FeedRelevance.HIGH]: 10n,
+        },
+        [FeedEventType.PROPOSAL]: {
+          [FeedRelevance.LOW]: 0n,
+          [FeedRelevance.MEDIUM]: 0n,
+          [FeedRelevance.HIGH]: 0n,
+        },
+        [FeedEventType.PROPOSAL_EXTENDED]: {
+          [FeedRelevance.LOW]: 0n,
+          [FeedRelevance.MEDIUM]: 0n,
+          [FeedRelevance.HIGH]: 0n,
         },
       };
     default:
@@ -57,6 +65,16 @@ export function getDaoRelevanceThreshold(daoId: DaoIdEnum): {
           [FeedRelevance.LOW]: parseEther("1000"),
           [FeedRelevance.MEDIUM]: parseEther("10000"),
           [FeedRelevance.HIGH]: parseEther("100000"),
+        },
+        [FeedEventType.PROPOSAL]: {
+          [FeedRelevance.LOW]: 0n,
+          [FeedRelevance.MEDIUM]: 0n,
+          [FeedRelevance.HIGH]: 0n,
+        },
+        [FeedEventType.PROPOSAL_EXTENDED]: {
+          [FeedRelevance.LOW]: 0n,
+          [FeedRelevance.MEDIUM]: 0n,
+          [FeedRelevance.HIGH]: 0n,
         },
       };
   }

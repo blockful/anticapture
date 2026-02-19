@@ -9,7 +9,7 @@ export class FeedRepository {
 
   async getFeedEvents(
     req: FeedRequest,
-    valueThresholds: Partial<Record<FeedEventType, bigint>>,
+    valueThresholds: Record<FeedEventType, bigint>,
   ): Promise<{
     items: DBFeedEvent[];
     totalCount: number;
@@ -30,14 +30,15 @@ export class FeedRepository {
     const orderByFn =
       orderDirection === "asc" ? asc(orderByColumn) : desc(orderByColumn);
 
-    const items = await this.db.query.feedEvent.findMany({
-      where,
-      orderBy: orderByFn,
-      offset: skip,
-      limit,
-    });
-
-    const totalCount = await this.db.$count(feedEvent, where);
+    const [items, totalCount] = await Promise.all([
+      this.db.query.feedEvent.findMany({
+        where,
+        orderBy: orderByFn,
+        offset: skip,
+        limit,
+      }),
+      this.db.$count(feedEvent, where),
+    ]);
 
     return {
       items,
@@ -47,24 +48,15 @@ export class FeedRepository {
 
   private buildRelevanceFilter(
     type: FeedEventType | undefined,
-    valueThresholds: Partial<Record<FeedEventType, bigint>>,
+    valueThresholds: Record<FeedEventType, bigint>,
   ): SQL | undefined {
     const conditions: SQL[] = [];
 
     if (type) {
-      if (
-        type === FeedEventType.PROPOSAL ||
-        type === FeedEventType.PROPOSAL_EXTENDED
-      ) {
-        conditions.push(eq(feedEvent.type, type));
-      } else {
-        const threshold = valueThresholds[type];
-        if (threshold) {
-          conditions.push(
-            and(eq(feedEvent.type, type), gte(feedEvent.value, threshold))!,
-          );
-        }
-      }
+      const threshold = valueThresholds[type];
+      conditions.push(
+        and(eq(feedEvent.type, type), gte(feedEvent.value, threshold))!,
+      );
     } else {
       // No type filter - build per-type conditions with OR
       for (const [eventType, minValue] of Object.entries(valueThresholds)) {
@@ -74,13 +66,6 @@ export class FeedRepository {
             gte(feedEvent.value, minValue),
           )!,
         );
-      }
-      // Always include PROPOSAL (no value threshold)
-      if (!(FeedEventType.PROPOSAL in valueThresholds)) {
-        conditions.push(eq(feedEvent.type, FeedEventType.PROPOSAL));
-      }
-      if (!(FeedEventType.PROPOSAL_EXTENDED in valueThresholds)) {
-        conditions.push(eq(feedEvent.type, FeedEventType.PROPOSAL_EXTENDED));
       }
     }
 

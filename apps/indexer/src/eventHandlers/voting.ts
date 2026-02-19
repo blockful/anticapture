@@ -191,7 +191,6 @@ export const proposalCreated = async (
     txHash,
     logIndex,
     type: "PROPOSAL",
-    value: 0n,
     timestamp,
     metadata: {
       id: proposalId,
@@ -250,7 +249,6 @@ export const proposalExtended = async (
     txHash,
     logIndex,
     type: "PROPOSAL_EXTENDED",
-    value: 0n,
     timestamp,
     metadata: {
       id: proposalId,
