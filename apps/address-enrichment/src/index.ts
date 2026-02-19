@@ -5,7 +5,7 @@ import { logger } from "hono/logger";
 import { cors } from "hono/cors";
 
 import { env } from "@/env";
-import { runMigrations } from "@/db";
+import { initDb, runMigrations } from "@/db";
 import { ArkhamClient } from "@/clients/arkham";
 import { ENSClient } from "@/clients/ens";
 import { EnrichmentService } from "@/services/enrichment";
@@ -54,6 +54,7 @@ app.doc("/docs/json", {
 app.get("/docs", swaggerUI({ url: "/docs/json" }));
 
 // Run migrations then start server
+initDb(env.DATABASE_URL);
 runMigrations(env.DATABASE_URL);
 console.log(`🚀 Address Enrichment API starting on port ${env.PORT}`);
 serve({

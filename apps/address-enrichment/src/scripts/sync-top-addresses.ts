@@ -9,9 +9,8 @@
 
 import { eq } from "drizzle-orm";
 import type { Address } from "viem";
-import { formatUnits } from "viem";
 
-import { initDb, getDb, schema } from "@/db";
+import { initDb, getDb, addressEnrichment } from "@/db";
 import { ArkhamClient } from "@/clients/arkham";
 import { AnticaptureClient } from "@/clients/anticapture";
 import { isContract, createRpcClient } from "@/utils/address-type";
@@ -19,15 +18,6 @@ import dotenv from "dotenv";
 import { DaoIdEnum } from "@/utils/types";
 
 dotenv.config();
-
-interface AddressInfo {
-  address: string;
-  isDelegate: boolean;
-  isHolder: boolean;
-  votingPower?: string;
-  balance?: string;
-  delegationsCount?: number;
-}
 
 // Parse environment variables (simplified for CLI)
 function getEnv(key: string, defaultValue?: string): string {
@@ -103,7 +93,7 @@ async function enrichAddress(
 
   // Check if already exists
   const existing = await db.query.addressEnrichment.findFirst({
-    where: eq(schema.addressEnrichment.address, normalizedAddress),
+    where: eq(addressEnrichment.address, normalizedAddress),
   });
 
   if (existing) {
@@ -135,7 +125,7 @@ async function enrichAddress(
 
   // Store in database
   await db
-    .insert(schema.addressEnrichment)
+    .insert(addressEnrichment)
     .values({
       address: normalizedAddress,
       isContract: isContractAddress,

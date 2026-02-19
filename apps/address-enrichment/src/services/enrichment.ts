@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import type { Address } from "viem";
 
-import { getDb, schema } from "@/db";
+import { getDb, addressEnrichment } from "@/db";
 import type { AddressEnrichment } from "@/db/schema";
 import { ArkhamClient } from "@/clients/arkham";
 import { ENSClient } from "@/clients/ens";
@@ -53,7 +53,7 @@ export class EnrichmentService {
 
     // Check if address exists in database
     const existing = await db.query.addressEnrichment.findFirst({
-      where: eq(schema.addressEnrichment.address, normalizedAddress),
+      where: eq(addressEnrichment.address, normalizedAddress),
     });
 
     if (existing) {
@@ -67,14 +67,14 @@ export class EnrichmentService {
       const now = new Date();
 
       await db
-        .update(schema.addressEnrichment)
+        .update(addressEnrichment)
         .set({
           ensName: ensData?.name ?? null,
           ensAvatar: ensData?.avatar ?? null,
           ensBanner: ensData?.banner ?? null,
           ensUpdatedAt: now,
         })
-        .where(eq(schema.addressEnrichment.address, normalizedAddress));
+        .where(eq(addressEnrichment.address, normalizedAddress));
 
       return this.mapToResult({
         ...existing,
@@ -105,7 +105,7 @@ export class EnrichmentService {
     const now = new Date();
 
     // Store in database
-    const newRecord: typeof schema.addressEnrichment.$inferInsert = {
+    const newRecord: typeof addressEnrichment.$inferInsert = {
       address: normalizedAddress,
       isContract: isContractAddress,
       arkhamEntity: arkhamData?.entity ?? null,
@@ -119,7 +119,7 @@ export class EnrichmentService {
     };
 
     const [inserted] = await db
-      .insert(schema.addressEnrichment)
+      .insert(addressEnrichment)
       .values(newRecord)
       .onConflictDoNothing()
       .returning();
@@ -127,7 +127,7 @@ export class EnrichmentService {
     // If insert failed due to race condition, fetch existing
     if (!inserted) {
       const existingAfterRace = await db.query.addressEnrichment.findFirst({
-        where: eq(schema.addressEnrichment.address, normalizedAddress),
+        where: eq(addressEnrichment.address, normalizedAddress),
       });
       if (existingAfterRace) {
         return this.mapToResult(existingAfterRace);
@@ -138,11 +138,11 @@ export class EnrichmentService {
         isContract: isContractAddress,
         arkham: arkhamData
           ? {
-              entity: arkhamData.entity,
-              entityType: arkhamData.entityType,
-              label: arkhamData.label,
-              twitter: arkhamData.twitter,
-            }
+            entity: arkhamData.entity,
+            entityType: arkhamData.entityType,
+            label: arkhamData.label,
+            twitter: arkhamData.twitter,
+          }
           : null,
         ens: ensData,
         createdAt: new Date().toISOString(),
@@ -179,10 +179,10 @@ export class EnrichmentService {
       },
       ens: hasEnsData
         ? {
-            name: record.ensName,
-            avatar: record.ensAvatar,
-            banner: record.ensBanner,
-          }
+          name: record.ensName,
+          avatar: record.ensAvatar,
+          banner: record.ensBanner,
+        }
         : null,
       createdAt: record.createdAt.toISOString(),
     };
