@@ -82,6 +82,15 @@ module.exports = [
     },
   },
 
+  // Disable no-undef for TypeScript files — TypeScript handles this better
+  // See: https://typescript-eslint.io/troubleshooting/faqs/eslint#i-get-errors-from-the-no-undef-rule-about-global-variables-not-being-defined-even-though-there-are-no-typescript-errors
+  {
+    files: ["**/*.{ts,tsx}"],
+    rules: {
+      "no-undef": "off",
+    },
+  },
+
   // Indexer-specific config (inline ponder rule)
   {
     files: ["apps/indexer/**/*.{js,ts}"],

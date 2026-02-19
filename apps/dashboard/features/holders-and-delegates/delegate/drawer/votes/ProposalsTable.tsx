@@ -19,7 +19,7 @@ import {
   CategoriesFilter,
   FilterOption,
 } from "@/shared/components/design-system/table/filters/CategoriesFilter";
-import daoConfigByDaoId from "@/shared/dao-config";
+import daoConfig from "@/shared/dao-config";
 import Link from "next/link";
 import {
   getUserVoteData,
@@ -28,7 +28,6 @@ import {
   proposalsFinalResultMapping,
 } from "@/features/holders-and-delegates/utils/proposalsTableUtils";
 import { Table } from "@/shared/components/design-system/table/Table";
-import daoConfig from "@/shared/dao-config";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 interface ProposalTableData {
@@ -108,11 +107,11 @@ export const ProposalsTable = ({
           finalResult.text,
           // dao data come in blocks, we then convert it to seconds
           (Number(daoData?.votingPeriod) *
-            daoConfigByDaoId[daoIdEnum]?.daoOverview.chain.blockTime) /
+            daoConfig[daoIdEnum]?.daoOverview.chain.blockTime) /
             1000,
           daoData?.votingDelay
             ? (Number(daoData?.votingDelay) *
-                daoConfigByDaoId[daoIdEnum]?.daoOverview.chain.blockTime) /
+                daoConfig[daoIdEnum]?.daoOverview.chain.blockTime) /
                 1000
             : 0,
         ),
@@ -379,9 +378,9 @@ export const ProposalsTable = ({
         }
 
         const govPlatformUrl =
-          daoConfigByDaoId[daoIdEnum]?.daoOverview?.govPlatform?.url;
+          daoConfig[daoIdEnum]?.daoOverview?.govPlatform?.url;
         const govPlatformName =
-          daoConfigByDaoId[daoIdEnum]?.daoOverview?.govPlatform?.name;
+          daoConfig[daoIdEnum]?.daoOverview?.govPlatform?.name;
 
         if (!govPlatformUrl) {
           return null;
