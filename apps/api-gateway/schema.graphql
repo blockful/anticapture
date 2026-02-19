@@ -373,7 +373,7 @@ type query_feedEvents_items_items {
   txHash: String!
   logIndex: Float!
   type: query_feedEvents_items_items_type!
-  value: String!
+  value: String
   timestamp: Float!
   relevance: query_feedEvents_items_items_relevance!
   metadata: JSON
