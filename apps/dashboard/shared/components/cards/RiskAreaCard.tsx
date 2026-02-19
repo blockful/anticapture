@@ -137,14 +137,14 @@ const RiskAreaCardInternal = ({
             className={cn(
               "block font-mono font-medium text-black lg:tracking-wider",
               {
-                "text-secondary!": risk.level === RiskLevel.NONE,
-                "text-success!":
+                "!text-secondary": risk.level === RiskLevel.NONE,
+                "!text-success":
                   risk.level === RiskLevel.LOW && !isActive && !isHovered,
-                "text-warning!":
+                "!text-warning":
                   risk.level === RiskLevel.MEDIUM && !isActive && !isHovered,
-                "text-error!":
+                "!text-error":
                   risk.level === RiskLevel.HIGH && !isActive && !isHovered,
-                "text-inverted!":
+                "!text-inverted":
                   isActive && risk.level !== RiskLevel.NONE && isHovered,
                 "text-alternative-sm": isRiskAnalysis,
                 "text-xs": !isRiskAnalysis,
