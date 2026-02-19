@@ -1,7 +1,22 @@
+import type { Metadata } from "next";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
 import { HeaderSidebar } from "@/widgets";
 import { Footer } from "@/shared/components/design-system/footer/Footer";
 import { PanelSection } from "@/features/panel";
+
+export const metadata: Metadata = {
+  title: "Anticapture - Panel",
+  description: "Explore and address governance risks in top DAOs.",
+  openGraph: {
+    title: "Anticapture - Panel",
+    description: "Explore and address governance risks in top DAOs.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Anticapture - Panel",
+    description: "Explore and address governance risks in top DAOs.",
+  },
+};
 
 export default function Home() {
   return (

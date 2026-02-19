@@ -54,6 +54,7 @@ interface BaseInfo {
     svgBgColor: string;
   };
   icon?: (props: DaoIconProps) => ReactNode;
+  ogIcon: (props: { size: number }) => ReactNode;
   disableDaoPage?: boolean;
   notSupportedMetrics?: MetricTypesEnum[];
 }
