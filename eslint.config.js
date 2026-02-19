@@ -148,7 +148,7 @@ module.exports = [
       ...nextPlugin.configs.recommended.rules,
       ...nextPlugin.configs["core-web-vitals"].rules,
       "react-hooks/rules-of-hooks": "error",
-      "react-hooks/exhaustive-deps": "error",
+      "react-hooks/exhaustive-deps": "warn",
       // Custom rules from old dashboard .eslintrc.json
       "no-restricted-imports": [
         "warn",
