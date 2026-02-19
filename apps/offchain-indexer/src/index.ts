@@ -11,7 +11,7 @@ async function main() {
 
   const db = drizzle(env.DATABASE_URL, { schema });
 
-  const repository = new DrizzleRepository(db);
+  const repository = await DrizzleRepository.create(db);
   const provider = new SnapshotProvider(
     env.PROVIDER_ENDPOINT,
     env.PROVIDER_DAO_ID,
