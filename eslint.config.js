@@ -4,6 +4,8 @@ const tsparser = require("@typescript-eslint/parser");
 const eslintConfigPrettier = require("eslint-config-prettier");
 const eslintPluginPrettier = require("eslint-plugin-prettier");
 const eslintPluginImport = require("eslint-plugin-import");
+const nextPlugin = require("@next/eslint-plugin-next");
+const reactHooksPlugin = require("eslint-plugin-react-hooks");
 const globals = require("globals");
 
 module.exports = [
@@ -128,6 +130,34 @@ module.exports = [
     files: ["apps/api/src/mappers/**/*.{js,ts}"],
     rules: {
       "@typescript-eslint/no-redeclare": "off",
+    },
+  },
+
+  // Dashboard — restore next/core-web-vitals rules
+  {
+    files: ["apps/dashboard/**/*.{js,jsx,ts,tsx}"],
+    plugins: {
+      "@next/next": nextPlugin,
+      "react-hooks": reactHooksPlugin,
+    },
+    rules: {
+      ...nextPlugin.configs.recommended.rules,
+      ...nextPlugin.configs["core-web-vitals"].rules,
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "error",
+      // Custom rules from old dashboard .eslintrc.json
+      "no-restricted-imports": [
+        "warn",
+        {
+          patterns: ["../*", "./*"],
+        },
+      ],
+      "@next/next/no-html-link-for-pages": "off",
+    },
+    settings: {
+      next: {
+        rootDir: "apps/dashboard/",
+      },
     },
   },
 
