@@ -1,7 +1,22 @@
+import type { Metadata } from "next";
 import { HeaderSidebar } from "@/widgets";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
 import { Footer } from "@/shared/components/design-system/footer/Footer";
 import { TermsSection } from "@/features/terms/TermsSection";
+
+export const metadata: Metadata = {
+  title: "Anticapture - Terms of Service",
+  description: "Terms of service for Anticapture platform.",
+  openGraph: {
+    title: "Anticapture - Terms of Service",
+    description: "Terms of service for Anticapture platform.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Anticapture - Terms of Service",
+    description: "Terms of service for Anticapture platform.",
+  },
+};
 
 export default function TermsPage() {
   return (

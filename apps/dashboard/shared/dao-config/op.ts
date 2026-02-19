@@ -2,6 +2,7 @@ import { DaoConfiguration } from "@/shared/dao-config/types";
 import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { OptimismIcon } from "@/shared/components/icons";
+import { OptimismOgIcon } from "@/shared/og/dao-og-icons";
 import { optimism } from "viem/chains";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 import { OptimismChainIcon } from "@/shared/components/icons/OptimismChainIcon";
@@ -16,6 +17,7 @@ export const OP: DaoConfiguration = {
   forumLink: "https://gov.optimism.io/",
   noStage: true,
   icon: OptimismIcon,
+  ogIcon: OptimismOgIcon,
   daoOverview: {
     token: "ERC20",
     chain: { ...optimism, icon: OptimismChainIcon },
