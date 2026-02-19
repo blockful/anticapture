@@ -280,7 +280,7 @@ export const FeedEventItem = ({
 
       case FeedEventType.Delegation: {
         if (!event.metadata) return null;
-        const hasRedelegation = event.metadata.previousDelegate !== zeroAddress;
+        const hasRedelegation = event.metadata.previousDelegate !== null && event.metadata.previousDelegate !== zeroAddress;
 
         return (
           <p className="leading-relaxed">

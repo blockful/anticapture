@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
-import { Activity, Filter, Loader2 } from "lucide-react";
+import { Activity, Filter, Loader2, Newspaper } from "lucide-react";
 import { cn } from "@/shared/utils";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { Button, BlankSlate } from "@/shared/components";
@@ -14,7 +14,6 @@ import { TheSectionLayout } from "@/shared/components";
 import { SubSectionsContainer } from "@/shared/components/design-system/section";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { BulletDivider } from "@/shared/components/design-system/section";
-import { Newspaper } from "lucide-react";
 import {
   FeedEvent,
   FeedEventType,
@@ -194,11 +193,9 @@ export const ActivityFeedSection = ({
   }, [handleIntersection]);
 
   return (
-    <>
-      <TheSectionLayout
-        title={PAGES_CONSTANTS.activityFeed.title}
-        subtitle={"Activity Feed"}
-        icon={<Newspaper className="section-layout-icon" />}
+    <TheSectionLayout
+      title={PAGES_CONSTANTS.activityFeed.title}
+      icon={<Newspaper className="section-layout-icon" />}
         description={PAGES_CONSTANTS.activityFeed.description}
         headerAction={
           <Button
@@ -311,7 +308,6 @@ export const ActivityFeedSection = ({
             </div>
           )}
         </div>
-      </TheSectionLayout>
-    </>
+    </TheSectionLayout>
   );
 };

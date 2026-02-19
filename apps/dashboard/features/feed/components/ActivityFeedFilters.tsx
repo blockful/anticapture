@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Calendar, X } from "lucide-react";
 import {
   Drawer,
@@ -102,19 +102,15 @@ export const ActivityFeedFiltersDrawer = ({
     }
   };
 
-  // Sync local state when drawer opens
-  const handleDrawerOpen = () => {
-    setLocalFilters(filters);
-  };
+  useEffect(() => {
+    if (isOpen) setLocalFilters(filters);
+  }, [isOpen]);
 
   return (
     <Drawer
       open={isOpen}
       onOpenChange={handleOpenChange}
       direction={isMobile ? "bottom" : "right"}
-      onAnimationEnd={(open) => {
-        if (open) handleDrawerOpen();
-      }}
     >
       <DrawerContent className="flex h-full flex-col">
         <div className="bg-surface-default flex h-full flex-col overflow-y-auto">
