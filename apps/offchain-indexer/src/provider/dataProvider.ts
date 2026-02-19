@@ -1,5 +1,5 @@
 import type { OffchainProposal, OffchainVote } from "@/repository/schema";
-import type { DataProvider, FetchResult } from "@/provider/dataProvider.interface";
+import type { DataProvider } from "@/provider/dataProvider.interface";
 
 const PAGE_SIZE = 1000;
 
@@ -87,7 +87,7 @@ export class SnapshotProvider implements DataProvider {
     private readonly apiKey?: string,
   ) {}
 
-  async fetchProposals(cursor: string | null): Promise<FetchResult<OffchainProposal>> {
+  async fetchProposals(cursor: string | null): Promise<{ data: OffchainProposal[]; nextCursor: string | null }> {
     const cursorInt = cursor ? parseInt(cursor, 10) : 0;
 
     const response = await this.query<{ proposals: RawProposal[] }>(
@@ -120,7 +120,7 @@ export class SnapshotProvider implements DataProvider {
     return { data: proposals, nextCursor };
   }
 
-  async fetchVotes(cursor: string | null): Promise<FetchResult<OffchainVote>> {
+  async fetchVotes(cursor: string | null): Promise<{ data: OffchainVote[]; nextCursor: string | null }> {
     const cursorInt = cursor ? parseInt(cursor, 10) : 0;
 
     const response = await this.query<{ votes: RawVote[] }>(
