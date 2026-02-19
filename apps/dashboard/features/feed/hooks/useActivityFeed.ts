@@ -7,6 +7,7 @@ import {
   QueryInput_FeedEvents_OrderDirection,
   QueryInput_FeedEvents_OrderBy,
   QueryInput_FeedEvents_Relevance,
+  QueryInput_FeedEvents_Type,
   useGetFeedEventsQuery,
 } from "@anticapture/graphql-client/hooks";
 import { ActivityFeedFilters, FeedEventType } from "@/features/feed/types";
@@ -45,6 +46,7 @@ export const useActivityFeed = ({
       relevance: filters.relevance as unknown as
         | QueryInput_FeedEvents_Relevance
         | undefined,
+      type: filters.type as unknown as QueryInput_FeedEvents_Type | undefined,
       fromDate: filters.fromTimestamp,
       toDate: filters.toTimestamp,
     }),
@@ -52,6 +54,7 @@ export const useActivityFeed = ({
       limit,
       filters.sortOrder,
       filters.relevance,
+      filters.type,
       filters.fromTimestamp,
       filters.toTimestamp,
     ],

@@ -13,6 +13,7 @@ import { Input } from "@/shared/components/design-system/form/fields/input/Input
 import { useScreenSize } from "@/shared/hooks";
 import {
   FeedEventRelevance,
+  FeedEventType,
   ActivityFeedFilterState,
 } from "@/features/feed/types";
 
@@ -27,6 +28,14 @@ const relevanceOptions: { value: FeedEventRelevance; label: string }[] = [
   { value: FeedEventRelevance.Low, label: "Low" },
   { value: FeedEventRelevance.Medium, label: "Medium" },
   { value: FeedEventRelevance.High, label: "High" },
+];
+
+const typeOptions: { value: FeedEventType; label: string }[] = [
+  { value: FeedEventType.Vote, label: "Vote" },
+  { value: FeedEventType.Proposal, label: "Proposal" },
+  { value: FeedEventType.ProposalExtended, label: "Proposal Extended" },
+  { value: FeedEventType.Transfer, label: "Transfer" },
+  { value: FeedEventType.Delegation, label: "Delegation" },
 ];
 
 const SectionDivider = () => (
@@ -57,6 +66,10 @@ export const ActivityFeedFiltersDrawer = ({
     setLocalFilters((prev) => ({ ...prev, relevance }));
   };
 
+  const handleTypeChange = (type: FeedEventType | undefined) => {
+    setLocalFilters((prev) => ({ ...prev, type }));
+  };
+
   const handleFromDateChange = (value: string) => {
     setLocalFilters((prev) => ({ ...prev, fromDate: value }));
   };
@@ -74,6 +87,7 @@ export const ActivityFeedFiltersDrawer = ({
     const clearedFilters: ActivityFeedFilterState = {
       sortOrder: "desc",
       relevance: FeedEventRelevance.Medium,
+      type: undefined,
       fromDate: "",
       toDate: "",
     };
@@ -150,6 +164,30 @@ export const ActivityFeedFiltersDrawer = ({
                     checked={localFilters.relevance === value}
                     onChange={() => handleRelevanceChange(value)}
                     name="relevance"
+                  />
+                ))}
+              </div>
+            </div>
+
+            <SectionDivider />
+
+            {/* Event Type */}
+            <div className="flex flex-col gap-3">
+              <SectionLabel>Event Type</SectionLabel>
+              <div className="flex flex-col gap-3">
+                <RadioButton
+                  label="All"
+                  checked={localFilters.type === undefined}
+                  onChange={() => handleTypeChange(undefined)}
+                  name="eventType"
+                />
+                {typeOptions.map(({ value, label }) => (
+                  <RadioButton
+                    key={value}
+                    label={label}
+                    checked={localFilters.type === value}
+                    onChange={() => handleTypeChange(value)}
+                    name="eventType"
                   />
                 ))}
               </div>

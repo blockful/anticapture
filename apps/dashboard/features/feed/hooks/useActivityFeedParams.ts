@@ -5,8 +5,12 @@ import { useCallback, useMemo } from "react";
 import {
   ActivityFeedFilterState,
   FeedEventRelevance,
+  FeedEventType,
 } from "@/features/feed/types";
-import { QueryInput_FeedEvents_Relevance } from "@anticapture/graphql-client";
+import {
+  QueryInput_FeedEvents_Relevance,
+  QueryInput_FeedEvents_Type,
+} from "@anticapture/graphql-client";
 
 export interface UseActivityFeedParamsReturn {
   filters: ActivityFeedFilterState;
@@ -29,6 +33,16 @@ export function useActivityFeedParams(): UseActivityFeedParamsReturn {
   );
   const [fromDate, setFromDate] = useQueryState("from", parseAsString);
   const [toDate, setToDate] = useQueryState("to", parseAsString);
+  const [eventType, setEventType] = useQueryState(
+    "type",
+    parseAsStringEnum([
+      QueryInput_FeedEvents_Type.Vote,
+      QueryInput_FeedEvents_Type.Proposal,
+      QueryInput_FeedEvents_Type.ProposalExtended,
+      QueryInput_FeedEvents_Type.Transfer,
+      QueryInput_FeedEvents_Type.Delegation,
+    ]),
+  );
 
   const filters: ActivityFeedFilterState = useMemo(
     () => ({
@@ -36,8 +50,9 @@ export function useActivityFeedParams(): UseActivityFeedParamsReturn {
       relevance: relevance as unknown as FeedEventRelevance,
       fromDate: fromDate ?? "",
       toDate: toDate ?? "",
+      type: (eventType as unknown as FeedEventType) ?? undefined,
     }),
-    [sortOrder, relevance, fromDate, toDate],
+    [sortOrder, relevance, fromDate, toDate, eventType],
   );
 
   const setFilters = useCallback(
@@ -48,8 +63,11 @@ export function useActivityFeedParams(): UseActivityFeedParamsReturn {
       );
       setFromDate(newFilters.fromDate || null);
       setToDate(newFilters.toDate || null);
+      setEventType(
+        (newFilters.type as unknown as QueryInput_FeedEvents_Type.Vote | QueryInput_FeedEvents_Type.Proposal | QueryInput_FeedEvents_Type.ProposalExtended | QueryInput_FeedEvents_Type.Transfer | QueryInput_FeedEvents_Type.Delegation) ?? null,
+      );
     },
-    [setSortOrder, setRelevance, setFromDate, setToDate],
+    [setSortOrder, setRelevance, setFromDate, setToDate, setEventType],
   );
 
   const clearFilters = useCallback(() => {
@@ -57,7 +75,8 @@ export function useActivityFeedParams(): UseActivityFeedParamsReturn {
     setRelevance(QueryInput_FeedEvents_Relevance.Medium);
     setFromDate(null);
     setToDate(null);
-  }, [setSortOrder, setRelevance, setFromDate, setToDate]);
+    setEventType(null);
+  }, [setSortOrder, setRelevance, setFromDate, setToDate, setEventType]);
 
   return { filters, setFilters, clearFilters };
 }

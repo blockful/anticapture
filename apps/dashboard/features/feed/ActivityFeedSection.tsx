@@ -142,6 +142,7 @@ export const ActivityFeedSection = ({
       limit: 20,
       sortOrder: filters.sortOrder,
       relevance: filters.relevance,
+      type: filters.type,
       fromTimestamp,
       toTimestamp,
     },
@@ -151,7 +152,8 @@ export const ActivityFeedSection = ({
     (filters.fromDate ? 1 : 0) +
     (filters.toDate ? 1 : 0) +
     (filters.sortOrder !== "desc" ? 1 : 0) +
-    (filters.relevance !== FeedEventRelevance.Medium ? 1 : 0);
+    (filters.relevance !== FeedEventRelevance.Medium ? 1 : 0) +
+    (filters.type ? 1 : 0);
 
   // Group events by date
   const groupedEvents = useMemo(() => groupEventsByDate(events), [events]);
@@ -198,19 +200,19 @@ export const ActivityFeedSection = ({
         subtitle={"Activity Feed"}
         icon={<Newspaper className="section-layout-icon" />}
         description={PAGES_CONSTANTS.activityFeed.description}
-        // headerAction={
-        //   <Button
-        //     variant="primary"
-        //     onClick={() => setIsFilterDrawerOpen(true)}
-        //     className="shrink-0 gap-1"
-        //   >
-        //     <Filter className="size-4" />
-        //     Filters
-        //     {activeFiltersCount > 0 && (
-        //       <span className="text-inverted">({activeFiltersCount})</span>
-        //     )}
-        //   </Button>
-        // }
+        headerAction={
+          <Button
+            variant="primary"
+            onClick={() => setIsFilterDrawerOpen(true)}
+            className="shrink-0 gap-1"
+          >
+            <Filter className="size-4" />
+            Filters
+            {activeFiltersCount > 0 && (
+              <span className="text-inverted">({activeFiltersCount})</span>
+            )}
+          </Button>
+        }
       >
         {/* Filter Drawer */}
         <ActivityFeedFiltersDrawer
