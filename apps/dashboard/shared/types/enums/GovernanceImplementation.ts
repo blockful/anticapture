@@ -4,7 +4,7 @@
  */
 export enum GovernanceImplementationEnum {
   AUDITED_CONTRACTS = "Audited Contracts",
-  INTERFACE_HIJACK = "Interface Hijack",
+  INTERFACE_RESILIENCE = "Interface Resilience",
   ATTACK_PROFITABILITY = "Attack Profitability",
   PROPOSAL_FLASHLOAN_PROTECTION = "Proposal Flashloan Protection",
   PROPOSAL_THRESHOLD = "Proposal Threshold",

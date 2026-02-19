@@ -10,7 +10,10 @@ import {
 } from "@/shared/dao-config/utils";
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
+import {
+  RiskLevel,
+  GovernanceImplementationEnum,
+} from "@/shared/types/enums";
 import { Stage } from "@/shared/types/enums/Stage";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { BarChart } from "lucide-react";
@@ -36,14 +39,20 @@ export const ResilienceStagesSection = ({
 
   const allFields = fieldsToArray(daoConfig.governanceImplementation?.fields);
 
+  const visibleFields = daoConfig.attackProfitability?.supportsLiquidTreasuryCall
+    ? allFields
+    : allFields.filter(
+        (f) => f.name !== GovernanceImplementationEnum.ATTACK_PROFITABILITY,
+      );
+
   const currentDaoStage = getDaoStageFromFields({
-    fields: allFields,
+    fields: visibleFields,
     noStage: daoConfig.noStage,
   });
 
-  const highRiskFields = filterFieldsByRiskLevel(allFields, RiskLevel.HIGH);
-  const mediumRiskFields = filterFieldsByRiskLevel(allFields, RiskLevel.MEDIUM);
-  const lowRiskFields = filterFieldsByRiskLevel(allFields, RiskLevel.LOW);
+  const highRiskFields = filterFieldsByRiskLevel(visibleFields, RiskLevel.HIGH);
+  const mediumRiskFields = filterFieldsByRiskLevel(visibleFields, RiskLevel.MEDIUM);
+  const lowRiskFields = filterFieldsByRiskLevel(visibleFields, RiskLevel.LOW);
 
   // Pending fields are the ones blocking progression to the next stage
   const pendingFields =

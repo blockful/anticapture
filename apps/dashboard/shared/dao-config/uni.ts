@@ -61,18 +61,20 @@ export const UNI: DaoConfiguration = {
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.AUDITED_CONTRACTS],
         nextStep: "The parameter is in its lowest-risk condition.",
       },
-      [GovernanceImplementationEnum.INTERFACE_HIJACK]: {
+      [GovernanceImplementationEnum.INTERFACE_RESILIENCE]: {
         riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
-            GovernanceImplementationEnum.INTERFACE_HIJACK
+            GovernanceImplementationEnum.INTERFACE_RESILIENCE
           ].description,
         currentSetting:
           "The Uniswap governance interface on tally has a secure HTTPS connection and is signed with DNSSEC.",
         impact:
           "The voting interface used has certificates to guarantee its source of content. It is still vulnerable to malicious/mistakenly pushed code by the third party provider.",
         recommendedSetting:
-          RECOMMENDED_SETTINGS[GovernanceImplementationEnum.INTERFACE_HIJACK],
+          RECOMMENDED_SETTINGS[
+            GovernanceImplementationEnum.INTERFACE_RESILIENCE
+          ],
         nextStep:
           "The DAO should host an immutable interface for voting, registering it to an ENS like vote.uniswap.eth and made available through .limo, .link or similar.",
         requirements: [
@@ -158,7 +160,7 @@ export const UNI: DaoConfiguration = {
         nextStep: "-",
       },
       [GovernanceImplementationEnum.SPAM_RESISTANCE]: {
-        riskLevel: RiskLevel.HIGH,
+        riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.SPAM_RESISTANCE

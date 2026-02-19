@@ -2,6 +2,7 @@ import {
   AlertCircle,
   CheckCircle2,
   ChevronsRight,
+  HelpCircle,
   TriangleAlert,
 } from "lucide-react";
 import { ReactNode, useMemo } from "react";
@@ -28,7 +29,7 @@ export const iconsMapping = {
   [RiskLevel.LOW]: <CheckCircle2 className="text-success size-5" />,
   [RiskLevel.MEDIUM]: <AlertCircle className="text-warning size-5" />,
   [RiskLevel.HIGH]: <TriangleAlert className="text-error size-5" />,
-  [RiskLevel.NONE]: <></>,
+  [RiskLevel.NONE]: <HelpCircle className="text-secondary size-5" />,
 } as const satisfies Record<RiskLevel, ReactNode>;
 
 const normalizeToArray = (value: string | string[]): string[] =>
@@ -50,21 +51,30 @@ const MetricButton = ({
 }: {
   metric: RequirementMetric;
   onClick?: (metric: RequirementMetric) => void;
-}) => (
-  <li className="flex items-center gap-2">
-    {iconsMapping[metric.riskLevel]}
-    <button
-      onClick={() => onClick?.(metric)}
-      className={
-        "text-primary border-border-contrast hover:border-primary border-b border-dashed font-mono text-[13px] font-medium uppercase tracking-wider transition-colors"
-      }
-      aria-label={`View details for ${metric.name}`}
-      type="button"
-    >
-      {metric.name}
-    </button>
-  </li>
-);
+}) => {
+  const isUnavailable = metric.riskLevel === RiskLevel.NONE;
+  return (
+    <li className="flex items-center gap-2">
+      {iconsMapping[metric.riskLevel]}
+      {isUnavailable ? (
+        <span className="text-secondary font-mono text-[13px] font-medium uppercase tracking-wider">
+          {metric.name}
+        </span>
+      ) : (
+        <button
+          onClick={() => onClick?.(metric)}
+          className={
+            "text-primary border-border-contrast hover:border-primary border-b border-dashed font-mono text-[13px] font-medium uppercase tracking-wider transition-colors"
+          }
+          aria-label={`View details for ${metric.name}`}
+          type="button"
+        >
+          {metric.name}
+        </button>
+      )}
+    </li>
+  );
+};
 
 const RiskInfoContainer = ({
   children,
@@ -118,7 +128,9 @@ export const RiskDescription = ({
           <h2 className="text-primary font-mono text-lg font-medium">
             {title}
           </h2>
-          <RiskLevelCardSmall status={riskLevel} />
+          {riskLevel !== RiskLevel.NONE && (
+            <RiskLevelCardSmall status={riskLevel} />
+          )}
         </header>
 
         <div className={"border-border-default h-px w-full border"} />

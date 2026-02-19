@@ -65,18 +65,20 @@ export const COMP: DaoConfiguration = {
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.AUDITED_CONTRACTS],
         nextStep: "The parameter is in its lowest-risk condition.",
       },
-      [GovernanceImplementationEnum.INTERFACE_HIJACK]: {
+      [GovernanceImplementationEnum.INTERFACE_RESILIENCE]: {
         riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
-            GovernanceImplementationEnum.INTERFACE_HIJACK
+            GovernanceImplementationEnum.INTERFACE_RESILIENCE
           ].description,
         currentSetting:
           "The domain is not signed with a valid signature (DNSSEC) and it is not possible to establish a secure connection to it (HTTPS).",
         impact:
           "Without protection for its governance domains and interfaces, governance participants may be manipulated into voting for an outcome that harms the DAO.",
         recommendedSetting:
-          RECOMMENDED_SETTINGS[GovernanceImplementationEnum.INTERFACE_HIJACK],
+          RECOMMENDED_SETTINGS[
+            GovernanceImplementationEnum.INTERFACE_RESILIENCE
+          ],
         nextStep:
           "Nouns needs to enable DNSSEC and HTTPS on the domains of its governance interfaces, in order to raise its standard to Medium Risk.",
         requirements: [
@@ -192,7 +194,7 @@ export const COMP: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.TIMELOCK_DELAY
           ].description,
-        currentSetting: "The Voting Period is set to 2 days",
+        currentSetting: "The Timelock Delay is set to 2 days",
         impact:
           "There is a protected delay between proposal approval and execution.",
         recommendedSetting:
@@ -237,7 +239,7 @@ export const COMP: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_DELAY
           ].description,
-        currentSetting: "The Voting Period is set to 1 day and 19 hours",
+        currentSetting: "The Voting Delay is set to 1 day and 19 hours",
         impact:
           "The Voting Delay period can be longer. This gives delegates and stakeholders little time to coordinate their votes and for the DAO to protect itself against an attack. This poses a governance risk.",
         recommendedSetting:
@@ -274,7 +276,8 @@ export const COMP: DaoConfiguration = {
           "The Voting Period can be longer. A short voting period makes it harder for stakeholders to coordinate and vote against a malicious proposal submitted to the DAO.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.VOTING_PERIOD],
-        nextStep: "The Voting Period should be at least two days.",
+        nextStep:
+          "The Voting Period should be equal to or greater than 7 days.",
         requirements: [
           "The Voting Period must have, at least, 3 days to be classified as Medium Risk.",
         ],
@@ -291,6 +294,22 @@ export const COMP: DaoConfiguration = {
           "By subsidizing governance participants' voting costs, there is greater participation and stronger incentives for delegates to protect the DAO, since they do not incur gas fees to vote.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.VOTING_SUBSIDY],
+        nextStep: "The parameter is in its lowest-risk condition.",
+      },
+      [GovernanceImplementationEnum.PROPOSER_BALANCE_CANCEL]: {
+        riskLevel: RiskLevel.LOW,
+        description:
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.PROPOSER_BALANCE_CANCEL
+          ].description,
+        currentSetting:
+          "There is no ability to cancel a proposal if the proposer’s balance falls below the Proposal Threshold after submitting it.",
+        impact:
+          "An attacker can buy tokens to submit a proposal in the DAO, vote with them, and sell during the voting period. There is nothing in Compound governance that protects against this or prevents the attacker from doing so.",
+        recommendedSetting:
+          RECOMMENDED_SETTINGS[
+            GovernanceImplementationEnum.PROPOSER_BALANCE_CANCEL
+          ],
         nextStep: "The parameter is in its lowest-risk condition.",
       },
     },

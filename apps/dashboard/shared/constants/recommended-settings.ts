@@ -50,7 +50,7 @@ export const RECOMMENDED_SETTINGS: Record<
   [GovernanceImplementationEnum.AUDITED_CONTRACTS]:
     "All governance contracts should be audited by reputable security firms and audit reports should be publicly available.",
 
-  [GovernanceImplementationEnum.INTERFACE_HIJACK]:
+  [GovernanceImplementationEnum.INTERFACE_RESILIENCE]:
     "The domain should be protected with standard security certificates, made public by its provider. Ideal security here includes a verified front-end, deployed in a immutable manner, linked to an ENS record by the DAO in a domain like vote.DAO.eth and made available through .limo or .link or equivalent.",
 
   [GovernanceImplementationEnum.ATTACK_PROFITABILITY]:

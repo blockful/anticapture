@@ -1,10 +1,9 @@
 "use client";
 
 import { ReactNode } from "react";
-import { AlertTriangle, AlertCircle, CheckCircle2 } from "lucide-react";
+import { AlertTriangle, AlertCircle, CheckCircle2, HelpCircle } from "lucide-react";
 import { cn } from "@/shared/utils/";
 import { RiskLevel } from "@/shared/types/enums/RiskLevel";
-import { CounterClockwiseClockIcon } from "@radix-ui/react-icons";
 import { BadgeStatus } from "../design-system/badges/BadgeStatus";
 
 type RiskConfig = {
@@ -36,7 +35,7 @@ const riskConfigs: Record<RiskLevel, RiskConfig> = {
       "bg-surface-contrast",
       "bg-surface-contrast",
     ],
-    icon: <CounterClockwiseClockIcon className="text-secondary size-3.5" />,
+    icon: <HelpCircle className="text-secondary size-3.5" />,
   },
 };
 

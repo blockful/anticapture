@@ -64,18 +64,20 @@ export const GTC: DaoConfiguration = {
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.AUDITED_CONTRACTS],
         nextStep: "The parameter is in its lowest-risk condition.",
       },
-      [GovernanceImplementationEnum.INTERFACE_HIJACK]: {
+      [GovernanceImplementationEnum.INTERFACE_RESILIENCE]: {
         riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
-            GovernanceImplementationEnum.INTERFACE_HIJACK
+            GovernanceImplementationEnum.INTERFACE_RESILIENCE
           ].description,
         currentSetting:
           "The governance interfaces and domain of the Optimism DAO do not have DNS protection, leaving voters vulnerable to spoofing and hijacking attacks.",
         impact:
           "Without protection for its governance domains and interfaces, governance participants may be manipulated into voting for an outcome that harms the DAO.",
         recommendedSetting:
-          RECOMMENDED_SETTINGS[GovernanceImplementationEnum.INTERFACE_HIJACK],
+          RECOMMENDED_SETTINGS[
+            GovernanceImplementationEnum.INTERFACE_RESILIENCE
+          ],
         nextStep:
           "Gitcoin needs to enable DNSSEC and HTTPS on the domains of its governance interfaces, in order to raise its standard to Medium Risk.",
         requirements: [
@@ -133,20 +135,8 @@ export const GTC: DaoConfiguration = {
           "With the current Proposal Threshold, the cost of submitting a proposal to the DAO makes spam attacks more difficult for attackers.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.PROPOSAL_THRESHOLD],
-        nextStep: "To be defined",
-      },
-      [GovernanceImplementationEnum.SECURITY_COUNCIL]: {
-        riskLevel: RiskLevel.NONE,
-        description:
-          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
-            GovernanceImplementationEnum.SECURITY_COUNCIL
-          ].description,
-        currentSetting: "Gitcoin does not have a Security Council.",
-        impact:
-          "The DAO doesn't have a veto strategy or Security Council. In this case, the only way to protect from malicious proposals is through mass defense at the voting stage.",
-        recommendedSetting:
-          RECOMMENDED_SETTINGS[GovernanceImplementationEnum.SECURITY_COUNCIL],
-        nextStep: "A Security Council should be created as a Veto Strategy.",
+        nextStep:
+          "The Proposal Threshold should be increased so that it is higher than 1% of the market supply, in order to raise the cost of submitting proposals in governance and reduce the likelihood of spam.",
       },
       [GovernanceImplementationEnum.SPAM_RESISTANCE]: {
         riskLevel: RiskLevel.HIGH,

@@ -5,7 +5,7 @@ export const GOVERNANCE_IMPLEMENTATION_CONSTANTS = {
     description:
       "The governance contract codes have been audited and approved by a security provider.",
   },
-  [GovernanceImplementationEnum.INTERFACE_HIJACK]: {
+  [GovernanceImplementationEnum.INTERFACE_RESILIENCE]: {
     description:
       "Protection against Domain Name Service attacks on the domains/websites used by the DAO.",
   },

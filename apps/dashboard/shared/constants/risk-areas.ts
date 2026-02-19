@@ -87,7 +87,7 @@ export const RISK_AREAS: Record<RiskAreaEnum, RiskAreaConstants> = {
     description:
       "Protects the governance interface from being compromised, hijacked, or manipulated to mislead voters.",
     requirements: [
-      GovernanceImplementationEnum.INTERFACE_HIJACK,
+      GovernanceImplementationEnum.INTERFACE_RESILIENCE,
       GovernanceImplementationEnum.VOTE_MUTABILITY,
       GovernanceImplementationEnum.VETO_STRATEGY,
     ],

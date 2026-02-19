@@ -28,14 +28,14 @@ export default async function DaoLayout({ children, params }: DaoLayoutProps) {
   return (
     <div className="bg-surface-background dark relative mx-auto flex h-screen max-w-screen-2xl">
       <div className="active relative hidden h-screen lg:flex">
-        <div className="h-full w-[68px] shrink-0 overflow-y-auto">
+        <div className="w-17 h-full shrink-0 overflow-y-auto">
           <HeaderSidebar />
         </div>
         <div className="h-full shrink-0">
           <HeaderDAOSidebar />
         </div>
       </div>
-      <main className="h-screen flex-1 overflow-auto lg:overflow-hidden">
+      <main className="h-screen flex-1 overflow-auto">
         <div className="lg:hidden">
           <HeaderMobile />
           <StickyPageHeader />

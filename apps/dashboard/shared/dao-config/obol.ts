@@ -67,18 +67,20 @@ export const OBOL: DaoConfiguration = {
           "Governance contracts must be audited by a reputable third-party security firm and the audit report should be publicly available.",
         ],
       },
-      [GovernanceImplementationEnum.INTERFACE_HIJACK]: {
+      [GovernanceImplementationEnum.INTERFACE_RESILIENCE]: {
         riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
-            GovernanceImplementationEnum.INTERFACE_HIJACK
+            GovernanceImplementationEnum.INTERFACE_RESILIENCE
           ].description,
         currentSetting:
           "The governance interfaces and domain of the Obol do not have DNS protection, leaving voters vulnerable to spoofing and hijacking attacks.",
         impact:
           "Without protection for its governance domains and interfaces, governance participants may be manipulated into voting for an outcome that harms the DAO.",
         recommendedSetting:
-          RECOMMENDED_SETTINGS[GovernanceImplementationEnum.INTERFACE_HIJACK],
+          RECOMMENDED_SETTINGS[
+            GovernanceImplementationEnum.INTERFACE_RESILIENCE
+          ],
         nextStep:
           "Obol needs to enable DNSSEC and HTTPS on the domains of its governance interfaces, in order to raise its standard to Medium Risk.",
         requirements: [

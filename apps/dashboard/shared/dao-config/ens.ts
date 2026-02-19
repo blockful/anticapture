@@ -86,18 +86,20 @@ export const ENS: DaoConfiguration = {
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.AUDITED_CONTRACTS],
         nextStep: "The parameter is in its lowest-risk condition.",
       },
-      [GovernanceImplementationEnum.INTERFACE_HIJACK]: {
+      [GovernanceImplementationEnum.INTERFACE_RESILIENCE]: {
         riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
-            GovernanceImplementationEnum.INTERFACE_HIJACK
+            GovernanceImplementationEnum.INTERFACE_RESILIENCE
           ].description,
         currentSetting:
           "The ENS governance interface has a secure HTTPS connection and is signed with DNSSEC.",
         impact:
           "The governance interface domain shows the basic security certificates, but without immutable decentralized storage it is not censorship-resistant or verifiable.",
         recommendedSetting:
-          RECOMMENDED_SETTINGS[GovernanceImplementationEnum.INTERFACE_HIJACK],
+          RECOMMENDED_SETTINGS[
+            GovernanceImplementationEnum.INTERFACE_RESILIENCE
+          ],
         nextStep:
           "The ENS governance interface domain should be hosted on IPFS.",
       },
