@@ -45,15 +45,3 @@ export function getDb() {
   return db;
 }
 
-/**
- * Close the database connection
- */
-export async function closeDb() {
-  if (pool) {
-    await pool.end();
-    pool = null;
-    db = null;
-  }
-}
-
-export { schema };
