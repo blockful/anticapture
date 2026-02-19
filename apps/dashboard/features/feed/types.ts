@@ -57,7 +57,7 @@ type FeedEventBase = {
   relevance: Query_FeedEvents_Items_Items_Relevance;
   timestamp: number;
   txHash: string;
-  value: string;
+  value?: string | null;
 };
 
 export type FeedEvent =

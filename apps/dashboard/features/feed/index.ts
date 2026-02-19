@@ -8,7 +8,6 @@ export type {
   ProposalDetail,
   TransferDetail,
   DelegationDetail,
-  FeedEventListResponse,
   ActivityFeedFilters,
   ActivityFeedFilterState,
 } from "./types";

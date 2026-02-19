@@ -232,7 +232,7 @@ export const ActivityFeedSection = ({
                   Failed to load activity feed
                 </p>
                 <button
-                  onClick={refetch}
+                  onClick={() => refetch()}
                   className="text-link hover:text-link-hover text-sm underline"
                 >
                   Try again
