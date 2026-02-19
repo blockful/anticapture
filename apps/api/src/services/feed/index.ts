@@ -27,6 +27,7 @@ export class FeedService {
         ...item,
         value: item.value.toString(),
         relevance: this.getItemRelevance(item),
+        type: item.type as FeedEventType,
       })),
       totalCount: response.totalCount,
     };
