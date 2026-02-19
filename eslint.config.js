@@ -6,6 +6,7 @@ const eslintPluginPrettier = require("eslint-plugin-prettier");
 const eslintPluginImport = require("eslint-plugin-import");
 const nextPlugin = require("@next/eslint-plugin-next");
 const reactHooksPlugin = require("eslint-plugin-react-hooks");
+const storybookPlugin = require("eslint-plugin-storybook");
 const globals = require("globals");
 
 module.exports = [
@@ -132,6 +133,9 @@ module.exports = [
       "@typescript-eslint/no-redeclare": "off",
     },
   },
+
+  // Dashboard — Storybook rules for story files
+  ...storybookPlugin.configs["flat/recommended"],
 
   // Dashboard — restore next/core-web-vitals rules
   {
