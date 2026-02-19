@@ -1,16 +1,26 @@
 import { DBDelegation } from "@/mappers";
-import { desc, eq } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 import { Drizzle } from "@/database";
 import { delegation } from "@/database";
 import { Address } from "viem";
+import { DelegationsRequestQuery } from "@/mappers";
 
 export class DelegationsRepository {
   constructor(private readonly db: Drizzle) {}
 
-  async getDelegations(address: Address): Promise<DBDelegation[]> {
+  async getDelegations(
+    address: Address,
+    sort: DelegationsRequestQuery,
+  ): Promise<DBDelegation[]> {
+    const direction = sort.orderDirection === "asc" ? asc : desc;
+    const column =
+      sort.orderBy === "amount"
+        ? delegation.delegatedValue
+        : delegation.timestamp;
+
     const result = await this.db.query.delegation.findMany({
       where: eq(delegation.delegateAccountId, address),
-      orderBy: [desc(delegation.timestamp), desc(delegation.logIndex)],
+      orderBy: [direction(column), desc(delegation.logIndex)],
     });
 
     return result;
