@@ -12,12 +12,9 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
-  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
-  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
-  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
 };
 
@@ -1163,7 +1160,7 @@ export type Query_FeedEvents_Items_Items = {
   timestamp: Scalars['Float']['output'];
   txHash: Scalars['String']['output'];
   type: Query_FeedEvents_Items_Items_Type;
-  value: Scalars['String']['output'];
+  value?: Maybe<Scalars['String']['output']>;
 };
 
 export enum Query_FeedEvents_Items_Items_Relevance {
@@ -1574,22 +1571,6 @@ export type VotingPowers_200_Response = {
   totalCount: Scalars['Float']['output'];
 };
 
-<<<<<<< Updated upstream
-=======
-export type MyQueryQueryVariables = Exact<{
-  fromDate?: InputMaybe<Scalars['Float']['input']>;
-  limit?: InputMaybe<Scalars['Float']['input']>;
-  orderDirection?: InputMaybe<QueryInput_FeedEvents_OrderDirection>;
-  relevance?: InputMaybe<QueryInput_FeedEvents_Relevance>;
-  skip?: InputMaybe<Scalars['Float']['input']>;
-  toDate?: InputMaybe<Scalars['Float']['input']>;
-  type?: InputMaybe<QueryInput_FeedEvents_Type>;
-}>;
-
-
-export type MyQueryQuery = { __typename?: 'Query', feedEvents?: { __typename?: 'feedEvents_200_response', totalCount: number, items: Array<{ __typename?: 'query_feedEvents_items_items', logIndex: number, relevance: Query_FeedEvents_Items_Items_Relevance, metadata?: any | null, timestamp: number, txHash: string, type: Query_FeedEvents_Items_Items_Type, value: string } | null> } | null };
-
->>>>>>> Stashed changes
 export type BalanceHistoryQueryVariables = Exact<{
   address: Scalars['String']['input'];
   offset?: InputMaybe<Scalars['Float']['input']>;
@@ -1746,7 +1727,7 @@ export type GetFeedEventsQueryVariables = Exact<{
 }>;
 
 
-export type GetFeedEventsQuery = { __typename?: 'Query', feedEvents?: { __typename?: 'feedEvents_200_response', totalCount: number, items: Array<{ __typename?: 'query_feedEvents_items_items', txHash: string, logIndex: number, type: Query_FeedEvents_Items_Items_Type, value: string, timestamp: number, relevance: Query_FeedEvents_Items_Items_Relevance, metadata?: any | null } | null> } | null };
+export type GetFeedEventsQuery = { __typename?: 'Query', feedEvents?: { __typename?: 'feedEvents_200_response', totalCount: number, items: Array<{ __typename?: 'query_feedEvents_items_items', txHash: string, logIndex: number, type: Query_FeedEvents_Items_Items_Type, value?: string | null, timestamp: number, relevance: Query_FeedEvents_Items_Items_Relevance, metadata?: any | null } | null> } | null };
 
 export type GetProposalsFromDaoQueryVariables = Exact<{
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
