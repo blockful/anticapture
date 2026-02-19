@@ -1,5 +1,6 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
+import { execSync } from "child_process";
 import * as schema from "./schema";
 
 let db: ReturnType<typeof drizzle<typeof schema>> | null = null;
@@ -20,6 +21,17 @@ export function initDb(connectionString: string) {
 
   db = drizzle(pool, { schema });
   return db;
+}
+
+/**
+ * Push schema to the database (like drizzle-kit push)
+ */
+export function runMigrations(connectionString: string) {
+  initDb(connectionString);
+  execSync("drizzle-kit push --force", {
+    env: { ...process.env, DATABASE_URL: connectionString },
+    stdio: "inherit",
+  });
 }
 
 /**

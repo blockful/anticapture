@@ -5,14 +5,11 @@ import { logger } from "hono/logger";
 import { cors } from "hono/cors";
 
 import { env } from "@/env";
-import { initDb } from "@/db";
+import { runMigrations } from "@/db";
 import { ArkhamClient } from "@/clients/arkham";
 import { ENSClient } from "@/clients/ens";
 import { EnrichmentService } from "@/services/enrichment";
 import { addressController } from "@/controllers/address";
-
-// Initialize database
-initDb(env.DATABASE_URL);
 
 // Initialize clients and services
 const arkhamClient = new ArkhamClient(env.ARKHAM_API_URL, env.ARKHAM_API_KEY);
@@ -56,7 +53,8 @@ app.doc("/docs/json", {
 
 app.get("/docs", swaggerUI({ url: "/docs/json" }));
 
-// Start server
+// Run migrations then start server
+runMigrations(env.DATABASE_URL);
 console.log(`🚀 Address Enrichment API starting on port ${env.PORT}`);
 serve({
   fetch: app.fetch,

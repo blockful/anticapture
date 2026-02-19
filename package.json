@@ -8,7 +8,7 @@
     "gateway": "dotenv -- pnpm run --filter=@anticapture/api-gateway",
     "api": "dotenv -- pnpm run --filter=@anticapture/api",
     "client": "dotenv -- pnpm run --filter=@anticapture/graphql-client",
-    "address-enrichment": "dotenv -- pnpm run --filter=@anticapture/address-enrichment",
+    "address": "dotenv -- pnpm run --filter=@anticapture/address-enrichment",
     "clean": "turbo clean && rm -rf node_modules .turbo .parcel-cache coverage *.log *.tsbuildinfo",
     "lint": "turbo lint",
     "lint:fix": "turbo lint:fix",
