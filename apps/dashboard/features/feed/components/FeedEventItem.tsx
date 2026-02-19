@@ -181,8 +181,9 @@ export const FeedEventItem = ({
               }
               className="text-primary font-medium transition-colors"
             >
-              {event.metadata.proposalId.slice(0, 6)}...
-              {event.metadata.proposalId.slice(-4)}
+              {event.metadata.proposalId.length > 10
+                ? `${event.metadata.proposalId.slice(0, 6)}...${event.metadata.proposalId.slice(-4)}`
+                : event.metadata.proposalId}
             </Link>{" "}
             <a
               href={explorerUrl}
@@ -280,7 +281,9 @@ export const FeedEventItem = ({
 
       case FeedEventType.Delegation: {
         if (!event.metadata) return null;
-        const hasRedelegation = event.metadata.previousDelegate !== null && event.metadata.previousDelegate !== zeroAddress;
+        const hasRedelegation =
+          event.metadata.previousDelegate !== null &&
+          event.metadata.previousDelegate !== zeroAddress;
 
         return (
           <p className="leading-relaxed">
