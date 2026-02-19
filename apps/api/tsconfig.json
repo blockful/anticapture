@@ -8,7 +8,7 @@
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "module": "ESNext",
-    "lib": ["ES2022"],
+    "lib": ["ES2022", "DOM"],
     "target": "ES2022",
     "skipLibCheck": true,
     "baseUrl": ".",
@@ -16,7 +16,8 @@
       "@/*": ["./src/*"]
     },
     "outDir": "./dist",
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "types": ["vitest/globals"]
   },
   "include": ["./**/*.ts"],
   "exclude": ["node_modules", "test"]

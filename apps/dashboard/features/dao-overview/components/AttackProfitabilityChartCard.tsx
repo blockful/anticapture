@@ -24,7 +24,8 @@ export const AttackProfitabilityChartCard = ({ daoId }: Props) => {
   const featureNotIncluded =
     !daoConfig[daoId].attackProfitability?.supportsLiquidTreasuryCall;
 
-  const controlledByMultisig = daoId === DaoIdEnum.OPTIMISM;
+  const controlledByMultisig = false;
+  // const controlledByMultisig = daoId === DaoIdEnum.OPTIMISM;
 
   const emptyState = controlledByMultisig
     ? {

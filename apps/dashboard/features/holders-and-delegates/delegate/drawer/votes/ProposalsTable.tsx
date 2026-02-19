@@ -84,7 +84,7 @@ export const ProposalsTable = ({
       const finalResult =
         proposalsFinalResultMapping[
           item.proposal.status as keyof typeof proposalsFinalResultMapping
-        ];
+        ] ?? proposalsFinalResultMapping.unknown;
 
       const userVote = getUserVoteData(
         item.userVote?.support,
