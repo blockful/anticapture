@@ -1,5 +1,5 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
-import { isAddress } from "viem";
+import { getAddress, isAddress } from "viem";
 
 import { EnrichmentService } from "@/services/enrichment";
 
@@ -167,7 +167,7 @@ export function addressController(app: Hono, service: EnrichmentService) {
 
       // Deduplicate addresses
       const uniqueAddresses = [
-        ...new Set(addresses.map((a) => a.toLowerCase())),
+        ...new Set(addresses.map((a) => getAddress(a))),
       ];
 
       const results: z.infer<typeof EnrichmentResponseSchema>[] = [];

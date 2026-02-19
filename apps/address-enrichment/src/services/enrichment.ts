@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import type { Address } from "viem";
+import { getAddress, type Address } from "viem";
 
 import { getDb, addressEnrichment } from "@/db";
 import type { AddressEnrichment } from "@/db/schema";
@@ -48,7 +48,7 @@ export class EnrichmentService {
    * - ENS data is cached with a configurable TTL and refetched when stale.
    */
   async getAddressEnrichment(address: string): Promise<EnrichmentResult> {
-    const normalizedAddress = address.toLowerCase() as Address;
+    const normalizedAddress = getAddress(address);
     const db = getDb();
 
     // Check if address exists in database

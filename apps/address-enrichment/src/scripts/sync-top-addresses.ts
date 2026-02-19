@@ -8,7 +8,7 @@
  */
 
 import { eq } from "drizzle-orm";
-import type { Address } from "viem";
+import { getAddress, type Address } from "viem";
 
 import { initDb, getDb, addressEnrichment } from "@/db";
 import { ArkhamClient } from "@/clients/arkham";
@@ -89,7 +89,7 @@ async function enrichAddress(
   rpcClient: ReturnType<typeof createRpcClient>,
   db: ReturnType<typeof getDb>,
 ): Promise<EnrichResult> {
-  const normalizedAddress = address.toLowerCase();
+  const normalizedAddress = getAddress(address);
 
   // Check if already exists
   const existing = await db.query.addressEnrichment.findFirst({
@@ -167,7 +167,7 @@ const processAndEnrichDelegates = async (
   try {
     for await (const d of anticaptureClient.streamTopDelegates(daoId)) {
       processedCount++;
-      const addr = d.accountId.toLowerCase();
+      const addr = getAddress(d.accountId);
       const progress = `[${daoId} delegate ${processedCount}]`;
       const roleStr = `(delegate)`;
 
@@ -226,7 +226,7 @@ const processAndEnrichHolders = async (
   try {
     for await (const h of anticaptureClient.streamTopTokenHolders(daoId)) {
       processedCount++;
-      const addr = h.address.toLowerCase();
+      const addr = getAddress(h.address);
       const progress = `[${daoId} holder ${processedCount}]`;
       const roleStr = `(holder)`;
 
