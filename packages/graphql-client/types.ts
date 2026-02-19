@@ -112,6 +112,8 @@ export type Query = {
   delegationPercentageByDay?: Maybe<DelegationPercentageByDay_200_Response>;
   /** Get current delegators of an account */
   delegations?: Maybe<Delegations_200_Response>;
+  /** Get feed events */
+  feedEvents?: Maybe<FeedEvents_200_Response>;
   /** Get historical DAO Token Treasury value (governance token quantity × token price) */
   getDaoTokenTreasury?: Maybe<GetDaoTokenTreasury_200_Response>;
   /** Get historical Liquid Treasury (treasury without DAO tokens) from external providers (DefiLlama/Dune) */
@@ -285,6 +287,18 @@ export type QueryDelegationPercentageByDayArgs = {
 
 export type QueryDelegationsArgs = {
   address: Scalars['String']['input'];
+};
+
+
+export type QueryFeedEventsArgs = {
+  fromDate?: InputMaybe<Scalars['Float']['input']>;
+  limit?: InputMaybe<Scalars['Float']['input']>;
+  orderBy?: InputMaybe<QueryInput_FeedEvents_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_FeedEvents_OrderDirection>;
+  relevance?: InputMaybe<QueryInput_FeedEvents_Relevance>;
+  skip?: InputMaybe<Scalars['Float']['input']>;
+  toDate?: InputMaybe<Scalars['Float']['input']>;
+  type?: InputMaybe<QueryInput_FeedEvents_Type>;
 };
 
 
@@ -638,6 +652,12 @@ export type Delegations_200_Response = {
   totalCount: Scalars['Float']['output'];
 };
 
+export type FeedEvents_200_Response = {
+  __typename?: 'feedEvents_200_response';
+  items: Array<Maybe<Query_FeedEvents_Items_Items>>;
+  totalCount: Scalars['Float']['output'];
+};
+
 export type GetDaoTokenTreasury_200_Response = {
   __typename?: 'getDaoTokenTreasury_200_response';
   items: Array<Maybe<Query_GetDaoTokenTreasury_Items_Items>>;
@@ -847,6 +867,31 @@ export enum QueryInput_CompareVotes_Days {
 export enum QueryInput_DelegationPercentageByDay_OrderDirection {
   Asc = 'asc',
   Desc = 'desc'
+}
+
+export enum QueryInput_FeedEvents_OrderBy {
+  Timestamp = 'timestamp',
+  Value = 'value'
+}
+
+export enum QueryInput_FeedEvents_OrderDirection {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
+export enum QueryInput_FeedEvents_Relevance {
+  High = 'HIGH',
+  Low = 'LOW',
+  Medium = 'MEDIUM'
+}
+
+export enum QueryInput_FeedEvents_Type {
+  Delegation = 'DELEGATION',
+  DelegationVotesChanged = 'DELEGATION_VOTES_CHANGED',
+  Proposal = 'PROPOSAL',
+  ProposalExtended = 'PROPOSAL_EXTENDED',
+  Transfer = 'TRANSFER',
+  Vote = 'VOTE'
 }
 
 export enum QueryInput_GetDaoTokenTreasury_Days {
@@ -1106,6 +1151,32 @@ export type Query_Delegations_Items_Items = {
   timestamp: Scalars['String']['output'];
   transactionHash: Scalars['String']['output'];
 };
+
+export type Query_FeedEvents_Items_Items = {
+  __typename?: 'query_feedEvents_items_items';
+  logIndex: Scalars['Float']['output'];
+  metadata?: Maybe<Scalars['JSON']['output']>;
+  relevance: Query_FeedEvents_Items_Items_Relevance;
+  timestamp: Scalars['Float']['output'];
+  txHash: Scalars['String']['output'];
+  type: Query_FeedEvents_Items_Items_Type;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+export enum Query_FeedEvents_Items_Items_Relevance {
+  High = 'HIGH',
+  Low = 'LOW',
+  Medium = 'MEDIUM'
+}
+
+export enum Query_FeedEvents_Items_Items_Type {
+  Delegation = 'DELEGATION',
+  DelegationVotesChanged = 'DELEGATION_VOTES_CHANGED',
+  Proposal = 'PROPOSAL',
+  ProposalExtended = 'PROPOSAL_EXTENDED',
+  Transfer = 'TRANSFER',
+  Vote = 'VOTE'
+}
 
 export type Query_GetDaoTokenTreasury_Items_Items = {
   __typename?: 'query_getDaoTokenTreasury_items_items';
@@ -1643,6 +1714,20 @@ export type GetDelegateProposalsActivityQueryVariables = Exact<{
 
 
 export type GetDelegateProposalsActivityQuery = { __typename?: 'Query', proposalsActivity?: { __typename?: 'proposalsActivity_200_response', address: string, totalProposals: number, votedProposals: number, neverVoted: boolean, avgTimeBeforeEnd: number } | null };
+
+export type GetFeedEventsQueryVariables = Exact<{
+  skip?: InputMaybe<Scalars['Float']['input']>;
+  limit?: InputMaybe<Scalars['Float']['input']>;
+  orderBy?: InputMaybe<QueryInput_FeedEvents_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_FeedEvents_OrderDirection>;
+  relevance?: InputMaybe<QueryInput_FeedEvents_Relevance>;
+  type?: InputMaybe<QueryInput_FeedEvents_Type>;
+  fromDate?: InputMaybe<Scalars['Float']['input']>;
+  toDate?: InputMaybe<Scalars['Float']['input']>;
+}>;
+
+
+export type GetFeedEventsQuery = { __typename?: 'Query', feedEvents?: { __typename?: 'feedEvents_200_response', totalCount: number, items: Array<{ __typename?: 'query_feedEvents_items_items', txHash: string, logIndex: number, type: Query_FeedEvents_Items_Items_Type, value?: string | null, timestamp: number, relevance: Query_FeedEvents_Items_Items_Relevance, metadata?: any | null } | null> } | null };
 
 export type GetProposalsFromDaoQueryVariables = Exact<{
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
