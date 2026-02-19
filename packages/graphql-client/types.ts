@@ -1571,6 +1571,19 @@ export type VotingPowers_200_Response = {
   totalCount: Scalars['Float']['output'];
 };
 
+export type MyQueryQueryVariables = Exact<{
+  fromDate?: InputMaybe<Scalars['Float']['input']>;
+  limit?: InputMaybe<Scalars['Float']['input']>;
+  orderDirection?: InputMaybe<QueryInput_FeedEvents_OrderDirection>;
+  relevance?: InputMaybe<QueryInput_FeedEvents_Relevance>;
+  skip?: InputMaybe<Scalars['Float']['input']>;
+  toDate?: InputMaybe<Scalars['Float']['input']>;
+  type?: InputMaybe<QueryInput_FeedEvents_Type>;
+}>;
+
+
+export type MyQueryQuery = { __typename?: 'Query', feedEvents?: { __typename?: 'feedEvents_200_response', totalCount: number, items: Array<{ __typename?: 'query_feedEvents_items_items', logIndex: number, relevance: Query_FeedEvents_Items_Items_Relevance, metadata?: any | null, timestamp: number, txHash: string, type: Query_FeedEvents_Items_Items_Type, value?: string | null } | null> } | null };
+
 export type BalanceHistoryQueryVariables = Exact<{
   address: Scalars['String']['input'];
   offset?: InputMaybe<Scalars['Float']['input']>;
