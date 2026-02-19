@@ -3,6 +3,7 @@ import { DaoConfiguration } from "@/shared/dao-config/types";
 import { GovernanceImplementationEnum } from "@/shared/types/enums/GovernanceImplementation";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { UniswapIcon } from "@/shared/components/icons";
+import { UniswapOgIcon } from "@/shared/og/dao-og-icons";
 import { mainnet } from "viem/chains";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
@@ -16,6 +17,7 @@ export const UNI: DaoConfiguration = {
   },
   forumLink: "https://gov.uniswap.org/",
   icon: UniswapIcon,
+  ogIcon: UniswapOgIcon,
   daoOverview: {
     token: "ERC20",
     chain: { ...mainnet, icon: MainnetIcon },
