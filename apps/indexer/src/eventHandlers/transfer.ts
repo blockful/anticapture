@@ -124,10 +124,10 @@ export const tokenTransfer = async (
       .onConflictDoNothing();
   }
 
-  const normalizedCex = cex.map(getAddress);
-  const normalizedDex = dex.map(getAddress);
-  const normalizedLending = lending.map(getAddress);
-  const normalizedBurning = burning.map(getAddress);
+  const normalizedCex = cex.map((a) => getAddress(a));
+  const normalizedDex = dex.map((a) => getAddress(a));
+  const normalizedLending = lending.map((a) => getAddress(a));
+  const normalizedBurning = burning.map((a) => getAddress(a));
 
   await context.db
     .insert(transfer)
@@ -167,6 +167,7 @@ export const tokenTransfer = async (
     metadata: {
       from: normalizedFrom,
       to: normalizedTo,
+      amount: value,
     },
   });
 };

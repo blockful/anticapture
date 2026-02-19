@@ -1165,7 +1165,7 @@ export type Query_FeedEvents_Items_Items = {
   relevance: Query_FeedEvents_Items_Items_Relevance;
   timestamp: Scalars['Float']['output'];
   txHash: Scalars['String']['output'];
-  type: Scalars['String']['output'];
+  type: Query_FeedEvents_Items_Items_Type;
   value: Scalars['String']['output'];
 };
 
@@ -1173,6 +1173,15 @@ export enum Query_FeedEvents_Items_Items_Relevance {
   High = 'HIGH',
   Low = 'LOW',
   Medium = 'MEDIUM'
+}
+
+export enum Query_FeedEvents_Items_Items_Type {
+  Delegation = 'DELEGATION',
+  DelegationVotesChanged = 'DELEGATION_VOTES_CHANGED',
+  Proposal = 'PROPOSAL',
+  ProposalExtended = 'PROPOSAL_EXTENDED',
+  Transfer = 'TRANSFER',
+  Vote = 'VOTE'
 }
 
 export type Query_GetDaoTokenTreasury_Items_Items = {
@@ -1581,6 +1590,19 @@ export type MyQueryQueryVariables = Exact<{
 
 export type MyQueryQuery = { __typename?: 'Query', feedEvents?: { __typename?: 'feedEvents_200_response', totalCount: number, items: Array<{ __typename?: 'query_feedEvents_items_items', logIndex: number, relevance: Query_FeedEvents_Items_Items_Relevance, metadata?: any | null, timestamp: number, txHash: string, type: string, value: string } | null> } | null };
 
+export type MyQueryQueryVariables = Exact<{
+  fromDate?: InputMaybe<Scalars['Float']['input']>;
+  limit?: InputMaybe<Scalars['Float']['input']>;
+  orderDirection?: InputMaybe<QueryInput_FeedEvents_OrderDirection>;
+  relevance?: InputMaybe<QueryInput_FeedEvents_Relevance>;
+  skip?: InputMaybe<Scalars['Float']['input']>;
+  toDate?: InputMaybe<Scalars['Float']['input']>;
+  type?: InputMaybe<QueryInput_FeedEvents_Type>;
+}>;
+
+
+export type MyQueryQuery = { __typename?: 'Query', feedEvents?: { __typename?: 'feedEvents_200_response', totalCount: number, items: Array<{ __typename?: 'query_feedEvents_items_items', logIndex: number, relevance: Query_FeedEvents_Items_Items_Relevance, metadata?: any | null, timestamp: number, txHash: string, type: Query_FeedEvents_Items_Items_Type, value: string } | null> } | null };
+
 export type BalanceHistoryQueryVariables = Exact<{
   address: Scalars['String']['input'];
   offset?: InputMaybe<Scalars['Float']['input']>;
@@ -1737,7 +1759,7 @@ export type GetFeedEventsQueryVariables = Exact<{
 }>;
 
 
-export type GetFeedEventsQuery = { __typename?: 'Query', feedEvents?: { __typename?: 'feedEvents_200_response', totalCount: number, items: Array<{ __typename?: 'query_feedEvents_items_items', txHash: string, logIndex: number, type: string, value: string, timestamp: number, relevance: Query_FeedEvents_Items_Items_Relevance, metadata?: any | null } | null> } | null };
+export type GetFeedEventsQuery = { __typename?: 'Query', feedEvents?: { __typename?: 'feedEvents_200_response', totalCount: number, items: Array<{ __typename?: 'query_feedEvents_items_items', txHash: string, logIndex: number, type: Query_FeedEvents_Items_Items_Type, value: string, timestamp: number, relevance: Query_FeedEvents_Items_Items_Relevance, metadata?: any | null } | null> } | null };
 
 export type GetProposalsFromDaoQueryVariables = Exact<{
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;

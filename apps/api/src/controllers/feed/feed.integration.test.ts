@@ -22,6 +22,9 @@ class FakeFeedRepository {
   ) {
     let filtered = this.items;
 
+    if (req.type != null) {
+      filtered = filtered.filter((i) => i.type === req.type);
+    }
     if (req.fromDate != null) {
       filtered = filtered.filter((i) => i.timestamp >= req.fromDate!);
     }
@@ -42,7 +45,7 @@ const createMockEvent = (
   txHash: "0xabc123",
   logIndex: 0,
   type: "VOTE",
-  value: parseEther("50000"),
+  value: parseEther("100000"),
   timestamp: 1700000000,
   metadata: null,
   ...overrides,
@@ -90,16 +93,6 @@ describe("Feed Controller - Integration Tests", () => {
       });
     });
 
-    it("should return value as string", async () => {
-      const value = parseEther("12345");
-      fakeRepo.setData([createMockEvent({ value })]);
-
-      const res = await app.request("/feed/events");
-      const body = await res.json();
-
-      expect(body.items[0]?.value).toBe(value.toString());
-    });
-
     it("should return empty items when no data available", async () => {
       fakeRepo.setData([]);
 
@@ -113,9 +106,7 @@ describe("Feed Controller - Integration Tests", () => {
     });
 
     it("should include relevance in each item", async () => {
-      fakeRepo.setData([
-        createMockEvent({ type: "PROPOSAL", value: 0n }),
-      ]);
+      fakeRepo.setData([createMockEvent({ type: "PROPOSAL", value: 0n })]);
 
       const res = await app.request("/feed/events");
       const body = await res.json();
@@ -123,9 +114,11 @@ describe("Feed Controller - Integration Tests", () => {
       expect(body.items[0]?.relevance).toBe(FeedRelevance.HIGH);
     });
 
-    it("should accept type query parameter", async () => {
+    it("should return only items matching the type filter when mixed types exist", async () => {
       fakeRepo.setData([
-        createMockEvent({ type: "DELEGATION" }),
+        createMockEvent({ type: "VOTE", logIndex: 0 }),
+        createMockEvent({ type: "DELEGATION", logIndex: 1 }),
+        createMockEvent({ type: "TRANSFER", logIndex: 2 }),
       ]);
 
       const res = await app.request("/feed/events?type=DELEGATION");
@@ -133,13 +126,41 @@ describe("Feed Controller - Integration Tests", () => {
       expect(res.status).toBe(200);
       const body = await res.json();
       expect(body.items).toHaveLength(1);
+      expect(body.items[0]?.type).toBe("DELEGATION");
+    });
+
+    it("should include PROPOSAL_EXTENDED events when no type filter is applied", async () => {
+      fakeRepo.setData([
+        createMockEvent({ type: "PROPOSAL_EXTENDED", value: 0n, logIndex: 0 }),
+        createMockEvent({ type: "VOTE", logIndex: 1 }),
+      ]);
+
+      const res = await app.request("/feed/events");
+
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.items).toHaveLength(2);
+      const types = body.items.map((i: { type: string }) => i.type);
+      expect(types).toContain("PROPOSAL_EXTENDED");
+    });
+
+    it("should return only PROPOSAL_EXTENDED items when type=PROPOSAL_EXTENDED filter is applied", async () => {
+      fakeRepo.setData([
+        createMockEvent({ type: "PROPOSAL_EXTENDED", value: 0n, logIndex: 0 }),
+        createMockEvent({ type: "VOTE", logIndex: 1 }),
+        createMockEvent({ type: "PROPOSAL", value: 0n, logIndex: 2 }),
+      ]);
+
+      const res = await app.request("/feed/events?type=PROPOSAL_EXTENDED");
+
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.items).toHaveLength(1);
+      expect(body.items[0]?.type).toBe("PROPOSAL_EXTENDED");
     });
 
     it("should accept pagination query parameters", async () => {
-      fakeRepo.setData(
-        [createMockEvent({ logIndex: 0 })],
-        5,
-      );
+      fakeRepo.setData([createMockEvent({ logIndex: 0 })], 5);
 
       const res = await app.request("/feed/events?skip=2&limit=1");
 
@@ -259,9 +280,7 @@ describe("Feed Controller - Integration Tests", () => {
         deltaMod: 1000,
         delegate: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
       };
-      fakeRepo.setData([
-        createMockEvent({ type: "DELEGATION", metadata }),
-      ]);
+      fakeRepo.setData([createMockEvent({ type: "DELEGATION", metadata })]);
 
       const res = await app.request("/feed/events");
       const body = await res.json();

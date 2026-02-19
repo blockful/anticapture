@@ -372,11 +372,20 @@ type feedEvents_200_response {
 type query_feedEvents_items_items {
   txHash: String!
   logIndex: Float!
-  type: String!
+  type: query_feedEvents_items_items_type!
   value: String!
   timestamp: Float!
   relevance: query_feedEvents_items_items_relevance!
   metadata: JSON
+}
+
+enum query_feedEvents_items_items_type {
+  VOTE
+  PROPOSAL
+  DELEGATION
+  TRANSFER
+  DELEGATION_VOTES_CHANGED
+  PROPOSAL_EXTENDED
 }
 
 enum query_feedEvents_items_items_relevance {

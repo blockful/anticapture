@@ -93,6 +93,7 @@ export const voteCast = async (
     value: votingPower,
     timestamp,
     metadata: {
+      voter: getAddress(voter),
       reason,
       support,
       votingPower,
@@ -159,7 +160,7 @@ export const proposalCreated = async (
     txHash,
     daoId,
     proposerAccountId: getAddress(proposer),
-    targets: targets.map(getAddress),
+    targets: targets.map((a) => getAddress(a)),
     values,
     signatures,
     calldatas,
@@ -173,7 +174,7 @@ export const proposalCreated = async (
   });
 
   // Update proposer's proposal count
-  await context.db
+  const { votingPower: proposerVotingPower } = await context.db
     .insert(accountPower)
     .values({
       accountId: getAddress(proposer),
@@ -190,12 +191,14 @@ export const proposalCreated = async (
     txHash,
     logIndex,
     type: "PROPOSAL",
-    value: 0n,
     timestamp,
     metadata: {
       id: proposalId,
       proposer: getAddress(proposer),
-      title: description.split("\n")[0]?.replace(/^#+\s*/, "") || "Untitled Proposal",
+      votingPower: proposerVotingPower,
+      title:
+        description.split("\n")[0]?.replace(/^#+\s*/, "") ||
+        "Untitled Proposal",
     },
   });
 };
@@ -227,21 +230,32 @@ export const proposalExtended = async (
   logIndex: number,
   timestamp: bigint,
 ) => {
-  await context.db.update(proposalsOnchain, { id: proposalId }).set((row) => ({
-    endBlock: Number(extendedDeadline),
-    endTimestamp:
+  let endTimestamp: bigint | undefined;
+
+  await context.db.update(proposalsOnchain, { id: proposalId }).set((row) => {
+    endTimestamp =
       row.endTimestamp +
-      BigInt((Number(extendedDeadline) - row.endBlock) * blockTime),
-  }));
+      BigInt((Number(extendedDeadline) - row.endBlock) * blockTime);
+    return {
+      row,
+      endBlock: Number(extendedDeadline),
+      endTimestamp,
+    };
+  });
+
+  const proposal = await context.db.find(proposalsOnchain, { id: proposalId });
 
   await context.db.insert(feedEvent).values({
     txHash,
     logIndex,
     type: "PROPOSAL_EXTENDED",
-    value: 0n,
     timestamp,
     metadata: {
-      proposalId,
+      id: proposalId,
+      title: proposal!.description.split("\n")[0]?.replace(/^#+\s*/, ""),
+      endBlock: Number(extendedDeadline),
+      endTimestamp,
+      proposer: getAddress(proposal!.proposerAccountId),
     },
   });
 };
