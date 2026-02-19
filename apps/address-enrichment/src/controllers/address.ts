@@ -86,33 +86,12 @@ export function addressController(app: Hono, service: EnrichmentService) {
             },
           },
         },
-        500: {
-          description: "Internal server error",
-          content: {
-            "application/json": {
-              schema: ErrorResponseSchema,
-            },
-          },
-        },
       },
     }),
     async (context) => {
       const { address } = context.req.valid("param");
-
-      try {
-        const result = await service.getAddressEnrichment(address);
-        return context.json(result, 200);
-      } catch (error) {
-        console.error("Error enriching address:", error);
-        return context.json(
-          {
-            error: "Internal server error",
-            message:
-              error instanceof Error ? error.message : "Unknown error occurred",
-          },
-          500,
-        );
-      }
+      const result = await service.getAddressEnrichment(address);
+      return context.json(result, 200);
     },
   );
 
@@ -146,14 +125,6 @@ export function addressController(app: Hono, service: EnrichmentService) {
         },
         400: {
           description: "Invalid request body",
-          content: {
-            "application/json": {
-              schema: ErrorResponseSchema,
-            },
-          },
-        },
-        500: {
-          description: "Internal server error",
           content: {
             "application/json": {
               schema: ErrorResponseSchema,

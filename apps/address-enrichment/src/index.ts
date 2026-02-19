@@ -32,6 +32,17 @@ app.use(
   }),
 );
 
+app.onError((err, c) => {
+  console.error("Unhandled error:", err);
+  return c.json(
+    {
+      error: "Internal server error",
+      message: err.message ?? "Unknown error occurred",
+    },
+    500,
+  );
+});
+
 // Health check
 app.get("/health", (c) => {
   return c.json({ status: "ok", timestamp: new Date().toISOString() });

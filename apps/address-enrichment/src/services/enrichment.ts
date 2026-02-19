@@ -48,7 +48,9 @@ export class EnrichmentService {
    * - ENS data is cached with a configurable TTL and refetched when stale.
    */
   async getAddressEnrichment(address: string): Promise<EnrichmentResult> {
-    const normalizedAddress = getAddress(address);
+    const normalizedAddress = address.toLowerCase();  /* FIXME: Unfortunately the addresses have already been commited to
+                                                       * the database in lowercase format, checksum format could only be
+                                                       * used here if we were to convert all current records */
     const db = getDb();
 
     // Check if address exists in database
