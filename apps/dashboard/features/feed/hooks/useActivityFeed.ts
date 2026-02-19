@@ -127,7 +127,12 @@ export const useActivityFeed = ({
   ]);
 
   return {
-    data: data?.feedEvents?.items.filter((item) => item !== null) ?? [],
+    data:
+      data?.feedEvents?.items
+        .filter((item) => item !== null)
+        .filter(
+          (item) => item.type !== FeedEventType.DelegationVotesChanged, // filtering because delegations already handles redelegations
+        ) ?? [],
     totalCount,
     loading,
     error,

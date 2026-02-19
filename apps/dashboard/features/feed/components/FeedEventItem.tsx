@@ -325,6 +325,23 @@ export const FeedEventItem = ({
         if (!event.metadata) return null;
         return (
           <p className="leading-relaxed">
+            <span className="inline-flex items-center gap-1.5 align-middle">
+              <EnsAvatar
+                address={event.metadata.delegate}
+                showAvatar={true}
+                size="xs"
+                nameClassName="text-primary font-medium"
+              />
+            </span>{" "}
+            <CopyAndPasteButton
+              textToCopy={event.metadata.delegate}
+              className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
+              iconSize="md"
+            />{" "}
+            <span className="text-secondary">
+              {BigInt(event.metadata.delta) > 0n ? "increased" : "decreased"}{" "}
+              voting power
+            </span>{" "}
             <span
               className={cn(
                 "font-medium",
@@ -333,16 +350,7 @@ export const FeedEventItem = ({
                   : "text-error",
               )}
             >
-              {formatAmount(event.metadata.delta)} {tokenSymbol}
-            </span>{" "}
-            <span className="text-secondary">from</span>{" "}
-            <span className="inline-flex items-center gap-1.5 align-middle">
-              <EnsAvatar
-                address={event.metadata.delegate}
-                showAvatar={true}
-                size="xs"
-                nameClassName="text-primary font-medium"
-              />
+              {formatAmount(event.metadata.deltaMod)} {tokenSymbol}
             </span>{" "}
             <a
               href={explorerUrl}
