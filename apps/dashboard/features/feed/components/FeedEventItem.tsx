@@ -152,6 +152,11 @@ export const FeedEventItem = ({
                 nameClassName="text-primary font-medium"
               />
             </span>{" "}
+            <CopyAndPasteButton
+              textToCopy={event.metadata.voter}
+              className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
+              iconSize="md"
+            />{" "}
             <span className="text-secondary">
               (
               <span className="text-primary">
@@ -239,6 +244,11 @@ export const FeedEventItem = ({
                 nameClassName="text-primary font-medium"
               />
             </span>{" "}
+            <CopyAndPasteButton
+              textToCopy={event.metadata.from}
+              className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
+              iconSize="md"
+            />{" "}
             <span className="text-secondary">transferred</span>{" "}
             <span className="text-primary font-medium">
               {formatAmount(event.metadata.amount)} {tokenSymbol}
@@ -281,6 +291,11 @@ export const FeedEventItem = ({
                 size="xs"
                 nameClassName="text-primary font-medium"
               />
+              <CopyAndPasteButton
+                textToCopy={event.metadata.delegator}
+                className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
+                iconSize="md"
+              />
             </span>{" "}
             <span className="text-secondary">
               {hasRedelegation ? "redelegated" : "delegated"}
@@ -298,6 +313,11 @@ export const FeedEventItem = ({
                     size="xs"
                     nameClassName="text-primary font-medium"
                   />
+                  <CopyAndPasteButton
+                    textToCopy={event.metadata.previousDelegate!}
+                    className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
+                    iconSize="md"
+                  />
                 </span>{" "}
               </>
             )}
@@ -310,6 +330,11 @@ export const FeedEventItem = ({
                 nameClassName="text-primary font-medium"
               />
             </span>{" "}
+            <CopyAndPasteButton
+              textToCopy={event.metadata.delegate}
+              className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
+              iconSize="md"
+            />{" "}
             <a
               href={explorerUrl}
               target="_blank"
