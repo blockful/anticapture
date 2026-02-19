@@ -1,6 +1,5 @@
 import { z } from "@hono/zod-openapi";
 import { getAddress, isAddress } from "viem";
-import { DelegationItem, DelegationsResponse } from "./historical";
 import { delegation } from "@/database";
 
 export type DBDelegation = typeof delegation.$inferSelect;

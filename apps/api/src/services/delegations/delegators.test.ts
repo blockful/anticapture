@@ -12,7 +12,10 @@ const createMockAggregatedDelegator = (
   ...overrides,
 });
 
-const defaultSort = { orderBy: "amount" as const, orderDirection: "desc" as const };
+const defaultSort = {
+  orderBy: "amount" as const,
+  orderDirection: "desc" as const,
+};
 
 describe("DelegatorsService", () => {
   const address = "0x1234567890123456789012345678901234567890" as Address;
@@ -73,7 +76,10 @@ describe("DelegatorsService", () => {
         items: [],
         totalCount: 0,
       });
-      const sort = { orderBy: "timestamp" as const, orderDirection: "asc" as const };
+      const sort = {
+        orderBy: "timestamp" as const,
+        orderDirection: "asc" as const,
+      };
 
       await service.getDelegators(address, 0, 10, sort);
 
@@ -109,6 +115,102 @@ describe("DelegatorsService", () => {
 
       expect(result.items).toHaveLength(3);
       expect(result.totalCount).toBe(3);
+    });
+
+    it("should reflect the delegator's current balance, not the balance at delegation time", async () => {
+      const delegator = createMockAggregatedDelegator({
+        amount: 5000000000000000000n,
+      });
+      stubRepository.getDelegators.mockResolvedValue({
+        items: [delegator],
+        totalCount: 1,
+      });
+
+      const result = await service.getDelegators(address, 0, 10, defaultSort);
+
+      expect(result.items).toEqual([
+        {
+          delegatorAddress:
+            "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+          amount: 5000000000000000000n,
+          timestamp: 1700000000n,
+        },
+      ]);
+    });
+
+    it("should not include a delegator who re-delegated to a different address", async () => {
+      stubRepository.getDelegators.mockResolvedValue({
+        items: [],
+        totalCount: 0,
+      });
+
+      const result = await service.getDelegators(address, 0, 10, defaultSort);
+
+      expect(result.items).toEqual([]);
+      expect(result.totalCount).toBe(0);
+    });
+
+    it("should include the delegate themselves when they self-delegate", async () => {
+      const selfDelegator = createMockAggregatedDelegator({
+        delegatorAddress: address,
+        amount: 3000000000000000000n,
+      });
+      stubRepository.getDelegators.mockResolvedValue({
+        items: [selfDelegator],
+        totalCount: 1,
+      });
+
+      const result = await service.getDelegators(address, 0, 10, defaultSort);
+
+      expect(result.items).toEqual([
+        {
+          delegatorAddress: address,
+          amount: 3000000000000000000n,
+          timestamp: 1700000000n,
+        },
+      ]);
+    });
+
+    it("should return the aggregated amount across multiple balance entries for a delegator", async () => {
+      const delegator = createMockAggregatedDelegator({
+        amount: 7000000000000000000n,
+      });
+      stubRepository.getDelegators.mockResolvedValue({
+        items: [delegator],
+        totalCount: 1,
+      });
+
+      const result = await service.getDelegators(address, 0, 10, defaultSort);
+
+      expect(result.items).toEqual([
+        {
+          delegatorAddress:
+            "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+          amount: 7000000000000000000n,
+          timestamp: 1700000000n,
+        },
+      ]);
+    });
+
+    it("should include a delegator with zero balance", async () => {
+      const zeroDelegator = createMockAggregatedDelegator({
+        amount: 0n,
+      });
+      stubRepository.getDelegators.mockResolvedValue({
+        items: [zeroDelegator],
+        totalCount: 1,
+      });
+
+      const result = await service.getDelegators(address, 0, 10, defaultSort);
+
+      expect(result.items).toEqual([
+        {
+          delegatorAddress:
+            "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+          amount: 0n,
+          timestamp: 1700000000n,
+        },
+      ]);
     });
   });
 });
