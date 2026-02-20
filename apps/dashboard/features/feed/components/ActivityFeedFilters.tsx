@@ -218,10 +218,12 @@ export const ActivityFeedFiltersDrawer = ({
                 </div>
               </div>
             </div>
+            {/* Spacer for fixed footer on mobile */}
+            <div className="h-[72px] w-full lg:hidden" />
           </div>
 
           {/* Footer */}
-          <div className="bg-surface-contrast mt-auto flex gap-3 px-4 py-4">
+          <div className="bg-surface-contrast fixed bottom-0 left-0 right-0 flex gap-3 px-4 py-4 lg:relative lg:bottom-auto lg:left-auto lg:right-auto lg:mt-auto">
             <Button variant="primary" onClick={handleApply}>
               Apply filters
             </Button>
