@@ -1,3 +1,4 @@
+import axios from "axios";
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
@@ -40,7 +41,10 @@ function makeVote(overrides?: Record<string, unknown>) {
 }
 
 const server = setupServer();
-const provider = new SnapshotProvider(ENDPOINT, SPACE_ID);
+const provider = new SnapshotProvider(
+  axios.create({ baseURL: ENDPOINT }),
+  SPACE_ID,
+);
 
 beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
 afterEach(() => server.resetHandlers());

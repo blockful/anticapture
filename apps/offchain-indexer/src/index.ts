@@ -1,3 +1,4 @@
+import axios from "axios";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 
@@ -19,9 +20,11 @@ async function main() {
 
   const repository = new DrizzleRepository(db);
   const provider = new SnapshotProvider(
-    env.PROVIDER_ENDPOINT,
+    axios.create({
+      baseURL: env.PROVIDER_ENDPOINT,
+      headers: env.PROVIDER_API_KEY ? { "x-api-key": env.PROVIDER_API_KEY } : {},
+    }),
     env.PROVIDER_DAO_ID,
-    env.PROVIDER_API_KEY,
   );
   const indexer = new Indexer(repository, provider, env.POLLING_INTERVAL_MS);
 
