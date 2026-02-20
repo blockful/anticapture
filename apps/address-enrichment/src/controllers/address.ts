@@ -78,14 +78,6 @@ export function addressController(app: Hono, service: EnrichmentService) {
             },
           },
         },
-        400: {
-          description: "Invalid address format",
-          content: {
-            "application/json": {
-              schema: ErrorResponseSchema,
-            },
-          },
-        },
       },
     }),
     async (context) => {
@@ -123,23 +115,13 @@ export function addressController(app: Hono, service: EnrichmentService) {
             },
           },
         },
-        400: {
-          description: "Invalid request body",
-          content: {
-            "application/json": {
-              schema: ErrorResponseSchema,
-            },
-          },
-        },
       },
     }),
     async (context) => {
       const { addresses } = context.req.valid("json");
 
       // Deduplicate addresses
-      const uniqueAddresses = [
-        ...new Set(addresses.map((a) => getAddress(a))),
-      ];
+      const uniqueAddresses = [...new Set(addresses.map((a) => getAddress(a)))];
 
       const results: z.infer<typeof EnrichmentResponseSchema>[] = [];
       const errors: { address: string; error: string }[] = [];

@@ -66,7 +66,7 @@ app.get("/docs", swaggerUI({ url: "/docs/json" }));
 
 // Run migrations then start server
 initDb(env.DATABASE_URL);
-runMigrations(env.DATABASE_URL);
+// runMigrations(env.DATABASE_URL);
 console.log(`🚀 Address Enrichment API starting on port ${env.PORT}`);
 serve({
   fetch: app.fetch,
