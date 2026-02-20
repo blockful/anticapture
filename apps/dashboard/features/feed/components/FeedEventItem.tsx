@@ -240,13 +240,13 @@ export const FeedEventItem = ({
             >
               <ExternalLink className="size-3.5" />
             </a>
-          </p>
+          </div>
         );
 
       case FeedEventType.ProposalExtended:
         if (!event.metadata) return null;
         return (
-          <p className="leading-relaxed">
+          <div className="leading-relaxed">
             <span className="text-secondary">
               Proposal{" "}
               <Link
@@ -265,13 +265,13 @@ export const FeedEventItem = ({
             >
               <ExternalLink className="size-3.5" />
             </a>
-          </p>
+          </div>
         );
 
       case FeedEventType.Transfer:
         if (!event.metadata) return null;
         return (
-          <p className="leading-relaxed">
+          <div className="leading-relaxed">
             <span className="inline-flex items-center gap-1.5 align-middle">
               <EnsAvatar
                 address={event.metadata.from}
@@ -311,7 +311,7 @@ export const FeedEventItem = ({
             >
               <ExternalLink className="size-3.5" />
             </a>
-          </p>
+          </div>
         );
 
       case FeedEventType.Delegation: {
@@ -321,7 +321,7 @@ export const FeedEventItem = ({
           event.metadata.previousDelegate !== zeroAddress;
 
         return (
-          <p className="leading-relaxed">
+          <div className="leading-relaxed">
             <span className="inline-flex items-center gap-1.5 align-middle">
               <EnsAvatar
                 address={event.metadata.delegator}
@@ -381,13 +381,13 @@ export const FeedEventItem = ({
             >
               <ExternalLink className="size-3.5" />
             </a>
-          </p>
+          </div>
         );
       }
       case FeedEventType.DelegationVotesChanged: {
         if (!event.metadata) return null;
         return (
-          <p className="leading-relaxed">
+          <div className="leading-relaxed">
             <span className="inline-flex items-center gap-1.5 align-middle">
               <EnsAvatar
                 address={event.metadata.delegate}
@@ -423,7 +423,7 @@ export const FeedEventItem = ({
             >
               <ExternalLink className="size-3.5" />
             </a>
-          </p>
+          </div>
         );
       }
     }
