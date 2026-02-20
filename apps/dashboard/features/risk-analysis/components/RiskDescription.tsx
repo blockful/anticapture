@@ -125,7 +125,7 @@ export const RiskDescription = ({
     <CorneredBox className="bg-surface-background lg:bg-surface-default lg:flex lg:h-full lg:flex-col">
       <div className="flex flex-col lg:h-full lg:overflow-hidden">
         <header className="flex w-full flex-col justify-between gap-2 pb-5 lg:shrink-0 lg:flex-row lg:items-center lg:p-4">
-          <h2 className="text-primary font-mono text-lg font-medium">
+          <h2 className="text-primary font-mono text-lg font-medium uppercase">
             {title}
           </h2>
           {riskLevel !== RiskLevel.NONE && (

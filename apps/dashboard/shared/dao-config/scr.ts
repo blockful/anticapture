@@ -120,7 +120,7 @@ export const SCR: DaoConfiguration = {
             GovernanceImplementationEnum.PROPOSAL_THRESHOLD
           ].description,
         currentSetting:
-          "The Proposal Threshold is set to 50M $UNI (5% Total Supply)",
+          "The Proposal Threshold is set to 50M $SCR (5% Total Supply)",
         impact:
           "The current liquidity of the governance token does not pose a risk to the DAO. Therefore, the Proposal Threshold is sufficient to block proposal spam and discourage attackers.",
         recommendedSetting:
@@ -240,7 +240,7 @@ export const SCR: DaoConfiguration = {
             GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION
           ].description,
         currentSetting:
-          "It protects the DAO from a flash loan aimed to increase their voting power, by taking a snapshot of the governance power from delegates/holders one block before the Voting Period sarts",
+          "It protects the DAO from a flash loan aimed to increase their voting power, by taking a snapshot of the governance power from delegates/holders one block before the Voting Period starts",
         impact:
           "It is not possible to use a flash loan to increase voting power and approve a proposal.",
         recommendedSetting:

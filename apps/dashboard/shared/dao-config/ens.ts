@@ -170,7 +170,7 @@ export const ENS: DaoConfiguration = {
             GovernanceImplementationEnum.PROPOSER_BALANCE_CANCEL
           ],
         nextStep:
-          "The governance contract should cancel a proposal if the address that submitted it has a governance token balance below the Proposal Threshold.",
+          "The governance contract should allow for permissionless cancel of a proposal if the address that submitted it has a governance token balance below the Proposal Threshold.",
         requirements: [
           "Once a proposal is submitted, the proposer can immediately dump their tokens, reducing their financial risk in case of an attack.",
           "The DAO must enforce a permissionless way to cancel any live proposal if the proposer's voting power drops below the proposal-creation threshold.",
@@ -296,7 +296,7 @@ export const ENS: DaoConfiguration = {
             GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION
           ].description,
         currentSetting:
-          "It protects the DAO from a flash loan aimed to increase their voting power, by taking a snapshot of the governance power from delegates/holders one block before the Voting Period sarts",
+          "It protects the DAO from a flash loan aimed to increase their voting power, by taking a snapshot of the governance power from delegates/holders one block before the Voting Period starts",
         impact:
           "It is not possible to use a flash loan to increase voting power and approve a proposal.",
         recommendedSetting:

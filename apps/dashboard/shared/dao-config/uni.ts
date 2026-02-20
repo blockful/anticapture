@@ -139,28 +139,15 @@ export const UNI: DaoConfiguration = {
         currentSetting:
           "Uniswap has a cancellation mechanism: if the proposer sells their tokens and their balance falls below the Proposal Threshold, the proposal is automatically canceled.",
         impact:
-          "If the proposer sells their tokens and their balance falls below the Proposal Threshold, the proposal is can be cancelled by any address.",
+          "If the proposer sells their tokens and their balance falls below the Proposal Threshold, the proposal can be cancelled by any address.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[
             GovernanceImplementationEnum.PROPOSER_BALANCE_CANCEL
           ],
         nextStep: "The parameter is in its lowest-risk condition.",
       },
-      [GovernanceImplementationEnum.SECURITY_COUNCIL]: {
-        riskLevel: RiskLevel.MEDIUM,
-        description:
-          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
-            GovernanceImplementationEnum.SECURITY_COUNCIL
-          ].description,
-        currentSetting: "The Uniswap DAO has no Security Council.",
-        impact:
-          "Without a Security Council, there is no protection mechanism against malicious proposals that get approved.",
-        recommendedSetting:
-          RECOMMENDED_SETTINGS[GovernanceImplementationEnum.SECURITY_COUNCIL],
-        nextStep: "-",
-      },
       [GovernanceImplementationEnum.SPAM_RESISTANCE]: {
-        riskLevel: RiskLevel.MEDIUM,
+        riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.SPAM_RESISTANCE
@@ -171,8 +158,7 @@ export const UNI: DaoConfiguration = {
           "A single address can only have one live proposal at the time, effectively protecting governance from a spam attack.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.SPAM_RESISTANCE],
-        nextStep:
-          "It is necessary to limit the number of proposals that can be submitted by a single address.",
+        nextStep: "The parameter is in its lowest-risk condition.",
       },
       [GovernanceImplementationEnum.TIMELOCK_ADMIN]: {
         riskLevel: RiskLevel.LOW,
@@ -205,21 +191,6 @@ export const UNI: DaoConfiguration = {
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.TIMELOCK_DELAY],
         nextStep: "The parameter is in its lowest-risk condition.",
       },
-      [GovernanceImplementationEnum.VETO_STRATEGY]: {
-        riskLevel: RiskLevel.MEDIUM,
-        description:
-          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
-            GovernanceImplementationEnum.VETO_STRATEGY
-          ].description,
-        currentSetting:
-          "Uniswap don't have a cancel function activated or a Security Council to stop malicious proposals. ",
-        impact:
-          "Without a veto strategy, a malicious proposal that gets approved will be executed.",
-        recommendedSetting:
-          RECOMMENDED_SETTINGS[GovernanceImplementationEnum.VETO_STRATEGY],
-        nextStep:
-          "The DAO has no need for a veto strategy at this moment, given the level of economic security it has.",
-      },
       [GovernanceImplementationEnum.VOTE_MUTABILITY]: {
         riskLevel: RiskLevel.MEDIUM,
         description:
@@ -251,7 +222,7 @@ export const UNI: DaoConfiguration = {
           "Given the current Voting Delay, the DAO has sufficient time to coordinate stakeholders and wallets before the snapshot (that counts votes) occurs.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.VOTING_DELAY],
-        nextStep: "The parameter is in its lowest-risk condition.",
+        nextStep: "The Voting Delay should be at least two days.",
         requirements: [
           "A short window between proposal submission and the voting snapshot lets attackers rush malicious items through before delegates mobilize.",
           "Currently, the delay is 44 h (Medium Risk).",
@@ -293,15 +264,15 @@ export const UNI: DaoConfiguration = {
         ],
       },
       [GovernanceImplementationEnum.VOTING_SUBSIDY]: {
-        riskLevel: RiskLevel.MEDIUM,
+        riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_SUBSIDY
           ].description,
         currentSetting:
-          "There is no subsidy to help voters participate in governance voting.",
+          "There is a subsidy to help voters participate in governance voting.",
         impact:
-          "Without subsidies, voters incur costs to participate in governance. During periods of high gas fees, participation may decrease, making the DAO easier to attack.",
+          "By subsidizing governance participants voting costs, there is greater participation and stronger incentives for delegates to protect the DAO, since they do not incur gas fees to vote.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.VOTING_SUBSIDY],
         nextStep: "The parameter is in its lowest-risk condition.",

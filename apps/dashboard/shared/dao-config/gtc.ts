@@ -71,7 +71,7 @@ export const GTC: DaoConfiguration = {
             GovernanceImplementationEnum.INTERFACE_RESILIENCE
           ].description,
         currentSetting:
-          "The governance interfaces and domain of the Optimism DAO do not have DNS protection, leaving voters vulnerable to spoofing and hijacking attacks.",
+          "The governance interfaces and domain of the Gitcoin DAO do not have DNS protection, leaving voters vulnerable to spoofing and hijacking attacks.",
         impact:
           "Without protection for its governance domains and interfaces, governance participants may be manipulated into voting for an outcome that harms the DAO.",
         recommendedSetting:
@@ -184,7 +184,7 @@ export const GTC: DaoConfiguration = {
         nextStep: "The parameter is in its lowest-risk condition.",
       },
       [GovernanceImplementationEnum.VETO_STRATEGY]: {
-        riskLevel: RiskLevel.LOW,
+        riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VETO_STRATEGY
@@ -239,7 +239,7 @@ export const GTC: DaoConfiguration = {
             GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION
           ].description,
         currentSetting:
-          "It protects the DAO from a flash loan aimed to increase their voting power, by taking a snapshot of the governance power from delegates/holders one block before the Voting Period sarts",
+          "It protects the DAO from a flash loan aimed to increase their voting power, by taking a snapshot of the governance power from delegates/holders one block before the Voting Period starts",
         impact:
           "It is not possible to use a flash loan to increase voting power and approve a proposal.",
         recommendedSetting:
