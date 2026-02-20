@@ -104,7 +104,7 @@ export const ActivityFeedFiltersDrawer = ({
 
   useEffect(() => {
     if (isOpen) setLocalFilters(filters);
-  }, [isOpen]);
+  }, [isOpen, filters]);
 
   return (
     <Drawer
