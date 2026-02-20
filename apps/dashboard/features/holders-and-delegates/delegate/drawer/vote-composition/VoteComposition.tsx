@@ -6,8 +6,6 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { useVoteCompositionData } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/hooks/useVoteCompositionData";
-import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
-import { Inbox } from "lucide-react";
 
 const ChartLegend = ({
   items,
@@ -74,7 +72,6 @@ export const VoteComposition = ({
   daoId: DaoIdEnum;
 }) => {
   const {
-    topFiveDelegators,
     currentVotingPower,
     legendItems,
     pieData,

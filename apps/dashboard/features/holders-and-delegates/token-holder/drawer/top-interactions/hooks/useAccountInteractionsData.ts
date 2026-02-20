@@ -1,5 +1,3 @@
-import { useMemo } from "react";
-
 import { DaoIdEnum } from "@/shared/types/daos";
 import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
 import { useMultipleEnsData } from "@/shared/hooks/useEnsData";
@@ -12,8 +10,6 @@ import {
   QueryInput_AccountInteractions_OrderBy,
   QueryInput_AccountInteractions_OrderDirection,
 } from "@anticapture/graphql-client";
-import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
-import { TimeInterval } from "@/shared/types/enums";
 
 interface Interaction {
   accountId: string;
@@ -71,12 +67,6 @@ export const useAccountInteractionsData = ({
   limit?: number;
 }): InteractionResponse => {
   const { decimals } = daoConfig[daoId];
-
-  const fromDate = useMemo(() => {
-    return (
-      Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[TimeInterval.NINETY_DAYS]
-    ).toString();
-  }, []);
 
   const { data, loading, error } = useGetAccountInteractionsQuery({
     variables: {

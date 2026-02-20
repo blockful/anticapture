@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/shared/utils";
-import { cva, VariantProps } from "class-variance-authority";
+import { cva, type VariantProps } from "class-variance-authority";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { Github, Twitter } from "lucide-react";
 import Link from "next/link";

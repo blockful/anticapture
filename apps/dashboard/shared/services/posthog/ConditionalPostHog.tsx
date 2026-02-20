@@ -78,6 +78,7 @@ const ConditionalPostHog = () => {
             }
           }
         } catch (error) {
+          console.error("Error parsing cookie consent data:", error);
           setShouldLoadPostHog(false);
         }
       } else {
