@@ -10,12 +10,11 @@ export function calculatePercentage(
 ): string {
   const normalizedBase = BigInt(baseValue);
   const normalizedVariation = BigInt(variation);
+  const previous = normalizedBase - normalizedVariation
 
-  return (normalizedBase - normalizedVariation
-    ? Number(
-      (normalizedVariation * 10000n) /
-      (normalizedBase - normalizedVariation),
-    ) / 100
-    : 0
+  return (
+    previous
+      ? Number((normalizedVariation * 10000n) / (previous)) / 100
+      : 0
   ).toString()
 }
