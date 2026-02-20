@@ -10,7 +10,10 @@ export class DrizzleRepository implements Repository {
   private constructor(private readonly db: NodePgDatabase<typeof schema>) {}
 
   static async create(db: NodePgDatabase<typeof schema>): Promise<DrizzleRepository> {
-    await migrate(db, { migrationsFolder: "./drizzle" });
+    await migrate(db, {
+      migrationsFolder: "./drizzle",
+      migrationsSchema: "snapshot",
+    });
     return new DrizzleRepository(db);
   }
 
