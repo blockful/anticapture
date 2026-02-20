@@ -59,6 +59,7 @@ module.exports = [
         "error",
         {
           argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
         },
       ],
       // Disable base no-redeclare and use TypeScript version
