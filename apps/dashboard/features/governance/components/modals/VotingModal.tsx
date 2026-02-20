@@ -132,7 +132,7 @@ export const VotingModal = ({
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center transition-colors  ${
+      className={`fixed inset-0 z-50 flex items-center justify-center transition-colors ${
         isOpen ? "visible opacity-100" : "invisible opacity-0"
       }`}
     >
@@ -225,14 +225,17 @@ export const VotingModal = ({
                   {userReadableQuorumVotes} / {userReadableQuorum}
                 </p>
                 {isQuorumReached ? (
-                  <BadgeStatus variant="success" iconClassName="text-success!" icon={Check}>
+                  <BadgeStatus
+                    variant="success"
+                    iconClassName="text-success!"
+                    icon={Check}
+                  >
                     Reached
                   </BadgeStatus>
                 ) : (
                   <BadgeStatus variant="dimmed">Not Reached</BadgeStatus>
                 )}
               </div>
-            
             </div>
 
             {/* Comment  */}

@@ -287,27 +287,29 @@ export const TabsVotedContent = ({
           const date = timestamp ? new Date(Number(timestamp) * 1000) : null;
           const formattedDate = date
             ? date.toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            })
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })
             : "Unknown";
 
           const formattedTime = date
-            ? date.toLocaleTimeString("en-US", {
-              hour: "numeric",
-              minute: "2-digit",
-              hour12: true,
-            }).toLowerCase()
+            ? date
+                .toLocaleTimeString("en-US", {
+                  hour: "numeric",
+                  minute: "2-digit",
+                  hour12: true,
+                })
+                .toLowerCase()
             : null;
 
           return (
             <div className="flex h-10 flex-col items-start justify-center gap-0 p-2">
-              <span className="text-secondary leading-5 text-sm whitespace-nowrap">
+              <span className="text-secondary whitespace-nowrap text-sm leading-5">
                 {formattedDate}
               </span>
               {formattedTime && (
-                <span className="text-secondary leading-[18px] text-xs">
+                <span className="text-secondary text-xs leading-[18px]">
                   {formattedTime}
                 </span>
               )}
@@ -490,7 +492,12 @@ export const TabsVotedContent = ({
           const daoIdKey = (daoId as string)?.toUpperCase() as DaoIdEnum;
           const decimals = daoConfigByDaoId[daoIdKey]?.decimals;
           const absoluteChangeNum = votingPowerVariation.absoluteChange
-            ? Number(formatUnits(BigInt(votingPowerVariation.absoluteChange), decimals))
+            ? Number(
+                formatUnits(
+                  BigInt(votingPowerVariation.absoluteChange),
+                  decimals,
+                ),
+              )
             : 0;
           const formattedAbsoluteChange = formatNumberUserReadable(
             absoluteChangeNum,
@@ -512,7 +519,8 @@ export const TabsVotedContent = ({
                     isNeutral && "text-secondary",
                   )}
                 >
-                  {votingPowerVariation.percentageChange === PERCENTAGE_NO_BASELINE
+                  {votingPowerVariation.percentageChange ===
+                  PERCENTAGE_NO_BASELINE
                     ? ">1000%"
                     : `${Number(votingPowerVariation.percentageChange).toFixed(1)}%`}
                 </span>
@@ -559,7 +567,7 @@ export const TabsVotedContent = ({
                 href={`${blockExplorerUrl}/tx/${transactionHash}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-fit cursor-pointer items-center justify-center border border-transparent bg-transparent p-1 text-primary transition-colors duration-300 hover:bg-surface-contrast"
+                className="text-primary hover:bg-surface-contrast flex h-fit cursor-pointer items-center justify-center border border-transparent bg-transparent p-1 transition-colors duration-300"
               >
                 <ExternalLink className="size-3.5 shrink-0" />
               </Link>
@@ -571,7 +579,7 @@ export const TabsVotedContent = ({
         ),
       },
     ],
-    [proposal, handleSort, sortBy, sortDirection, daoId],
+    [proposal, handleSort, sortBy, sortDirection, daoId, onAddressClick],
   );
 
   // Prepare table data with description rows and loading row if needed

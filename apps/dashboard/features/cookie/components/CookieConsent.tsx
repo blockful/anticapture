@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CookieIcon } from "@/shared/components/icons";
+import { CookieIcon, CookieBackground } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
-import { CookieBackground } from "@/shared/components/icons";
 import Image from "next/image";
 import { Button } from "@/shared/components";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
@@ -39,6 +38,7 @@ export const CookieConsent = ({ className }: CookieConsentProps) => {
           setIsVisible(true);
         }
       } catch (error) {
+        console.error("Error parsing cookie consent data:", error);
         // Invalid data format, remove it and show banner
         localStorage.removeItem("cookie-consent");
         setIsVisible(true);

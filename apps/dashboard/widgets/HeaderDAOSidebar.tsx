@@ -7,9 +7,15 @@ import {
   HeaderDAOSidebarDropdown,
   ButtonHeaderSidebar,
 } from "@/shared/components";
-import { BarChart, Gauge, Landmark, UserCheck } from "lucide-react";
+import {
+  BarChart,
+  Gauge,
+  Landmark,
+  UserCheck,
+  ArrowRightLeft,
+  PieChart,
+} from "lucide-react";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { ArrowRightLeft, PieChart } from "lucide-react";
 import { Crosshair2Icon } from "@radix-ui/react-icons";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { cn } from "@/shared/utils/";

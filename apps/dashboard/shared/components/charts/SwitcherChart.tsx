@@ -48,7 +48,7 @@ export const SwitcherChart = ({
             : "bg-surface-contrast border-transparent",
         )}
       >
-        <span className="text-sm font-medium whitespace-nowrap">
+        <span className="whitespace-nowrap text-sm font-medium">
           {isSelected}
         </span>
         <ChevronDown
@@ -60,12 +60,12 @@ export const SwitcherChart = ({
       </button>
 
       {isOpen && (
-        <div className="text-primary absolute top-full left-0 z-50 mt-1 min-w-[100px] rounded-md border border-white/10 bg-[#27272A] py-1">
+        <div className="text-primary absolute left-0 top-full z-50 mt-1 min-w-[100px] rounded-md border border-white/10 bg-[#27272A] py-1">
           {Object.values(options).map((metrics) => (
             <button
               key={metrics}
               className={cn(
-                "text-primary flex w-full items-center justify-between gap-1.5 px-3 py-2 text-left text-sm font-normal whitespace-nowrap hover:bg-[#26262A]",
+                "text-primary flex w-full items-center justify-between gap-1.5 whitespace-nowrap px-3 py-2 text-left text-sm font-normal hover:bg-[#26262A]",
                 isSelected == metrics && "bg-middle-dark",
               )}
               onClick={() => handleSelect(metrics)}

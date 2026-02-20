@@ -19,12 +19,12 @@ import {
   useActiveSupply,
   useAverageTurnout,
   useDelegatedSupply,
+  useScreenSize,
 } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { SkeletonRow } from "@/shared/components";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { formatNumberUserReadable } from "@/shared/utils/";
-import { useScreenSize } from "@/shared/hooks";
 import { mockedAttackCostBarData } from "@/shared/constants/mocked-data/mocked-attack-cost-bar-data";
 import {
   useDaoTokenHistoricalData,

@@ -29,7 +29,7 @@ export const VoteOption = ({
     <div className="flex flex-col">
       <label
         className={cn(
-          "group flex cursor-pointer items-center justify-between border px-[10px] py-2 transition-colors duration-300 hover:bg-surface-contrast",
+          "hover:bg-surface-contrast group flex cursor-pointer items-center justify-between border px-[10px] py-2 transition-colors duration-300",
           checked ? "border-highlight" : "border-border-default",
         )}
       >

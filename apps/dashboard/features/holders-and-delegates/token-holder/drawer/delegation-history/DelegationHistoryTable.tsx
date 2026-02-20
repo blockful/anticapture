@@ -4,18 +4,19 @@ import { Button, IconButton, SkeletonRow } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { ColumnDef } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
-import { Address, parseUnits } from "viem";
+import { Address, parseUnits, formatUnits } from "viem";
 import { useDelegationHistory } from "@/features/holders-and-delegates/hooks/useDelegationHistory";
-import { formatUnits } from "viem";
 import { formatNumberUserReadable } from "@/shared/utils/";
 import { ExternalLink } from "lucide-react";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { Table } from "@/shared/components/design-system/table/Table";
-import daoConfig from "@/shared/dao-config";
 import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
-import { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
+import {
+  AmountFilterState,
+  useAmountFilterStore,
+} from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
 import { fetchAddressFromEnsName } from "@/shared/hooks/useEnsData";
@@ -29,7 +30,6 @@ import {
   useQueryStates,
 } from "nuqs";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
-import { useAmountFilterStore } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 import { DateCell } from "@/shared/components/design-system/table/cells/DateCell";
 
 interface DelegationData {
@@ -48,7 +48,7 @@ export const DelegationHistoryTable = ({
   daoId,
 }: DelegationHistoryTableProps) => {
   const limit: number = 20;
-  const { decimals } = daoConfig[daoId];
+  const { decimals } = daoConfigByDaoId[daoId];
   const [isMounted, setIsMounted] = useState<boolean>(false);
 
   const [sortBy, setSortBy] = useQueryState(

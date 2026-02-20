@@ -1,8 +1,8 @@
 import { ImageResponse } from "next/og";
 import { ALL_DAOS, DaoIdEnum } from "@/shared/types/daos";
 import daoConfig from "@/shared/dao-config";
-import { AnticaptureGlobeLogoSvg } from "./anticapture-globe-logo-svg";
-import { loadLocalFonts } from "./fonts";
+import { AnticaptureGlobeLogoSvg } from "@/shared/og/anticapture-globe-logo-svg";
+import { loadLocalFonts } from "@/shared/og/fonts";
 
 const DAO_ICON_SIZE = 300;
 
@@ -38,23 +38,21 @@ export async function createDaoSectionOgImage({
 }: DaoSectionOgImageProps) {
   if (!isValidDaoId(daoId)) {
     return new ImageResponse(
-      (
-        <div
-          style={{
-            width: "100%",
-            height: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: OG_COLORS.background,
-            color: OG_COLORS.accent,
-            fontFamily: "monospace",
-            fontSize: 48,
-          }}
-        >
-          Unknown DAO
-        </div>
-      ),
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: OG_COLORS.background,
+          color: OG_COLORS.accent,
+          fontFamily: "monospace",
+          fontSize: 48,
+        }}
+      >
+        Unknown DAO
+      </div>,
       OG_DIMENSIONS,
     );
   }

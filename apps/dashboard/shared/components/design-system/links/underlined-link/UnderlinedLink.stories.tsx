@@ -1,8 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
 
 import { UnderlinedLink } from "@/shared/components/design-system/links/underlined-link/UnderlinedLink";
-import { ExternalLinkIcon } from "lucide-react";
-import { Key } from "lucide-react";
+import { ExternalLinkIcon, Key } from "lucide-react";
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta: Meta<typeof UnderlinedLink> = {

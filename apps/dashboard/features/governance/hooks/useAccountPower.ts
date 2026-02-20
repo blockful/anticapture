@@ -64,9 +64,7 @@ export const useVoterInfo = ({
   return {
     accountPower: data.votingPowerByAccountId,
     votingPower: formatNumberUserReadable(
-      Number(
-        formatUnits(BigInt(rawVotingPower), decimals),
-      ),
+      Number(formatUnits(BigInt(rawVotingPower), decimals)),
     ),
     rawVotingPower,
     votes: data.votesByProposalId || null,

@@ -348,9 +348,9 @@ export const TabsDidntVoteContent = ({
         },
         header: () => (
           <Tooltip tooltipContent="Shows the voting power change within 30 days before voting starts">
-              <p className="border-border-contrast hover:border-primary border-b border-dashed transition-colors duration-300">
-                VP Change (Last 30d)
-              </p>
+            <p className="border-border-contrast hover:border-primary border-b border-dashed transition-colors duration-300">
+              VP Change (Last 30d)
+            </p>
           </Tooltip>
         ),
       },
