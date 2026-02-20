@@ -187,8 +187,10 @@ export const FeedEventItem = ({
               href={
                 config?.governancePage
                   ? `/${daoId}/governance/proposal/${event.metadata.proposalId}`
-                  : `https://tally.xyz/proposal/${event.metadata.proposalId}`
+                  : `${config?.daoOverview?.govPlatform?.url ?? ""}${event.metadata.proposalId}`
               }
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-primary font-medium transition-colors"
             >
               {event.metadata.proposalId.length > 10
@@ -227,7 +229,13 @@ export const FeedEventItem = ({
             </span>{" "}
             <span className="text-secondary">created the proposal</span>{" "}
             <Link
-              href={`/${daoId}/governance/proposal/${event.metadata.id}`}
+              href={
+                config?.governancePage
+                  ? `/${daoId}/governance/proposal/${event.metadata.id}`
+                  : `${config?.daoOverview?.govPlatform?.url ?? ""}${event.metadata.id}`
+              }
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-primary hover:text-link font-medium transition-colors"
             >
               {event.metadata.title}
@@ -250,7 +258,13 @@ export const FeedEventItem = ({
             <span className="text-secondary">
               Proposal{" "}
               <Link
-                href={`/${daoId}/governance/proposal/${event.metadata.id}`}
+                href={
+                  config?.governancePage
+                    ? `/${daoId}/governance/proposal/${event.metadata.id}`
+                    : `${config?.daoOverview?.govPlatform?.url ?? ""}${event.metadata.id}`
+                }
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-primary hover:text-link font-medium transition-colors"
               >
                 {event.metadata.title}
