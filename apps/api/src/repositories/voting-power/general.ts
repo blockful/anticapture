@@ -22,7 +22,7 @@ import {
 
 import {
   AmountFilter,
-  DBAccountPower,
+  DBAccountPowerWithVariation,
   DBVotingPowerVariation,
   DBHistoricalVotingPowerWithRelations,
 } from "@/mappers";
@@ -283,20 +283,72 @@ export class VotingPowerRepository {
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
-    orderBy: "votingPower" | "delegationsCount",
+    orderBy: "votingPower" | "delegationsCount" | "variation",
     amountFilter: AmountFilter,
     addresses: Address[],
-  ): Promise<{ items: DBAccountPower[]; totalCount: number }> {
-    const orderColumn =
-      orderBy === "votingPower"
-        ? accountPower.votingPower
-        : accountPower.delegationsCount;
+    fromDate?: number,
+    toDate?: number,
+  ): Promise<{ items: DBAccountPowerWithVariation[]; totalCount: number }> {
+    const variationSubquery = this.db
+      .select({
+        accountId: votingPowerHistory.accountId,
+        absoluteChange: sql<bigint>`SUM(${votingPowerHistory.delta})`.as(
+          "absolute_change",
+        ),
+      })
+      .from(votingPowerHistory)
+      .where(
+        and(
+          fromDate
+            ? gte(votingPowerHistory.timestamp, BigInt(fromDate))
+            : undefined,
+          toDate
+            ? lte(votingPowerHistory.timestamp, BigInt(toDate))
+            : undefined,
+        ),
+      )
+      .groupBy(votingPowerHistory.accountId)
+      .as("variation");
+
+    const absoluteChangeSql = sql<bigint>`COALESCE(${variationSubquery.absoluteChange}, 0)`;
+    const percentageChangeSql = sql<number>`
+      CASE
+        WHEN (${accountPower.votingPower} - COALESCE(${variationSubquery.absoluteChange}, 0)) = 0 THEN 0
+        ELSE ROUND((COALESCE(${variationSubquery.absoluteChange}, 0)::numeric / (${accountPower.votingPower} - COALESCE(${variationSubquery.absoluteChange}, 0))::numeric) * 100, 2)
+      END
+    `;
+
+    const orderDirectionFn = orderDirection === "desc" ? desc : asc;
+    const orderSql =
+      orderBy === "variation"
+        ? orderDirectionFn(
+            sql`ABS(COALESCE(${variationSubquery.absoluteChange}, 0))`,
+          )
+        : orderDirectionFn(
+            orderBy === "votingPower"
+              ? accountPower.votingPower
+              : accountPower.delegationsCount,
+          );
 
     const items = await this.db
-      .select()
+      .select({
+        accountId: accountPower.accountId,
+        daoId: accountPower.daoId,
+        votingPower: accountPower.votingPower,
+        votesCount: accountPower.votesCount,
+        proposalsCount: accountPower.proposalsCount,
+        delegationsCount: accountPower.delegationsCount,
+        lastVoteTimestamp: accountPower.lastVoteTimestamp,
+        absoluteChange: absoluteChangeSql,
+        percentageChange: percentageChangeSql,
+      })
       .from(accountPower)
+      .leftJoin(
+        variationSubquery,
+        eq(accountPower.accountId, variationSubquery.accountId),
+      )
       .where(this.filterToSql(addresses, amountFilter))
-      .orderBy(orderDirection === "desc" ? desc(orderColumn) : asc(orderColumn))
+      .orderBy(orderSql)
       .offset(skip)
       .limit(limit);
 
@@ -308,28 +360,60 @@ export class VotingPowerRepository {
       .where(this.filterToSql(addresses, amountFilter));
 
     return {
-      items,
+      items: items.map((row) => ({
+        ...row,
+        absoluteChange: BigInt(row.absoluteChange ?? 0),
+        percentageChange: Number(row.percentageChange ?? 0),
+      })),
       totalCount: Number(totalCount?.count ?? 0),
     };
   }
 
   async getVotingPowersByAccountId(
     accountId: Address,
-  ): Promise<DBAccountPower> {
+  ): Promise<DBAccountPowerWithVariation> {
+    const variationSubquery = this.db
+      .select({
+        accountId: votingPowerHistory.accountId,
+        absoluteChange: sql<bigint>`SUM(${votingPowerHistory.delta})`.as(
+          "absolute_change",
+        ),
+      })
+      .from(votingPowerHistory)
+      .where(eq(votingPowerHistory.accountId, accountId))
+      .groupBy(votingPowerHistory.accountId)
+      .as("variation");
+
     const [result] = await this.db
-      .select()
+      .select({
+        accountId: accountPower.accountId,
+        daoId: accountPower.daoId,
+        votingPower: accountPower.votingPower,
+        votesCount: accountPower.votesCount,
+        proposalsCount: accountPower.proposalsCount,
+        delegationsCount: accountPower.delegationsCount,
+        lastVoteTimestamp: accountPower.lastVoteTimestamp,
+        absoluteChange:
+          sql<bigint>`COALESCE(${variationSubquery.absoluteChange}, 0)`,
+        percentageChange: sql<number>`
+          CASE
+            WHEN (${accountPower.votingPower} - COALESCE(${variationSubquery.absoluteChange}, 0)) = 0 THEN 0
+            ELSE ROUND((COALESCE(${variationSubquery.absoluteChange}, 0)::numeric / (${accountPower.votingPower} - COALESCE(${variationSubquery.absoluteChange}, 0))::numeric) * 100, 2)
+          END
+        `,
+      })
       .from(accountPower)
+      .leftJoin(
+        variationSubquery,
+        eq(accountPower.accountId, variationSubquery.accountId),
+      )
       .where(eq(accountPower.accountId, accountId));
 
     return result
       ? {
-          accountId: result.accountId,
-          votingPower: result.votingPower,
-          delegationsCount: result.delegationsCount,
-          votesCount: result.votesCount,
-          proposalsCount: result.proposalsCount,
-          daoId: result.daoId,
-          lastVoteTimestamp: result.lastVoteTimestamp,
+          ...result,
+          absoluteChange: BigInt(result.absoluteChange ?? 0),
+          percentageChange: Number(result.percentageChange ?? 0),
         }
       : {
           accountId: accountId,
@@ -339,6 +423,8 @@ export class VotingPowerRepository {
           proposalsCount: 0,
           daoId: "",
           lastVoteTimestamp: 0n,
+          absoluteChange: 0n,
+          percentageChange: 0,
         };
   }
 
