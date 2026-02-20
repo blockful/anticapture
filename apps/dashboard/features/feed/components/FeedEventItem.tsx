@@ -26,6 +26,7 @@ import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatu
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 import { BulletDivider } from "@/shared/components/design-system/section";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import { Button } from "@/shared/components/design-system/buttons/button/Button";
 
 interface FeedEventItemProps {
   event: FeedEvent;
@@ -197,14 +198,16 @@ export const FeedEventItem = ({
                 ? `${event.metadata.proposalId.slice(0, 6)}...${event.metadata.proposalId.slice(-4)}`
                 : event.metadata.proposalId}
             </Link>{" "}
-            <a
-              href={explorerUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-secondary hover:text-primary inline-flex align-middle transition-colors"
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className="inline-flex align-middle p-1"
             >
-              <ExternalLink className="size-3.5" />
-            </a>
+              <Link href={explorerUrl} target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="size-3.5" />
+              </Link>
+            </Button>
           </div>
         );
 
@@ -240,14 +243,16 @@ export const FeedEventItem = ({
             >
               {event.metadata.title}
             </Link>{" "}
-            <a
-              href={explorerUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-secondary hover:text-primary inline-flex align-middle transition-colors"
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className="inline-flex align-middle p-1"
             >
-              <ExternalLink className="size-3.5" />
-            </a>
+              <Link href={explorerUrl} target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="size-3.5" />
+              </Link>
+            </Button>
           </div>
         );
 
@@ -271,14 +276,16 @@ export const FeedEventItem = ({
               </Link>{" "}
               extended to {formatTime(Number(event.metadata.endTimestamp))}
             </span>{" "}
-            <a
-              href={explorerUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-secondary hover:text-primary inline-flex align-middle transition-colors"
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className="inline-flex align-middle p-1"
             >
-              <ExternalLink className="size-3.5" />
-            </a>
+              <Link href={explorerUrl} target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="size-3.5" />
+              </Link>
+            </Button>
           </div>
         );
 
@@ -317,14 +324,16 @@ export const FeedEventItem = ({
               className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
               iconSize="md"
             />
-            <a
-              href={explorerUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-secondary hover:text-primary inline-flex align-middle transition-colors"
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className="inline-flex align-middle p-1"
             >
-              <ExternalLink className="size-3.5" />
-            </a>
+              <Link href={explorerUrl} target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="size-3.5" />
+              </Link>
+            </Button>
           </div>
         );
 
@@ -387,14 +396,16 @@ export const FeedEventItem = ({
               className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
               iconSize="md"
             />{" "}
-            <a
-              href={explorerUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-secondary hover:text-primary inline-flex align-middle transition-colors"
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className="inline-flex align-middle p-1"
             >
-              <ExternalLink className="size-3.5" />
-            </a>
+              <Link href={explorerUrl} target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="size-3.5" />
+              </Link>
+            </Button>
           </div>
         );
       }
@@ -429,14 +440,16 @@ export const FeedEventItem = ({
             >
               {formatAmount(event.metadata.deltaMod)} {tokenSymbol}
             </span>{" "}
-            <a
-              href={explorerUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-secondary hover:text-primary inline-flex align-middle transition-colors"
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className="inline-flex align-middle p-1"
             >
-              <ExternalLink className="size-3.5" />
-            </a>
+              <Link href={explorerUrl} target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="size-3.5" />
+              </Link>
+            </Button>
           </div>
         );
       }
