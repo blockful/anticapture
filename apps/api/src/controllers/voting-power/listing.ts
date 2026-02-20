@@ -41,6 +41,8 @@ export function votingPowers(app: Hono, service: VotingPowerService) {
         addresses,
         fromValue,
         toValue,
+        fromDate,
+        toDate,
       } = context.req.valid("query");
 
       const { items, totalCount } = await service.getVotingPowers(
@@ -53,6 +55,8 @@ export function votingPowers(app: Hono, service: VotingPowerService) {
           maxAmount: toValue,
         },
         addresses,
+        fromDate,
+        toDate,
       );
 
       return context.json(VotingPowersMapper(items, totalCount));
