@@ -1,0 +1,24 @@
+query GetAddresses($input: batchAddressEnrichment_request_Input) {
+  batchAddressEnrichment(input: $input) {
+    results {
+      address
+      isContract
+      arkham {
+        entity
+        entityType
+        label
+        twitter
+      }
+      ens {
+        name
+        avatar
+        banner
+      }
+      createdAt
+    }
+    errors {
+      address
+      error
+    }
+  }
+}
