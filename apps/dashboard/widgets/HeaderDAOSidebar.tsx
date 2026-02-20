@@ -7,7 +7,7 @@ import {
   HeaderDAOSidebarDropdown,
   ButtonHeaderSidebar,
 } from "@/shared/components";
-import { BarChart, Gauge, Landmark, UserCheck } from "lucide-react";
+import { BarChart, Bomb, Landmark, UserCheck } from "lucide-react";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { ArrowRightLeft, PieChart } from "lucide-react";
 import { Crosshair2Icon } from "@radix-ui/react-icons";
@@ -59,21 +59,21 @@ export const HeaderDAOSidebar = () => {
                   isCollapsed={isCollapsed}
                 />
               )}
-            {daoConfig.riskAnalysis && (
-              <ButtonHeaderSidebar
-                page={PAGES_CONSTANTS.riskAnalysis.page}
-                icon={Gauge}
-                label={PAGES_CONSTANTS.riskAnalysis.title}
-                key={PAGES_CONSTANTS.riskAnalysis.title}
-                isCollapsed={isCollapsed}
-              />
-            )}
             {daoConfig.resilienceStages && (
               <ButtonHeaderSidebar
                 page={PAGES_CONSTANTS.resilienceStages.page}
                 icon={BarChart}
                 label={PAGES_CONSTANTS.resilienceStages.title}
                 key={PAGES_CONSTANTS.resilienceStages.title}
+                isCollapsed={isCollapsed}
+              />
+            )}
+            {daoConfig.attackExposure && (
+              <ButtonHeaderSidebar
+                page={PAGES_CONSTANTS.attackExposure.page}
+                icon={Bomb}
+                label={PAGES_CONSTANTS.attackExposure.title}
+                key={PAGES_CONSTANTS.attackExposure.title}
                 isCollapsed={isCollapsed}
               />
             )}

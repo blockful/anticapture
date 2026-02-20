@@ -109,7 +109,7 @@ const RiskAreaCardInternal = ({
     >
       <div
         className={cn(
-          "flex h-full items-center px-2 py-4",
+          "flex h-full items-center px-2 py-2 lg:py-5",
           !isPanelTable ? "flex-1 justify-between" : "size-7 p-0 text-center",
           {
             "bg-surface-contrast": risk.level === RiskLevel.NONE,
@@ -268,7 +268,7 @@ export const RiskAreaCard = ({
         description={riskInfo.description}
         riskLevel={riskArea.level}
       >
-        <div className="px- relative h-[48px]">
+        <div className="relative h-12">
           <RiskAreaCardInternal
             risk={riskArea}
             isActive={isActive}
@@ -279,7 +279,7 @@ export const RiskAreaCard = ({
       </RiskTooltipCard>
     ),
     [RiskAreaCardEnum.RISK_ANALYSIS]: (
-      <div className="flex h-[62px] w-full">
+      <div className="flex min-w-40 lg:w-full">
         <div
           className={cn(
             "w-full p-1.5",
@@ -294,7 +294,7 @@ export const RiskAreaCard = ({
             variant={variant}
           />
         </div>
-        <div className="hidden h-full w-[13px] items-center justify-center lg:flex">
+        <div className="hidden w-[13px] items-center justify-center lg:flex">
           {isActive && (
             <div className="border-l-middle-dark border-y-13 border-l-13 size-0 border-y-transparent" />
           )}
@@ -365,14 +365,14 @@ export const RiskAreaCardWrapper = ({
               openInNewTab={false}
               className="text-primary border-border-contrast hover:border-primary border-b border-dashed font-mono text-[13px] font-medium tracking-wider"
             >
-              RISK AREAS
+              ATTACK EXPOSURE
             </DefaultLink>
             <TooltipInfo text="Assess critical vulnerabilities in the DAO's governance setup. Each item highlights a specific risk area, showing which issues are resolved and which still expose the system to threats." />
           </div>
         ))}
       <div className={cn("", className)}>
         {riskAreas.map((risk: RiskArea, index: number) => {
-          if (risk.name === RiskAreaEnum.ATTACK_PROFITABILITY) {
+          if (risk.name === RiskAreaEnum.ECONOMIC_SECURITY) {
             const daoIdEnum = daoId?.toUpperCase() as DaoIdEnum;
             const daoConstants = daoConfig[daoIdEnum];
             const riskValue = !daoConstants?.attackProfitability
