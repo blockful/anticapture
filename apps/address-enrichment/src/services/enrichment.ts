@@ -6,23 +6,26 @@ import type { AddressEnrichment } from "@/db/schema";
 import { ArkhamClient } from "@/clients/arkham";
 import { ENSClient } from "@/clients/ens";
 import { isContract, createRpcClient } from "@/utils/address-type";
+import z from "zod";
 
-export interface EnrichmentResult {
-  address: string;
-  isContract: boolean;
-  arkham: {
-    entity: string | null;
-    entityType: string | null;
-    label: string | null;
-    twitter: string | null;
-  } | null;
-  ens: {
-    name: string | null;
-    avatar: string | null;
-    banner: string | null;
-  } | null;
-  createdAt: string;
-}
+export const EnrichmentResultSchema = z.object({
+  address: z.string(),
+  isContract: z.boolean(),
+  arkham: z.object({
+    entity: z.string().nullable(),
+    entityType: z.string().nullable(),
+    label: z.string().nullable(),
+    twitter: z.string().nullable(),
+  }).nullable(),
+  ens: z.object({
+    name: z.string().nullable(),
+    avatar: z.string().nullable(),
+    banner: z.string().nullable(),
+  }).nullable(),
+  createdAt: z.string(),
+})
+
+export type EnrichmentResult = z.infer<typeof EnrichmentResultSchema>;
 
 export class EnrichmentService {
   private arkhamClient: ArkhamClient;
@@ -101,7 +104,7 @@ export class EnrichmentService {
     ) {
       isContractAddress = arkhamData.isContract;
     } else {
-      isContractAddress = await isContract(this.rpcClient, normalizedAddress);
+      isContractAddress = await isContract(this.rpcClient, getAddress(normalizedAddress));
     }
 
     const now = new Date();
@@ -170,7 +173,7 @@ export class EnrichmentService {
   private mapToResult(record: AddressEnrichment): EnrichmentResult {
     const hasEnsData = record.ensName !== null;
 
-    return {
+    return EnrichmentResultSchema.parse({
       address: record.address,
       isContract: record.isContract,
       arkham: {
@@ -187,6 +190,6 @@ export class EnrichmentService {
         }
         : null,
       createdAt: record.createdAt.toISOString(),
-    };
+    });
   }
 }
