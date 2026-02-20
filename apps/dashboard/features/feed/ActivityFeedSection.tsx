@@ -30,7 +30,10 @@ const getLocalDateKey = (date: Date): string => {
 };
 
 // Helper to group events by date
-const groupEventsByDate = (events: FeedEvent[], sortOrder: "asc" | "desc" = "desc") => {
+const groupEventsByDate = (
+  events: FeedEvent[],
+  sortOrder: "asc" | "desc" = "desc",
+) => {
   const groups: {
     label: string;
     date: string;
@@ -200,7 +203,7 @@ export const ActivityFeedSection = ({
         <Button
           variant="primary"
           onClick={() => setIsFilterDrawerOpen(true)}
-          className="shrink-0 gap-1"
+          className="w-full shrink-0 gap-1 lg:w-auto"
         >
           <Filter className="size-4" />
           Filters

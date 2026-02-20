@@ -42,7 +42,12 @@ export const TheSectionLayout = ({
         className,
       )}
     >
-      <div className="flex items-start justify-between gap-4">
+      <div
+        className={cn(
+          "flex items-start justify-between gap-4",
+          headerAction && "flex-col lg:flex-row",
+        )}
+      >
         <SectionTitle
           icon={icon}
           title={title}
