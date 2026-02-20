@@ -30,7 +30,7 @@ const getLocalDateKey = (date: Date): string => {
 };
 
 // Helper to group events by date
-const groupEventsByDate = (events: FeedEvent[]) => {
+const groupEventsByDate = (events: FeedEvent[], sortOrder: "asc" | "desc" = "desc") => {
   const groups: {
     label: string;
     date: string;
@@ -58,9 +58,9 @@ const groupEventsByDate = (events: FeedEvent[]) => {
     eventsByDate.get(dateKey)!.push(event);
   });
 
-  // Sort dates in descending order (comparing date strings works for YYYY-MM-DD format)
+  // Sort dates to match the selected sort order
   const sortedDates = Array.from(eventsByDate.keys()).sort((a, b) =>
-    b.localeCompare(a),
+    sortOrder === "asc" ? a.localeCompare(b) : b.localeCompare(a),
   );
 
   sortedDates.forEach((dateKey) => {
@@ -151,7 +151,10 @@ export const ActivityFeedSection = ({
     (filters.type ? 1 : 0);
 
   // Group events by date
-  const groupedEvents = useMemo(() => groupEventsByDate(events), [events]);
+  const groupedEvents = useMemo(
+    () => groupEventsByDate(events, filters.sortOrder),
+    [events, filters.sortOrder],
+  );
 
   // Infinite scroll with Intersection Observer
   const loadMoreRef = useRef<HTMLDivElement>(null);
