@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "db:generate": "drizzle-kit generate",
     "dev": "tsx src/index.ts",
     "dev:watch": "tsx watch src/index.ts",
     "build": "tsup",
@@ -21,6 +22,7 @@
     "@types/node": "^20.16.5",
     "@types/pg": "^8.15.6",
     "dotenv": "^16.5.0",
+    "drizzle-kit": "^0.31.9",
     "msw": "^2.12.10",
     "tsup": "^8.5.1",
     "tsx": "^4.21.0",

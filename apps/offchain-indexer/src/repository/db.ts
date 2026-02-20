@@ -1,4 +1,5 @@
 import { eq, sql } from "drizzle-orm";
+import { migrate } from "drizzle-orm/node-postgres/migrator";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 
 import type { Repository } from "@/repository/db.interface";
@@ -9,11 +10,8 @@ export class DrizzleRepository implements Repository {
   private constructor(private readonly db: NodePgDatabase<typeof schema>) {}
 
   static async create(db: NodePgDatabase<typeof schema>): Promise<DrizzleRepository> {
-    const repo = new DrizzleRepository(db);
-    await db.execute(
-      sql`CREATE SCHEMA IF NOT EXISTS snapshot`,
-    );
-    return repo;
+    await migrate(db, { migrationsFolder: "./drizzle" });
+    return new DrizzleRepository(db);
   }
 
   async resetCursor(entity: string): Promise<void> {

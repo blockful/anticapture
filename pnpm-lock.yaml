@@ -473,6 +473,9 @@ importers:
       dotenv:
         specifier: ^16.5.0
         version: 16.6.1
+      drizzle-kit:
+        specifier: ^0.31.9
+        version: 0.31.9
       msw:
         specifier: ^2.12.10
         version: 2.12.10(@types/node@20.19.33)(typescript@5.9.3)
