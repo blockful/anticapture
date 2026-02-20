@@ -1,15 +1,17 @@
 import { createRoute, OpenAPIHono as Hono, z } from "@hono/zod-openapi";
 import { AccountBalanceService } from "@/services";
 import {
+  AccountBalanceRequestParamSchema,
+  AccountBalanceRequestQuerySchema,
   AccountBalancesRequestSchema,
   AccountBalancesWithVariationResponseMapper,
   AccountBalancesWithVariationResponseSchema,
+  AccountBalanceWithVariationResponseMapper,
+  AccountBalanceWithVariationResponseSchema,
 } from "@/mappers";
 import {
-  AccountBalanceResponseMapper,
   AccountBalanceResponseSchema,
 } from "@/mappers";
-import { getAddress, isAddress } from "viem";
 import { DaoIdEnum, DaysEnum } from "@/lib/enums";
 
 export function accountBalances(
@@ -52,13 +54,14 @@ export function accountBalances(
         fromDate,
         toDate,
       } = context.req.valid("query");
-      const now = Math.floor(Date.now() / 1000);
-      const ninetyDaysBack = now - DaysEnum["90d"];
+      const now = Math.floor(Date.now() / 1000)
+      const fromTimestamp = fromDate ?? now - DaysEnum["90d"];
+      const toTimestamp = toDate ?? now;
 
       const result = await service.getAccountBalances(
         daoId,
-        fromDate ?? ninetyDaysBack,
-        toDate ?? now,
+        fromTimestamp,
+        toTimestamp,
         skip,
         limit,
         orderDirection,
@@ -72,7 +75,12 @@ export function accountBalances(
       );
 
       return context.json(
-        AccountBalancesWithVariationResponseMapper(result.items, result.totalCount),
+        AccountBalancesWithVariationResponseMapper(
+          result.items,
+          result.totalCount,
+          fromTimestamp,
+          toTimestamp,
+        ),
       );
     },
   );
@@ -86,19 +94,15 @@ export function accountBalances(
       description: "Returns account balance information for a specific address",
       tags: ["account-balances"],
       request: {
-        params: z.object({
-          address: z
-            .string()
-            .refine((addr) => isAddress(addr, { strict: false }))
-            .transform((addr) => getAddress(addr)),
-        }),
+        params: AccountBalanceRequestParamSchema,
+        query: AccountBalanceRequestQuerySchema,
       },
       responses: {
         200: {
           description: "Successfully retrieved account balance",
           content: {
             "application/json": {
-              schema: AccountBalanceResponseSchema,
+              schema: AccountBalanceWithVariationResponseSchema,
             },
           },
         },
@@ -106,8 +110,22 @@ export function accountBalances(
     }),
     async (context) => {
       const { address } = context.req.valid("param");
-      const result = await service.getAccountBalance(address);
-      return context.json(AccountBalanceResponseMapper(result));
+      const { fromDate, toDate } = context.req.valid("query");
+      const now = Math.floor(Date.now() / 1000)
+      const fromTimestamp = fromDate ?? now - DaysEnum["90d"];
+      const toTimestamp = toDate ?? now;
+
+      const result = await service.getAccountBalanceWithVariation(
+        address,
+        fromTimestamp,
+        toTimestamp,
+      );
+
+      return context.json(AccountBalanceWithVariationResponseMapper(
+        result,
+        fromTimestamp,
+        toTimestamp,
+      ));
     },
   );
 }

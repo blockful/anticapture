@@ -20,7 +20,11 @@ interface AccountBalanceRepository {
     totalCount: bigint;
   }>;
 
-  getAccountBalance(accountId: Address): Promise<DBAccountBalance | undefined>;
+  getAccountBalanceWithVariation(
+    accountId: Address,
+    variationFromTimestamp: number,
+    variationToTimestamp: number,
+  ): Promise<DBAccountBalanceWithVariation | undefined>;
 }
 
 export class AccountBalanceService {
@@ -56,8 +60,16 @@ export class AccountBalanceService {
     );
   }
 
-  async getAccountBalance(accountId: Address): Promise<DBAccountBalance> {
-    const result = await this.repo.getAccountBalance(accountId);
+  async getAccountBalanceWithVariation(
+    accountId: Address,
+    variationFromTimestamp: number,
+    variationToTimestamp: number,
+  ): Promise<DBAccountBalanceWithVariation> {
+    const result = await this.repo.getAccountBalanceWithVariation(
+      accountId,
+      variationFromTimestamp,
+      variationToTimestamp
+    );
 
     if (!result) {
       throw new Error("Account not found");

@@ -1,6 +1,7 @@
 import { z } from "@hono/zod-openapi";
 import { accountBalance } from "@/database";
 import { Address, getAddress, isAddress } from "viem";
+import { PeriodResponseSchema, TimestampResponseMapper } from "../shared";
 
 export const AccountBalancesRequestSchema = z.object({
   fromDate: z
@@ -66,6 +67,24 @@ export const AccountBalancesRequestSchema = z.object({
     .optional(),
 });
 
+export const AccountBalanceRequestParamSchema = z.object({
+  address: z
+    .string()
+    .refine((addr) => isAddress(addr, { strict: false }))
+    .transform((addr) => getAddress(addr)),
+})
+
+export const AccountBalanceRequestQuerySchema = z.object({
+  fromDate: z
+    .string()
+    .transform((val) => Number(val))
+    .optional(),
+  toDate: z
+    .string()
+    .transform((val) => Number(val))
+    .optional(),
+})
+
 export const AccountBalanceResponseSchema = z.object({
   address: z.string(),
   balance: z.string(),
@@ -73,23 +92,35 @@ export const AccountBalanceResponseSchema = z.object({
   delegate: z.string(),
 });
 
-export const AccountBalanceWithVariationResponseSchema = z.object({
+export const AccountBalanceWithVariationSchema = z.object({
   address: z.string(),
   balance: z.string(),
-  previousBalance: z.string(),
   tokenId: z.string(),
   delegate: z.string(),
-  absoluteChange: z.string(),
-  percentageChange: z.string(),
+  variation: z.object({
+    previousBalance: z.string(),
+    absoluteChange: z.string(),
+    percentageChange: z.string(),
+  })
 });
 
 export const AccountBalancesWithVariationResponseSchema = z.object({
-  items: z.array(AccountBalanceWithVariationResponseSchema),
+  items: z.array(AccountBalanceWithVariationSchema),
+  period: PeriodResponseSchema,
   totalCount: z.number(),
+});
+
+export const AccountBalanceWithVariationResponseSchema = z.object({
+  data: AccountBalanceWithVariationSchema,
+  period: PeriodResponseSchema,
 });
 
 export type AccountBalanceResponse = z.infer<
   typeof AccountBalanceResponseSchema
+>;
+
+export type AccountBalanceWithVariation = z.infer<
+  typeof AccountBalanceWithVariationSchema
 >;
 
 export type AccountBalanceWithVariationResponse = z.infer<
@@ -103,35 +134,46 @@ export type AccountBalancesWithVariationResponse = z.infer<
 export const AccountBalancesWithVariationResponseMapper = (
   items: DBAccountBalanceWithVariation[],
   totalCount: bigint,
+  startTimestamp: number | undefined,
+  endTimestamp: number | undefined,
 ): AccountBalancesWithVariationResponse => {
   return {
+    items: items.map((item) => AccountBalanceWithVariationMapper(item)),
     totalCount: Number(totalCount),
-    items: items.map((item) => AccountBalanceWithVariationResponseMapper(item)),
+    period: PeriodResponseSchema.parse({
+      startTimestamp: TimestampResponseMapper(startTimestamp),
+      endTimestamp: TimestampResponseMapper(endTimestamp),
+    })
   };
 };
 
 export const AccountBalanceWithVariationResponseMapper = (
-  item: DBAccountBalanceWithVariation,
+  data: DBAccountBalanceWithVariation,
+  startTimestamp: number | undefined,
+  endTimestamp: number | undefined,
 ): AccountBalanceWithVariationResponse => {
+  return {
+    data: AccountBalanceWithVariationMapper(data),
+    period: PeriodResponseSchema.parse({
+      startTimestamp: TimestampResponseMapper(startTimestamp),
+      endTimestamp: TimestampResponseMapper(endTimestamp),
+    })
+  };
+}
+
+export const AccountBalanceWithVariationMapper = (
+  item: DBAccountBalanceWithVariation,
+): AccountBalanceWithVariation => {
   return {
     address: item.accountId,
     balance: item.currentBalance.toString(),
     tokenId: item.tokenId,
-    absoluteChange: item.absoluteChange.toString(),
     delegate: item.delegate,
-    percentageChange: item.percentageChange,
-    previousBalance: item.previousBalance.toString()
-  };
-};
-
-export const AccountBalanceResponseMapper = (
-  item: DBAccountBalance,
-): AccountBalanceResponse => {
-  return {
-    address: item.accountId,
-    balance: item.balance.toString(),
-    tokenId: item.tokenId,
-    delegate: item.delegate,
+    variation: {
+      absoluteChange: item.absoluteChange.toString(),
+      percentageChange: item.percentageChange,
+      previousBalance: item.previousBalance.toString()
+    }
   };
 };
 
