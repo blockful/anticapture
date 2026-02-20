@@ -22,7 +22,7 @@ export function getDaoRelevanceThreshold(daoId: DaoIdEnum): {
         [FeedEventType.TRANSFER]: thresholds(1n, 3n, 10n),
         [FeedEventType.DELEGATION]: thresholds(1n, 3n, 10n),
         [FeedEventType.VOTE]: thresholds(1n, 5n, 20n),
-        [FeedEventType.DELEGATION_VOTES_CHANGED]: thresholds(1n, 3n, 10n),
+        // [FeedEventType.DELEGATION_VOTES_CHANGED]: thresholds(1n, 3n, 10n),
         [FeedEventType.PROPOSAL]: thresholds(0n, 0n, 0n),
         [FeedEventType.PROPOSAL_EXTENDED]: thresholds(0n, 0n, 0n),
       };
@@ -43,11 +43,11 @@ export function getDaoRelevanceThreshold(daoId: DaoIdEnum): {
           parseEther("100000"),
           parseEther("500000"),
         ),
-        [FeedEventType.DELEGATION_VOTES_CHANGED]: thresholds(
-          parseEther("1000"),
-          parseEther("10000"),
-          parseEther("100000"),
-        ),
+        // [FeedEventType.DELEGATION_VOTES_CHANGED]: thresholds(
+        //   parseEther("1000"),
+        //   parseEther("10000"),
+        //   parseEther("100000"),
+        // ),
         [FeedEventType.PROPOSAL]: thresholds(0n, 0n, 0n),
         [FeedEventType.PROPOSAL_EXTENDED]: thresholds(0n, 0n, 0n),
       };

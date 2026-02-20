@@ -14,6 +14,7 @@ import {
   UserCheck,
   ArrowRightLeft,
   PieChart,
+  Newspaper,
 } from "lucide-react";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { Crosshair2Icon } from "@radix-ui/react-icons";
@@ -111,6 +112,14 @@ export const HeaderDAOSidebar = () => {
                 isCollapsed={isCollapsed}
               />
             )}
+
+            <ButtonHeaderSidebar
+              page={PAGES_CONSTANTS.activityFeed.page}
+              icon={Newspaper}
+              label={PAGES_CONSTANTS.activityFeed.title}
+              key={PAGES_CONSTANTS.activityFeed.title}
+              isCollapsed={isCollapsed}
+            />
           </div>
         </div>
       </div>
