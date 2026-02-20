@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { formatUnits } from "viem";
-import { BulletDivider } from "@/features/governance/components/proposal-overview/BulletDivider";
+import { BulletDivider } from "@/shared/components/design-system/section/BulletDivider";
 import { ProposalInfoText } from "@/features/governance/components/proposal-overview/ProposalInfoText";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 
@@ -32,7 +32,7 @@ const VotingProgressBar = ({
   const elapsedTime = now - startTime;
   const progressPercentage = Math.min(
     Math.max((elapsedTime / totalDuration) * 100, 0),
-    100
+    100,
   );
 
   return (
@@ -46,7 +46,7 @@ const VotingProgressBar = ({
       {/* Pulsing indicator */}
       <div className="relative flex size-4 shrink-0 items-center justify-center">
         {/* Pulse ring animation */}
-        <div className="bg-link absolute size-1 animate-pulse-ring rounded-full" />
+        <div className="bg-link animate-pulse-ring absolute size-1 rounded-full" />
         {/* Static center dot */}
         <div className="bg-link relative size-1 rounded-full" />
       </div>
@@ -225,7 +225,7 @@ export const ProposalInfoSection = ({
         <div className="flex items-center gap-2">
           <Users className="text-secondary size-3.5" />
           <Tooltip tooltipContent='Only "For" and "Abstain" votes are counted'>
-            <p className="text-secondary border-border-contrast hover:border-primary transition-colors duration-300 border-b border-dashed font-mono text-[13px] font-medium uppercase not-italic leading-[20px] tracking-[0.78px]">
+            <p className="text-secondary border-border-contrast hover:border-primary border-b border-dashed font-mono text-[13px] font-medium uppercase not-italic leading-[20px] tracking-[0.78px] transition-colors duration-300">
               Quorum
             </p>
           </Tooltip>
