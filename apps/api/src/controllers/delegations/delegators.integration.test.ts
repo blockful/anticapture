@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
-import { Address } from "viem";
+import { Address, getAddress } from "viem";
 import { delegators } from "./delegators";
 import {
   DelegatorsService,
@@ -70,7 +70,7 @@ describe("Delegators Controller - Integration Tests", () => {
       expect(body).toEqual({
         items: [
           {
-            delegatorAddress: delegator.delegatorAddress,
+            delegatorAddress: getAddress(delegator.delegatorAddress),
             amount: delegator.amount.toString(),
             timestamp: delegator.timestamp.toString(),
           },
