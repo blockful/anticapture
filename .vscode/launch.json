@@ -26,7 +26,21 @@
       "name": "api",
       "skipFiles": ["<node_internals>/**"],
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["run", "dev:watch"],
+      "runtimeArgs": ["run", "dev"],
+      "env": {
+        "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json",
+        "ENV_FILE": "${workspaceFolder}/apps/api/.env"
+      },
+      "outFiles": ["${workspaceFolder}/**/*.js", "!**/node_modules/**"],
+      "cwd": "${workspaceFolder}/apps/api"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "api test",
+      "skipFiles": ["<node_internals>/**"],
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["run", "test:watch"],
       "env": {
         "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json",
         "ENV_FILE": "${workspaceFolder}/apps/api/.env"

@@ -48,6 +48,10 @@ export const proposalsFinalResultMapping = {
     text: "Pending",
     icon: <Clock10 className="text-secondary size-4" />,
   },
+  PENDING_EXECUTION: {
+    text: "Pending Execution",
+    icon: <Clock10 className="text-secondary size-4" />,
+  },
   ACTIVE: {
     text: "Ongoing",
     icon: <ActivityIndicator className="text-warning" />,

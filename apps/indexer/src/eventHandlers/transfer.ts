@@ -1,6 +1,11 @@
 import { Context } from "ponder:registry";
 import { Address, getAddress, Hex, zeroAddress } from "viem";
-import { accountBalance, balanceHistory, transfer } from "ponder:schema";
+import {
+  accountBalance,
+  balanceHistory,
+  feedEvent,
+  transfer,
+} from "ponder:schema";
 
 import { DaoIdEnum } from "@/lib/enums";
 import { ensureAccountExists } from "./shared";
@@ -119,10 +124,10 @@ export const tokenTransfer = async (
       .onConflictDoNothing();
   }
 
-  const normalizedCex = cex.map(getAddress);
-  const normalizedDex = dex.map(getAddress);
-  const normalizedLending = lending.map(getAddress);
-  const normalizedBurning = burning.map(getAddress);
+  const normalizedCex = cex.map((a) => getAddress(a));
+  const normalizedDex = dex.map((a) => getAddress(a));
+  const normalizedLending = lending.map((a) => getAddress(a));
+  const normalizedBurning = burning.map((a) => getAddress(a));
 
   await context.db
     .insert(transfer)
@@ -151,4 +156,18 @@ export const tokenTransfer = async (
     .onConflictDoUpdate((current) => ({
       amount: current.amount + value,
     }));
+
+  // Insert feed event for activity feed
+  await context.db.insert(feedEvent).values({
+    txHash: transactionHash,
+    logIndex,
+    type: "TRANSFER",
+    value,
+    timestamp,
+    metadata: {
+      from: normalizedFrom,
+      to: normalizedTo,
+      amount: value,
+    },
+  });
 };

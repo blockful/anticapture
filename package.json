@@ -13,7 +13,8 @@
     "lint": "turbo lint",
     "lint:fix": "turbo lint:fix",
     "typecheck": "turbo typecheck",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test": "turbo test"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
