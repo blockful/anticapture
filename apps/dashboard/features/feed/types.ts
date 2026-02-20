@@ -5,8 +5,9 @@ import {
   Query_FeedEvents_Items_Items_Type,
 } from "@anticapture/graphql-client";
 
-export type FeedEventRelevance = Query_FeedEvents_Items_Items_Relevance;
-export type FeedEventType = Query_FeedEvents_Items_Items_Type;
+export { Query_FeedEvents_Items_Items_Relevance as FeedEventRelevance };
+
+export { Query_FeedEvents_Items_Items_Type as FeedEventType };
 
 export interface VoteDetail {
   voter: Address;
