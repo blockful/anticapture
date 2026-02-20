@@ -264,3 +264,32 @@ export const tokenPrice = pgTable("token_price", (drizzle) => ({
   price: bigint({ mode: "bigint" }).notNull(), // price in ETH
   timestamp: bigint({ mode: "bigint" }).primaryKey(),
 }));
+
+export const evenTypeEnum = pgEnum("event_type", [
+  "VOTE",
+  "PROPOSAL",
+  "DELEGATION",
+  "TRANSFER",
+  "DELEGATION_VOTES_CHANGED",
+  "PROPOSAL_EXTENDED",
+]);
+
+export const feedEvent = pgTable(
+  "feed_event",
+  (drizzle) => ({
+    txHash: drizzle.text().notNull(),
+    logIndex: drizzle.integer().notNull(),
+    type: evenTypeEnum("type").notNull(),
+    value: bigint({ mode: "bigint" }).notNull().default(0n),
+    timestamp: bigint({ mode: "number" }).notNull(),
+    metadata: drizzle.json().$type<Record<string, unknown>>(),
+  }),
+  (table) => [
+    primaryKey({
+      columns: [table.txHash, table.logIndex],
+    }),
+    index().on(table.timestamp),
+    index().on(table.type),
+    index().on(table.value),
+  ],
+);

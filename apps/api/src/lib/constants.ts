@@ -59,19 +59,6 @@ export const CONTRACT_ADDRESSES = {
       startBlock: 71801427,
     },
   },
-  [DaoIdEnum.TEST]: {
-    blockTime: 12,
-    tokenType: "ERC20",
-    token: {
-      address: "0x244dE6b06E7087110b94Cde88A42d9aBA17efa52",
-      decimals: 18,
-      startBlock: 22635098,
-    },
-    governor: {
-      address: "0x7c28FC9709650D49c8d0aED2f6ece6b191F192a9",
-      startBlock: 22635098,
-    },
-  },
   [DaoIdEnum.GTC]: {
     blockTime: 12,
     // https://etherscan.io/address/0xDe30da39c46104798bB5aA3fe8B9e0e1F348163F
@@ -196,7 +183,6 @@ export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     timelock: "0xb1a32fc9f9d8b2cf86c068cae13108809547ef71",
     auction: "0x830BD73E4184ceF73443C15111a1DF14e495C706",
   },
-  [DaoIdEnum.TEST]: {},
   [DaoIdEnum.GTC]: {
     "Gitcoin Timelock": "0x57a8865cfB1eCEf7253c27da6B4BC3dAEE5Be518",
     "Gitcoin CSDO": "0x931896A8A9313F622a2AFCA76d1471B97955e551",
@@ -346,3 +332,18 @@ export const MetricTypesArray = Object.values(MetricTypesEnum) as [
   string,
   ...string[],
 ];
+
+export enum FeedRelevance {
+  HIGH = "HIGH",
+  MEDIUM = "MEDIUM",
+  LOW = "LOW",
+}
+
+export enum FeedEventType {
+  VOTE = "VOTE",
+  PROPOSAL = "PROPOSAL",
+  DELEGATION = "DELEGATION",
+  TRANSFER = "TRANSFER",
+  DELEGATION_VOTES_CHANGED = "DELEGATION_VOTES_CHANGED",
+  PROPOSAL_EXTENDED = "PROPOSAL_EXTENDED",
+}
