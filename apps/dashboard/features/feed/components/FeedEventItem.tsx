@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { Address, formatUnits, zeroAddress } from "viem";
+import { formatUnits, zeroAddress } from "viem";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -232,6 +232,31 @@ export const FeedEventItem = ({
             >
               {event.metadata.title}
             </Link>{" "}
+            <a
+              href={explorerUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-secondary hover:text-primary inline-flex align-middle transition-colors"
+            >
+              <ExternalLink className="size-3.5" />
+            </a>
+          </p>
+        );
+
+      case FeedEventType.ProposalExtended:
+        if (!event.metadata) return null;
+        return (
+          <p className="leading-relaxed">
+            <span className="text-secondary">
+              Proposal{" "}
+              <Link
+                href={`/${daoId}/governance/proposal/${event.metadata.id}`}
+                className="text-primary hover:text-link font-medium transition-colors"
+              >
+                {event.metadata.title}
+              </Link>{" "}
+              extended to {formatTime(Number(event.metadata.endTimestamp))}
+            </span>{" "}
             <a
               href={explorerUrl}
               target="_blank"

@@ -196,118 +196,116 @@ export const ActivityFeedSection = ({
     <TheSectionLayout
       title={PAGES_CONSTANTS.activityFeed.title}
       icon={<Newspaper className="section-layout-icon" />}
-        description={PAGES_CONSTANTS.activityFeed.description}
-        headerAction={
-          <Button
-            variant="primary"
-            onClick={() => setIsFilterDrawerOpen(true)}
-            className="shrink-0 gap-1"
-          >
-            <Filter className="size-4" />
-            Filters
-            {activeFiltersCount > 0 && (
-              <span className="text-inverted">({activeFiltersCount})</span>
-            )}
-          </Button>
-        }
-      >
-        {/* Filter Drawer */}
-        <ActivityFeedFiltersDrawer
-          isOpen={isFilterDrawerOpen}
-          onClose={() => setIsFilterDrawerOpen(false)}
-          filters={filters}
-          onApplyFilters={setFilters}
-        />
+      description={PAGES_CONSTANTS.activityFeed.description}
+      headerAction={
+        <Button
+          variant="primary"
+          onClick={() => setIsFilterDrawerOpen(true)}
+          className="shrink-0 gap-1"
+        >
+          <Filter className="size-4" />
+          Filters
+          {activeFiltersCount > 0 && (
+            <span className="text-inverted">({activeFiltersCount})</span>
+          )}
+        </Button>
+      }
+    >
+      {/* Filter Drawer */}
+      <ActivityFeedFiltersDrawer
+        isOpen={isFilterDrawerOpen}
+        onClose={() => setIsFilterDrawerOpen(false)}
+        filters={filters}
+        onApplyFilters={setFilters}
+      />
 
-        {/* Feed content */}
-        <div className={cn("flex flex-col gap-2", className)}>
-          {error && (
-            <SubSectionsContainer>
-              <div className="flex flex-col items-center justify-center gap-2 px-4 py-8">
-                <p className="text-error text-sm">
-                  Failed to load activity feed
-                </p>
+      {/* Feed content */}
+      <div className={cn("flex flex-col gap-2", className)}>
+        {error && (
+          <SubSectionsContainer>
+            <div className="flex flex-col items-center justify-center gap-2 px-4 py-8">
+              <p className="text-error text-sm">Failed to load activity feed</p>
+              <button
+                onClick={() => refetch()}
+                className="text-link hover:text-link-hover text-sm underline"
+              >
+                Try again
+              </button>
+            </div>
+          </SubSectionsContainer>
+        )}
+
+        {loading && events.length === 0 && (
+          <SubSectionsContainer>
+            <div className="flex flex-col">
+              {Array.from({ length: 10 }).map((_, i) => (
+                <FeedEventSkeleton key={i} />
+              ))}
+            </div>
+          </SubSectionsContainer>
+        )}
+
+        {!loading && events.length === 0 && !error && (
+          <SubSectionsContainer>
+            <BlankSlate
+              variant="default"
+              icon={Activity}
+              description="No activity found"
+            >
+              {activeFiltersCount > 0 && (
                 <button
-                  onClick={() => refetch()}
+                  onClick={clearFilters}
                   className="text-link hover:text-link-hover text-sm underline"
                 >
-                  Try again
+                  Clear filters
                 </button>
+              )}
+            </BlankSlate>
+          </SubSectionsContainer>
+        )}
+
+        {groupedEvents.map((group) => (
+          <SubSectionsContainer
+            className="py-0 sm:py-0 lg:py-0"
+            key={group.date}
+          >
+            {/* Sticky date header */}
+            <div className="bg-surface-contrast sticky top-0 z-10 px-5 py-3 sm:-mx-5">
+              <div className="flex items-center gap-2">
+                <span className="text-primary font-mono text-xs font-medium uppercase">
+                  {group.label}
+                </span>
+                <BulletDivider />
+                <span className="text-secondary font-mono text-xs">
+                  {group.highRelevanceCount} HIGH RELEVANCE{" "}
+                  {group.highRelevanceCount === 1 ? "ACTIVITY" : "ACTIVITIES"}
+                </span>
               </div>
-            </SubSectionsContainer>
-          )}
-
-          {loading && events.length === 0 && (
-            <SubSectionsContainer>
-              <div className="flex flex-col">
-                {Array.from({ length: 10 }).map((_, i) => (
-                  <FeedEventSkeleton key={i} />
-                ))}
-              </div>
-            </SubSectionsContainer>
-          )}
-
-          {!loading && events.length === 0 && !error && (
-            <SubSectionsContainer>
-              <BlankSlate
-                variant="default"
-                icon={Activity}
-                description="No activity found"
-              >
-                {activeFiltersCount > 0 && (
-                  <button
-                    onClick={clearFilters}
-                    className="text-link hover:text-link-hover text-sm underline"
-                  >
-                    Clear filters
-                  </button>
-                )}
-              </BlankSlate>
-            </SubSectionsContainer>
-          )}
-
-          {groupedEvents.map((group) => (
-            <SubSectionsContainer
-              className="py-0 sm:py-0 lg:py-0"
-              key={group.date}
-            >
-              {/* Sticky date header */}
-              <div className="bg-surface-contrast sticky top-0 z-10 px-5 py-3 sm:-mx-5">
-                <div className="flex items-center gap-2">
-                  <span className="text-primary font-mono text-xs font-medium uppercase">
-                    {group.label}
-                  </span>
-                  <BulletDivider />
-                  <span className="text-secondary font-mono text-xs">
-                    {group.highRelevanceCount} HIGH RELEVANCE{" "}
-                    {group.highRelevanceCount === 1 ? "ACTIVITY" : "ACTIVITIES"}
-                  </span>
-                </div>
-              </div>
-
-              {/* Events */}
-              <div className="flex flex-col">
-                {group.events.map((event, index) => (
-                  <FeedEventItem
-                    key={`${event.txHash}-${event.logIndex}`}
-                    event={event}
-                    isLast={index === group.events.length - 1}
-                  />
-                ))}
-              </div>
-            </SubSectionsContainer>
-          ))}
-
-          {/* Infinite scroll sentinel */}
-          <div ref={loadMoreRef} className="h-1" />
-
-          {/* Loading indicator */}
-          {isLoadingMore && (
-            <div className="flex justify-center py-4">
-              <Loader2 className="text-secondary size-6 animate-spin" />
             </div>
-          )}
-        </div>
+
+            {/* Events */}
+            <div className="flex flex-col">
+              {group.events.map((event, index) => (
+                <FeedEventItem
+                  key={`${event.txHash}-${event.logIndex}`}
+                  event={event}
+                  isLast={index === group.events.length - 1}
+                />
+              ))}
+            </div>
+          </SubSectionsContainer>
+        ))}
+
+        {/* Infinite scroll sentinel */}
+        <div ref={loadMoreRef} className="h-1" />
+
+        {/* Loading indicator */}
+        {isLoadingMore && (
+          <div className="flex justify-center py-4">
+            <Loader2 className="text-secondary size-6 animate-spin" />
+          </div>
+        )}
+      </div>
     </TheSectionLayout>
   );
 };

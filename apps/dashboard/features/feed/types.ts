@@ -52,7 +52,7 @@ export interface DelegationVotesChangedDetail {
 }
 
 type FeedEventBase = {
-  logIndex: Number;
+  logIndex: number;
   relevance: Query_FeedEvents_Items_Items_Relevance;
   timestamp: number;
   txHash: string;
