@@ -7,6 +7,7 @@ import { GlobalProviders } from "@/shared/providers/GlobalProviders";
 import { ReactNode } from "react";
 import ConditionalPostHog from "@/shared/services/posthog/ConditionalPostHog";
 import UmamiScript from "@/shared/services/umami";
+import GoogleAnalytics from "@/shared/services/google-analytics";
 import { Inter, Roboto_Mono } from "next/font/google";
 import { CookieConsent } from "@/features/cookie";
 import { HelpPopover } from "@/shared/components";
@@ -82,6 +83,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <Toaster position="bottom-left" reverseOrder={false} />
           <ConditionalPostHog />
           <UmamiScript />
+          <GoogleAnalytics />
         </div>
       </body>
     </html>
