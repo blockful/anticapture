@@ -12,8 +12,11 @@ import { HeaderNavMobile } from "@/widgets";
 import { TelegramIcon } from "@/shared/components/icons";
 import { ANTICAPTURE_TELEGRAM_BOT } from "@/shared/constants/social-media";
 
-
-export const StickyPageHeader = ({ withMobileMenu = true }: { withMobileMenu?: boolean }) => {
+export const StickyPageHeader = ({
+  withMobileMenu = true,
+}: {
+  withMobileMenu?: boolean;
+}) => {
   const [lastScrollY, setLastScrollY] = useState<number>(0);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 

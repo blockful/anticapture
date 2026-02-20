@@ -11,8 +11,10 @@ import {
   Dot,
 } from "recharts";
 import { ChartContainer } from "@/shared/components/ui/chart";
-import { timestampToReadableDate } from "@/shared/utils";
-import { formatNumberUserReadable } from "@/shared/utils";
+import {
+  timestampToReadableDate,
+  formatNumberUserReadable,
+} from "@/shared/utils";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { DelegationHistoryGraphItem } from "@/features/holders-and-delegates/hooks";
 import { useDelegateDelegationHistoryGraph } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistoryGraph";

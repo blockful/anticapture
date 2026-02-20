@@ -7,7 +7,10 @@ import {
   useDelegates,
   HoldersAndDelegatesDrawer,
 } from "@/features/holders-and-delegates";
-import { getAvgVoteTimingData } from "@/features/holders-and-delegates/utils";
+import {
+  getAvgVoteTimingData,
+  DEFAULT_ITEMS_PER_PAGE,
+} from "@/features/holders-and-delegates/utils";
 import { TimeInterval } from "@/shared/types/enums";
 import { SkeletonRow, Button, SimpleProgressBar } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
@@ -30,7 +33,6 @@ import {
 } from "@anticapture/graphql-client";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
-import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
 interface DelegateTableData {
   address: string;
@@ -138,8 +140,8 @@ export const Delegates = ({
 
       const activityPercentage = delegate.proposalsActivity
         ? (delegate.proposalsActivity.votedProposals /
-          delegate.proposalsActivity.totalProposals) *
-        100
+            delegate.proposalsActivity.totalProposals) *
+          100
         : null;
 
       const avgVoteTiming = getAvgVoteTimingData(
@@ -289,9 +291,9 @@ export const Delegates = ({
 
         const variation = row.getValue("variation") as
           | {
-            percentageChange: number;
-            absoluteChange: number;
-          }
+              percentageChange: number;
+              absoluteChange: number;
+            }
           | undefined;
 
         if (isHistoricalLoadingFor(addr) || loading) {

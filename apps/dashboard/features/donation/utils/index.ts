@@ -1,1 +1,1 @@
-export * from "./donation-constants";
+export * from "@/features/donation/utils/donation-constants";

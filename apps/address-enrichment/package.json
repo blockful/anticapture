@@ -7,8 +7,8 @@
     "build": "tsup src/index.ts --format esm --clean",
     "start": "node dist/index.mjs",
     "sync": "tsx src/scripts/sync-top-addresses.ts",
-    "lint": "eslint . --ext .ts",
-    "lint:fix": "eslint . --ext .ts --fix",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf node_modules dist *.tsbuildinfo"
   },
@@ -27,9 +27,6 @@
   "devDependencies": {
     "@types/node": "^20.16.5",
     "@types/pg": "^8.11.10",
-    "eslint": "^8.53.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-prettier": "^5.2.1",
     "prettier": "^3.5.3",
     "tsup": "^8.5.1",
     "tsx": "^4.19.4",

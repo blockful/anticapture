@@ -40,7 +40,14 @@ export const getRadioState = (
 
 export const RadioIndicator = forwardRef<HTMLInputElement, RadioIndicatorProps>(
   (
-    { checked, disabled, className, indicatorClassName, enableGroupHover = true, ...props },
+    {
+      checked,
+      disabled,
+      className,
+      indicatorClassName,
+      enableGroupHover = true,
+      ...props
+    },
     ref,
   ) => {
     const state = getRadioState(checked, disabled);

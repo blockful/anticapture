@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/shared/utils";
 import { RadioButton } from "@/shared/components/design-system/buttons/RadioButton";
-import { Button } from "@/shared/components/design-system/buttons/button/Button";
 
 export interface SortOption {
   value: string;

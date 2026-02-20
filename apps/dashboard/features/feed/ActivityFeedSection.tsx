@@ -5,15 +5,16 @@ import { useParams } from "next/navigation";
 import { Activity, Filter, Loader2, Newspaper } from "lucide-react";
 import { cn } from "@/shared/utils";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { Button, BlankSlate } from "@/shared/components";
+import { Button, BlankSlate, TheSectionLayout } from "@/shared/components";
 import { useActivityFeed } from "@/features/feed/hooks/useActivityFeed";
 import { FeedEventItem } from "@/features/feed/components/FeedEventItem";
 import { FeedEventSkeleton } from "@/features/feed/components/FeedEventSkeleton";
 import { ActivityFeedFiltersDrawer } from "@/features/feed/components/ActivityFeedFilters";
-import { TheSectionLayout } from "@/shared/components";
-import { SubSectionsContainer } from "@/shared/components/design-system/section";
+import {
+  SubSectionsContainer,
+  BulletDivider,
+} from "@/shared/components/design-system/section";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
-import { BulletDivider } from "@/shared/components/design-system/section";
 import { FeedEvent, FeedEventRelevance } from "@/features/feed/types";
 import { useActivityFeedParams } from "@/features/feed/hooks/useActivityFeedParams";
 

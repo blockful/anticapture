@@ -21,7 +21,6 @@ import { parseUnits } from "viem";
 import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
 import { AddressFilter } from "@/shared/components/design-system/table/filters";
 import { fetchAddressFromEnsName } from "@/shared/hooks/useEnsData";
-import daoConfig from "@/shared/dao-config";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { DaoIdEnum } from "@/shared/types/daos";
 import {
@@ -58,7 +57,7 @@ export const BalanceHistoryTable = ({
   toTimestamp?: number;
 }) => {
   const limit: number = 20;
-  const { decimals } = daoConfig[daoId];
+  const { decimals } = daoConfigByDaoId[daoId];
 
   const [typeFilter, setTypeFilter] = useQueryState(
     "type",

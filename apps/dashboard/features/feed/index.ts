@@ -1,5 +1,5 @@
-export { ActivityFeedSection } from "./ActivityFeedSection";
-export { useActivityFeed } from "./hooks/useActivityFeed";
+export { ActivityFeedSection } from "@/features/feed/ActivityFeedSection";
+export { useActivityFeed } from "@/features/feed/hooks/useActivityFeed";
 export type {
   FeedEvent,
   FeedEventType,
@@ -10,9 +10,9 @@ export type {
   DelegationDetail,
   ActivityFeedFilters,
   ActivityFeedFilterState,
-} from "./types";
+} from "@/features/feed/types";
 export {
   FeedEventItem,
   FeedEventSkeleton,
   ActivityFeedFiltersDrawer,
-} from "./components";
+} from "@/features/feed/components";

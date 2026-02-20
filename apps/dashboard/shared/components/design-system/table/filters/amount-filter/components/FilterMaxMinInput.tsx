@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { cn } from "@/shared/utils";
 import { ArrowRightIcon } from "@radix-ui/react-icons";
 import { Input } from "@/shared/components/design-system/form/fields";
 

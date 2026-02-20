@@ -29,10 +29,7 @@ export class AnticaptureClient {
   /**
    * Fetches top delegates by voting power
    */
-  async *streamTopDelegates(
-    daoId: string,
-    pageSize: number = 100
-  ) {
+  async *streamTopDelegates(daoId: string, pageSize: number = 100) {
     const query = `
     query GetTopDelegates(
       $limit: PositiveInt!,
@@ -64,7 +61,7 @@ export class AnticaptureClient {
           limit: pageSize,
           skip,
         },
-        daoId
+        daoId,
       );
 
       const items = response.votingPowers.items;
@@ -84,10 +81,7 @@ export class AnticaptureClient {
   /**
    * Streams top token holders by balance using offset pagination
    */
-  async *streamTopTokenHolders(
-    daoId: string,
-    pageSize: number = 100
-  ) {
+  async *streamTopTokenHolders(daoId: string, pageSize: number = 100) {
     const query = `
     query GetTopTokenHolders(
       $limit: PositiveInt!,
@@ -118,7 +112,7 @@ export class AnticaptureClient {
           limit: pageSize,
           skip,
         },
-        daoId
+        daoId,
       );
 
       const items = response.accountBalances.items;

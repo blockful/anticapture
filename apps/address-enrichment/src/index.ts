@@ -5,7 +5,7 @@ import { logger } from "hono/logger";
 import { cors } from "hono/cors";
 
 import { env } from "@/env";
-import { initDb, runMigrations } from "@/db";
+import { initDb } from "@/db";
 import { ArkhamClient } from "@/clients/arkham";
 import { ENSClient } from "@/clients/ens";
 import { EnrichmentService } from "@/services/enrichment";

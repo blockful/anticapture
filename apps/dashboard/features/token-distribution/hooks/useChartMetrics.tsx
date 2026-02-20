@@ -7,8 +7,11 @@ import { useProposals } from "@/features/token-distribution/hooks/useProposals";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
-import { TokenMetricItem, PriceEntry } from "@/shared/dao-config/types";
-import { ChartDataSetPoint } from "@/shared/dao-config/types";
+import {
+  TokenMetricItem,
+  PriceEntry,
+  ChartDataSetPoint,
+} from "@/shared/dao-config/types";
 import { MetricSchema } from "@/features/token-distribution/utils/metrics";
 import { normalizeTimestamp } from "@/features/token-distribution/utils/chart";
 import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";

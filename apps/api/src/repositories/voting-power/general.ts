@@ -12,8 +12,8 @@ import {
   gte,
   lte,
 } from "drizzle-orm";
-import { Drizzle } from "@/database";
 import {
+  Drizzle,
   votingPowerHistory,
   delegation,
   transfer,

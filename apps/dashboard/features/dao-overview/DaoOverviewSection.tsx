@@ -24,7 +24,7 @@ import { MetricsCard } from "@/features/dao-overview/components/MetricsCard";
 import { AttackProfitabilityChartCard } from "@/features/dao-overview/components/AttackProfitabilityChartCard";
 import { useRouter } from "next/navigation";
 import { apolloClient } from "@/shared/providers/GlobalProviders";
-import { OngoingProposalBanner } from "./components/OngoingProposalBanner";
+import { OngoingProposalBanner } from "@/features/dao-overview/components/OngoingProposalBanner";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const router = useRouter();
@@ -132,9 +132,8 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           <div className="w-full">
             <VotingPowerChartCard daoId={daoId} />
           </div>
-          
         </div>
-        {daoConfig.governancePage && (<LastProposalsCard daoId={daoId} />)}
+        {daoConfig.governancePage && <LastProposalsCard daoId={daoId} />}
       </div>
     </Suspense>
   );

@@ -11,8 +11,7 @@ import {
   SQL,
   sql,
 } from "drizzle-orm";
-import { Drizzle } from "@/database";
-import { accountBalance } from "@/database";
+import { Drizzle, accountBalance } from "@/database";
 import { Address } from "viem";
 
 export class AccountBalanceRepository {

@@ -15,11 +15,10 @@ import {
   useDelegateDelegationHistory,
   DelegationHistoryItem,
 } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
-import daoConfigByDaoId from "@/shared/dao-config";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
 import { useAmountFilterStore } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
-import daoConfig from "@/shared/dao-config";
+import daoConfigByDaoId from "@/shared/dao-config";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import {
   parseAsBoolean,
@@ -45,7 +44,7 @@ export const VotingPowerHistoryTable = ({
   toTimestamp,
 }: VotingPowerHistoryTableProps) => {
   const limit: number = 20;
-  const { decimals } = daoConfig[daoId];
+  const { decimals } = daoConfigByDaoId[daoId];
 
   const [sortBy, setSortBy] = useQueryState(
     "orderBy",

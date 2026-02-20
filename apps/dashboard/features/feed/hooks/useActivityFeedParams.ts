@@ -64,7 +64,12 @@ export function useActivityFeedParams(): UseActivityFeedParamsReturn {
       setFromDate(newFilters.fromDate || null);
       setToDate(newFilters.toDate || null);
       setEventType(
-        (newFilters.type as unknown as QueryInput_FeedEvents_Type.Vote | QueryInput_FeedEvents_Type.Proposal | QueryInput_FeedEvents_Type.ProposalExtended | QueryInput_FeedEvents_Type.Transfer | QueryInput_FeedEvents_Type.Delegation) ?? null,
+        (newFilters.type as unknown as
+          | QueryInput_FeedEvents_Type.Vote
+          | QueryInput_FeedEvents_Type.Proposal
+          | QueryInput_FeedEvents_Type.ProposalExtended
+          | QueryInput_FeedEvents_Type.Transfer
+          | QueryInput_FeedEvents_Type.Delegation) ?? null,
       );
     },
     [setSortOrder, setRelevance, setFromDate, setToDate, setEventType],

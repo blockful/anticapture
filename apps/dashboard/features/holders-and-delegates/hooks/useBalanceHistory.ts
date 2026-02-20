@@ -11,7 +11,7 @@ import {
 } from "@anticapture/graphql-client/hooks";
 
 import { DaoIdEnum } from "@/shared/types/daos";
-import { AmountFilterVariables } from "./types";
+import { AmountFilterVariables } from "@/features/holders-and-delegates/hooks/types";
 import {
   QueryInput_Transfers_SortBy,
   QueryInput_Transfers_SortOrder,

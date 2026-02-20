@@ -6,7 +6,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@radix-ui/react-accordion";
-import { CheckCircle, MinusIcon } from "lucide-react";
+import { CheckCircle, MinusIcon, Plus } from "lucide-react";
 import { ReactNode } from "react";
 import { Stage } from "@/shared/types/enums/Stage";
 import { StageTagSimplified } from "@/shared/components/tags/StageTagSimplified";
@@ -15,7 +15,6 @@ import { formatPlural } from "@/shared/utils/formatPlural";
 import { StageContent } from "@/features/resilience-stages/components/StageContent";
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
 import { RiskLevel } from "@/shared/types/enums";
-import { Plus } from "lucide-react";
 import { DotFilledIcon } from "@radix-ui/react-icons";
 
 interface StageAccordionProps {

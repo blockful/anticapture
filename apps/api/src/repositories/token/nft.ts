@@ -1,5 +1,4 @@
-import { Drizzle } from "@/database";
-import { tokenPrice } from "@/database";
+import { Drizzle, tokenPrice } from "@/database";
 import { desc, sql } from "drizzle-orm";
 
 import { TokenHistoricalPriceResponse } from "@/mappers";

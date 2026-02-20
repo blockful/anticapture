@@ -77,7 +77,7 @@ export const LastProposalsCard = ({ daoId }: { daoId: DaoIdEnum }) => {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="border-x border-inverted mx-5">
+      <div className="border-inverted mx-5 border-x">
         <div className="lg:bg-surface-default flex w-full flex-col gap-4 lg:p-4">
           {/* Header */}
           <div className="flex items-center gap-2">

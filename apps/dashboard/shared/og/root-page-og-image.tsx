@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
-import { AnticaptureGlobeLogoSvg } from "./anticapture-globe-logo-svg";
-import { loadLocalFonts } from "./fonts";
+import { AnticaptureGlobeLogoSvg } from "@/shared/og/anticapture-globe-logo-svg";
+import { loadLocalFonts } from "@/shared/og/fonts";
 
 /** Figma design tokens */
 const OG_COLORS = {
@@ -26,96 +26,94 @@ export async function createRootPageOgImage({
   pageTitle,
 }: RootPageOgImageProps) {
   return new ImageResponse(
-    (
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: OG_COLORS.background,
+        padding: 48,
+        position: "relative",
+      }}
+    >
+      {/* Corner brackets */}
       <div
         style={{
-          width: "100%",
-          height: "100%",
+          position: "absolute",
+          top: 24,
+          left: 24,
+          width: 24,
+          height: 24,
+          borderLeft: `3px solid ${OG_COLORS.accent}`,
+          borderTop: `3px solid ${OG_COLORS.accent}`,
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          top: 24,
+          right: 24,
+          width: 24,
+          height: 24,
+          borderRight: `3px solid ${OG_COLORS.accent}`,
+          borderTop: `3px solid ${OG_COLORS.accent}`,
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          bottom: 24,
+          left: 24,
+          width: 24,
+          height: 24,
+          borderLeft: `3px solid ${OG_COLORS.accent}`,
+          borderBottom: `3px solid ${OG_COLORS.accent}`,
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          bottom: 24,
+          right: 24,
+          width: 24,
+          height: 24,
+          borderRight: `3px solid ${OG_COLORS.accent}`,
+          borderBottom: `3px solid ${OG_COLORS.accent}`,
+        }}
+      />
+
+      {/* Centered content: Logo and Title */}
+      <div
+        style={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: OG_COLORS.background,
-          padding: 48,
-          position: "relative",
+          gap: 32,
         }}
       >
-        {/* Corner brackets */}
-        <div
+        <AnticaptureGlobeLogoSvg width={700} />
+        <span
           style={{
-            position: "absolute",
-            top: 24,
-            left: 24,
-            width: 24,
-            height: 24,
-            borderLeft: `3px solid ${OG_COLORS.accent}`,
-            borderTop: `3px solid ${OG_COLORS.accent}`,
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            top: 24,
-            right: 24,
-            width: 24,
-            height: 24,
-            borderRight: `3px solid ${OG_COLORS.accent}`,
-            borderTop: `3px solid ${OG_COLORS.accent}`,
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            bottom: 24,
-            left: 24,
-            width: 24,
-            height: 24,
-            borderLeft: `3px solid ${OG_COLORS.accent}`,
-            borderBottom: `3px solid ${OG_COLORS.accent}`,
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            bottom: 24,
-            right: 24,
-            width: 24,
-            height: 24,
-            borderRight: `3px solid ${OG_COLORS.accent}`,
-            borderBottom: `3px solid ${OG_COLORS.accent}`,
-          }}
-        />
-
-        {/* Centered content: Logo and Title */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 32,
+            color: OG_COLORS.accent,
+            fontFamily: "Roboto Mono, monospace",
+            fontSize: 72,
+            fontWeight: 500,
+            letterSpacing: "0.1em",
+            lineHeight: 1.24,
+            textTransform: "uppercase",
+            textAlign: "center",
           }}
         >
-          <AnticaptureGlobeLogoSvg width={700} />
-          <span
-            style={{
-              color: OG_COLORS.accent,
-              fontFamily: "Roboto Mono, monospace",
-              fontSize: 72,
-              fontWeight: 500,
-              letterSpacing: "0.1em",
-              lineHeight: 1.24,
-              textTransform: "uppercase",
-              textAlign: "center",
-            }}
-          >
-            {"<"}
-            {pageTitle}
-            {">"}
-          </span>
-        </div>
+          {"<"}
+          {pageTitle}
+          {">"}
+        </span>
       </div>
-    ),
+    </div>,
     {
       ...OG_DIMENSIONS,
       fonts: await loadLocalFonts(),

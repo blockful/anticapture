@@ -1,2 +1,2 @@
-export * from "./DonationCard";
-export * from "./FundingSourcesCard";
+export * from "@/features/donation/components/DonationCard";
+export * from "@/features/donation/components/FundingSourcesCard";

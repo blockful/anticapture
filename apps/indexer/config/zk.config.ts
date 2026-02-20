@@ -33,4 +33,4 @@ export default createConfig({
       startBlock: ZK_CONTRACTS.governor.startBlock,
     },
   },
-})
+});

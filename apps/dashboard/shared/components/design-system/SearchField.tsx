@@ -1,4 +1,3 @@
-import { Search } from "lucide-react";
 import { InputHTMLAttributes } from "react";
 
 interface SearchFieldProps extends InputHTMLAttributes<HTMLInputElement> {

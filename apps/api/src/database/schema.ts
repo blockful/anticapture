@@ -260,7 +260,7 @@ export const transaction = pgTable("transaction", (drizzle) => ({
   timestamp: bigint({ mode: "bigint" }).notNull(),
 }));
 
-export const tokenPrice = pgTable("token_price", (drizzle) => ({
+export const tokenPrice = pgTable("token_price", (_drizzle) => ({
   price: bigint({ mode: "bigint" }).notNull(), // price in ETH
   timestamp: bigint({ mode: "bigint" }).primaryKey(),
 }));

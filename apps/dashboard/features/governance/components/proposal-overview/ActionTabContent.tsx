@@ -94,7 +94,7 @@ const ActionItem = ({
           <DefaultLink
             href={`${blockExplorerUrl}/address/${target}`}
             openInNewTab
-            className="text-secondary font-mono break-all text-sm font-normal not-italic leading-5"
+            className="text-secondary break-all font-mono text-sm font-normal not-italic leading-5"
           >
             {target}
           </DefaultLink>
@@ -107,7 +107,7 @@ const ActionItem = ({
             <div className="scrollbar-thin max-h-[248px] overflow-y-auto p-3">
               <p
                 className={`text-secondary font-mono text-sm font-normal not-italic leading-5 ${
-                  isDecoded  && !isLoading ? "whitespace-pre-wrap" : "break-all"
+                  isDecoded && !isLoading ? "whitespace-pre-wrap" : "break-all"
                 } ${isLoading ? "animate-pulse" : ""}`}
               >
                 {displayCalldata}

@@ -1,1 +1,1 @@
-export * from "./FaqCard";
+export * from "@/features/faq/components/FaqCard";
