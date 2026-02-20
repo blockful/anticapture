@@ -3,6 +3,14 @@ import { accountBalance } from "@/database";
 import { Address, getAddress, isAddress } from "viem";
 
 export const AccountBalancesRequestSchema = z.object({
+  fromDate: z
+    .string()
+    .transform((val) => Number(val))
+    .optional(),
+  toDate: z
+    .string()
+    .transform((val) => Number(val))
+    .optional(),
   limit: z.coerce
     .number()
     .int()
@@ -17,6 +25,7 @@ export const AccountBalancesRequestSchema = z.object({
     .optional()
     .default(0),
   orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
+  orderBy: z.enum(["balance", "variation"]).optional().default("balance"),
   addresses: z
     .union([
       z
@@ -64,8 +73,23 @@ export const AccountBalanceResponseSchema = z.object({
   delegate: z.string(),
 });
 
+export const AccountBalanceWithVariationResponseSchema = z.object({
+  address: z.string(),
+  balance: z.string(),
+  previousBalance: z.string(),
+  tokenId: z.string(),
+  delegate: z.string(),
+  absoluteChange: z.string(),
+  percentageChange: z.string(),
+});
+
 export const AccountBalancesResponseSchema = z.object({
   items: z.array(AccountBalanceResponseSchema),
+  totalCount: z.number(),
+});
+
+export const AccountBalancesWithVariationResponseSchema = z.object({
+  items: z.array(AccountBalanceWithVariationResponseSchema),
   totalCount: z.number(),
 });
 
@@ -77,13 +101,35 @@ export type AccountBalanceResponse = z.infer<
   typeof AccountBalanceResponseSchema
 >;
 
-export const AccountBalancesResponseMapper = (
-  items: DBAccountBalance[],
+export type AccountBalanceWithVariationResponse = z.infer<
+  typeof AccountBalanceWithVariationResponseSchema
+>;
+
+export type AccountBalancesWithVariationResponse = z.infer<
+  typeof AccountBalancesWithVariationResponseSchema
+>;
+
+export const AccountBalancesWithVariationResponseMapper = (
+  items: DBAccountBalanceWithVariation[],
   totalCount: bigint,
-): AccountBalancesResponse => {
+): AccountBalancesWithVariationResponse => {
   return {
     totalCount: Number(totalCount),
-    items: items.map((item) => AccountBalanceResponseMapper(item)),
+    items: items.map((item) => AccountBalanceWithVariationResponseMapper(item)),
+  };
+};
+
+export const AccountBalanceWithVariationResponseMapper = (
+  item: DBAccountBalanceWithVariation,
+): AccountBalanceWithVariationResponse => {
+  return {
+    address: item.accountId,
+    balance: item.currentBalance.toString(),
+    tokenId: item.tokenId,
+    absoluteChange: item.absoluteChange.toString(),
+    delegate: item.delegate,
+    percentageChange: item.percentageChange,
+    previousBalance: item.previousBalance.toString()
   };
 };
 
@@ -96,6 +142,16 @@ export const AccountBalanceResponseMapper = (
     tokenId: item.tokenId,
     delegate: item.delegate,
   };
+};
+
+export type DBAccountBalanceWithVariation = {
+  accountId: Address;
+  tokenId: Address;
+  delegate: Address;
+  previousBalance: bigint;
+  currentBalance: bigint;
+  absoluteChange: bigint;
+  percentageChange: string;
 };
 
 export type DBAccountBalance = typeof accountBalance.$inferSelect;

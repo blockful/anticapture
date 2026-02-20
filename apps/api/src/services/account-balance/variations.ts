@@ -4,6 +4,7 @@ import {
   Filter,
   DBAccountBalance,
   AmountFilter,
+  DBAccountBalanceWithVariation,
 } from "@/mappers";
 import { Address } from "viem";
 
@@ -11,15 +12,18 @@ interface AccountBalanceRepository {
   getAccountBalance(accountId: Address): Promise<DBAccountBalance | undefined>;
 
   getAccountBalances(
+    variationFromTimestamp: number,
+    variationToTimestamp: number,
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
+    orderBy: "balance" | "variation",
     addresses: Address[],
     delegates: Address[],
     excludeAddresses: Address[],
     amountfilter: AmountFilter,
   ): Promise<{
-    items: DBAccountBalance[];
+    items: DBAccountBalanceWithVariation[];
     totalCount: bigint;
   }>;
 }
@@ -82,8 +86,21 @@ export class BalanceVariationsService {
 
     const found = new Set(variations.map((v) => v.accountId))
     const missingResults = addresses.filter((addr) => !found.has(addr))
+    const now = Math.floor(Date.now() / 1000);
     const { items: balances } = await this.balanceRepository.getAccountBalances(
-      0, missingResults.length, "desc", missingResults, [], [], { maxAmount: undefined, minAmount: undefined }
+      now,
+      now,
+      0,
+      missingResults.length,
+      "desc",
+      "balance",
+      missingResults,
+      [],
+      [],
+      {
+        maxAmount: undefined,
+        minAmount: undefined
+      }
     )
 
     return addresses.map((address) => {
@@ -97,8 +114,8 @@ export class BalanceVariationsService {
 
       return {
         accountId: address,
-        previousBalance: balance?.balance ?? 0n,
-        currentBalance: balance?.balance ?? 0n,
+        previousBalance: balance?.currentBalance ?? 0n,
+        currentBalance: balance?.currentBalance ?? 0n,
         absoluteChange: 0n,
         percentageChange: "0",
       };

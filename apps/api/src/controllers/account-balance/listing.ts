@@ -2,15 +2,16 @@ import { createRoute, OpenAPIHono as Hono, z } from "@hono/zod-openapi";
 import { AccountBalanceService } from "@/services";
 import {
   AccountBalancesRequestSchema,
-  AccountBalancesResponseMapper,
+  AccountBalancesWithVariationResponseMapper,
   AccountBalancesResponseSchema,
+  AccountBalancesWithVariationResponseSchema,
 } from "@/mappers";
 import {
   AccountBalanceResponseMapper,
   AccountBalanceResponseSchema,
 } from "@/mappers";
 import { getAddress, isAddress } from "viem";
-import { DaoIdEnum } from "@/lib/enums";
+import { DaoIdEnum, DaysEnum } from "@/lib/enums";
 
 export function accountBalances(
   app: Hono,
@@ -33,7 +34,7 @@ export function accountBalances(
           description: "Successfully retrieved account balances",
           content: {
             "application/json": {
-              schema: AccountBalancesResponseSchema,
+              schema: AccountBalancesWithVariationResponseSchema,
             },
           },
         },
@@ -48,13 +49,21 @@ export function accountBalances(
         limit,
         skip,
         orderDirection,
+        orderBy,
+        fromDate,
+        toDate,
       } = context.req.valid("query");
+      const now = Math.floor(Date.now() / 1000);
+      const ninetyDaysBack = now - DaysEnum["90d"]
 
       const result = await service.getAccountBalances(
         daoId,
+        fromDate ?? ninetyDaysBack,
+        toDate ?? now,
         skip,
         limit,
         orderDirection,
+        orderBy,
         addresses,
         delegates,
         {
@@ -64,7 +73,7 @@ export function accountBalances(
       );
 
       return context.json(
-        AccountBalancesResponseMapper(result.items, result.totalCount),
+        AccountBalancesWithVariationResponseMapper(result.items, result.totalCount),
       );
     },
   );
