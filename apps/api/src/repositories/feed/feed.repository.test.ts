@@ -26,7 +26,7 @@ const defaultThresholds = (
   [FeedEventType.VOTE]: 0n,
   [FeedEventType.DELEGATION]: 0n,
   [FeedEventType.TRANSFER]: 0n,
-  [FeedEventType.DELEGATION_VOTES_CHANGED]: 0n,
+  // [FeedEventType.DELEGATION_VOTES_CHANGED]: 0n,
   [FeedEventType.PROPOSAL]: 0n,
   [FeedEventType.PROPOSAL_EXTENDED]: 0n,
   ...overrides,

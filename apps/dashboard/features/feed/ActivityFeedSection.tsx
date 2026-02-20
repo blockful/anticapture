@@ -14,11 +14,7 @@ import { TheSectionLayout } from "@/shared/components";
 import { SubSectionsContainer } from "@/shared/components/design-system/section";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { BulletDivider } from "@/shared/components/design-system/section";
-import {
-  FeedEvent,
-  FeedEventType,
-  FeedEventRelevance,
-} from "@/features/feed/types";
+import { FeedEvent, FeedEventRelevance } from "@/features/feed/types";
 import { useActivityFeedParams } from "@/features/feed/hooks/useActivityFeedParams";
 
 interface ActivityFeedSectionProps {
