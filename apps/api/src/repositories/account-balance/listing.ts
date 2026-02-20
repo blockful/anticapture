@@ -20,6 +20,52 @@ import { Address, getAddress } from "viem";
 export class AccountBalanceRepository {
   constructor(private readonly db: Drizzle) { }
 
+  async getAccountBalances(
+    skip: number,
+    limit: number,
+    orderDirection: "asc" | "desc",
+    addresses: Address[],
+    delegates: Address[],
+    excludeAddresses: Address[],
+    amountfilter: AmountFilter,
+  ): Promise<{
+    items: DBAccountBalance[];
+    totalCount: bigint;
+  }> {
+    const filter = this.filterToSql(
+      addresses,
+      delegates,
+      excludeAddresses,
+      amountfilter,
+    );
+
+    // Get total count with filters
+    const totalCount = await this.db
+      .select({
+        count: sql<number>`COUNT(*)`.as("count"),
+      })
+      .from(accountBalance)
+      .where(filter);
+
+    // Get paginated results
+    const page = await this.db
+      .select()
+      .from(accountBalance)
+      .where(filter)
+      .orderBy(
+        orderDirection === "desc"
+          ? desc(accountBalance.balance)
+          : asc(accountBalance.balance),
+      )
+      .offset(skip)
+      .limit(limit);
+
+    return {
+      items: page,
+      totalCount: BigInt(totalCount[0]?.count ?? 0),
+    };
+  }
+
   async getAccountBalance(
     accountId: Address,
   ): Promise<DBAccountBalance | undefined> {
@@ -32,7 +78,7 @@ export class AccountBalanceRepository {
     return result;
   }
 
-  async getAccountBalances(
+  async getAccountBalancesWithVariation(
     variationFromTimestamp: number,
     variationToTimestamp: number,
     skip: number,

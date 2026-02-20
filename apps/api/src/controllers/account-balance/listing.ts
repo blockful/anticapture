@@ -3,7 +3,6 @@ import { AccountBalanceService } from "@/services";
 import {
   AccountBalancesRequestSchema,
   AccountBalancesWithVariationResponseMapper,
-  AccountBalancesResponseSchema,
   AccountBalancesWithVariationResponseSchema,
 } from "@/mappers";
 import {

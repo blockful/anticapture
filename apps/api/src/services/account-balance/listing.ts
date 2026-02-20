@@ -1,10 +1,10 @@
 import { AmountFilter, DBAccountBalance, DBAccountBalanceWithVariation } from "@/mappers";
 import { TreasuryAddresses } from "@/lib/constants";
-import { DaoIdEnum, SECONDS_IN_DAY } from "@/lib/enums";
+import { DaoIdEnum } from "@/lib/enums";
 import { Address } from "viem";
 
 interface AccountBalanceRepository {
-  getAccountBalances(
+  getAccountBalancesWithVariation(
     variationFromTimestamp: number,
     variationToTimestamp: number,
     skip: number,
@@ -42,13 +42,7 @@ export class AccountBalanceService {
     totalCount: bigint;
   }> {
     const excludeAddresses = Object.values(TreasuryAddresses[daoId]);
-
-    console.log({
-      variationFromTimestamp,
-      variationToTimestamp,
-    })
-
-    return await this.repo.getAccountBalances(
+    return await this.repo.getAccountBalancesWithVariation(
       variationFromTimestamp,
       variationToTimestamp,
       skip,

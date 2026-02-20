@@ -12,6 +12,19 @@ interface AccountBalanceRepository {
   getAccountBalance(accountId: Address): Promise<DBAccountBalance | undefined>;
 
   getAccountBalances(
+    skip: number,
+    limit: number,
+    orderDirection: "asc" | "desc",
+    addresses: Address[],
+    delegates: Address[],
+    excludeAddresses: Address[],
+    amountfilter: AmountFilter,
+  ): Promise<{
+    items: DBAccountBalance[];
+    totalCount: bigint;
+  }>;
+
+  getAccountBalancesWithVariation(
     variationFromTimestamp: number,
     variationToTimestamp: number,
     skip: number,
@@ -86,14 +99,10 @@ export class BalanceVariationsService {
 
     const found = new Set(variations.map((v) => v.accountId))
     const missingResults = addresses.filter((addr) => !found.has(addr))
-    const now = Math.floor(Date.now() / 1000);
     const { items: balances } = await this.balanceRepository.getAccountBalances(
-      now,
-      now,
       0,
       missingResults.length,
       "desc",
-      "balance",
       missingResults,
       [],
       [],
@@ -114,8 +123,8 @@ export class BalanceVariationsService {
 
       return {
         accountId: address,
-        previousBalance: balance?.currentBalance ?? 0n,
-        currentBalance: balance?.currentBalance ?? 0n,
+        previousBalance: balance?.balance ?? 0n,
+        currentBalance: balance?.balance ?? 0n,
         absoluteChange: 0n,
         percentageChange: "0",
       };

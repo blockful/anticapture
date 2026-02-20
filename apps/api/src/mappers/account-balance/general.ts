@@ -83,19 +83,10 @@ export const AccountBalanceWithVariationResponseSchema = z.object({
   percentageChange: z.string(),
 });
 
-export const AccountBalancesResponseSchema = z.object({
-  items: z.array(AccountBalanceResponseSchema),
-  totalCount: z.number(),
-});
-
 export const AccountBalancesWithVariationResponseSchema = z.object({
   items: z.array(AccountBalanceWithVariationResponseSchema),
   totalCount: z.number(),
 });
-
-export type AccountBalancesResponse = z.infer<
-  typeof AccountBalancesResponseSchema
->;
 
 export type AccountBalanceResponse = z.infer<
   typeof AccountBalanceResponseSchema
