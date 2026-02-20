@@ -158,7 +158,6 @@ export class AccountBalanceRepository {
       .where(
         and(
           filter,
-          sql`${transfersFrom.accountId} IS NOT NULL OR ${transfersTo.accountId} IS NOT NULL`,
         )
       )
       .as("combined");
@@ -209,7 +208,7 @@ export class AccountBalanceRepository {
           : 0
         ).toString(),
       })),
-      totalCount: BigInt(totalCount?.count ?? 0)
+      totalCount: BigInt(totalCount?.count ?? 0),
     };
   }
 

@@ -53,7 +53,7 @@ export function accountBalances(
         toDate,
       } = context.req.valid("query");
       const now = Math.floor(Date.now() / 1000);
-      const ninetyDaysBack = now - DaysEnum["90d"]
+      const ninetyDaysBack = now - DaysEnum["90d"];
 
       const result = await service.getAccountBalances(
         daoId,
