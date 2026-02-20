@@ -184,6 +184,7 @@ export const FeedEventItem = ({
                     : "Abstain"}
               </span>{" "}
             </span>
+            <span className="text-secondary">on proposal</span>{" "}
             <Link
               href={
                 config?.governancePage
