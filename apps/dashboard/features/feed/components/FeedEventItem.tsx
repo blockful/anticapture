@@ -202,9 +202,13 @@ export const FeedEventItem = ({
               asChild
               variant="ghost"
               size="sm"
-              className="inline-flex align-middle p-1"
+              className="ml-1 inline-flex p-1 align-middle"
             >
-              <Link href={explorerUrl} target="_blank" rel="noopener noreferrer">
+              <Link
+                href={explorerUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <ExternalLink className="size-3.5" />
               </Link>
             </Button>
@@ -247,9 +251,13 @@ export const FeedEventItem = ({
               asChild
               variant="ghost"
               size="sm"
-              className="inline-flex align-middle p-1"
+              className="ml-1 inline-flex p-1 align-middle"
             >
-              <Link href={explorerUrl} target="_blank" rel="noopener noreferrer">
+              <Link
+                href={explorerUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <ExternalLink className="size-3.5" />
               </Link>
             </Button>
@@ -280,9 +288,13 @@ export const FeedEventItem = ({
               asChild
               variant="ghost"
               size="sm"
-              className="inline-flex align-middle p-1"
+              className="ml-1 inline-flex p-1 align-middle"
             >
-              <Link href={explorerUrl} target="_blank" rel="noopener noreferrer">
+              <Link
+                href={explorerUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <ExternalLink className="size-3.5" />
               </Link>
             </Button>
@@ -328,9 +340,13 @@ export const FeedEventItem = ({
               asChild
               variant="ghost"
               size="sm"
-              className="inline-flex align-middle p-1"
+              className="ml-1 inline-flex p-1 align-middle"
             >
-              <Link href={explorerUrl} target="_blank" rel="noopener noreferrer">
+              <Link
+                href={explorerUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <ExternalLink className="size-3.5" />
               </Link>
             </Button>
@@ -400,9 +416,13 @@ export const FeedEventItem = ({
               asChild
               variant="ghost"
               size="sm"
-              className="inline-flex align-middle p-1"
+              className="ml-1 inline-flex p-1 align-middle"
             >
-              <Link href={explorerUrl} target="_blank" rel="noopener noreferrer">
+              <Link
+                href={explorerUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <ExternalLink className="size-3.5" />
               </Link>
             </Button>
@@ -444,9 +464,13 @@ export const FeedEventItem = ({
               asChild
               variant="ghost"
               size="sm"
-              className="inline-flex align-middle p-1"
+              className="ml-1 inline-flex p-1 align-middle"
             >
-              <Link href={explorerUrl} target="_blank" rel="noopener noreferrer">
+              <Link
+                href={explorerUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <ExternalLink className="size-3.5" />
               </Link>
             </Button>
