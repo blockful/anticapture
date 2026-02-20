@@ -253,10 +253,11 @@ export const UNI: DaoConfiguration = {
           ].description,
         currentSetting: "The Voting Period is set to 5 day and 6 hours",
         impact:
-          "The current Voting Period is sufficient for governance participants to cast their votes.",
+          "The current Voting Period is sufficient for governance participants to cast their votes, but the recommended safety is 7 days or more for a low-level risk.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.VOTING_PERIOD],
-        nextStep: "The parameter is in its lowest-risk condition.",
+        nextStep:
+          "The Voting Period should be equal to or greater than 7 days.",
         requirements: [
           "A voting window under seven days risks excluding weekend or time‑zoned delegates, lowering turnout and quorum.",
           "Currently, voting lasts 5 d 6 h (Medium Risk).",
