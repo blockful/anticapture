@@ -207,9 +207,6 @@ export const ActivityFeedSection = ({
         >
           <Filter className="size-4" />
           Filters
-          {activeFiltersCount > 0 && (
-            <span className="text-inverted">({activeFiltersCount})</span>
-          )}
         </Button>
       }
     >
