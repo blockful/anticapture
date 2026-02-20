@@ -16,6 +16,7 @@ import {
 import { Drizzle, transfer } from "@/database";
 import { accountBalance } from "@/database";
 import { Address, getAddress } from "viem";
+import { calculatePercentage } from "@/lib/utils";
 
 export class AccountBalanceRepository {
   constructor(private readonly db: Drizzle) { }
@@ -155,11 +156,7 @@ export class AccountBalanceRepository {
         transfersTo,
         sql`${accountBalance.accountId} = ${transfersTo.accountId}`,
       )
-      .where(
-        and(
-          filter,
-        )
-      )
+      .where(filter)
       .as("combined");
 
     const [totalCount] = await this.db
@@ -200,13 +197,7 @@ export class AccountBalanceRepository {
         previousBalance: currentBalance - BigInt(absoluteChange),
         currentBalance: currentBalance,
         absoluteChange: BigInt(absoluteChange),
-        percentageChange: (currentBalance - BigInt(absoluteChange)
-          ? Number(
-            (BigInt(absoluteChange) * 10000n) /
-            (currentBalance - BigInt(absoluteChange)),
-          ) / 100
-          : 0
-        ).toString(),
+        percentageChange: calculatePercentage(currentBalance, absoluteChange),
       })),
       totalCount: BigInt(totalCount?.count ?? 0),
     };
@@ -287,7 +278,6 @@ export class AccountBalanceRepository {
           ),
       })
       .from(combined)
-      .where(sql`(${combined.fromChange} + ${combined.toChange}) != 0`);
 
     if (!result) return undefined
 

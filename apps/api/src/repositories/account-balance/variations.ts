@@ -3,6 +3,7 @@ import { Drizzle } from "@/database";
 import { accountBalance, transfer } from "@/database";
 import { DBAccountBalanceVariation } from "@/mappers";
 import { Address } from "viem";
+import { calculatePercentage } from "@/lib/utils";
 
 export class BalanceVariationsRepository {
   constructor(private readonly db: Drizzle) { }
@@ -102,13 +103,7 @@ export class BalanceVariationsRepository {
       previousBalance: currentBalance - BigInt(absoluteChange),
       currentBalance: currentBalance,
       absoluteChange: BigInt(absoluteChange),
-      percentageChange: (currentBalance - BigInt(absoluteChange)
-        ? Number(
-          (BigInt(absoluteChange) * 10000n) /
-          (currentBalance - BigInt(absoluteChange)),
-        ) / 100
-        : 0
-      ).toString(),
+      percentageChange: calculatePercentage(currentBalance, absoluteChange),
     }));
   }
 
