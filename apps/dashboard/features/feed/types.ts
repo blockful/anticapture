@@ -14,7 +14,7 @@ export interface VoteDetail {
   voter: Address;
   votingPower: string;
   proposalId: string;
-  support: "for" | "against" | "abstain";
+  support: number;
 }
 
 export interface ProposalDetail {

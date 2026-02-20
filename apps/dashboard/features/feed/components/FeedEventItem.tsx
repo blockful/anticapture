@@ -165,14 +165,24 @@ export const FeedEventItem = ({
               voting power)
             </span>{" "}
             <span className="text-secondary">voted</span>{" "}
-            <CheckCircle2 className="text-success inline size-4 align-middle" />{" "}
-            <span className="text-success font-medium capitalize">
-              {event.metadata.support === "for"
-                ? "Yes"
-                : event.metadata.support === "against"
-                  ? "No"
-                  : "Abstain"}
-            </span>{" "}
+            <span
+              className={cn(
+                event.metadata.support === 1
+                  ? "text-success"
+                  : event.metadata.support === 0
+                    ? "text-error"
+                    : "text-warning",
+              )}
+            >
+              <CheckCircle2 className="inline size-4 align-middle" />{" "}
+              <span className="font-medium capitalize">
+                {event.metadata.support === 1
+                  ? "Yes"
+                  : event.metadata.support === 0
+                    ? "No"
+                    : "Abstain"}
+              </span>{" "}
+            </span>
             <Link
               href={
                 config?.governancePage
