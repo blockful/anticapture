@@ -11,19 +11,23 @@ import z from "zod";
 export const EnrichmentResultSchema = z.object({
   address: z.string(),
   isContract: z.boolean(),
-  arkham: z.object({
-    entity: z.string().nullable(),
-    entityType: z.string().nullable(),
-    label: z.string().nullable(),
-    twitter: z.string().nullable(),
-  }).nullable(),
-  ens: z.object({
-    name: z.string().nullable(),
-    avatar: z.string().nullable(),
-    banner: z.string().nullable(),
-  }).nullable(),
+  arkham: z
+    .object({
+      entity: z.string().nullable(),
+      entityType: z.string().nullable(),
+      label: z.string().nullable(),
+      twitter: z.string().nullable(),
+    })
+    .nullable(),
+  ens: z
+    .object({
+      name: z.string().nullable(),
+      avatar: z.string().nullable(),
+      banner: z.string().nullable(),
+    })
+    .nullable(),
   createdAt: z.string(),
-})
+});
 
 export type EnrichmentResult = z.infer<typeof EnrichmentResultSchema>;
 
@@ -51,9 +55,10 @@ export class EnrichmentService {
    * - ENS data is cached with a configurable TTL and refetched when stale.
    */
   async getAddressEnrichment(address: string): Promise<EnrichmentResult> {
-    const normalizedAddress = address.toLowerCase();  /* FIXME: Unfortunately the addresses have already been commited to
-                                                       * the database in lowercase format, checksum format could only be
-                                                       * used here if we were to convert all current records */
+    const normalizedAddress =
+      address.toLowerCase(); /* FIXME: Unfortunately the addresses have already been commited to
+     * the database in lowercase format, checksum format could only be
+     * used here if we were to convert all current records */
     const db = getDb();
 
     // Check if address exists in database
@@ -104,7 +109,10 @@ export class EnrichmentService {
     ) {
       isContractAddress = arkhamData.isContract;
     } else {
-      isContractAddress = await isContract(this.rpcClient, getAddress(normalizedAddress));
+      isContractAddress = await isContract(
+        this.rpcClient,
+        getAddress(normalizedAddress),
+      );
     }
 
     const now = new Date();
@@ -143,11 +151,11 @@ export class EnrichmentService {
         isContract: isContractAddress,
         arkham: arkhamData
           ? {
-            entity: arkhamData.entity,
-            entityType: arkhamData.entityType,
-            label: arkhamData.label,
-            twitter: arkhamData.twitter,
-          }
+              entity: arkhamData.entity,
+              entityType: arkhamData.entityType,
+              label: arkhamData.label,
+              twitter: arkhamData.twitter,
+            }
           : null,
         ens: ensData,
         createdAt: new Date().toISOString(),
@@ -184,10 +192,10 @@ export class EnrichmentService {
       },
       ens: hasEnsData
         ? {
-          name: record.ensName,
-          avatar: record.ensAvatar,
-          banner: record.ensBanner,
-        }
+            name: record.ensName,
+            avatar: record.ensAvatar,
+            banner: record.ensBanner,
+          }
         : null,
       createdAt: record.createdAt.toISOString(),
     });

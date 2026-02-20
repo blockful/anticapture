@@ -1,80 +1,33 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
-import { getAddress, isAddress } from "viem";
+import { getAddress } from "viem";
 
 import { EnrichmentService } from "@/services/enrichment";
-
-const AddressParamSchema = z.object({
-  address: z.string().refine((addr) => isAddress(addr), {
-    message: "Invalid Ethereum address",
-  }),
-});
-
-const EnrichmentResponseSchema = z.object({
-  address: z.string(),
-  isContract: z.boolean(),
-  arkham: z
-    .object({
-      entity: z.string().nullable(),
-      entityType: z.string().nullable(),
-      label: z.string().nullable(),
-      twitter: z.string().nullable(),
-    })
-    .nullable(),
-  ens: z
-    .object({
-      name: z.string().nullable(),
-      avatar: z.string().nullable(),
-      banner: z.string().nullable(),
-    })
-    .nullable(),
-  createdAt: z.string(),
-});
-
-const BatchRequestSchema = z.object({
-  addresses: z
-    .array(
-      z.string().refine((addr) => isAddress(addr), {
-        message: "Invalid Ethereum address",
-      }),
-    )
-    .min(1, "At least one address is required")
-    .max(100, "Maximum 100 addresses per request"),
-});
-
-const BatchResponseSchema = z.object({
-  results: z.array(EnrichmentResponseSchema),
-  errors: z.array(
-    z.object({
-      address: z.string(),
-      error: z.string(),
-    }),
-  ),
-});
-
-const ErrorResponseSchema = z.object({
-  error: z.string(),
-  message: z.string().optional(),
-});
+import {
+  AddressRequestSchema,
+  AddressResponseSchema,
+  AddressesRequestSchema,
+  AddressesResponseSchema,
+} from "./mappers";
 
 export function addressController(app: Hono, service: EnrichmentService) {
   app.openapi(
     createRoute({
       method: "get",
-      operationId: "getAddressEnrichment",
+      operationId: "getAddress",
       path: "/address/{address}",
       summary: "Get enriched data for an address",
       description:
         "Returns label information from Arkham, ENS data, and whether the address is an EOA or contract. Arkham data is stored permanently. ENS data is cached with a configurable TTL.",
       tags: ["address"],
       request: {
-        params: AddressParamSchema,
+        params: AddressRequestSchema,
       },
       responses: {
         200: {
           description: "Successfully retrieved address enrichment data",
           content: {
             "application/json": {
-              schema: EnrichmentResponseSchema,
+              schema: AddressResponseSchema,
             },
           },
         },
@@ -83,47 +36,42 @@ export function addressController(app: Hono, service: EnrichmentService) {
     async (context) => {
       const { address } = context.req.valid("param");
       const result = await service.getAddressEnrichment(address);
-      return context.json(result, 200);
+      const response = AddressResponseSchema.safeParse(result);
+      return context.json(response.data);
     },
   );
 
   // Batch endpoint
   app.openapi(
     createRoute({
-      method: "post",
-      operationId: "batchAddressEnrichment",
+      method: "get",
+      operationId: "getAddresses",
       path: "/addresses",
       summary: "Get enriched data for multiple addresses",
       description:
         "Returns label information from Arkham, ENS data, and address type for multiple addresses. Maximum 100 addresses per request. Arkham data is stored permanently. ENS data is cached with a configurable TTL.",
       tags: ["address"],
       request: {
-        body: {
-          content: {
-            "application/json": {
-              schema: BatchRequestSchema,
-            },
-          },
-        },
+        query: AddressesRequestSchema,
       },
       responses: {
         200: {
           description: "Successfully retrieved batch enrichment data",
           content: {
             "application/json": {
-              schema: BatchResponseSchema,
+              schema: AddressesResponseSchema,
             },
           },
         },
       },
     }),
     async (context) => {
-      const { addresses } = context.req.valid("json");
+      const { addresses } = context.req.valid("query");
 
       // Deduplicate addresses
       const uniqueAddresses = [...new Set(addresses.map((a) => getAddress(a)))];
 
-      const results: z.infer<typeof EnrichmentResponseSchema>[] = [];
+      const results: z.infer<typeof AddressResponseSchema>[] = [];
       const errors: { address: string; error: string }[] = [];
 
       // Process in parallel with concurrency limit
@@ -134,23 +82,17 @@ export function addressController(app: Hono, service: EnrichmentService) {
           batch.map((address) => service.getAddressEnrichment(address)),
         );
 
-        batchResults.forEach((result, index) => {
-          const address = batch[index]!;
+        batchResults.forEach((result) => {
           if (result.status === "fulfilled") {
-            results.push(result.value);
-          } else {
-            errors.push({
-              address,
-              error:
-                result.reason instanceof Error
-                  ? result.reason.message
-                  : "Unknown error",
-            });
+            const response = AddressResponseSchema.safeParse(result.value);
+            if (response.success) {
+              results.push(response.data);
+            }
           }
         });
       }
 
-      return context.json({ results, errors }, 200);
+      return context.json({ results, errors });
     },
   );
 }
