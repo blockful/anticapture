@@ -74,7 +74,6 @@ export const VoteComposition = ({
   daoId: DaoIdEnum;
 }) => {
   const {
-    topFiveDelegators,
     currentVotingPower,
     legendItems,
     pieData,

@@ -68,23 +68,3 @@ export const DelegationsResponseSchema = z.object({
 
 export type DelegationsResponse = z.infer<typeof DelegationsResponseSchema>;
 export type DelegationItem = z.infer<typeof DelegationItemSchema>;
-
-const DelegationMapper = (d: DBDelegation): DelegationItem => {
-  return {
-    delegatorAddress: d.delegatorAccountId,
-    delegateAddress: d.delegateAccountId,
-    amount: d.delegatedValue.toString(),
-    timestamp: d.timestamp.toString(),
-    transactionHash: d.transactionHash,
-  };
-};
-
-export const DelegationResponseMapper = (d: {
-  items: DBDelegation[];
-  totalCount: number;
-}): DelegationsResponse => {
-  return {
-    items: d.items.map(DelegationMapper),
-    totalCount: d.totalCount,
-  };
-};

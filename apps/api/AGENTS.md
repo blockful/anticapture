@@ -172,19 +172,274 @@ export class DaoRepository {
 
 - **Unit tests**: Test services and repositories in isolation
 - **Integration tests**: Test full request/response flow
-- **Mocking**: Use Vitest mocks for external dependencies
+- **Test doubles**: Use in-memory repository implementations instead of mocks
+- **Assertions**: Use `toEqual` with the full expected object to verify exact output. Pass explicit values to factory/builder functions and assert those same values appear in the response — never use `expect.anything()` or partial matchers
+
+### Repository Tests
+
+Repository tests run against a real in-process PostgreSQL instance using **PGlite** — no Docker, no external dependencies. The schema is pushed with `pushSchema` from `drizzle-kit/api`.
+
+**Setup pattern**:
 
 ```typescript
+import { PGlite } from "@electric-sql/pglite";
+import { drizzle } from "drizzle-orm/pglite";
+import { pushSchema } from "drizzle-kit/api";
+import * as schema from "@/database/schema";
+import { myTable } from "@/database/schema";
+import { MyRepository } from "./my-repository";
+
+type MyTableInsert = typeof myTable.$inferInsert;
+
+// Named constants — typed at declaration so no `as` casts are needed later
+const OWNER: Address = "0x1111111111111111111111111111111111111111";
+const ENTITY_A: Address = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+const ENTITY_B: Address = "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+const ENTITY_C: Address = "0xcccccccccccccccccccccccccccccccccccccccc";
+
+// Counter to guarantee unique keys across inserts
+let counter = 0;
+
+// Factory with sensible defaults; override only what the test cares about
+const createRow = (overrides: Partial<MyTableInsert> = {}): MyTableInsert => ({
+  id: `id-${counter++}`,
+  value: 1000n,
+  ...overrides,
+});
+
+// Sort factory — tests only override what they care about
+const defaultSort = (overrides: Partial<SortOptions> = {}): SortOptions => ({
+  orderBy: "value",
+  orderDirection: "desc",
+  ...overrides,
+});
+
+describe("MyRepository", () => {
+  let client: PGlite;
+  let db: ReturnType<typeof drizzle<typeof schema>>;
+  let repository: MyRepository;
+
+  beforeAll(async () => {
+    // Required so BigInt values serialize correctly in assertions
+    (BigInt.prototype as any).toJSON = function () {
+      return this.toString();
+    };
+
+    client = new PGlite();
+    db = drizzle(client, { schema });
+    repository = new MyRepository(db);
+
+    const { apply } = await pushSchema(schema, db as any);
+    await apply();
+  });
+
+  afterAll(async () => {
+    await client.close();
+  });
+
+  // Reset data and counter before each test for full isolation
+  beforeEach(async () => {
+    await db.delete(myTable);
+    counter = 0;
+  });
+
+  describe("getItems", () => {
+    it("should return items and totalCount", async () => {
+      await db
+        .insert(myTable)
+        .values([createRow({ id: ENTITY_A, value: 500n })]);
+
+      const result = await repository.getItems(ENTITY_A, 0, 10, defaultSort());
+
+      expect(result).toEqual({
+        items: [{ id: ENTITY_A, value: 500n }],
+        totalCount: 1,
+      });
+    });
+
+    it("should return empty when no data exists", async () => {
+      const result = await repository.getItems(ENTITY_A, 0, 10, defaultSort());
+
+      expect(result).toEqual({ items: [], totalCount: 0 });
+    });
+
+    describe("sorting", () => {
+      // Seed shared data once for all sorting tests
+      beforeEach(async () => {
+        await db
+          .insert(myTable)
+          .values([
+            createRow({ id: ENTITY_A, value: 200n, timestamp: 2000n }),
+            createRow({ id: ENTITY_B, value: 300n, timestamp: 1000n }),
+            createRow({ id: ENTITY_C, value: 100n, timestamp: 3000n }),
+          ]);
+      });
+
+      it("should order by value descending", async () => {
+        const result = await repository.getItems(
+          OWNER,
+          0,
+          10,
+          defaultSort({ orderBy: "value", orderDirection: "desc" }),
+        );
+
+        expect(result).toEqual({
+          items: [
+            { id: ENTITY_B, value: 300n, timestamp: 1000n },
+            { id: ENTITY_A, value: 200n, timestamp: 2000n },
+            { id: ENTITY_C, value: 100n, timestamp: 3000n },
+          ],
+          totalCount: 3,
+        });
+      });
+
+      it("should order by value ascending", async () => {
+        const result = await repository.getItems(
+          OWNER,
+          0,
+          10,
+          defaultSort({ orderBy: "value", orderDirection: "asc" }),
+        );
+
+        expect(result).toEqual({
+          items: [
+            { id: ENTITY_C, value: 100n, timestamp: 3000n },
+            { id: ENTITY_A, value: 200n, timestamp: 2000n },
+            { id: ENTITY_B, value: 300n, timestamp: 1000n },
+          ],
+          totalCount: 3,
+        });
+      });
+
+      it("should order by timestamp descending", async () => {
+        const result = await repository.getItems(
+          OWNER,
+          0,
+          10,
+          defaultSort({ orderBy: "timestamp", orderDirection: "desc" }),
+        );
+
+        expect(result).toEqual({
+          items: [
+            { id: ENTITY_C, value: 100n, timestamp: 3000n },
+            { id: ENTITY_A, value: 200n, timestamp: 2000n },
+            { id: ENTITY_B, value: 300n, timestamp: 1000n },
+          ],
+          totalCount: 3,
+        });
+      });
+
+      it("should order by timestamp ascending", async () => {
+        const result = await repository.getItems(
+          OWNER,
+          0,
+          10,
+          defaultSort({ orderBy: "timestamp", orderDirection: "asc" }),
+        );
+
+        expect(result).toEqual({
+          items: [
+            { id: ENTITY_B, value: 300n, timestamp: 1000n },
+            { id: ENTITY_A, value: 200n, timestamp: 2000n },
+            { id: ENTITY_C, value: 100n, timestamp: 3000n },
+          ],
+          totalCount: 3,
+        });
+      });
+    });
+
+    describe("pagination", () => {
+      // Seed shared data once for all pagination tests
+      beforeEach(async () => {
+        await db
+          .insert(myTable)
+          .values([
+            createRow({ id: ENTITY_A, value: 300n, timestamp: 3000n }),
+            createRow({ id: ENTITY_B, value: 200n, timestamp: 2000n }),
+            createRow({ id: ENTITY_C, value: 100n, timestamp: 1000n }),
+          ]);
+      });
+
+      it("should apply skip", async () => {
+        const result = await repository.getItems(OWNER, 1, 10, defaultSort());
+
+        expect(result).toEqual({
+          items: [
+            { id: ENTITY_B, value: 200n, timestamp: 2000n },
+            { id: ENTITY_C, value: 100n, timestamp: 1000n },
+          ],
+          totalCount: 3,
+        });
+      });
+
+      it("should apply limit", async () => {
+        const result = await repository.getItems(OWNER, 0, 2, defaultSort());
+
+        expect(result).toEqual({
+          items: [
+            { id: ENTITY_A, value: 300n, timestamp: 3000n },
+            { id: ENTITY_B, value: 200n, timestamp: 2000n },
+          ],
+          totalCount: 3,
+        });
+      });
+
+      it("should return totalCount independent of pagination", async () => {
+        const result = await repository.getItems(OWNER, 1, 1, defaultSort());
+
+        expect(result).toEqual({
+          items: [{ id: ENTITY_B, value: 200n, timestamp: 2000n }],
+          totalCount: 3,
+        });
+      });
+    });
+  });
+});
+```
+
+**Key rules**:
+
+- Use `PGlite` (in-process) — never Testcontainers or a real Postgres server for repository unit tests
+- Push the full Drizzle schema once in `beforeAll` with `pushSchema`
+- Delete all rows and reset counters in `beforeEach` to isolate every test
+- Patch `BigInt.prototype.toJSON` in `beforeAll` so BigInt values can be compared with `toEqual`
+- Define named address/ID constants at the top; avoid magic strings inside tests
+- **No type casting** — never use `as SomeType`, `as Address`, or `as unknown as T`; declare constants with the correct type at definition (`const OWNER: Address = "0x..."`) so the compiler validates them without casts
+- Use factory functions with `Partial<T>` overrides — only pass what the test needs to control
+- Use `toEqual` with the full expected object; never use `expect.anything()` or partial matchers
+- Cover: happy path, empty state, filter/scope correctness, aggregation, edge values (zero, duplicates), sorting variants, and pagination (`skip`/`limit` with `totalCount` independent of page)
+
+### Service Tests
+
+```typescript
+// In-memory repository implementing the same interface
+class InMemoryDaoRepository {
+  private data: DaoConfig[];
+
+  constructor(data: DaoConfig[]) {
+    this.data = data;
+  }
+
+  async getDaoConfig() {
+    return this.data;
+  }
+}
+
 // Example test
 describe("DaoService", () => {
   it("should return DAO parameters", async () => {
-    const mockRepo = { getDaoConfig: vi.fn().mockResolvedValue({...}) };
-    const service = new DaoService(mockRepo);
+    const repository = new InMemoryDaoRepository([
+      { name: "Uniswap", quorum: 40_000_000n, proposalThreshold: 2_500_000n },
+    ]);
+    const service = new DaoService(repository);
 
     const result = await service.getDaoParameters();
 
-    expect(result).toBeDefined();
-    expect(mockRepo.getDaoConfig).toHaveBeenCalled();
+    expect(result).toEqual({
+      name: "Uniswap",
+      quorum: "40000000",
+      proposalThreshold: "2500000",
+    });
   });
 });
 ```

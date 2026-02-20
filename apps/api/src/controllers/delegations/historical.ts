@@ -1,7 +1,6 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import {
-  DelegationResponseMapper,
   HistoricalDelegationsRequestParamsSchema,
   HistoricalDelegationsRequestQuerySchema,
   DelegationsResponseSchema,
@@ -59,7 +58,7 @@ export function historicalDelegations(
         limit,
       );
 
-      return context.json(DelegationResponseMapper(result));
+      return context.json(DelegationsResponseSchema.parse(result));
     },
   );
 }

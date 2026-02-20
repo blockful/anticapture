@@ -29,6 +29,7 @@ import {
   votingPowerVariations,
   votingPowers,
   delegations,
+  delegators,
   historicalDelegations,
   votes,
 } from "@/controllers";
@@ -51,6 +52,7 @@ import {
   TreasuryRepository,
   VotingPowerRepository,
   DelegationsRepository,
+  DelegatorsRepository,
   HistoricalDelegationsRepository,
   VotesRepository,
   FeedRepository,
@@ -76,6 +78,7 @@ import {
   parseTreasuryProviderConfig,
   HistoricalDelegationsService,
   DelegationsService,
+  DelegatorsService,
   VotesService,
   FeedService,
 } from "@/services";
@@ -179,6 +182,7 @@ historicalDelegations(
 
 // TODO: add support to partial delegations at some point
 delegations(app, new DelegationsService(new DelegationsRepository(pgClient)));
+delegators(app, new DelegatorsService(new DelegatorsRepository(pgClient)));
 
 const treasuryService = createTreasuryService(
   new TreasuryRepository(pgClient),

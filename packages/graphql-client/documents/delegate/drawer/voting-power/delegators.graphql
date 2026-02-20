@@ -1,0 +1,22 @@
+query GetDelegators(
+  $address: String!
+  $skip: NonNegativeInt
+  $limit: PositiveInt = 10
+  $orderBy: queryInput_delegators_orderBy = amount
+  $orderDirection: queryInput_delegators_orderDirection = desc
+) {
+  delegators(
+    address: $address
+    skip: $skip
+    limit: $limit
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+  ) {
+    items {
+      delegatorAddress
+      amount
+      timestamp
+    }
+    totalCount
+  }
+}
