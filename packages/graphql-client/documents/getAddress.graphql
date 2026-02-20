@@ -1,5 +1,5 @@
 query GetAddress($address: String!) {
-  getAddressEnrichment(address: $address) {
+  getAddress(address: $address) {
     address
     isContract
     arkham {
@@ -13,6 +13,5 @@ query GetAddress($address: String!) {
       avatar
       banner
     }
-    createdAt
   }
 }

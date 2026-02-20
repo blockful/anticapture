@@ -1,5 +1,5 @@
-query GetAddresses($input: batchAddressEnrichment_request_Input) {
-  batchAddressEnrichment(input: $input) {
+query GetAddresses($addresses: JSON!) {
+  getAddresses(addresses: $addresses) {
     results {
       address
       isContract
@@ -14,11 +14,6 @@ query GetAddresses($input: batchAddressEnrichment_request_Input) {
         avatar
         banner
       }
-      createdAt
-    }
-    errors {
-      address
-      error
     }
   }
 }
