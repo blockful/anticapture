@@ -53,7 +53,12 @@ export const PendingCriteriaItem = ({
           <p className="text-secondary font-mono text-[13px] font-medium uppercase tracking-wider">
             Current
           </p>
-          <p className="text-error text-sm font-normal">
+          <p
+            className={cn(
+              "text-sm font-normal",
+              RISK_LEVEL_DOT_COLOR[field.riskLevel],
+            )}
+          >
             {field.currentSetting ?? "No protections"}
           </p>
         </div>
