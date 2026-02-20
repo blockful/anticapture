@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import ContactPageClient from "./ContactPageClient";
+import ContactPageClient from "@/app/contact/ContactPageClient";
 
 export const metadata: Metadata = {
   title: "Anticapture - Contact",

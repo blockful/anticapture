@@ -12,7 +12,7 @@ import {
   HistoricalVotingPowerByAccountQueryVariables,
   QueryInput_HistoricalVotingPowerByAccountId_OrderDirection,
 } from "@anticapture/graphql-client";
-import { AmountFilterVariables } from "./types";
+import { AmountFilterVariables } from "@/features/holders-and-delegates/hooks/types";
 
 // Interface for a single delegation history item
 export interface DelegationHistoryItem {
@@ -262,6 +262,7 @@ export function useDelegateDelegationHistory({
     } finally {
       setIsPaginationLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, limit, hasNextPage, isPaginationLoading, fetchMore]);
 
   return {

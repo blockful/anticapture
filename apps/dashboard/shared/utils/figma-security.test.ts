@@ -7,8 +7,8 @@
 import fs from "fs";
 import path from "path";
 
-import { getFigmaDesignConfig } from "./figma-storybook";
-import { fetchFigmaFile } from "./figma";
+import { getFigmaDesignConfig } from "@/shared/utils/figma-storybook";
+import { fetchFigmaFile } from "@/shared/utils/figma";
 
 describe("Figma Utilities Security", () => {
   const originalEnv = process.env;

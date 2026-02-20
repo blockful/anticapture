@@ -355,6 +355,7 @@ export const TabsDidntVoteContent = ({
         ),
       },
     ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [proposal, handleSort, sortDirection],
   );
 
