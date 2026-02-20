@@ -48,10 +48,14 @@ export class DelegatorsRepository {
       .orderBy(direction(orderColumn));
 
     const totalCount = await this.db.$count(baseQuery.as("subquery"));
-    const items = await baseQuery.offset(skip).limit(limit);
+    const rows = await baseQuery.offset(skip).limit(limit);
 
     return {
-      items,
+      items: rows.map((row) => ({
+        delegatorAddress: row.delegatorAddress,
+        amount: BigInt(row.amount),
+        timestamp: BigInt(row.timestamp),
+      })),
       totalCount,
     };
   }
