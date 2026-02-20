@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Button, SkeletonRow } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { ColumnDef } from "@tanstack/react-table";
-import { Address } from "viem";
+import { Address, formatUnits, parseUnits } from "viem";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { useDelegators } from "@/shared/hooks/graphql-client/useDelegators";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -38,9 +38,7 @@ export const VoteCompositionTable = ({
     "orderDirection",
     parseAsStringEnum(["asc", "desc"]).withDefault("desc"),
   );
-  const {
-    daoOverview: { token },
-  } = daoConfig[daoId as DaoIdEnum];
+  const { decimals } = daoConfig[daoId as DaoIdEnum];
 
   const {
     delegators,
@@ -63,7 +61,7 @@ export const VoteCompositionTable = ({
 
   const tableData = delegators.map((delegator) => ({
     address: delegator.delegatorAddress,
-    amount: Number(delegator.amount) || 0,
+    amount: Number(formatUnits(BigInt(delegator.amount), decimals)),
     timestamp: delegator.timestamp,
   }));
 
@@ -124,7 +122,8 @@ export const VoteCompositionTable = ({
       accessorKey: "amount",
       header: ({ column }) => {
         const handleSortToggle = () => {
-          const newSortOrder = sortOrder === "desc" ? "asc" : "desc";
+          const newSortOrder =
+            sortBy === "amount" && sortOrder === "desc" ? "asc" : "desc";
           setSortBy("amount");
           setSortOrder(newSortOrder);
           column.toggleSorting(newSortOrder === "desc");
@@ -166,11 +165,7 @@ export const VoteCompositionTable = ({
         const amount: number = row.getValue("amount");
         return (
           <div className="flex w-full items-center justify-end text-sm">
-            {formatNumberUserReadable(
-              token === "ERC20"
-                ? Number(BigInt(amount)) / Number(BigInt(10 ** 18)) || 0
-                : Number(amount) || 0,
-            )}
+            {formatNumberUserReadable(amount)}
           </div>
         );
       },
@@ -182,7 +177,8 @@ export const VoteCompositionTable = ({
       accessorKey: "timestamp",
       header: ({ column }) => {
         const handleSortToggle = () => {
-          const newSortOrder = sortOrder === "desc" ? "asc" : "desc";
+          const newSortOrder =
+            sortBy === "timestamp" && sortOrder === "desc" ? "asc" : "desc";
           setSortBy("timestamp");
           setSortOrder(newSortOrder);
           column.toggleSorting(newSortOrder === "desc");

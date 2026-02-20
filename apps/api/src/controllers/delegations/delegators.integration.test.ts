@@ -2,7 +2,10 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { Address } from "viem";
 import { delegators } from "./delegators";
-import { DelegatorsService } from "@/services/delegations/delegators";
+import {
+  DelegatorsService,
+  DelegatorsSortOptions,
+} from "@/services/delegations/delegators";
 import { AggregatedDelegator } from "@/mappers";
 
 class FakeDelegatorsRepository {
@@ -18,6 +21,7 @@ class FakeDelegatorsRepository {
     _address: Address,
     _skip: number,
     _limit: number,
+    _sort: DelegatorsSortOptions,
   ): Promise<{ items: AggregatedDelegator[]; totalCount: number }> {
     return {
       items: this.items,
@@ -59,9 +63,7 @@ describe("Delegators Controller - Integration Tests", () => {
       const delegator = createMockAggregatedDelegator();
       fakeRepo.setData([delegator]);
 
-      const res = await app.request(
-        `/accounts/${VALID_ADDRESS}/delegators`,
-      );
+      const res = await app.request(`/accounts/${VALID_ADDRESS}/delegators`);
 
       expect(res.status).toBe(200);
       const body = await res.json();
@@ -80,9 +82,7 @@ describe("Delegators Controller - Integration Tests", () => {
     it("should return 200 with empty items and totalCount 0 when no delegators exist", async () => {
       fakeRepo.setData([]);
 
-      const res = await app.request(
-        `/accounts/${VALID_ADDRESS}/delegators`,
-      );
+      const res = await app.request(`/accounts/${VALID_ADDRESS}/delegators`);
 
       expect(res.status).toBe(200);
       const body = await res.json();
@@ -108,9 +108,7 @@ describe("Delegators Controller - Integration Tests", () => {
         }),
       ]);
 
-      const res = await app.request(
-        `/accounts/${VALID_ADDRESS}/delegators`,
-      );
+      const res = await app.request(`/accounts/${VALID_ADDRESS}/delegators`);
 
       expect(res.status).toBe(200);
       const body = await res.json();
@@ -146,17 +144,13 @@ describe("Delegators Controller - Integration Tests", () => {
     it("should use default skip=0 and limit=10 when not provided", async () => {
       fakeRepo.setData([]);
 
-      const res = await app.request(
-        `/accounts/${VALID_ADDRESS}/delegators`,
-      );
+      const res = await app.request(`/accounts/${VALID_ADDRESS}/delegators`);
 
       expect(res.status).toBe(200);
     });
 
     it("should return 400 for an invalid address", async () => {
-      const res = await app.request(
-        "/accounts/not-a-valid-address/delegators",
-      );
+      const res = await app.request("/accounts/not-a-valid-address/delegators");
 
       expect(res.status).toBe(400);
     });
@@ -181,9 +175,7 @@ describe("Delegators Controller - Integration Tests", () => {
       fakeRepo.setData([createMockAggregatedDelegator()]);
       const lowercaseAddress = VALID_ADDRESS.toLowerCase();
 
-      const res = await app.request(
-        `/accounts/${lowercaseAddress}/delegators`,
-      );
+      const res = await app.request(`/accounts/${lowercaseAddress}/delegators`);
 
       expect(res.status).toBe(200);
     });
@@ -196,9 +188,7 @@ describe("Delegators Controller - Integration Tests", () => {
         }),
       ]);
 
-      const res = await app.request(
-        `/accounts/${VALID_ADDRESS}/delegators`,
-      );
+      const res = await app.request(`/accounts/${VALID_ADDRESS}/delegators`);
       const body = await res.json();
 
       expect(typeof body.items[0]?.amount).toBe("string");

@@ -81,21 +81,9 @@ export const useDelegators = ({
     fetchPolicy: "cache-and-network",
   });
 
-  console.log({ data });
-
   useEffect(() => {
     delegatorsSet(() => data?.delegators?.items.filter((item) => !!item) ?? []);
   }, [data?.delegators?.items]);
-
-  useEffect(() => {
-    refetchDelegators({
-      address,
-      orderBy,
-      orderDirection,
-      limit,
-      skip: 0,
-    });
-  }, [orderBy, orderDirection, refetchDelegators, limit, address]);
 
   const pagination = useMemo<PaginationInfo>(() => {
     const totalCount = data?.delegators?.totalCount || 0;
