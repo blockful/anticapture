@@ -1,22 +1,12 @@
 import { eq, sql } from "drizzle-orm";
-import { migrate } from "drizzle-orm/node-postgres/migrator";
-import type { NodePgDatabase } from "drizzle-orm/node-postgres";
+import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
 
 import type { Repository } from "@/repository/db.interface";
 import type { OffchainProposal, OffchainVote } from "@/repository/schema";
 import * as schema from "@/repository/schema";
 
 export class DrizzleRepository implements Repository {
-  private constructor(private readonly db: NodePgDatabase<typeof schema>) {}
-
-  static async create(db: NodePgDatabase<typeof schema>): Promise<DrizzleRepository> {
-    await migrate(db, {
-      migrationsFolder: "./drizzle",
-      migrationsSchema: "snapshot",
-    });
-    return new DrizzleRepository(db);
-  }
-
+  constructor(readonly db: PgDatabase<PgQueryResultHKT, typeof schema>) {}
   async resetCursor(entity: string): Promise<void> {
     await this.db
       .delete(schema.syncStatus)

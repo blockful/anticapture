@@ -1,4 +1,5 @@
 import { drizzle } from "drizzle-orm/node-postgres";
+import { migrate } from "drizzle-orm/node-postgres/migrator";
 
 import { env } from "@/env";
 import * as schema from "@/repository/schema";
@@ -11,7 +12,12 @@ async function main() {
 
   const db = drizzle(env.DATABASE_URL, { schema });
 
-  const repository = await DrizzleRepository.create(db);
+  await migrate(db, {
+    migrationsFolder: "./drizzle",
+    migrationsSchema: "snapshot",
+  });
+
+  const repository = new DrizzleRepository(db);
   const provider = new SnapshotProvider(
     env.PROVIDER_ENDPOINT,
     env.PROVIDER_DAO_ID,
