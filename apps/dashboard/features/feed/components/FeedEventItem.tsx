@@ -143,7 +143,7 @@ export const FeedEventItem = ({
       case FeedEventType.Vote:
         if (!event.metadata) return null;
         return (
-          <p className="leading-relaxed">
+          <div className="leading-relaxed">
             <span className="inline-flex items-center gap-1.5 align-middle">
               <EnsAvatar
                 address={event.metadata.voter}
@@ -203,13 +203,13 @@ export const FeedEventItem = ({
             >
               <ExternalLink className="size-3.5" />
             </a>
-          </p>
+          </div>
         );
 
       case FeedEventType.Proposal:
         if (!event.metadata) return null;
         return (
-          <p className="leading-relaxed">
+          <div className="leading-relaxed">
             <span className="inline-flex items-center gap-1.5 align-middle">
               <EnsAvatar
                 address={event.metadata.proposer}
