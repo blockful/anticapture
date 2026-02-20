@@ -137,14 +137,14 @@ const RiskAreaCardInternal = ({
             className={cn(
               "block font-mono font-medium text-black lg:tracking-wider",
               {
-                "!text-secondary": risk.level === RiskLevel.NONE,
-                "!text-success":
+                "text-secondary!": risk.level === RiskLevel.NONE,
+                "text-success!":
                   risk.level === RiskLevel.LOW && !isActive && !isHovered,
-                "!text-warning":
+                "text-warning!":
                   risk.level === RiskLevel.MEDIUM && !isActive && !isHovered,
-                "!text-error":
+                "text-error!":
                   risk.level === RiskLevel.HIGH && !isActive && !isHovered,
-                "!text-inverted":
+                "text-inverted!":
                   isActive && risk.level !== RiskLevel.NONE && isHovered,
                 "text-alternative-sm": isRiskAnalysis,
                 "text-xs": !isRiskAnalysis,
@@ -268,7 +268,7 @@ export const RiskAreaCard = ({
         description={riskInfo.description}
         riskLevel={riskArea.level}
       >
-        <div className="px- relative h-[48px]">
+        <div className="px- relative h-12">
           <RiskAreaCardInternal
             risk={riskArea}
             isActive={isActive}
@@ -303,20 +303,14 @@ export const RiskAreaCard = ({
     ),
     [RiskAreaCardEnum.PANEL_TABLE]:
       riskArea.level !== RiskLevel.NONE ? (
-        <RiskTooltipCard
-          title={riskInfo.title}
-          description={riskInfo.description}
-          riskLevel={riskArea.level}
-        >
-          <div className="flex size-7">
-            <RiskAreaCardInternal
-              risk={modifiedRiskArea}
-              isActive={isActive}
-              onClick={onClick}
-              variant={variant}
-            />
-          </div>
-        </RiskTooltipCard>
+        <div className="flex size-7">
+          <RiskAreaCardInternal
+            risk={modifiedRiskArea}
+            isActive={isActive}
+            onClick={onClick}
+            variant={variant}
+          />
+        </div>
       ) : (
         <div className="flex size-7">
           <RiskAreaCardInternal

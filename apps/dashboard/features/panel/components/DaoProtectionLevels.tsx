@@ -12,7 +12,7 @@ import {
 } from "@/shared/dao-config/utils";
 import { useMemo } from "react";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
-import { DaoProtectionLevelsTooltip } from "@/features/panel/components/DaoProtectionLevelsTooltip";
+import { DaoProtectionLevelsTooltip } from "@/features/panel/components/tooltips/DaoProtectionLevelsTooltip";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 
 const chartConfig: ChartConfig = {
@@ -96,12 +96,12 @@ export const DaoProtectionLevels = () => {
   }, []);
 
   return (
-    <div className="bg-surface-default flex w-full flex-col gap-2 p-4">
+    <div className="bg-surface-background lg:bg-surface-default flex w-full flex-col gap-2 lg:p-4">
       <div className="flex flex-col gap-1">
-        <h3 className="text-primary text-alternative-sm font-mono font-medium uppercase leading-[20px] tracking-[0.78px]">
+        <h3 className="text-primary text-alternative-sm font-mono font-medium uppercase leading-5 tracking-wider">
           DAO Governance Risk Levels
         </h3>
-        <p className="text-secondary text-sm font-normal leading-[20px]">
+        <p className="text-secondary text-sm font-normal leading-5">
           This platform monitors DAO governance risks and rates them through
           Anticapture&apos;s Stage system.
         </p>
@@ -119,7 +119,7 @@ export const DaoProtectionLevels = () => {
       <div className="flex w-full flex-col gap-2">
         <DividerDefault isHorizontal />
         <div className="border-t-brand flex items-center gap-1.5 border-b-0 border-l-4 border-r-0 border-t-0 pl-3">
-          <p className="text-primary text-alternative-xs font-mono font-medium uppercase leading-[16px] tracking-[0.72px]">
+          <p className="text-primary text-alternative-xs font-mono font-medium uppercase leading-4 tracking-wider">
             {totalMonitored} DAOs monitored by Anticapture
           </p>
         </div>
@@ -128,7 +128,7 @@ export const DaoProtectionLevels = () => {
 
       {/* Bar Chart */}
       <div className="flex flex-col gap-2">
-        <div className="relative flex h-[75px] w-full items-end">
+        <div className="relative flex h-40 w-full items-end lg:h-[75px]">
           <ChartContainer className="h-full w-full" config={chartConfig}>
             <BarChart
               data={stageData}
@@ -163,10 +163,10 @@ export const DaoProtectionLevels = () => {
               key={index}
               className="flex flex-1 flex-col items-center justify-center"
             >
-              <p className="text-primary text-xs font-medium leading-[16px]">
+              <p className="text-primary text-xs font-medium leading-4">
                 {item.stage}
               </p>
-              <p className="text-secondary text-xs font-medium leading-[16px]">
+              <p className="text-secondary text-xs font-medium leading-4">
                 {item.riskLevel}
               </p>
             </div>
