@@ -15,3 +15,4 @@ export * from "./transfers";
 export * from "./delegations";
 export * from "./treasury";
 export * from "./votes";
+export * from "./feed";
