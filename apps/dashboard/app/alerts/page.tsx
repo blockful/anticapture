@@ -1,7 +1,22 @@
+import type { Metadata } from "next";
 import { HeaderSidebar } from "@/widgets";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
 import { Footer } from "@/shared/components/design-system/footer/Footer";
 import { AlertsSection } from "@/features/alerts";
+
+export const metadata: Metadata = {
+  title: "Anticapture - Alerts",
+  description: "Stay updated with governance alerts and notifications.",
+  openGraph: {
+    title: "Anticapture - Alerts",
+    description: "Stay updated with governance alerts and notifications.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Anticapture - Alerts",
+    description: "Stay updated with governance alerts and notifications.",
+  },
+};
 
 export default function DonatePage() {
   return (

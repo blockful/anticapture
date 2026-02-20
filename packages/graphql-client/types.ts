@@ -12,9 +12,12 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
+  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
+  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
+  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
 };
 
@@ -112,6 +115,12 @@ export type Query = {
   delegationPercentageByDay?: Maybe<DelegationPercentageByDay_200_Response>;
   /** Get current delegators of an account */
   delegations?: Maybe<Delegations_200_Response>;
+  /** Get feed events */
+  feedEvents?: Maybe<FeedEvents_200_Response>;
+  /** Returns label information from Arkham, ENS data, and whether the address is an EOA or contract. Arkham data is stored permanently. ENS data is cached with a configurable TTL. */
+  getAddress?: Maybe<GetAddress_200_Response>;
+  /** Returns label information from Arkham, ENS data, and address type for multiple addresses. Maximum 100 addresses per request. Arkham data is stored permanently. ENS data is cached with a configurable TTL. */
+  getAddresses?: Maybe<GetAddresses_200_Response>;
   /** Get historical DAO Token Treasury value (governance token quantity × token price) */
   getDaoTokenTreasury?: Maybe<GetDaoTokenTreasury_200_Response>;
   /** Get historical Liquid Treasury (treasury without DAO tokens) from external providers (DefiLlama/Dune) */
@@ -285,6 +294,28 @@ export type QueryDelegationPercentageByDayArgs = {
 
 export type QueryDelegationsArgs = {
   address: Scalars['String']['input'];
+};
+
+
+export type QueryFeedEventsArgs = {
+  fromDate?: InputMaybe<Scalars['Float']['input']>;
+  limit?: InputMaybe<Scalars['Float']['input']>;
+  orderBy?: InputMaybe<QueryInput_FeedEvents_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_FeedEvents_OrderDirection>;
+  relevance?: InputMaybe<QueryInput_FeedEvents_Relevance>;
+  skip?: InputMaybe<Scalars['Float']['input']>;
+  toDate?: InputMaybe<Scalars['Float']['input']>;
+  type?: InputMaybe<QueryInput_FeedEvents_Type>;
+};
+
+
+export type QueryGetAddressArgs = {
+  address: Scalars['String']['input'];
+};
+
+
+export type QueryGetAddressesArgs = {
+  addresses: Scalars['JSON']['input'];
 };
 
 
@@ -638,6 +669,25 @@ export type Delegations_200_Response = {
   totalCount: Scalars['Float']['output'];
 };
 
+export type FeedEvents_200_Response = {
+  __typename?: 'feedEvents_200_response';
+  items: Array<Maybe<Query_FeedEvents_Items_Items>>;
+  totalCount: Scalars['Float']['output'];
+};
+
+export type GetAddress_200_Response = {
+  __typename?: 'getAddress_200_response';
+  address: Scalars['String']['output'];
+  arkham?: Maybe<Query_GetAddress_Arkham>;
+  ens?: Maybe<Query_GetAddress_Ens>;
+  isContract: Scalars['Boolean']['output'];
+};
+
+export type GetAddresses_200_Response = {
+  __typename?: 'getAddresses_200_response';
+  results: Array<Maybe<Query_GetAddresses_Results_Items>>;
+};
+
 export type GetDaoTokenTreasury_200_Response = {
   __typename?: 'getDaoTokenTreasury_200_response';
   items: Array<Maybe<Query_GetDaoTokenTreasury_Items_Items>>;
@@ -847,6 +897,31 @@ export enum QueryInput_CompareVotes_Days {
 export enum QueryInput_DelegationPercentageByDay_OrderDirection {
   Asc = 'asc',
   Desc = 'desc'
+}
+
+export enum QueryInput_FeedEvents_OrderBy {
+  Timestamp = 'timestamp',
+  Value = 'value'
+}
+
+export enum QueryInput_FeedEvents_OrderDirection {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
+export enum QueryInput_FeedEvents_Relevance {
+  High = 'HIGH',
+  Low = 'LOW',
+  Medium = 'MEDIUM'
+}
+
+export enum QueryInput_FeedEvents_Type {
+  Delegation = 'DELEGATION',
+  DelegationVotesChanged = 'DELEGATION_VOTES_CHANGED',
+  Proposal = 'PROPOSAL',
+  ProposalExtended = 'PROPOSAL_EXTENDED',
+  Transfer = 'TRANSFER',
+  Vote = 'VOTE'
 }
 
 export enum QueryInput_GetDaoTokenTreasury_Days {
@@ -1105,6 +1180,70 @@ export type Query_Delegations_Items_Items = {
   delegatorAddress: Scalars['String']['output'];
   timestamp: Scalars['String']['output'];
   transactionHash: Scalars['String']['output'];
+};
+
+export type Query_FeedEvents_Items_Items = {
+  __typename?: 'query_feedEvents_items_items';
+  logIndex: Scalars['Float']['output'];
+  metadata?: Maybe<Scalars['JSON']['output']>;
+  relevance: Query_FeedEvents_Items_Items_Relevance;
+  timestamp: Scalars['Float']['output'];
+  txHash: Scalars['String']['output'];
+  type: Query_FeedEvents_Items_Items_Type;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+export enum Query_FeedEvents_Items_Items_Relevance {
+  High = 'HIGH',
+  Low = 'LOW',
+  Medium = 'MEDIUM'
+}
+
+export enum Query_FeedEvents_Items_Items_Type {
+  Delegation = 'DELEGATION',
+  DelegationVotesChanged = 'DELEGATION_VOTES_CHANGED',
+  Proposal = 'PROPOSAL',
+  ProposalExtended = 'PROPOSAL_EXTENDED',
+  Transfer = 'TRANSFER',
+  Vote = 'VOTE'
+}
+
+export type Query_GetAddress_Arkham = {
+  __typename?: 'query_getAddress_arkham';
+  entity?: Maybe<Scalars['String']['output']>;
+  entityType?: Maybe<Scalars['String']['output']>;
+  label?: Maybe<Scalars['String']['output']>;
+  twitter?: Maybe<Scalars['String']['output']>;
+};
+
+export type Query_GetAddress_Ens = {
+  __typename?: 'query_getAddress_ens';
+  avatar?: Maybe<Scalars['String']['output']>;
+  banner?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+};
+
+export type Query_GetAddresses_Results_Items = {
+  __typename?: 'query_getAddresses_results_items';
+  address: Scalars['String']['output'];
+  arkham?: Maybe<Query_GetAddresses_Results_Items_Arkham>;
+  ens?: Maybe<Query_GetAddresses_Results_Items_Ens>;
+  isContract: Scalars['Boolean']['output'];
+};
+
+export type Query_GetAddresses_Results_Items_Arkham = {
+  __typename?: 'query_getAddresses_results_items_arkham';
+  entity?: Maybe<Scalars['String']['output']>;
+  entityType?: Maybe<Scalars['String']['output']>;
+  label?: Maybe<Scalars['String']['output']>;
+  twitter?: Maybe<Scalars['String']['output']>;
+};
+
+export type Query_GetAddresses_Results_Items_Ens = {
+  __typename?: 'query_getAddresses_results_items_ens';
+  avatar?: Maybe<Scalars['String']['output']>;
+  banner?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
 };
 
 export type Query_GetDaoTokenTreasury_Items_Items = {
@@ -1643,6 +1782,34 @@ export type GetDelegateProposalsActivityQueryVariables = Exact<{
 
 
 export type GetDelegateProposalsActivityQuery = { __typename?: 'Query', proposalsActivity?: { __typename?: 'proposalsActivity_200_response', address: string, totalProposals: number, votedProposals: number, neverVoted: boolean, avgTimeBeforeEnd: number } | null };
+
+export type GetFeedEventsQueryVariables = Exact<{
+  skip?: InputMaybe<Scalars['Float']['input']>;
+  limit?: InputMaybe<Scalars['Float']['input']>;
+  orderBy?: InputMaybe<QueryInput_FeedEvents_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_FeedEvents_OrderDirection>;
+  relevance?: InputMaybe<QueryInput_FeedEvents_Relevance>;
+  type?: InputMaybe<QueryInput_FeedEvents_Type>;
+  fromDate?: InputMaybe<Scalars['Float']['input']>;
+  toDate?: InputMaybe<Scalars['Float']['input']>;
+}>;
+
+
+export type GetFeedEventsQuery = { __typename?: 'Query', feedEvents?: { __typename?: 'feedEvents_200_response', totalCount: number, items: Array<{ __typename?: 'query_feedEvents_items_items', txHash: string, logIndex: number, type: Query_FeedEvents_Items_Items_Type, value?: string | null, timestamp: number, relevance: Query_FeedEvents_Items_Items_Relevance, metadata?: any | null } | null> } | null };
+
+export type GetAddressQueryVariables = Exact<{
+  address: Scalars['String']['input'];
+}>;
+
+
+export type GetAddressQuery = { __typename?: 'Query', getAddress?: { __typename?: 'getAddress_200_response', address: string, isContract: boolean, arkham?: { __typename?: 'query_getAddress_arkham', entity?: string | null, entityType?: string | null, label?: string | null, twitter?: string | null } | null, ens?: { __typename?: 'query_getAddress_ens', name?: string | null, avatar?: string | null, banner?: string | null } | null } | null };
+
+export type GetAddressesQueryVariables = Exact<{
+  addresses: Scalars['JSON']['input'];
+}>;
+
+
+export type GetAddressesQuery = { __typename?: 'Query', getAddresses?: { __typename?: 'getAddresses_200_response', results: Array<{ __typename?: 'query_getAddresses_results_items', address: string, isContract: boolean, arkham?: { __typename?: 'query_getAddresses_results_items_arkham', entity?: string | null, entityType?: string | null, label?: string | null, twitter?: string | null } | null, ens?: { __typename?: 'query_getAddresses_results_items_ens', name?: string | null, avatar?: string | null, banner?: string | null } | null } | null> } | null };
 
 export type GetProposalsFromDaoQueryVariables = Exact<{
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;

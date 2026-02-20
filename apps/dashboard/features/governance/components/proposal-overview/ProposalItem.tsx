@@ -8,7 +8,7 @@ import { Address } from "viem";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { BulletDivider } from "@/features/governance/components/proposal-overview/BulletDivider";
+import { BulletDivider } from "@/shared/components/design-system/section/BulletDivider";
 
 interface ProposalItemProps {
   proposal: Proposal;

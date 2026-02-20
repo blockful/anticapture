@@ -2,6 +2,7 @@ import { DaoConfiguration } from "@/shared/dao-config/types";
 import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { GitcoinIcon } from "@/shared/components/icons";
+import { GitcoinOgIcon } from "@/shared/og/dao-og-icons";
 import { mainnet } from "viem/chains";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
@@ -15,6 +16,7 @@ export const GTC: DaoConfiguration = {
   },
   forumLink: "https://gov.gitcoin.co/",
   icon: GitcoinIcon,
+  ogIcon: GitcoinOgIcon,
   daoOverview: {
     token: "ERC20",
     chain: { ...mainnet, icon: MainnetIcon },

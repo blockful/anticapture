@@ -44,7 +44,7 @@ export const useDaoTreasuryStats = ({
     return {
       lastPrice,
       liquidTreasuryNonDaoValue: liquidValue,
-      liquidTreasuryAllValue: tokenValue,
+      liquidTreasuryAllValue: totalValue,
       liquidTreasuryAllPercent,
     };
   }, [liquidTreasury, tokenTreasury, allTreasury, tokenData]);

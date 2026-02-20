@@ -5,7 +5,6 @@ export enum DaoIdEnum {
   OP = "OP",
   GTC = "GTC",
   NOUNS = "NOUNS",
-  TEST = "TEST",
   SCR = "SCR",
   COMP = "COMP",
   OBOL = "OBOL",

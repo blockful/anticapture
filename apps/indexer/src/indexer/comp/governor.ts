@@ -21,6 +21,7 @@ export function COMPGovernorIndexer(blockTime: number) {
       timestamp: event.block.timestamp,
       txHash: event.transaction.hash,
       votingPower: event.args.weight,
+      logIndex: event.log.logIndex,
     });
   });
 
@@ -38,6 +39,7 @@ export function COMPGovernorIndexer(blockTime: number) {
       description: event.args.description,
       timestamp: event.block.timestamp,
       blockNumber: event.block.number,
+      logIndex: event.log.logIndex,
     });
   });
 
@@ -63,6 +65,9 @@ export function COMPGovernorIndexer(blockTime: number) {
       event.args.proposalId.toString(),
       blockTime,
       event.args.extendedDeadline,
+      event.transaction.hash,
+      event.log.logIndex,
+      event.block.timestamp,
     );
   });
 

@@ -3,6 +3,7 @@ import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
 import { calculateMonthsBefore } from "@/shared/utils";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { EnsIcon } from "@/shared/components/icons";
+import { EnsOgIcon } from "@/shared/og/dao-og-icons";
 import { mainnet } from "viem/chains";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
@@ -16,6 +17,7 @@ export const ENS: DaoConfiguration = {
   },
   forumLink: "https://discuss.ens.domains/",
   icon: EnsIcon,
+  ogIcon: EnsOgIcon,
   daoOverview: {
     token: "ERC20",
     chain: { ...mainnet, icon: MainnetIcon },

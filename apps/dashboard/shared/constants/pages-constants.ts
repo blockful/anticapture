@@ -26,6 +26,12 @@ export const PAGES_CONSTANTS = {
     description:
       "Explore top token holders and high-power delegates. Click on any row to view more details.",
   },
+  activityFeed: {
+    title: "Activity Feed",
+    page: "activity-feed",
+    description:
+      "Surfaces governance activity that helps assess DAO health, power shifts, and emerging risks.",
+  },
   tokenDistribution: {
     title: "Token Distribution",
     page: "token-distribution",
