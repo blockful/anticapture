@@ -1,15 +1,15 @@
 import { serve } from "@hono/node-server";
-import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { swaggerUI } from "@hono/swagger-ui";
-import { logger } from "hono/logger";
+import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { cors } from "hono/cors";
+import { logger } from "hono/logger";
 
-import { env } from "@/env";
-import { initDb } from "@/db";
 import { ArkhamClient } from "@/clients/arkham";
 import { ENSClient } from "@/clients/ens";
-import { EnrichmentService } from "@/services/enrichment";
 import { addressController } from "@/controllers/address";
+import { initDb } from "@/db";
+import { env } from "@/env";
+import { EnrichmentService } from "@/services/enrichment";
 
 // Initialize clients and services
 const arkhamClient = new ArkhamClient(env.ARKHAM_API_URL, env.ARKHAM_API_KEY);

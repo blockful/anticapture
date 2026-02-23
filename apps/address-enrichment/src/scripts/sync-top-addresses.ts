@@ -7,14 +7,14 @@
  *   pnpm address-enrichment sync --limit 50 --holders-only
  */
 
+import dotenv from "dotenv";
 import { eq } from "drizzle-orm";
 import { type Address } from "viem";
 
-import { initDb, getDb, addressEnrichment } from "@/db";
-import { ArkhamClient } from "@/clients/arkham";
 import { AnticaptureClient } from "@/clients/anticapture";
+import { ArkhamClient } from "@/clients/arkham";
+import { initDb, getDb, addressEnrichment } from "@/db";
 import { isContract, createRpcClient } from "@/utils/address-type";
-import dotenv from "dotenv";
 import { DaoIdEnum } from "@/utils/types";
 
 dotenv.config();

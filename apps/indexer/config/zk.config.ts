@@ -1,8 +1,9 @@
+import { createConfig } from "ponder";
+
+import { env } from "@/env";
+import { GovernorAbi, TokenAbi } from "@/indexer/zk";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
-import { env } from "@/env";
-import { createConfig } from "ponder";
-import { GovernorAbi, TokenAbi } from "@/indexer/zk";
 
 const ZK_CONTRACTS = CONTRACT_ADDRESSES[DaoIdEnum.ZK];
 

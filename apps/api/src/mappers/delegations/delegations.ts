@@ -3,8 +3,6 @@ import { getAddress, isAddress } from "viem";
 
 import { delegation } from "@/database";
 
-import { DelegationItem, DelegationsResponse } from "./historical";
-
 export type DBDelegation = typeof delegation.$inferSelect;
 
 export const DelegationsRequestParamsSchema = z.object({
@@ -14,22 +12,11 @@ export const DelegationsRequestParamsSchema = z.object({
     .transform((val) => getAddress(val)),
 });
 
-export const delegationMapper = (d: DBDelegation): DelegationItem => {
-  return {
-    delegatorAddress: d.delegatorAccountId,
-    delegateAddress: d.delegateAccountId,
-    amount: d.delegatedValue.toString(),
-    timestamp: d.timestamp.toString(),
-    transactionHash: d.transactionHash,
-  };
-};
+export const DelegationsRequestQuerySchema = z.object({
+  orderBy: z.enum(["amount", "timestamp"]).optional().default("timestamp"),
+  orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
+});
 
-export const delegationsResponseMapper = (d: {
-  items: DBDelegation[];
-  totalCount: number;
-}): DelegationsResponse => {
-  return {
-    items: d.items.map(delegationMapper),
-    totalCount: d.totalCount,
-  };
-};
+export type DelegationsRequestQuery = z.infer<
+  typeof DelegationsRequestQuerySchema
+>;
