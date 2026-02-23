@@ -5,6 +5,8 @@ import { accountBalance } from "@/database";
 
 import { PeriodResponseSchema, TimestampResponseMapper } from "../shared";
 
+import { PercentageChangeMapper } from "./variations";
+
 export const AccountBalancesRequestSchema = z.object({
   fromDate: z
     .string()
@@ -173,7 +175,7 @@ export const AccountBalanceWithVariationMapper = (
     delegate: item.delegate,
     variation: {
       absoluteChange: item.absoluteChange.toString(),
-      percentageChange: item.percentageChange,
+      percentageChange: PercentageChangeMapper(item),
       previousBalance: item.previousBalance.toString(),
     },
   };
