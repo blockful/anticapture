@@ -1,20 +1,19 @@
 "use client";
 
-import { useParams } from "next/navigation";
-import { DaoIdEnum } from "@/shared/types/daos";
-import daoConfigByDaoId from "@/shared/dao-config";
-import { AttackProfitabilitySection } from "@/features/attack-profitability";
-import { RiskAnalysisSection } from "@/features/risk-analysis";
-import { GovernanceImplementationSection } from "@/features/governance-implementation";
-import { ResilienceStagesSection } from "@/features/resilience-stages";
-import { DaoOverviewSection } from "@/features/dao-overview";
-import { TokenDistributionSection } from "@/features/token-distribution";
-import { HoldersAndDelegatesSection } from "@/features/holders-and-delegates";
-// import { TransactionsTable } from "@/features/transactions/TransactionsTable";
-
-import { BannerAlert } from "@/shared/components/design-system/alerts/banner-alert/BannerAlert";
 import { Send } from "lucide-react";
+import { useParams } from "next/navigation";
+
+import { AttackProfitabilitySection } from "@/features/attack-profitability";
+import { DaoOverviewSection } from "@/features/dao-overview";
+import { GovernanceImplementationSection } from "@/features/governance-implementation";
+import { HoldersAndDelegatesSection } from "@/features/holders-and-delegates";
+import { ResilienceStagesSection } from "@/features/resilience-stages";
+import { RiskAnalysisSection } from "@/features/risk-analysis";
+import { TokenDistributionSection } from "@/features/token-distribution";
+import { BannerAlert } from "@/shared/components/design-system/alerts/banner-alert/BannerAlert";
 import { ANTICAPTURE_TELEGRAM_BOT } from "@/shared/constants/social-media";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 export const DaoTemplate = () => {
   const { daoId }: { daoId: string } = useParams();

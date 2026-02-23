@@ -1,7 +1,26 @@
-import { HeaderMobile } from "@/widgets/HeaderMobile";
+import type { Metadata } from "next";
+
+import { Footer } from "@/shared/components/design-system/footer/Footer";
 import { HomeTemplate } from "@/templates";
 import { HeaderSidebar } from "@/widgets";
-import { Footer } from "@/shared/components/design-system/footer/Footer";
+import { HeaderMobile } from "@/widgets/HeaderMobile";
+
+const metadataDescription =
+  "Anticapture | Monitor DAO governance risk. Track delegation shifts, voting power concentration, and onchain risk indicators across Ethereum DAOs.";
+
+export const metadata: Metadata = {
+  title: "Anticapture - Panel",
+  description: metadataDescription,
+  openGraph: {
+    title: "Anticapture - Panel",
+    description: metadataDescription,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Anticapture - Panel",
+    description: metadataDescription,
+  },
+};
 
 export default function Home() {
   return (

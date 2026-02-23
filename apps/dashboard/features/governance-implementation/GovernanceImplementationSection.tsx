@@ -1,14 +1,15 @@
 "use client";
 
-import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
 import { useState } from "react";
-import { cn } from "@/shared/utils/";
-import { GovernanceImplementationField } from "@/shared/dao-config/types";
-import { useScreenSize } from "@/shared/hooks";
-import { fieldsToArray } from "@/shared/dao-config/utils";
-import { sortByRiskLevel } from "@/shared/utils/sortByRiskLevel";
+
 import { GovernanceImplementationCard } from "@/features/governance-implementation/components";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { GovernanceImplementationField } from "@/shared/dao-config/types";
+import { fieldsToArray } from "@/shared/dao-config/utils";
+import { useScreenSize } from "@/shared/hooks";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { cn } from "@/shared/utils/";
+import { sortByRiskLevel } from "@/shared/utils/sortByRiskLevel";
 
 export const GovernanceImplementationSection = ({
   daoId,

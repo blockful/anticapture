@@ -1,10 +1,11 @@
 "use client";
 
-import { ReactNode, useState } from "react";
-import { cn } from "@/shared/utils/";
 import { ChevronDown } from "lucide-react";
 import Link from "next/link";
+import { ReactNode, useState } from "react";
+
 import { Button } from "@/shared/components";
+import { cn } from "@/shared/utils/";
 
 interface Option {
   value: string;

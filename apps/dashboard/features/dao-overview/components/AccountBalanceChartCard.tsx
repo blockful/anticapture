@@ -2,17 +2,18 @@
 
 import { useMemo } from "react";
 import { formatUnits } from "viem";
-import { SkeletonRow, TooltipInfo } from "@/shared/components";
-import { DefaultLink } from "@/shared/components/design-system/links/default-link";
-import { DaoIdEnum } from "@/shared/types/daos";
+
 import {
   TopAccountChartData,
   TopAccountsChart,
 } from "@/features/dao-overview/components/TopAccountsChart";
 import { useAccountBalanceVariations } from "@/features/dao-overview/hooks/useAccountBalanceVariations";
-import { TimeInterval } from "@/shared/types/enums";
-import daoConfig from "@/shared/dao-config";
+import { SkeletonRow, TooltipInfo } from "@/shared/components";
+import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
+import daoConfig from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { TimeInterval } from "@/shared/types/enums";
 
 export const AccountBalanceChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
   const accountBalanceVariations = useAccountBalanceVariations(

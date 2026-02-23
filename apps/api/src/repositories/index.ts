@@ -10,3 +10,4 @@ export * from "./treasury/index";
 export * from "./transfers";
 export * from "./delegations";
 export * from "./votes";
+export * from "./feed";

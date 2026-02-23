@@ -1,6 +1,5 @@
-import { Drizzle } from "@/database";
+import { Drizzle, daoMetricsDayBucket } from "@/database";
 import { inArray } from "drizzle-orm";
-import { daoMetricsDayBucket } from "@/database";
 
 import { ChartType } from "@/mappers/";
 import { MetricTypesEnum } from "@/lib/constants";

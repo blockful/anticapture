@@ -1,6 +1,5 @@
 import { eq } from "drizzle-orm";
-import { Drizzle } from "@/database";
-import { token } from "@/database";
+import { Drizzle, token } from "@/database";
 import { DBToken } from "@/mappers";
 import { DaoIdEnum } from "@/lib/enums";
 

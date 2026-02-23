@@ -50,7 +50,7 @@ export const ProposalTimeline = ({
   const getTimelineItemBgColor = (index: number) => {
     // Find the last completed item index (this is the current state)
     const lastCompletedIndex = timelineItems.findLastIndex(
-      (item) => item.status === "completed"
+      (item) => item.status === "completed",
     );
 
     if (index < lastCompletedIndex) {
@@ -97,7 +97,9 @@ export const ProposalTimeline = ({
             </div>
           </div>
           {index < timelineItems.length - 1 && (
-            <div className={`${getTimelineLineBgColor(index)} ml-[3px] h-5 w-0.5`} />
+            <div
+              className={`${getTimelineLineBgColor(index)} ml-[3px] h-5 w-0.5`}
+            />
           )}
         </div>
       ))}

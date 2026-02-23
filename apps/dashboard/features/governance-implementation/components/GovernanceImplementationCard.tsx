@@ -1,6 +1,7 @@
 "use client";
 
 import { MouseEvent } from "react";
+
 import { AccordionContentArea, RiskLevelCardSmall } from "@/shared/components";
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
 import { RiskLevel } from "@/shared/types/enums";

@@ -1,9 +1,10 @@
 "use client";
 
-import { useGetTopTokenHoldersQuery } from "@anticapture/graphql-client/hooks";
 import { QueryInput_AccountBalances_OrderDirection } from "@anticapture/graphql-client";
-import { useMemo, useCallback, useState, useEffect } from "react";
+import { useGetTopTokenHoldersQuery } from "@anticapture/graphql-client/hooks";
 import { NetworkStatus } from "@apollo/client";
+import { useMemo, useCallback, useState, useEffect } from "react";
+
 import { useHistoricalBalances } from "@/shared/hooks/graphql-client/useHistoricalBalances";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";

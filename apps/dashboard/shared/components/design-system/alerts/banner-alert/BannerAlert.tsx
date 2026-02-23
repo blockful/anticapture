@@ -2,9 +2,10 @@
 
 import { ChevronRight, X } from "lucide-react";
 import { ReactNode, useState, useEffect } from "react";
+
+import { IconButton } from "@/shared/components/design-system/buttons/icon-button/IconButton";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { cn } from "@/shared/utils";
-import { IconButton } from "@/shared/components/design-system/buttons/icon-button/IconButton";
 
 interface BannerAlertProps {
   icon: ReactNode;

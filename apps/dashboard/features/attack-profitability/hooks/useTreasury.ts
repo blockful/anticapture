@@ -1,5 +1,6 @@
-import useSWR from "swr";
 import axios from "axios";
+import useSWR from "swr";
+
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";

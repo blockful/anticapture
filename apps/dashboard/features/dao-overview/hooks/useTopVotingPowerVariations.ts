@@ -1,8 +1,9 @@
-import { DaoIdEnum } from "@/shared/types/daos";
-import { TimeInterval } from "@/shared/types/enums";
-import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 import { useTopVotingPowerVariationsQuery } from "@anticapture/graphql-client/hooks";
 import { useMemo } from "react";
+
+import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { TimeInterval } from "@/shared/types/enums";
 
 export const useTopVotingPowerVariations = (
   daoId: DaoIdEnum,

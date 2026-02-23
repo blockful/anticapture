@@ -1,14 +1,16 @@
 "use client";
 
-import { BlankSlate, Button } from "@/shared/components";
-import { DefaultLink } from "@/shared/components/design-system/links/default-link";
-import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
 import { GetProposalQuery } from "@anticapture/graphql-client";
 import { Inbox } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
+
 import { useDecodeCalldata } from "@/features/governance/hooks/useDecodeCalldata";
+import { BlankSlate, Button } from "@/shared/components";
+import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
+
 export const ActionsTabContent = ({
   proposal,
 }: {
@@ -94,7 +96,7 @@ const ActionItem = ({
           <DefaultLink
             href={`${blockExplorerUrl}/address/${target}`}
             openInNewTab
-            className="text-secondary font-mono break-all text-sm font-normal not-italic leading-5"
+            className="text-secondary break-all font-mono text-sm font-normal not-italic leading-5"
           >
             {target}
           </DefaultLink>
@@ -107,7 +109,7 @@ const ActionItem = ({
             <div className="scrollbar-thin max-h-[248px] overflow-y-auto p-3">
               <p
                 className={`text-secondary font-mono text-sm font-normal not-italic leading-5 ${
-                  isDecoded  && !isLoading ? "whitespace-pre-wrap" : "break-all"
+                  isDecoded && !isLoading ? "whitespace-pre-wrap" : "break-all"
                 } ${isLoading ? "animate-pulse" : ""}`}
               >
                 {displayCalldata}

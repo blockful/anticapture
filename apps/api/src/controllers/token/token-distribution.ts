@@ -131,12 +131,10 @@ export function tokenDistribution(
 
         const { oldValue, currentValue } = result;
 
-        /* eslint-disable */
         const changeRate =
           parseInt(oldValue) &&
           (BigInt(currentValue) * parseEther("1")) / BigInt(oldValue) -
             parseEther("1");
-        /* eslint-enable */
 
         return ctx.json(
           {

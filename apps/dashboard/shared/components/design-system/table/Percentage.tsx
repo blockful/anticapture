@@ -1,6 +1,7 @@
-import { cn } from "@/shared/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 import { ArrowDown, ArrowUp } from "lucide-react";
+
+import { cn } from "@/shared/utils";
 
 export const percentageVariants = cva(
   "flex items-center gap-0.5 transition-colors duration-300 text-sm font-normal",

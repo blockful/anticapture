@@ -1,8 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
+
 import { useCountdown } from "@/features/dao-overview/hooks";
 import { DaoOverviewConfig } from "@/shared/dao-config/types";
-import { useMemo } from "react";
 
 export const CountdownDaoInfo = ({
   daoOverview,

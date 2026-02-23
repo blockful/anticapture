@@ -1,19 +1,21 @@
 "use client";
 
+import { BarChart } from "lucide-react";
+
+import {
+  StagesContainer,
+  stageToRiskMapping,
+} from "@/features/resilience-stages/components/StagesContainer";
 import { RiskLevelCard, TheSectionLayout } from "@/shared/components";
+import { SubSectionsContainer } from "@/shared/components/design-system/section";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import daoConfigByDaoId from "@/shared/dao-config";
 import {
   getDaoStageFromFields,
   fieldsToArray,
 } from "@/shared/dao-config/utils";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
-import { BarChart } from "lucide-react";
-import {
-  StagesContainer,
-  stageToRiskMapping,
-} from "@/features/resilience-stages/components/StagesContainer";
-import { SubSectionsContainer } from "@/shared/components/design-system/section";
+
 interface ResilienceStagesSectionProps {
   daoId: DaoIdEnum;
 }

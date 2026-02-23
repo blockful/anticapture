@@ -1,15 +1,15 @@
 "use client";
 
-import { useMemo } from "react";
-import { formatUnits } from "viem";
-
-import { useBalanceHistoryGraphQuery } from "@anticapture/graphql-client/hooks";
-import { DaoIdEnum } from "@/shared/types/daos";
-import daoConfig from "@/shared/dao-config";
 import {
   QueryInput_HistoricalBalances_OrderBy,
   QueryInput_HistoricalBalances_OrderDirection,
 } from "@anticapture/graphql-client";
+import { useBalanceHistoryGraphQuery } from "@anticapture/graphql-client/hooks";
+import { useMemo } from "react";
+import { formatUnits } from "viem";
+
+import daoConfig from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 export interface BalanceHistoryGraphItem {
   timestamp: number;

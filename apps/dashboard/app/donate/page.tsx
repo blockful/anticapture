@@ -1,7 +1,23 @@
-import { HeaderSidebar } from "@/widgets";
+import type { Metadata } from "next";
+
 import { DonationSection } from "@/features/donation";
-import { HeaderMobile } from "@/widgets/HeaderMobile";
 import { Footer } from "@/shared/components/design-system/footer/Footer";
+import { HeaderSidebar } from "@/widgets";
+import { HeaderMobile } from "@/widgets/HeaderMobile";
+
+export const metadata: Metadata = {
+  title: "Anticapture - Donate",
+  description: "Support DAO governance security research and development.",
+  openGraph: {
+    title: "Anticapture - Donate",
+    description: "Support DAO governance security research and development.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Anticapture - Donate",
+    description: "Support DAO governance security research and development.",
+  },
+};
 
 export default function DonatePage() {
   return (

@@ -1,11 +1,11 @@
-import { Card, CardContent } from "@/shared/components/ui/card";
-import { Button } from "@/shared/components";
-import { DonationCardProps } from "@/features/donation/types";
 import { ExternalLink, Eye, BookOpen, Shield } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
-import Image from "next/image";
+import { DonationCardProps } from "@/features/donation/types";
+import { Button } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import { Card, CardContent } from "@/shared/components/ui/card";
 
 export const DonationCard = ({
   title,
