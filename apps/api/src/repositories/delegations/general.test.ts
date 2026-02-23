@@ -1,10 +1,12 @@
 import { PGlite } from "@electric-sql/pglite";
-import { drizzle } from "drizzle-orm/pglite";
 import { pushSchema } from "drizzle-kit/api";
+import { drizzle } from "drizzle-orm/pglite";
+import { Address } from "viem";
+
 import * as schema from "@/database/schema";
 import { delegation } from "@/database/schema";
+
 import { DelegationsRepository } from "./general";
-import { Address } from "viem";
 
 type DelegationInsert = typeof delegation.$inferInsert;
 
@@ -45,6 +47,7 @@ describe("DelegationsRepository", () => {
   let repository: DelegationsRepository;
 
   beforeAll(async () => {
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     (BigInt.prototype as any).toJSON = function () {
       return this.toString();
     };
@@ -53,6 +56,7 @@ describe("DelegationsRepository", () => {
     db = drizzle(client, { schema });
     repository = new DelegationsRepository(db);
 
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     const { apply } = await pushSchema(schema, db as any);
     await apply();
   });

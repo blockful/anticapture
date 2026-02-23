@@ -1,7 +1,9 @@
-import { describe, it, expect, beforeEach } from "vitest";
 import { Address } from "viem";
-import { HistoricalDelegationsService } from "./historical";
+import { describe, it, expect, beforeEach } from "vitest";
+
 import { DBDelegation } from "@/mappers";
+
+import { HistoricalDelegationsService } from "./historical";
 
 const createMockDelegation = (
   overrides: Partial<DBDelegation> = {},
@@ -9,8 +11,7 @@ const createMockDelegation = (
   transactionHash: "0xabc123",
   daoId: "uni",
   delegateAccountId: "0x1234567890123456789012345678901234567890" as Address,
-  delegatorAccountId:
-    "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd" as Address,
+  delegatorAccountId: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd" as Address,
   delegatedValue: 1000000000000000000n,
   previousDelegate: null,
   timestamp: 1700000000n,
@@ -23,8 +24,7 @@ const createMockDelegation = (
 });
 
 describe("HistoricalDelegationsService", () => {
-  const address =
-    "0x1234567890123456789012345678901234567890" as Address;
+  const address = "0x1234567890123456789012345678901234567890" as Address;
 
   let capturedArgs: unknown[];
   let stubResult: { items: DBDelegation[]; totalCount: number };
@@ -40,6 +40,7 @@ describe("HistoricalDelegationsService", () => {
         return Promise.resolve(stubResult);
       },
     };
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     service = new HistoricalDelegationsService(stubRepository as any);
   });
 
@@ -97,10 +98,8 @@ describe("HistoricalDelegationsService", () => {
           {
             transactionHash: "0xhistorical1",
             daoId: "uni",
-            delegateAccountId:
-              "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-            delegatorAccountId:
-              "0x1234567890123456789012345678901234567890",
+            delegateAccountId: "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            delegatorAccountId: "0x1234567890123456789012345678901234567890",
             delegatedValue: 9999n,
             previousDelegate: null,
             timestamp: 1700050000n,

@@ -1,8 +1,8 @@
-import { AggregatedDelegator } from "@/mappers";
 import { asc, desc, eq, sql } from "drizzle-orm";
-import { Drizzle } from "@/database";
-import { accountBalance, delegation } from "@/database";
 import { Address } from "viem";
+
+import { Drizzle, accountBalance, delegation } from "@/database";
+import { AggregatedDelegator } from "@/mappers";
 import { DelegatorsSortOptions } from "@/services/delegations/delegators";
 
 export class DelegatorsRepository {

@@ -1,5 +1,6 @@
-import { AggregatedDelegator, DelegatorsRequestQuery } from "@/mappers";
 import { Address } from "viem";
+
+import { AggregatedDelegator, DelegatorsRequestQuery } from "@/mappers";
 
 export type DelegatorsSortOptions = Pick<
   DelegatorsRequestQuery,

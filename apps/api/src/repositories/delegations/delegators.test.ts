@@ -1,11 +1,13 @@
 import { PGlite } from "@electric-sql/pglite";
-import { drizzle } from "drizzle-orm/pglite";
 import { pushSchema } from "drizzle-kit/api";
+import { drizzle } from "drizzle-orm/pglite";
+import { Address } from "viem";
+
 import * as schema from "@/database/schema";
 import { accountBalance, delegation } from "@/database/schema";
-import { Address } from "viem";
-import { DelegatorsRepository } from "./delegators";
 import { DelegatorsSortOptions } from "@/services/delegations/delegators";
+
+import { DelegatorsRepository } from "./delegators";
 
 type AccountBalanceInsert = typeof accountBalance.$inferInsert;
 type DelegationInsert = typeof delegation.$inferInsert;
@@ -55,6 +57,7 @@ describe("DelegatorsRepository", () => {
   let repository: DelegatorsRepository;
 
   beforeAll(async () => {
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     (BigInt.prototype as any).toJSON = function () {
       return this.toString();
     };
@@ -63,6 +66,7 @@ describe("DelegatorsRepository", () => {
     db = drizzle(client, { schema });
     repository = new DelegatorsRepository(db);
 
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     const { apply } = await pushSchema(schema, db as any);
     await apply();
   });
@@ -89,10 +93,12 @@ describe("DelegatorsRepository", () => {
           timestamp: 2000n,
         }),
       ]);
-      await db.insert(accountBalance).values([
-        createAccountBalance({ accountId: DELEGATOR_A, balance: 500n }),
-        createAccountBalance({ accountId: DELEGATOR_B, balance: 1000n }),
-      ]);
+      await db
+        .insert(accountBalance)
+        .values([
+          createAccountBalance({ accountId: DELEGATOR_A, balance: 500n }),
+          createAccountBalance({ accountId: DELEGATOR_B, balance: 1000n }),
+        ]);
 
       const result = await repository.getDelegators(
         DELEGATE,
@@ -161,14 +167,12 @@ describe("DelegatorsRepository", () => {
     });
 
     it("should aggregate balances across multiple token entries", async () => {
-      await db
-        .insert(delegation)
-        .values([
-          createDelegation({
-            delegatorAccountId: DELEGATOR_A,
-            timestamp: 1000n,
-          }),
-        ]);
+      await db.insert(delegation).values([
+        createDelegation({
+          delegatorAccountId: DELEGATOR_A,
+          timestamp: 1000n,
+        }),
+      ]);
       await db.insert(accountBalance).values([
         createAccountBalance({
           accountId: DELEGATOR_A,
@@ -198,15 +202,13 @@ describe("DelegatorsRepository", () => {
     });
 
     it("should include self-delegation", async () => {
-      await db
-        .insert(delegation)
-        .values([
-          createDelegation({
-            delegatorAccountId: DELEGATE,
-            delegateAccountId: DELEGATE,
-            timestamp: 1000n,
-          }),
-        ]);
+      await db.insert(delegation).values([
+        createDelegation({
+          delegatorAccountId: DELEGATE,
+          delegateAccountId: DELEGATE,
+          timestamp: 1000n,
+        }),
+      ]);
       await db.insert(accountBalance).values([
         createAccountBalance({
           accountId: DELEGATE,
@@ -223,9 +225,7 @@ describe("DelegatorsRepository", () => {
       );
 
       expect(result).toEqual({
-        items: [
-          { delegatorAddress: DELEGATE, amount: 500n, timestamp: 1000n },
-        ],
+        items: [{ delegatorAddress: DELEGATE, amount: 500n, timestamp: 1000n }],
         totalCount: 1,
       });
     });
@@ -245,9 +245,11 @@ describe("DelegatorsRepository", () => {
           timestamp: 2000n,
         }),
       ]);
-      await db.insert(accountBalance).values([
-        createAccountBalance({ accountId: DELEGATOR_A, balance: 500n }),
-      ]);
+      await db
+        .insert(accountBalance)
+        .values([
+          createAccountBalance({ accountId: DELEGATOR_A, balance: 500n }),
+        ]);
 
       const result = await repository.getDelegators(
         DELEGATE,
@@ -265,17 +267,17 @@ describe("DelegatorsRepository", () => {
     });
 
     it("should include a delegator with zero balance", async () => {
-      await db
-        .insert(delegation)
-        .values([
-          createDelegation({
-            delegatorAccountId: DELEGATOR_A,
-            timestamp: 1000n,
-          }),
-        ]);
-      await db.insert(accountBalance).values([
-        createAccountBalance({ accountId: DELEGATOR_A, balance: 0n }),
+      await db.insert(delegation).values([
+        createDelegation({
+          delegatorAccountId: DELEGATOR_A,
+          timestamp: 1000n,
+        }),
       ]);
+      await db
+        .insert(accountBalance)
+        .values([
+          createAccountBalance({ accountId: DELEGATOR_A, balance: 0n }),
+        ]);
 
       const result = await repository.getDelegators(
         DELEGATE,
