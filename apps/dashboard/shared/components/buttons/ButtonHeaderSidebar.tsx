@@ -89,7 +89,7 @@ export const ButtonHeaderSidebar = ({
           })}
         />
         {isNew && isCollapsed && (
-          <span className="absolute -right-0.5 -top-0.5 size-1.5 rounded-full bg-blue-500" />
+          <span className="absolute -right-0.5 -top-0.5 size-1.5 rounded-full bg-orange-400" />
         )}
       </div>
       {!isCollapsed && (
@@ -106,7 +106,7 @@ export const ButtonHeaderSidebar = ({
         </p>
       )}
       {isNew && !isCollapsed && (
-        <span className="rounded-sm bg-blue-500 px-1 py-px text-[10px] font-semibold uppercase leading-none text-white">
+        <span className="rounded-full bg-orange-100 px-2 py-0.5 text-[11px] font-medium text-orange-400">
           New
         </span>
       )}

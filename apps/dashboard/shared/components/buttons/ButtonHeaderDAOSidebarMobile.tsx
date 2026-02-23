@@ -62,7 +62,7 @@ export const ButtonHeaderDAOSidebarMobile = ({
               >
                 {option.title}
                 {option.isNew && (
-                  <span className="ml-1 rounded-sm bg-blue-500 px-1 py-px text-[10px] font-semibold uppercase leading-none text-white">
+                  <span className="rounded-full bg-orange-100 px-2 py-0.5 text-[11px] font-medium text-orange-400">
                     New
                   </span>
                 )}
