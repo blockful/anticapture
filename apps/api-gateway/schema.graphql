@@ -486,7 +486,6 @@ enum query_feedEvents_items_items_type {
   PROPOSAL
   DELEGATION
   TRANSFER
-  DELEGATION_VOTES_CHANGED
   PROPOSAL_EXTENDED
 }
 
@@ -517,7 +516,6 @@ enum queryInput_feedEvents_type {
   PROPOSAL
   DELEGATION
   TRANSFER
-  DELEGATION_VOTES_CHANGED
   PROPOSAL_EXTENDED
 }
 
