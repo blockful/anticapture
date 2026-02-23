@@ -1,8 +1,8 @@
-import { getDateRange } from "@/shared/utils";
 import { ReactNode } from "react";
-import { cn } from "@/shared/utils";
-import { SectionTitle } from "@/shared/components/design-system/section/SectionTitle";
+
 import { SubSection } from "@/shared/components/design-system/section";
+import { SectionTitle } from "@/shared/components/design-system/section/SectionTitle";
+import { getDateRange, cn } from "@/shared/utils";
 
 interface TheSectionLayoutProps {
   icon?: ReactNode;

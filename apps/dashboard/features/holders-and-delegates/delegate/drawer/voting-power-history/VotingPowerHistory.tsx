@@ -1,10 +1,11 @@
-import { DaoIdEnum } from "@/shared/types/daos";
-import { VotingPowerHistoryTable } from "@/features/holders-and-delegates/delegate/drawer/voting-power-history/VotingPowerHistoryTable";
-import { VotingPowerVariationGraph } from "@/features/holders-and-delegates/delegate/drawer/voting-power-history/VotingPowerVariationGraph";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { useMemo } from "react";
-import { getTimestampRangeFromPeriod } from "@/features/holders-and-delegates/utils";
+
 import { TimePeriod } from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
+import { VotingPowerHistoryTable } from "@/features/holders-and-delegates/delegate/drawer/voting-power-history/VotingPowerHistoryTable";
+import { VotingPowerVariationGraph } from "@/features/holders-and-delegates/delegate/drawer/voting-power-history/VotingPowerVariationGraph";
+import { getTimestampRangeFromPeriod } from "@/features/holders-and-delegates/utils";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 interface VotingPowerHistoryProps {
   accountId: string;

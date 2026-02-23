@@ -50,15 +50,19 @@ describe("FeedRepository", () => {
   let repository: FeedRepository;
 
   beforeAll(async () => {
-    (BigInt.prototype as any).toJSON = function () {
-      return this.toString();
-    };
+    (BigInt.prototype as unknown as { toJSON: () => string }).toJSON =
+      function () {
+        return this.toString();
+      };
 
     client = new PGlite();
     db = drizzle(client, { schema });
     repository = new FeedRepository(db);
 
-    const { apply } = await pushSchema(schema, db as any);
+    const { apply } = await pushSchema(
+      schema,
+      db as unknown as Parameters<typeof pushSchema>[1],
+    );
     await apply();
   });
 

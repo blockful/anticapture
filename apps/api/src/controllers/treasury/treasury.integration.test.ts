@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { treasury } from "./index";
-import { TreasuryService } from "@/services/treasury";
 import {
+  TreasuryService,
   TreasuryProvider,
   LiquidTreasuryDataPoint,
   PriceProvider,

@@ -10,23 +10,24 @@ import {
   ArrowUpDown,
   Clock,
 } from "lucide-react";
-import { cn, formatNumberUserReadable } from "@/shared/utils";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { formatUnits, zeroAddress } from "viem";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { DaoIdEnum } from "@/shared/types/daos";
+import { formatUnits, zeroAddress } from "viem";
+
 import {
   FeedEvent,
   FeedEventRelevance,
   FeedEventType,
 } from "@/features/feed/types";
-import daoConfig from "@/shared/dao-config";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
+import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 import { BulletDivider } from "@/shared/components/design-system/section";
-import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { Button } from "@/shared/components/design-system/buttons/button/Button";
+import daoConfig from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { cn, formatNumberUserReadable } from "@/shared/utils";
 
 interface FeedEventItemProps {
   event: FeedEvent;

@@ -1,10 +1,4 @@
-import {
-  Account,
-  Address,
-  Chain,
-  Client as vClient,
-  Transport,
-} from "viem";
+import { Account, Address, Chain, Client as vClient, Transport } from "viem";
 import { readContract } from "viem/actions";
 
 import { DAOClient } from "@/clients";

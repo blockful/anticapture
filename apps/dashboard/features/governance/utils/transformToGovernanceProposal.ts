@@ -1,11 +1,12 @@
 import { GetProposalsFromDaoQuery } from "@anticapture/graphql-client/hooks";
+import { formatUnits } from "viem";
+
+import type { Proposal as GovernanceProposal } from "@/features/governance/types";
 import {
   getTimeText,
   getProposalStatus,
   getProposalState,
 } from "@/features/governance/utils";
-import type { Proposal as GovernanceProposal } from "@/features/governance/types";
-import { formatUnits } from "viem";
 
 type GraphQLProposal = NonNullable<
   NonNullable<

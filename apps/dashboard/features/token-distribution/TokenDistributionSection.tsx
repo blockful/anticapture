@@ -1,21 +1,22 @@
 "use client";
 
+import { DownloadIcon } from "lucide-react";
 import { useState } from "react";
+import { CSVLink } from "react-csv";
+
 import {
   TokenDistributionChart,
   TokenDistributionMetrics,
 } from "@/features/token-distribution/components";
-import { DownloadIcon } from "lucide-react";
-import { Card, CardContent, CardTitle } from "@/shared/components/ui/card";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { metricsSchema } from "@/features/token-distribution/utils";
 import { useChartMetrics } from "@/features/token-distribution/hooks/useChartMetrics";
-import { useTokenDistributionStore } from "@/features/token-distribution/store/useTokenDistributionStore";
-import { CSVLink } from "react-csv";
-import { defaultLinkVariants } from "@/shared/components/design-system/links/default-link";
-import { ChartDataSetPoint } from "@/shared/dao-config/types";
-import daoConfig from "@/shared/dao-config";
 import { useTokenDistributionParams } from "@/features/token-distribution/hooks/useTokenDistributionParams";
+import { useTokenDistributionStore } from "@/features/token-distribution/store/useTokenDistributionStore";
+import { metricsSchema } from "@/features/token-distribution/utils";
+import { defaultLinkVariants } from "@/shared/components/design-system/links/default-link";
+import { Card, CardContent, CardTitle } from "@/shared/components/ui/card";
+import daoConfig from "@/shared/dao-config";
+import { ChartDataSetPoint } from "@/shared/dao-config/types";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 type CsvRow = Record<string, number | string | null>;
 

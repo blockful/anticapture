@@ -1,9 +1,10 @@
 "use client";
 
-import { cn } from "@/shared/utils/";
 import { AlertCircle, AlertTriangle } from "lucide-react";
-import { Stage } from "@/shared/types/enums/Stage";
 import { ReactNode } from "react";
+
+import { Stage } from "@/shared/types/enums/Stage";
+import { cn } from "@/shared/utils/";
 
 const STAGE_STYLES: Record<Stage, string> = {
   [Stage.ZERO]: "text-error",

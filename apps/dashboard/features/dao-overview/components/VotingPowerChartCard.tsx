@@ -1,18 +1,19 @@
 "use client";
 
-import { SkeletonRow, TooltipInfo } from "@/shared/components";
-import { DefaultLink } from "@/shared/components/design-system/links/default-link";
-import { DaoIdEnum } from "@/shared/types/daos";
+import { useMemo } from "react";
+import { formatUnits } from "viem";
+
 import {
   TopAccountChartData,
   TopAccountsChart,
 } from "@/features/dao-overview/components/TopAccountsChart";
-import { formatUnits } from "viem";
-import { TimeInterval } from "@/shared/types/enums";
-import { useMemo } from "react";
 import { useTopVotingPowerVariations } from "@/features/dao-overview/hooks/useTopVotingPowerVariations";
-import daoConfig from "@/shared/dao-config";
+import { SkeletonRow, TooltipInfo } from "@/shared/components";
+import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
+import daoConfig from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { TimeInterval } from "@/shared/types/enums";
 
 export const VotingPowerChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
   const votingPowerVariations = useTopVotingPowerVariations(

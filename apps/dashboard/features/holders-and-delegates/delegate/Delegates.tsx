@@ -1,37 +1,40 @@
 "use client";
 
-import { useMemo } from "react";
+import {
+  QueryInput_VotingPowers_OrderBy,
+  QueryInput_VotingPowers_OrderDirection,
+} from "@anticapture/graphql-client";
 import { ColumnDef } from "@tanstack/react-table";
+import { Plus } from "lucide-react";
+import { parseAsStringEnum, useQueryState } from "nuqs";
+import { useMemo } from "react";
+import { Address, formatUnits } from "viem";
 
 import {
   useDelegates,
   HoldersAndDelegatesDrawer,
 } from "@/features/holders-and-delegates";
-import { getAvgVoteTimingData } from "@/features/holders-and-delegates/utils";
-import { TimeInterval } from "@/shared/types/enums";
-import { SkeletonRow, Button, SimpleProgressBar } from "@/shared/components";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
-import { cn, formatNumberUserReadable } from "@/shared/utils";
-import { Plus } from "lucide-react";
 import { ProgressCircle } from "@/features/holders-and-delegates/components/ProgressCircle";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { useScreenSize, useDaoData } from "@/shared/hooks";
-import { Address, formatUnits } from "viem";
-import { Table } from "@/shared/components/design-system/table/Table";
-import { Percentage } from "@/shared/components/design-system/table/Percentage";
-import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
-import daoConfig from "@/shared/dao-config";
-import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { parseAsStringEnum, useQueryState } from "nuqs";
 import {
-  QueryInput_VotingPowers_OrderBy,
-  QueryInput_VotingPowers_OrderDirection,
-} from "@anticapture/graphql-client";
+  getAvgVoteTimingData,
+  DEFAULT_ITEMS_PER_PAGE,
+} from "@/features/holders-and-delegates/utils";
+import { SkeletonRow, Button, SimpleProgressBar } from "@/shared/components";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
+import { Percentage } from "@/shared/components/design-system/table/Percentage";
+import { Table } from "@/shared/components/design-system/table/Table";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
-import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
-import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
+import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
+import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
+import daoConfig from "@/shared/dao-config";
+import { useScreenSize, useDaoData } from "@/shared/hooks";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { TimeInterval } from "@/shared/types/enums";
+import { cn, formatNumberUserReadable } from "@/shared/utils";
+
 interface DelegateTableData {
   address: string;
   votingPower: string;
@@ -138,8 +141,8 @@ export const Delegates = ({
 
       const activityPercentage = delegate.proposalsActivity
         ? (delegate.proposalsActivity.votedProposals /
-          delegate.proposalsActivity.totalProposals) *
-        100
+            delegate.proposalsActivity.totalProposals) *
+          100
         : null;
 
       const avgVoteTiming = getAvgVoteTimingData(
@@ -289,9 +292,9 @@ export const Delegates = ({
 
         const variation = row.getValue("variation") as
           | {
-            percentageChange: number;
-            absoluteChange: number;
-          }
+              percentageChange: number;
+              absoluteChange: number;
+            }
           | undefined;
 
         if (isHistoricalLoadingFor(addr) || loading) {

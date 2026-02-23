@@ -1,21 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { Calendar, X } from "lucide-react";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerClose,
-} from "@/shared/components/ui/drawer";
-import { RadioButton } from "@/shared/components/design-system/buttons/RadioButton";
-import { Button, IconButton } from "@/shared/components";
-import { Input } from "@/shared/components/design-system/form/fields/input/Input";
-import { useScreenSize } from "@/shared/hooks";
+import { useState, useEffect } from "react";
+
 import {
   FeedEventRelevance,
   FeedEventType,
   ActivityFeedFilterState,
 } from "@/features/feed/types";
+import { Button, IconButton } from "@/shared/components";
+import { RadioButton } from "@/shared/components/design-system/buttons/RadioButton";
+import { Input } from "@/shared/components/design-system/form/fields/input/Input";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerClose,
+} from "@/shared/components/ui/drawer";
+import { useScreenSize } from "@/shared/hooks";
 
 interface ActivityFeedFiltersDrawerProps {
   isOpen: boolean;

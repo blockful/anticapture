@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+
+import { AlertsSection } from "@/features/alerts";
+import { Footer } from "@/shared/components/design-system/footer/Footer";
 import { HeaderSidebar } from "@/widgets";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
-import { Footer } from "@/shared/components/design-system/footer/Footer";
-import { AlertsSection } from "@/features/alerts";
 
 export const metadata: Metadata = {
   title: "Anticapture - Alerts",

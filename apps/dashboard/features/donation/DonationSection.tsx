@@ -1,11 +1,12 @@
-import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { Heart } from "lucide-react";
-import { TheSectionLayout } from "@/shared/components";
+
 import {
   DonationCard,
   FundingSourcesCard,
 } from "@/features/donation/components";
 import { DONATION_CONSTANTS } from "@/features/donation/utils/donation-constants";
+import { TheSectionLayout } from "@/shared/components";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 
 export const DonationSection = () => {
   const { donation, fundingSources } = DONATION_CONSTANTS;

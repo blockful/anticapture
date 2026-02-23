@@ -1,11 +1,11 @@
 "use client";
 
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
+import { cn } from "@/shared/utils";
 import {
   formatRelativeTime,
   formatFullDate,
 } from "@/shared/utils/formatRelativeTime";
-import { cn } from "@/shared/utils";
 
 interface DateCellProps {
   timestampSeconds: number | string;

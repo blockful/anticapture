@@ -1,3 +1,4 @@
+import { connectorsForWallets } from "@rainbow-me/rainbowkit";
 import {
   trustWallet,
   walletConnectWallet,
@@ -5,9 +6,8 @@ import {
   coinbaseWallet,
   metaMaskWallet,
 } from "@rainbow-me/rainbowkit/wallets";
-import { connectorsForWallets } from "@rainbow-me/rainbowkit";
-import { createConfig, http } from "wagmi";
 import { createPublicClient, createWalletClient } from "viem";
+import { createConfig, http } from "wagmi";
 import { mainnet } from "wagmi/chains";
 
 const alchemyApiKey = process.env.NEXT_PUBLIC_ALCHEMY_KEY;

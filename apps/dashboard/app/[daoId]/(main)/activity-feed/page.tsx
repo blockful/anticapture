@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import { DaoIdEnum } from "@/shared/types/daos";
+
 import { ActivityFeedSection } from "@/features/feed";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 type Props = {
   params: Promise<{ daoId: string }>;

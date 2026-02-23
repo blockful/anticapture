@@ -1,21 +1,23 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect, useCallback } from "react";
-import { useParams } from "next/navigation";
 import { Activity, Filter, Loader2, Newspaper } from "lucide-react";
-import { cn } from "@/shared/utils";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { Button, BlankSlate } from "@/shared/components";
-import { useActivityFeed } from "@/features/feed/hooks/useActivityFeed";
+import { useParams } from "next/navigation";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
+
+import { ActivityFeedFiltersDrawer } from "@/features/feed/components/ActivityFeedFilters";
 import { FeedEventItem } from "@/features/feed/components/FeedEventItem";
 import { FeedEventSkeleton } from "@/features/feed/components/FeedEventSkeleton";
-import { ActivityFeedFiltersDrawer } from "@/features/feed/components/ActivityFeedFilters";
-import { TheSectionLayout } from "@/shared/components";
-import { SubSectionsContainer } from "@/shared/components/design-system/section";
-import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
-import { BulletDivider } from "@/shared/components/design-system/section";
-import { FeedEvent, FeedEventRelevance } from "@/features/feed/types";
+import { useActivityFeed } from "@/features/feed/hooks/useActivityFeed";
 import { useActivityFeedParams } from "@/features/feed/hooks/useActivityFeedParams";
+import { FeedEvent, FeedEventRelevance } from "@/features/feed/types";
+import { Button, BlankSlate, TheSectionLayout } from "@/shared/components";
+import {
+  SubSectionsContainer,
+  BulletDivider,
+} from "@/shared/components/design-system/section";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { cn } from "@/shared/utils";
 
 interface ActivityFeedSectionProps {
   className?: string;

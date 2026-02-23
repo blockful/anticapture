@@ -1,5 +1,6 @@
-import { cn } from "@/shared/utils";
 import { forwardRef } from "react";
+
+import { cn } from "@/shared/utils";
 
 export const TableContainer = forwardRef<
   HTMLDivElement,

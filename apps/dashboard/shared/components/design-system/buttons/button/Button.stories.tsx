@@ -1,11 +1,11 @@
+import type { Meta, StoryObj } from "@storybook/nextjs";
 import { Plus } from "lucide-react";
+
 import {
   Button,
   iconSizeStyles,
 } from "@/shared/components/design-system/buttons/button/Button";
 import { ButtonProps } from "@/shared/components/design-system/buttons/types";
-
-import type { Meta, StoryObj } from "@storybook/nextjs";
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 // Extended type for stories that includes the custom showIcon property

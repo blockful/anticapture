@@ -1,16 +1,17 @@
 "use client";
 
+import {
+  QueryInput_FeedEvents_Relevance,
+  QueryInput_FeedEvents_Type,
+} from "@anticapture/graphql-client";
 import { useQueryState, parseAsStringEnum, parseAsString } from "nuqs";
 import { useCallback, useMemo } from "react";
+
 import {
   ActivityFeedFilterState,
   FeedEventRelevance,
   FeedEventType,
 } from "@/features/feed/types";
-import {
-  QueryInput_FeedEvents_Relevance,
-  QueryInput_FeedEvents_Type,
-} from "@anticapture/graphql-client";
 
 export interface UseActivityFeedParamsReturn {
   filters: ActivityFeedFilterState;
@@ -64,7 +65,12 @@ export function useActivityFeedParams(): UseActivityFeedParamsReturn {
       setFromDate(newFilters.fromDate || null);
       setToDate(newFilters.toDate || null);
       setEventType(
-        (newFilters.type as unknown as QueryInput_FeedEvents_Type.Vote | QueryInput_FeedEvents_Type.Proposal | QueryInput_FeedEvents_Type.ProposalExtended | QueryInput_FeedEvents_Type.Transfer | QueryInput_FeedEvents_Type.Delegation) ?? null,
+        (newFilters.type as unknown as
+          | QueryInput_FeedEvents_Type.Vote
+          | QueryInput_FeedEvents_Type.Proposal
+          | QueryInput_FeedEvents_Type.ProposalExtended
+          | QueryInput_FeedEvents_Type.Transfer
+          | QueryInput_FeedEvents_Type.Delegation) ?? null,
       );
     },
     [setSortOrder, setRelevance, setFromDate, setToDate, setEventType],

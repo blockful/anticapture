@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { getAddress, type Address } from "viem";
+import { getAddress } from "viem";
 
 import { getDb, addressEnrichment } from "@/db";
 import type { AddressEnrichment } from "@/db/schema";
