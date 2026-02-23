@@ -1,12 +1,11 @@
+import { serve } from "@hono/node-server";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { serve } from "@hono/node-server";
-
 import { logger } from "hono/logger";
-import * as schema from "@/database/schema";
-import { fromZodError } from "zod-validation-error";
 import { createPublicClient, http } from "viem";
+import { fromZodError } from "zod-validation-error";
 
+import { DaoCache } from "@/cache/dao-cache";
 import {
   accountBalanceVariations,
   accountBalances,
@@ -32,9 +31,14 @@ import {
   historicalDelegations,
   votes,
 } from "@/controllers";
+import * as schema from "@/database/schema";
 import { docs } from "@/docs";
 import { env } from "@/env";
-import { DaoCache } from "@/cache/dao-cache";
+import { getClient } from "@/lib/client";
+import { CONTRACT_ADDRESSES } from "@/lib/constants";
+import { DaoIdEnum } from "@/lib/enums";
+import { getChain } from "@/lib/utils";
+import { errorHandler } from "@/middlewares";
 import {
   AccountBalanceRepository,
   AccountInteractionsRepository,
@@ -56,9 +60,6 @@ import {
   FeedRepository,
   AccountBalanceQueryFragments,
 } from "@/repositories";
-import { errorHandler } from "@/middlewares";
-import { getClient } from "@/lib/client";
-import { getChain } from "@/lib/utils";
 import {
   AccountBalanceService,
   BalanceVariationsService,
@@ -80,8 +81,7 @@ import {
   VotesService,
   FeedService,
 } from "@/services";
-import { CONTRACT_ADDRESSES } from "@/lib/constants";
-import { DaoIdEnum } from "@/lib/enums";
+
 import { feed } from "./controllers/feed";
 
 const app = new Hono({
@@ -139,9 +139,15 @@ const delegationPercentageService = new DelegationPercentageService(
   daoMetricsDayBucketRepo,
 );
 const tokenMetricsService = new TokenMetricsService(daoMetricsDayBucketRepo);
-const balanceVariationsRepo = new BalanceVariationsRepository(pgClient, balanceQueryFragments);
+const balanceVariationsRepo = new BalanceVariationsRepository(
+  pgClient,
+  balanceQueryFragments,
+);
 const historicalBalancesRepo = new HistoricalBalanceRepository(pgClient);
-const accountBalanceRepo = new AccountBalanceRepository(pgClient, balanceQueryFragments);
+const accountBalanceRepo = new AccountBalanceRepository(
+  pgClient,
+  balanceQueryFragments,
+);
 const accountInteractionRepo = new AccountInteractionsRepository(pgClient);
 const transactionsService = new TransactionsService(transactionsRepo);
 const votingPowerService = new VotingPowerService(
@@ -162,15 +168,15 @@ const accountBalanceService = new AccountBalanceService(accountBalanceRepo);
 const tokenPriceClient =
   env.DAO_ID === DaoIdEnum.NOUNS
     ? new NFTPriceService(
-      new NFTPriceRepository(pgClient),
-      env.COINGECKO_API_URL,
-      env.COINGECKO_API_KEY,
-    )
+        new NFTPriceRepository(pgClient),
+        env.COINGECKO_API_URL,
+        env.COINGECKO_API_KEY,
+      )
     : new CoingeckoService(
-      env.COINGECKO_API_URL,
-      env.COINGECKO_API_KEY,
-      env.DAO_ID,
-    );
+        env.COINGECKO_API_URL,
+        env.COINGECKO_API_KEY,
+        env.DAO_ID,
+      );
 
 historicalDelegations(
   app,

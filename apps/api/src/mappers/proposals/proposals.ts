@@ -1,4 +1,5 @@
 import { z } from "@hono/zod-openapi";
+
 import { proposalsOnchain } from "@/database";
 
 export type DBProposal = typeof proposalsOnchain.$inferSelect;

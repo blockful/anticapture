@@ -12,7 +12,7 @@ import {
 } from "drizzle-orm";
 import { Address, getAddress } from "viem";
 
-import { accountBalance, Drizzle } from "@/database";
+import { Drizzle, accountBalance } from "@/database";
 import { calculatePercentage } from "@/lib/utils";
 import {
   AmountFilter,

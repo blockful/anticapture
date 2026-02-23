@@ -1,7 +1,8 @@
-import { AmountFilter, DBAccountBalance, DBAccountBalanceWithVariation } from "@/mappers";
+import { Address } from "viem";
+
 import { TreasuryAddresses } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
-import { Address } from "viem";
+import { AmountFilter, DBAccountBalanceWithVariation } from "@/mappers";
 
 interface AccountBalanceRepository {
   getAccountBalancesWithVariation(
@@ -28,7 +29,7 @@ interface AccountBalanceRepository {
 }
 
 export class AccountBalanceService {
-  constructor(private readonly repo: AccountBalanceRepository) { }
+  constructor(private readonly repo: AccountBalanceRepository) {}
 
   async getAccountBalances(
     daoId: DaoIdEnum,
@@ -68,7 +69,7 @@ export class AccountBalanceService {
     const result = await this.repo.getAccountBalanceWithVariation(
       accountId,
       variationFromTimestamp,
-      variationToTimestamp
+      variationToTimestamp,
     );
 
     if (!result) {

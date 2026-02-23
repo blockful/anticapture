@@ -1,6 +1,8 @@
 import { z } from "@hono/zod-openapi";
-import { accountBalance } from "@/database";
 import { Address, getAddress, isAddress } from "viem";
+
+import { accountBalance } from "@/database";
+
 import { PeriodResponseSchema, TimestampResponseMapper } from "../shared";
 
 export const AccountBalancesRequestSchema = z.object({
@@ -72,7 +74,7 @@ export const AccountBalanceRequestParamSchema = z.object({
     .string()
     .refine((addr) => isAddress(addr, { strict: false }))
     .transform((addr) => getAddress(addr)),
-})
+});
 
 export const AccountBalanceRequestQuerySchema = z.object({
   fromDate: z
@@ -83,7 +85,7 @@ export const AccountBalanceRequestQuerySchema = z.object({
     .string()
     .transform((val) => Number(val))
     .optional(),
-})
+});
 
 export const AccountBalanceResponseSchema = z.object({
   address: z.string(),
@@ -101,7 +103,7 @@ export const AccountBalanceWithVariationSchema = z.object({
     previousBalance: z.string(),
     absoluteChange: z.string(),
     percentageChange: z.string(),
-  })
+  }),
 });
 
 export const AccountBalancesWithVariationResponseSchema = z.object({
@@ -143,7 +145,7 @@ export const AccountBalancesWithVariationResponseMapper = (
     period: PeriodResponseSchema.parse({
       startTimestamp: TimestampResponseMapper(startTimestamp),
       endTimestamp: TimestampResponseMapper(endTimestamp),
-    })
+    }),
   };
 };
 
@@ -157,9 +159,9 @@ export const AccountBalanceWithVariationResponseMapper = (
     period: PeriodResponseSchema.parse({
       startTimestamp: TimestampResponseMapper(startTimestamp),
       endTimestamp: TimestampResponseMapper(endTimestamp),
-    })
+    }),
   };
-}
+};
 
 export const AccountBalanceWithVariationMapper = (
   item: DBAccountBalanceWithVariation,
@@ -172,8 +174,8 @@ export const AccountBalanceWithVariationMapper = (
     variation: {
       absoluteChange: item.absoluteChange.toString(),
       percentageChange: item.percentageChange,
-      previousBalance: item.previousBalance.toString()
-    }
+      previousBalance: item.previousBalance.toString(),
+    },
   };
 };
 
