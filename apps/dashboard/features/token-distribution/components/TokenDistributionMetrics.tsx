@@ -1,21 +1,22 @@
 "use client";
 
-import { CardTitle } from "@/shared/components/ui/card";
+import { Inbox } from "lucide-react";
+
 import { TokenDistributionDialog } from "@/features/token-distribution/components";
-import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
-import { ChartDataSetPoint } from "@/shared/dao-config/types";
+import { Metric } from "@/features/token-distribution/components/Metric";
+import { useBrushStore } from "@/features/token-distribution/store/useBrushStore";
+import { MetricWithKey } from "@/features/token-distribution/types";
 import {
   formatMetricsByCategory,
   MetricSchema,
   metricsSchema,
 } from "@/features/token-distribution/utils/metrics";
-import { Metric } from "@/features/token-distribution/components/Metric";
-import { MetricWithKey } from "@/features/token-distribution/types";
-import { useBrushStore } from "@/features/token-distribution/store/useBrushStore";
-import { formatNumberUserReadable } from "@/shared/utils";
 import { BlankSlate, TooltipInfo } from "@/shared/components";
-import { Inbox } from "lucide-react";
+import { CardTitle } from "@/shared/components/ui/card";
+import { ChartDataSetPoint } from "@/shared/dao-config/types";
 import { DaoIdEnum } from "@/shared/types/daos";
+import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
+import { formatNumberUserReadable } from "@/shared/utils";
 
 interface TokenDistributionMetricsProps {
   daoId: DaoIdEnum;

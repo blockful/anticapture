@@ -1,0 +1,19 @@
+query GetAddresses($addresses: JSON!) {
+  getAddresses(addresses: $addresses) {
+    results {
+      address
+      isContract
+      arkham {
+        entity
+        entityType
+        label
+        twitter
+      }
+      ens {
+        name
+        avatar
+        banner
+      }
+    }
+  }
+}

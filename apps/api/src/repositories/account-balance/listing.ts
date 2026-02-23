@@ -1,4 +1,3 @@
-import { AmountFilter, DBAccountBalance, DBAccountBalanceWithVariation } from "@/mappers";
 import {
   and,
   asc,
@@ -11,17 +10,23 @@ import {
   SQL,
   sql,
 } from "drizzle-orm";
-import { Drizzle } from "@/database";
-import { accountBalance } from "@/database";
 import { Address, getAddress } from "viem";
+
+import { accountBalance, Drizzle } from "@/database";
 import { calculatePercentage } from "@/lib/utils";
+import {
+  AmountFilter,
+  DBAccountBalance,
+  DBAccountBalanceWithVariation,
+} from "@/mappers";
+
 import { AccountBalanceQueryFragments } from "./common";
 
 export class AccountBalanceRepository {
   constructor(
     private readonly db: Drizzle,
     private queryFragments: AccountBalanceQueryFragments,
-  ) { }
+  ) {}
 
   async getAccountBalances(
     skip: number,
@@ -106,22 +111,21 @@ export class AccountBalanceRepository {
     const variations = this.queryFragments.variationCTE(
       variationFromTimestamp,
       variationToTimestamp,
-      filter
-    )
+      filter,
+    );
 
     const [totalCount] = await this.db
       .select({
         count: sql<number>`COUNT(*)`.as("count"),
       })
-      .from(variations)
+      .from(variations);
 
-    const orderDirectionFn = orderDirection === "desc"
-      ? desc
-      : asc;
+    const orderDirectionFn = orderDirection === "desc" ? desc : asc;
 
-    const orderByCriteria = orderBy === "balance"
-      ? variations.currentBalance
-      : sql`ABS(${variations.fromChange} + ${variations.toChange})`;
+    const orderByCriteria =
+      orderBy === "balance"
+        ? variations.currentBalance
+        : sql`ABS(${variations.fromChange} + ${variations.toChange})`;
 
     const result = await this.db
       .select({
@@ -140,15 +144,17 @@ export class AccountBalanceRepository {
       .limit(limit);
 
     return {
-      items: result.map(({ accountId, tokenId, delegate, currentBalance, absoluteChange }) => ({
-        accountId: accountId,
-        tokenId: getAddress(tokenId),
-        delegate: getAddress(delegate),
-        previousBalance: currentBalance - BigInt(absoluteChange),
-        currentBalance: currentBalance,
-        absoluteChange: BigInt(absoluteChange),
-        percentageChange: calculatePercentage(currentBalance, absoluteChange),
-      })),
+      items: result.map(
+        ({ accountId, tokenId, delegate, currentBalance, absoluteChange }) => ({
+          accountId: accountId,
+          tokenId: getAddress(tokenId),
+          delegate: getAddress(delegate),
+          previousBalance: currentBalance - BigInt(absoluteChange),
+          currentBalance: currentBalance,
+          absoluteChange: BigInt(absoluteChange),
+          percentageChange: calculatePercentage(currentBalance, absoluteChange),
+        }),
+      ),
       totalCount: BigInt(totalCount?.count ?? 0),
     };
   }
@@ -164,7 +170,7 @@ export class AccountBalanceRepository {
       variationFromTimestamp,
       variationToTimestamp,
       filter,
-    )
+    );
 
     const [result] = await this.db
       .select({
@@ -177,9 +183,9 @@ export class AccountBalanceRepository {
             "absolute_change",
           ),
       })
-      .from(variations)
+      .from(variations);
 
-    if (!result) return undefined
+    if (!result) return undefined;
 
     return {
       accountId: result.accountId,
@@ -190,7 +196,7 @@ export class AccountBalanceRepository {
       absoluteChange: BigInt(result.absoluteChange),
       percentageChange: calculatePercentage(
         result.currentBalance,
-        result.absoluteChange
+        result.absoluteChange,
       ),
     };
   }

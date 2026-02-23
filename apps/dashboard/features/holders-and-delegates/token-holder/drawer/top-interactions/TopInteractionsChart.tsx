@@ -8,10 +8,11 @@ import {
   Tooltip,
   TooltipProps,
 } from "recharts";
-import { formatNumberUserReadable } from "@/shared/utils";
+
 import { renderCustomizedLabel } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/utils/renderCustomizedLabel";
-import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
+import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
+import { formatNumberUserReadable } from "@/shared/utils";
 
 const TopInteractionsChartCustomTooltip: React.FC<
   TooltipProps<number, string> & {

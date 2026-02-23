@@ -1,27 +1,14 @@
 import {
   and,
-  lte,
   asc,
   desc,
   eq,
   gte,
-  gt,
   inArray,
   notInArray,
   sql,
-  isNull,
-  count,
-  max,
+  SQL,
 } from "drizzle-orm";
-import { Drizzle } from "@/database";
-import {
-  accountPower,
-  proposalsOnchain,
-  votesOnchain,
-  votingPowerHistory,
-} from "@/database";
-import { SQL } from "drizzle-orm";
-import { Address } from "viem";
 
 import {
   ActiveSupplyQueryResult,
@@ -29,6 +16,7 @@ import {
   ProposalsCompareQueryResult,
   VotesCompareQueryResult,
 } from "@/controllers";
+import { Drizzle, proposalsOnchain } from "@/database";
 import { DaysEnum } from "@/lib/enums";
 import { DBProposal } from "@/mappers";
 

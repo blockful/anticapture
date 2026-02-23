@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { HeaderSidebar } from "@/widgets";
+
 import { FaqSection } from "@/features/faq";
-import { HeaderMobile } from "@/widgets/HeaderMobile";
 import { Footer } from "@/shared/components/design-system/footer/Footer";
+import { HeaderSidebar } from "@/widgets";
+import { HeaderMobile } from "@/widgets/HeaderMobile";
 
 export const metadata: Metadata = {
   title: "Anticapture - FAQ",

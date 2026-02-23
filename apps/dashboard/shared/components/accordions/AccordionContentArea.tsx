@@ -1,9 +1,10 @@
 "use client";
 
 import { MouseEvent, ReactNode } from "react";
-import { cn } from "@/shared/utils/";
+
 import { Card } from "@/shared/components/ui/card";
 import { useScreenSize } from "@/shared/hooks";
+import { cn } from "@/shared/utils/";
 
 interface AccordionContentAreaProps {
   id: string;

@@ -1,6 +1,7 @@
-import { cn } from "@/shared/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Filter } from "lucide-react";
+
+import { cn } from "@/shared/utils";
 
 const buttonFilterVariants = cva(
   "group flex cursor-pointer items-center border p-1 transition-colors bg-surface-hover",

@@ -1,5 +1,6 @@
-import { createRoute, OpenAPIHono as Hono, z } from "@hono/zod-openapi";
-import { AccountBalanceService } from "@/services";
+import { createRoute, OpenAPIHono as Hono } from "@hono/zod-openapi";
+
+import { DaoIdEnum, DaysEnum } from "@/lib/enums";
 import {
   AccountBalanceRequestParamSchema,
   AccountBalanceRequestQuerySchema,
@@ -9,7 +10,7 @@ import {
   AccountBalanceWithVariationResponseMapper,
   AccountBalanceWithVariationResponseSchema,
 } from "@/mappers";
-import { DaoIdEnum, DaysEnum } from "@/lib/enums";
+import { AccountBalanceService } from "@/services";
 
 export function accountBalances(
   app: Hono,
@@ -118,11 +119,13 @@ export function accountBalances(
         toTimestamp,
       );
 
-      return context.json(AccountBalanceWithVariationResponseMapper(
-        result,
-        fromTimestamp,
-        toTimestamp,
-      ));
+      return context.json(
+        AccountBalanceWithVariationResponseMapper(
+          result,
+          fromTimestamp,
+          toTimestamp,
+        ),
+      );
     },
   );
 }

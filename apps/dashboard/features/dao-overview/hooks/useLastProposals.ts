@@ -1,13 +1,14 @@
-import { useMemo } from "react";
-import { ApolloError } from "@apollo/client";
-import { DaoIdEnum } from "@/shared/types/daos";
 import {
   QueryInput_Proposals_OrderDirection,
   useGetProposalsFromDaoQuery,
 } from "@anticapture/graphql-client/hooks";
+import { ApolloError } from "@apollo/client";
+import { useMemo } from "react";
+
 import type { Proposal as GovernanceProposal } from "@/features/governance/types";
 import { transformToGovernanceProposal } from "@/features/governance/utils/transformToGovernanceProposal";
 import daoConfig from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 export interface UseLastProposalsResult {
   proposals: GovernanceProposal[];

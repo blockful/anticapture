@@ -1,15 +1,11 @@
-import {
-  Account,
-  Address,
-  Chain,
-  Client as vClient,
-  Transport,
-} from "viem";
+import { Account, Address, Chain, Client as vClient, Transport } from "viem";
 import { readContract } from "viem/actions";
 
 import { DAOClient } from "@/clients";
-import { GovernorAbi } from "./abi/governor";
+
 import { GovernorBase } from "../governor.base";
+
+import { GovernorAbi } from "./abi/governor";
 
 export class Client<
   TTransport extends Transport = Transport,

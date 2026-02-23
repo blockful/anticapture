@@ -1,9 +1,9 @@
 "use client";
 
-import { cn } from "@/shared/utils";
-import { DaoOverviewConfig } from "@/shared/dao-config/types";
 import { CountdownDaoInfo } from "@/features/dao-overview/components/CountdownDaoInfo";
 import { TooltipInfo } from "@/shared/components";
+import { DaoOverviewConfig } from "@/shared/dao-config/types";
+import { cn } from "@/shared/utils";
 
 interface ProgressBarProps {
   startDate: string;

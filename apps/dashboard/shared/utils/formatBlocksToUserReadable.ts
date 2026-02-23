@@ -1,8 +1,8 @@
-import { formatPlural } from "@/shared/utils";
 import {
   SECONDS_PER_HOUR,
   SECONDS_PER_MINUTE,
 } from "@/shared/constants/time-related";
+import { formatPlural } from "@/shared/utils";
 
 export function formatBlocksToUserReadable(
   num: number,

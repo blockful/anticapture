@@ -1,6 +1,7 @@
+import { ReactNode } from "react";
+
 import { SkeletonRow } from "@/shared/components";
 import { cn } from "@/shared/utils";
-import { ReactNode } from "react";
 
 export const DaoOverviewMetricCard = ({
   title,

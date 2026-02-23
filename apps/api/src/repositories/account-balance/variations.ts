@@ -1,16 +1,17 @@
-import { asc, desc, gte, sql, and, inArray, lte, eq } from "drizzle-orm";
-import { Drizzle } from "@/database";
-import { accountBalance, transfer } from "@/database";
-import { DBAccountBalanceVariation } from "@/mappers";
+import { asc, desc, sql, and, inArray, eq } from "drizzle-orm";
 import { Address } from "viem";
+
+import { Drizzle, accountBalance } from "@/database";
 import { calculatePercentage } from "@/lib/utils";
+import { DBAccountBalanceVariation } from "@/mappers";
+
 import { AccountBalanceQueryFragments } from "./common";
 
 export class BalanceVariationsRepository {
   constructor(
     private readonly db: Drizzle,
     private readonly queryFragments: AccountBalanceQueryFragments,
-  ) { }
+  ) {}
 
   async getAccountBalanceVariations(
     fromTimestamp: number | undefined,
@@ -21,16 +22,13 @@ export class BalanceVariationsRepository {
     addresses?: Address[],
   ): Promise<DBAccountBalanceVariation[]> {
     const filter = and(
-      addresses
-        ? inArray(accountBalance.accountId, addresses)
-        : undefined,
-    )
-
+      addresses ? inArray(accountBalance.accountId, addresses) : undefined,
+    );
     const variations = this.queryFragments.variationCTE(
       fromTimestamp,
       toTimestamp,
-      filter
-    )
+      filter,
+    );
 
     const result = await this.db
       .select({
@@ -85,7 +83,7 @@ export class BalanceVariationsRepository {
       .from(combined)
       .where(sql`(${combined.fromChange} + ${combined.toChange}) != 0`);
 
-    if (!result) return undefined
+    if (!result) return undefined;
 
     return {
       accountId: result.accountId,
@@ -94,7 +92,7 @@ export class BalanceVariationsRepository {
       absoluteChange: BigInt(result.absoluteChange),
       percentageChange: calculatePercentage(
         result.currentBalance,
-        result.absoluteChange
+        result.absoluteChange,
       ),
     };
   }

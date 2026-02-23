@@ -15,9 +15,12 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
+  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
+  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
+  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
 };
 
@@ -117,6 +120,10 @@ export type Query = {
   delegations?: Maybe<Delegations_200_Response>;
   /** Get feed events */
   feedEvents?: Maybe<FeedEvents_200_Response>;
+  /** Returns label information from Arkham, ENS data, and whether the address is an EOA or contract. Arkham data is stored permanently. ENS data is cached with a configurable TTL. */
+  getAddress?: Maybe<GetAddress_200_Response>;
+  /** Returns label information from Arkham, ENS data, and address type for multiple addresses. Maximum 100 addresses per request. Arkham data is stored permanently. ENS data is cached with a configurable TTL. */
+  getAddresses?: Maybe<GetAddresses_200_Response>;
   /** Get historical DAO Token Treasury value (governance token quantity × token price) */
   getDaoTokenTreasury?: Maybe<GetDaoTokenTreasury_200_Response>;
   /** Get historical Liquid Treasury (treasury without DAO tokens) from external providers (DefiLlama/Dune) */
@@ -168,6 +175,8 @@ export type Query = {
 
 export type QueryAccountBalanceByAccountIdArgs = {
   address: Scalars['String']['input'];
+  fromDate?: InputMaybe<Scalars['String']['input']>;
+  toDate?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -191,10 +200,13 @@ export type QueryAccountBalanceVariationsByAccountIdArgs = {
 export type QueryAccountBalancesArgs = {
   addresses?: InputMaybe<Scalars['JSON']['input']>;
   delegates?: InputMaybe<Scalars['JSON']['input']>;
+  fromDate?: InputMaybe<Scalars['String']['input']>;
   fromValue?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<QueryInput_AccountBalances_OrderBy>;
   orderDirection?: InputMaybe<QueryInput_AccountBalances_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  toDate?: InputMaybe<Scalars['String']['input']>;
   toValue?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -302,6 +314,16 @@ export type QueryFeedEventsArgs = {
   skip?: InputMaybe<Scalars['Float']['input']>;
   toDate?: InputMaybe<Scalars['Float']['input']>;
   type?: InputMaybe<QueryInput_FeedEvents_Type>;
+};
+
+
+export type QueryGetAddressArgs = {
+  address: Scalars['String']['input'];
+};
+
+
+export type QueryGetAddressesArgs = {
+  addresses: Scalars['JSON']['input'];
 };
 
 
@@ -525,10 +547,8 @@ export type QueryVotingPowersArgs = {
 
 export type AccountBalanceByAccountId_200_Response = {
   __typename?: 'accountBalanceByAccountId_200_response';
-  address: Scalars['String']['output'];
-  balance: Scalars['String']['output'];
-  delegate: Scalars['String']['output'];
-  tokenId: Scalars['String']['output'];
+  data: Query_AccountBalanceByAccountId_Data;
+  period: Query_AccountBalanceByAccountId_Period;
 };
 
 export type AccountBalanceVariationsByAccountId_200_Response = {
@@ -546,6 +566,7 @@ export type AccountBalanceVariations_200_Response = {
 export type AccountBalances_200_Response = {
   __typename?: 'accountBalances_200_response';
   items: Array<Maybe<Query_AccountBalances_Items_Items>>;
+  period: Query_AccountBalances_Period;
   totalCount: Scalars['Float']['output'];
 };
 
@@ -661,6 +682,19 @@ export type FeedEvents_200_Response = {
   totalCount: Scalars['Float']['output'];
 };
 
+export type GetAddress_200_Response = {
+  __typename?: 'getAddress_200_response';
+  address: Scalars['String']['output'];
+  arkham?: Maybe<Query_GetAddress_Arkham>;
+  ens?: Maybe<Query_GetAddress_Ens>;
+  isContract: Scalars['Boolean']['output'];
+};
+
+export type GetAddresses_200_Response = {
+  __typename?: 'getAddresses_200_response';
+  results: Array<Maybe<Query_GetAddresses_Results_Items>>;
+};
+
 export type GetDaoTokenTreasury_200_Response = {
   __typename?: 'getDaoTokenTreasury_200_response';
   items: Array<Maybe<Query_GetDaoTokenTreasury_Items_Items>>;
@@ -762,6 +796,11 @@ export type Proposals_200_Response = {
 export enum QueryInput_AccountBalanceVariations_OrderDirection {
   Asc = 'asc',
   Desc = 'desc'
+}
+
+export enum QueryInput_AccountBalances_OrderBy {
+  Balance = 'balance',
+  Variation = 'variation'
 }
 
 export enum QueryInput_AccountBalances_OrderDirection {
@@ -890,7 +929,6 @@ export enum QueryInput_FeedEvents_Relevance {
 
 export enum QueryInput_FeedEvents_Type {
   Delegation = 'DELEGATION',
-  DelegationVotesChanged = 'DELEGATION_VOTES_CHANGED',
   Proposal = 'PROPOSAL',
   ProposalExtended = 'PROPOSAL_EXTENDED',
   Transfer = 'TRANSFER',
@@ -1081,6 +1119,28 @@ export enum QueryInput_VotingPowers_OrderDirection {
   Desc = 'desc'
 }
 
+export type Query_AccountBalanceByAccountId_Data = {
+  __typename?: 'query_accountBalanceByAccountId_data';
+  address: Scalars['String']['output'];
+  balance: Scalars['String']['output'];
+  delegate: Scalars['String']['output'];
+  tokenId: Scalars['String']['output'];
+  variation: Query_AccountBalanceByAccountId_Data_Variation;
+};
+
+export type Query_AccountBalanceByAccountId_Data_Variation = {
+  __typename?: 'query_accountBalanceByAccountId_data_variation';
+  absoluteChange: Scalars['String']['output'];
+  percentageChange: Scalars['String']['output'];
+  previousBalance: Scalars['String']['output'];
+};
+
+export type Query_AccountBalanceByAccountId_Period = {
+  __typename?: 'query_accountBalanceByAccountId_period';
+  endTimestamp: Scalars['String']['output'];
+  startTimestamp: Scalars['String']['output'];
+};
+
 export type Query_AccountBalanceVariationsByAccountId_Data = {
   __typename?: 'query_accountBalanceVariationsByAccountId_data';
   absoluteChange: Scalars['String']['output'];
@@ -1117,6 +1177,20 @@ export type Query_AccountBalances_Items_Items = {
   balance: Scalars['String']['output'];
   delegate: Scalars['String']['output'];
   tokenId: Scalars['String']['output'];
+  variation: Query_AccountBalances_Items_Items_Variation;
+};
+
+export type Query_AccountBalances_Items_Items_Variation = {
+  __typename?: 'query_accountBalances_items_items_variation';
+  absoluteChange: Scalars['String']['output'];
+  percentageChange: Scalars['String']['output'];
+  previousBalance: Scalars['String']['output'];
+};
+
+export type Query_AccountBalances_Period = {
+  __typename?: 'query_accountBalances_period';
+  endTimestamp: Scalars['String']['output'];
+  startTimestamp: Scalars['String']['output'];
 };
 
 export type Query_AccountInteractions_Items_Items = {
@@ -1174,12 +1248,49 @@ export enum Query_FeedEvents_Items_Items_Relevance {
 
 export enum Query_FeedEvents_Items_Items_Type {
   Delegation = 'DELEGATION',
-  DelegationVotesChanged = 'DELEGATION_VOTES_CHANGED',
   Proposal = 'PROPOSAL',
   ProposalExtended = 'PROPOSAL_EXTENDED',
   Transfer = 'TRANSFER',
   Vote = 'VOTE'
 }
+
+export type Query_GetAddress_Arkham = {
+  __typename?: 'query_getAddress_arkham';
+  entity?: Maybe<Scalars['String']['output']>;
+  entityType?: Maybe<Scalars['String']['output']>;
+  label?: Maybe<Scalars['String']['output']>;
+  twitter?: Maybe<Scalars['String']['output']>;
+};
+
+export type Query_GetAddress_Ens = {
+  __typename?: 'query_getAddress_ens';
+  avatar?: Maybe<Scalars['String']['output']>;
+  banner?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+};
+
+export type Query_GetAddresses_Results_Items = {
+  __typename?: 'query_getAddresses_results_items';
+  address: Scalars['String']['output'];
+  arkham?: Maybe<Query_GetAddresses_Results_Items_Arkham>;
+  ens?: Maybe<Query_GetAddresses_Results_Items_Ens>;
+  isContract: Scalars['Boolean']['output'];
+};
+
+export type Query_GetAddresses_Results_Items_Arkham = {
+  __typename?: 'query_getAddresses_results_items_arkham';
+  entity?: Maybe<Scalars['String']['output']>;
+  entityType?: Maybe<Scalars['String']['output']>;
+  label?: Maybe<Scalars['String']['output']>;
+  twitter?: Maybe<Scalars['String']['output']>;
+};
+
+export type Query_GetAddresses_Results_Items_Ens = {
+  __typename?: 'query_getAddresses_results_items_ens';
+  avatar?: Maybe<Scalars['String']['output']>;
+  banner?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+};
 
 export type Query_GetDaoTokenTreasury_Items_Items = {
   __typename?: 'query_getDaoTokenTreasury_items_items';
@@ -1731,6 +1842,20 @@ export type GetFeedEventsQueryVariables = Exact<{
 
 
 export type GetFeedEventsQuery = { __typename?: 'Query', feedEvents?: { __typename?: 'feedEvents_200_response', totalCount: number, items: Array<{ __typename?: 'query_feedEvents_items_items', txHash: string, logIndex: number, type: Query_FeedEvents_Items_Items_Type, value?: string | null, timestamp: number, relevance: Query_FeedEvents_Items_Items_Relevance, metadata?: any | null } | null> } | null };
+
+export type GetAddressQueryVariables = Exact<{
+  address: Scalars['String']['input'];
+}>;
+
+
+export type GetAddressQuery = { __typename?: 'Query', getAddress?: { __typename?: 'getAddress_200_response', address: string, isContract: boolean, arkham?: { __typename?: 'query_getAddress_arkham', entity?: string | null, entityType?: string | null, label?: string | null, twitter?: string | null } | null, ens?: { __typename?: 'query_getAddress_ens', name?: string | null, avatar?: string | null, banner?: string | null } | null } | null };
+
+export type GetAddressesQueryVariables = Exact<{
+  addresses: Scalars['JSON']['input'];
+}>;
+
+
+export type GetAddressesQuery = { __typename?: 'Query', getAddresses?: { __typename?: 'getAddresses_200_response', results: Array<{ __typename?: 'query_getAddresses_results_items', address: string, isContract: boolean, arkham?: { __typename?: 'query_getAddresses_results_items_arkham', entity?: string | null, entityType?: string | null, label?: string | null, twitter?: string | null } | null, ens?: { __typename?: 'query_getAddresses_results_items_ens', name?: string | null, avatar?: string | null, banner?: string | null } | null } | null> } | null };
 
 export type GetProposalsFromDaoQueryVariables = Exact<{
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
@@ -2846,6 +2971,118 @@ export type GetFeedEventsQueryHookResult = ReturnType<typeof useGetFeedEventsQue
 export type GetFeedEventsLazyQueryHookResult = ReturnType<typeof useGetFeedEventsLazyQuery>;
 export type GetFeedEventsSuspenseQueryHookResult = ReturnType<typeof useGetFeedEventsSuspenseQuery>;
 export type GetFeedEventsQueryResult = Apollo.QueryResult<GetFeedEventsQuery, GetFeedEventsQueryVariables>;
+export const GetAddressDocument = gql`
+    query GetAddress($address: String!) {
+  getAddress(address: $address) {
+    address
+    isContract
+    arkham {
+      entity
+      entityType
+      label
+      twitter
+    }
+    ens {
+      name
+      avatar
+      banner
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetAddressQuery__
+ *
+ * To run a query within a React component, call `useGetAddressQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAddressQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAddressQuery({
+ *   variables: {
+ *      address: // value for 'address'
+ *   },
+ * });
+ */
+export function useGetAddressQuery(baseOptions: Apollo.QueryHookOptions<GetAddressQuery, GetAddressQueryVariables> & ({ variables: GetAddressQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetAddressQuery, GetAddressQueryVariables>(GetAddressDocument, options);
+      }
+export function useGetAddressLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAddressQuery, GetAddressQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetAddressQuery, GetAddressQueryVariables>(GetAddressDocument, options);
+        }
+// @ts-ignore
+export function useGetAddressSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetAddressQuery, GetAddressQueryVariables>): Apollo.UseSuspenseQueryResult<GetAddressQuery, GetAddressQueryVariables>;
+export function useGetAddressSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetAddressQuery, GetAddressQueryVariables>): Apollo.UseSuspenseQueryResult<GetAddressQuery | undefined, GetAddressQueryVariables>;
+export function useGetAddressSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetAddressQuery, GetAddressQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetAddressQuery, GetAddressQueryVariables>(GetAddressDocument, options);
+        }
+export type GetAddressQueryHookResult = ReturnType<typeof useGetAddressQuery>;
+export type GetAddressLazyQueryHookResult = ReturnType<typeof useGetAddressLazyQuery>;
+export type GetAddressSuspenseQueryHookResult = ReturnType<typeof useGetAddressSuspenseQuery>;
+export type GetAddressQueryResult = Apollo.QueryResult<GetAddressQuery, GetAddressQueryVariables>;
+export const GetAddressesDocument = gql`
+    query GetAddresses($addresses: JSON!) {
+  getAddresses(addresses: $addresses) {
+    results {
+      address
+      isContract
+      arkham {
+        entity
+        entityType
+        label
+        twitter
+      }
+      ens {
+        name
+        avatar
+        banner
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetAddressesQuery__
+ *
+ * To run a query within a React component, call `useGetAddressesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAddressesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAddressesQuery({
+ *   variables: {
+ *      addresses: // value for 'addresses'
+ *   },
+ * });
+ */
+export function useGetAddressesQuery(baseOptions: Apollo.QueryHookOptions<GetAddressesQuery, GetAddressesQueryVariables> & ({ variables: GetAddressesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetAddressesQuery, GetAddressesQueryVariables>(GetAddressesDocument, options);
+      }
+export function useGetAddressesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAddressesQuery, GetAddressesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetAddressesQuery, GetAddressesQueryVariables>(GetAddressesDocument, options);
+        }
+// @ts-ignore
+export function useGetAddressesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetAddressesQuery, GetAddressesQueryVariables>): Apollo.UseSuspenseQueryResult<GetAddressesQuery, GetAddressesQueryVariables>;
+export function useGetAddressesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetAddressesQuery, GetAddressesQueryVariables>): Apollo.UseSuspenseQueryResult<GetAddressesQuery | undefined, GetAddressesQueryVariables>;
+export function useGetAddressesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetAddressesQuery, GetAddressesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetAddressesQuery, GetAddressesQueryVariables>(GetAddressesDocument, options);
+        }
+export type GetAddressesQueryHookResult = ReturnType<typeof useGetAddressesQuery>;
+export type GetAddressesLazyQueryHookResult = ReturnType<typeof useGetAddressesLazyQuery>;
+export type GetAddressesSuspenseQueryHookResult = ReturnType<typeof useGetAddressesSuspenseQuery>;
+export type GetAddressesQueryResult = Apollo.QueryResult<GetAddressesQuery, GetAddressesQueryVariables>;
 export const GetProposalsFromDaoDocument = gql`
     query GetProposalsFromDao($skip: NonNegativeInt, $limit: PositiveInt = 10, $orderDirection: queryInput_proposals_orderDirection = desc, $status: JSON, $fromDate: Float) {
   proposals(

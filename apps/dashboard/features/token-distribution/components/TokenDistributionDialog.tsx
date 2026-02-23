@@ -9,15 +9,16 @@ import {
   Title,
   Trigger,
 } from "@radix-ui/react-dialog";
-import { CardTitle } from "@/shared/components/ui/card";
 import { X, Plus, PlusIcon, Check } from "lucide-react";
 import React, { useState } from "react";
-import { Button } from "@/shared/components/design-system/buttons/button/Button";
-import { cn } from "@/shared/utils/cn";
-import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
+
 import { MetricWithKey } from "@/features/token-distribution/types";
-import { DaoIdEnum } from "@/shared/types/daos";
+import { Button } from "@/shared/components/design-system/buttons/button/Button";
+import { CardTitle } from "@/shared/components/ui/card";
 import daoConfig from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
+import { cn } from "@/shared/utils/cn";
 
 export const TokenDistributionDialog = ({
   appliedMetrics,

@@ -1,17 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { Crosshair2Icon } from "@radix-ui/react-icons";
+import {
+  BarChart,
+  Gauge,
+  Landmark,
+  UserCheck,
+  ArrowRightLeft,
+  PieChart,
+  Newspaper,
+} from "lucide-react";
 import { usePathname } from "next/navigation";
-import { DaoIdEnum } from "@/shared/types/daos";
+import { useState } from "react";
+
 import {
   HeaderDAOSidebarDropdown,
   ButtonHeaderSidebar,
 } from "@/shared/components";
-import { BarChart, Gauge, Landmark, UserCheck } from "lucide-react";
-import daoConfigByDaoId from "@/shared/dao-config";
-import { ArrowRightLeft, PieChart } from "lucide-react";
-import { Crosshair2Icon } from "@radix-ui/react-icons";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
 import { cn } from "@/shared/utils/";
 
 export const HeaderDAOSidebar = () => {
@@ -105,6 +113,14 @@ export const HeaderDAOSidebar = () => {
                 isCollapsed={isCollapsed}
               />
             )}
+
+            <ButtonHeaderSidebar
+              page={PAGES_CONSTANTS.activityFeed.page}
+              icon={Newspaper}
+              label={PAGES_CONSTANTS.activityFeed.title}
+              key={PAGES_CONSTANTS.activityFeed.title}
+              isCollapsed={isCollapsed}
+            />
           </div>
         </div>
       </div>

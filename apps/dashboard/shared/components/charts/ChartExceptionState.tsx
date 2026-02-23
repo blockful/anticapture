@@ -1,5 +1,6 @@
-import { BlankSlate, SkeletonRow } from "@/shared/components";
 import { Inbox } from "lucide-react";
+
+import { BlankSlate, SkeletonRow } from "@/shared/components";
 
 interface ChartExceptionStateProps {
   state: "loading" | "error" | "no-data";

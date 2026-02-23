@@ -252,9 +252,9 @@ export const ProposalSectionSkeleton = () => {
           </div>
 
           {/* Right Side - Tabs Section Skeleton */}
-          <div className="flex flex-1 flex-col lg:min-w-0 lg:bg-surface-default">
+          <div className="lg:bg-surface-default flex flex-1 flex-col lg:min-w-0">
             {/* Tabs header */}
-            <div className="border-border-default sticky left-0 top-[7px] z-10 flex w-full shrink-0 gap-2 border-b lg:top-[85px] lg:bg-surface-default lg:px-4">
+            <div className="border-border-default lg:bg-surface-default sticky left-0 top-[7px] z-10 flex w-full shrink-0 gap-2 border-b lg:top-[85px] lg:px-4">
               {Array.from({ length: 3 }).map((_, index) => (
                 <SkeletonRow
                   key={index}
