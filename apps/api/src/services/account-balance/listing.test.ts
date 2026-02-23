@@ -84,7 +84,7 @@ describe("AccountBalanceService", () => {
       );
 
       const [, , , , , , , , excludeAddresses] =
-        mockRepo.getAccountBalancesWithVariation.mock.calls[0];
+        mockRepo.getAccountBalancesWithVariation.mock.calls[0]!;
 
       expect(excludeAddresses.length).toBeGreaterThan(0);
     });
