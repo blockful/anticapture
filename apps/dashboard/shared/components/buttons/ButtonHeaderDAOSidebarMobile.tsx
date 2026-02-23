@@ -12,6 +12,7 @@ export const ButtonHeaderDAOSidebarMobile = ({
     page: string;
     title: string;
     enabled?: boolean;
+    isNew?: boolean;
   }[];
   headerOffset?: number;
 }) => {
@@ -60,6 +61,11 @@ export const ButtonHeaderDAOSidebarMobile = ({
                 value={option.page}
               >
                 {option.title}
+                {option.isNew && (
+                  <span className="ml-1 rounded-sm bg-blue-500 px-1 py-px text-[10px] font-semibold uppercase leading-none text-white">
+                    New
+                  </span>
+                )}
               </TabsTrigger>
             ),
         )}
