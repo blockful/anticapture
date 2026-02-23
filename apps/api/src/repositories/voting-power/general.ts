@@ -1,4 +1,3 @@
-import { Address } from "viem";
 import {
   and,
   desc,
@@ -12,6 +11,8 @@ import {
   gte,
   lte,
 } from "drizzle-orm";
+import { Address } from "viem";
+
 import {
   Drizzle,
   votingPowerHistory,
@@ -19,7 +20,6 @@ import {
   transfer,
   accountPower,
 } from "@/database";
-
 import {
   AmountFilter,
   DBAccountPower,

@@ -1,7 +1,8 @@
 import { eq } from "drizzle-orm";
+
 import { Drizzle, token } from "@/database";
-import { DBToken } from "@/mappers";
 import { DaoIdEnum } from "@/lib/enums";
+import { DBToken } from "@/mappers";
 
 export class TokenRepository {
   constructor(private readonly db: Drizzle) {}

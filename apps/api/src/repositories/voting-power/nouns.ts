@@ -1,7 +1,7 @@
-import { Address } from "viem";
 import { gte, and, lte, desc, eq, asc, sql } from "drizzle-orm";
-import { Drizzle, votingPowerHistory, delegation, transfer } from "@/database";
+import { Address } from "viem";
 
+import { Drizzle, votingPowerHistory, delegation, transfer } from "@/database";
 import { DBHistoricalVotingPowerWithRelations } from "@/mappers";
 
 export class NounsVotingPowerRepository {

@@ -1,5 +1,6 @@
-import { DBDelegation } from "@/mappers";
 import { Address } from "viem";
+
+import { DBDelegation } from "@/mappers";
 
 interface Repository {
   getDelegations(address: Address): Promise<DBDelegation[]>;

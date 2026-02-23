@@ -1,7 +1,8 @@
 import { asc, desc, gte, sql, and, inArray, lte, or, eq } from "drizzle-orm";
+import { Address } from "viem";
+
 import { Drizzle, accountBalance, transfer } from "@/database";
 import { DBAccountBalanceVariation } from "@/mappers";
-import { Address } from "viem";
 
 export class BalanceVariationsRepository {
   constructor(private readonly db: Drizzle) {}

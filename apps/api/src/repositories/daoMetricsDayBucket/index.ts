@@ -1,5 +1,6 @@
-import { Drizzle, daoMetricsDayBucket } from "@/database";
 import { and, gte, lte, desc, asc, eq, lt, inArray } from "drizzle-orm";
+
+import { Drizzle, daoMetricsDayBucket } from "@/database";
 
 export class DaoMetricsDayBucketRepository {
   constructor(private readonly db: Drizzle) {}

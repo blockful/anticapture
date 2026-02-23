@@ -1,3 +1,5 @@
+import { Address } from "viem";
+
 import {
   DBAccountBalanceVariation,
   AccountInteractions,
@@ -5,7 +7,6 @@ import {
   DBAccountBalance,
   AmountFilter,
 } from "@/mappers";
-import { Address } from "viem";
 
 interface AccountBalanceRepository {
   getAccountBalance(accountId: Address): Promise<DBAccountBalance | undefined>;
