@@ -175,6 +175,8 @@ export type Query = {
 
 export type QueryAccountBalanceByAccountIdArgs = {
   address: Scalars['String']['input'];
+  fromDate?: InputMaybe<Scalars['String']['input']>;
+  toDate?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -198,10 +200,13 @@ export type QueryAccountBalanceVariationsByAccountIdArgs = {
 export type QueryAccountBalancesArgs = {
   addresses?: InputMaybe<Scalars['JSON']['input']>;
   delegates?: InputMaybe<Scalars['JSON']['input']>;
+  fromDate?: InputMaybe<Scalars['String']['input']>;
   fromValue?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<QueryInput_AccountBalances_OrderBy>;
   orderDirection?: InputMaybe<QueryInput_AccountBalances_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  toDate?: InputMaybe<Scalars['String']['input']>;
   toValue?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -542,10 +547,8 @@ export type QueryVotingPowersArgs = {
 
 export type AccountBalanceByAccountId_200_Response = {
   __typename?: 'accountBalanceByAccountId_200_response';
-  address: Scalars['String']['output'];
-  balance: Scalars['String']['output'];
-  delegate: Scalars['String']['output'];
-  tokenId: Scalars['String']['output'];
+  data: Query_AccountBalanceByAccountId_Data;
+  period: Query_AccountBalanceByAccountId_Period;
 };
 
 export type AccountBalanceVariationsByAccountId_200_Response = {
@@ -563,6 +566,7 @@ export type AccountBalanceVariations_200_Response = {
 export type AccountBalances_200_Response = {
   __typename?: 'accountBalances_200_response';
   items: Array<Maybe<Query_AccountBalances_Items_Items>>;
+  period: Query_AccountBalances_Period;
   totalCount: Scalars['Float']['output'];
 };
 
@@ -794,6 +798,11 @@ export enum QueryInput_AccountBalanceVariations_OrderDirection {
   Desc = 'desc'
 }
 
+export enum QueryInput_AccountBalances_OrderBy {
+  Balance = 'balance',
+  Variation = 'variation'
+}
+
 export enum QueryInput_AccountBalances_OrderDirection {
   Asc = 'asc',
   Desc = 'desc'
@@ -920,7 +929,6 @@ export enum QueryInput_FeedEvents_Relevance {
 
 export enum QueryInput_FeedEvents_Type {
   Delegation = 'DELEGATION',
-  DelegationVotesChanged = 'DELEGATION_VOTES_CHANGED',
   Proposal = 'PROPOSAL',
   ProposalExtended = 'PROPOSAL_EXTENDED',
   Transfer = 'TRANSFER',
@@ -1111,6 +1119,28 @@ export enum QueryInput_VotingPowers_OrderDirection {
   Desc = 'desc'
 }
 
+export type Query_AccountBalanceByAccountId_Data = {
+  __typename?: 'query_accountBalanceByAccountId_data';
+  address: Scalars['String']['output'];
+  balance: Scalars['String']['output'];
+  delegate: Scalars['String']['output'];
+  tokenId: Scalars['String']['output'];
+  variation: Query_AccountBalanceByAccountId_Data_Variation;
+};
+
+export type Query_AccountBalanceByAccountId_Data_Variation = {
+  __typename?: 'query_accountBalanceByAccountId_data_variation';
+  absoluteChange: Scalars['String']['output'];
+  percentageChange: Scalars['String']['output'];
+  previousBalance: Scalars['String']['output'];
+};
+
+export type Query_AccountBalanceByAccountId_Period = {
+  __typename?: 'query_accountBalanceByAccountId_period';
+  endTimestamp: Scalars['String']['output'];
+  startTimestamp: Scalars['String']['output'];
+};
+
 export type Query_AccountBalanceVariationsByAccountId_Data = {
   __typename?: 'query_accountBalanceVariationsByAccountId_data';
   absoluteChange: Scalars['String']['output'];
@@ -1147,6 +1177,20 @@ export type Query_AccountBalances_Items_Items = {
   balance: Scalars['String']['output'];
   delegate: Scalars['String']['output'];
   tokenId: Scalars['String']['output'];
+  variation: Query_AccountBalances_Items_Items_Variation;
+};
+
+export type Query_AccountBalances_Items_Items_Variation = {
+  __typename?: 'query_accountBalances_items_items_variation';
+  absoluteChange: Scalars['String']['output'];
+  percentageChange: Scalars['String']['output'];
+  previousBalance: Scalars['String']['output'];
+};
+
+export type Query_AccountBalances_Period = {
+  __typename?: 'query_accountBalances_period';
+  endTimestamp: Scalars['String']['output'];
+  startTimestamp: Scalars['String']['output'];
 };
 
 export type Query_AccountInteractions_Items_Items = {
@@ -1204,7 +1248,6 @@ export enum Query_FeedEvents_Items_Items_Relevance {
 
 export enum Query_FeedEvents_Items_Items_Type {
   Delegation = 'DELEGATION',
-  DelegationVotesChanged = 'DELEGATION_VOTES_CHANGED',
   Proposal = 'PROPOSAL',
   ProposalExtended = 'PROPOSAL_EXTENDED',
   Transfer = 'TRANSFER',
