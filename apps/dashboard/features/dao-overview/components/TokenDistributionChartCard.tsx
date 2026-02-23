@@ -1,5 +1,6 @@
 "use client";
 
+import { OverviewMetric } from "@/features/dao-overview/components/OverviewMetric";
 import { TokenDistributionChart } from "@/features/token-distribution/components";
 import { useChartMetrics } from "@/features/token-distribution/hooks/useChartMetrics";
 import {
@@ -9,9 +10,8 @@ import {
 } from "@/features/token-distribution/utils";
 import { TooltipInfo } from "@/shared/components";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { OverviewMetric } from "@/features/dao-overview/components/OverviewMetric";
 import daoConfig from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 export const TokenDistributionChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
   const { decimals } = daoConfig[daoId];

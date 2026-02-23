@@ -1,9 +1,10 @@
 "use client";
 
 import { TooltipProps } from "recharts";
-import { formatNumberUserReadable } from "@/shared/utils";
+
 import { metricsSchema } from "@/features/token-distribution/utils/metrics";
 import { DaoIdEnum } from "@/shared/types/daos";
+import { formatNumberUserReadable } from "@/shared/utils";
 
 export const TokenDistributionCustomTooltip: React.FC<
   TooltipProps<number, string> & {

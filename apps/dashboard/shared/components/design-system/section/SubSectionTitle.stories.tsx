@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
-import { SubsectionTitle } from "@/shared/components/design-system/section/SubsectionTitle";
 import { Calendar, TrendingUp, Filter, RefreshCw } from "lucide-react";
+
+import { SubsectionTitle } from "@/shared/components/design-system/section/SubsectionTitle";
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta = {

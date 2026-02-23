@@ -1,13 +1,14 @@
-import { useState } from "react";
 import { Check } from "lucide-react";
-import { cn } from "@/shared/utils";
+import { useState } from "react";
+
+import { Button } from "@/shared/components/design-system/buttons/button/Button";
+import { ButtonFilter } from "@/shared/components/design-system/table/ButtonFilter";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/shared/components/ui/popover";
-import { ButtonFilter } from "@/shared/components/design-system/table/ButtonFilter";
-import { Button } from "@/shared/components/design-system/buttons/button/Button";
+import { cn } from "@/shared/utils";
 
 export interface FilterOption {
   value: string;

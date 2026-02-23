@@ -1,11 +1,12 @@
-import { DaoConfiguration } from "@/shared/dao-config/types";
-import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
+import { mainnet } from "viem/chains";
+
+import { ObolIcon } from "@/shared/components/icons";
+import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
-import { ObolIcon } from "@/shared/components/icons";
+import { DaoConfiguration } from "@/shared/dao-config/types";
 import { ObolOgIcon } from "@/shared/og/dao-og-icons";
-import { mainnet } from "viem/chains";
-import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
+import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
 
 export const OBOL: DaoConfiguration = {
   name: "Obol Collective",

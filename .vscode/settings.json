@@ -6,10 +6,7 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },
-  "cSpell.words": [
-    "anticapture",
-    "Anticapture"
-  ],
+  "cSpell.words": ["anticapture", "Anticapture"],
   // Editor settings
   // Language-specific settings
   "[typescript]": {
@@ -36,6 +33,7 @@
   "typescript.format.enable": false,
   "javascript.format.enable": false,
   // ESLint settings
+  "eslint.useFlatConfig": true,
   "eslint.validate": [
     "javascript",
     "javascriptreact",

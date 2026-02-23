@@ -1,12 +1,13 @@
 "use client";
 
-import { cn } from "@/shared/utils";
-import { cva, VariantProps } from "class-variance-authority";
-import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import { cva, type VariantProps } from "class-variance-authority";
 import { Github, Twitter } from "lucide-react";
 import Link from "next/link";
+
+import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { TelegramIcon } from "@/shared/components/icons/TelegramIcon";
 import { useGitHubRelease } from "@/shared/hooks";
+import { cn } from "@/shared/utils";
 
 const footerVariant = cva(
   "w-full justify-center items-center px-4 py-3 opacity-60 hover:opacity-100 transition-opacity duration-300  ",

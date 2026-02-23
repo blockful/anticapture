@@ -1,2 +1,2 @@
-export { Toast } from "./Toast";
-export type { ToastProps } from "./Toast";
+export { Toast } from "@/shared/components/design-system/toast/Toast";
+export type { ToastProps } from "@/shared/components/design-system/toast/Toast";

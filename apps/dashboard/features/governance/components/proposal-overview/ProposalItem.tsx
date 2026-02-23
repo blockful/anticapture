@@ -1,14 +1,15 @@
 "use client";
 
 import { CheckCircle2, XCircle } from "lucide-react";
-import { cn, formatNumberUserReadable } from "@/shared/utils";
-import { Proposal, ProposalStatus } from "@/features/governance/types";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { Address } from "viem";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { Address } from "viem";
+
+import { Proposal, ProposalStatus } from "@/features/governance/types";
+import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { BulletDivider } from "@/shared/components/design-system/section/BulletDivider";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { BulletDivider } from "@/features/governance/components/proposal-overview/BulletDivider";
+import { cn, formatNumberUserReadable } from "@/shared/utils";
 
 interface ProposalItemProps {
   proposal: Proposal;

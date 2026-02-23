@@ -1,4 +1,3 @@
-import { Drizzle } from "@/database";
 import {
   and,
   asc,
@@ -13,10 +12,15 @@ import {
   max,
   count,
 } from "drizzle-orm";
-import { accountPower, votesOnchain, votingPowerHistory } from "@/database";
-
-import { DBVote, VotesRequest } from "@/mappers";
 import { Address } from "viem";
+
+import {
+  Drizzle,
+  accountPower,
+  votesOnchain,
+  votingPowerHistory,
+} from "@/database";
+import { DBVote, VotesRequest } from "@/mappers";
 
 export class VotesRepository {
   constructor(private readonly db: Drizzle) {}

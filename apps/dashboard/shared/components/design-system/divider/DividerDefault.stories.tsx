@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
+
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 

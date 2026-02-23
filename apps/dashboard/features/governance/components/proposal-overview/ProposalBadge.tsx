@@ -1,10 +1,10 @@
-import { cn } from "@/shared/utils";
 import {
   getBackgroundStatusColor,
   getStatusText,
   getTextStatusColor,
 } from "@/features/governance/components/proposal-overview/ProposalItem";
 import { ProposalStatus } from "@/features/governance/types";
+import { cn } from "@/shared/utils";
 
 export const ProposalBadge = ({ status }: { status: ProposalStatus }) => {
   return (

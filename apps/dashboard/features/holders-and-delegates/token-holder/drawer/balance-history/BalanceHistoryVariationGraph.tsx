@@ -1,5 +1,7 @@
 "use client";
 
+import { parseAsStringEnum, useQueryState } from "nuqs";
+import { useMemo } from "react";
 import {
   CartesianGrid,
   Line,
@@ -9,24 +11,25 @@ import {
   Tooltip,
   Dot,
 } from "recharts";
-import { ChartContainer } from "@/shared/components/ui/chart";
-import { timestampToReadableDate } from "@/shared/utils";
-import { formatNumberUserReadable } from "@/shared/utils";
-import { DaoIdEnum } from "@/shared/types/daos";
-import {
-  BalanceHistoryGraphItem,
-  useBalanceHistoryGraph,
-} from "@/features/holders-and-delegates/hooks/useBalanceHistoryGraph";
+
 import {
   TimePeriod,
   TimePeriodSwitcher,
 } from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
+import {
+  BalanceHistoryGraphItem,
+  useBalanceHistoryGraph,
+} from "@/features/holders-and-delegates/hooks/useBalanceHistoryGraph";
+import { getTimestampRangeFromPeriod } from "@/features/holders-and-delegates/utils";
 import { ChartExceptionState } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
-import { parseAsStringEnum, useQueryState } from "nuqs";
-import { useMemo } from "react";
-import { getTimestampRangeFromPeriod } from "@/features/holders-and-delegates/utils";
+import { ChartContainer } from "@/shared/components/ui/chart";
+import { DaoIdEnum } from "@/shared/types/daos";
+import {
+  timestampToReadableDate,
+  formatNumberUserReadable,
+} from "@/shared/utils";
 
 interface BalanceHistoryVariationGraphProps {
   accountId: string;
@@ -158,18 +161,16 @@ export const BalanceHistoryVariationGraph = ({
     );
   }
 
-  const head = balanceHistory[0]
+  const head = balanceHistory[0];
   const extendedChartData = [
     {
       timestamp: fromDate
         ? fromDate * 1000
         : // 1 day in milliseconds to avoid hover conflict when max data is selected
-        head?.timestamp - 86400000,
-      balance: head?.balance + (
-        head?.direction === "in" ?
-          - head?.amount :
-          + head?.amount
-      ),
+          head?.timestamp - 86400000,
+      balance:
+        head?.balance +
+        (head?.direction === "in" ? -head?.amount : +head?.amount),
     },
     ...balanceHistory,
     {

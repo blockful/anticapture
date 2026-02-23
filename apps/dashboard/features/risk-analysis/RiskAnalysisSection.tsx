@@ -1,22 +1,23 @@
 "use client";
 
+import { ReactNode, useState } from "react";
+
+import { RiskDescription } from "@/features/risk-analysis/components/RiskDescription";
 import {
   RiskAreaCardEnum,
   RiskAreaCardWrapper,
 } from "@/shared/components/cards/RiskAreaCard";
-import { RiskDescription } from "@/features/risk-analysis/components/RiskDescription";
+import { RISK_AREAS } from "@/shared/constants/risk-areas";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { GovernanceImplementationField } from "@/shared/dao-config/types";
+import { fieldsToArray } from "@/shared/dao-config/utils";
+import { DaoIdEnum } from "@/shared/types/daos";
 import {
   RiskLevel,
   RiskAreaEnum,
   GovernanceImplementationEnum,
 } from "@/shared/types/enums";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { RISK_AREAS } from "@/shared/constants/risk-areas";
 import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
-import { fieldsToArray } from "@/shared/dao-config/utils";
-import daoConfigByDaoId from "@/shared/dao-config";
-import { GovernanceImplementationField } from "@/shared/dao-config/types";
-import { ReactNode, useState } from "react";
 
 interface RiskAreaDisplayItem {
   name: string;

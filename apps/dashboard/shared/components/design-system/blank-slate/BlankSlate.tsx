@@ -1,7 +1,8 @@
 "use client";
 
-import { ElementType, ReactNode } from "react";
 import { cva } from "class-variance-authority";
+import { ElementType, ReactNode } from "react";
+
 import { cn } from "@/shared/utils/cn";
 
 const blankSlateVariants = cva(

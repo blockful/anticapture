@@ -1,10 +1,12 @@
 import { PGlite } from "@electric-sql/pglite";
-import { drizzle } from "drizzle-orm/pglite";
 import { pushSchema } from "drizzle-kit/api";
+import { drizzle } from "drizzle-orm/pglite";
+
 import * as schema from "@/database/schema";
 import { feedEvent } from "@/database/schema";
 import { FeedEventType, FeedRelevance } from "@/lib/constants";
 import { FeedRequest } from "@/mappers";
+
 import { FeedRepository } from ".";
 
 type FeedEventInsert = typeof feedEvent.$inferInsert;
@@ -26,7 +28,7 @@ const defaultThresholds = (
   [FeedEventType.VOTE]: 0n,
   [FeedEventType.DELEGATION]: 0n,
   [FeedEventType.TRANSFER]: 0n,
-  [FeedEventType.DELEGATION_VOTES_CHANGED]: 0n,
+  // [FeedEventType.DELEGATION_VOTES_CHANGED]: 0n,
   [FeedEventType.PROPOSAL]: 0n,
   [FeedEventType.PROPOSAL_EXTENDED]: 0n,
   ...overrides,
@@ -50,15 +52,19 @@ describe("FeedRepository", () => {
   let repository: FeedRepository;
 
   beforeAll(async () => {
-    (BigInt.prototype as any).toJSON = function () {
-      return this.toString();
-    };
+    (BigInt.prototype as unknown as { toJSON: () => string }).toJSON =
+      function () {
+        return this.toString();
+      };
 
     client = new PGlite();
     db = drizzle(client, { schema });
     repository = new FeedRepository(db);
 
-    const { apply } = await pushSchema(schema, db as any);
+    const { apply } = await pushSchema(
+      schema,
+      db as unknown as Parameters<typeof pushSchema>[1],
+    );
     await apply();
   });
 

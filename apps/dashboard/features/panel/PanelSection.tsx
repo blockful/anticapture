@@ -1,5 +1,8 @@
 "use client";
 
+import { Tabs } from "@radix-ui/react-tabs";
+import { useState } from "react";
+
 import {
   PanelTable,
   DelegatedSupplyHistory,
@@ -10,8 +13,6 @@ import {
   SubSection,
   SubSectionsContainer,
 } from "@/shared/components/design-system/section";
-import { useState } from "react";
-import { Tabs } from "@radix-ui/react-tabs";
 import { TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { cn } from "@/shared/utils";
 

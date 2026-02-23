@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
-import { cn } from "@/shared/utils/";
-import { TimeInterval } from "@/shared/types/enums/TimeInterval";
-import { useScreenSize } from "@/shared/hooks";
 import { CheckIcon, ChevronDown } from "lucide-react";
+import { useState, useMemo } from "react";
+
+import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
+import { useScreenSize } from "@/shared/hooks";
+import { TimeInterval } from "@/shared/types/enums/TimeInterval";
+import { cn } from "@/shared/utils/";
 
 interface SwitcherDateProps {
   setTimeInterval: (timeInterval: TimeInterval) => void;

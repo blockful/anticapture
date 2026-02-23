@@ -1,9 +1,10 @@
 "use client";
 
-import { cn } from "@/shared/utils/";
-import { useParams, usePathname } from "next/navigation";
 import Link from "next/link";
+import { useParams, usePathname } from "next/navigation";
 import { ButtonHTMLAttributes, ElementType } from "react";
+
+import { cn } from "@/shared/utils/";
 
 interface ButtonHeaderSidebarProps extends ButtonHTMLAttributes<
   HTMLButtonElement | HTMLAnchorElement

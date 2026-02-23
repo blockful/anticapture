@@ -1,4 +1,3 @@
-import { AmountFilter, DBAccountBalance, DBAccountBalanceWithVariation } from "@/mappers";
 import {
   and,
   asc,
@@ -13,13 +12,18 @@ import {
   SQL,
   sql,
 } from "drizzle-orm";
-import { Drizzle, transfer } from "@/database";
-import { accountBalance } from "@/database";
 import { Address, getAddress } from "viem";
+
+import { Drizzle, transfer, accountBalance } from "@/database";
 import { calculatePercentage } from "@/lib/utils";
+import {
+  AmountFilter,
+  DBAccountBalance,
+  DBAccountBalanceWithVariation,
+} from "@/mappers";
 
 export class AccountBalanceRepository {
-  constructor(private readonly db: Drizzle) { }
+  constructor(private readonly db: Drizzle) {}
 
   async getAccountBalances(
     skip: number,
@@ -119,7 +123,9 @@ export class AccountBalanceRepository {
     const transfersFrom = this.db
       .select({
         accountId: scopedTransfers.fromAccountId,
-        fromAmount: sql<string>`-SUM(${scopedTransfers.amount})`.as("from_amount"),
+        fromAmount: sql<string>`-SUM(${scopedTransfers.amount})`.as(
+          "from_amount",
+        ),
       })
       .from(scopedTransfers)
       .groupBy(scopedTransfers.fromAccountId)
@@ -163,15 +169,14 @@ export class AccountBalanceRepository {
       .select({
         count: sql<number>`COUNT(*)`.as("count"),
       })
-      .from(combined)
+      .from(combined);
 
-    const orderDirectionFn = orderDirection === "desc"
-      ? desc
-      : asc;
+    const orderDirectionFn = orderDirection === "desc" ? desc : asc;
 
-    const orderByCriteria = orderBy === "balance"
-      ? combined.currentBalance
-      : sql`ABS(${combined.fromChange} + ${combined.toChange})`;
+    const orderByCriteria =
+      orderBy === "balance"
+        ? combined.currentBalance
+        : sql`ABS(${combined.fromChange} + ${combined.toChange})`;
 
     const result = await this.db
       .select({
@@ -190,15 +195,17 @@ export class AccountBalanceRepository {
       .limit(limit);
 
     return {
-      items: result.map(({ accountId, tokenId, delegate, currentBalance, absoluteChange }) => ({
-        accountId: accountId,
-        tokenId: getAddress(tokenId),
-        delegate: getAddress(delegate),
-        previousBalance: currentBalance - BigInt(absoluteChange),
-        currentBalance: currentBalance,
-        absoluteChange: BigInt(absoluteChange),
-        percentageChange: calculatePercentage(currentBalance, absoluteChange),
-      })),
+      items: result.map(
+        ({ accountId, tokenId, delegate, currentBalance, absoluteChange }) => ({
+          accountId: accountId,
+          tokenId: getAddress(tokenId),
+          delegate: getAddress(delegate),
+          previousBalance: currentBalance - BigInt(absoluteChange),
+          currentBalance: currentBalance,
+          absoluteChange: BigInt(absoluteChange),
+          percentageChange: calculatePercentage(currentBalance, absoluteChange),
+        }),
+      ),
       totalCount: BigInt(totalCount?.count ?? 0),
     };
   }
@@ -226,7 +233,9 @@ export class AccountBalanceRepository {
     const transfersFrom = this.db
       .select({
         accountId: scopedTransfers.fromAccountId,
-        fromAmount: sql<string>`-SUM(${scopedTransfers.amount})`.as("from_amount"),
+        fromAmount: sql<string>`-SUM(${scopedTransfers.amount})`.as(
+          "from_amount",
+        ),
       })
       .from(scopedTransfers)
       .groupBy(scopedTransfers.fromAccountId)
@@ -277,9 +286,9 @@ export class AccountBalanceRepository {
             "absolute_change",
           ),
       })
-      .from(combined)
+      .from(combined);
 
-    if (!result) return undefined
+    if (!result) return undefined;
 
     return {
       accountId: result.accountId,
@@ -290,9 +299,9 @@ export class AccountBalanceRepository {
       absoluteChange: BigInt(result.absoluteChange),
       percentageChange: (result.currentBalance - BigInt(result.absoluteChange)
         ? Number(
-          (BigInt(result.absoluteChange) * 10000n) /
-          (result.currentBalance - BigInt(result.absoluteChange)),
-        ) / 100
+            (BigInt(result.absoluteChange) * 10000n) /
+              (result.currentBalance - BigInt(result.absoluteChange)),
+          ) / 100
         : 0
       ).toString(),
     };

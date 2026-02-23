@@ -1,10 +1,12 @@
-import { describe, it, expect, beforeEach } from "vitest";
 import { parseEther } from "viem";
-import { FeedService } from ".";
+import { describe, it, expect, beforeEach } from "vitest";
+
 import { FeedEventType, FeedRelevance } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
-import { DBFeedEvent, FeedRequest } from "@/mappers";
 import { getDaoRelevanceThreshold } from "@/lib/eventRelevance";
+import { DBFeedEvent, FeedRequest } from "@/mappers";
+
+import { FeedService } from ".";
 
 const createFeedEvent = (
   overrides: Partial<DBFeedEvent> = {},
@@ -35,6 +37,7 @@ class SimpleFeedRepository {
     valueThresholds: Partial<Record<FeedEventType, bigint>>,
   ) {
     const filtered = this.items.filter((e) => {
+      if (e.type === "DELEGATION_VOTES_CHANGED") return false;
       const threshold = valueThresholds[e.type];
       return threshold === undefined || e.value >= threshold;
     });
@@ -79,7 +82,7 @@ describe("FeedService", () => {
         txHash: "0xdef456",
         logIndex: 5,
         type: "DELEGATION",
-        value: parseEther("100000"),
+        value: ensThresholds[FeedEventType.DELEGATION][FeedRelevance.MEDIUM],
         timestamp: 1700001000,
         metadata: { from: "0x1", to: "0x2" },
       });
@@ -181,7 +184,7 @@ describe("FeedService", () => {
         }),
         createFeedEvent({
           type: "VOTE",
-          value: parseEther("100000"),
+          value: ensThresholds[FeedEventType.VOTE][FeedRelevance.MEDIUM],
           logIndex: 1,
         }),
       ];

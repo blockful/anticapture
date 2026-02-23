@@ -1,10 +1,11 @@
 "use client";
 
-import { PageSkeleton } from "@/shared/components/skeletons/PageSkeleton";
-import { DaoOverviewSkeleton } from "@/features/dao-overview/skeleton/DaoOverviewSkeleton";
 import { useParams, usePathname } from "next/navigation";
-import { DaoIdEnum } from "@/shared/types/daos";
+
+import { DaoOverviewSkeleton } from "@/features/dao-overview/skeleton/DaoOverviewSkeleton";
+import { PageSkeleton } from "@/shared/components/skeletons/PageSkeleton";
 import daoConfigByDaoId from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 export default function Loading() {
   const { daoId }: { daoId?: string } = useParams();

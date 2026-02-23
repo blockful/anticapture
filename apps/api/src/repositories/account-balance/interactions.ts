@@ -1,7 +1,7 @@
-import { Address } from "viem";
 import { asc, desc, gte, sql, and, eq, or, gt, lt, lte } from "drizzle-orm";
-import { Drizzle } from "@/database";
-import { transfer, accountBalance } from "@/database";
+import { Address } from "viem";
+
+import { Drizzle, transfer, accountBalance } from "@/database";
 
 import { AccountInteractions, Filter } from "../../mappers";
 
