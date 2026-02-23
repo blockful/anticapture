@@ -1,7 +1,18 @@
 "use client";
 
-import { ReactNode, useMemo } from "react";
+import { Query_ProposalsActivity_Proposals_Items } from "@anticapture/graphql-client";
 import { ColumnDef } from "@tanstack/react-table";
+import { ExternalLink } from "lucide-react";
+import Link from "next/link";
+import { ReactNode, useMemo } from "react";
+
+import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
+import {
+  getUserVoteData,
+  extractProposalName,
+  getVoteTimingData,
+  proposalsFinalResultMapping,
+} from "@/features/holders-and-delegates/utils/proposalsTableUtils";
 import {
   SkeletonRow,
   TextIconLeft,
@@ -9,27 +20,18 @@ import {
   Button,
   IconButton,
 } from "@/shared/components";
-import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
-import { formatNumberUserReadable, cn } from "@/shared/utils";
-import { ExternalLink } from "lucide-react";
-import { useDaoData } from "@/shared/hooks";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { Query_ProposalsActivity_Proposals_Items } from "@anticapture/graphql-client";
 import {
   CategoriesFilter,
   FilterOption,
 } from "@/shared/components/design-system/table/filters/CategoriesFilter";
-import daoConfig from "@/shared/dao-config";
-import Link from "next/link";
-import {
-  getUserVoteData,
-  extractProposalName,
-  getVoteTimingData,
-  proposalsFinalResultMapping,
-} from "@/features/holders-and-delegates/utils/proposalsTableUtils";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
-import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
+import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
+import daoConfig from "@/shared/dao-config";
+import { useDaoData } from "@/shared/hooks";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { formatNumberUserReadable, cn } from "@/shared/utils";
+
 interface ProposalTableData {
   proposalId: string;
   proposalName: string;

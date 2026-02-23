@@ -1,27 +1,8 @@
 "use client";
 
-import { Button, IconButton, SkeletonRow } from "@/shared/components";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { ColumnDef } from "@tanstack/react-table";
-import { useEffect, useState } from "react";
-import { Address, parseUnits, formatUnits } from "viem";
-import { useDelegationHistory } from "@/features/holders-and-delegates/hooks/useDelegationHistory";
-import { formatNumberUserReadable } from "@/shared/utils/";
 import { ExternalLink } from "lucide-react";
-import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
-import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { Table } from "@/shared/components/design-system/table/Table";
-import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
-import {
-  AmountFilterState,
-  useAmountFilterStore,
-} from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
-import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
-import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
-import { fetchAddressFromEnsName } from "@/shared/hooks/useEnsData";
 import Link from "next/link";
-import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import {
   parseAsBoolean,
   parseAsString,
@@ -29,8 +10,28 @@ import {
   useQueryState,
   useQueryStates,
 } from "nuqs";
+import { useEffect, useState } from "react";
+import { Address, parseUnits, formatUnits } from "viem";
+
+import { useDelegationHistory } from "@/features/holders-and-delegates/hooks/useDelegationHistory";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
+import { Button, IconButton, SkeletonRow } from "@/shared/components";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { DateCell } from "@/shared/components/design-system/table/cells/DateCell";
+import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
+import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
+import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
+import {
+  AmountFilterState,
+  useAmountFilterStore,
+} from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
+import { Table } from "@/shared/components/design-system/table/Table";
+import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { fetchAddressFromEnsName } from "@/shared/hooks/useEnsData";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { formatNumberUserReadable } from "@/shared/utils/";
 
 interface DelegationData {
   address: string;

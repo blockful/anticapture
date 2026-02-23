@@ -1,13 +1,14 @@
 "use client";
 
-import { ReactNode } from "react";
-import { AlertCircle, AlertTriangle, CheckCircle } from "lucide-react";
 import { DotFilledIcon } from "@radix-ui/react-icons";
-import { cn } from "@/shared/utils/";
-import { Stage } from "@/shared/types/enums/Stage";
+import { AlertCircle, AlertTriangle, CheckCircle } from "lucide-react";
 import { useParams } from "next/navigation";
-import { DaoIdEnum } from "@/shared/types/daos";
+import { ReactNode } from "react";
+
 import daoConfigByDaoId from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { Stage } from "@/shared/types/enums/Stage";
+import { cn } from "@/shared/utils/";
 
 interface Issue {
   title: string;

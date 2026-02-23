@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { initialMetrics } from "@/features/token-distribution/utils";
-import { useTokenDistributionStore } from "@/features/token-distribution/store/useTokenDistributionStore";
-import { useBrushStore } from "@/features/token-distribution/store/useBrushStore";
-import { ChartDataSetPoint } from "@/shared/dao-config/types";
 import { parseAsInteger, useQueryState } from "nuqs";
-import { DaoIdEnum } from "@/shared/types/daos";
+import { useEffect, useRef } from "react";
+
+import { useBrushStore } from "@/features/token-distribution/store/useBrushStore";
+import { useTokenDistributionStore } from "@/features/token-distribution/store/useTokenDistributionStore";
+import { initialMetrics } from "@/features/token-distribution/utils";
 import daoConfig from "@/shared/dao-config";
+import { ChartDataSetPoint } from "@/shared/dao-config/types";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 export function useTokenDistributionParams(
   chartData: ChartDataSetPoint[],

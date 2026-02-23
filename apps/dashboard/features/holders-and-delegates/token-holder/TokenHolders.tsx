@@ -1,28 +1,29 @@
 "use client";
 
-import { useMemo } from "react";
-import { parseAsStringEnum, useQueryState } from "nuqs";
-import { formatNumberUserReadable } from "@/shared/utils";
-import { ColumnDef } from "@tanstack/react-table";
-import { Address, formatUnits, zeroAddress } from "viem";
-import { Plus } from "lucide-react";
-import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { Percentage } from "@/shared/components/design-system/table/Percentage";
-import { useTokenHolders } from "@/features/holders-and-delegates/hooks/useTokenHolders";
 import { QueryInput_AccountBalances_OrderDirection } from "@anticapture/graphql-client";
+import { ColumnDef } from "@tanstack/react-table";
+import { Plus } from "lucide-react";
+import { parseAsStringEnum, useQueryState } from "nuqs";
+import { useMemo } from "react";
+import { Address, formatUnits, zeroAddress } from "viem";
+
+import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
+import { useTokenHolders } from "@/features/holders-and-delegates/hooks/useTokenHolders";
+import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
+import { Button } from "@/shared/components";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
+import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
+import { Percentage } from "@/shared/components/design-system/table/Percentage";
+import { Table } from "@/shared/components/design-system/table/Table";
+import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
+import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
+import daoConfig from "@/shared/dao-config";
+import { useScreenSize } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
-import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
-import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
-import { useScreenSize } from "@/shared/hooks";
-import { Table } from "@/shared/components/design-system/table/Table";
-import { Button } from "@/shared/components";
-import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
-import daoConfig from "@/shared/dao-config";
-import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
-import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
+import { formatNumberUserReadable } from "@/shared/utils";
 
 interface TokenHolderTableData {
   address: Address;

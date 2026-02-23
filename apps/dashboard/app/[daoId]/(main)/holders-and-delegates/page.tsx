@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import { DaoIdEnum } from "@/shared/types/daos";
-import daoConfigByDaoId from "@/shared/dao-config";
+
 import { HoldersAndDelegatesSection } from "@/features/holders-and-delegates";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 type Props = {
   params: Promise<{ daoId: string }>;

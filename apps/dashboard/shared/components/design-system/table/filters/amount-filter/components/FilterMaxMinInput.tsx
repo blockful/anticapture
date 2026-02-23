@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { ArrowRightIcon } from "@radix-ui/react-icons";
+import { useState, useEffect } from "react";
+
 import { Input } from "@/shared/components/design-system/form/fields";
 
 interface FilterMaxMinInputProps {

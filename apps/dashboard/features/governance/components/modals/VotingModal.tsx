@@ -1,18 +1,19 @@
 "use client";
 
-import { BadgeStatus, Button } from "@/shared/components";
+import type { Query_Proposals_Items_Items } from "@anticapture/graphql-client/hooks";
 import { Check, User2Icon, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import type { Query_Proposals_Items_Items } from "@anticapture/graphql-client/hooks";
-
 import { Account, formatUnits } from "viem";
 import { useAccount, useWalletClient } from "wagmi";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { formatNumberUserReadable } from "@/shared/utils";
+
 import { LoadingComponent } from "@/features/governance/components/modals/LoadingContent";
 import { VoteOption } from "@/features/governance/components/proposal-overview/VoteOption";
-import { voteOnProposal } from "@/features/governance/utils/voteOnProposal";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
+import { voteOnProposal } from "@/features/governance/utils/voteOnProposal";
+import { BadgeStatus, Button } from "@/shared/components";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { formatNumberUserReadable } from "@/shared/utils";
+
 interface VotingModalProps {
   isOpen: boolean;
   onClose: () => void;

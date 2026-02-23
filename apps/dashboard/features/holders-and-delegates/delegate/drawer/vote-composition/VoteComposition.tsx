@@ -1,11 +1,11 @@
 "use client";
 
+import { useVoteCompositionData } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/hooks/useVoteCompositionData";
 import { ThePieChart } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/ThePieChart";
 import { VoteCompositionTable } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/VoteCompositionTable";
+import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils";
-import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
-import { useVoteCompositionData } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/hooks/useVoteCompositionData";
 
 const ChartLegend = ({
   items,

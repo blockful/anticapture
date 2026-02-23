@@ -1,16 +1,17 @@
-import type { Metadata } from "next";
-import { DaoIdEnum } from "@/shared/types/daos";
-import daoConfigByDaoId from "@/shared/dao-config";
-import { RiskAnalysisSection } from "@/features/risk-analysis";
-import { GovernanceImplementationSection } from "@/features/governance-implementation";
-import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { Gauge } from "lucide-react";
+import type { Metadata } from "next";
+
+import { GovernanceImplementationSection } from "@/features/governance-implementation";
+import { RiskAnalysisSection } from "@/features/risk-analysis";
 import { RiskLevelCard, TheSectionLayout } from "@/shared/components";
+import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 import {
   SubSection,
   SubSectionsContainer,
 } from "@/shared/components/design-system/section";
-import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
 import { RiskLevel } from "@/shared/types/enums";
 import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
 

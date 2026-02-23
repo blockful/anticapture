@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+
 import { AnticaptureGlobeLogoSvg } from "@/shared/og/anticapture-globe-logo-svg";
 import { loadLocalFonts } from "@/shared/og/fonts";
 

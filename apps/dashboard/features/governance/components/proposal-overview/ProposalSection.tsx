@@ -1,27 +1,28 @@
 "use client";
 
+import type { Query_Proposals_Items_Items } from "@anticapture/graphql-client/hooks";
+import { ArrowRight } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useProposal } from "@/features/governance/hooks/useProposal";
-import { ProposalStatusSection } from "@/features/governance/components/proposal-overview/ProposalStatusSection";
-import { ProposalInfoSection } from "@/features/governance/components/proposal-overview/ProposalInfoSection";
-import { TitleSection } from "@/features/governance/components/proposal-overview/TitleSection";
-import { TabsSection } from "@/features/governance/components/proposal-overview/TabsSection";
+import { useState, useCallback } from "react";
+import { useAccount } from "wagmi";
+
+import { VotingModal } from "@/features/governance/components/modals/VotingModal";
 import {
   getVoteText,
   ProposalHeader,
 } from "@/features/governance/components/proposal-overview/ProposalHeader";
-import type { Query_Proposals_Items_Items } from "@anticapture/graphql-client/hooks";
+import { ProposalInfoSection } from "@/features/governance/components/proposal-overview/ProposalInfoSection";
+import { ProposalSectionSkeleton } from "@/features/governance/components/proposal-overview/ProposalSectionSkeleton";
+import { ProposalStatusSection } from "@/features/governance/components/proposal-overview/ProposalStatusSection";
+import { TabsSection } from "@/features/governance/components/proposal-overview/TabsSection";
+import { TitleSection } from "@/features/governance/components/proposal-overview/TitleSection";
+import { useVoterInfo } from "@/features/governance/hooks/useAccountPower";
+import { useProposal } from "@/features/governance/hooks/useProposal";
+import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 import { Button } from "@/shared/components";
 import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCustom";
-import { ArrowRight } from "lucide-react";
-import { useAccount } from "wagmi";
-import { ProposalSectionSkeleton } from "@/features/governance/components/proposal-overview/ProposalSectionSkeleton";
-import { useState, useCallback } from "react";
-import { VotingModal } from "@/features/governance/components/modals/VotingModal";
-import { useVoterInfo } from "@/features/governance/hooks/useAccountPower";
-import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfig from "@/shared/dao-config";
-import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 export const ProposalSection = () => {
   const { proposalId, daoId } = useParams<{

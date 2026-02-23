@@ -1,16 +1,17 @@
 "use client";
 
+import { BarChart4 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState, useEffect, useMemo } from "react";
+
 import {
   ButtonHeaderSidebar,
   HeaderDAOSidebarDropdown,
 } from "@/shared/components";
-import { cn } from "@/shared/utils/";
-import { BarChart4 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { HeaderNavMobile } from "@/widgets";
 import { TelegramIcon } from "@/shared/components/icons";
 import { ANTICAPTURE_TELEGRAM_BOT } from "@/shared/constants/social-media";
+import { cn } from "@/shared/utils/";
+import { HeaderNavMobile } from "@/widgets";
 
 export const StickyPageHeader = ({
   withMobileMenu = true,

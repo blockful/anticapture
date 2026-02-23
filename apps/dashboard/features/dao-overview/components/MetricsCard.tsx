@@ -1,13 +1,14 @@
 import { ReactNode, useMemo } from "react";
+
 import { DaoOverviewMetricCard } from "@/features/dao-overview/components/DaoOverviewMetricCard";
+import { useDaoOverviewData } from "@/features/dao-overview/hooks/useDaoOverviewData";
 import { DaoConfiguration } from "@/shared/dao-config/types";
+import { DaoIdEnum } from "@/shared/types/daos";
 import {
   formatBlocksToUserReadable,
   formatNumberUserReadable,
   formatSecondsToReadable,
 } from "@/shared/utils";
-import { useDaoOverviewData } from "@/features/dao-overview/hooks/useDaoOverviewData";
-import { DaoIdEnum } from "@/shared/types/daos";
 
 interface MetricsCardProps {
   daoId: string;

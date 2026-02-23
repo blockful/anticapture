@@ -1,8 +1,9 @@
 "use client";
 
-import { cn } from "@/shared/utils";
-import daoConfig from "@/shared/dao-config";
 import { DaoAvatarIconProps } from "@/shared/components/icons/types";
+import daoConfig from "@/shared/dao-config";
+import { cn } from "@/shared/utils";
+
 export const DaoAvatarIcon = ({
   daoId,
   isRounded = false,

@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { CookieIcon, CookieBackground } from "@/shared/components/icons";
-import { cn } from "@/shared/utils";
 import Image from "next/image";
+import { useState, useEffect } from "react";
+
 import { Button } from "@/shared/components";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import { CookieIcon, CookieBackground } from "@/shared/components/icons";
+import { cn } from "@/shared/utils";
 
 interface CookieConsentProps {
   className?: string;

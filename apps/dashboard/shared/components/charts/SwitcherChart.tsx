@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
-import { cn } from "@/shared/utils/";
-import { useScreenSize } from "@/shared/hooks";
 import { ChevronDown, CheckIcon } from "lucide-react";
+import { useState } from "react";
+
+import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
+import { useScreenSize } from "@/shared/hooks";
+import { cn } from "@/shared/utils/";
 
 interface SwitcherChartProps {
   setMetric: (metric: string) => void;

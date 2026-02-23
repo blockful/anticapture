@@ -1,7 +1,8 @@
 "use client";
 
-import { cn } from "@/shared/utils";
 import { ReactNode } from "react";
+
+import { cn } from "@/shared/utils";
 
 type SubsectionTitleProps = {
   subsectionTitle: string | ReactNode;

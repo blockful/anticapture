@@ -1,9 +1,9 @@
+import { useBalanceVariationsQuery } from "@anticapture/graphql-client/hooks";
 import { useMemo } from "react";
 
-import { useBalanceVariationsQuery } from "@anticapture/graphql-client/hooks";
+import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
-import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 
 export const useHistoricalBalances = (
   daoId: DaoIdEnum,

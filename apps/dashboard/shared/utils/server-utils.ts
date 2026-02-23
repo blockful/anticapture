@@ -1,5 +1,6 @@
-import { publicClient } from "@/shared/services/wallet/wallet";
 import { Address } from "viem";
+
+import { publicClient } from "@/shared/services/wallet/wallet";
 
 export type User = {
   walletAddress: Address;

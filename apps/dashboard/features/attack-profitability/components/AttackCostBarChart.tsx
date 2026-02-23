@@ -1,8 +1,8 @@
 "use client";
 
-import { formatUnits } from "viem";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useRef } from "react";
+import { Data } from "react-csv/lib/core";
 import {
   BarChart,
   Bar,
@@ -13,8 +13,17 @@ import {
   Cell,
   LabelProps,
 } from "recharts";
-import { Data } from "react-csv/lib/core";
+import { formatUnits } from "viem";
 
+import {
+  useDaoTokenHistoricalData,
+  useTopTokenHolderNonDao,
+  useTreasury,
+} from "@/features/attack-profitability/hooks";
+import { SkeletonRow } from "@/shared/components";
+import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
+import { mockedAttackCostBarData } from "@/shared/constants/mocked-data/mocked-attack-cost-bar-data";
+import daoConfigByDaoId from "@/shared/dao-config";
 import {
   useActiveSupply,
   useAverageTurnout,
@@ -22,17 +31,8 @@ import {
   useScreenSize,
 } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { SkeletonRow } from "@/shared/components";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { formatNumberUserReadable } from "@/shared/utils/";
-import { mockedAttackCostBarData } from "@/shared/constants/mocked-data/mocked-attack-cost-bar-data";
-import {
-  useDaoTokenHistoricalData,
-  useTopTokenHolderNonDao,
-  useTreasury,
-} from "@/features/attack-profitability/hooks";
-import daoConfigByDaoId from "@/shared/dao-config";
-import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 
 interface StackedValue {
   value: number;

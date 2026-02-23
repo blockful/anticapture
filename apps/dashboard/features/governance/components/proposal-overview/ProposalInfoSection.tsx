@@ -1,5 +1,4 @@
 import { GetProposalQuery } from "@anticapture/graphql-client";
-import { getTimeLeftText } from "@/features/governance/utils";
 import {
   BarChart4,
   Check,
@@ -8,11 +7,13 @@ import {
   Users,
   XCircle,
 } from "lucide-react";
-import { formatNumberUserReadable } from "@/shared/utils";
 import { formatUnits } from "viem";
-import { BulletDivider } from "@/shared/components/design-system/section/BulletDivider";
+
 import { ProposalInfoText } from "@/features/governance/components/proposal-overview/ProposalInfoText";
+import { getTimeLeftText } from "@/features/governance/utils";
+import { BulletDivider } from "@/shared/components/design-system/section/BulletDivider";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
+import { formatNumberUserReadable } from "@/shared/utils";
 
 const VotingProgressBar = ({
   startTimestamp,

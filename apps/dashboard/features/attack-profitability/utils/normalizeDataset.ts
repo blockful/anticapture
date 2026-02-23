@@ -1,9 +1,10 @@
+import { formatUnits } from "viem";
+
 import {
   PriceEntry,
   TokenMetricItem,
   MultilineChartDataSetPoint,
 } from "@/shared/dao-config/types";
-import { formatUnits } from "viem";
 
 export function normalizeDataset(
   tokenPrices: PriceEntry[],

@@ -2,6 +2,7 @@
 
 import Script from "next/script";
 import { useCallback, useEffect, useState } from "react";
+
 import { posthogScript } from "@/shared/services/posthog";
 
 type WindowWithPostHog = typeof window & {

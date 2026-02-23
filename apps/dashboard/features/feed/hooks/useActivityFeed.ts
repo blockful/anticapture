@@ -1,7 +1,5 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
-import { DaoIdEnum } from "@/shared/types/daos";
 import {
   GetFeedEventsQuery,
   QueryInput_FeedEvents_OrderDirection,
@@ -10,7 +8,10 @@ import {
   QueryInput_FeedEvents_Type,
   useGetFeedEventsQuery,
 } from "@anticapture/graphql-client/hooks";
+import { useCallback, useMemo, useState } from "react";
+
 import { ActivityFeedFilters } from "@/features/feed/types";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 interface UseActivityFeedParams {
   daoId: DaoIdEnum;

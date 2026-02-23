@@ -1,12 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { usePathname } from "next/navigation";
-import { DaoIdEnum } from "@/shared/types/daos";
-import {
-  HeaderDAOSidebarDropdown,
-  ButtonHeaderSidebar,
-} from "@/shared/components";
+import { Crosshair2Icon } from "@radix-ui/react-icons";
 import {
   BarChart,
   Gauge,
@@ -16,9 +10,16 @@ import {
   PieChart,
   Newspaper,
 } from "lucide-react";
-import daoConfigByDaoId from "@/shared/dao-config";
-import { Crosshair2Icon } from "@radix-ui/react-icons";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
+
+import {
+  HeaderDAOSidebarDropdown,
+  ButtonHeaderSidebar,
+} from "@/shared/components";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
 import { cn } from "@/shared/utils/";
 
 export const HeaderDAOSidebar = () => {

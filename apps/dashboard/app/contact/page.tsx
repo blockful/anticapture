@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+
 import ContactPageClient from "@/app/contact/ContactPageClient";
 
 export const metadata: Metadata = {

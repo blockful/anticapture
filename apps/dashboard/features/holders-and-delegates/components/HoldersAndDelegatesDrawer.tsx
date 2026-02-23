@@ -1,21 +1,22 @@
 "use client";
 
-import { Drawer, DrawerContent } from "@/shared/components/ui/drawer";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { X } from "lucide-react";
-import { cn } from "@/shared/utils";
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
-import { useScreenSize } from "@/shared/hooks";
-import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { VotingPowerHistory } from "@/features/holders-and-delegates/delegate/drawer/voting-power-history/VotingPowerHistory";
-import { DaoIdEnum } from "@/shared/types/daos";
+import { X } from "lucide-react";
+import { parseAsString, useQueryState, useQueryStates } from "nuqs";
+
 import { VoteComposition } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/VoteComposition";
+import { DelegateProposalsActivity } from "@/features/holders-and-delegates/delegate/drawer/votes/DelegateProposalsActivity";
+import { VotingPowerHistory } from "@/features/holders-and-delegates/delegate/drawer/voting-power-history/VotingPowerHistory";
 import { BalanceHistory } from "@/features/holders-and-delegates/token-holder/drawer/balance-history/BalanceHistory";
 import { DelegationHistory } from "@/features/holders-and-delegates/token-holder/drawer/delegation-history/DelegationHistory";
-import { DelegateProposalsActivity } from "@/features/holders-and-delegates/delegate/drawer/votes/DelegateProposalsActivity";
-import { IconButton } from "@/shared/components";
 import { TopInteractions } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/TopInteractions";
-import { parseAsString, useQueryState, useQueryStates } from "nuqs";
+import { IconButton } from "@/shared/components";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { Drawer, DrawerContent } from "@/shared/components/ui/drawer";
+import { useScreenSize } from "@/shared/hooks";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { cn } from "@/shared/utils";
 
 export type EntityType = "delegate" | "tokenHolder";
 

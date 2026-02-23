@@ -1,5 +1,9 @@
 "use client";
 
+import Lottie from "lottie-react";
+import { useParams } from "next/navigation";
+import { useEffect, useMemo, useRef } from "react";
+import { Data } from "react-csv/lib/core";
 import {
   CartesianGrid,
   Line,
@@ -8,39 +12,33 @@ import {
   YAxis,
   Tooltip,
 } from "recharts";
-import { ChartConfig, ChartContainer } from "@/shared/components/ui/chart";
+import { formatUnits } from "viem";
 
-import { DaoIdEnum } from "@/shared/types/daos";
-import { useParams } from "next/navigation";
-
-import { TimeInterval } from "@/shared/types/enums/TimeInterval";
-import {
-  TokenMetricItem,
-  MultilineChartDataSetPoint,
-} from "@/shared/dao-config/types";
-import { useDaoData, useTimeSeriesData } from "@/shared/hooks";
-
-import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
-import { useEffect, useMemo, useRef } from "react";
-import { mockedAttackProfitabilityDatasets } from "@/shared/constants/mocked-data/mocked-attack-profitability-datasets";
-import { ResearchPendingChartBlur } from "@/shared/components/charts/ResearchPendingChartBlur";
 import { AttackProfitabilityCustomTooltip } from "@/features/attack-profitability/components";
 import {
   useDaoTokenHistoricalData,
   useTreasury,
 } from "@/features/attack-profitability/hooks";
+import { normalizeDataset } from "@/features/attack-profitability/utils";
+import loadingAnimation from "@/public/loading-animation.json";
+import { ResearchPendingChartBlur } from "@/shared/components/charts/ResearchPendingChartBlur";
+import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
+import { ChartConfig, ChartContainer } from "@/shared/components/ui/chart";
+import { mockedAttackProfitabilityDatasets } from "@/shared/constants/mocked-data/mocked-attack-profitability-datasets";
+import daoConfigByDaoId from "@/shared/dao-config";
+import {
+  TokenMetricItem,
+  MultilineChartDataSetPoint,
+} from "@/shared/dao-config/types";
+import { useDaoData, useTimeSeriesData } from "@/shared/hooks";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
+import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import {
   cn,
   formatNumberUserReadable,
   timestampToReadableDate,
 } from "@/shared/utils";
-import { normalizeDataset } from "@/features/attack-profitability/utils";
-import daoConfigByDaoId from "@/shared/dao-config";
-import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
-import { Data } from "react-csv/lib/core";
-import { formatUnits } from "viem";
-import Lottie from "lottie-react";
-import loadingAnimation from "@/public/loading-animation.json";
 
 interface MultilineChartAttackProfitabilityProps {
   days: string;

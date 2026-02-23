@@ -1,17 +1,18 @@
 "use client";
 
-import { ReactNode, useState } from "react";
-import { AlertCircle, AlertTriangle, CheckCircle2 } from "lucide-react";
-import { RiskLevel } from "@/shared/types/enums/RiskLevel";
 import { CounterClockwiseClockIcon } from "@radix-ui/react-icons";
-import { cn } from "@/shared/utils/";
+import { AlertCircle, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { ReactNode, useState } from "react";
+
 import { RiskTooltipCard, TooltipInfo } from "@/shared/components";
-import { RISK_AREAS } from "@/shared/constants/risk-areas";
-import { RiskAreaEnum } from "@/shared/types/enums";
-import { useScreenSize } from "@/shared/hooks";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import { RISK_AREAS } from "@/shared/constants/risk-areas";
 import daoConfig from "@/shared/dao-config";
+import { useScreenSize } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
+import { RiskAreaEnum } from "@/shared/types/enums";
+import { RiskLevel } from "@/shared/types/enums/RiskLevel";
+import { cn } from "@/shared/utils/";
 
 export type RiskArea = {
   name: string;

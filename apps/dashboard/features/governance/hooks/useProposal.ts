@@ -1,11 +1,12 @@
-import { useMemo } from "react";
-import { ApolloError } from "@apollo/client";
-import { DaoIdEnum } from "@/shared/types/daos";
 import {
   GetProposalQuery,
   useGetProposalQuery,
 } from "@anticapture/graphql-client/hooks";
+import { ApolloError } from "@apollo/client";
+import { useMemo } from "react";
+
 import { getProposalStatus } from "@/features/governance/utils";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 export interface UseProposalResult {
   proposal: GetProposalQuery["proposal"] | null;

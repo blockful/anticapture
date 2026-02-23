@@ -1,3 +1,4 @@
+import { QueryInput_AccountBalances_OrderDirection } from "@anticapture/graphql-client";
 import {
   GetDelegatorVotingPowerDetailsQuery,
   GetDelegationsTimestampQuery,
@@ -6,11 +7,11 @@ import {
   useGetTopFiveDelegatorsQuery,
   GetTopFiveDelegatorsQuery,
 } from "@anticapture/graphql-client/hooks";
-import { QueryInput_AccountBalances_OrderDirection } from "@anticapture/graphql-client";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { useState, useCallback, useMemo, useEffect } from "react";
 import { NetworkStatus } from "@apollo/client";
+import { useState, useCallback, useMemo, useEffect } from "react";
+
 import daoConfig from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 interface PaginationInfo {
   hasNextPage: boolean;

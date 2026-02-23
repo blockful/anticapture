@@ -1,15 +1,5 @@
-import { DaoIdEnum } from "@/shared/types/daos";
 import { GetProposalQuery } from "@anticapture/graphql-client";
-import { useParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  useVotes,
-  VoteWithHistoricalPower,
-} from "@/features/governance/hooks/useVotes";
-import { SkeletonRow, Button, BlankSlate } from "@/shared/components";
 import { ColumnDef } from "@tanstack/react-table";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { cn, formatNumberUserReadable } from "@/shared/utils";
 import {
   CheckCircle2,
   CircleMinus,
@@ -20,14 +10,25 @@ import {
   Inbox,
   ExternalLink,
 } from "lucide-react";
-import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
-import { VotesTable } from "@/features/governance/components/proposal-overview/VotesTable";
-import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import daoConfigByDaoId from "@/shared/dao-config";
 import Link from "next/link";
-import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
+import { useParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { formatUnits } from "viem";
+
+import { VotesTable } from "@/features/governance/components/proposal-overview/VotesTable";
+import {
+  useVotes,
+  VoteWithHistoricalPower,
+} from "@/features/governance/hooks/useVotes";
+import { SkeletonRow, Button, BlankSlate } from "@/shared/components";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
+import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { cn, formatNumberUserReadable } from "@/shared/utils";
 
 interface TabsVotedContentProps {
   proposal: NonNullable<GetProposalQuery["proposal"]>;

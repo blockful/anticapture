@@ -1,10 +1,11 @@
-import { DaoConfiguration } from "@/shared/dao-config/types";
-import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
-import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
-import { NounsIcon } from "@/shared/components/icons";
-import { NounsOgIcon } from "@/shared/og/dao-og-icons";
 import { mainnet } from "viem/chains";
+
+import { NounsIcon } from "@/shared/components/icons";
 import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
+import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
+import { DaoConfiguration } from "@/shared/dao-config/types";
+import { NounsOgIcon } from "@/shared/og/dao-og-icons";
+import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 
 export const NOUNS: DaoConfiguration = {

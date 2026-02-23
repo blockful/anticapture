@@ -1,15 +1,16 @@
 "use client";
 
-import { useMemo } from "react";
-import { SupplyType } from "@/shared/components/badges/SupplyLabel";
-import { useTransactionsTableData } from "@/features/transactions";
-import { DaoIdEnum } from "@/shared/types/daos";
 import { useParams } from "next/navigation";
-import { AffectedSupplyType } from "@/features/transactions/hooks/useTransactionsTableData";
-import { Table } from "@/shared/components/design-system/table/Table";
-import { getTransactionsColumns } from "@/features/transactions/utils/getTransactionsColumns";
-import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
+import { useMemo } from "react";
+
+import { useTransactionsTableData } from "@/features/transactions";
 import { useTransactionsTableParams } from "@/features/transactions/hooks/useTransactionParams";
+import { AffectedSupplyType } from "@/features/transactions/hooks/useTransactionsTableData";
+import { getTransactionsColumns } from "@/features/transactions/utils/getTransactionsColumns";
+import { SupplyType } from "@/shared/components/badges/SupplyLabel";
+import { Table } from "@/shared/components/design-system/table/Table";
+import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 type Supply = "CEX" | "DEX" | "LENDING" | "TOTAL" | "UNASSIGNED";
 

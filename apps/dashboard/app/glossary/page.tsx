@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+
 import GlossaryPageClient from "@/app/glossary/GlossaryPageClient";
 
 export const metadata: Metadata = {

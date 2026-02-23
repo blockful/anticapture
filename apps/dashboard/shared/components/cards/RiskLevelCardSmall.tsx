@@ -1,10 +1,11 @@
 "use client";
 
-import { ReactNode } from "react";
-import { AlertTriangle, AlertCircle, CheckCircle2 } from "lucide-react";
-import { cn } from "@/shared/utils/";
-import { RiskLevel } from "@/shared/types/enums/RiskLevel";
 import { CounterClockwiseClockIcon } from "@radix-ui/react-icons";
+import { AlertTriangle, AlertCircle, CheckCircle2 } from "lucide-react";
+import { ReactNode } from "react";
+
+import { RiskLevel } from "@/shared/types/enums/RiskLevel";
+import { cn } from "@/shared/utils/";
 
 type RiskConfig = {
   color: string;

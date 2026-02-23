@@ -1,19 +1,19 @@
 "use client";
 
-import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { GetProposalQuery } from "@anticapture/graphql-client";
-
-import { TabsVotedContent } from "@/features/governance/components/proposal-overview/TabsVotedContent";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { useParams } from "next/navigation";
 import {
   useGetProposalNonVotersQuery,
   useGetVotesQuery,
 } from "@anticapture/graphql-client/hooks";
-import { formatUnits } from "viem";
-import { TabsDidntVoteContent } from "@/features/governance/components/proposal-overview/TabsDidntVoteContent";
-import daoConfig from "@/shared/dao-config";
+import { useParams } from "next/navigation";
 import { parseAsStringEnum, useQueryState } from "nuqs";
+import { formatUnits } from "viem";
+
+import { TabsDidntVoteContent } from "@/features/governance/components/proposal-overview/TabsDidntVoteContent";
+import { TabsVotedContent } from "@/features/governance/components/proposal-overview/TabsVotedContent";
+import daoConfig from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { cn, formatNumberUserReadable } from "@/shared/utils";
 
 type VoteTabId = "voted" | "didntVote";
 

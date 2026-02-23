@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { TooltipInfo } from "@/shared/components";
+
 import { useLastProposals } from "@/features/dao-overview/hooks/useLastProposals";
 import { ProposalItem } from "@/features/governance/components/proposal-overview/ProposalItem";
+import { TooltipInfo } from "@/shared/components";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 const LastProposalsCardSkeleton = () => {
   return (

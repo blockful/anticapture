@@ -1,16 +1,17 @@
 "use client";
 
+import {
+  QueryInput_FeedEvents_Relevance,
+  QueryInput_FeedEvents_Type,
+} from "@anticapture/graphql-client";
 import { useQueryState, parseAsStringEnum, parseAsString } from "nuqs";
 import { useCallback, useMemo } from "react";
+
 import {
   ActivityFeedFilterState,
   FeedEventRelevance,
   FeedEventType,
 } from "@/features/feed/types";
-import {
-  QueryInput_FeedEvents_Relevance,
-  QueryInput_FeedEvents_Type,
-} from "@anticapture/graphql-client";
 
 export interface UseActivityFeedParamsReturn {
   filters: ActivityFeedFilterState;

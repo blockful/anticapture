@@ -1,11 +1,12 @@
 "use client";
 
-import { cn } from "@/shared/utils";
-import { DescriptionTabContent } from "@/features/governance/components/proposal-overview/DescriptionTabContent";
 import { GetProposalQuery } from "@anticapture/graphql-client";
-import { ActionsTabContent } from "@/features/governance/components/proposal-overview/ActionTabContent";
-import { VotesTabContent } from "@/features/governance/components/proposal-overview/VotesTabContent";
 import { parseAsStringEnum, useQueryState } from "nuqs";
+
+import { ActionsTabContent } from "@/features/governance/components/proposal-overview/ActionTabContent";
+import { DescriptionTabContent } from "@/features/governance/components/proposal-overview/DescriptionTabContent";
+import { VotesTabContent } from "@/features/governance/components/proposal-overview/VotesTabContent";
+import { cn } from "@/shared/utils";
 
 type TabId = "description" | "votes" | "actions";
 

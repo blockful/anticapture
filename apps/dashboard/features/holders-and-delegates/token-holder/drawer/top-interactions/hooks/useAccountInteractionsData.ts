@@ -1,15 +1,16 @@
-import { DaoIdEnum } from "@/shared/types/daos";
-import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
-import { useMultipleEnsData } from "@/shared/hooks/useEnsData";
-import { Address, formatUnits } from "viem";
-import { formatAddress } from "@/shared/utils/formatAddress";
-import { useGetAccountInteractionsQuery } from "@anticapture/graphql-client/hooks";
-import daoConfig from "@/shared/dao-config";
 import {
   Query_AccountInteractions_Items_Items,
   QueryInput_AccountInteractions_OrderBy,
   QueryInput_AccountInteractions_OrderDirection,
 } from "@anticapture/graphql-client";
+import { useGetAccountInteractionsQuery } from "@anticapture/graphql-client/hooks";
+import { Address, formatUnits } from "viem";
+
+import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
+import daoConfig from "@/shared/dao-config";
+import { useMultipleEnsData } from "@/shared/hooks/useEnsData";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { formatAddress } from "@/shared/utils/formatAddress";
 
 interface Interaction {
   accountId: string;

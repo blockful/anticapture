@@ -1,11 +1,12 @@
-import { Card, CardContent } from "@/shared/components/ui/card";
-import { cn } from "@/shared/utils";
+import Link from "next/link";
+
 import {
   AlertItem,
   AlertAvailability,
 } from "@/features/alerts/utils/alerts-constants";
-import Link from "next/link";
 import { Badge } from "@/shared/components";
+import { Card, CardContent } from "@/shared/components/ui/card";
+import { cn } from "@/shared/utils";
 
 export const AlertCard = ({
   title,

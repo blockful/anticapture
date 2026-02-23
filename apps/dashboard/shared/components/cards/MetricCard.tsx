@@ -1,8 +1,9 @@
 "use client";
 
 import { ReactNode } from "react";
-import { cn } from "@/shared/utils";
+
 import { SkeletonRow } from "@/shared/components";
+import { cn } from "@/shared/utils";
 
 interface MetricCardProps {
   icon: ReactNode;

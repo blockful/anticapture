@@ -1,11 +1,12 @@
-import { ApolloError } from "@apollo/client";
-import { DaoIdEnum } from "@/shared/types/daos";
 import {
   GetAccountPowerQuery,
   useGetAccountPowerQuery,
 } from "@anticapture/graphql-client/hooks";
-import { formatNumberUserReadable } from "@/shared/utils";
+import { ApolloError } from "@apollo/client";
 import { formatUnits } from "viem";
+
+import { DaoIdEnum } from "@/shared/types/daos";
+import { formatNumberUserReadable } from "@/shared/utils";
 
 export interface UseAccountPowerResult {
   accountPower: GetAccountPowerQuery["votingPowerByAccountId"] | null;
