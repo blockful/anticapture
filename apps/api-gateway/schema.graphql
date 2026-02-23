@@ -186,6 +186,9 @@ type Query {
   """Returns token related metrics for a single metric type."""
   tokenMetrics(metricType: queryInput_tokenMetrics_metricType!, startDate: Float, endDate: Float, orderDirection: queryInput_tokenMetrics_orderDirection = asc, limit: NonNegativeInt = 365, skip: NonNegativeInt): tokenMetrics_200_response
 
+  """Get current delegators of an account with voting power"""
+  delegators(address: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_delegators_orderBy = amount, orderDirection: queryInput_delegators_orderDirection = desc): delegators_200_response
+
   """
   Average delegation percentage across all supported DAOs by day.
   Returns the mean delegation percentage for each day in the specified range.
@@ -452,7 +455,6 @@ enum query_feedEvents_items_items_type {
   PROPOSAL
   DELEGATION
   TRANSFER
-  DELEGATION_VOTES_CHANGED
   PROPOSAL_EXTENDED
 }
 
@@ -483,7 +485,6 @@ enum queryInput_feedEvents_type {
   PROPOSAL
   DELEGATION
   TRANSFER
-  DELEGATION_VOTES_CHANGED
   PROPOSAL_EXTENDED
 }
 
@@ -1264,6 +1265,37 @@ enum queryInput_tokenMetrics_metricType {
 }
 
 enum queryInput_tokenMetrics_orderDirection {
+  asc
+  desc
+}
+
+enum queryInput_delegations_orderBy {
+  amount
+  timestamp
+}
+
+enum queryInput_delegations_orderDirection {
+  asc
+  desc
+}
+
+type delegators_200_response {
+  items: [query_delegators_items_items]!
+  totalCount: Float!
+}
+
+type query_delegators_items_items {
+  delegatorAddress: String!
+  amount: String!
+  timestamp: String!
+}
+
+enum queryInput_delegators_orderBy {
+  amount
+  timestamp
+}
+
+enum queryInput_delegators_orderDirection {
   asc
   desc
 }
