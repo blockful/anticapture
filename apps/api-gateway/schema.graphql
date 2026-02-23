@@ -136,7 +136,7 @@ type Query {
   accountBalances(fromDate: String, toDate: String, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalances_orderDirection = desc, orderBy: queryInput_accountBalances_orderBy = balance, addresses: JSON, delegates: JSON, fromValue: String, toValue: String): accountBalances_200_response
 
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/accounts/{args.address}/balances`\nReturns account balance information for a specific address\n"
-  accountBalanceByAccountId(address: String!): accountBalanceByAccountId_200_response
+  accountBalanceByAccountId(address: String!, fromDate: String, toDate: String): accountBalanceByAccountId_200_response
 
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/balances/{args.address}/interactions`\nReturns a mapping of the largest interactions between accounts. \nPositive amounts signify net token transfers FROM <address>, whilst negative amounts refer to net transfers TO <address>\n"
   accountInteractions(address: String!, fromDate: String, toDate: String, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountInteractions_orderDirection = desc, minAmount: String, maxAmount: String, orderBy: queryInput_accountInteractions_orderBy = count, filterAddress: String): accountInteractions_200_response
@@ -992,17 +992,27 @@ type query_accountBalanceVariationsByAccountId_data {
 
 type accountBalances_200_response {
   items: [query_accountBalances_items_items]!
+  period: query_accountBalances_period!
   totalCount: Float!
 }
 
 type query_accountBalances_items_items {
   address: String!
   balance: String!
-  previousBalance: String!
   tokenId: String!
   delegate: String!
+  variation: query_accountBalances_items_items_variation!
+}
+
+type query_accountBalances_items_items_variation {
+  previousBalance: String!
   absoluteChange: String!
   percentageChange: String!
+}
+
+type query_accountBalances_period {
+  startTimestamp: String!
+  endTimestamp: String!
 }
 
 enum queryInput_accountBalances_orderDirection {
@@ -1016,10 +1026,27 @@ enum queryInput_accountBalances_orderBy {
 }
 
 type accountBalanceByAccountId_200_response {
+  data: query_accountBalanceByAccountId_data!
+  period: query_accountBalanceByAccountId_period!
+}
+
+type query_accountBalanceByAccountId_data {
   address: String!
   balance: String!
   tokenId: String!
   delegate: String!
+  variation: query_accountBalanceByAccountId_data_variation!
+}
+
+type query_accountBalanceByAccountId_data_variation {
+  previousBalance: String!
+  absoluteChange: String!
+  percentageChange: String!
+}
+
+type query_accountBalanceByAccountId_period {
+  startTimestamp: String!
+  endTimestamp: String!
 }
 
 type accountInteractions_200_response {

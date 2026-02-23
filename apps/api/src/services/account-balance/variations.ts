@@ -23,22 +23,6 @@ interface AccountBalanceRepository {
     items: DBAccountBalance[];
     totalCount: bigint;
   }>;
-
-  getAccountBalancesWithVariation(
-    variationFromTimestamp: number,
-    variationToTimestamp: number,
-    skip: number,
-    limit: number,
-    orderDirection: "asc" | "desc",
-    orderBy: "balance" | "variation",
-    addresses: Address[],
-    delegates: Address[],
-    excludeAddresses: Address[],
-    amountfilter: AmountFilter,
-  ): Promise<{
-    items: DBAccountBalanceWithVariation[];
-    totalCount: bigint;
-  }>;
 }
 
 interface BalanceVariationsRepository {

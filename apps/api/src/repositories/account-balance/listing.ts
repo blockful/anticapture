@@ -5,21 +5,23 @@ import {
   desc,
   eq,
   gt,
-  gte,
   inArray,
   lt,
-  lte,
   not,
   SQL,
   sql,
 } from "drizzle-orm";
-import { Drizzle, transfer } from "@/database";
+import { Drizzle } from "@/database";
 import { accountBalance } from "@/database";
 import { Address, getAddress } from "viem";
 import { calculatePercentage } from "@/lib/utils";
+import { AccountBalanceQueryFragments } from "./common";
 
 export class AccountBalanceRepository {
-  constructor(private readonly db: Drizzle) { }
+  constructor(
+    private readonly db: Drizzle,
+    private queryFragments: AccountBalanceQueryFragments,
+  ) { }
 
   async getAccountBalances(
     skip: number,
@@ -101,90 +103,38 @@ export class AccountBalanceRepository {
       amountfilter,
     );
 
-    const scopedTransfers = this.db
-      .select()
-      .from(transfer)
-      .where(
-        and(
-          variationFromTimestamp
-            ? gte(transfer.timestamp, BigInt(variationFromTimestamp))
-            : undefined,
-          variationToTimestamp
-            ? lte(transfer.timestamp, BigInt(variationToTimestamp))
-            : undefined,
-        ),
-      )
-      .as("scoped_transfers");
-
-    const transfersFrom = this.db
-      .select({
-        accountId: scopedTransfers.fromAccountId,
-        fromAmount: sql<string>`-SUM(${scopedTransfers.amount})`.as("from_amount"),
-      })
-      .from(scopedTransfers)
-      .groupBy(scopedTransfers.fromAccountId)
-      .as("transfers_from");
-
-    const transfersTo = this.db
-      .select({
-        accountId: scopedTransfers.toAccountId,
-        toAmount: sql<string>`SUM(${scopedTransfers.amount})`.as("to_amount"),
-      })
-      .from(scopedTransfers)
-      .groupBy(scopedTransfers.toAccountId)
-      .as("transfers_to");
-
-    const combined = this.db
-      .select({
-        accountId: accountBalance.accountId,
-        tokenId: accountBalance.tokenId,
-        delegate: accountBalance.delegate,
-        currentBalance: accountBalance.balance,
-        fromChange: sql<string>`COALESCE(${transfersFrom.fromAmount}, 0)`.as(
-          "from_change",
-        ),
-        toChange: sql<string>`COALESCE(${transfersTo.toAmount}, 0)`.as(
-          "to_change",
-        ),
-      })
-      .from(accountBalance)
-      .leftJoin(
-        transfersFrom,
-        sql`${accountBalance.accountId} = ${transfersFrom.accountId}`,
-      )
-      .leftJoin(
-        transfersTo,
-        sql`${accountBalance.accountId} = ${transfersTo.accountId}`,
-      )
-      .where(filter)
-      .as("combined");
+    const variations = this.queryFragments.variationCTE(
+      variationFromTimestamp,
+      variationToTimestamp,
+      filter
+    )
 
     const [totalCount] = await this.db
       .select({
         count: sql<number>`COUNT(*)`.as("count"),
       })
-      .from(combined)
+      .from(variations)
 
     const orderDirectionFn = orderDirection === "desc"
       ? desc
       : asc;
 
     const orderByCriteria = orderBy === "balance"
-      ? combined.currentBalance
-      : sql`ABS(${combined.fromChange} + ${combined.toChange})`;
+      ? variations.currentBalance
+      : sql`ABS(${variations.fromChange} + ${variations.toChange})`;
 
     const result = await this.db
       .select({
-        accountId: combined.accountId,
-        tokenId: combined.tokenId,
-        delegate: combined.delegate,
-        currentBalance: combined.currentBalance,
+        accountId: variations.accountId,
+        tokenId: variations.tokenId,
+        delegate: variations.delegate,
+        currentBalance: variations.currentBalance,
         absoluteChange:
-          sql<string>`${combined.fromChange} + ${combined.toChange}`.as(
+          sql<string>`${variations.fromChange} + ${variations.toChange}`.as(
             "absolute_change",
           ),
       })
-      .from(combined)
+      .from(variations)
       .orderBy(orderDirectionFn(orderByCriteria))
       .offset(skip)
       .limit(limit);
@@ -208,76 +158,26 @@ export class AccountBalanceRepository {
     variationFromTimestamp: number,
     variationToTimestamp: number,
   ): Promise<DBAccountBalanceWithVariation | undefined> {
-    const scopedTransfers = this.db
-      .select()
-      .from(transfer)
-      .where(
-        and(
-          variationFromTimestamp
-            ? gte(transfer.timestamp, BigInt(variationFromTimestamp))
-            : undefined,
-          variationToTimestamp
-            ? lte(transfer.timestamp, BigInt(variationToTimestamp))
-            : undefined,
-        ),
-      )
-      .as("scoped_transfers");
+    const filter = eq(accountBalance.accountId, accountId);
 
-    const transfersFrom = this.db
-      .select({
-        accountId: scopedTransfers.fromAccountId,
-        fromAmount: sql<string>`-SUM(${scopedTransfers.amount})`.as("from_amount"),
-      })
-      .from(scopedTransfers)
-      .groupBy(scopedTransfers.fromAccountId)
-      .as("transfers_from");
-
-    const transfersTo = this.db
-      .select({
-        accountId: scopedTransfers.toAccountId,
-        toAmount: sql<string>`SUM(${scopedTransfers.amount})`.as("to_amount"),
-      })
-      .from(scopedTransfers)
-      .groupBy(scopedTransfers.toAccountId)
-      .as("transfers_to");
-
-    const combined = this.db
-      .select({
-        accountId: accountBalance.accountId,
-        tokenId: accountBalance.tokenId,
-        delegate: accountBalance.delegate,
-        currentBalance: accountBalance.balance,
-        fromChange: sql<string>`COALESCE(${transfersFrom.fromAmount}, 0)`.as(
-          "from_change",
-        ),
-        toChange: sql<string>`COALESCE(${transfersTo.toAmount}, 0)`.as(
-          "to_change",
-        ),
-      })
-      .from(accountBalance)
-      .leftJoin(
-        transfersFrom,
-        sql`${accountBalance.accountId} = ${transfersFrom.accountId}`,
-      )
-      .leftJoin(
-        transfersTo,
-        sql`${accountBalance.accountId} = ${transfersTo.accountId}`,
-      )
-      .where(eq(accountBalance.accountId, accountId))
-      .as("combined");
+    const variations = this.queryFragments.variationCTE(
+      variationFromTimestamp,
+      variationToTimestamp,
+      filter,
+    )
 
     const [result] = await this.db
       .select({
-        accountId: combined.accountId,
-        tokenId: combined.tokenId,
-        delegate: combined.delegate,
-        currentBalance: combined.currentBalance,
+        accountId: variations.accountId,
+        tokenId: variations.tokenId,
+        delegate: variations.delegate,
+        currentBalance: variations.currentBalance,
         absoluteChange:
-          sql<string>`${combined.fromChange} + ${combined.toChange}`.as(
+          sql<string>`${variations.fromChange} + ${variations.toChange}`.as(
             "absolute_change",
           ),
       })
-      .from(combined)
+      .from(variations)
 
     if (!result) return undefined
 
@@ -288,13 +188,10 @@ export class AccountBalanceRepository {
       previousBalance: result.currentBalance - BigInt(result.absoluteChange),
       currentBalance: result.currentBalance,
       absoluteChange: BigInt(result.absoluteChange),
-      percentageChange: (result.currentBalance - BigInt(result.absoluteChange)
-        ? Number(
-          (BigInt(result.absoluteChange) * 10000n) /
-          (result.currentBalance - BigInt(result.absoluteChange)),
-        ) / 100
-        : 0
-      ).toString(),
+      percentageChange: calculatePercentage(
+        result.currentBalance,
+        result.absoluteChange
+      ),
     };
   }
 

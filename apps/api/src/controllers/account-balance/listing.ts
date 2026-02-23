@@ -9,9 +9,6 @@ import {
   AccountBalanceWithVariationResponseMapper,
   AccountBalanceWithVariationResponseSchema,
 } from "@/mappers";
-import {
-  AccountBalanceResponseSchema,
-} from "@/mappers";
 import { DaoIdEnum, DaysEnum } from "@/lib/enums";
 
 export function accountBalances(
@@ -54,7 +51,7 @@ export function accountBalances(
         fromDate,
         toDate,
       } = context.req.valid("query");
-      const now = Math.floor(Date.now() / 1000)
+      const now = Math.floor(Date.now() / 1000);
       const fromTimestamp = fromDate ?? now - DaysEnum["90d"];
       const toTimestamp = toDate ?? now;
 
@@ -111,7 +108,7 @@ export function accountBalances(
     async (context) => {
       const { address } = context.req.valid("param");
       const { fromDate, toDate } = context.req.valid("query");
-      const now = Math.floor(Date.now() / 1000)
+      const now = Math.floor(Date.now() / 1000);
       const fromTimestamp = fromDate ?? now - DaysEnum["90d"];
       const toTimestamp = toDate ?? now;
 

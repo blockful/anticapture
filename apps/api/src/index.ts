@@ -54,6 +54,7 @@ import {
   HistoricalDelegationsRepository,
   VotesRepository,
   FeedRepository,
+  AccountBalanceQueryFragments,
 } from "@/repositories";
 import { errorHandler } from "@/middlewares";
 import { getClient } from "@/lib/client";
@@ -129,6 +130,7 @@ const optimisticProposalType =
     : undefined;
 
 const repo = new DrizzleRepository(pgClient);
+const balanceQueryFragments = new AccountBalanceQueryFragments(pgClient);
 const votingPowerRepo = new VotingPowerRepository(pgClient);
 const proposalsRepo = new DrizzleProposalsActivityRepository(pgClient);
 const transactionsRepo = new TransactionsRepository(pgClient);
@@ -137,9 +139,9 @@ const delegationPercentageService = new DelegationPercentageService(
   daoMetricsDayBucketRepo,
 );
 const tokenMetricsService = new TokenMetricsService(daoMetricsDayBucketRepo);
-const balanceVariationsRepo = new BalanceVariationsRepository(pgClient);
+const balanceVariationsRepo = new BalanceVariationsRepository(pgClient, balanceQueryFragments);
 const historicalBalancesRepo = new HistoricalBalanceRepository(pgClient);
-const accountBalanceRepo = new AccountBalanceRepository(pgClient);
+const accountBalanceRepo = new AccountBalanceRepository(pgClient, balanceQueryFragments);
 const accountInteractionRepo = new AccountInteractionsRepository(pgClient);
 const transactionsService = new TransactionsService(transactionsRepo);
 const votingPowerService = new VotingPowerService(
@@ -160,15 +162,15 @@ const accountBalanceService = new AccountBalanceService(accountBalanceRepo);
 const tokenPriceClient =
   env.DAO_ID === DaoIdEnum.NOUNS
     ? new NFTPriceService(
-        new NFTPriceRepository(pgClient),
-        env.COINGECKO_API_URL,
-        env.COINGECKO_API_KEY,
-      )
+      new NFTPriceRepository(pgClient),
+      env.COINGECKO_API_URL,
+      env.COINGECKO_API_KEY,
+    )
     : new CoingeckoService(
-        env.COINGECKO_API_URL,
-        env.COINGECKO_API_KEY,
-        env.DAO_ID,
-      );
+      env.COINGECKO_API_URL,
+      env.COINGECKO_API_KEY,
+      env.DAO_ID,
+    );
 
 historicalDelegations(
   app,
