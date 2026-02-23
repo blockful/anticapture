@@ -7,7 +7,7 @@ export interface DrawerRootProps {
 }
 
 export interface DrawerHeaderProps {
-  subtitle: string;
+  subtitle?: string;
   title: string | ReactNode;
   onClose: () => void;
   tabs?: DrawerTabConfig[];

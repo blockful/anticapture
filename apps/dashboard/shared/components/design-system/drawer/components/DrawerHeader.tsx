@@ -18,7 +18,7 @@ export const DrawerHeader = ({
     <div className="bg-surface-contrast w-full shrink-0">
       <div className="bg-surface-contrast flex justify-between p-4">
         <div className="flex flex-col gap-1">
-          <DrawerSubtitle>{subtitle}</DrawerSubtitle>
+          {subtitle && <DrawerSubtitle>{subtitle}</DrawerSubtitle>}
           <DrawerTitle>{title}</DrawerTitle>
         </div>
         <DrawerCloseButton onClick={onClose} />

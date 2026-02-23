@@ -108,21 +108,8 @@ export const ActivityFeedFiltersDrawer = ({
   return (
     <DrawerRoot open={isOpen} onOpenChange={handleOpenChange}>
       <DrawerContent>
-        <DrawerHeader
-          subtitle="Filter Activity"
-          title="Filter Activity"
-          onClose={onClose}
-        />
+        <DrawerHeader title="Filter Activity" onClose={onClose} />
         <div className="bg-surface-default flex h-full flex-col overflow-y-auto">
-          {/* Header */}
-          <div className="bg-surface-contrast px-4 pb-4 pt-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-primary text-lg font-semibold">
-                Filter Activity
-              </h2>
-            </div>
-          </div>
-
           {/* Content */}
           <div className="flex flex-1 flex-col gap-6 px-4 py-6">
             {/* Sort by Date */}
