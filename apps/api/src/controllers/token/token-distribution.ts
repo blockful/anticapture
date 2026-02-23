@@ -1,8 +1,8 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 import { formatUnits, parseEther } from "viem";
 
-import { DaysEnum, DaysOpts } from "@/lib/enums";
 import { MetricTypesEnum } from "@/lib/constants";
+import { DaysEnum, DaysOpts } from "@/lib/enums";
 
 interface TokenDistributionRepository {
   getSupplyComparison(

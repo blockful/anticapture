@@ -1,7 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { DelegationPercentageService } from "./delegation-percentage";
+
 import { MetricTypesEnum } from "@/lib/constants";
 import { DBTokenMetric } from "@/mappers/delegation-percentage";
+
+import { DelegationPercentageService } from "./delegation-percentage";
 
 /**
  * Mock Factory Pattern for type-safe test data

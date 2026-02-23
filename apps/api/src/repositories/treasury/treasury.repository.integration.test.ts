@@ -1,9 +1,11 @@
 import { PGlite } from "@electric-sql/pglite";
-import { drizzle } from "drizzle-orm/pglite";
 import { pushSchema } from "drizzle-kit/api";
+import { drizzle } from "drizzle-orm/pglite";
+
 import * as schema from "@/database/schema";
 import { daoMetricsDayBucket } from "@/database/schema";
 import { MetricTypesEnum } from "@/lib/constants";
+
 import { TreasuryRepository } from ".";
 
 type DaoMetricInsert = typeof daoMetricsDayBucket.$inferInsert;

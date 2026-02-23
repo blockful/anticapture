@@ -1,8 +1,8 @@
 import { and, asc, desc, eq, gte, lte, or, SQL } from "drizzle-orm";
 
-import { DBFeedEvent, FeedRequest } from "@/mappers";
 import { feedEvent, ReadonlyDrizzle } from "@/database";
 import { FeedEventType } from "@/lib/constants";
+import { DBFeedEvent, FeedRequest } from "@/mappers";
 
 export class FeedRepository {
   constructor(private readonly db: ReadonlyDrizzle) {}

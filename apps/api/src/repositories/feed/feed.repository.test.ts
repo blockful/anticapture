@@ -1,10 +1,12 @@
 import { PGlite } from "@electric-sql/pglite";
-import { drizzle } from "drizzle-orm/pglite";
 import { pushSchema } from "drizzle-kit/api";
+import { drizzle } from "drizzle-orm/pglite";
+
 import * as schema from "@/database/schema";
 import { feedEvent } from "@/database/schema";
 import { FeedEventType, FeedRelevance } from "@/lib/constants";
 import { FeedRequest } from "@/mappers";
+
 import { FeedRepository } from ".";
 
 type FeedEventInsert = typeof feedEvent.$inferInsert;

@@ -1,8 +1,8 @@
-import { Drizzle, daoMetricsDayBucket } from "@/database";
 import { inArray } from "drizzle-orm";
 
-import { ChartType } from "@/mappers/";
+import { Drizzle, daoMetricsDayBucket } from "@/database";
 import { MetricTypesEnum } from "@/lib/constants";
+import { ChartType } from "@/mappers/";
 
 export interface LastUpdateRepository {
   getLastUpdate(chart: ChartType): Promise<bigint | undefined>;

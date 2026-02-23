@@ -1,15 +1,15 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 import { getAddress, isAddress } from "viem";
 
+import { DAOClient } from "@/clients";
+import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
-import { ProposalsActivityService } from "@/services";
+import { ProposalActivityResponseSchema } from "@/mappers";
 import {
   DrizzleProposalsActivityRepository,
   VoteFilter,
 } from "@/repositories/";
-import { CONTRACT_ADDRESSES } from "@/lib/constants";
-import { DAOClient } from "@/clients";
-import { ProposalActivityResponseSchema } from "@/mappers";
+import { ProposalsActivityService } from "@/services";
 
 export function proposalsActivity(
   app: Hono,
