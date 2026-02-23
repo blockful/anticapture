@@ -43,8 +43,6 @@ const getBadgeIcon = (type: FeedEventType) => {
       return ArrowLeftRight;
     case FeedEventType.Delegation:
       return HeartHandshake;
-    // case FeedEventType.DelegationVotesChanged:
-    //   return ArrowUpDown;
     case FeedEventType.ProposalExtended:
       return Clock;
   }
@@ -99,8 +97,6 @@ const getEventTypeLabel = (type: FeedEventType) => {
       return "Transfer";
     case FeedEventType.Delegation:
       return "Delegation";
-    // case FeedEventType.DelegationVotesChanged:
-    //   return "Delegation Votes Changed";
     case FeedEventType.ProposalExtended:
       return "Proposal Extended";
   }
@@ -393,53 +389,17 @@ export const FeedEventItem = ({
               rel="noopener noreferrer"
               className="text-secondary hover:text-primary inline-flex align-middle transition-colors"
             >
-              <ExternalLink className="size-3.5" />
+              <Link
+                href={explorerUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <ExternalLink className="size-3.5" />
+              </Link>
             </a>
           </div>
         );
       }
-      // case FeedEventType.DelegationVotesChanged: {
-      //   if (!event.metadata) return null;
-      //   return (
-      //     <div className="leading-relaxed">
-      //       <span className="inline-flex items-center gap-1.5 align-middle">
-      //         <EnsAvatar
-      //           address={event.metadata.delegate}
-      //           showAvatar={true}
-      //           size="xs"
-      //           nameClassName="text-primary font-medium"
-      //         />
-      //       </span>{" "}
-      //       <CopyAndPasteButton
-      //         textToCopy={event.metadata.delegate}
-      //         className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
-      //         iconSize="md"
-      //       />{" "}
-      //       <span className="text-secondary">
-      //         {BigInt(event.metadata.delta) > 0n ? "increased" : "decreased"}{" "}
-      //         voting power
-      //       </span>{" "}
-      //       <span
-      //         className={cn(
-      //           "font-medium",
-      //           BigInt(event.metadata.delta) > 0n
-      //             ? "text-success"
-      //             : "text-error",
-      //         )}
-      //       >
-      //         {formatAmount(event.metadata.deltaMod)} {tokenSymbol}
-      //       </span>{" "}
-      //       <a
-      //         href={explorerUrl}
-      //         target="_blank"
-      //         rel="noopener noreferrer"
-      //         className="text-secondary hover:text-primary inline-flex align-middle transition-colors"
-      //       >
-      //         <ExternalLink className="size-3.5" />
-      //       </a>
-      //     </div>
-      //   );
-      // }
     }
   };
 
