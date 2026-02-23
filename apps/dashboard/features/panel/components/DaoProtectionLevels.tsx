@@ -1,19 +1,20 @@
 "use client";
 
 import { ChevronRight } from "lucide-react";
+import { useMemo } from "react";
 import { BarChart, Bar, XAxis, Cell, LabelList, Tooltip } from "recharts";
+
+import { DaoProtectionLevelsTooltip } from "@/features/panel/components/tooltips/DaoProtectionLevelsTooltip";
+import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
+import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { ChartConfig, ChartContainer } from "@/shared/components/ui/chart";
-import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { Stage } from "@/shared/types/enums/Stage";
 import {
   fieldsToArray,
   getDaoStageFromFields,
 } from "@/shared/dao-config/utils";
-import { useMemo } from "react";
-import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
-import { DaoProtectionLevelsTooltip } from "@/features/panel/components/tooltips/DaoProtectionLevelsTooltip";
-import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { Stage } from "@/shared/types/enums/Stage";
 
 const chartConfig: ChartConfig = {
   value: {
@@ -128,7 +129,7 @@ export const DaoProtectionLevels = () => {
 
       {/* Bar Chart */}
       <div className="flex flex-col gap-2">
-        <div className="relative flex h-40 w-full items-end lg:h-[75px]">
+        <div className="lg:h-18.75 relative flex h-40 w-full items-end">
           <ChartContainer className="h-full w-full" config={chartConfig}>
             <BarChart
               data={stageData}

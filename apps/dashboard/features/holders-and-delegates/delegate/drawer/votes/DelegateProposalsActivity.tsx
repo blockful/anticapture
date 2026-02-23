@@ -1,19 +1,20 @@
 "use client";
 
-import { useProposalsActivity } from "@/features/holders-and-delegates/hooks/useProposalsActivity";
 import {
   QueryInput_ProposalsActivity_OrderBy,
   QueryInput_ProposalsActivity_OrderDirection,
   QueryInput_ProposalsActivity_UserVoteFilter,
 } from "@anticapture/graphql-client";
-import { useState } from "react";
-import { MetricCard } from "@/shared/components";
-import { ProposalsTable } from "@/features/holders-and-delegates";
 import { Hand, Trophy, Check, Zap } from "lucide-react";
-import { DaoIdEnum } from "@/shared/types/daos";
+import { parseAsStringEnum, useQueryState } from "nuqs";
+import { useState } from "react";
+
+import { ProposalsTable } from "@/features/holders-and-delegates";
+import { useProposalsActivity } from "@/features/holders-and-delegates/hooks/useProposalsActivity";
+import { MetricCard } from "@/shared/components";
 import { FilterOption } from "@/shared/components/design-system/table/filters/CategoriesFilter";
 import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
-import { parseAsStringEnum, useQueryState } from "nuqs";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 interface DelegateProposalsActivityProps {
   address: string;

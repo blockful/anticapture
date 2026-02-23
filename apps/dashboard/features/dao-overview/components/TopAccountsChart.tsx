@@ -9,17 +9,18 @@ import {
   ReferenceLine,
   BarProps,
 } from "recharts";
-import { DaoIdEnum } from "@/shared/types/daos";
-import {
-  HoldersAndDelegatesDrawer,
-  EntityType,
-} from "@/features/holders-and-delegates";
+
 import {
   CustomBarShape,
   CustomBarShapeProps,
 } from "@/features/dao-overview/components/TopAccountsChartBarShape";
 import { CustomTooltip } from "@/features/dao-overview/components/TopAccountsChartTooltip";
 import { useTopAccountsChartData } from "@/features/dao-overview/hooks/useTopAccountsChartData";
+import {
+  HoldersAndDelegatesDrawer,
+  EntityType,
+} from "@/features/holders-and-delegates";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 export interface TopAccountChartData {
   address: string;

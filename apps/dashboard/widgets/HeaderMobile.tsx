@@ -1,9 +1,5 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import Link from "next/link";
-import { ButtonHeaderSidebar, ConnectWallet } from "@/shared/components";
-import { cn } from "@/shared/utils/";
 import {
   X,
   Menu,
@@ -14,8 +10,13 @@ import {
   Bell,
   Mail,
 } from "lucide-react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState, useEffect, useMemo } from "react";
+
+import { ButtonHeaderSidebar, ConnectWallet } from "@/shared/components";
 import { AnticaptureIcon } from "@/shared/components/icons";
+import { cn } from "@/shared/utils/";
 
 export const HeaderMobile = ({
   className,

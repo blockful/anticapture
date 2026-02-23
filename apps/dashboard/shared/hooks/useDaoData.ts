@@ -2,6 +2,7 @@ import {
   useGetDaoDataQuery,
   GetDaoDataQuery,
 } from "@anticapture/graphql-client/hooks";
+
 import { DaoIdEnum } from "@/shared/types/daos";
 
 interface UseDaoDataResult {

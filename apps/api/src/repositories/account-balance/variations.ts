@@ -1,11 +1,11 @@
-import { asc, desc, gte, sql, and, inArray, lte, eq } from "drizzle-orm";
-import { Drizzle } from "@/database";
-import { accountBalance, transfer } from "@/database";
-import { DBAccountBalanceVariation } from "@/mappers";
+import { asc, desc, gte, sql, and, inArray, lte, or, eq } from "drizzle-orm";
 import { Address } from "viem";
 
+import { Drizzle, accountBalance, transfer } from "@/database";
+import { DBAccountBalanceVariation } from "@/mappers";
+
 export class BalanceVariationsRepository {
-  constructor(private readonly db: Drizzle) { }
+  constructor(private readonly db: Drizzle) {}
 
   async getAccountBalanceVariations(
     fromTimestamp: number | undefined,
@@ -26,6 +26,12 @@ export class BalanceVariationsRepository {
           toTimestamp
             ? lte(transfer.timestamp, BigInt(toTimestamp))
             : undefined,
+          addresses
+            ? or(
+                inArray(transfer.fromAccountId, addresses),
+                inArray(transfer.toAccountId, addresses),
+              )
+            : undefined,
         ),
       )
       .as("scoped_transfers");
@@ -33,7 +39,9 @@ export class BalanceVariationsRepository {
     const transfersFrom = this.db
       .select({
         accountId: scopedTransfers.fromAccountId,
-        fromAmount: sql<string>`-SUM(${scopedTransfers.amount})`.as("from_amount"),
+        fromAmount: sql<string>`-SUM(${scopedTransfers.amount})`.as(
+          "from_amount",
+        ),
       })
       .from(scopedTransfers)
       .groupBy(scopedTransfers.fromAccountId)
@@ -70,11 +78,9 @@ export class BalanceVariationsRepository {
       )
       .where(
         and(
-          addresses
-            ? inArray(accountBalance.accountId, addresses)
-            : undefined,
+          addresses ? inArray(accountBalance.accountId, addresses) : undefined,
           sql`${transfersFrom.accountId} IS NOT NULL OR ${transfersTo.accountId} IS NOT NULL`,
-        )
+        ),
       )
       .as("combined");
 
@@ -104,9 +110,9 @@ export class BalanceVariationsRepository {
       absoluteChange: BigInt(absoluteChange),
       percentageChange: (currentBalance - BigInt(absoluteChange)
         ? Number(
-          (BigInt(absoluteChange) * 10000n) /
-          (currentBalance - BigInt(absoluteChange)),
-        ) / 100
+            (BigInt(absoluteChange) * 10000n) /
+              (currentBalance - BigInt(absoluteChange)),
+          ) / 100
         : 0
       ).toString(),
     }));
@@ -135,7 +141,9 @@ export class BalanceVariationsRepository {
     const transfersFrom = this.db
       .select({
         accountId: scopedTransfers.fromAccountId,
-        fromAmount: sql<string>`-SUM(${scopedTransfers.amount})`.as("from_amount"),
+        fromAmount: sql<string>`-SUM(${scopedTransfers.amount})`.as(
+          "from_amount",
+        ),
       })
       .from(scopedTransfers)
       .groupBy(scopedTransfers.fromAccountId)
@@ -185,7 +193,7 @@ export class BalanceVariationsRepository {
       .from(combined)
       .where(sql`(${combined.fromChange} + ${combined.toChange}) != 0`);
 
-    if (!result) return undefined
+    if (!result) return undefined;
 
     return {
       accountId: result.accountId,
@@ -194,9 +202,9 @@ export class BalanceVariationsRepository {
       absoluteChange: BigInt(result.absoluteChange),
       percentageChange: (result.currentBalance - BigInt(result.absoluteChange)
         ? Number(
-          (BigInt(result.absoluteChange) * 10000n) /
-          (result.currentBalance - BigInt(result.absoluteChange)),
-        ) / 100
+            (BigInt(result.absoluteChange) * 10000n) /
+              (result.currentBalance - BigInt(result.absoluteChange)),
+          ) / 100
         : 0
       ).toString(),
     };

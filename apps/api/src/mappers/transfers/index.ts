@@ -1,7 +1,7 @@
 import { z } from "@hono/zod-openapi";
+import { getAddress, isAddress } from "viem";
 
 import { transfer } from "@/database";
-import { getAddress, isAddress } from "viem";
 
 export type DBTransfer = typeof transfer.$inferSelect;
 

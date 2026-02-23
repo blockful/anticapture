@@ -1,4 +1,3 @@
-import { AmountFilter, DBAccountBalance } from "@/mappers";
 import {
   and,
   asc,
@@ -11,9 +10,10 @@ import {
   SQL,
   sql,
 } from "drizzle-orm";
-import { Drizzle } from "@/database";
-import { accountBalance } from "@/database";
 import { Address } from "viem";
+
+import { Drizzle, accountBalance } from "@/database";
+import { AmountFilter, DBAccountBalance } from "@/mappers";
 
 export class AccountBalanceRepository {
   constructor(private readonly db: Drizzle) {}

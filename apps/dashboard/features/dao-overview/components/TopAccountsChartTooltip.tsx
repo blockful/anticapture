@@ -1,10 +1,11 @@
 "use client";
 
 import React from "react";
+
+import { TopAccountChartData } from "@/features/dao-overview/components/TopAccountsChart";
+import { EntityType } from "@/features/holders-and-delegates";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils";
-import { EntityType } from "@/features/holders-and-delegates";
-import { TopAccountChartData } from "@/features/dao-overview/components/TopAccountsChart";
 import { formatAddress } from "@/shared/utils/formatAddress";
 
 interface CustomTooltipProps {

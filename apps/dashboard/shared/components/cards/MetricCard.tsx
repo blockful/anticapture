@@ -1,8 +1,9 @@
 "use client";
 
 import { ReactNode } from "react";
-import { cn } from "@/shared/utils";
+
 import { SkeletonRow } from "@/shared/components";
+import { cn } from "@/shared/utils";
 
 interface MetricCardProps {
   icon: ReactNode;
@@ -29,13 +30,13 @@ export const MetricCard = ({
         <div className="text-secondary flex items-center justify-center">
           {icon}
         </div>
-        <div className="text-secondary font-alternative text-alternative-xs font-medium tracking-widest uppercase">
+        <div className="text-secondary font-alternative text-alternative-xs font-medium uppercase tracking-widest">
           {title}
         </div>
       </div>
 
       {/* Value */}
-      <div className="text-primary text-sm font-regular">
+      <div className="text-primary font-regular text-sm">
         {value !== undefined ? value : <SkeletonRow className="h-5 w-16" />}
       </div>
     </div>

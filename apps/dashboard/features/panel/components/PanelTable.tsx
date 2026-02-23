@@ -1,14 +1,8 @@
 "use client";
 
-import { useRef } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { Table } from "@/shared/components/design-system/table/Table";
-import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
-import {
-  SortableColumnHeader,
-  TitleUnderlined,
-} from "@/features/panel/components/SortableColumnHeader";
+import { useRef } from "react";
+
 import {
   DaoCell,
   ChainCell,
@@ -18,6 +12,13 @@ import {
   AttackProfitabilityCell,
   ActiveTokensCell,
 } from "@/features/panel/components/cells";
+import {
+  SortableColumnHeader,
+  TitleUnderlined,
+} from "@/features/panel/components/SortableColumnHeader";
+import { Table } from "@/shared/components/design-system/table/Table";
+import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 type PanelDao = {
   dao: string;
@@ -95,14 +96,14 @@ export const PanelTable = () => {
               <div className="text-center">
                 <p>
                   Assess critical vulnerabilities in the DAO&apos;s governance
-                  setup. Each item highlights a specific risk area, showing
-                  which issues are resolved and which still expose the system to
-                  threats.
+                  setup. Each item highlights a specific attack exposure,
+                  showing which issues are resolved and which still expose the
+                  system to threats.
                 </p>
               </div>
             }
           >
-            <TitleUnderlined title="Risk Areas" className="text-left" />
+            <TitleUnderlined title="Attack Exposure" className="text-left" />
           </Tooltip>
         </div>
       ),

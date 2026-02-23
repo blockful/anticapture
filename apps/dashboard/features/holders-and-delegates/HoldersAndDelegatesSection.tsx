@@ -1,17 +1,18 @@
 "use client";
 
-import { ReactElement } from "react";
-import { TheSectionLayout } from "@/shared/components";
-import { TimeInterval } from "@/shared/types/enums";
-import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { UserCheck } from "lucide-react";
+import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
+import { ReactElement } from "react";
+
 import { Delegates } from "@/features/holders-and-delegates/components";
 import { TabButton } from "@/features/holders-and-delegates/components/TabButton";
-import { DaoIdEnum } from "@/shared/types/daos";
 import { TokenHolders } from "@/features/holders-and-delegates/token-holder";
+import { TheSectionLayout } from "@/shared/components";
 import { SubSectionsContainer } from "@/shared/components/design-system/section";
 import { SwitcherDateMobile } from "@/shared/components/switchers/SwitcherDateMobile";
-import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { TimeInterval } from "@/shared/types/enums";
 
 type TabId = "tokenHolders" | "delegates";
 

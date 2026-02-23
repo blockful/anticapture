@@ -1,8 +1,9 @@
 "use client";
 
-import { cn } from "@/shared/utils/";
-import { useRouter, useParams, usePathname } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
+import { useRouter, useParams, usePathname } from "next/navigation";
+
+import { cn } from "@/shared/utils/";
 
 export const ButtonHeaderDAOSidebarMobile = ({
   options,

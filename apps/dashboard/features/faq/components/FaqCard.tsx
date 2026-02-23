@@ -1,8 +1,9 @@
 "use client";
 
 import { MouseEvent } from "react";
-import { AccordionContentArea } from "@/shared/components";
+
 import { FaqItem } from "@/features/faq/utils/faq-constants";
+import { AccordionContentArea } from "@/shared/components";
 
 export const FaqCard = ({
   faqItem,

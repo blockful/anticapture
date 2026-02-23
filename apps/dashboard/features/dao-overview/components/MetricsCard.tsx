@@ -1,13 +1,14 @@
-import { useMemo } from "react";
+import { ReactNode, useMemo } from "react";
+
 import { DaoOverviewMetricCard } from "@/features/dao-overview/components/DaoOverviewMetricCard";
+import { useDaoOverviewData } from "@/features/dao-overview/hooks/useDaoOverviewData";
 import { DaoConfiguration } from "@/shared/dao-config/types";
+import { DaoIdEnum } from "@/shared/types/daos";
 import {
   formatBlocksToUserReadable,
   formatNumberUserReadable,
   formatSecondsToReadable,
 } from "@/shared/utils";
-import { useDaoOverviewData } from "@/features/dao-overview/hooks/useDaoOverviewData";
-import { DaoIdEnum } from "@/shared/types/daos";
 
 interface MetricsCardProps {
   daoId: string;
@@ -19,7 +20,7 @@ const COMMON_CARD_CLASSES =
 const TEXT_CLASSES = "mb-1";
 const BADGE_CLASSES = "bg-surface-opacity rounded-full px-1.5 py-0.5";
 
-const Badge = ({ children }: { children: React.ReactNode }) => (
+const Badge = ({ children }: { children: ReactNode }) => (
   <span className={BADGE_CLASSES}>{children}</span>
 );
 
@@ -85,12 +86,10 @@ const QuorumMetric = ({
 };
 
 const ExecutionRulesMetric = ({
-  daoId,
   executionRules,
   timelockDelay,
   isLoading,
 }: {
-  daoId: string;
   executionRules: string;
   timelockDelay: number;
   isLoading: boolean;
@@ -235,7 +234,6 @@ export const MetricsCard = ({ daoId, daoConfig }: MetricsCardProps) => {
       />
 
       <ExecutionRulesMetric
-        daoId={daoId}
         executionRules={derivedValues.executionRules}
         timelockDelay={timelockDelay}
         isLoading={isLoading}

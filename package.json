@@ -8,6 +8,7 @@
     "gateway": "dotenv -- pnpm run --filter=@anticapture/api-gateway",
     "api": "dotenv -- pnpm run --filter=@anticapture/api",
     "client": "dotenv -- pnpm run --filter=@anticapture/graphql-client",
+    "address": "dotenv -- pnpm run --filter=@anticapture/address-enrichment",
     "clean": "turbo clean && rm -rf node_modules .turbo .parcel-cache coverage *.log *.tsbuildinfo",
     "lint": "turbo lint",
     "lint:fix": "turbo lint:fix",
@@ -28,20 +29,31 @@
   "devDependencies": {
     "@commitlint/cli": "^19.5.0",
     "@commitlint/config-conventional": "^19.5.0",
+    "@eslint/js": "^9",
+    "@next/eslint-plugin-next": "16.1.3",
     "@types/node": "^20.16.5",
     "@typescript-eslint/eslint-plugin": "^8",
     "@typescript-eslint/parser": "^8",
     "dotenv-cli": "^7.4.4",
     "eslint": "^9",
     "eslint-config-prettier": "^9.1.0",
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-react-hooks": "^7.0.0",
+    "eslint-plugin-storybook": "^10.2.0",
+    "globals": "^17.3.0",
     "husky": "^9.1.6",
     "lint-staged": "^16.1.2",
     "prettier": "^3.4.2",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "turbo": "^2.3.1",
-    "typescript": "^5.8.3",
-    "eslint-plugin-import": "^2.32.0"
+    "typescript": "^5.8.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "eslint-plugin-react-hooks>zod-validation-error": "^4.0.0"
+    }
   },
   "private": true,
   "workspaces": [

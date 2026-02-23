@@ -1,5 +1,12 @@
+import {
+  QueryInput_VotingPowers_OrderDirection,
+  useGetDelegatesQuery,
+} from "@anticapture/graphql-client/hooks";
 import { formatUnits } from "viem";
 
+import { useDaoTreasuryStats } from "@/features/dao-overview/hooks/useDaoTreasuryStats";
+import { useTopDelegatesToPass } from "@/features/dao-overview/hooks/useTopDelegatesToPass";
+import { DaoConfiguration } from "@/shared/dao-config/types";
 import {
   useDaoData,
   useActiveSupply,
@@ -8,14 +15,7 @@ import {
 } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
-import { useTopDelegatesToPass } from "@/features/dao-overview/hooks/useTopDelegatesToPass";
-import { useDaoTreasuryStats } from "@/features/dao-overview/hooks/useDaoTreasuryStats";
 import { formatNumberUserReadable } from "@/shared/utils";
-import { DaoConfiguration } from "@/shared/dao-config/types";
-import {
-  QueryInput_VotingPowers_OrderDirection,
-  useGetDelegatesQuery,
-} from "@anticapture/graphql-client/hooks";
 
 export const useDaoOverviewData = ({
   daoId,

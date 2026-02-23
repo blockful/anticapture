@@ -1,15 +1,15 @@
 import "@/app/globals.css";
 import "tailwindcss";
+import type { Metadata } from "next";
+import { Inter, Roboto_Mono } from "next/font/google";
+import { ReactNode } from "react";
 import { Toaster } from "react-hot-toast";
 
-import type { Metadata } from "next";
-import { GlobalProviders } from "@/shared/providers/GlobalProviders";
-import { ReactNode } from "react";
-import ConditionalPostHog from "@/shared/services/posthog/ConditionalPostHog";
-import UmamiScript from "@/shared/services/umami";
-import { Inter, Roboto_Mono } from "next/font/google";
 import { CookieConsent } from "@/features/cookie";
 import { HelpPopover } from "@/shared/components";
+import { GlobalProviders } from "@/shared/providers/GlobalProviders";
+import ConditionalPostHog from "@/shared/services/posthog/ConditionalPostHog";
+import UmamiScript from "@/shared/services/umami";
 
 const inter = Inter({ weight: ["400", "500", "600"], subsets: ["latin"] });
 

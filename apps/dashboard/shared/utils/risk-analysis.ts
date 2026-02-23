@@ -3,13 +3,13 @@
  * Utility functions for risk analysis of DAOs
  */
 
-import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { RiskAreaEnum } from "@/shared/types/enums/RiskArea";
-import { GovernanceImplementationEnum } from "@/shared/types/enums/GovernanceImplementation";
 import { RISK_AREAS } from "@/shared/constants/risk-areas";
-import { RiskLevel } from "@/shared/types/enums/RiskLevel";
+import daoConfigByDaoId from "@/shared/dao-config";
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { GovernanceImplementationEnum } from "@/shared/types/enums/GovernanceImplementation";
+import { RiskAreaEnum } from "@/shared/types/enums/RiskArea";
+import { RiskLevel } from "@/shared/types/enums/RiskLevel";
 
 /**
  * Risk area information including risk level and governance implementation items
@@ -53,6 +53,14 @@ export function getDaoRiskAreas(
     let lowRiskCount = 0;
 
     for (const govImplItem of requiredGovImplItems) {
+      // Skip ATTACK_PROFITABILITY if the DAO doesn't have liquid treasury data
+      if (
+        govImplItem === GovernanceImplementationEnum.ATTACK_PROFITABILITY &&
+        !daoConfig.attackProfitability?.supportsLiquidTreasuryCall
+      ) {
+        continue;
+      }
+
       if (govImplFields[govImplItem]) {
         govImplItems[govImplItem] = govImplFields[govImplItem];
 

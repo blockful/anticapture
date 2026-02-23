@@ -1,21 +1,21 @@
 "use client";
 
-import { ChangeEvent, useState } from "react";
+import { ResetIcon } from "@radix-ui/react-icons";
 import { Loader2 } from "lucide-react";
+import { ChangeEvent, useState } from "react";
 import { isAddress } from "viem";
 import { normalize } from "viem/ens";
+
+import { Button } from "@/shared/components/design-system/buttons/button/Button";
+import SearchField from "@/shared/components/design-system/SearchField";
+import { ButtonFilter } from "@/shared/components/design-system/table/ButtonFilter";
 import {
   Popover,
   PopoverTrigger,
   PopoverContent,
 } from "@/shared/components/ui/popover";
-import SearchField from "@/shared/components/design-system/SearchField";
-
-import { cn } from "@/shared/utils/";
-import { ResetIcon } from "@radix-ui/react-icons";
 import { fetchAddressFromEnsName } from "@/shared/hooks/useEnsData";
-import { Button } from "@/shared/components/design-system/buttons/button/Button";
-import { ButtonFilter } from "@/shared/components/design-system/table/ButtonFilter";
+import { cn } from "@/shared/utils/";
 
 interface AddressFilterProps {
   onApply: (address: string | undefined) => void;

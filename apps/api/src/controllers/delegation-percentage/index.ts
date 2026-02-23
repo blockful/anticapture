@@ -1,10 +1,11 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
-import { DelegationPercentageService } from "@/services";
+
 import {
   DelegationPercentageRequestSchema,
   DelegationPercentageResponseSchema,
   toApi,
 } from "@/mappers/";
+import { DelegationPercentageService } from "@/services";
 
 export function delegationPercentage(
   app: Hono,

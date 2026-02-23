@@ -1,10 +1,11 @@
 "use client";
 
 import { Content, Trigger, Root, Portal } from "@radix-ui/react-tooltip";
-import { cn } from "@/shared/utils/";
 import { ReactNode, useState } from "react";
+
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 import { useScreenSize } from "@/shared/hooks/useScreenSize";
+import { cn } from "@/shared/utils/";
 
 interface TooltipProps {
   children: ReactNode;

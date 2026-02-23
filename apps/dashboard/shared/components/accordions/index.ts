@@ -1,1 +1,1 @@
-export { AccordionContentArea } from "./AccordionContentArea";
+export { AccordionContentArea } from "@/shared/components/accordions/AccordionContentArea";

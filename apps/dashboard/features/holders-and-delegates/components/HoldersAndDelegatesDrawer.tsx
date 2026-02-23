@@ -1,21 +1,22 @@
 "use client";
 
-import { Drawer, DrawerContent } from "@/shared/components/ui/drawer";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { X } from "lucide-react";
-import { cn } from "@/shared/utils";
-import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
-import { useScreenSize } from "@/shared/hooks";
-import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { VotingPowerHistory } from "@/features/holders-and-delegates/delegate/drawer/voting-power-history/VotingPowerHistory";
-import { DaoIdEnum } from "@/shared/types/daos";
+import { parseAsString, useQueryState, useQueryStates } from "nuqs";
+
 import { VoteComposition } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/VoteComposition";
+import { DelegateProposalsActivity } from "@/features/holders-and-delegates/delegate/drawer/votes/DelegateProposalsActivity";
+import { VotingPowerHistory } from "@/features/holders-and-delegates/delegate/drawer/voting-power-history/VotingPowerHistory";
 import { BalanceHistory } from "@/features/holders-and-delegates/token-holder/drawer/balance-history/BalanceHistory";
 import { DelegationHistory } from "@/features/holders-and-delegates/token-holder/drawer/delegation-history/DelegationHistory";
-import { DelegateProposalsActivity } from "@/features/holders-and-delegates/delegate/drawer/votes/DelegateProposalsActivity";
-import { IconButton } from "@/shared/components";
 import { TopInteractions } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/TopInteractions";
-import { parseAsString, useQueryState, useQueryStates } from "nuqs";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import {
+  DrawerBody,
+  DrawerContent,
+  DrawerHeader,
+  DrawerRoot,
+} from "@/shared/components/design-system/drawer";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 export type EntityType = "delegate" | "tokenHolder";
 
@@ -117,8 +118,6 @@ export const HoldersAndDelegatesDrawer = ({
     cleanupFilters();
   };
 
-  const { isMobile } = useScreenSize();
-
   const renderTabContent = (tabId: string) => {
     return entities[entityType].tabs.find((tab) => tab.id === tabId)?.content;
   };
@@ -129,95 +128,57 @@ export const HoldersAndDelegatesDrawer = ({
     cleanupFilters();
   };
 
+  const titleContent = (
+    <>
+      {/* Desktop */}
+      <div className="hidden lg:block">
+        <EnsAvatar
+          address={address as `0x${string}`}
+          size="sm"
+          variant="rounded"
+          nameClassName="text-lg leading-[18px]"
+          containerClassName="gap-2"
+          showFullAddress={true}
+        />
+      </div>
+
+      {/* Mobile */}
+      <div className="block lg:hidden">
+        <EnsAvatar
+          address={address as `0x${string}`}
+          size="sm"
+          variant="rounded"
+          nameClassName="text-lg leading-[18px]"
+          containerClassName="gap-2"
+          showFullAddress={false}
+        />
+      </div>
+
+      <CopyAndPasteButton
+        textToCopy={address as `0x${string}`}
+        className="p-1"
+        iconSize="md"
+        customTooltipText={{
+          default: "Copy address",
+          copied: "Address copied!",
+        }}
+      />
+    </>
+  );
+
   return (
-    <Drawer
-      open={isOpen}
-      onOpenChange={handleCloseDrawer}
-      direction={isMobile ? "bottom" : "right"}
-    >
+    <DrawerRoot open={isOpen} onOpenChange={handleCloseDrawer}>
       <DrawerContent>
-        <div className="bg-surface-default flex h-full w-full flex-col overflow-hidden">
-          <div className="bg-surface-contrast w-full shrink-0">
-            {/* Header */}
-            <div className="bg-surface-contrast flex justify-between px-4 pb-2 pt-4">
-              <div className="flex flex-col gap-1">
-                {/* Title */}
-                <div className="text-secondary font-mono text-xs font-medium uppercase tracking-wide">
-                  {entities[entityType].title}
-                </div>
-                <div className="flex items-center justify-center gap-2">
-                  {/* Desktop */}
-                  <div className="hidden lg:block">
-                    <EnsAvatar
-                      address={address as `0x${string}`}
-                      size="sm"
-                      variant="rounded"
-                      nameClassName="text-lg leading-[18px]"
-                      containerClassName="gap-2"
-                      showFullAddress={true}
-                    />
-                  </div>
-
-                  {/* Mobile */}
-                  <div className="block lg:hidden">
-                    <EnsAvatar
-                      address={address as `0x${string}`}
-                      size="sm"
-                      variant="rounded"
-                      nameClassName="text-lg leading-[18px]"
-                      containerClassName="gap-2"
-                      showFullAddress={false}
-                    />
-                  </div>
-
-                  <CopyAndPasteButton
-                    textToCopy={address as `0x${string}`}
-                    className="p-1"
-                    iconSize="md"
-                    customTooltipText={{
-                      default: "Copy address",
-                      copied: "Address copied!",
-                    }}
-                  />
-                </div>
-              </div>
-
-              <IconButton
-                variant="outline"
-                size="sm"
-                onClick={handleCloseDrawer}
-                icon={X}
-              />
-            </div>
-            <Tabs
-              defaultValue={entities[entityType].tabs[0].id}
-              value={activeTab}
-              onValueChange={handleTabChange}
-              className="w-fit min-w-full"
-            >
-              <TabsList className="group flex border-b border-b-white/10 pl-4">
-                {entities[entityType].tabs.map((tab) => (
-                  <TabsTrigger
-                    className={cn(
-                      "text-secondary relative cursor-pointer gap-2 whitespace-nowrap px-2 py-2 text-xs font-medium",
-                      "data-[state=active]:text-link",
-                      "after:absolute after:-bottom-px after:left-0 after:right-0 after:h-px after:bg-transparent after:content-['']",
-                      "data-[state=active]:after:bg-surface-solid-brand",
-                    )}
-                    key={tab.id}
-                    value={tab.id}
-                  >
-                    {tab.label}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
-          </div>
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-            {renderTabContent(activeTab)}
-          </div>
-        </div>
+        <DrawerHeader
+          subtitle={entities[entityType].title}
+          title={titleContent}
+          onClose={handleCloseDrawer}
+          tabs={entities[entityType].tabs}
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+        />
+        <DrawerBody>{renderTabContent(activeTab)}</DrawerBody>
       </DrawerContent>
-    </Drawer>
+    </DrawerRoot>
   );
 };

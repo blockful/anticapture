@@ -1,13 +1,13 @@
 "use client";
 
-import { useEnsData } from "@/shared/hooks/useEnsData";
-import { cn } from "@/shared/utils/cn";
-import { Address } from "viem";
 import Image, { ImageProps } from "next/image";
 import { useState } from "react";
 import Blockies from "react-blockies";
+import { Address } from "viem";
 
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
+import { useEnsData } from "@/shared/hooks/useEnsData";
+import { cn } from "@/shared/utils/cn";
 import { formatAddress } from "@/shared/utils/formatAddress";
 
 export type AvatarSize = "xs" | "sm" | "md" | "lg";
@@ -171,7 +171,7 @@ export const EnsAvatar = ({
 
   // Return avatar with name
   return (
-    <div className={cn("flex min-w-0 items-center gap-3", containerClassName)}>
+    <div className={cn("flex min-w-0 items-center gap-2", containerClassName)}>
       {avatarElement()}
 
       <div className="flex min-w-0 flex-col">

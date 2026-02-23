@@ -1,7 +1,7 @@
-import { Search } from "lucide-react";
-import { IconButton } from "@/shared/components/design-system/buttons/icon-button/IconButton";
-
 import type { Meta, StoryObj } from "@storybook/nextjs";
+import { Search } from "lucide-react";
+
+import { IconButton } from "@/shared/components/design-system/buttons/icon-button/IconButton";
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta: Meta<typeof IconButton> = {

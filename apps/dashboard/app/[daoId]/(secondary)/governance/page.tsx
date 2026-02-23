@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { DaoIdEnum } from "@/shared/types/daos";
 
-import { HeaderMobile } from "@/widgets/HeaderMobile";
-import { HeaderDAOSidebar, HeaderSidebar, StickyPageHeader } from "@/widgets";
-import { Footer } from "@/shared/components/design-system/footer/Footer";
 import { GovernanceSection } from "@/features/governance";
+import { Footer } from "@/shared/components/design-system/footer/Footer";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { HeaderDAOSidebar, HeaderSidebar, StickyPageHeader } from "@/widgets";
+import { HeaderMobile } from "@/widgets/HeaderMobile";
 
 type Props = {
   params: Promise<{ daoId: string }>;

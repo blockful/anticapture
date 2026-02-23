@@ -1,15 +1,16 @@
 "use client";
 
-import { BlankSlate, Button, TheSectionLayout } from "@/shared/components";
-import { useState } from "react";
-import { cn } from "@/shared/utils/";
-import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { HelpCircle, SearchXIcon } from "lucide-react";
-import { useScreenSize } from "@/shared/hooks";
+import Link from "next/link";
+import { useState } from "react";
+
 import { FaqCard } from "@/features/faq/components";
 import { FAQ_ITEMS } from "@/features/faq/utils/faq-constants";
-import Link from "next/link";
+import { BlankSlate, Button, TheSectionLayout } from "@/shared/components";
 import { TelegramIcon } from "@/shared/components/icons";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
+import { useScreenSize } from "@/shared/hooks";
+import { cn } from "@/shared/utils/";
 
 export const FaqSection = () => {
   const { isDesktop, isTablet } = useScreenSize();

@@ -1,20 +1,24 @@
 import type { Metadata } from "next";
-import { HeaderMobile } from "@/widgets/HeaderMobile";
-import { HomeTemplate } from "@/templates";
-import { HeaderSidebar } from "@/widgets";
+
+import { PanelSection } from "@/features/panel";
 import { Footer } from "@/shared/components/design-system/footer/Footer";
+import { HeaderSidebar } from "@/widgets";
+import { HeaderMobile } from "@/widgets/HeaderMobile";
+
+const metadataDescription =
+  "Anticapture | Monitor DAO governance risk. Track delegation shifts, voting power concentration, and onchain risk indicators across Ethereum DAOs.";
 
 export const metadata: Metadata = {
   title: "Anticapture - Panel",
-  description: "Explore and address governance risks in top DAOs.",
+  description: metadataDescription,
   openGraph: {
     title: "Anticapture - Panel",
-    description: "Explore and address governance risks in top DAOs.",
+    description: metadataDescription,
   },
   twitter: {
     card: "summary_large_image",
     title: "Anticapture - Panel",
-    description: "Explore and address governance risks in top DAOs.",
+    description: metadataDescription,
   },
 };
 
@@ -28,7 +32,7 @@ export default function Home() {
         </div>
         <div className="flex min-h-screen w-full flex-col items-center">
           <div className="w-full flex-1">
-            <HomeTemplate />
+            <PanelSection />
           </div>
           <Footer />
         </div>

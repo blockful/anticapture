@@ -1,36 +1,34 @@
 "use client";
 
+import { useCallback, useState } from "react";
+
+import { StageRequirementsTooltip } from "@/features/dao-overview/components/StageRequirementsTooltip";
+import { StageTag } from "@/features/resilience-stages/components";
 import {
   Button,
   StagesCardRequirements,
   TooltipInfo,
 } from "@/shared/components";
-import { cn, formatPlural } from "@/shared/utils/";
+import { OutlinedBox } from "@/shared/components/boxes/OutlinedBox";
+import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import { DaoAvatarIcon, PointerIcon } from "@/shared/components/icons";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
+import { DaoConfiguration } from "@/shared/dao-config/types";
 import {
   filterFieldsByRiskLevel,
   fieldsToArray,
 } from "@/shared/dao-config/utils";
-import { RiskLevel } from "@/shared/types/enums";
-import { DaoIdEnum } from "@/shared/types/daos";
-import {
-  StageAccordion,
-  StageTag,
-} from "@/features/resilience-stages/components";
-import { DaoAvatarIcon, PointerIcon } from "@/shared/components/icons";
-import { Stage } from "@/shared/types/enums/Stage";
-import { DaoConfiguration } from "@/shared/dao-config/types";
-import { OutlinedBox } from "@/shared/components/boxes/OutlinedBox";
-import { useCallback, useState } from "react";
 import { useScreenSize } from "@/shared/hooks";
-import { StageRequirementsTooltip } from "@/features/dao-overview/components/StageRequirementsTooltip";
-import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
-import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { RiskLevel } from "@/shared/types/enums";
+import { Stage } from "@/shared/types/enums/Stage";
+import { cn, formatPlural } from "@/shared/utils/";
 
 interface StagesContainerProps {
   daoId: DaoIdEnum;
   daoConfig: DaoConfiguration;
   currentDaoStage: Stage;
-  context?: "overview" | "section";
+  context?: "overview";
 }
 export const stageToRiskMapping: Record<Stage, RiskLevel> = {
   [Stage.ZERO]: RiskLevel.HIGH,
@@ -76,9 +74,13 @@ const CurrentDaoStageAvatar = ({
     >
       <DaoAvatarIcon daoId={daoId} className="rounded-none" />
     </div>
-    <PointerIcon className="absolute -bottom-4 translate-y-px" />
+    <PointerIcon
+      hasBorder={false}
+      className="text-surface-contrast absolute -bottom-4 translate-y-px"
+    />
   </>
 );
+
 export const StagesContainer = ({
   daoId,
   daoConfig,
@@ -137,18 +139,16 @@ export const StagesContainer = ({
         "lg:bg-surface-default gap-4 lg:p-4": context === "overview",
       })}
     >
-      {context === "overview" && (
-        <div className="flex h-5 items-center gap-2">
-          <DefaultLink
-            href={`${daoId.toLowerCase()}/resilience-stages`}
-            openInNewTab={false}
-            className="text-primary border-border-contrast hover:border-primary border-b border-dashed font-mono text-[13px] font-medium tracking-wider"
-          >
-            RESILIENCE STAGES
-          </DefaultLink>
-          <TooltipInfo text="Resilience Stages are based on governance mechanisms, considering the riskiest exposed vector as criteria for progression." />
-        </div>
-      )}
+      <div className="flex h-5 items-center gap-2">
+        <DefaultLink
+          href={`${daoId.toLowerCase()}/resilience-stages`}
+          openInNewTab={false}
+          className="text-primary border-border-contrast hover:border-primary border-b border-dashed font-mono text-[13px] font-medium tracking-wider"
+        >
+          RESILIENCE STAGES
+        </DefaultLink>
+        <TooltipInfo text="Resilience Stages are based on governance mechanisms, considering the riskiest exposed vector as criteria for progression." />
+      </div>
       <div className="flex flex-col gap-5">
         <div className={cn("flex flex-col")}>
           {/* Timeline Component */}
@@ -229,83 +229,74 @@ export const StagesContainer = ({
                 context === "overview",
             })}
           />
-          {context === "overview" && (
-            <div
-              className="border-light-dark bg-surface-contrast relative flex items-center justify-between gap-1 border-b p-2 lg:border-none lg:p-3"
-              onMouseLeave={() => !isMobile && setShowTooltip(false)}
-            >
-              {currentDaoStage === Stage.NONE ? (
-                <span className="text-secondary group-hover:text-primary font-mono text-sm/tight font-medium uppercase duration-300">
-                  Does not qualify
+          <div
+            className="border-light-dark bg-surface-contrast relative flex items-center justify-between gap-1 border-b p-2 lg:border-none lg:p-3"
+            onMouseLeave={() => !isMobile && setShowTooltip(false)}
+          >
+            {currentDaoStage === Stage.NONE ? (
+              <span className="text-secondary group-hover:text-primary font-mono text-sm/tight font-medium uppercase duration-300">
+                Does not qualify
+              </span>
+            ) : (
+              <Button
+                variant="ghost"
+                className="group px-0 py-0 font-mono"
+                onClick={handleButtonClick}
+                onMouseEnter={() => !isMobile && setShowTooltip(true)}
+              >
+                <span className="border-foreground text-alternative-sm text-nowrap border-b border-dashed font-medium duration-300 hover:border-white">
+                  <span className="text-primary uppercase duration-300">
+                    {currentDaoStage !== Stage.UNKNOWN
+                      ? formatPlural(
+                          highRiskItems.length ||
+                            mediumRiskItems.length ||
+                            lowRiskItems.length,
+                          "ITEM",
+                        )
+                      : "? ITEMS"}
+                  </span>
+                  <span
+                    className={cn(
+                      "text-secondary duration-300",
+                      isStageKnown && "group-hover:text-primary",
+                    )}
+                  >
+                    {" "}
+                    {isStageKnown
+                      ? `TO STAGE ${Number(currentDaoStage) + 1}`
+                      : "TO NEXT"}
+                  </span>
                 </span>
-              ) : (
-                <Button
-                  variant="ghost"
-                  className="group px-0 py-0 font-mono"
-                  onClick={handleButtonClick}
+              </Button>
+            )}
+
+            <div className="flex gap-1.5">
+              {boxConfigs.map(({ variant, count }) => (
+                <OutlinedBox
+                  key={variant}
+                  variant={variant}
+                  disabled={!isStageKnown}
+                  className={cn("border-0 px-2 py-1", {
+                    border: currentDaoStage === Stage.NONE,
+                  })}
+                  onClick={() => setShowTooltip((prev) => !prev)}
                   onMouseEnter={() => !isMobile && setShowTooltip(true)}
                 >
-                  <span className="border-foreground text-alternative-sm text-nowrap border-b border-dashed font-medium duration-300 hover:border-white">
-                    <span className="text-primary uppercase duration-300">
-                      {currentDaoStage !== Stage.UNKNOWN
-                        ? formatPlural(
-                            highRiskItems.length ||
-                              mediumRiskItems.length ||
-                              lowRiskItems.length,
-                            "ITEM",
-                          )
-                        : "? ITEMS"}
-                    </span>
-                    <span
-                      className={cn(
-                        "text-secondary duration-300",
-                        isStageKnown && "group-hover:text-primary",
-                      )}
-                    >
-                      {" "}
-                      {isStageKnown
-                        ? `TO STAGE ${Number(currentDaoStage) + 1}`
-                        : "TO NEXT"}
-                    </span>
-                  </span>
-                </Button>
-              )}
-
-              <div className="flex gap-1.5">
-                {boxConfigs.map(({ variant, count }) => (
-                  <OutlinedBox
-                    key={variant}
-                    variant={variant}
-                    disabled={!isStageKnown}
-                    className={cn("border-0 px-2 py-1", {
-                      border: currentDaoStage === Stage.NONE,
-                    })}
-                    onClick={() => setShowTooltip((prev) => !prev)}
-                    onMouseEnter={() => !isMobile && setShowTooltip(true)}
-                  >
-                    <span className="font-mono">{count}</span>
-                  </OutlinedBox>
-                ))}
-              </div>
-              {showTooltip && isStageKnown && (
-                <StageRequirementsTooltip
-                  currentStage={currentDaoStage}
-                  nextStage={Number(currentDaoStage) + 1}
-                  requirements={requirements}
-                  onMouseEnter={() => !isMobile && setShowTooltip(true)}
-                  onMouseLeave={() => !isMobile && setShowTooltip(false)}
-                />
-              )}
+                  <span className="font-mono">{count}</span>
+                </OutlinedBox>
+              ))}
             </div>
-          )}
+            {showTooltip && isStageKnown && (
+              <StageRequirementsTooltip
+                currentStage={currentDaoStage}
+                nextStage={Number(currentDaoStage) + 1}
+                requirements={requirements}
+                onMouseEnter={() => !isMobile && setShowTooltip(true)}
+                onMouseLeave={() => !isMobile && setShowTooltip(false)}
+              />
+            )}
+          </div>
         </div>
-        {context === "section" && (
-          <StageAccordion
-            daoStage={currentDaoStage}
-            highRiskFields={highRiskItems}
-            mediumRiskFields={mediumRiskItems}
-          />
-        )}
       </div>
     </div>
   );

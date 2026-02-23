@@ -24,7 +24,7 @@ export const DescriptionTabContent = ({
   proposal,
 }: DescriptionTabContentProps) => {
   return (
-    <div className="text-primary p-0 lg:p-4 py-4">
+    <div className="text-primary p-0 py-4 lg:p-4">
       <Markdown
         className="overflow-wrap-anywhere break-words"
         options={{
@@ -124,7 +124,7 @@ export const DescriptionTabContent = ({
                 children,
                 ...props
               }: React.HTMLAttributes<HTMLTableElement>) => (
-                <div className="overflow-x-auto mt-4 mb-4 max-w-full">
+                <div className="mb-4 mt-4 max-w-full overflow-x-auto">
                   <table className="min-w-full" {...props}>
                     {children}
                   </table>

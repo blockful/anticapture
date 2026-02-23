@@ -1,6 +1,7 @@
-import { cn } from "@/shared/utils/";
 import { AlertCircle, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { ComponentProps, ReactNode } from "react";
+
+import { cn } from "@/shared/utils/";
 
 type OutlinedBoxProps = ComponentProps<"div"> & {
   variant?: "success" | "warning" | "error" | "lightDark";

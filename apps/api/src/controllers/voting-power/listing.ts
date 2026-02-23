@@ -1,13 +1,14 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
-import { VotingPowerService } from "@/services";
+import { getAddress, isAddress } from "viem";
+
 import {
   VotingPowersRequestSchema,
   VotingPowersResponseSchema,
   VotingPowersMapper,
   VotingPowerResponseSchema,
 } from "@/mappers/";
-import { getAddress, isAddress } from "viem";
 import { VotingPowerMapper } from "@/mappers/voting-power/variations";
+import { VotingPowerService } from "@/services";
 
 export function votingPowers(app: Hono, service: VotingPowerService) {
   app.openapi(

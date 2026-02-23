@@ -1,6 +1,8 @@
 import { expect, afterEach, beforeEach, vi, describe, it } from "vitest";
-import { TreasuryProviderCache } from "./provider-cache";
+
 import { LiquidTreasuryDataPoint } from "../types";
+
+import { TreasuryProviderCache } from "./provider-cache";
 
 function createDataPoint(
   overrides?: Partial<LiquidTreasuryDataPoint>,
