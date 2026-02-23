@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import {
   pgTable,
   index,
@@ -5,7 +6,6 @@ import {
   pgEnum,
   primaryKey,
 } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
 import { Address, zeroAddress } from "viem";
 
 import { MetricTypesArray } from "@/lib/constants";

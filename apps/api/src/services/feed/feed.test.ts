@@ -1,10 +1,12 @@
-import { describe, it, expect, beforeEach } from "vitest";
 import { parseEther } from "viem";
-import { FeedService } from ".";
+import { describe, it, expect, beforeEach } from "vitest";
+
 import { FeedEventType, FeedRelevance } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
-import { DBFeedEvent, FeedRequest } from "@/mappers";
 import { getDaoRelevanceThreshold } from "@/lib/eventRelevance";
+import { DBFeedEvent, FeedRequest } from "@/mappers";
+
+import { FeedService } from ".";
 
 const createFeedEvent = (
   overrides: Partial<DBFeedEvent> = {},

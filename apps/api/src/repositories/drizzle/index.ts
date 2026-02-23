@@ -9,7 +9,6 @@ import {
   sql,
   SQL,
 } from "drizzle-orm";
-import { Drizzle, proposalsOnchain } from "@/database";
 
 import {
   ActiveSupplyQueryResult,
@@ -17,6 +16,7 @@ import {
   ProposalsCompareQueryResult,
   VotesCompareQueryResult,
 } from "@/controllers";
+import { Drizzle, proposalsOnchain } from "@/database";
 import { DaysEnum } from "@/lib/enums";
 import { DBProposal } from "@/mappers";
 

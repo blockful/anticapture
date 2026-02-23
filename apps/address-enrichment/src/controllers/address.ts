@@ -2,6 +2,7 @@ import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 import { getAddress } from "viem";
 
 import { EnrichmentService } from "@/services/enrichment";
+
 import {
   AddressRequestSchema,
   AddressResponseSchema,

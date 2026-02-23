@@ -1,6 +1,7 @@
 import { z } from "@hono/zod-openapi";
-import { accountBalance } from "@/database";
 import { Address, getAddress, isAddress } from "viem";
+
+import { accountBalance } from "@/database";
 
 export const AccountBalancesRequestSchema = z.object({
   limit: z.coerce

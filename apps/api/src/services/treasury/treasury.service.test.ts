@@ -1,9 +1,11 @@
-import { afterEach, beforeEach, vi, describe, it, expect } from "vitest";
-import { TreasuryService } from "./treasury.service";
-import { TreasuryProvider } from "./providers";
-import { PriceProvider, LiquidTreasuryDataPoint } from "./types";
-import { TreasuryRepository } from "@/repositories/treasury";
 import { parseEther } from "viem";
+import { afterEach, beforeEach, vi, describe, it, expect } from "vitest";
+
+import { TreasuryRepository } from "@/repositories/treasury";
+
+import { TreasuryProvider } from "./providers";
+import { TreasuryService } from "./treasury.service";
+import { PriceProvider, LiquidTreasuryDataPoint } from "./types";
 
 /**
  * Fakes for dependency injection

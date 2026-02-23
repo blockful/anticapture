@@ -1,6 +1,6 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
-import { ProposalsService } from "@/services";
+import { DAOClient } from "@/clients";
 import {
   ProposalsResponseSchema,
   ProposalsRequestSchema,
@@ -8,7 +8,7 @@ import {
   ProposalResponseSchema,
   ProposalMapper,
 } from "@/mappers";
-import { DAOClient } from "@/clients";
+import { ProposalsService } from "@/services";
 
 export function proposals(
   app: Hono,

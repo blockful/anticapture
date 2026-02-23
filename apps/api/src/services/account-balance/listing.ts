@@ -1,7 +1,8 @@
-import { AmountFilter, DBAccountBalance } from "@/mappers";
+import { Address } from "viem";
+
 import { TreasuryAddresses } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
-import { Address } from "viem";
+import { AmountFilter, DBAccountBalance } from "@/mappers";
 
 interface AccountBalanceRepository {
   getAccountBalances(

@@ -1,6 +1,6 @@
 import { DAOClient } from "@/clients";
-import { DBProposal, ProposalsRequest } from "@/mappers";
 import { ProposalStatus } from "@/lib/constants";
+import { DBProposal, ProposalsRequest } from "@/mappers";
 
 interface ProposalsRepository {
   getProposals(

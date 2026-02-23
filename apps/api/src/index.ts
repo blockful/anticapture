@@ -1,12 +1,11 @@
+import { serve } from "@hono/node-server";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { serve } from "@hono/node-server";
-
 import { logger } from "hono/logger";
-import * as schema from "@/database/schema";
-import { fromZodError } from "zod-validation-error";
 import { createPublicClient, http } from "viem";
+import { fromZodError } from "zod-validation-error";
 
+import { DaoCache } from "@/cache/dao-cache";
 import {
   accountBalanceVariations,
   accountBalances,
@@ -29,12 +28,18 @@ import {
   votingPowerVariations,
   votingPowers,
   delegations,
+  delegators,
   historicalDelegations,
   votes,
 } from "@/controllers";
+import * as schema from "@/database/schema";
 import { docs } from "@/docs";
 import { env } from "@/env";
-import { DaoCache } from "@/cache/dao-cache";
+import { getClient } from "@/lib/client";
+import { CONTRACT_ADDRESSES } from "@/lib/constants";
+import { DaoIdEnum } from "@/lib/enums";
+import { getChain } from "@/lib/utils";
+import { errorHandler } from "@/middlewares";
 import {
   AccountBalanceRepository,
   AccountInteractionsRepository,
@@ -51,13 +56,11 @@ import {
   TreasuryRepository,
   VotingPowerRepository,
   DelegationsRepository,
+  DelegatorsRepository,
   HistoricalDelegationsRepository,
   VotesRepository,
   FeedRepository,
 } from "@/repositories";
-import { errorHandler } from "@/middlewares";
-import { getClient } from "@/lib/client";
-import { getChain } from "@/lib/utils";
 import {
   AccountBalanceService,
   BalanceVariationsService,
@@ -76,11 +79,11 @@ import {
   parseTreasuryProviderConfig,
   HistoricalDelegationsService,
   DelegationsService,
+  DelegatorsService,
   VotesService,
   FeedService,
 } from "@/services";
-import { CONTRACT_ADDRESSES } from "@/lib/constants";
-import { DaoIdEnum } from "@/lib/enums";
+
 import { feed } from "./controllers/feed";
 
 const app = new Hono({
@@ -179,6 +182,7 @@ historicalDelegations(
 
 // TODO: add support to partial delegations at some point
 delegations(app, new DelegationsService(new DelegationsRepository(pgClient)));
+delegators(app, new DelegatorsService(new DelegatorsRepository(pgClient)));
 
 const treasuryService = createTreasuryService(
   new TreasuryRepository(pgClient),

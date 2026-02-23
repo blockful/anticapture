@@ -1,8 +1,9 @@
+import { createConfig } from "ponder";
+
+import { env } from "@/env";
+import { COMPGovernorAbi, COMPTokenAbi } from "@/indexer/comp";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
-import { env } from "@/env";
-import { createConfig } from "ponder";
-import { COMPGovernorAbi, COMPTokenAbi } from "@/indexer/comp";
 
 const COMP_CONTRACTS = CONTRACT_ADDRESSES[DaoIdEnum.COMP];
 
