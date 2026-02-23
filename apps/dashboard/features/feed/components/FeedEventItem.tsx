@@ -12,13 +12,14 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { formatUnits, zeroAddress } from "viem";
+import { Address, formatUnits, zeroAddress } from "viem";
 
 import {
   FeedEvent,
   FeedEventRelevance,
   FeedEventType,
 } from "@/features/feed/types";
+import { EntityType } from "@/features/holders-and-delegates/components/HoldersAndDelegatesDrawer";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
@@ -33,6 +34,7 @@ interface FeedEventItemProps {
   event: FeedEvent;
   className?: string;
   isLast?: boolean;
+  onRowClick?: (address: string, entityType: EntityType) => void;
 }
 
 const getBadgeIcon = (type: FeedEventType) => {
@@ -117,10 +119,34 @@ const formatTime = (timestamp: number) => {
   });
 };
 
+const AddressButton = ({
+  address,
+  entityType,
+  onRowClick,
+}: {
+  address: Address;
+  entityType: EntityType;
+  onRowClick?: (address: string, entityType: EntityType) => void;
+}) => (
+  <button
+    className="group inline-flex cursor-pointer items-center gap-1.5 align-middle"
+    onClick={() => onRowClick?.(address, entityType)}
+  >
+    <EnsAvatar
+      address={address}
+      showAvatar={true}
+      size="xs"
+      isDashed={true}
+      nameClassName="text-primary font-medium group-hover:border-primary transition-colors duration-200"
+    />
+  </button>
+);
+
 export const FeedEventItem = ({
   event,
   className,
   isLast = false,
+  onRowClick,
 }: FeedEventItemProps) => {
   const { daoId } = useParams<{ daoId: DaoIdEnum }>();
   const config = daoConfig[daoId.toUpperCase() as DaoIdEnum];
@@ -146,14 +172,11 @@ export const FeedEventItem = ({
         if (!event.metadata) return null;
         return (
           <div className="leading-relaxed">
-            <span className="inline-flex items-center gap-1.5 align-middle">
-              <EnsAvatar
-                address={event.metadata.voter}
-                showAvatar={true}
-                size="xs"
-                nameClassName="text-primary font-medium"
-              />
-            </span>{" "}
+            <AddressButton
+              address={event.metadata.voter}
+              entityType="delegate"
+              onRowClick={onRowClick}
+            />{" "}
             <CopyAndPasteButton
               textToCopy={event.metadata.voter}
               className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
@@ -221,14 +244,11 @@ export const FeedEventItem = ({
         if (!event.metadata) return null;
         return (
           <div className="leading-relaxed">
-            <span className="inline-flex items-center gap-1.5 align-middle">
-              <EnsAvatar
-                address={event.metadata.proposer}
-                showAvatar={true}
-                size="xs"
-                nameClassName="text-primary font-medium"
-              />
-            </span>{" "}
+            <AddressButton
+              address={event.metadata.proposer}
+              entityType="delegate"
+              onRowClick={onRowClick}
+            />{" "}
             <span className="text-secondary">
               (
               <span className="text-primary">
@@ -307,14 +327,11 @@ export const FeedEventItem = ({
         if (!event.metadata) return null;
         return (
           <div className="leading-relaxed">
-            <span className="inline-flex items-center gap-1.5 align-middle">
-              <EnsAvatar
-                address={event.metadata.from}
-                showAvatar={true}
-                size="xs"
-                nameClassName="text-primary font-medium"
-              />
-            </span>{" "}
+            <AddressButton
+              address={event.metadata.from}
+              entityType="tokenHolder"
+              onRowClick={onRowClick}
+            />{" "}
             <CopyAndPasteButton
               textToCopy={event.metadata.from}
               className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
@@ -325,14 +342,11 @@ export const FeedEventItem = ({
               {formatAmount(event.metadata.amount)} {tokenSymbol}
             </span>{" "}
             <span className="text-secondary">to</span>{" "}
-            <span className="inline-flex items-center gap-1.5 align-middle">
-              <EnsAvatar
-                address={event.metadata.to}
-                showAvatar={true}
-                size="xs"
-                nameClassName="text-primary font-medium"
-              />
-            </span>{" "}
+            <AddressButton
+              address={event.metadata.to}
+              entityType="tokenHolder"
+              onRowClick={onRowClick}
+            />{" "}
             <CopyAndPasteButton
               textToCopy={event.metadata.to}
               className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
@@ -363,19 +377,16 @@ export const FeedEventItem = ({
 
         return (
           <div className="leading-relaxed">
-            <span className="inline-flex items-center gap-1.5 align-middle">
-              <EnsAvatar
-                address={event.metadata.delegator}
-                showAvatar={true}
-                size="xs"
-                nameClassName="text-primary font-medium"
-              />
-              <CopyAndPasteButton
-                textToCopy={event.metadata.delegator}
-                className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
-                iconSize="md"
-              />
-            </span>{" "}
+            <AddressButton
+              address={event.metadata.delegator}
+              entityType="tokenHolder"
+              onRowClick={onRowClick}
+            />{" "}
+            <CopyAndPasteButton
+              textToCopy={event.metadata.delegator}
+              className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
+              iconSize="md"
+            />{" "}
             <span className="text-secondary">
               {hasRedelegation ? "redelegated" : "delegated"}
             </span>{" "}
@@ -385,30 +396,24 @@ export const FeedEventItem = ({
             {hasRedelegation && (
               <>
                 <span className="text-secondary">from</span>{" "}
-                <span className="inline-flex items-center gap-1.5 align-middle">
-                  <EnsAvatar
-                    address={event.metadata.previousDelegate!}
-                    showAvatar={true}
-                    size="xs"
-                    nameClassName="text-primary font-medium"
-                  />
-                  <CopyAndPasteButton
-                    textToCopy={event.metadata.previousDelegate!}
-                    className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
-                    iconSize="md"
-                  />
-                </span>{" "}
+                <AddressButton
+                  address={event.metadata.previousDelegate!}
+                  entityType="delegate"
+                  onRowClick={onRowClick}
+                />{" "}
+                <CopyAndPasteButton
+                  textToCopy={event.metadata.previousDelegate!}
+                  className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
+                  iconSize="md"
+                />{" "}
               </>
             )}
             <span className="text-secondary">to</span>{" "}
-            <span className="inline-flex items-center gap-1.5 align-middle">
-              <EnsAvatar
-                address={event.metadata.delegate}
-                showAvatar={true}
-                size="xs"
-                nameClassName="text-primary font-medium"
-              />
-            </span>{" "}
+            <AddressButton
+              address={event.metadata.delegate}
+              entityType="delegate"
+              onRowClick={onRowClick}
+            />{" "}
             <CopyAndPasteButton
               textToCopy={event.metadata.delegate}
               className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
@@ -435,14 +440,11 @@ export const FeedEventItem = ({
         if (!event.metadata) return null;
         return (
           <div className="leading-relaxed">
-            <span className="inline-flex items-center gap-1.5 align-middle">
-              <EnsAvatar
-                address={event.metadata.delegate}
-                showAvatar={true}
-                size="xs"
-                nameClassName="text-primary font-medium"
-              />
-            </span>{" "}
+            <AddressButton
+              address={event.metadata.delegate}
+              entityType="delegate"
+              onRowClick={onRowClick}
+            />{" "}
             <CopyAndPasteButton
               textToCopy={event.metadata.delegate}
               className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
