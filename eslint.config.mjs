@@ -1,15 +1,19 @@
-const eslintJs = require("@eslint/js");
-const tseslint = require("@typescript-eslint/eslint-plugin");
-const tsparser = require("@typescript-eslint/parser");
-const eslintConfigPrettier = require("eslint-config-prettier");
-const eslintPluginPrettier = require("eslint-plugin-prettier");
-const eslintPluginImport = require("eslint-plugin-import");
-const nextPlugin = require("@next/eslint-plugin-next");
-const reactHooksPlugin = require("eslint-plugin-react-hooks");
-const storybookPlugin = require("eslint-plugin-storybook");
-const globals = require("globals");
+import eslintJs from "@eslint/js";
+import tseslint from "@typescript-eslint/eslint-plugin";
+import tsparser from "@typescript-eslint/parser";
+import eslintConfigPrettier from "eslint-config-prettier";
+import eslintPluginPrettier from "eslint-plugin-prettier";
+import eslintPluginImport from "eslint-plugin-import";
+import nextPlugin from "@next/eslint-plugin-next";
+import reactHooksPlugin from "eslint-plugin-react-hooks";
+import storybookPlugin from "eslint-plugin-storybook";
+import globals from "globals";
+import { fileURLToPath } from "url";
+import path from "path";
 
-module.exports = [
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+export default [
   // Global ignores
   {
     ignores: [
@@ -75,10 +79,7 @@ module.exports = [
       "import/resolver": {
         typescript: {
           alwaysTryTypes: true,
-          project: [
-            "apps/*/tsconfig.json",
-            "packages/*/tsconfig.json",
-          ],
+          project: ["apps/*/tsconfig.json", "packages/*/tsconfig.json"],
           noWarnOnMultipleProjects: true,
         },
         node: true,
