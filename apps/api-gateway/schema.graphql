@@ -27,10 +27,7 @@ type Query {
   historicalDelegations(address: String!, delegateAddressIn: JSON, skip: NonNegativeInt, limit: PositiveInt = 10, fromValue: String, toValue: String, orderDirection: queryInput_historicalDelegations_orderDirection = desc): historicalDelegations_200_response
 
   """Get current delegators of an account"""
-  delegations(address: String!, orderBy: queryInput_delegations_orderBy = timestamp, orderDirection: queryInput_delegations_orderDirection = desc): delegations_200_response
-
-  """Get current delegators of an account with voting power"""
-  delegators(address: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_delegators_orderBy = amount, orderDirection: queryInput_delegators_orderDirection = desc): delegators_200_response
+  delegations(address: String!): delegations_200_response
 
   """
   Get historical Liquid Treasury (treasury without DAO tokens) from external providers (DefiLlama/Dune)
@@ -189,6 +186,9 @@ type Query {
   """Returns token related metrics for a single metric type."""
   tokenMetrics(metricType: queryInput_tokenMetrics_metricType!, startDate: Float, endDate: Float, orderDirection: queryInput_tokenMetrics_orderDirection = asc, limit: NonNegativeInt = 365, skip: NonNegativeInt): tokenMetrics_200_response
 
+  """Get current delegators of an account with voting power"""
+  delegators(address: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_delegators_orderBy = amount, orderDirection: queryInput_delegators_orderDirection = desc): delegators_200_response
+
   """
   Average delegation percentage across all supported DAOs by day.
   Returns the mean delegation percentage for each day in the specified range.
@@ -325,37 +325,6 @@ type query_delegations_items_items {
   amount: String!
   timestamp: String!
   transactionHash: String!
-}
-
-enum queryInput_delegations_orderBy {
-  amount
-  timestamp
-}
-
-enum queryInput_delegations_orderDirection {
-  asc
-  desc
-}
-
-type delegators_200_response {
-  items: [query_delegators_items_items]!
-  totalCount: Float!
-}
-
-type query_delegators_items_items {
-  delegatorAddress: String!
-  amount: String!
-  timestamp: String!
-}
-
-enum queryInput_delegators_orderBy {
-  amount
-  timestamp
-}
-
-enum queryInput_delegators_orderDirection {
-  asc
-  desc
 }
 
 type getLiquidTreasury_200_response {
@@ -1296,6 +1265,37 @@ enum queryInput_tokenMetrics_metricType {
 }
 
 enum queryInput_tokenMetrics_orderDirection {
+  asc
+  desc
+}
+
+enum queryInput_delegations_orderBy {
+  amount
+  timestamp
+}
+
+enum queryInput_delegations_orderDirection {
+  asc
+  desc
+}
+
+type delegators_200_response {
+  items: [query_delegators_items_items]!
+  totalCount: Float!
+}
+
+type query_delegators_items_items {
+  delegatorAddress: String!
+  amount: String!
+  timestamp: String!
+}
+
+enum queryInput_delegators_orderBy {
+  amount
+  timestamp
+}
+
+enum queryInput_delegators_orderDirection {
   asc
   desc
 }
