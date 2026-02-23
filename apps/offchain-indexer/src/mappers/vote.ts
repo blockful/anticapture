@@ -1,25 +1,20 @@
-import type { OffchainVote } from "@/repository/schema";
+import { z } from "zod" 
 
-export interface RawVote {
-  id: string;
-  voter: string;
-  proposal: { id: string };
-  choice: unknown;
-  vp: number;
-  reason: string;
-  created: number;
-}
-
-export const toOffchainVote = (
-  raw: RawVote,
-  spaceId: string,
-): OffchainVote => ({
-  id: raw.id,
-  spaceId,
-  voter: raw.voter,
-  proposalId: raw.proposal.id,
-  choice: raw.choice,
-  vp: raw.vp ?? 0,
-  reason: raw.reason ?? "",
-  created: raw.created,
+export const rawVoteSchema = z.object({
+  id: z.string(),
+  voter: z.string(),
+  proposal: z.object({id: z.string()}),
+  choice: z.unknown().default(null),
+  vp: z.number().default(0),
+  reason: z.string().default(""),
+  created: z.number()
 });
+
+export const toOffchainVote = (spaceId: string) => {
+  return rawVoteSchema.transform((raw) => ({
+    ...raw,
+    spaceId,
+    proposalId: raw.proposal.id,
+    choice: raw.choice
+  }))
+}

@@ -1,8 +1,8 @@
 import { AxiosError, type AxiosInstance } from "axios";
 import type { OffchainProposal, OffchainVote } from "@/repository/schema";
 import type { DataProvider } from "@/provider/dataProvider.interface";
-import { toOffchainProposal, type RawProposal } from "@/mappers/proposal";
-import { toOffchainVote, type RawVote } from "@/mappers/vote";
+import { toOffchainVote, rawVoteSchema } from "@/mappers/vote";
+import { rawProposalSchema, offchainProposalSchema} from "@/mappers/proposal"
 
 const PAGE_SIZE = 1000;
 
@@ -70,13 +70,13 @@ export class SnapshotProvider implements DataProvider {
   async fetchProposals(cursor: string | null): Promise<{ data: OffchainProposal[]; nextCursor: string | null }> {
     const cursorInt = cursor ? parseInt(cursor, 10) : 0;
 
-    const response = await this.query<{ proposals: RawProposal[] }>(
+    const response = await this.query<{ proposals: typeof rawProposalSchema[] }>(
       PROPOSALS_QUERY,
       { spaceId: this.spaceId, cursor: cursorInt, pageSize: PAGE_SIZE },
     );
 
     const proposals: OffchainProposal[] = response.proposals.map((p) =>
-      toOffchainProposal(p, this.spaceId),
+      offchainProposalSchema(this.spaceId).parse(p),
     );
 
     const nextCursor =
@@ -90,13 +90,13 @@ export class SnapshotProvider implements DataProvider {
   async fetchVotes(cursor: string | null): Promise<{ data: OffchainVote[]; nextCursor: string | null }> {
     const cursorInt = cursor ? parseInt(cursor, 10) : 0;
 
-    const response = await this.query<{ votes: RawVote[] }>(
+    const response = await this.query<{ votes: typeof rawVoteSchema[] }>(
       VOTES_QUERY,
       { spaceId: this.spaceId, cursor: cursorInt, pageSize: PAGE_SIZE },
     );
 
     const votes: OffchainVote[] = response.votes.map((v) =>
-      toOffchainVote(v, this.spaceId),
+      toOffchainVote(this.spaceId).parse(v),
     );
 
     const nextCursor =
