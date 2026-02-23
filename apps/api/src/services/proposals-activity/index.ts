@@ -1,5 +1,8 @@
 import { Address } from "viem";
+
+import { DAOClient } from "@/clients";
 import { DaoIdEnum } from "@/lib/enums";
+import { DBProposal } from "@/mappers";
 import {
   DbProposal,
   DbVote,
@@ -8,8 +11,6 @@ import {
   VoteFilter,
   DbProposalWithVote,
 } from "@/repositories/";
-import { DAOClient } from "@/clients";
-import { DBProposal } from "@/mappers";
 
 const FINAL_PROPOSAL_STATUSES = ["EXECUTED", "DEFEATED", "CANCELED", "EXPIRED"];
 

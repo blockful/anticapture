@@ -1,14 +1,14 @@
-import { RiskLevel } from "@/shared/types/enums";
-import { DaoConfiguration } from "@/shared/dao-config/types";
-import { GovernanceImplementationEnum } from "@/shared/types/enums/GovernanceImplementation";
-import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
-import { UniswapIcon } from "@/shared/components/icons";
-import { UniswapOgIcon } from "@/shared/og/dao-og-icons";
 import { mainnet } from "viem/chains";
-import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
+
+import { UniswapIcon } from "@/shared/components/icons";
 import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
+import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
+import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 import { RECOMMENDED_SETTINGS } from "@/shared/constants/recommended-settings";
-import { RiskAreaEnum } from "@/shared/types/enums/RiskArea";
+import { DaoConfiguration } from "@/shared/dao-config/types";
+import { UniswapOgIcon } from "@/shared/og/dao-og-icons";
+import { RiskAreaEnum, RiskLevel } from "@/shared/types/enums";
+import { GovernanceImplementationEnum } from "@/shared/types/enums/GovernanceImplementation";
 
 export const UNI: DaoConfiguration = {
   name: "Uniswap",

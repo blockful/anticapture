@@ -1,26 +1,8 @@
 "use client";
 
-import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components/FilterSort";
 import { ColumnDef } from "@tanstack/react-table";
-import { SkeletonRow, Button, IconButton } from "@/shared/components";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
-import { cn } from "@/shared/utils";
-import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
-import { Address, formatUnits, parseUnits, zeroAddress } from "viem";
 import { ArrowRight, ExternalLink } from "lucide-react";
-import { DaoIdEnum } from "@/shared/types/daos";
 import Link from "next/link";
-import {
-  useDelegateDelegationHistory,
-  DelegationHistoryItem,
-} from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
-import daoConfigByDaoId from "@/shared/dao-config";
-import { Table } from "@/shared/components/design-system/table/Table";
-import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
-import { useAmountFilterStore } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
-import daoConfig from "@/shared/dao-config";
-import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import {
   parseAsBoolean,
   parseAsString,
@@ -28,8 +10,26 @@ import {
   useQueryState,
   useQueryStates,
 } from "nuqs";
+import { Address, formatUnits, parseUnits, zeroAddress } from "viem";
+
+import {
+  useDelegateDelegationHistory,
+  DelegationHistoryItem,
+} from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
+import { SkeletonRow, Button, IconButton } from "@/shared/components";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { DateCell } from "@/shared/components/design-system/table/cells/DateCell";
+import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
+import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components/FilterSort";
+import { useAmountFilterStore } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
+import { Table } from "@/shared/components/design-system/table/Table";
+import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { cn } from "@/shared/utils";
+import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 
 interface VotingPowerHistoryTableProps {
   accountId: string;
@@ -45,7 +45,7 @@ export const VotingPowerHistoryTable = ({
   toTimestamp,
 }: VotingPowerHistoryTableProps) => {
   const limit: number = 20;
-  const { decimals } = daoConfig[daoId];
+  const { decimals } = daoConfigByDaoId[daoId];
 
   const [sortBy, setSortBy] = useQueryState(
     "orderBy",

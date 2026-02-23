@@ -1,8 +1,9 @@
 "use client";
 
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
-import { cn } from "@/shared/utils";
+
 import type { DrawerTabsProps } from "@/shared/components/design-system/drawer/types";
+import { cn } from "@/shared/utils";
 
 export const DrawerTabs = ({
   tabs,

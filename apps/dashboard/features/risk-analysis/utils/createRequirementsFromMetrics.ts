@@ -1,9 +1,12 @@
-import { DaoIdEnum } from "@/shared/types/daos";
-import { RiskAreaEnum, RiskLevel } from "@/shared/types/enums";
-import { GovernanceImplementationEnum } from "@/shared/types/enums";
-import daoConfigByDaoId from "@/shared/dao-config";
 import { RequirementMetric } from "@/features/risk-analysis/components/RiskDescription";
 import { RISK_AREAS } from "@/shared/constants/risk-areas";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
+import {
+  RiskAreaEnum,
+  RiskLevel,
+  GovernanceImplementationEnum,
+} from "@/shared/types/enums";
 
 export const createRequirementsFromMetrics = (
   riskArea: RiskAreaEnum,

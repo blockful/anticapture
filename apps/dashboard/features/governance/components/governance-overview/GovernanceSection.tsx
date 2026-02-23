@@ -1,17 +1,16 @@
 "use client";
 
+import { QueryInput_Proposals_OrderDirection } from "@anticapture/graphql-client";
 import { Building2, Landmark } from "lucide-react";
+import { useParams } from "next/navigation";
 import { useCallback, useEffect, useRef } from "react";
 
-import { useProposals } from "@/features/governance/hooks/useProposals";
-
 import { ProposalItem } from "@/features/governance/components/proposal-overview/ProposalItem";
+import { useProposals } from "@/features/governance/hooks/useProposals";
 import { TheSectionLayout } from "@/shared/components";
-import { Button } from "@/shared/components/ui/button";
-import { QueryInput_Proposals_OrderDirection } from "@anticapture/graphql-client";
-import { useParams } from "next/navigation";
-import { DaoIdEnum } from "@/shared/types/daos";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
+import { Button } from "@/shared/components/ui/button";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 export const GovernanceSection = () => {
   const { daoId }: { daoId: string } = useParams();

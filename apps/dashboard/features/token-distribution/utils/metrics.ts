@@ -1,5 +1,5 @@
-import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { MetricWithKey } from "@/features/token-distribution/types";
+import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 
 export const initialMetrics = [
   MetricTypesEnum.DELEGATED_SUPPLY,

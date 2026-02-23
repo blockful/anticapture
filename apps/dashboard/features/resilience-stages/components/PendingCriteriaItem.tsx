@@ -1,7 +1,8 @@
+import { DotFilledIcon } from "@radix-ui/react-icons";
+import { ChevronRight } from "lucide-react";
+
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
 import { RiskLevel } from "@/shared/types/enums/RiskLevel";
-import { ChevronRight } from "lucide-react";
-import { DotFilledIcon } from "@radix-ui/react-icons";
 import { cn } from "@/shared/utils";
 
 const RISK_LEVEL_DOT_COLOR: Record<RiskLevel, string> = {

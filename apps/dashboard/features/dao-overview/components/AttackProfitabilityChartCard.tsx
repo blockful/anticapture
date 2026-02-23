@@ -1,7 +1,7 @@
 "use client";
 
-import { ElementType, useMemo } from "react";
 import { CircleSlash, Hammer } from "lucide-react";
+import { ElementType, useMemo } from "react";
 
 import { MultilineChartAttackProfitability } from "@/features/attack-profitability/components";
 import { OverviewMetric } from "@/features/dao-overview/components/OverviewMetric";

@@ -1,10 +1,11 @@
-import { useVotingPower } from "@/shared/hooks/graphql-client/useVotingPower";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
-import { useMultipleEnsData } from "@/shared/hooks/useEnsData";
 import { Address, formatUnits } from "viem";
-import { formatAddress } from "@/shared/utils/formatAddress";
+
+import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
 import daoConfig from "@/shared/dao-config";
+import { useVotingPower } from "@/shared/hooks/graphql-client/useVotingPower";
+import { useMultipleEnsData } from "@/shared/hooks/useEnsData";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { formatAddress } from "@/shared/utils/formatAddress";
 
 export interface VoteCompositionData {
   // Dados básicos

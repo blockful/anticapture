@@ -1,5 +1,5 @@
-import { DAOClient } from "@/clients";
 import { DaoDataCache } from "@/cache/dao-cache.interface";
+import { DAOClient } from "@/clients";
 import { DaoResponse } from "@/mappers";
 
 export class DaoService {

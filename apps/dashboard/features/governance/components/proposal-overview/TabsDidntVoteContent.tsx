@@ -1,22 +1,22 @@
-import { formatUnits } from "viem";
-
-import { DaoIdEnum } from "@/shared/types/daos";
 import { GetProposalQuery } from "@anticapture/graphql-client";
+import { ColumnDef } from "@tanstack/react-table";
+import { ArrowUp, ArrowDown } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { formatUnits } from "viem";
+
+import { VotesTable } from "@/features/governance/components/proposal-overview/VotesTable";
 import {
   useNonVoters,
   NonVoter,
 } from "@/features/governance/hooks/useNonVoters";
 import { SkeletonRow, Button } from "@/shared/components";
-import { ColumnDef } from "@tanstack/react-table";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { cn, formatNumberUserReadable } from "@/shared/utils";
-import { ArrowUp, ArrowDown } from "lucide-react";
-import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
-import { VotesTable } from "@/features/governance/components/proposal-overview/VotesTable";
-import daoConfig from "@/shared/dao-config";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
+import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
+import daoConfig from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { cn, formatNumberUserReadable } from "@/shared/utils";
 
 interface TabsDidntVoteContentProps {
   proposal: NonNullable<GetProposalQuery["proposal"]>;
@@ -348,13 +348,14 @@ export const TabsDidntVoteContent = ({
         },
         header: () => (
           <Tooltip tooltipContent="Shows the voting power change within 30 days before voting starts">
-              <p className="border-border-contrast hover:border-primary border-b border-dashed transition-colors duration-300">
-                VP Change (Last 30d)
-              </p>
+            <p className="border-border-contrast hover:border-primary border-b border-dashed transition-colors duration-300">
+              VP Change (Last 30d)
+            </p>
           </Tooltip>
         ),
       },
     ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [proposal, handleSort, sortDirection],
   );
 

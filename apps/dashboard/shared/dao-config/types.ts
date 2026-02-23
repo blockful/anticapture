@@ -1,12 +1,13 @@
 import { ReactNode, SVGProps } from "react";
 import { Address, Chain } from "viem";
+
+import { DaoIconProps } from "@/shared/components/icons/types";
 import {
   RiskLevel,
   GovernanceImplementationEnum,
   RiskAreaEnum,
 } from "@/shared/types/enums";
-import { DaoIconProps } from "@/shared/components/icons/types";
-import { MetricTypesEnum } from "../types/enums/metric-type";
+import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 
 export type TokenMetricItem = {
   date: string;
@@ -117,6 +118,7 @@ export interface AttackProfitabilityConfig {
     percentage: number;
   };
 }
+export type GovernanceImplementationConfig = GovernanceImplementation;
 
 export type DefenseAreaDescription = {
   description: string;
@@ -125,8 +127,6 @@ export type DefenseAreaDescription = {
 export type AttackExposureConfig = {
   defenseAreas?: Partial<Record<RiskAreaEnum, DefenseAreaDescription>>;
 };
-
-export interface GovernanceImplementationConfig extends GovernanceImplementation {}
 
 // Complete DAO configuration structure
 export interface DaoConfiguration extends BaseInfo {

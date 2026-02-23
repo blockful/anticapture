@@ -1,9 +1,9 @@
 "use client";
 
 import { useQuery, useQueries } from "@tanstack/react-query";
+import axios from "axios";
 import { Address } from "viem";
 import { normalize } from "viem/ens";
-import axios from "axios";
 
 type EnsData = {
   address: Address;

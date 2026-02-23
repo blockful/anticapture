@@ -1,3 +1,5 @@
+import { JSX, ReactNode, SVGProps } from "react";
+
 import {
   DiscordColorIcon,
   SlackColorIcon,
@@ -7,7 +9,6 @@ import {
   ANTICAPTURE_SLACK_BOT,
   ANTICAPTURE_TELEGRAM_BOT,
 } from "@/shared/constants/social-media";
-import { JSX, ReactNode, SVGProps } from "react";
 
 export enum AlertAvailability {
   AVAILABLE = "Available",

@@ -7,14 +7,14 @@
  *   pnpm address-enrichment sync --limit 50 --holders-only
  */
 
-import { eq } from "drizzle-orm";
-import { getAddress, type Address } from "viem";
-
-import { initDb, getDb, addressEnrichment } from "@/db";
-import { ArkhamClient } from "@/clients/arkham";
-import { AnticaptureClient } from "@/clients/anticapture";
-import { isContract, createRpcClient } from "@/utils/address-type";
 import dotenv from "dotenv";
+import { eq } from "drizzle-orm";
+import { type Address } from "viem";
+
+import { AnticaptureClient } from "@/clients/anticapture";
+import { ArkhamClient } from "@/clients/arkham";
+import { initDb, getDb, addressEnrichment } from "@/db";
+import { isContract, createRpcClient } from "@/utils/address-type";
 import { DaoIdEnum } from "@/utils/types";
 
 dotenv.config();
@@ -89,9 +89,10 @@ async function enrichAddress(
   rpcClient: ReturnType<typeof createRpcClient>,
   db: ReturnType<typeof getDb>,
 ): Promise<EnrichResult> {
-  const normalizedAddress = address.toLowerCase();  /* FIXME: Unfortunately the addresses have already been commited to
-                                                     * the database in lowercase format, checksum format could only be
-                                                     * used here if we were to convert all current records */
+  const normalizedAddress =
+    address.toLowerCase(); /* FIXME: Unfortunately the addresses have already been commited to
+   * the database in lowercase format, checksum format could only be
+   * used here if we were to convert all current records */
 
   // Check if already exists
   const existing = await db.query.addressEnrichment.findFirst({

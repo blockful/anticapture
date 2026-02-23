@@ -1,27 +1,28 @@
 "use client";
 
+import { useCallback, useState } from "react";
+
+import { StageRequirementsTooltip } from "@/features/dao-overview/components/StageRequirementsTooltip";
+import { StageTag } from "@/features/resilience-stages/components";
 import {
   Button,
   StagesCardRequirements,
   TooltipInfo,
 } from "@/shared/components";
-import { cn, formatPlural } from "@/shared/utils/";
+import { OutlinedBox } from "@/shared/components/boxes/OutlinedBox";
+import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import { DaoAvatarIcon, PointerIcon } from "@/shared/components/icons";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
+import { DaoConfiguration } from "@/shared/dao-config/types";
 import {
   filterFieldsByRiskLevel,
   fieldsToArray,
 } from "@/shared/dao-config/utils";
-import { RiskLevel } from "@/shared/types/enums";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { StageTag } from "@/features/resilience-stages/components";
-import { DaoAvatarIcon, PointerIcon } from "@/shared/components/icons";
-import { Stage } from "@/shared/types/enums/Stage";
-import { DaoConfiguration } from "@/shared/dao-config/types";
-import { OutlinedBox } from "@/shared/components/boxes/OutlinedBox";
-import { useCallback, useState } from "react";
 import { useScreenSize } from "@/shared/hooks";
-import { StageRequirementsTooltip } from "@/features/dao-overview/components/StageRequirementsTooltip";
-import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
-import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { RiskLevel } from "@/shared/types/enums";
+import { Stage } from "@/shared/types/enums/Stage";
+import { cn, formatPlural } from "@/shared/utils/";
 
 interface StagesContainerProps {
   daoId: DaoIdEnum;

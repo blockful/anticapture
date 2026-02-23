@@ -1,12 +1,13 @@
 "use client";
 
-import { DaoIdEnum } from "@/shared/types/daos";
-import { BalanceHistoryVariationGraph } from "@/features/holders-and-delegates/token-holder/drawer/balance-history/BalanceHistoryVariationGraph";
-import { BalanceHistoryTable } from "@/features/holders-and-delegates/token-holder/drawer/balance-history/BalanceHistoryTable";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { useMemo } from "react";
-import { getTimestampRangeFromPeriod } from "@/features/holders-and-delegates/utils";
+
 import { TimePeriod } from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
+import { BalanceHistoryTable } from "@/features/holders-and-delegates/token-holder/drawer/balance-history/BalanceHistoryTable";
+import { BalanceHistoryVariationGraph } from "@/features/holders-and-delegates/token-holder/drawer/balance-history/BalanceHistoryVariationGraph";
+import { getTimestampRangeFromPeriod } from "@/features/holders-and-delegates/utils";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 interface BalanceHistoryProps {
   accountId: string;

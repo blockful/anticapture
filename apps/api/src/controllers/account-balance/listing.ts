@@ -1,16 +1,15 @@
 import { createRoute, OpenAPIHono as Hono, z } from "@hono/zod-openapi";
-import { AccountBalanceService } from "@/services";
+import { getAddress, isAddress } from "viem";
+
+import { DaoIdEnum } from "@/lib/enums";
 import {
   AccountBalancesRequestSchema,
   AccountBalancesResponseMapper,
   AccountBalancesResponseSchema,
-} from "@/mappers";
-import {
   AccountBalanceResponseMapper,
   AccountBalanceResponseSchema,
 } from "@/mappers";
-import { getAddress, isAddress } from "viem";
-import { DaoIdEnum } from "@/lib/enums";
+import { AccountBalanceService } from "@/services";
 
 export function accountBalances(
   app: Hono,

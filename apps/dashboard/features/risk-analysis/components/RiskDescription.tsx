@@ -6,10 +6,11 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import { ReactNode, useMemo } from "react";
-import { RiskLevel } from "@/shared/types/enums/RiskLevel";
+
+import { CorneredBox } from "@/features/risk-analysis/components/CorneredBox";
 import { RiskLevelCardSmall } from "@/shared/components";
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
-import { CorneredBox } from "@/features/risk-analysis/components/CorneredBox";
+import { RiskLevel } from "@/shared/types/enums/RiskLevel";
 
 export interface RequirementMetric extends GovernanceImplementationField {
   name: string;

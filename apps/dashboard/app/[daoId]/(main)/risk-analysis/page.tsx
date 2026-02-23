@@ -1,13 +1,12 @@
-import type { Metadata } from "next";
-import { DaoIdEnum } from "@/shared/types/daos";
-import daoConfigByDaoId from "@/shared/dao-config";
-import { RiskAnalysisSection } from "@/features/risk-analysis";
-import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { Bomb } from "lucide-react";
+import type { Metadata } from "next";
+
+import { RiskAnalysisSection } from "@/features/risk-analysis";
 import { TheSectionLayout } from "@/shared/components";
 import { SubSectionsContainer } from "@/shared/components/design-system/section";
-import { RiskLevel } from "@/shared/types/enums";
-import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 type Props = {
   params: Promise<{ daoId: string }>;
@@ -44,25 +43,6 @@ export default async function RiskAnalysisPage({
   if (!daoConstants.attackExposure) {
     return null;
   }
-
-  const daoRiskAreas = getDaoRiskAreas(daoIdEnum);
-
-  // Determine the highest risk level for the section header
-  const getHighestRiskLevel = (): RiskLevel => {
-    for (const riskAreaInfo of Object.values(daoRiskAreas)) {
-      if (riskAreaInfo.riskLevel === RiskLevel.HIGH) {
-        return RiskLevel.HIGH;
-      }
-    }
-
-    for (const riskAreaInfo of Object.values(daoRiskAreas)) {
-      if (riskAreaInfo.riskLevel === RiskLevel.MEDIUM) {
-        return RiskLevel.MEDIUM;
-      }
-    }
-
-    return RiskLevel.LOW;
-  };
 
   return (
     <div>

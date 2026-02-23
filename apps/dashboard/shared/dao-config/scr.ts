@@ -1,12 +1,16 @@
-import { DaoConfiguration } from "@/shared/dao-config/types";
-import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
-import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
-import { ScrollIcon } from "@/shared/components/icons";
-import { ScrollOgIcon } from "@/shared/og/dao-og-icons";
 import { scroll } from "viem/chains";
+
+import { ScrollIcon } from "@/shared/components/icons";
+import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 import { RECOMMENDED_SETTINGS } from "@/shared/constants/recommended-settings";
-import { RiskAreaEnum } from "@/shared/types/enums/RiskArea";
+import { DaoConfiguration } from "@/shared/dao-config/types";
+import { ScrollOgIcon } from "@/shared/og/dao-og-icons";
+import {
+  RiskLevel,
+  GovernanceImplementationEnum,
+  RiskAreaEnum,
+} from "@/shared/types/enums";
 
 export const SCR: DaoConfiguration = {
   name: "Scroll",

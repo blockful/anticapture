@@ -1,3 +1,6 @@
+import { Address } from "viem";
+
+import { DaysEnum } from "@/lib/enums";
 import {
   VotesRequest,
   DBVote,
@@ -5,8 +8,6 @@ import {
   VotesResponseSchema,
   VotersResponse,
 } from "@/mappers";
-import { DaysEnum } from "@/lib/enums";
-import { Address } from "viem";
 
 interface VotesRepository {
   getProposalNonVoters(

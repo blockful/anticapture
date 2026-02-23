@@ -1,10 +1,11 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
-import { TokenMetricsService } from "@/services/token-metrics";
+
 import {
   TokenMetricsRequestSchema,
   TokenMetricsResponseSchema,
   toTokenMetricsApi,
 } from "@/mappers/token-metrics";
+import { TokenMetricsService } from "@/services/token-metrics";
 
 export function tokenMetrics(app: Hono, service: TokenMetricsService) {
   app.openapi(

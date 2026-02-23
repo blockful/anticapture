@@ -1,6 +1,6 @@
-import { cn } from "@/shared/utils";
-import { Stage } from "@/shared/types/enums/Stage";
 import { PointerIcon } from "@/shared/components/icons";
+import { Stage } from "@/shared/types/enums/Stage";
+import { cn } from "@/shared/utils";
 
 const STAGE_CONFIG = [
   {

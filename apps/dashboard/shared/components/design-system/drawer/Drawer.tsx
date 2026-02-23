@@ -2,9 +2,10 @@
 
 import * as React from "react";
 import { Drawer as DrawerPrimitive } from "vaul";
+
+import type { DrawerRootProps } from "@/shared/components/design-system/drawer/types";
 import { useScreenSize } from "@/shared/hooks";
 import { cn } from "@/shared/utils";
-import type { DrawerRootProps } from "@/shared/components/design-system/drawer/types";
 
 const DrawerRoot = ({ open, onOpenChange, children }: DrawerRootProps) => {
   const { isMobile } = useScreenSize();

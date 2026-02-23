@@ -1,7 +1,8 @@
 import { ReactNode } from "react";
-import { RiskLevel } from "@/shared/types/enums/RiskLevel";
+
 import { RiskLevelCardSmall } from "@/shared/components/cards/RiskLevelCardSmall";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
+import { RiskLevel } from "@/shared/types/enums/RiskLevel";
 
 interface RiskTooltipCardProps {
   title?: string;

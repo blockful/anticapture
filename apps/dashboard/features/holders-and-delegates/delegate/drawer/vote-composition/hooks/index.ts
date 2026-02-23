@@ -1,2 +1,2 @@
-export { useVoteCompositionData } from "./useVoteCompositionData";
-export type { VoteCompositionData } from "./useVoteCompositionData";
+export { useVoteCompositionData } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/hooks/useVoteCompositionData";
+export type { VoteCompositionData } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/hooks/useVoteCompositionData";

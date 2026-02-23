@@ -1,13 +1,14 @@
-import { useCallback } from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs";
-import { ColumnDef } from "@tanstack/react-table";
 import {
   QueryClient,
   QueryClientProvider,
   useInfiniteQuery,
 } from "@tanstack/react-query";
+import { ColumnDef } from "@tanstack/react-table";
+import { useCallback } from "react";
 
 import { Table } from "@/shared/components/design-system/table/Table";
+import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 interface ExampleData {
   id: number;
@@ -72,8 +73,6 @@ const mockFetchPage = async ({
     nextPage: pageParam + 1 < TOTAL_PAGES ? pageParam + 1 : undefined,
   };
 };
-
-import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta: Meta<typeof ExampleDataTable> = {
   title: "Data Display/Table",

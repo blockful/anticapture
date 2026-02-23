@@ -1,17 +1,15 @@
+import { PendingCriteriaItem } from "@/features/resilience-stages/components/PendingCriteriaItem";
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
 import { Stage } from "@/shared/types/enums/Stage";
-import { PendingCriteriaItem } from "@/features/resilience-stages/components/PendingCriteriaItem";
 import { cn } from "@/shared/utils";
 
-const NEXT_STAGE_CONFIG: Record<
-  string,
-  { label: string; colorClass: string }
-> = {
-  [Stage.NONE]: { label: "eligibility", colorClass: "text-error" },
-  [Stage.ZERO]: { label: "Stage 1", colorClass: "text-warning" },
-  [Stage.ONE]: { label: "Stage 2", colorClass: "text-success" },
-  [Stage.TWO]: { label: "Stage 2", colorClass: "text-success" },
-};
+const NEXT_STAGE_CONFIG: Record<string, { label: string; colorClass: string }> =
+  {
+    [Stage.NONE]: { label: "eligibility", colorClass: "text-error" },
+    [Stage.ZERO]: { label: "Stage 1", colorClass: "text-warning" },
+    [Stage.ONE]: { label: "Stage 2", colorClass: "text-success" },
+    [Stage.TWO]: { label: "Stage 2", colorClass: "text-success" },
+  };
 
 interface PendingCriteriaCardProps {
   pendingFields: (GovernanceImplementationField & { name: string })[];

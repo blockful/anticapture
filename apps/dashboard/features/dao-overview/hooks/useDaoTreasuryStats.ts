@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+
 import { useTreasury } from "@/features/attack-profitability/hooks/useTreasury";
 import { TokenDataResponse } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";

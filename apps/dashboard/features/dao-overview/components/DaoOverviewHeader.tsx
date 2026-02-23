@@ -1,11 +1,12 @@
-import { DefaultLink } from "@/shared/components/design-system/links/default-link";
-import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
-import { EthereumIcon } from "@/shared/components/icons/EthereumIcon";
 import { DollarSign } from "lucide-react";
-import { DaoConfiguration, DaoOverviewConfig } from "@/shared/dao-config/types";
-import { OPMainnetIcon } from "@/shared/components/icons/OPMainnetIcon";
-import { cn } from "@/shared/utils";
+
 import { SkeletonRow, TooltipInfo } from "@/shared/components";
+import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
+import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import { EthereumIcon } from "@/shared/components/icons/EthereumIcon";
+import { OPMainnetIcon } from "@/shared/components/icons/OPMainnetIcon";
+import { DaoConfiguration, DaoOverviewConfig } from "@/shared/dao-config/types";
+import { cn } from "@/shared/utils";
 
 interface DaoOverviewHeaderProps {
   daoId: string;

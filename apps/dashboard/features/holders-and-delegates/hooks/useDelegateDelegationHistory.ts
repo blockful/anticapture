@@ -1,18 +1,18 @@
 "use client";
 
-import { useCallback, useMemo, useState, useEffect } from "react";
-import { ApolloError } from "@apollo/client";
-import { formatUnits } from "viem";
-
-import { useHistoricalVotingPowerByAccountQuery } from "@anticapture/graphql-client/hooks";
-import daoConfig from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
 import {
   HistoricalVotingPowerByAccountQuery,
   HistoricalVotingPowerByAccountQueryVariables,
   QueryInput_HistoricalVotingPowerByAccountId_OrderDirection,
 } from "@anticapture/graphql-client";
-import { AmountFilterVariables } from "./types";
+import { useHistoricalVotingPowerByAccountQuery } from "@anticapture/graphql-client/hooks";
+import { ApolloError } from "@apollo/client";
+import { useCallback, useMemo, useState, useEffect } from "react";
+import { formatUnits } from "viem";
+
+import { AmountFilterVariables } from "@/features/holders-and-delegates/hooks/types";
+import daoConfig from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 // Interface for a single delegation history item
 export interface DelegationHistoryItem {
@@ -262,6 +262,7 @@ export function useDelegateDelegationHistory({
     } finally {
       setIsPaginationLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, limit, hasNextPage, isPaginationLoading, fetchMore]);
 
   return {

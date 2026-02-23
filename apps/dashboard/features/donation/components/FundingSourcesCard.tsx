@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Card, CardContent } from "@/shared/components/ui/card";
+
 import { FundingSourcesCardProps } from "@/features/donation/types";
 import { DaoAvatarIcon } from "@/shared/components/icons/DaoAvatarIcon";
+import { Card, CardContent } from "@/shared/components/ui/card";
 
 export const FundingSourcesCard = ({
   title,

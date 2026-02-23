@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { HeaderMobile } from "@/widgets/HeaderMobile";
-import { HeaderSidebar } from "@/widgets";
-import { Footer } from "@/shared/components/design-system/footer/Footer";
+
 import { PanelSection } from "@/features/panel";
+import { Footer } from "@/shared/components/design-system/footer/Footer";
+import { HeaderSidebar } from "@/widgets";
+import { HeaderMobile } from "@/widgets/HeaderMobile";
 
 const metadataDescription =
   "Anticapture | Monitor DAO governance risk. Track delegation shifts, voting power concentration, and onchain risk indicators across Ethereum DAOs.";

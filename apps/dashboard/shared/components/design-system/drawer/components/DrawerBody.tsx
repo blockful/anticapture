@@ -1,7 +1,7 @@
 "use client";
 
-import { cn } from "@/shared/utils";
 import type { DrawerBodyProps } from "@/shared/components/design-system/drawer/types";
+import { cn } from "@/shared/utils";
 
 export const DrawerBody = ({ children, className }: DrawerBodyProps) => {
   return (

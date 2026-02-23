@@ -1,5 +1,6 @@
-import { cn } from "@/shared/utils";
 import { SVGProps } from "react";
+
+import { cn } from "@/shared/utils";
 
 interface PointerIconProps extends SVGProps<SVGSVGElement> {
   hasBorder?: boolean;

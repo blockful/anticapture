@@ -1,8 +1,9 @@
+import { JSX, useMemo } from "react";
+
+import { RiskAreaDisplayItem } from "@/features/risk-analysis/RiskAnalysisSection";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
-import { JSX, ReactNode, useMemo } from "react";
-import { RiskAreaDisplayItem } from "../RiskAnalysisSection";
 import { RiskAreaEnum } from "@/shared/types/enums";
+import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
 
 const customizeGovRiskArea = (
   riskAreas: RiskAreaDisplayItem[],

@@ -1,10 +1,11 @@
 "use client";
 
-import { cn } from "@/shared/utils/";
-import { Badge } from "@/shared/components";
-import { ReactNode } from "react";
 import { CheckCircle2, XCircle } from "lucide-react";
 import Link from "next/link";
+import { ReactNode } from "react";
+
+import { Badge } from "@/shared/components";
+import { cn } from "@/shared/utils/";
 
 interface SwitchItemProps {
   switched?: boolean;

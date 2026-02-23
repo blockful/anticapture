@@ -2,8 +2,10 @@ import { Account, Address, Chain, Client, Transport } from "viem";
 import { readContract } from "viem/actions";
 
 import { DAOClient } from "@/clients";
-import { GovernorAbi } from "./abi";
+
 import { GovernorBase } from "../governor.base";
+
+import { GovernorAbi } from "./abi";
 
 export class UNIClient<
   TTransport extends Transport = Transport,

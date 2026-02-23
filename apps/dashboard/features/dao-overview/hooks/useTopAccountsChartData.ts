@@ -1,19 +1,20 @@
 "use client";
 
-import { useMultipleEnsData } from "@/shared/hooks/useEnsData";
 import {
   GetDelegationHistoryItemsQuery,
   GetVotingPowerCountingQuery,
 } from "@anticapture/graphql-client";
-import { useApolloClient } from "@apollo/client";
-import { Address, zeroAddress } from "viem";
-import { TopAccountChartData } from "@/features/dao-overview/components/TopAccountsChart";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { useEffect, useState, useMemo } from "react";
 import {
   GetDelegationHistoryItemsDocument,
   GetVotingPowerCountingDocument,
 } from "@anticapture/graphql-client/hooks";
+import { useApolloClient } from "@apollo/client";
+import { useEffect, useState, useMemo } from "react";
+import { Address, zeroAddress } from "viem";
+
+import { TopAccountChartData } from "@/features/dao-overview/components/TopAccountsChart";
+import { useMultipleEnsData } from "@/shared/hooks/useEnsData";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 interface UseTopAccountsChartDataParams {
   chartData: TopAccountChartData[];

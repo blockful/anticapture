@@ -1,11 +1,12 @@
-import { useMemo, useCallback } from "react";
-import { ApolloError, NetworkStatus } from "@apollo/client";
-import { DaoIdEnum } from "@/shared/types/daos";
 import {
   GetProposalNonVotersQuery,
   useGetProposalNonVotersQuery,
   QueryInput_ProposalNonVoters_OrderDirection,
 } from "@anticapture/graphql-client/hooks";
+import { ApolloError, NetworkStatus } from "@apollo/client";
+import { useMemo, useCallback } from "react";
+
+import { DaoIdEnum } from "@/shared/types/daos";
 
 // Non-voter type
 export type NonVoter = NonNullable<

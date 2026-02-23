@@ -1,19 +1,20 @@
-import { DaoIdEnum } from "@/shared/types/daos";
 import {
   GetDaoAddressesAccountBalancesQuery,
   useGetDaoAddressesAccountBalancesQuery,
 } from "@anticapture/graphql-client/hooks";
 import { ApolloError, ApolloQueryResult } from "@apollo/client";
 
+import { DaoIdEnum } from "@/shared/types/daos";
+
 interface TopTokenHolderNonDaoResponse {
   data:
-  | {
-    __typename?: "query_accountBalances_items_items";
-    address: string;
-    balance: string;
-  }
-  | null
-  | undefined;
+    | {
+        __typename?: "query_accountBalances_items_items";
+        address: string;
+        balance: string;
+      }
+    | null
+    | undefined;
   loading: boolean;
   error: ApolloError | undefined;
   refetch: () => Promise<

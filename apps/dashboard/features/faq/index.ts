@@ -1,1 +1,1 @@
-export * from "./FaqSection";
+export * from "@/features/faq/FaqSection";

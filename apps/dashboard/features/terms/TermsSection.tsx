@@ -1,6 +1,7 @@
+import Link from "next/link";
+
 import { TheSectionLayout } from "@/shared/components";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
-import Link from "next/link";
 
 const termsData = [
   {

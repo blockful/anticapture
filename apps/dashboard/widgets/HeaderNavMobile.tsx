@@ -1,10 +1,11 @@
 "use client";
 
-import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
-import { ButtonHeaderDAOSidebarMobile } from "@/shared/components";
 import { useParams } from "next/navigation";
-import { DaoIdEnum } from "@/shared/types/daos";
+
+import { ButtonHeaderDAOSidebarMobile } from "@/shared/components";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import daoConfigByDaoId from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 export const HeaderNavMobile = () => {
   const { daoId }: { daoId: string } = useParams();
@@ -49,6 +50,11 @@ export const HeaderNavMobile = () => {
       page: "governance",
       title: "Governance",
       enabled: !!daoConfig.governancePage,
+    },
+    {
+      page: PAGES_CONSTANTS.activityFeed.page,
+      title: PAGES_CONSTANTS.activityFeed.title,
+      enabled: true,
     },
   ];
 

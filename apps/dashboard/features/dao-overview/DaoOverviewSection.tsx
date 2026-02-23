@@ -1,30 +1,31 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Suspense, useEffect } from "react";
-import { DaoIdEnum } from "@/shared/types/daos";
-import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoAvatarIcon } from "@/shared/components/icons";
-import { DaoOverviewSkeleton } from "@/features/dao-overview/skeleton/DaoOverviewSkeleton";
-import { DaoOverviewHeaderMetrics } from "@/features/dao-overview/components/DaoOverviewHeaderMetrics";
-import { TokenDistributionChartCard } from "@/features/dao-overview/components/TokenDistributionChartCard";
+
+import { AccountBalanceChartCard } from "@/features/dao-overview/components/AccountBalanceChartCard";
+import { AttackProfitabilityChartCard } from "@/features/dao-overview/components/AttackProfitabilityChartCard";
 import { DaoOverviewHeaderBackground } from "@/features/dao-overview/components/DaoOverviewHeaderBackground";
-import { SecurityCouncilCard } from "@/features/dao-overview/components/SecurityCouncilCard";
+import { DaoOverviewHeaderMetrics } from "@/features/dao-overview/components/DaoOverviewHeaderMetrics";
 import { LastProposalsCard } from "@/features/dao-overview/components/LastProposalsCard";
-import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
+import { MetricsCard } from "@/features/dao-overview/components/MetricsCard";
+import { OngoingProposalBanner } from "@/features/dao-overview/components/OngoingProposalBanner";
+import { SecurityCouncilCard } from "@/features/dao-overview/components/SecurityCouncilCard";
+import { TokenDistributionChartCard } from "@/features/dao-overview/components/TokenDistributionChartCard";
+import { VotingPowerChartCard } from "@/features/dao-overview/components/VotingPowerChartCard";
+import { DaoOverviewSkeleton } from "@/features/dao-overview/skeleton/DaoOverviewSkeleton";
 import { StagesContainer } from "@/features/resilience-stages/components/StagesContainer";
+import { RiskAreaCardEnum, RiskAreaCardWrapper } from "@/shared/components";
+import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
+import { DaoAvatarIcon } from "@/shared/components/icons";
+import daoConfigByDaoId from "@/shared/dao-config";
 import {
   fieldsToArray,
   getDaoStageFromFields,
 } from "@/shared/dao-config/utils";
-import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
-import { RiskAreaCardEnum, RiskAreaCardWrapper } from "@/shared/components";
-import { AccountBalanceChartCard } from "@/features/dao-overview/components/AccountBalanceChartCard";
-import { VotingPowerChartCard } from "@/features/dao-overview/components/VotingPowerChartCard";
-import { MetricsCard } from "@/features/dao-overview/components/MetricsCard";
-import { AttackProfitabilityChartCard } from "@/features/dao-overview/components/AttackProfitabilityChartCard";
-import { useRouter } from "next/navigation";
 import { apolloClient } from "@/shared/providers/GlobalProviders";
-import { OngoingProposalBanner } from "./components/OngoingProposalBanner";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const router = useRouter();

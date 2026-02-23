@@ -1,7 +1,9 @@
+import { execSync } from "child_process";
+
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { execSync } from "child_process";
-import * as schema from "./schema"
+
+import * as schema from "./schema";
 
 let db: ReturnType<typeof drizzle<typeof schema>> | null = null;
 let pool: Pool | null = null;
@@ -43,4 +45,3 @@ export function getDb() {
   }
   return db;
 }
-

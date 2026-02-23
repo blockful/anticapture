@@ -1,16 +1,17 @@
 "use client";
 
 import React, { useRef } from "react";
+
+import { iconsMapping } from "@/features/risk-analysis/components/RiskDescription";
 import {
   DrawerRoot,
   DrawerContent,
   DrawerHeader,
   DrawerBody,
 } from "@/shared/components/design-system/drawer";
-import { GovernanceImplementationEnum, RiskLevel } from "@/shared/types/enums";
-import { iconsMapping } from "@/features/risk-analysis/components/RiskDescription";
-import { cn } from "@/shared/utils";
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
+import { GovernanceImplementationEnum, RiskLevel } from "@/shared/types/enums";
+import { cn } from "@/shared/utils";
 
 interface GovernanceImplementationDrawerProps {
   isOpen: boolean;

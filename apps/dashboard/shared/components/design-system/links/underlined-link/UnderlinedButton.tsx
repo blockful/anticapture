@@ -1,6 +1,7 @@
 import { ButtonHTMLAttributes, ReactNode } from "react";
-import { cn } from "@/shared/utils";
+
 import { underlinedStyles } from "@/shared/components/design-system/links/underlined-link/UnderlinedLink";
+import { cn } from "@/shared/utils";
 
 type UnderlinedButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   children: ReactNode;

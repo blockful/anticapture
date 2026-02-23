@@ -1,28 +1,29 @@
 "use client";
 
-import { ReactNode, useState, useMemo, useCallback, useRef } from "react";
-import {
-  RiskAreaCardEnum,
-  RiskAreaCardWrapper,
-} from "@/shared/components/cards/RiskAreaCard";
+import { ReactNode, useCallback, useMemo, useRef, useState } from "react";
+
+import { GovernanceImplementationDrawer } from "@/features/risk-analysis/components/GovernanceImplementationDrawer";
 import {
   RequirementMetric,
   RiskDescription,
 } from "@/features/risk-analysis/components/RiskDescription";
+import { useRiskAreaData } from "@/features/risk-analysis/hooks/useRiskAreaData";
+import { createRequirementsFromMetrics } from "@/features/risk-analysis/utils/createRequirementsFromMetrics";
+import { getSelectedMetricData } from "@/features/risk-analysis/utils/getSelectedMetricData";
+import {
+  RiskAreaCardEnum,
+  RiskAreaCardWrapper,
+} from "@/shared/components/cards/RiskAreaCard";
+import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
+import { RISK_AREAS } from "@/shared/constants/risk-areas";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
 import {
   RiskLevel,
   RiskAreaEnum,
   GovernanceImplementationEnum,
 } from "@/shared/types/enums";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { RISK_AREAS } from "@/shared/constants/risk-areas";
 import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
-import daoConfigByDaoId from "@/shared/dao-config";
-import { GovernanceImplementationDrawer } from "@/features/risk-analysis/components/GovernanceImplementationDrawer";
-import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
-import { useRiskAreaData } from "./hooks/useRiskAreaData";
-import { createRequirementsFromMetrics } from "./utils/createRequirementsFromMetrics";
-import { getSelectedMetricData } from "./utils/getSelectedMetricData";
 
 export interface RiskAreaDisplayItem {
   name: string;

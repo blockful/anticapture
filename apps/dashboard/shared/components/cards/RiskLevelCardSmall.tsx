@@ -1,10 +1,16 @@
 "use client";
 
+import {
+  AlertTriangle,
+  AlertCircle,
+  CheckCircle2,
+  HelpCircle,
+} from "lucide-react";
 import { ReactNode } from "react";
-import { AlertTriangle, AlertCircle, CheckCircle2, HelpCircle } from "lucide-react";
-import { cn } from "@/shared/utils/";
+
+import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 import { RiskLevel } from "@/shared/types/enums/RiskLevel";
-import { BadgeStatus } from "../design-system/badges/BadgeStatus";
+import { cn } from "@/shared/utils/";
 
 type RiskConfig = {
   color: string;
@@ -71,10 +77,7 @@ interface RiskLevelCardSmallProps {
   className?: string;
 }
 
-export const RiskLevelCardSmall = ({
-  status,
-  className,
-}: RiskLevelCardSmallProps) => {
+export const RiskLevelCardSmall = ({ status }: RiskLevelCardSmallProps) => {
   const config = riskConfigs[status ?? RiskLevel.NONE];
 
   return (

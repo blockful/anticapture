@@ -1,8 +1,8 @@
-import { DaoIdEnum } from "@/shared/types/daos";
-import daoConfigByDaoId from "@/shared/dao-config";
-import { GovernanceImplementationEnum } from "@/shared/types/enums";
-import { GovernanceImplementationField } from "@/shared/dao-config/types";
 import { RequirementMetric } from "@/features/risk-analysis/components/RiskDescription";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { GovernanceImplementationField } from "@/shared/dao-config/types";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { GovernanceImplementationEnum } from "@/shared/types/enums";
 
 interface SelectedMetricData extends GovernanceImplementationField {
   name: string;

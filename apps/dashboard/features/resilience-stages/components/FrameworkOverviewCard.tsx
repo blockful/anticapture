@@ -1,11 +1,12 @@
-import { GovernanceImplementationField } from "@/shared/dao-config/types";
-import { RiskLevel } from "@/shared/types/enums/RiskLevel";
-import { ArrowUpRight, KeyRound } from "lucide-react";
 import { DotFilledIcon } from "@radix-ui/react-icons";
+import { ArrowUpRight } from "lucide-react";
+import Link from "next/link";
+
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 import { UnderlinedButton } from "@/shared/components/design-system/links/underlined-link";
+import { GovernanceImplementationField } from "@/shared/dao-config/types";
+import { RiskLevel } from "@/shared/types/enums/RiskLevel";
 import { cn } from "@/shared/utils";
-import Link from "next/link";
 
 const RISK_GROUP_CONFIG = [
   {

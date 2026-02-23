@@ -1,6 +1,5 @@
 import Link, { LinkProps } from "next/link";
 import { ReactNode } from "react";
-import { cn } from "@/shared/utils";
 
 export const underlinedStyles =
   "group border-foreground text-secondary hover:text-primary flex items-center gap-1 border-b border-dashed font-mono text-sm text-[13px] leading-[18px] font-medium tracking-wide uppercase duration-300 hover:border-white";
@@ -15,7 +14,6 @@ export const UnderlinedLink = ({
   children,
   href,
   openInNewTab,
-  className,
   ...props
 }: UnderlinedLinkProps) => {
   return (
@@ -23,7 +21,7 @@ export const UnderlinedLink = ({
       href={href}
       target={openInNewTab ? "_blank" : "_self"}
       rel="noopener noreferrer"
-      className={cn(underlinedStyles, className)}
+      className="border-foreground text-secondary hover:text-primary group flex items-center gap-1 border-b border-dashed font-mono text-[13px] text-sm font-medium uppercase leading-[18px] tracking-wide duration-300 hover:border-white"
       {...props}
     >
       {children}

@@ -1,20 +1,21 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { DaoIdEnum } from "@/shared/types/daos";
 import {
   QueryInput_Transactions_SortOrder,
   useTransactionsQuery,
 } from "@anticapture/graphql-client/hooks";
+import { NetworkStatus } from "@apollo/client";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { parseUnits } from "viem";
+
+import { TransactionsParamsType } from "@/features/transactions/hooks/useTransactionParams";
 import {
   adaptTransactionsToTableData,
   GraphTransaction,
 } from "@/features/transactions/utils/transactionsAdapter";
-import { NetworkStatus } from "@apollo/client";
-import { parseUnits } from "viem";
 import { SupplyType } from "@/shared/components";
 import daoConfig from "@/shared/dao-config";
-import { TransactionsParamsType } from "@/features/transactions/hooks/useTransactionParams";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 export type AffectedSupplyType =
   | "CEX"

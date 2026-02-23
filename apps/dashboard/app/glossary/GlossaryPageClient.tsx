@@ -1,10 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { HeaderSidebar } from "@/widgets";
-import { TheSectionLayout } from "@/shared/components";
-import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { BookOpen } from "lucide-react";
+import { useState } from "react";
+
 import {
   SAMPLE_GLOSSARY_DATA,
   getAvailableLetters,
@@ -15,8 +13,11 @@ import {
   GlossarySearchResults,
   GlossaryContent,
 } from "@/features/glossary";
-import { HeaderMobile } from "@/widgets/HeaderMobile";
+import { TheSectionLayout } from "@/shared/components";
 import { Footer } from "@/shared/components/design-system/footer/Footer";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
+import { HeaderSidebar } from "@/widgets";
+import { HeaderMobile } from "@/widgets/HeaderMobile";
 
 export default function GlossaryPage() {
   const availableLetters = getAvailableLetters(SAMPLE_GLOSSARY_DATA);

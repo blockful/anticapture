@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Button } from "@/shared/components";
-import { useParams, useRouter } from "next/navigation";
-import { DaoIdEnum } from "@/shared/types/daos";
 import { ChevronsUpDown, ChevronsRight, ChevronsLeft } from "lucide-react";
-import { cn } from "@/shared/utils/";
+import { useParams, useRouter } from "next/navigation";
+import React, { useState, useRef, useEffect, useCallback } from "react";
+
+import { Button } from "@/shared/components";
 import { DaoAvatarIcon } from "@/shared/components/icons";
 import daoConfigByDaoId from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { cn } from "@/shared/utils/";
 
 type Item = {
   id: number;

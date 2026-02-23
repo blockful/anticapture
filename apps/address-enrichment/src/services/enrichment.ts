@@ -1,12 +1,12 @@
 import { eq } from "drizzle-orm";
-import { getAddress, type Address } from "viem";
+import { getAddress } from "viem";
+import z from "zod";
 
-import { getDb, addressEnrichment } from "@/db";
-import type { AddressEnrichment } from "@/db/schema";
 import { ArkhamClient } from "@/clients/arkham";
 import { ENSClient } from "@/clients/ens";
+import { getDb, addressEnrichment } from "@/db";
+import type { AddressEnrichment } from "@/db/schema";
 import { isContract, createRpcClient } from "@/utils/address-type";
-import z from "zod";
 
 export const EnrichmentResultSchema = z.object({
   address: z.string(),
