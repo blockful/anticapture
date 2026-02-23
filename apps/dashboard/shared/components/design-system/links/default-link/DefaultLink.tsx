@@ -1,7 +1,8 @@
-import { cn } from "@/shared/utils";
-import Link, { LinkProps } from "next/link";
 import { cva, type VariantProps } from "class-variance-authority";
+import Link, { LinkProps } from "next/link";
 import { ReactNode } from "react";
+
+import { cn } from "@/shared/utils";
 
 export const defaultLinkVariants = cva(
   "flex items-center gap-1 font-mono tracking-wider uppercase leading-none text-[13px] font-medium transition-colors duration-300",

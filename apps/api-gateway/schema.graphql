@@ -1,16 +1,26 @@
-directive @enum(subgraph: String, value: String) on ENUM_VALUE
-
 directive @resolveRoot(subgraph: String) on FIELD_DEFINITION
-
-directive @typescript(subgraph: String, type: String) on SCALAR | ENUM
-
-directive @example(subgraph: String, value: ObjMap) repeatable on FIELD_DEFINITION | OBJECT | INPUT_OBJECT | ENUM | SCALAR
 
 directive @httpOperation(subgraph: String, path: String, operationSpecificHeaders: [[String]], httpMethod: HTTPMethod, isBinary: Boolean, requestBaseBody: ObjMap, queryParamArgMap: ObjMap, queryStringOptionsByParam: ObjMap, jsonApiFields: Boolean, queryStringOptions: ObjMap) on FIELD_DEFINITION
 
 directive @transport(subgraph: String, kind: String, location: String, headers: [[String]], queryStringOptions: ObjMap, queryParams: [[String]]) repeatable on SCHEMA
 
+directive @enum(subgraph: String, value: String) on ENUM_VALUE
+
+directive @typescript(subgraph: String, type: String) on SCALAR | ENUM
+
+directive @example(subgraph: String, value: ObjMap) repeatable on FIELD_DEFINITION | OBJECT | INPUT_OBJECT | ENUM | SCALAR
+
 type Query {
+  """
+  Returns label information from Arkham, ENS data, and whether the address is an EOA or contract. Arkham data is stored permanently. ENS data is cached with a configurable TTL.
+  """
+  getAddress(address: String!): getAddress_200_response
+
+  """
+  Returns label information from Arkham, ENS data, and address type for multiple addresses. Maximum 100 addresses per request. Arkham data is stored permanently. ENS data is cached with a configurable TTL.
+  """
+  getAddresses(addresses: JSON!): getAddresses_200_response
+
   """
   Get historical delegations for an account, with optional filtering and sorting
   """
@@ -217,6 +227,69 @@ type Query {
   daos: DAOList!
 }
 
+type getAddress_200_response {
+  address: String!
+  isContract: Boolean!
+  arkham: query_getAddress_arkham
+  ens: query_getAddress_ens
+}
+
+type query_getAddress_arkham {
+  entity: String
+  entityType: String
+  label: String
+  twitter: String
+}
+
+type query_getAddress_ens {
+  name: String
+  avatar: String
+  banner: String
+}
+
+type getAddresses_200_response {
+  results: [query_getAddresses_results_items]!
+}
+
+type query_getAddresses_results_items {
+  address: String!
+  isContract: Boolean!
+  arkham: query_getAddresses_results_items_arkham
+  ens: query_getAddresses_results_items_ens
+}
+
+type query_getAddresses_results_items_arkham {
+  entity: String
+  entityType: String
+  label: String
+  twitter: String
+}
+
+type query_getAddresses_results_items_ens {
+  name: String
+  avatar: String
+  banner: String
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
+
+enum HTTPMethod {
+  GET
+  HEAD
+  POST
+  PUT
+  DELETE
+  CONNECT
+  OPTIONS
+  TRACE
+  PATCH
+}
+
+scalar ObjMap
+
 type historicalDelegations_200_response {
   items: [query_historicalDelegations_items_items]!
   totalCount: Float!
@@ -229,11 +302,6 @@ type query_historicalDelegations_items_items {
   timestamp: String!
   transactionHash: String!
 }
-
-"""
-The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
-"""
-scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
 
 """Integers that will have a value of 0 or more."""
 scalar NonNegativeInt
@@ -1232,20 +1300,6 @@ enum queryInput_tokenMetrics_metricType {
 enum queryInput_tokenMetrics_orderDirection {
   asc
   desc
-}
-
-scalar ObjMap
-
-enum HTTPMethod {
-  GET
-  HEAD
-  POST
-  PUT
-  DELETE
-  CONNECT
-  OPTIONS
-  TRACE
-  PATCH
 }
 
 type AverageDelegationPercentageItem {

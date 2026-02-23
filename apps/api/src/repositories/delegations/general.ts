@@ -1,9 +1,8 @@
-import { DBDelegation } from "@/mappers";
 import { asc, desc, eq } from "drizzle-orm";
-import { Drizzle } from "@/database";
-import { delegation } from "@/database";
 import { Address } from "viem";
-import { DelegationsRequestQuery } from "@/mappers";
+
+import { Drizzle, delegation } from "@/database";
+import { DBDelegation, DelegationsRequestQuery } from "@/mappers";
 
 export class DelegationsRepository {
   constructor(private readonly db: Drizzle) {}

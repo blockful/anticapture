@@ -1,5 +1,5 @@
-import { DaoIdEnum } from "@/shared/types/daos";
 import { createDaoSectionOgImage } from "@/shared/og";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 export const alt = "Anticapture Token Distribution";
 export const size = { width: 1200, height: 630 };

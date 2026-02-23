@@ -1,18 +1,19 @@
 import {
-  useDelegators,
-  DelegatorItem,
-} from "@/shared/hooks/graphql-client/useDelegators";
-import {
   QueryInput_Delegators_OrderBy,
   QueryInput_Delegators_OrderDirection,
 } from "@anticapture/graphql-client";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
-import { useMultipleEnsData } from "@/shared/hooks/useEnsData";
-import { Address, formatUnits } from "viem";
-import { formatAddress } from "@/shared/utils/formatAddress";
-import daoConfig from "@/shared/dao-config";
 import { useGetVotingPowerQuery } from "@anticapture/graphql-client/hooks";
+import { Address, formatUnits } from "viem";
+
+import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
+import daoConfig from "@/shared/dao-config";
+import {
+  useDelegators,
+  DelegatorItem,
+} from "@/shared/hooks/graphql-client/useDelegators";
+import { useMultipleEnsData } from "@/shared/hooks/useEnsData";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { formatAddress } from "@/shared/utils/formatAddress";
 
 export interface VoteCompositionData {
   topDelegators: DelegatorItem[];

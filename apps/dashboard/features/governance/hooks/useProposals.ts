@@ -1,15 +1,16 @@
-import { useCallback, useMemo, useState, useEffect } from "react";
-import { ApolloError } from "@apollo/client";
-import { DaoIdEnum } from "@/shared/types/daos";
 import {
   GetProposalsFromDaoQuery,
   QueryInput_Proposals_OrderDirection,
   QueryProposalsArgs,
   useGetProposalsFromDaoQuery,
 } from "@anticapture/graphql-client/hooks";
+import { ApolloError } from "@apollo/client";
+import { useCallback, useMemo, useState, useEffect } from "react";
+
 import type { Proposal as GovernanceProposal } from "@/features/governance/types";
 import { transformToGovernanceProposal } from "@/features/governance/utils/transformToGovernanceProposal";
 import daoConfig from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 export interface PaginationInfo {
   hasNextPage: boolean;

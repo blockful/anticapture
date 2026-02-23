@@ -1,9 +1,10 @@
 "use client";
 
-import { cn } from "@/shared/utils/";
-import { usePathname } from "next/navigation";
 import { Heart, BookOpen, HelpCircle, Mail } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+import { cn } from "@/shared/utils/";
 
 interface BottomNavigationButtonsProps {
   className?: string;

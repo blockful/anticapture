@@ -1,5 +1,7 @@
 "use client";
 
+import Lottie from "lottie-react";
+import { useMemo } from "react";
 import {
   CartesianGrid,
   Line,
@@ -8,12 +10,11 @@ import {
   YAxis,
   Tooltip,
 } from "recharts";
+
+import loadingAnimation from "@/public/loading-animation.json";
+import { TooltipInfo } from "@/shared/components";
 import { ChartConfig, ChartContainer } from "@/shared/components/ui/chart";
 import { useDelegationPercentageByDay } from "@/shared/hooks";
-import { useMemo } from "react";
-import { TooltipInfo } from "@/shared/components";
-import loadingAnimation from "@/public/loading-animation.json";
-import Lottie from "lottie-react";
 
 const chartConfig: ChartConfig = {
   delegatedSupply: {

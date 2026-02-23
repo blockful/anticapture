@@ -3,9 +3,10 @@
 import React from "react";
 import { BarProps } from "recharts";
 import { Address } from "viem";
-import { formatNumberUserReadable } from "@/shared/utils";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+
 import { TopAccountChartData } from "@/features/dao-overview/components/TopAccountsChart";
+import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { formatNumberUserReadable } from "@/shared/utils";
 
 export interface CustomBarShapeProps extends BarProps {
   x: number;

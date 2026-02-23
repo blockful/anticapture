@@ -1,4 +1,5 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
+
 import {
   AccountBalanceVariationsByAccountIdRequestQuerySchema,
   AccountBalanceVariationsResponseMapper,
@@ -51,7 +52,7 @@ export function accountBalanceVariations(
       );
 
       return context.json(
-        AccountBalanceVariationsResponseMapper(result, fromDate, toDate)
+        AccountBalanceVariationsResponseMapper(result, fromDate, toDate),
       );
     },
   );

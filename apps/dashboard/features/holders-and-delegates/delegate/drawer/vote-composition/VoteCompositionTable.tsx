@@ -1,25 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
-import { Button, SkeletonRow } from "@/shared/components";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { ColumnDef } from "@tanstack/react-table";
-import { Address, formatUnits, parseUnits } from "viem";
-import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
-import { useDelegators } from "@/shared/hooks/graphql-client/useDelegators";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { formatNumberUserReadable } from "@/shared/utils";
-import { Table } from "@/shared/components/design-system/table/Table";
-import daoConfig from "@/shared/dao-config";
-import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { parseAsStringEnum, useQueryState } from "nuqs";
 import {
   QueryInput_Delegators_OrderBy,
   QueryInput_Delegators_OrderDirection,
 } from "@anticapture/graphql-client";
+import { ColumnDef } from "@tanstack/react-table";
+import { parseAsStringEnum, useQueryState } from "nuqs";
+import { useEffect, useState } from "react";
+import { Address, formatUnits } from "viem";
+
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
+import { SkeletonRow, Button } from "@/shared/components";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { DateCell } from "@/shared/components/design-system/table/cells/DateCell";
+import { Table } from "@/shared/components/design-system/table/Table";
+import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
+import daoConfig from "@/shared/dao-config";
+import { useDelegators } from "@/shared/hooks/graphql-client/useDelegators";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { formatNumberUserReadable } from "@/shared/utils";
 
 export const VoteCompositionTable = ({
   address,

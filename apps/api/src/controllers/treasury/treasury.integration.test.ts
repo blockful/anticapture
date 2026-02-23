@@ -1,14 +1,16 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
-import { treasury } from "./index";
-import { TreasuryService } from "@/services/treasury";
+import { parseEther } from "viem";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+
+import { TreasuryRepository } from "@/repositories/treasury";
 import {
+  TreasuryService,
   TreasuryProvider,
   LiquidTreasuryDataPoint,
   PriceProvider,
 } from "@/services/treasury";
-import { TreasuryRepository } from "@/repositories/treasury";
-import { parseEther } from "viem";
+
+import { treasury } from "./index";
 
 /**
  * Fakes for dependency injection

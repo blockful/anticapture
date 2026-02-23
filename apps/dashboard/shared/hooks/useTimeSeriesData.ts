@@ -1,14 +1,15 @@
+import axios from "axios";
 import useSWR from "swr";
-import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
-import { TokenMetricItem } from "@/shared/dao-config/types";
-import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { TimeInterval } from "@/shared/types/enums/TimeInterval";
+
 import {
   DAYS_IN_SECONDS,
   SECONDS_PER_DAY,
 } from "@/shared/constants/time-related";
-import axios from "axios";
+import { TokenMetricItem } from "@/shared/dao-config/types";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
+import { TimeInterval } from "@/shared/types/enums/TimeInterval";
+import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
 
 interface TokenMetricsItem {
   date: string;

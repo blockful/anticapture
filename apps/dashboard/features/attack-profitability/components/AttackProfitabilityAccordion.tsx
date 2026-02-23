@@ -1,6 +1,5 @@
 "use client";
 
-import { ReactNode } from "react";
 import {
   Accordion,
   AccordionItem,
@@ -20,6 +19,8 @@ import {
   Plus,
   Users,
 } from "lucide-react";
+import { ReactNode } from "react";
+
 import { Badge } from "@/shared/components/badges/Badge";
 
 interface AccordionDataProps {

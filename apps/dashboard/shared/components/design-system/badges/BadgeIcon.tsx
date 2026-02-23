@@ -1,6 +1,7 @@
-import { cn } from "@/shared/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 import { ElementType } from "react";
+
+import { cn } from "@/shared/utils";
 
 export type BadgeSize = "default" | "lg";
 

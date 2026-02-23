@@ -1,29 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { SkeletonRow, Button, IconButton } from "@/shared/components";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
-import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
-import { cn } from "@/shared/utils";
 import { ArrowRight, ExternalLink } from "lucide-react";
-import { useBalanceHistory } from "@/features/holders-and-delegates/hooks/useBalanceHistory";
-import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
-import {
-  CategoriesFilter,
-  FilterOption,
-} from "@/shared/components/design-system/table/filters/CategoriesFilter";
-import daoConfigByDaoId from "@/shared/dao-config";
-import { Table } from "@/shared/components/design-system/table/Table";
-import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
-import { parseUnits } from "viem";
-import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
-import { AddressFilter } from "@/shared/components/design-system/table/filters";
-import { fetchAddressFromEnsName } from "@/shared/hooks/useEnsData";
-import daoConfig from "@/shared/dao-config";
-import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { DaoIdEnum } from "@/shared/types/daos";
 import {
   parseAsBoolean,
   parseAsString,
@@ -31,9 +9,31 @@ import {
   useQueryState,
   useQueryStates,
 } from "nuqs";
+import { useMemo } from "react";
+import { parseUnits } from "viem";
+
+import { useBalanceHistory } from "@/features/holders-and-delegates/hooks/useBalanceHistory";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
-import { useAmountFilterStore } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
+import { SkeletonRow, Button, IconButton } from "@/shared/components";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 import { DateCell } from "@/shared/components/design-system/table/cells/DateCell";
+import { AddressFilter } from "@/shared/components/design-system/table/filters";
+import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
+import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
+import { useAmountFilterStore } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
+import {
+  CategoriesFilter,
+  FilterOption,
+} from "@/shared/components/design-system/table/filters/CategoriesFilter";
+import { Table } from "@/shared/components/design-system/table/Table";
+import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { fetchAddressFromEnsName } from "@/shared/hooks/useEnsData";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { cn } from "@/shared/utils";
+import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 
 interface BalanceHistoryData {
   id: string;
@@ -58,7 +58,7 @@ export const BalanceHistoryTable = ({
   toTimestamp?: number;
 }) => {
   const limit: number = 20;
-  const { decimals } = daoConfig[daoId];
+  const { decimals } = daoConfigByDaoId[daoId];
 
   const [typeFilter, setTypeFilter] = useQueryState(
     "type",

@@ -1,10 +1,10 @@
+import { AccountBalanceVariations_200_Response } from "@anticapture/graphql-client";
+import { useAccountBalanceVariationsQuery } from "@anticapture/graphql-client/hooks";
 import { useMemo } from "react";
 
-import { useAccountBalanceVariationsQuery } from "@anticapture/graphql-client/hooks";
+import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
-import { AccountBalanceVariations_200_Response } from "@anticapture/graphql-client";
-import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 
 interface UseAccountBalanceVariationsResult {
   data: AccountBalanceVariations_200_Response | null;

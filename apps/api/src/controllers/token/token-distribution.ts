@@ -1,8 +1,8 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 import { formatUnits, parseEther } from "viem";
 
-import { DaysEnum, DaysOpts } from "@/lib/enums";
 import { MetricTypesEnum } from "@/lib/constants";
+import { DaysEnum, DaysOpts } from "@/lib/enums";
 
 interface TokenDistributionRepository {
   getSupplyComparison(
@@ -131,12 +131,10 @@ export function tokenDistribution(
 
         const { oldValue, currentValue } = result;
 
-        /* eslint-disable */
         const changeRate =
           parseInt(oldValue) &&
           (BigInt(currentValue) * parseEther("1")) / BigInt(oldValue) -
             parseEther("1");
-        /* eslint-enable */
 
         return ctx.json(
           {
