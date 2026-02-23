@@ -1,7 +1,9 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
 import { Address } from "viem";
-import { DelegatorsService } from "./delegators";
+import { describe, it, expect, beforeEach, vi } from "vitest";
+
 import { AggregatedDelegator } from "@/mappers";
+
+import { DelegatorsService } from "./delegators";
 
 const createMockAggregatedDelegator = (
   overrides: Partial<AggregatedDelegator> = {},
@@ -130,8 +132,7 @@ describe("DelegatorsService", () => {
 
       expect(result.items).toEqual([
         {
-          delegatorAddress:
-            "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+          delegatorAddress: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
           amount: 5000000000000000000n,
           timestamp: 1700000000n,
         },
@@ -184,8 +185,7 @@ describe("DelegatorsService", () => {
 
       expect(result.items).toEqual([
         {
-          delegatorAddress:
-            "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+          delegatorAddress: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
           amount: 7000000000000000000n,
           timestamp: 1700000000n,
         },
@@ -205,8 +205,7 @@ describe("DelegatorsService", () => {
 
       expect(result.items).toEqual([
         {
-          delegatorAddress:
-            "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+          delegatorAddress: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
           amount: 0n,
           timestamp: 1700000000n,
         },

@@ -1,12 +1,14 @@
-import { describe, it, expect, beforeEach } from "vitest";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { Address, getAddress } from "viem";
-import { delegators } from "./delegators";
+import { describe, it, expect, beforeEach } from "vitest";
+
+import { AggregatedDelegator } from "@/mappers";
 import {
   DelegatorsService,
   DelegatorsSortOptions,
 } from "@/services/delegations/delegators";
-import { AggregatedDelegator } from "@/mappers";
+
+import { delegators } from "./delegators";
 
 class FakeDelegatorsRepository {
   private items: AggregatedDelegator[] = [];

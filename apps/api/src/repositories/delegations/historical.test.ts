@@ -1,10 +1,12 @@
 import { PGlite } from "@electric-sql/pglite";
-import { drizzle } from "drizzle-orm/pglite";
 import { pushSchema } from "drizzle-kit/api";
+import { drizzle } from "drizzle-orm/pglite";
+import { Address } from "viem";
+
 import * as schema from "@/database/schema";
 import { delegation } from "@/database/schema";
+
 import { HistoricalDelegationsRepository } from "./historical";
-import { Address } from "viem";
 
 type DelegationInsert = typeof delegation.$inferInsert;
 
@@ -47,6 +49,7 @@ describe("HistoricalDelegationsRepository", () => {
   let repository: HistoricalDelegationsRepository;
 
   beforeAll(async () => {
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     (BigInt.prototype as any).toJSON = function () {
       return this.toString();
     };
@@ -55,6 +58,7 @@ describe("HistoricalDelegationsRepository", () => {
     db = drizzle(client, { schema });
     repository = new HistoricalDelegationsRepository(db);
 
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     const { apply } = await pushSchema(schema, db as any);
     await apply();
   });
@@ -69,10 +73,12 @@ describe("HistoricalDelegationsRepository", () => {
 
   describe("getHistoricalDelegations", () => {
     it("should return items and totalCount", async () => {
-      await db.insert(delegation).values([
-        createDelegation({ transactionHash: "0xtx1", delegatedValue: 500n }),
-        createDelegation({ transactionHash: "0xtx2", delegatedValue: 800n }),
-      ]);
+      await db
+        .insert(delegation)
+        .values([
+          createDelegation({ transactionHash: "0xtx1", delegatedValue: 500n }),
+          createDelegation({ transactionHash: "0xtx2", delegatedValue: 800n }),
+        ]);
 
       const result = await repository.getHistoricalDelegations(
         delegator,
@@ -134,11 +140,13 @@ describe("HistoricalDelegationsRepository", () => {
     });
 
     it("should filter by fromValue (gte on timestamp)", async () => {
-      await db.insert(delegation).values([
-        createDelegation({ transactionHash: "0xtx1", timestamp: 1000n }),
-        createDelegation({ transactionHash: "0xtx2", timestamp: 2000n }),
-        createDelegation({ transactionHash: "0xtx3", timestamp: 3000n }),
-      ]);
+      await db
+        .insert(delegation)
+        .values([
+          createDelegation({ transactionHash: "0xtx1", timestamp: 1000n }),
+          createDelegation({ transactionHash: "0xtx2", timestamp: 2000n }),
+          createDelegation({ transactionHash: "0xtx3", timestamp: 3000n }),
+        ]);
 
       const result = await repository.getHistoricalDelegations(
         delegator,
@@ -158,11 +166,13 @@ describe("HistoricalDelegationsRepository", () => {
     });
 
     it("should filter by toValue (lte on timestamp)", async () => {
-      await db.insert(delegation).values([
-        createDelegation({ transactionHash: "0xtx1", timestamp: 1000n }),
-        createDelegation({ transactionHash: "0xtx2", timestamp: 2000n }),
-        createDelegation({ transactionHash: "0xtx3", timestamp: 3000n }),
-      ]);
+      await db
+        .insert(delegation)
+        .values([
+          createDelegation({ transactionHash: "0xtx1", timestamp: 1000n }),
+          createDelegation({ transactionHash: "0xtx2", timestamp: 2000n }),
+          createDelegation({ transactionHash: "0xtx3", timestamp: 3000n }),
+        ]);
 
       const result = await repository.getHistoricalDelegations(
         delegator,
@@ -183,12 +193,14 @@ describe("HistoricalDelegationsRepository", () => {
     });
 
     it("should filter by both fromValue and toValue", async () => {
-      await db.insert(delegation).values([
-        createDelegation({ transactionHash: "0xtx1", timestamp: 1000n }),
-        createDelegation({ transactionHash: "0xtx2", timestamp: 2000n }),
-        createDelegation({ transactionHash: "0xtx3", timestamp: 3000n }),
-        createDelegation({ transactionHash: "0xtx4", timestamp: 4000n }),
-      ]);
+      await db
+        .insert(delegation)
+        .values([
+          createDelegation({ transactionHash: "0xtx1", timestamp: 1000n }),
+          createDelegation({ transactionHash: "0xtx2", timestamp: 2000n }),
+          createDelegation({ transactionHash: "0xtx3", timestamp: 3000n }),
+          createDelegation({ transactionHash: "0xtx4", timestamp: 4000n }),
+        ]);
 
       const result = await repository.getHistoricalDelegations(
         delegator,
@@ -250,11 +262,13 @@ describe("HistoricalDelegationsRepository", () => {
     });
 
     it("should order by timestamp descending", async () => {
-      await db.insert(delegation).values([
-        createDelegation({ transactionHash: "0xtx1", timestamp: 1000n }),
-        createDelegation({ transactionHash: "0xtx2", timestamp: 3000n }),
-        createDelegation({ transactionHash: "0xtx3", timestamp: 2000n }),
-      ]);
+      await db
+        .insert(delegation)
+        .values([
+          createDelegation({ transactionHash: "0xtx1", timestamp: 1000n }),
+          createDelegation({ transactionHash: "0xtx2", timestamp: 3000n }),
+          createDelegation({ transactionHash: "0xtx3", timestamp: 2000n }),
+        ]);
 
       const result = await repository.getHistoricalDelegations(
         delegator,
@@ -274,11 +288,13 @@ describe("HistoricalDelegationsRepository", () => {
     });
 
     it("should order by timestamp ascending", async () => {
-      await db.insert(delegation).values([
-        createDelegation({ transactionHash: "0xtx1", timestamp: 3000n }),
-        createDelegation({ transactionHash: "0xtx2", timestamp: 1000n }),
-        createDelegation({ transactionHash: "0xtx3", timestamp: 2000n }),
-      ]);
+      await db
+        .insert(delegation)
+        .values([
+          createDelegation({ transactionHash: "0xtx1", timestamp: 3000n }),
+          createDelegation({ transactionHash: "0xtx2", timestamp: 1000n }),
+          createDelegation({ transactionHash: "0xtx3", timestamp: 2000n }),
+        ]);
 
       const result = await repository.getHistoricalDelegations(
         delegator,
@@ -298,11 +314,13 @@ describe("HistoricalDelegationsRepository", () => {
     });
 
     it("should apply pagination with skip", async () => {
-      await db.insert(delegation).values([
-        createDelegation({ transactionHash: "0xtx1", timestamp: 3000n }),
-        createDelegation({ transactionHash: "0xtx2", timestamp: 2000n }),
-        createDelegation({ transactionHash: "0xtx3", timestamp: 1000n }),
-      ]);
+      await db
+        .insert(delegation)
+        .values([
+          createDelegation({ transactionHash: "0xtx1", timestamp: 3000n }),
+          createDelegation({ transactionHash: "0xtx2", timestamp: 2000n }),
+          createDelegation({ transactionHash: "0xtx3", timestamp: 1000n }),
+        ]);
 
       const result = await repository.getHistoricalDelegations(
         delegator,
@@ -321,11 +339,13 @@ describe("HistoricalDelegationsRepository", () => {
     });
 
     it("should apply pagination with limit", async () => {
-      await db.insert(delegation).values([
-        createDelegation({ transactionHash: "0xtx1", timestamp: 3000n }),
-        createDelegation({ transactionHash: "0xtx2", timestamp: 2000n }),
-        createDelegation({ transactionHash: "0xtx3", timestamp: 1000n }),
-      ]);
+      await db
+        .insert(delegation)
+        .values([
+          createDelegation({ transactionHash: "0xtx1", timestamp: 3000n }),
+          createDelegation({ transactionHash: "0xtx2", timestamp: 2000n }),
+          createDelegation({ transactionHash: "0xtx3", timestamp: 1000n }),
+        ]);
 
       const result = await repository.getHistoricalDelegations(
         delegator,
@@ -344,13 +364,15 @@ describe("HistoricalDelegationsRepository", () => {
     });
 
     it("should return totalCount independent of pagination", async () => {
-      await db.insert(delegation).values([
-        createDelegation({ transactionHash: "0xtx1", timestamp: 5000n }),
-        createDelegation({ transactionHash: "0xtx2", timestamp: 4000n }),
-        createDelegation({ transactionHash: "0xtx3", timestamp: 3000n }),
-        createDelegation({ transactionHash: "0xtx4", timestamp: 2000n }),
-        createDelegation({ transactionHash: "0xtx5", timestamp: 1000n }),
-      ]);
+      await db
+        .insert(delegation)
+        .values([
+          createDelegation({ transactionHash: "0xtx1", timestamp: 5000n }),
+          createDelegation({ transactionHash: "0xtx2", timestamp: 4000n }),
+          createDelegation({ transactionHash: "0xtx3", timestamp: 3000n }),
+          createDelegation({ transactionHash: "0xtx4", timestamp: 2000n }),
+          createDelegation({ transactionHash: "0xtx5", timestamp: 1000n }),
+        ]);
 
       const result = await repository.getHistoricalDelegations(
         delegator,

@@ -1,7 +1,9 @@
-import { describe, it, expect, beforeEach } from "vitest";
 import { Address } from "viem";
-import { DelegationsService } from "./current";
+import { describe, it, expect, beforeEach } from "vitest";
+
 import { DBDelegation, DelegationsRequestQuery } from "@/mappers";
+
+import { DelegationsService } from "./current";
 
 const createMockDelegation = (
   overrides: Partial<DBDelegation> = {},
