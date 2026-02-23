@@ -1,6 +1,7 @@
 import { z } from "@hono/zod-openapi";
-import { votesOnchain } from "@/database";
 import { getAddress, isAddress } from "viem";
+
+import { votesOnchain } from "@/database";
 
 export type DBVote = typeof votesOnchain.$inferSelect;
 

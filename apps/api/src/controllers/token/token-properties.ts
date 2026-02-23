@@ -1,9 +1,9 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 
-import { DaoIdEnum } from "@/lib/enums";
-import { TokenService } from "@/services";
-import { TokenPropertiesResponseSchema, TokenMapper } from "@/mappers";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
+import { DaoIdEnum } from "@/lib/enums";
+import { TokenPropertiesResponseSchema, TokenMapper } from "@/mappers";
+import { TokenService } from "@/services";
 
 interface TokenPriceClient {
   getTokenPrice(

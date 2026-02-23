@@ -1,6 +1,5 @@
 import { z } from "@hono/zod-openapi";
 import { getAddress, isAddress } from "viem";
-import { DBDelegation } from "./delegations";
 
 export const HistoricalDelegationsRequestParamsSchema = z.object({
   address: z.string().refine((val) => isAddress(val, { strict: false })),

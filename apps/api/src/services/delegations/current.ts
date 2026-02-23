@@ -1,5 +1,6 @@
-import { DBDelegation, DelegationsRequestQuery } from "@/mappers";
 import { Address } from "viem";
+
+import { DBDelegation, DelegationsRequestQuery } from "@/mappers";
 
 interface Repository {
   getDelegations(
