@@ -1,5 +1,3 @@
-"use client";
-
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { StageTag } from "@/features/resilience-stages/components";
@@ -21,7 +19,10 @@ const STAGE_DESCRIPTIONS: Partial<Record<Stage, string>> = {
     "A Stage 1 DAO has resolved all High Risk issues but still has Medium Risk items.",
   [Stage.TWO]:
     "A Stage 2 DAO has achieved the highest level of governance security.",
-  [Stage.UNKNOWN]: "Stage information not available.",
+  [Stage.UNKNOWN]:
+    "The DAO doesn't qualify for the staging system because it doesn't use its governor and timelock structure to autonomously execute its proposals without depending on a centralized entity.",
+  [Stage.NONE]:
+    "The DAO doesn't qualify for the staging system because it doesn't use its governor and timelock structure to autonomously execute its proposals without depending on a centralized entity.",
 };
 
 const getStageRiskLevel = (stage: Stage): RiskLevel => {
@@ -37,7 +38,7 @@ const getStageName = (stage: Stage): string => {
     [Stage.ONE]: "1",
     [Stage.TWO]: "2",
   };
-  return `Stage ${stageNumbers[stage] ?? "Unknown"}`;
+  return stageNumbers[stage] ? `Stage ${stageNumbers[stage]}` : "No Stage";
 };
 
 export const StageCell = ({ daoId }: { daoId: DaoIdEnum }) => {
@@ -77,15 +78,27 @@ export const StageCell = ({ daoId }: { daoId: DaoIdEnum }) => {
   const stageRiskLevel = getStageRiskLevel(stage);
   const stageName = getStageName(stage);
 
+  console.log("StageCell render", {
+    daoId,
+    stage,
+    stageRiskLevel,
+    itemsToDisplay,
+  });
+
   return (
     <Tooltip
       title={stageName}
-      titleRight={<RiskLevelText level={stageRiskLevel} />}
+      titleRight={
+        stage !== Stage.UNKNOWN && stage !== Stage.NONE ? (
+          <RiskLevelText level={stageRiskLevel} />
+        ) : undefined
+      }
       triggerClassName="w-full"
       tooltipContent={
         <StageTooltip
           description={
-            STAGE_DESCRIPTIONS[stage] || "Stage information not available."
+            STAGE_DESCRIPTIONS[stage] ||
+            "The DAO doesn't qualify for the staging system because it doesn't use its governor and timelock structure to autonomously execute its proposals without depending on a centralized entity."
           }
           items={itemsToDisplay}
           footer="Click to see details"

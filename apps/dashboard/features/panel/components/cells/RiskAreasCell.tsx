@@ -1,5 +1,3 @@
-"use client";
-
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { RiskAreaCardEnum, RiskAreaCardWrapper } from "@/shared/components";

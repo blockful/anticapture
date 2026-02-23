@@ -1,5 +1,3 @@
-"use client";
-
 import {
   PanelTable,
   DelegatedSupplyHistory,
@@ -14,17 +12,9 @@ import {
   SubSectionsContainer,
 } from "@/shared/components/design-system/section";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
-import { useScreenSize } from "@/shared/hooks";
 import { BarChart4 } from "lucide-react";
 
 export const PanelSection = () => {
-  const { isMobile } = useScreenSize();
-
-  const slides = [
-    <DaoProtectionLevels />,
-    <TreasuryMonitoring />,
-    <DelegatedSupplyHistory />,
-  ];
   return (
     <TheSectionLayout
       title={PAGES_CONSTANTS.panel.title}
@@ -32,15 +22,21 @@ export const PanelSection = () => {
       description={PAGES_CONSTANTS.panel.description}
       className="mt-14 lg:mt-0"
     >
-      <div className="flex flex-col gap-8 lg:gap-2 lg:p-4">
-        {isMobile && <Carousel slides={slides} />}
-        {!isMobile && (
-          <div className="grid grid-cols-1 gap-2 lg:grid-cols-3">
-            <DaoProtectionLevels />
-            <TreasuryMonitoring />
-            <DelegatedSupplyHistory />
-          </div>
-        )}
+      <div className="flex flex-col gap-8 lg:gap-2">
+        <div className="lg:hidden">
+          <Carousel
+            slides={[
+              <DaoProtectionLevels />,
+              <TreasuryMonitoring />,
+              <DelegatedSupplyHistory />,
+            ]}
+          />
+        </div>
+        <div className="hidden gap-2 lg:grid lg:grid-cols-3">
+          <DaoProtectionLevels />
+          <TreasuryMonitoring />
+          <DelegatedSupplyHistory />
+        </div>
 
         <div className="block lg:hidden">
           <DividerDefault isHorizontal />

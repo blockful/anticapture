@@ -1,7 +1,5 @@
-"use client";
-
-import { ReactNode, useState } from "react";
-import { useRouter } from "next/navigation";
+import { ReactNode } from "react";
+import Link from "next/link";
 import { cn } from "@/shared/utils";
 
 interface ClickableCellProps {
@@ -15,22 +13,19 @@ export const ClickableCell = ({
   children,
   className,
 }: ClickableCellProps) => {
-  const router = useRouter();
-  const [isHovered, setIsHovered] = useState(false);
-
-  return (
-    <div
-      className={cn(
-        "flex w-full items-center transition-colors duration-200",
-        href && "cursor-pointer",
-        href && isHovered && "bg-surface-contrast",
-        className,
-      )}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onClick={href ? () => router.push(href) : undefined}
-    >
-      {children}
-    </div>
+  const baseClassName = cn(
+    "flex w-full items-center transition-colors duration-200",
+    href && "cursor-pointer hover:bg-surface-contrast",
+    className,
   );
+
+  if (href) {
+    return (
+      <Link href={href} className={baseClassName}>
+        {children}
+      </Link>
+    );
+  }
+
+  return <div className={baseClassName}>{children}</div>;
 };

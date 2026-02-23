@@ -1,15 +1,11 @@
-"use client";
-
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { useScreenSize } from "@/shared/hooks";
 import { DaoAvatarIcon } from "@/shared/components/icons";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { DaoTooltip } from "@/features/panel/components/tooltips/DaoTooltip";
 import { ClickableCell } from "@/features/panel/components/cells/ClickableCell";
 
 export const DaoCell = ({ daoId }: { daoId: DaoIdEnum }) => {
-  const { isMobile } = useScreenSize();
   const config = daoConfigByDaoId[daoId];
 
   return (
@@ -39,11 +35,9 @@ export const DaoCell = ({ daoId }: { daoId: DaoIdEnum }) => {
             className="size-icon-sm"
             isRounded={true}
           />
-          {!isMobile && (
-            <span className="text-primary whitespace-nowrap text-sm font-medium">
-              {config.name}
-            </span>
-          )}
+          <span className="text-primary hidden whitespace-nowrap text-sm font-medium lg:inline">
+            {config.name}
+          </span>
         </div>
       </ClickableCell>
     </Tooltip>
