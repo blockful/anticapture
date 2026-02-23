@@ -80,7 +80,7 @@ describe("FeedService", () => {
         txHash: "0xdef456",
         logIndex: 5,
         type: "DELEGATION",
-        value: parseEther("100000"),
+        value: ensThresholds[FeedEventType.DELEGATION][FeedRelevance.MEDIUM],
         timestamp: 1700001000,
         metadata: { from: "0x1", to: "0x2" },
       });
@@ -182,7 +182,7 @@ describe("FeedService", () => {
         }),
         createFeedEvent({
           type: "VOTE",
-          value: parseEther("100000"),
+          value: ensThresholds[FeedEventType.VOTE][FeedRelevance.MEDIUM],
           logIndex: 1,
         }),
       ];

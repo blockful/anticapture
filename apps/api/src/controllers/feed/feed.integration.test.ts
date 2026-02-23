@@ -6,6 +6,7 @@ import { FeedService } from "@/services/feed";
 import { FeedEventType, FeedRelevance } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 import { DBFeedEvent, FeedRequest } from "@/mappers";
+import { getDaoRelevanceThreshold } from "@/lib/eventRelevance";
 
 class FakeFeedRepository {
   private items: DBFeedEvent[] = [];
@@ -39,13 +40,15 @@ class FakeFeedRepository {
   }
 }
 
+const ensThresholds = getDaoRelevanceThreshold(DaoIdEnum.ENS);
+
 const createMockEvent = (
   overrides: Partial<DBFeedEvent> = {},
 ): DBFeedEvent => ({
   txHash: "0xabc123",
   logIndex: 0,
   type: "VOTE",
-  value: parseEther("100000"),
+  value: ensThresholds[FeedEventType.VOTE][FeedRelevance.MEDIUM],
   timestamp: 1700000000,
   metadata: null,
   ...overrides,
