@@ -55,8 +55,12 @@ export const DelegationItemSchema = z.object({
   delegateAddress: z
     .string()
     .refine((val) => isAddress(val, { strict: false })),
-  amount: z.string(),
-  timestamp: z.string(),
+  amount: z
+    .union([z.bigint().transform((val) => val.toString()), z.string()])
+    .openapi({ type: "string" }),
+  timestamp: z
+    .union([z.bigint().transform((val) => val.toString()), z.string()])
+    .openapi({ type: "string" }),
   transactionHash: z.string(),
 });
 

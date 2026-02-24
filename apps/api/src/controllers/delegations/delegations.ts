@@ -43,7 +43,13 @@ export function delegations(app: Hono, service: DelegationsService) {
 
       return context.json(
         DelegationsResponseSchema.parse({
-          items: result,
+          items: result.map((d) => ({
+            delegatorAddress: d.delegatorAccountId,
+            delegateAddress: d.delegateAccountId,
+            amount: d.delegatedValue,
+            timestamp: d.timestamp,
+            transactionHash: d.transactionHash,
+          })),
           totalCount: result.length,
         }),
       );
