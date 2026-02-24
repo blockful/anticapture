@@ -299,8 +299,6 @@ export type QueryDelegationPercentageByDayArgs = {
 
 export type QueryDelegationsArgs = {
   address: Scalars['String']['input'];
-  orderBy?: InputMaybe<QueryInput_Delegations_OrderBy>;
-  orderDirection?: InputMaybe<QueryInput_Delegations_OrderDirection>;
 };
 
 
@@ -1773,8 +1771,6 @@ export type GetDelegatorsQuery = { __typename?: 'Query', delegators?: { __typena
 
 export type GetDelegationsTimestampQueryVariables = Exact<{
   delegate: Scalars['String']['input'];
-  orderBy?: InputMaybe<QueryInput_Delegations_OrderBy>;
-  orderDirection?: InputMaybe<QueryInput_Delegations_OrderDirection>;
 }>;
 
 
@@ -1866,6 +1862,13 @@ export type GetAddressesQueryVariables = Exact<{
 
 
 export type GetAddressesQuery = { __typename?: 'Query', getAddresses?: { __typename?: 'getAddresses_200_response', results: Array<{ __typename?: 'query_getAddresses_results_items', address: string, isContract: boolean, arkham?: { __typename?: 'query_getAddresses_results_items_arkham', entity?: string | null, entityType?: string | null, label?: string | null, twitter?: string | null } | null, ens?: { __typename?: 'query_getAddresses_results_items_ens', name?: string | null, avatar?: string | null, banner?: string | null } | null } | null> } | null };
+
+export type GetArkhamDataQueryVariables = Exact<{
+  address: Scalars['String']['input'];
+}>;
+
+
+export type GetArkhamDataQuery = { __typename?: 'Query', getAddress?: { __typename?: 'getAddress_200_response', isContract: boolean, arkham?: { __typename?: 'query_getAddress_arkham', entity?: string | null, entityType?: string | null, label?: string | null, twitter?: string | null } | null, ens?: { __typename?: 'query_getAddress_ens', name?: string | null } | null } | null };
 
 export type GetProposalsFromDaoQueryVariables = Exact<{
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
@@ -2537,12 +2540,8 @@ export type GetDelegatorsLazyQueryHookResult = ReturnType<typeof useGetDelegator
 export type GetDelegatorsSuspenseQueryHookResult = ReturnType<typeof useGetDelegatorsSuspenseQuery>;
 export type GetDelegatorsQueryResult = Apollo.QueryResult<GetDelegatorsQuery, GetDelegatorsQueryVariables>;
 export const GetDelegationsTimestampDocument = gql`
-    query getDelegationsTimestamp($delegate: String!, $orderBy: queryInput_delegations_orderBy = timestamp, $orderDirection: queryInput_delegations_orderDirection = desc) {
-  delegations(
-    address: $delegate
-    orderBy: $orderBy
-    orderDirection: $orderDirection
-  ) {
+    query getDelegationsTimestamp($delegate: String!) {
+  delegations(address: $delegate) {
     items {
       delegatorAddress
       delegateAddress
@@ -2566,8 +2565,6 @@ export const GetDelegationsTimestampDocument = gql`
  * const { data, loading, error } = useGetDelegationsTimestampQuery({
  *   variables: {
  *      delegate: // value for 'delegate'
- *      orderBy: // value for 'orderBy'
- *      orderDirection: // value for 'orderDirection'
  *   },
  * });
  */
@@ -3141,6 +3138,58 @@ export type GetAddressesQueryHookResult = ReturnType<typeof useGetAddressesQuery
 export type GetAddressesLazyQueryHookResult = ReturnType<typeof useGetAddressesLazyQuery>;
 export type GetAddressesSuspenseQueryHookResult = ReturnType<typeof useGetAddressesSuspenseQuery>;
 export type GetAddressesQueryResult = Apollo.QueryResult<GetAddressesQuery, GetAddressesQueryVariables>;
+export const GetArkhamDataDocument = gql`
+    query GetArkhamData($address: String!) {
+  getAddress(address: $address) {
+    arkham {
+      entity
+      entityType
+      label
+      twitter
+    }
+    isContract
+    ens {
+      name
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetArkhamDataQuery__
+ *
+ * To run a query within a React component, call `useGetArkhamDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetArkhamDataQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetArkhamDataQuery({
+ *   variables: {
+ *      address: // value for 'address'
+ *   },
+ * });
+ */
+export function useGetArkhamDataQuery(baseOptions: Apollo.QueryHookOptions<GetArkhamDataQuery, GetArkhamDataQueryVariables> & ({ variables: GetArkhamDataQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetArkhamDataQuery, GetArkhamDataQueryVariables>(GetArkhamDataDocument, options);
+      }
+export function useGetArkhamDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetArkhamDataQuery, GetArkhamDataQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetArkhamDataQuery, GetArkhamDataQueryVariables>(GetArkhamDataDocument, options);
+        }
+// @ts-ignore
+export function useGetArkhamDataSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetArkhamDataQuery, GetArkhamDataQueryVariables>): Apollo.UseSuspenseQueryResult<GetArkhamDataQuery, GetArkhamDataQueryVariables>;
+export function useGetArkhamDataSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetArkhamDataQuery, GetArkhamDataQueryVariables>): Apollo.UseSuspenseQueryResult<GetArkhamDataQuery | undefined, GetArkhamDataQueryVariables>;
+export function useGetArkhamDataSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetArkhamDataQuery, GetArkhamDataQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetArkhamDataQuery, GetArkhamDataQueryVariables>(GetArkhamDataDocument, options);
+        }
+export type GetArkhamDataQueryHookResult = ReturnType<typeof useGetArkhamDataQuery>;
+export type GetArkhamDataLazyQueryHookResult = ReturnType<typeof useGetArkhamDataLazyQuery>;
+export type GetArkhamDataSuspenseQueryHookResult = ReturnType<typeof useGetArkhamDataSuspenseQuery>;
+export type GetArkhamDataQueryResult = Apollo.QueryResult<GetArkhamDataQuery, GetArkhamDataQueryVariables>;
 export const GetProposalsFromDaoDocument = gql`
     query GetProposalsFromDao($skip: NonNegativeInt, $limit: PositiveInt = 10, $orderDirection: queryInput_proposals_orderDirection = desc, $status: JSON, $fromDate: Float) {
   proposals(

@@ -1,12 +1,14 @@
 import {
-  GetAddressQuery,
-  useGetAddressQuery,
+  GetArkhamDataQuery,
+  useGetArkhamDataQuery,
 } from "@anticapture/graphql-client/hooks";
 
 type ArkhamData = NonNullable<
-  NonNullable<GetAddressQuery["getAddress"]>["arkham"]
+  NonNullable<GetArkhamDataQuery["getAddress"]>["arkham"]
 >;
-type EnsData = NonNullable<NonNullable<GetAddressQuery["getAddress"]>["ens"]>;
+type EnsData = NonNullable<
+  NonNullable<GetArkhamDataQuery["getAddress"]>["ens"]
+>;
 
 interface ArkhamDataResult {
   arkham: ArkhamData | null;
@@ -19,7 +21,7 @@ interface ArkhamDataResult {
 export const useArkhamData = (
   address: string | null | undefined,
 ): ArkhamDataResult => {
-  const { data, loading, error } = useGetAddressQuery({
+  const { data, loading, error } = useGetArkhamDataQuery({
     variables: {
       address: address!,
     },
