@@ -26,7 +26,6 @@ function makeProposal(overrides?: Partial<OffchainProposal>): OffchainProposal {
 
 function makeVote(overrides?: Partial<OffchainVote>): OffchainVote {
   return {
-    id: "v-1",
     spaceId: "ens.eth",
     voter: "0xdef",
     proposalId: "p-1",
@@ -197,7 +196,6 @@ describe("Indexer", () => {
     await vi.advanceTimersByTimeAsync(0);
 
     expect(repo.savedVotes).toHaveLength(1);
-    expect(repo.savedVotes[0]?.id).toBe("v-1");
     expect(repo.saveVotes).toHaveBeenCalledWith(votes, "1700000200");
 
     void promise;
