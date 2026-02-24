@@ -235,3 +235,30 @@ When making significant changes:
    - Testing strategies or code examples
 
 3. **Avoid duplication**: If it's package-specific, put it in the package AGENTS.md, not root
+
+## Cursor Cloud specific instructions
+
+### Environment prerequisites
+
+- **Node.js 22+** and **pnpm 10.10.0** are provided by the VM image.
+- After `pnpm install`, you must run `pnpm rebuild esbuild` so the platform-specific esbuild binary is available (the pnpm install step skips build scripts by default due to the `pnpm.onlyBuiltDependencies` allow-list; rebuild resolves this).
+- `.env` files are **not** committed. Create them from `.env.example` templates before running services. For dashboard-only work, placeholder values are sufficient; see below.
+
+### Running services locally
+
+Refer to the Commands section above for the full list. Key gotchas:
+
+- **Dashboard (`pnpm dashboard dev`)**: Starts on `:3000`. SSR will log `indexedDB is not defined` errors from WalletConnect — this is expected and does not break the page. The page renders correctly in the browser.
+- **API (`pnpm api dev`)**: Requires a live PostgreSQL with indexed data. Not needed for frontend-only work; the dashboard can point `NEXT_PUBLIC_BASE_URL` to a remote Railway dev gateway instead.
+- **Indexer**: Never run unless explicitly asked (triggers full reindex). Not needed for dev environment verification.
+- **GraphQL Client**: Generated types are committed to the repo (`packages/graphql-client/types.ts`, `hooks.ts`, `generated.ts`). You only need to run `pnpm client codegen` if the gateway schema has changed.
+
+### Lint caveats
+
+- `pnpm lint` (monorepo-wide) will fail due to pre-existing import-order errors in `apps/address-enrichment` and `apps/api`. Use per-package lint commands for packages you are modifying (e.g. `pnpm dashboard lint`).
+- `apps/api-gateway` has no lint script configured.
+
+### Testing
+
+- `pnpm test` runs all tests (dashboard Jest, API Vitest, gateway Jest). All pass without external services.
+- API tests use PGlite (in-memory Postgres) so no real database is needed for unit/integration tests.

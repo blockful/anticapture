@@ -53,7 +53,17 @@
   "pnpm": {
     "overrides": {
       "eslint-plugin-react-hooks>zod-validation-error": "^4.0.0"
-    }
+    },
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "bufferutil",
+      "core-js-pure",
+      "esbuild",
+      "keccak",
+      "sharp",
+      "unrs-resolver",
+      "utf-8-validate"
+    ]
   },
   "private": true,
   "workspaces": [
