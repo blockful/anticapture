@@ -50,13 +50,13 @@ apps/dashboard/
 ├── app/                        # Next.js App Router (routing + composition only)
 │   ├── (landing)/              # Public pages
 │   ├── [daoId]/
-│   │   ├── (core)/             # Core DAO pages (sidebar layout)
+│   │   ├── (shell)/             # Main DAO pages (sidebar layout)
 │   │   │   ├── attack-profitability/
 │   │   │   ├── holders-and-delegates/
 │   │   │   ├── resilience-stages/
 │   │   │   ├── risk-analysis/
 │   │   │   └── token-distribution/
-│   │   └── (aux)/governance/
+│   │   └── (nested)/governance/
 │   └── api/
 ├── features/                   # Domain modules (business logic)
 │   └── <feature-name>/
@@ -144,7 +144,7 @@ type MetricCardProps = {
 export const MetricCard = ({ title, value, changeRate, icon }: MetricCardProps) => { ... };
 ```
 
-Use `interface` for hook params and hook return types — these benefit from `extends` when building on generated GraphQL variable types:
+Use `interface` for hook params and hook return types — these benefit from `extends` when building on generated types:
 
 ```tsx
 import type { GetProposalsActivityQueryVariables } from "@anticapture/graphql-client";
@@ -162,7 +162,7 @@ interface UseProposalsActivityResult {
 }
 ```
 
-**Rule of thumb**: `type` for component props and local shapes; `interface` when you need to extend an existing type (especially generated GraphQL types).
+**Rule of thumb**: `type` for component props and local shapes; `interface` when you need to extend an existing type (especially generated types).
 
 ### Hooks
 
@@ -239,6 +239,8 @@ features/X → features/Y/*     ❌ forbidden — move to shared/
 - **Async**: Always use async arrow functions.
 - **Errors**: Use try/catch for async operations. Log with `console.error`. Never silently swallow errors.
 - **Conditionals**: Ternary for either/or, `&&` for show/hide, early return for guards. No nested ternaries.
+- **Immutability**: Never mutate props, state, or objects from hooks. Always create new references with spread or `.map()`. React relies on reference identity to detect changes — mutations cause stale renders.
+- **No `forwardRef`**: React 19 supports `ref` as a regular prop. Declare `ref?: React.Ref<Element>` in the props type instead of wrapping with `forwardRef`.
 - **Comments**: JSDoc for exported functions/hooks. No commented-out code. No obvious comments — only explain _why_, never _what_.
 
 ```tsx
@@ -367,55 +369,6 @@ export const useProposalMetrics = (daoId: DaoIdEnum) => {
 
 When transformation logic is non-trivial, extract it to a pure util in `utils/` and test it there — not inside the hook.
 
-### Pagination with `fetchMore`
-
-For paginated Apollo queries, use the accumulative `fetchMore` pattern. Never re-fetch the full list to get the next page.
-
-```tsx
-"use client";
-
-export const usePaginatedList = (daoId: DaoIdEnum, limit: number) => {
-  const [accumulated, setAccumulated] = useState<Item[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const { data, networkStatus, fetchMore } = useGetListQuery({
-    variables: { limit, skip: 0 },
-    context: { headers: { "anticapture-dao-id": daoId } },
-    notifyOnNetworkStatusChange: true,
-    fetchPolicy: "cache-and-network",
-  });
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [daoId]);
-
-  const fetchNextPage = useCallback(async () => {
-    if (networkStatus === NetworkStatus.fetchMore) return;
-    await fetchMore({
-      variables: { skip: accumulated.length, limit },
-      updateQuery: (prev, { fetchMoreResult }) => {
-        const merged = [...(prev.list ?? []), ...(fetchMoreResult.list ?? [])];
-        setAccumulated(merged);
-        return { ...fetchMoreResult, list: merged };
-      },
-    });
-    setCurrentPage((p) => p + 1);
-  }, [fetchMore, networkStatus, accumulated.length, limit]);
-
-  const totalPages = Math.ceil((data?.total ?? 0) / limit);
-
-  return {
-    items: accumulated,
-    isLoading: networkStatus === NetworkStatus.loading,
-    isFetchingMore: networkStatus === NetworkStatus.fetchMore,
-    hasNextPage: currentPage < totalPages,
-    fetchNextPage,
-  };
-};
-```
-
----
-
 ## Loading, Skeleton & Error States
 
 Every component that fetches data must handle all three states explicitly. Never render partial UI silently.
@@ -449,7 +402,7 @@ Rules:
 
 ## Component Composition
 
-Prefer `children` and simple props over render props or slots. Reach for more complex patterns only when the simpler one breaks.
+Prefer `children` and simple props over render props or slots. Reach for more complex patterns only when the simpler one breaks. Let parents decide what to render — inject content via `children` or `ReactNode` props instead of hardcoding child components inside a container.
 
 **`children`** — for layout wrappers and containers where the parent doesn't need to know about the content:
 
@@ -493,6 +446,129 @@ export const ChartCard = ({ header, chart, footer }: ChartCardProps) => (
 **Avoid render props** — they add complexity without benefit in a codebase using hooks. If you feel you need a render prop, the logic probably belongs in a hook instead.
 
 Do not over-abstract. A component used in one place does not need to be made composable. Generalize only when there is a second real use case.
+
+---
+
+## Props Design
+
+Design props for the consumer, not for the implementation.
+
+### Prefer `ReactNode` for visual content
+
+When a prop controls what users **see**, type it as `ReactNode`. This lets consumers extend the component without modifying it.
+
+```tsx
+// ❌ Closed: every visual variation requires a new prop
+type CardHeaderProps = {
+  title: string;
+  titleBold?: boolean;
+  titleIcon?: IconName;
+};
+
+// ✅ Open: consumers control rendering freely
+type CardHeaderProps = {
+  title: React.ReactNode;
+  subtitle?: React.ReactNode;
+  action?: React.ReactNode;
+};
+```
+
+Use primitive types (`string`, `number`) only when the component **processes** the value — formats it, sorts by it, uses it as a key, or derives a filename.
+
+### Accept only what you use
+
+Don't pass entire objects when the component only reads a few fields. This reduces coupling and makes the component easier to test and reuse.
+
+```tsx
+// ❌ Receives entire config, only uses 2 fields
+export const DaoHeader = ({ daoConfig }: { daoConfig: DaoConfiguration }) => (
+  <>
+    <h1>{daoConfig.name}</h1>
+    {daoConfig.forumLink && <a href={daoConfig.forumLink}>Forum</a>}
+  </>
+);
+
+// ✅ Depends only on what it renders
+export const DaoHeader = ({
+  name,
+  forumLink,
+}: {
+  name: string;
+  forumLink?: string;
+}) => (
+  <>
+    <h1>{name}</h1>
+    {forumLink && <a href={forumLink}>Forum</a>}
+  </>
+);
+```
+
+When a component genuinely needs many fields from the same source, use `Pick` instead of the full object:
+
+```tsx
+type DaoHeaderProps = Pick<DaoConfiguration, "name" | "color" | "forumLink">;
+```
+
+### Discriminated unions over boolean flags
+
+When states are mutually exclusive, model them as a union. Never use multiple booleans that create impossible combinations.
+
+```tsx
+// ❌ isRequired and isOptional can both be true
+type FormLabelProps = {
+  isRequired?: boolean;
+  isOptional?: boolean;
+};
+
+// ✅ One state at a time
+type FormLabelProps = {
+  modifier?: "required" | "optional";
+};
+```
+
+```tsx
+// ❌ Two booleans encoding three states
+type DividerProps = {
+  isVertical?: boolean;
+  isHorizontal?: boolean;
+};
+
+// ✅ Single prop with default
+type DividerProps = {
+  orientation?: "vertical" | "horizontal"; // default: "horizontal"
+};
+```
+
+For simpler cases (two truly independent booleans), booleans are fine. Use unions when three or more states compete or when booleans are mutually exclusive.
+
+### Extend native elements correctly
+
+When wrapping a native HTML element, accept and forward all remaining props so it works as a drop-in replacement. In React 19, `ref` is a regular prop — do not use `forwardRef`.
+
+```tsx
+type ButtonProps = {
+  variant?: "primary" | "secondary";
+  ref?: React.Ref<HTMLButtonElement>;
+} & React.ButtonHTMLAttributes<HTMLButtonElement>;
+
+export const Button = ({
+  variant = "primary",
+  className,
+  children,
+  ref,
+  ...rest
+}: ButtonProps) => (
+  <button
+    ref={ref}
+    className={cn(VARIANT_STYLES[variant], className)}
+    {...rest}
+  >
+    {children}
+  </button>
+);
+```
+
+Always destructure your custom props and spread `...rest` onto the native element. This ensures new native attributes (e.g., `aria-label`, `data-testid`) work without modification.
 
 ---
 
