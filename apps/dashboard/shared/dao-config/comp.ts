@@ -84,7 +84,7 @@ export const COMP: DaoConfiguration = {
             GovernanceImplementationEnum.INTERFACE_RESILIENCE
           ],
         nextStep:
-          "Nouns needs to enable DNSSEC and HTTPS on the domains of its governance interfaces, in order to raise its standard to Medium Risk.",
+          "Compound needs to enable DNSSEC and HTTPS on the domains of its governance interfaces, in order to raise its standard to Medium Risk.",
         requirements: [
           "Without the proper protections(DNSSEC/SPF/DKIM/DMARC), attackers can spoof governance UIs by hijacking unprotected domains.", // https://internet.nl/site/www.tally.xyz/3493806/
         ],
@@ -298,22 +298,6 @@ export const COMP: DaoConfiguration = {
           "By subsidizing governance participants' voting costs, there is greater participation and stronger incentives for delegates to protect the DAO, since they do not incur gas fees to vote.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.VOTING_SUBSIDY],
-        nextStep: "The parameter is in its lowest-risk condition.",
-      },
-      [GovernanceImplementationEnum.PROPOSER_BALANCE_CANCEL]: {
-        riskLevel: RiskLevel.LOW,
-        description:
-          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
-            GovernanceImplementationEnum.PROPOSER_BALANCE_CANCEL
-          ].description,
-        currentSetting:
-          "There is no ability to cancel a proposal if the proposer’s balance falls below the Proposal Threshold after submitting it.",
-        impact:
-          "An attacker can buy tokens to submit a proposal in the DAO, vote with them, and sell during the voting period. There is nothing in Compound governance that protects against this or prevents the attacker from doing so.",
-        recommendedSetting:
-          RECOMMENDED_SETTINGS[
-            GovernanceImplementationEnum.PROPOSER_BALANCE_CANCEL
-          ],
         nextStep: "The parameter is in its lowest-risk condition.",
       },
     },
