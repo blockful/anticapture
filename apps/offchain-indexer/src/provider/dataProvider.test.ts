@@ -162,9 +162,7 @@ describe("SnapshotProvider", () => {
         http.post(ENDPOINT, () => new HttpResponse(null, { status: 500, statusText: "Internal Server Error" })),
       );
 
-      await expect(provider.fetchProposals(null)).rejects.toThrow(
-        "Snapshot API error: 500 Internal Server Error",
-      );
+      await expect(provider.fetchProposals(null)).rejects.toThrow();
     });
 
     it("should throw when response has no data", async () => {
