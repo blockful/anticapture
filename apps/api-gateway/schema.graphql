@@ -143,10 +143,10 @@ type Query {
   votingPowerVariationsByAccountId(address: String!, fromDate: String, toDate: String): votingPowerVariationsByAccountId_200_response
 
   """Returns sorted and paginated account voting power records"""
-  votingPowers(limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_votingPowers_orderDirection = desc, orderBy: queryInput_votingPowers_orderBy = votingPower, addresses: JSON, fromValue: String, toValue: String): votingPowers_200_response
+  votingPowers(limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_votingPowers_orderDirection = desc, orderBy: queryInput_votingPowers_orderBy = votingPower, addresses: JSON, fromValue: String, toValue: String, fromDate: String, toDate: String): votingPowers_200_response
 
   """Returns voting power information for a specific address (account)"""
-  votingPowerByAccountId(accountId: String!): votingPowerByAccountId_200_response
+  votingPowerByAccountId(accountId: String!, fromDate: Float, toDate: Float): votingPowerByAccountId_200_response
 
   """
   Returns a mapping of the biggest variations to account balances associated by account address
@@ -1015,6 +1015,12 @@ type query_votingPowers_items_items {
   votesCount: Float!
   proposalsCount: Float!
   delegationsCount: Float!
+  variation: query_votingPowers_items_items_variation!
+}
+
+type query_votingPowers_items_items_variation {
+  absoluteChange: String!
+  percentageChange: Float!
 }
 
 enum queryInput_votingPowers_orderDirection {
@@ -1025,6 +1031,7 @@ enum queryInput_votingPowers_orderDirection {
 enum queryInput_votingPowers_orderBy {
   votingPower
   delegationsCount
+  variation
 }
 
 type votingPowerByAccountId_200_response {
@@ -1033,6 +1040,12 @@ type votingPowerByAccountId_200_response {
   votesCount: Float!
   proposalsCount: Float!
   delegationsCount: Float!
+  variation: query_votingPowerByAccountId_variation!
+}
+
+type query_votingPowerByAccountId_variation {
+  absoluteChange: String!
+  percentageChange: Float!
 }
 
 type accountBalanceVariations_200_response {
