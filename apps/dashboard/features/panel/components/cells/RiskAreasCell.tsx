@@ -1,23 +1,23 @@
-import { DaoIdEnum } from "@/shared/types/daos";
-import daoConfigByDaoId from "@/shared/dao-config";
-import { RiskAreaCardEnum, RiskAreaCardWrapper } from "@/shared/components";
-import { RiskLevel } from "@/shared/types/enums/RiskLevel";
-import { RiskAreaEnum } from "@/shared/types/enums";
-import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
-import { RISK_AREAS } from "@/shared/constants/risk-areas";
-import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
+import { ClickableCell } from "@/features/panel/components/cells/ClickableCell";
 import {
   RiskAreaItem,
   RiskAreasTooltip,
 } from "@/features/panel/components/tooltips/RiskAreasTooltip";
-import { ClickableCell } from "@/features/panel/components/cells/ClickableCell";
+import { RiskAreaCardEnum, RiskAreaCardWrapper } from "@/shared/components";
+import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
+import { RISK_AREAS } from "@/shared/constants/risk-areas";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { RiskAreaEnum } from "@/shared/types/enums";
+import { RiskLevel } from "@/shared/types/enums/RiskLevel";
+import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
 
 const computeRiskAreas = (daoId: DaoIdEnum) => {
   const daoRiskAreas = getDaoRiskAreas(daoId);
   const daoConstants = daoConfigByDaoId[daoId.toUpperCase() as DaoIdEnum];
 
   const riskAreas = Object.entries(daoRiskAreas).map(([name, info]) => {
-    if (name === RiskAreaEnum.ATTACK_PROFITABILITY) {
+    if (name === RiskAreaEnum.ECONOMIC_SECURITY) {
       return {
         name,
         level: !daoConstants?.attackProfitability?.supportsLiquidTreasuryCall
@@ -28,12 +28,17 @@ const computeRiskAreas = (daoId: DaoIdEnum) => {
     return { name, level: info.riskLevel };
   });
 
+  const defenseAreas = daoConstants?.attackExposure?.defenseAreas;
+
   const riskAreaItems = riskAreas.map(
     (area) =>
       ({
         ...area,
         ...RISK_AREAS[area.name as RiskAreaEnum],
         riskLevel: area.level,
+        ...(defenseAreas?.[area.name as RiskAreaEnum]?.description && {
+          description: defenseAreas[area.name as RiskAreaEnum]!.description,
+        }),
       }) as RiskAreaItem,
   );
 
@@ -47,6 +52,7 @@ export const RiskAreasCell = ({ daoId }: { daoId: DaoIdEnum }) => {
     <Tooltip
       className="text-left"
       triggerClassName="w-full"
+      disableMobileClick
       tooltipContent={
         <RiskAreasTooltip items={riskAreaItems} footer="Click to see details" />
       }

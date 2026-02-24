@@ -29,11 +29,13 @@ export const RiskAreasTooltip = ({
     <div className={cn("flex flex-col gap-2", className)}>
       {items.map((item, index) => {
         return (
-          <div key={index} className="flex w-full items-center gap-3">
-            <RiskAreaCard
-              variant={RiskAreaCardEnum.PANEL_TABLE}
-              riskArea={item}
-            />
+          <div key={index} className="flex w-full items-start gap-3">
+            <div className="pt-0.75">
+              <RiskAreaCard
+                variant={RiskAreaCardEnum.PANEL_TABLE}
+                riskArea={item}
+              />
+            </div>
 
             <div className="flex flex-1 flex-col gap-0.5">
               <p className="text-primary font-mono text-xs font-medium uppercase leading-4 tracking-wider">
@@ -41,7 +43,7 @@ export const RiskAreasTooltip = ({
               </p>
               <p
                 className={cn(
-                  "overflow-hidden text-ellipsis text-xs font-medium leading-4",
+                  "line-clamp-2 text-xs font-medium leading-4",
                   textColorMap[item.riskLevel],
                 )}
               >

@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect } from "react";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { SkeletonRow, BadgeStatus } from "@/shared/components";
-import { formatNumberUserReadable } from "@/shared/utils";
-import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
-import { useCostOfAttack } from "@/features/panel/hooks";
+
 import { ClickableCell } from "@/features/panel/components/cells/ClickableCell";
+import { useCostOfAttack } from "@/features/panel/hooks";
+import { SkeletonRow, BadgeStatus } from "@/shared/components";
+import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { formatNumberUserReadable } from "@/shared/utils";
 
 interface CostOfAttackCellProps {
   daoId: DaoIdEnum;
@@ -36,10 +37,12 @@ export const CostOfAttackCell = ({
     return (
       <Tooltip
         tooltipContent={
-          <div className="text-center">
-            <p>No data available</p>
-          </div>
+          <p className="text-secondary text-sm font-normal leading-5">
+            Treasury funds are protected by a multisig, so governance control
+            cannot directly be used to drain the treasury.
+          </p>
         }
+        title="Not applicable for this DAO"
         className="text-left"
         triggerClassName="w-full"
       >

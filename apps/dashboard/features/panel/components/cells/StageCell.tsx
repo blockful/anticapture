@@ -1,16 +1,16 @@
-import { DaoIdEnum } from "@/shared/types/daos";
-import daoConfigByDaoId from "@/shared/dao-config";
+import { ClickableCell } from "@/features/panel/components/cells/ClickableCell";
+import { RiskLevelText } from "@/features/panel/components/RiskLevelText";
+import { StageTooltip } from "@/features/panel/components/tooltips/StageTooltip";
 import { StageTag } from "@/features/resilience-stages/components";
-import { Stage } from "@/shared/types/enums/Stage";
-import { RiskLevel } from "@/shared/types/enums/RiskLevel";
+import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
+import daoConfigByDaoId from "@/shared/dao-config";
 import {
   fieldsToArray,
   getDaoStageFromFields,
 } from "@/shared/dao-config/utils";
-import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
-import { StageTooltip } from "@/features/panel/components/tooltips/StageTooltip";
-import { RiskLevelText } from "@/features/panel/components/RiskLevelText";
-import { ClickableCell } from "@/features/panel/components/cells/ClickableCell";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { RiskLevel } from "@/shared/types/enums/RiskLevel";
+import { Stage } from "@/shared/types/enums/Stage";
 
 const STAGE_DESCRIPTIONS: Partial<Record<Stage, string>> = {
   [Stage.ZERO]:
@@ -77,13 +77,6 @@ export const StageCell = ({ daoId }: { daoId: DaoIdEnum }) => {
 
   const stageRiskLevel = getStageRiskLevel(stage);
   const stageName = getStageName(stage);
-
-  console.log("StageCell render", {
-    daoId,
-    stage,
-    stageRiskLevel,
-    itemsToDisplay,
-  });
 
   return (
     <Tooltip

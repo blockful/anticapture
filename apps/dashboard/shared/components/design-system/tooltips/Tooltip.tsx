@@ -15,6 +15,7 @@ interface TooltipProps {
   title?: ReactNode;
   titleRight?: ReactNode;
   asChild?: boolean;
+  disableMobileClick?: boolean;
 }
 
 export function Tooltip({
@@ -25,22 +26,24 @@ export function Tooltip({
   title,
   titleRight,
   asChild = false,
+  disableMobileClick = false,
 }: TooltipProps) {
   const [open, setOpen] = useState<boolean>(false);
   const { isMobile } = useScreenSize();
 
   const handleOpenChange = (nextOpen: boolean) => {
+    if (isMobile && disableMobileClick) return;
     setOpen(nextOpen);
   };
 
-  // On mobile, prevent default behavior and manually control open state
-  const onClick = isMobile
-    ? (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setOpen(true);
-      }
-    : undefined;
+  const onClick =
+    isMobile && !disableMobileClick
+      ? (e: React.MouseEvent) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setOpen(true);
+        }
+      : undefined;
 
   return (
     <Root

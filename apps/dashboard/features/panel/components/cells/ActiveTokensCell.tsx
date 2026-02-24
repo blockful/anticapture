@@ -2,18 +2,19 @@
 
 import { useEffect } from "react";
 import { formatUnits } from "viem";
-import { DaoIdEnum } from "@/shared/types/daos";
-import daoConfigByDaoId from "@/shared/dao-config";
-import { SkeletonRow } from "@/shared/components";
-import { useTokenData, useActiveSupply } from "@/shared/hooks";
-import { formatNumberUserReadable } from "@/shared/utils";
-import { TimeInterval } from "@/shared/types/enums/TimeInterval";
-import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
+
+import { ClickableCell } from "@/features/panel/components/cells/ClickableCell";
 import {
   ActiveTokensProgress,
   ActiveTokensTooltip,
 } from "@/features/panel/components/tooltips/ActiveTokensTooltip";
-import { ClickableCell } from "@/features/panel/components/cells/ClickableCell";
+import { SkeletonRow } from "@/shared/components";
+import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { useTokenData, useActiveSupply } from "@/shared/hooks";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { TimeInterval } from "@/shared/types/enums/TimeInterval";
+import { formatNumberUserReadable } from "@/shared/utils";
 
 interface ActiveTokensCellProps {
   daoId: DaoIdEnum;
@@ -53,7 +54,7 @@ export const ActiveTokensCell = ({
     return (
       <SkeletonRow
         parentClassName="flex animate-pulse justify-end w-full"
-        className="h-5 w-full max-w-20 lg:max-w-32"
+        className="h-5 w-full lg:max-w-32"
       />
     );
   }
@@ -90,6 +91,7 @@ export const ActiveTokensCell = ({
           barPercentage={activePercentage}
         />
       }
+      disableMobileClick
     >
       <ClickableCell
         href={`/${daoId.toLowerCase()}/holders-and-delegates`}

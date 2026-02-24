@@ -1,14 +1,15 @@
-import { formatUnits } from "viem";
 import { useMemo } from "react";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { TimeInterval } from "@/shared/types/enums/TimeInterval";
-import { useDelegatedSupply } from "@/shared/hooks";
+import { formatUnits } from "viem";
+
 import { useDaoTokenHistoricalData } from "@/features/attack-profitability/hooks";
 import daoConfigByDaoId from "@/shared/dao-config";
+import { useActiveSupply } from "@/shared/hooks";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 
 export const useCostOfAttack = (daoId: DaoIdEnum) => {
   const timeInterval = TimeInterval.NINETY_DAYS;
-  const delegatedSupply = useDelegatedSupply(daoId, timeInterval);
+  const activeSupply = useActiveSupply(daoId, timeInterval);
 
   const {
     data: daoTokenPriceHistoricalData,
@@ -21,7 +22,7 @@ export const useCostOfAttack = (daoId: DaoIdEnum) => {
 
   const costOfAttack = useMemo(() => {
     if (
-      !delegatedSupply.data?.currentDelegatedSupply ||
+      !activeSupply.data?.activeSupply ||
       !daoTokenPriceHistoricalData.length
     ) {
       return null;
@@ -35,22 +36,19 @@ export const useCostOfAttack = (daoId: DaoIdEnum) => {
           )
         : 0;
 
-    const delegatedSupplyValue = Number(
-      formatUnits(
-        BigInt(delegatedSupply.data.currentDelegatedSupply),
-        daoConfig.decimals,
-      ),
+    const activeSupplyValue = Number(
+      formatUnits(BigInt(activeSupply.data.activeSupply), daoConfig.decimals),
     );
 
-    return delegatedSupplyValue * lastPrice;
+    return activeSupplyValue * lastPrice;
   }, [
-    delegatedSupply.data?.currentDelegatedSupply,
+    activeSupply.data?.activeSupply,
     daoTokenPriceHistoricalData,
     daoConfig.decimals,
   ]);
 
   return {
     costOfAttack,
-    isLoading: delegatedSupply.isLoading || daoTokenPriceHistoricalDataLoading,
+    isLoading: activeSupply.isLoading || daoTokenPriceHistoricalDataLoading,
   };
 };

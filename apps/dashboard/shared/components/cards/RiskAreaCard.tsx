@@ -109,8 +109,10 @@ const RiskAreaCardInternal = ({
     >
       <div
         className={cn(
-          "flex h-full items-center px-2 py-2 lg:py-5",
-          !isPanelTable ? "flex-1 justify-between" : "size-7 p-0 text-center",
+          "flex h-full items-center px-2 py-4",
+          !isPanelTable
+            ? "flex-1 justify-between lg:py-5"
+            : "size-7 p-0 text-center",
           {
             "bg-surface-contrast": risk.level === RiskLevel.NONE,
             "bg-success shadow-success/30": risk.level === RiskLevel.LOW,
@@ -137,14 +139,14 @@ const RiskAreaCardInternal = ({
             className={cn(
               "block font-mono font-medium text-black lg:tracking-wider",
               {
-                "text-secondary!": risk.level === RiskLevel.NONE,
-                "text-success!":
+                "!text-secondary": risk.level === RiskLevel.NONE,
+                "!text-success":
                   risk.level === RiskLevel.LOW && !isActive && !isHovered,
-                "text-warning!":
+                "!text-warning":
                   risk.level === RiskLevel.MEDIUM && !isActive && !isHovered,
-                "text-error!":
+                "!text-error":
                   risk.level === RiskLevel.HIGH && !isActive && !isHovered,
-                "text-inverted!":
+                "!text-inverted":
                   isActive && risk.level !== RiskLevel.NONE && isHovered,
                 "text-alternative-sm": isRiskAnalysis,
                 "text-xs": !isRiskAnalysis,
@@ -294,7 +296,7 @@ export const RiskAreaCard = ({
             variant={variant}
           />
         </div>
-        <div className="w-3.25 hidden items-center justify-center lg:flex">
+        <div className="w-3.25 hidden h-full items-center justify-center lg:flex">
           {isActive && (
             <div className="border-l-middle-dark border-y-13 border-l-13 size-0 border-y-transparent" />
           )}

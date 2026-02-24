@@ -55,7 +55,7 @@ export const StageTooltip = ({
                     textColorMap[item[1].riskLevel],
                   )}
                 >
-                  {item[1].value}
+                  {item[1].impact}
                 </p>
               </div>
             );
