@@ -124,7 +124,10 @@ export function AddressDetailsTooltip({
   );
 
   return (
-    <Tooltip tooltipContent={content} className="w-[280px] p-2 text-left">
+    <Tooltip
+      tooltipContent={content}
+      className="w-[280px] rounded-none p-2 text-left"
+    >
       {children}
     </Tooltip>
   );
