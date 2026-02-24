@@ -21,6 +21,7 @@ import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import daoConfig from "@/shared/dao-config";
 import { useScreenSize } from "@/shared/hooks";
+import { useArkhamData } from "@/shared/hooks/graphql-client/useArkhamData";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { formatNumberUserReadable } from "@/shared/utils";
@@ -31,6 +32,25 @@ interface TokenHolderTableData {
   balance: number;
   variation: { percentageChange: number; absoluteChange: number } | null;
   delegate: Address;
+}
+
+function TypeCell({ address }: { address: Address }) {
+  const { isContract, loading } = useArkhamData(address);
+
+  if (loading) {
+    return (
+      <SkeletonRow
+        parentClassName="flex animate-pulse"
+        className="h-5 w-16 rounded-full"
+      />
+    );
+  }
+
+  return (
+    <BadgeStatus variant="secondary">
+      {isContract ? "Contract" : "EOA"}
+    </BadgeStatus>
+  );
 }
 
 export const TokenHolders = ({
@@ -188,6 +208,20 @@ export const TokenHolders = ({
       },
       meta: {
         columnClassName: "w-72",
+      },
+    },
+    {
+      accessorKey: "type",
+      header: () => (
+        <div className="text-table-header flex w-full items-center justify-start">
+          <span>Type</span>
+        </div>
+      ),
+      cell: ({ row }) => {
+        return <TypeCell address={row.original.address} />;
+      },
+      meta: {
+        columnClassName: "w-28",
       },
     },
     {
