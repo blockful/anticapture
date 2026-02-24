@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar, X } from "lucide-react";
+import { Calendar } from "lucide-react";
 import { useState, useEffect } from "react";
 
 import {
@@ -8,15 +8,14 @@ import {
   FeedEventType,
   ActivityFeedFilterState,
 } from "@/features/feed/types";
-import { Button, IconButton } from "@/shared/components";
+import {
+  Button,
+  DrawerRoot,
+  DrawerContent,
+  DrawerHeader,
+} from "@/shared/components";
 import { RadioButton } from "@/shared/components/design-system/buttons/RadioButton";
 import { Input } from "@/shared/components/design-system/form/fields/input/Input";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerClose,
-} from "@/shared/components/ui/drawer";
-import { useScreenSize } from "@/shared/hooks";
 
 interface ActivityFeedFiltersDrawerProps {
   isOpen: boolean;
@@ -55,7 +54,6 @@ export const ActivityFeedFiltersDrawer = ({
   filters,
   onApplyFilters,
 }: ActivityFeedFiltersDrawerProps) => {
-  const { isMobile } = useScreenSize();
   const [localFilters, setLocalFilters] =
     useState<ActivityFeedFilterState>(filters);
 
@@ -108,25 +106,10 @@ export const ActivityFeedFiltersDrawer = ({
   }, [isOpen, filters]);
 
   return (
-    <Drawer
-      open={isOpen}
-      onOpenChange={handleOpenChange}
-      direction={isMobile ? "bottom" : "right"}
-    >
-      <DrawerContent className="flex h-full flex-col">
+    <DrawerRoot open={isOpen} onOpenChange={handleOpenChange}>
+      <DrawerContent>
+        <DrawerHeader title="Filter Activity" onClose={onClose} />
         <div className="bg-surface-default flex h-full flex-col overflow-y-auto">
-          {/* Header */}
-          <div className="bg-surface-contrast px-4 pb-4 pt-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-primary text-lg font-semibold">
-                Filter Activity
-              </h2>
-              <DrawerClose asChild>
-                <IconButton variant="outline" size="sm" icon={X} />
-              </DrawerClose>
-            </div>
-          </div>
-
           {/* Content */}
           <div className="flex flex-1 flex-col gap-6 px-4 py-6">
             {/* Sort by Date */}
@@ -234,6 +217,6 @@ export const ActivityFeedFiltersDrawer = ({
           </div>
         </div>
       </DrawerContent>
-    </Drawer>
+    </DrawerRoot>
   );
 };
