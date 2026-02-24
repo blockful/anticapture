@@ -4,7 +4,6 @@ import { ReactNode } from "react";
 import { Address } from "viem";
 
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
-import { BulletDivider } from "@/shared/components/design-system/section/BulletDivider";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { useArkhamData } from "@/shared/hooks/graphql-client/useArkhamData";
 import { cn } from "@/shared/utils/cn";
@@ -70,24 +69,27 @@ export function AddressDetailsTooltip({
 
       <DashedDivider />
 
-      <Row label="Arkham Entity/Label">
+      <Row label="Arkham Entity">
         {loading ? (
           <SkeletonLine className="mt-1 h-5 w-32" />
+        ) : arkham?.entity ? (
+          <span className="text-primary text-sm leading-5">
+            {arkham.entity}
+          </span>
         ) : (
-          <div className="flex items-center gap-1.5">
-            {arkham?.entity ? (
-              <span className="text-primary text-sm leading-5">
-                {arkham.entity}
-              </span>
-            ) : null}
-            {arkham?.entity && arkham?.label ? <BulletDivider /> : null}
-            {arkham?.label ? (
-              <span className="text-primary text-sm leading-5">
-                {arkham.label}
-              </span>
-            ) : null}
-            {!arkham?.entity && !arkham?.label ? <NotInformed /> : null}
-          </div>
+          <NotInformed />
+        )}
+      </Row>
+
+      <DashedDivider />
+
+      <Row label="Arkham Label">
+        {loading ? (
+          <SkeletonLine className="mt-1 h-5 w-32" />
+        ) : arkham?.label ? (
+          <span className="text-primary text-sm leading-5">{arkham.label}</span>
+        ) : (
+          <NotInformed />
         )}
       </Row>
 
