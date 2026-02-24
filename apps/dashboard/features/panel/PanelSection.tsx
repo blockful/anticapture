@@ -1,3 +1,5 @@
+import { BarChart4 } from "lucide-react";
+
 import {
   PanelTable,
   DelegatedSupplyHistory,
@@ -12,7 +14,6 @@ import {
   SubSectionsContainer,
 } from "@/shared/components/design-system/section";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
-import { BarChart4 } from "lucide-react";
 
 export const PanelSection = () => {
   return (

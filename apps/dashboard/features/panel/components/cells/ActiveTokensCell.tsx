@@ -59,7 +59,7 @@ export const ActiveTokensCell = ({
     );
   }
 
-  if (activePercentage === null || activePercentage === undefined) {
+  if (activePercentage === null) {
     return (
       <div className="text-secondary flex w-full items-center justify-end px-4 py-3 text-end text-sm font-normal">
         N/A

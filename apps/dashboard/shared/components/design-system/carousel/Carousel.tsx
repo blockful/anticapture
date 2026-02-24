@@ -45,7 +45,7 @@ export const Carousel = ({ slides }: { slides: React.ReactNode[] }) => {
           <button
             key={index}
             onClick={() => setCurrent(index)}
-            className={`h-2 w-6 rounded-full transition-all duration-300 ${
+            className={`h-2 w-6 transition-all duration-300 ${
               current === index ? "bg-link" : "bg-surface-contrast"
             }`}
           />

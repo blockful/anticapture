@@ -33,7 +33,7 @@ export const CostOfAttackCell = ({
     );
   }
 
-  if (costOfAttack === null || costOfAttack === undefined) {
+  if (costOfAttack === null) {
     return (
       <Tooltip
         tooltipContent={
