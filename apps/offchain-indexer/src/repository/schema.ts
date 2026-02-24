@@ -1,4 +1,4 @@
-import { pgSchema, index } from "drizzle-orm/pg-core";
+import { pgSchema, index, primaryKey } from "drizzle-orm/pg-core";
 
 export const snapshotSchema = pgSchema("snapshot");
 
@@ -22,7 +22,6 @@ export const proposals = snapshotSchema.table("proposals", (d) => ({
 export const votes = snapshotSchema.table(
   "votes",
   (d) => ({
-    id: d.text().primaryKey(),
     spaceId: d.text("space_id").notNull(),
     voter: d.text().notNull(),
     proposalId: d.text("proposal_id").notNull(),
@@ -31,7 +30,11 @@ export const votes = snapshotSchema.table(
     reason: d.text().notNull().default(""),
     created: d.integer().notNull(),
   }),
-  (table) => [
+  (table) => 
+  [
+    primaryKey({
+      columns: [table.proposalId, table.voter],
+    }),
     index("votes_proposal_id_idx").on(table.proposalId),
     index("votes_voter_idx").on(table.voter),
   ],

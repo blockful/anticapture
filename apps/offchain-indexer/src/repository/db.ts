@@ -72,10 +72,8 @@ export class DrizzleRepository implements Repository {
         .insert(schema.votes)
         .values(votes)
         .onConflictDoUpdate({
-          target: schema.votes.id,
+          target:  [schema.votes.proposalId, schema.votes.voter],
           set: {
-            voter: sql`excluded.voter`,
-            proposalId: sql`excluded.proposal_id`,
             choice: sql`excluded.choice`,
             vp: sql`excluded.vp`,
             reason: sql`excluded.reason`,

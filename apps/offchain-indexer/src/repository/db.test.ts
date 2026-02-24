@@ -30,7 +30,6 @@ function createVote(
   overrides?: Partial<schema.OffchainVote>
 ): schema.OffchainVote {
   return {
-    id: "vote-default",
     spaceId: "ens.eth",
     voter: "0x5678",
     proposalId: "prop-1",
@@ -163,7 +162,7 @@ describe("DrizzleRepository", () => {
 
   describe("votes", () => {
     it("should save the votes", async () => {
-      const vote = createVote({ id: "vote-1", voter: "0xabc" });
+      const vote = createVote({ voter: "0xabc" });
 
       await repo.saveVotes([vote], "cursor-1");
 
@@ -171,7 +170,6 @@ describe("DrizzleRepository", () => {
       expect(rows).toStrictEqual([{
         "choice": 1,
         "created": 1700000000,
-        "id": "vote-1",
         "proposalId": "prop-1",
         "reason": "",
         "spaceId": "ens.eth",
@@ -190,30 +188,36 @@ describe("DrizzleRepository", () => {
       expect(cursor).toBeNull();
     });
 
-    it("should upsert on conflict", async () => {
+    it("should upsert on conflict (revote scenario)", async () => {
       const vote = createVote({
-        id: "vote-1",
-        reason: "original reason",
+        voter: "0xabc",
+        proposalId: "prop-1",
+        choice: 1,
         vp: 100.5,
+        reason: "original reason",
+        created: 1700000000,
       });
       await repo.saveVotes([vote], "cursor-1");
 
-      const updated = createVote({
-        id: "vote-1",
-        reason: "updated reason",
+      const revote = createVote({
+        voter: "0xabc",
+        proposalId: "prop-1",
+        choice: 2,
         vp: 250.0,
+        reason: "changed my mind",
+        created: 1700005000,
       });
-      await repo.saveVotes([updated], "cursor-2");
+      await repo.saveVotes([revote], "cursor-2");
 
       const rows = await db.select().from(schema.votes);
+      expect(rows).toHaveLength(1);
       expect(rows).toStrictEqual([{
-        "choice": 1,
-        "created": 1700000000,
-        "id": "vote-1",
+        "choice": 2,
+        "created": 1700005000,
         "proposalId": "prop-1",
-        "reason": "updated reason",
+        "reason": "changed my mind",
         "spaceId": "ens.eth",
-        "voter": "0x5678",
+        "voter": "0xabc",
         "vp": 250,
       }])
     });
