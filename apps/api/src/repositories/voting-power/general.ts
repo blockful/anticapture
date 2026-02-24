@@ -438,10 +438,10 @@ export class VotingPowerRepository {
       conditions.push(inArray(accountPower.accountId, addresses));
     }
     if (amountfilter.minAmount) {
-      gt(accountPower.votingPower, BigInt(amountfilter.minAmount));
+      conditions.push(gt(accountPower.votingPower, BigInt(amountfilter.minAmount)));
     }
     if (amountfilter.maxAmount) {
-      lt(accountPower.votingPower, BigInt(amountfilter.maxAmount));
+      conditions.push(lt(accountPower.votingPower, BigInt(amountfilter.maxAmount)));
     }
 
     return conditions.length ? and(...conditions) : sql`true`;

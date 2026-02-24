@@ -4,7 +4,7 @@ import { Address } from "viem";
 import { votingPowers } from "./listing";
 import { VotingPowerService } from "@/services/voting-power";
 import {
-  DBAccountPower,
+  DBAccountPowerWithVariation,
   DBVotingPowerVariation,
   DBHistoricalVotingPowerWithRelations,
   AmountFilter,
@@ -12,11 +12,6 @@ import {
 
 const TEST_ACCOUNT_1 = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045" as Address;
 const TEST_ACCOUNT_2 = "0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B" as Address;
-
-type DBAccountPowerWithVariation = DBAccountPower & {
-  absoluteChange: bigint;
-  percentageChange: number;
-};
 
 function createAccountPower(
   overrides: Partial<DBAccountPowerWithVariation> = {},
@@ -190,27 +185,42 @@ describe("Voting Powers Controller - Integration Tests", () => {
     });
 
     it("should accept orderBy=delegationsCount", async () => {
-      fakeRepo.setData([createAccountPower()]);
+      const account = createAccountPower({ delegationsCount: 10 });
+      fakeRepo.setData([account]);
 
       const res = await app.request("/voting-powers?orderBy=delegationsCount");
 
       expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.items).toHaveLength(1);
+      expect(body.items[0].delegationsCount).toBe(10);
     });
 
     it("should accept orderBy=variation", async () => {
-      fakeRepo.setData([createAccountPower()]);
+      const account = createAccountPower({
+        absoluteChange: 500n,
+        percentageChange: 50,
+      });
+      fakeRepo.setData([account]);
 
       const res = await app.request("/voting-powers?orderBy=variation");
 
       expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.items).toHaveLength(1);
+      expect(body.items[0].variation.absoluteChange).toBe("500");
     });
 
     it("should accept orderDirection=asc", async () => {
-      fakeRepo.setData([createAccountPower()]);
+      const account = createAccountPower();
+      fakeRepo.setData([account]);
 
       const res = await app.request("/voting-powers?orderDirection=asc");
 
       expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.items).toHaveLength(1);
+      expect(body.items[0].accountId).toBe(account.accountId);
     });
 
     it("should return multiple items with variation data", async () => {
@@ -249,23 +259,49 @@ describe("Voting Powers Controller - Integration Tests", () => {
     });
 
     it("should accept address filtering", async () => {
-      fakeRepo.setData([createAccountPower({ accountId: TEST_ACCOUNT_1 })]);
+      const account = createAccountPower({ accountId: TEST_ACCOUNT_1 });
+      fakeRepo.setData([account]);
 
       const res = await app.request(
         `/voting-powers?addresses=${TEST_ACCOUNT_1}`,
       );
 
       expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.items).toHaveLength(1);
+      expect(body.items[0].accountId).toBe(TEST_ACCOUNT_1);
     });
 
     it("should accept fromDate and toDate query parameters", async () => {
-      fakeRepo.setData([createAccountPower()]);
+      const account = createAccountPower();
+      fakeRepo.setData([account]);
 
       const res = await app.request(
         "/voting-powers?fromDate=1700000000&toDate=1701000000",
       );
 
       expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.items).toHaveLength(1);
+      expect(body.totalCount).toBe(1);
+    });
+
+    it("should return 400 for limit exceeding 100", async () => {
+      const res = await app.request("/voting-powers?limit=200");
+
+      expect(res.status).toBe(400);
+    });
+
+    it("should return 400 for negative skip", async () => {
+      const res = await app.request("/voting-powers?skip=-1");
+
+      expect(res.status).toBe(400);
+    });
+
+    it("should return 400 for invalid orderBy value", async () => {
+      const res = await app.request("/voting-powers?orderBy=invalid");
+
+      expect(res.status).toBe(400);
     });
 
     it("should return zero variation for accounts with no changes", async () => {
@@ -321,6 +357,31 @@ describe("Voting Powers Controller - Integration Tests", () => {
         absoluteChange: "0",
         percentageChange: 0,
       });
+    });
+
+    it("should return negative variation for account that lost voting power", async () => {
+      const account = createAccountPower({
+        accountId: TEST_ACCOUNT_1,
+        votingPower: 500n,
+        absoluteChange: -300n,
+        percentageChange: -37.5,
+      });
+      fakeRepo.setSingleAccount(account);
+
+      const res = await app.request(`/voting-powers/${TEST_ACCOUNT_1}`);
+
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.variation).toEqual({
+        absoluteChange: "-300",
+        percentageChange: -37.5,
+      });
+    });
+
+    it("should return 400 for invalid address format", async () => {
+      const res = await app.request("/voting-powers/not-an-address");
+
+      expect(res.status).toBe(400);
     });
   });
 });
