@@ -46,6 +46,10 @@ function SkeletonLine({ className }: { className?: string }) {
   );
 }
 
+function NotInformed() {
+  return <span className="text-secondary text-sm leading-5">Not informed</span>;
+}
+
 export function AddressDetailsTooltip({
   address,
   children,
@@ -57,10 +61,10 @@ export function AddressDetailsTooltip({
       <Row label="ENS address">
         {loading ? (
           <SkeletonLine className="mt-1 h-5 w-24" />
+        ) : ens?.name ? (
+          <span className="text-primary text-sm leading-5">{ens.name}</span>
         ) : (
-          <span className="text-primary text-sm leading-5">
-            {ens?.name ?? "—"}
-          </span>
+          <NotInformed />
         )}
       </Row>
 
@@ -82,9 +86,7 @@ export function AddressDetailsTooltip({
                 {arkham.label}
               </span>
             ) : null}
-            {!arkham?.entity && !arkham?.label ? (
-              <span className="text-secondary text-sm leading-5">—</span>
-            ) : null}
+            {!arkham?.entity && !arkham?.label ? <NotInformed /> : null}
           </div>
         )}
       </Row>
