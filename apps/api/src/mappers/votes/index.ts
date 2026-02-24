@@ -48,9 +48,13 @@ export const VoteResponseSchema = z.object({
   transactionHash: z.string(),
   proposalId: z.string(),
   support: z.number(),
-  votingPower: z.string(),
+  votingPower: z
+    .union([z.string(), z.bigint().transform((val) => val.toString())])
+    .openapi({ type: "string" }),
   reason: z.string().optional(),
-  timestamp: z.number(),
+  timestamp: z
+    .union([z.number(), z.bigint().transform((val) => Number(val))])
+    .openapi({ type: "integer" }),
   proposalTitle: z.string(),
 });
 

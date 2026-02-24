@@ -742,7 +742,7 @@ type query_proposals_items_items {
   daoId: String!
   txHash: String!
   proposerAccountId: String!
-  title: String!
+  title: String
   description: String!
   startBlock: Float!
   endBlock: Float!
@@ -775,7 +775,7 @@ type proposal_200_response {
   daoId: String!
   txHash: String!
   proposerAccountId: String!
-  title: String!
+  title: String
   description: String!
   startBlock: Float!
   endBlock: Float!
@@ -1122,8 +1122,8 @@ type query_accountBalanceVariationsByAccountId_data {
 
 type accountBalances_200_response {
   items: [query_accountBalances_items_items]!
-  totalCount: Float!
   period: query_accountBalances_period!
+  totalCount: Float!
 }
 
 type query_accountBalances_items_items {
@@ -1134,18 +1134,49 @@ type query_accountBalances_items_items {
   variation: query_accountBalances_items_items_variation!
 }
 
+type query_accountBalances_items_items_variation {
+  previousBalance: String!
+  absoluteChange: String!
+  percentageChange: String!
+}
+
+type query_accountBalances_period {
+  startTimestamp: String!
+  endTimestamp: String!
+}
+
 enum queryInput_accountBalances_orderDirection {
   asc
   desc
 }
 
+enum queryInput_accountBalances_orderBy {
+  balance
+  variation
+}
+
 type accountBalanceByAccountId_200_response {
+  data: query_accountBalanceByAccountId_data!
+  period: query_accountBalanceByAccountId_period!
+}
+
+type query_accountBalanceByAccountId_data {
   address: String!
   balance: String!
   tokenId: String!
   delegate: String!
-  data: query_accountBalanceByAccountId_data!
-  period: query_accountBalanceByAccountId_period!
+  variation: query_accountBalanceByAccountId_data_variation!
+}
+
+type query_accountBalanceByAccountId_data_variation {
+  previousBalance: String!
+  absoluteChange: String!
+  percentageChange: String!
+}
+
+type query_accountBalanceByAccountId_period {
+  startTimestamp: String!
+  endTimestamp: String!
 }
 
 type accountInteractions_200_response {
@@ -1218,7 +1249,7 @@ type query_votesByProposalId_items_items {
   support: Float!
   votingPower: String!
   reason: String
-  timestamp: Float!
+  timestamp: Int!
   proposalTitle: String!
 }
 
@@ -1244,7 +1275,7 @@ type query_votes_items_items {
   support: Float!
   votingPower: String!
   reason: String
-  timestamp: Float!
+  timestamp: Int!
   proposalTitle: String!
 }
 
@@ -1315,41 +1346,6 @@ enum queryInput_tokenMetrics_metricType {
 enum queryInput_tokenMetrics_orderDirection {
   asc
   desc
-}
-
-type query_accountBalances_items_items_variation {
-  previousBalance: String!
-  absoluteChange: String!
-  percentageChange: String!
-}
-
-type query_accountBalances_period {
-  startTimestamp: String!
-  endTimestamp: String!
-}
-
-enum queryInput_accountBalances_orderBy {
-  balance
-  variation
-}
-
-type query_accountBalanceByAccountId_data {
-  address: String!
-  balance: String!
-  tokenId: String!
-  delegate: String!
-  variation: query_accountBalanceByAccountId_data_variation!
-}
-
-type query_accountBalanceByAccountId_data_variation {
-  previousBalance: String!
-  absoluteChange: String!
-  percentageChange: String!
-}
-
-type query_accountBalanceByAccountId_period {
-  startTimestamp: String!
-  endTimestamp: String!
 }
 
 type AverageDelegationPercentageItem {
