@@ -1,13 +1,14 @@
-import { Address, getAddress, isAddress } from "viem";
 import { z } from "@hono/zod-openapi";
-import { PeriodResponseSchema, TimestampResponseMapper } from "../shared";
+import { Address, getAddress, isAddress } from "viem";
+
 import { PERCENTAGE_NO_BASELINE } from "../constants";
+import { PeriodResponseSchema, TimestampResponseMapper } from "../shared";
 
 export const AccountBalanceVariationsByAccountIdRequestParamsSchema = z.object({
   address: z
     .string()
     .refine(isAddress, "Invalid address")
-    .transform((addr) => getAddress(addr))
+    .transform((addr) => getAddress(addr)),
 });
 
 export const AccountBalanceVariationsByAccountIdRequestQuerySchema = z.object({
@@ -91,6 +92,16 @@ export type DBAccountBalanceVariation = {
   percentageChange: string;
 };
 
+export const PercentageChangeMapper = (variation: {
+  previousBalance: bigint;
+  currentBalance: bigint;
+  percentageChange: string;
+}): string => {
+  return !variation.previousBalance && variation.currentBalance
+    ? PERCENTAGE_NO_BASELINE
+    : variation.percentageChange.toString();
+};
+
 export const AccountBalanceVariationMapper = (
   variation: DBAccountBalanceVariation,
 ): AccountBalanceVariation => ({
@@ -98,9 +109,7 @@ export const AccountBalanceVariationMapper = (
   previousBalance: variation.previousBalance.toString(),
   currentBalance: variation.currentBalance.toString(),
   absoluteChange: variation.absoluteChange.toString(),
-  percentageChange: (!variation.previousBalance && variation.currentBalance)
-    ? PERCENTAGE_NO_BASELINE
-    : variation.percentageChange.toString()
+  percentageChange: PercentageChangeMapper(variation),
 });
 
 export const AccountBalanceVariationsByAccountIdResponseMapper = (

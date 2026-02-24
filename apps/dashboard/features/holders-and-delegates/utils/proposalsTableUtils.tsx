@@ -1,4 +1,3 @@
-import { ActivityIndicator } from "@/shared/components";
 import {
   Query_ProposalsActivity_Proposals_Items_Proposal,
   Query_ProposalsActivity_Proposals_Items_UserVote,
@@ -12,6 +11,8 @@ import {
   UserX,
 } from "lucide-react";
 import React, { ReactNode } from "react";
+
+import { ActivityIndicator } from "@/shared/components";
 
 // Vote mapping object
 export const proposalsUserVoteMapping = {

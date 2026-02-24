@@ -15,9 +15,12 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
+  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
+  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
+  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
 };
 
@@ -115,6 +118,14 @@ export type Query = {
   delegationPercentageByDay?: Maybe<DelegationPercentageByDay_200_Response>;
   /** Get current delegators of an account */
   delegations?: Maybe<Delegations_200_Response>;
+  /** Get current delegators of an account with voting power */
+  delegators?: Maybe<Delegators_200_Response>;
+  /** Get feed events */
+  feedEvents?: Maybe<FeedEvents_200_Response>;
+  /** Returns label information from Arkham, ENS data, and whether the address is an EOA or contract. Arkham data is stored permanently. ENS data is cached with a configurable TTL. */
+  getAddress?: Maybe<GetAddress_200_Response>;
+  /** Returns label information from Arkham, ENS data, and address type for multiple addresses. Maximum 100 addresses per request. Arkham data is stored permanently. ENS data is cached with a configurable TTL. */
+  getAddresses?: Maybe<GetAddresses_200_Response>;
   /** Get historical DAO Token Treasury value (governance token quantity × token price) */
   getDaoTokenTreasury?: Maybe<GetDaoTokenTreasury_200_Response>;
   /** Get historical Liquid Treasury (treasury without DAO tokens) from external providers (DefiLlama/Dune) */
@@ -166,6 +177,8 @@ export type Query = {
 
 export type QueryAccountBalanceByAccountIdArgs = {
   address: Scalars['String']['input'];
+  fromDate?: InputMaybe<Scalars['String']['input']>;
+  toDate?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -189,10 +202,13 @@ export type QueryAccountBalanceVariationsByAccountIdArgs = {
 export type QueryAccountBalancesArgs = {
   addresses?: InputMaybe<Scalars['JSON']['input']>;
   delegates?: InputMaybe<Scalars['JSON']['input']>;
+  fromDate?: InputMaybe<Scalars['String']['input']>;
   fromValue?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<QueryInput_AccountBalances_OrderBy>;
   orderDirection?: InputMaybe<QueryInput_AccountBalances_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  toDate?: InputMaybe<Scalars['String']['input']>;
   toValue?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -288,6 +304,39 @@ export type QueryDelegationPercentageByDayArgs = {
 
 export type QueryDelegationsArgs = {
   address: Scalars['String']['input'];
+  orderBy?: InputMaybe<QueryInput_Delegations_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_Delegations_OrderDirection>;
+};
+
+
+export type QueryDelegatorsArgs = {
+  address: Scalars['String']['input'];
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<QueryInput_Delegators_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_Delegators_OrderDirection>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+};
+
+
+export type QueryFeedEventsArgs = {
+  fromDate?: InputMaybe<Scalars['Float']['input']>;
+  limit?: InputMaybe<Scalars['Float']['input']>;
+  orderBy?: InputMaybe<QueryInput_FeedEvents_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_FeedEvents_OrderDirection>;
+  relevance?: InputMaybe<QueryInput_FeedEvents_Relevance>;
+  skip?: InputMaybe<Scalars['Float']['input']>;
+  toDate?: InputMaybe<Scalars['Float']['input']>;
+  type?: InputMaybe<QueryInput_FeedEvents_Type>;
+};
+
+
+export type QueryGetAddressArgs = {
+  address: Scalars['String']['input'];
+};
+
+
+export type QueryGetAddressesArgs = {
+  addresses: Scalars['JSON']['input'];
 };
 
 
@@ -479,6 +528,8 @@ export type QueryVotesByProposalIdArgs = {
 
 export type QueryVotingPowerByAccountIdArgs = {
   accountId: Scalars['String']['input'];
+  fromDate?: InputMaybe<Scalars['Float']['input']>;
+  toDate?: InputMaybe<Scalars['Float']['input']>;
 };
 
 
@@ -501,11 +552,13 @@ export type QueryVotingPowerVariationsByAccountIdArgs = {
 
 export type QueryVotingPowersArgs = {
   addresses?: InputMaybe<Scalars['JSON']['input']>;
+  fromDate?: InputMaybe<Scalars['String']['input']>;
   fromValue?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   orderBy?: InputMaybe<QueryInput_VotingPowers_OrderBy>;
   orderDirection?: InputMaybe<QueryInput_VotingPowers_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  toDate?: InputMaybe<Scalars['String']['input']>;
   toValue?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -513,7 +566,9 @@ export type AccountBalanceByAccountId_200_Response = {
   __typename?: 'accountBalanceByAccountId_200_response';
   address: Scalars['String']['output'];
   balance: Scalars['String']['output'];
+  data: Query_AccountBalanceByAccountId_Data;
   delegate: Scalars['String']['output'];
+  period: Query_AccountBalanceByAccountId_Period;
   tokenId: Scalars['String']['output'];
 };
 
@@ -532,6 +587,7 @@ export type AccountBalanceVariations_200_Response = {
 export type AccountBalances_200_Response = {
   __typename?: 'accountBalances_200_response';
   items: Array<Maybe<Query_AccountBalances_Items_Items>>;
+  period: Query_AccountBalances_Period;
   totalCount: Scalars['Float']['output'];
 };
 
@@ -641,6 +697,31 @@ export type Delegations_200_Response = {
   totalCount: Scalars['Float']['output'];
 };
 
+export type Delegators_200_Response = {
+  __typename?: 'delegators_200_response';
+  items: Array<Maybe<Query_Delegators_Items_Items>>;
+  totalCount: Scalars['Float']['output'];
+};
+
+export type FeedEvents_200_Response = {
+  __typename?: 'feedEvents_200_response';
+  items: Array<Maybe<Query_FeedEvents_Items_Items>>;
+  totalCount: Scalars['Float']['output'];
+};
+
+export type GetAddress_200_Response = {
+  __typename?: 'getAddress_200_response';
+  address: Scalars['String']['output'];
+  arkham?: Maybe<Query_GetAddress_Arkham>;
+  ens?: Maybe<Query_GetAddress_Ens>;
+  isContract: Scalars['Boolean']['output'];
+};
+
+export type GetAddresses_200_Response = {
+  __typename?: 'getAddresses_200_response';
+  results: Array<Maybe<Query_GetAddresses_Results_Items>>;
+};
+
 export type GetDaoTokenTreasury_200_Response = {
   __typename?: 'getDaoTokenTreasury_200_response';
   items: Array<Maybe<Query_GetDaoTokenTreasury_Items_Items>>;
@@ -742,6 +823,11 @@ export type Proposals_200_Response = {
 export enum QueryInput_AccountBalanceVariations_OrderDirection {
   Asc = 'asc',
   Desc = 'desc'
+}
+
+export enum QueryInput_AccountBalances_OrderBy {
+  Balance = 'balance',
+  Variation = 'variation'
 }
 
 export enum QueryInput_AccountBalances_OrderDirection {
@@ -850,6 +936,50 @@ export enum QueryInput_CompareVotes_Days {
 export enum QueryInput_DelegationPercentageByDay_OrderDirection {
   Asc = 'asc',
   Desc = 'desc'
+}
+
+export enum QueryInput_Delegations_OrderBy {
+  Amount = 'amount',
+  Timestamp = 'timestamp'
+}
+
+export enum QueryInput_Delegations_OrderDirection {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
+export enum QueryInput_Delegators_OrderBy {
+  Amount = 'amount',
+  Timestamp = 'timestamp'
+}
+
+export enum QueryInput_Delegators_OrderDirection {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
+export enum QueryInput_FeedEvents_OrderBy {
+  Timestamp = 'timestamp',
+  Value = 'value'
+}
+
+export enum QueryInput_FeedEvents_OrderDirection {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
+export enum QueryInput_FeedEvents_Relevance {
+  High = 'HIGH',
+  Low = 'LOW',
+  Medium = 'MEDIUM'
+}
+
+export enum QueryInput_FeedEvents_Type {
+  Delegation = 'DELEGATION',
+  Proposal = 'PROPOSAL',
+  ProposalExtended = 'PROPOSAL_EXTENDED',
+  Transfer = 'TRANSFER',
+  Vote = 'VOTE'
 }
 
 export enum QueryInput_GetDaoTokenTreasury_Days {
@@ -1028,6 +1158,7 @@ export enum QueryInput_VotingPowerVariations_OrderDirection {
 
 export enum QueryInput_VotingPowers_OrderBy {
   DelegationsCount = 'delegationsCount',
+  Variation = 'variation',
   VotingPower = 'votingPower'
 }
 
@@ -1035,6 +1166,28 @@ export enum QueryInput_VotingPowers_OrderDirection {
   Asc = 'asc',
   Desc = 'desc'
 }
+
+export type Query_AccountBalanceByAccountId_Data = {
+  __typename?: 'query_accountBalanceByAccountId_data';
+  address: Scalars['String']['output'];
+  balance: Scalars['String']['output'];
+  delegate: Scalars['String']['output'];
+  tokenId: Scalars['String']['output'];
+  variation: Query_AccountBalanceByAccountId_Data_Variation;
+};
+
+export type Query_AccountBalanceByAccountId_Data_Variation = {
+  __typename?: 'query_accountBalanceByAccountId_data_variation';
+  absoluteChange: Scalars['String']['output'];
+  percentageChange: Scalars['String']['output'];
+  previousBalance: Scalars['String']['output'];
+};
+
+export type Query_AccountBalanceByAccountId_Period = {
+  __typename?: 'query_accountBalanceByAccountId_period';
+  endTimestamp: Scalars['String']['output'];
+  startTimestamp: Scalars['String']['output'];
+};
 
 export type Query_AccountBalanceVariationsByAccountId_Data = {
   __typename?: 'query_accountBalanceVariationsByAccountId_data';
@@ -1072,6 +1225,20 @@ export type Query_AccountBalances_Items_Items = {
   balance: Scalars['String']['output'];
   delegate: Scalars['String']['output'];
   tokenId: Scalars['String']['output'];
+  variation: Query_AccountBalances_Items_Items_Variation;
+};
+
+export type Query_AccountBalances_Items_Items_Variation = {
+  __typename?: 'query_accountBalances_items_items_variation';
+  absoluteChange: Scalars['String']['output'];
+  percentageChange: Scalars['String']['output'];
+  previousBalance: Scalars['String']['output'];
+};
+
+export type Query_AccountBalances_Period = {
+  __typename?: 'query_accountBalances_period';
+  endTimestamp: Scalars['String']['output'];
+  startTimestamp: Scalars['String']['output'];
 };
 
 export type Query_AccountInteractions_Items_Items = {
@@ -1108,6 +1275,76 @@ export type Query_Delegations_Items_Items = {
   delegatorAddress: Scalars['String']['output'];
   timestamp: Scalars['String']['output'];
   transactionHash: Scalars['String']['output'];
+};
+
+export type Query_Delegators_Items_Items = {
+  __typename?: 'query_delegators_items_items';
+  amount: Scalars['String']['output'];
+  delegatorAddress: Scalars['String']['output'];
+  timestamp: Scalars['String']['output'];
+};
+
+export type Query_FeedEvents_Items_Items = {
+  __typename?: 'query_feedEvents_items_items';
+  logIndex: Scalars['Float']['output'];
+  metadata?: Maybe<Scalars['JSON']['output']>;
+  relevance: Query_FeedEvents_Items_Items_Relevance;
+  timestamp: Scalars['Float']['output'];
+  txHash: Scalars['String']['output'];
+  type: Query_FeedEvents_Items_Items_Type;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+export enum Query_FeedEvents_Items_Items_Relevance {
+  High = 'HIGH',
+  Low = 'LOW',
+  Medium = 'MEDIUM'
+}
+
+export enum Query_FeedEvents_Items_Items_Type {
+  Delegation = 'DELEGATION',
+  Proposal = 'PROPOSAL',
+  ProposalExtended = 'PROPOSAL_EXTENDED',
+  Transfer = 'TRANSFER',
+  Vote = 'VOTE'
+}
+
+export type Query_GetAddress_Arkham = {
+  __typename?: 'query_getAddress_arkham';
+  entity?: Maybe<Scalars['String']['output']>;
+  entityType?: Maybe<Scalars['String']['output']>;
+  label?: Maybe<Scalars['String']['output']>;
+  twitter?: Maybe<Scalars['String']['output']>;
+};
+
+export type Query_GetAddress_Ens = {
+  __typename?: 'query_getAddress_ens';
+  avatar?: Maybe<Scalars['String']['output']>;
+  banner?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+};
+
+export type Query_GetAddresses_Results_Items = {
+  __typename?: 'query_getAddresses_results_items';
+  address: Scalars['String']['output'];
+  arkham?: Maybe<Query_GetAddresses_Results_Items_Arkham>;
+  ens?: Maybe<Query_GetAddresses_Results_Items_Ens>;
+  isContract: Scalars['Boolean']['output'];
+};
+
+export type Query_GetAddresses_Results_Items_Arkham = {
+  __typename?: 'query_getAddresses_results_items_arkham';
+  entity?: Maybe<Scalars['String']['output']>;
+  entityType?: Maybe<Scalars['String']['output']>;
+  label?: Maybe<Scalars['String']['output']>;
+  twitter?: Maybe<Scalars['String']['output']>;
+};
+
+export type Query_GetAddresses_Results_Items_Ens = {
+  __typename?: 'query_getAddresses_results_items_ens';
+  avatar?: Maybe<Scalars['String']['output']>;
+  banner?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
 };
 
 export type Query_GetDaoTokenTreasury_Items_Items = {
@@ -1388,6 +1625,12 @@ export type Query_Votes_Items_Items = {
   votingPower: Scalars['String']['output'];
 };
 
+export type Query_VotingPowerByAccountId_Variation = {
+  __typename?: 'query_votingPowerByAccountId_variation';
+  absoluteChange: Scalars['String']['output'];
+  percentageChange: Scalars['Float']['output'];
+};
+
 export type Query_VotingPowerVariationsByAccountId_Data = {
   __typename?: 'query_votingPowerVariationsByAccountId_data';
   absoluteChange: Scalars['String']['output'];
@@ -1423,8 +1666,15 @@ export type Query_VotingPowers_Items_Items = {
   accountId: Scalars['String']['output'];
   delegationsCount: Scalars['Float']['output'];
   proposalsCount: Scalars['Float']['output'];
+  variation: Query_VotingPowers_Items_Items_Variation;
   votesCount: Scalars['Float']['output'];
   votingPower: Scalars['String']['output'];
+};
+
+export type Query_VotingPowers_Items_Items_Variation = {
+  __typename?: 'query_votingPowers_items_items_variation';
+  absoluteChange: Scalars['String']['output'];
+  percentageChange: Scalars['Float']['output'];
 };
 
 export enum Timestamp_Const {
@@ -1481,6 +1731,7 @@ export type VotingPowerByAccountId_200_Response = {
   accountId: Scalars['String']['output'];
   delegationsCount: Scalars['Float']['output'];
   proposalsCount: Scalars['Float']['output'];
+  variation: Query_VotingPowerByAccountId_Variation;
   votesCount: Scalars['Float']['output'];
   votingPower: Scalars['String']['output'];
 };
@@ -1577,19 +1828,21 @@ export type GetDelegatesQueryVariables = Exact<{
 
 export type GetDelegatesQuery = { __typename?: 'Query', votingPowers?: { __typename?: 'votingPowers_200_response', totalCount: number, items: Array<{ __typename?: 'query_votingPowers_items_items', accountId: string, delegationsCount: number, votingPower: string } | null> } | null };
 
-export type GetDelegatorVotingPowerDetailsQueryVariables = Exact<{
-  addresses?: InputMaybe<Scalars['JSON']['input']>;
+export type GetDelegatorsQueryVariables = Exact<{
   address: Scalars['String']['input'];
-  orderDirection?: InputMaybe<QueryInput_AccountBalances_OrderDirection>;
-  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<QueryInput_Delegators_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_Delegators_OrderDirection>;
 }>;
 
 
-export type GetDelegatorVotingPowerDetailsQuery = { __typename?: 'Query', votingPowerByAccountId?: { __typename?: 'votingPowerByAccountId_200_response', accountId: string, votingPower: string } | null, accountBalances?: { __typename?: 'accountBalances_200_response', totalCount: number, items: Array<{ __typename?: 'query_accountBalances_items_items', address: string, balance: string } | null> } | null };
+export type GetDelegatorsQuery = { __typename?: 'Query', delegators?: { __typename?: 'delegators_200_response', totalCount: number, items: Array<{ __typename?: 'query_delegators_items_items', delegatorAddress: string, amount: string, timestamp: string } | null> } | null };
 
 export type GetDelegationsTimestampQueryVariables = Exact<{
   delegate: Scalars['String']['input'];
+  orderBy?: InputMaybe<QueryInput_Delegations_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_Delegations_OrderDirection>;
 }>;
 
 
@@ -1602,6 +1855,13 @@ export type GetTopFiveDelegatorsQueryVariables = Exact<{
 
 
 export type GetTopFiveDelegatorsQuery = { __typename?: 'Query', accountBalances?: { __typename?: 'accountBalances_200_response', items: Array<{ __typename?: 'query_accountBalances_items_items', address: string, balance: string } | null> } | null };
+
+export type GetVotingPowerQueryVariables = Exact<{
+  address: Scalars['String']['input'];
+}>;
+
+
+export type GetVotingPowerQuery = { __typename?: 'Query', votingPowerByAccountId?: { __typename?: 'votingPowerByAccountId_200_response', accountId: string, votingPower: string } | null };
 
 export type GetVotingPowerCountingQueryVariables = Exact<{
   delegates?: InputMaybe<Scalars['JSON']['input']>;
@@ -1646,6 +1906,34 @@ export type GetDelegateProposalsActivityQueryVariables = Exact<{
 
 
 export type GetDelegateProposalsActivityQuery = { __typename?: 'Query', proposalsActivity?: { __typename?: 'proposalsActivity_200_response', address: string, totalProposals: number, votedProposals: number, neverVoted: boolean, avgTimeBeforeEnd: number } | null };
+
+export type GetFeedEventsQueryVariables = Exact<{
+  skip?: InputMaybe<Scalars['Float']['input']>;
+  limit?: InputMaybe<Scalars['Float']['input']>;
+  orderBy?: InputMaybe<QueryInput_FeedEvents_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_FeedEvents_OrderDirection>;
+  relevance?: InputMaybe<QueryInput_FeedEvents_Relevance>;
+  type?: InputMaybe<QueryInput_FeedEvents_Type>;
+  fromDate?: InputMaybe<Scalars['Float']['input']>;
+  toDate?: InputMaybe<Scalars['Float']['input']>;
+}>;
+
+
+export type GetFeedEventsQuery = { __typename?: 'Query', feedEvents?: { __typename?: 'feedEvents_200_response', totalCount: number, items: Array<{ __typename?: 'query_feedEvents_items_items', txHash: string, logIndex: number, type: Query_FeedEvents_Items_Items_Type, value?: string | null, timestamp: number, relevance: Query_FeedEvents_Items_Items_Relevance, metadata?: any | null } | null> } | null };
+
+export type GetAddressQueryVariables = Exact<{
+  address: Scalars['String']['input'];
+}>;
+
+
+export type GetAddressQuery = { __typename?: 'Query', getAddress?: { __typename?: 'getAddress_200_response', address: string, isContract: boolean, arkham?: { __typename?: 'query_getAddress_arkham', entity?: string | null, entityType?: string | null, label?: string | null, twitter?: string | null } | null, ens?: { __typename?: 'query_getAddress_ens', name?: string | null, avatar?: string | null, banner?: string | null } | null } | null };
+
+export type GetAddressesQueryVariables = Exact<{
+  addresses: Scalars['JSON']['input'];
+}>;
+
+
+export type GetAddressesQuery = { __typename?: 'Query', getAddresses?: { __typename?: 'getAddresses_200_response', results: Array<{ __typename?: 'query_getAddresses_results_items', address: string, isContract: boolean, arkham?: { __typename?: 'query_getAddresses_results_items_arkham', entity?: string | null, entityType?: string | null, label?: string | null, twitter?: string | null } | null, ens?: { __typename?: 'query_getAddresses_results_items_ens', name?: string | null, avatar?: string | null, banner?: string | null } | null } | null> } | null };
 
 export type GetProposalsFromDaoQueryVariables = Exact<{
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
@@ -1883,6 +2171,9 @@ export function useBalanceHistoryLazyQuery(baseOptions?: Apollo.LazyQueryHookOpt
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<BalanceHistoryQuery, BalanceHistoryQueryVariables>(BalanceHistoryDocument, options);
         }
+// @ts-ignore
+export function useBalanceHistorySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<BalanceHistoryQuery, BalanceHistoryQueryVariables>): Apollo.UseSuspenseQueryResult<BalanceHistoryQuery, BalanceHistoryQueryVariables>;
+export function useBalanceHistorySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<BalanceHistoryQuery, BalanceHistoryQueryVariables>): Apollo.UseSuspenseQueryResult<BalanceHistoryQuery | undefined, BalanceHistoryQueryVariables>;
 export function useBalanceHistorySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<BalanceHistoryQuery, BalanceHistoryQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
           return Apollo.useSuspenseQuery<BalanceHistoryQuery, BalanceHistoryQueryVariables>(BalanceHistoryDocument, options);
@@ -1942,6 +2233,9 @@ export function useBalanceHistoryGraphLazyQuery(baseOptions?: Apollo.LazyQueryHo
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<BalanceHistoryGraphQuery, BalanceHistoryGraphQueryVariables>(BalanceHistoryGraphDocument, options);
         }
+// @ts-ignore
+export function useBalanceHistoryGraphSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<BalanceHistoryGraphQuery, BalanceHistoryGraphQueryVariables>): Apollo.UseSuspenseQueryResult<BalanceHistoryGraphQuery, BalanceHistoryGraphQueryVariables>;
+export function useBalanceHistoryGraphSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<BalanceHistoryGraphQuery, BalanceHistoryGraphQueryVariables>): Apollo.UseSuspenseQueryResult<BalanceHistoryGraphQuery | undefined, BalanceHistoryGraphQueryVariables>;
 export function useBalanceHistoryGraphSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<BalanceHistoryGraphQuery, BalanceHistoryGraphQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
           return Apollo.useSuspenseQuery<BalanceHistoryGraphQuery, BalanceHistoryGraphQueryVariables>(BalanceHistoryGraphDocument, options);
@@ -1989,6 +2283,9 @@ export function useBalanceVariationsLazyQuery(baseOptions?: Apollo.LazyQueryHook
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<BalanceVariationsQuery, BalanceVariationsQueryVariables>(BalanceVariationsDocument, options);
         }
+// @ts-ignore
+export function useBalanceVariationsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<BalanceVariationsQuery, BalanceVariationsQueryVariables>): Apollo.UseSuspenseQueryResult<BalanceVariationsQuery, BalanceVariationsQueryVariables>;
+export function useBalanceVariationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<BalanceVariationsQuery, BalanceVariationsQueryVariables>): Apollo.UseSuspenseQueryResult<BalanceVariationsQuery | undefined, BalanceVariationsQueryVariables>;
 export function useBalanceVariationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<BalanceVariationsQuery, BalanceVariationsQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
           return Apollo.useSuspenseQuery<BalanceVariationsQuery, BalanceVariationsQueryVariables>(BalanceVariationsDocument, options);
@@ -2036,6 +2333,9 @@ export function useAccountBalanceVariationsLazyQuery(baseOptions?: Apollo.LazyQu
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<AccountBalanceVariationsQuery, AccountBalanceVariationsQueryVariables>(AccountBalanceVariationsDocument, options);
         }
+// @ts-ignore
+export function useAccountBalanceVariationsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AccountBalanceVariationsQuery, AccountBalanceVariationsQueryVariables>): Apollo.UseSuspenseQueryResult<AccountBalanceVariationsQuery, AccountBalanceVariationsQueryVariables>;
+export function useAccountBalanceVariationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<AccountBalanceVariationsQuery, AccountBalanceVariationsQueryVariables>): Apollo.UseSuspenseQueryResult<AccountBalanceVariationsQuery | undefined, AccountBalanceVariationsQueryVariables>;
 export function useAccountBalanceVariationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<AccountBalanceVariationsQuery, AccountBalanceVariationsQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
           return Apollo.useSuspenseQuery<AccountBalanceVariationsQuery, AccountBalanceVariationsQueryVariables>(AccountBalanceVariationsDocument, options);
@@ -2078,6 +2378,9 @@ export function useCompareTreasuryLazyQuery(baseOptions?: Apollo.LazyQueryHookOp
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<CompareTreasuryQuery, CompareTreasuryQueryVariables>(CompareTreasuryDocument, options);
         }
+// @ts-ignore
+export function useCompareTreasurySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CompareTreasuryQuery, CompareTreasuryQueryVariables>): Apollo.UseSuspenseQueryResult<CompareTreasuryQuery, CompareTreasuryQueryVariables>;
+export function useCompareTreasurySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<CompareTreasuryQuery, CompareTreasuryQueryVariables>): Apollo.UseSuspenseQueryResult<CompareTreasuryQuery | undefined, CompareTreasuryQueryVariables>;
 export function useCompareTreasurySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<CompareTreasuryQuery, CompareTreasuryQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
           return Apollo.useSuspenseQuery<CompareTreasuryQuery, CompareTreasuryQueryVariables>(CompareTreasuryDocument, options);
@@ -2125,6 +2428,9 @@ export function useTopVotingPowerVariationsLazyQuery(baseOptions?: Apollo.LazyQu
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<TopVotingPowerVariationsQuery, TopVotingPowerVariationsQueryVariables>(TopVotingPowerVariationsDocument, options);
         }
+// @ts-ignore
+export function useTopVotingPowerVariationsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<TopVotingPowerVariationsQuery, TopVotingPowerVariationsQueryVariables>): Apollo.UseSuspenseQueryResult<TopVotingPowerVariationsQuery, TopVotingPowerVariationsQueryVariables>;
+export function useTopVotingPowerVariationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<TopVotingPowerVariationsQuery, TopVotingPowerVariationsQueryVariables>): Apollo.UseSuspenseQueryResult<TopVotingPowerVariationsQuery | undefined, TopVotingPowerVariationsQueryVariables>;
 export function useTopVotingPowerVariationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<TopVotingPowerVariationsQuery, TopVotingPowerVariationsQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
           return Apollo.useSuspenseQuery<TopVotingPowerVariationsQuery, TopVotingPowerVariationsQueryVariables>(TopVotingPowerVariationsDocument, options);
@@ -2170,6 +2476,9 @@ export function useGetDaoDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<GetDaoDataQuery, GetDaoDataQueryVariables>(GetDaoDataDocument, options);
         }
+// @ts-ignore
+export function useGetDaoDataSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetDaoDataQuery, GetDaoDataQueryVariables>): Apollo.UseSuspenseQueryResult<GetDaoDataQuery, GetDaoDataQueryVariables>;
+export function useGetDaoDataSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDaoDataQuery, GetDaoDataQueryVariables>): Apollo.UseSuspenseQueryResult<GetDaoDataQuery | undefined, GetDaoDataQueryVariables>;
 export function useGetDaoDataSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDaoDataQuery, GetDaoDataQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
           return Apollo.useSuspenseQuery<GetDaoDataQuery, GetDaoDataQueryVariables>(GetDaoDataDocument, options);
@@ -2226,6 +2535,9 @@ export function useGetDelegatesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptio
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<GetDelegatesQuery, GetDelegatesQueryVariables>(GetDelegatesDocument, options);
         }
+// @ts-ignore
+export function useGetDelegatesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetDelegatesQuery, GetDelegatesQueryVariables>): Apollo.UseSuspenseQueryResult<GetDelegatesQuery, GetDelegatesQueryVariables>;
+export function useGetDelegatesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegatesQuery, GetDelegatesQueryVariables>): Apollo.UseSuspenseQueryResult<GetDelegatesQuery | undefined, GetDelegatesQueryVariables>;
 export function useGetDelegatesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegatesQuery, GetDelegatesQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
           return Apollo.useSuspenseQuery<GetDelegatesQuery, GetDelegatesQueryVariables>(GetDelegatesDocument, options);
@@ -2234,66 +2546,71 @@ export type GetDelegatesQueryHookResult = ReturnType<typeof useGetDelegatesQuery
 export type GetDelegatesLazyQueryHookResult = ReturnType<typeof useGetDelegatesLazyQuery>;
 export type GetDelegatesSuspenseQueryHookResult = ReturnType<typeof useGetDelegatesSuspenseQuery>;
 export type GetDelegatesQueryResult = Apollo.QueryResult<GetDelegatesQuery, GetDelegatesQueryVariables>;
-export const GetDelegatorVotingPowerDetailsDocument = gql`
-    query GetDelegatorVotingPowerDetails($addresses: JSON, $address: String!, $orderDirection: queryInput_accountBalances_orderDirection, $limit: PositiveInt, $skip: NonNegativeInt) {
-  votingPowerByAccountId(accountId: $address) {
-    accountId
-    votingPower
-  }
-  accountBalances(
-    orderDirection: $orderDirection
-    limit: $limit
+export const GetDelegatorsDocument = gql`
+    query GetDelegators($address: String!, $skip: NonNegativeInt, $limit: PositiveInt = 10, $orderBy: queryInput_delegators_orderBy = amount, $orderDirection: queryInput_delegators_orderDirection = desc) {
+  delegators(
+    address: $address
     skip: $skip
-    delegates: $addresses
+    limit: $limit
+    orderBy: $orderBy
+    orderDirection: $orderDirection
   ) {
-    totalCount
     items {
-      address
-      balance
+      delegatorAddress
+      amount
+      timestamp
     }
+    totalCount
   }
 }
     `;
 
 /**
- * __useGetDelegatorVotingPowerDetailsQuery__
+ * __useGetDelegatorsQuery__
  *
- * To run a query within a React component, call `useGetDelegatorVotingPowerDetailsQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetDelegatorVotingPowerDetailsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGetDelegatorsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetDelegatorsQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useGetDelegatorVotingPowerDetailsQuery({
+ * const { data, loading, error } = useGetDelegatorsQuery({
  *   variables: {
- *      addresses: // value for 'addresses'
  *      address: // value for 'address'
- *      orderDirection: // value for 'orderDirection'
- *      limit: // value for 'limit'
  *      skip: // value for 'skip'
+ *      limit: // value for 'limit'
+ *      orderBy: // value for 'orderBy'
+ *      orderDirection: // value for 'orderDirection'
  *   },
  * });
  */
-export function useGetDelegatorVotingPowerDetailsQuery(baseOptions: Apollo.QueryHookOptions<GetDelegatorVotingPowerDetailsQuery, GetDelegatorVotingPowerDetailsQueryVariables> & ({ variables: GetDelegatorVotingPowerDetailsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useGetDelegatorsQuery(baseOptions: Apollo.QueryHookOptions<GetDelegatorsQuery, GetDelegatorsQueryVariables> & ({ variables: GetDelegatorsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetDelegatorVotingPowerDetailsQuery, GetDelegatorVotingPowerDetailsQueryVariables>(GetDelegatorVotingPowerDetailsDocument, options);
+        return Apollo.useQuery<GetDelegatorsQuery, GetDelegatorsQueryVariables>(GetDelegatorsDocument, options);
       }
-export function useGetDelegatorVotingPowerDetailsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDelegatorVotingPowerDetailsQuery, GetDelegatorVotingPowerDetailsQueryVariables>) {
+export function useGetDelegatorsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDelegatorsQuery, GetDelegatorsQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetDelegatorVotingPowerDetailsQuery, GetDelegatorVotingPowerDetailsQueryVariables>(GetDelegatorVotingPowerDetailsDocument, options);
+          return Apollo.useLazyQuery<GetDelegatorsQuery, GetDelegatorsQueryVariables>(GetDelegatorsDocument, options);
         }
-export function useGetDelegatorVotingPowerDetailsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegatorVotingPowerDetailsQuery, GetDelegatorVotingPowerDetailsQueryVariables>) {
+// @ts-ignore
+export function useGetDelegatorsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetDelegatorsQuery, GetDelegatorsQueryVariables>): Apollo.UseSuspenseQueryResult<GetDelegatorsQuery, GetDelegatorsQueryVariables>;
+export function useGetDelegatorsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegatorsQuery, GetDelegatorsQueryVariables>): Apollo.UseSuspenseQueryResult<GetDelegatorsQuery | undefined, GetDelegatorsQueryVariables>;
+export function useGetDelegatorsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegatorsQuery, GetDelegatorsQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetDelegatorVotingPowerDetailsQuery, GetDelegatorVotingPowerDetailsQueryVariables>(GetDelegatorVotingPowerDetailsDocument, options);
+          return Apollo.useSuspenseQuery<GetDelegatorsQuery, GetDelegatorsQueryVariables>(GetDelegatorsDocument, options);
         }
-export type GetDelegatorVotingPowerDetailsQueryHookResult = ReturnType<typeof useGetDelegatorVotingPowerDetailsQuery>;
-export type GetDelegatorVotingPowerDetailsLazyQueryHookResult = ReturnType<typeof useGetDelegatorVotingPowerDetailsLazyQuery>;
-export type GetDelegatorVotingPowerDetailsSuspenseQueryHookResult = ReturnType<typeof useGetDelegatorVotingPowerDetailsSuspenseQuery>;
-export type GetDelegatorVotingPowerDetailsQueryResult = Apollo.QueryResult<GetDelegatorVotingPowerDetailsQuery, GetDelegatorVotingPowerDetailsQueryVariables>;
+export type GetDelegatorsQueryHookResult = ReturnType<typeof useGetDelegatorsQuery>;
+export type GetDelegatorsLazyQueryHookResult = ReturnType<typeof useGetDelegatorsLazyQuery>;
+export type GetDelegatorsSuspenseQueryHookResult = ReturnType<typeof useGetDelegatorsSuspenseQuery>;
+export type GetDelegatorsQueryResult = Apollo.QueryResult<GetDelegatorsQuery, GetDelegatorsQueryVariables>;
 export const GetDelegationsTimestampDocument = gql`
-    query getDelegationsTimestamp($delegate: String!) {
-  delegations(address: $delegate) {
+    query getDelegationsTimestamp($delegate: String!, $orderBy: queryInput_delegations_orderBy = timestamp, $orderDirection: queryInput_delegations_orderDirection = desc) {
+  delegations(
+    address: $delegate
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+  ) {
     items {
       delegatorAddress
       delegateAddress
@@ -2317,6 +2634,8 @@ export const GetDelegationsTimestampDocument = gql`
  * const { data, loading, error } = useGetDelegationsTimestampQuery({
  *   variables: {
  *      delegate: // value for 'delegate'
+ *      orderBy: // value for 'orderBy'
+ *      orderDirection: // value for 'orderDirection'
  *   },
  * });
  */
@@ -2328,6 +2647,9 @@ export function useGetDelegationsTimestampLazyQuery(baseOptions?: Apollo.LazyQue
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<GetDelegationsTimestampQuery, GetDelegationsTimestampQueryVariables>(GetDelegationsTimestampDocument, options);
         }
+// @ts-ignore
+export function useGetDelegationsTimestampSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetDelegationsTimestampQuery, GetDelegationsTimestampQueryVariables>): Apollo.UseSuspenseQueryResult<GetDelegationsTimestampQuery, GetDelegationsTimestampQueryVariables>;
+export function useGetDelegationsTimestampSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegationsTimestampQuery, GetDelegationsTimestampQueryVariables>): Apollo.UseSuspenseQueryResult<GetDelegationsTimestampQuery | undefined, GetDelegationsTimestampQueryVariables>;
 export function useGetDelegationsTimestampSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegationsTimestampQuery, GetDelegationsTimestampQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
           return Apollo.useSuspenseQuery<GetDelegationsTimestampQuery, GetDelegationsTimestampQueryVariables>(GetDelegationsTimestampDocument, options);
@@ -2377,6 +2699,9 @@ export function useGetTopFiveDelegatorsLazyQuery(baseOptions?: Apollo.LazyQueryH
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<GetTopFiveDelegatorsQuery, GetTopFiveDelegatorsQueryVariables>(GetTopFiveDelegatorsDocument, options);
         }
+// @ts-ignore
+export function useGetTopFiveDelegatorsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetTopFiveDelegatorsQuery, GetTopFiveDelegatorsQueryVariables>): Apollo.UseSuspenseQueryResult<GetTopFiveDelegatorsQuery, GetTopFiveDelegatorsQueryVariables>;
+export function useGetTopFiveDelegatorsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetTopFiveDelegatorsQuery, GetTopFiveDelegatorsQueryVariables>): Apollo.UseSuspenseQueryResult<GetTopFiveDelegatorsQuery | undefined, GetTopFiveDelegatorsQueryVariables>;
 export function useGetTopFiveDelegatorsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetTopFiveDelegatorsQuery, GetTopFiveDelegatorsQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
           return Apollo.useSuspenseQuery<GetTopFiveDelegatorsQuery, GetTopFiveDelegatorsQueryVariables>(GetTopFiveDelegatorsDocument, options);
@@ -2385,6 +2710,50 @@ export type GetTopFiveDelegatorsQueryHookResult = ReturnType<typeof useGetTopFiv
 export type GetTopFiveDelegatorsLazyQueryHookResult = ReturnType<typeof useGetTopFiveDelegatorsLazyQuery>;
 export type GetTopFiveDelegatorsSuspenseQueryHookResult = ReturnType<typeof useGetTopFiveDelegatorsSuspenseQuery>;
 export type GetTopFiveDelegatorsQueryResult = Apollo.QueryResult<GetTopFiveDelegatorsQuery, GetTopFiveDelegatorsQueryVariables>;
+export const GetVotingPowerDocument = gql`
+    query GetVotingPower($address: String!) {
+  votingPowerByAccountId(accountId: $address) {
+    accountId
+    votingPower
+  }
+}
+    `;
+
+/**
+ * __useGetVotingPowerQuery__
+ *
+ * To run a query within a React component, call `useGetVotingPowerQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetVotingPowerQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetVotingPowerQuery({
+ *   variables: {
+ *      address: // value for 'address'
+ *   },
+ * });
+ */
+export function useGetVotingPowerQuery(baseOptions: Apollo.QueryHookOptions<GetVotingPowerQuery, GetVotingPowerQueryVariables> & ({ variables: GetVotingPowerQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetVotingPowerQuery, GetVotingPowerQueryVariables>(GetVotingPowerDocument, options);
+      }
+export function useGetVotingPowerLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetVotingPowerQuery, GetVotingPowerQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetVotingPowerQuery, GetVotingPowerQueryVariables>(GetVotingPowerDocument, options);
+        }
+// @ts-ignore
+export function useGetVotingPowerSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetVotingPowerQuery, GetVotingPowerQueryVariables>): Apollo.UseSuspenseQueryResult<GetVotingPowerQuery, GetVotingPowerQueryVariables>;
+export function useGetVotingPowerSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetVotingPowerQuery, GetVotingPowerQueryVariables>): Apollo.UseSuspenseQueryResult<GetVotingPowerQuery | undefined, GetVotingPowerQueryVariables>;
+export function useGetVotingPowerSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetVotingPowerQuery, GetVotingPowerQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetVotingPowerQuery, GetVotingPowerQueryVariables>(GetVotingPowerDocument, options);
+        }
+export type GetVotingPowerQueryHookResult = ReturnType<typeof useGetVotingPowerQuery>;
+export type GetVotingPowerLazyQueryHookResult = ReturnType<typeof useGetVotingPowerLazyQuery>;
+export type GetVotingPowerSuspenseQueryHookResult = ReturnType<typeof useGetVotingPowerSuspenseQuery>;
+export type GetVotingPowerQueryResult = Apollo.QueryResult<GetVotingPowerQuery, GetVotingPowerQueryVariables>;
 export const GetVotingPowerCountingDocument = gql`
     query GetVotingPowerCounting($delegates: JSON) {
   accountBalances(delegates: $delegates) {
@@ -2417,6 +2786,9 @@ export function useGetVotingPowerCountingLazyQuery(baseOptions?: Apollo.LazyQuer
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<GetVotingPowerCountingQuery, GetVotingPowerCountingQueryVariables>(GetVotingPowerCountingDocument, options);
         }
+// @ts-ignore
+export function useGetVotingPowerCountingSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetVotingPowerCountingQuery, GetVotingPowerCountingQueryVariables>): Apollo.UseSuspenseQueryResult<GetVotingPowerCountingQuery, GetVotingPowerCountingQueryVariables>;
+export function useGetVotingPowerCountingSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetVotingPowerCountingQuery, GetVotingPowerCountingQueryVariables>): Apollo.UseSuspenseQueryResult<GetVotingPowerCountingQuery | undefined, GetVotingPowerCountingQueryVariables>;
 export function useGetVotingPowerCountingSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetVotingPowerCountingQuery, GetVotingPowerCountingQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
           return Apollo.useSuspenseQuery<GetVotingPowerCountingQuery, GetVotingPowerCountingQueryVariables>(GetVotingPowerCountingDocument, options);
@@ -2485,6 +2857,9 @@ export function useGetDelegateDelegationHistoryGraphLazyQuery(baseOptions?: Apol
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<GetDelegateDelegationHistoryGraphQuery, GetDelegateDelegationHistoryGraphQueryVariables>(GetDelegateDelegationHistoryGraphDocument, options);
         }
+// @ts-ignore
+export function useGetDelegateDelegationHistoryGraphSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetDelegateDelegationHistoryGraphQuery, GetDelegateDelegationHistoryGraphQueryVariables>): Apollo.UseSuspenseQueryResult<GetDelegateDelegationHistoryGraphQuery, GetDelegateDelegationHistoryGraphQueryVariables>;
+export function useGetDelegateDelegationHistoryGraphSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegateDelegationHistoryGraphQuery, GetDelegateDelegationHistoryGraphQueryVariables>): Apollo.UseSuspenseQueryResult<GetDelegateDelegationHistoryGraphQuery | undefined, GetDelegateDelegationHistoryGraphQueryVariables>;
 export function useGetDelegateDelegationHistoryGraphSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegateDelegationHistoryGraphQuery, GetDelegateDelegationHistoryGraphQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
           return Apollo.useSuspenseQuery<GetDelegateDelegationHistoryGraphQuery, GetDelegateDelegationHistoryGraphQueryVariables>(GetDelegateDelegationHistoryGraphDocument, options);
@@ -2533,6 +2908,9 @@ export function useGetDelegatedSupplyHistoryLazyQuery(baseOptions?: Apollo.LazyQ
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<GetDelegatedSupplyHistoryQuery, GetDelegatedSupplyHistoryQueryVariables>(GetDelegatedSupplyHistoryDocument, options);
         }
+// @ts-ignore
+export function useGetDelegatedSupplyHistorySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetDelegatedSupplyHistoryQuery, GetDelegatedSupplyHistoryQueryVariables>): Apollo.UseSuspenseQueryResult<GetDelegatedSupplyHistoryQuery, GetDelegatedSupplyHistoryQueryVariables>;
+export function useGetDelegatedSupplyHistorySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegatedSupplyHistoryQuery, GetDelegatedSupplyHistoryQueryVariables>): Apollo.UseSuspenseQueryResult<GetDelegatedSupplyHistoryQuery | undefined, GetDelegatedSupplyHistoryQueryVariables>;
 export function useGetDelegatedSupplyHistorySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegatedSupplyHistoryQuery, GetDelegatedSupplyHistoryQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
           return Apollo.useSuspenseQuery<GetDelegatedSupplyHistoryQuery, GetDelegatedSupplyHistoryQueryVariables>(GetDelegatedSupplyHistoryDocument, options);
@@ -2592,6 +2970,9 @@ export function useGetHistoricalVotingAndActivityLazyQuery(baseOptions?: Apollo.
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<GetHistoricalVotingAndActivityQuery, GetHistoricalVotingAndActivityQueryVariables>(GetHistoricalVotingAndActivityDocument, options);
         }
+// @ts-ignore
+export function useGetHistoricalVotingAndActivitySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetHistoricalVotingAndActivityQuery, GetHistoricalVotingAndActivityQueryVariables>): Apollo.UseSuspenseQueryResult<GetHistoricalVotingAndActivityQuery, GetHistoricalVotingAndActivityQueryVariables>;
+export function useGetHistoricalVotingAndActivitySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetHistoricalVotingAndActivityQuery, GetHistoricalVotingAndActivityQueryVariables>): Apollo.UseSuspenseQueryResult<GetHistoricalVotingAndActivityQuery | undefined, GetHistoricalVotingAndActivityQueryVariables>;
 export function useGetHistoricalVotingAndActivitySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetHistoricalVotingAndActivityQuery, GetHistoricalVotingAndActivityQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
           return Apollo.useSuspenseQuery<GetHistoricalVotingAndActivityQuery, GetHistoricalVotingAndActivityQueryVariables>(GetHistoricalVotingAndActivityDocument, options);
@@ -2637,6 +3018,9 @@ export function useGetDelegateProposalsActivityLazyQuery(baseOptions?: Apollo.La
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<GetDelegateProposalsActivityQuery, GetDelegateProposalsActivityQueryVariables>(GetDelegateProposalsActivityDocument, options);
         }
+// @ts-ignore
+export function useGetDelegateProposalsActivitySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetDelegateProposalsActivityQuery, GetDelegateProposalsActivityQueryVariables>): Apollo.UseSuspenseQueryResult<GetDelegateProposalsActivityQuery, GetDelegateProposalsActivityQueryVariables>;
+export function useGetDelegateProposalsActivitySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegateProposalsActivityQuery, GetDelegateProposalsActivityQueryVariables>): Apollo.UseSuspenseQueryResult<GetDelegateProposalsActivityQuery | undefined, GetDelegateProposalsActivityQueryVariables>;
 export function useGetDelegateProposalsActivitySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegateProposalsActivityQuery, GetDelegateProposalsActivityQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
           return Apollo.useSuspenseQuery<GetDelegateProposalsActivityQuery, GetDelegateProposalsActivityQueryVariables>(GetDelegateProposalsActivityDocument, options);
@@ -2645,6 +3029,186 @@ export type GetDelegateProposalsActivityQueryHookResult = ReturnType<typeof useG
 export type GetDelegateProposalsActivityLazyQueryHookResult = ReturnType<typeof useGetDelegateProposalsActivityLazyQuery>;
 export type GetDelegateProposalsActivitySuspenseQueryHookResult = ReturnType<typeof useGetDelegateProposalsActivitySuspenseQuery>;
 export type GetDelegateProposalsActivityQueryResult = Apollo.QueryResult<GetDelegateProposalsActivityQuery, GetDelegateProposalsActivityQueryVariables>;
+export const GetFeedEventsDocument = gql`
+    query GetFeedEvents($skip: Float, $limit: Float = 10, $orderBy: queryInput_feedEvents_orderBy = timestamp, $orderDirection: queryInput_feedEvents_orderDirection = desc, $relevance: queryInput_feedEvents_relevance = MEDIUM, $type: queryInput_feedEvents_type, $fromDate: Float, $toDate: Float) {
+  feedEvents(
+    skip: $skip
+    limit: $limit
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+    relevance: $relevance
+    type: $type
+    fromDate: $fromDate
+    toDate: $toDate
+  ) {
+    items {
+      txHash
+      logIndex
+      type
+      value
+      timestamp
+      relevance
+      metadata
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useGetFeedEventsQuery__
+ *
+ * To run a query within a React component, call `useGetFeedEventsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetFeedEventsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetFeedEventsQuery({
+ *   variables: {
+ *      skip: // value for 'skip'
+ *      limit: // value for 'limit'
+ *      orderBy: // value for 'orderBy'
+ *      orderDirection: // value for 'orderDirection'
+ *      relevance: // value for 'relevance'
+ *      type: // value for 'type'
+ *      fromDate: // value for 'fromDate'
+ *      toDate: // value for 'toDate'
+ *   },
+ * });
+ */
+export function useGetFeedEventsQuery(baseOptions?: Apollo.QueryHookOptions<GetFeedEventsQuery, GetFeedEventsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetFeedEventsQuery, GetFeedEventsQueryVariables>(GetFeedEventsDocument, options);
+      }
+export function useGetFeedEventsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetFeedEventsQuery, GetFeedEventsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetFeedEventsQuery, GetFeedEventsQueryVariables>(GetFeedEventsDocument, options);
+        }
+// @ts-ignore
+export function useGetFeedEventsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetFeedEventsQuery, GetFeedEventsQueryVariables>): Apollo.UseSuspenseQueryResult<GetFeedEventsQuery, GetFeedEventsQueryVariables>;
+export function useGetFeedEventsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetFeedEventsQuery, GetFeedEventsQueryVariables>): Apollo.UseSuspenseQueryResult<GetFeedEventsQuery | undefined, GetFeedEventsQueryVariables>;
+export function useGetFeedEventsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetFeedEventsQuery, GetFeedEventsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetFeedEventsQuery, GetFeedEventsQueryVariables>(GetFeedEventsDocument, options);
+        }
+export type GetFeedEventsQueryHookResult = ReturnType<typeof useGetFeedEventsQuery>;
+export type GetFeedEventsLazyQueryHookResult = ReturnType<typeof useGetFeedEventsLazyQuery>;
+export type GetFeedEventsSuspenseQueryHookResult = ReturnType<typeof useGetFeedEventsSuspenseQuery>;
+export type GetFeedEventsQueryResult = Apollo.QueryResult<GetFeedEventsQuery, GetFeedEventsQueryVariables>;
+export const GetAddressDocument = gql`
+    query GetAddress($address: String!) {
+  getAddress(address: $address) {
+    address
+    isContract
+    arkham {
+      entity
+      entityType
+      label
+      twitter
+    }
+    ens {
+      name
+      avatar
+      banner
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetAddressQuery__
+ *
+ * To run a query within a React component, call `useGetAddressQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAddressQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAddressQuery({
+ *   variables: {
+ *      address: // value for 'address'
+ *   },
+ * });
+ */
+export function useGetAddressQuery(baseOptions: Apollo.QueryHookOptions<GetAddressQuery, GetAddressQueryVariables> & ({ variables: GetAddressQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetAddressQuery, GetAddressQueryVariables>(GetAddressDocument, options);
+      }
+export function useGetAddressLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAddressQuery, GetAddressQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetAddressQuery, GetAddressQueryVariables>(GetAddressDocument, options);
+        }
+// @ts-ignore
+export function useGetAddressSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetAddressQuery, GetAddressQueryVariables>): Apollo.UseSuspenseQueryResult<GetAddressQuery, GetAddressQueryVariables>;
+export function useGetAddressSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetAddressQuery, GetAddressQueryVariables>): Apollo.UseSuspenseQueryResult<GetAddressQuery | undefined, GetAddressQueryVariables>;
+export function useGetAddressSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetAddressQuery, GetAddressQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetAddressQuery, GetAddressQueryVariables>(GetAddressDocument, options);
+        }
+export type GetAddressQueryHookResult = ReturnType<typeof useGetAddressQuery>;
+export type GetAddressLazyQueryHookResult = ReturnType<typeof useGetAddressLazyQuery>;
+export type GetAddressSuspenseQueryHookResult = ReturnType<typeof useGetAddressSuspenseQuery>;
+export type GetAddressQueryResult = Apollo.QueryResult<GetAddressQuery, GetAddressQueryVariables>;
+export const GetAddressesDocument = gql`
+    query GetAddresses($addresses: JSON!) {
+  getAddresses(addresses: $addresses) {
+    results {
+      address
+      isContract
+      arkham {
+        entity
+        entityType
+        label
+        twitter
+      }
+      ens {
+        name
+        avatar
+        banner
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetAddressesQuery__
+ *
+ * To run a query within a React component, call `useGetAddressesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAddressesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAddressesQuery({
+ *   variables: {
+ *      addresses: // value for 'addresses'
+ *   },
+ * });
+ */
+export function useGetAddressesQuery(baseOptions: Apollo.QueryHookOptions<GetAddressesQuery, GetAddressesQueryVariables> & ({ variables: GetAddressesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetAddressesQuery, GetAddressesQueryVariables>(GetAddressesDocument, options);
+      }
+export function useGetAddressesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAddressesQuery, GetAddressesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetAddressesQuery, GetAddressesQueryVariables>(GetAddressesDocument, options);
+        }
+// @ts-ignore
+export function useGetAddressesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetAddressesQuery, GetAddressesQueryVariables>): Apollo.UseSuspenseQueryResult<GetAddressesQuery, GetAddressesQueryVariables>;
+export function useGetAddressesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetAddressesQuery, GetAddressesQueryVariables>): Apollo.UseSuspenseQueryResult<GetAddressesQuery | undefined, GetAddressesQueryVariables>;
+export function useGetAddressesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetAddressesQuery, GetAddressesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetAddressesQuery, GetAddressesQueryVariables>(GetAddressesDocument, options);
+        }
+export type GetAddressesQueryHookResult = ReturnType<typeof useGetAddressesQuery>;
+export type GetAddressesLazyQueryHookResult = ReturnType<typeof useGetAddressesLazyQuery>;
+export type GetAddressesSuspenseQueryHookResult = ReturnType<typeof useGetAddressesSuspenseQuery>;
+export type GetAddressesQueryResult = Apollo.QueryResult<GetAddressesQuery, GetAddressesQueryVariables>;
 export const GetProposalsFromDaoDocument = gql`
     query GetProposalsFromDao($skip: NonNegativeInt, $limit: PositiveInt = 10, $orderDirection: queryInput_proposals_orderDirection = desc, $status: JSON, $fromDate: Float) {
   proposals(
@@ -2704,6 +3268,9 @@ export function useGetProposalsFromDaoLazyQuery(baseOptions?: Apollo.LazyQueryHo
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<GetProposalsFromDaoQuery, GetProposalsFromDaoQueryVariables>(GetProposalsFromDaoDocument, options);
         }
+// @ts-ignore
+export function useGetProposalsFromDaoSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetProposalsFromDaoQuery, GetProposalsFromDaoQueryVariables>): Apollo.UseSuspenseQueryResult<GetProposalsFromDaoQuery, GetProposalsFromDaoQueryVariables>;
+export function useGetProposalsFromDaoSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetProposalsFromDaoQuery, GetProposalsFromDaoQueryVariables>): Apollo.UseSuspenseQueryResult<GetProposalsFromDaoQuery | undefined, GetProposalsFromDaoQueryVariables>;
 export function useGetProposalsFromDaoSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetProposalsFromDaoQuery, GetProposalsFromDaoQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
           return Apollo.useSuspenseQuery<GetProposalsFromDaoQuery, GetProposalsFromDaoQueryVariables>(GetProposalsFromDaoDocument, options);
@@ -2760,6 +3327,9 @@ export function useGetProposalLazyQuery(baseOptions?: Apollo.LazyQueryHookOption
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<GetProposalQuery, GetProposalQueryVariables>(GetProposalDocument, options);
         }
+// @ts-ignore
+export function useGetProposalSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetProposalQuery, GetProposalQueryVariables>): Apollo.UseSuspenseQueryResult<GetProposalQuery, GetProposalQueryVariables>;
+export function useGetProposalSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetProposalQuery, GetProposalQueryVariables>): Apollo.UseSuspenseQueryResult<GetProposalQuery | undefined, GetProposalQueryVariables>;
 export function useGetProposalSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetProposalQuery, GetProposalQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
           return Apollo.useSuspenseQuery<GetProposalQuery, GetProposalQueryVariables>(GetProposalDocument, options);
@@ -2819,6 +3389,9 @@ export function useGetVotesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<G
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<GetVotesQuery, GetVotesQueryVariables>(GetVotesDocument, options);
         }
+// @ts-ignore
+export function useGetVotesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetVotesQuery, GetVotesQueryVariables>): Apollo.UseSuspenseQueryResult<GetVotesQuery, GetVotesQueryVariables>;
+export function useGetVotesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetVotesQuery, GetVotesQueryVariables>): Apollo.UseSuspenseQueryResult<GetVotesQuery | undefined, GetVotesQueryVariables>;
 export function useGetVotesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetVotesQuery, GetVotesQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
           return Apollo.useSuspenseQuery<GetVotesQuery, GetVotesQueryVariables>(GetVotesDocument, options);
@@ -2871,6 +3444,9 @@ export function useGetVotingPowerChangeLazyQuery(baseOptions?: Apollo.LazyQueryH
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<GetVotingPowerChangeQuery, GetVotingPowerChangeQueryVariables>(GetVotingPowerChangeDocument, options);
         }
+// @ts-ignore
+export function useGetVotingPowerChangeSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetVotingPowerChangeQuery, GetVotingPowerChangeQueryVariables>): Apollo.UseSuspenseQueryResult<GetVotingPowerChangeQuery, GetVotingPowerChangeQueryVariables>;
+export function useGetVotingPowerChangeSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetVotingPowerChangeQuery, GetVotingPowerChangeQueryVariables>): Apollo.UseSuspenseQueryResult<GetVotingPowerChangeQuery | undefined, GetVotingPowerChangeQueryVariables>;
 export function useGetVotingPowerChangeSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetVotingPowerChangeQuery, GetVotingPowerChangeQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
           return Apollo.useSuspenseQuery<GetVotingPowerChangeQuery, GetVotingPowerChangeQueryVariables>(GetVotingPowerChangeDocument, options);
@@ -2925,6 +3501,9 @@ export function useGetProposalNonVotersLazyQuery(baseOptions?: Apollo.LazyQueryH
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<GetProposalNonVotersQuery, GetProposalNonVotersQueryVariables>(GetProposalNonVotersDocument, options);
         }
+// @ts-ignore
+export function useGetProposalNonVotersSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetProposalNonVotersQuery, GetProposalNonVotersQueryVariables>): Apollo.UseSuspenseQueryResult<GetProposalNonVotersQuery, GetProposalNonVotersQueryVariables>;
+export function useGetProposalNonVotersSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetProposalNonVotersQuery, GetProposalNonVotersQueryVariables>): Apollo.UseSuspenseQueryResult<GetProposalNonVotersQuery | undefined, GetProposalNonVotersQueryVariables>;
 export function useGetProposalNonVotersSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetProposalNonVotersQuery, GetProposalNonVotersQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
           return Apollo.useSuspenseQuery<GetProposalNonVotersQuery, GetProposalNonVotersQueryVariables>(GetProposalNonVotersDocument, options);
@@ -2978,6 +3557,9 @@ export function useGetAccountPowerLazyQuery(baseOptions?: Apollo.LazyQueryHookOp
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<GetAccountPowerQuery, GetAccountPowerQueryVariables>(GetAccountPowerDocument, options);
         }
+// @ts-ignore
+export function useGetAccountPowerSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetAccountPowerQuery, GetAccountPowerQueryVariables>): Apollo.UseSuspenseQueryResult<GetAccountPowerQuery, GetAccountPowerQueryVariables>;
+export function useGetAccountPowerSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetAccountPowerQuery, GetAccountPowerQueryVariables>): Apollo.UseSuspenseQueryResult<GetAccountPowerQuery | undefined, GetAccountPowerQueryVariables>;
 export function useGetAccountPowerSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetAccountPowerQuery, GetAccountPowerQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
           return Apollo.useSuspenseQuery<GetAccountPowerQuery, GetAccountPowerQueryVariables>(GetAccountPowerDocument, options);
@@ -3054,6 +3636,9 @@ export function useHistoricalVotingPowerLazyQuery(baseOptions?: Apollo.LazyQuery
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<HistoricalVotingPowerQuery, HistoricalVotingPowerQueryVariables>(HistoricalVotingPowerDocument, options);
         }
+// @ts-ignore
+export function useHistoricalVotingPowerSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<HistoricalVotingPowerQuery, HistoricalVotingPowerQueryVariables>): Apollo.UseSuspenseQueryResult<HistoricalVotingPowerQuery, HistoricalVotingPowerQueryVariables>;
+export function useHistoricalVotingPowerSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<HistoricalVotingPowerQuery, HistoricalVotingPowerQueryVariables>): Apollo.UseSuspenseQueryResult<HistoricalVotingPowerQuery | undefined, HistoricalVotingPowerQueryVariables>;
 export function useHistoricalVotingPowerSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<HistoricalVotingPowerQuery, HistoricalVotingPowerQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
           return Apollo.useSuspenseQuery<HistoricalVotingPowerQuery, HistoricalVotingPowerQueryVariables>(HistoricalVotingPowerDocument, options);
@@ -3130,6 +3715,9 @@ export function useHistoricalVotingPowerByAccountLazyQuery(baseOptions?: Apollo.
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<HistoricalVotingPowerByAccountQuery, HistoricalVotingPowerByAccountQueryVariables>(HistoricalVotingPowerByAccountDocument, options);
         }
+// @ts-ignore
+export function useHistoricalVotingPowerByAccountSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<HistoricalVotingPowerByAccountQuery, HistoricalVotingPowerByAccountQueryVariables>): Apollo.UseSuspenseQueryResult<HistoricalVotingPowerByAccountQuery, HistoricalVotingPowerByAccountQueryVariables>;
+export function useHistoricalVotingPowerByAccountSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<HistoricalVotingPowerByAccountQuery, HistoricalVotingPowerByAccountQueryVariables>): Apollo.UseSuspenseQueryResult<HistoricalVotingPowerByAccountQuery | undefined, HistoricalVotingPowerByAccountQueryVariables>;
 export function useHistoricalVotingPowerByAccountSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<HistoricalVotingPowerByAccountQuery, HistoricalVotingPowerByAccountQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
           return Apollo.useSuspenseQuery<HistoricalVotingPowerByAccountQuery, HistoricalVotingPowerByAccountQueryVariables>(HistoricalVotingPowerByAccountDocument, options);
@@ -3213,6 +3801,9 @@ export function useGetProposalsActivityLazyQuery(baseOptions?: Apollo.LazyQueryH
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<GetProposalsActivityQuery, GetProposalsActivityQueryVariables>(GetProposalsActivityDocument, options);
         }
+// @ts-ignore
+export function useGetProposalsActivitySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetProposalsActivityQuery, GetProposalsActivityQueryVariables>): Apollo.UseSuspenseQueryResult<GetProposalsActivityQuery, GetProposalsActivityQueryVariables>;
+export function useGetProposalsActivitySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetProposalsActivityQuery, GetProposalsActivityQueryVariables>): Apollo.UseSuspenseQueryResult<GetProposalsActivityQuery | undefined, GetProposalsActivityQueryVariables>;
 export function useGetProposalsActivitySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetProposalsActivityQuery, GetProposalsActivityQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
           return Apollo.useSuspenseQuery<GetProposalsActivityQuery, GetProposalsActivityQueryVariables>(GetProposalsActivityDocument, options);
@@ -3258,6 +3849,9 @@ export function useGetProposalsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptio
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<GetProposalsQuery, GetProposalsQueryVariables>(GetProposalsDocument, options);
         }
+// @ts-ignore
+export function useGetProposalsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetProposalsQuery, GetProposalsQueryVariables>): Apollo.UseSuspenseQueryResult<GetProposalsQuery, GetProposalsQueryVariables>;
+export function useGetProposalsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetProposalsQuery, GetProposalsQueryVariables>): Apollo.UseSuspenseQueryResult<GetProposalsQuery | undefined, GetProposalsQueryVariables>;
 export function useGetProposalsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetProposalsQuery, GetProposalsQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
           return Apollo.useSuspenseQuery<GetProposalsQuery, GetProposalsQueryVariables>(GetProposalsDocument, options);
@@ -3300,6 +3894,9 @@ export function useGetDaoAddressesAccountBalancesLazyQuery(baseOptions?: Apollo.
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<GetDaoAddressesAccountBalancesQuery, GetDaoAddressesAccountBalancesQueryVariables>(GetDaoAddressesAccountBalancesDocument, options);
         }
+// @ts-ignore
+export function useGetDaoAddressesAccountBalancesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetDaoAddressesAccountBalancesQuery, GetDaoAddressesAccountBalancesQueryVariables>): Apollo.UseSuspenseQueryResult<GetDaoAddressesAccountBalancesQuery, GetDaoAddressesAccountBalancesQueryVariables>;
+export function useGetDaoAddressesAccountBalancesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDaoAddressesAccountBalancesQuery, GetDaoAddressesAccountBalancesQueryVariables>): Apollo.UseSuspenseQueryResult<GetDaoAddressesAccountBalancesQuery | undefined, GetDaoAddressesAccountBalancesQueryVariables>;
 export function useGetDaoAddressesAccountBalancesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDaoAddressesAccountBalancesQuery, GetDaoAddressesAccountBalancesQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
           return Apollo.useSuspenseQuery<GetDaoAddressesAccountBalancesQuery, GetDaoAddressesAccountBalancesQueryVariables>(GetDaoAddressesAccountBalancesDocument, options);
@@ -3362,6 +3959,9 @@ export function useGetAccountInteractionsLazyQuery(baseOptions?: Apollo.LazyQuer
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<GetAccountInteractionsQuery, GetAccountInteractionsQueryVariables>(GetAccountInteractionsDocument, options);
         }
+// @ts-ignore
+export function useGetAccountInteractionsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetAccountInteractionsQuery, GetAccountInteractionsQueryVariables>): Apollo.UseSuspenseQueryResult<GetAccountInteractionsQuery, GetAccountInteractionsQueryVariables>;
+export function useGetAccountInteractionsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetAccountInteractionsQuery, GetAccountInteractionsQueryVariables>): Apollo.UseSuspenseQueryResult<GetAccountInteractionsQuery | undefined, GetAccountInteractionsQueryVariables>;
 export function useGetAccountInteractionsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetAccountInteractionsQuery, GetAccountInteractionsQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
           return Apollo.useSuspenseQuery<GetAccountInteractionsQuery, GetAccountInteractionsQueryVariables>(GetAccountInteractionsDocument, options);
@@ -3423,6 +4023,9 @@ export function useGetDelegationHistoryItemsLazyQuery(baseOptions?: Apollo.LazyQ
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<GetDelegationHistoryItemsQuery, GetDelegationHistoryItemsQueryVariables>(GetDelegationHistoryItemsDocument, options);
         }
+// @ts-ignore
+export function useGetDelegationHistoryItemsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetDelegationHistoryItemsQuery, GetDelegationHistoryItemsQueryVariables>): Apollo.UseSuspenseQueryResult<GetDelegationHistoryItemsQuery, GetDelegationHistoryItemsQueryVariables>;
+export function useGetDelegationHistoryItemsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegationHistoryItemsQuery, GetDelegationHistoryItemsQueryVariables>): Apollo.UseSuspenseQueryResult<GetDelegationHistoryItemsQuery | undefined, GetDelegationHistoryItemsQueryVariables>;
 export function useGetDelegationHistoryItemsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegationHistoryItemsQuery, GetDelegationHistoryItemsQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
           return Apollo.useSuspenseQuery<GetDelegationHistoryItemsQuery, GetDelegationHistoryItemsQueryVariables>(GetDelegationHistoryItemsDocument, options);
@@ -3478,6 +4081,9 @@ export function useGetTopTokenHoldersLazyQuery(baseOptions?: Apollo.LazyQueryHoo
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<GetTopTokenHoldersQuery, GetTopTokenHoldersQueryVariables>(GetTopTokenHoldersDocument, options);
         }
+// @ts-ignore
+export function useGetTopTokenHoldersSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetTopTokenHoldersQuery, GetTopTokenHoldersQueryVariables>): Apollo.UseSuspenseQueryResult<GetTopTokenHoldersQuery, GetTopTokenHoldersQueryVariables>;
+export function useGetTopTokenHoldersSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetTopTokenHoldersQuery, GetTopTokenHoldersQueryVariables>): Apollo.UseSuspenseQueryResult<GetTopTokenHoldersQuery | undefined, GetTopTokenHoldersQueryVariables>;
 export function useGetTopTokenHoldersSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetTopTokenHoldersQuery, GetTopTokenHoldersQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
           return Apollo.useSuspenseQuery<GetTopTokenHoldersQuery, GetTopTokenHoldersQueryVariables>(GetTopTokenHoldersDocument, options);
@@ -3522,6 +4128,9 @@ export function useTokenInfoLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<TokenInfoQuery, TokenInfoQueryVariables>(TokenInfoDocument, options);
         }
+// @ts-ignore
+export function useTokenInfoSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<TokenInfoQuery, TokenInfoQueryVariables>): Apollo.UseSuspenseQueryResult<TokenInfoQuery, TokenInfoQueryVariables>;
+export function useTokenInfoSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<TokenInfoQuery, TokenInfoQueryVariables>): Apollo.UseSuspenseQueryResult<TokenInfoQuery | undefined, TokenInfoQueryVariables>;
 export function useTokenInfoSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<TokenInfoQuery, TokenInfoQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
           return Apollo.useSuspenseQuery<TokenInfoQuery, TokenInfoQueryVariables>(TokenInfoDocument, options);
@@ -3622,6 +4231,9 @@ export function useTransactionsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptio
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<TransactionsQuery, TransactionsQueryVariables>(TransactionsDocument, options);
         }
+// @ts-ignore
+export function useTransactionsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<TransactionsQuery, TransactionsQueryVariables>): Apollo.UseSuspenseQueryResult<TransactionsQuery, TransactionsQueryVariables>;
+export function useTransactionsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<TransactionsQuery, TransactionsQueryVariables>): Apollo.UseSuspenseQueryResult<TransactionsQuery | undefined, TransactionsQueryVariables>;
 export function useTransactionsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<TransactionsQuery, TransactionsQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
           return Apollo.useSuspenseQuery<TransactionsQuery, TransactionsQueryVariables>(TransactionsDocument, options);

@@ -12,9 +12,12 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
+  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
+  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
+  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
 };
 
@@ -112,6 +115,14 @@ export type Query = {
   delegationPercentageByDay?: Maybe<DelegationPercentageByDay_200_Response>;
   /** Get current delegators of an account */
   delegations?: Maybe<Delegations_200_Response>;
+  /** Get current delegators of an account with voting power */
+  delegators?: Maybe<Delegators_200_Response>;
+  /** Get feed events */
+  feedEvents?: Maybe<FeedEvents_200_Response>;
+  /** Returns label information from Arkham, ENS data, and whether the address is an EOA or contract. Arkham data is stored permanently. ENS data is cached with a configurable TTL. */
+  getAddress?: Maybe<GetAddress_200_Response>;
+  /** Returns label information from Arkham, ENS data, and address type for multiple addresses. Maximum 100 addresses per request. Arkham data is stored permanently. ENS data is cached with a configurable TTL. */
+  getAddresses?: Maybe<GetAddresses_200_Response>;
   /** Get historical DAO Token Treasury value (governance token quantity × token price) */
   getDaoTokenTreasury?: Maybe<GetDaoTokenTreasury_200_Response>;
   /** Get historical Liquid Treasury (treasury without DAO tokens) from external providers (DefiLlama/Dune) */
@@ -163,6 +174,8 @@ export type Query = {
 
 export type QueryAccountBalanceByAccountIdArgs = {
   address: Scalars['String']['input'];
+  fromDate?: InputMaybe<Scalars['String']['input']>;
+  toDate?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -186,10 +199,13 @@ export type QueryAccountBalanceVariationsByAccountIdArgs = {
 export type QueryAccountBalancesArgs = {
   addresses?: InputMaybe<Scalars['JSON']['input']>;
   delegates?: InputMaybe<Scalars['JSON']['input']>;
+  fromDate?: InputMaybe<Scalars['String']['input']>;
   fromValue?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<QueryInput_AccountBalances_OrderBy>;
   orderDirection?: InputMaybe<QueryInput_AccountBalances_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  toDate?: InputMaybe<Scalars['String']['input']>;
   toValue?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -285,6 +301,39 @@ export type QueryDelegationPercentageByDayArgs = {
 
 export type QueryDelegationsArgs = {
   address: Scalars['String']['input'];
+  orderBy?: InputMaybe<QueryInput_Delegations_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_Delegations_OrderDirection>;
+};
+
+
+export type QueryDelegatorsArgs = {
+  address: Scalars['String']['input'];
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<QueryInput_Delegators_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_Delegators_OrderDirection>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+};
+
+
+export type QueryFeedEventsArgs = {
+  fromDate?: InputMaybe<Scalars['Float']['input']>;
+  limit?: InputMaybe<Scalars['Float']['input']>;
+  orderBy?: InputMaybe<QueryInput_FeedEvents_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_FeedEvents_OrderDirection>;
+  relevance?: InputMaybe<QueryInput_FeedEvents_Relevance>;
+  skip?: InputMaybe<Scalars['Float']['input']>;
+  toDate?: InputMaybe<Scalars['Float']['input']>;
+  type?: InputMaybe<QueryInput_FeedEvents_Type>;
+};
+
+
+export type QueryGetAddressArgs = {
+  address: Scalars['String']['input'];
+};
+
+
+export type QueryGetAddressesArgs = {
+  addresses: Scalars['JSON']['input'];
 };
 
 
@@ -476,6 +525,8 @@ export type QueryVotesByProposalIdArgs = {
 
 export type QueryVotingPowerByAccountIdArgs = {
   accountId: Scalars['String']['input'];
+  fromDate?: InputMaybe<Scalars['Float']['input']>;
+  toDate?: InputMaybe<Scalars['Float']['input']>;
 };
 
 
@@ -498,11 +549,13 @@ export type QueryVotingPowerVariationsByAccountIdArgs = {
 
 export type QueryVotingPowersArgs = {
   addresses?: InputMaybe<Scalars['JSON']['input']>;
+  fromDate?: InputMaybe<Scalars['String']['input']>;
   fromValue?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   orderBy?: InputMaybe<QueryInput_VotingPowers_OrderBy>;
   orderDirection?: InputMaybe<QueryInput_VotingPowers_OrderDirection>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  toDate?: InputMaybe<Scalars['String']['input']>;
   toValue?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -510,7 +563,9 @@ export type AccountBalanceByAccountId_200_Response = {
   __typename?: 'accountBalanceByAccountId_200_response';
   address: Scalars['String']['output'];
   balance: Scalars['String']['output'];
+  data: Query_AccountBalanceByAccountId_Data;
   delegate: Scalars['String']['output'];
+  period: Query_AccountBalanceByAccountId_Period;
   tokenId: Scalars['String']['output'];
 };
 
@@ -529,6 +584,7 @@ export type AccountBalanceVariations_200_Response = {
 export type AccountBalances_200_Response = {
   __typename?: 'accountBalances_200_response';
   items: Array<Maybe<Query_AccountBalances_Items_Items>>;
+  period: Query_AccountBalances_Period;
   totalCount: Scalars['Float']['output'];
 };
 
@@ -638,6 +694,31 @@ export type Delegations_200_Response = {
   totalCount: Scalars['Float']['output'];
 };
 
+export type Delegators_200_Response = {
+  __typename?: 'delegators_200_response';
+  items: Array<Maybe<Query_Delegators_Items_Items>>;
+  totalCount: Scalars['Float']['output'];
+};
+
+export type FeedEvents_200_Response = {
+  __typename?: 'feedEvents_200_response';
+  items: Array<Maybe<Query_FeedEvents_Items_Items>>;
+  totalCount: Scalars['Float']['output'];
+};
+
+export type GetAddress_200_Response = {
+  __typename?: 'getAddress_200_response';
+  address: Scalars['String']['output'];
+  arkham?: Maybe<Query_GetAddress_Arkham>;
+  ens?: Maybe<Query_GetAddress_Ens>;
+  isContract: Scalars['Boolean']['output'];
+};
+
+export type GetAddresses_200_Response = {
+  __typename?: 'getAddresses_200_response';
+  results: Array<Maybe<Query_GetAddresses_Results_Items>>;
+};
+
 export type GetDaoTokenTreasury_200_Response = {
   __typename?: 'getDaoTokenTreasury_200_response';
   items: Array<Maybe<Query_GetDaoTokenTreasury_Items_Items>>;
@@ -739,6 +820,11 @@ export type Proposals_200_Response = {
 export enum QueryInput_AccountBalanceVariations_OrderDirection {
   Asc = 'asc',
   Desc = 'desc'
+}
+
+export enum QueryInput_AccountBalances_OrderBy {
+  Balance = 'balance',
+  Variation = 'variation'
 }
 
 export enum QueryInput_AccountBalances_OrderDirection {
@@ -847,6 +933,50 @@ export enum QueryInput_CompareVotes_Days {
 export enum QueryInput_DelegationPercentageByDay_OrderDirection {
   Asc = 'asc',
   Desc = 'desc'
+}
+
+export enum QueryInput_Delegations_OrderBy {
+  Amount = 'amount',
+  Timestamp = 'timestamp'
+}
+
+export enum QueryInput_Delegations_OrderDirection {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
+export enum QueryInput_Delegators_OrderBy {
+  Amount = 'amount',
+  Timestamp = 'timestamp'
+}
+
+export enum QueryInput_Delegators_OrderDirection {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
+export enum QueryInput_FeedEvents_OrderBy {
+  Timestamp = 'timestamp',
+  Value = 'value'
+}
+
+export enum QueryInput_FeedEvents_OrderDirection {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
+export enum QueryInput_FeedEvents_Relevance {
+  High = 'HIGH',
+  Low = 'LOW',
+  Medium = 'MEDIUM'
+}
+
+export enum QueryInput_FeedEvents_Type {
+  Delegation = 'DELEGATION',
+  Proposal = 'PROPOSAL',
+  ProposalExtended = 'PROPOSAL_EXTENDED',
+  Transfer = 'TRANSFER',
+  Vote = 'VOTE'
 }
 
 export enum QueryInput_GetDaoTokenTreasury_Days {
@@ -1025,6 +1155,7 @@ export enum QueryInput_VotingPowerVariations_OrderDirection {
 
 export enum QueryInput_VotingPowers_OrderBy {
   DelegationsCount = 'delegationsCount',
+  Variation = 'variation',
   VotingPower = 'votingPower'
 }
 
@@ -1032,6 +1163,28 @@ export enum QueryInput_VotingPowers_OrderDirection {
   Asc = 'asc',
   Desc = 'desc'
 }
+
+export type Query_AccountBalanceByAccountId_Data = {
+  __typename?: 'query_accountBalanceByAccountId_data';
+  address: Scalars['String']['output'];
+  balance: Scalars['String']['output'];
+  delegate: Scalars['String']['output'];
+  tokenId: Scalars['String']['output'];
+  variation: Query_AccountBalanceByAccountId_Data_Variation;
+};
+
+export type Query_AccountBalanceByAccountId_Data_Variation = {
+  __typename?: 'query_accountBalanceByAccountId_data_variation';
+  absoluteChange: Scalars['String']['output'];
+  percentageChange: Scalars['String']['output'];
+  previousBalance: Scalars['String']['output'];
+};
+
+export type Query_AccountBalanceByAccountId_Period = {
+  __typename?: 'query_accountBalanceByAccountId_period';
+  endTimestamp: Scalars['String']['output'];
+  startTimestamp: Scalars['String']['output'];
+};
 
 export type Query_AccountBalanceVariationsByAccountId_Data = {
   __typename?: 'query_accountBalanceVariationsByAccountId_data';
@@ -1069,6 +1222,20 @@ export type Query_AccountBalances_Items_Items = {
   balance: Scalars['String']['output'];
   delegate: Scalars['String']['output'];
   tokenId: Scalars['String']['output'];
+  variation: Query_AccountBalances_Items_Items_Variation;
+};
+
+export type Query_AccountBalances_Items_Items_Variation = {
+  __typename?: 'query_accountBalances_items_items_variation';
+  absoluteChange: Scalars['String']['output'];
+  percentageChange: Scalars['String']['output'];
+  previousBalance: Scalars['String']['output'];
+};
+
+export type Query_AccountBalances_Period = {
+  __typename?: 'query_accountBalances_period';
+  endTimestamp: Scalars['String']['output'];
+  startTimestamp: Scalars['String']['output'];
 };
 
 export type Query_AccountInteractions_Items_Items = {
@@ -1105,6 +1272,76 @@ export type Query_Delegations_Items_Items = {
   delegatorAddress: Scalars['String']['output'];
   timestamp: Scalars['String']['output'];
   transactionHash: Scalars['String']['output'];
+};
+
+export type Query_Delegators_Items_Items = {
+  __typename?: 'query_delegators_items_items';
+  amount: Scalars['String']['output'];
+  delegatorAddress: Scalars['String']['output'];
+  timestamp: Scalars['String']['output'];
+};
+
+export type Query_FeedEvents_Items_Items = {
+  __typename?: 'query_feedEvents_items_items';
+  logIndex: Scalars['Float']['output'];
+  metadata?: Maybe<Scalars['JSON']['output']>;
+  relevance: Query_FeedEvents_Items_Items_Relevance;
+  timestamp: Scalars['Float']['output'];
+  txHash: Scalars['String']['output'];
+  type: Query_FeedEvents_Items_Items_Type;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+export enum Query_FeedEvents_Items_Items_Relevance {
+  High = 'HIGH',
+  Low = 'LOW',
+  Medium = 'MEDIUM'
+}
+
+export enum Query_FeedEvents_Items_Items_Type {
+  Delegation = 'DELEGATION',
+  Proposal = 'PROPOSAL',
+  ProposalExtended = 'PROPOSAL_EXTENDED',
+  Transfer = 'TRANSFER',
+  Vote = 'VOTE'
+}
+
+export type Query_GetAddress_Arkham = {
+  __typename?: 'query_getAddress_arkham';
+  entity?: Maybe<Scalars['String']['output']>;
+  entityType?: Maybe<Scalars['String']['output']>;
+  label?: Maybe<Scalars['String']['output']>;
+  twitter?: Maybe<Scalars['String']['output']>;
+};
+
+export type Query_GetAddress_Ens = {
+  __typename?: 'query_getAddress_ens';
+  avatar?: Maybe<Scalars['String']['output']>;
+  banner?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+};
+
+export type Query_GetAddresses_Results_Items = {
+  __typename?: 'query_getAddresses_results_items';
+  address: Scalars['String']['output'];
+  arkham?: Maybe<Query_GetAddresses_Results_Items_Arkham>;
+  ens?: Maybe<Query_GetAddresses_Results_Items_Ens>;
+  isContract: Scalars['Boolean']['output'];
+};
+
+export type Query_GetAddresses_Results_Items_Arkham = {
+  __typename?: 'query_getAddresses_results_items_arkham';
+  entity?: Maybe<Scalars['String']['output']>;
+  entityType?: Maybe<Scalars['String']['output']>;
+  label?: Maybe<Scalars['String']['output']>;
+  twitter?: Maybe<Scalars['String']['output']>;
+};
+
+export type Query_GetAddresses_Results_Items_Ens = {
+  __typename?: 'query_getAddresses_results_items_ens';
+  avatar?: Maybe<Scalars['String']['output']>;
+  banner?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
 };
 
 export type Query_GetDaoTokenTreasury_Items_Items = {
@@ -1385,6 +1622,12 @@ export type Query_Votes_Items_Items = {
   votingPower: Scalars['String']['output'];
 };
 
+export type Query_VotingPowerByAccountId_Variation = {
+  __typename?: 'query_votingPowerByAccountId_variation';
+  absoluteChange: Scalars['String']['output'];
+  percentageChange: Scalars['Float']['output'];
+};
+
 export type Query_VotingPowerVariationsByAccountId_Data = {
   __typename?: 'query_votingPowerVariationsByAccountId_data';
   absoluteChange: Scalars['String']['output'];
@@ -1420,8 +1663,15 @@ export type Query_VotingPowers_Items_Items = {
   accountId: Scalars['String']['output'];
   delegationsCount: Scalars['Float']['output'];
   proposalsCount: Scalars['Float']['output'];
+  variation: Query_VotingPowers_Items_Items_Variation;
   votesCount: Scalars['Float']['output'];
   votingPower: Scalars['String']['output'];
+};
+
+export type Query_VotingPowers_Items_Items_Variation = {
+  __typename?: 'query_votingPowers_items_items_variation';
+  absoluteChange: Scalars['String']['output'];
+  percentageChange: Scalars['Float']['output'];
 };
 
 export enum Timestamp_Const {
@@ -1478,6 +1728,7 @@ export type VotingPowerByAccountId_200_Response = {
   accountId: Scalars['String']['output'];
   delegationsCount: Scalars['Float']['output'];
   proposalsCount: Scalars['Float']['output'];
+  variation: Query_VotingPowerByAccountId_Variation;
   votesCount: Scalars['Float']['output'];
   votingPower: Scalars['String']['output'];
 };
@@ -1574,19 +1825,21 @@ export type GetDelegatesQueryVariables = Exact<{
 
 export type GetDelegatesQuery = { __typename?: 'Query', votingPowers?: { __typename?: 'votingPowers_200_response', totalCount: number, items: Array<{ __typename?: 'query_votingPowers_items_items', accountId: string, delegationsCount: number, votingPower: string } | null> } | null };
 
-export type GetDelegatorVotingPowerDetailsQueryVariables = Exact<{
-  addresses?: InputMaybe<Scalars['JSON']['input']>;
+export type GetDelegatorsQueryVariables = Exact<{
   address: Scalars['String']['input'];
-  orderDirection?: InputMaybe<QueryInput_AccountBalances_OrderDirection>;
-  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<QueryInput_Delegators_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_Delegators_OrderDirection>;
 }>;
 
 
-export type GetDelegatorVotingPowerDetailsQuery = { __typename?: 'Query', votingPowerByAccountId?: { __typename?: 'votingPowerByAccountId_200_response', accountId: string, votingPower: string } | null, accountBalances?: { __typename?: 'accountBalances_200_response', totalCount: number, items: Array<{ __typename?: 'query_accountBalances_items_items', address: string, balance: string } | null> } | null };
+export type GetDelegatorsQuery = { __typename?: 'Query', delegators?: { __typename?: 'delegators_200_response', totalCount: number, items: Array<{ __typename?: 'query_delegators_items_items', delegatorAddress: string, amount: string, timestamp: string } | null> } | null };
 
 export type GetDelegationsTimestampQueryVariables = Exact<{
   delegate: Scalars['String']['input'];
+  orderBy?: InputMaybe<QueryInput_Delegations_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_Delegations_OrderDirection>;
 }>;
 
 
@@ -1599,6 +1852,13 @@ export type GetTopFiveDelegatorsQueryVariables = Exact<{
 
 
 export type GetTopFiveDelegatorsQuery = { __typename?: 'Query', accountBalances?: { __typename?: 'accountBalances_200_response', items: Array<{ __typename?: 'query_accountBalances_items_items', address: string, balance: string } | null> } | null };
+
+export type GetVotingPowerQueryVariables = Exact<{
+  address: Scalars['String']['input'];
+}>;
+
+
+export type GetVotingPowerQuery = { __typename?: 'Query', votingPowerByAccountId?: { __typename?: 'votingPowerByAccountId_200_response', accountId: string, votingPower: string } | null };
 
 export type GetVotingPowerCountingQueryVariables = Exact<{
   delegates?: InputMaybe<Scalars['JSON']['input']>;
@@ -1643,6 +1903,34 @@ export type GetDelegateProposalsActivityQueryVariables = Exact<{
 
 
 export type GetDelegateProposalsActivityQuery = { __typename?: 'Query', proposalsActivity?: { __typename?: 'proposalsActivity_200_response', address: string, totalProposals: number, votedProposals: number, neverVoted: boolean, avgTimeBeforeEnd: number } | null };
+
+export type GetFeedEventsQueryVariables = Exact<{
+  skip?: InputMaybe<Scalars['Float']['input']>;
+  limit?: InputMaybe<Scalars['Float']['input']>;
+  orderBy?: InputMaybe<QueryInput_FeedEvents_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_FeedEvents_OrderDirection>;
+  relevance?: InputMaybe<QueryInput_FeedEvents_Relevance>;
+  type?: InputMaybe<QueryInput_FeedEvents_Type>;
+  fromDate?: InputMaybe<Scalars['Float']['input']>;
+  toDate?: InputMaybe<Scalars['Float']['input']>;
+}>;
+
+
+export type GetFeedEventsQuery = { __typename?: 'Query', feedEvents?: { __typename?: 'feedEvents_200_response', totalCount: number, items: Array<{ __typename?: 'query_feedEvents_items_items', txHash: string, logIndex: number, type: Query_FeedEvents_Items_Items_Type, value?: string | null, timestamp: number, relevance: Query_FeedEvents_Items_Items_Relevance, metadata?: any | null } | null> } | null };
+
+export type GetAddressQueryVariables = Exact<{
+  address: Scalars['String']['input'];
+}>;
+
+
+export type GetAddressQuery = { __typename?: 'Query', getAddress?: { __typename?: 'getAddress_200_response', address: string, isContract: boolean, arkham?: { __typename?: 'query_getAddress_arkham', entity?: string | null, entityType?: string | null, label?: string | null, twitter?: string | null } | null, ens?: { __typename?: 'query_getAddress_ens', name?: string | null, avatar?: string | null, banner?: string | null } | null } | null };
+
+export type GetAddressesQueryVariables = Exact<{
+  addresses: Scalars['JSON']['input'];
+}>;
+
+
+export type GetAddressesQuery = { __typename?: 'Query', getAddresses?: { __typename?: 'getAddresses_200_response', results: Array<{ __typename?: 'query_getAddresses_results_items', address: string, isContract: boolean, arkham?: { __typename?: 'query_getAddresses_results_items_arkham', entity?: string | null, entityType?: string | null, label?: string | null, twitter?: string | null } | null, ens?: { __typename?: 'query_getAddresses_results_items_ens', name?: string | null, avatar?: string | null, banner?: string | null } | null } | null> } | null };
 
 export type GetProposalsFromDaoQueryVariables = Exact<{
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;

@@ -1,35 +1,35 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
 import { ColumnDef } from "@tanstack/react-table";
+import React, { useEffect, useRef } from "react";
+import { formatUnits } from "viem";
 
+import { StageTag } from "@/features/resilience-stages/components";
 import {
   SkeletonRow,
   RiskAreaCardEnum,
   RiskAreaCardWrapper,
   Button,
 } from "@/shared/components";
-import { DaoIdEnum } from "@/shared/types/daos";
-import daoConfigByDaoId from "@/shared/dao-config";
-import { useScreenSize, useTokenData, useActiveSupply } from "@/shared/hooks";
+import { Table } from "@/shared/components/design-system/table/Table";
+import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import {
   ArrowUpDown,
   ArrowState,
   DaoAvatarIcon,
 } from "@/shared/components/icons";
-import { cn, formatNumberUserReadable } from "@/shared/utils";
-import { formatUnits } from "viem";
-import { StageTag } from "@/features/resilience-stages/components";
-import { Stage } from "@/shared/types/enums/Stage";
-import { TimeInterval } from "@/shared/types/enums/TimeInterval";
+import daoConfigByDaoId from "@/shared/dao-config";
 import {
   fieldsToArray,
   getDaoStageFromFields,
 } from "@/shared/dao-config/utils";
-import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
-import { Table } from "@/shared/components/design-system/table/Table";
+import { useScreenSize, useTokenData, useActiveSupply } from "@/shared/hooks";
 import { useQuorumGap } from "@/shared/hooks/useQuorumGap";
-import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { Stage } from "@/shared/types/enums/Stage";
+import { TimeInterval } from "@/shared/types/enums/TimeInterval";
+import { cn, formatNumberUserReadable } from "@/shared/utils";
+import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
 
 type PanelDao = {
   dao: string;
@@ -435,14 +435,14 @@ export const PanelTable = ({ currency }: PanelTableProps) => {
               <div className="text-center">
                 <p>
                   Assess critical vulnerabilities in the DAO&apos;s governance
-                  setup. Each item highlights a specific risk area, showing
-                  which issues are resolved and which still expose the system to
-                  threats.
+                  setup. Each item highlights a specific attack exposure,
+                  showing which issues are resolved and which still expose the
+                  system to threats.
                 </p>
               </div>
             }
           >
-            <TitleUnderlined title="Risk Areas" className="text-left" />
+            <TitleUnderlined title="Attack Exposure" className="text-left" />
           </Tooltip>
         </div>
       ),

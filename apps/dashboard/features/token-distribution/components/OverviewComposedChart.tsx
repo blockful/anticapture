@@ -1,4 +1,3 @@
-import { ChartContainer } from "@/shared/components/ui/chart";
 import {
   Area,
   CartesianGrid,
@@ -7,11 +6,13 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+
 import { TokenDistributionCustomTooltip } from "@/features/token-distribution/components/TokenDistributionCustomTooltip";
-import { formatNumberUserReadable } from "@/shared/utils";
-import { DaoIdEnum } from "@/shared/types/daos";
 import { MetricSchema } from "@/features/token-distribution/utils";
+import { ChartContainer } from "@/shared/components/ui/chart";
 import { ChartDataSetPoint } from "@/shared/dao-config/types";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { formatNumberUserReadable } from "@/shared/utils";
 
 export const OverviewComposedChart = ({
   chartData,

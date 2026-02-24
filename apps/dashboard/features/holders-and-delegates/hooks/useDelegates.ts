@@ -1,19 +1,20 @@
 "use client";
 
 import {
+  QueryInput_VotingPowers_OrderBy,
+  QueryInput_VotingPowers_OrderDirection,
+} from "@anticapture/graphql-client";
+import {
   useGetDelegatesQuery,
   useGetHistoricalVotingAndActivityQuery,
   useGetDelegateProposalsActivityLazyQuery,
 } from "@anticapture/graphql-client/hooks";
-import { useMemo, useCallback, useState, useEffect } from "react";
 import { NetworkStatus } from "@apollo/client";
+import { useMemo, useCallback, useState, useEffect } from "react";
+
+import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
-import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
-import {
-  QueryInput_VotingPowers_OrderBy,
-  QueryInput_VotingPowers_OrderDirection,
-} from "@anticapture/graphql-client";
 
 interface ProposalsActivity {
   totalProposals: number;

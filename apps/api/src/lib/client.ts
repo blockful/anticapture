@@ -1,7 +1,5 @@
 import { Chain, Account, Transport, Client } from "viem";
 
-import { DaoIdEnum } from "./enums";
-import { CONTRACT_ADDRESSES } from "./constants";
 import {
   UNIClient,
   SCRClient,
@@ -14,6 +12,9 @@ import {
   Client as NounsClient,
   DAOClient,
 } from "@/clients";
+
+import { CONTRACT_ADDRESSES } from "./constants";
+import { DaoIdEnum } from "./enums";
 
 export function getClient<
   TTransport extends Transport = Transport,
@@ -35,10 +36,6 @@ export function getClient<
     case DaoIdEnum.OP: {
       const { governor } = CONTRACT_ADDRESSES[daoId];
       return new OPClient(client, governor.address);
-    }
-    case DaoIdEnum.TEST: {
-      const { governor } = CONTRACT_ADDRESSES[daoId];
-      return new ENSClient(client, governor.address);
     }
     case DaoIdEnum.GTC: {
       const { governor } = CONTRACT_ADDRESSES[daoId];

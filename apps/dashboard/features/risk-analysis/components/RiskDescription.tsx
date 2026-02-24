@@ -1,79 +1,170 @@
-import { AlertCircle, CheckCircle2, TriangleAlert } from "lucide-react";
-import { ReactNode } from "react";
-import { RiskLevel } from "@/shared/types/enums/RiskLevel";
+import {
+  AlertCircle,
+  CheckCircle2,
+  ChevronsRight,
+  HelpCircle,
+  TriangleAlert,
+} from "lucide-react";
+import { ReactNode, useMemo } from "react";
+
+import { CorneredBox } from "@/features/risk-analysis/components/CorneredBox";
 import { RiskLevelCardSmall } from "@/shared/components";
 import { GovernanceImplementationField } from "@/shared/dao-config/types";
-import { CorneredBox } from "@/features/risk-analysis/components/CorneredBox";
+import { RiskLevel } from "@/shared/types/enums/RiskLevel";
 
-/**
- * Props for the RiskDescription component
- */
-export interface RiskDescriptionProps {
-  title: string;
-  description: string | string[];
-  requirements?: (GovernanceImplementationField & { name: string })[];
-  children?: ReactNode;
-  riskLevel?: RiskLevel;
+export interface RequirementMetric extends GovernanceImplementationField {
+  name: string;
 }
 
-/**
- * Component for displaying standardized risk descriptions
- */
+export interface RiskDescriptionProps {
+  title: string;
+  defenseDefinition: string | string[];
+  riskExposure: string | string[];
+  riskLevel: RiskLevel;
+  requirements?: RequirementMetric[];
+  children?: ReactNode;
+  onMetricClick?: (requirement: RequirementMetric) => void;
+}
+
+export const iconsMapping = {
+  [RiskLevel.LOW]: <CheckCircle2 className="text-success size-5" />,
+  [RiskLevel.MEDIUM]: <AlertCircle className="text-warning size-5" />,
+  [RiskLevel.HIGH]: <TriangleAlert className="text-error size-5" />,
+  [RiskLevel.NONE]: <HelpCircle className="text-secondary size-5" />,
+} as const satisfies Record<RiskLevel, ReactNode>;
+
+const normalizeToArray = (value: string | string[]): string[] =>
+  Array.isArray(value) ? value : [value];
+
+const ParagraphList = ({ items }: { items: string[] }) => (
+  <>
+    {items.map((paragraph, index) => (
+      <p key={index} className={"text-primary text-sm leading-5"}>
+        {paragraph}
+      </p>
+    ))}
+  </>
+);
+
+const MetricButton = ({
+  metric,
+  onClick,
+}: {
+  metric: RequirementMetric;
+  onClick?: (metric: RequirementMetric) => void;
+}) => {
+  const isUnavailable = metric.riskLevel === RiskLevel.NONE;
+  return (
+    <li className="flex items-center gap-2">
+      {iconsMapping[metric.riskLevel]}
+      {isUnavailable ? (
+        <span className="text-secondary font-mono text-[13px] font-medium uppercase tracking-wider">
+          {metric.name}
+        </span>
+      ) : (
+        <button
+          onClick={() => onClick?.(metric)}
+          className={
+            "text-primary border-border-contrast hover:border-primary border-b border-dashed font-mono text-[13px] font-medium uppercase tracking-wider transition-colors"
+          }
+          aria-label={`View details for ${metric.name}`}
+          type="button"
+        >
+          {metric.name}
+        </button>
+      )}
+    </li>
+  );
+};
+
+const RiskInfoContainer = ({
+  children,
+  title,
+  rightContent,
+}: {
+  children: ReactNode;
+  title?: string;
+  rightContent?: ReactNode;
+}) => {
+  return (
+    <section className="flex flex-col gap-2">
+      {title && (
+        <h3
+          className={
+            "text-secondary flex items-center gap-2 font-mono text-[13px] font-medium leading-5"
+          }
+        >
+          <ChevronsRight className="size-4" />
+          {title}
+        </h3>
+      )}
+      {rightContent && <div>{rightContent}</div>}
+      <div className="ml-6 flex flex-col gap-2">{children}</div>
+    </section>
+  );
+};
+
 export const RiskDescription = ({
   title,
-  description,
+  defenseDefinition,
+  riskExposure,
   requirements = [],
   riskLevel,
+  onMetricClick,
 }: RiskDescriptionProps) => {
-  // Convert description to array if it's a string
-  const descriptionArray = Array.isArray(description)
-    ? description
-    : [description];
+  const defenseDefinitionArray = useMemo(
+    () => normalizeToArray(defenseDefinition),
+    [defenseDefinition],
+  );
 
-  const iconsMapping: Record<RiskLevel, ReactNode> = {
-    [RiskLevel.LOW]: <CheckCircle2 className="text-success size-5" />,
-    [RiskLevel.MEDIUM]: <AlertCircle className="text-warning size-5" />,
-    [RiskLevel.HIGH]: <TriangleAlert className="text-error size-5" />,
-    [RiskLevel.NONE]: <></>,
-  };
+  const riskExposureArray = useMemo(
+    () => normalizeToArray(riskExposure),
+    [riskExposure],
+  );
 
   return (
-    <CorneredBox className="bg-surface-background lg:bg-surface-default p-4">
-      <div className="flex flex-col gap-4">
-        {/* Header with title and risk level */}
-        <div className="flex w-full items-center justify-start gap-2">
-          <h2 className="text-primary text-lg font-medium">{title}</h2>
-          <RiskLevelCardSmall status={riskLevel} />
-        </div>
+    <CorneredBox className="bg-surface-background lg:bg-surface-default lg:flex lg:h-full lg:flex-col">
+      <div className="flex flex-col lg:h-full lg:overflow-hidden">
+        <header className="flex w-full flex-col justify-between gap-2 pb-5 lg:shrink-0 lg:flex-row lg:items-center lg:p-4">
+          <h2 className="text-primary font-mono text-lg font-medium uppercase">
+            {title}
+          </h2>
+          {riskLevel !== RiskLevel.NONE && (
+            <RiskLevelCardSmall status={riskLevel} />
+          )}
+        </header>
 
-        {/* Description paragraphs */}
-        {descriptionArray.map((paragraph, index) => (
-          <p key={index} className="text-secondary text-sm">
-            {paragraph}
-          </p>
-        ))}
+        <div className={"border-border-default h-px w-full border"} />
 
-        {/* Requirements section with divider */}
-        {requirements.length > 0 && (
-          <div className="flex flex-col gap-4">
-            {/* Thin divider line */}
-            <div className="bg-surface-contrast h-px w-full" />
+        <div className="scrollbar-custom flex flex-col gap-4 py-4 lg:flex-1 lg:overflow-y-auto lg:p-4">
+          <RiskInfoContainer title="DEFENSE DEFINITION">
+            <ParagraphList items={defenseDefinitionArray} />
+          </RiskInfoContainer>
 
-            <h3 className="text-alternative-sm text-primary font-mono font-medium tracking-wider">
-              <span className="text-secondary">{`//`}</span> REQUIREMENTS
-            </h3>
-            <ul className="space-y-2">
+          <div
+            className={"border-border-default h-px w-full border border-dashed"}
+          />
+
+          <RiskInfoContainer title="RISK EXPOSURE">
+            <ParagraphList items={riskExposureArray} />
+          </RiskInfoContainer>
+
+          <div
+            className={"border-border-default h-px w-full border border-dashed"}
+          />
+
+          <RiskInfoContainer title="FRAMEWORK METRICS IN THIS AREA">
+            <ul className="space-y-3" role="list">
               {requirements.map((requirement, index) => (
-                <li key={index} className="flex items-center gap-2">
-                  {iconsMapping[requirement.riskLevel]}
-                  <span className="text-secondary text-sm">
-                    {requirement.name}
-                  </span>
-                </li>
+                <MetricButton
+                  key={requirement.name || index}
+                  metric={requirement}
+                  onClick={onMetricClick}
+                />
               ))}
             </ul>
-          </div>
-        )}
+          </RiskInfoContainer>
+        </div>
       </div>
     </CorneredBox>
   );

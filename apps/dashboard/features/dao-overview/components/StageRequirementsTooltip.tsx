@@ -1,13 +1,14 @@
 "use client";
 
-import { Stage } from "@/shared/types/enums/Stage";
-import { OutlinedBox } from "@/shared/components/boxes/OutlinedBox";
 import {
   CheckCircleIcon,
   AlertCircleIcon,
   AlertTriangleIcon,
 } from "lucide-react";
 import { ReactNode } from "react";
+
+import { OutlinedBox } from "@/shared/components/boxes/OutlinedBox";
+import { Stage } from "@/shared/types/enums/Stage";
 
 interface StageRequirementsTooltipProps {
   currentStage: Stage;

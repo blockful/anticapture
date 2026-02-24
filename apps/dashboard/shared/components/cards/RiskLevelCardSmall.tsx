@@ -1,10 +1,16 @@
 "use client";
 
+import {
+  AlertTriangle,
+  AlertCircle,
+  CheckCircle2,
+  HelpCircle,
+} from "lucide-react";
 import { ReactNode } from "react";
-import { AlertTriangle, AlertCircle, CheckCircle2 } from "lucide-react";
-import { cn } from "@/shared/utils/";
+
+import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 import { RiskLevel } from "@/shared/types/enums/RiskLevel";
-import { CounterClockwiseClockIcon } from "@radix-ui/react-icons";
+import { cn } from "@/shared/utils/";
 
 type RiskConfig = {
   color: string;
@@ -35,7 +41,7 @@ const riskConfigs: Record<RiskLevel, RiskConfig> = {
       "bg-surface-contrast",
       "bg-surface-contrast",
     ],
-    icon: <CounterClockwiseClockIcon className="text-secondary size-3.5" />,
+    icon: <HelpCircle className="text-secondary size-3.5" />,
   },
 };
 
@@ -44,20 +50,15 @@ const RiskLabel = ({
   color,
   icon,
 }: {
-  status: RiskLevel | undefined;
+  status: RiskLevel;
   color: string;
   icon: ReactNode;
 }) => (
   <div className="flex h-full flex-row gap-1 rounded-l-full">
     <p
-      className={`items-center gap-1 text-${color} hidden font-mono text-xs font-medium lg:flex`}
+      className={`items-center gap-1 text-${color} flex font-mono text-xs font-medium`}
     >
-      {status ?? "------"}
-      {icon}
-    </p>
-    <p
-      className={`items-center gap-1 text-${color} flex font-mono text-xs font-medium lg:hidden`}
-    >
+      {status} RISK
       {icon}
     </p>
   </div>
@@ -72,25 +73,17 @@ const RiskDots = ({ pattern }: { pattern: RiskConfig["pattern"] }) => (
 );
 
 interface RiskLevelCardSmallProps {
-  status?: RiskLevel;
+  status: RiskLevel;
   className?: string;
 }
 
-export const RiskLevelCardSmall = ({
-  status,
-  className,
-}: RiskLevelCardSmallProps) => {
+export const RiskLevelCardSmall = ({ status }: RiskLevelCardSmallProps) => {
   const config = riskConfigs[status ?? RiskLevel.NONE];
 
   return (
-    <div
-      className={cn(
-        "bg-surface-opacity flex h-full w-fit gap-1 rounded-full px-2 py-0.5",
-        className,
-      )}
-    >
+    <BadgeStatus variant="dimmed" className="w-fit px-2 py-1">
       <RiskLabel status={status} color={config.color} icon={config.icon} />
       <RiskDots pattern={config.pattern} />
-    </div>
+    </BadgeStatus>
   );
 };

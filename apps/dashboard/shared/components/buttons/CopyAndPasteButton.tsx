@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import { Copy, Check } from "lucide-react";
-import { cn } from "@/shared/utils";
+import { useState } from "react";
+
 import { IconButton } from "@/shared/components";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
+import { cn } from "@/shared/utils";
 
 interface CopyButtonProps {
   textToCopy: string;

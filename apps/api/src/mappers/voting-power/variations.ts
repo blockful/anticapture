@@ -1,5 +1,6 @@
 import { z } from "@hono/zod-openapi";
 import { Address, getAddress, isAddress } from "viem";
+
 import { accountPower } from "@/database";
 
 import { PeriodResponseSchema, TimestampResponseMapper } from "../shared";
@@ -77,7 +78,7 @@ export const VotingPowersRequestSchema = z.object({
     .default(0),
   orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
   orderBy: z
-    .enum(["votingPower", "delegationsCount"])
+    .enum(["votingPower", "delegationsCount", "variation"])
     .optional()
     .default("votingPower"),
   addresses: z
@@ -106,6 +107,14 @@ export const VotingPowersRequestSchema = z.object({
     .string()
     .transform((val) => BigInt(val))
     .optional(),
+  fromDate: z
+    .string()
+    .transform((val) => Number(val))
+    .optional(),
+  toDate: z
+    .string()
+    .transform((val) => Number(val))
+    .optional(),
 });
 
 export const VotingPowerVariationResponseSchema = z.object({
@@ -116,12 +125,18 @@ export const VotingPowerVariationResponseSchema = z.object({
   percentageChange: z.string(),
 });
 
+export const VotingPowerVariationFieldSchema = z.object({
+  absoluteChange: z.string(),
+  percentageChange: z.number(),
+});
+
 export const VotingPowerResponseSchema = z.object({
   accountId: z.string(),
   votingPower: z.string(),
   votesCount: z.number(),
   proposalsCount: z.number(),
   delegationsCount: z.number(),
+  variation: VotingPowerVariationFieldSchema,
 });
 
 export const VotingPowersResponseSchema = z.object({
@@ -165,6 +180,11 @@ export type DBVotingPowerVariation = {
 
 export type DBAccountPower = typeof accountPower.$inferSelect;
 
+export type DBAccountPowerWithVariation = DBAccountPower & {
+  absoluteChange: bigint;
+  percentageChange: number;
+};
+
 export const VotingPowerVariationResponseMapper = (
   delta: DBVotingPowerVariation,
 ): VotingPowerVariationResponse => ({
@@ -204,7 +224,7 @@ export const VotingPowerVariationsByAccountIdResponseMapper = (
 };
 
 export const VotingPowerMapper = (
-  data: DBAccountPower,
+  data: DBAccountPowerWithVariation,
 ): VotingPowerResponse => {
   return VotingPowerResponseSchema.parse({
     accountId: data.accountId,
@@ -212,11 +232,15 @@ export const VotingPowerMapper = (
     votesCount: data.votesCount,
     proposalsCount: data.proposalsCount,
     delegationsCount: data.delegationsCount,
+    variation: {
+      absoluteChange: data.absoluteChange.toString(),
+      percentageChange: data.percentageChange,
+    },
   });
 };
 
 export const VotingPowersMapper = (
-  items: DBAccountPower[],
+  items: DBAccountPowerWithVariation[],
   totalCount: number,
 ): VotingPowersResponse => {
   return VotingPowersResponseSchema.parse({

@@ -1,9 +1,11 @@
 import { Account, Address, Chain, Client, Transport } from "viem";
+import { getBlockNumber, readContract } from "viem/actions";
 
 import { DAOClient } from "@/clients";
+
 import { GovernorBase } from "../governor.base";
+
 import { COMPGovernorAbi } from "./abi";
-import { getBlockNumber, readContract } from "viem/actions";
 
 export class COMPClient<
   TTransport extends Transport = Transport,

@@ -1,5 +1,6 @@
-import { Toast } from "@/shared/components/design-system/toast";
 import toast from "react-hot-toast";
+
+import { Toast } from "@/shared/components/design-system/toast";
 
 export const showCustomToast = (message: string, type: "success" | "error") => {
   toast.custom(

@@ -1,7 +1,23 @@
-import { HeaderSidebar } from "@/widgets";
+import type { Metadata } from "next";
+
 import { FaqSection } from "@/features/faq";
-import { HeaderMobile } from "@/widgets/HeaderMobile";
 import { Footer } from "@/shared/components/design-system/footer/Footer";
+import { HeaderSidebar } from "@/widgets";
+import { HeaderMobile } from "@/widgets/HeaderMobile";
+
+export const metadata: Metadata = {
+  title: "Anticapture - FAQ",
+  description: "Frequently asked questions about DAO governance security.",
+  openGraph: {
+    title: "Anticapture - FAQ",
+    description: "Frequently asked questions about DAO governance security.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Anticapture - FAQ",
+    description: "Frequently asked questions about DAO governance security.",
+  },
+};
 
 export default function FAQPage() {
   return (

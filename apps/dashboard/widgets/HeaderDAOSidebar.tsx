@@ -1,17 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { Crosshair2Icon } from "@radix-ui/react-icons";
+import {
+  BarChart,
+  Landmark,
+  UserCheck,
+  ArrowRightLeft,
+  PieChart,
+  Newspaper,
+  Bomb,
+} from "lucide-react";
 import { usePathname } from "next/navigation";
-import { DaoIdEnum } from "@/shared/types/daos";
+import { useState } from "react";
+
 import {
   HeaderDAOSidebarDropdown,
   ButtonHeaderSidebar,
 } from "@/shared/components";
-import { BarChart, Gauge, Landmark, UserCheck } from "lucide-react";
-import daoConfigByDaoId from "@/shared/dao-config";
-import { ArrowRightLeft, PieChart } from "lucide-react";
-import { Crosshair2Icon } from "@radix-ui/react-icons";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { DaoIdEnum } from "@/shared/types/daos";
 import { cn } from "@/shared/utils/";
 
 export const HeaderDAOSidebar = () => {
@@ -59,21 +67,21 @@ export const HeaderDAOSidebar = () => {
                   isCollapsed={isCollapsed}
                 />
               )}
-            {daoConfig.riskAnalysis && (
-              <ButtonHeaderSidebar
-                page={PAGES_CONSTANTS.riskAnalysis.page}
-                icon={Gauge}
-                label={PAGES_CONSTANTS.riskAnalysis.title}
-                key={PAGES_CONSTANTS.riskAnalysis.title}
-                isCollapsed={isCollapsed}
-              />
-            )}
             {daoConfig.resilienceStages && (
               <ButtonHeaderSidebar
                 page={PAGES_CONSTANTS.resilienceStages.page}
                 icon={BarChart}
                 label={PAGES_CONSTANTS.resilienceStages.title}
                 key={PAGES_CONSTANTS.resilienceStages.title}
+                isCollapsed={isCollapsed}
+              />
+            )}
+            {daoConfig.attackExposure && (
+              <ButtonHeaderSidebar
+                page={PAGES_CONSTANTS.attackExposure.page}
+                icon={Bomb}
+                label={PAGES_CONSTANTS.attackExposure.title}
+                key={PAGES_CONSTANTS.attackExposure.title}
                 isCollapsed={isCollapsed}
               />
             )}
@@ -105,6 +113,14 @@ export const HeaderDAOSidebar = () => {
                 isCollapsed={isCollapsed}
               />
             )}
+
+            <ButtonHeaderSidebar
+              page={PAGES_CONSTANTS.activityFeed.page}
+              icon={Newspaper}
+              label={PAGES_CONSTANTS.activityFeed.title}
+              key={PAGES_CONSTANTS.activityFeed.title}
+              isCollapsed={isCollapsed}
+            />
           </div>
         </div>
       </div>

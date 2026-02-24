@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+
 import { useTreasury } from "@/features/attack-profitability/hooks/useTreasury";
 import { TokenDataResponse } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -44,7 +45,7 @@ export const useDaoTreasuryStats = ({
     return {
       lastPrice,
       liquidTreasuryNonDaoValue: liquidValue,
-      liquidTreasuryAllValue: tokenValue,
+      liquidTreasuryAllValue: totalValue,
       liquidTreasuryAllPercent,
     };
   }, [liquidTreasury, tokenTreasury, allTreasury, tokenData]);

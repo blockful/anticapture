@@ -1,8 +1,13 @@
 import { ReactNode, SVGProps } from "react";
 import { Address, Chain } from "viem";
-import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
+
 import { DaoIconProps } from "@/shared/components/icons/types";
-import { MetricTypesEnum } from "../types/enums/metric-type";
+import {
+  RiskLevel,
+  GovernanceImplementationEnum,
+  RiskAreaEnum,
+} from "@/shared/types/enums";
+import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 
 export type TokenMetricItem = {
   date: string;
@@ -29,11 +34,15 @@ export type GovernanceImplementation = {
 };
 
 export type GovernanceImplementationField = {
-  value: string;
-  description: string;
   riskLevel: RiskLevel;
-  requirements?: string[];
-  riskExplanation?: string;
+  description: string;
+
+  requirements?: string[]; // Remove this when update Risk Analysis and Stages to not rely on it
+
+  currentSetting?: string;
+  impact?: string;
+  recommendedSetting?: string;
+  nextStep?: string;
 };
 
 // Base DAO information
@@ -46,6 +55,7 @@ interface BaseInfo {
     svgBgColor: string;
   };
   icon?: (props: DaoIconProps) => ReactNode;
+  ogIcon: (props: { size: number }) => ReactNode;
   disableDaoPage?: boolean;
   notSupportedMetrics?: MetricTypesEnum[];
 }
@@ -108,13 +118,22 @@ export interface AttackProfitabilityConfig {
     percentage: number;
   };
 }
-export interface GovernanceImplementationConfig extends GovernanceImplementation {}
+export type GovernanceImplementationConfig = GovernanceImplementation;
+
+export type DefenseAreaDescription = {
+  description: string;
+};
+
+export type AttackExposureConfig = {
+  defenseAreas?: Partial<Record<RiskAreaEnum, DefenseAreaDescription>>;
+};
 
 // Complete DAO configuration structure
 export interface DaoConfiguration extends BaseInfo {
   daoOverview: DaoOverviewConfig;
   attackProfitability?: AttackProfitabilityConfig;
   governanceImplementation?: GovernanceImplementationConfig;
+  attackExposure?: AttackExposureConfig;
   resilienceStages?: boolean;
   tokenDistribution?: boolean;
   dataTables?: boolean;

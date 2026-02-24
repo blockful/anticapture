@@ -1,19 +1,16 @@
-import { useMemo } from "react";
-
-import { DaoIdEnum } from "@/shared/types/daos";
-import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
-import { useMultipleEnsData } from "@/shared/hooks/useEnsData";
-import { Address, formatUnits } from "viem";
-import { formatAddress } from "@/shared/utils/formatAddress";
-import { useGetAccountInteractionsQuery } from "@anticapture/graphql-client/hooks";
-import daoConfig from "@/shared/dao-config";
 import {
   Query_AccountInteractions_Items_Items,
   QueryInput_AccountInteractions_OrderBy,
   QueryInput_AccountInteractions_OrderDirection,
 } from "@anticapture/graphql-client";
-import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
-import { TimeInterval } from "@/shared/types/enums";
+import { useGetAccountInteractionsQuery } from "@anticapture/graphql-client/hooks";
+import { Address, formatUnits } from "viem";
+
+import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
+import daoConfig from "@/shared/dao-config";
+import { useMultipleEnsData } from "@/shared/hooks/useEnsData";
+import { DaoIdEnum } from "@/shared/types/daos";
+import { formatAddress } from "@/shared/utils/formatAddress";
 
 interface Interaction {
   accountId: string;
@@ -71,12 +68,6 @@ export const useAccountInteractionsData = ({
   limit?: number;
 }): InteractionResponse => {
   const { decimals } = daoConfig[daoId];
-
-  const fromDate = useMemo(() => {
-    return (
-      Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[TimeInterval.NINETY_DAYS]
-    ).toString();
-  }, []);
 
   const { data, loading, error } = useGetAccountInteractionsQuery({
     variables: {

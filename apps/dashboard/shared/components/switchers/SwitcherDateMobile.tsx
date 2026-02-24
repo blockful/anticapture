@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import { cn } from "@/shared/utils/";
-import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { CheckIcon, ChevronDown } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+
+import { TimeInterval } from "@/shared/types/enums/TimeInterval";
+import { cn } from "@/shared/utils/";
 
 interface SwitcherDateProps {
   setTimeInterval: (timeInterval: TimeInterval) => void;
