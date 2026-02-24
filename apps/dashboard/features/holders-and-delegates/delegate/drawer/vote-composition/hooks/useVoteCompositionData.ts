@@ -1,19 +1,25 @@
+import {
+  QueryInput_Delegators_OrderBy,
+  QueryInput_Delegators_OrderDirection,
+} from "@anticapture/graphql-client";
+import { useGetVotingPowerQuery } from "@anticapture/graphql-client/hooks";
 import { Address, formatUnits } from "viem";
 
 import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
 import daoConfig from "@/shared/dao-config";
-import { useVotingPower } from "@/shared/hooks/graphql-client/useVotingPower";
+import {
+  useDelegators,
+  DelegatorItem,
+} from "@/shared/hooks/graphql-client/useDelegators";
 import { useMultipleEnsData } from "@/shared/hooks/useEnsData";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { formatAddress } from "@/shared/utils/formatAddress";
 
 export interface VoteCompositionData {
-  // Dados básicos
-  topFiveDelegators: unknown[];
+  topDelegators: DelegatorItem[];
   currentVotingPower: number;
   loading: boolean;
 
-  // Dados calculados
   chartConfig: Record<
     string,
     { label: string; color: string; percentage: string; ensName?: string }
@@ -21,44 +27,44 @@ export interface VoteCompositionData {
   pieData: { name: string; value: number }[];
   legendItems: { color: string; label: string; percentage: string }[];
 
-  // Valores calculados
   totalIndividualDelegators: bigint;
   othersValue: bigint;
   othersPercentage: number;
 }
 
-/**
- * Hook to get the vote composition data for a delegate
- * @param daoId - The ID of the DAO
- * @param address - The address of the delegate
- * @returns The vote composition data
- */
 export const useVoteCompositionData = (
   daoId: DaoIdEnum,
   address: string,
 ): VoteCompositionData => {
-  const {
-    decimals,
-    daoOverview: { token },
-  } = daoConfig[daoId];
-  const { topFiveDelegators, delegatorsVotingPowerDetails, loading } =
-    useVotingPower({
-      daoId,
+  const { decimals } = daoConfig[daoId];
+
+  const { delegators, loading } = useDelegators({
+    daoId,
+    address,
+    orderBy: QueryInput_Delegators_OrderBy.Amount,
+    orderDirection: QueryInput_Delegators_OrderDirection.Desc,
+    limit: 5,
+  });
+
+  const { data: votingPowerData } = useGetVotingPowerQuery({
+    context: {
+      headers: {
+        "anticapture-dao-id": daoId,
+      },
+    },
+    variables: {
       address,
-    });
+    },
+  });
 
-  // Extract addresses for ENS lookup
-  const delegatorAddresses: Address[] =
-    topFiveDelegators
-      ?.filter((delegator) => delegator.address && delegator.rawBalance > 0n)
-      .map((delegator) => delegator.address as Address) || [];
+  const delegatorAddresses: Address[] = delegators.map(
+    (delegator) => delegator.delegatorAddress as Address,
+  );
 
-  // Fetch ENS data for all delegators
   const { data: ensData } = useMultipleEnsData(delegatorAddresses);
 
-  // default Value when there is no data
   const defaultData: VoteCompositionData = {
-    topFiveDelegators: [],
+    topDelegators: [],
     currentVotingPower: 0,
     loading,
     chartConfig: {},
@@ -69,34 +75,18 @@ export const useVoteCompositionData = (
     othersPercentage: 0,
   };
 
-  // Get total voting power from accountPower query
-  const accountPowerVotingPower =
-    delegatorsVotingPowerDetails?.votingPowerByAccountId?.votingPower;
-
-  // return default data when there is no valid data
-  if (!topFiveDelegators || topFiveDelegators.length === 0) {
+  if (delegators.length === 0) {
     return defaultData;
   }
 
-  // Use accountPower.votingPower as the total voting power (actual total)
-  // Fallback to sum of top 5 if accountPower is not available
-  const delegateCurrentVotingPower = accountPowerVotingPower
-    ? BigInt(accountPowerVotingPower)
-    : topFiveDelegators.reduce(
-        (acc, item) => acc + BigInt(item.rawBalance),
-        BigInt(0),
-      );
-
-  const currentVotingPowerNumber = Number(
-    token === "ERC20"
-      ? Number(formatUnits(BigInt(delegateCurrentVotingPower), decimals))
-      : Number(delegateCurrentVotingPower),
+  const delegateCurrentVotingPower = BigInt(
+    votingPowerData?.votingPowerByAccountId?.votingPower ?? "0",
   );
 
-  // Calculate the total value of the delegators that will be shown individually (top 5)
-  const totalIndividualDelegators = topFiveDelegators.reduce((acc, item) => {
-    if (item.rawBalance === 0n) return acc;
-    return acc + BigInt(item.rawBalance);
+  const totalIndividualDelegators = delegators.reduce((acc, item) => {
+    const amount = BigInt(item.amount);
+    if (amount === 0n) return acc;
+    return acc + amount;
   }, BigInt(0));
 
   // Others is the remaining value that completes 100%
@@ -111,22 +101,21 @@ export const useVoteCompositionData = (
     { label: string; color: string; percentage: string; ensName?: string }
   > = {};
 
-  // Create pie data
   const pieData: { name: string; label: string; value: number }[] = [];
 
-  topFiveDelegators.forEach((delegator, index) => {
-    if (delegator.rawBalance === 0n) return;
+  delegators.forEach((delegator, index) => {
+    const amount = BigInt(delegator.amount);
+    if (amount === 0n) return;
 
     const percentage = Number(
-      (Number(BigInt(delegator.rawBalance)) /
-        Number(delegateCurrentVotingPower)) *
-        100,
+      (Number(amount) / Number(delegateCurrentVotingPower)) * 100,
     );
 
-    const ensName = ensData?.[delegator.address as Address]?.ens;
-    const displayLabel = ensName || formatAddress(delegator.address) || "";
+    const ensName = ensData?.[delegator.delegatorAddress as Address]?.ens;
+    const displayLabel =
+      ensName || formatAddress(delegator.delegatorAddress) || "";
 
-    chartConfig[delegator.address || `delegator-${index}`] = {
+    chartConfig[delegator.delegatorAddress || `delegator-${index}`] = {
       label: displayLabel,
       color: PIE_CHART_COLORS[index % PIE_CHART_COLORS.length],
       percentage: percentage.toFixed(2),
@@ -134,37 +123,26 @@ export const useVoteCompositionData = (
     };
 
     pieData.push({
-      name: delegator.address || "",
+      name: delegator.delegatorAddress || "",
       label: displayLabel,
-      value:
-        token === "ERC20"
-          ? Number(BigInt(delegator.rawBalance) / BigInt(10 ** 18))
-          : Number(delegator.rawBalance),
+      value: Number(formatUnits(amount, decimals)),
     });
   });
 
-  // Add Others if there's remaining voting power
   if (othersValue > BigInt(0)) {
     chartConfig["others"] = {
       label: "Others",
-      color: "#9CA3AF", // Gray color for Others
+      color: "#9CA3AF",
       percentage: othersPercentage.toFixed(2),
     };
-  }
 
-  // Add "Others" slice to pie chart if there's remaining voting power
-  if (othersValue > BigInt(0)) {
     pieData.push({
       name: "others",
       label: "Others",
-      value:
-        token === "ERC20"
-          ? Number(othersValue / BigInt(10 ** decimals))
-          : Number(othersValue),
+      value: Number(formatUnits(othersValue, decimals)),
     });
   }
 
-  // Create legend items from chartConfig
   const legendItems = Object.entries(chartConfig).map(
     ([, config]: [
       string,
@@ -177,8 +155,10 @@ export const useVoteCompositionData = (
   );
 
   return {
-    topFiveDelegators,
-    currentVotingPower: currentVotingPowerNumber,
+    topDelegators: delegators,
+    currentVotingPower: Number(
+      formatUnits(BigInt(delegateCurrentVotingPower), decimals),
+    ),
     loading,
     chartConfig,
     pieData,
