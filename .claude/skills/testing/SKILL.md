@@ -1,10 +1,14 @@
+---
+name: testing
+description: Testing guidelines for Anticapture (pyramid, AAA, doubles, coverage, determinism)
+user-invocable: false
+---
+
 # Testing Guidelines
 
 Follow these rules when writing tests for the Anticapture project.
 
----
-
-## Rule 1: Test Pyramid
+## Test Pyramid
 
 Follow the test pyramid strategy with three test types.
 **Target ratio:** ~70% unit, ~20% integration, ~10% E2E
@@ -24,9 +28,7 @@ Follow the test pyramid strategy with three test types.
    - Slow and expensive to maintain
    - Reserve for high-value scenarios only
 
----
-
-## Rule 2: Test Doubles Strategy
+## Test Doubles Strategy
 
 Prefer **stubs** and **fakes** over mocks to avoid brittle tests.
 
@@ -36,12 +38,12 @@ Prefer **stubs** and **fakes** over mocks to avoid brittle tests.
 | **Fake** | Need working simplified implementation         | `InMemoryRepository`                |
 | **Mock** | Need to verify a call was made (use sparingly) | `jest.fn()` with `toHaveBeenCalled` |
 
-### Why?
+Why:
 
 - **Mocks verify implementation** → tests break on refactor
 - **Stubs/Fakes verify behavior** → tests survive refactor
 
-### Example
+Example:
 
 ```typescript
 // ❌ Avoid: mock that verifies implementation
@@ -55,13 +57,9 @@ expect(result.name).toBe("vitalik.eth");
 
 Exception: Use mocks when the call itself IS the behavior (e.g., verifying an event was emitted, an email was sent).
 
----
-
-## Rule 3: Arrange-Act-Assert (AAA) Pattern
+## Arrange-Act-Assert (AAA) Pattern
 
 Structure every test using AAA for readability and consistency. **Do not write `// Arrange`, `// Act`, `// Assert` comments** — use blank lines to separate sections visually.
-
-### Structure
 
 ```typescript
 it("should calculate delegation percentage", async () => {
@@ -74,38 +72,34 @@ it("should calculate delegation percentage", async () => {
 });
 ```
 
----
-
-## Rule 4: Test Coverage Policy
+## Test Coverage Policy
 
 Write tests for all new business logic. There is no minimum coverage enforced in CI.
 
-### What must have tests:
+What must have tests:
 
 - Services and their business rules
 - Utility functions (`lib/`)
 - Calculations (voting power, percentages, etc.)
 - Data transformations (mappers)
 
-### What may not have tests:
+What may not have tests:
 
 - Infrastructure/boilerplate code
 - UI components (nice-to-have, not required)
 - Configuration and wiring
 
-> **Philosophy:** High coverage doesn't mean well-tested code. 100% coverage with bad tests is worse than 60% coverage with meaningful tests.
+**Philosophy:** High coverage doesn't mean well-tested code. 100% coverage with bad tests is worse than 60% coverage with meaningful tests.
 
----
-
-## Rule 5: Test Happy Paths and Break Your Code
+## Test Happy Paths and Break Your Code
 
 Cover the **happy path** first, then actively try to break your code.
 
-### Mindset
+Mindset:
 
 Don't just prove the code works — **try to break it**. Think like a malicious user or an unstable system.
 
-### Common edge cases to consider:
+Common edge cases to consider:
 
 | Category                 | Examples                                             |
 | ------------------------ | ---------------------------------------------------- |
@@ -116,7 +110,7 @@ Don't just prove the code works — **try to break it**. Think like a malicious 
 | **Strings**              | Unicode, whitespace, special characters              |
 | **Concurrency**          | Missing data, unexpected order                       |
 
-### Example
+Example:
 
 ```typescript
 // ❌ Happy path only
@@ -138,13 +132,11 @@ it("should handle when value exceeds total", () => {
 });
 ```
 
----
-
-## Rule 6: Deterministic Tests
+## Deterministic Tests
 
 Write tests that produce the **same result every time**, in any environment, in any order.
 
-### Never depend on:
+Never depend on:
 
 - Execution order between tests
 - System date/time (`Date.now()`)
@@ -152,7 +144,7 @@ Write tests that produce the **same result every time**, in any environment, in 
 - Randomness without a fixed seed
 - Shared global state
 
-### How to handle dates
+How to handle dates:
 
 ```typescript
 // ❌ Non-deterministic
@@ -169,7 +161,7 @@ afterEach(() => {
 });
 ```
 
-### How to ensure isolation
+How to ensure isolation:
 
 ```typescript
 // ✅ Each test creates its own data
@@ -184,11 +176,9 @@ it("should find the account", () => {
 });
 ```
 
----
-
 ## Useful Tools
 
-### 1. Testing HTTP (Hono)
+### Testing HTTP (Hono)
 
 Use Hono's native test client:
 
@@ -207,7 +197,7 @@ it("should return proposals", async () => {
 });
 ```
 
-### 2. Test Database
+### Test Database
 
 Use Testcontainers for real PostgreSQL in Docker:
 
@@ -227,7 +217,7 @@ afterAll(async () => {
 });
 ```
 
-### 3. External APIs
+### External APIs
 
 Use MSW (Mock Service Worker) to intercept HTTP requests:
 
@@ -248,11 +238,9 @@ afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 ```
 
----
-
 ## Important Patterns
 
-### 1. Test Data Builders / Factories
+### Test Data Builders / Factories
 
 ```ts
 // factories/proposal.ts
@@ -272,7 +260,7 @@ const proposal = createProposal({ status: "executed" });
 await db.insert(proposals).values(proposal);
 ```
 
-### 2. Database Seeding
+### Database Seeding
 
 ```ts
 async function seedTestData() {
