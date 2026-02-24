@@ -1,13 +1,5 @@
-query getDelegationsTimestamp(
-  $delegate: String!
-  $orderBy: queryInput_delegations_orderBy = timestamp
-  $orderDirection: queryInput_delegations_orderDirection = desc
-) {
-  delegations(
-    address: $delegate
-    orderBy: $orderBy
-    orderDirection: $orderDirection
-  ) {
+query getDelegationsTimestamp($delegate: String!) {
+  delegations(address: $delegate) {
     items {
       delegatorAddress
       delegateAddress
