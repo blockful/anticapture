@@ -160,10 +160,10 @@ type Query {
   accountBalanceVariationsByAccountId(address: String!, fromDate: String, toDate: String): accountBalanceVariationsByAccountId_200_response
 
   """Returns sorted and paginated account balance records"""
-  accountBalances(limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalances_orderDirection = desc, addresses: JSON, delegates: JSON, fromValue: String, toValue: String): accountBalances_200_response
+  accountBalances(fromDate: String, toDate: String, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalances_orderDirection = desc, orderBy: queryInput_accountBalances_orderBy = balance, addresses: JSON, delegates: JSON, fromValue: String, toValue: String): accountBalances_200_response
 
   """Returns account balance information for a specific address"""
-  accountBalanceByAccountId(address: String!): accountBalanceByAccountId_200_response
+  accountBalanceByAccountId(address: String!, fromDate: String, toDate: String): accountBalanceByAccountId_200_response
 
   """
   Returns a mapping of the largest interactions between accounts. 
@@ -1123,6 +1123,7 @@ type query_accountBalanceVariationsByAccountId_data {
 type accountBalances_200_response {
   items: [query_accountBalances_items_items]!
   totalCount: Float!
+  period: query_accountBalances_period!
 }
 
 type query_accountBalances_items_items {
@@ -1130,6 +1131,7 @@ type query_accountBalances_items_items {
   balance: String!
   tokenId: String!
   delegate: String!
+  variation: query_accountBalances_items_items_variation!
 }
 
 enum queryInput_accountBalances_orderDirection {
@@ -1142,6 +1144,8 @@ type accountBalanceByAccountId_200_response {
   balance: String!
   tokenId: String!
   delegate: String!
+  data: query_accountBalanceByAccountId_data!
+  period: query_accountBalanceByAccountId_period!
 }
 
 type accountInteractions_200_response {
@@ -1311,6 +1315,41 @@ enum queryInput_tokenMetrics_metricType {
 enum queryInput_tokenMetrics_orderDirection {
   asc
   desc
+}
+
+type query_accountBalances_items_items_variation {
+  previousBalance: String!
+  absoluteChange: String!
+  percentageChange: String!
+}
+
+type query_accountBalances_period {
+  startTimestamp: String!
+  endTimestamp: String!
+}
+
+enum queryInput_accountBalances_orderBy {
+  balance
+  variation
+}
+
+type query_accountBalanceByAccountId_data {
+  address: String!
+  balance: String!
+  tokenId: String!
+  delegate: String!
+  variation: query_accountBalanceByAccountId_data_variation!
+}
+
+type query_accountBalanceByAccountId_data_variation {
+  previousBalance: String!
+  absoluteChange: String!
+  percentageChange: String!
+}
+
+type query_accountBalanceByAccountId_period {
+  startTimestamp: String!
+  endTimestamp: String!
 }
 
 type AverageDelegationPercentageItem {
