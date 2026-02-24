@@ -3,8 +3,6 @@ import { getAddress, isAddress } from "viem";
 
 import { delegation } from "@/database";
 
-import { DelegationItem, DelegationsResponse } from "./historical";
-
 export type DBDelegation = typeof delegation.$inferSelect;
 
 export const DelegationsRequestParamsSchema = z.object({
