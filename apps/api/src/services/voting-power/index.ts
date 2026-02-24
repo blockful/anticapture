@@ -58,6 +58,8 @@ interface VotingPowersRepository {
 
   getVotingPowersByAccountId(
     accountId: Address,
+    fromDate?: number,
+    toDate?: number,
   ): Promise<DBAccountPowerWithVariation>;
 }
 
@@ -178,7 +180,13 @@ export class VotingPowerService {
 
   async getVotingPowersByAccountId(
     accountId: Address,
+    fromDate?: number,
+    toDate?: number,
   ): Promise<DBAccountPowerWithVariation> {
-    return this.votingPowerRepository.getVotingPowersByAccountId(accountId);
+    return this.votingPowerRepository.getVotingPowersByAccountId(
+      accountId,
+      fromDate,
+      toDate,
+    );
   }
 }

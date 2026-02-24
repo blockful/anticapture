@@ -79,6 +79,10 @@ export function votingPowers(app: Hono, service: VotingPowerService) {
             .refine((addr) => isAddress(addr, { strict: false }))
             .transform((addr) => getAddress(addr)),
         }),
+        query: z.object({
+          fromDate: z.coerce.number().optional(),
+          toDate: z.coerce.number().optional(),
+        }),
       },
       responses: {
         200: {
@@ -93,7 +97,12 @@ export function votingPowers(app: Hono, service: VotingPowerService) {
     }),
     async (context) => {
       const { accountId } = context.req.valid("param");
-      const result = await service.getVotingPowersByAccountId(accountId);
+      const { fromDate, toDate } = context.req.valid("query");
+      const result = await service.getVotingPowersByAccountId(
+        accountId,
+        fromDate,
+        toDate,
+      );
       return context.json(VotingPowerMapper(result));
     },
   );

@@ -34,6 +34,9 @@ class FakeVotingPowersRepository {
   private items: DBAccountPowerWithVariation[] = [];
   private totalCount = 0;
   private singleAccount: DBAccountPowerWithVariation | null = null;
+  lastAccountId: Address | null = null;
+  lastFromDate: number | undefined;
+  lastToDate: number | undefined;
 
   setData(items: DBAccountPowerWithVariation[], totalCount?: number) {
     this.items = items;
@@ -62,7 +65,12 @@ class FakeVotingPowersRepository {
 
   async getVotingPowersByAccountId(
     accountId: Address,
+    fromDate?: number,
+    toDate?: number,
   ): Promise<DBAccountPowerWithVariation> {
+    this.lastAccountId = accountId;
+    this.lastFromDate = fromDate;
+    this.lastToDate = toDate;
     if (this.singleAccount) return this.singleAccount;
     return createAccountPower({
       accountId,
@@ -376,6 +384,20 @@ describe("Voting Powers Controller - Integration Tests", () => {
         absoluteChange: "-300",
         percentageChange: -37.5,
       });
+    });
+
+    it("should pass fromDate and toDate query parameters", async () => {
+      const account = createAccountPower({ accountId: TEST_ACCOUNT_1 });
+      fakeRepo.setSingleAccount(account);
+
+      const res = await app.request(
+        `/voting-powers/${TEST_ACCOUNT_1}?fromDate=1700000000&toDate=1701000000`,
+      );
+
+      expect(res.status).toBe(200);
+      expect(fakeRepo.lastAccountId).toBe(TEST_ACCOUNT_1);
+      expect(fakeRepo.lastFromDate).toBe(1700000000);
+      expect(fakeRepo.lastToDate).toBe(1701000000);
     });
 
     it("should return 400 for invalid address format", async () => {

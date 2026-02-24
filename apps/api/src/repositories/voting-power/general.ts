@@ -371,6 +371,8 @@ export class VotingPowerRepository {
 
   async getVotingPowersByAccountId(
     accountId: Address,
+    fromDate?: number,
+    toDate?: number,
   ): Promise<DBAccountPowerWithVariation> {
     const variationSubquery = this.db
       .select({
@@ -380,7 +382,17 @@ export class VotingPowerRepository {
         ),
       })
       .from(votingPowerHistory)
-      .where(eq(votingPowerHistory.accountId, accountId))
+      .where(
+        and(
+          eq(votingPowerHistory.accountId, accountId),
+          fromDate
+            ? gte(votingPowerHistory.timestamp, BigInt(fromDate))
+            : undefined,
+          toDate
+            ? lte(votingPowerHistory.timestamp, BigInt(toDate))
+            : undefined,
+        ),
+      )
       .groupBy(votingPowerHistory.accountId)
       .as("variation");
 
@@ -393,8 +405,7 @@ export class VotingPowerRepository {
         proposalsCount: accountPower.proposalsCount,
         delegationsCount: accountPower.delegationsCount,
         lastVoteTimestamp: accountPower.lastVoteTimestamp,
-        absoluteChange:
-          sql<bigint>`COALESCE(${variationSubquery.absoluteChange}, 0)`,
+        absoluteChange: sql<bigint>`COALESCE(${variationSubquery.absoluteChange}, 0)`,
         percentageChange: sql<number>`
           CASE
             WHEN (${accountPower.votingPower} - COALESCE(${variationSubquery.absoluteChange}, 0)) = 0 THEN 0
@@ -438,10 +449,14 @@ export class VotingPowerRepository {
       conditions.push(inArray(accountPower.accountId, addresses));
     }
     if (amountfilter.minAmount) {
-      conditions.push(gt(accountPower.votingPower, BigInt(amountfilter.minAmount)));
+      conditions.push(
+        gt(accountPower.votingPower, BigInt(amountfilter.minAmount)),
+      );
     }
     if (amountfilter.maxAmount) {
-      conditions.push(lt(accountPower.votingPower, BigInt(amountfilter.maxAmount)));
+      conditions.push(
+        lt(accountPower.votingPower, BigInt(amountfilter.maxAmount)),
+      );
     }
 
     return conditions.length ? and(...conditions) : sql`true`;

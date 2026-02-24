@@ -284,6 +284,24 @@ describe("VotingPowerRepository - getVotingPowersByAccountId", () => {
     expect(result.absoluteChange).toBe(200n);
   });
 
+  it("should filter history by fromDate and toDate for the account", async () => {
+    await db.insert(accountPower).values(createAccountPowerRow({ votingPower: 1000n }));
+    await db.insert(votingPowerHistory).values([
+      createHistoryRow({ delta: 100n, timestamp: 1699000000n, logIndex: 0 }),
+      createHistoryRow({ delta: 200n, timestamp: 1700500000n, logIndex: 1, transactionHash: "0xtx2" }),
+      createHistoryRow({ delta: 400n, timestamp: 1702000000n, logIndex: 2, transactionHash: "0xtx3" }),
+    ]);
+
+    const result = await repository.getVotingPowersByAccountId(
+      TEST_ACCOUNT_1,
+      1700000000,
+      1701000000,
+    );
+
+    expect(result.absoluteChange).toBe(200n);
+    expect(result.percentageChange).toBe(25);
+  });
+
   it("should not include history from other accounts", async () => {
     await db.insert(accountPower).values([
       createAccountPowerRow({ accountId: TEST_ACCOUNT_1, votingPower: 1000n }),
