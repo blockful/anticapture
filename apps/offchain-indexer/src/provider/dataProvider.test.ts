@@ -104,13 +104,22 @@ describe("SnapshotProvider", () => {
 
       const result = await provider.fetchProposals(null);
 
-      expect(result.data[0]?.body).toBe("");
-      expect(result.data[0]?.discussion).toBe("");
-      expect(result.data[0]?.type).toBe("single-choice");
-      expect(result.data[0]?.state).toBe("closed");
-      expect(result.data[0]?.updated).toBe(1700000000);
-      expect(result.data[0]?.link).toBe("");
-      expect(result.data[0]?.flagged).toBe(false);
+      expect(result.data[0]).toStrictEqual({
+        "author": "0xabc",
+        "body": "",
+        "created": 1700000000,
+        "discussion": "",
+        "end": 1700100000,
+        "flagged": false,
+        "id": "proposal-1",
+        "link": "",
+        "spaceId": "ens.eth",
+        "start": 1700000000,
+        "state": "closed",
+        "title": "Test Proposal",
+        "type": "single-choice",
+        "updated": 1700000000,
+      })
     });
   });
 
