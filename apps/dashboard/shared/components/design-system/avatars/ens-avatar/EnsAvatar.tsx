@@ -6,6 +6,7 @@ import Blockies from "react-blockies";
 import { Address } from "viem";
 
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
+import { AddressDetailsTooltip } from "@/shared/components/tooltips/AddressDetailsTooltip";
 import { useEnsData } from "@/shared/hooks/useEnsData";
 import { cn } from "@/shared/utils/cn";
 import { formatAddress } from "@/shared/utils/formatAddress";
@@ -170,7 +171,7 @@ export const EnsAvatar = ({
   }
 
   // Return avatar with name
-  return (
+  const avatarWithName = (
     <div className={cn("flex min-w-0 items-center gap-2", containerClassName)}>
       {avatarElement()}
 
@@ -198,4 +199,14 @@ export const EnsAvatar = ({
       </div>
     </div>
   );
+
+  if (address) {
+    return (
+      <AddressDetailsTooltip address={address}>
+        {avatarWithName}
+      </AddressDetailsTooltip>
+    );
+  }
+
+  return avatarWithName;
 };
