@@ -5,7 +5,7 @@ export const GOVERNANCE_IMPLEMENTATION_CONSTANTS = {
     description:
       "The governance contract codes have been audited and approved by a security provider.",
   },
-  [GovernanceImplementationEnum.INTERFACE_HIJACK]: {
+  [GovernanceImplementationEnum.INTERFACE_RESILIENCE]: {
     description:
       "Protection against Domain Name Service attacks on the domains/websites used by the DAO.",
   },
@@ -23,10 +23,6 @@ export const GOVERNANCE_IMPLEMENTATION_CONSTANTS = {
   [GovernanceImplementationEnum.PROPOSER_BALANCE_CANCEL]: {
     description:
       "Allow for any user to cancel the proposer of an address if that address no longer holds the necessary voting power to pass proposal threshold while their proposal is still active.",
-  },
-  [GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL]: {
-    description:
-      "Whether a proposal may be canceled if the wallet that submitted it no longer has the number of governance tokens required to reach the proposal threshold.",
   },
   [GovernanceImplementationEnum.SECURITY_COUNCIL]: {
     description:

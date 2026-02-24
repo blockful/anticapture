@@ -60,6 +60,7 @@ import {
   HistoricalDelegationsRepository,
   VotesRepository,
   FeedRepository,
+  AccountBalanceQueryFragments,
 } from "@/repositories";
 import {
   AccountBalanceService,
@@ -132,6 +133,7 @@ const optimisticProposalType =
     : undefined;
 
 const repo = new DrizzleRepository(pgClient);
+const balanceQueryFragments = new AccountBalanceQueryFragments(pgClient);
 const votingPowerRepo = new VotingPowerRepository(pgClient);
 const proposalsRepo = new DrizzleProposalsActivityRepository(pgClient);
 const transactionsRepo = new TransactionsRepository(pgClient);
@@ -140,9 +142,15 @@ const delegationPercentageService = new DelegationPercentageService(
   daoMetricsDayBucketRepo,
 );
 const tokenMetricsService = new TokenMetricsService(daoMetricsDayBucketRepo);
-const balanceVariationsRepo = new BalanceVariationsRepository(pgClient);
+const balanceVariationsRepo = new BalanceVariationsRepository(
+  pgClient,
+  balanceQueryFragments,
+);
 const historicalBalancesRepo = new HistoricalBalanceRepository(pgClient);
-const accountBalanceRepo = new AccountBalanceRepository(pgClient);
+const accountBalanceRepo = new AccountBalanceRepository(
+  pgClient,
+  balanceQueryFragments,
+);
 const accountInteractionRepo = new AccountInteractionsRepository(pgClient);
 const transactionsService = new TransactionsService(transactionsRepo);
 const votingPowerService = new VotingPowerService(

@@ -46,7 +46,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
 
   const daoRiskAreas = getDaoRiskAreas(daoId);
   const riskAreas = {
-    title: "RISK AREAS",
+    title: "Attack Exposure",
     risks: Object.entries(daoRiskAreas).map(([name, info]) => ({
       name,
       level: info.riskLevel,

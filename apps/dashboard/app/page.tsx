@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
+import { PanelSection } from "@/features/panel";
 import { Footer } from "@/shared/components/design-system/footer/Footer";
-import { HomeTemplate } from "@/templates";
 import { HeaderSidebar } from "@/widgets";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
 
@@ -32,7 +32,7 @@ export default function Home() {
         </div>
         <div className="flex min-h-screen w-full flex-col items-center">
           <div className="w-full flex-1">
-            <HomeTemplate />
+            <PanelSection />
           </div>
           <Footer />
         </div>

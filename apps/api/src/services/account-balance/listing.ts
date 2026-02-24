@@ -2,23 +2,30 @@ import { Address } from "viem";
 
 import { TreasuryAddresses } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
-import { AmountFilter, DBAccountBalance } from "@/mappers";
+import { AmountFilter, DBAccountBalanceWithVariation } from "@/mappers";
 
 interface AccountBalanceRepository {
-  getAccountBalances(
+  getAccountBalancesWithVariation(
+    variationFromTimestamp: number,
+    variationToTimestamp: number,
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
+    orderBy: "balance" | "variation",
     addresses: Address[],
     delegates: Address[],
     excludeAddresses: Address[],
     amountfilter: AmountFilter,
   ): Promise<{
-    items: DBAccountBalance[];
+    items: DBAccountBalanceWithVariation[];
     totalCount: bigint;
   }>;
 
-  getAccountBalance(accountId: Address): Promise<DBAccountBalance | undefined>;
+  getAccountBalanceWithVariation(
+    accountId: Address,
+    variationFromTimestamp: number,
+    variationToTimestamp: number,
+  ): Promise<DBAccountBalanceWithVariation | undefined>;
 }
 
 export class AccountBalanceService {
@@ -26,22 +33,27 @@ export class AccountBalanceService {
 
   async getAccountBalances(
     daoId: DaoIdEnum,
+    variationFromTimestamp: number,
+    variationToTimestamp: number,
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
+    orderBy: "balance" | "variation",
     addresses: Address[],
     delegates: Address[],
     amountFilter: AmountFilter,
   ): Promise<{
-    items: DBAccountBalance[];
+    items: DBAccountBalanceWithVariation[];
     totalCount: bigint;
   }> {
     const excludeAddresses = Object.values(TreasuryAddresses[daoId]);
-
-    return await this.repo.getAccountBalances(
+    return await this.repo.getAccountBalancesWithVariation(
+      variationFromTimestamp,
+      variationToTimestamp,
       skip,
       limit,
       orderDirection,
+      orderBy,
       addresses,
       delegates,
       excludeAddresses,
@@ -49,8 +61,16 @@ export class AccountBalanceService {
     );
   }
 
-  async getAccountBalance(accountId: Address): Promise<DBAccountBalance> {
-    const result = await this.repo.getAccountBalance(accountId);
+  async getAccountBalanceWithVariation(
+    accountId: Address,
+    variationFromTimestamp: number,
+    variationToTimestamp: number,
+  ): Promise<DBAccountBalanceWithVariation> {
+    const result = await this.repo.getAccountBalanceWithVariation(
+      accountId,
+      variationFromTimestamp,
+      variationToTimestamp,
+    );
 
     if (!result) {
       throw new Error("Account not found");
