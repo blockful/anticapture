@@ -110,9 +110,11 @@ export function AddressDetailsTooltip({
             <SkeletonLine className="h-5 w-10 rounded-full" />
           </div>
         ) : (
-          <div className="flex flex-wrap gap-1">
-            {arkham?.entityType && (
+          <div className="flex flex-wrap items-center gap-1">
+            {arkham?.entityType ? (
               <BadgeStatus variant="secondary">{arkham.entityType}</BadgeStatus>
+            ) : (
+              <NotInformed />
             )}
             <BadgeStatus variant="secondary">
               {isContract ? "Contract" : "EOA"}
