@@ -29,7 +29,7 @@ export default async function DaoLayout({ children, params }: DaoLayoutProps) {
   return (
     <div className="bg-surface-background dark relative mx-auto flex h-screen max-w-screen-2xl">
       <div className="active relative hidden h-screen lg:flex">
-        <div className="h-full w-[68px] shrink-0 overflow-y-auto">
+        <div className="w-17 h-full shrink-0 overflow-y-auto">
           <HeaderSidebar />
         </div>
         <div className="h-full shrink-0">
@@ -41,7 +41,7 @@ export default async function DaoLayout({ children, params }: DaoLayoutProps) {
           <HeaderMobile />
           <StickyPageHeader />
         </div>
-        <div className="flex w-full flex-col items-center overflow-y-scroll lg:h-screen">
+        <div className="flex w-full flex-col items-center lg:h-screen">
           <div className="w-full flex-1">{children}</div>
           <Footer />
         </div>
