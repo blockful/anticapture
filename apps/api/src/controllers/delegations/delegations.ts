@@ -41,7 +41,12 @@ export function delegations(app: Hono, service: DelegationsService) {
         orderDirection,
       });
 
-      return context.json(DelegationsResponseSchema.parse(result));
+      return context.json(
+        DelegationsResponseSchema.parse({
+          items: result,
+          totalCount: result.length,
+        }),
+      );
     },
   );
 }
