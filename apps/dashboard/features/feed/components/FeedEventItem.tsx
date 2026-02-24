@@ -179,6 +179,7 @@ export const FeedEventItem = ({
                     : "Abstain"}
               </span>{" "}
             </span>
+            <span className="text-secondary">on proposal</span>{" "}
             <Link
               href={
                 config?.governancePage
@@ -187,11 +188,12 @@ export const FeedEventItem = ({
               }
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary font-medium transition-colors"
+              className="text-primary hover:text-link font-medium transition-colors"
             >
-              {event.metadata.proposalId.length > 10
-                ? `${event.metadata.proposalId.slice(0, 6)}...${event.metadata.proposalId.slice(-4)}`
-                : event.metadata.proposalId}
+              {event.metadata.title ||
+                (event.metadata.proposalId.length > 10
+                  ? `${event.metadata.proposalId.slice(0, 6)}...${event.metadata.proposalId.slice(-4)}`
+                  : event.metadata.proposalId)}
             </Link>{" "}
             <a
               href={explorerUrl}
