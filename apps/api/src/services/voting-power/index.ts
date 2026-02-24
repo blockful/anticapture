@@ -4,7 +4,7 @@ import {
   DBHistoricalVotingPowerWithRelations,
   DBVotingPowerVariation,
   AmountFilter,
-  DBAccountPower,
+  DBAccountPowerWithVariation,
 } from "@/mappers";
 
 interface HistoricalVotingPowerRepository {
@@ -49,12 +49,18 @@ interface VotingPowersRepository {
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
-    orderBy: "votingPower" | "delegationsCount",
+    orderBy: "votingPower" | "delegationsCount" | "variation",
     amountFilter: AmountFilter,
     addresses: Address[],
-  ): Promise<{ items: DBAccountPower[]; totalCount: number }>;
+    fromDate?: number,
+    toDate?: number,
+  ): Promise<{ items: DBAccountPowerWithVariation[]; totalCount: number }>;
 
-  getVotingPowersByAccountId(accountId: Address): Promise<DBAccountPower>;
+  getVotingPowersByAccountId(
+    accountId: Address,
+    fromDate?: number,
+    toDate?: number,
+  ): Promise<DBAccountPowerWithVariation>;
 }
 
 export class VotingPowerService {
@@ -154,10 +160,12 @@ export class VotingPowerService {
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
-    orderBy: "votingPower" | "delegationsCount",
+    orderBy: "votingPower" | "delegationsCount" | "variation",
     amountFilter: AmountFilter,
     addresses: Address[],
-  ): Promise<{ items: DBAccountPower[]; totalCount: number }> {
+    fromDate?: number,
+    toDate?: number,
+  ): Promise<{ items: DBAccountPowerWithVariation[]; totalCount: number }> {
     return this.votingPowerRepository.getVotingPowers(
       skip,
       limit,
@@ -165,12 +173,20 @@ export class VotingPowerService {
       orderBy,
       amountFilter,
       addresses,
+      fromDate,
+      toDate,
     );
   }
 
   async getVotingPowersByAccountId(
     accountId: Address,
-  ): Promise<DBAccountPower> {
-    return this.votingPowerRepository.getVotingPowersByAccountId(accountId);
+    fromDate?: number,
+    toDate?: number,
+  ): Promise<DBAccountPowerWithVariation> {
+    return this.votingPowerRepository.getVotingPowersByAccountId(
+      accountId,
+      fromDate,
+      toDate,
+    );
   }
 }

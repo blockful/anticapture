@@ -53,6 +53,14 @@ export function getDaoRiskAreas(
     let lowRiskCount = 0;
 
     for (const govImplItem of requiredGovImplItems) {
+      // Skip ATTACK_PROFITABILITY if the DAO doesn't have liquid treasury data
+      if (
+        govImplItem === GovernanceImplementationEnum.ATTACK_PROFITABILITY &&
+        !daoConfig.attackProfitability?.supportsLiquidTreasuryCall
+      ) {
+        continue;
+      }
+
       if (govImplFields[govImplItem]) {
         govImplItems[govImplItem] = govImplFields[govImplItem];
 

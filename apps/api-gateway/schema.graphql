@@ -20,8 +20,11 @@ type Query {
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/accounts/{args.address}/delegations/historical`\nGet historical delegations for an account, with optional filtering and sorting\n"
   historicalDelegations(address: String!, delegateAddressIn: JSON, skip: NonNegativeInt, limit: PositiveInt = 10, fromValue: String, toValue: String, orderDirection: queryInput_historicalDelegations_orderDirection = desc): historicalDelegations_200_response
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/accounts/{args.address}/delegations`\nGet current delegators of an account\n"
-  delegations(address: String!): delegations_200_response
+  """Get current delegators of an account"""
+  delegations(address: String!, orderBy: queryInput_delegations_orderBy = timestamp, orderDirection: queryInput_delegations_orderDirection = desc): delegations_200_response
+
+  """Get current delegators of an account with voting power"""
+  delegators(address: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_delegators_orderBy = amount, orderDirection: queryInput_delegators_orderDirection = desc): delegators_200_response
 
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/treasury/liquid`\nGet historical Liquid Treasury (treasury without DAO tokens) from external providers (DefiLlama/Dune)\n"
   getLiquidTreasury(days: queryInput_getLiquidTreasury_days = _365d, order: queryInput_getLiquidTreasury_order = asc): getLiquidTreasury_200_response
@@ -126,11 +129,11 @@ type Query {
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/accounts/{args.address}/voting-powers/variations`\nReturns a the changes to voting power by period and accountId\n"
   votingPowerVariationsByAccountId(address: String!, fromDate: String, toDate: String): votingPowerVariationsByAccountId_200_response
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/voting-powers`\nReturns sorted and paginated account voting power records\n"
-  votingPowers(limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_votingPowers_orderDirection = desc, orderBy: queryInput_votingPowers_orderBy = votingPower, addresses: JSON, fromValue: String, toValue: String): votingPowers_200_response
+  """Returns sorted and paginated account voting power records"""
+  votingPowers(limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_votingPowers_orderDirection = desc, orderBy: queryInput_votingPowers_orderBy = votingPower, addresses: JSON, fromValue: String, toValue: String, fromDate: String, toDate: String): votingPowers_200_response
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/voting-powers/{args.accountId}`\nReturns voting power information for a specific address (account)\n"
-  votingPowerByAccountId(accountId: String!): votingPowerByAccountId_200_response
+  """Returns voting power information for a specific address (account)"""
+  votingPowerByAccountId(accountId: String!, fromDate: Float, toDate: Float): votingPowerByAccountId_200_response
 
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/balances/variations`\nReturns a mapping of the biggest variations to account balances associated by account address\n"
   accountBalanceVariations(fromDate: String, toDate: String, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalanceVariations_orderDirection = desc, addresses: JSON): accountBalanceVariations_200_response
@@ -301,6 +304,37 @@ type query_delegations_items_items {
   amount: String!
   timestamp: String!
   transactionHash: String!
+}
+
+enum queryInput_delegations_orderBy {
+  amount
+  timestamp
+}
+
+enum queryInput_delegations_orderDirection {
+  asc
+  desc
+}
+
+type delegators_200_response {
+  items: [query_delegators_items_items]!
+  totalCount: Float!
+}
+
+type query_delegators_items_items {
+  delegatorAddress: String!
+  amount: String!
+  timestamp: String!
+}
+
+enum queryInput_delegators_orderBy {
+  amount
+  timestamp
+}
+
+enum queryInput_delegators_orderDirection {
+  asc
+  desc
 }
 
 type getLiquidTreasury_200_response {
@@ -991,6 +1025,12 @@ type query_votingPowers_items_items {
   votesCount: Float!
   proposalsCount: Float!
   delegationsCount: Float!
+  variation: query_votingPowers_items_items_variation!
+}
+
+type query_votingPowers_items_items_variation {
+  absoluteChange: String!
+  percentageChange: Float!
 }
 
 enum queryInput_votingPowers_orderDirection {
@@ -1001,6 +1041,7 @@ enum queryInput_votingPowers_orderDirection {
 enum queryInput_votingPowers_orderBy {
   votingPower
   delegationsCount
+  variation
 }
 
 type votingPowerByAccountId_200_response {
@@ -1009,6 +1050,12 @@ type votingPowerByAccountId_200_response {
   votesCount: Float!
   proposalsCount: Float!
   delegationsCount: Float!
+  variation: query_votingPowerByAccountId_variation!
+}
+
+type query_votingPowerByAccountId_variation {
+  absoluteChange: String!
+  percentageChange: Float!
 }
 
 type accountBalanceVariations_200_response {
