@@ -48,6 +48,14 @@ function SkeletonLine({ className }: { className?: string }) {
   );
 }
 
+const UPPERCASE_ENTITY_TYPES = new Set(["cex", "dex"]);
+
+function formatEntityType(type: string) {
+  return UPPERCASE_ENTITY_TYPES.has(type.toLowerCase())
+    ? type.toUpperCase()
+    : type;
+}
+
 function NotInformed() {
   return <span className="text-secondary text-sm leading-5">Not informed</span>;
 }
@@ -117,7 +125,9 @@ export function AddressDetailsTooltip({
         ) : (
           <div className="flex flex-wrap items-center gap-1">
             {arkham?.entityType ? (
-              <BadgeStatus variant="secondary">{arkham.entityType}</BadgeStatus>
+              <BadgeStatus variant="secondary">
+                {formatEntityType(arkham.entityType)}
+              </BadgeStatus>
             ) : (
               <NotInformed />
             )}

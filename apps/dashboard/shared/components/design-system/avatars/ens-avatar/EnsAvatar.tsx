@@ -186,7 +186,10 @@ export const EnsAvatar = ({
         arkham?.twitter && `@${arkham.twitter}`,
         ensData?.ens,
         address && formatAddress(address),
-        arkham?.entityType,
+        arkham?.entityType &&
+          (["cex", "dex"].includes(arkham.entityType.toLowerCase())
+            ? arkham.entityType.toUpperCase()
+            : arkham.entityType),
         isContract !== null ? (isContract ? "Contract" : "EOA") : null,
       ].filter(Boolean)
     : [];
