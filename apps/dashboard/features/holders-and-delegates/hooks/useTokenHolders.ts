@@ -1,22 +1,29 @@
 "use client";
 
-import { QueryInput_AccountBalances_OrderDirection } from "@anticapture/graphql-client";
+import {
+  QueryInput_AccountBalances_OrderBy,
+  QueryInput_AccountBalances_OrderDirection,
+} from "@anticapture/graphql-client";
 import { useGetTopTokenHoldersQuery } from "@anticapture/graphql-client/hooks";
 import { NetworkStatus } from "@apollo/client";
 import { useMemo, useCallback, useState, useEffect } from "react";
 
-import { useHistoricalBalances } from "@/shared/hooks/graphql-client/useHistoricalBalances";
+import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
+
+export interface TokenHolderVariation {
+  previousBalance: string;
+  absoluteChange: string;
+  percentageChange: string;
+}
 
 export interface TokenHolder {
   accountId: string;
   balance: string;
   delegate: string;
   tokenId: string;
-  account?: {
-    type: string;
-  } | null;
+  variation: TokenHolderVariation | null;
 }
 
 interface PaginationInfo {
@@ -40,14 +47,12 @@ interface UseTokenHoldersResult {
   fetchNextPage: () => Promise<void>;
   fetchPreviousPage: () => Promise<void>;
   fetchingMore: boolean;
-  isHistoricalLoadingFor: (address: string) => boolean;
-  historicalBalancesCache: Map<string, string>;
 }
 
 interface UseTokenHoldersParams {
   daoId: DaoIdEnum;
-  address: string | null;
-  orderBy?: string;
+  address?: string;
+  orderBy?: QueryInput_AccountBalances_OrderBy;
   orderDirection?: QueryInput_AccountBalances_OrderDirection;
   limit?: number;
   days: TimeInterval;
@@ -55,7 +60,7 @@ interface UseTokenHoldersParams {
 
 export const useTokenHolders = ({
   daoId,
-  orderBy = "balance",
+  orderBy = QueryInput_AccountBalances_OrderBy.Balance,
   orderDirection = QueryInput_AccountBalances_OrderDirection.Desc,
   limit = 10,
   address,
@@ -63,24 +68,19 @@ export const useTokenHolders = ({
 }: UseTokenHoldersParams): UseTokenHoldersResult => {
   // Track current page - this is the source of truth for page number
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [historicalBalancesCache, setHistoricalBalancesCache] = useState<
-    Map<string, string>
-  >(new Map());
 
   // Track pagination loading state to prevent rapid clicks
   const [isPaginationLoading, setIsPaginationLoading] =
     useState<boolean>(false);
 
-  // Reset to page 1 and refetch when sorting changes (new query)
+  const fromDate = useMemo(() => {
+    return (Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[days]).toString();
+  }, [days]);
+
+  // Reset to page 1 when sorting changes (new query)
   useEffect(() => {
     setCurrentPage(1);
-    setHistoricalBalancesCache(new Map());
-  }, [orderBy, orderDirection, address]);
-
-  // Clear historical balances cache when days changes to refetch it
-  useEffect(() => {
-    setHistoricalBalancesCache(new Map());
-  }, [days]);
+  }, [orderBy, orderDirection, address, days]);
 
   const {
     data: tokenHoldersData,
@@ -93,6 +93,8 @@ export const useTokenHolders = ({
       limit,
       skip: 0,
       orderDirection,
+      orderBy,
+      fromDate,
       ...(address && { addresses: [address] }),
     },
     context: {
@@ -101,40 +103,8 @@ export const useTokenHolders = ({
       },
     },
     notifyOnNetworkStatusChange: true,
-    fetchPolicy: "cache-and-network", // Always check network for fresh data
+    fetchPolicy: "cache-and-network",
   });
-
-  const tokenHolderAddresses = useMemo(
-    () =>
-      tokenHoldersData?.accountBalances?.items
-        ?.filter((tokenHolder) => tokenHolder !== null)
-        .map((tokenHolder) => tokenHolder.address)
-        .filter(Boolean) || [],
-    [tokenHoldersData],
-  );
-
-  const newAddressesForHistoricalVP = useMemo(
-    () =>
-      tokenHolderAddresses.filter((addr) => !historicalBalancesCache.has(addr)),
-    [tokenHolderAddresses, historicalBalancesCache],
-  );
-
-  const { data: newHistoricalData, loading: historicalLoading } =
-    useHistoricalBalances(daoId, newAddressesForHistoricalVP, days);
-
-  useEffect(() => {
-    if (newHistoricalData) {
-      setHistoricalBalancesCache((prevCache) => {
-        const newCache = new Map(prevCache);
-        newHistoricalData?.forEach((h) => {
-          if (h?.accountId && h.previousBalance) {
-            newCache.set(h.accountId, h.previousBalance);
-          }
-        });
-        return newCache;
-      });
-    }
-  }, [newHistoricalData]);
 
   // Refetch data when sorting changes to ensure we start from page 1
   useEffect(() => {
@@ -142,9 +112,11 @@ export const useTokenHolders = ({
       limit,
       skip: 0,
       orderDirection,
+      orderBy,
+      fromDate,
       ...(address && { addresses: [address] }),
     });
-  }, [orderBy, orderDirection, limit, refetch, address]);
+  }, [orderBy, orderDirection, limit, refetch, address, fromDate]);
 
   const processedData = useMemo(() => {
     if (!tokenHoldersData?.accountBalances?.items) return null;
@@ -156,13 +128,15 @@ export const useTokenHolders = ({
         balance: holder.balance,
         delegate: holder.delegate,
         tokenId: holder.tokenId,
+        variation: holder.variation
+          ? {
+              previousBalance: holder.variation.previousBalance,
+              absoluteChange: holder.variation.absoluteChange,
+              percentageChange: holder.variation.percentageChange,
+            }
+          : null,
       }));
   }, [tokenHoldersData]);
-
-  const isHistoricalLoadingFor = useCallback(
-    (addr: string) => historicalLoading && !historicalBalancesCache.has(addr),
-    [historicalBalancesCache, historicalLoading],
-  );
 
   // Pagination info - combines GraphQL data with our page tracking
   const pagination = useMemo<PaginationInfo>(() => {
@@ -209,6 +183,8 @@ export const useTokenHolders = ({
           limit,
           skip,
           orderDirection,
+          orderBy,
+          fromDate,
           ...(address && { addresses: [address] }),
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
@@ -248,6 +224,8 @@ export const useTokenHolders = ({
     pagination.hasNextPage,
     limit,
     orderDirection,
+    orderBy,
+    fromDate,
     address,
     isPaginationLoading,
     tokenHoldersData?.accountBalances?.items?.length,
@@ -271,6 +249,8 @@ export const useTokenHolders = ({
           limit,
           skip,
           orderDirection,
+          orderBy,
+          fromDate,
           ...(address && { addresses: [address] }),
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
@@ -299,6 +279,8 @@ export const useTokenHolders = ({
     pagination.hasPreviousPage,
     limit,
     orderDirection,
+    orderBy,
+    fromDate,
     address,
     isPaginationLoading,
     currentPage,
@@ -328,7 +310,5 @@ export const useTokenHolders = ({
     fetchPreviousPage,
     fetchingMore:
       networkStatus === NetworkStatus.fetchMore || isPaginationLoading,
-    isHistoricalLoadingFor,
-    historicalBalancesCache,
   };
 };

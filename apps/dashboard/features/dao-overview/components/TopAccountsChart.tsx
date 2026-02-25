@@ -29,6 +29,8 @@ export interface TopAccountChartData {
   name?: string;
   latestDelegate?: string;
   totalDelegators?: number;
+  delegate?: string;
+  delegationsCount?: number;
 }
 
 export const TopAccountsChart = ({
