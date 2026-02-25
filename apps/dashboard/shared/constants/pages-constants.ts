@@ -87,4 +87,10 @@ export const PAGES_CONSTANTS = {
     title: "Terms of Service",
     anchorId: "termsSection",
   },
+  serviceProviders: {
+    title: "Service Providers",
+    page: "service-providers",
+    description:
+      "Monitor the publication status of quarterly reports from DAO-funded service providers.",
+  },
 };
