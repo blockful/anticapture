@@ -143,7 +143,7 @@ export function AddressDetailsTooltip({
   return (
     <Tooltip
       tooltipContent={content}
-      className="hidden w-[280px] rounded-none p-2 text-left md:flex"
+      className="w-[280px] rounded-none p-2 text-left"
     >
       {children}
     </Tooltip>

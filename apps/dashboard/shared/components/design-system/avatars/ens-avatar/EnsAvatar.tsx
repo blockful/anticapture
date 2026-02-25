@@ -249,15 +249,20 @@ export const EnsAvatar = ({
 
   if (address && !showTags) {
     return (
-      <AddressDetailsTooltip
-        address={address}
-        arkham={arkham}
-        ens={ensData ? { name: ensData.ens ?? null } : null}
-        isContract={isContract}
-        loading={ensLoading || arkhamLoading}
-      >
-        {avatarWithName}
-      </AddressDetailsTooltip>
+      <>
+        <span className="hidden md:contents">
+          <AddressDetailsTooltip
+            address={address}
+            arkham={arkham}
+            ens={ensData ? { name: ensData.ens ?? null } : null}
+            isContract={isContract}
+            loading={ensLoading || arkhamLoading}
+          >
+            {avatarWithName}
+          </AddressDetailsTooltip>
+        </span>
+        <span className="contents md:hidden">{avatarWithName}</span>
+      </>
     );
   }
 
