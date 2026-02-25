@@ -1,4 +1,4 @@
 export * from "./voters";
-export * from "./proposals";
+export * from "./onchainProposals";
 export * from "./offchainProposals";
 export * from "./activity";
