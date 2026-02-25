@@ -56,7 +56,7 @@ export function offchainProposals(
   app.openapi(
     createRoute({
       method: "get",
-      operationId: "offchainProposal",
+      operationId: "offchainProposalById",
       path: "/offchain/proposals/{id}",
       summary: "Get an offchain proposal by ID",
       description: "Returns a single offchain (Snapshot) proposal by its ID",
