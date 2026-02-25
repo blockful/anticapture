@@ -109,6 +109,7 @@ export const EnsAvatar = ({
     else if (address) name = showFullAddress ? address : formatAddress(address);
     else name = "Unknown";
 
+    if (showFullAddress) return name;
     return name.length > 30 ? `${name.slice(0, 30)}…` : name;
   };
 
