@@ -218,6 +218,14 @@ export const TokenHolders = ({
         </div>
       ),
       cell: ({ row }) => {
+        if (loading) {
+          return (
+            <SkeletonRow
+              parentClassName="flex animate-pulse"
+              className="h-5 w-16 rounded-full"
+            />
+          );
+        }
         return <TypeCell address={row.original.address} />;
       },
       meta: {
