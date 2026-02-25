@@ -11,3 +11,5 @@ export * from "./transfers";
 export * from "./delegations";
 export * from "./votes";
 export * from "./feed";
+export * from "./offchain-proposals";
+export * from "./offchain-votes";
