@@ -7,33 +7,31 @@
     "dev": "tsx watch src/index.ts",
     "start": "node dist/src/index.js",
     "build": "tsc",
-    "clean": "rm -rf node_modules dist schema.graphql *.tsbuildinfo",
+    "clean": "rm -rf node_modules dist *.tsbuildinfo",
     "typecheck": "tsc --noEmit",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@graphql-mesh/cli": "^0.100.4",
     "@types/jest": "^29.5.14",
+    "@types/node": "^20.0.0",
     "jest": "^29.7.0",
     "ts-jest": "^29.4.1",
     "tsx": "^4.19.4",
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@graphql-mesh/config": "^0.108.4",
-    "@graphql-mesh/graphql": "^0.104.3",
-    "@graphql-mesh/http": "^0.106.3",
-    "@graphql-mesh/openapi": "^0.109.8",
-    "@graphql-mesh/runtime": "^0.106.3",
-    "@graphql-mesh/transform-filter-schema": "^0.104.19",
-    "@graphql-mesh/transform-rename": "^0.105.7",
-    "@graphql-mesh/transform-filter-schema": "^0.104.18",
-    "@graphql-mesh/types": "^0.104.3",
+    "@hono/node-server": "^1.13.7",
     "dotenv": "^16.5.0",
-    "graphql": "^16.11.0"
+    "hono": "^4.7.0",
+    "p-retry": "^6.2.1",
+    "pino": "^9.6.0",
+    "pino-pretty": "^13.0.0",
+    "zod": "^3.24.2"
   }
 }
