@@ -51,14 +51,22 @@ export const OffchainVoteResponseSchema = z.object({
 
 export type OffchainVoteResponse = z.infer<typeof OffchainVoteResponseSchema>;
 
+export const OffchainVotesResponseSchema = z.object({
+  items: z.array(OffchainVoteResponseSchema),
+  totalCount: z.number(),
+});
+
 export const OffchainVoteMapper = {
-  toApi: (v: DBOffchainVote, proposalTitle: string): OffchainVoteResponse => ({
+  toApi: (
+    v: DBOffchainVote,
+    proposalTitle: string | null,
+  ): OffchainVoteResponse => ({
     voter: v.voter,
     proposalId: v.proposalId,
     choice: v.choice,
     vp: v.vp,
     reason: v.reason,
     created: v.created,
-    proposalTitle,
+    proposalTitle: proposalTitle ?? "Untitled Proposal",
   }),
 };

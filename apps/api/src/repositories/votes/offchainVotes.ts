@@ -15,7 +15,7 @@ export class OffchainVoteRepository {
     fromDate?: number,
     toDate?: number,
   ): Promise<{
-    items: (DBOffchainVote & { proposalTitle: string })[];
+    items: (DBOffchainVote & { proposalTitle: string | null })[];
     totalCount: number;
   }> {
     const whereClauses: SQL<unknown>[] = [];
@@ -63,7 +63,7 @@ export class OffchainVoteRepository {
     return {
       items: items.map(({ proposalTitle, ...rest }) => ({
         ...rest,
-        proposalTitle: proposalTitle ?? "Untitled Proposal",
+        proposalTitle: proposalTitle ?? null,
       })),
       totalCount,
     };
@@ -79,7 +79,7 @@ export class OffchainVoteRepository {
     fromDate?: number,
     toDate?: number,
   ): Promise<{
-    items: (DBOffchainVote & { proposalTitle: string })[];
+    items: (DBOffchainVote & { proposalTitle: string | null })[];
     totalCount: number;
   }> {
     const whereClauses: SQL<unknown>[] = [
@@ -129,7 +129,7 @@ export class OffchainVoteRepository {
     return {
       items: items.map(({ proposalTitle, ...rest }) => ({
         ...rest,
-        proposalTitle: proposalTitle ?? "Untitled Proposal",
+        proposalTitle: proposalTitle ?? null,
       })),
       totalCount,
     };

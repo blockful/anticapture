@@ -1,16 +1,11 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 
 import {
-  OffchainVoteResponseSchema,
   OffchainVoteMapper,
   OffchainVotesRequestSchema,
+  OffchainVotesResponseSchema,
 } from "@/mappers";
 import { OffchainVotesService } from "@/services";
-
-const OffchainVotesResponseSchema = z.object({
-  items: z.array(OffchainVoteResponseSchema),
-  totalCount: z.number(),
-});
 
 export function offchainVotes(app: Hono, service: OffchainVotesService) {
   app.openapi(

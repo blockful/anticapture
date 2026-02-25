@@ -10,7 +10,7 @@ interface OffchainVotesRepository {
     fromDate?: number,
     toDate?: number,
   ): Promise<{
-    items: (DBOffchainVote & { proposalTitle: string })[];
+    items: (DBOffchainVote & { proposalTitle: string | null })[];
     totalCount: number;
   }>;
   getVotesByProposalId(
@@ -23,7 +23,7 @@ interface OffchainVotesRepository {
     fromDate?: number,
     toDate?: number,
   ): Promise<{
-    items: (DBOffchainVote & { proposalTitle: string })[];
+    items: (DBOffchainVote & { proposalTitle: string | null })[];
     totalCount: number;
   }>;
 }

@@ -69,8 +69,7 @@ export const OffchainProposalsRequestSchema = z.object({
     .optional()
     .transform((val) => {
       if (!val) return undefined;
-      const normalized = typeof val === "string" ? [val] : val;
-      return normalized.map((v) => v.toUpperCase());
+      return typeof val === "string" ? [val] : val;
     }),
   fromDate: z.coerce.number().optional(),
 });
