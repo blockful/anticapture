@@ -1,4 +1,5 @@
 import { z } from "@hono/zod-openapi";
+import { isAddress, getAddress } from "viem";
 
 import { offchainVotes } from "@/database";
 
@@ -19,12 +20,19 @@ export const OffchainVotesRequestSchema = z.object({
   orderBy: z.enum(["created", "vp"]).optional().default("created"),
   orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
   voterAddresses: z
-    .union([z.string(), z.array(z.string())])
-    .optional()
-    .transform((val) => {
-      if (!val) return undefined;
-      return typeof val === "string" ? [val] : val;
-    }),
+    .union([
+      z
+        .string()
+        .refine((val) => isAddress(val, { strict: false }))
+        .transform((val) => [getAddress(val)]),
+      z.array(
+        z
+          .string()
+          .refine((val) => isAddress(val, { strict: false }))
+          .transform((val) => getAddress(val)),
+      ),
+    ])
+    .optional(),
   fromDate: z.coerce.number().optional(),
   toDate: z.coerce.number().optional(),
 });
