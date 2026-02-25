@@ -5,11 +5,14 @@ import { Address } from "viem";
 
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
-import { useArkhamData } from "@/shared/hooks/graphql-client/useArkhamData";
+import { ArkhamDataResult } from "@/shared/hooks/graphql-client/useArkhamData";
 import { cn } from "@/shared/utils/cn";
 import { formatAddress } from "@/shared/utils/formatAddress";
 
-interface AddressDetailsTooltipProps {
+interface AddressDetailsTooltipProps extends Pick<
+  ArkhamDataResult,
+  "arkham" | "ens" | "isContract" | "loading"
+> {
   address: Address;
   children: ReactNode;
 }
@@ -51,10 +54,12 @@ function NotInformed() {
 
 export function AddressDetailsTooltip({
   address,
+  arkham,
+  ens,
+  isContract,
+  loading,
   children,
 }: AddressDetailsTooltipProps) {
-  const { arkham, ens, isContract, loading } = useArkhamData(address);
-
   const content = (
     <div className="flex w-full flex-col gap-2">
       <Row label="ENS address">

@@ -81,7 +81,7 @@ export const EnsAvatar = ({
   const { data: ensData, isLoading: ensLoading } = useEnsData(
     shouldFetchEns ? address : null,
   );
-  const { arkham, loading: arkhamLoading } = useArkhamData(address);
+  const { arkham, isContract, loading: arkhamLoading } = useArkhamData(address);
 
   const [imageError, setImageError] = useState(false);
 
@@ -208,7 +208,13 @@ export const EnsAvatar = ({
 
   if (address) {
     return (
-      <AddressDetailsTooltip address={address}>
+      <AddressDetailsTooltip
+        address={address}
+        arkham={arkham}
+        ens={ensData ? { name: ensData.ens ?? null } : null}
+        isContract={isContract}
+        loading={ensLoading || arkhamLoading}
+      >
         {avatarWithName}
       </AddressDetailsTooltip>
     );

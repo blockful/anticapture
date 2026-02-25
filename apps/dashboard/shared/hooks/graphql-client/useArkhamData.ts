@@ -10,7 +10,7 @@ type EnsData = NonNullable<
   NonNullable<GetArkhamDataQuery["getAddress"]>["ens"]
 >;
 
-interface ArkhamDataResult {
+export interface ArkhamDataResult {
   arkham: ArkhamData | null;
   ens: EnsData | null;
   isContract: boolean | null;
