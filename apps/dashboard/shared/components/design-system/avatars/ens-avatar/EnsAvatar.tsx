@@ -7,6 +7,7 @@ import { Address } from "viem";
 
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { AddressDetailsTooltip } from "@/shared/components/tooltips/AddressDetailsTooltip";
+import { useArkhamData } from "@/shared/hooks/graphql-client/useArkhamData";
 import { useEnsData } from "@/shared/hooks/useEnsData";
 import { cn } from "@/shared/utils/cn";
 import { formatAddress } from "@/shared/utils/formatAddress";
@@ -80,6 +81,7 @@ export const EnsAvatar = ({
   const { data: ensData, isLoading: ensLoading } = useEnsData(
     shouldFetchEns ? address : null,
   );
+  const { arkham, loading: arkhamLoading } = useArkhamData(address);
 
   const [imageError, setImageError] = useState(false);
 
@@ -95,18 +97,23 @@ export const EnsAvatar = ({
 
   // Determine what to display as the name
   const getDisplayName = () => {
-    if (ensData?.ens) {
-      return ensData.ens;
-    }
-    if (address) {
-      return showFullAddress ? address : formatAddress(address);
-    }
-    return "Unknown";
+    if (ensData?.ens) return ensData.ens;
+
+    const entity = arkham?.entity;
+    const label = arkham?.label;
+
+    let name: string;
+    if (entity && label) name = `${entity} · ${label}`;
+    else if (entity) name = entity;
+    else if (label) name = label;
+    else if (address) name = showFullAddress ? address : formatAddress(address);
+    else name = "Unknown";
+
+    return name.length > 30 ? `${name.slice(0, 30)}…` : name;
   };
 
   const displayName = getDisplayName();
-  const isLoadingName = loading || (ensLoading && !address);
-  const isEnsName = Boolean(ensData?.ens);
+  const isLoadingName = loading || (ensLoading && !address) || arkhamLoading;
   const isResolvingEns = ensLoading && address;
 
   const baseClasses = cn(
@@ -185,8 +192,7 @@ export const EnsAvatar = ({
           ) : (
             <span
               className={cn(
-                "text-primary inline-block text-sm",
-                isEnsName && "overflow-hidden truncate whitespace-nowrap",
+                "text-primary inline-block overflow-hidden truncate whitespace-nowrap text-sm",
                 isDashed && "border-b border-dashed border-[#3F3F46]",
                 isResolvingEns && "animate-pulse",
                 nameClassName,
