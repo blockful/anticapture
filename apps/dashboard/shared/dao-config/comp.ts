@@ -300,6 +300,22 @@ export const COMP: DaoConfiguration = {
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.VOTING_SUBSIDY],
         nextStep: "The parameter is in its lowest-risk condition.",
       },
+      [GovernanceImplementationEnum.PROPOSER_BALANCE_CANCEL]: {
+        riskLevel: RiskLevel.LOW,
+        description:
+          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+            GovernanceImplementationEnum.PROPOSER_BALANCE_CANCEL
+          ].description,
+        currentSetting:
+          "The DAO has an implementation to allow permissionless cancel of proposals when the proposer's balance falls below the defined threshold.",
+        impact:
+          "By canceling proposals when the proposer's balance is insufficient, there is greater protection against spam and malicious proposals, ensuring the integrity of the DAO's governance process.",
+        recommendedSetting:
+          RECOMMENDED_SETTINGS[
+            GovernanceImplementationEnum.PROPOSER_BALANCE_CANCEL
+          ],
+        nextStep: "The parameter is in its lowest-risk condition.",
+      },
     },
   },
   attackExposure: {
