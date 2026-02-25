@@ -113,8 +113,8 @@ export const EnsAvatar = ({
   };
 
   const displayName = getDisplayName();
-  const isLoadingName = loading || (ensLoading && !address) || arkhamLoading;
-  const isResolvingEns = ensLoading && address;
+  const isLoadingName = loading || (ensLoading && !address);
+  const isResolvingData = !!address && (ensLoading || arkhamLoading);
 
   const baseClasses = cn(
     sizeClasses[size],
@@ -194,7 +194,7 @@ export const EnsAvatar = ({
               className={cn(
                 "text-primary inline-block overflow-hidden truncate whitespace-nowrap text-sm",
                 isDashed && "border-b border-dashed border-[#3F3F46]",
-                isResolvingEns && "animate-pulse",
+                isResolvingData && "animate-pulse",
                 nameClassName,
               )}
             >
