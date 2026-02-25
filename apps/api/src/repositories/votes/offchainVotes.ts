@@ -61,15 +61,9 @@ export class OffchainVoteRepository {
     ]);
 
     return {
-      items: items.map((item) => ({
-        spaceId: item.spaceId,
-        voter: item.voter,
-        proposalId: item.proposalId,
-        choice: item.choice,
-        vp: item.vp,
-        reason: item.reason,
-        created: item.created,
-        proposalTitle: item.proposalTitle ?? "Untitled Proposal",
+      items: items.map(({ proposalTitle, ...rest }) => ({
+        ...rest,
+        proposalTitle: proposalTitle ?? "Untitled Proposal",
       })),
       totalCount,
     };
@@ -133,15 +127,9 @@ export class OffchainVoteRepository {
     ]);
 
     return {
-      items: items.map((item) => ({
-        spaceId: item.spaceId,
-        voter: item.voter,
-        proposalId: item.proposalId,
-        choice: item.choice,
-        vp: item.vp,
-        reason: item.reason,
-        created: item.created,
-        proposalTitle: item.proposalTitle ?? "Untitled Proposal",
+      items: items.map(({ proposalTitle, ...rest }) => ({
+        ...rest,
+        proposalTitle: proposalTitle ?? "Untitled Proposal",
       })),
       totalCount,
     };
