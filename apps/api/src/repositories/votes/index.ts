@@ -60,6 +60,8 @@ export class VotesRepository {
     return {
       items: items.map((item) => ({
         ...item,
+        transactionHash: item.txHash,
+        voterAddress: item.voterAccountId,
         proposalTitle: item.proposal.title,
       })),
       totalCount,

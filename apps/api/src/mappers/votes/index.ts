@@ -47,15 +47,15 @@ export const VoteResponseSchema = z.object({
   voterAddress: z.string(),
   transactionHash: z.string(),
   proposalId: z.string(),
-  support: z.number(),
+  support: z.coerce.number(),
   votingPower: z
     .union([z.string(), z.bigint().transform((val) => val.toString())])
     .openapi({ type: "string" }),
-  reason: z.string().optional(),
+  reason: z.string().nullish(),
   timestamp: z
     .union([z.number(), z.bigint().transform((val) => Number(val))])
     .openapi({ type: "integer" }),
-  proposalTitle: z.string(),
+  proposalTitle: z.string().nullish(),
 });
 
 export type VoteResponse = z.infer<typeof VoteResponseSchema>;

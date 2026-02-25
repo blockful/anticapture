@@ -101,7 +101,7 @@ export const voteCast = async (
       support,
       votingPower,
       proposalId,
-      title: proposal!.title,
+      title: proposal?.title ?? undefined,
     },
   });
 };
@@ -158,7 +158,7 @@ export const proposalCreated = async (
 
   await ensureAccountExists(context, proposer);
 
-  const title = description.split("\n")[0]?.replace(/^#+\s*/, "");
+  const title = description.split("\n")[0]?.replace(/^#+\s*/, "") || null;
   const blockDelta = parseInt(endBlock) - Number(blockNumber);
   await context.db.insert(proposalsOnchain).values({
     id: proposalId,
@@ -256,7 +256,7 @@ export const proposalExtended = async (
     timestamp,
     metadata: {
       id: proposalId,
-      title: proposal!.title,
+      title: proposal?.title ?? undefined,
       endBlock: Number(extendedDeadline),
       endTimestamp,
       proposer: getAddress(proposal!.proposerAccountId),
