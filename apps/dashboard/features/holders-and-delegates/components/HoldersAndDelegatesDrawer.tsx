@@ -136,9 +136,9 @@ export const HoldersAndDelegatesDrawer = ({
           address={address as `0x${string}`}
           size="sm"
           variant="rounded"
-          nameClassName="text-lg leading-[18px]"
           containerClassName="gap-2"
           showFullAddress={true}
+          showTags={true}
         />
       </div>
 
@@ -148,9 +148,9 @@ export const HoldersAndDelegatesDrawer = ({
           address={address as `0x${string}`}
           size="sm"
           variant="rounded"
-          nameClassName="text-lg leading-[18px]"
           containerClassName="gap-2"
           showFullAddress={false}
+          showTags={true}
         />
       </div>
 

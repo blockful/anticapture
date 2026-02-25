@@ -5,6 +5,7 @@ import { useState } from "react";
 import Blockies from "react-blockies";
 import { Address } from "viem";
 
+import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { AddressDetailsTooltip } from "@/shared/components/tooltips/AddressDetailsTooltip";
 import { useArkhamData } from "@/shared/hooks/graphql-client/useArkhamData";
@@ -32,6 +33,7 @@ interface EnsAvatarProps extends Omit<
   containerClassName?: string;
   isDashed?: boolean;
   showFullAddress?: boolean;
+  showTags?: boolean;
 }
 
 const sizeClasses: Record<AvatarSize, string> = {
@@ -74,6 +76,7 @@ export const EnsAvatar = ({
   containerClassName,
   showFullAddress = false,
   isDashed = false,
+  showTags = false,
   ...imageProps
 }: EnsAvatarProps) => {
   // Only fetch ENS data if we have an address and either we need imageUrl or fetchEnsName is true
@@ -178,12 +181,22 @@ export const EnsAvatar = ({
     );
   }
 
+  const tags = showTags
+    ? [
+        arkham?.twitter && `@${arkham.twitter}`,
+        ensData?.ens,
+        address && formatAddress(address),
+        arkham?.entityType,
+        isContract !== null ? (isContract ? "Contract" : "EOA") : null,
+      ].filter(Boolean)
+    : [];
+
   // Return avatar with name
   const avatarWithName = (
     <div className={cn("flex min-w-0 items-center gap-2", containerClassName)}>
       {avatarElement()}
 
-      <div className="flex min-w-0 flex-col">
+      <div className="flex min-w-0 flex-col gap-0.5">
         <div className="flex items-center gap-2">
           {isLoadingName ? (
             <SkeletonRow
@@ -193,7 +206,8 @@ export const EnsAvatar = ({
           ) : (
             <span
               className={cn(
-                "text-primary inline-block overflow-hidden truncate whitespace-nowrap text-sm",
+                "text-primary inline-block overflow-hidden truncate whitespace-nowrap",
+                showTags ? "text-lg font-medium" : "text-sm",
                 isDashed && "border-b border-dashed border-[#3F3F46]",
                 isResolvingData && "animate-pulse",
                 nameClassName,
@@ -203,11 +217,34 @@ export const EnsAvatar = ({
             </span>
           )}
         </div>
+
+        {showTags && (
+          <div className="flex flex-wrap gap-1">
+            {arkhamLoading || ensLoading ? (
+              <>
+                <SkeletonRow
+                  parentClassName="flex animate-pulse"
+                  className="h-5 w-16 rounded-full"
+                />
+                <SkeletonRow
+                  parentClassName="flex animate-pulse"
+                  className="h-5 w-20 rounded-full"
+                />
+              </>
+            ) : (
+              tags.map((tag) => (
+                <BadgeStatus key={tag} variant="secondary">
+                  {tag}
+                </BadgeStatus>
+              ))
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
 
-  if (address) {
+  if (address && !showTags) {
     return (
       <AddressDetailsTooltip
         address={address}
