@@ -16,7 +16,7 @@ export function offchainVotes(app: Hono, service: OffchainVotesService) {
   app.openapi(
     createRoute({
       method: "get",
-      operationId: "offchainVotes",
+      operationId: "votesOffchain",
       path: "/offchain/votes",
       summary: "Get offchain votes",
       description: "Returns a list of offchain (Snapshot) votes",
@@ -68,7 +68,7 @@ export function offchainVotes(app: Hono, service: OffchainVotesService) {
   app.openapi(
     createRoute({
       method: "get",
-      operationId: "offchainVotesByProposalId",
+      operationId: "votesOffchainByProposalId",
       path: "/offchain/proposals/{id}/votes",
       summary: "Get offchain votes for a proposal",
       description:
