@@ -5,6 +5,7 @@ import { useState } from "react";
 import Blockies from "react-blockies";
 import { Address } from "viem";
 
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { AddressDetailsTooltip } from "@/shared/components/tooltips/AddressDetailsTooltip";
@@ -34,6 +35,7 @@ interface EnsAvatarProps extends Omit<
   isDashed?: boolean;
   showFullAddress?: boolean;
   showTags?: boolean;
+  showCopyAddress?: boolean;
 }
 
 const sizeClasses: Record<AvatarSize, string> = {
@@ -77,6 +79,7 @@ export const EnsAvatar = ({
   showFullAddress = false,
   isDashed = false,
   showTags = false,
+  showCopyAddress = false,
   ...imageProps
 }: EnsAvatarProps) => {
   // Only fetch ENS data if we have an address and either we need imageUrl or fetchEnsName is true
@@ -219,10 +222,21 @@ export const EnsAvatar = ({
               {displayName}
             </span>
           )}
+          {showCopyAddress && address && (
+            <CopyAndPasteButton
+              textToCopy={address}
+              className="p-1"
+              iconSize="md"
+              customTooltipText={{
+                default: "Copy address",
+                copied: "Address copied!",
+              }}
+            />
+          )}
         </div>
 
         {showTags && (
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap items-center gap-1">
             {arkhamLoading || ensLoading ? (
               <>
                 <SkeletonRow

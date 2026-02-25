@@ -8,7 +8,6 @@ import { VotingPowerHistory } from "@/features/holders-and-delegates/delegate/dr
 import { BalanceHistory } from "@/features/holders-and-delegates/token-holder/drawer/balance-history/BalanceHistory";
 import { DelegationHistory } from "@/features/holders-and-delegates/token-holder/drawer/delegation-history/DelegationHistory";
 import { TopInteractions } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/TopInteractions";
-import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import {
   DrawerBody,
@@ -139,6 +138,7 @@ export const HoldersAndDelegatesDrawer = ({
           containerClassName="gap-2"
           showFullAddress={true}
           showTags={true}
+          showCopyAddress={true}
         />
       </div>
 
@@ -151,18 +151,9 @@ export const HoldersAndDelegatesDrawer = ({
           containerClassName="gap-2"
           showFullAddress={false}
           showTags={true}
+          showCopyAddress={true}
         />
       </div>
-
-      <CopyAndPasteButton
-        textToCopy={address as `0x${string}`}
-        className="p-1"
-        iconSize="md"
-        customTooltipText={{
-          default: "Copy address",
-          copied: "Address copied!",
-        }}
-      />
     </>
   );
 
