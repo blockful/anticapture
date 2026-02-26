@@ -6,7 +6,7 @@ import {
 } from "@anticapture/graphql-client";
 import { useGetTokenHoldersQuery } from "@anticapture/graphql-client/hooks";
 import { NetworkStatus } from "@apollo/client";
-import { useMemo, useCallback, useState, useEffect } from "react";
+import { useMemo, useCallback, useState } from "react";
 
 import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -77,11 +77,6 @@ export const useTokenHolders = ({
     return (Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[days]).toString();
   }, [days]);
 
-  // Reset to page 1 when sorting changes (new query)
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [orderBy, orderDirection, address, days]);
-
   const {
     data: tokenHoldersData,
     error: tokenHoldersError,
@@ -105,18 +100,6 @@ export const useTokenHolders = ({
     notifyOnNetworkStatusChange: true,
     fetchPolicy: "cache-and-network",
   });
-
-  // Refetch data when sorting changes to ensure we start from page 1
-  useEffect(() => {
-    refetch({
-      limit,
-      skip: 0,
-      orderDirection,
-      orderBy,
-      fromDate,
-      ...(address && { addresses: [address] }),
-    });
-  }, [orderBy, orderDirection, limit, refetch, address, fromDate]);
 
   const processedData = useMemo(() => {
     if (!tokenHoldersData?.accountBalances?.items) return null;
