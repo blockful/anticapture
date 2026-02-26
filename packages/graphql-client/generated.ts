@@ -15,12 +15,9 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
-  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
-  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
-  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
 };
 
@@ -304,6 +301,8 @@ export type QueryDelegationPercentageByDayArgs = {
 
 export type QueryDelegationsArgs = {
   address: Scalars['String']['input'];
+  orderBy?: InputMaybe<QueryInput_Delegations_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_Delegations_OrderDirection>;
 };
 
 
@@ -1598,9 +1597,9 @@ export type Query_Transfers_Items_Items = {
 export type Query_VotesByProposalId_Items_Items = {
   __typename?: 'query_votesByProposalId_items_items';
   proposalId: Scalars['String']['output'];
-  proposalTitle: Scalars['String']['output'];
+  proposalTitle?: Maybe<Scalars['String']['output']>;
   reason?: Maybe<Scalars['String']['output']>;
-  support: Scalars['Float']['output'];
+  support?: Maybe<Scalars['Float']['output']>;
   timestamp: Scalars['Int']['output'];
   transactionHash: Scalars['String']['output'];
   voterAddress: Scalars['String']['output'];
@@ -1610,9 +1609,9 @@ export type Query_VotesByProposalId_Items_Items = {
 export type Query_Votes_Items_Items = {
   __typename?: 'query_votes_items_items';
   proposalId: Scalars['String']['output'];
-  proposalTitle: Scalars['String']['output'];
+  proposalTitle?: Maybe<Scalars['String']['output']>;
   reason?: Maybe<Scalars['String']['output']>;
-  support: Scalars['Float']['output'];
+  support?: Maybe<Scalars['Float']['output']>;
   timestamp: Scalars['Int']['output'];
   transactionHash: Scalars['String']['output'];
   voterAddress: Scalars['String']['output'];
@@ -1875,19 +1874,19 @@ export type GetAddressQueryVariables = Exact<{
 
 export type GetAddressQuery = { __typename?: 'Query', getAddress?: { __typename?: 'getAddress_200_response', address: string, isContract: boolean, arkham?: { __typename?: 'query_getAddress_arkham', entity?: string | null, entityType?: string | null, label?: string | null, twitter?: string | null } | null, ens?: { __typename?: 'query_getAddress_ens', name?: string | null, avatar?: string | null, banner?: string | null } | null } | null };
 
+export type GetAddressDataQueryVariables = Exact<{
+  address: Scalars['String']['input'];
+}>;
+
+
+export type GetAddressDataQuery = { __typename?: 'Query', getAddress?: { __typename?: 'getAddress_200_response', isContract: boolean, arkham?: { __typename?: 'query_getAddress_arkham', entity?: string | null, entityType?: string | null, label?: string | null, twitter?: string | null } | null, ens?: { __typename?: 'query_getAddress_ens', name?: string | null } | null } | null };
+
 export type GetAddressesQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];
 }>;
 
 
 export type GetAddressesQuery = { __typename?: 'Query', getAddresses?: { __typename?: 'getAddresses_200_response', results: Array<{ __typename?: 'query_getAddresses_results_items', address: string, isContract: boolean, arkham?: { __typename?: 'query_getAddresses_results_items_arkham', entity?: string | null, entityType?: string | null, label?: string | null, twitter?: string | null } | null, ens?: { __typename?: 'query_getAddresses_results_items_ens', name?: string | null, avatar?: string | null, banner?: string | null } | null } | null> } | null };
-
-export type GetArkhamDataQueryVariables = Exact<{
-  address: Scalars['String']['input'];
-}>;
-
-
-export type GetArkhamDataQuery = { __typename?: 'Query', getAddress?: { __typename?: 'getAddress_200_response', isContract: boolean, arkham?: { __typename?: 'query_getAddress_arkham', entity?: string | null, entityType?: string | null, label?: string | null, twitter?: string | null } | null, ens?: { __typename?: 'query_getAddress_ens', name?: string | null } | null } | null };
 
 export type GetProposalsFromDaoQueryVariables = Exact<{
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
@@ -1916,7 +1915,7 @@ export type GetVotesQueryVariables = Exact<{
 }>;
 
 
-export type GetVotesQuery = { __typename?: 'Query', votesByProposalId?: { __typename?: 'votesByProposalId_200_response', totalCount: number, items: Array<{ __typename?: 'query_votesByProposalId_items_items', voterAddress: string, transactionHash: string, proposalId: string, support: number, votingPower: string, reason?: string | null, timestamp: number } | null> } | null };
+export type GetVotesQuery = { __typename?: 'Query', votesByProposalId?: { __typename?: 'votesByProposalId_200_response', totalCount: number, items: Array<{ __typename?: 'query_votesByProposalId_items_items', voterAddress: string, transactionHash: string, proposalId: string, support?: number | null, votingPower: string, reason?: string | null, timestamp: number } | null> } | null };
 
 export type GetVotingPowerChangeQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];
@@ -1944,7 +1943,7 @@ export type GetAccountPowerQueryVariables = Exact<{
 }>;
 
 
-export type GetAccountPowerQuery = { __typename?: 'Query', votingPowerByAccountId?: { __typename?: 'votingPowerByAccountId_200_response', accountId: string, votingPower: string } | null, votesByProposalId?: { __typename?: 'votesByProposalId_200_response', totalCount: number, items: Array<{ __typename?: 'query_votesByProposalId_items_items', support: number, votingPower: string, reason?: string | null, timestamp: number, transactionHash: string } | null> } | null };
+export type GetAccountPowerQuery = { __typename?: 'Query', votingPowerByAccountId?: { __typename?: 'votingPowerByAccountId_200_response', accountId: string, votingPower: string } | null, votesByProposalId?: { __typename?: 'votesByProposalId_200_response', totalCount: number, items: Array<{ __typename?: 'query_votesByProposalId_items_items', support?: number | null, votingPower: string, reason?: string | null, timestamp: number, transactionHash: string } | null> } | null };
 
 export type HistoricalVotingPowerQueryVariables = Exact<{
   address?: InputMaybe<Scalars['String']['input']>;
@@ -2844,6 +2843,58 @@ export type GetAddressQueryHookResult = ReturnType<typeof useGetAddressQuery>;
 export type GetAddressLazyQueryHookResult = ReturnType<typeof useGetAddressLazyQuery>;
 export type GetAddressSuspenseQueryHookResult = ReturnType<typeof useGetAddressSuspenseQuery>;
 export type GetAddressQueryResult = Apollo.QueryResult<GetAddressQuery, GetAddressQueryVariables>;
+export const GetAddressDataDocument = gql`
+    query GetAddressData($address: String!) {
+  getAddress(address: $address) {
+    arkham {
+      entity
+      entityType
+      label
+      twitter
+    }
+    isContract
+    ens {
+      name
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetAddressDataQuery__
+ *
+ * To run a query within a React component, call `useGetAddressDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAddressDataQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAddressDataQuery({
+ *   variables: {
+ *      address: // value for 'address'
+ *   },
+ * });
+ */
+export function useGetAddressDataQuery(baseOptions: Apollo.QueryHookOptions<GetAddressDataQuery, GetAddressDataQueryVariables> & ({ variables: GetAddressDataQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetAddressDataQuery, GetAddressDataQueryVariables>(GetAddressDataDocument, options);
+      }
+export function useGetAddressDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAddressDataQuery, GetAddressDataQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetAddressDataQuery, GetAddressDataQueryVariables>(GetAddressDataDocument, options);
+        }
+// @ts-ignore
+export function useGetAddressDataSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetAddressDataQuery, GetAddressDataQueryVariables>): Apollo.UseSuspenseQueryResult<GetAddressDataQuery, GetAddressDataQueryVariables>;
+export function useGetAddressDataSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetAddressDataQuery, GetAddressDataQueryVariables>): Apollo.UseSuspenseQueryResult<GetAddressDataQuery | undefined, GetAddressDataQueryVariables>;
+export function useGetAddressDataSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetAddressDataQuery, GetAddressDataQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetAddressDataQuery, GetAddressDataQueryVariables>(GetAddressDataDocument, options);
+        }
+export type GetAddressDataQueryHookResult = ReturnType<typeof useGetAddressDataQuery>;
+export type GetAddressDataLazyQueryHookResult = ReturnType<typeof useGetAddressDataLazyQuery>;
+export type GetAddressDataSuspenseQueryHookResult = ReturnType<typeof useGetAddressDataSuspenseQuery>;
+export type GetAddressDataQueryResult = Apollo.QueryResult<GetAddressDataQuery, GetAddressDataQueryVariables>;
 export const GetAddressesDocument = gql`
     query GetAddresses($addresses: JSON!) {
   getAddresses(addresses: $addresses) {
@@ -2901,58 +2952,6 @@ export type GetAddressesQueryHookResult = ReturnType<typeof useGetAddressesQuery
 export type GetAddressesLazyQueryHookResult = ReturnType<typeof useGetAddressesLazyQuery>;
 export type GetAddressesSuspenseQueryHookResult = ReturnType<typeof useGetAddressesSuspenseQuery>;
 export type GetAddressesQueryResult = Apollo.QueryResult<GetAddressesQuery, GetAddressesQueryVariables>;
-export const GetArkhamDataDocument = gql`
-    query GetArkhamData($address: String!) {
-  getAddress(address: $address) {
-    arkham {
-      entity
-      entityType
-      label
-      twitter
-    }
-    isContract
-    ens {
-      name
-    }
-  }
-}
-    `;
-
-/**
- * __useGetArkhamDataQuery__
- *
- * To run a query within a React component, call `useGetArkhamDataQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetArkhamDataQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetArkhamDataQuery({
- *   variables: {
- *      address: // value for 'address'
- *   },
- * });
- */
-export function useGetArkhamDataQuery(baseOptions: Apollo.QueryHookOptions<GetArkhamDataQuery, GetArkhamDataQueryVariables> & ({ variables: GetArkhamDataQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetArkhamDataQuery, GetArkhamDataQueryVariables>(GetArkhamDataDocument, options);
-      }
-export function useGetArkhamDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetArkhamDataQuery, GetArkhamDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetArkhamDataQuery, GetArkhamDataQueryVariables>(GetArkhamDataDocument, options);
-        }
-// @ts-ignore
-export function useGetArkhamDataSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetArkhamDataQuery, GetArkhamDataQueryVariables>): Apollo.UseSuspenseQueryResult<GetArkhamDataQuery, GetArkhamDataQueryVariables>;
-export function useGetArkhamDataSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetArkhamDataQuery, GetArkhamDataQueryVariables>): Apollo.UseSuspenseQueryResult<GetArkhamDataQuery | undefined, GetArkhamDataQueryVariables>;
-export function useGetArkhamDataSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetArkhamDataQuery, GetArkhamDataQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetArkhamDataQuery, GetArkhamDataQueryVariables>(GetArkhamDataDocument, options);
-        }
-export type GetArkhamDataQueryHookResult = ReturnType<typeof useGetArkhamDataQuery>;
-export type GetArkhamDataLazyQueryHookResult = ReturnType<typeof useGetArkhamDataLazyQuery>;
-export type GetArkhamDataSuspenseQueryHookResult = ReturnType<typeof useGetArkhamDataSuspenseQuery>;
-export type GetArkhamDataQueryResult = Apollo.QueryResult<GetArkhamDataQuery, GetArkhamDataQueryVariables>;
 export const GetProposalsFromDaoDocument = gql`
     query GetProposalsFromDao($skip: NonNegativeInt, $limit: PositiveInt = 10, $orderDirection: queryInput_proposals_orderDirection = desc, $status: JSON, $fromDate: Float) {
   proposals(

@@ -12,12 +12,9 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
-  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
-  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
-  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
 };
 
@@ -301,6 +298,8 @@ export type QueryDelegationPercentageByDayArgs = {
 
 export type QueryDelegationsArgs = {
   address: Scalars['String']['input'];
+  orderBy?: InputMaybe<QueryInput_Delegations_OrderBy>;
+  orderDirection?: InputMaybe<QueryInput_Delegations_OrderDirection>;
 };
 
 
@@ -1595,9 +1594,9 @@ export type Query_Transfers_Items_Items = {
 export type Query_VotesByProposalId_Items_Items = {
   __typename?: 'query_votesByProposalId_items_items';
   proposalId: Scalars['String']['output'];
-  proposalTitle: Scalars['String']['output'];
+  proposalTitle?: Maybe<Scalars['String']['output']>;
   reason?: Maybe<Scalars['String']['output']>;
-  support: Scalars['Float']['output'];
+  support?: Maybe<Scalars['Float']['output']>;
   timestamp: Scalars['Int']['output'];
   transactionHash: Scalars['String']['output'];
   voterAddress: Scalars['String']['output'];
@@ -1607,9 +1606,9 @@ export type Query_VotesByProposalId_Items_Items = {
 export type Query_Votes_Items_Items = {
   __typename?: 'query_votes_items_items';
   proposalId: Scalars['String']['output'];
-  proposalTitle: Scalars['String']['output'];
+  proposalTitle?: Maybe<Scalars['String']['output']>;
   reason?: Maybe<Scalars['String']['output']>;
-  support: Scalars['Float']['output'];
+  support?: Maybe<Scalars['Float']['output']>;
   timestamp: Scalars['Int']['output'];
   transactionHash: Scalars['String']['output'];
   voterAddress: Scalars['String']['output'];
@@ -1872,19 +1871,19 @@ export type GetAddressQueryVariables = Exact<{
 
 export type GetAddressQuery = { __typename?: 'Query', getAddress?: { __typename?: 'getAddress_200_response', address: string, isContract: boolean, arkham?: { __typename?: 'query_getAddress_arkham', entity?: string | null, entityType?: string | null, label?: string | null, twitter?: string | null } | null, ens?: { __typename?: 'query_getAddress_ens', name?: string | null, avatar?: string | null, banner?: string | null } | null } | null };
 
+export type GetAddressDataQueryVariables = Exact<{
+  address: Scalars['String']['input'];
+}>;
+
+
+export type GetAddressDataQuery = { __typename?: 'Query', getAddress?: { __typename?: 'getAddress_200_response', isContract: boolean, arkham?: { __typename?: 'query_getAddress_arkham', entity?: string | null, entityType?: string | null, label?: string | null, twitter?: string | null } | null, ens?: { __typename?: 'query_getAddress_ens', name?: string | null } | null } | null };
+
 export type GetAddressesQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];
 }>;
 
 
 export type GetAddressesQuery = { __typename?: 'Query', getAddresses?: { __typename?: 'getAddresses_200_response', results: Array<{ __typename?: 'query_getAddresses_results_items', address: string, isContract: boolean, arkham?: { __typename?: 'query_getAddresses_results_items_arkham', entity?: string | null, entityType?: string | null, label?: string | null, twitter?: string | null } | null, ens?: { __typename?: 'query_getAddresses_results_items_ens', name?: string | null, avatar?: string | null, banner?: string | null } | null } | null> } | null };
-
-export type GetArkhamDataQueryVariables = Exact<{
-  address: Scalars['String']['input'];
-}>;
-
-
-export type GetArkhamDataQuery = { __typename?: 'Query', getAddress?: { __typename?: 'getAddress_200_response', isContract: boolean, arkham?: { __typename?: 'query_getAddress_arkham', entity?: string | null, entityType?: string | null, label?: string | null, twitter?: string | null } | null, ens?: { __typename?: 'query_getAddress_ens', name?: string | null } | null } | null };
 
 export type GetProposalsFromDaoQueryVariables = Exact<{
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
@@ -1913,7 +1912,7 @@ export type GetVotesQueryVariables = Exact<{
 }>;
 
 
-export type GetVotesQuery = { __typename?: 'Query', votesByProposalId?: { __typename?: 'votesByProposalId_200_response', totalCount: number, items: Array<{ __typename?: 'query_votesByProposalId_items_items', voterAddress: string, transactionHash: string, proposalId: string, support: number, votingPower: string, reason?: string | null, timestamp: number } | null> } | null };
+export type GetVotesQuery = { __typename?: 'Query', votesByProposalId?: { __typename?: 'votesByProposalId_200_response', totalCount: number, items: Array<{ __typename?: 'query_votesByProposalId_items_items', voterAddress: string, transactionHash: string, proposalId: string, support?: number | null, votingPower: string, reason?: string | null, timestamp: number } | null> } | null };
 
 export type GetVotingPowerChangeQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];
@@ -1941,7 +1940,7 @@ export type GetAccountPowerQueryVariables = Exact<{
 }>;
 
 
-export type GetAccountPowerQuery = { __typename?: 'Query', votingPowerByAccountId?: { __typename?: 'votingPowerByAccountId_200_response', accountId: string, votingPower: string } | null, votesByProposalId?: { __typename?: 'votesByProposalId_200_response', totalCount: number, items: Array<{ __typename?: 'query_votesByProposalId_items_items', support: number, votingPower: string, reason?: string | null, timestamp: number, transactionHash: string } | null> } | null };
+export type GetAccountPowerQuery = { __typename?: 'Query', votingPowerByAccountId?: { __typename?: 'votingPowerByAccountId_200_response', accountId: string, votingPower: string } | null, votesByProposalId?: { __typename?: 'votesByProposalId_200_response', totalCount: number, items: Array<{ __typename?: 'query_votesByProposalId_items_items', support?: number | null, votingPower: string, reason?: string | null, timestamp: number, transactionHash: string } | null> } | null };
 
 export type HistoricalVotingPowerQueryVariables = Exact<{
   address?: InputMaybe<Scalars['String']['input']>;

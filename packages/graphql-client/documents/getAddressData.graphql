@@ -1,4 +1,4 @@
-query GetArkhamData($address: String!) {
+query GetAddressData($address: String!) {
   getAddress(address: $address) {
     arkham {
       entity
