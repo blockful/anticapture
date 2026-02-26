@@ -3,8 +3,8 @@ import { pushSchema } from "drizzle-kit/api";
 import { drizzle } from "drizzle-orm/pglite";
 import { Address } from "viem";
 
-import * as schema from "@/database/schema";
 import { accountBalance, delegation } from "@/database/schema";
+import * as schema from "@/database/schema";
 import { DelegatorsSortOptions } from "@/services/delegations/delegators";
 
 import { DelegatorsRepository } from "./delegators";
