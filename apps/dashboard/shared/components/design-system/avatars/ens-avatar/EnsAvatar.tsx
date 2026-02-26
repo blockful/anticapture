@@ -114,17 +114,21 @@ export const EnsAvatar = ({
     const entity = arkhamData?.entity;
     const label = arkhamData?.label;
 
-    let name: string;
-    if (entity && label) name = `${entity} · ${label}`;
-    else if (entity) name = entity;
-    else if (label) name = label;
-    else if (address) name = showFullAddress ? address : formatAddress(address);
-    else name = "Unknown";
+    const name =
+      entity && label
+        ? `${entity} · ${label}`
+        : entity
+          ? entity
+          : label
+            ? label
+            : address
+              ? showFullAddress
+                ? address
+                : formatAddress(address)
+              : "Unknown";
 
-    if (showFullAddress) return name;
-    return name.length > TRUNCATE_ADDRESS_LENGTH
-      ? `${name.slice(0, TRUNCATE_ADDRESS_LENGTH)}…`
-      : name;
+    if (showFullAddress || name.length <= TRUNCATE_ADDRESS_LENGTH) return name;
+    return `${name.slice(0, TRUNCATE_ADDRESS_LENGTH)}…`;
   };
 
   const displayName = getDisplayName();
