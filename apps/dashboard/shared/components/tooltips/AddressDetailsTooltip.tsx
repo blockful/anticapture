@@ -5,6 +5,7 @@ import { Address } from "viem";
 
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
+import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { ArkhamDataResult } from "@/shared/hooks/graphql-client/useArkhamData";
 import { cn } from "@/shared/utils/cn";
 import { formatAddress } from "@/shared/utils/formatAddress";
@@ -44,12 +45,6 @@ const Row = ({
   );
 };
 
-const SkeletonLine = ({ className }: { className?: string }) => {
-  return (
-    <div className={cn("bg-surface-hover animate-pulse rounded", className)} />
-  );
-};
-
 const formatEntityType = (type: string) => {
   return UPPERCASE_ENTITY_TYPES.has(type.toLowerCase())
     ? type.toUpperCase()
@@ -72,7 +67,7 @@ export const AddressDetailsTooltip = ({
     <div className="flex w-full flex-col gap-2">
       <Row label="ENS address">
         {isLoading ? (
-          <SkeletonLine className="mt-1 h-5 w-24" />
+          <SkeletonRow parentClassName="mt-1" className="h-5 w-24" />
         ) : ens?.name ? (
           <span className="text-primary text-sm leading-5">{ens.name}</span>
         ) : (
@@ -84,7 +79,7 @@ export const AddressDetailsTooltip = ({
 
       <Row label="Arkham Entity">
         {isLoading ? (
-          <SkeletonLine className="mt-1 h-5 w-32" />
+          <SkeletonRow parentClassName="mt-1" className="h-5 w-32" />
         ) : arkham?.entity ? (
           <span className="text-primary text-sm leading-5">
             {arkham.entity}
@@ -98,7 +93,7 @@ export const AddressDetailsTooltip = ({
 
       <Row label="Arkham Label">
         {isLoading ? (
-          <SkeletonLine className="mt-1 h-5 w-32" />
+          <SkeletonRow parentClassName="mt-1" className="h-5 w-32" />
         ) : arkham?.label ? (
           <span className="text-primary text-sm leading-5">{arkham.label}</span>
         ) : (
@@ -119,8 +114,8 @@ export const AddressDetailsTooltip = ({
       <Row label="Main Tag/Type" className="gap-1">
         {isLoading ? (
           <div className="flex gap-1">
-            <SkeletonLine className="h-5 w-16 rounded-full" />
-            <SkeletonLine className="h-5 w-10 rounded-full" />
+            <SkeletonRow className="h-5 w-16 rounded-full" />
+            <SkeletonRow className="h-5 w-10 rounded-full" />
           </div>
         ) : (
           <div className="flex flex-wrap items-center gap-1">
