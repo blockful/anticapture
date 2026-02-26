@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  QueryInput_VotingPowers_OrderBy,
+  QueryInput_VotingPowers_OrderDirection,
+} from "@anticapture/graphql-client";
 import { useMemo } from "react";
 import { formatUnits } from "viem";
 
@@ -7,53 +11,54 @@ import {
   TopAccountChartData,
   TopAccountsChart,
 } from "@/features/dao-overview/components/TopAccountsChart";
-import { useTopVotingPowerVariations } from "@/features/dao-overview/hooks/useTopVotingPowerVariations";
+import { useDelegates } from "@/features/holders-and-delegates/hooks/useDelegates";
 import { SkeletonRow, TooltipInfo } from "@/shared/components";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
-import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
 import daoConfig from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
 
 export const VotingPowerChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
-  const votingPowerVariations = useTopVotingPowerVariations(
+  const { data: delegatesData, loading } = useDelegates({
     daoId,
-    TimeInterval.NINETY_DAYS,
-  );
+    orderBy: QueryInput_VotingPowers_OrderBy.Variation,
+    orderDirection: QueryInput_VotingPowers_OrderDirection.Desc,
+    limit: 10,
+    days: TimeInterval.NINETY_DAYS,
+    skipActivity: true,
+  });
 
   const chartData: TopAccountChartData[] = useMemo(() => {
-    const rawItems = votingPowerVariations.data;
+    if (!delegatesData) return [];
 
-    return rawItems
+    return delegatesData
       .filter((item) => !!item)
       .map((item) => {
         const absoluteChange = Number(
-          formatUnits(BigInt(item.absoluteChange), daoConfig[daoId].decimals),
-        );
-
-        const percentageChange =
-          item?.percentageChange === PERCENTAGE_NO_BASELINE
-            ? 0
-            : Number(item?.percentageChange);
-
-        const balance = Number(
           formatUnits(
-            BigInt(item.currentVotingPower),
+            BigInt(item.variation.absoluteChange),
             daoConfig[daoId].decimals,
           ),
+        );
+
+        const percentageChange = Number(item.variation.percentageChange);
+
+        const balance = Number(
+          formatUnits(BigInt(item.votingPower), daoConfig[daoId].decimals),
         );
 
         return {
           address: item.accountId,
           value: absoluteChange,
           balance,
+          delegationsCount: item.delegationsCount,
           variation: {
             absoluteChange,
             percentageChange,
           },
         };
       });
-  }, [votingPowerVariations.data, daoId]);
+  }, [delegatesData, daoId]);
 
   return (
     <div className="lg:bg-surface-default flex w-full flex-col gap-4 px-5 lg:p-4">
@@ -67,8 +72,8 @@ export const VotingPowerChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
         </DefaultLink>
         <TooltipInfo text="Addresses with the most delegated votes." />
       </div>
-      {votingPowerVariations.loading && <SkeletonRow className="h-52 w-full" />}
-      {!votingPowerVariations.loading && (
+      {loading && <SkeletonRow className="h-52 w-full" />}
+      {!loading && (
         <TopAccountsChart
           daoId={daoId}
           chartData={chartData}

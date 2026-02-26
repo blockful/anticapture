@@ -51,9 +51,11 @@ export type HistoricalDelegationsRequestQuery = z.infer<
 export const DelegationItemSchema = z.object({
   delegatorAddress: z
     .string()
-    .refine((val) => isAddress(val, { strict: false })),
+    .refine((val) => isAddress(val, { strict: false }))
+    .transform((val) => getAddress(val)),
   delegateAddress: z
     .string()
+<<<<<<< feat/address-enrichment
     .refine((val) => isAddress(val, { strict: false })),
   amount: z
     .union([z.bigint().transform((val) => val.toString()), z.string()])
@@ -61,6 +63,12 @@ export const DelegationItemSchema = z.object({
   timestamp: z
     .union([z.bigint().transform((val) => val.toString()), z.string()])
     .openapi({ type: "string" }),
+=======
+    .refine((val) => isAddress(val, { strict: false }))
+    .transform((val) => getAddress(val)),
+  amount: z.string(),
+  timestamp: z.string(),
+>>>>>>> dev
   transactionHash: z.string(),
 });
 

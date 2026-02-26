@@ -4,12 +4,16 @@ query GetDelegates(
   $skip: NonNegativeInt = 0
   $orderDirection: queryInput_votingPowers_orderDirection = desc
   $orderBy: queryInput_votingPowers_orderBy = votingPower
+  $fromDate: String
+  $toDate: String
 ) {
   votingPowers(
     limit: $limit
     skip: $skip
     orderDirection: $orderDirection
     orderBy: $orderBy
+    fromDate: $fromDate
+    toDate: $toDate
     fromValue: "0"
     addresses: $addresses
   ) {
@@ -17,6 +21,10 @@ query GetDelegates(
       accountId
       delegationsCount
       votingPower
+      variation {
+        absoluteChange
+        percentageChange
+      }
     }
     totalCount
   }
