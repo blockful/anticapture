@@ -84,7 +84,7 @@ export const COMP: DaoConfiguration = {
             GovernanceImplementationEnum.INTERFACE_RESILIENCE
           ],
         nextStep:
-          "Nouns needs to enable DNSSEC and HTTPS on the domains of its governance interfaces, in order to raise its standard to Medium Risk.",
+          "Compound needs to enable DNSSEC and HTTPS on the domains of its governance interfaces, in order to raise its standard to Medium Risk.",
         requirements: [
           "Without the proper protections(DNSSEC/SPF/DKIM/DMARC), attackers can spoof governance UIs by hijacking unprotected domains.", // https://internet.nl/site/www.tally.xyz/3493806/
         ],
@@ -307,9 +307,9 @@ export const COMP: DaoConfiguration = {
             GovernanceImplementationEnum.PROPOSER_BALANCE_CANCEL
           ].description,
         currentSetting:
-          "There is no ability to cancel a proposal if the proposer’s balance falls below the Proposal Threshold after submitting it.",
+          "The DAO has an implementation to allow permissionless cancel of proposals when the proposer's balance falls below the defined threshold.",
         impact:
-          "An attacker can buy tokens to submit a proposal in the DAO, vote with them, and sell during the voting period. There is nothing in Compound governance that protects against this or prevents the attacker from doing so.",
+          "By canceling proposals when the proposer's balance is insufficient, there is greater protection against spam and malicious proposals, ensuring the integrity of the DAO's governance process.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[
             GovernanceImplementationEnum.PROPOSER_BALANCE_CANCEL

@@ -9,7 +9,7 @@ const RISK_LEVEL_DOT_COLOR: Record<RiskLevel, string> = {
   [RiskLevel.HIGH]: "text-error",
   [RiskLevel.MEDIUM]: "text-warning",
   [RiskLevel.LOW]: "text-success",
-  [RiskLevel.NONE]: "text-error",
+  [RiskLevel.NONE]: "text-secondary",
 };
 
 interface PendingCriteriaItemProps {

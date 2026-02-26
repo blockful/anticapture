@@ -1,6 +1,13 @@
 "use client";
 
-import { ReactNode, useCallback, useMemo, useRef, useState } from "react";
+import {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { GovernanceImplementationDrawer } from "@/features/risk-analysis/components/GovernanceImplementationDrawer";
 import {
@@ -99,6 +106,14 @@ export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     GovFrontendVulnerabilityLabel,
   );
 
+  useEffect(() => {
+    return () => {
+      if (transitionTimeoutRef.current) {
+        clearTimeout(transitionTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleRiskClick = useCallback((riskName: RiskAreaEnum) => {
     setActiveRisk(riskName);
 
@@ -145,7 +160,7 @@ export const RiskAnalysisSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     <>
       <div className="flex flex-col lg:h-[calc(100vh-16rem)] lg:flex-row lg:gap-3">
         {/* Risk Areas Sidebar */}
-        <div className="bg-surface-background lg:bg-surface-default sticky top-[97px] z-20 lg:block lg:w-2/5">
+        <div className="bg-surface-background lg:bg-surface-default top-24.25 sticky z-20 lg:block lg:w-2/5">
           <RiskAreaCardWrapper
             daoId={daoId}
             title="Attack Exposure"
