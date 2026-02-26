@@ -66,7 +66,7 @@ export const ActiveTokensTooltip = ({
       </div>
 
       <p className="text-secondary text-xs font-medium leading-4">
-        Click to see details
+        Click on the cell to see details
       </p>
     </div>
   );

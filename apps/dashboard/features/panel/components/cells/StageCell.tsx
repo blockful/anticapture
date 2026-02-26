@@ -94,7 +94,7 @@ export const StageCell = ({ daoId }: { daoId: DaoIdEnum }) => {
             "The DAO doesn't qualify for the staging system because it doesn't use its governor and timelock structure to autonomously execute its proposals without depending on a centralized entity."
           }
           items={itemsToDisplay}
-          footer="Click to see details"
+          footer="Click on the cell to see details"
         />
       }
     >

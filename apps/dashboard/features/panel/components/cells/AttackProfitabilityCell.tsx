@@ -8,6 +8,7 @@ import { RiskLevelText } from "@/features/panel/components/RiskLevelText";
 import { useAttackProfitability } from "@/features/panel/hooks";
 import { SkeletonRow, BadgeStatus } from "@/shared/components";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
+import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
 import {
   GovernanceImplementationEnum,
@@ -58,29 +59,42 @@ export const AttackProfitabilityCell = ({
   }
 
   if (economicSecurityRiskLevel === RiskLevel.NONE) {
+    const daoConfig = daoConfigByDaoId[daoId];
+    const isNotApplicable =
+      daoConfig.attackProfitability?.riskLevel === RiskLevel.LOW;
+    const tooltipDescription =
+      daoConfig.attackExposure?.defenseAreas?.[RiskAreaEnum.ECONOMIC_SECURITY]
+        ?.description;
+
     return (
       <Tooltip
-        title="Not applicable for this DAO"
+        title={
+          isNotApplicable ? "Not applicable for this DAO" : "No data available"
+        }
         className="text-left"
         triggerClassName="w-full"
         disableMobileClick
         tooltipContent={
           <p className="text-secondary text-sm font-normal leading-5">
-            The treasury is controlled by a multisig, not executed automatically
-            by governance. Since proposals can’t directly move funds, attacks
-            that try to profit by draining the treasury don’t apply.
+            {tooltipDescription ??
+              "Economic security data is not yet available. Our team is actively working to integrate it."}
           </p>
         }
       >
-        <div className="ml-auto w-min px-2">
-          <BadgeStatus children="N/A" variant="dimmed" />
+        <div className="ml-auto w-fit px-2">
+          <BadgeStatus variant="dimmed">
+            {isNotApplicable ? "Not applicable" : "No Data"}
+          </BadgeStatus>
         </div>
       </Tooltip>
     );
   }
 
   const profitabilityValue = Math.max(profitability?.value ?? 0, 0);
-  const formattedValue = formatNumberUserReadable(profitabilityValue, 1);
+  const formattedValue =
+    profitabilityValue === 0
+      ? "<$10K"
+      : `$${formatNumberUserReadable(profitabilityValue, 1)}`;
 
   return (
     <Tooltip
@@ -95,7 +109,7 @@ export const AttackProfitabilityCell = ({
             {attackProfitInfos?.impact}
           </p>
           <p className="text-secondary text-xs font-medium leading-4">
-            Click to see details
+            Click on the cell to see details
           </p>
         </div>
       }
@@ -105,7 +119,8 @@ export const AttackProfitabilityCell = ({
         className="justify-end py-4 text-end text-sm font-normal"
       >
         <span className="flex items-center gap-2 px-2">
-          {riskLevelIcons[economicSecurityRiskLevel]}${formattedValue}
+          {riskLevelIcons[economicSecurityRiskLevel]}
+          {formattedValue}
         </span>
       </ClickableCell>
     </Tooltip>

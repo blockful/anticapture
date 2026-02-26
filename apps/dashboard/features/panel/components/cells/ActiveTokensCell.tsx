@@ -54,7 +54,7 @@ export const ActiveTokensCell = ({
     return (
       <SkeletonRow
         parentClassName="flex animate-pulse justify-end w-full"
-        className="h-5 w-full lg:max-w-32"
+        className="mx-4 h-5 w-full"
       />
     );
   }

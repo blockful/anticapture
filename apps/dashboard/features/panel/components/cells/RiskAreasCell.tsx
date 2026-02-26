@@ -54,7 +54,10 @@ export const RiskAreasCell = ({ daoId }: { daoId: DaoIdEnum }) => {
       triggerClassName="w-full"
       disableMobileClick
       tooltipContent={
-        <RiskAreasTooltip items={riskAreaItems} footer="Click to see details" />
+        <RiskAreasTooltip
+          items={riskAreaItems}
+          footer="Click on the cell to see details"
+        />
       }
     >
       <ClickableCell

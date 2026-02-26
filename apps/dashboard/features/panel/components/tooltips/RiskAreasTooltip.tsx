@@ -22,7 +22,7 @@ export const RiskAreasTooltip = ({
     [RiskLevel.HIGH]: "text-error",
     [RiskLevel.MEDIUM]: "text-warning",
     [RiskLevel.LOW]: "text-success",
-    [RiskLevel.NONE]: "text-primary",
+    [RiskLevel.NONE]: "text-secondary",
   };
 
   return (

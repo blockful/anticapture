@@ -54,7 +54,9 @@ export const PanelTable = () => {
     {
       accessorKey: "dao",
       cell: ({ row }) => <DaoCell daoId={row.getValue("dao") as DaoIdEnum} />,
-      header: () => <h4 className="text-table-header px-4 py-3">DAO</h4>,
+      header: () => (
+        <h4 className="text-table-header px-4 py-3">Organizations</h4>
+      ),
       meta: { columnClassName: "w-auto px-0 py-0" },
     },
     {
@@ -146,7 +148,7 @@ export const PanelTable = () => {
         <SortableColumnHeader
           column={column}
           title="Attack Profitability"
-          tooltipContent="Compares the Cost of Attack with how much value could be taken from the treasury and TVL. A high value means an attack may be financially attractive. A low value does not guarantee safety."
+          tooltipContent="Compares the Cost of Attack with how much value could be taken from the treasury. A high value means an attack may be financially attractive. A low value does not guarantee safety."
         />
       ),
       enableSorting: true,

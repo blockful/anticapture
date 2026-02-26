@@ -197,7 +197,8 @@ export const SCR: DaoConfiguration = {
           ].description,
         currentSetting:
           "Scroll has the ability to veto proposals through its Security Council and via its Timelock (Governor).",
-        impact: "Scroll can veto malicious proposals with the Security Council",
+        impact:
+          "Scroll can veto malicious proposals with the Security Council.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.VETO_STRATEGY],
         nextStep:
@@ -244,7 +245,7 @@ export const SCR: DaoConfiguration = {
             GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION
           ].description,
         currentSetting:
-          "It protects the DAO from a flash loan aimed to increase their voting power, by taking a snapshot of the governance power from delegates/holders one block before the Voting Period starts",
+          "It protects the DAO from a flash loan aimed to increase their voting power, by taking a snapshot of the governance power from delegates/holders one block before the Voting Period starts.",
         impact:
           "It is not possible to use a flash loan to increase voting power and approve a proposal.",
         recommendedSetting:

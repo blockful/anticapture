@@ -26,7 +26,7 @@ export const Carousel = ({ slides }: { slides: React.ReactNode[] }) => {
   };
 
   return (
-    <div className="w-full max-w-xl overflow-hidden">
+    <div className="w-full overflow-hidden">
       <div
         className="flex transition-transform duration-500 ease-in-out"
         style={{ transform: `translateX(-${current * 100}%)` }}
