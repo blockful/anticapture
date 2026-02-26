@@ -1246,11 +1246,11 @@ type query_votesByProposalId_items_items {
   voterAddress: String!
   transactionHash: String!
   proposalId: String!
-  support: Float!
+  support: Float
   votingPower: String!
   reason: String
   timestamp: Int!
-  proposalTitle: String!
+  proposalTitle: String
 }
 
 enum queryInput_votesByProposalId_orderBy {
@@ -1272,11 +1272,11 @@ type query_votes_items_items {
   voterAddress: String!
   transactionHash: String!
   proposalId: String!
-  support: Float!
+  support: Float
   votingPower: String!
   reason: String
   timestamp: Int!
-  proposalTitle: String!
+  proposalTitle: String
 }
 
 enum queryInput_votes_orderBy {
