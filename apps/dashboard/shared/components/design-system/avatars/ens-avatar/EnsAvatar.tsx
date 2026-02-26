@@ -109,26 +109,22 @@ export const EnsAvatar = ({
 
   // Determine what to display as the name
   const getDisplayName = () => {
+    const truncate = (name: string) => {
+      if (showFullAddress || name.length <= TRUNCATE_ADDRESS_LENGTH)
+        return name;
+      return `${name.slice(0, TRUNCATE_ADDRESS_LENGTH)}…`;
+    };
+
     if (ensData?.ens) return ensData.ens;
 
     const entity = arkhamData?.entity;
     const label = arkhamData?.label;
 
-    const name =
-      entity && label
-        ? `${entity} · ${label}`
-        : entity
-          ? entity
-          : label
-            ? label
-            : address
-              ? showFullAddress
-                ? address
-                : formatAddress(address)
-              : "Unknown";
-
-    if (showFullAddress || name.length <= TRUNCATE_ADDRESS_LENGTH) return name;
-    return `${name.slice(0, TRUNCATE_ADDRESS_LENGTH)}…`;
+    if (entity && label) return truncate(`${entity} · ${label}`);
+    if (entity) return truncate(entity);
+    if (label) return truncate(label);
+    if (address) return showFullAddress ? address : formatAddress(address);
+    return "Unknown";
   };
 
   const displayName = getDisplayName();
