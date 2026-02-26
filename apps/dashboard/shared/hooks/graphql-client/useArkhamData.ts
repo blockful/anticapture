@@ -1,5 +1,5 @@
 import {
-  GetArkhamDataQuery,
+  type GetArkhamDataQuery,
   useGetArkhamDataQuery,
 } from "@anticapture/graphql-client/hooks";
 
@@ -11,17 +11,21 @@ type EnsData = NonNullable<
 >;
 
 export interface ArkhamDataResult {
-  arkham: ArkhamData | null;
+  arkhamData: ArkhamData | null;
   ens: EnsData | null;
   isContract: boolean | null;
-  loading: boolean;
+  isLoading: boolean;
   error: Error | null;
 }
 
 export const useArkhamData = (
   address: string | null | undefined,
 ): ArkhamDataResult => {
-  const { data, loading, error } = useGetArkhamDataQuery({
+  const {
+    data,
+    loading: isLoading,
+    error,
+  } = useGetArkhamDataQuery({
     variables: {
       address: address!,
     },
@@ -29,10 +33,10 @@ export const useArkhamData = (
   });
 
   return {
-    arkham: data?.getAddress?.arkham ?? null,
+    arkhamData: data?.getAddress?.arkham ?? null,
     ens: data?.getAddress?.ens ?? null,
     isContract: data?.getAddress?.isContract ?? null,
-    loading,
+    isLoading,
     error: error || null,
   };
 };

@@ -14,6 +14,8 @@ import { useEnsData } from "@/shared/hooks/useEnsData";
 import { cn } from "@/shared/utils/cn";
 import { formatAddress } from "@/shared/utils/formatAddress";
 
+const TRUNCATE_ADDRESS_LENGTH = 30;
+
 export type AvatarSize = "xs" | "sm" | "md" | "lg";
 export type AvatarVariant = "square" | "rounded";
 
@@ -84,10 +86,14 @@ export const EnsAvatar = ({
 }: EnsAvatarProps) => {
   // Only fetch ENS data if we have an address and either we need imageUrl or fetchEnsName is true
   const shouldFetchEns = address && !imageUrl;
-  const { data: ensData, isLoading: ensLoading } = useEnsData(
+  const { data: ensData, isLoading: isEnsLoading } = useEnsData(
     shouldFetchEns ? address : null,
   );
-  const { arkham, isContract, loading: arkhamLoading } = useArkhamData(address);
+  const {
+    arkhamData,
+    isContract,
+    isLoading: isArkhamDataLoading,
+  } = useArkhamData(address);
 
   const [imageError, setImageError] = useState(false);
 
@@ -105,8 +111,8 @@ export const EnsAvatar = ({
   const getDisplayName = () => {
     if (ensData?.ens) return ensData.ens;
 
-    const entity = arkham?.entity;
-    const label = arkham?.label;
+    const entity = arkhamData?.entity;
+    const label = arkhamData?.label;
 
     let name: string;
     if (entity && label) name = `${entity} · ${label}`;
@@ -116,12 +122,14 @@ export const EnsAvatar = ({
     else name = "Unknown";
 
     if (showFullAddress) return name;
-    return name.length > 30 ? `${name.slice(0, 30)}…` : name;
+    return name.length > TRUNCATE_ADDRESS_LENGTH
+      ? `${name.slice(0, TRUNCATE_ADDRESS_LENGTH)}…`
+      : name;
   };
 
   const displayName = getDisplayName();
-  const isLoadingName = loading || (ensLoading && !address);
-  const isResolvingData = !!address && (ensLoading || arkhamLoading);
+  const isLoadingName = loading || (isEnsLoading && !address);
+  const isResolvingData = !!address && (isEnsLoading || isArkhamDataLoading);
 
   const baseClasses = cn(
     sizeClasses[size],
@@ -131,7 +139,7 @@ export const EnsAvatar = ({
   );
 
   const avatarElement = () => {
-    if (loading || (ensLoading && !address)) {
+    if (loading || (isEnsLoading && !address)) {
       return (
         <SkeletonRow
           parentClassName="flex animate-pulse"
@@ -186,13 +194,13 @@ export const EnsAvatar = ({
 
   const tags = showTags
     ? [
-        arkham?.twitter && `@${arkham.twitter}`,
+        arkhamData?.twitter && `@${arkhamData.twitter}`,
         ensData?.ens,
         address && formatAddress(address),
-        arkham?.entityType &&
-          (["cex", "dex"].includes(arkham.entityType.toLowerCase())
-            ? arkham.entityType.toUpperCase()
-            : arkham.entityType),
+        arkhamData?.entityType &&
+          (["cex", "dex"].includes(arkhamData.entityType.toLowerCase())
+            ? arkhamData.entityType.toUpperCase()
+            : arkhamData.entityType),
         isContract !== null ? (isContract ? "Contract" : "EOA") : null,
       ].filter(Boolean)
     : [];
@@ -237,7 +245,7 @@ export const EnsAvatar = ({
 
         {showTags && (
           <div className="flex flex-wrap items-center gap-1">
-            {arkhamLoading || ensLoading ? (
+            {isArkhamDataLoading || isEnsLoading ? (
               <>
                 <SkeletonRow
                   parentClassName="flex animate-pulse"
@@ -267,10 +275,10 @@ export const EnsAvatar = ({
         <span className="hidden md:contents">
           <AddressDetailsTooltip
             address={address}
-            arkham={arkham}
+            arkhamData={arkhamData}
             ens={ensData ? { name: ensData.ens ?? null } : null}
             isContract={isContract}
-            loading={ensLoading || arkhamLoading}
+            isLoading={isEnsLoading || isArkhamDataLoading}
           >
             {avatarWithName}
           </AddressDetailsTooltip>

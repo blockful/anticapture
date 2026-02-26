@@ -9,21 +9,23 @@ import { ArkhamDataResult } from "@/shared/hooks/graphql-client/useArkhamData";
 import { cn } from "@/shared/utils/cn";
 import { formatAddress } from "@/shared/utils/formatAddress";
 
+const UPPERCASE_ENTITY_TYPES = new Set(["cex", "dex"]);
+
 interface AddressDetailsTooltipProps extends Pick<
   ArkhamDataResult,
-  "arkham" | "ens" | "isContract" | "loading"
+  "arkhamData" | "ens" | "isContract" | "isLoading"
 > {
   address: Address;
   children: ReactNode;
 }
 
-function DashedDivider() {
+const DashedDivider = () => {
   return (
     <div className="border-border-contrast w-full border-t border-dashed" />
   );
-}
+};
 
-function Row({
+const Row = ({
   label,
   children,
   className,
@@ -31,7 +33,7 @@ function Row({
   label: string;
   children: ReactNode;
   className?: string;
-}) {
+}) => {
   return (
     <div className={cn("flex flex-col", className)}>
       <span className="text-secondary text-xs font-medium leading-4">
@@ -40,38 +42,36 @@ function Row({
       {children}
     </div>
   );
-}
+};
 
-function SkeletonLine({ className }: { className?: string }) {
+const SkeletonLine = ({ className }: { className?: string }) => {
   return (
     <div className={cn("bg-surface-hover animate-pulse rounded", className)} />
   );
-}
+};
 
-const UPPERCASE_ENTITY_TYPES = new Set(["cex", "dex"]);
-
-function formatEntityType(type: string) {
+const formatEntityType = (type: string) => {
   return UPPERCASE_ENTITY_TYPES.has(type.toLowerCase())
     ? type.toUpperCase()
     : type;
-}
+};
 
-function NotInformed() {
+const NotInformed = () => {
   return <span className="text-secondary text-sm leading-5">Not informed</span>;
-}
+};
 
-export function AddressDetailsTooltip({
+export const AddressDetailsTooltip = ({
   address,
-  arkham,
+  arkhamData: arkham,
   ens,
   isContract,
-  loading,
+  isLoading,
   children,
-}: AddressDetailsTooltipProps) {
+}: AddressDetailsTooltipProps) => {
   const content = (
     <div className="flex w-full flex-col gap-2">
       <Row label="ENS address">
-        {loading ? (
+        {isLoading ? (
           <SkeletonLine className="mt-1 h-5 w-24" />
         ) : ens?.name ? (
           <span className="text-primary text-sm leading-5">{ens.name}</span>
@@ -83,7 +83,7 @@ export function AddressDetailsTooltip({
       <DashedDivider />
 
       <Row label="Arkham Entity">
-        {loading ? (
+        {isLoading ? (
           <SkeletonLine className="mt-1 h-5 w-32" />
         ) : arkham?.entity ? (
           <span className="text-primary text-sm leading-5">
@@ -97,7 +97,7 @@ export function AddressDetailsTooltip({
       <DashedDivider />
 
       <Row label="Arkham Label">
-        {loading ? (
+        {isLoading ? (
           <SkeletonLine className="mt-1 h-5 w-32" />
         ) : arkham?.label ? (
           <span className="text-primary text-sm leading-5">{arkham.label}</span>
@@ -117,7 +117,7 @@ export function AddressDetailsTooltip({
       <DashedDivider />
 
       <Row label="Main Tag/Type" className="gap-1">
-        {loading ? (
+        {isLoading ? (
           <div className="flex gap-1">
             <SkeletonLine className="h-5 w-16 rounded-full" />
             <SkeletonLine className="h-5 w-10 rounded-full" />
@@ -143,9 +143,9 @@ export function AddressDetailsTooltip({
   return (
     <Tooltip
       tooltipContent={content}
-      className="w-[280px] rounded-none p-2 text-left"
+      className="w-70 rounded-none p-2 text-left"
     >
       {children}
     </Tooltip>
   );
-}
+};

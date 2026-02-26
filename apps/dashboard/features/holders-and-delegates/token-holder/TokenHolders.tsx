@@ -34,10 +34,10 @@ interface TokenHolderTableData {
   delegate: Address;
 }
 
-function TypeCell({ address }: { address: Address }) {
-  const { isContract, loading } = useArkhamData(address);
+const TypeCell = ({ address }: { address: Address }) => {
+  const { isContract, isLoading: isArkhamLoading } = useArkhamData(address);
 
-  if (loading) {
+  if (isArkhamLoading) {
     return (
       <SkeletonRow
         parentClassName="flex animate-pulse"
@@ -51,7 +51,7 @@ function TypeCell({ address }: { address: Address }) {
       {isContract ? "Contract" : "EOA"}
     </BadgeStatus>
   );
-}
+};
 
 export const TokenHolders = ({
   days,
