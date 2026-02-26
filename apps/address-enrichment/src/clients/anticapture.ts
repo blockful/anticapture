@@ -83,7 +83,7 @@ export class AnticaptureClient {
    */
   async *streamTopTokenHolders(daoId: string, pageSize: number = 100) {
     const query = `
-    query GetTopTokenHolders(
+    query GetTokenHolders(
       $limit: PositiveInt!,
       $skip: NonNegativeInt!,
     ) {

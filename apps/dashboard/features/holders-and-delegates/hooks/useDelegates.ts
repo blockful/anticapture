@@ -6,7 +6,6 @@ import {
 } from "@anticapture/graphql-client";
 import {
   useGetDelegatesQuery,
-  useGetHistoricalVotingAndActivityQuery,
   useGetDelegateProposalsActivityLazyQuery,
 } from "@anticapture/graphql-client/hooks";
 import { NetworkStatus } from "@apollo/client";
@@ -23,15 +22,17 @@ interface ProposalsActivity {
   avgTimeBeforeEnd?: number;
 }
 
-interface Delegate {
+export interface DelegateVariation {
+  absoluteChange: string;
+  percentageChange: number;
+}
+
+export interface Delegate {
   votingPower: string;
   delegationsCount: number;
   accountId: string;
   proposalsActivity?: ProposalsActivity;
-  percentageChange: string;
-  absoluteChange: string;
-  previousVotingPower: string;
-  currentVotingPower: string;
+  variation: DelegateVariation;
 }
 
 interface PaginationInfo {
@@ -48,28 +49,27 @@ interface UseDelegatesResult {
   pagination: PaginationInfo;
   fetchNextPage: () => Promise<void>;
   fetchingMore: boolean;
-  isHistoricalLoadingFor: (addr: string) => boolean;
   isActivityLoadingFor: (addr: string) => boolean;
 }
 
 interface UseDelegatesParams {
-  address: string | null;
   days: TimeInterval;
-  fromDate: number;
   daoId: DaoIdEnum;
+  address?: string;
   orderBy?: QueryInput_VotingPowers_OrderBy;
   orderDirection?: QueryInput_VotingPowers_OrderDirection;
   limit?: number;
+  skipActivity?: boolean;
 }
 
 export const useDelegates = ({
-  fromDate,
   daoId,
   orderBy,
   orderDirection = QueryInput_VotingPowers_OrderDirection.Desc,
   days,
   address,
   limit = 15,
+  skipActivity = false,
 }: UseDelegatesParams): UseDelegatesResult => {
   // Track current page - this is the source of truth for page number
   const [currentPage, setCurrentPage] = useState(1);
@@ -77,17 +77,6 @@ export const useDelegates = ({
   // Track pagination loading state to prevent rapid clicks
   const [isPaginationLoading, setIsPaginationLoading] = useState(false);
 
-  const [historicalVPCache, setHistoricalVPCache] = useState<
-    Map<
-      string,
-      {
-        previousVotingPower: string;
-        currentVotingPower: string;
-        percentageChange: string;
-        absoluteChange: string;
-      }
-    >
-  >(new Map());
   const [delegateActivities, setDelegateActivities] = useState<
     Map<string, ProposalsActivity>
   >(new Map());
@@ -95,10 +84,13 @@ export const useDelegates = ({
     Set<string>
   >(new Set());
 
+  const fromDate = useMemo(() => {
+    return Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[days];
+  }, [days]);
+
   // Reset to page 1 and refetch when sorting changes (new query)
   useEffect(() => {
     setCurrentPage(1);
-    setHistoricalVPCache(new Map());
     setDelegateActivities(new Map());
     setLoadingActivityAddresses(new Set());
   }, [orderDirection, address, days, orderBy]);
@@ -114,11 +106,12 @@ export const useDelegates = ({
       orderDirection,
       orderBy,
       limit,
+      fromDate: fromDate.toString(),
       ...(address && { addresses: [address] }),
     },
     context: { headers: { "anticapture-dao-id": daoId } },
     notifyOnNetworkStatusChange: true,
-    fetchPolicy: "cache-and-network", // Always check network for fresh data
+    fetchPolicy: "cache-and-network",
   });
 
   // Refetch data when sorting changes to ensure we start from page 1
@@ -126,9 +119,10 @@ export const useDelegates = ({
     refetch({
       orderDirection,
       orderBy,
+      fromDate: fromDate.toString(),
       ...(address && { addresses: [address] }),
     });
-  }, [orderDirection, address, refetch, orderBy]);
+  }, [orderDirection, address, refetch, orderBy, fromDate]);
 
   const delegateAddresses = useMemo(
     () =>
@@ -138,39 +132,6 @@ export const useDelegates = ({
     [delegatesData],
   );
 
-  const newAddressesForHistoricalVP = useMemo(
-    () =>
-      delegateAddresses.filter(
-        (addr) => addr !== undefined && !historicalVPCache.has(addr),
-      ),
-    [delegateAddresses, historicalVPCache],
-  );
-
-  // Get historical voting power data
-  const { data: newHistoricalData, loading: historicalLoading } =
-    useGetHistoricalVotingAndActivityQuery({
-      variables: {
-        addresses: newAddressesForHistoricalVP,
-        address: newAddressesForHistoricalVP[0] || "", // This is still needed for the query structure
-        fromDate: fromDate.toString(),
-        toDate: (fromDate + DAYS_IN_SECONDS[days]).toString(),
-      },
-      context: { headers: { "anticapture-dao-id": daoId } },
-      skip: newAddressesForHistoricalVP.length === 0,
-    });
-
-  useEffect(() => {
-    if (newHistoricalData?.votingPowerVariations) {
-      setHistoricalVPCache((prevCache) => {
-        const newCache = new Map(prevCache);
-        newHistoricalData.votingPowerVariations?.items?.forEach((h) => {
-          if (h) newCache.set(h.accountId, h);
-        });
-        return newCache;
-      });
-    }
-  }, [newHistoricalData]);
-
   const [getDelegateProposalsActivity] =
     useGetDelegateProposalsActivityLazyQuery({
       context: { headers: { "anticapture-dao-id": daoId } },
@@ -178,6 +139,8 @@ export const useDelegates = ({
 
   // Fetch proposals activity for all delegates using Promise.all
   useEffect(() => {
+    if (skipActivity) return;
+
     const newAddresses = delegateAddresses
       .filter((addr) => addr !== undefined)
       .filter(
@@ -226,6 +189,7 @@ export const useDelegates = ({
     getDelegateProposalsActivity,
     fromDate,
     loadingActivityAddresses,
+    skipActivity,
   ]);
 
   const finalData = useMemo(() => {
@@ -234,29 +198,22 @@ export const useDelegates = ({
     return delegatesData.votingPowers.items
       .filter((item) => item !== null)
       .map((delegate) => {
-        const votingPowerVariation = historicalVPCache.get(
-          delegate.accountId,
-        ) || {
-          previousVotingPower: "0",
-          currentVotingPower: "0",
-          percentageChange: "0",
-          absoluteChange: "0",
-        };
-
         const proposalsActivity = delegateActivities.get(delegate.accountId);
 
         return {
-          ...delegate,
-          ...votingPowerVariation,
+          votingPower: delegate.votingPower,
+          delegationsCount: delegate.delegationsCount,
+          accountId: delegate.accountId,
+          variation: delegate.variation
+            ? {
+                absoluteChange: delegate.variation.absoluteChange,
+                percentageChange: delegate.variation.percentageChange,
+              }
+            : { absoluteChange: "0", percentageChange: 0 },
           proposalsActivity,
         };
       });
-  }, [delegatesData, historicalVPCache, delegateActivities]);
-
-  const isHistoricalLoadingFor = useCallback(
-    (addr: string) => historicalLoading && !historicalVPCache.has(addr),
-    [historicalVPCache, historicalLoading],
-  );
+  }, [delegatesData, delegateActivities]);
 
   const isActivityLoadingFor = useCallback(
     (addr: string) => loadingActivityAddresses.has(addr),
@@ -277,6 +234,7 @@ export const useDelegates = ({
         variables: {
           orderDirection,
           orderBy,
+          fromDate: fromDate.toString(),
           ...(address && { addresses: [address] }),
           skip: currentItemsCount,
         },
@@ -307,6 +265,7 @@ export const useDelegates = ({
     address,
     orderDirection,
     orderBy,
+    fromDate,
   ]);
 
   const handleRefetch = useCallback(() => {
@@ -314,9 +273,10 @@ export const useDelegates = ({
     refetch({
       orderDirection,
       orderBy,
+      fromDate: fromDate.toString(),
       ...(address && { addresses: [address] }),
     });
-  }, [refetch, orderDirection, address, orderBy]);
+  }, [refetch, orderDirection, address, orderBy, fromDate]);
 
   const isLoading = useMemo(() => {
     return (
@@ -339,7 +299,6 @@ export const useDelegates = ({
     fetchNextPage,
     fetchingMore:
       isPaginationLoading || networkStatus === NetworkStatus.fetchMore,
-    isHistoricalLoadingFor,
     isActivityLoadingFor,
   };
 };

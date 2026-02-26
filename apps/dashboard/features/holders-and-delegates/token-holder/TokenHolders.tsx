@@ -1,6 +1,9 @@
 "use client";
 
-import { QueryInput_AccountBalances_OrderDirection } from "@anticapture/graphql-client";
+import {
+  QueryInput_AccountBalances_OrderBy,
+  QueryInput_AccountBalances_OrderDirection,
+} from "@anticapture/graphql-client";
 import { ColumnDef } from "@tanstack/react-table";
 import { Plus } from "lucide-react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
@@ -19,6 +22,7 @@ import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
+import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
 import daoConfig from "@/shared/dao-config";
 import { useScreenSize } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -27,7 +31,6 @@ import { formatNumberUserReadable } from "@/shared/utils";
 
 interface TokenHolderTableData {
   address: Address;
-  type: string | undefined;
   balance: number;
   variation: { percentageChange: number; absoluteChange: number } | null;
   delegate: Address;
@@ -48,11 +51,24 @@ export const TokenHolders = ({
     "sort",
     parseAsStringEnum(["desc", "asc"]).withDefault("desc"),
   );
+  const [sortBy, setSortBy] = useQueryState(
+    "sortBy",
+    parseAsStringEnum(["balance", "variation"]).withDefault("balance"),
+  );
   const { isMobile } = useScreenSize();
   const { decimals } = daoConfig[daoId];
 
   const handleAddressFilterApply = (address: string | undefined) => {
     setCurrentAddressFilter(address || null);
+  };
+
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(field as "balance" | "variation");
+      setSortOrder("desc");
+    }
   };
 
   const {
@@ -62,64 +78,40 @@ export const TokenHolders = ({
     pagination,
     fetchNextPage,
     fetchingMore,
-    isHistoricalLoadingFor,
-    historicalBalancesCache,
   } = useTokenHolders({
     daoId: daoId,
     limit: pageLimit,
+    orderBy: sortBy as QueryInput_AccountBalances_OrderBy,
     orderDirection: sortOrder as QueryInput_AccountBalances_OrderDirection,
-    address: currentAddressFilter,
+    address: currentAddressFilter || undefined,
     days: days,
   });
 
   const tableData: TokenHolderTableData[] = useMemo(() => {
-    const calculateVariation = (
-      currentBalance: string,
-      historicalBalance: string | undefined,
-    ): { percentageChange: number; absoluteChange: number } | null => {
-      if (!historicalBalance) return null;
-
-      try {
-        const current = Number(formatUnits(BigInt(currentBalance), decimals));
-        const historical = Number(
-          formatUnits(BigInt(historicalBalance), decimals),
-        );
-
-        const absoluteChange = current - historical;
-
-        if (historical === 0) {
-          return {
-            percentageChange: 9999,
-            absoluteChange: Number(absoluteChange.toFixed(2)),
-          };
-        }
-
-        const percentageChange = ((current - historical) / historical) * 100;
-
-        return {
-          percentageChange: Number(percentageChange.toFixed(2)),
-          absoluteChange: Number(absoluteChange.toFixed(2)),
-        };
-      } catch (error) {
-        console.error("Error calculating variation:", error);
-        return { percentageChange: 0, absoluteChange: 0 };
-      }
-    };
     return (
       tokenHoldersData?.map((holder) => {
-        const historicalBalance = historicalBalancesCache.get(holder.accountId);
-        const variation = calculateVariation(holder.balance, historicalBalance);
-
+        const variation = holder.variation
+          ? {
+              percentageChange:
+                holder.variation.percentageChange === PERCENTAGE_NO_BASELINE
+                  ? 9999
+                  : Number(
+                      Number(holder.variation.percentageChange).toFixed(2),
+                    ),
+              absoluteChange: Number(
+                formatUnits(BigInt(holder.variation.absoluteChange), decimals),
+              ),
+            }
+          : null;
         return {
           address: holder.accountId as Address,
-          type: holder.account?.type,
           balance: Number(formatUnits(BigInt(holder.balance), decimals)),
           variation,
           delegate: holder.delegate as Address,
         };
       }) || []
     );
-  }, [tokenHoldersData, historicalBalancesCache, decimals]);
+  }, [tokenHoldersData, decimals]);
 
   const tokenHoldersColumns: ColumnDef<TokenHolderTableData>[] = [
     {
@@ -192,38 +184,28 @@ export const TokenHolders = ({
     },
     {
       accessorKey: "balance",
-      header: ({ column }) => {
-        const handleSortToggle = () => {
-          const newSortOrder = sortOrder === "desc" ? "asc" : "desc";
-          setSortOrder(newSortOrder);
-          column.toggleSorting(newSortOrder === "desc");
-        };
-
-        return (
-          <div className="text-table-header flex w-full items-center justify-end whitespace-nowrap">
+      header: () => (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-secondary w-full justify-end p-0"
+          onClick={() => handleSort("balance")}
+        >
+          <h4 className="text-table-header whitespace-nowrap">
             Balance ({daoId})
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-secondary justify-end p-0"
-              onClick={handleSortToggle}
-            >
-              <ArrowUpDown
-                props={{
-                  className: "size-4",
-                }}
-                activeState={
-                  sortOrder === "asc"
-                    ? ArrowState.UP
-                    : sortOrder === "desc"
-                      ? ArrowState.DOWN
-                      : ArrowState.DEFAULT
-                }
-              />
-            </Button>
-          </div>
-        );
-      },
+          </h4>
+          <ArrowUpDown
+            props={{ className: "size-4" }}
+            activeState={
+              sortBy === "balance"
+                ? sortOrder === "asc"
+                  ? ArrowState.UP
+                  : ArrowState.DOWN
+                : ArrowState.DEFAULT
+            }
+          />
+        </Button>
+      ),
       cell: ({ row }) => {
         if (loading) {
           return (
@@ -247,13 +229,28 @@ export const TokenHolders = ({
     {
       accessorKey: "variation",
       header: () => (
-        <div className="text-table-header flex w-full items-center justify-center">
-          Change ({daoId})
-        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-secondary w-full justify-center p-0"
+          onClick={() => handleSort("variation")}
+        >
+          <h4 className="text-table-header whitespace-nowrap">
+            Change ({daoId})
+          </h4>
+          <ArrowUpDown
+            props={{ className: "size-4" }}
+            activeState={
+              sortBy === "variation"
+                ? sortOrder === "asc"
+                  ? ArrowState.UP
+                  : ArrowState.DOWN
+                : ArrowState.DEFAULT
+            }
+          />
+        </Button>
       ),
       cell: ({ row }) => {
-        const addr = row.original.address;
-
         const variation = row.getValue("variation") as
           | {
               percentageChange: number;
@@ -261,7 +258,7 @@ export const TokenHolders = ({
             }
           | undefined;
 
-        if (isHistoricalLoadingFor(addr) || loading) {
+        if (loading) {
           return (
             <div className="flex w-full items-center justify-center">
               <SkeletonRow
@@ -333,7 +330,7 @@ export const TokenHolders = ({
 
   return (
     <>
-      <div className="flex h-[calc(100vh-16rem)] min-h-[300px] w-full flex-col text-white">
+      <div className="min-h-75 flex h-[calc(100vh-16rem)] w-full flex-col text-white">
         <Table
           columns={tokenHoldersColumns}
           data={loading ? Array(DEFAULT_ITEMS_PER_PAGE).fill({}) : tableData}
