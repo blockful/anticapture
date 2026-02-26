@@ -1,4 +1,4 @@
-query GetTopTokenHolders(
+query GetTokenHolders(
   $limit: PositiveInt
   $skip: NonNegativeInt
   $orderDirection: queryInput_accountBalances_orderDirection

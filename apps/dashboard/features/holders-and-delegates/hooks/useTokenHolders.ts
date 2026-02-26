@@ -4,7 +4,7 @@ import {
   QueryInput_AccountBalances_OrderBy,
   QueryInput_AccountBalances_OrderDirection,
 } from "@anticapture/graphql-client";
-import { useGetTopTokenHoldersQuery } from "@anticapture/graphql-client/hooks";
+import { useGetTokenHoldersQuery } from "@anticapture/graphql-client/hooks";
 import { NetworkStatus } from "@apollo/client";
 import { useMemo, useCallback, useState, useEffect } from "react";
 
@@ -88,7 +88,7 @@ export const useTokenHolders = ({
     refetch,
     fetchMore,
     networkStatus,
-  } = useGetTopTokenHoldersQuery({
+  } = useGetTokenHoldersQuery({
     variables: {
       limit,
       skip: 0,

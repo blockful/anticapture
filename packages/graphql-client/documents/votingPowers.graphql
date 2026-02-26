@@ -5,6 +5,7 @@ query GetDelegates(
   $orderDirection: queryInput_votingPowers_orderDirection = desc
   $orderBy: queryInput_votingPowers_orderBy = votingPower
   $fromDate: String
+  $toDate: String
 ) {
   votingPowers(
     limit: $limit
@@ -12,6 +13,7 @@ query GetDelegates(
     orderDirection: $orderDirection
     orderBy: $orderBy
     fromDate: $fromDate
+    toDate: $toDate
     fromValue: "0"
     addresses: $addresses
   ) {
