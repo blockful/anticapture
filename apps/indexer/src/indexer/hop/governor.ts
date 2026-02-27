@@ -2,7 +2,6 @@ import { ponder } from "ponder:registry";
 
 import {
   proposalCreated,
-  // proposalExtended,
   updateProposalStatus,
   voteCast,
 } from "@/eventHandlers";
@@ -59,17 +58,7 @@ export function HOPGovernorIndexer(blockTime: number) {
     );
   });
 
-  // ponder.on(`HOPGovernor:ProposalExtended`, async ({ event, context }) => {
-  //   await proposalExtended(
-  //     context,
-  //     event.args.proposalId.toString(),
-  //     blockTime,
-  //     event.args.extendedDeadline,
-  //     event.transaction.hash,
-  //     event.log.logIndex,
-  //     event.block.timestamp,
-  //   );
-  // });
+  // Note: Hop governor does not have a ProposalExtended event
 
   ponder.on("HOPGovernor:ProposalQueued", async ({ event, context }) => {
     await updateProposalStatus(
