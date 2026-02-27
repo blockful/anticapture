@@ -6,6 +6,7 @@ import { useLastProposals } from "@/features/dao-overview/hooks/useLastProposals
 import { ProposalItem } from "@/features/governance/components/proposal-overview/ProposalItem";
 import { TooltipInfo } from "@/shared/components";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
+import { EmptyState as ErrorState } from "@/shared/components/design-system/table/components/EmptyState";
 import { DaoIdEnum } from "@/shared/types/daos";
 
 const LastProposalsCardSkeleton = () => {
@@ -39,14 +40,6 @@ const EmptyState = () => {
   );
 };
 
-const ErrorState = ({ message }: { message: string }) => {
-  return (
-    <div className="bg-surface-default flex items-center justify-center p-8">
-      <p className="text-error">Error loading proposals: {message}</p>
-    </div>
-  );
-};
-
 export const LastProposalsCard = ({ daoId }: { daoId: DaoIdEnum }) => {
   const { proposals, loading, error } = useLastProposals(daoId);
 
@@ -56,7 +49,7 @@ export const LastProposalsCard = ({ daoId }: { daoId: DaoIdEnum }) => {
     }
 
     if (error) {
-      return <ErrorState message={error.message} />;
+      return <ErrorState />;
     }
 
     if (proposals.length === 0) {
