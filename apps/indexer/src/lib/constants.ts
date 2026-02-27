@@ -136,14 +136,12 @@ export const CONTRACT_ADDRESSES = {
     token: {
       address: "0xc00e94Cb662C3520282E6f5717214004A7f26888",
       decimals: 18,
-      // startBlock: 9601359, TODO changing this for shorter local test index
-      startBlock: 24136487,
+      startBlock: 9601359,
     },
     // https://etherscan.io/address/0x309a862bbC1A00e45506cB8A802D1ff10004c8C0
     governor: {
       address: "0x309a862bbC1A00e45506cB8A802D1ff10004c8C0",
-      // startBlock: 21688680, TODO change back
-      startBlock: 24136487,
+      startBlock: 21688680,
     },
   },
   [DaoIdEnum.OBOL]: {
@@ -190,7 +188,6 @@ export const CONTRACT_ADDRESSES = {
     // https://etherscan.io/address/0xed8Bdb5895B8B7f9Fdb3C087628FD8410E853D48
     governor: {
       address: "0xed8Bdb5895B8B7f9Fdb3C087628FD8410E853D48",
-      // startBlock: 21688680, TODO change back
       startBlock: 14923681,
     },
   },
@@ -337,7 +334,10 @@ export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   [DaoIdEnum.ZK]: {
     timelock: "0xe5d21A9179CA2E1F0F327d598D464CcF60d89c3d",
   },
-  [DaoIdEnum.HOP]: {}, // TODO
+  [DaoIdEnum.HOP]: {
+    // TODO expand on this
+    timelock: "0xeeA8422a08258e73c139Fc32a25e10410c14bd7a",
+  },
 };
 
 export const CEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -615,7 +615,12 @@ export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     "Pancake Swap": "0xf92b0178bc932a59d45c1c4aac81712aac6a5b61",
     Uniswap: "0x3d7264539E6e3f596bb485E3091f3Ae02Ad01ef8",
   },
-  [DaoIdEnum.HOP]: {}, // TODO
+  [DaoIdEnum.HOP]: {
+    "Uniswap V4: Pool Manager": "0x000000000004444c5dc75cB358380D2e3dE08A90",
+    "Uniswap V3: HOP": "0x8d132E304D697DbEC65fC41FdAB9cF6404E0DD1c",
+    "Uniswap V3: HOP 2": "0x021ab4a498448d2612dfb4b93b9e4ed19729df54",
+    "SushiSwap: HOP": "0xEd92BFE08dE542bbb40FDBE0a27Ca66313C0C457",
+  }, // TODO
 };
 
 export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -733,7 +738,7 @@ export const BurningAddresses: Record<
   [DaoIdEnum.HOP]: {
     ZeroAddress: zeroAddress,
     Dead: "0x0000000000000000000000000000000000000000",
-    TokenContract: "0x5A7d6b2F92C77FAD6CCaBd7EE0624E64907Eaf3E", // TODO this is not correct I just copied from zk sync
+    TokenContract: "0xc5102fE9359FD9a28f877a67E36B0F050d81a3CC",
   },
 };
 
