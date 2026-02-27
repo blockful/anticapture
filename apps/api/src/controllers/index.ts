@@ -11,4 +11,6 @@ export * from "./dao";
 export * from "./treasury";
 export * from "./transfers";
 export * from "./delegations";
-export * from "./votes";
+export * from "./votes/onchainVotes";
+export * from "./proposals/offchainProposals";
+export * from "./votes/offchainVotes";

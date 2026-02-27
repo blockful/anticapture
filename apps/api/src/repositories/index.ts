@@ -9,5 +9,7 @@ export * from "./account-balance";
 export * from "./treasury/index";
 export * from "./transfers";
 export * from "./delegations";
-export * from "./votes";
+export * from "./votes/onchainVotes";
 export * from "./feed";
+export * from "./proposals/offchainProposals";
+export * from "./votes/offchainVotes";

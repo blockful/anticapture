@@ -31,7 +31,10 @@ import {
   delegators,
   historicalDelegations,
   votes,
+  offchainProposals,
+  offchainVotes,
 } from "@/controllers";
+import * as offchainSchema from "@/database/offchain-schema";
 import * as schema from "@/database/schema";
 import { docs } from "@/docs";
 import { env } from "@/env";
@@ -61,6 +64,8 @@ import {
   VotesRepository,
   FeedRepository,
   AccountBalanceQueryFragments,
+  OffchainProposalRepository,
+  OffchainVoteRepository,
 } from "@/repositories";
 import {
   AccountBalanceService,
@@ -83,6 +88,8 @@ import {
   DelegatorsService,
   VotesService,
   FeedService,
+  OffchainProposalsService,
+  OffchainVotesService,
 } from "@/services";
 
 import { feed } from "./controllers/feed";
@@ -124,6 +131,10 @@ if (!daoClient) {
 }
 
 const pgClient = drizzle(env.DATABASE_URL, { schema, casing: "snake_case" });
+const pgOffchainClient = drizzle(env.DATABASE_URL, {
+  schema: offchainSchema,
+  casing: "snake_case",
+});
 
 const daoConfig = CONTRACT_ADDRESSES[env.DAO_ID];
 const { blockTime, tokenType } = daoConfig;
@@ -237,6 +248,11 @@ votes(app, new VotesService(new VotesRepository(pgClient)));
 dao(app, daoService);
 docs(app);
 tokenMetrics(app, tokenMetricsService);
+
+const offchainProposalsRepo = new OffchainProposalRepository(pgOffchainClient);
+const offchainVotesRepo = new OffchainVoteRepository(pgOffchainClient);
+offchainProposals(app, new OffchainProposalsService(offchainProposalsRepo));
+offchainVotes(app, new OffchainVotesService(offchainVotesRepo));
 
 serve(
   {
