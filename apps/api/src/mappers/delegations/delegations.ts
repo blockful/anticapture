@@ -11,12 +11,3 @@ export const DelegationsRequestParamsSchema = z.object({
     .refine((val) => isAddress(val, { strict: false }))
     .transform((val) => getAddress(val)),
 });
-
-export const DelegationsRequestQuerySchema = z.object({
-  orderBy: z.enum(["amount", "timestamp"]).optional().default("timestamp"),
-  orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
-});
-
-export type DelegationsRequestQuery = z.infer<
-  typeof DelegationsRequestQuerySchema
->;

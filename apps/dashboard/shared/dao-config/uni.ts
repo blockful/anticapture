@@ -123,7 +123,7 @@ export const UNI: DaoConfiguration = {
             GovernanceImplementationEnum.PROPOSAL_THRESHOLD
           ].description,
         currentSetting:
-          "The Proposal Threshold is set to 1M $UNI (0,1% Total Supply)",
+          "The Proposal Threshold is set to 1M $UNI (0.1% Total Supply)",
         impact:
           "The DAO has a sufficiently high proposal threshold to avoid spam proposals and discourage attacks.",
         recommendedSetting:
@@ -217,7 +217,7 @@ export const UNI: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_DELAY
           ].description,
-        currentSetting: "The Voting Delay is set to 1 day and 19 hours",
+        currentSetting: "The Voting Delay is set to 1 day and 19 hours.",
         impact:
           "Given the current Voting Delay, the DAO has sufficient time to coordinate stakeholders and wallets before the snapshot (that counts votes) occurs.",
         recommendedSetting:
@@ -236,7 +236,7 @@ export const UNI: DaoConfiguration = {
             GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION
           ].description,
         currentSetting:
-          "It protects the DAO from a flash loan aimed to increase their voting power, by taking a snapshot of the governance power from delegates/holders one block before the Voting Period starts",
+          "It protects the DAO from a flash loan aimed to increase their voting power, by taking a snapshot of the governance power from delegates/holders one block before the Voting Period starts.",
         impact:
           "It is not possible to use a flash loan to increase voting power and approve a proposal.",
         recommendedSetting:
@@ -251,7 +251,7 @@ export const UNI: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_PERIOD
           ].description,
-        currentSetting: "The Voting Period is set to 5 day and 6 hours",
+        currentSetting: "The Voting Period is set to 5 days and 6 hours.",
         impact:
           "The current Voting Period is sufficient for governance participants to cast their votes, but the recommended safety is 7 days or more for a low-level risk.",
         recommendedSetting:

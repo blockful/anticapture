@@ -15,12 +15,9 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
-  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
-  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
-  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
 };
 
@@ -564,12 +561,8 @@ export type QueryVotingPowersArgs = {
 
 export type AccountBalanceByAccountId_200_Response = {
   __typename?: 'accountBalanceByAccountId_200_response';
-  address: Scalars['String']['output'];
-  balance: Scalars['String']['output'];
   data: Query_AccountBalanceByAccountId_Data;
-  delegate: Scalars['String']['output'];
   period: Query_AccountBalanceByAccountId_Period;
-  tokenId: Scalars['String']['output'];
 };
 
 export type AccountBalanceVariationsByAccountId_200_Response = {
@@ -797,7 +790,7 @@ export type Proposal_200_Response = {
   status: Scalars['String']['output'];
   targets: Array<Maybe<Scalars['String']['output']>>;
   timestamp: Scalars['String']['output'];
-  title: Scalars['String']['output'];
+  title?: Maybe<Scalars['String']['output']>;
   txHash: Scalars['String']['output'];
   values: Array<Maybe<Scalars['String']['output']>>;
 };
@@ -1520,7 +1513,7 @@ export type Query_Proposals_Items_Items = {
   status: Scalars['String']['output'];
   targets: Array<Maybe<Scalars['String']['output']>>;
   timestamp: Scalars['String']['output'];
-  title: Scalars['String']['output'];
+  title?: Maybe<Scalars['String']['output']>;
   txHash: Scalars['String']['output'];
   values: Array<Maybe<Scalars['String']['output']>>;
 };
@@ -1604,10 +1597,10 @@ export type Query_Transfers_Items_Items = {
 export type Query_VotesByProposalId_Items_Items = {
   __typename?: 'query_votesByProposalId_items_items';
   proposalId: Scalars['String']['output'];
-  proposalTitle: Scalars['String']['output'];
+  proposalTitle?: Maybe<Scalars['String']['output']>;
   reason?: Maybe<Scalars['String']['output']>;
-  support: Scalars['Float']['output'];
-  timestamp: Scalars['Float']['output'];
+  support?: Maybe<Scalars['Float']['output']>;
+  timestamp: Scalars['Int']['output'];
   transactionHash: Scalars['String']['output'];
   voterAddress: Scalars['String']['output'];
   votingPower: Scalars['String']['output'];
@@ -1616,10 +1609,10 @@ export type Query_VotesByProposalId_Items_Items = {
 export type Query_Votes_Items_Items = {
   __typename?: 'query_votes_items_items';
   proposalId: Scalars['String']['output'];
-  proposalTitle: Scalars['String']['output'];
+  proposalTitle?: Maybe<Scalars['String']['output']>;
   reason?: Maybe<Scalars['String']['output']>;
-  support: Scalars['Float']['output'];
-  timestamp: Scalars['Float']['output'];
+  support?: Maybe<Scalars['Float']['output']>;
+  timestamp: Scalars['Int']['output'];
   transactionHash: Scalars['String']['output'];
   voterAddress: Scalars['String']['output'];
   votingPower: Scalars['String']['output'];
@@ -1781,22 +1774,6 @@ export type BalanceHistoryGraphQueryVariables = Exact<{
 
 export type BalanceHistoryGraphQuery = { __typename?: 'Query', historicalBalances?: { __typename?: 'historicalBalances_200_response', items: Array<{ __typename?: 'query_historicalBalances_items_items', balance: string, logIndex: number, timestamp: string, transactionHash: string, transfer: { __typename?: 'query_historicalBalances_items_items_transfer', from: string, to: string, value: string } } | null> } | null };
 
-export type BalanceVariationsQueryVariables = Exact<{
-  addresses: Scalars['JSON']['input'];
-  fromDate: Scalars['String']['input'];
-}>;
-
-
-export type BalanceVariationsQuery = { __typename?: 'Query', accountBalanceVariations?: { __typename?: 'accountBalanceVariations_200_response', items: Array<{ __typename?: 'query_accountBalanceVariations_items_items', accountId: string, previousBalance: string, currentBalance: string, absoluteChange: string, percentageChange: string } | null> } | null };
-
-export type AccountBalanceVariationsQueryVariables = Exact<{
-  fromDate: Scalars['String']['input'];
-  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
-}>;
-
-
-export type AccountBalanceVariationsQuery = { __typename?: 'Query', accountBalanceVariations?: { __typename?: 'accountBalanceVariations_200_response', items: Array<{ __typename?: 'query_accountBalanceVariations_items_items', accountId: string, previousBalance: string, currentBalance: string, absoluteChange: string, percentageChange: string } | null> } | null };
-
 export type CompareTreasuryQueryVariables = Exact<{
   days: QueryInput_CompareTreasury_Days;
 }>;
@@ -1804,29 +1781,10 @@ export type CompareTreasuryQueryVariables = Exact<{
 
 export type CompareTreasuryQuery = { __typename?: 'Query', compareTreasury?: { __typename?: 'compareTreasury_200_response', changeRate: number, currentTreasury: string, oldTreasury: string } | null };
 
-export type TopVotingPowerVariationsQueryVariables = Exact<{
-  fromDate: Scalars['String']['input'];
-  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
-}>;
-
-
-export type TopVotingPowerVariationsQuery = { __typename?: 'Query', votingPowerVariations?: { __typename?: 'votingPowerVariations_200_response', items: Array<{ __typename?: 'query_votingPowerVariations_items_items', absoluteChange: string, accountId: string, currentVotingPower: string, percentageChange: string, previousVotingPower: string } | null> } | null };
-
 export type GetDaoDataQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetDaoDataQuery = { __typename?: 'Query', dao?: { __typename?: 'dao_200_response', id: string, chainId: number, quorum: string, proposalThreshold: string, votingDelay: string, votingPeriod: string, timelockDelay: string } | null };
-
-export type GetDelegatesQueryVariables = Exact<{
-  addresses?: InputMaybe<Scalars['JSON']['input']>;
-  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
-  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
-  orderDirection?: InputMaybe<QueryInput_VotingPowers_OrderDirection>;
-  orderBy?: InputMaybe<QueryInput_VotingPowers_OrderBy>;
-}>;
-
-
-export type GetDelegatesQuery = { __typename?: 'Query', votingPowers?: { __typename?: 'votingPowers_200_response', totalCount: number, items: Array<{ __typename?: 'query_votingPowers_items_items', accountId: string, delegationsCount: number, votingPower: string } | null> } | null };
 
 export type GetDelegatorsQueryVariables = Exact<{
   address: Scalars['String']['input'];
@@ -1841,8 +1799,6 @@ export type GetDelegatorsQuery = { __typename?: 'Query', delegators?: { __typena
 
 export type GetDelegationsTimestampQueryVariables = Exact<{
   delegate: Scalars['String']['input'];
-  orderBy?: InputMaybe<QueryInput_Delegations_OrderBy>;
-  orderDirection?: InputMaybe<QueryInput_Delegations_OrderDirection>;
 }>;
 
 
@@ -1889,16 +1845,6 @@ export type GetDelegatedSupplyHistoryQueryVariables = Exact<{
 
 export type GetDelegatedSupplyHistoryQuery = { __typename?: 'Query', averageDelegationPercentageByDay: { __typename?: 'AverageDelegationPercentagePage', items: Array<{ __typename?: 'AverageDelegationPercentageItem', date: string, high: string }> } };
 
-export type GetHistoricalVotingAndActivityQueryVariables = Exact<{
-  addresses: Scalars['JSON']['input'];
-  address: Scalars['String']['input'];
-  fromDate: Scalars['String']['input'];
-  toDate: Scalars['String']['input'];
-}>;
-
-
-export type GetHistoricalVotingAndActivityQuery = { __typename?: 'Query', votingPowerVariations?: { __typename?: 'votingPowerVariations_200_response', items: Array<{ __typename?: 'query_votingPowerVariations_items_items', accountId: string, previousVotingPower: string, currentVotingPower: string, percentageChange: string, absoluteChange: string } | null> } | null, proposalsActivity?: { __typename?: 'proposalsActivity_200_response', totalProposals: number, votedProposals: number, neverVoted: boolean, avgTimeBeforeEnd: number } | null };
-
 export type GetDelegateProposalsActivityQueryVariables = Exact<{
   address: Scalars['String']['input'];
   fromDate?: InputMaybe<Scalars['String']['input']>;
@@ -1928,6 +1874,13 @@ export type GetAddressQueryVariables = Exact<{
 
 export type GetAddressQuery = { __typename?: 'Query', getAddress?: { __typename?: 'getAddress_200_response', address: string, isContract: boolean, arkham?: { __typename?: 'query_getAddress_arkham', entity?: string | null, entityType?: string | null, label?: string | null, twitter?: string | null } | null, ens?: { __typename?: 'query_getAddress_ens', name?: string | null, avatar?: string | null, banner?: string | null } | null } | null };
 
+export type GetAddressDataQueryVariables = Exact<{
+  address: Scalars['String']['input'];
+}>;
+
+
+export type GetAddressDataQuery = { __typename?: 'Query', getAddress?: { __typename?: 'getAddress_200_response', isContract: boolean, arkham?: { __typename?: 'query_getAddress_arkham', entity?: string | null, entityType?: string | null, label?: string | null, twitter?: string | null } | null, ens?: { __typename?: 'query_getAddress_ens', name?: string | null } | null } | null };
+
 export type GetAddressesQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];
 }>;
@@ -1944,14 +1897,14 @@ export type GetProposalsFromDaoQueryVariables = Exact<{
 }>;
 
 
-export type GetProposalsFromDaoQuery = { __typename?: 'Query', proposals?: { __typename?: 'proposals_200_response', totalCount: number, items: Array<{ __typename?: 'query_proposals_items_items', id: string, daoId: string, txHash: string, quorum: string, forVotes: string, againstVotes: string, abstainVotes: string, timestamp: string, status: string, proposerAccountId: string, title: string, startTimestamp: string, endTimestamp: string, targets: Array<string | null>, values: Array<string | null> } | null> } | null };
+export type GetProposalsFromDaoQuery = { __typename?: 'Query', proposals?: { __typename?: 'proposals_200_response', totalCount: number, items: Array<{ __typename?: 'query_proposals_items_items', id: string, daoId: string, txHash: string, quorum: string, forVotes: string, againstVotes: string, abstainVotes: string, timestamp: string, status: string, proposerAccountId: string, title?: string | null, startTimestamp: string, endTimestamp: string, targets: Array<string | null>, values: Array<string | null> } | null> } | null };
 
 export type GetProposalQueryVariables = Exact<{
   id: Scalars['String']['input'];
 }>;
 
 
-export type GetProposalQuery = { __typename?: 'Query', proposal?: { __typename?: 'proposal_200_response', id: string, daoId: string, txHash: string, proposerAccountId: string, title: string, description: string, quorum: string, timestamp: string, status: string, forVotes: string, againstVotes: string, abstainVotes: string, startTimestamp: string, endTimestamp: string, calldatas: Array<string | null>, targets: Array<string | null>, values: Array<string | null> } | null };
+export type GetProposalQuery = { __typename?: 'Query', proposal?: { __typename?: 'proposal_200_response', id: string, daoId: string, txHash: string, proposerAccountId: string, title?: string | null, description: string, quorum: string, timestamp: string, status: string, forVotes: string, againstVotes: string, abstainVotes: string, startTimestamp: string, endTimestamp: string, calldatas: Array<string | null>, targets: Array<string | null>, values: Array<string | null> } | null };
 
 export type GetVotesQueryVariables = Exact<{
   proposalId: Scalars['String']['input'];
@@ -1962,7 +1915,7 @@ export type GetVotesQueryVariables = Exact<{
 }>;
 
 
-export type GetVotesQuery = { __typename?: 'Query', votesByProposalId?: { __typename?: 'votesByProposalId_200_response', totalCount: number, items: Array<{ __typename?: 'query_votesByProposalId_items_items', voterAddress: string, transactionHash: string, proposalId: string, support: number, votingPower: string, reason?: string | null, timestamp: number } | null> } | null };
+export type GetVotesQuery = { __typename?: 'Query', votesByProposalId?: { __typename?: 'votesByProposalId_200_response', totalCount: number, items: Array<{ __typename?: 'query_votesByProposalId_items_items', voterAddress: string, transactionHash: string, proposalId: string, support?: number | null, votingPower: string, reason?: string | null, timestamp: number } | null> } | null };
 
 export type GetVotingPowerChangeQueryVariables = Exact<{
   addresses: Scalars['JSON']['input'];
@@ -1990,7 +1943,7 @@ export type GetAccountPowerQueryVariables = Exact<{
 }>;
 
 
-export type GetAccountPowerQuery = { __typename?: 'Query', votingPowerByAccountId?: { __typename?: 'votingPowerByAccountId_200_response', accountId: string, votingPower: string } | null, votesByProposalId?: { __typename?: 'votesByProposalId_200_response', totalCount: number, items: Array<{ __typename?: 'query_votesByProposalId_items_items', support: number, votingPower: string, reason?: string | null, timestamp: number, transactionHash: string } | null> } | null };
+export type GetAccountPowerQuery = { __typename?: 'Query', votingPowerByAccountId?: { __typename?: 'votingPowerByAccountId_200_response', accountId: string, votingPower: string } | null, votesByProposalId?: { __typename?: 'votesByProposalId_200_response', totalCount: number, items: Array<{ __typename?: 'query_votesByProposalId_items_items', support?: number | null, votingPower: string, reason?: string | null, timestamp: number, transactionHash: string } | null> } | null };
 
 export type HistoricalVotingPowerQueryVariables = Exact<{
   address?: InputMaybe<Scalars['String']['input']>;
@@ -2041,7 +1994,7 @@ export type GetProposalsQueryVariables = Exact<{
 }>;
 
 
-export type GetProposalsQuery = { __typename?: 'Query', proposals?: { __typename?: 'proposals_200_response', items: Array<{ __typename?: 'query_proposals_items_items', id: string, title: string, timestamp: string } | null> } | null };
+export type GetProposalsQuery = { __typename?: 'Query', proposals?: { __typename?: 'proposals_200_response', items: Array<{ __typename?: 'query_proposals_items_items', id: string, title?: string | null, timestamp: string } | null> } | null };
 
 export type GetDaoAddressesAccountBalancesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -2075,15 +2028,17 @@ export type GetDelegationHistoryItemsQueryVariables = Exact<{
 
 export type GetDelegationHistoryItemsQuery = { __typename?: 'Query', historicalDelegations?: { __typename?: 'historicalDelegations_200_response', totalCount: number, items: Array<{ __typename?: 'query_historicalDelegations_items_items', delegatorAddress: string, delegateAddress: string, amount: string, timestamp: string, transactionHash: string } | null> } | null };
 
-export type GetTopTokenHoldersQueryVariables = Exact<{
+export type GetTokenHoldersQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   orderDirection?: InputMaybe<QueryInput_AccountBalances_OrderDirection>;
+  orderBy?: InputMaybe<QueryInput_AccountBalances_OrderBy>;
+  fromDate?: InputMaybe<Scalars['String']['input']>;
   addresses?: InputMaybe<Scalars['JSON']['input']>;
 }>;
 
 
-export type GetTopTokenHoldersQuery = { __typename?: 'Query', accountBalances?: { __typename?: 'accountBalances_200_response', totalCount: number, items: Array<{ __typename?: 'query_accountBalances_items_items', address: string, balance: string, delegate: string, tokenId: string } | null> } | null };
+export type GetTokenHoldersQuery = { __typename?: 'Query', accountBalances?: { __typename?: 'accountBalances_200_response', totalCount: number, items: Array<{ __typename?: 'query_accountBalances_items_items', address: string, balance: string, delegate: string, tokenId: string, variation: { __typename?: 'query_accountBalances_items_items_variation', previousBalance: string, absoluteChange: string, percentageChange: string } } | null> } | null };
 
 export type TokenInfoQueryVariables = Exact<{
   currency?: InputMaybe<QueryInput_Token_Currency>;
@@ -2108,6 +2063,19 @@ export type TransactionsQueryVariables = Exact<{
 
 
 export type TransactionsQuery = { __typename?: 'Query', transactions?: { __typename?: 'transactions_200_response', totalCount: number, items: Array<{ __typename?: 'query_transactions_items_items', from?: string | null, isCex: boolean, isDex: boolean, isLending: boolean, isTotal: boolean, timestamp: string, to?: string | null, transactionHash: string, delegations: Array<{ __typename?: 'query_transactions_items_items_delegations_items', daoId: string, delegateAccountId: string, delegatedValue: string, delegatorAccountId: string, isCex: boolean, isDex: boolean, isTotal: boolean, isLending: boolean, logIndex: number, previousDelegate?: string | null, timestamp: string, transactionHash: string } | null>, transfers: Array<{ __typename?: 'query_transactions_items_items_transfers_items', amount: string, daoId: string, fromAccountId: string, isCex: boolean, isDex: boolean, isLending: boolean, isTotal: boolean, logIndex: number, timestamp: string, toAccountId: string, tokenId: string, transactionHash: string } | null> } | null> } | null };
+
+export type GetDelegatesQueryVariables = Exact<{
+  addresses?: InputMaybe<Scalars['JSON']['input']>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  orderDirection?: InputMaybe<QueryInput_VotingPowers_OrderDirection>;
+  orderBy?: InputMaybe<QueryInput_VotingPowers_OrderBy>;
+  fromDate?: InputMaybe<Scalars['String']['input']>;
+  toDate?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GetDelegatesQuery = { __typename?: 'Query', votingPowers?: { __typename?: 'votingPowers_200_response', totalCount: number, items: Array<{ __typename?: 'query_votingPowers_items_items', accountId: string, delegationsCount: number, votingPower: string, variation: { __typename?: 'query_votingPowers_items_items_variation', absoluteChange: string, percentageChange: number } } | null> } | null };
 
 
 export const BalanceHistoryDocument = gql`
@@ -2244,106 +2212,6 @@ export type BalanceHistoryGraphQueryHookResult = ReturnType<typeof useBalanceHis
 export type BalanceHistoryGraphLazyQueryHookResult = ReturnType<typeof useBalanceHistoryGraphLazyQuery>;
 export type BalanceHistoryGraphSuspenseQueryHookResult = ReturnType<typeof useBalanceHistoryGraphSuspenseQuery>;
 export type BalanceHistoryGraphQueryResult = Apollo.QueryResult<BalanceHistoryGraphQuery, BalanceHistoryGraphQueryVariables>;
-export const BalanceVariationsDocument = gql`
-    query BalanceVariations($addresses: JSON!, $fromDate: String!) {
-  accountBalanceVariations(addresses: $addresses, fromDate: $fromDate) {
-    items {
-      accountId
-      previousBalance
-      currentBalance
-      absoluteChange
-      percentageChange
-    }
-  }
-}
-    `;
-
-/**
- * __useBalanceVariationsQuery__
- *
- * To run a query within a React component, call `useBalanceVariationsQuery` and pass it any options that fit your needs.
- * When your component renders, `useBalanceVariationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useBalanceVariationsQuery({
- *   variables: {
- *      addresses: // value for 'addresses'
- *      fromDate: // value for 'fromDate'
- *   },
- * });
- */
-export function useBalanceVariationsQuery(baseOptions: Apollo.QueryHookOptions<BalanceVariationsQuery, BalanceVariationsQueryVariables> & ({ variables: BalanceVariationsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<BalanceVariationsQuery, BalanceVariationsQueryVariables>(BalanceVariationsDocument, options);
-      }
-export function useBalanceVariationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<BalanceVariationsQuery, BalanceVariationsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<BalanceVariationsQuery, BalanceVariationsQueryVariables>(BalanceVariationsDocument, options);
-        }
-// @ts-ignore
-export function useBalanceVariationsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<BalanceVariationsQuery, BalanceVariationsQueryVariables>): Apollo.UseSuspenseQueryResult<BalanceVariationsQuery, BalanceVariationsQueryVariables>;
-export function useBalanceVariationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<BalanceVariationsQuery, BalanceVariationsQueryVariables>): Apollo.UseSuspenseQueryResult<BalanceVariationsQuery | undefined, BalanceVariationsQueryVariables>;
-export function useBalanceVariationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<BalanceVariationsQuery, BalanceVariationsQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<BalanceVariationsQuery, BalanceVariationsQueryVariables>(BalanceVariationsDocument, options);
-        }
-export type BalanceVariationsQueryHookResult = ReturnType<typeof useBalanceVariationsQuery>;
-export type BalanceVariationsLazyQueryHookResult = ReturnType<typeof useBalanceVariationsLazyQuery>;
-export type BalanceVariationsSuspenseQueryHookResult = ReturnType<typeof useBalanceVariationsSuspenseQuery>;
-export type BalanceVariationsQueryResult = Apollo.QueryResult<BalanceVariationsQuery, BalanceVariationsQueryVariables>;
-export const AccountBalanceVariationsDocument = gql`
-    query AccountBalanceVariations($fromDate: String!, $limit: PositiveInt = 10) {
-  accountBalanceVariations(fromDate: $fromDate, limit: $limit) {
-    items {
-      accountId
-      previousBalance
-      currentBalance
-      absoluteChange
-      percentageChange
-    }
-  }
-}
-    `;
-
-/**
- * __useAccountBalanceVariationsQuery__
- *
- * To run a query within a React component, call `useAccountBalanceVariationsQuery` and pass it any options that fit your needs.
- * When your component renders, `useAccountBalanceVariationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useAccountBalanceVariationsQuery({
- *   variables: {
- *      fromDate: // value for 'fromDate'
- *      limit: // value for 'limit'
- *   },
- * });
- */
-export function useAccountBalanceVariationsQuery(baseOptions: Apollo.QueryHookOptions<AccountBalanceVariationsQuery, AccountBalanceVariationsQueryVariables> & ({ variables: AccountBalanceVariationsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AccountBalanceVariationsQuery, AccountBalanceVariationsQueryVariables>(AccountBalanceVariationsDocument, options);
-      }
-export function useAccountBalanceVariationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AccountBalanceVariationsQuery, AccountBalanceVariationsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AccountBalanceVariationsQuery, AccountBalanceVariationsQueryVariables>(AccountBalanceVariationsDocument, options);
-        }
-// @ts-ignore
-export function useAccountBalanceVariationsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AccountBalanceVariationsQuery, AccountBalanceVariationsQueryVariables>): Apollo.UseSuspenseQueryResult<AccountBalanceVariationsQuery, AccountBalanceVariationsQueryVariables>;
-export function useAccountBalanceVariationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<AccountBalanceVariationsQuery, AccountBalanceVariationsQueryVariables>): Apollo.UseSuspenseQueryResult<AccountBalanceVariationsQuery | undefined, AccountBalanceVariationsQueryVariables>;
-export function useAccountBalanceVariationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<AccountBalanceVariationsQuery, AccountBalanceVariationsQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AccountBalanceVariationsQuery, AccountBalanceVariationsQueryVariables>(AccountBalanceVariationsDocument, options);
-        }
-export type AccountBalanceVariationsQueryHookResult = ReturnType<typeof useAccountBalanceVariationsQuery>;
-export type AccountBalanceVariationsLazyQueryHookResult = ReturnType<typeof useAccountBalanceVariationsLazyQuery>;
-export type AccountBalanceVariationsSuspenseQueryHookResult = ReturnType<typeof useAccountBalanceVariationsSuspenseQuery>;
-export type AccountBalanceVariationsQueryResult = Apollo.QueryResult<AccountBalanceVariationsQuery, AccountBalanceVariationsQueryVariables>;
 export const CompareTreasuryDocument = gql`
     query CompareTreasury($days: queryInput_compareTreasury_days!) {
   compareTreasury(days: $days) {
@@ -2389,56 +2257,6 @@ export type CompareTreasuryQueryHookResult = ReturnType<typeof useCompareTreasur
 export type CompareTreasuryLazyQueryHookResult = ReturnType<typeof useCompareTreasuryLazyQuery>;
 export type CompareTreasurySuspenseQueryHookResult = ReturnType<typeof useCompareTreasurySuspenseQuery>;
 export type CompareTreasuryQueryResult = Apollo.QueryResult<CompareTreasuryQuery, CompareTreasuryQueryVariables>;
-export const TopVotingPowerVariationsDocument = gql`
-    query TopVotingPowerVariations($fromDate: String!, $limit: PositiveInt = 10) {
-  votingPowerVariations(fromDate: $fromDate, limit: $limit, orderDirection: desc) {
-    items {
-      absoluteChange
-      accountId
-      currentVotingPower
-      percentageChange
-      previousVotingPower
-    }
-  }
-}
-    `;
-
-/**
- * __useTopVotingPowerVariationsQuery__
- *
- * To run a query within a React component, call `useTopVotingPowerVariationsQuery` and pass it any options that fit your needs.
- * When your component renders, `useTopVotingPowerVariationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useTopVotingPowerVariationsQuery({
- *   variables: {
- *      fromDate: // value for 'fromDate'
- *      limit: // value for 'limit'
- *   },
- * });
- */
-export function useTopVotingPowerVariationsQuery(baseOptions: Apollo.QueryHookOptions<TopVotingPowerVariationsQuery, TopVotingPowerVariationsQueryVariables> & ({ variables: TopVotingPowerVariationsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<TopVotingPowerVariationsQuery, TopVotingPowerVariationsQueryVariables>(TopVotingPowerVariationsDocument, options);
-      }
-export function useTopVotingPowerVariationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<TopVotingPowerVariationsQuery, TopVotingPowerVariationsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<TopVotingPowerVariationsQuery, TopVotingPowerVariationsQueryVariables>(TopVotingPowerVariationsDocument, options);
-        }
-// @ts-ignore
-export function useTopVotingPowerVariationsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<TopVotingPowerVariationsQuery, TopVotingPowerVariationsQueryVariables>): Apollo.UseSuspenseQueryResult<TopVotingPowerVariationsQuery, TopVotingPowerVariationsQueryVariables>;
-export function useTopVotingPowerVariationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<TopVotingPowerVariationsQuery, TopVotingPowerVariationsQueryVariables>): Apollo.UseSuspenseQueryResult<TopVotingPowerVariationsQuery | undefined, TopVotingPowerVariationsQueryVariables>;
-export function useTopVotingPowerVariationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<TopVotingPowerVariationsQuery, TopVotingPowerVariationsQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<TopVotingPowerVariationsQuery, TopVotingPowerVariationsQueryVariables>(TopVotingPowerVariationsDocument, options);
-        }
-export type TopVotingPowerVariationsQueryHookResult = ReturnType<typeof useTopVotingPowerVariationsQuery>;
-export type TopVotingPowerVariationsLazyQueryHookResult = ReturnType<typeof useTopVotingPowerVariationsLazyQuery>;
-export type TopVotingPowerVariationsSuspenseQueryHookResult = ReturnType<typeof useTopVotingPowerVariationsSuspenseQuery>;
-export type TopVotingPowerVariationsQueryResult = Apollo.QueryResult<TopVotingPowerVariationsQuery, TopVotingPowerVariationsQueryVariables>;
 export const GetDaoDataDocument = gql`
     query GetDaoData {
   dao {
@@ -2487,65 +2305,6 @@ export type GetDaoDataQueryHookResult = ReturnType<typeof useGetDaoDataQuery>;
 export type GetDaoDataLazyQueryHookResult = ReturnType<typeof useGetDaoDataLazyQuery>;
 export type GetDaoDataSuspenseQueryHookResult = ReturnType<typeof useGetDaoDataSuspenseQuery>;
 export type GetDaoDataQueryResult = Apollo.QueryResult<GetDaoDataQuery, GetDaoDataQueryVariables>;
-export const GetDelegatesDocument = gql`
-    query GetDelegates($addresses: JSON, $limit: PositiveInt = 10, $skip: NonNegativeInt = 0, $orderDirection: queryInput_votingPowers_orderDirection = desc, $orderBy: queryInput_votingPowers_orderBy = votingPower) {
-  votingPowers(
-    limit: $limit
-    skip: $skip
-    orderDirection: $orderDirection
-    orderBy: $orderBy
-    fromValue: "0"
-    addresses: $addresses
-  ) {
-    items {
-      accountId
-      delegationsCount
-      votingPower
-    }
-    totalCount
-  }
-}
-    `;
-
-/**
- * __useGetDelegatesQuery__
- *
- * To run a query within a React component, call `useGetDelegatesQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetDelegatesQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetDelegatesQuery({
- *   variables: {
- *      addresses: // value for 'addresses'
- *      limit: // value for 'limit'
- *      skip: // value for 'skip'
- *      orderDirection: // value for 'orderDirection'
- *      orderBy: // value for 'orderBy'
- *   },
- * });
- */
-export function useGetDelegatesQuery(baseOptions?: Apollo.QueryHookOptions<GetDelegatesQuery, GetDelegatesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetDelegatesQuery, GetDelegatesQueryVariables>(GetDelegatesDocument, options);
-      }
-export function useGetDelegatesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDelegatesQuery, GetDelegatesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetDelegatesQuery, GetDelegatesQueryVariables>(GetDelegatesDocument, options);
-        }
-// @ts-ignore
-export function useGetDelegatesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetDelegatesQuery, GetDelegatesQueryVariables>): Apollo.UseSuspenseQueryResult<GetDelegatesQuery, GetDelegatesQueryVariables>;
-export function useGetDelegatesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegatesQuery, GetDelegatesQueryVariables>): Apollo.UseSuspenseQueryResult<GetDelegatesQuery | undefined, GetDelegatesQueryVariables>;
-export function useGetDelegatesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegatesQuery, GetDelegatesQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetDelegatesQuery, GetDelegatesQueryVariables>(GetDelegatesDocument, options);
-        }
-export type GetDelegatesQueryHookResult = ReturnType<typeof useGetDelegatesQuery>;
-export type GetDelegatesLazyQueryHookResult = ReturnType<typeof useGetDelegatesLazyQuery>;
-export type GetDelegatesSuspenseQueryHookResult = ReturnType<typeof useGetDelegatesSuspenseQuery>;
-export type GetDelegatesQueryResult = Apollo.QueryResult<GetDelegatesQuery, GetDelegatesQueryVariables>;
 export const GetDelegatorsDocument = gql`
     query GetDelegators($address: String!, $skip: NonNegativeInt, $limit: PositiveInt = 10, $orderBy: queryInput_delegators_orderBy = amount, $orderDirection: queryInput_delegators_orderDirection = desc) {
   delegators(
@@ -2605,12 +2364,8 @@ export type GetDelegatorsLazyQueryHookResult = ReturnType<typeof useGetDelegator
 export type GetDelegatorsSuspenseQueryHookResult = ReturnType<typeof useGetDelegatorsSuspenseQuery>;
 export type GetDelegatorsQueryResult = Apollo.QueryResult<GetDelegatorsQuery, GetDelegatorsQueryVariables>;
 export const GetDelegationsTimestampDocument = gql`
-    query getDelegationsTimestamp($delegate: String!, $orderBy: queryInput_delegations_orderBy = timestamp, $orderDirection: queryInput_delegations_orderDirection = desc) {
-  delegations(
-    address: $delegate
-    orderBy: $orderBy
-    orderDirection: $orderDirection
-  ) {
+    query getDelegationsTimestamp($delegate: String!) {
+  delegations(address: $delegate) {
     items {
       delegatorAddress
       delegateAddress
@@ -2634,8 +2389,6 @@ export const GetDelegationsTimestampDocument = gql`
  * const { data, loading, error } = useGetDelegationsTimestampQuery({
  *   variables: {
  *      delegate: // value for 'delegate'
- *      orderBy: // value for 'orderBy'
- *      orderDirection: // value for 'orderDirection'
  *   },
  * });
  */
@@ -2919,68 +2672,6 @@ export type GetDelegatedSupplyHistoryQueryHookResult = ReturnType<typeof useGetD
 export type GetDelegatedSupplyHistoryLazyQueryHookResult = ReturnType<typeof useGetDelegatedSupplyHistoryLazyQuery>;
 export type GetDelegatedSupplyHistorySuspenseQueryHookResult = ReturnType<typeof useGetDelegatedSupplyHistorySuspenseQuery>;
 export type GetDelegatedSupplyHistoryQueryResult = Apollo.QueryResult<GetDelegatedSupplyHistoryQuery, GetDelegatedSupplyHistoryQueryVariables>;
-export const GetHistoricalVotingAndActivityDocument = gql`
-    query GetHistoricalVotingAndActivity($addresses: JSON!, $address: String!, $fromDate: String!, $toDate: String!) {
-  votingPowerVariations(
-    addresses: $addresses
-    fromDate: $fromDate
-    toDate: $toDate
-  ) {
-    items {
-      accountId
-      previousVotingPower
-      currentVotingPower
-      percentageChange
-      absoluteChange
-    }
-  }
-  proposalsActivity(address: $address, fromDate: $fromDate) {
-    totalProposals
-    votedProposals
-    neverVoted
-    avgTimeBeforeEnd
-  }
-}
-    `;
-
-/**
- * __useGetHistoricalVotingAndActivityQuery__
- *
- * To run a query within a React component, call `useGetHistoricalVotingAndActivityQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetHistoricalVotingAndActivityQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetHistoricalVotingAndActivityQuery({
- *   variables: {
- *      addresses: // value for 'addresses'
- *      address: // value for 'address'
- *      fromDate: // value for 'fromDate'
- *      toDate: // value for 'toDate'
- *   },
- * });
- */
-export function useGetHistoricalVotingAndActivityQuery(baseOptions: Apollo.QueryHookOptions<GetHistoricalVotingAndActivityQuery, GetHistoricalVotingAndActivityQueryVariables> & ({ variables: GetHistoricalVotingAndActivityQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetHistoricalVotingAndActivityQuery, GetHistoricalVotingAndActivityQueryVariables>(GetHistoricalVotingAndActivityDocument, options);
-      }
-export function useGetHistoricalVotingAndActivityLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetHistoricalVotingAndActivityQuery, GetHistoricalVotingAndActivityQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetHistoricalVotingAndActivityQuery, GetHistoricalVotingAndActivityQueryVariables>(GetHistoricalVotingAndActivityDocument, options);
-        }
-// @ts-ignore
-export function useGetHistoricalVotingAndActivitySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetHistoricalVotingAndActivityQuery, GetHistoricalVotingAndActivityQueryVariables>): Apollo.UseSuspenseQueryResult<GetHistoricalVotingAndActivityQuery, GetHistoricalVotingAndActivityQueryVariables>;
-export function useGetHistoricalVotingAndActivitySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetHistoricalVotingAndActivityQuery, GetHistoricalVotingAndActivityQueryVariables>): Apollo.UseSuspenseQueryResult<GetHistoricalVotingAndActivityQuery | undefined, GetHistoricalVotingAndActivityQueryVariables>;
-export function useGetHistoricalVotingAndActivitySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetHistoricalVotingAndActivityQuery, GetHistoricalVotingAndActivityQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetHistoricalVotingAndActivityQuery, GetHistoricalVotingAndActivityQueryVariables>(GetHistoricalVotingAndActivityDocument, options);
-        }
-export type GetHistoricalVotingAndActivityQueryHookResult = ReturnType<typeof useGetHistoricalVotingAndActivityQuery>;
-export type GetHistoricalVotingAndActivityLazyQueryHookResult = ReturnType<typeof useGetHistoricalVotingAndActivityLazyQuery>;
-export type GetHistoricalVotingAndActivitySuspenseQueryHookResult = ReturnType<typeof useGetHistoricalVotingAndActivitySuspenseQuery>;
-export type GetHistoricalVotingAndActivityQueryResult = Apollo.QueryResult<GetHistoricalVotingAndActivityQuery, GetHistoricalVotingAndActivityQueryVariables>;
 export const GetDelegateProposalsActivityDocument = gql`
     query GetDelegateProposalsActivity($address: String!, $fromDate: String) {
   proposalsActivity(address: $address, fromDate: $fromDate) {
@@ -3152,6 +2843,58 @@ export type GetAddressQueryHookResult = ReturnType<typeof useGetAddressQuery>;
 export type GetAddressLazyQueryHookResult = ReturnType<typeof useGetAddressLazyQuery>;
 export type GetAddressSuspenseQueryHookResult = ReturnType<typeof useGetAddressSuspenseQuery>;
 export type GetAddressQueryResult = Apollo.QueryResult<GetAddressQuery, GetAddressQueryVariables>;
+export const GetAddressDataDocument = gql`
+    query GetAddressData($address: String!) {
+  getAddress(address: $address) {
+    arkham {
+      entity
+      entityType
+      label
+      twitter
+    }
+    isContract
+    ens {
+      name
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetAddressDataQuery__
+ *
+ * To run a query within a React component, call `useGetAddressDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAddressDataQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAddressDataQuery({
+ *   variables: {
+ *      address: // value for 'address'
+ *   },
+ * });
+ */
+export function useGetAddressDataQuery(baseOptions: Apollo.QueryHookOptions<GetAddressDataQuery, GetAddressDataQueryVariables> & ({ variables: GetAddressDataQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetAddressDataQuery, GetAddressDataQueryVariables>(GetAddressDataDocument, options);
+      }
+export function useGetAddressDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAddressDataQuery, GetAddressDataQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetAddressDataQuery, GetAddressDataQueryVariables>(GetAddressDataDocument, options);
+        }
+// @ts-ignore
+export function useGetAddressDataSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetAddressDataQuery, GetAddressDataQueryVariables>): Apollo.UseSuspenseQueryResult<GetAddressDataQuery, GetAddressDataQueryVariables>;
+export function useGetAddressDataSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetAddressDataQuery, GetAddressDataQueryVariables>): Apollo.UseSuspenseQueryResult<GetAddressDataQuery | undefined, GetAddressDataQueryVariables>;
+export function useGetAddressDataSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetAddressDataQuery, GetAddressDataQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetAddressDataQuery, GetAddressDataQueryVariables>(GetAddressDataDocument, options);
+        }
+export type GetAddressDataQueryHookResult = ReturnType<typeof useGetAddressDataQuery>;
+export type GetAddressDataLazyQueryHookResult = ReturnType<typeof useGetAddressDataLazyQuery>;
+export type GetAddressDataSuspenseQueryHookResult = ReturnType<typeof useGetAddressDataSuspenseQuery>;
+export type GetAddressDataQueryResult = Apollo.QueryResult<GetAddressDataQuery, GetAddressDataQueryVariables>;
 export const GetAddressesDocument = gql`
     query GetAddresses($addresses: JSON!) {
   getAddresses(addresses: $addresses) {
@@ -4034,10 +3777,12 @@ export type GetDelegationHistoryItemsQueryHookResult = ReturnType<typeof useGetD
 export type GetDelegationHistoryItemsLazyQueryHookResult = ReturnType<typeof useGetDelegationHistoryItemsLazyQuery>;
 export type GetDelegationHistoryItemsSuspenseQueryHookResult = ReturnType<typeof useGetDelegationHistoryItemsSuspenseQuery>;
 export type GetDelegationHistoryItemsQueryResult = Apollo.QueryResult<GetDelegationHistoryItemsQuery, GetDelegationHistoryItemsQueryVariables>;
-export const GetTopTokenHoldersDocument = gql`
-    query GetTopTokenHolders($limit: PositiveInt, $skip: NonNegativeInt, $orderDirection: queryInput_accountBalances_orderDirection, $addresses: JSON) {
+export const GetTokenHoldersDocument = gql`
+    query GetTokenHolders($limit: PositiveInt, $skip: NonNegativeInt, $orderDirection: queryInput_accountBalances_orderDirection, $orderBy: queryInput_accountBalances_orderBy = balance, $fromDate: String, $addresses: JSON) {
   accountBalances(
     orderDirection: $orderDirection
+    orderBy: $orderBy
+    fromDate: $fromDate
     limit: $limit
     skip: $skip
     fromValue: "0"
@@ -4049,49 +3794,56 @@ export const GetTopTokenHoldersDocument = gql`
       balance
       delegate
       tokenId
+      variation {
+        previousBalance
+        absoluteChange
+        percentageChange
+      }
     }
   }
 }
     `;
 
 /**
- * __useGetTopTokenHoldersQuery__
+ * __useGetTokenHoldersQuery__
  *
- * To run a query within a React component, call `useGetTopTokenHoldersQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetTopTokenHoldersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGetTokenHoldersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetTokenHoldersQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useGetTopTokenHoldersQuery({
+ * const { data, loading, error } = useGetTokenHoldersQuery({
  *   variables: {
  *      limit: // value for 'limit'
  *      skip: // value for 'skip'
  *      orderDirection: // value for 'orderDirection'
+ *      orderBy: // value for 'orderBy'
+ *      fromDate: // value for 'fromDate'
  *      addresses: // value for 'addresses'
  *   },
  * });
  */
-export function useGetTopTokenHoldersQuery(baseOptions?: Apollo.QueryHookOptions<GetTopTokenHoldersQuery, GetTopTokenHoldersQueryVariables>) {
+export function useGetTokenHoldersQuery(baseOptions?: Apollo.QueryHookOptions<GetTokenHoldersQuery, GetTokenHoldersQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetTopTokenHoldersQuery, GetTopTokenHoldersQueryVariables>(GetTopTokenHoldersDocument, options);
+        return Apollo.useQuery<GetTokenHoldersQuery, GetTokenHoldersQueryVariables>(GetTokenHoldersDocument, options);
       }
-export function useGetTopTokenHoldersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetTopTokenHoldersQuery, GetTopTokenHoldersQueryVariables>) {
+export function useGetTokenHoldersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetTokenHoldersQuery, GetTokenHoldersQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetTopTokenHoldersQuery, GetTopTokenHoldersQueryVariables>(GetTopTokenHoldersDocument, options);
+          return Apollo.useLazyQuery<GetTokenHoldersQuery, GetTokenHoldersQueryVariables>(GetTokenHoldersDocument, options);
         }
 // @ts-ignore
-export function useGetTopTokenHoldersSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetTopTokenHoldersQuery, GetTopTokenHoldersQueryVariables>): Apollo.UseSuspenseQueryResult<GetTopTokenHoldersQuery, GetTopTokenHoldersQueryVariables>;
-export function useGetTopTokenHoldersSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetTopTokenHoldersQuery, GetTopTokenHoldersQueryVariables>): Apollo.UseSuspenseQueryResult<GetTopTokenHoldersQuery | undefined, GetTopTokenHoldersQueryVariables>;
-export function useGetTopTokenHoldersSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetTopTokenHoldersQuery, GetTopTokenHoldersQueryVariables>) {
+export function useGetTokenHoldersSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetTokenHoldersQuery, GetTokenHoldersQueryVariables>): Apollo.UseSuspenseQueryResult<GetTokenHoldersQuery, GetTokenHoldersQueryVariables>;
+export function useGetTokenHoldersSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetTokenHoldersQuery, GetTokenHoldersQueryVariables>): Apollo.UseSuspenseQueryResult<GetTokenHoldersQuery | undefined, GetTokenHoldersQueryVariables>;
+export function useGetTokenHoldersSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetTokenHoldersQuery, GetTokenHoldersQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetTopTokenHoldersQuery, GetTopTokenHoldersQueryVariables>(GetTopTokenHoldersDocument, options);
+          return Apollo.useSuspenseQuery<GetTokenHoldersQuery, GetTokenHoldersQueryVariables>(GetTokenHoldersDocument, options);
         }
-export type GetTopTokenHoldersQueryHookResult = ReturnType<typeof useGetTopTokenHoldersQuery>;
-export type GetTopTokenHoldersLazyQueryHookResult = ReturnType<typeof useGetTopTokenHoldersLazyQuery>;
-export type GetTopTokenHoldersSuspenseQueryHookResult = ReturnType<typeof useGetTopTokenHoldersSuspenseQuery>;
-export type GetTopTokenHoldersQueryResult = Apollo.QueryResult<GetTopTokenHoldersQuery, GetTopTokenHoldersQueryVariables>;
+export type GetTokenHoldersQueryHookResult = ReturnType<typeof useGetTokenHoldersQuery>;
+export type GetTokenHoldersLazyQueryHookResult = ReturnType<typeof useGetTokenHoldersLazyQuery>;
+export type GetTokenHoldersSuspenseQueryHookResult = ReturnType<typeof useGetTokenHoldersSuspenseQuery>;
+export type GetTokenHoldersQueryResult = Apollo.QueryResult<GetTokenHoldersQuery, GetTokenHoldersQueryVariables>;
 export const TokenInfoDocument = gql`
     query TokenInfo($currency: queryInput_token_currency = usd) {
   token(currency: $currency) {
@@ -4242,3 +3994,70 @@ export type TransactionsQueryHookResult = ReturnType<typeof useTransactionsQuery
 export type TransactionsLazyQueryHookResult = ReturnType<typeof useTransactionsLazyQuery>;
 export type TransactionsSuspenseQueryHookResult = ReturnType<typeof useTransactionsSuspenseQuery>;
 export type TransactionsQueryResult = Apollo.QueryResult<TransactionsQuery, TransactionsQueryVariables>;
+export const GetDelegatesDocument = gql`
+    query GetDelegates($addresses: JSON, $limit: PositiveInt = 10, $skip: NonNegativeInt = 0, $orderDirection: queryInput_votingPowers_orderDirection = desc, $orderBy: queryInput_votingPowers_orderBy = votingPower, $fromDate: String, $toDate: String) {
+  votingPowers(
+    limit: $limit
+    skip: $skip
+    orderDirection: $orderDirection
+    orderBy: $orderBy
+    fromDate: $fromDate
+    toDate: $toDate
+    fromValue: "0"
+    addresses: $addresses
+  ) {
+    items {
+      accountId
+      delegationsCount
+      votingPower
+      variation {
+        absoluteChange
+        percentageChange
+      }
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useGetDelegatesQuery__
+ *
+ * To run a query within a React component, call `useGetDelegatesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetDelegatesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetDelegatesQuery({
+ *   variables: {
+ *      addresses: // value for 'addresses'
+ *      limit: // value for 'limit'
+ *      skip: // value for 'skip'
+ *      orderDirection: // value for 'orderDirection'
+ *      orderBy: // value for 'orderBy'
+ *      fromDate: // value for 'fromDate'
+ *      toDate: // value for 'toDate'
+ *   },
+ * });
+ */
+export function useGetDelegatesQuery(baseOptions?: Apollo.QueryHookOptions<GetDelegatesQuery, GetDelegatesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetDelegatesQuery, GetDelegatesQueryVariables>(GetDelegatesDocument, options);
+      }
+export function useGetDelegatesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDelegatesQuery, GetDelegatesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetDelegatesQuery, GetDelegatesQueryVariables>(GetDelegatesDocument, options);
+        }
+// @ts-ignore
+export function useGetDelegatesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetDelegatesQuery, GetDelegatesQueryVariables>): Apollo.UseSuspenseQueryResult<GetDelegatesQuery, GetDelegatesQueryVariables>;
+export function useGetDelegatesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegatesQuery, GetDelegatesQueryVariables>): Apollo.UseSuspenseQueryResult<GetDelegatesQuery | undefined, GetDelegatesQueryVariables>;
+export function useGetDelegatesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDelegatesQuery, GetDelegatesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetDelegatesQuery, GetDelegatesQueryVariables>(GetDelegatesDocument, options);
+        }
+export type GetDelegatesQueryHookResult = ReturnType<typeof useGetDelegatesQuery>;
+export type GetDelegatesLazyQueryHookResult = ReturnType<typeof useGetDelegatesLazyQuery>;
+export type GetDelegatesSuspenseQueryHookResult = ReturnType<typeof useGetDelegatesSuspenseQuery>;
+export type GetDelegatesQueryResult = Apollo.QueryResult<GetDelegatesQuery, GetDelegatesQueryVariables>;

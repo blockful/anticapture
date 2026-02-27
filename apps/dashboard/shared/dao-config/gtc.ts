@@ -105,7 +105,7 @@ export const GTC: DaoConfiguration = {
             GovernanceImplementationEnum.ATTACK_PROFITABILITY
           ],
         nextStep:
-          "The Delegated Cap should increase, incentivizing delegation to ENS delegates. This raises the cost of attacking the DAO and reduces the potential profitability of an attack.",
+          "The Delegated Cap should increase, incentivizing delegation to Gitcoin delegates. This raises the cost of attacking the DAO and reduces the potential profitability of an attack.",
         requirements: [
           "Increase the delegation supply and active voter set to lower the profitability of an attacker.",
           "Get the delegated supply above the value directly available for proposal execution.",
@@ -134,7 +134,7 @@ export const GTC: DaoConfiguration = {
             GovernanceImplementationEnum.PROPOSAL_THRESHOLD
           ].description,
         currentSetting:
-          "The Proposal Threshold is set to 150K $GTC (0,5% Total Supply)",
+          "The Proposal Threshold is set to 150K $GTC (0.5% Total Supply)",
         impact:
           "With the current Proposal Threshold, the cost of submitting a proposal to the DAO makes spam attacks more difficult for attackers.",
         recommendedSetting:
@@ -193,7 +193,7 @@ export const GTC: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VETO_STRATEGY
           ].description,
-        currentSetting: "The DAO has not Veto Strategy",
+        currentSetting: "The DAO has no Veto Strategy.",
         impact: "There is no protection mechanism to veto malicious proposals.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.VETO_STRATEGY],
@@ -243,7 +243,7 @@ export const GTC: DaoConfiguration = {
             GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION
           ].description,
         currentSetting:
-          "It protects the DAO from a flash loan aimed to increase their voting power, by taking a snapshot of the governance power from delegates/holders one block before the Voting Period starts",
+          "It protects the DAO from a flash loan aimed to increase their voting power, by taking a snapshot of the governance power from delegates/holders one block before the Voting Period starts.",
         impact:
           "It is not possible to use a flash loan to increase voting power and approve a proposal.",
         recommendedSetting:

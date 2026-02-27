@@ -71,7 +71,7 @@ describe("HistoricalDelegationsService", () => {
       ]);
     });
 
-    it("should return the repository result unchanged", async () => {
+    it("should map repository result to delegation items response", async () => {
       const delegation = createMockDelegation({
         transactionHash: "0xhistorical1",
         delegatorAccountId: address,
@@ -96,18 +96,11 @@ describe("HistoricalDelegationsService", () => {
       expect(result).toEqual({
         items: [
           {
+            delegatorAddress: "0x1234567890123456789012345678901234567890",
+            delegateAddress: "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            amount: "9999",
+            timestamp: "1700050000",
             transactionHash: "0xhistorical1",
-            daoId: "uni",
-            delegateAccountId: "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-            delegatorAccountId: "0x1234567890123456789012345678901234567890",
-            delegatedValue: 9999n,
-            previousDelegate: null,
-            timestamp: 1700050000n,
-            logIndex: 7,
-            isCex: false,
-            isDex: false,
-            isLending: false,
-            isTotal: false,
           },
         ],
         totalCount: 1,
@@ -150,7 +143,7 @@ describe("HistoricalDelegationsService", () => {
       ]);
     });
 
-    it("should return multiple delegations from repository", async () => {
+    it("should map multiple delegations from repository", async () => {
       const delegationA = createMockDelegation({
         transactionHash: "0xtxA",
         timestamp: 1700000000n,
@@ -182,7 +175,29 @@ describe("HistoricalDelegationsService", () => {
       );
 
       expect(result).toEqual({
-        items: [delegationA, delegationB, delegationC],
+        items: [
+          {
+            delegatorAddress: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+            delegateAddress: "0x1234567890123456789012345678901234567890",
+            amount: "1000000000000000000",
+            timestamp: "1700000000",
+            transactionHash: "0xtxA",
+          },
+          {
+            delegatorAddress: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+            delegateAddress: "0x1234567890123456789012345678901234567890",
+            amount: "1000000000000000000",
+            timestamp: "1700001000",
+            transactionHash: "0xtxB",
+          },
+          {
+            delegatorAddress: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+            delegateAddress: "0x1234567890123456789012345678901234567890",
+            amount: "1000000000000000000",
+            timestamp: "1700002000",
+            transactionHash: "0xtxC",
+          },
+        ],
         totalCount: 3,
       });
     });
