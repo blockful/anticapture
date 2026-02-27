@@ -193,6 +193,7 @@ export default [
       "no-unused-vars": "off",
       "unused-imports/no-unused-imports": "off",
       "unused-imports/no-unused-vars": "off",
+      "no-restricted-imports": "off",
     },
   },
 
