@@ -186,6 +186,16 @@ export default [
     },
   },
 
+  {
+    files: ["apps/dashboard/**/*.figma.{jsx,tsx}"],
+    rules: {
+      "@typescript-eslint/no-unused-vars": "off",
+      "no-unused-vars": "off",
+      "unused-imports/no-unused-imports": "off",
+      "unused-imports/no-unused-vars": "off",
+    },
+  },
+
   // Prettier must be last to disable conflicting rules
   eslintConfigPrettier,
 ];

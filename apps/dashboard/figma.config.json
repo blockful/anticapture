@@ -1,0 +1,8 @@
+{
+  "codeConnect": {
+    "include": ["shared/components/design-system/**/*.{tsx,jsx}"],
+    "exclude": ["shared/components/design-system/**/*.stories.{tsx,jsx}"],
+    "label": "React",
+    "interactiveSetupFigmaFileUrl": "https://www.figma.com/design/DEKMQifA8YOb3oxznHboSY/%F0%9F%93%81-Orbit-UI?m=auto&t=Yjc80Ka8OabXbWej-6"
+  }
+}
