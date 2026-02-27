@@ -2,7 +2,7 @@ import { ponder } from "ponder:registry";
 
 import {
   proposalCreated,
-  proposalExtended,
+  // proposalExtended,
   updateProposalStatus,
   voteCast,
 } from "@/eventHandlers";
@@ -34,8 +34,8 @@ export function HOPGovernorIndexer(blockTime: number) {
       values: [...event.args.values],
       signatures: [...event.args.signatures],
       calldatas: [...event.args.calldatas],
-      startBlock: event.args.voteStart.toString(),
-      endBlock: event.args.voteEnd.toString(),
+      startBlock: event.args.startBlock.toString(),
+      endBlock: event.args.endBlock.toString(),
       description: event.args.description,
       timestamp: event.block.timestamp,
       blockNumber: event.block.number,
@@ -59,17 +59,17 @@ export function HOPGovernorIndexer(blockTime: number) {
     );
   });
 
-  ponder.on(`HOPGovernor:ProposalExtended`, async ({ event, context }) => {
-    await proposalExtended(
-      context,
-      event.args.proposalId.toString(),
-      blockTime,
-      event.args.extendedDeadline,
-      event.transaction.hash,
-      event.log.logIndex,
-      event.block.timestamp,
-    );
-  });
+  // ponder.on(`HOPGovernor:ProposalExtended`, async ({ event, context }) => {
+  //   await proposalExtended(
+  //     context,
+  //     event.args.proposalId.toString(),
+  //     blockTime,
+  //     event.args.extendedDeadline,
+  //     event.transaction.hash,
+  //     event.log.logIndex,
+  //     event.block.timestamp,
+  //   );
+  // });
 
   ponder.on("HOPGovernor:ProposalQueued", async ({ event, context }) => {
     await updateProposalStatus(

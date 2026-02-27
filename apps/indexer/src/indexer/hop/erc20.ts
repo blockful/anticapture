@@ -38,7 +38,7 @@ export function HOPTokenIndexer(address: Address, decimals: number) {
   ponder.on(`HOPToken:Transfer`, async ({ event, context }) => {
     const { logIndex } = event.log;
     const { hash } = event.transaction;
-    const { from, to, amount } = event.args;
+    const { from, to, value } = event.args;
     const { timestamp } = event.block;
 
     const cexAddressList = Object.values(CEXAddresses[daoId]);
@@ -56,7 +56,7 @@ export function HOPTokenIndexer(address: Address, decimals: number) {
         to: to,
         token: address,
         transactionHash: hash,
-        value: amount,
+        value: value,
         timestamp: timestamp,
         logIndex: logIndex,
       },
@@ -74,7 +74,7 @@ export function HOPTokenIndexer(address: Address, decimals: number) {
       MetricTypesEnum.LENDING_SUPPLY,
       from,
       to,
-      amount,
+      value,
       daoId,
       address,
       timestamp,
@@ -87,7 +87,7 @@ export function HOPTokenIndexer(address: Address, decimals: number) {
       MetricTypesEnum.CEX_SUPPLY,
       from,
       to,
-      amount,
+      value,
       daoId,
       address,
       timestamp,
@@ -100,7 +100,7 @@ export function HOPTokenIndexer(address: Address, decimals: number) {
       MetricTypesEnum.DEX_SUPPLY,
       from,
       to,
-      amount,
+      value,
       daoId,
       address,
       timestamp,
@@ -113,7 +113,7 @@ export function HOPTokenIndexer(address: Address, decimals: number) {
       MetricTypesEnum.TREASURY,
       from,
       to,
-      amount,
+      value,
       daoId,
       address,
       timestamp,
@@ -125,7 +125,7 @@ export function HOPTokenIndexer(address: Address, decimals: number) {
       MetricTypesEnum.TOTAL_SUPPLY,
       from,
       to,
-      amount,
+      value,
       daoId,
       address,
       timestamp,
