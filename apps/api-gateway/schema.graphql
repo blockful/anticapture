@@ -26,7 +26,7 @@ type Query {
   """
   historicalDelegations(address: String!, delegateAddressIn: JSON, skip: NonNegativeInt, limit: PositiveInt = 10, fromValue: String, toValue: String, orderDirection: queryInput_historicalDelegations_orderDirection = desc): historicalDelegations_200_response
 
-  """Get current delegators of an account"""
+  """Get current delegations for an account"""
   delegations(address: String!, orderBy: queryInput_delegations_orderBy = timestamp, orderDirection: queryInput_delegations_orderDirection = desc): delegations_200_response
 
   """Get current delegators of an account with voting power"""
