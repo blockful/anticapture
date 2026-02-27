@@ -100,7 +100,7 @@ describe("Offchain Votes Controller - Integration Tests", () => {
       const voter = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
       const res = await app.request(
-        `/offchain/votes?skip=0&limit=5&orderBy=vp&orderDirection=asc&voterAddresses=${voter}&fromDate=1000&toDate=5000`,
+        `/offchain/votes?skip=0&limit=5&orderBy=votingPower&orderDirection=asc&voterAddresses=${voter}&fromDate=1000&toDate=5000`,
       );
 
       expect(res.status).toBe(200);
