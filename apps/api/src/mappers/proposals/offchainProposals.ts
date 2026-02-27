@@ -65,11 +65,7 @@ export const OffchainProposalsRequestSchema = z.object({
     .default(10),
   orderDirection: z.enum(["asc", "desc"]).default("desc").optional(),
   status: z
-    .union([z.string(), z.array(z.string())])
-    .optional()
-    .transform((val) => {
-      if (!val) return undefined;
-      return typeof val === "string" ? [val] : val;
-    }),
+    .union([z.string().transform((a) => [a]), z.array(z.string())])
+    .optional(),
   fromDate: z.coerce.number().optional(),
 });
