@@ -47,11 +47,15 @@ export const VoteResponseSchema = z.object({
   voterAddress: z.string(),
   transactionHash: z.string(),
   proposalId: z.string(),
-  support: z.number(),
-  votingPower: z.string(),
-  reason: z.string().optional(),
-  timestamp: z.number(),
-  proposalTitle: z.string(),
+  support: z.coerce.number(),
+  votingPower: z
+    .union([z.string(), z.bigint().transform((val) => val.toString())])
+    .openapi({ type: "string" }),
+  reason: z.string().nullish(),
+  timestamp: z
+    .union([z.number(), z.bigint().transform((val) => Number(val))])
+    .openapi({ type: "integer" }),
+  proposalTitle: z.string().nullish(),
 });
 
 export type VoteResponse = z.infer<typeof VoteResponseSchema>;
@@ -62,5 +66,3 @@ export const VotesResponseSchema = z.object({
 });
 
 export type VotesResponse = z.infer<typeof VotesResponseSchema>;
-
-export * from "./offchainVotes";
