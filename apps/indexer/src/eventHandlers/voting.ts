@@ -7,8 +7,9 @@ import {
 } from "ponder:schema";
 import { Address, getAddress, Hex } from "viem";
 
-import { ensureAccountExists } from "./shared";
 import { ProposalStatus } from "@/lib/constants";
+
+import { ensureAccountExists } from "./shared";
 
 /**
  * ### Creates:
@@ -86,6 +87,8 @@ export const voteCast = async (
       abstainVotes: current.abstainVotes + (support === 2 ? votingPower : 0n),
     }));
 
+  const proposal = await context.db.find(proposalsOnchain, { id: proposalId });
+
   await context.db.insert(feedEvent).values({
     txHash,
     logIndex,
@@ -98,6 +101,7 @@ export const voteCast = async (
       support,
       votingPower,
       proposalId,
+      title: proposal?.title ?? undefined,
     },
   });
 };
@@ -154,6 +158,7 @@ export const proposalCreated = async (
 
   await ensureAccountExists(context, proposer);
 
+  const title = description.split("\n")[0]?.replace(/^#+\s*/, "") || null;
   const blockDelta = parseInt(endBlock) - Number(blockNumber);
   await context.db.insert(proposalsOnchain).values({
     id: proposalId,
@@ -166,6 +171,7 @@ export const proposalCreated = async (
     calldatas,
     startBlock: parseInt(startBlock),
     endBlock: parseInt(endBlock),
+    title,
     description,
     timestamp,
     status: ProposalStatus.PENDING,
@@ -196,9 +202,7 @@ export const proposalCreated = async (
       id: proposalId,
       proposer: getAddress(proposer),
       votingPower: proposerVotingPower,
-      title:
-        description.split("\n")[0]?.replace(/^#+\s*/, "") ||
-        "Untitled Proposal",
+      title,
     },
   });
 };
@@ -252,7 +256,7 @@ export const proposalExtended = async (
     timestamp,
     metadata: {
       id: proposalId,
-      title: proposal!.description.split("\n")[0]?.replace(/^#+\s*/, ""),
+      title: proposal?.title ?? undefined,
       endBlock: Number(extendedDeadline),
       endTimestamp,
       proposer: getAddress(proposal!.proposerAccountId),

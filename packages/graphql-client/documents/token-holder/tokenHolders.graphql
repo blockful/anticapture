@@ -1,11 +1,15 @@
-query GetTopTokenHolders(
+query GetTokenHolders(
   $limit: PositiveInt
   $skip: NonNegativeInt
   $orderDirection: queryInput_accountBalances_orderDirection
+  $orderBy: queryInput_accountBalances_orderBy = balance
+  $fromDate: String
   $addresses: JSON
 ) {
   accountBalances(
     orderDirection: $orderDirection
+    orderBy: $orderBy
+    fromDate: $fromDate
     limit: $limit
     skip: $skip
     fromValue: "0"
@@ -17,6 +21,11 @@ query GetTopTokenHolders(
       balance
       delegate
       tokenId
+      variation {
+        previousBalance
+        absoluteChange
+        percentageChange
+      }
     }
   }
 }

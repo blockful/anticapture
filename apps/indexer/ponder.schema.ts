@@ -1,4 +1,3 @@
-import { metricTypeArray } from "@/lib/constants";
 import {
   onchainTable,
   index,
@@ -7,6 +6,8 @@ import {
   relations,
 } from "ponder";
 import { Address, zeroAddress } from "viem";
+
+import { metricTypeArray } from "@/lib/constants";
 
 export const token = onchainTable("token", (drizzle) => ({
   id: drizzle.text().primaryKey(),
@@ -203,6 +204,7 @@ export const proposalsOnchain = onchainTable(
     calldatas: drizzle.json().$type<string[]>().notNull(),
     startBlock: drizzle.integer("start_block").notNull(),
     endBlock: drizzle.integer("end_block").notNull(),
+    title: drizzle.text(),
     description: drizzle.text().notNull(),
     timestamp: drizzle.bigint().notNull(),
     endTimestamp: drizzle.bigint("end_timestamp").notNull(),

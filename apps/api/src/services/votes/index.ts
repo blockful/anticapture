@@ -19,7 +19,7 @@ interface VotesRepository {
   ): Promise<{ voter: Address; votingPower: bigint }[]>;
   getProposalNonVotersCount(proposalId: string): Promise<number>;
   getVotes(req: VotesRequest): Promise<{
-    items: (DBVote & { description: string })[];
+    items: (DBVote & { proposalTitle: string | null })[];
     totalCount: number;
   }>;
   getVotesByProposalId(
@@ -33,7 +33,7 @@ interface VotesRepository {
     fromDate?: number,
     toDate?: number,
   ): Promise<{
-    items: (DBVote & { description: string })[];
+    items: (DBVote & { proposalTitle: string | null })[];
     totalCount: number;
   }>;
 
@@ -47,22 +47,8 @@ interface VotesRepository {
 export class VotesService {
   constructor(private votesRepository: VotesRepository) {}
   async getVotes(params: VotesRequest): Promise<VotesResponse> {
-    const { items, totalCount } = await this.votesRepository.getVotes(params);
-    return VotesResponseSchema.parse({
-      items: items.map((item) => ({
-        voterAddress: item.voterAccountId,
-        transactionHash: item.txHash,
-        proposalId: item.proposalId,
-        support: Number(item.support),
-        votingPower: item.votingPower.toString(),
-        reason: item.reason ? item.reason : undefined,
-        timestamp: Number(item.timestamp),
-        proposalTitle:
-          item.description.split("\n")[0]?.replace(/^#+\s*/, "") ||
-          "Untitled Proposal",
-      })),
-      totalCount,
-    });
+    const response = await this.votesRepository.getVotes(params);
+    return VotesResponseSchema.parse(response);
   }
 
   /**
@@ -134,20 +120,6 @@ export class VotesService {
       toDate,
     );
 
-    return VotesResponseSchema.parse({
-      items: response.items.map((item) => ({
-        voterAddress: item.voterAccountId,
-        transactionHash: item.txHash,
-        proposalId: item.proposalId,
-        support: Number(item.support),
-        votingPower: item.votingPower.toString(),
-        reason: item.reason ? item.reason : undefined,
-        timestamp: Number(item.timestamp),
-        proposalTitle:
-          item.description.split("\n")[0]?.replace(/^#+\s*/, "") ||
-          "Untitled Proposal",
-      })),
-      totalCount: response.totalCount,
-    });
+    return VotesResponseSchema.parse(response);
   }
 }
