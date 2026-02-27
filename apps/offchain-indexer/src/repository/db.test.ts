@@ -1,11 +1,13 @@
 import { PGlite } from "@electric-sql/pglite";
 import { drizzle, type PgliteDatabase } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
+
 import * as schema from "@/repository/schema";
+
 import { DrizzleRepository } from "./db";
 
 function createProposal(
-  overrides?: Partial<schema.OffchainProposal>
+  overrides?: Partial<schema.OffchainProposal>,
 ): schema.OffchainProposal {
   return {
     id: "prop-default",
@@ -27,14 +29,14 @@ function createProposal(
 }
 
 function createVote(
-  overrides?: Partial<schema.OffchainVote>
+  overrides?: Partial<schema.OffchainVote>,
 ): schema.OffchainVote {
   return {
     spaceId: "ens.eth",
     voter: "0x5678",
     proposalId: "prop-1",
     choice: 1,
-    vp: 100.5,
+    vp: "100.5",
     reason: "",
     created: 1700000000,
     ...overrides,
@@ -47,6 +49,7 @@ describe("DrizzleRepository", () => {
   let repo: DrizzleRepository;
 
   beforeAll(async () => {
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     (BigInt.prototype as any).toJSON = function () {
       return this.toString();
     };
@@ -97,22 +100,24 @@ describe("DrizzleRepository", () => {
       await repo.saveProposals([proposal], "cursor-1");
 
       const rows = await db.select().from(schema.proposals);
-      expect(rows).toStrictEqual([{
-        "author": "0x1234",
-        "body": "Proposal body",
-        "created": 1700000000,
-        "discussion": "",
-        "end": 1700100000,
-        "flagged": false,
-        "id": "prop-1",
-        "link": "",
-        "spaceId": "ens.eth",
-        "start": 1700000000,
-        "state": "active",
-        "title": "Test Proposal",
-        "type": "single-choice",
-        "updated": 1700000000,
-      }]);
+      expect(rows).toStrictEqual([
+        {
+          author: "0x1234",
+          body: "Proposal body",
+          created: 1700000000,
+          discussion: "",
+          end: 1700100000,
+          flagged: false,
+          id: "prop-1",
+          link: "",
+          spaceId: "ens.eth",
+          start: 1700000000,
+          state: "active",
+          title: "Test Proposal",
+          type: "single-choice",
+          updated: 1700000000,
+        },
+      ]);
     });
 
     it("should skip saving if the proposals are empty", async () => {
@@ -141,22 +146,24 @@ describe("DrizzleRepository", () => {
       await repo.saveProposals([updated], "cursor-2");
 
       const rows = await db.select().from(schema.proposals);
-      expect(rows).toStrictEqual([{
-        "author": "0x1234",
-        "body": "Proposal body",
-        "created": 1700000000,
-        "discussion": "",
-        "end": 1700100000,
-        "flagged": false,
-        "id": "prop-1",
-        "link": "",
-        "spaceId": "ens.eth",
-        "start": 1700000000,
-        "state": "closed",
-        "title": "Updated Title",
-        "type": "single-choice",
-        "updated": 1700000000,
-      }])
+      expect(rows).toStrictEqual([
+        {
+          author: "0x1234",
+          body: "Proposal body",
+          created: 1700000000,
+          discussion: "",
+          end: 1700100000,
+          flagged: false,
+          id: "prop-1",
+          link: "",
+          spaceId: "ens.eth",
+          start: 1700000000,
+          state: "closed",
+          title: "Updated Title",
+          type: "single-choice",
+          updated: 1700000000,
+        },
+      ]);
     });
   });
 
@@ -167,15 +174,17 @@ describe("DrizzleRepository", () => {
       await repo.saveVotes([vote], "cursor-1");
 
       const rows = await db.select().from(schema.votes);
-      expect(rows).toStrictEqual([{
-        "choice": 1,
-        "created": 1700000000,
-        "proposalId": "prop-1",
-        "reason": "",
-        "spaceId": "ens.eth",
-        "voter": "0xabc",
-        "vp": 100.5,
-      }])
+      expect(rows).toStrictEqual([
+        {
+          choice: 1,
+          created: 1700000000,
+          proposalId: "prop-1",
+          reason: "",
+          spaceId: "ens.eth",
+          voter: "0xabc",
+          vp: "100.5",
+        },
+      ]);
     });
 
     it("should skip saving if the votes are empty", async () => {
@@ -193,7 +202,7 @@ describe("DrizzleRepository", () => {
         voter: "0xabc",
         proposalId: "prop-1",
         choice: 1,
-        vp: 100.5,
+        vp: "100.5",
         reason: "original reason",
         created: 1700000000,
       });
@@ -203,7 +212,7 @@ describe("DrizzleRepository", () => {
         voter: "0xabc",
         proposalId: "prop-1",
         choice: 2,
-        vp: 250.0,
+        vp: "250",
         reason: "changed my mind",
         created: 1700005000,
       });
@@ -211,15 +220,17 @@ describe("DrizzleRepository", () => {
 
       const rows = await db.select().from(schema.votes);
       expect(rows).toHaveLength(1);
-      expect(rows).toStrictEqual([{
-        "choice": 2,
-        "created": 1700005000,
-        "proposalId": "prop-1",
-        "reason": "changed my mind",
-        "spaceId": "ens.eth",
-        "voter": "0xabc",
-        "vp": 250,
-      }])
+      expect(rows).toStrictEqual([
+        {
+          choice: 2,
+          created: 1700005000,
+          proposalId: "prop-1",
+          reason: "changed my mind",
+          spaceId: "ens.eth",
+          voter: "0xabc",
+          vp: "250",
+        },
+      ]);
     });
   });
 });

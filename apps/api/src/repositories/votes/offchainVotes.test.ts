@@ -40,7 +40,7 @@ const createVote = (overrides: Partial<VoteInsert> = {}): VoteInsert => ({
   voter: VOTER_A,
   proposalId: PROPOSAL_1,
   choice: { "1": 1 },
-  vp: 100.0,
+  vp: "100",
   reason: "",
   created: 1700000000,
   ...overrides,
@@ -184,8 +184,8 @@ describe("OffchainVoteRepository", () => {
       await db
         .insert(offchainVotes)
         .values([
-          createVote({ voter: VOTER_A, proposalId: PROPOSAL_1, vp: 50.0 }),
-          createVote({ voter: VOTER_B, proposalId: PROPOSAL_1, vp: 200.0 }),
+          createVote({ voter: VOTER_A, proposalId: PROPOSAL_1, vp: "50" }),
+          createVote({ voter: VOTER_B, proposalId: PROPOSAL_1, vp: "200" }),
         ]);
 
       const result = await repository.getVotes(0, 10, "vp", "desc");

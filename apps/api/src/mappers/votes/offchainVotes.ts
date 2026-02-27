@@ -43,7 +43,7 @@ export const OffchainVoteResponseSchema = z.object({
   voter: z.string(),
   proposalId: z.string(),
   choice: z.unknown(),
-  vp: z.number(),
+  vp: z.coerce.number(),
   reason: z.string(),
   created: z.number(),
   proposalTitle: z.string(),

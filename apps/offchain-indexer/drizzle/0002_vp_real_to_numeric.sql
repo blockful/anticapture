@@ -1,0 +1,1 @@
+ALTER TABLE "snapshot"."votes" ALTER COLUMN "vp" SET DATA TYPE numeric USING "vp"::numeric;

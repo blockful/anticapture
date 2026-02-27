@@ -13,7 +13,7 @@ const createMockVote = (
   voter: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   proposalId: "proposal-1",
   choice: { "1": 1 },
-  vp: 100.0,
+  vp: "100",
   reason: "",
   created: 1700000000,
   proposalTitle: "Test Proposal",

@@ -26,12 +26,11 @@ export const votes = snapshotSchema.table(
     voter: d.text().notNull(),
     proposalId: d.text("proposal_id").notNull(),
     choice: d.jsonb().notNull(),
-    vp: d.real().notNull(),
+    vp: d.numeric().notNull(),
     reason: d.text().notNull().default(""),
     created: d.integer().notNull(),
   }),
-  (table) => 
-  [
+  (table) => [
     primaryKey({
       columns: [table.proposalId, table.voter],
     }),

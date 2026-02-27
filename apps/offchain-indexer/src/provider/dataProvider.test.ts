@@ -51,9 +51,7 @@ afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 
 function mockGraphQL(data: Record<string, unknown>) {
-  server.use(
-    http.post(ENDPOINT, () => HttpResponse.json({ data })),
-  );
+  server.use(http.post(ENDPOINT, () => HttpResponse.json({ data })));
 }
 
 describe("SnapshotProvider", () => {
@@ -63,22 +61,24 @@ describe("SnapshotProvider", () => {
 
       const result = await provider.fetchProposals(null);
 
-      expect(result.data).toEqual([{
-        id: "proposal-1",
-        spaceId: SPACE_ID,
-        author: "0xabc",
-        title: "Test Proposal",
-        body: "Some body",
-        discussion: "https://discuss.ens.domains/t/1",
-        type: "single-choice",
-        start: 1700000000,
-        end: 1700100000,
-        state: "closed",
-        created: 1700000000,
-        updated: 1700000100,
-        link: "https://snapshot.org/#/ens.eth/proposal/proposal-1",
-        flagged: false,
-      }]);
+      expect(result.data).toEqual([
+        {
+          id: "proposal-1",
+          spaceId: SPACE_ID,
+          author: "0xabc",
+          title: "Test Proposal",
+          body: "Some body",
+          discussion: "https://discuss.ens.domains/t/1",
+          type: "single-choice",
+          start: 1700000000,
+          end: 1700100000,
+          state: "closed",
+          created: 1700000000,
+          updated: 1700000100,
+          link: "https://snapshot.org/#/ens.eth/proposal/proposal-1",
+          flagged: false,
+        },
+      ]);
       expect(result.nextCursor).toBeNull();
     });
 
@@ -96,30 +96,37 @@ describe("SnapshotProvider", () => {
 
     it("should default missing fields with fallbacks", async () => {
       mockGraphQL({
-        proposals: [makeProposal({
-          body: null, discussion: null, type: null,
-          state: null, updated: null, link: null, flagged: null,
-        })],
+        proposals: [
+          makeProposal({
+            body: null,
+            discussion: null,
+            type: null,
+            state: null,
+            updated: null,
+            link: null,
+            flagged: null,
+          }),
+        ],
       });
 
       const result = await provider.fetchProposals(null);
 
       expect(result.data[0]).toStrictEqual({
-        "author": "0xabc",
-        "body": "",
-        "created": 1700000000,
-        "discussion": "",
-        "end": 1700100000,
-        "flagged": false,
-        "id": "proposal-1",
-        "link": "",
-        "spaceId": "ens.eth",
-        "start": 1700000000,
-        "state": "closed",
-        "title": "Test Proposal",
-        "type": "single-choice",
-        "updated": 1700000000,
-      })
+        author: "0xabc",
+        body: "",
+        created: 1700000000,
+        discussion: "",
+        end: 1700100000,
+        flagged: false,
+        id: "proposal-1",
+        link: "",
+        spaceId: "ens.eth",
+        start: 1700000000,
+        state: "closed",
+        title: "Test Proposal",
+        type: "single-choice",
+        updated: 1700000000,
+      });
     });
   });
 
@@ -130,16 +137,18 @@ describe("SnapshotProvider", () => {
       const result = await provider.fetchVotes(null);
 
       expect(result.data).toHaveLength(1);
-      expect(result.data).toEqual([{
-        id: "vote-1",
-        spaceId: SPACE_ID,
-        voter: "0xdef",
-        proposalId: "proposal-1",
-        choice: 1,
-        vp: 100.5,
-        reason: "I agree",
-        created: 1700000050,
-      }]);
+      expect(result.data).toEqual([
+        {
+          id: "vote-1",
+          spaceId: SPACE_ID,
+          voter: "0xdef",
+          proposalId: "proposal-1",
+          choice: 1,
+          vp: "100.5",
+          reason: "I agree",
+          created: 1700000050,
+        },
+      ]);
       expect(result.nextCursor).toBeNull();
     });
 
@@ -160,7 +169,7 @@ describe("SnapshotProvider", () => {
 
       const result = await provider.fetchVotes(null);
 
-      expect(result.data[0]?.vp).toBe(0);
+      expect(result.data[0]?.vp).toBe("0");
       expect(result.data[0]?.reason).toBe("");
     });
   });
@@ -168,16 +177,21 @@ describe("SnapshotProvider", () => {
   describe("error handling", () => {
     it("should throw on HTTP error", async () => {
       server.use(
-        http.post(ENDPOINT, () => new HttpResponse(null, { status: 500, statusText: "Internal Server Error" })),
+        http.post(
+          ENDPOINT,
+          () =>
+            new HttpResponse(null, {
+              status: 500,
+              statusText: "Internal Server Error",
+            }),
+        ),
       );
 
       await expect(provider.fetchProposals(null)).rejects.toThrow();
     });
 
     it("should throw when response has no data", async () => {
-      server.use(
-        http.post(ENDPOINT, () => HttpResponse.json({})),
-      );
+      server.use(http.post(ENDPOINT, () => HttpResponse.json({})));
 
       await expect(provider.fetchProposals(null)).rejects.toThrow(
         "Snapshot API returned no data",
