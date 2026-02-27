@@ -26,8 +26,8 @@ type Query {
   """
   historicalDelegations(address: String!, delegateAddressIn: JSON, skip: NonNegativeInt, limit: PositiveInt = 10, fromValue: String, toValue: String, orderDirection: queryInput_historicalDelegations_orderDirection = desc): historicalDelegations_200_response
 
-  """Get current delegators of an account"""
-  delegations(address: String!, orderBy: queryInput_delegations_orderBy = timestamp, orderDirection: queryInput_delegations_orderDirection = desc): delegations_200_response
+  """Get current delegator of an account"""
+  delegation(address: String!, orderBy: queryInput_delegation_orderBy = timestamp, orderDirection: queryInput_delegation_orderDirection = desc): delegation_200_response
 
   """Get current delegators of an account with voting power"""
   delegators(address: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_delegators_orderBy = amount, orderDirection: queryInput_delegators_orderDirection = desc): delegators_200_response
@@ -314,12 +314,7 @@ enum queryInput_historicalDelegations_orderDirection {
   desc
 }
 
-type delegations_200_response {
-  items: [query_delegations_items_items]!
-  totalCount: Float!
-}
-
-type query_delegations_items_items {
+type delegation_200_response {
   delegatorAddress: String!
   delegateAddress: String!
   amount: String!
@@ -327,12 +322,12 @@ type query_delegations_items_items {
   transactionHash: String!
 }
 
-enum queryInput_delegations_orderBy {
+enum queryInput_delegation_orderBy {
   amount
   timestamp
 }
 
-enum queryInput_delegations_orderDirection {
+enum queryInput_delegation_orderDirection {
   asc
   desc
 }

@@ -1,9 +1,9 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import {
-  DelegationsResponseSchema,
   DelegationsRequestParamsSchema,
   DelegationsRequestQuerySchema,
+  DelegationItemSchema,
 } from "@/mappers/delegations";
 import { DelegationsService } from "@/services/delegations/current";
 
@@ -13,8 +13,8 @@ export function delegations(app: Hono, service: DelegationsService) {
       method: "get",
       operationId: "delegations",
       path: "/accounts/{address}/delegations",
-      summary: "Get delegations",
-      description: "Get current delegators of an account",
+      summary: "Get delegation",
+      description: "Get current delegator of an account",
       tags: ["delegations"],
       request: {
         params: DelegationsRequestParamsSchema,
@@ -25,7 +25,7 @@ export function delegations(app: Hono, service: DelegationsService) {
           description: "Returns delegations for an account",
           content: {
             "application/json": {
-              schema: DelegationsResponseSchema,
+              schema: DelegationItemSchema.nullable(),
             },
           },
         },
@@ -41,7 +41,9 @@ export function delegations(app: Hono, service: DelegationsService) {
         orderDirection,
       });
 
-      return context.json(DelegationsResponseSchema.parse(result));
+      if (!result) return context.json(null); // TODO: graphql-mesh can't handle the null value
+
+      return context.json(DelegationItemSchema.parse(result));
     },
   );
 }

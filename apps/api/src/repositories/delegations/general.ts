@@ -10,18 +10,16 @@ export class DelegationsRepository {
   async getDelegations(
     address: Address,
     sort: DelegationsRequestQuery,
-  ): Promise<DBDelegation[]> {
+  ): Promise<DBDelegation | undefined> {
     const direction = sort.orderDirection === "asc" ? asc : desc;
     const column =
       sort.orderBy === "amount"
         ? delegation.delegatedValue
         : delegation.timestamp;
 
-    const result = await this.db.query.delegation.findMany({
+    return await this.db.query.delegation.findFirst({
       where: eq(delegation.delegateAccountId, address),
       orderBy: [direction(column), desc(delegation.logIndex)],
     });
-
-    return result;
   }
 }

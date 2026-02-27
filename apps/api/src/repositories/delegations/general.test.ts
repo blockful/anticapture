@@ -70,7 +70,7 @@ describe("DelegationsRepository", () => {
   });
 
   describe("getDelegations", () => {
-    it("should return delegations for the given delegate address", async () => {
+    it("should return the latest delegation for the given delegate address", async () => {
       await db.insert(delegation).values([
         createDelegation({
           transactionHash: "0xtx1",
@@ -91,29 +91,23 @@ describe("DelegationsRepository", () => {
         orderDirection: "desc",
       });
 
-      expect(result).toEqual([
+      expect(result).toEqual(
         fullDelegation({
           transactionHash: "0xtx2",
           delegatorAccountId: "0x2222222222222222222222222222222222222222",
           delegatedValue: 800n,
           timestamp: 1700002000n,
         }),
-        fullDelegation({
-          transactionHash: "0xtx1",
-          delegatorAccountId: "0x1111111111111111111111111111111111111111",
-          delegatedValue: 500n,
-          timestamp: 1700001000n,
-        }),
-      ]);
+      );
     });
 
-    it("should return empty when no delegations exist", async () => {
+    it("should return undefined when no delegations exist", async () => {
       const result = await repository.getDelegations(delegate, {
         orderBy: "timestamp",
         orderDirection: "desc",
       });
 
-      expect(result).toEqual([]);
+      expect(result).toBeUndefined();
     });
 
     it("should only return delegations for the specified delegate", async () => {
@@ -135,12 +129,12 @@ describe("DelegationsRepository", () => {
         orderDirection: "desc",
       });
 
-      expect(result).toEqual([
+      expect(result).toEqual(
         fullDelegation({
           transactionHash: "0xtx1",
           delegatorAccountId: "0x1111111111111111111111111111111111111111",
         }),
-      ]);
+      );
     });
 
     it("should order by timestamp descending", async () => {
@@ -167,23 +161,13 @@ describe("DelegationsRepository", () => {
         orderDirection: "desc",
       });
 
-      expect(result).toEqual([
+      expect(result).toEqual(
         fullDelegation({
           transactionHash: "0xtx2",
           delegatorAccountId: "0x2222222222222222222222222222222222222222",
           timestamp: 3000n,
         }),
-        fullDelegation({
-          transactionHash: "0xtx3",
-          delegatorAccountId: "0x3333333333333333333333333333333333333333",
-          timestamp: 2000n,
-        }),
-        fullDelegation({
-          transactionHash: "0xtx1",
-          delegatorAccountId: "0x1111111111111111111111111111111111111111",
-          timestamp: 1000n,
-        }),
-      ]);
+      );
     });
 
     it("should order by timestamp ascending", async () => {
@@ -210,23 +194,13 @@ describe("DelegationsRepository", () => {
         orderDirection: "asc",
       });
 
-      expect(result).toEqual([
+      expect(result).toEqual(
         fullDelegation({
           transactionHash: "0xtx2",
           delegatorAccountId: "0x2222222222222222222222222222222222222222",
           timestamp: 1000n,
         }),
-        fullDelegation({
-          transactionHash: "0xtx3",
-          delegatorAccountId: "0x3333333333333333333333333333333333333333",
-          timestamp: 2000n,
-        }),
-        fullDelegation({
-          transactionHash: "0xtx1",
-          delegatorAccountId: "0x1111111111111111111111111111111111111111",
-          timestamp: 3000n,
-        }),
-      ]);
+      );
     });
 
     it("should order by amount (delegatedValue) descending", async () => {
@@ -253,23 +227,13 @@ describe("DelegationsRepository", () => {
         orderDirection: "desc",
       });
 
-      expect(result).toEqual([
+      expect(result).toEqual(
         fullDelegation({
           transactionHash: "0xtx2",
           delegatorAccountId: "0x2222222222222222222222222222222222222222",
           delegatedValue: 300n,
         }),
-        fullDelegation({
-          transactionHash: "0xtx3",
-          delegatorAccountId: "0x3333333333333333333333333333333333333333",
-          delegatedValue: 200n,
-        }),
-        fullDelegation({
-          transactionHash: "0xtx1",
-          delegatorAccountId: "0x1111111111111111111111111111111111111111",
-          delegatedValue: 100n,
-        }),
-      ]);
+      );
     });
 
     it("should order by amount (delegatedValue) ascending", async () => {
@@ -296,23 +260,13 @@ describe("DelegationsRepository", () => {
         orderDirection: "asc",
       });
 
-      expect(result).toEqual([
+      expect(result).toEqual(
         fullDelegation({
           transactionHash: "0xtx2",
           delegatorAccountId: "0x2222222222222222222222222222222222222222",
           delegatedValue: 100n,
         }),
-        fullDelegation({
-          transactionHash: "0xtx3",
-          delegatorAccountId: "0x3333333333333333333333333333333333333333",
-          delegatedValue: 200n,
-        }),
-        fullDelegation({
-          transactionHash: "0xtx1",
-          delegatorAccountId: "0x1111111111111111111111111111111111111111",
-          delegatedValue: 300n,
-        }),
-      ]);
+      );
     });
 
     it("should use logIndex as secondary sort descending", async () => {
@@ -342,26 +296,14 @@ describe("DelegationsRepository", () => {
         orderDirection: "desc",
       });
 
-      expect(result).toEqual([
+      expect(result).toEqual(
         fullDelegation({
           transactionHash: "0xtx2",
           delegatorAccountId: "0x2222222222222222222222222222222222222222",
           timestamp: 1000n,
           logIndex: 3,
         }),
-        fullDelegation({
-          transactionHash: "0xtx3",
-          delegatorAccountId: "0x3333333333333333333333333333333333333333",
-          timestamp: 1000n,
-          logIndex: 2,
-        }),
-        fullDelegation({
-          transactionHash: "0xtx1",
-          delegatorAccountId: "0x1111111111111111111111111111111111111111",
-          timestamp: 1000n,
-          logIndex: 1,
-        }),
-      ]);
+      );
     });
   });
 });
