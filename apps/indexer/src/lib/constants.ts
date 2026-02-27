@@ -178,6 +178,22 @@ export const CONTRACT_ADDRESSES = {
       startBlock: 55519658,
     },
   },
+  [DaoIdEnum.HOP]: {
+    blockTime: 12,
+    // https://etherscan.io/address/0xc5102fE9359FD9a28f877a67E36B0F050d81a3CC
+    tokenType: "ERC20",
+    token: {
+      address: "0xc5102fE9359FD9a28f877a67E36B0F050d81a3CC",
+      decimals: 18,
+      startBlock: 14923678,
+    },
+    // https://etherscan.io/address/0xed8Bdb5895B8B7f9Fdb3C087628FD8410E853D48
+    governor: {
+      address: "0xed8Bdb5895B8B7f9Fdb3C087628FD8410E853D48",
+      // startBlock: 21688680, TODO change back
+      startBlock: 14923681,
+    },
+  },
 } as const;
 
 export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -321,6 +337,7 @@ export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   [DaoIdEnum.ZK]: {
     timelock: "0xe5d21A9179CA2E1F0F327d598D464CcF60d89c3d",
   },
+  [DaoIdEnum.HOP]: {}, // TODO
 };
 
 export const CEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -532,6 +549,7 @@ export const CEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     OKX2: "0xf9b52be2426f06ab6d560f64a7b15e820f33cbdb",
     OKX3: "0xecf17c7f6a6090f1edd21e0beb2268197270fb44",
   },
+  [DaoIdEnum.HOP]: {}, // TODO
 };
 
 export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -597,6 +615,7 @@ export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     "Pancake Swap": "0xf92b0178bc932a59d45c1c4aac81712aac6a5b61",
     Uniswap: "0x3d7264539E6e3f596bb485E3091f3Ae02Ad01ef8",
   },
+  [DaoIdEnum.HOP]: {}, // TODO
 };
 
 export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -643,6 +662,7 @@ export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     Aave: "0xd6cd2c0fc55936498726cacc497832052a9b2d1b",
     Venus: "0x697a70779c1a03ba2bd28b7627a902bff831b616",
   },
+  [DaoIdEnum.HOP]: {}, // TODO
 };
 
 export const BurningAddresses: Record<
@@ -709,6 +729,11 @@ export const BurningAddresses: Record<
     ZeroAddress: zeroAddress,
     Dead: "0x0000000000000000000000000000000000000000",
     TokenContract: "0x5A7d6b2F92C77FAD6CCaBd7EE0624E64907Eaf3E",
+  },
+  [DaoIdEnum.HOP]: {
+    ZeroAddress: zeroAddress,
+    Dead: "0x0000000000000000000000000000000000000000",
+    TokenContract: "0x5A7d6b2F92C77FAD6CCaBd7EE0624E64907Eaf3E", // TODO this is not correct I just copied from zk sync
   },
 };
 

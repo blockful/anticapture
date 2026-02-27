@@ -1,11 +1,11 @@
 import { createConfig } from "ponder";
 
 import { env } from "@/env";
-import { COMPGovernorAbi, COMPTokenAbi } from "@/indexer/comp";
+import { HOPGovernorAbi, HOPTokenAbi } from "@/indexer/hop";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 
-const COMP_CONTRACTS = CONTRACT_ADDRESSES[DaoIdEnum.COMP];
+const HOP_CONTRACTS = CONTRACT_ADDRESSES[DaoIdEnum.HOP];
 
 export default createConfig({
   database: {
@@ -21,17 +21,17 @@ export default createConfig({
     },
   },
   contracts: {
-    COMPToken: {
-      abi: COMPTokenAbi,
+    HOPToken: {
+      abi: HOPTokenAbi,
       chain: "ethereum_mainnet",
-      address: COMP_CONTRACTS.token.address,
-      startBlock: COMP_CONTRACTS.token.startBlock,
+      address: HOP_CONTRACTS.token.address,
+      startBlock: HOP_CONTRACTS.token.startBlock,
     },
-    COMPGovernor: {
-      abi: COMPGovernorAbi,
+    HOPGovernor: {
+      abi: HOPGovernorAbi,
       chain: "ethereum_mainnet",
-      address: COMP_CONTRACTS.governor.address,
-      startBlock: COMP_CONTRACTS.governor.startBlock,
+      address: HOP_CONTRACTS.governor.address,
+      startBlock: HOP_CONTRACTS.governor.startBlock,
     },
   },
 });
