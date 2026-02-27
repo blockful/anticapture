@@ -23,6 +23,6 @@ figma.connect(
       // "isAvatar": figma.boolean('isAvatar'),
       // "hasBadge": figma.boolean('hasBadge')
     },
-    example: (props) => <DrawerTitle />,
+    example: (props) => <DrawerTitle children={""} />,
   },
 );

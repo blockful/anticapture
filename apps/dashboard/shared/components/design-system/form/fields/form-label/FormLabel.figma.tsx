@@ -21,6 +21,6 @@ figma.connect(
       // "hasValue": figma.boolean('hasValue'),
       // "isColorful": figma.boolean('isColorful')
     },
-    example: (props) => <FormLabel />,
+    example: (props) => <FormLabel children={""} />,
   },
 );

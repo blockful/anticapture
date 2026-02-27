@@ -24,6 +24,6 @@ figma.connect(
       //   "just one page": "just-one-page"
       // })
     },
-    example: (props) => <Pagination currentPage={/* TODO */} />,
+    example: (props) => <Pagination currentPage={0} />,
   },
 );

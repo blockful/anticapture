@@ -21,6 +21,6 @@ figma.connect(
       // "text": figma.string('text'),
       // "hasLink": figma.boolean('hasLink')
     },
-    example: (props) => <InlineAlert text={props.text} variant={/* TODO */} />,
+    example: (props) => <InlineAlert text={props.text} variant={"info"} />,
   },
 );

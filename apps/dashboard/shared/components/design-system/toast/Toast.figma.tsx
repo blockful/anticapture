@@ -29,8 +29,8 @@ figma.connect(
       <Toast
         message={props.message}
         type={props.type}
-        visible={/* TODO */}
-        onClose={/* TODO */}
+        visible={false}
+        onClose={() => {}}
       />
     ),
   },

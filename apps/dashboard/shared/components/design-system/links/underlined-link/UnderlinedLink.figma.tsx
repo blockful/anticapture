@@ -25,7 +25,7 @@ figma.connect(
       // "hasIcon": figma.boolean('hasIcon')
     },
     example: (props) => (
-      <UnderlinedLink href={/* TODO */} openInNewTab={/* TODO */} />
+      <UnderlinedLink href={""} openInNewTab={false} children={<></>} />
     ),
   },
 );

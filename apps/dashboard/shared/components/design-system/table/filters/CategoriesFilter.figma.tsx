@@ -18,9 +18,9 @@ figma.connect(
     props: {},
     example: (props) => (
       <CategoriesFilter
-        options={/* TODO */}
-        selectedValue={/* TODO */}
-        onValueChange={/* TODO */}
+        options={[]}
+        selectedValue={""}
+        onValueChange={() => {}}
       />
     ),
   },

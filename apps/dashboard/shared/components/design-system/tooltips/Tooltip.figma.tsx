@@ -24,6 +24,6 @@ figma.connect(
       //   "topics": "topics"
       // })
     },
-    example: (props) => <Tooltip tooltipContent={/* TODO */} />,
+    example: (props) => <Tooltip tooltipContent={<></>} children={<></>} />,
   },
 );

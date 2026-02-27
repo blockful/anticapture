@@ -16,6 +16,6 @@ figma.connect(
   "https://www.figma.com/design/DEKMQifA8YOb3oxznHboSY/%F0%9F%93%81-Orbit-UI?node-id=4%3A5594",
   {
     props: {},
-    example: (props) => <Percentage value={/* TODO */} />,
+    example: (props) => <Percentage value={0} />,
   },
 );

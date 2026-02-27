@@ -29,9 +29,9 @@ figma.connect(
     },
     example: (props) => (
       <DefaultLink
-        href={/* TODO */}
+        href={""}
         scroll={props.scroll}
-        openInNewTab={/* TODO */}
+        openInNewTab={false}
         className={props.className}
       />
     ),

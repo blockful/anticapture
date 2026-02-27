@@ -1,5 +1,5 @@
 import figma from "@figma/code-connect";
-import React from "react";
+import React, { ElementType } from "react";
 
 import { BlankSlate } from "./BlankSlate";
 
@@ -31,8 +31,8 @@ figma.connect(
     },
     example: (props) => (
       <BlankSlate
-        variant={/* TODO */}
-        icon={/* TODO */}
+        variant={"default"}
+        icon={null as unknown as ElementType}
         title={props.title}
         className={props.className}
         description={props.description}

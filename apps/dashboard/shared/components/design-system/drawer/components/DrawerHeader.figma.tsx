@@ -20,8 +20,6 @@ figma.connect(
       // "hasTabs": figma.boolean('hasTabs'),
       // "hasSubtitle": figma.boolean('hasSubtitle')
     },
-    example: (props) => (
-      <DrawerHeader title={/* TODO */} onClose={/* TODO */} />
-    ),
+    example: (props) => <DrawerHeader title={""} onClose={() => {}} />,
   },
 );

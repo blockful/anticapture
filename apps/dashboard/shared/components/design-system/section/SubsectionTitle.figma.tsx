@@ -25,10 +25,10 @@ figma.connect(
     },
     example: (props) => (
       <SubsectionTitle
-        subsectionTitle={/* TODO */}
+        subsectionTitle={""}
         subsectionDescription={props.subsectionDescription}
-        dateRange={/* TODO */}
-        switcherComponent={/* TODO */}
+        dateRange={""}
+        switcherComponent={null}
       />
     ),
   },

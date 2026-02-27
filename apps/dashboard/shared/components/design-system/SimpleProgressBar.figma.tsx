@@ -24,6 +24,6 @@ figma.connect(
       //   "bottom": "bottom"
       // })
     },
-    example: (props) => <SimpleProgressBar percentage={/* TODO */} />,
+    example: (props) => <SimpleProgressBar percentage={0} />,
   },
 );

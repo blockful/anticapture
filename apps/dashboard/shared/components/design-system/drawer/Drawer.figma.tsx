@@ -22,7 +22,7 @@ figma.connect(
       // })
     },
     example: (props) => (
-      <DrawerRoot open={/* TODO */} onOpenChange={/* TODO */} />
+      <DrawerRoot open={false} onOpenChange={() => {}} children={<></>} />
     ),
   },
 );

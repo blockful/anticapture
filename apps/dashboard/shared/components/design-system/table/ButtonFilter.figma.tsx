@@ -29,6 +29,6 @@ figma.connect(
       // }),
       // "isLeft": figma.boolean('isLeft')
     },
-    example: (props) => <ButtonFilter onClick={/* TODO */} />,
+    example: (props) => <ButtonFilter onClick={() => {}} />,
   },
 );

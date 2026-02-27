@@ -17,11 +17,7 @@ figma.connect(
   {
     props: {},
     example: (props) => (
-      <SectionTitle
-        icon={/* TODO */}
-        title={/* TODO */}
-        description={/* TODO */}
-      />
+      <SectionTitle icon={<></>} title={""} description={""} />
     ),
   },
 );
