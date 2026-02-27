@@ -46,7 +46,7 @@ export const NOUNS: DaoConfiguration = {
       cancelFunction: true,
       logic: "For",
       quorumCalculation: "10-15% Dynamic Quorum",
-      proposalThreshold: "3 $NOUN (>0,25% Adjusted Supply)",
+      proposalThreshold: "3 $NOUN (>0.25% Adjusted Supply)",
     },
   },
   attackProfitability: {
@@ -77,7 +77,7 @@ export const NOUNS: DaoConfiguration = {
             GovernanceImplementationEnum.INTERFACE_RESILIENCE
           ].description,
         currentSetting:
-          "The governance interfaces and domain of the Optimism DAO do not have DNS protection, leaving voters vulnerable to spoofing and hijacking attacks.",
+          "The governance interfaces and domain of Nouns do not have DNS protection, leaving voters vulnerable to spoofing and hijacking attacks.",
         impact:
           "Without protection for its governance domains and interfaces, governance participants may be manipulated into voting for an outcome that harms the DAO.",
         recommendedSetting:
@@ -131,7 +131,7 @@ export const NOUNS: DaoConfiguration = {
             GovernanceImplementationEnum.PROPOSAL_THRESHOLD
           ].description,
         currentSetting:
-          "The Proposal Threshold is set to 3 $UNI (30% Market Supply)",
+          "The Proposal Threshold is set to 3 $NOUNS (30% Market Supply)",
         impact:
           "The current liquidity of the governance token does not pose a risk to the DAO. Therefore, the Proposal Threshold is sufficient to block proposal spam and discourage attackers.",
         recommendedSetting:
@@ -235,7 +235,7 @@ export const NOUNS: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_DELAY
           ].description,
-        currentSetting: "The Voting Delay is set to 12 hours",
+        currentSetting: "The Voting Delay is set to 12 hours.",
         impact:
           "The Voting Delay period can be longer. This gives delegates and stakeholders little time to coordinate their votes and for the DAO to protect itself against an attack. This poses a governance risk.",
         recommendedSetting:
@@ -252,7 +252,7 @@ export const NOUNS: DaoConfiguration = {
             GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION
           ].description,
         currentSetting:
-          "It protects the DAO from a flash loan aimed to increase their voting power, by taking a snapshot of the governance power from delegates/holders one block before the Voting Period starts",
+          "It protects the DAO from a flash loan aimed to increase their voting power, by taking a snapshot of the governance power from delegates/holders one block before the Voting Period starts.",
         impact:
           "It is not possible to use a flash loan to increase voting power and approve a proposal.",
         recommendedSetting:
@@ -267,12 +267,12 @@ export const NOUNS: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_PERIOD
           ].description,
-        currentSetting: "The Voting Period is set to 4 days",
+        currentSetting: "The Voting Period is set to 4 days.",
         impact:
           "The current Voting Period is sufficient for governance participants to cast their votes.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.VOTING_PERIOD],
-        nextStep: "The parameter is in its lowest-risk condition.",
+        nextStep: "The Voting Period should be increased to at least 7 days.",
         requirements: [
           "The voting period is 4 days, with the recommended safety being of 7 or more for a low level of risk.",
         ],
