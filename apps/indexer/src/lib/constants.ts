@@ -136,12 +136,14 @@ export const CONTRACT_ADDRESSES = {
     token: {
       address: "0xc00e94Cb662C3520282E6f5717214004A7f26888",
       decimals: 18,
-      startBlock: 9601359,
+      // startBlock: 9601359, TODO changing this for shorter local test index
+      startBlock: 24136487,
     },
     // https://etherscan.io/address/0x309a862bbC1A00e45506cB8A802D1ff10004c8C0
     governor: {
       address: "0x309a862bbC1A00e45506cB8A802D1ff10004c8C0",
-      startBlock: 21688680,
+      // startBlock: 21688680, TODO change back
+      startBlock: 24136487,
     },
   },
   [DaoIdEnum.OBOL]: {
