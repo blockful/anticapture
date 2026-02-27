@@ -55,7 +55,12 @@ export const PanelTable = () => {
       accessorKey: "dao",
       cell: ({ row }) => <DaoCell daoId={row.getValue("dao") as DaoIdEnum} />,
       header: () => (
-        <h4 className="text-table-header px-4 py-3">Organizations</h4>
+        <>
+          <h4 className="text-table-header hidden px-4 py-3 md:block">
+            Organizations
+          </h4>
+          <h4 className="text-table-header px-4 py-3 md:hidden">Orgs</h4>
+        </>
       ),
       meta: { columnClassName: "w-auto px-0 py-0" },
     },
