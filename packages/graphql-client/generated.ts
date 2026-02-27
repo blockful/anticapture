@@ -4258,7 +4258,6 @@ export const GetDelegatesDocument = gql`
     orderBy: $orderBy
     fromDate: $fromDate
     toDate: $toDate
-    fromValue: "0"
     addresses: $addresses
   ) {
     items {
