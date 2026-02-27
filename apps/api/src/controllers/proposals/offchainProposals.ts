@@ -2,7 +2,6 @@ import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 
 import {
   OffchainProposalResponseSchema,
-  OffchainProposalMapper,
   OffchainProposalsResponseSchema,
   OffchainProposalsRequestSchema,
 } from "@/mappers";
@@ -38,7 +37,7 @@ export function offchainProposals(
       const { skip, limit, orderDirection, status, fromDate } =
         context.req.valid("query");
 
-      const { items, totalCount } = await service.getProposals({
+      const response = await service.getProposals({
         skip,
         limit,
         orderDirection,
@@ -46,10 +45,7 @@ export function offchainProposals(
         fromDate,
       });
 
-      return context.json({
-        items: items.map(OffchainProposalMapper.toApi),
-        totalCount,
-      });
+      return context.json(OffchainProposalsResponseSchema.parse(response));
     },
   );
 
@@ -87,7 +83,7 @@ export function offchainProposals(
         return context.json({ error: "Proposal not found" }, 404);
       }
 
-      return context.json(OffchainProposalMapper.toApi(proposal), 200);
+      return context.json(OffchainProposalResponseSchema.parse(proposal));
     },
   );
 }

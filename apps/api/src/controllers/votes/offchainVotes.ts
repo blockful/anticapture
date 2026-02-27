@@ -1,7 +1,6 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 
 import {
-  OffchainVoteMapper,
   OffchainVotesRequestSchema,
   OffchainVotesResponseSchema,
 } from "@/mappers";
@@ -51,12 +50,9 @@ export function offchainVotes(app: Hono, service: OffchainVotesService) {
         toDate,
       });
 
-      return context.json({
-        items: items.map((item) =>
-          OffchainVoteMapper.toApi(item, item.proposalTitle),
-        ),
-        totalCount,
-      });
+      return context.json(
+        OffchainVotesResponseSchema.parse({ items, totalCount }),
+      );
     },
   );
 
@@ -106,12 +102,9 @@ export function offchainVotes(app: Hono, service: OffchainVotesService) {
         toDate,
       });
 
-      return context.json({
-        items: items.map((item) =>
-          OffchainVoteMapper.toApi(item, item.proposalTitle),
-        ),
-        totalCount,
-      });
+      return context.json(
+        OffchainVotesResponseSchema.parse({ items, totalCount }),
+      );
     },
   );
 }
