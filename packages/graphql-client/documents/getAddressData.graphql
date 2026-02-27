@@ -1,0 +1,14 @@
+query GetAddressData($address: String!) {
+  getAddress(address: $address) {
+    arkham {
+      entity
+      entityType
+      label
+      twitter
+    }
+    isContract
+    ens {
+      name
+    }
+  }
+}
