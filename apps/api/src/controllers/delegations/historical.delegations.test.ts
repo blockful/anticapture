@@ -7,19 +7,11 @@ import { HistoricalDelegationsService } from "@/services/delegations";
 
 import { historicalDelegations } from "./historical";
 
-type DelegationItem = {
-  delegatorAddress: string;
-  delegateAddress: string;
-  amount: string;
-  timestamp: string;
-  transactionHash: string;
-};
-
 class FakeHistoricalDelegationsRepository {
-  private items: DelegationItem[] = [];
+  private items: DBDelegation[] = [];
   private count = 0;
 
-  setData(items: DelegationItem[], totalCount?: number) {
+  setData(items: DBDelegation[], totalCount?: number) {
     this.items = items;
     this.count = totalCount ?? items.length;
   }
@@ -34,19 +26,26 @@ class FakeHistoricalDelegationsRepository {
     _delegateAddressIn: Address[] | undefined,
   ): Promise<{ items: DBDelegation[]; totalCount: number }> {
     return {
-      items: this.items as unknown as DBDelegation[],
+      items: this.items,
       totalCount: this.count,
     };
   }
 }
 
 const createMockDelegationItem = (
-  overrides: Partial<DelegationItem> = {},
-): DelegationItem => ({
-  delegatorAddress: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
-  delegateAddress: "0x1234567890123456789012345678901234567890",
-  amount: "1000000000000000000",
-  timestamp: "1700000000",
+  overrides: Partial<DBDelegation> = {},
+): DBDelegation => ({
+  daoId: "uni",
+  delegatorAccountId: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+  delegateAccountId: "0x1234567890123456789012345678901234567890",
+  delegatedValue: 1000000000000000000n,
+  previousDelegate: null,
+  timestamp: 1700000000n,
+  logIndex: 0,
+  isCex: false,
+  isDex: false,
+  isLending: false,
+  isTotal: false,
   transactionHash:
     "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
   ...overrides,
@@ -85,10 +84,10 @@ describe("Historical Delegations Controller - Integration Tests", () => {
       expect(body).toEqual({
         items: [
           {
-            delegatorAddress: getAddress(item.delegatorAddress),
-            delegateAddress: getAddress(item.delegateAddress),
-            amount: item.amount,
-            timestamp: item.timestamp,
+            delegatorAddress: getAddress(item.delegatorAccountId),
+            delegateAddress: getAddress(item.delegateAccountId),
+            amount: item.delegatedValue.toString(),
+            timestamp: item.timestamp.toString(),
             transactionHash: item.transactionHash,
           },
         ],
@@ -114,14 +113,14 @@ describe("Historical Delegations Controller - Integration Tests", () => {
     it("should return 200 with multiple delegations", async () => {
       fakeRepo.setData([
         createMockDelegationItem({
-          delegatorAddress: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
-          amount: "1000000000000000000",
-          timestamp: "1700000000",
+          delegatorAccountId: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+          delegatedValue: 1000000000000000000n,
+          timestamp: 1700000000n,
         }),
         createMockDelegationItem({
-          delegatorAddress: "0x1111111111111111111111111111111111111111",
-          amount: "2000000000000000000",
-          timestamp: "1700001000",
+          delegatorAccountId: "0x1111111111111111111111111111111111111111",
+          delegatedValue: 2000000000000000000n,
+          timestamp: 1700001000n,
         }),
       ]);
 
@@ -208,8 +207,8 @@ describe("Historical Delegations Controller - Integration Tests", () => {
     it("should serialize amount and timestamp as strings in response items", async () => {
       fakeRepo.setData([
         createMockDelegationItem({
-          amount: "999999999999999999",
-          timestamp: "1234567890",
+          delegatedValue: 999999999999999999n,
+          timestamp: 1234567890n,
         }),
       ]);
 
