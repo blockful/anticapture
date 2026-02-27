@@ -1,7 +1,7 @@
 import { Address } from "viem";
 import { describe, it, expect, beforeEach } from "vitest";
 
-import { DBDelegation, DelegationsRequestQuery } from "@/mappers";
+import { DBDelegation } from "@/mappers";
 
 import { DelegationsService } from "./current";
 
@@ -27,10 +27,7 @@ describe("DelegationsService", () => {
   const address = "0x1234567890123456789012345678901234567890";
 
   let stubRepository: {
-    getDelegations: (
-      address: Address,
-      sort: DelegationsRequestQuery,
-    ) => Promise<DBDelegation | undefined>;
+    getDelegations: (address: Address) => Promise<DBDelegation | undefined>;
   };
   let service: DelegationsService;
 
@@ -53,27 +50,29 @@ describe("DelegationsService", () => {
       stubRepository.getDelegations = () => Promise.resolve(delegation);
       service = new DelegationsService(stubRepository);
 
-      const result = await service.getDelegations(address, {
-        orderBy: "timestamp",
-        orderDirection: "desc",
-      });
+      const result = await service.getDelegations(address);
 
       expect(result).toEqual({
-        amount: "5000",
-        timestamp: "1700001000",
-        transactionHash: "0xdelegate1",
-        delegatorAddress: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        delegateAddress: "0x1234567890123456789012345678901234567890",
+        items: [
+          {
+            amount: "5000",
+            timestamp: "1700001000",
+            transactionHash: "0xdelegate1",
+            delegatorAddress: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            delegateAddress: "0x1234567890123456789012345678901234567890",
+          },
+        ],
+        totalCount: 1,
       });
     });
 
-    it("should return null when repository returns no data", async () => {
-      const result = await service.getDelegations(address, {
-        orderBy: "timestamp",
-        orderDirection: "desc",
-      });
+    it("should return empty items and totalCount 0 when repository returns no data", async () => {
+      const result = await service.getDelegations(address);
 
-      expect(result).toBeNull();
+      expect(result).toEqual({
+        items: [],
+        totalCount: 0,
+      });
     });
 
     it("should preserve delegate and delegator addresses in mapped response", async () => {
@@ -84,17 +83,19 @@ describe("DelegationsService", () => {
       stubRepository.getDelegations = () => Promise.resolve(delegation);
       service = new DelegationsService(stubRepository);
 
-      const result = await service.getDelegations(address, {
-        orderBy: "timestamp",
-        orderDirection: "desc",
-      });
+      const result = await service.getDelegations(address);
 
       expect(result).toEqual({
-        amount: "1000000000000000000",
-        timestamp: "1700000000",
-        transactionHash: "0xabc123",
-        delegatorAddress: "0x1111111111111111111111111111111111111111",
-        delegateAddress: "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        items: [
+          {
+            amount: "1000000000000000000",
+            timestamp: "1700000000",
+            transactionHash: "0xabc123",
+            delegatorAddress: "0x1111111111111111111111111111111111111111",
+            delegateAddress: "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          },
+        ],
+        totalCount: 1,
       });
     });
   });

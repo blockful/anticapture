@@ -1,24 +1,21 @@
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
-import { Address } from "viem";
+import { Address, getAddress } from "viem";
 import { describe, it, expect, beforeEach } from "vitest";
 
-import { DBDelegation, DelegationsRequestQuery } from "@/mappers";
+import { DBDelegation } from "@/mappers";
 import { DelegationsService } from "@/services/delegations/current";
 
 import { delegations } from "./delegations";
 
 class FakeDelegationsRepository {
-  private items: DBDelegation[] = [];
+  private item: DBDelegation | undefined;
 
-  setData(items: DBDelegation[]) {
-    this.items = items;
+  setData(item: DBDelegation | undefined) {
+    this.item = item;
   }
 
-  async getDelegations(
-    _address: Address,
-    _sort: DelegationsRequestQuery,
-  ): Promise<DBDelegation[]> {
-    return this.items;
+  async getDelegations(_address: Address): Promise<DBDelegation | undefined> {
+    return this.item;
   }
 }
 
@@ -63,7 +60,7 @@ describe("Delegations Controller - Integration Tests", () => {
   describe(`GET /accounts/:address/delegations`, () => {
     it("should return 200 with correct response shape for a valid address", async () => {
       const delegation = createMockDBDelegation();
-      fakeRepo.setData([delegation]);
+      fakeRepo.setData(delegation);
 
       const res = await app.request(`/accounts/${VALID_ADDRESS}/delegations`);
 
@@ -72,7 +69,7 @@ describe("Delegations Controller - Integration Tests", () => {
       expect(body).toEqual({
         items: [
           {
-            delegatorAddress: delegation.delegatorAccountId,
+            delegatorAddress: getAddress(delegation.delegatorAccountId),
             delegateAddress: delegation.delegateAccountId,
             amount: delegation.delegatedValue.toString(),
             timestamp: delegation.timestamp.toString(),
@@ -84,7 +81,7 @@ describe("Delegations Controller - Integration Tests", () => {
     });
 
     it("should return 200 with empty items and totalCount 0 when no delegations exist", async () => {
-      fakeRepo.setData([]);
+      fakeRepo.setData(undefined);
 
       const res = await app.request(`/accounts/${VALID_ADDRESS}/delegations`);
 
@@ -97,13 +94,7 @@ describe("Delegations Controller - Integration Tests", () => {
     });
 
     it("should return 200 with multiple delegations", async () => {
-      fakeRepo.setData([
-        createMockDBDelegation({
-          delegatorAccountId:
-            "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd" as Address,
-          delegatedValue: 1000000000000000000n,
-          timestamp: 1700000000n,
-        }),
+      fakeRepo.setData(
         createMockDBDelegation({
           delegatorAccountId:
             "0x1111111111111111111111111111111111111111" as Address,
@@ -112,14 +103,14 @@ describe("Delegations Controller - Integration Tests", () => {
           transactionHash:
             "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
         }),
-      ]);
+      );
 
       const res = await app.request(`/accounts/${VALID_ADDRESS}/delegations`);
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.items).toHaveLength(2);
-      expect(body.totalCount).toBe(2);
+      expect(body.items).toHaveLength(1);
+      expect(body.totalCount).toBe(1);
     });
 
     it("should return 400 for an invalid address", async () => {
@@ -131,7 +122,7 @@ describe("Delegations Controller - Integration Tests", () => {
     });
 
     it("should checksum the address from the path parameter", async () => {
-      fakeRepo.setData([createMockDBDelegation()]);
+      fakeRepo.setData(createMockDBDelegation());
       const lowercaseAddress = VALID_ADDRESS.toLowerCase();
 
       const res = await app.request(
@@ -141,69 +132,13 @@ describe("Delegations Controller - Integration Tests", () => {
       expect(res.status).toBe(200);
     });
 
-    it("should accept orderBy=amount query parameter", async () => {
-      fakeRepo.setData([createMockDBDelegation()]);
-
-      const res = await app.request(
-        `/accounts/${VALID_ADDRESS}/delegations?orderBy=amount`,
-      );
-
-      expect(res.status).toBe(200);
-    });
-
-    it("should accept orderBy=timestamp query parameter", async () => {
-      fakeRepo.setData([createMockDBDelegation()]);
-
-      const res = await app.request(
-        `/accounts/${VALID_ADDRESS}/delegations?orderBy=timestamp`,
-      );
-
-      expect(res.status).toBe(200);
-    });
-
-    it("should accept orderDirection=asc query parameter", async () => {
-      fakeRepo.setData([createMockDBDelegation()]);
-
-      const res = await app.request(
-        `/accounts/${VALID_ADDRESS}/delegations?orderDirection=asc`,
-      );
-
-      expect(res.status).toBe(200);
-    });
-
-    it("should accept orderDirection=desc query parameter", async () => {
-      fakeRepo.setData([createMockDBDelegation()]);
-
-      const res = await app.request(
-        `/accounts/${VALID_ADDRESS}/delegations?orderDirection=desc`,
-      );
-
-      expect(res.status).toBe(200);
-    });
-
-    it("should return 400 for an invalid orderBy value", async () => {
-      const res = await app.request(
-        `/accounts/${VALID_ADDRESS}/delegations?orderBy=invalid`,
-      );
-
-      expect(res.status).toBe(400);
-    });
-
-    it("should return 400 for an invalid orderDirection value", async () => {
-      const res = await app.request(
-        `/accounts/${VALID_ADDRESS}/delegations?orderDirection=invalid`,
-      );
-
-      expect(res.status).toBe(400);
-    });
-
     it("should serialize amount and timestamp as strings in response items", async () => {
-      fakeRepo.setData([
+      fakeRepo.setData(
         createMockDBDelegation({
           delegatedValue: 999999999999999999n,
           timestamp: 1234567890n,
         }),
-      ]);
+      );
 
       const res = await app.request(`/accounts/${VALID_ADDRESS}/delegations`);
       const body = await res.json();
@@ -217,7 +152,7 @@ describe("Delegations Controller - Integration Tests", () => {
     it("should include transactionHash in response items", async () => {
       const txHash =
         "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef";
-      fakeRepo.setData([createMockDBDelegation({ transactionHash: txHash })]);
+      fakeRepo.setData(createMockDBDelegation({ transactionHash: txHash }));
 
       const res = await app.request(`/accounts/${VALID_ADDRESS}/delegations`);
       const body = await res.json();
@@ -226,7 +161,7 @@ describe("Delegations Controller - Integration Tests", () => {
     });
 
     it("should use default orderBy=timestamp and orderDirection=desc when not provided", async () => {
-      fakeRepo.setData([]);
+      fakeRepo.setData(undefined);
 
       const res = await app.request(`/accounts/${VALID_ADDRESS}/delegations`);
 

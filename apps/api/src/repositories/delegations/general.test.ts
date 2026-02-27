@@ -4,21 +4,23 @@ import { drizzle } from "drizzle-orm/pglite";
 import { Address } from "viem";
 
 import * as schema from "@/database/schema";
-import { delegation } from "@/database/schema";
+import { accountBalance, delegation } from "@/database/schema";
 
 import { DelegationsRepository } from "./general";
 
 type DelegationInsert = typeof delegation.$inferInsert;
+type AccountBalanceInsert = typeof accountBalance.$inferInsert;
 
-const delegate: Address = "0x1234567890123456789012345678901234567890";
+const accountAddress: Address = "0x1234567890123456789012345678901234567890";
+const delegatedAccount: Address = "0x2222222222222222222222222222222222222222";
 
 const createDelegation = (
   overrides: Partial<DelegationInsert> = {},
 ): DelegationInsert => ({
   transactionHash: "0xdefault",
   daoId: "uni",
-  delegateAccountId: delegate,
-  delegatorAccountId: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+  delegateAccountId: accountAddress,
+  delegatorAccountId: delegatedAccount,
   delegatedValue: 1000000000000000000n,
   previousDelegate: null,
   timestamp: 1700000000n,
@@ -26,10 +28,20 @@ const createDelegation = (
   ...overrides,
 });
 
+const createAccountBalance = (
+  overrides: Partial<AccountBalanceInsert> = {},
+): AccountBalanceInsert => ({
+  accountId: accountAddress,
+  tokenId: "uni",
+  balance: 1000n,
+  delegate: delegatedAccount,
+  ...overrides,
+});
+
 const fullDelegation = (overrides: Partial<DelegationInsert> = {}) => ({
   daoId: "uni",
-  delegateAccountId: delegate,
-  delegatorAccountId: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+  delegateAccountId: accountAddress,
+  delegatorAccountId: delegatedAccount,
   delegatedValue: 1000000000000000000n,
   previousDelegate: null,
   timestamp: 1700000000n,
@@ -67,241 +79,106 @@ describe("DelegationsRepository", () => {
 
   beforeEach(async () => {
     await db.delete(delegation);
+    await db.delete(accountBalance);
   });
 
   describe("getDelegations", () => {
-    it("should return the latest delegation for the given delegate address", async () => {
-      await db.insert(delegation).values([
+    it("should return undefined when account has no balance row", async () => {
+      const result = await repository.getDelegations(accountAddress);
+      expect(result).toBeUndefined();
+    });
+
+    it("should return undefined when no delegation exists for account delegate", async () => {
+      await db.insert(accountBalance).values(createAccountBalance());
+
+      await db.insert(delegation).values(
         createDelegation({
           transactionHash: "0xtx1",
           delegatorAccountId: "0x1111111111111111111111111111111111111111",
+        }),
+      );
+
+      const result = await repository.getDelegations(accountAddress);
+      expect(result).toBeUndefined();
+    });
+
+    it("should return latest delegation for the delegate referenced in account balance", async () => {
+      await db.insert(accountBalance).values(createAccountBalance());
+
+      await db.insert(delegation).values([
+        createDelegation({
+          transactionHash: "0xtx1",
           delegatedValue: 500n,
           timestamp: 1700001000n,
         }),
         createDelegation({
           transactionHash: "0xtx2",
-          delegatorAccountId: "0x2222222222222222222222222222222222222222",
           delegatedValue: 800n,
           timestamp: 1700002000n,
         }),
       ]);
 
-      const result = await repository.getDelegations(delegate, {
-        orderBy: "timestamp",
-        orderDirection: "desc",
-      });
+      const result = await repository.getDelegations(accountAddress);
 
       expect(result).toEqual(
         fullDelegation({
           transactionHash: "0xtx2",
-          delegatorAccountId: "0x2222222222222222222222222222222222222222",
           delegatedValue: 800n,
           timestamp: 1700002000n,
-        }),
-      );
-    });
-
-    it("should return undefined when no delegations exist", async () => {
-      const result = await repository.getDelegations(delegate, {
-        orderBy: "timestamp",
-        orderDirection: "desc",
-      });
-
-      expect(result).toBeUndefined();
-    });
-
-    it("should only return delegations for the specified delegate", async () => {
-      await db.insert(delegation).values([
-        createDelegation({
-          transactionHash: "0xtx1",
-          delegateAccountId: delegate,
-          delegatorAccountId: "0x1111111111111111111111111111111111111111",
-        }),
-        createDelegation({
-          transactionHash: "0xtx2",
-          delegateAccountId: "0x9999999999999999999999999999999999999999",
-          delegatorAccountId: "0x8888888888888888888888888888888888888888",
-        }),
-      ]);
-
-      const result = await repository.getDelegations(delegate, {
-        orderBy: "timestamp",
-        orderDirection: "desc",
-      });
-
-      expect(result).toEqual(
-        fullDelegation({
-          transactionHash: "0xtx1",
-          delegatorAccountId: "0x1111111111111111111111111111111111111111",
-        }),
-      );
-    });
-
-    it("should order by timestamp descending", async () => {
-      await db.insert(delegation).values([
-        createDelegation({
-          transactionHash: "0xtx1",
-          delegatorAccountId: "0x1111111111111111111111111111111111111111",
-          timestamp: 1000n,
-        }),
-        createDelegation({
-          transactionHash: "0xtx2",
-          delegatorAccountId: "0x2222222222222222222222222222222222222222",
-          timestamp: 3000n,
-        }),
-        createDelegation({
-          transactionHash: "0xtx3",
-          delegatorAccountId: "0x3333333333333333333333333333333333333333",
-          timestamp: 2000n,
-        }),
-      ]);
-
-      const result = await repository.getDelegations(delegate, {
-        orderBy: "timestamp",
-        orderDirection: "desc",
-      });
-
-      expect(result).toEqual(
-        fullDelegation({
-          transactionHash: "0xtx2",
-          delegatorAccountId: "0x2222222222222222222222222222222222222222",
-          timestamp: 3000n,
-        }),
-      );
-    });
-
-    it("should order by timestamp ascending", async () => {
-      await db.insert(delegation).values([
-        createDelegation({
-          transactionHash: "0xtx1",
-          delegatorAccountId: "0x1111111111111111111111111111111111111111",
-          timestamp: 3000n,
-        }),
-        createDelegation({
-          transactionHash: "0xtx2",
-          delegatorAccountId: "0x2222222222222222222222222222222222222222",
-          timestamp: 1000n,
-        }),
-        createDelegation({
-          transactionHash: "0xtx3",
-          delegatorAccountId: "0x3333333333333333333333333333333333333333",
-          timestamp: 2000n,
-        }),
-      ]);
-
-      const result = await repository.getDelegations(delegate, {
-        orderBy: "timestamp",
-        orderDirection: "asc",
-      });
-
-      expect(result).toEqual(
-        fullDelegation({
-          transactionHash: "0xtx2",
-          delegatorAccountId: "0x2222222222222222222222222222222222222222",
-          timestamp: 1000n,
-        }),
-      );
-    });
-
-    it("should order by amount (delegatedValue) descending", async () => {
-      await db.insert(delegation).values([
-        createDelegation({
-          transactionHash: "0xtx1",
-          delegatorAccountId: "0x1111111111111111111111111111111111111111",
-          delegatedValue: 100n,
-        }),
-        createDelegation({
-          transactionHash: "0xtx2",
-          delegatorAccountId: "0x2222222222222222222222222222222222222222",
-          delegatedValue: 300n,
-        }),
-        createDelegation({
-          transactionHash: "0xtx3",
-          delegatorAccountId: "0x3333333333333333333333333333333333333333",
-          delegatedValue: 200n,
-        }),
-      ]);
-
-      const result = await repository.getDelegations(delegate, {
-        orderBy: "amount",
-        orderDirection: "desc",
-      });
-
-      expect(result).toEqual(
-        fullDelegation({
-          transactionHash: "0xtx2",
-          delegatorAccountId: "0x2222222222222222222222222222222222222222",
-          delegatedValue: 300n,
-        }),
-      );
-    });
-
-    it("should order by amount (delegatedValue) ascending", async () => {
-      await db.insert(delegation).values([
-        createDelegation({
-          transactionHash: "0xtx1",
-          delegatorAccountId: "0x1111111111111111111111111111111111111111",
-          delegatedValue: 300n,
-        }),
-        createDelegation({
-          transactionHash: "0xtx2",
-          delegatorAccountId: "0x2222222222222222222222222222222222222222",
-          delegatedValue: 100n,
-        }),
-        createDelegation({
-          transactionHash: "0xtx3",
-          delegatorAccountId: "0x3333333333333333333333333333333333333333",
-          delegatedValue: 200n,
-        }),
-      ]);
-
-      const result = await repository.getDelegations(delegate, {
-        orderBy: "amount",
-        orderDirection: "asc",
-      });
-
-      expect(result).toEqual(
-        fullDelegation({
-          transactionHash: "0xtx2",
-          delegatorAccountId: "0x2222222222222222222222222222222222222222",
-          delegatedValue: 100n,
         }),
       );
     });
 
     it("should use logIndex as secondary sort descending", async () => {
+      await db.insert(accountBalance).values(createAccountBalance());
+
       await db.insert(delegation).values([
         createDelegation({
           transactionHash: "0xtx1",
-          delegatorAccountId: "0x1111111111111111111111111111111111111111",
           timestamp: 1000n,
           logIndex: 1,
         }),
         createDelegation({
           transactionHash: "0xtx2",
-          delegatorAccountId: "0x2222222222222222222222222222222222222222",
           timestamp: 1000n,
           logIndex: 3,
         }),
-        createDelegation({
-          transactionHash: "0xtx3",
-          delegatorAccountId: "0x3333333333333333333333333333333333333333",
-          timestamp: 1000n,
-          logIndex: 2,
-        }),
       ]);
 
-      const result = await repository.getDelegations(delegate, {
-        orderBy: "timestamp",
-        orderDirection: "desc",
-      });
+      const result = await repository.getDelegations(accountAddress);
 
       expect(result).toEqual(
         fullDelegation({
           transactionHash: "0xtx2",
-          delegatorAccountId: "0x2222222222222222222222222222222222222222",
           timestamp: 1000n,
           logIndex: 3,
+        }),
+      );
+    });
+
+    it("should ignore delegations from other delegator accounts", async () => {
+      await db.insert(accountBalance).values(createAccountBalance());
+
+      await db.insert(delegation).values([
+        createDelegation({
+          transactionHash: "0xtx1",
+          delegatorAccountId: delegatedAccount,
+          timestamp: 1000n,
+        }),
+        createDelegation({
+          transactionHash: "0xtx2",
+          delegatorAccountId: "0x3333333333333333333333333333333333333333",
+          timestamp: 9999n,
+        }),
+      ]);
+
+      const result = await repository.getDelegations(accountAddress);
+
+      expect(result).toEqual(
+        fullDelegation({
+          transactionHash: "0xtx1",
+          delegatorAccountId: delegatedAccount,
+          timestamp: 1000n,
         }),
       );
     });
