@@ -7,17 +7,8 @@ export const ENS_SERVICE_PROVIDERS: ServiceProvider[] = [
     proposalUrl:
       "https://discuss.ens.domains/t/social-executable-temp-check-service-provider-streams-for-sp5/20257",
     budget: "$700K",
+    githubSlug: "blockful",
     years: {
-      2026: {
-        Q1: {
-          status: "published",
-          reportUrl:
-            "https://discuss.ens.domains/t/blockful-q1-2026-service-provider-report/20600",
-        },
-        Q2: { status: "due_soon" },
-        Q3: { status: "upcoming" },
-        Q4: { status: "upcoming" },
-      },
       2025: {
         Q1: {
           status: "published",
@@ -48,13 +39,8 @@ export const ENS_SERVICE_PROVIDERS: ServiceProvider[] = [
     proposalUrl:
       "https://discuss.ens.domains/t/social-executable-temp-check-service-provider-streams-for-sp5/20257",
     budget: "$700K",
+    githubSlug: "eht.limo",
     years: {
-      2026: {
-        Q1: { status: "overdue" },
-        Q2: { status: "due_soon" },
-        Q3: { status: "upcoming" },
-        Q4: { status: "upcoming" },
-      },
       2025: {
         Q1: {
           status: "published",
@@ -85,13 +71,8 @@ export const ENS_SERVICE_PROVIDERS: ServiceProvider[] = [
     proposalUrl:
       "https://discuss.ens.domains/t/social-executable-temp-check-service-provider-streams-for-sp5/20257",
     budget: "$500K",
+    githubSlug: "ethereum-identity-fnd",
     years: {
-      2026: {
-        Q1: { status: "overdue" },
-        Q2: { status: "due_soon" },
-        Q3: { status: "upcoming" },
-        Q4: { status: "upcoming" },
-      },
       2025: {
         Q1: {
           status: "published",
@@ -118,17 +99,8 @@ export const ENS_SERVICE_PROVIDERS: ServiceProvider[] = [
     proposalUrl:
       "https://discuss.ens.domains/t/social-executable-temp-check-service-provider-streams-for-sp5/20257",
     budget: "$400K",
+    githubSlug: "unruggable",
     years: {
-      2026: {
-        Q1: {
-          status: "published",
-          reportUrl:
-            "https://discuss.ens.domains/t/unruggable-q1-2026-report/20610",
-        },
-        Q2: { status: "due_soon" },
-        Q3: { status: "upcoming" },
-        Q4: { status: "upcoming" },
-      },
       2025: {
         Q1: {
           status: "published",
@@ -159,17 +131,8 @@ export const ENS_SERVICE_PROVIDERS: ServiceProvider[] = [
     proposalUrl:
       "https://discuss.ens.domains/t/social-executable-temp-check-service-provider-streams-for-sp5/20257",
     budget: "$1.1M",
+    githubSlug: "namehash-labs",
     years: {
-      2026: {
-        Q1: {
-          status: "published",
-          reportUrl:
-            "https://discuss.ens.domains/t/namehashlabs-q1-2026-report/20620",
-        },
-        Q2: { status: "due_soon" },
-        Q3: { status: "upcoming" },
-        Q4: { status: "upcoming" },
-      },
       2025: {
         Q1: {
           status: "published",
@@ -200,13 +163,8 @@ export const ENS_SERVICE_PROVIDERS: ServiceProvider[] = [
     proposalUrl:
       "https://discuss.ens.domains/t/social-executable-temp-check-service-provider-streams-for-sp5/20257",
     budget: "$400K",
+    githubSlug: "namespace",
     years: {
-      2026: {
-        Q1: { status: "overdue" },
-        Q2: { status: "due_soon" },
-        Q3: { status: "upcoming" },
-        Q4: { status: "upcoming" },
-      },
       2025: {
         Q1: {
           status: "published",
@@ -237,13 +195,8 @@ export const ENS_SERVICE_PROVIDERS: ServiceProvider[] = [
     proposalUrl:
       "https://discuss.ens.domains/t/social-executable-temp-check-service-provider-streams-for-sp5/20257",
     budget: "$400K",
+    githubSlug: "zk-email",
     years: {
-      2026: {
-        Q1: { status: "overdue" },
-        Q2: { status: "due_soon" },
-        Q3: { status: "upcoming" },
-        Q4: { status: "upcoming" },
-      },
       2025: {
         Q1: {
           status: "published",
@@ -274,13 +227,8 @@ export const ENS_SERVICE_PROVIDERS: ServiceProvider[] = [
     proposalUrl:
       "https://discuss.ens.domains/t/social-executable-temp-check-service-provider-streams-for-sp5/20257",
     budget: "$300K",
+    githubSlug: "justaname",
     years: {
-      2026: {
-        Q1: { status: "overdue" },
-        Q2: { status: "due_soon" },
-        Q3: { status: "upcoming" },
-        Q4: { status: "upcoming" },
-      },
       2025: {
         Q1: {
           status: "published",
@@ -309,13 +257,8 @@ export const ENS_SERVICE_PROVIDERS: ServiceProvider[] = [
     name: "ENS Labs",
     websiteUrl: "https://enslabs.org",
     budget: "-",
+    githubSlug: "ens-labs",
     years: {
-      2026: {
-        Q1: { status: "overdue" },
-        Q2: { status: "due_soon" },
-        Q3: { status: "upcoming" },
-        Q4: { status: "upcoming" },
-      },
       2025: {
         Q1: {
           status: "published",

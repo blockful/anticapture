@@ -17,6 +17,7 @@ export interface ServiceProvider {
   websiteUrl: string;
   proposalUrl?: string;
   budget: string;
+  githubSlug: string;
   years: Record<number, YearData>;
 }
 

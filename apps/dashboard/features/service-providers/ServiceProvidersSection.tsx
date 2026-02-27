@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import { CsvExportButton } from "@/features/service-providers/components/CsvExportButton";
 import { ServiceProvidersTable } from "@/features/service-providers/components/ServiceProvidersTable";
-import { ENS_SERVICE_PROVIDERS } from "@/features/service-providers/data/ens-service-providers";
+import { ServiceProvider } from "@/features/service-providers/types";
 import { TheSectionLayout } from "@/shared/components/containers/TheSectionLayout";
 import { InlineAlert } from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
@@ -15,9 +15,16 @@ import { cn } from "@/shared/utils";
 
 const AVAILABLE_YEARS = [2026, 2025];
 
-const UPDATE_STATUS_URL = "https://github.com/blockful-io/anticapture/pulls";
+const UPDATE_STATUS_URL =
+  "https://github.com/blockful/spp-accountability/pulls";
 
-export const ServiceProvidersSection = () => {
+interface ServiceProvidersSectionProps {
+  providers: ServiceProvider[];
+}
+
+export const ServiceProvidersSection = ({
+  providers,
+}: ServiceProvidersSectionProps) => {
   const currentYear = new Date().getFullYear();
   const defaultYear = AVAILABLE_YEARS.includes(currentYear)
     ? currentYear
@@ -51,7 +58,7 @@ export const ServiceProvidersSection = () => {
                 key={year}
                 onClick={() => setSelectedYear(year)}
                 className={cn(
-                  "border-1 cursor-pointer px-3 py-2 font-mono text-[13px] font-medium uppercase leading-5 tracking-[0.78px] transition-all duration-300",
+                  "cursor-pointer border px-3 py-2 font-mono text-[13px] font-medium uppercase leading-5 tracking-[0.78px] transition-all duration-300",
                   selectedYear === year
                     ? "border-orange-400 bg-transparent text-orange-400"
                     : "border-[#3F3F46] bg-transparent text-[#A1A1AA] hover:bg-[#27272A]",
@@ -62,15 +69,9 @@ export const ServiceProvidersSection = () => {
             ))}
           </div>
 
-          <ServiceProvidersTable
-            providers={ENS_SERVICE_PROVIDERS}
-            year={selectedYear}
-          />
+          <ServiceProvidersTable providers={providers} year={selectedYear} />
 
-          <CsvExportButton
-            providers={ENS_SERVICE_PROVIDERS}
-            year={selectedYear}
-          />
+          <CsvExportButton providers={providers} year={selectedYear} />
         </div>
       </SubSectionsContainer>
     </TheSectionLayout>
