@@ -41,7 +41,18 @@ export function delegations(app: Hono, service: DelegationsService) {
         orderDirection,
       });
 
-      return context.json(DelegationsResponseSchema.parse(result));
+      return context.json(
+        DelegationsResponseSchema.parse({
+          items: result.map((d) => ({
+            delegatorAddress: d.delegatorAccountId,
+            delegateAddress: d.delegateAccountId,
+            amount: d.delegatedValue,
+            timestamp: d.timestamp,
+            transactionHash: d.transactionHash,
+          })),
+          totalCount: result.length,
+        }),
+      );
     },
   );
 }

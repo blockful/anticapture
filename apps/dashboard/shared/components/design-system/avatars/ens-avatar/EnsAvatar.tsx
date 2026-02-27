@@ -5,10 +5,16 @@ import { useState } from "react";
 import Blockies from "react-blockies";
 import { Address } from "viem";
 
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
+import { AddressDetailsTooltip } from "@/shared/components/tooltips/AddressDetailsTooltip";
+import { useArkhamData } from "@/shared/hooks/graphql-client/useArkhamData";
 import { useEnsData } from "@/shared/hooks/useEnsData";
 import { cn } from "@/shared/utils/cn";
 import { formatAddress } from "@/shared/utils/formatAddress";
+
+const TRUNCATE_ADDRESS_LENGTH = 30;
 
 export type AvatarSize = "xs" | "sm" | "md" | "lg";
 export type AvatarVariant = "square" | "rounded";
@@ -30,6 +36,8 @@ interface EnsAvatarProps extends Omit<
   containerClassName?: string;
   isDashed?: boolean;
   showFullAddress?: boolean;
+  showTags?: boolean;
+  showCopyAddress?: boolean;
 }
 
 const sizeClasses: Record<AvatarSize, string> = {
@@ -72,13 +80,20 @@ export const EnsAvatar = ({
   containerClassName,
   showFullAddress = false,
   isDashed = false,
+  showTags = false,
+  showCopyAddress = false,
   ...imageProps
 }: EnsAvatarProps) => {
   // Only fetch ENS data if we have an address and either we need imageUrl or fetchEnsName is true
   const shouldFetchEns = address && !imageUrl;
-  const { data: ensData, isLoading: ensLoading } = useEnsData(
+  const { data: ensData, isLoading: isEnsLoading } = useEnsData(
     shouldFetchEns ? address : null,
   );
+  const {
+    arkhamData,
+    isContract,
+    isLoading: isArkhamDataLoading,
+  } = useArkhamData(address);
 
   const [imageError, setImageError] = useState(false);
 
@@ -94,19 +109,27 @@ export const EnsAvatar = ({
 
   // Determine what to display as the name
   const getDisplayName = () => {
-    if (ensData?.ens) {
-      return ensData.ens;
-    }
-    if (address) {
-      return showFullAddress ? address : formatAddress(address);
-    }
+    const truncate = (name: string) => {
+      if (showFullAddress || name.length <= TRUNCATE_ADDRESS_LENGTH)
+        return name;
+      return `${name.slice(0, TRUNCATE_ADDRESS_LENGTH)}…`;
+    };
+
+    if (ensData?.ens) return ensData.ens;
+
+    const entity = arkhamData?.entity;
+    const label = arkhamData?.label;
+
+    if (entity && label) return truncate(`${entity} · ${label}`);
+    if (entity) return truncate(entity);
+    if (label) return truncate(label);
+    if (address) return showFullAddress ? address : formatAddress(address);
     return "Unknown";
   };
 
   const displayName = getDisplayName();
-  const isLoadingName = loading || (ensLoading && !address);
-  const isEnsName = Boolean(ensData?.ens);
-  const isResolvingEns = ensLoading && address;
+  const isLoadingName = loading || (isEnsLoading && !address);
+  const isResolvingData = !!address && (isEnsLoading || isArkhamDataLoading);
 
   const baseClasses = cn(
     sizeClasses[size],
@@ -116,7 +139,7 @@ export const EnsAvatar = ({
   );
 
   const avatarElement = () => {
-    if (loading || (ensLoading && !address)) {
+    if (loading || (isEnsLoading && !address)) {
       return (
         <SkeletonRow
           parentClassName="flex animate-pulse"
@@ -169,12 +192,25 @@ export const EnsAvatar = ({
     );
   }
 
+  const tags = showTags
+    ? [
+        arkhamData?.twitter && `@${arkhamData.twitter}`,
+        ensData?.ens,
+        address && formatAddress(address),
+        arkhamData?.entityType &&
+          (["cex", "dex"].includes(arkhamData.entityType.toLowerCase())
+            ? arkhamData.entityType.toUpperCase()
+            : arkhamData.entityType),
+        isContract !== null ? (isContract ? "Contract" : "EOA") : null,
+      ].filter(Boolean)
+    : [];
+
   // Return avatar with name
-  return (
+  const avatarWithName = (
     <div className={cn("flex min-w-0 items-center gap-2", containerClassName)}>
       {avatarElement()}
 
-      <div className="flex min-w-0 flex-col">
+      <div className="flex min-w-0 flex-col gap-0.5">
         <div className="flex items-center gap-2">
           {isLoadingName ? (
             <SkeletonRow
@@ -184,18 +220,73 @@ export const EnsAvatar = ({
           ) : (
             <span
               className={cn(
-                "text-primary inline-block text-sm",
-                isEnsName && "overflow-hidden truncate whitespace-nowrap",
+                "text-primary inline-block overflow-hidden truncate whitespace-nowrap",
+                showTags ? "text-lg font-medium" : "text-sm",
                 isDashed && "border-b border-dashed border-[#3F3F46]",
-                isResolvingEns && "animate-pulse",
+                isResolvingData && "animate-pulse",
                 nameClassName,
               )}
             >
               {displayName}
             </span>
           )}
+          {showCopyAddress && address && (
+            <CopyAndPasteButton
+              textToCopy={address}
+              className="p-1"
+              iconSize="md"
+              customTooltipText={{
+                default: "Copy address",
+                copied: "Address copied!",
+              }}
+            />
+          )}
         </div>
+
+        {showTags && (
+          <div className="flex flex-wrap items-center gap-1">
+            {isArkhamDataLoading || isEnsLoading ? (
+              <>
+                <SkeletonRow
+                  parentClassName="flex animate-pulse"
+                  className="h-5 w-16 rounded-full"
+                />
+                <SkeletonRow
+                  parentClassName="flex animate-pulse"
+                  className="h-5 w-20 rounded-full"
+                />
+              </>
+            ) : (
+              tags.map((tag) => (
+                <BadgeStatus key={tag} variant="secondary">
+                  {tag}
+                </BadgeStatus>
+              ))
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
+
+  if (address && !showTags) {
+    return (
+      <>
+        <span className="hidden md:contents">
+          <AddressDetailsTooltip
+            address={address}
+            arkhamData={arkhamData}
+            ens={ensData ? { name: ensData.ens ?? null } : null}
+            isContract={isContract}
+            isLoading={isEnsLoading || isArkhamDataLoading}
+          >
+            {avatarWithName}
+          </AddressDetailsTooltip>
+        </span>
+        <span className="contents md:hidden">{avatarWithName}</span>
+      </>
+    );
+  }
+
+  return avatarWithName;
 };
