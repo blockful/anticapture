@@ -25,7 +25,7 @@ const defaultParams = (
 ): OffchainVotesRequest => ({
   skip: 0,
   limit: 10,
-  orderBy: "created",
+  orderBy: "timestamp",
   orderDirection: "desc",
   ...overrides,
 });

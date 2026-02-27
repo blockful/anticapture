@@ -28,6 +28,11 @@ interface OffchainVotesRepository {
   }>;
 }
 
+const ORDER_BY_MAP = {
+  timestamp: "created",
+  votingPower: "vp",
+} as const;
+
 export class OffchainVotesService {
   constructor(private readonly repo: OffchainVotesRepository) {}
 
@@ -35,7 +40,7 @@ export class OffchainVotesService {
     const {
       skip = 0,
       limit = 10,
-      orderBy = "created",
+      orderBy = "timestamp",
       orderDirection = "desc",
       voterAddresses,
       fromDate,
@@ -45,7 +50,7 @@ export class OffchainVotesService {
     return this.repo.getVotes(
       skip,
       limit,
-      orderBy,
+      ORDER_BY_MAP[orderBy],
       orderDirection,
       voterAddresses,
       fromDate,
@@ -57,7 +62,7 @@ export class OffchainVotesService {
     const {
       skip = 0,
       limit = 10,
-      orderBy = "created",
+      orderBy = "timestamp",
       orderDirection = "desc",
       voterAddresses,
       fromDate,
@@ -68,7 +73,7 @@ export class OffchainVotesService {
       proposalId,
       skip,
       limit,
-      orderBy,
+      ORDER_BY_MAP[orderBy],
       orderDirection,
       voterAddresses,
       fromDate,

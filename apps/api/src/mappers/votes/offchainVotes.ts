@@ -17,7 +17,7 @@ export const OffchainVotesRequestSchema = z.object({
     .max(1000, "Limit cannot exceed 1000")
     .optional()
     .default(10),
-  orderBy: z.enum(["created", "vp"]).optional().default("created"),
+  orderBy: z.enum(["timestamp", "votingPower"]).optional().default("timestamp"),
   orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
   voterAddresses: z
     .union([
@@ -55,18 +55,3 @@ export const OffchainVotesResponseSchema = z.object({
   items: z.array(OffchainVoteResponseSchema),
   totalCount: z.number(),
 });
-
-export const OffchainVoteMapper = {
-  toApi: (
-    v: DBOffchainVote,
-    proposalTitle: string | null,
-  ): OffchainVoteResponse => ({
-    voter: v.voter,
-    proposalId: v.proposalId,
-    choice: v.choice,
-    vp: v.vp,
-    reason: v.reason,
-    created: v.created,
-    proposalTitle: proposalTitle ?? "Untitled Proposal",
-  }),
-};

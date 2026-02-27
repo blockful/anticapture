@@ -41,12 +41,9 @@ export class OffchainProposalRepository {
   async getProposalById(
     proposalId: string,
   ): Promise<DBOffchainProposal | undefined> {
-    const results = await this.db
-      .select()
-      .from(offchainProposals)
-      .where(eq(offchainProposals.id, proposalId));
-
-    return results[0];
+    return await this.db.query.offchainProposals.findFirst({
+      where: eq(offchainProposals.id, proposalId),
+    });
   }
 
   async getProposalsCount(
