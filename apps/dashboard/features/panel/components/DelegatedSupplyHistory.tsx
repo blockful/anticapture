@@ -218,19 +218,19 @@ const ContentWrapper = ({ children }: { children: React.ReactNode }) => {
     "Delegation shows how much of the token supply actively participates in governance. When this share keeps falling, decisions depend on a shrinking group of voters, increasing the chance of concentrated influence across the ecosystem.";
 
   return (
-    <div className="bg-surface-default flex w-full flex-col gap-4 p-4">
+    <div className="bg-surface-background lg:bg-surface-default flex w-full flex-col gap-4 lg:p-4">
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-2">
-          <h3 className="text-primary text-alternative-sm font-mono font-medium uppercase leading-[20px] tracking-[0.78px]">
+          <h3 className="text-primary text-alternative-sm font-mono font-medium uppercase leading-5 tracking-wider">
             delegated supply history
           </h3>
           <TooltipInfo text={tooltipText} />
         </div>
-        <p className="text-secondary text-sm font-normal leading-[20px]">
+        <p className="text-secondary text-sm font-normal leading-5">
           {delegatedSupplyDescription}
         </p>
       </div>
-      <div className="relative flex h-[175px] w-full items-center justify-center pb-1">
+      <div className="relative flex h-60 w-full items-center justify-center pb-1 lg:h-[175px]">
         {children}
       </div>
     </div>

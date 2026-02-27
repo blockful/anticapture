@@ -1,8 +1,9 @@
+import { createConfig } from "ponder";
+
+import { env } from "@/env";
+import { SCRGovernorAbi, SCRTokenAbi } from "@/indexer/scr/abi";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
-import { env } from "@/env";
-import { createConfig } from "ponder";
-import { SCRGovernorAbi, SCRTokenAbi } from "@/indexer/scr/abi";
 
 const SCR_CONTRACTS = CONTRACT_ADDRESSES[DaoIdEnum.SCR];
 

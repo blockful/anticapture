@@ -1,14 +1,16 @@
-import { createRoute, OpenAPIHono as Hono, z } from "@hono/zod-openapi";
-import { AccountBalanceService } from "@/services";
+import { createRoute, OpenAPIHono as Hono } from "@hono/zod-openapi";
+
+import { DaoIdEnum, DaysEnum } from "@/lib/enums";
 import {
+  AccountBalanceRequestParamSchema,
+  AccountBalanceRequestQuerySchema,
   AccountBalancesRequestSchema,
-  AccountBalancesResponseMapper,
-  AccountBalancesResponseSchema,
-  AccountBalanceResponseMapper,
-  AccountBalanceResponseSchema,
+  AccountBalancesWithVariationResponseMapper,
+  AccountBalancesWithVariationResponseSchema,
+  AccountBalanceWithVariationResponseMapper,
+  AccountBalanceWithVariationResponseSchema,
 } from "@/mappers";
-import { getAddress, isAddress } from "viem";
-import { DaoIdEnum } from "@/lib/enums";
+import { AccountBalanceService } from "@/services";
 
 export function accountBalances(
   app: Hono,
@@ -31,7 +33,7 @@ export function accountBalances(
           description: "Successfully retrieved account balances",
           content: {
             "application/json": {
-              schema: AccountBalancesResponseSchema,
+              schema: AccountBalancesWithVariationResponseSchema,
             },
           },
         },
@@ -46,13 +48,22 @@ export function accountBalances(
         limit,
         skip,
         orderDirection,
+        orderBy,
+        fromDate,
+        toDate,
       } = context.req.valid("query");
+      const now = Math.floor(Date.now() / 1000);
+      const fromTimestamp = fromDate ?? now - DaysEnum["90d"];
+      const toTimestamp = toDate ?? now;
 
       const result = await service.getAccountBalances(
         daoId,
+        fromTimestamp,
+        toTimestamp,
         skip,
         limit,
         orderDirection,
+        orderBy,
         addresses,
         delegates,
         {
@@ -62,7 +73,12 @@ export function accountBalances(
       );
 
       return context.json(
-        AccountBalancesResponseMapper(result.items, result.totalCount),
+        AccountBalancesWithVariationResponseMapper(
+          result.items,
+          result.totalCount,
+          fromTimestamp,
+          toTimestamp,
+        ),
       );
     },
   );
@@ -76,19 +92,15 @@ export function accountBalances(
       description: "Returns account balance information for a specific address",
       tags: ["account-balances"],
       request: {
-        params: z.object({
-          address: z
-            .string()
-            .refine((addr) => isAddress(addr, { strict: false }))
-            .transform((addr) => getAddress(addr)),
-        }),
+        params: AccountBalanceRequestParamSchema,
+        query: AccountBalanceRequestQuerySchema,
       },
       responses: {
         200: {
           description: "Successfully retrieved account balance",
           content: {
             "application/json": {
-              schema: AccountBalanceResponseSchema,
+              schema: AccountBalanceWithVariationResponseSchema,
             },
           },
         },
@@ -96,8 +108,24 @@ export function accountBalances(
     }),
     async (context) => {
       const { address } = context.req.valid("param");
-      const result = await service.getAccountBalance(address);
-      return context.json(AccountBalanceResponseMapper(result));
+      const { fromDate, toDate } = context.req.valid("query");
+      const now = Math.floor(Date.now() / 1000);
+      const fromTimestamp = fromDate ?? now - DaysEnum["90d"];
+      const toTimestamp = toDate ?? now;
+
+      const result = await service.getAccountBalanceWithVariation(
+        address,
+        fromTimestamp,
+        toTimestamp,
+      );
+
+      return context.json(
+        AccountBalanceWithVariationResponseMapper(
+          result,
+          fromTimestamp,
+          toTimestamp,
+        ),
+      );
     },
   );
 }

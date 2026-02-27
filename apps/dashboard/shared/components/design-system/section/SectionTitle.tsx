@@ -3,7 +3,7 @@ import { ReactNode } from "react";
 type SectionTitleProps = {
   icon: ReactNode;
   title: string;
-  riskLevel: ReactNode;
+  riskLevel?: ReactNode;
   description: string;
 };
 
@@ -23,15 +23,19 @@ export const SectionTitle = ({
               {title}
             </h4>
           </div>
-          <div className="hidden items-center lg:flex">{riskLevel}</div>
+          {riskLevel && (
+            <div className="hidden items-center lg:flex">{riskLevel}</div>
+          )}
         </div>
       </div>
       <div>
-        <p className="text-secondary flex w-full flex-col text-justify font-normal lg:text-sm">
+        <p className="text-secondary flex w-full flex-col text-justify text-sm font-normal">
           {description}
         </p>
       </div>
-      <div className="flex items-center lg:hidden">{riskLevel}</div>
+      {riskLevel && (
+        <div className="flex items-center lg:hidden">{riskLevel}</div>
+      )}
     </div>
   );
 };

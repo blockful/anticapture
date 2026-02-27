@@ -1,4 +1,5 @@
 import { z } from "@hono/zod-openapi";
+
 import { proposalsOnchain } from "@/database";
 
 export type DBProposal = typeof proposalsOnchain.$inferSelect;
@@ -42,7 +43,7 @@ export const ProposalResponseSchema = z.object({
   daoId: z.string(),
   txHash: z.string(),
   proposerAccountId: z.string(),
-  title: z.string(),
+  title: z.string().nullish(),
   description: z.string(),
   startBlock: z.number(),
   endBlock: z.number(),
@@ -86,9 +87,7 @@ export const ProposalMapper = {
       daoId: p.daoId,
       txHash: p.txHash,
       proposerAccountId: p.proposerAccountId,
-      title:
-        p.description.split("\n")[0]?.replace(/^#+\s*/, "") ||
-        "Untitled Proposal",
+      title: p.title,
       description: p.description,
       startBlock: p.startBlock,
       endBlock: p.endBlock,

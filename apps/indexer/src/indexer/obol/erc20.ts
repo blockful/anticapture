@@ -2,19 +2,18 @@ import { ponder } from "ponder:registry";
 import { token } from "ponder:schema";
 import { Address } from "viem";
 
-import { DaoIdEnum } from "@/lib/enums";
 import {
   delegateChanged,
   delegatedVotesChanged,
   tokenTransfer,
 } from "@/eventHandlers";
-import { handleTransaction } from "@/eventHandlers/shared";
 import {
   updateDelegatedSupply,
   updateCirculatingSupply,
   updateSupplyMetric,
   updateTotalSupply,
 } from "@/eventHandlers/metrics";
+import { handleTransaction } from "@/eventHandlers/shared";
 import {
   MetricTypesEnum,
   BurningAddresses,
@@ -23,6 +22,7 @@ import {
   LendingAddresses,
   TreasuryAddresses,
 } from "@/lib/constants";
+import { DaoIdEnum } from "@/lib/enums";
 
 export function ObolTokenIndexer(
   address: Address,

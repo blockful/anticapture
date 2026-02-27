@@ -1,10 +1,4 @@
 import {
-  Drizzle,
-  accountPower,
-  votesOnchain,
-  votingPowerHistory,
-} from "@/database";
-import {
   and,
   asc,
   desc,
@@ -18,14 +12,20 @@ import {
   max,
   count,
 } from "drizzle-orm";
-
-import { DBVote, VotesRequest } from "@/mappers";
 import { Address } from "viem";
+
+import {
+  Drizzle,
+  accountPower,
+  votesOnchain,
+  votingPowerHistory,
+} from "@/database";
+import { DBVote, VotesRequest } from "@/mappers";
 
 export class VotesRepository {
   constructor(private readonly db: Drizzle) {}
   async getVotes(req: VotesRequest): Promise<{
-    items: (DBVote & { description: string })[];
+    items: (DBVote & { proposalTitle: string | null })[];
     totalCount: number;
   }> {
     const sortBy =
@@ -50,7 +50,7 @@ export class VotesRepository {
         with: {
           proposal: {
             columns: {
-              description: true,
+              title: true,
             },
           },
         },
@@ -60,7 +60,9 @@ export class VotesRepository {
     return {
       items: items.map((item) => ({
         ...item,
-        description: item.proposal.description,
+        transactionHash: item.txHash,
+        voterAddress: item.voterAccountId,
+        proposalTitle: item.proposal.title,
       })),
       totalCount,
     };
@@ -207,7 +209,7 @@ export class VotesRepository {
     fromDate?: number,
     toDate?: number,
   ): Promise<{
-    items: (DBVote & { description: string })[];
+    items: (DBVote & { proposalTitle: string | null })[];
     totalCount: number;
   }> {
     const whereClauses: SQL<unknown>[] = [
@@ -247,7 +249,7 @@ export class VotesRepository {
         with: {
           proposal: {
             columns: {
-              description: true,
+              title: true,
             },
           },
         },
@@ -258,7 +260,7 @@ export class VotesRepository {
     return {
       items: queryItems.map((item) => ({
         ...item,
-        description: item.proposal.description,
+        proposalTitle: item.proposal.title,
       })),
       totalCount,
     };

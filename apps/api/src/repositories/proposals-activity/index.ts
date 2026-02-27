@@ -1,7 +1,8 @@
-import { Address } from "viem";
-import { DaoIdEnum } from "@/lib/enums";
 import { asc, eq, sql } from "drizzle-orm";
+import { Address } from "viem";
+
 import { Drizzle, votesOnchain } from "@/database";
+import { DaoIdEnum } from "@/lib/enums";
 
 export type DbProposal = {
   id: string;

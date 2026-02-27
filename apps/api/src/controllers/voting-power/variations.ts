@@ -1,6 +1,5 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
-import { VotingPowerService } from "@/services";
 import {
   VotingPowerVariationsByAccountIdRequestQuerySchema,
   VotingPowerVariationsByAccountIdResponseSchema,
@@ -10,6 +9,7 @@ import {
   VotingPowerVariationsRequestQuerySchema,
   VotingPowerVariationsByAccountIdRequestParamsSchema,
 } from "@/mappers/";
+import { VotingPowerService } from "@/services";
 
 export function votingPowerVariations(app: Hono, service: VotingPowerService) {
   app.openapi(

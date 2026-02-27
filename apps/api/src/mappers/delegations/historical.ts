@@ -1,6 +1,5 @@
 import { z } from "@hono/zod-openapi";
 import { getAddress, isAddress } from "viem";
-import { DBDelegation } from "./delegations";
 
 export const HistoricalDelegationsRequestParamsSchema = z.object({
   address: z.string().refine((val) => isAddress(val, { strict: false })),
@@ -52,10 +51,12 @@ export type HistoricalDelegationsRequestQuery = z.infer<
 export const DelegationItemSchema = z.object({
   delegatorAddress: z
     .string()
-    .refine((val) => isAddress(val, { strict: false })),
+    .refine((val) => isAddress(val, { strict: false }))
+    .transform((val) => getAddress(val)),
   delegateAddress: z
     .string()
-    .refine((val) => isAddress(val, { strict: false })),
+    .refine((val) => isAddress(val, { strict: false }))
+    .transform((val) => getAddress(val)),
   amount: z.string(),
   timestamp: z.string(),
   transactionHash: z.string(),
@@ -68,23 +69,3 @@ export const DelegationsResponseSchema = z.object({
 
 export type DelegationsResponse = z.infer<typeof DelegationsResponseSchema>;
 export type DelegationItem = z.infer<typeof DelegationItemSchema>;
-
-const DelegationMapper = (d: DBDelegation): DelegationItem => {
-  return {
-    delegatorAddress: d.delegatorAccountId,
-    delegateAddress: d.delegateAccountId,
-    amount: d.delegatedValue.toString(),
-    timestamp: d.timestamp.toString(),
-    transactionHash: d.transactionHash,
-  };
-};
-
-export const DelegationResponseMapper = (d: {
-  items: DBDelegation[];
-  totalCount: number;
-}): DelegationsResponse => {
-  return {
-    items: d.items.map(DelegationMapper),
-    totalCount: d.totalCount,
-  };
-};

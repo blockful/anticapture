@@ -26,8 +26,11 @@ type Query {
   """
   historicalDelegations(address: String!, delegateAddressIn: JSON, skip: NonNegativeInt, limit: PositiveInt = 10, fromValue: String, toValue: String, orderDirection: queryInput_historicalDelegations_orderDirection = desc): historicalDelegations_200_response
 
-  """Get current delegators of an account"""
-  delegations(address: String!): delegations_200_response
+  """Get current delegations for an account"""
+  delegations(address: String!, orderBy: queryInput_delegations_orderBy = timestamp, orderDirection: queryInput_delegations_orderDirection = desc): delegations_200_response
+
+  """Get current delegators of an account with voting power"""
+  delegators(address: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_delegators_orderBy = amount, orderDirection: queryInput_delegators_orderDirection = desc): delegators_200_response
 
   """
   Get historical Liquid Treasury (treasury without DAO tokens) from external providers (DefiLlama/Dune)
@@ -143,10 +146,10 @@ type Query {
   votingPowerVariationsByAccountId(address: String!, fromDate: String, toDate: String): votingPowerVariationsByAccountId_200_response
 
   """Returns sorted and paginated account voting power records"""
-  votingPowers(limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_votingPowers_orderDirection = desc, orderBy: queryInput_votingPowers_orderBy = votingPower, addresses: JSON, fromValue: String, toValue: String): votingPowers_200_response
+  votingPowers(limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_votingPowers_orderDirection = desc, orderBy: queryInput_votingPowers_orderBy = votingPower, addresses: JSON, fromValue: String, toValue: String, fromDate: String, toDate: String): votingPowers_200_response
 
   """Returns voting power information for a specific address (account)"""
-  votingPowerByAccountId(accountId: String!): votingPowerByAccountId_200_response
+  votingPowerByAccountId(accountId: String!, fromDate: Float, toDate: Float): votingPowerByAccountId_200_response
 
   """
   Returns a mapping of the biggest variations to account balances associated by account address
@@ -157,10 +160,10 @@ type Query {
   accountBalanceVariationsByAccountId(address: String!, fromDate: String, toDate: String): accountBalanceVariationsByAccountId_200_response
 
   """Returns sorted and paginated account balance records"""
-  accountBalances(limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalances_orderDirection = desc, addresses: JSON, delegates: JSON, fromValue: String, toValue: String): accountBalances_200_response
+  accountBalances(fromDate: String, toDate: String, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalances_orderDirection = desc, orderBy: queryInput_accountBalances_orderBy = balance, addresses: JSON, delegates: JSON, fromValue: String, toValue: String): accountBalances_200_response
 
   """Returns account balance information for a specific address"""
-  accountBalanceByAccountId(address: String!): accountBalanceByAccountId_200_response
+  accountBalanceByAccountId(address: String!, fromDate: String, toDate: String): accountBalanceByAccountId_200_response
 
   """
   Returns a mapping of the largest interactions between accounts. 
@@ -324,6 +327,37 @@ type query_delegations_items_items {
   transactionHash: String!
 }
 
+enum queryInput_delegations_orderBy {
+  amount
+  timestamp
+}
+
+enum queryInput_delegations_orderDirection {
+  asc
+  desc
+}
+
+type delegators_200_response {
+  items: [query_delegators_items_items]!
+  totalCount: Float!
+}
+
+type query_delegators_items_items {
+  delegatorAddress: String!
+  amount: String!
+  timestamp: String!
+}
+
+enum queryInput_delegators_orderBy {
+  amount
+  timestamp
+}
+
+enum queryInput_delegators_orderDirection {
+  asc
+  desc
+}
+
 type getLiquidTreasury_200_response {
   items: [query_getLiquidTreasury_items_items]!
 
@@ -452,7 +486,6 @@ enum query_feedEvents_items_items_type {
   PROPOSAL
   DELEGATION
   TRANSFER
-  DELEGATION_VOTES_CHANGED
   PROPOSAL_EXTENDED
 }
 
@@ -483,7 +516,6 @@ enum queryInput_feedEvents_type {
   PROPOSAL
   DELEGATION
   TRANSFER
-  DELEGATION_VOTES_CHANGED
   PROPOSAL_EXTENDED
 }
 
@@ -710,7 +742,7 @@ type query_proposals_items_items {
   daoId: String!
   txHash: String!
   proposerAccountId: String!
-  title: String!
+  title: String
   description: String!
   startBlock: Float!
   endBlock: Float!
@@ -743,7 +775,7 @@ type proposal_200_response {
   daoId: String!
   txHash: String!
   proposerAccountId: String!
-  title: String!
+  title: String
   description: String!
   startBlock: Float!
   endBlock: Float!
@@ -1014,6 +1046,12 @@ type query_votingPowers_items_items {
   votesCount: Float!
   proposalsCount: Float!
   delegationsCount: Float!
+  variation: query_votingPowers_items_items_variation!
+}
+
+type query_votingPowers_items_items_variation {
+  absoluteChange: String!
+  percentageChange: Float!
 }
 
 enum queryInput_votingPowers_orderDirection {
@@ -1024,6 +1062,7 @@ enum queryInput_votingPowers_orderDirection {
 enum queryInput_votingPowers_orderBy {
   votingPower
   delegationsCount
+  variation
 }
 
 type votingPowerByAccountId_200_response {
@@ -1032,6 +1071,12 @@ type votingPowerByAccountId_200_response {
   votesCount: Float!
   proposalsCount: Float!
   delegationsCount: Float!
+  variation: query_votingPowerByAccountId_variation!
+}
+
+type query_votingPowerByAccountId_variation {
+  absoluteChange: String!
+  percentageChange: Float!
 }
 
 type accountBalanceVariations_200_response {
@@ -1077,6 +1122,7 @@ type query_accountBalanceVariationsByAccountId_data {
 
 type accountBalances_200_response {
   items: [query_accountBalances_items_items]!
+  period: query_accountBalances_period!
   totalCount: Float!
 }
 
@@ -1085,6 +1131,18 @@ type query_accountBalances_items_items {
   balance: String!
   tokenId: String!
   delegate: String!
+  variation: query_accountBalances_items_items_variation!
+}
+
+type query_accountBalances_items_items_variation {
+  previousBalance: String!
+  absoluteChange: String!
+  percentageChange: String!
+}
+
+type query_accountBalances_period {
+  startTimestamp: String!
+  endTimestamp: String!
 }
 
 enum queryInput_accountBalances_orderDirection {
@@ -1092,11 +1150,33 @@ enum queryInput_accountBalances_orderDirection {
   desc
 }
 
+enum queryInput_accountBalances_orderBy {
+  balance
+  variation
+}
+
 type accountBalanceByAccountId_200_response {
+  data: query_accountBalanceByAccountId_data!
+  period: query_accountBalanceByAccountId_period!
+}
+
+type query_accountBalanceByAccountId_data {
   address: String!
   balance: String!
   tokenId: String!
   delegate: String!
+  variation: query_accountBalanceByAccountId_data_variation!
+}
+
+type query_accountBalanceByAccountId_data_variation {
+  previousBalance: String!
+  absoluteChange: String!
+  percentageChange: String!
+}
+
+type query_accountBalanceByAccountId_period {
+  startTimestamp: String!
+  endTimestamp: String!
 }
 
 type accountInteractions_200_response {
@@ -1166,11 +1246,11 @@ type query_votesByProposalId_items_items {
   voterAddress: String!
   transactionHash: String!
   proposalId: String!
-  support: Float!
+  support: Float
   votingPower: String!
   reason: String
-  timestamp: Float!
-  proposalTitle: String!
+  timestamp: Int!
+  proposalTitle: String
 }
 
 enum queryInput_votesByProposalId_orderBy {
@@ -1192,11 +1272,11 @@ type query_votes_items_items {
   voterAddress: String!
   transactionHash: String!
   proposalId: String!
-  support: Float!
+  support: Float
   votingPower: String!
   reason: String
-  timestamp: Float!
-  proposalTitle: String!
+  timestamp: Int!
+  proposalTitle: String
 }
 
 enum queryInput_votes_orderBy {

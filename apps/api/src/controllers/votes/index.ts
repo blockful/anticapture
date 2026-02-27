@@ -1,12 +1,12 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 
-import { VotesService } from "@/services";
 import {
   VotersRequestSchema,
   VotersResponseSchema,
   VotesRequestSchema,
   VotesResponseSchema,
 } from "@/mappers";
+import { VotesService } from "@/services";
 
 export function votes(app: Hono, service: VotesService) {
   app.openapi(

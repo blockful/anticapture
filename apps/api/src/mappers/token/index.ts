@@ -1,4 +1,5 @@
 import { z } from "@hono/zod-openapi";
+
 import { token } from "@/database";
 
 export const TokenHistoricalPriceRequest = z.object({

@@ -1,7 +1,7 @@
-import { Address } from "viem";
 import { gte, and, lte, desc, eq, asc, sql } from "drizzle-orm";
-import { Drizzle, balanceHistory, transfer } from "@/database";
+import { Address } from "viem";
 
+import { Drizzle, balanceHistory, transfer } from "@/database";
 import { DBHistoricalBalanceWithRelations } from "@/mappers";
 
 export class HistoricalBalanceRepository {

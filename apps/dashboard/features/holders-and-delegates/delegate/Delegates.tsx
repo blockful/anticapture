@@ -27,8 +27,6 @@ import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
-import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
-import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 import daoConfig from "@/shared/dao-config";
 import { useScreenSize, useDaoData } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -53,11 +51,6 @@ interface DelegatesProps {
   daoId: DaoIdEnum;
 }
 
-// Converts a TimeInterval to a timestamp (in seconds) representing the start date.
-const getFromTimestamp = (period: TimeInterval): number => {
-  return Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[period];
-};
-
 export const Delegates = ({
   timePeriod = TimeInterval.THIRTY_DAYS,
   daoId,
@@ -73,9 +66,11 @@ export const Delegates = ({
   );
   const [sortBy, setSortBy] = useQueryState(
     "sortBy",
-    parseAsStringEnum(["delegationsCount", "votingPower"]).withDefault(
+    parseAsStringEnum([
+      "delegationsCount",
       "votingPower",
-    ),
+      "variation",
+    ]).withDefault("votingPower"),
   );
   const { decimals } = daoConfig[daoId];
   const { data: daoData } = useDaoData(daoId);
@@ -90,9 +85,6 @@ export const Delegates = ({
     setCurrentAddressFilter(address || "");
   };
 
-  // Calculate time-based parameters
-  const fromDate = useMemo(() => getFromTimestamp(timePeriod), [timePeriod]);
-
   const {
     data,
     loading,
@@ -100,15 +92,13 @@ export const Delegates = ({
     pagination,
     fetchNextPage,
     fetchingMore,
-    isHistoricalLoadingFor,
     isActivityLoadingFor,
   } = useDelegates({
-    fromDate,
     orderBy: sortBy as QueryInput_VotingPowers_OrderBy,
     orderDirection: sortOrder as QueryInput_VotingPowers_OrderDirection,
     daoId,
     days: timePeriod,
-    address: currentAddressFilter,
+    address: currentAddressFilter || undefined,
     limit: pageLimit,
   });
 
@@ -121,8 +111,8 @@ export const Delegates = ({
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
       // New field, default to desc for votingPower, asc for delegationsCount
-      setSortBy(field as "votingPower" | "delegationsCount");
-      setSortOrder(field === "votingPower" ? "desc" : "asc");
+      setSortBy(field as "votingPower" | "delegationsCount" | "variation");
+      setSortOrder(field === "delegationsCount" ? "asc" : "desc");
     }
   };
 
@@ -155,12 +145,11 @@ export const Delegates = ({
         address: delegate.accountId,
         votingPower: formatNumberUserReadable(votingPowerFormatted),
         variation: {
-          percentageChange:
-            delegate.percentageChange === PERCENTAGE_NO_BASELINE
-              ? 9999
-              : Number(Number(delegate.percentageChange).toFixed(2)),
+          percentageChange: Number(
+            Number(delegate.variation.percentageChange).toFixed(2),
+          ),
           absoluteChange: Number(
-            formatUnits(BigInt(delegate.absoluteChange), decimals),
+            formatUnits(BigInt(delegate.variation.absoluteChange), decimals),
           ),
         },
         activity,
@@ -288,8 +277,6 @@ export const Delegates = ({
     {
       accessorKey: "variation",
       cell: ({ row }) => {
-        const addr = row.original.address;
-
         const variation = row.getValue("variation") as
           | {
               percentageChange: number;
@@ -297,7 +284,7 @@ export const Delegates = ({
             }
           | undefined;
 
-        if (isHistoricalLoadingFor(addr) || loading) {
+        if (loading) {
           return (
             <div className="flex w-full items-center justify-center">
               <SkeletonRow
@@ -317,9 +304,26 @@ export const Delegates = ({
         );
       },
       header: () => (
-        <h4 className="text-table-header flex w-full items-center justify-center">
-          Change ({daoId})
-        </h4>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-secondary w-full justify-center p-0"
+          onClick={() => handleSort("variation")}
+        >
+          <h4 className="text-table-header whitespace-nowrap">
+            Change ({daoId})
+          </h4>
+          <ArrowUpDown
+            props={{ className: "size-4" }}
+            activeState={
+              sortBy === "variation"
+                ? sortOrder === "asc"
+                  ? ArrowState.UP
+                  : ArrowState.DOWN
+                : ArrowState.DEFAULT
+            }
+          />
+        </Button>
       ),
       meta: {
         columnClassName: "w-64",
@@ -447,7 +451,7 @@ export const Delegates = ({
 
   return (
     <>
-      <div className="flex h-[calc(100vh-16rem)] min-h-[300px] w-full flex-col">
+      <div className="min-h-75 flex h-[calc(100vh-16rem)] w-full flex-col">
         <Table
           columns={delegateColumns}
           data={loading ? Array(DEFAULT_ITEMS_PER_PAGE).fill({}) : tableData}

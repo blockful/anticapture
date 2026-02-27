@@ -1,8 +1,9 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
-import { ChartType } from "@/mappers/";
-import { LastUpdateService } from "@/services";
-import { LastUpdateRepositoryImpl } from "@/repositories";
+
 import { Drizzle } from "@/database";
+import { ChartType } from "@/mappers/";
+import { LastUpdateRepositoryImpl } from "@/repositories";
+import { LastUpdateService } from "@/services";
 
 export function lastUpdate(app: Hono, db: Drizzle) {
   const repository = new LastUpdateRepositoryImpl(db);

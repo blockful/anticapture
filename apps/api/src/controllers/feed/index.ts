@@ -1,6 +1,6 @@
-import { FeedRequestSchema, FeedResponseSchema } from "@/mappers";
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
+import { FeedRequestSchema, FeedResponseSchema } from "@/mappers";
 import { FeedService } from "@/services";
 
 export function feed(app: Hono, service: FeedService) {

@@ -12,6 +12,7 @@ export interface VoteDetail {
   voter: Address;
   votingPower: string;
   proposalId: string;
+  title: string | null;
   support: number;
 }
 
@@ -77,11 +78,11 @@ export type FeedEvent =
   | (FeedEventBase & {
       type: Query_FeedEvents_Items_Items_Type.Delegation;
       metadata?: DelegationDetail;
-    })
-  | (FeedEventBase & {
-      type: Query_FeedEvents_Items_Items_Type.DelegationVotesChanged;
-      metadata?: DelegationVotesChangedDetail;
     });
+// | (FeedEventBase & {
+//     type: Query_FeedEvents_Items_Items_Type.DelegationVotesChanged;
+//     metadata?: DelegationVotesChangedDetail;
+//   });
 
 export interface ActivityFeedFilters {
   limit?: number;
