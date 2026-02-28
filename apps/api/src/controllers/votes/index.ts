@@ -48,7 +48,7 @@ export function votes(app: Hono, service: VotesService) {
         toDate,
       } = context.req.valid("query");
 
-      const { totalCount, items } = await service.getVotesByProposal(
+      const response = await service.getVotesByProposal(
         id,
         skip,
         limit,
@@ -60,7 +60,7 @@ export function votes(app: Hono, service: VotesService) {
         toDate,
       );
 
-      return context.json({ totalCount, items });
+      return context.json(response);
     },
   );
 
