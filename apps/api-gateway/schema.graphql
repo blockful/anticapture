@@ -20,7 +20,7 @@ type Query {
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/accounts/{args.address}/delegations/historical`\nGet historical delegations for an account, with optional filtering and sorting\n"
   historicalDelegations(address: String!, delegateAddressIn: JSON, skip: NonNegativeInt, limit: PositiveInt = 10, fromValue: String, toValue: String, orderDirection: queryInput_historicalDelegations_orderDirection = desc): historicalDelegations_200_response
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/accounts/{args.address}/delegations`\nGet current delegations for an account\n"
+  """Get current delegations for an account"""
   delegations(address: String!): delegations_200_response
 
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/accounts/{args.address}/delegators`\nGet current delegators of an account with voting power\n"
@@ -1020,7 +1020,7 @@ type query_votingPowers_items_items {
 
 type query_votingPowers_items_items_variation {
   absoluteChange: String!
-  percentageChange: Float!
+  percentageChange: String!
 }
 
 enum queryInput_votingPowers_orderDirection {
@@ -1045,7 +1045,7 @@ type votingPowerByAccountId_200_response {
 
 type query_votingPowerByAccountId_variation {
   absoluteChange: String!
-  percentageChange: Float!
+  percentageChange: String!
 }
 
 type accountBalanceVariations_200_response {
