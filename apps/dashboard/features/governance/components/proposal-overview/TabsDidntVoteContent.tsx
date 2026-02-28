@@ -11,6 +11,7 @@ import {
   NonVoter,
 } from "@/features/governance/hooks/useNonVoters";
 import { SkeletonRow, Button } from "@/shared/components";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
@@ -133,6 +134,11 @@ export const TabsDidntVoteContent = ({
                   nameClassName="group-hover:border-primary transition-colors duration-200"
                 />
               </button>
+              <CopyAndPasteButton
+                textToCopy={voterAddress}
+                className="size-2"
+                iconSize="md"
+              />
             </div>
           );
         },

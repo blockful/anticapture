@@ -237,14 +237,7 @@ export type Query = {
    *
    */
   delegationPercentageByDay?: Maybe<DelegationPercentageByDay_200_Response>;
-  /**
-   *
-   * >**Method**: `GET`
-   * >**Base URL**: `http://localhost:42069`
-   * >**Path**: `/accounts/{args.address}/delegations`
-   * Get current delegations for an account
-   *
-   */
+  /** Get current delegations for an account */
   delegations?: Maybe<Delegations_200_Response>;
   /**
    *
@@ -1929,7 +1922,7 @@ export type Query_Votes_Items_Items = {
 export type Query_VotingPowerByAccountId_Variation = {
   __typename?: 'query_votingPowerByAccountId_variation';
   absoluteChange: Scalars['String']['output'];
-  percentageChange: Scalars['Float']['output'];
+  percentageChange: Scalars['String']['output'];
 };
 
 export type Query_VotingPowerVariationsByAccountId_Data = {
@@ -1975,7 +1968,7 @@ export type Query_VotingPowers_Items_Items = {
 export type Query_VotingPowers_Items_Items_Variation = {
   __typename?: 'query_votingPowers_items_items_variation';
   absoluteChange: Scalars['String']['output'];
-  percentageChange: Scalars['Float']['output'];
+  percentageChange: Scalars['String']['output'];
 };
 
 export enum Timestamp_Const {
@@ -2376,4 +2369,4 @@ export type GetDelegatesQueryVariables = Exact<{
 }>;
 
 
-export type GetDelegatesQuery = { __typename?: 'Query', votingPowers?: { __typename?: 'votingPowers_200_response', totalCount: number, items: Array<{ __typename?: 'query_votingPowers_items_items', accountId: string, delegationsCount: number, votingPower: string, variation: { __typename?: 'query_votingPowers_items_items_variation', absoluteChange: string, percentageChange: number } } | null> } | null };
+export type GetDelegatesQuery = { __typename?: 'Query', votingPowers?: { __typename?: 'votingPowers_200_response', totalCount: number, items: Array<{ __typename?: 'query_votingPowers_items_items', accountId: string, delegationsCount: number, votingPower: string, variation: { __typename?: 'query_votingPowers_items_items_variation', absoluteChange: string, percentageChange: string } } | null> } | null };

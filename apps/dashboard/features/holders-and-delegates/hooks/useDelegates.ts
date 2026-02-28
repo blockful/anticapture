@@ -24,7 +24,7 @@ interface ProposalsActivity {
 
 export interface DelegateVariation {
   absoluteChange: string;
-  percentageChange: number;
+  percentageChange: string;
 }
 
 export interface Delegate {
@@ -209,7 +209,7 @@ export const useDelegates = ({
                 absoluteChange: delegate.variation.absoluteChange,
                 percentageChange: delegate.variation.percentageChange,
               }
-            : { absoluteChange: "0", percentageChange: 0 },
+            : { absoluteChange: "0", percentageChange: "0" },
           proposalsActivity,
         };
       });

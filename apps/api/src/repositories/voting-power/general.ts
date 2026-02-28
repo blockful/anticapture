@@ -311,10 +311,12 @@ export class VotingPowerRepository {
       .as("variation");
 
     const absoluteChangeSql = sql<bigint>`COALESCE(${variationSubquery.absoluteChange}, 0)`;
-    const percentageChangeSql = sql<number>`
+    const percentageChangeSql = sql<string>`
       CASE
-        WHEN (${accountPower.votingPower} - COALESCE(${variationSubquery.absoluteChange}, 0)) = 0 THEN 0
-        ELSE ROUND((COALESCE(${variationSubquery.absoluteChange}, 0)::numeric / (${accountPower.votingPower} - COALESCE(${variationSubquery.absoluteChange}, 0))::numeric) * 100, 2)
+        WHEN (${accountPower.votingPower} - COALESCE(${variationSubquery.absoluteChange}, 0)) = 0 THEN
+          CASE WHEN COALESCE(${variationSubquery.absoluteChange}, 0) = 0 THEN '0'
+          ELSE ${PERCENTAGE_NO_BASELINE} END
+        ELSE ROUND((COALESCE(${variationSubquery.absoluteChange}, 0)::numeric / (${accountPower.votingPower} - COALESCE(${variationSubquery.absoluteChange}, 0))::numeric) * 100, 2)::text
       END
     `;
 
@@ -363,7 +365,7 @@ export class VotingPowerRepository {
       items: items.map((row) => ({
         ...row,
         absoluteChange: BigInt(row.absoluteChange ?? 0),
-        percentageChange: Number(row.percentageChange ?? 0),
+        percentageChange: String(row.percentageChange ?? "0"),
       })),
       totalCount: Number(totalCount?.count ?? 0),
     };
@@ -406,10 +408,12 @@ export class VotingPowerRepository {
         delegationsCount: accountPower.delegationsCount,
         lastVoteTimestamp: accountPower.lastVoteTimestamp,
         absoluteChange: sql<bigint>`COALESCE(${variationSubquery.absoluteChange}, 0)`,
-        percentageChange: sql<number>`
+        percentageChange: sql<string>`
           CASE
-            WHEN (${accountPower.votingPower} - COALESCE(${variationSubquery.absoluteChange}, 0)) = 0 THEN 0
-            ELSE ROUND((COALESCE(${variationSubquery.absoluteChange}, 0)::numeric / (${accountPower.votingPower} - COALESCE(${variationSubquery.absoluteChange}, 0))::numeric) * 100, 2)
+            WHEN (${accountPower.votingPower} - COALESCE(${variationSubquery.absoluteChange}, 0)) = 0 THEN
+              CASE WHEN COALESCE(${variationSubquery.absoluteChange}, 0) = 0 THEN '0'
+              ELSE ${PERCENTAGE_NO_BASELINE} END
+            ELSE ROUND((COALESCE(${variationSubquery.absoluteChange}, 0)::numeric / (${accountPower.votingPower} - COALESCE(${variationSubquery.absoluteChange}, 0))::numeric) * 100, 2)::text
           END
         `,
       })
@@ -424,7 +428,7 @@ export class VotingPowerRepository {
       ? {
           ...result,
           absoluteChange: BigInt(result.absoluteChange ?? 0),
-          percentageChange: Number(result.percentageChange ?? 0),
+          percentageChange: String(result.percentageChange ?? "0"),
         }
       : {
           accountId: accountId,
@@ -435,7 +439,7 @@ export class VotingPowerRepository {
           daoId: "",
           lastVoteTimestamp: 0n,
           absoluteChange: 0n,
-          percentageChange: 0,
+          percentageChange: "0",
         };
   }
 

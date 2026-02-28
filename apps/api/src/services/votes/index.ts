@@ -120,6 +120,13 @@ export class VotesService {
       toDate,
     );
 
-    return VotesResponseSchema.parse(response);
+    return VotesResponseSchema.parse({
+      ...response,
+      items: response.items.map((item) => ({
+        ...item,
+        transactionHash: item.txHash,
+        voterAddress: item.voterAccountId,
+      })),
+    });
   }
 }
