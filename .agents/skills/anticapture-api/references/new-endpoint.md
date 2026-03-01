@@ -7,14 +7,18 @@ Use this sequence when adding/changing a route in `apps/api`.
 ```typescript
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 import { DaoService } from "@/services";
-import { DaoResponseSchema } from "@/mappers";
+import {
+  DaoResponseSchema,
+  DaosRequestParamsSchema,
+  DaosRequestQuerySchema,
+} from "@/mappers";
 
 export function dao(app: Hono, service: DaoService) {
   app.openapi(
     createRoute({
       method: "get",
       operationId: "dao",
-      path: "/dao",
+      path: "/dao/:id",
       summary: "Get DAO governance parameters",
       tags: ["governance"],
       request: {
@@ -68,7 +72,7 @@ interface DaoRepository {
 export class DaoService {
   constructor(private repository: DaoRepository) {}
 
-  async getDaoParameters(id: string, _value: bigint): Promise<{ id: String }> {
+  async getDaoParameters(id: string, _value: bigint): Promise<{ id: string }> {
     return await this.repository.getDaoConfig(id);
   }
 }

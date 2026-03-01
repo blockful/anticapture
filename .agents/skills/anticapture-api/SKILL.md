@@ -36,7 +36,7 @@ description: Use for apps/api work: adding or changing REST controllers, service
 | Database query           | `src/repositories/<domain>/` |                                   |
 | Data transformation      | `src/mappers/<domain>/`      |                                   |
 | External API integration | `src/clients/<service>/`     |                                   |
-| Database schema          | `src/database/schema/`       | `./references/database-schema.md` |
+| Database schema          | `src/database/schema.ts`     | `./references/database-schema.md` |
 
 ## Workflow
 
@@ -46,6 +46,7 @@ description: Use for apps/api work: adding or changing REST controllers, service
 4. Add/update tests per `./references/testing-endpoint.md`.
 5. Run verification:
    - `pnpm run --filter=@anticapture/api typecheck`
+   - `pnpm run --filter=@anticapture/api lint`
    - `pnpm run --filter=@anticapture/api test`
 
 ## Guardrails

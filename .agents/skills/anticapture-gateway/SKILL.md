@@ -33,6 +33,7 @@ description: Use for apps/api-gateway work: Mesh configuration, DAO source disco
 3. Keep resolver logic consistent with API docs/contracts.
 4. Verify:
    - `pnpm run --filter=@anticapture/api-gateway typecheck`
+   - `pnpm run --filter=@anticapture/api-gateway lint`
    - `pnpm run --filter=@anticapture/api-gateway test`
 
 ## Guardrails

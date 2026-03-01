@@ -4,7 +4,7 @@
 
 **Workflow for schema changes**:
 
-1. Change must originate in `apps/indexer/src/ponder.schema.ts`
-2. Translate Ponder syntax to Drizzle format in `src/database/schema/`
+1. Change must originate in `apps/indexer/ponder.schema.ts`
+2. Translate Ponder syntax to Drizzle format in `src/database/schema.ts`
 3. Update relevant repositories and mappers
 4. Update OpenAPI schemas in controllers

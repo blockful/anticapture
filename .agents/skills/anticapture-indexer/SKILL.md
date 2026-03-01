@@ -37,7 +37,7 @@ description: Use for apps/indexer work: event handlers, DAO indexer implementati
 | Event handler               | `src/eventHandlers/`     |                            |
 | DAO-specific implementation | `src/indexer/<dao>/`     |                            |
 | DAO configuration           | `config/<dao>.config.ts` |                            |
-| Database schema changes     | `src/ponder.schema.ts`   | `./references/database.md` |
+| Database schema changes     | `ponder.schema.ts`       | `./references/database.md` |
 
 ## Workflow
 

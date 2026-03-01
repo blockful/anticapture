@@ -34,6 +34,8 @@ describe("Endpoint", () => {
 });
 ```
 
+`Service` and `fakeRepository` are placeholders in this minimal snippet. Follow concrete setup patterns from existing tests such as `apps/api/src/controllers/delegations/delegators.test.ts`.
+
 ## Coverage Expectations
 
 - Happy path status and response shape.

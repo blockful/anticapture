@@ -17,7 +17,7 @@ description: Use for apps/dashboard work: routes, features, shared components/ho
 - Location: `apps/dashboard`
 - Runtime: Next.js App Router
 - UI: Tailwind + shared design-system components
-- Data: `@anticapture/graphql-client` + Apollo/React Query patterns
+- Data: `@anticapture/graphql-client` + Apollo hooks
 
 ## Architecture
 
