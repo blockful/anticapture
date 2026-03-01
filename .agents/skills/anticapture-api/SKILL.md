@@ -1,30 +1,25 @@
 ---
 name: anticapture-api
-description: Used whenever creating or changing an endpoint on the API
+description: Use for apps/api work: adding or changing REST controllers, services, repositories, mappers, clients, schema mapping, or API tests.
 ---
 
 # API Package Guide
 
-## Overview
+## Use This Skill When
 
-- **Service ID**: `<dao>-api`
-- **Port**: 42069 (configurable via `PORT` env var)
-- **Stack**: Hono, Drizzle ORM, @hono/zod-openapi
-- **Purpose**: REST API serving governance data from the indexer with OpenAPI documentation
+- You are editing files under `apps/api`.
+- You are adding/changing a REST endpoint.
+- You are changing API-layer business logic, queries, DTO mapping, or integrations.
+- You are updating tests for API behavior.
 
-## What It Does
+## Package Snapshot
 
-- Serves governance data indexed by both the Indexer and Offchain Indexer
-- Exposes RESTful endpoints with OpenAPI/Swagger documentation (`/docs`)
-
-## Dependencies
-
-- **PostgreSQL**: With data populated by the Indexer
-- **Ethereum RPC**: For some real-time queries
+- Location: `apps/api`
+- Runtime: Hono + `@hono/zod-openapi`
+- Data access: Drizzle ORM (`src/repositories/drizzle`)
+- Docs endpoint: `/docs`
 
 ## Architecture
-
-### Layer Responsibilities
 
 - **Controllers**: Define routes, validate requests, handle responses
 - **Services**: Implement business logic, orchestrate repositories and clients
@@ -32,7 +27,7 @@ description: Used whenever creating or changing an endpoint on the API
 - **Clients**: Interact with external APIs (CoinGecko, Dune, etc.)
 - **Mappers**: Transform database models to API response DTOs
 
-## Where to Put New Code
+## Placement Rules
 
 | What you're adding       | Where it goes                | Further information               |
 | ------------------------ | ---------------------------- | --------------------------------- |
@@ -43,4 +38,18 @@ description: Used whenever creating or changing an endpoint on the API
 | External API integration | `src/clients/<service>/`     |                                   |
 | Database schema          | `src/database/schema/`       | `./references/database-schema.md` |
 
-When testing an endpoint see `./references/testing-endpoint.md`.
+## Workflow
+
+1. If changing routes/contracts, read `./references/new-endpoint.md`.
+2. Implement controller + mapper + service + repository changes in the proper layer.
+3. If schema-related, follow `./references/database-schema.md` exactly.
+4. Add/update tests per `./references/testing-endpoint.md`.
+5. Run verification:
+   - `pnpm run --filter=@anticapture/api typecheck`
+   - `pnpm run --filter=@anticapture/api test`
+
+## Guardrails
+
+- Keep transport validation in controllers/mappers, not in repositories.
+- Keep database-specific logic in repositories.
+- Do not couple controllers directly to database access.

@@ -1,65 +1,42 @@
-## Code Examples
+# Testing Endpoints
 
-### Controller (Hono + OpenAPI)
+Use integration-style controller tests that mount the route in a real Hono app and hit it with `app.request(...)`.
 
-```typescript
-import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
-import { DaoService } from "@/services";
-import { DaoResponseSchema } from "@/mappers";
+## Commands
 
-export function dao(app: Hono, service: DaoService) {
-  app.openapi(
-    createRoute({
-      method: "get",
-      operationId: "dao",
-      path: "/dao",
-      summary: "Get DAO governance parameters",
-      tags: ["governance"],
-      responses: {
-        200: {
-          description: "DAO governance parameters",
-          content: {
-            "application/json": { schema: DaoResponseSchema },
-          },
-        },
-      },
-    }),
-    async (context) => {
-      const daoData = await service.getDaoParameters();
-      return context.json(daoData, 200);
-    },
-  );
-}
-```
+- Run all API tests:
+  - `pnpm run --filter=@anticapture/api test`
+- Run API typecheck:
+  - `pnpm run --filter=@anticapture/api typecheck`
 
-### Service
+## Minimal Pattern
+
+Use existing controller tests as reference (for example, `apps/api/src/controllers/delegations/delegators.test.ts`).
 
 ```typescript
-import { mapDaoToResponse } from "@/mappers";
+import { OpenAPIHono as Hono } from "@hono/zod-openapi";
+import { describe, it, expect } from "vitest";
+import { endpoint } from "./endpoint";
 
-interface DaoRepository {
-  getDaoConfig(): Promise<{}>;
+function createTestApp(service: Service) {
+  const app = new Hono();
+  endpoint(app, service);
+  return app;
 }
 
-export class DaoService {
-  constructor(private repository: DaoRepository) {}
-
-  async getDaoParameters() {
-    return await this.repository.getDaoConfig();
-  }
-}
+describe("Endpoint", () => {
+  it("returns 200 on valid input", async () => {
+    const service = new Service(fakeRepository);
+    const app = createTestApp(service);
+    const response = await app.request("/your/route");
+    expect(response.status).toBe(200);
+  });
+});
 ```
 
-### Repository
+## Coverage Expectations
 
-```typescript
-import { db } from "@/database";
-import { daoConfig } from "@/database/schema";
-import { eq } from "drizzle-orm";
-
-export class DaoRepository {
-  async getDaoConfig(): Promise<{}> {
-    return await db.select().from(daoConfig).limit(1);
-  }
-}
-```
+- Happy path status and response shape.
+- Invalid params/query/body returns `400`.
+- Edge-case pagination/sorting/defaults (when relevant).
+- Serialization checks for `bigint`/address normalization (when relevant).

@@ -1,54 +1,50 @@
 ---
 name: anticapture-dashboard
-description: Used whenever dealing with the dashboard
+description: Use for apps/dashboard work: routes, features, shared components/hooks, styling, data-fetching wiring, and dashboard tests.
 ---
 
 # Dashboard Package Guide
 
-## Overview
+## Use This Skill When
 
-- **Port**: 3000
-- **Stack**: Next.js, Tailwind CSS, React Query, wagmi, viem, Zustand, Recharts
+- You are editing files in `apps/dashboard`.
+- You are adding or refactoring UI/features/routes.
+- You are wiring data from GraphQL hooks into the UI.
+- You are updating dashboard tests or lint/type issues.
 
-## What It Does
+## Package Snapshot
 
-- Multi-DAO support
-- Governance security analysis and risk assessment
-- Token distribution visualization
-
-## Dependencies
-
-- **API Gateway**: GraphQL endpoint for data fetching
-- **GraphQL Client**: Generated types and hooks (`@anticapture/graphql-client`)
+- Location: `apps/dashboard`
+- Runtime: Next.js App Router
+- UI: Tailwind + shared design-system components
+- Data: `@anticapture/graphql-client` + Apollo/React Query patterns
 
 ## Architecture
 
-### Feature-Based Organization
-
-The dashboard follows a **feature-based architecture** where each major domain has its own directory with all related code.
-
 ```
 apps/dashboard/
-├── app/                        # Next.js App Router pages
+├── app/                        # Next.js routes, layouts, route handlers
 ├── features/                   # Feature modules (domain-driven)
 │   └── <feature-name>/
-│       ├── components/         # Feature-specific components
-│       ├── hooks/              # Feature-specific hooks
-│       ├── contexts/           # Feature-specific React contexts
-│       └── utils/              # Feature-specific utilities
-├── shared/                     # Shared code across features
-│   ├── components/
-│   │   ├── ui/                 # Reusable UI components
-│   │   └── design-system/      # Design system components
-│   ├── hooks/                  # Shared hooks
-│   ├── types/                  # Shared TypeScript types
-│   ├── utils/                  # Shared utilities
-│   └── lib/                    # External library configurations
-├── templates/                  # Page-level templates
-├── widgets/                    # Standalone UI components
+├── shared/                     # Cross-feature components/services/types/utils
+├── widgets/                    # Composed UI sections
 └── public/                     # Static assets
 ```
 
-## Creating new components
+## Workflow
 
-- Every new component should be added to the design system with props and variants
+1. Place code by ownership:
+   - Feature-specific UI/logic in `features/<feature>/...`
+   - Cross-feature primitives in `shared/...`
+   - Higher-level composed sections in `widgets/...`
+2. Reuse existing shared components before adding new primitives.
+3. Keep route-level composition in `app/...`; avoid pushing route concerns into low-level components.
+4. Verify:
+   - `pnpm run --filter=@anticapture/dashboard typecheck`
+   - `pnpm run --filter=@anticapture/dashboard lint`
+   - `pnpm run --filter=@anticapture/dashboard test` (when behavior changes)
+
+## Guardrails
+
+- Do not add feature-specific logic into `shared` unless reused by multiple features.
+- Prefer extending existing design-system/shared UI instead of creating near-duplicates.

@@ -1,4 +1,10 @@
 # Database
 
-The `ponder.schema.ts` file is an abstraction of the Drizzle schema created by ponder.
-It has its own table definitions, as well as relations that only apply to the generated API (currently being replaced by the `apps/api`).
+`apps/indexer/ponder.schema.ts` is the source of truth for indexed storage shape.
+
+When schema changes:
+
+1. Keep changes minimal and backward-compatible where possible.
+2. Confirm affected event handlers still populate required fields.
+3. Coordinate required mapping changes in `apps/api/src/database/schema.ts` and related repositories/mappers.
+4. Reindex implications must be explicitly acknowledged before runtime execution.

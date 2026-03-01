@@ -21,10 +21,22 @@ export function DaoComponent() {
 }
 ```
 
+For hooks-only imports, use:
+
+```typescript
+import { useGetDaoQuery } from "@anticapture/graphql-client/hooks";
+```
+
 ## Environment Variables
 
-Configure in `packages/graphql-client/.env`:
+Preferred local setup is `packages/graphql-client/.env` (copy from `.env.example`).
+`codegen.ts` also supports falling back to `../../apps/api-gateway/schema.graphql` when no endpoint env var is set.
 
 | Variable                       | Required | Description                     |
 | ------------------------------ | -------- | ------------------------------- |
 | `ANTICAPTURE_GRAPHQL_ENDPOINT` | yes      | API Gateway URL (with /graphql) |
+
+## Codegen Commands
+
+- `pnpm run --filter=@anticapture/graphql-client codegen`
+- `pnpm run --filter=@anticapture/graphql-client codegen:watch`

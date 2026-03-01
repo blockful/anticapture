@@ -1,8 +1,8 @@
-# Creating or changing a new endpoint
+# Creating Or Changing An Endpoint
 
-## Controller
+Use this sequence when adding/changing a route in `apps/api`.
 
-Where the endpoint definition lives, with the responses and error handling.
+## 1) Controller
 
 ```typescript
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
@@ -31,8 +31,8 @@ export function dao(app: Hono, service: DaoService) {
       },
     }),
     async (context) => {
-      const { id } = req.valid("params");
-      const { value } = req.valid("query");
+      const { id } = context.req.valid("param");
+      const { value } = context.req.valid("query");
       const daoData = await service.getDaoParameters(id, value);
       return context.json(daoData, 200);
     },
@@ -40,7 +40,7 @@ export function dao(app: Hono, service: DaoService) {
 }
 ```
 
-## Mappers
+## 2) Mapper/Input Schemas
 
 Validation of route params, responses and types.
 
@@ -56,25 +56,25 @@ export const DaosRequestQuerySchema = z.object({
 export type DaosRequestQuery = z.infer<typeof DaosRequestQuerySchema>;
 ```
 
-## Service
+## 3) Service
 
 ```typescript
-import { mapDaoToResponse } from "@/mappers";
-
 interface DaoRepository {
-  getDaoConfig(): Promise<{}>;
+  getDaoConfig(id: string): Promise<{
+    id: string;
+  }>;
 }
 
 export class DaoService {
   constructor(private repository: DaoRepository) {}
 
-  async getDaoParameters() {
-    return await this.repository.getDaoConfig();
+  async getDaoParameters(id: string, _value: bigint): Promise<{ id: String }> {
+    return await this.repository.getDaoConfig(id);
   }
 }
 ```
 
-## Repository
+## 4) Repository
 
 ```typescript
 import { db } from "@/database";
@@ -82,8 +82,20 @@ import { daoConfig } from "@/database/schema";
 import { eq } from "drizzle-orm";
 
 export class DaoRepository {
-  async getDaoConfig(): Promise<{}> {
-    return await db.select().from(daoConfig).limit(1);
+  async getDaoConfig(id: string) {
+    return await db
+      .select()
+      .from(daoConfig)
+      .where(eq(daoConfig.id, id))
+      .limit(1);
   }
 }
 ```
+
+## 5) Validation Checklist
+
+- Route is declared with `createRoute` and has response schema.
+- Request params/query/body are validated in controller layer.
+- Service coordinates business logic only.
+- Repository only performs data access.
+- Test coverage updated for happy path and validation error cases.

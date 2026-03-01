@@ -1,38 +1,26 @@
 ---
 name: anticapture-graphql-client
-description: Used whenever working with the GraphQL Client package (codegen, types, hooks) or running the gateway locally
+description: Use for packages/graphql-client work: GraphQL documents, codegen config, generated types/hooks, exports, and schema-sync issues.
 ---
 
 # GraphQL Client Package Guide
 
-## Overview
+## Use This Skill When
 
-- **Stack**: @graphql-codegen/cli, @graphql-codegen/typescript-react-apollo
-- **Purpose**: Auto-generated TypeScript types and React Apollo hooks from the API Gateway's GraphQL schema
+- You are editing `packages/graphql-client`.
+- You added/changed `.graphql` documents used by dashboard.
+- Generated files are stale or type imports break.
+- Gateway schema changes require client regeneration.
 
-## What It Does
+## Package Snapshot
 
-- Fetches GraphQL schema from API Gateway
-- Generates TypeScript type definitions for all GraphQL types
-- Creates React hooks for queries
-- Provides type-safe GraphQL client for the Dashboard
-
-## Dependencies
-
-- **API Gateway**: URL on `ANTICAPTURE_GRAPHQL_ENDPOINT`, either local or on the cloud.
-
-## File Structure
-
-```
-packages/graphql-client/
-├── src/
-│   ├── generated/              # Auto-generated files (DO NOT EDIT)
-│   │   ├── graphql.ts          # TypeScript types
-│   │   └── operations.ts       # React hooks
-│   └── index.ts                # Package exports
-├── codegen.ts                  # GraphQL Codegen configuration
-└── package.json
-```
+- Location: `packages/graphql-client`
+- Stack: GraphQL Code Generator
+- Inputs: `documents/**/*.graphql` + schema from `ANTICAPTURE_GRAPHQL_ENDPOINT` or `../../apps/api-gateway/schema.graphql`
+- Outputs:
+  - `generated.ts` (React Apollo hooks + operation types)
+  - `types.ts` (types/operations without React hooks)
+  - `hooks.ts` and `index.ts` (exports)
 
 ## How It Works
 
@@ -43,15 +31,21 @@ packages/graphql-client/
 
 ## When to Regenerate
 
-Run `pnpm client codegen` when:
+Run codegen when:
 
 1. GraphQL schema changes in the API Gateway
-2. After pulling changes that include schema updates
+2. `.graphql` operations in `documents/` change
+3. After pulling generated/schema-related changes
+
+Command:
+
+- `pnpm run --filter=@anticapture/graphql-client codegen`
+- Optional watch: `pnpm run --filter=@anticapture/graphql-client codegen:watch`
 
 ## Important Rules
 
-- **DO NOT** manually edit files in `src/generated/`
+- **DO NOT** manually edit generated sections in `generated.ts` and `types.ts`
 - **DO** commit generated files to version control
 - **DO** use generated types instead of `any`
 
-For usage examples and codegen configuration see `./references/usage-and-config.md`.
+For usage patterns and env setup see `./references/usage-and-config.md`.
