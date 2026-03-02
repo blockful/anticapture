@@ -1,9 +1,12 @@
+import * as Sentry from "@sentry/node";
 import type { ErrorHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 
 export const errorHandler: ErrorHandler = (err, c) => {
+  Sentry.captureException(err);
+
   if (err instanceof HTTPException) {
     return err.getResponse();
   }

@@ -1,3 +1,4 @@
+import "instrument";
 import { serve } from "@hono/node-server";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { drizzle } from "drizzle-orm/node-postgres";
@@ -86,6 +87,7 @@ import {
 } from "@/services";
 
 import { feed } from "./controllers/feed";
+import { sentry } from "./sentry";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -236,6 +238,7 @@ transfers(app, new TransfersService(new TransfersRepository(pgClient)));
 votes(app, new VotesService(new VotesRepository(pgClient)));
 dao(app, daoService);
 docs(app);
+sentry(app);
 tokenMetrics(app, tokenMetricsService);
 
 serve(

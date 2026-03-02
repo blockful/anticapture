@@ -60,5 +60,8 @@
   "workspaces": [
     "apps/dashboard",
     "apps/graphql-client"
-  ]
+  ],
+  "dependencies": {
+    "@sentry/cli": "^2.58.5"
+  }
 }
