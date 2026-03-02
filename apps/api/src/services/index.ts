@@ -16,3 +16,4 @@ export * from "./delegations";
 export * from "./treasury";
 export * from "./votes";
 export * from "./feed";
+export * from "./event-relevance";
