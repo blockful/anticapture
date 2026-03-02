@@ -151,3 +151,5 @@ dist
 .github/copilot-instructions.md
 
 .claude/worktrees
+
+.sentryclirc
