@@ -40,7 +40,7 @@ import { getClient } from "@/lib/client";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 import { getChain } from "@/lib/utils";
-import { errorHandler } from "@/middlewares";
+import { errorHandler, sentryTracing } from "@/middlewares";
 import {
   AccountBalanceRepository,
   AccountInteractionsRepository,
@@ -106,6 +106,7 @@ const app = new Hono({
 });
 
 app.use(logger());
+app.use("*", sentryTracing);
 app.onError(errorHandler);
 
 const chain = getChain(env.CHAIN_ID);

@@ -9,8 +9,11 @@ import { ReactNode } from "react";
 import { WagmiProvider } from "wagmi";
 import "@rainbow-me/rainbowkit/styles.css";
 
+import { registerSentryAxiosTracing } from "@/shared/services/sentry/axiosTracing";
 import { wagmiConfig } from "@/shared/services/wallet/wallet";
 import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
+
+registerSentryAxiosTracing();
 
 const queryClient = new QueryClient();
 

@@ -1,5 +1,7 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+import { withSentryConfig } from "@sentry/nextjs";
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
@@ -32,4 +34,15 @@ const nextConfig = {
   serverExternalPackages: ["pino-pretty"],
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  org: "blockful-pl",
+  project: "anticapture-dashboard",
+  // Upload source maps during build
+  sourcemaps: {
+    disable: false,
+  },
+  // Suppress build-time logs
+  silent: !process.env.CI,
+  // Tree-shake Sentry debug code in production
+  disableLogger: true,
+});
