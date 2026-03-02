@@ -29,7 +29,11 @@ import {
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 
-import { AaveTokenIndexer } from "./indexer/aave/aave";
+import {
+  AAVETokenIndexer,
+  sktAaveTokenIndexer,
+  aAAVETokenIndexer,
+} from "./indexer/aave";
 import {
   ZKTokenIndexer,
   GovernorIndexer as ZKGovernorIndexer,
@@ -95,7 +99,11 @@ switch (daoId) {
     break;
   }
   case DaoIdEnum.AAVE: {
-    AaveTokenIndexer(token.address, token.decimals);
+    const { aave, stkAAVE, aAAVE } = CONTRACT_ADDRESSES[DaoIdEnum.AAVE];
+
+    AAVETokenIndexer(aave.address, aave.decimals);
+    sktAaveTokenIndexer(stkAAVE.address, stkAAVE.decimals);
+    aAAVETokenIndexer(aAAVE.address, aAAVE.decimals);
     break;
   }
   default:

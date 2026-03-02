@@ -124,6 +124,7 @@ export const delegation = onchainTable(
     isDex: drizzle.boolean().notNull().default(false),
     isLending: drizzle.boolean().notNull().default(false),
     isTotal: drizzle.boolean().notNull().default(false),
+    type: drizzle.integer(),
   }),
   (table) => ({
     pk: primaryKey({

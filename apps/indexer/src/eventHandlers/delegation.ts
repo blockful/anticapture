@@ -8,14 +8,15 @@ import {
 } from "ponder:schema";
 import { Address, getAddress, Hex, zeroAddress } from "viem";
 
-import { ensureAccountExists, ensureAccountsExist } from "./shared";
-import { DaoIdEnum } from "@/lib/enums";
 import {
   BurningAddresses,
   CEXAddresses,
   DEXAddresses,
   LendingAddresses,
 } from "@/lib/constants";
+import { DaoIdEnum } from "@/lib/enums";
+
+import { ensureAccountExists, ensureAccountsExist } from "./shared";
 
 /**
  * ### Creates:
@@ -43,6 +44,7 @@ export const delegateChanged = async (
     timestamp: bigint;
     logIndex: number;
     delegatorBalance?: bigint;
+    type?: number;
   },
 ) => {
   const {
@@ -54,6 +56,7 @@ export const delegateChanged = async (
     timestamp,
     logIndex,
     delegatorBalance: _delegatorBalance,
+    type,
   } = args;
 
   const normalizedDelegator = getAddress(delegator);
@@ -113,6 +116,7 @@ export const delegateChanged = async (
       isDex,
       isLending,
       isTotal,
+      type,
     })
     .onConflictDoUpdate((current) => ({
       delegatedValue:

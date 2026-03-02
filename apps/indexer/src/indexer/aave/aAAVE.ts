@@ -5,10 +5,10 @@ import { Address, zeroAddress } from "viem";
 import { delegateChanged, tokenTransfer } from "@/eventHandlers";
 import { DaoIdEnum } from "@/lib/enums";
 
-export function AAVETokenIndexer(address: Address, decimals: number) {
+export function aAAVETokenIndexer(address: Address, decimals: number) {
   const daoId = DaoIdEnum.AAVE;
 
-  ponder.on(`AAVE:setup`, async ({ context }) => {
+  ponder.on(`aAAVE:setup`, async ({ context }) => {
     await context.db.insert(token).values({
       id: address,
       name: daoId,
@@ -16,7 +16,7 @@ export function AAVETokenIndexer(address: Address, decimals: number) {
     });
   });
 
-  ponder.on(`AAVE:Transfer`, async ({ event, context }) => {
+  ponder.on(`aAAVE:Transfer`, async ({ event, context }) => {
     const { from, to, value } = event.args;
 
     await tokenTransfer(
@@ -35,7 +35,7 @@ export function AAVETokenIndexer(address: Address, decimals: number) {
     );
   });
 
-  ponder.on(`AAVE:DelegateChanged`, async ({ event, context }) => {
+  ponder.on(`aAAVE:DelegateChanged`, async ({ event, context }) => {
     await delegateChanged(context, daoId, {
       delegator: event.args.delegator,
       delegate: event.args.delegatee,
