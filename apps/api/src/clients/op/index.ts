@@ -30,12 +30,14 @@ export class OPClient<
 
   async getQuorum(proposalId: string | null): Promise<bigint> {
     if (!proposalId) return 0n;
-    return readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "quorum",
-      args: [BigInt(proposalId)],
-    });
+    return this.getCachedQuorum(async () => {
+      return readContract(this.client, {
+        abi: this.abi,
+        address: this.address,
+        functionName: "quorum",
+        args: [BigInt(proposalId)],
+      });
+    }, `quorum:proposal:${proposalId}`);
   }
 
   async getTimelockDelay(): Promise<bigint> {

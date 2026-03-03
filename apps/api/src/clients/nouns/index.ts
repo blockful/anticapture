@@ -29,45 +29,50 @@ export class Client<
   }
 
   async getQuorum(): Promise<bigint> {
-    const lastProposalId = await readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "proposalCount",
-    });
+    return this.getCachedQuorum(async () => {
+      const lastProposalId = await readContract(this.client, {
+        abi: this.abi,
+        address: this.address,
+        functionName: "proposalCount",
+      });
 
-    return await readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "quorumVotes",
-      args: [lastProposalId],
+      return readContract(this.client, {
+        abi: this.abi,
+        address: this.address,
+        functionName: "quorumVotes",
+        args: [lastProposalId],
+      });
     });
   }
 
   async getTimelockDelay(): Promise<bigint> {
-    const timelockAddress = await readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "timelock",
-    });
-    return readContract(this.client, {
-      abi: [
-        {
-          inputs: [],
-          name: "delay",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-      ],
-      address: timelockAddress,
-      functionName: "delay",
-    });
+    if (!this.cache.timelockDelay) {
+      const timelockAddress = await readContract(this.client, {
+        abi: this.abi,
+        address: this.address,
+        functionName: "timelock",
+      });
+      this.cache.timelockDelay = await readContract(this.client, {
+        abi: [
+          {
+            inputs: [],
+            name: "delay",
+            outputs: [
+              {
+                internalType: "uint256",
+                name: "",
+                type: "uint256",
+              },
+            ],
+            stateMutability: "view",
+            type: "function",
+          },
+        ],
+        address: timelockAddress,
+        functionName: "delay",
+      });
+    }
+    return this.cache.timelockDelay;
   }
 
   calculateQuorum(votes: {
