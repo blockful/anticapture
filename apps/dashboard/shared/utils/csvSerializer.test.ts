@@ -51,6 +51,16 @@ describe("serializeCsvValue", () => {
     expect(serializeCsvValue([1, 2, 3])).toBe("1, 2, 3");
   });
 
+  test("joins arrays of Dates as ISO strings", () => {
+    const dates = [
+      new Date("2025-01-01T00:00:00Z"),
+      new Date("2025-06-15T12:00:00Z"),
+    ];
+    expect(serializeCsvValue(dates)).toBe(
+      "2025-01-01T00:00:00.000Z, 2025-06-15T12:00:00.000Z",
+    );
+  });
+
   test("extracts text from object with text property", () => {
     expect(serializeCsvValue({ text: "Passed", percentage: 75 })).toBe(
       "Passed",
@@ -166,6 +176,33 @@ describe("flattenRow", () => {
     });
   });
 
+  test("quotes values containing semicolons (CSV separator)", () => {
+    const row = { label: "foo; bar" };
+    const result = flattenRow(row);
+
+    expect(result).toEqual({
+      label: '"foo; bar"',
+    });
+  });
+
+  test("quotes text-object values containing semicolons", () => {
+    const row = { timing: { text: "Early; 3d avg" } };
+    const result = flattenRow(row);
+
+    expect(result).toEqual({
+      timing: '"Early; 3d avg"',
+    });
+  });
+
+  test("quotes text-object values containing commas", () => {
+    const row = { timing: { text: "Early, on time" } };
+    const result = flattenRow(row);
+
+    expect(result).toEqual({
+      timing: '"Early, on time"',
+    });
+  });
+
   test("handles variation with null value", () => {
     const row = {
       address: "0x123",
@@ -249,8 +286,7 @@ describe("formatCsvData", () => {
     expect(result[0].activity).toBe("5/10");
     expect(result[0].activityPercentage).toBe("50");
     expect(result[0].delegators).toBe("25");
-    expect(result[0].avgVoteTiming_text).toBe("Early (3d avg)");
-    expect(result[0].avgVoteTiming_percentage).toBe("40");
+    expect(result[0].avgVoteTiming).toBe("Early (3d avg)");
   });
 
   test("simulates token holder table data for CSV export", () => {

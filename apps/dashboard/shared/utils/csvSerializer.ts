@@ -2,6 +2,9 @@ import { isValidElement } from "react";
 
 const escapeCsv = (value: string) => value.replace(/"/g, '""');
 
+const quoteIfNeeded = (serialized: string): string =>
+  /[",;\r\n]/.test(serialized) ? `"${serialized}"` : serialized;
+
 export const serializeCsvValue = (value: unknown): string => {
   if (value === null || value === undefined) return "";
 
@@ -20,7 +23,7 @@ export const serializeCsvValue = (value: unknown): string => {
   }
 
   if (Array.isArray(value)) {
-    return escapeCsv(value.map((item) => String(item)).join(", "));
+    return value.map((item) => serializeCsvValue(item)).join(", ");
   }
 
   if (typeof value === "object") {
@@ -58,8 +61,9 @@ export const flattenRow = (
     ) {
       const obj = value as Record<string, unknown>;
 
-      if ("text" in obj && "icon" in obj) {
-        result[csvKey] = escapeCsv(String(obj.text ?? ""));
+      if ("text" in obj && typeof obj.text === "string") {
+        const serialized = serializeCsvValue(obj.text);
+        result[csvKey] = quoteIfNeeded(serialized);
         continue;
       }
 
@@ -69,7 +73,7 @@ export const flattenRow = (
     }
 
     const serialized = serializeCsvValue(value);
-    result[csvKey] = /[",\n]/.test(serialized) ? `"${serialized}"` : serialized;
+    result[csvKey] = quoteIfNeeded(serialized);
   }
 
   return result;

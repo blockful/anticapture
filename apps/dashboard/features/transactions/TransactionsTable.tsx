@@ -124,6 +124,8 @@ export const TransactionsTable = ({
         getSubRows={(row) => row.subRows}
         withSorting={true}
         mobileTableFixed={true}
+        withDownloadCSV={true}
+        csvFilename="transactions.csv"
       />
     </div>
   );
