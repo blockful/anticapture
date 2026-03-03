@@ -4,6 +4,7 @@ import {
 } from "@anticapture/graphql-client/hooks";
 
 import { DaoIdEnum } from "@/shared/types/daos";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 interface UseDaoDataResult {
   data: GetDaoDataQuery["dao"] | null;
@@ -17,6 +18,7 @@ export const useDaoData = (daoId: DaoIdEnum): UseDaoDataResult => {
     context: {
       headers: {
         "anticapture-dao-id": daoId,
+        ...getAuthHeaders(),
       },
     },
   });

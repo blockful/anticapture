@@ -15,6 +15,7 @@ import { formatUnits } from "viem";
 
 import { AmountFilterVariables } from "@/features/holders-and-delegates/hooks/types";
 import { DaoIdEnum } from "@/shared/types/daos";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 export function useBalanceHistory({
   accountId,
@@ -105,6 +106,7 @@ export function useBalanceHistory({
     context: {
       headers: {
         "anticapture-dao-id": daoId,
+        ...getAuthHeaders(),
       },
     },
   });
