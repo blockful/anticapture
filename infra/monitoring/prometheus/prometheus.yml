@@ -16,3 +16,7 @@ scrape_configs:
     scrape_interval: 15s
     static_configs:
       - targets: ["host.docker.internal:42069"]
+
+  - job_name: otelcol-metrics
+    static_configs:
+      - targets: ["otelcol:8889"]
