@@ -2,7 +2,7 @@ import axios from "axios";
 import useSWR, { SWRConfiguration } from "swr";
 
 import { DaoIdEnum } from "@/shared/types/daos";
-import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
+import { BACKEND_ENDPOINT, getAuthHeaders } from "@/shared/utils/server-utils";
 
 export interface AverageTurnoutResponse {
   currentAverageTurnout: string;
@@ -33,6 +33,7 @@ export const fetchAverageTurnout = async ({
     {
       headers: {
         "anticapture-dao-id": daoId,
+        ...getAuthHeaders(),
       },
     },
   );
