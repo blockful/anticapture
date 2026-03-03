@@ -3,7 +3,7 @@ scrape_configs:
   # Run: pnpm indexer dev
   - job_name: ponder
     metrics_path: "/metrics"
-    scrape_interval: 1s
+    scrape_interval: 15s
     static_configs:
       - targets: ["host.docker.internal:42069"]
 

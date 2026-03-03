@@ -105,7 +105,6 @@ const app = new Hono({
 });
 
 app.use(logger());
-app.use(metricsMiddleware);
 app.onError(errorHandler);
 
 app.get("/metrics", async (c) => {
@@ -113,6 +112,8 @@ app.get("/metrics", async (c) => {
     "Content-Type": registry.contentType,
   });
 });
+
+app.use(metricsMiddleware);
 
 const chain = getChain(env.CHAIN_ID);
 if (!chain) {
