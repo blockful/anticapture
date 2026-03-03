@@ -13,9 +13,10 @@
     "clean": "rm -rf node_modules generated .ponder dump *.tsbuildinfo"
   },
   "dependencies": {
+    "@anticapture/observability": "workspace:*",
+    "@opentelemetry/api": "^1.9.0",
     "hono": "^4.10.7",
     "ponder": "^0.16.2",
-    "prom-client": "^15.1.3",
     "viem": "^2.37.11",
     "zod": "^3.25.3"
   },

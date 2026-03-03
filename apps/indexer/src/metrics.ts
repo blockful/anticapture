@@ -1,26 +1,36 @@
-import { Registry, collectDefaultMetrics, Counter, Gauge } from "prom-client";
+import {
+  createObservabilityProvider,
+  type ObservabilityProvider,
+} from "@anticapture/observability";
+import { metrics } from "@opentelemetry/api";
+import type { Counter, Gauge } from "@opentelemetry/api";
 
-export const registry = new Registry();
+const observability: ObservabilityProvider = createObservabilityProvider(
+  "anticapture-indexer",
+);
 
-collectDefaultMetrics({ register: registry });
+export const exporter = observability.exporter;
+export const meterProvider = observability.meterProvider;
 
-export const indexerEventsProcessed = new Counter({
-  name: "indexer_events_processed_total",
-  help: "Total number of blockchain events processed",
-  labelNames: ["dao_id", "event_type"],
-  registers: [registry],
-});
+const meter = metrics.getMeter("anticapture-indexer");
 
-export const indexerEventErrors = new Counter({
-  name: "indexer_event_errors_total",
-  help: "Total number of errors while processing blockchain events",
-  labelNames: ["dao_id", "event_type"],
-  registers: [registry],
-});
+export const indexerEventsProcessed: Counter = meter.createCounter(
+  "indexer_events_processed_total",
+  {
+    description: "Total number of blockchain events processed",
+  },
+);
 
-export const indexerLastProcessedBlock = new Gauge({
-  name: "indexer_last_processed_block",
-  help: "Last blockchain block number processed by the indexer",
-  labelNames: ["dao_id"],
-  registers: [registry],
-});
+export const indexerEventErrors: Counter = meter.createCounter(
+  "indexer_event_errors_total",
+  {
+    description: "Total number of errors while processing blockchain events",
+  },
+);
+
+export const indexerLastProcessedBlock: Gauge = meter.createGauge(
+  "indexer_last_processed_block",
+  {
+    description: "Last blockchain block number processed by the indexer",
+  },
+);

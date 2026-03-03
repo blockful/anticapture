@@ -173,5 +173,5 @@ export const tokenTransfer = async (
     },
   });
 
-  indexerEventsProcessed.inc({ dao_id: daoId, event_type: "Transfer" });
+  indexerEventsProcessed.add(1, { dao_id: daoId, event_type: "Transfer" });
 };

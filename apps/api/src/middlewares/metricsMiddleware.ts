@@ -11,6 +11,6 @@ export const metricsMiddleware: MiddlewareHandler = async (c, next) => {
   const route = c.req.routePath ?? c.req.path;
   const status = String(c.res.status);
 
-  httpRequestDuration.observe({ method, route, status }, duration);
-  httpRequestTotal.inc({ method, route, status });
+  httpRequestDuration.record(duration, { method, route, status });
+  httpRequestTotal.add(1, { method, route, status });
 };

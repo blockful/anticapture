@@ -106,7 +106,7 @@ export const voteCast = async (
     },
   });
 
-  indexerEventsProcessed.inc({ dao_id: daoId, event_type: "VoteCast" });
+  indexerEventsProcessed.add(1, { dao_id: daoId, event_type: "VoteCast" });
 };
 
 /**
@@ -209,7 +209,10 @@ export const proposalCreated = async (
     },
   });
 
-  indexerEventsProcessed.inc({ dao_id: daoId, event_type: "ProposalCreated" });
+  indexerEventsProcessed.add(1, {
+    dao_id: daoId,
+    event_type: "ProposalCreated",
+  });
 };
 
 /**

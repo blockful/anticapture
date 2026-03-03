@@ -1,12 +1,20 @@
+import {
+  PROMETHEUS_MIME_TYPE,
+  PrometheusSerializer,
+} from "@anticapture/observability";
 import { Hono } from "hono/tiny";
 
-import { registry } from "@/metrics";
+import { exporter } from "@/metrics";
 
 const app = new Hono();
 
 app.get("/metrics", async (c) => {
-  return c.text(await registry.metrics(), 200, {
-    "Content-Type": registry.contentType,
+  const result = await exporter.collect();
+  const serialized = new PrometheusSerializer().serialize(
+    result.resourceMetrics,
+  );
+  return c.text(serialized, 200, {
+    "Content-Type": PROMETHEUS_MIME_TYPE,
   });
 });
 

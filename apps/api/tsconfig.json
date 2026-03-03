@@ -16,7 +16,7 @@
       "@/*": ["./src/*"]
     },
     "outDir": "./dist",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "types": ["vitest/globals"]
   },
   "include": ["./**/*.ts"],

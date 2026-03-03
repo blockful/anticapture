@@ -1,39 +1,41 @@
 import {
-  Registry,
-  collectDefaultMetrics,
-  Histogram,
-  Counter,
-} from "prom-client";
+  createObservabilityProvider,
+  type ObservabilityProvider,
+} from "@anticapture/observability";
+import { metrics } from "@opentelemetry/api";
+import type { Counter, Histogram } from "@opentelemetry/api";
 
-export const registry = new Registry();
+const observability: ObservabilityProvider =
+  createObservabilityProvider("anticapture-api");
 
-collectDefaultMetrics({ register: registry });
+export const exporter = observability.exporter;
+export const meterProvider = observability.meterProvider;
 
-export const httpRequestDuration = new Histogram({
-  name: "http_request_duration_seconds",
-  help: "Duration of HTTP requests in seconds",
-  labelNames: ["method", "route", "status"],
-  buckets: [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5],
-  registers: [registry],
+const meter = metrics.getMeter("anticapture-api");
+
+export const httpRequestDuration: Histogram = meter.createHistogram(
+  "http_request_duration_seconds",
+  {
+    description: "Duration of HTTP requests in seconds",
+    advice: {
+      explicitBucketBoundaries: [
+        0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5,
+      ],
+    },
+  },
+);
+
+export const httpRequestTotal: Counter = meter.createCounter(
+  "http_requests_total",
+  {
+    description: "Total number of HTTP requests",
+  },
+);
+
+export const cacheHits: Counter = meter.createCounter("cache_hits_total", {
+  description: "Total number of cache hits",
 });
 
-export const httpRequestTotal = new Counter({
-  name: "http_requests_total",
-  help: "Total number of HTTP requests",
-  labelNames: ["method", "route", "status"],
-  registers: [registry],
-});
-
-export const cacheHits = new Counter({
-  name: "cache_hits_total",
-  help: "Total number of cache hits",
-  labelNames: ["dao_id"],
-  registers: [registry],
-});
-
-export const cacheMisses = new Counter({
-  name: "cache_misses_total",
-  help: "Total number of cache misses",
-  labelNames: ["dao_id"],
-  registers: [registry],
+export const cacheMisses: Counter = meter.createCounter("cache_misses_total", {
+  description: "Total number of cache misses",
 });

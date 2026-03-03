@@ -170,7 +170,10 @@ export const delegateChanged = async (
     },
   });
 
-  indexerEventsProcessed.inc({ dao_id: daoId, event_type: "DelegateChanged" });
+  indexerEventsProcessed.add(1, {
+    dao_id: daoId,
+    event_type: "DelegateChanged",
+  });
 };
 
 /**
@@ -245,7 +248,7 @@ export const delegatedVotesChanged = async (
     },
   });
 
-  indexerEventsProcessed.inc({
+  indexerEventsProcessed.add(1, {
     dao_id: daoId,
     event_type: "DelegateVotesChanged",
   });
