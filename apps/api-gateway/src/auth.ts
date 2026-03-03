@@ -6,7 +6,7 @@ export const validateAuthToken = (
 ): boolean => {
   if (req.method === "OPTIONS") return true;
 
-  const apiToken = process.env.API_TOKEN;
+  const apiToken = process.env.BLOCKFUL_API_TOKEN;
 
   if (!apiToken) return true;
 

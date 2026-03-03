@@ -139,7 +139,7 @@ export class AnticaptureClient {
       headers: {
         "Content-Type": "application/json",
         "anticapture-dao-id": daoId,
-        Authorization: `Bearer ${process.env.API_TOKEN}`,
+        Authorization: `Bearer ${process.env.BLOCKFUL_API_TOKEN}`,
       },
       body: JSON.stringify({ query, variables }),
     });

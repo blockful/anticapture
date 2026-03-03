@@ -29,7 +29,7 @@ describe("validateAuthToken", () => {
   });
 
   it("should allow requests when API_TOKEN is not set", () => {
-    delete process.env.API_TOKEN;
+    delete process.env.BLOCKFUL_API_TOKEN;
     const { req, res } = createMockReqRes();
 
     expect(validateAuthToken(req, res)).toBe(true);
@@ -37,7 +37,7 @@ describe("validateAuthToken", () => {
   });
 
   it("should allow requests with a valid Bearer token", () => {
-    process.env.API_TOKEN = "secret-123";
+    process.env.BLOCKFUL_API_TOKEN = "secret-123";
     const { req, res } = createMockReqRes("Bearer secret-123");
 
     expect(validateAuthToken(req, res)).toBe(true);
@@ -45,7 +45,7 @@ describe("validateAuthToken", () => {
   });
 
   it("should reject requests with an invalid token", () => {
-    process.env.API_TOKEN = "secret-123";
+    process.env.BLOCKFUL_API_TOKEN = "secret-123";
     const { req, res } = createMockReqRes("Bearer wrong-token");
 
     expect(validateAuthToken(req, res)).toBe(false);
@@ -58,7 +58,7 @@ describe("validateAuthToken", () => {
   });
 
   it("should reject requests with no Authorization header", () => {
-    process.env.API_TOKEN = "secret-123";
+    process.env.BLOCKFUL_API_TOKEN = "secret-123";
     const { req, res } = createMockReqRes();
 
     expect(validateAuthToken(req, res)).toBe(false);
@@ -68,7 +68,7 @@ describe("validateAuthToken", () => {
   });
 
   it("should reject requests with a non-Bearer authorization", () => {
-    process.env.API_TOKEN = "secret-123";
+    process.env.BLOCKFUL_API_TOKEN = "secret-123";
     const { req, res } = createMockReqRes("Basic secret-123");
 
     expect(validateAuthToken(req, res)).toBe(false);
