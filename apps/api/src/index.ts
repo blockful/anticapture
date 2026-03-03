@@ -39,7 +39,8 @@ import { getClient } from "@/lib/client";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 import { getChain } from "@/lib/utils";
-import { errorHandler } from "@/middlewares";
+import { registry } from "@/metrics";
+import { errorHandler, metricsMiddleware } from "@/middlewares";
 import {
   AccountBalanceRepository,
   AccountInteractionsRepository,
@@ -104,7 +105,14 @@ const app = new Hono({
 });
 
 app.use(logger());
+app.use(metricsMiddleware);
 app.onError(errorHandler);
+
+app.get("/metrics", async (c) => {
+  return c.text(await registry.metrics(), 200, {
+    "Content-Type": registry.contentType,
+  });
+});
 
 const chain = getChain(env.CHAIN_ID);
 if (!chain) {

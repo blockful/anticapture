@@ -8,14 +8,16 @@ import {
 } from "ponder:schema";
 import { Address, getAddress, Hex, zeroAddress } from "viem";
 
-import { ensureAccountExists, ensureAccountsExist } from "./shared";
-import { DaoIdEnum } from "@/lib/enums";
 import {
   BurningAddresses,
   CEXAddresses,
   DEXAddresses,
   LendingAddresses,
 } from "@/lib/constants";
+import { DaoIdEnum } from "@/lib/enums";
+import { indexerEventsProcessed } from "@/metrics";
+
+import { ensureAccountExists, ensureAccountsExist } from "./shared";
 
 /**
  * ### Creates:
@@ -167,6 +169,8 @@ export const delegateChanged = async (
       amount: delegatorBalance?.balance ?? 0n,
     },
   });
+
+  indexerEventsProcessed.inc({ dao_id: daoId, event_type: "DelegateChanged" });
 };
 
 /**
@@ -239,5 +243,10 @@ export const delegatedVotesChanged = async (
       deltaMod,
       delegate: normalizedDelegate,
     },
+  });
+
+  indexerEventsProcessed.inc({
+    dao_id: daoId,
+    event_type: "DelegateVotesChanged",
   });
 };

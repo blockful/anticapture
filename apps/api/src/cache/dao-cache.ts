@@ -1,4 +1,5 @@
 import { DaoResponse } from "@/mappers";
+import { cacheHits, cacheMisses } from "@/metrics";
 
 import { DaoDataCache } from "./dao-cache.interface";
 
@@ -19,17 +20,22 @@ export class DaoCache implements DaoDataCache {
 
   get(daoId: string): DaoResponse | null {
     const cached = this.cache.get(daoId);
-    if (!cached) return null;
+    if (!cached) {
+      cacheMisses.inc({ dao_id: daoId });
+      return null;
+    }
 
     const isExpired = Date.now() - cached.timestamp > this.CACHE_TTL_MS;
     if (isExpired) {
       this.cache.delete(daoId);
+      cacheMisses.inc({ dao_id: daoId });
       return null;
     }
 
     // Remove internal timestamp before returning
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { timestamp, ...daoResponse } = cached;
+    cacheHits.inc({ dao_id: daoId });
     return daoResponse;
   }
 
