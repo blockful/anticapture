@@ -19,7 +19,7 @@ export class Client<
   protected address: Address;
 
   constructor(client: vClient<TTransport, TChain, TAccount>, address: Address) {
-    super(client);
+    super(client, 5); // 5 minutes of cache for quorum
     this.address = address;
     this.abi = GovernorAbi;
   }

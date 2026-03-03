@@ -40,7 +40,7 @@ export abstract class GovernorBase<
 
   constructor(
     protected client: Client<TTransport, TChain, TAccount>,
-    quorumCacheTtlMinutes = 5,
+    quorumCacheTtlMinutes: number = Infinity,
   ) {
     this.quorumCacheTtlMs = Math.max(1, quorumCacheTtlMinutes) * 60 * 1000;
   }
