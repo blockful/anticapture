@@ -111,18 +111,20 @@ export abstract class GovernorBase<
 
   abstract getTimelockDelay(): Promise<bigint>;
 
-  async getProposalStatus(proposal: {
-    id: string;
-    status: string;
-    startBlock: number;
-    endBlock: number;
-    forVotes: bigint;
-    againstVotes: bigint;
-    abstainVotes: bigint;
-    endTimestamp: bigint;
-  }): Promise<string> {
-    const currentBlock = await this.getCurrentBlockNumber();
-    const currentTimestamp = await this.getBlockTime(currentBlock);
+  async getProposalStatus(
+    proposal: {
+      id: string;
+      status: string;
+      startBlock: number;
+      endBlock: number;
+      forVotes: bigint;
+      againstVotes: bigint;
+      abstainVotes: bigint;
+      endTimestamp: bigint;
+    },
+    currentBlock: number,
+    currentTimestamp: number,
+  ): Promise<string> {
     const timelockDelay = await this.getTimelockDelay();
 
     if (
