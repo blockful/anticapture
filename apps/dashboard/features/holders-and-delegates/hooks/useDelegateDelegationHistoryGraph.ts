@@ -10,6 +10,7 @@ import { formatUnits } from "viem";
 
 import daoConfig from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 // Interface for a single delegation history item for the graph
 export interface DelegationHistoryGraphItem {
@@ -50,6 +51,7 @@ export function useDelegateDelegationHistoryGraph(
     context: {
       headers: {
         "anticapture-dao-id": daoId,
+        ...getAuthHeaders(),
       },
     },
     skip: !accountId,

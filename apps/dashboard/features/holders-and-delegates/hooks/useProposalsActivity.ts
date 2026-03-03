@@ -9,6 +9,7 @@ import { NetworkStatus } from "@apollo/client";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { DaoIdEnum } from "@/shared/types/daos";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 interface UseProposalsActivityParams extends GetProposalsActivityQueryVariables {
   limit: number;
@@ -58,6 +59,7 @@ export const useProposalsActivity = ({
     context: {
       headers: {
         "anticapture-dao-id": daoId,
+        ...getAuthHeaders(),
       },
     },
     notifyOnNetworkStatusChange: true,

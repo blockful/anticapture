@@ -52,7 +52,9 @@ const fetchTreasury = async ({
   } = await axios.post(
     `${BACKEND_ENDPOINT}`,
     { query },
-    { headers: { "anticapture-dao-id": daoId, ...getAuthHeaders() } },
+    {
+      headers: { "anticapture-dao-id": daoId, ...getAuthHeaders() },
+    },
   );
 
   return response.data.data[queryName];
