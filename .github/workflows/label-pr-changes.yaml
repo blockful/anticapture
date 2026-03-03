@@ -3,11 +3,6 @@ name: Label PR Changes
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    paths:
-      - "apps/indexer/**/*"
-      - "apps/api-gateway/**/*"
-      - "apps/dashboard/**/*"
-      - "apps/api/**/*"
 
 jobs:
   label-changes:
