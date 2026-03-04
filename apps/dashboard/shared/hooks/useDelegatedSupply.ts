@@ -2,7 +2,7 @@ import axios from "axios";
 import useSWR, { SWRConfiguration } from "swr";
 
 import { DaoIdEnum } from "@/shared/types/daos";
-import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
+import { BACKEND_ENDPOINT, getAuthHeaders } from "@/shared/utils/server-utils";
 
 interface DelegatedSupplyResponse {
   oldDelegatedSupply: string;
@@ -35,6 +35,7 @@ export const fetchDelegatedSupply = async ({
     {
       headers: {
         "anticapture-dao-id": daoId,
+        ...getAuthHeaders(),
       },
     },
   );

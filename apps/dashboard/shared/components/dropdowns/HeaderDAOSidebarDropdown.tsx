@@ -1,20 +1,20 @@
 "use client";
 
 import { ChevronsUpDown, ChevronsRight, ChevronsLeft } from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import React, { useState, useRef, useEffect, useCallback } from "react";
 
 import { Button } from "@/shared/components";
 import { DaoAvatarIcon } from "@/shared/components/icons";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
+import { getDaoNavigationPath } from "@/shared/utils/dao-navigation";
 import { cn } from "@/shared/utils/";
 
 type Item = {
   id: number;
   label: string;
   icon: React.ReactNode;
-  href: string;
   name: string;
 };
 
@@ -31,6 +31,7 @@ export const HeaderDAOSidebarDropdown = ({
   const [selectedHeaderSidebarItem, setSelectedHeaderSidebarItem] =
     useState<number>(0);
   const router = useRouter();
+  const pathname = usePathname();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { daoId } = useParams<{ daoId: string }>();
 
@@ -72,24 +73,30 @@ export const HeaderDAOSidebarDropdown = ({
             isRounded
           />
         ),
-        href: `/${daoIdValue.toLowerCase()}`,
         name: daoIdValue,
       }),
     );
   }
   const dropdownItems = dropdownItemsRef.current!;
 
+  const currentDaoId = daoId?.toUpperCase();
   const currentItem = dropdownItems.find(
-    (item) => item.name === daoId.toUpperCase(),
+    (item) => item.name === currentDaoId,
   );
 
   const toggleDropdown = () => setIsOpen((prev) => !prev);
 
-  const handleSelectItem = (id: number, href: string) => {
+  const handleSelectItem = (id: number, targetDaoId: DaoIdEnum) => {
     setSelectedHeaderSidebarItem(id);
     sessionStorage.setItem("selectedHeaderSidebarItem", id.toString());
     setIsOpen(false);
-    router.push(href);
+    router.push(
+      getDaoNavigationPath({
+        targetDaoId,
+        pathname,
+        currentDaoId: daoId,
+      }),
+    );
   };
 
   return (
@@ -152,7 +159,7 @@ export const HeaderDAOSidebarDropdown = ({
               size="lg"
               key={item.id}
               className={"w-full"}
-              onClick={() => handleSelectItem(item.id, item.href || "")}
+              onClick={() => handleSelectItem(item.id, item.name as DaoIdEnum)}
               role="menuitemradio"
               aria-checked={item.id === selectedHeaderSidebarItem}
             >
