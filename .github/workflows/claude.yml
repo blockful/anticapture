@@ -37,7 +37,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1
+
+      - name: Check for dashboard changes
+        id: dashboard
+        run: |
+          DIFF=$(gh pr diff ${{ github.event.pull_request.number || github.event.issue.number }} --name-only || true)
+          if echo "$DIFF" | grep -q '^dashboard/'; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Run Claude Code
         id: claude
@@ -58,6 +70,8 @@ jobs:
             - Performance considerations
 
             Keep your review concise and actionable. Limit your feedback to the most important findings.
+
+            ${{ steps.dashboard.outputs.changed == 'true' && 'This PR includes dashboard changes. Before reviewing, read all .md files under .agents/skills/anticapture-dashboard/references/ for additional context on dashboard conventions and patterns.' || '' }}
 
             Note: The PR branch is already checked out in the current working directory.
 
