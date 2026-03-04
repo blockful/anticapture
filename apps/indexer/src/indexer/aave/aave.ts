@@ -2,13 +2,13 @@ import { ponder } from "ponder:registry";
 import {
   accountBalance,
   accountPower,
+  balanceHistory,
   delegation,
   token,
   votingPowerHistory,
 } from "ponder:schema";
 import { Address, getAddress, zeroAddress } from "viem";
 
-import { tokenTransfer } from "@/eventHandlers";
 import { DaoIdEnum } from "@/lib/enums";
 import { ensureAccountsExist } from "@/eventHandlers/shared";
 
@@ -24,22 +24,115 @@ export function AAVETokenIndexer(address: Address, decimals: number) {
   });
 
   ponder.on(`AAVE:Transfer`, async ({ event, context }) => {
-    const { from, to, value } = event.args;
+    const { from: _from, to: _to, value } = event.args;
 
-    await tokenTransfer(
-      context,
-      daoId,
-      {
-        from,
-        to,
-        value,
-        token: address,
+    const from = getAddress(_from);
+    const to = getAddress(_to);
+    const tokenId = getAddress(address);
+
+    await ensureAccountsExist(context, [to, from]);
+
+    const { balance: currentReceiverBalance, delegate: toDelegate } =
+      await context.db
+        .insert(accountBalance)
+        .values({
+          accountId: to,
+          tokenId: tokenId,
+          balance: value,
+          delegate: zeroAddress,
+        })
+        .onConflictDoUpdate((current) => ({
+          balance: current.balance + value,
+        }));
+
+    if (toDelegate !== zeroAddress) {
+      const { votingPower: currentVotingPower } = await context.db
+        .insert(accountPower)
+        .values({
+          accountId: toDelegate,
+          daoId,
+        })
+        .onConflictDoUpdate((current) => ({
+          votingPower: current.votingPower + value,
+        }));
+
+      await context.db.insert(votingPowerHistory).values({
+        daoId,
         transactionHash: event.transaction.hash,
+        accountId: toDelegate,
+        votingPower: currentVotingPower + value,
+        delta: value,
+        deltaMod: value,
         timestamp: event.block.timestamp,
         logIndex: event.log.logIndex,
-      },
-      {},
-    );
+      });
+    }
+
+    await context.db
+      .insert(balanceHistory)
+      .values({
+        daoId,
+        transactionHash: event.transaction.hash,
+        accountId: to,
+        balance: currentReceiverBalance,
+        delta: value,
+        deltaMod: value > 0n ? value : -value,
+        timestamp: event.block.timestamp,
+        logIndex: event.log.logIndex,
+      })
+      .onConflictDoNothing();
+
+    if (from !== zeroAddress) {
+      const { balance: currentSenderBalance, delegate: fromDelegate } =
+        await context.db
+          .insert(accountBalance)
+          .values({
+            accountId: from,
+            tokenId: tokenId,
+            balance: -value,
+            delegate: zeroAddress,
+          })
+          .onConflictDoUpdate((current) => ({
+            balance: current.balance - value,
+          }));
+
+      if (fromDelegate !== zeroAddress) {
+        const { votingPower: currentVotingPower } = await context.db
+          .insert(accountPower)
+          .values({
+            accountId: fromDelegate,
+            daoId,
+          })
+          .onConflictDoUpdate((current) => ({
+            votingPower: current.votingPower - value,
+          }));
+
+        await context.db.insert(votingPowerHistory).values({
+          daoId,
+          transactionHash: event.transaction.hash,
+          accountId: fromDelegate,
+          votingPower: currentVotingPower - value,
+          delta: -value,
+          deltaMod: value > 0n ? value : -value,
+          timestamp: event.block.timestamp,
+          logIndex: event.log.logIndex,
+        });
+      }
+
+      await context.db
+        .insert(balanceHistory)
+        .values({
+          daoId,
+          transactionHash: event.transaction.hash,
+          accountId: from,
+          balance: currentSenderBalance,
+          delta: -value,
+          deltaMod: value > 0n ? value : -value,
+          timestamp: event.block.timestamp,
+          logIndex: event.log.logIndex,
+        })
+        .onConflictDoNothing();
+    }
   });
 
   ponder.on(`AAVE:DelegateChanged`, async ({ event, context }) => {
@@ -67,7 +160,7 @@ export function AAVETokenIndexer(address: Address, decimals: number) {
         accountId: delegator,
         tokenId,
         delegate: delegate,
-        balance: BigInt(0),
+        balance: 0n,
       })
       .onConflictDoUpdate({
         delegate: delegate,
