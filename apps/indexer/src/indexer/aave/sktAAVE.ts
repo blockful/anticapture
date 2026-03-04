@@ -43,15 +43,35 @@ export function sktAaveTokenIndexer(address: Address, decimals: number) {
   });
 
   ponder.on(`stkAAVE:DelegateChanged`, async ({ event, context }) => {
+    if (event.args.delegationType === 1) {
+      // proposal delegation
+      return;
+    }
+
     const delegator = getAddress(event.args.delegator);
     const delegate = getAddress(event.args.delegatee);
+    const tokenId = getAddress(address);
 
     await ensureAccountsExist(context, [delegator, delegate]);
 
-    const delegatorBalance = await context.db.find(accountBalance, {
+    const previousDelegate = (await context.db.find(accountBalance, {
       accountId: delegator,
-      tokenId: getAddress(address),
-    });
+      tokenId,
+    }))!.delegate;
+
+    const redelegation = previousDelegate !== zeroAddress;
+
+    const delegatorBalance = await context.db
+      .insert(accountBalance)
+      .values({
+        accountId: delegator,
+        tokenId,
+        delegate: delegate,
+        balance: BigInt(0),
+      })
+      .onConflictDoUpdate({
+        delegate: delegate,
+      });
 
     await context.db
       .insert(delegation)
@@ -60,8 +80,8 @@ export function sktAaveTokenIndexer(address: Address, decimals: number) {
         daoId,
         delegateAccountId: delegate,
         delegatorAccountId: delegator,
-        delegatedValue: delegatorBalance?.balance ?? 0n,
-        previousDelegate: zeroAddress,
+        delegatedValue: delegatorBalance.balance,
+        previousDelegate,
         timestamp: event.block.timestamp,
         logIndex: event.log.logIndex,
         isCex: false,
@@ -71,21 +91,8 @@ export function sktAaveTokenIndexer(address: Address, decimals: number) {
         type: event.args.delegationType,
       })
       .onConflictDoUpdate((current) => ({
-        delegatedValue:
-          current.delegatedValue + (delegatorBalance?.balance ?? 0n),
+        delegatedValue: current.delegatedValue + delegatorBalance.balance,
       }));
-
-    await context.db
-      .insert(accountBalance)
-      .values({
-        accountId: delegator,
-        tokenId: getAddress(address),
-        delegate: delegate,
-        balance: BigInt(0),
-      })
-      .onConflictDoUpdate({
-        delegate: delegate,
-      });
 
     await context.db
       .insert(accountPower)
@@ -93,11 +100,35 @@ export function sktAaveTokenIndexer(address: Address, decimals: number) {
         accountId: delegate,
         daoId,
         delegationsCount: 1,
-        votingPower: delegatorBalance?.balance ?? 0n,
+        votingPower: delegatorBalance.balance,
       })
       .onConflictDoUpdate((current) => ({
         delegationsCount: current.delegationsCount + 1,
+        votingPower: current.votingPower + delegatorBalance.balance,
       }));
+
+    if (redelegation) {
+      const previousVp = await context.db
+        .update(accountPower, { accountId: previousDelegate })
+        .set((current) => ({
+          delegationsCount: current.delegationsCount - 1,
+          votingPower: current.votingPower - delegatorBalance.balance,
+        }));
+
+      await context.db
+        .insert(votingPowerHistory)
+        .values({
+          daoId,
+          transactionHash: event.transaction.hash,
+          accountId: previousDelegate,
+          votingPower: previousVp.votingPower - delegatorBalance.balance,
+          delta: -delegatorBalance.balance,
+          deltaMod: delegatorBalance.balance,
+          timestamp: event.block.timestamp,
+          logIndex: event.log.logIndex,
+        })
+        .onConflictDoNothing();
+    }
 
     await context.db
       .insert(votingPowerHistory)
@@ -105,9 +136,9 @@ export function sktAaveTokenIndexer(address: Address, decimals: number) {
         daoId,
         transactionHash: event.transaction.hash,
         accountId: delegate,
-        votingPower: delegatorBalance?.balance ?? 0n,
-        delta: delegatorBalance?.balance ?? 0n,
-        deltaMod: delegatorBalance?.balance ?? 0n,
+        votingPower: delegatorBalance.balance,
+        delta: delegatorBalance.balance,
+        deltaMod: delegatorBalance.balance,
         timestamp: event.block.timestamp,
         logIndex: event.log.logIndex,
       })

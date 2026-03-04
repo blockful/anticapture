@@ -33,7 +33,7 @@ export const accountBalance = onchainTable(
     tokenId: drizzle.text("token_id").notNull(),
     balance: drizzle.bigint().notNull(),
     // This field represents for who the account is delegating their voting power to
-    delegate: drizzle.text().default(zeroAddress).notNull(),
+    delegate: drizzle.text().$type<Address>().notNull().default(zeroAddress),
   }),
   (table) => ({
     pk: primaryKey({
