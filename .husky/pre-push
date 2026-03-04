@@ -1,1 +1,4 @@
 pnpm typecheck
+
+.claude/hooks/copy-review/dashboard-copy-review.sh
+
