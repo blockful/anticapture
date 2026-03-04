@@ -27,6 +27,9 @@ import { useScreenSize } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
 import { formatNumberUserReadable } from "@/shared/utils";
+import { Footer } from "@/shared/components/design-system/footer";
+import { HeaderSidebar } from "@/widgets";
+import { HeaderMobile } from "@/widgets/HeaderMobile";
 
 interface DelegateTableData {
   address: string;
@@ -329,28 +332,41 @@ export default function AavePage() {
   ];
 
   return (
-    <>
-      <div className="min-h-75 flex h-[calc(100vh-16rem)] w-full flex-col">
-        <Table
-          columns={delegateColumns}
-          data={loading ? Array(DEFAULT_ITEMS_PER_PAGE).fill({}) : tableData}
-          onRowClick={(row) => setDrawerAddress(row.address as Address)}
-          size="sm"
-          hasMore={pagination.hasNextPage}
-          isLoadingMore={fetchingMore}
-          onLoadMore={fetchNextPage}
-          withDownloadCSV={true}
-          error={error}
-          fillHeight
-        />
-      </div>
-      <HoldersAndDelegatesDrawer
-        isOpen={!!drawerAddress}
-        onClose={() => setDrawerAddress(null)}
-        entityType="delegate"
-        address={drawerAddress || ""}
-        daoId={daoId}
-      />
-    </>
+    <div className="bg-surface-background dark flex h-screen overflow-hidden">
+      <HeaderSidebar />
+      <main className="flex-1 overflow-auto">
+        <div className="lg:hidden">
+          <HeaderMobile overlayClassName="top-[57px]" />
+        </div>
+        <div className="flex min-h-screen w-full flex-col items-center">
+          <div className="w-full flex-1">
+            <div className="min-h-75 flex h-[calc(100vh-16rem)] w-full flex-col">
+              <Table
+                columns={delegateColumns}
+                data={
+                  loading ? Array(DEFAULT_ITEMS_PER_PAGE).fill({}) : tableData
+                }
+                onRowClick={(row) => setDrawerAddress(row.address as Address)}
+                size="sm"
+                hasMore={pagination.hasNextPage}
+                isLoadingMore={fetchingMore}
+                onLoadMore={fetchNextPage}
+                withDownloadCSV={true}
+                error={error}
+                fillHeight
+              />
+            </div>
+            <HoldersAndDelegatesDrawer
+              isOpen={!!drawerAddress}
+              onClose={() => setDrawerAddress(null)}
+              entityType="delegate"
+              address={drawerAddress || ""}
+              daoId={daoId}
+            />
+          </div>
+          <Footer />
+        </div>
+      </main>
+    </div>
   );
 }
