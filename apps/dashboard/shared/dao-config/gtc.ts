@@ -55,7 +55,7 @@ export const GTC: DaoConfiguration = {
     // Fields are sorted alphabetically by GovernanceImplementationEnum for readability
     fields: {
       [GovernanceImplementationEnum.AUDITED_CONTRACTS]: {
-        riskLevel: RiskLevel.LOW,
+        riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.AUDITED_CONTRACTS
