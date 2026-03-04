@@ -52,6 +52,8 @@ interface DelegatesProps {
   daoId: DaoIdEnum;
 }
 
+type DelegateSortKey = "delegationsCount" | "votingPower" | "signedVariation";
+
 export const Delegates = ({
   timePeriod = TimeInterval.THIRTY_DAYS,
   daoId,
@@ -70,8 +72,8 @@ export const Delegates = ({
     parseAsStringEnum([
       "delegationsCount",
       "votingPower",
-      "variation",
-    ]).withDefault("votingPower"),
+      "signedVariation",
+    ]).withDefault("votingPower" as DelegateSortKey),
   );
   const { decimals } = daoConfig[daoId];
   const { data: daoData } = useDaoData(daoId);
@@ -86,6 +88,12 @@ export const Delegates = ({
     setCurrentAddressFilter(address || "");
   };
 
+  const orderByMap: Record<DelegateSortKey, QueryInput_VotingPowers_OrderBy> = {
+    delegationsCount: QueryInput_VotingPowers_OrderBy.DelegationsCount,
+    votingPower: QueryInput_VotingPowers_OrderBy.VotingPower,
+    signedVariation: QueryInput_VotingPowers_OrderBy.SignedVariation,
+  };
+
   const {
     data,
     loading,
@@ -95,7 +103,7 @@ export const Delegates = ({
     fetchingMore,
     isActivityLoadingFor,
   } = useDelegates({
-    orderBy: sortBy as QueryInput_VotingPowers_OrderBy,
+    orderBy: orderByMap[sortBy],
     orderDirection: sortOrder as QueryInput_VotingPowers_OrderDirection,
     daoId,
     days: timePeriod,
@@ -112,7 +120,7 @@ export const Delegates = ({
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
       // New field, default to desc for votingPower, asc for delegationsCount
-      setSortBy(field as "votingPower" | "delegationsCount" | "variation");
+      setSortBy(field as DelegateSortKey);
       setSortOrder(field === "delegationsCount" ? "asc" : "desc");
     }
   };
@@ -310,7 +318,7 @@ export const Delegates = ({
           variant="ghost"
           size="sm"
           className="text-secondary w-full justify-center p-0"
-          onClick={() => handleSort("variation")}
+          onClick={() => handleSort("signedVariation")}
         >
           <h4 className="text-table-header whitespace-nowrap">
             Change ({daoId})
@@ -318,7 +326,7 @@ export const Delegates = ({
           <ArrowUpDown
             props={{ className: "size-4" }}
             activeState={
-              sortBy === "variation"
+              sortBy === "signedVariation"
                 ? sortOrder === "asc"
                   ? ArrowState.UP
                   : ArrowState.DOWN

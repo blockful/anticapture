@@ -37,6 +37,8 @@ interface TokenHolderTableData {
   delegate: Address;
 }
 
+type TokenHolderSortKey = "balance" | "signedVariation";
+
 const TypeCell = ({ address }: { address: Address }) => {
   const { isContract, isLoading: isArkhamLoading } = useArkhamData(address);
 
@@ -73,8 +75,17 @@ export const TokenHolders = ({
   );
   const [sortBy, setSortBy] = useQueryState(
     "sortBy",
-    parseAsStringEnum(["balance", "variation"]).withDefault("balance"),
+    parseAsStringEnum(["balance", "signedVariation"]).withDefault(
+      "balance" as TokenHolderSortKey,
+    ),
   );
+  const orderByMap: Record<
+    TokenHolderSortKey,
+    QueryInput_AccountBalances_OrderBy
+  > = {
+    balance: QueryInput_AccountBalances_OrderBy.Balance,
+    signedVariation: QueryInput_AccountBalances_OrderBy.SignedVariation,
+  };
   const { isMobile } = useScreenSize();
   const { decimals } = daoConfig[daoId];
 
@@ -86,7 +97,7 @@ export const TokenHolders = ({
     if (sortBy === field) {
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
-      setSortBy(field as "balance" | "variation");
+      setSortBy(field as TokenHolderSortKey);
       setSortOrder("desc");
     }
   };
@@ -101,7 +112,7 @@ export const TokenHolders = ({
   } = useTokenHolders({
     daoId: daoId,
     limit: pageLimit,
-    orderBy: sortBy as QueryInput_AccountBalances_OrderBy,
+    orderBy: orderByMap[sortBy],
     orderDirection: sortOrder as QueryInput_AccountBalances_OrderDirection,
     address: currentAddressFilter || undefined,
     days: days,
@@ -275,7 +286,7 @@ export const TokenHolders = ({
           variant="ghost"
           size="sm"
           className="text-secondary w-full justify-center p-0"
-          onClick={() => handleSort("variation")}
+          onClick={() => handleSort("signedVariation")}
         >
           <h4 className="text-table-header whitespace-nowrap">
             Change ({daoId})
@@ -283,7 +294,7 @@ export const TokenHolders = ({
           <ArrowUpDown
             props={{ className: "size-4" }}
             activeState={
-              sortBy === "variation"
+              sortBy === "signedVariation"
                 ? sortOrder === "asc"
                   ? ArrowState.UP
                   : ArrowState.DOWN
