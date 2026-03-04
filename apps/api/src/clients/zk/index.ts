@@ -29,39 +29,44 @@ export class ZKClient<
   }
 
   async getQuorum(): Promise<bigint> {
-    return readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "quorum",
-      args: [BigInt(Math.floor(Date.now() / 1000))],
+    return this.getCachedQuorum(async () => {
+      return readContract(this.client, {
+        abi: this.abi,
+        address: this.address,
+        functionName: "quorum",
+        args: [BigInt(Math.floor(Date.now() / 1000))],
+      });
     });
   }
 
   async getTimelockDelay(): Promise<bigint> {
-    const timelockAddress = await readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "timelock",
-    });
-    return readContract(this.client, {
-      abi: [
-        {
-          inputs: [],
-          name: "getMinDelay",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-      ],
-      address: timelockAddress,
-      functionName: "getMinDelay",
-    });
+    if (!this.cache.timelockDelay) {
+      const timelockAddress = await readContract(this.client, {
+        abi: this.abi,
+        address: this.address,
+        functionName: "timelock",
+      });
+      this.cache.timelockDelay = await readContract(this.client, {
+        abi: [
+          {
+            inputs: [],
+            name: "getMinDelay",
+            outputs: [
+              {
+                internalType: "uint256",
+                name: "",
+                type: "uint256",
+              },
+            ],
+            stateMutability: "view",
+            type: "function",
+          },
+        ],
+        address: timelockAddress,
+        functionName: "getMinDelay",
+      });
+    }
+    return this.cache.timelockDelay;
   }
 
   calculateQuorum(votes: {

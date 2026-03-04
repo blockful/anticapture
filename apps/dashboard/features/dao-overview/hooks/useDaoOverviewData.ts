@@ -16,6 +16,7 @@ import {
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
 import { formatNumberUserReadable } from "@/shared/utils";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 export const useDaoOverviewData = ({
   daoId,
@@ -36,7 +37,12 @@ export const useDaoOverviewData = ({
       orderDirection: QueryInput_VotingPowers_OrderDirection.Desc,
       limit: 20,
     },
-    context: { headers: { "anticapture-dao-id": daoId } },
+    context: {
+      headers: {
+        "anticapture-dao-id": daoId,
+        ...getAuthHeaders(),
+      },
+    },
     notifyOnNetworkStatusChange: true,
     fetchPolicy: "cache-and-network", // Always check network for fresh data
   });

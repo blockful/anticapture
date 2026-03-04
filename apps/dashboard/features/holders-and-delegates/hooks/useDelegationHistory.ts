@@ -13,6 +13,7 @@ import {
   PaginationInfo,
 } from "@/features/holders-and-delegates/hooks/types";
 import { DaoIdEnum } from "@/shared/types/daos";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 interface UseDelegationHistoryResult {
   data:
@@ -85,6 +86,7 @@ export const useDelegationHistory = ({
     context: {
       headers: {
         "anticapture-dao-id": daoId,
+        ...getAuthHeaders(),
       },
     },
     notifyOnNetworkStatusChange: true,

@@ -7,6 +7,7 @@ import { useMemo } from "react";
 
 import { getProposalStatus } from "@/features/governance/utils";
 import { DaoIdEnum } from "@/shared/types/daos";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 export interface UseProposalResult {
   proposal: GetProposalQuery["proposal"] | null;
@@ -31,6 +32,7 @@ export const useProposal = ({
     context: {
       headers: {
         "anticapture-dao-id": daoId,
+        ...getAuthHeaders(),
       },
     },
     skip: !proposalId, // Skip query if no proposalId provided

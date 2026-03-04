@@ -19,6 +19,7 @@ const daoItemQueries = [
   "dao",
   "delegationPercentageByDay",
   "feedEvents",
+  "getEventRelevanceThreshold",
   "getDaoTokenTreasury",
   "getLiquidTreasury",
   "getTotalAssets",

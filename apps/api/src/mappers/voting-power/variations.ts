@@ -127,7 +127,7 @@ export const VotingPowerVariationResponseSchema = z.object({
 
 export const VotingPowerVariationFieldSchema = z.object({
   absoluteChange: z.string(),
-  percentageChange: z.number(),
+  percentageChange: z.string(),
 });
 
 export const VotingPowerResponseSchema = z.object({
@@ -182,7 +182,7 @@ export type DBAccountPower = typeof accountPower.$inferSelect;
 
 export type DBAccountPowerWithVariation = DBAccountPower & {
   absoluteChange: bigint;
-  percentageChange: number;
+  percentageChange: string;
 };
 
 export const VotingPowerVariationResponseMapper = (
