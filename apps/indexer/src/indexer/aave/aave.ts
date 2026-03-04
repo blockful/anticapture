@@ -187,18 +187,34 @@ export function AAVETokenIndexer(address: Address, decimals: number) {
         delegatedValue: current.delegatedValue + delegatorBalance.balance,
       }));
 
-    await context.db
-      .insert(accountPower)
-      .values({
-        accountId: delegate,
-        daoId,
-        delegationsCount: 1,
-        votingPower: delegatorBalance.balance,
-      })
-      .onConflictDoUpdate((current) => ({
-        delegationsCount: current.delegationsCount + 1,
-        votingPower: current.votingPower + delegatorBalance.balance,
-      }));
+    if (delegate !== zeroAddress) {
+      await context.db
+        .insert(accountPower)
+        .values({
+          accountId: delegate,
+          daoId,
+          delegationsCount: 1,
+          votingPower: delegatorBalance.balance,
+        })
+        .onConflictDoUpdate((current) => ({
+          delegationsCount: current.delegationsCount + 1,
+          votingPower: current.votingPower + delegatorBalance.balance,
+        }));
+
+      await context.db
+        .insert(votingPowerHistory)
+        .values({
+          daoId,
+          transactionHash: event.transaction.hash,
+          accountId: delegate,
+          votingPower: delegatorBalance.balance,
+          delta: delegatorBalance.balance,
+          deltaMod: delegatorBalance.balance,
+          timestamp: event.block.timestamp,
+          logIndex: event.log.logIndex,
+        })
+        .onConflictDoNothing();
+    }
 
     if (redelegation) {
       const previousVp = await context.db
@@ -222,19 +238,5 @@ export function AAVETokenIndexer(address: Address, decimals: number) {
         })
         .onConflictDoNothing();
     }
-
-    await context.db
-      .insert(votingPowerHistory)
-      .values({
-        daoId,
-        transactionHash: event.transaction.hash,
-        accountId: delegate,
-        votingPower: delegatorBalance.balance,
-        delta: delegatorBalance.balance,
-        deltaMod: delegatorBalance.balance,
-        timestamp: event.block.timestamp,
-        logIndex: event.log.logIndex,
-      })
-      .onConflictDoNothing();
   });
 }
