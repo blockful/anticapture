@@ -29,17 +29,16 @@ export class ENSClient<
   }
 
   async getQuorum(): Promise<bigint> {
-    if (!this.cache.quorum) {
+    return this.getCachedQuorum(async () => {
       const blockNumber = await getBlockNumber(this.client);
       const targetBlock = blockNumber - 10n;
-      this.cache.quorum = await readContract(this.client, {
+      return readContract(this.client, {
         abi: this.abi,
         address: this.address,
         functionName: "quorum",
         args: [targetBlock < 0n ? 0n : targetBlock],
       });
-    }
-    return this.cache.quorum;
+    });
   }
 
   async getTimelockDelay(): Promise<bigint> {

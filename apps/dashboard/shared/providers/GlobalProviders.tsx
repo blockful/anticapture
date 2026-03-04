@@ -10,7 +10,7 @@ import { WagmiProvider } from "wagmi";
 import "@rainbow-me/rainbowkit/styles.css";
 
 import { wagmiConfig } from "@/shared/services/wallet/wallet";
-import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
+import { BACKEND_ENDPOINT, getAuthHeaders } from "@/shared/utils/server-utils";
 
 const queryClient = new QueryClient();
 
@@ -18,6 +18,7 @@ const queryClient = new QueryClient();
 export const apolloClient = new ApolloClient({
   uri: BACKEND_ENDPOINT,
   cache: new InMemoryCache(),
+  headers: getAuthHeaders(),
 });
 
 export const GlobalProviders = ({ children }: { children: ReactNode }) => {

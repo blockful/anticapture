@@ -24,17 +24,46 @@ export abstract class GovernorBase<
   TAccount extends Account | undefined = Account | undefined,
 > {
   protected cache: {
-    quorum?: bigint;
     proposalThreshold?: bigint;
     votingDelay?: bigint;
     votingPeriod?: bigint;
     timelockDelay?: bigint;
   } = {};
+  private readonly quorumCache = new Map<
+    string,
+    { value: bigint; expiresAt: number }
+  >();
+  private readonly quorumCacheTtlMs: number;
 
   protected abstract address: Address;
   protected abstract abi: Abi;
 
-  constructor(protected client: Client<TTransport, TChain, TAccount>) {}
+  constructor(
+    protected client: Client<TTransport, TChain, TAccount>,
+    quorumCacheTtlMinutes: number = Infinity,
+  ) {
+    this.quorumCacheTtlMs = Math.max(1, quorumCacheTtlMinutes) * 60 * 1000;
+  }
+
+  protected async getCachedQuorum(
+    fetcher: () => Promise<bigint>,
+    cacheKey: string = "quorum",
+  ): Promise<bigint> {
+    const now = Date.now();
+    const cached = this.quorumCache.get(cacheKey);
+
+    if (cached && cached.expiresAt > now) {
+      return cached.value;
+    }
+
+    const quorum = await fetcher();
+    this.quorumCache.set(cacheKey, {
+      value: quorum,
+      expiresAt: now + this.quorumCacheTtlMs,
+    });
+
+    return quorum;
+  }
 
   async getProposalThreshold(): Promise<bigint> {
     if (!this.cache.proposalThreshold) {
@@ -82,18 +111,20 @@ export abstract class GovernorBase<
 
   abstract getTimelockDelay(): Promise<bigint>;
 
-  async getProposalStatus(proposal: {
-    id: string;
-    status: string;
-    startBlock: number;
-    endBlock: number;
-    forVotes: bigint;
-    againstVotes: bigint;
-    abstainVotes: bigint;
-    endTimestamp: bigint;
-  }): Promise<string> {
-    const currentBlock = await this.getCurrentBlockNumber();
-    const currentTimestamp = await this.getBlockTime(currentBlock);
+  async getProposalStatus(
+    proposal: {
+      id: string;
+      status: string;
+      startBlock: number;
+      endBlock: number;
+      forVotes: bigint;
+      againstVotes: bigint;
+      abstainVotes: bigint;
+      endTimestamp: bigint;
+    },
+    currentBlock: number,
+    currentTimestamp: number,
+  ): Promise<string> {
     const timelockDelay = await this.getTimelockDelay();
 
     if (

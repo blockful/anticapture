@@ -5,6 +5,7 @@ import { Info } from "lucide-react";
 
 import { ProposalStatus } from "@/features/governance";
 import { BannerAlert } from "@/shared/components/design-system/alerts/banner-alert/BannerAlert";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 export const OngoingProposalBanner = ({ daoId }: { daoId: string }) => {
   const { data, loading } = useGetProposalsFromDaoQuery({
@@ -15,6 +16,7 @@ export const OngoingProposalBanner = ({ daoId }: { daoId: string }) => {
     context: {
       headers: {
         "anticapture-dao-id": daoId,
+        ...getAuthHeaders(),
       },
     },
   });
