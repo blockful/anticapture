@@ -34,7 +34,7 @@ export const accountBalance = pgTable(
     tokenId: drizzle.text("token_id").notNull(),
     balance: bigint({ mode: "bigint" }).notNull(),
     // This field represents for who the account is delegating their voting power to
-    delegate: drizzle.text().default(zeroAddress).notNull(),
+    delegate: drizzle.text().$type<Address>().default(zeroAddress).notNull(),
   }),
   (table) => [
     primaryKey({
@@ -205,6 +205,7 @@ export const proposalsOnchain = pgTable(
     calldatas: drizzle.json().$type<string[]>().notNull(),
     startBlock: drizzle.integer("start_block").notNull(),
     endBlock: drizzle.integer("end_block").notNull(),
+    title: drizzle.text(),
     description: drizzle.text().notNull(),
     timestamp: bigint({ mode: "bigint" }).notNull(),
     endTimestamp: bigint({ mode: "bigint" }).notNull(),

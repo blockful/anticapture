@@ -51,10 +51,12 @@ export type HistoricalDelegationsRequestQuery = z.infer<
 export const DelegationItemSchema = z.object({
   delegatorAddress: z
     .string()
-    .refine((val) => isAddress(val, { strict: false })),
+    .refine((val) => isAddress(val, { strict: false }))
+    .transform((val) => getAddress(val)),
   delegateAddress: z
     .string()
-    .refine((val) => isAddress(val, { strict: false })),
+    .refine((val) => isAddress(val, { strict: false }))
+    .transform((val) => getAddress(val)),
   amount: z.string(),
   timestamp: z.string(),
   transactionHash: z.string(),

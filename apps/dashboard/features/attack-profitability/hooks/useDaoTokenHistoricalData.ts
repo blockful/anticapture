@@ -4,7 +4,7 @@ import useSWR, { SWRConfiguration } from "swr";
 import { getOnlyClosedData } from "@/features/attack-profitability/utils/normalizeDataset";
 import { PriceEntry } from "@/shared/dao-config/types";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
+import { BACKEND_ENDPOINT, getAuthHeaders } from "@/shared/utils/server-utils";
 
 export const fetchDaoTokenHistoricalData = async ({
   daoId,
@@ -32,6 +32,7 @@ export const fetchDaoTokenHistoricalData = async ({
     {
       headers: {
         "anticapture-dao-id": daoId,
+        ...getAuthHeaders(),
       },
     },
   );

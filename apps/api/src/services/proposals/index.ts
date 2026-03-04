@@ -92,9 +92,16 @@ export class ProposalsService {
       proposalTypeExclude,
     );
 
+    const currentBlock = await this.daoClient.getCurrentBlockNumber();
+    const currentTimestamp = await this.daoClient.getBlockTime(currentBlock);
+
     // 4. Update each proposal with its real on-chain status
     for (const proposal of proposals) {
-      proposal.status = await this.daoClient.getProposalStatus(proposal);
+      proposal.status = await this.daoClient.getProposalStatus(
+        proposal,
+        currentBlock,
+        currentTimestamp!,
+      );
     }
 
     // 5. Filter by originally requested statuses (handles on-chain determined statuses)
@@ -108,7 +115,14 @@ export class ProposalsService {
       return undefined;
     }
 
-    const status = await this.daoClient.getProposalStatus(proposal);
+    const currentBlock = await this.daoClient.getCurrentBlockNumber();
+    const currentTimestamp = await this.daoClient.getBlockTime(currentBlock);
+
+    const status = await this.daoClient.getProposalStatus(
+      proposal,
+      currentBlock,
+      currentTimestamp!,
+    );
 
     return { ...proposal, status };
   }

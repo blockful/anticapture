@@ -1,6 +1,6 @@
 import { Address } from "viem";
 
-import { DBDelegation } from "@/mappers";
+import { DBDelegation, DelegationItem } from "@/mappers";
 
 interface Repository {
   getHistoricalDelegations(
@@ -29,17 +29,29 @@ export class HistoricalDelegationsService {
     skip: number,
     limit: number,
   ): Promise<{
-    items: DBDelegation[];
+    items: DelegationItem[];
     totalCount: number;
   }> {
-    return this.historicalDelegationsRepository.getHistoricalDelegations(
-      address,
-      orderDirection,
-      skip,
-      limit,
-      fromValue,
-      toValue,
-      delegateAddressIn,
-    );
+    const result =
+      await this.historicalDelegationsRepository.getHistoricalDelegations(
+        address,
+        orderDirection,
+        skip,
+        limit,
+        fromValue,
+        toValue,
+        delegateAddressIn,
+      );
+
+    return {
+      items: result.items.map((item) => ({
+        delegatorAddress: item.delegatorAccountId,
+        delegateAddress: item.delegateAccountId,
+        amount: item.delegatedValue.toString(),
+        timestamp: item.timestamp.toString(),
+        transactionHash: item.transactionHash,
+      })),
+      totalCount: result.totalCount,
+    };
   }
 }

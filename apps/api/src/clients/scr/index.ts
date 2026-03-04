@@ -29,34 +29,39 @@ export class SCRClient<
   }
 
   async getQuorum(_: string | null): Promise<bigint> {
-    return parseEther("2100000"); // 2.1M $SCR (0.21% Total Supply)
+    return this.getCachedQuorum(async () => {
+      return parseEther("2100000"); // 2.1M $SCR (0.21% Total Supply)
+    });
   }
 
   async getTimelockDelay(): Promise<bigint> {
-    const timelockAddress = await readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "timelock",
-    });
-    return readContract(this.client, {
-      abi: [
-        {
-          inputs: [],
-          name: "getMinDelay",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "duration",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-      ],
-      address: timelockAddress,
-      functionName: "getMinDelay",
-    });
+    if (!this.cache.timelockDelay) {
+      const timelockAddress = await readContract(this.client, {
+        abi: this.abi,
+        address: this.address,
+        functionName: "timelock",
+      });
+      this.cache.timelockDelay = await readContract(this.client, {
+        abi: [
+          {
+            inputs: [],
+            name: "getMinDelay",
+            outputs: [
+              {
+                internalType: "uint256",
+                name: "duration",
+                type: "uint256",
+              },
+            ],
+            stateMutability: "view",
+            type: "function",
+          },
+        ],
+        address: timelockAddress,
+        functionName: "getMinDelay",
+      });
+    }
+    return this.cache.timelockDelay;
   }
 
   calculateQuorum(votes: {

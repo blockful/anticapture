@@ -12,6 +12,7 @@ export interface VoteDetail {
   voter: Address;
   votingPower: string;
   proposalId: string;
+  title: string | null;
   support: number;
 }
 

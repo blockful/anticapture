@@ -40,7 +40,7 @@ export class HistoricalDelegationsRepository {
 
     return {
       items: items,
-      totalCount: totalCount?.count ?? 0,
+      totalCount: Number(totalCount?.count ?? 0),
     };
   }
 

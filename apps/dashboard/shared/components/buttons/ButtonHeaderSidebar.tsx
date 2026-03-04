@@ -16,6 +16,7 @@ interface ButtonHeaderSidebarProps extends ButtonHTMLAttributes<
   isGlobal?: boolean;
   isAction?: boolean;
   isCollapsed?: boolean;
+  isNew?: boolean;
 }
 
 export const ButtonHeaderSidebar = ({
@@ -26,6 +27,7 @@ export const ButtonHeaderSidebar = ({
   isGlobal = false,
   isAction = false,
   isCollapsed = false,
+  isNew = false,
   onClick,
   ...props
 }: ButtonHeaderSidebarProps) => {
@@ -79,12 +81,17 @@ export const ButtonHeaderSidebar = ({
 
   const content = (
     <>
-      <Icon
-        className={cn("size-4 shrink-0 transition-colors", {
-          "text-inverted": isActive,
-          "text-secondary group-hover:text-primary": !isActive,
-        })}
-      />
+      <div className="relative shrink-0">
+        <Icon
+          className={cn("size-4 transition-colors", {
+            "text-inverted": isActive,
+            "text-secondary group-hover:text-primary": !isActive,
+          })}
+        />
+        {isNew && isCollapsed && (
+          <span className="bg-orange-400/12 absolute -right-0.5 -top-0.5 size-1.5 rounded-full" />
+        )}
+      </div>
       {!isCollapsed && (
         <p
           className={cn(
@@ -97,6 +104,11 @@ export const ButtonHeaderSidebar = ({
         >
           {label}
         </p>
+      )}
+      {isNew && !isCollapsed && (
+        <span className="bg-orange-400/12 rounded-full px-2 py-0.5 text-[11px] font-medium text-orange-400">
+          New
+        </span>
       )}
     </>
   );

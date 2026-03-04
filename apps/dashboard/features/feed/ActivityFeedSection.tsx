@@ -10,6 +10,10 @@ import { FeedEventSkeleton } from "@/features/feed/components/FeedEventSkeleton"
 import { useActivityFeed } from "@/features/feed/hooks/useActivityFeed";
 import { useActivityFeedParams } from "@/features/feed/hooks/useActivityFeedParams";
 import { FeedEvent, FeedEventRelevance } from "@/features/feed/types";
+import {
+  EntityType,
+  HoldersAndDelegatesDrawer,
+} from "@/features/holders-and-delegates/components/HoldersAndDelegatesDrawer";
 import { Button, BlankSlate, TheSectionLayout } from "@/shared/components";
 import {
   SubSectionsContainer,
@@ -112,6 +116,10 @@ export const ActivityFeedSection = ({
 }: ActivityFeedSectionProps) => {
   const { daoId } = useParams<{ daoId: DaoIdEnum }>();
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
+  const [drawerState, setDrawerState] = useState<{
+    address: string;
+    entityType: EntityType;
+  } | null>(null);
   const { filters, setFilters, clearFilters } = useActivityFeedParams();
 
   // Convert date strings to timestamps
@@ -212,6 +220,17 @@ export const ActivityFeedSection = ({
         </Button>
       }
     >
+      {/* Holders / Delegates Drawer */}
+      {drawerState && (
+        <HoldersAndDelegatesDrawer
+          isOpen={true}
+          onClose={() => setDrawerState(null)}
+          entityType={drawerState.entityType}
+          address={drawerState.address}
+          daoId={daoId.toUpperCase() as DaoIdEnum}
+        />
+      )}
+
       {/* Filter Drawer */}
       <ActivityFeedFiltersDrawer
         isOpen={isFilterDrawerOpen}
@@ -291,6 +310,9 @@ export const ActivityFeedSection = ({
                   key={`${event.txHash}-${event.logIndex}`}
                   event={event}
                   isLast={index === group.events.length - 1}
+                  onRowClick={(address, entityType) =>
+                    setDrawerState({ address, entityType })
+                  }
                 />
               ))}
             </div>

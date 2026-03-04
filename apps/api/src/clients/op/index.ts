@@ -19,7 +19,7 @@ export class OPClient<
   protected address: Address;
 
   constructor(client: Client<TTransport, TChain, TAccount>, address: Address) {
-    super(client);
+    super(client, 5); // 5 minutes of cache for quorum
     this.address = address;
     this.abi = GovernorAbi;
   }
@@ -30,12 +30,14 @@ export class OPClient<
 
   async getQuorum(proposalId: string | null): Promise<bigint> {
     if (!proposalId) return 0n;
-    return readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "quorum",
-      args: [BigInt(proposalId)],
-    });
+    return this.getCachedQuorum(async () => {
+      return readContract(this.client, {
+        abi: this.abi,
+        address: this.address,
+        functionName: "quorum",
+        args: [BigInt(proposalId)],
+      });
+    }, `quorum:proposal:${proposalId}`);
   }
 
   async getTimelockDelay(): Promise<bigint> {

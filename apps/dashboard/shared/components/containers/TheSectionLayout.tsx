@@ -38,7 +38,7 @@ export const TheSectionLayout = ({
   return (
     <div
       className={cn(
-        "flex h-full w-full flex-col gap-8 border-none px-4 py-5 lg:gap-6 lg:p-5",
+        "flex h-full w-full flex-col gap-5 border-none px-4 py-5 lg:gap-6 lg:p-5",
         className,
       )}
     >

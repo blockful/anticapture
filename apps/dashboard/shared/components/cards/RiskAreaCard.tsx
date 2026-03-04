@@ -64,10 +64,12 @@ const RiskAreaCardInternal = ({
   const isBox2Filled =
     risk.level === RiskLevel.MEDIUM || risk.level === RiskLevel.HIGH;
   const isBox3Filled = risk.level === RiskLevel.HIGH;
-  const [isHovered, setIsHovered] = useState<boolean>(false);
+  const [isHoveredState, setIsHovered] = useState<boolean>(false);
   // Adjust styling based on variant
   const isRiskAnalysis = variant === RiskAreaCardEnum.RISK_ANALYSIS;
   const isPanelTable = variant === RiskAreaCardEnum.PANEL_TABLE;
+  // Disable hover effects for PANEL_TABLE since the cell already handles hover
+  const isHovered = isPanelTable ? false : isHoveredState;
 
   const riskLevelIcons = {
     [RiskLevel.LOW]: (
@@ -104,15 +106,17 @@ const RiskAreaCardInternal = ({
         isPanelTable || (risk.level === RiskLevel.NONE && "cursor-default"),
       )}
       onClick={onClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={isPanelTable ? undefined : () => setIsHovered(true)}
+      onMouseLeave={isPanelTable ? undefined : () => setIsHovered(false)}
     >
       <div
         className={cn(
-          "flex h-full items-center px-2 py-2 lg:py-5",
-          !isPanelTable ? "flex-1 justify-between" : "size-7 p-0 text-center",
+          "flex h-full items-center px-2 py-4",
+          !isPanelTable
+            ? "flex-1 justify-between lg:py-5"
+            : "size-7 p-0 text-center",
           {
-            "bg-surface-contrast": risk.level === RiskLevel.NONE,
+            "bg-surface-opacity/50": risk.level === RiskLevel.NONE,
             "bg-success shadow-success/30": risk.level === RiskLevel.LOW,
             "bg-warning shadow-warning/30": risk.level === RiskLevel.MEDIUM,
             "bg-error shadow-error/30": risk.level === RiskLevel.HIGH,
@@ -294,7 +298,7 @@ export const RiskAreaCard = ({
             variant={variant}
           />
         </div>
-        <div className="hidden w-[13px] items-center justify-center lg:flex">
+        <div className="w-3.25 hidden h-full items-center justify-center lg:flex">
           {isActive && (
             <div className="border-l-middle-dark border-y-13 border-l-13 size-0 border-y-transparent" />
           )}
@@ -303,20 +307,14 @@ export const RiskAreaCard = ({
     ),
     [RiskAreaCardEnum.PANEL_TABLE]:
       riskArea.level !== RiskLevel.NONE ? (
-        <RiskTooltipCard
-          title={riskInfo.title}
-          description={riskInfo.description}
-          riskLevel={riskArea.level}
-        >
-          <div className="flex size-7">
-            <RiskAreaCardInternal
-              risk={modifiedRiskArea}
-              isActive={isActive}
-              onClick={onClick}
-              variant={variant}
-            />
-          </div>
-        </RiskTooltipCard>
+        <div className="flex size-7">
+          <RiskAreaCardInternal
+            risk={modifiedRiskArea}
+            isActive={isActive}
+            onClick={onClick}
+            variant={variant}
+          />
+        </div>
       ) : (
         <div className="flex size-7">
           <RiskAreaCardInternal
@@ -367,7 +365,7 @@ export const RiskAreaCardWrapper = ({
             >
               ATTACK EXPOSURE
             </DefaultLink>
-            <TooltipInfo text="Assess critical vulnerabilities in the DAO's governance setup. Each item highlights a specific risk area, showing which issues are resolved and which still expose the system to threats." />
+            <TooltipInfo text="Assess critical vulnerabilities in the DAO's governance setup. Each item highlights a specific attack exposure, showing which issues are resolved and which still expose the system to threats." />
           </div>
         ))}
       <div className={cn("", className)}>

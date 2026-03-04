@@ -1,13 +1,15 @@
 import {
-  GetDelegatorsQuery,
-  useGetDelegatorsQuery,
-} from "@anticapture/graphql-client/hooks";
-import {
   QueryInput_Delegators_OrderBy,
   QueryInput_Delegators_OrderDirection,
 } from "@anticapture/graphql-client";
-import { DaoIdEnum } from "@/shared/types/daos";
+import {
+  GetDelegatorsQuery,
+  useGetDelegatorsQuery,
+} from "@anticapture/graphql-client/hooks";
 import { useState, useCallback, useMemo, useEffect } from "react";
+
+import { DaoIdEnum } from "@/shared/types/daos";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 interface PaginationInfo {
   hasNextPage: boolean;
@@ -68,6 +70,7 @@ export const useDelegators = ({
     context: {
       headers: {
         "anticapture-dao-id": daoId,
+        ...getAuthHeaders(),
       },
     },
     variables: {
