@@ -1,5 +1,7 @@
 "use client";
 
+import { Suspense } from "react";
+
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 
 import { TabButton } from "@/features/holders-and-delegates/components/TabButton";
@@ -20,7 +22,7 @@ const TABS: { id: TabId; label: string }[] = [
   { id: "delegates", label: "DELEGATES" },
 ];
 
-export default function AavePage() {
+function AavePageContent() {
   const defaultDays = TimeInterval.NINETY_DAYS;
   const [days, setDays] = useQueryState(
     "days",
@@ -84,5 +86,13 @@ export default function AavePage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function AavePage() {
+  return (
+    <Suspense>
+      <AavePageContent />
+    </Suspense>
   );
 }
