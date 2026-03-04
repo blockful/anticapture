@@ -243,6 +243,7 @@ export const VoteCompositionTable = ({
         isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}
         withDownloadCSV={true}
+        csvFilename="vote-composition.csv"
         error={error}
         fillHeight
       />

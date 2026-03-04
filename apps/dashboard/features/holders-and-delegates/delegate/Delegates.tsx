@@ -36,7 +36,7 @@ import { cn, formatNumberUserReadable } from "@/shared/utils";
 
 interface DelegateTableData {
   address: string;
-  votingPower: string;
+  votingPower: number;
   variation?: {
     percentageChange: number;
     absoluteChange: number;
@@ -144,7 +144,7 @@ export const Delegates = ({
 
       return {
         address: delegate.accountId,
-        votingPower: formatNumberUserReadable(votingPowerFormatted),
+        votingPower: votingPowerFormatted,
         variation: {
           percentageChange:
             delegate.variation.percentageChange === PERCENTAGE_NO_BASELINE
@@ -233,7 +233,7 @@ export const Delegates = ({
     {
       accessorKey: "votingPower",
       cell: ({ row }) => {
-        const votingPower = row.getValue("votingPower") as string;
+        const votingPower = row.getValue("votingPower") as number;
 
         if (loading) {
           return (
@@ -246,7 +246,7 @@ export const Delegates = ({
 
         return (
           <div className="text-secondary flex w-full items-center justify-end text-end text-sm font-normal">
-            {votingPower}
+            {formatNumberUserReadable(votingPower)}
           </div>
         );
       },
@@ -463,6 +463,7 @@ export const Delegates = ({
           isLoadingMore={fetchingMore}
           onLoadMore={fetchNextPage}
           withDownloadCSV={true}
+          csvFilename="delegates.csv"
           error={error}
           fillHeight
         />
