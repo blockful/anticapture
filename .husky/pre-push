@@ -1,4 +1,22 @@
 pnpm typecheck
 
-.claude/hooks/copy-review/dashboard-copy-review.sh
+# Run copy review via Claude if there are dashboard changes
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"
+MAIN_BRANCH="dev"
+REMOTE="${REMOTE:-origin}"
+MERGE_BASE=$(git merge-base "$REMOTE/$MAIN_BRANCH" HEAD 2>/dev/null)
+MARKER_FILE="$REPO_ROOT/.claude/hooks/copy-review/.copy-review-approved"
+
+if [ -n "$MERGE_BASE" ]; then
+  DASHBOARD_CHANGES=$(git diff --name-only "$MERGE_BASE" HEAD -- apps/dashboard/)
+  if [ -n "$DASHBOARD_CHANGES" ]; then
+    if [ -f "$MARKER_FILE" ]; then
+      rm -f "$MARKER_FILE"
+    else
+      echo "Dashboard changes detected. Launching Claude for copy review..."
+      claude --print "Run the dashboard copy review hook by executing: .claude/hooks/copy-review/dashboard-copy-review.sh. Follow the instructions in its output to review the copy changes. If the review passes and the user approves, create the marker file and tell them to re-run git push."
+      exit 1
+    fi
+  fi
+fi
 
