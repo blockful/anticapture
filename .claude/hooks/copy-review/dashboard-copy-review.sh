@@ -2,6 +2,11 @@
 # Hook: Review dashboard copy before pushing
 # Detects dashboard changes and instructs Claude to run a copy review
 # using the style guide, framework reference, and review prompt.
+#
+# Flow:
+#   1st push attempt → blocks, outputs review context for Claude to review
+#   Claude reviews → if clean, asks user for approval → creates marker file
+#   2nd push attempt → marker found → allows push, cleans up marker
 
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"
 if [ -z "$REPO_ROOT" ]; then
@@ -9,8 +14,15 @@ if [ -z "$REPO_ROOT" ]; then
 fi
 
 HOOK_DIR="$REPO_ROOT/.claude/hooks/copy-review"
+MARKER_FILE="$HOOK_DIR/.copy-review-approved"
 MAIN_BRANCH="dev"
 REMOTE="${REMOTE:-origin}"
+
+# If a previous review was approved, allow the push and clean up
+if [ -f "$MARKER_FILE" ]; then
+  rm -f "$MARKER_FILE"
+  exit 0
+fi
 
 # Get the merge base with the main branch
 MERGE_BASE=$(git merge-base "$REMOTE/$MAIN_BRANCH" HEAD 2>/dev/null)
@@ -53,5 +65,10 @@ echo ""
 echo "=== DASHBOARD DIFF ==="
 echo "$DASHBOARD_DIFF"
 echo ""
-echo "Review the diff against the style guide and framework reference. Report findings in the format specified by the review prompt. If no issues are found, state that explicitly."
+echo "=== INSTRUCTIONS ==="
+echo "Review the diff against the style guide and framework reference. Report findings in the format specified by the review prompt."
+echo ""
+echo "After your review:"
+echo "- If NO issues are found: ask the user for approval to push. If they approve, create the marker file at '$MARKER_FILE' and retry the git push command."
+echo "- If issues ARE found: report all findings to the user and ask them to fix the issues before pushing. Do NOT create the marker file."
 exit 1
