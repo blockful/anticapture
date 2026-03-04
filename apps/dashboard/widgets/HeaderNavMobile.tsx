@@ -22,9 +22,25 @@ export const HeaderNavMobile = () => {
       enabled: !!daoConfig.daoOverview,
     },
     {
+      page: PAGES_CONSTANTS.holdersAndDelegates.page,
+      title: PAGES_CONSTANTS.holdersAndDelegates.title,
+      enabled: !!daoConfig.dataTables,
+    },
+    {
+      page: "governance",
+      title: "Governance",
+      enabled: !!daoConfig.governancePage,
+    },
+    {
+      page: PAGES_CONSTANTS.activityFeed.page,
+      title: PAGES_CONSTANTS.activityFeed.title,
+      enabled: true,
+      isNew: true,
+    },
+    {
       page: PAGES_CONSTANTS.attackProfitability.page,
       title: PAGES_CONSTANTS.attackProfitability.title,
-      enabled: !!daoConfig.attackProfitability,
+      enabled: !!daoConfig.attackProfitability?.supportsLiquidTreasuryCall,
     },
     {
       page: PAGES_CONSTANTS.resilienceStages.page,
@@ -40,22 +56,6 @@ export const HeaderNavMobile = () => {
       page: PAGES_CONSTANTS.tokenDistribution.page,
       title: PAGES_CONSTANTS.tokenDistribution.title,
       enabled: !!daoConfig.tokenDistribution,
-    },
-    {
-      page: PAGES_CONSTANTS.holdersAndDelegates.page,
-      title: PAGES_CONSTANTS.holdersAndDelegates.title,
-      enabled: true,
-    },
-    {
-      page: "governance",
-      title: "Governance",
-      enabled: !!daoConfig.governancePage,
-    },
-    {
-      page: PAGES_CONSTANTS.activityFeed.page,
-      title: PAGES_CONSTANTS.activityFeed.title,
-      enabled: true,
-      isNew: true,
     },
   ];
 

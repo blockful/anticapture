@@ -83,8 +83,10 @@ import {
   DelegatorsService,
   VotesService,
   FeedService,
+  EventRelevanceService,
 } from "@/services";
 
+import { eventRelevance } from "./controllers/event-relevance";
 import { feed } from "./controllers/feed";
 
 const app = new Hono({
@@ -213,6 +215,7 @@ token(
 );
 
 feed(app, new FeedService(env.DAO_ID, new FeedRepository(pgClient)));
+eventRelevance(app, new EventRelevanceService(env.DAO_ID));
 tokenDistribution(app, repo);
 governanceActivity(app, repo, tokenType);
 proposalsActivity(app, proposalsRepo, env.DAO_ID, daoClient);

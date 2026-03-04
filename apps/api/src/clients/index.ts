@@ -23,14 +23,18 @@ export interface DAOClient {
     againstVotes: bigint;
     abstainVotes: bigint;
   }) => bigint;
-  getProposalStatus: (proposal: {
-    id: string;
-    status: string;
-    startBlock: number;
-    endBlock: number;
-    forVotes: bigint;
-    againstVotes: bigint;
-    abstainVotes: bigint;
-    endTimestamp: bigint;
-  }) => Promise<string>;
+  getProposalStatus: (
+    proposal: {
+      id: string;
+      status: string;
+      startBlock: number;
+      endBlock: number;
+      forVotes: bigint;
+      againstVotes: bigint;
+      abstainVotes: bigint;
+      endTimestamp: bigint;
+    },
+    currentBlock: number,
+    currentTimestamp: number,
+  ) => Promise<string>;
 }

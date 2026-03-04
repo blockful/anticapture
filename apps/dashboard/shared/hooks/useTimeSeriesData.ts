@@ -9,7 +9,7 @@ import { TokenMetricItem } from "@/shared/dao-config/types";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
-import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
+import { BACKEND_ENDPOINT, getAuthHeaders } from "@/shared/utils/server-utils";
 
 interface TokenMetricsItem {
   date: string;
@@ -62,6 +62,7 @@ const fetchSingleMetric = async (
       headers: {
         "Content-Type": "application/json",
         "anticapture-dao-id": daoId,
+        ...getAuthHeaders(),
       },
     },
   );
