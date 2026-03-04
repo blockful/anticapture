@@ -1,5 +1,11 @@
 import { ponder } from "ponder:registry";
-import { accountBalance, accountPower, delegation, token } from "ponder:schema";
+import {
+  accountBalance,
+  accountPower,
+  delegation,
+  token,
+  votingPowerHistory,
+} from "ponder:schema";
 import { Address, getAddress, zeroAddress } from "viem";
 
 import { tokenTransfer } from "@/eventHandlers";
@@ -87,9 +93,24 @@ export function AAVETokenIndexer(address: Address, decimals: number) {
         accountId: delegate,
         daoId,
         delegationsCount: 1,
+        votingPower: delegatorBalance?.balance ?? 0n,
       })
       .onConflictDoUpdate((current) => ({
         delegationsCount: current.delegationsCount + 1,
       }));
+
+    await context.db
+      .insert(votingPowerHistory)
+      .values({
+        daoId,
+        transactionHash: event.transaction.hash,
+        accountId: delegate,
+        votingPower: delegatorBalance?.balance ?? 0n,
+        delta: delegatorBalance?.balance ?? 0n,
+        deltaMod: delegatorBalance?.balance ?? 0n,
+        timestamp: event.block.timestamp,
+        logIndex: event.log.logIndex,
+      })
+      .onConflictDoNothing();
   });
 }

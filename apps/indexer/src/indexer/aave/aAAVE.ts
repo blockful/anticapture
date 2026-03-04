@@ -93,6 +93,7 @@ export function aAAVETokenIndexer(address: Address, decimals: number) {
         accountId: delegate,
         daoId,
         delegationsCount: 1,
+        votingPower: delegatorBalance?.balance ?? 0n,
       })
       .onConflictDoUpdate((current) => ({
         delegationsCount: current.delegationsCount + 1,
