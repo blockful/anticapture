@@ -43,7 +43,7 @@ jobs:
         id: dashboard
         run: |
           DIFF=$(gh pr diff ${{ github.event.pull_request.number || github.event.issue.number }} --name-only || true)
-          if echo "$DIFF" | grep -q '^dashboard/'; then
+          if echo "$DIFF" | grep -q '^apps/dashboard/'; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "changed=false" >> "$GITHUB_OUTPUT"
@@ -80,5 +80,5 @@ jobs:
             Only post GitHub comments - don't submit review text as messages.
 
           claude_args: |
-            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Read(file:*),Glob(git ls-files:*),Grep(grep:*)"
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Read,Glob,Grep"
             --max-tokens 4096
