@@ -2,7 +2,7 @@ import { pgSchema, index, primaryKey } from "drizzle-orm/pg-core";
 
 export const snapshotSchema = pgSchema("snapshot");
 
-export const proposals = snapshotSchema.table("proposals", (d) => ({
+export const offchainProposals = snapshotSchema.table("proposals", (d) => ({
   id: d.text().primaryKey(),
   spaceId: d.text("space_id").notNull(),
   author: d.text().notNull(),
@@ -19,7 +19,7 @@ export const proposals = snapshotSchema.table("proposals", (d) => ({
   flagged: d.boolean().notNull().default(false),
 }));
 
-export const votes = snapshotSchema.table(
+export const offchainVotes = snapshotSchema.table(
   "votes",
   (d) => ({
     spaceId: d.text("space_id").notNull(),
@@ -38,13 +38,3 @@ export const votes = snapshotSchema.table(
     index("votes_voter_idx").on(table.voter),
   ],
 );
-
-export const syncStatus = snapshotSchema.table("sync_status", (d) => ({
-  entity: d.text().primaryKey(),
-  lastCursor: d.text("last_cursor"),
-  lastSyncedAt: d.integer("last_synced_at").notNull(),
-}));
-
-export type OffchainProposal = typeof proposals.$inferInsert;
-export type OffchainVote = typeof votes.$inferInsert;
-export type SyncStatus = typeof syncStatus.$inferSelect;
