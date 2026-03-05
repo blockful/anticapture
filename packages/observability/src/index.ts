@@ -1,3 +1,4 @@
+import { metrics } from "@opentelemetry/api";
 import {
   PrometheusExporter,
   PrometheusSerializer,
@@ -26,7 +27,9 @@ export function createObservabilityProvider(
     readers: [exporter],
   });
 
-  new HostMetrics({ meterProvider, name: serviceName }).start();
+  metrics.setGlobalMeterProvider(meterProvider);
+
+  new HostMetrics({ meterProvider }).start();
 
   return { meterProvider, exporter };
 }
