@@ -12,6 +12,7 @@ enum AssetPlatformEnum {
 }
 
 export const CoingeckoTokenIdEnum: Record<DaoIdEnum, string> = {
+  AAVE: "aave",
   ENS: "ethereum-name-service",
   UNI: "uniswap",
   ARB: "arbitrum",
