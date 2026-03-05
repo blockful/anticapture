@@ -1,10 +1,15 @@
 import { getMesh } from "@graphql-mesh/runtime";
 import { createMeshHTTPHandler } from "@graphql-mesh/http";
 import { createServer } from "node:http";
-
-import config from "../meshrc";
 import { writeFileSync } from "node:fs";
 import { printSchema } from "graphql";
+import {
+  PROMETHEUS_MIME_TYPE,
+  PrometheusSerializer,
+} from "@anticapture/observability";
+
+import config from "../meshrc";
+import { exporter } from "./instrumentation";
 
 const bootstrap = async () => {
   const mesh = await getMesh(await config);
@@ -16,7 +21,19 @@ const bootstrap = async () => {
     getBuiltMesh: () => Promise.resolve(mesh),
   });
 
-  const server = createServer((req, res) => handler(req, res));
+  const server = createServer(async (req, res) => {
+    if (req.url === "/metrics") {
+      const result = await exporter.collect();
+      const serialized = new PrometheusSerializer().serialize(
+        result.resourceMetrics,
+      );
+      res.writeHead(200, { "Content-Type": PROMETHEUS_MIME_TYPE });
+      res.end(serialized);
+      return;
+    }
+    handler(req, res);
+  });
+
   const port = process.env.PORT || 4000;
   server.listen(port, () => {
     console.log(`🚀 Mesh running at http://localhost:${port}/graphql`);

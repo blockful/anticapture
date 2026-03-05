@@ -25,6 +25,12 @@ scrape_configs:
     static_configs:
       - targets: ["172.17.0.1:42069"]
 
+  - job_name: anticapture-gateway
+    metrics_path: "/metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["172.17.0.1:4000"]
+
   - job_name: otelcol-metrics
     static_configs:
       - targets: ["otelcol:8889"]
