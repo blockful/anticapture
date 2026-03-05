@@ -13,7 +13,7 @@ COPY pnpm-lock.yaml pnpm-lock.yaml
 COPY --from=builder /app/out/json/ .
 RUN pnpm install
 COPY --from=builder /app/out/full/ .
-COPY turbo.json turbo.json
+COPY --from=builder /app/turbo.json turbo.json
 RUN pnpm --filter @anticapture/observability build
 RUN pnpm run api build
 
@@ -21,5 +21,6 @@ FROM base AS runner
 WORKDIR /app
 COPY --from=installer /app .
 RUN npm install -g pnpm
+WORKDIR /app/apps/api
 EXPOSE 42069
-ENTRYPOINT ["pnpm", "api", "start"]
+ENTRYPOINT ["node", "--import", "./dist/instrumentation.js", "dist/index.js"]
