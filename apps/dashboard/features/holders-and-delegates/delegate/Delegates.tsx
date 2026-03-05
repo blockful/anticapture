@@ -325,9 +325,13 @@ export const Delegates = ({
         }
 
         return (
-          <div className="flex w-full items-center justify-center gap-2 text-sm">
-            {(variation?.percentageChange || 0) < 0 ? "-" : ""}
-            {formatNumberUserReadable(Math.abs(variation?.absoluteChange || 0))}
+          <div className="grid w-full grid-cols-2 items-center gap-2 text-sm">
+            <span className="text-right tabular-nums">
+              {(variation?.percentageChange || 0) < 0 ? "-" : ""}
+              {formatNumberUserReadable(
+                Math.abs(variation?.absoluteChange || 0),
+              )}
+            </span>
             <Percentage value={variation?.percentageChange || 0} />
           </div>
         );
@@ -384,6 +388,9 @@ export const Delegates = ({
           Activity
         </h4>
       ),
+      meta: {
+        columnClassName: "w-32",
+      },
     },
     {
       accessorKey: "avgVoteTiming",
@@ -490,6 +497,7 @@ export const Delegates = ({
           isLoadingMore={fetchingMore}
           onLoadMore={fetchNextPage}
           withDownloadCSV={true}
+          mobileTableFixed={true}
           error={error}
           fillHeight
         />
