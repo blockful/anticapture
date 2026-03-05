@@ -257,7 +257,7 @@ export const Delegates = ({
         </div>
       ),
       meta: {
-        columnClassName: "w-72",
+        columnClassName: "w-[25%]",
       },
     },
     {
@@ -303,7 +303,7 @@ export const Delegates = ({
         </Button>
       ),
       meta: {
-        columnClassName: "w-40",
+        columnClassName: "w-[15%]",
       },
     },
     {
@@ -364,7 +364,7 @@ export const Delegates = ({
         </Button>
       ),
       meta: {
-        columnClassName: "w-64",
+        columnClassName: "w-[20%]",
       },
     },
     {
@@ -394,7 +394,7 @@ export const Delegates = ({
         </h4>
       ),
       meta: {
-        columnClassName: "w-32",
+        columnClassName: "w-[15%]",
       },
     },
     {
@@ -442,7 +442,7 @@ export const Delegates = ({
         </div>
       ),
       meta: {
-        columnClassName: "w-40",
+        columnClassName: "w-[15%]",
       },
     },
     {
@@ -485,7 +485,7 @@ export const Delegates = ({
         </Button>
       ),
       meta: {
-        columnClassName: "w-28",
+        columnClassName: "w-[10%]",
       },
     },
   ];
