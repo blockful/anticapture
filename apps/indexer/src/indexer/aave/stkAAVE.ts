@@ -53,55 +53,57 @@ export function stkAAVETokenIndexer(address: Address, decimals: number) {
         amount: current.amount + value,
       }));
 
-    const { balance: currentReceiverBalance, delegate: toDelegate } =
-      await context.db
-        .insert(accountBalance)
-        .values({
-          accountId: to,
-          tokenId: tokenId,
-          balance: value,
-          delegate: zeroAddress,
-        })
-        .onConflictDoUpdate((current) => ({
-          balance: current.balance + value,
-        }));
+    if (to !== zeroAddress) {
+      const { balance: currentReceiverBalance, delegate: toDelegate } =
+        await context.db
+          .insert(accountBalance)
+          .values({
+            accountId: to,
+            tokenId: tokenId,
+            balance: value,
+            delegate: zeroAddress,
+          })
+          .onConflictDoUpdate((current) => ({
+            balance: current.balance + value,
+          }));
 
-    if (toDelegate !== zeroAddress) {
-      const { votingPower: currentVotingPower } = await context.db
-        .insert(accountPower)
-        .values({
-          accountId: toDelegate,
+      if (toDelegate !== zeroAddress) {
+        const { votingPower: currentVotingPower } = await context.db
+          .insert(accountPower)
+          .values({
+            accountId: toDelegate,
+            daoId,
+          })
+          .onConflictDoUpdate((current) => ({
+            votingPower: current.votingPower + value,
+          }));
+
+        await context.db.insert(votingPowerHistory).values({
           daoId,
+          transactionHash: event.transaction.hash,
+          accountId: toDelegate,
+          votingPower: currentVotingPower + value,
+          delta: value,
+          deltaMod: value,
+          timestamp: event.block.timestamp,
+          logIndex: event.log.logIndex + 1,
+        });
+      }
+
+      await context.db
+        .insert(balanceHistory)
+        .values({
+          daoId,
+          transactionHash: event.transaction.hash,
+          accountId: to,
+          balance: currentReceiverBalance,
+          delta: value,
+          deltaMod: value > 0n ? value : -value,
+          timestamp: event.block.timestamp,
+          logIndex: event.log.logIndex,
         })
-        .onConflictDoUpdate((current) => ({
-          votingPower: current.votingPower + value,
-        }));
-
-      await context.db.insert(votingPowerHistory).values({
-        daoId,
-        transactionHash: event.transaction.hash,
-        accountId: toDelegate,
-        votingPower: currentVotingPower + value,
-        delta: value,
-        deltaMod: value,
-        timestamp: event.block.timestamp,
-        logIndex: event.log.logIndex + 1,
-      });
+        .onConflictDoNothing();
     }
-
-    await context.db
-      .insert(balanceHistory)
-      .values({
-        daoId,
-        transactionHash: event.transaction.hash,
-        accountId: to,
-        balance: currentReceiverBalance,
-        delta: value,
-        deltaMod: value > 0n ? value : -value,
-        timestamp: event.block.timestamp,
-        logIndex: event.log.logIndex,
-      })
-      .onConflictDoNothing();
 
     if (from !== zeroAddress) {
       const { balance: currentSenderBalance, delegate: fromDelegate } =
