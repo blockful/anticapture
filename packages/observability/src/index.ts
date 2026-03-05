@@ -1,3 +1,4 @@
+import { metrics } from "@opentelemetry/api";
 import { OTLPMetricExporter } from "@opentelemetry/exporter-metrics-otlp-http";
 import {
   PrometheusExporter,
@@ -69,7 +70,9 @@ export function createObservabilityProvider(
     instrumentations: [new HttpInstrumentation(), new PgInstrumentation()],
   });
 
-  new HostMetrics({ meterProvider, name: serviceName }).start();
+  metrics.setGlobalMeterProvider(meterProvider);
+
+  new HostMetrics({ meterProvider }).start();
 
   return { meterProvider, tracerProvider, exporter: prometheusExporter };
 }
