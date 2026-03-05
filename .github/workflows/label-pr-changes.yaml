@@ -1,0 +1,58 @@
+name: Label PR Changes
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  label-changes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            api:
+              - 'apps/api/**/*'
+              - 'apps/address-enrichment/**/*'
+            indexer:
+              - 'apps/indexer/**/*'
+              - 'apps/offchain-indexer/**/*'
+            dashboard:
+              - 'apps/dashboard/**/*'
+              - 'packages/graphql-client/**/*'
+            gateway:
+              - 'apps/api-gateway/**/*'
+
+      - name: Add API label
+        if: ${{ steps.changes.outputs.api == 'true' }}
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: API
+
+      - name: Add indexer label
+        if: ${{ steps.changes.outputs.indexer == 'true' }}
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: Indexer
+
+      - name: Add dashboard label
+        if: ${{ steps.changes.outputs.dashboard == 'true' }}
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: Dashboard
+
+      - name: Add gateway label
+        if: ${{ steps.changes.outputs.gateway == 'true' }}
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: Gateway

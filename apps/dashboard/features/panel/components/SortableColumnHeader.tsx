@@ -1,7 +1,8 @@
 import { Column } from "@tanstack/react-table";
+
 import { Button } from "@/shared/components";
-import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
+import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
 
 export const TitleUnderlined = ({

@@ -10,6 +10,7 @@ import {
 
 import config from "../meshrc";
 import { exporter } from "./instrumentation";
+import { validateAuthToken } from "./auth";
 
 const bootstrap = async () => {
   const mesh = await getMesh(await config);
@@ -22,6 +23,7 @@ const bootstrap = async () => {
   });
 
   const server = createServer(async (req, res) => {
+    if (!validateAuthToken(req, res)) return;
     if (req.url === "/metrics") {
       const result = await exporter.collect();
       const serialized = new PrometheusSerializer().serialize(

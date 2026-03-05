@@ -35,7 +35,10 @@ import {
   delegators,
   historicalDelegations,
   votes,
+  offchainProposals,
+  offchainVotes,
 } from "@/controllers";
+import * as offchainSchema from "@/database/offchain-schema";
 import * as schema from "@/database/schema";
 import { docs } from "@/docs";
 import { env } from "@/env";
@@ -66,6 +69,8 @@ import {
   VotesRepository,
   FeedRepository,
   AccountBalanceQueryFragments,
+  OffchainProposalRepository,
+  OffchainVoteRepository,
 } from "@/repositories";
 import {
   AccountBalanceService,
@@ -88,8 +93,12 @@ import {
   DelegatorsService,
   VotesService,
   FeedService,
+  OffchainProposalsService,
+  OffchainVotesService,
+  EventRelevanceService,
 } from "@/services";
 
+import { eventRelevance } from "./controllers/event-relevance";
 import { feed } from "./controllers/feed";
 
 const app = new Hono({
@@ -141,6 +150,10 @@ if (!daoClient) {
 }
 
 const pgClient = drizzle(env.DATABASE_URL, { schema, casing: "snake_case" });
+const pgOffchainClient = drizzle(env.DATABASE_URL, {
+  schema: offchainSchema,
+  casing: "snake_case",
+});
 
 const daoConfig = CONTRACT_ADDRESSES[env.DAO_ID];
 const { blockTime, tokenType } = daoConfig;
@@ -230,6 +243,7 @@ token(
 );
 
 feed(app, new FeedService(env.DAO_ID, new FeedRepository(pgClient)));
+eventRelevance(app, new EventRelevanceService(env.DAO_ID));
 tokenDistribution(app, repo);
 governanceActivity(app, repo, tokenType);
 proposalsActivity(app, proposalsRepo, env.DAO_ID, daoClient);
@@ -254,6 +268,11 @@ votes(app, new VotesService(new VotesRepository(pgClient)));
 dao(app, daoService);
 docs(app);
 tokenMetrics(app, tokenMetricsService);
+
+const offchainProposalsRepo = new OffchainProposalRepository(pgOffchainClient);
+const offchainVotesRepo = new OffchainVoteRepository(pgOffchainClient);
+offchainProposals(app, new OffchainProposalsService(offchainProposalsRepo));
+offchainVotes(app, new OffchainVotesService(offchainVotesRepo));
 
 serve(
   {

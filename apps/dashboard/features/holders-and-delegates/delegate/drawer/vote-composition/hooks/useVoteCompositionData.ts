@@ -14,6 +14,7 @@ import {
 import { useMultipleEnsData } from "@/shared/hooks/useEnsData";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { formatAddress } from "@/shared/utils/formatAddress";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 export interface VoteCompositionData {
   topDelegators: DelegatorItem[];
@@ -50,6 +51,7 @@ export const useVoteCompositionData = (
     context: {
       headers: {
         "anticapture-dao-id": daoId,
+        ...getAuthHeaders(),
       },
     },
     variables: {
