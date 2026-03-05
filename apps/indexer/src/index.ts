@@ -31,7 +31,7 @@ import { DaoIdEnum } from "@/lib/enums";
 
 import {
   AAVETokenIndexer,
-  sktAaveTokenIndexer,
+  stkAAVETokenIndexer,
   aAAVETokenIndexer,
 } from "./indexer/aave";
 import {
@@ -102,7 +102,7 @@ switch (daoId) {
     const { aave, stkAAVE, aAAVE } = CONTRACT_ADDRESSES[DaoIdEnum.AAVE];
 
     AAVETokenIndexer(aave.address, aave.decimals);
-    sktAaveTokenIndexer(stkAAVE.address, stkAAVE.decimals);
+    stkAAVETokenIndexer(stkAAVE.address, stkAAVE.decimals);
     aAAVETokenIndexer(aAAVE.address, aAAVE.decimals);
     break;
   }

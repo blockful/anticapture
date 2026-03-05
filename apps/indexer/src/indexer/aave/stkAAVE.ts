@@ -1,5 +1,6 @@
 import { ponder } from "ponder:registry";
 import {
+  transfer,
   accountBalance,
   accountPower,
   balanceHistory,
@@ -12,7 +13,7 @@ import { Address, getAddress, zeroAddress } from "viem";
 import { DaoIdEnum } from "@/lib/enums";
 import { ensureAccountsExist } from "@/eventHandlers/shared";
 
-export function sktAaveTokenIndexer(address: Address, decimals: number) {
+export function stkAAVETokenIndexer(address: Address, decimals: number) {
   const daoId = DaoIdEnum.AAVE;
 
   ponder.on(`stkAAVE:setup`, async ({ context }) => {
@@ -31,6 +32,26 @@ export function sktAaveTokenIndexer(address: Address, decimals: number) {
     const tokenId = getAddress(address);
 
     await ensureAccountsExist(context, [to, from]);
+
+    await context.db
+      .insert(transfer)
+      .values({
+        transactionHash: event.transaction.hash,
+        daoId,
+        tokenId,
+        amount: value,
+        fromAccountId: from,
+        toAccountId: to,
+        timestamp: event.block.timestamp,
+        logIndex: event.log.logIndex,
+        isCex: false,
+        isDex: false,
+        isLending: false,
+        isTotal: false,
+      })
+      .onConflictDoUpdate((current) => ({
+        amount: current.amount + value,
+      }));
 
     const { balance: currentReceiverBalance, delegate: toDelegate } =
       await context.db
@@ -64,7 +85,7 @@ export function sktAaveTokenIndexer(address: Address, decimals: number) {
         delta: value,
         deltaMod: value,
         timestamp: event.block.timestamp,
-        logIndex: event.log.logIndex,
+        logIndex: event.log.logIndex + 1,
       });
     }
 
@@ -115,7 +136,7 @@ export function sktAaveTokenIndexer(address: Address, decimals: number) {
           delta: -value,
           deltaMod: value > 0n ? value : -value,
           timestamp: event.block.timestamp,
-          logIndex: event.log.logIndex,
+          logIndex: event.log.logIndex + 1,
         });
       }
 
@@ -147,10 +168,13 @@ export function sktAaveTokenIndexer(address: Address, decimals: number) {
 
     await ensureAccountsExist(context, [delegator, delegate]);
 
-    const previousDelegate = (await context.db.find(accountBalance, {
-      accountId: delegator,
-      tokenId,
-    }))!.delegate;
+    const previousDelegate =
+      (
+        await context.db.find(accountBalance, {
+          accountId: delegator,
+          tokenId,
+        })
+      )?.delegate ?? zeroAddress;
 
     const redelegation = previousDelegate !== zeroAddress;
 
@@ -211,7 +235,7 @@ export function sktAaveTokenIndexer(address: Address, decimals: number) {
           delta: delegatorBalance.balance,
           deltaMod: delegatorBalance.balance,
           timestamp: event.block.timestamp,
-          logIndex: event.log.logIndex,
+          logIndex: event.log.logIndex + 1,
         })
         .onConflictDoNothing();
     }
@@ -234,7 +258,7 @@ export function sktAaveTokenIndexer(address: Address, decimals: number) {
           delta: -delegatorBalance.balance,
           deltaMod: delegatorBalance.balance,
           timestamp: event.block.timestamp,
-          logIndex: event.log.logIndex,
+          logIndex: event.log.logIndex + 1,
         })
         .onConflictDoNothing();
     }
