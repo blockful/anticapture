@@ -28,6 +28,7 @@ export interface ObservabilityProvider {
   meterProvider: MeterProvider;
   tracerProvider: NodeTracerProvider;
   exporter: PrometheusExporter;
+  shutdown: () => Promise<void>;
 }
 
 export function createObservabilityProvider(
@@ -86,5 +87,15 @@ export function createObservabilityProvider(
 
   new HostMetrics({ meterProvider }).start();
 
-  return { meterProvider, tracerProvider, exporter: prometheusExporter };
+  const shutdown = async () => {
+    await meterProvider.shutdown();
+    await tracerProvider.shutdown();
+  };
+
+  return {
+    meterProvider,
+    tracerProvider,
+    exporter: prometheusExporter,
+    shutdown,
+  };
 }
