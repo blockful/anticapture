@@ -61,8 +61,10 @@ export function createObservabilityProvider(
     url: `${collectorEndpoint}/v1/traces`,
   });
 
-  const tracerProvider = new NodeTracerProvider({ resource });
-  tracerProvider.addSpanProcessor(new BatchSpanProcessor(traceExporter));
+  const tracerProvider = new NodeTracerProvider({
+    resource,
+    spanProcessors: [new BatchSpanProcessor(traceExporter)],
+  });
   tracerProvider.register();
 
   registerInstrumentations({
