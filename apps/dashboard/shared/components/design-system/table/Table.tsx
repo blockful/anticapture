@@ -222,9 +222,12 @@ export const Table = <TData, TValue>({
     >
       <TableContainer
         className={cn(
-          "text-secondary lg:bg-surface-default border-separate border-spacing-0 bg-transparent",
-          mobileTableFixed ? "table-fixed" : "table-auto lg:table-fixed",
+          "text-secondary lg:bg-surface-default bg-transparent",
           fillHeight && "flex h-full flex-col",
+        )}
+        tableClassName={cn(
+          "border-separate border-spacing-0",
+          mobileTableFixed ? "table-fixed" : "table-auto lg:table-fixed",
         )}
       >
         <TableHeader className="bg-surface-contrast text-secondary sticky -top-px z-30 text-xs font-medium">
