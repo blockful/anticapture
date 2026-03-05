@@ -31,6 +31,8 @@ const daoItemQueries = [
   "historicalVotingPowerByAccountId",
   "historicalVotingPower",
   "lastUpdate",
+  "offchainProposals",
+  "offchainProposalById",
   "proposal",
   "proposalNonVoters",
   "proposals",
