@@ -131,12 +131,15 @@ export const Delegates = ({
     }
   };
 
-  // Cycles: both-arrows (absolute variation desc) → down-arrow (signed variation desc) → up-arrow (signed variation asc) → both-arrows
+  // Cycles: no-arrow (votingPower desc) → down-arrow (signed variation desc) → up-arrow (signed variation asc) → both-arrows (variation desc) → no-arrow
   const handleVariationSort = () => {
     if (sortBy === "signedVariation" && sortOrder === "desc") {
       setSortOrder("asc");
     } else if (sortBy === "signedVariation" && sortOrder === "asc") {
       setSortBy("variation");
+      setSortOrder("desc");
+    } else if (sortBy === "variation") {
+      setSortBy("votingPower");
       setSortOrder("desc");
     } else {
       setSortBy("signedVariation");
@@ -353,7 +356,9 @@ export const Delegates = ({
                 ? sortOrder === "desc"
                   ? ArrowState.DOWN
                   : ArrowState.UP
-                : ArrowState.DEFAULT
+                : sortBy === "variation"
+                  ? ArrowState.BOTH
+                  : ArrowState.DEFAULT
             }
           />
         </Button>

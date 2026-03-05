@@ -103,12 +103,15 @@ export const TokenHolders = ({
     }
   };
 
-  // Cycles: both-arrows (absolute variation desc) → down-arrow (signed variation desc) → up-arrow (signed variation asc) → both-arrows
+  // Cycles: no-arrow (balance desc) → down-arrow (signed variation desc) → up-arrow (signed variation asc) → both-arrows (variation desc) → no-arrow
   const handleVariationSort = () => {
     if (sortBy === "signedVariation" && sortOrder === "desc") {
       setSortOrder("asc");
     } else if (sortBy === "signedVariation" && sortOrder === "asc") {
       setSortBy("variation");
+      setSortOrder("desc");
+    } else if (sortBy === "variation") {
+      setSortBy("balance");
       setSortOrder("desc");
     } else {
       setSortBy("signedVariation");
@@ -312,7 +315,9 @@ export const TokenHolders = ({
                 ? sortOrder === "desc"
                   ? ArrowState.DOWN
                   : ArrowState.UP
-                : ArrowState.DEFAULT
+                : sortBy === "variation"
+                  ? ArrowState.BOTH
+                  : ArrowState.DEFAULT
             }
           />
         </Button>
