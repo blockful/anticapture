@@ -1,12 +1,19 @@
 server:
   http_listen_port: 3200
 
+memberlist:
+  join_members: []
+
 distributor:
   receivers:
     otlp:
       protocols:
         grpc:
           endpoint: 0.0.0.0:4317
+
+ingester:
+  trace_idle_period: 10s
+  max_block_duration: 5m
 
 storage:
   trace:

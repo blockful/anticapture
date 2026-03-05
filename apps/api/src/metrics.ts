@@ -1,20 +1,12 @@
-import {
-  createObservabilityProvider,
-  type ObservabilityProvider,
-} from "@anticapture/observability";
 import { metrics } from "@opentelemetry/api";
 import type { Counter, Histogram } from "@opentelemetry/api";
 
-const observability: ObservabilityProvider =
-  createObservabilityProvider("anticapture-api");
-
-export const exporter = observability.exporter;
-export const meterProvider = observability.meterProvider;
+export { exporter, meterProvider } from "@/instrumentation";
 
 const meter = metrics.getMeter("anticapture-api");
 
 export const httpRequestDuration: Histogram = meter.createHistogram(
-  "http_request_duration_seconds",
+  "http_server_request_duration_seconds",
   {
     description: "Duration of HTTP requests in seconds",
     advice: {
@@ -26,7 +18,7 @@ export const httpRequestDuration: Histogram = meter.createHistogram(
 );
 
 export const httpRequestTotal: Counter = meter.createCounter(
-  "http_requests_total",
+  "http_server_requests_total",
   {
     description: "Total number of HTTP requests",
   },

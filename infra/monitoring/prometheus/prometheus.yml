@@ -1,3 +1,11 @@
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["alertmanager:9093"]
+
+rule_files:
+  - alerts.yml
+
 scrape_configs:
   # Ponder indexer built-in metrics (port 42069)
   # Run: pnpm indexer dev
@@ -5,7 +13,7 @@ scrape_configs:
     metrics_path: "/metrics"
     scrape_interval: 15s
     static_configs:
-      - targets: ["host.docker.internal:42069"]
+      - targets: ["172.17.0.1:42069"]
 
   # Anticapture API custom metrics (port 42069 by default, set PORT env to change)
   # Run: pnpm api dev
@@ -15,7 +23,7 @@ scrape_configs:
     metrics_path: "/metrics"
     scrape_interval: 15s
     static_configs:
-      - targets: ["host.docker.internal:42069"]
+      - targets: ["172.17.0.1:42069"]
 
   - job_name: otelcol-metrics
     static_configs:

@@ -57,8 +57,21 @@ services:
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/prometheus
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - --web.enable-lifecycle
+    networks:
+      - backend
+
+  alertmanager:
+    image: prom/alertmanager:latest
+    profiles: [monitoring]
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./infra/monitoring/alertmanager/:/etc/alertmanager/
+    command:
+      - --config.file=/etc/alertmanager/config.yml
+    environment:
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL:-}
     networks:
       - backend
 
@@ -85,20 +98,18 @@ services:
       - backend
 
   otelcol:
-    image: otel/opentelemetry-collector-contrib:0.115.0
+    image: otel/opentelemetry-collector-contrib:latest
     profiles: [monitoring]
     volumes:
       - ./infra/monitoring/otelcol/config.yaml:/etc/otelcol-contrib/config.yaml
     ports:
       - "4318:4318"
       - "8889:8889"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     networks:
       - backend
 
   tempo:
-    image: grafana/tempo:latest
+    image: grafana/tempo:2.6.1
     profiles: [monitoring]
     command: ["-config.file=/etc/tempo.yaml"]
     volumes:

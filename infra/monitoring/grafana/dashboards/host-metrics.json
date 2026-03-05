@@ -3,21 +3,21 @@
   "uid": "anticapture-host",
   "editable": true,
   "schemaVersion": 38,
-  "version": 1,
+  "version": 2,
   "refresh": "15s",
   "time": { "from": "now-30m", "to": "now" },
   "panels": [
     {
       "id": 1,
-      "title": "CPU Usage %",
+      "title": "Process CPU Usage %",
       "type": "timeseries",
       "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
       "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
       "fieldConfig": {
         "defaults": {
-          "unit": "percent",
+          "unit": "percentunit",
           "min": 0,
-          "max": 100,
+          "max": 1,
           "color": { "mode": "palette-classic" }
         },
         "overrides": []
@@ -25,15 +25,15 @@
       "options": { "tooltip": { "mode": "multi" } },
       "targets": [
         {
-          "expr": "rate(process_cpu_time_seconds_total[1m]) * 100",
-          "legendFormat": "{{state}} - {{job}}",
+          "expr": "sum(process_cpu_utilization) by (exported_job, process_cpu_state)",
+          "legendFormat": "{{exported_job}} - {{process_cpu_state}}",
           "refId": "A"
         }
       ]
     },
     {
       "id": 2,
-      "title": "Heap Memory Used",
+      "title": "Process Memory Usage",
       "type": "timeseries",
       "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
       "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
@@ -47,22 +47,41 @@
       "options": { "tooltip": { "mode": "multi" } },
       "targets": [
         {
-          "expr": "nodejs_heap_size_used_bytes",
-          "legendFormat": "heap used - {{job}}",
+          "expr": "sum(process_memory_usage) by (exported_job, process_memory_type)",
+          "legendFormat": "{{exported_job}} - {{process_memory_type}}",
           "refId": "A"
-        },
-        {
-          "expr": "nodejs_heap_size_total_bytes",
-          "legendFormat": "heap total - {{job}}",
-          "refId": "B"
         }
       ]
     },
     {
       "id": 3,
-      "title": "Memory RSS",
+      "title": "System CPU Usage %",
       "type": "timeseries",
       "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "options": { "tooltip": { "mode": "multi" } },
+      "targets": [
+        {
+          "expr": "sum(system_cpu_utilization) by (system_cpu_state)",
+          "legendFormat": "{{system_cpu_state}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "System Memory Usage",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
       "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
       "fieldConfig": {
         "defaults": {
@@ -74,21 +93,21 @@
       "options": { "tooltip": { "mode": "multi" } },
       "targets": [
         {
-          "expr": "process_resident_memory_bytes",
-          "legendFormat": "RSS - {{job}}",
+          "expr": "sum(system_memory_usage) by (system_memory_state)",
+          "legendFormat": "{{system_memory_state}}",
           "refId": "A"
         }
       ]
     },
     {
-      "id": 4,
-      "title": "Event Loop Lag (p99)",
+      "id": 5,
+      "title": "Network I/O",
       "type": "timeseries",
-      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+      "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 },
       "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
       "fieldConfig": {
         "defaults": {
-          "unit": "s",
+          "unit": "Bps",
           "color": { "mode": "palette-classic" }
         },
         "overrides": []
@@ -96,22 +115,17 @@
       "options": { "tooltip": { "mode": "multi" } },
       "targets": [
         {
-          "expr": "nodejs_eventloop_lag_p99_seconds",
-          "legendFormat": "p99 lag - {{job}}",
+          "expr": "sum(rate(system_network_io_total[1m])) by (network_io_direction)",
+          "legendFormat": "{{network_io_direction}}",
           "refId": "A"
-        },
-        {
-          "expr": "nodejs_eventloop_lag_mean_seconds",
-          "legendFormat": "mean lag - {{job}}",
-          "refId": "B"
         }
       ]
     },
     {
-      "id": 5,
-      "title": "Active Handles & Requests",
+      "id": 6,
+      "title": "Network Errors & Drops",
       "type": "timeseries",
-      "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 },
+      "gridPos": { "x": 12, "y": 16, "w": 12, "h": 8 },
       "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
       "fieldConfig": {
         "defaults": {
@@ -123,36 +137,14 @@
       "options": { "tooltip": { "mode": "multi" } },
       "targets": [
         {
-          "expr": "nodejs_active_handles_total",
-          "legendFormat": "active handles - {{job}}",
+          "expr": "sum(rate(system_network_errors_total[1m])) by (network_io_direction)",
+          "legendFormat": "errors {{network_io_direction}}",
           "refId": "A"
         },
         {
-          "expr": "nodejs_active_requests_total",
-          "legendFormat": "active requests - {{job}}",
+          "expr": "sum(rate(system_network_dropped_total[1m])) by (network_io_direction)",
+          "legendFormat": "drops {{network_io_direction}}",
           "refId": "B"
-        }
-      ]
-    },
-    {
-      "id": 6,
-      "title": "GC Duration (rate)",
-      "type": "timeseries",
-      "gridPos": { "x": 12, "y": 16, "w": 12, "h": 8 },
-      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "s",
-          "color": { "mode": "palette-classic" }
-        },
-        "overrides": []
-      },
-      "options": { "tooltip": { "mode": "multi" } },
-      "targets": [
-        {
-          "expr": "rate(nodejs_gc_duration_seconds_sum[1m])",
-          "legendFormat": "GC time/s - {{job}} {{kind}}",
-          "refId": "A"
         }
       ]
     }
