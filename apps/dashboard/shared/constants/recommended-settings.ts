@@ -24,10 +24,10 @@ export const RECOMMENDED_SETTINGS: Record<
     "The Timelock has a waiting period (delay) of at least one day to execute an approved proposal in the DAO.",
 
   [GovernanceImplementationEnum.VOTING_DELAY]:
-    "The waiting period between the proposal submission and the snapshot of voting power must be at least two days. In addition, the DAO needs to have an activation plan to contact delegates and stakeholders to mobilize their votes in case of an attack.",
+    "The waiting period between the proposal submission and the snapshot of voting power must be more than two days. In addition, the DAO needs to have an activation plan to contact delegates and stakeholders to mobilize their votes in case of an attack.",
 
   [GovernanceImplementationEnum.PROPOSAL_THRESHOLD]:
-    "The threshold to submit proposals in a DAO needs to be more than 1% of the token's market supply - a sum of governance tokens deposited on centralized exchanges, DEXs and lending markets.",
+    "The threshold to submit proposals in a DAO needs to be at least 1% of the token's market supply - a sum of governance tokens deposited on centralized exchanges, DEXs and lending markets.",
 
   [GovernanceImplementationEnum.VETO_STRATEGY]:
     "A safeguard to veto malicious proposals submitted through on-chain governance must be controlled by the DAO itself to achieve the highest Anticapture security standard.",
@@ -51,7 +51,7 @@ export const RECOMMENDED_SETTINGS: Record<
     "All governance contracts should be audited by reputable security firms and audit reports should be publicly available.",
 
   [GovernanceImplementationEnum.INTERFACE_RESILIENCE]:
-    "The domain should be protected with standard security certificates, made public by its provider. Ideal security here includes a verified front-end, deployed in a immutable manner, linked to an ENS record by the DAO in a domain like vote.DAO.eth and made available through .limo or .link or equivalent.",
+    "The domain should be protected with standard security certificates, made public by its provider. Ideal security here includes a verified front-end, deployed in an immutable manner, linked to an ENS record by the DAO in a domain like vote.DAO.eth and made available through .limo or .link or equivalent.",
 
   [GovernanceImplementationEnum.ATTACK_PROFITABILITY]:
     "The cost of acquiring voting power should exceed the potential profit from attacking the treasury. Security councils or veto mechanisms are recommended when treasury value is high.",

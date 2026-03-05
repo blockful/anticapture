@@ -16,6 +16,7 @@ import {
 import { SupplyType } from "@/shared/components";
 import daoConfig from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 export type AffectedSupplyType =
   | "CEX"
@@ -94,6 +95,7 @@ export const useTransactionsTableData = ({
       context: {
         headers: {
           "anticapture-dao-id": daoId,
+          ...getAuthHeaders(),
         },
       },
       notifyOnNetworkStatusChange: true,

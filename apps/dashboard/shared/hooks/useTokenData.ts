@@ -3,7 +3,7 @@ import useSWR, { SWRConfiguration } from "swr";
 import { Address } from "viem";
 
 import { DaoIdEnum } from "@/shared/types/daos";
-import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
+import { BACKEND_ENDPOINT, getAuthHeaders } from "@/shared/utils/server-utils";
 
 export interface TokenDataResponse {
   id: Address;
@@ -52,6 +52,7 @@ export const fetchTokenData = async ({
     {
       headers: {
         "anticapture-dao-id": daoId,
+        ...getAuthHeaders(),
       },
     },
   );

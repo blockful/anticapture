@@ -12,7 +12,6 @@ query GetTokenHolders(
     fromDate: $fromDate
     limit: $limit
     skip: $skip
-    fromValue: "0"
     addresses: $addresses
   ) {
     totalCount

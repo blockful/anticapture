@@ -58,6 +58,32 @@ export const HeaderDAOSidebar = () => {
                 isCollapsed={isCollapsed}
               />
             )}
+            {daoConfig.dataTables && (
+              <ButtonHeaderSidebar
+                page={PAGES_CONSTANTS.holdersAndDelegates.page}
+                icon={UserCheck}
+                label={PAGES_CONSTANTS.holdersAndDelegates.title}
+                key={PAGES_CONSTANTS.holdersAndDelegates.title}
+                isCollapsed={isCollapsed}
+              />
+            )}
+            {daoConfig.governancePage && (
+              <ButtonHeaderSidebar
+                page={"governance"}
+                icon={Landmark}
+                label="Governance"
+                key="Governance"
+                isCollapsed={isCollapsed}
+              />
+            )}
+            <ButtonHeaderSidebar
+              page={PAGES_CONSTANTS.activityFeed.page}
+              icon={Newspaper}
+              label={PAGES_CONSTANTS.activityFeed.title}
+              key={PAGES_CONSTANTS.activityFeed.title}
+              isCollapsed={isCollapsed}
+              isNew
+            />
             {daoConfig.attackProfitability &&
               daoConfig.attackProfitability.supportsLiquidTreasuryCall && (
                 <ButtonHeaderSidebar
@@ -95,26 +121,6 @@ export const HeaderDAOSidebar = () => {
                 isCollapsed={isCollapsed}
               />
             )}
-            {daoConfig.dataTables && (
-              <ButtonHeaderSidebar
-                page={PAGES_CONSTANTS.holdersAndDelegates.page}
-                icon={UserCheck}
-                label={PAGES_CONSTANTS.holdersAndDelegates.title}
-                key={PAGES_CONSTANTS.holdersAndDelegates.title}
-                isCollapsed={isCollapsed}
-              />
-            )}
-
-            {daoConfig.governancePage && (
-              <ButtonHeaderSidebar
-                page={"governance"}
-                icon={Landmark}
-                label="Governance"
-                key="Governance"
-                isCollapsed={isCollapsed}
-              />
-            )}
-
             {daoConfig.serviceProviders && (
               <ButtonHeaderSidebar
                 page={PAGES_CONSTANTS.serviceProviders.page}
@@ -124,15 +130,6 @@ export const HeaderDAOSidebar = () => {
                 isCollapsed={isCollapsed}
               />
             )}
-
-            <ButtonHeaderSidebar
-              page={PAGES_CONSTANTS.activityFeed.page}
-              icon={Newspaper}
-              label={PAGES_CONSTANTS.activityFeed.title}
-              key={PAGES_CONSTANTS.activityFeed.title}
-              isCollapsed={isCollapsed}
-              isNew
-            />
           </div>
         </div>
       </div>

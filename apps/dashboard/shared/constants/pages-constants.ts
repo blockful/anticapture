@@ -2,7 +2,8 @@ export const PAGES_CONSTANTS = {
   panel: {
     title: "Panel",
     page: "panel",
-    description: undefined,
+    description:
+      "Check governance security across DAOs, with details on attack vectors and capture risks.",
   },
   alerts: {
     title: "Alerts",

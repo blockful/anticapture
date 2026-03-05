@@ -96,6 +96,9 @@
   --color-border-default: var(--base-secondary);
   --color-border-contrast: var(--base-border);
   --color-border-primary: var(--base-primary-foreground);
+  --color-border-error: var(--base-error);
+  --color-border-warning: var(--base-warning);
+  --color-border-success: var(--base-success);
 
   /* Icon Sizes */
   --size-icon-xxs: 16px;

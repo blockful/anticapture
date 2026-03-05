@@ -27,6 +27,7 @@ import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
+import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
 import daoConfig from "@/shared/dao-config";
 import { useScreenSize, useDaoData } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -145,9 +146,10 @@ export const Delegates = ({
         address: delegate.accountId,
         votingPower: formatNumberUserReadable(votingPowerFormatted),
         variation: {
-          percentageChange: Number(
-            Number(delegate.variation.percentageChange).toFixed(2),
-          ),
+          percentageChange:
+            delegate.variation.percentageChange === PERCENTAGE_NO_BASELINE
+              ? 9999
+              : Number(Number(delegate.variation.percentageChange).toFixed(2)),
           absoluteChange: Number(
             formatUnits(BigInt(delegate.variation.absoluteChange), decimals),
           ),

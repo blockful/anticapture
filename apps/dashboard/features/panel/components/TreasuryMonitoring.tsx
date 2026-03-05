@@ -28,12 +28,12 @@ const monitoringData = [
 
 export const TreasuryMonitoring = () => {
   return (
-    <div className="bg-surface-default flex w-full flex-col gap-4 p-4">
-      <div className="flex flex-col gap-3">
+    <div className="bg-surface-background lg:bg-surface-default flex w-full flex-col gap-10 lg:gap-4 lg:p-4">
+      <div className="flex flex-col gap-10 lg:gap-3">
         {monitoringData.map((item, index) => (
           <div key={index} className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
-              <h3 className="text-primary text-alternative-sm font-mono font-medium uppercase leading-[20px] tracking-[0.78px]">
+              <h3 className="text-primary text-alternative-sm font-mono font-medium uppercase leading-5 tracking-wider">
                 {item.title}
               </h3>
 
@@ -43,10 +43,10 @@ export const TreasuryMonitoring = () => {
             <div className="flex flex-col">
               {/* Value display */}
               <div className="flex items-end gap-1">
-                <p className="text-primary font-mono text-2xl font-normal uppercase leading-[32px]">
+                <p className="text-primary font-mono text-2xl font-normal uppercase leading-8">
                   {formatNumberUserReadable(item.current)}
                 </p>
-                <p className="text-secondary text-alternative-xs font-mono font-medium uppercase leading-[16px] tracking-[0.72px]">
+                <p className="text-secondary text-alternative-xs font-mono font-medium uppercase leading-4 tracking-wider">
                   / {formatNumberUserReadable(item.total)}
                 </p>
               </div>
@@ -59,7 +59,7 @@ export const TreasuryMonitoring = () => {
                     style={{ width: `${item.percentage}%` }}
                   />
                 </div>
-                <p className="text-error text-sm font-normal leading-[20px]">
+                <p className="text-error text-sm font-normal leading-5">
                   {item.percentage}%
                 </p>
               </div>

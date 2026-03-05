@@ -5,23 +5,24 @@ on:
     types: [created]
   pull_request_review_comment:
     types: [created]
-  issues:
-    types: [opened, assigned]
   pull_request_review:
     types: [submitted]
   pull_request:
     types: [opened, ready_for_review]
 
 jobs:
-  claude:
+  review:
     if: |
       github.event.sender.type != 'Bot' &&
+      !(github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main' && github.event.pull_request.head.ref == 'dev') &&
       (
+        github.event_name == 'pull_request' ||
         (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
         (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
         (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
         (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
       )
+
     runs-on: ubuntu-latest
     timeout-minutes: 10
     concurrency:
@@ -30,7 +31,6 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-      issues: write
       id-token: write
       actions: read
     steps:
@@ -39,10 +39,46 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Check for dashboard changes
+        id: dashboard
+        run: |
+          DIFF=$(gh pr diff ${{ github.event.pull_request.number || github.event.issue.number }} --name-only || true)
+          if echo "$DIFF" | grep -q '^apps/dashboard/'; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       - name: Run Claude Code
         id: claude
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          track_progress: true
           additional_permissions: |
             actions: read
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            Please review this pull request with a focus on:
+            - Code quality and best practices
+            - Potential bugs or issues
+            - Security implications
+            - Performance considerations
+
+            Keep your review concise and actionable. Limit your feedback to the most important findings.
+
+            ${{ steps.dashboard.outputs.changed == 'true' && 'This PR includes text changes. Before reviewing, read all .md files under .agents/skills/anticapture-dashboard/references/ for additional context on copy review.' || '' }}
+
+            Note: The PR branch is already checked out in the current working directory.
+
+            Use `gh pr comment` for top-level feedback.
+            Use `mcp__github_inline_comment__create_inline_comment` to highlight specific code issues.
+            Only post GitHub comments - don't submit review text as messages.
+
+          claude_args: |
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Read,Glob,Grep"
+            --max-tokens 4096

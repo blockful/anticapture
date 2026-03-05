@@ -266,7 +266,7 @@ export const OP: DaoConfiguration = {
             GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION
           ].description,
         currentSetting:
-          "It protects the DAO from a flash loan aimed to increase their voting power, by taking a snapshot of the governance power from delegates/holders one block before the Voting Period starts",
+          "It protects the DAO from a flash loan aimed to increase their voting power, by taking a snapshot of the governance power from delegates/holders one block before the Voting Period starts.",
         impact:
           "It is not possible to use a flash loan to increase voting power and approve a proposal.",
         recommendedSetting:
@@ -281,12 +281,12 @@ export const OP: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_PERIOD
           ].description,
-        currentSetting: "The Voting Period is set to 6 days",
+        currentSetting: "The Voting Period is set to 6 days.",
         impact:
           "The current Voting Period is sufficient for governance participants to cast their votes.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.VOTING_PERIOD],
-        nextStep: "The parameter is in its lowest-risk condition.",
+        nextStep: "The Voting Period should be increased to at least 7 days.",
         requirements: [
           "The voting period is 6 days, with the recommended safety being of 7 or more for a low level of risk.",
           "The Foundation is the only allowed proposer, and it follows a voting schedule, reducing the impact of this risk.",

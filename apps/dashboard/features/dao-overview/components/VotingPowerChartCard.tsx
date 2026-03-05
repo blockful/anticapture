@@ -14,6 +14,7 @@ import {
 import { useDelegates } from "@/features/holders-and-delegates/hooks/useDelegates";
 import { SkeletonRow, TooltipInfo } from "@/shared/components";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
 import daoConfig from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
@@ -41,7 +42,10 @@ export const VotingPowerChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
           ),
         );
 
-        const percentageChange = Number(item.variation.percentageChange);
+        const percentageChange =
+          item.variation.percentageChange === PERCENTAGE_NO_BASELINE
+            ? 9999
+            : Number(item.variation.percentageChange);
 
         const balance = Number(
           formatUnits(BigInt(item.votingPower), daoConfig[daoId].decimals),

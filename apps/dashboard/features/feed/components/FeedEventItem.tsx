@@ -238,6 +238,11 @@ export const FeedEventItem = ({
               entityType="delegate"
               onRowClick={onRowClick}
             />{" "}
+            <CopyAndPasteButton
+              textToCopy={event.metadata.proposer}
+              className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
+              iconSize="md"
+            />{" "}
             <span className="text-secondary">
               (
               <span className="text-primary">

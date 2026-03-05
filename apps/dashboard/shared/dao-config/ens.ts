@@ -113,7 +113,7 @@ export const ENS: DaoConfiguration = {
         currentSetting:
           "Because ENS has a large liquid treasury (over $100M), attacking the DAO would be highly profitable. In this case, the Veto Strategy/Security Council is necessary.",
         impact:
-          "An attacker has fewer incentives to capture the DAO given the difference between liquid assets and treasury size, and attacker has financial incentives to takeover governance power.",
+          "A large liquid treasury creates financial incentives for an attacker to take over governance power, despite the cost required to accumulate sufficient voting weight.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[
             GovernanceImplementationEnum.ATTACK_PROFITABILITY
@@ -144,7 +144,7 @@ export const ENS: DaoConfiguration = {
             GovernanceImplementationEnum.PROPOSAL_THRESHOLD
           ].description,
         currentSetting:
-          "The Proposal Threshold is set to 100K $ENS (0,1% Total Supply)",
+          "The Proposal Threshold is set to 100K $ENS (0.1% Total Supply)",
         impact:
           "ENS has a proposal threshold that makes it harder for attackers to be able to create proposals without reaching a significant level of accumulation first.",
         recommendedSetting:
@@ -185,7 +185,7 @@ export const ENS: DaoConfiguration = {
           ].description,
         currentSetting:
           "ENS has a Security Council, managed by a 4/8 multisig, whose authority to cancel proposals must be renewed every two years (and will expire in July 2026).",
-        impact: "ENS can veto malicious proposals with the Security Council",
+        impact: "ENS can veto malicious proposals with the Security Council.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.SECURITY_COUNCIL],
         nextStep: "The parameter is in its lowest-risk condition.",
@@ -220,7 +220,8 @@ export const ENS: DaoConfiguration = {
           "Since the Governor is the only administrator of the Timelock, only the DAO can control it - decentralizing its governance.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.TIMELOCK_ADMIN],
-        nextStep: "The parameter is in its lowest-risk condition.",
+        nextStep:
+          "Admin rights should rest only with DAO governance plus contracts it explicitly approves after a public audit.",
         requirements: [
           "The timelock admin can control execution, canceling, upgrades or critical parameter changes; if this power sits outside audited, DAO-approved contracts, attackers or insiders can sidestep on-chain voting.",
           "Admin rights should rest only with DAO governance plus contracts it explicitly approves after a public audit.",
@@ -248,7 +249,7 @@ export const ENS: DaoConfiguration = {
           ].description,
         currentSetting:
           "ENS has a Security Council that is able to veto malicious proposals.",
-        impact: "ENS can veto malicious proposals with the Security Council",
+        impact: "ENS can veto malicious proposals with the Security Council.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.VETO_STRATEGY],
         nextStep: "The parameter is in its lowest-risk condition.",
@@ -297,7 +298,7 @@ export const ENS: DaoConfiguration = {
             GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION
           ].description,
         currentSetting:
-          "It protects the DAO from a flash loan aimed to increase their voting power, by taking a snapshot of the governance power from delegates/holders one block before the Voting Period starts",
+          "It protects the DAO from a flash loan aimed to increase their voting power, by taking a snapshot of the governance power from delegates/holders one block before the Voting Period starts.",
         impact:
           "It is not possible to use a flash loan to increase voting power and approve a proposal.",
         recommendedSetting:

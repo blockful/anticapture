@@ -11,6 +11,7 @@ import { useMemo, useCallback, useState } from "react";
 import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 export interface TokenHolderVariation {
   previousBalance: string;
@@ -95,6 +96,7 @@ export const useTokenHolders = ({
     context: {
       headers: {
         "anticapture-dao-id": daoId,
+        ...getAuthHeaders(),
       },
     },
     notifyOnNetworkStatusChange: true,

@@ -97,7 +97,8 @@ export const COMP: DaoConfiguration = {
           ].description,
         currentSetting:
           "If Compound gets captured, the entire TVL of the protocol could be stolen — including users' funds.",
-        impact: "$2.7B could be stolen from Compound, including user funds.",
+        impact:
+          "The protocol's full TVL — including user funds — could be at risk if governance is captured.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[
             GovernanceImplementationEnum.ATTACK_PROFITABILITY
@@ -133,7 +134,7 @@ export const COMP: DaoConfiguration = {
             GovernanceImplementationEnum.PROPOSAL_THRESHOLD
           ].description,
         currentSetting:
-          "The proposal threshold is 0,9% of the market supply, which is considered medium risk.",
+          "The proposal threshold is 0.9% of the market supply, which is considered medium risk.",
         impact:
           "$COMP has higher liquidity, making it easier for a large attacker to reach the Proposal Threshold and submit a proposal.",
         recommendedSetting:
@@ -198,7 +199,7 @@ export const COMP: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.TIMELOCK_DELAY
           ].description,
-        currentSetting: "The Timelock Delay is set to 2 days",
+        currentSetting: "The Timelock Delay is set to 2 days.",
         impact:
           "There is a protected delay between proposal approval and execution.",
         recommendedSetting:
@@ -214,7 +215,7 @@ export const COMP: DaoConfiguration = {
         currentSetting:
           "There is a veto strategy controlled by the Compound DAO.",
         impact:
-          "Compound can veto malicious proposals with the Security Council",
+          "Compound can veto malicious proposals with the Security Council.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.VETO_STRATEGY],
         nextStep: "The parameter is in its lowest-risk condition.",
@@ -243,7 +244,7 @@ export const COMP: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_DELAY
           ].description,
-        currentSetting: "The Voting Delay is set to 1 day and 19 hours",
+        currentSetting: "The Voting Delay is set to 1 day and 19 hours.",
         impact:
           "The Voting Delay period can be longer. This gives delegates and stakeholders little time to coordinate their votes and for the DAO to protect itself against an attack. This poses a governance risk.",
         recommendedSetting:
@@ -260,7 +261,7 @@ export const COMP: DaoConfiguration = {
             GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION
           ].description,
         currentSetting:
-          "It protects the DAO from a flash loan aimed to increase their voting power, by taking a snapshot of the governance power from delegates/holders one block before the Voting Period starts",
+          "It protects the DAO from a flash loan aimed to increase their voting power, by taking a snapshot of the governance power from delegates/holders one block before the Voting Period starts.",
         impact:
           "It is not possible to use a flash loan to increase voting power and approve a proposal.",
         recommendedSetting:
@@ -275,7 +276,7 @@ export const COMP: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_PERIOD
           ].description,
-        currentSetting: "The Voting Period is set to 2 days and 17 hours",
+        currentSetting: "The Voting Period is set to 2 days and 17 hours.",
         impact:
           "The Voting Period can be longer. A short voting period makes it harder for stakeholders to coordinate and vote against a malicious proposal submitted to the DAO.",
         recommendedSetting:

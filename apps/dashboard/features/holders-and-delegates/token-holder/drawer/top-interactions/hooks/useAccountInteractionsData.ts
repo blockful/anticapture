@@ -11,6 +11,7 @@ import daoConfig from "@/shared/dao-config";
 import { useMultipleEnsData } from "@/shared/hooks/useEnsData";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { formatAddress } from "@/shared/utils/formatAddress";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 interface Interaction {
   accountId: string;
@@ -83,6 +84,7 @@ export const useAccountInteractionsData = ({
     context: {
       headers: {
         "anticapture-dao-id": daoId,
+        ...getAuthHeaders(),
       },
     },
     notifyOnNetworkStatusChange: true,
