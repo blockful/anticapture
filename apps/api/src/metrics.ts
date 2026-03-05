@@ -1,9 +1,10 @@
-import { metrics } from "@opentelemetry/api";
 import type { Counter, Histogram } from "@opentelemetry/api";
+
+import { meterProvider } from "@/instrumentation";
 
 export { exporter, meterProvider } from "@/instrumentation";
 
-const meter = metrics.getMeter("anticapture-api");
+const meter = meterProvider.getMeter("anticapture-api");
 
 export const httpRequestDuration: Histogram = meter.createHistogram(
   "http_server_request_duration_seconds",
