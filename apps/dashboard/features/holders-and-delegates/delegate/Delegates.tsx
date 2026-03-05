@@ -52,7 +52,11 @@ interface DelegatesProps {
   daoId: DaoIdEnum;
 }
 
-type DelegateSortKey = "delegationsCount" | "votingPower" | "signedVariation";
+type DelegateSortKey =
+  | "delegationsCount"
+  | "votingPower"
+  | "signedVariation"
+  | "variation";
 
 export const Delegates = ({
   timePeriod = TimeInterval.THIRTY_DAYS,
@@ -73,6 +77,7 @@ export const Delegates = ({
       "delegationsCount",
       "votingPower",
       "signedVariation",
+      "variation",
     ]).withDefault("votingPower" as DelegateSortKey),
   );
   const { decimals } = daoConfig[daoId];
@@ -92,6 +97,7 @@ export const Delegates = ({
     delegationsCount: QueryInput_VotingPowers_OrderBy.DelegationsCount,
     votingPower: QueryInput_VotingPowers_OrderBy.VotingPower,
     signedVariation: QueryInput_VotingPowers_OrderBy.SignedVariation,
+    variation: QueryInput_VotingPowers_OrderBy.Variation,
   };
 
   const {
@@ -122,6 +128,19 @@ export const Delegates = ({
       // New field, default to desc for votingPower, asc for delegationsCount
       setSortBy(field as DelegateSortKey);
       setSortOrder(field === "delegationsCount" ? "asc" : "desc");
+    }
+  };
+
+  // Cycles: both-arrows (absolute variation desc) → down-arrow (signed variation desc) → up-arrow (signed variation asc) → both-arrows
+  const handleVariationSort = () => {
+    if (sortBy === "signedVariation" && sortOrder === "desc") {
+      setSortOrder("asc");
+    } else if (sortBy === "signedVariation" && sortOrder === "asc") {
+      setSortBy("variation");
+      setSortOrder("desc");
+    } else {
+      setSortBy("signedVariation");
+      setSortOrder("desc");
     }
   };
 
@@ -318,7 +337,7 @@ export const Delegates = ({
           variant="ghost"
           size="sm"
           className="text-secondary w-full justify-center p-0"
-          onClick={() => handleSort("signedVariation")}
+          onClick={handleVariationSort}
         >
           <h4 className="text-table-header whitespace-nowrap">
             Change ({daoId})
@@ -327,9 +346,9 @@ export const Delegates = ({
             props={{ className: "size-4" }}
             activeState={
               sortBy === "signedVariation"
-                ? sortOrder === "asc"
-                  ? ArrowState.UP
-                  : ArrowState.DOWN
+                ? sortOrder === "desc"
+                  ? ArrowState.DOWN
+                  : ArrowState.UP
                 : ArrowState.DEFAULT
             }
           />

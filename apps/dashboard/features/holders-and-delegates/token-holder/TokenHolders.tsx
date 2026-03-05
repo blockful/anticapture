@@ -37,7 +37,7 @@ interface TokenHolderTableData {
   delegate: Address;
 }
 
-type TokenHolderSortKey = "balance" | "signedVariation";
+type TokenHolderSortKey = "balance" | "signedVariation" | "variation";
 
 const TypeCell = ({ address }: { address: Address }) => {
   const { isContract, isLoading: isArkhamLoading } = useArkhamData(address);
@@ -75,7 +75,7 @@ export const TokenHolders = ({
   );
   const [sortBy, setSortBy] = useQueryState(
     "sortBy",
-    parseAsStringEnum(["balance", "signedVariation"]).withDefault(
+    parseAsStringEnum(["balance", "signedVariation", "variation"]).withDefault(
       "balance" as TokenHolderSortKey,
     ),
   );
@@ -85,6 +85,7 @@ export const TokenHolders = ({
   > = {
     balance: QueryInput_AccountBalances_OrderBy.Balance,
     signedVariation: QueryInput_AccountBalances_OrderBy.SignedVariation,
+    variation: QueryInput_AccountBalances_OrderBy.Variation,
   };
   const { isMobile } = useScreenSize();
   const { decimals } = daoConfig[daoId];
@@ -98,6 +99,19 @@ export const TokenHolders = ({
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
       setSortBy(field as TokenHolderSortKey);
+      setSortOrder("desc");
+    }
+  };
+
+  // Cycles: both-arrows (absolute variation desc) → down-arrow (signed variation desc) → up-arrow (signed variation asc) → both-arrows
+  const handleVariationSort = () => {
+    if (sortBy === "signedVariation" && sortOrder === "desc") {
+      setSortOrder("asc");
+    } else if (sortBy === "signedVariation" && sortOrder === "asc") {
+      setSortBy("variation");
+      setSortOrder("desc");
+    } else {
+      setSortBy("signedVariation");
       setSortOrder("desc");
     }
   };
@@ -286,7 +300,7 @@ export const TokenHolders = ({
           variant="ghost"
           size="sm"
           className="text-secondary w-full justify-center p-0"
-          onClick={() => handleSort("signedVariation")}
+          onClick={handleVariationSort}
         >
           <h4 className="text-table-header whitespace-nowrap">
             Change ({daoId})
@@ -295,9 +309,9 @@ export const TokenHolders = ({
             props={{ className: "size-4" }}
             activeState={
               sortBy === "signedVariation"
-                ? sortOrder === "asc"
-                  ? ArrowState.UP
-                  : ArrowState.DOWN
+                ? sortOrder === "desc"
+                  ? ArrowState.DOWN
+                  : ArrowState.UP
                 : ArrowState.DEFAULT
             }
           />
