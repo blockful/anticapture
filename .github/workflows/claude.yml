@@ -71,7 +71,7 @@ jobs:
 
             Keep your review concise and actionable. Limit your feedback to the most important findings.
 
-            ${{ steps.dashboard.outputs.changed == 'true' && 'This PR includes dashboard changes. Before reviewing, read all .md files under .agents/skills/anticapture-dashboard/references/ for additional context on dashboard conventions and patterns.' || '' }}
+            ${{ steps.dashboard.outputs.changed == 'true' && 'This PR includes text changes. Before reviewing, read all .md files under .agents/skills/anticapture-dashboard/references/ for additional context on copy review.' || '' }}
 
             Note: The PR branch is already checked out in the current working directory.
 
