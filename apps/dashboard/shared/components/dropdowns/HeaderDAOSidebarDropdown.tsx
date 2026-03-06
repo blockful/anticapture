@@ -8,8 +8,8 @@ import { Button } from "@/shared/components";
 import { DaoAvatarIcon } from "@/shared/components/icons";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { getDaoNavigationPath } from "@/shared/utils/dao-navigation";
 import { cn } from "@/shared/utils/";
+import { getDaoNavigationPath } from "@/shared/utils/dao-navigation";
 
 type Item = {
   id: number;
@@ -80,9 +80,7 @@ export const HeaderDAOSidebarDropdown = ({
   const dropdownItems = dropdownItemsRef.current!;
 
   const currentDaoId = daoId?.toUpperCase();
-  const currentItem = dropdownItems.find(
-    (item) => item.name === currentDaoId,
-  );
+  const currentItem = dropdownItems.find((item) => item.name === currentDaoId);
 
   const toggleDropdown = () => setIsOpen((prev) => !prev);
 

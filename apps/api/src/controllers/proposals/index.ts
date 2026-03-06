@@ -1,2 +1,2 @@
-export * from "./proposals";
+export * from "./onchainProposals";
 export * from "./proposals-activity";
