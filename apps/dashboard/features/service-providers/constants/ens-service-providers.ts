@@ -3,10 +3,10 @@ import {
   ServiceProvider,
 } from "@/features/service-providers/types";
 
-export const GITHUB_RAW_BASE =
-  "https://raw.githubusercontent.com/blockful/spp-accountability/main";
+const GITHUB_REPO = "blockful/spp-accountability";
 
-export const GITHUB_TRACKED_YEARS = [2025, 2026];
+export const GITHUB_RAW_BASE = `https://raw.githubusercontent.com/${GITHUB_REPO}/main`;
+export const GITHUB_API_BASE = `https://api.github.com/repos/${GITHUB_REPO}`;
 
 export const QUARTERS: QuarterKey[] = ["Q1", "Q2", "Q3", "Q4"];
 
@@ -51,6 +51,9 @@ export const ENS_SERVICE_PROVIDERS: ServiceProvider[] = [
   },
   {
     name: "Ethereum Identity Fnd",
+    proposalUrl:
+      "https://discuss.ens.domains/t/spp2-ethereum-identity-foundation-application/20439",
+    websiteUrl: "https://ethid.org",
     iconUrl: "/images/ethereum.svg",
     budget: 500000,
     githubSlug: "ethereum-identity-fnd",
@@ -104,14 +107,6 @@ export const ENS_SERVICE_PROVIDERS: ServiceProvider[] = [
       "https://discuss.ens.domains/t/spp2-justaname-application/20430",
     budget: 300000,
     githubSlug: "justaname",
-    years: {},
-  },
-  {
-    name: "ENS Labs",
-    iconUrl: "/images/ens-labs.svg",
-    websiteUrl: "https://enslabs.org",
-    budget: 0,
-    githubSlug: "ens-labs",
     years: {},
   },
 ];

@@ -1,11 +1,8 @@
 import type { Metadata } from "next";
 
 import { ServiceProvidersSection } from "@/features/service-providers";
-import {
-  ENS_SERVICE_PROVIDERS,
-  GITHUB_TRACKED_YEARS,
-} from "@/features/service-providers/constants/ens-service-providers";
-import { fetchProviderYearData } from "@/features/service-providers/utils/fetchProviderYearData";
+import { ENS_SERVICE_PROVIDERS } from "@/features/service-providers/constants/ens-service-providers";
+import { fetchServiceProvidersData } from "@/features/service-providers/utils/fetchServiceProvidersData";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
 
@@ -45,29 +42,18 @@ export default async function ServiceProvidersPage({
     return null;
   }
 
-  const providers = await Promise.all(
-    ENS_SERVICE_PROVIDERS.map(async (provider) => {
-      const dynamicYears: Record<
-        number,
-        Awaited<ReturnType<typeof fetchProviderYearData>>
-      > = {};
-
-      for (const year of GITHUB_TRACKED_YEARS) {
-        dynamicYears[year] = await fetchProviderYearData(
-          provider.githubSlug,
-          year,
-        );
-      }
-
-      return {
-        ...provider,
-        years: {
-          ...provider.years,
-          ...dynamicYears,
-        },
-      };
-    }),
+  const serviceProvidersData = await fetchServiceProvidersData(
+    ENS_SERVICE_PROVIDERS.map((p) => p.githubSlug),
   );
+
+  const providers = ENS_SERVICE_PROVIDERS.map((provider) => ({
+    ...provider,
+    years: Object.fromEntries(
+      Object.entries(serviceProvidersData)
+        .filter(([, slugData]) => slugData[provider.githubSlug])
+        .map(([year, slugData]) => [year, slugData[provider.githubSlug]]),
+    ),
+  }));
 
   return <ServiceProvidersSection providers={providers} />;
 }
