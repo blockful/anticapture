@@ -20,7 +20,7 @@ export default createConfig({
     AAVE: {
       abi: AaveAbi,
       chain: "ethereum_mainnet",
-      // https://etherscan.io/token/0xb1a32FC9F9D8b2cf86C068Cae13108809547ef71
+      // https://etherscan.io/token/0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9
       address: "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9",
       startBlock: 10926829,
     },
