@@ -3,5 +3,5 @@ COPY prometheus.yml /etc/prometheus/prometheus.yml.tmpl
 COPY alerts.yml /etc/prometheus/alerts.yml
 COPY entrypoint.prometheus.sh /entrypoint.sh
 USER root
-RUN chmod +x /entrypoint.sh && apk add --no-cache gettext
+RUN apt-get update && apt-get install -y gettext-base && chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
