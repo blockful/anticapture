@@ -1,15 +1,9 @@
-import {
-  and,
-  gte,
-  lte,
-  SQL,
-  sql,
-} from "drizzle-orm";
+import { and, gte, lte, SQL, sql } from "drizzle-orm";
 import { Drizzle, transfer } from "@/database";
 import { accountBalance } from "@/database";
 
 export class AccountBalanceQueryFragments {
-  constructor(private readonly db: Drizzle) { }
+  constructor(private readonly db: Drizzle) {}
 
   variationCTE(
     fromTimestamp: number | undefined,
@@ -34,7 +28,9 @@ export class AccountBalanceQueryFragments {
     const transfersFrom = this.db
       .select({
         accountId: scopedTransfers.fromAccountId,
-        fromAmount: sql<string>`-SUM(${scopedTransfers.amount})`.as("from_amount"),
+        fromAmount: sql<string>`-SUM(${scopedTransfers.amount})`.as(
+          "from_amount",
+        ),
       })
       .from(scopedTransfers)
       .groupBy(scopedTransfers.fromAccountId)
@@ -74,6 +70,6 @@ export class AccountBalanceQueryFragments {
       .where(filter)
       .as("variations");
 
-    return variations
+    return variations;
   }
 }
