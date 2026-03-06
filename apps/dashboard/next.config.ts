@@ -16,6 +16,21 @@ const nextConfig = {
     contentDispositionType: "attachment",
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
+  async redirects() {
+    return [
+      {
+        source: "/telegram",
+        destination: "https://t.me/anticapturebot",
+        permanent: false,
+      },
+      {
+        source: "/slack",
+        destination:
+          "https://subscription-server-production.up.railway.app/slack/install",
+        permanent: false,
+      },
+    ];
+  },
   async headers() {
     return [
       {
