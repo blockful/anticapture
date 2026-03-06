@@ -10,6 +10,8 @@ import { parseAsStringEnum, useQueryState } from "nuqs";
 import { useMemo } from "react";
 import { Address, formatUnits } from "viem";
 
+import { useGetTokenHoldersQuery } from "@anticapture/graphql-client/hooks";
+
 import {
   useDelegates,
   HoldersAndDelegatesDrawer,
@@ -27,10 +29,13 @@ import { useScreenSize } from "@/shared/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
 import { formatNumberUserReadable } from "@/shared/utils";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 interface DelegateTableData {
   address: string;
   votingPower: string;
+  balance: string;
+  total: string;
   variation?: {
     percentageChange: number;
     absoluteChange: number;
@@ -54,6 +59,8 @@ export function DelegationTable() {
       "delegationsCount",
       "votingPower",
       "variation",
+      "total",
+      "balance",
     ]).withDefault("votingPower"),
   );
   const daoId = DaoIdEnum.AAVE;
@@ -74,6 +81,22 @@ export function DelegationTable() {
       skipActivity: true,
     });
 
+  const delegateAddresses = useMemo(
+    () => data?.map((d) => d.accountId) || [],
+    [data],
+  );
+
+  const { data: balancesData } = useGetTokenHoldersQuery({
+    variables: {
+      addresses: delegateAddresses,
+      limit: delegateAddresses.length || 1,
+    },
+    context: {
+      headers: { "anticapture-dao-id": daoId, ...getAuthHeaders() },
+    },
+    skip: delegateAddresses.length === 0,
+  });
+
   const { isMobile } = useScreenSize();
 
   const handleSort = (field: string) => {
@@ -89,14 +112,28 @@ export function DelegationTable() {
     if (!data) return [];
 
     return data.map((delegate): DelegateTableData => {
-      const votingPowerBigInt = BigInt(delegate.votingPower || "0");
-      const votingPowerFormatted = Number(
-        formatUnits(votingPowerBigInt, decimals),
+      const combinedPowerBigInt = BigInt(delegate.votingPower || "0");
+      const combinedPowerFormatted = Number(
+        formatUnits(combinedPowerBigInt, decimals),
       );
+
+      const balanceItem = balancesData?.accountBalances?.items?.find(
+        (item) => item?.address === delegate.accountId,
+      );
+      const balanceRaw = balanceItem
+        ? Number(formatUnits(BigInt(balanceItem.balance), decimals))
+        : 0;
+      const delegatedPower = combinedPowerFormatted - balanceRaw;
 
       return {
         address: delegate.accountId,
-        votingPower: formatNumberUserReadable(votingPowerFormatted),
+        votingPower:
+          delegatedPower > 0 ? formatNumberUserReadable(delegatedPower) : "-",
+        balance:
+          balanceItem && Number(balanceRaw) > 0
+            ? formatNumberUserReadable(balanceRaw)
+            : "-",
+        total: formatNumberUserReadable(combinedPowerFormatted),
         variation: {
           percentageChange:
             delegate.variation.percentageChange === PERCENTAGE_NO_BASELINE
@@ -109,7 +146,7 @@ export function DelegationTable() {
         delegators: delegate.delegationsCount,
       };
     });
-  }, [data, decimals]);
+  }, [data, decimals, balancesData]);
 
   const delegateColumns: ColumnDef<DelegateTableData>[] = [
     {
@@ -180,6 +217,50 @@ export function DelegationTable() {
       },
     },
     {
+      accessorKey: "balance",
+      cell: ({ row }) => {
+        const balance = row.getValue("balance") as string;
+
+        if (loading) {
+          return (
+            <SkeletonRow
+              parentClassName="flex animate-pulse w-full items-center justify-end pr-4"
+              className="h-5 w-full max-w-20"
+            />
+          );
+        }
+
+        return (
+          <div className="text-secondary flex w-full items-center justify-end text-end text-sm font-normal">
+            {balance}
+          </div>
+        );
+      },
+      header: () => (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-secondary w-full justify-end p-0"
+          onClick={() => handleSort("balance")}
+        >
+          <h4 className="text-table-header whitespace-nowrap">Balance</h4>
+          <ArrowUpDown
+            props={{ className: "size-4" }}
+            activeState={
+              sortBy === "balance"
+                ? sortOrder === "asc"
+                  ? ArrowState.UP
+                  : ArrowState.DOWN
+                : ArrowState.DEFAULT
+            }
+          />
+        </Button>
+      ),
+      meta: {
+        columnClassName: "w-40",
+      },
+    },
+    {
       accessorKey: "votingPower",
       cell: ({ row }) => {
         const votingPower = row.getValue("votingPower") as string;
@@ -207,12 +288,56 @@ export function DelegationTable() {
           onClick={() => handleSort("votingPower")}
         >
           <h4 className="text-table-header whitespace-nowrap">
-            Voting Power ({daoId})
+            Delegation received
           </h4>
           <ArrowUpDown
             props={{ className: "size-4" }}
             activeState={
               sortBy === "votingPower"
+                ? sortOrder === "asc"
+                  ? ArrowState.UP
+                  : ArrowState.DOWN
+                : ArrowState.DEFAULT
+            }
+          />
+        </Button>
+      ),
+      meta: {
+        columnClassName: "w-40",
+      },
+    },
+    {
+      accessorKey: "total",
+      cell: ({ row }) => {
+        const total = row.getValue("total") as string;
+
+        if (loading) {
+          return (
+            <SkeletonRow
+              parentClassName="flex animate-pulse w-full items-center justify-end pr-4"
+              className="h-5 w-full max-w-20"
+            />
+          );
+        }
+
+        return (
+          <div className="text-secondary flex w-full items-center justify-end text-end text-sm font-normal">
+            {total}
+          </div>
+        );
+      },
+      header: () => (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-secondary w-full justify-end p-0"
+          onClick={() => handleSort("total")}
+        >
+          <h4 className="text-table-header whitespace-nowrap">Total</h4>
+          <ArrowUpDown
+            props={{ className: "size-4" }}
+            activeState={
+              sortBy === "total"
                 ? sortOrder === "asc"
                   ? ArrowState.UP
                   : ArrowState.DOWN
