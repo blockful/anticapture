@@ -20,13 +20,12 @@ const nextConfig = {
     return [
       {
         source: "/telegram",
-        destination: "https://t.me/anticapturebot",
+        destination: process.env.NEXT_PUBLIC_ANTICAPTURE_TELEGRAM_BOT!,
         permanent: false,
       },
       {
         source: "/slack",
-        destination:
-          "https://subscription-server-production.up.railway.app/slack/install",
+        destination: process.env.NEXT_PUBLIC_ANTICAPTURE_SLACK_BOT!,
         permanent: false,
       },
     ];
