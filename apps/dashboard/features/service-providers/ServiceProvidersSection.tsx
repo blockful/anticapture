@@ -12,8 +12,6 @@ import { SubSectionsContainer } from "@/shared/components/design-system/section"
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { cn } from "@/shared/utils";
 
-const AVAILABLE_YEARS = [2026, 2025];
-
 const UPDATE_STATUS_URL =
   "https://github.com/blockful/spp-accountability/pulls";
 
@@ -24,10 +22,14 @@ interface ServiceProvidersSectionProps {
 export const ServiceProvidersSection = ({
   providers,
 }: ServiceProvidersSectionProps) => {
+  const availableYears = [
+    ...new Set(providers.flatMap((p) => Object.keys(p.years).map(Number))),
+  ].sort((a, b) => b - a);
+
   const currentYear = new Date().getFullYear();
-  const defaultYear = AVAILABLE_YEARS.includes(currentYear)
+  const defaultYear = availableYears.includes(currentYear)
     ? currentYear
-    : AVAILABLE_YEARS[0];
+    : availableYears[0];
   const [selectedYear, setSelectedYear] = useState(defaultYear);
 
   return (
@@ -51,7 +53,7 @@ export const ServiceProvidersSection = ({
       <SubSectionsContainer>
         <div className="flex flex-col gap-4">
           <div className="flex gap-2">
-            {AVAILABLE_YEARS.map((year) => (
+            {availableYears.map((year) => (
               <button
                 key={year}
                 onClick={() => setSelectedYear(year)}
