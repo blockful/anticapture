@@ -3,6 +3,7 @@
 import { Crosshair2Icon } from "@radix-ui/react-icons";
 import {
   BarChart,
+  Building2,
   Landmark,
   UserCheck,
   ArrowRightLeft,
@@ -117,6 +118,15 @@ export const HeaderDAOSidebar = () => {
                 icon={ArrowRightLeft}
                 label={PAGES_CONSTANTS.tokenDistribution.title}
                 key={PAGES_CONSTANTS.tokenDistribution.title}
+                isCollapsed={isCollapsed}
+              />
+            )}
+            {daoConfig.serviceProviders && (
+              <ButtonHeaderSidebar
+                page={PAGES_CONSTANTS.serviceProviders.page}
+                icon={Building2}
+                label={PAGES_CONSTANTS.serviceProviders.title}
+                key={PAGES_CONSTANTS.serviceProviders.title}
                 isCollapsed={isCollapsed}
               />
             )}
