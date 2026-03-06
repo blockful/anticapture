@@ -3,5 +3,5 @@ datasources:
   - name: Tempo
     type: tempo
     access: proxy
-    url: http://tempo.railway.internal:3200
+    url: ${TEMPO_URL}
     editable: true

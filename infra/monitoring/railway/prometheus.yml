@@ -1,31 +1,25 @@
 alerting:
   alertmanagers:
     - static_configs:
-        - targets: ["alertmanager.railway.internal:9093"]
+        - targets: ["${ALERTMANAGER_ENDPOINT}"]
 
 rule_files:
   - alerts.yml
 
 scrape_configs:
-  - job_name: anticapture-api
+  - job_name: anticapture-ens-api
     metrics_path: "/metrics"
     scrape_interval: 15s
     static_configs:
-      - targets: ["ens-api.railway.internal:42069"]
-        labels:
-          dao: ens
-      # Add more DAO API instances here as needed:
-      # - targets: ["gtc-api.railway.internal:42069"]
-      #   labels:
-      #     dao: gtc
+      - targets: ["${ENS_API_ENDPOINT}"]
 
   - job_name: anticapture-gateway
     metrics_path: "/metrics"
     scrape_interval: 15s
     static_configs:
-      - targets: ["api-gateway.railway.internal:4000"]
+      - targets: ["${GATEWAY_ENDPOINT}"]
 
   - job_name: otelcol-metrics
     scrape_interval: 15s
     static_configs:
-      - targets: ["otelcol.railway.internal:8889"]
+      - targets: ["${OTELCOL_ENDPOINT}"]

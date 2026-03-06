@@ -1,4 +1,7 @@
 FROM prom/prometheus:latest
-COPY prometheus.yml /etc/prometheus/prometheus.yml
+COPY prometheus.yml /etc/prometheus/prometheus.yml.tmpl
 COPY alerts.yml /etc/prometheus/alerts.yml
-CMD ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.path=/prometheus", "--web.enable-lifecycle"]
+COPY entrypoint.prometheus.sh /entrypoint.sh
+USER root
+RUN chmod +x /entrypoint.sh && apk add --no-cache gettext
+ENTRYPOINT ["/entrypoint.sh"]

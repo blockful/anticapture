@@ -11,7 +11,7 @@ exporters:
   prometheus:
     endpoint: 0.0.0.0:8889
   otlp_grpc/tempo:
-    endpoint: tempo.railway.internal:4317
+    endpoint: ${TEMPO_ENDPOINT}
     tls:
       insecure: true
 
