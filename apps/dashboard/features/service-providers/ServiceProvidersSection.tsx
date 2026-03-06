@@ -3,7 +3,6 @@
 import { Building2, Pencil } from "lucide-react";
 import { useState } from "react";
 
-import { CsvExportButton } from "@/features/service-providers/components/CsvExportButton";
 import { ServiceProvidersTable } from "@/features/service-providers/components/ServiceProvidersTable";
 import { ServiceProvider } from "@/features/service-providers/types";
 import { TheSectionLayout } from "@/shared/components/containers/TheSectionLayout";
@@ -69,8 +68,6 @@ export const ServiceProvidersSection = ({
           </div>
 
           <ServiceProvidersTable providers={providers} year={selectedYear} />
-
-          <CsvExportButton providers={providers} year={selectedYear} />
         </div>
       </SubSectionsContainer>
     </TheSectionLayout>

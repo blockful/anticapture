@@ -25,7 +25,7 @@ export const fetchQuarterReport = async (
       }
     }
   } catch {
-    // ignore fetch errors, fall through to computed status
+    console.error("Failed to fetch quarter report");
   }
 
   return { status: computeQuarterStatus(year, quarter, now) };

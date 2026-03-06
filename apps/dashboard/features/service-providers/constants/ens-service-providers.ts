@@ -31,6 +31,7 @@ export const QUARTER_DUE_DATES: Record<
 export const ENS_SERVICE_PROVIDERS: ServiceProvider[] = [
   {
     name: "Blockful",
+    iconUrl: "/images/blockful.svg",
     websiteUrl: "https://blockful.io",
     proposalUrl:
       "https://discuss.ens.domains/t/spp2-blockful-application/20463",
@@ -40,6 +41,7 @@ export const ENS_SERVICE_PROVIDERS: ServiceProvider[] = [
   },
   {
     name: "eth.limo",
+    iconUrl: "/images/eth-limo.svg",
     websiteUrl: "https://eth.limo",
     proposalUrl:
       "https://discuss.ens.domains/t/spp2-eth-limo-application/20369",
@@ -49,12 +51,14 @@ export const ENS_SERVICE_PROVIDERS: ServiceProvider[] = [
   },
   {
     name: "Ethereum Identity Fnd",
+    iconUrl: "/images/ethereum.svg",
     budget: 500000,
     githubSlug: "ethereum-identity-fnd",
     years: {},
   },
   {
     name: "Unruggable",
+    iconUrl: "/images/unruggable.svg",
     websiteUrl: "https://unruggable.com",
     proposalUrl:
       "https://discuss.ens.domains/t/spp2-unruggable-application/20485",
@@ -64,6 +68,7 @@ export const ENS_SERVICE_PROVIDERS: ServiceProvider[] = [
   },
   {
     name: "NameHash Labs",
+    iconUrl: "/images/namehash.svg",
     websiteUrl: "https://namehashlabs.org",
     proposalUrl:
       "https://discuss.ens.domains/t/spp2-namehash-labs-application/20502",
@@ -73,6 +78,7 @@ export const ENS_SERVICE_PROVIDERS: ServiceProvider[] = [
   },
   {
     name: "Namespace",
+    iconUrl: "/images/namespace.svg",
     websiteUrl: "https://namespace.tech",
     proposalUrl:
       "https://discuss.ens.domains/t/spp2-namespace-application/20456",
@@ -82,6 +88,7 @@ export const ENS_SERVICE_PROVIDERS: ServiceProvider[] = [
   },
   {
     name: "ZK Email",
+    iconUrl: "/images/zk-email.svg",
     websiteUrl: "https://zkemail.com",
     proposalUrl:
       "https://discuss.ens.domains/t/spp2-zk-email-application/20450",
@@ -91,6 +98,7 @@ export const ENS_SERVICE_PROVIDERS: ServiceProvider[] = [
   },
   {
     name: "JustaName",
+    iconUrl: "/images/justaname.svg",
     websiteUrl: "https://justaname.id",
     proposalUrl:
       "https://discuss.ens.domains/t/spp2-justaname-application/20430",
@@ -100,6 +108,7 @@ export const ENS_SERVICE_PROVIDERS: ServiceProvider[] = [
   },
   {
     name: "ENS Labs",
+    iconUrl: "/images/ens-labs.svg",
     websiteUrl: "https://enslabs.org",
     budget: 0,
     githubSlug: "ens-labs",

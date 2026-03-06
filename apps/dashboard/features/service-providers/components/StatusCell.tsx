@@ -51,7 +51,7 @@ export const StatusCell = ({ status, reportUrl }: StatusCellProps) => {
       <DefaultLink
         href={reportUrl}
         openInNewTab
-        className="text-primary border-border-contrast hover:border-primary border-b border-dashed font-mono text-[13px] font-medium tracking-wider"
+        className="text-primary border-border-contrast hover:border-primary mx-2 border-b border-dashed font-mono text-[13px] font-medium tracking-wider"
       >
         <Icon className={cn("size-3.5 shrink-0", config.iconClassName)} />
         <span className="text-primary">{config.label}</span>
@@ -61,7 +61,7 @@ export const StatusCell = ({ status, reportUrl }: StatusCellProps) => {
   }
 
   return (
-    <div className="flex items-center gap-1.5 font-mono text-xs font-medium uppercase tracking-wider">
+    <div className="mx-2 flex items-center gap-1.5 font-mono text-xs font-medium uppercase tracking-wider">
       <Icon className={cn("size-3.5 shrink-0", config.iconClassName)} />
       <span className={config.textClassName}>{config.label}</span>
     </div>

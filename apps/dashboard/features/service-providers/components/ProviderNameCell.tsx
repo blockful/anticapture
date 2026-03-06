@@ -1,11 +1,15 @@
+import Image from "next/image";
+
 interface ProviderNameCellProps {
   name: string;
+  iconUrl?: string;
   websiteUrl?: string;
   proposalUrl?: string;
 }
 
 export const ProviderNameCell = ({
   name,
+  iconUrl,
   websiteUrl,
   proposalUrl,
 }: ProviderNameCellProps) => {
@@ -19,7 +23,17 @@ export const ProviderNameCell = ({
   return (
     <div className="flex items-center gap-3">
       <div className="bg-surface-contrast border-border-contrast flex size-6 shrink-0 items-center justify-center rounded-full border text-[9px] font-bold text-white">
-        {initials}
+        {iconUrl ? (
+          <Image
+            src={iconUrl}
+            alt={name}
+            width={24}
+            height={24}
+            className="rounded-full"
+          />
+        ) : (
+          initials
+        )}
       </div>
       <div className="flex min-w-0 flex-col gap-0.5">
         <span className="text-primary truncate text-sm font-medium">

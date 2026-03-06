@@ -20,6 +20,7 @@ import { cn, formatNumberUserReadable } from "@/shared/utils";
 
 interface ProviderRow {
   name: string;
+  iconUrl?: string;
   websiteUrl?: string;
   proposalUrl?: string;
   budget: number;
@@ -48,6 +49,7 @@ export const ServiceProvidersTable = ({
     return [
       {
         name: provider.name,
+        iconUrl: provider.iconUrl,
         websiteUrl: provider.websiteUrl,
         proposalUrl: provider.proposalUrl,
         budget: provider.budget,
@@ -66,11 +68,12 @@ export const ServiceProvidersTable = ({
       cell: ({ row }) => (
         <ProviderNameCell
           name={row.original.name}
+          iconUrl={row.original.iconUrl}
           websiteUrl={row.original.websiteUrl}
           proposalUrl={row.original.proposalUrl}
         />
       ),
-      meta: { columnClassName: "w-[220px]" },
+      meta: { columnClassName: "w-[220px] px-2" },
     },
     {
       accessorKey: "budget",
@@ -112,8 +115,8 @@ export const ServiceProvidersTable = ({
         header: () => (
           <div
             className={cn(
-              "flex h-full flex-col gap-0.5 pt-1",
-              isCurrentQuarter && "border-b-2 border-orange-400",
+              "flex h-full flex-col gap-0.5 px-2 pt-1",
+              isCurrentQuarter && "bg-orange-400/12",
             )}
           >
             <span className="text-primary text-xs font-medium">
@@ -136,7 +139,7 @@ export const ServiceProvidersTable = ({
           />
         ),
         meta: {
-          columnClassName: "w-[149px]",
+          columnClassName: "w-[149px] px-2",
         },
       } as ColumnDef<ProviderRow>;
     }),
