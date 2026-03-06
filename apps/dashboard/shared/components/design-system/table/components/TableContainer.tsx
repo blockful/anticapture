@@ -4,8 +4,8 @@ import { cn } from "@/shared/utils";
 
 export const TableContainer = forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => {
+  React.HTMLAttributes<HTMLDivElement> & { tableClassName?: string }
+>(({ className, tableClassName, ...props }, ref) => {
   return (
     <div
       ref={ref}
@@ -20,7 +20,7 @@ export const TableContainer = forwardRef<
     >
       <table
         data-slot="table"
-        className={"w-full caption-bottom text-sm"}
+        className={cn("w-full caption-bottom text-sm", tableClassName)}
         {...props}
       />
     </div>
