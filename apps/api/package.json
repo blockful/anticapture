@@ -10,12 +10,13 @@
     "test:watch": "vitest",
     "clean": "rm -rf node_modules *.tsbuildinfo dist",
     "start": "node dist/index.js",
+    "start:aave": "node dist/aave.js",
     "build": "tsup",
     "build:watch": "tsc --watch",
-    "dev:watch": "tsx watch src/index.ts",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
-    "dev": "tsx watch src/index.ts"
+    "dev": "tsx watch cmd/index.ts",
+    "dev:aave": "tsx watch cmd/aave.ts"
   },
   "keywords": [],
   "author": "",
