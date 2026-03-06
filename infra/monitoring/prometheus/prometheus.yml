@@ -1,0 +1,36 @@
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["alertmanager:9093"]
+
+rule_files:
+  - alerts.yml
+
+scrape_configs:
+  # Ponder indexer built-in metrics (port 42069)
+  # Run: pnpm indexer dev
+  - job_name: ponder
+    metrics_path: "/metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["172.17.0.1:42069"]
+
+  # Anticapture API custom metrics (port 42069 by default, set PORT env to change)
+  # Run: pnpm api dev
+  # Note: API and indexer share port 42069 but run separately (different deployments).
+  # In production each service runs on its own host; override the target accordingly.
+  - job_name: anticapture-api
+    metrics_path: "/metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["172.17.0.1:42069"]
+
+  - job_name: anticapture-gateway
+    metrics_path: "/metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["172.17.0.1:4000"]
+
+  - job_name: otelcol-metrics
+    static_configs:
+      - targets: ["otelcol:8889"]
