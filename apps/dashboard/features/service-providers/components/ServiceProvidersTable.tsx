@@ -1,16 +1,33 @@
 "use client";
 
+import { ColumnDef } from "@tanstack/react-table";
+
 import { ProviderNameCell } from "@/features/service-providers/components/ProviderNameCell";
 import { StatusCell } from "@/features/service-providers/components/StatusCell";
 import {
-  getCurrentQuarter,
   QUARTER_DUE_DATES,
-  QuarterKey,
-  ServiceProvider,
+  QUARTERS,
+} from "@/features/service-providers/constants/ens-service-providers";
+import {
+  type QuarterReport,
+  type ServiceProvider,
 } from "@/features/service-providers/types";
-import { cn } from "@/shared/utils";
+import { getCurrentQuarter } from "@/features/service-providers/utils/getQuarterInfos";
+import { Button } from "@/shared/components";
+import { Table } from "@/shared/components/design-system/table/Table";
+import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
+import { cn, formatNumberUserReadable } from "@/shared/utils";
 
-const QUARTERS: QuarterKey[] = ["Q1", "Q2", "Q3", "Q4"];
+interface ProviderRow {
+  name: string;
+  websiteUrl?: string;
+  proposalUrl?: string;
+  budget: number;
+  Q1: QuarterReport;
+  Q2: QuarterReport;
+  Q3: QuarterReport;
+  Q4: QuarterReport;
+}
 
 interface ServiceProvidersTableProps {
   providers: ServiceProvider[];
@@ -25,108 +42,115 @@ export const ServiceProvidersTable = ({
   const currentQuarter = getCurrentQuarter();
   const quarterMeta = QUARTER_DUE_DATES[year] ?? QUARTER_DUE_DATES[currentYear];
 
-  return (
-    <div className="w-full overflow-x-auto">
-      <table className="w-full border-collapse">
-        <thead>
-          <tr className="border-border-contrast border-b">
-            <th className="text-secondary w-[220px] py-3 pl-4 text-left text-xs font-medium uppercase tracking-wider">
-              Name
-            </th>
-            <th className="text-secondary w-[92px] py-3 pl-4 text-left text-xs font-medium">
-              <div className="flex items-center gap-1">
-                Budget
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 12 12"
-                  fill="currentColor"
-                  className="opacity-60"
-                >
-                  <path d="M6 2L8.5 5H3.5L6 2ZM6 10L3.5 7H8.5L6 10Z" />
-                </svg>
-              </div>
-            </th>
-            {QUARTERS.map((quarter) => {
-              const isCurrentQuarter =
-                year === currentYear && quarter === currentQuarter;
-              const meta = quarterMeta[quarter];
-              return (
-                <th
-                  key={quarter}
-                  className={cn(
-                    "w-[149px] py-3 pl-4 text-left",
-                    isCurrentQuarter && "border-b-2 border-orange-400",
-                  )}
-                >
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-primary text-xs font-medium">
-                      {quarter}
-                      {isCurrentQuarter && (
-                        <span className="text-secondary ml-1 font-normal">
-                          (Current)
-                        </span>
-                      )}
-                    </span>
-                    <span className="text-secondary text-[10px] font-normal">
-                      {meta?.dueDateLabel}
-                    </span>
-                  </div>
-                </th>
-              );
-            })}
-          </tr>
-        </thead>
-        <tbody>
-          {providers.map((provider, index) => {
-            const yearData = provider.years[year];
-            if (!yearData) return null;
+  const data: ProviderRow[] = providers.flatMap((provider) => {
+    const yearData = provider.years[year];
+    if (!yearData) return [];
+    return [
+      {
+        name: provider.name,
+        websiteUrl: provider.websiteUrl,
+        proposalUrl: provider.proposalUrl,
+        budget: provider.budget,
+        Q1: yearData.Q1,
+        Q2: yearData.Q2,
+        Q3: yearData.Q3,
+        Q4: yearData.Q4,
+      },
+    ];
+  });
 
-            return (
-              <tr
-                key={provider.name}
-                className={cn(
-                  "border-border-contrast border-b transition-colors",
-                  index % 2 === 0 ? "bg-transparent" : "bg-surface-contrast/20",
-                  "hover:bg-surface-contrast/40",
-                )}
-              >
-                <td className="py-3 pl-4">
-                  <ProviderNameCell
-                    name={provider.name}
-                    websiteUrl={provider.websiteUrl}
-                    proposalUrl={provider.proposalUrl}
-                  />
-                </td>
-                <td className="py-3 pl-4">
-                  <span className="text-primary text-sm">
-                    {provider.budget}
-                  </span>
-                </td>
-                {QUARTERS.map((quarter) => {
-                  const report = yearData[quarter];
-                  const isCurrentQuarter =
-                    year === currentYear && quarter === currentQuarter;
-                  return (
-                    <td
-                      key={quarter}
-                      className={cn(
-                        "py-3 pl-4",
-                        isCurrentQuarter && "border-b-2 border-orange-400",
-                      )}
-                    >
-                      <StatusCell
-                        status={report.status}
-                        reportUrl={report.reportUrl}
-                      />
-                    </td>
-                  );
-                })}
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+  const columns: ColumnDef<ProviderRow>[] = [
+    {
+      accessorKey: "name",
+      header: () => <span className="text-table-header">Name</span>,
+      cell: ({ row }) => (
+        <ProviderNameCell
+          name={row.original.name}
+          websiteUrl={row.original.websiteUrl}
+          proposalUrl={row.original.proposalUrl}
+        />
+      ),
+      meta: { columnClassName: "w-[220px]" },
+    },
+    {
+      accessorKey: "budget",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-secondary w-full justify-start p-0"
+          onClick={() => column.toggleSorting()}
+        >
+          <h4 className="text-table-header whitespace-nowrap">Budget</h4>
+          <ArrowUpDown
+            props={{ className: "size-4" }}
+            activeState={
+              column.getIsSorted() === "asc"
+                ? ArrowState.UP
+                : column.getIsSorted() === "desc"
+                  ? ArrowState.DOWN
+                  : ArrowState.DEFAULT
+            }
+          />
+        </Button>
+      ),
+      cell: ({ row }) => (
+        <span className="text-primary text-sm">
+          {formatNumberUserReadable(row.original.budget)}
+        </span>
+      ),
+      enableSorting: true,
+      sortingFn: (rowA, rowB) => rowA.original.budget - rowB.original.budget,
+      meta: { columnClassName: "w-[92px]" },
+    },
+    ...QUARTERS.map((quarter) => {
+      const isCurrentQuarter =
+        year === currentYear && quarter === currentQuarter;
+      const meta = quarterMeta[quarter];
+      return {
+        id: quarter,
+        header: () => (
+          <div
+            className={cn(
+              "flex h-full flex-col gap-0.5 pt-1",
+              isCurrentQuarter && "border-b-2 border-orange-400",
+            )}
+          >
+            <span className="text-primary text-xs font-medium">
+              {quarter}
+              {isCurrentQuarter && (
+                <span className="text-secondary ml-1 font-normal">
+                  (Current)
+                </span>
+              )}
+            </span>
+            <span className="text-secondary text-[10px] font-normal">
+              {meta?.dueDateLabel}
+            </span>
+          </div>
+        ),
+        cell: ({ row }: { row: { original: ProviderRow } }) => (
+          <StatusCell
+            status={row.original[quarter].status}
+            reportUrl={row.original[quarter].reportUrl}
+          />
+        ),
+        meta: {
+          columnClassName: "w-[149px]",
+        },
+      } as ColumnDef<ProviderRow>;
+    }),
+  ];
+
+  return (
+    <Table
+      columns={columns}
+      data={data}
+      onRowClick={() => {}}
+      wrapperClassName="overflow-x-auto overflow-y-visible"
+      withDownloadCSV={true}
+      withSorting={true}
+      fillHeight
+    />
   );
 };

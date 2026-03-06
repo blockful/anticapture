@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 
 import { ServiceProvidersSection } from "@/features/service-providers";
-import { ENS_SERVICE_PROVIDERS } from "@/features/service-providers/data/ens-service-providers";
 import {
-  fetchProviderYearData,
+  ENS_SERVICE_PROVIDERS,
   GITHUB_TRACKED_YEARS,
-} from "@/features/service-providers/lib/github";
+} from "@/features/service-providers/constants/ens-service-providers";
+import { fetchProviderYearData } from "@/features/service-providers/utils/fetchProviderYearData";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
 

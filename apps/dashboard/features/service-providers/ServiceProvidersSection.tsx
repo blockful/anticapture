@@ -38,19 +38,18 @@ export const ServiceProvidersSection = ({
       description={PAGES_CONSTANTS.serviceProviders.description ?? ""}
       headerAction={
         <a href={UPDATE_STATUS_URL} target="_blank" rel="noopener noreferrer">
-          <Button variant="outline" size="md">
+          <Button variant="primary" size="md" className="whitespace-nowrap">
             <Pencil className="size-3.5" />
             Update report status
           </Button>
         </a>
       }
     >
+      <InlineAlert
+        text="Report status updates are made via GitHub pull requests and must include a link to the published DAO forum post."
+        variant="info"
+      />
       <SubSectionsContainer>
-        <InlineAlert
-          text="Report status updates are made via GitHub pull requests and must include a link to the published DAO forum post."
-          variant="info"
-        />
-
         <div className="flex flex-col gap-4">
           <div className="flex gap-2">
             {AVAILABLE_YEARS.map((year) => (

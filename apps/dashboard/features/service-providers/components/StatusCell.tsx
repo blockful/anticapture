@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 
 import { ReportStatus } from "@/features/service-providers/types";
+import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { cn } from "@/shared/utils";
 
 interface StatusCellProps {
@@ -18,22 +19,26 @@ const STATUS_CONFIG = {
   published: {
     icon: Check,
     label: "PUBLISHED",
-    className: "text-success",
+    iconClassName: "text-success",
+    textClassName: "text-success",
   },
   overdue: {
     icon: AlertTriangle,
     label: "OVERDUE",
-    className: "text-warning",
+    iconClassName: "text-error",
+    textClassName: "text-primary",
   },
   due_soon: {
     icon: Clock,
     label: "DUE SOON",
-    className: "text-yellow-400",
+    iconClassName: "text-warning",
+    textClassName: "text-primary",
   },
   upcoming: {
     icon: CalendarDays,
     label: "UPCOMING",
-    className: "text-secondary",
+    iconClassName: "text-secondary",
+    textClassName: "text-secondary",
   },
 } as const;
 
@@ -43,31 +48,22 @@ export const StatusCell = ({ status, reportUrl }: StatusCellProps) => {
 
   if (status === "published" && reportUrl) {
     return (
-      <a
+      <DefaultLink
         href={reportUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={cn(
-          "flex items-center gap-1.5 font-mono text-xs font-medium uppercase tracking-wider transition-opacity hover:opacity-80",
-          config.className,
-        )}
+        openInNewTab
+        className="text-primary border-border-contrast hover:border-primary border-b border-dashed font-mono text-[13px] font-medium tracking-wider"
       >
-        <Icon className="size-3.5 shrink-0" />
-        <span>{config.label}</span>
+        <Icon className={cn("size-3.5 shrink-0", config.iconClassName)} />
+        <span className="text-primary">{config.label}</span>
         <ExternalLink className="size-3 shrink-0" />
-      </a>
+      </DefaultLink>
     );
   }
 
   return (
-    <div
-      className={cn(
-        "flex items-center gap-1.5 font-mono text-xs font-medium uppercase tracking-wider",
-        config.className,
-      )}
-    >
-      <Icon className="size-3.5 shrink-0" />
-      <span>{config.label}</span>
+    <div className="flex items-center gap-1.5 font-mono text-xs font-medium uppercase tracking-wider">
+      <Icon className={cn("size-3.5 shrink-0", config.iconClassName)} />
+      <span className={config.textClassName}>{config.label}</span>
     </div>
   );
 };

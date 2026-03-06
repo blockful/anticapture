@@ -1,6 +1,6 @@
 interface ProviderNameCellProps {
   name: string;
-  websiteUrl: string;
+  websiteUrl?: string;
   proposalUrl?: string;
 }
 
@@ -26,14 +26,16 @@ export const ProviderNameCell = ({
           {name}
         </span>
         <div className="flex items-center gap-1.5">
-          <a
-            href={websiteUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-secondary hover:text-link font-mono text-[10px] font-normal uppercase tracking-wider transition-colors"
-          >
-            WEBSITE
-          </a>
+          {websiteUrl && (
+            <a
+              href={websiteUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-secondary hover:text-link font-mono text-[10px] font-normal uppercase tracking-wider transition-colors"
+            >
+              WEBSITE
+            </a>
+          )}
           {proposalUrl && (
             <>
               <span className="text-secondary text-[10px]">·</span>
