@@ -7,9 +7,9 @@ rule_files:
   - alerts.yml
 
 scrape_configs:
-  # Ponder indexer built-in metrics (port 42069)
+  # ENS indexer metrics (port 42069)
   # Run: pnpm indexer dev
-  - job_name: ponder
+  - job_name: anticapture-ens-indexer
     metrics_path: "/metrics"
     scrape_interval: 15s
     static_configs:
