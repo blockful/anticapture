@@ -30,7 +30,10 @@ export const AccountBalancesRequestSchema = z.object({
     .optional()
     .default(0),
   orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
-  orderBy: z.enum(["balance", "variation"]).optional().default("balance"),
+  orderBy: z
+    .enum(["balance", "variation", "signedVariation"])
+    .optional()
+    .default("balance"),
   addresses: z
     .union([
       z

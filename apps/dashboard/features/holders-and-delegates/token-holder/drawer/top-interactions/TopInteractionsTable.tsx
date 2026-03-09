@@ -380,6 +380,7 @@ export const TopInteractionsTable = ({
         filterColumn="address"
         size="sm"
         withDownloadCSV={true}
+        csvFilename="top-interactions.csv"
         error={error}
         fillHeight
       />

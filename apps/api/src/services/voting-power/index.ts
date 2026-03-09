@@ -49,7 +49,11 @@ interface VotingPowersRepository {
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
-    orderBy: "votingPower" | "delegationsCount" | "variation",
+    orderBy:
+      | "votingPower"
+      | "delegationsCount"
+      | "variation"
+      | "signedVariation",
     amountFilter: AmountFilter,
     addresses: Address[],
     fromDate?: number,
@@ -160,7 +164,11 @@ export class VotingPowerService {
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
-    orderBy: "votingPower" | "delegationsCount" | "variation",
+    orderBy:
+      | "votingPower"
+      | "delegationsCount"
+      | "variation"
+      | "signedVariation",
     amountFilter: AmountFilter,
     addresses: Address[],
     fromDate?: number,
