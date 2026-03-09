@@ -33,15 +33,6 @@ export function createObservabilityProvider(
   const collectorEndpoint =
     process.env.OTEL_EXPORTER_OTLP_ENDPOINT ?? "http://localhost:4318";
 
-  const otlpHeaders = process.env.OTEL_EXPORTER_OTLP_HEADERS
-    ? Object.fromEntries(
-        process.env.OTEL_EXPORTER_OTLP_HEADERS.split(",").map((h) => {
-          const idx = h.indexOf("=");
-          return [h.slice(0, idx), h.slice(idx + 1)] as [string, string];
-        }),
-      )
-    : undefined;
-
   const resource = new Resource({ [ATTR_SERVICE_NAME]: serviceName });
 
   const prometheusExporter = new PrometheusExporter({
@@ -55,7 +46,6 @@ export function createObservabilityProvider(
 
   const traceExporter = new OTLPTraceExporter({
     url: `${collectorEndpoint}/v1/traces`,
-    headers: otlpHeaders,
   });
 
   const tracerProvider = new NodeTracerProvider({
