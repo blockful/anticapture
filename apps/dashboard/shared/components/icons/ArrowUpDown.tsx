@@ -4,6 +4,7 @@ export enum ArrowState {
   DEFAULT = "DEFAULT",
   UP = "UP",
   DOWN = "DOWN",
+  BOTH = "BOTH",
 }
 
 export const ArrowUpDown = ({
@@ -24,7 +25,7 @@ export const ArrowUpDown = ({
     >
       <g
         id="arrow-down"
-        stroke={`${activeState === ArrowState.DOWN ? "#F4F4F4" : "#A1A1AA"}`}
+        stroke={`${activeState === ArrowState.DOWN || activeState === ArrowState.BOTH ? "#F4F4F4" : "#A1A1AA"}`}
       >
         <path
           id="Vector"
@@ -43,7 +44,7 @@ export const ArrowUpDown = ({
       </g>
       <g
         id="arrow-up"
-        stroke={`${activeState === ArrowState.UP ? "#F4F4F4" : "#A1A1AA"}`}
+        stroke={`${activeState === ArrowState.UP || activeState === ArrowState.BOTH ? "#F4F4F4" : "#A1A1AA"}`}
       >
         <path
           id="Vector_3"

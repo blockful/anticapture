@@ -53,7 +53,11 @@ class FakeVotingPowersRepository {
     _skip: number,
     _limit: number,
     _orderDirection: "asc" | "desc",
-    _orderBy: "votingPower" | "delegationsCount" | "variation",
+    _orderBy:
+      | "votingPower"
+      | "delegationsCount"
+      | "variation"
+      | "signedVariation",
     _amountFilter: AmountFilter,
     _addresses: Address[],
     _fromDate?: number,
@@ -219,6 +223,21 @@ describe("Voting Powers Controller - Integration Tests", () => {
       const body = await res.json();
       expect(body.items).toHaveLength(1);
       expect(body.items[0].variation.absoluteChange).toBe("500");
+    });
+
+    it("should accept orderBy=signedVariation", async () => {
+      const account = createAccountPower({
+        absoluteChange: -500n,
+        percentageChange: "-50",
+      });
+      fakeRepo.setData([account]);
+
+      const res = await app.request("/voting-powers?orderBy=signedVariation");
+
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.items).toHaveLength(1);
+      expect(body.items[0].variation.absoluteChange).toBe("-500");
     });
 
     it("should accept orderDirection=asc", async () => {
