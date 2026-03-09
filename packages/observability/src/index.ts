@@ -35,9 +35,10 @@ export function createObservabilityProvider(
 
   const otlpHeaders = process.env.OTEL_EXPORTER_OTLP_HEADERS
     ? Object.fromEntries(
-        process.env.OTEL_EXPORTER_OTLP_HEADERS.split(",").map(
-          (h) => h.split("=", 2) as [string, string],
-        ),
+        process.env.OTEL_EXPORTER_OTLP_HEADERS.split(",").map((h) => {
+          const idx = h.indexOf("=");
+          return [h.slice(0, idx), h.slice(idx + 1)] as [string, string];
+        }),
       )
     : undefined;
 
