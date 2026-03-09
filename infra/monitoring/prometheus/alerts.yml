@@ -41,10 +41,10 @@ groups:
           sum(rate(http_server_request_duration_seconds_count{http_response_status_code=~"5.."}[2m]))
           /
           sum(rate(http_server_request_duration_seconds_count[2m]))
-          > 0.01
+          * 100 > 1
         for: 2m
         labels:
           severity: critical
         annotations:
           summary: "High 5xx error rate"
-          description: '5xx rate is {{ printf "%.2f%%" (mul $value 100.0) }}'
+          description: '5xx rate is {{ printf "%.2f" $value }}%'
