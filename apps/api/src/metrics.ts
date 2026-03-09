@@ -24,11 +24,3 @@ export const httpRequestTotal: Counter = meter.createCounter(
     description: "Total number of HTTP requests",
   },
 );
-
-export const cacheHits: Counter = meter.createCounter("cache_hits_total", {
-  description: "Total number of cache hits",
-});
-
-export const cacheMisses: Counter = meter.createCounter("cache_misses_total", {
-  description: "Total number of cache misses",
-});
