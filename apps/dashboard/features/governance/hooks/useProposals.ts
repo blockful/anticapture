@@ -11,6 +11,7 @@ import type { Proposal as GovernanceProposal } from "@/features/governance/types
 import { transformToGovernanceProposal } from "@/features/governance/utils/transformToGovernanceProposal";
 import daoConfig from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 export interface PaginationInfo {
   hasNextPage: boolean;
@@ -68,6 +69,7 @@ export const useProposals = ({
     context: {
       headers: {
         "anticapture-dao-id": daoId,
+        ...getAuthHeaders(),
       },
     },
   });

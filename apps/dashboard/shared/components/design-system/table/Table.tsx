@@ -191,9 +191,12 @@ export const Table = <TData, TValue>({
     >
       <TableContainer
         className={cn(
-          "text-secondary lg:bg-surface-default border-separate border-spacing-0 bg-transparent",
-          mobileTableFixed ? "table-fixed" : "table-auto lg:table-fixed",
+          "text-secondary lg:bg-surface-default bg-transparent",
           fillHeight && "flex h-full flex-col",
+        )}
+        tableClassName={cn(
+          "border-separate border-spacing-0",
+          mobileTableFixed ? "table-fixed" : "table-auto lg:table-fixed",
         )}
       >
         <TableHeader className="bg-surface-contrast text-secondary sticky -top-px z-30 text-xs font-medium">
@@ -289,7 +292,7 @@ export const Table = <TData, TValue>({
                             className={cn(
                               cell.column.getIndex() === 0 &&
                                 stickyFirstColumn &&
-                                "bg-surface-background sticky-border-r sticky left-0 z-20 shadow-md shadow-black lg:relative lg:bg-transparent",
+                                "bg-surface-background sticky-border-r sticky left-0 z-20 lg:relative lg:bg-transparent",
                               rowSizeVariants[size],
                               colMeta?.columnClassName,
                             )}

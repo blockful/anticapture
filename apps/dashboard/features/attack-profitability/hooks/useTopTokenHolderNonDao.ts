@@ -5,6 +5,7 @@ import {
 import { ApolloError, ApolloQueryResult } from "@apollo/client";
 
 import { DaoIdEnum } from "@/shared/types/daos";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 interface TopTokenHolderNonDaoResponse {
   data:
@@ -39,6 +40,7 @@ export const useTopTokenHolderNonDao = (
       context: {
         headers: {
           "anticapture-dao-id": daoId,
+          ...getAuthHeaders(),
         },
       },
       notifyOnNetworkStatusChange: true,

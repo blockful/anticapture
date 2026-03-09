@@ -14,6 +14,7 @@ import { useMemo, useCallback, useState, useEffect } from "react";
 import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 interface ProposalsActivity {
   totalProposals: number;
@@ -109,7 +110,9 @@ export const useDelegates = ({
       fromDate: fromDate.toString(),
       ...(address && { addresses: [address] }),
     },
-    context: { headers: { "anticapture-dao-id": daoId } },
+    context: {
+      headers: { "anticapture-dao-id": daoId, ...getAuthHeaders() },
+    },
     notifyOnNetworkStatusChange: true,
     fetchPolicy: "cache-and-network",
   });
@@ -134,7 +137,9 @@ export const useDelegates = ({
 
   const [getDelegateProposalsActivity] =
     useGetDelegateProposalsActivityLazyQuery({
-      context: { headers: { "anticapture-dao-id": daoId } },
+      context: {
+        headers: { "anticapture-dao-id": daoId, ...getAuthHeaders() },
+      },
     });
 
   // Fetch proposals activity for all delegates using Promise.all
