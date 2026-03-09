@@ -47,4 +47,4 @@ groups:
           severity: critical
         annotations:
           summary: "High 5xx error rate"
-          description: '5xx rate is {{ printf "%.1f%%" (humanizePercentage $value) }}'
+          description: '5xx rate is {{ printf "%.2f%%" (mul $value 100.0) }}'
