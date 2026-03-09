@@ -1,0 +1,77 @@
+logLevel: debug
+
+server:
+  httpHostV4: "0.0.0.0"
+  httpHostV6: "[::]"
+  httpPort: 4000
+
+metrics:
+  enabled: true
+  hostV4: "0.0.0.0"
+  hostV6: "[::]"
+  port: 4001
+
+projects:
+  - id: main
+    upstreams:
+      # - id: nodeful
+      #   endpoint: "${NODEFUL}"
+      #   rateLimitBudget: global-indexer-limit
+      #   group: primary
+      #   autoIgnoreUnsupportedMethods: true
+      #   failsafe:
+      #     - matchMethod: "*"
+      #       timeout:
+      #         duration: 10s
+      #       retry:
+      #         maxAttempts: 2
+      #         delay: 200ms
+
+      - id: chainstack
+        endpoint: chainstack://${CHAINSTACK_API_KEY}
+        rateLimitBudget: global-indexer-limit
+        group: primary
+        autoIgnoreUnsupportedMethods: true
+        failsafe:
+          - matchMethod: "*"
+            timeout:
+              duration: 15s
+            retry:
+              maxAttempts: 3
+              delay: 300ms
+              backoffMaxDelay: 5s
+              backoffFactor: 1.5
+
+rateLimiters:
+  store:
+    driver: memory
+
+  budgets:
+    - id: global-api-limit
+      rules:
+        - method: "*"
+          maxCount: 20
+          period: second
+          perIP: true
+    - id: global-indexer-limit
+      rules:
+        - method: "*"
+          maxCount: 400
+          period: second
+
+database:
+  evmJsonRpcCache:
+    connectors:
+      - id: postgres-cache
+        driver: postgresql
+        postgresql:
+          connectionUri: "${DATABASE_URL}"
+          table: rpc_cache
+          initTimeout: 5s
+          getTimeout: 1s
+          setTimeout: 2s
+    policies:
+      - network: "*"
+        method: "*"
+        finality: finalized
+        connector: postgres-cache
