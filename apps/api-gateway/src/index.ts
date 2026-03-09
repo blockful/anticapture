@@ -8,6 +8,8 @@ import {
   PrometheusSerializer,
 } from "@anticapture/observability";
 
+const prometheusSerializer = new PrometheusSerializer();
+
 import config from "../meshrc";
 import { exporter } from "./instrumentation";
 import { validateAuthToken } from "./auth";
@@ -25,12 +27,17 @@ const bootstrap = async () => {
   const server = createServer(async (req, res) => {
     if (!validateAuthToken(req, res)) return;
     if (req.url === "/metrics") {
-      const result = await exporter.collect();
-      const serialized = new PrometheusSerializer().serialize(
-        result.resourceMetrics,
-      );
-      res.writeHead(200, { "Content-Type": PROMETHEUS_MIME_TYPE });
-      res.end(serialized);
+      try {
+        const result = await exporter.collect();
+        const serialized = prometheusSerializer.serialize(
+          result.resourceMetrics,
+        );
+        res.writeHead(200, { "Content-Type": PROMETHEUS_MIME_TYPE });
+        res.end(serialized);
+      } catch (err) {
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Failed to collect metrics" }));
+      }
       return;
     }
     handler(req, res);

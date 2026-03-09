@@ -78,6 +78,16 @@ export function createObservabilityProvider(
     await tracerProvider.shutdown();
   };
 
+  process.on("SIGTERM", async () => {
+    await shutdown();
+    process.exit(0);
+  });
+
+  process.on("SIGINT", async () => {
+    await shutdown();
+    process.exit(0);
+  });
+
   return {
     meterProvider,
     tracerProvider,

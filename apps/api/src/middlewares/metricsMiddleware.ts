@@ -1,4 +1,9 @@
 import { trace } from "@opentelemetry/api";
+import {
+  ATTR_HTTP_REQUEST_METHOD,
+  ATTR_HTTP_RESPONSE_STATUS_CODE,
+  ATTR_HTTP_ROUTE,
+} from "@opentelemetry/semantic-conventions";
 import type { MiddlewareHandler } from "hono";
 
 import { httpRequestDuration, httpRequestTotal } from "@/metrics";
@@ -8,10 +13,6 @@ export const metricsMiddleware: MiddlewareHandler = async (c, next) => {
   await next();
   const duration = (performance.now() - start) / 1000;
 
-  const http_request_method = c.req.method;
-  const http_route = c.req.routePath ?? c.req.path;
-  const http_response_status_code = String(c.res.status);
-
   const spanContext = trace.getActiveSpan()?.spanContext();
   const traceId = spanContext?.traceId;
 
@@ -19,7 +20,11 @@ export const metricsMiddleware: MiddlewareHandler = async (c, next) => {
     c.res.headers.set("X-Trace-Id", traceId);
   }
 
-  const labels = { http_request_method, http_route, http_response_status_code };
+  const labels = {
+    [ATTR_HTTP_REQUEST_METHOD]: c.req.method,
+    [ATTR_HTTP_ROUTE]: c.req.routePath ?? c.req.path,
+    [ATTR_HTTP_RESPONSE_STATUS_CODE]: c.res.status,
+  };
   httpRequestDuration.record(duration, labels);
   httpRequestTotal.add(1, labels);
 };

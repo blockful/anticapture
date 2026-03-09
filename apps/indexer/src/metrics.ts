@@ -1,30 +1,12 @@
-import {
-  createObservabilityProvider,
-  type ObservabilityProvider,
-} from "@anticapture/observability";
-import { metrics } from "@opentelemetry/api";
+import { createObservabilityProvider } from "@anticapture/observability";
 import type { Counter, Gauge } from "@opentelemetry/api";
 
-const observability: ObservabilityProvider = createObservabilityProvider(
-  "anticapture-indexer",
-);
+const observability = createObservabilityProvider("anticapture-indexer");
 
 export const exporter = observability.exporter;
 export const meterProvider = observability.meterProvider;
 
-const shutdown = observability.shutdown;
-
-process.on("SIGTERM", async () => {
-  await shutdown();
-  process.exit(0);
-});
-
-process.on("SIGINT", async () => {
-  await shutdown();
-  process.exit(0);
-});
-
-const meter = metrics.getMeter("anticapture-indexer");
+const meter = meterProvider.getMeter("anticapture-indexer");
 
 export const indexerEventsProcessed: Counter = meter.createCounter(
   "indexer_events_processed_total",
