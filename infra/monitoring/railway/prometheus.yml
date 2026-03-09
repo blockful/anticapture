@@ -18,8 +18,3 @@ scrape_configs:
     scrape_interval: 15s
     static_configs:
       - targets: ["${GATEWAY_ENDPOINT}"]
-
-  - job_name: otelcol-metrics
-    scrape_interval: 15s
-    static_configs:
-      - targets: ["${OTELCOL_ENDPOINT}"]

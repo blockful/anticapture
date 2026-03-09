@@ -1,5 +1,4 @@
 import { metrics } from "@opentelemetry/api";
-import { OTLPMetricExporter } from "@opentelemetry/exporter-metrics-otlp-http";
 import {
   PrometheusExporter,
   PrometheusSerializer,
@@ -10,10 +9,7 @@ import { registerInstrumentations } from "@opentelemetry/instrumentation";
 import { HttpInstrumentation } from "@opentelemetry/instrumentation-http";
 import { PgInstrumentation } from "@opentelemetry/instrumentation-pg";
 import { Resource } from "@opentelemetry/resources";
-import {
-  PeriodicExportingMetricReader,
-  MeterProvider,
-} from "@opentelemetry/sdk-metrics";
+import { MeterProvider } from "@opentelemetry/sdk-metrics";
 import {
   NodeTracerProvider,
   BatchSpanProcessor,
@@ -51,20 +47,9 @@ export function createObservabilityProvider(
     preventServerStart: true,
   });
 
-  const otlpMetricExporter = new OTLPMetricExporter({
-    url: `${collectorEndpoint}/v1/metrics`,
-    headers: otlpHeaders,
-  });
-
   const meterProvider = new MeterProvider({
     resource,
-    readers: [
-      prometheusExporter,
-      new PeriodicExportingMetricReader({
-        exporter: otlpMetricExporter,
-        exportIntervalMillis: 15_000,
-      }),
-    ],
+    readers: [prometheusExporter],
   });
 
   const traceExporter = new OTLPTraceExporter({

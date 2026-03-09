@@ -19,7 +19,6 @@
   },
   "dependencies": {
     "@opentelemetry/api": "^1.9.0",
-    "@opentelemetry/exporter-metrics-otlp-http": "^0.57.2",
     "@opentelemetry/exporter-prometheus": "^0.57.0",
     "@opentelemetry/exporter-trace-otlp-http": "^0.57.2",
     "@opentelemetry/host-metrics": "^0.35.4",
