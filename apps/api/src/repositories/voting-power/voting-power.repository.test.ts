@@ -262,6 +262,78 @@ describe("VotingPowerRepository - getVotingPowers", () => {
     expect(result.items[1]!.accountId).toBe(TEST_ACCOUNT_1);
   });
 
+  it("should order by signedVariation from positive to negative on desc", async () => {
+    await db.insert(accountPower).values([
+      createAccountPowerRow({
+        accountId: TEST_ACCOUNT_1,
+        votingPower: 1000n,
+      }),
+      createAccountPowerRow({ accountId: TEST_ACCOUNT_2, votingPower: 800n }),
+    ]);
+    await db.insert(votingPowerHistory).values([
+      createHistoryRow({
+        accountId: TEST_ACCOUNT_1,
+        delta: 100n,
+        logIndex: 0,
+      }),
+      createHistoryRow({
+        accountId: TEST_ACCOUNT_2,
+        delta: -500n,
+        deltaMod: 500n,
+        logIndex: 1,
+        transactionHash: "0xtx2",
+      }),
+    ]);
+
+    const result = await repository.getVotingPowers(
+      0,
+      10,
+      "desc",
+      "signedVariation",
+      NO_FILTER,
+      [],
+    );
+
+    expect(result.items[0]!.accountId).toBe(TEST_ACCOUNT_1);
+    expect(result.items[1]!.accountId).toBe(TEST_ACCOUNT_2);
+  });
+
+  it("should order by signedVariation from negative to positive on asc", async () => {
+    await db.insert(accountPower).values([
+      createAccountPowerRow({
+        accountId: TEST_ACCOUNT_1,
+        votingPower: 1000n,
+      }),
+      createAccountPowerRow({ accountId: TEST_ACCOUNT_2, votingPower: 800n }),
+    ]);
+    await db.insert(votingPowerHistory).values([
+      createHistoryRow({
+        accountId: TEST_ACCOUNT_1,
+        delta: 100n,
+        logIndex: 0,
+      }),
+      createHistoryRow({
+        accountId: TEST_ACCOUNT_2,
+        delta: -500n,
+        deltaMod: 500n,
+        logIndex: 1,
+        transactionHash: "0xtx2",
+      }),
+    ]);
+
+    const result = await repository.getVotingPowers(
+      0,
+      10,
+      "asc",
+      "signedVariation",
+      NO_FILTER,
+      [],
+    );
+
+    expect(result.items[0]!.accountId).toBe(TEST_ACCOUNT_2);
+    expect(result.items[1]!.accountId).toBe(TEST_ACCOUNT_1);
+  });
+
   it("should filter by addresses", async () => {
     await db
       .insert(accountPower)

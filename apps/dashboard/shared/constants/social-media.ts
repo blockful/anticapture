@@ -1,11 +1,2 @@
-if (!process.env.NEXT_PUBLIC_ANTICAPTURE_TELEGRAM_BOT) {
-  throw new Error("NEXT_PUBLIC_ANTICAPTURE_TELEGRAM_BOT is not set");
-}
-if (!process.env.NEXT_PUBLIC_ANTICAPTURE_SLACK_BOT) {
-  throw new Error("NEXT_PUBLIC_ANTICAPTURE_SLACK_BOT is not set");
-}
-
-export const ANTICAPTURE_TELEGRAM_BOT =
-  process.env.NEXT_PUBLIC_ANTICAPTURE_TELEGRAM_BOT;
-export const ANTICAPTURE_SLACK_BOT =
-  process.env.NEXT_PUBLIC_ANTICAPTURE_SLACK_BOT;
+export const ANTICAPTURE_TELEGRAM_BOT = "/telegram";
+export const ANTICAPTURE_SLACK_BOT = "/slack";
