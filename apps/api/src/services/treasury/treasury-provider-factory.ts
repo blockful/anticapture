@@ -99,6 +99,8 @@ export function createTreasuryService(
     logger.warn(
       "liquid treasury provider not configured; only dao-token treasury will be available",
     );
+  } else {
+    logger.info({ provider: config.id }, "liquid treasury provider configured");
   }
 
   return new TreasuryService(repository, liquidProvider, tokenPriceProvider);

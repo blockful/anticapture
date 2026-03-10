@@ -43,13 +43,19 @@ export class Indexer {
     try {
       await this.syncProposals();
     } catch (err) {
-      logger.error({ err }, "error syncing proposals");
+      logger.error(
+        { err, cursor: this.proposalsCursor },
+        "error syncing proposals - will retry",
+      );
     }
 
     try {
       await this.syncVotes();
     } catch (err) {
-      logger.error({ err }, "error syncing votes");
+      logger.error(
+        { err, cursor: this.votesCursor },
+        "error syncing votes - will retry",
+      );
     }
   }
 

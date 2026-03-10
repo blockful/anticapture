@@ -18,6 +18,7 @@ async function main() {
     migrationsFolder: "./drizzle",
     migrationsSchema: "snapshot",
   });
+  logger.info("database migrations completed");
 
   const repository = new DrizzleRepository(db);
   const provider = new SnapshotProvider(

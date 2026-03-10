@@ -2,6 +2,7 @@ import { AxiosInstance } from "axios";
 import { HTTPException } from "hono/http-exception";
 
 import { filterWithFallback } from "@/lib/query-helpers";
+import { logger } from "@/logger";
 
 import { LiquidTreasuryDataPoint } from "../types";
 
@@ -53,6 +54,7 @@ export class DuneProvider implements TreasuryProvider {
 
       return filterWithFallback(data, cutoffTimestamp);
     } catch (error) {
+      logger.error({ err: error }, "dune API fetch failed");
       throw new HTTPException(503, {
         message: "Failed to fetch total assets data",
         cause: error,
