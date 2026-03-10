@@ -1,7 +1,6 @@
 import { serve } from "@hono/node-server";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { logger } from "hono/logger";
 import { createPublicClient, http } from "viem";
 import { fromZodError } from "zod-validation-error";
 
@@ -42,6 +41,7 @@ import { getClient } from "@/lib/client";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 import { getChain } from "@/lib/utils";
+import { logger } from "@/logger";
 import { errorHandler } from "@/middlewares";
 import {
   AccountBalanceRepository,
@@ -112,14 +112,26 @@ const app = new Hono({
   },
 });
 
-app.use(logger());
+app.use(async (c, next) => {
+  const start = Date.now();
+  await next();
+  logger.info(
+    {
+      method: c.req.method,
+      url: c.req.path,
+      status: c.res.status,
+      durationMs: Date.now() - start,
+    },
+    "request",
+  );
+});
 app.onError(errorHandler);
 
 const chain = getChain(env.CHAIN_ID);
 if (!chain) {
   throw new Error(`Chain not found for chainId ${env.CHAIN_ID}`);
 }
-console.log("Connected to chain", chain.name);
+logger.info({ chain: chain.name }, "connected to chain");
 
 const client = createPublicClient({
   chain,
@@ -263,6 +275,6 @@ serve(
     port: env.PORT,
   },
   (info) => {
-    console.log(`Server running at http://localhost:${info.port}`);
+    logger.info({ port: info.port }, "server running");
   },
 );

@@ -1,5 +1,6 @@
 import axios from "axios";
 
+import { logger } from "@/logger";
 import { TreasuryRepository } from "@/repositories/treasury";
 
 import { CompoundProvider, TreasuryProvider } from "./providers";
@@ -95,8 +96,8 @@ export function createTreasuryService(
 ): TreasuryService {
   const liquidProvider = config ? resolveTreasuryProvider(config) : undefined;
   if (!config) {
-    console.warn(
-      "Liquid treasury provider not configured. Only dao-token treasury will be available.",
+    logger.warn(
+      "liquid treasury provider not configured; only dao-token treasury will be available",
     );
   }
 

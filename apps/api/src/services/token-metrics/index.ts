@@ -29,6 +29,7 @@ import {
 } from "@/lib/date-helpers";
 import { applyCursorPagination } from "@/lib/query-helpers";
 import { forwardFill, generateOrderedTimeline } from "@/lib/time-series";
+import { logger } from "@/logger";
 import { TokenMetricItem } from "@/mappers/token-metrics";
 import { DaoMetricsDayBucketRepository } from "@/repositories/daoMetricsDayBucket";
 
@@ -163,7 +164,7 @@ export class TokenMetricsService {
       }
       return undefined;
     } catch (error) {
-      console.error("Error fetching initial value:", error);
+      logger.error({ err: error }, "error fetching initial value");
       return undefined;
     }
   }

@@ -22,6 +22,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@anticapture/observability": "workspace:*",
     "@hono/node-server": "^1.19.9",
     "@hono/zod-openapi": "^0.19.6",
     "axios": "^1.9.0",
@@ -30,6 +31,7 @@
     "hono": "^4.7.10",
     "pg": "^8.17.2",
     "viem": "^2.41.2",
+    "pino-http": "^10.4.0",
     "zod": "^3.25.3",
     "zod-validation-error": "^3.4.1"
   },
