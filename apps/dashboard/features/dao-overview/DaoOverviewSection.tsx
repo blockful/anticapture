@@ -106,6 +106,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             }}
             variant={RiskAreaCardEnum.DAO_OVERVIEW}
             className="grid h-full grid-cols-2 gap-2 px-5 lg:px-0"
+            currentDaoStage={currentDaoStage}
           />
           <div className="block lg:hidden">
             <DividerDefault isHorizontal />
@@ -121,11 +122,17 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         </div>
         <SecurityCouncilCard daoOverview={daoOverview} />
         <div className="border-inverted grid grid-cols-1 gap-5 border-x lg:mx-5 lg:grid-cols-2 lg:gap-2">
-          <AttackProfitabilityChartCard daoId={daoId} />
+          <AttackProfitabilityChartCard
+            daoId={daoId}
+            currentDaoStage={currentDaoStage}
+          />
           <div className="block lg:hidden">
             <DividerDefault isHorizontal />
           </div>
-          <TokenDistributionChartCard daoId={daoId} />
+          <TokenDistributionChartCard
+            daoId={daoId}
+            currentDaoStage={currentDaoStage}
+          />
         </div>
         <div className="block lg:hidden">
           <DividerDefault isHorizontal />

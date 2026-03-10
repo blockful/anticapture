@@ -2,6 +2,8 @@
 
 import { useCallback, useState } from "react";
 
+import { CounterClockwiseClockIcon } from "@radix-ui/react-icons";
+
 import { StageRequirementsTooltip } from "@/features/dao-overview/components/StageRequirementsTooltip";
 import { StageTag } from "@/features/resilience-stages/components";
 import {
@@ -11,6 +13,7 @@ import {
 } from "@/shared/components";
 import { OutlinedBox } from "@/shared/components/boxes/OutlinedBox";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import { EmptyState } from "@/shared/components/design-system/table/components/EmptyState";
 import { DaoAvatarIcon, PointerIcon } from "@/shared/components/icons";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { DaoConfiguration } from "@/shared/dao-config/types";
@@ -143,161 +146,171 @@ export const StagesContainer = ({
         <DefaultLink
           href={`${daoId.toLowerCase()}/resilience-stages`}
           openInNewTab={false}
-          className="text-primary border-border-contrast hover:border-primary border-b border-dashed font-mono text-[13px] font-medium tracking-wider"
+          className={cn(
+            "text-primary border-border-contrast hover:border-primary font-mono text-[13px] font-medium tracking-wider",
+            currentDaoStage !== Stage.UNKNOWN && "border-b border-dashed",
+          )}
         >
           RESILIENCE STAGES
         </DefaultLink>
         <TooltipInfo text="Resilience Stages are based on governance mechanisms, considering the riskiest exposed vector as criteria for progression." />
       </div>
-      <div className="flex flex-col gap-5">
-        <div className={cn("flex flex-col")}>
-          {/* Timeline Component */}
-          <div
-            className={
-              "relative mb-4 flex h-7 w-full flex-col items-center justify-start"
-            }
-          >
-            {/* Background Line */}
-            <div className="bg-middle-dark absolute left-0 right-0 top-1/2 z-0 h-0.5 -translate-y-1/2" />
-            {/* Horizontal Line */}
+      {currentDaoStage === Stage.UNKNOWN ? (
+        <EmptyState
+          title="REVIEW NEEDED"
+          description="Review required to complete integration and start extracting deeper insights from this DAO."
+          icon={<CounterClockwiseClockIcon className="text-secondary size-8" />}
+          classes="bg-surface-contrast"
+        />
+      ) : (
+        <div className="flex flex-col gap-5">
+          <div className={cn("flex flex-col")}>
+            {/* Timeline Component */}
             <div
-              className={cn(
-                "absolute left-0 top-1/2 z-0 h-0.5 -translate-y-1/2 transition-all duration-500",
-                StagesToLineColor[currentDaoStage],
-              )}
-              style={{ width: StagesToLineWidth[currentDaoStage] }}
-            />
-            <div className="z-10 flex h-full w-full items-center justify-between">
-              {/* Stage 0 */}
-              <div className="bg-surface-default">
-                <StageTag
-                  tagStage={Stage.ZERO}
-                  daoStage={currentDaoStage}
-                  showStageText
-                />
-              </div>
-              {/* Space between Stage 0 and 1 */}
-              <div className="flex flex-1 items-center justify-center">
-                {currentDaoStage === Stage.ZERO && (
-                  <CurrentDaoStageAvatar
-                    daoId={daoId}
-                    currentDaoStage={currentDaoStage}
-                  />
+              className={
+                "relative mb-4 flex h-7 w-full flex-col items-center justify-start"
+              }
+            >
+              {/* Background Line */}
+              <div className="bg-middle-dark absolute left-0 right-0 top-1/2 z-0 h-0.5 -translate-y-1/2" />
+              {/* Horizontal Line */}
+              <div
+                className={cn(
+                  "absolute left-0 top-1/2 z-0 h-0.5 -translate-y-1/2 transition-all duration-500",
+                  StagesToLineColor[currentDaoStage],
                 )}
-              </div>
-              {/* Stage 1 */}
-              <div className="bg-surface-default">
-                <StageTag
-                  tagStage={Stage.ONE}
-                  daoStage={currentDaoStage}
-                  showStageText
-                />
-              </div>
-              {/* Space between Stage 1 and 2 */}
-              <div className="flex flex-1 items-center justify-center">
-                {currentDaoStage === Stage.ONE && (
-                  <CurrentDaoStageAvatar
-                    daoId={daoId}
-                    currentDaoStage={currentDaoStage}
-                  />
-                )}
-              </div>
-              {/* Stage 2 */}
-              <div className="bg-surface-default">
-                <StageTag
-                  tagStage={Stage.TWO}
-                  daoStage={currentDaoStage}
-                  showStageText
-                />
-              </div>
-              {currentDaoStage === Stage.TWO && (
-                <div className="right-18 absolute top-1/2 -translate-y-1/2">
-                  <CurrentDaoStageAvatar
-                    daoId={daoId}
-                    currentDaoStage={currentDaoStage}
+                style={{ width: StagesToLineWidth[currentDaoStage] }}
+              />
+              <div className="z-10 flex h-full w-full items-center justify-between">
+                {/* Stage 0 */}
+                <div className="bg-surface-default">
+                  <StageTag
+                    tagStage={Stage.ZERO}
+                    daoStage={currentDaoStage}
+                    showStageText
                   />
                 </div>
+                {/* Space between Stage 0 and 1 */}
+                <div className="flex flex-1 items-center justify-center">
+                  {currentDaoStage === Stage.ZERO && (
+                    <CurrentDaoStageAvatar
+                      daoId={daoId}
+                      currentDaoStage={currentDaoStage}
+                    />
+                  )}
+                </div>
+                {/* Stage 1 */}
+                <div className="bg-surface-default">
+                  <StageTag
+                    tagStage={Stage.ONE}
+                    daoStage={currentDaoStage}
+                    showStageText
+                  />
+                </div>
+                {/* Space between Stage 1 and 2 */}
+                <div className="flex flex-1 items-center justify-center">
+                  {currentDaoStage === Stage.ONE && (
+                    <CurrentDaoStageAvatar
+                      daoId={daoId}
+                      currentDaoStage={currentDaoStage}
+                    />
+                  )}
+                </div>
+                {/* Stage 2 */}
+                <div className="bg-surface-default">
+                  <StageTag
+                    tagStage={Stage.TWO}
+                    daoStage={currentDaoStage}
+                    showStageText
+                  />
+                </div>
+                {currentDaoStage === Stage.TWO && (
+                  <div className="right-18 absolute top-1/2 -translate-y-1/2">
+                    <CurrentDaoStageAvatar
+                      daoId={daoId}
+                      currentDaoStage={currentDaoStage}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+            <StagesCardRequirements
+              issues={issues}
+              daoStage={currentDaoStage}
+              context={context}
+              className={cn({
+                "border-border-contrast rounded-none border-b p-3":
+                  context === "overview",
+              })}
+            />
+            <div
+              className="border-light-dark bg-surface-contrast relative flex items-center justify-between gap-1 border-b p-2 lg:border-none lg:p-3"
+              onMouseLeave={() => !isMobile && setShowTooltip(false)}
+            >
+              {currentDaoStage === Stage.NONE ? (
+                <span className="text-secondary group-hover:text-primary font-mono text-sm/tight font-medium uppercase duration-300">
+                  Does not qualify
+                </span>
+              ) : (
+                <Button
+                  variant="ghost"
+                  className="group px-0 py-0 font-mono"
+                  onClick={handleButtonClick}
+                  onMouseEnter={() => !isMobile && setShowTooltip(true)}
+                >
+                  <span className="border-foreground text-alternative-sm text-nowrap border-b border-dashed font-medium duration-300 hover:border-white">
+                    <span className="text-primary uppercase duration-300">
+                      {formatPlural(
+                        highRiskItems.length ||
+                          mediumRiskItems.length ||
+                          lowRiskItems.length,
+                        "ITEM",
+                      )}
+                    </span>
+                    <span
+                      className={cn(
+                        "text-secondary duration-300",
+                        isStageKnown && "group-hover:text-primary",
+                      )}
+                    >
+                      {" "}
+                      {isStageKnown
+                        ? `TO STAGE ${Number(currentDaoStage) + 1}`
+                        : "TO NEXT"}
+                    </span>
+                  </span>
+                </Button>
+              )}
+
+              <div className="flex gap-1.5">
+                {boxConfigs.map(({ variant, count }) => (
+                  <OutlinedBox
+                    key={variant}
+                    variant={variant}
+                    disabled={!isStageKnown}
+                    className={cn("border-0 px-2 py-1", {
+                      border: currentDaoStage === Stage.NONE,
+                    })}
+                    onClick={() => setShowTooltip((prev) => !prev)}
+                    onMouseEnter={() => !isMobile && setShowTooltip(true)}
+                  >
+                    <span className="font-mono">{count}</span>
+                  </OutlinedBox>
+                ))}
+              </div>
+              {showTooltip && isStageKnown && (
+                <StageRequirementsTooltip
+                  currentStage={currentDaoStage}
+                  nextStage={Number(currentDaoStage) + 1}
+                  requirements={requirements}
+                  onMouseEnter={() => !isMobile && setShowTooltip(true)}
+                  onMouseLeave={() => !isMobile && setShowTooltip(false)}
+                />
               )}
             </div>
           </div>
-          <StagesCardRequirements
-            issues={issues}
-            daoStage={currentDaoStage}
-            context={context}
-            className={cn({
-              "border-border-contrast rounded-none border-b p-3":
-                context === "overview",
-            })}
-          />
-          <div
-            className="border-light-dark bg-surface-contrast relative flex items-center justify-between gap-1 border-b p-2 lg:border-none lg:p-3"
-            onMouseLeave={() => !isMobile && setShowTooltip(false)}
-          >
-            {currentDaoStage === Stage.NONE ? (
-              <span className="text-secondary group-hover:text-primary font-mono text-sm/tight font-medium uppercase duration-300">
-                Does not qualify
-              </span>
-            ) : (
-              <Button
-                variant="ghost"
-                className="group px-0 py-0 font-mono"
-                onClick={handleButtonClick}
-                onMouseEnter={() => !isMobile && setShowTooltip(true)}
-              >
-                <span className="border-foreground text-alternative-sm text-nowrap border-b border-dashed font-medium duration-300 hover:border-white">
-                  <span className="text-primary uppercase duration-300">
-                    {currentDaoStage !== Stage.UNKNOWN
-                      ? formatPlural(
-                          highRiskItems.length ||
-                            mediumRiskItems.length ||
-                            lowRiskItems.length,
-                          "ITEM",
-                        )
-                      : "? ITEMS"}
-                  </span>
-                  <span
-                    className={cn(
-                      "text-secondary duration-300",
-                      isStageKnown && "group-hover:text-primary",
-                    )}
-                  >
-                    {" "}
-                    {isStageKnown
-                      ? `TO STAGE ${Number(currentDaoStage) + 1}`
-                      : "TO NEXT"}
-                  </span>
-                </span>
-              </Button>
-            )}
-
-            <div className="flex gap-1.5">
-              {boxConfigs.map(({ variant, count }) => (
-                <OutlinedBox
-                  key={variant}
-                  variant={variant}
-                  disabled={!isStageKnown}
-                  className={cn("border-0 px-2 py-1", {
-                    border: currentDaoStage === Stage.NONE,
-                  })}
-                  onClick={() => setShowTooltip((prev) => !prev)}
-                  onMouseEnter={() => !isMobile && setShowTooltip(true)}
-                >
-                  <span className="font-mono">{count}</span>
-                </OutlinedBox>
-              ))}
-            </div>
-            {showTooltip && isStageKnown && (
-              <StageRequirementsTooltip
-                currentStage={currentDaoStage}
-                nextStage={Number(currentDaoStage) + 1}
-                requirements={requirements}
-                onMouseEnter={() => !isMobile && setShowTooltip(true)}
-                onMouseLeave={() => !isMobile && setShowTooltip(false)}
-              />
-            )}
-          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

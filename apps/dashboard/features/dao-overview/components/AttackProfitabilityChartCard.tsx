@@ -1,5 +1,7 @@
 "use client";
 
+import { cn } from "@/shared/utils";
+import { CounterClockwiseClockIcon } from "@radix-ui/react-icons";
 import { CircleSlash, Hammer } from "lucide-react";
 import { ElementType, useMemo } from "react";
 
@@ -7,9 +9,11 @@ import { MultilineChartAttackProfitability } from "@/features/attack-profitabili
 import { OverviewMetric } from "@/features/dao-overview/components/OverviewMetric";
 import { BlankSlate, TooltipInfo } from "@/shared/components";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import { EmptyState } from "@/shared/components/design-system/table/components/EmptyState";
 import daoConfig from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
+import { Stage } from "@/shared/types/enums/Stage";
 
 const METRICS_SCHEMA = {
   all: { label: "Treasury", color: "#4ade80" },
@@ -18,9 +22,13 @@ const METRICS_SCHEMA = {
 
 type Props = {
   daoId: DaoIdEnum;
+  currentDaoStage?: Stage;
 };
 
-export const AttackProfitabilityChartCard = ({ daoId }: Props) => {
+export const AttackProfitabilityChartCard = ({
+  daoId,
+  currentDaoStage,
+}: Props) => {
   const featureNotIncluded =
     !daoConfig[daoId].attackProfitability?.supportsLiquidTreasuryCall;
 
@@ -50,8 +58,15 @@ export const AttackProfitabilityChartCard = ({ daoId }: Props) => {
     <div className="lg:bg-surface-default flex w-full flex-col gap-4 px-5 lg:p-4">
       <CardHeader daoId={daoId} disabled={featureNotIncluded} />
 
-      {featureNotIncluded ? (
-        <EmptyState {...emptyState} />
+      {currentDaoStage === Stage.UNKNOWN ? (
+        <EmptyState
+          title="REVIEW NEEDED"
+          description="Review required to complete integration and start extracting deeper insights from this DAO."
+          icon={<CounterClockwiseClockIcon className="text-secondary size-8" />}
+          classes="bg-surface-contrast"
+        />
+      ) : featureNotIncluded ? (
+        <ChartEmptyState {...emptyState} />
       ) : (
         <div className="flex flex-col gap-4">
           <MultilineChartAttackProfitability
@@ -80,7 +95,12 @@ const CardHeader = ({
 }) => (
   <div className="flex h-5 items-center gap-2">
     {disabled ? (
-      <span className="text-primary border-border-contrast border-b border-dashed font-mono text-[13px] font-medium tracking-wider">
+      <span
+        className={cn(
+          "text-primary border-border-contrast font-mono text-[13px] font-medium tracking-wider",
+          !disabled && "border-b border-dashed",
+        )}
+      >
         ATTACK PROFITABILITY
       </span>
     ) : (
@@ -97,7 +117,7 @@ const CardHeader = ({
   </div>
 );
 
-const EmptyState = ({
+const ChartEmptyState = ({
   icon,
   title,
   text,
