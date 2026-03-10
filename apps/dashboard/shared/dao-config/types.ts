@@ -81,7 +81,7 @@ export interface DaoOverviewConfig {
   cancelFunction?: string;
   snapshot?: string;
   priceDisclaimer?: string;
-  rules: {
+  rules?: {
     delay: boolean;
     changeVote: boolean;
     timelock: boolean;

@@ -10,7 +10,7 @@ import { Footer } from "@/shared/components/design-system/footer";
 import { SwitcherDateMobile } from "@/shared/components/switchers/SwitcherDateMobile";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
-import { HeaderSidebar } from "@/widgets";
+import { HeaderDAOSidebar, HeaderSidebar } from "@/widgets";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
 
 import { DelegationTable } from "@/app/aave/holders-and-delegates/DelegationTable";
@@ -54,15 +54,19 @@ function AavePageContent() {
   };
 
   return (
-    <div className="bg-surface-background dark flex h-screen overflow-hidden">
-      <HeaderSidebar />
-      <main className="flex-1 overflow-auto">
+    <div className="bg-surface-background dark relative mx-auto flex h-screen max-w-screen-2xl">
+      <div className="active relative hidden h-screen lg:flex">
+        <div className="w-17 h-full shrink-0 overflow-y-auto">
+          <HeaderSidebar />
+        </div>
+        <div className="h-full shrink-0">
+          <HeaderDAOSidebar />
+        </div>
+      </div>
+      <main className="h-screen flex-1 overflow-auto">
         <div className="lg:hidden">
           <HeaderMobile overlayClassName="top-[57px]" />
         </div>
-        {/* <div className="h-full shrink-0">
-          <HeaderDAOSidebar />
-        </div> */}
         <TheSectionLayout
           title={PAGES_CONSTANTS.holdersAndDelegates.title}
           subtitle={"Holders & Delegates"}

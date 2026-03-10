@@ -72,7 +72,7 @@ export const TokenDistributionChartCard = ({
           title="REVIEW NEEDED"
           description="Review required to complete integration and start extracting deeper insights from this DAO."
           icon={<CounterClockwiseClockIcon className="text-secondary size-8" />}
-          classes="bg-surface-contrast"
+          classNames="bg-surface-contrast"
         />
       ) : (
         <>

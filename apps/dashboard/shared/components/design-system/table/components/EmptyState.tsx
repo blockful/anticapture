@@ -6,20 +6,20 @@ export const EmptyState = ({
   description = "Things are stabilizing, and our team is on it!",
   icon,
   fillHeight = false,
-  classes,
+  classNames,
 }: {
   title?: string;
   description?: string;
   icon?: React.ReactNode;
   fillHeight?: boolean;
-  classes: string;
+  classNames?: string;
 }) => {
   return (
     <div
       className={cn(
         "text-secondary/70 flex flex-col items-center gap-2 p-8 text-center text-sm",
         fillHeight && "h-[calc(100vh-300px)] justify-center",
-        classes,
+        classNames,
       )}
     >
       {icon || <AlienIcon />}

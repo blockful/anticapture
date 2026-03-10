@@ -198,14 +198,14 @@ export const DaoOverviewHeaderMetrics = ({
     formattedValues.liquidTreasuryAll,
     Number(liquidTreasuryAllPercent),
     formattedValues.liquidTreasuryNonDao,
-    reviewStage,
+    !!reviewStage,
   );
 
   const delegatesToPass = getDelegatesToPass(
     daoId,
     Number(topDelegatesToPass),
     isLoading,
-    reviewStage,
+    !!reviewStage,
   );
 
   return (
