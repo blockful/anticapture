@@ -5,7 +5,7 @@ import {
   Button,
   iconSizeStyles,
 } from "@/shared/components/design-system/buttons/button/Button";
-import { ButtonProps } from "@/shared/components/design-system/buttons/types";
+import type { ButtonProps } from "@/shared/components/design-system/buttons/types";
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 // Extended type for stories that includes the custom showIcon property

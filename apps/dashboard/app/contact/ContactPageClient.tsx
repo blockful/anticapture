@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Mail, Rocket } from "lucide-react";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
+import type * as z from "zod";
 
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 import { Button, TheSectionLayout } from "@/shared/components";

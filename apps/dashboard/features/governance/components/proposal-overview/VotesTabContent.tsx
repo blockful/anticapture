@@ -1,6 +1,6 @@
 "use client";
 
-import { GetProposalQuery } from "@anticapture/graphql-client";
+import type { GetProposalQuery } from "@anticapture/graphql-client";
 import {
   useGetProposalNonVotersQuery,
   useGetVotesQuery,
@@ -12,7 +12,7 @@ import { formatUnits } from "viem";
 import { TabsDidntVoteContent } from "@/features/governance/components/proposal-overview/TabsDidntVoteContent";
 import { TabsVotedContent } from "@/features/governance/components/proposal-overview/TabsVotedContent";
 import daoConfig from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { getAuthHeaders } from "@/shared/utils/server-utils";
 

@@ -1,20 +1,23 @@
 "use client";
 
-import {
+import type {
   ColumnDef,
-  flexRender,
   SortingState,
+  ColumnFiltersState,
+  TableOptions,
+  ExpandedState,
+} from "@tanstack/react-table";
+import {
+  flexRender,
   getCoreRowModel,
   getPaginationRowModel,
   getFilteredRowModel,
-  ColumnFiltersState,
   getSortedRowModel,
   useReactTable,
-  TableOptions,
-  ExpandedState,
   getExpandedRowModel,
 } from "@tanstack/react-table";
-import { ReactNode, useState } from "react";
+import type { ReactNode } from "react";
+import { useState } from "react";
 
 import { TreeLines } from "@/shared/components/tables/TreeLines";
 import {

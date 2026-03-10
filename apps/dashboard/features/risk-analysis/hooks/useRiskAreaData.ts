@@ -1,7 +1,8 @@
-import { JSX, useMemo } from "react";
+import type { JSX } from "react";
+import { useMemo } from "react";
 
-import { RiskAreaDisplayItem } from "@/features/risk-analysis/RiskAnalysisSection";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { RiskAreaDisplayItem } from "@/features/risk-analysis/RiskAnalysisSection";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { RiskAreaEnum } from "@/shared/types/enums";
 import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
 

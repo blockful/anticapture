@@ -1,7 +1,8 @@
 "use client";
 
 import { AlertCircleIcon, AlertTriangleIcon } from "lucide-react";
-import { ReactNode, useEffect } from "react";
+import type { ReactNode } from "react";
+import { useEffect } from "react";
 
 import { ClickableCell } from "@/features/panel/components/cells/ClickableCell";
 import { RiskLevelText } from "@/features/panel/components/RiskLevelText";
@@ -9,7 +10,7 @@ import { useAttackProfitability } from "@/features/panel/hooks";
 import { SkeletonRow, BadgeStatus } from "@/shared/components";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import {
   GovernanceImplementationEnum,
   RiskAreaEnum,

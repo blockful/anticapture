@@ -1,14 +1,13 @@
 "use client";
 
-import {
-  QueryInput_AccountBalances_OrderBy,
-  QueryInput_AccountBalances_OrderDirection,
-} from "@anticapture/graphql-client";
-import { ColumnDef } from "@tanstack/react-table";
+import type { QueryInput_AccountBalances_OrderDirection } from "@anticapture/graphql-client";
+import { QueryInput_AccountBalances_OrderBy } from "@anticapture/graphql-client";
+import type { ColumnDef } from "@tanstack/react-table";
 import { Plus } from "lucide-react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { useMemo } from "react";
-import { Address, formatUnits, zeroAddress } from "viem";
+import type { Address } from "viem";
+import { formatUnits, zeroAddress } from "viem";
 
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 import { useTokenHolders } from "@/features/holders-and-delegates/hooks/useTokenHolders";
@@ -26,8 +25,8 @@ import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
 import daoConfig from "@/shared/dao-config";
 import { useScreenSize } from "@/shared/hooks";
 import { useArkhamData } from "@/shared/hooks/graphql-client/useArkhamData";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { TimeInterval } from "@/shared/types/enums/TimeInterval";
+import type { DaoIdEnum } from "@/shared/types/daos";
+import type { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { formatNumberUserReadable } from "@/shared/utils";
 
 interface TokenHolderTableData {

@@ -1,15 +1,13 @@
 "use client";
 
+import type { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
 import {
   FilterBox,
   FilterMaxMinInput,
   FilterSort,
-  SortOption,
 } from "@/shared/components/design-system/table/filters/amount-filter/components";
-import {
-  useAmountFilterStore,
-  AmountFilterState,
-} from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
+import type { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
+import { useAmountFilterStore } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 
 interface AmountFilterProps {
   className?: string;

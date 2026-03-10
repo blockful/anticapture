@@ -1,23 +1,26 @@
 "use client";
 
-import {
+import type {
   ColumnDef as TanstackColumnDef,
-  flexRender,
   SortingState,
-  getCoreRowModel,
-  getFilteredRowModel,
   ColumnFiltersState,
-  getSortedRowModel,
-  getExpandedRowModel,
   ExpandedState,
-  useReactTable,
   TableOptions,
   Row,
+} from "@tanstack/react-table";
+import {
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getSortedRowModel,
+  getExpandedRowModel,
+  useReactTable,
 } from "@tanstack/react-table";
 import { DownloadIcon, Inbox } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Fragment, ReactNode, useEffect, useRef, useState } from "react";
+import type { ReactNode } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { CSVLink } from "react-csv";
 
 import { defaultLinkVariants } from "@/shared/components/design-system/links/default-link";
@@ -30,10 +33,8 @@ import {
   TableRow,
 } from "@/shared/components/design-system/table/components";
 import { EmptyState } from "@/shared/components/design-system/table/components/EmptyState";
-import {
-  ExpandableData,
-  ExpandButton,
-} from "@/shared/components/design-system/table/ExpandButton";
+import type { ExpandableData } from "@/shared/components/design-system/table/ExpandButton";
+import { ExpandButton } from "@/shared/components/design-system/table/ExpandButton";
 import {
   headerSizeVariants,
   rowSizeVariants,

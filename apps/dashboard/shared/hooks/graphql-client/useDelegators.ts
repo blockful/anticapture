@@ -2,13 +2,11 @@ import {
   QueryInput_Delegators_OrderBy,
   QueryInput_Delegators_OrderDirection,
 } from "@anticapture/graphql-client";
-import {
-  GetDelegatorsQuery,
-  useGetDelegatorsQuery,
-} from "@anticapture/graphql-client/hooks";
+import type { GetDelegatorsQuery } from "@anticapture/graphql-client/hooks";
+import { useGetDelegatorsQuery } from "@anticapture/graphql-client/hooks";
 import { useState, useCallback, useMemo, useEffect } from "react";
 
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 interface PaginationInfo {

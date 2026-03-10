@@ -2,13 +2,13 @@ import {
   QueryInput_Proposals_OrderDirection,
   useGetProposalsFromDaoQuery,
 } from "@anticapture/graphql-client/hooks";
-import { ApolloError } from "@apollo/client";
+import type { ApolloError } from "@apollo/client";
 import { useMemo } from "react";
 
 import type { Proposal as GovernanceProposal } from "@/features/governance/types";
 import { transformToGovernanceProposal } from "@/features/governance/utils/transformToGovernanceProposal";
 import daoConfig from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 export interface UseLastProposalsResult {

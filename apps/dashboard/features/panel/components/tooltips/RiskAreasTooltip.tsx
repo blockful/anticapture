@@ -1,5 +1,5 @@
 import { RiskAreaCard, RiskAreaCardEnum } from "@/shared/components";
-import { RiskAreaConstants } from "@/shared/constants/risk-areas";
+import type { RiskAreaConstants } from "@/shared/constants/risk-areas";
 import { RiskLevel } from "@/shared/types/enums";
 import { cn } from "@/shared/utils";
 

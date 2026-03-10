@@ -2,7 +2,7 @@ import { useMemo } from "react";
 
 import { useTreasury } from "@/features/attack-profitability/hooks";
 import { useCostOfAttack } from "@/features/panel/hooks/useCostOfAttack";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 
 export const useAttackProfitability = (daoId: DaoIdEnum) => {

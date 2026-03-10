@@ -1,6 +1,6 @@
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 export const ChainCell = ({ daoId }: { daoId: DaoIdEnum }) => {
   const { icon: ChainIcon, name: chainName } =

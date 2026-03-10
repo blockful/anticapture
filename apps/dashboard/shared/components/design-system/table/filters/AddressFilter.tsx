@@ -2,7 +2,8 @@
 
 import { ResetIcon } from "@radix-ui/react-icons";
 import { Loader2 } from "lucide-react";
-import { ChangeEvent, useState } from "react";
+import type { ChangeEvent } from "react";
+import { useState } from "react";
 import { isAddress } from "viem";
 import { normalize } from "viem/ens";
 

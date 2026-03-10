@@ -1,8 +1,9 @@
 import axios from "axios";
-import useSWR, { SWRConfiguration } from "swr";
-import { Address } from "viem";
+import type { SWRConfiguration } from "swr";
+import useSWR from "swr";
+import type { Address } from "viem";
 
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { BACKEND_ENDPOINT, getAuthHeaders } from "@/shared/utils/server-utils";
 
 export interface TokenDataResponse {

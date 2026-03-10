@@ -1,6 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import Link, { LinkProps } from "next/link";
-import { ReactNode } from "react";
+import type { LinkProps } from "next/link";
+import Link from "next/link";
+import type { ReactNode } from "react";
 
 import { cn } from "@/shared/utils";
 

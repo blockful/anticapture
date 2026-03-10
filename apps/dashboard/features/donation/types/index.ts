@@ -1,4 +1,4 @@
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 export interface DonationData {
   title: string;

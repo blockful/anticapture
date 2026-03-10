@@ -3,16 +3,15 @@ import {
   QueryInput_Delegators_OrderDirection,
 } from "@anticapture/graphql-client";
 import { useGetVotingPowerQuery } from "@anticapture/graphql-client/hooks";
-import { Address, formatUnits } from "viem";
+import type { Address } from "viem";
+import { formatUnits } from "viem";
 
 import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
 import daoConfig from "@/shared/dao-config";
-import {
-  useDelegators,
-  DelegatorItem,
-} from "@/shared/hooks/graphql-client/useDelegators";
+import type { DelegatorItem } from "@/shared/hooks/graphql-client/useDelegators";
+import { useDelegators } from "@/shared/hooks/graphql-client/useDelegators";
 import { useMultipleEnsData } from "@/shared/hooks/useEnsData";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatAddress } from "@/shared/utils/formatAddress";
 import { getAuthHeaders } from "@/shared/utils/server-utils";
 

@@ -1,7 +1,8 @@
 "use client";
 
 import { ChevronRight, X } from "lucide-react";
-import { ReactNode, useState, useEffect } from "react";
+import type { ReactNode } from "react";
+import { useState, useEffect } from "react";
 
 import { IconButton } from "@/shared/components/design-system/buttons/icon-button/IconButton";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
