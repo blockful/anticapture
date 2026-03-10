@@ -4,7 +4,7 @@ import { ElementType, ReactNode } from "react";
 import { cn } from "@/shared/utils";
 
 const badgeStatusVariants = cva(
-  "rounded-full h-5 gap-1.5 px-1.5 flex items-center text-xs font-medium",
+  "rounded-full h-5 gap-1.5 px-1.5 flex items-center text-xs font-medium whitespace-nowrap",
   {
     variants: {
       variant: {

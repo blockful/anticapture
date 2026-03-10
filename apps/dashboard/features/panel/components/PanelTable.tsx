@@ -1,7 +1,8 @@
 "use client";
 
+import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { ColumnDef } from "@tanstack/react-table";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 import {
   DaoCell,
@@ -18,6 +19,8 @@ import {
 } from "@/features/panel/components/SortableColumnHeader";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { cn } from "@/shared/utils";
 import { DaoIdEnum } from "@/shared/types/daos";
 
 type PanelDao = {
@@ -41,14 +44,32 @@ const createSortingFn = (ref: SortValuesRef) => {
     (ref.current[rowA.index] ?? 0) - (ref.current[rowB.index] ?? 0);
 };
 
+const TABS = {
+  FULLY_ANALYZED: "fully-analyzed",
+  NOT_REVIEWED: "not-reviewed",
+} as const;
+
+type TabValue = (typeof TABS)[keyof typeof TABS];
+
 export const PanelTable = () => {
+  const [activeTab, setActiveTab] = useState<TabValue>(TABS.FULLY_ANALYZED);
   const costOfAttackSort = useRef<Record<number, number>>({});
   const attackProfitabilitySort = useRef<Record<number, number>>({});
   const activeTokensSort = useRef<Record<number, number>>({});
 
-  const data = Object.values(DaoIdEnum).map((daoId) => ({
+  const allDaos = Object.values(DaoIdEnum).map((daoId) => ({
     dao: daoId,
   }));
+
+  const fullyAnalyzedDaos = allDaos.filter(
+    ({ dao }) => !!daoConfigByDaoId[dao].governanceImplementation,
+  );
+  const notReviewedDaos = allDaos.filter(
+    ({ dao }) => !daoConfigByDaoId[dao].governanceImplementation,
+  );
+
+  const data =
+    activeTab === TABS.FULLY_ANALYZED ? fullyAnalyzedDaos : notReviewedDaos;
 
   const panelColumns: ColumnDef<PanelDao>[] = [
     {
@@ -186,11 +207,48 @@ export const PanelTable = () => {
   ];
 
   return (
-    <Table
-      columns={panelColumns}
-      data={data}
-      withSorting={true}
-      stickyFirstColumn={true}
-    />
+    <div className="flex flex-col">
+      <Tabs
+        value={activeTab}
+        onValueChange={(v) => setActiveTab(v as TabValue)}
+      >
+        <TabsList className="mb-4 flex border-b border-b-white/10 font-mono">
+          <TabsTrigger
+            value={TABS.FULLY_ANALYZED}
+            className={cn(
+              "text-secondary relative flex cursor-pointer items-center gap-2 whitespace-nowrap px-2 py-2 text-xs font-medium",
+              "data-[state=active]:text-link",
+              "after:absolute after:-bottom-px after:left-0 after:right-0 after:h-px after:bg-transparent after:content-['']",
+              "data-[state=active]:after:bg-surface-solid-brand",
+            )}
+          >
+            Fully Analyzed
+            <span className="bg-surface-contrast text-secondary rounded-full px-1.5 py-0.5 text-xs">
+              {fullyAnalyzedDaos.length}
+            </span>
+          </TabsTrigger>
+          <TabsTrigger
+            value={TABS.NOT_REVIEWED}
+            className={cn(
+              "text-secondary relative flex cursor-pointer items-center gap-2 whitespace-nowrap px-2 py-2 text-xs font-medium",
+              "data-[state=active]:text-link",
+              "after:absolute after:-bottom-px after:left-0 after:right-0 after:h-px after:bg-transparent after:content-['']",
+              "data-[state=active]:after:bg-surface-solid-brand",
+            )}
+          >
+            Not Reviewed
+            <span className="bg-surface-contrast text-secondary rounded-full px-1.5 py-0.5 text-xs">
+              {notReviewedDaos.length}
+            </span>
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
+      <Table
+        columns={panelColumns}
+        data={data}
+        withSorting={true}
+        stickyFirstColumn={true}
+      />
+    </div>
   );
 };
