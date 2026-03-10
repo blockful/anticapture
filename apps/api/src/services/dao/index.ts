@@ -1,5 +1,6 @@
 import { DaoDataCache } from "@/cache/dao-cache.interface";
 import { DAOClient } from "@/clients";
+import { logger } from "@/logger";
 import { DaoResponse } from "@/mappers";
 
 export class DaoService {
@@ -23,6 +24,8 @@ export class DaoService {
     }
 
     // Fetch from blockchain
+    logger.info({ daoId }, "fetching DAO parameters from blockchain");
+
     const [
       quorum,
       proposalThreshold,
@@ -49,6 +52,7 @@ export class DaoService {
 
     // Cache and return
     this.cache.set(daoId, daoData);
+    logger.info({ daoId }, "cached DAO parameters");
     return daoData;
   }
 }
