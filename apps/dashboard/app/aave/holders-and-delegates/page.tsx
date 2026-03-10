@@ -15,6 +15,7 @@ import { HeaderMobile } from "@/widgets/HeaderMobile";
 
 import { DelegationTable } from "@/app/aave/holders-and-delegates/DelegationTable";
 import { TheSectionLayout } from "@/shared/components/containers/TheSectionLayout";
+import { SubSectionsContainer } from "@/shared/components/design-system/section";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { UserCheck } from "lucide-react";
 
@@ -73,36 +74,34 @@ function AavePageContent() {
           icon={<UserCheck className="section-layout-icon" />}
           description={PAGES_CONSTANTS.holdersAndDelegates.description}
         >
-          <div className="flex w-full flex-1 flex-col items-center p-4">
-            <div className="mx-auto w-full max-w-7xl flex-1">
-              <div className="mb-4 flex w-full items-center justify-between px-4 pt-4">
-                <div className="flex gap-2">
-                  {TABS.map((tab) => (
-                    <TabButton
-                      key={tab.id}
-                      id={tab.id}
-                      label={tab.label}
-                      activeTab={activeTab as TabId}
-                      setActiveTab={handleTabChange}
-                    />
-                  ))}
-                </div>
-                <SwitcherDateMobile
-                  defaultValue={days || defaultDays}
-                  setTimeInterval={setDays}
-                />
+          <SubSectionsContainer>
+            <div className="flex w-full items-center justify-between">
+              <div className="flex gap-2">
+                {TABS.map((tab) => (
+                  <TabButton
+                    key={tab.id}
+                    id={tab.id}
+                    label={tab.label}
+                    activeTab={activeTab as TabId}
+                    setActiveTab={handleTabChange}
+                  />
+                ))}
               </div>
-              {activeTab === "delegates" ? (
-                <DelegationTable />
-              ) : (
-                <TokenHolders
-                  days={days || defaultDays}
-                  daoId={DaoIdEnum.AAVE}
-                  showTokenName={false}
-                />
-              )}
+              <SwitcherDateMobile
+                defaultValue={days || defaultDays}
+                setTimeInterval={setDays}
+              />
             </div>
-          </div>
+            {activeTab === "delegates" ? (
+              <DelegationTable />
+            ) : (
+              <TokenHolders
+                days={days || defaultDays}
+                daoId={DaoIdEnum.AAVE}
+                showTokenName={false}
+              />
+            )}
+          </SubSectionsContainer>
         </TheSectionLayout>
         <Footer />
       </main>
