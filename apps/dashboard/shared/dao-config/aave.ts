@@ -12,7 +12,6 @@ export const AAVE: DaoConfiguration = {
     svgColor: "#27272A",
     svgBgColor: "#9391F7",
   },
-  noStage: true,
   forumLink: "https://gov.uniswap.org/",
   icon: AaveIcon,
   ogIcon: UniswapOgIcon,

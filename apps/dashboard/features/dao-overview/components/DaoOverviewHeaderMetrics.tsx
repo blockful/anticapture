@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { DaoOverviewHeader } from "@/features/dao-overview/components/DaoOverviewHeader";
 import { DaoOverviewMetricCard } from "@/features/dao-overview/components/DaoOverviewMetricCard";
 import { useDaoOverviewData } from "@/features/dao-overview/hooks/useDaoOverviewData";
-import { TooltipInfo } from "@/shared/components";
+import { BadgeStatus, TooltipInfo } from "@/shared/components";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { DaoConfiguration } from "@/shared/dao-config/types";
 import { useQuorumGap } from "@/shared/hooks/useQuorumGap";
@@ -13,6 +13,7 @@ import { formatNumberUserReadable } from "@/shared/utils";
 interface DaoOverviewHeaderMetricsProps {
   daoId: string;
   daoConfig: DaoConfiguration;
+  reviewStage?: boolean;
 }
 
 const TREASURY_TOOLTIPS = {
@@ -58,6 +59,7 @@ const getTreasuryMetrics = (
   liquidTreasuryAllValueFormatted: string,
   liquidTreasuryAllPercent: number,
   liquidTreasuryNonDaoValueFormatted: string,
+  reviewStage?: boolean,
 ) => {
   // if (daoId === DaoIdEnum.OPTIMISM) {
   //   return (
@@ -94,9 +96,17 @@ const getTreasuryMetrics = (
   return (
     <DaoOverviewMetricCard
       title="Treasury"
-      text={`$${liquidTreasuryAllValueFormatted} (${liquidTreasuryAllPercent}% in ${daoId})`}
+      text={
+        reviewStage ? (
+          <BadgeStatus variant={"dimmed"}>
+            <span className="w-full text-center">Review needed</span>
+          </BadgeStatus>
+        ) : (
+          `$${liquidTreasuryAllValueFormatted} (${liquidTreasuryAllPercent}% in ${daoId})`
+        )
+      }
       subText={
-        liquidTreasuryNonDaoValueFormatted !== "0"
+        liquidTreasuryNonDaoValueFormatted !== "0" && !reviewStage
           ? `$${liquidTreasuryNonDaoValueFormatted} not counting ${daoId}`
           : undefined
       }
@@ -134,6 +144,7 @@ const getDelegatesToPass = (
 export const DaoOverviewHeaderMetrics = ({
   daoId,
   daoConfig,
+  reviewStage,
 }: DaoOverviewHeaderMetricsProps) => {
   const {
     treasuryStats,
@@ -178,6 +189,7 @@ export const DaoOverviewHeaderMetrics = ({
     formattedValues.liquidTreasuryAll,
     Number(liquidTreasuryAllPercent),
     formattedValues.liquidTreasuryNonDao,
+    reviewStage,
   );
 
   const delegatesToPass = getDelegatesToPass(
@@ -198,15 +210,34 @@ export const DaoOverviewHeaderMetrics = ({
       <div className="border-t-border-default lg:bg-surface-default grid grid-cols-2 gap-4 border-t border-dashed pt-4 lg:grid-cols-4 lg:gap-0.5 lg:border-none lg:pt-0">
         <DaoOverviewMetricCard
           title="Votable Supply"
-          text={`${formattedValues.delegatedSupply} ${daoId} delegated`}
-          subText={`${formattedValues.activeSupply} ${daoId} active in last 90d`}
+          text={
+            reviewStage ? (
+              <BadgeStatus variant={"dimmed"}>
+                <span className="w-full text-center">Review needed</span>
+              </BadgeStatus>
+            ) : (
+              `${formattedValues.delegatedSupply} ${daoId} delegated`
+            )
+          }
+          subText={
+            !reviewStage &&
+            `${formattedValues.activeSupply} ${daoId} active in last 90d`
+          }
           isLoading={isLoading}
         />
         {treasuryMetrics}
         <DaoOverviewMetricCard
           title="Average Turnout"
-          text={`${formattedValues.averageTurnout} ${daoId}`}
-          subText={quorumGapText}
+          text={
+            reviewStage ? (
+              <BadgeStatus variant={"dimmed"}>
+                <span className="w-full text-center">Review needed</span>
+              </BadgeStatus>
+            ) : (
+              `${formattedValues.averageTurnout} ${daoId}`
+            )
+          }
+          subText={!reviewStage && quorumGapText}
           isLoading={isLoading}
         />
         {delegatesToPass}

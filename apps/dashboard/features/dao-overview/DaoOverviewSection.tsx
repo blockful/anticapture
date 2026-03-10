@@ -19,6 +19,7 @@ import { RiskAreaCardEnum, RiskAreaCardWrapper } from "@/shared/components";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 import { DaoAvatarIcon } from "@/shared/components/icons";
 import daoConfigByDaoId from "@/shared/dao-config";
+import { Stage } from "@/shared/types/enums/Stage";
 import {
   fieldsToArray,
   getDaoStageFromFields,
@@ -67,7 +68,11 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               className="border-inverted size-32 shrink-0 rounded-none border-2 lg:border-none"
             />
 
-            <DaoOverviewHeaderMetrics daoId={daoId} daoConfig={daoConfig} />
+            <DaoOverviewHeaderMetrics
+              daoId={daoId}
+              daoConfig={daoConfig}
+              reviewStage={currentDaoStage === Stage.UNKNOWN}
+            />
           </div>
         </div>
         <div className="block lg:hidden">
