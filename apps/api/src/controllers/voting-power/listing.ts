@@ -21,7 +21,8 @@ interface VotingPowerService {
       | "delegationsCount"
       | "variation"
       | "total"
-      | "balance",
+      | "balance"
+      | "signedVariation",
     amountFilter: AmountFilter,
     addresses: Address[],
     fromDate?: number,

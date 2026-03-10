@@ -283,7 +283,11 @@ export class VotingPowerRepository {
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
-    orderBy: "votingPower" | "delegationsCount" | "variation",
+    orderBy:
+      | "votingPower"
+      | "delegationsCount"
+      | "variation"
+      | "signedVariation",
     amountFilter: AmountFilter,
     addresses: Address[],
     fromDate?: number,
@@ -326,11 +330,15 @@ export class VotingPowerRepository {
         ? orderDirectionFn(
             sql`ABS(COALESCE(${variationSubquery.absoluteChange}, 0))`,
           )
-        : orderDirectionFn(
-            orderBy === "votingPower"
-              ? accountPower.votingPower
-              : accountPower.delegationsCount,
-          );
+        : orderBy === "signedVariation"
+          ? orderDirectionFn(
+              sql`COALESCE(${variationSubquery.absoluteChange}, 0)`,
+            )
+          : orderDirectionFn(
+              orderBy === "votingPower"
+                ? accountPower.votingPower
+                : accountPower.delegationsCount,
+            );
 
     const items = await this.db
       .select({

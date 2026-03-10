@@ -54,7 +54,8 @@ interface VotingPowersRepository {
       | "delegationsCount"
       | "variation"
       | "total"
-      | "balance",
+      | "balance"
+      | "signedVariation",
     amountFilter: AmountFilter,
     addresses: Address[],
     fromDate?: number,
@@ -170,7 +171,8 @@ export class VotingPowerService {
       | "delegationsCount"
       | "variation"
       | "total"
-      | "balance",
+      | "balance"
+      | "signedVariation",
     amountFilter: AmountFilter,
     addresses: Address[],
     fromDate?: number,

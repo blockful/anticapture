@@ -92,7 +92,7 @@ export class AccountBalanceRepository {
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
-    orderBy: "balance" | "variation",
+    orderBy: "balance" | "variation" | "signedVariation",
     addresses: Address[],
     delegates: Address[],
     excludeAddresses: Address[],
@@ -122,10 +122,13 @@ export class AccountBalanceRepository {
 
     const orderDirectionFn = orderDirection === "desc" ? desc : asc;
 
+    const variationChangeSql = sql`${variations.fromChange} + ${variations.toChange}`;
     const orderByCriteria =
       orderBy === "balance"
         ? variations.currentBalance
-        : sql`ABS(${variations.fromChange} + ${variations.toChange})`;
+        : orderBy === "signedVariation"
+          ? variationChangeSql
+          : sql`ABS(${variationChangeSql})`;
 
     const result = await this.db
       .select({
@@ -133,10 +136,9 @@ export class AccountBalanceRepository {
         tokenId: variations.tokenId,
         delegate: variations.delegate,
         currentBalance: variations.currentBalance,
-        absoluteChange:
-          sql<string>`${variations.fromChange} + ${variations.toChange}`.as(
-            "absolute_change",
-          ),
+        absoluteChange: sql<string>`${variationChangeSql}`.as(
+          "absolute_change",
+        ),
       })
       .from(variations)
       .orderBy(orderDirectionFn(orderByCriteria))

@@ -38,7 +38,7 @@ import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadabl
 interface BalanceHistoryData {
   id: string;
   timestamp: string;
-  amount: string;
+  amount: number;
   type: "Buy" | "Sell";
   fromAddress: string;
   fromEns?: string;
@@ -123,7 +123,7 @@ export const BalanceHistoryTable = ({
       return {
         id: transfer.transactionHash,
         timestamp: transfer.timestamp,
-        amount: formatNumberUserReadable(transfer.amount),
+        amount: transfer.amount,
         type: transfer.direction === "in" ? "Buy" : ("Sell" as "Buy" | "Sell"),
         fromAddress: transfer.fromAccountId,
         toAddress: transfer.toAccountId,
@@ -197,7 +197,7 @@ export const BalanceHistoryTable = ({
         columnClassName: "w-32",
       },
       cell: ({ row }) => {
-        const amount = row.getValue("amount") as string;
+        const amount = row.getValue("amount") as number;
 
         if (isInitialLoading) {
           return (
@@ -212,7 +212,9 @@ export const BalanceHistoryTable = ({
 
         return (
           <div className="flex items-center justify-end">
-            <span className="text-secondary text-sm font-medium">{amount}</span>
+            <span className="text-secondary text-sm font-medium">
+              {formatNumberUserReadable(amount)}
+            </span>
           </div>
         );
       },
@@ -472,6 +474,7 @@ export const BalanceHistoryTable = ({
         isLoadingMore={loading}
         onLoadMore={fetchNextPage}
         withDownloadCSV={true}
+        csvFilename="balance-history.csv"
         error={error}
         fillHeight
       />

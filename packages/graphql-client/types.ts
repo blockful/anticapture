@@ -1131,6 +1131,7 @@ export enum QueryInput_AccountBalanceVariations_OrderDirection {
 
 export enum QueryInput_AccountBalances_OrderBy {
   Balance = 'balance',
+  SignedVariation = 'signedVariation',
   Variation = 'variation'
 }
 
@@ -1452,6 +1453,7 @@ export enum QueryInput_VotingPowerVariations_OrderDirection {
 
 export enum QueryInput_VotingPowers_OrderBy {
   DelegationsCount = 'delegationsCount',
+  SignedVariation = 'signedVariation',
   Variation = 'variation',
   VotingPower = 'votingPower'
 }

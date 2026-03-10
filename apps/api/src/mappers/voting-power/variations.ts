@@ -82,6 +82,7 @@ export const VotingPowersRequestSchema = z.object({
       "votingPower",
       "delegationsCount",
       "variation",
+      "signedVariation",
       /* AAVE only */
       "total",
       "balance",
