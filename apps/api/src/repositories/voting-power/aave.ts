@@ -146,6 +146,7 @@ export class AAVEVotingPowerRepository {
       | "votingPower"
       | "delegationsCount"
       | "variation"
+      | "signedVariation"
       | "total"
       | "balance",
     amountFilter: AmountFilter,
@@ -192,22 +193,29 @@ export class AAVEVotingPowerRepository {
       WHEN (${combinedPowerSql} - COALESCE(${variationSubquery.absoluteChange}, 0)) = 0 THEN
         CASE WHEN COALESCE(${variationSubquery.absoluteChange}, 0) = 0 THEN '0'
         ELSE ${PERCENTAGE_NO_BASELINE} END
-      ELSE ROUND((COALESCE(${variationSubquery.absoluteChange}, 0)::numeric / (${combinedPowerSql} - COALESCE(${variationSubquery.absoluteChange}, 0))::numeric) * 100, 2)::text
+      ELSE ROUND((COALESCE(${variationSubquery.absoluteChange}, 0)::numeric / (${combinedPowerSql} - COALESCE(${variationSubquery.absoluteChange}, 0))::numeric) * 100, 6)::text
     END
   `;
 
     const orderDirectionFn = orderDirection === "desc" ? desc : asc;
-    const orderSql = orderDirectionFn(
+    const orderSql =
       orderBy === "variation"
-        ? sql`ABS(COALESCE(${variationSubquery.absoluteChange}, 0))`
-        : orderBy === "total"
-          ? combinedPowerSql
-          : orderBy === "votingPower"
-            ? accountPower.votingPower
-            : orderBy === "balance"
-              ? sql`COALESCE(${balanceSubquery.totalBalance}, 0)`
-              : accountPower.delegationsCount,
-    );
+        ? orderDirectionFn(
+            sql`ABS(COALESCE(${variationSubquery.absoluteChange}, 0))`,
+          )
+        : orderBy === "signedVariation"
+          ? orderDirectionFn(
+              sql`COALESCE(${variationSubquery.absoluteChange}, 0)`,
+            )
+          : orderDirectionFn(
+              orderBy === "total"
+                ? combinedPowerSql
+                : orderBy === "votingPower"
+                  ? accountPower.votingPower
+                  : orderBy === "balance"
+                    ? sql`COALESCE(${balanceSubquery.totalBalance}, 0)`
+                    : accountPower.delegationsCount,
+            );
 
     const items = await this.db
       .select({
@@ -309,7 +317,7 @@ export class AAVEVotingPowerRepository {
             WHEN (${combinedPowerSql} - COALESCE(${variationSubquery.absoluteChange}, 0)) = 0 THEN
               CASE WHEN COALESCE(${variationSubquery.absoluteChange}, 0) = 0 THEN '0'
               ELSE ${PERCENTAGE_NO_BASELINE} END
-            ELSE ROUND((COALESCE(${variationSubquery.absoluteChange}, 0)::numeric / (${combinedPowerSql} - COALESCE(${variationSubquery.absoluteChange}, 0))::numeric) * 100, 2)::text
+            ELSE ROUND((COALESCE(${variationSubquery.absoluteChange}, 0)::numeric / (${combinedPowerSql} - COALESCE(${variationSubquery.absoluteChange}, 0))::numeric) * 100, 6)::text
           END
         `,
       })

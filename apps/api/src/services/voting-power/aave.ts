@@ -35,6 +35,7 @@ interface Repo {
       | "votingPower"
       | "delegationsCount"
       | "variation"
+      | "signedVariation"
       | "total"
       | "balance",
     amountFilter: AmountFilter,
@@ -97,6 +98,7 @@ export class AAVEVotingPowerService {
       | "votingPower"
       | "delegationsCount"
       | "variation"
+      | "signedVariation"
       | "total"
       | "balance",
     amountFilter: AmountFilter,

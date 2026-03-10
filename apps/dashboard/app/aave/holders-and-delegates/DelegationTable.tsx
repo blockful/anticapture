@@ -1,14 +1,13 @@
 "use client";
 
-import {
-  QueryInput_VotingPowers_OrderBy,
-  QueryInput_VotingPowers_OrderDirection,
-} from "@anticapture/graphql-client";
-import { ColumnDef } from "@tanstack/react-table";
+import { QueryInput_VotingPowers_OrderBy } from "@anticapture/graphql-client";
+import type { QueryInput_VotingPowers_OrderDirection } from "@anticapture/graphql-client";
+import type { ColumnDef } from "@tanstack/react-table";
 import { Plus } from "lucide-react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { useMemo } from "react";
-import { Address, formatUnits } from "viem";
+import type { Address } from "viem";
+import { formatUnits } from "viem";
 
 import { useGetTokenHoldersQuery } from "@anticapture/graphql-client/hooks";
 
@@ -17,7 +16,8 @@ import {
   HoldersAndDelegatesDrawer,
 } from "@/features/holders-and-delegates";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
-import { SkeletonRow, Button } from "@/shared/components";
+import { SkeletonRow } from "@/shared/components/skeletons";
+import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
@@ -25,10 +25,10 @@ import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
-import { useScreenSize } from "@/shared/hooks";
+import { useScreenSize } from "@/shared/hooks/useScreenSize";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
-import { formatNumberUserReadable } from "@/shared/utils";
+import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 interface DelegateTableData {
@@ -58,6 +58,7 @@ export function DelegationTable() {
     parseAsStringEnum([
       "delegationsCount",
       "votingPower",
+      "signedVariation",
       "variation",
       "total",
       "balance",
@@ -70,9 +71,26 @@ export function DelegationTable() {
     setCurrentAddressFilter(address || "");
   };
 
+  type DelegateSortKey =
+    | "delegationsCount"
+    | "votingPower"
+    | "signedVariation"
+    | "variation"
+    | "total"
+    | "balance";
+
+  const orderByMap: Record<DelegateSortKey, QueryInput_VotingPowers_OrderBy> = {
+    delegationsCount: QueryInput_VotingPowers_OrderBy.DelegationsCount,
+    votingPower: QueryInput_VotingPowers_OrderBy.VotingPower,
+    signedVariation: QueryInput_VotingPowers_OrderBy.SignedVariation,
+    variation: QueryInput_VotingPowers_OrderBy.Variation,
+    total: QueryInput_VotingPowers_OrderBy.VotingPower,
+    balance: QueryInput_VotingPowers_OrderBy.VotingPower,
+  };
+
   const { data, loading, error, pagination, fetchNextPage, fetchingMore } =
     useDelegates({
-      orderBy: sortBy as QueryInput_VotingPowers_OrderBy,
+      orderBy: orderByMap[sortBy as DelegateSortKey],
       orderDirection: sortOrder as QueryInput_VotingPowers_OrderDirection,
       daoId,
       days: TimeInterval.THIRTY_DAYS,
@@ -103,8 +121,24 @@ export function DelegationTable() {
     if (sortBy === field) {
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
-      setSortBy(field as "votingPower" | "delegationsCount" | "variation");
+      setSortBy(field as DelegateSortKey);
       setSortOrder(field === "delegationsCount" ? "asc" : "desc");
+    }
+  };
+
+  // Cycles: no-arrow (votingPower desc) → down-arrow (signed variation desc) → up-arrow (signed variation asc) → both-arrows (variation desc) → no-arrow
+  const handleVariationSort = () => {
+    if (sortBy === "signedVariation" && sortOrder === "desc") {
+      setSortOrder("asc");
+    } else if (sortBy === "signedVariation" && sortOrder === "asc") {
+      setSortBy("variation");
+      setSortOrder("desc");
+    } else if (sortBy === "variation") {
+      setSortBy("votingPower");
+      setSortOrder("desc");
+    } else {
+      setSortBy("signedVariation");
+      setSortOrder("desc");
     }
   };
 
@@ -125,6 +159,7 @@ export function DelegationTable() {
         : 0;
       const delegatedPower = combinedPowerFormatted - balanceRaw;
 
+      const percentage = Number(delegate.variation.percentageChange);
       return {
         address: delegate.accountId,
         votingPower:
@@ -138,7 +173,11 @@ export function DelegationTable() {
           percentageChange:
             delegate.variation.percentageChange === PERCENTAGE_NO_BASELINE
               ? 9999
-              : Number(Number(delegate.variation.percentageChange).toFixed(2)),
+              : Number(
+                  percentage > 0 && percentage < 1
+                    ? "0.01"
+                    : percentage.toFixed(2),
+                ),
           absoluteChange: Number(
             formatUnits(BigInt(delegate.variation.absoluteChange), decimals),
           ),
@@ -347,7 +386,7 @@ export function DelegationTable() {
         </Button>
       ),
       meta: {
-        columnClassName: "w-40",
+        columnClassName: "w-auto",
       },
     },
     {
@@ -384,7 +423,7 @@ export function DelegationTable() {
           variant="ghost"
           size="sm"
           className="text-secondary w-full justify-center p-0"
-          onClick={() => handleSort("variation")}
+          onClick={handleVariationSort}
         >
           <h4 className="text-table-header whitespace-nowrap">
             Change ({daoId})
@@ -392,11 +431,13 @@ export function DelegationTable() {
           <ArrowUpDown
             props={{ className: "size-4" }}
             activeState={
-              sortBy === "variation"
-                ? sortOrder === "asc"
-                  ? ArrowState.UP
-                  : ArrowState.DOWN
-                : ArrowState.DEFAULT
+              sortBy === "signedVariation"
+                ? sortOrder === "desc"
+                  ? ArrowState.DOWN
+                  : ArrowState.UP
+                : sortBy === "variation"
+                  ? ArrowState.BOTH
+                  : ArrowState.DEFAULT
             }
           />
         </Button>

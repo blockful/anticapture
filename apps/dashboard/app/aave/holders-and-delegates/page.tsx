@@ -14,7 +14,7 @@ import { HeaderDAOSidebar, HeaderSidebar } from "@/widgets";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
 
 import { DelegationTable } from "@/app/aave/holders-and-delegates/DelegationTable";
-import { TheSectionLayout } from "@/shared/components";
+import { TheSectionLayout } from "@/shared/components/containers/TheSectionLayout";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { UserCheck } from "lucide-react";
 
@@ -73,7 +73,7 @@ function AavePageContent() {
           icon={<UserCheck className="section-layout-icon" />}
           description={PAGES_CONSTANTS.holdersAndDelegates.description}
         >
-          <div className="flex min-h-screen w-full flex-col items-center">
+          <div className="flex min-h-screen w-full flex-col items-center p-4">
             <div className="mx-auto w-full max-w-7xl flex-1">
               <div className="mb-4 flex w-full items-center justify-between px-4 pt-4">
                 <div className="flex gap-2">
