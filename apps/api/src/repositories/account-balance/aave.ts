@@ -92,7 +92,7 @@ export class AAVEAccountBalanceRepository {
     skip: number,
     limit: number,
     orderDirection: "asc" | "desc",
-    orderBy: "balance" | "variation",
+    orderBy: "balance" | "variation" | "signedVariation",
     addresses: Address[],
     delegates: Address[],
     excludeAddresses: Address[],
@@ -140,7 +140,9 @@ export class AAVEAccountBalanceRepository {
     const orderByCriteria =
       orderBy === "balance"
         ? aggregated.currentBalance
-        : sql`ABS(${aggregated.absoluteChange})`;
+        : orderBy === "signedVariation"
+          ? sql`${aggregated.absoluteChange}::numeric`
+          : sql`ABS(${aggregated.absoluteChange}::numeric)`;
 
     const result = await this.db
       .select()

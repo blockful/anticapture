@@ -513,6 +513,7 @@ export function DelegationTable() {
         entityType="delegate"
         address={drawerAddress || ""}
         daoId={daoId}
+        withVotes={false}
       />
     </>
   );
