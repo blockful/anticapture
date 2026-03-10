@@ -17,10 +17,14 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const ogTitle = `Anticapture - ${daoId} DAO`;
   const ogDescription = `Explore and mitigate governance risks in ${daoId} DAO.`;
 
+  const canonicalPath = `/${params.daoId}/governance`;
+
   return {
     title: ogTitle,
     description: ogDescription,
+    alternates: { canonical: canonicalPath },
     openGraph: {
+      url: canonicalPath,
       title: ogTitle,
       description: ogDescription,
     },

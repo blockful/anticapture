@@ -16,10 +16,14 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const daoId = params.daoId.toUpperCase() as DaoIdEnum;
 
+  const canonicalPath = `/${params.daoId}/attack-profitability`;
+
   return {
     title: `Anticapture - ${daoId} DAO Attack Profitability`,
     description: `Analyze attack profitability and governance capture costs for ${daoId} DAO.`,
+    alternates: { canonical: canonicalPath },
     openGraph: {
+      url: canonicalPath,
       title: `Anticapture - ${daoId} DAO Attack Profitability`,
       description: `Analyze attack profitability and governance capture costs for ${daoId} DAO.`,
     },
