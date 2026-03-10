@@ -8,7 +8,6 @@ import {
 import { Address, getAddress, Hex, zeroAddress } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
-import { indexerEventsProcessed } from "@/metrics";
 
 import { ensureAccountExists } from "./shared";
 
@@ -172,6 +171,4 @@ export const tokenTransfer = async (
       amount: value,
     },
   });
-
-  indexerEventsProcessed.add(1, { dao_id: daoId, event_type: "Transfer" });
 };

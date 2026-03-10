@@ -24,3 +24,10 @@ export const httpRequestTotal: Counter = meter.createCounter(
     description: "Total number of HTTP requests",
   },
 );
+
+export const rpcRequestTotal: Counter = meter.createCounter(
+  "rpc_requests_total",
+  {
+    description: "Total number of RPC requests sent to the RPC node",
+  },
+);

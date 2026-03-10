@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx watch --import ./src/instrumentation.ts src/index.ts",
+    "dev": "tsx watch src/index.ts",
     "start": "node --import ./dist/src/instrumentation.js dist/src/index.js",
     "build": "tsc",
     "clean": "rm -rf node_modules dist schema.graphql *.tsbuildinfo",

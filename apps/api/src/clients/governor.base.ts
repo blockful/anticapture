@@ -4,11 +4,16 @@ import {
   Address,
   Chain,
   Client,
+  ContractFunctionArgs,
+  ContractFunctionName,
   fromHex,
   toHex,
   Transport,
 } from "viem";
 import { readContract } from "viem/actions";
+import type { ReadContractParameters } from "viem/actions";
+
+import { rpcRequestTotal } from "@/metrics";
 
 import { ProposalStatus } from "../lib/constants";
 
@@ -67,7 +72,7 @@ export abstract class GovernorBase<
 
   async getProposalThreshold(): Promise<bigint> {
     if (!this.cache.proposalThreshold) {
-      this.cache.proposalThreshold = (await readContract(this.client, {
+      this.cache.proposalThreshold = (await this.readContract({
         abi: this.abi,
         address: this.address,
         functionName: "proposalThreshold",
@@ -79,7 +84,7 @@ export abstract class GovernorBase<
 
   async getVotingDelay(): Promise<bigint> {
     if (!this.cache.votingDelay) {
-      this.cache.votingDelay = (await readContract(this.client, {
+      this.cache.votingDelay = (await this.readContract({
         abi: this.abi,
         address: this.address,
         functionName: "votingDelay",
@@ -91,7 +96,7 @@ export abstract class GovernorBase<
 
   async getVotingPeriod(): Promise<bigint> {
     if (!this.cache.votingPeriod) {
-      this.cache.votingPeriod = (await readContract(this.client, {
+      this.cache.votingPeriod = (await this.readContract({
         abi: this.abi,
         address: this.address,
         functionName: "votingPeriod",
@@ -181,7 +186,25 @@ export abstract class GovernorBase<
     return proposal.status;
   }
 
+  protected async readContract<
+    const TAbi extends Abi,
+    TFunctionName extends ContractFunctionName<TAbi, "pure" | "view">,
+    TArgs extends ContractFunctionArgs<TAbi, "pure" | "view", TFunctionName>,
+  >(
+    params: ReadContractParameters<TAbi, TFunctionName, TArgs>,
+  ): Promise<unknown> {
+    rpcRequestTotal.add(1, { method: "eth_call" });
+    return readContract(this.client, params);
+  }
+
+  protected async getBlockNumber(): Promise<bigint> {
+    rpcRequestTotal.add(1, { method: "eth_blockNumber" });
+    const result = await this.client.request({ method: "eth_blockNumber" });
+    return BigInt(result);
+  }
+
   async getCurrentBlockNumber(): Promise<number> {
+    rpcRequestTotal.add(1, { method: "eth_blockNumber" });
     const result = await this.client.request({
       method: "eth_blockNumber",
     });
@@ -189,6 +212,7 @@ export abstract class GovernorBase<
   }
 
   async getBlockTime(blockNumber: number): Promise<number | null> {
+    rpcRequestTotal.add(1, { method: "eth_getBlockByNumber" });
     const block = await this.client.request({
       method: "eth_getBlockByNumber",
       params: [toHex(blockNumber), false],

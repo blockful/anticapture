@@ -25,7 +25,6 @@ const bootstrap = async () => {
   });
 
   const server = createServer(async (req, res) => {
-    if (!validateAuthToken(req, res)) return;
     if (req.url === "/metrics") {
       try {
         const result = await exporter.collect();
@@ -40,6 +39,7 @@ const bootstrap = async () => {
       }
       return;
     }
+    if (!validateAuthToken(req, res)) return;
     handler(req, res);
   });
 

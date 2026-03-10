@@ -8,7 +8,6 @@ import {
 import { Address, getAddress, Hex } from "viem";
 
 import { ProposalStatus } from "@/lib/constants";
-import { indexerEventsProcessed } from "@/metrics";
 
 import { ensureAccountExists } from "./shared";
 
@@ -105,8 +104,6 @@ export const voteCast = async (
       title: proposal?.title ?? undefined,
     },
   });
-
-  indexerEventsProcessed.add(1, { dao_id: daoId, event_type: "VoteCast" });
 };
 
 /**
@@ -207,11 +204,6 @@ export const proposalCreated = async (
       votingPower: proposerVotingPower,
       title,
     },
-  });
-
-  indexerEventsProcessed.add(1, {
-    dao_id: daoId,
-    event_type: "ProposalCreated",
   });
 };
 

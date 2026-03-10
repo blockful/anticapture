@@ -1,5 +1,4 @@
 import { Account, Address, Chain, Client, Transport } from "viem";
-import { readContract } from "viem/actions";
 
 import { DAOClient } from "@/clients";
 
@@ -31,12 +30,12 @@ export class OPClient<
   async getQuorum(proposalId: string | null): Promise<bigint> {
     if (!proposalId) return 0n;
     return this.getCachedQuorum(async () => {
-      return readContract(this.client, {
+      return this.readContract({
         abi: this.abi,
         address: this.address,
         functionName: "quorum",
         args: [BigInt(proposalId)],
-      });
+      }) as Promise<bigint>;
     }, `quorum:proposal:${proposalId}`);
   }
 

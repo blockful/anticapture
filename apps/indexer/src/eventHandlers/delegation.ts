@@ -15,7 +15,6 @@ import {
   LendingAddresses,
 } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
-import { indexerEventsProcessed } from "@/metrics";
 
 import { ensureAccountExists, ensureAccountsExist } from "./shared";
 
@@ -169,11 +168,6 @@ export const delegateChanged = async (
       amount: delegatorBalance?.balance ?? 0n,
     },
   });
-
-  indexerEventsProcessed.add(1, {
-    dao_id: daoId,
-    event_type: "DelegateChanged",
-  });
 };
 
 /**
@@ -246,10 +240,5 @@ export const delegatedVotesChanged = async (
       deltaMod,
       delegate: normalizedDelegate,
     },
-  });
-
-  indexerEventsProcessed.add(1, {
-    dao_id: daoId,
-    event_type: "DelegateVotesChanged",
   });
 };

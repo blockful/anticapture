@@ -12,10 +12,10 @@
     "start": "node --import ./dist/instrumentation.js dist/index.js",
     "build": "tsup",
     "build:watch": "tsc --watch",
-    "dev:watch": "tsx watch --import tsx/esm src/index.ts",
+    "dev:watch": "tsx watch src/index.ts",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
-    "dev": "tsx watch --import ./src/instrumentation.ts src/index.ts"
+    "dev": "tsx watch src/index.ts"
   },
   "keywords": [],
   "author": "",
