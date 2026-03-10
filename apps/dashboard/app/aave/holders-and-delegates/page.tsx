@@ -63,7 +63,7 @@ function AavePageContent() {
           <HeaderDAOSidebar />
         </div>
       </div>
-      <main className="h-screen flex-1 overflow-auto">
+      <main className="flex h-screen flex-1 flex-col overflow-hidden">
         <div className="lg:hidden">
           <HeaderMobile overlayClassName="top-[57px]" />
         </div>
@@ -73,7 +73,7 @@ function AavePageContent() {
           icon={<UserCheck className="section-layout-icon" />}
           description={PAGES_CONSTANTS.holdersAndDelegates.description}
         >
-          <div className="flex min-h-screen w-full flex-col items-center p-4">
+          <div className="flex w-full flex-1 flex-col items-center p-4">
             <div className="mx-auto w-full max-w-7xl flex-1">
               <div className="mb-4 flex w-full items-center justify-between px-4 pt-4">
                 <div className="flex gap-2">

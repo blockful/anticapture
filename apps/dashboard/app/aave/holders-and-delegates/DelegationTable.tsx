@@ -429,7 +429,7 @@ export function DelegationTable() {
             Change ({daoId})
           </h4>
           <ArrowUpDown
-            props={{ className: "size-4" }}
+            props={{ className: "size-4 shrink-0" }}
             activeState={
               sortBy === "signedVariation"
                 ? sortOrder === "desc"

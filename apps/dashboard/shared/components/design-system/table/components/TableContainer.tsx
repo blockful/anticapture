@@ -10,7 +10,7 @@ export const TableContainer = forwardRef<
     <div
       ref={ref}
       className={cn(
-        "lg:border-light-dark scrollbar-thin relative w-full overflow-y-auto lg:border",
+        "lg:border-light-dark scrollbar-thin relative w-full overflow-auto lg:border",
         className,
       )}
       style={{
@@ -20,7 +20,7 @@ export const TableContainer = forwardRef<
     >
       <table
         data-slot="table"
-        className={cn("w-full caption-bottom text-sm", tableClassName)}
+        className={cn("min-w-full caption-bottom text-sm", tableClassName)}
         {...props}
       />
     </div>

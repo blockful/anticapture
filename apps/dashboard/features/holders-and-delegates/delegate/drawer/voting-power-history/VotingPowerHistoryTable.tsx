@@ -167,7 +167,7 @@ export const VotingPowerHistoryTable = ({
         );
       },
       meta: {
-        columnClassName: "w-32",
+        columnClassName: "w-24",
       },
     },
     {
@@ -265,7 +265,7 @@ export const VotingPowerHistoryTable = ({
         );
       },
       meta: {
-        columnClassName: "w-52",
+        columnClassName: "w-32",
       },
     },
     {
@@ -357,7 +357,7 @@ export const VotingPowerHistoryTable = ({
         );
       },
       meta: {
-        columnClassName: "w-32",
+        columnClassName: "w-28",
       },
     },
     {
@@ -375,7 +375,7 @@ export const VotingPowerHistoryTable = ({
         );
       },
       meta: {
-        columnClassName: "w-16",
+        columnClassName: "w-8",
       },
     },
     {
@@ -473,7 +473,7 @@ export const VotingPowerHistoryTable = ({
         );
       },
       meta: {
-        columnClassName: "w-32",
+        columnClassName: "w-36",
       },
     },
   ];
@@ -491,6 +491,7 @@ export const VotingPowerHistoryTable = ({
         hasMore={hasNextPage}
         isLoadingMore={loading}
         onLoadMore={fetchNextPage}
+        mobileTableFixed={true}
         withDownloadCSV={true}
         csvFilename="voting-power-history.csv"
         error={error}
