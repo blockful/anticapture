@@ -31,12 +31,12 @@ export const AttackProfitabilityChartCard = ({ daoId }: Props) => {
     ? {
         icon: CircleSlash,
         title: "Not applicable for this DAO",
-        text: "The treasury is controlled by a multisig, not executed automatically by governance. Since proposals can’t directly move funds, attacks that try to profit by draining the treasury don’t apply.",
+        text: "The treasury is controlled by a multisig, not executed automatically by governance. Since proposals can't directly move funds, attacks that try to profit by draining the treasury don't apply.",
       }
     : {
         icon: Hammer,
-        title: "This data isn’t available yet",
-        text: "We’re actively working to bring this data online. Community support helps us prioritize and deliver it faster.",
+        title: "This data isn't available yet",
+        text: "We're actively working to bring this data online. Community support helps us prioritize and deliver it faster.",
       };
 
   const filterData = useMemo(
@@ -93,7 +93,7 @@ const CardHeader = ({
       </DefaultLink>
     )}
 
-    <TooltipInfo text="Takes into account the maximum cost and the minimum profit possible. If it looks bad, it’s bad. If it looks good, it’s better, but it does not represent 100% safety. Remember that both getting votes and causing damage can take other formats beyond direct buying and selling assets." />
+    <TooltipInfo text="Takes into account the maximum cost and the minimum profit possible. If it looks bad, it's bad. If it looks good, it's better, but it does not represent 100% safety. Remember that both getting votes and causing damage can take other formats beyond direct buying and selling assets." />
   </div>
 );
 

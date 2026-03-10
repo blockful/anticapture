@@ -111,9 +111,11 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             <DividerDefault isHorizontal />
           </div>
         </div>
-        <div className="border-inverted mx-5 border-x">
-          <MetricsCard daoId={daoId} daoConfig={daoConfig} />
-        </div>
+        {currentDaoStage !== Stage.UNKNOWN && (
+          <div className="border-inverted mx-5 border-x">
+            <MetricsCard daoId={daoId} daoConfig={daoConfig} />
+          </div>
+        )}
         <div className="block lg:hidden">
           <DividerDefault isHorizontal />
         </div>
