@@ -13,7 +13,7 @@ import { TimeInterval } from "@/shared/types/enums";
 import { HeaderSidebar } from "@/widgets";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
 
-import { DelegationTable } from "@/app/aave/DelegationTable";
+import { DelegationTable } from "@/app/aave/holders-and-delegates/DelegationTable";
 import { TheSectionLayout } from "@/shared/components";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { UserCheck } from "lucide-react";

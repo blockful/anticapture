@@ -49,6 +49,7 @@ export const NOUNS: DaoConfiguration = {
       proposalThreshold: "3 $NOUN (>0.25% Adjusted Supply)",
     },
   },
+  activityFeed: true,
   attackProfitability: {
     riskLevel: RiskLevel.LOW,
     supportsLiquidTreasuryCall: true,

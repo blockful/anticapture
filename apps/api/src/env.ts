@@ -9,7 +9,7 @@ const envSchema = z.object({
   RPC_URL: z.string(),
   DATABASE_URL: z
     .string()
-    .transform((val) => `${val}?options=-c%20search_path%3Danticapture`),
+    .transform((val) => `${val}?options=-c%20search_path%3Dpublic`),
   DAO_ID: z.nativeEnum(DaoIdEnum),
   CHAIN_ID: z.coerce.number(),
 

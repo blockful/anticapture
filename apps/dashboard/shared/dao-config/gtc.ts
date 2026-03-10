@@ -295,6 +295,7 @@ export const GTC: DaoConfiguration = {
   resilienceStages: true,
   tokenDistribution: true,
   dataTables: true,
+  activityFeed: true,
   attackExposure: {
     defenseAreas: {
       [RiskAreaEnum.SPAM_RESISTANCE]: {

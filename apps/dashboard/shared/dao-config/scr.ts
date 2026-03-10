@@ -290,6 +290,7 @@ export const SCR: DaoConfiguration = {
   resilienceStages: true,
   tokenDistribution: true,
   dataTables: true,
+  activityFeed: true,
   attackExposure: {
     defenseAreas: {
       [RiskAreaEnum.SPAM_RESISTANCE]: {

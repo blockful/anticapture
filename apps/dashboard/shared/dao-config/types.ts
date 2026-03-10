@@ -131,6 +131,7 @@ export type AttackExposureConfig = {
 // Complete DAO configuration structure
 export interface DaoConfiguration extends BaseInfo {
   daoOverview: DaoOverviewConfig;
+  activityFeed?: boolean;
   attackProfitability?: AttackProfitabilityConfig;
   governanceImplementation?: GovernanceImplementationConfig;
   attackExposure?: AttackExposureConfig;
