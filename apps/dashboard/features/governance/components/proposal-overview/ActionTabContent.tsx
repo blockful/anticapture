@@ -1,6 +1,6 @@
 "use client";
 
-import { GetProposalQuery } from "@anticapture/graphql-client";
+import type { GetProposalQuery } from "@anticapture/graphql-client";
 import { Inbox } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
@@ -9,7 +9,7 @@ import { useDecodeCalldata } from "@/features/governance/hooks/useDecodeCalldata
 import { BlankSlate, Button } from "@/shared/components";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 export const ActionsTabContent = ({
   proposal,

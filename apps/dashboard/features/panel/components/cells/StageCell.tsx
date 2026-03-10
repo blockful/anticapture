@@ -8,7 +8,7 @@ import {
   fieldsToArray,
   getDaoStageFromFields,
 } from "@/shared/dao-config/utils";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { RiskLevel } from "@/shared/types/enums/RiskLevel";
 import { Stage } from "@/shared/types/enums/Stage";
 

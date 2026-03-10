@@ -12,20 +12,16 @@ import {
   Dot,
 } from "recharts";
 
-import {
-  TimePeriod,
-  TimePeriodSwitcher,
-} from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
-import {
-  BalanceHistoryGraphItem,
-  useBalanceHistoryGraph,
-} from "@/features/holders-and-delegates/hooks/useBalanceHistoryGraph";
+import type { TimePeriod } from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
+import { TimePeriodSwitcher } from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
+import type { BalanceHistoryGraphItem } from "@/features/holders-and-delegates/hooks/useBalanceHistoryGraph";
+import { useBalanceHistoryGraph } from "@/features/holders-and-delegates/hooks/useBalanceHistoryGraph";
 import { getTimestampRangeFromPeriod } from "@/features/holders-and-delegates/utils";
 import { ChartExceptionState } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 import { ChartContainer } from "@/shared/components/ui/chart";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import {
   timestampToReadableDate,
   formatNumberUserReadable,

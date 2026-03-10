@@ -1,10 +1,10 @@
 "use client";
 
-import {
+import type {
   GlossaryData,
   GlossaryLetter,
-  getAvailableLetters,
 } from "@/features/glossary/glossary";
+import { getAvailableLetters } from "@/features/glossary/glossary";
 import { Button } from "@/shared/components";
 import { cn, formatPlural } from "@/shared/utils";
 

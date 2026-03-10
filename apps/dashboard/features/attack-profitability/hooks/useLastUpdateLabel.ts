@@ -1,7 +1,8 @@
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 
-import { ChartType, useLastUpdate } from "@/shared/hooks/useLastUpdate";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { ChartType } from "@/shared/hooks/useLastUpdate";
+import { useLastUpdate } from "@/shared/hooks/useLastUpdate";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatTimeFromNow } from "@/shared/utils/formatTimeFromNow";
 
 export const useLastUpdateLabel = (daoId: DaoIdEnum, chartType: ChartType) => {

@@ -15,7 +15,7 @@ import {
   DrawerHeader,
   DrawerRoot,
 } from "@/shared/components/design-system/drawer";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 export type EntityType = "delegate" | "tokenHolder";
 

@@ -22,7 +22,7 @@ import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 import { Button } from "@/shared/components";
 import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCustom";
 import daoConfig from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 export const ProposalSection = () => {
   const { proposalId, daoId } = useParams<{

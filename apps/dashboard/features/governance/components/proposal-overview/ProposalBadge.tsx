@@ -3,7 +3,7 @@ import {
   getStatusText,
   getTextStatusColor,
 } from "@/features/governance/components/proposal-overview/ProposalItem";
-import { ProposalStatus } from "@/features/governance/types";
+import type { ProposalStatus } from "@/features/governance/types";
 import { cn } from "@/shared/utils";
 
 export const ProposalBadge = ({ status }: { status: ProposalStatus }) => {

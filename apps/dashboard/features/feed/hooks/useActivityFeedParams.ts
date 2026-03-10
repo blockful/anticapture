@@ -7,7 +7,7 @@ import {
 import { useQueryState, parseAsStringEnum, parseAsString } from "nuqs";
 import { useCallback, useMemo } from "react";
 
-import {
+import type {
   ActivityFeedFilterState,
   FeedEventRelevance,
   FeedEventType,

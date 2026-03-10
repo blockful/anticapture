@@ -2,7 +2,7 @@ import {
   Query_FeedEvents_Items_Items_Relevance,
   Query_FeedEvents_Items_Items_Type,
 } from "@anticapture/graphql-client";
-import { Address } from "viem";
+import type { Address } from "viem";
 
 export { Query_FeedEvents_Items_Items_Relevance as FeedEventRelevance };
 

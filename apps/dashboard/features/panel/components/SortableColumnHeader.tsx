@@ -1,4 +1,4 @@
-import { Column } from "@tanstack/react-table";
+import type { Column } from "@tanstack/react-table";
 
 import { Button } from "@/shared/components";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";

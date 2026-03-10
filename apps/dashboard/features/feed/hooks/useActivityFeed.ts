@@ -1,17 +1,19 @@
 "use client";
 
-import {
+import type {
   GetFeedEventsQuery,
-  QueryInput_FeedEvents_OrderDirection,
-  QueryInput_FeedEvents_OrderBy,
   QueryInput_FeedEvents_Relevance,
   QueryInput_FeedEvents_Type,
+} from "@anticapture/graphql-client/hooks";
+import {
+  QueryInput_FeedEvents_OrderDirection,
+  QueryInput_FeedEvents_OrderBy,
   useGetFeedEventsQuery,
 } from "@anticapture/graphql-client/hooks";
 import { useCallback, useMemo, useState } from "react";
 
-import { ActivityFeedFilters } from "@/features/feed/types";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { ActivityFeedFilters } from "@/features/feed/types";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 interface UseActivityFeedParams {

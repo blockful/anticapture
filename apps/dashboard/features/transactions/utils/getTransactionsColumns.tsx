@@ -1,15 +1,14 @@
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowUp, ArrowDown, ExternalLink, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { Address, zeroAddress } from "viem";
+import type { Address } from "viem";
+import { zeroAddress } from "viem";
 
-import { TransactionsParamsType } from "@/features/transactions/hooks/useTransactionParams";
-import { TransactionData } from "@/features/transactions/hooks/useTransactionsTableData";
+import type { TransactionsParamsType } from "@/features/transactions/hooks/useTransactionParams";
+import type { TransactionData } from "@/features/transactions/hooks/useTransactionsTableData";
 import { SkeletonRow } from "@/shared/components";
-import {
-  SupplyLabel,
-  SupplyType,
-} from "@/shared/components/badges/SupplyLabel";
+import type { SupplyType } from "@/shared/components/badges/SupplyLabel";
+import { SupplyLabel } from "@/shared/components/badges/SupplyLabel";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { DateCell } from "@/shared/components/design-system/table/cells/DateCell";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
@@ -17,7 +16,7 @@ import { AmountFilter } from "@/shared/components/design-system/table/filters/Am
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 import { Button } from "@/shared/components/ui/button";
 import { fetchAddressFromEnsName } from "@/shared/hooks/useEnsData";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn } from "@/shared/utils";
 
 export const getTransactionsColumns = ({

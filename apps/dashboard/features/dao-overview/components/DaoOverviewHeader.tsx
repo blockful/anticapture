@@ -5,7 +5,10 @@ import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatu
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { EthereumIcon } from "@/shared/components/icons/EthereumIcon";
 import { OPMainnetIcon } from "@/shared/components/icons/OPMainnetIcon";
-import { DaoConfiguration, DaoOverviewConfig } from "@/shared/dao-config/types";
+import type {
+  DaoConfiguration,
+  DaoOverviewConfig,
+} from "@/shared/dao-config/types";
 import { cn } from "@/shared/utils";
 
 interface DaoOverviewHeaderProps {

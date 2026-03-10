@@ -9,8 +9,9 @@ import {
   DrawerHeader,
   DrawerBody,
 } from "@/shared/components/design-system/drawer";
-import { GovernanceImplementationField } from "@/shared/dao-config/types";
-import { GovernanceImplementationEnum, RiskLevel } from "@/shared/types/enums";
+import type { GovernanceImplementationField } from "@/shared/dao-config/types";
+import type { GovernanceImplementationEnum } from "@/shared/types/enums";
+import { RiskLevel } from "@/shared/types/enums";
 import { cn } from "@/shared/utils";
 
 interface GovernanceImplementationDrawerProps {

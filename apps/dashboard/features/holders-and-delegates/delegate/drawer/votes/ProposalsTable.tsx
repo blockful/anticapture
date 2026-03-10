@@ -1,10 +1,11 @@
 "use client";
 
-import { Query_ProposalsActivity_Proposals_Items } from "@anticapture/graphql-client";
-import { ColumnDef } from "@tanstack/react-table";
+import type { Query_ProposalsActivity_Proposals_Items } from "@anticapture/graphql-client";
+import type { ColumnDef } from "@tanstack/react-table";
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
-import { ReactNode, useMemo } from "react";
+import type { ReactNode } from "react";
+import { useMemo } from "react";
 
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 import {
@@ -20,16 +21,14 @@ import {
   Button,
   IconButton,
 } from "@/shared/components";
-import {
-  CategoriesFilter,
-  FilterOption,
-} from "@/shared/components/design-system/table/filters/CategoriesFilter";
+import type { FilterOption } from "@/shared/components/design-system/table/filters/CategoriesFilter";
+import { CategoriesFilter } from "@/shared/components/design-system/table/filters/CategoriesFilter";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import daoConfig from "@/shared/dao-config";
 import { useDaoData } from "@/shared/hooks";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable, cn } from "@/shared/utils";
 
 interface ProposalTableData {

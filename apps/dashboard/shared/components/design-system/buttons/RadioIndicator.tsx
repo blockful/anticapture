@@ -1,5 +1,6 @@
 import { cva } from "class-variance-authority";
-import { InputHTMLAttributes, forwardRef } from "react";
+import type { InputHTMLAttributes } from "react";
+import { forwardRef } from "react";
 
 import { cn } from "@/shared/utils";
 

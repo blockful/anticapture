@@ -3,7 +3,8 @@
 import { cn } from "@/shared/utils";
 import { CounterClockwiseClockIcon } from "@radix-ui/react-icons";
 import { CircleSlash, Hammer } from "lucide-react";
-import { ElementType, useMemo } from "react";
+import type { ElementType } from "react";
+import { useMemo } from "react";
 
 import { MultilineChartAttackProfitability } from "@/features/attack-profitability/components";
 import { OverviewMetric } from "@/features/dao-overview/components/OverviewMetric";
@@ -11,7 +12,7 @@ import { BlankSlate, TooltipInfo } from "@/shared/components";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { EmptyState } from "@/shared/components/design-system/table/components/EmptyState";
 import daoConfig from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
 import { Stage } from "@/shared/types/enums/Stage";
 

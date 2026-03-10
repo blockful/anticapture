@@ -1,20 +1,22 @@
 "use client";
 
-import {
+import type {
   QueryInput_Transfers_SortBy,
   QueryInput_Transfers_SortOrder,
 } from "@anticapture/graphql-client";
-import {
+import type {
   BalanceHistoryQueryVariables,
+  BalanceHistoryQuery,
+} from "@anticapture/graphql-client/hooks";
+import {
   Timestamp_Const,
   useBalanceHistoryQuery,
-  BalanceHistoryQuery,
 } from "@anticapture/graphql-client/hooks";
 import { useMemo, useState, useEffect, useCallback } from "react";
 import { formatUnits } from "viem";
 
-import { AmountFilterVariables } from "@/features/holders-and-delegates/hooks/types";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { AmountFilterVariables } from "@/features/holders-and-delegates/hooks/types";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 export function useBalanceHistory({

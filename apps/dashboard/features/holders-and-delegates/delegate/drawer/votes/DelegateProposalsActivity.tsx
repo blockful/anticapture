@@ -1,6 +1,6 @@
 "use client";
 
-import {
+import type {
   QueryInput_ProposalsActivity_OrderBy,
   QueryInput_ProposalsActivity_OrderDirection,
   QueryInput_ProposalsActivity_UserVoteFilter,
@@ -12,9 +12,9 @@ import { useState } from "react";
 import { ProposalsTable } from "@/features/holders-and-delegates";
 import { useProposalsActivity } from "@/features/holders-and-delegates/hooks/useProposalsActivity";
 import { MetricCard } from "@/shared/components";
-import { FilterOption } from "@/shared/components/design-system/table/filters/CategoriesFilter";
+import type { FilterOption } from "@/shared/components/design-system/table/filters/CategoriesFilter";
 import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 interface DelegateProposalsActivityProps {
   address: string;

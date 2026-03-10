@@ -1,7 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import { useMessageStack } from "@/shared/hooks/useMessageStack";
 

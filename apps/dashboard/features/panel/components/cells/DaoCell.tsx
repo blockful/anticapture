@@ -3,7 +3,7 @@ import { DaoTooltip } from "@/features/panel/components/tooltips/DaoTooltip";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { DaoAvatarIcon } from "@/shared/components/icons";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 export const DaoCell = ({ daoId }: { daoId: DaoIdEnum }) => {
   const config = daoConfigByDaoId[daoId];

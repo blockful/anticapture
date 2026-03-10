@@ -1,14 +1,13 @@
 "use client";
 
-import {
-  QueryInput_VotingPowers_OrderBy,
-  QueryInput_VotingPowers_OrderDirection,
-} from "@anticapture/graphql-client";
-import { ColumnDef } from "@tanstack/react-table";
+import type { QueryInput_VotingPowers_OrderDirection } from "@anticapture/graphql-client";
+import { QueryInput_VotingPowers_OrderBy } from "@anticapture/graphql-client";
+import type { ColumnDef } from "@tanstack/react-table";
 import { Plus } from "lucide-react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { useMemo } from "react";
-import { Address, formatUnits } from "viem";
+import type { Address } from "viem";
+import { formatUnits } from "viem";
 
 import {
   useDelegates,
@@ -30,7 +29,7 @@ import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
 import daoConfig from "@/shared/dao-config";
 import { useScreenSize, useDaoData } from "@/shared/hooks";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 

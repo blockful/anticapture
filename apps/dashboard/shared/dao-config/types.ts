@@ -1,13 +1,13 @@
-import { ReactNode, SVGProps } from "react";
-import { Address, Chain } from "viem";
+import type { ReactNode, SVGProps } from "react";
+import type { Address, Chain } from "viem";
 
-import { DaoIconProps } from "@/shared/components/icons/types";
-import {
+import type { DaoIconProps } from "@/shared/components/icons/types";
+import type {
   RiskLevel,
   GovernanceImplementationEnum,
   RiskAreaEnum,
 } from "@/shared/types/enums";
-import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
+import type { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 
 export type TokenMetricItem = {
   date: string;

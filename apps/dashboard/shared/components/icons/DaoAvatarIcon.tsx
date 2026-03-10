@@ -1,6 +1,6 @@
 "use client";
 
-import { DaoAvatarIconProps } from "@/shared/components/icons/types";
+import type { DaoAvatarIconProps } from "@/shared/components/icons/types";
 import daoConfig from "@/shared/dao-config";
 import { cn } from "@/shared/utils";
 

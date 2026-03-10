@@ -1,6 +1,6 @@
-import { ComponentProps } from "react";
+import type { ComponentProps } from "react";
 
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 export interface DaoAvatarIconProps extends ComponentProps<"svg"> {
   daoId: DaoIdEnum;

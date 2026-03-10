@@ -5,18 +5,18 @@ import { CounterClockwiseClockIcon } from "@radix-ui/react-icons";
 import { OverviewMetric } from "@/features/dao-overview/components/OverviewMetric";
 import { TokenDistributionChart } from "@/features/token-distribution/components";
 import { useChartMetrics } from "@/features/token-distribution/hooks/useChartMetrics";
+import type { MetricSchema } from "@/features/token-distribution/utils";
 import {
   initialMetrics,
-  MetricSchema,
   metricsSchema,
 } from "@/features/token-distribution/utils";
-import { TooltipInfo } from "@/shared/components";
+import { TooltipInfo } from "@/shared/components/tooltips/TooltipInfo";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { EmptyState } from "@/shared/components/design-system/table/components/EmptyState";
 import daoConfig from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { Stage } from "@/shared/types/enums/Stage";
-import { cn } from "@/shared/utils";
+import { cn } from "@/shared/utils/cn";
 
 export const TokenDistributionChartCard = ({
   daoId,

@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import { RiskLevelCardSmall } from "@/shared/components/cards/RiskLevelCardSmall";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";

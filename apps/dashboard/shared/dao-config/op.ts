@@ -5,7 +5,7 @@ import { OptimismChainIcon } from "@/shared/components/icons/OptimismChainIcon";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 import { RECOMMENDED_SETTINGS } from "@/shared/constants/recommended-settings";
-import { DaoConfiguration } from "@/shared/dao-config/types";
+import type { DaoConfiguration } from "@/shared/dao-config/types";
 import { OptimismOgIcon } from "@/shared/og/dao-og-icons";
 import {
   RiskLevel,

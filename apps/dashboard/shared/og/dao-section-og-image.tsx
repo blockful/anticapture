@@ -3,7 +3,8 @@ import { ImageResponse } from "next/og";
 import daoConfig from "@/shared/dao-config";
 import { AnticaptureGlobeLogoSvg } from "@/shared/og/anticapture-globe-logo-svg";
 import { loadLocalFonts } from "@/shared/og/fonts";
-import { ALL_DAOS, DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
+import { ALL_DAOS } from "@/shared/types/daos";
 
 const DAO_ICON_SIZE = 300;
 

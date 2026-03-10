@@ -11,21 +11,19 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Address, formatUnits, zeroAddress } from "viem";
+import type { Address } from "viem";
+import { formatUnits, zeroAddress } from "viem";
 
-import {
-  FeedEvent,
-  FeedEventRelevance,
-  FeedEventType,
-} from "@/features/feed/types";
-import { EntityType } from "@/features/holders-and-delegates/components/HoldersAndDelegatesDrawer";
+import type { FeedEvent } from "@/features/feed/types";
+import { FeedEventRelevance, FeedEventType } from "@/features/feed/types";
+import type { EntityType } from "@/features/holders-and-delegates/components/HoldersAndDelegatesDrawer";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 import { BulletDivider } from "@/shared/components/design-system/section";
 import daoConfig from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 
 interface FeedEventItemProps {

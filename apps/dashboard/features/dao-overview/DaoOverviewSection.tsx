@@ -27,7 +27,7 @@ import {
   getDaoStageFromFields,
 } from "@/shared/dao-config/utils";
 import { apolloClient } from "@/shared/providers/GlobalProviders";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {

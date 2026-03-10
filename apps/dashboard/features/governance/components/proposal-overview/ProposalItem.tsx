@@ -3,12 +3,13 @@
 import { CheckCircle2, XCircle } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Address } from "viem";
+import type { Address } from "viem";
 
-import { Proposal, ProposalStatus } from "@/features/governance/types";
+import type { Proposal } from "@/features/governance/types";
+import { ProposalStatus } from "@/features/governance/types";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { BulletDivider } from "@/shared/components/design-system/section/BulletDivider";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 
 interface ProposalItemProps {

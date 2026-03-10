@@ -1,4 +1,4 @@
-import { TimePeriod } from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
+import type { TimePeriod } from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
 import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
 
 interface TimestampRange {

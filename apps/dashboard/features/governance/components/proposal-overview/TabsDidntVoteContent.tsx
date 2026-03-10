@@ -1,22 +1,20 @@
-import { GetProposalQuery } from "@anticapture/graphql-client";
-import { ColumnDef } from "@tanstack/react-table";
+import type { GetProposalQuery } from "@anticapture/graphql-client";
+import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { formatUnits } from "viem";
 
 import { VotesTable } from "@/features/governance/components/proposal-overview/VotesTable";
-import {
-  useNonVoters,
-  NonVoter,
-} from "@/features/governance/hooks/useNonVoters";
+import type { NonVoter } from "@/features/governance/hooks/useNonVoters";
+import { useNonVoters } from "@/features/governance/hooks/useNonVoters";
 import { SkeletonRow, Button } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import daoConfig from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 
 interface TabsDidntVoteContentProps {

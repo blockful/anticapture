@@ -1,13 +1,11 @@
 import { ClickableCell } from "@/features/panel/components/cells/ClickableCell";
-import {
-  RiskAreaItem,
-  RiskAreasTooltip,
-} from "@/features/panel/components/tooltips/RiskAreasTooltip";
+import type { RiskAreaItem } from "@/features/panel/components/tooltips/RiskAreasTooltip";
+import { RiskAreasTooltip } from "@/features/panel/components/tooltips/RiskAreasTooltip";
 import { RiskAreaCardEnum, RiskAreaCardWrapper } from "@/shared/components";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { RISK_AREAS } from "@/shared/constants/risk-areas";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { RiskAreaEnum } from "@/shared/types/enums";
 import { RiskLevel } from "@/shared/types/enums/RiskLevel";
 import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";

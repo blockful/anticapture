@@ -16,13 +16,13 @@ import { DefaultLink } from "@/shared/components/design-system/links/default-lin
 import { EmptyState } from "@/shared/components/design-system/table/components/EmptyState";
 import { DaoAvatarIcon, PointerIcon } from "@/shared/components/icons";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
-import { DaoConfiguration } from "@/shared/dao-config/types";
+import type { DaoConfiguration } from "@/shared/dao-config/types";
 import {
   filterFieldsByRiskLevel,
   fieldsToArray,
 } from "@/shared/dao-config/utils";
 import { useScreenSize } from "@/shared/hooks";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { RiskLevel } from "@/shared/types/enums";
 import { Stage } from "@/shared/types/enums/Stage";
 import { cn, formatPlural } from "@/shared/utils/";

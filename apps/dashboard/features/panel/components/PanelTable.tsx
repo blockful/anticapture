@@ -1,9 +1,10 @@
 "use client";
 
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { useRef, useState } from "react";
 
+import { cn } from "@/shared/utils/cn";
 import {
   DaoCell,
   ChainCell,
@@ -20,7 +21,6 @@ import {
 import { Table } from "@/shared/components/design-system/table/Table";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { cn } from "@/shared/utils";
 import { DaoIdEnum } from "@/shared/types/daos";
 
 type PanelDao = {

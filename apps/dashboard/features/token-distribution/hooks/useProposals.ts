@@ -1,6 +1,6 @@
 import { useGetProposalsQuery } from "@anticapture/graphql-client/hooks";
 
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 export const useProposals = (daoId: DaoIdEnum, fromDate: number) => {

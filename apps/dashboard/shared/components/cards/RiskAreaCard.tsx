@@ -2,7 +2,8 @@
 
 import { CounterClockwiseClockIcon } from "@radix-ui/react-icons";
 import { AlertCircle, AlertTriangle, CheckCircle2 } from "lucide-react";
-import { ReactNode, useState } from "react";
+import type { ReactNode } from "react";
+import { useState } from "react";
 
 import { RiskTooltipCard, TooltipInfo } from "@/shared/components";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
@@ -10,7 +11,7 @@ import { EmptyState } from "@/shared/components/design-system/table/components/E
 import { RISK_AREAS } from "@/shared/constants/risk-areas";
 import daoConfig from "@/shared/dao-config";
 import { useScreenSize } from "@/shared/hooks";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { RiskAreaEnum } from "@/shared/types/enums";
 import { RiskLevel } from "@/shared/types/enums/RiskLevel";
 import { Stage } from "@/shared/types/enums/Stage";

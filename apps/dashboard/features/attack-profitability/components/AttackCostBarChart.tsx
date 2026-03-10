@@ -2,7 +2,8 @@
 
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useRef } from "react";
-import { Data } from "react-csv/lib/core";
+import type { Data } from "react-csv/lib/core";
+import type { LabelProps } from "recharts";
 import {
   BarChart,
   Bar,
@@ -11,7 +12,6 @@ import {
   ResponsiveContainer,
   LabelList,
   Cell,
-  LabelProps,
 } from "recharts";
 import { formatUnits } from "viem";
 
@@ -30,7 +30,7 @@ import {
   useDelegatedSupply,
   useScreenSize,
 } from "@/shared/hooks";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { formatNumberUserReadable } from "@/shared/utils/";
 

@@ -5,7 +5,7 @@ import { DaoOverviewMetricCard } from "@/features/dao-overview/components/DaoOve
 import { useDaoOverviewData } from "@/features/dao-overview/hooks/useDaoOverviewData";
 import { BadgeStatus, TooltipInfo } from "@/shared/components";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
-import { DaoConfiguration } from "@/shared/dao-config/types";
+import type { DaoConfiguration } from "@/shared/dao-config/types";
 import { useQuorumGap } from "@/shared/hooks/useQuorumGap";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils";
