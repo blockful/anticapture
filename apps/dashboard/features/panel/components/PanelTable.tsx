@@ -212,7 +212,7 @@ export const PanelTable = () => {
         value={activeTab}
         onValueChange={(v) => setActiveTab(v as TabValue)}
       >
-        <TabsList className="mb-4 flex border-b border-b-white/10 font-mono">
+        <TabsList className="mb-4 flex border-b border-b-white/10">
           <TabsTrigger
             value={TABS.FULLY_ANALYZED}
             className={cn(
