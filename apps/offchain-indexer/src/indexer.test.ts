@@ -1,8 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Repository } from "@/repository/db.interface";
-import type { DataProvider } from "@/provider/dataProvider.interface";
-import type { OffchainProposal, OffchainVote } from "@/repository/schema";
+
 import { Indexer } from "@/indexer";
+import type { DataProvider } from "@/provider/dataProvider.interface";
+import type { Repository } from "@/repository/db.interface";
+import type { OffchainProposal, OffchainVote } from "@/repository/schema";
 
 function makeProposal(overrides?: Partial<OffchainProposal>): OffchainProposal {
   return {
@@ -30,7 +31,7 @@ function makeVote(overrides?: Partial<OffchainVote>): OffchainVote {
     voter: "0xdef",
     proposalId: "p-1",
     choice: 1,
-    vp: 100,
+    vp: "100",
     reason: "",
     created: 1700000050,
     ...overrides,
@@ -51,11 +52,15 @@ function createSimpleRepository(): Repository & {
     savedProposals,
     savedVotes,
     getLastCursor: vi.fn(async (entity: string) => cursors.get(entity) ?? null),
-    resetCursor: vi.fn(async (entity: string) => { cursors.delete(entity); }),
-    saveProposals: vi.fn(async (proposals: OffchainProposal[], cursor: string) => {
-      savedProposals.push(...proposals);
-      cursors.set("proposals", cursor);
+    resetCursor: vi.fn(async (entity: string) => {
+      cursors.delete(entity);
     }),
+    saveProposals: vi.fn(
+      async (proposals: OffchainProposal[], cursor: string) => {
+        savedProposals.push(...proposals);
+        cursors.set("proposals", cursor);
+      },
+    ),
     saveVotes: vi.fn(async (votes: OffchainVote[], cursor: string) => {
       savedVotes.push(...votes);
       cursors.set("votes", cursor);
@@ -234,7 +239,10 @@ describe("Indexer", () => {
 
   it("should continue polling after provider error", async () => {
     const repo = createSimpleRepository();
-    const provider = createSimpleProvider({ failProposals: true, failVotes: true });
+    const provider = createSimpleProvider({
+      failProposals: true,
+      failVotes: true,
+    });
     const indexer = new Indexer(repo, provider, 1_000);
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
