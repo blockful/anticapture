@@ -18,7 +18,20 @@ export const AAVE: DaoConfiguration = {
     token: "ERC20",
     chain: { ...mainnet, icon: MainnetIcon },
     contracts: {
-      token: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+      token: [
+        {
+          label: "AAVE",
+          address: "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9",
+        },
+        {
+          label: "stkAAVE",
+          address: "0x4da27a545c0c5B758a6BA100e3a049001de870f5",
+        },
+        {
+          label: "aAAVE",
+          address: "0xA700b4eB416Be35b2911fd5Dee80678ff64fF6C9",
+        },
+      ],
     },
   },
   dataTables: true,

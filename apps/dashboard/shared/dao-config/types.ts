@@ -69,7 +69,7 @@ export interface ChainWithIcon extends Chain {
 export interface DaoOverviewConfig {
   chain: ChainWithIcon;
   contracts: {
-    token: Address;
+    token: Address | { label: string; address: Address }[];
     governor?: Address;
     timelock?: Address;
   };

@@ -98,8 +98,8 @@ const getTreasuryMetrics = (
       title="Treasury"
       text={
         reviewStage ? (
-          <BadgeStatus variant={"dimmed"}>
-            <span className="w-full text-center">Review needed</span>
+          <BadgeStatus variant={"dimmed"} className="w-fit rounded">
+            Review needed
           </BadgeStatus>
         ) : (
           `$${liquidTreasuryAllValueFormatted} (${liquidTreasuryAllPercent}% in ${daoId})`
@@ -119,6 +119,7 @@ const getDelegatesToPass = (
   daoId: string,
   topDelegatesToPass: number | null,
   isLoading: boolean,
+  reviewStage: boolean,
 ) => {
   // if (daoId === DaoIdEnum.OPTIMISM) {
   //   return (
@@ -134,8 +135,16 @@ const getDelegatesToPass = (
   return (
     <DaoOverviewMetricCard
       title={<DelegateToPassTitle />}
-      text={`Top ${topDelegatesToPass || "N/A"} delegates`}
-      subText="To reach quorum"
+      text={
+        reviewStage ? (
+          <BadgeStatus variant={"dimmed"} className="w-fit rounded">
+            <span className="w-full text-center">Review needed</span>
+          </BadgeStatus>
+        ) : (
+          `Top ${topDelegatesToPass || "N/A"} delegates`
+        )
+      }
+      subText={!reviewStage && "To reach quorum"}
       isLoading={isLoading}
     />
   );
@@ -196,6 +205,7 @@ export const DaoOverviewHeaderMetrics = ({
     daoId,
     Number(topDelegatesToPass),
     isLoading,
+    reviewStage,
   );
 
   return (
@@ -212,7 +222,7 @@ export const DaoOverviewHeaderMetrics = ({
           title="Votable Supply"
           text={
             reviewStage ? (
-              <BadgeStatus variant={"dimmed"}>
+              <BadgeStatus variant={"dimmed"} className="w-fit rounded">
                 <span className="w-full text-center">Review needed</span>
               </BadgeStatus>
             ) : (
@@ -230,7 +240,7 @@ export const DaoOverviewHeaderMetrics = ({
           title="Average Turnout"
           text={
             reviewStage ? (
-              <BadgeStatus variant={"dimmed"}>
+              <BadgeStatus variant={"dimmed"} className="w-fit rounded">
                 <span className="w-full text-center">Review needed</span>
               </BadgeStatus>
             ) : (
