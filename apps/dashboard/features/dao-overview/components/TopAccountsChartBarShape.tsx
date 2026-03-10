@@ -1,10 +1,10 @@
 "use client";
 
 import React from "react";
-import { BarProps } from "recharts";
-import { Address } from "viem";
+import type { BarProps } from "recharts";
+import type { Address } from "viem";
 
-import { TopAccountChartData } from "@/features/dao-overview/components/TopAccountsChart";
+import type { TopAccountChartData } from "@/features/dao-overview/components/TopAccountsChart";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { formatNumberUserReadable } from "@/shared/utils";
 

@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 
 import { ANTICAPTURE_TELEGRAM_BOT } from "@/shared/constants/social-media";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 export const TelegramBotMessage = () => {
   const { daoId } = useParams() as { daoId: string };

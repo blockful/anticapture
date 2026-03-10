@@ -10,7 +10,7 @@ import { useProposals } from "@/features/governance/hooks/useProposals";
 import { TheSectionLayout } from "@/shared/components";
 import { EmptyState } from "@/shared/components/design-system/table/components/EmptyState";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 export const GovernanceSection = () => {
   const { daoId }: { daoId: string } = useParams();

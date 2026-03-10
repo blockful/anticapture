@@ -1,5 +1,6 @@
-import Link, { LinkProps } from "next/link";
-import { ReactNode } from "react";
+import type { LinkProps } from "next/link";
+import Link from "next/link";
+import type { ReactNode } from "react";
 
 export const underlinedStyles =
   "group border-foreground text-secondary hover:text-primary flex items-center gap-1 border-b border-dashed font-mono text-sm text-[13px] leading-[18px] font-medium tracking-wide uppercase duration-300 hover:border-white";

@@ -6,15 +6,15 @@ import { OverviewComposedChart } from "@/features/token-distribution/components/
 import { SectionComposedChart } from "@/features/token-distribution/components/SectionComposedChart";
 import { TokenDistributionWrapper } from "@/features/token-distribution/components/TokenDistributionWrapper";
 import { useBrushStore } from "@/features/token-distribution/store/useBrushStore";
-import { MetricSchema } from "@/features/token-distribution/utils/metrics";
+import type { MetricSchema } from "@/features/token-distribution/utils/metrics";
 import loadingAnimation from "@/public/loading-animation.json";
 import { ResearchPendingChartBlur } from "@/shared/components/charts/ResearchPendingChartBlur";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { ChartDataSetPoint } from "@/shared/dao-config/types";
+import type { ChartDataSetPoint } from "@/shared/dao-config/types";
 import { useScreenSize } from "@/shared/hooks/useScreenSize";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { timestampToReadableDate } from "@/shared/utils";
 
 interface TokenDistributionChartProps {

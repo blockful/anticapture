@@ -3,11 +3,8 @@
 import { Calendar } from "lucide-react";
 import { useState, useEffect } from "react";
 
-import {
-  FeedEventRelevance,
-  FeedEventType,
-  ActivityFeedFilterState,
-} from "@/features/feed/types";
+import type { ActivityFeedFilterState } from "@/features/feed/types";
+import { FeedEventRelevance, FeedEventType } from "@/features/feed/types";
 import {
   Button,
   DrawerRoot,

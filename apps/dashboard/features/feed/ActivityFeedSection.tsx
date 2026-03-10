@@ -9,18 +9,17 @@ import { FeedEventItem } from "@/features/feed/components/FeedEventItem";
 import { FeedEventSkeleton } from "@/features/feed/components/FeedEventSkeleton";
 import { useActivityFeed } from "@/features/feed/hooks/useActivityFeed";
 import { useActivityFeedParams } from "@/features/feed/hooks/useActivityFeedParams";
-import { FeedEvent, FeedEventRelevance } from "@/features/feed/types";
-import {
-  EntityType,
-  HoldersAndDelegatesDrawer,
-} from "@/features/holders-and-delegates/components/HoldersAndDelegatesDrawer";
+import type { FeedEvent } from "@/features/feed/types";
+import { FeedEventRelevance } from "@/features/feed/types";
+import type { EntityType } from "@/features/holders-and-delegates/components/HoldersAndDelegatesDrawer";
+import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates/components/HoldersAndDelegatesDrawer";
 import { Button, BlankSlate, TheSectionLayout } from "@/shared/components";
 import {
   SubSectionsContainer,
   BulletDivider,
 } from "@/shared/components/design-system/section";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn } from "@/shared/utils";
 
 interface ActivityFeedSectionProps {

@@ -16,16 +16,17 @@ export default async function DaoOverviewPage({ params }: Props) {
 
 ## Exports
 
-Always use named exports. Never use default exports (except App Router pages/layouts).
+> **Enforced by ESLint** (`import/no-default-export`): Named exports required in `features/`, `shared/`, `widgets/`.
+
+App Router pages/layouts are the only exception (they require `export default`).
 
 ## Type Imports
 
-Always use `import type` for type-only imports. Use inline `type` for mixed imports.
+> **Enforced by ESLint** (`@typescript-eslint/consistent-type-imports`): Auto-fixed on `lint:fix`.
+
+Use inline `type` keyword for mixed imports:
 
 ```tsx
-import type { DaoIdEnum } from "@/shared/types/daos";
-
-// Mixed import with inline type
 import {
   useGetProposalsQuery,
   type GetProposalsQuery,
@@ -34,7 +35,7 @@ import {
 
 ## Props And Types Typing
 
-Never use `React.FC`; it implicitly adds `children` to props and is redundant since TypeScript infers the return type from arrow functions.
+> **Enforced by ESLint** (`@typescript-eslint/no-restricted-types`): `React.FC` and `React.FunctionComponent` are banned.
 
 Use `type` for component props. Inline for 1 to 2 props, named alias for 3 or more.
 
@@ -90,6 +91,10 @@ export const useTokenHolders = (daoId: DaoIdEnum) => {
 
 ## Import Ordering
 
+> **Partially enforced by ESLint** (`import/order`): Groups and newlines between groups are auto-fixed.
+
+The preferred group order within each section:
+
 ```tsx
 // 1. React
 import { useState, useMemo } from "react";
@@ -112,15 +117,9 @@ import type { OverviewData } from "./types";
 
 ## No Barrel Files
 
-Always import directly from the source file. Never import from `index.ts`. Barrel files force bundlers to load all re-exported modules even when only one is needed, create circular dependency risks, and make it harder to trace where code lives.
+> **Enforced by ESLint** (`no-restricted-imports`): Barrel imports from `@/shared/components`, `@/shared/hooks`, `@/shared/utils` are blocked.
 
-```tsx
-// Correct
-import { MetricCard } from "@/shared/components/cards/MetricCard";
-
-// Wrong
-import { MetricCard } from "@/shared/components";
-```
+Always import directly from the source file. Never import from `index.ts`.
 
 ## Import Boundaries
 
@@ -150,7 +149,7 @@ features/X -> features/Y/*     forbidden, move to shared/
 - **Strings**: Always double quotes. Template literals only for interpolation.
 - **Async**: Always use async arrow functions.
 - **Errors**: Use try/catch for async operations. Log with `console.error`. Never silently swallow errors.
-- **Conditionals**: Ternary for either/or, `&&` for show/hide, early return for guards. No nested ternaries.
+- **Conditionals**: Ternary for either/or, `&&` for show/hide, early return for guards. No nested ternaries (**enforced by ESLint**: `no-nested-ternary`).
 - **Immutability**: Never mutate props, state, or objects from hooks. Always create new references with spread or `.map()`.
 - **No `forwardRef`**: React 19 supports `ref` as a regular prop. Declare `ref?: React.Ref<Element>` in props instead of `forwardRef`.
 - **Comments**: JSDoc for exported functions/hooks. No commented-out code. No obvious comments; explain why, not what.

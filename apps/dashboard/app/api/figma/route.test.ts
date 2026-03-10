@@ -9,7 +9,6 @@
 
 import { NextRequest } from "next/server";
 
-// eslint-disable-next-line no-restricted-imports
 import { GET } from "./route";
 
 // Mock environment variables

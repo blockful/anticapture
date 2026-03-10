@@ -1,5 +1,5 @@
-import { GetProposalQuery } from "@anticapture/graphql-client";
-import { ColumnDef } from "@tanstack/react-table";
+import type { GetProposalQuery } from "@anticapture/graphql-client";
+import type { ColumnDef } from "@tanstack/react-table";
 import {
   CheckCircle2,
   CircleMinus,
@@ -16,10 +16,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { formatUnits } from "viem";
 
 import { VotesTable } from "@/features/governance/components/proposal-overview/VotesTable";
-import {
-  useVotes,
-  VoteWithHistoricalPower,
-} from "@/features/governance/hooks/useVotes";
+import type { VoteWithHistoricalPower } from "@/features/governance/hooks/useVotes";
+import { useVotes } from "@/features/governance/hooks/useVotes";
 import { SkeletonRow, Button, BlankSlate } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
@@ -27,7 +25,7 @@ import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 
 interface TabsVotedContentProps {

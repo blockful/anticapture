@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import { SkeletonRow } from "@/shared/components";
 import { cn } from "@/shared/utils";

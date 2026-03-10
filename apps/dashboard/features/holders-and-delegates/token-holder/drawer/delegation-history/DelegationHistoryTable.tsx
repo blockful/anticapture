@@ -1,6 +1,6 @@
 "use client";
 
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 import {
@@ -11,7 +11,8 @@ import {
   useQueryStates,
 } from "nuqs";
 import { useEffect, useState } from "react";
-import { Address, parseUnits, formatUnits } from "viem";
+import type { Address } from "viem";
+import { parseUnits, formatUnits } from "viem";
 
 import { useDelegationHistory } from "@/features/holders-and-delegates/hooks/useDelegationHistory";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
@@ -21,16 +22,14 @@ import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/
 import { DateCell } from "@/shared/components/design-system/table/cells/DateCell";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
-import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
-import {
-  AmountFilterState,
-  useAmountFilterStore,
-} from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
+import type { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
+import type { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
+import { useAmountFilterStore } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { fetchAddressFromEnsName } from "@/shared/hooks/useEnsData";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils/";
 
 interface DelegationData {

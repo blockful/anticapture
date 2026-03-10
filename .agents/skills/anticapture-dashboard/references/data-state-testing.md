@@ -51,7 +51,7 @@ export const useGitHubRelease = () => {
 
 ## Bundle Size
 
-- No barrel files: import directly from source files.
+- No barrel files (**enforced by ESLint** `no-restricted-imports`): import directly from source files.
 - Direct icon imports: `import { CircleSlash } from "lucide-react"`; never import the full library.
 - Use `next/dynamic` to lazy-load charts and heavy components.
 - Use `optimizePackageImports` in `next.config.ts` for libraries that only offer barrel imports.

@@ -1,7 +1,7 @@
 import { Slot } from "@radix-ui/react-slot";
 
 import { variantStyles } from "@/shared/components/design-system/buttons/styles";
-import {
+import type {
   ButtonProps,
   ButtonSize,
 } from "@/shared/components/design-system/buttons/types";

@@ -1,6 +1,6 @@
 "use client";
 
-import {
+import type {
   GetProposalsActivityQueryVariables,
   Query_ProposalsActivity_Proposals_Items,
 } from "@anticapture/graphql-client";
@@ -8,7 +8,7 @@ import { useGetProposalsActivityQuery } from "@anticapture/graphql-client/hooks"
 import { NetworkStatus } from "@apollo/client";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 interface UseProposalsActivityParams extends GetProposalsActivityQueryVariables {

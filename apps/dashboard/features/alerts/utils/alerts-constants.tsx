@@ -1,4 +1,4 @@
-import { JSX, ReactNode, SVGProps } from "react";
+import type { JSX, ReactNode, SVGProps } from "react";
 
 import {
   DiscordColorIcon,

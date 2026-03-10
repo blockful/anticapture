@@ -8,10 +8,10 @@ import {
 } from "recharts";
 
 import { TokenDistributionCustomTooltip } from "@/features/token-distribution/components/TokenDistributionCustomTooltip";
-import { MetricSchema } from "@/features/token-distribution/utils";
+import type { MetricSchema } from "@/features/token-distribution/utils";
 import { ChartContainer } from "@/shared/components/ui/chart";
-import { ChartDataSetPoint } from "@/shared/dao-config/types";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { ChartDataSetPoint } from "@/shared/dao-config/types";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils";
 
 export const OverviewComposedChart = ({

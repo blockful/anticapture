@@ -4,7 +4,7 @@ import { useVoteCompositionData } from "@/features/holders-and-delegates/delegat
 import { ThePieChart } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/ThePieChart";
 import { VoteCompositionTable } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/VoteCompositionTable";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils";
 
 const ChartLegend = ({

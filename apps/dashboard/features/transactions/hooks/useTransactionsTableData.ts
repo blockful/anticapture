@@ -1,21 +1,17 @@
 "use client";
 
-import {
-  QueryInput_Transactions_SortOrder,
-  useTransactionsQuery,
-} from "@anticapture/graphql-client/hooks";
+import type { QueryInput_Transactions_SortOrder } from "@anticapture/graphql-client/hooks";
+import { useTransactionsQuery } from "@anticapture/graphql-client/hooks";
 import { NetworkStatus } from "@apollo/client";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { parseUnits } from "viem";
 
-import { TransactionsParamsType } from "@/features/transactions/hooks/useTransactionParams";
-import {
-  adaptTransactionsToTableData,
-  GraphTransaction,
-} from "@/features/transactions/utils/transactionsAdapter";
-import { SupplyType } from "@/shared/components";
+import type { TransactionsParamsType } from "@/features/transactions/hooks/useTransactionParams";
+import type { GraphTransaction } from "@/features/transactions/utils/transactionsAdapter";
+import { adaptTransactionsToTableData } from "@/features/transactions/utils/transactionsAdapter";
+import type { SupplyType } from "@/shared/components";
 import daoConfig from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 export type AffectedSupplyType =

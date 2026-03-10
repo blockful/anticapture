@@ -1,17 +1,17 @@
-import {
+import type {
   QueryInput_VotesByProposalId_OrderBy,
   QueryInput_VotesByProposalId_OrderDirection,
 } from "@anticapture/graphql-client";
+import type { GetVotesQuery } from "@anticapture/graphql-client/hooks";
 import {
-  GetVotesQuery,
   useGetVotesQuery,
   useGetVotingPowerChangeLazyQuery,
 } from "@anticapture/graphql-client/hooks";
-import { ApolloError } from "@apollo/client";
+import type { ApolloError } from "@apollo/client";
 import { useMemo, useState, useCallback, useEffect } from "react";
 
 import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 type VotingPowerVariation = {
