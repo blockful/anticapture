@@ -4,6 +4,7 @@ import {
   accountPower,
   balanceHistory,
   delegation,
+  feedEvent,
   token,
   votingPowerHistory,
 } from "ponder:schema";
@@ -169,6 +170,19 @@ export async function aaveTransfer(
       })
       .onConflictDoNothing();
   }
+
+  await context.db.insert(feedEvent).values({
+    txHash: transactionHash,
+    logIndex,
+    type: "TRANSFER",
+    value,
+    timestamp,
+    metadata: {
+      from,
+      to,
+      amount: value,
+    },
+  });
 }
 
 export async function aaveDelegateChanged(
@@ -285,4 +299,18 @@ export async function aaveDelegateChanged(
       })
       .onConflictDoNothing();
   }
+
+  await context.db.insert(feedEvent).values({
+    txHash: transactionHash,
+    logIndex,
+    type: "DELEGATION",
+    value: delegatorBalance.balance,
+    timestamp,
+    metadata: {
+      delegator,
+      delegate,
+      previousDelegate,
+      amount: delegatorBalance.balance,
+    },
+  });
 }
