@@ -21,7 +21,7 @@ interface AccountBalanceRepository {
     amountfilter: AmountFilter,
   ): Promise<{
     items: DBAccountBalance[];
-    totalCount: bigint;
+    totalCount: number;
   }>;
 }
 
