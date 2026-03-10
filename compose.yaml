@@ -46,5 +46,84 @@ services:
     networks:
       - backend
 
+  prometheus:
+    image: prom/prometheus
+    profiles: [monitoring]
+    ports:
+      - "9090:9090"
+    volumes:
+      - prometheus_data:/prometheus
+      - ./infra/monitoring/prometheus/:/etc/prometheus/
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+    networks:
+      - backend
+
+  alertmanager:
+    image: prom/alertmanager:latest
+    profiles: [monitoring]
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./infra/monitoring/alertmanager/:/etc/alertmanager/
+    command:
+      - --config.file=/etc/alertmanager/config.yml
+    environment:
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL:-}
+    networks:
+      - backend
+
+  grafana:
+    image: grafana/grafana
+    profiles: [monitoring]
+    ports:
+      - "3000:3000"
+    environment:
+      PROMETHEUS_URL: http://prometheus:9090
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+    entrypoint: >
+      sh -c "cp -r /etc/grafana/provisioning_temp/dashboards/. /etc/grafana/provisioning/dashboards &&
+             find /etc/grafana/provisioning/dashboards/ -name '*.json' -exec sed -i 's/$${DS_PROMETHEUS}/Prometheus/g' {} \+ &&
+             /run.sh"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./infra/monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+      - ./infra/monitoring/grafana/dashboards:/etc/grafana/provisioning_temp/dashboards
+      - ./infra/monitoring/grafana/grafana.ini:/etc/grafana/grafana.ini
+    depends_on:
+      - prometheus
+    networks:
+      - backend
+
+  otelcol:
+    image: otel/opentelemetry-collector-contrib:latest
+    profiles: [monitoring]
+    volumes:
+      - ./infra/monitoring/otelcol/config.yaml:/etc/otelcol-contrib/config.yaml
+    ports:
+      - "4318:4318"
+    networks:
+      - backend
+
+  tempo:
+    image: grafana/tempo:2.6.1
+    profiles: [monitoring]
+    command: ["-config.file=/etc/tempo.yaml"]
+    volumes:
+      - ./infra/monitoring/tempo/tempo.yaml:/etc/tempo.yaml
+      - tempo_data:/var/tempo
+    ports:
+      - "3200:3200"
+      - "4317:4317"
+    networks:
+      - backend
+
+volumes:
+  prometheus_data:
+  grafana_data:
+  tempo_data:
+
 networks:
   backend:

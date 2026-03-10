@@ -1,3 +1,7 @@
+import {
+  PROMETHEUS_MIME_TYPE,
+  PrometheusSerializer,
+} from "@anticapture/observability";
 import { serve } from "@hono/node-server";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { drizzle } from "drizzle-orm/node-postgres";
@@ -42,7 +46,8 @@ import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 import { getChain } from "@/lib/utils";
 import { logger } from "@/logger";
-import { errorHandler } from "@/middlewares";
+import { exporter } from "@/metrics";
+import { errorHandler, metricsMiddleware } from "@/middlewares";
 import {
   AccountBalanceRepository,
   AccountInteractionsRepository,
@@ -126,6 +131,18 @@ app.use(async (c, next) => {
   );
 });
 app.onError(errorHandler);
+
+app.get("/metrics", async (c) => {
+  const result = await exporter.collect();
+  const serialized = new PrometheusSerializer().serialize(
+    result.resourceMetrics,
+  );
+  return c.text(serialized, 200, {
+    "Content-Type": PROMETHEUS_MIME_TYPE,
+  });
+});
+
+app.use(metricsMiddleware);
 
 const chain = getChain(env.CHAIN_ID);
 if (!chain) {

@@ -11,8 +11,8 @@ import { PgInstrumentation } from "@opentelemetry/instrumentation-pg";
 import { Resource } from "@opentelemetry/resources";
 import { MeterProvider } from "@opentelemetry/sdk-metrics";
 import {
-  BatchSpanProcessor,
   NodeTracerProvider,
+  BatchSpanProcessor,
 } from "@opentelemetry/sdk-trace-node";
 import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
 
@@ -32,13 +32,6 @@ export function createObservabilityProvider(
 ): ObservabilityProvider {
   const collectorEndpoint =
     process.env.OTEL_EXPORTER_OTLP_ENDPOINT ?? "http://localhost:4318";
-  const otlpHeaders = process.env.OTEL_EXPORTER_OTLP_HEADERS
-    ? Object.fromEntries(
-        process.env.OTEL_EXPORTER_OTLP_HEADERS.split(",").map(
-          (h) => h.split("=", 2) as [string, string],
-        ),
-      )
-    : undefined;
 
   const resource = new Resource({ [ATTR_SERVICE_NAME]: serviceName });
 
@@ -53,14 +46,12 @@ export function createObservabilityProvider(
 
   const traceExporter = new OTLPTraceExporter({
     url: `${collectorEndpoint}/v1/traces`,
-    headers: otlpHeaders,
   });
 
   const tracerProvider = new NodeTracerProvider({
     resource,
     spanProcessors: [new BatchSpanProcessor(traceExporter)],
   });
-
   tracerProvider.register();
 
   registerInstrumentations({
@@ -69,12 +60,16 @@ export function createObservabilityProvider(
   });
 
   metrics.setGlobalMeterProvider(meterProvider);
+
   new HostMetrics({ meterProvider }).start();
 
   const shutdown = async () => {
     await meterProvider.shutdown();
     await tracerProvider.shutdown();
   };
+
+  process.once("SIGTERM", shutdown);
+  process.once("SIGINT", shutdown);
 
   return {
     meterProvider,

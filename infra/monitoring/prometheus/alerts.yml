@@ -1,0 +1,50 @@
+groups:
+  - name: anticapture
+    interval: 30s
+    rules:
+      # Service is not responding (no scrape data for 1 minute)
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "Prometheus cannot scrape {{ $labels.job }} at {{ $labels.instance }}"
+
+      # CPU usage above 80% for 5 minutes
+      - alert: HighCPUUsage
+        expr: rate(process_cpu_time_seconds_total[1m]) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU on {{ $labels.job }}"
+          description: '{{ $labels.job }} CPU at {{ printf "%.1f" $value }}% for 5 minutes'
+
+      # p99 HTTP latency above 2s for 5 minutes
+      - alert: HighLatency
+        expr: >
+          histogram_quantile(0.99,
+            sum(rate(http_server_request_duration_seconds_bucket[5m])) by (le)
+          ) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High p99 latency"
+          description: 'p99 latency is {{ printf "%.2f" $value }}s'
+
+      # 5xx error rate above 1% for 2 minutes
+      - alert: HighErrorRate
+        expr: >
+          sum(rate(http_server_request_duration_seconds_count{http_response_status_code=~"5.."}[2m]))
+          /
+          sum(rate(http_server_request_duration_seconds_count[2m]))
+          * 100 > 1
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High 5xx error rate"
+          description: '5xx rate is {{ printf "%.2f" $value }}%'
