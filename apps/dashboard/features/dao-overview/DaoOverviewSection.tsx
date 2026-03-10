@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { Suspense, useEffect } from "react";
+import { Info } from "lucide-react";
 
 import { AccountBalanceChartCard } from "@/features/dao-overview/components/AccountBalanceChartCard";
 import { AttackProfitabilityChartCard } from "@/features/dao-overview/components/AttackProfitabilityChartCard";
@@ -20,6 +21,7 @@ import { DividerDefault } from "@/shared/components/design-system/divider/Divide
 import { DaoAvatarIcon } from "@/shared/components/icons";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { Stage } from "@/shared/types/enums/Stage";
+import { BannerAlert } from "@/shared/components/design-system/alerts/banner-alert/BannerAlert";
 import {
   fieldsToArray,
   getDaoStageFromFields,
@@ -82,6 +84,21 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         {daoConfig.governancePage && (
           <div className="mx-5">
             <OngoingProposalBanner daoId={daoId} />
+          </div>
+        )}
+
+        {currentDaoStage === Stage.UNKNOWN && (
+          <div className="mx-5">
+            <BannerAlert
+              icon={<Info className="size-4" />}
+              text="This DAO is needing review. Enable monitoring for faster governance risk signals."
+              storageKey={`donate-banner-dismissed-${daoId}`}
+              link={{
+                url: `/donate`,
+                text: "Donate",
+                openInNewTab: true,
+              }}
+            />
           </div>
         )}
 
