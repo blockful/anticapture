@@ -16,10 +16,14 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const daoId = params.daoId.toUpperCase() as DaoIdEnum;
 
+  const canonicalPath = `/${params.daoId}/token-distribution`;
+
   return {
     title: `Anticapture - ${daoId} DAO Token Distribution`,
     description: `Analyze token distribution and concentration for ${daoId} DAO.`,
+    alternates: { canonical: canonicalPath },
     openGraph: {
+      url: canonicalPath,
       title: `Anticapture - ${daoId} DAO Token Distribution`,
       description: `Analyze token distribution and concentration for ${daoId} DAO.`,
     },

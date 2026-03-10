@@ -12,10 +12,14 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const daoId = params.daoId.toUpperCase() as DaoIdEnum;
 
+  const canonicalPath = `/${params.daoId}/holders-and-delegates`;
+
   return {
     title: `Anticapture - ${daoId} DAO Holders and Delegates`,
     description: `Explore ${daoId} DAO token holders and delegate distribution.`,
+    alternates: { canonical: canonicalPath },
     openGraph: {
+      url: canonicalPath,
       title: `Anticapture - ${daoId} DAO Holders and Delegates`,
       description: `Explore ${daoId} DAO token holders and delegate distribution.`,
     },
