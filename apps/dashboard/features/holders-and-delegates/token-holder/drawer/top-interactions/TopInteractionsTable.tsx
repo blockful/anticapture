@@ -1,6 +1,6 @@
 "use client";
 
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import {
   parseAsBoolean,
@@ -10,7 +10,8 @@ import {
   useQueryStates,
 } from "nuqs";
 import { useEffect, useState } from "react";
-import { Address, formatUnits, parseUnits } from "viem";
+import type { Address } from "viem";
+import { formatUnits, parseUnits } from "viem";
 
 import { useAccountInteractionsData } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/hooks/useAccountInteractionsData";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
@@ -19,17 +20,15 @@ import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButt
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { AddressFilter } from "@/shared/components/design-system/table/filters";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
-import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
-import {
-  AmountFilterState,
-  useAmountFilterStore,
-} from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
+import type { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
+import type { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
+import { useAmountFilterStore } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 import { percentageVariants } from "@/shared/components/design-system/table/Percentage";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 import daoConfig from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 
 export const TopInteractionsTable = ({

@@ -1,13 +1,13 @@
 "use client";
 
-import { GetAccountPowerQuery } from "@anticapture/graphql-client";
+import type { GetAccountPowerQuery } from "@anticapture/graphql-client";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 import { Button, IconButton } from "@/shared/components";
 import { DaoAvatarIcon } from "@/shared/components/icons";
 import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCustom";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 interface ProposalHeaderProps {
   daoId: string;

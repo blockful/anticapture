@@ -1,4 +1,4 @@
-import { TokenMetricItem } from "@/shared/dao-config/types";
+import type { TokenMetricItem } from "@/shared/dao-config/types";
 
 export const mockedTokenMultineDatasets: Record<string, TokenMetricItem[]> = {
   delegatedSupply: [

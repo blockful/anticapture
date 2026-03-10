@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ButtonHTMLAttributes, ElementType } from "react";
+import type { ButtonHTMLAttributes, ElementType } from "react";
 
 import { cn } from "@/shared/utils/";
 

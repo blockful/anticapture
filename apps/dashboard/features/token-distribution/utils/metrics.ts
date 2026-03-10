@@ -1,4 +1,4 @@
-import { MetricWithKey } from "@/features/token-distribution/types";
+import type { MetricWithKey } from "@/features/token-distribution/types";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 
 export const initialMetrics = [

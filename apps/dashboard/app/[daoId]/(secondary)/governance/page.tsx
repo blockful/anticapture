@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { GovernanceSection } from "@/features/governance";
 import { Footer } from "@/shared/components/design-system/footer/Footer";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { HeaderDAOSidebar, HeaderSidebar, StickyPageHeader } from "@/widgets";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
 

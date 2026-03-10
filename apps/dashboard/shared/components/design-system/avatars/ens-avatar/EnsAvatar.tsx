@@ -1,9 +1,10 @@
 "use client";
 
-import Image, { ImageProps } from "next/image";
+import type { ImageProps } from "next/image";
+import Image from "next/image";
 import { useState } from "react";
 import Blockies from "react-blockies";
-import { Address } from "viem";
+import type { Address } from "viem";
 
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";

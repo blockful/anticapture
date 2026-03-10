@@ -19,7 +19,7 @@ import {
   Plus,
   Users,
 } from "lucide-react";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import { Badge } from "@/shared/components/badges/Badge";
 

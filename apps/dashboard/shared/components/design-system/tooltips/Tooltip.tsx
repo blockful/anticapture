@@ -1,7 +1,8 @@
 "use client";
 
 import { Content, Trigger, Root, Portal } from "@radix-ui/react-tooltip";
-import { ReactNode, useState } from "react";
+import type { ReactNode } from "react";
+import { useState } from "react";
 
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 import { useScreenSize } from "@/shared/hooks/useScreenSize";

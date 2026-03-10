@@ -7,7 +7,7 @@ import { ProposalItem } from "@/features/governance/components/proposal-overview
 import { TooltipInfo } from "@/shared/components";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 import { EmptyState as ErrorState } from "@/shared/components/design-system/table/components/EmptyState";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 const LastProposalsCardSkeleton = () => {
   return (

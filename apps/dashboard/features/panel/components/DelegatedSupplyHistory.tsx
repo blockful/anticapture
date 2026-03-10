@@ -13,7 +13,8 @@ import {
 
 import loadingAnimation from "@/public/loading-animation.json";
 import { TooltipInfo } from "@/shared/components";
-import { ChartConfig, ChartContainer } from "@/shared/components/ui/chart";
+import type { ChartConfig } from "@/shared/components/ui/chart";
+import { ChartContainer } from "@/shared/components/ui/chart";
 import { useDelegationPercentageByDay } from "@/shared/hooks";
 
 const chartConfig: ChartConfig = {

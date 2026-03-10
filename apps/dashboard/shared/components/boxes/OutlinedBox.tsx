@@ -1,5 +1,5 @@
 import { AlertCircle, AlertTriangle, CheckCircle2 } from "lucide-react";
-import { ComponentProps, ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 
 import { cn } from "@/shared/utils/";
 

@@ -5,17 +5,17 @@ import { Inbox } from "lucide-react";
 import { TokenDistributionDialog } from "@/features/token-distribution/components";
 import { Metric } from "@/features/token-distribution/components/Metric";
 import { useBrushStore } from "@/features/token-distribution/store/useBrushStore";
-import { MetricWithKey } from "@/features/token-distribution/types";
+import type { MetricWithKey } from "@/features/token-distribution/types";
+import type { MetricSchema } from "@/features/token-distribution/utils/metrics";
 import {
   formatMetricsByCategory,
-  MetricSchema,
   metricsSchema,
 } from "@/features/token-distribution/utils/metrics";
 import { BlankSlate, TooltipInfo } from "@/shared/components";
 import { CardTitle } from "@/shared/components/ui/card";
-import { ChartDataSetPoint } from "@/shared/dao-config/types";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
+import type { ChartDataSetPoint } from "@/shared/dao-config/types";
+import type { DaoIdEnum } from "@/shared/types/daos";
+import type { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { formatNumberUserReadable } from "@/shared/utils";
 
 interface TokenDistributionMetricsProps {

@@ -1,8 +1,9 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import NotFound from "@/app/not-found";
 import { Footer } from "@/shared/components/design-system/footer/Footer";
-import { ALL_DAOS, DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
+import { ALL_DAOS } from "@/shared/types/daos";
 import { HeaderDAOSidebar, HeaderSidebar, StickyPageHeader } from "@/widgets";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
 // import { BaseHeaderLayoutSidebar } from "@/shared/components";

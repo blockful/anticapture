@@ -1,6 +1,6 @@
 "use client";
 
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import {
@@ -10,24 +10,23 @@ import {
   useQueryState,
   useQueryStates,
 } from "nuqs";
-import { Address, formatUnits, parseUnits, zeroAddress } from "viem";
+import type { Address } from "viem";
+import { formatUnits, parseUnits, zeroAddress } from "viem";
 
-import {
-  useDelegateDelegationHistory,
-  DelegationHistoryItem,
-} from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
+import type { DelegationHistoryItem } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
+import { useDelegateDelegationHistory } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 import { SkeletonRow, Button, IconButton } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { DateCell } from "@/shared/components/design-system/table/cells/DateCell";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
-import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components/FilterSort";
+import type { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components/FilterSort";
 import { useAmountFilterStore } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn } from "@/shared/utils";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 

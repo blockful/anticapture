@@ -2,7 +2,7 @@ import "@/app/globals.css";
 import "tailwindcss";
 import type { Metadata } from "next";
 import { Inter, Roboto_Mono } from "next/font/google";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Toaster } from "react-hot-toast";
 
 import { CookieConsent } from "@/features/cookie";

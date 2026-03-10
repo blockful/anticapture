@@ -1,12 +1,12 @@
 "use client";
 
-import { GetProposalQuery } from "@anticapture/graphql-client";
+import type { GetProposalQuery } from "@anticapture/graphql-client";
 import { ChatBubbleIcon } from "@radix-ui/react-icons";
 import { Share2 } from "lucide-react";
-import { Address } from "viem";
+import type { Address } from "viem";
 
 import { ProposalBadge } from "@/features/governance/components/proposal-overview/ProposalBadge";
-import { ProposalStatus } from "@/features/governance/types";
+import type { ProposalStatus } from "@/features/governance/types";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { BulletDivider } from "@/shared/components/design-system/section/BulletDivider";

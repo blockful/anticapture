@@ -1,9 +1,7 @@
 "use client";
 
-import {
-  QueryInput_VotingPowers_OrderBy,
-  QueryInput_VotingPowers_OrderDirection,
-} from "@anticapture/graphql-client";
+import type { QueryInput_VotingPowers_OrderBy } from "@anticapture/graphql-client";
+import { QueryInput_VotingPowers_OrderDirection } from "@anticapture/graphql-client";
 import {
   useGetDelegatesQuery,
   useGetDelegateProposalsActivityLazyQuery,
@@ -12,8 +10,8 @@ import { NetworkStatus } from "@apollo/client";
 import { useMemo, useCallback, useState, useEffect } from "react";
 
 import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { TimeInterval } from "@/shared/types/enums";
+import type { DaoIdEnum } from "@/shared/types/daos";
+import type { TimeInterval } from "@/shared/types/enums";
 import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 interface ProposalsActivity {

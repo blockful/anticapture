@@ -10,13 +10,13 @@ import { GovernanceImplementationDrawer } from "@/features/risk-analysis/compone
 import { TheSectionLayout } from "@/shared/components";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { GovernanceImplementationField } from "@/shared/dao-config/types";
+import type { GovernanceImplementationField } from "@/shared/dao-config/types";
 import {
   getDaoStageFromFields,
   fieldsToArray,
   filterFieldsByRiskLevel,
 } from "@/shared/dao-config/utils";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { GovernanceImplementationEnum, RiskLevel } from "@/shared/types/enums";
 import { Stage } from "@/shared/types/enums/Stage";
 

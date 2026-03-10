@@ -9,8 +9,8 @@ import { NetworkStatus } from "@apollo/client";
 import { useMemo, useCallback, useState } from "react";
 
 import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { TimeInterval } from "@/shared/types/enums";
+import type { DaoIdEnum } from "@/shared/types/daos";
+import type { TimeInterval } from "@/shared/types/enums";
 import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 export interface TokenHolderVariation {

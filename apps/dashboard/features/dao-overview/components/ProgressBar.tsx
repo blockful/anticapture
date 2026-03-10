@@ -2,7 +2,7 @@
 
 import { CountdownDaoInfo } from "@/features/dao-overview/components/CountdownDaoInfo";
 import { TooltipInfo } from "@/shared/components";
-import { DaoOverviewConfig } from "@/shared/dao-config/types";
+import type { DaoOverviewConfig } from "@/shared/dao-config/types";
 import { cn } from "@/shared/utils";
 
 interface ProgressBarProps {

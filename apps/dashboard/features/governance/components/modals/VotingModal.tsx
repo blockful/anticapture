@@ -3,7 +3,8 @@
 import type { Query_Proposals_Items_Items } from "@anticapture/graphql-client/hooks";
 import { Check, User2Icon, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Account, formatUnits } from "viem";
+import type { Account } from "viem";
+import { formatUnits } from "viem";
 import { useAccount, useWalletClient } from "wagmi";
 
 import { LoadingComponent } from "@/features/governance/components/modals/LoadingContent";

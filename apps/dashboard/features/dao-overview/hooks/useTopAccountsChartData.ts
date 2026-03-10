@@ -1,11 +1,12 @@
 "use client";
 
 import { useMemo } from "react";
-import { Address, zeroAddress } from "viem";
+import type { Address } from "viem";
+import { zeroAddress } from "viem";
 
-import { TopAccountChartData } from "@/features/dao-overview/components/TopAccountsChart";
+import type { TopAccountChartData } from "@/features/dao-overview/components/TopAccountsChart";
 import { useMultipleEnsData } from "@/shared/hooks/useEnsData";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 interface UseTopAccountsChartDataParams {
   chartData: TopAccountChartData[];

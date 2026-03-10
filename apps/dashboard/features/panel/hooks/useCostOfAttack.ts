@@ -4,7 +4,7 @@ import { formatUnits } from "viem";
 import { useDaoTokenHistoricalData } from "@/features/attack-profitability/hooks";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { useActiveSupply } from "@/shared/hooks";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 
 export const useCostOfAttack = (daoId: DaoIdEnum) => {

@@ -1,4 +1,4 @@
-import {
+import type {
   Query_ProposalsActivity_Proposals_Items_Proposal,
   Query_ProposalsActivity_Proposals_Items_UserVote,
 } from "@anticapture/graphql-client";
@@ -10,7 +10,8 @@ import {
   Clock10,
   UserX,
 } from "lucide-react";
-import React, { ReactNode } from "react";
+import type { ReactNode } from "react";
+import React from "react";
 
 import { ActivityIndicator } from "@/shared/components";
 
