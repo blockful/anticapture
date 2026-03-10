@@ -136,8 +136,9 @@ export class AccountBalanceRepository {
         tokenId: variations.tokenId,
         delegate: variations.delegate,
         currentBalance: variations.currentBalance,
-        absoluteChange:
-          sql<string>`${variationChangeSql}`.as("absolute_change"),
+        absoluteChange: sql<string>`${variationChangeSql}`.as(
+          "absolute_change",
+        ),
       })
       .from(variations)
       .orderBy(orderDirectionFn(orderByCriteria))

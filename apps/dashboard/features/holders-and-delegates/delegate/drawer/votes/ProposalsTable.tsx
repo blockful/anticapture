@@ -35,9 +35,11 @@ import { formatNumberUserReadable, cn } from "@/shared/utils";
 interface ProposalTableData {
   proposalId: string;
   proposalName: string;
-  finalResult: { text: string; icon: ReactNode };
-  userVote: { text: string; icon: ReactNode };
-  votingPower: string;
+  finalResult: string;
+  userVote: string;
+  finalResultIcon: ReactNode;
+  userVoteIcon: ReactNode;
+  votingPower: number | null;
   voteTiming: { text: string; percentage: number };
   status: string;
 }
@@ -94,15 +96,15 @@ export const ProposalsTable = ({
       return {
         proposalId: item.proposal?.id || "",
         proposalName: extractProposalName(item.proposal?.description || ""),
-        finalResult,
-        userVote,
+        finalResult: finalResult.text,
+        userVote: userVote.text,
+        finalResultIcon: finalResult.icon,
+        userVoteIcon: userVote.icon,
         votingPower: item.userVote?.votingPower
-          ? formatNumberUserReadable(
-              token === "ERC20"
-                ? Number(item.userVote.votingPower) / 1e18
-                : Number(item.userVote.votingPower),
-            )
-          : "-",
+          ? token === "ERC20"
+            ? Number(item.userVote.votingPower) / 1e18
+            : Number(item.userVote.votingPower)
+          : null,
         voteTiming: getVoteTimingData(
           item.userVote,
           item.proposal,
@@ -182,10 +184,8 @@ export const ProposalsTable = ({
         columnClassName: "w-28",
       },
       cell: ({ row }) => {
-        const finalResult = row.getValue("finalResult") as {
-          text: string;
-          icon: ReactNode;
-        };
+        const finalResult = row.getValue("finalResult") as string;
+        const finalResultIcon = row.original.finalResultIcon;
 
         if (loading) {
           return (
@@ -197,7 +197,7 @@ export const ProposalsTable = ({
 
         return (
           <div className="flex items-center justify-start">
-            <TextIconLeft text={finalResult.text} icon={finalResult.icon} />
+            <TextIconLeft text={finalResult} icon={finalResultIcon} />
           </div>
         );
       },
@@ -209,10 +209,8 @@ export const ProposalsTable = ({
         columnClassName: "w-28",
       },
       cell: ({ row }) => {
-        const userVote = row.getValue("userVote") as {
-          text: string;
-          icon: ReactNode;
-        };
+        const userVote = row.getValue("userVote") as string;
+        const userVoteIcon = row.original.userVoteIcon;
 
         if (loading) {
           return (
@@ -224,7 +222,7 @@ export const ProposalsTable = ({
 
         return (
           <div className="flex items-center justify-start">
-            <TextIconLeft text={userVote.text} icon={userVote.icon} />
+            <TextIconLeft text={userVote} icon={userVoteIcon} />
           </div>
         );
       },
@@ -248,7 +246,7 @@ export const ProposalsTable = ({
         columnClassName: "min-w-32",
       },
       cell: ({ row }) => {
-        const votingPower = row.getValue("votingPower") as string;
+        const votingPower = row.getValue("votingPower") as number | null;
 
         if (loading) {
           return (
@@ -260,9 +258,9 @@ export const ProposalsTable = ({
 
         return (
           <div className="text-secondary flex items-center justify-end text-sm font-normal">
-            {votingPower === "-"
+            {votingPower === null
               ? "-"
-              : `${votingPower} ${daoData?.id || "ENS"}`}
+              : `${formatNumberUserReadable(votingPower)} ${daoData?.id || "ENS"}`}
           </div>
         );
       },
@@ -417,6 +415,7 @@ export const ProposalsTable = ({
         isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}
         withDownloadCSV={true}
+        csvFilename="proposals.csv"
         error={error}
         fillHeight
       />

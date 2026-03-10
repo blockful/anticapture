@@ -246,7 +246,7 @@ export const VotingPowerHistoryTable = ({
         }
 
         return (
-          <div className="flex h-[52px] flex-col items-start justify-center">
+          <div className="h-13 flex flex-col items-start justify-center">
             <div className="flex items-center gap-1">
               <span className={cn("text-sm font-medium", delegationType.color)}>
                 {delegationType.symbol}
@@ -323,7 +323,7 @@ export const VotingPowerHistoryTable = ({
 
         return (
           <div className="group flex items-center gap-3">
-            <div className="overflow-truncate flex max-w-[140px] items-center gap-2">
+            <div className="overflow-truncate max-w-35 flex items-center gap-2">
               <EnsAvatar
                 address={delegatorAddress as `0x${string}`}
                 size="sm"
@@ -431,7 +431,7 @@ export const VotingPowerHistoryTable = ({
 
         return (
           <div className="group flex items-center justify-between gap-3">
-            <div className="flex max-w-[140px] items-center gap-2 overflow-hidden">
+            <div className="max-w-35 flex items-center gap-2 overflow-hidden">
               <EnsAvatar
                 address={delegateAddress as `0x${string}`}
                 size="sm"
@@ -487,6 +487,7 @@ export const VotingPowerHistoryTable = ({
         isLoadingMore={loading}
         onLoadMore={fetchNextPage}
         withDownloadCSV={true}
+        csvFilename="voting-power-history.csv"
         error={error}
         fillHeight
       />

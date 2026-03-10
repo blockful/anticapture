@@ -416,6 +416,7 @@ export const TokenHolders = ({
           onRowClick={(row) => setDrawerAddress(row.address as Address)}
           size="sm"
           withDownloadCSV={true}
+          csvFilename="token-holders.csv"
           error={error}
           fillHeight
         />

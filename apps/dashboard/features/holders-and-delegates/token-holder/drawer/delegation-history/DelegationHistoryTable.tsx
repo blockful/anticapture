@@ -125,7 +125,7 @@ export const DelegationHistoryTable = ({
       header: () => (
         <div className="text-table-header flex h-8 w-full items-center justify-start">
           <span>Delegate Address</span>
-          <div className="ml-2 w-[180px]">
+          <div className="w-45 ml-2">
             <AddressFilter
               onApply={async (addr) => {
                 if ((addr ?? "").indexOf(".eth") > 0) {
@@ -358,6 +358,7 @@ export const DelegationHistoryTable = ({
         isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}
         withDownloadCSV={true}
+        csvFilename="delegation-history.csv"
         error={error}
         fillHeight
       />

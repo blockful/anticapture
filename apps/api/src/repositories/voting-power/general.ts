@@ -334,11 +334,11 @@ export class VotingPowerRepository {
           ? orderDirectionFn(
               sql`COALESCE(${variationSubquery.absoluteChange}, 0)`,
             )
-        : orderDirectionFn(
-            orderBy === "votingPower"
-              ? accountPower.votingPower
-              : accountPower.delegationsCount,
-          );
+          : orderDirectionFn(
+              orderBy === "votingPower"
+                ? accountPower.votingPower
+                : accountPower.delegationsCount,
+            );
 
     const items = await this.db
       .select({
