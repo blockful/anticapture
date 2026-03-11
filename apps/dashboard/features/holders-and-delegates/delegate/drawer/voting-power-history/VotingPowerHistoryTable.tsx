@@ -492,7 +492,6 @@ export const VotingPowerHistoryTable = ({
         hasMore={hasNextPage}
         isLoadingMore={loading}
         onLoadMore={fetchNextPage}
-        mobileTableFixed={true}
         withDownloadCSV={true}
         csvFilename="voting-power-history.csv"
         error={error}
