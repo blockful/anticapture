@@ -22,6 +22,7 @@ import { Table } from "@/shared/components/design-system/table/Table";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
+import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 
 type PanelDao = {
   dao: string;
@@ -115,7 +116,10 @@ export const PanelTable = () => {
     {
       accessorKey: "riskareas",
       cell: ({ row }) => (
-        <RiskAreasCell daoId={row.getValue("dao") as DaoIdEnum} />
+        <RiskAreasCell
+          daoId={row.getValue("dao") as DaoIdEnum}
+          disabled={activeTab === TABS.NOT_REVIEWED}
+        />
       ),
       header: () => (
         <div className="w-full justify-end px-0 text-left lg:px-4">
@@ -183,15 +187,36 @@ export const PanelTable = () => {
     },
     {
       accessorKey: "activeTokensInGovernance",
-      cell: ({ row }) => (
-        <ActiveTokensCell
-          daoId={row.getValue("dao") as DaoIdEnum}
-          onSortValueChange={createSortValueHandler(
-            activeTokensSort,
-            row.index,
-          )}
-        />
-      ),
+      cell: ({ row }) => {
+        if (activeTab === TABS.FULLY_ANALYZED) {
+          return (
+            <ActiveTokensCell
+              daoId={row.getValue("dao") as DaoIdEnum}
+              onSortValueChange={createSortValueHandler(
+                activeTokensSort,
+                row.index,
+              )}
+            />
+          );
+        }
+        return (
+          <Tooltip
+            tooltipContent={
+              <p className="text-secondary text-sm font-normal leading-5">
+                Economic security data is not yet available. Our team is
+                actively working to integrate it.
+              </p>
+            }
+            title={"No data available"}
+            className="text-left"
+            triggerClassName="w-full"
+          >
+            <div className="ml-auto w-fit px-2">
+              <BadgeStatus variant="dimmed">No Data</BadgeStatus>
+            </div>
+          </Tooltip>
+        );
+      },
       header: ({ column }) => (
         <SortableColumnHeader
           column={column}
