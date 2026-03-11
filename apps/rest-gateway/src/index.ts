@@ -12,6 +12,7 @@ import { averageDelegation } from "./delegation/route.js";
 import { DelegationService } from "./delegation/service.js";
 import { health } from "./health/route.js";
 import { proxy } from "./proxy/route.js";
+import { mergeUpstreamDocs } from "./upstream-docs.js";
 
 const app = new OpenAPIHono();
 
@@ -31,15 +32,20 @@ daos(app, daosService);
 averageDelegation(app, delegationService);
 addressEnrichment(app, config.addressEnrichmentUrl);
 
-// Proxy catch-all
-proxy(app, config.daoApis);
-
 // OpenAPI docs
-app.doc("/docs/json", {
-  openapi: "3.1.0",
-  info: { title: "Anticapture REST Gateway", version: "1.0.0" },
+app.get("/docs/json", async (c) => {
+  const ownSpec = app.getOpenAPI31Document({
+    openapi: "3.1.0",
+    info: { title: "Anticapture REST Gateway", version: "1.0.0" },
+  });
+
+  const merged = await mergeUpstreamDocs(ownSpec, config.daoApis);
+  return c.json(merged);
 });
 app.get("/docs", swaggerUI({ url: "/docs/json" }));
+
+// Proxy catch-all (must be last)
+proxy(app, config.daoApis);
 
 console.log(`🚀 REST Gateway running`);
 

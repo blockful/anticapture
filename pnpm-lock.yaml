@@ -588,10 +588,16 @@ importers:
       hono:
         specifier: ^4.7.0
         version: 4.11.9
+      openapi3-ts:
+        specifier: ^4.5.0
+        version: 4.5.0
       zod:
         specifier: ^3.25.76
         version: 3.25.76
     devDependencies:
+      openapi-types:
+        specifier: ^12.1.3
+        version: 12.1.3
       tsx:
         specifier: ^4.19.4
         version: 4.21.0
