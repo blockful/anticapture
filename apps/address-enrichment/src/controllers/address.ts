@@ -38,7 +38,7 @@ export function addressController(app: Hono, service: EnrichmentService) {
     async (context) => {
       const { address } = context.req.valid("param");
       const result = await service.getAddressEnrichment(address);
-      logger.debug({ address: address, enrichedData: result });
+      logger.info({ address: address, enrichedData: result });
       const response = AddressResponseSchema.safeParse(result);
       return context.json(response.data);
     },

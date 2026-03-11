@@ -68,7 +68,7 @@ export class EnrichmentService {
     });
 
     if (existing) {
-      logger.debug({ address: normalizedAddress }, "Address found in database");
+      logger.info({ address: normalizedAddress }, "Address found in database");
       // Arkham data is permanent, but ENS may need refreshing
       if (this.isEnsFresh(existing)) {
         return this.mapToResult(existing);
@@ -100,7 +100,7 @@ export class EnrichmentService {
         ensUpdatedAt: now,
       });
     } else {
-      logger.debug(
+      logger.info(
         { address: normalizedAddress },
         "Address NOT found in database",
       );
@@ -118,13 +118,13 @@ export class EnrichmentService {
       arkhamData?.isContract !== null &&
       arkhamData?.isContract !== undefined
     ) {
-      logger.debug(
+      logger.info(
         { address: normalizedAddress },
         "Address type deducted from Arkham data",
       );
       isContractAddress = arkhamData.isContract;
     } else {
-      logger.debug(
+      logger.info(
         { address: normalizedAddress },
         "Arkham data unavailable - performing RPC call",
       );
