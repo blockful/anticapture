@@ -1,12 +1,10 @@
-import {
-  GetProposalQuery,
-  useGetProposalQuery,
-} from "@anticapture/graphql-client/hooks";
-import { ApolloError } from "@apollo/client";
+import type { GetProposalQuery } from "@anticapture/graphql-client/hooks";
+import { useGetProposalQuery } from "@anticapture/graphql-client/hooks";
+import type { ApolloError } from "@apollo/client";
 import { useMemo } from "react";
 
 import { getProposalStatus } from "@/features/governance/utils";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 export interface UseProposalResult {

@@ -1,9 +1,10 @@
-import { Account, Chain, publicActions, WalletClient } from "viem";
+import type { Account, Chain, WalletClient } from "viem";
+import { publicActions } from "viem";
 
 import EnsGovernorAbi from "@/abis/ens-governor.json";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 const getDaoGovernanceAddress = (daoId: DaoIdEnum) => {
   return daoConfigByDaoId[daoId].daoOverview.contracts?.governor;

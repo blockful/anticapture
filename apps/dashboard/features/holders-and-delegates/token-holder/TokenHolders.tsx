@@ -1,14 +1,13 @@
 "use client";
 
-import {
-  QueryInput_AccountBalances_OrderBy,
-  QueryInput_AccountBalances_OrderDirection,
-} from "@anticapture/graphql-client";
-import { ColumnDef } from "@tanstack/react-table";
+import type { QueryInput_AccountBalances_OrderDirection } from "@anticapture/graphql-client";
+import { QueryInput_AccountBalances_OrderBy } from "@anticapture/graphql-client";
+import type { ColumnDef } from "@tanstack/react-table";
 import { Plus } from "lucide-react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { useMemo } from "react";
-import { Address, formatUnits, zeroAddress } from "viem";
+import type { Address } from "viem";
+import { formatUnits, zeroAddress } from "viem";
 
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 import { useTokenHolders } from "@/features/holders-and-delegates/hooks/useTokenHolders";
@@ -26,8 +25,8 @@ import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
 import daoConfig from "@/shared/dao-config";
 import { useScreenSize } from "@/shared/hooks";
 import { useArkhamData } from "@/shared/hooks/graphql-client/useArkhamData";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { TimeInterval } from "@/shared/types/enums/TimeInterval";
+import type { DaoIdEnum } from "@/shared/types/daos";
+import type { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { formatNumberUserReadable } from "@/shared/utils";
 
 interface TokenHolderTableData {
@@ -36,6 +35,8 @@ interface TokenHolderTableData {
   variation: { percentageChange: number; absoluteChange: number } | null;
   delegate: Address;
 }
+
+type TokenHolderSortKey = "balance" | "signedVariation" | "variation";
 
 const TypeCell = ({ address }: { address: Address }) => {
   const { isContract, isLoading: isArkhamLoading } = useArkhamData(address);
@@ -73,8 +74,18 @@ export const TokenHolders = ({
   );
   const [sortBy, setSortBy] = useQueryState(
     "sortBy",
-    parseAsStringEnum(["balance", "variation"]).withDefault("balance"),
+    parseAsStringEnum(["balance", "signedVariation", "variation"]).withDefault(
+      "balance" as TokenHolderSortKey,
+    ),
   );
+  const orderByMap: Record<
+    TokenHolderSortKey,
+    QueryInput_AccountBalances_OrderBy
+  > = {
+    balance: QueryInput_AccountBalances_OrderBy.Balance,
+    signedVariation: QueryInput_AccountBalances_OrderBy.SignedVariation,
+    variation: QueryInput_AccountBalances_OrderBy.Variation,
+  };
   const { isMobile } = useScreenSize();
   const { decimals } = daoConfig[daoId];
 
@@ -86,7 +97,23 @@ export const TokenHolders = ({
     if (sortBy === field) {
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
-      setSortBy(field as "balance" | "variation");
+      setSortBy(field as TokenHolderSortKey);
+      setSortOrder("desc");
+    }
+  };
+
+  // Cycles: no-arrow (balance desc) → down-arrow (signed variation desc) → up-arrow (signed variation asc) → both-arrows (variation desc) → no-arrow
+  const handleVariationSort = () => {
+    if (sortBy === "signedVariation" && sortOrder === "desc") {
+      setSortOrder("asc");
+    } else if (sortBy === "signedVariation" && sortOrder === "asc") {
+      setSortBy("variation");
+      setSortOrder("desc");
+    } else if (sortBy === "variation") {
+      setSortBy("balance");
+      setSortOrder("desc");
+    } else {
+      setSortBy("signedVariation");
       setSortOrder("desc");
     }
   };
@@ -101,7 +128,7 @@ export const TokenHolders = ({
   } = useTokenHolders({
     daoId: daoId,
     limit: pageLimit,
-    orderBy: sortBy as QueryInput_AccountBalances_OrderBy,
+    orderBy: orderByMap[sortBy],
     orderDirection: sortOrder as QueryInput_AccountBalances_OrderDirection,
     address: currentAddressFilter || undefined,
     days: days,
@@ -199,7 +226,7 @@ export const TokenHolders = ({
         );
       },
       meta: {
-        columnClassName: "w-72",
+        columnClassName: "w-68",
       },
     },
     {
@@ -221,7 +248,7 @@ export const TokenHolders = ({
         return <TypeCell address={row.original.address} />;
       },
       meta: {
-        columnClassName: "w-28",
+        columnClassName: "w-12",
       },
     },
     {
@@ -265,7 +292,7 @@ export const TokenHolders = ({
         );
       },
       meta: {
-        columnClassName: "w-20",
+        columnClassName: "w-40",
       },
     },
     {
@@ -275,7 +302,7 @@ export const TokenHolders = ({
           variant="ghost"
           size="sm"
           className="text-secondary w-full justify-center p-0"
-          onClick={() => handleSort("variation")}
+          onClick={handleVariationSort}
         >
           <h4 className="text-table-header whitespace-nowrap">
             Change ({daoId})
@@ -283,11 +310,13 @@ export const TokenHolders = ({
           <ArrowUpDown
             props={{ className: "size-4" }}
             activeState={
-              sortBy === "variation"
-                ? sortOrder === "asc"
-                  ? ArrowState.UP
-                  : ArrowState.DOWN
-                : ArrowState.DEFAULT
+              sortBy === "signedVariation"
+                ? sortOrder === "desc"
+                  ? ArrowState.DOWN
+                  : ArrowState.UP
+                : sortBy === "variation"
+                  ? ArrowState.BOTH
+                  : ArrowState.DEFAULT
             }
           />
         </Button>
@@ -312,15 +341,19 @@ export const TokenHolders = ({
         }
 
         return (
-          <div className="flex w-full items-center justify-center gap-2 text-sm">
-            {(variation?.percentageChange || 0) < 0 ? "-" : ""}
-            {formatNumberUserReadable(Math.abs(variation?.absoluteChange || 0))}
+          <div className="grid w-full grid-cols-2 items-center gap-2 text-sm">
+            <span className="text-right tabular-nums">
+              {(variation?.percentageChange || 0) < 0 ? "-" : ""}
+              {formatNumberUserReadable(
+                Math.abs(variation?.absoluteChange || 0),
+              )}
+            </span>
             <Percentage value={variation?.percentageChange || 0} />
           </div>
         );
       },
       meta: {
-        columnClassName: "w-80",
+        columnClassName: "w-50",
       },
     },
     {
@@ -365,7 +398,7 @@ export const TokenHolders = ({
         );
       },
       meta: {
-        columnClassName: "w-80",
+        columnClassName: "w-40",
       },
     },
   ];
@@ -382,6 +415,7 @@ export const TokenHolders = ({
           onRowClick={(row) => setDrawerAddress(row.address as Address)}
           size="sm"
           withDownloadCSV={true}
+          csvFilename="token-holders.csv"
           error={error}
           fillHeight
         />

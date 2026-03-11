@@ -1,6 +1,6 @@
 "use client";
 
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { useRef } from "react";
 
 import {
@@ -62,13 +62,13 @@ export const PanelTable = () => {
           <h4 className="text-table-header px-4 py-3 md:hidden">Orgs</h4>
         </>
       ),
-      meta: { columnClassName: "w-auto px-0 py-0" },
+      meta: { columnClassName: "w-[18%] px-0 py-0" },
     },
     {
       accessorKey: "chain",
       cell: ({ row }) => <ChainCell daoId={row.getValue("dao") as DaoIdEnum} />,
       header: () => <h4 className="text-table-header">Chain</h4>,
-      meta: { columnClassName: "w-auto" },
+      meta: { columnClassName: "w-[8%]" },
     },
     {
       accessorKey: "stage",
@@ -89,7 +89,7 @@ export const PanelTable = () => {
           </Tooltip>
         </div>
       ),
-      meta: { columnClassName: "w-40 px-0 py-0" },
+      meta: { columnClassName: "w-[10%] px-0 py-0" },
     },
     {
       accessorKey: "riskareas",
@@ -114,7 +114,7 @@ export const PanelTable = () => {
           </Tooltip>
         </div>
       ),
-      meta: { columnClassName: "w-56 px-0 py-0" },
+      meta: { columnClassName: "w-[18%] px-0 py-0" },
     },
     {
       accessorKey: "costOfAttack",
@@ -136,7 +136,7 @@ export const PanelTable = () => {
       ),
       enableSorting: true,
       sortingFn: createSortingFn(costOfAttackSort),
-      meta: { columnClassName: "w-auto px-0 py-0" },
+      meta: { columnClassName: "w-[15%] px-0 py-0" },
     },
     {
       accessorKey: "attackProfitability",
@@ -158,7 +158,7 @@ export const PanelTable = () => {
       ),
       enableSorting: true,
       sortingFn: createSortingFn(attackProfitabilitySort),
-      meta: { columnClassName: "w-auto" },
+      meta: { columnClassName: "w-[16%]" },
     },
     {
       accessorKey: "activeTokensInGovernance",
@@ -181,7 +181,7 @@ export const PanelTable = () => {
       ),
       enableSorting: true,
       sortingFn: createSortingFn(activeTokensSort),
-      meta: { columnClassName: "w-auto px-0 py-0" },
+      meta: { columnClassName: "w-[15%] px-0 py-0" },
     },
   ];
 

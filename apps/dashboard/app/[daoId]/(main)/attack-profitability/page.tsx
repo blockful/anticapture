@@ -6,7 +6,7 @@ import { TheSectionLayout } from "@/shared/components";
 import { SubSectionsContainer } from "@/shared/components/design-system/section";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 type Props = {
   params: Promise<{ daoId: string }>;
@@ -16,10 +16,14 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const daoId = params.daoId.toUpperCase() as DaoIdEnum;
 
+  const canonicalPath = `/${params.daoId}/attack-profitability`;
+
   return {
     title: `Anticapture - ${daoId} DAO Attack Profitability`,
     description: `Analyze attack profitability and governance capture costs for ${daoId} DAO.`,
+    alternates: { canonical: canonicalPath },
     openGraph: {
+      url: canonicalPath,
       title: `Anticapture - ${daoId} DAO Attack Profitability`,
       description: `Analyze attack profitability and governance capture costs for ${daoId} DAO.`,
     },

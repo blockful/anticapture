@@ -1,10 +1,8 @@
-import {
-  GetDaoAddressesAccountBalancesQuery,
-  useGetDaoAddressesAccountBalancesQuery,
-} from "@anticapture/graphql-client/hooks";
-import { ApolloError, ApolloQueryResult } from "@apollo/client";
+import type { GetDaoAddressesAccountBalancesQuery } from "@anticapture/graphql-client/hooks";
+import { useGetDaoAddressesAccountBalancesQuery } from "@anticapture/graphql-client/hooks";
+import type { ApolloError, ApolloQueryResult } from "@apollo/client";
 
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 interface TopTokenHolderNonDaoResponse {

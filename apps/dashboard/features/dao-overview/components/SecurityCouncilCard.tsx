@@ -7,7 +7,7 @@ import { ProgressBar } from "@/features/dao-overview/components";
 import { TooltipInfo } from "@/shared/components";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 import { UnderlinedLink } from "@/shared/components/design-system/links/underlined-link/UnderlinedLink";
-import { DaoOverviewConfig } from "@/shared/dao-config/types";
+import type { DaoOverviewConfig } from "@/shared/dao-config/types";
 
 export const SecurityCouncilCard = ({
   daoOverview,

@@ -1,6 +1,6 @@
 "use client";
 
-import { MouseEvent, ReactNode } from "react";
+import type { MouseEvent, ReactNode } from "react";
 
 import { Card } from "@/shared/components/ui/card";
 import { useScreenSize } from "@/shared/hooks";

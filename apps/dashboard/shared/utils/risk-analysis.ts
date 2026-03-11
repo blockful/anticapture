@@ -5,8 +5,8 @@
 
 import { RISK_AREAS } from "@/shared/constants/risk-areas";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { GovernanceImplementationField } from "@/shared/dao-config/types";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { GovernanceImplementationField } from "@/shared/dao-config/types";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { GovernanceImplementationEnum } from "@/shared/types/enums/GovernanceImplementation";
 import { RiskAreaEnum } from "@/shared/types/enums/RiskArea";
 import { RiskLevel } from "@/shared/types/enums/RiskLevel";

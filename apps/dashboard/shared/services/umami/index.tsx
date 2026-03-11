@@ -1,7 +1,7 @@
 "use client";
 
 import Script from "next/script";
-import { FC } from "react";
+import type { FC } from "react";
 
 const UMAMI_WEBSITE_ID = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
 

@@ -6,6 +6,7 @@ import {
   PopoverPortal,
   PopoverTrigger,
 } from "@radix-ui/react-popover";
+import type { LucideIcon } from "lucide-react";
 import {
   CircleHelp,
   Calendar,
@@ -13,7 +14,6 @@ import {
   HelpCircle,
   X,
   MessageCircle,
-  LucideIcon,
 } from "lucide-react";
 import { useState } from "react";
 

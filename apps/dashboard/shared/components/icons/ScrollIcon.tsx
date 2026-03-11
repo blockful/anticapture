@@ -1,4 +1,4 @@
-import { DaoIconProps } from "@/shared/components/icons/types";
+import type { DaoIconProps } from "@/shared/components/icons/types";
 
 export const ScrollIcon = ({
   showBackground = true,

@@ -1,7 +1,8 @@
-import { forwardRef, ElementType } from "react";
+import type { ElementType } from "react";
+import { forwardRef } from "react";
 
 import { variantStyles } from "@/shared/components/design-system/buttons/styles";
-import {
+import type {
   ButtonSize,
   ButtonProps,
 } from "@/shared/components/design-system/buttons/types";

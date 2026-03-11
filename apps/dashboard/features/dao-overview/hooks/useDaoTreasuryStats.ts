@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 
 import { useTreasury } from "@/features/attack-profitability/hooks/useTreasury";
-import { TokenDataResponse } from "@/shared/hooks";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { TokenDataResponse } from "@/shared/hooks";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 
 export const useDaoTreasuryStats = ({

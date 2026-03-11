@@ -1074,6 +1074,7 @@ enum queryInput_votingPowers_orderBy {
   votingPower
   delegationsCount
   variation
+  signedVariation
 }
 
 type votingPowerByAccountId_200_response {
@@ -1164,6 +1165,7 @@ enum queryInput_accountBalances_orderDirection {
 enum queryInput_accountBalances_orderBy {
   balance
   variation
+  signedVariation
 }
 
 type accountBalanceByAccountId_200_response {

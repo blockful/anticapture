@@ -5,12 +5,12 @@ import { useMemo } from "react";
 
 import { useTransactionsTableData } from "@/features/transactions";
 import { useTransactionsTableParams } from "@/features/transactions/hooks/useTransactionParams";
-import { AffectedSupplyType } from "@/features/transactions/hooks/useTransactionsTableData";
+import type { AffectedSupplyType } from "@/features/transactions/hooks/useTransactionsTableData";
 import { getTransactionsColumns } from "@/features/transactions/utils/getTransactionsColumns";
-import { SupplyType } from "@/shared/components/badges/SupplyLabel";
+import type { SupplyType } from "@/shared/components/badges/SupplyLabel";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 type Supply = "CEX" | "DEX" | "LENDING" | "TOTAL" | "UNASSIGNED";
 
@@ -84,7 +84,7 @@ export const TransactionsTable = ({
 
   if (loading && (!tableData || tableData.length === 0)) {
     return (
-      <div className="flex h-[calc(100vh-20rem)] min-h-[300px] w-full flex-col">
+      <div className="min-h-75 flex h-[calc(100vh-20rem)] w-full flex-col">
         <Table
           columns={columns}
           data={Array.from({ length: pageLimit }, () => ({
@@ -104,7 +104,6 @@ export const TransactionsTable = ({
           withSorting={true}
           size="sm"
           mobileTableFixed={true}
-          withDownloadCSV={true}
           wrapperClassName="h-full overflow-y-auto"
         />
       </div>
@@ -112,7 +111,7 @@ export const TransactionsTable = ({
   }
 
   return (
-    <div className="flex h-[calc(100vh-20rem)] min-h-[300px] w-full flex-col text-white">
+    <div className="min-h-75 flex h-[calc(100vh-20rem)] w-full flex-col text-white">
       <Table
         columns={columns}
         data={tableData}
@@ -125,6 +124,8 @@ export const TransactionsTable = ({
         getSubRows={(row) => row.subRows}
         withSorting={true}
         mobileTableFixed={true}
+        withDownloadCSV={true}
+        csvFilename="transactions.csv"
       />
     </div>
   );

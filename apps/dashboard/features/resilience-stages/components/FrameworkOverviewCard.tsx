@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 import { UnderlinedButton } from "@/shared/components/design-system/links/underlined-link";
-import { GovernanceImplementationField } from "@/shared/dao-config/types";
+import type { GovernanceImplementationField } from "@/shared/dao-config/types";
 import { RiskLevel } from "@/shared/types/enums/RiskLevel";
 import { cn } from "@/shared/utils";
 

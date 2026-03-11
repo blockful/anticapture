@@ -1,5 +1,6 @@
+import type { ReactNode } from "react";
+
 import { cn } from "@/shared/utils";
-import { ReactNode } from "react";
 
 export interface DaoTooltipProps {
   title: string;

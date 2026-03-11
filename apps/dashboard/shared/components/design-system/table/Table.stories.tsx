@@ -4,7 +4,7 @@ import {
   QueryClientProvider,
   useInfiniteQuery,
 } from "@tanstack/react-query";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { useCallback } from "react";
 
 import { Table } from "@/shared/components/design-system/table/Table";

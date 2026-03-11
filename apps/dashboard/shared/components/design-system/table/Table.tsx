@@ -1,23 +1,26 @@
 "use client";
 
-import {
+import type {
   ColumnDef as TanstackColumnDef,
-  flexRender,
   SortingState,
-  getCoreRowModel,
-  getFilteredRowModel,
   ColumnFiltersState,
-  getSortedRowModel,
-  getExpandedRowModel,
   ExpandedState,
-  useReactTable,
   TableOptions,
   Row,
+} from "@tanstack/react-table";
+import {
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getSortedRowModel,
+  getExpandedRowModel,
+  useReactTable,
 } from "@tanstack/react-table";
 import { DownloadIcon, Inbox } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Fragment, ReactNode, useEffect, useRef, useState } from "react";
+import type { ReactNode } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { CSVLink } from "react-csv";
 
 import { defaultLinkVariants } from "@/shared/components/design-system/links/default-link";
@@ -30,16 +33,15 @@ import {
   TableRow,
 } from "@/shared/components/design-system/table/components";
 import { EmptyState } from "@/shared/components/design-system/table/components/EmptyState";
-import {
-  ExpandableData,
-  ExpandButton,
-} from "@/shared/components/design-system/table/ExpandButton";
+import type { ExpandableData } from "@/shared/components/design-system/table/ExpandButton";
+import { ExpandButton } from "@/shared/components/design-system/table/ExpandButton";
 import {
   headerSizeVariants,
   rowSizeVariants,
 } from "@/shared/components/design-system/table/styles";
 import { TreeLines } from "@/shared/components/tables/TreeLines";
 import { cn } from "@/shared/utils";
+import { formatCsvData } from "@/shared/utils/csvSerializer";
 
 type ColumnMeta = {
   columnClassName?: string;
@@ -67,6 +69,7 @@ interface DataTableProps<TData, TValue> {
   size?: "default" | "sm";
   stickyFirstColumn?: boolean;
   withDownloadCSV?: boolean;
+  csvFilename?: string;
   withSorting?: boolean;
   wrapperClassName?: string;
   enableExpanding?: boolean;
@@ -96,6 +99,7 @@ export const Table = <TData, TValue>({
   size = "default",
   stickyFirstColumn = false,
   withDownloadCSV = false,
+  csvFilename,
   withSorting = false,
   wrapperClassName,
   enableExpanding = false,
@@ -177,40 +181,6 @@ export const Table = <TData, TValue>({
 
   const table = useReactTable(tableConfig);
 
-  const escapeCsv = (value: string) => value.replace(/"/g, '""');
-
-  const serializeValue = (value: unknown): string => {
-    const primitiveTypes = new Set(["string", "number", "boolean"]);
-
-    if (!value) return "";
-
-    if (primitiveTypes.has(typeof value)) {
-      return escapeCsv(String(value));
-    }
-
-    if (value instanceof Date) {
-      return value.toISOString();
-    }
-
-    try {
-      return escapeCsv(JSON.stringify(value));
-    } catch {
-      return "";
-    }
-  };
-
-  const formatCsvData = (data: TData[]): Record<string, string>[] => {
-    return data.map((row) =>
-      Object.entries(row as Record<string, unknown>).reduce<
-        Record<string, string>
-      >((acc, [key, value]) => {
-        const serialized = serializeValue(value);
-        acc[key] = /[",\n]/.test(serialized) ? `"${serialized}"` : serialized;
-        return acc;
-      }, {}),
-    );
-  };
-
   return (
     <div
       className={cn(
@@ -218,13 +188,16 @@ export const Table = <TData, TValue>({
         fillHeight && "h-full",
         wrapperClassName,
       )}
-      ref={wrapperRef}
     >
       <TableContainer
+        ref={wrapperRef}
         className={cn(
-          "text-secondary lg:bg-surface-default border-separate border-spacing-0 bg-transparent",
-          mobileTableFixed ? "table-fixed" : "table-auto lg:table-fixed",
+          "text-secondary lg:bg-surface-default bg-transparent",
           fillHeight && "flex h-full flex-col",
+        )}
+        tableClassName={cn(
+          "border-separate border-spacing-0",
+          mobileTableFixed ? "table-fixed" : "table-auto lg:table-fixed",
         )}
       >
         <TableHeader className="bg-surface-contrast text-secondary sticky -top-px z-30 text-xs font-medium">
@@ -320,7 +293,7 @@ export const Table = <TData, TValue>({
                             className={cn(
                               cell.column.getIndex() === 0 &&
                                 stickyFirstColumn &&
-                                "bg-surface-background sticky-border-r sticky left-0 z-20 shadow-md shadow-black lg:relative lg:bg-transparent",
+                                "bg-surface-background sticky-border-r sticky left-0 z-20 lg:relative lg:bg-transparent",
                               rowSizeVariants[size],
                               colMeta?.columnClassName,
                             )}
@@ -415,7 +388,7 @@ export const Table = <TData, TValue>({
           [DOWNLOAD AS{" "}
           <CSVLink
             data={formatCsvData(data)}
-            filename={"table-data.csv"}
+            filename={csvFilename ?? "table-data.csv"}
             className={cn(
               defaultLinkVariants({ variant: "highlight" }),
               "pl-2",

@@ -7,16 +7,14 @@ import {
 import { useMemo } from "react";
 import { formatUnits } from "viem";
 
-import {
-  TopAccountChartData,
-  TopAccountsChart,
-} from "@/features/dao-overview/components/TopAccountsChart";
+import type { TopAccountChartData } from "@/features/dao-overview/components/TopAccountsChart";
+import { TopAccountsChart } from "@/features/dao-overview/components/TopAccountsChart";
 import { useDelegates } from "@/features/holders-and-delegates/hooks/useDelegates";
 import { SkeletonRow, TooltipInfo } from "@/shared/components";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
 import daoConfig from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
 
 export const VotingPowerChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
