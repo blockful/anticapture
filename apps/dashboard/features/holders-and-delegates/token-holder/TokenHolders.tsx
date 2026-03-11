@@ -353,7 +353,7 @@ export const TokenHolders = ({
         );
       },
       meta: {
-        columnClassName: "w-[25%]",
+        columnClassName: "w-[35%]",
       },
     },
     {

@@ -504,7 +504,6 @@ export const Delegates = ({
           onLoadMore={fetchNextPage}
           withDownloadCSV={true}
           csvFilename="delegates.csv"
-          mobileTableFixed={true}
           error={error}
           fillHeight
         />
