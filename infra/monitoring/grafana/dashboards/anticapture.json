@@ -382,8 +382,8 @@
       },
       "targets": [
         {
-          "expr": "sum(process_cpu_utilization) by (exported_job, process_cpu_state)",
-          "legendFormat": "{{exported_job}} - {{process_cpu_state}}",
+          "expr": "sum(process_cpu_utilization) by (job, process_cpu_state)",
+          "legendFormat": "{{job}} - {{process_cpu_state}}",
           "refId": "A"
         }
       ]
@@ -418,8 +418,8 @@
       },
       "targets": [
         {
-          "expr": "sum(process_memory_usage) by (exported_job, process_memory_type)",
-          "legendFormat": "{{exported_job}} - {{process_memory_type}}",
+          "expr": "sum(process_memory_usage) by (job, process_memory_type)",
+          "legendFormat": "{{job}} - {{process_memory_type}}",
           "refId": "A"
         }
       ]
