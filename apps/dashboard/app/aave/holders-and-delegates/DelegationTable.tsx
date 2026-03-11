@@ -84,8 +84,8 @@ export function DelegationTable() {
     votingPower: QueryInput_VotingPowers_OrderBy.VotingPower,
     signedVariation: QueryInput_VotingPowers_OrderBy.SignedVariation,
     variation: QueryInput_VotingPowers_OrderBy.Variation,
-    total: QueryInput_VotingPowers_OrderBy.VotingPower,
-    balance: QueryInput_VotingPowers_OrderBy.VotingPower,
+    total: QueryInput_VotingPowers_OrderBy.Total,
+    balance: QueryInput_VotingPowers_OrderBy.Balance,
   };
 
   const { data, loading, error, pagination, fetchNextPage, fetchingMore } =
@@ -145,18 +145,22 @@ export function DelegationTable() {
   const tableData = useMemo(() => {
     if (!data) return [];
 
+    const balances = balancesData?.accountBalances?.items
+      .filter((bal) => !!bal)
+      .reduce((acc, cur) => {
+        acc.set(cur.address, BigInt(cur.balance));
+        return acc;
+      }, new Map<string, bigint>());
+
     return data.map((delegate): DelegateTableData => {
       const combinedPowerBigInt = BigInt(delegate.votingPower || "0");
       const combinedPowerFormatted = Number(
         formatUnits(combinedPowerBigInt, decimals),
       );
 
-      const balanceItem = balancesData?.accountBalances?.items?.find(
-        (item) => item?.address === delegate.accountId,
-      );
-      const balanceRaw = balanceItem
-        ? Number(formatUnits(BigInt(balanceItem.balance), decimals))
-        : 0;
+      const delegateBalance = balances?.get(delegate?.accountId) || 0n;
+
+      const balanceRaw = Number(formatUnits(delegateBalance, decimals));
       const delegatedPower = combinedPowerFormatted - balanceRaw;
 
       const percentage = Number(delegate.variation.percentageChange);
@@ -165,9 +169,7 @@ export function DelegationTable() {
         votingPower:
           delegatedPower > 0 ? formatNumberUserReadable(delegatedPower) : "-",
         balance:
-          balanceItem && Number(balanceRaw) > 0
-            ? formatNumberUserReadable(balanceRaw)
-            : "-",
+          Number(balanceRaw) > 0 ? formatNumberUserReadable(balanceRaw) : "-",
         total: formatNumberUserReadable(combinedPowerFormatted),
         variation: {
           percentageChange:
@@ -252,7 +254,7 @@ export function DelegationTable() {
         </div>
       ),
       meta: {
-        columnClassName: "w-72",
+        columnClassName: "w-40",
       },
     },
     {
@@ -386,7 +388,7 @@ export function DelegationTable() {
         </Button>
       ),
       meta: {
-        columnClassName: "w-auto",
+        columnClassName: "w-40",
       },
     },
     {

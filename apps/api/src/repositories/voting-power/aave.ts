@@ -198,24 +198,21 @@ export class AAVEVotingPowerRepository {
   `;
 
     const orderDirectionFn = orderDirection === "desc" ? desc : asc;
-    const orderSql =
+    const orderSql = orderDirectionFn(
       orderBy === "variation"
-        ? orderDirectionFn(
-            sql`ABS(COALESCE(${variationSubquery.absoluteChange}, 0))`,
-          )
+        ? sql`ABS(COALESCE(${variationSubquery.absoluteChange}, 0))`
         : orderBy === "signedVariation"
           ? orderDirectionFn(
               sql`COALESCE(${variationSubquery.absoluteChange}, 0)`,
             )
-          : orderDirectionFn(
-              orderBy === "total"
-                ? combinedPowerSql
-                : orderBy === "votingPower"
-                  ? accountPower.votingPower
-                  : orderBy === "balance"
-                    ? sql`COALESCE(${balanceSubquery.totalBalance}, 0)`
-                    : accountPower.delegationsCount,
-            );
+          : orderBy === "total"
+            ? combinedPowerSql
+            : orderBy === "votingPower"
+              ? accountPower.votingPower
+              : orderBy === "balance"
+                ? sql`COALESCE(${balanceSubquery.totalBalance}, 0)`
+                : accountPower.delegationsCount,
+    );
 
     const items = await this.db
       .select({
@@ -228,6 +225,7 @@ export class AAVEVotingPowerRepository {
         lastVoteTimestamp: accountPower.lastVoteTimestamp,
         absoluteChange: absoluteChangeSql,
         percentageChange: percentageChangeSql,
+        balance: balanceSubquery.totalBalance,
       })
       .from(accountPower)
       .leftJoin(
