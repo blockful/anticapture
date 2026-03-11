@@ -1,0 +1,28 @@
+{
+  "name": "@anticapture/rest-gateway",
+  "version": "1.0.0",
+  "description": "REST API Gateway for Anticapture DAO APIs",
+  "main": "dist/src/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/src/index.js",
+    "build": "tsc",
+    "test": "vitest run"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3",
+    "vitest": "^4.0.18"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.14.0",
+    "@hono/swagger-ui": "^0.5.3",
+    "@hono/zod-openapi": "^0.19.10",
+    "dotenv": "^16.5.0",
+    "hono": "^4.7.0",
+    "zod": "^3.25.76"
+  }
+}
