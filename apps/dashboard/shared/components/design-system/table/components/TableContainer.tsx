@@ -1,6 +1,6 @@
 import { forwardRef } from "react";
 
-import { cn } from "@/shared/utils";
+import { cn } from "@/shared/utils/cn";
 
 export const TableContainer = forwardRef<
   HTMLDivElement,
@@ -10,7 +10,7 @@ export const TableContainer = forwardRef<
     <div
       ref={ref}
       className={cn(
-        "lg:border-light-dark scrollbar-thin relative w-full overflow-y-auto lg:border",
+        "lg:border-light-dark scrollbar-thin relative w-full overflow-auto lg:border",
         className,
       )}
       style={{
