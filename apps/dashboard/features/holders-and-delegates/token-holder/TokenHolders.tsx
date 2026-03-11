@@ -228,7 +228,7 @@ export const TokenHolders = ({
         );
       },
       meta: {
-        columnClassName: "w-[25%]",
+        columnClassName: "w-68",
       },
     },
     {
@@ -250,7 +250,7 @@ export const TokenHolders = ({
         return <TypeCell address={row.original.address} />;
       },
       meta: {
-        columnClassName: "w-[10%]",
+        columnClassName: "w-12",
       },
     },
     {
@@ -294,7 +294,7 @@ export const TokenHolders = ({
         );
       },
       meta: {
-        columnClassName: "w-[15%]",
+        columnClassName: "w-40",
       },
     },
     {
@@ -355,7 +355,7 @@ export const TokenHolders = ({
         );
       },
       meta: {
-        columnClassName: "w-[25%]",
+        columnClassName: "w-50",
       },
     },
     {
@@ -400,7 +400,7 @@ export const TokenHolders = ({
         );
       },
       meta: {
-        columnClassName: "w-[25%]",
+        columnClassName: "w-40",
       },
     },
   ];

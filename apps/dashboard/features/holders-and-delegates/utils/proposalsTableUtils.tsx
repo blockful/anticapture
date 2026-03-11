@@ -52,7 +52,7 @@ export const proposalsFinalResultMapping = {
   },
   PENDING_EXECUTION: {
     text: "Pending Execution",
-    icon: <Clock10 className="text-secondary size-4" />,
+    icon: <Clock10 className="text-success size-4" />,
   },
   ACTIVE: {
     text: "Ongoing",

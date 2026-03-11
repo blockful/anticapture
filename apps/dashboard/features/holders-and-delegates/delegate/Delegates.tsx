@@ -260,7 +260,7 @@ export const Delegates = ({
         </div>
       ),
       meta: {
-        columnClassName: "w-[25%]",
+        columnClassName: "w-40",
       },
     },
     {
@@ -397,7 +397,7 @@ export const Delegates = ({
         </h4>
       ),
       meta: {
-        columnClassName: "w-[15%]",
+        columnClassName: "w-16",
       },
     },
     {
@@ -488,7 +488,7 @@ export const Delegates = ({
         </Button>
       ),
       meta: {
-        columnClassName: "w-[10%]",
+        columnClassName: "w-20",
       },
     },
   ];
@@ -506,7 +506,6 @@ export const Delegates = ({
           onLoadMore={fetchNextPage}
           withDownloadCSV={true}
           csvFilename="delegates.csv"
-          mobileTableFixed={true}
           error={error}
           fillHeight
         />
