@@ -17,19 +17,18 @@ import {
   VotesCompareQueryResult,
 } from "@/controllers";
 import { Drizzle, proposalsOnchain } from "@/database";
-import { DaysEnum } from "@/lib/enums";
 import { DBProposal } from "@/mappers";
 
 export class DrizzleRepository {
   constructor(private readonly db: Drizzle) {}
 
-  async getSupplyComparison(metricType: string, days: DaysEnum) {
+  async getSupplyComparison(metricType: string, fromDate: number) {
     const query = sql`
       WITH old_data AS (
         SELECT db.average as old_amount
         FROM dao_metrics_day_buckets db
         WHERE db."metricType" = ${metricType}
-        AND db."date" <= ${this.now() - days}
+        AND db."date" <= ${fromDate}
         ORDER BY db."date" desc LIMIT 1
       ),
       current_data AS (
@@ -51,22 +50,22 @@ export class DrizzleRepository {
     return result.rows[0];
   }
 
-  async getActiveSupply(days: DaysEnum) {
+  async getActiveSupply(fromDate: number) {
     const query = sql`
       SELECT COALESCE(SUM(ap."voting_power"), 0) as "activeSupply"
       FROM "account_power" ap
-      WHERE ap."last_vote_timestamp" >= ${this.now() - days}
+      WHERE ap."last_vote_timestamp" >= ${fromDate}
     `;
     const result = await this.db.execute<ActiveSupplyQueryResult>(query);
     return result.rows[0];
   }
 
-  async getProposalsCompare(days: DaysEnum) {
+  async getProposalsCompare(fromDate: number) {
     const query = sql`
       WITH old_proposals AS (
         SELECT COUNT(*) AS "oldProposalsLaunched"
         FROM "proposals_onchain" p
-        WHERE p.timestamp <= ${this.now() - days}
+        WHERE p.timestamp <= ${fromDate}
       ),
       current_proposals AS (
         SELECT COUNT(*) AS "currentProposalsLaunched"
@@ -79,12 +78,12 @@ export class DrizzleRepository {
     return result.rows[0];
   }
 
-  async getVotesCompare(days: DaysEnum) {
+  async getVotesCompare(fromDate: number) {
     const query = sql`
       WITH old_votes AS (
         SELECT COUNT(*) AS "oldVotes"
         FROM "votes_onchain" v
-        WHERE v.timestamp <= ${this.now() - days}
+        WHERE v.timestamp <= ${fromDate}
       ),
       current_votes AS (
         SELECT COUNT(*) AS "currentVotes"
@@ -97,18 +96,18 @@ export class DrizzleRepository {
     return result.rows[0];
   }
 
-  async getAverageTurnoutCompare(days: DaysEnum) {
+  async getAverageTurnoutCompare(fromDate: number) {
     const query = sql<AverageTurnoutCompareQueryResult>`
       WITH old_average_turnout AS (
         SELECT COALESCE(AVG(${proposalsOnchain.forVotes} + ${proposalsOnchain.againstVotes} + ${proposalsOnchain.abstainVotes}), 0) AS "oldAverageTurnout"
         FROM ${proposalsOnchain}
-        WHERE ${proposalsOnchain.timestamp} <= ${this.now() - days}
+        WHERE ${proposalsOnchain.timestamp} <= ${fromDate}
         AND ${proposalsOnchain.status} != 'CANCELED'
       ),
       current_average_turnout AS (
         SELECT COALESCE(AVG(${proposalsOnchain.forVotes} + ${proposalsOnchain.againstVotes} + ${proposalsOnchain.abstainVotes}), 0) AS "currentAverageTurnout"
         FROM ${proposalsOnchain}
-        WHERE ${proposalsOnchain.status} != 'CANCELED' AND ${proposalsOnchain.timestamp} >= ${this.now() - days}
+        WHERE ${proposalsOnchain.status} != 'CANCELED' AND ${proposalsOnchain.timestamp} >= ${fromDate}
       )
       SELECT * FROM current_average_turnout
       JOIN old_average_turnout ON 1=1;
@@ -168,9 +167,5 @@ export class DrizzleRepository {
 
   async getProposalsCount(): Promise<number> {
     return this.db.$count(proposalsOnchain);
-  }
-
-  now() {
-    return Math.floor(Date.now() / 1000);
   }
 }

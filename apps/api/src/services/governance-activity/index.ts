@@ -6,18 +6,23 @@ import {
   ProposalsCompareQueryResult,
   VotesCompareQueryResult,
 } from "@/controllers";
-import { DaysEnum } from "@/lib/enums";
 
 interface GovernanceActivityRepository {
-  getActiveSupply(days: DaysEnum): Promise<ActiveSupplyQueryResult | undefined>;
+  getActiveSupply(
+    fromDate: number,
+  ): Promise<ActiveSupplyQueryResult | undefined>;
   getProposalsCompare(
-    days: DaysEnum,
+    fromDate: number,
   ): Promise<ProposalsCompareQueryResult | undefined>;
-  getVotesCompare(days: DaysEnum): Promise<VotesCompareQueryResult | undefined>;
+  getVotesCompare(
+    fromDate: number,
+  ): Promise<VotesCompareQueryResult | undefined>;
   getAverageTurnoutCompare(
-    days: DaysEnum,
+    fromDate: number,
   ): Promise<AverageTurnoutCompareQueryResult | undefined>;
-  getVotesCompare(days: DaysEnum): Promise<VotesCompareQueryResult | undefined>;
+  getVotesCompare(
+    fromDate: number,
+  ): Promise<VotesCompareQueryResult | undefined>;
 }
 
 export class GovernanceActivityService {
@@ -26,12 +31,12 @@ export class GovernanceActivityService {
     private tokenType: "ERC20" | "ERC721",
   ) {}
 
-  async getActiveSupply(days: DaysEnum) {
-    return await this.repository.getActiveSupply(days);
+  async getActiveSupply(fromDate: number) {
+    return await this.repository.getActiveSupply(fromDate);
   }
 
-  async getAverageTurnout(days: DaysEnum) {
-    const data = await this.repository.getAverageTurnoutCompare(days);
+  async getAverageTurnout(fromDate: number) {
+    const data = await this.repository.getAverageTurnoutCompare(fromDate);
 
     if (!data) {
       return {
@@ -64,8 +69,8 @@ export class GovernanceActivityService {
     };
   }
 
-  async getProposals(days: DaysEnum) {
-    const data = await this.repository.getProposalsCompare(days);
+  async getProposals(fromDate: number) {
+    const data = await this.repository.getProposalsCompare(fromDate);
     if (!data) {
       return {
         currentProposalsLaunched: 0,
@@ -83,8 +88,8 @@ export class GovernanceActivityService {
     };
   }
 
-  async getVotes(days: DaysEnum) {
-    const data = await this.repository.getVotesCompare(days);
+  async getVotes(fromDate: number) {
+    const data = await this.repository.getVotesCompare(fromDate);
     if (!data) {
       return {
         currentVotes: 0,

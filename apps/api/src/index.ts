@@ -91,6 +91,7 @@ import {
   OffchainProposalsService,
   OffchainVotesService,
   EventRelevanceService,
+  GovernanceActivityService,
 } from "@/services";
 
 import { eventRelevance } from "./controllers/event-relevance";
@@ -144,43 +145,6 @@ const optimisticProposalType =
   "optimisticProposalType" in daoConfig
     ? daoConfig.optimisticProposalType
     : undefined;
-
-const repo = new DrizzleRepository(pgClient);
-const balanceQueryFragments = new AccountBalanceQueryFragments(pgClient);
-const votingPowerRepo = new VotingPowerRepository(pgClient);
-const proposalsRepo = new DrizzleProposalsActivityRepository(pgClient);
-const transactionsRepo = new TransactionsRepository(pgClient);
-const daoMetricsDayBucketRepo = new DaoMetricsDayBucketRepository(pgClient);
-const delegationPercentageService = new DelegationPercentageService(
-  daoMetricsDayBucketRepo,
-);
-const tokenMetricsService = new TokenMetricsService(daoMetricsDayBucketRepo);
-const balanceVariationsRepo = new BalanceVariationsRepository(
-  pgClient,
-  balanceQueryFragments,
-);
-const historicalBalancesRepo = new HistoricalBalanceRepository(pgClient);
-const accountBalanceRepo = new AccountBalanceRepository(
-  pgClient,
-  balanceQueryFragments,
-);
-const accountInteractionRepo = new AccountInteractionsRepository(pgClient);
-const transactionsService = new TransactionsService(transactionsRepo);
-const votingPowerService = new VotingPowerService(
-  env.DAO_ID === DaoIdEnum.NOUNS
-    ? new NounsVotingPowerRepository(pgClient)
-    : votingPowerRepo,
-  votingPowerRepo,
-);
-const daoCache = new DaoCache();
-const daoService = new DaoService(daoClient, daoCache, env.CHAIN_ID);
-const balanceVariationsService = new BalanceVariationsService(
-  balanceVariationsRepo,
-  accountInteractionRepo,
-  accountBalanceRepo,
-);
-const accountBalanceService = new AccountBalanceService(accountBalanceRepo);
-
 const tokenPriceClient =
   env.DAO_ID === DaoIdEnum.NOUNS
     ? new NFTPriceService(
@@ -193,6 +157,55 @@ const tokenPriceClient =
         env.COINGECKO_API_KEY,
         env.DAO_ID,
       );
+
+const repo = new DrizzleRepository(pgClient);
+const balanceQueryFragments = new AccountBalanceQueryFragments(pgClient);
+const votingPowerRepo = new VotingPowerRepository(pgClient);
+const proposalsRepo = new DrizzleProposalsActivityRepository(pgClient);
+const transactionsRepo = new TransactionsRepository(pgClient);
+const daoMetricsDayBucketRepo = new DaoMetricsDayBucketRepository(pgClient);
+const delegationPercentageService = new DelegationPercentageService(
+  daoMetricsDayBucketRepo,
+);
+const tokenMetricsService = new TokenMetricsService(daoMetricsDayBucketRepo);
+const governanceService = new GovernanceActivityService(repo, tokenType);
+const balanceVariationsRepo = new BalanceVariationsRepository(
+  pgClient,
+  balanceQueryFragments,
+);
+const historicalBalancesRepo = new HistoricalBalanceRepository(pgClient);
+const accountBalanceRepo = new AccountBalanceRepository(
+  pgClient,
+  balanceQueryFragments,
+);
+const proposalsService = new ProposalsService(
+  repo,
+  daoClient,
+  optimisticProposalType,
+);
+const accountInteractionRepo = new AccountInteractionsRepository(pgClient);
+const transactionsService = new TransactionsService(transactionsRepo);
+const votingPowerService = new VotingPowerService(
+  env.DAO_ID === DaoIdEnum.NOUNS
+    ? new NounsVotingPowerRepository(pgClient)
+    : votingPowerRepo,
+  votingPowerRepo,
+);
+const daoCache = new DaoCache();
+const daoService = new DaoService(
+  daoClient,
+  daoCache,
+  env.CHAIN_ID,
+  governanceService,
+  proposalsService,
+  tokenPriceClient,
+);
+const balanceVariationsService = new BalanceVariationsService(
+  balanceVariationsRepo,
+  accountInteractionRepo,
+  accountBalanceRepo,
+);
+const accountBalanceService = new AccountBalanceService(accountBalanceRepo);
 
 historicalDelegations(
   app,
@@ -228,14 +241,9 @@ token(
 feed(app, new FeedService(env.DAO_ID, new FeedRepository(pgClient)));
 eventRelevance(app, new EventRelevanceService(env.DAO_ID));
 tokenDistribution(app, repo);
-governanceActivity(app, repo, tokenType);
+governanceActivity(app, governanceService);
 proposalsActivity(app, proposalsRepo, env.DAO_ID, daoClient);
-proposals(
-  app,
-  new ProposalsService(repo, daoClient, optimisticProposalType),
-  daoClient,
-  blockTime,
-);
+proposals(app, proposalsService, daoClient, blockTime);
 historicalBalances(app, new HistoricalBalancesService(historicalBalancesRepo));
 transactions(app, transactionsService);
 lastUpdate(app, pgClient);

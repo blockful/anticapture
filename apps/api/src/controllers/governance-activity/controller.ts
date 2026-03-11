@@ -46,7 +46,8 @@ export function governanceActivity(
     }),
     async (context) => {
       const { days } = context.req.valid("query");
-      const data = await service.getActiveSupply(days);
+      const now = Math.floor(Date.now() / 1000);
+      const data = await service.getActiveSupply(now - days);
       return context.json({ activeSupply: data?.activeSupply || "0" });
     },
   );
@@ -83,7 +84,8 @@ export function governanceActivity(
     }),
     async (context) => {
       const { days } = context.req.valid("query");
-      const data = await service.getProposals(days);
+      const now = Math.floor(Date.now() / 1000);
+      const data = await service.getProposals(now - days);
       return context.json(data);
     },
   );
@@ -120,7 +122,8 @@ export function governanceActivity(
     }),
     async (context) => {
       const { days } = context.req.valid("query");
-      const data = await service.getVotes(days);
+      const now = Math.floor(Date.now() / 1000);
+      const data = await service.getVotes(now - days);
       return context.json(data);
     },
   );
@@ -157,7 +160,8 @@ export function governanceActivity(
     }),
     async (context) => {
       const { days } = context.req.valid("query");
-      const data = await service.getAverageTurnout(days);
+      const now = Math.floor(Date.now() / 1000);
+      const data = await service.getAverageTurnout(now - days);
       return context.json(data);
     },
   );

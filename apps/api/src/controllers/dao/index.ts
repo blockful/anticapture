@@ -1,6 +1,7 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
-import { DaoResponseSchema } from "@/mappers";
+import { DaysEnum } from "@/lib/enums";
+import { DaoRequestQuerySchema, DaoResponseSchema } from "@/mappers";
 import { DaoService } from "@/services";
 
 export function dao(app: Hono, service: DaoService) {
@@ -12,6 +13,9 @@ export function dao(app: Hono, service: DaoService) {
       summary: "Get DAO governance parameters",
       description: "Returns current governance parameters for this DAO",
       tags: ["governance"],
+      request: {
+        query: DaoRequestQuerySchema,
+      },
       responses: {
         200: {
           description: "DAO governance parameters",
@@ -24,7 +28,10 @@ export function dao(app: Hono, service: DaoService) {
       },
     }),
     async (context) => {
-      const daoData = await service.getDaoParameters();
+      const { fromDate } = context.req.valid("query");
+      const daoData = await service.getDaoParameters(
+        fromDate || Math.floor(Date.now() / 1000) - DaysEnum["90d"],
+      );
       return context.json(daoData, 200);
     },
   );
