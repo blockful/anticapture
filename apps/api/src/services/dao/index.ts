@@ -2,29 +2,25 @@ import { DaoDataCache } from "@/cache/dao-cache.interface";
 import { DAOClient } from "@/clients";
 import { DaoResponse } from "@/mappers";
 
-// activeSupply: number;
-// averageTurnout: number;
+import { GovernanceActivityService } from "../governance-activity";
+
 // quorumGap: number;
 // proposalThreshold: number;
 // lastPrice: number;
-
-// interface Repository {
-//   getActiveSupply(days: DaysEnum): Promise<ActiveSupplyQueryResult | undefined>;
-// }
 
 export class DaoService {
   constructor(
     private readonly client: DAOClient,
     private readonly cache: DaoDataCache,
     private readonly chainId: number,
-    // private readonly repository: Repository
-  ) {}
+    private readonly governanceService: GovernanceActivityService,
+  ) { }
 
   /**
    * Retrieves DAO governance parameters from cache or blockchain
    * Caches results
    */
-  async getDaoParameters(): Promise<DaoResponse> {
+  async getDaoParameters(fromDate: number): Promise<DaoResponse> {
     const daoId = this.client.getDaoId();
 
     // Check cache first
@@ -40,12 +36,16 @@ export class DaoService {
       votingDelay,
       votingPeriod,
       timelockDelay,
+      activeSupply,
+      averageTurnout,
     ] = await Promise.all([
       this.client.getQuorum(null),
       this.client.getProposalThreshold(),
       this.client.getVotingDelay(),
       this.client.getVotingPeriod(),
       this.client.getTimelockDelay(),
+      this.governanceService.getActiveSupply(fromDate),
+      this.governanceService.getAverageTurnout(fromDate),
     ]);
 
     const daoData: DaoResponse = {
@@ -56,6 +56,12 @@ export class DaoService {
       votingDelay: votingDelay.toString(),
       votingPeriod: votingPeriod.toString(),
       timelockDelay: timelockDelay.toString(),
+      activeSupply: activeSupply?.activeSupply ?? "0",
+      averageTurnout: {
+        // TODO: Move to mapper
+        ...averageTurnout,
+        changeRate: averageTurnout.changeRate.toString(),
+      },
     };
 
     // Cache and return
