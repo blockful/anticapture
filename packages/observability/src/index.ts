@@ -17,9 +17,7 @@ import {
 import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
 
 export { PrometheusExporter, PrometheusSerializer };
-
 export const PROMETHEUS_MIME_TYPE = "text/plain; version=0.0.4; charset=utf-8";
-
 export interface ObservabilityProvider {
   meterProvider: MeterProvider;
   tracerProvider: NodeTracerProvider;
@@ -27,30 +25,39 @@ export interface ObservabilityProvider {
   shutdown: () => Promise<void>;
 }
 
+const noopExporter = {
+  export: (_spans: unknown[], done: (result: { code: 0 }) => void) =>
+    done({ code: 0 }),
+  shutdown: () => Promise.resolve(),
+};
+
 export function createObservabilityProvider(
   serviceName: string,
+  /** Optional callback invoked by the SIGTERM/SIGINT handler *after* telemetry
+   *  is flushed. Use it to close the HTTP server and then call process.exit()
+   *  (or let Node exit naturally once all handles are closed). */
+  onShutdown?: () => Promise<void>,
 ): ObservabilityProvider {
-  const collectorEndpoint =
-    process.env.OTEL_EXPORTER_OTLP_ENDPOINT ?? "http://localhost:4318";
+  const collectorEndpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
 
   const resource = new Resource({ [ATTR_SERVICE_NAME]: serviceName });
 
   const prometheusExporter = new PrometheusExporter({
     preventServerStart: true,
   });
-
   const meterProvider = new MeterProvider({
     resource,
     readers: [prometheusExporter],
   });
 
-  const traceExporter = new OTLPTraceExporter({
-    url: `${collectorEndpoint}/v1/traces`,
-  });
+  // Only wire up OTLP push when an endpoint is explicitly configured.
+  const spanExporter = collectorEndpoint
+    ? new OTLPTraceExporter({ url: `${collectorEndpoint}/v1/traces` })
+    : noopExporter;
 
   const tracerProvider = new NodeTracerProvider({
     resource,
-    spanProcessors: [new BatchSpanProcessor(traceExporter)],
+    spanProcessors: [new BatchSpanProcessor(spanExporter)],
   });
   tracerProvider.register();
 
@@ -60,12 +67,15 @@ export function createObservabilityProvider(
   });
 
   metrics.setGlobalMeterProvider(meterProvider);
-
   new HostMetrics({ meterProvider }).start();
 
   const shutdown = async () => {
     await meterProvider.shutdown();
     await tracerProvider.shutdown();
+    // Delegate process-level cleanup (server close, process.exit, etc.) to the
+    // caller. Without this hook the signal handler would return with sockets
+    // still open and the process would hang until forcibly killed.
+    await onShutdown?.();
   };
 
   process.once("SIGTERM", shutdown);
