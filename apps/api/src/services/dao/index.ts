@@ -2,11 +2,22 @@ import { DaoDataCache } from "@/cache/dao-cache.interface";
 import { DAOClient } from "@/clients";
 import { DaoResponse } from "@/mappers";
 
+// activeSupply: number;
+// averageTurnout: number;
+// quorumGap: number;
+// proposalThreshold: number;
+// lastPrice: number;
+
+// interface Repository {
+//   getActiveSupply(days: DaysEnum): Promise<ActiveSupplyQueryResult | undefined>;
+// }
+
 export class DaoService {
   constructor(
     private readonly client: DAOClient,
     private readonly cache: DaoDataCache,
     private readonly chainId: number,
+    // private readonly repository: Repository
   ) {}
 
   /**
