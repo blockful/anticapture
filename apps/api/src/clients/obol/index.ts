@@ -36,18 +36,18 @@ export class ObolClient<
         address: this.address,
         functionName: "quorum",
         args: [targetBlock < 0n ? 0n : targetBlock],
-      }) as Promise<bigint>;
+      });
     });
   }
 
   async getTimelockDelay(): Promise<bigint> {
     if (!this.cache.timelockDelay) {
-      const timelockAddress = (await this.readContract({
+      const timelockAddress = await this.readContract({
         abi: this.abi,
         address: this.address,
         functionName: "timelock",
-      })) as Address;
-      this.cache.timelockDelay = (await this.readContract({
+      });
+      this.cache.timelockDelay = await this.readContract({
         abi: [
           {
             constant: true,
@@ -61,7 +61,7 @@ export class ObolClient<
         ],
         address: timelockAddress,
         functionName: "getMinDelay",
-      })) as bigint;
+      });
     }
     return this.cache.timelockDelay;
   }

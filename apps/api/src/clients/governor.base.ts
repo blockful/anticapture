@@ -11,7 +11,10 @@ import {
   Transport,
 } from "viem";
 import { readContract } from "viem/actions";
-import type { ReadContractParameters } from "viem/actions";
+import type {
+  ReadContractParameters,
+  ReadContractReturnType,
+} from "viem/actions";
 
 import { rpcRequestTotal } from "@/metrics";
 
@@ -192,7 +195,7 @@ export abstract class GovernorBase<
     TArgs extends ContractFunctionArgs<TAbi, "pure" | "view", TFunctionName>,
   >(
     params: ReadContractParameters<TAbi, TFunctionName, TArgs>,
-  ): Promise<unknown> {
+  ): Promise<ReadContractReturnType<TAbi, TFunctionName, TArgs>> {
     rpcRequestTotal.add(1, { method: "eth_call" });
     return readContract(this.client, params);
   }

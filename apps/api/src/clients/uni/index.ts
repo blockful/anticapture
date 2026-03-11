@@ -34,18 +34,18 @@ export class UNIClient<
         address: this.address,
         functionName: "quorumVotes",
         args: [],
-      }) as Promise<bigint>;
+      });
     });
   }
 
   async getTimelockDelay(): Promise<bigint> {
     if (!this.cache.timelockDelay) {
-      const timelockAddress = (await this.readContract({
+      const timelockAddress = await this.readContract({
         abi: this.abi,
         address: this.address,
         functionName: "timelock",
-      })) as Address;
-      this.cache.timelockDelay = (await this.readContract({
+      });
+      this.cache.timelockDelay = await this.readContract({
         abi: [
           {
             constant: true,
@@ -59,7 +59,7 @@ export class UNIClient<
         ],
         address: timelockAddress,
         functionName: "delay",
-      })) as bigint;
+      });
     }
     return this.cache.timelockDelay;
   }

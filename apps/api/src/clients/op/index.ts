@@ -35,7 +35,7 @@ export class OPClient<
         address: this.address,
         functionName: "quorum",
         args: [BigInt(proposalId)],
-      }) as Promise<bigint>;
+      });
     }, `quorum:proposal:${proposalId}`);
   }
 

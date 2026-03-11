@@ -29,29 +29,29 @@ export class Client<
 
   async getQuorum(): Promise<bigint> {
     return this.getCachedQuorum(async () => {
-      const lastProposalId = (await this.readContract({
+      const lastProposalId = await this.readContract({
         abi: this.abi,
         address: this.address,
         functionName: "proposalCount",
-      })) as bigint;
+      });
 
       return this.readContract({
         abi: this.abi,
         address: this.address,
         functionName: "quorumVotes",
         args: [lastProposalId],
-      }) as Promise<bigint>;
+      });
     });
   }
 
   async getTimelockDelay(): Promise<bigint> {
     if (!this.cache.timelockDelay) {
-      const timelockAddress = (await this.readContract({
+      const timelockAddress = await this.readContract({
         abi: this.abi,
         address: this.address,
         functionName: "timelock",
-      })) as Address;
-      this.cache.timelockDelay = (await this.readContract({
+      });
+      this.cache.timelockDelay = await this.readContract({
         abi: [
           {
             inputs: [],
@@ -69,7 +69,7 @@ export class Client<
         ],
         address: timelockAddress,
         functionName: "delay",
-      })) as bigint;
+      });
     }
     return this.cache.timelockDelay;
   }

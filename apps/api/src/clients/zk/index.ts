@@ -34,18 +34,18 @@ export class ZKClient<
         address: this.address,
         functionName: "quorum",
         args: [BigInt(Math.floor(Date.now() / 1000))],
-      }) as Promise<bigint>;
+      });
     });
   }
 
   async getTimelockDelay(): Promise<bigint> {
     if (!this.cache.timelockDelay) {
-      const timelockAddress = (await this.readContract({
+      const timelockAddress = await this.readContract({
         abi: this.abi,
         address: this.address,
         functionName: "timelock",
-      })) as Address;
-      this.cache.timelockDelay = (await this.readContract({
+      });
+      this.cache.timelockDelay = await this.readContract({
         abi: [
           {
             inputs: [],
@@ -63,7 +63,7 @@ export class ZKClient<
         ],
         address: timelockAddress,
         functionName: "getMinDelay",
-      })) as bigint;
+      });
     }
     return this.cache.timelockDelay;
   }
