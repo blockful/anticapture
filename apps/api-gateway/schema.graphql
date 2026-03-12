@@ -166,7 +166,7 @@ type Query {
   proposalNonVoters(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposalNonVoters_orderDirection = desc, addresses: JSON): proposalNonVoters_200_response
 
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/dao`\nReturns current governance parameters for this DAO\n"
-  dao(fromDate: String): dao_200_response
+  dao(fromDate: String, fetchGovernanceData: queryInput_dao_fetchGovernanceData = FALSE): dao_200_response
 
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/token-metrics`\nReturns token related metrics for a single metric type.\n"
   tokenMetrics(metricType: queryInput_tokenMetrics_metricType!, startDate: Float, endDate: Float, orderDirection: queryInput_tokenMetrics_orderDirection = asc, limit: NonNegativeInt = 365, skip: NonNegativeInt): tokenMetrics_200_response
@@ -218,7 +218,7 @@ type Query {
   ): AverageDelegationPercentagePage!
 
   """Get all DAOs"""
-  daos: DAOList!
+  daos(fetchGovernanceData: queryInput_dao_fetchGovernanceData = FALSE): DAOList!
 }
 
 type getAddress_200_response {
@@ -1318,16 +1318,25 @@ type dao_200_response {
   votingDelay: String!
   votingPeriod: String!
   timelockDelay: String!
+  governanceData: query_dao_governanceData
+}
+
+type query_dao_governanceData {
   activeSupply: String!
-  averageTurnout: query_dao_averageTurnout!
+  averageTurnout: query_dao_governanceData_averageTurnout!
   quorumGap: String!
   lastPrice: String!
 }
 
-type query_dao_averageTurnout {
+type query_dao_governanceData_averageTurnout {
   oldAverageTurnout: String!
   currentAverageTurnout: String!
   changeRate: String!
+}
+
+enum queryInput_dao_fetchGovernanceData {
+  TRUE
+  FALSE
 }
 
 type tokenMetrics_200_response {

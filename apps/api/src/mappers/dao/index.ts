@@ -1,17 +1,19 @@
 import { z } from "@hono/zod-openapi";
 
-import { ActiveSupplyQueryResult } from "@/controllers";
-
 import { NOT_APPLICABLE } from "../constants";
 
-export const DaoRequestQuerySchema = z.object({
+export const DaoParametersRequestQuerySchema = z.object({
   fromDate: z
     .string()
     .transform((val) => Number(val))
     .optional(),
+  fetchGovernanceData: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((val) => val === "true"),
 });
 
-export const DaoResponseSchema = z.object({
+export const DaoParametersResponseSchema = z.object({
   id: z.string(),
   chainId: z.number(),
   quorum: z.string(),
@@ -19,49 +21,82 @@ export const DaoResponseSchema = z.object({
   votingDelay: z.string(),
   votingPeriod: z.string(),
   timelockDelay: z.string(),
-  activeSupply: z.string(),
+  governanceData: z
+    .object({
+      activeSupply: z.string(),
+      averageTurnout: z.object({
+        oldAverageTurnout: z.string(),
+        currentAverageTurnout: z.string(),
+        changeRate: z.string(),
+      }),
+      quorumGap: z.string(),
+      lastPrice: z.string(),
+    })
+    .nullable(),
+});
+
+export type DaoParametersResponse = z.infer<typeof DaoParametersResponseSchema>;
+
+export const DaoParametersRPCResponseSchema = z.object({
+  id: z.string(),
+  chainId: z.number(),
+  quorum: z.bigint(),
+  proposalThreshold: z.bigint(),
+  votingDelay: z.bigint(),
+  votingPeriod: z.bigint(),
+  timelockDelay: z.bigint(),
+});
+
+export type DaoParametersRPCResponse = z.infer<
+  typeof DaoParametersRPCResponseSchema
+>;
+
+export const DaoParametersDBResponseSchema = z.object({
+  // TODO: Rename
+  activeSupply: z
+    .object({
+      activeSupply: z.string(),
+    })
+    .nullable(),
   averageTurnout: z.object({
-    oldAverageTurnout: z.string(),
     currentAverageTurnout: z.string(),
-    changeRate: z.string(),
+    oldAverageTurnout: z.string(),
+    changeRate: z.number(),
   }),
-  quorumGap: z.string(),
+  quorumGap: z.number().nullable(),
   lastPrice: z.string(),
 });
 
-export type DaoResponse = z.infer<typeof DaoResponseSchema>;
+export type DaoParametersDBResponse = z.infer<
+  typeof DaoParametersDBResponseSchema
+>;
 
 export const DaoResponseMapper = (values: {
-  id: string;
-  chainId: number;
-  quorum: bigint;
-  proposalThreshold: bigint;
-  votingDelay: bigint;
-  votingPeriod: bigint;
-  timelockDelay: bigint;
-  activeSupply: ActiveSupplyQueryResult | undefined;
-  averageTurnout: {
-    currentAverageTurnout: string;
-    oldAverageTurnout: string;
-    changeRate: number;
-  };
-  quorumGap: number | null;
-  lastPrice: string;
-}): DaoResponse => {
+  rpcData: DaoParametersRPCResponse;
+  dbData: DaoParametersDBResponse | null;
+}): DaoParametersResponse => {
+  const { rpcData, dbData } = values;
+
   return {
-    id: values.id,
-    chainId: values.chainId,
-    quorum: values.quorum.toString(),
-    proposalThreshold: values.proposalThreshold.toString(),
-    votingDelay: values.votingDelay.toString(),
-    votingPeriod: values.votingPeriod.toString(),
-    timelockDelay: values.timelockDelay.toString(),
-    activeSupply: values.activeSupply?.activeSupply ?? "0",
-    averageTurnout: {
-      ...values.averageTurnout,
-      changeRate: values.averageTurnout.changeRate.toString(),
-    },
-    quorumGap: values.quorumGap ? values.quorumGap.toString() : NOT_APPLICABLE,
-    lastPrice: values.lastPrice,
+    id: rpcData.id,
+    chainId: rpcData.chainId,
+    quorum: rpcData.quorum.toString(),
+    proposalThreshold: rpcData.proposalThreshold.toString(),
+    votingDelay: rpcData.votingDelay.toString(),
+    votingPeriod: rpcData.votingPeriod.toString(),
+    timelockDelay: rpcData.timelockDelay.toString(),
+    governanceData: dbData
+      ? {
+          activeSupply: dbData.activeSupply?.activeSupply ?? "0",
+          averageTurnout: {
+            ...dbData.averageTurnout,
+            changeRate: dbData.averageTurnout.changeRate.toString(),
+          },
+          quorumGap: dbData.quorumGap
+            ? dbData.quorumGap.toString()
+            : NOT_APPLICABLE,
+          lastPrice: dbData.lastPrice,
+        }
+      : null,
   };
 };
