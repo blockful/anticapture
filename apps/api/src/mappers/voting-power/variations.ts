@@ -78,7 +78,16 @@ export const VotingPowersRequestSchema = z.object({
     .default(0),
   orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
   orderBy: z
-    .enum(["votingPower", "delegationsCount", "variation", "signedVariation"])
+    .enum([
+      "votingPower",
+      "delegationsCount",
+      "variation",
+      "signedVariation",
+      /* AAVE only */
+      "total",
+      "balance",
+      /*-----------*/
+    ])
     .optional()
     .default("votingPower"),
   addresses: z

@@ -33,6 +33,8 @@ import {
   votes,
   offchainProposals,
   offchainVotes,
+  eventRelevance,
+  feed,
 } from "@/controllers";
 import * as offchainSchema from "@/database/offchain-schema";
 import * as schema from "@/database/schema";
@@ -92,9 +94,6 @@ import {
   OffchainVotesService,
   EventRelevanceService,
 } from "@/services";
-
-import { eventRelevance } from "./controllers/event-relevance";
-import { feed } from "./controllers/feed";
 
 const app = new Hono({
   defaultHook: (result, c) => {

@@ -7,6 +7,7 @@ export * from "./comp";
 export * from "./obol";
 export * from "./zk";
 export * from "./uni";
+export * from "./aave";
 
 export interface DAOClient {
   getDaoId: () => string;

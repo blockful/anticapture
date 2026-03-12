@@ -1,14 +1,40 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
-import { getAddress, isAddress } from "viem";
+import { Address, getAddress, isAddress } from "viem";
 
 import {
   VotingPowersRequestSchema,
   VotingPowersResponseSchema,
   VotingPowersMapper,
   VotingPowerResponseSchema,
+  AmountFilter,
+  DBAccountPowerWithVariation,
 } from "@/mappers/";
 import { VotingPowerMapper } from "@/mappers/voting-power/variations";
-import { VotingPowerService } from "@/services";
+
+interface VotingPowerService {
+  getVotingPowers(
+    skip: number,
+    limit: number,
+    orderDirection: "asc" | "desc",
+    orderBy:
+      | "votingPower"
+      | "delegationsCount"
+      | "variation"
+      | "total"
+      | "balance"
+      | "signedVariation",
+    amountFilter: AmountFilter,
+    addresses: Address[],
+    fromDate?: number,
+    toDate?: number,
+  ): Promise<{ items: DBAccountPowerWithVariation[]; totalCount: number }>;
+
+  getVotingPowersByAccountId(
+    accountId: Address,
+    fromDate?: number,
+    toDate?: number,
+  ): Promise<DBAccountPowerWithVariation>;
+}
 
 export function votingPowers(app: Hono, service: VotingPowerService) {
   app.openapi(

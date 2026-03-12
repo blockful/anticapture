@@ -366,5 +366,6 @@ export const ENS: DaoConfiguration = {
   resilienceStages: true,
   tokenDistribution: true,
   dataTables: true,
+  activityFeed: true,
   governancePage: true,
 };

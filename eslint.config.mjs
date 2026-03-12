@@ -57,7 +57,6 @@ export default [
     rules: {
       ...eslintJs.configs.recommended.rules,
       ...tseslint.configs.recommended.rules,
-      ...eslintPluginImport.flatConfigs.recommended.rules,
       "prettier/prettier": "error",
       "@typescript-eslint/no-unused-vars": [
         "error",
@@ -66,25 +65,6 @@ export default [
           varsIgnorePattern: "^_",
         },
       ],
-      // Add these for auto-fixable import ordering:
-      "import/order": [
-        "error",
-        {
-          groups: [
-            "builtin",
-            "external",
-            "internal",
-            "parent",
-            "sibling",
-            "index",
-          ],
-          "newlines-between": "always",
-          alphabetize: { order: "asc", caseInsensitive: true },
-        },
-      ],
-      "import/no-duplicates": "error",
-      "import/first": "error",
-      "import/newline-after-import": "error",
       // Disable base no-redeclare and use TypeScript version
       "no-redeclare": "off",
       "@typescript-eslint/no-redeclare": [

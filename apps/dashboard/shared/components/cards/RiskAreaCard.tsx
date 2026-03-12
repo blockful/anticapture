@@ -7,12 +7,14 @@ import { useState } from "react";
 
 import { RiskTooltipCard, TooltipInfo } from "@/shared/components";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import { EmptyState } from "@/shared/components/design-system/table/components/EmptyState";
 import { RISK_AREAS } from "@/shared/constants/risk-areas";
 import daoConfig from "@/shared/dao-config";
 import { useScreenSize } from "@/shared/hooks";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { RiskAreaEnum } from "@/shared/types/enums";
 import { RiskLevel } from "@/shared/types/enums/RiskLevel";
+import { Stage } from "@/shared/types/enums/Stage";
 import { cn } from "@/shared/utils/";
 
 export type RiskArea = {
@@ -43,6 +45,7 @@ interface RiskAreaCardWrapperProps {
   className?: string;
   variant?: RiskAreaCardEnum;
   withTitle?: boolean;
+  currentDaoStage?: Stage;
 }
 
 interface RiskAreaCardInternalProps {
@@ -343,7 +346,10 @@ export const RiskAreaCardWrapper = ({
   className,
   variant = RiskAreaCardEnum.DAO_OVERVIEW,
   withTitle = true,
+  currentDaoStage,
 }: RiskAreaCardWrapperProps) => {
+  const isUnknown = currentDaoStage === Stage.UNKNOWN;
+
   return (
     <div
       className={cn("flex w-full flex-col gap-1", {
@@ -362,45 +368,57 @@ export const RiskAreaCardWrapper = ({
             <DefaultLink
               href={`${daoId.toLowerCase()}/risk-analysis`}
               openInNewTab={false}
-              className="text-primary border-border-contrast hover:border-primary border-b border-dashed font-mono text-[13px] font-medium tracking-wider"
+              className={cn(
+                "text-primary border-border-contrast hover:border-primary font-mono text-[13px] font-medium tracking-wider",
+                currentDaoStage !== Stage.UNKNOWN && "border-b border-dashed",
+              )}
             >
               ATTACK EXPOSURE
             </DefaultLink>
             <TooltipInfo text="Assess critical vulnerabilities in the DAO's governance setup. Each item highlights a specific attack exposure, showing which issues are resolved and which still expose the system to threats." />
           </div>
         ))}
-      <div className={cn("", className)}>
-        {riskAreas.map((risk: RiskArea, index: number) => {
-          if (risk.name === RiskAreaEnum.ECONOMIC_SECURITY) {
-            const daoIdEnum = daoId?.toUpperCase() as DaoIdEnum;
-            const daoConstants = daoConfig[daoIdEnum];
-            const riskValue = !daoConstants?.attackProfitability
-              ?.supportsLiquidTreasuryCall
-              ? { ...risk, level: RiskLevel.NONE }
-              : risk;
+      {isUnknown ? (
+        <EmptyState
+          title="REVIEW NEEDED"
+          description="Review required to complete integration and start extracting deeper insights from this DAO."
+          icon={<CounterClockwiseClockIcon className="text-secondary size-8" />}
+          classNames="bg-surface-contrast"
+        />
+      ) : (
+        <div className={cn("", className)}>
+          {riskAreas.map((risk: RiskArea, index: number) => {
+            if (risk.name === RiskAreaEnum.ECONOMIC_SECURITY) {
+              const daoIdEnum = daoId?.toUpperCase() as DaoIdEnum;
+              const daoConstants = daoConfig[daoIdEnum];
+              const riskValue = !daoConstants?.attackProfitability
+                ?.supportsLiquidTreasuryCall
+                ? { ...risk, level: RiskLevel.NONE }
+                : risk;
+
+              return (
+                <RiskAreaCard
+                  key={`${risk.name}-${index}`}
+                  riskArea={riskValue}
+                  isActive={activeRiskId === risk.name}
+                  onClick={() => onRiskClick?.(risk.name as RiskAreaEnum)}
+                  variant={variant}
+                />
+              );
+            }
 
             return (
               <RiskAreaCard
                 key={`${risk.name}-${index}`}
-                riskArea={riskValue}
+                riskArea={risk}
                 isActive={activeRiskId === risk.name}
                 onClick={() => onRiskClick?.(risk.name as RiskAreaEnum)}
                 variant={variant}
               />
             );
-          }
-
-          return (
-            <RiskAreaCard
-              key={`${risk.name}-${index}`}
-              riskArea={risk}
-              isActive={activeRiskId === risk.name}
-              onClick={() => onRiskClick?.(risk.name as RiskAreaEnum)}
-              variant={variant}
-            />
-          );
-        })}
-      </div>
+          })}
+        </div>
+      )}
     </div>
   );
 };
