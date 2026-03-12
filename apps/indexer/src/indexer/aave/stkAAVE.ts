@@ -27,7 +27,7 @@ export function stkAAVETokenIndexer(address: Address, decimals: number) {
     );
   });
 
-  ponder.on(`stkAAVE:DelegateChanged`, async ({ event, context }) => {
+  ponder.on(`v3stkAAVE:DelegateChanged`, async ({ event, context }) => {
     await aaveDelegateChanged(
       context,
       {

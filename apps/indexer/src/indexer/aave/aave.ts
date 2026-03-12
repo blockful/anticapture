@@ -27,7 +27,7 @@ export function AAVETokenIndexer(address: Address, decimals: number) {
     );
   });
 
-  ponder.on(`AAVE:DelegateChanged`, async ({ event, context }) => {
+  ponder.on(`v3AAVE:DelegateChanged`, async ({ event, context }) => {
     await aaveDelegateChanged(
       context,
       {
