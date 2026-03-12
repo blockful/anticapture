@@ -44,14 +44,14 @@ export const ProviderNameCell = ({
         </span>
         <div className="flex items-center gap-1.5">
           {websiteUrl && (
-            <DefaultLink openInNewTab href={websiteUrl}>
+            <DefaultLink size="sm" openInNewTab href={websiteUrl}>
               WEBSITE
             </DefaultLink>
           )}
           {proposalUrl && (
             <>
               <BulletDivider />
-              <DefaultLink openInNewTab href={proposalUrl}>
+              <DefaultLink size="sm" openInNewTab href={proposalUrl}>
                 PROPOSAL
               </DefaultLink>
             </>
