@@ -3,14 +3,14 @@ export type SegmentedControlSize = "sm" | "md";
 export type SegmentedControlItem = {
   label: string;
   value: string;
-  items?: string | number;
+  items?: string;
 };
 
 export type SegmentedControlItemProps = {
   label: string;
   isActive?: boolean;
   size?: SegmentedControlSize;
-  items?: string | number;
+  items?: string;
   onClick?: () => void;
   className?: string;
 };

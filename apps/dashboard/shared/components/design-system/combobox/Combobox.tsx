@@ -19,7 +19,7 @@ export const Combobox = ({
   value,
   placeholder = "Select…",
   onValueChange,
-  disabled = false,
+  isDisabled = false,
   className,
 }: ComboboxProps) => {
   const [open, setOpen] = useState(false);
@@ -41,7 +41,7 @@ export const Combobox = ({
           role="combobox"
           aria-expanded={open}
           aria-haspopup="listbox"
-          disabled={disabled}
+          disabled={isDisabled}
           className={cn(
             // Base/layout
             "flex items-center gap-1.5",
@@ -58,7 +58,7 @@ export const Combobox = ({
             // Hover
             "hover:bg-surface-hover",
             // Disabled
-            disabled && "pointer-events-none opacity-50",
+            isDisabled && "pointer-events-none opacity-50",
             // Cursor
             "cursor-pointer",
             // Min width from Figma (128px)
@@ -76,10 +76,9 @@ export const Combobox = ({
           </span>
           <ChevronDownIcon
             className={cn(
-              "text-secondary shrink-0 transition-transform duration-150",
+              "text-secondary size-3.5 shrink-0 transition-transform duration-150",
               open && "rotate-180",
             )}
-            style={{ width: 14, height: 14 }}
             aria-hidden="true"
           />
         </button>
@@ -122,7 +121,6 @@ export const Combobox = ({
             <ComboboxItem
               key={item.value}
               label={item.label}
-              hasIcon={!!item.icon}
               icon={item.icon}
               status={status}
               isSelected={isSelected}

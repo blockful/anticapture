@@ -13,20 +13,15 @@ const meta: Meta<ModalFooterProps> = {
   },
   tags: ["autodocs"],
   argTypes: {
-    actionsNumber: {
-      control: "select",
-      options: ["1", "2"],
-      description:
-        "Number of action buttons — '1' for Cancel only, '2' for Cancel + Confirm",
-    },
     cancelLabel: {
       control: "text",
-      description: "Label for the cancel button",
+      description:
+        "Label for the cancel button. When provided, the button is shown.",
     },
     confirmLabel: {
       control: "text",
       description:
-        "Label for the confirm button (only visible when actionsNumber='2')",
+        "Label for the confirm button. When provided, the button is shown.",
     },
     isConfirmLoading: {
       control: "boolean",
@@ -43,7 +38,7 @@ const meta: Meta<ModalFooterProps> = {
   },
   decorators: [
     (Story) => (
-      <div className="w-[600px]">
+      <div className="w-full max-w-2xl">
         <Story />
       </div>
     ),
@@ -55,7 +50,6 @@ type Story = StoryObj<ModalFooterProps>;
 
 export const Default: Story = {
   args: {
-    actionsNumber: "2",
     cancelLabel: "Cancel",
     confirmLabel: "Confirm",
     isConfirmLoading: false,
@@ -65,43 +59,29 @@ export const Default: Story = {
 
 export const AllStates: Story = {
   render: () => (
-    <div className="flex flex-col gap-6">
+    <div className="flex w-full max-w-2xl flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <div className="w-[600px]">
-          <ModalFooter actionsNumber="1" cancelLabel="Cancel" />
-        </div>
-        <span className="text-secondary text-xs">One action</span>
+        <ModalFooter cancelLabel="Cancel" />
+        <span className="text-secondary text-xs">Cancel only</span>
       </div>
       <div className="flex flex-col gap-1">
-        <div className="w-[600px]">
-          <ModalFooter
-            actionsNumber="2"
-            cancelLabel="Cancel"
-            confirmLabel="Confirm"
-          />
-        </div>
-        <span className="text-secondary text-xs">Two actions</span>
+        <ModalFooter cancelLabel="Cancel" confirmLabel="Confirm" />
+        <span className="text-secondary text-xs">Cancel + Confirm</span>
       </div>
       <div className="flex flex-col gap-1">
-        <div className="w-[600px]">
-          <ModalFooter
-            actionsNumber="2"
-            cancelLabel="Cancel"
-            confirmLabel="Saving..."
-            isConfirmLoading
-          />
-        </div>
+        <ModalFooter
+          cancelLabel="Cancel"
+          confirmLabel="Saving..."
+          isConfirmLoading
+        />
         <span className="text-secondary text-xs">Loading</span>
       </div>
       <div className="flex flex-col gap-1">
-        <div className="w-[600px]">
-          <ModalFooter
-            actionsNumber="2"
-            cancelLabel="Cancel"
-            confirmLabel="Confirm"
-            isConfirmDisabled
-          />
-        </div>
+        <ModalFooter
+          cancelLabel="Cancel"
+          confirmLabel="Confirm"
+          isConfirmDisabled
+        />
         <span className="text-secondary text-xs">Disabled confirm</span>
       </div>
     </div>

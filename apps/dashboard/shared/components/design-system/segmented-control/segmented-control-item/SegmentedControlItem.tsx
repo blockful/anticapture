@@ -39,8 +39,7 @@ export const SegmentedControlItem = ({
         // Hover state — text becomes primary when not active
         !isActive && "hover:text-primary",
         // Active state — surface-contrast bg + shadow-xs
-        isActive &&
-          "bg-surface-contrast text-primary shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]",
+        isActive && "bg-surface-contrast text-primary shadow-xs",
         // Cursor
         "cursor-pointer",
         // Allow overrides
@@ -48,7 +47,7 @@ export const SegmentedControlItem = ({
       )}
     >
       {label}
-      {items !== undefined && (
+      {!!items && items.length > 0 && (
         <BadgeStatus variant="dimmed">{items}</BadgeStatus>
       )}
     </button>

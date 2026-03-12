@@ -25,18 +25,15 @@ const meta: Meta<ModalProps> = {
       control: "text",
       description: "Optional description in the modal header",
     },
-    actionsNumber: {
-      control: "select",
-      options: ["1", "2"],
-      description: "Number of footer action buttons",
-    },
     cancelLabel: {
       control: "text",
-      description: "Label for the cancel button",
+      description:
+        "Label for the cancel button. When provided, the button is shown.",
     },
     confirmLabel: {
       control: "text",
-      description: "Label for the confirm button",
+      description:
+        "Label for the confirm button. When provided, the button is shown.",
     },
     isConfirmLoading: {
       control: "boolean",
@@ -75,7 +72,6 @@ export const Default: Story = {
     <ModalWithTrigger
       title={args.title ?? "Confirm action"}
       description={args.description}
-      actionsNumber={args.actionsNumber}
       cancelLabel={args.cancelLabel}
       confirmLabel={args.confirmLabel}
       isConfirmLoading={args.isConfirmLoading}
@@ -89,7 +85,6 @@ export const Default: Story = {
   args: {
     title: "Confirm action",
     description: undefined,
-    actionsNumber: "2",
     cancelLabel: "Cancel",
     confirmLabel: "Confirm",
     isConfirmLoading: false,
@@ -112,7 +107,6 @@ const CompositionsRender = () => {
         onOpenChange={setOpenDelete}
         title="Delete item"
         description="This action cannot be undone."
-        actionsNumber="2"
         cancelLabel="Cancel"
         confirmLabel="Delete"
       >
@@ -131,7 +125,6 @@ const CompositionsRender = () => {
         open={openSave}
         onOpenChange={setOpenSave}
         title="Save changes"
-        actionsNumber="2"
         cancelLabel="Cancel"
         confirmLabel="Saving..."
         isConfirmLoading
@@ -148,7 +141,6 @@ const CompositionsRender = () => {
         open={openInfo}
         onOpenChange={setOpenInfo}
         title="Information"
-        actionsNumber="1"
         cancelLabel="Close"
       >
         <div className="text-secondary flex h-20 items-center justify-center text-sm">

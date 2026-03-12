@@ -81,6 +81,10 @@
   --color-surface-destructive-hover: var(--base-destructive-hover);
   --color-surface-disabled: var(--base-muted);
 
+  /* Banner Surface Colors — intentionally dark in both themes */
+  --color-surface-banner-default: #2c1810;
+  --color-surface-banner-highlight: #18181b;
+
   /* Opacity Surface Colors */
   --color-surface-opacity-success: var(--base-success-opacity);
   --color-surface-opacity-warning: var(--base-warning-opacity);
@@ -285,26 +289,28 @@
     }
   }
 
-  /* Modal animations - slide up from below */
+  /* Modal animations - slide up from below.
+     Uses the `translate` CSS property (same as Tailwind's -translate-x-1/2 -translate-y-1/2)
+     so centering is preserved throughout the animation. */
   @keyframes modal-in {
     from {
       opacity: 0;
-      transform: translateY(20px);
+      translate: -50% calc(-50% + 20px);
     }
     to {
       opacity: 1;
-      transform: translateY(0);
+      translate: -50% -50%;
     }
   }
 
   @keyframes modal-out {
     from {
       opacity: 1;
-      transform: translateY(0);
+      translate: -50% -50%;
     }
     to {
       opacity: 0;
-      transform: translateY(20px);
+      translate: -50% calc(-50% + 20px);
     }
   }
 
@@ -415,7 +421,7 @@
 
   .scrollbar-thin {
     scrollbar-width: thin; /* Firefox */
-    scrollbar-color: #a1a1aa transparent; /* Firefox */
+    scrollbar-color: var(--base-dimmed) transparent; /* Firefox */
   }
 
   .scrollbar-thin::-webkit-scrollbar {
@@ -427,18 +433,18 @@
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: #a1a1aa; /* Chrome, Safari, Opera */
+    background: var(--base-dimmed); /* Chrome, Safari, Opera */
     border-radius: 3px;
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: #71717a; /* Chrome, Safari, Opera */
+    background: var(--base-ring); /* Chrome, Safari, Opera */
   }
 
   /* Thin scrollbar on hover */
   .hover\:scrollbar-thin:hover {
     scrollbar-width: thin; /* Firefox */
-    scrollbar-color: #a1a1aa transparent; /* Firefox */
+    scrollbar-color: var(--base-dimmed) transparent; /* Firefox */
   }
 
   .hover\:scrollbar-thin:hover::-webkit-scrollbar {
@@ -450,12 +456,12 @@
   }
 
   .hover\:scrollbar-thin:hover::-webkit-scrollbar-thumb {
-    background: #a1a1aa; /* Chrome, Safari, Opera */
+    background: var(--base-dimmed); /* Chrome, Safari, Opera */
     border-radius: 3px;
   }
 
   .hover\:scrollbar-thin:hover::-webkit-scrollbar-thumb:hover {
-    background: #71717a; /* Chrome, Safari, Opera */
+    background: var(--base-ring); /* Chrome, Safari, Opera */
   }
 
   .no-scroll {
@@ -545,7 +551,7 @@
 
   /* Recharts Brush tick formatting */
   .recharts-brush-texts text {
-    fill: #fafafa !important;
+    fill: var(--base-primary-foreground) !important;
     font-size: 10px;
   }
 

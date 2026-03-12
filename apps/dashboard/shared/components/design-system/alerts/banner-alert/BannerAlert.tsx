@@ -21,8 +21,8 @@ interface BannerAlertProps {
 }
 
 const mapVariantToColor = {
-  default: "bg-[#2C1810]",
-  highlight: "bg-[#18181B] ",
+  default: "bg-surface-banner-default",
+  highlight: "bg-surface-banner-highlight",
 };
 
 export const BannerAlert = ({

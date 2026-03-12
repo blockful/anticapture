@@ -12,9 +12,7 @@ export type ComboboxItem = {
 export type ComboboxItemProps = {
   /** Display label for the item */
   label: string;
-  /** Whether to render an icon slot */
-  hasIcon?: boolean;
-  /** Icon element rendered at the leading edge */
+  /** Icon element rendered at the leading edge (slot is only shown when this is provided) */
   icon?: React.ReactNode;
   /** Visual state of the item */
   status?: ComboboxItemStatus;
@@ -41,6 +39,6 @@ export type ComboboxProps = {
   /** Callback fired when selection changes */
   onValueChange?: (value: string) => void;
   /** Whether the combobox is disabled */
-  disabled?: boolean;
+  isDisabled?: boolean;
   className?: string;
 };

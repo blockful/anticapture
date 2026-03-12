@@ -14,7 +14,6 @@ import { cn } from "@/shared/utils/cn";
  */
 export const ComboboxItem = ({
   label,
-  hasIcon = false,
   icon,
   status = "default",
   isSelected = false,
@@ -27,16 +26,18 @@ export const ComboboxItem = ({
   const showCheck = isSelected || status === "active" || status === "filter";
 
   return (
-    <div
+    <button
+      type="button"
       role="option"
       aria-selected={isSelected}
       aria-disabled={disabled}
-      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
+      onClick={onClick}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       className={cn(
         // Base/layout
-        "flex items-center gap-1.5",
+        "flex w-full items-center gap-1.5",
         // Sizing — px-3 (12px) py-2 (8px) from Figma blocks/padding-xlg and blocks/padding-md
         "px-3 py-2",
         // Typography
@@ -54,24 +55,23 @@ export const ComboboxItem = ({
         className,
       )}
     >
-      {/* Leading icon slot — 14px, only rendered when hasIcon is true */}
-      {hasIcon && (
+      {/* Leading icon slot — 14px, only rendered when icon is provided */}
+      {icon && (
         <span className="flex size-3.5 shrink-0 items-center justify-center overflow-hidden">
-          {icon ?? null}
+          {icon}
         </span>
       )}
 
       {/* Label — fills remaining space */}
-      <span className="min-w-0 flex-1 truncate">{label}</span>
+      <span className="min-w-0 flex-1 truncate text-left">{label}</span>
 
       {/* Trailing check icon — shown for active/filter/selected states, 14px */}
       {showCheck && (
         <CheckIcon
-          className="text-primary shrink-0"
-          style={{ width: 14, height: 14 }}
+          className="text-primary size-3.5 shrink-0"
           aria-hidden="true"
         />
       )}
-    </div>
+    </button>
   );
 };

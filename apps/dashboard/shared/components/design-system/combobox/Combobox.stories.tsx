@@ -23,7 +23,7 @@ const meta: Meta<ComboboxStoryArgs> = {
       control: "text",
       description: "Placeholder text when no item is selected",
     },
-    disabled: {
+    isDisabled: {
       control: "boolean",
       description: "Disabled state",
     },
@@ -51,37 +51,31 @@ const iconItems = [
   {
     value: "uniswap",
     label: "Uniswap",
-    icon: (
-      <CrownIcon style={{ width: 14, height: 14 }} className="text-highlight" />
-    ),
+    icon: <CrownIcon className="text-highlight size-3.5" />,
   },
   {
     value: "ens",
     label: "ENS",
-    icon: (
-      <StarIcon style={{ width: 14, height: 14 }} className="text-highlight" />
-    ),
+    icon: <StarIcon className="text-highlight size-3.5" />,
   },
   {
     value: "optimism",
     label: "Optimism",
-    icon: (
-      <ZapIcon style={{ width: 14, height: 14 }} className="text-highlight" />
-    ),
+    icon: <ZapIcon className="text-highlight size-3.5" />,
   },
 ];
 
 export const Default: Story = {
   args: {
     placeholder: "Select…",
-    disabled: false,
+    isDisabled: false,
     showIcon: false,
   },
-  render: ({ placeholder, disabled, showIcon }) => (
+  render: ({ placeholder, isDisabled, showIcon }) => (
     <Combobox
       items={showIcon ? iconItems : basicItems}
       placeholder={placeholder ?? "Select…"}
-      disabled={disabled}
+      isDisabled={isDisabled}
     />
   ),
 };
@@ -112,7 +106,7 @@ export const Disabled: Story = {
   args: {
     items: basicItems,
     value: "overview",
-    disabled: true,
+    isDisabled: true,
     placeholder: "Select…",
   },
 };

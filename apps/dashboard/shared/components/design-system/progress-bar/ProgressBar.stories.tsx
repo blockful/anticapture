@@ -51,7 +51,7 @@ export const Default: Story = {
   },
   decorators: [
     (Story) => (
-      <div className="w-[270px]">
+      <div className="w-72">
         <Story />
       </div>
     ),
@@ -60,7 +60,7 @@ export const Default: Story = {
 
 export const Sizes: Story = {
   render: () => (
-    <div className="flex w-[270px] flex-col gap-6">
+    <div className="flex w-72 flex-col gap-6">
       <div className="flex flex-col gap-2">
         <span className="text-secondary text-xs">Default — 4px</span>
         <ProgressBar value={60} label="Label" size="default" />
@@ -75,7 +75,7 @@ export const Sizes: Story = {
 
 export const LabelPositions: Story = {
   render: () => (
-    <div className="flex w-[270px] flex-col gap-6">
+    <div className="flex w-72 flex-col gap-6">
       {(["top", "bottom", "left", "right"] as const).map((pos) => (
         <div key={pos} className="flex flex-col gap-1">
           <span className="text-secondary text-xs capitalize">{pos}</span>
@@ -88,7 +88,7 @@ export const LabelPositions: Story = {
 
 export const MultipleColors: Story = {
   render: () => (
-    <div className="flex w-[270px] flex-col gap-6">
+    <div className="flex w-72 flex-col gap-6">
       <div className="flex flex-col gap-1">
         <span className="text-secondary text-xs">Default size</span>
         <ProgressBar
@@ -121,7 +121,7 @@ export const MultipleColors: Story = {
 
 export const WithMarker: Story = {
   render: () => (
-    <div className="flex w-[270px] flex-col gap-10">
+    <div className="flex w-72 flex-col gap-10">
       <div className="flex flex-col gap-1">
         <span className="text-secondary text-xs">Label top + marker</span>
         <ProgressBar
@@ -165,7 +165,7 @@ export const WithMarker: Story = {
 
 export const WithMarkerAndMultipleColors: Story = {
   render: () => (
-    <div className="flex w-[270px] flex-col gap-10">
+    <div className="flex w-72 flex-col gap-10">
       <ProgressBar
         label="Label"
         labelPosition="top"

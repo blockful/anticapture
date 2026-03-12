@@ -19,9 +19,8 @@ export const Modal = ({
   title,
   description,
   children,
-  actionsNumber = "1",
   cancelLabel = "Cancel",
-  confirmLabel = "Confirm",
+  confirmLabel,
   onCancel,
   onConfirm,
   isConfirmLoading = false,
@@ -75,7 +74,6 @@ export const Modal = ({
 
           {/* Footer */}
           <ModalFooter
-            actionsNumber={actionsNumber}
             cancelLabel={cancelLabel}
             confirmLabel={confirmLabel}
             onCancel={handleCancel}

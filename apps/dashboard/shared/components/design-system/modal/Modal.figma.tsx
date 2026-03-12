@@ -15,7 +15,6 @@ figma.connect(
         open
         onOpenChange={() => undefined}
         title={title}
-        actionsNumber="2"
         cancelLabel="Cancel"
         confirmLabel="Confirm"
       >

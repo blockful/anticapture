@@ -3,6 +3,7 @@
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 
+import { IconButton } from "@/shared/components/design-system/buttons/icon-button/IconButton";
 import type { ModalHeaderProps } from "@/shared/components/design-system/modal/types";
 import { cn } from "@/shared/utils/cn";
 
@@ -42,22 +43,8 @@ export const ModalHeader = ({
       </div>
 
       {/* Close button */}
-      <DialogPrimitive.Close
-        className={cn(
-          // Layout
-          "flex shrink-0 items-center justify-center",
-          // Sizing
-          "size-7",
-          // Colors
-          "text-secondary hover:text-primary",
-          // Transitions
-          "transition-colors duration-150",
-          // Cursor
-          "cursor-pointer",
-        )}
-        aria-label="Close"
-      >
-        <X className="size-3.5" />
+      <DialogPrimitive.Close asChild>
+        <IconButton variant="ghost" size="sm" icon={X} aria-label="Close" />
       </DialogPrimitive.Close>
     </div>
   );

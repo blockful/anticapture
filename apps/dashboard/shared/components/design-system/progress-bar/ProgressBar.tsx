@@ -30,13 +30,13 @@ export const ProgressBar = ({
   const labelFirst = labelPosition === "top" || labelPosition === "left";
   const clampedValue = Math.max(0, Math.min(100, value));
 
-  const labelEl = label ? (
+  const labelNode = label ? (
     <span className="text-secondary shrink-0 whitespace-nowrap text-sm leading-5">
       {label}
     </span>
   ) : null;
 
-  const trackEl = (
+  const trackNode = (
     <div className={cn("relative", isRow ? "min-w-0 flex-1" : "w-full")}>
       {/* Track background + fill (overflow-hidden to clip fill bars) */}
       <div
@@ -98,9 +98,9 @@ export const ProgressBar = ({
         className,
       )}
     >
-      {labelFirst && labelEl}
-      {trackEl}
-      {!labelFirst && labelEl}
+      {labelFirst && labelNode}
+      {trackNode}
+      {!labelFirst && labelNode}
     </div>
   );
 };

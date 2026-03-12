@@ -5,5 +5,4 @@ export type {
   ModalProps,
   ModalHeaderProps,
   ModalFooterProps,
-  ModalActionsNumber,
 } from "@/shared/components/design-system/modal/types";

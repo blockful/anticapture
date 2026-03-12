@@ -11,9 +11,8 @@ import { cn } from "@/shared/utils/cn";
  * To display a modal dialog, use <Modal> which already includes the header and footer.
  */
 export const ModalFooter = ({
-  actionsNumber = "1",
-  cancelLabel = "Cancel",
-  confirmLabel = "Confirm",
+  cancelLabel,
+  confirmLabel,
   onCancel,
   onConfirm,
   isConfirmLoading = false,
@@ -32,11 +31,13 @@ export const ModalFooter = ({
         className,
       )}
     >
-      <Button variant="outline" size="md" onClick={onCancel}>
-        {cancelLabel}
-      </Button>
+      {cancelLabel && (
+        <Button variant="outline" size="md" onClick={onCancel}>
+          {cancelLabel}
+        </Button>
+      )}
 
-      {actionsNumber === "2" && (
+      {confirmLabel && (
         <Button
           variant="primary"
           size="md"

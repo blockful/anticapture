@@ -1,5 +1,3 @@
-export type ModalActionsNumber = "1" | "2";
-
 export type ModalHeaderProps = {
   /** Title text displayed in the header. */
   title: string;
@@ -10,19 +8,13 @@ export type ModalHeaderProps = {
 };
 
 export type ModalFooterProps = {
-  /**
-   * Number of action buttons:
-   * - "1" → Cancel only
-   * - "2" → Cancel + Confirm
-   */
-  actionsNumber?: ModalActionsNumber;
-  /** Label for the cancel button. Defaults to "Cancel". */
+  /** Label for the cancel button. When provided, the cancel button is shown. */
   cancelLabel?: string;
-  /** Label for the confirm button (only visible when actionsNumber="2"). Defaults to "Confirm". */
+  /** Label for the confirm button. When provided, the confirm button is shown. */
   confirmLabel?: string;
   /** Called when the cancel button is clicked. */
   onCancel?: () => void;
-  /** Called when the confirm button is clicked (only used when actionsNumber="2"). */
+  /** Called when the confirm button is clicked. */
   onConfirm?: () => void;
   /** Whether the confirm button is in a loading state. */
   isConfirmLoading?: boolean;
@@ -43,15 +35,9 @@ export type ModalProps = {
   description?: string;
   /** Modal body content. */
   children: React.ReactNode;
-  /**
-   * Number of footer action buttons:
-   * - "1" → Cancel only
-   * - "2" → Cancel + Confirm
-   */
-  actionsNumber?: ModalActionsNumber;
-  /** Label for the cancel button. */
+  /** Label for the cancel button. When provided, the cancel button is shown. Defaults to "Cancel". */
   cancelLabel?: string;
-  /** Label for the confirm button. */
+  /** Label for the confirm button. When provided, the confirm button is shown. */
   confirmLabel?: string;
   /** Called when the cancel button is clicked. Defaults to closing the modal. */
   onCancel?: () => void;

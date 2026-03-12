@@ -30,7 +30,7 @@ const meta: Meta<ModalHeaderProps> = {
   decorators: [
     (Story) => (
       <DialogPrimitive.Root>
-        <div className="w-[600px]">
+        <div className="w-full max-w-2xl">
           <Story />
         </div>
       </DialogPrimitive.Root>
@@ -52,13 +52,13 @@ export const AllStates: Story = {
   render: () => (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <div className="w-[600px]">
+        <div className="w-full max-w-2xl">
           <ModalHeader title="Confirm action" />
         </div>
         <span className="text-secondary text-xs">Without description</span>
       </div>
       <div className="flex flex-col gap-1">
-        <div className="w-[600px]">
+        <div className="w-full max-w-2xl">
           <ModalHeader
             title="Confirm action"
             description="This action cannot be undone. Please review your changes before proceeding."

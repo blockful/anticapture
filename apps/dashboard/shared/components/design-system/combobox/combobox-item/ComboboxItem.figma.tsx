@@ -9,10 +9,6 @@ figma.connect(
   {
     props: {
       label: figma.string("label"),
-      hasIcon: figma.enum("hasIcon", {
-        true: true,
-        false: false,
-      }),
       status: figma.enum("status", {
         Default: "default",
         Hover: "hover",
@@ -26,13 +22,8 @@ figma.connect(
         Hover: false,
       }),
     },
-    example: ({ label, hasIcon, status, isSelected }) => (
-      <ComboboxItem
-        label={label}
-        hasIcon={hasIcon}
-        status={status}
-        isSelected={isSelected}
-      />
+    example: ({ label, status, isSelected }) => (
+      <ComboboxItem label={label} status={status} isSelected={isSelected} />
     ),
   },
 );
