@@ -12,6 +12,10 @@ import {
 import { computeQuarterStatus } from "./computeQuarterStatus";
 import { extractUrlFromMarkdown } from "./extractUrlFromMarkdown";
 
+const githubHeaders: HeadersInit = process.env.GITHUB_TOKEN
+  ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` }
+  : {};
+
 export type ServiceProvidersData = Record<number, Record<string, YearData>>;
 
 const fetchQuarterReport = async (
@@ -25,7 +29,8 @@ const fetchQuarterReport = async (
 
   if (existingFiles.has(filePath)) {
     const response = await fetch(`${GITHUB_RAW_BASE}/${filePath}`, {
-      next: { revalidate: 1 },
+      headers: githubHeaders,
+      next: { revalidate: 3600 },
     });
     if (response.ok) {
       const content = (await response.text()).trim();
@@ -46,7 +51,7 @@ export const fetchServiceProvidersData = async (
 ): Promise<ServiceProvidersData> => {
   const treeResponse = await fetch(
     `${GITHUB_API_BASE}/git/trees/main?recursive=1`,
-    { next: { revalidate: 3600 } },
+    { headers: githubHeaders, next: { revalidate: 3600 } },
   );
 
   if (!treeResponse.ok) return {};

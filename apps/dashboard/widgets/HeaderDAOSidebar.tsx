@@ -128,6 +128,7 @@ export const HeaderDAOSidebar = () => {
                 label={PAGES_CONSTANTS.serviceProviders.title}
                 key={PAGES_CONSTANTS.serviceProviders.title}
                 isCollapsed={isCollapsed}
+                isNew
               />
             )}
           </div>
