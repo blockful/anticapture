@@ -27,7 +27,7 @@ export async function fanOutGet<T = unknown>(
     if (result.status === "fulfilled") {
       responses.set(result.value.dao, result.value.data);
     } else {
-      console.error(`[fan-out] Fail: `, result.reason);
+      console.error(`[fan-out] `, result.reason);
     }
   }
 
