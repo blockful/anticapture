@@ -1,5 +1,6 @@
 import type { OpenAPIHono } from "@hono/zod-openapi";
 import type { Context } from "hono";
+import { proxy as honoProxy } from "hono/proxy";
 
 /**
  * Extracts the DAO identifier and the forwarding path from the request.
@@ -62,12 +63,6 @@ export function proxy(app: OpenAPIHono, daoApis: Map<string, string>) {
     const url = new URL(resolved.path || "/", daoAPI);
     url.search = new URL(c.req.url).search;
 
-    const res = await fetch(url.toString(), {
-      method: c.req.method,
-      headers: c.req.raw.headers,
-      body: c.req.method !== "GET" ? await c.req.raw.text() : undefined,
-    });
-
-    return new Response(res.body, { status: res.status, headers: res.headers });
+    return honoProxy(url.toString(), { ...c.req });
   }
 }

@@ -1,4 +1,5 @@
 import type { OpenAPIHono } from "@hono/zod-openapi";
+import { proxy } from "hono/proxy";
 
 export function addressEnrichment(app: OpenAPIHono, upstreamUrl?: string) {
   app.all("/address-enrichment/*", async (c) => {
@@ -13,15 +14,6 @@ export function addressEnrichment(app: OpenAPIHono, upstreamUrl?: string) {
     const url = new URL(path || "/", upstreamUrl);
     url.search = new URL(c.req.url).search;
 
-    const res = await fetch(url.toString(), {
-      method: c.req.method,
-      headers: c.req.raw.headers,
-      body: c.req.method !== "GET" ? await c.req.raw.text() : undefined,
-    });
-
-    return new Response(res.body, {
-      status: res.status,
-      headers: res.headers,
-    });
+    return proxy(url.toString(), { ...c.req });
   });
 }
