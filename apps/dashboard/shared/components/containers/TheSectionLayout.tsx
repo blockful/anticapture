@@ -38,13 +38,13 @@ export const TheSectionLayout = ({
   return (
     <div
       className={cn(
-        "flex h-full w-full flex-col gap-5 border-none px-4 py-5 lg:gap-6 lg:p-5",
+        "flex h-full w-full flex-col gap-5 border-none px-4 py-5 lg:gap-2 lg:p-5",
         className,
       )}
     >
       <div
         className={cn(
-          "flex items-start justify-between gap-4",
+          "flex items-start justify-between gap-4 pb-4",
           headerAction && "flex-col lg:flex-row",
         )}
       >
