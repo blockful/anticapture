@@ -1,27 +1,29 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
-import { AlertCircle, Info, CheckCircle2, AlertTriangle } from "lucide-react";
+import { AlertCircle, AlertTriangle, Info } from "lucide-react";
 
 import { BannerAlert } from "@/shared/components/design-system/alerts/banner-alert/BannerAlert";
+import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta: Meta<typeof BannerAlert> = {
   title: "Design System/Alerts/BannerAlert",
   component: BannerAlert,
   parameters: {
     layout: "fullwidth",
-    design: {
-      type: "figma",
-      url: "https://www.figma.com/design/DEKMQifA8YOb3oxznHboSY/%F0%9F%93%81-Orbit-UI?node-id=10150-19926",
-    },
+    design: getFigmaDesignConfigByNodeId("10150-19926"),
   },
   tags: ["autodocs"],
   argTypes: {
     icon: { control: false },
-    text: { control: "text" },
-    link: { control: "object" },
-    storageKey: { control: "text" },
+    text: { control: "text", description: "Banner message text" },
+    link: { control: "object", description: "Optional link" },
+    storageKey: {
+      control: "text",
+      description: "localStorage key to persist dismissed state",
+    },
     variant: {
       control: "select",
       options: ["default", "highlight"],
+      description: "Visual variant",
     },
   },
 };
@@ -32,69 +34,53 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     icon: <Info className="size-4" />,
-    text: "This is a default banner alert message.",
-    storageKey: "default-banner",
+    text: "New governance proposal requires your vote.",
+    storageKey: "sb-default-banner",
     variant: "default",
   },
 };
 
-export const Highlight: Story = {
-  args: {
-    icon: <AlertCircle className="size-4" />,
-    text: "This is a highlighted banner alert message.",
-    storageKey: "highlight-banner",
-    variant: "highlight",
-  },
-};
-
-export const WithLink: Story = {
-  args: {
-    icon: <CheckCircle2 className="size-4" />,
-    text: "Check out our latest updates and improvements.",
-    link: {
-      url: "https://example.com",
-      text: "Learn more",
-    },
-    storageKey: "with-link-banner",
-    variant: "default",
-  },
-};
-
-export const HighlightWithLink: Story = {
-  args: {
-    icon: <AlertTriangle className="size-4" />,
-    text: "Important security update available.",
-    link: {
-      url: "https://example.com/security",
-      text: "Update now",
-    },
-    storageKey: "security-banner",
-    variant: "highlight",
-  },
-};
-
-export const LongText: Story = {
-  args: {
-    icon: <Info className="size-4" />,
-    text: "This is a longer banner alert message that demonstrates how the component handles extended text content and maintains proper layout across different screen sizes.",
-    link: {
-      url: "https://example.com/details",
-      text: "Read full details",
-    },
-    storageKey: "long-text-banner",
-    variant: "highlight",
-  },
-};
-
-export const InternalLink: Story = {
-  args: {
-    icon: <AlertCircle className="size-4" />,
-    text: "New governance proposal requires your attention.",
-    link: {
-      url: "/governance/proposals",
-      text: "View proposals",
-    },
-    storageKey: "governance-banner",
-    variant: "default",
-  },
+export const AllStates: Story = {
+  render: () => (
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-1">
+        <span className="text-secondary px-2 text-xs">Default</span>
+        <BannerAlert
+          icon={<Info className="size-4" />}
+          text="New governance proposal requires your vote."
+          storageKey="sb-states-default"
+          variant="default"
+        />
+      </div>
+      <div className="flex flex-col gap-1">
+        <span className="text-secondary px-2 text-xs">Highlight</span>
+        <BannerAlert
+          icon={<AlertCircle className="size-4" />}
+          text="Security council intervention may be required."
+          storageKey="sb-states-highlight"
+          variant="highlight"
+        />
+      </div>
+      <div className="flex flex-col gap-1">
+        <span className="text-secondary px-2 text-xs">Default + link</span>
+        <BannerAlert
+          icon={<Info className="size-4" />}
+          text="Check out the latest protocol updates."
+          link={{ url: "https://example.com", text: "Learn more" }}
+          storageKey="sb-states-default-link"
+          variant="default"
+        />
+      </div>
+      <div className="flex flex-col gap-1">
+        <span className="text-secondary px-2 text-xs">Highlight + link</span>
+        <BannerAlert
+          icon={<AlertTriangle className="size-4" />}
+          text="Important security update available."
+          link={{ url: "https://example.com/security", text: "Update now" }}
+          storageKey="sb-states-highlight-link"
+          variant="highlight"
+        />
+      </div>
+    </div>
+  ),
 };

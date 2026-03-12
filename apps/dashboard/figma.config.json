@@ -1,7 +1,11 @@
 {
   "codeConnect": {
     "include": ["**/*.{tsx,jsx}", "shared/components/**/*.{ts,tsx}"],
-    "exclude": ["src/components/icons/**"],
+    "exclude": [
+      "shared/components/icons/**",
+      "**/*.stories.tsx",
+      "**/*.test.tsx"
+    ],
     "paths": {
       "@/*": ["./*"]
     },

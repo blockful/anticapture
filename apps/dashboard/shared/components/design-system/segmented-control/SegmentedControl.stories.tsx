@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs";
 
 import { SegmentedControl } from "@/shared/components/design-system/segmented-control/SegmentedControl";
 import type { SegmentedControlProps } from "@/shared/components/design-system/segmented-control/types";
+import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 type SegmentedControlStoryArgs = SegmentedControlProps & {
   showBadges?: boolean;
@@ -12,10 +13,7 @@ const meta: Meta<SegmentedControlStoryArgs> = {
   component: SegmentedControl,
   parameters: {
     layout: "centered",
-    design: {
-      type: "figma",
-      url: "https://www.figma.com/design/DEKMQifA8YOb3oxznHboSY/%F0%9F%93%81-Orbit-UI?node-id=6492-10373",
-    },
+    design: getFigmaDesignConfigByNodeId("6492-10373"),
   },
   tags: ["autodocs"],
   argTypes: {

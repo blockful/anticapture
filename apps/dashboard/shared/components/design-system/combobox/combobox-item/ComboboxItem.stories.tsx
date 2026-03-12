@@ -3,6 +3,7 @@ import { CrownIcon } from "lucide-react";
 
 import { ComboboxItem } from "@/shared/components/design-system/combobox/combobox-item/ComboboxItem";
 import type { ComboboxItemProps } from "@/shared/components/design-system/combobox/types";
+import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 type ComboboxItemStoryArgs = ComboboxItemProps & { showIcon?: boolean };
 
@@ -11,10 +12,7 @@ const meta: Meta<ComboboxItemStoryArgs> = {
   component: ComboboxItem,
   parameters: {
     layout: "centered",
-    design: {
-      type: "figma",
-      url: "https://www.figma.com/design/DEKMQifA8YOb3oxznHboSY/%F0%9F%93%81-Orbit-UI?node-id=7459-19867",
-    },
+    design: getFigmaDesignConfigByNodeId("7459-19867"),
   },
   tags: ["autodocs"],
   argTypes: {

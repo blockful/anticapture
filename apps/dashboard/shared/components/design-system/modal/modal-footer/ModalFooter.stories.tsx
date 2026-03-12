@@ -2,16 +2,14 @@ import type { Meta, StoryObj } from "@storybook/nextjs";
 
 import { ModalFooter } from "@/shared/components/design-system/modal/modal-footer/ModalFooter";
 import type { ModalFooterProps } from "@/shared/components/design-system/modal/types";
+import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta: Meta<ModalFooterProps> = {
   title: "Design System/Modal/ModalFooter",
   component: ModalFooter,
   parameters: {
     layout: "centered",
-    design: {
-      type: "figma",
-      url: "https://www.figma.com/design/DEKMQifA8YOb3oxznHboSY/%F0%9F%93%81-Orbit-UI?node-id=14960-53541",
-    },
+    design: getFigmaDesignConfigByNodeId("14960-53541"),
   },
   tags: ["autodocs"],
   argTypes: {

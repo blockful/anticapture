@@ -8,6 +8,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { useCallback } from "react";
 
 import { Table } from "@/shared/components/design-system/table/Table";
+import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 interface ExampleData {
   id: number;
@@ -78,10 +79,7 @@ const meta: Meta<typeof ExampleDataTable> = {
   component: ExampleDataTable,
   parameters: {
     layout: "fullscreen",
-    design: {
-      type: "figma",
-      url: "https://www.figma.com/design/DEKMQifA8YOb3oxznHboSY/%F0%9F%93%81-Orbit-UI?node-id=10706-9608",
-    },
+    design: getFigmaDesignConfigByNodeId("10706-9608"),
   },
   argTypes: {
     size: {

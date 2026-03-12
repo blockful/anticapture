@@ -3,16 +3,14 @@ import { Calendar, TrendingUp, Users } from "lucide-react";
 
 import { SubSection } from "@/shared/components/design-system/section/SubSection";
 import { SubSectionsContainer } from "@/shared/components/design-system/section/SubSectionsContainer";
+import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta = {
   title: "Design System/Sections/SubSectionsContainer",
   component: SubSectionsContainer,
   parameters: {
     layout: "fullscreen",
-    design: {
-      type: "figma",
-      url: "https://www.figma.com/design/DEKMQifA8YOb3oxznHboSY/%F0%9F%93%81-Orbit-UI?node-id=10101-29339",
-    },
+    design: getFigmaDesignConfigByNodeId("10101-29339"),
   },
   tags: ["autodocs"],
   argTypes: {

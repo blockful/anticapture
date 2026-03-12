@@ -2,16 +2,14 @@ import type { Meta, StoryObj } from "@storybook/nextjs";
 
 import { PillTabGroup } from "@/shared/components/design-system/tabs/pill-tab-group/PillTabGroup";
 import type { PillTabGroupProps } from "@/shared/components/design-system/tabs/types";
+import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta: Meta<PillTabGroupProps> = {
   title: "Design System/Tabs/PillTabGroup",
   component: PillTabGroup,
   parameters: {
     layout: "centered",
-    design: {
-      type: "figma",
-      url: "https://www.figma.com/design/DEKMQifA8YOb3oxznHboSY/%F0%9F%93%81-Orbit-UI?node-id=11059-11258",
-    },
+    design: getFigmaDesignConfigByNodeId("11059-11258"),
   },
   tags: ["autodocs"],
   argTypes: {

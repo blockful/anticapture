@@ -11,16 +11,14 @@ import {
 } from "lucide-react";
 
 import { SectionTitle } from "@/shared/components/design-system/section/SectionTitle";
+import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta = {
   title: "Design System/Sections/SectionTitle",
   component: SectionTitle,
   parameters: {
     layout: "padded",
-    design: {
-      type: "figma",
-      url: "https://www.figma.com/design/DEKMQifA8YOb3oxznHboSY/%F0%9F%93%81-Orbit-UI?node-id=10101-29339",
-    },
+    design: getFigmaDesignConfigByNodeId("10101-29339"),
   },
   tags: ["autodocs"],
   argTypes: {

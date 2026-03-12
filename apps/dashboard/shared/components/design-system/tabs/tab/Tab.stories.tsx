@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs";
 
 import { Tab } from "@/shared/components/design-system/tabs/tab/Tab";
 import type { TabProps } from "@/shared/components/design-system/tabs/types";
+import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 type TabStoryArgs = TabProps & { showBadge?: boolean };
 
@@ -10,10 +11,7 @@ const meta: Meta<TabStoryArgs> = {
   component: Tab,
   parameters: {
     layout: "centered",
-    design: {
-      type: "figma",
-      url: "https://www.figma.com/design/DEKMQifA8YOb3oxznHboSY/%F0%9F%93%81-Orbit-UI?node-id=7673-37546",
-    },
+    design: getFigmaDesignConfigByNodeId("7673-37546"),
   },
   tags: ["autodocs"],
   argTypes: {
