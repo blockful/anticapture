@@ -70,8 +70,8 @@ export const HeaderDAOSidebar = () => {
               <ButtonHeaderSidebar
                 page={"governance"}
                 icon={Landmark}
-                label="Governance"
-                key="Governance"
+                label="Proposals"
+                key="Proposals"
                 isCollapsed={isCollapsed}
               />
             )}
