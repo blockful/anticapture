@@ -5,7 +5,7 @@ import type { QueryInput_VotingPowers_OrderDirection } from "@anticapture/graphq
 import type { ColumnDef } from "@tanstack/react-table";
 import { Plus } from "lucide-react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Address } from "viem";
 import { formatUnits } from "viem";
 
@@ -104,16 +104,40 @@ export function DelegationTable() {
     [data],
   );
 
+  const fetchedBalancesRef = useRef<Map<string, bigint>>(new Map());
+  const [balanceTick, setBalanceTick] = useState(0);
+
+  const unfetchedAddresses = useMemo(
+    () =>
+      delegateAddresses.filter((addr) => !fetchedBalancesRef.current.has(addr)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [delegateAddresses, balanceTick],
+  );
+
   const { data: balancesData } = useGetTokenHoldersQuery({
     variables: {
-      addresses: delegateAddresses,
-      limit: delegateAddresses.length || 1,
+      addresses: unfetchedAddresses,
+      limit: unfetchedAddresses.length || 1,
     },
     context: {
       headers: { "anticapture-dao-id": daoId, ...getAuthHeaders() },
     },
-    skip: delegateAddresses.length === 0,
+    skip: unfetchedAddresses.length === 0,
   });
+
+  useEffect(() => {
+    if (!balancesData?.accountBalances?.items) return;
+
+    balancesData.accountBalances.items.forEach((bal) => {
+      if (bal) fetchedBalancesRef.current.set(bal.address, BigInt(bal.balance));
+    });
+    unfetchedAddresses.forEach((addr) => {
+      if (!fetchedBalancesRef.current.has(addr))
+        fetchedBalancesRef.current.set(addr, 0n);
+    });
+
+    setBalanceTick((t) => t + 1);
+  }, [balancesData]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { isMobile } = useScreenSize();
 
@@ -145,20 +169,14 @@ export function DelegationTable() {
   const tableData = useMemo(() => {
     if (!data) return [];
 
-    const balances = balancesData?.accountBalances?.items
-      .filter((bal) => !!bal)
-      .reduce((acc, cur) => {
-        acc.set(cur.address, BigInt(cur.balance));
-        return acc;
-      }, new Map<string, bigint>());
-
     return data.map((delegate): DelegateTableData => {
       const combinedPowerBigInt = BigInt(delegate.votingPower || "0");
       const combinedPowerFormatted = Number(
         formatUnits(combinedPowerBigInt, decimals),
       );
 
-      const delegateBalance = balances?.get(delegate?.accountId) || 0n;
+      const delegateBalance =
+        fetchedBalancesRef.current.get(delegate?.accountId) ?? 0n;
 
       const balanceRaw = Number(formatUnits(delegateBalance, decimals));
       const delegatedPower = combinedPowerFormatted - balanceRaw;
@@ -187,7 +205,8 @@ export function DelegationTable() {
         delegators: delegate.delegationsCount,
       };
     });
-  }, [data, decimals, balancesData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, decimals, balanceTick]);
 
   const delegateColumns: ColumnDef<DelegateTableData>[] = [
     {
