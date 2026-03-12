@@ -167,7 +167,7 @@ export const VotingPowerHistoryTable = ({
         );
       },
       meta: {
-        columnClassName: "w-32",
+        columnClassName: "w-20",
       },
     },
     {
@@ -259,7 +259,7 @@ export const VotingPowerHistoryTable = ({
         );
       },
       meta: {
-        columnClassName: "w-52",
+        columnClassName: "w-24",
       },
     },
     {
@@ -322,7 +322,7 @@ export const VotingPowerHistoryTable = ({
 
         return (
           <div className="group flex items-center gap-3">
-            <div className="overflow-truncate max-w-35 flex items-center gap-2">
+            <div className="overflow-truncate flex max-w-24 items-center gap-2">
               <EnsAvatar
                 address={delegatorAddress as `0x${string}`}
                 size="sm"
@@ -351,7 +351,7 @@ export const VotingPowerHistoryTable = ({
         );
       },
       meta: {
-        columnClassName: "w-32",
+        columnClassName: "w-24",
       },
     },
     {
@@ -369,7 +369,7 @@ export const VotingPowerHistoryTable = ({
         );
       },
       meta: {
-        columnClassName: "w-16",
+        columnClassName: "w-6",
       },
     },
     {
@@ -467,7 +467,7 @@ export const VotingPowerHistoryTable = ({
         );
       },
       meta: {
-        columnClassName: "w-32",
+        columnClassName: "w-26",
       },
     },
   ];
@@ -482,6 +482,7 @@ export const VotingPowerHistoryTable = ({
             : delegationHistory
         }
         size="sm"
+        mobileTableFixed={true}
         hasMore={hasNextPage}
         isLoadingMore={loading}
         onLoadMore={fetchNextPage}

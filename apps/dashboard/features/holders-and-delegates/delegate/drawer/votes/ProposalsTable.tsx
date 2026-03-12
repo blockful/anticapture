@@ -127,7 +127,7 @@ export const ProposalsTable = ({
     {
       accessorKey: "proposalName",
       meta: {
-        columnClassName: "w-32",
+        columnClassName: "w-50",
       },
       cell: ({ row }) => {
         const proposalName = row.getValue("proposalName") as string;
@@ -180,7 +180,7 @@ export const ProposalsTable = ({
     {
       accessorKey: "finalResult",
       meta: {
-        columnClassName: "w-28",
+        columnClassName: "w-40",
       },
       cell: ({ row }) => {
         const finalResult = row.getValue("finalResult") as string;
@@ -242,7 +242,7 @@ export const ProposalsTable = ({
     {
       accessorKey: "votingPower",
       meta: {
-        columnClassName: "min-w-32",
+        columnClassName: "w-32",
       },
       cell: ({ row }) => {
         const votingPower = row.getValue("votingPower") as number | null;
