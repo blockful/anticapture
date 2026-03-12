@@ -36,7 +36,7 @@ export class COMPClient<
         address: this.address,
         functionName: "quorum",
         args: [targetBlock < 0n ? 0n : targetBlock],
-      }) as Promise<bigint>;
+      });
     });
   }
 
