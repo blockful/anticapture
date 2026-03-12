@@ -5,7 +5,7 @@ import { ReactNode } from "react";
 import { cn } from "@/shared/utils";
 
 export const defaultLinkVariants = cva(
-  "flex items-center gap-1 font-mono tracking-wider uppercase leading-none text-[13px] font-medium transition-colors duration-300",
+  "flex items-center gap-1 font-mono tracking-wider uppercase leading-none text-xs font-medium transition-colors duration-300",
   {
     variants: {
       variant: {

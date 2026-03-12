@@ -1,5 +1,8 @@
 import Image from "next/image";
 
+import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import { BulletDivider } from "@/shared/components/design-system/section";
+
 interface ProviderNameCellProps {
   name: string;
   iconUrl?: string;
@@ -41,26 +44,16 @@ export const ProviderNameCell = ({
         </span>
         <div className="flex items-center gap-1.5">
           {websiteUrl && (
-            <a
-              href={websiteUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-secondary hover:text-link font-mono text-[10px] font-normal uppercase tracking-wider transition-colors"
-            >
+            <DefaultLink openInNewTab href={websiteUrl}>
               WEBSITE
-            </a>
+            </DefaultLink>
           )}
           {proposalUrl && (
             <>
-              <span className="text-secondary text-[10px]">·</span>
-              <a
-                href={proposalUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-secondary hover:text-link font-mono text-[10px] font-normal uppercase tracking-wider transition-colors"
-              >
+              <BulletDivider />
+              <DefaultLink openInNewTab href={proposalUrl}>
                 PROPOSAL
-              </a>
+              </DefaultLink>
             </>
           )}
         </div>

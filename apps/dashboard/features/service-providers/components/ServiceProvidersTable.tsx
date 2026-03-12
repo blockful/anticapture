@@ -115,8 +115,9 @@ export const ServiceProvidersTable = ({
         header: () => (
           <div
             className={cn(
-              "flex h-full flex-col gap-0.5 px-2 pt-1",
-              isCurrentQuarter && "bg-orange-400/12",
+              "flex h-full flex-col gap-0.5 px-2 py-1",
+              isCurrentQuarter &&
+                "bg-orange-400/12 border-1 border-surface-solid-brand",
             )}
           >
             <span className="text-primary text-xs font-medium">
@@ -127,7 +128,7 @@ export const ServiceProvidersTable = ({
                 </span>
               )}
             </span>
-            <span className="text-secondary text-[10px] font-normal">
+            <span className="text-secondary text-xs font-normal">
               {meta?.dueDateLabel}
             </span>
           </div>
@@ -149,7 +150,6 @@ export const ServiceProvidersTable = ({
     <Table
       columns={columns}
       data={data}
-      onRowClick={() => {}}
       wrapperClassName="overflow-x-auto overflow-y-visible"
       withDownloadCSV={true}
       withSorting={true}
