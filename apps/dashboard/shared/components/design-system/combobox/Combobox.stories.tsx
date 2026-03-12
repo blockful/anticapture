@@ -6,7 +6,6 @@ import { useState } from "react";
 
 import { Combobox } from "@/shared/components/design-system/combobox/Combobox";
 import type { ComboboxProps } from "@/shared/components/design-system/combobox/types";
-import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 type ComboboxStoryArgs = ComboboxProps & { showIcon?: boolean };
 
@@ -15,7 +14,10 @@ const meta: Meta<ComboboxStoryArgs> = {
   component: Combobox,
   parameters: {
     layout: "centered",
-    design: getFigmaDesignConfigByNodeId("11197-22067"),
+    design: {
+      type: "figma",
+      url: "https://www.figma.com/design/DEKMQifA8YOb3oxznHboSY/%F0%9F%93%81-Orbit-UI?node-id=11197-22067",
+    },
   },
   tags: ["autodocs"],
   argTypes: {

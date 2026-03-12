@@ -13,14 +13,16 @@ import {
 } from "lucide-react";
 
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
-import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta = {
   title: "Design System/Feedback/BlankSlate",
   component: BlankSlate,
   parameters: {
     layout: "centered",
-    design: getFigmaDesignConfigByNodeId("10738-9717"),
+    design: {
+      type: "figma",
+      url: "https://www.figma.com/design/DEKMQifA8YOb3oxznHboSY/%F0%9F%93%81-Orbit-UI?node-id=10738-9717",
+    },
   },
   tags: ["autodocs"],
   argTypes: {

@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from "@storybook/nextjs";
 
 import { TabGroup } from "@/shared/components/design-system/tabs/tab-group/TabGroup";
 import type { TabGroupProps } from "@/shared/components/design-system/tabs/types";
-import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 type TabGroupStoryArgs = TabGroupProps & { showBadges?: boolean };
 
@@ -11,7 +10,10 @@ const meta: Meta<TabGroupStoryArgs> = {
   component: TabGroup,
   parameters: {
     layout: "centered",
-    design: getFigmaDesignConfigByNodeId("10748-16842"),
+    design: {
+      type: "figma",
+      url: "https://www.figma.com/design/DEKMQifA8YOb3oxznHboSY/%F0%9F%93%81-Orbit-UI?node-id=10748-16842",
+    },
   },
   tags: ["autodocs"],
   argTypes: {

@@ -1,14 +1,16 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
 
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta: Meta<typeof EnsAvatar> = {
   title: "Design System/Avatars/EnsAvatar",
   component: EnsAvatar,
   parameters: {
     layout: "centered",
-    design: getFigmaDesignConfigByNodeId("10166-18044"),
+    design: {
+      type: "figma",
+      url: "https://www.figma.com/design/DEKMQifA8YOb3oxznHboSY/%F0%9F%93%81-Orbit-UI?node-id=10166-18044",
+    },
   },
   tags: ["autodocs"],
   argTypes: {

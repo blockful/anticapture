@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from "@storybook/nextjs";
 
 import { PillTab } from "@/shared/components/design-system/tabs/pill-tab/PillTab";
 import type { PillTabProps } from "@/shared/components/design-system/tabs/types";
-import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 type PillTabStoryArgs = PillTabProps & { showCounter?: boolean };
 
@@ -11,7 +10,10 @@ const meta: Meta<PillTabStoryArgs> = {
   component: PillTab,
   parameters: {
     layout: "centered",
-    design: getFigmaDesignConfigByNodeId("10682-13924"),
+    design: {
+      type: "figma",
+      url: "https://www.figma.com/design/DEKMQifA8YOb3oxznHboSY/%F0%9F%93%81-Orbit-UI?node-id=10682-13924",
+    },
   },
   tags: ["autodocs"],
   argTypes: {

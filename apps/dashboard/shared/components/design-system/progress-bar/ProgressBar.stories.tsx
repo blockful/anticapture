@@ -2,14 +2,16 @@ import type { Meta, StoryObj } from "@storybook/nextjs";
 
 import { ProgressBar } from "@/shared/components/design-system/progress-bar/ProgressBar";
 import type { ProgressBarProps } from "@/shared/components/design-system/progress-bar/types";
-import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta: Meta<ProgressBarProps> = {
   title: "Design System/Progress Bar/ProgressBar",
   component: ProgressBar,
   parameters: {
     layout: "centered",
-    design: getFigmaDesignConfigByNodeId("21932-7368"),
+    design: {
+      type: "figma",
+      url: "https://www.figma.com/design/DEKMQifA8YOb3oxznHboSY/%F0%9F%93%81-Orbit-UI?node-id=21932-7368",
+    },
   },
   tags: ["autodocs"],
   argTypes: {

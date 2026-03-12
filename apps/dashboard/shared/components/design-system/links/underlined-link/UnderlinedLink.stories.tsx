@@ -2,14 +2,16 @@ import type { Meta, StoryObj } from "@storybook/nextjs";
 import { ExternalLinkIcon, Key } from "lucide-react";
 
 import { UnderlinedLink } from "@/shared/components/design-system/links/underlined-link/UnderlinedLink";
-import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta: Meta<typeof UnderlinedLink> = {
   title: "Design System/Links/UnderlinedLink",
   component: UnderlinedLink,
   parameters: {
     layout: "centered",
-    design: getFigmaDesignConfigByNodeId("10339-16196"),
+    design: {
+      type: "figma",
+      url: "https://www.figma.com/design/DEKMQifA8YOb3oxznHboSY/%F0%9F%93%81-Orbit-UI?node-id=10339-16196",
+    },
   },
   tags: ["autodocs"],
   argTypes: {

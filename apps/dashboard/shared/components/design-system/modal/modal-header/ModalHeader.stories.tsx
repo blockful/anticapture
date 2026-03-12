@@ -3,14 +3,16 @@ import type { Meta, StoryObj } from "@storybook/nextjs";
 
 import { ModalHeader } from "@/shared/components/design-system/modal/modal-header/ModalHeader";
 import type { ModalHeaderProps } from "@/shared/components/design-system/modal/types";
-import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta: Meta<ModalHeaderProps> = {
   title: "Design System/Modal/ModalHeader",
   component: ModalHeader,
   parameters: {
     layout: "centered",
-    design: getFigmaDesignConfigByNodeId("14960-53381"),
+    design: {
+      type: "figma",
+      url: "https://www.figma.com/design/DEKMQifA8YOb3oxznHboSY/%F0%9F%93%81-Orbit-UI?node-id=14960-53381",
+    },
   },
   tags: ["autodocs"],
   argTypes: {

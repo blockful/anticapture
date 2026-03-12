@@ -6,14 +6,16 @@ import { useState } from "react";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { Modal } from "@/shared/components/design-system/modal/Modal";
 import type { ModalProps } from "@/shared/components/design-system/modal/types";
-import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta: Meta<ModalProps> = {
   title: "Design System/Modal/Modal",
   component: Modal,
   parameters: {
     layout: "centered",
-    design: getFigmaDesignConfigByNodeId("14968-53733"),
+    design: {
+      type: "figma",
+      url: "https://www.figma.com/design/DEKMQifA8YOb3oxznHboSY/%F0%9F%93%81-Orbit-UI?node-id=14968-53733",
+    },
   },
   tags: ["autodocs"],
   argTypes: {
