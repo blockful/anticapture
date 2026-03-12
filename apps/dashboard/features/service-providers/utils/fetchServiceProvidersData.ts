@@ -1,6 +1,7 @@
 import {
   GITHUB_API_BASE,
   GITHUB_RAW_BASE,
+  QUARTER_DUE_DATES,
   QUARTERS,
 } from "@/features/service-providers/constants/ens-service-providers";
 import {
@@ -8,9 +9,8 @@ import {
   type QuarterReport,
   type YearData,
 } from "@/features/service-providers/types";
-
-import { computeQuarterStatus } from "./computeQuarterStatus";
-import { extractUrlFromMarkdown } from "./extractUrlFromMarkdown";
+import { computeQuarterStatus } from "@/features/service-providers/utils/computeQuarterStatus";
+import { extractUrlFromMarkdown } from "@/features/service-providers/utils/extractUrlFromMarkdown";
 
 const githubHeaders: HeadersInit = process.env.GITHUB_TOKEN
   ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` }
@@ -59,9 +59,7 @@ export const fetchServiceProvidersData = async (
   const { tree }: { tree: { path: string; type: string }[] } =
     await treeResponse.json();
 
-  const years = tree
-    .filter((item) => item.type === "tree" && /^\d{4}$/.test(item.path))
-    .map((item) => Number(item.path));
+  const years = Object.keys(QUARTER_DUE_DATES).map(Number);
 
   const existingFiles = new Set(
     tree
