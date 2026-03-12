@@ -9,12 +9,11 @@
 
 import dotenv from "dotenv";
 import { eq } from "drizzle-orm";
-import { type Address } from "viem";
 
 import { AnticaptureClient } from "@/clients/anticapture";
 import { ArkhamClient } from "@/clients/arkham";
 import { initDb, getDb, addressEnrichment } from "@/db";
-import { isContract, createRpcClient } from "@/utils/address-type";
+import { createRpcClient } from "@/utils/address-type";
 import { DaoIdEnum } from "@/utils/types";
 
 dotenv.config();
@@ -85,8 +84,8 @@ interface EnrichResult {
 
 async function enrichAddress(
   address: string,
-  arkhamClient: ArkhamClient,
-  rpcClient: ReturnType<typeof createRpcClient>,
+  _arkhamClient: ArkhamClient,
+  _rpcClient: ReturnType<typeof createRpcClient>,
   db: ReturnType<typeof getDb>,
 ): Promise<EnrichResult> {
   const normalizedAddress =
@@ -112,41 +111,41 @@ async function enrichAddress(
   }
 
   // Fetch from Arkham first
-  const arkhamData =
-    await arkhamClient.getAddressIntelligence(normalizedAddress);
+  // const arkhamData =
+  // await arkhamClient.getAddressIntelligence(normalizedAddress);
 
   // Use Arkham's contract info if available, otherwise fall back to RPC
-  let isContractAddress: boolean;
-  if (arkhamData?.isContract !== null && arkhamData?.isContract !== undefined) {
-    isContractAddress = arkhamData.isContract;
-  } else {
-    isContractAddress = await isContract(
-      rpcClient,
-      normalizedAddress as Address,
-    );
-  }
+  // let isContractAddress: boolean;
+  // if (arkhamData?.isContract !== null && arkhamData?.isContract !== undefined) {
+  //   isContractAddress = arkhamData.isContract;
+  // } else {
+  //   isContractAddress = await isContract(
+  //     rpcClient,
+  //     normalizedAddress as Address,
+  //   );
+  // }
 
   // Store in database
   await db
     .insert(addressEnrichment)
     .values({
       address: normalizedAddress,
-      isContract: isContractAddress,
-      arkhamEntity: arkhamData?.entity ?? null,
-      arkhamEntityType: arkhamData?.entityType ?? null,
-      arkhamLabel: arkhamData?.label ?? null,
-      arkhamTwitter: arkhamData?.twitter ?? null,
+      isContract: false,
+      arkhamEntity: null,
+      arkhamEntityType: null,
+      arkhamLabel: null,
+      arkhamTwitter: null,
     })
     .onConflictDoNothing();
 
   return {
     address: normalizedAddress,
     isNew: true,
-    entity: arkhamData?.entity ?? null,
-    entityType: arkhamData?.entityType ?? null,
-    label: arkhamData?.label ?? null,
-    twitter: arkhamData?.twitter ?? null,
-    isContract: isContractAddress,
+    entity: null,
+    entityType: null,
+    label: null,
+    twitter: null,
+    isContract: false,
   };
 }
 
