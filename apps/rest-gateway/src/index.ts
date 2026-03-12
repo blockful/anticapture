@@ -32,8 +32,7 @@ const daosService = new DaosService(config.daoApis);
 const delegationService = new DelegationService(config.daoApis);
 
 console.log(
-  `Discovered ${config.daoApis.size} DAO APIs:`,
-  Array.from(config.daoApis.keys()),
+  `Discovered ${config.daoApis.size} DAO APIs: [${Array.from(config.daoApis.keys()).join(", ")}]`,
 );
 
 // OpenAPI routes
