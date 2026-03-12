@@ -1,10 +1,17 @@
 import { getMesh } from "@graphql-mesh/runtime";
 import { createMeshHTTPHandler } from "@graphql-mesh/http";
 import { createServer } from "node:http";
-
-import config from "../meshrc";
 import { writeFileSync } from "node:fs";
 import { printSchema } from "graphql";
+import {
+  PROMETHEUS_MIME_TYPE,
+  PrometheusSerializer,
+} from "@anticapture/observability";
+
+const prometheusSerializer = new PrometheusSerializer();
+
+import config from "../meshrc";
+import { exporter } from "./instrumentation";
 import { validateAuthToken } from "./auth";
 
 const bootstrap = async () => {
@@ -17,10 +24,25 @@ const bootstrap = async () => {
     getBuiltMesh: () => Promise.resolve(mesh),
   });
 
-  const server = createServer((req, res) => {
+  const server = createServer(async (req, res) => {
+    if (req.url === "/metrics") {
+      try {
+        const result = await exporter.collect();
+        const serialized = prometheusSerializer.serialize(
+          result.resourceMetrics,
+        );
+        res.writeHead(200, { "Content-Type": PROMETHEUS_MIME_TYPE });
+        res.end(serialized);
+      } catch (err) {
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Failed to collect metrics" }));
+      }
+      return;
+    }
     if (!validateAuthToken(req, res)) return;
     handler(req, res);
   });
+
   const port = process.env.PORT || 4000;
   server.listen(port, () => {
     console.log(`🚀 Mesh running at http://localhost:${port}/graphql`);

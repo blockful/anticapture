@@ -1,5 +1,3 @@
-version: "3"
-
 volumes:
   prometheus_data:
   grafana_data:
@@ -8,7 +6,7 @@ services:
   prometheus:
     image: prom/prometheus
     ports:
-      - 9090:9090
+      - "9090:9090"
     volumes:
       - ./prometheus/:/etc/prometheus/
       - prometheus_data:/prometheus
@@ -16,18 +14,15 @@ services:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/prometheus
     extra_hosts:
-      # https://stackoverflow.com/a/43541732/5204678
       - "host.docker.internal:host-gateway"
 
   grafana:
     image: grafana/grafana
     ports:
-      - 3000:3000
+      - "3000:3000"
     environment:
       PROMETHEUS_URL: http://prometheus:9090
-    # 1. Copy dashboards from temp directory to prevent modifying original host files
-    # 2. Replace Prometheus datasource placeholder with the actual name
-    # 3. Run Grafana
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
     entrypoint: >
       sh -c "cp -r /etc/grafana/provisioning_temp/dashboards/. /etc/grafana/provisioning/dashboards &&
              find /etc/grafana/provisioning/dashboards/ -name '*.json' -exec sed -i 's/$${DS_PROMETHEUS}/Prometheus/g' {} \+ &&

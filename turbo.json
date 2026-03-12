@@ -3,6 +3,7 @@
   "globalEnv": [".env"],
   "tasks": {
     "build": {
+      "dependsOn": ["^build"],
       "outputs": ["dist/**", ".next/**", ".next/cache/**"],
       "env": ["RESEND_API_KEY", "RESEND_FROM_EMAIL", "CONTACT_EMAIL"]
     },
