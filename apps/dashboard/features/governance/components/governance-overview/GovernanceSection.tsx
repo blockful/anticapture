@@ -59,7 +59,7 @@ export const GovernanceSection = () => {
     return (
       <div className="bg-background flex min-h-screen flex-col">
         <TheSectionLayout
-          title="Governance"
+          title="Proposals"
           icon={<Building2 className="section-layout-icon" />}
           description="View and vote on executable proposals from this DAO."
         >
@@ -77,23 +77,27 @@ export const GovernanceSection = () => {
   return (
     <div className="bg-background flex min-h-screen flex-col">
       <TheSectionLayout
-        title="Governance"
+        title="Proposals"
         icon={<Landmark className="section-layout-icon" />}
         description="View and vote on executable proposals from this DAO."
         className="lg:bg-transparent"
       >
         <div className="flex-1">
-          {loading && proposals.length === 0 ? (
+          {loading && proposals.length === 0 && (
             <div className="flex flex-col gap-2">
               {Array.from({ length: 10 }).map((_, index) => (
                 <ProposalItemSkeleton key={index} />
               ))}
             </div>
-          ) : proposals.length === 0 ? (
+          )}
+
+          {!loading && proposals.length === 0 && (
             <div className="flex flex-col items-center justify-center py-12">
               <p className="text-muted-foreground mb-4">No proposals found</p>
             </div>
-          ) : (
+          )}
+
+          {proposals.length > 0 && (
             <>
               <div className="flex flex-col gap-2 space-y-0">
                 {proposals.map((proposal) => (
