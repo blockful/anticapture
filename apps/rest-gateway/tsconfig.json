@@ -12,7 +12,7 @@
     "moduleResolution": "node16",
     "outDir": "./dist",
     "noImplicitAny": false,
-    "types": ["vitest/globals"]
+    "types": ["node", "vitest/globals"]
   },
   "exclude": ["node_modules", "dist"]
 }
