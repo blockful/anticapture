@@ -312,4 +312,5 @@ export const UNI: DaoConfiguration = {
   tokenDistribution: true,
   resilienceStages: true,
   dataTables: true,
+  governancePage: true,
 };
