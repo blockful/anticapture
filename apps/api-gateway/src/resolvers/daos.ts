@@ -5,9 +5,6 @@
  */
 export const daosResolver = {
   resolve: async (root, _args, context) => {
-    console.log({
-      root, _args, context
-    })
     // Extract REST clients from context
     const restClients = Object.keys(context)
       .filter((key) => key.startsWith('rest_'))
@@ -34,6 +31,14 @@ export const daosResolver = {
               votingDelay
               votingPeriod
               timelockDelay
+              activeSupply
+              averageTurnout {
+                oldAverageTurnout
+                currentAverageTurnout
+                changeRate
+              }
+              quorumGap
+              lastPrice
             }
           `,
         })
@@ -50,8 +55,6 @@ export const daosResolver = {
         result.status === 'fulfilled' && result.value.response
       )
       .map(result => result.value.response);
-
-    console.log({ items, results: results[0]?.['value'] })
 
     return {
       items,
