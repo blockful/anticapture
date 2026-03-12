@@ -93,7 +93,7 @@ function AavePageContent() {
               />
             </div>
             {activeTab === "delegates" ? (
-              <DelegationTable />
+              <DelegationTable days={days || defaultDays} />
             ) : (
               <TokenHolders
                 days={days || defaultDays}

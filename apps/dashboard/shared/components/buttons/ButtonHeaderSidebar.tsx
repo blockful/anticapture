@@ -34,8 +34,9 @@ export const ButtonHeaderSidebar = ({
   const params = useParams();
   const pathname = usePathname();
 
-  const daoId = params?.daoId as string;
-  const currentPage = pathname?.split("/").filter(Boolean).pop();
+  const routeParams = pathname?.split("/");
+  const currentPage = routeParams.filter(Boolean).pop();
+  const daoId = (params?.daoId as string) ?? routeParams[1];
 
   // Determine if this button should be highlighted as active
   const isActive = (() => {

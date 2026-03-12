@@ -27,7 +27,7 @@ export const EmptyState = ({
       <span className="text-primary font-mono text-xs font-medium uppercase leading-none tracking-wider">
         {title}
       </span>
-      <span className="text-secondary text-sm leading-none">{description}</span>
+      <span className="text-secondary text-sm leading-6">{description}</span>
     </div>
   );
 };

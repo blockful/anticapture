@@ -236,7 +236,7 @@ export class AAVEVotingPowerRepository {
         variationSubquery,
         eq(accountPower.accountId, variationSubquery.accountId),
       )
-      .where(this.filterToSql(addresses, amountFilter))
+      .where(this.filterToSql(addresses, amountFilter, combinedPowerSql))
       .orderBy(orderSql)
       .offset(skip)
       .limit(limit);
@@ -246,7 +246,11 @@ export class AAVEVotingPowerRepository {
         count: sql<number>`COUNT(*)`.as("count"),
       })
       .from(accountPower)
-      .where(this.filterToSql(addresses, amountFilter));
+      .leftJoin(
+        balanceSubquery,
+        eq(accountPower.accountId, balanceSubquery.accountId),
+      )
+      .where(this.filterToSql(addresses, amountFilter, combinedPowerSql));
 
     return {
       items: items.map((row) => ({
@@ -351,22 +355,36 @@ export class AAVEVotingPowerRepository {
   }
   private filterToSql(
     addresses: Address[],
-    amountfilter: AmountFilter,
+    amountFilter: AmountFilter,
+    totalVotingPowerSql?: SQL,
   ): SQL | undefined {
     const conditions = [];
 
     if (addresses.length) {
       conditions.push(inArray(accountPower.accountId, addresses));
     }
-    if (amountfilter.minAmount) {
-      conditions.push(
-        gt(accountPower.votingPower, BigInt(amountfilter.minAmount)),
-      );
-    }
-    if (amountfilter.maxAmount) {
-      conditions.push(
-        lt(accountPower.votingPower, BigInt(amountfilter.maxAmount)),
-      );
+    if (totalVotingPowerSql) {
+      if (amountFilter.minAmount) {
+        conditions.push(
+          sql`${totalVotingPowerSql} > ${BigInt(amountFilter.minAmount)}`,
+        );
+      }
+      if (amountFilter.maxAmount) {
+        conditions.push(
+          sql`${totalVotingPowerSql} < ${BigInt(amountFilter.maxAmount)}`,
+        );
+      }
+    } else {
+      if (amountFilter.minAmount) {
+        conditions.push(
+          gt(accountPower.votingPower, BigInt(amountFilter.minAmount)),
+        );
+      }
+      if (amountFilter.maxAmount) {
+        conditions.push(
+          lt(accountPower.votingPower, BigInt(amountFilter.maxAmount)),
+        );
+      }
     }
 
     return conditions.length ? and(...conditions) : sql`true`;

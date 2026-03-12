@@ -27,7 +27,7 @@ import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
 import { useScreenSize } from "@/shared/hooks/useScreenSize";
 import { DaoIdEnum } from "@/shared/types/daos";
-import { TimeInterval } from "@/shared/types/enums";
+import type { TimeInterval } from "@/shared/types/enums";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 import { getAuthHeaders } from "@/shared/utils/server-utils";
 
@@ -43,7 +43,7 @@ interface DelegateTableData {
   delegators: number;
 }
 
-export function DelegationTable() {
+export function DelegationTable({ days }: { days: TimeInterval }) {
   const pageLimit: number = 20;
 
   const [drawerAddress, setDrawerAddress] = useQueryState("drawerAddress");
@@ -93,7 +93,7 @@ export function DelegationTable() {
       orderBy: orderByMap[sortBy as DelegateSortKey],
       orderDirection: sortOrder as QueryInput_VotingPowers_OrderDirection,
       daoId,
-      days: TimeInterval.THIRTY_DAYS,
+      days,
       address: currentAddressFilter || undefined,
       limit: pageLimit,
       skipActivity: true,
@@ -185,9 +185,9 @@ export function DelegationTable() {
       return {
         address: delegate.accountId,
         votingPower:
-          delegatedPower > 0 ? formatNumberUserReadable(delegatedPower) : "-",
+          delegatedPower > 0 ? formatNumberUserReadable(delegatedPower) : "0",
         balance:
-          Number(balanceRaw) > 0 ? formatNumberUserReadable(balanceRaw) : "-",
+          Number(balanceRaw) > 0 ? formatNumberUserReadable(balanceRaw) : "0",
         total: formatNumberUserReadable(combinedPowerFormatted),
         variation: {
           percentageChange:

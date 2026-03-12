@@ -96,7 +96,7 @@ export const PanelTable = () => {
       accessorKey: "stage",
       cell: ({ row }) => <StageCell daoId={row.getValue("dao") as DaoIdEnum} />,
       header: () => (
-        <div className="w-full justify-end px-0 text-left lg:px-4">
+        <div className="w-full justify-end px-0 text-left">
           <Tooltip
             tooltipContent={
               <div className="text-center">
@@ -237,32 +237,32 @@ export const PanelTable = () => {
         value={activeTab}
         onValueChange={(v) => setActiveTab(v as TabValue)}
       >
-        <TabsList className="mb-4 flex border-b border-b-white/10">
+        <TabsList className="mb-4 flex border-b border-b-white/10 text-sm">
           <TabsTrigger
             value={TABS.FULLY_ANALYZED}
             className={cn(
-              "text-secondary relative flex cursor-pointer items-center gap-2 whitespace-nowrap px-2 py-2 text-xs font-medium",
+              "text-secondary relative flex cursor-pointer items-center gap-2 whitespace-nowrap px-2 py-2 font-medium",
               "data-[state=active]:text-link",
               "after:absolute after:-bottom-px after:left-0 after:right-0 after:h-px after:bg-transparent after:content-['']",
               "data-[state=active]:after:bg-surface-solid-brand",
             )}
           >
             Fully Analyzed
-            <span className="bg-surface-contrast text-secondary rounded-full px-1.5 py-0.5 text-xs">
+            <span className="bg-surface-contrast text-secondary w-6 rounded-md px-1.5 py-0.5">
               {fullyAnalyzedDaos.length}
             </span>
           </TabsTrigger>
           <TabsTrigger
             value={TABS.NOT_REVIEWED}
             className={cn(
-              "text-secondary relative flex cursor-pointer items-center gap-2 whitespace-nowrap px-2 py-2 text-xs font-medium",
+              "text-secondary relative flex cursor-pointer items-center gap-2 whitespace-nowrap px-2 py-2 font-medium",
               "data-[state=active]:text-link",
               "after:absolute after:-bottom-px after:left-0 after:right-0 after:h-px after:bg-transparent after:content-['']",
               "data-[state=active]:after:bg-surface-solid-brand",
             )}
           >
             Not Reviewed
-            <span className="bg-surface-contrast text-secondary rounded-full px-1.5 py-0.5 text-xs">
+            <span className="bg-surface-contrast text-secondary w-6 rounded-md px-1.5 py-0.5">
               {notReviewedDaos.length}
             </span>
           </TabsTrigger>

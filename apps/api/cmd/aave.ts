@@ -16,6 +16,7 @@ import {
   delegations,
   delegators,
   historicalDelegations,
+  token,
 } from "@/controllers";
 import * as schema from "@/database/schema";
 import { docs } from "@/docs";
@@ -31,6 +32,7 @@ import {
   HistoricalDelegationsRepository,
   AccountBalanceQueryFragments,
   AAVEAccountBalanceRepository,
+  TokenRepository,
 } from "@/repositories";
 import { AAVEVotingPowerRepository } from "@/repositories/voting-power/aave";
 import {
@@ -41,6 +43,8 @@ import {
   HistoricalDelegationsService,
   DelegationsService,
   DelegatorsService,
+  CoingeckoService,
+  TokenService,
 } from "@/services";
 import { AAVEVotingPowerService } from "@/services/voting-power/aave";
 
@@ -99,6 +103,17 @@ historicalDelegations(
   new HistoricalDelegationsService(
     new HistoricalDelegationsRepository(pgClient),
   ),
+);
+
+token(
+  app,
+  new CoingeckoService(
+    env.COINGECKO_API_URL,
+    env.COINGECKO_API_KEY,
+    env.DAO_ID,
+  ),
+  new TokenService(new TokenRepository(pgClient)),
+  env.DAO_ID,
 );
 delegations(app, new DelegationsService(new DelegationsRepository(pgClient)));
 delegators(app, new DelegatorsService(new DelegatorsRepository(pgClient)));

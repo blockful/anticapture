@@ -2,7 +2,7 @@ import { mainnet } from "viem/chains";
 
 import { AaveIcon } from "@/shared/components/icons/AaveIcon";
 import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
-import { DaoConfiguration } from "@/shared/dao-config/types";
+import type { DaoConfiguration } from "@/shared/dao-config/types";
 import { UniswapOgIcon } from "@/shared/og/dao-og-icons";
 
 export const AAVE: DaoConfiguration = {

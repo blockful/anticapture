@@ -30,7 +30,7 @@ export class AAVEClient<
   }
 
   getDaoId(): string {
-    return "ZK";
+    return "AAVE";
   }
 
   async getQuorum(): Promise<bigint> {

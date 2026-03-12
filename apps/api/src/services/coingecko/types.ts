@@ -26,6 +26,7 @@ export const CoingeckoTokenIdEnum: Record<DaoIdEnum, string> = {
 } as const;
 
 export const CoingeckoIdToAssetPlatformId = {
+  [CoingeckoTokenIdEnum.AAVE]: AssetPlatformEnum.ETHEREUM,
   [CoingeckoTokenIdEnum.UNI]: AssetPlatformEnum.ETHEREUM,
   [CoingeckoTokenIdEnum.ENS]: AssetPlatformEnum.ETHEREUM,
   [CoingeckoTokenIdEnum.ARB]: AssetPlatformEnum.ARBITRUM,
