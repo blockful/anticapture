@@ -69,15 +69,23 @@ export const TopInteractionsTable = ({
     daoOverview: { token },
   } = daoConfig[daoId as DaoIdEnum];
 
-  const { interactions, loading, error, totalTransfers } =
-    useAccountInteractionsData({
-      daoId: daoId as DaoIdEnum,
-      address: address,
-      filterAddress: currentAddressFilter ?? undefined,
-      sortBy,
-      sortDirection,
-      filterVariables,
-    });
+  const {
+    interactions,
+    loading,
+    error,
+    totalTransfers,
+    fetchNextPage,
+    fetchingMore,
+    hasNextPage,
+  } = useAccountInteractionsData({
+    daoId: daoId as DaoIdEnum,
+    address: address,
+    filterAddress: currentAddressFilter ?? undefined,
+    sortBy,
+    sortDirection,
+    filterVariables,
+    limit: 10,
+  });
 
   useEffect(() => {
     setIsMounted(true);
@@ -381,6 +389,9 @@ export const TopInteractionsTable = ({
         withDownloadCSV={true}
         csvFilename="top-interactions.csv"
         error={error}
+        hasMore={hasNextPage}
+        isLoadingMore={fetchingMore}
+        onLoadMore={fetchNextPage}
         fillHeight
       />
     </div>

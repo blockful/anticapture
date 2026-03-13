@@ -115,9 +115,6 @@ export const VoteCompositionTable = ({
           </div>
         );
       },
-      meta: {
-        columnClassName: "w-72",
-      },
     },
     {
       accessorKey: "amount",
@@ -169,9 +166,6 @@ export const VoteCompositionTable = ({
             {formatNumberUserReadable(amount)}
           </div>
         );
-      },
-      meta: {
-        columnClassName: "w-72",
       },
     },
     {
@@ -226,9 +220,6 @@ export const VoteCompositionTable = ({
             {timestamp ? <DateCell timestampSeconds={timestamp} /> : "N/A"}
           </div>
         );
-      },
-      meta: {
-        columnClassName: "w-72",
       },
     },
   ];

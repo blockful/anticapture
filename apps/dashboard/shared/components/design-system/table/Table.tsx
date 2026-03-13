@@ -188,9 +188,9 @@ export const Table = <TData, TValue>({
         fillHeight && "h-full",
         wrapperClassName,
       )}
-      ref={wrapperRef}
     >
       <TableContainer
+        ref={wrapperRef}
         className={cn(
           "text-secondary lg:bg-surface-default bg-transparent",
           fillHeight && "flex h-full flex-col",
