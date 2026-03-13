@@ -8,7 +8,7 @@ const meta: Meta<typeof EnsAvatar> = {
   component: EnsAvatar,
   parameters: {
     layout: "centered",
-    design: getFigmaDesignConfigByNodeId("10166-18044"),
+    design: getFigmaDesignConfigByNodeId("8133-68025"),
   },
   tags: ["autodocs"],
   argTypes: {
