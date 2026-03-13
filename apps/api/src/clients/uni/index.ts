@@ -65,6 +65,10 @@ export class UNIClient<
     return this.cache.timelockDelay;
   }
 
+  alreadySupportCalldataReview(): boolean {
+    return true;
+  }
+
   calculateQuorum(votes: {
     forVotes: bigint;
     againstVotes: bigint;
