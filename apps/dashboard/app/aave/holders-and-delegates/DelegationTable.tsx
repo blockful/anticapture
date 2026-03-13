@@ -142,7 +142,9 @@ export function DelegationTable({ days }: { days: TimeInterval }) {
         votingPower:
           delegatedPower > 0 ? formatNumberUserReadable(delegatedPower) : "0",
         balance:
-          Number(balanceRaw) > 0 ? formatNumberUserReadable(balanceRaw) : "0",
+          Number(balanceRaw) > 0
+            ? formatNumberUserReadable(balanceRaw, 1)
+            : "0",
         total: formatNumberUserReadable(combinedPowerFormatted),
         variation: {
           percentageChange:

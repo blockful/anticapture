@@ -165,6 +165,16 @@ export class AAVEVotingPowerRepository {
       .groupBy(accountBalance.accountId)
       .as("balance");
 
+    const allAccountIds = this.db
+      .selectDistinct({ accountId: accountPower.accountId })
+      .from(accountPower)
+      .union(
+        this.db
+          .selectDistinct({ accountId: accountBalance.accountId })
+          .from(accountBalance),
+      )
+      .as("all_accounts");
+
     const variationSubquery = this.db
       .select({
         accountId: votingPowerHistory.accountId,
@@ -186,7 +196,7 @@ export class AAVEVotingPowerRepository {
       .groupBy(votingPowerHistory.accountId)
       .as("variation");
 
-    const combinedPowerSql = sql<bigint>`(${accountPower.votingPower} + COALESCE(${balanceSubquery.totalBalance}, 0))`;
+    const combinedPowerSql = sql<bigint>`(COALESCE(${accountPower.votingPower}, 0) + COALESCE(${balanceSubquery.totalBalance}, 0))`;
     const absoluteChangeSql = sql<bigint>`COALESCE(${variationSubquery.absoluteChange}, 0)`;
     const percentageChangeSql = sql<string>`
     CASE
@@ -208,15 +218,15 @@ export class AAVEVotingPowerRepository {
           : orderBy === "total"
             ? combinedPowerSql
             : orderBy === "votingPower"
-              ? accountPower.votingPower
+              ? sql`COALESCE(${accountPower.votingPower}, 0)`
               : orderBy === "balance"
                 ? sql`COALESCE(${balanceSubquery.totalBalance}, 0)`
-                : accountPower.delegationsCount,
+                : sql`COALESCE(${accountPower.delegationsCount}, 0)`,
     );
 
     const items = await this.db
       .select({
-        accountId: accountPower.accountId,
+        accountId: allAccountIds.accountId,
         daoId: accountPower.daoId,
         votingPower: combinedPowerSql,
         votesCount: accountPower.votesCount,
@@ -227,16 +237,27 @@ export class AAVEVotingPowerRepository {
         percentageChange: percentageChangeSql,
         balance: balanceSubquery.totalBalance,
       })
-      .from(accountPower)
+      .from(allAccountIds)
+      .leftJoin(
+        accountPower,
+        eq(allAccountIds.accountId, accountPower.accountId),
+      )
       .leftJoin(
         balanceSubquery,
-        eq(accountPower.accountId, balanceSubquery.accountId),
+        eq(allAccountIds.accountId, balanceSubquery.accountId),
       )
       .leftJoin(
         variationSubquery,
-        eq(accountPower.accountId, variationSubquery.accountId),
+        eq(allAccountIds.accountId, variationSubquery.accountId),
       )
-      .where(this.filterToSql(addresses, amountFilter, combinedPowerSql))
+      .where(
+        this.filterToSql(
+          addresses,
+          amountFilter,
+          combinedPowerSql,
+          sql`${allAccountIds.accountId}`,
+        ),
+      )
       .orderBy(orderSql)
       .offset(skip)
       .limit(limit);
@@ -245,16 +266,32 @@ export class AAVEVotingPowerRepository {
       .select({
         count: sql<number>`COUNT(*)`.as("count"),
       })
-      .from(accountPower)
+      .from(allAccountIds)
+      .leftJoin(
+        accountPower,
+        eq(allAccountIds.accountId, accountPower.accountId),
+      )
       .leftJoin(
         balanceSubquery,
-        eq(accountPower.accountId, balanceSubquery.accountId),
+        eq(allAccountIds.accountId, balanceSubquery.accountId),
       )
-      .where(this.filterToSql(addresses, amountFilter, combinedPowerSql));
+      .where(
+        this.filterToSql(
+          addresses,
+          amountFilter,
+          combinedPowerSql,
+          sql`${allAccountIds.accountId}`,
+        ),
+      );
 
     return {
       items: items.map((row) => ({
         ...row,
+        daoId: row.daoId ?? "",
+        votesCount: row.votesCount ?? 0,
+        proposalsCount: row.proposalsCount ?? 0,
+        delegationsCount: row.delegationsCount ?? 0,
+        lastVoteTimestamp: row.lastVoteTimestamp ?? 0n,
         balance: row.balance || undefined,
         absoluteChange: row.absoluteChange,
         percentageChange: row.percentageChange,
@@ -358,11 +395,14 @@ export class AAVEVotingPowerRepository {
     addresses: Address[],
     amountFilter: AmountFilter,
     totalVotingPowerSql?: SQL,
+    accountIdSql?: SQL,
   ): SQL | undefined {
     const conditions = [];
 
     if (addresses.length) {
-      conditions.push(inArray(accountPower.accountId, addresses));
+      conditions.push(
+        inArray(accountIdSql ?? sql`${accountPower.accountId}`, addresses),
+      );
     }
     if (totalVotingPowerSql) {
       if (amountFilter.minAmount) {
