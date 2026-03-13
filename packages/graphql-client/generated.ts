@@ -1917,6 +1917,15 @@ export type VotingPowers_200_Response = {
   totalCount: Scalars['Float']['output'];
 };
 
+export type AccountBalanceByAddressQueryVariables = Exact<{
+  address: Scalars['String']['input'];
+  fromDate?: InputMaybe<Scalars['String']['input']>;
+  toDate?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type AccountBalanceByAddressQuery = { __typename?: 'Query', accountBalanceByAccountId?: { __typename?: 'accountBalanceByAccountId_200_response', data: { __typename?: 'query_accountBalanceByAccountId_data', address: string, balance: string, delegate: string, tokenId: string, variation: { __typename?: 'query_accountBalanceByAccountId_data_variation', absoluteChange: string, percentageChange: string, previousBalance: string } }, period: { __typename?: 'query_accountBalanceByAccountId_period', endTimestamp: string, startTimestamp: string } } | null };
+
 export type BalanceHistoryQueryVariables = Exact<{
   address: Scalars['String']['input'];
   offset?: InputMaybe<Scalars['Float']['input']>;
@@ -2241,6 +2250,69 @@ export type GetDelegatesQueryVariables = Exact<{
 export type GetDelegatesQuery = { __typename?: 'Query', votingPowers?: { __typename?: 'votingPowers_200_response', totalCount: number, items: Array<{ __typename?: 'query_votingPowers_items_items', accountId: string, delegationsCount: number, votingPower: string, balance?: string | null, variation: { __typename?: 'query_votingPowers_items_items_variation', absoluteChange: string, percentageChange: string } } | null> } | null };
 
 
+export const AccountBalanceByAddressDocument = gql`
+    query AccountBalanceByAddress($address: String!, $fromDate: String = "", $toDate: String = "") {
+  accountBalanceByAccountId(
+    address: $address
+    fromDate: $fromDate
+    toDate: $toDate
+  ) {
+    data {
+      address
+      balance
+      delegate
+      tokenId
+      variation {
+        absoluteChange
+        percentageChange
+        previousBalance
+      }
+    }
+    period {
+      endTimestamp
+      startTimestamp
+    }
+  }
+}
+    `;
+
+/**
+ * __useAccountBalanceByAddressQuery__
+ *
+ * To run a query within a React component, call `useAccountBalanceByAddressQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAccountBalanceByAddressQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAccountBalanceByAddressQuery({
+ *   variables: {
+ *      address: // value for 'address'
+ *      fromDate: // value for 'fromDate'
+ *      toDate: // value for 'toDate'
+ *   },
+ * });
+ */
+export function useAccountBalanceByAddressQuery(baseOptions: Apollo.QueryHookOptions<AccountBalanceByAddressQuery, AccountBalanceByAddressQueryVariables> & ({ variables: AccountBalanceByAddressQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AccountBalanceByAddressQuery, AccountBalanceByAddressQueryVariables>(AccountBalanceByAddressDocument, options);
+      }
+export function useAccountBalanceByAddressLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AccountBalanceByAddressQuery, AccountBalanceByAddressQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AccountBalanceByAddressQuery, AccountBalanceByAddressQueryVariables>(AccountBalanceByAddressDocument, options);
+        }
+// @ts-ignore
+export function useAccountBalanceByAddressSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AccountBalanceByAddressQuery, AccountBalanceByAddressQueryVariables>): Apollo.UseSuspenseQueryResult<AccountBalanceByAddressQuery, AccountBalanceByAddressQueryVariables>;
+export function useAccountBalanceByAddressSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<AccountBalanceByAddressQuery, AccountBalanceByAddressQueryVariables>): Apollo.UseSuspenseQueryResult<AccountBalanceByAddressQuery | undefined, AccountBalanceByAddressQueryVariables>;
+export function useAccountBalanceByAddressSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<AccountBalanceByAddressQuery, AccountBalanceByAddressQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AccountBalanceByAddressQuery, AccountBalanceByAddressQueryVariables>(AccountBalanceByAddressDocument, options);
+        }
+export type AccountBalanceByAddressQueryHookResult = ReturnType<typeof useAccountBalanceByAddressQuery>;
+export type AccountBalanceByAddressLazyQueryHookResult = ReturnType<typeof useAccountBalanceByAddressLazyQuery>;
+export type AccountBalanceByAddressSuspenseQueryHookResult = ReturnType<typeof useAccountBalanceByAddressSuspenseQuery>;
+export type AccountBalanceByAddressQueryResult = Apollo.QueryResult<AccountBalanceByAddressQuery, AccountBalanceByAddressQueryVariables>;
 export const BalanceHistoryDocument = gql`
     query BalanceHistory($address: String!, $offset: Float = 0, $limit: Float = 10, $sortBy: queryInput_transfers_sortBy, $sortOrder: queryInput_transfers_sortOrder, $from: String, $to: String, $fromValue: String, $toValue: String, $fromDate: Float, $toDate: Float) {
   transfers(

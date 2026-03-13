@@ -2,7 +2,10 @@ import {
   QueryInput_Delegators_OrderBy,
   QueryInput_Delegators_OrderDirection,
 } from "@anticapture/graphql-client";
-import { useGetVotingPowerQuery } from "@anticapture/graphql-client/hooks";
+import {
+  useAccountBalanceByAddressQuery,
+  useGetVotingPowerQuery,
+} from "@anticapture/graphql-client/hooks";
 import type { Address } from "viem";
 import { formatUnits } from "viem";
 
@@ -11,7 +14,7 @@ import daoConfig from "@/shared/dao-config";
 import type { DelegatorItem } from "@/shared/hooks/graphql-client/useDelegators";
 import { useDelegators } from "@/shared/hooks/graphql-client/useDelegators";
 import { useMultipleEnsData } from "@/shared/hooks/useEnsData";
-import type { DaoIdEnum } from "@/shared/types/daos";
+import { DaoIdEnum } from "@/shared/types/daos";
 import { formatAddress } from "@/shared/utils/formatAddress";
 import { getAuthHeaders } from "@/shared/utils/server-utils";
 
@@ -58,6 +61,23 @@ export const useVoteCompositionData = (
     },
   });
 
+  const isAave = daoId === DaoIdEnum.AAVE;
+
+  const { data: balanceData } = useAccountBalanceByAddressQuery({
+    context: {
+      headers: {
+        "anticapture-dao-id": daoId,
+        ...getAuthHeaders(),
+      },
+    },
+    variables: {
+      address,
+    },
+    skip: !isAave,
+  });
+
+  console.log({ balanceData });
+
   const delegatorAddresses: Address[] = delegators.map(
     (delegator) => delegator.delegatorAddress as Address,
   );
@@ -76,7 +96,11 @@ export const useVoteCompositionData = (
     othersPercentage: 0,
   };
 
-  if (delegators.length === 0) {
+  const selfBalance = isAave
+    ? BigInt(balanceData?.accountBalanceByAccountId?.data?.balance ?? "0")
+    : 0n;
+
+  if (delegators.length === 0 && selfBalance === 0n) {
     return defaultData;
   }
 
@@ -90,11 +114,20 @@ export const useVoteCompositionData = (
     return acc + amount;
   }, BigInt(0));
 
+  // For AAVE, an address can hold tokens without activating voting power
+  // (requires self-delegation). Fall back to selfBalance + delegators as total.
+  const effectiveTotal =
+    delegateCurrentVotingPower > 0n
+      ? delegateCurrentVotingPower
+      : selfBalance + totalIndividualDelegators;
+
   // Others is the remaining value that completes 100%
   // This will be > 0 when there are more than 5 delegators
-  const othersValue = delegateCurrentVotingPower - totalIndividualDelegators;
+  // For AAVE, own balance is shown separately, so subtract it from others
+  const othersValue =
+    delegateCurrentVotingPower - selfBalance - totalIndividualDelegators;
   const othersPercentage = Number(
-    (Number(othersValue) / Number(delegateCurrentVotingPower)) * 100,
+    (Number(othersValue) / Number(effectiveTotal)) * 100,
   );
 
   const chartConfig: Record<
@@ -104,13 +137,30 @@ export const useVoteCompositionData = (
 
   const pieData: { name: string; label: string; value: number }[] = [];
 
+  // For AAVE, add the delegate's own balance as the first slice
+  if (isAave && selfBalance > 0n) {
+    const selfPercentage = Number(
+      (Number(selfBalance) / Number(effectiveTotal)) * 100,
+    );
+    chartConfig["self"] = {
+      label: "Self",
+      color: PIE_CHART_COLORS[0],
+      percentage: selfPercentage.toFixed(2),
+    };
+    pieData.push({
+      name: "self",
+      label: "Self",
+      value: Number(formatUnits(selfBalance, decimals)),
+    });
+  }
+
+  const delegatorColorOffset = isAave && selfBalance > 0n ? 1 : 0;
+
   delegators.forEach((delegator, index) => {
     const amount = BigInt(delegator.amount);
     if (amount === 0n) return;
 
-    const percentage = Number(
-      (Number(amount) / Number(delegateCurrentVotingPower)) * 100,
-    );
+    const percentage = Number((Number(amount) / Number(effectiveTotal)) * 100);
 
     const ensName = ensData?.[delegator.delegatorAddress as Address]?.ens;
     const displayLabel =
@@ -118,7 +168,10 @@ export const useVoteCompositionData = (
 
     chartConfig[delegator.delegatorAddress || `delegator-${index}`] = {
       label: displayLabel,
-      color: PIE_CHART_COLORS[index % PIE_CHART_COLORS.length],
+      color:
+        PIE_CHART_COLORS[
+          (index + delegatorColorOffset) % PIE_CHART_COLORS.length
+        ],
       percentage: percentage.toFixed(2),
       ensName,
     };
@@ -157,9 +210,7 @@ export const useVoteCompositionData = (
 
   return {
     topDelegators: delegators,
-    currentVotingPower: Number(
-      formatUnits(BigInt(delegateCurrentVotingPower), decimals),
-    ),
+    currentVotingPower: Number(formatUnits(effectiveTotal, decimals)),
     loading,
     chartConfig,
     pieData,

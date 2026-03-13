@@ -181,7 +181,7 @@ export class AAVEAccountBalanceRepository {
     const [result] = await this.db
       .select({
         accountId: variations.accountId,
-        currentBalance: sql<bigint>`SUM(${variations.currentBalance})`.as(
+        currentBalance: sql<string>`SUM(${variations.currentBalance})`.as(
           "current_balance",
         ),
         absoluteChange:
@@ -198,8 +198,9 @@ export class AAVEAccountBalanceRepository {
       accountId: result.accountId,
       tokenId: getAddress(result.accountId),
       delegate: getAddress(result.accountId),
-      previousBalance: result.currentBalance - BigInt(result.absoluteChange),
-      currentBalance: result.currentBalance,
+      previousBalance:
+        BigInt(result.currentBalance) - BigInt(result.absoluteChange),
+      currentBalance: BigInt(result.currentBalance),
       absoluteChange: BigInt(result.absoluteChange),
       percentageChange: calculatePercentage(
         result.currentBalance,

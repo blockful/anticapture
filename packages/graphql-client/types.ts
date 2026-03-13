@@ -1914,6 +1914,15 @@ export type VotingPowers_200_Response = {
   totalCount: Scalars['Float']['output'];
 };
 
+export type AccountBalanceByAddressQueryVariables = Exact<{
+  address: Scalars['String']['input'];
+  fromDate?: InputMaybe<Scalars['String']['input']>;
+  toDate?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type AccountBalanceByAddressQuery = { __typename?: 'Query', accountBalanceByAccountId?: { __typename?: 'accountBalanceByAccountId_200_response', data: { __typename?: 'query_accountBalanceByAccountId_data', address: string, balance: string, delegate: string, tokenId: string, variation: { __typename?: 'query_accountBalanceByAccountId_data_variation', absoluteChange: string, percentageChange: string, previousBalance: string } }, period: { __typename?: 'query_accountBalanceByAccountId_period', endTimestamp: string, startTimestamp: string } } | null };
+
 export type BalanceHistoryQueryVariables = Exact<{
   address: Scalars['String']['input'];
   offset?: InputMaybe<Scalars['Float']['input']>;
