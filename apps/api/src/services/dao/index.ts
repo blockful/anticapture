@@ -13,7 +13,6 @@ import {
 } from "@/mappers";
 
 import { GovernanceActivityService } from "../governance-activity";
-import { ProposalsService } from "../proposals";
 
 interface TokenPriceClient {
   getTokenPrice(
@@ -28,7 +27,6 @@ export class DaoService {
     private readonly cache: DaoDataCache,
     private readonly chainId: number,
     private readonly governanceService: GovernanceActivityService,
-    private readonly proposalsService: ProposalsService,
     private readonly tokenClient: TokenPriceClient,
   ) {}
 
@@ -51,42 +49,39 @@ export class DaoService {
       dbData: daoData,
     });
 
-    // Cache and return
-    this.cache.set(daoId, daoParameters);
     return daoResponse;
   }
 
   private async resolveRPCData(daoId: string) {
     const cached = this.cache.get(daoId);
+    if (cached) return cached;
 
-    return (
-      cached ??
-      (await (async () => {
-        const [
-          quorum,
-          proposalThreshold,
-          votingDelay,
-          votingPeriod,
-          timelockDelay,
-        ] = await Promise.all([
-          this.client.getQuorum(null),
-          this.client.getProposalThreshold(),
-          this.client.getVotingDelay(),
-          this.client.getVotingPeriod(),
-          this.client.getTimelockDelay(),
-        ]);
+    const [
+      quorum,
+      proposalThreshold,
+      votingDelay,
+      votingPeriod,
+      timelockDelay,
+    ] = await Promise.all([
+      this.client.getQuorum(null),
+      this.client.getProposalThreshold(),
+      this.client.getVotingDelay(),
+      this.client.getVotingPeriod(),
+      this.client.getTimelockDelay(),
+    ]);
 
-        return DaoParametersRPCResponseSchema.parse({
-          id: daoId,
-          chainId: this.chainId,
-          quorum,
-          proposalThreshold,
-          votingDelay,
-          votingPeriod,
-          timelockDelay,
-        });
-      })())
-    );
+    const fresh = DaoParametersRPCResponseSchema.parse({
+      id: daoId,
+      chainId: this.chainId,
+      quorum,
+      proposalThreshold,
+      votingDelay,
+      votingPeriod,
+      timelockDelay,
+    });
+
+    this.cache.set(daoId, fresh);
+    return fresh;
   }
 
   private async resolveDBData(
@@ -96,27 +91,12 @@ export class DaoService {
   ): Promise<DaoParametersDBResponse> {
     const token = CONTRACT_ADDRESSES[daoId as DaoIdEnum].token;
 
-    // Fetch from database
-    const [activeSupply, averageTurnout, proposals] = await Promise.all([
+    const [activeSupply, averageTurnout, tokenPrice] = await Promise.all([
       this.governanceService.getActiveSupply(fromDate),
       this.governanceService.getAverageTurnout(fromDate),
-      this.proposalsService.getProposals({
-        skip: 0,
-        limit: 10,
-        orderDirection: undefined,
-        status: undefined,
-        fromDate: fromDate,
-        fromEndDate: undefined,
-        includeOptimisticProposals: true,
-      }),
+      this.tokenClient.getTokenPrice(token.address, "usd"),
     ]);
 
-    const tokenPrice = await this.tokenClient.getTokenPrice(
-      token.address,
-      "usd",
-    );
-
-    const isGapEligible = proposals.length > 0;
     const normalizedQuorum = quorum
       ? Number(formatUnits(BigInt(quorum), token.decimals))
       : null;
@@ -132,9 +112,7 @@ export class DaoService {
     return DaoParametersDBResponseSchema.parse({
       activeSupply: activeSupply,
       averageTurnout,
-      quorumGap: isGapEligible
-        ? this.calculateQuorumGap(normalizedQuorum, normalizedTurnout)
-        : null,
+      quorumGap: this.calculateQuorumGap(normalizedQuorum, normalizedTurnout),
       lastPrice: tokenPrice,
     });
   }
@@ -142,8 +120,8 @@ export class DaoService {
   private calculateQuorumGap(
     quorum: number | null,
     avgTurnout: number | null,
-  ): number {
-    if (quorum === null || quorum === 0 || avgTurnout === null) return 0;
+  ): number | null {
+    if (quorum === null || quorum === 0 || avgTurnout === null) return null;
     return (avgTurnout / quorum - 1) * 100;
   }
 }

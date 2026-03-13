@@ -92,9 +92,10 @@ export const DaoResponseMapper = (values: {
             ...dbData.averageTurnout,
             changeRate: dbData.averageTurnout.changeRate.toString(),
           },
-          quorumGap: dbData.quorumGap
-            ? dbData.quorumGap.toString()
-            : NOT_APPLICABLE,
+          quorumGap:
+            dbData.quorumGap !== null
+              ? dbData.quorumGap.toString()
+              : NOT_APPLICABLE,
           lastPrice: dbData.lastPrice,
         }
       : null,

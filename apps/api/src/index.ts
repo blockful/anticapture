@@ -197,7 +197,6 @@ const daoService = new DaoService(
   daoCache,
   env.CHAIN_ID,
   governanceService,
-  proposalsService,
   tokenPriceClient,
 );
 const balanceVariationsService = new BalanceVariationsService(
