@@ -1,5 +1,6 @@
 "use client";
 
+import { parseAsStringEnum, useQueryState } from "nuqs";
 import { useMemo } from "react";
 import {
   CartesianGrid,
@@ -10,21 +11,21 @@ import {
   Tooltip,
   Dot,
 } from "recharts";
-import { ChartContainer } from "@/shared/components/ui/chart";
-import { timestampToReadableDate } from "@/shared/utils";
-import { formatNumberUserReadable } from "@/shared/utils";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { DelegationHistoryGraphItem } from "@/features/holders-and-delegates/hooks";
+
+import type { TimePeriod } from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
+import { TimePeriodSwitcher } from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
+import type { DelegationHistoryGraphItem } from "@/features/holders-and-delegates/hooks";
 import { useDelegateDelegationHistoryGraph } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistoryGraph";
-import {
-  TimePeriod,
-  TimePeriodSwitcher,
-} from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
+import { getTimestampRangeFromPeriod } from "@/features/holders-and-delegates/utils";
 import { ChartExceptionState } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
-import { parseAsStringEnum, useQueryState } from "nuqs";
-import { getTimestampRangeFromPeriod } from "@/features/holders-and-delegates/utils";
+import { ChartContainer } from "@/shared/components/ui/chart";
+import type { DaoIdEnum } from "@/shared/types/daos";
+import {
+  timestampToReadableDate,
+  formatNumberUserReadable,
+} from "@/shared/utils";
 
 interface VotingPowerVariationGraphProps {
   accountId: string;

@@ -1,15 +1,14 @@
-import { getAddress, isAddress } from "viem";
 import { z } from "@hono/zod-openapi";
+import { getAddress, isAddress } from "viem";
 
 import { transaction } from "@/database";
 
+import { DBDelegation } from "../delegations";
 import {
   DBTransfer,
   TransferMapper,
   TransferResponseSchema,
 } from "../transfers";
-
-import { DBDelegation } from "../delegations";
 
 export type DBTransaction = typeof transaction.$inferSelect & {
   transfers: DBTransfer[];

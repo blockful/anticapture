@@ -1,13 +1,13 @@
-import { formatEther } from "viem";
 import axios, { AxiosInstance } from "axios";
+import { formatEther } from "viem";
 
-import { TokenHistoricalPriceResponse } from "@/mappers";
-import { PriceProvider } from "@/services/treasury/types";
-import { forwardFill, createDailyTimeline } from "@/lib/time-series";
 import {
   truncateTimestampToMidnight,
   calculateCutoffTimestamp,
 } from "@/lib/date-helpers";
+import { forwardFill, createDailyTimeline } from "@/lib/time-series";
+import { TokenHistoricalPriceResponse } from "@/mappers";
+import { PriceProvider } from "@/services/treasury/types";
 
 interface Repository {
   getHistoricalNFTPrice(

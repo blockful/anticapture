@@ -1,8 +1,9 @@
 "use client";
 
-import { Stage } from "@/shared/types/enums/Stage";
-import { cn } from "@/shared/utils/";
 import { CheckCircle, XCircle } from "lucide-react";
+
+import type { Stage } from "@/shared/types/enums/Stage";
+import { cn } from "@/shared/utils/";
 
 interface StageTagSimplifiedProps {
   stage: Stage;

@@ -1,6 +1,5 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
-import { VotingPowerService } from "@/services";
 import {
   HistoricalVotingPowersResponseSchema,
   HistoricalVotingPowerRequestQuerySchema,
@@ -8,6 +7,7 @@ import {
   HistoricalVotingPowerRequestParamsSchema,
   HistoricalVotingPowerGlobalQuerySchema,
 } from "@/mappers";
+import { VotingPowerService } from "@/services";
 
 export function historicalVotingPower(app: Hono, service: VotingPowerService) {
   app.openapi(

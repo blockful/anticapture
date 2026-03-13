@@ -1,10 +1,10 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
-import { TreasuryService } from "@/services/treasury";
 import {
   TreasuryResponseSchema,
   TreasuryQuerySchema,
 } from "@/mappers/treasury";
+import { TreasuryService } from "@/services/treasury";
 
 export function treasury(
   app: Hono,

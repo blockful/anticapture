@@ -1,13 +1,14 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
+import { formatEther } from "viem";
 
 import { DaysEnum, DaysOpts } from "@/lib/enums";
+
 import {
   ActiveSupplyQueryResult,
   ProposalsCompareQueryResult,
   VotesCompareQueryResult,
   AverageTurnoutCompareQueryResult,
 } from "./types";
-import { formatEther } from "viem";
 
 interface GovernanceActivityRepository {
   getActiveSupply(days: DaysEnum): Promise<ActiveSupplyQueryResult | undefined>;

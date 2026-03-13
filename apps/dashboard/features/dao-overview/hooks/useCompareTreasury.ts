@@ -2,8 +2,9 @@ import {
   QueryInput_CompareTreasury_Days,
   useCompareTreasuryQuery,
 } from "@anticapture/graphql-client/hooks";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { TimeInterval } from "@/shared/types/enums";
+
+import type { DaoIdEnum } from "@/shared/types/daos";
+import type { TimeInterval } from "@/shared/types/enums";
 
 interface CompareTreasury {
   changeRate: number;

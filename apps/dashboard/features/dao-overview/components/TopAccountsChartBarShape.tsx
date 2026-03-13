@@ -1,11 +1,12 @@
 "use client";
 
 import React from "react";
-import { BarProps } from "recharts";
-import { Address } from "viem";
-import { formatNumberUserReadable } from "@/shared/utils";
+import type { BarProps } from "recharts";
+import type { Address } from "viem";
+
+import type { TopAccountChartData } from "@/features/dao-overview/components/TopAccountsChart";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { TopAccountChartData } from "@/features/dao-overview/components/TopAccountsChart";
+import { formatNumberUserReadable } from "@/shared/utils";
 
 export interface CustomBarShapeProps extends BarProps {
   x: number;

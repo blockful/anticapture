@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import GlossaryPageClient from "./GlossaryPageClient";
+
+import GlossaryPageClient from "@/app/glossary/GlossaryPageClient";
 
 export const metadata: Metadata = {
   title: "Anticapture - Glossary",

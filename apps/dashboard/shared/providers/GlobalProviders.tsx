@@ -1,17 +1,16 @@
 "use client";
 
-import { ReactNode } from "react";
-import { WagmiProvider } from "wagmi";
-
-import "@rainbow-me/rainbowkit/styles.css";
-
+import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
+import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { lightTheme, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
-import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
-import { wagmiConfig } from "@/shared/services/wallet/wallet";
-import { TooltipProvider } from "@radix-ui/react-tooltip";
-import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
+import type { ReactNode } from "react";
+import { WagmiProvider } from "wagmi";
+import "@rainbow-me/rainbowkit/styles.css";
+
+import { wagmiConfig } from "@/shared/services/wallet/wallet";
+import { BACKEND_ENDPOINT, getAuthHeaders } from "@/shared/utils/server-utils";
 
 const queryClient = new QueryClient();
 
@@ -19,6 +18,7 @@ const queryClient = new QueryClient();
 export const apolloClient = new ApolloClient({
   uri: BACKEND_ENDPOINT,
   cache: new InMemoryCache(),
+  headers: getAuthHeaders(),
 });
 
 export const GlobalProviders = ({ children }: { children: ReactNode }) => {

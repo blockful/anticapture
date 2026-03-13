@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { TooltipInfo } from "@/shared/components";
+
 import { useLastProposals } from "@/features/dao-overview/hooks/useLastProposals";
 import { ProposalItem } from "@/features/governance/components/proposal-overview/ProposalItem";
+import { TooltipInfo } from "@/shared/components";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
+import { EmptyState as ErrorState } from "@/shared/components/design-system/table/components/EmptyState";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 const LastProposalsCardSkeleton = () => {
   return (
@@ -38,14 +40,6 @@ const EmptyState = () => {
   );
 };
 
-const ErrorState = ({ message }: { message: string }) => {
-  return (
-    <div className="bg-surface-default flex items-center justify-center p-8">
-      <p className="text-error">Error loading proposals: {message}</p>
-    </div>
-  );
-};
-
 export const LastProposalsCard = ({ daoId }: { daoId: DaoIdEnum }) => {
   const { proposals, loading, error } = useLastProposals(daoId);
 
@@ -55,7 +49,7 @@ export const LastProposalsCard = ({ daoId }: { daoId: DaoIdEnum }) => {
     }
 
     if (error) {
-      return <ErrorState message={error.message} />;
+      return <ErrorState />;
     }
 
     if (proposals.length === 0) {
@@ -77,7 +71,7 @@ export const LastProposalsCard = ({ daoId }: { daoId: DaoIdEnum }) => {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="border-x border-inverted mx-5">
+      <div className="border-inverted mx-5 border-x">
         <div className="lg:bg-surface-default flex w-full flex-col gap-4 lg:p-4">
           {/* Header */}
           <div className="flex items-center gap-2">

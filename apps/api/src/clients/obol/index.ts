@@ -2,8 +2,10 @@ import { Account, Address, Chain, Client, Transport } from "viem";
 import { getBlockNumber, readContract } from "viem/actions";
 
 import { DAOClient } from "@/clients";
-import { ObolGovernorAbi } from "./abi";
+
 import { GovernorBase } from "../governor.base";
+
+import { ObolGovernorAbi } from "./abi";
 
 export class ObolClient<
   TTransport extends Transport = Transport,
@@ -27,37 +29,42 @@ export class ObolClient<
   }
 
   async getQuorum(): Promise<bigint> {
-    const blockNumber = await getBlockNumber(this.client);
-    const targetBlock = blockNumber - 10n;
-    return readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "quorum",
-      args: [targetBlock < 0n ? 0n : targetBlock],
+    return this.getCachedQuorum(async () => {
+      const blockNumber = await getBlockNumber(this.client);
+      const targetBlock = blockNumber - 10n;
+      return readContract(this.client, {
+        abi: this.abi,
+        address: this.address,
+        functionName: "quorum",
+        args: [targetBlock < 0n ? 0n : targetBlock],
+      });
     });
   }
 
   async getTimelockDelay(): Promise<bigint> {
-    const timelockAddress = await readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "timelock",
-    });
-    return readContract(this.client, {
-      abi: [
-        {
-          constant: true,
-          inputs: [],
-          outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-          payable: false,
-          stateMutability: "view",
-          type: "function",
-          name: "getMinDelay",
-        },
-      ],
-      address: timelockAddress,
-      functionName: "getMinDelay",
-    });
+    if (!this.cache.timelockDelay) {
+      const timelockAddress = await readContract(this.client, {
+        abi: this.abi,
+        address: this.address,
+        functionName: "timelock",
+      });
+      this.cache.timelockDelay = await readContract(this.client, {
+        abi: [
+          {
+            constant: true,
+            inputs: [],
+            outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+            payable: false,
+            stateMutability: "view",
+            type: "function",
+            name: "getMinDelay",
+          },
+        ],
+        address: timelockAddress,
+        functionName: "getMinDelay",
+      });
+    }
+    return this.cache.timelockDelay;
   }
 
   calculateQuorum(votes: {

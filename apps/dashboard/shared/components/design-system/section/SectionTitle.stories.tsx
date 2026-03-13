@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
-import { SectionTitle } from "@/shared/components/design-system/section/SectionTitle";
 import {
   Shield,
   AlertTriangle,
@@ -10,6 +9,8 @@ import {
   Database,
   Settings,
 } from "lucide-react";
+
+import { SectionTitle } from "@/shared/components/design-system/section/SectionTitle";
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta = {

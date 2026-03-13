@@ -1,13 +1,14 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
-import { VotingPowerService } from "@/services";
+import { getAddress, isAddress } from "viem";
+
 import {
   VotingPowersRequestSchema,
   VotingPowersResponseSchema,
   VotingPowersMapper,
   VotingPowerResponseSchema,
 } from "@/mappers/";
-import { getAddress, isAddress } from "viem";
 import { VotingPowerMapper } from "@/mappers/voting-power/variations";
+import { VotingPowerService } from "@/services";
 
 export function votingPowers(app: Hono, service: VotingPowerService) {
   app.openapi(
@@ -41,6 +42,8 @@ export function votingPowers(app: Hono, service: VotingPowerService) {
         addresses,
         fromValue,
         toValue,
+        fromDate,
+        toDate,
       } = context.req.valid("query");
 
       const { items, totalCount } = await service.getVotingPowers(
@@ -53,6 +56,8 @@ export function votingPowers(app: Hono, service: VotingPowerService) {
           maxAmount: toValue,
         },
         addresses,
+        fromDate,
+        toDate,
       );
 
       return context.json(VotingPowersMapper(items, totalCount));
@@ -75,6 +80,10 @@ export function votingPowers(app: Hono, service: VotingPowerService) {
             .refine((addr) => isAddress(addr, { strict: false }))
             .transform((addr) => getAddress(addr)),
         }),
+        query: z.object({
+          fromDate: z.coerce.number().optional(),
+          toDate: z.coerce.number().optional(),
+        }),
       },
       responses: {
         200: {
@@ -89,7 +98,12 @@ export function votingPowers(app: Hono, service: VotingPowerService) {
     }),
     async (context) => {
       const { accountId } = context.req.valid("param");
-      const result = await service.getVotingPowersByAccountId(accountId);
+      const { fromDate, toDate } = context.req.valid("query");
+      const result = await service.getVotingPowersByAccountId(
+        accountId,
+        fromDate,
+        toDate,
+      );
       return context.json(VotingPowerMapper(result));
     },
   );

@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+
+import { TermsSection } from "@/features/terms/TermsSection";
+import { Footer } from "@/shared/components/design-system/footer/Footer";
 import { HeaderSidebar } from "@/widgets";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
-import { Footer } from "@/shared/components/design-system/footer/Footer";
-import { TermsSection } from "@/features/terms/TermsSection";
 
 export const metadata: Metadata = {
   title: "Anticapture - Terms of Service",

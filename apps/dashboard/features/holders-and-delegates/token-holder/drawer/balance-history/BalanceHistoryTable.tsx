@@ -1,29 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
-import { ColumnDef } from "@tanstack/react-table";
-import { SkeletonRow, Button, IconButton } from "@/shared/components";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
-import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
-import { cn } from "@/shared/utils";
+import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowRight, ExternalLink } from "lucide-react";
-import { useBalanceHistory } from "@/features/holders-and-delegates/hooks/useBalanceHistory";
-import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
-import {
-  CategoriesFilter,
-  FilterOption,
-} from "@/shared/components/design-system/table/filters/CategoriesFilter";
-import daoConfigByDaoId from "@/shared/dao-config";
-import { Table } from "@/shared/components/design-system/table/Table";
-import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
-import { parseUnits } from "viem";
-import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
-import { AddressFilter } from "@/shared/components/design-system/table/filters";
-import { fetchAddressFromEnsName } from "@/shared/hooks/useEnsData";
-import daoConfig from "@/shared/dao-config";
-import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { DaoIdEnum } from "@/shared/types/daos";
 import {
   parseAsBoolean,
   parseAsString,
@@ -31,14 +9,34 @@ import {
   useQueryState,
   useQueryStates,
 } from "nuqs";
+import { useMemo } from "react";
+import { parseUnits } from "viem";
+
+import { useBalanceHistory } from "@/features/holders-and-delegates/hooks/useBalanceHistory";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
-import { useAmountFilterStore } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
+import { SkeletonRow, Button, IconButton } from "@/shared/components";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 import { DateCell } from "@/shared/components/design-system/table/cells/DateCell";
+import { AddressFilter } from "@/shared/components/design-system/table/filters";
+import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
+import type { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
+import { useAmountFilterStore } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
+import type { FilterOption } from "@/shared/components/design-system/table/filters/CategoriesFilter";
+import { CategoriesFilter } from "@/shared/components/design-system/table/filters/CategoriesFilter";
+import { Table } from "@/shared/components/design-system/table/Table";
+import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { fetchAddressFromEnsName } from "@/shared/hooks/useEnsData";
+import type { DaoIdEnum } from "@/shared/types/daos";
+import { cn } from "@/shared/utils";
+import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 
 interface BalanceHistoryData {
   id: string;
   timestamp: string;
-  amount: string;
+  amount: number;
   type: "Buy" | "Sell";
   fromAddress: string;
   fromEns?: string;
@@ -58,7 +56,7 @@ export const BalanceHistoryTable = ({
   toTimestamp?: number;
 }) => {
   const limit: number = 20;
-  const { decimals } = daoConfig[daoId];
+  const { decimals } = daoConfigByDaoId[daoId];
 
   const [typeFilter, setTypeFilter] = useQueryState(
     "type",
@@ -123,7 +121,7 @@ export const BalanceHistoryTable = ({
       return {
         id: transfer.transactionHash,
         timestamp: transfer.timestamp,
-        amount: formatNumberUserReadable(transfer.amount),
+        amount: transfer.amount,
         type: transfer.direction === "in" ? "Buy" : ("Sell" as "Buy" | "Sell"),
         fromAddress: transfer.fromAccountId,
         toAddress: transfer.toAccountId,
@@ -197,7 +195,7 @@ export const BalanceHistoryTable = ({
         columnClassName: "w-32",
       },
       cell: ({ row }) => {
-        const amount = row.getValue("amount") as string;
+        const amount = row.getValue("amount") as number;
 
         if (isInitialLoading) {
           return (
@@ -212,7 +210,9 @@ export const BalanceHistoryTable = ({
 
         return (
           <div className="flex items-center justify-end">
-            <span className="text-secondary text-sm font-medium">{amount}</span>
+            <span className="text-secondary text-sm font-medium">
+              {formatNumberUserReadable(amount)}
+            </span>
           </div>
         );
       },
@@ -472,6 +472,7 @@ export const BalanceHistoryTable = ({
         isLoadingMore={loading}
         onLoadMore={fetchNextPage}
         withDownloadCSV={true}
+        csvFilename="balance-history.csv"
         error={error}
         fillHeight
       />

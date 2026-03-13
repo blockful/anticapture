@@ -1,11 +1,12 @@
+import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
+
 import { Button } from "@/shared/components";
+import { Footer } from "@/shared/components/design-system/footer/Footer";
 import { NotFoundPageIcon } from "@/shared/components/icons/NotFoundPageIcon";
 import { HeaderSidebar } from "@/widgets";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
-import { Footer } from "@/shared/components/design-system/footer/Footer";
-import Image from "next/image";
-import Link from "next/link";
-import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Anticapture - Page not found",

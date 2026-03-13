@@ -1,5 +1,5 @@
-import { TimeInterval } from "@/shared/types/enums/TimeInterval";
-import { TokenMetricItem } from "@/shared/dao-config/types";
+import type { TokenMetricItem } from "@/shared/dao-config/types";
+import type { TimeInterval } from "@/shared/types/enums/TimeInterval";
 
 export interface MetricData {
   value: string | undefined | null;

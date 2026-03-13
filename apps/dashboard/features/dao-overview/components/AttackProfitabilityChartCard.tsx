@@ -1,14 +1,15 @@
 "use client";
 
-import { ElementType, useMemo } from "react";
 import { CircleSlash, Hammer } from "lucide-react";
+import type { ElementType } from "react";
+import { useMemo } from "react";
 
 import { MultilineChartAttackProfitability } from "@/features/attack-profitability/components";
 import { OverviewMetric } from "@/features/dao-overview/components/OverviewMetric";
 import { BlankSlate, TooltipInfo } from "@/shared/components";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import daoConfig from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
 
 const METRICS_SCHEMA = {

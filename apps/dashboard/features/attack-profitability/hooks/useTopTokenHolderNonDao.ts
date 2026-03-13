@@ -1,19 +1,19 @@
-import { DaoIdEnum } from "@/shared/types/daos";
-import {
-  GetDaoAddressesAccountBalancesQuery,
-  useGetDaoAddressesAccountBalancesQuery,
-} from "@anticapture/graphql-client/hooks";
-import { ApolloError, ApolloQueryResult } from "@apollo/client";
+import type { GetDaoAddressesAccountBalancesQuery } from "@anticapture/graphql-client/hooks";
+import { useGetDaoAddressesAccountBalancesQuery } from "@anticapture/graphql-client/hooks";
+import type { ApolloError, ApolloQueryResult } from "@apollo/client";
+
+import type { DaoIdEnum } from "@/shared/types/daos";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 interface TopTokenHolderNonDaoResponse {
   data:
-  | {
-    __typename?: "query_accountBalances_items_items";
-    address: string;
-    balance: string;
-  }
-  | null
-  | undefined;
+    | {
+        __typename?: "query_accountBalances_items_items";
+        address: string;
+        balance: string;
+      }
+    | null
+    | undefined;
   loading: boolean;
   error: ApolloError | undefined;
   refetch: () => Promise<
@@ -38,6 +38,7 @@ export const useTopTokenHolderNonDao = (
       context: {
         headers: {
           "anticapture-dao-id": daoId,
+          ...getAuthHeaders(),
         },
       },
       notifyOnNetworkStatusChange: true,

@@ -1,12 +1,11 @@
+import { serve } from "@hono/node-server";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { serve } from "@hono/node-server";
-
 import { logger } from "hono/logger";
-import * as schema from "@/database/schema";
-import { fromZodError } from "zod-validation-error";
 import { createPublicClient, http } from "viem";
+import { fromZodError } from "zod-validation-error";
 
+import { DaoCache } from "@/cache/dao-cache";
 import {
   accountBalanceVariations,
   accountBalances,
@@ -29,12 +28,21 @@ import {
   votingPowerVariations,
   votingPowers,
   delegations,
+  delegators,
   historicalDelegations,
   votes,
+  offchainProposals,
+  offchainVotes,
 } from "@/controllers";
+import * as offchainSchema from "@/database/offchain-schema";
+import * as schema from "@/database/schema";
 import { docs } from "@/docs";
 import { env } from "@/env";
-import { DaoCache } from "@/cache/dao-cache";
+import { getClient } from "@/lib/client";
+import { CONTRACT_ADDRESSES } from "@/lib/constants";
+import { DaoIdEnum } from "@/lib/enums";
+import { getChain } from "@/lib/utils";
+import { errorHandler } from "@/middlewares";
 import {
   AccountBalanceRepository,
   AccountInteractionsRepository,
@@ -51,13 +59,14 @@ import {
   TreasuryRepository,
   VotingPowerRepository,
   DelegationsRepository,
+  DelegatorsRepository,
   HistoricalDelegationsRepository,
   VotesRepository,
   FeedRepository,
+  AccountBalanceQueryFragments,
+  OffchainProposalRepository,
+  OffchainVoteRepository,
 } from "@/repositories";
-import { errorHandler } from "@/middlewares";
-import { getClient } from "@/lib/client";
-import { getChain } from "@/lib/utils";
 import {
   AccountBalanceService,
   BalanceVariationsService,
@@ -76,11 +85,15 @@ import {
   parseTreasuryProviderConfig,
   HistoricalDelegationsService,
   DelegationsService,
+  DelegatorsService,
   VotesService,
   FeedService,
+  OffchainProposalsService,
+  OffchainVotesService,
+  EventRelevanceService,
 } from "@/services";
-import { CONTRACT_ADDRESSES } from "@/lib/constants";
-import { DaoIdEnum } from "@/lib/enums";
+
+import { eventRelevance } from "./controllers/event-relevance";
 import { feed } from "./controllers/feed";
 
 const app = new Hono({
@@ -120,6 +133,10 @@ if (!daoClient) {
 }
 
 const pgClient = drizzle(env.DATABASE_URL, { schema, casing: "snake_case" });
+const pgOffchainClient = drizzle(env.DATABASE_URL, {
+  schema: offchainSchema,
+  casing: "snake_case",
+});
 
 const daoConfig = CONTRACT_ADDRESSES[env.DAO_ID];
 const { blockTime, tokenType } = daoConfig;
@@ -129,6 +146,7 @@ const optimisticProposalType =
     : undefined;
 
 const repo = new DrizzleRepository(pgClient);
+const balanceQueryFragments = new AccountBalanceQueryFragments(pgClient);
 const votingPowerRepo = new VotingPowerRepository(pgClient);
 const proposalsRepo = new DrizzleProposalsActivityRepository(pgClient);
 const transactionsRepo = new TransactionsRepository(pgClient);
@@ -137,9 +155,15 @@ const delegationPercentageService = new DelegationPercentageService(
   daoMetricsDayBucketRepo,
 );
 const tokenMetricsService = new TokenMetricsService(daoMetricsDayBucketRepo);
-const balanceVariationsRepo = new BalanceVariationsRepository(pgClient);
+const balanceVariationsRepo = new BalanceVariationsRepository(
+  pgClient,
+  balanceQueryFragments,
+);
 const historicalBalancesRepo = new HistoricalBalanceRepository(pgClient);
-const accountBalanceRepo = new AccountBalanceRepository(pgClient);
+const accountBalanceRepo = new AccountBalanceRepository(
+  pgClient,
+  balanceQueryFragments,
+);
 const accountInteractionRepo = new AccountInteractionsRepository(pgClient);
 const transactionsService = new TransactionsService(transactionsRepo);
 const votingPowerService = new VotingPowerService(
@@ -179,6 +203,7 @@ historicalDelegations(
 
 // TODO: add support to partial delegations at some point
 delegations(app, new DelegationsService(new DelegationsRepository(pgClient)));
+delegators(app, new DelegatorsService(new DelegatorsRepository(pgClient)));
 
 const treasuryService = createTreasuryService(
   new TreasuryRepository(pgClient),
@@ -201,6 +226,7 @@ token(
 );
 
 feed(app, new FeedService(env.DAO_ID, new FeedRepository(pgClient)));
+eventRelevance(app, new EventRelevanceService(env.DAO_ID));
 tokenDistribution(app, repo);
 governanceActivity(app, repo, tokenType);
 proposalsActivity(app, proposalsRepo, env.DAO_ID, daoClient);
@@ -225,6 +251,11 @@ votes(app, new VotesService(new VotesRepository(pgClient)));
 dao(app, daoService);
 docs(app);
 tokenMetrics(app, tokenMetricsService);
+
+const offchainProposalsRepo = new OffchainProposalRepository(pgOffchainClient);
+const offchainVotesRepo = new OffchainVoteRepository(pgOffchainClient);
+offchainProposals(app, new OffchainProposalsService(offchainProposalsRepo));
+offchainVotes(app, new OffchainVotesService(offchainVotesRepo));
 
 serve(
   {

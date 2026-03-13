@@ -1,8 +1,9 @@
 "use client";
 
 import { parseAsInteger, parseAsStringEnum, useQueryState } from "nuqs";
+import type { Address } from "viem";
+
 import { parseAsAddress } from "@/shared/utils/parseAsAddress";
-import { Address } from "viem";
 
 export interface TransactionsParamsType {
   min: number | null;

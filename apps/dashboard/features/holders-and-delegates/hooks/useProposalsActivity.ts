@@ -1,14 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-
-import { useGetProposalsActivityQuery } from "@anticapture/graphql-client/hooks";
-import {
+import type {
   GetProposalsActivityQueryVariables,
   Query_ProposalsActivity_Proposals_Items,
 } from "@anticapture/graphql-client";
-import { DaoIdEnum } from "@/shared/types/daos";
+import { useGetProposalsActivityQuery } from "@anticapture/graphql-client/hooks";
 import { NetworkStatus } from "@apollo/client";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+import type { DaoIdEnum } from "@/shared/types/daos";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 interface UseProposalsActivityParams extends GetProposalsActivityQueryVariables {
   limit: number;
@@ -58,6 +59,7 @@ export const useProposalsActivity = ({
     context: {
       headers: {
         "anticapture-dao-id": daoId,
+        ...getAuthHeaders(),
       },
     },
     notifyOnNetworkStatusChange: true,

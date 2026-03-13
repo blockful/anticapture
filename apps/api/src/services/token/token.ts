@@ -1,5 +1,5 @@
-import { DBToken } from "@/mappers";
 import { DaoIdEnum } from "@/lib/enums";
+import { DBToken } from "@/mappers";
 
 interface TokenRepository {
   getTokenPropertiesByName(

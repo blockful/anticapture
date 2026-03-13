@@ -1,9 +1,8 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import {
-  DelegationsResponseSchema,
-  delegationMapper,
   DelegationsRequestParamsSchema,
+  DelegationsResponseSchema,
 } from "@/mappers/delegations";
 import { DelegationsService } from "@/services/delegations/current";
 
@@ -14,7 +13,7 @@ export function delegations(app: Hono, service: DelegationsService) {
       operationId: "delegations",
       path: "/accounts/{address}/delegations",
       summary: "Get delegations",
-      description: "Get current delegators of an account",
+      description: "Get current delegations for an account",
       tags: ["delegations"],
       request: {
         params: DelegationsRequestParamsSchema,
@@ -36,10 +35,7 @@ export function delegations(app: Hono, service: DelegationsService) {
 
       const result = await service.getDelegations(address);
 
-      return context.json({
-        items: result.map(delegationMapper),
-        totalCount: result.length,
-      });
+      return context.json(DelegationsResponseSchema.parse(result));
     },
   );
 }

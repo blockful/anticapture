@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
+
 import { Footer } from "@/shared/components/design-system/footer/Footer";
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 

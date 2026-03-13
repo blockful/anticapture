@@ -1,7 +1,8 @@
 "use client";
 
+import type { ReactNode } from "react";
+
 import { cn } from "@/shared/utils";
-import { ReactNode } from "react";
 
 type SubSectionsContainerProps = {
   children: ReactNode;

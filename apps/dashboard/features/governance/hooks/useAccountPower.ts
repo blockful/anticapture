@@ -1,11 +1,11 @@
-import { ApolloError } from "@apollo/client";
-import { DaoIdEnum } from "@/shared/types/daos";
-import {
-  GetAccountPowerQuery,
-  useGetAccountPowerQuery,
-} from "@anticapture/graphql-client/hooks";
-import { formatNumberUserReadable } from "@/shared/utils";
+import type { GetAccountPowerQuery } from "@anticapture/graphql-client/hooks";
+import { useGetAccountPowerQuery } from "@anticapture/graphql-client/hooks";
+import type { ApolloError } from "@apollo/client";
 import { formatUnits } from "viem";
+
+import type { DaoIdEnum } from "@/shared/types/daos";
+import { formatNumberUserReadable } from "@/shared/utils";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 export interface UseAccountPowerResult {
   accountPower: GetAccountPowerQuery["votingPowerByAccountId"] | null;
@@ -41,6 +41,7 @@ export const useVoterInfo = ({
     context: {
       headers: {
         "anticapture-dao-id": daoId,
+        ...getAuthHeaders(),
       },
     },
     skip: !address || !proposalId, // Skip query if no address or proposalId provided
@@ -64,9 +65,7 @@ export const useVoterInfo = ({
   return {
     accountPower: data.votingPowerByAccountId,
     votingPower: formatNumberUserReadable(
-      Number(
-        formatUnits(BigInt(rawVotingPower), decimals),
-      ),
+      Number(formatUnits(BigInt(rawVotingPower), decimals)),
     ),
     rawVotingPower,
     votes: data.votesByProposalId || null,

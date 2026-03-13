@@ -1,5 +1,5 @@
-import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs";
+import * as React from "react";
 
 import { Checkbox } from "@/shared/components/design-system/form/fields/checkbox/Checkbox";
 

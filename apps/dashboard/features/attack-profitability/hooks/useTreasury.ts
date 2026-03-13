@@ -1,8 +1,9 @@
-import useSWR from "swr";
 import axios from "axios";
-import { DaoIdEnum } from "@/shared/types/daos";
+import useSWR from "swr";
+
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
-import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
+import { BACKEND_ENDPOINT, getAuthHeaders } from "@/shared/utils/server-utils";
 
 export type TreasuryType = "liquid" | "dao-token" | "total";
 
@@ -51,7 +52,9 @@ const fetchTreasury = async ({
   } = await axios.post(
     `${BACKEND_ENDPOINT}`,
     { query },
-    { headers: { "anticapture-dao-id": daoId } },
+    {
+      headers: { "anticapture-dao-id": daoId, ...getAuthHeaders() },
+    },
   );
 
   return response.data.data[queryName];

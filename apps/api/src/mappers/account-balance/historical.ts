@@ -1,6 +1,8 @@
 import { z } from "@hono/zod-openapi";
-import { balanceHistory } from "@/database";
 import { getAddress, isAddress } from "viem";
+
+import { balanceHistory } from "@/database";
+
 import { DBTransfer } from "../transfers";
 
 export type DBHistoricalBalance = typeof balanceHistory.$inferSelect;

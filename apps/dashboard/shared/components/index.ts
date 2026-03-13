@@ -7,7 +7,6 @@ export * from "@/shared/components/buttons/ButtonHeaderDAOSidebarMobile";
 export * from "@/shared/components/buttons/ButtonMainNav";
 export * from "@/shared/components/dropdowns/HeaderDAOSidebarDropdown";
 export * from "@/shared/components/wallet/ConnectWallet";
-export * from "@/shared/components/cards/RiskLevelCard";
 export * from "@/shared/components/cards/RiskLevelCardSmall";
 export * from "@/shared/components/tooltips/RiskTooltipCard";
 export * from "@/shared/components/skeletons/SkeletonDaoInfoCards";
@@ -33,5 +32,6 @@ export * from "@/shared/components/design-system/ActivityIndicator";
 export * from "@/shared/components/design-system/buttons/button/Button";
 export * from "@/shared/components/design-system/buttons/icon-button/IconButton";
 export * from "@/shared/components/design-system/help-popover";
+export * from "@/shared/components/design-system/drawer";
 
 export { StagesCardRequirements } from "@/shared/components/cards/StagesCardRequirements";

@@ -1,8 +1,8 @@
-import { getDateRange } from "@/shared/utils";
-import { ReactNode } from "react";
-import { cn } from "@/shared/utils";
-import { SectionTitle } from "@/shared/components/design-system/section/SectionTitle";
+import type { ReactNode } from "react";
+
 import { SubSection } from "@/shared/components/design-system/section";
+import { SectionTitle } from "@/shared/components/design-system/section/SectionTitle";
+import { getDateRange, cn } from "@/shared/utils";
 
 interface TheSectionLayoutProps {
   icon?: ReactNode;
@@ -18,6 +18,7 @@ interface TheSectionLayoutProps {
   className?: string;
   subHeader?: ReactNode;
   leftContent?: ReactNode;
+  headerAction?: ReactNode;
   subsectionTitle?: string;
   subsectionDescription?: string;
 }
@@ -30,22 +31,31 @@ export const TheSectionLayout = ({
   riskLevel,
   children,
   className,
+  headerAction,
   subsectionTitle,
   subsectionDescription,
 }: TheSectionLayoutProps) => {
   return (
     <div
       className={cn(
-        "flex h-full w-full flex-col gap-8 border-none px-4 py-5 lg:gap-6 lg:p-5",
+        "flex h-full w-full flex-col gap-5 border-none px-4 py-5 lg:gap-6 lg:p-5",
         className,
       )}
     >
-      <SectionTitle
-        icon={icon}
-        title={title}
-        riskLevel={riskLevel}
-        description={description ?? ""}
-      />
+      <div
+        className={cn(
+          "flex items-start justify-between gap-4",
+          headerAction && "flex-col lg:flex-row",
+        )}
+      >
+        <SectionTitle
+          icon={icon}
+          title={title}
+          riskLevel={riskLevel}
+          description={description ?? ""}
+        />
+        {headerAction}
+      </div>
       <div className="border-border-default w-full border-b border-dashed lg:hidden" />
       {subsectionTitle ? (
         <SubSection

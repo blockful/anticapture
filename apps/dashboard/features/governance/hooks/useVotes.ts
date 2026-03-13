@@ -1,17 +1,18 @@
-import { useMemo, useState, useCallback, useEffect } from "react";
-import { ApolloError } from "@apollo/client";
-import { DaoIdEnum } from "@/shared/types/daos";
-import {
-  GetVotesQuery,
-  useGetVotesQuery,
-  useGetVotingPowerChangeLazyQuery,
-} from "@anticapture/graphql-client/hooks";
-import {
+import type {
   QueryInput_VotesByProposalId_OrderBy,
   QueryInput_VotesByProposalId_OrderDirection,
 } from "@anticapture/graphql-client";
+import type { GetVotesQuery } from "@anticapture/graphql-client/hooks";
+import {
+  useGetVotesQuery,
+  useGetVotingPowerChangeLazyQuery,
+} from "@anticapture/graphql-client/hooks";
+import type { ApolloError } from "@apollo/client";
+import { useMemo, useState, useCallback, useEffect } from "react";
 
 import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
+import type { DaoIdEnum } from "@/shared/types/daos";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 type VotingPowerVariation = {
   previousVotingPower: string;
@@ -78,6 +79,7 @@ export const useVotes = ({
     context: {
       headers: {
         "anticapture-dao-id": daoId,
+        ...getAuthHeaders(),
       },
     },
     notifyOnNetworkStatusChange: true,
@@ -114,6 +116,7 @@ export const useVotes = ({
           context: {
             headers: {
               "anticapture-dao-id": daoId,
+              ...getAuthHeaders(),
             },
           },
         });

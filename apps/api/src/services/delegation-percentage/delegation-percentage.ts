@@ -27,9 +27,9 @@
  */
 
 import { MetricTypesEnum } from "@/lib/constants";
-import { forwardFill, generateOrderedTimeline } from "@/lib/time-series";
-import { applyCursorPagination } from "@/lib/query-helpers";
 import { getEffectiveStartDate } from "@/lib/date-helpers";
+import { applyCursorPagination } from "@/lib/query-helpers";
+import { forwardFill, generateOrderedTimeline } from "@/lib/time-series";
 import {
   DBTokenMetric,
   DelegationPercentageItem,

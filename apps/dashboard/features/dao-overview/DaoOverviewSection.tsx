@@ -1,42 +1,35 @@
 "use client";
 
-import { Suspense, useEffect } from "react";
-import { DaoIdEnum } from "@/shared/types/daos";
-import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoAvatarIcon } from "@/shared/components/icons";
-import { DaoOverviewSkeleton } from "@/features/dao-overview/skeleton/DaoOverviewSkeleton";
-import { DaoOverviewHeaderMetrics } from "@/features/dao-overview/components/DaoOverviewHeaderMetrics";
-import { TokenDistributionChartCard } from "@/features/dao-overview/components/TokenDistributionChartCard";
+import { useRouter } from "next/navigation";
+import { Suspense } from "react";
+
+import { AccountBalanceChartCard } from "@/features/dao-overview/components/AccountBalanceChartCard";
+import { AttackProfitabilityChartCard } from "@/features/dao-overview/components/AttackProfitabilityChartCard";
 import { DaoOverviewHeaderBackground } from "@/features/dao-overview/components/DaoOverviewHeaderBackground";
-import { SecurityCouncilCard } from "@/features/dao-overview/components/SecurityCouncilCard";
+import { DaoOverviewHeaderMetrics } from "@/features/dao-overview/components/DaoOverviewHeaderMetrics";
 import { LastProposalsCard } from "@/features/dao-overview/components/LastProposalsCard";
-import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
+import { MetricsCard } from "@/features/dao-overview/components/MetricsCard";
+import { OngoingProposalBanner } from "@/features/dao-overview/components/OngoingProposalBanner";
+import { SecurityCouncilCard } from "@/features/dao-overview/components/SecurityCouncilCard";
+import { TokenDistributionChartCard } from "@/features/dao-overview/components/TokenDistributionChartCard";
+import { VotingPowerChartCard } from "@/features/dao-overview/components/VotingPowerChartCard";
+import { DaoOverviewSkeleton } from "@/features/dao-overview/skeleton/DaoOverviewSkeleton";
 import { StagesContainer } from "@/features/resilience-stages/components/StagesContainer";
+import { RiskAreaCardEnum, RiskAreaCardWrapper } from "@/shared/components";
+import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
+import { DaoAvatarIcon } from "@/shared/components/icons";
+import daoConfigByDaoId from "@/shared/dao-config";
 import {
   fieldsToArray,
   getDaoStageFromFields,
 } from "@/shared/dao-config/utils";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
-import { RiskAreaCardEnum, RiskAreaCardWrapper } from "@/shared/components";
-import { AccountBalanceChartCard } from "@/features/dao-overview/components/AccountBalanceChartCard";
-import { VotingPowerChartCard } from "@/features/dao-overview/components/VotingPowerChartCard";
-import { MetricsCard } from "@/features/dao-overview/components/MetricsCard";
-import { AttackProfitabilityChartCard } from "@/features/dao-overview/components/AttackProfitabilityChartCard";
-import { useRouter } from "next/navigation";
-import { apolloClient } from "@/shared/providers/GlobalProviders";
-import { OngoingProposalBanner } from "./components/OngoingProposalBanner";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const router = useRouter();
   const daoConfig = daoConfigByDaoId[daoId];
   const daoOverview = daoConfig.daoOverview;
-
-  useEffect(() => {
-    // FIXME:
-    //   This is only a workaround for now, as Apollo Client does not yet support HTTP header context for cache indexing;
-    //   https://github.com/apollographql/apollo-feature-requests/issues/326
-    apolloClient.cache.reset();
-  }, [daoId]);
 
   const currentDaoStage = getDaoStageFromFields({
     fields: fieldsToArray(daoConfig.governanceImplementation?.fields),
@@ -45,7 +38,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
 
   const daoRiskAreas = getDaoRiskAreas(daoId);
   const riskAreas = {
-    title: "RISK AREAS",
+    title: "Attack Exposure",
     risks: Object.entries(daoRiskAreas).map(([name, info]) => ({
       name,
       level: info.riskLevel,
@@ -132,9 +125,8 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           <div className="w-full">
             <VotingPowerChartCard daoId={daoId} />
           </div>
-          
         </div>
-        {daoConfig.governancePage && (<LastProposalsCard daoId={daoId} />)}
+        {daoConfig.governancePage && <LastProposalsCard daoId={daoId} />}
       </div>
     </Suspense>
   );

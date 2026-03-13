@@ -2,8 +2,10 @@ import { Account, Address, Chain, Client, Transport } from "viem";
 import { readContract } from "viem/actions";
 
 import { DAOClient } from "@/clients";
-import { GovernorAbi } from "./abi";
+
 import { GovernorBase } from "../governor.base";
+
+import { GovernorAbi } from "./abi";
 
 export class UNIClient<
   TTransport extends Transport = Transport,
@@ -27,35 +29,40 @@ export class UNIClient<
   }
 
   async getQuorum(): Promise<bigint> {
-    return readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "quorumVotes",
-      args: [],
+    return this.getCachedQuorum(async () => {
+      return readContract(this.client, {
+        abi: this.abi,
+        address: this.address,
+        functionName: "quorumVotes",
+        args: [],
+      });
     });
   }
 
   async getTimelockDelay(): Promise<bigint> {
-    const timelockAddress = await readContract(this.client, {
-      abi: this.abi,
-      address: this.address,
-      functionName: "timelock",
-    });
-    return readContract(this.client, {
-      abi: [
-        {
-          constant: true,
-          inputs: [],
-          outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-          payable: false,
-          stateMutability: "view",
-          type: "function",
-          name: "delay",
-        },
-      ],
-      address: timelockAddress,
-      functionName: "delay",
-    });
+    if (!this.cache.timelockDelay) {
+      const timelockAddress = await readContract(this.client, {
+        abi: this.abi,
+        address: this.address,
+        functionName: "timelock",
+      });
+      this.cache.timelockDelay = await readContract(this.client, {
+        abi: [
+          {
+            constant: true,
+            inputs: [],
+            outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+            payable: false,
+            stateMutability: "view",
+            type: "function",
+            name: "delay",
+          },
+        ],
+        address: timelockAddress,
+        functionName: "delay",
+      });
+    }
+    return this.cache.timelockDelay;
   }
 
   calculateQuorum(votes: {

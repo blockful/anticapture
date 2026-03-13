@@ -1,17 +1,20 @@
-import { formatUnits } from "viem";
 import { useMemo } from "react";
+import { formatUnits } from "viem";
 
-import { useTimeSeriesData } from "@/shared/hooks";
 import { useDaoTokenHistoricalData } from "@/features/attack-profitability/hooks/useDaoTokenHistoricalData";
 import { useProposals } from "@/features/token-distribution/hooks/useProposals";
-import { DaoIdEnum } from "@/shared/types/daos";
+import { normalizeTimestamp } from "@/features/token-distribution/utils/chart";
+import type { MetricSchema } from "@/features/token-distribution/utils/metrics";
+import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
+import type {
+  TokenMetricItem,
+  PriceEntry,
+  ChartDataSetPoint,
+} from "@/shared/dao-config/types";
+import { useTimeSeriesData } from "@/shared/hooks";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
-import { TokenMetricItem, PriceEntry } from "@/shared/dao-config/types";
-import { ChartDataSetPoint } from "@/shared/dao-config/types";
-import { MetricSchema } from "@/features/token-distribution/utils/metrics";
-import { normalizeTimestamp } from "@/features/token-distribution/utils/chart";
-import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 
 export interface UseChartMetricsResult {
   chartData: ChartDataSetPoint[];

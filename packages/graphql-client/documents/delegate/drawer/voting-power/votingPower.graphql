@@ -1,0 +1,6 @@
+query GetVotingPower($address: String!) {
+  votingPowerByAccountId(accountId: $address) {
+    accountId
+    votingPower
+  }
+}

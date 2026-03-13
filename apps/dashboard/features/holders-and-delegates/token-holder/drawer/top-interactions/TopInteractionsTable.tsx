@@ -1,27 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
-import { Button, SkeletonRow } from "@/shared/components";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { ColumnDef } from "@tanstack/react-table";
-import { Address, formatUnits, parseUnits } from "viem";
+import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp } from "lucide-react";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { cn, formatNumberUserReadable } from "@/shared/utils";
-import { Table } from "@/shared/components/design-system/table/Table";
-import daoConfig from "@/shared/dao-config";
-import { useAccountInteractionsData } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/hooks/useAccountInteractionsData";
-import { AddressFilter } from "@/shared/components/design-system/table/filters";
-import { percentageVariants } from "@/shared/components/design-system/table/Percentage";
-import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
-import {
-  AmountFilterState,
-  useAmountFilterStore,
-} from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
-import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
-import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
 import {
   parseAsBoolean,
   parseAsString,
@@ -29,8 +9,27 @@ import {
   useQueryState,
   useQueryStates,
 } from "nuqs";
-import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
+import { useEffect, useState } from "react";
+import type { Address } from "viem";
+import { formatUnits, parseUnits } from "viem";
+
+import { useAccountInteractionsData } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/hooks/useAccountInteractionsData";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
+import { Button, SkeletonRow } from "@/shared/components";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { AddressFilter } from "@/shared/components/design-system/table/filters";
+import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
+import type { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
+import type { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
+import { useAmountFilterStore } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
+import { percentageVariants } from "@/shared/components/design-system/table/Percentage";
+import { Table } from "@/shared/components/design-system/table/Table";
+import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
+import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
+import daoConfig from "@/shared/dao-config";
+import type { DaoIdEnum } from "@/shared/types/daos";
+import { cn, formatNumberUserReadable } from "@/shared/utils";
 
 export const TopInteractionsTable = ({
   address,
@@ -70,15 +69,23 @@ export const TopInteractionsTable = ({
     daoOverview: { token },
   } = daoConfig[daoId as DaoIdEnum];
 
-  const { interactions, loading, error, totalTransfers } =
-    useAccountInteractionsData({
-      daoId: daoId as DaoIdEnum,
-      address: address,
-      filterAddress: currentAddressFilter ?? undefined,
-      sortBy,
-      sortDirection,
-      filterVariables,
-    });
+  const {
+    interactions,
+    loading,
+    error,
+    totalTransfers,
+    fetchNextPage,
+    fetchingMore,
+    hasNextPage,
+  } = useAccountInteractionsData({
+    daoId: daoId as DaoIdEnum,
+    address: address,
+    filterAddress: currentAddressFilter ?? undefined,
+    sortBy,
+    sortDirection,
+    filterVariables,
+    limit: 10,
+  });
 
   useEffect(() => {
     setIsMounted(true);
@@ -380,7 +387,11 @@ export const TopInteractionsTable = ({
         filterColumn="address"
         size="sm"
         withDownloadCSV={true}
+        csvFilename="top-interactions.csv"
         error={error}
+        hasMore={hasNextPage}
+        isLoadingMore={fetchingMore}
+        onLoadMore={fetchNextPage}
         fillHeight
       />
     </div>

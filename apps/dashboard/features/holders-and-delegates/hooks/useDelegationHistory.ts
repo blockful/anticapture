@@ -1,17 +1,17 @@
 "use client";
 
+import type { GetDelegationHistoryItemsQuery } from "@anticapture/graphql-client";
+import { QueryInput_HistoricalDelegations_OrderDirection } from "@anticapture/graphql-client";
 import { useGetDelegationHistoryItemsQuery } from "@anticapture/graphql-client/hooks";
-import {
-  GetDelegationHistoryItemsQuery,
-  QueryInput_HistoricalDelegations_OrderDirection,
-} from "@anticapture/graphql-client";
-import { useMemo, useCallback, useState, useEffect } from "react";
 import { NetworkStatus } from "@apollo/client";
-import { DaoIdEnum } from "@/shared/types/daos";
-import {
+import { useMemo, useCallback, useState, useEffect } from "react";
+
+import type {
   AmountFilterVariables,
   PaginationInfo,
 } from "@/features/holders-and-delegates/hooks/types";
+import type { DaoIdEnum } from "@/shared/types/daos";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 interface UseDelegationHistoryResult {
   data:
@@ -84,6 +84,7 @@ export const useDelegationHistory = ({
     context: {
       headers: {
         "anticapture-dao-id": daoId,
+        ...getAuthHeaders(),
       },
     },
     notifyOnNetworkStatusChange: true,

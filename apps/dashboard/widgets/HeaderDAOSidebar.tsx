@@ -1,17 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { Crosshair2Icon } from "@radix-ui/react-icons";
+import {
+  BarChart,
+  Landmark,
+  UserCheck,
+  ArrowRightLeft,
+  PieChart,
+  Newspaper,
+  Bomb,
+} from "lucide-react";
 import { usePathname } from "next/navigation";
-import { DaoIdEnum } from "@/shared/types/daos";
+import { useState } from "react";
+
 import {
   HeaderDAOSidebarDropdown,
   ButtonHeaderSidebar,
 } from "@/shared/components";
-import { BarChart, Gauge, Landmark, UserCheck } from "lucide-react";
-import daoConfigByDaoId from "@/shared/dao-config";
-import { ArrowRightLeft, PieChart } from "lucide-react";
-import { Crosshair2Icon } from "@radix-ui/react-icons";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
+import daoConfigByDaoId from "@/shared/dao-config";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn } from "@/shared/utils/";
 
 export const HeaderDAOSidebar = () => {
@@ -49,6 +57,32 @@ export const HeaderDAOSidebar = () => {
                 isCollapsed={isCollapsed}
               />
             )}
+            {daoConfig.dataTables && (
+              <ButtonHeaderSidebar
+                page={PAGES_CONSTANTS.holdersAndDelegates.page}
+                icon={UserCheck}
+                label={PAGES_CONSTANTS.holdersAndDelegates.title}
+                key={PAGES_CONSTANTS.holdersAndDelegates.title}
+                isCollapsed={isCollapsed}
+              />
+            )}
+            {daoConfig.governancePage && (
+              <ButtonHeaderSidebar
+                page={"governance"}
+                icon={Landmark}
+                label="Governance"
+                key="Governance"
+                isCollapsed={isCollapsed}
+              />
+            )}
+            <ButtonHeaderSidebar
+              page={PAGES_CONSTANTS.activityFeed.page}
+              icon={Newspaper}
+              label={PAGES_CONSTANTS.activityFeed.title}
+              key={PAGES_CONSTANTS.activityFeed.title}
+              isCollapsed={isCollapsed}
+              isNew
+            />
             {daoConfig.attackProfitability &&
               daoConfig.attackProfitability.supportsLiquidTreasuryCall && (
                 <ButtonHeaderSidebar
@@ -59,15 +93,6 @@ export const HeaderDAOSidebar = () => {
                   isCollapsed={isCollapsed}
                 />
               )}
-            {daoConfig.riskAnalysis && (
-              <ButtonHeaderSidebar
-                page={PAGES_CONSTANTS.riskAnalysis.page}
-                icon={Gauge}
-                label={PAGES_CONSTANTS.riskAnalysis.title}
-                key={PAGES_CONSTANTS.riskAnalysis.title}
-                isCollapsed={isCollapsed}
-              />
-            )}
             {daoConfig.resilienceStages && (
               <ButtonHeaderSidebar
                 page={PAGES_CONSTANTS.resilienceStages.page}
@@ -77,31 +102,21 @@ export const HeaderDAOSidebar = () => {
                 isCollapsed={isCollapsed}
               />
             )}
+            {daoConfig.attackExposure && (
+              <ButtonHeaderSidebar
+                page={PAGES_CONSTANTS.attackExposure.page}
+                icon={Bomb}
+                label={PAGES_CONSTANTS.attackExposure.title}
+                key={PAGES_CONSTANTS.attackExposure.title}
+                isCollapsed={isCollapsed}
+              />
+            )}
             {daoConfig.tokenDistribution && (
               <ButtonHeaderSidebar
                 page={PAGES_CONSTANTS.tokenDistribution.page}
                 icon={ArrowRightLeft}
                 label={PAGES_CONSTANTS.tokenDistribution.title}
                 key={PAGES_CONSTANTS.tokenDistribution.title}
-                isCollapsed={isCollapsed}
-              />
-            )}
-            {daoConfig.dataTables && (
-              <ButtonHeaderSidebar
-                page={PAGES_CONSTANTS.holdersAndDelegates.page}
-                icon={UserCheck}
-                label={PAGES_CONSTANTS.holdersAndDelegates.title}
-                key={PAGES_CONSTANTS.holdersAndDelegates.title}
-                isCollapsed={isCollapsed}
-              />
-            )}
-
-            {daoConfig.governancePage && (
-              <ButtonHeaderSidebar
-                page={"governance"}
-                icon={Landmark}
-                label="Governance"
-                key="Governance"
                 isCollapsed={isCollapsed}
               />
             )}

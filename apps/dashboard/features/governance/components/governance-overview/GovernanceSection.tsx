@@ -1,17 +1,16 @@
 "use client";
 
+import { QueryInput_Proposals_OrderDirection } from "@anticapture/graphql-client";
 import { Building2, Landmark } from "lucide-react";
+import { useParams } from "next/navigation";
 import { useCallback, useEffect, useRef } from "react";
 
-import { useProposals } from "@/features/governance/hooks/useProposals";
-
 import { ProposalItem } from "@/features/governance/components/proposal-overview/ProposalItem";
+import { useProposals } from "@/features/governance/hooks/useProposals";
 import { TheSectionLayout } from "@/shared/components";
-import { Button } from "@/shared/components/ui/button";
-import { QueryInput_Proposals_OrderDirection } from "@anticapture/graphql-client";
-import { useParams } from "next/navigation";
-import { DaoIdEnum } from "@/shared/types/daos";
+import { EmptyState } from "@/shared/components/design-system/table/components/EmptyState";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 export const GovernanceSection = () => {
   const { daoId }: { daoId: string } = useParams();
@@ -65,10 +64,10 @@ export const GovernanceSection = () => {
           description="View and vote on executable proposals from this DAO."
         >
           <div className="flex flex-col items-center justify-center py-12">
-            <p className="text-error mb-4">
-              Error loading proposals: {error.message}
-            </p>
-            <Button onClick={() => window.location.reload()}>Try Again</Button>
+            <EmptyState
+              title="Unable to load proposals"
+              description="Please try again later"
+            />
           </div>
         </TheSectionLayout>
       </div>

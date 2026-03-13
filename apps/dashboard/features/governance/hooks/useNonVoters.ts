@@ -1,11 +1,14 @@
-import { useMemo, useCallback } from "react";
-import { ApolloError, NetworkStatus } from "@apollo/client";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { GetProposalNonVotersQuery } from "@anticapture/graphql-client/hooks";
 import {
-  GetProposalNonVotersQuery,
   useGetProposalNonVotersQuery,
   QueryInput_ProposalNonVoters_OrderDirection,
 } from "@anticapture/graphql-client/hooks";
+import type { ApolloError } from "@apollo/client";
+import { NetworkStatus } from "@apollo/client";
+import { useMemo, useCallback } from "react";
+
+import type { DaoIdEnum } from "@/shared/types/daos";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 // Non-voter type
 export type NonVoter = NonNullable<
@@ -59,6 +62,7 @@ export const useNonVoters = ({
       context: {
         headers: {
           "anticapture-dao-id": daoId,
+          ...getAuthHeaders(),
         },
       },
       skip: !proposalId,

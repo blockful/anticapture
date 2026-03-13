@@ -1,5 +1,8 @@
 import { Address } from "viem";
+
+import { DAOClient } from "@/clients";
 import { DaoIdEnum } from "@/lib/enums";
+import { DBProposal } from "@/mappers";
 import {
   DbProposal,
   DbVote,
@@ -8,8 +11,6 @@ import {
   VoteFilter,
   DbProposalWithVote,
 } from "@/repositories/";
-import { DAOClient } from "@/clients";
-import { DBProposal } from "@/mappers";
 
 const FINAL_PROPOSAL_STATUSES = ["EXECUTED", "DEFEATED", "CANCELED", "EXPIRED"];
 
@@ -144,6 +145,9 @@ export class ProposalsActivityService {
       return this.createEmptyActivity(address, false);
     }
 
+    const currentBlock = await this.daoClient.getCurrentBlockNumber();
+    const currentTimestamp = await this.daoClient.getBlockTime(currentBlock);
+
     // Transform to the expected format
     const proposals = await Promise.all(
       proposalsWithVotes.map(async (item) => {
@@ -161,7 +165,11 @@ export class ProposalsActivityService {
           abstainVotes: item.proposal.abstain_votes,
           endTimestamp: BigInt(item.proposal.proposal_end_timestamp),
         };
-        proposal.status = await this.daoClient.getProposalStatus(proposal);
+        proposal.status = await this.daoClient.getProposalStatus(
+          proposal,
+          currentBlock,
+          currentTimestamp!,
+        );
         return {
           proposal,
           userVote: item.userVote && {

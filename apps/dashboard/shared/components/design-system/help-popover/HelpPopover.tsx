@@ -1,6 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverPortal,
+  PopoverTrigger,
+} from "@radix-ui/react-popover";
+import type { LucideIcon } from "lucide-react";
 import {
   CircleHelp,
   Calendar,
@@ -8,17 +14,12 @@ import {
   HelpCircle,
   X,
   MessageCircle,
-  LucideIcon,
 } from "lucide-react";
-import { cn } from "@/shared/utils";
-import {
-  Popover,
-  PopoverContent,
-  PopoverPortal,
-  PopoverTrigger,
-} from "@radix-ui/react-popover";
-import { Button } from "@/shared/components/design-system/buttons/button/Button";
+import { useState } from "react";
+
 import { BadgeIcon } from "@/shared/components/design-system/badges/BadgeIcon";
+import { Button } from "@/shared/components/design-system/buttons/button/Button";
+import { cn } from "@/shared/utils";
 
 interface HelpPopoverProps {
   className?: string;

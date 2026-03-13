@@ -1,7 +1,19 @@
 "use client";
 
-import { ReactNode, useMemo } from "react";
-import { ColumnDef } from "@tanstack/react-table";
+import type { Query_ProposalsActivity_Proposals_Items } from "@anticapture/graphql-client";
+import type { ColumnDef } from "@tanstack/react-table";
+import { ExternalLink } from "lucide-react";
+import Link from "next/link";
+import type { ReactNode } from "react";
+import { useMemo } from "react";
+
+import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
+import {
+  getUserVoteData,
+  extractProposalName,
+  getVoteTimingData,
+  proposalsFinalResultMapping,
+} from "@/features/holders-and-delegates/utils/proposalsTableUtils";
 import {
   SkeletonRow,
   TextIconLeft,
@@ -9,34 +21,24 @@ import {
   Button,
   IconButton,
 } from "@/shared/components";
-import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
-import { formatNumberUserReadable, cn } from "@/shared/utils";
-import { ExternalLink } from "lucide-react";
-import { useDaoData } from "@/shared/hooks";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { Query_ProposalsActivity_Proposals_Items } from "@anticapture/graphql-client";
-import {
-  CategoriesFilter,
-  FilterOption,
-} from "@/shared/components/design-system/table/filters/CategoriesFilter";
-import daoConfigByDaoId from "@/shared/dao-config";
-import Link from "next/link";
-import {
-  getUserVoteData,
-  extractProposalName,
-  getVoteTimingData,
-  proposalsFinalResultMapping,
-} from "@/features/holders-and-delegates/utils/proposalsTableUtils";
+import type { FilterOption } from "@/shared/components/design-system/table/filters/CategoriesFilter";
+import { CategoriesFilter } from "@/shared/components/design-system/table/filters/CategoriesFilter";
 import { Table } from "@/shared/components/design-system/table/Table";
-import daoConfig from "@/shared/dao-config";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
-import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
+import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
+import daoConfig from "@/shared/dao-config";
+import { useDaoData } from "@/shared/hooks";
+import type { DaoIdEnum } from "@/shared/types/daos";
+import { formatNumberUserReadable, cn } from "@/shared/utils";
+
 interface ProposalTableData {
   proposalId: string;
   proposalName: string;
-  finalResult: { text: string; icon: ReactNode };
-  userVote: { text: string; icon: ReactNode };
-  votingPower: string;
+  finalResult: string;
+  userVote: string;
+  finalResultIcon: ReactNode;
+  userVoteIcon: ReactNode;
+  votingPower: number | null;
   voteTiming: { text: string; percentage: number };
   status: string;
 }
@@ -93,26 +95,26 @@ export const ProposalsTable = ({
       return {
         proposalId: item.proposal?.id || "",
         proposalName: extractProposalName(item.proposal?.description || ""),
-        finalResult,
-        userVote,
+        finalResult: finalResult.text,
+        userVote: userVote.text,
+        finalResultIcon: finalResult.icon,
+        userVoteIcon: userVote.icon,
         votingPower: item.userVote?.votingPower
-          ? formatNumberUserReadable(
-              token === "ERC20"
-                ? Number(item.userVote.votingPower) / 1e18
-                : Number(item.userVote.votingPower),
-            )
-          : "-",
+          ? token === "ERC20"
+            ? Number(item.userVote.votingPower) / 1e18
+            : Number(item.userVote.votingPower)
+          : null,
         voteTiming: getVoteTimingData(
           item.userVote,
           item.proposal,
           finalResult.text,
           // dao data come in blocks, we then convert it to seconds
           (Number(daoData?.votingPeriod) *
-            daoConfigByDaoId[daoIdEnum]?.daoOverview.chain.blockTime) /
+            daoConfig[daoIdEnum]?.daoOverview.chain.blockTime) /
             1000,
           daoData?.votingDelay
             ? (Number(daoData?.votingDelay) *
-                daoConfigByDaoId[daoIdEnum]?.daoOverview.chain.blockTime) /
+                daoConfig[daoIdEnum]?.daoOverview.chain.blockTime) /
                 1000
             : 0,
         ),
@@ -125,7 +127,7 @@ export const ProposalsTable = ({
     {
       accessorKey: "proposalName",
       meta: {
-        columnClassName: "w-32",
+        columnClassName: "w-50",
       },
       cell: ({ row }) => {
         const proposalName = row.getValue("proposalName") as string;
@@ -178,13 +180,11 @@ export const ProposalsTable = ({
     {
       accessorKey: "finalResult",
       meta: {
-        columnClassName: "w-28",
+        columnClassName: "w-40",
       },
       cell: ({ row }) => {
-        const finalResult = row.getValue("finalResult") as {
-          text: string;
-          icon: ReactNode;
-        };
+        const finalResult = row.getValue("finalResult") as string;
+        const finalResultIcon = row.original.finalResultIcon;
 
         if (loading) {
           return (
@@ -196,7 +196,7 @@ export const ProposalsTable = ({
 
         return (
           <div className="flex items-center justify-start">
-            <TextIconLeft text={finalResult.text} icon={finalResult.icon} />
+            <TextIconLeft text={finalResult} icon={finalResultIcon} />
           </div>
         );
       },
@@ -208,10 +208,8 @@ export const ProposalsTable = ({
         columnClassName: "w-28",
       },
       cell: ({ row }) => {
-        const userVote = row.getValue("userVote") as {
-          text: string;
-          icon: ReactNode;
-        };
+        const userVote = row.getValue("userVote") as string;
+        const userVoteIcon = row.original.userVoteIcon;
 
         if (loading) {
           return (
@@ -223,7 +221,7 @@ export const ProposalsTable = ({
 
         return (
           <div className="flex items-center justify-start">
-            <TextIconLeft text={userVote.text} icon={userVote.icon} />
+            <TextIconLeft text={userVote} icon={userVoteIcon} />
           </div>
         );
       },
@@ -244,10 +242,10 @@ export const ProposalsTable = ({
     {
       accessorKey: "votingPower",
       meta: {
-        columnClassName: "min-w-32",
+        columnClassName: "w-32",
       },
       cell: ({ row }) => {
-        const votingPower = row.getValue("votingPower") as string;
+        const votingPower = row.getValue("votingPower") as number | null;
 
         if (loading) {
           return (
@@ -259,9 +257,9 @@ export const ProposalsTable = ({
 
         return (
           <div className="text-secondary flex items-center justify-end text-sm font-normal">
-            {votingPower === "-"
+            {votingPower === null
               ? "-"
-              : `${votingPower} ${daoData?.id || "ENS"}`}
+              : `${formatNumberUserReadable(votingPower)} ${daoData?.id || "ENS"}`}
           </div>
         );
       },
@@ -379,9 +377,9 @@ export const ProposalsTable = ({
         }
 
         const govPlatformUrl =
-          daoConfigByDaoId[daoIdEnum]?.daoOverview?.govPlatform?.url;
+          daoConfig[daoIdEnum]?.daoOverview?.govPlatform?.url;
         const govPlatformName =
-          daoConfigByDaoId[daoIdEnum]?.daoOverview?.govPlatform?.name;
+          daoConfig[daoIdEnum]?.daoOverview?.govPlatform?.name;
 
         if (!govPlatformUrl) {
           return null;
@@ -416,6 +414,7 @@ export const ProposalsTable = ({
         isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}
         withDownloadCSV={true}
+        csvFilename="proposals.csv"
         error={error}
         fillHeight
       />

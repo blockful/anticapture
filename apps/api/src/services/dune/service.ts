@@ -1,4 +1,5 @@
 import { HTTPException } from "hono/http-exception";
+
 import { DuneResponse } from "../treasury/providers/dune-provider";
 
 export class DuneService {

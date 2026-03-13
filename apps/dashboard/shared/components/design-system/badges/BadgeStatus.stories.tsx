@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
-import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 import {
   CheckCircle2,
   AlertCircle,
@@ -10,6 +9,7 @@ import {
   Zap,
 } from "lucide-react";
 
+import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta = {

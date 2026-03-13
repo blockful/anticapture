@@ -1,6 +1,7 @@
+import { Check, Hourglass, Pencil } from "lucide-react";
+
 import { SpinIcon } from "@/shared/components/icons/SpinIcon";
 import { cn } from "@/shared/utils";
-import { Check, Hourglass, Pencil } from "lucide-react";
 
 interface LoadingComponentProps {
   transactionhash: string;

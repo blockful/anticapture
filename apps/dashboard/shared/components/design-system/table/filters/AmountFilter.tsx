@@ -1,16 +1,18 @@
 "use client";
 
-import { ChangeEvent, useState } from "react";
+import { ResetIcon } from "@radix-ui/react-icons";
+import type { ChangeEvent } from "react";
+import { useState } from "react";
+
+import SearchField from "@/shared/components/design-system/SearchField";
+import { ButtonFilter } from "@/shared/components/design-system/table/ButtonFilter";
+import { Button } from "@/shared/components/ui/button";
 import {
   Popover,
   PopoverTrigger,
   PopoverContent,
 } from "@/shared/components/ui/popover";
-import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/utils/";
-import SearchField from "@/shared/components/design-system/SearchField";
-import { ResetIcon } from "@radix-ui/react-icons";
-import { ButtonFilter } from "@/shared/components/design-system/table/ButtonFilter";
 
 interface AmountFilterProps {
   onApply: (params: { min?: number; max?: number }) => void;

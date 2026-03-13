@@ -1,11 +1,13 @@
-import { forwardRef, ElementType } from "react";
-import { cn } from "@/shared/utils";
-import Spinner from "@/shared/components/ui/spinner";
-import {
+import type { ElementType } from "react";
+import { forwardRef } from "react";
+
+import { variantStyles } from "@/shared/components/design-system/buttons/styles";
+import type {
   ButtonSize,
   ButtonProps,
 } from "@/shared/components/design-system/buttons/types";
-import { variantStyles } from "@/shared/components/design-system/buttons/styles";
+import Spinner from "@/shared/components/ui/spinner";
+import { cn } from "@/shared/utils";
 
 interface IconButtonProps extends ButtonProps {
   icon?: ElementType;

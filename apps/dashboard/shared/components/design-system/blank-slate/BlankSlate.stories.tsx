@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
-import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 import {
   Inbox,
   FileX,
@@ -13,6 +12,7 @@ import {
   WifiOff,
 } from "lucide-react";
 
+import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta = {

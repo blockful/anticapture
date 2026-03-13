@@ -1,6 +1,7 @@
-import { GlossarySearchResult } from "@/features/glossary/glossary";
-import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 import { SearchIcon } from "lucide-react";
+
+import type { GlossarySearchResult } from "@/features/glossary/glossary";
+import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 
 interface GlossarySearchResultsProps {
   results: GlossarySearchResult[];

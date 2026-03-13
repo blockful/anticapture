@@ -1,11 +1,12 @@
-import type { Metadata } from "next";
-import { DaoIdEnum } from "@/shared/types/daos";
-import daoConfigByDaoId from "@/shared/dao-config";
-import { AttackProfitabilitySection } from "@/features/attack-profitability";
-import { SubSectionsContainer } from "@/shared/components/design-system/section";
-import { RiskLevelCard, TheSectionLayout } from "@/shared/components";
-import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { Crosshair2Icon } from "@radix-ui/react-icons";
+import type { Metadata } from "next";
+
+import { AttackProfitabilitySection } from "@/features/attack-profitability";
+import { TheSectionLayout } from "@/shared/components";
+import { SubSectionsContainer } from "@/shared/components/design-system/section";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
+import daoConfigByDaoId from "@/shared/dao-config";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 type Props = {
   params: Promise<{ daoId: string }>;
@@ -15,10 +16,14 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const daoId = params.daoId.toUpperCase() as DaoIdEnum;
 
+  const canonicalPath = `/${params.daoId}/attack-profitability`;
+
   return {
     title: `Anticapture - ${daoId} DAO Attack Profitability`,
     description: `Analyze attack profitability and governance capture costs for ${daoId} DAO.`,
+    alternates: { canonical: canonicalPath },
     openGraph: {
+      url: canonicalPath,
       title: `Anticapture - ${daoId} DAO Attack Profitability`,
       description: `Analyze attack profitability and governance capture costs for ${daoId} DAO.`,
     },
@@ -49,9 +54,6 @@ export default async function AttackProfitabilityPage({
         title={PAGES_CONSTANTS.attackProfitability.title}
         icon={<Crosshair2Icon className="section-layout-icon" />}
         description={PAGES_CONSTANTS.attackProfitability.description}
-        riskLevel={
-          <RiskLevelCard status={daoConstants.attackProfitability?.riskLevel} />
-        }
       >
         <SubSectionsContainer>
           <AttackProfitabilitySection

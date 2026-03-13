@@ -1,8 +1,8 @@
-import { Address } from "viem";
-import { DaoIdEnum } from "@/lib/enums";
 import { asc, eq, sql } from "drizzle-orm";
-import { Drizzle } from "@/database";
-import { votesOnchain } from "@/database";
+import { Address } from "viem";
+
+import { Drizzle, votesOnchain } from "@/database";
+import { DaoIdEnum } from "@/lib/enums";
 
 export type DbProposal = {
   id: string;
@@ -43,11 +43,8 @@ export enum VoteFilter {
 export type OrderByField = "votingPower" | "voteTiming" | "timestamp";
 export type OrderDirection = "asc" | "desc";
 
-/* eslint-disable */
 export class DrizzleProposalsActivityRepository {
   constructor(private readonly db: Drizzle) {}
-
-  /* eslint-enable */
 
   async getFirstVoteTimestamp(address: Address): Promise<number | null> {
     const firstVote = await this.db.query.votesOnchain.findFirst({

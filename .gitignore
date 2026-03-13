@@ -149,3 +149,5 @@ dist
 
 .github/skills/*
 .github/copilot-instructions.md
+
+.claude/worktrees

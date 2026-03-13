@@ -1,14 +1,16 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { ResetIcon } from "@radix-ui/react-icons";
+import type { ReactNode } from "react";
+import { useState } from "react";
+
+import { Button } from "@/shared/components/design-system/buttons/button/Button";
+import { ButtonFilter } from "@/shared/components/design-system/table/ButtonFilter";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/shared/components/ui/popover";
-import { ButtonFilter } from "@/shared/components/design-system/table/ButtonFilter";
-import { ResetIcon } from "@radix-ui/react-icons";
-import { Button } from "@/shared/components/design-system/buttons/button/Button";
 
 interface FilterBoxProps<T> {
   className?: string;

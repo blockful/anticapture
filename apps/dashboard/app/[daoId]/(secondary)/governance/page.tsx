@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { DaoIdEnum } from "@/shared/types/daos";
 
-import { HeaderMobile } from "@/widgets/HeaderMobile";
-import { HeaderDAOSidebar, HeaderSidebar, StickyPageHeader } from "@/widgets";
-import { Footer } from "@/shared/components/design-system/footer/Footer";
 import { GovernanceSection } from "@/features/governance";
+import { Footer } from "@/shared/components/design-system/footer/Footer";
+import type { DaoIdEnum } from "@/shared/types/daos";
+import { HeaderDAOSidebar, HeaderSidebar, StickyPageHeader } from "@/widgets";
+import { HeaderMobile } from "@/widgets/HeaderMobile";
 
 type Props = {
   params: Promise<{ daoId: string }>;
@@ -17,10 +17,14 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const ogTitle = `Anticapture - ${daoId} DAO`;
   const ogDescription = `Explore and mitigate governance risks in ${daoId} DAO.`;
 
+  const canonicalPath = `/${params.daoId}/governance`;
+
   return {
     title: ogTitle,
     description: ogDescription,
+    alternates: { canonical: canonicalPath },
     openGraph: {
+      url: canonicalPath,
       title: ogTitle,
       description: ogDescription,
     },

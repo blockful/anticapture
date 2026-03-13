@@ -1,5 +1,6 @@
+import type { HTMLAttributes, SVGProps } from "react";
+
 import { cn } from "@/shared/utils";
-import { HTMLAttributes, SVGProps } from "react";
 
 export const AnticaptureLogo = (props: SVGProps<SVGSVGElement>) => {
   return (

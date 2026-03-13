@@ -1,4 +1,5 @@
 import { Info } from "lucide-react";
+
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 
 export function TooltipInfo({

@@ -1,14 +1,17 @@
 import { formatUnits } from "viem";
-import { TreasuryProvider } from "./providers";
-import { PriceProvider } from "./types";
-import { TreasuryResponse } from "@/mappers/treasury";
-import { TreasuryRepository } from "../../repositories/treasury";
-import { forwardFill, createDailyTimeline } from "@/lib/time-series";
+
 import {
   calculateCutoffTimestamp,
   normalizeMapTimestamps,
   truncateTimestampToMidnight,
 } from "@/lib/date-helpers";
+import { forwardFill, createDailyTimeline } from "@/lib/time-series";
+import { TreasuryResponse } from "@/mappers/treasury";
+
+import { TreasuryRepository } from "../../repositories/treasury";
+
+import { TreasuryProvider } from "./providers";
+import { PriceProvider } from "./types";
 
 /**
  * Treasury Service - Orchestrates treasury data retrieval and calculation.

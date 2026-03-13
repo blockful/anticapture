@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import { DaoIdEnum } from "@/shared/types/daos";
-import daoConfigByDaoId from "@/shared/dao-config";
+
 import { HoldersAndDelegatesSection } from "@/features/holders-and-delegates";
+import daoConfigByDaoId from "@/shared/dao-config";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 type Props = {
   params: Promise<{ daoId: string }>;
@@ -11,10 +12,14 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const daoId = params.daoId.toUpperCase() as DaoIdEnum;
 
+  const canonicalPath = `/${params.daoId}/holders-and-delegates`;
+
   return {
     title: `Anticapture - ${daoId} DAO Holders and Delegates`,
     description: `Explore ${daoId} DAO token holders and delegate distribution.`,
+    alternates: { canonical: canonicalPath },
     openGraph: {
+      url: canonicalPath,
       title: `Anticapture - ${daoId} DAO Holders and Delegates`,
       description: `Explore ${daoId} DAO token holders and delegate distribution.`,
     },

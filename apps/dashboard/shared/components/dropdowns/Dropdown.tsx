@@ -1,6 +1,7 @@
-import { cn } from "@/shared/utils";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
+
+import { cn } from "@/shared/utils";
 
 export interface Option {
   value: string;

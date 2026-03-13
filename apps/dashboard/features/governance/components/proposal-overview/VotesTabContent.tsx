@@ -1,19 +1,20 @@
 "use client";
 
-import { cn, formatNumberUserReadable } from "@/shared/utils";
-import { GetProposalQuery } from "@anticapture/graphql-client";
-
-import { TabsVotedContent } from "@/features/governance/components/proposal-overview/TabsVotedContent";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { useParams } from "next/navigation";
+import type { GetProposalQuery } from "@anticapture/graphql-client";
 import {
   useGetProposalNonVotersQuery,
   useGetVotesQuery,
 } from "@anticapture/graphql-client/hooks";
-import { formatUnits } from "viem";
-import { TabsDidntVoteContent } from "@/features/governance/components/proposal-overview/TabsDidntVoteContent";
-import daoConfig from "@/shared/dao-config";
+import { useParams } from "next/navigation";
 import { parseAsStringEnum, useQueryState } from "nuqs";
+import { formatUnits } from "viem";
+
+import { TabsDidntVoteContent } from "@/features/governance/components/proposal-overview/TabsDidntVoteContent";
+import { TabsVotedContent } from "@/features/governance/components/proposal-overview/TabsVotedContent";
+import daoConfig from "@/shared/dao-config";
+import type { DaoIdEnum } from "@/shared/types/daos";
+import { cn, formatNumberUserReadable } from "@/shared/utils";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 type VoteTabId = "voted" | "didntVote";
 
@@ -43,6 +44,7 @@ export const VotesTabContent = ({
     context: {
       headers: {
         "anticapture-dao-id": daoIdEnum,
+        ...getAuthHeaders(),
       },
     },
   });
@@ -56,6 +58,7 @@ export const VotesTabContent = ({
     context: {
       headers: {
         "anticapture-dao-id": daoIdEnum,
+        ...getAuthHeaders(),
       },
     },
   });
@@ -72,7 +75,7 @@ export const VotesTabContent = ({
   );
 
   return (
-    <div className="text-primary flex w-full flex-col gap-3 lg:p-4 py-4">
+    <div className="text-primary flex w-full flex-col gap-3 py-4 lg:p-4">
       <div className="grid grid-cols-2 gap-4">
         <div
           onClick={() => setActiveTab("voted")}

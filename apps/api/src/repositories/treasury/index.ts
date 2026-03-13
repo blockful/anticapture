@@ -1,6 +1,6 @@
-import { Drizzle } from "@/database";
-import { daoMetricsDayBucket } from "@/database";
 import { and, eq, gte, lte, desc } from "drizzle-orm";
+
+import { Drizzle, daoMetricsDayBucket } from "@/database";
 import { MetricTypesEnum } from "@/lib/constants";
 
 /**

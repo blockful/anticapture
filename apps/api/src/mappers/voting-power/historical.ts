@@ -1,8 +1,9 @@
 import { z } from "@hono/zod-openapi";
+import { getAddress, isAddress } from "viem";
+
 import { delegation, votingPowerHistory } from "@/database";
 
 import { DBTransfer } from "../transfers";
-import { getAddress, isAddress } from "viem";
 
 type DBDelegation = typeof delegation.$inferSelect;
 

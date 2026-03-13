@@ -1,11 +1,12 @@
-import type { Metadata } from "next";
-import { DaoIdEnum } from "@/shared/types/daos";
-import daoConfigByDaoId from "@/shared/dao-config";
-import { TokenDistributionSection } from "@/features/token-distribution";
-import { SubSectionsContainer } from "@/shared/components/design-system/section";
-import { TheSectionLayout } from "@/shared/components";
-import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { ArrowRightLeft } from "lucide-react";
+import type { Metadata } from "next";
+
+import { TokenDistributionSection } from "@/features/token-distribution";
+import { TheSectionLayout } from "@/shared/components";
+import { SubSectionsContainer } from "@/shared/components/design-system/section";
+import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
+import daoConfigByDaoId from "@/shared/dao-config";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 type Props = {
   params: Promise<{ daoId: string }>;
@@ -15,10 +16,14 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const daoId = params.daoId.toUpperCase() as DaoIdEnum;
 
+  const canonicalPath = `/${params.daoId}/token-distribution`;
+
   return {
     title: `Anticapture - ${daoId} DAO Token Distribution`,
     description: `Analyze token distribution and concentration for ${daoId} DAO.`,
+    alternates: { canonical: canonicalPath },
     openGraph: {
+      url: canonicalPath,
       title: `Anticapture - ${daoId} DAO Token Distribution`,
       description: `Analyze token distribution and concentration for ${daoId} DAO.`,
     },

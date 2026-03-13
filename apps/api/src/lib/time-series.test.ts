@@ -1,6 +1,6 @@
-import { forwardFill, createDailyTimeline } from "@/lib/time-series";
 import { truncateTimestampToMidnight } from "@/lib/date-helpers";
 import { SECONDS_IN_DAY } from "@/lib/enums";
+import { forwardFill, createDailyTimeline } from "@/lib/time-series";
 
 describe("time-series", () => {
   describe("forwardFill", () => {

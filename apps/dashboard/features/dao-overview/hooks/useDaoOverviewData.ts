@@ -1,21 +1,22 @@
+import {
+  QueryInput_VotingPowers_OrderDirection,
+  useGetDelegatesQuery,
+} from "@anticapture/graphql-client/hooks";
 import { formatUnits } from "viem";
 
+import { useDaoTreasuryStats } from "@/features/dao-overview/hooks/useDaoTreasuryStats";
+import { useTopDelegatesToPass } from "@/features/dao-overview/hooks/useTopDelegatesToPass";
+import type { DaoConfiguration } from "@/shared/dao-config/types";
 import {
   useDaoData,
   useActiveSupply,
   useAverageTurnout,
   useTokenData,
 } from "@/shared/hooks";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
-import { useTopDelegatesToPass } from "@/features/dao-overview/hooks/useTopDelegatesToPass";
-import { useDaoTreasuryStats } from "@/features/dao-overview/hooks/useDaoTreasuryStats";
 import { formatNumberUserReadable } from "@/shared/utils";
-import { DaoConfiguration } from "@/shared/dao-config/types";
-import {
-  QueryInput_VotingPowers_OrderDirection,
-  useGetDelegatesQuery,
-} from "@anticapture/graphql-client/hooks";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 export const useDaoOverviewData = ({
   daoId,
@@ -36,7 +37,12 @@ export const useDaoOverviewData = ({
       orderDirection: QueryInput_VotingPowers_OrderDirection.Desc,
       limit: 20,
     },
-    context: { headers: { "anticapture-dao-id": daoId } },
+    context: {
+      headers: {
+        "anticapture-dao-id": daoId,
+        ...getAuthHeaders(),
+      },
+    },
     notifyOnNetworkStatusChange: true,
     fetchPolicy: "cache-and-network", // Always check network for fresh data
   });

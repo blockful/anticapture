@@ -1,11 +1,12 @@
 import { Slot } from "@radix-ui/react-slot";
-import { cn } from "@/shared/utils";
-import Spinner from "@/shared/components/ui/spinner";
-import {
+
+import { variantStyles } from "@/shared/components/design-system/buttons/styles";
+import type {
   ButtonProps,
   ButtonSize,
 } from "@/shared/components/design-system/buttons/types";
-import { variantStyles } from "@/shared/components/design-system/buttons/styles";
+import Spinner from "@/shared/components/ui/spinner";
+import { cn } from "@/shared/utils";
 
 const sizeStyles: Record<ButtonSize, string> = {
   sm: "py-1 px-2",

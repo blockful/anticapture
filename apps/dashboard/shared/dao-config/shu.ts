@@ -1,11 +1,12 @@
-import { DaoConfiguration } from "@/shared/dao-config/types";
-import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
-import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
-import { ShutterIcon } from "@/shared/components/icons";
 import { mainnet } from "viem/chains";
-import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
+
+import { ShutterIcon } from "@/shared/components/icons";
 import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
-import { ShutterOgIcon } from "../og/dao-og-icons";
+import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
+import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
+import type { DaoConfiguration } from "@/shared/dao-config/types";
+import { ShutterOgIcon } from "@/shared/og/dao-og-icons";
+import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
 
 export const SHU: DaoConfiguration = {
   name: "Shutter",
@@ -44,23 +45,23 @@ export const SHU: DaoConfiguration = {
     // Fields are sorted alphabetically by GovernanceImplementationEnum for readability
     fields: {
       [GovernanceImplementationEnum.AUDITED_CONTRACTS]: {
-        value: "Yes",
+        // value: "Yes",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.AUDITED_CONTRACTS
           ].description,
       },
-      [GovernanceImplementationEnum.INTERFACE_HIJACK]: {
-        value: "No",
-        riskLevel: RiskLevel.MEDIUM,
-        description:
-          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
-            GovernanceImplementationEnum.INTERFACE_HIJACK
-          ].description,
-      },
+      // [GovernanceImplementationEnum.INTERFACE_HIJACK]: {
+      //   // value: "No",
+      //   riskLevel: RiskLevel.MEDIUM,
+      //   description:
+      //     GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+      //       GovernanceImplementationEnum.INTERFACE_HIJACK
+      //     ].description,
+      // },
       [GovernanceImplementationEnum.ATTACK_PROFITABILITY]: {
-        value: "~100M USD",
+        // value: "~100M USD",
         riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -68,7 +69,7 @@ export const SHU: DaoConfiguration = {
           ].description,
       },
       [GovernanceImplementationEnum.PROPOSAL_FLASHLOAN_PROTECTION]: {
-        value: "Yes",
+        // value: "Yes",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -76,23 +77,23 @@ export const SHU: DaoConfiguration = {
           ].description,
       },
       [GovernanceImplementationEnum.PROPOSAL_THRESHOLD]: {
-        value: "100k SHU",
+        // value: "100k SHU",
         riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.PROPOSAL_THRESHOLD
           ].description,
       },
-      [GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL]: {
-        value: "No",
-        riskLevel: RiskLevel.HIGH,
-        description:
-          GOVERNANCE_IMPLEMENTATION_CONSTANTS[
-            GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL
-          ].description,
-      },
+      // [GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL]: {
+      // value: "No",
+      //   riskLevel: RiskLevel.HIGH,
+      //   description:
+      //     GOVERNANCE_IMPLEMENTATION_CONSTANTS[
+      //       GovernanceImplementationEnum.PROPOSAL_THRESHOLD_CANCEL
+      //     ].description,
+      // },
       [GovernanceImplementationEnum.PROPOSER_BALANCE_CANCEL]: {
-        value: "No",
+        // value: "No",
         riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -104,7 +105,7 @@ export const SHU: DaoConfiguration = {
         ],
       },
       [GovernanceImplementationEnum.SECURITY_COUNCIL]: {
-        value: "Yes",
+        // value: "Yes",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -112,7 +113,7 @@ export const SHU: DaoConfiguration = {
           ].description,
       },
       [GovernanceImplementationEnum.SPAM_RESISTANCE]: {
-        value: "No",
+        // value: "No",
         riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -120,7 +121,7 @@ export const SHU: DaoConfiguration = {
           ].description,
       },
       [GovernanceImplementationEnum.TIMELOCK_ADMIN]: {
-        value: "No",
+        // value: "No",
         riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -128,7 +129,7 @@ export const SHU: DaoConfiguration = {
           ].description,
       },
       [GovernanceImplementationEnum.TIMELOCK_DELAY]: {
-        value: "2 days",
+        // value: "2 days",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -136,7 +137,7 @@ export const SHU: DaoConfiguration = {
           ].description,
       },
       [GovernanceImplementationEnum.VETO_STRATEGY]: {
-        value: "Yes",
+        // value: "Yes",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -144,7 +145,7 @@ export const SHU: DaoConfiguration = {
           ].description,
       },
       [GovernanceImplementationEnum.VOTE_MUTABILITY]: {
-        value: "No",
+        // value: "No",
         riskLevel: RiskLevel.MEDIUM,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -152,7 +153,7 @@ export const SHU: DaoConfiguration = {
           ].description,
       },
       [GovernanceImplementationEnum.VOTING_DELAY]: {
-        value: "12 seconds",
+        // value: "12 seconds",
         riskLevel: RiskLevel.HIGH,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -160,7 +161,7 @@ export const SHU: DaoConfiguration = {
           ].description,
       },
       [GovernanceImplementationEnum.VOTING_FLASHLOAN_PROTECTION]: {
-        value: "Yes(default)",
+        // value: "Yes(default)",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -168,7 +169,7 @@ export const SHU: DaoConfiguration = {
           ].description,
       },
       [GovernanceImplementationEnum.VOTING_PERIOD]: {
-        value: "7 days",
+        // value: "7 days",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
@@ -176,7 +177,7 @@ export const SHU: DaoConfiguration = {
           ].description,
       },
       [GovernanceImplementationEnum.VOTING_SUBSIDY]: {
-        value: "Yes",
+        // value: "Yes",
         riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[

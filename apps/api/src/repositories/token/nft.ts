@@ -1,7 +1,6 @@
-import { Drizzle } from "@/database";
-import { tokenPrice } from "@/database";
 import { desc, sql } from "drizzle-orm";
 
+import { Drizzle, tokenPrice } from "@/database";
 import { TokenHistoricalPriceResponse } from "@/mappers";
 
 export class NFTPriceRepository {

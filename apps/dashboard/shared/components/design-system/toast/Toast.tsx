@@ -1,5 +1,6 @@
-import { cn } from "@/shared/utils";
 import { AlertTriangle, CheckCircle2, X } from "lucide-react";
+
+import { cn } from "@/shared/utils";
 
 export interface ToastProps {
   message: string;

@@ -1,6 +1,8 @@
 import { z } from "@hono/zod-openapi";
 import { getAddress, isAddress } from "viem";
+
 import { PeriodResponseSchema, TimestampResponseMapper } from "../shared";
+
 import { DBAccountBalanceVariation } from "./variations";
 
 export const AccountInteractionsParamsSchema = z.object({

@@ -1,7 +1,6 @@
-import { Drizzle } from "@/database";
 import { and, asc, desc, eq, gte, lte, or } from "drizzle-orm";
-import { transfer } from "@/database";
 
+import { Drizzle, transfer } from "@/database";
 import { DBTransfer, TransfersRequest } from "@/mappers";
 
 export class TransfersRepository {

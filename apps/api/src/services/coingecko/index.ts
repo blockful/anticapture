@@ -1,6 +1,11 @@
-import { HTTPException } from "hono/http-exception";
 import axios, { AxiosInstance } from "axios";
+import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
+
+import { truncateTimestampToMidnight } from "@/lib/date-helpers";
+import { DaoIdEnum } from "@/lib/enums";
+import { TokenHistoricalPriceResponse } from "@/mappers";
+import { PriceProvider } from "@/services/treasury/types";
 
 import {
   CoingeckoHistoricalMarketData,
@@ -8,10 +13,6 @@ import {
   CoingeckoIdToAssetPlatformId,
   CoingeckoTokenIdEnum,
 } from "./types";
-import { DaoIdEnum } from "@/lib/enums";
-import { TokenHistoricalPriceResponse } from "@/mappers";
-import { PriceProvider } from "@/services/treasury/types";
-import { truncateTimestampToMidnight } from "@/lib/date-helpers";
 
 const createCoingeckoTokenPriceDataSchema = (
   tokenContractAddress: string,

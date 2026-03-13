@@ -1,20 +1,25 @@
 "use client";
 
-import { ReactNode, useState } from "react";
-import {
+import type {
   ColumnDef,
-  flexRender,
   SortingState,
+  ColumnFiltersState,
+  TableOptions,
+  ExpandedState,
+} from "@tanstack/react-table";
+import {
+  flexRender,
   getCoreRowModel,
   getPaginationRowModel,
   getFilteredRowModel,
-  ColumnFiltersState,
   getSortedRowModel,
   useReactTable,
-  TableOptions,
-  ExpandedState,
   getExpandedRowModel,
 } from "@tanstack/react-table";
+import type { ReactNode } from "react";
+import { useState } from "react";
+
+import { TreeLines } from "@/shared/components/tables/TreeLines";
 import {
   TableBody,
   TableCell,
@@ -23,7 +28,6 @@ import {
   TableRow,
 } from "@/shared/components/ui/table";
 import { cn } from "@/shared/utils";
-import { TreeLines } from "@/shared/components/tables/TreeLines";
 
 interface DataTableProps<TData, TValue> {
   filterColumn?: string;

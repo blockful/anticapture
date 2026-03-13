@@ -1,19 +1,20 @@
-import { useMemo } from "react";
-
-import { DaoIdEnum } from "@/shared/types/daos";
-import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
-import { useMultipleEnsData } from "@/shared/hooks/useEnsData";
-import { Address, formatUnits } from "viem";
-import { formatAddress } from "@/shared/utils/formatAddress";
-import { useGetAccountInteractionsQuery } from "@anticapture/graphql-client/hooks";
-import daoConfig from "@/shared/dao-config";
-import {
+import type {
   Query_AccountInteractions_Items_Items,
   QueryInput_AccountInteractions_OrderBy,
   QueryInput_AccountInteractions_OrderDirection,
 } from "@anticapture/graphql-client";
-import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
-import { TimeInterval } from "@/shared/types/enums";
+import { useGetAccountInteractionsQuery } from "@anticapture/graphql-client/hooks";
+import { NetworkStatus } from "@apollo/client";
+import { useState, useCallback } from "react";
+import type { Address } from "viem";
+import { formatUnits } from "viem";
+
+import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
+import daoConfig from "@/shared/dao-config";
+import { useMultipleEnsData } from "@/shared/hooks/useEnsData";
+import type { DaoIdEnum } from "@/shared/types/daos";
+import { formatAddress } from "@/shared/utils/formatAddress";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 interface Interaction {
   accountId: string;
@@ -48,6 +49,9 @@ interface InteractionResponse {
   totalCount: number;
   totalTransfers: number;
   error?: Error;
+  fetchNextPage: () => Promise<void>;
+  fetchingMore: boolean;
+  hasNextPage: boolean;
 }
 
 export const useAccountInteractionsData = ({
@@ -72,34 +76,92 @@ export const useAccountInteractionsData = ({
 }): InteractionResponse => {
   const { decimals } = daoConfig[daoId];
 
-  const fromDate = useMemo(() => {
-    return (
-      Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[TimeInterval.NINETY_DAYS]
-    ).toString();
-  }, []);
+  const [isPaginationLoading, setIsPaginationLoading] = useState(false);
 
-  const { data, loading, error } = useGetAccountInteractionsQuery({
-    variables: {
-      address,
-      orderBy: sortBy as QueryInput_AccountInteractions_OrderBy,
-      orderDirection:
-        sortDirection as QueryInput_AccountInteractions_OrderDirection,
-      minAmount: filterVariables?.minAmount,
-      maxAmount: filterVariables?.maxAmount,
-      limit,
-      filterAddress,
-    },
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
+  const { data, loading, error, fetchMore, networkStatus } =
+    useGetAccountInteractionsQuery({
+      variables: {
+        address,
+        orderBy: sortBy as QueryInput_AccountInteractions_OrderBy,
+        orderDirection:
+          sortDirection as QueryInput_AccountInteractions_OrderDirection,
+        minAmount: filterVariables?.minAmount,
+        maxAmount: filterVariables?.maxAmount,
+        limit,
+        filterAddress,
       },
-    },
-    notifyOnNetworkStatusChange: true,
-    fetchPolicy: "cache-and-network",
-  });
+      context: {
+        headers: {
+          "anticapture-dao-id": daoId,
+          ...getAuthHeaders(),
+        },
+      },
+      notifyOnNetworkStatusChange: true,
+      fetchPolicy: "cache-and-network",
+    });
 
   const interactionsData = data?.accountInteractions?.items;
   const totalCount = data?.accountInteractions?.totalCount || 0n;
+  const numericTotalCount = Number(totalCount);
+  const currentItemsCount = interactionsData?.length || 0;
+  const hasNextPage = currentItemsCount < numericTotalCount;
+
+  const fetchNextPage = useCallback(async () => {
+    if (!hasNextPage || isPaginationLoading) return;
+
+    setIsPaginationLoading(true);
+    try {
+      await fetchMore({
+        variables: {
+          address,
+          orderBy: sortBy as QueryInput_AccountInteractions_OrderBy,
+          orderDirection:
+            sortDirection as QueryInput_AccountInteractions_OrderDirection,
+          minAmount: filterVariables?.minAmount,
+          maxAmount: filterVariables?.maxAmount,
+          limit,
+          filterAddress,
+          skip: currentItemsCount,
+        },
+        updateQuery: (previousResult, { fetchMoreResult }) => {
+          if (!fetchMoreResult?.accountInteractions) return previousResult;
+
+          const prevItems = previousResult.accountInteractions?.items ?? [];
+          const newItems = fetchMoreResult.accountInteractions.items ?? [];
+
+          const merged = [
+            ...prevItems,
+            ...newItems.filter(
+              (n) => n && !prevItems.some((p) => p?.accountId === n.accountId),
+            ),
+          ];
+
+          return {
+            ...fetchMoreResult,
+            accountInteractions: {
+              ...fetchMoreResult.accountInteractions,
+              items: merged,
+            },
+          };
+        },
+      });
+    } catch (err) {
+      console.error("Error fetching next page:", err);
+    } finally {
+      setIsPaginationLoading(false);
+    }
+  }, [
+    hasNextPage,
+    isPaginationLoading,
+    fetchMore,
+    address,
+    sortBy,
+    sortDirection,
+    filterVariables,
+    limit,
+    filterAddress,
+    currentItemsCount,
+  ]);
   const topFive: Interaction[] =
     interactionsData && interactionsData?.length > 0
       ? interactionsData
@@ -126,6 +188,10 @@ export const useAccountInteractionsData = ({
     totalCount: 0,
     totalTransfers: 0,
     error,
+    fetchNextPage,
+    fetchingMore:
+      networkStatus === NetworkStatus.fetchMore || isPaginationLoading,
+    hasNextPage,
   };
 
   if (!topFive.length || totalCount === 0n) {
@@ -242,5 +308,9 @@ export const useAccountInteractionsData = ({
     legendItems,
     totalIndividualInteractions,
     error,
+    fetchNextPage,
+    fetchingMore:
+      networkStatus === NetworkStatus.fetchMore || isPaginationLoading,
+    hasNextPage,
   };
 };

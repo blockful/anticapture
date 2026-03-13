@@ -1,10 +1,10 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
-import { TransactionsService } from "@/services";
 import {
   TransactionsRequestSchema,
   TransactionsResponseSchema,
 } from "@/mappers/";
+import { TransactionsService } from "@/services";
 
 export function transactions(app: Hono, service: TransactionsService) {
   app.openapi(

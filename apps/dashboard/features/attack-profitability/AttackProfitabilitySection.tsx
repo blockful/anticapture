@@ -1,22 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import { TheCardChartLayout, SwitcherDate } from "@/shared/components";
-import { TimeInterval } from "@/shared/types/enums";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { AttackProfitabilityConfig } from "@/shared/dao-config/types";
+import type { Data } from "react-csv/lib/core";
+
 import {
   AttackProfitabilityAccordion,
   MultilineChartAttackProfitability,
   AttackCostBarChart,
   AttackProfitabilityToggleHeader,
 } from "@/features/attack-profitability/components";
-import { Data } from "react-csv/lib/core";
-import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 import { useLastUpdateLabel } from "@/features/attack-profitability/hooks/useLastUpdateLabel";
+import { TheCardChartLayout, SwitcherDate } from "@/shared/components";
+import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
+import type { Option } from "@/shared/components/dropdowns/Dropdown";
+import { Dropdown } from "@/shared/components/dropdowns/Dropdown";
+import type { AttackProfitabilityConfig } from "@/shared/dao-config/types";
 import { ChartType } from "@/shared/hooks/useLastUpdate";
+import type { DaoIdEnum } from "@/shared/types/daos";
+import { TimeInterval } from "@/shared/types/enums";
 import { getDateRange } from "@/shared/utils";
-import { Dropdown, Option } from "@/shared/components/dropdowns/Dropdown";
 
 export const AttackProfitabilitySection = ({
   daoId,

@@ -1,7 +1,8 @@
-import { SupplyType } from "@/shared/components/badges/SupplyLabel";
-import { formatNumberUserReadable } from "@/shared/utils";
 import { formatUnits } from "viem";
-import { TransactionData } from "@/features/transactions/hooks/useTransactionsTableData";
+
+import type { TransactionData } from "@/features/transactions/hooks/useTransactionsTableData";
+import type { SupplyType } from "@/shared/components/badges/SupplyLabel";
+import { formatNumberUserReadable } from "@/shared/utils";
 
 export type GraphTransaction = {
   from: string;

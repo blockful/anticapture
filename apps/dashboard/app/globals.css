@@ -96,6 +96,9 @@
   --color-border-default: var(--base-secondary);
   --color-border-contrast: var(--base-border);
   --color-border-primary: var(--base-primary-foreground);
+  --color-border-error: var(--base-error);
+  --color-border-warning: var(--base-warning);
+  --color-border-success: var(--base-success);
 
   /* Icon Sizes */
   --size-icon-xxs: 16px;
@@ -113,6 +116,49 @@
   --text-alternative-xs: 12px;
   --text-alternative-xs--line-height: 16px;
   --text-alternative-xs--letter-spacing: 6%;
+
+  /* Typography Scale */
+  --text-display: 48px;
+  --text-display--line-height: 52px;
+  --text-display--letter-spacing: -0.02em;
+
+  --text-h1: 40px;
+  --text-h1--line-height: 44px;
+  --text-h1--letter-spacing: -0.012em;
+
+  --text-h2: 30px;
+  --text-h2--line-height: 36px;
+  --text-h2--letter-spacing: -0.0075em;
+
+  --text-h3: 24px;
+  --text-h3--line-height: 32px;
+  --text-h3--letter-spacing: -0.006em;
+
+  --text-h4: 20px;
+  --text-h4--line-height: 28px;
+  --text-h4--letter-spacing: -0.005em;
+
+  --text-h5: 18px;
+  --text-h5--line-height: 24px;
+
+  --text-h6: 16px;
+  --text-h6--line-height: 24px;
+
+  --text-body-lg: 16px;
+  --text-body-lg--line-height: 24px;
+
+  --text-body-md: 14px;
+  --text-body-md--line-height: 20px;
+
+  --text-body-sm: 12px;
+  --text-body-sm--line-height: 16px;
+
+  --text-caption: 11px;
+  --text-caption--line-height: 16px;
+
+  --text-overline: 11px;
+  --text-overline--line-height: 16px;
+  --text-overline--letter-spacing: 0.08em;
 
   @keyframes accordion-down {
     from {

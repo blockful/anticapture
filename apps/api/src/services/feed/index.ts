@@ -1,7 +1,7 @@
-import { DaoIdEnum } from "@/lib/enums";
-import { DBFeedEvent, FeedRequest, FeedResponse } from "@/mappers";
-import { getDaoRelevanceThreshold } from "@/lib/eventRelevance";
 import { FeedEventType, FeedRelevance } from "@/lib/constants";
+import { DaoIdEnum } from "@/lib/enums";
+import { getDaoRelevanceThreshold } from "@/lib/eventRelevance";
+import { DBFeedEvent, FeedRequest, FeedResponse } from "@/mappers";
 
 interface FeedRepository {
   getFeedEvents(

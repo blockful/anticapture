@@ -1,23 +1,23 @@
-import { SkeletonRow } from "@/shared/components";
-import {
-  SupplyLabel,
-  SupplyType,
-} from "@/shared/components/badges/SupplyLabel";
+import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowUp, ArrowDown, ExternalLink, ArrowRight } from "lucide-react";
-import { DaoIdEnum } from "@/shared/types/daos";
+import Link from "next/link";
+import type { Address } from "viem";
+import { zeroAddress } from "viem";
+
+import type { TransactionsParamsType } from "@/features/transactions/hooks/useTransactionParams";
+import type { TransactionData } from "@/features/transactions/hooks/useTransactionsTableData";
+import { SkeletonRow } from "@/shared/components";
+import type { SupplyType } from "@/shared/components/badges/SupplyLabel";
+import { SupplyLabel } from "@/shared/components/badges/SupplyLabel";
+import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { DateCell } from "@/shared/components/design-system/table/cells/DateCell";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/AmountFilter";
-import { ColumnDef } from "@tanstack/react-table";
-import { Button } from "@/shared/components/ui/button";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
-import { TransactionData } from "@/features/transactions/hooks/useTransactionsTableData";
-import Link from "next/link";
+import { Button } from "@/shared/components/ui/button";
 import { fetchAddressFromEnsName } from "@/shared/hooks/useEnsData";
-import { Address, zeroAddress } from "viem";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn } from "@/shared/utils";
-import { TransactionsParamsType } from "@/features/transactions/hooks/useTransactionParams";
-import { DateCell } from "@/shared/components/design-system/table/cells/DateCell";
 
 export const getTransactionsColumns = ({
   loading,

@@ -1,40 +1,41 @@
 "use client";
 
+import type { QueryInput_VotingPowers_OrderDirection } from "@anticapture/graphql-client";
+import { QueryInput_VotingPowers_OrderBy } from "@anticapture/graphql-client";
+import type { ColumnDef } from "@tanstack/react-table";
+import { Plus } from "lucide-react";
+import { parseAsStringEnum, useQueryState } from "nuqs";
 import { useMemo } from "react";
-import { ColumnDef } from "@tanstack/react-table";
+import type { Address } from "viem";
+import { formatUnits } from "viem";
 
 import {
   useDelegates,
   HoldersAndDelegatesDrawer,
 } from "@/features/holders-and-delegates";
-import { getAvgVoteTimingData } from "@/features/holders-and-delegates/utils";
-import { TimeInterval } from "@/shared/types/enums";
-import { SkeletonRow, Button, SimpleProgressBar } from "@/shared/components";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
-import { cn, formatNumberUserReadable } from "@/shared/utils";
-import { Plus } from "lucide-react";
 import { ProgressCircle } from "@/features/holders-and-delegates/components/ProgressCircle";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { useScreenSize, useDaoData } from "@/shared/hooks";
-import { Address, formatUnits } from "viem";
-import { Table } from "@/shared/components/design-system/table/Table";
-import { Percentage } from "@/shared/components/design-system/table/Percentage";
-import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
-import daoConfig from "@/shared/dao-config";
-import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { parseAsStringEnum, useQueryState } from "nuqs";
 import {
-  QueryInput_VotingPowers_OrderBy,
-  QueryInput_VotingPowers_OrderDirection,
-} from "@anticapture/graphql-client";
+  getAvgVoteTimingData,
+  DEFAULT_ITEMS_PER_PAGE,
+} from "@/features/holders-and-delegates/utils";
+import { SkeletonRow, Button, SimpleProgressBar } from "@/shared/components";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
+import { Percentage } from "@/shared/components/design-system/table/Percentage";
+import { Table } from "@/shared/components/design-system/table/Table";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
-import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
-import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
+import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
+import daoConfig from "@/shared/dao-config";
+import { useScreenSize, useDaoData } from "@/shared/hooks";
+import type { DaoIdEnum } from "@/shared/types/daos";
+import { TimeInterval } from "@/shared/types/enums";
+import { cn, formatNumberUserReadable } from "@/shared/utils";
+
 interface DelegateTableData {
   address: string;
-  votingPower: string;
+  votingPower: number;
   variation?: {
     percentageChange: number;
     absoluteChange: number;
@@ -50,10 +51,11 @@ interface DelegatesProps {
   daoId: DaoIdEnum;
 }
 
-// Converts a TimeInterval to a timestamp (in seconds) representing the start date.
-const getFromTimestamp = (period: TimeInterval): number => {
-  return Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[period];
-};
+type DelegateSortKey =
+  | "delegationsCount"
+  | "votingPower"
+  | "signedVariation"
+  | "variation";
 
 export const Delegates = ({
   timePeriod = TimeInterval.THIRTY_DAYS,
@@ -70,9 +72,12 @@ export const Delegates = ({
   );
   const [sortBy, setSortBy] = useQueryState(
     "sortBy",
-    parseAsStringEnum(["delegationsCount", "votingPower"]).withDefault(
+    parseAsStringEnum([
+      "delegationsCount",
       "votingPower",
-    ),
+      "signedVariation",
+      "variation",
+    ]).withDefault("votingPower" as DelegateSortKey),
   );
   const { decimals } = daoConfig[daoId];
   const { data: daoData } = useDaoData(daoId);
@@ -87,8 +92,12 @@ export const Delegates = ({
     setCurrentAddressFilter(address || "");
   };
 
-  // Calculate time-based parameters
-  const fromDate = useMemo(() => getFromTimestamp(timePeriod), [timePeriod]);
+  const orderByMap: Record<DelegateSortKey, QueryInput_VotingPowers_OrderBy> = {
+    delegationsCount: QueryInput_VotingPowers_OrderBy.DelegationsCount,
+    votingPower: QueryInput_VotingPowers_OrderBy.VotingPower,
+    signedVariation: QueryInput_VotingPowers_OrderBy.SignedVariation,
+    variation: QueryInput_VotingPowers_OrderBy.Variation,
+  };
 
   const {
     data,
@@ -97,15 +106,13 @@ export const Delegates = ({
     pagination,
     fetchNextPage,
     fetchingMore,
-    isHistoricalLoadingFor,
     isActivityLoadingFor,
   } = useDelegates({
-    fromDate,
-    orderBy: sortBy as QueryInput_VotingPowers_OrderBy,
+    orderBy: orderByMap[sortBy],
     orderDirection: sortOrder as QueryInput_VotingPowers_OrderDirection,
     daoId,
     days: timePeriod,
-    address: currentAddressFilter,
+    address: currentAddressFilter || undefined,
     limit: pageLimit,
   });
 
@@ -118,8 +125,24 @@ export const Delegates = ({
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
       // New field, default to desc for votingPower, asc for delegationsCount
-      setSortBy(field as "votingPower" | "delegationsCount");
-      setSortOrder(field === "votingPower" ? "desc" : "asc");
+      setSortBy(field as DelegateSortKey);
+      setSortOrder(field === "delegationsCount" ? "asc" : "desc");
+    }
+  };
+
+  // Cycles: no-arrow (votingPower desc) → down-arrow (signed variation desc) → up-arrow (signed variation asc) → both-arrows (variation desc) → no-arrow
+  const handleVariationSort = () => {
+    if (sortBy === "signedVariation" && sortOrder === "desc") {
+      setSortOrder("asc");
+    } else if (sortBy === "signedVariation" && sortOrder === "asc") {
+      setSortBy("variation");
+      setSortOrder("desc");
+    } else if (sortBy === "variation") {
+      setSortBy("votingPower");
+      setSortOrder("desc");
+    } else {
+      setSortBy("signedVariation");
+      setSortOrder("desc");
     }
   };
 
@@ -138,8 +161,8 @@ export const Delegates = ({
 
       const activityPercentage = delegate.proposalsActivity
         ? (delegate.proposalsActivity.votedProposals /
-          delegate.proposalsActivity.totalProposals) *
-        100
+            delegate.proposalsActivity.totalProposals) *
+          100
         : null;
 
       const avgVoteTiming = getAvgVoteTimingData(
@@ -150,14 +173,14 @@ export const Delegates = ({
 
       return {
         address: delegate.accountId,
-        votingPower: formatNumberUserReadable(votingPowerFormatted),
+        votingPower: votingPowerFormatted,
         variation: {
           percentageChange:
-            delegate.percentageChange === PERCENTAGE_NO_BASELINE
+            delegate.variation.percentageChange === PERCENTAGE_NO_BASELINE
               ? 9999
-              : Number(Number(delegate.percentageChange).toFixed(2)),
+              : Number(Number(delegate.variation.percentageChange).toFixed(2)),
           absoluteChange: Number(
-            formatUnits(BigInt(delegate.absoluteChange), decimals),
+            formatUnits(BigInt(delegate.variation.absoluteChange), decimals),
           ),
         },
         activity,
@@ -190,13 +213,15 @@ export const Delegates = ({
 
         return (
           <div className="group flex w-full items-center">
-            <EnsAvatar
-              address={address as Address}
-              size="sm"
-              variant="rounded"
-              isDashed={true}
-              nameClassName="[tr:hover_&]:border-primary"
-            />
+            <div className="min-w-0 flex-1">
+              <EnsAvatar
+                address={address as Address}
+                size="sm"
+                variant="rounded"
+                isDashed={true}
+                nameClassName="[tr:hover_&]:border-primary"
+              />
+            </div>
             {!isMobile && (
               <div className="flex items-center opacity-0 transition-opacity [tr:hover_&]:opacity-100">
                 <CopyAndPasteButton
@@ -233,13 +258,13 @@ export const Delegates = ({
         </div>
       ),
       meta: {
-        columnClassName: "w-72",
+        columnClassName: "w-40",
       },
     },
     {
       accessorKey: "votingPower",
       cell: ({ row }) => {
-        const votingPower = row.getValue("votingPower") as string;
+        const votingPower = row.getValue("votingPower") as number;
 
         if (loading) {
           return (
@@ -252,7 +277,7 @@ export const Delegates = ({
 
         return (
           <div className="text-secondary flex w-full items-center justify-end text-end text-sm font-normal">
-            {votingPower}
+            {formatNumberUserReadable(votingPower)}
           </div>
         );
       },
@@ -279,22 +304,20 @@ export const Delegates = ({
         </Button>
       ),
       meta: {
-        columnClassName: "w-40",
+        columnClassName: "w-[15%]",
       },
     },
     {
       accessorKey: "variation",
       cell: ({ row }) => {
-        const addr = row.original.address;
-
         const variation = row.getValue("variation") as
           | {
-            percentageChange: number;
-            absoluteChange: number;
-          }
+              percentageChange: number;
+              absoluteChange: number;
+            }
           | undefined;
 
-        if (isHistoricalLoadingFor(addr) || loading) {
+        if (loading) {
           return (
             <div className="flex w-full items-center justify-center">
               <SkeletonRow
@@ -306,20 +329,43 @@ export const Delegates = ({
         }
 
         return (
-          <div className="flex w-full items-center justify-center gap-2 text-sm">
-            {(variation?.percentageChange || 0) < 0 ? "-" : ""}
-            {formatNumberUserReadable(Math.abs(variation?.absoluteChange || 0))}
+          <div className="grid w-full grid-cols-2 items-center gap-2 text-sm">
+            <span className="text-right tabular-nums">
+              {(variation?.percentageChange || 0) < 0 ? "-" : ""}
+              {formatNumberUserReadable(
+                Math.abs(variation?.absoluteChange || 0),
+              )}
+            </span>
             <Percentage value={variation?.percentageChange || 0} />
           </div>
         );
       },
       header: () => (
-        <h4 className="text-table-header flex w-full items-center justify-center">
-          Change ({daoId})
-        </h4>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-secondary w-full justify-center p-0"
+          onClick={handleVariationSort}
+        >
+          <h4 className="text-table-header whitespace-nowrap">
+            Change ({daoId})
+          </h4>
+          <ArrowUpDown
+            props={{ className: "size-4" }}
+            activeState={
+              sortBy === "signedVariation"
+                ? sortOrder === "desc"
+                  ? ArrowState.DOWN
+                  : ArrowState.UP
+                : sortBy === "variation"
+                  ? ArrowState.BOTH
+                  : ArrowState.DEFAULT
+            }
+          />
+        </Button>
       ),
       meta: {
-        columnClassName: "w-64",
+        columnClassName: "w-[20%]",
       },
     },
     {
@@ -348,6 +394,9 @@ export const Delegates = ({
           Activity
         </h4>
       ),
+      meta: {
+        columnClassName: "w-16",
+      },
     },
     {
       accessorKey: "avgVoteTiming",
@@ -394,7 +443,7 @@ export const Delegates = ({
         </div>
       ),
       meta: {
-        columnClassName: "w-40",
+        columnClassName: "w-[15%]",
       },
     },
     {
@@ -437,14 +486,14 @@ export const Delegates = ({
         </Button>
       ),
       meta: {
-        columnClassName: "w-28",
+        columnClassName: "w-20",
       },
     },
   ];
 
   return (
     <>
-      <div className="flex h-[calc(100vh-16rem)] min-h-[300px] w-full flex-col">
+      <div className="min-h-75 flex h-[calc(100vh-16rem)] w-full flex-col">
         <Table
           columns={delegateColumns}
           data={loading ? Array(DEFAULT_ITEMS_PER_PAGE).fill({}) : tableData}
@@ -454,6 +503,7 @@ export const Delegates = ({
           isLoadingMore={fetchingMore}
           onLoadMore={fetchNextPage}
           withDownloadCSV={true}
+          csvFilename="delegates.csv"
           error={error}
           fillHeight
         />

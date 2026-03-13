@@ -1,14 +1,15 @@
+import axios from "axios";
 import useSWR from "swr";
-import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
-import { TokenMetricItem } from "@/shared/dao-config/types";
-import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { TimeInterval } from "@/shared/types/enums/TimeInterval";
+
 import {
   DAYS_IN_SECONDS,
   SECONDS_PER_DAY,
 } from "@/shared/constants/time-related";
-import axios from "axios";
+import type { TokenMetricItem } from "@/shared/dao-config/types";
+import type { DaoIdEnum } from "@/shared/types/daos";
+import type { MetricTypesEnum } from "@/shared/types/enums/metric-type";
+import type { TimeInterval } from "@/shared/types/enums/TimeInterval";
+import { BACKEND_ENDPOINT, getAuthHeaders } from "@/shared/utils/server-utils";
 
 interface TokenMetricsItem {
   date: string;
@@ -61,6 +62,7 @@ const fetchSingleMetric = async (
       headers: {
         "Content-Type": "application/json",
         "anticapture-dao-id": daoId,
+        ...getAuthHeaders(),
       },
     },
   );

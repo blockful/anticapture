@@ -1,5 +1,4 @@
-import { ActivityIndicator } from "@/shared/components";
-import {
+import type {
   Query_ProposalsActivity_Proposals_Items_Proposal,
   Query_ProposalsActivity_Proposals_Items_UserVote,
 } from "@anticapture/graphql-client";
@@ -11,7 +10,10 @@ import {
   Clock10,
   UserX,
 } from "lucide-react";
-import React, { ReactNode } from "react";
+import type { ReactNode } from "react";
+import React from "react";
+
+import { ActivityIndicator } from "@/shared/components";
 
 // Vote mapping object
 export const proposalsUserVoteMapping = {
@@ -50,7 +52,7 @@ export const proposalsFinalResultMapping = {
   },
   PENDING_EXECUTION: {
     text: "Pending Execution",
-    icon: <Clock10 className="text-secondary size-4" />,
+    icon: <Clock10 className="text-success size-4" />,
   },
   ACTIVE: {
     text: "Ongoing",

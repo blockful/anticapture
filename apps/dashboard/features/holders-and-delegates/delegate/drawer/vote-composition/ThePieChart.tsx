@@ -1,17 +1,12 @@
 "use client";
 
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-  TooltipProps,
-} from "recharts";
-import { formatNumberUserReadable } from "@/shared/utils";
+import type { TooltipProps } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+
 import { renderCustomizedLabel } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/utils/renderCustomizedLabel";
-import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
+import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
+import { formatNumberUserReadable } from "@/shared/utils";
 
 const PieChartCustomTooltip: React.FC<
   TooltipProps<number, string> & {

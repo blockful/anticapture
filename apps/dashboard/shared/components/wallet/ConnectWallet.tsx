@@ -1,9 +1,10 @@
 "use client";
 
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import Image from "next/image";
-import dynamic from "next/dynamic";
 import { Wallet } from "lucide-react";
+import dynamic from "next/dynamic";
+import Image from "next/image";
+
 import { Button } from "@/shared/components";
 import { cn } from "@/shared/utils";
 

@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
 import { Info, HelpCircle, AlertCircle } from "lucide-react";
 
+import { RiskLevelCardSmall } from "@/shared/components/cards/RiskLevelCardSmall";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { RiskLevel } from "@/shared/types/enums";
-import { RiskLevelCardSmall } from "@/shared/components/cards/RiskLevelCardSmall";
 
 const meta: Meta<typeof Tooltip> = {
   title: "Design System/Tooltips/Tooltip",
