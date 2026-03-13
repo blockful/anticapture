@@ -189,5 +189,5 @@ export const SHU: DaoConfiguration = {
   resilienceStages: true,
   tokenDistribution: true,
   dataTables: true,
-  governancePage: true,
+  governancePage: false,
 };
