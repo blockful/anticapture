@@ -7,6 +7,7 @@
     "build": "tsup src/index.ts --format esm --clean",
     "start": "node dist/index.mjs",
     "sync": "tsx src/scripts/sync-top-addresses.ts",
+    "fix-eoa": "tsx src/scripts/fix-eoa-status.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
