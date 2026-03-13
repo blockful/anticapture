@@ -22,7 +22,10 @@ export class DrizzleRepository implements Repository {
     return row?.lastCursor ?? null;
   }
 
-  async saveProposals(proposals: OffchainProposal[], cursor: string): Promise<void> {
+  async saveProposals(
+    proposals: OffchainProposal[],
+    cursor: string,
+  ): Promise<void> {
     if (proposals.length === 0) return;
 
     await this.db.transaction(async (tx) => {
@@ -72,7 +75,7 @@ export class DrizzleRepository implements Repository {
         .insert(schema.votes)
         .values(votes)
         .onConflictDoUpdate({
-          target:  [schema.votes.proposalId, schema.votes.voter],
+          target: [schema.votes.proposalId, schema.votes.voter],
           set: {
             choice: sql`excluded.choice`,
             vp: sql`excluded.vp`,

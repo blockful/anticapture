@@ -22,6 +22,7 @@ export const CoingeckoTokenIdEnum: Record<DaoIdEnum, string> = {
   COMP: "compound-governance-token",
   OBOL: "obol-2",
   ZK: "zksync",
+  SHU: "shutter",
 } as const;
 
 export const CoingeckoIdToAssetPlatformId = {
@@ -34,6 +35,7 @@ export const CoingeckoIdToAssetPlatformId = {
   [CoingeckoTokenIdEnum.COMP]: AssetPlatformEnum.ETHEREUM,
   [CoingeckoTokenIdEnum.OBOL]: AssetPlatformEnum.ETHEREUM,
   [CoingeckoTokenIdEnum.ZK]: AssetPlatformEnum.ZKSYNC,
+  [CoingeckoTokenIdEnum.SHU]: AssetPlatformEnum.ETHEREUM,
 } as const;
 
 export interface CoingeckoHistoricalMarketData {
