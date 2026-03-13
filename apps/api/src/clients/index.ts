@@ -17,6 +17,7 @@ export interface DAOClient {
   getProposalThreshold: () => Promise<bigint>;
   getCurrentBlockNumber: () => Promise<number>;
   getBlockTime: (blockNumber: number) => Promise<number | null>;
+  alreadySupportCalldataReview: () => boolean;
   calculateQuorum: (votes: {
     forVotes: bigint;
     againstVotes: bigint;
