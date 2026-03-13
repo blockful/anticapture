@@ -5,11 +5,9 @@ import type { QueryInput_VotingPowers_OrderDirection } from "@anticapture/graphq
 import type { ColumnDef } from "@tanstack/react-table";
 import { Plus } from "lucide-react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo } from "react";
 import type { Address } from "viem";
 import { formatUnits } from "viem";
-
-import { useGetTokenHoldersQuery } from "@anticapture/graphql-client/hooks";
 
 import {
   useDelegates,
@@ -29,12 +27,11 @@ import { useScreenSize } from "@/shared/hooks/useScreenSize";
 import { DaoIdEnum } from "@/shared/types/daos";
 import type { TimeInterval } from "@/shared/types/enums";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
-import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 interface DelegateTableData {
   address: string;
   votingPower: string;
-  balance: string;
+  balance?: string;
   total: string;
   variation?: {
     percentageChange: number;
@@ -99,46 +96,6 @@ export function DelegationTable({ days }: { days: TimeInterval }) {
       skipActivity: true,
     });
 
-  const delegateAddresses = useMemo(
-    () => data?.map((d) => d.accountId) || [],
-    [data],
-  );
-
-  const fetchedBalancesRef = useRef<Map<string, bigint>>(new Map());
-  const [balanceTick, setBalanceTick] = useState(0);
-
-  const unfetchedAddresses = useMemo(
-    () =>
-      delegateAddresses.filter((addr) => !fetchedBalancesRef.current.has(addr)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [delegateAddresses, balanceTick],
-  );
-
-  const { data: balancesData } = useGetTokenHoldersQuery({
-    variables: {
-      addresses: unfetchedAddresses,
-      limit: unfetchedAddresses.length || 1,
-    },
-    context: {
-      headers: { "anticapture-dao-id": daoId, ...getAuthHeaders() },
-    },
-    skip: unfetchedAddresses.length === 0,
-  });
-
-  useEffect(() => {
-    if (!balancesData?.accountBalances?.items) return;
-
-    balancesData.accountBalances.items.forEach((bal) => {
-      if (bal) fetchedBalancesRef.current.set(bal.address, BigInt(bal.balance));
-    });
-    unfetchedAddresses.forEach((addr) => {
-      if (!fetchedBalancesRef.current.has(addr))
-        fetchedBalancesRef.current.set(addr, 0n);
-    });
-
-    setBalanceTick((t) => t + 1);
-  }, [balancesData]); // eslint-disable-line react-hooks/exhaustive-deps
-
   const { isMobile } = useScreenSize();
 
   const handleSort = (field: string) => {
@@ -175,9 +132,7 @@ export function DelegationTable({ days }: { days: TimeInterval }) {
         formatUnits(combinedPowerBigInt, decimals),
       );
 
-      const delegateBalance =
-        fetchedBalancesRef.current.get(delegate?.accountId) ?? 0n;
-
+      const delegateBalance = BigInt(delegate.balance ?? "0");
       const balanceRaw = Number(formatUnits(delegateBalance, decimals));
       const delegatedPower = combinedPowerFormatted - balanceRaw;
 
@@ -205,8 +160,7 @@ export function DelegationTable({ days }: { days: TimeInterval }) {
         delegators: delegate.delegationsCount,
       };
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, decimals, balanceTick]);
+  }, [data, decimals]);
 
   const delegateColumns: ColumnDef<DelegateTableData>[] = [
     {

@@ -1810,6 +1810,7 @@ export type Query_VotingPowerVariations_Period = {
 export type Query_VotingPowers_Items_Items = {
   __typename?: 'query_votingPowers_items_items';
   accountId: Scalars['String']['output'];
+  balance?: Maybe<Scalars['String']['output']>;
   delegationsCount: Scalars['Float']['output'];
   proposalsCount: Scalars['Float']['output'];
   variation: Query_VotingPowers_Items_Items_Variation;
@@ -1887,6 +1888,7 @@ export type Votes_200_Response = {
 export type VotingPowerByAccountId_200_Response = {
   __typename?: 'votingPowerByAccountId_200_response';
   accountId: Scalars['String']['output'];
+  balance?: Maybe<Scalars['String']['output']>;
   delegationsCount: Scalars['Float']['output'];
   proposalsCount: Scalars['Float']['output'];
   variation: Query_VotingPowerByAccountId_Variation;
@@ -2233,4 +2235,4 @@ export type GetDelegatesQueryVariables = Exact<{
 }>;
 
 
-export type GetDelegatesQuery = { __typename?: 'Query', votingPowers?: { __typename?: 'votingPowers_200_response', totalCount: number, items: Array<{ __typename?: 'query_votingPowers_items_items', accountId: string, delegationsCount: number, votingPower: string, variation: { __typename?: 'query_votingPowers_items_items_variation', absoluteChange: string, percentageChange: string } } | null> } | null };
+export type GetDelegatesQuery = { __typename?: 'Query', votingPowers?: { __typename?: 'votingPowers_200_response', totalCount: number, items: Array<{ __typename?: 'query_votingPowers_items_items', accountId: string, delegationsCount: number, votingPower: string, balance?: string | null, variation: { __typename?: 'query_votingPowers_items_items_variation', absoluteChange: string, percentageChange: string } } | null> } | null };

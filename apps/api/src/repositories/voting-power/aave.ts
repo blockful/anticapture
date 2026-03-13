@@ -157,7 +157,7 @@ export class AAVEVotingPowerRepository {
     const balanceSubquery = this.db
       .select({
         accountId: accountBalance.accountId,
-        totalBalance: sql<bigint>`SUM(${accountBalance.balance})`.as(
+        totalBalance: sql<string>`SUM(${accountBalance.balance})`.as(
           "total_balance",
         ),
       })
@@ -255,9 +255,9 @@ export class AAVEVotingPowerRepository {
     return {
       items: items.map((row) => ({
         ...row,
-        votingPower: BigInt(row.votingPower ?? 0),
-        absoluteChange: BigInt(row.absoluteChange ?? 0),
-        percentageChange: String(row.percentageChange ?? "0"),
+        balance: row.balance || undefined,
+        absoluteChange: row.absoluteChange,
+        percentageChange: row.percentageChange,
       })),
       totalCount: Number(totalCount?.count ?? 0),
     };
@@ -271,7 +271,7 @@ export class AAVEVotingPowerRepository {
     const balanceSubquery = this.db
       .select({
         accountId: accountBalance.accountId,
-        totalBalance: sql<bigint>`SUM(${accountBalance.balance})`.as(
+        totalBalance: sql<string>`SUM(${accountBalance.balance})`.as(
           "total_balance",
         ),
       })
@@ -322,6 +322,7 @@ export class AAVEVotingPowerRepository {
             ELSE ROUND((COALESCE(${variationSubquery.absoluteChange}, 0)::numeric / (${combinedPowerSql} - COALESCE(${variationSubquery.absoluteChange}, 0))::numeric) * 100, 6)::text
           END
         `,
+        balance: balanceSubquery.totalBalance,
       })
       .from(accountPower)
       .leftJoin(
@@ -337,9 +338,9 @@ export class AAVEVotingPowerRepository {
     return result
       ? {
           ...result,
-          votingPower: BigInt(result.votingPower ?? 0),
-          absoluteChange: BigInt(result.absoluteChange ?? 0),
-          percentageChange: String(result.percentageChange ?? "0"),
+          balance: result.balance ?? undefined,
+          absoluteChange: result.absoluteChange,
+          percentageChange: result.percentageChange,
         }
       : {
           accountId: accountId,

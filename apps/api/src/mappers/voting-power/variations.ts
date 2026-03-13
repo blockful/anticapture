@@ -145,6 +145,7 @@ export const VotingPowerResponseSchema = z.object({
   votesCount: z.number(),
   proposalsCount: z.number(),
   delegationsCount: z.number(),
+  balance: z.string().optional(),
   variation: VotingPowerVariationFieldSchema,
 });
 
@@ -190,6 +191,7 @@ export type DBVotingPowerVariation = {
 export type DBAccountPower = typeof accountPower.$inferSelect;
 
 export type DBAccountPowerWithVariation = DBAccountPower & {
+  balance?: string;
   absoluteChange: bigint;
   percentageChange: string;
 };
@@ -229,31 +231,5 @@ export const VotingPowerVariationsByAccountIdResponseMapper = (
       endTimestamp: TimestampResponseMapper(endTimestamp),
     }),
     data: VotingPowerVariationResponseMapper(delta),
-  });
-};
-
-export const VotingPowerMapper = (
-  data: DBAccountPowerWithVariation,
-): VotingPowerResponse => {
-  return VotingPowerResponseSchema.parse({
-    accountId: data.accountId,
-    votingPower: data.votingPower.toString(),
-    votesCount: data.votesCount,
-    proposalsCount: data.proposalsCount,
-    delegationsCount: data.delegationsCount,
-    variation: {
-      absoluteChange: data.absoluteChange.toString(),
-      percentageChange: data.percentageChange,
-    },
-  });
-};
-
-export const VotingPowersMapper = (
-  items: DBAccountPowerWithVariation[],
-  totalCount: number,
-): VotingPowersResponse => {
-  return VotingPowersResponseSchema.parse({
-    totalCount: totalCount,
-    items: items.map(VotingPowerMapper),
   });
 };
