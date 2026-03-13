@@ -1,30 +1,11 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
-import { formatEther } from "viem";
 
 import { DaysEnum, DaysOpts } from "@/lib/enums";
-
-import {
-  ActiveSupplyQueryResult,
-  ProposalsCompareQueryResult,
-  VotesCompareQueryResult,
-  AverageTurnoutCompareQueryResult,
-} from "./types";
-
-interface GovernanceActivityRepository {
-  getActiveSupply(days: DaysEnum): Promise<ActiveSupplyQueryResult | undefined>;
-  getProposalsCompare(
-    days: DaysEnum,
-  ): Promise<ProposalsCompareQueryResult | undefined>;
-  getVotesCompare(days: DaysEnum): Promise<VotesCompareQueryResult | undefined>;
-  getAverageTurnoutCompare(
-    days: DaysEnum,
-  ): Promise<AverageTurnoutCompareQueryResult | undefined>;
-}
+import { GovernanceActivityService } from "@/services";
 
 export function governanceActivity(
   app: Hono,
-  repository: GovernanceActivityRepository,
-  tokenType: "ERC20" | "ERC721",
+  service: GovernanceActivityService,
 ) {
   app.openapi(
     createRoute({
@@ -65,7 +46,8 @@ export function governanceActivity(
     }),
     async (context) => {
       const { days } = context.req.valid("query");
-      const data = await repository.getActiveSupply(days);
+      const now = Math.floor(Date.now() / 1000);
+      const data = await service.getActiveSupply(now - days);
       return context.json({ activeSupply: data?.activeSupply || "0" });
     },
   );
@@ -102,26 +84,9 @@ export function governanceActivity(
     }),
     async (context) => {
       const { days } = context.req.valid("query");
-
-      const data = await repository.getProposalsCompare(days);
-      if (!data) {
-        return context.json({
-          currentProposalsLaunched: 0,
-          oldProposalsLaunched: 0,
-          changeRate: 0,
-        });
-      }
-      const changeRate =
-        data.oldProposalsLaunched &&
-        data.currentProposalsLaunched / data.oldProposalsLaunched - 1;
-
-      return context.json(
-        {
-          ...data,
-          changeRate: changeRate ? Number(Number(changeRate).toFixed(2)) : 0,
-        },
-        200,
-      );
+      const now = Math.floor(Date.now() / 1000);
+      const data = await service.getProposals(now - days);
+      return context.json(data);
     },
   );
 
@@ -157,25 +122,9 @@ export function governanceActivity(
     }),
     async (context) => {
       const { days } = context.req.valid("query");
-
-      const data = await repository.getVotesCompare(days);
-      if (!data) {
-        return context.json({
-          currentVotes: 0,
-          oldVotes: 0,
-          changeRate: 0,
-        });
-      }
-
-      const changeRate = data.oldVotes && data.currentVotes / data.oldVotes - 1;
-
-      return context.json(
-        {
-          ...data,
-          changeRate: changeRate ? Number(Number(changeRate).toFixed(2)) : 0,
-        },
-        200,
-      );
+      const now = Math.floor(Date.now() / 1000);
+      const data = await service.getVotes(now - days);
+      return context.json(data);
     },
   );
 
@@ -211,44 +160,9 @@ export function governanceActivity(
     }),
     async (context) => {
       const { days } = context.req.valid("query");
-
-      const data = await repository.getAverageTurnoutCompare(days);
-      if (!data) {
-        return context.json({
-          currentAverageTurnout: "0",
-          oldAverageTurnout: "0",
-          changeRate: 0,
-        });
-      }
-
-      if (tokenType === "ERC721") {
-        return context.json(
-          {
-            currentAverageTurnout:
-              data.currentAverageTurnout?.split(".")[0] || "0",
-            oldAverageTurnout: data.oldAverageTurnout?.split(".")[0] || "0",
-            changeRate: data.oldAverageTurnout
-              ? Number(data.currentAverageTurnout) /
-                  Number(data.oldAverageTurnout) -
-                1
-              : 0,
-          },
-          200,
-        );
-      }
-
-      return context.json(
-        {
-          ...data,
-          changeRate:
-            Number(formatEther(BigInt(data.oldAverageTurnout))) > 0
-              ? Number(formatEther(BigInt(data.currentAverageTurnout))) /
-                  Number(formatEther(BigInt(data.oldAverageTurnout))) -
-                1
-              : 0,
-        },
-        200,
-      );
+      const now = Math.floor(Date.now() / 1000);
+      const data = await service.getAverageTurnout(now - days);
+      return context.json(data);
     },
   );
 }

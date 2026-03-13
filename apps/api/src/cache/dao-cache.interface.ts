@@ -1,4 +1,4 @@
-import { DaoResponse } from "../mappers";
+import { DaoParametersRPCResponse } from "../mappers";
 
 /**
  * Interface for DAO data caching
@@ -8,12 +8,12 @@ export interface DaoDataCache {
   /**
    * Retrieves cached DAO data if valid, null if expired or not found
    */
-  get(daoId: string): DaoResponse | null;
+  get(daoId: string): DaoParametersRPCResponse | null;
 
   /**
    * Stores DAO data in cache
    */
-  set(daoId: string, data: DaoResponse): void;
+  set(daoId: string, data: DaoParametersRPCResponse): void;
 
   /**
    * Clears all cached data

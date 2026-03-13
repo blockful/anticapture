@@ -115,8 +115,9 @@ export function tokenDistribution(
       }),
       async (ctx) => {
         const { days } = ctx.req.valid("query");
+        const now = Math.floor(Date.now() / 1000);
 
-        const result = await repository.getSupplyComparison(metric, days);
+        const result = await repository.getSupplyComparison(metric, now - days);
 
         if (!result) {
           return ctx.json(

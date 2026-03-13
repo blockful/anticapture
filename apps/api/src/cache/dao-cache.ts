@@ -1,11 +1,11 @@
-import { DaoResponse } from "@/mappers";
+import { DaoParametersRPCResponse } from "@/mappers";
 
 import { DaoDataCache } from "./dao-cache.interface";
 
 /**
  * Internal cache data structure with timestamp for TTL management
  */
-interface CachedDaoData extends DaoResponse {
+interface CachedDaoData extends DaoParametersRPCResponse {
   timestamp: number;
 }
 
@@ -17,7 +17,7 @@ export class DaoCache implements DaoDataCache {
   private cache = new Map<string, CachedDaoData>();
   private readonly CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 
-  get(daoId: string): DaoResponse | null {
+  get(daoId: string): DaoParametersRPCResponse | null {
     const cached = this.cache.get(daoId);
     if (!cached) return null;
 
@@ -33,7 +33,7 @@ export class DaoCache implements DaoDataCache {
     return daoResponse;
   }
 
-  set(daoId: string, data: DaoResponse): void {
+  set(daoId: string, data: DaoParametersRPCResponse): void {
     const cachedData: CachedDaoData = {
       ...data,
       timestamp: Date.now(),

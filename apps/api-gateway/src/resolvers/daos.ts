@@ -4,7 +4,8 @@
  * and aggregates them into a list of DAOs
  */
 export const daosResolver = {
-  resolve: async (root, _args, context) => {
+  resolve: async (root, args, context, info) => {
+    const fetchGovernanceData: "true" | "false" = args?.fetchGovernanceData ?? "false";
     // Extract REST clients from context
     const restClients = Object.keys(context)
       .filter((key) => key.startsWith('rest_'))
@@ -21,7 +22,9 @@ export const daosResolver = {
       restClients.map(({ daoId, client }) =>
         client.dao({
           root,
+          args: { fetchGovernanceData },
           context,
+          info,
           selectionSet: `
             {
               id
@@ -31,13 +34,23 @@ export const daosResolver = {
               votingDelay
               votingPeriod
               timelockDelay
+              governanceData {
+                activeSupply
+                averageTurnout {
+                  oldAverageTurnout
+                  currentAverageTurnout
+                  changeRate
+                }
+                quorumGap
+                lastPrice
+              }
             }
           `,
         })
-        .then((response) => ({
-          daoId,
-          response,
-        }))
+          .then((response) => ({
+            daoId,
+            response,
+          }))
       )
     );
 

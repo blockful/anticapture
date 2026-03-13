@@ -19,3 +19,4 @@ export * from "./feed";
 export * from "./proposals/offchainProposals";
 export * from "./votes/offchainVotes";
 export * from "./event-relevance";
+export * from "./governance-activity";

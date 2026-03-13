@@ -118,7 +118,7 @@ export default processConfig(
         """
         Get all DAOs
         """
-        daos: DAOList!
+        daos(fetchGovernanceData: queryInput_dao_fetchGovernanceData = FALSE): DAOList!
       }
     `,
     additionalResolvers: ["src/resolvers/index"],
