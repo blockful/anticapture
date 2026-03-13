@@ -1,6 +1,9 @@
+import dns from "node:dns";
+
 import { serve } from "@hono/node-server";
 import { swaggerUI } from "@hono/swagger-ui";
 import { OpenAPIHono } from "@hono/zod-openapi";
+import { bearerAuth } from "hono/bearer-auth";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 
@@ -14,16 +17,22 @@ import { health } from "./health/route.js";
 import { proxy } from "./proxy/route.js";
 import { mergeUpstreamDocs } from "./upstream-docs.js";
 
+// "verbatim" preserves the DNS response order so AAAA records
+// are used directly, allowing fetch() to resolve *.railway.internal correctly.
+dns.setDefaultResultOrder("verbatim");
+
 const app = new OpenAPIHono();
 
 app.use("*", cors({ origin: "*" }));
 app.use("*", logger());
+if (config.blockfulApiToken) {
+  app.use("*", bearerAuth({ token: config.blockfulApiToken }));
+}
 const daosService = new DaosService(config.daoApis);
 const delegationService = new DelegationService(config.daoApis);
 
 console.log(
-  `Discovered ${config.daoApis.size} DAO APIs:`,
-  Array.from(config.daoApis.keys()),
+  `Discovered ${config.daoApis.size} DAO APIs: [${Array.from(config.daoApis.keys()).join(", ")}]`,
 );
 
 // OpenAPI routes
@@ -49,6 +58,6 @@ proxy(app, config.daoApis);
 
 console.log(`🚀 REST Gateway running`);
 
-serve({ fetch: app.fetch, port: config.port });
+serve({ fetch: app.fetch, port: config.port, hostname: "::" });
 
 export { app };

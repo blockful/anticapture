@@ -6,6 +6,7 @@ dotenv.config();
 const envSchema = z.object({
   PORT: z.coerce.number().default(4000),
   ADDRESS_ENRICHMENT_API_URL: z.string().url().optional(),
+  BLOCKFUL_API_TOKEN: z.string().optional(),
 });
 
 function loadDaoApis(
@@ -28,5 +29,6 @@ const env = envSchema.parse(process.env);
 export const config = {
   port: env.PORT,
   addressEnrichmentUrl: env.ADDRESS_ENRICHMENT_API_URL,
+  blockfulApiToken: env.BLOCKFUL_API_TOKEN,
   daoApis: loadDaoApis(),
 };
