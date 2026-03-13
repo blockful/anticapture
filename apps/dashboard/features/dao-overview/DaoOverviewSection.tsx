@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Suspense, useEffect } from "react";
+import { Suspense } from "react";
 
 import { AccountBalanceChartCard } from "@/features/dao-overview/components/AccountBalanceChartCard";
 import { AttackProfitabilityChartCard } from "@/features/dao-overview/components/AttackProfitabilityChartCard";
@@ -23,7 +23,6 @@ import {
   fieldsToArray,
   getDaoStageFromFields,
 } from "@/shared/dao-config/utils";
-import { apolloClient } from "@/shared/providers/GlobalProviders";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
 
@@ -31,13 +30,6 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const router = useRouter();
   const daoConfig = daoConfigByDaoId[daoId];
   const daoOverview = daoConfig.daoOverview;
-
-  useEffect(() => {
-    // FIXME:
-    //   This is only a workaround for now, as Apollo Client does not yet support HTTP header context for cache indexing;
-    //   https://github.com/apollographql/apollo-feature-requests/issues/326
-    apolloClient.cache.reset();
-  }, [daoId]);
 
   const currentDaoStage = getDaoStageFromFields({
     fields: fieldsToArray(daoConfig.governanceImplementation?.fields),
