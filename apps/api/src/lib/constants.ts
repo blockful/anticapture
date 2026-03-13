@@ -161,6 +161,26 @@ export const CONTRACT_ADDRESSES = {
       startBlock: 55519658,
     },
   },
+  [DaoIdEnum.SHU]: {
+    blockTime: 12,
+    tokenType: "ERC20",
+    // https://etherscan.io/address/0xe485E2f1bab389C08721B291f6b59780feC83Fd7
+    token: {
+      address: "0xe485E2f1bab389C08721B291f6b59780feC83Fd7",
+      decimals: 18,
+      startBlock: 19021394,
+    },
+    // https://etherscan.io/address/0xAA6BfA174d2f803b517026E93DBBEc1eBa26258e
+    azorius: {
+      address: "0xAA6BfA174d2f803b517026E93DBBEc1eBa26258e",
+      startBlock: 19021698,
+    },
+    // https://etherscan.io/address/0x4b29d8B250B8b442ECfCd3a4e3D91933d2db720F
+    linearVotingStrategy: {
+      address: "0x4b29d8B250B8b442ECfCd3a4e3D91933d2db720F",
+      startBlock: 19021698,
+    },
+  },
 } as const;
 
 export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -179,6 +199,7 @@ export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   },
   [DaoIdEnum.ARB]: {},
   [DaoIdEnum.OP]: {},
+  [DaoIdEnum.SHU]: {},
   [DaoIdEnum.NOUNS]: {
     timelock: "0xb1a32fc9f9d8b2cf86c068cae13108809547ef71",
     auction: "0x830BD73E4184ceF73443C15111a1DF14e495C706",
