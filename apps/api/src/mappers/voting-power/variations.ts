@@ -135,13 +135,13 @@ export const VotingPowerVariationResponseSchema = z.object({
 });
 
 export const VotingPowerVariationFieldSchema = z.object({
-  absoluteChange: z.bigint().transform((r) => r.toString()),
+  absoluteChange: z.string(),
   percentageChange: z.string(),
 });
 
 export const VotingPowerResponseSchema = z.object({
   accountId: z.string(),
-  votingPower: z.bigint().transform((r) => r.toString()),
+  votingPower: z.string(),
   votesCount: z.number(),
   proposalsCount: z.number(),
   delegationsCount: z.number(),
