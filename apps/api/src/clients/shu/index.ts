@@ -34,31 +34,34 @@ export class SHUClient<
     return "SHU";
   }
 
-  async getQuorum(_: string | null): Promise<bigint> {
-    return parseEther("30000000");
+  async getQuorum(proposalId: string | null): Promise<bigint> {
+    if (!proposalId) return 0n;
+
+    return BigInt(
+      await readContract(this.client, {
+        abi: [
+          {
+            inputs: [
+              { internalType: "uint32", name: "_proposalId", type: "uint32" },
+            ],
+            name: "quorumVotes",
+            outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+            stateMutability: "view",
+            type: "function",
+          },
+        ],
+        address: this.votingStrategyAddress,
+        functionName: "quorumVotes",
+        args: [Number(proposalId)],
+      }),
+    );
   }
 
   async getProposalThreshold(): Promise<bigint> {
-    return 0n;
-    // readContract(this.client, {
-    //   abi: [
-    //     {
-    //       anonymous: false,
-    //       inputs: [
-    //         {
-    //           indexed: false,
-    //           internalType: "uint256",
-    //           name: "requiredProposerWeight",
-    //           type: "uint256",
-    //         },
-    //       ],
-    //       name: "RequiredProposerWeightUpdated",
-    //       type: "event",
-    //     },
-    //   ],
-    //   address: this.votingStrategyAddress,
-    //   functionName: "requiredProposerWeight",
-    // });
+    // Hardcoded: requiredProposerWeight on LinearVotingStrategy is 1 SHU.
+    // No DB column exists for this; all other DAOs read it via RPC.
+    // Hardcoding avoids an RPC call for a value that rarely changes.
+    return parseEther("1");
   }
 
   async getVotingDelay(): Promise<bigint> {
@@ -106,6 +109,6 @@ export class SHUClient<
     againstVotes: bigint;
     abstainVotes: bigint;
   }): bigint {
-    return votes.forVotes + votes.abstainVotes + votes.abstainVotes;
+    return votes.forVotes + votes.abstainVotes;
   }
 }
