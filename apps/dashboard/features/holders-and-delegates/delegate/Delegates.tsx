@@ -28,10 +28,12 @@ import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
 import daoConfig from "@/shared/dao-config";
-import { useScreenSize, useDaoData } from "@/shared/hooks";
+import { useScreenSize } from "@/shared/hooks/useScreenSize";
+import { useDaoData } from "@/shared/hooks/useDaoData";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
-import { cn, formatNumberUserReadable } from "@/shared/utils";
+import { cn } from "@/shared/utils/cn";
+import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 
 interface DelegateTableData {
   address: string;

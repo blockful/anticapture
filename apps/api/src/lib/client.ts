@@ -12,6 +12,7 @@ import {
   Client as NounsClient,
   DAOClient,
   SHUClient,
+  AAVEClient,
 } from "@/clients";
 
 import { CONTRACT_ADDRESSES } from "./constants";
@@ -70,6 +71,9 @@ export function getClient<
         governor.address,
         linearVotingStrategy.address,
       );
+    }
+    case DaoIdEnum.AAVE: {
+      return new AAVEClient(client);
     }
     default:
       return null;

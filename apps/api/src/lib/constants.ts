@@ -181,6 +181,15 @@ export const CONTRACT_ADDRESSES = {
       startBlock: 19021698,
     },
   },
+  [DaoIdEnum.AAVE]: {
+    blockTime: 12,
+    tokenType: "ERC20",
+    token: {
+      address: "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9",
+      decimals: 18,
+      startBlock: 12422079,
+    },
+  },
 } as const;
 
 export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -198,6 +207,7 @@ export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     ethRegistrarController: "0x253553366Da8546fC250F225fe3d25d0C782303b",
   },
   [DaoIdEnum.ARB]: {},
+  [DaoIdEnum.AAVE]: {},
   [DaoIdEnum.OP]: {},
   [DaoIdEnum.SHU]: { timelock: "0x36bD3044ab68f600f6d3e081056F34f2a58432c4" },
   [DaoIdEnum.NOUNS]: {
