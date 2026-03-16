@@ -34,27 +34,28 @@ export class SHUClient<
     return "SHU";
   }
 
-  async getQuorum(proposalId: string | null): Promise<bigint> {
-    if (!proposalId) return 0n;
-
-    return BigInt(
-      await readContract(this.client, {
-        abi: [
-          {
-            inputs: [
-              { internalType: "uint32", name: "_proposalId", type: "uint32" },
-            ],
-            name: "quorumVotes",
-            outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-            stateMutability: "view",
-            type: "function",
-          },
-        ],
-        address: this.votingStrategyAddress,
-        functionName: "quorumVotes",
-        args: [Number(proposalId)],
-      }),
-    );
+  async getQuorum(_proposalId: string | null): Promise<bigint> {
+    return parseEther("30000000");
+    // if (!proposalId) return 0n;
+    //
+    // return BigInt(
+    //   await readContract(this.client, {
+    //     abi: [
+    //       {
+    //         inputs: [
+    //           { internalType: "uint32", name: "_proposalId", type: "uint32" },
+    //         ],
+    //         name: "quorumVotes",
+    //         outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    //         stateMutability: "view",
+    //         type: "function",
+    //       },
+    //     ],
+    //     address: this.votingStrategyAddress,
+    //     functionName: "quorumVotes",
+    //     args: [Number(proposalId)],
+    //   }),
+    // );
   }
 
   async getProposalThreshold(): Promise<bigint> {
