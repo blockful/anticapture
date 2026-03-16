@@ -2437,6 +2437,8 @@ export type GetVotesQueryVariables = Exact<{
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   orderBy?: InputMaybe<QueryInput_VotesByProposalId_OrderBy>;
   orderDirection?: InputMaybe<QueryInput_VotesByProposalId_OrderDirection>;
+  support?: InputMaybe<Scalars['Float']['input']>;
+  voterAddressIn?: InputMaybe<Scalars['JSON']['input']>;
 }>;
 
 

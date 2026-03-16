@@ -2440,6 +2440,8 @@ export type GetVotesQueryVariables = Exact<{
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   orderBy?: InputMaybe<QueryInput_VotesByProposalId_OrderBy>;
   orderDirection?: InputMaybe<QueryInput_VotesByProposalId_OrderDirection>;
+  support?: InputMaybe<Scalars['Float']['input']>;
+  voterAddressIn?: InputMaybe<Scalars['JSON']['input']>;
 }>;
 
 
@@ -3625,13 +3627,15 @@ export type GetProposalLazyQueryHookResult = ReturnType<typeof useGetProposalLaz
 export type GetProposalSuspenseQueryHookResult = ReturnType<typeof useGetProposalSuspenseQuery>;
 export type GetProposalQueryResult = Apollo.QueryResult<GetProposalQuery, GetProposalQueryVariables>;
 export const GetVotesDocument = gql`
-    query GetVotes($proposalId: String!, $limit: Float, $skip: NonNegativeInt, $orderBy: queryInput_votesByProposalId_orderBy = timestamp, $orderDirection: queryInput_votesByProposalId_orderDirection = desc) {
+    query GetVotes($proposalId: String!, $limit: Float, $skip: NonNegativeInt, $orderBy: queryInput_votesByProposalId_orderBy = timestamp, $orderDirection: queryInput_votesByProposalId_orderDirection = desc, $support: Float, $voterAddressIn: JSON) {
   votesByProposalId(
     limit: $limit
     skip: $skip
     id: $proposalId
     orderBy: $orderBy
     orderDirection: $orderDirection
+    support: $support
+    voterAddressIn: $voterAddressIn
   ) {
     totalCount
     items {
@@ -3664,6 +3668,8 @@ export const GetVotesDocument = gql`
  *      skip: // value for 'skip'
  *      orderBy: // value for 'orderBy'
  *      orderDirection: // value for 'orderDirection'
+ *      support: // value for 'support'
+ *      voterAddressIn: // value for 'voterAddressIn'
  *   },
  * });
  */

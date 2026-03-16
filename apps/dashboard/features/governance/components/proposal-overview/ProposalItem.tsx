@@ -115,7 +115,7 @@ export const getStatusText = (status: ProposalStatus) => {
     case ProposalStatus.PENDING_EXECUTION:
       return "Pending Execution";
     case ProposalStatus.SUCCEEDED:
-      return "Succeeded";
+      return "Pending Queue";
     case ProposalStatus.EXPIRED:
       return "Expired";
     case ProposalStatus.NO_QUORUM:
