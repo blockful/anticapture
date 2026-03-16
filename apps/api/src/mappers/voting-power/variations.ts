@@ -141,7 +141,10 @@ export const VotingPowerVariationFieldSchema = z.object({
 
 export const VotingPowerResponseSchema = z.object({
   accountId: z.string(),
-  votingPower: z.string(),
+  votingPower: z
+    .bigint()
+    .transform((val) => val.toString())
+    .openapi({ type: "string" }),
   votesCount: z.number(),
   proposalsCount: z.number(),
   delegationsCount: z.number(),
