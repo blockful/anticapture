@@ -25,6 +25,7 @@ interface HoldersAndDelegatesDrawerProps {
   entityType: EntityType;
   address: string;
   daoId: DaoIdEnum;
+  withVotes?: boolean;
 }
 
 export const HoldersAndDelegatesDrawer = ({
@@ -33,18 +34,23 @@ export const HoldersAndDelegatesDrawer = ({
   entityType,
   address,
   daoId,
+  withVotes = true,
 }: HoldersAndDelegatesDrawerProps) => {
   const entities = {
     delegate: {
       title: "Delegate",
       tabs: [
-        {
-          id: "votes",
-          label: "Votes",
-          content: (
-            <DelegateProposalsActivity address={address} daoId={daoId} />
-          ),
-        },
+        ...(withVotes
+          ? [
+              {
+                id: "votes",
+                label: "Votes",
+                content: (
+                  <DelegateProposalsActivity address={address} daoId={daoId} />
+                ),
+              },
+            ]
+          : []),
         {
           id: "voteComposition",
           label: "Vote Composition",

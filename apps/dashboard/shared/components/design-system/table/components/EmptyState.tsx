@@ -6,17 +6,20 @@ export const EmptyState = ({
   description = "Things are stabilizing, and our team is on it!",
   icon,
   fillHeight = false,
+  classNames,
 }: {
   title?: string;
   description?: string;
   icon?: React.ReactNode;
   fillHeight?: boolean;
+  classNames?: string;
 }) => {
   return (
     <div
       className={cn(
         "text-secondary/70 flex flex-col items-center gap-2 p-8 text-center text-sm",
         fillHeight && "h-[calc(100vh-300px)] justify-center",
+        classNames,
       )}
     >
       {icon || <AlienIcon />}
@@ -24,7 +27,7 @@ export const EmptyState = ({
       <span className="text-primary font-mono text-xs font-medium uppercase leading-none tracking-wider">
         {title}
       </span>
-      <span className="text-secondary text-sm leading-none">{description}</span>
+      <span className="text-secondary text-sm leading-6">{description}</span>
     </div>
   );
 };

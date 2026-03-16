@@ -11,6 +11,7 @@ import {
   GTCClient,
   Client as NounsClient,
   DAOClient,
+  AAVEClient,
 } from "@/clients";
 
 import { CONTRACT_ADDRESSES } from "./constants";
@@ -60,6 +61,9 @@ export function getClient<
     case DaoIdEnum.ZK: {
       const { governor } = CONTRACT_ADDRESSES[daoId];
       return new ZKClient(client, governor.address);
+    }
+    case DaoIdEnum.AAVE: {
+      return new AAVEClient(client);
     }
     default:
       return null;
