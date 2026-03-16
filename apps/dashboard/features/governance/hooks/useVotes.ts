@@ -47,6 +47,8 @@ export interface UseVotesParams {
   orderBy?: string;
   orderDirection?: string;
   proposalStartTimestamp?: number;
+  support?: number | null;
+  voterAddress?: string | null;
 }
 
 export const useVotes = ({
@@ -56,6 +58,8 @@ export const useVotes = ({
   limit = 10,
   orderBy = "timestamp",
   orderDirection = "desc",
+  support = null,
+  voterAddress = null,
 }: UseVotesParams = {}): UseVotesResult => {
   // State for infinite scroll
   const [allVotes, setAllVotes] = useState<VoteWithHistoricalPower[]>([]);
@@ -70,8 +74,10 @@ export const useVotes = ({
       orderBy: orderBy as QueryInput_VotesByProposalId_OrderBy,
       orderDirection:
         orderDirection as QueryInput_VotesByProposalId_OrderDirection,
+      ...(support !== null && { support }),
+      ...(voterAddress && { voterAddressIn: [voterAddress] }),
     };
-  }, [proposalId, limit, orderBy, orderDirection]);
+  }, [proposalId, limit, orderBy, orderDirection, support, voterAddress]);
 
   // Main votes query
   const { data, loading, error, fetchMore } = useGetVotesQuery({
@@ -156,11 +162,11 @@ export const useVotes = ({
     [daoId, getVotingPowerChange, proposalStartTimestamp],
   );
 
-  // Reset accumulated votes when sorting parameters change
+  // Reset accumulated votes when sorting or filter parameters change
   useEffect(() => {
     setAllVotes([]);
     setIsLoadingMore(false);
-  }, [orderBy, orderDirection]);
+  }, [orderBy, orderDirection, support, voterAddress]);
 
   // Initialize allVotes on first load or when data changes after reset
   useEffect(() => {
