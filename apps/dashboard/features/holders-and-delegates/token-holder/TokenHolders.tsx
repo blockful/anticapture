@@ -343,14 +343,17 @@ export const TokenHolders = ({
         }
 
         return (
-          <div className="grid w-full grid-cols-2 items-center gap-2 text-sm">
-            <span className="text-right tabular-nums">
+          <div className="grid w-full grid-cols-2 items-center gap-2 overflow-hidden text-sm">
+            <span className="min-w-0 text-right tabular-nums">
               {(variation?.percentageChange || 0) < 0 ? "-" : ""}
               {formatNumberUserReadable(
                 Math.abs(variation?.absoluteChange || 0),
               )}
             </span>
-            <Percentage value={variation?.percentageChange || 0} />
+            <Percentage
+              className="min-w-0"
+              value={variation?.percentageChange || 0}
+            />
           </div>
         );
       },
