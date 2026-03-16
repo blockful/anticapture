@@ -183,7 +183,7 @@ export const CONTRACT_ADDRESSES = {
     token: {
       address: "0xe485E2f1bab389C08721B291f6b59780feC83Fd7",
       decimals: 18,
-      startBlock: 19265894,
+      startBlock: 19021394,
     },
     // https://etherscan.io/address/0xAA6BfA174d2f803b517026E93DBBEc1eBa26258e
     azorius: {
