@@ -65,6 +65,7 @@ export class SHUClient<
   }
 
   async getVotingDelay(): Promise<bigint> {
+    // Azorius has no voting delay — proposals become active immediately on submission
     return 0n;
   }
 

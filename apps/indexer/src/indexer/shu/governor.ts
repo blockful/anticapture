@@ -44,24 +44,40 @@ export function SHUGovernorIndexer(blockTime: number) {
       title = metadata.split("\n")[0]?.replace(/^#+\s*/, "") || null;
     }
 
-    // Insert proposal — endBlock will be updated by ProposalInitialized
-    await context.db.insert(proposalsOnchain).values({
-      id: proposalIdStr,
-      txHash: event.transaction.hash,
-      daoId,
-      proposerAccountId: getAddress(proposer),
-      targets,
-      values,
-      signatures: [],
-      calldatas,
-      startBlock: Number(event.block.number),
-      endBlock: 0,
-      title,
-      description,
-      timestamp: event.block.timestamp,
-      status: ProposalStatus.PENDING,
-      endTimestamp: 0n,
-    });
+    // ProposalInitialized fires BEFORE ProposalCreated (lower logIndex),
+    // so the row may already exist with endBlock/endTimestamp from the init event.
+    // Use onConflictDoUpdate to merge proposal details into the existing row.
+    await context.db
+      .insert(proposalsOnchain)
+      .values({
+        id: proposalIdStr,
+        txHash: event.transaction.hash,
+        daoId,
+        proposerAccountId: getAddress(proposer),
+        targets,
+        values,
+        signatures: [],
+        calldatas,
+        startBlock: Number(event.block.number),
+        endBlock: 0,
+        title,
+        description,
+        timestamp: event.block.timestamp,
+        status: ProposalStatus.ACTIVE,
+        endTimestamp: 0n,
+      })
+      .onConflictDoUpdate({
+        txHash: event.transaction.hash,
+        proposerAccountId: getAddress(proposer),
+        targets,
+        values,
+        signatures: [],
+        calldatas,
+        startBlock: Number(event.block.number),
+        title,
+        description,
+        timestamp: event.block.timestamp,
+      });
 
     const { votingPower: proposerVotingPower } = await context.db
       .insert(accountPower)
@@ -91,8 +107,11 @@ export function SHUGovernorIndexer(blockTime: number) {
 
   /**
    * LinearVotingStrategy ProposalInitialized event.
-   * Updates the proposal's endBlock and endTimestamp.
-   * Fired in the same transaction as ProposalCreated.
+   * Sets the proposal's endBlock and endTimestamp.
+   *
+   * IMPORTANT: This event fires BEFORE ProposalCreated in the same tx
+   * (lower logIndex). We upsert a partial row here; ProposalCreated
+   * will merge the remaining fields via onConflictDoUpdate.
    */
   ponder.on(
     "LinearVotingStrategy:ProposalInitialized",
@@ -100,21 +119,34 @@ export function SHUGovernorIndexer(blockTime: number) {
       const { proposalId, votingEndBlock } = event.args;
       const proposalIdStr = proposalId.toString();
 
-      const proposal = await context.db.find(proposalsOnchain, {
-        id: proposalIdStr,
-      });
-
-      if (!proposal) return;
-
       const blockDelta = votingEndBlock - Number(event.block.number);
       const endTimestamp =
         event.block.timestamp + BigInt(blockDelta * blockTime);
 
-      await context.db.update(proposalsOnchain, { id: proposalIdStr }).set({
-        endBlock: votingEndBlock,
-        endTimestamp,
-        status: ProposalStatus.ACTIVE,
-      });
+      await context.db
+        .insert(proposalsOnchain)
+        .values({
+          id: proposalIdStr,
+          txHash: event.transaction.hash,
+          daoId,
+          proposerAccountId: getAddress(event.transaction.from),
+          targets: [],
+          values: [],
+          signatures: [],
+          calldatas: [],
+          startBlock: Number(event.block.number),
+          endBlock: votingEndBlock,
+          title: null,
+          description: "",
+          timestamp: event.block.timestamp,
+          status: ProposalStatus.ACTIVE,
+          endTimestamp,
+        })
+        .onConflictDoUpdate({
+          endBlock: votingEndBlock,
+          endTimestamp,
+          status: ProposalStatus.ACTIVE,
+        });
     },
   );
 
