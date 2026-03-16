@@ -26,6 +26,7 @@ export const SHU: DaoConfiguration = {
       governor: "0x36bD3044ab68f600f6d3e081056F34f2a58432c4",
       token: "0xe485E2f1bab389C08721B291f6b59780feC83Fd7",
       timelock: "0x36bD3044ab68f600f6d3e081056F34f2a58432c4",
+      votingStrategy: "0x4b29d8B250B8b442ECfCd3a4e3D91933d2db720F",
     },
     rules: {
       delay: true,
@@ -189,5 +190,5 @@ export const SHU: DaoConfiguration = {
   resilienceStages: true,
   tokenDistribution: true,
   dataTables: true,
-  governancePage: false,
+  governancePage: true,
 };

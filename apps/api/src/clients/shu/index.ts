@@ -2,6 +2,7 @@ import { Account, Address, Chain, Client, parseEther, Transport } from "viem";
 import { readContract } from "viem/actions";
 
 import { DAOClient } from "@/clients";
+import { ProposalStatus } from "@/lib/constants";
 
 import { GovernorBase } from "../governor.base";
 
@@ -35,27 +36,9 @@ export class SHUClient<
   }
 
   async getQuorum(_proposalId: string | null): Promise<bigint> {
+    // Hardcoded: quorumNumerator is 30M on LinearVotingStrategy (30% of 100M basis).
+    // Avoids per-proposal RPC calls. If governance updates this, change here.
     return parseEther("30000000");
-    // if (!proposalId) return 0n;
-    //
-    // return BigInt(
-    //   await readContract(this.client, {
-    //     abi: [
-    //       {
-    //         inputs: [
-    //           { internalType: "uint32", name: "_proposalId", type: "uint32" },
-    //         ],
-    //         name: "quorumVotes",
-    //         outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    //         stateMutability: "view",
-    //         type: "function",
-    //       },
-    //     ],
-    //     address: this.votingStrategyAddress,
-    //     functionName: "quorumVotes",
-    //     args: [Number(proposalId)],
-    //   }),
-    // );
   }
 
   async getProposalThreshold(): Promise<bigint> {
@@ -104,6 +87,71 @@ export class SHUClient<
         functionName: "timelockPeriod",
       }),
     );
+  }
+
+  /**
+   * Azorius proposals expire if not executed within the execution period
+   * after the timelock. Override base class to compute EXPIRED status.
+   *
+   * Lifecycle: ACTIVE → SUCCEEDED → (timelock) → EXECUTABLE → EXPIRED
+   * Since timelockPeriod=0 on Shutter, it goes directly to EXECUTABLE.
+   */
+  async getProposalStatus(
+    proposal: {
+      id: string;
+      status: string;
+      startBlock: number;
+      endBlock: number;
+      forVotes: bigint;
+      againstVotes: bigint;
+      abstainVotes: bigint;
+      endTimestamp: bigint;
+    },
+    currentBlock: number,
+    currentTimestamp: number,
+  ): Promise<string> {
+    // Use base class for all standard states first
+    const status = await super.getProposalStatus(
+      proposal,
+      currentBlock,
+      currentTimestamp,
+    );
+
+    // If base class returns SUCCEEDED, check if the execution window has expired
+    if (status === ProposalStatus.SUCCEEDED) {
+      const timelockDelay = await this.getTimelockDelay();
+      const executionPeriod = await this.getExecutionPeriod();
+
+      const expirationBlock =
+        proposal.endBlock + Number(timelockDelay) + Number(executionPeriod);
+
+      if (currentBlock >= expirationBlock) {
+        return ProposalStatus.EXPIRED;
+      }
+    }
+
+    return status;
+  }
+
+  private async getExecutionPeriod(): Promise<bigint> {
+    if (!this.cache.executionPeriod) {
+      this.cache.executionPeriod = BigInt(
+        await readContract(this.client, {
+          abi: [
+            {
+              inputs: [],
+              name: "executionPeriod",
+              outputs: [{ internalType: "uint32", name: "", type: "uint32" }],
+              stateMutability: "view",
+              type: "function",
+            },
+          ],
+          address: this.address,
+          functionName: "executionPeriod",
+        }),
+      );
+    }
+    return this.cache.executionPeriod;
   }
 
   calculateQuorum(votes: {

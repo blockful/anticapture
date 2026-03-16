@@ -6,8 +6,25 @@ import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 import daoConfigByDaoId from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
+const LinearVotingStrategyAbi = [
+  {
+    inputs: [
+      { internalType: "uint32", name: "_proposalId", type: "uint32" },
+      { internalType: "uint8", name: "_voteType", type: "uint8" },
+    ],
+    name: "vote",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+] as const;
+
 const getDaoGovernanceAddress = (daoId: DaoIdEnum) => {
   return daoConfigByDaoId[daoId].daoOverview.contracts?.governor;
+};
+
+const getDaoVotingStrategyAddress = (daoId: DaoIdEnum) => {
+  return daoConfigByDaoId[daoId].daoOverview.contracts?.votingStrategy;
 };
 
 export const voteOnProposal = async (
@@ -20,48 +37,54 @@ export const voteOnProposal = async (
   setTransactionhash: (hash: string) => void,
   comment?: string,
 ) => {
-  const daoGovernanceAddress = getDaoGovernanceAddress(daoId);
-
-  if (!daoGovernanceAddress) {
-    throw new Error("DAO governance address not found");
-  }
-
+  const client = walletClient.extend(publicActions);
   const voteNumber = vote === "for" ? 1 : vote === "against" ? 0 : 2;
 
-  const client = walletClient.extend(publicActions);
-
   try {
-    let request;
+    let hash: `0x${string}`;
 
-    if (!comment) {
-      const simulatedRequest = await client.simulateContract({
-        abi: EnsGovernorAbi,
-        address: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
-        functionName: "castVote",
-        args: [proposalId, voteNumber],
+    const votingStrategyAddress = getDaoVotingStrategyAddress(daoId);
+
+    if (votingStrategyAddress) {
+      // Azorius/Fractal governance: vote on LinearVotingStrategy
+      const { request } = await client.simulateContract({
+        abi: LinearVotingStrategyAbi,
+        address: votingStrategyAddress,
+        functionName: "vote",
+        args: [Number(proposalId), voteNumber],
         account,
       });
-
-      request = simulatedRequest.request;
+      hash = await client.writeContract(request);
     } else {
-      const simulatedRequest = await client.simulateContract({
-        abi: EnsGovernorAbi,
-        address: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
-        functionName: "castVoteWithReason",
-        args: [proposalId, voteNumber, comment],
-        account,
-      });
+      // OZ Governor: castVote / castVoteWithReason on governor contract
+      const daoGovernanceAddress = getDaoGovernanceAddress(daoId);
+      if (!daoGovernanceAddress) {
+        throw new Error("DAO governance address not found");
+      }
 
-      request = simulatedRequest.request;
+      if (!comment) {
+        const { request } = await client.simulateContract({
+          abi: EnsGovernorAbi,
+          address: daoGovernanceAddress,
+          functionName: "castVote",
+          args: [proposalId, voteNumber],
+          account,
+        });
+        hash = await client.writeContract(request);
+      } else {
+        const { request } = await client.simulateContract({
+          abi: EnsGovernorAbi,
+          address: daoGovernanceAddress,
+          functionName: "castVoteWithReason",
+          args: [proposalId, voteNumber, comment],
+          account,
+        });
+        hash = await client.writeContract(request);
+      }
     }
 
-    if (!request) {
-      throw new Error("Request not found");
-    }
-
-    const hash = await client.writeContract(request);
     setTransactionhash(hash);
-    const transaction = await client.waitForTransactionReceipt({ hash: hash });
+    const transaction = await client.waitForTransactionReceipt({ hash });
     setTransactionhash("");
 
     return transaction;
