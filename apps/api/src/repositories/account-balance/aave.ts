@@ -132,7 +132,7 @@ export class AAVEAccountBalanceRepository {
           "current_balance",
         ),
         absoluteChange:
-          sql<string>`SUM(${variations.fromChange} + ${variations.toChange})`.as(
+          sql<string>`MAX(${variations.fromChange}::numeric) + MAX(${variations.toChange}::numeric)`.as(
             "absolute_change",
           ),
       })
@@ -190,7 +190,7 @@ export class AAVEAccountBalanceRepository {
           "current_balance",
         ),
         absoluteChange:
-          sql<string>`SUM(${variations.fromChange} + ${variations.toChange})`.as(
+          sql<string>`MAX(${variations.fromChange}::numeric) + MAX(${variations.toChange}::numeric)`.as(
             "absolute_change",
           ),
       })
