@@ -44,7 +44,6 @@ export const delegateChanged = async (
     timestamp: bigint;
     logIndex: number;
     delegatorBalance?: bigint;
-    type?: number;
   },
 ) => {
   const {
@@ -56,7 +55,6 @@ export const delegateChanged = async (
     timestamp,
     logIndex,
     delegatorBalance: _delegatorBalance,
-    type,
   } = args;
 
   const normalizedDelegator = getAddress(delegator);
@@ -116,7 +114,6 @@ export const delegateChanged = async (
       isDex,
       isLending,
       isTotal,
-      type,
     })
     .onConflictDoUpdate((current) => ({
       delegatedValue:
