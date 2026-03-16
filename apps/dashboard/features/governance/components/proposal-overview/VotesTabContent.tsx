@@ -2,8 +2,13 @@
 
 import type { GetProposalQuery } from "@anticapture/graphql-client";
 import {
+  QueryInput_TokenMetrics_MetricType,
+  QueryInput_TokenMetrics_OrderDirection,
+} from "@anticapture/graphql-client";
+import {
   useGetProposalNonVotersQuery,
   useGetVotesQuery,
+  useTokenMetricsQuery,
 } from "@anticapture/graphql-client/hooks";
 import { useParams } from "next/navigation";
 import { parseAsStringEnum, useQueryState } from "nuqs";
@@ -12,7 +17,6 @@ import { formatUnits } from "viem";
 import { TabsDidntVoteContent } from "@/features/governance/components/proposal-overview/TabsDidntVoteContent";
 import { TabsVotedContent } from "@/features/governance/components/proposal-overview/TabsVotedContent";
 import daoConfig from "@/shared/dao-config";
-import { useTokenInfo } from "@/shared/hooks/useTokenInfo";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { getAuthHeaders } from "@/shared/utils/server-utils";
@@ -37,7 +41,21 @@ export const VotesTabContent = ({
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
   const { decimals } = daoConfig[daoIdEnum];
 
-  const { data: tokenInfo } = useTokenInfo(daoIdEnum);
+  // Get delegated supply at proposal end time
+  const { data: delegatedSupplyData } = useTokenMetricsQuery({
+    variables: {
+      metricType: QueryInput_TokenMetrics_MetricType.DelegatedSupply,
+      endDate: Number(proposal.endTimestamp),
+      orderDirection: QueryInput_TokenMetrics_OrderDirection.Desc,
+      limit: 1,
+    },
+    context: {
+      headers: {
+        "anticapture-dao-id": daoIdEnum,
+        ...getAuthHeaders(),
+      },
+    },
+  });
 
   // Get votes for this proposal
   const { data } = useGetVotesQuery({
@@ -75,11 +93,13 @@ export const VotesTabContent = ({
     Number(formatUnits(totalVotesBigInt, decimals)),
   );
 
-  const nonVoterVotingPower = tokenInfo?.delegatedSupply
+  const historicalDelegatedSupply =
+    delegatedSupplyData?.tokenMetrics?.items?.[0]?.high;
+  const nonVoterVotingPower = historicalDelegatedSupply
     ? formatNumberUserReadable(
         Number(
           formatUnits(
-            BigInt(tokenInfo.delegatedSupply) - totalVotesBigInt,
+            BigInt(historicalDelegatedSupply) - totalVotesBigInt,
             decimals,
           ),
         ),
