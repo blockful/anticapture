@@ -18,7 +18,7 @@ interface AccountBalanceRepository {
     amountfilter: AmountFilter,
   ): Promise<{
     items: DBAccountBalanceWithVariation[];
-    totalCount: bigint;
+    totalCount: number;
   }>;
 
   getAccountBalanceWithVariation(
@@ -44,7 +44,7 @@ export class AccountBalanceService {
     amountFilter: AmountFilter,
   ): Promise<{
     items: DBAccountBalanceWithVariation[];
-    totalCount: bigint;
+    totalCount: number;
   }> {
     const excludeAddresses = Object.values(TreasuryAddresses[daoId]);
     return await this.repo.getAccountBalancesWithVariation(

@@ -10,7 +10,6 @@ import { useMemo } from "react";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 import {
   getUserVoteData,
-  extractProposalName,
   getVoteTimingData,
   proposalsFinalResultMapping,
 } from "@/features/holders-and-delegates/utils/proposalsTableUtils";
@@ -94,7 +93,7 @@ export const ProposalsTable = ({
       );
       return {
         proposalId: item.proposal?.id || "",
-        proposalName: extractProposalName(item.proposal?.description || ""),
+        proposalName: item.proposal?.title || item.proposal?.description || "",
         finalResult: finalResult.text,
         userVote: userVote.text,
         finalResultIcon: finalResult.icon,
@@ -131,6 +130,7 @@ export const ProposalsTable = ({
       },
       cell: ({ row }) => {
         const proposalName = row.getValue("proposalName") as string;
+        const proposalId = row.original.proposalId;
 
         if (loading) {
           return (
@@ -140,11 +140,21 @@ export const ProposalsTable = ({
           );
         }
 
+        const daoIdLower = daoIdEnum.toLowerCase();
+        const href = daoConfig[daoIdEnum]?.governancePage
+          ? `/${daoIdLower}/governance/proposal/${proposalId}`
+          : `${daoConfig[daoIdEnum]?.daoOverview?.govPlatform?.url ?? ""}${proposalId}`;
+
         return (
           <div className="flex items-center">
-            <span className="text-primary font-regular max-w-48 truncate text-sm">
+            <Link
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary font-regular hover:border-primary max-w-48 truncate border-b border-dashed border-[#3F3F46] text-sm transition-colors"
+            >
               {proposalName}
-            </span>
+            </Link>
           </div>
         );
       },

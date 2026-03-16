@@ -16,6 +16,7 @@ query GetProposalsActivity(
     proposals {
       proposal {
         id
+        title
         description
         startBlock
         endBlock

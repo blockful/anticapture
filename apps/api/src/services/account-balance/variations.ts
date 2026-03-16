@@ -2,8 +2,6 @@ import { Address } from "viem";
 
 import {
   DBAccountBalanceVariation,
-  AccountInteractions,
-  Filter,
   DBAccountBalance,
   AmountFilter,
 } from "@/mappers";
@@ -21,7 +19,7 @@ interface AccountBalanceRepository {
     amountfilter: AmountFilter,
   ): Promise<{
     items: DBAccountBalance[];
-    totalCount: bigint;
+    totalCount: number;
   }>;
 }
 
@@ -42,23 +40,10 @@ interface BalanceVariationsRepository {
   ): Promise<DBAccountBalanceVariation | undefined>;
 }
 
-interface AccountInteractionsRepository {
-  getAccountInteractions(
-    accountId: Address,
-    fromTimestamp: number | undefined,
-    toTimestamp: number | undefined,
-    limit: number,
-    skip: number,
-    orderBy: "volume" | "count",
-    orderDirection: "asc" | "desc",
-    filter: Filter,
-  ): Promise<AccountInteractions>;
-}
-
 export class BalanceVariationsService {
   constructor(
     private readonly variationsRepository: BalanceVariationsRepository,
-    private readonly interactionRepository: AccountInteractionsRepository,
+
     private readonly balanceRepository: AccountBalanceRepository,
   ) {}
 
@@ -138,27 +123,5 @@ export class BalanceVariationsService {
       absoluteChange: 0n,
       percentageChange: "0",
     };
-  }
-
-  async getAccountInteractions(
-    accountId: Address,
-    fromTimestamp: number | undefined,
-    toTimestamp: number | undefined,
-    skip: number,
-    limit: number,
-    orderBy: "volume" | "count",
-    orderDirection: "asc" | "desc",
-    filter: Filter,
-  ): Promise<AccountInteractions> {
-    return this.interactionRepository.getAccountInteractions(
-      accountId,
-      fromTimestamp,
-      toTimestamp,
-      limit,
-      skip,
-      orderBy,
-      orderDirection,
-      filter,
-    );
   }
 }

@@ -158,7 +158,7 @@ export const proposalCreated = async (
 
   await ensureAccountExists(context, proposer);
 
-  const title = description.split("\n")[0]?.replace(/^#+\s*/, "") || null;
+  const title = description.split("\n")[0]?.replace(/^#+\s*/, "") || "";
   const blockDelta = parseInt(endBlock) - Number(blockNumber);
   await context.db.insert(proposalsOnchain).values({
     id: proposalId,
@@ -174,6 +174,7 @@ export const proposalCreated = async (
     title,
     description,
     timestamp,
+    logIndex,
     status: ProposalStatus.PENDING,
     endTimestamp: timestamp + BigInt(blockDelta * blockTime),
     proposalType: args.proposalType,

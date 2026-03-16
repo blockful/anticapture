@@ -70,19 +70,21 @@ export const HeaderDAOSidebar = () => {
               <ButtonHeaderSidebar
                 page={"governance"}
                 icon={Landmark}
-                label="Governance"
-                key="Governance"
+                label="Proposals"
+                key="Proposals"
                 isCollapsed={isCollapsed}
               />
             )}
-            <ButtonHeaderSidebar
-              page={PAGES_CONSTANTS.activityFeed.page}
-              icon={Newspaper}
-              label={PAGES_CONSTANTS.activityFeed.title}
-              key={PAGES_CONSTANTS.activityFeed.title}
-              isCollapsed={isCollapsed}
-              isNew
-            />
+            {daoConfig.activityFeed && (
+              <ButtonHeaderSidebar
+                page={PAGES_CONSTANTS.activityFeed.page}
+                icon={Newspaper}
+                label={PAGES_CONSTANTS.activityFeed.title}
+                key={PAGES_CONSTANTS.activityFeed.title}
+                isCollapsed={isCollapsed}
+                isNew
+              />
+            )}
             {daoConfig.attackProfitability &&
               daoConfig.attackProfitability.supportsLiquidTreasuryCall && (
                 <ButtonHeaderSidebar

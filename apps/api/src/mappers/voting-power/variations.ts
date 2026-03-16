@@ -78,7 +78,16 @@ export const VotingPowersRequestSchema = z.object({
     .default(0),
   orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
   orderBy: z
-    .enum(["votingPower", "delegationsCount", "variation", "signedVariation"])
+    .enum([
+      "votingPower",
+      "delegationsCount",
+      "variation",
+      "signedVariation",
+      /* AAVE only */
+      "total",
+      "balance",
+      /*-----------*/
+    ])
     .optional()
     .default("votingPower"),
   addresses: z
@@ -132,10 +141,17 @@ export const VotingPowerVariationFieldSchema = z.object({
 
 export const VotingPowerResponseSchema = z.object({
   accountId: z.string(),
-  votingPower: z.string(),
+  votingPower: z
+    .union([z.bigint().transform((val) => val.toString()), z.string()])
+    .openapi({ type: "string" }),
   votesCount: z.number(),
   proposalsCount: z.number(),
   delegationsCount: z.number(),
+  balance: z
+    .bigint()
+    .transform((val) => val.toString())
+    .optional()
+    .openapi({ type: "string" }),
   variation: VotingPowerVariationFieldSchema,
 });
 
@@ -181,6 +197,7 @@ export type DBVotingPowerVariation = {
 export type DBAccountPower = typeof accountPower.$inferSelect;
 
 export type DBAccountPowerWithVariation = DBAccountPower & {
+  balance?: bigint;
   absoluteChange: bigint;
   percentageChange: string;
 };
@@ -220,31 +237,5 @@ export const VotingPowerVariationsByAccountIdResponseMapper = (
       endTimestamp: TimestampResponseMapper(endTimestamp),
     }),
     data: VotingPowerVariationResponseMapper(delta),
-  });
-};
-
-export const VotingPowerMapper = (
-  data: DBAccountPowerWithVariation,
-): VotingPowerResponse => {
-  return VotingPowerResponseSchema.parse({
-    accountId: data.accountId,
-    votingPower: data.votingPower.toString(),
-    votesCount: data.votesCount,
-    proposalsCount: data.proposalsCount,
-    delegationsCount: data.delegationsCount,
-    variation: {
-      absoluteChange: data.absoluteChange.toString(),
-      percentageChange: data.percentageChange,
-    },
-  });
-};
-
-export const VotingPowersMapper = (
-  items: DBAccountPowerWithVariation[],
-  totalCount: number,
-): VotingPowersResponse => {
-  return VotingPowersResponseSchema.parse({
-    totalCount: totalCount,
-    items: items.map(VotingPowerMapper),
   });
 };

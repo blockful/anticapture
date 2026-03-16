@@ -8,14 +8,15 @@ import {
 } from "ponder:schema";
 import { Address, getAddress, Hex, zeroAddress } from "viem";
 
-import { ensureAccountExists, ensureAccountsExist } from "./shared";
-import { DaoIdEnum } from "@/lib/enums";
 import {
   BurningAddresses,
   CEXAddresses,
   DEXAddresses,
   LendingAddresses,
 } from "@/lib/constants";
+import { DaoIdEnum } from "@/lib/enums";
+
+import { ensureAccountExists, ensureAccountsExist } from "./shared";
 
 /**
  * ### Creates:
