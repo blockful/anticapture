@@ -313,4 +313,5 @@ export const UNI: DaoConfiguration = {
   resilienceStages: true,
   dataTables: true,
   activityFeed: true,
+  governancePage: true,
 };
