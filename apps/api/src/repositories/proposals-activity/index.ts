@@ -8,6 +8,7 @@ export type DbProposal = {
   id: string;
   dao_id: string;
   proposer_account_id: string;
+  title: string | null;
   description: string;
   start_block: number;
   end_block: number;
@@ -168,6 +169,7 @@ export class DrizzleProposalsActivityRepository {
         id: string;
         dao_id: string;
         proposer_account_id: string;
+        title: string | null;
         description: string;
         start_block: number;
         end_block: number;
@@ -196,6 +198,7 @@ export class DrizzleProposalsActivityRepository {
         id: row.id,
         dao_id: row.dao_id,
         proposer_account_id: row.proposer_account_id,
+        title: row.title,
         description: row.description,
         start_block: row.start_block,
         end_block: row.end_block,

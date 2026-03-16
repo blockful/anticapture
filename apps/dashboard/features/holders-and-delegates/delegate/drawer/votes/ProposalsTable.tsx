@@ -94,7 +94,9 @@ export const ProposalsTable = ({
       );
       return {
         proposalId: item.proposal?.id || "",
-        proposalName: extractProposalName(item.proposal?.description || ""),
+        proposalName:
+          (item.proposal as { title?: string | null })?.title ||
+          extractProposalName(item.proposal?.description || ""),
         finalResult: finalResult.text,
         userVote: userVote.text,
         finalResultIcon: finalResult.icon,

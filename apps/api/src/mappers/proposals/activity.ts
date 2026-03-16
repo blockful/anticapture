@@ -14,6 +14,7 @@ export const ProposalActivityResponseSchema = z.object({
         id: z.string(),
         daoId: z.string(),
         proposerAccountId: z.string(),
+        title: z.string().nullable(),
         description: z.string().nullable(),
         startBlock: z.number(),
         endBlock: z.number(),
