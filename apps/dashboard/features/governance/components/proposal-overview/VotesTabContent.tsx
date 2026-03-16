@@ -12,6 +12,7 @@ import { formatUnits } from "viem";
 import { TabsDidntVoteContent } from "@/features/governance/components/proposal-overview/TabsDidntVoteContent";
 import { TabsVotedContent } from "@/features/governance/components/proposal-overview/TabsVotedContent";
 import daoConfig from "@/shared/dao-config";
+import { useTokenInfo } from "@/shared/hooks/useTokenInfo";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { getAuthHeaders } from "@/shared/utils/server-utils";
@@ -35,6 +36,8 @@ export const VotesTabContent = ({
   const { daoId } = useParams<{ daoId: string }>();
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
   const { decimals } = daoConfig[daoIdEnum];
+
+  const { data: tokenInfo } = useTokenInfo(daoIdEnum);
 
   // Get votes for this proposal
   const { data } = useGetVotesQuery({
@@ -63,16 +66,25 @@ export const VotesTabContent = ({
     },
   });
 
+  const totalVotesBigInt =
+    BigInt(proposal.forVotes) +
+    BigInt(proposal.againstVotes) +
+    BigInt(proposal.abstainVotes);
+
   const totalVotes = formatNumberUserReadable(
-    Number(
-      formatUnits(
-        BigInt(proposal.forVotes) +
-          BigInt(proposal.againstVotes) +
-          BigInt(proposal.abstainVotes),
-        decimals,
-      ),
-    ),
+    Number(formatUnits(totalVotesBigInt, decimals)),
   );
+
+  const nonVoterVotingPower = tokenInfo?.delegatedSupply
+    ? formatNumberUserReadable(
+        Number(
+          formatUnits(
+            BigInt(tokenInfo.delegatedSupply) - totalVotesBigInt,
+            decimals,
+          ),
+        ),
+      )
+    : null;
 
   return (
     <div className="text-primary flex w-full flex-col gap-3 py-4 lg:p-4">
@@ -99,6 +111,7 @@ export const VotesTabContent = ({
           Didn&apos;t vote
           <div className="text-secondary font-inter hidden text-[12px] font-normal not-italic leading-[16px] lg:block">
             {nonVotersData?.proposalNonVoters?.totalCount || 0} voters
+            {nonVoterVotingPower != null && ` / ${nonVoterVotingPower} VP`}
           </div>
         </div>
       </div>
