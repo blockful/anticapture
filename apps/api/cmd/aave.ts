@@ -17,6 +17,7 @@ import {
   delegators,
   historicalDelegations,
   token,
+  accountInteractions,
 } from "@/controllers";
 import * as schema from "@/database/schema";
 import { docs } from "@/docs";
@@ -47,6 +48,7 @@ import {
   TokenService,
 } from "@/services";
 import { AAVEVotingPowerService } from "@/services/voting-power/aave";
+import { AccountInteractionsService } from "@/services/account-balance/interactions";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -92,12 +94,11 @@ const daoService = new DaoService(daoClient, daoCache, env.CHAIN_ID);
 const votingPowerService = new AAVEVotingPowerService(
   new AAVEVotingPowerRepository(pgClient),
 );
-const accountBalanceService = new AccountBalanceService(
-  new AAVEAccountBalanceRepository(
-    pgClient,
-    new AccountBalanceQueryFragments(pgClient),
-  ),
+const accountBalanceRepo = new AAVEAccountBalanceRepository(
+  pgClient,
+  new AccountBalanceQueryFragments(pgClient),
 );
+const accountBalanceService = new AccountBalanceService(accountBalanceRepo);
 historicalDelegations(
   app,
   new HistoricalDelegationsService(
@@ -124,6 +125,7 @@ historicalBalances(
 historicalVotingPower(app, votingPowerService);
 votingPowers(app, votingPowerService);
 accountBalances(app, env.DAO_ID, accountBalanceService);
+accountInteractions(app, new AccountInteractionsService(accountBalanceRepo));
 transfers(app, new TransfersService(new TransfersRepository(pgClient)));
 dao(app, daoService);
 docs(app);

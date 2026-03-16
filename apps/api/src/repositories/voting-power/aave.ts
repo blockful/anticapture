@@ -293,8 +293,6 @@ export class AAVEVotingPowerRepository {
         delegationsCount: row.delegationsCount ?? 0,
         lastVoteTimestamp: row.lastVoteTimestamp ?? 0n,
         balance: row.balance || undefined,
-        absoluteChange: row.absoluteChange,
-        percentageChange: row.percentageChange,
       })),
       totalCount: Number(totalCount?.count ?? 0),
     };

@@ -39,9 +39,7 @@ describe("BalanceVariationsService", () => {
     getAccountBalanceVariations: ReturnType<typeof vi.fn>;
     getAccountBalanceVariationsByAccountId: ReturnType<typeof vi.fn>;
   };
-  let mockInteractionsRepo: {
-    getAccountInteractions: ReturnType<typeof vi.fn>;
-  };
+
   let mockBalanceRepo: {
     getAccountBalance: ReturnType<typeof vi.fn>;
     getAccountBalances: ReturnType<typeof vi.fn>;
@@ -52,19 +50,12 @@ describe("BalanceVariationsService", () => {
       getAccountBalanceVariations: vi.fn(),
       getAccountBalanceVariationsByAccountId: vi.fn(),
     };
-    mockInteractionsRepo = {
-      getAccountInteractions: vi.fn(),
-    };
     mockBalanceRepo = {
       getAccountBalance: vi.fn(),
       getAccountBalances: vi.fn(),
     };
 
-    service = new BalanceVariationsService(
-      mockVariationsRepo,
-      mockInteractionsRepo,
-      mockBalanceRepo,
-    );
+    service = new BalanceVariationsService(mockVariationsRepo, mockBalanceRepo);
   });
 
   describe("getAccountBalanceVariations", () => {

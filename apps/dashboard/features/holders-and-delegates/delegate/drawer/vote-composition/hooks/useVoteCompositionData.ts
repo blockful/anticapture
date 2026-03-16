@@ -38,6 +38,7 @@ export interface VoteCompositionData {
 export const useVoteCompositionData = (
   daoId: DaoIdEnum,
   address: string,
+  includeBalance = true,
 ): VoteCompositionData => {
   const { decimals } = daoConfig[daoId];
 
@@ -76,8 +77,6 @@ export const useVoteCompositionData = (
     skip: !isAave,
   });
 
-  console.log({ balanceData });
-
   const delegatorAddresses: Address[] = delegators.map(
     (delegator) => delegator.delegatorAddress as Address,
   );
@@ -96,9 +95,10 @@ export const useVoteCompositionData = (
     othersPercentage: 0,
   };
 
-  const selfBalance = isAave
-    ? BigInt(balanceData?.accountBalanceByAccountId?.data?.balance ?? "0")
-    : 0n;
+  const selfBalance =
+    isAave && includeBalance
+      ? BigInt(balanceData?.accountBalanceByAccountId?.data?.balance ?? "0")
+      : 0n;
 
   if (delegators.length === 0 && selfBalance === 0n) {
     return defaultData;
@@ -142,10 +142,14 @@ export const useVoteCompositionData = (
     const selfPercentage = Number(
       (Number(selfBalance) / Number(effectiveTotal)) * 100,
     );
+    const selfPercentageStr =
+      selfPercentage > 0 && selfPercentage < 0.01
+        ? "<0.01"
+        : selfPercentage.toFixed(2);
     chartConfig["self"] = {
       label: "Self",
       color: PIE_CHART_COLORS[0],
-      percentage: selfPercentage.toFixed(2),
+      percentage: selfPercentageStr,
     };
     pieData.push({
       name: "self",
@@ -161,6 +165,8 @@ export const useVoteCompositionData = (
     if (amount === 0n) return;
 
     const percentage = Number((Number(amount) / Number(effectiveTotal)) * 100);
+    const percentageStr =
+      percentage > 0 && percentage < 0.01 ? "<0.01" : percentage.toFixed(2);
 
     const ensName = ensData?.[delegator.delegatorAddress as Address]?.ens;
     const displayLabel =
@@ -172,7 +178,7 @@ export const useVoteCompositionData = (
         PIE_CHART_COLORS[
           (index + delegatorColorOffset) % PIE_CHART_COLORS.length
         ],
-      percentage: percentage.toFixed(2),
+      percentage: percentageStr,
       ensName,
     };
 
