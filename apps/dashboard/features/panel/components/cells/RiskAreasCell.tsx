@@ -43,7 +43,13 @@ const computeRiskAreas = (daoId: DaoIdEnum) => {
   return { riskAreas, riskAreaItems };
 };
 
-export const RiskAreasCell = ({ daoId }: { daoId: DaoIdEnum }) => {
+export const RiskAreasCell = ({
+  daoId,
+  disabled,
+}: {
+  daoId: DaoIdEnum;
+  disabled?: boolean;
+}) => {
   const { riskAreas, riskAreaItems } = computeRiskAreas(daoId);
 
   return (
@@ -59,7 +65,7 @@ export const RiskAreasCell = ({ daoId }: { daoId: DaoIdEnum }) => {
       }
     >
       <ClickableCell
-        href={`/${daoId.toLowerCase()}/risk-analysis`}
+        href={disabled ? "" : `/${daoId.toLowerCase()}/risk-analysis`}
         className="justify-end px-4 py-3 text-end text-sm font-normal"
       >
         <RiskAreaCardWrapper

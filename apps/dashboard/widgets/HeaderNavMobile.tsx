@@ -34,7 +34,7 @@ export const HeaderNavMobile = () => {
     {
       page: PAGES_CONSTANTS.activityFeed.page,
       title: PAGES_CONSTANTS.activityFeed.title,
-      enabled: true,
+      enabled: daoConfig.activityFeed,
       isNew: true,
     },
     {

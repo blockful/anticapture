@@ -69,7 +69,7 @@ export interface ChainWithIcon extends Chain {
 export interface DaoOverviewConfig {
   chain: ChainWithIcon;
   contracts: {
-    token: Address;
+    token: Address | { label: string; address: Address }[];
     governor?: Address;
     timelock?: Address;
   };
@@ -81,7 +81,7 @@ export interface DaoOverviewConfig {
   cancelFunction?: string;
   snapshot?: string;
   priceDisclaimer?: string;
-  rules: {
+  rules?: {
     delay: boolean;
     changeVote: boolean;
     timelock: boolean;
@@ -131,6 +131,7 @@ export type AttackExposureConfig = {
 // Complete DAO configuration structure
 export interface DaoConfiguration extends BaseInfo {
   daoOverview: DaoOverviewConfig;
+  activityFeed?: boolean;
   attackProfitability?: AttackProfitabilityConfig;
   governanceImplementation?: GovernanceImplementationConfig;
   attackExposure?: AttackExposureConfig;

@@ -1,0 +1,27 @@
+query AccountBalanceByAddress(
+  $address: String!
+  $fromDate: String = ""
+  $toDate: String = ""
+) {
+  accountBalanceByAccountId(
+    address: $address
+    fromDate: $fromDate
+    toDate: $toDate
+  ) {
+    data {
+      address
+      balance
+      delegate
+      tokenId
+      variation {
+        absoluteChange
+        percentageChange
+        previousBalance
+      }
+    }
+    period {
+      endTimestamp
+      startTimestamp
+    }
+  }
+}

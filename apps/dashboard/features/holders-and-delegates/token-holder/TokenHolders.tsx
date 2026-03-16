@@ -60,9 +60,11 @@ const TypeCell = ({ address }: { address: Address }) => {
 export const TokenHolders = ({
   days,
   daoId,
+  showTokenName = true,
 }: {
   days: TimeInterval;
   daoId: DaoIdEnum;
+  showTokenName?: boolean;
 }) => {
   const pageLimit: number = 20;
   const [drawerAddress, setDrawerAddress] = useQueryState("drawerAddress");
@@ -261,7 +263,7 @@ export const TokenHolders = ({
           onClick={() => handleSort("balance")}
         >
           <h4 className="text-table-header whitespace-nowrap">
-            Balance ({daoId})
+            Balance {!!showTokenName && `(${daoId})`}
           </h4>
           <ArrowUpDown
             props={{ className: "size-4" }}
