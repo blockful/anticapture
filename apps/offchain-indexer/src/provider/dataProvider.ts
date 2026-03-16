@@ -1,8 +1,9 @@
-import { AxiosError, type AxiosInstance } from "axios";
-import type { OffchainProposal, OffchainVote } from "@/repository/schema";
-import type { DataProvider } from "@/provider/dataProvider.interface";
+import { type AxiosInstance } from "axios";
+
+import { rawProposalSchema, offchainProposalSchema } from "@/mappers/proposal";
 import { toOffchainVote, rawVoteSchema } from "@/mappers/vote";
-import { rawProposalSchema, offchainProposalSchema} from "@/mappers/proposal"
+import type { DataProvider } from "@/provider/dataProvider.interface";
+import type { OffchainProposal, OffchainVote } from "@/repository/schema";
 
 const PAGE_SIZE = 1000;
 
@@ -67,13 +68,18 @@ export class SnapshotProvider implements DataProvider {
     this.client = client;
   }
 
-  async fetchProposals(cursor: string | null): Promise<{ data: OffchainProposal[]; nextCursor: string | null }> {
+  async fetchProposals(
+    cursor: string | null,
+  ): Promise<{ data: OffchainProposal[]; nextCursor: string | null }> {
     const cursorInt = cursor ? parseInt(cursor, 10) : 0;
 
-    const response = await this.query<{ proposals: typeof rawProposalSchema[] }>(
-      PROPOSALS_QUERY,
-      { spaceId: this.spaceId, cursor: cursorInt, pageSize: PAGE_SIZE },
-    );
+    const response = await this.query<{
+      proposals: (typeof rawProposalSchema)[];
+    }>(PROPOSALS_QUERY, {
+      spaceId: this.spaceId,
+      cursor: cursorInt,
+      pageSize: PAGE_SIZE,
+    });
 
     const proposals: OffchainProposal[] = response.proposals.map((p) =>
       offchainProposalSchema(this.spaceId).parse(p),
@@ -87,10 +93,12 @@ export class SnapshotProvider implements DataProvider {
     return { data: proposals, nextCursor };
   }
 
-  async fetchVotes(cursor: string | null): Promise<{ data: OffchainVote[]; nextCursor: string | null }> {
+  async fetchVotes(
+    cursor: string | null,
+  ): Promise<{ data: OffchainVote[]; nextCursor: string | null }> {
     const cursorInt = cursor ? parseInt(cursor, 10) : 0;
 
-    const response = await this.query<{ votes: typeof rawVoteSchema[] }>(
+    const response = await this.query<{ votes: (typeof rawVoteSchema)[] }>(
       VOTES_QUERY,
       { spaceId: this.spaceId, cursor: cursorInt, pageSize: PAGE_SIZE },
     );
