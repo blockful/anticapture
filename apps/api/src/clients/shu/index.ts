@@ -1,5 +1,4 @@
 import { Account, Address, Chain, Client, parseEther, Transport } from "viem";
-import { readContract } from "viem/actions";
 
 import { DAOClient } from "@/clients";
 import { ProposalStatus } from "@/lib/constants";
@@ -7,6 +6,10 @@ import { ProposalStatus } from "@/lib/constants";
 import { GovernorBase } from "../governor.base";
 
 import { AzoriusABI } from "./abi/governor";
+
+// Azorius on-chain constants (hardcoded to avoid RPC calls)
+const EXECUTION_PERIOD_BLOCKS = 21600; // ~3 days at 12s/block
+const TIMELOCK_PERIOD_BLOCKS = 0; // No timelock on Shutter
 
 export class SHUClient<
   TTransport extends Transport = Transport,
@@ -36,15 +39,13 @@ export class SHUClient<
   }
 
   async getQuorum(_proposalId: string | null): Promise<bigint> {
-    // Hardcoded: quorumNumerator is 30M on LinearVotingStrategy (30% of 100M basis).
+    // Hardcoded: quorumNumerator is 30M on LinearVotingStrategy.
     // Avoids per-proposal RPC calls. If governance updates this, change here.
     return parseEther("30000000");
   }
 
   async getProposalThreshold(): Promise<bigint> {
     // Hardcoded: requiredProposerWeight on LinearVotingStrategy is 1 SHU.
-    // No DB column exists for this; all other DAOs read it via RPC.
-    // Hardcoding avoids an RPC call for a value that rarely changes.
     return parseEther("1");
   }
 
@@ -54,47 +55,26 @@ export class SHUClient<
   }
 
   async getVotingPeriod(): Promise<bigint> {
-    return BigInt(
-      await readContract(this.client, {
-        abi: [
-          {
-            inputs: [],
-            name: "votingPeriod",
-            outputs: [{ internalType: "uint32", name: "", type: "uint32" }],
-            stateMutability: "view",
-            type: "function",
-          },
-        ],
-        address: this.votingStrategyAddress,
-        functionName: "votingPeriod",
-      }),
-    );
+    // Hardcoded: 21600 blocks (~3 days at 12s/block)
+    return 21600n;
   }
 
   async getTimelockDelay(): Promise<bigint> {
-    return BigInt(
-      await readContract(this.client, {
-        abi: [
-          {
-            inputs: [],
-            name: "timelockPeriod",
-            outputs: [{ internalType: "uint32", name: "", type: "uint32" }],
-            stateMutability: "view",
-            type: "function",
-          },
-        ],
-        address: this.address,
-        functionName: "timelockPeriod",
-      }),
-    );
+    // Hardcoded: Shutter has no timelock period
+    return BigInt(TIMELOCK_PERIOD_BLOCKS);
   }
 
   /**
-   * Azorius proposals expire if not executed within the execution period
-   * after the timelock. Override base class to compute EXPIRED status.
+   * Azorius proposal status computation.
    *
-   * Lifecycle: ACTIVE → SUCCEEDED → (timelock) → EXECUTABLE → EXPIRED
-   * Since timelockPeriod=0 on Shutter, it goes directly to EXECUTABLE.
+   * Base class computes: PENDING, ACTIVE, NO_QUORUM, DEFEATED, SUCCEEDED.
+   * This override adds EXPIRED: proposals that passed but weren't executed
+   * within the execution period (endBlock + timelockPeriod + executionPeriod).
+   *
+   * Note: EXPIRED and NO_QUORUM are computed statuses never persisted in DB.
+   * The proposals query prepareStatusForDatabase maps ACTIVE/DEFEATED/SUCCEEDED
+   * to PENDING for DB filtering, so EXPIRED queries filter as ACTIVE (which is
+   * the stored status for expired proposals).
    */
   async getProposalStatus(
     proposal: {
@@ -110,20 +90,16 @@ export class SHUClient<
     currentBlock: number,
     currentTimestamp: number,
   ): Promise<string> {
-    // Use base class for all standard states first
     const status = await super.getProposalStatus(
       proposal,
       currentBlock,
       currentTimestamp,
     );
 
-    // If base class returns SUCCEEDED, check if the execution window has expired
+    // If base returns SUCCEEDED, check if the execution window has expired
     if (status === ProposalStatus.SUCCEEDED) {
-      const timelockDelay = await this.getTimelockDelay();
-      const executionPeriod = await this.getExecutionPeriod();
-
       const expirationBlock =
-        proposal.endBlock + Number(timelockDelay) + Number(executionPeriod);
+        proposal.endBlock + TIMELOCK_PERIOD_BLOCKS + EXECUTION_PERIOD_BLOCKS;
 
       if (currentBlock >= expirationBlock) {
         return ProposalStatus.EXPIRED;
@@ -131,27 +107,6 @@ export class SHUClient<
     }
 
     return status;
-  }
-
-  private async getExecutionPeriod(): Promise<bigint> {
-    if (!this.cache.executionPeriod) {
-      this.cache.executionPeriod = BigInt(
-        await readContract(this.client, {
-          abi: [
-            {
-              inputs: [],
-              name: "executionPeriod",
-              outputs: [{ internalType: "uint32", name: "", type: "uint32" }],
-              stateMutability: "view",
-              type: "function",
-            },
-          ],
-          address: this.address,
-          functionName: "executionPeriod",
-        }),
-      );
-    }
-    return this.cache.executionPeriod;
   }
 
   calculateQuorum(votes: {

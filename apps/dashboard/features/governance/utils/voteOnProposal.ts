@@ -1,5 +1,11 @@
-import type { Account, Chain, WalletClient } from "viem";
 import { publicActions } from "viem";
+import type {
+  Account,
+  Chain,
+  PublicActions,
+  WalletActions,
+  WalletClient,
+} from "viem";
 
 import EnsGovernorAbi from "@/abis/ens-governor.json";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
@@ -19,19 +25,85 @@ const LinearVotingStrategyAbi = [
   },
 ] as const;
 
-const getDaoGovernanceAddress = (daoId: DaoIdEnum) => {
-  return daoConfigByDaoId[daoId].daoOverview.contracts?.governor;
+type VoteClient = WalletClient & PublicActions & WalletActions;
+
+type VoteParams = {
+  proposalId: string;
+  voteNumber: number;
+  account: Account;
+  comment?: string;
 };
 
-const getDaoVotingStrategyAddress = (daoId: DaoIdEnum) => {
-  return daoConfigByDaoId[daoId].daoOverview.contracts?.votingStrategy;
-};
+type VoteHandler = (
+  client: VoteClient,
+  params: VoteParams,
+) => Promise<`0x${string}`>;
+
+/**
+ * Azorius/Fractal: vote on LinearVotingStrategy. No reason support.
+ */
+const azoriusVoteHandler =
+  (daoId: DaoIdEnum): VoteHandler =>
+  async (client, params) => {
+    const address =
+      daoConfigByDaoId[daoId].daoOverview.contracts.votingStrategy;
+    if (!address) throw new Error("Voting strategy address not found");
+
+    const { request } = await client.simulateContract({
+      abi: LinearVotingStrategyAbi,
+      address,
+      functionName: "vote",
+      args: [Number(params.proposalId), params.voteNumber],
+      account: params.account,
+    });
+    return client.writeContract(request);
+  };
+
+/**
+ * OZ Governor: castVote / castVoteWithReason on governor contract.
+ */
+const ozGovernorVoteHandler =
+  (daoId: DaoIdEnum): VoteHandler =>
+  async (client, params) => {
+    const address = daoConfigByDaoId[daoId].daoOverview.contracts.governor;
+    if (!address) throw new Error("DAO governance address not found");
+
+    if (!params.comment) {
+      const { request } = await client.simulateContract({
+        abi: EnsGovernorAbi,
+        address,
+        functionName: "castVote",
+        args: [params.proposalId, params.voteNumber],
+        account: params.account,
+      });
+      return client.writeContract(request);
+    }
+
+    const { request } = await client.simulateContract({
+      abi: EnsGovernorAbi,
+      address,
+      functionName: "castVoteWithReason",
+      args: [params.proposalId, params.voteNumber, params.comment],
+      account: params.account,
+    });
+    return client.writeContract(request);
+  };
+
+/**
+ * Returns the vote handler for a DAO. Add new cases for new governance frameworks.
+ */
+function getVoteHandler(daoId: DaoIdEnum): VoteHandler {
+  if (daoConfigByDaoId[daoId].daoOverview.contracts.votingStrategy) {
+    return azoriusVoteHandler(daoId);
+  }
+  return ozGovernorVoteHandler(daoId);
+}
 
 export const voteOnProposal = async (
   vote: "for" | "against" | "abstain",
   proposalId: string,
   account: Account,
-  chain: Chain,
+  _chain: Chain,
   daoId: DaoIdEnum,
   walletClient: WalletClient,
   setTransactionhash: (hash: string) => void,
@@ -41,47 +113,13 @@ export const voteOnProposal = async (
   const voteNumber = vote === "for" ? 1 : vote === "against" ? 0 : 2;
 
   try {
-    let hash: `0x${string}`;
-
-    const votingStrategyAddress = getDaoVotingStrategyAddress(daoId);
-
-    if (votingStrategyAddress) {
-      // Azorius/Fractal governance: vote on LinearVotingStrategy
-      const { request } = await client.simulateContract({
-        abi: LinearVotingStrategyAbi,
-        address: votingStrategyAddress,
-        functionName: "vote",
-        args: [Number(proposalId), voteNumber],
-        account,
-      });
-      hash = await client.writeContract(request);
-    } else {
-      // OZ Governor: castVote / castVoteWithReason on governor contract
-      const daoGovernanceAddress = getDaoGovernanceAddress(daoId);
-      if (!daoGovernanceAddress) {
-        throw new Error("DAO governance address not found");
-      }
-
-      if (!comment) {
-        const { request } = await client.simulateContract({
-          abi: EnsGovernorAbi,
-          address: daoGovernanceAddress,
-          functionName: "castVote",
-          args: [proposalId, voteNumber],
-          account,
-        });
-        hash = await client.writeContract(request);
-      } else {
-        const { request } = await client.simulateContract({
-          abi: EnsGovernorAbi,
-          address: daoGovernanceAddress,
-          functionName: "castVoteWithReason",
-          args: [proposalId, voteNumber, comment],
-          account,
-        });
-        hash = await client.writeContract(request);
-      }
-    }
+    const handler = getVoteHandler(daoId);
+    const hash = await handler(client as VoteClient, {
+      proposalId,
+      voteNumber,
+      account,
+      comment,
+    });
 
     setTransactionhash(hash);
     const transaction = await client.waitForTransactionReceipt({ hash });
