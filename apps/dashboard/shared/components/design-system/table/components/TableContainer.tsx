@@ -20,7 +20,7 @@ export const TableContainer = forwardRef<
     >
       <table
         data-slot="table"
-        className={cn("min-w-full caption-bottom text-sm", tableClassName)}
+        className={cn("w-full caption-bottom text-sm", tableClassName)}
         {...props}
       />
     </div>
