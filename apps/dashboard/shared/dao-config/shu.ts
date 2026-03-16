@@ -28,7 +28,10 @@ export const SHU: DaoConfiguration = {
     chain: { ...mainnet, icon: MainnetIcon },
     snapshot: "https://snapshot.box/#/s:shutterdao0x36.eth/",
     contracts: {
-      governor: "0xaa6bfa174d2f803b517026e93dbbec1eba26258e/advanced",
+      // Shutter uses Fractal/Azorius — governor and timelock both point to the
+      // Shutter Safe (execution target), not the Azorius module itself.
+      // Voting goes through votingStrategy (LinearVotingStrategy).
+      governor: "0x36bD3044ab68f600f6d3e081056F34f2a58432c4",
       token: "0xe485E2f1bab389C08721B291f6b59780feC83Fd7",
       timelock: "0x36bD3044ab68f600f6d3e081056F34f2a58432c4",
       votingStrategy: "0x4b29d8B250B8b442ECfCd3a4e3D91933d2db720F",
