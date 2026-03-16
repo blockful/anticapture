@@ -628,7 +628,9 @@ export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     "Pancake Swap": "0xf92b0178bc932a59d45c1c4aac81712aac6a5b61",
     Uniswap: "0x3d7264539E6e3f596bb485E3091f3Ae02Ad01ef8",
   },
-  [DaoIdEnum.SHU]: {},
+  [DaoIdEnum.SHU]: {
+    "Uniswap V3": "0x7A922aea89288d8c91777BeECc68DF4A17151df1",
+  },
 };
 
 export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {

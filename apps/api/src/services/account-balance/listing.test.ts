@@ -64,7 +64,7 @@ describe("AccountBalanceService", () => {
       expect(result.items[0]?.accountId).toBe(MOCK_ADDRESS);
     });
 
-    it("should exclude treasury addresses for UNI DAO", async () => {
+    it("should not exclude any addresses", async () => {
       mockRepo.getAccountBalancesWithVariation.mockResolvedValue({
         items: [],
         totalCount: 0n,
@@ -86,7 +86,7 @@ describe("AccountBalanceService", () => {
       const [, , , , , , , , excludeAddresses] =
         mockRepo.getAccountBalancesWithVariation.mock.calls[0]!;
 
-      expect(excludeAddresses.length).toBeGreaterThan(0);
+      expect(excludeAddresses).toEqual([]);
     });
 
     it("should pass through filters to repository", async () => {
