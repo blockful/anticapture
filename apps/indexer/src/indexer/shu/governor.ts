@@ -63,6 +63,7 @@ export function SHUGovernorIndexer(blockTime: number) {
         title,
         description,
         timestamp: event.block.timestamp,
+        logIndex: event.log.logIndex,
         status: ProposalStatus.ACTIVE,
         endTimestamp: 0n,
       })
@@ -77,6 +78,7 @@ export function SHUGovernorIndexer(blockTime: number) {
         title,
         description,
         timestamp: event.block.timestamp,
+        logIndex: event.log.logIndex,
       });
 
     const { votingPower: proposerVotingPower } = await context.db
@@ -139,6 +141,7 @@ export function SHUGovernorIndexer(blockTime: number) {
           title: null,
           description: "",
           timestamp: event.block.timestamp,
+          logIndex: event.log.logIndex,
           status: ProposalStatus.ACTIVE,
           endTimestamp,
         })

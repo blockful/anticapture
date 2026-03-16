@@ -174,6 +174,7 @@ export const proposalCreated = async (
     title,
     description,
     timestamp,
+    logIndex,
     status: ProposalStatus.PENDING,
     endTimestamp: timestamp + BigInt(blockDelta * blockTime),
     proposalType: args.proposalType,

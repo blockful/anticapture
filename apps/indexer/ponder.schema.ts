@@ -207,6 +207,7 @@ export const proposalsOnchain = onchainTable(
     title: drizzle.text(),
     description: drizzle.text().notNull(),
     timestamp: drizzle.bigint().notNull(),
+    logIndex: drizzle.integer("log_index").notNull(),
     endTimestamp: drizzle.bigint("end_timestamp").notNull(),
     status: drizzle.text().notNull(),
     forVotes: drizzle.bigint("for_votes").default(0n).notNull(),
