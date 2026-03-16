@@ -142,13 +142,16 @@ export const VotingPowerVariationFieldSchema = z.object({
 export const VotingPowerResponseSchema = z.object({
   accountId: z.string(),
   votingPower: z
-    .bigint()
-    .transform((val) => val.toString())
+    .union([z.bigint().transform((val) => val.toString()), z.string()])
     .openapi({ type: "string" }),
   votesCount: z.number(),
   proposalsCount: z.number(),
   delegationsCount: z.number(),
-  balance: z.string().optional(),
+  balance: z
+    .bigint()
+    .transform((val) => val.toString())
+    .optional()
+    .openapi({ type: "string" }),
   variation: VotingPowerVariationFieldSchema,
 });
 
@@ -194,7 +197,7 @@ export type DBVotingPowerVariation = {
 export type DBAccountPower = typeof accountPower.$inferSelect;
 
 export type DBAccountPowerWithVariation = DBAccountPower & {
-  balance?: string;
+  balance?: bigint;
   absoluteChange: bigint;
   percentageChange: string;
 };
