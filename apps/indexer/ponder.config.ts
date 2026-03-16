@@ -1,3 +1,4 @@
+import aaveConfig from "./config/aave.config";
 import arbitrumConfig from "./config/arbitrum.config";
 import compoundConfig from "./config/compound.config";
 import ensConfig from "./config/ens.config";
@@ -12,6 +13,7 @@ import zkConfig from "./config/zk.config";
 
 export default {
   chains: {
+    ...aaveConfig.chains,
     ...arbitrumConfig.chains,
     ...ensConfig.chains,
     ...uniswapConfig.chains,
@@ -25,6 +27,7 @@ export default {
     ...shutterConfig.chains,
   },
   contracts: {
+    ...aaveConfig.contracts,
     ...arbitrumConfig.contracts,
     ...ensConfig.contracts,
     ...uniswapConfig.contracts,

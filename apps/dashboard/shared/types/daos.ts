@@ -1,4 +1,5 @@
 export enum DaoIdEnum {
+  AAVE = "AAVE",
   COMP = "COMP",
   ENS = "ENS",
   NOUNS = "NOUNS",
