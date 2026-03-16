@@ -716,7 +716,8 @@ type query_proposalsActivity_proposals_items_proposal {
   id: String!
   daoId: String!
   proposerAccountId: String!
-  description: String
+  title: String!
+  description: String!
   startBlock: Float!
   endBlock: Float!
   timestamp: String
@@ -767,7 +768,7 @@ type query_proposals_items_items {
   daoId: String!
   txHash: String!
   proposerAccountId: String!
-  title: String
+  title: String!
   description: String!
   startBlock: Float!
   endBlock: Float!
@@ -800,7 +801,7 @@ type proposal_200_response {
   daoId: String!
   txHash: String!
   proposerAccountId: String!
-  title: String
+  title: String!
   description: String!
   startBlock: Float!
   endBlock: Float!

@@ -97,26 +97,20 @@ export const useProposalsActivity = ({
     }
   }, [data?.proposalsActivity?.proposals, currentPage]);
 
-  // Calculate pagination values
-  const pagination = useMemo(() => {
-    const totalPages = data?.proposalsActivity?.totalProposals
-      ? Math.ceil(data.proposalsActivity.totalProposals / limit)
-      : 1;
-    const currentPageCalc = skip ? Math.floor(skip / limit) + 1 : 1;
-    const hasNextPage = currentPageCalc < totalPages;
-    const hasPreviousPage = currentPageCalc > 1;
-
-    return {
-      totalPages,
-      hasNextPage,
-      hasPreviousPage,
-      currentPage: currentPageCalc,
-    };
-  }, [data?.proposalsActivity?.totalProposals, skip, limit]);
-
   const totalProposals = data?.proposalsActivity?.totalProposals || 0;
   const totalPages = totalProposals ? Math.ceil(totalProposals / limit) : 1;
   const hasNextPage = currentPage < totalPages;
+
+  // Pagination uses the accumulated state (currentPage) rather than the
+  // initial skip variable, so infinite scroll works beyond the first page.
+  const pagination = useMemo(() => {
+    return {
+      totalPages,
+      hasNextPage,
+      hasPreviousPage: currentPage > 1,
+      currentPage,
+    };
+  }, [totalPages, hasNextPage, currentPage]);
 
   const fetchNextPage = useCallback(async () => {
     if (!hasNextPage || networkStatus === NetworkStatus.fetchMore) return;

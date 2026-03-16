@@ -72,6 +72,7 @@ export interface DaoOverviewConfig {
     token: Address | { label: string; address: Address }[];
     governor?: Address;
     timelock?: Address;
+    votingStrategy?: Address;
   };
   govPlatform?: {
     name: string;

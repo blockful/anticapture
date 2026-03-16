@@ -5,6 +5,7 @@ import { NOUNS } from "@/shared/dao-config/nouns";
 import { OBOL } from "@/shared/dao-config/obol";
 import { OP } from "@/shared/dao-config/op";
 import { SCR } from "@/shared/dao-config/scr";
+import { SHU } from "@/shared/dao-config/shu";
 import { UNI } from "@/shared/dao-config/uni";
 import { AAVE } from "@/shared/dao-config/aave";
 
@@ -18,4 +19,5 @@ export default {
   NOUNS,
   COMP,
   OBOL,
+  SHU,
 } as const;
