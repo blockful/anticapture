@@ -8,8 +8,10 @@ import { GovernorBase } from "../governor.base";
 import { AzoriusABI } from "./abi/governor";
 
 // Azorius on-chain constants (hardcoded to avoid RPC calls)
-const EXECUTION_PERIOD_BLOCKS = 21600; // ~3 days at 12s/block
-const TIMELOCK_PERIOD_BLOCKS = 0; // No timelock on Shutter
+// Source: LinearVotingStrategy contract (0x4b29d8B250B8b442ECfCd3a4e3D91933d2db720F)
+const VOTING_PERIOD_BLOCKS = 21600; // votingPeriod() — ~3 days at 12s/block
+const EXECUTION_PERIOD_BLOCKS = 21600; // Azorius.executionPeriod() — ~3 days at 12s/block
+const TIMELOCK_PERIOD_BLOCKS = 0; // Azorius.timelockPeriod() — no timelock on Shutter
 
 export class SHUClient<
   TTransport extends Transport = Transport,
@@ -55,8 +57,7 @@ export class SHUClient<
   }
 
   async getVotingPeriod(): Promise<bigint> {
-    // Hardcoded: 21600 blocks (~3 days at 12s/block)
-    return 21600n;
+    return BigInt(VOTING_PERIOD_BLOCKS);
   }
 
   async getTimelockDelay(): Promise<bigint> {
@@ -67,14 +68,16 @@ export class SHUClient<
   /**
    * Azorius proposal status computation.
    *
-   * Base class computes: PENDING, ACTIVE, NO_QUORUM, DEFEATED, SUCCEEDED.
-   * This override adds EXPIRED: proposals that passed but weren't executed
-   * within the execution period (endBlock + timelockPeriod + executionPeriod).
+   * Lifecycle:
+   *   ACTIVE → DEFEATED (forVotes <= againstVotes and quorum met)
+   *   ACTIVE → NO_QUORUM (quorum not met)
+   *   ACTIVE → SUCCEEDED (forVotes > againstVotes and quorum met)
+   *   SUCCEEDED → EXPIRED (execution window passed: endBlock + timelockPeriod + executionPeriod)
+   *   SUCCEEDED → EXECUTED (ProposalExecuted event, persisted by indexer)
    *
-   * Note: EXPIRED and NO_QUORUM are computed statuses never persisted in DB.
-   * The proposals query prepareStatusForDatabase maps ACTIVE/DEFEATED/SUCCEEDED
-   * to PENDING for DB filtering, so EXPIRED queries filter as ACTIVE (which is
-   * the stored status for expired proposals).
+   * DEFEATED, NO_QUORUM, SUCCEEDED, and EXPIRED are computed at read-time
+   * by the base class + this override. They are never persisted in DB.
+   * prepareStatusForDatabase maps them to PENDING/ACTIVE for DB filtering.
    */
   async getProposalStatus(
     proposal: {

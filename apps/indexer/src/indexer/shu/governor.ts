@@ -30,18 +30,20 @@ export function SHUGovernorIndexer(blockTime: number) {
     const calldatas = transactions.map((tx) => tx.data) as Hex[];
 
     // Metadata is a JSON string with "title" and "description" keys
-    let title: string | null = null;
+    let title = "metadataParsingError";
     let description = metadata;
     try {
       const parsed = JSON.parse(metadata) as {
         title?: string;
         description?: string;
       };
-      title = parsed.title || null;
+      title = parsed.title || "metadataParsingError";
       description = parsed.description || metadata;
     } catch {
       // Fallback: treat raw metadata as description, extract title from first line
-      title = metadata.split("\n")[0]?.replace(/^#+\s*/, "") || null;
+      title =
+        metadata.split("\n")[0]?.replace(/^#+\s*/, "") ||
+        "metadataParsingError";
     }
 
     // ProposalInitialized fires BEFORE ProposalCreated (lower logIndex),
@@ -63,6 +65,7 @@ export function SHUGovernorIndexer(blockTime: number) {
         title,
         description,
         timestamp: event.block.timestamp,
+        logIndex: event.log.logIndex,
         status: ProposalStatus.ACTIVE,
         endTimestamp: 0n,
       })
@@ -77,6 +80,7 @@ export function SHUGovernorIndexer(blockTime: number) {
         title,
         description,
         timestamp: event.block.timestamp,
+        logIndex: event.log.logIndex,
       });
 
     const { votingPower: proposerVotingPower } = await context.db
@@ -136,9 +140,10 @@ export function SHUGovernorIndexer(blockTime: number) {
           calldatas: [],
           startBlock: Number(event.block.number),
           endBlock: votingEndBlock,
-          title: null,
+          title: "",
           description: "",
           timestamp: event.block.timestamp,
+          logIndex: event.log.logIndex,
           status: ProposalStatus.ACTIVE,
           endTimestamp,
         })

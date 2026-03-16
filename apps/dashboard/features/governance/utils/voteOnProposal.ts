@@ -10,7 +10,7 @@ import type {
 import EnsGovernorAbi from "@/abis/ens-governor.json";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 import daoConfigByDaoId from "@/shared/dao-config";
-import type { DaoIdEnum } from "@/shared/types/daos";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 const LinearVotingStrategyAbi = [
   {
@@ -93,10 +93,12 @@ const ozGovernorVoteHandler =
  * Returns the vote handler for a DAO. Add new cases for new governance frameworks.
  */
 function getVoteHandler(daoId: DaoIdEnum): VoteHandler {
-  if (daoConfigByDaoId[daoId].daoOverview.contracts.votingStrategy) {
-    return azoriusVoteHandler(daoId);
+  switch (daoId) {
+    case DaoIdEnum.SHU:
+      return azoriusVoteHandler(daoId);
+    default:
+      return ozGovernorVoteHandler(daoId);
   }
-  return ozGovernorVoteHandler(daoId);
 }
 
 export const voteOnProposal = async (

@@ -8,7 +8,7 @@ export type DbProposal = {
   id: string;
   dao_id: string;
   proposer_account_id: string;
-  title: string | null;
+  title: string;
   description: string;
   start_block: number;
   end_block: number;
@@ -139,7 +139,7 @@ export class DrizzleProposalsActivityRepository {
         orderByClause = `ORDER BY COALESCE(v.timestamp - p.timestamp, 999999999) ${orderDirection.toUpperCase()}`;
         break;
       default:
-        orderByClause = `ORDER BY p.timestamp ${orderDirection.toUpperCase()}`;
+        orderByClause = `ORDER BY p.timestamp ${orderDirection.toUpperCase()}, p.log_index ${orderDirection.toUpperCase()}`;
     }
 
     // Main query with LEFT JOIN to get proposals and their votes
@@ -169,7 +169,7 @@ export class DrizzleProposalsActivityRepository {
         id: string;
         dao_id: string;
         proposer_account_id: string;
-        title: string | null;
+        title: string;
         description: string;
         start_block: number;
         end_block: number;
