@@ -1071,8 +1071,8 @@ type query_votingPowers_items_items {
   votesCount: Float!
   proposalsCount: Float!
   delegationsCount: Float!
-  variation: query_votingPowers_items_items_variation!
   balance: String
+  variation: query_votingPowers_items_items_variation!
 }
 
 type query_votingPowers_items_items_variation {
@@ -1100,8 +1100,8 @@ type votingPowerByAccountId_200_response {
   votesCount: Float!
   proposalsCount: Float!
   delegationsCount: Float!
-  variation: query_votingPowerByAccountId_variation!
   balance: String
+  variation: query_votingPowerByAccountId_variation!
 }
 
 type query_votingPowerByAccountId_variation {
