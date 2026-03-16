@@ -199,7 +199,7 @@ export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   },
   [DaoIdEnum.ARB]: {},
   [DaoIdEnum.OP]: {},
-  [DaoIdEnum.SHU]: {},
+  [DaoIdEnum.SHU]: { timelock: "0x36bD3044ab68f600f6d3e081056F34f2a58432c4" },
   [DaoIdEnum.NOUNS]: {
     timelock: "0xb1a32fc9f9d8b2cf86c068cae13108809547ef71",
     auction: "0x830BD73E4184ceF73443C15111a1DF14e495C706",
