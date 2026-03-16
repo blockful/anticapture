@@ -2,8 +2,13 @@
 
 import type { GetProposalQuery } from "@anticapture/graphql-client";
 import {
+  QueryInput_TokenMetrics_MetricType,
+  QueryInput_TokenMetrics_OrderDirection,
+} from "@anticapture/graphql-client";
+import {
   useGetProposalNonVotersQuery,
   useGetVotesQuery,
+  useTokenMetricsQuery,
 } from "@anticapture/graphql-client/hooks";
 import { useParams } from "next/navigation";
 import { parseAsStringEnum, useQueryState } from "nuqs";
@@ -36,6 +41,22 @@ export const VotesTabContent = ({
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
   const { decimals } = daoConfig[daoIdEnum];
 
+  // Get delegated supply at proposal end time
+  const { data: delegatedSupplyData } = useTokenMetricsQuery({
+    variables: {
+      metricType: QueryInput_TokenMetrics_MetricType.DelegatedSupply,
+      endDate: Number(proposal.endTimestamp),
+      orderDirection: QueryInput_TokenMetrics_OrderDirection.Desc,
+      limit: 1,
+    },
+    context: {
+      headers: {
+        "anticapture-dao-id": daoIdEnum,
+        ...getAuthHeaders(),
+      },
+    },
+  });
+
   // Get votes for this proposal
   const { data } = useGetVotesQuery({
     variables: {
@@ -63,16 +84,27 @@ export const VotesTabContent = ({
     },
   });
 
+  const totalVotesBigInt =
+    BigInt(proposal.forVotes) +
+    BigInt(proposal.againstVotes) +
+    BigInt(proposal.abstainVotes);
+
   const totalVotes = formatNumberUserReadable(
-    Number(
-      formatUnits(
-        BigInt(proposal.forVotes) +
-          BigInt(proposal.againstVotes) +
-          BigInt(proposal.abstainVotes),
-        decimals,
-      ),
-    ),
+    Number(formatUnits(totalVotesBigInt, decimals)),
   );
+
+  const historicalDelegatedSupply =
+    delegatedSupplyData?.tokenMetrics?.items?.[0]?.high;
+  const nonVoterVotingPower = historicalDelegatedSupply
+    ? formatNumberUserReadable(
+        Number(
+          formatUnits(
+            BigInt(historicalDelegatedSupply) - totalVotesBigInt,
+            decimals,
+          ),
+        ),
+      )
+    : null;
 
   return (
     <div className="text-primary flex w-full flex-col gap-3 py-4 lg:p-4">
@@ -99,6 +131,7 @@ export const VotesTabContent = ({
           Didn&apos;t vote
           <div className="text-secondary font-inter hidden text-[12px] font-normal not-italic leading-[16px] lg:block">
             {nonVotersData?.proposalNonVoters?.totalCount || 0} voters
+            {nonVoterVotingPower != null && ` / ${nonVoterVotingPower} VP`}
           </div>
         </div>
       </div>
