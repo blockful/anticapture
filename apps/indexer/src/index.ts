@@ -1,25 +1,14 @@
 import { env } from "@/env";
-import { DaoIdEnum } from "@/lib/enums";
-import { CONTRACT_ADDRESSES } from "@/lib/constants";
+import { ARBTokenIndexer } from "@/indexer/arb";
+import { COMPGovernorIndexer, COMPTokenIndexer } from "@/indexer/comp";
 import {
   GovernorIndexer as ENSGovernorIndexer,
   ENSTokenIndexer,
 } from "@/indexer/ens";
 import {
-  GovernorIndexer as UNIGovernorIndexer,
-  UNITokenIndexer,
-} from "@/indexer/uni";
-import {
-  GovernorIndexer as OPGovernorIndexer,
-  OPTokenIndexer,
-} from "@/indexer/op";
-import { ARBTokenIndexer } from "@/indexer/arb";
-import { COMPGovernorIndexer, COMPTokenIndexer } from "@/indexer/comp";
-import {
   GovernorIndexer as GTCGovernorIndexer,
   GTCTokenIndexer,
 } from "@/indexer/gtc";
-import { SCRTokenIndexer, SCRGovernorIndexer } from "@/indexer/scr";
 import {
   NounsTokenIndexer,
   GovernorIndexer as NounsGovernorIndexer,
@@ -28,6 +17,19 @@ import {
   GovernorIndexer as ObolGovernorIndexer,
   ObolTokenIndexer,
 } from "@/indexer/obol";
+import {
+  GovernorIndexer as OPGovernorIndexer,
+  OPTokenIndexer,
+} from "@/indexer/op";
+import { SCRTokenIndexer, SCRGovernorIndexer } from "@/indexer/scr";
+import { SHUTokenIndexer, ShutterGovernorIndexer } from "@/indexer/shu";
+import {
+  GovernorIndexer as UNIGovernorIndexer,
+  UNITokenIndexer,
+} from "@/indexer/uni";
+import { CONTRACT_ADDRESSES } from "@/lib/constants";
+import { DaoIdEnum } from "@/lib/enums";
+
 import {
   ZKTokenIndexer,
   GovernorIndexer as ZKGovernorIndexer,
@@ -95,6 +97,12 @@ switch (daoId) {
     const { token } = CONTRACT_ADDRESSES[daoId];
     ObolTokenIndexer(token.address, token.decimals);
     ObolGovernorIndexer(blockTime);
+    break;
+  }
+  case DaoIdEnum.SHU: {
+    const { token } = CONTRACT_ADDRESSES[daoId];
+    SHUTokenIndexer(token.address, token.decimals);
+    ShutterGovernorIndexer(blockTime);
     break;
   }
   case DaoIdEnum.ZK: {
