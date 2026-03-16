@@ -1,12 +1,13 @@
 import arbitrumConfig from "./config/arbitrum.config";
+import compoundConfig from "./config/compound.config";
 import ensConfig from "./config/ens.config";
-import uniswapConfig from "./config/uniswap.config";
-import optimismConfig from "./config/optimism.config";
 import gitcoinConfig from "./config/gitcoin.config";
 import nounsConfig from "./config/nouns.config";
-import scrollConfig from "./config/scroll.config";
-import compoundConfig from "./config/compound.config";
 import obolConfig from "./config/obol.config";
+import optimismConfig from "./config/optimism.config";
+import scrollConfig from "./config/scroll.config";
+import shutterConfig from "./config/shutter.config";
+import uniswapConfig from "./config/uniswap.config";
 import zkConfig from "./config/zk.config";
 
 export default {
@@ -20,6 +21,7 @@ export default {
     ...scrollConfig.chains,
     ...compoundConfig.chains,
     ...obolConfig.chains,
+    ...shutterConfig.chains,
     ...zkConfig.chains,
   },
   contracts: {
@@ -32,6 +34,7 @@ export default {
     ...scrollConfig.contracts,
     ...compoundConfig.contracts,
     ...obolConfig.contracts,
+    ...shutterConfig.contracts,
     ...zkConfig.contracts,
   },
 };
