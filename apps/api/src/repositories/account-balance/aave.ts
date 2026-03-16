@@ -128,6 +128,7 @@ export class AAVEAccountBalanceRepository {
     const aggregated = this.db
       .select({
         accountId: variations.accountId,
+        delegate: sql<string>`MAX(${variations.delegate})`.as("delegate"),
         currentBalance: sql<bigint>`SUM(${variations.currentBalance})`.as(
           "current_balance",
         ),
@@ -157,15 +158,17 @@ export class AAVEAccountBalanceRepository {
       .limit(limit);
 
     return {
-      items: result.map(({ accountId, currentBalance, absoluteChange }) => ({
-        accountId: accountId,
-        tokenId: getAddress(accountId),
-        delegate: getAddress(accountId),
-        previousBalance: BigInt(currentBalance) - BigInt(absoluteChange),
-        currentBalance: currentBalance,
-        absoluteChange: BigInt(absoluteChange),
-        percentageChange: calculatePercentage(currentBalance, absoluteChange),
-      })),
+      items: result.map(
+        ({ accountId, delegate, currentBalance, absoluteChange }) => ({
+          accountId: accountId,
+          tokenId: getAddress(accountId),
+          delegate: getAddress(delegate as Address),
+          previousBalance: BigInt(currentBalance) - BigInt(absoluteChange),
+          currentBalance: currentBalance,
+          absoluteChange: BigInt(absoluteChange),
+          percentageChange: calculatePercentage(currentBalance, absoluteChange),
+        }),
+      ),
       totalCount: totalCount?.count ?? 0,
     };
   }
@@ -186,6 +189,7 @@ export class AAVEAccountBalanceRepository {
     const [result] = await this.db
       .select({
         accountId: variations.accountId,
+        delegate: sql<string>`MAX(${variations.delegate})`.as("delegate"),
         currentBalance: sql<string>`SUM(${variations.currentBalance})`.as(
           "current_balance",
         ),
@@ -202,7 +206,7 @@ export class AAVEAccountBalanceRepository {
     return {
       accountId: result.accountId,
       tokenId: getAddress(result.accountId),
-      delegate: getAddress(result.accountId),
+      delegate: getAddress(result.delegate as Address),
       previousBalance:
         BigInt(result.currentBalance) - BigInt(result.absoluteChange),
       currentBalance: BigInt(result.currentBalance),
