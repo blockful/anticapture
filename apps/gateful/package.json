@@ -1,0 +1,31 @@
+{
+  "name": "@anticapture/gateful",
+  "version": "1.0.0",
+  "description": "REST API Gateway for Anticapture DAO APIs",
+  "main": "dist/src/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/src/index.js",
+    "build": "tsc",
+    "test": "vitest run"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^25.4.0",
+    "openapi-types": "^12.1.3",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3",
+    "vitest": "^4.0.18"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.14.0",
+    "@hono/swagger-ui": "^0.5.3",
+    "@hono/zod-openapi": "^1.2.2",
+    "dotenv": "^16.5.0",
+    "hono": "^4.12.7",
+    "openapi3-ts": "^4.5.0",
+    "zod": "^4.3.6"
+  }
+}

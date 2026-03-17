@@ -21,6 +21,7 @@ export const DaoParametersResponseSchema = z.object({
   votingDelay: z.string(),
   votingPeriod: z.string(),
   timelockDelay: z.string(),
+  alreadySupportCalldataReview: z.boolean(),
   governanceData: z
     .object({
       activeSupply: z.string(),
@@ -45,6 +46,7 @@ export const DaoParametersRPCResponseSchema = z.object({
   votingDelay: z.bigint(),
   votingPeriod: z.bigint(),
   timelockDelay: z.bigint(),
+  alreadySupportCalldataReview: z.boolean(),
 });
 
 export type DaoParametersRPCResponse = z.infer<
@@ -78,6 +80,7 @@ export const DaoResponseMapper = (values: {
   const { rpcData, dbData } = values;
 
   return {
+    // TODO
     id: rpcData.id,
     chainId: rpcData.chainId,
     quorum: rpcData.quorum.toString(),
@@ -85,6 +88,7 @@ export const DaoResponseMapper = (values: {
     votingDelay: rpcData.votingDelay.toString(),
     votingPeriod: rpcData.votingPeriod.toString(),
     timelockDelay: rpcData.timelockDelay.toString(),
+    alreadySupportCalldataReview: rpcData.alreadySupportCalldataReview,
     governanceData: dbData
       ? {
           activeSupply: dbData.activeSupply?.activeSupply ?? "0",

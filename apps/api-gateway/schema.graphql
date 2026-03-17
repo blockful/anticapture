@@ -1323,6 +1323,7 @@ type dao_200_response {
   votingDelay: String!
   votingPeriod: String!
   timelockDelay: String!
+  alreadySupportCalldataReview: Boolean!
   governanceData: query_dao_governanceData
 }
 

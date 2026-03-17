@@ -19,7 +19,9 @@ export class DaoCache implements DaoDataCache {
 
   get(daoId: string): DaoParametersRPCResponse | null {
     const cached = this.cache.get(daoId);
-    if (!cached) return null;
+    if (!cached) {
+      return null;
+    }
 
     const isExpired = Date.now() - cached.timestamp > this.CACHE_TTL_MS;
     if (isExpired) {

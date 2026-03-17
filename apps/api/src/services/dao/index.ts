@@ -73,12 +73,14 @@ export class DaoService {
       votingDelay,
       votingPeriod,
       timelockDelay,
+      alreadySupportCalldataReview,
     ] = await Promise.all([
       this.client.getQuorum(null),
       this.client.getProposalThreshold(),
       this.client.getVotingDelay(),
       this.client.getVotingPeriod(),
       this.client.getTimelockDelay(),
+      this.client.alreadySupportCalldataReview(),
     ]);
 
     const fresh = DaoParametersRPCResponseSchema.parse({
@@ -89,6 +91,7 @@ export class DaoService {
       votingDelay,
       votingPeriod,
       timelockDelay,
+      alreadySupportCalldataReview,
     });
 
     this.cache.set(daoId, fresh);

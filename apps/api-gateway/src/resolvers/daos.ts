@@ -34,6 +34,7 @@ export const daosResolver = {
               votingDelay
               votingPeriod
               timelockDelay
+              alreadySupportCalldataReview
               governanceData {
                 activeSupply
                 averageTurnout {
