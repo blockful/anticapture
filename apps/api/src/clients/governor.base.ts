@@ -207,6 +207,10 @@ export abstract class GovernorBase<
     return BigInt(result);
   }
 
+  alreadySupportCalldataReview(): boolean {
+    return false;
+  }
+
   async getCurrentBlockNumber(): Promise<number> {
     rpcRequestTotal.add(1, { method: "eth_blockNumber" });
     const result = await this.client.request({
