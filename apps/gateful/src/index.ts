@@ -4,22 +4,20 @@ import { OpenAPIHono } from "@hono/zod-openapi";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 
-import { addressEnrichment } from "./address-enrichment/route.js";
 import { config } from "./config.js";
-import { daos } from "./daos/route.js";
-import { DaosService } from "./daos/service.js";
-import { averageDelegation } from "./delegation/route.js";
-import { DelegationService } from "./delegation/service.js";
 import { health } from "./health/route.js";
 import { proxy } from "./proxy/route.js";
+import { addressEnrichment } from "./resolvers/address-enrichment/route.js";
+import { daos } from "./resolvers/daos/route.js";
+import { DaosService } from "./resolvers/daos/service.js";
+import { averageDelegation } from "./resolvers/delegation/route.js";
+import { DelegationService } from "./resolvers/delegation/service.js";
 import { mergeUpstreamDocs } from "./upstream-docs.js";
 
 const app = new OpenAPIHono();
 
 app.use("*", cors({ origin: "*" }));
 app.use("*", logger());
-const daosService = new DaosService(config.daoApis);
-const delegationService = new DelegationService(config.daoApis);
 
 console.log(
   `Discovered ${config.daoApis.size} DAO APIs:`,
@@ -28,9 +26,14 @@ console.log(
 
 // OpenAPI routes
 health(app);
+addressEnrichment(app, config.addressEnrichmentUrl);
+
+// Aggregation routes
+const daosService = new DaosService(config.daoApis);
+const delegationService = new DelegationService(config.daoApis);
+
 daos(app, daosService);
 averageDelegation(app, delegationService);
-addressEnrichment(app, config.addressEnrichmentUrl);
 
 // OpenAPI docs
 app.get("/docs/json", async (c) => {

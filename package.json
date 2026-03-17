@@ -6,6 +6,7 @@
     "dashboard": "dotenv -- pnpm run --filter=@anticapture/dashboard",
     "indexer": "dotenv -- pnpm run --filter=@anticapture/indexer",
     "gateway": "dotenv -- pnpm run --filter=@anticapture/api-gateway",
+    "gateful": "dotenv -- pnpm run --filter=@anticapture/gateful",
     "api": "dotenv -- pnpm run --filter=@anticapture/api",
     "client": "dotenv -- pnpm run --filter=@anticapture/graphql-client",
     "offchain-indexer": "dotenv -- pnpm run --filter=@anticapture/offchain-indexer",

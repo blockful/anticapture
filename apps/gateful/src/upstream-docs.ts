@@ -34,28 +34,38 @@ function mergeSchemas(docs: OpenAPIObject[]): Schemas {
 
 function mergePaths(docs: OpenAPIObject[], daoNames: string[]): PathsObject {
   const paths: PathsObject = {};
-  const seen = new Set<string>();
 
-  const daoParam: ParameterObject = {
-    name: "dao",
-    in: "path",
-    required: true,
-    schema: { type: "string", enum: daoNames },
-    description: "DAO identifier",
-  };
+  // 1. Collect which DAOs support each path
+  const pathDaoMap = new Map<string, Set<string>>();
+  const pathItems = new Map<string, PathItemObject>();
 
-  for (const doc of docs) {
+  for (let i = 0; i < docs.length; i++) {
+    const doc = docs[i];
+    const daoName = daoNames[i];
     if (!doc.paths) continue;
 
     for (const [path, pathItem] of Object.entries(doc.paths)) {
-      if (seen.has(path)) continue;
-      seen.add(path);
-
-      const enrichedItem: PathItemObject = { ...pathItem };
-      enrichedItem.parameters = [daoParam, ...(enrichedItem.parameters ?? [])];
-
-      paths[`/{dao}${path}`] = enrichedItem;
+      if (!pathDaoMap.has(path)) {
+        pathDaoMap.set(path, new Set());
+        pathItems.set(path, { ...pathItem });
+      }
+      pathDaoMap.get(path)!.add(daoName);
     }
+  }
+
+  // 2. Build merged paths with per-path dao enum
+  for (const [path, supportedDaos] of pathDaoMap) {
+    const daoParam: ParameterObject = {
+      name: "dao",
+      in: "path",
+      required: true,
+      schema: { type: "string", enum: [...supportedDaos].sort() },
+      description: "DAO identifier",
+    };
+
+    const item = pathItems.get(path)!;
+    item.parameters = [daoParam, ...(item.parameters ?? [])];
+    paths[`/{dao}${path}`] = item;
   }
 
   return paths;
@@ -73,8 +83,16 @@ export async function mergeUpstreamDocs(
     entries.map(([name, url]) => fetchDoc(name, url)),
   );
 
-  const docs = results.filter((doc): doc is OpenAPIObject => doc !== null);
-  const daoNames = Array.from(daoApis.keys());
+  // Keep only successful fetches, with matching names
+  const docs: OpenAPIObject[] = [];
+  const daoNames: string[] = [];
+  for (let i = 0; i < results.length; i++) {
+    const result = results[i];
+    if (result !== null) {
+      docs.push(result);
+      daoNames.push(entries[i][0]);
+    }
+  }
 
   return {
     ...ownSpec,

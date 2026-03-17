@@ -1,4 +1,4 @@
-import { fanOutGet } from "../shared/fan-out.js";
+import { fanOutGet } from "../../shared/fan-out.js";
 
 export type DelegationPercentageResponse = {
   items: { date: string; high: string }[];
@@ -32,7 +32,7 @@ export class DelegationService {
 
     const daoResponses = await fanOutGet<DelegationPercentageResponse>(
       this.daoApis,
-      "/delegation-percentage-by-day",
+      "/delegation-percentage",
       params.toString(),
     );
 
