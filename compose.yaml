@@ -17,7 +17,7 @@ services:
   indexer:
     build:
       context: .
-      dockerfile: infra/indexer/Dockerfile.indexer
+      dockerfile: Dockerfile.indexer
     command:
       ["npm", "run", "start", "--", "--config", "config/ens.local.config.ts"]
     environment:
