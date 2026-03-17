@@ -182,6 +182,10 @@ export abstract class GovernorBase<
     return proposal.status;
   }
 
+  alreadySupportCalldataReview(): boolean {
+    return false;
+  }
+
   async getCurrentBlockNumber(): Promise<number> {
     const result = await this.client.request({
       method: "eth_blockNumber",

@@ -29,7 +29,7 @@ export async function fanOutGet<T = unknown>(
     if (result.status === "fulfilled") {
       responses.set(result.value.dao, result.value.data);
     } else {
-      console.warn(`Upstream request failed: ${result.reason}`);
+      console.error(`[fan-out] `, result.reason);
     }
   }
 
