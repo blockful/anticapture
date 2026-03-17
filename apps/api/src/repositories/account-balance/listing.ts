@@ -38,7 +38,7 @@ export class AccountBalanceRepository {
     amountfilter: AmountFilter,
   ): Promise<{
     items: DBAccountBalance[];
-    totalCount: bigint;
+    totalCount: number;
   }> {
     const filter = this.filterToSql(
       addresses,
@@ -70,7 +70,7 @@ export class AccountBalanceRepository {
 
     return {
       items: page,
-      totalCount: BigInt(totalCount[0]?.count ?? 0),
+      totalCount: totalCount[0]?.count ?? 0,
     };
   }
 
@@ -99,7 +99,7 @@ export class AccountBalanceRepository {
     amountfilter: AmountFilter,
   ): Promise<{
     items: DBAccountBalanceWithVariation[];
-    totalCount: bigint;
+    totalCount: number;
   }> {
     const filter = this.filterToSql(
       addresses,
@@ -157,7 +157,7 @@ export class AccountBalanceRepository {
           percentageChange: calculatePercentage(currentBalance, absoluteChange),
         }),
       ),
-      totalCount: BigInt(totalCount?.count ?? 0),
+      totalCount: totalCount?.count ?? 0,
     };
   }
 

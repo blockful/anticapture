@@ -27,7 +27,7 @@ import { Table } from "@/shared/components/design-system/table/Table";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 import daoConfigByDaoId from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { cn } from "@/shared/utils";
+import { cn } from "@/shared/utils/cn";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 
 interface VotingPowerHistoryTableProps {
@@ -232,12 +232,18 @@ export const VotingPowerHistoryTable = ({
 
         let amount = "0";
         if (item.delegation) {
+          const value = Number(
+            formatUnits(BigInt(item.delegation.value), decimals),
+          );
           amount = formatNumberUserReadable(
-            Number(formatUnits(BigInt(item.delegation.value), decimals)),
+            value > 0 && value < 1 ? 0.01 : value,
           );
         } else if (item.transfer) {
+          const value = Number(
+            formatUnits(BigInt(item.transfer.value), decimals),
+          );
           amount = formatNumberUserReadable(
-            Number(formatUnits(BigInt(item.transfer.value), decimals)),
+            value > 0 && value < 1 ? 0.01 : value,
           );
         } else {
           // Auto delegation protocols wont have neither delegation nor transfer, so we use the delta

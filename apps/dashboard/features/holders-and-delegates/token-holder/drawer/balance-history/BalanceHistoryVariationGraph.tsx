@@ -178,6 +178,7 @@ export const BalanceHistoryVariationGraph = ({
   // Custom dot component to show each transfer/delegation point
   const CustomDot = (props: CustomDotProps) => {
     const { cx, cy, payload } = props;
+    if (!payload.direction) return <></>;
     return (
       <Dot
         key={`${payload.transactionHash}-${payload.logIndex}`}
@@ -262,7 +263,7 @@ export const BalanceHistoryVariationGraph = ({
                   return (
                     <div className="bg-surface-contrast border-light-dark rounded-lg border p-3 shadow-lg">
                       <p className="text-primary text-sm font-medium">
-                        {timestampToReadableDate(Number(data.timestamp) / 1000)}
+                        {timestampToReadableDate(Number(data.timestamp))}
                       </p>
                       <p className="text-secondary flex gap-1 text-xs">
                         Balance:

@@ -6,8 +6,26 @@ import {
   HistoricalVotingPowersResponseMapper,
   HistoricalVotingPowerRequestParamsSchema,
   HistoricalVotingPowerGlobalQuerySchema,
+  DBHistoricalVotingPowerWithRelations,
 } from "@/mappers";
-import { VotingPowerService } from "@/services";
+import { Address } from "viem";
+
+interface VotingPowerService {
+  getHistoricalVotingPowers(
+    skip: number,
+    limit: number,
+    orderDirection: "asc" | "desc",
+    orderBy: "timestamp" | "delta",
+    accountId?: Address,
+    minDelta?: string,
+    maxDelta?: string,
+    fromDate?: number,
+    toDate?: number,
+  ): Promise<{
+    items: DBHistoricalVotingPowerWithRelations[];
+    totalCount: number;
+  }>;
+}
 
 export function historicalVotingPower(app: Hono, service: VotingPowerService) {
   app.openapi(

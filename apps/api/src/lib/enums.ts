@@ -1,10 +1,12 @@
 export enum DaoIdEnum {
+  AAVE = "AAVE",
   UNI = "UNI",
   ENS = "ENS",
   ARB = "ARB",
   OP = "OP",
   GTC = "GTC",
   NOUNS = "NOUNS",
+  SHU = "SHU",
   SCR = "SCR",
   COMP = "COMP",
   OBOL = "OBOL",

@@ -107,6 +107,7 @@ export const ProposalSection = () => {
           votingPower={votingPower}
           rawVotingPower={rawVotingPower}
           decimals={decimals}
+          daoId={daoEnum}
         />
 
         <HoldersAndDelegatesDrawer

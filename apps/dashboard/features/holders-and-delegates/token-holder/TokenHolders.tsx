@@ -60,9 +60,11 @@ const TypeCell = ({ address }: { address: Address }) => {
 export const TokenHolders = ({
   days,
   daoId,
+  showTokenName = true,
 }: {
   days: TimeInterval;
   daoId: DaoIdEnum;
+  showTokenName?: boolean;
 }) => {
   const pageLimit: number = 20;
   const [drawerAddress, setDrawerAddress] = useQueryState("drawerAddress");
@@ -261,7 +263,7 @@ export const TokenHolders = ({
           onClick={() => handleSort("balance")}
         >
           <h4 className="text-table-header whitespace-nowrap">
-            Balance ({daoId})
+            Balance {!!showTokenName && `(${daoId})`}
           </h4>
           <ArrowUpDown
             props={{ className: "size-4" }}
@@ -341,14 +343,17 @@ export const TokenHolders = ({
         }
 
         return (
-          <div className="grid w-full grid-cols-2 items-center gap-2 text-sm">
-            <span className="text-right tabular-nums">
+          <div className="grid w-full grid-cols-2 items-center gap-2 overflow-hidden text-sm">
+            <span className="min-w-0 text-right tabular-nums">
               {(variation?.percentageChange || 0) < 0 ? "-" : ""}
               {formatNumberUserReadable(
                 Math.abs(variation?.absoluteChange || 0),
               )}
             </span>
-            <Percentage value={variation?.percentageChange || 0} />
+            <Percentage
+              className="min-w-0"
+              value={variation?.percentageChange || 0}
+            />
           </div>
         );
       },

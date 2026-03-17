@@ -55,6 +55,7 @@ export const OP: DaoConfiguration = {
       percentage: 0.3,
     },
   },
+  activityFeed: true,
   governanceImplementation: {
     // Fields are sorted alphabetically by GovernanceImplementationEnum for readability
     fields: {

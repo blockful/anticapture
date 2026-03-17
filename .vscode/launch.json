@@ -37,16 +37,30 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "api test",
+      "name": "api aave",
       "skipFiles": ["<node_internals>/**"],
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["run", "test:watch"],
+      "runtimeArgs": ["run", "dev:aave"],
       "env": {
         "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json",
         "ENV_FILE": "${workspaceFolder}/apps/api/.env"
       },
       "outFiles": ["${workspaceFolder}/**/*.js", "!**/node_modules/**"],
       "cwd": "${workspaceFolder}/apps/api"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "gateful",
+      "skipFiles": ["<node_internals>/**"],
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["dev"],
+      "env": {
+        "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json",
+        "ENV_FILE": "${workspaceFolder}/apps/gateful/.env"
+      },
+      "outFiles": ["${workspaceFolder}/**/*.js", "!**/node_modules/**"],
+      "cwd": "${workspaceFolder}/apps/gateful"
     }
   ]
 }
