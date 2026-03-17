@@ -368,4 +368,5 @@ export const ENS: DaoConfiguration = {
   dataTables: true,
   activityFeed: true,
   governancePage: true,
+  serviceProviders: true,
 };
