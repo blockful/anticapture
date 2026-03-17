@@ -151,7 +151,7 @@ export class DelegationService {
       };
     }
 
-    const userLimit = args.limit || 100;
+    const userLimit = args.limit ?? 100;
     const finalItems = items.slice(0, userLimit);
 
     return {
