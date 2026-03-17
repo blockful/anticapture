@@ -74,7 +74,7 @@ export const VoteComposition = ({
   daoId: DaoIdEnum;
 }) => {
   const isAave = daoId === DaoIdEnum.AAVE;
-  const [includeBalance, setIncludeBalance] = useState(true);
+  const [includeBalance, setIncludeBalance] = useState(false);
 
   const {
     currentVotingPower,

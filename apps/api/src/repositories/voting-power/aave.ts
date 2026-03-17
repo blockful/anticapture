@@ -292,7 +292,7 @@ export class AAVEVotingPowerRepository {
         proposalsCount: row.proposalsCount ?? 0,
         delegationsCount: row.delegationsCount ?? 0,
         lastVoteTimestamp: row.lastVoteTimestamp ?? 0n,
-        balance: row.balance || undefined,
+        balance: row.balance ? BigInt(row.balance) : undefined,
       })),
       totalCount: Number(totalCount?.count ?? 0),
     };
@@ -373,7 +373,7 @@ export class AAVEVotingPowerRepository {
     return result
       ? {
           ...result,
-          balance: result.balance ?? undefined,
+          balance: result.balance ? BigInt(result.balance) : undefined,
           absoluteChange: result.absoluteChange,
           percentageChange: result.percentageChange,
         }

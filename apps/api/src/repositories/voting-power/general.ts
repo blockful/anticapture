@@ -370,7 +370,10 @@ export class VotingPowerRepository {
       .where(this.filterToSql(addresses, amountFilter));
 
     return {
-      items,
+      items: items.map((item) => ({
+        ...item,
+        absoluteChange: BigInt(item.absoluteChange ?? 0),
+      })),
       totalCount: Number(totalCount?.count ?? 0),
     };
   }

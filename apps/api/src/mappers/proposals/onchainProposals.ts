@@ -43,7 +43,7 @@ export const ProposalResponseSchema = z.object({
   daoId: z.string(),
   txHash: z.string(),
   proposerAccountId: z.string(),
-  title: z.string().nullish(),
+  title: z.string(),
   description: z.string(),
   startBlock: z.number(),
   endBlock: z.number(),

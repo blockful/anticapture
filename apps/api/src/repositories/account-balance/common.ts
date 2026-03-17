@@ -1,6 +1,6 @@
 import { and, gte, lte, SQL, sql } from "drizzle-orm";
-import { Drizzle, transfer } from "@/database";
-import { accountBalance } from "@/database";
+
+import { Drizzle, transfer, accountBalance } from "@/database";
 
 export class AccountBalanceQueryFragments {
   constructor(private readonly db: Drizzle) {}

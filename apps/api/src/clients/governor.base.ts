@@ -36,6 +36,7 @@ export abstract class GovernorBase<
     votingDelay?: bigint;
     votingPeriod?: bigint;
     timelockDelay?: bigint;
+    executionPeriod?: bigint;
   } = {};
   private readonly quorumCache = new Map<
     string,

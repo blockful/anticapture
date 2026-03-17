@@ -1,5 +1,5 @@
-import { z } from "zod";
 import dotenv from "dotenv";
+import { z } from "zod";
 
 dotenv.config();
 
@@ -10,9 +10,7 @@ const envSchema = z.object({
     .enum(["true", "false"])
     .default("false")
     .transform((val) => val === "true"),
-  PROVIDER_ENDPOINT: z
-    .string()
-    .default("https://hub.snapshot.org/graphql"),
+  PROVIDER_ENDPOINT: z.string().default("https://hub.snapshot.org/graphql"),
   PROVIDER_API_KEY: z.string().optional(),
   PROVIDER_DAO_ID: z.string(),
 });

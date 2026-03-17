@@ -184,6 +184,7 @@ export const VotingPowerVariationGraph = ({
   // Custom dot component to show each transfer/delegation point
   const CustomDot = (props: CustomDotProps) => {
     const { cx, cy, payload } = props;
+    if (!payload.transactionHash) return <></>;
     return (
       <Dot
         key={payload.transactionHash}
@@ -271,7 +272,7 @@ export const VotingPowerVariationGraph = ({
                   return (
                     <div className="bg-surface-contrast border-light-dark rounded-lg border p-3 shadow-lg">
                       <p className="text-primary text-sm font-medium">
-                        {timestampToReadableDate(data.timestamp / 1000)}
+                        {timestampToReadableDate(data.timestamp)}
                       </p>
                       <p className="text-secondary text-xs">
                         Voting Power:{" "}

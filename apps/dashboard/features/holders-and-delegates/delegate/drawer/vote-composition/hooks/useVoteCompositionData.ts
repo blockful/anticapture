@@ -38,7 +38,7 @@ export interface VoteCompositionData {
 export const useVoteCompositionData = (
   daoId: DaoIdEnum,
   address: string,
-  includeBalance = true,
+  includeBalance = false,
 ): VoteCompositionData => {
   const { decimals } = daoConfig[daoId];
 
@@ -95,10 +95,11 @@ export const useVoteCompositionData = (
     othersPercentage: 0,
   };
 
-  const selfBalance =
-    isAave && includeBalance
-      ? BigInt(balanceData?.accountBalanceByAccountId?.data?.balance ?? "0")
-      : 0n;
+  const actualSelfBalance = isAave
+    ? BigInt(balanceData?.accountBalanceByAccountId?.data?.balance ?? "0")
+    : 0n;
+
+  const selfBalance = isAave && includeBalance ? actualSelfBalance : 0n;
 
   if (delegators.length === 0 && selfBalance === 0n) {
     return defaultData;
@@ -114,18 +115,25 @@ export const useVoteCompositionData = (
     return acc + amount;
   }, BigInt(0));
 
+  // When balance is excluded, subtract it from the voting power so the total
+  // only reflects delegated tokens.
+  const adjustedVotingPower =
+    isAave && !includeBalance
+      ? delegateCurrentVotingPower - actualSelfBalance
+      : delegateCurrentVotingPower;
+
   // For AAVE, an address can hold tokens without activating voting power
   // (requires self-delegation). Fall back to selfBalance + delegators as total.
   const effectiveTotal =
-    delegateCurrentVotingPower > 0n
-      ? delegateCurrentVotingPower
+    adjustedVotingPower > 0n
+      ? adjustedVotingPower
       : selfBalance + totalIndividualDelegators;
 
   // Others is the remaining value that completes 100%
   // This will be > 0 when there are more than 5 delegators
   // For AAVE, own balance is shown separately, so subtract it from others
   const othersValue =
-    delegateCurrentVotingPower - selfBalance - totalIndividualDelegators;
+    adjustedVotingPower - selfBalance - totalIndividualDelegators;
   const othersPercentage = Number(
     (Number(othersValue) / Number(effectiveTotal)) * 100,
   );
