@@ -2,7 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { slice, isHex, decodeFunctionData, parseAbiItem, Hex } from "viem";
+import type { Hex } from "viem";
+import { slice, isHex, decodeFunctionData, parseAbiItem } from "viem";
 
 type SignatureResponse = {
   result?: {

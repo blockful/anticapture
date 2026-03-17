@@ -1,5 +1,6 @@
-import { GovernanceImplementationField } from "@/shared/dao-config/types";
-import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
+import type { GovernanceImplementationField } from "@/shared/dao-config/types";
+import type { GovernanceImplementationEnum } from "@/shared/types/enums";
+import { RiskLevel } from "@/shared/types/enums";
 import { Stage } from "@/shared/types/enums/Stage";
 
 /**

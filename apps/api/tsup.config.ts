@@ -1,7 +1,7 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig({
-  entry: ["src/index.ts"],
+  entry: ["cmd/index.ts", "cmd/aave.ts"],
   format: ["esm"],
   target: "es2022",
   outDir: "dist",

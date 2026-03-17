@@ -1,6 +1,6 @@
 import { formatUnits } from "viem";
 
-import {
+import type {
   PriceEntry,
   TokenMetricItem,
   MultilineChartDataSetPoint,

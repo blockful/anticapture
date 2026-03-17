@@ -1,13 +1,7 @@
 "use client";
 
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-  TooltipProps,
-} from "recharts";
+import type { TooltipProps } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
 import { renderCustomizedLabel } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/utils/renderCustomizedLabel";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";

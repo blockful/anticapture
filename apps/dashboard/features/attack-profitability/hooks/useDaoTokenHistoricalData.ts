@@ -1,9 +1,10 @@
 import axios from "axios";
-import useSWR, { SWRConfiguration } from "swr";
+import type { SWRConfiguration } from "swr";
+import useSWR from "swr";
 
 import { getOnlyClosedData } from "@/features/attack-profitability/utils/normalizeDataset";
-import { PriceEntry } from "@/shared/dao-config/types";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { PriceEntry } from "@/shared/dao-config/types";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { BACKEND_ENDPOINT, getAuthHeaders } from "@/shared/utils/server-utils";
 
 export const fetchDaoTokenHistoricalData = async ({

@@ -5,7 +5,7 @@ import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 import { RECOMMENDED_SETTINGS } from "@/shared/constants/recommended-settings";
-import { DaoConfiguration } from "@/shared/dao-config/types";
+import type { DaoConfiguration } from "@/shared/dao-config/types";
 import { CompoundOgIcon } from "@/shared/og/dao-og-icons";
 import {
   RiskLevel,
@@ -20,6 +20,7 @@ export const COMP: DaoConfiguration = {
     svgColor: "#070A0E",
     svgBgColor: "#00D395",
   },
+  forumLink: "https://www.comp.xyz/",
   icon: CompoundIcon,
   ogIcon: CompoundOgIcon,
 
@@ -349,4 +350,5 @@ export const COMP: DaoConfiguration = {
   resilienceStages: true,
   tokenDistribution: true,
   dataTables: true,
+  activityFeed: true,
 };

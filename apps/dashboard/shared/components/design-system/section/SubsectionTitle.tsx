@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import { cn } from "@/shared/utils";
 
@@ -19,7 +19,7 @@ export const SubsectionTitle = ({
 }: SubsectionTitleProps) => {
   return (
     <div
-      className={cn("flex h-full w-full flex-col justify-between gap-2", {
+      className={cn("flex h-full w-full flex-col justify-between", {
         "lg:flex-row": switcherComponent,
       })}
     >

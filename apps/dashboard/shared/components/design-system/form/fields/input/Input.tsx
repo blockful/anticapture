@@ -20,7 +20,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       //enabled
       "has-[:enabled]:hover:bg-surface-contrast",
       //focused
-      "has-[:focus-visible]:border-border-contrast has-[:focus-visible]:shadow-[0px_0px_0px_2px_rgba(82,82,91,0.3)]",
+      "has-[:focus-visible]:border-border-contrast has-[:focus-visible]:shadow-[var(--shadow-focus-ring)]",
       //disabled
       "has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50 has-[:disabled]:bg-surface-disabled has-[:disabled]:border-border-default",
       //error
@@ -45,7 +45,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           //enabled
           "enabled:hover:bg-surface-contrast",
           //focused
-          "focus-visible:border-border-contrast focus-visible:shadow-[0px_0px_0px_2px_rgba(82,82,91,0.3)] focus-visible:outline-none",
+          "focus-visible:border-border-contrast focus-visible:shadow-[var(--shadow-focus-ring)] focus-visible:outline-none",
           //disabled
           "disabled:bg-surface-disabled disabled:border-border-default disabled:text-secondary disabled:cursor-not-allowed disabled:opacity-50",
           //error

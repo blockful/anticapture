@@ -79,7 +79,8 @@ export const HeaderDAOSidebarDropdown = ({
   }
   const dropdownItems = dropdownItemsRef.current!;
 
-  const currentDaoId = daoId?.toUpperCase();
+  const currentDaoId =
+    daoId?.toUpperCase() ?? pathname.split("/")[1]?.toUpperCase();
   const currentItem = dropdownItems.find((item) => item.name === currentDaoId);
 
   const toggleDropdown = () => setIsOpen((prev) => !prev);

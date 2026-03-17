@@ -6,7 +6,7 @@ import {
   CheckCircle2,
   HelpCircle,
 } from "lucide-react";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 import { RiskLevel } from "@/shared/types/enums/RiskLevel";

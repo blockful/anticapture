@@ -5,7 +5,7 @@ import {
   AlertCircleIcon,
   AlertTriangleIcon,
 } from "lucide-react";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import { OutlinedBox } from "@/shared/components/boxes/OutlinedBox";
 import { Stage } from "@/shared/types/enums/Stage";

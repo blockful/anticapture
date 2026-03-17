@@ -1,14 +1,13 @@
 "use client";
 
-import {
-  QueryInput_VotingPowers_OrderBy,
-  QueryInput_VotingPowers_OrderDirection,
-} from "@anticapture/graphql-client";
-import { ColumnDef } from "@tanstack/react-table";
+import type { QueryInput_VotingPowers_OrderDirection } from "@anticapture/graphql-client";
+import { QueryInput_VotingPowers_OrderBy } from "@anticapture/graphql-client";
+import type { ColumnDef } from "@tanstack/react-table";
 import { Plus } from "lucide-react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { useMemo } from "react";
-import { Address, formatUnits } from "viem";
+import type { Address } from "viem";
+import { formatUnits } from "viem";
 
 import {
   useDelegates,
@@ -29,10 +28,12 @@ import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
 import daoConfig from "@/shared/dao-config";
-import { useScreenSize, useDaoData } from "@/shared/hooks";
-import { DaoIdEnum } from "@/shared/types/daos";
+import { useScreenSize } from "@/shared/hooks/useScreenSize";
+import { useDaoData } from "@/shared/hooks/useDaoData";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
-import { cn, formatNumberUserReadable } from "@/shared/utils";
+import { cn } from "@/shared/utils/cn";
+import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 
 interface DelegateTableData {
   address: string;
@@ -259,7 +260,7 @@ export const Delegates = ({
         </div>
       ),
       meta: {
-        columnClassName: "w-[25%]",
+        columnClassName: "w-40",
       },
     },
     {
@@ -396,7 +397,7 @@ export const Delegates = ({
         </h4>
       ),
       meta: {
-        columnClassName: "w-[15%]",
+        columnClassName: "w-16",
       },
     },
     {
@@ -487,7 +488,7 @@ export const Delegates = ({
         </Button>
       ),
       meta: {
-        columnClassName: "w-[10%]",
+        columnClassName: "w-20",
       },
     },
   ];
@@ -505,7 +506,6 @@ export const Delegates = ({
           onLoadMore={fetchNextPage}
           withDownloadCSV={true}
           csvFilename="delegates.csv"
-          mobileTableFixed={true}
           error={error}
           fillHeight
         />

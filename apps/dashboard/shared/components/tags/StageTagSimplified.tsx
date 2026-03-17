@@ -2,7 +2,7 @@
 
 import { CheckCircle, XCircle } from "lucide-react";
 
-import { Stage } from "@/shared/types/enums/Stage";
+import type { Stage } from "@/shared/types/enums/Stage";
 import { cn } from "@/shared/utils/";
 
 interface StageTagSimplifiedProps {

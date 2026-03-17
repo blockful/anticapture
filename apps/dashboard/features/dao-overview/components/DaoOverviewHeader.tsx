@@ -5,7 +5,10 @@ import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatu
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { EthereumIcon } from "@/shared/components/icons/EthereumIcon";
 import { OPMainnetIcon } from "@/shared/components/icons/OPMainnetIcon";
-import { DaoConfiguration, DaoOverviewConfig } from "@/shared/dao-config/types";
+import type {
+  DaoConfiguration,
+  DaoOverviewConfig,
+} from "@/shared/dao-config/types";
 import { cn } from "@/shared/utils";
 
 interface DaoOverviewHeaderProps {
@@ -66,13 +69,15 @@ export const DaoOverviewHeader = ({
       </div>
 
       <div className="flex items-center gap-2">
-        <DefaultLink
-          href={`${baseLinkRoute}/${daoOverview.contracts?.governor}`}
-          openInNewTab
-          className="after:text-border-contrast text-xs uppercase after:content-['•']"
-        >
-          Governor
-        </DefaultLink>
+        {daoOverview.contracts?.governor && (
+          <DefaultLink
+            href={`${baseLinkRoute}/${daoOverview.contracts?.governor}`}
+            openInNewTab
+            className="after:text-border-contrast text-xs uppercase after:content-['•']"
+          >
+            Governor
+          </DefaultLink>
+        )}
         {daoOverview.contracts?.timelock && (
           <DefaultLink
             href={`${baseLinkRoute}/${daoOverview.contracts.timelock}`}
@@ -82,23 +87,43 @@ export const DaoOverviewHeader = ({
             Timelock
           </DefaultLink>
         )}
-        <DefaultLink
-          href={daoOverview.snapshot || "#"}
-          openInNewTab
-          className="after:text-border-contrast text-xs uppercase after:content-['•']"
-        >
-          Snapshot
-        </DefaultLink>
-        <DefaultLink
-          href={`${baseLinkRoute}/${daoOverview.contracts?.token}`}
-          openInNewTab
-          className={cn(
-            `after:text-border-contrast text-xs uppercase`,
-            daoConfig.forumLink && `after:content-['•']`,
-          )}
-        >
-          Token
-        </DefaultLink>
+        {daoOverview.snapshot && (
+          <DefaultLink
+            href={daoOverview.snapshot || "#"}
+            openInNewTab
+            className="after:text-border-contrast text-xs uppercase after:content-['•']"
+          >
+            Snapshot
+          </DefaultLink>
+        )}
+        {Array.isArray(daoOverview.contracts?.token) ? (
+          daoOverview.contracts.token.map(({ label, address }, i) => (
+            <DefaultLink
+              key={address}
+              href={`${baseLinkRoute}/${address}`}
+              openInNewTab
+              className={cn(
+                `after:text-border-contrast text-xs uppercase`,
+                (i < daoOverview.contracts.token.length - 1 ||
+                  daoConfig.forumLink) &&
+                  `after:content-['•']`,
+              )}
+            >
+              {label}
+            </DefaultLink>
+          ))
+        ) : (
+          <DefaultLink
+            href={`${baseLinkRoute}/${daoOverview.contracts?.token}`}
+            openInNewTab
+            className={cn(
+              `after:text-border-contrast text-xs uppercase`,
+              daoConfig.forumLink && `after:content-['•']`,
+            )}
+          >
+            Token
+          </DefaultLink>
+        )}
         {daoConfig.forumLink && (
           <DefaultLink
             href={daoConfig.forumLink}

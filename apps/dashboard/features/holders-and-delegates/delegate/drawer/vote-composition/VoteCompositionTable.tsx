@@ -1,13 +1,14 @@
 "use client";
 
-import {
+import type {
   QueryInput_Delegators_OrderBy,
   QueryInput_Delegators_OrderDirection,
 } from "@anticapture/graphql-client";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { useEffect, useState } from "react";
-import { Address, formatUnits } from "viem";
+import type { Address } from "viem";
+import { formatUnits } from "viem";
 
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 import { SkeletonRow, Button } from "@/shared/components";
@@ -18,7 +19,7 @@ import { Table } from "@/shared/components/design-system/table/Table";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import daoConfig from "@/shared/dao-config";
 import { useDelegators } from "@/shared/hooks/graphql-client/useDelegators";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils";
 
 export const VoteCompositionTable = ({
@@ -114,9 +115,6 @@ export const VoteCompositionTable = ({
           </div>
         );
       },
-      meta: {
-        columnClassName: "w-72",
-      },
     },
     {
       accessorKey: "amount",
@@ -168,9 +166,6 @@ export const VoteCompositionTable = ({
             {formatNumberUserReadable(amount)}
           </div>
         );
-      },
-      meta: {
-        columnClassName: "w-72",
       },
     },
     {
@@ -225,9 +220,6 @@ export const VoteCompositionTable = ({
             {timestamp ? <DateCell timestampSeconds={timestamp} /> : "N/A"}
           </div>
         );
-      },
-      meta: {
-        columnClassName: "w-72",
       },
     },
   ];

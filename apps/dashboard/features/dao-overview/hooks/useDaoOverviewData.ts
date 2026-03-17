@@ -6,14 +6,14 @@ import { formatUnits } from "viem";
 
 import { useDaoTreasuryStats } from "@/features/dao-overview/hooks/useDaoTreasuryStats";
 import { useTopDelegatesToPass } from "@/features/dao-overview/hooks/useTopDelegatesToPass";
-import { DaoConfiguration } from "@/shared/dao-config/types";
+import type { DaoConfiguration } from "@/shared/dao-config/types";
 import {
   useDaoData,
   useActiveSupply,
   useAverageTurnout,
   useTokenData,
 } from "@/shared/hooks";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { getAuthHeaders } from "@/shared/utils/server-utils";

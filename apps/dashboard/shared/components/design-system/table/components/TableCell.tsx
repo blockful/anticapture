@@ -1,4 +1,4 @@
-import { cn } from "@/shared/utils";
+import { cn } from "@/shared/utils/cn";
 
 export const TableCell = ({
   className,
@@ -7,7 +7,7 @@ export const TableCell = ({
   return (
     <td
       data-slot="table-cell"
-      className={cn("bg-light h-auto w-auto p-4", className)}
+      className={cn("bg-light h-auto w-auto whitespace-nowrap p-4", className)}
       {...props}
     />
   );

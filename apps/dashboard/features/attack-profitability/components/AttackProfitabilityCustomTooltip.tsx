@@ -1,6 +1,6 @@
 "use client";
 
-import { TooltipProps } from "recharts";
+import type { TooltipProps } from "recharts";
 
 import { formatNumberUserReadable } from "@/shared/utils/";
 

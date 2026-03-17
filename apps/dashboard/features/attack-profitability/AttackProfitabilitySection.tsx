@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Data } from "react-csv/lib/core";
+import type { Data } from "react-csv/lib/core";
 
 import {
   AttackProfitabilityAccordion,
@@ -12,10 +12,11 @@ import {
 import { useLastUpdateLabel } from "@/features/attack-profitability/hooks/useLastUpdateLabel";
 import { TheCardChartLayout, SwitcherDate } from "@/shared/components";
 import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
-import { Dropdown, Option } from "@/shared/components/dropdowns/Dropdown";
-import { AttackProfitabilityConfig } from "@/shared/dao-config/types";
+import type { Option } from "@/shared/components/dropdowns/Dropdown";
+import { Dropdown } from "@/shared/components/dropdowns/Dropdown";
+import type { AttackProfitabilityConfig } from "@/shared/dao-config/types";
 import { ChartType } from "@/shared/hooks/useLastUpdate";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
 import { getDateRange } from "@/shared/utils";
 

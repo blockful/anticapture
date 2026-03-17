@@ -1,4 +1,4 @@
-import { Address } from "viem";
+import type { Address } from "viem";
 
 export const openEtherscanAddress = (address: Address) => {
   window.open(

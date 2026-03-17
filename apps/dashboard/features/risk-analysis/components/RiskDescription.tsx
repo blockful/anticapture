@@ -5,11 +5,12 @@ import {
   HelpCircle,
   TriangleAlert,
 } from "lucide-react";
-import { ReactNode, useMemo } from "react";
+import type { ReactNode } from "react";
+import { useMemo } from "react";
 
 import { CorneredBox } from "@/features/risk-analysis/components/CorneredBox";
 import { RiskLevelCardSmall } from "@/shared/components";
-import { GovernanceImplementationField } from "@/shared/dao-config/types";
+import type { GovernanceImplementationField } from "@/shared/dao-config/types";
 import { RiskLevel } from "@/shared/types/enums/RiskLevel";
 
 export interface RequirementMetric extends GovernanceImplementationField {

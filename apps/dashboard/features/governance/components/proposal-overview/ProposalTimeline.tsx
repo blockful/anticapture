@@ -1,10 +1,16 @@
-import { GetProposalQuery } from "@anticapture/graphql-client";
+import type { GetProposalQuery } from "@anticapture/graphql-client";
+import { ExternalLink } from "lucide-react";
+import Link from "next/link";
+
+interface ProposalTimelineProps {
+  proposal: NonNullable<GetProposalQuery["proposal"]>;
+  blockExplorerUrl?: string;
+}
 
 export const ProposalTimeline = ({
   proposal,
-}: {
-  proposal: NonNullable<GetProposalQuery["proposal"]>;
-}) => {
+  blockExplorerUrl = "https://etherscan.io",
+}: ProposalTimelineProps) => {
   const now = Date.now() / 1000;
   const createdTime = parseInt(proposal.timestamp);
   const startTime = parseInt(proposal.startTimestamp);
@@ -26,25 +32,59 @@ export const ProposalTimeline = ({
     return "pending";
   };
 
+  const proposalStatus = proposal.status.toLowerCase();
+  const isQueued =
+    proposalStatus === "queued" ||
+    proposalStatus === "pending_execution" ||
+    proposalStatus === "executed";
+  const isExecuted = proposalStatus === "executed";
+
   const timelineItems = [
     {
       label: "Created",
       timestamp: createdTime,
       date: formatTimestamp(createdTime),
       status: getTimelineItemStatus(createdTime),
+      txLink: proposal.txHash
+        ? `${blockExplorerUrl}/tx/${proposal.txHash}`
+        : undefined,
     },
     {
       label: startTime <= now ? "Started" : "Starts",
       timestamp: startTime,
       date: formatTimestamp(startTime),
       status: getTimelineItemStatus(startTime),
+      txLink: undefined,
     },
     {
       label: endTime <= now ? "Ended" : "Ends",
       timestamp: endTime,
       date: formatTimestamp(endTime),
       status: getTimelineItemStatus(endTime),
+      txLink: undefined,
     },
+    ...(isQueued
+      ? [
+          {
+            label: "Queued",
+            timestamp: endTime + 1,
+            date: undefined as string | undefined,
+            status: "completed" as const,
+            txLink: undefined,
+          },
+        ]
+      : []),
+    ...(isExecuted
+      ? [
+          {
+            label: "Executed",
+            timestamp: endTime + 2,
+            date: undefined as string | undefined,
+            status: "completed" as const,
+            txLink: undefined,
+          },
+        ]
+      : []),
   ];
 
   const getTimelineItemBgColor = (index: number) => {
@@ -89,11 +129,23 @@ export const ProposalTimeline = ({
             </div>
 
             {/* Timeline content */}
-            <div className="flex flex-col">
+            <div className="flex items-center gap-1.5">
               <p className={`font-roboto-mono text-[13px]`}>
                 <span className="text-primary">{item.label}</span>{" "}
-                <span className="text-secondary">on {item.date}</span>
+                {item.date && (
+                  <span className="text-secondary">on {item.date}</span>
+                )}
               </p>
+              {item.txLink && (
+                <Link
+                  href={item.txLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-secondary hover:text-primary transition-colors"
+                >
+                  <ExternalLink className="size-3" />
+                </Link>
+              )}
             </div>
           </div>
           {index < timelineItems.length - 1 && (

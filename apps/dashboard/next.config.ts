@@ -44,6 +44,14 @@ const nextConfig = {
     ];
   },
   serverExternalPackages: ["pino-pretty"],
+  experimental: {
+    optimizePackageImports: [
+      "lucide-react",
+      "recharts",
+      "@rainbow-me/rainbowkit",
+      "date-fns",
+    ],
+  },
 };
 
 export default nextConfig;

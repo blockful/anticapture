@@ -1,6 +1,6 @@
 import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoConfiguration } from "@/shared/dao-config/types";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoConfiguration } from "@/shared/dao-config/types";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 export type DaoFeaturePage =
   | "/"

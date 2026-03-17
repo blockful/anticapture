@@ -1,4 +1,4 @@
-import { HTMLAttributes, SVGProps } from "react";
+import type { HTMLAttributes, SVGProps } from "react";
 
 import { cn } from "@/shared/utils";
 

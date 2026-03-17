@@ -1,13 +1,13 @@
-import { ReactNode, SVGProps } from "react";
-import { Address, Chain } from "viem";
+import type { ReactNode, SVGProps } from "react";
+import type { Address, Chain } from "viem";
 
-import { DaoIconProps } from "@/shared/components/icons/types";
-import {
+import type { DaoIconProps } from "@/shared/components/icons/types";
+import type {
   RiskLevel,
   GovernanceImplementationEnum,
   RiskAreaEnum,
 } from "@/shared/types/enums";
-import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
+import type { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 
 export type TokenMetricItem = {
   date: string;
@@ -69,9 +69,10 @@ export interface ChainWithIcon extends Chain {
 export interface DaoOverviewConfig {
   chain: ChainWithIcon;
   contracts: {
-    token: Address;
+    token: Address | { label: string; address: Address }[];
     governor?: Address;
     timelock?: Address;
+    votingStrategy?: Address;
   };
   govPlatform?: {
     name: string;
@@ -81,7 +82,7 @@ export interface DaoOverviewConfig {
   cancelFunction?: string;
   snapshot?: string;
   priceDisclaimer?: string;
-  rules: {
+  rules?: {
     delay: boolean;
     changeVote: boolean;
     timelock: boolean;
@@ -131,6 +132,7 @@ export type AttackExposureConfig = {
 // Complete DAO configuration structure
 export interface DaoConfiguration extends BaseInfo {
   daoOverview: DaoOverviewConfig;
+  activityFeed?: boolean;
   attackProfitability?: AttackProfitabilityConfig;
   governanceImplementation?: GovernanceImplementationConfig;
   attackExposure?: AttackExposureConfig;

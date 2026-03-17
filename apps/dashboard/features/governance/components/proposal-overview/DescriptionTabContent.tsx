@@ -1,4 +1,4 @@
-import { GetProposalQuery } from "@anticapture/graphql-client";
+import type { GetProposalQuery } from "@anticapture/graphql-client";
 import Markdown from "markdown-to-jsx";
 
 interface DescriptionTabContentProps {
