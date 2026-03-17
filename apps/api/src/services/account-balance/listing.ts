@@ -2,6 +2,7 @@ import { Address } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
 import { AmountFilter, DBAccountBalanceWithVariation } from "@/mappers";
+import { TreasuryAddresses } from "@/lib/constants";
 
 interface AccountBalanceRepository {
   getAccountBalancesWithVariation(
@@ -41,10 +42,14 @@ export class AccountBalanceService {
     addresses: Address[],
     delegates: Address[],
     amountFilter: AmountFilter,
+    excludeDaoAddresses: boolean,
   ): Promise<{
     items: DBAccountBalanceWithVariation[];
     totalCount: number;
   }> {
+    const daoAddresses = excludeDaoAddresses
+      ? Object.values(TreasuryAddresses[daoId])
+      : [];
     return await this.repo.getAccountBalancesWithVariation(
       variationFromTimestamp,
       variationToTimestamp,
@@ -54,7 +59,7 @@ export class AccountBalanceService {
       orderBy,
       addresses,
       delegates,
-      [],
+      daoAddresses,
       amountFilter,
     );
   }
