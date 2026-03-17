@@ -1,4 +1,7 @@
-import { GlossaryData, GlossaryLetter } from "@/features/glossary/glossary";
+import type {
+  GlossaryData,
+  GlossaryLetter,
+} from "@/features/glossary/glossary";
 
 interface GlossaryContentProps {
   glossaryData: GlossaryData;

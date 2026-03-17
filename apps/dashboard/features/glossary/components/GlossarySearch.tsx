@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 
-import {
+import type {
   GlossaryData,
-  searchGlossary,
   GlossarySearchResult,
 } from "@/features/glossary/glossary";
+import { searchGlossary } from "@/features/glossary/glossary";
 import SearchField from "@/shared/components/design-system/SearchField";
 
 interface GlossarySearchProps {

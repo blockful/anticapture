@@ -57,7 +57,6 @@ export default [
     rules: {
       ...eslintJs.configs.recommended.rules,
       ...tseslint.configs.recommended.rules,
-      ...eslintPluginImport.flatConfigs.recommended.rules,
       "prettier/prettier": "error",
       "@typescript-eslint/no-unused-vars": [
         "error",
@@ -66,25 +65,6 @@ export default [
           varsIgnorePattern: "^_",
         },
       ],
-      // Add these for auto-fixable import ordering:
-      "import/order": [
-        "error",
-        {
-          groups: [
-            "builtin",
-            "external",
-            "internal",
-            "parent",
-            "sibling",
-            "index",
-          ],
-          "newlines-between": "always",
-          alphabetize: { order: "asc", caseInsensitive: true },
-        },
-      ],
-      "import/no-duplicates": "error",
-      "import/first": "error",
-      "import/newline-after-import": "error",
       // Disable base no-redeclare and use TypeScript version
       "no-redeclare": "off",
       "@typescript-eslint/no-redeclare": [
@@ -170,19 +150,79 @@ export default [
       ...nextPlugin.configs["core-web-vitals"].rules,
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
-      // Custom rules from old dashboard .eslintrc.json
+      "@next/next/no-html-link-for-pages": "off",
+
+      // Enforce `import type` for type-only imports
+      "@typescript-eslint/consistent-type-imports": [
+        "error",
+        { prefer: "type-imports", fixStyle: "separate-type-imports" },
+      ],
+
+      // Ban React.FC — it implicitly adds children and is redundant with arrow functions
+      "@typescript-eslint/no-restricted-types": [
+        "warn",
+        {
+          types: {
+            "React.FC": {
+              message:
+                "Use arrow functions with typed props instead of React.FC.",
+            },
+            "React.FunctionComponent": {
+              message:
+                "Use arrow functions with typed props instead of React.FunctionComponent.",
+            },
+          },
+        },
+      ],
+
+      // No nested ternaries
+      "no-nested-ternary": "warn",
+
+      // Import boundaries: no barrel files, prefer @/* aliases
       "no-restricted-imports": [
         "warn",
         {
-          patterns: ["../*", "./*"],
+          // Exact barrel-file imports — block index re-exports
+          paths: [
+            {
+              name: "@/shared/components",
+              message:
+                "Import directly from the source file (e.g., @/shared/components/cards/MetricCard).",
+            },
+            {
+              name: "@/shared/hooks",
+              message:
+                "Import directly from the source file (e.g., @/shared/hooks/useMessageStack).",
+            },
+            {
+              name: "@/shared/utils",
+              message:
+                "Import directly from the source file (e.g., @/shared/utils/cn).",
+            },
+          ],
+          patterns: [
+            // Prefer @/* aliases over parent-directory traversal
+            {
+              group: ["../*"],
+              message:
+                "Use @/* path aliases instead of parent-relative imports.",
+            },
+          ],
         },
       ],
-      "@next/next/no-html-link-for-pages": "off",
     },
     settings: {
       next: {
         rootDir: "apps/dashboard/",
       },
+    },
+  },
+
+  // Dashboard — enforce named exports (no default exports except App Router pages/layouts)
+  {
+    files: ["apps/dashboard/features/**/*.{ts,tsx}", "apps/dashboard/shared/**/*.{ts,tsx}", "apps/dashboard/widgets/**/*.{ts,tsx}"],
+    rules: {
+      "import/no-default-export": "warn",
     },
   },
 

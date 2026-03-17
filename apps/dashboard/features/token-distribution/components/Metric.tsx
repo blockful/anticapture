@@ -1,7 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
-import { ButtonHTMLAttributes } from "react";
+import type { ButtonHTMLAttributes } from "react";
 
 import { cn } from "@/shared/utils/cn";
 

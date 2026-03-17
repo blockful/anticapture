@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import { SubSection } from "@/shared/components/design-system/section";
 import { SectionTitle } from "@/shared/components/design-system/section/SectionTitle";

@@ -5,7 +5,7 @@ import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { lightTheme, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { WagmiProvider } from "wagmi";
 import "@rainbow-me/rainbowkit/styles.css";
 

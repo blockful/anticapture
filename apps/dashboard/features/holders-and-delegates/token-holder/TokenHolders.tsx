@@ -1,14 +1,13 @@
 "use client";
 
-import {
-  QueryInput_AccountBalances_OrderBy,
-  QueryInput_AccountBalances_OrderDirection,
-} from "@anticapture/graphql-client";
-import { ColumnDef } from "@tanstack/react-table";
+import type { QueryInput_AccountBalances_OrderDirection } from "@anticapture/graphql-client";
+import { QueryInput_AccountBalances_OrderBy } from "@anticapture/graphql-client";
+import type { ColumnDef } from "@tanstack/react-table";
 import { Plus } from "lucide-react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { useMemo } from "react";
-import { Address, formatUnits, zeroAddress } from "viem";
+import type { Address } from "viem";
+import { formatUnits, zeroAddress } from "viem";
 
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 import { useTokenHolders } from "@/features/holders-and-delegates/hooks/useTokenHolders";
@@ -26,8 +25,8 @@ import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
 import daoConfig from "@/shared/dao-config";
 import { useScreenSize } from "@/shared/hooks";
 import { useArkhamData } from "@/shared/hooks/graphql-client/useArkhamData";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { TimeInterval } from "@/shared/types/enums/TimeInterval";
+import type { DaoIdEnum } from "@/shared/types/daos";
+import type { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { formatNumberUserReadable } from "@/shared/utils";
 
 interface TokenHolderTableData {
@@ -61,9 +60,11 @@ const TypeCell = ({ address }: { address: Address }) => {
 export const TokenHolders = ({
   days,
   daoId,
+  showTokenName = true,
 }: {
   days: TimeInterval;
   daoId: DaoIdEnum;
+  showTokenName?: boolean;
 }) => {
   const pageLimit: number = 20;
   const [drawerAddress, setDrawerAddress] = useQueryState("drawerAddress");
@@ -227,7 +228,7 @@ export const TokenHolders = ({
         );
       },
       meta: {
-        columnClassName: "w-[25%]",
+        columnClassName: "w-68",
       },
     },
     {
@@ -249,7 +250,7 @@ export const TokenHolders = ({
         return <TypeCell address={row.original.address} />;
       },
       meta: {
-        columnClassName: "w-[10%]",
+        columnClassName: "w-12",
       },
     },
     {
@@ -262,7 +263,7 @@ export const TokenHolders = ({
           onClick={() => handleSort("balance")}
         >
           <h4 className="text-table-header whitespace-nowrap">
-            Balance ({daoId})
+            Balance {!!showTokenName && `(${daoId})`}
           </h4>
           <ArrowUpDown
             props={{ className: "size-4" }}
@@ -293,7 +294,7 @@ export const TokenHolders = ({
         );
       },
       meta: {
-        columnClassName: "w-[15%]",
+        columnClassName: "w-40",
       },
     },
     {
@@ -342,19 +343,22 @@ export const TokenHolders = ({
         }
 
         return (
-          <div className="grid w-full grid-cols-2 items-center gap-2 text-sm">
-            <span className="text-right tabular-nums">
+          <div className="grid w-full grid-cols-2 items-center gap-2 overflow-hidden text-sm">
+            <span className="min-w-0 text-right tabular-nums">
               {(variation?.percentageChange || 0) < 0 ? "-" : ""}
               {formatNumberUserReadable(
                 Math.abs(variation?.absoluteChange || 0),
               )}
             </span>
-            <Percentage value={variation?.percentageChange || 0} />
+            <Percentage
+              className="min-w-0"
+              value={variation?.percentageChange || 0}
+            />
           </div>
         );
       },
       meta: {
-        columnClassName: "w-[25%]",
+        columnClassName: "w-50",
       },
     },
     {
@@ -399,7 +403,7 @@ export const TokenHolders = ({
         );
       },
       meta: {
-        columnClassName: "w-[25%]",
+        columnClassName: "w-40",
       },
     },
   ];

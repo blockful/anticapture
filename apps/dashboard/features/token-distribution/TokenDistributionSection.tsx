@@ -15,8 +15,8 @@ import { metricsSchema } from "@/features/token-distribution/utils";
 import { defaultLinkVariants } from "@/shared/components/design-system/links/default-link";
 import { Card, CardContent, CardTitle } from "@/shared/components/ui/card";
 import daoConfig from "@/shared/dao-config";
-import { ChartDataSetPoint } from "@/shared/dao-config/types";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { ChartDataSetPoint } from "@/shared/dao-config/types";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 type CsvRow = Record<string, number | string | null>;
 

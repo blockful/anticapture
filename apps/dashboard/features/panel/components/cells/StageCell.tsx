@@ -8,7 +8,7 @@ import {
   fieldsToArray,
   getDaoStageFromFields,
 } from "@/shared/dao-config/utils";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { RiskLevel } from "@/shared/types/enums/RiskLevel";
 import { Stage } from "@/shared/types/enums/Stage";
 
@@ -47,11 +47,11 @@ export const StageCell = ({ daoId }: { daoId: DaoIdEnum }) => {
   if (!daoConfig.governanceImplementation) {
     return (
       <div className="scrollbar-none text-primary flex items-center gap-3 space-x-1 overflow-auto">
-        <StageTag
-          daoStage={Stage.UNKNOWN}
-          tagStage={Stage.UNKNOWN}
-          showStageText
-        />
+        <div className="bg-surface-contrast inline-flex h-7 items-center px-2 py-1">
+          <span className="text-secondary text-alternative-sm whitespace-nowrap font-mono text-[13px] font-medium leading-[20px]">
+            NEEDS REVIEW
+          </span>
+        </div>
       </div>
     );
   }

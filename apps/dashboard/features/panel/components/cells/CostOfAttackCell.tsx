@@ -7,7 +7,7 @@ import { useCostOfAttack } from "@/features/panel/hooks";
 import { SkeletonRow, BadgeStatus } from "@/shared/components";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { RiskAreaEnum } from "@/shared/types/enums";
 import { RiskLevel } from "@/shared/types/enums/RiskLevel";
 import { formatNumberUserReadable } from "@/shared/utils";

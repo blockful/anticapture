@@ -2,11 +2,12 @@ import "@/app/globals.css";
 import "tailwindcss";
 import type { Metadata } from "next";
 import { Inter, Roboto_Mono } from "next/font/google";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Toaster } from "react-hot-toast";
 
 import { CookieConsent } from "@/features/cookie";
 import { HelpPopover } from "@/shared/components";
+import { ShutterAttackBanner } from "@/shared/components/banners/ShutterAttackBanner";
 import { GlobalProviders } from "@/shared/providers/GlobalProviders";
 import ConditionalPostHog from "@/shared/services/posthog/ConditionalPostHog";
 import UmamiScript from "@/shared/services/umami";
@@ -65,6 +66,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           className="border-light-dark mx-auto max-w-screen-2xl overflow-x-hidden border xl:overflow-hidden"
         >
           <GlobalProviders>
+            <ShutterAttackBanner />
             {children}
             <CookieConsent />
             <HelpPopover />

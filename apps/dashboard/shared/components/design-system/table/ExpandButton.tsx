@@ -1,4 +1,4 @@
-import { Row } from "@tanstack/react-table";
+import type { Row } from "@tanstack/react-table";
 import { Minus, Plus } from "lucide-react";
 
 interface ExpandButtonProps<TData> {

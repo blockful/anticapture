@@ -7,7 +7,8 @@ import { BarChart, Bar, XAxis, Cell, LabelList, Tooltip } from "recharts";
 import { DaoProtectionLevelsTooltip } from "@/features/panel/components/tooltips/DaoProtectionLevelsTooltip";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
-import { ChartConfig, ChartContainer } from "@/shared/components/ui/chart";
+import type { ChartConfig } from "@/shared/components/ui/chart";
+import { ChartContainer } from "@/shared/components/ui/chart";
 import daoConfigByDaoId from "@/shared/dao-config";
 import {
   fieldsToArray,

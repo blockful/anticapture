@@ -1,26 +1,22 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
+import type { BarProps } from "recharts";
 import {
   BarChart,
   Bar,
   Tooltip,
   ResponsiveContainer,
   ReferenceLine,
-  BarProps,
 } from "recharts";
 
-import {
-  CustomBarShape,
-  CustomBarShapeProps,
-} from "@/features/dao-overview/components/TopAccountsChartBarShape";
+import type { CustomBarShapeProps } from "@/features/dao-overview/components/TopAccountsChartBarShape";
+import { CustomBarShape } from "@/features/dao-overview/components/TopAccountsChartBarShape";
 import { CustomTooltip } from "@/features/dao-overview/components/TopAccountsChartTooltip";
 import { useTopAccountsChartData } from "@/features/dao-overview/hooks/useTopAccountsChartData";
-import {
-  HoldersAndDelegatesDrawer,
-  EntityType,
-} from "@/features/holders-and-delegates";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { EntityType } from "@/features/holders-and-delegates";
+import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 export interface TopAccountChartData {
   address: string;

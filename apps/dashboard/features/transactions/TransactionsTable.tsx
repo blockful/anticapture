@@ -5,12 +5,12 @@ import { useMemo } from "react";
 
 import { useTransactionsTableData } from "@/features/transactions";
 import { useTransactionsTableParams } from "@/features/transactions/hooks/useTransactionParams";
-import { AffectedSupplyType } from "@/features/transactions/hooks/useTransactionsTableData";
+import type { AffectedSupplyType } from "@/features/transactions/hooks/useTransactionsTableData";
 import { getTransactionsColumns } from "@/features/transactions/utils/getTransactionsColumns";
-import { SupplyType } from "@/shared/components/badges/SupplyLabel";
+import type { SupplyType } from "@/shared/components/badges/SupplyLabel";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 type Supply = "CEX" | "DEX" | "LENDING" | "TOTAL" | "UNASSIGNED";
 

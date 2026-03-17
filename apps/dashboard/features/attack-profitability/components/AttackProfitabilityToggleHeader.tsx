@@ -1,10 +1,10 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { Dispatch, SetStateAction } from "react";
+import type { Dispatch, SetStateAction } from "react";
 
 import { SwitcherChart } from "@/shared/components/charts/SwitcherChart";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 export const AttackProfitabilityToggleHeader = ({
   treasuryMetric,

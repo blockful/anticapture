@@ -5,14 +5,14 @@ import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 import { RECOMMENDED_SETTINGS } from "@/shared/constants/recommended-settings";
-import { DaoConfiguration } from "@/shared/dao-config/types";
+import type { DaoConfiguration } from "@/shared/dao-config/types";
 import { EnsOgIcon } from "@/shared/og/dao-og-icons";
 import {
   RiskLevel,
   GovernanceImplementationEnum,
   RiskAreaEnum,
 } from "@/shared/types/enums";
-import { calculateMonthsBefore } from "@/shared/utils";
+import { calculateMonthsBefore } from "@/shared/utils/calculateMonthsBefore";
 
 export const ENS: DaoConfiguration = {
   name: "ENS",
@@ -366,6 +366,7 @@ export const ENS: DaoConfiguration = {
   resilienceStages: true,
   tokenDistribution: true,
   dataTables: true,
+  activityFeed: true,
   governancePage: true,
   serviceProviders: true,
 };

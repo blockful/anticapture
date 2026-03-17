@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { FundingSourcesCardProps } from "@/features/donation/types";
+import type { FundingSourcesCardProps } from "@/features/donation/types";
 import { DaoAvatarIcon } from "@/shared/components/icons/DaoAvatarIcon";
 import { Card, CardContent } from "@/shared/components/ui/card";
 

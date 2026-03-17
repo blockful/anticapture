@@ -1,4 +1,4 @@
-import { GetProposalsFromDaoQuery } from "@anticapture/graphql-client/hooks";
+import type { GetProposalsFromDaoQuery } from "@anticapture/graphql-client/hooks";
 import { formatUnits } from "viem";
 
 import type { Proposal as GovernanceProposal } from "@/features/governance/types";

@@ -1,11 +1,9 @@
-import {
-  GetAccountPowerQuery,
-  useGetAccountPowerQuery,
-} from "@anticapture/graphql-client/hooks";
-import { ApolloError } from "@apollo/client";
+import type { GetAccountPowerQuery } from "@anticapture/graphql-client/hooks";
+import { useGetAccountPowerQuery } from "@anticapture/graphql-client/hooks";
+import type { ApolloError } from "@apollo/client";
 import { formatUnits } from "viem";
 
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { getAuthHeaders } from "@/shared/utils/server-utils";
 

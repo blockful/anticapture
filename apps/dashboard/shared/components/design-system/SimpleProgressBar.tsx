@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/shared/utils";
+import { cn } from "@/shared/utils/cn";
 
 interface SimpleProgressBarProps {
   percentage: number; // 0-100

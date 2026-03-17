@@ -1,6 +1,6 @@
 "use client";
 
-import { GetProposalQuery } from "@anticapture/graphql-client";
+import type { GetProposalQuery } from "@anticapture/graphql-client";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 
 import { ActionsTabContent } from "@/features/governance/components/proposal-overview/ActionTabContent";

@@ -15,7 +15,7 @@ import {
   DrawerHeader,
   DrawerRoot,
 } from "@/shared/components/design-system/drawer";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 export type EntityType = "delegate" | "tokenHolder";
 
@@ -25,6 +25,7 @@ interface HoldersAndDelegatesDrawerProps {
   entityType: EntityType;
   address: string;
   daoId: DaoIdEnum;
+  withVotes?: boolean;
 }
 
 export const HoldersAndDelegatesDrawer = ({
@@ -33,18 +34,23 @@ export const HoldersAndDelegatesDrawer = ({
   entityType,
   address,
   daoId,
+  withVotes = true,
 }: HoldersAndDelegatesDrawerProps) => {
   const entities = {
     delegate: {
       title: "Delegate",
       tabs: [
-        {
-          id: "votes",
-          label: "Votes",
-          content: (
-            <DelegateProposalsActivity address={address} daoId={daoId} />
-          ),
-        },
+        ...(withVotes
+          ? [
+              {
+                id: "votes",
+                label: "Votes",
+                content: (
+                  <DelegateProposalsActivity address={address} daoId={daoId} />
+                ),
+              },
+            ]
+          : []),
         {
           id: "voteComposition",
           label: "Vote Composition",

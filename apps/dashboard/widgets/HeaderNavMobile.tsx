@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { ButtonHeaderDAOSidebarMobile } from "@/shared/components";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 export const HeaderNavMobile = () => {
   const { daoId }: { daoId: string } = useParams();
@@ -34,7 +34,7 @@ export const HeaderNavMobile = () => {
     {
       page: PAGES_CONSTANTS.activityFeed.page,
       title: PAGES_CONSTANTS.activityFeed.title,
-      enabled: true,
+      enabled: daoConfig.activityFeed,
       isNew: true,
     },
     {

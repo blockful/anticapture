@@ -1,7 +1,7 @@
 import { AlertCircle, AlertTriangle, Info } from "lucide-react";
 
 import { CardDescription } from "@/shared/components/ui/card";
-import { cn } from "@/shared/utils";
+import { cn } from "@/shared/utils/cn";
 
 interface InlineAlertProps {
   text: string;

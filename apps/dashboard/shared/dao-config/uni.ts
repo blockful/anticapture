@@ -5,7 +5,7 @@ import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 import { RECOMMENDED_SETTINGS } from "@/shared/constants/recommended-settings";
-import { DaoConfiguration } from "@/shared/dao-config/types";
+import type { DaoConfiguration } from "@/shared/dao-config/types";
 import { UniswapOgIcon } from "@/shared/og/dao-og-icons";
 import { RiskAreaEnum, RiskLevel } from "@/shared/types/enums";
 import { GovernanceImplementationEnum } from "@/shared/types/enums/GovernanceImplementation";
@@ -312,4 +312,5 @@ export const UNI: DaoConfiguration = {
   tokenDistribution: true,
   resilienceStages: true,
   dataTables: true,
+  activityFeed: true,
 };

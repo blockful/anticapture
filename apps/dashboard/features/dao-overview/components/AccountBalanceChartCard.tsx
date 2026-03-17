@@ -4,16 +4,14 @@ import { QueryInput_AccountBalances_OrderBy } from "@anticapture/graphql-client"
 import { useMemo } from "react";
 import { formatUnits } from "viem";
 
-import {
-  TopAccountChartData,
-  TopAccountsChart,
-} from "@/features/dao-overview/components/TopAccountsChart";
+import type { TopAccountChartData } from "@/features/dao-overview/components/TopAccountsChart";
+import { TopAccountsChart } from "@/features/dao-overview/components/TopAccountsChart";
 import { useTokenHolders } from "@/features/holders-and-delegates/hooks/useTokenHolders";
 import { SkeletonRow, TooltipInfo } from "@/shared/components";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
 import daoConfig from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
 
 export const AccountBalanceChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
@@ -60,7 +58,7 @@ export const AccountBalanceChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
     <div className="lg:bg-surface-default flex w-full flex-col gap-4 px-5 lg:p-4">
       <div className="flex h-5 items-center gap-2">
         <DefaultLink
-          href={`${daoId.toLowerCase()}/holders-and-delegates?days=90d`}
+          href={`${daoId.toLowerCase()}/holders-and-delegates?days=90d&sortBy=variation`}
           openInNewTab={false}
           className="text-primary border-border-contrast hover:border-primary border-b border-dashed font-mono text-[13px] font-medium tracking-wider"
         >

@@ -1,5 +1,5 @@
-import { GetProposalQuery } from "@anticapture/graphql-client";
-import { ColumnDef } from "@tanstack/react-table";
+import type { GetProposalQuery } from "@anticapture/graphql-client";
+import type { ColumnDef } from "@tanstack/react-table";
 import {
   CheckCircle2,
   CircleMinus,
@@ -16,19 +16,29 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { formatUnits } from "viem";
 
 import { VotesTable } from "@/features/governance/components/proposal-overview/VotesTable";
-import {
-  useVotes,
-  VoteWithHistoricalPower,
-} from "@/features/governance/hooks/useVotes";
+import type { VoteWithHistoricalPower } from "@/features/governance/hooks/useVotes";
+import { useVotes } from "@/features/governance/hooks/useVotes";
 import { SkeletonRow, Button, BlankSlate } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
+import {
+  CategoriesFilter,
+  type FilterOption,
+} from "@/shared/components/design-system/table/filters/CategoriesFilter";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
+
+const choiceFilterOptions: FilterOption[] = [
+  { value: "all", label: "All Votes" },
+  { value: "1", label: "For" },
+  { value: "0", label: "Against" },
+  { value: "2", label: "Abstain" },
+];
 
 interface TabsVotedContentProps {
   proposal: NonNullable<GetProposalQuery["proposal"]>;
@@ -46,11 +56,16 @@ export const TabsVotedContent = ({
   const [sortBy, setSortBy] = useState<string>("votingPower");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
+  // State for filters
+  const [choiceFilter, setChoiceFilter] = useState<string>("all");
+  const [voterFilter, setVoterFilter] = useState<string | undefined>(undefined);
+
+  const supportValue = choiceFilter === "all" ? null : Number(choiceFilter);
+
   // Handle sorting
   const handleSort = useCallback(
     (field: string) => {
       if (sortBy === field) {
-        // Toggle direction if same field
         setSortDirection(sortDirection === "asc" ? "desc" : "asc");
       } else {
         setSortBy(field);
@@ -65,12 +80,14 @@ export const TabsVotedContent = ({
     useVotes({
       proposalId: proposal.id,
       daoId: (daoId as string)?.toUpperCase() as DaoIdEnum,
-      limit: 10, // Load 10 items at a time
+      limit: 10,
       proposalStartTimestamp: proposal.startTimestamp
         ? Number(proposal.startTimestamp) * 1000
         : undefined,
       orderBy: sortBy,
       orderDirection: sortDirection,
+      support: supportValue,
+      voterAddress: voterFilter ?? null,
     });
 
   // Intersection observer on the loading row
@@ -164,8 +181,12 @@ export const TabsVotedContent = ({
           );
         },
         header: () => (
-          <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
+          <div className="text-table-header flex h-8 w-full items-center justify-start gap-1 px-2">
             <p>Voter</p>
+            <AddressFilter
+              onApply={(addr) => setVoterFilter(addr)}
+              currentFilter={voterFilter}
+            />
           </div>
         ),
       },
@@ -243,8 +264,13 @@ export const TabsVotedContent = ({
           );
         },
         header: () => (
-          <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
+          <div className="text-table-header flex h-8 w-full items-center justify-start gap-1 px-2">
             <p>Choice</p>
+            <CategoriesFilter
+              options={choiceFilterOptions}
+              selectedValue={choiceFilter}
+              onValueChange={setChoiceFilter}
+            />
           </div>
         ),
       },
@@ -580,7 +606,16 @@ export const TabsVotedContent = ({
         ),
       },
     ],
-    [proposal, handleSort, sortBy, sortDirection, daoId, onAddressClick],
+    [
+      proposal,
+      handleSort,
+      sortBy,
+      sortDirection,
+      daoId,
+      onAddressClick,
+      voterFilter,
+      choiceFilter,
+    ],
   );
 
   // Prepare table data with description rows and loading row if needed

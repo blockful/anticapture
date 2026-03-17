@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertCircle, AlertTriangle } from "lucide-react";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import { Stage } from "@/shared/types/enums/Stage";
 import { cn } from "@/shared/utils/";
