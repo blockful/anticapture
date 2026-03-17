@@ -16,8 +16,8 @@ const QuerySchema = z
       .openapi({ description: "End date (Unix timestamp)" }),
     after: z.string().optional(),
     before: z.string().optional(),
-    orderDirection: z.string().optional(),
-    limit: z.string().optional(),
+    orderDirection: z.enum(["asc", "desc"]).optional(),
+    limit: z.string().regex(/^\d+$/).optional(),
   })
   .refine(
     (data) => !data.endDate || BigInt(data.startDate) < BigInt(data.endDate),
