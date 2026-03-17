@@ -107,7 +107,7 @@ export class DrizzleRepository {
       current_average_turnout AS (
         SELECT COALESCE(AVG(${proposalsOnchain.forVotes} + ${proposalsOnchain.againstVotes} + ${proposalsOnchain.abstainVotes}), 0) AS "currentAverageTurnout"
         FROM ${proposalsOnchain}
-        WHERE ${proposalsOnchain.timestamp} >= ${proposalsOnchain.timestamp} >= ${fromDate}
+        WHERE ${proposalsOnchain.timestamp} >= ${fromDate}
         AND ${proposalsOnchain.status} NOT IN ('ACTIVE', 'PENDING', 'CANCELED')
       )
       SELECT * FROM current_average_turnout

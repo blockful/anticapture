@@ -20,15 +20,12 @@ interface GovernanceActivityRepository {
   getAverageTurnoutCompare(
     fromDate: number,
   ): Promise<AverageTurnoutCompareQueryResult | undefined>;
-  getVotesCompare(
-    fromDate: number,
-  ): Promise<VotesCompareQueryResult | undefined>;
 }
 
 export class GovernanceActivityService {
   constructor(
-    private repository: GovernanceActivityRepository,
-    private tokenType: "ERC20" | "ERC721",
+    private readonly repository: GovernanceActivityRepository,
+    private readonly tokenType: "ERC20" | "ERC721",
   ) {}
 
   async getActiveSupply(fromDate: number) {
