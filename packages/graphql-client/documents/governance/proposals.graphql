@@ -62,6 +62,8 @@ query GetVotes(
   $skip: NonNegativeInt
   $orderBy: queryInput_votesByProposalId_orderBy = timestamp
   $orderDirection: queryInput_votesByProposalId_orderDirection = desc
+  $support: Float
+  $voterAddressIn: JSON
 ) {
   votesByProposalId(
     limit: $limit
@@ -69,6 +71,8 @@ query GetVotes(
     id: $proposalId
     orderBy: $orderBy
     orderDirection: $orderDirection
+    support: $support
+    voterAddressIn: $voterAddressIn
   ) {
     totalCount
     items {

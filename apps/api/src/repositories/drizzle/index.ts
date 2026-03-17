@@ -155,6 +155,9 @@ export class DrizzleRepository {
         orderDirection === "asc"
           ? asc(proposalsOnchain.timestamp)
           : desc(proposalsOnchain.timestamp),
+        orderDirection === "asc"
+          ? asc(proposalsOnchain.logIndex)
+          : desc(proposalsOnchain.logIndex),
       )
       .limit(limit)
       .offset(skip);
