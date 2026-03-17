@@ -158,7 +158,7 @@ export class DelegationService {
       items: finalItems,
       totalCount: finalItems.length,
       pageInfo: {
-        hasNextPage: hasNextPageFromDaos,
+        hasNextPage: hasNextPageFromDaos || items.length > userLimit,
         hasPreviousPage: this.calculateHasPreviousPage({
           startDate: args.startDate,
           after: args.after,
