@@ -33,6 +33,8 @@ import {
   votes,
   offchainProposals,
   offchainVotes,
+  eventRelevance,
+  feed,
 } from "@/controllers";
 import * as offchainSchema from "@/database/offchain-schema";
 import * as schema from "@/database/schema";
@@ -93,9 +95,7 @@ import {
   EventRelevanceService,
   GovernanceActivityService,
 } from "@/services";
-
-import { eventRelevance } from "./controllers/event-relevance";
-import { feed } from "./controllers/feed";
+import { AccountInteractionsService } from "@/services/account-balance/interactions";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -201,7 +201,6 @@ const daoService = new DaoService(
 );
 const balanceVariationsService = new BalanceVariationsService(
   balanceVariationsRepo,
-  accountInteractionRepo,
   accountBalanceRepo,
 );
 const accountBalanceService = new AccountBalanceService(accountBalanceRepo);
@@ -252,7 +251,10 @@ votingPowerVariations(app, votingPowerService);
 votingPowers(app, votingPowerService);
 accountBalanceVariations(app, balanceVariationsService);
 accountBalances(app, env.DAO_ID, accountBalanceService);
-accountInteractions(app, balanceVariationsService);
+accountInteractions(
+  app,
+  new AccountInteractionsService(accountInteractionRepo),
+);
 transfers(app, new TransfersService(new TransfersRepository(pgClient)));
 votes(app, new VotesService(new VotesRepository(pgClient)));
 dao(app, daoService);

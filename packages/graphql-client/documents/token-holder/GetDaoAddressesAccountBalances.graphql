@@ -1,5 +1,9 @@
-query GetDaoAddressesAccountBalances {
-  accountBalances(orderDirection: desc, limit: 1) {
+query GetDaoAddressesAccountBalances($excludeDaoAddresses: Boolean) {
+  accountBalances(
+    orderDirection: desc
+    limit: 1
+    excludeDaoAddresses: $excludeDaoAddresses
+  ) {
     items {
       address
       balance

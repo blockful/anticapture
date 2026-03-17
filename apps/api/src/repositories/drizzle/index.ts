@@ -102,12 +102,13 @@ export class DrizzleRepository {
         SELECT COALESCE(AVG(${proposalsOnchain.forVotes} + ${proposalsOnchain.againstVotes} + ${proposalsOnchain.abstainVotes}), 0) AS "oldAverageTurnout"
         FROM ${proposalsOnchain}
         WHERE ${proposalsOnchain.timestamp} <= ${fromDate}
-        AND ${proposalsOnchain.status} != 'CANCELED'
+        AND ${proposalsOnchain.status} NOT IN ('ACTIVE', 'PENDING', 'CANCELED')
       ),
       current_average_turnout AS (
         SELECT COALESCE(AVG(${proposalsOnchain.forVotes} + ${proposalsOnchain.againstVotes} + ${proposalsOnchain.abstainVotes}), 0) AS "currentAverageTurnout"
         FROM ${proposalsOnchain}
-        WHERE ${proposalsOnchain.status} != 'CANCELED' AND ${proposalsOnchain.timestamp} >= ${fromDate}
+        WHERE ${proposalsOnchain.timestamp} >= ${proposalsOnchain.timestamp} >= ${fromDate}
+        AND ${proposalsOnchain.status} NOT IN ('ACTIVE', 'PENDING', 'CANCELED')
       )
       SELECT * FROM current_average_turnout
       JOIN old_average_turnout ON 1=1;
@@ -154,6 +155,9 @@ export class DrizzleRepository {
         orderDirection === "asc"
           ? asc(proposalsOnchain.timestamp)
           : desc(proposalsOnchain.timestamp),
+        orderDirection === "asc"
+          ? asc(proposalsOnchain.logIndex)
+          : desc(proposalsOnchain.logIndex),
       )
       .limit(limit)
       .offset(skip);

@@ -8,7 +8,7 @@ const meta = {
   component: Footer,
   parameters: {
     layout: "fullscreen",
-    design: getFigmaDesignConfigByNodeId("10339-57793"),
+    design: getFigmaDesignConfigByNodeId("13529-98262"),
   },
   tags: ["autodocs"],
   argTypes: {

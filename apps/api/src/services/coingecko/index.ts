@@ -80,7 +80,7 @@ export class CoingeckoService implements PriceProvider {
 
     // CoinGecko returns timestamps in milliseconds, convert to seconds
     return data.prices.map(([timestampMs, price]) => ({
-      price: price.toFixed(2),
+      price: price.toFixed(4),
       timestamp: Math.floor(timestampMs / 1000),
     }));
   }

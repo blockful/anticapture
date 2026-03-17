@@ -145,7 +145,7 @@ type Query {
   accountBalanceVariationsByAccountId(address: String!, fromDate: String, toDate: String): accountBalanceVariationsByAccountId_200_response
 
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/balances`\nReturns sorted and paginated account balance records\n"
-  accountBalances(fromDate: String, toDate: String, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalances_orderDirection = desc, orderBy: queryInput_accountBalances_orderBy = balance, addresses: JSON, delegates: JSON, fromValue: String, toValue: String): accountBalances_200_response
+  accountBalances(fromDate: String, toDate: String, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalances_orderDirection = desc, orderBy: queryInput_accountBalances_orderBy = balance, excludeDaoAddresses: Boolean, addresses: JSON, delegates: JSON, fromValue: String, toValue: String): accountBalances_200_response
 
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/accounts/{args.address}/balances`\nReturns account balance information for a specific address\n"
   accountBalanceByAccountId(address: String!, fromDate: String, toDate: String): accountBalanceByAccountId_200_response
@@ -693,7 +693,8 @@ type query_proposalsActivity_proposals_items_proposal {
   id: String!
   daoId: String!
   proposerAccountId: String!
-  description: String
+  title: String!
+  description: String!
   startBlock: Float!
   endBlock: Float!
   timestamp: String
@@ -744,7 +745,7 @@ type query_proposals_items_items {
   daoId: String!
   txHash: String!
   proposerAccountId: String!
-  title: String
+  title: String!
   description: String!
   startBlock: Float!
   endBlock: Float!
@@ -777,7 +778,7 @@ type proposal_200_response {
   daoId: String!
   txHash: String!
   proposerAccountId: String!
-  title: String
+  title: String!
   description: String!
   startBlock: Float!
   endBlock: Float!
@@ -1048,6 +1049,7 @@ type query_votingPowers_items_items {
   votesCount: Float!
   proposalsCount: Float!
   delegationsCount: Float!
+  balance: String
   variation: query_votingPowers_items_items_variation!
 }
 
@@ -1066,6 +1068,8 @@ enum queryInput_votingPowers_orderBy {
   delegationsCount
   variation
   signedVariation
+  total
+  balance
 }
 
 type votingPowerByAccountId_200_response {
@@ -1074,6 +1078,7 @@ type votingPowerByAccountId_200_response {
   votesCount: Float!
   proposalsCount: Float!
   delegationsCount: Float!
+  balance: String
   variation: query_votingPowerByAccountId_variation!
 }
 

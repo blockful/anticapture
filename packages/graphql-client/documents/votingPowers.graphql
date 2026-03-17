@@ -20,6 +20,7 @@ query GetDelegates(
       accountId
       delegationsCount
       votingPower
+      balance
       variation {
         absoluteChange
         percentageChange

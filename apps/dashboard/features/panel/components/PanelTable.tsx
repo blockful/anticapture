@@ -1,8 +1,10 @@
 "use client";
 
+import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import type { ColumnDef } from "@tanstack/react-table";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
+import { cn } from "@/shared/utils/cn";
 import {
   DaoCell,
   ChainCell,
@@ -18,7 +20,9 @@ import {
 } from "@/features/panel/components/SortableColumnHeader";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
+import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
+import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
 
 type PanelDao = {
   dao: string;
@@ -41,14 +45,32 @@ const createSortingFn = (ref: SortValuesRef) => {
     (ref.current[rowA.index] ?? 0) - (ref.current[rowB.index] ?? 0);
 };
 
+const TABS = {
+  FULLY_ANALYZED: "fully-analyzed",
+  NOT_REVIEWED: "not-reviewed",
+} as const;
+
+type TabValue = (typeof TABS)[keyof typeof TABS];
+
 export const PanelTable = () => {
+  const [activeTab, setActiveTab] = useState<TabValue>(TABS.FULLY_ANALYZED);
   const costOfAttackSort = useRef<Record<number, number>>({});
   const attackProfitabilitySort = useRef<Record<number, number>>({});
   const activeTokensSort = useRef<Record<number, number>>({});
 
-  const data = Object.values(DaoIdEnum).map((daoId) => ({
+  const allDaos = Object.values(DaoIdEnum).map((daoId) => ({
     dao: daoId,
   }));
+
+  const fullyAnalyzedDaos = allDaos.filter(
+    ({ dao }) => !!daoConfigByDaoId[dao].governanceImplementation,
+  );
+  const notReviewedDaos = allDaos.filter(
+    ({ dao }) => !daoConfigByDaoId[dao].governanceImplementation,
+  );
+
+  const data =
+    activeTab === TABS.FULLY_ANALYZED ? fullyAnalyzedDaos : notReviewedDaos;
 
   const panelColumns: ColumnDef<PanelDao>[] = [
     {
@@ -74,7 +96,7 @@ export const PanelTable = () => {
       accessorKey: "stage",
       cell: ({ row }) => <StageCell daoId={row.getValue("dao") as DaoIdEnum} />,
       header: () => (
-        <div className="w-full justify-end px-0 text-left lg:px-4">
+        <div className="w-full justify-end px-0 text-left">
           <Tooltip
             tooltipContent={
               <div className="text-center">
@@ -94,7 +116,10 @@ export const PanelTable = () => {
     {
       accessorKey: "riskareas",
       cell: ({ row }) => (
-        <RiskAreasCell daoId={row.getValue("dao") as DaoIdEnum} />
+        <RiskAreasCell
+          daoId={row.getValue("dao") as DaoIdEnum}
+          disabled={activeTab === TABS.NOT_REVIEWED}
+        />
       ),
       header: () => (
         <div className="w-full justify-end px-0 text-left lg:px-4">
@@ -162,15 +187,36 @@ export const PanelTable = () => {
     },
     {
       accessorKey: "activeTokensInGovernance",
-      cell: ({ row }) => (
-        <ActiveTokensCell
-          daoId={row.getValue("dao") as DaoIdEnum}
-          onSortValueChange={createSortValueHandler(
-            activeTokensSort,
-            row.index,
-          )}
-        />
-      ),
+      cell: ({ row }) => {
+        if (activeTab === TABS.FULLY_ANALYZED) {
+          return (
+            <ActiveTokensCell
+              daoId={row.getValue("dao") as DaoIdEnum}
+              onSortValueChange={createSortValueHandler(
+                activeTokensSort,
+                row.index,
+              )}
+            />
+          );
+        }
+        return (
+          <Tooltip
+            tooltipContent={
+              <p className="text-secondary text-sm font-normal leading-5">
+                Economic security data is not yet available. Our team is
+                actively working to integrate it.
+              </p>
+            }
+            title={"No data available"}
+            className="text-left"
+            triggerClassName="w-full"
+          >
+            <div className="ml-auto w-fit px-2">
+              <BadgeStatus variant="dimmed">No Data</BadgeStatus>
+            </div>
+          </Tooltip>
+        );
+      },
       header: ({ column }) => (
         <SortableColumnHeader
           column={column}
@@ -186,11 +232,48 @@ export const PanelTable = () => {
   ];
 
   return (
-    <Table
-      columns={panelColumns}
-      data={data}
-      withSorting={true}
-      stickyFirstColumn={true}
-    />
+    <div className="flex flex-col">
+      <Tabs
+        value={activeTab}
+        onValueChange={(v) => setActiveTab(v as TabValue)}
+      >
+        <TabsList className="mb-4 flex border-b border-b-white/10 text-sm">
+          <TabsTrigger
+            value={TABS.FULLY_ANALYZED}
+            className={cn(
+              "text-secondary relative flex cursor-pointer items-center gap-2 whitespace-nowrap px-2 py-2 font-medium",
+              "data-[state=active]:text-link",
+              "after:absolute after:-bottom-px after:left-0 after:right-0 after:h-px after:bg-transparent after:content-['']",
+              "data-[state=active]:after:bg-surface-solid-brand",
+            )}
+          >
+            Fully Analyzed
+            <span className="bg-surface-contrast text-secondary w-6 rounded-md px-1.5 py-0.5">
+              {fullyAnalyzedDaos.length}
+            </span>
+          </TabsTrigger>
+          <TabsTrigger
+            value={TABS.NOT_REVIEWED}
+            className={cn(
+              "text-secondary relative flex cursor-pointer items-center gap-2 whitespace-nowrap px-2 py-2 font-medium",
+              "data-[state=active]:text-link",
+              "after:absolute after:-bottom-px after:left-0 after:right-0 after:h-px after:bg-transparent after:content-['']",
+              "data-[state=active]:after:bg-surface-solid-brand",
+            )}
+          >
+            Not Reviewed
+            <span className="bg-surface-contrast text-secondary w-6 rounded-md px-1.5 py-0.5">
+              {notReviewedDaos.length}
+            </span>
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
+      <Table
+        columns={panelColumns}
+        data={data}
+        withSorting={true}
+        stickyFirstColumn={true}
+      />
+    </div>
   );
 };

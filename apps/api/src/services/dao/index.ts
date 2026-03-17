@@ -12,13 +12,24 @@ import {
   DaoResponseMapper,
 } from "@/mappers";
 
-import { GovernanceActivityService } from "../governance-activity";
+import { ActiveSupplyQueryResult } from "@/controllers";
 
 interface TokenPriceClient {
   getTokenPrice(
     tokenContractAddress: string,
     targetCurrency: string,
   ): Promise<string>;
+}
+
+interface GovernanceActivityService {
+  getActiveSupply(
+    fromDate: number,
+  ): Promise<ActiveSupplyQueryResult | undefined>;
+  getAverageTurnout(fromDate: number): Promise<{
+    currentAverageTurnout: string;
+    oldAverageTurnout: string;
+    changeRate: number;
+  }>;
 }
 
 export class DaoService {
