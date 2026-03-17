@@ -14,7 +14,9 @@ export async function fanOutGet<T = unknown>(
       const url = new URL(path, baseUrl);
       if (queryString) url.search = queryString;
 
-      const res = await fetch(url.toString());
+      const res = await fetch(url.toString(), {
+        signal: AbortSignal.timeout(5000),
+      });
       if (!res.ok) throw new Error(`${dao}: ${res.status}`);
 
       const data = (await res.json()) as T;
@@ -26,6 +28,8 @@ export async function fanOutGet<T = unknown>(
   for (const result of results) {
     if (result.status === "fulfilled") {
       responses.set(result.value.dao, result.value.data);
+    } else {
+      console.warn(`Upstream request failed: ${result.reason}`);
     }
   }
 
