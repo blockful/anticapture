@@ -14,7 +14,7 @@ groups:
 
       # CPU usage above 80% for 5 minutes
       - alert: HighCPUUsage
-        expr: rate(process_cpu_time_seconds_total[1m]) * 100 > 80
+        expr: sum by (job) (rate(process_cpu_time_seconds_total[1m])) * 100 > 80
         for: 5m
         labels:
           severity: warning
