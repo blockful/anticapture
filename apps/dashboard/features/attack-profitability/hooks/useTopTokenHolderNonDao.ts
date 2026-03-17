@@ -41,6 +41,9 @@ export const useTopTokenHolderNonDao = (
           ...getAuthHeaders(),
         },
       },
+      variables: {
+        excludeDaoAddresses: true,
+      },
       notifyOnNetworkStatusChange: true,
       fetchPolicy: "cache-and-network",
       pollInterval: options?.refreshInterval || 0,

@@ -163,7 +163,7 @@ type Query {
   accountBalanceVariationsByAccountId(address: String!, fromDate: String, toDate: String): accountBalanceVariationsByAccountId_200_response
 
   """Returns sorted and paginated account balance records"""
-  accountBalances(fromDate: String, toDate: String, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalances_orderDirection = desc, orderBy: queryInput_accountBalances_orderBy = balance, addresses: JSON, delegates: JSON, fromValue: String, toValue: String): accountBalances_200_response
+  accountBalances(fromDate: String, toDate: String, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalances_orderDirection = desc, orderBy: queryInput_accountBalances_orderBy = balance, excludeDaoAddresses: Boolean, addresses: JSON, delegates: JSON, fromValue: String, toValue: String): accountBalances_200_response
 
   """Returns account balance information for a specific address"""
   accountBalanceByAccountId(address: String!, fromDate: String, toDate: String): accountBalanceByAccountId_200_response

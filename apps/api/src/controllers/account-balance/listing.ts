@@ -51,6 +51,7 @@ export function accountBalances(
         orderBy,
         fromDate,
         toDate,
+        excludeDaoAddresses,
       } = context.req.valid("query");
       const now = Math.floor(Date.now() / 1000);
       const fromTimestamp = fromDate ?? now - DaysEnum["90d"];
@@ -70,6 +71,7 @@ export function accountBalances(
           minAmount: fromValue,
           maxAmount: toValue,
         },
+        excludeDaoAddresses,
       );
 
       return context.json(

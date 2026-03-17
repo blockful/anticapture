@@ -9,7 +9,7 @@ export const ShutterAttackBanner = () => {
       text="$3M governance attack detected and mitigated on Shutter DAO."
       links={[
         {
-          url: "https://x.com/blockful_io",
+          url: "https://shutternetwork.discourse.group/t/security-emergency-governance-hardening-attack-prevention/804",
           text: "Read the details",
           openInNewTab: true,
         },
