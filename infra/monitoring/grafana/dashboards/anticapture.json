@@ -226,7 +226,7 @@
       "title": "RPC request rate",
       "gridPos": {
         "h": 8,
-        "w": 12,
+        "w": 16,
         "x": 0,
         "y": 43
       },
