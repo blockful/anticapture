@@ -33,6 +33,10 @@ export class AAVEClient<
     return "AAVE";
   }
 
+  async getProposalThreshold(): Promise<bigint> {
+    return 0n;
+  }
+
   async getQuorum(): Promise<bigint> {
     return 0n;
     // return readContract(this.client, {
