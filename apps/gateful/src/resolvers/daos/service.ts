@@ -1,4 +1,4 @@
-import { fanOutGet } from "../shared/fan-out.js";
+import { fanOutGet } from "../../shared/fan-out.js";
 
 import { DaoResponse, DaosResponse } from "./route.js";
 

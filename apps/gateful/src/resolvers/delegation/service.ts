@@ -1,4 +1,4 @@
-import { fanOutGet } from "../shared/fan-out.js";
+import { fanOutGet } from "../../shared/fan-out.js";
 
 export type DelegationPercentageResponse = {
   items: { date: string; high: string }[];
