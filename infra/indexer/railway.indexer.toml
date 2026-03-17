@@ -1,6 +1,6 @@
 [build]
 builder = "DOCKERFILE"
-dockerfilePath = "./infra/indexer/Dockerfile.indexer"
+dockerfilePath = "./Dockerfile.indexer"
 
 [deploy]
 restartPolicyType = "ON_FAILURE"
