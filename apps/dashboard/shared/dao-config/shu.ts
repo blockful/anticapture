@@ -44,7 +44,7 @@ export const SHU: DaoConfiguration = {
   },
   attackProfitability: {
     riskLevel: RiskLevel.HIGH,
-    supportsLiquidTreasuryCall: false,
+    supportsLiquidTreasuryCall: true,
   },
   governanceImplementation: {
     // Fields are sorted alphabetically by GovernanceImplementationEnum for readability
