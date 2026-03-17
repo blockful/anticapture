@@ -10,7 +10,7 @@ import {
   AverageTurnoutCompareQueryResult,
 } from "./types";
 
-interface GovernanceActivityRepository {
+export interface GovernanceActivityRepository {
   getActiveSupply(days: DaysEnum): Promise<ActiveSupplyQueryResult | undefined>;
   getProposalsCompare(
     days: DaysEnum,
