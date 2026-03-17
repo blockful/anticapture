@@ -22,4 +22,5 @@ WORKDIR /app
 COPY --from=installer /app .
 WORKDIR /app/apps/api
 EXPOSE 42069
-ENTRYPOINT ["node", "--import", "./dist/instrumentation.js", "dist/index.js"]
+ENTRYPOINT ["node", "--import", "./dist/instrumentation.js"]
+CMD ["dist/index.js"]
