@@ -23,6 +23,7 @@ export const OBOL: DaoConfiguration = {
   icon: ObolIcon,
   ogIcon: ObolOgIcon,
   noStage: true,
+  activityFeed: true,
   daoOverview: {
     token: "ERC20",
     chain: { ...mainnet, icon: MainnetIcon },

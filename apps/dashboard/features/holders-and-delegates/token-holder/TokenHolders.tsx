@@ -60,9 +60,11 @@ const TypeCell = ({ address }: { address: Address }) => {
 export const TokenHolders = ({
   days,
   daoId,
+  showTokenName = true,
 }: {
   days: TimeInterval;
   daoId: DaoIdEnum;
+  showTokenName?: boolean;
 }) => {
   const pageLimit: number = 20;
   const [drawerAddress, setDrawerAddress] = useQueryState("drawerAddress");
@@ -226,7 +228,7 @@ export const TokenHolders = ({
         );
       },
       meta: {
-        columnClassName: "w-[25%]",
+        columnClassName: "w-68",
       },
     },
     {
@@ -248,7 +250,7 @@ export const TokenHolders = ({
         return <TypeCell address={row.original.address} />;
       },
       meta: {
-        columnClassName: "w-[10%]",
+        columnClassName: "w-12",
       },
     },
     {
@@ -261,7 +263,7 @@ export const TokenHolders = ({
           onClick={() => handleSort("balance")}
         >
           <h4 className="text-table-header whitespace-nowrap">
-            Balance ({daoId})
+            Balance {!!showTokenName && `(${daoId})`}
           </h4>
           <ArrowUpDown
             props={{ className: "size-4" }}
@@ -292,7 +294,7 @@ export const TokenHolders = ({
         );
       },
       meta: {
-        columnClassName: "w-[15%]",
+        columnClassName: "w-40",
       },
     },
     {
@@ -353,7 +355,7 @@ export const TokenHolders = ({
         );
       },
       meta: {
-        columnClassName: "w-[25%]",
+        columnClassName: "w-50",
       },
     },
     {
@@ -398,7 +400,7 @@ export const TokenHolders = ({
         );
       },
       meta: {
-        columnClassName: "w-[25%]",
+        columnClassName: "w-40",
       },
     },
   ];

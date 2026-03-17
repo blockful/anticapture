@@ -349,4 +349,5 @@ export const COMP: DaoConfiguration = {
   resilienceStages: true,
   tokenDistribution: true,
   dataTables: true,
+  activityFeed: true,
 };

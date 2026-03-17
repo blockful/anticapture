@@ -140,13 +140,13 @@ export type AccountBalancesWithVariationResponse = z.infer<
 
 export const AccountBalancesWithVariationResponseMapper = (
   items: DBAccountBalanceWithVariation[],
-  totalCount: bigint,
+  totalCount: number,
   startTimestamp: number | undefined,
   endTimestamp: number | undefined,
 ): AccountBalancesWithVariationResponse => {
   return {
     items: items.map((item) => AccountBalanceWithVariationMapper(item)),
-    totalCount: Number(totalCount),
+    totalCount,
     period: PeriodResponseSchema.parse({
       startTimestamp: TimestampResponseMapper(startTimestamp),
       endTimestamp: TimestampResponseMapper(endTimestamp),
