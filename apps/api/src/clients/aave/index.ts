@@ -71,6 +71,10 @@ export class AAVEClient<
     // });
   }
 
+  async getProposalThreshold(): Promise<bigint> {
+    return 0n;
+  }
+
   calculateQuorum(votes: {
     forVotes: bigint;
     againstVotes: bigint;
