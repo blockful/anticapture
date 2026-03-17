@@ -47,6 +47,14 @@ export class AAVEClient<
     // });
   }
 
+  async getVotingDelay(): Promise<bigint> {
+    return 0n;
+  }
+
+  async getVotingPeriod(): Promise<bigint> {
+    return 0n;
+  }
+
   async getTimelockDelay(): Promise<bigint> {
     return 0n;
     // const timelockAddress = await readContract(this.client, {
