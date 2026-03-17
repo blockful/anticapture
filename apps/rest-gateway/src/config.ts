@@ -12,11 +12,16 @@ function loadDaoApis(
   source: Record<string, string | undefined> = process.env,
 ): Map<string, string> {
   const daoApis = new Map<string, string>();
+  const urlSchema = z.url();
 
   for (const [key, value] of Object.entries(source)) {
     if (key.startsWith("DAO_API_") && value) {
+      const parsed = urlSchema.safeParse(value);
+      if (!parsed.success) {
+        throw new Error(`Invalid URL for ${key}: ${parsed.error.message}`);
+      }
       const daoName = key.replace("DAO_API_", "").toLowerCase();
-      daoApis.set(daoName, value);
+      daoApis.set(daoName, parsed.data);
     }
   }
 
