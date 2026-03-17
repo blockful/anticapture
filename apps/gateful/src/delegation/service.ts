@@ -32,7 +32,7 @@ export class DelegationService {
 
     const daoResponses = await fanOutGet<DelegationPercentageResponse>(
       this.daoApis,
-      "/delegation-percentage-by-day",
+      "/delegation-percentage",
       params.toString(),
     );
 

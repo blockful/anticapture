@@ -5,19 +5,19 @@ import type { DelegationService } from "./service.js";
 
 const QuerySchema = z
   .object({
-    startDate: z
-      .string()
-      .regex(/^\d+$/)
+    startDate: z.coerce
+      .number()
+      .transform(String)
       .openapi({ description: "Start date (Unix timestamp)" }),
-    endDate: z
-      .string()
-      .regex(/^\d+$/)
+    endDate: z.coerce
+      .number()
+      .transform(String)
       .optional()
       .openapi({ description: "End date (Unix timestamp)" }),
     after: z.string().optional(),
     before: z.string().optional(),
-    orderDirection: z.enum(["asc", "desc"]).optional(),
-    limit: z.string().regex(/^\d+$/).optional(),
+    orderDirection: z.enum(["asc", "desc"]).optional().default("asc"),
+    limit: z.coerce.number().optional().default(10),
   })
   .refine(
     (data) => !data.endDate || BigInt(data.startDate) < BigInt(data.endDate),
@@ -49,14 +49,6 @@ const route = createRoute({
       content: { "application/json": { schema: ResponseSchema } },
       description: "Average delegation percentage across all DAOs",
     },
-    400: {
-      content: {
-        "application/json": {
-          schema: z.object({ error: z.string() }),
-        },
-      },
-      description: "Validation error",
-    },
   },
 });
 
@@ -74,9 +66,9 @@ export function averageDelegation(
       after,
       before,
       orderDirection,
-      limit: limit ? parseInt(limit, 10) : undefined,
+      limit,
     });
 
-    return c.json(result, 200);
+    return c.json(result);
   });
 }
