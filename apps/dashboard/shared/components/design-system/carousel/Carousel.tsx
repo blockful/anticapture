@@ -2,7 +2,9 @@
 
 import { useRef, useState } from "react";
 
-export const Carousel = ({ slides }: { slides: React.ReactNode[] }) => {
+import type { CarouselProps } from "./types";
+
+export const Carousel = ({ slides }: CarouselProps) => {
   const [current, setCurrent] = useState(0);
   const touchStartX = useRef<number | null>(null);
 

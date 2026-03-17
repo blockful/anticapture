@@ -1,7 +1,6 @@
 "use client";
 
 import { X } from "lucide-react";
-import type { ReactNode } from "react";
 import { useState, useEffect } from "react";
 
 import { IconButton } from "@/shared/components/design-system/buttons/icon-button/IconButton";
@@ -9,21 +8,7 @@ import { DefaultLink } from "@/shared/components/design-system/links/default-lin
 import { BulletDivider } from "@/shared/components/design-system/section/BulletDivider";
 import { cn } from "@/shared/utils/cn";
 
-type BannerLink = {
-  url: string;
-  text: string;
-  openInNewTab?: boolean;
-};
-
-interface BannerAlertProps {
-  icon: ReactNode;
-  text: string;
-  link?: BannerLink;
-  links?: BannerLink[];
-  storageKey: string;
-  variant?: "default" | "highlight";
-  persist?: boolean;
-}
+import type { BannerAlertProps } from "@/shared/components/design-system/alerts/types";
 
 const mapVariantToColor = {
   default: "bg-surface-banner-default",

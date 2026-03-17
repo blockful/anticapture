@@ -19,7 +19,7 @@ import { useState } from "react";
 
 import { BadgeIcon } from "@/shared/components/design-system/badges/BadgeIcon";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
-import { cn } from "@/shared/utils";
+import { cn } from "@/shared/utils/cn";
 
 interface HelpPopoverProps {
   className?: string;
