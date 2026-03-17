@@ -5,7 +5,7 @@ dotenv.config();
 
 const envSchema = z.object({
   PORT: z.coerce.number().default(4000),
-  ADDRESS_ENRICHMENT_API_URL: z.string().url().optional(),
+  ADDRESS_ENRICHMENT_API_URL: z.url().optional(),
 });
 
 function loadDaoApis(

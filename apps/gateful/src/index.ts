@@ -18,8 +18,6 @@ const app = new OpenAPIHono();
 
 app.use("*", cors({ origin: "*" }));
 app.use("*", logger());
-const daosService = new DaosService(config.daoApis);
-const delegationService = new DelegationService(config.daoApis);
 
 console.log(
   `Discovered ${config.daoApis.size} DAO APIs:`,
@@ -28,9 +26,14 @@ console.log(
 
 // OpenAPI routes
 health(app);
+addressEnrichment(app, config.addressEnrichmentUrl);
+
+// Aggregation routes
+const daosService = new DaosService(config.daoApis);
+const delegationService = new DelegationService(config.daoApis);
+
 daos(app, daosService);
 averageDelegation(app, delegationService);
-addressEnrichment(app, config.addressEnrichmentUrl);
 
 // OpenAPI docs
 app.get("/docs/json", async (c) => {
