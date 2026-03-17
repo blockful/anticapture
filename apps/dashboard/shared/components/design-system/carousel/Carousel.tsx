@@ -2,9 +2,10 @@
 
 import { useRef, useState } from "react";
 
-import type { CarouselProps } from "./types";
+import type { CarouselProps } from "@/shared/components/design-system/carousel/types";
+import { cn } from "@/shared/utils/cn";
 
-export const Carousel = ({ slides }: CarouselProps) => {
+export const Carousel = ({ slides, className }: CarouselProps) => {
   const [current, setCurrent] = useState(0);
   const touchStartX = useRef<number | null>(null);
 
@@ -28,7 +29,7 @@ export const Carousel = ({ slides }: CarouselProps) => {
   };
 
   return (
-    <div className="w-full overflow-hidden">
+    <div className={cn("w-full overflow-hidden", className)}>
       <div
         className="flex transition-transform duration-500 ease-in-out"
         style={{ transform: `translateX(-${current * 100}%)` }}

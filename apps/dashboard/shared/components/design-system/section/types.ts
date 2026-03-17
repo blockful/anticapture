@@ -5,6 +5,7 @@ export type SectionTitleProps = {
   title: string;
   riskLevel?: ReactNode;
   description: string;
+  className?: string;
 };
 
 export type SubsectionTitleProps = {

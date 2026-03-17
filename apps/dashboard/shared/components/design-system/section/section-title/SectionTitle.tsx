@@ -1,3 +1,5 @@
+import { cn } from "@/shared/utils/cn";
+
 import type { SectionTitleProps } from "@/shared/components/design-system/section/types";
 
 export const SectionTitle = ({
@@ -5,9 +7,10 @@ export const SectionTitle = ({
   title,
   riskLevel,
   description,
+  className,
 }: SectionTitleProps) => {
   return (
-    <div className="flex w-full flex-col gap-2">
+    <div className={cn("flex w-full flex-col gap-2", className)}>
       <div className="flex w-full items-center justify-between">
         <div className="flex flex-col items-center gap-2 lg:flex-row">
           <div className="flex items-center gap-2">

@@ -5,6 +5,7 @@ import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import type { DrawerTabsProps } from "@/shared/components/design-system/drawer/types";
 import { cn } from "@/shared/utils/cn";
 
+/** @internal Used internally by DrawerHeader. Not part of the public API. */
 export const DrawerTabs = ({
   tabs,
   activeTab,

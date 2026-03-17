@@ -6,6 +6,8 @@ import { DrawerTabs } from "@/shared/components/design-system/drawer/drawer-head
 import { DrawerTitle } from "@/shared/components/design-system/drawer/drawer-header/DrawerTitle";
 import type { DrawerHeaderProps } from "@/shared/components/design-system/drawer/types";
 
+import { cn } from "@/shared/utils/cn";
+
 export const DrawerHeader = ({
   subtitle,
   title,
@@ -13,9 +15,10 @@ export const DrawerHeader = ({
   tabs,
   activeTab,
   onTabChange,
+  className,
 }: DrawerHeaderProps) => {
   return (
-    <div className="bg-surface-contrast w-full shrink-0">
+    <div className={cn("bg-surface-contrast w-full shrink-0", className)}>
       <div className="bg-surface-contrast flex justify-between p-4">
         <div className="flex flex-col gap-1">
           {subtitle && <DrawerSubtitle>{subtitle}</DrawerSubtitle>}

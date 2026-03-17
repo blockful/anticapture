@@ -13,6 +13,7 @@ export interface DrawerHeaderProps {
   tabs?: DrawerTabConfig[];
   activeTab?: string;
   onTabChange?: (tabId: string) => void;
+  className?: string;
 }
 
 export interface DrawerSubtitleProps {
@@ -21,6 +22,7 @@ export interface DrawerSubtitleProps {
 
 export interface DrawerTitleProps {
   children: string | ReactNode;
+  className?: string;
 }
 
 export interface DrawerTabConfig {

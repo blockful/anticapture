@@ -1,17 +1,24 @@
 "use client";
 
+import { cn } from "@/shared/utils/cn";
+
 import type { DrawerTitleProps } from "@/shared/components/design-system/drawer/types";
 
-export const DrawerTitle = ({ children }: DrawerTitleProps) => {
+/** @internal Used internally by DrawerHeader. Not part of the public API. */
+export const DrawerTitle = ({ children, className }: DrawerTitleProps) => {
   if (typeof children === "string") {
     return (
-      <span className="text-primary text-lg font-medium leading-6">
+      <span
+        className={cn("text-primary text-lg font-medium leading-6", className)}
+      >
         {children}
       </span>
     );
   }
 
   return (
-    <div className="flex items-center justify-center gap-2">{children}</div>
+    <div className={cn("flex items-center justify-center gap-2", className)}>
+      {children}
+    </div>
   );
 };

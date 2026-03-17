@@ -23,9 +23,13 @@ const mapVariantToIcon = {
   },
 };
 
-export const InlineAlert = ({ text, variant = "info" }: InlineAlertProps) => {
+export const InlineAlert = ({
+  text,
+  variant = "info",
+  className,
+}: InlineAlertProps) => {
   return (
-    <div className="bg-surface-contrast w-full">
+    <div className={cn("bg-surface-contrast w-full", className)}>
       <CardDescription
         className={cn(
           "flex w-full items-center gap-2 p-2",
