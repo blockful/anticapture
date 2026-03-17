@@ -5,7 +5,7 @@ import { SubSection } from "@/shared/components/design-system/section";
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta = {
-  title: "Design System/Sections/SubSection",
+  title: "Layout/Sections/SubSection",
   component: SubSection,
   parameters: {
     layout: "padded",

@@ -5,7 +5,7 @@ import { BannerAlert } from "@/shared/components/design-system/alerts/banner-ale
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta: Meta<typeof BannerAlert> = {
-  title: "Design System/Alerts/BannerAlert",
+  title: "Feedback/Alerts/BannerAlert",
   component: BannerAlert,
   parameters: {
     layout: "fullwidth",

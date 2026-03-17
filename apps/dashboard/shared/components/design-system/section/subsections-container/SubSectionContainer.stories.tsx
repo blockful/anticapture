@@ -6,7 +6,7 @@ import { SubSectionsContainer } from "@/shared/components/design-system/section"
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta = {
-  title: "Design System/Sections/SubSectionsContainer",
+  title: "Layout/Sections/SubSectionsContainer",
   component: SubSectionsContainer,
   parameters: {
     layout: "fullscreen",

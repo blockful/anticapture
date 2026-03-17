@@ -5,7 +5,7 @@ import type { BulletDividerProps } from "@/shared/components/design-system/secti
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta: Meta<BulletDividerProps> = {
-  title: "Design System/Sections/BulletDivider",
+  title: "Layout/Sections/BulletDivider",
   component: BulletDivider,
   parameters: {
     layout: "centered",

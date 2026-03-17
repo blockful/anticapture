@@ -13,7 +13,7 @@ import { BadgeStatus } from "@/shared/components/design-system/badges";
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta = {
-  title: "Design System/Badges/BadgeStatus",
+  title: "Data Display/Badges/BadgeStatus",
   component: BadgeStatus,
   parameters: {
     layout: "centered",

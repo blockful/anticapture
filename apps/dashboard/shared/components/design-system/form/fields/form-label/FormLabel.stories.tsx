@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs";
 import { FormLabel } from "@/shared/components/design-system/form/fields/form-label/FormLabel";
 
 const meta: Meta<typeof FormLabel> = {
-  title: "Design System/Form/FormLabel",
+  title: "Data Entry/Form/FormLabel",
   component: FormLabel,
   parameters: {
     layout: "centered",

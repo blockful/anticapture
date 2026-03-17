@@ -8,7 +8,7 @@ import {
 import type { IconSize } from "@/shared/components/design-system/iconography/Iconography";
 
 const meta = {
-  title: "Design System/Primitives/Iconography",
+  title: "Foundation/Iconography",
   component: IconGallery,
   parameters: {
     layout: "padded",

@@ -5,7 +5,7 @@ import type { RadioButtonProps } from "@/shared/components/design-system/form/fi
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta: Meta<RadioButtonProps> = {
-  title: "Design System/Form/RadioButton",
+  title: "Data Entry/Form/RadioButton",
   component: RadioButton,
   parameters: {
     layout: "centered",

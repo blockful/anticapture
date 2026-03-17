@@ -13,7 +13,7 @@ import type { BadgeIconProps } from "@/shared/components/design-system/badges/ba
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta: Meta<BadgeIconProps> = {
-  title: "Design System/Badges/BadgeIcon",
+  title: "Data Display/Badges/BadgeIcon",
   component: BadgeIcon,
   parameters: {
     layout: "centered",

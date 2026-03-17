@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs";
 import { ColorPalette } from "@/shared/components/design-system/colors/ColorPalette";
 
 const meta = {
-  title: "Design System/Primitives/Colors",
+  title: "Foundation/Colors",
   component: ColorPalette,
   parameters: {
     layout: "padded",
