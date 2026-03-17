@@ -20,9 +20,11 @@ export const OBOL: DaoConfiguration = {
     svgColor: "#0F7C76",
     svgBgColor: "#e8f2ff",
   },
+  forumLink: "https://community.obol.org/",
   icon: ObolIcon,
   ogIcon: ObolOgIcon,
   noStage: true,
+  activityFeed: true,
   daoOverview: {
     token: "ERC20",
     chain: { ...mainnet, icon: MainnetIcon },

@@ -20,6 +20,7 @@ export const COMP: DaoConfiguration = {
     svgColor: "#070A0E",
     svgBgColor: "#00D395",
   },
+  forumLink: "https://www.comp.xyz/",
   icon: CompoundIcon,
   ogIcon: CompoundOgIcon,
 
@@ -349,4 +350,5 @@ export const COMP: DaoConfiguration = {
   resilienceStages: true,
   tokenDistribution: true,
   dataTables: true,
+  activityFeed: true,
 };

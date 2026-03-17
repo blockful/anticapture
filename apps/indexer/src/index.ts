@@ -1,25 +1,14 @@
 import { env } from "@/env";
-import { DaoIdEnum } from "@/lib/enums";
-import { CONTRACT_ADDRESSES } from "@/lib/constants";
+import { ARBTokenIndexer } from "@/indexer/arb";
+import { COMPGovernorIndexer, COMPTokenIndexer } from "@/indexer/comp";
 import {
   GovernorIndexer as ENSGovernorIndexer,
   ENSTokenIndexer,
 } from "@/indexer/ens";
 import {
-  GovernorIndexer as UNIGovernorIndexer,
-  UNITokenIndexer,
-} from "@/indexer/uni";
-import {
-  GovernorIndexer as OPGovernorIndexer,
-  OPTokenIndexer,
-} from "@/indexer/op";
-import { ARBTokenIndexer } from "@/indexer/arb";
-import { COMPGovernorIndexer, COMPTokenIndexer } from "@/indexer/comp";
-import {
   GovernorIndexer as GTCGovernorIndexer,
   GTCTokenIndexer,
 } from "@/indexer/gtc";
-import { SCRTokenIndexer, SCRGovernorIndexer } from "@/indexer/scr";
 import {
   NounsTokenIndexer,
   GovernorIndexer as NounsGovernorIndexer,
@@ -29,78 +18,98 @@ import {
   ObolTokenIndexer,
 } from "@/indexer/obol";
 import {
+  GovernorIndexer as OPGovernorIndexer,
+  OPTokenIndexer,
+} from "@/indexer/op";
+import { SCRTokenIndexer, SCRGovernorIndexer } from "@/indexer/scr";
+import {
+  GovernorIndexer as UNIGovernorIndexer,
+  UNITokenIndexer,
+} from "@/indexer/uni";
+import { CONTRACT_ADDRESSES } from "@/lib/constants";
+import { DaoIdEnum } from "@/lib/enums";
+
+import { SHUGovernorIndexer, SHUTokenIndexer } from "./indexer/shu";
+import {
+  AAVETokenIndexer,
+  stkAAVETokenIndexer,
+  aAAVETokenIndexer,
+} from "./indexer/aave";
+import {
   ZKTokenIndexer,
   GovernorIndexer as ZKGovernorIndexer,
 } from "./indexer/zk";
 
 const { DAO_ID: daoId } = env;
 
-const blockTime = CONTRACT_ADDRESSES[env.DAO_ID].blockTime;
+const { token, blockTime } = CONTRACT_ADDRESSES[env.DAO_ID];
 
 switch (daoId) {
   case DaoIdEnum.ENS: {
-    const { token } = CONTRACT_ADDRESSES[daoId];
     ENSTokenIndexer(token.address, token.decimals);
     ENSGovernorIndexer(blockTime);
     break;
   }
   case DaoIdEnum.UNI: {
-    const { token } = CONTRACT_ADDRESSES[daoId];
     UNITokenIndexer(token.address, token.decimals);
     UNIGovernorIndexer(blockTime);
     break;
   }
   case DaoIdEnum.ARB: {
-    const { token } = CONTRACT_ADDRESSES[daoId];
     ARBTokenIndexer(token.address, token.decimals);
     break;
   }
   case DaoIdEnum.OP: {
-    const { token } = CONTRACT_ADDRESSES[daoId];
     OPTokenIndexer(token.address, token.decimals);
     OPGovernorIndexer(blockTime);
     break;
   }
   case DaoIdEnum.TEST: {
-    const { token } = CONTRACT_ADDRESSES[daoId];
     ENSTokenIndexer(token.address, token.decimals, daoId);
     ENSGovernorIndexer(blockTime, daoId);
     break;
   }
   case DaoIdEnum.GTC: {
-    const { token } = CONTRACT_ADDRESSES[daoId];
     GTCTokenIndexer(token.address, token.decimals);
     GTCGovernorIndexer(blockTime);
     break;
   }
   case DaoIdEnum.NOUNS: {
-    const { token } = CONTRACT_ADDRESSES[daoId];
     NounsTokenIndexer(token.address, token.decimals);
     NounsGovernorIndexer(blockTime);
     break;
   }
   case DaoIdEnum.SCR: {
-    const { token } = CONTRACT_ADDRESSES[daoId];
     SCRTokenIndexer(token.address, token.decimals);
     SCRGovernorIndexer(blockTime);
     break;
   }
   case DaoIdEnum.COMP: {
-    const { token } = CONTRACT_ADDRESSES[daoId];
     COMPTokenIndexer(token.address, token.decimals);
     COMPGovernorIndexer(blockTime);
     break;
   }
   case DaoIdEnum.OBOL: {
-    const { token } = CONTRACT_ADDRESSES[daoId];
     ObolTokenIndexer(token.address, token.decimals);
     ObolGovernorIndexer(blockTime);
     break;
   }
   case DaoIdEnum.ZK: {
-    const { token } = CONTRACT_ADDRESSES[daoId];
     ZKTokenIndexer(token.address, token.decimals);
     ZKGovernorIndexer(blockTime);
+    break;
+  }
+  case DaoIdEnum.SHU: {
+    const { token } = CONTRACT_ADDRESSES[daoId];
+    SHUTokenIndexer(token.address, token.decimals);
+    SHUGovernorIndexer(blockTime);
+    break;
+  }
+  case DaoIdEnum.AAVE: {
+    const { aave, stkAAVE, aAAVE } = CONTRACT_ADDRESSES[DaoIdEnum.AAVE];
+    AAVETokenIndexer(aave.address, aave.decimals);
+    stkAAVETokenIndexer(stkAAVE.address, stkAAVE.decimals);
+    aAAVETokenIndexer(aAAVE.address, aAAVE.decimals);
     break;
   }
   default:

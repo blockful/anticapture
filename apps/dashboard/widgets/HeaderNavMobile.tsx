@@ -34,7 +34,7 @@ export const HeaderNavMobile = () => {
     {
       page: PAGES_CONSTANTS.activityFeed.page,
       title: PAGES_CONSTANTS.activityFeed.title,
-      enabled: true,
+      enabled: daoConfig.activityFeed,
       isNew: true,
     },
     {
@@ -56,6 +56,12 @@ export const HeaderNavMobile = () => {
       page: PAGES_CONSTANTS.tokenDistribution.page,
       title: PAGES_CONSTANTS.tokenDistribution.title,
       enabled: !!daoConfig.tokenDistribution,
+    },
+    {
+      page: PAGES_CONSTANTS.serviceProviders.page,
+      title: PAGES_CONSTANTS.serviceProviders.title,
+      enabled: !!daoConfig.serviceProviders,
+      isNew: true,
     },
   ];
 

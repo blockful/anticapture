@@ -29,19 +29,25 @@ export class ProposalsService {
 
   /**
    * Prepares status array for database query.
-   * Maps ACTIVE, DEFEATED, and SUCCEEDED to PENDING (as they're determined on-chain)
-   * and removes duplicates.
+   * Maps computed statuses (ACTIVE, DEFEATED, SUCCEEDED, EXPIRED, NO_QUORUM)
+   * to their stored DB equivalents and removes duplicates.
+   *
+   * These statuses are computed at read time from PENDING/ACTIVE rows:
+   * - ACTIVE, DEFEATED, SUCCEEDED → stored as PENDING or ACTIVE in DB
+   * - EXPIRED, NO_QUORUM → stored as ACTIVE in DB (Azorius proposals)
    */
   private prepareStatusForDatabase(statusArray: string[]): string[] {
-    const mappedStatuses = statusArray.map((status) => {
+    const mappedStatuses = statusArray.flatMap((status) => {
       if (
         status === ProposalStatus.ACTIVE ||
         status === ProposalStatus.DEFEATED ||
-        status === ProposalStatus.SUCCEEDED
+        status === ProposalStatus.SUCCEEDED ||
+        status === ProposalStatus.EXPIRED ||
+        status === ProposalStatus.NO_QUORUM
       ) {
-        return ProposalStatus.PENDING;
+        return [ProposalStatus.PENDING, ProposalStatus.ACTIVE];
       }
-      return status;
+      return [status];
     });
 
     return [...new Set(mappedStatuses)]; // Remove duplicates

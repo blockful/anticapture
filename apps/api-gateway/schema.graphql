@@ -163,7 +163,7 @@ type Query {
   accountBalanceVariationsByAccountId(address: String!, fromDate: String, toDate: String): accountBalanceVariationsByAccountId_200_response
 
   """Returns sorted and paginated account balance records"""
-  accountBalances(fromDate: String, toDate: String, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalances_orderDirection = desc, orderBy: queryInput_accountBalances_orderBy = balance, addresses: JSON, delegates: JSON, fromValue: String, toValue: String): accountBalances_200_response
+  accountBalances(fromDate: String, toDate: String, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalances_orderDirection = desc, orderBy: queryInput_accountBalances_orderBy = balance, excludeDaoAddresses: Boolean, addresses: JSON, delegates: JSON, fromValue: String, toValue: String): accountBalances_200_response
 
   """Returns account balance information for a specific address"""
   accountBalanceByAccountId(address: String!, fromDate: String, toDate: String): accountBalanceByAccountId_200_response
@@ -191,6 +191,20 @@ type Query {
 
   """Returns token related metrics for a single metric type."""
   tokenMetrics(metricType: queryInput_tokenMetrics_metricType!, startDate: Float, endDate: Float, orderDirection: queryInput_tokenMetrics_orderDirection = asc, limit: NonNegativeInt = 365, skip: NonNegativeInt): tokenMetrics_200_response
+
+  """Returns a list of offchain (Snapshot) proposals"""
+  offchainProposals(skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_offchainProposals_orderDirection = desc, status: JSON, fromDate: Float): offchainProposals_200_response
+
+  """Returns a single offchain (Snapshot) proposal by its ID"""
+  offchainProposalById(id: String!): offchainProposalById_200_response
+
+  """Returns a list of offchain (Snapshot) votes"""
+  votesOffchain(skip: NonNegativeInt, limit: Float = 10, orderBy: queryInput_votesOffchain_orderBy = timestamp, orderDirection: queryInput_votesOffchain_orderDirection = desc, voterAddresses: JSON, fromDate: Float, toDate: Float): votesOffchain_200_response
+
+  """
+  Returns a paginated list of offchain (Snapshot) votes for a specific proposal
+  """
+  votesOffchainByProposalId(id: String!, skip: NonNegativeInt, limit: Float = 10, orderBy: queryInput_votesOffchainByProposalId_orderBy = timestamp, orderDirection: queryInput_votesOffchainByProposalId_orderDirection = desc, voterAddresses: JSON, fromDate: Float, toDate: Float): votesOffchainByProposalId_200_response
 
   """
   Average delegation percentage across all supported DAOs by day.
@@ -702,7 +716,8 @@ type query_proposalsActivity_proposals_items_proposal {
   id: String!
   daoId: String!
   proposerAccountId: String!
-  description: String
+  title: String!
+  description: String!
   startBlock: Float!
   endBlock: Float!
   timestamp: String
@@ -753,7 +768,7 @@ type query_proposals_items_items {
   daoId: String!
   txHash: String!
   proposerAccountId: String!
-  title: String
+  title: String!
   description: String!
   startBlock: Float!
   endBlock: Float!
@@ -786,7 +801,7 @@ type proposal_200_response {
   daoId: String!
   txHash: String!
   proposerAccountId: String!
-  title: String
+  title: String!
   description: String!
   startBlock: Float!
   endBlock: Float!
@@ -1057,6 +1072,7 @@ type query_votingPowers_items_items {
   votesCount: Float!
   proposalsCount: Float!
   delegationsCount: Float!
+  balance: String
   variation: query_votingPowers_items_items_variation!
 }
 
@@ -1075,6 +1091,8 @@ enum queryInput_votingPowers_orderBy {
   delegationsCount
   variation
   signedVariation
+  total
+  balance
 }
 
 type votingPowerByAccountId_200_response {
@@ -1083,6 +1101,7 @@ type votingPowerByAccountId_200_response {
   votesCount: Float!
   proposalsCount: Float!
   delegationsCount: Float!
+  balance: String
   variation: query_votingPowerByAccountId_variation!
 }
 
@@ -1357,6 +1376,100 @@ enum queryInput_tokenMetrics_metricType {
 }
 
 enum queryInput_tokenMetrics_orderDirection {
+  asc
+  desc
+}
+
+type offchainProposals_200_response {
+  items: [query_offchainProposals_items_items]!
+  totalCount: Float!
+}
+
+type query_offchainProposals_items_items {
+  id: String!
+  spaceId: String!
+  author: String!
+  title: String!
+  body: String!
+  discussion: String!
+  type: String!
+  start: Float!
+  end: Float!
+  state: String!
+  created: Float!
+  updated: Float!
+  link: String!
+  flagged: Boolean!
+}
+
+enum queryInput_offchainProposals_orderDirection {
+  asc
+  desc
+}
+
+type offchainProposalById_200_response {
+  id: String!
+  spaceId: String!
+  author: String!
+  title: String!
+  body: String!
+  discussion: String!
+  type: String!
+  start: Float!
+  end: Float!
+  state: String!
+  created: Float!
+  updated: Float!
+  link: String!
+  flagged: Boolean!
+}
+
+type votesOffchain_200_response {
+  items: [query_votesOffchain_items_items]!
+  totalCount: Float!
+}
+
+type query_votesOffchain_items_items {
+  voter: String!
+  proposalId: String!
+  choice: JSON
+  vp: Float
+  reason: String!
+  created: Float!
+  proposalTitle: String!
+}
+
+enum queryInput_votesOffchain_orderBy {
+  timestamp
+  votingPower
+}
+
+enum queryInput_votesOffchain_orderDirection {
+  asc
+  desc
+}
+
+type votesOffchainByProposalId_200_response {
+  items: [query_votesOffchainByProposalId_items_items]!
+  totalCount: Float!
+}
+
+type query_votesOffchainByProposalId_items_items {
+  voter: String!
+  proposalId: String!
+  choice: JSON
+  vp: Float
+  reason: String!
+  created: Float!
+  proposalTitle: String!
+}
+
+enum queryInput_votesOffchainByProposalId_orderBy {
+  timestamp
+  votingPower
+}
+
+enum queryInput_votesOffchainByProposalId_orderDirection {
   asc
   desc
 }

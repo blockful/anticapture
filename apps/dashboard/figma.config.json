@@ -1,0 +1,15 @@
+{
+  "codeConnect": {
+    "include": ["**/*.{tsx,jsx}", "shared/components/**/*.{ts,tsx}"],
+    "exclude": [
+      "shared/components/icons/**",
+      "**/*.stories.tsx",
+      "**/*.test.tsx"
+    ],
+    "paths": {
+      "@/*": ["./*"]
+    },
+    "label": "React",
+    "interactiveSetupFigmaFileUrl": "https://www.figma.com/design/DEKMQifA8YOb3oxznHboSY/%F0%9F%93%81-Orbit-UI?node-id=10748-16842&m=dev"
+  }
+}

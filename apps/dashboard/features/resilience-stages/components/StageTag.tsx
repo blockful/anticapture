@@ -44,7 +44,9 @@ export const StageTag = ({
         {showNoTag && "NO "}
         <span className="hidden lg:inline">STAGE </span>
 
-        {showStageText && <span className="inline lg:hidden">STAGE </span>}
+        {tagStage !== Stage.UNKNOWN && showStageText && (
+          <span className="inline lg:hidden">STAGE </span>
+        )}
         {tagStage === Stage.UNKNOWN ? "?" : !showNoTag && tagStage}
       </span>
     </div>

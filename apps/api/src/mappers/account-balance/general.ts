@@ -34,6 +34,12 @@ export const AccountBalancesRequestSchema = z.object({
     .enum(["balance", "variation", "signedVariation"])
     .optional()
     .default("balance"),
+  excludeDaoAddresses: z
+    .enum(["true", "false"])
+    .optional()
+    .default("false")
+    .transform((val) => val === "true")
+    .openapi({ type: "boolean" }),
   addresses: z
     .union([
       z
@@ -140,13 +146,13 @@ export type AccountBalancesWithVariationResponse = z.infer<
 
 export const AccountBalancesWithVariationResponseMapper = (
   items: DBAccountBalanceWithVariation[],
-  totalCount: bigint,
+  totalCount: number,
   startTimestamp: number | undefined,
   endTimestamp: number | undefined,
 ): AccountBalancesWithVariationResponse => {
   return {
     items: items.map((item) => AccountBalanceWithVariationMapper(item)),
-    totalCount: Number(totalCount),
+    totalCount,
     period: PeriodResponseSchema.parse({
       startTimestamp: TimestampResponseMapper(startTimestamp),
       endTimestamp: TimestampResponseMapper(endTimestamp),

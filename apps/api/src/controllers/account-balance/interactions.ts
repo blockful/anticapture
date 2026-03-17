@@ -1,17 +1,29 @@
+import { Address } from "viem";
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import {
+  AccountInteractions,
   AccountInteractionsMapper,
   AccountInteractionsParamsSchema,
   AccountInteractionsQuerySchema,
   AccountInteractionsResponseSchema,
+  Filter,
 } from "../../mappers";
-import { BalanceVariationsService } from "../../services";
 
-export function accountInteractions(
-  app: Hono,
-  service: BalanceVariationsService,
-) {
+interface InteractionsService {
+  getAccountInteractions(
+    accountId: Address,
+    fromTimestamp: number | undefined,
+    toTimestamp: number | undefined,
+    skip: number,
+    limit: number,
+    orderBy: "volume" | "count",
+    orderDirection: "asc" | "desc",
+    filter: Filter,
+  ): Promise<AccountInteractions>;
+}
+
+export function accountInteractions(app: Hono, service: InteractionsService) {
   app.openapi(
     createRoute({
       method: "get",

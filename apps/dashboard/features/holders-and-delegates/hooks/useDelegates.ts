@@ -32,6 +32,7 @@ export interface Delegate {
   accountId: string;
   proposalsActivity?: ProposalsActivity;
   variation: DelegateVariation;
+  balance?: string;
 }
 
 interface PaginationInfo {
@@ -204,9 +205,8 @@ export const useDelegates = ({
         const proposalsActivity = delegateActivities.get(delegate.accountId);
 
         return {
-          votingPower: delegate.votingPower,
-          delegationsCount: delegate.delegationsCount,
-          accountId: delegate.accountId,
+          ...delegate,
+          balance: delegate.balance ?? undefined,
           variation: delegate.variation
             ? {
                 absoluteChange: delegate.variation.absoluteChange,

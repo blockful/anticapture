@@ -3,6 +3,7 @@
 import { Crosshair2Icon } from "@radix-ui/react-icons";
 import {
   BarChart,
+  Building2,
   Landmark,
   UserCheck,
   ArrowRightLeft,
@@ -70,19 +71,21 @@ export const HeaderDAOSidebar = () => {
               <ButtonHeaderSidebar
                 page={"governance"}
                 icon={Landmark}
-                label="Governance"
-                key="Governance"
+                label="Proposals"
+                key="Proposals"
                 isCollapsed={isCollapsed}
               />
             )}
-            <ButtonHeaderSidebar
-              page={PAGES_CONSTANTS.activityFeed.page}
-              icon={Newspaper}
-              label={PAGES_CONSTANTS.activityFeed.title}
-              key={PAGES_CONSTANTS.activityFeed.title}
-              isCollapsed={isCollapsed}
-              isNew
-            />
+            {daoConfig.activityFeed && (
+              <ButtonHeaderSidebar
+                page={PAGES_CONSTANTS.activityFeed.page}
+                icon={Newspaper}
+                label={PAGES_CONSTANTS.activityFeed.title}
+                key={PAGES_CONSTANTS.activityFeed.title}
+                isCollapsed={isCollapsed}
+                isNew
+              />
+            )}
             {daoConfig.attackProfitability &&
               daoConfig.attackProfitability.supportsLiquidTreasuryCall && (
                 <ButtonHeaderSidebar
@@ -118,6 +121,16 @@ export const HeaderDAOSidebar = () => {
                 label={PAGES_CONSTANTS.tokenDistribution.title}
                 key={PAGES_CONSTANTS.tokenDistribution.title}
                 isCollapsed={isCollapsed}
+              />
+            )}
+            {daoConfig.serviceProviders && (
+              <ButtonHeaderSidebar
+                page={PAGES_CONSTANTS.serviceProviders.page}
+                icon={Building2}
+                label={PAGES_CONSTANTS.serviceProviders.title}
+                key={PAGES_CONSTANTS.serviceProviders.title}
+                isCollapsed={isCollapsed}
+                isNew
               />
             )}
           </div>
