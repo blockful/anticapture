@@ -75,6 +75,14 @@ export class AAVEClient<
     return 0n;
   }
 
+  async getVotingDelay(): Promise<bigint> {
+    return 0n;
+  }
+
+  async getVotingPeriod(): Promise<bigint> {
+    return 0n;
+  }
+
   calculateQuorum(votes: {
     forVotes: bigint;
     againstVotes: bigint;
