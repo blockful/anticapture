@@ -1,5 +1,5 @@
 {
-  "name": "@anticapture/rest-gateway",
+  "name": "@anticapture/gateful",
   "version": "1.0.0",
   "description": "REST API Gateway for Anticapture DAO APIs",
   "main": "dist/src/index.js",
