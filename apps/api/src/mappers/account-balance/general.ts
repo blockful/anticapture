@@ -34,6 +34,12 @@ export const AccountBalancesRequestSchema = z.object({
     .enum(["balance", "variation", "signedVariation"])
     .optional()
     .default("balance"),
+  excludeDaoAddresses: z
+    .enum(["true", "false"])
+    .optional()
+    .default("false")
+    .transform((val) => val === "true")
+    .openapi({ type: "boolean" }),
   addresses: z
     .union([
       z

@@ -61,7 +61,7 @@ export const DaoOverviewHeader = ({
             iconVariant="secondary"
             className="bg-surface-opacity text-primary h-5 rounded-full text-xs"
           >
-            1 {daoId} = ${lastPrice.toFixed(daoId === DaoIdEnum.SHU ? 3 : 2)}
+            1 {daoId} = ${lastPrice.toFixed(daoId === DaoIdEnum.SHU ? 4 : 2)}
             {daoOverview.priceDisclaimer && (
               <TooltipInfo text={daoOverview.priceDisclaimer} />
             )}

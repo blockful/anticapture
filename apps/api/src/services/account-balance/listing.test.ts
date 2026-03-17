@@ -1,6 +1,7 @@
 import { Address } from "viem";
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
+import { TreasuryAddresses } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 import { DBAccountBalanceWithVariation } from "@/mappers";
 
@@ -57,6 +58,7 @@ describe("AccountBalanceService", () => {
         [],
         [],
         { minAmount: undefined, maxAmount: undefined },
+        false,
       );
 
       expect(result.items).toHaveLength(1);
@@ -64,7 +66,7 @@ describe("AccountBalanceService", () => {
       expect(result.items[0]?.accountId).toBe(MOCK_ADDRESS);
     });
 
-    it("should not exclude any addresses", async () => {
+    it("should not exclude any addresses when excludeDaoAddresses is false", async () => {
       mockRepo.getAccountBalancesWithVariation.mockResolvedValue({
         items: [],
         totalCount: 0n,
@@ -81,12 +83,95 @@ describe("AccountBalanceService", () => {
         [],
         [],
         { minAmount: undefined, maxAmount: undefined },
+        false,
       );
 
       const [, , , , , , , , excludeAddresses] =
         mockRepo.getAccountBalancesWithVariation.mock.calls[0]!;
 
       expect(excludeAddresses).toEqual([]);
+    });
+
+    it("should exclude DAO treasury addresses when excludeDaoAddresses is true", async () => {
+      mockRepo.getAccountBalancesWithVariation.mockResolvedValue({
+        items: [],
+        totalCount: 0n,
+      });
+
+      await service.getAccountBalances(
+        DaoIdEnum.UNI,
+        0,
+        1700000000,
+        0,
+        20,
+        "desc",
+        "balance",
+        [],
+        [],
+        { minAmount: undefined, maxAmount: undefined },
+        true,
+      );
+
+      const [, , , , , , , , excludeAddresses] =
+        mockRepo.getAccountBalancesWithVariation.mock.calls[0]!;
+
+      expect(excludeAddresses).toEqual(
+        Object.values(TreasuryAddresses[DaoIdEnum.UNI]),
+      );
+    });
+
+    it("should pass empty exclude list for DAO with no treasury addresses", async () => {
+      mockRepo.getAccountBalancesWithVariation.mockResolvedValue({
+        items: [],
+        totalCount: 0n,
+      });
+
+      await service.getAccountBalances(
+        DaoIdEnum.ARB,
+        0,
+        1700000000,
+        0,
+        20,
+        "desc",
+        "balance",
+        [],
+        [],
+        { minAmount: undefined, maxAmount: undefined },
+        true,
+      );
+
+      const [, , , , , , , , excludeAddresses] =
+        mockRepo.getAccountBalancesWithVariation.mock.calls[0]!;
+
+      expect(excludeAddresses).toEqual([]);
+    });
+
+    it("should exclude correct addresses for SHU DAO", async () => {
+      mockRepo.getAccountBalancesWithVariation.mockResolvedValue({
+        items: [],
+        totalCount: 0n,
+      });
+
+      await service.getAccountBalances(
+        DaoIdEnum.SHU,
+        0,
+        1700000000,
+        0,
+        20,
+        "desc",
+        "balance",
+        [],
+        [],
+        { minAmount: undefined, maxAmount: undefined },
+        true,
+      );
+
+      const [, , , , , , , , excludeAddresses] =
+        mockRepo.getAccountBalancesWithVariation.mock.calls[0]!;
+
+      expect(excludeAddresses).toEqual(
+        Object.values(TreasuryAddresses[DaoIdEnum.SHU]),
+      );
     });
 
     it("should pass through filters to repository", async () => {
@@ -111,6 +196,7 @@ describe("AccountBalanceService", () => {
         [MOCK_ADDRESS],
         [MOCK_DELEGATE],
         amountFilter,
+        false,
       );
 
       expect(mockRepo.getAccountBalancesWithVariation).toHaveBeenCalledWith(
@@ -144,6 +230,7 @@ describe("AccountBalanceService", () => {
         [],
         [],
         { minAmount: undefined, maxAmount: undefined },
+        false,
       );
 
       expect(result.items).toHaveLength(0);

@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import { IconButton } from "@/shared/components/design-system/buttons/icon-button/IconButton";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { BulletDivider } from "@/shared/components/design-system/section/BulletDivider";
-import { cn } from "@/shared/utils";
+import { cn } from "@/shared/utils/cn";
 
 type BannerLink = {
   url: string;
@@ -26,8 +26,8 @@ interface BannerAlertProps {
 }
 
 const mapVariantToColor = {
-  default: "bg-[#2C1810]",
-  highlight: "bg-[#18181B] ",
+  default: "bg-surface-banner-default",
+  highlight: "bg-surface-banner-highlight",
 };
 
 export const BannerAlert = ({
