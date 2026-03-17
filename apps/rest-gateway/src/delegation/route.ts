@@ -7,9 +7,11 @@ const QuerySchema = z
   .object({
     startDate: z
       .string()
+      .regex(/^\d+$/)
       .openapi({ description: "Start date (Unix timestamp)" }),
     endDate: z
       .string()
+      .regex(/^\d+$/)
       .optional()
       .openapi({ description: "End date (Unix timestamp)" }),
     after: z.string().optional(),
