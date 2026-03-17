@@ -1,4 +1,4 @@
-import {
+import type {
   QuarterKey,
   ServiceProvider,
 } from "@/features/service-providers/types";

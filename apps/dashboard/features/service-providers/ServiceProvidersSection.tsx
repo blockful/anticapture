@@ -1,36 +1,40 @@
 "use client";
 
 import { Building2, Pencil } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { ServiceProvidersTable } from "@/features/service-providers/components/ServiceProvidersTable";
-import { ServiceProvider } from "@/features/service-providers/types";
+import { useServiceProvidersData } from "@/features/service-providers/hooks/useServiceProvidersData";
 import { TheSectionLayout } from "@/shared/components/containers/TheSectionLayout";
 import { InlineAlert } from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { SubSectionsContainer } from "@/shared/components/design-system/section";
+import { PillTabGroup } from "@/shared/components/design-system/tabs/pill-tab-group/PillTabGroup";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
-import { cn } from "@/shared/utils";
 
 const UPDATE_STATUS_URL =
   "https://github.com/blockful/spp-accountability/pulls";
 
-interface ServiceProvidersSectionProps {
-  providers: ServiceProvider[];
-}
+export const ServiceProvidersSection = () => {
+  const { data: providers = [], isLoading } = useServiceProvidersData();
 
-export const ServiceProvidersSection = ({
-  providers,
-}: ServiceProvidersSectionProps) => {
   const availableYears = [
     ...new Set(providers.flatMap((p) => Object.keys(p.years).map(Number))),
   ].sort((a, b) => b - a);
 
   const currentYear = new Date().getFullYear();
-  const defaultYear = availableYears.includes(currentYear)
-    ? currentYear
-    : availableYears[0];
-  const [selectedYear, setSelectedYear] = useState(defaultYear);
+  const [selectedYear, setSelectedYear] = useState<number | undefined>(
+    undefined,
+  );
+
+  useEffect(() => {
+    if (selectedYear === undefined && availableYears.length > 0) {
+      const year = availableYears.includes(currentYear)
+        ? currentYear
+        : availableYears[0];
+      setSelectedYear(year);
+    }
+  }, [availableYears, currentYear, selectedYear]);
 
   return (
     <TheSectionLayout
@@ -52,24 +56,20 @@ export const ServiceProvidersSection = ({
       />
       <SubSectionsContainer>
         <div className="flex flex-col gap-4">
-          <div className="flex gap-2">
-            {availableYears.map((year) => (
-              <button
-                key={year}
-                onClick={() => setSelectedYear(year)}
-                className={cn(
-                  "cursor-pointer border px-3 py-2 font-mono text-[13px] font-medium uppercase leading-5 tracking-[0.78px] transition-all duration-300",
-                  selectedYear === year
-                    ? "border-orange-400 bg-transparent text-orange-400"
-                    : "border-[#3F3F46] bg-transparent text-[#A1A1AA] hover:bg-[#27272A]",
-                )}
-              >
-                {year}
-              </button>
-            ))}
-          </div>
+          <PillTabGroup
+            tabs={availableYears.map((year) => ({
+              label: String(year),
+              value: String(year),
+            }))}
+            activeTab={String(selectedYear)}
+            onTabChange={(value) => setSelectedYear(Number(value))}
+          />
 
-          <ServiceProvidersTable providers={providers} year={selectedYear} />
+          <ServiceProvidersTable
+            providers={providers}
+            year={selectedYear ?? currentYear}
+            isLoading={isLoading}
+          />
         </div>
       </SubSectionsContainer>
     </TheSectionLayout>

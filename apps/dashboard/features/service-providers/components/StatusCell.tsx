@@ -6,7 +6,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 
-import { ReportStatus } from "@/features/service-providers/types";
+import type { ReportStatus } from "@/features/service-providers/types";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { cn } from "@/shared/utils";
 

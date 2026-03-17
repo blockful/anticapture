@@ -1,4 +1,4 @@
-import { QuarterKey } from "@/features/service-providers/types";
+import type { QuarterKey } from "@/features/service-providers/types";
 
 export function getCurrentQuarter(): QuarterKey {
   const month = new Date().getMonth() + 1;
