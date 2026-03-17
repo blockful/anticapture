@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-import { BadgeIcon } from "@/shared/components/design-system/badges/BadgeIcon";
+import { BadgeIcon } from "@/shared/components/design-system/badges";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { cn } from "@/shared/utils/cn";
 

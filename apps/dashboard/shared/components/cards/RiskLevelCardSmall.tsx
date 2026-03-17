@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import type { ReactNode } from "react";
 
-import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
+import { BadgeStatus } from "@/shared/components/design-system/badges";
 import { RiskLevel } from "@/shared/types/enums/RiskLevel";
 import { cn } from "@/shared/utils/";
 

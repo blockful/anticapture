@@ -1,10 +1,22 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import type { ElementType, ReactNode } from "react";
+import type { ElementType } from "react";
 
-import { cn } from "@/shared/utils";
+import { cn } from "@/shared/utils/cn";
 
-const badgeStatusVariants = cva(
-  "rounded-full h-5 gap-1.5 px-1.5 flex items-center text-xs font-medium whitespace-nowrap",
+import type { BadgeSize } from "@/shared/components/design-system/badges/types";
+
+const sizeStyles: Record<BadgeSize, string> = {
+  default: "size-6",
+  lg: "size-10",
+};
+
+const iconSizeStyles: Record<BadgeSize, string> = {
+  default: "size-3",
+  lg: "size-4",
+};
+
+const badgeIconVariants = cva(
+  "rounded-full h-5 gap-1.5 px-1.5 flex items-center text-xs font-medium",
   {
     variants: {
       variant: {
@@ -41,25 +53,25 @@ const iconVariants = cva("size-3", {
   },
 });
 
-type BadgeStatusProps = VariantProps<typeof badgeStatusVariants> & {
-  children?: ReactNode;
+export type BadgeIconProps = VariantProps<typeof badgeIconVariants> & {
+  icon: ElementType;
   className?: string;
-  icon?: ElementType;
+  size?: BadgeSize;
   iconVariant?: VariantProps<typeof iconVariants>["variant"];
   iconClassName?: string;
   isLoading?: boolean;
 };
 
-export const BadgeStatus = ({
-  children,
+export const BadgeIcon = ({
   variant,
   className,
   icon: Icon,
   iconVariant,
   iconClassName,
+  size = "default",
   isLoading = false,
   ...props
-}: BadgeStatusProps) => {
+}: BadgeIconProps) => {
   if (isLoading) {
     return (
       <div
@@ -73,15 +85,20 @@ export const BadgeStatus = ({
 
   return (
     <span
-      className={cn(badgeStatusVariants({ variant }), className)}
+      className={cn(
+        badgeIconVariants({ variant }),
+        sizeStyles[size],
+        className,
+      )}
       {...props}
     >
-      {Icon && (
-        <Icon
-          className={cn(iconVariants({ variant: iconVariant }), iconClassName)}
-        />
-      )}
-      {children}
+      <Icon
+        className={cn(
+          iconVariants({ variant: iconVariant }),
+          iconSizeStyles[size],
+          iconClassName,
+        )}
+      />
     </span>
   );
 };

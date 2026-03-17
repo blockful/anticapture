@@ -1,9 +1,9 @@
 "use client";
 
-import { DrawerCloseButton } from "@/shared/components/design-system/drawer/components/DrawerCloseButton";
-import { DrawerSubtitle } from "@/shared/components/design-system/drawer/components/DrawerSubtitle";
-import { DrawerTabs } from "@/shared/components/design-system/drawer/components/DrawerTabs";
-import { DrawerTitle } from "@/shared/components/design-system/drawer/components/DrawerTitle";
+import { DrawerCloseButton } from "@/shared/components/design-system/drawer/drawer-header/DrawerCloseButton";
+import { DrawerSubtitle } from "@/shared/components/design-system/drawer/drawer-header/DrawerSubtitle";
+import { DrawerTabs } from "@/shared/components/design-system/drawer/drawer-header/DrawerTabs";
+import { DrawerTitle } from "@/shared/components/design-system/drawer/drawer-header/DrawerTitle";
 import type { DrawerHeaderProps } from "@/shared/components/design-system/drawer/types";
 
 export const DrawerHeader = ({

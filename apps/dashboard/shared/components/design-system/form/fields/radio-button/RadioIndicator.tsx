@@ -2,7 +2,7 @@ import { cva } from "class-variance-authority";
 import type { InputHTMLAttributes } from "react";
 import { forwardRef } from "react";
 
-import { cn } from "@/shared/utils";
+import { cn } from "@/shared/utils/cn";
 
 const radioIndicatorVariants = cva(
   "size-4 rounded-full border-2 transition-all duration-200 relative bg-transparent shrink-0",

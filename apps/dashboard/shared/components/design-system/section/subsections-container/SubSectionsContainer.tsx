@@ -1,13 +1,8 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { cn } from "@/shared/utils/cn";
 
-import { cn } from "@/shared/utils";
-
-type SubSectionsContainerProps = {
-  children: ReactNode;
-  className?: string;
-};
+import type { SubSectionsContainerProps } from "@/shared/components/design-system/section/types";
 
 export const SubSectionsContainer = ({
   children,

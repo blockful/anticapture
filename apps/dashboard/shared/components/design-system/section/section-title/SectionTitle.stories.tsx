@@ -10,7 +10,7 @@ import {
   Settings,
 } from "lucide-react";
 
-import { SectionTitle } from "@/shared/components/design-system/section/SectionTitle";
+import { SectionTitle } from "@/shared/components/design-system/section";
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta = {

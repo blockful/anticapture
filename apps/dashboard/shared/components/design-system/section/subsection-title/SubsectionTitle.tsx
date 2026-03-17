@@ -1,15 +1,8 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { cn } from "@/shared/utils/cn";
 
-import { cn } from "@/shared/utils";
-
-type SubsectionTitleProps = {
-  subsectionTitle: string | ReactNode;
-  subsectionDescription: string;
-  dateRange: string;
-  switcherComponent: ReactNode;
-};
+import type { SubsectionTitleProps } from "@/shared/components/design-system/section/types";
 
 export const SubsectionTitle = ({
   subsectionTitle,

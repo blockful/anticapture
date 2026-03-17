@@ -2,7 +2,7 @@
 
 import { X } from "lucide-react";
 
-import { IconButton } from "@/shared/components";
+import { IconButton } from "@/shared/components/design-system/buttons/icon-button/IconButton";
 import type { DrawerCloseButtonProps } from "@/shared/components/design-system/drawer/types";
 
 export const DrawerCloseButton = ({ onClick }: DrawerCloseButtonProps) => {

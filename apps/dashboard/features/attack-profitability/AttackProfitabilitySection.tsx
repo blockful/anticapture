@@ -11,7 +11,7 @@ import {
 } from "@/features/attack-profitability/components";
 import { useLastUpdateLabel } from "@/features/attack-profitability/hooks/useLastUpdateLabel";
 import { TheCardChartLayout, SwitcherDate } from "@/shared/components";
-import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
+import { BadgeStatus } from "@/shared/components/design-system/badges";
 import type { Option } from "@/shared/components/dropdowns/Dropdown";
 import { Dropdown } from "@/shared/components/dropdowns/Dropdown";
 import type { AttackProfitabilityConfig } from "@/shared/dao-config/types";

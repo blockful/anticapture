@@ -8,7 +8,7 @@ import type { Address } from "viem";
 import type { Proposal } from "@/features/governance/types";
 import { ProposalStatus } from "@/features/governance/types";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { BulletDivider } from "@/shared/components/design-system/section/BulletDivider";
+import { BulletDivider } from "@/shared/components/design-system/section";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 

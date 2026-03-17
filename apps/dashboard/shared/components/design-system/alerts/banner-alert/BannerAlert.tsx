@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 
 import { IconButton } from "@/shared/components/design-system/buttons/icon-button/IconButton";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
-import { BulletDivider } from "@/shared/components/design-system/section/BulletDivider";
+import { BulletDivider } from "@/shared/components/design-system/section";
 import { cn } from "@/shared/utils/cn";
 
 import type { BannerAlertProps } from "@/shared/components/design-system/alerts/types";

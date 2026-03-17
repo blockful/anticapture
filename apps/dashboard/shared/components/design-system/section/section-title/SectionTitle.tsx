@@ -1,11 +1,4 @@
-import type { ReactNode } from "react";
-
-type SectionTitleProps = {
-  icon: ReactNode;
-  title: string;
-  riskLevel?: ReactNode;
-  description: string;
-};
+import type { SectionTitleProps } from "@/shared/components/design-system/section/types";
 
 export const SectionTitle = ({
   icon,

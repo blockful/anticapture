@@ -5,8 +5,8 @@ import { forwardRef } from "react";
 import {
   RadioIndicator,
   getRadioState,
-} from "@/shared/components/design-system/buttons/RadioIndicator";
-import { cn } from "@/shared/utils";
+} from "@/shared/components/design-system/form/fields/radio-button/RadioIndicator";
+import { cn } from "@/shared/utils/cn";
 
 const radioButtonVariants = cva(
   "relative flex items-center gap-2 cursor-pointer",
@@ -37,7 +37,10 @@ const radioLabelVariants = cva("text-sm transition-colors duration-200", {
   },
 });
 
-type RadioButtonProps = Omit<InputHTMLAttributes<HTMLInputElement>, "type"> &
+export type RadioButtonProps = Omit<
+  InputHTMLAttributes<HTMLInputElement>,
+  "type"
+> &
   VariantProps<typeof radioButtonVariants> & {
     label: string;
     className?: string;

@@ -1,22 +1,10 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import type { ElementType } from "react";
+import type { ElementType, ReactNode } from "react";
 
-import { cn } from "@/shared/utils";
+import { cn } from "@/shared/utils/cn";
 
-export type BadgeSize = "default" | "lg";
-
-const sizeStyles: Record<BadgeSize, string> = {
-  default: "size-6",
-  lg: "size-10",
-};
-
-const iconSizeStyles: Record<BadgeSize, string> = {
-  default: "size-3",
-  lg: "size-4",
-};
-
-const badgeIconVariants = cva(
-  "rounded-full h-5 gap-1.5 px-1.5 flex items-center text-xs font-medium",
+const badgeStatusVariants = cva(
+  "rounded-full h-5 gap-1.5 px-1.5 flex items-center text-xs font-medium whitespace-nowrap",
   {
     variants: {
       variant: {
@@ -53,30 +41,30 @@ const iconVariants = cva("size-3", {
   },
 });
 
-type BadgeIconProps = VariantProps<typeof badgeIconVariants> & {
-  icon: ElementType;
+export type BadgeStatusProps = VariantProps<typeof badgeStatusVariants> & {
+  children?: ReactNode;
   className?: string;
-  size?: BadgeSize;
+  icon?: ElementType;
   iconVariant?: VariantProps<typeof iconVariants>["variant"];
   iconClassName?: string;
   isLoading?: boolean;
 };
 
-export const BadgeIcon = ({
+export const BadgeStatus = ({
+  children,
   variant,
   className,
   icon: Icon,
   iconVariant,
   iconClassName,
-  size = "default",
   isLoading = false,
   ...props
-}: BadgeIconProps) => {
+}: BadgeStatusProps) => {
   if (isLoading) {
     return (
       <div
         className={cn(
-          "bg-surface-hover size- size- h-5 w-28 animate-pulse rounded-full",
+          "bg-surface-hover h-5 w-28 animate-pulse rounded-full",
           className,
         )}
       />
@@ -85,20 +73,15 @@ export const BadgeIcon = ({
 
   return (
     <span
-      className={cn(
-        badgeIconVariants({ variant }),
-        sizeStyles[size],
-        className,
-      )}
+      className={cn(badgeStatusVariants({ variant }), className)}
       {...props}
     >
-      <Icon
-        className={cn(
-          iconVariants({ variant: iconVariant }),
-          iconSizeStyles[size],
-          iconClassName,
-        )}
-      />
+      {Icon && (
+        <Icon
+          className={cn(iconVariants({ variant: iconVariant }), iconClassName)}
+        />
+      )}
+      {children}
     </span>
   );
 };
