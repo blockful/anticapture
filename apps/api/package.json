@@ -15,8 +15,7 @@
     "build:watch": "tsc --watch",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
-    "dev": "tsx watch cmd/index.ts",
-    "dev:aave": "tsx watch cmd/aave.ts"
+    "dev": "sh -c 'DAO_ID=${1:?\"DAO_ID is required\"}; LOW=$(echo $1 | tr A-Z a-z); FILE=cmd/${LOW}.ts; [ ! -f \"$FILE\" ] && FILE=cmd/index.ts; railway run -e dev -s $1-api tsx watch $FILE' --"
   },
   "keywords": [],
   "author": "",
