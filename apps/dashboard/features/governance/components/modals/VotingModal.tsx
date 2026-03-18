@@ -271,6 +271,7 @@ export const VotingModal = ({
               !vote ||
               !walletClient ||
               isLoading ||
+              !rawVotingPower ||
               rawVotingPower === "0"
             }
             loading={isLoading}
