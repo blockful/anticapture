@@ -1,13 +1,14 @@
 import { Context } from "ponder:registry";
-import { Address, getAddress, Hex, zeroAddress } from "viem";
 import {
   accountBalance,
   balanceHistory,
   feedEvent,
   transfer,
 } from "ponder:schema";
+import { Address, getAddress, Hex, zeroAddress } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
+
 import { ensureAccountExists } from "./shared";
 
 /**

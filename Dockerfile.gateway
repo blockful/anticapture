@@ -14,6 +14,7 @@ COPY --from=builder /app/out/json/ .
 RUN pnpm install
 COPY --from=builder /app/out/full/ .
 COPY turbo.json turbo.json
+RUN pnpm --filter @anticapture/observability build
 RUN pnpm run gateway build
 
 FROM base AS runner
