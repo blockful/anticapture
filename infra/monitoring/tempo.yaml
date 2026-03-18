@@ -21,6 +21,9 @@ metrics_generator:
       source: tempo
   storage:
     path: /var/tempo/generator/wal
+  remote_write:
+    - url: ${PROMETHEUS_REMOTE_WRITE_URL}
+      send_exemplars: true
   processor:
     service_graphs:
       enable_virtual_node_label: true
