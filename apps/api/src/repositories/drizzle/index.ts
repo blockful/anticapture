@@ -156,9 +156,9 @@ export class DrizzleRepository {
         orderDirection === "asc"
           ? asc(proposalsOnchain.timestamp)
           : desc(proposalsOnchain.timestamp),
-        orderDirection === "asc"
-          ? asc(proposalsOnchain.logIndex)
-          : desc(proposalsOnchain.logIndex),
+        // orderDirection === "asc"
+        //   ? asc(proposalsOnchain.logIndex)
+        //   : desc(proposalsOnchain.logIndex), // TODO: enable it when all daos are indexed
       )
       .limit(limit)
       .offset(skip);
