@@ -14,6 +14,10 @@
       "outputs": ["storybook-static/**"],
       "env": ["FIGMA_TOKEN", "VALIDATE_FIGMA_TOKEN_API"]
     },
+    "start": {
+      "dependsOn": ["^build"],
+      "persistent": true
+    },
     "clean": {},
     "lint": {
       "inputs": [
