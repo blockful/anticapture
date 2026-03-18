@@ -15,8 +15,7 @@ export type BannerLink = {
 export type BannerAlertProps = {
   icon: ReactNode;
   text: string;
-  link?: BannerLink;
-  links?: BannerLink[];
+  links?: BannerLink | BannerLink[];
   storageKey: string;
   variant?: "default" | "highlight";
   persist?: boolean;

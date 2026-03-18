@@ -15,7 +15,7 @@ const meta: Meta<typeof BannerAlert> = {
   argTypes: {
     icon: { control: false },
     text: { control: "text", description: "Banner message text" },
-    link: { control: "object", description: "Optional link" },
+    links: { control: "object", description: "Optional link or links" },
     storageKey: {
       control: "text",
       description: "localStorage key to persist dismissed state",
@@ -66,7 +66,7 @@ export const AllStates: Story = {
         <BannerAlert
           icon={<Info className="size-4" />}
           text="Check out the latest protocol updates."
-          link={{ url: "https://example.com", text: "Learn more" }}
+          links={{ url: "https://example.com", text: "Learn more" }}
           storageKey="sb-states-default-link"
           variant="default"
         />
@@ -76,7 +76,7 @@ export const AllStates: Story = {
         <BannerAlert
           icon={<AlertTriangle className="size-4" />}
           text="Important security update available."
-          link={{ url: "https://example.com/security", text: "Update now" }}
+          links={{ url: "https://example.com/security", text: "Update now" }}
           storageKey="sb-states-highlight-link"
           variant="highlight"
         />

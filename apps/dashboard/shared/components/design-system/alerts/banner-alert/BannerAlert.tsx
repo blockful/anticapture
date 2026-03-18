@@ -18,7 +18,6 @@ const mapVariantToColor = {
 export const BannerAlert = ({
   icon,
   text,
-  link,
   links,
   storageKey,
   variant = "default",
@@ -49,7 +48,7 @@ export const BannerAlert = ({
   // Don't render anything until we've checked localStorage
   if (isVisible === null || isVisible === false) return null;
 
-  const allLinks = links ?? (link ? [link] : []);
+  const allLinks = links ? (Array.isArray(links) ? links : [links]) : [];
 
   return (
     <div
