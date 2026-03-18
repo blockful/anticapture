@@ -42,5 +42,5 @@ export const AAVE: DaoConfiguration = {
   //    getTimelockDelay(), and V3-specific getProposalStatus() override
   // 3. Dashboard: Add governor/timelock contract addresses, rules, and vote handler
   // 4. AAVE V3 uses per-access-level voting configs, not global quorum/delay
-  // See: https://github.com/blockful/anticapture/pull/XXXX for details
+  // See: https://github.com/blockful/anticapture/pull/1741 for details
 };
