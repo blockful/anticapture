@@ -4,7 +4,12 @@ import { drizzle } from "drizzle-orm/pglite";
 import { Address } from "viem";
 
 import * as schema from "@/database/schema";
-import { accountPower, votingPowerHistory } from "@/database/schema";
+import {
+  accountPower,
+  votingPowerHistory,
+  delegation,
+  transfer,
+} from "@/database/schema";
 import { AmountFilter } from "@/mappers";
 import { PERCENTAGE_NO_BASELINE } from "@/mappers/constants";
 
@@ -12,6 +17,8 @@ import { VotingPowerRepository } from ".";
 
 type AccountPowerInsert = typeof accountPower.$inferInsert;
 type VotingPowerHistoryInsert = typeof votingPowerHistory.$inferInsert;
+type DelegationInsert = typeof delegation.$inferInsert;
+type TransferInsert = typeof transfer.$inferInsert;
 
 const NO_FILTER: AmountFilter = { minAmount: undefined, maxAmount: undefined };
 
@@ -43,6 +50,35 @@ const createHistoryRow = (
   deltaMod: 200n,
   timestamp: 1700000000n,
   logIndex: 0,
+  ...overrides,
+});
+
+let vpTxCounter = 0;
+
+const createDelegationRow = (
+  overrides: Partial<DelegationInsert> = {},
+): DelegationInsert => ({
+  transactionHash: `0x${(vpTxCounter++).toString(16).padStart(64, "0")}`,
+  daoId: TEST_DAO,
+  delegateAccountId: TEST_ACCOUNT_1,
+  delegatorAccountId: TEST_ACCOUNT_2,
+  delegatedValue: 0n,
+  timestamp: 1700000000n,
+  logIndex: 5,
+  ...overrides,
+});
+
+const createTransferRow = (
+  overrides: Partial<TransferInsert> = {},
+): TransferInsert => ({
+  transactionHash: `0x${vpTxCounter.toString(16).padStart(64, "0")}`,
+  daoId: TEST_DAO,
+  tokenId: "token-1",
+  amount: 100n,
+  fromAccountId: TEST_ACCOUNT_2,
+  toAccountId: TEST_ACCOUNT_1,
+  timestamp: 1700000000n,
+  logIndex: 5,
   ...overrides,
 });
 
@@ -543,5 +579,614 @@ describe("VotingPowerRepository - getVotingPowersByAccountId", () => {
     const result = await repository.getVotingPowersByAccountId(TEST_ACCOUNT_1);
 
     expect(result.absoluteChange).toBe(100n);
+  });
+});
+
+describe("VotingPowerRepository - getHistoricalVotingPowerCount", () => {
+  let client: PGlite;
+  let db: ReturnType<typeof drizzle<typeof schema>>;
+  let repository: VotingPowerRepository;
+
+  beforeAll(async () => {
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    (BigInt.prototype as any).toJSON = function () {
+      return this.toString();
+    };
+
+    client = new PGlite();
+    db = drizzle(client, { schema });
+    repository = new VotingPowerRepository(db);
+
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    const { apply } = await pushSchema(schema, db as any);
+    await apply();
+  });
+
+  afterAll(async () => {
+    await client.close();
+  });
+
+  beforeEach(async () => {
+    await db.delete(votingPowerHistory);
+    await db.delete(accountPower);
+    await db.delete(delegation);
+    await db.delete(transfer);
+    vpTxCounter = 0;
+  });
+
+  it("should return count of all history entries", async () => {
+    await db
+      .insert(votingPowerHistory)
+      .values([
+        createHistoryRow({ logIndex: 0 }),
+        createHistoryRow({ logIndex: 1, transactionHash: "0xtx2" }),
+      ]);
+
+    const count = await repository.getHistoricalVotingPowerCount();
+
+    expect(count).toBe(2);
+  });
+
+  it("should filter by accountId", async () => {
+    await db.insert(votingPowerHistory).values([
+      createHistoryRow({ accountId: TEST_ACCOUNT_1, logIndex: 0 }),
+      createHistoryRow({
+        accountId: TEST_ACCOUNT_2,
+        logIndex: 1,
+        transactionHash: "0xtx2",
+      }),
+    ]);
+
+    const count =
+      await repository.getHistoricalVotingPowerCount(TEST_ACCOUNT_1);
+
+    expect(count).toBe(1);
+  });
+
+  it("should filter by delta range", async () => {
+    await db.insert(votingPowerHistory).values([
+      createHistoryRow({ deltaMod: 100n, logIndex: 0 }),
+      createHistoryRow({
+        deltaMod: 500n,
+        logIndex: 1,
+        transactionHash: "0xtx2",
+      }),
+      createHistoryRow({
+        deltaMod: 1000n,
+        logIndex: 2,
+        transactionHash: "0xtx3",
+      }),
+    ]);
+
+    const count = await repository.getHistoricalVotingPowerCount(
+      undefined,
+      "200",
+      "800",
+    );
+
+    expect(count).toBe(1);
+  });
+
+  it("should filter by date range", async () => {
+    await db.insert(votingPowerHistory).values([
+      createHistoryRow({ timestamp: 1000n, logIndex: 0 }),
+      createHistoryRow({
+        timestamp: 3000n,
+        logIndex: 1,
+        transactionHash: "0xtx2",
+      }),
+    ]);
+
+    const count = await repository.getHistoricalVotingPowerCount(
+      undefined,
+      undefined,
+      undefined,
+      2000,
+      4000,
+    );
+
+    expect(count).toBe(1);
+  });
+
+  it("should return 0 when no data exists", async () => {
+    const count = await repository.getHistoricalVotingPowerCount();
+
+    expect(count).toBe(0);
+  });
+});
+
+describe("VotingPowerRepository - getHistoricalVotingPowers", () => {
+  let client: PGlite;
+  let db: ReturnType<typeof drizzle<typeof schema>>;
+  let repository: VotingPowerRepository;
+
+  beforeAll(async () => {
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    (BigInt.prototype as any).toJSON = function () {
+      return this.toString();
+    };
+
+    client = new PGlite();
+    db = drizzle(client, { schema });
+    repository = new VotingPowerRepository(db);
+
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    const { apply } = await pushSchema(schema, db as any);
+    await apply();
+  });
+
+  afterAll(async () => {
+    await client.close();
+  });
+
+  beforeEach(async () => {
+    await db.delete(votingPowerHistory);
+    await db.delete(accountPower);
+    await db.delete(delegation);
+    await db.delete(transfer);
+    vpTxCounter = 0;
+  });
+
+  it("should return history with LEFT JOIN delegation", async () => {
+    const txHash = "0xtx-hist-1";
+    await db
+      .insert(votingPowerHistory)
+      .values(createHistoryRow({ transactionHash: txHash, logIndex: 10 }));
+    await db
+      .insert(delegation)
+      .values(createDelegationRow({ transactionHash: txHash, logIndex: 5 }));
+
+    const result = await repository.getHistoricalVotingPowers(
+      0,
+      10,
+      "desc",
+      "timestamp",
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0]!.delegations).toBeDefined();
+    expect(result[0]!.delegations!.logIndex).toBe(5);
+  });
+
+  it("should return history with LEFT JOIN transfer", async () => {
+    const txHash = "0xtx-hist-2";
+    await db
+      .insert(votingPowerHistory)
+      .values(createHistoryRow({ transactionHash: txHash, logIndex: 10 }));
+    await db
+      .insert(transfer)
+      .values(createTransferRow({ transactionHash: txHash, logIndex: 5 }));
+
+    const result = await repository.getHistoricalVotingPowers(
+      0,
+      10,
+      "desc",
+      "timestamp",
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0]!.transfers).toBeDefined();
+    expect(result[0]!.transfers!.logIndex).toBe(5);
+  });
+
+  it("should return null when no related delegation or transfer exist", async () => {
+    await db
+      .insert(votingPowerHistory)
+      .values(createHistoryRow({ logIndex: 10 }));
+
+    const result = await repository.getHistoricalVotingPowers(
+      0,
+      10,
+      "desc",
+      "timestamp",
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0]!.delegations).toBeNull();
+    expect(result[0]!.transfers).toBeNull();
+  });
+
+  it("should filter by accountId", async () => {
+    await db.insert(votingPowerHistory).values([
+      createHistoryRow({ accountId: TEST_ACCOUNT_1, logIndex: 0 }),
+      createHistoryRow({
+        accountId: TEST_ACCOUNT_2,
+        logIndex: 1,
+        transactionHash: "0xtx2",
+      }),
+    ]);
+
+    const result = await repository.getHistoricalVotingPowers(
+      0,
+      10,
+      "desc",
+      "timestamp",
+      TEST_ACCOUNT_1,
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0]!.accountId).toBe(TEST_ACCOUNT_1);
+  });
+
+  it("should sort by timestamp descending", async () => {
+    await db.insert(votingPowerHistory).values([
+      createHistoryRow({ timestamp: 1000n, logIndex: 0 }),
+      createHistoryRow({
+        timestamp: 2000n,
+        logIndex: 1,
+        transactionHash: "0xtx2",
+      }),
+    ]);
+
+    const result = await repository.getHistoricalVotingPowers(
+      0,
+      10,
+      "desc",
+      "timestamp",
+    );
+
+    expect(result[0]!.timestamp).toBe(2000n);
+    expect(result[1]!.timestamp).toBe(1000n);
+  });
+
+  it("should sort by delta ascending", async () => {
+    await db.insert(votingPowerHistory).values([
+      createHistoryRow({ deltaMod: 500n, logIndex: 0 }),
+      createHistoryRow({
+        deltaMod: 100n,
+        logIndex: 1,
+        transactionHash: "0xtx2",
+      }),
+    ]);
+
+    const result = await repository.getHistoricalVotingPowers(
+      0,
+      10,
+      "asc",
+      "delta",
+    );
+
+    expect(result[0]!.deltaMod).toBe(100n);
+    expect(result[1]!.deltaMod).toBe(500n);
+  });
+
+  it("should apply pagination", async () => {
+    await db.insert(votingPowerHistory).values([
+      createHistoryRow({ timestamp: 3000n, logIndex: 0 }),
+      createHistoryRow({
+        timestamp: 2000n,
+        logIndex: 1,
+        transactionHash: "0xtx2",
+      }),
+      createHistoryRow({
+        timestamp: 1000n,
+        logIndex: 2,
+        transactionHash: "0xtx3",
+      }),
+    ]);
+
+    const result = await repository.getHistoricalVotingPowers(
+      1,
+      1,
+      "desc",
+      "timestamp",
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0]!.timestamp).toBe(2000n);
+  });
+
+  it("should return empty when no data exists", async () => {
+    const result = await repository.getHistoricalVotingPowers(
+      0,
+      10,
+      "desc",
+      "timestamp",
+    );
+
+    expect(result).toEqual([]);
+  });
+});
+
+describe("VotingPowerRepository - getVotingPowerVariations", () => {
+  let client: PGlite;
+  let db: ReturnType<typeof drizzle<typeof schema>>;
+  let repository: VotingPowerRepository;
+
+  beforeAll(async () => {
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    (BigInt.prototype as any).toJSON = function () {
+      return this.toString();
+    };
+
+    client = new PGlite();
+    db = drizzle(client, { schema });
+    repository = new VotingPowerRepository(db);
+
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    const { apply } = await pushSchema(schema, db as any);
+    await apply();
+  });
+
+  afterAll(async () => {
+    await client.close();
+  });
+
+  beforeEach(async () => {
+    await db.delete(votingPowerHistory);
+    await db.delete(accountPower);
+    vpTxCounter = 0;
+  });
+
+  it("should compute variation between two time snapshots", async () => {
+    await db.insert(votingPowerHistory).values([
+      createHistoryRow({
+        accountId: TEST_ACCOUNT_1,
+        votingPower: 500n,
+        timestamp: 1000n,
+        logIndex: 0,
+      }),
+      createHistoryRow({
+        accountId: TEST_ACCOUNT_1,
+        votingPower: 1000n,
+        timestamp: 3000n,
+        logIndex: 1,
+        transactionHash: "0xtx2",
+      }),
+    ]);
+
+    const result = await repository.getVotingPowerVariations(
+      1500,
+      3500,
+      0,
+      10,
+      "desc",
+    );
+
+    expect(result).toHaveLength(1);
+    expect(BigInt(result[0]!.absoluteChange)).toBe(500n);
+  });
+
+  it("should handle NO_BASELINE when from snapshot is missing", async () => {
+    await db.insert(votingPowerHistory).values(
+      createHistoryRow({
+        accountId: TEST_ACCOUNT_1,
+        votingPower: 1000n,
+        timestamp: 3000n,
+        logIndex: 0,
+      }),
+    );
+
+    const result = await repository.getVotingPowerVariations(
+      500,
+      3500,
+      0,
+      10,
+      "desc",
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0]!.percentageChange).toBe(PERCENTAGE_NO_BASELINE);
+  });
+
+  it("should order by absolute change descending", async () => {
+    await db.insert(votingPowerHistory).values([
+      createHistoryRow({
+        accountId: TEST_ACCOUNT_1,
+        votingPower: 500n,
+        timestamp: 1000n,
+        logIndex: 0,
+      }),
+      createHistoryRow({
+        accountId: TEST_ACCOUNT_1,
+        votingPower: 600n,
+        timestamp: 3000n,
+        logIndex: 1,
+        transactionHash: "0xtx2",
+      }),
+      createHistoryRow({
+        accountId: TEST_ACCOUNT_2,
+        votingPower: 100n,
+        timestamp: 1000n,
+        logIndex: 2,
+        transactionHash: "0xtx3",
+      }),
+      createHistoryRow({
+        accountId: TEST_ACCOUNT_2,
+        votingPower: 900n,
+        timestamp: 3000n,
+        logIndex: 3,
+        transactionHash: "0xtx4",
+      }),
+    ]);
+
+    const result = await repository.getVotingPowerVariations(
+      1500,
+      3500,
+      0,
+      10,
+      "desc",
+    );
+
+    expect(result.length).toBeGreaterThanOrEqual(2);
+    expect(Math.abs(Number(result[0]!.absoluteChange))).toBeGreaterThanOrEqual(
+      Math.abs(Number(result[1]!.absoluteChange)),
+    );
+  });
+
+  it("should filter by addresses", async () => {
+    await db.insert(votingPowerHistory).values([
+      createHistoryRow({
+        accountId: TEST_ACCOUNT_1,
+        votingPower: 500n,
+        timestamp: 1000n,
+        logIndex: 0,
+      }),
+      createHistoryRow({
+        accountId: TEST_ACCOUNT_2,
+        votingPower: 300n,
+        timestamp: 1000n,
+        logIndex: 1,
+        transactionHash: "0xtx2",
+      }),
+    ]);
+
+    const result = await repository.getVotingPowerVariations(
+      undefined,
+      1500,
+      0,
+      10,
+      "desc",
+      [TEST_ACCOUNT_1],
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0]!.accountId).toBe(TEST_ACCOUNT_1);
+  });
+
+  it("should apply pagination", async () => {
+    await db.insert(votingPowerHistory).values([
+      createHistoryRow({
+        accountId: TEST_ACCOUNT_1,
+        votingPower: 500n,
+        timestamp: 1000n,
+        logIndex: 0,
+      }),
+      createHistoryRow({
+        accountId: TEST_ACCOUNT_2,
+        votingPower: 300n,
+        timestamp: 1000n,
+        logIndex: 1,
+        transactionHash: "0xtx2",
+      }),
+    ]);
+
+    const result = await repository.getVotingPowerVariations(
+      undefined,
+      1500,
+      0,
+      1,
+      "desc",
+    );
+
+    expect(result).toHaveLength(1);
+  });
+});
+
+describe("VotingPowerRepository - getVotingPowerVariationsByAccountId", () => {
+  let client: PGlite;
+  let db: ReturnType<typeof drizzle<typeof schema>>;
+  let repository: VotingPowerRepository;
+
+  beforeAll(async () => {
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    (BigInt.prototype as any).toJSON = function () {
+      return this.toString();
+    };
+
+    client = new PGlite();
+    db = drizzle(client, { schema });
+    repository = new VotingPowerRepository(db);
+
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    const { apply } = await pushSchema(schema, db as any);
+    await apply();
+  });
+
+  afterAll(async () => {
+    await client.close();
+  });
+
+  beforeEach(async () => {
+    await db.delete(votingPowerHistory);
+    await db.delete(accountPower);
+    vpTxCounter = 0;
+  });
+
+  it("should return variation for a specific account", async () => {
+    await db.insert(accountPower).values(
+      createAccountPowerRow({
+        accountId: TEST_ACCOUNT_1,
+        votingPower: 1200n,
+      }),
+    );
+    await db.insert(votingPowerHistory).values(
+      createHistoryRow({
+        accountId: TEST_ACCOUNT_1,
+        delta: 200n,
+        logIndex: 0,
+      }),
+    );
+
+    const result = await repository.getVotingPowerVariationsByAccountId(
+      TEST_ACCOUNT_1,
+      undefined,
+      undefined,
+    );
+
+    expect(result.accountId).toBe(TEST_ACCOUNT_1);
+    expect(result.absoluteChange).toBe(200n);
+    expect(result.currentVotingPower).toBe(1200n);
+    expect(result.previousVotingPower).toBe(1000n);
+  });
+
+  it("should filter by date range", async () => {
+    await db.insert(accountPower).values(
+      createAccountPowerRow({
+        accountId: TEST_ACCOUNT_1,
+        votingPower: 1000n,
+      }),
+    );
+    await db.insert(votingPowerHistory).values([
+      createHistoryRow({
+        accountId: TEST_ACCOUNT_1,
+        delta: 100n,
+        timestamp: 1000n,
+        logIndex: 0,
+      }),
+      createHistoryRow({
+        accountId: TEST_ACCOUNT_1,
+        delta: 200n,
+        timestamp: 3000n,
+        logIndex: 1,
+        transactionHash: "0xtx2",
+      }),
+    ]);
+
+    const result = await repository.getVotingPowerVariationsByAccountId(
+      TEST_ACCOUNT_1,
+      2000,
+      4000,
+    );
+
+    expect(result.absoluteChange).toBe(200n);
+  });
+
+  it("should return zero change when no history exists", async () => {
+    await db.insert(accountPower).values(
+      createAccountPowerRow({
+        accountId: TEST_ACCOUNT_1,
+        votingPower: 1000n,
+      }),
+    );
+
+    const result = await repository.getVotingPowerVariationsByAccountId(
+      TEST_ACCOUNT_1,
+      undefined,
+      undefined,
+    );
+
+    expect(result.absoluteChange).toBe(0n);
+    expect(result.percentageChange).toBe("0.00");
+  });
+
+  it("should throw when account does not exist in accountPower", async () => {
+    await expect(
+      repository.getVotingPowerVariationsByAccountId(
+        TEST_ACCOUNT_1,
+        undefined,
+        undefined,
+      ),
+    ).rejects.toThrow("Account not found");
   });
 });
