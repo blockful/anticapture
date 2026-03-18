@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "railway run -e dev -s api-gateway tsx watch src/index.ts",
     "start": "node --import ./dist/src/instrumentation.js dist/src/index.js",
     "build": "tsc",
     "clean": "rm -rf node_modules dist schema.graphql *.tsbuildinfo",
