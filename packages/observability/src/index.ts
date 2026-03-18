@@ -14,6 +14,10 @@ import {
   NodeTracerProvider,
   BatchSpanProcessor,
 } from "@opentelemetry/sdk-trace-node";
+import {
+  W3CTraceContextPropagator,
+  CompositePropagator,
+} from "@opentelemetry/core";
 import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
 
 export { PrometheusExporter, PrometheusSerializer };
@@ -59,7 +63,11 @@ export function createObservabilityProvider(
     resource,
     spanProcessors: [new BatchSpanProcessor(spanExporter)],
   });
-  tracerProvider.register();
+  tracerProvider.register({
+    propagator: new CompositePropagator({
+      propagators: [new W3CTraceContextPropagator()],
+    }),
+  });
 
   registerInstrumentations({
     tracerProvider,
