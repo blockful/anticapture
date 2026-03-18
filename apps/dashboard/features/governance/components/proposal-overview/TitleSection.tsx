@@ -51,7 +51,7 @@ export const TitleSection = ({
   const daoIdKey = proposal.daoId.toUpperCase() as DaoIdEnum;
   const daoConfig = daoConfigByDaoId[daoIdKey];
   const twitterHandle = DAO_TWITTER_HANDLES[proposal.daoId.toUpperCase()] ?? "";
-  const proposalLink = `https://anticapture.com/${proposal.daoId.toLowerCase()}/governance/proposal/${proposal.id}`;
+  const proposalLink = `${process.env.NEXT_PUBLIC_SITE_URL}/${proposal.daoId.toLowerCase()}/governance/proposal/${proposal.id}`;
   const twitterText = `🗳️ [${daoConfig?.name ?? proposal.daoId.toUpperCase()} DAO] PROPOSAL DETECTED — STATUS: [${proposal.status.toUpperCase()}] // This transmission needs a response. ${twitterHandle} ${proposalLink}`;
 
   return (
