@@ -15,6 +15,20 @@ ingester:
   trace_idle_period: 10s
   max_block_duration: 5m
 
+metrics_generator:
+  registry:
+    external_labels:
+      source: tempo
+  storage:
+    path: /var/tempo/generator/wal
+  processor:
+    service_graphs:
+      enable_virtual_node_label: true
+    span_metrics:
+      enable_target_info: true
+    local_blocks:
+      filter_server_spans: false
+
 storage:
   trace:
     backend: local
@@ -22,3 +36,8 @@ storage:
       path: /var/tempo/blocks
     wal:
       path: /var/tempo/wal
+
+overrides:
+  defaults:
+    metrics_generator:
+      processors: [service-graphs, span-metrics, local-blocks]
