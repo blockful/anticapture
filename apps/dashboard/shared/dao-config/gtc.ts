@@ -323,4 +323,5 @@ export const GTC: DaoConfiguration = {
       },
     },
   },
+  governancePage: true,
 };

@@ -139,7 +139,7 @@ export class DrizzleProposalsActivityRepository {
         orderByClause = `ORDER BY COALESCE(v.timestamp - p.timestamp, 999999999) ${orderDirection.toUpperCase()}`;
         break;
       default:
-        orderByClause = `ORDER BY p.timestamp ${orderDirection.toUpperCase()}, p.log_index ${orderDirection.toUpperCase()}`;
+        orderByClause = `ORDER BY p.timestamp ${orderDirection.toUpperCase()}`; //, p.log_index ${orderDirection.toUpperCase()}`; // TODO: enable it again when all DAOs are indexed
     }
 
     // Main query with LEFT JOIN to get proposals and their votes
