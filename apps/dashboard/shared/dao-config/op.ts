@@ -345,4 +345,5 @@ export const OP: DaoConfiguration = {
   resilienceStages: true,
   tokenDistribution: true,
   dataTables: true,
+  governancePage: true,
 };
