@@ -7,9 +7,33 @@ receivers:
 processors:
   batch: {}
 
+connectors:
+  spanmetrics:
+    histogram:
+      explicit:
+        boundaries: [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000]
+    dimensions:
+      - service.name
+      - http.method
+      - http.status_code
+      - db.system
+    aggregation_temporality: CUMULATIVE
+    metrics_flush_interval: 15s
+
+  servicegraph:
+    latency_histogram_buckets: [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000]
+    dimensions:
+      - service.name
+      - http.method
+
 exporters:
   otlp_grpc/tempo:
     endpoint: ${TEMPO_ENDPOINT}
+    tls:
+      insecure: true
+
+  prometheusremotewrite:
+    endpoint: ${PROMETHEUS_REMOTE_WRITE_URL}
     tls:
       insecure: true
 
@@ -18,4 +42,8 @@ service:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [otlp_grpc/tempo]
+      exporters: [otlp_grpc/tempo, spanmetrics, servicegraph]
+    metrics/spanmetrics:
+      receivers: [spanmetrics, servicegraph]
+      processors: [batch]
+      exporters: [prometheusremotewrite]

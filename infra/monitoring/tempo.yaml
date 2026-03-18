@@ -15,6 +15,38 @@ ingester:
   trace_idle_period: 10s
   max_block_duration: 5m
 
+metrics_generator:
+  registry:
+    collection_interval: 15s
+    stale_duration: 15m
+    external_labels:
+      source: tempo
+  storage:
+    path: /var/tempo/wal
+    remote_write:
+      - url: ${PROMETHEUS_REMOTE_WRITE_URL}
+        send_exemplars: true
+  processors:
+    - service-graphs
+    - span-metrics
+  processor:
+    service_graphs:
+      dimensions:
+        - service.name
+        - http.method
+        - http.status_code
+    span_metrics:
+      dimensions:
+        - service.name
+        - http.method
+        - http.status_code
+        - db.system
+
+overrides:
+  defaults:
+    metrics_generator:
+      processors: [service-graphs, span-metrics]
+
 storage:
   trace:
     backend: local
