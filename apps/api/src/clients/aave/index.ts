@@ -33,6 +33,10 @@ export class AAVEClient<
     return "AAVE";
   }
 
+  async getProposalThreshold(): Promise<bigint> {
+    return 0n;
+  }
+
   async getQuorum(): Promise<bigint> {
     return 0n;
     // return readContract(this.client, {
@@ -41,6 +45,14 @@ export class AAVEClient<
     //   functionName: "quorum",
     //   args: [BigInt(Math.floor(Date.now() / 1000))],
     // });
+  }
+
+  async getVotingDelay(): Promise<bigint> {
+    return 0n;
+  }
+
+  async getVotingPeriod(): Promise<bigint> {
+    return 0n;
   }
 
   async getTimelockDelay(): Promise<bigint> {
