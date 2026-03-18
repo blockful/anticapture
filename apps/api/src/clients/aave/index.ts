@@ -39,51 +39,9 @@ export class AAVEClient<
 
   async getQuorum(): Promise<bigint> {
     return 0n;
-    // return readContract(this.client, {
-    //   abi: this.abi,
-    //   address: this.address,
-    //   functionName: "quorum",
-    //   args: [BigInt(Math.floor(Date.now() / 1000))],
-    // });
-  }
-
-  async getVotingDelay(): Promise<bigint> {
-    return 0n;
-  }
-
-  async getVotingPeriod(): Promise<bigint> {
-    return 0n;
   }
 
   async getTimelockDelay(): Promise<bigint> {
-    return 0n;
-    // const timelockAddress = await readContract(this.client, {
-    //   abi: this.abi,
-    //   address: this.address,
-    //   functionName: "timelock",
-    // });
-    // return readContract(this.client, {
-    //   abi: [
-    //     {
-    //       inputs: [],
-    //       name: "getMinDelay",
-    //       outputs: [
-    //         {
-    //           internalType: "uint256",
-    //           name: "",
-    //           type: "uint256",
-    //         },
-    //       ],
-    //       stateMutability: "view",
-    //       type: "function",
-    //     },
-    //   ],
-    //   address: timelockAddress,
-    //   functionName: "getMinDelay",
-    // });
-  }
-
-  async getProposalThreshold(): Promise<bigint> {
     return 0n;
   }
 
