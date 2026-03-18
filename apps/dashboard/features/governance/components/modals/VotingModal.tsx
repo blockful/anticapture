@@ -265,7 +265,14 @@ export const VotingModal = ({
             data-ph-event="vote_submit"
             data-ph-source="gov_fe"
             data-umami-event="vote_submit"
-            disabled={!address || !chain || !vote || !walletClient || isLoading}
+            disabled={
+              !address ||
+              !chain ||
+              !vote ||
+              !walletClient ||
+              isLoading ||
+              rawVotingPower === "0"
+            }
             loading={isLoading}
             onClick={async () => {
               if (!address || !chain || !walletClient) return;
