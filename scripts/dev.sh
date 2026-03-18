@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DAO_ID="${1:?Usage: pnpm dev <DAO_ID>}"
-DAO_UPPER=$(echo "$DAO_ID" | tr '[:lower:]' '[:upper:]')
+DAO_ID="${1:-}"
 
 # Colors per service
 C_API="\033[34m"       # blue
@@ -15,6 +14,18 @@ C_RESET="\033[0m"
 
 log() {
   printf "${C_SCRIPT}[dev]${C_RESET} %s\n" "$*"
+}
+
+# Run a command silently, only showing lines that contain error/ERR/Error
+run_errors_only() {
+  local color=$1
+  local label=$2
+  shift 2
+  "$@" 2>&1 | while IFS= read -r line; do
+    if [[ "$line" =~ [Ee][Rr][Rr][Oo][Rr] ]] || [[ "$line" =~ [Ff][Aa][Ii][Ll] ]]; then
+      printf "${color}[%s]${C_RESET} %s\n" "$label" "$line"
+    fi
+  done
 }
 
 # Prefix each line of a command's output with a colored tag
@@ -58,7 +69,7 @@ cleanup() {
   log "Shutting down..."
   # Send TERM to all processes in our process group
   trap - INT TERM EXIT
-  rm -f "${GATEWAY_READY:-}" 2>/dev/null
+  rm -f "${GATEWAY_READY:-}" "${GATEFUL_READY:-}" 2>/dev/null
   kill 0 2>/dev/null || true
   wait 2>/dev/null
 }
@@ -81,41 +92,55 @@ wait_for_port() {
   log "$name is ready on port $port"
 }
 
-# 1. Start API
-log "Starting API for $DAO_ID..."
-run_with_prefix "$C_API" "api" "" "" pnpm api dev "$DAO_ID" &
+if [ -n "$DAO_ID" ]; then
+  DAO_UPPER=$(echo "$DAO_ID" | tr '[:lower:]' '[:upper:]')
 
-# 2. Wait for API
-wait_for_port 42069 "API"
-export "DAO_API_${DAO_UPPER}=http://localhost:42069"
+  # 1. Start API
+  log "Starting API for $DAO_ID..."
+  run_with_prefix "$C_API" "🐙 api" "" "" pnpm api dev "$DAO_ID" &
+
+  # 2. Wait for API
+  wait_for_port 42069 "API"
+  export "DAO_API_${DAO_UPPER}=http://localhost:42069"
+else
+  log "No DAO_ID provided, skipping local API"
+fi
 
 GATEWAY_READY=$(mktemp)
 rm -f "$GATEWAY_READY"
 
-log "Starting Gateway with DAO_API_${DAO_UPPER}=http://localhost:42069..."
-run_with_prefix "$C_GATEWAY" "gateway" "$GATEWAY_READY" "Mesh running at" pnpm gateway dev &
+log "Starting Gateway..."
+run_with_prefix "$C_GATEWAY" "🌎 gateway" "$GATEWAY_READY" "Mesh running at" pnpm gateway dev &
 
 # 3. Wait for Gateway
 wait_for_ready "$GATEWAY_READY" "Gateway"
 
+GATEFUL_READY=$(mktemp)
+rm -f "$GATEFUL_READY"
+
 log "Starting Gateful..."
-run_with_prefix "$C_GATEFUL" "gateful" "" "" pnpm gateful dev &
+run_with_prefix "$C_GATEFUL" "🚪 gateful" "$GATEFUL_READY" "🚀 REST Gateway running" pnpm gateful dev &
 
-# # 4. Wait for Gateful
-# wait_for_port 5000 "Gateful"
-# log "Running client codegen..."
-# run_with_prefix "$C_CODEGEN" "codegen" "" "" env ANTICAPTURE_GRAPHQL_ENDPOINT=http://localhost:4000/graphql pnpm client codegen
+# 4. Wait for Gateful
+wait_for_ready "$GATEFUL_READY" "Gateful"
 
-# 5. Start Dashboard
+# 5. Start Client (codegen + build watch, errors only)
+log "Starting Client (silent, errors only)..."
+run_errors_only "$C_CODEGEN" "🤝 client" pnpm client dev &
+
+# 6. Start Dashboard
 log "Starting Dashboard..."
-run_with_prefix "$C_DASHBOARD" "dashboard" "" "" pnpm dashboard dev &
+run_with_prefix "$C_DASHBOARD" "📺 dashboard" "" "" pnpm dashboard dev &
 
 echo ""
 log "All services running:"
-printf "  ${C_API}API${C_RESET}       http://localhost:42069  ($DAO_ID)\n"
-printf "  ${C_GATEWAY}Gateway${C_RESET}   http://localhost:4000\n"
-printf "  ${C_GATEFUL}Gateful${C_RESET}   http://localhost:5000\n"
-printf "  ${C_DASHBOARD}Dashboard${C_RESET} http://localhost:3000\n"
+if [ -n "$DAO_ID" ]; then
+  printf "  ${C_API}🐙 API${C_RESET}       http://localhost:42069  ($DAO_ID)\n"
+fi
+printf "  ${C_GATEWAY}🌎 Gateway${C_RESET}   http://localhost:4000\n"
+printf "  ${C_GATEFUL}🚪 Gateful${C_RESET}   http://localhost:5000\n"
+printf "  ${C_CODEGEN}🤝 Client${C_RESET}    codegen + build watch\n"
+printf "  ${C_DASHBOARD}📺 Dashboard${C_RESET} http://localhost:3000\n"
 echo ""
 log "Press Ctrl+C to stop all services."
 
