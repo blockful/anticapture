@@ -5,7 +5,7 @@
  */
 export const daosResolver = {
   resolve: async (root, args, context, info) => {
-    const fetchGovernanceData: "true" | "false" = args?.fetchGovernanceData ?? "false";
+    const fetchGovernanceData = (args?.fetchGovernanceData ?? "false").toLowerCase() as "true" | "false";
     // Extract REST clients from context
     const restClients = Object.keys(context)
       .filter((key) => key.startsWith('rest_'))

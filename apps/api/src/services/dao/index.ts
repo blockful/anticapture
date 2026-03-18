@@ -135,7 +135,13 @@ export class DaoService {
     quorum: number | null,
     avgTurnout: number | null,
   ): number | null {
-    if (quorum === null || quorum === 0 || avgTurnout === null) return null;
+    if (
+      quorum === null ||
+      quorum === 0 ||
+      avgTurnout === null ||
+      avgTurnout === 0
+    )
+      return null;
     return (avgTurnout / quorum - 1) * 100;
   }
 }
