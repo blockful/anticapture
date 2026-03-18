@@ -44,7 +44,7 @@ export const NOUNS: DaoConfiguration = {
       changeVote: false,
       timelock: true,
       cancelFunction: true,
-      logic: "For",
+      logic: "For + Abstain",
       quorumCalculation: "10-15% Dynamic Quorum",
       proposalThreshold: "3 $NOUN (>0.25% Adjusted Supply)",
     },
