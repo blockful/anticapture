@@ -1,5 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalEnv": [".env"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
@@ -19,41 +20,9 @@
       "persistent": true
     },
     "clean": {},
-    "lint": {
-      "inputs": [
-        "**/*.ts",
-        "**/*.tsx",
-        "**/*.js",
-        "**/*.jsx",
-        "eslint.config.*"
-      ]
-    },
-    "lint:fix": {
-      "inputs": [
-        "**/*.ts",
-        "**/*.tsx",
-        "**/*.js",
-        "**/*.jsx",
-        "eslint.config.*"
-      ]
-    },
-    "typecheck": {
-      "dependsOn": ["^build"],
-      "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json"]
-    },
-    "test": {
-      "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"]
-    },
-    "codegen": {
-      "outputs": ["generated.ts", "types.ts"]
-    },
-    "db:generate": {
-      "inputs": ["src/**/*.ts"],
-      "outputs": ["drizzle/**"]
-    },
-    "dev": {
-      "persistent": true,
-      "cache": false
-    }
+    "lint": {},
+    "lint:fix": {},
+    "typecheck": {},
+    "test": {}
   }
 }
