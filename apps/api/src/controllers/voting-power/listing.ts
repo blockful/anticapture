@@ -91,7 +91,7 @@ export function votingPowers(app: Hono, service: VotingPowerService) {
             ...r,
             variation: {
               percentageChange: r.percentageChange,
-              absoluteChange: r.absoluteChange,
+              absoluteChange: r.absoluteChange.toString(),
             },
           })),
         }),
@@ -144,7 +144,7 @@ export function votingPowers(app: Hono, service: VotingPowerService) {
           ...result,
           variation: {
             percentageChange: result.percentageChange,
-            absoluteChange: result.absoluteChange,
+            absoluteChange: result.absoluteChange.toString(),
           },
         }),
       );
