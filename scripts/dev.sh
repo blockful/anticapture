@@ -130,7 +130,8 @@ export ANTICAPTURE_GRAPHQL_ENDPOINT="http://localhost:4000/graphql"
 log "Starting Client (silent, errors only)..."
 run_errors_only "$C_CODEGEN" "🤝 client" pnpm client dev &
 
-# 6. Start Dashboard
+# 6. Start Dashboard – point it at the local Gateful so local backend changes are visible
+export NEXT_PUBLIC_BASE_URL="http://localhost:5000/graphql"
 log "Starting Dashboard..."
 run_with_prefix "$C_DASHBOARD" "📺 dashboard" "" "" pnpm dashboard dev &
 
