@@ -35,4 +35,12 @@ export const AAVE: DaoConfiguration = {
     },
   },
   dataTables: true,
+  // TODO: Enable governancePage after implementing AAVE Governance V3 support:
+  // 1. Indexer: Add governor contract (0x9AEE0B04504CeF83A65AC3f0e838D0593BCb2BC7) with V3 events
+  //    (ProposalCreated, VoteEmitted, ProposalQueued, ProposalExecuted, ProposalCanceled)
+  // 2. API Client: Implement AAVEClient with real governor address, ABI, getQuorum(),
+  //    getTimelockDelay(), and V3-specific getProposalStatus() override
+  // 3. Dashboard: Add governor/timelock contract addresses, rules, and vote handler
+  // 4. AAVE V3 uses per-access-level voting configs, not global quorum/delay
+  // See: https://github.com/blockful/anticapture/pull/XXXX for details
 };
