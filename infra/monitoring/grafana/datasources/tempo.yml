@@ -5,19 +5,3 @@ datasources:
     access: proxy
     url: http://tempo:3200
     editable: true
-    jsonData:
-      tracesToMetrics:
-        datasourceUid: prometheus
-        tags:
-          - key: service.name
-            value: service_name
-        queries:
-          - name: RED metrics
-            query: >-
-              traces_spanmetrics_calls_total{$$__tags}
-      serviceMap:
-        datasourceUid: prometheus
-      nodeGraph:
-        enabled: true
-      lokiSearch:
-        datasourceUid: ""
