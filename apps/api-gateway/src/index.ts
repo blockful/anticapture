@@ -25,6 +25,11 @@ const bootstrap = async () => {
   });
 
   const server = createServer(async (req, res) => {
+    if (req.url === "/health") {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ status: "ok" }));
+      return;
+    }
     if (req.url === "/metrics") {
       try {
         const result = await exporter.collect();
