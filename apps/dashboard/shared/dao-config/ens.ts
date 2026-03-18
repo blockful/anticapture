@@ -12,7 +12,7 @@ import {
   GovernanceImplementationEnum,
   RiskAreaEnum,
 } from "@/shared/types/enums";
-import { calculateMonthsBefore } from "@/shared/utils";
+import { calculateMonthsBefore } from "@/shared/utils/calculateMonthsBefore";
 
 export const ENS: DaoConfiguration = {
   name: "ENS",
@@ -368,4 +368,5 @@ export const ENS: DaoConfiguration = {
   dataTables: true,
   activityFeed: true,
   governancePage: true,
+  serviceProviders: true,
 };

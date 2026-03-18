@@ -214,7 +214,7 @@ export const proposalsOnchain = pgTable(
     calldatas: drizzle.json().$type<string[]>().notNull(),
     startBlock: drizzle.integer("start_block").notNull(),
     endBlock: drizzle.integer("end_block").notNull(),
-    title: drizzle.text(),
+    title: drizzle.text().notNull(),
     description: drizzle.text().notNull(),
     timestamp: bigint({ mode: "bigint" }).notNull(),
     endTimestamp: bigint("end_timestamp", { mode: "bigint" }).notNull(),

@@ -229,17 +229,21 @@ export const TabsDidntVoteContent = ({
             );
           }
 
-          const votingPowerNum = votingPower ? Number(votingPower) / 1e18 : 0;
+          const votingPowerNum = votingPower
+            ? Number(formatUnits(BigInt(votingPower), decimals))
+            : 0;
           const formattedVotingPower = formatNumberUserReadable(votingPowerNum);
 
-          // Calculate percentage of total voting power
           const totalVotingPower =
-            Number(proposal.forVotes || 0) +
-            Number(proposal.againstVotes || 0) +
-            Number(proposal.abstainVotes || 0);
+            BigInt(proposal.forVotes || "0") +
+            BigInt(proposal.againstVotes || "0") +
+            BigInt(proposal.abstainVotes || "0");
+          const totalVotingPowerNum = Number(
+            formatUnits(totalVotingPower, decimals),
+          );
           const percentage =
-            totalVotingPower > 0
-              ? ((votingPowerNum / (totalVotingPower / 1e18)) * 100).toFixed(1)
+            totalVotingPowerNum > 0
+              ? ((votingPowerNum / totalVotingPowerNum) * 100).toFixed(1)
               : "0.0";
 
           return (

@@ -29,6 +29,7 @@ import {
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 
+import { SHUGovernorIndexer, SHUTokenIndexer } from "./indexer/shu";
 import {
   AAVETokenIndexer,
   stkAAVETokenIndexer,
@@ -98,9 +99,14 @@ switch (daoId) {
     ZKGovernorIndexer(blockTime);
     break;
   }
+  case DaoIdEnum.SHU: {
+    const { token } = CONTRACT_ADDRESSES[daoId];
+    SHUTokenIndexer(token.address, token.decimals);
+    SHUGovernorIndexer(blockTime);
+    break;
+  }
   case DaoIdEnum.AAVE: {
     const { aave, stkAAVE, aAAVE } = CONTRACT_ADDRESSES[DaoIdEnum.AAVE];
-
     AAVETokenIndexer(aave.address, aave.decimals);
     stkAAVETokenIndexer(stkAAVE.address, stkAAVE.decimals);
     aAAVETokenIndexer(aAAVE.address, aAAVE.decimals);

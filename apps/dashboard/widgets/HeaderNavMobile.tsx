@@ -57,6 +57,12 @@ export const HeaderNavMobile = () => {
       title: PAGES_CONSTANTS.tokenDistribution.title,
       enabled: !!daoConfig.tokenDistribution,
     },
+    {
+      page: PAGES_CONSTANTS.serviceProviders.page,
+      title: PAGES_CONSTANTS.serviceProviders.title,
+      enabled: !!daoConfig.serviceProviders,
+      isNew: true,
+    },
   ];
 
   return (

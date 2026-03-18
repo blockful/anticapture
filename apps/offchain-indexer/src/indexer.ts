@@ -1,5 +1,5 @@
-import type { Repository } from "@/repository/db.interface";
 import type { DataProvider } from "@/provider/dataProvider.interface";
+import type { Repository } from "@/repository/db.interface";
 import type { OffchainProposal } from "@/repository/schema";
 
 const ACTIVE_STATES = new Set(["pending", "active"]);
@@ -49,15 +49,16 @@ export class Indexer {
   }
 
   private async syncProposals(): Promise<void> {
-    const { data } =
-      await this.provider.fetchProposals(this.proposalsCursor);
+    const { data } = await this.provider.fetchProposals(this.proposalsCursor);
 
     if (data.length === 0) return;
 
     this.updateProposalsCursor(data);
     await this.repository.saveProposals(data, this.proposalsCursor ?? "0");
 
-    console.log(`Synced ${data.length} proposals (cursor: ${this.proposalsCursor})`);
+    console.log(
+      `Synced ${data.length} proposals (cursor: ${this.proposalsCursor})`,
+    );
   }
 
   private updateProposalsCursor(proposals: OffchainProposal[]) {
@@ -79,8 +80,9 @@ export class Indexer {
   }
 
   private async syncVotes(): Promise<void> {
-    const { data, nextCursor } =
-      await this.provider.fetchVotes(this.votesCursor);
+    const { data, nextCursor } = await this.provider.fetchVotes(
+      this.votesCursor,
+    );
 
     if (data.length === 0) return;
 

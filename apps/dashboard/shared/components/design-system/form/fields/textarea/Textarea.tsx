@@ -15,7 +15,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           //enabled
           "enabled:hover:bg-surface-contrast",
           //focused
-          "focus-visible:border-border-contrast focus-visible:shadow-[0px_0px_0px_2px_rgba(82,82,91,0.3)] focus-visible:outline-none",
+          "focus-visible:border-border-contrast focus-visible:shadow-[var(--shadow-focus-ring)] focus-visible:outline-none",
           //disabled
           "disabled:bg-surface-disabled disabled:border-border-default disabled:text-secondary disabled:cursor-not-allowed disabled:opacity-50",
           //error

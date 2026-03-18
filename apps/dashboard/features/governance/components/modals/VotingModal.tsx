@@ -12,7 +12,7 @@ import { VoteOption } from "@/features/governance/components/proposal-overview/V
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 import { voteOnProposal } from "@/features/governance/utils/voteOnProposal";
 import { BadgeStatus, Button } from "@/shared/components";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils";
 
 interface VotingModalProps {
@@ -22,6 +22,7 @@ interface VotingModalProps {
   votingPower: string;
   rawVotingPower: string;
   decimals: number;
+  daoId: DaoIdEnum;
 }
 
 export const VotingModal = ({
@@ -31,6 +32,7 @@ export const VotingModal = ({
   votingPower,
   rawVotingPower,
   decimals,
+  daoId,
 }: VotingModalProps) => {
   const [vote, setVote] = useState<string>("");
   const [comment, setComment] = useState<string>("");
@@ -263,7 +265,15 @@ export const VotingModal = ({
             data-ph-event="vote_submit"
             data-ph-source="gov_fe"
             data-umami-event="vote_submit"
-            disabled={!address || !chain || !vote || !walletClient || isLoading}
+            disabled={
+              !address ||
+              !chain ||
+              !vote ||
+              !walletClient ||
+              isLoading ||
+              !rawVotingPower ||
+              rawVotingPower === "0"
+            }
             loading={isLoading}
             onClick={async () => {
               if (!address || !chain || !walletClient) return;
@@ -273,7 +283,7 @@ export const VotingModal = ({
                 proposal?.id as string,
                 address as unknown as Account,
                 chain,
-                DaoIdEnum.ENS as DaoIdEnum,
+                daoId,
                 walletClient,
                 setTransactionhash,
                 comment,

@@ -7,6 +7,7 @@ import nounsConfig from "./config/nouns.config";
 import obolConfig from "./config/obol.config";
 import optimismConfig from "./config/optimism.config";
 import scrollConfig from "./config/scroll.config";
+import shutterConfig from "./config/shutter.config";
 import uniswapConfig from "./config/uniswap.config";
 import zkConfig from "./config/zk.config";
 
@@ -23,6 +24,7 @@ export default {
     ...compoundConfig.chains,
     ...obolConfig.chains,
     ...zkConfig.chains,
+    ...shutterConfig.chains,
   },
   contracts: {
     ...aaveConfig.contracts,
@@ -36,5 +38,6 @@ export default {
     ...compoundConfig.contracts,
     ...obolConfig.contracts,
     ...zkConfig.contracts,
+    ...shutterConfig.contracts,
   },
 };

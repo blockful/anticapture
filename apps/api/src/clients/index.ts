@@ -7,6 +7,7 @@ export * from "./comp";
 export * from "./obol";
 export * from "./zk";
 export * from "./uni";
+export * from "./shu";
 export * from "./aave";
 
 export interface DAOClient {
@@ -18,6 +19,7 @@ export interface DAOClient {
   getProposalThreshold: () => Promise<bigint>;
   getCurrentBlockNumber: () => Promise<number>;
   getBlockTime: (blockNumber: number) => Promise<number | null>;
+  alreadySupportCalldataReview: () => boolean;
   calculateQuorum: (votes: {
     forVotes: bigint;
     againstVotes: bigint;

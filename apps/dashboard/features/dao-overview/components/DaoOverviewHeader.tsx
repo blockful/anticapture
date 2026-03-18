@@ -9,6 +9,7 @@ import type {
   DaoConfiguration,
   DaoOverviewConfig,
 } from "@/shared/dao-config/types";
+import { DaoIdEnum } from "@/shared/types/daos";
 import { cn } from "@/shared/utils";
 
 interface DaoOverviewHeaderProps {
@@ -60,7 +61,7 @@ export const DaoOverviewHeader = ({
             iconVariant="secondary"
             className="bg-surface-opacity text-primary h-5 rounded-full text-xs"
           >
-            1 {daoId} = ${lastPrice.toFixed(2)}
+            1 {daoId} = ${lastPrice.toFixed(daoId === DaoIdEnum.SHU ? 4 : 2)}
             {daoOverview.priceDisclaimer && (
               <TooltipInfo text={daoOverview.priceDisclaimer} />
             )}
