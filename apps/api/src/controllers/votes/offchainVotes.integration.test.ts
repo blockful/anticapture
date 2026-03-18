@@ -49,7 +49,7 @@ function createTestApp(service: OffchainVotesService) {
   return app;
 }
 
-describe("Offchain Votes Controller - Integration Tests", () => {
+describe("Offchain Votes Controller", () => {
   let fakeRepo: FakeOffchainVotesRepository;
   let service: OffchainVotesService;
   let app: ReturnType<typeof createTestApp>;

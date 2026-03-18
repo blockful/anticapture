@@ -49,7 +49,7 @@ function createTestApp(service: DelegatorsService) {
 
 const VALID_ADDRESS = "0x1234567890123456789012345678901234567890";
 
-describe("Delegators Controller - Integration Tests", () => {
+describe("Delegators Controller", () => {
   let fakeRepo: FakeDelegatorsRepository;
   let service: DelegatorsService;
   let app: ReturnType<typeof createTestApp>;

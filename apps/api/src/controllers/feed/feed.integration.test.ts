@@ -61,7 +61,7 @@ function createTestApp(service: FeedService) {
   return app;
 }
 
-describe("Feed Controller - Integration Tests", () => {
+describe("Feed Controller", () => {
   let fakeRepo: FakeFeedRepository;
   let service: FeedService;
   let app: ReturnType<typeof createTestApp>;

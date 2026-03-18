@@ -57,7 +57,7 @@ class SimpleDAOClient implements DAOClient {
   }
 }
 
-describe("Dao Controller - Integration Tests", () => {
+describe("Dao Controller", () => {
   let client: SimpleDAOClient;
   let service: DaoService;
   let app: Hono;

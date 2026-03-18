@@ -50,7 +50,7 @@ const createProposal = (
   ...overrides,
 });
 
-describe("GovernanceActivity Controller - Integration Tests", () => {
+describe("GovernanceActivity Controller", () => {
   let client: PGlite;
   let db: ReturnType<typeof drizzle<typeof schema>>;
   let erc20App: Hono;

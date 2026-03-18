@@ -56,7 +56,7 @@ function createTestApp(service: OffchainProposalsService) {
   return app;
 }
 
-describe("Offchain Proposals Controller - Integration Tests", () => {
+describe("Offchain Proposals Controller", () => {
   let fakeRepo: FakeOffchainProposalsRepository;
   let service: OffchainProposalsService;
   let app: ReturnType<typeof createTestApp>;

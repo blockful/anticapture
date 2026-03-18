@@ -133,7 +133,7 @@ function createTestApp(service: VotingPowerService) {
   return app;
 }
 
-describe("Voting Powers Controller - Integration Tests", () => {
+describe("Voting Powers Controller", () => {
   let fakeRepo: FakeVotingPowersRepository;
   let service: VotingPowerService;
   let app: ReturnType<typeof createTestApp>;
