@@ -15,7 +15,7 @@
     "build:watch": "tsc --watch",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
-    "dev": "sh -c 'DAO_ID=${1:?\"DAO_ID is required\"}; LOW=$(echo $1 | tr A-Z a-z); FILE=cmd/${LOW}.ts; [ ! -f \"$FILE\" ] && FILE=cmd/index.ts; railway run -e dev -s $1-api tsx watch $FILE' --"
+    "dev": "sh -c 'DAO_ID=${1:?\"DAO_ID is required\"}; LOW=$(echo $1 | tr A-Z a-z); FILE=cmd/${LOW}.ts; [ ! -f \"$FILE\" ] && FILE=cmd/index.ts; if railway run -e dev -s $1-api echo ok >/dev/null 2>&1; then railway run -e dev -s $1-api tsx watch $FILE; else echo \"Railway service $1-api not found, running locally with .env\"; DAO_ID=$1 tsx watch $FILE; fi' --"
   },
   "keywords": [],
   "author": "",

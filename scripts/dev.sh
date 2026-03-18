@@ -97,7 +97,7 @@ if [ -n "$DAO_ID" ]; then
 
   # 1. Start API
   log "Starting API for $DAO_ID..."
-  run_with_prefix "$C_API" "🐙 api" "" "" pnpm api dev "$DAO_ID" &
+  run_with_prefix "$C_API" "🐙 api" "" "" pnpm api dev -- "$DAO_ID" &
 
   # 2. Wait for API
   wait_for_port 42069 "API"
@@ -125,6 +125,8 @@ run_with_prefix "$C_GATEFUL" "🚪 gateful" "$GATEFUL_READY" "🚀 REST Gateway 
 wait_for_ready "$GATEFUL_READY" "Gateful"
 
 # 5. Start Client (codegen + build watch, errors only)
+#    Point codegen at the local gateway so types stay in sync
+export ANTICAPTURE_GRAPHQL_ENDPOINT="http://localhost:4000/graphql"
 log "Starting Client (silent, errors only)..."
 run_errors_only "$C_CODEGEN" "🤝 client" pnpm client dev &
 
