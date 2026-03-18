@@ -317,4 +317,5 @@ export const SCR: DaoConfiguration = {
       },
     },
   },
+  governancePage: true,
 };
