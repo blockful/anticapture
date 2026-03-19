@@ -1,4 +1,4 @@
-logLevel: debug
+logLevel: ${LOG_LEVEL:-warn}
 
 server:
   httpHostV4: "0.0.0.0"
@@ -11,25 +11,22 @@ metrics:
   hostV6: "[::]"
   port: 4001
 
+# Two projects: indexer (high throughput) vs api (conservative per-IP limits)
+# Access via: http://erpc:4000/indexer/evm/<chainId> or http://erpc:4000/api/evm/<chainId>
 projects:
-  - id: main
+  - id: indexer
+    rateLimitBudget: indexer-limit
+    networks:
+      - architecture: evm
+        evm:
+          chainId: 1
+      - architecture: evm
+        evm:
+          chainId: 534352
     upstreams:
-      # - id: nodeful
-      #   endpoint: "${NODEFUL}"
-      #   rateLimitBudget: global-indexer-limit
-      #   group: primary
-      #   autoIgnoreUnsupportedMethods: true
-      #   failsafe:
-      #     - matchMethod: "*"
-      #       timeout:
-      #         duration: 10s
-      #       retry:
-      #         maxAttempts: 2
-      #         delay: 200ms
-
       - id: chainstack
         endpoint: chainstack://${CHAINSTACK_API_KEY}
-        rateLimitBudget: global-indexer-limit
+        rateLimitBudget: chainstack-indexer
         group: primary
         autoIgnoreUnsupportedMethods: true
         failsafe:
@@ -42,22 +39,57 @@ projects:
               backoffMaxDelay: 5s
               backoffFactor: 1.5
 
+  - id: api
+    rateLimitBudget: api-limit
+    networks:
+      - architecture: evm
+        evm:
+          chainId: 1
+      - architecture: evm
+        evm:
+          chainId: 534352
+    upstreams:
+      - id: chainstack
+        endpoint: chainstack://${CHAINSTACK_API_KEY}
+        rateLimitBudget: chainstack-api
+        group: primary
+        autoIgnoreUnsupportedMethods: true
+        failsafe:
+          - matchMethod: "*"
+            timeout:
+              duration: 10s
+            retry:
+              maxAttempts: 2
+              delay: 200ms
+
 rateLimiters:
   store:
     driver: memory
 
   budgets:
-    - id: global-api-limit
+    # Upstream-level: split Chainstack's 400 req/s between indexer and api
+    - id: chainstack-indexer
+      rules:
+        - method: "*"
+          maxCount: 300
+          period: second
+    - id: chainstack-api
+      rules:
+        - method: "*"
+          maxCount: 100
+          period: second
+    # Project-level: self-imposed limits
+    - id: indexer-limit
+      rules:
+        - method: "*"
+          maxCount: 300
+          period: second
+    - id: api-limit
       rules:
         - method: "*"
           maxCount: 20
           period: second
           perIP: true
-    - id: global-indexer-limit
-      rules:
-        - method: "*"
-          maxCount: 400
-          period: second
 
 database:
   evmJsonRpcCache:
