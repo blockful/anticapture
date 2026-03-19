@@ -10,16 +10,18 @@ import { proxy as honoProxy } from "hono/proxy";
  * so it only catches unmatched requests.
  */
 export function proxy(app: OpenAPIHono, daoApis: Map<string, string>) {
-  // Two route patterns share the same handler — path-based matches first
+  // Register path-based matches before the fallback catch-alls so the DAO
+  // param is available when present in the URL.
   app.all("/:dao{[^/]+}/*", handler);
+  app.all("/", handler);
+  app.all("/*", handler);
 
   async function handler(c: Context) {
     const paramDao = c.req.param("dao");
     if (!paramDao) {
       return c.json(
         {
-          error:
-            "Missing DAO identifier. Use /:dao/* path or anticapture-dao-id header",
+          error: "Missing DAO identifier. Use /:dao/* path",
         },
         400,
       );
