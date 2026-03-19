@@ -72,6 +72,44 @@ Before building any sub-element from scratch, ask:
 | Standalone (one variant axis)     | `category/Component.tsx` + `Component.stories.tsx` + `Component.figma.tsx`                                                        |
 | A family with shared types/styles | `category/types.ts` + `category/styles.ts` + `category/component/Component.tsx` + `Component.stories.tsx` + `Component.figma.tsx` |
 
+### Composite vs internal sub-parts
+
+When a component has sub-parts (e.g. a Drawer with a header and body), apply this rule:
+
+**A sub-part gets its own named subfolder + `.stories.tsx` + `.figma.tsx` when:**
+
+- A consumer would use it directly (it appears in the public `index.ts`)
+- It exists as a named, documented component in Figma
+
+**A sub-part is a flat file inside the composite's folder when:**
+
+- It is only ever used by one parent composite (not re-exported publicly)
+- It is purely structural — renders one specific slot of its parent
+- It has no independent Figma frame
+
+> Ask yourself: "Does this appear in Figma as its own named component?" If yes → subfolder + stories + figma. If it's just a structural slot inside a bigger component → flat file.
+
+**Example — Drawer:**
+
+```
+drawer/
+├── Drawer.tsx                 ← composite root → stories + figma
+├── Drawer.stories.tsx
+├── Drawer.figma.tsx
+├── drawer-header/             ← composite sub-part → stories + figma
+│   ├── DrawerHeader.tsx
+│   ├── DrawerHeader.stories.tsx
+│   ├── DrawerHeader.figma.tsx
+│   ├── DrawerTitle.tsx        ← internal flat file (only used by DrawerHeader)
+│   ├── DrawerSubtitle.tsx
+│   ├── DrawerTabs.tsx
+│   └── DrawerCloseButton.tsx
+└── drawer-body/               ← composite sub-part → stories + figma
+    ├── DrawerBody.tsx
+    ├── DrawerBody.stories.tsx
+    └── DrawerBody.figma.tsx
+```
+
 ---
 
 ## 4. Create Files

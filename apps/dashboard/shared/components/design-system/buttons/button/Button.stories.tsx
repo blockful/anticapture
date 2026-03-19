@@ -14,7 +14,7 @@ type ButtonStoryArgs = ButtonProps & {
 };
 
 const meta: Meta<ButtonStoryArgs> = {
-  title: "Design System/Buttons/Button",
+  title: "Data Entry/Buttons/Button",
   component: Button,
   parameters: {
     layout: "centered",

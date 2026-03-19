@@ -5,7 +5,7 @@ import type { PillTabGroupProps } from "@/shared/components/design-system/tabs/t
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta: Meta<PillTabGroupProps> = {
-  title: "Design System/Tabs/PillTabGroup",
+  title: "Navigation/Tabs/PillTabGroup",
   component: PillTabGroup,
   parameters: {
     layout: "centered",

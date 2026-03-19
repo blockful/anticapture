@@ -1,11 +1,6 @@
-import { cn } from "@/shared/utils";
+import { cn } from "@/shared/utils/cn";
 
-type DividerDefaultProps = {
-  isVertical?: boolean;
-  isHorizontal?: boolean;
-  isDashed?: boolean;
-  className?: string;
-};
+import type { DividerDefaultProps } from "./types";
 
 export const DividerDefault = ({
   isVertical,

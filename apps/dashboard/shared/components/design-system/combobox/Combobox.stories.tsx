@@ -11,7 +11,7 @@ import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 type ComboboxStoryArgs = ComboboxProps & { showIcon?: boolean };
 
 const meta: Meta<ComboboxStoryArgs> = {
-  title: "Design System/Combobox/Combobox",
+  title: "Data Entry/Combobox/Combobox",
   component: Combobox,
   parameters: {
     layout: "centered",

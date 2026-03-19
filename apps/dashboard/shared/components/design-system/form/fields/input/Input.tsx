@@ -1,12 +1,9 @@
 import { Search } from "lucide-react";
 import * as React from "react";
 
-import { cn } from "@/shared/utils";
+import { cn } from "@/shared/utils/cn";
 
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  hasIcon?: boolean;
-  error?: boolean;
-}
+import type { InputProps } from "./types";
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, hasIcon, error, ...props }, ref) => {

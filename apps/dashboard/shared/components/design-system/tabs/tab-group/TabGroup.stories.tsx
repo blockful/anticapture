@@ -7,7 +7,7 @@ import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 type TabGroupStoryArgs = TabGroupProps & { showBadges?: boolean };
 
 const meta: Meta<TabGroupStoryArgs> = {
-  title: "Design System/Tabs/TabGroup",
+  title: "Navigation/Tabs/TabGroup",
   component: TabGroup,
   parameters: {
     layout: "centered",
