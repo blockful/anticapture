@@ -2,14 +2,17 @@ logLevel: ${LOG_LEVEL:-warn}
 
 server:
   httpHostV4: "0.0.0.0"
-  httpHostV6: "[::]"
   httpPort: 4000
+  listenV6: true
+  httpHostV6: "[::]"
+  httpPortV6: 5000
 
 metrics:
   enabled: true
   hostV4: "0.0.0.0"
   hostV6: "[::]"
   port: 4001
+  listenV6: true
 
 # Two projects: indexer (high throughput) vs api (conservative per-IP limits)
 # Access via: http://erpc:4000/indexer/evm/<chainId> or http://erpc:4000/api/evm/<chainId>
@@ -94,16 +97,34 @@ rateLimiters:
 database:
   evmJsonRpcCache:
     connectors:
+      - id: memory-cache
+        driver: memory
+        memory:
+          maxItems: 100000
       - id: postgres-cache
         driver: postgresql
         postgresql:
           connectionUri: "${DATABASE_URL}"
           table: rpc_cache
-          initTimeout: 5s
-          getTimeout: 1s
-          setTimeout: 2s
     policies:
       - network: "*"
         method: "*"
         finality: finalized
+        connector: memory-cache
+        ttl: 0
+      - network: "*"
+        method: "*"
+        finality: unfinalized
+        connector: memory-cache
+        maxItemSize: 1MB # optional max size of item to store via this policy
+        ttl: 5s
+      - network: "*"
+        method: "*"
+        finality: unknown
+        connector: memory-cache
+        ttl: 5s
+      - network: "*" # supports * as wildcard and | as OR operator
+        method: "eth_getLogs|trace_*" # supports * as wildcard and | as OR operator
+        finality: finalized
         connector: postgres-cache
+        ttl: 0
