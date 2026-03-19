@@ -14,6 +14,7 @@ function createStubDAOClient(overrides?: Partial<DAOClient>): DAOClient {
     getCurrentBlockNumber: () => Promise.resolve(0),
     getBlockTime: () => Promise.resolve(null),
     calculateQuorum: () => 0n,
+    alreadySupportCalldataReview: () => false,
     getProposalStatus: () => Promise.resolve("ACTIVE"),
     ...overrides,
   };

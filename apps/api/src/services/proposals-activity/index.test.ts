@@ -42,6 +42,7 @@ const createDbProposal = (overrides = {}): DbProposal => ({
   id: "proposal-1",
   dao_id: "UNI",
   proposer_account_id: VOTER_ADDRESS,
+  title: "Test proposal",
   description: "Test proposal",
   start_block: 100,
   end_block: 200,

@@ -39,6 +39,9 @@ class SimpleDAOClient implements DAOClient {
   }) {
     return 0n;
   }
+  alreadySupportCalldataReview() {
+    return false;
+  }
   getProposalStatus(
     _: {
       id: string;

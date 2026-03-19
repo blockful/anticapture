@@ -40,6 +40,7 @@ const createProposal = (
   calldatas: [],
   startBlock: 1,
   endBlock: 100,
+  title: "Test proposal",
   description: "Test proposal",
   timestamp: RECENT_TS,
   endTimestamp: BigInt(CURRENT_TIME + 10000),

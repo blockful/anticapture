@@ -38,6 +38,7 @@ const createProposal = (
   calldatas: [],
   startBlock: 100,
   endBlock: 200,
+  title: "Test proposal",
   description: "Test proposal",
   timestamp: 1699900000n,
   endTimestamp: 1700100000n,
