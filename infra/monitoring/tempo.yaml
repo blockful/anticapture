@@ -29,9 +29,6 @@ metrics_generator:
       enable_virtual_node_label: true
     span_metrics:
       enable_target_info: true
-    local_blocks:
-      filter_server_spans: false
-
 storage:
   trace:
     backend: local
@@ -43,4 +40,4 @@ storage:
 overrides:
   defaults:
     metrics_generator:
-      processors: [service-graphs, span-metrics, local-blocks]
+      processors: [service-graphs, span-metrics]
