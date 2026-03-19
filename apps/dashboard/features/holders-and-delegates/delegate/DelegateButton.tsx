@@ -78,9 +78,9 @@ export const DelegateButton = ({
     }
   };
 
-  if (isAlreadyDelegated) {
+  if (!isAlreadyDelegated) {
     return (
-      <Button size={size} variant="outline" disabled>
+      <Button size={size} variant="outline" disabled className="opacity-100">
         <Check className="size-3.5" />
         Delegated
       </Button>
