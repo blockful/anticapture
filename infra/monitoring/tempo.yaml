@@ -24,11 +24,15 @@ metrics_generator:
     remote_write:
       - url: ${PROMETHEUS_REMOTE_WRITE_URL}
         send_exemplars: true
+  traces_storage:
+    path: /var/tempo/generator/traces
   processor:
     service_graphs:
       enable_virtual_node_label: true
     span_metrics:
       enable_target_info: true
+    local_blocks:
+      filter_server_spans: false
 storage:
   trace:
     backend: local
@@ -40,4 +44,4 @@ storage:
 overrides:
   defaults:
     metrics_generator:
-      processors: [service-graphs, span-metrics]
+      processors: [service-graphs, span-metrics, local-blocks]
