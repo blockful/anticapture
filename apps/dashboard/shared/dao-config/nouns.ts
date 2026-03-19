@@ -1,6 +1,6 @@
 import { mainnet } from "viem/chains";
 
-import { NounsIcon } from "@/shared/components/icons";
+import { NounsIcon } from "@/shared/components/icons/NounsIcon";
 import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { RECOMMENDED_SETTINGS } from "@/shared/constants/recommended-settings";
