@@ -16,7 +16,9 @@
     },
     "start": {
       "dependsOn": ["^build"],
-      "persistent": true
+      "persistent": true,
+      "cache": false,
+      "passThroughEnv": ["*"]
     },
     "clean": {},
     "lint": {
@@ -53,7 +55,8 @@
     },
     "dev": {
       "persistent": true,
-      "cache": false
+      "cache": false,
+      "passThroughEnv": ["*"]
     }
   }
 }
