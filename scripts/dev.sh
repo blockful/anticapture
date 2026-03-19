@@ -109,7 +109,7 @@ if [ -n "$DAO_ID" ]; then
 
   # 1. Start API
   log "Starting API for $DAO_ID..."
-  run_with_prefix "$C_API" "🐙 api" "" "" railway_run "$DAO_UPPER-api" pnpm api dev -- "$DAO_ID" &
+  run_with_prefix "$C_API" "🐙 api" "" "" railway_run "${DAO_ID}-api" pnpm api dev -- "$DAO_ID" &
 
   # 2. Wait for API
   wait_for_port 42069 "API"

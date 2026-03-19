@@ -15,7 +15,7 @@
     "build:watch": "tsc --watch",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
-    "dev": "sh -c 'DAO_ID=${1:?\"DAO_ID is required\"}; LOW=$(echo $1 | tr A-Z a-z); FILE=cmd/${LOW}.ts; [ ! -f \"$FILE\" ] && FILE=cmd/index.ts; DAO_ID=$1 tsx watch $FILE' --"
+    "dev": "sh -c 'dao_id=\"$1\"; if [ -n \"$dao_id\" ] && [ -f \"cmd/$dao_id.ts\" ]; then exec tsx watch \"cmd/$dao_id.ts\"; else exec tsx watch cmd/index.ts; fi' --"
   },
   "keywords": [],
   "author": "",
