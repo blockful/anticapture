@@ -3,9 +3,10 @@ datasources:
   - name: Tempo
     type: tempo
     access: proxy
-    url: http://tempo:3200
+    url: ${TEMPO_URL}
     editable: true
     jsonData:
+      httpMethod: GET
       serviceMap:
         datasourceUid: prometheus
       nodeGraph:
