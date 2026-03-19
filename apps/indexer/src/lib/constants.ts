@@ -774,6 +774,44 @@ export const BurningAddresses: Record<
   },
 };
 
+export const NonCirculatingAddresses: Record<
+  DaoIdEnum,
+  Record<string, Address>
+> = {
+  [DaoIdEnum.UNI]: {},
+  [DaoIdEnum.ENS]: {
+    // https://etherscan.io/address/0xd7a029db2585553978190db5e85ec724aa4df23f
+    // Linear vesting for contributors, unlock end Dec 2025
+    "Token Timelock": "0xd7a029db2585553978190db5e85ec724aa4df23f",
+  },
+  [DaoIdEnum.ARB]: {},
+  [DaoIdEnum.AAVE]: {
+    // https://etherscan.io/address/0x317625234562B1526Ea2FaC4030Ea499C5291de4
+    // Permanently locked - LEND migration discontinued
+    "LEND to AAVE Migrator": "0x317625234562B1526Ea2FaC4030Ea499C5291de4",
+  },
+  [DaoIdEnum.OP]: {},
+  [DaoIdEnum.NOUNS]: {},
+  [DaoIdEnum.TEST]: {},
+  [DaoIdEnum.GTC]: {},
+  [DaoIdEnum.SCR]: {},
+  [DaoIdEnum.COMP]: {},
+  [DaoIdEnum.OBOL]: {},
+  [DaoIdEnum.ZK]: {
+    // https://docs.zknation.io/zk-nation/zksync-governance-contract-addresses
+    "Initial Merkle Distributor": "0x66fd4fc8fa52c9bec2aba368047a0b27e24ecfe4",
+    "Second ZK Distributor": "0xb294F411cB52c7C6B6c0B0b61DBDf398a8b0725d",
+    "Third ZK Distributor": "0xf29d698e74ef1904bcfdb20ed38f9f3ef0a89e5b",
+    "Matter Labs Allocation": "0xa97fbc75ccbc7d4353c4d2676ed18cd0c5aaf7e6",
+    "Foundation Allocation": "0xd78dc27d4db8f428c67f542216a2b23663838405",
+    "Guardians Allocation": "0x21b27952f8621f54f3cb652630e122ec81dd2dc1",
+    "Security Council Allocation": "0x0ad50686c159040e57ddce137db0b63c67473450",
+    "ZKsync Association Allocation":
+      "0x0681e3808a0aa12004fb815ebb4515dc823cfbb4",
+  },
+  [DaoIdEnum.SHU]: {},
+};
+
 export enum ProposalStatus {
   PENDING = "PENDING",
   ACTIVE = "ACTIVE",
@@ -794,6 +832,7 @@ export enum MetricTypesEnum {
   LENDING_SUPPLY = "LENDING_SUPPLY",
   CIRCULATING_SUPPLY = "CIRCULATING_SUPPLY",
   TREASURY = "TREASURY",
+  NON_CIRCULATING_SUPPLY = "NON_CIRCULATING_SUPPLY",
 }
 
 export const metricTypeArray = Object.values(MetricTypesEnum);

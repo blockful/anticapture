@@ -19,6 +19,7 @@ import {
   DEXAddresses,
   BurningAddresses,
   TreasuryAddresses,
+  NonCirculatingAddresses,
   MetricTypesEnum,
 } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
@@ -39,6 +40,9 @@ export function SHUTokenIndexer(address: Address, decimals: number) {
     const dexAddressList = Object.values(DEXAddresses[daoId]);
     const burningAddressList = Object.values(BurningAddresses[daoId]);
     const treasuryAddressList = Object.values(TreasuryAddresses[daoId]);
+    const nonCirculatingAddressList = Object.values(
+      NonCirculatingAddresses[daoId],
+    );
 
     await tokenTransfer(
       context,
@@ -90,6 +94,19 @@ export function SHUTokenIndexer(address: Address, decimals: number) {
       "treasury",
       treasuryAddressList,
       MetricTypesEnum.TREASURY,
+      event.args.from,
+      event.args.to,
+      event.args.value,
+      daoId,
+      address,
+      event.block.timestamp,
+    );
+
+    await updateSupplyMetric(
+      context,
+      "nonCirculatingSupply",
+      nonCirculatingAddressList,
+      MetricTypesEnum.NON_CIRCULATING_SUPPLY,
       event.args.from,
       event.args.to,
       event.args.value,
