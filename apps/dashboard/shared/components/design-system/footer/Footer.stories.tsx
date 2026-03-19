@@ -4,7 +4,7 @@ import { Footer } from "@/shared/components/design-system/footer/Footer";
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta = {
-  title: "Design System/Layout/Footer",
+  title: "Layout/Footer",
   component: Footer,
   parameters: {
     layout: "fullscreen",

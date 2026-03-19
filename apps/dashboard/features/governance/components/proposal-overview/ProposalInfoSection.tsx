@@ -11,7 +11,7 @@ import { formatUnits } from "viem";
 
 import { ProposalInfoText } from "@/features/governance/components/proposal-overview/ProposalInfoText";
 import { getTimeLeftText } from "@/features/governance/utils";
-import { BulletDivider } from "@/shared/components/design-system/section/BulletDivider";
+import { BulletDivider } from "@/shared/components/design-system/section";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { formatNumberUserReadable } from "@/shared/utils";
 

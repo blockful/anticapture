@@ -16,7 +16,7 @@ import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankS
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta = {
-  title: "Design System/Feedback/BlankSlate",
+  title: "Feedback/BlankSlate",
   component: BlankSlate,
   parameters: {
     layout: "centered",

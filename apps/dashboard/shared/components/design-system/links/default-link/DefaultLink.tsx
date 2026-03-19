@@ -3,7 +3,7 @@ import type { LinkProps } from "next/link";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { cn } from "@/shared/utils";
+import { cn } from "@/shared/utils/cn";
 
 export const defaultLinkVariants = cva(
   "flex items-center gap-1 font-mono tracking-wider uppercase leading-none font-medium transition-colors duration-300",
@@ -25,7 +25,7 @@ export const defaultLinkVariants = cva(
   },
 );
 
-type DefaultLinkProps = LinkProps &
+export type DefaultLinkProps = LinkProps &
   VariantProps<typeof defaultLinkVariants> & {
     children?: ReactNode;
     openInNewTab: boolean;

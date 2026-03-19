@@ -9,7 +9,7 @@ type SegmentedControlItemStoryArgs = SegmentedControlItemProps & {
 };
 
 const meta: Meta<SegmentedControlItemStoryArgs> = {
-  title: "Design System/Segmented Control/SegmentedControlItem",
+  title: "Data Entry/Segmented Control/SegmentedControlItem",
   component: SegmentedControlItem,
   parameters: {
     layout: "centered",
