@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs";
 import { TypographyShowcase } from "@/shared/components/design-system/typography/Typography";
 
 const meta = {
-  title: "Design System/Primitives/Typography",
+  title: "Foundation/Typography",
   component: TypographyShowcase,
   parameters: {
     layout: "padded",

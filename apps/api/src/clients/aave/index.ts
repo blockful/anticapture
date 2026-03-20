@@ -39,12 +39,10 @@ export class AAVEClient<
 
   async getQuorum(): Promise<bigint> {
     return 0n;
-    // return readContract(this.client, {
-    //   abi: this.abi,
-    //   address: this.address,
-    //   functionName: "quorum",
-    //   args: [BigInt(Math.floor(Date.now() / 1000))],
-    // });
+  }
+
+  async getTimelockDelay(): Promise<bigint> {
+    return 0n;
   }
 
   async getVotingDelay(): Promise<bigint> {
@@ -53,34 +51,6 @@ export class AAVEClient<
 
   async getVotingPeriod(): Promise<bigint> {
     return 0n;
-  }
-
-  async getTimelockDelay(): Promise<bigint> {
-    return 0n;
-    // const timelockAddress = await readContract(this.client, {
-    //   abi: this.abi,
-    //   address: this.address,
-    //   functionName: "timelock",
-    // });
-    // return readContract(this.client, {
-    //   abi: [
-    //     {
-    //       inputs: [],
-    //       name: "getMinDelay",
-    //       outputs: [
-    //         {
-    //           internalType: "uint256",
-    //           name: "",
-    //           type: "uint256",
-    //         },
-    //       ],
-    //       stateMutability: "view",
-    //       type: "function",
-    //     },
-    //   ],
-    //   address: timelockAddress,
-    //   functionName: "getMinDelay",
-    // });
   }
 
   calculateQuorum(votes: {

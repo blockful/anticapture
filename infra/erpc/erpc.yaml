@@ -1,0 +1,109 @@
+logLevel: ${LOG_LEVEL:-warn}
+
+server:
+  httpHostV4: "0.0.0.0"
+  httpHostV6: "[::]"
+  httpPort: 4000
+
+metrics:
+  enabled: true
+  hostV4: "0.0.0.0"
+  hostV6: "[::]"
+  port: 4001
+
+# Two projects: indexer (high throughput) vs api (conservative per-IP limits)
+# Access via: http://erpc:4000/indexer/evm/<chainId> or http://erpc:4000/api/evm/<chainId>
+projects:
+  - id: indexer
+    rateLimitBudget: indexer-limit
+    networks:
+      - architecture: evm
+        evm:
+          chainId: 1
+      - architecture: evm
+        evm:
+          chainId: 534352
+    upstreams:
+      - id: chainstack
+        endpoint: chainstack://${CHAINSTACK_API_KEY}
+        rateLimitBudget: chainstack-indexer
+        group: primary
+        autoIgnoreUnsupportedMethods: true
+        failsafe:
+          - matchMethod: "*"
+            timeout:
+              duration: 15s
+            retry:
+              maxAttempts: 3
+              delay: 300ms
+              backoffMaxDelay: 5s
+              backoffFactor: 1.5
+
+  - id: api
+    rateLimitBudget: api-limit
+    networks:
+      - architecture: evm
+        evm:
+          chainId: 1
+      - architecture: evm
+        evm:
+          chainId: 534352
+    upstreams:
+      - id: chainstack
+        endpoint: chainstack://${CHAINSTACK_API_KEY}
+        rateLimitBudget: chainstack-api
+        group: primary
+        autoIgnoreUnsupportedMethods: true
+        failsafe:
+          - matchMethod: "*"
+            timeout:
+              duration: 10s
+            retry:
+              maxAttempts: 2
+              delay: 200ms
+
+rateLimiters:
+  store:
+    driver: memory
+
+  budgets:
+    # Upstream-level: split Chainstack's 400 req/s between indexer and api
+    - id: chainstack-indexer
+      rules:
+        - method: "*"
+          maxCount: 300
+          period: second
+    - id: chainstack-api
+      rules:
+        - method: "*"
+          maxCount: 100
+          period: second
+    # Project-level: self-imposed limits
+    - id: indexer-limit
+      rules:
+        - method: "*"
+          maxCount: 300
+          period: second
+    - id: api-limit
+      rules:
+        - method: "*"
+          maxCount: 20
+          period: second
+          perIP: true
+
+database:
+  evmJsonRpcCache:
+    connectors:
+      - id: postgres-cache
+        driver: postgresql
+        postgresql:
+          connectionUri: "${DATABASE_URL}"
+          table: rpc_cache
+          initTimeout: 5s
+          getTimeout: 1s
+          setTimeout: 2s
+    policies:
+      - network: "*"
+        method: "*"
+        finality: finalized
+        connector: postgres-cache

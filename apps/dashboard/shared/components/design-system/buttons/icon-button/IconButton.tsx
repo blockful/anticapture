@@ -7,7 +7,7 @@ import type {
   ButtonProps,
 } from "@/shared/components/design-system/buttons/types";
 import Spinner from "@/shared/components/ui/spinner";
-import { cn } from "@/shared/utils";
+import { cn } from "@/shared/utils/cn";
 
 interface IconButtonProps extends ButtonProps {
   icon?: ElementType;

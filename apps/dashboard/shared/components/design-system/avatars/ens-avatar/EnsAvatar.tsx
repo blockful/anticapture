@@ -7,7 +7,7 @@ import Blockies from "react-blockies";
 import type { Address } from "viem";
 
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
+import { BadgeStatus } from "@/shared/components/design-system/badges";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { AddressDetailsTooltip } from "@/shared/components/tooltips/AddressDetailsTooltip";
 import { useArkhamData } from "@/shared/hooks/graphql-client/useArkhamData";

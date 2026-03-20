@@ -5,7 +5,7 @@ import type { ProgressBarProps } from "@/shared/components/design-system/progres
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta: Meta<ProgressBarProps> = {
-  title: "Design System/Progress Bar/ProgressBar",
+  title: "Data Display/ProgressBar",
   component: ProgressBar,
   parameters: {
     layout: "centered",

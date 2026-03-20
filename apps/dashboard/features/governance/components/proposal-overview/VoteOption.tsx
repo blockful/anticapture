@@ -1,6 +1,6 @@
 import { formatUnits } from "viem";
 
-import { RadioIndicator } from "@/shared/components/design-system/buttons/RadioIndicator";
+import { RadioIndicator } from "@/shared/components/design-system/form/fields";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 
 interface VoteOptionProps {

@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs";
 import { Input } from "@/shared/components/design-system/form/fields/input/Input";
 
 const meta: Meta<typeof Input> = {
-  title: "Design System/Form/Input",
+  title: "Data Entry/Form/Input",
   component: Input,
   parameters: {
     layout: "centered",

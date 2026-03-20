@@ -18,7 +18,20 @@ Use this checklist when **updating an existing** design system component. Always
 - [ ] Read the `index.ts` re-export if present
 - [ ] Check for other components that import from the same shared types/styles
 
-### 3. Diff: Code vs Figma
+### 3. Audit Folder Structure
+
+Before touching any code, verify the component follows the hierarchy rule:
+
+- [ ] **Root composite** (`Component.tsx`) has `.stories.tsx` + `.figma.tsx` alongside it
+- [ ] **Sub-parts that are named Figma components** live in their own `component-name/` subfolder with `.stories.tsx` + `.figma.tsx`
+- [ ] **Internal building blocks** (only used by one parent, no independent Figma frame) are flat `.tsx` files inside the parent subfolder — no own subfolder, no stories, no figma
+- [ ] **`index.ts`** uses explicit named exports (`export { X }`, `export type { Y }`) — never `export *`
+- [ ] **`types.ts`** exists for shared prop types; inline prop types only acceptable when tied to a CVA variant object
+- [ ] **`cn()`** imported from `@/shared/utils/cn` (not `@/shared/utils`)
+- [ ] **No imports from `@/shared/components`** inside design-system components — use direct source paths to avoid circular deps
+- [ ] Component belongs in the correct category (`RadioButton` → `form/fields/`, not `buttons/`)
+
+### 4. Diff: Code vs Figma
 
 Compare what the code currently implements against what Figma defines:
 
