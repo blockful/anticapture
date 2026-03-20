@@ -5,6 +5,7 @@ import ensConfig from "./config/ens.config";
 import gitcoinConfig from "./config/gitcoin.config";
 import nounsConfig from "./config/nouns.config";
 import obolConfig from "./config/obol.config";
+import olasConfig from "./config/olas.config";
 import optimismConfig from "./config/optimism.config";
 import scrollConfig from "./config/scroll.config";
 import shutterConfig from "./config/shutter.config";
@@ -23,6 +24,7 @@ export default {
     ...scrollConfig.chains,
     ...compoundConfig.chains,
     ...obolConfig.chains,
+    ...olasConfig.chains,
     ...zkConfig.chains,
     ...shutterConfig.chains,
   },
@@ -37,6 +39,7 @@ export default {
     ...scrollConfig.contracts,
     ...compoundConfig.contracts,
     ...obolConfig.contracts,
+    ...olasConfig.contracts,
     ...zkConfig.contracts,
     ...shutterConfig.contracts,
   },
