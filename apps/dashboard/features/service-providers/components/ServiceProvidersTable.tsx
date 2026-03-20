@@ -64,6 +64,9 @@ export const ServiceProvidersTable = ({
   const year2Cols = spp === "SPP2" ? SPP2_YEAR2_QUARTERS : [];
   const allCols = [...year1Cols, ...year2Cols];
 
+  // Total pixel width of all year2 columns combined — used for the "1Y only" overlay
+  const year2TotalWidth = year2Cols.length * 140;
+
   const sppProviderList = ENS_SERVICE_PROVIDERS.filter((p) =>
     p.sppPrograms.includes(spp),
   );
@@ -109,9 +112,10 @@ export const ServiceProvidersTable = ({
 
   const buildQuarterColumn = (
     col: QuarterColumn,
-    groupLabel?: string,
+    year2ColIndex?: number,
   ): ColumnDef<ProviderRow> => {
     const key = quarterKey(col);
+    const isYear2 = year2ColIndex !== undefined;
     const isCurrentQuarter =
       col.year === currentYear && col.quarter === currentQuarter;
     const meta = QUARTER_DUE_DATES[col.year]?.[col.quarter];
@@ -126,13 +130,8 @@ export const ServiceProvidersTable = ({
               "bg-orange-400/12 border-1 border-surface-solid-brand",
           )}
         >
-          {groupLabel && (
-            <span className="text-secondary mb-0.5 text-[10px] font-medium uppercase tracking-wider">
-              {groupLabel}
-            </span>
-          )}
           <span className="text-primary text-xs font-medium">
-            {col.quarter}
+            {col.year}/{col.quarter}
             {isCurrentQuarter && (
               <span className="text-secondary ml-1 font-normal">(Current)</span>
             )}
@@ -142,19 +141,39 @@ export const ServiceProvidersTable = ({
           </span>
         </div>
       ),
-      cell: ({ row }: { row: { original: ProviderRow } }) =>
-        isLoading ? (
-          <SkeletonRow
-            parentClassName="flex animate-pulse"
-            className="h-4 w-20"
-          />
-        ) : (
-          <StatusCell
-            status={row.original.quarters[key].status}
-            reportUrl={row.original.quarters[key].reportUrl}
-          />
-        ),
-      meta: { columnClassName: "w-[149px] px-2" },
+      cell: ({ row }: { row: { original: ProviderRow } }) => {
+        if (isLoading) {
+          return (
+            <SkeletonRow
+              parentClassName="flex animate-pulse"
+              className="h-4 w-20"
+            />
+          );
+        }
+
+        const { status, reportUrl } = row.original.quarters[key];
+
+        if (status === "1y_only" && isYear2) {
+          // First year2 cell renders a wide overlay that visually spans all year2 columns
+          if (year2ColIndex === 0) {
+            return (
+              <div
+                className="bg-surface-contrast absolute inset-y-0 left-0 z-10 flex items-center justify-center"
+                style={{ width: year2TotalWidth }}
+              >
+                <span className="text-dimmed text-sm font-normal italic">
+                  1Y only
+                </span>
+              </div>
+            );
+          }
+          // Subsequent year2 cells are visually covered by the first cell's overlay
+          return null;
+        }
+
+        return <StatusCell status={status} reportUrl={reportUrl} />;
+      },
+      meta: { columnClassName: "w-[140px] px-2 relative" },
     };
   };
 
@@ -183,7 +202,8 @@ export const ServiceProvidersTable = ({
           />
         ),
       meta: {
-        columnClassName: "w-[220px] px-2 sticky left-0 z-10 bg-surface",
+        columnClassName:
+          "w-[220px] px-2 sticky left-0 z-20 [&:is(th)]:bg-surface-contrast bg-surface-default border-r border-border-default",
       },
     },
     {
@@ -192,20 +212,25 @@ export const ServiceProvidersTable = ({
         <Button
           variant="ghost"
           size="sm"
-          className="text-secondary w-full justify-start p-0"
+          className="text-secondary h-full w-full flex-col items-start justify-center gap-0 p-0"
           onClick={() => column.toggleSorting()}
         >
-          <h4 className="text-table-header whitespace-nowrap">Budget</h4>
-          <ArrowUpDown
-            props={{ className: "size-4" }}
-            activeState={
-              column.getIsSorted() === "asc"
-                ? ArrowState.UP
-                : column.getIsSorted() === "desc"
-                  ? ArrowState.DOWN
-                  : ArrowState.DEFAULT
-            }
-          />
+          <div className="flex items-center gap-1">
+            <span className="text-table-header whitespace-nowrap">Budget/</span>
+            <ArrowUpDown
+              props={{ className: "size-4" }}
+              activeState={
+                column.getIsSorted() === "asc"
+                  ? ArrowState.UP
+                  : column.getIsSorted() === "desc"
+                    ? ArrowState.DOWN
+                    : ArrowState.DEFAULT
+              }
+            />
+          </div>
+          <span className="text-table-header whitespace-nowrap font-normal">
+            Stream Duration
+          </span>
         </Button>
       ),
       cell: ({ row }) =>
@@ -215,23 +240,30 @@ export const ServiceProvidersTable = ({
             className="h-4 w-16"
           />
         ) : (
-          <div className="flex flex-col gap-0.5">
-            <span className="text-primary text-sm">
+          <div className="flex flex-col">
+            <span className="text-secondary text-sm">
               {formatNumberUserReadable(row.original.budget)}
             </span>
             {spp === "SPP2" && (
-              <span className="text-secondary text-xs">
-                {row.original.streamDuration}Y stream
+              <span
+                className={cn(
+                  "text-xs",
+                  row.original.streamDuration === 2
+                    ? "text-blue-400"
+                    : "text-pink-500",
+                )}
+              >
+                {row.original.streamDuration === 2 ? "2 years" : "1 year"}
               </span>
             )}
           </div>
         ),
       enableSorting: true,
       sortingFn: (rowA, rowB) => rowA.original.budget - rowB.original.budget,
-      meta: { columnClassName: "w-[92px]" },
+      meta: { columnClassName: "w-[152px]" },
     },
     ...year1Cols.map((col) => buildQuarterColumn(col)),
-    ...year2Cols.map((col) => buildQuarterColumn(col, "Year 2")),
+    ...year2Cols.map((col, i) => buildQuarterColumn(col, i)),
   ];
 
   return (
