@@ -11,6 +11,7 @@ export enum DaoIdEnum {
   COMP = "COMP",
   OBOL = "OBOL",
   ZK = "ZK",
+  GNO = "GNO",
 }
 
 export const SECONDS_IN_DAY = 24 * 60 * 60;

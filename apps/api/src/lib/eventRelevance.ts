@@ -33,6 +33,14 @@ const DAO_RELEVANCE_THRESHOLDS: Record<DaoIdEnum, EventRelevanceMap> = {
     [FeedEventType.PROPOSAL]: EMPTY_THRESHOLDS,
     [FeedEventType.PROPOSAL_EXTENDED]: EMPTY_THRESHOLDS,
   },
+  // TODO: tune thresholds once GNO supply/price is known
+  [DaoIdEnum.GNO]: {
+    [FeedEventType.TRANSFER]: EMPTY_THRESHOLDS,
+    [FeedEventType.DELEGATION]: EMPTY_THRESHOLDS,
+    [FeedEventType.VOTE]: EMPTY_THRESHOLDS,
+    [FeedEventType.PROPOSAL]: EMPTY_THRESHOLDS,
+    [FeedEventType.PROPOSAL_EXTENDED]: EMPTY_THRESHOLDS,
+  },
   [DaoIdEnum.AAVE]: {
     [FeedEventType.TRANSFER]: EMPTY_THRESHOLDS,
     [FeedEventType.DELEGATION]: EMPTY_THRESHOLDS,

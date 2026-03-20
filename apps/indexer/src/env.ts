@@ -8,6 +8,7 @@ dotenv.config();
 export const env = z
   .object({
     RPC_URL: z.string(),
+    GNOSIS_RPC_URL: z.string().optional(),
     DATABASE_URL: z.string().optional(),
     POLLING_INTERVAL: z.coerce.number().default(10000), // 10s
     MAX_REQUESTS_PER_SECOND: z.coerce.number().default(20),

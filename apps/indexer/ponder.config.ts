@@ -1,4 +1,5 @@
 import aaveConfig from "./config/aave.config";
+import gnoConfig from "./config/gno.config";
 import arbitrumConfig from "./config/arbitrum.config";
 import compoundConfig from "./config/compound.config";
 import ensConfig from "./config/ens.config";
@@ -25,6 +26,7 @@ export default {
     ...obolConfig.chains,
     ...zkConfig.chains,
     ...shutterConfig.chains,
+    ...gnoConfig.chains,
   },
   contracts: {
     ...aaveConfig.contracts,
@@ -39,5 +41,6 @@ export default {
     ...obolConfig.contracts,
     ...zkConfig.contracts,
     ...shutterConfig.contracts,
+    ...gnoConfig.contracts,
   },
 };

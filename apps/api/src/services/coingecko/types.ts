@@ -24,6 +24,8 @@ export const CoingeckoTokenIdEnum: Record<DaoIdEnum, string> = {
   OBOL: "obol-2",
   ZK: "zksync",
   SHU: "shutter",
+  // TODO: verify GNO coingecko token ID
+  GNO: "gnosis",
 } as const;
 
 export const CoingeckoIdToAssetPlatformId = {
