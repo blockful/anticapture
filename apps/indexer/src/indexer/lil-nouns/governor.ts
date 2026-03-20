@@ -1,5 +1,4 @@
 import { ponder } from "ponder:registry";
-import { tokenPrice } from "ponder:schema";
 
 import {
   updateProposalStatus,
@@ -8,12 +7,11 @@ import {
 } from "@/eventHandlers";
 import { DaoIdEnum } from "@/lib/enums";
 import { ProposalStatus } from "@/lib/constants";
-import { truncateTimestampToMidnight } from "@/lib/date-helpers";
 
-export function GovernorIndexer(blockTime: number) {
-  const daoId = DaoIdEnum.NOUNS;
+export function LilNounsGovernorIndexer(blockTime: number) {
+  const daoId = DaoIdEnum.LIL_NOUNS;
 
-  ponder.on(`NounsGovernor:VoteCast`, async ({ event, context }) => {
+  ponder.on(`LilNounsGovernor:VoteCast`, async ({ event, context }) => {
     await voteCast(context, daoId, {
       proposalId: event.args.proposalId.toString(),
       voter: event.args.voter,
@@ -26,7 +24,7 @@ export function GovernorIndexer(blockTime: number) {
     });
   });
 
-  ponder.on(`NounsGovernor:ProposalCreated`, async ({ event, context }) => {
+  ponder.on(`LilNounsGovernor:ProposalCreated`, async ({ event, context }) => {
     await proposalCreated(context, daoId, blockTime, {
       proposalId: event.args.id.toString(),
       txHash: event.transaction.hash,
@@ -44,7 +42,7 @@ export function GovernorIndexer(blockTime: number) {
     });
   });
 
-  ponder.on(`NounsGovernor:ProposalCanceled`, async ({ event, context }) => {
+  ponder.on(`LilNounsGovernor:ProposalCanceled`, async ({ event, context }) => {
     await updateProposalStatus(
       context,
       event.args.id.toString(),
@@ -52,7 +50,7 @@ export function GovernorIndexer(blockTime: number) {
     );
   });
 
-  ponder.on(`NounsGovernor:ProposalExecuted`, async ({ event, context }) => {
+  ponder.on(`LilNounsGovernor:ProposalExecuted`, async ({ event, context }) => {
     await updateProposalStatus(
       context,
       event.args.id.toString(),
@@ -60,7 +58,7 @@ export function GovernorIndexer(blockTime: number) {
     );
   });
 
-  ponder.on(`NounsGovernor:ProposalQueued`, async ({ event, context }) => {
+  ponder.on(`LilNounsGovernor:ProposalQueued`, async ({ event, context }) => {
     await updateProposalStatus(
       context,
       event.args.id.toString(),
@@ -68,20 +66,11 @@ export function GovernorIndexer(blockTime: number) {
     );
   });
 
-  ponder.on(`NounsGovernor:ProposalVetoed`, async ({ event, context }) => {
+  ponder.on(`LilNounsGovernor:ProposalVetoed`, async ({ event, context }) => {
     await updateProposalStatus(
       context,
       event.args.id.toString(),
       ProposalStatus.VETOED,
     );
-  });
-
-  ponder.on(`NounsAuction:AuctionSettled`, async ({ event, context }) => {
-    await context.db.insert(tokenPrice).values({
-      price: event.args.amount,
-      timestamp: BigInt(
-        truncateTimestampToMidnight(Number(event.block.timestamp)),
-      ),
-    });
   });
 }
