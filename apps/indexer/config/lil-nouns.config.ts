@@ -7,7 +7,7 @@ import {
   GovernorAbi,
   TokenAbi,
   LegacyGovernorABI,
-} from "@/indexer/lilnouns/abi";
+} from "@/indexer/lil-nouns/abi";
 
 const LIL_NOUNS_CONTRACTS = CONTRACT_ADDRESSES[DaoIdEnum.LIL_NOUNS];
 

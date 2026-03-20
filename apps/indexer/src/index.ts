@@ -12,7 +12,7 @@ import {
 import {
   LilNounsTokenIndexer,
   LilNounsGovernorIndexer,
-} from "@/indexer/lilnouns";
+} from "@/indexer/lil-nouns";
 import {
   NounsTokenIndexer,
   GovernorIndexer as NounsGovernorIndexer,

@@ -3,7 +3,7 @@ import arbitrumConfig from "./config/arbitrum.config";
 import compoundConfig from "./config/compound.config";
 import ensConfig from "./config/ens.config";
 import gitcoinConfig from "./config/gitcoin.config";
-import lilnounsConfig from "./config/lilnouns.config";
+import lilnounsConfig from "./config/lil-nouns.config";
 import nounsConfig from "./config/nouns.config";
 import obolConfig from "./config/obol.config";
 import optimismConfig from "./config/optimism.config";
