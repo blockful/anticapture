@@ -60,7 +60,6 @@ Indexed against local reth node, verified against on-chain data:
 
 ## What's Pending
 
-- API client (FLUIDClient) not yet created
 - Dashboard DAO config not yet created
 - Gateway env var (DAO_API_FLUID) not yet configured
 

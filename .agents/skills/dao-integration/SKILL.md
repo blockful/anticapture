@@ -23,6 +23,8 @@ Before starting, gather these details about the DAO:
 - **Treasury addresses**: DAO multisigs, vesting contracts
 - **CEX/DEX/Lending addresses**: Known exchange wallets, LP pools, lending contracts holding the token
 - **Governance rules**: Voting delay, period, quorum calculation, cancel function, vote logic
+- **CoinGecko token ID**: The slug from the CoinGecko URL (e.g. `"uniswap"`, `"fluid"`) — ask the user
+- **Event relevance thresholds**: LOW/MEDIUM/HIGH token amounts for feed relevance filtering — ask the user
 
 ## Integration Checklist
 
@@ -225,6 +227,14 @@ Follow the pattern in `apps/api/src/clients/ens/index.ts`.
 
 Add `export * from "./<dao>";`
 
+#### 3d. Event Relevance (`apps/api/src/lib/eventRelevance.ts`)
+
+**Ask the user** for the LOW/MEDIUM/HIGH relevance thresholds for TRANSFER, DELEGATION, and VOTE events. These determine how events appear in the feed. The `DAO_RELEVANCE_THRESHOLDS` map is a `Record<DaoIdEnum, EventRelevanceMap>` — the compiler will error if the new DAO is missing. Default to `EMPTY_THRESHOLDS` for all event types and let the user provide specific values later.
+
+#### 3e. CoinGecko Mapping (`apps/api/src/services/coingecko/types.ts`)
+
+**Ask the user** for the CoinGecko token ID (the slug used in CoinGecko URLs, e.g. `"uniswap"`, `"fluid"`). Add it to `CoingeckoTokenIdEnum` and add the corresponding asset platform to `CoingeckoIdToAssetPlatformId`. Both are `Record<DaoIdEnum, ...>` — the compiler will error if missing.
+
 ### Step 4: Gateway
 
 The gateway auto-discovers DAOs from `DAO_API_*` environment variables. Add:
@@ -289,15 +299,15 @@ pnpm dashboard typecheck && pnpm dashboard lint
 
 ## Common Patterns & Variations
 
-| Variation                          | Example DAO       | Key Difference                                                                                                                                                                                        |
-| ---------------------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Standard ERC20 + Compound Governor | ENS, UNI, GTC, OP | Straightforward, follow ENS pattern                                                                                                                                                                   |
-| ERC721 (NFT) token                 | NOUNS             | Token is NFT, auto-delegates on transfer                                                                                                                                                              |
-| Multi-token tracking               | AAVE              | Tracks AAVE + stkAAVE + aAAVE separately                                                                                                                                                              |
-| Azorius governance (Fractal)       | SHU               | Different governor events, custom proposal handling                                                                                                                                                   |
-| Multi-chain                        | ARB, OP, SCR      | Config needs chain-specific RPC and chain ID                                                                                                                                                          |
-| No governor (token-only)           | ARB               | Only token indexer, no governor handler                                                                                                                                                               |
-| Vote-escrow (veToken) governance   | OLAS              | ERC20 has no delegation; voting power from veToken lock. Requires custom veToken indexer for `Deposit`/`Withdraw` events to track `delegatedSupply` and `accountPower`. Governor events are standard. |
+| Variation                          | Example DAO              | Key Difference                                                                                                                                                                                        |
+| ---------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Standard ERC20 + Compound Governor | ENS, UNI, GTC, OP, FLUID | Straightforward, follow ENS pattern. FLUID reuses the COMP ABI (identical CompoundGovernor). Timelock uses `delay()` (CompoundTimelock), quorum is `forVotes` only.                                   |
+| ERC721 (NFT) token                 | NOUNS                    | Token is NFT, auto-delegates on transfer                                                                                                                                                              |
+| Multi-token tracking               | AAVE                     | Tracks AAVE + stkAAVE + aAAVE separately                                                                                                                                                              |
+| Azorius governance (Fractal)       | SHU                      | Different governor events, custom proposal handling                                                                                                                                                   |
+| Multi-chain                        | ARB, OP, SCR             | Config needs chain-specific RPC and chain ID                                                                                                                                                          |
+| No governor (token-only)           | ARB                      | Only token indexer, no governor handler                                                                                                                                                               |
+| Vote-escrow (veToken) governance   | OLAS                     | ERC20 has no delegation; voting power from veToken lock. Requires custom veToken indexer for `Deposit`/`Withdraw` events to track `delegatedSupply` and `accountPower`. Governor events are standard. |
 
 ## INTEGRATION.md Template
 
