@@ -4,6 +4,7 @@ import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 import type { DaoConfiguration } from "@/shared/dao-config/types";
 import { EnsOgIcon } from "@/shared/og/dao-og-icons";
+import { FluidIcon } from "../components/icons/FluidIcon";
 
 export const FLUID: DaoConfiguration = {
   name: "Fluid",
@@ -13,6 +14,7 @@ export const FLUID: DaoConfiguration = {
     svgBgColor: "#6C63FF",
   },
   ogIcon: EnsOgIcon,
+  icon: FluidIcon,
   daoOverview: {
     token: "ERC20",
     chain: { ...mainnet, icon: MainnetIcon },
@@ -34,8 +36,10 @@ export const FLUID: DaoConfiguration = {
       quorumCalculation: QUORUM_CALCULATION_TYPES.TOTAL_SUPPLY,
     },
   },
+  initialPage: "governance",
+  overviewPage: false,
   tokenDistribution: true,
   dataTables: true,
-  activityFeed: true,
+  activityFeed: false,
   governancePage: true,
 };
