@@ -834,6 +834,7 @@ export const NonCirculatingAddresses: Record<
     "ZKsync Association Allocation":
       "0x0681e3808a0aa12004fb815ebb4515dc823cfbb4",
   },
+  [DaoIdEnum.LIL_NOUNS]: {},
   [DaoIdEnum.SHU]: {},
 };
 
