@@ -22,7 +22,7 @@ import { cn, formatNumberUserReadable } from "@/shared/utils";
 
 interface ProviderRow {
   name: string;
-  iconUrl?: string;
+  avatarUrl?: string;
   websiteUrl?: string;
   proposalUrl?: string;
   budget: number;
@@ -69,7 +69,7 @@ export const ServiceProvidersTable = ({
         return [
           {
             name: provider.name,
-            iconUrl: provider.iconUrl,
+            avatarUrl: provider.avatarUrl,
             websiteUrl: provider.websiteUrl,
             proposalUrl: provider.proposalUrl,
             budget: provider.budget,
@@ -100,7 +100,7 @@ export const ServiceProvidersTable = ({
         ) : (
           <ProviderNameCell
             name={row.original.name}
-            iconUrl={row.original.iconUrl}
+            avatarUrl={row.original.avatarUrl}
             websiteUrl={row.original.websiteUrl}
             proposalUrl={row.original.proposalUrl}
           />
