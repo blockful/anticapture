@@ -19,6 +19,8 @@ export interface historicalBalanceRepositoryInterface {
     accountId: Address,
     minDelta?: string,
     maxDelta?: string,
+    fromDate?: number,
+    toDate?: number,
   ): Promise<number>;
 }
 
@@ -57,6 +59,8 @@ export class HistoricalBalancesService {
       account,
       minDelta,
       maxDelta,
+      fromDate,
+      toDate,
     );
     return { items, totalCount };
   }

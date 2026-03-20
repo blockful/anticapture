@@ -32,6 +32,7 @@ describe("TokenService", () => {
       dexSupply: 0n,
       lendingSupply: 0n,
       circulatingSupply: 0n,
+      nonCirculatingSupply: 0n,
       treasury: 0n,
     };
     repo.tokenData = mockToken;

@@ -41,10 +41,10 @@ describe("proxy route", () => {
     expect(res.status).toBe(200);
   });
 
-  it("should return 404 when no DAO identifier is provided in path", async () => {
+  it("should return 400 when no DAO identifier is provided in path", async () => {
     const res = await app.request("/");
 
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(400);
   });
 
   it("should resolve DAO case-insensitively from path", async () => {

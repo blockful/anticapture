@@ -87,6 +87,7 @@ describe("Token Properties Controller (integration)", () => {
         dexSupply: "20000000000000000",
         lendingSupply: "5000000000000000",
         circulatingSupply: "800000000000000000",
+        nonCirculatingSupply: "0",
         treasury: "100000000000000000",
         price: "25.50",
       });
@@ -110,6 +111,7 @@ describe("Token Properties Controller (integration)", () => {
         dexSupply: "20000000000000000",
         lendingSupply: "5000000000000000",
         circulatingSupply: "800000000000000000",
+        nonCirculatingSupply: "0",
         treasury: "100000000000000000",
         price: "0.01",
       });
@@ -141,6 +143,7 @@ describe("Token Properties Controller (integration)", () => {
         dexSupply: "20000000000000000",
         lendingSupply: "5000000000000000",
         circulatingSupply: "800000000000000000",
+        nonCirculatingSupply: "0",
         treasury: "100000000000000000",
         price: "1",
       });
@@ -164,6 +167,7 @@ describe("Token Properties Controller (integration)", () => {
         dexSupply: "20000000000000000",
         lendingSupply: "5000000000000000",
         circulatingSupply: "800000000000000000",
+        nonCirculatingSupply: "0",
         treasury: "100000000000000000",
         price: "25.50",
       });

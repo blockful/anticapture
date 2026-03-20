@@ -13,7 +13,7 @@ import {
 import { TokenHistoricalPriceResponse } from "@/mappers";
 import { NFTPriceService } from "./index";
 
-const COINGECKO_URL = "https://api.coingecko.com/";
+const COINGECKO_URL = "https://api.coingecko.com";
 const COINGECKO_KEY = "test-key";
 const ETH_MARKET_CHART_URL = `${COINGECKO_URL}/coins/ethereum/market_chart`;
 const ETH_MARKET_CHART_RANGE_URL = `${COINGECKO_URL}/coins/ethereum/market_chart/range`;

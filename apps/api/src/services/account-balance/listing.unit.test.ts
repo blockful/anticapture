@@ -120,7 +120,7 @@ describe("AccountBalanceService", () => {
       );
     });
 
-    it("should pass empty exclude list for DAO with no treasury addresses", async () => {
+    it("should exclude DAO treasury addresses for ARB when excludeDaoAddresses is true", async () => {
       mockRepo.getAccountBalancesWithVariation.mockResolvedValue({
         items: [],
         totalCount: 0n,
@@ -143,7 +143,9 @@ describe("AccountBalanceService", () => {
       const [, , , , , , , , excludeAddresses] =
         mockRepo.getAccountBalancesWithVariation.mock.calls[0]!;
 
-      expect(excludeAddresses).toEqual([]);
+      expect(excludeAddresses).toEqual(
+        Object.values(TreasuryAddresses[DaoIdEnum.ARB]),
+      );
     });
 
     it("should exclude correct addresses for SHU DAO", async () => {
