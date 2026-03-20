@@ -1,8 +1,23 @@
 import type { Preview } from "@storybook/nextjs";
 import React, { useEffect } from "react";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  ApolloClient,
+  ApolloLink,
+  ApolloProvider,
+  InMemoryCache,
+  Observable,
+} from "@apollo/client";
 
 import "../app/globals.css";
+
+const queryClient = new QueryClient();
+
+const mockApolloClient = new ApolloClient({
+  link: new ApolloLink(() => new Observable(() => {})),
+  cache: new InMemoryCache(),
+});
 
 const preview: Preview = {
   parameters: {
@@ -34,12 +49,20 @@ const preview: Preview = {
       }, []);
 
       return React.createElement(
-        TooltipProvider,
-        null,
+        ApolloProvider,
+        { client: mockApolloClient },
         React.createElement(
-          "div",
-          { className: "dark" },
-          React.createElement(Story),
+          QueryClientProvider,
+          { client: queryClient },
+          React.createElement(
+            TooltipProvider,
+            null,
+            React.createElement(
+              "div",
+              { className: "dark" },
+              React.createElement(Story),
+            ),
+          ),
         ),
       );
     },

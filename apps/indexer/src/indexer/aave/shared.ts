@@ -12,7 +12,21 @@ import { Context } from "ponder:registry";
 import { Address, getAddress, zeroAddress } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
+import {
+  MetricTypesEnum,
+  BurningAddresses,
+  CEXAddresses,
+  DEXAddresses,
+  LendingAddresses,
+  TreasuryAddresses,
+  NonCirculatingAddresses,
+} from "@/lib/constants";
 import { ensureAccountsExist } from "@/eventHandlers/shared";
+import {
+  updateCirculatingSupply,
+  updateSupplyMetric,
+  updateTotalSupply,
+} from "@/eventHandlers/metrics";
 
 export async function aaveSetup(
   context: Context,
@@ -183,6 +197,94 @@ export async function aaveTransfer(
       amount: value,
     },
   });
+
+  const cexAddressList = Object.values(CEXAddresses[daoId]);
+  const dexAddressList = Object.values(DEXAddresses[daoId]);
+  const lendingAddressList = Object.values(LendingAddresses[daoId]);
+  const treasuryAddressList = Object.values(TreasuryAddresses[daoId]);
+  const nonCirculatingAddressList = Object.values(
+    NonCirculatingAddresses[daoId],
+  );
+  const burningAddressList = Object.values(BurningAddresses[daoId]);
+
+  await updateSupplyMetric(
+    context,
+    "lendingSupply",
+    lendingAddressList,
+    MetricTypesEnum.LENDING_SUPPLY,
+    from,
+    to,
+    value,
+    daoId,
+    address,
+    timestamp,
+  );
+
+  await updateSupplyMetric(
+    context,
+    "cexSupply",
+    cexAddressList,
+    MetricTypesEnum.CEX_SUPPLY,
+    from,
+    to,
+    value,
+    daoId,
+    address,
+    timestamp,
+  );
+
+  await updateSupplyMetric(
+    context,
+    "dexSupply",
+    dexAddressList,
+    MetricTypesEnum.DEX_SUPPLY,
+    from,
+    to,
+    value,
+    daoId,
+    address,
+    timestamp,
+  );
+
+  await updateSupplyMetric(
+    context,
+    "treasury",
+    treasuryAddressList,
+    MetricTypesEnum.TREASURY,
+    from,
+    to,
+    value,
+    daoId,
+    address,
+    timestamp,
+  );
+
+  await updateSupplyMetric(
+    context,
+    "nonCirculatingSupply",
+    nonCirculatingAddressList,
+    MetricTypesEnum.NON_CIRCULATING_SUPPLY,
+    from,
+    to,
+    value,
+    daoId,
+    address,
+    timestamp,
+  );
+
+  await updateTotalSupply(
+    context,
+    burningAddressList,
+    MetricTypesEnum.TOTAL_SUPPLY,
+    from,
+    to,
+    value,
+    daoId,
+    address,
+    timestamp,
+  );
+
+  await updateCirculatingSupply(context, daoId, address, timestamp);
 }
 
 export async function aaveDelegateChanged(

@@ -7,7 +7,7 @@ import Blockies from "react-blockies";
 import type { Address } from "viem";
 
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
+import { BadgeStatus } from "@/shared/components/design-system/badges";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { AddressDetailsTooltip } from "@/shared/components/tooltips/AddressDetailsTooltip";
 import { useArkhamData } from "@/shared/hooks/graphql-client/useArkhamData";
@@ -39,6 +39,7 @@ interface EnsAvatarProps extends Omit<
   showFullAddress?: boolean;
   showTags?: boolean;
   showCopyAddress?: boolean;
+  maxVisibleTags?: number;
 }
 
 const sizeClasses: Record<AvatarSize, string> = {
@@ -83,6 +84,7 @@ export const EnsAvatar = ({
   isDashed = false,
   showTags = false,
   showCopyAddress = false,
+  maxVisibleTags,
   ...imageProps
 }: EnsAvatarProps) => {
   // Only fetch ENS data if we have an address and either we need imageUrl or fetchEnsName is true
@@ -97,6 +99,7 @@ export const EnsAvatar = ({
   } = useArkhamData(address);
 
   const [imageError, setImageError] = useState(false);
+  const [tagsExpanded, setTagsExpanded] = useState(false);
 
   // Determine the final image URL to use
   const finalImageUrl = imageUrl || ensData?.avatarUrl;
@@ -193,7 +196,12 @@ export const EnsAvatar = ({
     );
   }
 
-  const tags = showTags
+  const getContractLabel = () => {
+    if (isContract === null) return null;
+    return isContract ? "Contract" : "EOA";
+  };
+
+  const allTags = showTags
     ? [
         arkhamData?.twitter && `@${arkhamData.twitter}`,
         ensData?.ens,
@@ -202,9 +210,18 @@ export const EnsAvatar = ({
           (["cex", "dex"].includes(arkhamData.entityType.toLowerCase())
             ? arkhamData.entityType.toUpperCase()
             : arkhamData.entityType),
-        isContract !== null ? (isContract ? "Contract" : "EOA") : null,
+        getContractLabel(),
       ].filter(Boolean)
     : [];
+
+  const tags =
+    maxVisibleTags !== undefined && !tagsExpanded
+      ? allTags.slice(0, maxVisibleTags)
+      : allTags;
+  const hiddenTagsCount =
+    maxVisibleTags !== undefined && !tagsExpanded
+      ? Math.max(0, allTags.length - maxVisibleTags)
+      : 0;
 
   // Return avatar with name
   const avatarWithName = (
@@ -258,11 +275,25 @@ export const EnsAvatar = ({
                 />
               </>
             ) : (
-              tags.map((tag) => (
-                <BadgeStatus key={tag} variant="secondary">
-                  {tag}
-                </BadgeStatus>
-              ))
+              <>
+                {tags.map((tag) => (
+                  <BadgeStatus key={tag} variant="secondary">
+                    {tag}
+                  </BadgeStatus>
+                ))}
+                {hiddenTagsCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setTagsExpanded(true)}
+                    className="flex cursor-pointer items-center gap-0.5"
+                    aria-label={`Show ${hiddenTagsCount} more tags`}
+                  >
+                    <BadgeStatus variant="secondary">
+                      +{hiddenTagsCount}
+                    </BadgeStatus>
+                  </button>
+                )}
+              </>
             )}
           </div>
         )}

@@ -1,23 +1,13 @@
 "use client";
 
 import { Content, Trigger, Root, Portal } from "@radix-ui/react-tooltip";
-import type { ReactNode } from "react";
 import { useState } from "react";
 
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 import { useScreenSize } from "@/shared/hooks/useScreenSize";
-import { cn } from "@/shared/utils/";
+import { cn } from "@/shared/utils/cn";
 
-interface TooltipProps {
-  children: ReactNode;
-  tooltipContent: ReactNode;
-  className?: string;
-  triggerClassName?: string;
-  title?: ReactNode;
-  titleRight?: ReactNode;
-  asChild?: boolean;
-  disableMobileClick?: boolean;
-}
+import type { TooltipProps } from "./types";
 
 export function Tooltip({
   children,

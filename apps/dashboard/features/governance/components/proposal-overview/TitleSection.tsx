@@ -7,7 +7,7 @@ import { ProposalBadge } from "@/features/governance/components/proposal-overvie
 import type { ProposalStatus } from "@/features/governance/types";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
-import { BulletDivider } from "@/shared/components/design-system/section/BulletDivider";
+import { BulletDivider } from "@/shared/components/design-system/section";
 import daoConfigByDaoId from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
@@ -51,7 +51,7 @@ export const TitleSection = ({
   const daoIdKey = proposal.daoId.toUpperCase() as DaoIdEnum;
   const daoConfig = daoConfigByDaoId[daoIdKey];
   const twitterHandle = DAO_TWITTER_HANDLES[proposal.daoId.toUpperCase()] ?? "";
-  const proposalLink = `https://anticapture.com/${proposal.daoId.toLowerCase()}/governance/proposal/${proposal.id}`;
+  const proposalLink = `${process.env.NEXT_PUBLIC_SITE_URL}/${proposal.daoId.toLowerCase()}/governance/proposal/${proposal.id}`;
   const twitterText = `🗳️ [${daoConfig?.name ?? proposal.daoId.toUpperCase()} DAO] PROPOSAL DETECTED — STATUS: [${proposal.status.toUpperCase()}] // This transmission needs a response. ${twitterHandle} ${proposalLink}`;
 
   return (

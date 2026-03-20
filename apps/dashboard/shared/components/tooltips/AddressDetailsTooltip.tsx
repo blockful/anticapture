@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import type { Address } from "viem";
 
-import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
+import { BadgeStatus } from "@/shared/components/design-system/badges";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import type { ArkhamDataResult } from "@/shared/hooks/graphql-client/useArkhamData";

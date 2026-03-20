@@ -4,7 +4,7 @@
   "description": "REST API Gateway for Anticapture DAO APIs",
   "main": "dist/src/index.js",
   "scripts": {
-    "dev": "railway run -e dev -s gateful tsx watch src/index.ts",
+    "dev": "tsx watch src/index.ts",
     "start": "node dist/src/index.js",
     "build": "tsc",
     "test": "vitest run",

@@ -1,0 +1,37 @@
+import { cn } from "@/shared/utils/cn";
+
+import type { SectionTitleProps } from "@/shared/components/design-system/section/types";
+
+export const SectionTitle = ({
+  icon,
+  title,
+  riskLevel,
+  description,
+  className,
+}: SectionTitleProps) => {
+  return (
+    <div className={cn("flex w-full flex-col gap-2", className)}>
+      <div className="flex w-full items-center justify-between">
+        <div className="flex flex-col items-center gap-2 lg:flex-row">
+          <div className="flex items-center gap-2">
+            {icon}
+            <h4 className="text-primary text-xl font-medium leading-7 tracking-[-0.5%] lg:text-left">
+              {title}
+            </h4>
+          </div>
+          {riskLevel && (
+            <div className="hidden items-center lg:flex">{riskLevel}</div>
+          )}
+        </div>
+      </div>
+      <div>
+        <p className="text-secondary flex w-full flex-col text-justify text-sm font-normal">
+          {description}
+        </p>
+      </div>
+      {riskLevel && (
+        <div className="flex items-center lg:hidden">{riskLevel}</div>
+      )}
+    </div>
+  );
+};

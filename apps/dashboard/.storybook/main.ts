@@ -4,9 +4,11 @@ import { dirname } from "path";
 import { resolve } from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
+import { createRequire } from "module";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+const require = createRequire(import.meta.url);
 
 dotenv.config({
   path: resolve(__dirname, "../.env.local"),
@@ -29,6 +31,17 @@ const config: StorybookConfig = {
     options: {},
   },
   staticDirs: ["../public"],
+
+  webpackFinal: async (config) => {
+    config.resolve = config.resolve ?? {};
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "@apollo/client": dirname(
+        require.resolve("@apollo/client/package.json"),
+      ),
+    };
+    return config;
+  },
 
   env: (config) => ({
     ...config,

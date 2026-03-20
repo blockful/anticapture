@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 
-import { RadioButton } from "@/shared/components/design-system/buttons/RadioButton";
+import { RadioButton } from "@/shared/components/design-system/form/fields";
 import { cn } from "@/shared/utils";
 
 export interface SortOption {

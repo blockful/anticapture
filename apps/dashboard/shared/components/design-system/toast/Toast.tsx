@@ -1,13 +1,8 @@
 import { AlertTriangle, CheckCircle2, X } from "lucide-react";
 
-import { cn } from "@/shared/utils";
+import { cn } from "@/shared/utils/cn";
 
-export interface ToastProps {
-  message: string;
-  type: "success" | "error";
-  visible: boolean;
-  onClose: () => void;
-}
+import type { ToastProps } from "./types";
 
 const toastConfig = {
   success: {
