@@ -1,6 +1,12 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
+    "@anticapture/observability#build": {
+      "outputs": ["packages/observability/dist/**"]
+    },
+    "@anticapture/graphql-client#build": {
+      "outputs": ["packages/graphql-client/dist/**"]
+    },
     "@anticapture/dasbhoard#build": {
       "dependsOn": ["@anticapture/#graphql-client#build"],
       "outputs": ["dist/**", ".next/**", ".next/cache/**"]
