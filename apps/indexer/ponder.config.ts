@@ -2,6 +2,7 @@ import aaveConfig from "./config/aave.config";
 import arbitrumConfig from "./config/arbitrum.config";
 import compoundConfig from "./config/compound.config";
 import ensConfig from "./config/ens.config";
+import fluidConfig from "./config/fluid.config";
 import gitcoinConfig from "./config/gitcoin.config";
 import nounsConfig from "./config/nouns.config";
 import obolConfig from "./config/obol.config";
@@ -16,6 +17,7 @@ export default {
     ...aaveConfig.chains,
     ...arbitrumConfig.chains,
     ...ensConfig.chains,
+    ...fluidConfig.chains,
     ...uniswapConfig.chains,
     ...optimismConfig.chains,
     ...gitcoinConfig.chains,
@@ -30,6 +32,7 @@ export default {
     ...aaveConfig.contracts,
     ...arbitrumConfig.contracts,
     ...ensConfig.contracts,
+    ...fluidConfig.contracts,
     ...uniswapConfig.contracts,
     ...optimismConfig.contracts,
     ...gitcoinConfig.contracts,

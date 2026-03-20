@@ -1,6 +1,7 @@
 import { env } from "@/env";
 import { ARBTokenIndexer } from "@/indexer/arb";
 import { COMPGovernorIndexer, COMPTokenIndexer } from "@/indexer/comp";
+import { FLUIDGovernorIndexer, FLUIDTokenIndexer } from "@/indexer/fluid";
 import {
   GovernorIndexer as ENSGovernorIndexer,
   ENSTokenIndexer,
@@ -103,6 +104,11 @@ switch (daoId) {
     const { token } = CONTRACT_ADDRESSES[daoId];
     SHUTokenIndexer(token.address, token.decimals);
     SHUGovernorIndexer(blockTime);
+    break;
+  }
+  case DaoIdEnum.FLUID: {
+    FLUIDTokenIndexer(token.address, token.decimals);
+    FLUIDGovernorIndexer(blockTime);
     break;
   }
   case DaoIdEnum.AAVE: {
