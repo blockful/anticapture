@@ -37,6 +37,7 @@ export const TokenPropertiesSchema = z.object({
   dexSupply: z.string(),
   lendingSupply: z.string(),
   circulatingSupply: z.string(),
+  nonCirculatingSupply: z.string(),
   treasury: z.string(),
 });
 
@@ -60,6 +61,7 @@ export const TokenMapper = {
       dexSupply: dbToken.dexSupply.toString(),
       lendingSupply: dbToken.lendingSupply.toString(),
       circulatingSupply: dbToken.circulatingSupply.toString(),
+      nonCirculatingSupply: dbToken.nonCirculatingSupply.toString(),
       treasury: dbToken.treasury.toString(),
       price: tokenPrice,
     };

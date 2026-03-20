@@ -15,16 +15,20 @@ export const DrawerHeader = ({
   tabs,
   activeTab,
   onTabChange,
+  action,
   className,
 }: DrawerHeaderProps) => {
   return (
     <div className={cn("bg-surface-contrast w-full shrink-0", className)}>
-      <div className="bg-surface-contrast flex justify-between p-4">
-        <div className="flex flex-col gap-1">
+      <div className="bg-surface-contrast flex flex-col gap-2 p-4">
+        <div className="flex items-center justify-between">
           {subtitle && <DrawerSubtitle>{subtitle}</DrawerSubtitle>}
-          <DrawerTitle>{title}</DrawerTitle>
+          <DrawerCloseButton onClick={onClose} />
         </div>
-        <DrawerCloseButton onClick={onClose} />
+        <div className="flex items-start justify-between gap-2">
+          <DrawerTitle>{title}</DrawerTitle>
+          {action && <div className="shrink-0 self-start">{action}</div>}
+        </div>
       </div>
       {tabs && activeTab && onTabChange && (
         <DrawerTabs
