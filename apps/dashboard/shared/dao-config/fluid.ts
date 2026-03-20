@@ -23,10 +23,6 @@ export const FLUID: DaoConfiguration = {
       token: "0x6f40d4A6237C257fff2dB00FA0510DeEECd303eb",
       timelock: "0xC7Cb1dE2721BFC0E0DA1b9D526bCdC54eF1C0eFC",
     },
-    govPlatform: {
-      name: "Tally",
-      url: "https://tally.xyz/gov/fluid/proposal/",
-    },
     rules: {
       delay: true,
       changeVote: false,
