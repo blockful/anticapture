@@ -1,5 +1,6 @@
 import { COMP } from "@/shared/dao-config/comp";
 import { ENS } from "@/shared/dao-config/ens";
+import { FLUID } from "@/shared/dao-config/fluid";
 import { GTC } from "@/shared/dao-config/gtc";
 import { NOUNS } from "@/shared/dao-config/nouns";
 import { OBOL } from "@/shared/dao-config/obol";
@@ -13,6 +14,7 @@ export default {
   AAVE,
   UNI,
   ENS,
+  FLUID,
   OP,
   GTC,
   SCR,

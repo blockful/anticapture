@@ -235,56 +235,15 @@ Add `export * from "./<dao>";`
 
 **Ask the user** for the CoinGecko token ID (the slug used in CoinGecko URLs, e.g. `"uniswap"`, `"fluid"`). Add it to `CoingeckoTokenIdEnum` and add the corresponding asset platform to `CoingeckoIdToAssetPlatformId`. Both are `Record<DaoIdEnum, ...>` — the compiler will error if missing.
 
-### Step 4: Gateway
-
-The gateway auto-discovers DAOs from `DAO_API_*` environment variables. Add:
-
-```
-DAO_API_NEW_DAO=<api-url>
-```
-
-No code changes needed unless the API exposes new endpoint patterns.
-
 ### Step 5: Dashboard
 
-#### 5a. DAO Config (`apps/dashboard/shared/dao-config/<dao>.ts`)
+Follow the **`dashboard-dao` skill** (`.agents/skills/dashboard-dao/SKILL.md`) for the full step-by-step guide. The dashboard enum entry is already handled in Step 1 above — the `dashboard-dao` skill covers the remaining dashboard-specific work:
 
-Create a `DaoConfiguration` object. Follow `apps/dashboard/shared/dao-config/ens.ts` as a template. Required fields:
-
-```typescript
-export const NEW_DAO: DaoConfiguration = {
-  name: "New DAO",
-  decimals: 18,
-  color: { svgColor: "#...", svgBgColor: "#..." },
-  ogIcon: NewDaoOgIcon,
-  daoOverview: {
-    token: "ERC20",
-    chain: { ...mainnet, icon: MainnetIcon },
-    contracts: { governor: "0x...", token: "0x...", timelock: "0x..." },
-    rules: {
-      delay: true,
-      changeVote: false,
-      timelock: true,
-      cancelFunction: false,
-      logic: "For",
-      quorumCalculation: "...",
-    },
-  },
-  // Feature flags
-  resilienceStages: true,
-  tokenDistribution: true,
-  dataTables: true,
-  governancePage: true,
-};
-```
-
-#### 5b. Register config (`apps/dashboard/shared/dao-config/index.ts`)
-
-Import and add to the default export object.
-
-#### 5c. Icons (optional)
-
-Add DAO icon component in `apps/dashboard/shared/components/icons/` and OG icon in `apps/dashboard/shared/og/dao-og-icons/`.
+1. Quorum calculation label
+2. DAO config file creation
+3. Config registration
+4. Icons (optional)
+5. Governance implementation fields (optional)
 
 ## Verification
 
