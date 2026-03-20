@@ -1,6 +1,7 @@
 import { Account, Address, Chain, Client as vClient, Transport } from "viem";
 
 import { DAOClient } from "@/clients";
+import { DaoIdEnum } from "@/lib/enums";
 
 import { GovernorBase } from "../governor.base";
 
@@ -16,15 +17,21 @@ export class Client<
 {
   protected abi: typeof GovernorAbi;
   protected address: Address;
+  private daoId: DaoIdEnum;
 
-  constructor(client: vClient<TTransport, TChain, TAccount>, address: Address) {
+  constructor(
+    client: vClient<TTransport, TChain, TAccount>,
+    address: Address,
+    daoId: DaoIdEnum,
+  ) {
     super(client, 5); // 5 minutes of cache for quorum
     this.address = address;
+    this.daoId = daoId;
     this.abi = GovernorAbi;
   }
 
   getDaoId(): string {
-    return "NOUNS";
+    return this.daoId;
   }
 
   async getQuorum(): Promise<bigint> {
