@@ -95,11 +95,6 @@ describe("VotesRepository", () => {
   let repository: VotesRepository;
 
   beforeAll(async () => {
-    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    (BigInt.prototype as any).toJSON = function () {
-      return this.toString();
-    };
-
     client = new PGlite();
     db = drizzle(client, { schema });
     repository = new VotesRepository(db);

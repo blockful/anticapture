@@ -47,11 +47,6 @@ beforeAll(async () => {
   vi.useFakeTimers();
   vi.setSystemTime(NOW * 1000);
 
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  (BigInt.prototype as any).toJSON = function () {
-    return this.toString();
-  };
-
   client = new PGlite();
   db = drizzle(client, { schema });
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */

@@ -53,11 +53,6 @@ describe("FeedRepository", () => {
   let repository: FeedRepository;
 
   beforeAll(async () => {
-    (BigInt.prototype as unknown as { toJSON: () => string }).toJSON =
-      function () {
-        return this.toString();
-      };
-
     client = new PGlite();
     db = drizzle(client, { schema });
     repository = new FeedRepository(db);

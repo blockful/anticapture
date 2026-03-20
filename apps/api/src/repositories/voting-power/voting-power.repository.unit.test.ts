@@ -89,11 +89,6 @@ describe("VotingPowerRepository - getVotingPowers", () => {
   let repository: VotingPowerRepository;
 
   beforeAll(async () => {
-    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    (BigInt.prototype as any).toJSON = function () {
-      return this.toString();
-    };
-
     client = new PGlite();
     db = drizzle(client, { schema });
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
@@ -457,11 +452,6 @@ describe("VotingPowerRepository - getVotingPowersByAccountId", () => {
   let repository: VotingPowerRepository;
 
   beforeAll(async () => {
-    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    (BigInt.prototype as any).toJSON = function () {
-      return this.toString();
-    };
-
     client = new PGlite();
     db = drizzle(client, { schema });
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
@@ -589,11 +579,6 @@ describe("VotingPowerRepository - getHistoricalVotingPowerCount", () => {
   let repository: VotingPowerRepository;
 
   beforeAll(async () => {
-    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    (BigInt.prototype as any).toJSON = function () {
-      return this.toString();
-    };
-
     client = new PGlite();
     db = drizzle(client, { schema });
     repository = new VotingPowerRepository(db);
@@ -702,11 +687,6 @@ describe("VotingPowerRepository - getHistoricalVotingPowers", () => {
   let repository: VotingPowerRepository;
 
   beforeAll(async () => {
-    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    (BigInt.prototype as any).toJSON = function () {
-      return this.toString();
-    };
-
     client = new PGlite();
     db = drizzle(client, { schema });
     repository = new VotingPowerRepository(db);
@@ -895,11 +875,6 @@ describe("VotingPowerRepository - getVotingPowerVariations", () => {
   let repository: VotingPowerRepository;
 
   beforeAll(async () => {
-    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    (BigInt.prototype as any).toJSON = function () {
-      return this.toString();
-    };
-
     client = new PGlite();
     db = drizzle(client, { schema });
     repository = new VotingPowerRepository(db);
@@ -1080,11 +1055,6 @@ describe("VotingPowerRepository - getVotingPowerVariationsByAccountId", () => {
   let repository: VotingPowerRepository;
 
   beforeAll(async () => {
-    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    (BigInt.prototype as any).toJSON = function () {
-      return this.toString();
-    };
-
     client = new PGlite();
     db = drizzle(client, { schema });
     repository = new VotingPowerRepository(db);

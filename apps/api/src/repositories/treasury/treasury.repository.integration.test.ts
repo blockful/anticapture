@@ -35,14 +35,6 @@ describe("TreasuryRepository - Integration", () => {
   let repository: TreasuryRepository;
 
   beforeAll(async () => {
-    // pushSchema uses JSON.stringify internally, which doesn't handle BigInt
-    Object.defineProperty(BigInt.prototype, "toJSON", {
-      value: function (this: bigint) {
-        return this.toString();
-      },
-      writable: true,
-    });
-
     client = new PGlite();
     db = drizzle(client, { schema });
     repository = new TreasuryRepository(db);

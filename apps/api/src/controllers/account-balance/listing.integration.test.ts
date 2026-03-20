@@ -85,10 +85,6 @@ beforeAll(async () => {
   vi.useFakeTimers();
   vi.setSystemTime(new Date("2024-01-15T00:00:00Z"));
 
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  (BigInt.prototype as any).toJSON = function () {
-    return this.toString();
-  };
   client = new PGlite();
   db = drizzle(client, { schema });
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
