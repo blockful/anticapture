@@ -1,10 +1,8 @@
-import { Account, Address, Chain, Client, Transport } from "viem";
+import { Abi, Account, Address, Chain, Client, Transport } from "viem";
 
 import { DAOClient } from "@/clients";
 
 import { GovernorBase } from "../governor.base";
-
-import { GNOGovernorAbi } from "./abi";
 
 export class GNOClient<
   TTransport extends Transport = Transport,
@@ -14,13 +12,12 @@ export class GNOClient<
   extends GovernorBase
   implements DAOClient
 {
-  protected abi: typeof GNOGovernorAbi;
+  protected abi: Abi = [];
   protected address: Address;
 
   constructor(client: Client<TTransport, TChain, TAccount>, address: Address) {
     super(client);
     this.address = address;
-    this.abi = GNOGovernorAbi;
   }
 
   getDaoId(): string {
@@ -28,46 +25,15 @@ export class GNOClient<
   }
 
   async getQuorum(): Promise<bigint> {
-    return this.getCachedQuorum(async () => {
-      const blockNumber = await this.getBlockNumber();
-      const targetBlock = blockNumber - 10n;
-      return this.readContract({
-        abi: this.abi,
-        address: this.address,
-        functionName: "quorum",
-        args: [targetBlock < 0n ? 0n : targetBlock],
-      });
-    });
+    return 0n;
   }
 
   async getTimelockDelay(): Promise<bigint> {
-    if (!this.cache.timelockDelay) {
-      const timelockAddress = await this.readContract({
-        abi: this.abi,
-        address: this.address,
-        functionName: "timelock",
-      });
-      this.cache.timelockDelay = await this.readContract({
-        abi: [
-          {
-            constant: true,
-            inputs: [],
-            outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-            payable: false,
-            stateMutability: "view",
-            type: "function",
-            name: "getMinDelay",
-          },
-        ],
-        address: timelockAddress,
-        functionName: "getMinDelay",
-      });
-    }
-    return this.cache.timelockDelay;
+    return 0n;
   }
 
   alreadySupportCalldataReview(): boolean {
-    return true;
+    return false;
   }
 
   calculateQuorum(votes: {

@@ -2,13 +2,8 @@ import { token } from "ponder:schema";
 import { Context } from "ponder:registry";
 import { Address } from "viem";
 
+import { tokenTransfer } from "@/eventHandlers";
 import {
-  delegateChanged,
-  delegatedVotesChanged,
-  tokenTransfer,
-} from "@/eventHandlers";
-import {
-  updateDelegatedSupply,
   updateCirculatingSupply,
   updateSupplyMetric,
   updateTotalSupply,
@@ -164,106 +159,5 @@ export async function gnoTransfer(
       lending: lendingAddressList,
       burning: burningAddressList,
     },
-  );
-}
-
-export async function gnoDelegateChanged(
-  context: Context,
-  daoId: DaoIdEnum,
-  {
-    delegator,
-    toDelegate,
-    fromDelegate,
-    tokenId,
-    txHash,
-    timestamp,
-    logIndex,
-    transactionFrom,
-    transactionTo,
-  }: {
-    delegator: Address;
-    toDelegate: Address;
-    fromDelegate: Address;
-    tokenId: Address;
-    txHash: `0x${string}`;
-    timestamp: bigint;
-    logIndex: number;
-    transactionFrom: Address;
-    transactionTo: Address | null;
-  },
-) {
-  await delegateChanged(context, daoId, {
-    delegator,
-    delegate: toDelegate,
-    tokenId,
-    previousDelegate: fromDelegate,
-    txHash,
-    timestamp,
-    logIndex,
-  });
-
-  if (!transactionTo) return;
-
-  await handleTransaction(
-    context,
-    txHash,
-    transactionFrom,
-    transactionTo,
-    timestamp,
-    [delegator, toDelegate],
-  );
-}
-
-export async function gnoDelegateVotesChanged(
-  context: Context,
-  daoId: DaoIdEnum,
-  {
-    delegate,
-    newBalance,
-    previousBalance,
-    logAddress,
-    txHash,
-    timestamp,
-    logIndex,
-    transactionFrom,
-    transactionTo,
-  }: {
-    delegate: Address;
-    newBalance: bigint;
-    previousBalance: bigint;
-    logAddress: Address;
-    txHash: `0x${string}`;
-    timestamp: bigint;
-    logIndex: number;
-    transactionFrom: Address;
-    transactionTo: Address | null;
-  },
-) {
-  await delegatedVotesChanged(context, daoId, {
-    delegate,
-    txHash,
-    newBalance,
-    oldBalance: previousBalance,
-    timestamp,
-    logIndex,
-  });
-
-  await updateDelegatedSupply(
-    context,
-    daoId,
-    logAddress,
-    newBalance - previousBalance,
-    timestamp,
-  );
-
-  if (!transactionTo) return;
-
-  await handleTransaction(
-    context,
-    txHash,
-    transactionFrom,
-    transactionTo,
-    timestamp,
-    [delegate],
   );
 }

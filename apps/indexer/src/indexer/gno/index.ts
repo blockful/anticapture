@@ -1,4 +1,5 @@
 export * from "./abi";
 
-export * from "./erc20";
+export * from "./mainnet";
+export * from "./gnosis";
 export * from "./shared";

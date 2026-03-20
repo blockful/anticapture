@@ -185,15 +185,15 @@ export const CONTRACT_ADDRESSES = {
   },
   [DaoIdEnum.GNO]: {
     blockTime: 12,
-    // https://etherscan.io/address/0x1B2Eef4dd90cF1aF05967e0F246d4C0a19387B2A
+    // https://etherscan.io/address/0x6810e776880C02933D47DB1b9fc05908e5386b96
     gnoMainnet: {
-      address: "0x1B2Eef4dd90cF1aF05967e0F246d4C0a19387B2A" as Address,
+      address: "0x6810e776880C02933D47DB1b9fc05908e5386b96" as Address,
       decimals: 18,
       startBlock: 23383727,
     },
-    // https://gnosisscan.io/address/0xE6C45c06e4C73e2aD58Aedf9bf83bCe1534b524a
+    // https://gnosisscan.io/address/0x9C58BAcC331c9aa871AFD802DB6379a98e80CEdb
     gnoGnosis: {
-      address: "0xE6C45c06e4C73e2aD58Aedf9bf83bCe1534b524a" as Address,
+      address: "0x9C58BAcC331c9aa871AFD802DB6379a98e80CEdb" as Address,
       decimals: 18,
       startBlock: 41603868,
     },
@@ -779,7 +779,7 @@ export const BurningAddresses: Record<
     ZeroAddress: zeroAddress,
     Dead: "0x000000000000000000000000000000000000dEaD",
     // Ethereum mainnet token contract (used as the canonical burning address)
-    TokenContract: "0x1B2Eef4dd90cF1aF05967e0F246d4C0a19387B2A" as Address,
+    TokenContract: "0x6810e776880C02933D47DB1b9fc05908e5386b96" as Address,
   },
 };
 

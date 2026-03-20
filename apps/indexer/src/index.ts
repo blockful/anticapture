@@ -30,11 +30,7 @@ import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 
 import { SHUGovernorIndexer, SHUTokenIndexer } from "./indexer/shu";
-import {
-  GNOGovernorIndexer,
-  GNOTokenIndexer,
-  GNOTokenGnosisIndexer,
-} from "./indexer/gno";
+import { GNOTokenIndexer, GNOTokenGnosisIndexer } from "./indexer/gno";
 import {
   AAVETokenIndexer,
   stkAAVETokenIndexer,
@@ -126,7 +122,6 @@ switch (daoId) {
     const { gnoMainnet, gnoGnosis } = CONTRACT_ADDRESSES[DaoIdEnum.GNO];
     GNOTokenIndexer(gnoMainnet.address, gnoMainnet.decimals);
     GNOTokenGnosisIndexer(gnoGnosis.address, gnoGnosis.decimals);
-    GNOGovernorIndexer(blockTime);
     break;
   }
   default:

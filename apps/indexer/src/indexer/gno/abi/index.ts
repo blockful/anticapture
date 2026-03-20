@@ -1,2 +1,2 @@
-export { GovernorAbi as GNOGovernorAbi } from "./governor";
-export { TokenAbi as GNOTokenAbi } from "./token";
+export { MainnetTokenAbi as MainnetGNOTokenAbi } from "./mainnet";
+export { GnosisTokenAbi as GnosisGNOTokenAbi } from "./gnosis";

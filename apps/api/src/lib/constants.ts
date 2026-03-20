@@ -194,12 +194,12 @@ export const CONTRACT_ADDRESSES = {
     blockTime: 12,
     tokenType: "ERC20",
     gnoMainnet: {
-      address: "0x1B2Eef4dd90cF1aF05967e0F246d4C0a19387B2A",
+      address: "0x6810e776880C02933D47DB1b9fc05908e5386b96",
       decimals: 18,
       startBlock: 23383727,
     },
     gnoGnosis: {
-      address: "0xE6C45c06e4C73e2aD58Aedf9bf83bCe1534b524a",
+      address: "0x9C58BAcC331c9aa871AFD802DB6379a98e80CEdb",
       decimals: 18,
       startBlock: 41603868,
     },
