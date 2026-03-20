@@ -7,9 +7,10 @@ dotenv.config();
 
 const envSchema = z.object({
   RPC_URL: z.string(),
-  DATABASE_URL: z
-    .string()
-    .transform((val) => `${val}?options=-c%20search_path%3Danticapture`),
+  DATABASE_URL: z.string().transform((val) => {
+    const schema = process.env.DB_SCHEMA ?? "anticapture";
+    return `${val}?options=-c%20search_path%3D${schema}`;
+  }),
   DAO_ID: z.nativeEnum(DaoIdEnum),
   CHAIN_ID: z.coerce.number(),
 
