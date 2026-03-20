@@ -5,14 +5,14 @@ import { BulletDivider } from "@/shared/components/design-system/section";
 
 interface ProviderNameCellProps {
   name: string;
-  iconUrl?: string;
+  avatarUrl?: string;
   websiteUrl?: string;
   proposalUrl?: string;
 }
 
 export const ProviderNameCell = ({
   name,
-  iconUrl,
+  avatarUrl,
   websiteUrl,
   proposalUrl,
 }: ProviderNameCellProps) => {
@@ -26,9 +26,9 @@ export const ProviderNameCell = ({
   return (
     <div className="flex items-center gap-3">
       <div className="bg-surface-contrast border-border-contrast flex size-6 shrink-0 items-center justify-center rounded-full border text-[9px] font-bold text-white">
-        {iconUrl ? (
+        {avatarUrl ? (
           <Image
-            src={iconUrl}
+            src={avatarUrl}
             alt={name}
             width={24}
             height={24}

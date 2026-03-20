@@ -14,6 +14,11 @@ import { extractUrlFromMarkdown } from "@/features/service-providers/utils/extra
 
 export type ServiceProvidersData = Record<number, Record<string, YearData>>;
 
+export type ServiceProvidersResult = {
+  data: ServiceProvidersData;
+  avatarUrls: Record<string, string>;
+};
+
 const fetchQuarterReport = async (
   year: number,
   slug: string,
@@ -41,12 +46,12 @@ const fetchQuarterReport = async (
 
 export const fetchServiceProvidersData = async (
   slugs: string[],
-): Promise<ServiceProvidersData> => {
+): Promise<ServiceProvidersResult> => {
   const treeResponse = await fetch(
     `${GITHUB_API_BASE}/git/trees/main?recursive=1`,
   );
 
-  if (!treeResponse.ok) return {};
+  if (!treeResponse.ok) return { data: {}, avatarUrls: {} };
 
   const { tree }: { tree: { path: string; type: string }[] } =
     await treeResponse.json();
@@ -62,6 +67,18 @@ export const fetchServiceProvidersData = async (
       )
       .map((item) => item.path.toLowerCase()),
   );
+
+  const avatarUrls: Record<string, string> = {};
+  tree
+    .filter(
+      (item) =>
+        item.type === "blob" && /^avatars\/[^/]+\.[^.]+$/.test(item.path),
+    )
+    .forEach((item) => {
+      const fileName = item.path.slice("avatars/".length);
+      const slug = fileName.slice(0, fileName.lastIndexOf("."));
+      avatarUrls[slug] = `${GITHUB_RAW_BASE}/${item.path}`;
+    });
 
   const now = new Date();
 
@@ -94,5 +111,5 @@ export const fetchServiceProvidersData = async (
     }),
   );
 
-  return Object.fromEntries(yearEntries);
+  return { data: Object.fromEntries(yearEntries), avatarUrls };
 };

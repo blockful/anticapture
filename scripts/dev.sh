@@ -92,12 +92,24 @@ wait_for_port() {
   log "$name is ready on port $port"
 }
 
+# Wrap a command with `railway run` for env injection, with fallback to running locally
+railway_run() {
+  local service=$1
+  shift
+  if railway run -e dev -s "$service" echo ok >/dev/null 2>&1; then
+    railway run -e dev -s "$service" "$@"
+  else
+    log "Railway service $service not found, running locally with .env"
+    "$@"
+  fi
+}
+
 if [ -n "$DAO_ID" ]; then
   DAO_UPPER=$(echo "$DAO_ID" | tr '[:lower:]' '[:upper:]')
 
   # 1. Start API
   log "Starting API for $DAO_ID..."
-  run_with_prefix "$C_API" "🐙 api" "" "" pnpm api dev -- "$DAO_ID" &
+  run_with_prefix "$C_API" "🐙 api" "" "" railway_run "${DAO_ID}-api" pnpm api dev -- "$DAO_ID" &
 
   # 2. Wait for API
   wait_for_port 42069 "API"
@@ -110,7 +122,7 @@ GATEWAY_READY=$(mktemp)
 rm -f "$GATEWAY_READY"
 
 log "Starting Gateway..."
-run_with_prefix "$C_GATEWAY" "🌎 gateway" "$GATEWAY_READY" "Mesh running at" pnpm gateway dev &
+run_with_prefix "$C_GATEWAY" "🌎 gateway" "$GATEWAY_READY" "Mesh running at" railway_run api-gateway pnpm gateway dev &
 
 # 3. Wait for Gateway
 wait_for_ready "$GATEWAY_READY" "Gateway"
@@ -119,7 +131,7 @@ GATEFUL_READY=$(mktemp)
 rm -f "$GATEFUL_READY"
 
 log "Starting Gateful..."
-run_with_prefix "$C_GATEFUL" "🚪 gateful" "$GATEFUL_READY" "🚀 REST Gateway running" pnpm gateful dev &
+run_with_prefix "$C_GATEFUL" "🚪 gateful" "$GATEFUL_READY" "🚀 REST Gateway running" railway_run gateful pnpm gateful dev &
 
 # 4. Wait for Gateful
 wait_for_ready "$GATEFUL_READY" "Gateful"
@@ -131,7 +143,7 @@ log "Starting Client (silent, errors only)..."
 run_errors_only "$C_CODEGEN" "🤝 client" pnpm client dev &
 
 # 6. Start Dashboard – point it at the local Gateful so local backend changes are visible
-export NEXT_PUBLIC_BASE_URL="http://localhost:5000/graphql"
+export NEXT_PUBLIC_BASE_URL="http://localhost:4000/graphql"
 log "Starting Dashboard..."
 run_with_prefix "$C_DASHBOARD" "📺 dashboard" "" "" pnpm dashboard dev &
 
@@ -141,7 +153,7 @@ if [ -n "$DAO_ID" ]; then
   printf "  ${C_API}🐙 API${C_RESET}       http://localhost:42069  ($DAO_ID)\n"
 fi
 printf "  ${C_GATEWAY}🌎 Gateway${C_RESET}   http://localhost:4000\n"
-printf "  ${C_GATEFUL}🚪 Gateful${C_RESET}   http://localhost:5000\n"
+printf "  ${C_GATEFUL}🚪 Gateful${C_RESET}   http://localhost:4001\n"
 printf "  ${C_CODEGEN}🤝 Client${C_RESET}    codegen + build watch\n"
 printf "  ${C_DASHBOARD}📺 Dashboard${C_RESET} http://localhost:3000\n"
 echo ""

@@ -17,7 +17,8 @@ export const updateCirculatingSupply = async (
     .update(token, { id: getAddress(tokenAddress) })
     .set((current) => {
       currentCirculatingSupply = current.circulatingSupply;
-      newCirculatingSupply = current.totalSupply - current.treasury;
+      newCirculatingSupply =
+        current.totalSupply - current.treasury - current.nonCirculatingSupply;
       return {
         circulatingSupply: newCirculatingSupply,
       };

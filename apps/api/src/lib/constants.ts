@@ -206,9 +206,25 @@ export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     oldEthRegistrarController: "0x283Af0B28c62C092C9727F1Ee09c02CA627EB7F5",
     ethRegistrarController: "0x253553366Da8546fC250F225fe3d25d0C782303b",
   },
-  [DaoIdEnum.ARB]: {},
-  [DaoIdEnum.AAVE]: {},
-  [DaoIdEnum.OP]: {},
+  [DaoIdEnum.ARB]: {
+    // https://docs.arbitrum.foundation/deployment-addresses
+    "DAO Treasury": "0xF3FC178157fb3c87548bAA86F9d24BA38E649B58",
+    "L2 Treasury Timelock": "0xbFc1FECa8B09A5c5D3EFfE7429eBE24b9c09EF58",
+    "L2 Core Timelock": "0x34d45e99f7D8c45ed05B5cA72D54bbD1fb3F98f0",
+    "Foundation Vesting Wallet": "0x15533b77981cDa0F85c4F9a485237DF4285D6844",
+  },
+  [DaoIdEnum.AAVE]: {
+    // https://github.com/bgd-labs/aave-address-book
+    Collector: "0x464C71f6c2F760DdA6093dCB91C24c39e5d6e18c",
+    "Ecosystem Reserve": "0x25F2226B597E8F9514B3F68F00f494cF4f286491",
+  },
+  [DaoIdEnum.OP]: {
+    // https://gov.optimism.io/t/where-are-the-optimisms-main-treasury-addresses/8880
+    "Unallocated Treasury": "0x2A82Ae142b2e62Cb7D10b55E323ACB1Cab663a26",
+    "Foundation Budget": "0x2501c477D0A35545a387Aa4A3EEe4292A9a8B3F0",
+    "Foundation Grants": "0x19793c7824Be70ec58BB673CA42D2779d12581BE",
+    "Foundation Locked Grants": "0xE4553b743E74dA3424Ac51f8C1E586fd43aE226F",
+  },
   [DaoIdEnum.SHU]: { timelock: "0x36bD3044ab68f600f6d3e081056F34f2a58432c4" },
   [DaoIdEnum.NOUNS]: {
     timelock: "0xb1a32fc9f9d8b2cf86c068cae13108809547ef71",

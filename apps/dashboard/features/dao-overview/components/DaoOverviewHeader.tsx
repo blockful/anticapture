@@ -1,7 +1,7 @@
 import { DollarSign } from "lucide-react";
 
 import { SkeletonRow, TooltipInfo } from "@/shared/components";
-import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
+import { BadgeStatus } from "@/shared/components/design-system/badges";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { EthereumIcon } from "@/shared/components/icons/EthereumIcon";
 import { OPMainnetIcon } from "@/shared/components/icons/OPMainnetIcon";

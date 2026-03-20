@@ -11,7 +11,7 @@ import {
   DrawerContent,
   DrawerHeader,
 } from "@/shared/components";
-import { RadioButton } from "@/shared/components/design-system/buttons/RadioButton";
+import { RadioButton } from "@/shared/components/design-system/form/fields";
 import { Input } from "@/shared/components/design-system/form/fields/input/Input";
 
 interface ActivityFeedFiltersDrawerProps {

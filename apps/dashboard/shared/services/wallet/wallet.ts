@@ -6,31 +6,21 @@ import {
   coinbaseWallet,
   metaMaskWallet,
 } from "@rainbow-me/rainbowkit/wallets";
-import { createPublicClient, createWalletClient } from "viem";
+import { createWalletClient } from "viem";
 import { createConfig, http } from "wagmi";
 import { mainnet } from "wagmi/chains";
 
 const alchemyApiKey = process.env.NEXT_PUBLIC_ALCHEMY_KEY;
 
-if (alchemyApiKey == undefined) {
-  throw new Error("Missing API key for mainnet environment");
-}
-
 export const rpcHttpUrl = `https://eth-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
-
-export const publicClient = createPublicClient({
-  chain: mainnet,
-  batch: { multicall: true },
-  transport: http(rpcHttpUrl),
-});
 
 export const walletClient = createWalletClient({
   chain: mainnet,
   transport: http(rpcHttpUrl),
 });
 
-const projectId = process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID ?? "";
-
+const projectId =
+  process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID ?? "anticapture";
 if (!projectId) throw new Error("Missing WalletConnect project ID");
 
 export const appName = "Anticapture";

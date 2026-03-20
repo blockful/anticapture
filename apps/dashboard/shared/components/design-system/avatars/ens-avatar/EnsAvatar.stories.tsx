@@ -4,7 +4,7 @@ import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta: Meta<typeof EnsAvatar> = {
-  title: "Design System/Avatars/EnsAvatar",
+  title: "Data Display/EnsAvatar",
   component: EnsAvatar,
   parameters: {
     layout: "centered",

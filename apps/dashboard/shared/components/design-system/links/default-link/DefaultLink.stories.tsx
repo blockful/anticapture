@@ -4,7 +4,7 @@ import { DefaultLink } from "@/shared/components/design-system/links/default-lin
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta: Meta<typeof DefaultLink> = {
-  title: "Design System/Links/DefaultLink",
+  title: "Navigation/Links/DefaultLink",
   component: DefaultLink,
   parameters: {
     layout: "centered",
