@@ -54,5 +54,7 @@ pg_dump -Fc --no-owner --no-privileges --schema=ponder_sync "$DB_URL" > "$OUTPUT
 DUMP_SIZE=$(du -h "$OUTPUT" | cut -f1)
 echo "  Done: ${OUTPUT} (${DUMP_SIZE})"
 echo ""
-echo "Next: ./scripts/restore.sh ${OUTPUT} <target_database_url>"
+echo "Next steps:"
+echo "  Backup to S3:  ./scripts/backup_dump.sh ${OUTPUT}"
+echo "  Restore to DB: ./scripts/restore.sh ${OUTPUT} <target_database_url>"
 echo ""

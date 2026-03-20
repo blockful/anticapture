@@ -25,14 +25,18 @@ RESPONSE=$(curl -s \
   -H "Authorization: ${S3_AUTH}" \
   "https://${S3_HOST}/")
 
-# Parse XML response — extract Key and Size pairs
-echo "$RESPONSE" | grep -oP '<Key>[^<]+</Key>\s*<LastModified>[^<]+</LastModified>\s*<Size>[^<]+</Size>' | \
-  sed 's/<Key>/  /; s/<\/Key>/  /; s/<LastModified>//; s/<\/LastModified>/  /; s/<Size>//; s/<\/Size>//' | \
-  while read -r name date size; do
-    if [ -n "$name" ]; then
-      human_size=$(numfmt --to=iec "$size" 2>/dev/null || echo "${size}B")
-      printf "  %-50s %s  %s\n" "$name" "$date" "$human_size"
-    fi
+# Parse XML response — extract Key, LastModified, Size from each <Contents> block
+KEYS=($(echo "$RESPONSE" | grep -oP '<Key>[^<]+</Key>' | sed 's/<[^>]*>//g'))
+DATES=($(echo "$RESPONSE" | grep -oP '<LastModified>[^<]+</LastModified>' | sed 's/<[^>]*>//g'))
+SIZES=($(echo "$RESPONSE" | grep -oP '<Size>[^<]+</Size>' | sed 's/<[^>]*>//g'))
+
+if [ ${#KEYS[@]} -eq 0 ]; then
+  echo "  (empty)"
+else
+  for i in "${!KEYS[@]}"; do
+    human_size=$(numfmt --to=iec "${SIZES[$i]}" 2>/dev/null || echo "${SIZES[$i]}B")
+    printf "  %-50s %s  %s\n" "${KEYS[$i]}" "${DATES[$i]}" "$human_size"
   done
+fi
 
 echo ""
