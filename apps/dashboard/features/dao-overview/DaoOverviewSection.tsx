@@ -85,7 +85,7 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               icon={<Info className="size-4" />}
               text="This DAO is needing review. Enable monitoring for faster governance risk signals."
               storageKey={`donate-banner-dismissed-${daoId}`}
-              link={{
+              links={{
                 url: `/donate`,
                 text: "Donate",
                 openInNewTab: true,

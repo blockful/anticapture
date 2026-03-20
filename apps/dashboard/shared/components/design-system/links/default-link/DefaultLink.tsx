@@ -3,24 +3,29 @@ import type { LinkProps } from "next/link";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { cn } from "@/shared/utils";
+import { cn } from "@/shared/utils/cn";
 
 export const defaultLinkVariants = cva(
-  "flex items-center gap-1 font-mono tracking-wider uppercase leading-none text-[13px] font-medium transition-colors duration-300",
+  "flex items-center gap-1 font-mono tracking-wider uppercase leading-none font-medium transition-colors duration-300",
   {
     variants: {
       variant: {
         default: "text-secondary hover:text-primary",
         highlight: "text-link hover:text-link/80",
       },
+      size: {
+        default: "text-[13px]",
+        sm: "text-xs",
+      },
     },
     defaultVariants: {
       variant: "default",
+      size: "default",
     },
   },
 );
 
-type DefaultLinkProps = LinkProps &
+export type DefaultLinkProps = LinkProps &
   VariantProps<typeof defaultLinkVariants> & {
     children?: ReactNode;
     openInNewTab: boolean;
@@ -32,6 +37,7 @@ export const DefaultLink = ({
   href,
   openInNewTab = true,
   variant,
+  size,
   className,
   ...props
 }: DefaultLinkProps) => {
@@ -40,7 +46,7 @@ export const DefaultLink = ({
       href={href}
       target={openInNewTab ? "_blank" : "_self"}
       rel="noopener noreferrer"
-      className={cn(defaultLinkVariants({ variant }), className)}
+      className={cn(defaultLinkVariants({ variant, size }), className)}
       {...props}
     >
       {children}

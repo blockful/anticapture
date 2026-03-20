@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs";
 import { Toast } from "@/shared/components/design-system/toast/Toast";
 
 const meta: Meta<typeof Toast> = {
-  title: "Design System/Toast",
+  title: "Feedback/Toast",
   component: Toast,
   parameters: {
     layout: "centered",

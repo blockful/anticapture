@@ -1346,6 +1346,7 @@ type dao_200_response {
   votingDelay: String!
   votingPeriod: String!
   timelockDelay: String!
+  alreadySupportCalldataReview: Boolean!
 }
 
 type tokenMetrics_200_response {

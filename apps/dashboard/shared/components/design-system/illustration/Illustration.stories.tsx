@@ -7,7 +7,7 @@ import {
 import type { IllustrationName } from "@/shared/components/design-system/illustration/Illustration";
 
 const meta = {
-  title: "Design System/Primitives/Illustration",
+  title: "Foundation/Illustration",
   component: Illustration,
   parameters: {
     layout: "padded",

@@ -1,0 +1,36 @@
+FROM ubuntu:22.04 AS erpc_fetcher
+
+RUN apt-get update && apt-get install -y git curl
+
+# clone the entire eRPC repo, but only keep certain folders with sparse checkout
+RUN git clone --depth=1 --filter=blob:none --sparse \
+    https://github.com/erpc/erpc /tmp/erpc \
+    && cd /tmp/erpc \
+    && git sparse-checkout init --cone \
+    && git sparse-checkout set monitoring/prometheus monitoring/grafana monitoring/scripts
+
+FROM prom/prometheus:v2.37.0 as prometheus
+FROM grafana/grafana:9.3.2 as grafana
+FROM ubuntu:22.04
+
+# Set rwailway environment variables
+ENV SERVICE_ENDPOINT=""
+ENV SERVICE_PORT=""
+
+COPY --from=prometheus /bin/prometheus /bin/prometheus
+COPY --from=prometheus /bin/promtool   /bin/promtool
+COPY --from=erpc_fetcher /tmp/erpc/monitoring/prometheus/prometheus.yml /etc/prometheus/prometheus.yml
+COPY --from=erpc_fetcher /tmp/erpc/monitoring/prometheus/alert.rules     /etc/prometheus/alert.rules
+
+COPY --from=grafana /usr/share/grafana /usr/share/grafana
+COPY --from=grafana /etc/grafana       /etc/grafana
+COPY --from=erpc_fetcher /tmp/erpc/monitoring/grafana/grafana.ini                    /etc/grafana/grafana.ini
+COPY --from=erpc_fetcher /tmp/erpc/monitoring/grafana/datasources/prometheus.yml     /etc/grafana/provisioning/datasources/prometheus.yml
+COPY --from=erpc_fetcher /tmp/erpc/monitoring/grafana/dashboards/default.yml         /etc/grafana/provisioning/dashboards/default.yml
+COPY --from=erpc_fetcher /tmp/erpc/monitoring/grafana/dashboards/erpc.json           /etc/grafana/provisioning/dashboards/erpc.json
+
+COPY --from=erpc_fetcher /tmp/erpc/monitoring/scripts/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+EXPOSE 3000 9090
+ENTRYPOINT ["/entrypoint.sh"]

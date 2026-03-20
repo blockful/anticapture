@@ -209,7 +209,7 @@ export const proposalsOnchain = pgTable(
     title: drizzle.text().notNull(),
     description: drizzle.text().notNull(),
     timestamp: bigint({ mode: "bigint" }).notNull(),
-    logIndex: drizzle.integer().notNull(),
+    // logIndex: drizzle.integer().notNull(),
     endTimestamp: bigint({ mode: "bigint" }).notNull(),
     status: drizzle.text().notNull(),
     forVotes: bigint({ mode: "bigint" }).default(0n).notNull(),

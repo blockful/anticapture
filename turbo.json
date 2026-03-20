@@ -1,6 +1,5 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalEnv": [".env"],
   "tasks": {
     "@anticapture/observability#build": {
       "outputs": ["packages/observability/dist/**"]
@@ -12,11 +11,22 @@
       "dependsOn": ["@anticapture/#graphql-client#build"],
       "outputs": ["dist/**", ".next/**", ".next/cache/**"]
     },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**", ".next/cache/**"],
+      "env": ["RESEND_API_KEY", "RESEND_FROM_EMAIL", "CONTACT_EMAIL"]
+    },
     "storybook": {
       "outputs": ["dist/**", ".next/**", ".next/cache/**"]
     },
     "build-storybook": {
       "outputs": ["storybook-static/**"]
+    },
+    "start": {
+      "dependsOn": ["^build"],
+      "persistent": true,
+      "cache": false,
+      "passThroughEnv": ["*"]
     },
     "clean": {},
     "lint": {
