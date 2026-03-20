@@ -2,7 +2,7 @@ import { Address } from "viem";
 
 import { DBHistoricalBalanceWithRelations } from "@/mappers";
 
-interface Repository {
+export interface historicalBalanceRepositoryInterface {
   getHistoricalBalances(
     accountId: Address,
     skip: number,
@@ -23,7 +23,9 @@ interface Repository {
 }
 
 export class HistoricalBalancesService {
-  constructor(private readonly repository: Repository) {}
+  constructor(
+    private readonly repository: historicalBalanceRepositoryInterface,
+  ) {}
 
   async getHistoricalBalances(
     account: Address,
