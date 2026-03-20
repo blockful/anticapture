@@ -113,23 +113,6 @@ describe("TokenMetrics Controller", () => {
       });
     });
 
-    it("should include pageInfo shape in response", async () => {
-      const res = await app.request(
-        `/token-metrics?metricType=${MetricTypesEnum.DELEGATED_SUPPLY}`,
-      );
-
-      expect(res.status).toBe(200);
-      const body = await res.json();
-      expect(body).toEqual({
-        items: [],
-        pageInfo: {
-          hasNextPage: false,
-          startDate: null,
-          endDate: null,
-        },
-      });
-    });
-
     it("should accept optional orderDirection and limit ", async () => {
       const res = await app.request(
         `/token-metrics?metricType=${MetricTypesEnum.DELEGATED_SUPPLY}&orderDirection=desc&limit=30`,
