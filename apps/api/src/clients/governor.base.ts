@@ -148,6 +148,7 @@ export abstract class GovernorBase<
     if (
       [
         ProposalStatus.CANCELED,
+        ProposalStatus.VETOED,
         ProposalStatus.QUEUED,
         ProposalStatus.EXECUTED,
       ].includes(proposal.status as ProposalStatus)

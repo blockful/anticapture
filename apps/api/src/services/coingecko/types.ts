@@ -18,6 +18,7 @@ export const CoingeckoTokenIdEnum: Record<DaoIdEnum, string> = {
   ARB: "arbitrum",
   OP: "optimism",
   GTC: "gitcoin",
+  LIL_NOUNS: "lil-nouns",
   NOUNS: "nouns",
   SCR: "scroll",
   COMP: "compound-governance-token",

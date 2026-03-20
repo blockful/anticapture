@@ -3,6 +3,7 @@ export enum DaoIdEnum {
   COMP = "COMP",
   ENS = "ENS",
   FLUID = "FLUID",
+  LIL_NOUNS = "LIL_NOUNS",
   NOUNS = "NOUNS",
   SCR = "SCR",
   OBOL = "OBOL",

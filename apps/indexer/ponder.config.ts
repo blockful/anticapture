@@ -4,6 +4,7 @@ import compoundConfig from "./config/compound.config";
 import ensConfig from "./config/ens.config";
 import fluidConfig from "./config/fluid.config";
 import gitcoinConfig from "./config/gitcoin.config";
+import lilnounsConfig from "./config/lil-nouns.config";
 import nounsConfig from "./config/nouns.config";
 import obolConfig from "./config/obol.config";
 import optimismConfig from "./config/optimism.config";
@@ -21,6 +22,7 @@ export default {
     ...uniswapConfig.chains,
     ...optimismConfig.chains,
     ...gitcoinConfig.chains,
+    ...lilnounsConfig.chains,
     ...nounsConfig.chains,
     ...scrollConfig.chains,
     ...compoundConfig.chains,
@@ -36,6 +38,7 @@ export default {
     ...uniswapConfig.contracts,
     ...optimismConfig.contracts,
     ...gitcoinConfig.contracts,
+    ...lilnounsConfig.contracts,
     ...nounsConfig.contracts,
     ...scrollConfig.contracts,
     ...compoundConfig.contracts,
