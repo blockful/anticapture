@@ -2,6 +2,7 @@ import { PGlite } from "@electric-sql/pglite";
 import { pushSchema } from "drizzle-kit/api";
 import { drizzle } from "drizzle-orm/pglite";
 
+import type { Drizzle } from "@/database";
 import { token } from "@/database/schema";
 import * as schema from "@/database/schema";
 import { DaoIdEnum } from "@/lib/enums";
@@ -20,7 +21,7 @@ const createToken = (overrides: Partial<TokenInsert> = {}): TokenInsert => ({
 
 describe("TokenRepository", () => {
   let client: PGlite;
-  let db: ReturnType<typeof drizzle<typeof schema>>;
+  let db: Drizzle;
   let repository: TokenRepository;
 
   beforeAll(async () => {

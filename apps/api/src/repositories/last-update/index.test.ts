@@ -1,6 +1,7 @@
 import { PGlite } from "@electric-sql/pglite";
 import { pushSchema } from "drizzle-kit/api";
 import { drizzle } from "drizzle-orm/pglite";
+import type { Drizzle } from "@/database";
 import * as schema from "@/database/schema";
 import { daoMetricsDayBucket } from "@/database/schema";
 import { MetricTypesEnum } from "@/lib/constants";
@@ -27,7 +28,7 @@ const createMetric = (overrides: Partial<MetricInsert> = {}): MetricInsert => ({
 
 describe("LastUpdateRepositoryImpl", () => {
   let client: PGlite;
-  let db: ReturnType<typeof drizzle<typeof schema>>;
+  let db: Drizzle;
   let repository: LastUpdateRepositoryImpl;
 
   beforeAll(async () => {

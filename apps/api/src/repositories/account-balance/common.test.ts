@@ -4,6 +4,7 @@ import { sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/pglite";
 import { Address } from "viem";
 
+import type { Drizzle } from "@/database";
 import { accountBalance, transfer } from "@/database/schema";
 import * as schema from "@/database/schema";
 
@@ -42,7 +43,7 @@ const createTransfer = (
 
 describe("AccountBalanceQueryFragments", () => {
   let client: PGlite;
-  let db: ReturnType<typeof drizzle<typeof schema>>;
+  let db: Drizzle;
   let fragments: AccountBalanceQueryFragments;
 
   beforeAll(async () => {

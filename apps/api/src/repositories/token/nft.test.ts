@@ -2,6 +2,7 @@ import { PGlite } from "@electric-sql/pglite";
 import { pushSchema } from "drizzle-kit/api";
 import { drizzle } from "drizzle-orm/pglite";
 
+import type { Drizzle } from "@/database";
 import { tokenPrice } from "@/database/schema";
 import * as schema from "@/database/schema";
 
@@ -21,7 +22,7 @@ const createTokenPrice = (
 
 describe("NFTPriceRepository", () => {
   let client: PGlite;
-  let db: ReturnType<typeof drizzle<typeof schema>>;
+  let db: Drizzle;
   let repository: NFTPriceRepository;
 
   beforeAll(async () => {

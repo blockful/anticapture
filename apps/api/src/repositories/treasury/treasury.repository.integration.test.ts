@@ -2,6 +2,7 @@ import { PGlite } from "@electric-sql/pglite";
 import { pushSchema } from "drizzle-kit/api";
 import { drizzle } from "drizzle-orm/pglite";
 
+import type { Drizzle } from "@/database";
 import * as schema from "@/database/schema";
 import { daoMetricsDayBucket } from "@/database/schema";
 import { MetricTypesEnum } from "@/lib/constants";
@@ -30,7 +31,7 @@ const createMetricRow = (
 
 describe("TreasuryRepository - Integration", () => {
   let client: PGlite;
-  let db: ReturnType<typeof drizzle<typeof schema>>;
+  let db: Drizzle;
   let repository: TreasuryRepository;
 
   beforeAll(async () => {

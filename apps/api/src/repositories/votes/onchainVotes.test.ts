@@ -3,6 +3,7 @@ import { pushSchema } from "drizzle-kit/api";
 import { drizzle } from "drizzle-orm/pglite";
 import { Address } from "viem";
 
+import type { Drizzle } from "@/database";
 import {
   votesOnchain,
   proposalsOnchain,
@@ -90,7 +91,7 @@ const createHistoryRow = (
 
 describe("VotesRepository", () => {
   let client: PGlite;
-  let db: ReturnType<typeof drizzle<typeof schema>>;
+  let db: Drizzle;
   let repository: VotesRepository;
 
   beforeAll(async () => {

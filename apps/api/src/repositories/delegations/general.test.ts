@@ -3,6 +3,7 @@ import { pushSchema } from "drizzle-kit/api";
 import { drizzle } from "drizzle-orm/pglite";
 import { Address } from "viem";
 
+import type { Drizzle } from "@/database";
 import * as schema from "@/database/schema";
 import { accountBalance, delegation } from "@/database/schema";
 
@@ -55,7 +56,7 @@ const fullDelegation = (overrides: Partial<DelegationInsert> = {}) => ({
 
 describe("DelegationsRepository", () => {
   let client: PGlite;
-  let db: ReturnType<typeof drizzle<typeof schema>>;
+  let db: Drizzle;
   let repository: DelegationsRepository;
 
   beforeAll(async () => {

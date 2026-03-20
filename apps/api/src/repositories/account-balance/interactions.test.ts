@@ -3,6 +3,7 @@ import { pushSchema } from "drizzle-kit/api";
 import { drizzle } from "drizzle-orm/pglite";
 import { Address } from "viem";
 
+import type { Drizzle } from "@/database";
 import { accountBalance, transfer } from "@/database/schema";
 import * as schema from "@/database/schema";
 import { Filter } from "@/mappers/account-balance/general";
@@ -45,7 +46,7 @@ const createTransfer = (
 
 describe("AccountInteractionsRepository", () => {
   let client: PGlite;
-  let db: ReturnType<typeof drizzle<typeof schema>>;
+  let db: Drizzle;
   let repository: AccountInteractionsRepository;
 
   beforeAll(async () => {

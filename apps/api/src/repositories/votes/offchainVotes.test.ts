@@ -2,6 +2,7 @@ import { PGlite } from "@electric-sql/pglite";
 import { pushSchema } from "drizzle-kit/api";
 import { drizzle } from "drizzle-orm/pglite";
 
+import type { OffchainDrizzle } from "@/database";
 import * as offchainSchema from "@/database/offchain-schema";
 import { offchainProposals, offchainVotes } from "@/database/offchain-schema";
 
@@ -48,7 +49,7 @@ const createVote = (overrides: Partial<VoteInsert> = {}): VoteInsert => ({
 
 describe("OffchainVoteRepository", () => {
   let client: PGlite;
-  let db: ReturnType<typeof drizzle<typeof offchainSchema>>;
+  let db: OffchainDrizzle;
   let repository: OffchainVoteRepository;
 
   beforeAll(async () => {

@@ -2,6 +2,7 @@ import { PGlite } from "@electric-sql/pglite";
 import { pushSchema } from "drizzle-kit/api";
 import { drizzle } from "drizzle-orm/pglite";
 import { getAddress } from "viem";
+import type { Drizzle } from "@/database";
 import * as schema from "@/database/schema";
 import { transfer } from "@/database/schema";
 import { TransfersRequest } from "@/mappers";
@@ -40,7 +41,7 @@ const defaultReq = (
 
 describe("TransfersRepository", () => {
   let client: PGlite;
-  let db: ReturnType<typeof drizzle<typeof schema>>;
+  let db: Drizzle;
   let repository: TransfersRepository;
 
   beforeAll(async () => {

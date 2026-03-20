@@ -2,6 +2,7 @@ import { PGlite } from "@electric-sql/pglite";
 import { pushSchema } from "drizzle-kit/api";
 import { drizzle } from "drizzle-orm/pglite";
 
+import type { OffchainDrizzle } from "@/database";
 import * as offchainSchema from "@/database/offchain-schema";
 import { offchainProposals } from "@/database/offchain-schema";
 
@@ -31,7 +32,7 @@ const createProposal = (
 
 describe("OffchainProposalRepository", () => {
   let client: PGlite;
-  let db: ReturnType<typeof drizzle<typeof offchainSchema>>;
+  let db: OffchainDrizzle;
   let repository: OffchainProposalRepository;
 
   beforeAll(async () => {

@@ -3,6 +3,7 @@ import { pushSchema } from "drizzle-kit/api";
 import { drizzle } from "drizzle-orm/pglite";
 import { Address } from "viem";
 
+import type { Drizzle } from "@/database";
 import { votingPowerHistory, delegation, transfer } from "@/database/schema";
 import * as schema from "@/database/schema";
 
@@ -61,7 +62,7 @@ const createTransfer = (
 
 describe("NounsVotingPowerRepository", () => {
   let client: PGlite;
-  let db: ReturnType<typeof drizzle<typeof schema>>;
+  let db: Drizzle;
   let repository: NounsVotingPowerRepository;
 
   beforeAll(async () => {

@@ -2,6 +2,7 @@ import { PGlite } from "@electric-sql/pglite";
 import { pushSchema } from "drizzle-kit/api";
 import { drizzle } from "drizzle-orm/pglite";
 
+import type { Drizzle } from "@/database";
 import * as schema from "@/database/schema";
 import { feedEvent } from "@/database/schema";
 import { FeedEventType, FeedRelevance } from "@/lib/constants";
@@ -48,7 +49,7 @@ const createFeedEvent = (
 
 describe("FeedRepository", () => {
   let client: PGlite;
-  let db: ReturnType<typeof drizzle<typeof schema>>;
+  let db: Drizzle;
   let repository: FeedRepository;
 
   beforeAll(async () => {

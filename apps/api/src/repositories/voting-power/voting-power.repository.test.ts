@@ -3,6 +3,7 @@ import { pushSchema } from "drizzle-kit/api";
 import { drizzle } from "drizzle-orm/pglite";
 import { Address } from "viem";
 
+import type { Drizzle } from "@/database";
 import * as schema from "@/database/schema";
 import {
   accountPower,
@@ -84,7 +85,7 @@ const createTransferRow = (
 
 describe("VotingPowerRepository - getVotingPowers", () => {
   let client: PGlite;
-  let db: ReturnType<typeof drizzle<typeof schema>>;
+  let db: Drizzle;
   let repository: VotingPowerRepository;
 
   beforeAll(async () => {
@@ -452,7 +453,7 @@ describe("VotingPowerRepository - getVotingPowers", () => {
 
 describe("VotingPowerRepository - getVotingPowersByAccountId", () => {
   let client: PGlite;
-  let db: ReturnType<typeof drizzle<typeof schema>>;
+  let db: Drizzle;
   let repository: VotingPowerRepository;
 
   beforeAll(async () => {
@@ -584,7 +585,7 @@ describe("VotingPowerRepository - getVotingPowersByAccountId", () => {
 
 describe("VotingPowerRepository - getHistoricalVotingPowerCount", () => {
   let client: PGlite;
-  let db: ReturnType<typeof drizzle<typeof schema>>;
+  let db: Drizzle;
   let repository: VotingPowerRepository;
 
   beforeAll(async () => {
@@ -697,7 +698,7 @@ describe("VotingPowerRepository - getHistoricalVotingPowerCount", () => {
 
 describe("VotingPowerRepository - getHistoricalVotingPowers", () => {
   let client: PGlite;
-  let db: ReturnType<typeof drizzle<typeof schema>>;
+  let db: Drizzle;
   let repository: VotingPowerRepository;
 
   beforeAll(async () => {
@@ -890,7 +891,7 @@ describe("VotingPowerRepository - getHistoricalVotingPowers", () => {
 
 describe("VotingPowerRepository - getVotingPowerVariations", () => {
   let client: PGlite;
-  let db: ReturnType<typeof drizzle<typeof schema>>;
+  let db: Drizzle;
   let repository: VotingPowerRepository;
 
   beforeAll(async () => {
@@ -1075,7 +1076,7 @@ describe("VotingPowerRepository - getVotingPowerVariations", () => {
 
 describe("VotingPowerRepository - getVotingPowerVariationsByAccountId", () => {
   let client: PGlite;
-  let db: ReturnType<typeof drizzle<typeof schema>>;
+  let db: Drizzle;
   let repository: VotingPowerRepository;
 
   beforeAll(async () => {
