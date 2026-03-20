@@ -252,7 +252,7 @@ import { setupServer } from "msw/node";
 import { http, HttpResponse } from "msw";
 
 const server = setupServer(
-  http.get("https://api.coingecko.com/api/v3/simple/price", () => {
+  http.get("https://api.coingecko.com/simple/price", () => {
     return HttpResponse.json({ uniswap: { usd: 7.5 } });
   }),
 );
