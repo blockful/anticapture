@@ -197,10 +197,10 @@ importers:
         version: 9.1.2(eslint@9.39.4(jiti@2.6.1))
       eslint-plugin-prettier:
         specifier: ^5.2.1
-        version: 5.5.5(@types/eslint@9.6.1)(eslint-config-prettier@9.1.2(eslint@9.39.2(jiti@2.6.1)))(eslint@9.39.2(jiti@2.6.1))(prettier@3.8.1)
+        version: 5.5.5(@types/eslint@9.6.1)(eslint-config-prettier@9.1.2(eslint@9.39.4(jiti@2.6.1)))(eslint@9.39.4(jiti@2.6.1))(prettier@3.8.1)
       msw:
         specifier: ^2.12.10
-        version: 2.12.10(@types/node@20.19.33)(typescript@5.9.3)
+        version: 2.12.10(@types/node@20.19.37)(typescript@5.9.3)
       prettier:
         specifier: ^3.5.3
         version: 3.8.1
@@ -227,7 +227,7 @@ importers:
         version: 0.108.31(graphql@16.13.1)
       "@graphql-mesh/graphql":
         specifier: ^0.104.3
-        version: 0.104.24(@types/node@20.19.33)(bufferutil@4.0.9)(crossws@0.3.5)(graphql@16.12.0)(utf-8-validate@5.0.10)
+        version: 0.104.24(@types/node@20.19.37)(bufferutil@4.0.9)(crossws@0.3.5)(graphql@16.13.1)(utf-8-validate@5.0.10)
       "@graphql-mesh/http":
         specifier: ^0.106.3
         version: 0.106.29(graphql@16.13.1)
@@ -255,16 +255,16 @@ importers:
     devDependencies:
       "@graphql-mesh/cli":
         specifier: ^0.100.4
-        version: 0.100.36(@types/node@25.4.0)(bufferutil@4.0.9)(crossws@0.3.5)(graphql@16.13.1)(utf-8-validate@5.0.10)
+        version: 0.100.36(@types/node@20.19.37)(bufferutil@4.0.9)(crossws@0.3.5)(graphql@16.13.1)(utf-8-validate@5.0.10)
       "@types/jest":
         specifier: ^29.5.14
         version: 29.5.14
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.33)(ts-node@10.9.2(@types/node@20.19.33)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.37)(ts-node@10.9.2(@types/node@20.19.37)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.4.1
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.29.0))(jest-util@29.7.0)(jest@29.7.0(@types/node@20.19.33)(ts-node@10.9.2(@types/node@20.19.33)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.29.0))(jest-util@29.7.0)(jest@29.7.0(@types/node@20.19.37)(ts-node@10.9.2(@types/node@20.19.37)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.19.4
         version: 4.21.0
@@ -1180,15 +1180,6 @@ packages:
     peerDependencies:
       "@babel/core": ^7.0.0-0
 
-  "@babel/plugin-syntax-import-attributes@7.27.1":
-    resolution:
-      {
-        integrity: sha512-oFT0FrKHgF53f4vOsZGi2Hh3I35PfSmVs4IBFLFj4dnafP+hIWDLg3VyKmUHfLoLHlyxY4C7DGtmHuJgn+IGww==,
-      }
-    engines: { node: ">=6.9.0" }
-    peerDependencies:
-      "@babel/core": ^7.0.0-0
-
   "@babel/plugin-syntax-import-attributes@7.28.6":
     resolution:
       {
@@ -1284,15 +1275,6 @@ packages:
     resolution:
       {
         integrity: sha512-hx++upLv5U1rgYfwe1xBQUhRmU41NEvpUvrp8jkrSCdvGSnM5/qdRMtylJ6PG5OFkBaHkbTAKTnd3/YyESRHFw==,
-      }
-    engines: { node: ">=6.9.0" }
-    peerDependencies:
-      "@babel/core": ^7.0.0-0
-
-  "@babel/plugin-syntax-typescript@7.27.1":
-    resolution:
-      {
-        integrity: sha512-xfYCBMxveHrRMnAWl1ZlPXOZjzkN82THFvLhQhFXFt81Z5HnN+EtUkZhv/zcKpmT3fzmWZB0ywiBrbC3vogbwQ==,
       }
     engines: { node: ">=6.9.0" }
     peerDependencies:
@@ -20403,13 +20385,13 @@ snapshots:
   "@babel/plugin-syntax-async-generators@7.8.4(@babel/core@7.28.5)":
     dependencies:
       "@babel/core": 7.28.5
-      "@babel/helper-plugin-utils": 7.27.1
+      "@babel/helper-plugin-utils": 7.28.6
     optional: true
 
   "@babel/plugin-syntax-async-generators@7.8.4(@babel/core@7.29.0)":
     dependencies:
       "@babel/core": 7.29.0
-      "@babel/helper-plugin-utils": 7.27.1
+      "@babel/helper-plugin-utils": 7.28.6
 
   "@babel/plugin-syntax-bigint@7.8.3(@babel/core@7.28.5)":
     dependencies:
@@ -20424,24 +20406,24 @@ snapshots:
   "@babel/plugin-syntax-class-properties@7.12.13(@babel/core@7.28.5)":
     dependencies:
       "@babel/core": 7.28.5
-      "@babel/helper-plugin-utils": 7.27.1
+      "@babel/helper-plugin-utils": 7.28.6
     optional: true
 
   "@babel/plugin-syntax-class-properties@7.12.13(@babel/core@7.29.0)":
     dependencies:
       "@babel/core": 7.29.0
-      "@babel/helper-plugin-utils": 7.27.1
+      "@babel/helper-plugin-utils": 7.28.6
 
   "@babel/plugin-syntax-class-static-block@7.14.5(@babel/core@7.28.5)":
     dependencies:
       "@babel/core": 7.28.5
-      "@babel/helper-plugin-utils": 7.27.1
+      "@babel/helper-plugin-utils": 7.28.6
     optional: true
 
   "@babel/plugin-syntax-class-static-block@7.14.5(@babel/core@7.29.0)":
     dependencies:
       "@babel/core": 7.29.0
-      "@babel/helper-plugin-utils": 7.27.1
+      "@babel/helper-plugin-utils": 7.28.6
 
   "@babel/plugin-syntax-dynamic-import@7.8.3(@babel/core@7.28.5)":
     dependencies:
@@ -20468,43 +20450,37 @@ snapshots:
       "@babel/core": 7.29.0
       "@babel/helper-plugin-utils": 7.28.6
 
-  "@babel/plugin-syntax-import-attributes@7.27.1(@babel/core@7.28.5)":
-    dependencies:
-      "@babel/core": 7.28.5
-      "@babel/helper-plugin-utils": 7.27.1
-    optional: true
-
-  "@babel/plugin-syntax-import-attributes@7.27.1(@babel/core@7.29.0)":
-    dependencies:
-      "@babel/core": 7.29.0
-      "@babel/helper-plugin-utils": 7.27.1
-
   "@babel/plugin-syntax-import-attributes@7.28.6(@babel/core@7.28.5)":
     dependencies:
       "@babel/core": 7.28.5
       "@babel/helper-plugin-utils": 7.28.6
 
+  "@babel/plugin-syntax-import-attributes@7.28.6(@babel/core@7.29.0)":
+    dependencies:
+      "@babel/core": 7.29.0
+      "@babel/helper-plugin-utils": 7.28.6
+
   "@babel/plugin-syntax-import-meta@7.10.4(@babel/core@7.28.5)":
     dependencies:
       "@babel/core": 7.28.5
-      "@babel/helper-plugin-utils": 7.27.1
+      "@babel/helper-plugin-utils": 7.28.6
     optional: true
 
   "@babel/plugin-syntax-import-meta@7.10.4(@babel/core@7.29.0)":
     dependencies:
       "@babel/core": 7.29.0
-      "@babel/helper-plugin-utils": 7.27.1
+      "@babel/helper-plugin-utils": 7.28.6
 
   "@babel/plugin-syntax-json-strings@7.8.3(@babel/core@7.28.5)":
     dependencies:
       "@babel/core": 7.28.5
-      "@babel/helper-plugin-utils": 7.27.1
+      "@babel/helper-plugin-utils": 7.28.6
     optional: true
 
   "@babel/plugin-syntax-json-strings@7.8.3(@babel/core@7.29.0)":
     dependencies:
       "@babel/core": 7.29.0
-      "@babel/helper-plugin-utils": 7.27.1
+      "@babel/helper-plugin-utils": 7.28.6
 
   "@babel/plugin-syntax-jsx@7.27.1(@babel/core@7.28.5)":
     dependencies:
@@ -20519,99 +20495,99 @@ snapshots:
   "@babel/plugin-syntax-logical-assignment-operators@7.10.4(@babel/core@7.28.5)":
     dependencies:
       "@babel/core": 7.28.5
-      "@babel/helper-plugin-utils": 7.27.1
+      "@babel/helper-plugin-utils": 7.28.6
     optional: true
 
   "@babel/plugin-syntax-logical-assignment-operators@7.10.4(@babel/core@7.29.0)":
     dependencies:
       "@babel/core": 7.29.0
-      "@babel/helper-plugin-utils": 7.27.1
+      "@babel/helper-plugin-utils": 7.28.6
 
   "@babel/plugin-syntax-nullish-coalescing-operator@7.8.3(@babel/core@7.28.5)":
     dependencies:
       "@babel/core": 7.28.5
-      "@babel/helper-plugin-utils": 7.27.1
+      "@babel/helper-plugin-utils": 7.28.6
     optional: true
 
   "@babel/plugin-syntax-nullish-coalescing-operator@7.8.3(@babel/core@7.29.0)":
     dependencies:
       "@babel/core": 7.29.0
-      "@babel/helper-plugin-utils": 7.27.1
+      "@babel/helper-plugin-utils": 7.28.6
 
   "@babel/plugin-syntax-numeric-separator@7.10.4(@babel/core@7.28.5)":
     dependencies:
       "@babel/core": 7.28.5
-      "@babel/helper-plugin-utils": 7.27.1
+      "@babel/helper-plugin-utils": 7.28.6
     optional: true
 
   "@babel/plugin-syntax-numeric-separator@7.10.4(@babel/core@7.29.0)":
     dependencies:
       "@babel/core": 7.29.0
-      "@babel/helper-plugin-utils": 7.27.1
+      "@babel/helper-plugin-utils": 7.28.6
 
   "@babel/plugin-syntax-object-rest-spread@7.8.3(@babel/core@7.28.5)":
     dependencies:
       "@babel/core": 7.28.5
-      "@babel/helper-plugin-utils": 7.27.1
+      "@babel/helper-plugin-utils": 7.28.6
     optional: true
 
   "@babel/plugin-syntax-object-rest-spread@7.8.3(@babel/core@7.29.0)":
     dependencies:
       "@babel/core": 7.29.0
-      "@babel/helper-plugin-utils": 7.27.1
+      "@babel/helper-plugin-utils": 7.28.6
 
   "@babel/plugin-syntax-optional-catch-binding@7.8.3(@babel/core@7.28.5)":
     dependencies:
       "@babel/core": 7.28.5
-      "@babel/helper-plugin-utils": 7.27.1
+      "@babel/helper-plugin-utils": 7.28.6
     optional: true
 
   "@babel/plugin-syntax-optional-catch-binding@7.8.3(@babel/core@7.29.0)":
     dependencies:
       "@babel/core": 7.29.0
-      "@babel/helper-plugin-utils": 7.27.1
+      "@babel/helper-plugin-utils": 7.28.6
 
   "@babel/plugin-syntax-optional-chaining@7.8.3(@babel/core@7.28.5)":
     dependencies:
       "@babel/core": 7.28.5
-      "@babel/helper-plugin-utils": 7.27.1
+      "@babel/helper-plugin-utils": 7.28.6
     optional: true
 
   "@babel/plugin-syntax-optional-chaining@7.8.3(@babel/core@7.29.0)":
     dependencies:
       "@babel/core": 7.29.0
-      "@babel/helper-plugin-utils": 7.27.1
+      "@babel/helper-plugin-utils": 7.28.6
 
   "@babel/plugin-syntax-private-property-in-object@7.14.5(@babel/core@7.28.5)":
     dependencies:
       "@babel/core": 7.28.5
-      "@babel/helper-plugin-utils": 7.27.1
+      "@babel/helper-plugin-utils": 7.28.6
     optional: true
 
   "@babel/plugin-syntax-private-property-in-object@7.14.5(@babel/core@7.29.0)":
     dependencies:
       "@babel/core": 7.29.0
-      "@babel/helper-plugin-utils": 7.27.1
+      "@babel/helper-plugin-utils": 7.28.6
 
   "@babel/plugin-syntax-top-level-await@7.14.5(@babel/core@7.28.5)":
     dependencies:
       "@babel/core": 7.28.5
-      "@babel/helper-plugin-utils": 7.27.1
+      "@babel/helper-plugin-utils": 7.28.6
     optional: true
 
   "@babel/plugin-syntax-top-level-await@7.14.5(@babel/core@7.29.0)":
     dependencies:
       "@babel/core": 7.29.0
-      "@babel/helper-plugin-utils": 7.27.1
-
-  "@babel/plugin-syntax-typescript@7.27.1(@babel/core@7.29.0)":
-    dependencies:
-      "@babel/core": 7.29.0
-      "@babel/helper-plugin-utils": 7.27.1
+      "@babel/helper-plugin-utils": 7.28.6
 
   "@babel/plugin-syntax-typescript@7.28.6(@babel/core@7.28.5)":
     dependencies:
       "@babel/core": 7.28.5
+      "@babel/helper-plugin-utils": 7.28.6
+
+  "@babel/plugin-syntax-typescript@7.28.6(@babel/core@7.29.0)":
+    dependencies:
+      "@babel/core": 7.29.0
       "@babel/helper-plugin-utils": 7.28.6
 
   "@babel/plugin-syntax-unicode-sets-regex@7.18.6(@babel/core@7.28.5)":
@@ -22503,7 +22479,7 @@ snapshots:
       - "@nats-io/nats-core"
       - ioredis
 
-  "@graphql-mesh/cli@0.100.36(@types/node@25.4.0)(bufferutil@4.0.9)(crossws@0.3.5)(graphql@16.13.1)(utf-8-validate@5.0.10)":
+  "@graphql-mesh/cli@0.100.36(@types/node@20.19.37)(bufferutil@4.0.9)(crossws@0.3.5)(graphql@16.13.1)(utf-8-validate@5.0.10)":
     dependencies:
       "@graphql-codegen/core": 5.0.1(graphql@16.13.1)
       "@graphql-codegen/typed-document-node": 6.1.7(graphql@16.13.1)
@@ -22515,7 +22491,7 @@ snapshots:
       "@graphql-mesh/cross-helpers": 0.4.12(graphql@16.13.1)
       "@graphql-mesh/http": 0.106.29(graphql@16.13.1)
       "@graphql-mesh/include": 0.3.26(graphql@16.13.1)
-      "@graphql-mesh/incontext-sdk-codegen": 0.0.2(@types/node@25.4.0)(graphql@16.13.1)
+      "@graphql-mesh/incontext-sdk-codegen": 0.0.2(@types/node@20.19.37)(graphql@16.13.1)
       "@graphql-mesh/runtime": 0.106.27(graphql@16.13.1)
       "@graphql-mesh/store": 0.104.27(graphql@16.13.1)
       "@graphql-mesh/types": 0.104.23(graphql@16.13.1)
@@ -22607,18 +22583,25 @@ snapshots:
       - ioredis
       - supports-color
 
-  "@graphql-mesh/graphql@0.104.24(@types/node@20.19.33)(bufferutil@4.0.9)(crossws@0.3.5)(graphql@16.12.0)(utf-8-validate@5.0.10)":
+  "@graphql-mesh/fusion-runtime@1.8.1(@types/node@20.19.37)(graphql@16.13.1)":
     dependencies:
-      "@graphql-mesh/cross-helpers": 0.4.12(graphql@16.12.0)
-      "@graphql-mesh/store": 0.104.24(graphql@16.12.0)
-      "@graphql-mesh/string-interpolation": 0.5.11(graphql@16.12.0)
-      "@graphql-mesh/types": 0.104.20(graphql@16.12.0)
-      "@graphql-mesh/utils": 0.104.22(graphql@16.12.0)
-      "@graphql-tools/delegate": 12.0.6(graphql@16.12.0)
-      "@graphql-tools/federation": 4.2.10(@types/node@20.19.33)(graphql@16.12.0)
-      "@graphql-tools/merge": 9.1.7(graphql@16.12.0)
-      "@graphql-tools/url-loader": 9.0.6(@types/node@20.19.33)(bufferutil@4.0.9)(crossws@0.3.5)(graphql@16.12.0)(utf-8-validate@5.0.10)
-      "@graphql-tools/utils": 11.0.0(graphql@16.12.0)
+      "@envelop/core": 5.5.1
+      "@envelop/instrumentation": 1.0.0
+      "@graphql-hive/logger": 1.1.0
+      "@graphql-mesh/cross-helpers": 0.4.12(graphql@16.13.1)
+      "@graphql-mesh/transport-common": 1.0.15(graphql@16.13.1)
+      "@graphql-mesh/types": 0.104.23(graphql@16.13.1)
+      "@graphql-mesh/utils": 0.104.25(graphql@16.13.1)
+      "@graphql-tools/batch-execute": 10.0.7(graphql@16.13.1)
+      "@graphql-tools/delegate": 12.0.12(graphql@16.13.1)
+      "@graphql-tools/executor": 1.5.1(graphql@16.13.1)
+      "@graphql-tools/federation": 4.3.1(@types/node@20.19.37)(graphql@16.13.1)
+      "@graphql-tools/merge": 9.1.7(graphql@16.13.1)
+      "@graphql-tools/stitch": 10.1.16(graphql@16.13.1)
+      "@graphql-tools/stitching-directives": 4.0.18(graphql@16.13.1)
+      "@graphql-tools/utils": 11.0.0(graphql@16.13.1)
+      "@graphql-tools/wrap": 11.1.12(graphql@16.13.1)
+      "@whatwg-node/disposablestack": 0.0.6
       "@whatwg-node/promise-helpers": 1.3.2
       graphql: 16.13.1
       graphql-yoga: 5.18.1(graphql@16.13.1)
@@ -22631,17 +22614,17 @@ snapshots:
       - pino
       - winston
 
-  "@graphql-mesh/graphql@0.104.24(@types/node@25.4.0)(bufferutil@4.0.9)(crossws@0.3.5)(graphql@16.13.1)(utf-8-validate@5.0.10)":
+  "@graphql-mesh/graphql@0.104.24(@types/node@20.19.37)(bufferutil@4.0.9)(crossws@0.3.5)(graphql@16.13.1)(utf-8-validate@5.0.10)":
     dependencies:
       "@graphql-mesh/cross-helpers": 0.4.12(graphql@16.13.1)
       "@graphql-mesh/store": 0.104.27(graphql@16.13.1)
       "@graphql-mesh/string-interpolation": 0.5.11(graphql@16.13.1)
       "@graphql-mesh/types": 0.104.23(graphql@16.13.1)
       "@graphql-mesh/utils": 0.104.25(graphql@16.13.1)
-      "@graphql-tools/delegate": 12.0.9(graphql@16.13.1)
-      "@graphql-tools/federation": 4.2.10(@types/node@25.4.0)(graphql@16.13.1)
+      "@graphql-tools/delegate": 12.0.12(graphql@16.13.1)
+      "@graphql-tools/federation": 4.2.10(@types/node@20.19.37)(graphql@16.13.1)
       "@graphql-tools/merge": 9.1.7(graphql@16.13.1)
-      "@graphql-tools/url-loader": 9.0.6(@types/node@25.4.0)(bufferutil@4.0.9)(crossws@0.3.5)(graphql@16.13.1)(utf-8-validate@5.0.10)
+      "@graphql-tools/url-loader": 9.0.6(@types/node@20.19.37)(bufferutil@4.0.9)(crossws@0.3.5)(graphql@16.13.1)(utf-8-validate@5.0.10)
       "@graphql-tools/utils": 11.0.0(graphql@16.13.1)
       "@whatwg-node/promise-helpers": 1.3.2
       graphql: 16.13.1
@@ -22684,13 +22667,13 @@ snapshots:
       - "@nats-io/nats-core"
       - ioredis
 
-  "@graphql-mesh/incontext-sdk-codegen@0.0.2(@types/node@25.4.0)(graphql@16.13.1)":
+  "@graphql-mesh/incontext-sdk-codegen@0.0.2(@types/node@20.19.37)(graphql@16.13.1)":
     dependencies:
       "@graphql-codegen/core": 5.0.1(graphql@16.13.1)
       "@graphql-codegen/plugin-helpers": 6.2.0(graphql@16.13.1)
       "@graphql-codegen/typescript": 5.0.9(graphql@16.13.1)
       "@graphql-mesh/cross-helpers": 0.4.12(graphql@16.13.1)
-      "@graphql-mesh/fusion-runtime": 1.8.1(@types/node@25.4.0)(graphql@16.13.1)
+      "@graphql-mesh/fusion-runtime": 1.8.1(@types/node@20.19.37)(graphql@16.13.1)
       "@graphql-mesh/transport-common": 1.0.15(graphql@16.13.1)
       "@graphql-mesh/types": 0.104.23(graphql@16.13.1)
       "@graphql-mesh/utils": 0.104.25(graphql@16.13.1)
@@ -23080,22 +23063,7 @@ snapshots:
     transitivePeerDependencies:
       - "@types/node"
 
-  "@graphql-tools/executor-http@3.1.0(@types/node@20.19.33)(graphql@16.12.0)":
-    dependencies:
-      "@graphql-hive/signal": 2.0.0
-      "@graphql-tools/executor-common": 1.0.6(graphql@16.13.1)
-      "@graphql-tools/utils": 11.0.0(graphql@16.13.1)
-      "@repeaterjs/repeater": 3.0.6
-      "@whatwg-node/disposablestack": 0.0.6
-      "@whatwg-node/fetch": 0.10.13
-      "@whatwg-node/promise-helpers": 1.3.2
-      graphql: 16.12.0
-      meros: 1.3.2(@types/node@20.19.33)
-      tslib: 2.8.1
-    transitivePeerDependencies:
-      - "@types/node"
-
-  "@graphql-tools/executor-http@3.1.1(@types/node@25.4.0)(graphql@16.13.1)":
+  "@graphql-tools/executor-http@3.1.0(@types/node@20.19.37)(graphql@16.13.1)":
     dependencies:
       "@graphql-hive/signal": 2.0.0
       "@graphql-tools/executor-common": 1.0.6(graphql@16.13.1)
@@ -23105,7 +23073,22 @@ snapshots:
       "@whatwg-node/fetch": 0.10.13
       "@whatwg-node/promise-helpers": 1.3.2
       graphql: 16.13.1
-      meros: 1.3.2(@types/node@25.4.0)
+      meros: 1.3.2(@types/node@20.19.37)
+      tslib: 2.8.1
+    transitivePeerDependencies:
+      - "@types/node"
+
+  "@graphql-tools/executor-http@3.1.1(@types/node@20.19.37)(graphql@16.13.1)":
+    dependencies:
+      "@graphql-hive/signal": 2.0.0
+      "@graphql-tools/executor-common": 1.0.6(graphql@16.13.1)
+      "@graphql-tools/utils": 11.0.0(graphql@16.13.1)
+      "@repeaterjs/repeater": 3.0.6
+      "@whatwg-node/disposablestack": 0.0.6
+      "@whatwg-node/fetch": 0.10.13
+      "@whatwg-node/promise-helpers": 1.3.2
+      graphql: 16.13.1
+      meros: 1.3.2(@types/node@20.19.37)
       tslib: 2.8.1
     transitivePeerDependencies:
       - "@types/node"
@@ -23154,16 +23137,16 @@ snapshots:
       graphql: 16.13.1
       tslib: 2.8.1
 
-  "@graphql-tools/federation@4.2.10(@types/node@25.4.0)(graphql@16.13.1)":
+  "@graphql-tools/federation@4.2.10(@types/node@20.19.37)(graphql@16.13.1)":
     dependencies:
-      "@graphql-tools/delegate": 12.0.9(graphql@16.13.1)
+      "@graphql-tools/delegate": 12.0.12(graphql@16.13.1)
       "@graphql-tools/executor": 1.5.1(graphql@16.13.1)
-      "@graphql-tools/executor-http": 3.1.0(@types/node@25.4.0)(graphql@16.13.1)
+      "@graphql-tools/executor-http": 3.1.0(@types/node@20.19.37)(graphql@16.13.1)
       "@graphql-tools/merge": 9.1.7(graphql@16.13.1)
       "@graphql-tools/schema": 10.0.31(graphql@16.13.1)
-      "@graphql-tools/stitch": 10.1.13(graphql@16.13.1)
+      "@graphql-tools/stitch": 10.1.16(graphql@16.13.1)
       "@graphql-tools/utils": 11.0.0(graphql@16.13.1)
-      "@graphql-tools/wrap": 11.1.9(graphql@16.13.1)
+      "@graphql-tools/wrap": 11.1.12(graphql@16.13.1)
       "@graphql-yoga/typed-event-target": 3.0.2
       "@whatwg-node/disposablestack": 0.0.6
       "@whatwg-node/events": 0.1.2
@@ -23174,16 +23157,16 @@ snapshots:
     transitivePeerDependencies:
       - "@types/node"
 
-  "@graphql-tools/federation@4.2.10(@types/node@20.19.33)(graphql@16.12.0)":
+  "@graphql-tools/federation@4.3.1(@types/node@20.19.37)(graphql@16.13.1)":
     dependencies:
-      "@graphql-tools/delegate": 12.0.6(graphql@16.12.0)
-      "@graphql-tools/executor": 1.5.1(graphql@16.12.0)
-      "@graphql-tools/executor-http": 3.1.0(@types/node@20.19.33)(graphql@16.12.0)
-      "@graphql-tools/merge": 9.1.7(graphql@16.12.0)
-      "@graphql-tools/schema": 10.0.31(graphql@16.12.0)
-      "@graphql-tools/stitch": 10.1.10(graphql@16.12.0)
-      "@graphql-tools/utils": 11.0.0(graphql@16.12.0)
-      "@graphql-tools/wrap": 11.1.6(graphql@16.12.0)
+      "@graphql-tools/delegate": 12.0.12(graphql@16.13.1)
+      "@graphql-tools/executor": 1.5.1(graphql@16.13.1)
+      "@graphql-tools/executor-http": 3.1.1(@types/node@20.19.37)(graphql@16.13.1)
+      "@graphql-tools/merge": 9.1.7(graphql@16.13.1)
+      "@graphql-tools/schema": 10.0.31(graphql@16.13.1)
+      "@graphql-tools/stitch": 10.1.16(graphql@16.13.1)
+      "@graphql-tools/utils": 11.0.0(graphql@16.13.1)
+      "@graphql-tools/wrap": 11.1.12(graphql@16.13.1)
       "@graphql-yoga/typed-event-target": 3.0.2
       "@whatwg-node/disposablestack": 0.0.6
       "@whatwg-node/events": 0.1.2
@@ -23464,13 +23447,13 @@ snapshots:
       - crossws
       - utf-8-validate
 
-  "@graphql-tools/url-loader@9.0.6(@types/node@20.19.33)(bufferutil@4.0.9)(crossws@0.3.5)(graphql@16.12.0)(utf-8-validate@5.0.10)":
+  "@graphql-tools/url-loader@9.0.6(@types/node@20.19.37)(bufferutil@4.0.9)(crossws@0.3.5)(graphql@16.13.1)(utf-8-validate@5.0.10)":
     dependencies:
-      "@graphql-tools/executor-graphql-ws": 3.1.4(bufferutil@4.0.9)(crossws@0.3.5)(graphql@16.12.0)(utf-8-validate@5.0.10)
-      "@graphql-tools/executor-http": 3.1.0(@types/node@20.19.33)(graphql@16.12.0)
-      "@graphql-tools/executor-legacy-ws": 1.1.25(bufferutil@4.0.9)(graphql@16.12.0)(utf-8-validate@5.0.10)
-      "@graphql-tools/utils": 11.0.0(graphql@16.12.0)
-      "@graphql-tools/wrap": 11.1.6(graphql@16.12.0)
+      "@graphql-tools/executor-graphql-ws": 3.1.4(bufferutil@4.0.9)(crossws@0.3.5)(graphql@16.13.1)(utf-8-validate@5.0.10)
+      "@graphql-tools/executor-http": 3.1.0(@types/node@20.19.37)(graphql@16.13.1)
+      "@graphql-tools/executor-legacy-ws": 1.1.25(bufferutil@4.0.9)(graphql@16.13.1)(utf-8-validate@5.0.10)
+      "@graphql-tools/utils": 11.0.0(graphql@16.13.1)
+      "@graphql-tools/wrap": 11.1.12(graphql@16.13.1)
       "@types/ws": 8.18.1
       "@whatwg-node/fetch": 0.10.13
       "@whatwg-node/promise-helpers": 1.3.2
@@ -27979,7 +27962,7 @@ snapshots:
 
   babel-plugin-istanbul@6.1.1:
     dependencies:
-      "@babel/helper-plugin-utils": 7.27.1
+      "@babel/helper-plugin-utils": 7.28.6
       "@istanbuljs/load-nyc-config": 1.1.0
       "@istanbuljs/schema": 0.1.3
       istanbul-lib-instrument: 5.2.1
@@ -28025,7 +28008,7 @@ snapshots:
       "@babel/plugin-syntax-bigint": 7.8.3(@babel/core@7.28.5)
       "@babel/plugin-syntax-class-properties": 7.12.13(@babel/core@7.28.5)
       "@babel/plugin-syntax-class-static-block": 7.14.5(@babel/core@7.28.5)
-      "@babel/plugin-syntax-import-attributes": 7.27.1(@babel/core@7.28.5)
+      "@babel/plugin-syntax-import-attributes": 7.28.6(@babel/core@7.28.5)
       "@babel/plugin-syntax-import-meta": 7.10.4(@babel/core@7.28.5)
       "@babel/plugin-syntax-json-strings": 7.8.3(@babel/core@7.28.5)
       "@babel/plugin-syntax-logical-assignment-operators": 7.10.4(@babel/core@7.28.5)
@@ -28045,7 +28028,7 @@ snapshots:
       "@babel/plugin-syntax-bigint": 7.8.3(@babel/core@7.29.0)
       "@babel/plugin-syntax-class-properties": 7.12.13(@babel/core@7.29.0)
       "@babel/plugin-syntax-class-static-block": 7.14.5(@babel/core@7.29.0)
-      "@babel/plugin-syntax-import-attributes": 7.27.1(@babel/core@7.29.0)
+      "@babel/plugin-syntax-import-attributes": 7.28.6(@babel/core@7.29.0)
       "@babel/plugin-syntax-import-meta": 7.10.4(@babel/core@7.29.0)
       "@babel/plugin-syntax-json-strings": 7.8.3(@babel/core@7.29.0)
       "@babel/plugin-syntax-logical-assignment-operators": 7.10.4(@babel/core@7.29.0)
@@ -29430,7 +29413,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.1(@typescript-eslint/parser@8.55.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@4.4.4)(eslint@9.39.2(jiti@2.6.1)):
+  eslint-module-utils@2.12.1(@typescript-eslint/parser@8.57.0(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@4.4.4)(eslint@9.39.4(jiti@2.6.1)):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
@@ -29481,7 +29464,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.39.4(jiti@2.6.1)
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.55.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@4.4.4)(eslint@9.39.2(jiti@2.6.1))
+      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.57.0(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@4.4.4)(eslint@9.39.4(jiti@2.6.1))
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3
@@ -30860,7 +30843,7 @@ snapshots:
       - supports-color
       - ts-node
 
-  jest-config@29.7.0(@types/node@20.19.33)(ts-node@10.9.2(@types/node@20.19.33)(typescript@5.9.3)):
+  jest-config@29.7.0(@types/node@20.19.37)(ts-node@10.9.2(@types/node@20.19.37)(typescript@5.9.3)):
     dependencies:
       "@babel/core": 7.29.0
       "@jest/test-sequencer": 29.7.0
@@ -31050,7 +31033,7 @@ snapshots:
       "@babel/core": 7.29.0
       "@babel/generator": 7.29.1
       "@babel/plugin-syntax-jsx": 7.27.1(@babel/core@7.29.0)
-      "@babel/plugin-syntax-typescript": 7.27.1(@babel/core@7.29.0)
+      "@babel/plugin-syntax-typescript": 7.28.6(@babel/core@7.29.0)
       "@babel/types": 7.29.0
       "@jest/expect-utils": 29.7.0
       "@jest/transform": 29.7.0
@@ -31583,10 +31566,6 @@ snapshots:
   meros@1.3.2(@types/node@20.19.37):
     optionalDependencies:
       "@types/node": 20.19.37
-
-  meros@1.3.2(@types/node@20.19.33):
-    optionalDependencies:
-      "@types/node": 20.19.33
 
   mersenne-twister@1.1.0: {}
 
@@ -33871,12 +33850,12 @@ snapshots:
       babel-jest: 29.7.0(@babel/core@7.28.5)
       jest-util: 29.7.0
 
-  ts-jest@29.4.6(@babel/core@7.29.0)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.29.0))(jest-util@29.7.0)(jest@29.7.0(@types/node@20.19.33)(ts-node@10.9.2(@types/node@20.19.33)(typescript@5.9.3)))(typescript@5.9.3):
+  ts-jest@29.4.6(@babel/core@7.29.0)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.29.0))(jest-util@29.7.0)(jest@29.7.0(@types/node@20.19.37)(ts-node@10.9.2(@types/node@20.19.37)(typescript@5.9.3)))(typescript@5.9.3):
     dependencies:
       bs-logger: 0.2.6
       fast-json-stable-stringify: 2.1.0
       handlebars: 4.7.8
-      jest: 29.7.0(@types/node@20.19.33)(ts-node@10.9.2(@types/node@20.19.33)(typescript@5.9.3))
+      jest: 29.7.0(@types/node@20.19.37)(ts-node@10.9.2(@types/node@20.19.37)(typescript@5.9.3))
       json5: 2.2.3
       lodash.memoize: 4.1.2
       make-error: 1.3.6

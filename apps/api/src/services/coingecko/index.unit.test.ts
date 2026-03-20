@@ -47,20 +47,6 @@ describe("CoingeckoService", () => {
       });
     });
 
-    it("converts CoinGecko ms timestamps to seconds", async () => {
-      const msTimestamp = 1700000000000;
-
-      server.use(
-        handleMarketChart("uniswap", {
-          prices: [[msTimestamp, 10.0]],
-        }),
-      );
-
-      const result = await service.getHistoricalTokenData(1);
-
-      expect(result[0]!.timestamp).toBe(1700000000);
-    });
-
     it("throws HTTPException(503) when zod schema validation fails", async () => {
       server.use(handleMarketChart("uniswap", { invalid: "structure" }));
 

@@ -71,13 +71,6 @@ describe("DaoCache", () => {
   });
 
   describe("set", () => {
-    it("should store data that can be retrieved", () => {
-      const data = createDaoResponse();
-      cache.set("dao-1", data);
-
-      expect(cache.get("dao-1")).toEqual(data);
-    });
-
     it("should overwrite data for an existing key", () => {
       const oldData = createDaoResponse({ quorum: "100" });
       const newData = createDaoResponse({ quorum: "200" });

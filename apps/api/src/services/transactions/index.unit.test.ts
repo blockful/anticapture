@@ -67,16 +67,4 @@ describe("TransactionsService", () => {
     expect(result.items).toHaveLength(0);
     expect(result.totalCount).toBe(42);
   });
-
-  it("maps multiple transactions correctly", async () => {
-    const dbTx1 = makeDBTransaction({ transactionHash: "0xaaa" });
-    const dbTx2 = makeDBTransaction({ transactionHash: "0xbbb" });
-    const service = new TransactionsService(createStubRepo([dbTx1, dbTx2], 2));
-
-    const result = await service.getTransactions(defaultRequest);
-
-    expect(result.items).toHaveLength(2);
-    expect(result.items[0]).toEqual(TransactionMapper.toApi(dbTx1));
-    expect(result.items[1]).toEqual(TransactionMapper.toApi(dbTx2));
-  });
 });

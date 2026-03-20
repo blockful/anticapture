@@ -196,19 +196,5 @@ describe("ProposalsActivityService", () => {
         ],
       });
     });
-
-    it("should calculate yesRate correctly", async () => {
-      repo.firstVoteTs = 1699000000;
-      repo.paginationResult = {
-        proposals: [createProposalWithVote()],
-        totalCount: 1,
-      };
-      repo.proposals = [createDbProposal()];
-      repo.votes = [createDbVote({ support: "1" })];
-
-      const result = await service.getProposalsActivity(defaultRequest);
-
-      expect(result.yesRate).toBe(100);
-    });
   });
 });

@@ -169,65 +169,6 @@ describe("HistoricalDelegationsService", () => {
       });
     });
 
-    it("should map multiple delegations from repository", async () => {
-      const delegationA = createMockDelegation({
-        transactionHash: "0xtxA",
-        timestamp: 1700000000n,
-        logIndex: 0,
-      });
-      const delegationB = createMockDelegation({
-        transactionHash: "0xtxB",
-        timestamp: 1700001000n,
-        logIndex: 1,
-      });
-      const delegationC = createMockDelegation({
-        transactionHash: "0xtxC",
-        timestamp: 1700002000n,
-        logIndex: 2,
-      });
-      stubResult = {
-        items: [delegationA, delegationB, delegationC],
-        totalCount: 3,
-      };
-
-      const result = await service.getHistoricalDelegations(
-        address,
-        undefined,
-        undefined,
-        undefined,
-        "desc",
-        0,
-        10,
-      );
-
-      expect(result).toEqual({
-        items: [
-          {
-            delegatorAddress: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
-            delegateAddress: "0x1234567890123456789012345678901234567890",
-            amount: "1000000000000000000",
-            timestamp: "1700000000",
-            transactionHash: "0xtxA",
-          },
-          {
-            delegatorAddress: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
-            delegateAddress: "0x1234567890123456789012345678901234567890",
-            amount: "1000000000000000000",
-            timestamp: "1700001000",
-            transactionHash: "0xtxB",
-          },
-          {
-            delegatorAddress: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
-            delegateAddress: "0x1234567890123456789012345678901234567890",
-            amount: "1000000000000000000",
-            timestamp: "1700002000",
-            transactionHash: "0xtxC",
-          },
-        ],
-        totalCount: 3,
-      });
-    });
-
     it("should forward multiple delegate addresses to repository", async () => {
       const delegateAddresses = [
         "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" as Address,

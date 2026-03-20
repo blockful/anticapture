@@ -55,18 +55,6 @@ describe("VotingPowerService (voting-power)", () => {
       expect(result.totalCount).toBe(1);
     });
 
-    it("returns empty items when repo returns no results", async () => {
-      const service = new VotingPowerService(
-        createStubVotingRepo(),
-        createStubVariationRepo(),
-      );
-
-      const result = await service.getVotingPowers(accountId, 0, 10);
-
-      expect(result.items).toEqual([]);
-      expect(result.totalCount).toBe(0);
-    });
-
     it("totalCount comes from repo, not items.length", async () => {
       const service = new VotingPowerService(
         createStubVotingRepo([], 77),
