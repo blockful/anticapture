@@ -39,6 +39,7 @@ import {
   ZKTokenIndexer,
   GovernorIndexer as ZKGovernorIndexer,
 } from "./indexer/zk";
+import { OlasTokenIndexer, OlasGovernorIndexer } from "./indexer/olas";
 
 const { DAO_ID: daoId } = env;
 
@@ -103,6 +104,11 @@ switch (daoId) {
     const { token } = CONTRACT_ADDRESSES[daoId];
     SHUTokenIndexer(token.address, token.decimals);
     SHUGovernorIndexer(blockTime);
+    break;
+  }
+  case DaoIdEnum.OLAS: {
+    OlasTokenIndexer(token.address, token.decimals);
+    OlasGovernorIndexer(blockTime);
     break;
   }
   case DaoIdEnum.AAVE: {
