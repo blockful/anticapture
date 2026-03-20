@@ -112,12 +112,16 @@ const MAX_TITLE_LENGTH = 200;
  * Extracts a proposal title from a markdown description.
  *
  * Strategy:
- * 1. If the first non-empty line is an H1 (`# Title`), use it.
- * 2. Otherwise, use the first non-empty line that is not a section header
+ * 1. Normalize literal `\n` sequences to real newlines (some proposers
+ *    submit descriptions with escaped newlines).
+ * 2. If the first non-empty line is an H1 (`# Title`), use it.
+ * 3. Otherwise, use the first non-empty line that is not a section header
  *    (H2+), truncated to MAX_TITLE_LENGTH characters.
  */
 function parseProposalTitle(description: string): string {
-  const lines = description.split("\n");
+  // Normalize literal "\n" (two chars) into real newlines
+  const normalized = description.replace(/\\n/g, "\n");
+  const lines = normalized.split("\n");
 
   // Pass 1: look for an H1 among leading lines (before any content)
   for (const line of lines) {
