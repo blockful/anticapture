@@ -33,7 +33,7 @@ export const OngoingProposalBanner = ({ daoId }: { daoId: string }) => {
       icon={<Info className="size-4" />}
       text="This DAO has an ongoing proposal, cast your vote now."
       storageKey={`banner-dismissed-${daoId}`}
-      link={{
+      links={{
         url: `/${daoId.toLowerCase()}/governance`,
         text: "View proposals",
         openInNewTab: false,

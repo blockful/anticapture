@@ -5,7 +5,7 @@ import { IconButton } from "@/shared/components/design-system/buttons/icon-butto
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta: Meta<typeof IconButton> = {
-  title: "Design System/Buttons/IconButton",
+  title: "Data Entry/Buttons/IconButton",
   component: IconButton,
   parameters: {
     layout: "centered",

@@ -6,7 +6,7 @@ import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { RiskLevel } from "@/shared/types/enums";
 
 const meta: Meta<typeof Tooltip> = {
-  title: "Design System/Tooltips/Tooltip",
+  title: "Feedback/Tooltip",
   component: Tooltip,
   parameters: {
     layout: "centered",

@@ -4,7 +4,7 @@ import { DividerDefault } from "@/shared/components/design-system/divider/Divide
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta = {
-  title: "Design System/Dividers/DividerDefault",
+  title: "Layout/Dividers/DividerDefault",
   component: DividerDefault,
   parameters: {
     layout: "centered",

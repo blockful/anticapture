@@ -7,7 +7,7 @@ import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 type PillTabStoryArgs = PillTabProps & { showCounter?: boolean };
 
 const meta: Meta<PillTabStoryArgs> = {
-  title: "Design System/Tabs/PillTab",
+  title: "Navigation/Tabs/PillTab",
   component: PillTab,
   parameters: {
     layout: "centered",

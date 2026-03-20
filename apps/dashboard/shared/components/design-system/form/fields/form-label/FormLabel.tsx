@@ -1,15 +1,8 @@
 import * as React from "react";
 
-import { cn } from "@/shared/utils";
+import { cn } from "@/shared/utils/cn";
 
-export interface FormLabelProps extends React.LabelHTMLAttributes<HTMLLabelElement> {
-  /** The label text */
-  children: React.ReactNode;
-  /** Shows a red asterisk after the label */
-  isRequired?: boolean;
-  /** Shows "(Optional)" after the label */
-  isOptional?: boolean;
-}
+import type { FormLabelProps } from "./types";
 
 const FormLabel = React.forwardRef<HTMLLabelElement, FormLabelProps>(
   ({ className, children, isRequired, isOptional, ...props }, ref) => {
