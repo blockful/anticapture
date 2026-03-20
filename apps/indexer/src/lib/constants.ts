@@ -792,6 +792,7 @@ export enum ProposalStatus {
   QUEUED = "QUEUED",
   EXPIRED = "EXPIRED",
   EXECUTED = "EXECUTED",
+  VETOED = "VETOED",
   NO_QUORUM = "NO_QUORUM",
 }
 
