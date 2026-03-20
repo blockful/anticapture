@@ -174,7 +174,11 @@ describe("Delegations Controller", () => {
 
       expect(body).toEqual({
         items: [
-          { ...BASE_DELEGATION_ITEM, amount: "999999999999999999", timestamp: "1234567890" },
+          {
+            ...BASE_DELEGATION_ITEM,
+            amount: "999999999999999999",
+            timestamp: "1234567890",
+          },
         ],
         totalCount: 1,
       });
@@ -226,7 +230,13 @@ describe("Delegations Controller", () => {
       const body = await res.json();
       // getDelegations uses findFirst with desc(timestamp), so returns the most recent one
       expect(body).toEqual({
-        items: [{ ...BASE_DELEGATION_ITEM, timestamp: "1700001000", transactionHash: TX_2 }],
+        items: [
+          {
+            ...BASE_DELEGATION_ITEM,
+            timestamp: "1700001000",
+            transactionHash: TX_2,
+          },
+        ],
         totalCount: 1,
       });
     });

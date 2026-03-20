@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { MetricTypesEnum } from "@/lib/constants";
-import { TokenMetricsService } from "./index";
+import { ITokenMetricsRepository, TokenMetricsService } from "./index";
 
 type MetricRow = {
   date: bigint;
@@ -17,12 +17,22 @@ type MetricRow = {
   lastUpdate: bigint;
 };
 
-function createStubRepo(rows: MetricRow[] = [], lastMetric?: MetricRow) {
+function createStubRepo(
+  rows: MetricRow[] = [],
+  lastMetric?: MetricRow,
+): ITokenMetricsRepository {
   return {
     getMetricsByDateRange: async () => rows,
     getLastMetricBeforeDate: async () => lastMetric,
   };
 }
+
+const EMPTY_METRICS = {
+  items: [],
+  hasNextPage: false,
+  startDate: null,
+  endDate: null,
+};
 
 const createRow = (overrides: Partial<MetricRow> = {}): MetricRow => ({
   date: 1700000000n,
@@ -45,8 +55,7 @@ const ONE_DAY = 86400;
 describe("TokenMetricsService", () => {
   describe("getMetricsForType", () => {
     it("should return empty result when no data and no initial value", async () => {
-      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-      const service = new TokenMetricsService(createStubRepo() as any);
+      const service = new TokenMetricsService(createStubRepo());
 
       const result = await service.getMetricsForType({
         metricType: MetricTypesEnum.DELEGATED_SUPPLY,
@@ -55,10 +64,7 @@ describe("TokenMetricsService", () => {
         limit: 365,
       });
 
-      expect(result.items).toHaveLength(0);
-      expect(result.hasNextPage).toBe(false);
-      expect(result.startDate).toBeNull();
-      expect(result.endDate).toBeNull();
+      expect(result).toEqual(EMPTY_METRICS);
     });
 
     it("should return items from repository data", async () => {
@@ -66,8 +72,7 @@ describe("TokenMetricsService", () => {
       const repo = createStubRepo([
         createRow({ date: day1, high: 1000n, volume: 100n }),
       ]);
-      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-      const service = new TokenMetricsService(repo as any);
+      const service = new TokenMetricsService(repo);
 
       const result = await service.getMetricsForType({
         metricType: MetricTypesEnum.DELEGATED_SUPPLY,
@@ -89,8 +94,7 @@ describe("TokenMetricsService", () => {
         [createRow({ date: existingDate, high: 800n, volume: 80n })],
         createRow({ date: 1699913600n, high: 500n, volume: 50n }),
       );
-      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-      const service = new TokenMetricsService(repo as any);
+      const service = new TokenMetricsService(repo);
 
       const result = await service.getMetricsForType({
         metricType: MetricTypesEnum.DELEGATED_SUPPLY,
@@ -108,8 +112,7 @@ describe("TokenMetricsService", () => {
       repo.getLastMetricBeforeDate = async () => {
         throw new Error("DB error");
       };
-      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-      const service = new TokenMetricsService(repo as any);
+      const service = new TokenMetricsService(repo);
 
       await expect(
         service.getMetricsForType({
@@ -130,8 +133,7 @@ describe("TokenMetricsService", () => {
           }),
         ),
       );
-      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-      const service = new TokenMetricsService(repo as any);
+      const service = new TokenMetricsService(repo);
 
       const result = await service.getMetricsForType({
         metricType: MetricTypesEnum.DELEGATED_SUPPLY,
@@ -154,8 +156,7 @@ describe("TokenMetricsService", () => {
         }),
         createRow({ date: 1700000000n, high: 100n, volume: 10n }),
       ]);
-      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-      const service = new TokenMetricsService(repo as any);
+      const service = new TokenMetricsService(repo);
 
       const result = await service.getMetricsForType({
         metricType: MetricTypesEnum.DELEGATED_SUPPLY,
@@ -180,8 +181,7 @@ describe("TokenMetricsService", () => {
       repo.getLastMetricBeforeDate = async () => {
         throw new Error("DB error");
       };
-      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-      const service = new TokenMetricsService(repo as any);
+      const service = new TokenMetricsService(repo);
 
       const result = await service.getMetricsForType({
         metricType: MetricTypesEnum.DELEGATED_SUPPLY,

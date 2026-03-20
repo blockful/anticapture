@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 
 import { MetricTypesEnum } from "@/lib/constants";
 import { DBTokenMetric } from "@/mappers/delegation-percentage";
@@ -28,6 +28,9 @@ const createMockRow = (
   ...overwrites,
 });
 
+const FIXED_DATE = new Date("2026-01-15T00:00:00Z");
+const FIXED_TIMESTAMP = Math.floor(FIXED_DATE.getTime() / 1000);
+
 describe("DelegationPercentageService", () => {
   let service: DelegationPercentageService;
   let mockRepository: {
@@ -36,12 +39,19 @@ describe("DelegationPercentageService", () => {
   };
 
   beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(FIXED_DATE);
+
     mockRepository = {
       getMetricsByDateRange: vi.fn(),
       getLastMetricBeforeDate: vi.fn(),
     };
 
     service = new DelegationPercentageService(mockRepository);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   describe("delegationPercentageByDay", () => {
@@ -683,8 +693,7 @@ describe("DelegationPercentageService", () => {
 
     it("should forward-fill to today when endDate is not provided", async () => {
       const ONE_DAY = 86400;
-      const threeDaysAgo = Date.now() / 1000 - 3 * ONE_DAY;
-      const threeDaysAgoMidnight = Math.floor(threeDaysAgo / ONE_DAY) * ONE_DAY;
+      const threeDaysAgoMidnight = FIXED_TIMESTAMP - 3 * ONE_DAY;
 
       // Mock data from 3 days ago (only last data point)
       const mockRows = [
@@ -718,17 +727,15 @@ describe("DelegationPercentageService", () => {
         expect(item.high).toBe("50.00");
       });
 
-      // Last item should be today
-      const todayMidnight = Math.floor(Date.now() / 1000 / ONE_DAY) * ONE_DAY;
+      // Last item should be today (FIXED_DATE is at midnight UTC)
       expect(result.items[result.items.length - 1]?.date).toBe(
-        todayMidnight.toString(),
+        FIXED_TIMESTAMP.toString(),
       );
     });
 
     it("should set hasNextPage to false when reaching today without endDate", async () => {
       const ONE_DAY = 86400;
-      const twoDaysAgo = Date.now() / 1000 - 2 * ONE_DAY;
-      const twoDaysAgoMidnight = Math.floor(twoDaysAgo / ONE_DAY) * ONE_DAY;
+      const twoDaysAgoMidnight = FIXED_TIMESTAMP - 2 * ONE_DAY;
 
       const mockRows = [
         createMockRow({
@@ -758,8 +765,7 @@ describe("DelegationPercentageService", () => {
 
     it("should set hasNextPage to true when limit cuts before today without endDate", async () => {
       const ONE_DAY = 86400;
-      const tenDaysAgo = Date.now() / 1000 - 10 * ONE_DAY;
-      const tenDaysAgoMidnight = Math.floor(tenDaysAgo / ONE_DAY) * ONE_DAY;
+      const tenDaysAgoMidnight = FIXED_TIMESTAMP - 10 * ONE_DAY;
 
       const mockRows = [
         createMockRow({

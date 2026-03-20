@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { ProposalStatus } from "@/lib/constants";
 import { DBProposal, ProposalsRequest } from "@/mappers";
+import { DAOClient } from "@/clients";
 import { ProposalsService } from "./onchainProposals";
 
 const DEFAULT_REQ: ProposalsRequest = {
@@ -61,25 +62,30 @@ function createStubRepo() {
 function createStubDaoClient() {
   const stub: {
     currentBlock: number;
-    blockTime: number;
+    blockTime: number | null;
     proposalStatus: string;
     proposalStatusQueue: string[] | undefined;
     getCurrentBlockNumberCallCount: number;
-    getCurrentBlockNumber: () => Promise<number>;
-    getBlockTime: () => Promise<number>;
-    getProposalStatus: () => Promise<string>;
-  } = {
+  } & DAOClient = {
     currentBlock: 300,
     blockTime: 1700001000,
     proposalStatus: ProposalStatus.ACTIVE,
     proposalStatusQueue: undefined,
     getCurrentBlockNumberCallCount: 0,
+    getDaoId: () => "UNI",
+    getVotingDelay: async () => 0n,
+    getVotingPeriod: async () => 0n,
+    getTimelockDelay: async () => 0n,
+    getQuorum: async (_proposalId) => 0n,
+    getProposalThreshold: async () => 0n,
+    alreadySupportCalldataReview: () => false,
+    calculateQuorum: () => 0n,
     getCurrentBlockNumber: async () => {
       stub.getCurrentBlockNumberCallCount++;
       return stub.currentBlock;
     },
-    getBlockTime: async () => stub.blockTime,
-    getProposalStatus: async () =>
+    getBlockTime: async (_blockNumber) => stub.blockTime,
+    getProposalStatus: async (_proposal, _currentBlock, _currentTimestamp) =>
       stub.proposalStatusQueue?.shift() ?? stub.proposalStatus,
   };
   return stub;
@@ -93,7 +99,7 @@ describe("ProposalsService", () => {
   beforeEach(() => {
     repo = createStubRepo();
     daoClient = createStubDaoClient();
-    service = new ProposalsService(repo, daoClient as never);
+    service = new ProposalsService(repo, daoClient);
   });
 
   describe("getProposalsCount", () => {
@@ -172,11 +178,7 @@ describe("ProposalsService", () => {
     });
 
     it("should exclude optimistic proposals when configured", async () => {
-      const serviceWithOptimistic = new ProposalsService(
-        repo,
-        daoClient as never,
-        2,
-      );
+      const serviceWithOptimistic = new ProposalsService(repo, daoClient, 2);
 
       await serviceWithOptimistic.getProposals({
         ...DEFAULT_REQ,
@@ -187,11 +189,7 @@ describe("ProposalsService", () => {
     });
 
     it("should not exclude when includeOptimisticProposals is true", async () => {
-      const serviceWithOptimistic = new ProposalsService(
-        repo,
-        daoClient as never,
-        2,
-      );
+      const serviceWithOptimistic = new ProposalsService(repo, daoClient, 2);
 
       await serviceWithOptimistic.getProposals({
         ...DEFAULT_REQ,

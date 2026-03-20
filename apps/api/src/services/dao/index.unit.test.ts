@@ -27,10 +27,10 @@ describe("DaoService", () => {
     service = new DaoService(createStubDAOClient(), new DaoCache(), 1);
   });
 
-  it("returns correct governance parameters mapped to strings", async () => {
+  it("returns correct governance parameters", async () => {
     const result = await service.getDaoParameters();
 
-    expect(result).toMatchObject({
+    expect(result).toEqual({
       id: "UNI",
       chainId: 1,
       quorum: "40000000000000000000000000",
@@ -38,19 +38,8 @@ describe("DaoService", () => {
       votingDelay: "2",
       votingPeriod: "40320",
       timelockDelay: "172800",
+      alreadySupportCalldataReview: false,
     });
-  });
-
-  it("includes all required fields in the response", async () => {
-    const result = await service.getDaoParameters();
-
-    expect(result).toHaveProperty("id");
-    expect(result).toHaveProperty("chainId");
-    expect(result).toHaveProperty("quorum");
-    expect(result).toHaveProperty("proposalThreshold");
-    expect(result).toHaveProperty("votingDelay");
-    expect(result).toHaveProperty("votingPeriod");
-    expect(result).toHaveProperty("timelockDelay");
   });
 
   it("propagates error when a client method rejects", async () => {

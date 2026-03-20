@@ -246,7 +246,12 @@ describe("Voting Powers Controller", () => {
       expect(body).toEqual({
         items: [
           { ...BASE_ACCOUNT_POWER_ITEM, votingPower: "2000", votesCount: 10 },
-          { ...BASE_ACCOUNT_POWER_ITEM, accountId: TEST_ACCOUNT_2, votingPower: "500", delegationsCount: 7 },
+          {
+            ...BASE_ACCOUNT_POWER_ITEM,
+            accountId: TEST_ACCOUNT_2,
+            votingPower: "500",
+            delegationsCount: 7,
+          },
         ],
         totalCount: 2,
       });

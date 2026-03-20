@@ -55,9 +55,18 @@ describe("TokenRepository", () => {
 
       const result = await repository.getTokenPropertiesByName(DaoIdEnum.UNI);
 
-      expect(result).toBeDefined();
-      expect(result!.name).toBe("UNI");
-      expect(result!.id).toBe("uni-token");
+      expect(result).toEqual({
+        id: "uni-token",
+        name: "UNI",
+        decimals: 18,
+        totalSupply: 1000000000000000000n,
+        delegatedSupply: 0n,
+        cexSupply: 0n,
+        dexSupply: 0n,
+        lendingSupply: 0n,
+        circulatingSupply: 0n,
+        treasury: 0n,
+      });
     });
 
     it("should return undefined when no token matches", async () => {
@@ -79,9 +88,18 @@ describe("TokenRepository", () => {
 
       const result = await repository.getTokenPropertiesByName(DaoIdEnum.AAVE);
 
-      expect(result).toBeDefined();
-      expect(result!.id).toBe("aave-token");
-      expect(result!.name).toBe("AAVE");
+      expect(result).toEqual({
+        id: "aave-token",
+        name: "AAVE",
+        decimals: 18,
+        totalSupply: 1000000000000000000n,
+        delegatedSupply: 0n,
+        cexSupply: 0n,
+        dexSupply: 0n,
+        lendingSupply: 0n,
+        circulatingSupply: 0n,
+        treasury: 0n,
+      });
     });
 
     it("should return undefined when table is empty", async () => {

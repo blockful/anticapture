@@ -3,7 +3,10 @@ import { describe, it, expect, beforeEach } from "vitest";
 
 import { DBDelegation } from "@/mappers";
 
-import { HistoricalDelegationsService } from "./historical";
+import {
+  HistoricalDelegationsRepository,
+  HistoricalDelegationsService,
+} from "./historical";
 
 const createMockDelegation = (
   overrides: Partial<DBDelegation> = {},
@@ -34,14 +37,29 @@ describe("HistoricalDelegationsService", () => {
     capturedArgs = [];
     stubResult = { items: [], totalCount: 0 };
 
-    const stubRepository = {
-      getHistoricalDelegations: (...args: unknown[]) => {
-        capturedArgs = args;
+    const stubRepository: HistoricalDelegationsRepository = {
+      getHistoricalDelegations: (
+        address,
+        orderDirection,
+        skip,
+        limit,
+        fromValue,
+        toValue,
+        delegateAddressIn,
+      ) => {
+        capturedArgs = [
+          address,
+          orderDirection,
+          skip,
+          limit,
+          fromValue,
+          toValue,
+          delegateAddressIn,
+        ];
         return Promise.resolve(stubResult);
       },
     };
-    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    service = new HistoricalDelegationsService(stubRepository as any);
+    service = new HistoricalDelegationsService(stubRepository);
   });
 
   describe("getHistoricalDelegations", () => {

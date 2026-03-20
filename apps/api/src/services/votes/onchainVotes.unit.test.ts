@@ -1,5 +1,5 @@
 import { Address, getAddress } from "viem";
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { DBVote } from "@/mappers";
 import { VotesService } from "./onchainVotes";
 
@@ -63,13 +63,22 @@ function createStubRepo() {
   return stub;
 }
 
+const FIXED_DATE = new Date("2026-01-15T00:00:00Z");
+const FIXED_TIMESTAMP = Math.floor(FIXED_DATE.getTime() / 1000);
+
 describe("VotesService", () => {
   let service: VotesService;
   let repo: ReturnType<typeof createStubRepo>;
 
   beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(FIXED_DATE);
     repo = createStubRepo();
     service = new VotesService(repo);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   const EXPECTED_VOTE = {
@@ -219,19 +228,11 @@ describe("VotesService", () => {
       repo.nonVoters = [{ voter: VOTER_A, votingPower: 500n }];
       repo.nonVotersCount = 1;
 
-      // DaysEnum["30d"] = 30 * 86400 = 2592000
-      const beforeCall = Math.floor(Date.now() / 1000);
       await service.getProposalNonVoters("1", 0, 10, "desc");
-      const afterCall = Math.floor(Date.now() / 1000);
 
-      const expectedMin = beforeCall - 2592000;
-      const expectedMax = afterCall - 2592000;
-
-      expect(repo.lastVotingPowerVariationTimestamp).toBeGreaterThanOrEqual(
-        expectedMin,
-      );
-      expect(repo.lastVotingPowerVariationTimestamp).toBeLessThanOrEqual(
-        expectedMax,
+      // DaysEnum["30d"] = 30 * 86400 = 2592000
+      expect(repo.lastVotingPowerVariationTimestamp).toBe(
+        FIXED_TIMESTAMP - 2592000,
       );
     });
   });

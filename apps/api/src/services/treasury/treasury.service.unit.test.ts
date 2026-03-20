@@ -1,10 +1,8 @@
 import { parseEther } from "viem";
 import { afterEach, beforeEach, vi, describe, it, expect } from "vitest";
 
-import { TreasuryRepository } from "@/repositories/treasury";
-
 import { TreasuryProvider } from "./providers";
-import { TreasuryService } from "./treasury.service";
+import { ITreasuryRepository, TreasuryService } from "./treasury.service";
 import { PriceProvider, LiquidTreasuryDataPoint } from "./types";
 
 /**
@@ -39,7 +37,9 @@ class FakePriceProvider implements PriceProvider {
   }
 }
 
-class FakeTreasuryRepository {
+const EMPTY_RESULT = { items: [], totalCount: 0 };
+
+class FakeTreasuryRepository implements ITreasuryRepository {
   private tokenQuantities: Map<number, bigint> = new Map();
 
   setTokenQuantities(quantities: Map<number, bigint>) {
@@ -83,30 +83,24 @@ describe("TreasuryService", () => {
 
   describe("getLiquidTreasury", () => {
     it("should return empty when provider is undefined", async () => {
-      const service = new TreasuryService(
-        metricRepo as unknown as TreasuryRepository,
-        undefined,
-        undefined,
-      );
+      const service = new TreasuryService(metricRepo, undefined, undefined);
 
       const result = await service.getLiquidTreasury(7, "asc");
 
-      expect(result.items).toHaveLength(0);
-      expect(result.totalCount).toBe(0);
+      expect(result).toEqual(EMPTY_RESULT);
     });
 
     it("should return empty when provider returns empty array", async () => {
       liquidProvider.setData([]);
       const service = new TreasuryService(
-        metricRepo as unknown as TreasuryRepository,
+        metricRepo,
         liquidProvider,
         undefined,
       );
 
       const result = await service.getLiquidTreasury(7, "asc");
 
-      expect(result.items).toHaveLength(0);
-      expect(result.totalCount).toBe(0);
+      expect(result).toEqual(EMPTY_RESULT);
     });
 
     it("should return items sorted ascending", async () => {
@@ -118,7 +112,7 @@ describe("TreasuryService", () => {
       liquidProvider.setData(expected);
 
       const service = new TreasuryService(
-        metricRepo as unknown as TreasuryRepository,
+        metricRepo,
         liquidProvider,
         undefined,
       );
@@ -140,7 +134,7 @@ describe("TreasuryService", () => {
       liquidProvider.setData(expected);
 
       const service = new TreasuryService(
-        metricRepo as unknown as TreasuryRepository,
+        metricRepo,
         liquidProvider,
         undefined,
       );
@@ -156,32 +150,22 @@ describe("TreasuryService", () => {
 
   describe("getTokenTreasury", () => {
     it("should return empty when priceProvider is undefined", async () => {
-      const service = new TreasuryService(
-        metricRepo as unknown as TreasuryRepository,
-        undefined,
-        undefined,
-      );
+      const service = new TreasuryService(metricRepo, undefined, undefined);
 
       const result = await service.getTokenTreasury(7, "asc", 18);
 
-      expect(result.items).toHaveLength(0);
-      expect(result.totalCount).toBe(0);
+      expect(result).toEqual(EMPTY_RESULT);
     });
 
     it("should return empty when repository and priceProvider return empty", async () => {
       metricRepo.setTokenQuantities(new Map());
       priceProvider.setPrices(new Map());
 
-      const service = new TreasuryService(
-        metricRepo as unknown as TreasuryRepository,
-        undefined,
-        priceProvider,
-      );
+      const service = new TreasuryService(metricRepo, undefined, priceProvider);
 
       const result = await service.getTokenTreasury(7, "asc", 18);
 
-      expect(result.items).toHaveLength(0);
-      expect(result.totalCount).toBe(0);
+      expect(result).toEqual(EMPTY_RESULT);
     });
 
     it("should calculate value correctly with decimals", async () => {
@@ -193,11 +177,7 @@ describe("TreasuryService", () => {
       );
       priceProvider.setPrices(new Map([[FIXED_TIMESTAMP, price]]));
 
-      const service = new TreasuryService(
-        metricRepo as unknown as TreasuryRepository,
-        undefined,
-        priceProvider,
-      );
+      const service = new TreasuryService(metricRepo, undefined, priceProvider);
 
       const result = await service.getTokenTreasury(7, "asc", 18);
 
@@ -224,11 +204,7 @@ describe("TreasuryService", () => {
         ]),
       );
 
-      const service = new TreasuryService(
-        metricRepo as unknown as TreasuryRepository,
-        undefined,
-        priceProvider,
-      );
+      const service = new TreasuryService(metricRepo, undefined, priceProvider);
 
       const result = await service.getTokenTreasury(7, "asc", 18);
 
@@ -259,11 +235,7 @@ describe("TreasuryService", () => {
         ]),
       );
 
-      const service = new TreasuryService(
-        metricRepo as unknown as TreasuryRepository,
-        undefined,
-        priceProvider,
-      );
+      const service = new TreasuryService(metricRepo, undefined, priceProvider);
 
       const result = await service.getTokenTreasury(7, "desc", 18);
 
@@ -285,11 +257,7 @@ describe("TreasuryService", () => {
       );
       priceProvider.setPrices(new Map([[fourDaysAgo, 10]]));
 
-      const service = new TreasuryService(
-        metricRepo as unknown as TreasuryRepository,
-        undefined,
-        priceProvider,
-      );
+      const service = new TreasuryService(metricRepo, undefined, priceProvider);
 
       const result = await service.getTokenTreasury(7, "asc", 18);
 
@@ -315,18 +283,13 @@ describe("TreasuryService", () => {
       liquidProvider.setData([]);
       metricRepo.setTokenQuantities(new Map());
       priceProvider.setPrices(new Map());
-      service = new TreasuryService(
-        metricRepo as unknown as TreasuryRepository,
-        liquidProvider,
-        priceProvider,
-      );
+      service = new TreasuryService(metricRepo, liquidProvider, priceProvider);
     });
 
     it("should return empty when both liquid and token are empty", async () => {
       const result = await service.getTotalTreasury(7, "asc", 18);
 
-      expect(result.items).toHaveLength(0);
-      expect(result.totalCount).toBe(0);
+      expect(result).toEqual(EMPTY_RESULT);
     });
 
     it("should sum liquid and token treasury correctly", async () => {
@@ -370,7 +333,7 @@ describe("TreasuryService", () => {
       priceProvider.setPrices(new Map([[dayTimestamp, 25]]));
 
       const service = new TreasuryService(
-        metricRepo as unknown as TreasuryRepository,
+        metricRepo,
         undefined, // no liquid provider
         priceProvider,
       );

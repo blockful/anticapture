@@ -1,5 +1,6 @@
 import { Address } from "viem";
 import { describe, it, expect, beforeEach } from "vitest";
+import { DAOClient } from "@/clients";
 import { DaoIdEnum } from "@/lib/enums";
 import { DbProposal, DbVote, DbProposalWithVote } from "@/repositories/";
 import { ProposalsActivityService, ProposalActivityRequest } from "./index";
@@ -28,13 +29,20 @@ function createStubRepo() {
   return stub;
 }
 
-function createStubDaoClient() {
+function createStubDaoClient(): DAOClient {
   return {
+    getDaoId: () => "UNI",
     getVotingPeriod: async () => 40320n,
     getVotingDelay: async () => 2n,
+    getTimelockDelay: async () => 0n,
+    getQuorum: async (_proposalId) => 0n,
+    getProposalThreshold: async () => 0n,
     getCurrentBlockNumber: async () => 1000000,
-    getBlockTime: async () => 1700000000,
-    getProposalStatus: async () => "EXECUTED",
+    getBlockTime: async (_blockNumber) => 1700000000,
+    alreadySupportCalldataReview: () => false,
+    calculateQuorum: () => 0n,
+    getProposalStatus: async (_proposal, _currentBlock, _currentTimestamp) =>
+      "EXECUTED",
   };
 }
 
@@ -88,19 +96,23 @@ describe("ProposalsActivityService", () => {
 
   beforeEach(() => {
     repo = createStubRepo();
-    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    service = new ProposalsActivityService(repo, createStubDaoClient() as any);
+    service = new ProposalsActivityService(repo, createStubDaoClient());
   });
 
   describe("getProposalsActivity", () => {
     it("should return empty activity when user has never voted", async () => {
       const result = await service.getProposalsActivity(defaultRequest);
 
-      expect(result.neverVoted).toBe(true);
-      expect(result.totalProposals).toBe(0);
-      expect(result.votedProposals).toBe(0);
-      expect(result.proposals).toHaveLength(0);
-      expect(result.address).toBe(VOTER_ADDRESS);
+      expect(result).toEqual({
+        address: VOTER_ADDRESS,
+        totalProposals: 0,
+        votedProposals: 0,
+        neverVoted: true,
+        winRate: 0,
+        yesRate: 0,
+        avgTimeBeforeEnd: 0,
+        proposals: [],
+      });
     });
 
     it("should return proposals with user votes and analytics", async () => {
