@@ -1,3 +1,36 @@
+# =============================================================================
+# eRPC Configuration
+# =============================================================================
+#
+# Projects:
+#   - indexer: High-throughput project for Ponder blockchain indexing (300 req/s)
+#   - api:     Conservative per-IP rate-limited project for public API (20 req/s per IP)
+#   Access: http://erpc:4000/{indexer|api}/evm/{chainId}
+#
+# Caching Strategy:
+#   Uses a tiered caching approach with 3 memory connectors + Postgres:
+#
+#   1. Finalized eth_call/eth_getCode/eth_getStorageAt → Postgres (persistent)
+#      Heavy read methods cached permanently in Postgres, especially useful
+#      for Ponder indexing functions that replay the same calls. Max 4MB per item.
+#
+#   2. Other finalized data → memory-finalized (100k items, no TTL)
+#      All remaining finalized responses cached in a large in-memory store.
+#
+#   3. Unfinalized/unknown data → memory-unfinalized (4096 items, 2s TTL)
+#      Short-lived cache with 20KB item cap.
+#
+#   4. Realtime data → memory-realtime (4096 items, per-network TTL)
+#      Network-specific TTLs tuned to block times:
+#        - Scroll (534352): 1s TTL (shorter block times)
+#        - Ethereum (1):    2s TTL
+#
+# Rate Limiting:
+#   Chainstack's 400 req/s budget is split: 300 for indexer, 100 for api.
+#   Project-level limits mirror upstream limits to prevent overload.
+#
+# =============================================================================
+
 logLevel: ${LOG_LEVEL:-warn}
 
 server:
@@ -52,10 +85,21 @@ projects:
         evm:
           chainId: 534352
     upstreams:
+      - id: envio
+        endpoint: envio://rpc.hypersync.xyz/${ENVIO_API_KEY}
+        group: primary
+        autoIgnoreUnsupportedMethods: true
+        failsafe:
+          - matchMethod: "*"
+            timeout:
+              duration: 10s
+            retry:
+              maxAttempts: 2
+              delay: 200ms
       - id: chainstack
         endpoint: chainstack://${CHAINSTACK_API_KEY}
         rateLimitBudget: chainstack-api
-        group: primary
+        group: fallback
         autoIgnoreUnsupportedMethods: true
         failsafe:
           - matchMethod: "*"
@@ -97,34 +141,74 @@ rateLimiters:
 database:
   evmJsonRpcCache:
     connectors:
-      - id: memory-cache
+      - id: memory-finalized
         driver: memory
         memory:
           maxItems: 100000
+      - id: memory-unfinalized
+        driver: memory
+        memory:
+          maxItems: 4096
+      - id: memory-realtime
+        driver: memory
+        memory:
+          maxItems: 4096
       - id: postgres-cache
         driver: postgresql
         postgresql:
           connectionUri: "${DATABASE_URL}"
           table: rpc_cache
     policies:
+      # eth_call/eth_getCode/eth_getStorageAt finalized → Postgres (useful for Ponder indexing)
+      - network: "*"
+        method: "eth_call"
+        finality: finalized
+        connector: postgres-cache
+        maxItemSize: 4MB
+        ttl: 0
+      - network: "*"
+        method: "eth_getCode"
+        finality: finalized
+        connector: postgres-cache
+        maxItemSize: 4MB
+        ttl: 0
+      - network: "*"
+        method: "eth_getStorageAt"
+        finality: finalized
+        connector: postgres-cache
+        maxItemSize: 4MB
+        ttl: 0
+      # Other finalized data → in-memory cache
       - network: "*"
         method: "*"
         finality: finalized
-        connector: memory-cache
+        connector: memory-finalized
         ttl: 0
+      # Unfinalized data → in-memory, skip empty responses, cap item size
       - network: "*"
         method: "*"
         finality: unfinalized
-        connector: memory-cache
-        maxItemSize: 1MB # optional max size of item to store via this policy
-        ttl: 5s
+        connector: memory-unfinalized
+        maxItemSize: 20KB
+
+        ttl: 2s
       - network: "*"
         method: "*"
         finality: unknown
-        connector: memory-cache
-        ttl: 5s
-      - network: "*" # supports * as wildcard and | as OR operator
-        method: "eth_getLogs|trace_*" # supports * as wildcard and | as OR operator
-        finality: finalized
-        connector: postgres-cache
-        ttl: 0
+        connector: memory-unfinalized
+        maxItemSize: 20KB
+
+        ttl: 2s
+      # Realtime data → per-network TTLs to match block times
+      - network: "evm:534352"
+        method: "*"
+        finality: realtime
+        connector: memory-realtime
+
+        ttl: 1s
+      - network: "evm:1"
+        method: "*"
+        finality: realtime
+        connector: memory-realtime
+
+        ttl: 2s
