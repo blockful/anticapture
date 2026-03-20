@@ -28,6 +28,54 @@ Before starting, gather these details about the DAO:
 
 The integration touches 5 components. Work through them in order.
 
+### Step 0: Governance Architecture Discovery
+
+**This step is mandatory before writing any code.** Many DAOs have non-standard governance architectures. Skipping this step risks building an integration that misses the core governance mechanism.
+
+#### 0a. Verify the governor's voting token
+
+Call `governor.token()` on-chain to find what contract the governor actually uses for voting power:
+
+```bash
+cast call <GOVERNOR_ADDRESS> "token()(address)" --rpc-url <RPC_URL>
+```
+
+Compare the result against the token address the user provided. They may differ — e.g. the governor may point to a vote-escrow wrapper, not the ERC20.
+
+#### 0b. Classify the voting token
+
+Check what the voting token actually is:
+
+| Check | Command | What it tells you |
+|---|---|---|
+| Is it the same as the ERC20? | Compare addresses | If different, there's an intermediary |
+| Does it have `delegates()`? | `cast call <TOKEN> "delegates(address)(address)" <ZERO_ADDR>` | If reverts → no delegation, voting power comes from elsewhere |
+| Does it emit `DelegateChanged`? | Check ABI on block explorer | If missing → `delegatedSupply` and `accountPower` will be empty |
+| Is it a vote-escrow (veToken)? | Check contract name/source on block explorer | veTokens use lock-based voting power with `Deposit`/`Withdraw` events |
+| Is it a wrapper? | Check if it references another contract | Wrappers (like wveOLAS) proxy reads to an underlying contract |
+
+#### 0c. Determine integration scope
+
+Based on the findings, classify the integration:
+
+| Architecture | Token events available | Delegation tracking | Example |
+|---|---|---|---|
+| **Standard ERC20Votes** | Transfer, DelegateChanged, DelegateVotesChanged | Full | ENS, UNI, OBOL |
+| **Plain ERC20 + veToken** | Transfer only (on ERC20); Deposit/Withdraw (on veToken) | Requires custom veToken indexing | OLAS |
+| **ERC721 (NFT)** | Transfer (minting = delegation) | Via transfer events | NOUNS |
+| **Multi-token** | Transfer + delegation per token | Aggregated across tokens | AAVE |
+
+#### 0d. Document findings in INTEGRATION.md
+
+Create `apps/indexer/src/indexer/<dao>/INTEGRATION.md` documenting:
+
+1. **Architecture**: What contracts exist and how they connect
+2. **What's integrated**: Which events and metrics are covered
+3. **What's pending**: Gaps that need follow-up work (e.g. veToken indexing)
+4. **Addresses provided vs discovered**: Any discrepancies from user-provided info
+
+This file is the source of truth for the integration status of each DAO. See the template below in "INTEGRATION.md Template".
+
 ### Step 1: Enum Sync
 
 Add the DAO ID to the enum in **all three locations** (they must match):
@@ -249,6 +297,43 @@ pnpm dashboard typecheck && pnpm dashboard lint
 | Azorius governance (Fractal)       | SHU               | Different governor events, custom proposal handling |
 | Multi-chain                        | ARB, OP, SCR      | Config needs chain-specific RPC and chain ID        |
 | No governor (token-only)           | ARB               | Only token indexer, no governor handler             |
+| Vote-escrow (veToken) governance   | OLAS              | ERC20 has no delegation; voting power from veToken lock. Requires custom veToken indexer for `Deposit`/`Withdraw` events to track `delegatedSupply` and `accountPower`. Governor events are standard. |
+
+## INTEGRATION.md Template
+
+Every DAO integration **must** include an `INTEGRATION.md` file at `apps/indexer/src/indexer/<dao>/INTEGRATION.md`. This is the source of truth for what's integrated and what's pending.
+
+```markdown
+# <DAO_NAME> Integration Status
+
+## Architecture
+
+| Contract | Address | Type | Events used |
+|---|---|---|---|
+| Token | 0x... | ERC20 / ERC721 / veToken | Transfer, DelegateChanged, ... |
+| Governor | 0x... | OZ Governor / Azorius / ... | ProposalCreated, VoteCast, ... |
+| Timelock | 0x... | TimelockController | (not indexed) |
+
+Governor voting token: `<address>` (same as token / veToken wrapper / other)
+
+## What's Integrated
+
+- [ ] Token supply tracking (Transfer events)
+- [ ] Delegation tracking (DelegateChanged / DelegateVotesChanged)
+- [ ] Voting power tracking (accountPower, votingPowerHistory)
+- [ ] Governor proposals (ProposalCreated, status updates)
+- [ ] Governor votes (VoteCast)
+- [ ] CEX/DEX/Lending address classification
+- [ ] Treasury tracking
+
+## What's Pending
+
+List gaps with context on why and what's needed to close them.
+
+## Notes
+
+Any DAO-specific quirks, discrepancies, or decisions made during integration.
+```
 
 ## Guardrails
 
@@ -257,3 +342,4 @@ pnpm dashboard typecheck && pnpm dashboard lint
 - ABIs **must** match the deployed contracts — verify on block explorer
 - Do **not** run the indexer unless explicitly asked (reindexing is expensive)
 - Test the API client against the real chain before deploying
+- **Always** run Step 0 (Governance Architecture Discovery) before writing code — never assume the token the user provides is the voting token
