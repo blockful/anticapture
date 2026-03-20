@@ -7,11 +7,14 @@ import { StatusCell } from "@/features/service-providers/components/StatusCell";
 import {
   ENS_SERVICE_PROVIDERS,
   QUARTER_DUE_DATES,
-  QUARTERS,
+  SPP1_YEAR_QUARTERS,
+  SPP2_YEAR1_QUARTERS,
+  SPP2_YEAR2_QUARTERS,
 } from "@/features/service-providers/constants/ens-service-providers";
 import {
   type QuarterReport,
   type ServiceProvider,
+  type SPPKey,
 } from "@/features/service-providers/types";
 import { getCurrentQuarter } from "@/features/service-providers/utils/getQuarterInfos";
 import { Button } from "@/shared/components";
@@ -20,66 +23,140 @@ import { Table } from "@/shared/components/design-system/table/Table";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 
+type QuarterColumn = { year: number; quarter: "Q1" | "Q2" | "Q3" | "Q4" };
+
 interface ProviderRow {
   name: string;
   avatarUrl?: string;
   websiteUrl?: string;
   proposalUrl?: string;
   budget: number;
-  Q1: QuarterReport;
-  Q2: QuarterReport;
-  Q3: QuarterReport;
-  Q4: QuarterReport;
+  streamDuration: 1 | 2;
+  quarters: Record<string, QuarterReport>;
 }
 
-const SKELETON_ROW: ProviderRow = {
+const quarterKey = (col: QuarterColumn) => `${col.year}_${col.quarter}`;
+
+const makeSkeletonRow = (cols: QuarterColumn[]): ProviderRow => ({
   name: "",
   budget: 0,
-  Q1: { status: "upcoming" },
-  Q2: { status: "upcoming" },
-  Q3: { status: "upcoming" },
-  Q4: { status: "upcoming" },
-};
-
-const SKELETON_ROWS: ProviderRow[] = Array.from(
-  { length: ENS_SERVICE_PROVIDERS.length },
-  () => SKELETON_ROW,
-);
+  streamDuration: 1,
+  quarters: Object.fromEntries(
+    cols.map((col) => [quarterKey(col), { status: "upcoming" as const }]),
+  ),
+});
 
 interface ServiceProvidersTableProps {
   providers: ServiceProvider[];
-  year: number;
+  spp: SPPKey;
   isLoading?: boolean;
 }
 
 export const ServiceProvidersTable = ({
   providers,
-  year,
+  spp,
   isLoading = false,
 }: ServiceProvidersTableProps) => {
   const currentYear = new Date().getFullYear();
   const currentQuarter = getCurrentQuarter();
-  const quarterMeta = QUARTER_DUE_DATES[year] ?? QUARTER_DUE_DATES[currentYear];
+
+  const year1Cols = spp === "SPP1" ? SPP1_YEAR_QUARTERS : SPP2_YEAR1_QUARTERS;
+  const year2Cols = spp === "SPP2" ? SPP2_YEAR2_QUARTERS : [];
+  const allCols = [...year1Cols, ...year2Cols];
+
+  const sppProviderList = ENS_SERVICE_PROVIDERS.filter((p) =>
+    p.sppPrograms.includes(spp),
+  );
+
+  const skeletonRows: ProviderRow[] = Array.from(
+    { length: sppProviderList.length },
+    () => makeSkeletonRow(allCols),
+  );
 
   const data: ProviderRow[] = isLoading
-    ? SKELETON_ROWS
-    : providers.flatMap((provider) => {
-        const yearData = provider.years[year];
-        if (!yearData) return [];
-        return [
-          {
+    ? skeletonRows
+    : providers
+        .filter((p) => p.sppPrograms.includes(spp))
+        .map((provider) => {
+          const reportsByQuarter: Record<string, QuarterReport> = {};
+
+          for (const col of year1Cols) {
+            const yearData = provider.years[col.year];
+            reportsByQuarter[quarterKey(col)] = yearData?.[col.quarter] ?? {
+              status: "upcoming",
+            };
+          }
+
+          for (const col of year2Cols) {
+            reportsByQuarter[quarterKey(col)] =
+              provider.streamDuration === 1
+                ? { status: "1y_only" }
+                : (provider.years[col.year]?.[col.quarter] ?? {
+                    status: "upcoming",
+                  });
+          }
+
+          return {
             name: provider.name,
             avatarUrl: provider.avatarUrl,
             websiteUrl: provider.websiteUrl,
             proposalUrl: provider.proposalUrl,
             budget: provider.budget,
-            Q1: yearData.Q1,
-            Q2: yearData.Q2,
-            Q3: yearData.Q3,
-            Q4: yearData.Q4,
-          },
-        ];
-      });
+            streamDuration: provider.streamDuration,
+            quarters: reportsByQuarter,
+          };
+        });
+
+  const buildQuarterColumn = (
+    col: QuarterColumn,
+    groupLabel?: string,
+  ): ColumnDef<ProviderRow> => {
+    const key = quarterKey(col);
+    const isCurrentQuarter =
+      col.year === currentYear && col.quarter === currentQuarter;
+    const meta = QUARTER_DUE_DATES[col.year]?.[col.quarter];
+
+    return {
+      id: key,
+      header: () => (
+        <div
+          className={cn(
+            "flex h-full flex-col gap-0.5 px-2 py-1",
+            isCurrentQuarter &&
+              "bg-orange-400/12 border-1 border-surface-solid-brand",
+          )}
+        >
+          {groupLabel && (
+            <span className="text-secondary mb-0.5 text-[10px] font-medium uppercase tracking-wider">
+              {groupLabel}
+            </span>
+          )}
+          <span className="text-primary text-xs font-medium">
+            {col.quarter}
+            {isCurrentQuarter && (
+              <span className="text-secondary ml-1 font-normal">(Current)</span>
+            )}
+          </span>
+          <span className="text-secondary text-xs font-normal">
+            {meta?.dueDateLabel}
+          </span>
+        </div>
+      ),
+      cell: ({ row }: { row: { original: ProviderRow } }) =>
+        isLoading ? (
+          <SkeletonRow
+            parentClassName="flex animate-pulse"
+            className="h-4 w-20"
+          />
+        ) : (
+          <StatusCell
+            status={row.original.quarters[key].status}
+            reportUrl={row.original.quarters[key].reportUrl}
+          />
+        ),
+      meta: { columnClassName: "w-[149px] px-2" },
+    };
+  };
 
   const columns: ColumnDef<ProviderRow>[] = [
     {
@@ -105,7 +182,9 @@ export const ServiceProvidersTable = ({
             proposalUrl={row.original.proposalUrl}
           />
         ),
-      meta: { columnClassName: "w-[220px] px-2" },
+      meta: {
+        columnClassName: "w-[220px] px-2 sticky left-0 z-10 bg-surface",
+      },
     },
     {
       accessorKey: "budget",
@@ -136,58 +215,23 @@ export const ServiceProvidersTable = ({
             className="h-4 w-16"
           />
         ) : (
-          <span className="text-primary text-sm">
-            {formatNumberUserReadable(row.original.budget)}
-          </span>
+          <div className="flex flex-col gap-0.5">
+            <span className="text-primary text-sm">
+              {formatNumberUserReadable(row.original.budget)}
+            </span>
+            {spp === "SPP2" && (
+              <span className="text-secondary text-xs">
+                {row.original.streamDuration}Y stream
+              </span>
+            )}
+          </div>
         ),
       enableSorting: true,
       sortingFn: (rowA, rowB) => rowA.original.budget - rowB.original.budget,
       meta: { columnClassName: "w-[92px]" },
     },
-    ...QUARTERS.map((quarter) => {
-      const isCurrentQuarter =
-        year === currentYear && quarter === currentQuarter;
-      const meta = quarterMeta[quarter];
-      return {
-        id: quarter,
-        header: () => (
-          <div
-            className={cn(
-              "flex h-full flex-col gap-0.5 px-2 py-1",
-              isCurrentQuarter &&
-                "bg-orange-400/12 border-1 border-surface-solid-brand",
-            )}
-          >
-            <span className="text-primary text-xs font-medium">
-              {quarter}
-              {isCurrentQuarter && (
-                <span className="text-secondary ml-1 font-normal">
-                  (Current)
-                </span>
-              )}
-            </span>
-            <span className="text-secondary text-xs font-normal">
-              {meta?.dueDateLabel}
-            </span>
-          </div>
-        ),
-        cell: ({ row }: { row: { original: ProviderRow } }) =>
-          isLoading ? (
-            <SkeletonRow
-              parentClassName="flex animate-pulse"
-              className="h-4 w-20"
-            />
-          ) : (
-            <StatusCell
-              status={row.original[quarter].status}
-              reportUrl={row.original[quarter].reportUrl}
-            />
-          ),
-        meta: {
-          columnClassName: "w-[149px] px-2",
-        },
-      } as ColumnDef<ProviderRow>;
-    }),
+    ...year1Cols.map((col) => buildQuarterColumn(col)),
+    ...year2Cols.map((col) => buildQuarterColumn(col, "Year 2")),
   ];
 
   return (

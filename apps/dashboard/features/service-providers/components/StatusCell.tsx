@@ -43,6 +43,14 @@ const STATUS_CONFIG = {
 } as const;
 
 export const StatusCell = ({ status, reportUrl }: StatusCellProps) => {
+  if (status === "1y_only") {
+    return (
+      <div className="text-secondary mx-2 font-mono text-xs font-medium tracking-wider">
+        1Y ONLY
+      </div>
+    );
+  }
+
   const config = STATUS_CONFIG[status];
   const Icon = config.icon;
 
@@ -61,7 +69,12 @@ export const StatusCell = ({ status, reportUrl }: StatusCellProps) => {
   }
 
   return (
-    <div className="mx-2 flex items-center gap-1.5 font-mono text-xs font-medium uppercase tracking-wider">
+    <div
+      className={cn(
+        "mx-2 flex items-center gap-1.5 font-mono text-xs font-medium uppercase tracking-wider",
+        status === "upcoming" && "opacity-40",
+      )}
+    >
       <Icon className={cn("size-3.5 shrink-0", config.iconClassName)} />
       <span className={config.textClassName}>{config.label}</span>
     </div>

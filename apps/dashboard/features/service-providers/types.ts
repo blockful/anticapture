@@ -1,4 +1,11 @@
-export type ReportStatus = "published" | "overdue" | "due_soon" | "upcoming";
+export type ReportStatus =
+  | "published"
+  | "overdue"
+  | "due_soon"
+  | "upcoming"
+  | "1y_only";
+
+export type SPPKey = "SPP1" | "SPP2";
 
 export type QuarterReport = {
   status: ReportStatus;
@@ -19,6 +26,8 @@ export type ServiceProvider = {
   proposalUrl?: string;
   budget: number;
   githubSlug: string;
+  sppPrograms: SPPKey[];
+  streamDuration: 1 | 2;
   years: Record<number, YearData>;
 };
 
