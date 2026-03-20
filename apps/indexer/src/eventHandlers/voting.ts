@@ -106,6 +106,41 @@ export const voteCast = async (
   });
 };
 
+const MAX_TITLE_LENGTH = 200;
+
+/**
+ * Extracts a proposal title from a markdown description.
+ *
+ * Strategy:
+ * 1. If the first non-empty line is an H1 (`# Title`), use it.
+ * 2. Otherwise, use the first non-empty line that is not a section header
+ *    (H2+), truncated to MAX_TITLE_LENGTH characters.
+ */
+function parseProposalTitle(description: string): string {
+  const lines = description.split("\n");
+
+  // Pass 1: look for an H1 among leading lines (before any content)
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    if (/^# /.test(trimmed)) {
+      return trimmed.replace(/^# +/, "");
+    }
+    break; // stop at first non-empty, non-H1 line
+  }
+
+  // Pass 2: no H1 found — use first non-empty, non-header line
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || /^#{1,6}\s/.test(trimmed)) continue;
+    return trimmed.length > MAX_TITLE_LENGTH
+      ? trimmed.substring(0, MAX_TITLE_LENGTH) + "..."
+      : trimmed;
+  }
+
+  return "";
+}
+
 /**
  * ### Creates:
  * - New `Account` record (for proposer if it doesn't exist)
@@ -158,7 +193,7 @@ export const proposalCreated = async (
 
   await ensureAccountExists(context, proposer);
 
-  const title = description.split("\n")[0]?.replace(/^#+\s*/, "") || "";
+  const title = parseProposalTitle(description);
   const blockDelta = parseInt(endBlock) - Number(blockNumber);
   await context.db.insert(proposalsOnchain).values({
     id: proposalId,
