@@ -12,6 +12,7 @@ export enum DaoIdEnum {
   OBOL = "OBOL",
   ZK = "ZK",
   SHU = "SHU",
+  FLUID = "FLUID",
   LIL_NOUNS = "LIL_NOUNS",
 }
 

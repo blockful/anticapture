@@ -225,6 +225,13 @@ const DAO_RELEVANCE_THRESHOLDS: Record<DaoIdEnum, EventRelevanceMap> = {
     [FeedEventType.PROPOSAL]: EMPTY_THRESHOLDS,
     [FeedEventType.PROPOSAL_EXTENDED]: EMPTY_THRESHOLDS,
   },
+  [DaoIdEnum.FLUID]: {
+    [FeedEventType.TRANSFER]: EMPTY_THRESHOLDS,
+    [FeedEventType.DELEGATION]: EMPTY_THRESHOLDS,
+    [FeedEventType.VOTE]: EMPTY_THRESHOLDS,
+    [FeedEventType.PROPOSAL]: EMPTY_THRESHOLDS,
+    [FeedEventType.PROPOSAL_EXTENDED]: EMPTY_THRESHOLDS,
+  },
 };
 
 export function getDaoRelevanceThreshold(daoId: DaoIdEnum): EventRelevanceMap {

@@ -15,7 +15,8 @@
     "build:watch": "tsc --watch",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
-    "dev": "sh -c 'dao_id=\"$1\"; if [ -n \"$dao_id\" ] && [ -f \"cmd/$dao_id.ts\" ]; then exec tsx watch \"cmd/$dao_id.ts\"; else exec tsx watch cmd/index.ts; fi' --"
+    "dev": "sh -c 'dao_id=\"$1\"; if [ -n \"$dao_id\" ] && [ -f \"cmd/$dao_id.ts\" ]; then exec tsx watch \"cmd/$dao_id.ts\"; else exec tsx watch cmd/index.ts; fi' --",
+    "dev:rw": "sh -c 'dao_id=\"$1\"; exec railway run -e dev -s \"${dao_id}-api\" -- pnpm dev' --"
   },
   "keywords": [],
   "author": "",

@@ -183,6 +183,20 @@ export const CONTRACT_ADDRESSES = {
       startBlock: 19021698,
     },
   },
+  [DaoIdEnum.FLUID]: {
+    blockTime: 12,
+    // https://etherscan.io/address/0x6f40d4A6237C257fff2dB00FA0510DeEECd303eb
+    token: {
+      address: "0x6f40d4A6237C257fff2dB00FA0510DeEECd303eb",
+      decimals: 18,
+      startBlock: 12183236,
+    },
+    // https://etherscan.io/address/0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B
+    governor: {
+      address: "0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B",
+      startBlock: 12183245,
+    },
+  },
   [DaoIdEnum.LIL_NOUNS]: {
     blockTime: 12,
     token: {
@@ -381,6 +395,13 @@ export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   },
   [DaoIdEnum.SHU]: {
     timelock: "0x36bD3044ab68f600f6d3e081056F34f2a58432c4",
+  },
+  [DaoIdEnum.FLUID]: {
+    "InstaDApp Treasury": "0x28849D2b63fA8D361e5fc15cB8aBB13019884d09",
+    "Fluid Liquidity": "0x52Aa899454998Be5b000Ad077a46Bbe360F4e497",
+    "Chainlink CCIP LockReleaseTokenPool":
+      "0x639f35C5E212D61Fe14Bd5CD8b66aAe4df11a50c",
+    InstaTimelock: "0xC7Cb1dE2721BFC0E0DA1b9D526bCdC54eF1C0eFC",
   },
 };
 
@@ -596,6 +617,11 @@ export const CEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     OKX3: "0xecf17c7f6a6090f1edd21e0beb2268197270fb44",
   },
   [DaoIdEnum.SHU]: {},
+  [DaoIdEnum.FLUID]: {
+    MEXC: "0x9642b23Ed1E01Df1092B92641051881a322F5D4E",
+    Gate: "0x0D0707963952f2fBA59dD06f2b425ace40b492Fe",
+    Bitvavo: "0xaB782bc7D4a2b306825de5a7730034F8F63ee1bC",
+  },
 };
 
 export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -666,6 +692,9 @@ export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   [DaoIdEnum.SHU]: {
     "Uniswap V3": "0x7A922aea89288d8c91777BeECc68DF4A17151df1",
   },
+  [DaoIdEnum.FLUID]: {
+    "Uniswap V3 INST/WETH": "0xc1cd3D0913f4633b43FcdDBCd7342bC9b71C676f",
+  },
 };
 
 export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -715,6 +744,7 @@ export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     Venus: "0x697a70779c1a03ba2bd28b7627a902bff831b616",
   },
   [DaoIdEnum.SHU]: {},
+  [DaoIdEnum.FLUID]: {},
 };
 
 export const BurningAddresses: Record<
@@ -797,6 +827,11 @@ export const BurningAddresses: Record<
     Dead: "0x000000000000000000000000000000000000dEaD",
     TokenContract: "0xe485E2f1bab389C08721B291f6b59780feC83Fd7",
   },
+  [DaoIdEnum.FLUID]: {
+    ZeroAddress: zeroAddress,
+    Dead: "0x000000000000000000000000000000000000dEaD",
+    TokenContract: "0x6f40d4A6237C257fff2dB00FA0510DeEECd303eb",
+  },
 };
 
 export const NonCirculatingAddresses: Record<
@@ -820,6 +855,7 @@ export const NonCirculatingAddresses: Record<
   [DaoIdEnum.TEST]: {},
   [DaoIdEnum.GTC]: {},
   [DaoIdEnum.SCR]: {},
+  [DaoIdEnum.FLUID]: {},
   [DaoIdEnum.COMP]: {},
   [DaoIdEnum.OBOL]: {},
   [DaoIdEnum.ZK]: {

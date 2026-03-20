@@ -176,6 +176,21 @@ export const CONTRACT_ADDRESSES = {
       startBlock: 55519658,
     },
   },
+  [DaoIdEnum.FLUID]: {
+    blockTime: 12,
+    tokenType: "ERC20",
+    // https://etherscan.io/address/0x6f40d4A6237C257fff2dB00FA0510DeEECd303eb
+    token: {
+      address: "0x6f40d4A6237C257fff2dB00FA0510DeEECd303eb",
+      decimals: 18,
+      startBlock: 12183236,
+    },
+    // https://etherscan.io/address/0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B
+    governor: {
+      address: "0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B",
+      startBlock: 12183245,
+    },
+  },
   [DaoIdEnum.SHU]: {
     blockTime: 12,
     tokenType: "ERC20",
@@ -367,6 +382,13 @@ export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   },
   [DaoIdEnum.ZK]: {
     timelock: "0xe5d21A9179CA2E1F0F327d598D464CcF60d89c3d",
+  },
+  [DaoIdEnum.FLUID]: {
+    "InstaDApp Treasury": "0x28849D2b63fA8D361e5fc15cB8aBB13019884d09",
+    "Fluid Liquidity": "0x52Aa899454998Be5b000Ad077a46Bbe360F4e497",
+    "Chainlink CCIP LockReleaseTokenPool":
+      "0x639f35C5E212D61Fe14Bd5CD8b66aAe4df11a50c",
+    InstaTimelock: "0xC7Cb1dE2721BFC0E0DA1b9D526bCdC54eF1C0eFC",
   },
 };
 
