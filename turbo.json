@@ -62,9 +62,15 @@
       "outputs": ["drizzle/**"]
     },
     "@anticapture/api#dev": {
-      "dependsOn": ["@anticapture/observability#build"]
+      "dependsOn": ["@anticapture/observability#build"],
+      "passThroughEnv": ["*"]
     },
     "dev": {
+      "persistent": true,
+      "cache": false,
+      "passThroughEnv": ["*"]
+    },
+    "dev:rw": {
       "persistent": true,
       "cache": false,
       "passThroughEnv": ["*"]

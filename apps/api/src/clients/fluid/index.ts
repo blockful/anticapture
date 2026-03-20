@@ -1,4 +1,4 @@
-import { Account, Address, Chain, Client, Transport } from "viem";
+import { Account, Address, Chain, Client, parseEther, Transport } from "viem";
 
 import { DAOClient } from "@/clients";
 
@@ -28,16 +28,7 @@ export class FLUIDClient<
   }
 
   async getQuorum(): Promise<bigint> {
-    return this.getCachedQuorum(async () => {
-      const blockNumber = await this.getBlockNumber();
-      const targetBlock = blockNumber - 10n;
-      return this.readContract({
-        abi: this.abi,
-        address: this.address,
-        functionName: "quorum",
-        args: [targetBlock < 0n ? 0n : targetBlock],
-      });
-    });
+    return parseEther("4000000");
   }
 
   async getTimelockDelay(): Promise<bigint> {
