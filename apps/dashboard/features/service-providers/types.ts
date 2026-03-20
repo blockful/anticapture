@@ -14,7 +14,7 @@ export type YearData = {
 
 export type ServiceProvider = {
   name: string;
-  iconUrl?: string;
+  avatarUrl?: string;
   websiteUrl?: string;
   proposalUrl?: string;
   budget: number;
