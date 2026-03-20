@@ -183,6 +183,20 @@ export const CONTRACT_ADDRESSES = {
       startBlock: 19021698,
     },
   },
+  [DaoIdEnum.LIL_NOUNS]: {
+    blockTime: 12,
+    token: {
+      // https://etherscan.io/address/0x4b10701Bfd7BFEdc47d50562b76b436fbB5BdB3B
+      address: "0x4b10701Bfd7BFEdc47d50562b76b436fbB5BdB3B",
+      decimals: 0,
+      startBlock: 14736710,
+    },
+    governor: {
+      // https://etherscan.io/address/0x5d2C31ce16924C2a71D317e5BbFd5ce387854039
+      address: "0x5d2C31ce16924C2a71D317e5BbFd5ce387854039",
+      startBlock: 14736719,
+    },
+  },
   [DaoIdEnum.AAVE]: {
     blockTime: 1,
     token: {
@@ -224,6 +238,9 @@ export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   [DaoIdEnum.NOUNS]: {
     timelock: "0xb1a32fc9f9d8b2cf86c068cae13108809547ef71",
     auction: "0x830BD73E4184ceF73443C15111a1DF14e495C706",
+  },
+  [DaoIdEnum.LIL_NOUNS]: {
+    timelock: "0xd5f279ff9EB21c6D40C8f345a66f2751C4eeA1fB",
   },
   [DaoIdEnum.TEST]: {},
   [DaoIdEnum.GTC]: {
@@ -412,6 +429,7 @@ export const CEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   [DaoIdEnum.ARB]: {},
   [DaoIdEnum.AAVE]: {},
   [DaoIdEnum.NOUNS]: {},
+  [DaoIdEnum.LIL_NOUNS]: {},
   [DaoIdEnum.OP]: {
     "Binance 1": "0xF977814e90dA44bFA03b6295A0616a897441aceC",
     "Binance 2": "0x5a52E96BAcdaBb82fd05763E25335261B270Efcb",
@@ -587,6 +605,7 @@ export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   [DaoIdEnum.ARB]: {},
   [DaoIdEnum.AAVE]: {},
   [DaoIdEnum.NOUNS]: {},
+  [DaoIdEnum.LIL_NOUNS]: {},
   [DaoIdEnum.OP]: {
     "Velodrome Finance": "0x47029bc8f5CBe3b464004E87eF9c9419a48018cd",
     "Uniswap 1": "0x9a13F98Cb987694C9F086b1F5eB990EeA8264Ec3",
@@ -646,6 +665,7 @@ export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   [DaoIdEnum.ARB]: {},
   [DaoIdEnum.AAVE]: {},
   [DaoIdEnum.NOUNS]: {},
+  [DaoIdEnum.LIL_NOUNS]: {},
   [DaoIdEnum.OP]: {
     Aave: "0x513c7E3a9c69cA3e22550eF58AC1C0088e918FFf",
     Superfluid: "0x1828Bff08BD244F7990edDCd9B19cc654b33cDB4",
@@ -730,6 +750,11 @@ export const BurningAddresses: Record<
     ZeroAddress: zeroAddress,
     Dead: "0x0000000000000000000000000000000000000000",
     TokenContract: "0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03",
+  },
+  [DaoIdEnum.LIL_NOUNS]: {
+    ZeroAddress: zeroAddress,
+    Dead: "0x0000000000000000000000000000000000000000",
+    TokenContract: "0x4b10701Bfd7BFEdc47d50562b76b436fbB5BdB3B",
   },
   [DaoIdEnum.SCR]: {
     ZeroAddress: zeroAddress,
