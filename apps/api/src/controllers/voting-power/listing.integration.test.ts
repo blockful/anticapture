@@ -245,22 +245,8 @@ describe("Voting Powers Controller", () => {
       // Default order: votingPower desc → ACCOUNT_1 (2000) first, ACCOUNT_2 (500) second
       expect(body).toEqual({
         items: [
-          {
-            accountId: TEST_ACCOUNT_1,
-            votingPower: "2000",
-            votesCount: 10,
-            proposalsCount: 2,
-            delegationsCount: 3,
-            variation: { absoluteChange: "0", percentageChange: "0.00" },
-          },
-          {
-            accountId: TEST_ACCOUNT_2,
-            votingPower: "500",
-            votesCount: 5,
-            proposalsCount: 2,
-            delegationsCount: 7,
-            variation: { absoluteChange: "0", percentageChange: "0.00" },
-          },
+          { ...BASE_ACCOUNT_POWER_ITEM, votingPower: "2000", votesCount: 10 },
+          { ...BASE_ACCOUNT_POWER_ITEM, accountId: TEST_ACCOUNT_2, votingPower: "500", delegationsCount: 7 },
         ],
         totalCount: 2,
       });

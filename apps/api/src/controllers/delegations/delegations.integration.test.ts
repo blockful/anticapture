@@ -52,6 +52,19 @@ const createDelegationRow = (
   ...overrides,
 });
 
+const BASE_DELEGATION_ITEM = {
+  delegatorAddress: getAddress(DELEGATE_ADDRESS),
+  delegateAddress: VALID_ADDRESS,
+  amount: "1000000000000000000",
+  timestamp: "1700000000",
+  transactionHash: TX_HASH,
+};
+
+const EMPTY_DELEGATIONS_RESPONSE = {
+  items: [],
+  totalCount: 0,
+};
+
 let client: PGlite;
 let db: Drizzle;
 let app: Hono;
@@ -98,15 +111,7 @@ describe("Delegations Controller", () => {
       expect(res.status).toBe(200);
       const body = await res.json();
       expect(body).toEqual({
-        items: [
-          {
-            delegatorAddress: getAddress(DELEGATE_ADDRESS),
-            delegateAddress: VALID_ADDRESS,
-            amount: "1000000000000000000",
-            timestamp: "1700000000",
-            transactionHash: TX_HASH,
-          },
-        ],
+        items: [BASE_DELEGATION_ITEM],
         totalCount: 1,
       });
     });
@@ -116,10 +121,7 @@ describe("Delegations Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body).toEqual({
-        items: [],
-        totalCount: 0,
-      });
+      expect(body).toEqual(EMPTY_DELEGATIONS_RESPONSE);
     });
 
     it("should return 200 with empty items when accountBalance has no matching delegation", async () => {
@@ -132,10 +134,7 @@ describe("Delegations Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body).toEqual({
-        items: [],
-        totalCount: 0,
-      });
+      expect(body).toEqual(EMPTY_DELEGATIONS_RESPONSE);
     });
 
     it("should return 400 for an invalid address", async () => {
@@ -175,13 +174,7 @@ describe("Delegations Controller", () => {
 
       expect(body).toEqual({
         items: [
-          {
-            delegatorAddress: getAddress(DELEGATE_ADDRESS),
-            delegateAddress: VALID_ADDRESS,
-            amount: "999999999999999999",
-            timestamp: "1234567890",
-            transactionHash: TX_HASH,
-          },
+          { ...BASE_DELEGATION_ITEM, amount: "999999999999999999", timestamp: "1234567890" },
         ],
         totalCount: 1,
       });
@@ -202,15 +195,7 @@ describe("Delegations Controller", () => {
       const body = await res.json();
 
       expect(body).toEqual({
-        items: [
-          {
-            delegatorAddress: getAddress(DELEGATE_ADDRESS),
-            delegateAddress: VALID_ADDRESS,
-            amount: "1000000000000000000",
-            timestamp: "1700000000",
-            transactionHash: txHash,
-          },
-        ],
+        items: [{ ...BASE_DELEGATION_ITEM, transactionHash: txHash }],
         totalCount: 1,
       });
     });
@@ -241,15 +226,7 @@ describe("Delegations Controller", () => {
       const body = await res.json();
       // getDelegations uses findFirst with desc(timestamp), so returns the most recent one
       expect(body).toEqual({
-        items: [
-          {
-            delegatorAddress: getAddress(DELEGATE_ADDRESS),
-            delegateAddress: VALID_ADDRESS,
-            amount: "1000000000000000000",
-            timestamp: "1700001000",
-            transactionHash: TX_2,
-          },
-        ],
+        items: [{ ...BASE_DELEGATION_ITEM, timestamp: "1700001000", transactionHash: TX_2 }],
         totalCount: 1,
       });
     });

@@ -142,28 +142,10 @@ describe("Onchain Proposals Controller", () => {
         totalCount: 1,
         items: [
           {
+            ...BASE_PROPOSAL_FIELDS,
             id: "1",
-            daoId: "ENS",
             txHash: "0xabc123",
-            proposerAccountId: getAddress(
-              "0xaAaAaAaaAaAaAaaAaAAAAAAAAaaaAaAaAaaAaaAa",
-            ),
-            title: "Test Proposal",
-            description: "A test proposal description",
-            startBlock: 10,
-            endBlock: 110,
             timestamp: "1700000000",
-            endTimestamp: "1700100000",
-            startTimestamp: "1700098800",
-            status: "ACTIVE",
-            forVotes: "5000",
-            againstVotes: "1000",
-            abstainVotes: "500",
-            quorum: "1000",
-            calldatas: ["0x"],
-            values: ["0"],
-            targets: ["0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB"],
-            proposalType: null,
           },
         ],
       });
@@ -269,28 +251,10 @@ describe("Onchain Proposals Controller", () => {
       expect(res.status).toBe(200);
       const body = await res.json();
       expect(body).toEqual({
+        ...BASE_PROPOSAL_FIELDS,
         id: "42",
-        daoId: "ENS",
         txHash: "0xabc123",
-        proposerAccountId: getAddress(
-          "0xaAaAaAaaAaAaAaaAaAAAAAAAAaaaAaAaAaaAaaAa",
-        ),
-        title: "Test Proposal",
-        description: "A test proposal description",
-        startBlock: 10,
-        endBlock: 110,
         timestamp: "1700000000",
-        endTimestamp: "1700100000",
-        startTimestamp: "1700098800",
-        status: "ACTIVE",
-        forVotes: "5000",
-        againstVotes: "1000",
-        abstainVotes: "500",
-        quorum: "1000",
-        calldatas: ["0x"],
-        values: ["0"],
-        targets: ["0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB"],
-        proposalType: null,
       });
     });
 

@@ -96,19 +96,7 @@ describe("Feed Controller (integration)", () => {
       expect(res.status).toBe(200);
       const body = await res.json();
       expect(body).toEqual({
-        items: [
-          {
-            txHash: "0xabc123def456abc1",
-            logIndex: 0,
-            type: "VOTE",
-            value: String(
-              nounsThresholds[FeedEventType.VOTE][FeedRelevance.MEDIUM],
-            ),
-            timestamp: 1700000000,
-            relevance: FeedRelevance.MEDIUM,
-            metadata: null,
-          },
-        ],
+        items: [buildExpectedItem()],
         totalCount: 1,
       });
     });

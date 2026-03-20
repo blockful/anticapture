@@ -50,6 +50,24 @@ const createTransferRow = (
   ...overrides,
 });
 
+const DATE_PERIOD = {
+  startTimestamp: "2023-11-14T22:13:20.000Z",
+  endTimestamp: "2023-11-26T12:00:00.000Z",
+};
+
+const EMPTY_INTERACTIONS_RESPONSE = {
+  totalCount: 0,
+  period: { startTimestamp: "UNBOUND", endTimestamp: "UNBOUND" },
+  items: [],
+};
+
+const COUNTERPART_INTERACTION_ITEM = {
+  accountId: COUNTERPART,
+  amountTransferred: "-100000000000000000",
+  totalVolume: "100000000000000000",
+  transferCount: "1",
+};
+
 let client: PGlite;
 let db: Drizzle;
 let app: Hono;
@@ -94,18 +112,8 @@ describe("Account Interactions Controller", () => {
       const body = await res.json();
       expect(body).toEqual({
         totalCount: 1,
-        period: {
-          startTimestamp: "2023-11-14T22:13:20.000Z",
-          endTimestamp: "2023-11-26T12:00:00.000Z",
-        },
-        items: [
-          {
-            accountId: COUNTERPART,
-            amountTransferred: "-100000000000000000",
-            totalVolume: "100000000000000000",
-            transferCount: "1",
-          },
-        ],
+        period: DATE_PERIOD,
+        items: [COUNTERPART_INTERACTION_ITEM],
       });
     });
 
@@ -114,11 +122,7 @@ describe("Account Interactions Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body).toEqual({
-        totalCount: 0,
-        period: { startTimestamp: "UNBOUND", endTimestamp: "UNBOUND" },
-        items: [],
-      });
+      expect(body).toEqual(EMPTY_INTERACTIONS_RESPONSE);
     });
 
     it("should accept pagination parameters", async () => {
@@ -133,18 +137,8 @@ describe("Account Interactions Controller", () => {
       const body = await res.json();
       expect(body).toEqual({
         totalCount: 1,
-        period: {
-          startTimestamp: "2023-11-14T22:13:20.000Z",
-          endTimestamp: "2023-11-26T12:00:00.000Z",
-        },
-        items: [
-          {
-            accountId: COUNTERPART,
-            amountTransferred: "-100000000000000000",
-            totalVolume: "100000000000000000",
-            transferCount: "1",
-          },
-        ],
+        period: DATE_PERIOD,
+        items: [COUNTERPART_INTERACTION_ITEM],
       });
     });
 
@@ -217,18 +211,8 @@ describe("Account Interactions Controller", () => {
       // Only COUNTERPART's interaction should be returned
       expect(body).toEqual({
         totalCount: 1,
-        period: {
-          startTimestamp: "2023-11-14T22:13:20.000Z",
-          endTimestamp: "2023-11-26T12:00:00.000Z",
-        },
-        items: [
-          {
-            accountId: COUNTERPART,
-            amountTransferred: "-100000000000000000",
-            totalVolume: "100000000000000000",
-            transferCount: "1",
-          },
-        ],
+        period: DATE_PERIOD,
+        items: [COUNTERPART_INTERACTION_ITEM],
       });
     });
 
@@ -243,11 +227,7 @@ describe("Account Interactions Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body).toEqual({
-        totalCount: 0,
-        period: { startTimestamp: "UNBOUND", endTimestamp: "UNBOUND" },
-        items: [],
-      });
+      expect(body).toEqual(EMPTY_INTERACTIONS_RESPONSE);
     });
   });
 });
