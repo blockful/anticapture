@@ -59,6 +59,35 @@ beforeEach(async () => {
 
 describe("Feed Controller (integration)", () => {
   describe("GET /feed/events", () => {
+    const buildExpectedItem = (
+      overrides: {
+        txHash?: string;
+        logIndex?: number;
+        type?: string;
+        value?: string;
+        timestamp?: number;
+        relevance?: string;
+        metadata?: unknown;
+      } = {},
+    ): Record<string, unknown> => {
+      const item: Record<string, unknown> = {
+        txHash: "0xabc123def456abc1",
+        logIndex: 0,
+        type: "VOTE",
+        value: String(
+          nounsThresholds[FeedEventType.VOTE][FeedRelevance.MEDIUM],
+        ),
+        timestamp: 1700000000,
+        relevance: FeedRelevance.MEDIUM,
+        metadata: null,
+        ...overrides,
+      };
+      if (item.type === "PROPOSAL" || item.type === "PROPOSAL_EXTENDED") {
+        delete item.value;
+      }
+      return item;
+    };
+
     it("should return 200 with valid response structure", async () => {
       await db.insert(feedEvent).values(createEvent());
 
@@ -89,8 +118,7 @@ describe("Feed Controller (integration)", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.items).toHaveLength(0);
-      expect(body.totalCount).toBe(0);
+      expect(body).toEqual({ items: [], totalCount: 0 });
     });
 
     it("should include relevance in each item", async () => {
@@ -101,7 +129,15 @@ describe("Feed Controller (integration)", () => {
       const res = await app.request("/feed/events");
       const body = await res.json();
 
-      expect(body.items[0]?.relevance).toBe(FeedRelevance.HIGH);
+      expect(body).toEqual({
+        items: [
+          buildExpectedItem({
+            type: "PROPOSAL",
+            relevance: FeedRelevance.HIGH,
+          }),
+        ],
+        totalCount: 1,
+      });
     });
 
     it("should return only items matching the type filter when mixed types exist", async () => {
@@ -126,8 +162,17 @@ describe("Feed Controller (integration)", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.items).toHaveLength(1);
-      expect(body.items[0]?.type).toBe("DELEGATION");
+      expect(body).toEqual({
+        items: [
+          buildExpectedItem({
+            type: "DELEGATION",
+            logIndex: 1,
+            value: String(delegationValue),
+            relevance: FeedRelevance.MEDIUM,
+          }),
+        ],
+        totalCount: 1,
+      });
     });
 
     it("should include PROPOSAL_EXTENDED events when no type filter is applied", async () => {
@@ -139,17 +184,38 @@ describe("Feed Controller (integration)", () => {
           type: "PROPOSAL_EXTENDED",
           value: 0n,
           logIndex: 0,
+          timestamp: 1700000000,
         }),
-        createEvent({ type: "VOTE", logIndex: 1, value: voteValue }),
+        createEvent({
+          type: "VOTE",
+          logIndex: 1,
+          value: voteValue,
+          timestamp: 1700000001,
+        }),
       ]);
 
       const res = await app.request("/feed/events");
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.items).toHaveLength(2);
-      const types = body.items.map((i: { type: string }) => i.type);
-      expect(types).toContain("PROPOSAL_EXTENDED");
+      expect(body).toEqual({
+        items: [
+          buildExpectedItem({
+            type: "VOTE",
+            logIndex: 1,
+            value: String(voteValue),
+            timestamp: 1700000001,
+            relevance: FeedRelevance.MEDIUM,
+          }),
+          buildExpectedItem({
+            type: "PROPOSAL_EXTENDED",
+            logIndex: 0,
+            timestamp: 1700000000,
+            relevance: FeedRelevance.HIGH,
+          }),
+        ],
+        totalCount: 2,
+      });
     });
 
     it("should return only PROPOSAL_EXTENDED items when type=PROPOSAL_EXTENDED filter is applied", async () => {
@@ -170,25 +236,38 @@ describe("Feed Controller (integration)", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.items).toHaveLength(1);
-      expect(body.items[0]?.type).toBe("PROPOSAL_EXTENDED");
+      expect(body).toEqual({
+        items: [
+          buildExpectedItem({
+            type: "PROPOSAL_EXTENDED",
+            logIndex: 0,
+            relevance: FeedRelevance.HIGH,
+          }),
+        ],
+        totalCount: 1,
+      });
     });
 
     it("should accept pagination query parameters", async () => {
       await db
         .insert(feedEvent)
         .values([
-          createEvent({ logIndex: 0 }),
-          createEvent({ logIndex: 1 }),
-          createEvent({ logIndex: 2 }),
+          createEvent({ logIndex: 0, timestamp: 1700000001 }),
+          createEvent({ logIndex: 1, timestamp: 1700000002 }),
+          createEvent({ logIndex: 2, timestamp: 1700000003 }),
         ]);
 
       const res = await app.request("/feed/events?skip=0&limit=2");
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.totalCount).toBe(3);
-      expect(body.items).toHaveLength(2);
+      expect(body).toEqual({
+        items: [
+          buildExpectedItem({ logIndex: 2, timestamp: 1700000003 }),
+          buildExpectedItem({ logIndex: 1, timestamp: 1700000002 }),
+        ],
+        totalCount: 3,
+      });
     });
 
     it("should accept ordering query parameters", async () => {
@@ -208,10 +287,23 @@ describe("Feed Controller (integration)", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.items).toHaveLength(2);
       // asc by value: PROPOSAL (value=0) first, VOTE (value=medium) second
-      expect(body.items[0].type).toBe("PROPOSAL");
-      expect(body.items[1].type).toBe("VOTE");
+      expect(body).toEqual({
+        items: [
+          buildExpectedItem({
+            type: "PROPOSAL",
+            logIndex: 0,
+            relevance: FeedRelevance.HIGH,
+          }),
+          buildExpectedItem({
+            type: "VOTE",
+            logIndex: 1,
+            value: String(voteValue),
+            relevance: FeedRelevance.MEDIUM,
+          }),
+        ],
+        totalCount: 2,
+      });
     });
 
     it("should accept relevance query parameter", async () => {
@@ -230,8 +322,16 @@ describe("Feed Controller (integration)", () => {
       expect(res.status).toBe(200);
       const body = await res.json();
       // Only the PROPOSAL event has HIGH relevance
-      expect(body.items).toHaveLength(1);
-      expect(body.items[0].type).toBe("PROPOSAL");
+      expect(body).toEqual({
+        items: [
+          buildExpectedItem({
+            type: "PROPOSAL",
+            logIndex: 0,
+            relevance: FeedRelevance.HIGH,
+          }),
+        ],
+        totalCount: 1,
+      });
     });
 
     it("should accept date range query parameters", async () => {
@@ -252,8 +352,17 @@ describe("Feed Controller (integration)", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.items).toHaveLength(1);
-      expect(body.items[0]?.timestamp).toBe(1700000000);
+      expect(body).toEqual({
+        items: [
+          buildExpectedItem({
+            logIndex: 0,
+            value: String(voteValue),
+            timestamp: 1700000000,
+            relevance: FeedRelevance.MEDIUM,
+          }),
+        ],
+        totalCount: 1,
+      });
     });
 
     it("should include metadata in response", async () => {
@@ -265,7 +374,16 @@ describe("Feed Controller (integration)", () => {
       const res = await app.request("/feed/events");
       const body = await res.json();
 
-      expect(body.items[0]?.metadata).toEqual(metadata);
+      expect(body).toEqual({
+        items: [
+          buildExpectedItem({
+            type: "PROPOSAL",
+            relevance: FeedRelevance.HIGH,
+            metadata,
+          }),
+        ],
+        totalCount: 1,
+      });
     });
 
     it("should handle null metadata", async () => {
@@ -274,7 +392,10 @@ describe("Feed Controller (integration)", () => {
       const res = await app.request("/feed/events");
       const body = await res.json();
 
-      expect(body.items[0]?.metadata).toBeNull();
+      expect(body).toEqual({
+        items: [buildExpectedItem()],
+        totalCount: 1,
+      });
     });
 
     it("should handle empty metadata object", async () => {
@@ -285,7 +406,10 @@ describe("Feed Controller (integration)", () => {
       const res = await app.request("/feed/events");
       const body = await res.json();
 
-      expect(body.items[0]?.metadata).toEqual({});
+      expect(body).toEqual({
+        items: [buildExpectedItem({ metadata: {} })],
+        totalCount: 1,
+      });
     });
 
     it("should preserve VOTE metadata shape", async () => {
@@ -304,7 +428,16 @@ describe("Feed Controller (integration)", () => {
       const res = await app.request("/feed/events");
       const body = await res.json();
 
-      expect(body.items[0]?.metadata).toEqual(metadata);
+      expect(body).toEqual({
+        items: [
+          buildExpectedItem({
+            value: String(voteValue),
+            relevance: FeedRelevance.MEDIUM,
+            metadata,
+          }),
+        ],
+        totalCount: 1,
+      });
     });
 
     it("should preserve DELEGATION metadata shape", async () => {
@@ -324,7 +457,17 @@ describe("Feed Controller (integration)", () => {
       const res = await app.request("/feed/events");
       const body = await res.json();
 
-      expect(body.items[0]?.metadata).toEqual(metadata);
+      expect(body).toEqual({
+        items: [
+          buildExpectedItem({
+            type: "DELEGATION",
+            value: String(delegationValue),
+            relevance: FeedRelevance.MEDIUM,
+            metadata,
+          }),
+        ],
+        totalCount: 1,
+      });
     });
 
     it("should preserve TRANSFER metadata shape", async () => {
@@ -343,7 +486,17 @@ describe("Feed Controller (integration)", () => {
       const res = await app.request("/feed/events");
       const body = await res.json();
 
-      expect(body.items[0]?.metadata).toEqual(metadata);
+      expect(body).toEqual({
+        items: [
+          buildExpectedItem({
+            type: "TRANSFER",
+            value: String(transferValue),
+            relevance: FeedRelevance.MEDIUM,
+            metadata,
+          }),
+        ],
+        totalCount: 1,
+      });
     });
 
     it("should preserve metadata with numeric values", async () => {
@@ -363,7 +516,17 @@ describe("Feed Controller (integration)", () => {
       const res = await app.request("/feed/events");
       const body = await res.json();
 
-      expect(body.items[0]?.metadata).toEqual(metadata);
+      expect(body).toEqual({
+        items: [
+          buildExpectedItem({
+            type: "DELEGATION",
+            value: String(delegationValue),
+            relevance: FeedRelevance.MEDIUM,
+            metadata,
+          }),
+        ],
+        totalCount: 1,
+      });
     });
 
     it("should preserve different metadata per item in a mixed list", async () => {
@@ -403,10 +566,34 @@ describe("Feed Controller (integration)", () => {
       const res = await app.request("/feed/events");
       const body = await res.json();
 
-      expect(body.items).toHaveLength(3);
-      expect(body.items[0]?.metadata).toEqual(proposalMeta);
-      expect(body.items[1]?.metadata).toEqual(transferMeta);
-      expect(body.items[2]?.metadata).toBeNull();
+      expect(body).toEqual({
+        items: [
+          buildExpectedItem({
+            type: "PROPOSAL",
+            logIndex: 0,
+            timestamp: 1700000003,
+            relevance: FeedRelevance.HIGH,
+            metadata: proposalMeta,
+          }),
+          buildExpectedItem({
+            type: "TRANSFER",
+            logIndex: 1,
+            timestamp: 1700000002,
+            value: String(transferValue),
+            relevance: FeedRelevance.MEDIUM,
+            metadata: transferMeta,
+          }),
+          buildExpectedItem({
+            type: "VOTE",
+            logIndex: 2,
+            timestamp: 1700000001,
+            value: String(voteValue),
+            relevance: FeedRelevance.MEDIUM,
+            metadata: null,
+          }),
+        ],
+        totalCount: 3,
+      });
     });
   });
 });

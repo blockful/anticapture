@@ -41,8 +41,14 @@ function createStubRepo() {
     votingPowerVariation: {} as Record<Address, bigint>,
     lastVotingPowerVariationTimestamp: undefined as number | undefined,
     nonVotersCountCallCount: 0,
-    getVotes: async () => ({ items: stub.votes, totalCount: stub.votesTotalCount }),
-    getVotesByProposalId: async () => ({ items: stub.votes, totalCount: stub.votesTotalCount }),
+    getVotes: async () => ({
+      items: stub.votes,
+      totalCount: stub.votesTotalCount,
+    }),
+    getVotesByProposalId: async () => ({
+      items: stub.votes,
+      totalCount: stub.votesTotalCount,
+    }),
     getProposalNonVoters: async () => stub.nonVoters,
     getProposalNonVotersCount: async () => {
       stub.nonVotersCountCallCount++;
@@ -150,7 +156,14 @@ describe("VotesService", () => {
 
       expect(result).toEqual({
         totalCount: 2,
-        items: [{ voter: VOTER_A, votingPower: "500", lastVoteTimestamp: 0, votingPowerVariation: "0" }],
+        items: [
+          {
+            voter: VOTER_A,
+            votingPower: "500",
+            lastVoteTimestamp: 0,
+            votingPowerVariation: "0",
+          },
+        ],
       });
       // Should NOT call getProposalNonVotersCount
       expect(repo.nonVotersCountCallCount).toBe(0);
@@ -171,7 +184,14 @@ describe("VotesService", () => {
 
       expect(result).toEqual({
         totalCount: 1,
-        items: [{ voter: VOTER_A, votingPower: "500", lastVoteTimestamp: 0, votingPowerVariation: "50" }],
+        items: [
+          {
+            voter: VOTER_A,
+            votingPower: "500",
+            lastVoteTimestamp: 0,
+            votingPowerVariation: "50",
+          },
+        ],
       });
     });
 
@@ -184,7 +204,14 @@ describe("VotesService", () => {
 
       expect(result).toEqual({
         totalCount: 1,
-        items: [{ voter: VOTER_A, votingPower: "500", lastVoteTimestamp: 1699000000, votingPowerVariation: "0" }],
+        items: [
+          {
+            voter: VOTER_A,
+            votingPower: "500",
+            lastVoteTimestamp: 1699000000,
+            votingPowerVariation: "0",
+          },
+        ],
       });
     });
 

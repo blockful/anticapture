@@ -346,10 +346,16 @@ describe("Voting Powers Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.votingPower).toBe("0");
-      expect(body.variation).toEqual({
-        absoluteChange: "0",
-        percentageChange: "0",
+      expect(body).toEqual({
+        accountId: TEST_ACCOUNT_1,
+        votingPower: "0",
+        votesCount: 0,
+        proposalsCount: 0,
+        delegationsCount: 0,
+        variation: {
+          absoluteChange: "0",
+          percentageChange: "0",
+        },
       });
     });
 

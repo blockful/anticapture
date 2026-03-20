@@ -25,10 +25,10 @@ describe("EventRelevance Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(typeof body.threshold).toBe("string");
-      expect(body.threshold).toBe(
-        compThresholds[FeedEventType.TRANSFER][FeedRelevance.LOW].toString(),
-      );
+      expect(body).toEqual({
+        threshold:
+          compThresholds[FeedEventType.TRANSFER][FeedRelevance.LOW].toString(),
+      });
     });
 
     it("should return 200 with threshold '0' for PROPOSAL/HIGH (EMPTY_THRESHOLDS)", async () => {
@@ -38,9 +38,10 @@ describe("EventRelevance Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.threshold).toBe(
-        compThresholds[FeedEventType.PROPOSAL][FeedRelevance.HIGH].toString(),
-      );
+      expect(body).toEqual({
+        threshold:
+          compThresholds[FeedEventType.PROPOSAL][FeedRelevance.HIGH].toString(),
+      });
     });
 
     it("should return 400 when required query params are missing", async () => {
@@ -72,9 +73,10 @@ describe("EventRelevance Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.threshold).toBe(
-        compThresholds[FeedEventType.VOTE][FeedRelevance.MEDIUM].toString(),
-      );
+      expect(body).toEqual({
+        threshold:
+          compThresholds[FeedEventType.VOTE][FeedRelevance.MEDIUM].toString(),
+      });
     });
   });
 });

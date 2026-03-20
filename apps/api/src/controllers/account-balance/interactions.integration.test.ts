@@ -180,10 +180,28 @@ describe("Account Interactions Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.totalCount).toBe(2);
       // asc by volume: COUNTERPART (volume=100) first, COUNTERPART_2 (volume=500) second
-      expect(body.items[0].accountId).toBe(COUNTERPART);
-      expect(body.items[1].accountId).toBe(COUNTERPART_2);
+      expect(body).toEqual({
+        totalCount: 2,
+        period: {
+          startTimestamp: "2023-11-14T22:13:20.000Z",
+          endTimestamp: "2023-11-26T12:00:00.000Z",
+        },
+        items: [
+          {
+            accountId: COUNTERPART,
+            amountTransferred: "-100",
+            totalVolume: "100",
+            transferCount: "1",
+          },
+          {
+            accountId: COUNTERPART_2,
+            amountTransferred: "-500",
+            totalVolume: "500",
+            transferCount: "1",
+          },
+        ],
+      });
     });
 
     it("should accept filter parameters", async () => {
@@ -197,9 +215,21 @@ describe("Account Interactions Controller", () => {
       expect(res.status).toBe(200);
       const body = await res.json();
       // Only COUNTERPART's interaction should be returned
-      expect(body.totalCount).toBe(1);
-      expect(body.items).toHaveLength(1);
-      expect(body.items[0].accountId).toBe(COUNTERPART);
+      expect(body).toEqual({
+        totalCount: 1,
+        period: {
+          startTimestamp: "2023-11-14T22:13:20.000Z",
+          endTimestamp: "2023-11-26T12:00:00.000Z",
+        },
+        items: [
+          {
+            accountId: COUNTERPART,
+            amountTransferred: "-100000000000000000",
+            totalVolume: "100000000000000000",
+            transferCount: "1",
+          },
+        ],
+      });
     });
 
     it("should return 400 for invalid address", async () => {

@@ -173,10 +173,18 @@ describe("Delegations Controller", () => {
       const res = await app.request(`/accounts/${VALID_ADDRESS}/delegations`);
       const body = await res.json();
 
-      expect(typeof body.items[0]?.amount).toBe("string");
-      expect(typeof body.items[0]?.timestamp).toBe("string");
-      expect(body.items[0]?.amount).toBe("999999999999999999");
-      expect(body.items[0]?.timestamp).toBe("1234567890");
+      expect(body).toEqual({
+        items: [
+          {
+            delegatorAddress: getAddress(DELEGATE_ADDRESS),
+            delegateAddress: VALID_ADDRESS,
+            amount: "999999999999999999",
+            timestamp: "1234567890",
+            transactionHash: TX_HASH,
+          },
+        ],
+        totalCount: 1,
+      });
     });
 
     it("should include transactionHash in response items", async () => {
@@ -193,7 +201,18 @@ describe("Delegations Controller", () => {
       const res = await app.request(`/accounts/${VALID_ADDRESS}/delegations`);
       const body = await res.json();
 
-      expect(body.items[0]?.transactionHash).toBe(txHash);
+      expect(body).toEqual({
+        items: [
+          {
+            delegatorAddress: getAddress(DELEGATE_ADDRESS),
+            delegateAddress: VALID_ADDRESS,
+            amount: "1000000000000000000",
+            timestamp: "1700000000",
+            transactionHash: txHash,
+          },
+        ],
+        totalCount: 1,
+      });
     });
 
     it("should use default orderBy=timestamp and orderDirection=desc when not provided", async () => {
@@ -221,8 +240,18 @@ describe("Delegations Controller", () => {
       expect(res.status).toBe(200);
       const body = await res.json();
       // getDelegations uses findFirst with desc(timestamp), so returns the most recent one
-      expect(body.totalCount).toBe(1);
-      expect(body.items[0].timestamp).toBe("1700001000");
+      expect(body).toEqual({
+        items: [
+          {
+            delegatorAddress: getAddress(DELEGATE_ADDRESS),
+            delegateAddress: VALID_ADDRESS,
+            amount: "1000000000000000000",
+            timestamp: "1700001000",
+            transactionHash: TX_2,
+          },
+        ],
+        totalCount: 1,
+      });
     });
   });
 });

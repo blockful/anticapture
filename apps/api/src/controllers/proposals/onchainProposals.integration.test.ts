@@ -184,7 +184,17 @@ describe("Onchain Proposals Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.totalCount).toBe(1);
+      expect(body).toEqual({
+        totalCount: 1,
+        items: [
+          {
+            ...BASE_PROPOSAL_FIELDS,
+            id: "1",
+            txHash: "0xabc123",
+            timestamp: "1700000000",
+          },
+        ],
+      });
     });
 
     it("should accept orderDirection parameter", async () => {

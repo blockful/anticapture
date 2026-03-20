@@ -185,10 +185,35 @@ describe("Account Balances Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.totalCount).toBe(2);
       // VALID_ADDRESS has larger variation (500), SECOND_ADDRESS has smaller (100)
-      expect(body.items[0].address).toBe(VALID_ADDRESS);
-      expect(body.items[1].address).toBe(SECOND_ADDRESS);
+      expect(body).toEqual({
+        totalCount: 2,
+        period: DEFAULT_PERIOD,
+        items: [
+          {
+            address: VALID_ADDRESS,
+            balance: "1000",
+            tokenId: TOKEN_ID,
+            delegate: DELEGATE_ADDRESS,
+            variation: {
+              previousBalance: "500",
+              absoluteChange: "500",
+              percentageChange: "100",
+            },
+          },
+          {
+            address: SECOND_ADDRESS,
+            balance: "2000",
+            tokenId: TOKEN_ID,
+            delegate: DELEGATE_ADDRESS,
+            variation: {
+              previousBalance: "1900",
+              absoluteChange: "100",
+              percentageChange: "5.26",
+            },
+          },
+        ],
+      });
     });
 
     it("should accept orderDirection=asc", async () => {
@@ -205,10 +230,35 @@ describe("Account Balances Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.totalCount).toBe(2);
       // asc by balance: smaller balance first
-      expect(body.items[0].balance).toBe("1000");
-      expect(body.items[1].balance).toBe("2000");
+      expect(body).toEqual({
+        totalCount: 2,
+        period: DEFAULT_PERIOD,
+        items: [
+          {
+            address: VALID_ADDRESS,
+            balance: "1000",
+            tokenId: TOKEN_ID,
+            delegate: DELEGATE_ADDRESS,
+            variation: {
+              previousBalance: "1000",
+              absoluteChange: "0",
+              percentageChange: "0",
+            },
+          },
+          {
+            address: SECOND_ADDRESS,
+            balance: "2000",
+            tokenId: TOKEN_ID,
+            delegate: DELEGATE_ADDRESS,
+            variation: {
+              previousBalance: "2000",
+              absoluteChange: "0",
+              percentageChange: "0",
+            },
+          },
+        ],
+      });
     });
 
     it("should accept addresses filter", async () => {
@@ -224,9 +274,11 @@ describe("Account Balances Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.totalCount).toBe(1);
-      expect(body.items).toHaveLength(1);
-      expect(body.items[0].address).toBe(VALID_ADDRESS);
+      expect(body).toEqual({
+        items: [ACCOUNT_BALANCE_ITEM],
+        totalCount: 1,
+        period: DEFAULT_PERIOD,
+      });
     });
 
     it("should accept fromDate and toDate parameters to override defaults", async () => {

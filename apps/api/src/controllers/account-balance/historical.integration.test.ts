@@ -177,10 +177,36 @@ describe("Historical Balances Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.totalCount).toBe(2);
       // desc by deltaMod: larger delta first
-      expect(body.items[0].delta).toBe("500");
-      expect(body.items[1].delta).toBe("100");
+      expect(body).toEqual({
+        totalCount: 2,
+        items: [
+          {
+            transactionHash: TX_2,
+            daoId: DAO_ID,
+            accountId: VALID_ADDRESS,
+            balance: "1000000000000000000",
+            delta: "500",
+            timestamp: "1700000000",
+            logIndex: 0,
+            transfer: { value: "500", from: FROM_ADDRESS, to: VALID_ADDRESS },
+          },
+          {
+            transactionHash: TX_1,
+            daoId: DAO_ID,
+            accountId: VALID_ADDRESS,
+            balance: "1000000000000000000",
+            delta: "100",
+            timestamp: "1700000000",
+            logIndex: 0,
+            transfer: {
+              value: "500000000000000000",
+              from: FROM_ADDRESS,
+              to: VALID_ADDRESS,
+            },
+          },
+        ],
+      });
     });
 
     it("should accept orderDirection=asc", async () => {
@@ -210,10 +236,18 @@ describe("Historical Balances Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.totalCount).toBe(2);
       // asc by timestamp: earlier first
-      expect(body.items[0].timestamp).toBe("1700000000");
-      expect(body.items[1].timestamp).toBe("1700001000");
+      expect(body).toEqual({
+        totalCount: 2,
+        items: [
+          { ...BALANCE_HISTORY_ITEM, transactionHash: TX_1 },
+          {
+            ...BALANCE_HISTORY_ITEM,
+            transactionHash: TX_2,
+            timestamp: "1700001000",
+          },
+        ],
+      });
     });
 
     it("should accept fromValue and toValue parameters", async () => {
@@ -244,7 +278,10 @@ describe("Historical Balances Controller", () => {
       expect(res.status).toBe(200);
       const body = await res.json();
       // Only the row with deltaMod=100 is within [50, 200]
-      expect(body.items).toHaveLength(1);
+      expect(body).toEqual({
+        totalCount: 1,
+        items: [{ ...BALANCE_HISTORY_ITEM, transactionHash: TX_1 }],
+      });
     });
 
     it("should accept fromDate and toDate parameters", async () => {
@@ -281,8 +318,10 @@ describe("Historical Balances Controller", () => {
       expect(res.status).toBe(200);
       const body = await res.json();
       // Only the row with timestamp=1700000000 is within the range
-      expect(body.items).toHaveLength(1);
-      expect(body.items[0].timestamp).toBe("1700000000");
+      expect(body).toEqual({
+        totalCount: 1,
+        items: [{ ...BALANCE_HISTORY_ITEM, transactionHash: TX_1 }],
+      });
     });
 
     it("should return 400 for invalid address", async () => {

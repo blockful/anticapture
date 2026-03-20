@@ -91,7 +91,7 @@ describe("Dao Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body).toMatchObject({
+      expect(body).toEqual({
         id: "UNI",
         chainId: 1,
         quorum: "40000000000000000000000000",
@@ -99,21 +99,8 @@ describe("Dao Controller", () => {
         votingDelay: "2",
         votingPeriod: "40320",
         timelockDelay: "172800",
+        alreadySupportCalldataReview: false,
       });
-    });
-
-    it("should include all required fields in the response", async () => {
-      const res = await app.request("/dao");
-
-      expect(res.status).toBe(200);
-      const body = await res.json();
-      expect(body).toHaveProperty("id");
-      expect(body).toHaveProperty("chainId");
-      expect(body).toHaveProperty("quorum");
-      expect(body).toHaveProperty("proposalThreshold");
-      expect(body).toHaveProperty("votingDelay");
-      expect(body).toHaveProperty("votingPeriod");
-      expect(body).toHaveProperty("timelockDelay");
     });
   });
 });
