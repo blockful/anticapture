@@ -20,6 +20,10 @@ export const token = onchainTable("token", (drizzle) => ({
   lendingSupply: drizzle.bigint("lending_supply").notNull().default(0n),
   circulatingSupply: drizzle.bigint("circulating_supply").notNull().default(0n),
   treasury: drizzle.bigint().notNull().default(0n),
+  nonCirculatingSupply: drizzle
+    .bigint("non_circulating_supply")
+    .notNull()
+    .default(0n),
 }));
 
 export const account = onchainTable("account", (drizzle) => ({

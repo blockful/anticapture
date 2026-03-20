@@ -46,24 +46,24 @@ Compare the result against the token address the user provided. They may differ 
 
 Check what the voting token actually is:
 
-| Check | Command | What it tells you |
-|---|---|---|
-| Is it the same as the ERC20? | Compare addresses | If different, there's an intermediary |
-| Does it have `delegates()`? | `cast call <TOKEN> "delegates(address)(address)" <ZERO_ADDR>` | If reverts → no delegation, voting power comes from elsewhere |
-| Does it emit `DelegateChanged`? | Check ABI on block explorer | If missing → `delegatedSupply` and `accountPower` will be empty |
-| Is it a vote-escrow (veToken)? | Check contract name/source on block explorer | veTokens use lock-based voting power with `Deposit`/`Withdraw` events |
-| Is it a wrapper? | Check if it references another contract | Wrappers (like wveOLAS) proxy reads to an underlying contract |
+| Check                           | Command                                                       | What it tells you                                                     |
+| ------------------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Is it the same as the ERC20?    | Compare addresses                                             | If different, there's an intermediary                                 |
+| Does it have `delegates()`?     | `cast call <TOKEN> "delegates(address)(address)" <ZERO_ADDR>` | If reverts → no delegation, voting power comes from elsewhere         |
+| Does it emit `DelegateChanged`? | Check ABI on block explorer                                   | If missing → `delegatedSupply` and `accountPower` will be empty       |
+| Is it a vote-escrow (veToken)?  | Check contract name/source on block explorer                  | veTokens use lock-based voting power with `Deposit`/`Withdraw` events |
+| Is it a wrapper?                | Check if it references another contract                       | Wrappers (like wveOLAS) proxy reads to an underlying contract         |
 
 #### 0c. Determine integration scope
 
 Based on the findings, classify the integration:
 
-| Architecture | Token events available | Delegation tracking | Example |
-|---|---|---|---|
-| **Standard ERC20Votes** | Transfer, DelegateChanged, DelegateVotesChanged | Full | ENS, UNI, OBOL |
-| **Plain ERC20 + veToken** | Transfer only (on ERC20); Deposit/Withdraw (on veToken) | Requires custom veToken indexing | OLAS |
-| **ERC721 (NFT)** | Transfer (minting = delegation) | Via transfer events | NOUNS |
-| **Multi-token** | Transfer + delegation per token | Aggregated across tokens | AAVE |
+| Architecture              | Token events available                                  | Delegation tracking              | Example        |
+| ------------------------- | ------------------------------------------------------- | -------------------------------- | -------------- |
+| **Standard ERC20Votes**   | Transfer, DelegateChanged, DelegateVotesChanged         | Full                             | ENS, UNI, OBOL |
+| **Plain ERC20 + veToken** | Transfer only (on ERC20); Deposit/Withdraw (on veToken) | Requires custom veToken indexing | OLAS           |
+| **ERC721 (NFT)**          | Transfer (minting = delegation)                         | Via transfer events              | NOUNS          |
+| **Multi-token**           | Transfer + delegation per token                         | Aggregated across tokens         | AAVE           |
 
 #### 0d. Document findings in INTEGRATION.md
 
@@ -289,14 +289,14 @@ pnpm dashboard typecheck && pnpm dashboard lint
 
 ## Common Patterns & Variations
 
-| Variation                          | Example DAO       | Key Difference                                      |
-| ---------------------------------- | ----------------- | --------------------------------------------------- |
-| Standard ERC20 + Compound Governor | ENS, UNI, GTC, OP | Straightforward, follow ENS pattern                 |
-| ERC721 (NFT) token                 | NOUNS             | Token is NFT, auto-delegates on transfer            |
-| Multi-token tracking               | AAVE              | Tracks AAVE + stkAAVE + aAAVE separately            |
-| Azorius governance (Fractal)       | SHU               | Different governor events, custom proposal handling |
-| Multi-chain                        | ARB, OP, SCR      | Config needs chain-specific RPC and chain ID        |
-| No governor (token-only)           | ARB               | Only token indexer, no governor handler             |
+| Variation                          | Example DAO       | Key Difference                                                                                                                                                                                        |
+| ---------------------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Standard ERC20 + Compound Governor | ENS, UNI, GTC, OP | Straightforward, follow ENS pattern                                                                                                                                                                   |
+| ERC721 (NFT) token                 | NOUNS             | Token is NFT, auto-delegates on transfer                                                                                                                                                              |
+| Multi-token tracking               | AAVE              | Tracks AAVE + stkAAVE + aAAVE separately                                                                                                                                                              |
+| Azorius governance (Fractal)       | SHU               | Different governor events, custom proposal handling                                                                                                                                                   |
+| Multi-chain                        | ARB, OP, SCR      | Config needs chain-specific RPC and chain ID                                                                                                                                                          |
+| No governor (token-only)           | ARB               | Only token indexer, no governor handler                                                                                                                                                               |
 | Vote-escrow (veToken) governance   | OLAS              | ERC20 has no delegation; voting power from veToken lock. Requires custom veToken indexer for `Deposit`/`Withdraw` events to track `delegatedSupply` and `accountPower`. Governor events are standard. |
 
 ## INTEGRATION.md Template
@@ -308,11 +308,11 @@ Every DAO integration **must** include an `INTEGRATION.md` file at `apps/indexer
 
 ## Architecture
 
-| Contract | Address | Type | Events used |
-|---|---|---|---|
-| Token | 0x... | ERC20 / ERC721 / veToken | Transfer, DelegateChanged, ... |
-| Governor | 0x... | OZ Governor / Azorius / ... | ProposalCreated, VoteCast, ... |
-| Timelock | 0x... | TimelockController | (not indexed) |
+| Contract | Address | Type                        | Events used                    |
+| -------- | ------- | --------------------------- | ------------------------------ |
+| Token    | 0x...   | ERC20 / ERC721 / veToken    | Transfer, DelegateChanged, ... |
+| Governor | 0x...   | OZ Governor / Azorius / ... | ProposalCreated, VoteCast, ... |
+| Timelock | 0x...   | TimelockController          | (not indexed)                  |
 
 Governor voting token: `<address>` (same as token / veToken wrapper / other)
 

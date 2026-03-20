@@ -7,7 +7,12 @@ import { MetricTypesEnum } from "@/lib/constants";
 
 export const updateSupplyMetric = async (
   context: Context,
-  supplyField: "lendingSupply" | "cexSupply" | "dexSupply" | "treasury",
+  supplyField:
+    | "lendingSupply"
+    | "cexSupply"
+    | "dexSupply"
+    | "treasury"
+    | "nonCirculatingSupply",
   addressList: Address[],
   metricType: MetricTypesEnum,
   from: Address,

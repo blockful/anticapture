@@ -13,6 +13,7 @@ import {
   BurningAddresses,
   MetricTypesEnum,
   TreasuryAddresses,
+  NonCirculatingAddresses,
 } from "@/lib/constants";
 import {
   updateCirculatingSupply,
@@ -79,6 +80,10 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
         },
       );
 
+      const nonCirculatingAddressList = Object.values(
+        NonCirculatingAddresses[daoId],
+      );
+
       const isFromTimelock = isAddressEqual(event.args.from, timelock);
       const isToTimelock = isAddressEqual(event.args.to, timelock);
 
@@ -103,6 +108,19 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
           event.block.timestamp,
         );
       }
+
+      await updateSupplyMetric(
+        context,
+        "nonCirculatingSupply",
+        nonCirculatingAddressList,
+        MetricTypesEnum.NON_CIRCULATING_SUPPLY,
+        from,
+        to,
+        1n,
+        daoId,
+        address,
+        event.block.timestamp,
+      );
 
       if (!event.transaction.to) return;
 
