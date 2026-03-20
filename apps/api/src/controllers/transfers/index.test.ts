@@ -4,6 +4,7 @@ import { pushSchema } from "drizzle-kit/api";
 import { drizzle } from "drizzle-orm/pglite";
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
 import { getAddress, Address } from "viem";
+import type { Drizzle } from "@/database";
 import * as schema from "@/database/schema";
 import { transfer } from "@/database/schema";
 import { TransfersRepository } from "@/repositories/transfers";
@@ -36,7 +37,7 @@ const createTransfer = (
 
 describe("Transfers Controller", () => {
   let client: PGlite;
-  let db: ReturnType<typeof drizzle<typeof schema>>;
+  let db: Drizzle;
   let app: Hono;
 
   beforeAll(async () => {
@@ -82,12 +83,26 @@ describe("Transfers Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.totalCount).toBe(1);
-      expect(body.items).toHaveLength(1);
-      expect(body.items[0]).toMatchObject({
-        transactionHash: "0xabc",
-        daoId: "UNI",
-        tokenId: "uni",
+      expect(body).toEqual({
+        totalCount: 1,
+        items: [
+          {
+            transactionHash: "0xabc",
+            daoId: "UNI",
+            tokenId: "uni",
+            amount: "1000000000000000000",
+            fromAccountId: VALID_ADDRESS,
+            toAccountId: getAddress(
+              "0x2222222222222222222222222222222222222222",
+            ),
+            timestamp: "1700000000",
+            logIndex: 0,
+            isCex: false,
+            isDex: false,
+            isLending: false,
+            isTotal: false,
+          },
+        ],
       });
     });
 

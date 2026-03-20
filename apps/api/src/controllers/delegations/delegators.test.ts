@@ -1,69 +1,110 @@
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
+import { PGlite } from "@electric-sql/pglite";
+import { pushSchema } from "drizzle-kit/api";
+import { drizzle } from "drizzle-orm/pglite";
 import { Address, getAddress } from "viem";
-import { describe, it, expect, beforeEach } from "vitest";
-
-import { AggregatedDelegator } from "@/mappers";
-import {
-  DelegatorsService,
-  DelegatorsSortOptions,
-} from "@/services/delegations/delegators";
-
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
+import type { Drizzle } from "@/database";
+import * as schema from "@/database/schema";
+import { delegation, accountBalance } from "@/database/schema";
+import { DelegatorsRepository } from "@/repositories/delegations/delegators";
+import { DelegatorsService } from "@/services/delegations/delegators";
 import { delegators } from "./delegators";
 
-class FakeDelegatorsRepository {
-  private items: AggregatedDelegator[] = [];
-  private count = 0;
+type DelegationInsert = typeof delegation.$inferInsert;
+type AccountBalanceInsert = typeof accountBalance.$inferInsert;
 
-  setData(items: AggregatedDelegator[], totalCount?: number) {
-    this.items = items;
-    this.count = totalCount ?? items.length;
-  }
+// VALID_ADDRESS is the delegatee (the one being delegated to)
+const VALID_ADDRESS = getAddress(
+  "0x1234567890123456789012345678901234567890",
+) as Address;
+const DELEGATOR_1 = getAddress(
+  "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+) as Address;
+const DELEGATOR_2 = getAddress(
+  "0x1111111111111111111111111111111111111111",
+) as Address;
+const DAO_ID = "uni";
 
-  async getDelegators(
-    _address: Address,
-    _skip: number,
-    _limit: number,
-    _sort: DelegatorsSortOptions,
-  ): Promise<{ items: AggregatedDelegator[]; totalCount: number }> {
-    return {
-      items: this.items,
-      totalCount: this.count,
-    };
-  }
-}
-
-const createMockAggregatedDelegator = (
-  overrides: Partial<AggregatedDelegator> = {},
-): AggregatedDelegator => ({
-  delegatorAddress: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd" as Address,
-  amount: 1000000000000000000n,
+const createDelegationRow = (
+  overrides: Partial<DelegationInsert> = {},
+): DelegationInsert => ({
+  transactionHash:
+    "0xaabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccdd",
+  daoId: DAO_ID,
+  delegateAccountId: VALID_ADDRESS,
+  delegatorAccountId: DELEGATOR_1,
+  delegatedValue: 0n,
+  previousDelegate: null,
   timestamp: 1700000000n,
+  logIndex: 0,
+  isCex: false,
+  isDex: false,
+  isLending: false,
+  isTotal: false,
   ...overrides,
 });
 
-function createTestApp(service: DelegatorsService) {
-  const app = new Hono();
-  delegators(app, service);
-  return app;
-}
+const createAccountBalanceRow = (
+  overrides: Partial<AccountBalanceInsert> = {},
+): AccountBalanceInsert => ({
+  accountId: DELEGATOR_1,
+  tokenId: "uni",
+  balance: 1000000000000000000n,
+  delegate: VALID_ADDRESS,
+  ...overrides,
+});
 
-const VALID_ADDRESS = "0x1234567890123456789012345678901234567890";
+let client: PGlite;
+let db: Drizzle;
+let app: Hono;
+
+beforeAll(async () => {
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  (BigInt.prototype as any).toJSON = function () {
+    return this.toString();
+  };
+  client = new PGlite();
+  db = drizzle(client, { schema });
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  const { apply } = await pushSchema(schema, db as any);
+  await apply();
+
+  const repo = new DelegatorsRepository(db);
+  const service = new DelegatorsService(repo);
+  app = new Hono();
+  delegators(app, service);
+});
+
+afterAll(async () => {
+  await client.close();
+});
+
+beforeEach(async () => {
+  await db.delete(delegation);
+  await db.delete(accountBalance);
+});
 
 describe("Delegators Controller", () => {
-  let fakeRepo: FakeDelegatorsRepository;
-  let service: DelegatorsService;
-  let app: ReturnType<typeof createTestApp>;
-
-  beforeEach(() => {
-    fakeRepo = new FakeDelegatorsRepository();
-    service = new DelegatorsService(fakeRepo);
-    app = createTestApp(service);
-  });
-
-  describe(`GET /accounts/:address/delegators`, () => {
+  describe("GET /accounts/:address/delegators", () => {
     it("should return 200 with correct response shape for a valid address", async () => {
-      const delegator = createMockAggregatedDelegator();
-      fakeRepo.setData([delegator]);
+      // DelegatorsRepository queries accountBalance WHERE delegate = address
+      // and joins with delegation WHERE delegateAccountId = address
+      await db.insert(delegation).values(
+        createDelegationRow({
+          delegateAccountId: VALID_ADDRESS,
+          delegatorAccountId: DELEGATOR_1,
+          logIndex: 0,
+        }),
+      );
+      await db.insert(accountBalance).values(
+        createAccountBalanceRow({
+          accountId: DELEGATOR_1,
+          delegate: VALID_ADDRESS,
+          balance: 1000000000000000000n,
+          tokenId: "uni",
+        }),
+      );
 
       const res = await app.request(`/accounts/${VALID_ADDRESS}/delegators`);
 
@@ -72,9 +113,9 @@ describe("Delegators Controller", () => {
       expect(body).toEqual({
         items: [
           {
-            delegatorAddress: getAddress(delegator.delegatorAddress),
-            amount: delegator.amount.toString(),
-            timestamp: delegator.timestamp.toString(),
+            delegatorAddress: getAddress(DELEGATOR_1),
+            amount: "1000000000000000000",
+            timestamp: "1700000000",
           },
         ],
         totalCount: 1,
@@ -82,8 +123,6 @@ describe("Delegators Controller", () => {
     });
 
     it("should return 200 with empty items and totalCount 0 when no delegators exist", async () => {
-      fakeRepo.setData([]);
-
       const res = await app.request(`/accounts/${VALID_ADDRESS}/delegators`);
 
       expect(res.status).toBe(200);
@@ -95,18 +134,34 @@ describe("Delegators Controller", () => {
     });
 
     it("should return 200 with multiple delegators", async () => {
-      fakeRepo.setData([
-        createMockAggregatedDelegator({
-          delegatorAddress:
-            "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd" as Address,
-          amount: 1000000000000000000n,
+      await db.insert(delegation).values([
+        createDelegationRow({
+          delegateAccountId: VALID_ADDRESS,
+          delegatorAccountId: DELEGATOR_1,
+          transactionHash:
+            "0xaabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccdd",
+          logIndex: 0,
           timestamp: 1700000000n,
         }),
-        createMockAggregatedDelegator({
-          delegatorAddress:
-            "0x1111111111111111111111111111111111111111" as Address,
-          amount: 2000000000000000000n,
+        createDelegationRow({
+          delegateAccountId: VALID_ADDRESS,
+          delegatorAccountId: DELEGATOR_2,
+          transactionHash:
+            "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          logIndex: 0,
           timestamp: 1700001000n,
+        }),
+      ]);
+      await db.insert(accountBalance).values([
+        createAccountBalanceRow({
+          accountId: DELEGATOR_1,
+          delegate: VALID_ADDRESS,
+          balance: 1000000000000000000n,
+        }),
+        createAccountBalanceRow({
+          accountId: DELEGATOR_2,
+          delegate: VALID_ADDRESS,
+          balance: 2000000000000000000n,
         }),
       ]);
 
@@ -114,12 +169,36 @@ describe("Delegators Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.items).toHaveLength(2);
-      expect(body.totalCount).toBe(2);
+      expect(body).toEqual({
+        items: [
+          {
+            delegatorAddress: getAddress(DELEGATOR_2),
+            amount: "2000000000000000000",
+            timestamp: "1700001000",
+          },
+          {
+            delegatorAddress: getAddress(DELEGATOR_1),
+            amount: "1000000000000000000",
+            timestamp: "1700000000",
+          },
+        ],
+        totalCount: 2,
+      });
     });
 
-    it("should return totalCount from repository even when paginated", async () => {
-      fakeRepo.setData([createMockAggregatedDelegator()], 50);
+    it("should accept skip and limit query parameters", async () => {
+      await db.insert(delegation).values(
+        createDelegationRow({
+          delegateAccountId: VALID_ADDRESS,
+          delegatorAccountId: DELEGATOR_1,
+        }),
+      );
+      await db.insert(accountBalance).values(
+        createAccountBalanceRow({
+          accountId: DELEGATOR_1,
+          delegate: VALID_ADDRESS,
+        }),
+      );
 
       const res = await app.request(
         `/accounts/${VALID_ADDRESS}/delegators?skip=0&limit=1`,
@@ -127,28 +206,24 @@ describe("Delegators Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.totalCount).toBe(50);
-      expect(body.items).toHaveLength(1);
-    });
-
-    it("should accept skip and limit query parameters", async () => {
-      fakeRepo.setData([createMockAggregatedDelegator()], 10);
-
-      const res = await app.request(
-        `/accounts/${VALID_ADDRESS}/delegators?skip=5&limit=3`,
-      );
-
-      expect(res.status).toBe(200);
-      const body = await res.json();
-      expect(body.totalCount).toBe(10);
+      expect(body).toEqual({
+        items: [
+          {
+            delegatorAddress: getAddress(DELEGATOR_1),
+            amount: "1000000000000000000",
+            timestamp: "1700000000",
+          },
+        ],
+        totalCount: 1,
+      });
     });
 
     it("should use default skip=0 and limit=10 when not provided", async () => {
-      fakeRepo.setData([]);
-
       const res = await app.request(`/accounts/${VALID_ADDRESS}/delegators`);
 
       expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body).toEqual({ items: [], totalCount: 0 });
     });
 
     it("should return 400 for an invalid address", async () => {
@@ -171,32 +246,6 @@ describe("Delegators Controller", () => {
       );
 
       expect(res.status).toBe(400);
-    });
-
-    it("should checksum the address from the path parameter", async () => {
-      fakeRepo.setData([createMockAggregatedDelegator()]);
-      const lowercaseAddress = VALID_ADDRESS.toLowerCase();
-
-      const res = await app.request(`/accounts/${lowercaseAddress}/delegators`);
-
-      expect(res.status).toBe(200);
-    });
-
-    it("should serialize amount and timestamp as strings in response items", async () => {
-      fakeRepo.setData([
-        createMockAggregatedDelegator({
-          amount: 999999999999999999n,
-          timestamp: 1234567890n,
-        }),
-      ]);
-
-      const res = await app.request(`/accounts/${VALID_ADDRESS}/delegators`);
-      const body = await res.json();
-
-      expect(typeof body.items[0]?.amount).toBe("string");
-      expect(typeof body.items[0]?.timestamp).toBe("string");
-      expect(body.items[0]?.amount).toBe("999999999999999999");
-      expect(body.items[0]?.timestamp).toBe("1234567890");
     });
   });
 });

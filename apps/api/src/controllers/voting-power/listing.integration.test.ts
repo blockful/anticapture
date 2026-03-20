@@ -1,175 +1,119 @@
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
-import { Address } from "viem";
-import { describe, it, expect, beforeEach } from "vitest";
-
-import {
-  DBAccountPowerWithVariation,
-  DBVotingPowerVariation,
-  DBHistoricalVotingPowerWithRelations,
-  AmountFilter,
-} from "@/mappers";
+import { PGlite } from "@electric-sql/pglite";
+import { pushSchema } from "drizzle-kit/api";
+import { drizzle } from "drizzle-orm/pglite";
+import { Address, getAddress } from "viem";
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
+import type { Drizzle } from "@/database";
+import * as schema from "@/database/schema";
+import { accountPower, votingPowerHistory } from "@/database/schema";
+import { VotingPowerRepository } from "@/repositories/voting-power/general";
 import { VotingPowerService } from "@/services/voting-power";
-
 import { votingPowers } from "./listing";
 
-const TEST_ACCOUNT_1 = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045" as Address;
-const TEST_ACCOUNT_2 = "0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B" as Address;
+type AccountPowerInsert = typeof accountPower.$inferInsert;
+type VotingPowerHistoryInsert = typeof votingPowerHistory.$inferInsert;
 
-function createAccountPower(
-  overrides: Partial<DBAccountPowerWithVariation> = {},
-): DBAccountPowerWithVariation {
-  return {
-    accountId: TEST_ACCOUNT_1,
-    daoId: "test-dao",
-    votingPower: 1000n,
-    votesCount: 5,
-    proposalsCount: 2,
-    delegationsCount: 3,
-    lastVoteTimestamp: 0n,
-    absoluteChange: 200n,
-    percentageChange: "25",
-    ...overrides,
+const TEST_ACCOUNT_1 = getAddress(
+  "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+) as Address;
+const TEST_ACCOUNT_2 = getAddress(
+  "0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B",
+) as Address;
+const DAO_ID = "test-dao";
+
+const createAccountPowerRow = (
+  overrides: Partial<AccountPowerInsert> = {},
+): AccountPowerInsert => ({
+  accountId: TEST_ACCOUNT_1,
+  daoId: DAO_ID,
+  votingPower: 1000n,
+  votesCount: 5,
+  proposalsCount: 2,
+  delegationsCount: 3,
+  lastVoteTimestamp: 0n,
+  ...overrides,
+});
+
+const createHistoryRow = (
+  overrides: Partial<VotingPowerHistoryInsert> = {},
+): VotingPowerHistoryInsert => ({
+  transactionHash:
+    "0xabc1230000000000000000000000000000000000000000000000000000000000",
+  daoId: DAO_ID,
+  accountId: TEST_ACCOUNT_1,
+  votingPower: 1000n,
+  delta: 200n,
+  deltaMod: 200n,
+  timestamp: 1700000000n,
+  logIndex: 0,
+  ...overrides,
+});
+
+// Base item for TEST_ACCOUNT_1 with no history (absoluteChange=0)
+const BASE_ACCOUNT_POWER_ITEM = {
+  accountId: TEST_ACCOUNT_1,
+  votingPower: "1000",
+  votesCount: 5,
+  proposalsCount: 2,
+  delegationsCount: 3,
+  variation: { absoluteChange: "0", percentageChange: "0.00" },
+};
+
+let client: PGlite;
+let db: Drizzle;
+let app: Hono;
+
+beforeAll(async () => {
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  (BigInt.prototype as any).toJSON = function () {
+    return this.toString();
   };
-}
+  client = new PGlite();
+  db = drizzle(client, { schema });
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  const { apply } = await pushSchema(schema, db as any);
+  await apply();
 
-class FakeVotingPowersRepository {
-  private items: DBAccountPowerWithVariation[] = [];
-  private totalCount = 0;
-  private singleAccount: DBAccountPowerWithVariation | null = null;
-  lastAccountId: Address | null = null;
-  lastFromDate: number | undefined;
-  lastToDate: number | undefined;
-
-  setData(items: DBAccountPowerWithVariation[], totalCount?: number) {
-    this.items = items;
-    this.totalCount = totalCount ?? items.length;
-  }
-
-  setSingleAccount(account: DBAccountPowerWithVariation) {
-    this.singleAccount = account;
-  }
-
-  async getVotingPowers(
-    _skip: number,
-    _limit: number,
-    _orderDirection: "asc" | "desc",
-    _orderBy:
-      | "votingPower"
-      | "delegationsCount"
-      | "variation"
-      | "signedVariation",
-    _amountFilter: AmountFilter,
-    _addresses: Address[],
-    _fromDate?: number,
-    _toDate?: number,
-  ): Promise<{
-    items: DBAccountPowerWithVariation[];
-    totalCount: number;
-  }> {
-    return { items: this.items, totalCount: this.totalCount };
-  }
-
-  async getVotingPowersByAccountId(
-    accountId: Address,
-    fromDate?: number,
-    toDate?: number,
-  ): Promise<DBAccountPowerWithVariation> {
-    this.lastAccountId = accountId;
-    this.lastFromDate = fromDate;
-    this.lastToDate = toDate;
-    if (this.singleAccount) return this.singleAccount;
-    return createAccountPower({
-      accountId,
-      votingPower: 0n,
-      votesCount: 0,
-      proposalsCount: 0,
-      delegationsCount: 0,
-      absoluteChange: 0n,
-      percentageChange: "0",
-    });
-  }
-
-  async getVotingPowerVariations(
-    _startTimestamp: number | undefined,
-    _endTimestamp: number | undefined,
-    _skip: number,
-    _limit: number,
-    _orderDirection: "asc" | "desc",
-    _addresses?: Address[],
-  ): Promise<DBVotingPowerVariation[]> {
-    return [];
-  }
-
-  async getVotingPowerVariationsByAccountId(
-    accountId: Address,
-    _startTimestamp: number | undefined,
-    _endTimestamp: number | undefined,
-  ): Promise<DBVotingPowerVariation> {
-    return {
-      accountId,
-      previousVotingPower: 0n,
-      currentVotingPower: 0n,
-      absoluteChange: 0n,
-      percentageChange: "0",
-    };
-  }
-}
-
-class FakeHistoricalVotingPowerRepository {
-  async getHistoricalVotingPowers(): Promise<
-    DBHistoricalVotingPowerWithRelations[]
-  > {
-    return [];
-  }
-
-  async getHistoricalVotingPowerCount(): Promise<number> {
-    return 0;
-  }
-}
-
-function createTestApp(service: VotingPowerService) {
-  const app = new Hono();
+  const repo = new VotingPowerRepository(db);
+  const service = new VotingPowerService(repo, repo);
+  app = new Hono();
   votingPowers(app, service);
-  return app;
-}
+});
+
+afterAll(async () => {
+  await client.close();
+});
+
+beforeEach(async () => {
+  await db.delete(votingPowerHistory);
+  await db.delete(accountPower);
+});
 
 describe("Voting Powers Controller", () => {
-  let fakeRepo: FakeVotingPowersRepository;
-  let service: VotingPowerService;
-  let app: ReturnType<typeof createTestApp>;
-
-  beforeEach(() => {
-    fakeRepo = new FakeVotingPowersRepository();
-    service = new VotingPowerService(
-      new FakeHistoricalVotingPowerRepository(),
-      fakeRepo,
-    );
-    app = createTestApp(service);
-  });
-
   describe("GET /voting-powers", () => {
     it("should return 200 with correct response structure including variation", async () => {
-      const account = createAccountPower({
-        absoluteChange: 200n,
-        percentageChange: "25",
-      });
-      fakeRepo.setData([account]);
+      await db
+        .insert(accountPower)
+        .values(createAccountPowerRow({ votingPower: 1200n }));
+      await db
+        .insert(votingPowerHistory)
+        .values(createHistoryRow({ delta: 200n }));
 
       const res = await app.request("/voting-powers");
 
       expect(res.status).toBe(200);
-      expect(await res.json()).toEqual({
+      const body = await res.json();
+      // absoluteChange=200, votingPower=1200 → prev=1000, pct=ROUND(200/1000*100,2)=20.00
+      expect(body).toEqual({
         items: [
           {
-            accountId: account.accountId,
-            votingPower: account.votingPower.toString(),
-            votesCount: account.votesCount,
-            proposalsCount: account.proposalsCount,
-            delegationsCount: account.delegationsCount,
-            variation: {
-              absoluteChange: "200",
-              percentageChange: "25",
-            },
+            accountId: TEST_ACCOUNT_1,
+            votingPower: "1200",
+            votesCount: 5,
+            proposalsCount: 2,
+            delegationsCount: 3,
+            variation: { absoluteChange: "200", percentageChange: "20.00" },
           },
         ],
         totalCount: 1,
@@ -177,8 +121,6 @@ describe("Voting Powers Controller", () => {
     });
 
     it("should return empty items when no data available", async () => {
-      fakeRepo.setData([]);
-
       const res = await app.request("/voting-powers");
 
       expect(res.status).toBe(200);
@@ -188,108 +130,149 @@ describe("Voting Powers Controller", () => {
       });
     });
 
-    it("should accept pagination query parameters", async () => {
-      fakeRepo.setData([createAccountPower()], 10);
-
-      const res = await app.request("/voting-powers?skip=2&limit=5");
-
-      expect(res.status).toBe(200);
-      const body = await res.json();
-      expect(body.totalCount).toBe(10);
-    });
-
-    it("should accept orderBy=delegationsCount", async () => {
-      const account = createAccountPower({ delegationsCount: 10 });
-      fakeRepo.setData([account]);
-
-      const res = await app.request("/voting-powers?orderBy=delegationsCount");
-
-      expect(res.status).toBe(200);
-      const body = await res.json();
-      expect(body.items).toHaveLength(1);
-      expect(body.items[0].delegationsCount).toBe(10);
-    });
-
-    it("should accept orderBy=variation", async () => {
-      const account = createAccountPower({
-        absoluteChange: 500n,
-        percentageChange: "50",
-      });
-      fakeRepo.setData([account]);
-
-      const res = await app.request("/voting-powers?orderBy=variation");
-
-      expect(res.status).toBe(200);
-      const body = await res.json();
-      expect(body.items).toHaveLength(1);
-      expect(body.items[0].variation.absoluteChange).toBe("500");
-    });
-
-    it("should accept orderBy=signedVariation", async () => {
-      const account = createAccountPower({
-        absoluteChange: -500n,
-        percentageChange: "-50",
-      });
-      fakeRepo.setData([account]);
-
-      const res = await app.request("/voting-powers?orderBy=signedVariation");
-
-      expect(res.status).toBe(200);
-      const body = await res.json();
-      expect(body.items).toHaveLength(1);
-      expect(body.items[0].variation.absoluteChange).toBe("-500");
-    });
-
-    it("should accept orderDirection=asc", async () => {
-      const account = createAccountPower();
-      fakeRepo.setData([account]);
-
-      const res = await app.request("/voting-powers?orderDirection=asc");
-
-      expect(res.status).toBe(200);
-      const body = await res.json();
-      expect(body.items).toHaveLength(1);
-      expect(body.items[0].accountId).toBe(account.accountId);
-    });
-
-    it("should return multiple items with variation data", async () => {
-      const testAccount1 = createAccountPower({
-        accountId: TEST_ACCOUNT_1,
-        votingPower: 2000n,
-        votesCount: 10,
-        absoluteChange: 500n,
-        percentageChange: "33.33",
-      });
-      const testAccount2 = createAccountPower({
-        accountId: TEST_ACCOUNT_2,
-        votingPower: 500n,
-        delegationsCount: 7,
-        absoluteChange: -100n,
-        percentageChange: "-16.67",
-      });
-      fakeRepo.setData([testAccount1, testAccount2]);
+    it("should return zero variation when no history exists", async () => {
+      await db.insert(accountPower).values(createAccountPowerRow());
 
       const res = await app.request("/voting-powers");
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.items).toHaveLength(2);
-      expect(body.items[0].accountId).toBe(TEST_ACCOUNT_1);
-      expect(body.items[0].variation).toEqual({
-        absoluteChange: "500",
-        percentageChange: "33.33",
+      expect(body).toEqual({ items: [BASE_ACCOUNT_POWER_ITEM], totalCount: 1 });
+    });
+
+    it("should accept pagination query parameters", async () => {
+      await db.insert(accountPower).values(createAccountPowerRow());
+
+      const res = await app.request("/voting-powers?skip=0&limit=5");
+
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body).toEqual({ items: [BASE_ACCOUNT_POWER_ITEM], totalCount: 1 });
+    });
+
+    it("should accept orderBy=delegationsCount", async () => {
+      await db
+        .insert(accountPower)
+        .values(createAccountPowerRow({ delegationsCount: 10 }));
+
+      const res = await app.request("/voting-powers?orderBy=delegationsCount");
+
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body).toEqual({
+        items: [
+          {
+            ...BASE_ACCOUNT_POWER_ITEM,
+            delegationsCount: 10,
+          },
+        ],
+        totalCount: 1,
       });
-      expect(body.items[1].accountId).toBe(TEST_ACCOUNT_2);
-      expect(body.items[1].variation).toEqual({
-        absoluteChange: "-100",
-        percentageChange: "-16.67",
+    });
+
+    it("should accept orderBy=variation", async () => {
+      await db.insert(accountPower).values(createAccountPowerRow());
+      await db
+        .insert(votingPowerHistory)
+        .values(createHistoryRow({ delta: 500n }));
+
+      const res = await app.request("/voting-powers?orderBy=variation");
+
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      // absoluteChange=500, votingPower=1000 → prev=500, pct=ROUND(500/500*100,2)=100.00
+      expect(body).toEqual({
+        items: [
+          {
+            ...BASE_ACCOUNT_POWER_ITEM,
+            variation: { absoluteChange: "500", percentageChange: "100.00" },
+          },
+        ],
+        totalCount: 1,
       });
-      expect(body.totalCount).toBe(2);
+    });
+
+    it("should accept orderBy=signedVariation", async () => {
+      await db.insert(accountPower).values(createAccountPowerRow());
+      await db
+        .insert(votingPowerHistory)
+        .values(createHistoryRow({ delta: -500n, deltaMod: 500n }));
+
+      const res = await app.request("/voting-powers?orderBy=signedVariation");
+
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      // absoluteChange=-500, votingPower=1000 → prev=1500, pct=ROUND(-500/1500*100,2)=-33.33
+      expect(body).toEqual({
+        items: [
+          {
+            ...BASE_ACCOUNT_POWER_ITEM,
+            variation: { absoluteChange: "-500", percentageChange: "-33.33" },
+          },
+        ],
+        totalCount: 1,
+      });
+    });
+
+    it("should accept orderDirection=asc", async () => {
+      await db.insert(accountPower).values(createAccountPowerRow());
+
+      const res = await app.request("/voting-powers?orderDirection=asc");
+
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body).toEqual({ items: [BASE_ACCOUNT_POWER_ITEM], totalCount: 1 });
+    });
+
+    it("should return multiple items with variation data", async () => {
+      await db.insert(accountPower).values([
+        createAccountPowerRow({
+          accountId: TEST_ACCOUNT_1,
+          votingPower: 2000n,
+          votesCount: 10,
+        }),
+        createAccountPowerRow({
+          accountId: TEST_ACCOUNT_2,
+          votingPower: 500n,
+          delegationsCount: 7,
+        }),
+      ]);
+
+      const res = await app.request("/voting-powers");
+
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      // Default order: votingPower desc → ACCOUNT_1 (2000) first, ACCOUNT_2 (500) second
+      expect(body).toEqual({
+        items: [
+          {
+            accountId: TEST_ACCOUNT_1,
+            votingPower: "2000",
+            votesCount: 10,
+            proposalsCount: 2,
+            delegationsCount: 3,
+            variation: { absoluteChange: "0", percentageChange: "0.00" },
+          },
+          {
+            accountId: TEST_ACCOUNT_2,
+            votingPower: "500",
+            votesCount: 5,
+            proposalsCount: 2,
+            delegationsCount: 7,
+            variation: { absoluteChange: "0", percentageChange: "0.00" },
+          },
+        ],
+        totalCount: 2,
+      });
     });
 
     it("should accept address filtering", async () => {
-      const account = createAccountPower({ accountId: TEST_ACCOUNT_1 });
-      fakeRepo.setData([account]);
+      await db
+        .insert(accountPower)
+        .values([
+          createAccountPowerRow({ accountId: TEST_ACCOUNT_1 }),
+          createAccountPowerRow({ accountId: TEST_ACCOUNT_2 }),
+        ]);
 
       const res = await app.request(
         `/voting-powers?addresses=${TEST_ACCOUNT_1}`,
@@ -297,13 +280,11 @@ describe("Voting Powers Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.items).toHaveLength(1);
-      expect(body.items[0].accountId).toBe(TEST_ACCOUNT_1);
+      expect(body).toEqual({ items: [BASE_ACCOUNT_POWER_ITEM], totalCount: 1 });
     });
 
     it("should accept fromDate and toDate query parameters", async () => {
-      const account = createAccountPower();
-      fakeRepo.setData([account]);
+      await db.insert(accountPower).values(createAccountPowerRow());
 
       const res = await app.request(
         "/voting-powers?fromDate=1700000000&toDate=1701000000",
@@ -311,8 +292,7 @@ describe("Voting Powers Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.items).toHaveLength(1);
-      expect(body.totalCount).toBe(1);
+      expect(body).toEqual({ items: [BASE_ACCOUNT_POWER_ITEM], totalCount: 1 });
     });
 
     it("should return 400 for limit exceeding 100", async () => {
@@ -332,47 +312,32 @@ describe("Voting Powers Controller", () => {
 
       expect(res.status).toBe(400);
     });
-
-    it("should return zero variation for accounts with no changes", async () => {
-      const account = createAccountPower({
-        absoluteChange: 0n,
-        percentageChange: "0",
-      });
-      fakeRepo.setData([account]);
-
-      const res = await app.request("/voting-powers");
-
-      expect(res.status).toBe(200);
-      const body = await res.json();
-      expect(body.items[0].variation).toEqual({
-        absoluteChange: "0",
-        percentageChange: "0",
-      });
-    });
   });
 
   describe("GET /voting-powers/{accountId}", () => {
     it("should return account power data with variation", async () => {
-      const account = createAccountPower({
-        accountId: TEST_ACCOUNT_1,
-        absoluteChange: 300n,
-        percentageChange: "42.86",
-      });
-      fakeRepo.setSingleAccount(account);
+      await db.insert(accountPower).values(
+        createAccountPowerRow({
+          accountId: TEST_ACCOUNT_1,
+          votingPower: 1000n,
+        }),
+      );
+      await db
+        .insert(votingPowerHistory)
+        .values(createHistoryRow({ delta: 300n }));
 
       const res = await app.request(`/voting-powers/${TEST_ACCOUNT_1}`);
 
       expect(res.status).toBe(200);
-      expect(await res.json()).toEqual({
-        accountId: account.accountId,
-        votingPower: account.votingPower.toString(),
-        votesCount: account.votesCount,
-        proposalsCount: account.proposalsCount,
-        delegationsCount: account.delegationsCount,
-        variation: {
-          absoluteChange: "300",
-          percentageChange: "42.86",
-        },
+      const body = await res.json();
+      // absoluteChange=300, votingPower=1000 → prev=700, pct=ROUND(300/700*100,2)=42.86
+      expect(body).toEqual({
+        accountId: TEST_ACCOUNT_1,
+        votingPower: "1000",
+        votesCount: 5,
+        proposalsCount: 2,
+        delegationsCount: 3,
+        variation: { absoluteChange: "300", percentageChange: "42.86" },
       });
     });
 
@@ -388,37 +353,21 @@ describe("Voting Powers Controller", () => {
       });
     });
 
-    it("should return negative variation for account that lost voting power", async () => {
-      const account = createAccountPower({
-        accountId: TEST_ACCOUNT_1,
-        votingPower: 500n,
-        absoluteChange: -300n,
-        percentageChange: "-37.5",
-      });
-      fakeRepo.setSingleAccount(account);
-
-      const res = await app.request(`/voting-powers/${TEST_ACCOUNT_1}`);
-
-      expect(res.status).toBe(200);
-      const body = await res.json();
-      expect(body.variation).toEqual({
-        absoluteChange: "-300",
-        percentageChange: "-37.5",
-      });
-    });
-
-    it("should pass fromDate and toDate query parameters", async () => {
-      const account = createAccountPower({ accountId: TEST_ACCOUNT_1 });
-      fakeRepo.setSingleAccount(account);
+    it("should accept fromDate and toDate query parameters", async () => {
+      await db
+        .insert(accountPower)
+        .values(createAccountPowerRow({ accountId: TEST_ACCOUNT_1 }));
 
       const res = await app.request(
         `/voting-powers/${TEST_ACCOUNT_1}?fromDate=1700000000&toDate=1701000000`,
       );
 
       expect(res.status).toBe(200);
-      expect(fakeRepo.lastAccountId).toBe(TEST_ACCOUNT_1);
-      expect(fakeRepo.lastFromDate).toBe(1700000000);
-      expect(fakeRepo.lastToDate).toBe(1701000000);
+      const body = await res.json();
+      expect(body).toEqual({
+        ...BASE_ACCOUNT_POWER_ITEM,
+        variation: { absoluteChange: "0", percentageChange: "0.00" },
+      });
     });
 
     it("should return 400 for invalid address format", async () => {

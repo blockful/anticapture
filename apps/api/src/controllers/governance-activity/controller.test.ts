@@ -12,6 +12,7 @@ import {
   vi,
 } from "vitest";
 
+import type { Drizzle } from "@/database";
 import * as schema from "@/database/schema";
 import {
   accountPower,
@@ -53,7 +54,7 @@ const createProposal = (
 
 describe("GovernanceActivity Controller", () => {
   let client: PGlite;
-  let db: ReturnType<typeof drizzle<typeof schema>>;
+  let db: Drizzle;
   let erc20App: Hono;
   let erc721App: Hono;
 
@@ -114,7 +115,7 @@ describe("GovernanceActivity Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.activeSupply).toBe("1000000000000000000");
+      expect(body).toEqual({ activeSupply: "1000000000000000000" });
     });
 
     it("should return 400 for invalid days param", async () => {
@@ -135,7 +136,7 @@ describe("GovernanceActivity Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.activeSupply).toBe("500");
+      expect(body).toEqual({ activeSupply: "500" });
     });
   });
 
@@ -145,9 +146,11 @@ describe("GovernanceActivity Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(Number(body.currentProposalsLaunched)).toBe(0);
-      expect(Number(body.oldProposalsLaunched)).toBe(0);
-      expect(body.changeRate).toBe(0);
+      expect(body).toEqual({
+        currentProposalsLaunched: 0,
+        oldProposalsLaunched: 0,
+        changeRate: 0,
+      });
     });
 
     it("should return 200 with data and calculated changeRate", async () => {
@@ -169,9 +172,11 @@ describe("GovernanceActivity Controller", () => {
       // currentProposalsLaunched = 15 (all proposals)
       // oldProposalsLaunched = 5
       // changeRate = 15/5 - 1 = 2
-      expect(Number(body.currentProposalsLaunched)).toBe(15);
-      expect(Number(body.oldProposalsLaunched)).toBe(5);
-      expect(body.changeRate).toBe(2);
+      expect(body).toEqual({
+        currentProposalsLaunched: 15,
+        oldProposalsLaunched: 5,
+        changeRate: 2,
+      });
     });
 
     it("should return changeRate=0 when oldProposalsLaunched is 0", async () => {
@@ -183,7 +188,11 @@ describe("GovernanceActivity Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.changeRate).toBe(0);
+      expect(body).toEqual({
+        currentProposalsLaunched: 1,
+        oldProposalsLaunched: 0,
+        changeRate: 0,
+      });
     });
   });
 
@@ -193,9 +202,7 @@ describe("GovernanceActivity Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(Number(body.currentVotes)).toBe(0);
-      expect(Number(body.oldVotes)).toBe(0);
-      expect(body.changeRate).toBe(0);
+      expect(body).toEqual({ currentVotes: 0, oldVotes: 0, changeRate: 0 });
     });
 
     it("should return 200 with data and calculated changeRate", async () => {
@@ -235,9 +242,7 @@ describe("GovernanceActivity Controller", () => {
       const body = await res.json();
       // currentVotes = 3 (all), oldVotes = 1
       // changeRate = 3/1 - 1 = 2
-      expect(Number(body.currentVotes)).toBe(3);
-      expect(Number(body.oldVotes)).toBe(1);
-      expect(body.changeRate).toBe(2);
+      expect(body).toEqual({ currentVotes: 3, oldVotes: 1, changeRate: 2 });
     });
   });
 
@@ -247,7 +252,11 @@ describe("GovernanceActivity Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.changeRate).toBe(0);
+      expect(body).toEqual({
+        currentAverageTurnout: expect.anything(),
+        oldAverageTurnout: expect.anything(),
+        changeRate: 0,
+      });
     });
 
     it("should return 200 with ERC20 formatted values and changeRate", async () => {
@@ -255,6 +264,7 @@ describe("GovernanceActivity Controller", () => {
         createProposal({
           id: "current-1",
           timestamp: RECENT_TS,
+          status: "SUCCEEDED",
           forVotes: 2000000000000000000n,
           againstVotes: 1000000000000000000n,
           abstainVotes: 500000000000000000n,
@@ -262,6 +272,7 @@ describe("GovernanceActivity Controller", () => {
         createProposal({
           id: "old-1",
           timestamp: OLD_TS,
+          status: "SUCCEEDED",
           forVotes: 1000000000000000000n,
           againstVotes: 500000000000000000n,
           abstainVotes: 250000000000000000n,
@@ -272,20 +283,22 @@ describe("GovernanceActivity Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(typeof body.currentAverageTurnout).toBe("string");
-      expect(typeof body.oldAverageTurnout).toBe("string");
-      // current: AVG(3.5e18) = 3.5e18 → formatEther = "3.5"
-      // old: AVG(1.75e18) = 1.75e18 → formatEther = "1.75"
+      // current: AVG(3.5e18) = 3.5e18
+      // old: AVG(1.75e18) = 1.75e18
       // changeRate = 3.5 / 1.75 - 1 = 1
-      expect(body.changeRate).toBe(1);
+      expect(body).toEqual({
+        currentAverageTurnout: "3500000000000000000",
+        oldAverageTurnout: "1750000000000000000",
+        changeRate: 1,
+      });
     });
 
     it("should exclude CANCELED proposals from average turnout", async () => {
       await db.insert(proposalsOnchain).values([
         createProposal({
-          id: "active-1",
+          id: "succeeded-1",
           timestamp: RECENT_TS,
-          status: "ACTIVE",
+          status: "SUCCEEDED",
           forVotes: 100n,
           againstVotes: 50n,
           abstainVotes: 25n,
@@ -304,8 +317,12 @@ describe("GovernanceActivity Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      // Only ACTIVE counted: AVG(100 + 50 + 25) = 175
-      expect(Number(body.currentAverageTurnout)).toBe(175);
+      // Only SUCCEEDED counted: AVG(100 + 50 + 25) = 175
+      expect(body).toEqual({
+        currentAverageTurnout: "175.0000000000000000",
+        oldAverageTurnout: "0",
+        changeRate: 0,
+      });
     });
   });
 
@@ -315,6 +332,7 @@ describe("GovernanceActivity Controller", () => {
         createProposal({
           id: "current-1",
           timestamp: RECENT_TS,
+          status: "SUCCEEDED",
           forVotes: 30n,
           againstVotes: 10n,
           abstainVotes: 5n,
@@ -322,6 +340,7 @@ describe("GovernanceActivity Controller", () => {
         createProposal({
           id: "old-1",
           timestamp: OLD_TS,
+          status: "SUCCEEDED",
           forVotes: 15n,
           againstVotes: 5n,
           abstainVotes: 2n,
@@ -334,8 +353,11 @@ describe("GovernanceActivity Controller", () => {
       const body = await res.json();
       // current: AVG(30 + 10 + 5) = 45 → "45"
       // old: AVG(15 + 5 + 2) = 22 → "22"
-      expect(body.currentAverageTurnout).toBe("45");
-      expect(body.oldAverageTurnout).toBe("22");
+      expect(body).toEqual({
+        currentAverageTurnout: "45",
+        oldAverageTurnout: "22",
+        changeRate: 45 / 22 - 1,
+      });
     });
   });
 });

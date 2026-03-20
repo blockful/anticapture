@@ -3,6 +3,7 @@ import { PGlite } from "@electric-sql/pglite";
 import { pushSchema } from "drizzle-kit/api";
 import { drizzle } from "drizzle-orm/pglite";
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
+import type { Drizzle } from "@/database";
 import * as schema from "@/database/schema";
 import { daoMetricsDayBucket } from "@/database/schema";
 import { MetricTypesEnum } from "@/lib/constants";
@@ -31,7 +32,7 @@ const createMetric = (overrides: Partial<MetricInsert> = {}): MetricInsert => ({
 
 describe("TokenMetrics Controller", () => {
   let client: PGlite;
-  let db: ReturnType<typeof drizzle<typeof schema>>;
+  let db: Drizzle;
   let app: Hono;
 
   beforeAll(async () => {
@@ -101,9 +102,19 @@ describe("TokenMetrics Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.items).toHaveLength(1);
-      expect(body.items[0]).toMatchObject({
-        high: "1000000000000000000",
+      expect(body).toEqual({
+        items: [
+          {
+            date: "1699920000",
+            high: "1000000000000000000",
+            volume: "500000000000000000",
+          },
+        ],
+        pageInfo: {
+          hasNextPage: false,
+          startDate: "1699920000",
+          endDate: "1699920000",
+        },
       });
     });
 
@@ -114,10 +125,14 @@ describe("TokenMetrics Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body).toHaveProperty("pageInfo");
-      expect(body.pageInfo).toHaveProperty("hasNextPage");
-      expect(body.pageInfo).toHaveProperty("startDate");
-      expect(body.pageInfo).toHaveProperty("endDate");
+      expect(body).toEqual({
+        items: [],
+        pageInfo: {
+          hasNextPage: false,
+          startDate: null,
+          endDate: null,
+        },
+      });
     });
 
     it("should accept optional orderDirection and limit ", async () => {

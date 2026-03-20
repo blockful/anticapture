@@ -1,43 +1,41 @@
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
+import { PGlite } from "@electric-sql/pglite";
+import { pushSchema } from "drizzle-kit/api";
+import { drizzle } from "drizzle-orm/pglite";
 import { Address, getAddress } from "viem";
-import { describe, it, expect, beforeEach } from "vitest";
-
-import { DBDelegation } from "@/mappers";
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
+import type { Drizzle } from "@/database";
+import * as schema from "@/database/schema";
+import { delegation } from "@/database/schema";
+import { HistoricalDelegationsRepository } from "@/repositories/delegations/historical";
 import { HistoricalDelegationsService } from "@/services/delegations";
-
 import { historicalDelegations } from "./historical";
 
-class FakeHistoricalDelegationsRepository {
-  private items: DBDelegation[] = [];
-  private count = 0;
+type DelegationInsert = typeof delegation.$inferInsert;
 
-  setData(items: DBDelegation[], totalCount?: number) {
-    this.items = items;
-    this.count = totalCount ?? items.length;
-  }
+// VALID_ADDRESS is used as the delegatorAccountId (the address we query history for)
+const VALID_ADDRESS = getAddress(
+  "0x1234567890123456789012345678901234567890",
+) as Address;
+const DELEGATE_ADDRESS = getAddress(
+  "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+) as Address;
+const SECOND_DELEGATE = getAddress(
+  "0x1111111111111111111111111111111111111111",
+);
+const DAO_ID = "uni";
+const TX_HASH =
+  "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef";
+const TX_HASH_2 =
+  "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbee2";
 
-  async getHistoricalDelegations(
-    _address: Address,
-    _orderDirection: "asc" | "desc",
-    _skip: number,
-    _limit: number,
-    _fromValue: bigint | undefined,
-    _toValue: bigint | undefined,
-    _delegateAddressIn: Address[] | undefined,
-  ): Promise<{ items: DBDelegation[]; totalCount: number }> {
-    return {
-      items: this.items,
-      totalCount: this.count,
-    };
-  }
-}
-
-const createMockDelegationItem = (
-  overrides: Partial<DBDelegation> = {},
-): DBDelegation => ({
-  daoId: "uni",
-  delegatorAccountId: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
-  delegateAccountId: "0x1234567890123456789012345678901234567890",
+const createDelegationRow = (
+  overrides: Partial<DelegationInsert> = {},
+): DelegationInsert => ({
+  transactionHash: TX_HASH,
+  daoId: DAO_ID,
+  delegatorAccountId: VALID_ADDRESS,
+  delegateAccountId: DELEGATE_ADDRESS,
   delegatedValue: 1000000000000000000n,
   previousDelegate: null,
   timestamp: 1700000000n,
@@ -46,34 +44,42 @@ const createMockDelegationItem = (
   isDex: false,
   isLending: false,
   isTotal: false,
-  transactionHash:
-    "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
   ...overrides,
 });
 
-function createTestApp(service: HistoricalDelegationsService) {
-  const app = new Hono();
-  historicalDelegations(app, service);
-  return app;
-}
+let client: PGlite;
+let db: Drizzle;
+let app: Hono;
 
-const VALID_ADDRESS = "0x1234567890123456789012345678901234567890";
+beforeAll(async () => {
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  (BigInt.prototype as any).toJSON = function () {
+    return this.toString();
+  };
+  client = new PGlite();
+  db = drizzle(client, { schema });
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  const { apply } = await pushSchema(schema, db as any);
+  await apply();
+
+  const repo = new HistoricalDelegationsRepository(db);
+  const service = new HistoricalDelegationsService(repo);
+  app = new Hono();
+  historicalDelegations(app, service);
+});
+
+afterAll(async () => {
+  await client.close();
+});
+
+beforeEach(async () => {
+  await db.delete(delegation);
+});
 
 describe("Historical Delegations Controller", () => {
-  let fakeRepo: FakeHistoricalDelegationsRepository;
-  let service: HistoricalDelegationsService;
-  let app: ReturnType<typeof createTestApp>;
-
-  beforeEach(() => {
-    fakeRepo = new FakeHistoricalDelegationsRepository();
-    service = new HistoricalDelegationsService(fakeRepo);
-    app = createTestApp(service);
-  });
-
-  describe(`GET /accounts/:address/delegations/historical`, () => {
+  describe("GET /accounts/:address/delegations/historical", () => {
     it("should return 200 with correct response shape for a valid address", async () => {
-      const item = createMockDelegationItem();
-      fakeRepo.setData([item]);
+      await db.insert(delegation).values(createDelegationRow());
 
       const res = await app.request(
         `/accounts/${VALID_ADDRESS}/delegations/historical`,
@@ -84,11 +90,11 @@ describe("Historical Delegations Controller", () => {
       expect(body).toEqual({
         items: [
           {
-            delegatorAddress: getAddress(item.delegatorAccountId),
-            delegateAddress: getAddress(item.delegateAccountId),
-            amount: item.delegatedValue.toString(),
-            timestamp: item.timestamp.toString(),
-            transactionHash: item.transactionHash,
+            delegatorAddress: getAddress(VALID_ADDRESS),
+            delegateAddress: getAddress(DELEGATE_ADDRESS),
+            amount: "1000000000000000000",
+            timestamp: "1700000000",
+            transactionHash: TX_HASH,
           },
         ],
         totalCount: 1,
@@ -96,8 +102,6 @@ describe("Historical Delegations Controller", () => {
     });
 
     it("should return 200 with empty items and totalCount 0 when no delegations exist", async () => {
-      fakeRepo.setData([]);
-
       const res = await app.request(
         `/accounts/${VALID_ADDRESS}/delegations/historical`,
       );
@@ -111,16 +115,23 @@ describe("Historical Delegations Controller", () => {
     });
 
     it("should return 200 with multiple delegations", async () => {
-      fakeRepo.setData([
-        createMockDelegationItem({
-          delegatorAccountId: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+      await db.insert(delegation).values([
+        createDelegationRow({
+          delegatorAccountId: VALID_ADDRESS,
           delegatedValue: 1000000000000000000n,
           timestamp: 1700000000n,
+          transactionHash:
+            "0xaabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccdd",
         }),
-        createMockDelegationItem({
-          delegatorAccountId: "0x1111111111111111111111111111111111111111",
+        createDelegationRow({
+          delegatorAccountId: VALID_ADDRESS,
           delegatedValue: 2000000000000000000n,
           timestamp: 1700001000n,
+          delegateAccountId: getAddress(
+            "0x1111111111111111111111111111111111111111",
+          ),
+          transactionHash:
+            "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
         }),
       ]);
 
@@ -130,43 +141,62 @@ describe("Historical Delegations Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.items).toHaveLength(2);
-      expect(body.totalCount).toBe(2);
-    });
-
-    it("should return totalCount from repository even when paginated", async () => {
-      fakeRepo.setData([createMockDelegationItem()], 50);
-
-      const res = await app.request(
-        `/accounts/${VALID_ADDRESS}/delegations/historical?skip=0&limit=1`,
-      );
-
-      expect(res.status).toBe(200);
-      const body = await res.json();
-      expect(body.totalCount).toBe(50);
-      expect(body.items).toHaveLength(1);
+      expect(body).toEqual({
+        items: [
+          {
+            delegatorAddress: getAddress(VALID_ADDRESS),
+            delegateAddress: getAddress(
+              "0x1111111111111111111111111111111111111111",
+            ),
+            amount: "2000000000000000000",
+            timestamp: "1700001000",
+            transactionHash:
+              "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          },
+          {
+            delegatorAddress: getAddress(VALID_ADDRESS),
+            delegateAddress: getAddress(DELEGATE_ADDRESS),
+            amount: "1000000000000000000",
+            timestamp: "1700000000",
+            transactionHash:
+              "0xaabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccdd",
+          },
+        ],
+        totalCount: 2,
+      });
     });
 
     it("should accept skip and limit query parameters", async () => {
-      fakeRepo.setData([createMockDelegationItem()], 10);
+      await db.insert(delegation).values(createDelegationRow());
 
       const res = await app.request(
-        `/accounts/${VALID_ADDRESS}/delegations/historical?skip=5&limit=3`,
+        `/accounts/${VALID_ADDRESS}/delegations/historical?skip=0&limit=3`,
       );
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.totalCount).toBe(10);
+      expect(body).toEqual({
+        items: [
+          {
+            delegatorAddress: getAddress(VALID_ADDRESS),
+            delegateAddress: getAddress(DELEGATE_ADDRESS),
+            amount: "1000000000000000000",
+            timestamp: "1700000000",
+            transactionHash: TX_HASH,
+          },
+        ],
+        totalCount: 1,
+      });
     });
 
     it("should use default skip=0 and limit=10 when not provided", async () => {
-      fakeRepo.setData([]);
-
       const res = await app.request(
         `/accounts/${VALID_ADDRESS}/delegations/historical`,
       );
 
       expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body).toEqual({ items: [], totalCount: 0 });
     });
 
     it("should return 400 for an invalid address", async () => {
@@ -193,44 +223,40 @@ describe("Historical Delegations Controller", () => {
       expect(res.status).toBe(400);
     });
 
-    it("should checksum the address from the path parameter", async () => {
-      fakeRepo.setData([createMockDelegationItem()]);
-      const lowercaseAddress = VALID_ADDRESS.toLowerCase();
-
-      const res = await app.request(
-        `/accounts/${lowercaseAddress}/delegations/historical`,
-      );
-
-      expect(res.status).toBe(200);
-    });
-
-    it("should serialize amount and timestamp as strings in response items", async () => {
-      fakeRepo.setData([
-        createMockDelegationItem({
-          delegatedValue: 999999999999999999n,
-          timestamp: 1234567890n,
+    it("should accept orderDirection query parameter", async () => {
+      await db.insert(delegation).values([
+        createDelegationRow({ timestamp: 1700000000n }),
+        createDelegationRow({
+          transactionHash: TX_HASH_2,
+          timestamp: 1700001000n,
         }),
       ]);
-
-      const res = await app.request(
-        `/accounts/${VALID_ADDRESS}/delegations/historical`,
-      );
-      const body = await res.json();
-
-      expect(typeof body.items[0]?.amount).toBe("string");
-      expect(typeof body.items[0]?.timestamp).toBe("string");
-      expect(body.items[0]?.amount).toBe("999999999999999999");
-      expect(body.items[0]?.timestamp).toBe("1234567890");
-    });
-
-    it("should accept orderDirection query parameter", async () => {
-      fakeRepo.setData([createMockDelegationItem()]);
 
       const res = await app.request(
         `/accounts/${VALID_ADDRESS}/delegations/historical?orderDirection=asc`,
       );
 
       expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body).toEqual({
+        items: [
+          {
+            delegatorAddress: getAddress(VALID_ADDRESS),
+            delegateAddress: getAddress(DELEGATE_ADDRESS),
+            amount: "1000000000000000000",
+            timestamp: "1700000000",
+            transactionHash: TX_HASH,
+          },
+          {
+            delegatorAddress: getAddress(VALID_ADDRESS),
+            delegateAddress: getAddress(DELEGATE_ADDRESS),
+            amount: "1000000000000000000",
+            timestamp: "1700001000",
+            transactionHash: TX_HASH_2,
+          },
+        ],
+        totalCount: 2,
+      });
     });
 
     it("should return 400 for an invalid orderDirection value", async () => {
@@ -242,23 +268,67 @@ describe("Historical Delegations Controller", () => {
     });
 
     it("should accept fromValue and toValue query parameters", async () => {
-      fakeRepo.setData([createMockDelegationItem()]);
+      // fromValue and toValue filter by timestamp, not delegatedValue
+      // row 1: timestamp=1700000000 is within [1699000000, 1700500000]
+      // row 2: timestamp=1701000000 is outside [1699000000, 1700500000]
+      await db.insert(delegation).values([
+        createDelegationRow({ timestamp: 1700000000n }),
+        createDelegationRow({
+          transactionHash: TX_HASH_2,
+          timestamp: 1701000000n,
+        }),
+      ]);
 
       const res = await app.request(
-        `/accounts/${VALID_ADDRESS}/delegations/historical?fromValue=100&toValue=1000`,
+        `/accounts/${VALID_ADDRESS}/delegations/historical?fromValue=1699000000&toValue=1700500000`,
       );
 
       expect(res.status).toBe(200);
+      const body = await res.json();
+      // Only the row with timestamp=1700000000 is within the range
+      expect(body).toEqual({
+        items: [
+          {
+            delegatorAddress: getAddress(VALID_ADDRESS),
+            delegateAddress: getAddress(DELEGATE_ADDRESS),
+            amount: "1000000000000000000",
+            timestamp: "1700000000",
+            transactionHash: TX_HASH,
+          },
+        ],
+        totalCount: 1,
+      });
     });
 
     it("should accept a single delegateAddressIn query parameter", async () => {
-      fakeRepo.setData([createMockDelegationItem()]);
+      // Insert 2 rows with different delegates; filter by DELEGATE_ADDRESS
+      await db.insert(delegation).values([
+        createDelegationRow({ delegateAccountId: DELEGATE_ADDRESS }),
+        createDelegationRow({
+          transactionHash: TX_HASH_2,
+          delegateAccountId: SECOND_DELEGATE,
+        }),
+      ]);
 
       const res = await app.request(
-        `/accounts/${VALID_ADDRESS}/delegations/historical?delegateAddressIn=${VALID_ADDRESS}`,
+        `/accounts/${VALID_ADDRESS}/delegations/historical?delegateAddressIn=${DELEGATE_ADDRESS}`,
       );
 
       expect(res.status).toBe(200);
+      const body = await res.json();
+      // Only the row with delegateAccountId=DELEGATE_ADDRESS is returned
+      expect(body).toEqual({
+        items: [
+          {
+            delegatorAddress: getAddress(VALID_ADDRESS),
+            delegateAddress: getAddress(DELEGATE_ADDRESS),
+            amount: "1000000000000000000",
+            timestamp: "1700000000",
+            transactionHash: TX_HASH,
+          },
+        ],
+        totalCount: 1,
+      });
     });
 
     it("should return 400 for an invalid delegateAddressIn address", async () => {

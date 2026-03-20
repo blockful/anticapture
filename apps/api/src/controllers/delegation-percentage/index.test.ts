@@ -3,6 +3,7 @@ import { PGlite } from "@electric-sql/pglite";
 import { pushSchema } from "drizzle-kit/api";
 import { drizzle } from "drizzle-orm/pglite";
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
+import type { Drizzle } from "@/database";
 import * as schema from "@/database/schema";
 import { daoMetricsDayBucket } from "@/database/schema";
 import { MetricTypesEnum } from "@/lib/constants";
@@ -31,7 +32,7 @@ const createMetric = (overrides: Partial<MetricInsert> = {}): MetricInsert => ({
 
 describe("DelegationPercentage Controller", () => {
   let client: PGlite;
-  let db: ReturnType<typeof drizzle<typeof schema>>;
+  let db: Drizzle;
   let app: Hono;
 
   beforeAll(async () => {
@@ -97,8 +98,15 @@ describe("DelegationPercentage Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.items).toHaveLength(1);
-      expect(body.items[0].high).toBe("50.00");
+      expect(body).toEqual({
+        items: [{ date: "1699920000", high: "50.00" }],
+        totalCount: 1,
+        pageInfo: {
+          hasNextPage: false,
+          startDate: "1699920000",
+          endDate: "1699920000",
+        },
+      });
     });
 
     it("should have pageInfo shape in response", async () => {
@@ -106,18 +114,59 @@ describe("DelegationPercentage Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body).toHaveProperty("pageInfo");
-      expect(body.pageInfo).toHaveProperty("hasNextPage");
-      expect(body.pageInfo).toHaveProperty("startDate");
-      expect(body.pageInfo).toHaveProperty("endDate");
+      expect(body).toEqual({
+        items: [],
+        totalCount: 0,
+        pageInfo: {
+          hasNextPage: false,
+          startDate: null,
+          endDate: null,
+        },
+      });
     });
 
     it("should accept orderDirection and limit", async () => {
+      const DATE_2 = TEST_DATE + 86400n;
+
+      await db.insert(daoMetricsDayBucket).values([
+        createMetric({
+          date: TEST_DATE,
+          metricType: MetricTypesEnum.DELEGATED_SUPPLY,
+          high: 500n,
+        }),
+        createMetric({
+          date: TEST_DATE,
+          metricType: MetricTypesEnum.TOTAL_SUPPLY,
+          high: 1000n,
+        }),
+        createMetric({
+          date: DATE_2,
+          metricType: MetricTypesEnum.DELEGATED_SUPPLY,
+          high: 300n,
+        }),
+        createMetric({
+          date: DATE_2,
+          metricType: MetricTypesEnum.TOTAL_SUPPLY,
+          high: 1000n,
+        }),
+      ]);
+
       const res = await app.request(
-        "/delegation-percentage?orderDirection=desc&limit=30",
+        `/delegation-percentage?orderDirection=desc&limit=1&endDate=${DATE_2}`,
       );
 
       expect(res.status).toBe(200);
+      const body = await res.json();
+      // DATE_2 is newer so desc order returns it first; limit=1 from 2 total dates
+      expect(body).toEqual({
+        items: [{ date: String(DATE_2), high: "30.00" }],
+        totalCount: 1,
+        pageInfo: {
+          hasNextPage: true,
+          startDate: String(DATE_2),
+          endDate: String(DATE_2),
+        },
+      });
     });
   });
 });

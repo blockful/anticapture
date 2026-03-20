@@ -3,6 +3,7 @@ import { PGlite } from "@electric-sql/pglite";
 import { pushSchema } from "drizzle-kit/api";
 import { drizzle } from "drizzle-orm/pglite";
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
+import type { Drizzle } from "@/database";
 import * as schema from "@/database/schema";
 import { daoMetricsDayBucket } from "@/database/schema";
 import { MetricTypesEnum } from "@/lib/constants";
@@ -29,7 +30,7 @@ const createMetric = (overrides: Partial<MetricInsert> = {}): MetricInsert => ({
 
 describe("lastUpdate Controller", () => {
   let client: PGlite;
-  let db: ReturnType<typeof drizzle<typeof schema>>;
+  let db: Drizzle;
   let app: Hono;
 
   beforeAll(async () => {
@@ -74,11 +75,7 @@ describe("lastUpdate Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(typeof body.lastUpdate).toBe("string");
-      // Verify it corresponds to the expected timestamp
-      expect(new Date(body.lastUpdate).getTime()).toBe(
-        Number(expectedTimestamp) * 1000,
-      );
+      expect(body).toEqual({ lastUpdate: "2023-11-14T22:13:20.000Z" });
     });
 
     it("should return 200 with lastUpdate for attack_profitability when DELEGATED_SUPPLY data exists", async () => {
@@ -95,7 +92,7 @@ describe("lastUpdate Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(typeof body.lastUpdate).toBe("string");
+      expect(body).toEqual({ lastUpdate: "2023-11-14T22:13:20.000Z" });
     });
 
     it("should return 200 with lastUpdate for token_distribution when DELEGATED_SUPPLY data exists", async () => {
@@ -112,7 +109,7 @@ describe("lastUpdate Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(typeof body.lastUpdate).toBe("string");
+      expect(body).toEqual({ lastUpdate: "2023-11-14T22:13:20.000Z" });
     });
 
     it("should return 400 for an invalid chart param", async () => {
@@ -149,9 +146,7 @@ describe("lastUpdate Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      // Should correspond to the more recent timestamp
-      const parsedDate = new Date(body.lastUpdate);
-      expect(parsedDate.getTime()).toBe(Number(1700086400n) * 1000);
+      expect(body).toEqual({ lastUpdate: "2023-11-15T22:13:20.000Z" });
     });
   });
 });

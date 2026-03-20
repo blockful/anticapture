@@ -4,6 +4,7 @@ import { pushSchema } from "drizzle-kit/api";
 import { drizzle } from "drizzle-orm/pglite";
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
 import { getAddress } from "viem";
+import type { Drizzle } from "@/database";
 import * as schema from "@/database/schema";
 import { transaction, transfer, delegation } from "@/database/schema";
 import { TransactionsRepository } from "@/repositories/transactions";
@@ -66,7 +67,7 @@ const createDelegation = (
 
 describe("Transactions Controller", () => {
   let client: PGlite;
-  let db: ReturnType<typeof drizzle<typeof schema>>;
+  let db: Drizzle;
   let app: Hono;
 
   beforeAll(async () => {
@@ -115,11 +116,41 @@ describe("Transactions Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.totalCount).toBe(1);
-      expect(body.items).toHaveLength(1);
-      expect(body.items[0]).toMatchObject({
-        transactionHash: TX_HASH,
-        timestamp: "1700000000",
+      expect(body).toEqual({
+        totalCount: 1,
+        items: [
+          {
+            transactionHash: TX_HASH,
+            from: getAddress("0x1111111111111111111111111111111111111111"),
+            to: getAddress("0x2222222222222222222222222222222222222222"),
+            isCex: false,
+            isDex: false,
+            isLending: false,
+            isTotal: false,
+            timestamp: "1700000000",
+            transfers: [
+              {
+                transactionHash: TX_HASH,
+                daoId: "UNI",
+                tokenId: "uni",
+                amount: "1000",
+                fromAccountId: getAddress(
+                  "0x1111111111111111111111111111111111111111",
+                ),
+                toAccountId: getAddress(
+                  "0x2222222222222222222222222222222222222222",
+                ),
+                timestamp: "1700000000",
+                logIndex: 0,
+                isCex: false,
+                isDex: false,
+                isLending: false,
+                isTotal: false,
+              },
+            ],
+            delegations: [],
+          },
+        ],
       });
     });
 
@@ -131,11 +162,41 @@ describe("Transactions Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.totalCount).toBe(1);
-      expect(body.items).toHaveLength(1);
-      expect(body.items[0]).toMatchObject({
-        transactionHash: TX_HASH,
-        timestamp: "1700000000",
+      expect(body).toEqual({
+        totalCount: 1,
+        items: [
+          {
+            transactionHash: TX_HASH,
+            from: getAddress("0x1111111111111111111111111111111111111111"),
+            to: getAddress("0x2222222222222222222222222222222222222222"),
+            isCex: false,
+            isDex: false,
+            isLending: false,
+            isTotal: false,
+            timestamp: "1700000000",
+            transfers: [],
+            delegations: [
+              {
+                transactionHash: TX_HASH,
+                daoId: "UNI",
+                delegateAccountId: getAddress(
+                  "0x3333333333333333333333333333333333333333",
+                ),
+                delegatorAccountId: getAddress(
+                  "0x1111111111111111111111111111111111111111",
+                ),
+                delegatedValue: "5000",
+                previousDelegate: null,
+                timestamp: "1700000000",
+                logIndex: 0,
+                isCex: false,
+                isDex: false,
+                isLending: false,
+                isTotal: false,
+              },
+            ],
+          },
+        ],
       });
     });
 
@@ -144,8 +205,7 @@ describe("Transactions Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.items).toHaveLength(0);
-      expect(body.totalCount).toBe(0);
+      expect(body).toEqual({ items: [], totalCount: 0 });
     });
   });
 });
