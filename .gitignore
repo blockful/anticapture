@@ -2,7 +2,10 @@ node_modules/*
 .git/*
 out/
 .turbo
-.env# Logs
+.env
+*.dump
+
+# Logs
 logs
 *.log
 npm-debug.log*
