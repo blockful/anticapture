@@ -10,6 +10,7 @@
     "clean": "rm -rf node_modules dist schema.graphql *.tsbuildinfo",
     "typecheck": "tsc --noEmit",
     "test": "jest",
+    "test:unit": "jest --testPathIgnorePatterns '.*\\.integration\\.test\\.ts'",
     "test:watch": "jest --watch"
   },
   "keywords": [],

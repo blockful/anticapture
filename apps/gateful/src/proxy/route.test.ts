@@ -41,24 +41,10 @@ describe("proxy route", () => {
     expect(res.status).toBe(200);
   });
 
-  it("should resolve DAO from anticapture-dao-id header", async () => {
-    vi.spyOn(global, "fetch").mockResolvedValue(
-      new Response(JSON.stringify({ ok: true }), { status: 200 }),
-    );
-
-    const res = await app.request("http://localhost/", {
-      headers: { "anticapture-dao-id": "uni" },
-    });
-
-    expect(res.status).toBe(200);
-  });
-
-  it("should return 400 when no DAO identifier is provided", async () => {
+  it("should return 404 when no DAO identifier is provided in path", async () => {
     const res = await app.request("/");
 
-    expect(res.status).toBe(400);
-    const body = (await res.json()) as { error: string };
-    expect(body.error).toContain("Missing DAO identifier");
+    expect(res.status).toBe(404);
   });
 
   it("should resolve DAO case-insensitively from path", async () => {

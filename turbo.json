@@ -40,6 +40,9 @@
     "test": {
       "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"]
     },
+    "test:unit": {
+      "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"]
+    },
     "codegen": {
       "outputs": ["generated.ts", "types.ts"]
     },

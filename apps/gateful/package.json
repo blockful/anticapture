@@ -7,7 +7,8 @@
     "dev": "railway run -e dev -s gateful tsx watch src/index.ts",
     "start": "node dist/src/index.js",
     "build": "tsc",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:unit": "vitest run --exclude '**/*.integration.test.ts'"
   },
   "keywords": [],
   "author": "",

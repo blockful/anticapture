@@ -6,6 +6,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest",
+    "test:unit": "vitest run --exclude '**/*.integration.test.ts'",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "clean": "rm -rf node_modules *.tsbuildinfo dist",
