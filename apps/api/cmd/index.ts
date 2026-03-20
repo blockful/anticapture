@@ -230,7 +230,8 @@ const treasuryService = createTreasuryService(
     env.TREASURY_DATA_PROVIDER_API_KEY,
   ),
 );
-const decimals = CONTRACT_ADDRESSES[env.DAO_ID].token.decimals;
+const _daoContracts = CONTRACT_ADDRESSES[env.DAO_ID];
+const decimals = "token" in _daoContracts ? _daoContracts.token.decimals : 18;
 
 treasury(app, treasuryService, decimals);
 tokenHistoricalData(app, tokenPriceClient);

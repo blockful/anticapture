@@ -31,6 +31,11 @@ import { DaoIdEnum } from "@/lib/enums";
 
 import { SHUGovernorIndexer, SHUTokenIndexer } from "./indexer/shu";
 import {
+  GNOGovernorIndexer,
+  GNOTokenIndexer,
+  GNOTokenGnosisIndexer,
+} from "./indexer/gno";
+import {
   AAVETokenIndexer,
   stkAAVETokenIndexer,
   aAAVETokenIndexer,
@@ -42,7 +47,12 @@ import {
 
 const { DAO_ID: daoId } = env;
 
-const { token, blockTime } = CONTRACT_ADDRESSES[env.DAO_ID];
+const contracts = CONTRACT_ADDRESSES[env.DAO_ID];
+const { blockTime } = contracts;
+const token =
+  "token" in contracts
+    ? contracts.token
+    : { address: "0x" as `0x${string}`, decimals: 0 };
 
 switch (daoId) {
   case DaoIdEnum.ENS: {
@@ -110,6 +120,13 @@ switch (daoId) {
     AAVETokenIndexer(aave.address, aave.decimals);
     stkAAVETokenIndexer(stkAAVE.address, stkAAVE.decimals);
     aAAVETokenIndexer(aAAVE.address, aAAVE.decimals);
+    break;
+  }
+  case DaoIdEnum.GNO: {
+    const { gnoMainnet, gnoGnosis } = CONTRACT_ADDRESSES[DaoIdEnum.GNO];
+    GNOTokenIndexer(gnoMainnet.address, gnoMainnet.decimals);
+    GNOTokenGnosisIndexer(gnoGnosis.address, gnoGnosis.decimals);
+    GNOGovernorIndexer(blockTime);
     break;
   }
   default:

@@ -190,6 +190,20 @@ export const CONTRACT_ADDRESSES = {
       startBlock: 12422079,
     },
   },
+  [DaoIdEnum.GNO]: {
+    blockTime: 12,
+    tokenType: "ERC20",
+    gnoMainnet: {
+      address: "0x1B2Eef4dd90cF1aF05967e0F246d4C0a19387B2A",
+      decimals: 18,
+      startBlock: 23383727,
+    },
+    gnoGnosis: {
+      address: "0xE6C45c06e4C73e2aD58Aedf9bf83bCe1534b524a",
+      decimals: 18,
+      startBlock: 41603868,
+    },
+  },
 } as const;
 
 export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -334,6 +348,7 @@ export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   [DaoIdEnum.ZK]: {
     timelock: "0xe5d21A9179CA2E1F0F327d598D464CcF60d89c3d",
   },
+  [DaoIdEnum.GNO]: {},
 };
 
 export enum ProposalStatus {

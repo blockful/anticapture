@@ -49,18 +49,19 @@ export function token(
     async (context) => {
       const { currency } = context.req.valid("query");
 
-      const tokenContractAddress = CONTRACT_ADDRESSES[daoId].token.address;
+      const _contracts = CONTRACT_ADDRESSES[daoId];
+      const tokenContractAddress =
+        "token" in _contracts ? _contracts.token.address : undefined;
       const tokenProps = await service.getTokenProperties(daoId);
-      const priceData = await client.getTokenPrice(
-        tokenContractAddress,
-        currency,
-      );
+      const priceData = tokenContractAddress
+        ? await client.getTokenPrice(tokenContractAddress, currency)
+        : null;
 
       if (!tokenProps) {
         return context.json({ error: "Token not found" }, 404);
       }
 
-      return context.json(TokenMapper.toApi(tokenProps, priceData), 200);
+      return context.json(TokenMapper.toApi(tokenProps, priceData ?? ""), 200);
     },
   );
 }
