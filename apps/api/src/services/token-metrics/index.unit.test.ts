@@ -2,20 +2,9 @@ import { describe, it, expect } from "vitest";
 import { MetricTypesEnum } from "@/lib/constants";
 import { ITokenMetricsRepository, TokenMetricsService } from "./index";
 
-type MetricRow = {
-  date: bigint;
-  daoId: string;
-  tokenId: string;
-  metricType: string;
-  open: bigint;
-  close: bigint;
-  low: bigint;
-  high: bigint;
-  average: bigint;
-  volume: bigint;
-  count: number;
-  lastUpdate: bigint;
-};
+type MetricRow = Awaited<
+  ReturnType<ITokenMetricsRepository["getMetricsByDateRange"]>
+>[number];
 
 function createStubRepo(
   rows: MetricRow[] = [],
@@ -34,23 +23,19 @@ const EMPTY_METRICS = {
   endDate: null,
 };
 
-const createRow = (overrides: Partial<MetricRow> = {}): MetricRow => ({
-  date: 1700000000n,
-  daoId: "UNI",
-  tokenId: "uni",
-  metricType: MetricTypesEnum.DELEGATED_SUPPLY,
-  open: 0n,
-  close: 0n,
-  low: 0n,
-  high: 1000n,
-  average: 0n,
-  volume: 100n,
-  count: 1,
-  lastUpdate: 1700000000n,
-  ...overrides,
+const createRow = (overrides: {
+  date: bigint;
+  high: bigint;
+  volume: bigint;
+}): MetricRow => ({
+  date: overrides.date,
+  high: overrides.high,
+  volume: overrides.volume,
 });
 
 const ONE_DAY = 86400;
+// Use midnight-aligned timestamps since the service normalizes to midnight UTC
+const DAY1 = 1699920000; // midnight UTC
 
 describe("TokenMetricsService", () => {
   describe("getMetricsForType", () => {
@@ -59,7 +44,7 @@ describe("TokenMetricsService", () => {
 
       const result = await service.getMetricsForType({
         metricType: MetricTypesEnum.DELEGATED_SUPPLY,
-        startDate: 1700000000,
+        startDate: DAY1,
         orderDirection: "asc",
         limit: 365,
       });
@@ -68,43 +53,63 @@ describe("TokenMetricsService", () => {
     });
 
     it("should return items from repository data", async () => {
-      const day1 = 1700000000n;
       const repo = createStubRepo([
-        createRow({ date: day1, high: 1000n, volume: 100n }),
+        createRow({ date: BigInt(DAY1), high: 1000n, volume: 100n }),
       ]);
       const service = new TokenMetricsService(repo);
 
       const result = await service.getMetricsForType({
         metricType: MetricTypesEnum.DELEGATED_SUPPLY,
-        startDate: Number(day1),
-        endDate: Number(day1),
+        startDate: DAY1,
+        endDate: DAY1,
         orderDirection: "asc",
         limit: 365,
       });
 
-      expect(result.items.length).toBeGreaterThan(0);
-      expect(result.startDate).not.toBeNull();
-      expect(result.endDate).not.toBeNull();
+      expect(result).toEqual({
+        items: [{ date: DAY1.toString(), high: "1000", volume: "100" }],
+        hasNextPage: false,
+        startDate: DAY1.toString(),
+        endDate: DAY1.toString(),
+      });
     });
 
     it("should forward-fill gaps using initial value when startDate is provided", async () => {
-      const existingDate = 1700259200n; // 3 days later
+      const day4 = DAY1 + 3 * ONE_DAY;
 
       const repo = createStubRepo(
-        [createRow({ date: existingDate, high: 800n, volume: 80n })],
-        createRow({ date: 1699913600n, high: 500n, volume: 50n }),
+        [createRow({ date: BigInt(day4), high: 800n, volume: 80n })],
+        createRow({
+          date: BigInt(DAY1 - ONE_DAY),
+          high: 500n,
+          volume: 50n,
+        }),
       );
       const service = new TokenMetricsService(repo);
 
       const result = await service.getMetricsForType({
         metricType: MetricTypesEnum.DELEGATED_SUPPLY,
-        startDate: 1700000000,
-        endDate: Number(existingDate),
+        startDate: DAY1,
+        endDate: day4,
         orderDirection: "asc",
         limit: 365,
       });
 
-      expect(result.items.length).toBeGreaterThan(1);
+      expect(result).toEqual({
+        items: [
+          { date: DAY1.toString(), high: "500", volume: "0" },
+          { date: (DAY1 + ONE_DAY).toString(), high: "500", volume: "0" },
+          {
+            date: (DAY1 + 2 * ONE_DAY).toString(),
+            high: "500",
+            volume: "0",
+          },
+          { date: day4.toString(), high: "800", volume: "80" },
+        ],
+        hasNextPage: false,
+        startDate: DAY1.toString(),
+        endDate: day4.toString(),
+      });
     });
 
     it("should not fetch initial value when no startDate provided", async () => {
@@ -127,7 +132,7 @@ describe("TokenMetricsService", () => {
       const repo = createStubRepo(
         Array.from({ length: 6 }, (_, i) =>
           createRow({
-            date: BigInt(1700000000 + i * ONE_DAY),
+            date: BigInt(DAY1 + i * ONE_DAY),
             high: BigInt(i * 100),
             volume: 0n,
           }),
@@ -137,46 +142,68 @@ describe("TokenMetricsService", () => {
 
       const result = await service.getMetricsForType({
         metricType: MetricTypesEnum.DELEGATED_SUPPLY,
-        startDate: 1700000000,
-        endDate: 1700000000 + 9 * ONE_DAY,
+        startDate: DAY1,
+        endDate: DAY1 + 9 * ONE_DAY,
         orderDirection: "asc",
         limit: 5,
       });
 
-      expect(result.items).toHaveLength(5);
-      expect(result.hasNextPage).toBe(true);
+      expect(result).toEqual({
+        items: [
+          { date: DAY1.toString(), high: "0", volume: "0" },
+          { date: (DAY1 + ONE_DAY).toString(), high: "100", volume: "0" },
+          {
+            date: (DAY1 + 2 * ONE_DAY).toString(),
+            high: "200",
+            volume: "0",
+          },
+          {
+            date: (DAY1 + 3 * ONE_DAY).toString(),
+            high: "300",
+            volume: "0",
+          },
+          {
+            date: (DAY1 + 4 * ONE_DAY).toString(),
+            high: "400",
+            volume: "0",
+          },
+        ],
+        hasNextPage: true,
+        startDate: DAY1.toString(),
+        endDate: (DAY1 + 4 * ONE_DAY).toString(),
+      });
     });
 
     it("should return items in descending order when specified", async () => {
+      const day2 = DAY1 + ONE_DAY;
       const repo = createStubRepo([
-        createRow({
-          date: BigInt(1700000000 + ONE_DAY),
-          high: 200n,
-          volume: 20n,
-        }),
-        createRow({ date: 1700000000n, high: 100n, volume: 10n }),
+        createRow({ date: BigInt(day2), high: 200n, volume: 20n }),
+        createRow({ date: BigInt(DAY1), high: 100n, volume: 10n }),
       ]);
       const service = new TokenMetricsService(repo);
 
       const result = await service.getMetricsForType({
         metricType: MetricTypesEnum.DELEGATED_SUPPLY,
-        startDate: 1700000000,
-        endDate: 1700000000 + ONE_DAY,
+        startDate: DAY1,
+        endDate: day2,
         orderDirection: "desc",
         limit: 365,
       });
 
-      expect(result.items.length).toBeGreaterThan(0);
-      if (result.items.length >= 2) {
-        expect(Number(result.items[0]!.date)).toBeGreaterThan(
-          Number(result.items[1]!.date),
-        );
-      }
+      expect(result).toEqual({
+        items: [
+          { date: day2.toString(), high: "200", volume: "20" },
+          { date: DAY1.toString(), high: "100", volume: "10" },
+        ],
+        hasNextPage: false,
+        startDate: day2.toString(),
+        endDate: DAY1.toString(),
+      });
     });
 
     it("should handle error fetching initial value gracefully", async () => {
       const repo = createStubRepo([
-        createRow({ date: 1700000000n, high: 1000n, volume: 100n }),
+        createRow({ date: BigInt(DAY1), high: 1000n, volume: 100n }),
       ]);
       repo.getLastMetricBeforeDate = async () => {
         throw new Error("DB error");
@@ -185,12 +212,18 @@ describe("TokenMetricsService", () => {
 
       const result = await service.getMetricsForType({
         metricType: MetricTypesEnum.DELEGATED_SUPPLY,
-        startDate: 1700000000,
+        startDate: DAY1,
+        endDate: DAY1,
         orderDirection: "asc",
         limit: 365,
       });
 
-      expect(result.items.length).toBeGreaterThan(0);
+      expect(result).toEqual({
+        items: [{ date: DAY1.toString(), high: "1000", volume: "100" }],
+        hasNextPage: false,
+        startDate: DAY1.toString(),
+        endDate: DAY1.toString(),
+      });
     });
   });
 });

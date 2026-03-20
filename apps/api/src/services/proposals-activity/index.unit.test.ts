@@ -2,12 +2,29 @@ import { Address } from "viem";
 import { describe, it, expect, beforeEach } from "vitest";
 import { DAOClient } from "@/clients";
 import { DaoIdEnum } from "@/lib/enums";
-import { DbProposal, DbVote, DbProposalWithVote } from "@/repositories/";
-import { ProposalsActivityService, ProposalActivityRequest } from "./index";
+import {
+  DbProposal,
+  DbVote,
+  DbProposalWithVote,
+  OrderByField,
+  OrderDirection,
+  VoteFilter,
+} from "@/repositories/";
+import {
+  ProposalsActivityService,
+  ProposalsActivityRepository,
+  ProposalActivityRequest,
+} from "./index";
 
 const VOTER_ADDRESS = "0x1111111111111111111111111111111111111111" as Address;
 
-function createStubRepo() {
+function createStubRepo(): ProposalsActivityRepository & {
+  lastActivityStart: number | null;
+  firstVoteTs: number | null;
+  proposals: DbProposal[];
+  votes: DbVote[];
+  paginationResult: { proposals: DbProposalWithVote[]; totalCount: number };
+} {
   const stub = {
     lastActivityStart: null as number | null,
     firstVoteTs: null as number | null,
@@ -15,12 +32,26 @@ function createStubRepo() {
     votes: [] as DbVote[],
     paginationResult: { proposals: [] as DbProposalWithVote[], totalCount: 0 },
 
-    getFirstVoteTimestamp: async () => stub.firstVoteTs,
-    getProposals: async () => stub.proposals,
-    getUserVotes: async () => stub.votes,
+    getFirstVoteTimestamp: async (_address: Address) => stub.firstVoteTs,
+    getProposals: async (
+      _daoId: DaoIdEnum,
+      _activityStart: number,
+      _votingPeriodSeconds: number,
+    ) => stub.proposals,
+    getUserVotes: async (
+      _address: Address,
+      _daoId: DaoIdEnum,
+      _proposalIds: string[],
+    ) => stub.votes,
     getProposalsWithVotesAndPagination: async (
       _addr: Address,
       activityStart: number,
+      _votingPeriodSeconds: number,
+      _skip: number,
+      _limit: number,
+      _orderBy: OrderByField,
+      _orderDirection: OrderDirection,
+      _userVoteFilter?: VoteFilter,
     ) => {
       stub.lastActivityStart = activityStart;
       return stub.paginationResult;
@@ -126,10 +157,44 @@ describe("ProposalsActivityService", () => {
 
       const result = await service.getProposalsActivity(defaultRequest);
 
-      expect(result.neverVoted).toBe(false);
-      expect(result.totalProposals).toBe(1);
-      expect(result.proposals).toHaveLength(1);
-      expect(result.proposals[0]?.userVote).not.toBeNull();
+      // avgTimeBeforeEnd = 1700100000 - 1699950000 = 150000
+      expect(result).toEqual({
+        address: VOTER_ADDRESS,
+        totalProposals: 1,
+        votedProposals: 1,
+        neverVoted: false,
+        winRate: 100,
+        yesRate: 100,
+        avgTimeBeforeEnd: 150000,
+        proposals: [
+          {
+            proposal: {
+              id: "proposal-1",
+              daoId: "UNI",
+              proposerAccountId: VOTER_ADDRESS,
+              title: "Test proposal",
+              description: "Test proposal",
+              startBlock: 100,
+              endBlock: 200,
+              timestamp: 1699900000n,
+              status: "EXECUTED",
+              forVotes: 1000n,
+              againstVotes: 100n,
+              abstainVotes: 50n,
+              endTimestamp: 1700100000n,
+            },
+            userVote: {
+              id: "vote-1",
+              voterAccountId: VOTER_ADDRESS,
+              proposalId: "proposal-1",
+              support: "1",
+              votingPower: "1000",
+              reason: "",
+              timestamp: "1699950000",
+            },
+          },
+        ],
+      });
     });
 
     it("should calculate yesRate correctly", async () => {

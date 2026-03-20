@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { ProposalStatus } from "@/lib/constants";
 import { DBProposal, ProposalsRequest } from "@/mappers";
 import { DAOClient } from "@/clients";
-import { ProposalsService } from "./onchainProposals";
+import { ProposalsRepository, ProposalsService } from "./onchainProposals";
 
 const DEFAULT_REQ: ProposalsRequest = {
   skip: 0,
@@ -35,22 +35,36 @@ const createMockProposal = (
   ...overrides,
 });
 
-function createStubRepo() {
-  const stub: {
+function createStubRepo(): ProposalsRepository & {
+  proposals: DBProposal[];
+  count: number;
+  byId: DBProposal | undefined;
+  lastStatusArg: string[] | undefined;
+  lastProposalTypeExcludeArg: number[] | undefined;
+} {
+  const stub: ProposalsRepository & {
     proposals: DBProposal[];
     count: number;
     byId: DBProposal | undefined;
-    lastGetProposalsArgs: unknown[] | undefined;
-    getProposals: (...args: unknown[]) => Promise<DBProposal[]>;
-    getProposalsCount: () => Promise<number>;
-    getProposalById: () => Promise<DBProposal | undefined>;
+    lastStatusArg: string[] | undefined;
+    lastProposalTypeExcludeArg: number[] | undefined;
   } = {
     proposals: [],
     count: 0,
     byId: undefined,
-    lastGetProposalsArgs: undefined,
-    getProposals: async (...args: unknown[]) => {
-      stub.lastGetProposalsArgs = args;
+    lastStatusArg: undefined,
+    lastProposalTypeExcludeArg: undefined,
+    getProposals: async (
+      _skip: number,
+      _limit: number,
+      _orderDirection: "asc" | "desc",
+      status: string[] | undefined,
+      _fromDate: number | undefined,
+      _fromEndDate: number | undefined,
+      proposalTypeExclude?: number[],
+    ) => {
+      stub.lastStatusArg = status;
+      stub.lastProposalTypeExcludeArg = proposalTypeExclude;
       return stub.proposals;
     },
     getProposalsCount: async () => stub.count,
@@ -119,8 +133,9 @@ describe("ProposalsService", () => {
 
       const result = await service.getProposals({ ...DEFAULT_REQ });
 
-      expect(result).toHaveLength(1);
-      expect(result[0]?.status).toBe(ProposalStatus.ACTIVE);
+      expect(result).toEqual([
+        createMockProposal({ status: ProposalStatus.ACTIVE }),
+      ]);
     });
 
     it("should map ACTIVE to PENDING and ACTIVE for DB query", async () => {
@@ -129,7 +144,7 @@ describe("ProposalsService", () => {
         status: [ProposalStatus.ACTIVE],
       });
 
-      expect(repo.lastGetProposalsArgs?.[3]).toEqual([
+      expect(repo.lastStatusArg).toEqual([
         ProposalStatus.PENDING,
         ProposalStatus.ACTIVE,
       ]);
@@ -142,7 +157,7 @@ describe("ProposalsService", () => {
       });
 
       // Both map to [PENDING, ACTIVE], which gets deduplicated
-      expect(repo.lastGetProposalsArgs?.[3]).toEqual([
+      expect(repo.lastStatusArg).toEqual([
         ProposalStatus.PENDING,
         ProposalStatus.ACTIVE,
       ]);
@@ -164,8 +179,9 @@ describe("ProposalsService", () => {
       });
 
       // Only proposal1 has ACTIVE status after chain check
-      expect(result).toHaveLength(1);
-      expect(result[0]?.id).toBe("1");
+      expect(result).toEqual([
+        createMockProposal({ id: "1", status: ProposalStatus.ACTIVE }),
+      ]);
     });
 
     it("should not filter when no status provided", async () => {
@@ -174,7 +190,9 @@ describe("ProposalsService", () => {
 
       const result = await service.getProposals({ ...DEFAULT_REQ });
 
-      expect(result).toHaveLength(1);
+      expect(result).toEqual([
+        createMockProposal({ status: ProposalStatus.ACTIVE }),
+      ]);
     });
 
     it("should exclude optimistic proposals when configured", async () => {
@@ -185,7 +203,7 @@ describe("ProposalsService", () => {
         includeOptimisticProposals: false,
       });
 
-      expect(repo.lastGetProposalsArgs?.[6]).toEqual([2]);
+      expect(repo.lastProposalTypeExcludeArg).toEqual([2]);
     });
 
     it("should not exclude when includeOptimisticProposals is true", async () => {
@@ -196,7 +214,7 @@ describe("ProposalsService", () => {
         includeOptimisticProposals: true,
       });
 
-      expect(repo.lastGetProposalsArgs?.[6]).toBeUndefined();
+      expect(repo.lastProposalTypeExcludeArg).toBeUndefined();
     });
 
     it("should deduplicate PENDING + ACTIVE in status array", async () => {
@@ -206,7 +224,7 @@ describe("ProposalsService", () => {
       });
 
       // PENDING stays as [PENDING], ACTIVE maps to [PENDING, ACTIVE], deduplication gives [PENDING, ACTIVE]
-      expect(repo.lastGetProposalsArgs?.[3]).toEqual([
+      expect(repo.lastStatusArg).toEqual([
         ProposalStatus.PENDING,
         ProposalStatus.ACTIVE,
       ]);
@@ -220,7 +238,9 @@ describe("ProposalsService", () => {
 
       const result = await service.getProposalById("1");
 
-      expect(result?.status).toBe(ProposalStatus.ACTIVE);
+      expect(result).toEqual(
+        createMockProposal({ status: ProposalStatus.ACTIVE }),
+      );
     });
 
     it("should return undefined when not found", async () => {

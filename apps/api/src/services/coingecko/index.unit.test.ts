@@ -4,7 +4,7 @@ import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
 import { DaoIdEnum } from "@/lib/enums";
 import { CoingeckoService } from "./index";
 
-const API_URL = "https://api.coingecko.com/api/v3";
+const API_URL = "https://api.coingecko.com/";
 const server = setupServer();
 
 beforeAll(() => server.listen());

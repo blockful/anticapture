@@ -3,7 +3,11 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { MetricTypesEnum } from "@/lib/constants";
 import { DBTokenMetric } from "@/mappers/delegation-percentage";
 
-import { DelegationPercentageService } from "./delegation-percentage";
+import {
+  DelegationPercentageRepository,
+  DelegationPercentageService,
+  DelegationPercentageServiceResult,
+} from "./delegation-percentage";
 
 /**
  * Mock Factory Pattern for type-safe test data
@@ -11,7 +15,7 @@ import { DelegationPercentageService } from "./delegation-percentage";
  * Only requires specifying fields relevant to each test case
  */
 const createMockRow = (
-  overwrites: Partial<DBTokenMetric> = {},
+  overrides: Partial<DBTokenMetric> = {},
 ): DBTokenMetric => ({
   date: 0n,
   daoId: "uniswap",
@@ -25,7 +29,7 @@ const createMockRow = (
   volume: 0n,
   count: 0,
   lastUpdate: 0n,
-  ...overwrites,
+  ...overrides,
 });
 
 const FIXED_DATE = new Date("2026-01-15T00:00:00Z");
@@ -33,7 +37,7 @@ const FIXED_TIMESTAMP = Math.floor(FIXED_DATE.getTime() / 1000);
 
 describe("DelegationPercentageService", () => {
   let service: DelegationPercentageService;
-  let mockRepository: {
+  let mockRepository: DelegationPercentageRepository & {
     getMetricsByDateRange: ReturnType<typeof vi.fn>;
     getLastMetricBeforeDate: ReturnType<typeof vi.fn>;
   };
@@ -63,11 +67,13 @@ describe("DelegationPercentageService", () => {
         orderDirection: "asc" as const,
       });
 
-      expect(result.items).toHaveLength(0);
-      expect(result.totalCount).toBe(0);
-      expect(result.hasNextPage).toBe(false);
-      expect(result.startDate).toBeNull();
-      expect(result.endDate).toBeNull();
+      expect(result).toEqual({
+        items: [],
+        totalCount: 0,
+        hasNextPage: false,
+        startDate: null,
+        endDate: null,
+      } satisfies DelegationPercentageServiceResult);
     });
 
     it("should calculate delegation percentage correctly", async () => {
@@ -93,10 +99,13 @@ describe("DelegationPercentageService", () => {
         orderDirection: "asc" as const,
       });
 
-      expect(result.items).toHaveLength(1);
-      // 50/100 = 0.5 = 50%
-      expect(result.items[0]?.high).toBe("50.00");
-      expect(result.items[0]?.date).toBe("1600041600");
+      expect(result).toEqual({
+        items: [{ date: "1600041600", high: "50.00" }],
+        totalCount: 1,
+        hasNextPage: false,
+        startDate: "1600041600",
+        endDate: "1600041600",
+      } satisfies DelegationPercentageServiceResult);
     });
 
     it("should apply forward-fill for missing dates", async () => {
@@ -139,14 +148,17 @@ describe("DelegationPercentageService", () => {
         orderDirection: "asc" as const,
       });
 
-      expect(result.items).toHaveLength(3);
-      // Day 1: 40%
-      expect(result.items[0]?.high).toBe("40.00");
-      // Day 2: forward-filled from day 1 = 40%
-      expect(result.items[1]?.high).toBe("40.00");
-      expect(result.items[1]?.date).toBe(day2.toString());
-      // Day 3: 60%
-      expect(result.items[2]?.high).toBe("60.00");
+      expect(result).toEqual({
+        items: [
+          { date: day1.toString(), high: "40.00" },
+          { date: day2.toString(), high: "40.00" },
+          { date: day3.toString(), high: "60.00" },
+        ],
+        totalCount: 3,
+        hasNextPage: false,
+        startDate: day1.toString(),
+        endDate: day3.toString(),
+      } satisfies DelegationPercentageServiceResult);
     });
 
     it("should handle division by zero when total supply is zero", async () => {
@@ -172,8 +184,13 @@ describe("DelegationPercentageService", () => {
         orderDirection: "asc" as const,
       });
 
-      expect(result.items).toHaveLength(1);
-      expect(result.items[0]?.high).toBe("0.00"); // Should be 0 instead of throwing error
+      expect(result).toEqual({
+        items: [{ date: "1600041600", high: "0.00" }],
+        totalCount: 1,
+        hasNextPage: false,
+        startDate: "1600041600",
+        endDate: "1600041600",
+      } satisfies DelegationPercentageServiceResult);
     });
 
     it("should apply pagination with limit", async () => {
@@ -206,10 +223,17 @@ describe("DelegationPercentageService", () => {
         orderDirection: "asc" as const,
       });
 
-      expect(result.items).toHaveLength(3);
-      expect(result.hasNextPage).toBe(true);
-      expect(result.startDate).toBe("1600041600");
-      expect(result.endDate).toBe("1600214400");
+      expect(result).toEqual({
+        items: [
+          { date: "1600041600", high: "50.00" },
+          { date: "1600128000", high: "50.00" },
+          { date: "1600214400", high: "50.00" },
+        ],
+        totalCount: 3,
+        hasNextPage: true,
+        startDate: "1600041600",
+        endDate: "1600214400",
+      } satisfies DelegationPercentageServiceResult);
     });
 
     it("should sort data in descending order when specified", async () => {
@@ -242,11 +266,17 @@ describe("DelegationPercentageService", () => {
         limit: 365,
       });
 
-      expect(result.items).toHaveLength(3);
-      // Should be in descending order
-      expect(result.items[0]?.date).toBe("1600214400"); // Day 3
-      expect(result.items[1]?.date).toBe("1600128000"); // Day 2
-      expect(result.items[2]?.date).toBe("1600041600"); // Day 1
+      expect(result).toEqual({
+        items: [
+          { date: "1600214400", high: "50.00" },
+          { date: "1600128000", high: "40.00" },
+          { date: "1600041600", high: "30.00" },
+        ],
+        totalCount: 3,
+        hasNextPage: false,
+        startDate: "1600214400",
+        endDate: "1600041600",
+      } satisfies DelegationPercentageServiceResult);
     });
 
     it("should use default values when optional parameters are not provided", async () => {
@@ -267,7 +297,13 @@ describe("DelegationPercentageService", () => {
         orderDirection: "asc",
         limit: 732,
       });
-      expect(result.items).toHaveLength(0);
+      expect(result).toEqual({
+        items: [],
+        totalCount: 0,
+        hasNextPage: false,
+        startDate: null,
+        endDate: null,
+      } satisfies DelegationPercentageServiceResult);
     });
 
     it("should handle complex scenario with multiple days and changing values", async () => {
@@ -313,15 +349,18 @@ describe("DelegationPercentageService", () => {
         orderDirection: "asc" as const,
       });
 
-      expect(result.items).toHaveLength(4);
-      // Day 1: 25%
-      expect(result.items[0]?.high).toBe("25.00");
-      // Day 2: 12.5% (25/200)
-      expect(result.items[1]?.high).toBe("12.50");
-      // Day 3: 25% (50/200)
-      expect(result.items[2]?.high).toBe("25.00");
-      // Day 4: 25% (forward-filled)
-      expect(result.items[3]?.high).toBe("25.00");
+      expect(result).toEqual({
+        items: [
+          { date: day1.toString(), high: "25.00" },
+          { date: day2.toString(), high: "12.50" },
+          { date: day3.toString(), high: "25.00" },
+          { date: day4.toString(), high: "25.00" },
+        ],
+        totalCount: 4,
+        hasNextPage: false,
+        startDate: day1.toString(),
+        endDate: day4.toString(),
+      } satisfies DelegationPercentageServiceResult);
     });
 
     it("should use last known values before startDate for forward-fill", async () => {
@@ -366,12 +405,22 @@ describe("DelegationPercentageService", () => {
         orderDirection: "asc" as const,
       });
 
-      expect(result.items).toHaveLength(6);
-      // Days 100-104: should use values from day 1 (40/100 = 40%)
-      expect(result.items[0]?.high).toBe("40.00"); // day 100
-      expect(result.items[4]?.high).toBe("40.00"); // day 104
-      // Day 105: new value (60/100 = 60%)
-      expect(result.items[5]?.high).toBe("60.00");
+      const expectedItems = [];
+      for (let i = 0; i < 5; i++) {
+        expectedItems.push({
+          date: (Number(day100) + i * ONE_DAY).toString(),
+          high: "40.00",
+        });
+      }
+      expectedItems.push({ date: day105.toString(), high: "60.00" });
+
+      expect(result).toEqual({
+        items: expectedItems,
+        totalCount: 6,
+        hasNextPage: false,
+        startDate: day100.toString(),
+        endDate: day105.toString(),
+      } satisfies DelegationPercentageServiceResult);
     });
 
     it("should handle when only one metric has previous value", async () => {
@@ -406,8 +455,13 @@ describe("DelegationPercentageService", () => {
         orderDirection: "asc" as const,
       });
 
-      // With total = 100 and delegated = 30 (from past) = 30%
-      expect(result.items[0]?.high).toBe("30.00");
+      expect(result).toEqual({
+        items: [{ date: day100.toString(), high: "30.00" }],
+        totalCount: 1,
+        hasNextPage: false,
+        startDate: day100.toString(),
+        endDate: day100.toString(),
+      } satisfies DelegationPercentageServiceResult);
     });
 
     it("should start with 0% when no previous values exist", async () => {
@@ -439,20 +493,30 @@ describe("DelegationPercentageService", () => {
         orderDirection: "asc" as const,
       });
 
-      // Should use values from day 100 directly (50/100 = 50%)
-      expect(result.items[0]?.high).toBe("50.00");
+      expect(result).toEqual({
+        items: [{ date: day100.toString(), high: "50.00" }],
+        totalCount: 1,
+        hasNextPage: false,
+        startDate: day100.toString(),
+        endDate: day100.toString(),
+      } satisfies DelegationPercentageServiceResult);
     });
 
     it("should not fetch previous values when neither startDate nor after is provided", async () => {
       mockRepository.getMetricsByDateRange.mockResolvedValue([]);
 
-      await service.delegationPercentageByDay({
+      const result = await service.delegationPercentageByDay({
         limit: 365,
         orderDirection: "asc" as const,
       });
 
-      // Should not call getLastMetricBeforeDate when no reference date
-      expect(mockRepository.getLastMetricBeforeDate).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        items: [],
+        totalCount: 0,
+        hasNextPage: false,
+        startDate: null,
+        endDate: null,
+      } satisfies DelegationPercentageServiceResult);
     });
 
     it("should fallback to 0 when fetching previous values fails", async () => {
@@ -489,9 +553,13 @@ describe("DelegationPercentageService", () => {
         orderDirection: "asc" as const,
       });
 
-      // Should work normally with fallback to 0 (50/100 = 50%)
-      expect(result.items[0]?.high).toBe("50.00");
-      expect(result.items).toHaveLength(1);
+      expect(result).toEqual({
+        items: [{ date: day100.toString(), high: "50.00" }],
+        totalCount: 1,
+        hasNextPage: false,
+        startDate: day100.toString(),
+        endDate: day100.toString(),
+      } satisfies DelegationPercentageServiceResult);
 
       // Verify error was logged
       expect(consoleErrorSpy).toHaveBeenCalledWith(
@@ -545,15 +613,22 @@ describe("DelegationPercentageService", () => {
       });
 
       // Should start from day 10 (first real data), not day 5
-      expect(result.items.length).toBeGreaterThan(0);
-      expect(result.items[0]?.date).toBe(day10.toString());
-      expect(result.items[0]?.high).toBe("40.00");
+      const expectedItems = [];
+      for (let i = 0; i < 5; i++) {
+        expectedItems.push({
+          date: (Number(day10) + i * ONE_DAY).toString(),
+          high: "40.00",
+        });
+      }
+      expectedItems.push({ date: day15.toString(), high: "50.00" });
 
-      // Should not have data from day 5-9 (before first real data)
-      const hasDayBefore10 = result.items.some(
-        (item) => BigInt(item.date) < day10,
-      );
-      expect(hasDayBefore10).toBe(false);
+      expect(result).toEqual({
+        items: expectedItems,
+        totalCount: 6,
+        hasNextPage: false,
+        startDate: day10.toString(),
+        endDate: day15.toString(),
+      } satisfies DelegationPercentageServiceResult);
     });
 
     it("should return empty when startDate is after all available data", async () => {
@@ -574,10 +649,13 @@ describe("DelegationPercentageService", () => {
         orderDirection: "asc" as const,
       });
 
-      // Should return empty
-      expect(result.items).toHaveLength(0);
-      expect(result.totalCount).toBe(0);
-      expect(result.hasNextPage).toBe(false);
+      expect(result).toEqual({
+        items: [],
+        totalCount: 0,
+        hasNextPage: false,
+        startDate: null,
+        endDate: null,
+      } satisfies DelegationPercentageServiceResult);
     });
 
     it("should fetch previous values and optimize query when only after is provided", async () => {
@@ -639,7 +717,34 @@ describe("DelegationPercentageService", () => {
       expect(mockRepository.getLastMetricBeforeDate).toHaveBeenCalledTimes(2);
 
       // Results should have correct forward-fill from previous values
-      expect(result.items.length).toBeGreaterThan(0);
+      // From day50 to day100, forward-fill at 30%, then day100 = 50%
+      // Plus forward-fill to today (FIXED_DATE)
+      // Build expected items: day50+1 through day100 at 30%, day100 at 50%, then forward-fill to today at 50%
+      const expectedItems = [];
+      for (let d = Number(day50); d < Number(day100); d += ONE_DAY) {
+        expectedItems.push({ date: d.toString(), high: "30.00" });
+      }
+      expectedItems.push({ date: day100.toString(), high: "50.00" });
+      // Forward-fill to today
+      for (
+        let d = Number(day100) + ONE_DAY;
+        d <= FIXED_TIMESTAMP;
+        d += ONE_DAY
+      ) {
+        expectedItems.push({ date: d.toString(), high: "50.00" });
+      }
+
+      // Only first 365 items due to limit
+      const limitedItems = expectedItems.slice(0, 365);
+      const hasNextPage = expectedItems.length > 365;
+
+      expect(result).toEqual({
+        items: limitedItems,
+        totalCount: limitedItems.length,
+        hasNextPage,
+        startDate: limitedItems[0]?.date ?? null,
+        endDate: limitedItems[limitedItems.length - 1]?.date ?? null,
+      } satisfies DelegationPercentageServiceResult);
     });
 
     it("should optimize query when only before is provided", async () => {
@@ -681,14 +786,20 @@ describe("DelegationPercentageService", () => {
       // Should not fetch previous values (no startDate or after)
       expect(mockRepository.getLastMetricBeforeDate).not.toHaveBeenCalled();
 
-      // With forward-fill, should generate from day1 to day50 (50 days)
-      expect(result.items.length).toBeGreaterThan(1);
-      // First day should have 30%
-      expect(result.items[0]?.high).toBe("30.00");
-      // All days should have forward-filled value of 30%
-      result.items.forEach((item) => {
-        expect(item.high).toBe("30.00");
-      });
+      // With forward-fill, should generate from day1 to day50 (51 days including both endpoints)
+      const ONE_DAY = 86400;
+      const expectedItems = [];
+      for (let d = Number(day1); d <= Number(day50); d += ONE_DAY) {
+        expectedItems.push({ date: d.toString(), high: "30.00" });
+      }
+
+      expect(result).toEqual({
+        items: expectedItems,
+        totalCount: expectedItems.length,
+        hasNextPage: false,
+        startDate: day1.toString(),
+        endDate: day50.toString(),
+      } satisfies DelegationPercentageServiceResult);
     });
 
     it("should forward-fill to today when endDate is not provided", async () => {
@@ -719,18 +830,21 @@ describe("DelegationPercentageService", () => {
       });
 
       // Should have data from 3 days ago until today (4 days total)
-      expect(result.items.length).toBeGreaterThanOrEqual(4);
+      const expectedItems = [];
+      for (let i = 0; i <= 3; i++) {
+        expectedItems.push({
+          date: (threeDaysAgoMidnight + i * ONE_DAY).toString(),
+          high: "50.00",
+        });
+      }
 
-      // All items should have the same percentage (forward-filled)
-      // 50/100 = 0.5 = 50%
-      result.items.forEach((item) => {
-        expect(item.high).toBe("50.00");
-      });
-
-      // Last item should be today (FIXED_DATE is at midnight UTC)
-      expect(result.items[result.items.length - 1]?.date).toBe(
-        FIXED_TIMESTAMP.toString(),
-      );
+      expect(result).toEqual({
+        items: expectedItems,
+        totalCount: 4,
+        hasNextPage: false,
+        startDate: threeDaysAgoMidnight.toString(),
+        endDate: FIXED_TIMESTAMP.toString(),
+      } satisfies DelegationPercentageServiceResult);
     });
 
     it("should set hasNextPage to false when reaching today without endDate", async () => {
@@ -760,7 +874,17 @@ describe("DelegationPercentageService", () => {
       });
 
       // Should have hasNextPage = false because we reached today
-      expect(result.hasNextPage).toBe(false);
+      expect(result).toEqual({
+        items: [
+          { date: twoDaysAgoMidnight.toString(), high: "50.00" },
+          { date: (twoDaysAgoMidnight + ONE_DAY).toString(), high: "50.00" },
+          { date: FIXED_TIMESTAMP.toString(), high: "50.00" },
+        ],
+        totalCount: 3,
+        hasNextPage: false,
+        startDate: twoDaysAgoMidnight.toString(),
+        endDate: FIXED_TIMESTAMP.toString(),
+      } satisfies DelegationPercentageServiceResult);
     });
 
     it("should set hasNextPage to true when limit cuts before today without endDate", async () => {
@@ -789,11 +913,20 @@ describe("DelegationPercentageService", () => {
         orderDirection: "asc" as const,
       });
 
-      // Should have exactly 3 items
-      expect(result.items).toHaveLength(3);
-
-      // Should have hasNextPage = true because we didn't reach today
-      expect(result.hasNextPage).toBe(true);
+      expect(result).toEqual({
+        items: [
+          { date: tenDaysAgoMidnight.toString(), high: "50.00" },
+          { date: (tenDaysAgoMidnight + ONE_DAY).toString(), high: "50.00" },
+          {
+            date: (tenDaysAgoMidnight + 2 * ONE_DAY).toString(),
+            high: "50.00",
+          },
+        ],
+        totalCount: 3,
+        hasNextPage: true,
+        startDate: tenDaysAgoMidnight.toString(),
+        endDate: (tenDaysAgoMidnight + 2 * ONE_DAY).toString(),
+      } satisfies DelegationPercentageServiceResult);
     });
   });
 });

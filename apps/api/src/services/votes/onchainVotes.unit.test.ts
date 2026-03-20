@@ -1,7 +1,7 @@
 import { Address, getAddress } from "viem";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { DBVote } from "@/mappers";
-import { VotesService } from "./onchainVotes";
+import { DBVote, VotesRequest } from "@/mappers";
+import { VotesRepository, VotesService } from "./onchainVotes";
 
 const VOTER_A = getAddress("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045");
 const VOTER_B = getAddress("0x1234567890123456789012345678901234567890");
@@ -31,7 +31,16 @@ const createMockDBVote = (
   ...overrides,
 });
 
-function createStubRepo() {
+function createStubRepo(): VotesRepository & {
+  votes: VoteWithTitle[];
+  votesTotalCount: number;
+  nonVoters: { voter: Address; votingPower: bigint }[];
+  nonVotersCount: number;
+  lastVotersTimestamp: Record<Address, bigint>;
+  votingPowerVariation: Record<Address, bigint>;
+  lastVotingPowerVariationTimestamp: number | undefined;
+  nonVotersCountCallCount: number;
+} {
   const stub = {
     votes: [] as VoteWithTitle[],
     votesTotalCount: 0,
@@ -41,20 +50,37 @@ function createStubRepo() {
     votingPowerVariation: {} as Record<Address, bigint>,
     lastVotingPowerVariationTimestamp: undefined as number | undefined,
     nonVotersCountCallCount: 0,
-    getVotes: async () => ({
+    getVotes: async (_req: VotesRequest) => ({
       items: stub.votes,
       totalCount: stub.votesTotalCount,
     }),
-    getVotesByProposalId: async () => ({
+    getVotesByProposalId: async (
+      _proposalId: string,
+      _skip: number,
+      _limit: number,
+      _orderBy: "timestamp" | "votingPower",
+      _orderDirection: "asc" | "desc",
+      _voterAddressIn?: Address[],
+      _support?: string,
+      _fromDate?: number,
+      _toDate?: number,
+    ) => ({
       items: stub.votes,
       totalCount: stub.votesTotalCount,
     }),
-    getProposalNonVoters: async () => stub.nonVoters,
-    getProposalNonVotersCount: async () => {
+    getProposalNonVoters: async (
+      _proposalId: string,
+      _skip: number,
+      _limit: number,
+      _orderDirection: "asc" | "desc",
+      _addresses?: Address[],
+    ) => stub.nonVoters,
+    getProposalNonVotersCount: async (_proposalId: string) => {
       stub.nonVotersCountCallCount++;
       return stub.nonVotersCount;
     },
-    getLastVotersTimestamp: async () => stub.lastVotersTimestamp,
+    getLastVotersTimestamp: async (_voters: Address[]) =>
+      stub.lastVotersTimestamp,
     getVotingPowerVariation: async (_voters: Address[], timestamp: number) => {
       stub.lastVotingPowerVariationTimestamp = timestamp;
       return stub.votingPowerVariation;

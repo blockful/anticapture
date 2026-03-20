@@ -29,12 +29,20 @@ const createMockDelegation = (
 describe("HistoricalDelegationsService", () => {
   const address = "0x1234567890123456789012345678901234567890" as Address;
 
-  let capturedArgs: unknown[];
+  let capturedFields: {
+    address: Address | undefined;
+    orderDirection: "asc" | "desc" | undefined;
+    skip: number | undefined;
+    limit: number | undefined;
+    fromValue: bigint | undefined;
+    toValue: bigint | undefined;
+    delegateAddressIn: Address[] | undefined;
+  };
   let stubResult: { items: DBDelegation[]; totalCount: number };
   let service: HistoricalDelegationsService;
 
   beforeEach(() => {
-    capturedArgs = [];
+    capturedFields = {} as typeof capturedFields;
     stubResult = { items: [], totalCount: 0 };
 
     const stubRepository: HistoricalDelegationsRepository = {
@@ -47,7 +55,7 @@ describe("HistoricalDelegationsService", () => {
         toValue,
         delegateAddressIn,
       ) => {
-        capturedArgs = [
+        capturedFields = {
           address,
           orderDirection,
           skip,
@@ -55,7 +63,7 @@ describe("HistoricalDelegationsService", () => {
           fromValue,
           toValue,
           delegateAddressIn,
-        ];
+        };
         return Promise.resolve(stubResult);
       },
     };
@@ -78,15 +86,15 @@ describe("HistoricalDelegationsService", () => {
         20,
       );
 
-      expect(capturedArgs).toEqual([
+      expect(capturedFields).toEqual({
         address,
-        "asc",
-        5,
-        20,
-        100n,
-        200n,
-        delegateAddresses,
-      ]);
+        orderDirection: "asc",
+        skip: 5,
+        limit: 20,
+        fromValue: 100n,
+        toValue: 200n,
+        delegateAddressIn: delegateAddresses,
+      });
     });
 
     it("should map repository result to delegation items response", async () => {
@@ -150,15 +158,15 @@ describe("HistoricalDelegationsService", () => {
         10,
       );
 
-      expect(capturedArgs).toEqual([
+      expect(capturedFields).toEqual({
         address,
-        "desc",
-        0,
-        10,
-        undefined,
-        undefined,
-        undefined,
-      ]);
+        orderDirection: "desc",
+        skip: 0,
+        limit: 10,
+        fromValue: undefined,
+        toValue: undefined,
+        delegateAddressIn: undefined,
+      });
     });
 
     it("should map multiple delegations from repository", async () => {
@@ -236,15 +244,15 @@ describe("HistoricalDelegationsService", () => {
         10,
       );
 
-      expect(capturedArgs).toEqual([
+      expect(capturedFields).toEqual({
         address,
-        "desc",
-        0,
-        10,
-        undefined,
-        undefined,
-        delegateAddresses,
-      ]);
+        orderDirection: "desc",
+        skip: 0,
+        limit: 10,
+        fromValue: undefined,
+        toValue: undefined,
+        delegateAddressIn: delegateAddresses,
+      });
     });
   });
 });
