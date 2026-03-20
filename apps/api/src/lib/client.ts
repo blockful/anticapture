@@ -13,6 +13,7 @@ import {
   DAOClient,
   SHUClient,
   AAVEClient,
+  TrueFiClient,
 } from "@/clients";
 
 import { CONTRACT_ADDRESSES } from "./constants";
@@ -71,6 +72,10 @@ export function getClient<
         governor.address,
         linearVotingStrategy.address,
       );
+    }
+    case DaoIdEnum.TRUEFI: {
+      const { governor } = CONTRACT_ADDRESSES[daoId];
+      return new TrueFiClient(client, governor.address);
     }
     case DaoIdEnum.AAVE: {
       return new AAVEClient(client);

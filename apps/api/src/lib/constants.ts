@@ -181,6 +181,21 @@ export const CONTRACT_ADDRESSES = {
       startBlock: 19021698,
     },
   },
+  [DaoIdEnum.TRUEFI]: {
+    blockTime: 12,
+    tokenType: "ERC20",
+    // https://etherscan.io/address/0x23696914Ca9737466D8553a2d619948f548Ee424
+    token: {
+      address: "0x23696914Ca9737466D8553a2d619948f548Ee424",
+      decimals: 8,
+      startBlock: 11884565,
+    },
+    // https://etherscan.io/address/0x585CcA060422ef1779Fb0Dd710A49e7C49A823C9
+    governor: {
+      address: "0x585CcA060422ef1779Fb0Dd710A49e7C49A823C9",
+      startBlock: 14789712,
+    },
+  },
   [DaoIdEnum.AAVE]: {
     blockTime: 12,
     tokenType: "ERC20",
@@ -333,6 +348,9 @@ export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   },
   [DaoIdEnum.ZK]: {
     timelock: "0xe5d21A9179CA2E1F0F327d598D464CcF60d89c3d",
+  },
+  [DaoIdEnum.TRUEFI]: {
+    timelock: "0x4f4AC7a7032A14243aEbDa98Ee04a5D7Fe293d07",
   },
 };
 
