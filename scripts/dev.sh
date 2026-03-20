@@ -96,8 +96,8 @@ wait_for_port() {
 railway_run() {
   local service=$1
   shift
-  if railway run -e dev -s "$service" echo ok >/dev/null 2>&1; then
-    railway run -e dev -s "$service" "$@"
+  if pnpm railway run -e dev -s "$service" echo ok >/dev/null 2>&1; then
+    pnpm railway run -e dev -s "$service" "$@"
   else
     log "Railway service $service not found, running locally with .env"
     "$@"
@@ -122,6 +122,7 @@ GATEWAY_READY=$(mktemp)
 rm -f "$GATEWAY_READY"
 
 log "Starting Gateway..."
+export DAO_API_$DAO_ID=localhost:42069
 run_with_prefix "$C_GATEWAY" "🌎 gateway" "$GATEWAY_READY" "Mesh running at" railway_run api-gateway pnpm gateway dev &
 
 # 3. Wait for Gateway

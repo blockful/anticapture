@@ -14,6 +14,7 @@
     "dev": "bash scripts/dev.sh",
     "clean": "turbo clean && rm -rf node_modules .turbo .parcel-cache coverage *.log *.tsbuildinfo",
     "lint": "turbo lint",
+    "build": "turbo build",
     "lint:fix": "turbo lint:fix",
     "typecheck": "turbo typecheck",
     "prepare": "husky",

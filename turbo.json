@@ -1,10 +1,9 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
-    "build": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**", ".next/cache/**"],
-      "env": ["RESEND_API_KEY", "RESEND_FROM_EMAIL", "CONTACT_EMAIL"]
+    "@anticapture/dasbhoard#build": {
+      "dependsOn": ["@anticapture/#graphql-client#build"],
+      "outputs": ["dist/**", ".next/**", ".next/cache/**"]
     },
     "storybook": {
       "outputs": ["dist/**", ".next/**", ".next/cache/**"],
@@ -52,6 +51,9 @@
     "db:generate": {
       "inputs": ["src/**/*.ts"],
       "outputs": ["drizzle/**"]
+    },
+    "@anticapture/api#dev": {
+      "dependsOn": ["@anticapture/observability#build"]
     },
     "dev": {
       "persistent": true,
