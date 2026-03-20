@@ -1,76 +1,114 @@
 import { z } from "@hono/zod-openapi";
 
 import { proposalsOnchain } from "@/database";
+import {
+  booleanQueryParam,
+  normalizeQueryArray,
+  unixTimestampQueryParam,
+} from "../shared";
 
 export type DBProposal = typeof proposalsOnchain.$inferSelect;
 
-export const ProposalsRequestSchema = z.object({
-  skip: z.coerce
-    .number()
-    .int()
-    .min(0, "Skip must be a non-negative integer")
-    .optional()
-    .default(0),
-  limit: z.coerce
-    .number()
-    .int()
-    .min(1, "Limit must be a positive integer")
-    .max(1000, "Limit cannot exceed 1000")
-    .optional()
-    .default(10),
-  orderDirection: z.enum(["asc", "desc"]).default("desc").optional(),
-  status: z
-    .union([z.string(), z.array(z.string())])
-    .optional()
-    .transform((val) => {
-      if (!val) return undefined;
-      // Always normalize to array and uppercase
-      const normalized = typeof val === "string" ? [val] : val;
-      return normalized.map((v) => v.toUpperCase());
+const StringArrayQuerySchema = z
+  .array(z.string())
+  .openapi("OnchainProposalStatusList");
+
+export const ProposalsRequestSchema = z
+  .object({
+    skip: z.coerce
+      .number()
+      .int()
+      .min(0, "Skip must be a non-negative integer")
+      .optional()
+      .default(0)
+      .openapi({
+        description: "Number of proposals to skip before collecting results.",
+        example: 0,
+      }),
+    limit: z.coerce
+      .number()
+      .int()
+      .min(1, "Limit must be a positive integer")
+      .max(1000, "Limit cannot exceed 1000")
+      .optional()
+      .default(10)
+      .openapi({
+        description: "Maximum number of proposals to return.",
+        example: 10,
+      }),
+    orderDirection: z.enum(["asc", "desc"]).default("desc").optional().openapi({
+      description: "Sort direction for proposal timestamps.",
+      example: "desc",
     }),
-  fromDate: z.coerce.number().optional(),
-  fromEndDate: z.coerce.number().optional(),
-  includeOptimisticProposals: z
-    .enum(["true", "false"])
-    .default("true")
-    .transform((value) => value === "true"),
-});
+    status: z
+      .preprocess(normalizeQueryArray, StringArrayQuerySchema.optional())
+      .transform((values) => values?.map((value) => value.toUpperCase()))
+      .openapi({
+        description:
+          "Proposal status filter. Pass repeated query params or a comma-delimited list.",
+        example: ["ACTIVE"],
+      }),
+    fromDate: unixTimestampQueryParam(
+      "Earliest proposal timestamp, in Unix seconds.",
+    ),
+    fromEndDate: unixTimestampQueryParam(
+      "Latest proposal end timestamp, in Unix seconds.",
+      1700086400,
+    ),
+    includeOptimisticProposals: booleanQueryParam({
+      defaultValue: true,
+      description: "Whether optimistic proposals should be included.",
+      example: true,
+    }).default(true),
+  })
+  .openapi("OnchainProposalsRequest");
 
 export type ProposalsRequest = z.infer<typeof ProposalsRequestSchema>;
 
-export const ProposalResponseSchema = z.object({
-  id: z.string(),
-  daoId: z.string(),
-  txHash: z.string(),
-  proposerAccountId: z.string(),
-  title: z.string(),
-  description: z.string(),
-  startBlock: z.number(),
-  endBlock: z.number(),
-  timestamp: z.string(),
-  status: z.string(),
-  forVotes: z.string(),
-  againstVotes: z.string(),
-  abstainVotes: z.string(),
-  startTimestamp: z.string(),
-  endTimestamp: z.string(),
-  quorum: z.string(),
-  calldatas: z.array(z.string()),
-  values: z.array(z.string()),
-  targets: z.array(z.string()),
-  proposalType: z.number().nullish(),
-});
+export const ProposalResponseSchema = z
+  .object({
+    id: z.string(),
+    daoId: z.string(),
+    txHash: z.string(),
+    proposerAccountId: z.string(),
+    title: z.string(),
+    description: z.string(),
+    startBlock: z.number().int(),
+    endBlock: z.number().int(),
+    timestamp: z.number().int(),
+    status: z.string(),
+    forVotes: z.string(),
+    againstVotes: z.string(),
+    abstainVotes: z.string(),
+    startTimestamp: z.number().int(),
+    endTimestamp: z.number().int(),
+    quorum: z.string(),
+    calldatas: z.array(z.string()),
+    values: z.array(z.string()),
+    targets: z.array(z.string()),
+    proposalType: z.number().int().nullable(),
+  })
+  .openapi("OnchainProposal");
 
-export const ProposalsResponseSchema = z.object({
-  items: z.array(ProposalResponseSchema),
-  totalCount: z.number(),
-});
+export const ProposalsResponseSchema = z
+  .object({
+    items: z.array(ProposalResponseSchema),
+    totalCount: z.number().int(),
+  })
+  .openapi("OnchainProposalsResponse");
 
 export type ProposalsResponse = z.infer<typeof ProposalsResponseSchema>;
 
-export const ProposalRequestSchema = z.object({
-  id: z.string(),
-});
+export const ProposalRequestSchema = z
+  .object({
+    id: z.string().openapi({
+      param: {
+        description: "Onchain proposal identifier.",
+        example: "proposal-1",
+      },
+    }),
+  })
+  .openapi("OnchainProposalParams");
 
 export type ProposalParams = z.infer<typeof ProposalRequestSchema>;
 
@@ -91,16 +129,15 @@ export const ProposalMapper = {
       description: p.description,
       startBlock: p.startBlock,
       endBlock: p.endBlock,
-      timestamp: p.timestamp.toString(),
+      timestamp: Number(p.timestamp),
       status: p.status,
       forVotes: p.forVotes.toString(),
       againstVotes: p.againstVotes.toString(),
       abstainVotes: p.abstainVotes.toString(),
-      endTimestamp: p.endTimestamp.toString(),
-      startTimestamp: (
-        Number(p.endTimestamp) -
-        (p.endBlock - p.startBlock) * blockTime
-      ).toString(),
+      endTimestamp: Number(p.endTimestamp),
+      startTimestamp: Math.trunc(
+        Number(p.endTimestamp) - (p.endBlock - p.startBlock) * blockTime,
+      ),
       quorum: quorum.toString(),
       calldatas: p.calldatas,
       values: p.values.map((v) => v.toString()),

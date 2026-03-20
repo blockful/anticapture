@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@hono/zod-openapi";
 
 import { daoMetricsDayBucket } from "@/database";
 import { SECONDS_IN_DAY } from "@/lib/enums";
@@ -9,10 +9,29 @@ export type DBTokenMetric = typeof daoMetricsDayBucket.$inferSelect;
 
 // Base schema for filters
 const BaseFiltersSchema = z.object({
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
-  orderDirection: z.enum(["asc", "desc"]).optional(),
-  limit: z.number().optional(),
+  startDate: z
+    .string()
+    .openapi({
+      description: "Inclusive lower bound cursor as a Unix timestamp string.",
+      example: "1704067200",
+    })
+    .optional(),
+  endDate: z
+    .string()
+    .openapi({
+      description: "Inclusive upper bound cursor as a Unix timestamp string.",
+      example: "1706745600",
+    })
+    .optional(),
+  orderDirection: z.enum(["asc", "desc"]).optional().openapi({
+    description: "Sort direction for the returned buckets.",
+    example: "asc",
+  }),
+  limit: z.number().optional().openapi({
+    description: "Optional limit used by internal filters.",
+    example: 365,
+    type: "integer",
+  }),
 });
 
 // Repository filters schema
@@ -24,29 +43,71 @@ export const RepositoryFiltersSchema = BaseFiltersSchema.extend({
 // HTTP query schema (extends base with pagination cursors and HTTP validations)
 export const DelegationPercentageRequestSchema = BaseFiltersSchema.extend({
   // Cursor for pagination - returns items after this date (exclusive)
-  after: z.string().optional(),
+  after: z
+    .string()
+    .openapi({
+      description: "Return items after this cursor (exclusive).",
+      example: "1704067200",
+    })
+    .optional(),
   // Cursor for pagination - returns items before this date (exclusive)
-  before: z.string().optional(),
-  orderDirection: z.enum(["asc", "desc"]).default("asc"),
-  limit: z.coerce.number().int().positive().max(1000).default(365),
-});
+  before: z
+    .string()
+    .openapi({
+      description: "Return items before this cursor (exclusive).",
+      example: "1706745600",
+    })
+    .optional(),
+  orderDirection: z.enum(["asc", "desc"]).default("asc").openapi({
+    description: "Sort direction for the returned buckets.",
+    example: "asc",
+  }),
+  limit: z.coerce.number().int().positive().max(1000).default(365).openapi({
+    description: "Maximum number of buckets to return.",
+    example: 365,
+    type: "integer",
+  }),
+}).openapi("DelegationPercentageRequest");
 
-export const DelegationPercentageItemSchema = z.object({
-  date: z.string(),
-  high: z.string(),
-});
+export const DelegationPercentageItemSchema = z
+  .object({
+    date: z.string().openapi({
+      description: "Unix day bucket represented as a timestamp string.",
+      example: "1704067200",
+    }),
+    high: z.string().openapi({
+      description: "Delegation percentage value for the day bucket.",
+      example: "42.75",
+    }),
+  })
+  .openapi("DelegationPercentageItem");
 
-export const PageInfoSchema = z.object({
-  hasNextPage: z.boolean(),
-  endDate: z.string().nullable(),
-  startDate: z.string().nullable(),
-});
+export const PageInfoSchema = z
+  .object({
+    hasNextPage: z
+      .boolean()
+      .openapi({ description: "Whether more items are available." }),
+    endDate: z
+      .string()
+      .nullable()
+      .openapi({ description: "End cursor for the current page." }),
+    startDate: z
+      .string()
+      .nullable()
+      .openapi({ description: "Start cursor for the current page." }),
+  })
+  .openapi("DelegationPercentagePageInfo");
 
-export const DelegationPercentageResponseSchema = z.object({
-  items: z.array(DelegationPercentageItemSchema),
-  totalCount: z.number(),
-  pageInfo: PageInfoSchema,
-});
+export const DelegationPercentageResponseSchema = z
+  .object({
+    items: z.array(DelegationPercentageItemSchema),
+    totalCount: z.number().int().openapi({
+      description: "Total number of matching day buckets.",
+      example: 365,
+    }),
+    pageInfo: PageInfoSchema,
+  })
+  .openapi("DelegationPercentageResponse");
 
 // === INFERRED TYPES ===
 

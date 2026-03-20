@@ -2,67 +2,116 @@ import { z } from "@hono/zod-openapi";
 import { getAddress, isAddress } from "viem";
 
 import { votesOnchain } from "@/database";
+import { normalizeQueryArray, unixTimestampQueryParam } from "../shared";
 
 export type DBVote = typeof votesOnchain.$inferSelect;
 
-export const VotesRequestSchema = z.object({
-  skip: z.coerce
-    .number()
-    .int()
-    .min(0, "Skip must be a non-negative integer")
-    .optional()
-    .default(0),
-  limit: z.coerce
-    .number()
-    .max(1000, "Limit cannot exceed 1000")
-    .optional()
-    .default(10),
-  voterAddressIn: z
-    .union([
-      z
-        .string()
-        .refine((val) => isAddress(val, { strict: false }))
-        .transform((val) => [getAddress(val)]),
-      z.array(
-        z
-          .string()
-          .refine((val) => isAddress(val, { strict: false }))
-          .transform((val) => getAddress(val)),
-      ),
-    ])
-    .optional(),
-  orderBy: z.enum(["timestamp", "votingPower"]).optional().default("timestamp"),
-  orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
-  support: z.coerce
-    .number()
-    .transform((val) => String(val)) // Support for the vote like For, Against, Abstain
-    .optional(),
-  fromDate: z.coerce.number().optional(),
-  toDate: z.coerce.number().optional(),
-});
+const StringArrayQuerySchema = z
+  .array(
+    z.string().refine((val) => isAddress(val, { strict: false }), {
+      message: "Invalid address",
+    }),
+  )
+  .openapi("OnchainVoteAddressList");
+
+export const VotesRequestSchema = z
+  .object({
+    skip: z.coerce
+      .number()
+      .int()
+      .min(0, "Skip must be a non-negative integer")
+      .optional()
+      .default(0)
+      .openapi({
+        description: "Number of votes to skip before collecting results.",
+        example: 0,
+      }),
+    limit: z.coerce
+      .number()
+      .int()
+      .min(1, "Limit must be a positive integer")
+      .max(1000, "Limit cannot exceed 1000")
+      .optional()
+      .default(10)
+      .openapi({
+        description: "Maximum number of votes to return.",
+        example: 10,
+      }),
+    voterAddressIn: z
+      .preprocess(
+        normalizeQueryArray,
+        StringArrayQuerySchema.transform((values) =>
+          values.map((val) => getAddress(val)),
+        ).optional(),
+      )
+      .openapi({
+        description:
+          "Filter by one or more voter addresses. Pass repeated query params or a comma-delimited list.",
+      }),
+    orderBy: z
+      .enum(["timestamp", "votingPower"])
+      .optional()
+      .default("timestamp")
+      .openapi({
+        description: "Sort votes by timestamp or voting power.",
+        example: "timestamp",
+      }),
+    orderDirection: z.enum(["asc", "desc"]).optional().default("desc").openapi({
+      description: "Sort direction for the selected order field.",
+      example: "desc",
+    }),
+    support: z
+      .string()
+      .regex(/^\d+$/, "Support must be a numeric vote choice")
+      .optional()
+      .openapi({
+        description: "Numeric support value encoded as a string.",
+        example: "1",
+      }),
+    fromDate: unixTimestampQueryParam(
+      "Earliest vote timestamp, in Unix seconds.",
+    ),
+    toDate: unixTimestampQueryParam(
+      "Latest vote timestamp, in Unix seconds.",
+      1700086400,
+    ),
+  })
+  .openapi("OnchainVotesRequest");
 
 export type VotesRequest = z.infer<typeof VotesRequestSchema>;
 
-export const VoteResponseSchema = z.object({
-  voterAddress: z.string(),
-  transactionHash: z.string(),
-  proposalId: z.string(),
-  support: z.coerce.number(),
-  votingPower: z
-    .union([z.string(), z.bigint().transform((val) => val.toString())])
-    .openapi({ type: "string" }),
-  reason: z.string().nullish(),
-  timestamp: z
-    .union([z.number(), z.bigint().transform((val) => Number(val))])
-    .openapi({ type: "integer" }),
-  proposalTitle: z.string().nullish(),
-});
+export const VoteResponseSchema = z
+  .object({
+    voterAddress: z.string(),
+    transactionHash: z.string(),
+    proposalId: z.string(),
+    support: z.string(),
+    votingPower: z
+      .bigint()
+      .transform((val) => val.toString())
+      .openapi({
+        type: "string",
+        description: "Voting power encoded as a decimal string.",
+      }),
+    reason: z.string().nullish(),
+    timestamp: z
+      .bigint()
+      .transform((val) => Number(val))
+      .openapi({
+        type: "integer",
+        description: "Vote timestamp in Unix seconds.",
+      }),
+    proposalTitle: z.string().nullish(),
+  })
+  .openapi("OnchainVote");
 
 export type VoteResponse = z.infer<typeof VoteResponseSchema>;
 
-export const VotesResponseSchema = z.object({
-  items: z.array(VoteResponseSchema),
-  totalCount: z.number(),
-});
+export const VotesResponseSchema = z
+  .object({
+    items: z.array(VoteResponseSchema),
+    totalCount: z.number().int(),
+  })
+  .openapi("OnchainVotesResponse");
 
 export type VotesResponse = z.infer<typeof VotesResponseSchema>;

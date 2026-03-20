@@ -1,7 +1,9 @@
-import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
+import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import {
+  ErrorResponseSchema,
   OffchainProposalResponseSchema,
+  OffchainProposalRequestSchema,
   OffchainProposalsResponseSchema,
   OffchainProposalsRequestSchema,
 } from "@/mappers";
@@ -58,7 +60,7 @@ export function offchainProposals(
       description: "Returns a single offchain (Snapshot) proposal by its ID",
       tags: ["offchain"],
       request: {
-        params: z.object({ id: z.string() }),
+        params: OffchainProposalRequestSchema,
       },
       responses: {
         200: {
@@ -71,6 +73,11 @@ export function offchainProposals(
         },
         404: {
           description: "Proposal not found",
+          content: {
+            "application/json": {
+              schema: ErrorResponseSchema,
+            },
+          },
         },
       },
     }),
@@ -80,7 +87,10 @@ export function offchainProposals(
       const proposal = await service.getProposalById(id);
 
       if (!proposal) {
-        return context.json({ error: "Proposal not found" }, 404);
+        return context.json(
+          ErrorResponseSchema.parse({ error: "Proposal not found" }),
+          404,
+        );
       }
 
       return context.json(OffchainProposalResponseSchema.parse(proposal));

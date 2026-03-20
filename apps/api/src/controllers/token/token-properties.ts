@@ -2,7 +2,11 @@ import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
-import { TokenPropertiesResponseSchema, TokenMapper } from "@/mappers";
+import {
+  ErrorResponseSchema,
+  TokenPropertiesResponseSchema,
+  TokenMapper,
+} from "@/mappers";
 import { TokenService } from "@/services";
 
 interface TokenPriceClient {
@@ -11,6 +15,15 @@ interface TokenPriceClient {
     targetCurrency: string,
   ): Promise<string>;
 }
+
+const TokenPropertiesQuerySchema = z
+  .object({
+    currency: z.enum(["eth", "usd"]).default("usd").openapi({
+      description: "Currency to use when fetching token price data.",
+      example: "usd",
+    }),
+  })
+  .openapi("TokenPropertiesQuery");
 
 export function token(
   app: Hono,
@@ -27,9 +40,7 @@ export function token(
       description: "Get property data for a specific token",
       tags: ["tokens"],
       request: {
-        query: z.object({
-          currency: z.enum(["eth", "usd"]).default("usd"),
-        }),
+        query: TokenPropertiesQuerySchema,
       },
       responses: {
         200: {
@@ -43,6 +54,11 @@ export function token(
         },
         404: {
           description: "Token not found",
+          content: {
+            "application/json": {
+              schema: ErrorResponseSchema,
+            },
+          },
         },
       },
     }),
@@ -57,7 +73,10 @@ export function token(
       );
 
       if (!tokenProps) {
-        return context.json({ error: "Token not found" }, 404);
+        return context.json(
+          ErrorResponseSchema.parse({ error: "Token not found" }),
+          404,
+        );
       }
 
       return context.json(TokenMapper.toApi(tokenProps, priceData), 200);

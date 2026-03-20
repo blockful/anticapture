@@ -2,6 +2,7 @@ import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import { DAOClient } from "@/clients";
 import {
+  ErrorResponseSchema,
   ProposalsResponseSchema,
   ProposalsRequestSchema,
   ProposalRequestSchema,
@@ -95,6 +96,11 @@ export function proposals(
         },
         404: {
           description: "Proposal not found",
+          content: {
+            "application/json": {
+              schema: ErrorResponseSchema,
+            },
+          },
         },
       },
     }),
@@ -104,7 +110,10 @@ export function proposals(
       const proposal = await service.getProposalById(id);
 
       if (!proposal) {
-        return context.json({ error: "Proposal not found" }, 404);
+        return context.json(
+          ErrorResponseSchema.parse({ error: "Proposal not found" }),
+          404,
+        );
       }
 
       const [quorum] = await Promise.all([
