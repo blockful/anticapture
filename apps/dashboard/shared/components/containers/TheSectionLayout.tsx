@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 import { SubSection } from "@/shared/components/design-system/section";
-import { SectionTitle } from "@/shared/components/design-system/section/SectionTitle";
+import { SectionTitle } from "@/shared/components/design-system/section";
 import { getDateRange, cn } from "@/shared/utils";
 
 interface TheSectionLayoutProps {

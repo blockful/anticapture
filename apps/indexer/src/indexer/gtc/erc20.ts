@@ -15,6 +15,7 @@ import {
   CEXAddresses,
   DEXAddresses,
   TreasuryAddresses,
+  NonCirculatingAddresses,
 } from "@/lib/constants";
 import {
   updateDelegatedSupply,
@@ -50,6 +51,9 @@ export function GTCTokenIndexer(address: Address, decimals: number) {
       const dexAddressList = Object.values(DEXAddresses[daoId]);
       const burningAddressList = Object.values(BurningAddresses[daoId]);
       const treasuryAddressList = Object.values(TreasuryAddresses[daoId]);
+      const nonCirculatingAddressList = Object.values(
+        NonCirculatingAddresses[daoId],
+      );
 
       await tokenTransfer(
         context,
@@ -101,6 +105,19 @@ export function GTCTokenIndexer(address: Address, decimals: number) {
         "treasury",
         treasuryAddressList,
         MetricTypesEnum.TREASURY,
+        from,
+        to,
+        amount,
+        daoId,
+        address,
+        timestamp,
+      );
+
+      await updateSupplyMetric(
+        context,
+        "nonCirculatingSupply",
+        nonCirculatingAddressList,
+        MetricTypesEnum.NON_CIRCULATING_SUPPLY,
         from,
         to,
         amount,

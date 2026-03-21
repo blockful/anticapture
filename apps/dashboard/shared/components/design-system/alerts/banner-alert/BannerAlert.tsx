@@ -1,29 +1,14 @@
 "use client";
 
 import { X } from "lucide-react";
-import type { ReactNode } from "react";
 import { useState, useEffect } from "react";
 
 import { IconButton } from "@/shared/components/design-system/buttons/icon-button/IconButton";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
-import { BulletDivider } from "@/shared/components/design-system/section/BulletDivider";
+import { BulletDivider } from "@/shared/components/design-system/section";
 import { cn } from "@/shared/utils/cn";
 
-type BannerLink = {
-  url: string;
-  text: string;
-  openInNewTab?: boolean;
-};
-
-interface BannerAlertProps {
-  icon: ReactNode;
-  text: string;
-  link?: BannerLink;
-  links?: BannerLink[];
-  storageKey: string;
-  variant?: "default" | "highlight";
-  persist?: boolean;
-}
+import type { BannerAlertProps } from "@/shared/components/design-system/alerts/types";
 
 const mapVariantToColor = {
   default: "bg-surface-banner-default",
@@ -33,11 +18,11 @@ const mapVariantToColor = {
 export const BannerAlert = ({
   icon,
   text,
-  link,
   links,
   storageKey,
   variant = "default",
   persist = true,
+  className,
 }: BannerAlertProps) => {
   // Initialize as null to prevent rendering during hydration
   const [isVisible, setIsVisible] = useState<boolean | null>(null);
@@ -63,13 +48,14 @@ export const BannerAlert = ({
   // Don't render anything until we've checked localStorage
   if (isVisible === null || isVisible === false) return null;
 
-  const allLinks = links ?? (link ? [link] : []);
+  const allLinks = links ? (Array.isArray(links) ? links : [links]) : [];
 
   return (
     <div
       className={cn(
         "text-tangerine flex w-full items-center justify-between gap-2 px-3 py-1 text-sm",
         mapVariantToColor[variant],
+        className,
       )}
     >
       <div className="flex items-center gap-2 tracking-wider lg:flex-row">

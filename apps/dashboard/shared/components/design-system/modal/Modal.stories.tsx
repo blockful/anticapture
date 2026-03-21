@@ -9,7 +9,7 @@ import type { ModalProps } from "@/shared/components/design-system/modal/types";
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta: Meta<ModalProps> = {
-  title: "Design System/Modal/Modal",
+  title: "Feedback/Modal/Modal",
   component: Modal,
   parameters: {
     layout: "centered",

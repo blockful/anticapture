@@ -12,6 +12,7 @@ import {
   LendingAddresses,
   MetricTypesEnum,
   TreasuryAddresses,
+  NonCirculatingAddresses,
 } from "@/lib/constants";
 import {
   updateSupplyMetric,
@@ -40,6 +41,9 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
     const lendingAddressList = Object.values(LendingAddresses[daoId]);
     const burningAddressList = Object.values(BurningAddresses[daoId]);
     const treasuryAddressList = Object.values(TreasuryAddresses[daoId]);
+    const nonCirculatingAddressList = Object.values(
+      NonCirculatingAddresses[daoId],
+    );
 
     await tokenTransfer(
       context,
@@ -105,6 +109,19 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
       "treasury",
       treasuryAddressList,
       MetricTypesEnum.TREASURY,
+      from,
+      to,
+      value,
+      daoId,
+      address,
+      timestamp,
+    );
+
+    await updateSupplyMetric(
+      context,
+      "nonCirculatingSupply",
+      nonCirculatingAddressList,
+      MetricTypesEnum.NON_CIRCULATING_SUPPLY,
       from,
       to,
       value,

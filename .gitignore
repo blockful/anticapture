@@ -2,7 +2,10 @@ node_modules/*
 .git/*
 out/
 .turbo
-.env# Logs
+.env
+*.dump
+
+# Logs
 logs
 *.log
 npm-debug.log*
@@ -151,3 +154,5 @@ dist
 .github/copilot-instructions.md
 
 .claude/worktrees
+.claude/settings.local.json
+**/.claude/settings.local.json

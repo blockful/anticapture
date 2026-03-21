@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs";
 import { Textarea } from "@/shared/components/design-system/form/fields/textarea/Textarea";
 
 const meta: Meta<typeof Textarea> = {
-  title: "Design System/Form/Textarea",
+  title: "Data Entry/Form/Textarea",
   component: Textarea,
   parameters: {
     layout: "centered",

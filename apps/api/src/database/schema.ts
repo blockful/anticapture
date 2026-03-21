@@ -21,6 +21,9 @@ export const token = pgTable("token", (drizzle) => ({
   lendingSupply: bigint({ mode: "bigint" }).notNull().default(0n),
   circulatingSupply: bigint({ mode: "bigint" }).notNull().default(0n),
   treasury: bigint({ mode: "bigint" }).notNull().default(0n),
+  nonCirculatingSupply: bigint("non_circulating_supply", { mode: "bigint" })
+    .notNull()
+    .default(0n),
 }));
 
 export const account = pgTable("account", (drizzle) => ({

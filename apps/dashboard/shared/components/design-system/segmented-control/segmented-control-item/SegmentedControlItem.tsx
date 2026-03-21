@@ -1,6 +1,6 @@
 // ⚠️ Internal component — use <SegmentedControl> instead of rendering SegmentedControlItem directly.
 
-import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
+import { BadgeStatus } from "@/shared/components/design-system/badges";
 import { sizeStyles } from "@/shared/components/design-system/segmented-control/styles";
 import type { SegmentedControlItemProps } from "@/shared/components/design-system/segmented-control/types";
 import { cn } from "@/shared/utils/cn";

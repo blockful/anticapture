@@ -720,6 +720,7 @@ export type CompareVotes_200_Response = {
 
 export type Dao_200_Response = {
   __typename?: 'dao_200_response';
+  alreadySupportCalldataReview: Scalars['Boolean']['output'];
   chainId: Scalars['Float']['output'];
   id: Scalars['String']['output'];
   proposalThreshold: Scalars['String']['output'];
