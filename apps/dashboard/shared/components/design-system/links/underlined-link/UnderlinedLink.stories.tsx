@@ -5,7 +5,7 @@ import { UnderlinedLink } from "@/shared/components/design-system/links/underlin
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta: Meta<typeof UnderlinedLink> = {
-  title: "Design System/Links/UnderlinedLink",
+  title: "Navigation/Links/UnderlinedLink",
   component: UnderlinedLink,
   parameters: {
     layout: "centered",

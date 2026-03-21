@@ -7,7 +7,7 @@ import type {
 } from "@/shared/components/design-system/logo/Logo";
 
 const meta = {
-  title: "Design System/Primitives/Logo",
+  title: "Foundation/Logo",
   component: Logo,
   parameters: {
     layout: "centered",

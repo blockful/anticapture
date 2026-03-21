@@ -1,4 +1,4 @@
-import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
+import { BadgeStatus } from "@/shared/components/design-system/badges";
 import { sizeStyles } from "@/shared/components/design-system/tabs/styles";
 import type { TabProps } from "@/shared/components/design-system/tabs/types";
 import { cn } from "@/shared/utils/cn";

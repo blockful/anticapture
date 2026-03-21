@@ -30,6 +30,7 @@ import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 
 import { SHUGovernorIndexer, SHUTokenIndexer } from "./indexer/shu";
+import { TrueFiTokenIndexer, TrueFiGovernorIndexer } from "./indexer/truefi";
 import {
   AAVETokenIndexer,
   stkAAVETokenIndexer,
@@ -103,6 +104,11 @@ switch (daoId) {
     const { token } = CONTRACT_ADDRESSES[daoId];
     SHUTokenIndexer(token.address, token.decimals);
     SHUGovernorIndexer(blockTime);
+    break;
+  }
+  case DaoIdEnum.TRUEFI: {
+    TrueFiTokenIndexer(token.address, token.decimals);
+    TrueFiGovernorIndexer(blockTime);
     break;
   }
   case DaoIdEnum.AAVE: {

@@ -183,6 +183,20 @@ export const CONTRACT_ADDRESSES = {
       startBlock: 19021698,
     },
   },
+  [DaoIdEnum.TRUEFI]: {
+    blockTime: 12,
+    // https://etherscan.io/address/0x23696914Ca9737466D8553a2d619948f548Ee424
+    token: {
+      address: "0x23696914Ca9737466D8553a2d619948f548Ee424",
+      decimals: 8,
+      startBlock: 11884565,
+    },
+    // https://etherscan.io/address/0x585CcA060422ef1779Fb0Dd710A49e7C49A823C9
+    governor: {
+      address: "0x585CcA060422ef1779Fb0Dd710A49e7C49A823C9",
+      startBlock: 14789712,
+    },
+  },
   [DaoIdEnum.AAVE]: {
     blockTime: 1,
     token: {
@@ -348,6 +362,9 @@ export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   },
   [DaoIdEnum.SHU]: {
     timelock: "0x36bD3044ab68f600f6d3e081056F34f2a58432c4",
+  },
+  [DaoIdEnum.TRUEFI]: {
+    timelock: "0x4f4AC7a7032A14243aEbDa98Ee04a5D7Fe293d07",
   },
 };
 
@@ -562,6 +579,7 @@ export const CEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     OKX3: "0xecf17c7f6a6090f1edd21e0beb2268197270fb44",
   },
   [DaoIdEnum.SHU]: {},
+  [DaoIdEnum.TRUEFI]: {},
 };
 
 export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -631,6 +649,7 @@ export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   [DaoIdEnum.SHU]: {
     "Uniswap V3": "0x7A922aea89288d8c91777BeECc68DF4A17151df1",
   },
+  [DaoIdEnum.TRUEFI]: {},
 };
 
 export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -679,6 +698,7 @@ export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     Venus: "0x697a70779c1a03ba2bd28b7627a902bff831b616",
   },
   [DaoIdEnum.SHU]: {},
+  [DaoIdEnum.TRUEFI]: {},
 };
 
 export const BurningAddresses: Record<
@@ -755,6 +775,11 @@ export const BurningAddresses: Record<
     ZeroAddress: zeroAddress,
     Dead: "0x000000000000000000000000000000000000dEaD",
     TokenContract: "0xe485E2f1bab389C08721B291f6b59780feC83Fd7",
+  },
+  [DaoIdEnum.TRUEFI]: {
+    ZeroAddress: zeroAddress,
+    Dead: "0x000000000000000000000000000000000000dEaD",
+    TokenContract: "0x23696914Ca9737466D8553a2d619948f548Ee424",
   },
 };
 
