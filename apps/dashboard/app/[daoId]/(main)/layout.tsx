@@ -1,32 +1,17 @@
 import type { ReactNode } from "react";
 
-import NotFound from "@/app/not-found";
 import { Footer } from "@/shared/components/design-system/footer/Footer";
-import type { DaoIdEnum } from "@/shared/types/daos";
-import { ALL_DAOS } from "@/shared/types/daos";
 import { HeaderDAOSidebar, HeaderSidebar, StickyPageHeader } from "@/widgets";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
-// import { BaseHeaderLayoutSidebar } from "@/shared/components";
-
-type DaoParams = {
-  daoId: string;
-};
 
 interface DaoLayoutProps {
   children: ReactNode;
-  params: Promise<DaoParams>;
+  params: Promise<{ daoId: string }>;
 }
 
 export default async function DaoLayout({ children, params }: DaoLayoutProps) {
-  const { daoId } = await params;
-  const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
+  await params;
 
-  // Check if DAO exists and handle support stages
-  if (!ALL_DAOS.includes(daoIdEnum)) {
-    return <NotFound />;
-  }
-
-  // For FULL, IN_ANALYSIS and ELECTION stages, render the layout with appropriate providers
   return (
     <div className="bg-surface-background dark relative mx-auto flex h-screen max-w-screen-2xl">
       <div className="active relative hidden h-screen lg:flex">
