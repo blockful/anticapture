@@ -71,6 +71,7 @@ function createStubDaoClient(): DAOClient {
     getCurrentBlockNumber: async () => 1000000,
     getBlockTime: async (_blockNumber) => 1700000000,
     alreadySupportCalldataReview: () => false,
+    supportOffchainData: () => false,
     calculateQuorum: () => 0n,
     getProposalStatus: async (_proposal, _currentBlock, _currentTimestamp) =>
       "EXECUTED",

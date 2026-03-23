@@ -58,6 +58,9 @@ class SimpleDAOClient implements DAOClient {
   ) {
     return Promise.resolve("ACTIVE");
   }
+  supportOffchainData() {
+    return false;
+  }
 }
 
 describe("Dao Controller", () => {
@@ -100,6 +103,7 @@ describe("Dao Controller", () => {
         votingPeriod: "40320",
         timelockDelay: "172800",
         alreadySupportCalldataReview: false,
+        supportOffchainData: false,
       });
     });
   });
