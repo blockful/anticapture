@@ -79,6 +79,21 @@ export const CONTRACT_ADDRESSES = {
       startBlock: 12497481,
     },
   },
+  [DaoIdEnum.LIL_NOUNS]: {
+    blockTime: 12,
+    tokenType: "ERC721",
+    token: {
+      // https://etherscan.io/address/0x4b10701Bfd7BFEdc47d50562b76b436fbB5BdB3B
+      address: "0x4b10701Bfd7BFEdc47d50562b76b436fbB5BdB3B",
+      decimals: 0,
+      startBlock: 14736710,
+    },
+    governor: {
+      // https://etherscan.io/address/0x5d2C31ce16924C2a71D317e5BbFd5ce387854039
+      address: "0x5d2C31ce16924C2a71D317e5BbFd5ce387854039",
+      startBlock: 14736719,
+    },
+  },
   [DaoIdEnum.NOUNS]: {
     blockTime: 12,
     tokenType: "ERC721",
@@ -161,6 +176,21 @@ export const CONTRACT_ADDRESSES = {
       startBlock: 55519658,
     },
   },
+  [DaoIdEnum.FLUID]: {
+    blockTime: 12,
+    tokenType: "ERC20",
+    // https://etherscan.io/address/0x6f40d4A6237C257fff2dB00FA0510DeEECd303eb
+    token: {
+      address: "0x6f40d4A6237C257fff2dB00FA0510DeEECd303eb",
+      decimals: 18,
+      startBlock: 12183236,
+    },
+    // https://etherscan.io/address/0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B
+    governor: {
+      address: "0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B",
+      startBlock: 12183245,
+    },
+  },
   [DaoIdEnum.SHU]: {
     blockTime: 12,
     tokenType: "ERC20",
@@ -226,6 +256,9 @@ export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     "Foundation Locked Grants": "0xE4553b743E74dA3424Ac51f8C1E586fd43aE226F",
   },
   [DaoIdEnum.SHU]: { timelock: "0x36bD3044ab68f600f6d3e081056F34f2a58432c4" },
+  [DaoIdEnum.LIL_NOUNS]: {
+    timelock: "0xd5f279ff9EB21c6D40C8f345a66f2751C4eeA1fB",
+  },
   [DaoIdEnum.NOUNS]: {
     timelock: "0xb1a32fc9f9d8b2cf86c068cae13108809547ef71",
     auction: "0x830BD73E4184ceF73443C15111a1DF14e495C706",
@@ -350,6 +383,13 @@ export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   [DaoIdEnum.ZK]: {
     timelock: "0xe5d21A9179CA2E1F0F327d598D464CcF60d89c3d",
   },
+  [DaoIdEnum.FLUID]: {
+    "InstaDApp Treasury": "0x28849D2b63fA8D361e5fc15cB8aBB13019884d09",
+    "Fluid Liquidity": "0x52Aa899454998Be5b000Ad077a46Bbe360F4e497",
+    "Chainlink CCIP LockReleaseTokenPool":
+      "0x639f35C5E212D61Fe14Bd5CD8b66aAe4df11a50c",
+    InstaTimelock: "0xC7Cb1dE2721BFC0E0DA1b9D526bCdC54eF1C0eFC",
+  },
 };
 
 export enum ProposalStatus {
@@ -362,6 +402,7 @@ export enum ProposalStatus {
   EXPIRED = "EXPIRED",
   PENDING_EXECUTION = "PENDING_EXECUTION",
   EXECUTED = "EXECUTED",
+  VETOED = "VETOED",
   NO_QUORUM = "NO_QUORUM",
 }
 

@@ -1,6 +1,7 @@
 import { env } from "@/env";
 import { ARBTokenIndexer } from "@/indexer/arb";
 import { COMPGovernorIndexer, COMPTokenIndexer } from "@/indexer/comp";
+import { FLUIDGovernorIndexer, FLUIDTokenIndexer } from "@/indexer/fluid";
 import {
   GovernorIndexer as ENSGovernorIndexer,
   ENSTokenIndexer,
@@ -9,6 +10,10 @@ import {
   GovernorIndexer as GTCGovernorIndexer,
   GTCTokenIndexer,
 } from "@/indexer/gtc";
+import {
+  LilNounsTokenIndexer,
+  LilNounsGovernorIndexer,
+} from "@/indexer/lil-nouns";
 import {
   NounsTokenIndexer,
   GovernorIndexer as NounsGovernorIndexer,
@@ -79,6 +84,11 @@ switch (daoId) {
     NounsGovernorIndexer(blockTime);
     break;
   }
+  case DaoIdEnum.LIL_NOUNS: {
+    LilNounsTokenIndexer(token.address, token.decimals);
+    LilNounsGovernorIndexer(blockTime);
+    break;
+  }
   case DaoIdEnum.SCR: {
     SCRTokenIndexer(token.address, token.decimals);
     SCRGovernorIndexer(blockTime);
@@ -103,6 +113,11 @@ switch (daoId) {
     const { token } = CONTRACT_ADDRESSES[daoId];
     SHUTokenIndexer(token.address, token.decimals);
     SHUGovernorIndexer(blockTime);
+    break;
+  }
+  case DaoIdEnum.FLUID: {
+    FLUIDTokenIndexer(token.address, token.decimals);
+    FLUIDGovernorIndexer(blockTime);
     break;
   }
   case DaoIdEnum.AAVE: {
