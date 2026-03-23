@@ -183,6 +183,34 @@ export const CONTRACT_ADDRESSES = {
       startBlock: 19021698,
     },
   },
+  [DaoIdEnum.FLUID]: {
+    blockTime: 12,
+    // https://etherscan.io/address/0x6f40d4A6237C257fff2dB00FA0510DeEECd303eb
+    token: {
+      address: "0x6f40d4A6237C257fff2dB00FA0510DeEECd303eb",
+      decimals: 18,
+      startBlock: 12183236,
+    },
+    // https://etherscan.io/address/0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B
+    governor: {
+      address: "0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B",
+      startBlock: 12183245,
+    },
+  },
+  [DaoIdEnum.LIL_NOUNS]: {
+    blockTime: 12,
+    token: {
+      // https://etherscan.io/address/0x4b10701Bfd7BFEdc47d50562b76b436fbB5BdB3B
+      address: "0x4b10701Bfd7BFEdc47d50562b76b436fbB5BdB3B",
+      decimals: 0,
+      startBlock: 14736710,
+    },
+    governor: {
+      // https://etherscan.io/address/0x5d2C31ce16924C2a71D317e5BbFd5ce387854039
+      address: "0x5d2C31ce16924C2a71D317e5BbFd5ce387854039",
+      startBlock: 14736719,
+    },
+  },
   [DaoIdEnum.AAVE]: {
     blockTime: 1,
     token: {
@@ -240,6 +268,9 @@ export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   [DaoIdEnum.NOUNS]: {
     timelock: "0xb1a32fc9f9d8b2cf86c068cae13108809547ef71",
     auction: "0x830BD73E4184ceF73443C15111a1DF14e495C706",
+  },
+  [DaoIdEnum.LIL_NOUNS]: {
+    timelock: "0xd5f279ff9EB21c6D40C8f345a66f2751C4eeA1fB",
   },
   [DaoIdEnum.TEST]: {},
   [DaoIdEnum.GTC]: {
@@ -365,6 +396,13 @@ export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   [DaoIdEnum.SHU]: {
     timelock: "0x36bD3044ab68f600f6d3e081056F34f2a58432c4",
   },
+  [DaoIdEnum.FLUID]: {
+    "InstaDApp Treasury": "0x28849D2b63fA8D361e5fc15cB8aBB13019884d09",
+    "Fluid Liquidity": "0x52Aa899454998Be5b000Ad077a46Bbe360F4e497",
+    "Chainlink CCIP LockReleaseTokenPool":
+      "0x639f35C5E212D61Fe14Bd5CD8b66aAe4df11a50c",
+    InstaTimelock: "0xC7Cb1dE2721BFC0E0DA1b9D526bCdC54eF1C0eFC",
+  },
 };
 
 export const CEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -428,6 +466,7 @@ export const CEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   [DaoIdEnum.ARB]: {},
   [DaoIdEnum.AAVE]: {},
   [DaoIdEnum.NOUNS]: {},
+  [DaoIdEnum.LIL_NOUNS]: {},
   [DaoIdEnum.OP]: {
     "Binance 1": "0xF977814e90dA44bFA03b6295A0616a897441aceC",
     "Binance 2": "0x5a52E96BAcdaBb82fd05763E25335261B270Efcb",
@@ -578,6 +617,11 @@ export const CEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     OKX3: "0xecf17c7f6a6090f1edd21e0beb2268197270fb44",
   },
   [DaoIdEnum.SHU]: {},
+  [DaoIdEnum.FLUID]: {
+    MEXC: "0x9642b23Ed1E01Df1092B92641051881a322F5D4E",
+    Gate: "0x0D0707963952f2fBA59dD06f2b425ace40b492Fe",
+    Bitvavo: "0xaB782bc7D4a2b306825de5a7730034F8F63ee1bC",
+  },
 };
 
 export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -603,6 +647,7 @@ export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   [DaoIdEnum.ARB]: {},
   [DaoIdEnum.AAVE]: {},
   [DaoIdEnum.NOUNS]: {},
+  [DaoIdEnum.LIL_NOUNS]: {},
   [DaoIdEnum.OP]: {
     "Velodrome Finance": "0x47029bc8f5CBe3b464004E87eF9c9419a48018cd",
     "Uniswap 1": "0x9a13F98Cb987694C9F086b1F5eB990EeA8264Ec3",
@@ -647,6 +692,9 @@ export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   [DaoIdEnum.SHU]: {
     "Uniswap V3": "0x7A922aea89288d8c91777BeECc68DF4A17151df1",
   },
+  [DaoIdEnum.FLUID]: {
+    "Uniswap V3 INST/WETH": "0xc1cd3D0913f4633b43FcdDBCd7342bC9b71C676f",
+  },
 };
 
 export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -662,6 +710,7 @@ export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   [DaoIdEnum.ARB]: {},
   [DaoIdEnum.AAVE]: {},
   [DaoIdEnum.NOUNS]: {},
+  [DaoIdEnum.LIL_NOUNS]: {},
   [DaoIdEnum.OP]: {
     Aave: "0x513c7E3a9c69cA3e22550eF58AC1C0088e918FFf",
     Superfluid: "0x1828Bff08BD244F7990edDCd9B19cc654b33cDB4",
@@ -695,6 +744,7 @@ export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     Venus: "0x697a70779c1a03ba2bd28b7627a902bff831b616",
   },
   [DaoIdEnum.SHU]: {},
+  [DaoIdEnum.FLUID]: {},
 };
 
 export const BurningAddresses: Record<
@@ -747,6 +797,11 @@ export const BurningAddresses: Record<
     Dead: "0x000000000000000000000000000000000000dEaD",
     TokenContract: "0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03",
   },
+  [DaoIdEnum.LIL_NOUNS]: {
+    ZeroAddress: zeroAddress,
+    Dead: "0x0000000000000000000000000000000000000000",
+    TokenContract: "0x4b10701Bfd7BFEdc47d50562b76b436fbB5BdB3B",
+  },
   [DaoIdEnum.SCR]: {
     ZeroAddress: zeroAddress,
     Dead: "0x000000000000000000000000000000000000dEaD",
@@ -772,6 +827,11 @@ export const BurningAddresses: Record<
     Dead: "0x000000000000000000000000000000000000dEaD",
     TokenContract: "0xe485E2f1bab389C08721B291f6b59780feC83Fd7",
   },
+  [DaoIdEnum.FLUID]: {
+    ZeroAddress: zeroAddress,
+    Dead: "0x000000000000000000000000000000000000dEaD",
+    TokenContract: "0x6f40d4A6237C257fff2dB00FA0510DeEECd303eb",
+  },
 };
 
 export const NonCirculatingAddresses: Record<
@@ -795,6 +855,7 @@ export const NonCirculatingAddresses: Record<
   [DaoIdEnum.TEST]: {},
   [DaoIdEnum.GTC]: {},
   [DaoIdEnum.SCR]: {},
+  [DaoIdEnum.FLUID]: {},
   [DaoIdEnum.COMP]: {},
   [DaoIdEnum.OBOL]: {},
   [DaoIdEnum.ZK]: {
@@ -809,6 +870,7 @@ export const NonCirculatingAddresses: Record<
     "ZKsync Association Allocation":
       "0x0681e3808a0aa12004fb815ebb4515dc823cfbb4",
   },
+  [DaoIdEnum.LIL_NOUNS]: {},
   [DaoIdEnum.SHU]: {},
 };
 
@@ -821,6 +883,7 @@ export enum ProposalStatus {
   QUEUED = "QUEUED",
   EXPIRED = "EXPIRED",
   EXECUTED = "EXECUTED",
+  VETOED = "VETOED",
   NO_QUORUM = "NO_QUORUM",
 }
 

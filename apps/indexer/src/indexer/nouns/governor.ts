@@ -18,7 +18,7 @@ export function GovernorIndexer(blockTime: number) {
       proposalId: event.args.proposalId.toString(),
       voter: event.args.voter,
       reason: event.args.reason,
-      support: event.args.support ? 1 : 0,
+      support: event.args.support,
       timestamp: event.block.timestamp,
       txHash: event.transaction.hash,
       votingPower: event.args.votes,
@@ -65,6 +65,14 @@ export function GovernorIndexer(blockTime: number) {
       context,
       event.args.id.toString(),
       ProposalStatus.QUEUED,
+    );
+  });
+
+  ponder.on(`NounsGovernor:ProposalVetoed`, async ({ event, context }) => {
+    await updateProposalStatus(
+      context,
+      event.args.id.toString(),
+      ProposalStatus.VETOED,
     );
   });
 
