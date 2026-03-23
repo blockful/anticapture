@@ -23,6 +23,8 @@ Before starting, gather these details about the DAO:
 - **Treasury addresses**: DAO multisigs, vesting contracts
 - **CEX/DEX/Lending addresses**: Known exchange wallets, LP pools, lending contracts holding the token
 - **Governance rules**: Voting delay, period, quorum calculation, cancel function, vote logic
+- **CoinGecko token ID**: The slug from the CoinGecko URL (e.g. `"uniswap"`, `"fluid"`) — ask the user
+- **Event relevance thresholds**: LOW/MEDIUM/HIGH token amounts for feed relevance filtering — ask the user
 
 ## Integration Checklist
 
@@ -225,56 +227,23 @@ Follow the pattern in `apps/api/src/clients/ens/index.ts`.
 
 Add `export * from "./<dao>";`
 
-### Step 4: Gateway
+#### 3d. Event Relevance (`apps/api/src/lib/eventRelevance.ts`)
 
-The gateway auto-discovers DAOs from `DAO_API_*` environment variables. Add:
+**Ask the user** for the LOW/MEDIUM/HIGH relevance thresholds for TRANSFER, DELEGATION, and VOTE events. These determine how events appear in the feed. The `DAO_RELEVANCE_THRESHOLDS` map is a `Record<DaoIdEnum, EventRelevanceMap>` — the compiler will error if the new DAO is missing. Default to `EMPTY_THRESHOLDS` for all event types and let the user provide specific values later.
 
-```
-DAO_API_NEW_DAO=<api-url>
-```
+#### 3e. CoinGecko Mapping (`apps/api/src/services/coingecko/types.ts`)
 
-No code changes needed unless the API exposes new endpoint patterns.
+**Ask the user** for the CoinGecko token ID (the slug used in CoinGecko URLs, e.g. `"uniswap"`, `"fluid"`). Add it to `CoingeckoTokenIdEnum` and add the corresponding asset platform to `CoingeckoIdToAssetPlatformId`. Both are `Record<DaoIdEnum, ...>` — the compiler will error if missing.
 
 ### Step 5: Dashboard
 
-#### 5a. DAO Config (`apps/dashboard/shared/dao-config/<dao>.ts`)
+Follow the **`dashboard-dao` skill** (`.agents/skills/dashboard-dao/SKILL.md`) for the full step-by-step guide. The dashboard enum entry is already handled in Step 1 above — the `dashboard-dao` skill covers the remaining dashboard-specific work:
 
-Create a `DaoConfiguration` object. Follow `apps/dashboard/shared/dao-config/ens.ts` as a template. Required fields:
-
-```typescript
-export const NEW_DAO: DaoConfiguration = {
-  name: "New DAO",
-  decimals: 18,
-  color: { svgColor: "#...", svgBgColor: "#..." },
-  ogIcon: NewDaoOgIcon,
-  daoOverview: {
-    token: "ERC20",
-    chain: { ...mainnet, icon: MainnetIcon },
-    contracts: { governor: "0x...", token: "0x...", timelock: "0x..." },
-    rules: {
-      delay: true,
-      changeVote: false,
-      timelock: true,
-      cancelFunction: false,
-      logic: "For",
-      quorumCalculation: "...",
-    },
-  },
-  // Feature flags
-  resilienceStages: true,
-  tokenDistribution: true,
-  dataTables: true,
-  governancePage: true,
-};
-```
-
-#### 5b. Register config (`apps/dashboard/shared/dao-config/index.ts`)
-
-Import and add to the default export object.
-
-#### 5c. Icons (optional)
-
-Add DAO icon component in `apps/dashboard/shared/components/icons/` and OG icon in `apps/dashboard/shared/og/dao-og-icons/`.
+1. Quorum calculation label
+2. DAO config file creation
+3. Config registration
+4. Icons (optional)
+5. Governance implementation fields (optional)
 
 ## Verification
 
@@ -289,15 +258,15 @@ pnpm dashboard typecheck && pnpm dashboard lint
 
 ## Common Patterns & Variations
 
-| Variation                          | Example DAO       | Key Difference                                                                                                                                                                                        |
-| ---------------------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Standard ERC20 + Compound Governor | ENS, UNI, GTC, OP | Straightforward, follow ENS pattern                                                                                                                                                                   |
-| ERC721 (NFT) token                 | NOUNS             | Token is NFT, auto-delegates on transfer                                                                                                                                                              |
-| Multi-token tracking               | AAVE              | Tracks AAVE + stkAAVE + aAAVE separately                                                                                                                                                              |
-| Azorius governance (Fractal)       | SHU               | Different governor events, custom proposal handling                                                                                                                                                   |
-| Multi-chain                        | ARB, OP, SCR      | Config needs chain-specific RPC and chain ID                                                                                                                                                          |
-| No governor (token-only)           | ARB               | Only token indexer, no governor handler                                                                                                                                                               |
-| Vote-escrow (veToken) governance   | OLAS              | ERC20 has no delegation; voting power from veToken lock. Requires custom veToken indexer for `Deposit`/`Withdraw` events to track `delegatedSupply` and `accountPower`. Governor events are standard. |
+| Variation                          | Example DAO              | Key Difference                                                                                                                                                                                        |
+| ---------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Standard ERC20 + Compound Governor | ENS, UNI, GTC, OP, FLUID | Straightforward, follow ENS pattern. FLUID reuses the COMP ABI (identical CompoundGovernor). Timelock uses `delay()` (CompoundTimelock), quorum is `forVotes` only.                                   |
+| ERC721 (NFT) token                 | NOUNS                    | Token is NFT, auto-delegates on transfer                                                                                                                                                              |
+| Multi-token tracking               | AAVE                     | Tracks AAVE + stkAAVE + aAAVE separately                                                                                                                                                              |
+| Azorius governance (Fractal)       | SHU                      | Different governor events, custom proposal handling                                                                                                                                                   |
+| Multi-chain                        | ARB, OP, SCR             | Config needs chain-specific RPC and chain ID                                                                                                                                                          |
+| No governor (token-only)           | ARB                      | Only token indexer, no governor handler                                                                                                                                                               |
+| Vote-escrow (veToken) governance   | OLAS                     | ERC20 has no delegation; voting power from veToken lock. Requires custom veToken indexer for `Deposit`/`Withdraw` events to track `delegatedSupply` and `accountPower`. Governor events are standard. |
 
 ## INTEGRATION.md Template
 

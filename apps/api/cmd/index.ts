@@ -184,7 +184,7 @@ const accountBalanceRepo = new AccountBalanceRepository(
 const accountInteractionRepo = new AccountInteractionsRepository(pgClient);
 const transactionsService = new TransactionsService(transactionsRepo);
 const votingPowerService = new VotingPowerService(
-  env.DAO_ID === DaoIdEnum.NOUNS
+  env.DAO_ID === DaoIdEnum.NOUNS || env.DAO_ID === DaoIdEnum.LIL_NOUNS
     ? new NounsVotingPowerRepository(pgClient)
     : votingPowerRepo,
   votingPowerRepo,
@@ -198,7 +198,7 @@ const balanceVariationsService = new BalanceVariationsService(
 const accountBalanceService = new AccountBalanceService(accountBalanceRepo);
 
 const tokenPriceClient =
-  env.DAO_ID === DaoIdEnum.NOUNS
+  env.DAO_ID === DaoIdEnum.NOUNS || env.DAO_ID === DaoIdEnum.LIL_NOUNS
     ? new NFTPriceService(
         new NFTPriceRepository(pgClient),
         env.COINGECKO_API_URL,

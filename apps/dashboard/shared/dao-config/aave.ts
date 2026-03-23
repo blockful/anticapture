@@ -35,4 +35,6 @@ export const AAVE: DaoConfiguration = {
     },
   },
   dataTables: true,
+  overviewPage: false,
+  initialPage: "holders-and-delegates",
 };
