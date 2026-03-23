@@ -8,7 +8,7 @@ import {
 
 import type { ReportStatus } from "@/features/service-providers/types";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
-import { cn } from "@/shared/utils";
+import { cn } from "@/shared/utils/cn";
 
 interface StatusCellProps {
   status: ReportStatus;
@@ -59,7 +59,7 @@ export const StatusCell = ({ status, reportUrl }: StatusCellProps) => {
       <DefaultLink
         href={reportUrl}
         openInNewTab
-        className="text-primary border-border-contrast hover:border-primary mx-2 border-b border-dashed font-mono text-[13px] font-medium tracking-wider"
+        className="text-primary border-border-contrast hover:border-primary text-alternative-sm mx-2 border-b border-dashed font-mono font-medium tracking-wider"
       >
         <Icon className={cn("size-3.5 shrink-0", config.iconClassName)} />
         <span className="text-primary">{config.label}</span>

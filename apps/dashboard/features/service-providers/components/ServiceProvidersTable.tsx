@@ -17,11 +17,12 @@ import {
   type SPPKey,
 } from "@/features/service-providers/types";
 import { getCurrentQuarter } from "@/features/service-providers/utils/getQuarterInfos";
-import { Button } from "@/shared/components";
+import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
-import { cn, formatNumberUserReadable } from "@/shared/utils";
+import { cn } from "@/shared/utils/cn";
+import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 
 type QuarterColumn = { year: number; quarter: "Q1" | "Q2" | "Q3" | "Q4" };
 
@@ -124,7 +125,7 @@ export const ServiceProvidersTable = ({
           className={cn(
             "flex h-full flex-col gap-0.5 px-2 py-1",
             isCurrentQuarter &&
-              "bg-orange-400/12 border-1 border-surface-solid-brand",
+              "bg-surface-opacity-brand border-1 border-surface-solid-brand",
           )}
         >
           <span className="text-primary text-xs font-medium">
@@ -198,7 +199,7 @@ export const ServiceProvidersTable = ({
         columnClassName: cn(
           "w-[220px] px-2 sticky left-0 z-20 [&:is(th)]:bg-surface-contrast bg-surface-background lg:bg-surface-default",
           spp === "SPP2" &&
-            "after:absolute after:right-0 after:top-0 after:bottom-0 after:w-px after:content-[''] after:bg-[var(--color-border-default)]",
+            "after:absolute after:right-0 after:top-0 after:bottom-0 after:w-px after:content-[''] after:bg-border-default",
         ),
       },
     },
@@ -247,8 +248,8 @@ export const ServiceProvidersTable = ({
                 className={cn(
                   "text-xs",
                   row.original.streamDuration === 2
-                    ? "text-blue-400"
-                    : "text-pink-500",
+                    ? "text-[var(--base-chart-1)]"
+                    : "text-[var(--base-chart-2)]",
                 )}
               >
                 {row.original.streamDuration === 2 ? "2 years" : "1 year"}
