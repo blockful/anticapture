@@ -193,8 +193,11 @@ export const ServiceProvidersTable = ({
           />
         ),
       meta: {
-        columnClassName:
-          "w-[220px] px-2 sticky left-0 z-20 [&:is(th)]:bg-surface-contrast bg-surface-default after:absolute after:right-0 after:top-0 after:bottom-0 after:w-px after:content-[''] after:bg-[var(--color-border-default)]",
+        columnClassName: cn(
+          "w-[220px] px-2 sticky left-0 z-20 [&:is(th)]:bg-surface-contrast bg-surface-default",
+          spp === "SPP2" &&
+            "after:absolute after:right-0 after:top-0 after:bottom-0 after:w-px after:content-[''] after:bg-[var(--color-border-default)]",
+        ),
       },
     },
     {
@@ -207,7 +210,7 @@ export const ServiceProvidersTable = ({
           onClick={() => column.toggleSorting()}
         >
           <div className="flex items-center gap-1">
-            <span className="text-table-header whitespace-nowrap">Budget/</span>
+            <span className="text-table-header whitespace-nowrap">Budget</span>
             <ArrowUpDown
               props={{ className: "size-4" }}
               activeState={
@@ -263,7 +266,7 @@ export const ServiceProvidersTable = ({
     <Table
       columns={columns}
       data={data}
-      wrapperClassName="overflow-x-auto overflow-y-visible"
+      wrapperClassName="overflow-x-auto overflow-y-visible [&_table]:w-auto"
       withDownloadCSV={true}
       withSorting={true}
       fillHeight
