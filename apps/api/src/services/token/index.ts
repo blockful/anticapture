@@ -1,1 +1,1 @@
-export { TokenService } from "./token";
+export { TokenService, type TokenRepository } from "./token";

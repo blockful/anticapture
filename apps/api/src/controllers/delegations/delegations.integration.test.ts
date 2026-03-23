@@ -1,32 +1,46 @@
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
+import { PGlite } from "@electric-sql/pglite";
+import { pushSchema } from "drizzle-kit/api";
+import { drizzle } from "drizzle-orm/pglite";
 import { Address, getAddress } from "viem";
-import { describe, it, expect, beforeEach } from "vitest";
-
-import { DBDelegation } from "@/mappers";
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
+import type { Drizzle } from "@/database";
+import * as schema from "@/database/schema";
+import { accountBalance, delegation } from "@/database/schema";
+import { DelegationsRepository } from "@/repositories/delegations/general";
 import { DelegationsService } from "@/services/delegations/current";
-
 import { delegations } from "./delegations";
 
-class FakeDelegationsRepository {
-  private item: DBDelegation | undefined;
+type AccountBalanceInsert = typeof accountBalance.$inferInsert;
+type DelegationInsert = typeof delegation.$inferInsert;
 
-  setData(item: DBDelegation | undefined) {
-    this.item = item;
-  }
+const VALID_ADDRESS = getAddress(
+  "0x1234567890123456789012345678901234567890",
+) as Address;
+const DELEGATE_ADDRESS = getAddress(
+  "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+) as Address;
+const DAO_ID = "uni";
+const TX_HASH =
+  "0xaabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccdd";
 
-  async getDelegations(_address: Address): Promise<DBDelegation | undefined> {
-    return this.item;
-  }
-}
+const createAccountBalanceRow = (
+  overrides: Partial<AccountBalanceInsert> = {},
+): AccountBalanceInsert => ({
+  accountId: VALID_ADDRESS,
+  tokenId: "uni",
+  balance: 1000000000000000000n,
+  delegate: DELEGATE_ADDRESS,
+  ...overrides,
+});
 
-const createMockDBDelegation = (
-  overrides: Partial<DBDelegation> = {},
-): DBDelegation => ({
-  transactionHash:
-    "0xaabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccdd",
-  daoId: "uni",
-  delegateAccountId: "0x1234567890123456789012345678901234567890" as Address,
-  delegatorAccountId: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd" as Address,
+const createDelegationRow = (
+  overrides: Partial<DelegationInsert> = {},
+): DelegationInsert => ({
+  transactionHash: TX_HASH,
+  daoId: DAO_ID,
+  delegateAccountId: VALID_ADDRESS,
+  delegatorAccountId: DELEGATE_ADDRESS,
   delegatedValue: 1000000000000000000n,
   previousDelegate: null,
   timestamp: 1700000000n,
@@ -38,79 +52,85 @@ const createMockDBDelegation = (
   ...overrides,
 });
 
-function createTestApp(service: DelegationsService) {
-  const app = new Hono();
+const BASE_DELEGATION_ITEM = {
+  delegatorAddress: getAddress(DELEGATE_ADDRESS),
+  delegateAddress: VALID_ADDRESS,
+  amount: "1000000000000000000",
+  timestamp: "1700000000",
+  transactionHash: TX_HASH,
+};
+
+const EMPTY_DELEGATIONS_RESPONSE = {
+  items: [],
+  totalCount: 0,
+};
+
+let client: PGlite;
+let db: Drizzle;
+let app: Hono;
+
+beforeAll(async () => {
+  client = new PGlite();
+  db = drizzle(client, { schema });
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  const { apply } = await pushSchema(schema, db as any);
+  await apply();
+
+  const repo = new DelegationsRepository(db);
+  const service = new DelegationsService(repo);
+  app = new Hono();
   delegations(app, service);
-  return app;
-}
+});
 
-const VALID_ADDRESS = "0x1234567890123456789012345678901234567890";
+afterAll(async () => {
+  await client.close();
+});
 
-describe("Delegations Controller - Integration Tests", () => {
-  let fakeRepo: FakeDelegationsRepository;
-  let service: DelegationsService;
-  let app: ReturnType<typeof createTestApp>;
+beforeEach(async () => {
+  await db.delete(delegation);
+  await db.delete(accountBalance);
+});
 
-  beforeEach(() => {
-    fakeRepo = new FakeDelegationsRepository();
-    service = new DelegationsService(fakeRepo);
-    app = createTestApp(service);
-  });
-
-  describe(`GET /accounts/:address/delegations`, () => {
+describe("Delegations Controller", () => {
+  describe("GET /accounts/:address/delegations", () => {
     it("should return 200 with correct response shape for a valid address", async () => {
-      const delegation = createMockDBDelegation();
-      fakeRepo.setData(delegation);
+      // DelegationsRepository.getDelegations:
+      // 1. Queries accountBalance WHERE accountId = address -> gets `delegate` field
+      // 2. Queries delegation WHERE delegatorAccountId = accountBalance.delegate
+      await db.insert(accountBalance).values(createAccountBalanceRow());
+      await db
+        .insert(delegation)
+        .values(createDelegationRow({ delegatorAccountId: DELEGATE_ADDRESS }));
 
       const res = await app.request(`/accounts/${VALID_ADDRESS}/delegations`);
 
       expect(res.status).toBe(200);
       const body = await res.json();
       expect(body).toEqual({
-        items: [
-          {
-            delegatorAddress: getAddress(delegation.delegatorAccountId),
-            delegateAddress: delegation.delegateAccountId,
-            amount: delegation.delegatedValue.toString(),
-            timestamp: delegation.timestamp.toString(),
-            transactionHash: delegation.transactionHash,
-          },
-        ],
+        items: [BASE_DELEGATION_ITEM],
         totalCount: 1,
       });
     });
 
     it("should return 200 with empty items and totalCount 0 when no delegations exist", async () => {
-      fakeRepo.setData(undefined);
-
       const res = await app.request(`/accounts/${VALID_ADDRESS}/delegations`);
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body).toEqual({
-        items: [],
-        totalCount: 0,
-      });
+      expect(body).toEqual(EMPTY_DELEGATIONS_RESPONSE);
     });
 
-    it("should return 200 with multiple delegations", async () => {
-      fakeRepo.setData(
-        createMockDBDelegation({
-          delegatorAccountId:
-            "0x1111111111111111111111111111111111111111" as Address,
-          delegatedValue: 2000000000000000000n,
-          timestamp: 1700001000n,
-          transactionHash:
-            "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-        }),
-      );
+    it("should return 200 with empty items when accountBalance has no matching delegation", async () => {
+      // accountBalance exists but no matching delegation row for the delegate
+      await db
+        .insert(accountBalance)
+        .values(createAccountBalanceRow({ delegate: DELEGATE_ADDRESS }));
 
       const res = await app.request(`/accounts/${VALID_ADDRESS}/delegations`);
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.items).toHaveLength(1);
-      expect(body.totalCount).toBe(1);
+      expect(body).toEqual(EMPTY_DELEGATIONS_RESPONSE);
     });
 
     it("should return 400 for an invalid address", async () => {
@@ -122,7 +142,10 @@ describe("Delegations Controller - Integration Tests", () => {
     });
 
     it("should checksum the address from the path parameter", async () => {
-      fakeRepo.setData(createMockDBDelegation());
+      await db.insert(accountBalance).values(createAccountBalanceRow());
+      await db
+        .insert(delegation)
+        .values(createDelegationRow({ delegatorAccountId: DELEGATE_ADDRESS }));
       const lowercaseAddress = VALID_ADDRESS.toLowerCase();
 
       const res = await app.request(
@@ -133,8 +156,10 @@ describe("Delegations Controller - Integration Tests", () => {
     });
 
     it("should serialize amount and timestamp as strings in response items", async () => {
-      fakeRepo.setData(
-        createMockDBDelegation({
+      await db.insert(accountBalance).values(createAccountBalanceRow());
+      await db.insert(delegation).values(
+        createDelegationRow({
+          delegatorAccountId: DELEGATE_ADDRESS,
           delegatedValue: 999999999999999999n,
           timestamp: 1234567890n,
         }),
@@ -143,29 +168,73 @@ describe("Delegations Controller - Integration Tests", () => {
       const res = await app.request(`/accounts/${VALID_ADDRESS}/delegations`);
       const body = await res.json();
 
-      expect(typeof body.items[0]?.amount).toBe("string");
-      expect(typeof body.items[0]?.timestamp).toBe("string");
-      expect(body.items[0]?.amount).toBe("999999999999999999");
-      expect(body.items[0]?.timestamp).toBe("1234567890");
+      expect(body).toEqual({
+        items: [
+          {
+            ...BASE_DELEGATION_ITEM,
+            amount: "999999999999999999",
+            timestamp: "1234567890",
+          },
+        ],
+        totalCount: 1,
+      });
     });
 
     it("should include transactionHash in response items", async () => {
       const txHash =
         "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef";
-      fakeRepo.setData(createMockDBDelegation({ transactionHash: txHash }));
+      await db.insert(accountBalance).values(createAccountBalanceRow());
+      await db.insert(delegation).values(
+        createDelegationRow({
+          delegatorAccountId: DELEGATE_ADDRESS,
+          transactionHash: txHash,
+        }),
+      );
 
       const res = await app.request(`/accounts/${VALID_ADDRESS}/delegations`);
       const body = await res.json();
 
-      expect(body.items[0]?.transactionHash).toBe(txHash);
+      expect(body).toEqual({
+        items: [{ ...BASE_DELEGATION_ITEM, transactionHash: txHash }],
+        totalCount: 1,
+      });
     });
 
     it("should use default orderBy=timestamp and orderDirection=desc when not provided", async () => {
-      fakeRepo.setData(undefined);
+      const TX_1 =
+        "0xaabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbcc01";
+      const TX_2 =
+        "0xaabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbcc02";
+      await db.insert(accountBalance).values(createAccountBalanceRow());
+      await db.insert(delegation).values([
+        createDelegationRow({
+          delegatorAccountId: DELEGATE_ADDRESS,
+          transactionHash: TX_1,
+          timestamp: 1700000000n,
+        }),
+        createDelegationRow({
+          delegatorAccountId: DELEGATE_ADDRESS,
+          transactionHash: TX_2,
+          logIndex: 1,
+          timestamp: 1700001000n,
+        }),
+      ]);
 
       const res = await app.request(`/accounts/${VALID_ADDRESS}/delegations`);
 
       expect(res.status).toBe(200);
+      const body = await res.json();
+      // getDelegations uses findFirst with desc(timestamp), so returns the most recent one
+      expect(body).toEqual({
+        items: [
+          {
+            ...BASE_DELEGATION_ITEM,
+            timestamp: "1700001000",
+            transactionHash: TX_2,
+          },
+        ],
+        totalCount: 1,
+      });
     });
   });
 });

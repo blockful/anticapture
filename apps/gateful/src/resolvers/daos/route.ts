@@ -11,6 +11,8 @@ const DaoResponseSchema = z.object({
   votingDelay: z.string(),
   votingPeriod: z.string(),
   timelockDelay: z.string(),
+  alreadySupportCalldataReview: z.boolean(),
+  supportOffchainData: z.boolean(),
 });
 
 const DaosResponseSchema = z.object({

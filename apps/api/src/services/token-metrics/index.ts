@@ -30,7 +30,26 @@ import {
 import { applyCursorPagination } from "@/lib/query-helpers";
 import { forwardFill, generateOrderedTimeline } from "@/lib/time-series";
 import { TokenMetricItem } from "@/mappers/token-metrics";
-import { DaoMetricsDayBucketRepository } from "@/repositories/daoMetricsDayBucket";
+
+interface DaoMetricsRow {
+  date: bigint;
+  high: bigint;
+  volume: bigint;
+}
+
+export interface ITokenMetricsRepository {
+  getMetricsByDateRange(filters: {
+    metricTypes: string[];
+    startDate?: string;
+    endDate?: string;
+    orderDirection: "asc" | "desc";
+    limit: number;
+  }): Promise<DaoMetricsRow[]>;
+  getLastMetricBeforeDate(
+    metricType: string,
+    beforeDate: string,
+  ): Promise<DaoMetricsRow | null | undefined>;
+}
 
 interface MetricData {
   high: bigint;
@@ -43,7 +62,7 @@ interface MetricData {
 }
 
 export class TokenMetricsService {
-  constructor(private readonly repository: DaoMetricsDayBucketRepository) {}
+  constructor(private readonly repository: ITokenMetricsRepository) {}
 
   /**
    * Get metrics for a single type with forward-fill

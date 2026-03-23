@@ -2,7 +2,7 @@ import { DAOClient } from "@/clients";
 import { ProposalStatus } from "@/lib/constants";
 import { DBProposal, ProposalsRequest } from "@/mappers";
 
-interface ProposalsRepository {
+export interface ProposalsRepository {
   getProposals(
     skip: number,
     limit: number,
