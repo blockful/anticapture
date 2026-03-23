@@ -16,6 +16,7 @@ function createStubDAOClient(overrides?: Partial<DAOClient>): DAOClient {
     calculateQuorum: () => 0n,
     alreadySupportCalldataReview: () => false,
     getProposalStatus: () => Promise.resolve("ACTIVE"),
+    supportOffchainData: () => false,
     ...overrides,
   };
 }
@@ -39,6 +40,7 @@ describe("DaoService", () => {
       votingPeriod: "40320",
       timelockDelay: "172800",
       alreadySupportCalldataReview: false,
+      supportOffchainData: false,
     });
   });
 

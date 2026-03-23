@@ -12,12 +12,9 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
-  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
-  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
-  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
 };
 
@@ -1847,6 +1844,7 @@ export type Token_200_Response = {
   id: Scalars['String']['output'];
   lendingSupply: Scalars['String']['output'];
   name?: Maybe<Scalars['String']['output']>;
+  nonCirculatingSupply: Scalars['String']['output'];
   price: Scalars['String']['output'];
   totalSupply: Scalars['String']['output'];
   treasury: Scalars['String']['output'];

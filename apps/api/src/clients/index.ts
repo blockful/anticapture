@@ -21,6 +21,7 @@ export interface DAOClient {
   getCurrentBlockNumber: () => Promise<number>;
   getBlockTime: (blockNumber: number) => Promise<number | null>;
   alreadySupportCalldataReview: () => boolean;
+  supportOffchainData: () => boolean;
   calculateQuorum: (votes: {
     forVotes: bigint;
     againstVotes: bigint;

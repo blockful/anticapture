@@ -93,6 +93,7 @@ function createStubDaoClient() {
     getQuorum: async (_proposalId) => 0n,
     getProposalThreshold: async () => 0n,
     alreadySupportCalldataReview: () => false,
+    supportOffchainData: () => false,
     calculateQuorum: () => 0n,
     getCurrentBlockNumber: async () => {
       stub.getCurrentBlockNumberCallCount++;

@@ -464,6 +464,7 @@ type token_200_response {
   dexSupply: String!
   lendingSupply: String!
   circulatingSupply: String!
+  nonCirculatingSupply: String!
   treasury: String!
   price: String!
 }

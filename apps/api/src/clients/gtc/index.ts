@@ -70,6 +70,10 @@ export class GTCClient<
     return this.cache.timelockDelay;
   }
 
+  supportOffchainData(): boolean {
+    return true;
+  }
+
   calculateQuorum(votes: {
     forVotes: bigint;
     againstVotes: bigint;
