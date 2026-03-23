@@ -42,6 +42,9 @@ class FakeDAOClient implements DAOClient {
   alreadySupportCalldataReview(): boolean {
     return false;
   }
+  supportOffchainData(): boolean {
+    return false;
+  }
   calculateQuorum(): bigint {
     return 0n;
   }
