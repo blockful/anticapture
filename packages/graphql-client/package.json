@@ -4,21 +4,18 @@
   "scripts": {
     "codegen": "graphql-codegen",
     "codegen:watch": "graphql-codegen --watch",
-    "build": "tsc",
-    "build:watch": "tsc --watch",
-    "clean": "rm -rf node_modules dist generated.ts types.ts *.tsbuildinfo",
-    "dev": "concurrently \"npm run codegen:watch\" \"npm run build:watch\""
+    "build": "graphql-codegen",
+    "clean": "rm -rf node_modules dist generated/*.ts *.tsbuildinfo",
+    "dev": "graphql-codegen --watch"
   },
-  "main": "dist/generated.js",
-  "types": "dist/types.js",
   "exports": {
     ".": {
-      "types": "./types.ts",
-      "default": "./types.ts"
+      "types": "./generated/types.ts",
+      "default": "./generated/types.ts"
     },
     "./hooks": {
-      "types": "./hooks.ts",
-      "default": "./hooks.ts"
+      "types": "./generated/hooks.ts",
+      "default": "./generated/hooks.ts"
     }
   },
   "dependencies": {
