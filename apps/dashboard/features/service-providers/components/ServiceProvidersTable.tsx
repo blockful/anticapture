@@ -152,7 +152,7 @@ export const ServiceProvidersTable = ({
 
         if (status === "1y_only" && isYear2) {
           return (
-            <div className="bg-surface-contrast absolute inset-0 flex items-center justify-center opacity-30">
+            <div className="bg-surface-contrast/30 absolute inset-0 flex items-center justify-center">
               {year2ColIndex === 1 && (
                 <span className="text-dimmed text-sm font-normal italic">
                   1Y only
