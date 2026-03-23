@@ -143,7 +143,9 @@ describe("AccountBalanceService", () => {
       const [, , , , , , , , excludeAddresses] =
         mockRepo.getAccountBalancesWithVariation.mock.calls[0]!;
 
-      expect(excludeAddresses).toEqual([]);
+      expect(excludeAddresses).toEqual(
+        Object.values(TreasuryAddresses[DaoIdEnum.ARB]),
+      );
     });
 
     it("should exclude correct addresses for SHU DAO", async () => {
