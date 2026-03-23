@@ -1,2 +1,2 @@
 pnpm typecheck
-pnpm turbo test --filter=!@anticapture/dashboard
+pnpm turbo test --filter=!@anticapture/dashboard -- --watch=false
