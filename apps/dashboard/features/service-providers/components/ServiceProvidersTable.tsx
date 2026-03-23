@@ -266,7 +266,7 @@ export const ServiceProvidersTable = ({
     <Table
       columns={columns}
       data={data}
-      wrapperClassName="overflow-x-auto overflow-y-visible [&_table]:w-auto"
+      wrapperClassName="overflow-x-auto overflow-y-visible [&_table]:w-max"
       withDownloadCSV={true}
       withSorting={true}
       fillHeight
