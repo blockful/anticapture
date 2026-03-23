@@ -78,6 +78,13 @@ const DAO_RELEVANCE_THRESHOLDS: Record<DaoIdEnum, EventRelevanceMap> = {
     [FeedEventType.PROPOSAL]: EMPTY_THRESHOLDS,
     [FeedEventType.PROPOSAL_EXTENDED]: EMPTY_THRESHOLDS,
   },
+  [DaoIdEnum.LIL_NOUNS]: {
+    [FeedEventType.TRANSFER]: thresholds(2n, 4n, 6n),
+    [FeedEventType.DELEGATION]: thresholds(2n, 4n, 6n),
+    [FeedEventType.VOTE]: thresholds(2n, 4n, 6n),
+    [FeedEventType.PROPOSAL]: EMPTY_THRESHOLDS,
+    [FeedEventType.PROPOSAL_EXTENDED]: EMPTY_THRESHOLDS,
+  },
   [DaoIdEnum.NOUNS]: {
     [FeedEventType.TRANSFER]: thresholds(2n, 4n, 6n),
     [FeedEventType.DELEGATION]: thresholds(2n, 4n, 6n),
@@ -215,6 +222,13 @@ const DAO_RELEVANCE_THRESHOLDS: Record<DaoIdEnum, EventRelevanceMap> = {
       parseEther("100000"),
       parseEther("1000000"),
     ),
+    [FeedEventType.PROPOSAL]: EMPTY_THRESHOLDS,
+    [FeedEventType.PROPOSAL_EXTENDED]: EMPTY_THRESHOLDS,
+  },
+  [DaoIdEnum.FLUID]: {
+    [FeedEventType.TRANSFER]: EMPTY_THRESHOLDS,
+    [FeedEventType.DELEGATION]: EMPTY_THRESHOLDS,
+    [FeedEventType.VOTE]: EMPTY_THRESHOLDS,
     [FeedEventType.PROPOSAL]: EMPTY_THRESHOLDS,
     [FeedEventType.PROPOSAL_EXTENDED]: EMPTY_THRESHOLDS,
   },

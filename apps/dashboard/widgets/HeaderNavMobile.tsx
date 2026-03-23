@@ -19,7 +19,7 @@ export const HeaderNavMobile = () => {
     {
       page: PAGES_CONSTANTS.daoOverview.page,
       title: PAGES_CONSTANTS.daoOverview.title,
-      enabled: !!daoConfig.daoOverview,
+      enabled: daoConfig.overviewPage !== false && !!daoConfig.daoOverview,
     },
     {
       page: PAGES_CONSTANTS.holdersAndDelegates.page,

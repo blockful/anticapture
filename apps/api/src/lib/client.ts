@@ -13,6 +13,7 @@ import {
   DAOClient,
   SHUClient,
   AAVEClient,
+  FLUIDClient,
 } from "@/clients";
 
 import { CONTRACT_ADDRESSES } from "./constants";
@@ -43,6 +44,10 @@ export function getClient<
       const { governor } = CONTRACT_ADDRESSES[daoId];
       return new GTCClient(client, governor.address);
     }
+    case DaoIdEnum.LIL_NOUNS: {
+      const { governor } = CONTRACT_ADDRESSES[daoId];
+      return new NounsClient(client, governor.address);
+    }
     case DaoIdEnum.NOUNS: {
       const { governor } = CONTRACT_ADDRESSES[daoId];
       return new NounsClient(client, governor.address);
@@ -71,6 +76,10 @@ export function getClient<
         governor.address,
         linearVotingStrategy.address,
       );
+    }
+    case DaoIdEnum.FLUID: {
+      const { governor } = CONTRACT_ADDRESSES[daoId];
+      return new FLUIDClient(client, governor.address);
     }
     case DaoIdEnum.AAVE: {
       return new AAVEClient(client);

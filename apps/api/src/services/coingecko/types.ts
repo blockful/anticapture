@@ -18,12 +18,14 @@ export const CoingeckoTokenIdEnum: Record<DaoIdEnum, string> = {
   ARB: "arbitrum",
   OP: "optimism",
   GTC: "gitcoin",
+  LIL_NOUNS: "lil-nouns",
   NOUNS: "nouns",
   SCR: "scroll",
   COMP: "compound-governance-token",
   OBOL: "obol-2",
   ZK: "zksync",
   SHU: "shutter",
+  FLUID: "fluid",
 } as const;
 
 export const CoingeckoIdToAssetPlatformId = {
@@ -38,6 +40,7 @@ export const CoingeckoIdToAssetPlatformId = {
   [CoingeckoTokenIdEnum.OBOL]: AssetPlatformEnum.ETHEREUM,
   [CoingeckoTokenIdEnum.ZK]: AssetPlatformEnum.ZKSYNC,
   [CoingeckoTokenIdEnum.SHU]: AssetPlatformEnum.ETHEREUM,
+  [CoingeckoTokenIdEnum.FLUID]: AssetPlatformEnum.ETHEREUM,
 } as const;
 
 export interface CoingeckoHistoricalMarketData {
