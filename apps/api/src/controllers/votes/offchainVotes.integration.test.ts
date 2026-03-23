@@ -1,93 +1,103 @@
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
-import { describe, it, expect, beforeEach } from "vitest";
-
-import { DBOffchainVote } from "@/mappers";
+import { PGlite } from "@electric-sql/pglite";
+import { pushSchema } from "drizzle-kit/api";
+import { drizzle } from "drizzle-orm/pglite";
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
+import type { OffchainDrizzle } from "@/database";
+import * as offchainSchema from "@/database/offchain-schema";
+import { offchainProposals, offchainVotes } from "@/database/offchain-schema";
+import { OffchainVoteRepository } from "@/repositories/votes/offchainVotes";
 import { OffchainVotesService } from "@/services/votes/offchainVotes";
+import { offchainVotes as offchainVotesController } from "./offchainVotes";
 
-import { offchainVotes } from "./offchainVotes";
+let client: PGlite;
+let db: OffchainDrizzle;
+let app: Hono;
 
-type VoteWithTitle = DBOffchainVote & { proposalTitle: string | null };
+type OffchainVoteInsert = typeof offchainVotes.$inferInsert;
+type OffchainProposalInsert = typeof offchainProposals.$inferInsert;
 
-class FakeOffchainVotesRepository {
-  private votes: VoteWithTitle[] = [];
-  private count = 0;
+const VOTER = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
-  setData(votes: VoteWithTitle[], totalCount?: number) {
-    this.votes = votes;
-    this.count = totalCount ?? votes.length;
-  }
+const FULL_VOTE_ITEM = {
+  voter: VOTER,
+  proposalId: "proposal-1",
+  choice: { "1": 1 },
+  vp: 100,
+  reason: "",
+  created: 1700000000,
+  proposalTitle: "Test Proposal",
+};
 
-  async getVotes(): Promise<{ items: VoteWithTitle[]; totalCount: number }> {
-    return { items: this.votes, totalCount: this.count };
-  }
-
-  async getVotesByProposalId(
-    proposalId: string,
-  ): Promise<{ items: VoteWithTitle[]; totalCount: number }> {
-    const filtered = this.votes.filter((v) => v.proposalId === proposalId);
-    return { items: filtered, totalCount: filtered.length };
-  }
-}
-
-const createMockVote = (
-  overrides: Partial<VoteWithTitle> = {},
-): VoteWithTitle => ({
+const createVote = (
+  overrides: Partial<OffchainVoteInsert> = {},
+): OffchainVoteInsert => ({
   spaceId: "ens.eth",
-  voter: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  voter: VOTER,
   proposalId: "proposal-1",
   choice: { "1": 1 },
   vp: "100",
   reason: "",
   created: 1700000000,
-  proposalTitle: "Test Proposal",
   ...overrides,
 });
 
-function createTestApp(service: OffchainVotesService) {
-  const app = new Hono();
-  offchainVotes(app, service);
-  return app;
-}
+const createOffchainProposal = (
+  overrides: Partial<OffchainProposalInsert> = {},
+): OffchainProposalInsert => ({
+  id: "proposal-1",
+  spaceId: "ens.eth",
+  author: VOTER,
+  title: "Test Proposal",
+  body: "Test body",
+  discussion: "",
+  type: "single-choice",
+  start: 1700000000,
+  end: 1700086400,
+  state: "active",
+  created: 1700000000,
+  updated: 1700000000,
+  link: "",
+  flagged: false,
+  ...overrides,
+});
 
-describe("Offchain Votes Controller - Integration Tests", () => {
-  let fakeRepo: FakeOffchainVotesRepository;
-  let service: OffchainVotesService;
-  let app: ReturnType<typeof createTestApp>;
+beforeAll(async () => {
+  client = new PGlite();
+  db = drizzle(client, { schema: offchainSchema });
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  const { apply } = await pushSchema(offchainSchema, db as any);
+  await apply();
+});
 
-  beforeEach(() => {
-    fakeRepo = new FakeOffchainVotesRepository();
-    service = new OffchainVotesService(fakeRepo);
-    app = createTestApp(service);
-  });
+afterAll(async () => {
+  await client.close();
+});
 
+beforeEach(async () => {
+  await db.delete(offchainVotes);
+  await db.delete(offchainProposals);
+
+  const repo = new OffchainVoteRepository(db);
+  const service = new OffchainVotesService(repo);
+  app = new Hono();
+  offchainVotesController(app, service);
+});
+
+describe("Offchain Votes Controller", () => {
   describe("GET /offchain/votes", () => {
     it("should return 200 with correct response shape", async () => {
-      const vote = createMockVote();
-      fakeRepo.setData([vote]);
+      await db.insert(offchainProposals).values(createOffchainProposal());
+      await db.insert(offchainVotes).values(createVote());
 
       const res = await app.request("/offchain/votes");
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body).toEqual({
-        items: [
-          {
-            voter: vote.voter,
-            proposalId: vote.proposalId,
-            choice: vote.choice,
-            vp: Number(vote.vp),
-            reason: vote.reason,
-            created: vote.created,
-            proposalTitle: vote.proposalTitle,
-          },
-        ],
-        totalCount: 1,
-      });
+      expect(body).toEqual({ items: [FULL_VOTE_ITEM], totalCount: 1 });
     });
 
     it("should return 200 with empty items when no data", async () => {
-      fakeRepo.setData([]);
-
       const res = await app.request("/offchain/votes");
 
       expect(res.status).toBe(200);
@@ -96,38 +106,47 @@ describe("Offchain Votes Controller - Integration Tests", () => {
     });
 
     it("should accept all query params", async () => {
-      fakeRepo.setData([createMockVote()]);
-      const voter = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+      await db.insert(offchainProposals).values(createOffchainProposal());
+      await db.insert(offchainVotes).values(createVote());
 
       const res = await app.request(
-        `/offchain/votes?skip=0&limit=5&orderBy=votingPower&orderDirection=asc&voterAddresses=${voter}&fromDate=1000&toDate=5000`,
+        `/offchain/votes?skip=0&limit=5&orderBy=votingPower&orderDirection=asc&voterAddresses=${VOTER}&fromDate=1000&toDate=5000`,
       );
 
       expect(res.status).toBe(200);
+      const body = await res.json();
+      // vote.created=1700000000 > toDate=5000, so filtered out
+      expect(body).toEqual({ items: [], totalCount: 0 });
     });
   });
 
   describe("GET /offchain/proposals/{id}/votes", () => {
     it("should return 200 with votes for given proposal", async () => {
-      fakeRepo.setData([
-        createMockVote({ proposalId: "p-1" }),
-        createMockVote({
+      await db
+        .insert(offchainProposals)
+        .values(createOffchainProposal({ id: "p-1" }));
+      await db
+        .insert(offchainProposals)
+        .values(createOffchainProposal({ id: "p-2" }));
+      await db.insert(offchainVotes).values(createVote({ proposalId: "p-1" }));
+      await db.insert(offchainVotes).values(
+        createVote({
           proposalId: "p-2",
           voter: "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
         }),
-      ]);
+      );
 
       const res = await app.request("/offchain/proposals/p-1/votes");
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.items).toHaveLength(1);
-      expect(body.items[0].proposalId).toBe("p-1");
+      expect(body).toEqual({
+        items: [{ ...FULL_VOTE_ITEM, proposalId: "p-1" }],
+        totalCount: 1,
+      });
     });
 
     it("should return 200 with empty items when no votes", async () => {
-      fakeRepo.setData([]);
-
       const res = await app.request("/offchain/proposals/nonexistent/votes");
 
       expect(res.status).toBe(200);

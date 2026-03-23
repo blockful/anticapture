@@ -2,7 +2,7 @@ import { Address } from "viem";
 
 import { DBDelegation, DelegationItem } from "@/mappers";
 
-interface Repository {
+export interface HistoricalDelegationsRepository {
   getHistoricalDelegations(
     address: Address,
     orderDirection: "asc" | "desc",
@@ -18,7 +18,9 @@ interface Repository {
 }
 
 export class HistoricalDelegationsService {
-  constructor(private historicalDelegationsRepository: Repository) {}
+  constructor(
+    private historicalDelegationsRepository: HistoricalDelegationsRepository,
+  ) {}
 
   async getHistoricalDelegations(
     address: Address,

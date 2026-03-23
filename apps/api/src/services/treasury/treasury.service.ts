@@ -8,10 +8,15 @@ import {
 import { forwardFill, createDailyTimeline } from "@/lib/time-series";
 import { TreasuryResponse } from "@/mappers/treasury";
 
-import { TreasuryRepository } from "../../repositories/treasury";
-
 import { TreasuryProvider } from "./providers";
 import { PriceProvider } from "./types";
+
+export interface ITreasuryRepository {
+  getTokenQuantities(cutoffTimestamp: number): Promise<Map<number, bigint>>;
+  getLastTokenQuantityBeforeDate(
+    cutoffTimestamp: number,
+  ): Promise<bigint | null>;
+}
 
 /**
  * Treasury Service - Orchestrates treasury data retrieval and calculation.
@@ -19,7 +24,7 @@ import { PriceProvider } from "./types";
  */
 export class TreasuryService {
   constructor(
-    private repository: TreasuryRepository,
+    private repository: ITreasuryRepository,
     private provider?: TreasuryProvider,
     private priceProvider?: PriceProvider,
   ) {}

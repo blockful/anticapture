@@ -17,7 +17,8 @@
     "lint:fix": "turbo lint:fix",
     "typecheck": "turbo typecheck",
     "prepare": "husky",
-    "test": "turbo test"
+    "test": "turbo test",
+    "test:unit": "turbo test:unit"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

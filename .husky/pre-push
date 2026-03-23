@@ -1,1 +1,2 @@
 pnpm typecheck
+pnpm turbo test --filter=!@anticapture/dashboard

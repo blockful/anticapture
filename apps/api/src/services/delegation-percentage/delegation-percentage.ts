@@ -56,7 +56,7 @@ interface DateData {
   tokenId?: string;
 }
 
-interface DelegationPercentageRepository {
+export interface DelegationPercentageRepository {
   getMetricsByDateRange(filters: {
     metricTypes: string[];
     startDate?: string;
