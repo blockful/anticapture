@@ -9,7 +9,7 @@ import {
   VotersResponse,
 } from "@/mappers";
 
-interface VotesRepository {
+export interface VotesRepository {
   getProposalNonVoters(
     proposalId: string,
     skip: number,

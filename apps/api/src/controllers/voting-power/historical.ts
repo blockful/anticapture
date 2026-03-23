@@ -10,7 +10,7 @@ import {
 } from "@/mappers";
 import { Address } from "viem";
 
-interface VotingPowerService {
+export interface HistoricalVotingPowerService {
   getHistoricalVotingPowers(
     skip: number,
     limit: number,
@@ -27,7 +27,10 @@ interface VotingPowerService {
   }>;
 }
 
-export function historicalVotingPower(app: Hono, service: VotingPowerService) {
+export function historicalVotingPower(
+  app: Hono,
+  service: HistoricalVotingPowerService,
+) {
   app.openapi(
     createRoute({
       method: "get",

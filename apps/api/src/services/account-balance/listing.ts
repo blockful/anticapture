@@ -4,7 +4,7 @@ import { DaoIdEnum } from "@/lib/enums";
 import { AmountFilter, DBAccountBalanceWithVariation } from "@/mappers";
 import { TreasuryAddresses } from "@/lib/constants";
 
-interface AccountBalanceRepository {
+export interface AccountBalanceRepositoryInterface {
   getAccountBalancesWithVariation(
     variationFromTimestamp: number,
     variationToTimestamp: number,
@@ -29,7 +29,7 @@ interface AccountBalanceRepository {
 }
 
 export class AccountBalanceService {
-  constructor(private readonly repo: AccountBalanceRepository) {}
+  constructor(private readonly repo: AccountBalanceRepositoryInterface) {}
 
   async getAccountBalances(
     daoId: DaoIdEnum,

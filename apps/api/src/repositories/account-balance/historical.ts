@@ -62,6 +62,8 @@ export class HistoricalBalanceRepository {
     accountId: Address,
     minDelta?: string,
     maxDelta?: string,
+    fromDate?: number,
+    toDate?: number,
   ): Promise<number> {
     return await this.db.$count(
       balanceHistory,
@@ -69,6 +71,8 @@ export class HistoricalBalanceRepository {
         eq(balanceHistory.accountId, accountId),
         minDelta ? gte(balanceHistory.deltaMod, BigInt(minDelta)) : undefined,
         maxDelta ? lte(balanceHistory.deltaMod, BigInt(maxDelta)) : undefined,
+        fromDate ? gte(balanceHistory.timestamp, BigInt(fromDate)) : undefined,
+        toDate ? lte(balanceHistory.timestamp, BigInt(toDate)) : undefined,
       ),
     );
   }
