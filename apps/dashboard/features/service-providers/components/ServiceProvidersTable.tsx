@@ -164,7 +164,9 @@ export const ServiceProvidersTable = ({
 
         return <StatusCell status={status} reportUrl={reportUrl} />;
       },
-      meta: { columnClassName: "w-[140px] px-2 relative" },
+      meta: {
+        columnClassName: cn(spp === "SPP2" && "w-[140px]", "px-2 relative"),
+      },
     };
   };
 
@@ -266,7 +268,7 @@ export const ServiceProvidersTable = ({
     <Table
       columns={columns}
       data={data}
-      wrapperClassName="overflow-x-auto overflow-y-visible [&_table]:w-max"
+      wrapperClassName="overflow-x-auto overflow-y-visible"
       withDownloadCSV={true}
       withSorting={true}
       fillHeight
