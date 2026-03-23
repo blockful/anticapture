@@ -464,6 +464,7 @@ type token_200_response {
   dexSupply: String!
   lendingSupply: String!
   circulatingSupply: String!
+  nonCirculatingSupply: String!
   treasury: String!
   price: String!
 }
@@ -732,7 +733,7 @@ type query_proposalsActivity_proposals_items_userVote {
   voterAccountId: String!
   proposalId: String!
   support: String
-  votingPower: String!
+  votingPower: String
   reason: String
   timestamp: String
 }
@@ -1347,6 +1348,7 @@ type dao_200_response {
   votingPeriod: String!
   timelockDelay: String!
   alreadySupportCalldataReview: Boolean!
+  supportOffchainData: Boolean!
 }
 
 type tokenMetrics_200_response {
