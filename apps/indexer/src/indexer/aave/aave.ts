@@ -2,10 +2,29 @@ import { ponder } from "ponder:registry";
 import { Address } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
+import {
+  BurningAddresses,
+  CEXAddresses,
+  DEXAddresses,
+  LendingAddresses,
+  NonCirculatingAddresses,
+  TreasuryAddresses,
+} from "@/lib/constants";
+import { createAddressSet } from "@/eventHandlers/shared";
 import { aaveSetup, aaveTransfer, aaveDelegateChanged } from "./shared";
 
 export function AAVETokenIndexer(address: Address, decimals: number) {
   const daoId = DaoIdEnum.AAVE;
+  const addressSets = {
+    cex: createAddressSet(Object.values(CEXAddresses[daoId])),
+    dex: createAddressSet(Object.values(DEXAddresses[daoId])),
+    lending: createAddressSet(Object.values(LendingAddresses[daoId])),
+    treasury: createAddressSet(Object.values(TreasuryAddresses[daoId])),
+    nonCirculating: createAddressSet(
+      Object.values(NonCirculatingAddresses[daoId]),
+    ),
+    burning: createAddressSet(Object.values(BurningAddresses[daoId])),
+  };
 
   ponder.on(`AAVE:setup`, async ({ context }) => {
     await aaveSetup(context, address, daoId, decimals);
@@ -24,6 +43,7 @@ export function AAVETokenIndexer(address: Address, decimals: number) {
       },
       address,
       daoId,
+      addressSets,
     );
   });
 
