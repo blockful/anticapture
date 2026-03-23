@@ -64,9 +64,6 @@ export const ServiceProvidersTable = ({
   const year2Cols = spp === "SPP2" ? SPP2_YEAR2_QUARTERS : [];
   const allCols = [...year1Cols, ...year2Cols];
 
-  // Total pixel width of all year2 columns combined — used for the "1Y only" overlay
-  const year2TotalWidth = year2Cols.length * 140;
-
   const sppProviderList = ENS_SERVICE_PROVIDERS.filter((p) =>
     p.sppPrograms.includes(spp),
   );
@@ -154,21 +151,15 @@ export const ServiceProvidersTable = ({
         const { status, reportUrl } = row.original.quarters[key];
 
         if (status === "1y_only" && isYear2) {
-          // First year2 cell renders a wide overlay that visually spans all year2 columns
-          if (year2ColIndex === 0) {
-            return (
-              <div
-                className="bg-surface-contrast absolute inset-y-0 left-0 z-10 flex items-center justify-center"
-                style={{ width: year2TotalWidth }}
-              >
+          return (
+            <div className="bg-surface-contrast/50 absolute inset-0 flex items-center justify-center">
+              {year2ColIndex === 1 && (
                 <span className="text-dimmed text-sm font-normal italic">
                   1Y only
                 </span>
-              </div>
-            );
-          }
-          // Subsequent year2 cells are visually covered by the first cell's overlay
-          return null;
+              )}
+            </div>
+          );
         }
 
         return <StatusCell status={status} reportUrl={reportUrl} />;
@@ -203,7 +194,7 @@ export const ServiceProvidersTable = ({
         ),
       meta: {
         columnClassName:
-          "w-[220px] px-2 sticky left-0 z-20 [&:is(th)]:bg-surface-contrast bg-surface-default border-r border-border-default",
+          "w-[220px] px-2 sticky left-0 z-20 [&:is(th)]:bg-surface-contrast bg-surface-default after:absolute after:right-0 after:top-0 after:bottom-0 after:w-px after:content-[''] after:bg-[var(--color-border-default)]",
       },
     },
     {
@@ -228,9 +219,11 @@ export const ServiceProvidersTable = ({
               }
             />
           </div>
-          <span className="text-table-header whitespace-nowrap font-normal">
-            Stream Duration
-          </span>
+          {spp === "SPP2" && (
+            <span className="text-table-header whitespace-nowrap font-normal">
+              Stream Duration
+            </span>
+          )}
         </Button>
       ),
       cell: ({ row }) =>
