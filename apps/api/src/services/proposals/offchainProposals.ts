@@ -7,10 +7,12 @@ interface OffchainProposalsRepository {
     orderDirection: "asc" | "desc",
     state: string[] | undefined,
     fromDate: number | undefined,
+    endDate: number | undefined,
   ): Promise<DBOffchainProposal[]>;
   getProposalsCount(
     state?: string[] | undefined,
     fromDate?: number | undefined,
+    endDate?: number | undefined,
   ): Promise<number>;
   getProposalById(proposalId: string): Promise<DBOffchainProposal | undefined>;
 }
@@ -21,6 +23,7 @@ export interface OffchainProposalsRequest {
   orderDirection?: "asc" | "desc";
   status?: string[];
   fromDate?: number;
+  endDate?: number;
 }
 
 export class OffchainProposalsService {
@@ -33,11 +36,19 @@ export class OffchainProposalsService {
       orderDirection = "desc",
       status,
       fromDate,
+      endDate,
     } = params;
 
     const [items, totalCount] = await Promise.all([
-      this.repo.getProposals(skip, limit, orderDirection, status, fromDate),
-      this.repo.getProposalsCount(status, fromDate),
+      this.repo.getProposals(
+        skip,
+        limit,
+        orderDirection,
+        status,
+        fromDate,
+        endDate,
+      ),
+      this.repo.getProposalsCount(status, fromDate, endDate),
     ]);
 
     return { items, totalCount };
