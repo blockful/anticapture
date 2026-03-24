@@ -71,16 +71,23 @@ export const delegateChanged = async (
 
   const normalizedDelegator = getAddress(delegator);
   const normalizedDelegate = getAddress(delegate);
+  const normalizedTokenId = getAddress(tokenId);
+  const normalizedPreviousDelegate = getAddress(previousDelegate);
 
-  // Ensure all required accounts exist in parallel
-  await ensureAccountsExist(context, [delegator, delegate]);
+  const delegatorBalancePromise =
+    _delegatorBalance === undefined
+      ? context.db.find(accountBalance, {
+          accountId: normalizedDelegator,
+          tokenId: normalizedTokenId,
+        })
+      : Promise.resolve({ balance: _delegatorBalance });
 
-  const delegatorBalance = _delegatorBalance
-    ? { balance: _delegatorBalance }
-    : await context.db.find(accountBalance, {
-        accountId: normalizedDelegator,
-        tokenId: getAddress(tokenId),
-      });
+  await Promise.all([
+    ensureAccountsExist(context, [delegator, delegate]),
+    delegatorBalancePromise,
+  ]);
+
+  const delegatorBalance = await delegatorBalancePromise;
 
   // Pre-compute address lists for flag determination (normalized to checksum)
   const { cex, dex, lending, burning } = addressSets ?? {
@@ -99,7 +106,7 @@ export const delegateChanged = async (
     burning.has(normalizedDelegator) || burning.has(normalizedDelegate);
   const isTotal = isBurning;
 
-  await context.db
+  const delegationWrite = context.db
     .insert(delegation)
     .values({
       transactionHash: txHash,
@@ -107,7 +114,7 @@ export const delegateChanged = async (
       delegateAccountId: normalizedDelegate,
       delegatorAccountId: normalizedDelegator,
       delegatedValue: delegatorBalance?.balance ?? 0n,
-      previousDelegate: getAddress(previousDelegate),
+      previousDelegate: normalizedPreviousDelegate,
       timestamp,
       logIndex,
       isCex,
@@ -120,11 +127,11 @@ export const delegateChanged = async (
         current.delegatedValue + (delegatorBalance?.balance ?? 0n),
     }));
 
-  await context.db
+  const accountBalanceWrite = context.db
     .insert(accountBalance)
     .values({
       accountId: normalizedDelegator,
-      tokenId: getAddress(tokenId),
+      tokenId: normalizedTokenId,
       delegate: normalizedDelegate,
       balance: BigInt(0),
     })
@@ -132,19 +139,25 @@ export const delegateChanged = async (
       delegate: normalizedDelegate,
     });
 
-  if (previousDelegate !== zeroAddress) {
-    await context.db
-      .insert(accountPower)
-      .values({
-        accountId: getAddress(previousDelegate),
-        daoId,
-      })
-      .onConflictDoUpdate((current) => ({
-        delegationsCount: Math.max(0, current.delegationsCount - 1),
-      }));
-  }
+  const writes: Promise<unknown>[] = [
+    delegationWrite,
+    accountBalanceWrite,
+    context.db.insert(feedEvent).values({
+      txHash,
+      logIndex,
+      type: "DELEGATION",
+      value: delegatorBalance?.balance ?? 0n,
+      timestamp,
+      metadata: {
+        delegator: normalizedDelegator,
+        delegate: normalizedDelegate,
+        previousDelegate: normalizedPreviousDelegate,
+        amount: delegatorBalance?.balance ?? 0n,
+      },
+    }),
+  ];
 
-  await context.db
+  const nextDelegatePowerWrite = context.db
     .insert(accountPower)
     .values({
       accountId: normalizedDelegate,
@@ -155,19 +168,71 @@ export const delegateChanged = async (
       delegationsCount: current.delegationsCount + 1,
     }));
 
-  await context.db.insert(feedEvent).values({
-    txHash,
-    logIndex,
-    type: "DELEGATION",
-    value: delegatorBalance?.balance ?? 0n,
-    timestamp,
-    metadata: {
-      delegator: normalizedDelegator,
-      delegate: normalizedDelegate,
-      previousDelegate: getAddress(previousDelegate),
-      amount: delegatorBalance?.balance ?? 0n,
-    },
+  if (previousDelegate !== zeroAddress) {
+    const previousDelegatePowerWrite = context.db
+      .insert(accountPower)
+      .values({
+        accountId: normalizedPreviousDelegate,
+        daoId,
+      })
+      .onConflictDoUpdate((current) => ({
+        delegationsCount: Math.max(0, current.delegationsCount - 1),
+      }));
+
+    if (normalizedPreviousDelegate === normalizedDelegate) {
+      await Promise.all(writes);
+      await previousDelegatePowerWrite;
+      await nextDelegatePowerWrite;
+      return;
+    }
+
+    writes.push(previousDelegatePowerWrite);
+  }
+
+  writes.push(nextDelegatePowerWrite);
+
+  await Promise.all(writes);
+};
+
+export const selfDelegateIfUnset = async (
+  context: Context,
+  daoId: DaoIdEnum,
+  args: {
+    delegator: Address;
+    tokenId: Address;
+    txHash: Hex;
+    timestamp: bigint;
+    logIndex: number;
+  },
+  addressSets?: DelegationAddressSets,
+) => {
+  const normalizedDelegator = getAddress(args.delegator);
+  const normalizedTokenId = getAddress(args.tokenId);
+
+  const delegatorBalance = await context.db.find(accountBalance, {
+    accountId: normalizedDelegator,
+    tokenId: normalizedTokenId,
   });
+
+  if (!delegatorBalance || delegatorBalance.delegate !== zeroAddress) {
+    return;
+  }
+
+  await delegateChanged(
+    context,
+    daoId,
+    {
+      delegator: normalizedDelegator,
+      delegate: normalizedDelegator,
+      tokenId: normalizedTokenId,
+      previousDelegate: zeroAddress,
+      txHash: args.txHash,
+      timestamp: args.timestamp,
+      logIndex: args.logIndex,
+      delegatorBalance: delegatorBalance.balance,
+    },
+    addressSets,
+  );
 };
 
 /**
@@ -204,41 +269,41 @@ export const delegatedVotesChanged = async (
   const delta = newBalance - oldBalance;
   const deltaMod = delta > 0n ? delta : -delta;
 
-  await context.db
-    .insert(votingPowerHistory)
-    .values({
-      daoId,
-      transactionHash: txHash,
-      accountId: normalizedDelegate,
-      votingPower: newBalance,
-      delta,
-      deltaMod,
-      timestamp,
+  await Promise.all([
+    context.db
+      .insert(votingPowerHistory)
+      .values({
+        daoId,
+        transactionHash: txHash,
+        accountId: normalizedDelegate,
+        votingPower: newBalance,
+        delta,
+        deltaMod,
+        timestamp,
+        logIndex,
+      })
+      .onConflictDoNothing(),
+    context.db
+      .insert(accountPower)
+      .values({
+        accountId: normalizedDelegate,
+        daoId,
+        votingPower: newBalance,
+      })
+      .onConflictDoUpdate(() => ({
+        votingPower: newBalance,
+      })),
+    context.db.insert(feedEvent).values({
+      txHash,
       logIndex,
-    })
-    .onConflictDoNothing();
-
-  await context.db
-    .insert(accountPower)
-    .values({
-      accountId: normalizedDelegate,
-      daoId,
-      votingPower: newBalance,
-    })
-    .onConflictDoUpdate(() => ({
-      votingPower: newBalance,
-    }));
-
-  await context.db.insert(feedEvent).values({
-    txHash,
-    logIndex,
-    type: "DELEGATION_VOTES_CHANGED",
-    value: deltaMod,
-    timestamp,
-    metadata: {
-      delta,
-      deltaMod,
-      delegate: normalizedDelegate,
-    },
-  });
+      type: "DELEGATION_VOTES_CHANGED",
+      value: deltaMod,
+      timestamp,
+      metadata: {
+        delta,
+        deltaMod,
+        delegate: normalizedDelegate,
+      },
+    }),
+  ]);
 };

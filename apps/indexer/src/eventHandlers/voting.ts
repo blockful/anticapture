@@ -52,42 +52,38 @@ export const voteCast = async (
 
   await ensureAccountExists(context, voter);
 
-  // Update account power with vote statistics
-  await context.db
-    .insert(accountPower)
-    .values({
-      accountId: getAddress(voter),
+  const normalizedVoter = getAddress(voter);
+
+  const [proposal] = await Promise.all([
+    context.db.find(proposalsOnchain, { id: proposalId }),
+    context.db
+      .insert(accountPower)
+      .values({
+        accountId: normalizedVoter,
+        daoId,
+        votesCount: 1,
+        lastVoteTimestamp: timestamp,
+      })
+      .onConflictDoUpdate((current) => ({
+        votesCount: current.votesCount + 1,
+        lastVoteTimestamp: timestamp,
+      })),
+    context.db.insert(votesOnchain).values({
+      txHash: txHash,
       daoId,
-      votesCount: 1,
-      lastVoteTimestamp: timestamp,
-    })
-    .onConflictDoUpdate((current) => ({
-      votesCount: current.votesCount + 1,
-      lastVoteTimestamp: timestamp,
-    }));
-
-  // Create vote record
-  await context.db.insert(votesOnchain).values({
-    txHash: txHash,
-    daoId,
-    proposalId,
-    voterAccountId: getAddress(voter),
-    support: support.toString(),
-    votingPower,
-    reason,
-    timestamp,
-  });
-
-  // Update proposal vote totals
-  await context.db
-    .update(proposalsOnchain, { id: proposalId })
-    .set((current) => ({
+      proposalId,
+      voterAccountId: normalizedVoter,
+      support: support.toString(),
+      votingPower,
+      reason,
+      timestamp,
+    }),
+    context.db.update(proposalsOnchain, { id: proposalId }).set((current) => ({
       againstVotes: current.againstVotes + (support === 0 ? votingPower : 0n),
       forVotes: current.forVotes + (support === 1 ? votingPower : 0n),
       abstainVotes: current.abstainVotes + (support === 2 ? votingPower : 0n),
-    }));
-
-  const proposal = await context.db.find(proposalsOnchain, { id: proposalId });
+    })),
+  ]);
 
   await context.db.insert(feedEvent).values({
     txHash,
@@ -96,7 +92,7 @@ export const voteCast = async (
     value: votingPower,
     timestamp,
     metadata: {
-      voter: getAddress(voter),
+      voter: normalizedVoter,
       reason,
       support,
       votingPower,

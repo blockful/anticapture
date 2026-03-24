@@ -1,11 +1,12 @@
 import { Context, Event, ponder } from "ponder:registry";
-import { accountBalance, token } from "ponder:schema";
+import { token } from "ponder:schema";
 import { Address, isAddressEqual, zeroAddress } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
 import {
   delegateChanged,
   delegatedVotesChanged,
+  selfDelegateIfUnset,
   tokenTransfer,
 } from "@/eventHandlers";
 import { createAddressSet, handleTransaction } from "@/eventHandlers/shared";
@@ -56,29 +57,6 @@ export function LilNounsTokenIndexer(address: Address, decimals: number) {
     }) => {
       const { from, to } = event.args;
 
-      // Auto-self-delegate for Lil Nouns when no explicit delegate is set
-      const toBal = await context.db.find(accountBalance, {
-        accountId: event.args.to,
-        tokenId: event.log.address,
-      });
-
-      if (toBal?.delegate === zeroAddress) {
-        await delegateChanged(
-          context,
-          daoId,
-          {
-            delegator: event.args.to,
-            delegate: event.args.to,
-            tokenId: event.log.address,
-            previousDelegate: zeroAddress,
-            txHash: event.transaction.hash,
-            timestamp: event.block.timestamp,
-            logIndex: event.log.logIndex,
-          },
-          delegationAddressSets,
-        );
-      }
-
       await tokenTransfer(
         context,
         daoId,
@@ -95,6 +73,21 @@ export function LilNounsTokenIndexer(address: Address, decimals: number) {
           burning: burningAddressSet,
         },
       );
+
+      if (to !== zeroAddress) {
+        await selfDelegateIfUnset(
+          context,
+          daoId,
+          {
+            delegator: to,
+            tokenId: event.log.address,
+            txHash: event.transaction.hash,
+            timestamp: event.block.timestamp,
+            logIndex: -event.log.logIndex - 1,
+          },
+          delegationAddressSets,
+        );
+      }
 
       const isFromTimelock = isAddressEqual(event.args.from, timelock);
       const isToTimelock = isAddressEqual(event.args.to, timelock);

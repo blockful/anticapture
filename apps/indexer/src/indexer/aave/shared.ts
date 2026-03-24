@@ -69,25 +69,39 @@ export async function aaveTransfer(
 
   await ensureAccountsExist(context, [to, from]);
 
-  await context.db
-    .insert(transfer)
-    .values({
-      transactionHash,
-      daoId,
-      tokenId,
-      amount: value,
-      fromAccountId: from,
-      toAccountId: to,
-      timestamp,
+  const independentWrites: Promise<unknown>[] = [
+    context.db
+      .insert(transfer)
+      .values({
+        transactionHash,
+        daoId,
+        tokenId,
+        amount: value,
+        fromAccountId: from,
+        toAccountId: to,
+        timestamp,
+        logIndex,
+        isCex: false,
+        isDex: false,
+        isLending: false,
+        isTotal: false,
+      })
+      .onConflictDoUpdate((current) => ({
+        amount: current.amount + value,
+      })),
+    context.db.insert(feedEvent).values({
+      txHash: transactionHash,
       logIndex,
-      isCex: false,
-      isDex: false,
-      isLending: false,
-      isTotal: false,
-    })
-    .onConflictDoUpdate((current) => ({
-      amount: current.amount + value,
-    }));
+      type: "TRANSFER",
+      value,
+      timestamp,
+      metadata: {
+        from,
+        to,
+        amount: value,
+      },
+    }),
+  ];
 
   if (to !== zeroAddress) {
     const { balance: currentReceiverBalance, delegate: toDelegate } =
@@ -103,39 +117,47 @@ export async function aaveTransfer(
           balance: current.balance + value,
         }));
 
-    if (toDelegate !== zeroAddress) {
-      const { votingPower: currentVotingPower } = await context.db
-        .insert(accountPower)
-        .values({ accountId: toDelegate, daoId })
-        .onConflictDoUpdate((current) => ({
-          votingPower: current.votingPower + value,
-        }));
+    const receiverWrites: Promise<unknown>[] = [
+      context.db
+        .insert(balanceHistory)
+        .values({
+          daoId,
+          transactionHash,
+          accountId: to,
+          balance: currentReceiverBalance,
+          delta: value,
+          deltaMod: value > 0n ? value : -value,
+          timestamp,
+          logIndex,
+        })
+        .onConflictDoNothing(),
+    ];
 
-      await context.db.insert(votingPowerHistory).values({
-        daoId,
-        transactionHash,
-        accountId: toDelegate,
-        votingPower: currentVotingPower + value,
-        delta: value,
-        deltaMod: value,
-        timestamp,
-        logIndex: logIndex + 1,
-      });
+    if (toDelegate !== zeroAddress) {
+      receiverWrites.push(
+        (async () => {
+          const { votingPower: currentVotingPower } = await context.db
+            .insert(accountPower)
+            .values({ accountId: toDelegate, daoId })
+            .onConflictDoUpdate((current) => ({
+              votingPower: current.votingPower + value,
+            }));
+
+          await context.db.insert(votingPowerHistory).values({
+            daoId,
+            transactionHash,
+            accountId: toDelegate,
+            votingPower: currentVotingPower + value,
+            delta: value,
+            deltaMod: value,
+            timestamp,
+            logIndex: logIndex + 1,
+          });
+        })(),
+      );
     }
 
-    await context.db
-      .insert(balanceHistory)
-      .values({
-        daoId,
-        transactionHash,
-        accountId: to,
-        balance: currentReceiverBalance,
-        delta: value,
-        deltaMod: value > 0n ? value : -value,
-        timestamp,
-        logIndex,
-      })
-      .onConflictDoNothing();
+    await Promise.all(receiverWrites);
   }
 
   if (from !== zeroAddress) {
@@ -152,53 +174,50 @@ export async function aaveTransfer(
           balance: current.balance - value,
         }));
 
-    if (fromDelegate !== zeroAddress) {
-      const { votingPower: currentVotingPower } = await context.db
-        .insert(accountPower)
-        .values({ accountId: fromDelegate, daoId })
-        .onConflictDoUpdate((current) => ({
-          votingPower: current.votingPower - value,
-        }));
+    const senderWrites: Promise<unknown>[] = [
+      context.db
+        .insert(balanceHistory)
+        .values({
+          daoId,
+          transactionHash,
+          accountId: from,
+          balance: currentSenderBalance,
+          delta: -value,
+          deltaMod: value > 0n ? value : -value,
+          timestamp,
+          logIndex,
+        })
+        .onConflictDoNothing(),
+    ];
 
-      await context.db.insert(votingPowerHistory).values({
-        daoId,
-        transactionHash,
-        accountId: fromDelegate,
-        votingPower: currentVotingPower - value,
-        delta: -value,
-        deltaMod: value > 0n ? value : -value,
-        timestamp,
-        logIndex: logIndex + 1,
-      });
+    if (fromDelegate !== zeroAddress) {
+      senderWrites.push(
+        (async () => {
+          const { votingPower: currentVotingPower } = await context.db
+            .insert(accountPower)
+            .values({ accountId: fromDelegate, daoId })
+            .onConflictDoUpdate((current) => ({
+              votingPower: current.votingPower - value,
+            }));
+
+          await context.db.insert(votingPowerHistory).values({
+            daoId,
+            transactionHash,
+            accountId: fromDelegate,
+            votingPower: currentVotingPower - value,
+            delta: -value,
+            deltaMod: value > 0n ? value : -value,
+            timestamp,
+            logIndex: logIndex + 1,
+          });
+        })(),
+      );
     }
 
-    await context.db
-      .insert(balanceHistory)
-      .values({
-        daoId,
-        transactionHash,
-        accountId: from,
-        balance: currentSenderBalance,
-        delta: -value,
-        deltaMod: value > 0n ? value : -value,
-        timestamp,
-        logIndex,
-      })
-      .onConflictDoNothing();
+    await Promise.all(senderWrites);
   }
 
-  await context.db.insert(feedEvent).values({
-    txHash: transactionHash,
-    logIndex,
-    type: "TRANSFER",
-    value,
-    timestamp,
-    metadata: {
-      from,
-      to,
-      amount: value,
-    },
-  });
+  await Promise.all(independentWrites);
 
   const { cex, dex, lending, treasury, nonCirculating, burning } = addressSets;
 
@@ -333,90 +352,107 @@ export async function aaveDelegateChanged(
     .values({ accountId: delegator, tokenId, delegate, balance: 0n })
     .onConflictDoUpdate({ delegate });
 
-  await context.db
-    .insert(delegation)
-    .values({
-      transactionHash,
-      daoId,
-      delegateAccountId: delegate,
-      delegatorAccountId: delegator,
-      delegatedValue: delegatorBalance.balance,
-      previousDelegate,
-      timestamp,
-      logIndex,
-      isCex: false,
-      isDex: false,
-      isLending: false,
-      isTotal: false,
-      type: delegationType,
-    })
-    .onConflictDoUpdate((current) => ({
-      delegatedValue: current.delegatedValue + delegatorBalance.balance,
-    }));
-
-  if (delegate !== zeroAddress) {
-    await context.db
-      .insert(accountPower)
+  const sharedWrites: Promise<unknown>[] = [
+    context.db
+      .insert(delegation)
       .values({
-        accountId: delegate,
+        transactionHash,
         daoId,
-        delegationsCount: 1,
-        votingPower: delegatorBalance.balance,
+        delegateAccountId: delegate,
+        delegatorAccountId: delegator,
+        delegatedValue: delegatorBalance.balance,
+        previousDelegate,
+        timestamp,
+        logIndex,
+        isCex: false,
+        isDex: false,
+        isLending: false,
+        isTotal: false,
+        type: delegationType,
       })
       .onConflictDoUpdate((current) => ({
-        delegationsCount: current.delegationsCount + 1,
-        votingPower: current.votingPower + delegatorBalance.balance,
-      }));
+        delegatedValue: current.delegatedValue + delegatorBalance.balance,
+      })),
+    context.db.insert(feedEvent).values({
+      txHash: transactionHash,
+      logIndex,
+      type: "DELEGATION",
+      value: delegatorBalance.balance,
+      timestamp,
+      metadata: {
+        delegator,
+        delegate,
+        previousDelegate,
+        amount: delegatorBalance.balance,
+      },
+    }),
+  ];
 
-    await context.db
-      .insert(votingPowerHistory)
-      .values({
-        daoId,
-        transactionHash,
-        accountId: delegate,
-        votingPower: delegatorBalance.balance,
-        delta: delegatorBalance.balance,
-        deltaMod: delegatorBalance.balance,
-        timestamp,
-        logIndex: logIndex + 1,
-      })
-      .onConflictDoNothing();
+  if (delegate !== zeroAddress) {
+    sharedWrites.push(
+      (async () => {
+        const { votingPower: currentVotingPower } = await context.db
+          .insert(accountPower)
+          .values({
+            accountId: delegate,
+            daoId,
+            delegationsCount: 1,
+            votingPower: delegatorBalance.balance,
+          })
+          .onConflictDoUpdate((current) => ({
+            delegationsCount: current.delegationsCount + 1,
+            votingPower: current.votingPower + delegatorBalance.balance,
+          }));
+
+        await context.db
+          .insert(votingPowerHistory)
+          .values({
+            daoId,
+            transactionHash,
+            accountId: delegate,
+            votingPower: currentVotingPower + delegatorBalance.balance,
+            delta: delegatorBalance.balance,
+            deltaMod: delegatorBalance.balance,
+            timestamp,
+            logIndex: logIndex + 1,
+          })
+          .onConflictDoNothing();
+      })(),
+    );
   }
 
   if (redelegation) {
-    const previousVp = await context.db
-      .update(accountPower, { accountId: previousDelegate })
-      .set((current) => ({
-        delegationsCount: current.delegationsCount - 1,
-        votingPower: current.votingPower - delegatorBalance.balance,
-      }));
+    const previousDelegateWrite = (async () => {
+      const previousVp = await context.db
+        .update(accountPower, { accountId: previousDelegate })
+        .set((current) => ({
+          delegationsCount: current.delegationsCount - 1,
+          votingPower: current.votingPower - delegatorBalance.balance,
+        }));
 
-    await context.db
-      .insert(votingPowerHistory)
-      .values({
-        daoId,
-        transactionHash,
-        accountId: previousDelegate,
-        votingPower: previousVp.votingPower - delegatorBalance.balance,
-        delta: -delegatorBalance.balance,
-        deltaMod: delegatorBalance.balance,
-        timestamp,
-        logIndex: logIndex + 1,
-      })
-      .onConflictDoNothing();
+      await context.db
+        .insert(votingPowerHistory)
+        .values({
+          daoId,
+          transactionHash,
+          accountId: previousDelegate,
+          votingPower: previousVp.votingPower - delegatorBalance.balance,
+          delta: -delegatorBalance.balance,
+          deltaMod: delegatorBalance.balance,
+          timestamp,
+          logIndex: logIndex + 1,
+        })
+        .onConflictDoNothing();
+    })();
+
+    if (previousDelegate === delegate) {
+      await Promise.all(sharedWrites);
+      await previousDelegateWrite;
+      return;
+    }
+
+    sharedWrites.push(previousDelegateWrite);
   }
 
-  await context.db.insert(feedEvent).values({
-    txHash: transactionHash,
-    logIndex,
-    type: "DELEGATION",
-    value: delegatorBalance.balance,
-    timestamp,
-    metadata: {
-      delegator,
-      delegate,
-      previousDelegate,
-      amount: delegatorBalance.balance,
-    },
-  });
+  await Promise.all(sharedWrites);
 }
