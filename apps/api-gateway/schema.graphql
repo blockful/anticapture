@@ -1,26 +1,20 @@
-directive @resolveRoot(subgraph: String) on FIELD_DEFINITION
-
-directive @httpOperation(subgraph: String, path: String, operationSpecificHeaders: [[String]], httpMethod: HTTPMethod, isBinary: Boolean, requestBaseBody: ObjMap, queryParamArgMap: ObjMap, queryStringOptionsByParam: ObjMap, jsonApiFields: Boolean, queryStringOptions: ObjMap) on FIELD_DEFINITION
-
-directive @transport(subgraph: String, kind: String, location: String, headers: [[String]], queryStringOptions: ObjMap, queryParams: [[String]]) repeatable on SCHEMA
+directive @statusCodeTypeName(subgraph: String, typeName: String, statusCode: String) repeatable on UNION
 
 directive @enum(subgraph: String, value: String) on ENUM_VALUE
+
+directive @resolveRoot(subgraph: String) on FIELD_DEFINITION
 
 directive @typescript(subgraph: String, type: String) on SCALAR | ENUM
 
 directive @example(subgraph: String, value: ObjMap) repeatable on FIELD_DEFINITION | OBJECT | INPUT_OBJECT | ENUM | SCALAR
 
+directive @regexp(subgraph: String, pattern: String) on SCALAR
+
+directive @httpOperation(subgraph: String, path: String, operationSpecificHeaders: [[String]], httpMethod: HTTPMethod, isBinary: Boolean, requestBaseBody: ObjMap, queryParamArgMap: ObjMap, queryStringOptionsByParam: ObjMap, jsonApiFields: Boolean, queryStringOptions: ObjMap) on FIELD_DEFINITION
+
+directive @transport(subgraph: String, kind: String, location: String, headers: [[String]], queryStringOptions: ObjMap, queryParams: [[String]]) repeatable on SCHEMA
+
 type Query {
-  """
-  Returns label information from Arkham, ENS data, and whether the address is an EOA or contract. Arkham data is stored permanently. ENS data is cached with a configurable TTL.
-  """
-  getAddress(address: String!): getAddress_200_response
-
-  """
-  Returns label information from Arkham, ENS data, and address type for multiple addresses. Maximum 100 addresses per request. Arkham data is stored permanently. ENS data is cached with a configurable TTL.
-  """
-  getAddresses(addresses: JSON!): getAddresses_200_response
-
   """
   Get historical delegations for an account, with optional filtering and sorting
   """
@@ -46,13 +40,19 @@ type Query {
   getTotalTreasury(days: queryInput_getTotalTreasury_days = _365d, order: queryInput_getTotalTreasury_order = asc): getTotalTreasury_200_response
 
   """Get historical market data for a specific token"""
-  historicalTokenData(skip: NonNegativeInt, limit: Float = 365): [query_historicalTokenData_items]
+  historicalTokenData(
+    """Number of rows to skip before returning results."""
+    skip: Int
+
+    """Maximum number of historical points to return."""
+    limit: Int
+  ): [TokenHistoricalPriceItem]
 
   """Get property data for a specific token"""
-  token(currency: queryInput_token_currency = usd): token_200_response
+  token(currency: queryInput_token_currency = usd): token_response
 
   """Get feed events"""
-  feedEvents(skip: Float, limit: Float = 10, orderBy: queryInput_feedEvents_orderBy = timestamp, orderDirection: queryInput_feedEvents_orderDirection = desc, relevance: queryInput_feedEvents_relevance = MEDIUM, type: queryInput_feedEvents_type, fromDate: Float, toDate: Float): feedEvents_200_response
+  feedEvents(skip: Int, limit: Int = 10, orderBy: queryInput_feedEvents_orderBy = timestamp, orderDirection: queryInput_feedEvents_orderDirection = desc, relevance: queryInput_feedEvents_relevance = MEDIUM, type: queryInput_feedEvents_type, fromDate: Int, toDate: Int): FeedResponse
 
   """Get event relevance threshold"""
   getEventRelevanceThreshold(type: queryInput_getEventRelevanceThreshold_type!, relevance: queryInput_getEventRelevanceThreshold_relevance!): getEventRelevanceThreshold_200_response
@@ -96,10 +96,34 @@ type Query {
   proposalsActivity(address: String!, fromDate: String, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_proposalsActivity_orderBy = timestamp, orderDirection: queryInput_proposalsActivity_orderDirection = desc, userVoteFilter: queryInput_proposalsActivity_userVoteFilter): proposalsActivity_200_response
 
   """Returns a list of proposal"""
-  proposals(skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposals_orderDirection = desc, status: JSON, fromDate: Float, fromEndDate: Float, includeOptimisticProposals: queryInput_proposals_includeOptimisticProposals = TRUE): proposals_200_response
+  proposals(
+    """Number of proposals to skip before collecting results."""
+    skip: NonNegativeInt
+
+    """Maximum number of proposals to return."""
+    limit: PositiveInt = 10
+    orderDirection: queryInput_proposals_orderDirection = desc
+
+    """
+    Proposal status filter. Pass repeated query params or a comma-delimited list.
+    """
+    status: [String]
+
+    """Earliest proposal timestamp, in Unix seconds."""
+    fromDate: Int
+
+    """Latest proposal end timestamp, in Unix seconds."""
+    fromEndDate: Int
+
+    """Whether optimistic proposals should be included."""
+    includeOptimisticProposals: Boolean
+  ): OnchainProposalsResponse
 
   """Returns a single proposal by its ID"""
-  proposal(id: String!): proposal_200_response
+  proposal(
+    """Onchain proposal identifier."""
+    id: String!
+  ): proposal_response
 
   """TODO"""
   historicalBalances(address: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_historicalBalances_orderBy = timestamp, orderDirection: queryInput_historicalBalances_orderDirection = desc, fromDate: String, toDate: String, fromValue: String, toValue: String): historicalBalances_200_response
@@ -132,7 +156,23 @@ type Query {
   lastUpdate(chart: queryInput_lastUpdate_chart!): lastUpdate_200_response
 
   """Get delegation percentage day buckets with forward-fill"""
-  delegationPercentageByDay(startDate: String, endDate: String, orderDirection: queryInput_delegationPercentageByDay_orderDirection = asc, limit: NonNegativeInt = 365, after: String, before: String): delegationPercentageByDay_200_response
+  delegationPercentageByDay(
+    """Inclusive lower bound cursor as a Unix timestamp string."""
+    startDate: String
+
+    """Inclusive upper bound cursor as a Unix timestamp string."""
+    endDate: String
+    orderDirection: queryInput_delegationPercentageByDay_orderDirection = asc
+
+    """Maximum number of buckets to return."""
+    limit: Int
+
+    """Return items after this cursor (exclusive)."""
+    after: String
+
+    """Return items before this cursor (exclusive)."""
+    before: String
+  ): DelegationPercentageResponse
 
   """Returns a list of voting power changes for a specific account"""
   historicalVotingPowerByAccountId(address: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_historicalVotingPowerByAccountId_orderBy = timestamp, orderDirection: queryInput_historicalVotingPowerByAccountId_orderDirection = desc, fromDate: String, toDate: String, fromValue: String, toValue: String): historicalVotingPowerByAccountId_200_response
@@ -163,10 +203,40 @@ type Query {
   accountBalanceVariationsByAccountId(address: String!, fromDate: String, toDate: String): accountBalanceVariationsByAccountId_200_response
 
   """Returns sorted and paginated account balance records"""
-  accountBalances(fromDate: String, toDate: String, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountBalances_orderDirection = desc, orderBy: queryInput_accountBalances_orderBy = balance, excludeDaoAddresses: Boolean, addresses: JSON, delegates: JSON, fromValue: String, toValue: String): accountBalances_200_response
+  accountBalances(
+    """Inclusive lower bound for balance history filters, in Unix seconds."""
+    fromDate: Int
+
+    """Inclusive upper bound for balance history filters, in Unix seconds."""
+    toDate: Int
+    limit: PositiveInt = 20
+    skip: NonNegativeInt
+    orderDirection: queryInput_accountBalances_orderDirection = desc
+    orderBy: queryInput_accountBalances_orderBy = balance
+
+    """Whether DAO-owned addresses should be excluded from the results."""
+    excludeDaoAddresses: Boolean
+    addresses: [String]
+    delegates: [String]
+    fromValue: String
+    toValue: String
+  ): AccountBalancesWithVariationResponse
 
   """Returns account balance information for a specific address"""
-  accountBalanceByAccountId(address: String!, fromDate: String, toDate: String): accountBalanceByAccountId_200_response
+  accountBalanceByAccountId(
+    """Wallet address whose balance is being queried."""
+    address: String!
+
+    """
+    Inclusive lower bound for the returned balance period, in Unix seconds.
+    """
+    fromDate: Int
+
+    """
+    Inclusive upper bound for the returned balance period, in Unix seconds.
+    """
+    toDate: Int
+  ): AccountBalanceWithVariationResponse
 
   """
   Returns a mapping of the largest interactions between accounts. 
@@ -175,13 +245,68 @@ type Query {
   accountInteractions(address: String!, fromDate: String, toDate: String, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: queryInput_accountInteractions_orderDirection = desc, minAmount: String, maxAmount: String, orderBy: queryInput_accountInteractions_orderBy = count, filterAddress: String): accountInteractions_200_response
 
   """Get transfers of a given address"""
-  transfers(address: String!, limit: Float = 10, offset: Float, sortBy: queryInput_transfers_sortBy = timestamp, sortOrder: queryInput_transfers_sortOrder = asc, from: String, to: String, fromDate: Float, toDate: Float, fromValue: String, toValue: String): transfers_200_response
+  transfers(
+    """Wallet address whose transfers are being queried."""
+    address: String!
+    limit: Int = 10
+    offset: Int
+    sortBy: queryInput_transfers_sortBy = timestamp
+    sortOrder: queryInput_transfers_sortOrder = asc
+    from: String
+    to: String
+    fromDate: Int
+    toDate: Int
+    fromValue: String
+    toValue: String
+  ): TransfersResponse
 
   """Returns a paginated list of votes cast on a specific proposal"""
-  votesByProposalId(id: String!, skip: NonNegativeInt, limit: Float = 10, voterAddressIn: JSON, orderBy: queryInput_votesByProposalId_orderBy = timestamp, orderDirection: queryInput_votesByProposalId_orderDirection = desc, support: Float, fromDate: Float, toDate: Float): votesByProposalId_200_response
+  votesByProposalId(
+    id: String!
+
+    """Number of votes to skip before collecting results."""
+    skip: NonNegativeInt
+
+    """Maximum number of votes to return."""
+    limit: PositiveInt = 10
+
+    """
+    Filter by one or more voter addresses. Pass repeated query params or a comma-delimited list.
+    """
+    voterAddressIn: [String]
+    orderBy: queryInput_votesByProposalId_orderBy = timestamp
+    orderDirection: queryInput_votesByProposalId_orderDirection = desc
+    support: queryInput_votesByProposalId_support
+
+    """Earliest vote timestamp, in Unix seconds."""
+    fromDate: Int
+
+    """Latest vote timestamp, in Unix seconds."""
+    toDate: Int
+  ): OnchainVotesResponse
 
   """Get all votes ordered by timestamp or voting power"""
-  votes(skip: NonNegativeInt, limit: Float = 10, voterAddressIn: JSON, orderBy: queryInput_votes_orderBy = timestamp, orderDirection: queryInput_votes_orderDirection = desc, support: Float, fromDate: Float, toDate: Float): votes_200_response
+  votes(
+    """Number of votes to skip before collecting results."""
+    skip: NonNegativeInt
+
+    """Maximum number of votes to return."""
+    limit: PositiveInt = 10
+
+    """
+    Filter by one or more voter addresses. Pass repeated query params or a comma-delimited list.
+    """
+    voterAddressIn: [String]
+    orderBy: queryInput_votes_orderBy = timestamp
+    orderDirection: queryInput_votes_orderDirection = desc
+    support: queryInput_votes_support
+
+    """Earliest vote timestamp, in Unix seconds."""
+    fromDate: Int
+
+    """Latest vote timestamp, in Unix seconds."""
+    toDate: Int
+  ): OnchainVotesResponse
 
   """Returns the active delegates that did not vote on a given proposal"""
   proposalNonVoters(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_proposalNonVoters_orderDirection = desc, addresses: JSON): proposalNonVoters_200_response
@@ -190,21 +315,94 @@ type Query {
   dao: dao_200_response
 
   """Returns token related metrics for a single metric type."""
-  tokenMetrics(metricType: queryInput_tokenMetrics_metricType!, startDate: Float, endDate: Float, orderDirection: queryInput_tokenMetrics_orderDirection = asc, limit: NonNegativeInt = 365, skip: NonNegativeInt): tokenMetrics_200_response
+  tokenMetrics(
+    metricType: queryInput_tokenMetrics_metricType!
+
+    """Inclusive lower bound as a Unix timestamp in seconds."""
+    startDate: Int
+
+    """Inclusive upper bound as a Unix timestamp in seconds."""
+    endDate: Int
+    orderDirection: queryInput_tokenMetrics_orderDirection = asc
+
+    """Maximum number of buckets to return."""
+    limit: Int
+
+    """Number of buckets to skip before returning results."""
+    skip: Int
+  ): TokenMetricsResponse
 
   """Returns a list of offchain (Snapshot) proposals"""
-  offchainProposals(skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_offchainProposals_orderDirection = desc, status: JSON, fromDate: Float): offchainProposals_200_response
+  offchainProposals(
+    """Number of proposals to skip before collecting results."""
+    skip: NonNegativeInt
+
+    """Maximum number of proposals to return."""
+    limit: PositiveInt = 10
+    orderDirection: queryInput_offchainProposals_orderDirection = desc
+
+    """
+    Snapshot proposal state filter. Pass repeated query params or a comma-delimited list.
+    """
+    status: [String]
+
+    """Earliest proposal creation timestamp, in Unix seconds."""
+    fromDate: Int
+  ): OffchainProposalsResponse
 
   """Returns a single offchain (Snapshot) proposal by its ID"""
-  offchainProposalById(id: String!): offchainProposalById_200_response
+  offchainProposalById(
+    """Snapshot proposal identifier."""
+    id: String!
+  ): offchainProposalById_response
 
   """Returns a list of offchain (Snapshot) votes"""
-  votesOffchain(skip: NonNegativeInt, limit: Float = 10, orderBy: queryInput_votesOffchain_orderBy = timestamp, orderDirection: queryInput_votesOffchain_orderDirection = desc, voterAddresses: JSON, fromDate: Float, toDate: Float): votesOffchain_200_response
+  votesOffchain(
+    """Number of votes to skip before collecting results."""
+    skip: NonNegativeInt
+
+    """Maximum number of votes to return."""
+    limit: PositiveInt = 10
+    orderBy: queryInput_votesOffchain_orderBy = timestamp
+    orderDirection: queryInput_votesOffchain_orderDirection = desc
+
+    """
+    Filter by one or more voter addresses. Pass repeated query params or a comma-delimited list.
+    """
+    voterAddresses: [String]
+
+    """Earliest vote timestamp, in Unix seconds."""
+    fromDate: Int
+
+    """Latest vote timestamp, in Unix seconds."""
+    toDate: Int
+  ): OffchainVotesResponse
 
   """
   Returns a paginated list of offchain (Snapshot) votes for a specific proposal
   """
-  votesOffchainByProposalId(id: String!, skip: NonNegativeInt, limit: Float = 10, orderBy: queryInput_votesOffchainByProposalId_orderBy = timestamp, orderDirection: queryInput_votesOffchainByProposalId_orderDirection = desc, voterAddresses: JSON, fromDate: Float, toDate: Float): votesOffchainByProposalId_200_response
+  votesOffchainByProposalId(
+    id: String!
+
+    """Number of votes to skip before collecting results."""
+    skip: NonNegativeInt
+
+    """Maximum number of votes to return."""
+    limit: PositiveInt = 10
+    orderBy: queryInput_votesOffchainByProposalId_orderBy = timestamp
+    orderDirection: queryInput_votesOffchainByProposalId_orderDirection = desc
+
+    """
+    Filter by one or more voter addresses. Pass repeated query params or a comma-delimited list.
+    """
+    voterAddresses: [String]
+
+    """Earliest vote timestamp, in Unix seconds."""
+    fromDate: Int
+
+    """Latest vote timestamp, in Unix seconds."""
+    toDate: Int
+  ): OffchainVotesResponse
 
   """
   Average delegation percentage across all supported DAOs by day.
@@ -244,69 +442,6 @@ type Query {
   daos: DAOList!
 }
 
-type getAddress_200_response {
-  address: String!
-  isContract: Boolean!
-  arkham: query_getAddress_arkham
-  ens: query_getAddress_ens
-}
-
-type query_getAddress_arkham {
-  entity: String
-  entityType: String
-  label: String
-  twitter: String
-}
-
-type query_getAddress_ens {
-  name: String
-  avatar: String
-  banner: String
-}
-
-type getAddresses_200_response {
-  results: [query_getAddresses_results_items]!
-}
-
-type query_getAddresses_results_items {
-  address: String!
-  isContract: Boolean!
-  arkham: query_getAddresses_results_items_arkham
-  ens: query_getAddresses_results_items_ens
-}
-
-type query_getAddresses_results_items_arkham {
-  entity: String
-  entityType: String
-  label: String
-  twitter: String
-}
-
-type query_getAddresses_results_items_ens {
-  name: String
-  avatar: String
-  banner: String
-}
-
-"""
-The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
-"""
-scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
-
-enum HTTPMethod {
-  GET
-  HEAD
-  POST
-  PUT
-  DELETE
-  CONNECT
-  OPTIONS
-  TRACE
-  PATCH
-}
-
-scalar ObjMap
-
 type historicalDelegations_200_response {
   items: [query_historicalDelegations_items_items]!
   totalCount: Float!
@@ -319,6 +454,11 @@ type query_historicalDelegations_items_items {
   timestamp: String!
   transactionHash: String!
 }
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
 
 """Integers that will have a value of 0 or more."""
 scalar NonNegativeInt
@@ -449,15 +589,22 @@ enum queryInput_getTotalTreasury_order {
   desc
 }
 
-type query_historicalTokenData_items {
+type TokenHistoricalPriceItem {
+  """Historical price value as a decimal string."""
   price: String!
-  timestamp: Float!
+
+  """Unix timestamp in seconds."""
+  timestamp: Int!
 }
 
-type token_200_response {
+union token_response = TokenPropertiesResponse | ErrorResponse
+
+type TokenPropertiesResponse {
   id: String!
   name: String
-  decimals: Float!
+
+  """Token decimals."""
+  decimals: Int!
   totalSupply: String!
   delegatedSupply: String!
   cexSupply: String!
@@ -468,22 +615,28 @@ type token_200_response {
   price: String!
 }
 
+type ErrorResponse {
+  """Human-readable error message"""
+  error: String!
+}
+
+"""Currency to use when fetching token price data."""
 enum queryInput_token_currency {
   eth
   usd
 }
 
-type feedEvents_200_response {
-  items: [query_feedEvents_items_items]!
-  totalCount: Float!
+type FeedResponse {
+  items: [FeedItem]!
+  totalCount: Int!
 }
 
-type query_feedEvents_items_items {
+type FeedItem {
   txHash: String!
-  logIndex: Float!
+  logIndex: Int!
   type: query_feedEvents_items_items_type!
   value: String
-  timestamp: Float!
+  timestamp: Int!
   relevance: query_feedEvents_items_items_relevance!
   metadata: JSON
 }
@@ -758,66 +911,41 @@ enum queryInput_proposalsActivity_userVoteFilter {
   no_vote
 }
 
-type proposals_200_response {
-  items: [query_proposals_items_items]!
-  totalCount: Float!
+type OnchainProposalsResponse {
+  items: [OnchainProposal]!
+  totalCount: Int!
 }
 
-type query_proposals_items_items {
+type OnchainProposal {
   id: String!
   daoId: String!
   txHash: String!
   proposerAccountId: String!
   title: String!
   description: String!
-  startBlock: Float!
-  endBlock: Float!
-  timestamp: String!
+  startBlock: Int!
+  endBlock: Int!
+  timestamp: Int!
   status: String!
   forVotes: String!
   againstVotes: String!
   abstainVotes: String!
-  startTimestamp: String!
-  endTimestamp: String!
+  startTimestamp: Int!
+  endTimestamp: Int!
   quorum: String!
   calldatas: [String]!
   values: [String]!
   targets: [String]!
-  proposalType: Float
+  proposalType: Int
 }
 
+"""Sort direction for proposal timestamps."""
 enum queryInput_proposals_orderDirection {
   asc
   desc
 }
 
-enum queryInput_proposals_includeOptimisticProposals {
-  TRUE
-  FALSE
-}
-
-type proposal_200_response {
-  id: String!
-  daoId: String!
-  txHash: String!
-  proposerAccountId: String!
-  title: String!
-  description: String!
-  startBlock: Float!
-  endBlock: Float!
-  timestamp: String!
-  status: String!
-  forVotes: String!
-  againstVotes: String!
-  abstainVotes: String!
-  startTimestamp: String!
-  endTimestamp: String!
-  quorum: String!
-  calldatas: [String]!
-  values: [String]!
-  targets: [String]!
-  proposalType: Float
-}
+union proposal_response = OnchainProposal | ErrorResponse
 
 type historicalBalances_200_response {
   items: [query_historicalBalances_items_items]!
@@ -865,11 +993,11 @@ type query_transactions_items_items {
   isLending: Boolean!
   isTotal: Boolean!
   timestamp: String!
-  transfers: [query_transactions_items_items_transfers_items]!
+  transfers: [Transfer]!
   delegations: [query_transactions_items_items_delegations_items]!
 }
 
-type query_transactions_items_items_transfers_items {
+type Transfer {
   transactionHash: String!
   daoId: String!
   tokenId: String!
@@ -877,7 +1005,7 @@ type query_transactions_items_items_transfers_items {
   fromAccountId: String!
   toAccountId: String!
   timestamp: String!
-  logIndex: Float!
+  logIndex: Int!
   isCex: Boolean!
   isDex: Boolean!
   isLending: Boolean!
@@ -918,23 +1046,34 @@ enum queryInput_lastUpdate_chart {
   token_distribution
 }
 
-type delegationPercentageByDay_200_response {
-  items: [query_delegationPercentageByDay_items_items]!
-  totalCount: Float!
-  pageInfo: query_delegationPercentageByDay_pageInfo!
+type DelegationPercentageResponse {
+  items: [DelegationPercentageItem]!
+
+  """Total number of matching day buckets."""
+  totalCount: Int!
+  pageInfo: DelegationPercentagePageInfo!
 }
 
-type query_delegationPercentageByDay_items_items {
+type DelegationPercentageItem {
+  """Unix day bucket represented as a timestamp string."""
   date: String!
+
+  """Delegation percentage value for the day bucket."""
   high: String!
 }
 
-type query_delegationPercentageByDay_pageInfo {
+type DelegationPercentagePageInfo {
+  """Whether more items are available."""
   hasNextPage: Boolean!
+
+  """End cursor for the current page."""
   endDate: String
+
+  """Start cursor for the current page."""
   startDate: String
 }
 
+"""Sort direction for the returned buckets."""
 enum queryInput_delegationPercentageByDay_orderDirection {
   asc
   desc
@@ -1021,11 +1160,11 @@ enum queryInput_historicalVotingPower_orderDirection {
 }
 
 type votingPowerVariations_200_response {
-  period: query_votingPowerVariations_period!
+  period: PeriodResponse!
   items: [query_votingPowerVariations_items_items]!
 }
 
-type query_votingPowerVariations_period {
+type PeriodResponse {
   startTimestamp: String!
   endTimestamp: String!
 }
@@ -1044,13 +1183,8 @@ enum queryInput_votingPowerVariations_orderDirection {
 }
 
 type votingPowerVariationsByAccountId_200_response {
-  period: query_votingPowerVariationsByAccountId_period!
+  period: PeriodResponse!
   data: query_votingPowerVariationsByAccountId_data!
-}
-
-type query_votingPowerVariationsByAccountId_period {
-  startTimestamp: String!
-  endTimestamp: String!
 }
 
 type query_votingPowerVariationsByAccountId_data {
@@ -1111,13 +1245,8 @@ type query_votingPowerByAccountId_variation {
 }
 
 type accountBalanceVariations_200_response {
-  period: query_accountBalanceVariations_period!
+  period: PeriodResponse!
   items: [query_accountBalanceVariations_items_items]!
-}
-
-type query_accountBalanceVariations_period {
-  startTimestamp: String!
-  endTimestamp: String!
 }
 
 type query_accountBalanceVariations_items_items {
@@ -1134,13 +1263,8 @@ enum queryInput_accountBalanceVariations_orderDirection {
 }
 
 type accountBalanceVariationsByAccountId_200_response {
-  period: query_accountBalanceVariationsByAccountId_period!
+  period: PeriodResponse!
   data: query_accountBalanceVariationsByAccountId_data!
-}
-
-type query_accountBalanceVariationsByAccountId_period {
-  startTimestamp: String!
-  endTimestamp: String!
 }
 
 type query_accountBalanceVariationsByAccountId_data {
@@ -1151,13 +1275,13 @@ type query_accountBalanceVariationsByAccountId_data {
   percentageChange: String!
 }
 
-type accountBalances_200_response {
-  items: [query_accountBalances_items_items]!
-  period: query_accountBalances_period!
-  totalCount: Float!
+type AccountBalancesWithVariationResponse {
+  items: [AccountBalanceWithVariation]!
+  period: PeriodResponse!
+  totalCount: Int!
 }
 
-type query_accountBalances_items_items {
+type AccountBalanceWithVariation {
   address: String!
   balance: String!
   tokenId: String!
@@ -1166,14 +1290,11 @@ type query_accountBalances_items_items {
 }
 
 type query_accountBalances_items_items_variation {
+  accountId: String!
   previousBalance: String!
+  currentBalance: String!
   absoluteChange: String!
   percentageChange: String!
-}
-
-type query_accountBalances_period {
-  startTimestamp: String!
-  endTimestamp: String!
 }
 
 enum queryInput_accountBalances_orderDirection {
@@ -1187,39 +1308,15 @@ enum queryInput_accountBalances_orderBy {
   signedVariation
 }
 
-type accountBalanceByAccountId_200_response {
-  data: query_accountBalanceByAccountId_data!
-  period: query_accountBalanceByAccountId_period!
-}
-
-type query_accountBalanceByAccountId_data {
-  address: String!
-  balance: String!
-  tokenId: String!
-  delegate: String!
-  variation: query_accountBalanceByAccountId_data_variation!
-}
-
-type query_accountBalanceByAccountId_data_variation {
-  previousBalance: String!
-  absoluteChange: String!
-  percentageChange: String!
-}
-
-type query_accountBalanceByAccountId_period {
-  startTimestamp: String!
-  endTimestamp: String!
+type AccountBalanceWithVariationResponse {
+  data: AccountBalanceWithVariation!
+  period: PeriodResponse!
 }
 
 type accountInteractions_200_response {
-  period: query_accountInteractions_period!
+  period: PeriodResponse!
   totalCount: Float!
   items: [query_accountInteractions_items_items]!
-}
-
-type query_accountInteractions_period {
-  startTimestamp: String!
-  endTimestamp: String!
 }
 
 type query_accountInteractions_items_items {
@@ -1239,24 +1336,9 @@ enum queryInput_accountInteractions_orderBy {
   count
 }
 
-type transfers_200_response {
-  items: [query_transfers_items_items]!
-  totalCount: Float!
-}
-
-type query_transfers_items_items {
-  transactionHash: String!
-  daoId: String!
-  tokenId: String!
-  amount: String!
-  fromAccountId: String!
-  toAccountId: String!
-  timestamp: String!
-  logIndex: Float!
-  isCex: Boolean!
-  isDex: Boolean!
-  isLending: Boolean!
-  isTotal: Boolean!
+type TransfersResponse {
+  items: [Transfer]!
+  totalCount: Int!
 }
 
 enum queryInput_transfers_sortBy {
@@ -1269,57 +1351,53 @@ enum queryInput_transfers_sortOrder {
   desc
 }
 
-type votesByProposalId_200_response {
-  items: [query_votesByProposalId_items_items]!
-  totalCount: Float!
+type OnchainVotesResponse {
+  items: [OnchainVote]!
+  totalCount: Int!
 }
 
-type query_votesByProposalId_items_items {
+type OnchainVote {
   voterAddress: String!
   transactionHash: String!
   proposalId: String!
-  support: Float
+  support: String!
+
+  """Voting power encoded as a decimal string."""
   votingPower: String!
   reason: String
+
+  """Vote timestamp in Unix seconds."""
   timestamp: Int!
   proposalTitle: String
 }
 
+"""Sort votes by timestamp or voting power."""
 enum queryInput_votesByProposalId_orderBy {
   timestamp
   votingPower
 }
 
+"""Sort direction for the selected order field."""
 enum queryInput_votesByProposalId_orderDirection {
   asc
   desc
 }
 
-type votes_200_response {
-  items: [query_votes_items_items]!
-  totalCount: Float!
-}
+scalar queryInput_votesByProposalId_support
 
-type query_votes_items_items {
-  voterAddress: String!
-  transactionHash: String!
-  proposalId: String!
-  support: Float
-  votingPower: String!
-  reason: String
-  timestamp: Int!
-  proposalTitle: String
-}
-
+"""Sort votes by timestamp or voting power."""
 enum queryInput_votes_orderBy {
   timestamp
   votingPower
 }
 
+"""Sort direction for the selected order field."""
 enum queryInput_votes_orderDirection {
   asc
   desc
 }
+
+scalar queryInput_votes_support
 
 type proposalNonVoters_200_response {
   items: [query_proposalNonVoters_items_items]!
@@ -1349,23 +1427,34 @@ type dao_200_response {
   alreadySupportCalldataReview: Boolean!
 }
 
-type tokenMetrics_200_response {
-  items: [query_tokenMetrics_items_items]!
-  pageInfo: query_tokenMetrics_pageInfo!
+type TokenMetricsResponse {
+  items: [TokenMetricItem]!
+  pageInfo: TokenMetricsPageInfo!
 }
 
-type query_tokenMetrics_items_items {
+type TokenMetricItem {
+  """Unix day bucket represented as a timestamp string."""
   date: String!
+
+  """Highest observed value for the period."""
   high: String!
+
+  """Total volume observed for the period."""
   volume: String!
 }
 
-type query_tokenMetrics_pageInfo {
+type TokenMetricsPageInfo {
+  """Whether more items are available."""
   hasNextPage: Boolean!
+
+  """Start cursor for the current page."""
   startDate: String
+
+  """End cursor for the current page."""
   endDate: String
 }
 
+"""Metric family to query."""
 enum queryInput_tokenMetrics_metricType {
   TOTAL_SUPPLY
   DELEGATED_SUPPLY
@@ -1376,17 +1465,18 @@ enum queryInput_tokenMetrics_metricType {
   TREASURY
 }
 
+"""Sort direction for the returned buckets."""
 enum queryInput_tokenMetrics_orderDirection {
   asc
   desc
 }
 
-type offchainProposals_200_response {
-  items: [query_offchainProposals_items_items]!
-  totalCount: Float!
+type OffchainProposalsResponse {
+  items: [OffchainProposal]!
+  totalCount: Int!
 }
 
-type query_offchainProposals_items_items {
+type OffchainProposal {
   id: String!
   spaceId: String!
   author: String!
@@ -1394,85 +1484,74 @@ type query_offchainProposals_items_items {
   body: String!
   discussion: String!
   type: String!
-  start: Float!
-  end: Float!
+  start: Int!
+  end: Int!
   state: String!
-  created: Float!
-  updated: Float!
+  created: Int!
+  updated: Int!
   link: String!
   flagged: Boolean!
 }
 
+"""Sort direction for proposal creation timestamps."""
 enum queryInput_offchainProposals_orderDirection {
   asc
   desc
 }
 
-type offchainProposalById_200_response {
-  id: String!
-  spaceId: String!
-  author: String!
-  title: String!
-  body: String!
-  discussion: String!
-  type: String!
-  start: Float!
-  end: Float!
-  state: String!
-  created: Float!
-  updated: Float!
-  link: String!
-  flagged: Boolean!
+union offchainProposalById_response = OffchainProposal | ErrorResponse
+
+type OffchainVotesResponse {
+  items: [OffchainVote]!
+  totalCount: Int!
 }
 
-type votesOffchain_200_response {
-  items: [query_votesOffchain_items_items]!
-  totalCount: Float!
-}
-
-type query_votesOffchain_items_items {
+type OffchainVote {
   voter: String!
   proposalId: String!
-  choice: JSON
+  choice: JSON!
   vp: Float
   reason: String!
-  created: Float!
-  proposalTitle: String!
+  created: Int!
+  proposalTitle: String
 }
 
+"""Sort votes by timestamp or voting power."""
 enum queryInput_votesOffchain_orderBy {
   timestamp
   votingPower
 }
 
+"""Sort direction for the selected order field."""
 enum queryInput_votesOffchain_orderDirection {
   asc
   desc
 }
 
-type votesOffchainByProposalId_200_response {
-  items: [query_votesOffchainByProposalId_items_items]!
-  totalCount: Float!
-}
-
-type query_votesOffchainByProposalId_items_items {
-  voter: String!
-  proposalId: String!
-  choice: JSON
-  vp: Float
-  reason: String!
-  created: Float!
-  proposalTitle: String!
-}
-
+"""Sort votes by timestamp or voting power."""
 enum queryInput_votesOffchainByProposalId_orderBy {
   timestamp
   votingPower
 }
 
+"""Sort direction for the selected order field."""
 enum queryInput_votesOffchainByProposalId_orderDirection {
   asc
   desc
+}
+
+scalar ObjMap
+
+enum HTTPMethod {
+  GET
+  HEAD
+  POST
+  PUT
+  DELETE
+  CONNECT
+  OPTIONS
+  TRACE
+  PATCH
 }
 
 type AverageDelegationPercentageItem {
