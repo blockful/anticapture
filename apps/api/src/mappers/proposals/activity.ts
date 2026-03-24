@@ -39,10 +39,7 @@ export const ProposalActivityResponseSchema = z.object({
           voterAccountId: z.string(),
           proposalId: z.string(),
           support: z.string().nullable(),
-          votingPower: z
-            .bigint()
-            .transform((val) => val.toString())
-            .openapi({ type: "string" }),
+          votingPower: z.string(),
           reason: z.string().nullable(),
           timestamp: z.coerce.string(),
         })

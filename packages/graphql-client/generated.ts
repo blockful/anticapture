@@ -725,6 +725,7 @@ export type Dao_200_Response = {
   id: Scalars['String']['output'];
   proposalThreshold: Scalars['String']['output'];
   quorum: Scalars['String']['output'];
+  supportOffchainData: Scalars['Boolean']['output'];
   timelockDelay: Scalars['String']['output'];
   votingDelay: Scalars['String']['output'];
   votingPeriod: Scalars['String']['output'];

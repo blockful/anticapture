@@ -119,14 +119,31 @@ cleanup() {
 trap cleanup INT TERM EXIT
 
 # Wrap a command with `railway run` for env injection, with fallback to running locally
+# Extra env overrides can be passed as KEY=VALUE pairs before the service name.
+# They are re-applied after Railway injects its variables so local values win.
 railway_run() {
+  local -a overrides=()
+  while [[ "${1:-}" == *=* ]]; do
+    overrides+=("$1")
+    shift
+  done
+
   local service=$1
   shift
+
   if railway run -e dev -s "$service" echo ok >/dev/null 2>&1; then
-    railway run -e dev -s "$service" "$@"
+    if [ ${#overrides[@]} -gt 0 ]; then
+      railway run -e dev -s "$service" env "${overrides[@]}" "$@"
+    else
+      railway run -e dev -s "$service" "$@"
+    fi
   else
     log "Railway service $service not found, running locally with .env"
-    "$@"
+    if [ ${#overrides[@]} -gt 0 ]; then
+      env "${overrides[@]}" "$@"
+    else
+      "$@"
+    fi
   fi
 }
 
@@ -166,7 +183,11 @@ fi
 GATEWAY_READY=$(mktemp)
 rm -f "$GATEWAY_READY"
 log "Starting Gateway..."
-run_with_prefix "$C_GATEWAY" "🌎 gateway" "$GATEWAY_READY" "Mesh running at" railway_run api-gateway pnpm gateway dev &
+GATEWAY_OVERRIDES=()
+if [ "$RUN_API" = true ]; then
+  GATEWAY_OVERRIDES+=("DAO_API_${DAO_ID}=http://localhost:${PORT_API}")
+fi
+run_with_prefix "$C_GATEWAY" "🌎 gateway" "$GATEWAY_READY" "Mesh running at" railway_run "${GATEWAY_OVERRIDES[@]}" api-gateway pnpm gateway dev &
 wait_for_ready "$GATEWAY_READY" "Gateway"
 
 # 4. Gateful
