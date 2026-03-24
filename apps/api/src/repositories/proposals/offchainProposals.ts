@@ -12,6 +12,7 @@ export class OffchainProposalRepository {
     orderDirection: "asc" | "desc",
     state: string[] | undefined,
     fromDate: number | undefined,
+    endDate: number | undefined,
   ): Promise<DBOffchainProposal[]> {
     const whereClauses: SQL<unknown>[] = [];
 
@@ -23,6 +24,10 @@ export class OffchainProposalRepository {
 
     if (fromDate) {
       whereClauses.push(gte(offchainProposals.created, fromDate));
+    }
+
+    if (endDate) {
+      whereClauses.push(gte(offchainProposals.end, endDate));
     }
 
     return await this.db
@@ -49,6 +54,7 @@ export class OffchainProposalRepository {
   async getProposalsCount(
     state?: string[] | undefined,
     fromDate?: number | undefined,
+    endDate?: number | undefined,
   ): Promise<number> {
     const whereClauses: SQL<unknown>[] = [];
 
@@ -59,6 +65,10 @@ export class OffchainProposalRepository {
 
     if (fromDate) {
       whereClauses.push(gte(offchainProposals.created, fromDate));
+    }
+
+    if (endDate) {
+      whereClauses.push(gte(offchainProposals.end, endDate));
     }
 
     return this.db.$count(

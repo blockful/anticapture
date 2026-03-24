@@ -69,6 +69,7 @@ describe("OffchainProposalRepository", () => {
         "desc",
         undefined,
         undefined,
+        undefined,
       );
 
       expect(result.map((p) => p.id)).toEqual(["p2", "p3", "p1"]);
@@ -79,6 +80,7 @@ describe("OffchainProposalRepository", () => {
         0,
         10,
         "desc",
+        undefined,
         undefined,
         undefined,
       );
@@ -101,6 +103,7 @@ describe("OffchainProposalRepository", () => {
         "desc",
         ["ACTIVE"],
         undefined,
+        undefined,
       );
 
       expect(result).toHaveLength(2);
@@ -122,6 +125,7 @@ describe("OffchainProposalRepository", () => {
         "desc",
         undefined,
         2000,
+        undefined,
       );
 
       expect(result).toHaveLength(2);
@@ -143,6 +147,7 @@ describe("OffchainProposalRepository", () => {
         "asc",
         undefined,
         undefined,
+        undefined,
       );
 
       expect(result.map((p) => p.id)).toEqual(["p2", "p3", "p1"]);
@@ -161,6 +166,7 @@ describe("OffchainProposalRepository", () => {
         1,
         10,
         "desc",
+        undefined,
         undefined,
         undefined,
       );
@@ -184,10 +190,34 @@ describe("OffchainProposalRepository", () => {
         "desc",
         undefined,
         undefined,
+        undefined,
       );
 
       expect(result).toHaveLength(2);
       expect(result.map((p) => p.id)).toEqual(["p1", "p2"]);
+    });
+
+    it("should filter by endDate", async () => {
+      await db
+        .insert(offchainProposals)
+        .values([
+          createProposal({ id: "p1", end: 1000 }),
+          createProposal({ id: "p2", end: 2000 }),
+          createProposal({ id: "p3", end: 3000 }),
+        ]);
+
+      const result = await repository.getProposals(
+        0,
+        10,
+        "desc",
+        undefined,
+        undefined,
+        2000,
+      );
+
+      expect(result).toHaveLength(2);
+      expect(result.map((p) => p.id)).toContain("p2");
+      expect(result.map((p) => p.id)).toContain("p3");
     });
 
     it("should combine state and fromDate filters", async () => {
@@ -205,6 +235,48 @@ describe("OffchainProposalRepository", () => {
         "desc",
         ["active"],
         2000,
+        undefined,
+      );
+
+      expect(result).toHaveLength(1);
+      expect(result[0]!.id).toBe("p2");
+    });
+
+    it("should combine state, fromDate and endDate filters", async () => {
+      await db.insert(offchainProposals).values([
+        createProposal({
+          id: "p1",
+          state: "active",
+          created: 1000,
+          end: 1500,
+        }),
+        createProposal({
+          id: "p2",
+          state: "active",
+          created: 3000,
+          end: 4000,
+        }),
+        createProposal({
+          id: "p3",
+          state: "closed",
+          created: 3000,
+          end: 4000,
+        }),
+        createProposal({
+          id: "p4",
+          state: "active",
+          created: 3000,
+          end: 2000,
+        }),
+      ]);
+
+      const result = await repository.getProposals(
+        0,
+        10,
+        "desc",
+        ["active"],
+        2000,
+        3000,
       );
 
       expect(result).toHaveLength(1);
