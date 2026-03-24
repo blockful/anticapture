@@ -193,7 +193,7 @@ type Query {
   tokenMetrics(metricType: queryInput_tokenMetrics_metricType!, startDate: Float, endDate: Float, orderDirection: queryInput_tokenMetrics_orderDirection = asc, limit: NonNegativeInt = 365, skip: NonNegativeInt): tokenMetrics_200_response
 
   """Returns a list of offchain (Snapshot) proposals"""
-  offchainProposals(skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_offchainProposals_orderDirection = desc, status: JSON, fromDate: Float): offchainProposals_200_response
+  offchainProposals(skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_offchainProposals_orderDirection = desc, status: JSON, fromDate: Float, endDate: Float): offchainProposals_200_response
 
   """Returns a single offchain (Snapshot) proposal by its ID"""
   offchainProposalById(id: String!): offchainProposalById_200_response
@@ -1348,6 +1348,7 @@ type dao_200_response {
   votingPeriod: String!
   timelockDelay: String!
   alreadySupportCalldataReview: Boolean!
+  supportOffchainData: Boolean!
 }
 
 type tokenMetrics_200_response {
