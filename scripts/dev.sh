@@ -2,15 +2,31 @@
 set -euo pipefail
 
 USE_RAILWAY=false
+RUN_INDEXER=false
 DAO_ID=""
 
 # Parse arguments
 for arg in "$@"; do
   case "$arg" in
     --rw) USE_RAILWAY=true ;;
+    --indexer) RUN_INDEXER=true ;;
     *) DAO_ID="$arg" ;;
   esac
 done
+
+# Ports
+PORT_INDEXER=42070
+PORT_API=42069
+PORT_GATEWAY=4000
+PORT_GATEFUL=4001
+PORT_DASHBOARD=3000
+PORTS=("$PORT_INDEXER" "$PORT_API" "$PORT_GATEWAY" "$PORT_GATEFUL" "$PORT_DASHBOARD")
+
+# Derived flags
+RUN_API=false
+if [ -n "$DAO_ID" ]; then
+  RUN_API=true
+fi
 
 # Colors per service
 C_INDEXER="\033[31m"   # red
