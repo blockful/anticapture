@@ -189,7 +189,7 @@ describe("ProposalsActivityService", () => {
               voterAccountId: VOTER_ADDRESS,
               proposalId: "proposal-1",
               support: "1",
-              votingPower: "1000",
+              votingPower: 1000n,
               reason: "",
               timestamp: "1699950000",
             },
