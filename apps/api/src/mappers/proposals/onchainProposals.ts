@@ -1,11 +1,7 @@
 import { z } from "@hono/zod-openapi";
 
 import { proposalsOnchain } from "@/database";
-import {
-  booleanQueryParam,
-  normalizeQueryArray,
-  unixTimestampQueryParam,
-} from "../shared";
+import { normalizeQueryArray, unixTimestampQueryParam } from "../shared";
 
 export type DBProposal = typeof proposalsOnchain.$inferSelect;
 
@@ -55,11 +51,16 @@ export const ProposalsRequestSchema = z
       "Latest proposal end timestamp, in Unix seconds.",
       1700086400,
     ),
-    includeOptimisticProposals: booleanQueryParam({
-      defaultValue: true,
-      description: "Whether optimistic proposals should be included.",
-      example: true,
-    }).default(true),
+    includeOptimisticProposals: z
+      .enum(["true", "false"])
+      .optional()
+      .default("true")
+      .transform((val) => val === "true")
+      .openapi({
+        description: "Whether optimistic proposals should be included.",
+        example: "false",
+        type: "boolean",
+      }),
   })
   .openapi("OnchainProposalsRequest");
 

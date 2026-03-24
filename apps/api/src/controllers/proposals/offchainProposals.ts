@@ -93,7 +93,7 @@ export function offchainProposals(
         );
       }
 
-      return context.json(OffchainProposalResponseSchema.parse(proposal));
+      return context.json(OffchainProposalResponseSchema.parse(proposal), 200);
     },
   );
 }

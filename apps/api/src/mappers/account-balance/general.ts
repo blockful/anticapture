@@ -4,14 +4,16 @@ import { Address, getAddress, isAddress } from "viem";
 import { accountBalance } from "@/database";
 
 import {
-  booleanQueryParam,
   normalizeQueryArray,
   PeriodResponseSchema,
   TimestampResponseMapper,
   unixTimestampQueryParam,
 } from "../shared";
 
-import { PercentageChangeMapper } from "./variations";
+import {
+  AccountBalanceVariationSchema,
+  PercentageChangeMapper,
+} from "./variations";
 
 const AddressSchema = z
   .string()
@@ -55,16 +57,19 @@ export const AccountBalancesRequestSchema = z
       .enum(["balance", "variation", "signedVariation"])
       .optional()
       .default("balance"),
-    excludeDaoAddresses: booleanQueryParam({
-      defaultValue: false,
-      description:
-        "Whether DAO-owned addresses should be excluded from the results.",
-      example: false,
-    })
+    excludeDaoAddresses: z
+      .enum(["true", "false"])
       .optional()
-      .default(false),
-    addresses: AddressListSchema.optional(),
-    delegates: AddressListSchema.optional(),
+      .default("false")
+      .transform((val) => val === "true")
+      .openapi({
+        description:
+          "Whether DAO-owned addresses should be excluded from the results.",
+        example: "false",
+        type: "boolean",
+      }),
+    addresses: AddressListSchema,
+    delegates: AddressListSchema,
     fromValue: z
       .string()
       .transform((val) => BigInt(val))
@@ -107,14 +112,6 @@ export const AccountBalanceResponseSchema = z
     delegate: z.string(),
   })
   .openapi("AccountBalance");
-
-export const AccountBalanceVariationSchema = z
-  .object({
-    previousBalance: z.string(),
-    absoluteChange: z.string(),
-    percentageChange: z.string(),
-  })
-  .openapi("AccountBalanceVariation");
 
 export const AccountBalanceWithVariationSchema = z
   .object({
@@ -199,6 +196,8 @@ export const AccountBalanceWithVariationMapper = (
       absoluteChange: item.absoluteChange.toString(),
       percentageChange: PercentageChangeMapper(item),
       previousBalance: item.previousBalance.toString(),
+      accountId: item.accountId,
+      currentBalance: item.currentBalance.toString(),
     },
   };
 };

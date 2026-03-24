@@ -23,60 +23,6 @@ export const ErrorResponseSchema = z
   })
   .openapi("ErrorResponse");
 
-const parseBooleanQueryValue = (
-  value: unknown,
-  defaultValue?: boolean,
-): boolean | undefined => {
-  if (value === undefined) {
-    return defaultValue;
-  }
-
-  if (typeof value === "boolean") {
-    return value;
-  }
-
-  if (typeof value === "string") {
-    const normalized = value.trim().toLowerCase();
-
-    if (normalized === "true") {
-      return true;
-    }
-
-    if (normalized === "false") {
-      return false;
-    }
-  }
-
-  return undefined;
-};
-
-export const booleanQueryParam = (options: {
-  defaultValue?: boolean;
-  description: string;
-  example?: boolean;
-}) =>
-  z
-    .string()
-    .optional()
-    .transform((value, ctx) => {
-      const parsed = parseBooleanQueryValue(value, options.defaultValue);
-
-      if (parsed === undefined && value !== undefined) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Expected 'true' or 'false'",
-        });
-        return z.NEVER;
-      }
-
-      return parsed;
-    })
-    .openapi({
-      type: "boolean",
-      description: options.description,
-      example: options.example ?? options.defaultValue,
-    });
-
 export const normalizeQueryArray = (value: unknown): unknown[] | undefined => {
   if (value == null || value === "") {
     return undefined;
