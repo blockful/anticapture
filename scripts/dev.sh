@@ -1,7 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DAO_ID="${1:-}"
+USE_RAILWAY=false
+DAO_ID=""
+
+# Parse arguments
+for arg in "$@"; do
+  case "$arg" in
+    --rw) USE_RAILWAY=true ;;
+    *) DAO_ID="$arg" ;;
+  esac
+done
 
 # Colors per service
 C_API="\033[34m"       # blue
@@ -92,14 +101,13 @@ wait_for_port() {
   log "$name is ready on port $port"
 }
 
-# Wrap a command with `railway run` for env injection, with fallback to running locally
+# Wrap a command with `railway run` for env injection when --rw flag is set
 railway_run() {
   local service=$1
   shift
-  if pnpm railway run -e dev -s "$service" echo ok >/dev/null 2>&1; then
+  if [ "$USE_RAILWAY" = true ]; then
     pnpm railway run -e dev -s "$service" "$@"
   else
-    log "Railway service $service not found, running locally with .env"
     "$@"
   fi
 }
@@ -122,7 +130,6 @@ GATEWAY_READY=$(mktemp)
 rm -f "$GATEWAY_READY"
 
 log "Starting Gateway..."
-export DAO_API_$DAO_ID=localhost:42069
 run_with_prefix "$C_GATEWAY" "🌎 gateway" "$GATEWAY_READY" "Mesh running at" railway_run api-gateway pnpm gateway dev &
 
 # 3. Wait for Gateway
