@@ -10,6 +10,7 @@
     "build": "tsup",
     "start": "node dist/index.js",
     "test": "vitest",
+    "test:unit": "vitest run --exclude '**/*.integration.test.ts'",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf node_modules dist *.tsbuildinfo"
   },

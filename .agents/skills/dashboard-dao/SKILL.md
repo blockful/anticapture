@@ -33,7 +33,7 @@ Add the DAO to `DaoIdEnum` in alphabetical order:
 ```typescript
 export enum DaoIdEnum {
   // ... existing entries ...
-  FLUID = "FLUID",  // <-- value must match indexer/API enums exactly
+  FLUID = "FLUID", // <-- value must match indexer/API enums exactly
   // ...
 }
 ```
@@ -56,14 +56,14 @@ export const NEW_DAO: DaoConfiguration = {
   name: "New DAO",
   decimals: 18,
   color: {
-    svgColor: "#...",    // foreground/text color
-    svgBgColor: "#...",  // background/accent color
+    svgColor: "#...", // foreground/text color
+    svgBgColor: "#...", // background/accent color
   },
   ogIcon: EnsOgIcon, // placeholder — replace with real OG icon later
   // icon: NewDaoIcon, // uncomment when icon component exists
 
   daoOverview: {
-    token: "ERC20",  // or "ERC721" for NFT-based DAOs
+    token: "ERC20", // or "ERC721" for NFT-based DAOs
     chain: { ...mainnet, icon: MainnetIcon },
     contracts: {
       governor: "0x...",
@@ -80,11 +80,11 @@ export const NEW_DAO: DaoConfiguration = {
     // Optional: direct link to cancel function on Etherscan
     // cancelFunction: "https://etherscan.io/address/0x...#writeContract#F1",
     rules: {
-      delay: true,           // has voting delay?
-      changeVote: false,     // can voters change their vote?
-      timelock: true,        // has timelock?
+      delay: true, // has voting delay?
+      changeVote: false, // can voters change their vote?
+      timelock: true, // has timelock?
       cancelFunction: false, // has public cancel function?
-      logic: "For",          // "For" | "For + Abstain" | "For + Abstain + Against" | "All Votes Cast"
+      logic: "For", // "For" | "For + Abstain" | "For + Abstain + Against" | "All Votes Cast"
       quorumCalculation: QUORUM_CALCULATION_TYPES.NEW_DAO,
       // proposalThreshold: "100K $TOKEN",  // optional display string
     },
@@ -157,6 +157,7 @@ export const FluidIcon = ({ showBackground = true, ...props }: DaoIconProps) => 
 ```
 
 Then export from `apps/dashboard/shared/components/icons/index.ts`:
+
 ```typescript
 export * from "@/shared/components/icons/FluidIcon";
 ```
@@ -176,6 +177,7 @@ export function FluidOgIcon({ size }: { size: number }) {
 ```
 
 **c. Update the DAO config** to use the real icons:
+
 ```typescript
 import { FluidIcon } from "@/shared/components/icons";
 import { FluidOgIcon } from "@/shared/og/dao-og-icons";

@@ -6,7 +6,7 @@ import {
   AmountFilter,
 } from "@/mappers";
 
-interface AccountBalanceRepository {
+export interface AccountBalanceRepository {
   getAccountBalance(accountId: Address): Promise<DBAccountBalance | undefined>;
 
   getAccountBalances(
@@ -23,7 +23,7 @@ interface AccountBalanceRepository {
   }>;
 }
 
-interface BalanceVariationsRepository {
+export interface BalanceVariationsRepository {
   getAccountBalanceVariations(
     fromTimestamp: number | undefined,
     toTimestamp: number | undefined,

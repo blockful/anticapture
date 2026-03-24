@@ -12,15 +12,25 @@ if [ -f "$ROOT_DIR/.env" ]; then
   set +a
 fi
 
+# Parse arguments
+RUN_INDEXER=false
+positional=()
+for arg in "$@"; do
+  case "$arg" in
+    --indexer) RUN_INDEXER=true ;;
+    *) positional+=("$arg") ;;
+  esac
+done
+
 # CLI argument overrides .env
-if [ -n "${1:-}" ]; then
-  DAO_ID="$(echo "$1" | tr '[:lower:]' '[:upper:]')"
+if [ -n "${positional[0]:-}" ]; then
+  DAO_ID="$(echo "${positional[0]}" | tr '[:lower:]' '[:upper:]')"
   export DAO_ID
 fi
 
-if [ -z "${DAO_ID:-}" ]; then
-  echo "Error: DAO_ID not set. Add it to .env or pass as argument: pnpm dev [DAO_ID]"
-  exit 1
+RUN_API=false
+if [ -n "${DAO_ID:-}" ]; then
+  RUN_API=true
 fi
 
 # Ports
@@ -30,7 +40,11 @@ PORT_GATEWAY=${PORT_GATEWAY:-4000}
 PORT_GATEFUL=${PORT_GATEFUL:-4001}
 PORT_DASHBOARD=${PORT_DASHBOARD:-3000}
 
-PORTS=("$PORT_INDEXER" "$PORT_API" "$PORT_GATEWAY" "$PORT_GATEFUL" "$PORT_DASHBOARD")
+if [ "$RUN_API" = true ]; then
+  PORTS=("$PORT_INDEXER" "$PORT_API" "$PORT_GATEWAY" "$PORT_GATEFUL" "$PORT_DASHBOARD")
+else
+  PORTS=("$PORT_GATEWAY" "$PORT_GATEFUL" "$PORT_DASHBOARD")
+fi
 
 # Colors per service
 C_INDEXER="\033[31m"   # red
@@ -104,6 +118,35 @@ cleanup() {
 }
 trap cleanup INT TERM EXIT
 
+# Wrap a command with `railway run` for env injection, with fallback to running locally
+# Extra env overrides can be passed as KEY=VALUE pairs before the service name.
+# They are re-applied after Railway injects its variables so local values win.
+railway_run() {
+  local -a overrides=()
+  while [[ "${1:-}" == *=* ]]; do
+    overrides+=("$1")
+    shift
+  done
+
+  local service=$1
+  shift
+
+  if railway run -e dev -s "$service" echo ok >/dev/null 2>&1; then
+    if [ ${#overrides[@]} -gt 0 ]; then
+      railway run -e dev -s "$service" env "${overrides[@]}" "$@"
+    else
+      railway run -e dev -s "$service" "$@"
+    fi
+  else
+    log "Railway service $service not found, running locally with .env"
+    if [ ${#overrides[@]} -gt 0 ]; then
+      env "${overrides[@]}" "$@"
+    else
+      "$@"
+    fi
+  fi
+}
+
 # Kill anything already running on our ports
 for port in "${PORTS[@]}"; do
   pid=$(lsof -ti ":$port" 2>/dev/null || true)
@@ -114,30 +157,44 @@ for port in "${PORTS[@]}"; do
 done
 sleep 1
 
-# 1. Indexer
-log "Starting Indexer for $DAO_ID..."
-export RAILWAY_DEPLOYMENT_ID="${DAO_ID}-dev"
-run_with_prefix "$C_INDEXER" "⛓ indexer" "" "" pnpm indexer start -- --port "$PORT_INDEXER" &
+# 1. Indexer (only with --indexer flag, requires API)
+if [ "$RUN_INDEXER" = true ] && [ "$RUN_API" = true ]; then
+  log "Starting Indexer for $DAO_ID..."
+  export RAILWAY_DEPLOYMENT_ID="${DAO_ID}-dev"
+  run_with_prefix "$C_INDEXER" "⛓ indexer" "" "" pnpm indexer start -- --port "$PORT_INDEXER" &
+elif [ "$RUN_INDEXER" = true ]; then
+  log "Skipping Indexer (requires DAO_ID to run)"
+else
+  log "Skipping Indexer (use --indexer to enable)"
+fi
 
-# 2. API
-log "Starting API for $DAO_ID..."
-run_with_prefix "$C_API" "🐙 api" "" "" pnpm api dev -- "$DAO_ID" &
+# 2. API (only when DAO_ID is provided)
+if [ "$RUN_API" = true ]; then
+  log "Starting API for $DAO_ID..."
+  run_with_prefix "$C_API" "🐙 api" "" "" railway_run "${DAO_ID}-api" pnpm api dev -- "$DAO_ID" &
 
-wait_for_port "$PORT_API" "API"
-export "DAO_API_${DAO_ID}=http://localhost:${PORT_API}"
+  wait_for_port "$PORT_API" "API"
+  export "DAO_API_${DAO_ID}=http://localhost:${PORT_API}"
+else
+  log "Skipping API (no DAO_ID provided, using DAO_API_* from .env)"
+fi
 
 # 3. Gateway
 GATEWAY_READY=$(mktemp)
 rm -f "$GATEWAY_READY"
 log "Starting Gateway..."
-run_with_prefix "$C_GATEWAY" "🌎 gateway" "$GATEWAY_READY" "Mesh running at" pnpm gateway dev &
+GATEWAY_OVERRIDES=()
+if [ "$RUN_API" = true ]; then
+  GATEWAY_OVERRIDES+=("DAO_API_${DAO_ID}=http://localhost:${PORT_API}")
+fi
+run_with_prefix "$C_GATEWAY" "🌎 gateway" "$GATEWAY_READY" "Mesh running at" railway_run "${GATEWAY_OVERRIDES[@]}" api-gateway pnpm gateway dev &
 wait_for_ready "$GATEWAY_READY" "Gateway"
 
 # 4. Gateful
 GATEFUL_READY=$(mktemp)
 rm -f "$GATEFUL_READY"
 log "Starting Gateful..."
-run_with_prefix "$C_GATEFUL" "🚪 gateful" "$GATEFUL_READY" "🚀 REST Gateway running" pnpm gateful dev &
+run_with_prefix "$C_GATEFUL" "🚪 gateful" "$GATEFUL_READY" "🚀 REST Gateway running" railway_run gateful pnpm gateful dev &
 wait_for_ready "$GATEFUL_READY" "Gateful"
 
 # 5. Client — codegen + build watch
@@ -152,8 +209,12 @@ run_with_prefix "$C_DASHBOARD" "📺 dashboard" "" "" pnpm dashboard dev &
 
 echo ""
 log "All services running:"
-printf "  ${C_INDEXER}⛓ Indexer${C_RESET}   http://localhost:${PORT_INDEXER}  ($DAO_ID)\n"
-printf "  ${C_API}🐙 API${C_RESET}       http://localhost:${PORT_API}  ($DAO_ID)\n"
+if [ "$RUN_INDEXER" = true ] && [ "$RUN_API" = true ]; then
+  printf "  ${C_INDEXER}⛓ Indexer${C_RESET}   http://localhost:${PORT_INDEXER}  ($DAO_ID)\n"
+fi
+if [ "$RUN_API" = true ]; then
+  printf "  ${C_API}🐙 API${C_RESET}       http://localhost:${PORT_API}  ($DAO_ID)\n"
+fi
 printf "  ${C_GATEWAY}🌎 Gateway${C_RESET}   http://localhost:${PORT_GATEWAY}\n"
 printf "  ${C_GATEFUL}🚪 Gateful${C_RESET}   http://localhost:${PORT_GATEFUL}\n"
 printf "  ${C_CODEGEN}🤝 Client${C_RESET}    codegen + build watch\n"
