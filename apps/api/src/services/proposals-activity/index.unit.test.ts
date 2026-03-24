@@ -100,7 +100,7 @@ const createDbVote = (overrides = {}): DbVote => ({
   voter_account_id: VOTER_ADDRESS,
   proposal_id: "proposal-1",
   support: "1",
-  voting_power: "1000",
+  voting_power: 1000n,
   reason: "",
   timestamp: "1699950000",
   ...overrides,
