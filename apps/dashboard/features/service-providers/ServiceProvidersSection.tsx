@@ -1,10 +1,12 @@
 "use client";
 
 import { Building2, Pencil } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { ServiceProvidersTable } from "@/features/service-providers/components/ServiceProvidersTable";
+import { SPP_PROGRAMS } from "@/features/service-providers/constants/ens-service-providers";
 import { useServiceProvidersData } from "@/features/service-providers/hooks/useServiceProvidersData";
+import type { SPPKey } from "@/features/service-providers/types";
 import { TheSectionLayout } from "@/shared/components/containers/TheSectionLayout";
 import { InlineAlert } from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
@@ -13,28 +15,11 @@ import { PillTabGroup } from "@/shared/components/design-system/tabs/pill-tab-gr
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 
 const UPDATE_STATUS_URL =
-  "https://github.com/blockful/spp-accountability/pulls";
+  "https://github.com/blockful/spp-accountability/blob/main/README.md";
 
 export const ServiceProvidersSection = () => {
   const { data: providers = [], isLoading } = useServiceProvidersData();
-
-  const availableYears = [
-    ...new Set(providers.flatMap((p) => Object.keys(p.years).map(Number))),
-  ].sort((a, b) => b - a);
-
-  const currentYear = new Date().getFullYear();
-  const [selectedYear, setSelectedYear] = useState<number | undefined>(
-    undefined,
-  );
-
-  useEffect(() => {
-    if (selectedYear === undefined && availableYears.length > 0) {
-      const year = availableYears.includes(currentYear)
-        ? currentYear
-        : availableYears[0];
-      setSelectedYear(year);
-    }
-  }, [availableYears, currentYear, selectedYear]);
+  const [selectedSpp, setSelectedSpp] = useState<SPPKey>("SPP2");
 
   return (
     <TheSectionLayout
@@ -57,17 +42,17 @@ export const ServiceProvidersSection = () => {
       <SubSectionsContainer>
         <div className="flex flex-col gap-4">
           <PillTabGroup
-            tabs={availableYears.map((year) => ({
-              label: String(year),
-              value: String(year),
+            tabs={SPP_PROGRAMS.map((spp) => ({
+              label: spp,
+              value: spp,
             }))}
-            activeTab={String(selectedYear)}
-            onTabChange={(value) => setSelectedYear(Number(value))}
+            activeTab={selectedSpp}
+            onTabChange={(value) => setSelectedSpp(value as SPPKey)}
           />
 
           <ServiceProvidersTable
             providers={providers}
-            year={selectedYear ?? currentYear}
+            spp={selectedSpp}
             isLoading={isLoading}
           />
         </div>
