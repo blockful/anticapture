@@ -9,7 +9,7 @@ const config: CodegenConfig = {
   ignoreNoDocuments: true,
   generates: {
     // Build with React hooks (for React apps)
-    "./generated.ts": {
+    "./generated/hooks.ts": {
       plugins: [
         "typescript",
         "typescript-operations",
@@ -17,7 +17,7 @@ const config: CodegenConfig = {
       ],
     },
     // Build with just types and operations (for non-React usage)
-    "./types.ts": {
+    "./generated/types.ts": {
       plugins: ["typescript", "typescript-operations"],
     },
   },

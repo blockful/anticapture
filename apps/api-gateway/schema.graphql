@@ -611,6 +611,7 @@ type TokenPropertiesResponse {
   dexSupply: String!
   lendingSupply: String!
   circulatingSupply: String!
+  nonCirculatingSupply: String!
   treasury: String!
   price: String!
 }
@@ -1425,6 +1426,7 @@ type dao_200_response {
   votingPeriod: String!
   timelockDelay: String!
   alreadySupportCalldataReview: Boolean!
+  supportOffchainData: Boolean!
 }
 
 type TokenMetricsResponse {

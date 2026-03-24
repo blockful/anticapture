@@ -11,13 +11,16 @@
       "dependsOn": ["@anticapture/#graphql-client#build"],
       "outputs": ["dist/**", ".next/**", ".next/cache/**"]
     },
-    "storybook": {
+    "build": {
+      "dependsOn": ["^build"],
       "outputs": ["dist/**", ".next/**", ".next/cache/**"],
-      "env": ["FIGMA_TOKEN", "VALIDATE_FIGMA_TOKEN_API"]
+      "env": ["RESEND_API_KEY", "RESEND_FROM_EMAIL", "CONTACT_EMAIL"]
+    },
+    "storybook": {
+      "outputs": ["dist/**", ".next/**", ".next/cache/**"]
     },
     "build-storybook": {
-      "outputs": ["storybook-static/**"],
-      "env": ["FIGMA_TOKEN", "VALIDATE_FIGMA_TOKEN_API"]
+      "outputs": ["storybook-static/**"]
     },
     "start": {
       "dependsOn": ["^build"],
@@ -51,17 +54,26 @@
     "test": {
       "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"]
     },
+    "test:unit": {
+      "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"]
+    },
     "codegen": {
-      "outputs": ["generated.ts", "types.ts"]
+      "outputs": ["generated/**"]
     },
     "db:generate": {
       "inputs": ["src/**/*.ts"],
       "outputs": ["drizzle/**"]
     },
     "@anticapture/api#dev": {
-      "dependsOn": ["@anticapture/observability#build"]
+      "dependsOn": ["@anticapture/observability#build"],
+      "passThroughEnv": ["*"]
     },
     "dev": {
+      "persistent": true,
+      "cache": false,
+      "passThroughEnv": ["*"]
+    },
+    "dev:rw": {
       "persistent": true,
       "cache": false,
       "passThroughEnv": ["*"]

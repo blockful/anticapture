@@ -49,7 +49,7 @@ export const HeaderDAOSidebar = () => {
         />
         <div className="flex h-full flex-col justify-between">
           <div className="flex flex-col gap-[12px] p-2">
-            {daoConfig.daoOverview && (
+            {daoConfig.daoOverview && daoConfig.overviewPage !== false && (
               <ButtonHeaderSidebar
                 page={PAGES_CONSTANTS.daoOverview.page}
                 icon={PieChart}

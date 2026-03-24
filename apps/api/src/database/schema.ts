@@ -14,13 +14,22 @@ export const token = pgTable("token", (drizzle) => ({
   id: drizzle.text().primaryKey(),
   name: drizzle.text(),
   decimals: drizzle.integer().notNull(),
-  totalSupply: bigint({ mode: "bigint" }).notNull().default(0n),
-  delegatedSupply: bigint({ mode: "bigint" }).notNull().default(0n),
-  cexSupply: bigint({ mode: "bigint" }).notNull().default(0n),
-  dexSupply: bigint({ mode: "bigint" }).notNull().default(0n),
-  lendingSupply: bigint({ mode: "bigint" }).notNull().default(0n),
-  circulatingSupply: bigint({ mode: "bigint" }).notNull().default(0n),
+  totalSupply: bigint("total_supply", { mode: "bigint" }).notNull().default(0n),
+  delegatedSupply: bigint("delegated_supply", { mode: "bigint" })
+    .notNull()
+    .default(0n),
+  cexSupply: bigint("cex_supply", { mode: "bigint" }).notNull().default(0n),
+  dexSupply: bigint("dex_supply", { mode: "bigint" }).notNull().default(0n),
+  lendingSupply: bigint("lending_supply", { mode: "bigint" })
+    .notNull()
+    .default(0n),
+  circulatingSupply: bigint("circulating_supply", { mode: "bigint" })
+    .notNull()
+    .default(0n),
   treasury: bigint({ mode: "bigint" }).notNull().default(0n),
+  nonCirculatingSupply: bigint("non_circulating_supply", { mode: "bigint" })
+    .notNull()
+    .default(0n),
 }));
 
 export const account = pgTable("account", (drizzle) => ({
@@ -49,12 +58,13 @@ export const accountPower = pgTable(
   (drizzle) => ({
     accountId: drizzle.text("account_id").$type<Address>().notNull(),
     daoId: drizzle.text("dao_id").notNull(),
-    votingPower: bigint({ mode: "bigint" }).default(BigInt(0)).notNull(),
+    votingPower: bigint("voting_power", { mode: "bigint" })
+      .default(BigInt(0))
+      .notNull(),
     votesCount: drizzle.integer("votes_count").default(0).notNull(),
     proposalsCount: drizzle.integer("proposals_count").default(0).notNull(),
     delegationsCount: drizzle.integer("delegations_count").default(0).notNull(),
-    lastVoteTimestamp: drizzle
-      .bigint({ mode: "bigint" })
+    lastVoteTimestamp: bigint("last_vote_timestamp", { mode: "bigint" })
       .default(BigInt(0))
       .notNull(),
   }),
@@ -72,9 +82,9 @@ export const votingPowerHistory = pgTable(
     transactionHash: drizzle.text("transaction_hash").notNull(),
     daoId: drizzle.text("dao_id").notNull(),
     accountId: drizzle.text("account_id").$type<Address>().notNull(),
-    votingPower: bigint({ mode: "bigint" }).notNull(),
+    votingPower: bigint("voting_power", { mode: "bigint" }).notNull(),
     delta: bigint({ mode: "bigint" }).notNull(),
-    deltaMod: bigint({ mode: "bigint" }).notNull(),
+    deltaMod: bigint("delta_mod", { mode: "bigint" }).notNull(),
     timestamp: bigint({ mode: "bigint" }).notNull(),
     logIndex: drizzle.integer("log_index").notNull(),
   }),
@@ -93,7 +103,7 @@ export const balanceHistory = pgTable(
     accountId: drizzle.text("account_id").$type<Address>().notNull(),
     balance: bigint({ mode: "bigint" }).notNull(),
     delta: bigint({ mode: "bigint" }).notNull(),
-    deltaMod: bigint({ mode: "bigint" }).notNull(),
+    deltaMod: bigint("delta_mod", { mode: "bigint" }).notNull(),
     timestamp: bigint({ mode: "bigint" }).notNull(),
     logIndex: drizzle.integer("log_index").notNull(),
   }),
@@ -117,14 +127,16 @@ export const delegation = pgTable(
       .text("delegator_account_id")
       .$type<Address>()
       .notNull(),
-    delegatedValue: bigint({ mode: "bigint" }).notNull().default(0n),
+    delegatedValue: bigint("delegated_value", { mode: "bigint" })
+      .notNull()
+      .default(0n),
     previousDelegate: drizzle.text("previous_delegate"),
     timestamp: bigint({ mode: "bigint" }).notNull(),
     logIndex: drizzle.integer("log_index").notNull(),
-    isCex: drizzle.boolean().notNull().default(false),
-    isDex: drizzle.boolean().notNull().default(false),
-    isLending: drizzle.boolean().notNull().default(false),
-    isTotal: drizzle.boolean().notNull().default(false),
+    isCex: drizzle.boolean("is_cex").notNull().default(false),
+    isDex: drizzle.boolean("is_dex").notNull().default(false),
+    isLending: drizzle.boolean("is_lending").notNull().default(false),
+    isTotal: drizzle.boolean("is_total").notNull().default(false),
   }),
   (table) => [
     primaryKey({
@@ -153,10 +165,10 @@ export const transfer = pgTable(
     toAccountId: drizzle.text("to_account_id").$type<Address>().notNull(),
     timestamp: bigint({ mode: "bigint" }).notNull(),
     logIndex: drizzle.integer("log_index").notNull(),
-    isCex: drizzle.boolean().notNull().default(false),
-    isDex: drizzle.boolean().notNull().default(false),
-    isLending: drizzle.boolean().notNull().default(false),
-    isTotal: drizzle.boolean().notNull().default(false),
+    isCex: drizzle.boolean("is_cex").notNull().default(false),
+    isDex: drizzle.boolean("is_dex").notNull().default(false),
+    isLending: drizzle.boolean("is_lending").notNull().default(false),
+    isTotal: drizzle.boolean("is_total").notNull().default(false),
   }),
   (table) => [
     primaryKey({
@@ -178,7 +190,7 @@ export const votesOnchain = pgTable(
     voterAccountId: drizzle.text("voter_account_id").$type<Address>().notNull(),
     proposalId: drizzle.text("proposal_id").notNull(),
     support: drizzle.text().notNull(),
-    votingPower: bigint({ mode: "bigint" }).notNull(),
+    votingPower: bigint("voting_power", { mode: "bigint" }).notNull(),
     reason: drizzle.text(),
     timestamp: bigint({ mode: "bigint" }).notNull(),
   }),
@@ -208,12 +220,15 @@ export const proposalsOnchain = pgTable(
     title: drizzle.text().notNull(),
     description: drizzle.text().notNull(),
     timestamp: bigint({ mode: "bigint" }).notNull(),
-    // logIndex: drizzle.integer().notNull(),
-    endTimestamp: bigint({ mode: "bigint" }).notNull(),
+    endTimestamp: bigint("end_timestamp", { mode: "bigint" }).notNull(),
     status: drizzle.text().notNull(),
-    forVotes: bigint({ mode: "bigint" }).default(0n).notNull(),
-    againstVotes: bigint({ mode: "bigint" }).default(0n).notNull(),
-    abstainVotes: bigint({ mode: "bigint" }).default(0n).notNull(),
+    forVotes: bigint("for_votes", { mode: "bigint" }).default(0n).notNull(),
+    againstVotes: bigint("against_votes", { mode: "bigint" })
+      .default(0n)
+      .notNull(),
+    abstainVotes: bigint("abstain_votes", { mode: "bigint" })
+      .default(0n)
+      .notNull(),
     proposalType: drizzle.integer("proposal_type"),
   }),
   (table) => [index().on(table.proposerAccountId)],
@@ -242,7 +257,7 @@ export const daoMetricsDayBucket = pgTable(
     average: bigint({ mode: "bigint" }).notNull(),
     volume: bigint({ mode: "bigint" }).notNull(),
     count: drizzle.integer().notNull(),
-    lastUpdate: bigint({ mode: "bigint" }).notNull(),
+    lastUpdate: bigint("last_update", { mode: "bigint" }).notNull(),
   }),
   (table) => [
     primaryKey({
@@ -255,10 +270,10 @@ export const transaction = pgTable("transaction", (drizzle) => ({
   transactionHash: drizzle.text("transaction_hash").primaryKey(),
   fromAddress: drizzle.text("from_address"),
   toAddress: drizzle.text("to_address"),
-  isCex: drizzle.boolean().notNull().default(false),
-  isDex: drizzle.boolean().notNull().default(false),
-  isLending: drizzle.boolean().notNull().default(false),
-  isTotal: drizzle.boolean().notNull().default(false),
+  isCex: drizzle.boolean("is_cex").notNull().default(false),
+  isDex: drizzle.boolean("is_dex").notNull().default(false),
+  isLending: drizzle.boolean("is_lending").notNull().default(false),
+  isTotal: drizzle.boolean("is_total").notNull().default(false),
   timestamp: bigint({ mode: "bigint" }).notNull(),
 }));
 
@@ -279,8 +294,8 @@ export const evenTypeEnum = pgEnum("event_type", [
 export const feedEvent = pgTable(
   "feed_event",
   (drizzle) => ({
-    txHash: drizzle.text().notNull(),
-    logIndex: drizzle.integer().notNull(),
+    txHash: drizzle.text("tx_hash").notNull(),
+    logIndex: drizzle.integer("log_index").notNull(),
     type: evenTypeEnum("type").notNull(),
     value: bigint({ mode: "bigint" }).notNull().default(0n),
     timestamp: bigint({ mode: "number" }).notNull(),

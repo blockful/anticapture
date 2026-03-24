@@ -1,7 +1,7 @@
 import { AccountInteractions, Filter } from "@/mappers";
 import { Address } from "viem";
 
-interface AccountInteractionsRepository {
+export interface AccountInteractionsRepository {
   getAccountInteractions(
     accountId: Address,
     fromTimestamp: number | undefined,

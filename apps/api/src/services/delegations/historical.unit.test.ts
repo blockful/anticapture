@@ -1,0 +1,199 @@
+import { Address } from "viem";
+import { describe, it, expect, beforeEach } from "vitest";
+
+import { DBDelegation } from "@/mappers";
+
+import {
+  HistoricalDelegationsRepository,
+  HistoricalDelegationsService,
+} from "./historical";
+
+const createMockDelegation = (
+  overrides: Partial<DBDelegation> = {},
+): DBDelegation => ({
+  transactionHash: "0xabc123",
+  daoId: "uni",
+  delegateAccountId: "0x1234567890123456789012345678901234567890" as Address,
+  delegatorAccountId: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd" as Address,
+  delegatedValue: 1000000000000000000n,
+  previousDelegate: null,
+  timestamp: 1700000000n,
+  logIndex: 0,
+  isCex: false,
+  isDex: false,
+  isLending: false,
+  isTotal: false,
+  ...overrides,
+});
+
+describe("HistoricalDelegationsService", () => {
+  const address = "0x1234567890123456789012345678901234567890" as Address;
+
+  let capturedFields: {
+    address: Address | undefined;
+    orderDirection: "asc" | "desc" | undefined;
+    skip: number | undefined;
+    limit: number | undefined;
+    fromValue: bigint | undefined;
+    toValue: bigint | undefined;
+    delegateAddressIn: Address[] | undefined;
+  };
+  let stubResult: { items: DBDelegation[]; totalCount: number };
+  let service: HistoricalDelegationsService;
+
+  beforeEach(() => {
+    capturedFields = {} as typeof capturedFields;
+    stubResult = { items: [], totalCount: 0 };
+
+    const stubRepository: HistoricalDelegationsRepository = {
+      getHistoricalDelegations: (
+        address,
+        orderDirection,
+        skip,
+        limit,
+        fromValue,
+        toValue,
+        delegateAddressIn,
+      ) => {
+        capturedFields = {
+          address,
+          orderDirection,
+          skip,
+          limit,
+          fromValue,
+          toValue,
+          delegateAddressIn,
+        };
+        return Promise.resolve(stubResult);
+      },
+    };
+    service = new HistoricalDelegationsService(stubRepository);
+  });
+
+  describe("getHistoricalDelegations", () => {
+    it("should reorder parameters when forwarding to the repository", async () => {
+      const delegateAddresses = [
+        "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" as Address,
+      ];
+
+      await service.getHistoricalDelegations(
+        address,
+        100n,
+        200n,
+        delegateAddresses,
+        "asc",
+        5,
+        20,
+      );
+
+      expect(capturedFields).toEqual({
+        address,
+        orderDirection: "asc",
+        skip: 5,
+        limit: 20,
+        fromValue: 100n,
+        toValue: 200n,
+        delegateAddressIn: delegateAddresses,
+      });
+    });
+
+    it("should map repository result to delegation items response", async () => {
+      const delegation = createMockDelegation({
+        transactionHash: "0xhistorical1",
+        delegatorAccountId: address,
+        delegateAccountId:
+          "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" as Address,
+        delegatedValue: 9999n,
+        timestamp: 1700050000n,
+        logIndex: 7,
+      });
+      stubResult = { items: [delegation], totalCount: 1 };
+
+      const result = await service.getHistoricalDelegations(
+        address,
+        undefined,
+        undefined,
+        undefined,
+        "desc",
+        0,
+        10,
+      );
+
+      expect(result).toEqual({
+        items: [
+          {
+            delegatorAddress: "0x1234567890123456789012345678901234567890",
+            delegateAddress: "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            amount: "9999",
+            timestamp: "1700050000",
+            transactionHash: "0xhistorical1",
+          },
+        ],
+        totalCount: 1,
+      });
+    });
+
+    it("should return empty result when repository returns no data", async () => {
+      const result = await service.getHistoricalDelegations(
+        address,
+        undefined,
+        undefined,
+        undefined,
+        "desc",
+        0,
+        10,
+      );
+
+      expect(result).toEqual({ items: [], totalCount: 0 });
+    });
+
+    it("should pass undefined filters when not provided", async () => {
+      await service.getHistoricalDelegations(
+        address,
+        undefined,
+        undefined,
+        undefined,
+        "desc",
+        0,
+        10,
+      );
+
+      expect(capturedFields).toEqual({
+        address,
+        orderDirection: "desc",
+        skip: 0,
+        limit: 10,
+        fromValue: undefined,
+        toValue: undefined,
+        delegateAddressIn: undefined,
+      });
+    });
+
+    it("should forward multiple delegate addresses to repository", async () => {
+      const delegateAddresses = [
+        "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" as Address,
+        "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" as Address,
+      ];
+
+      await service.getHistoricalDelegations(
+        address,
+        undefined,
+        undefined,
+        delegateAddresses,
+        "desc",
+        0,
+        10,
+      );
+
+      expect(capturedFields).toEqual({
+        address,
+        orderDirection: "desc",
+        skip: 0,
+        limit: 10,
+        fromValue: undefined,
+        toValue: undefined,
+        delegateAddressIn: delegateAddresses,
+      });
+    });
+  });
+});

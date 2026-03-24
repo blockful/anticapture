@@ -6,7 +6,7 @@ import {
   DBAccountPowerWithVariation,
 } from "@/mappers";
 
-interface Repo {
+export interface AAVEVotingPowerRepo {
   getHistoricalVotingPowers(
     skip: number,
     limit: number,
@@ -52,7 +52,7 @@ interface Repo {
 }
 
 export class AAVEVotingPowerService {
-  constructor(private readonly repo: Repo) {}
+  constructor(private readonly repo: AAVEVotingPowerRepo) {}
 
   async getHistoricalVotingPowers(
     skip: number,

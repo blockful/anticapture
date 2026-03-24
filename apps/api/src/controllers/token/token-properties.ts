@@ -9,7 +9,7 @@ import {
 } from "@/mappers";
 import { TokenService } from "@/services";
 
-interface TokenPriceClient {
+export interface TokenPriceClient {
   getTokenPrice(
     tokenContractAddress: string,
     targetCurrency: string,

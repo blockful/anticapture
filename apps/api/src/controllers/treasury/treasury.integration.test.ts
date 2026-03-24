@@ -92,7 +92,7 @@ function createTestApp(
   return app;
 }
 
-describe("Treasury Controller - Integration Tests", () => {
+describe("Treasury Controller", () => {
   const FIXED_DATE = new Date("2026-01-15T00:00:00Z");
   const FIXED_TIMESTAMP = Math.floor(FIXED_DATE.getTime() / 1000);
   const ONE_DAY = 86400;

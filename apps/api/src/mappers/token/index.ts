@@ -64,6 +64,7 @@ export const TokenPropertiesSchema = z
     dexSupply: z.string(),
     lendingSupply: z.string(),
     circulatingSupply: z.string(),
+    nonCirculatingSupply: z.string(),
     treasury: z.string(),
   })
   .openapi("TokenProperties");
@@ -88,6 +89,7 @@ export const TokenMapper = {
       dexSupply: dbToken.dexSupply.toString(),
       lendingSupply: dbToken.lendingSupply.toString(),
       circulatingSupply: dbToken.circulatingSupply.toString(),
+      nonCirculatingSupply: dbToken.nonCirculatingSupply.toString(),
       treasury: dbToken.treasury.toString(),
       price: tokenPrice,
     };

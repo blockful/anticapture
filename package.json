@@ -4,10 +4,10 @@
   "description": "Anticapture Monorepo",
   "scripts": {
     "dashboard": "dotenv -- turbo run --filter=@anticapture/dashboard",
-    "indexer": "turbo run --filter=@anticapture/indexer",
-    "gateway": "turbo run --filter=@anticapture/api-gateway",
-    "gateful": "turbo run --filter=@anticapture/gateful",
-    "api": "turbo run --filter=@anticapture/api",
+    "indexer": "dotenv -- turbo run --filter=@anticapture/indexer",
+    "gateway": "dotenv -- turbo run --filter=@anticapture/api-gateway",
+    "gateful": "dotenv -- turbo run --filter=@anticapture/gateful",
+    "api": "dotenv -- turbo run --filter=@anticapture/api",
     "client": "turbo run --filter=@anticapture/graphql-client",
     "offchain-indexer": "turbo run --filter=@anticapture/offchain-indexer",
     "address": "turbo run --filter=@anticapture/address-enrichment",
@@ -18,7 +18,8 @@
     "lint:fix": "turbo lint:fix",
     "typecheck": "turbo typecheck",
     "prepare": "husky",
-    "test": "turbo test"
+    "test": "turbo test",
+    "test:unit": "turbo test:unit"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

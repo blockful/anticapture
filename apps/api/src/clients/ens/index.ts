@@ -70,6 +70,10 @@ export class ENSClient<
     return true;
   }
 
+  supportOffchainData(): boolean {
+    return true;
+  }
+
   calculateQuorum(votes: {
     forVotes: bigint;
     againstVotes: bigint;
