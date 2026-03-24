@@ -824,12 +824,15 @@ export type OffchainProposalById_200_Response = {
   __typename?: 'offchainProposalById_200_response';
   author: Scalars['String']['output'];
   body: Scalars['String']['output'];
+  choices: Array<Maybe<Scalars['String']['output']>>;
   created: Scalars['Float']['output'];
   discussion: Scalars['String']['output'];
   end: Scalars['Float']['output'];
   flagged: Scalars['Boolean']['output'];
   id: Scalars['String']['output'];
   link: Scalars['String']['output'];
+  quorum: Scalars['String']['output'];
+  scores: Array<Maybe<Scalars['Float']['output']>>;
   spaceId: Scalars['String']['output'];
   start: Scalars['Float']['output'];
   state: Scalars['String']['output'];
@@ -1570,12 +1573,15 @@ export type Query_OffchainProposals_Items_Items = {
   __typename?: 'query_offchainProposals_items_items';
   author: Scalars['String']['output'];
   body: Scalars['String']['output'];
+  choices: Array<Maybe<Scalars['String']['output']>>;
   created: Scalars['Float']['output'];
   discussion: Scalars['String']['output'];
   end: Scalars['Float']['output'];
   flagged: Scalars['Boolean']['output'];
   id: Scalars['String']['output'];
   link: Scalars['String']['output'];
+  quorum: Scalars['String']['output'];
+  scores: Array<Maybe<Scalars['Float']['output']>>;
   spaceId: Scalars['String']['output'];
   start: Scalars['Float']['output'];
   state: Scalars['String']['output'];
@@ -2057,6 +2063,33 @@ export type GetAddressesQueryVariables = Exact<{
 
 
 export type GetAddressesQuery = { __typename?: 'Query', getAddresses?: { __typename?: 'getAddresses_200_response', results: Array<{ __typename?: 'query_getAddresses_results_items', address: string, isContract: boolean, arkham?: { __typename?: 'query_getAddresses_results_items_arkham', entity?: string | null, entityType?: string | null, label?: string | null, twitter?: string | null } | null, ens?: { __typename?: 'query_getAddresses_results_items_ens', name?: string | null, avatar?: string | null, banner?: string | null } | null } | null> } | null };
+
+export type GetOffchainProposalsFromDaoQueryVariables = Exact<{
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderDirection?: InputMaybe<QueryInput_OffchainProposals_OrderDirection>;
+  status?: InputMaybe<Scalars['JSON']['input']>;
+  fromDate?: InputMaybe<Scalars['Float']['input']>;
+}>;
+
+
+export type GetOffchainProposalsFromDaoQuery = { __typename?: 'Query', offchainProposals?: { __typename?: 'offchainProposals_200_response', totalCount: number, items: Array<{ __typename?: 'query_offchainProposals_items_items', id: string, spaceId: string, author: string, title: string, state: string, start: number, end: number, created: number, updated: number, forVotes: string, againstVotes: string, abstainVotes: string } | null> } | null };
+
+export type GetOffchainProposalQueryVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type GetOffchainProposalQuery = { __typename?: 'Query', offchainProposalById?: { __typename?: 'offchainProposalById_200_response', id: string, spaceId: string, author: string, title: string, body: string, state: string, start: number, end: number, created: number, updated: number, link: string, forVotes: string, againstVotes: string, abstainVotes: string } | null };
+
+export type GetOffchainVotesByProposalIdQueryVariables = Exact<{
+  id: Scalars['String']['input'];
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  limit?: InputMaybe<Scalars['Float']['input']>;
+}>;
+
+
+export type GetOffchainVotesByProposalIdQuery = { __typename?: 'Query', votesOffchainByProposalId?: { __typename?: 'votesOffchainByProposalId_200_response', totalCount: number, items: Array<{ __typename?: 'query_votesOffchainByProposalId_items_items', voter: string, choice?: any | null, vp?: number | null, reason: string, created: number } | null> } | null };
 
 export type GetProposalsFromDaoQueryVariables = Exact<{
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
