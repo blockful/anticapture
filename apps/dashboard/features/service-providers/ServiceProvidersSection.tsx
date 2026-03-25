@@ -1,7 +1,7 @@
 "use client";
 
 import { Building2, Pencil } from "lucide-react";
-import { Fragment, useState } from "react";
+import { useState } from "react";
 
 import { ServiceProvidersTable } from "@/features/service-providers/components/ServiceProvidersTable";
 import { UPDATE_STATUS_URL } from "@/features/service-providers/constants/ens-service-providers";
@@ -59,20 +59,31 @@ export const ServiceProvidersSection = () => {
                 activeTab={activeProgram ?? ""}
                 onTabChange={(value) => setSelectedProgram(value)}
               />
-              {activeProgramDef && activeProgramDef.proposals.length > 0 && (
+              {activeProgramDef && (
                 <div className="flex items-center gap-1.5">
-                  {activeProgramDef.proposals.map((proposal, i) => (
-                    <Fragment key={proposal.id}>
-                      {i > 0 && <BulletDivider />}
-                      <DefaultLink
-                        size="sm"
-                        openInNewTab
-                        href={proposal.forumUrl}
-                      >
-                        {proposal.id}
-                      </DefaultLink>
-                    </Fragment>
-                  ))}
+                  <DefaultLink
+                    size="sm"
+                    openInNewTab
+                    href={activeProgramDef.discussionUrl}
+                  >
+                    DISCUSSION
+                  </DefaultLink>
+                  <BulletDivider />
+                  <DefaultLink
+                    size="sm"
+                    openInNewTab
+                    href={activeProgramDef.budgetProposal.forumUrl}
+                  >
+                    {activeProgramDef.budgetProposal.id}
+                  </DefaultLink>
+                  <BulletDivider />
+                  <DefaultLink
+                    size="sm"
+                    openInNewTab
+                    href={activeProgramDef.selectionProposal.forumUrl}
+                  >
+                    {activeProgramDef.selectionProposal.id}
+                  </DefaultLink>
                 </div>
               )}
             </div>

@@ -34,7 +34,9 @@ function parseQuarterString(str: string): ParsedQuarter | null {
 export function parseProgramConfig(config: ProgramConfig): ProgramDefinition {
   return {
     name: config.name,
-    proposals: config.proposals,
+    discussionUrl: config.discussionUrl,
+    budgetProposal: config.budgetProposal,
+    selectionProposal: config.selectionProposal,
     year1Quarters: config.year1Quarters
       .map(parseQuarterString)
       .filter((q): q is ParsedQuarter => q !== null),

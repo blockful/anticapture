@@ -24,12 +24,10 @@ export type YearData = {
 export type ProgramProposal = {
   id: string;
   title: string;
-  type: "social" | "executable";
   description?: string;
   date: string;
   forumUrl: string;
-  snapshotUrl?: string;
-  tallyUrl?: string;
+  snapshotUrl: string;
   docsUrl?: string;
 };
 
@@ -39,7 +37,9 @@ export type ProgramConfig = {
   year2Quarters?: string[];
   budget: number;
   startDate: string;
-  proposals: ProgramProposal[];
+  discussionUrl: string;
+  budgetProposal: ProgramProposal;
+  selectionProposal: ProgramProposal;
 };
 
 export type ProgramsConfig = Record<string, ProgramConfig>;
@@ -70,7 +70,9 @@ export type ProgramDefinition = {
   name: string;
   year1Quarters: ParsedQuarter[];
   year2Quarters: ParsedQuarter[];
-  proposals: ProgramProposal[];
+  discussionUrl: string;
+  budgetProposal: ProgramProposal;
+  selectionProposal: ProgramProposal;
 };
 
 export type ServiceProvider = {
