@@ -39,6 +39,7 @@ export type ProviderEntry = {
   slug: string;
   website?: string;
   programs: Record<string, ProviderProgramEntry>;
+  reports: Record<string, string>;
 };
 
 export type ProvidersConfig = {
