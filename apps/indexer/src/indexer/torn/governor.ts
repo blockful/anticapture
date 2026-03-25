@@ -141,8 +141,10 @@ export function TORNGovernorIndexer(blockTime: number) {
   });
 
   /**
-   * Voted — custom handler instead of shared voteCast() to handle potential
-   * duplicate vote events gracefully with onConflictDoUpdate.
+   * Voted — custom handler using onConflictDoNothing to prevent Ponder's
+   * DelayedInsertError crash during batch flushing. Ponder's deferred insert
+   * mechanism can hit unique constraint violations during backfill; plain
+   * inserts (as in the shared voteCast) cause unhandledRejection crashes.
    *
    * bool support mapped: true→1 (for), false→0 (against). No reason field.
    */
@@ -150,13 +152,14 @@ export function TORNGovernorIndexer(blockTime: number) {
     const { proposalId, voter, support, votes } = event.args;
     const proposalIdStr = proposalId.toString();
     const supportNum = support ? 1 : 0;
+    const normalizedVoter = getAddress(voter);
 
     await ensureAccountExists(context, voter);
 
     await context.db
       .insert(accountPower)
       .values({
-        accountId: getAddress(voter),
+        accountId: normalizedVoter,
         daoId,
         votesCount: 1,
         lastVoteTimestamp: event.block.timestamp,
@@ -166,25 +169,20 @@ export function TORNGovernorIndexer(blockTime: number) {
         lastVoteTimestamp: event.block.timestamp,
       }));
 
-    // Use onConflictDoUpdate to handle potential duplicate vote events
+    // onConflictDoNothing prevents DelayedInsertError from Ponder's batch flush
     await context.db
       .insert(votesOnchain)
       .values({
         txHash: event.transaction.hash,
         daoId,
         proposalId: proposalIdStr,
-        voterAccountId: getAddress(voter),
+        voterAccountId: normalizedVoter,
         support: supportNum.toString(),
         votingPower: votes,
         reason: "",
         timestamp: event.block.timestamp,
       })
-      .onConflictDoUpdate({
-        support: supportNum.toString(),
-        votingPower: votes,
-        txHash: event.transaction.hash,
-        timestamp: event.block.timestamp,
-      });
+      .onConflictDoNothing();
 
     await context.db
       .update(proposalsOnchain, { id: proposalIdStr })
@@ -204,7 +202,7 @@ export function TORNGovernorIndexer(blockTime: number) {
       value: votes,
       timestamp: event.block.timestamp,
       metadata: {
-        voter: getAddress(voter),
+        voter: normalizedVoter,
         reason: "",
         support: supportNum,
         votingPower: votes,

@@ -90,10 +90,24 @@ Tornado Cash was sanctioned by the U.S. Treasury's OFAC in August 2022. While th
 | CLOSING_PERIOD       | 3600   | 1 hour         |
 | VOTE_EXTEND_TIME     | 21600  | 6 hours        |
 
-### Proposal state distribution (as of March 2025)
+### Vote handler: onConflictDoNothing
 
-Total proposals: 65
+The shared `voteCast()` handler uses plain inserts which trigger Ponder's `DelayedInsertError` during batch flushing (duplicate key constraint on `votes_onchain`). This is specific to Tornado Cash and occurs during backfill. The custom handler uses `onConflictDoNothing` on the vote insert to prevent crashes, with incremental tally updates. After backfill, tallies should be reconciled from vote rows via SQL.
 
-- Executed (state 5): ~45 proposals
-- Defeated (state 2): ~18 proposals
-- Other states: 2 (RPC errors on proposals 21 and 59)
+### Vote tallies vs on-chain proposals struct
+
+Indexed vote tallies (from Voted events) may differ from on-chain `proposals(id).forVotes/againstVotes`. The governance contract was upgraded 5 times (current version: `"5.proposal-state-patch"`), including post-attack recovery proposals that may have directly modified the `proposals` mapping. Our indexed data reflects the immutable Voted event history. Both are valid — events show what happened, on-chain struct shows the current governance state.
+
+### Verification results (March 2026)
+
+Full backfill completed successfully with zero crashes.
+
+| Metric             | Indexed      | On-chain     | Status          |
+| ------------------ | ------------ | ------------ | --------------- |
+| Proposals          | 65           | 65           | Exact match     |
+| Executed proposals | 49           | 49           | Exact match     |
+| Votes              | 1,089        | —            | Zero duplicates |
+| delegatedSupply    | 4,732,271.91 | 4,732,271.91 | Exact match     |
+| Delegations        | 72           | —            | —               |
+| Transfers          | 458,282      | —            | —               |
+| Accounts           | 42,890       | —            | —               |
