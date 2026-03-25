@@ -22,8 +22,7 @@ export type YearData = {
 // --- External providers.json schema (spp-accountability repo) ---
 
 export type ProgramConfig = {
-  quarters?: string[];
-  year1Quarters?: string[];
+  year1Quarters: string[];
   year2Quarters?: string[];
   forumUrl?: string;
   voteUrl?: string;
