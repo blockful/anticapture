@@ -1,5 +1,5 @@
 import { publicActions } from "viem";
-import type { Account, Address, WalletClient } from "viem";
+import type { Address, Chain, WalletClient } from "viem";
 
 const ERC20VotesAbi = [
   {
@@ -14,9 +14,10 @@ const ERC20VotesAbi = [
 export const delegateTo = async (
   tokenAddress: Address,
   delegateAddress: Address,
-  account: Account,
+  account: Address,
   walletClient: WalletClient,
   onTxHash: (hash: `0x${string}`) => void,
+  chain?: Chain,
 ) => {
   const client = walletClient.extend(publicActions);
 
@@ -26,6 +27,7 @@ export const delegateTo = async (
     functionName: "delegate",
     args: [delegateAddress],
     account,
+    chain,
   });
 
   const hash = await client.writeContract(request);
