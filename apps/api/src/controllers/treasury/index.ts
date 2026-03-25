@@ -4,6 +4,7 @@ import {
   TreasuryResponseSchema,
   TreasuryQuerySchema,
 } from "@/mappers/treasury";
+
 import { TreasuryService } from "@/services/treasury";
 
 export function treasury(
@@ -37,7 +38,7 @@ export function treasury(
     async (context) => {
       const { days, order } = context.req.valid("query");
       const result = await treasuryService.getLiquidTreasury(days, order);
-      return context.json(result);
+      return context.json(result, 200);
     },
   );
 
@@ -62,9 +63,6 @@ export function treasury(
             },
           },
         },
-        400: {
-          description: "Invalid DAO ID or missing configuration",
-        },
       },
     }),
     async (context) => {
@@ -74,7 +72,7 @@ export function treasury(
         order,
         decimals,
       );
-      return context.json(result);
+      return context.json(result, 200);
     },
   );
 
@@ -99,9 +97,6 @@ export function treasury(
             },
           },
         },
-        400: {
-          description: "Invalid DAO ID or missing configuration",
-        },
       },
     }),
     async (context) => {
@@ -111,7 +106,7 @@ export function treasury(
         order,
         decimals,
       );
-      return context.json(result);
+      return context.json(result, 200);
     },
   );
 }

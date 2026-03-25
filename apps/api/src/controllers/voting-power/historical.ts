@@ -81,6 +81,7 @@ export function historicalVotingPower(
       );
       return context.json(
         HistoricalVotingPowersResponseMapper(items, totalCount),
+        200,
       );
     },
   );
@@ -133,6 +134,7 @@ export function historicalVotingPower(
       );
       return context.json(
         HistoricalVotingPowersResponseMapper(items, totalCount),
+        200,
       );
     },
   );

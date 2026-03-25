@@ -12,7 +12,9 @@ export const PeriodResponseSchema = z
     startTimestamp: z.string(),
     endTimestamp: z.string(),
   })
-  .openapi("PeriodResponse");
+  .openapi("PeriodResponse", {
+    description: "Inclusive time period represented as ISO-8601 timestamps.",
+  });
 
 export const ErrorResponseSchema = z
   .object({
@@ -21,7 +23,35 @@ export const ErrorResponseSchema = z
       example: "Proposal not found",
     }),
   })
-  .openapi("ErrorResponse");
+  .openapi("ErrorResponse", {
+    description: "Generic error payload returned by the API.",
+  });
+
+export const ValidationErrorDetailSchema = z
+  .string()
+  .openapi("ValidationErrorDetail", {
+    description: "Single validation issue produced while parsing a request.",
+    example: 'Expected number, received string at "limit"',
+  });
+
+export const ValidationErrorResponseSchema = z
+  .object({
+    error: z.literal("Validation Error").openapi({
+      description: "Static identifier for request validation failures.",
+      example: "Validation Error",
+    }),
+    message: z.string().openapi({
+      description: "Combined validation message.",
+      example: "Validation error: limit: Expected number, received string",
+    }),
+    details: z.array(ValidationErrorDetailSchema).optional().openapi({
+      description: "Optional list of individual validation issues.",
+    }),
+  })
+  .openapi("ValidationErrorResponse", {
+    description:
+      "Payload returned when request params, query, or body fail validation.",
+  });
 
 export const normalizeQueryArray = (value: unknown): unknown[] | undefined => {
   if (value == null || value === "") {

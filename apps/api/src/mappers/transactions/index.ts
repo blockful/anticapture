@@ -118,42 +118,60 @@ export const TransactionsRequestSchema = z
       message: "fromDate must be less than or equal to toDate",
       path: ["fromDate"],
     },
-  );
+  )
+  .openapi("TransactionsRequest", {
+    description:
+      "Query params used to page and filter transactions with transfer and delegation context.",
+  });
 
 export type TransactionsRequest = z.infer<typeof TransactionsRequestSchema>;
 
-export const DelegationResponseSchema = z.object({
-  transactionHash: z.string(),
-  daoId: z.string(),
-  delegateAccountId: z.string(),
-  delegatorAccountId: z.string(),
-  delegatedValue: z.string(),
-  previousDelegate: z.string().nullable(),
-  timestamp: z.string(),
-  logIndex: z.number(),
-  isCex: z.boolean(),
-  isDex: z.boolean(),
-  isLending: z.boolean(),
-  isTotal: z.boolean(),
-});
+export const DelegationResponseSchema = z
+  .object({
+    transactionHash: z.string(),
+    daoId: z.string(),
+    delegateAccountId: z.string(),
+    delegatorAccountId: z.string(),
+    delegatedValue: z.string(),
+    previousDelegate: z.string().nullable(),
+    timestamp: z.string(),
+    logIndex: z.number(),
+    isCex: z.boolean(),
+    isDex: z.boolean(),
+    isLending: z.boolean(),
+    isTotal: z.boolean(),
+  })
+  .openapi("TransactionDelegation", {
+    description: "Delegation event embedded within a transaction response.",
+  });
 
-export const TransactionResponseSchema = z.object({
-  transactionHash: z.string(),
-  from: z.string().nullable(),
-  to: z.string().nullable(),
-  isCex: z.boolean(),
-  isDex: z.boolean(),
-  isLending: z.boolean(),
-  isTotal: z.boolean(),
-  timestamp: z.string(),
-  transfers: z.array(TransferResponseSchema),
-  delegations: z.array(DelegationResponseSchema),
-});
+export const TransactionResponseSchema = z
+  .object({
+    transactionHash: z.string(),
+    from: z.string().nullable(),
+    to: z.string().nullable(),
+    isCex: z.boolean(),
+    isDex: z.boolean(),
+    isLending: z.boolean(),
+    isTotal: z.boolean(),
+    timestamp: z.string(),
+    transfers: z.array(TransferResponseSchema),
+    delegations: z.array(DelegationResponseSchema),
+  })
+  .openapi("Transaction", {
+    description:
+      "Transaction response enriched with transfer and delegation events.",
+  });
 
-export const TransactionsResponseSchema = z.object({
-  items: z.array(TransactionResponseSchema),
-  totalCount: z.number(),
-});
+export const TransactionsResponseSchema = z
+  .object({
+    items: z.array(TransactionResponseSchema),
+    totalCount: z.number(),
+  })
+  .openapi("TransactionsResponse", {
+    description:
+      "Paginated transactions with embedded transfer and delegation data.",
+  });
 
 export type TransactionsResponse = z.infer<typeof TransactionsResponseSchema>;
 export type TransactionResponse = z.infer<typeof TransactionResponseSchema>;

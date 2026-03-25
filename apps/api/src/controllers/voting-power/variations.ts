@@ -118,6 +118,7 @@ export function votingPowerVariations(
           fromDate,
           toDate,
         ),
+        200,
       );
     },
   );

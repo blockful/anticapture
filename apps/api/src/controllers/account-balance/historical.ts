@@ -60,7 +60,10 @@ export function historicalBalances(
         toDate,
       );
 
-      return context.json(HistoricalBalancesResponseMapper(items, totalCount));
+      return context.json(
+        HistoricalBalancesResponseMapper(items, totalCount),
+        200,
+      );
     },
   );
 }

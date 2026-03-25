@@ -42,7 +42,7 @@ export function delegators(app: Hono, service: DelegatorsService) {
         orderDirection,
       });
 
-      return context.json(DelegatorsResponseSchema.parse(result));
+      return context.json(DelegatorsResponseSchema.parse(result), 200);
     },
   );
 }

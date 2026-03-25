@@ -77,7 +77,10 @@ Positive amounts signify net token transfers FROM <address>, whilst negative amo
         },
       );
 
-      return context.json(AccountInteractionsMapper(result, fromDate, toDate));
+      return context.json(
+        AccountInteractionsMapper(result, fromDate, toDate),
+        200,
+      );
     },
   );
 }

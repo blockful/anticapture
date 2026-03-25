@@ -59,7 +59,7 @@ export function transfers(app: Hono, service: TransfersService) {
         toDate,
       });
 
-      return context.json(result);
+      return context.json(result, 200);
     },
   );
 }

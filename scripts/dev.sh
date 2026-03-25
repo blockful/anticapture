@@ -111,6 +111,18 @@ railway_run() {
   fi
 }
 
+# Always try railway for the API; fall back to plain execution (.env) if service not found
+railway_run_api() {
+  local service=$1
+  shift
+  if pnpm railway run -e dev -s "$service" true >/dev/null 2>&1; then
+    pnpm railway run -e dev -s "$service" "$@"
+  else
+    log "Railway service '$service' not found, using .env"
+    "$@"
+  fi
+}
+
 # Kill anything already running on our ports
 for port in "${PORTS[@]}"; do
   pid=$(lsof -ti ":$port" 2>/dev/null || true)
@@ -135,7 +147,7 @@ fi
 # 2. API (only when DAO_ID is provided)
 if [ "$RUN_API" = true ]; then
   log "Starting API for $DAO_ID..."
-  run_with_prefix "$C_API" "🐙 api" "" "" railway_run "${DAO_ID}-api" pnpm api dev -- "$DAO_ID" &
+  run_with_prefix "$C_API" "🐙 api" "" "" railway_run_api "${DAO_ID}-api" pnpm api dev -- "$DAO_ID" &
 
   wait_for_port "$PORT_API" "API"
   export "DAO_API_${DAO_ID}=http://localhost:${PORT_API}"
@@ -149,6 +161,25 @@ rm -f "$GATEWAY_READY"
 log "Starting Gateway..."
 run_with_prefix "$C_GATEWAY" "🌎 gateway" "$GATEWAY_READY" "Mesh running at" railway_run api-gateway pnpm gateway dev &
 wait_for_ready "$GATEWAY_READY" "Gateway"
+
+# Watchdog: when API recovers after being down, touch the sentinel file so tsx reloads the gateway
+if [ "$RUN_API" = true ]; then
+  (
+    api_was_up=true
+    while true; do
+      sleep 3
+      if lsof -i ":$PORT_API" -sTCP:LISTEN >/dev/null 2>&1; then
+        if [ "$api_was_up" = false ]; then
+          log "API recovered — reloading Gateway..."
+          touch "$(dirname "$0")/../apps/api-gateway/src/_dev-reload.ts"
+          api_was_up=true
+        fi
+      else
+        api_was_up=false
+      fi
+    done
+  ) &
+fi
 
 # 4. Gateful
 GATEFUL_READY=$(mktemp)

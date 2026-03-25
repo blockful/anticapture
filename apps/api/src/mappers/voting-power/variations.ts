@@ -5,23 +5,33 @@ import { accountPower } from "@/database";
 
 import { PeriodResponseSchema, TimestampResponseMapper } from "../shared";
 
-export const VotingPowerVariationsByAccountIdRequestParamsSchema = z.object({
-  address: z
-    .string()
-    .refine((addr) => isAddress(addr, { strict: false }))
-    .transform((addr) => getAddress(addr)),
-});
+export const VotingPowerVariationsByAccountIdRequestParamsSchema = z
+  .object({
+    address: z
+      .string()
+      .refine((addr) => isAddress(addr, { strict: false }))
+      .transform((addr) => getAddress(addr)),
+  })
+  .openapi("VotingPowerVariationsByAccountIdRequestParams", {
+    description:
+      "Path params for a single-account voting power variation request.",
+  });
 
-export const VotingPowerVariationsByAccountIdRequestQuerySchema = z.object({
-  fromDate: z
-    .string()
-    .transform((val) => Number(val))
-    .optional(),
-  toDate: z
-    .string()
-    .transform((val) => Number(val))
-    .optional(),
-});
+export const VotingPowerVariationsByAccountIdRequestQuerySchema = z
+  .object({
+    fromDate: z
+      .string()
+      .transform((val) => Number(val))
+      .optional(),
+    toDate: z
+      .string()
+      .transform((val) => Number(val))
+      .optional(),
+  })
+  .openapi("VotingPowerVariationsByAccountIdRequestQuery", {
+    description:
+      "Time-window filters for a single-account voting power variation request.",
+  });
 
 export const VotingPowerVariationsRequestQuerySchema = z
   .object({
@@ -60,117 +70,176 @@ export const VotingPowerVariationsRequestQuerySchema = z
       ])
       .optional(),
   })
-  .extend(VotingPowerVariationsByAccountIdRequestQuerySchema.shape);
+  .extend(VotingPowerVariationsByAccountIdRequestQuerySchema.shape)
+  .openapi("VotingPowerVariationsRequestQuery", {
+    description:
+      "Query params used to page and filter voting power variations.",
+  });
 
-export const VotingPowersRequestSchema = z.object({
-  limit: z.coerce
-    .number()
-    .int()
-    .min(1, "Limit must be a positive integer")
-    .max(100, "Limit cannot exceed 100")
-    .optional()
-    .default(20),
-  skip: z.coerce
-    .number()
-    .int()
-    .min(0, "Skip must be a non-negative integer")
-    .optional()
-    .default(0),
-  orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
-  orderBy: z
-    .enum([
-      "votingPower",
-      "delegationsCount",
-      "variation",
-      "signedVariation",
-      /* AAVE only */
-      "total",
-      "balance",
-      /*-----------*/
-    ])
-    .optional()
-    .default("votingPower"),
-  addresses: z
-    .union([
-      z
-        .string()
-        .refine((addr) => isAddress(addr, { strict: false }), "Invalid address")
-        .transform((addr) => [getAddress(addr)]),
-      z.array(
+export const VotingPowersRequestSchema = z
+  .object({
+    limit: z.coerce
+      .number()
+      .int()
+      .min(1, "Limit must be a positive integer")
+      .max(100, "Limit cannot exceed 100")
+      .optional()
+      .default(20),
+    skip: z.coerce
+      .number()
+      .int()
+      .min(0, "Skip must be a non-negative integer")
+      .optional()
+      .default(0),
+    orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
+    orderBy: z
+      .enum([
+        "votingPower",
+        "delegationsCount",
+        "variation",
+        "signedVariation",
+        "total",
+        "balance",
+      ])
+      .optional()
+      .default("votingPower"),
+    addresses: z
+      .union([
         z
           .string()
           .refine(
             (addr) => isAddress(addr, { strict: false }),
-            "Invalid addresses",
+            "Invalid address",
           )
-          .transform((addr) => getAddress(addr)),
-      ),
-    ])
-    .optional()
-    .transform((val) => val ?? []),
-  fromValue: z
-    .string()
-    .transform((val) => BigInt(val))
-    .optional(),
-  toValue: z
-    .string()
-    .transform((val) => BigInt(val))
-    .optional(),
-  fromDate: z
-    .string()
-    .transform((val) => Number(val))
-    .optional(),
-  toDate: z
-    .string()
-    .transform((val) => Number(val))
-    .optional(),
-});
+          .transform((addr) => [getAddress(addr)]),
+        z.array(
+          z
+            .string()
+            .refine(
+              (addr) => isAddress(addr, { strict: false }),
+              "Invalid addresses",
+            )
+            .transform((addr) => getAddress(addr)),
+        ),
+      ])
+      .optional()
+      .transform((val) => val ?? []),
+    fromValue: z
+      .string()
+      .transform((val) => BigInt(val))
+      .optional(),
+    toValue: z
+      .string()
+      .transform((val) => BigInt(val))
+      .optional(),
+    fromDate: z
+      .string()
+      .transform((val) => Number(val))
+      .optional(),
+    toDate: z
+      .string()
+      .transform((val) => Number(val))
+      .optional(),
+  })
+  .openapi("VotingPowersRequest", {
+    description:
+      "Query params used to page and filter current voting power records.",
+  });
 
-export const VotingPowerVariationResponseSchema = z.object({
-  accountId: z.string(),
-  previousVotingPower: z.string(),
-  currentVotingPower: z.string(),
-  absoluteChange: z.string(),
-  percentageChange: z.string(),
-});
+export const VotingPowerByAccountIdRequestParamsSchema = z
+  .object({
+    accountId: z
+      .string()
+      .refine((addr) => isAddress(addr, { strict: false }))
+      .transform((addr) => getAddress(addr)),
+  })
+  .openapi("VotingPowerByAccountIdRequestParams", {
+    description:
+      "Path params for fetching the current voting power of a single account.",
+  });
 
-export const VotingPowerVariationFieldSchema = z.object({
-  absoluteChange: z
-    .union([z.bigint().transform((val) => val.toString()), z.string()])
-    .openapi({ type: "string" }),
-  percentageChange: z.string(),
-});
+export const VotingPowerByAccountIdRequestQuerySchema = z
+  .object({
+    fromDate: z.coerce.number().optional(),
+    toDate: z.coerce.number().optional(),
+  })
+  .openapi("VotingPowerByAccountIdRequestQuery", {
+    description:
+      "Optional time-window query params used to enrich a single account voting power response.",
+  });
 
-export const VotingPowerResponseSchema = z.object({
-  accountId: z.string(),
-  votingPower: z
-    .union([z.bigint().transform((val) => val.toString()), z.string()])
-    .openapi({ type: "string" }),
-  votesCount: z.number(),
-  proposalsCount: z.number(),
-  delegationsCount: z.number(),
-  balance: z
-    .bigint()
-    .transform((val) => val.toString())
-    .optional()
-    .openapi({ type: "string" }),
-  variation: VotingPowerVariationFieldSchema,
-});
+export const VotingPowerVariationResponseSchema = z
+  .object({
+    accountId: z.string(),
+    previousVotingPower: z.string(),
+    currentVotingPower: z.string(),
+    absoluteChange: z.string(),
+    percentageChange: z.string(),
+  })
+  .openapi("VotingPowerVariation", {
+    description:
+      "Voting power delta for a single account across two timestamps.",
+  });
 
-export const VotingPowersResponseSchema = z.object({
-  items: z.array(VotingPowerResponseSchema),
-  totalCount: z.number(),
-});
+export const VotingPowerVariationFieldSchema = z
+  .object({
+    absoluteChange: z
+      .union([z.bigint().transform((val) => val.toString()), z.string()])
+      .openapi({ type: "string" }),
+    percentageChange: z.string(),
+  })
+  .openapi("VotingPowerVariationField", {
+    description:
+      "Embedded voting power delta metadata for a current voting power row.",
+  });
 
-export const VotingPowerVariationsByAccountIdResponseSchema = z.object({
-  period: PeriodResponseSchema,
-  data: VotingPowerVariationResponseSchema,
-});
+export const VotingPowerResponseSchema = z
+  .object({
+    accountId: z.string(),
+    votingPower: z
+      .union([z.bigint().transform((val) => val.toString()), z.string()])
+      .openapi({ type: "string" }),
+    votesCount: z.number(),
+    proposalsCount: z.number(),
+    delegationsCount: z.number(),
+    balance: z
+      .bigint()
+      .transform((val) => val.toString())
+      .optional()
+      .openapi({ type: "string" }),
+    variation: VotingPowerVariationFieldSchema,
+  })
+  .openapi("VotingPower", {
+    description: "Current voting power snapshot for one account.",
+  });
 
-export const VotingPowerVariationsResponseSchema = z.object({
-  period: PeriodResponseSchema,
-  items: z.array(VotingPowerVariationResponseSchema),
-});
+export const VotingPowersResponseSchema = z
+  .object({
+    items: z.array(VotingPowerResponseSchema),
+    totalCount: z.number(),
+  })
+  .openapi("VotingPowersResponse", {
+    description: "Paginated current voting power records.",
+  });
+
+export const VotingPowerVariationsByAccountIdResponseSchema = z
+  .object({
+    period: PeriodResponseSchema,
+    data: VotingPowerVariationResponseSchema,
+  })
+  .openapi("VotingPowerVariationsByAccountIdResponse", {
+    description: "Voting power variation response for a single account.",
+  });
+
+export const VotingPowerVariationsResponseSchema = z
+  .object({
+    period: PeriodResponseSchema,
+    items: z.array(VotingPowerVariationResponseSchema),
+  })
+  .openapi("VotingPowerVariationsResponse", {
+    description:
+      "List of voting power variations for multiple accounts in the selected period.",
+  });
 
 export type VotingPowerVariationResponse = z.infer<
   typeof VotingPowerVariationResponseSchema

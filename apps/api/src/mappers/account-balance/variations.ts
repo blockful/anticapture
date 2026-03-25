@@ -4,23 +4,32 @@ import { Address, getAddress, isAddress } from "viem";
 import { PERCENTAGE_NO_BASELINE } from "../constants";
 import { PeriodResponseSchema, TimestampResponseMapper } from "../shared";
 
-export const AccountBalanceVariationsByAccountIdRequestParamsSchema = z.object({
-  address: z
-    .string()
-    .refine(isAddress, "Invalid address")
-    .transform((addr) => getAddress(addr)),
-});
+export const AccountBalanceVariationsByAccountIdRequestParamsSchema = z
+  .object({
+    address: z
+      .string()
+      .refine(isAddress, "Invalid address")
+      .transform((addr) => getAddress(addr)),
+  })
+  .openapi("AccountBalanceVariationsByAccountIdRequestParams", {
+    description: "Path params for a single-account balance variation request.",
+  });
 
-export const AccountBalanceVariationsByAccountIdRequestQuerySchema = z.object({
-  fromDate: z
-    .string()
-    .transform((val) => Number(val))
-    .optional(),
-  toDate: z
-    .string()
-    .transform((val) => Number(val))
-    .optional(),
-});
+export const AccountBalanceVariationsByAccountIdRequestQuerySchema = z
+  .object({
+    fromDate: z
+      .string()
+      .transform((val) => Number(val))
+      .optional(),
+    toDate: z
+      .string()
+      .transform((val) => Number(val))
+      .optional(),
+  })
+  .openapi("AccountBalanceVariationsByAccountIdRequestQuery", {
+    description:
+      "Time-window filters for a single-account balance variation request.",
+  });
 
 export const AccountBalanceVariationsRequestQuerySchema =
   AccountBalanceVariationsByAccountIdRequestQuerySchema.extend({
@@ -52,25 +61,41 @@ export const AccountBalanceVariationsRequestQuerySchema =
         ),
       ])
       .optional(),
+  }).openapi("AccountBalanceVariationsRequestQuery", {
+    description:
+      "Query params used to page and filter account balance variations.",
   });
 
-export const AccountBalanceVariationSchema = z.object({
-  accountId: z.string(),
-  previousBalance: z.string(),
-  currentBalance: z.string(),
-  absoluteChange: z.string(),
-  percentageChange: z.string(),
-});
+export const AccountBalanceVariationSchema = z
+  .object({
+    accountId: z.string(),
+    previousBalance: z.string(),
+    currentBalance: z.string(),
+    absoluteChange: z.string(),
+    percentageChange: z.string(),
+  })
+  .openapi("AccountBalanceVariation", {
+    description: "Balance delta for a single account across two timestamps.",
+  });
 
-export const AccountBalanceVariationsByAccountIdResponseSchema = z.object({
-  period: PeriodResponseSchema,
-  data: AccountBalanceVariationSchema,
-});
+export const AccountBalanceVariationsByAccountIdResponseSchema = z
+  .object({
+    period: PeriodResponseSchema,
+    data: AccountBalanceVariationSchema,
+  })
+  .openapi("AccountBalanceVariationsByAccountIdResponse", {
+    description: "Balance variation response for a single account.",
+  });
 
-export const AccountBalanceVariationsResponseSchema = z.object({
-  period: PeriodResponseSchema,
-  items: z.array(AccountBalanceVariationSchema),
-});
+export const AccountBalanceVariationsResponseSchema = z
+  .object({
+    period: PeriodResponseSchema,
+    items: z.array(AccountBalanceVariationSchema),
+  })
+  .openapi("AccountBalanceVariationsResponse", {
+    description:
+      "List of balance variations for multiple accounts in the selected period.",
+  });
 
 export type AccountBalanceVariationsResponse = z.infer<
   typeof AccountBalanceVariationsResponseSchema

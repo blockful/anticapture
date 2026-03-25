@@ -81,6 +81,7 @@ export function accountBalances(
           fromTimestamp,
           toTimestamp,
         ),
+        200,
       );
     },
   );
@@ -127,6 +128,7 @@ export function accountBalances(
           fromTimestamp,
           toTimestamp,
         ),
+        200,
       );
     },
   );

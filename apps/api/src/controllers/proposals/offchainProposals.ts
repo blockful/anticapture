@@ -47,7 +47,7 @@ export function offchainProposals(
         fromDate,
       });
 
-      return context.json(OffchainProposalsResponseSchema.parse(response));
+      return context.json(OffchainProposalsResponseSchema.parse(response), 200);
     },
   );
 

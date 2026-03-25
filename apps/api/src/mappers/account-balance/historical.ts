@@ -10,64 +10,88 @@ export type DBHistoricalBalanceWithRelations = DBHistoricalBalance & {
   transfer: DBTransfer;
 };
 
-export const HistoricalBalanceRequestParamsSchema = z.object({
-  address: z
-    .string()
-    .refine((addr) => isAddress(addr))
-    .transform((addr) => getAddress(addr)),
-});
+export const HistoricalBalanceRequestParamsSchema = z
+  .object({
+    address: z
+      .string()
+      .refine((addr) => isAddress(addr))
+      .transform((addr) => getAddress(addr)),
+  })
+  .openapi("HistoricalBalanceRequestParams", {
+    description: "Path params for historical balance queries.",
+  });
 
-export const HistoricalBalanceRequestQuerySchema = z.object({
-  skip: z.coerce
-    .number()
-    .int()
-    .min(0, "Skip must be a non-negative integer")
-    .optional()
-    .default(0),
-  limit: z.coerce
-    .number()
-    .int()
-    .min(1, "Limit must be a positive integer")
-    .max(1000, "Limit cannot exceed 1000")
-    .optional()
-    .default(10),
-  orderBy: z.enum(["timestamp", "delta"]).optional().default("timestamp"),
-  orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
-  fromDate: z
-    .string()
-    .transform((val) => Number(val))
-    .optional(),
-  toDate: z
-    .string()
-    .transform((val) => Number(val))
-    .optional(),
-  fromValue: z.string().optional(),
-  toValue: z.string().optional(),
-});
+export const HistoricalBalanceRequestQuerySchema = z
+  .object({
+    skip: z.coerce
+      .number()
+      .int()
+      .min(0, "Skip must be a non-negative integer")
+      .optional()
+      .default(0),
+    limit: z.coerce
+      .number()
+      .int()
+      .min(1, "Limit must be a positive integer")
+      .max(1000, "Limit cannot exceed 1000")
+      .optional()
+      .default(10),
+    orderBy: z.enum(["timestamp", "delta"]).optional().default("timestamp"),
+    orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
+    fromDate: z
+      .string()
+      .transform((val) => Number(val))
+      .optional(),
+    toDate: z
+      .string()
+      .transform((val) => Number(val))
+      .optional(),
+    fromValue: z.string().optional(),
+    toValue: z.string().optional(),
+  })
+  .openapi("HistoricalBalanceRequestQuery", {
+    description:
+      "Query params used to page and filter historical balance deltas.",
+  });
 
 export type HistoricalBalanceRequest = z.infer<
   typeof HistoricalBalanceRequestQuerySchema
 >;
 
-export const HistoricalBalanceResponseSchema = z.object({
-  transactionHash: z.string(),
-  daoId: z.string(),
-  accountId: z.string(),
-  balance: z.string(),
-  delta: z.string(),
-  timestamp: z.string(),
-  logIndex: z.number(),
-  transfer: z.object({
+export const HistoricalBalanceTransferSchema = z
+  .object({
     value: z.string(),
     from: z.string(),
     to: z.string(),
-  }),
-});
+  })
+  .openapi("HistoricalBalanceTransfer", {
+    description: "Transfer event associated with a historical balance row.",
+  });
 
-export const HistoricalBalancesResponseSchema = z.object({
-  items: z.array(HistoricalBalanceResponseSchema),
-  totalCount: z.number(),
-});
+export const HistoricalBalanceResponseSchema = z
+  .object({
+    transactionHash: z.string(),
+    daoId: z.string(),
+    accountId: z.string(),
+    balance: z.string(),
+    delta: z.string(),
+    timestamp: z.string(),
+    logIndex: z.number(),
+    transfer: HistoricalBalanceTransferSchema,
+  })
+  .openapi("HistoricalBalance", {
+    description:
+      "Single historical balance record enriched with transfer context.",
+  });
+
+export const HistoricalBalancesResponseSchema = z
+  .object({
+    items: z.array(HistoricalBalanceResponseSchema),
+    totalCount: z.number(),
+  })
+  .openapi("HistoricalBalancesResponse", {
+    description: "Paginated historical balance records for one account.",
+  });
 
 export type HistoricalBalanceResponse = z.infer<
   typeof HistoricalBalanceResponseSchema

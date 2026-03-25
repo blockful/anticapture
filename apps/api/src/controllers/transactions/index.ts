@@ -62,7 +62,7 @@ export function transactions(app: Hono, service: TransactionsService) {
         includes,
       });
 
-      return context.json(result);
+      return context.json(result, 200);
     },
   );
 }

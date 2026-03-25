@@ -65,12 +65,15 @@ export function proposals(
         client.getVotingDelay(),
       ]);
 
-      return context.json({
-        items: result.map((p, index) =>
-          ProposalMapper.toApi(p, quorums[index]!, blockTime),
-        ),
-        totalCount: await service.getProposalsCount(),
-      });
+      return context.json(
+        {
+          items: result.map((p, index) =>
+            ProposalMapper.toApi(p, quorums[index]!, blockTime),
+          ),
+          totalCount: await service.getProposalsCount(),
+        },
+        200,
+      );
     },
   );
 

@@ -36,7 +36,7 @@ export function delegationPercentage(
       );
       const httpResponse = toApi(serviceResult);
 
-      return ctx.json(httpResponse);
+      return ctx.json(httpResponse, 200);
     },
   );
 }

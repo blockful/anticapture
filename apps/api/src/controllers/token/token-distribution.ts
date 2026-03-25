@@ -1,8 +1,12 @@
-import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
+import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 import { formatUnits, parseEther } from "viem";
 
 import { MetricTypesEnum } from "@/lib/constants";
-import { DaysEnum, DaysOpts } from "@/lib/enums";
+import { DaysEnum } from "@/lib/enums";
+import {
+  SupplyComparisonResponseSchema,
+  TokenDistributionComparisonQuerySchema,
+} from "@/mappers";
 
 interface TokenDistributionRepository {
   getSupplyComparison(
@@ -16,99 +20,36 @@ export function tokenDistribution(
   repository: TokenDistributionRepository,
 ) {
   const routes = [
-    {
-      path: "total-supply",
-      metric: MetricTypesEnum.TOTAL_SUPPLY,
-      resultKey: "TotalSupply",
-      resultSchema: z.object({
-        oldTotalSupply: z.string(),
-        currentTotalSupply: z.string(),
-        changeRate: z.number(),
-      }),
-    },
-    {
-      path: "delegated-supply",
-      metric: MetricTypesEnum.DELEGATED_SUPPLY,
-      resultKey: "DelegatedSupply",
-      resultSchema: z.object({
-        oldDelegatedSupply: z.string(),
-        currentDelegatedSupply: z.string(),
-        changeRate: z.number(),
-      }),
-    },
-    {
-      path: "circulating-supply",
-      metric: MetricTypesEnum.CIRCULATING_SUPPLY,
-      resultKey: "CirculatingSupply",
-      resultSchema: z.object({
-        oldCirculatingSupply: z.string(),
-        currentCirculatingSupply: z.string(),
-        changeRate: z.number(),
-      }),
-    },
-    {
-      path: "treasury",
-      metric: MetricTypesEnum.TREASURY,
-      resultKey: "Treasury",
-      resultSchema: z.object({
-        oldTreasury: z.string(),
-        currentTreasury: z.string(),
-        changeRate: z.number(),
-      }),
-    },
-    {
-      path: "cex-supply",
-      metric: MetricTypesEnum.CEX_SUPPLY,
-      resultKey: "CexSupply",
-      resultSchema: z.object({
-        oldCexSupply: z.string(),
-        currentCexSupply: z.string(),
-        changeRate: z.number(),
-      }),
-    },
-    {
-      path: "dex-supply",
-      metric: MetricTypesEnum.DEX_SUPPLY,
-      resultKey: "DexSupply",
-      resultSchema: z.object({
-        oldDexSupply: z.string(),
-        currentDexSupply: z.string(),
-        changeRate: z.number(),
-      }),
-    },
-    {
-      path: "lending-supply",
-      metric: MetricTypesEnum.LENDING_SUPPLY,
-      resultKey: "LendingSupply",
-      resultSchema: z.object({
-        oldLendingSupply: z.string(),
-        currentLendingSupply: z.string(),
-        changeRate: z.number(),
-      }),
-    },
+    { path: "total-supply", metric: MetricTypesEnum.TOTAL_SUPPLY },
+    { path: "delegated-supply", metric: MetricTypesEnum.DELEGATED_SUPPLY },
+    { path: "circulating-supply", metric: MetricTypesEnum.CIRCULATING_SUPPLY },
+    { path: "treasury", metric: MetricTypesEnum.TREASURY },
+    { path: "cex-supply", metric: MetricTypesEnum.CEX_SUPPLY },
+    { path: "dex-supply", metric: MetricTypesEnum.DEX_SUPPLY },
+    { path: "lending-supply", metric: MetricTypesEnum.LENDING_SUPPLY },
   ];
 
-  for (const { path, metric, resultKey, resultSchema } of routes) {
+  for (const { path, metric } of routes) {
+    const operationId = `compare${path
+      .split("-")
+      .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+      .join("")}`;
+
     app.openapi(
       createRoute({
         method: "get",
-        operationId: `compare${resultKey}`,
+        operationId,
         path: `/${path}/compare`,
         summary: `Compare ${path.replace(/-/g, " ")} between periods`,
         tags: ["tokens"],
         request: {
-          query: z.object({
-            days: z
-              .enum(DaysOpts)
-              .default("90d")
-              .transform((val) => DaysEnum[val]),
-          }),
+          query: TokenDistributionComparisonQuerySchema,
         },
         responses: {
           200: {
             description: `${path.replace(/-/g, " ")} comparison`,
             content: {
-              "application/json": { schema: resultSchema },
+              "application/json": { schema: SupplyComparisonResponseSchema },
             },
           },
         },
@@ -120,11 +61,7 @@ export function tokenDistribution(
 
         if (!result) {
           return ctx.json(
-            {
-              [`old${resultKey}`]: "0",
-              [`current${resultKey}`]: "0",
-              changeRate: 0,
-            } as z.infer<typeof resultSchema>,
+            { previousValue: "0", currentValue: "0", changeRate: 0 },
             200,
           );
         }
@@ -138,12 +75,12 @@ export function tokenDistribution(
 
         return ctx.json(
           {
-            [`old${resultKey}`]: oldValue || "0",
-            [`current${resultKey}`]: currentValue || "0",
+            previousValue: oldValue || "0",
+            currentValue: currentValue || "0",
             changeRate: changeRate
-              ? Number(formatUnits(changeRate, 18)).toFixed(2)
+              ? Number(Number(formatUnits(changeRate, 18)).toFixed(2))
               : 0,
-          } as z.infer<typeof resultSchema>,
+          },
           200,
         );
       },

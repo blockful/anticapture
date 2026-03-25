@@ -1,6 +1,7 @@
-import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
+import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import {
+  ProposalRequestSchema,
   VotersRequestSchema,
   VotersResponseSchema,
   VotesRequestSchema,
@@ -19,9 +20,7 @@ export function votes(app: Hono, service: VotesService) {
         "Returns a paginated list of votes cast on a specific proposal",
       tags: ["proposals"],
       request: {
-        params: z.object({
-          id: z.string(),
-        }),
+        params: ProposalRequestSchema,
         query: VotesRequestSchema,
       },
       responses: {
@@ -60,7 +59,7 @@ export function votes(app: Hono, service: VotesService) {
         toDate,
       );
 
-      return context.json({ totalCount, items });
+      return context.json({ totalCount, items }, 200);
     },
   );
 
@@ -99,7 +98,7 @@ export function votes(app: Hono, service: VotesService) {
         toDate,
       });
 
-      return context.json(VotesResponseSchema.parse(result));
+      return context.json(VotesResponseSchema.parse(result), 200);
     },
   );
 
@@ -113,9 +112,7 @@ export function votes(app: Hono, service: VotesService) {
         "Returns the active delegates that did not vote on a given proposal",
       tags: ["proposals"],
       request: {
-        params: z.object({
-          id: z.string(),
-        }),
+        params: ProposalRequestSchema,
         query: VotersRequestSchema,
       },
       responses: {
@@ -141,7 +138,7 @@ export function votes(app: Hono, service: VotesService) {
         orderDirection,
         addresses,
       );
-      return context.json({ totalCount, items });
+      return context.json({ totalCount, items }, 200);
     },
   );
 }

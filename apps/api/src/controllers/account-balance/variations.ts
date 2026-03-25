@@ -53,6 +53,7 @@ export function accountBalanceVariations(
 
       return context.json(
         AccountBalanceVariationsResponseMapper(result, fromDate, toDate),
+        200,
       );
     },
   );
@@ -96,6 +97,7 @@ export function accountBalanceVariations(
           fromDate,
           toDate,
         ),
+        200,
       );
     },
   );

@@ -1,6 +1,7 @@
 import { z } from "@hono/zod-openapi";
 
 import { token } from "@/database";
+import { DaysEnum, DaysOpts } from "@/lib/enums";
 
 export const TokenHistoricalPriceRequest = z
   .object({
@@ -21,7 +22,9 @@ export const TokenHistoricalPriceRequest = z
       type: "integer",
     }),
   })
-  .openapi("TokenHistoricalPriceRequest");
+  .openapi("TokenHistoricalPriceRequest", {
+    description: "Pagination query for historical token market data.",
+  });
 
 export type TokenHistoricalPriceRequest = z.infer<
   typeof TokenHistoricalPriceRequest
@@ -43,7 +46,9 @@ export const TokenHistoricalPriceItemSchema = z
 
 export const TokenHistoricalPriceResponse = z
   .array(TokenHistoricalPriceItemSchema)
-  .openapi("TokenHistoricalPriceResponse");
+  .openapi("TokenHistoricalPriceResponse", {
+    description: "Historical token price points ordered by timestamp.",
+  });
 
 export type TokenHistoricalPriceResponse = z.infer<
   typeof TokenHistoricalPriceResponse
@@ -67,11 +72,44 @@ export const TokenPropertiesSchema = z
     nonCirculatingSupply: z.string(),
     treasury: z.string(),
   })
-  .openapi("TokenProperties");
+  .openapi("TokenProperties", {
+    description:
+      "Core token supply and treasury attributes for the active DAO token.",
+  });
 
 export const TokenPropertiesResponseSchema = TokenPropertiesSchema.extend({
   price: z.string(),
-}).openapi("TokenPropertiesResponse");
+}).openapi("TokenPropertiesResponse", {
+  description: "Token properties enriched with the current token price.",
+});
+
+export const TokenDistributionComparisonQuerySchema = z
+  .object({
+    days: z
+      .enum(DaysOpts)
+      .default("90d")
+      .openapi({
+        description:
+          "Comparison window to use for the token distribution metric.",
+        example: "90d",
+      })
+      .transform((val) => DaysEnum[val]),
+  })
+  .openapi("TokenDistributionComparisonQuery", {
+    description:
+      "Shared query params for token distribution comparison endpoints.",
+  });
+
+export const SupplyComparisonResponseSchema = z
+  .object({
+    previousValue: z.string(),
+    currentValue: z.string(),
+    changeRate: z.number(),
+  })
+  .openapi("SupplyComparisonResponse", {
+    description:
+      "Supply metric comparison between current and previous periods.",
+  });
 
 export type TokenPropertiesResponse = z.infer<
   typeof TokenPropertiesResponseSchema

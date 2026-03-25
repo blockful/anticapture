@@ -5,9 +5,13 @@ import { delegation } from "@/database";
 
 export type DBDelegation = typeof delegation.$inferSelect;
 
-export const DelegationsRequestParamsSchema = z.object({
-  address: z
-    .string()
-    .refine((val) => isAddress(val, { strict: false }))
-    .transform((val) => getAddress(val)),
-});
+export const DelegationsRequestParamsSchema = z
+  .object({
+    address: z
+      .string()
+      .refine((val) => isAddress(val, { strict: false }))
+      .transform((val) => getAddress(val)),
+  })
+  .openapi("DelegationsRequestParams", {
+    description: "Path params for fetching current delegations of an account.",
+  });

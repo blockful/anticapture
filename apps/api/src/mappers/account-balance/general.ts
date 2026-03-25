@@ -58,14 +58,15 @@ export const AccountBalancesRequestSchema = z
       .optional()
       .default("balance"),
     excludeDaoAddresses: z
-      .enum(["true", "false"])
-      .optional()
-      .default("false")
-      .transform((val) => val === "true")
+      .preprocess(
+        (value) =>
+          value === "true" ? true : value === "false" ? false : value,
+        z.boolean().optional().default(false),
+      )
       .openapi({
         description:
           "Whether DAO-owned addresses should be excluded from the results.",
-        example: "false",
+        example: false,
         type: "boolean",
       }),
     addresses: AddressListSchema,

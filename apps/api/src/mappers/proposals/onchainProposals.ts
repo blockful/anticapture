@@ -52,13 +52,14 @@ export const ProposalsRequestSchema = z
       1700086400,
     ),
     includeOptimisticProposals: z
-      .enum(["true", "false"])
-      .optional()
-      .default("true")
-      .transform((val) => val === "true")
+      .preprocess(
+        (value) =>
+          value === "true" ? true : value === "false" ? false : value,
+        z.boolean().optional().default(true),
+      )
       .openapi({
         description: "Whether optimistic proposals should be included.",
-        example: "false",
+        example: false,
         type: "boolean",
       }),
   })

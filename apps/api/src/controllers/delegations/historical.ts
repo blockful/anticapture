@@ -5,6 +5,7 @@ import {
   HistoricalDelegationsRequestQuerySchema,
   DelegationsResponseSchema,
 } from "@/mappers/delegations";
+
 import { HistoricalDelegationsService } from "@/services/delegations";
 
 export function historicalDelegations(
@@ -58,7 +59,7 @@ export function historicalDelegations(
         limit,
       );
 
-      return context.json(DelegationsResponseSchema.parse(result));
+      return context.json(DelegationsResponseSchema.parse(result), 200);
     },
   );
 }

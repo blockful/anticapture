@@ -5,6 +5,7 @@ import {
   TokenMetricsResponseSchema,
   toTokenMetricsApi,
 } from "@/mappers/token-metrics";
+
 import { TokenMetricsService } from "@/services/token-metrics";
 
 export function tokenMetrics(app: Hono, service: TokenMetricsService) {
@@ -33,7 +34,7 @@ export function tokenMetrics(app: Hono, service: TokenMetricsService) {
         ctx.req.valid("query"),
       );
       const httpResponse = toTokenMetricsApi(serviceResult);
-      return ctx.json(httpResponse);
+      return ctx.json(httpResponse, 200);
     },
   );
 }

@@ -19,7 +19,9 @@ export const FeedRequestSchema = z
     fromDate: z.coerce.number().int().optional(),
     toDate: z.coerce.number().int().optional(),
   })
-  .openapi("FeedRequest");
+  .openapi("FeedRequest", {
+    description: "Query params used to page and filter feed events.",
+  });
 
 export const FeedItemSchema = z
   .object({
@@ -31,14 +33,18 @@ export const FeedItemSchema = z
     relevance: z.nativeEnum(FeedRelevance),
     metadata: z.record(z.string(), z.any()).nullable().openapi("FeedMetadata"),
   })
-  .openapi("FeedItem");
+  .openapi("FeedItem", {
+    description: "Single event in the governance activity feed.",
+  });
 
 export const FeedResponseSchema = z
   .object({
     items: z.array(FeedItemSchema),
     totalCount: z.number().int(),
   })
-  .openapi("FeedResponse");
+  .openapi("FeedResponse", {
+    description: "Paginated governance activity feed response.",
+  });
 
 export type FeedRequest = z.infer<typeof FeedRequestSchema>;
 export type FeedResponse = z.infer<typeof FeedResponseSchema>;
