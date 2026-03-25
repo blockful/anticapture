@@ -50,7 +50,7 @@ export const ServiceProvidersSection = () => {
       <SubSectionsContainer>
         <div className="flex flex-col gap-4">
           {programKeys.length > 1 && (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center justify-between gap-3">
               <PillTabGroup
                 tabs={programKeys.map((key) => ({
                   label: key,

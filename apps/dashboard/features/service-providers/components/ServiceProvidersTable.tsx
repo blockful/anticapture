@@ -141,7 +141,7 @@ export const ServiceProvidersTable = ({
         if (status === "1y_only" && isYear2) {
           return (
             <div className="bg-surface-contrast/30 absolute inset-0 flex items-center justify-center">
-              {year2ColIndex === 1 && (
+              {year2ColIndex === 0 && (
                 <span className="text-dimmed text-sm font-normal italic">
                   1Y only
                 </span>
@@ -184,7 +184,7 @@ export const ServiceProvidersTable = ({
         ),
       meta: {
         columnClassName: cn(
-          "w-[220px] px-2 sticky left-0 z-20 [&:is(th)]:bg-surface-contrast bg-surface-background lg:bg-surface-default",
+          "w-[260px] px-2 sticky left-0 z-20 [&:is(th)]:bg-surface-contrast bg-surface-background lg:bg-surface-default",
           hasYear2 &&
             "after:absolute after:right-0 after:top-0 after:bottom-0 after:w-px after:content-[''] after:bg-border-default",
         ),
