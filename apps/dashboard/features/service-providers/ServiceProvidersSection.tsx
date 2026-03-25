@@ -1,7 +1,7 @@
 "use client";
 
 import { Building2, Pencil } from "lucide-react";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 
 import { ServiceProvidersTable } from "@/features/service-providers/components/ServiceProvidersTable";
 import { UPDATE_STATUS_URL } from "@/features/service-providers/constants/ens-service-providers";
@@ -59,32 +59,22 @@ export const ServiceProvidersSection = () => {
                 activeTab={activeProgram ?? ""}
                 onTabChange={(value) => setSelectedProgram(value)}
               />
-              {activeProgramDef &&
-                (activeProgramDef.forumUrl || activeProgramDef.voteUrl) && (
-                  <div className="flex items-center gap-1.5">
-                    {activeProgramDef.forumUrl && (
+              {activeProgramDef && activeProgramDef.proposals.length > 0 && (
+                <div className="flex items-center gap-1.5">
+                  {activeProgramDef.proposals.map((proposal, i) => (
+                    <Fragment key={proposal.id}>
+                      {i > 0 && <BulletDivider />}
                       <DefaultLink
                         size="sm"
                         openInNewTab
-                        href={activeProgramDef.forumUrl}
+                        href={proposal.forumUrl}
                       >
-                        PROPOSAL
+                        {proposal.id}
                       </DefaultLink>
-                    )}
-                    {activeProgramDef.forumUrl && activeProgramDef.voteUrl && (
-                      <BulletDivider />
-                    )}
-                    {activeProgramDef.voteUrl && (
-                      <DefaultLink
-                        size="sm"
-                        openInNewTab
-                        href={activeProgramDef.voteUrl}
-                      >
-                        VOTE
-                      </DefaultLink>
-                    )}
-                  </div>
-                )}
+                    </Fragment>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

@@ -19,14 +19,30 @@ export type YearData = {
   Q4: QuarterReport;
 };
 
-// --- External providers.json schema (spp-accountability repo) ---
+// --- External JSON schema (spp-accountability repo) ---
+
+export type ProgramProposal = {
+  id: string;
+  title: string;
+  type: "social" | "executable";
+  description?: string;
+  date: string;
+  forumUrl: string;
+  snapshotUrl?: string;
+  tallyUrl?: string;
+  docsUrl?: string;
+};
 
 export type ProgramConfig = {
+  name: string;
   year1Quarters: string[];
   year2Quarters?: string[];
-  forumUrl?: string;
-  voteUrl?: string;
+  budget: number;
+  startDate: string;
+  proposals: ProgramProposal[];
 };
+
+export type ProgramsConfig = Record<string, ProgramConfig>;
 
 export type ProviderProgramEntry = {
   proposalUrl?: string;
@@ -43,7 +59,6 @@ export type ProviderEntry = {
 };
 
 export type ProvidersConfig = {
-  programs: Record<string, ProgramConfig>;
   providers: ProviderEntry[];
 };
 
@@ -52,10 +67,10 @@ export type ProvidersConfig = {
 export type ParsedQuarter = { year: number; quarter: QuarterKey };
 
 export type ProgramDefinition = {
+  name: string;
   year1Quarters: ParsedQuarter[];
   year2Quarters: ParsedQuarter[];
-  forumUrl?: string;
-  voteUrl?: string;
+  proposals: ProgramProposal[];
 };
 
 export type ServiceProvider = {

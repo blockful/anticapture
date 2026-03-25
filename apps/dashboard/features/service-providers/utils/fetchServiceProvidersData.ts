@@ -6,6 +6,7 @@ import type {
   ParsedQuarter,
   ProgramConfig,
   ProgramDefinition,
+  ProgramsConfig,
   ProvidersConfig,
   QuarterKey,
   QuarterReport,
@@ -32,8 +33,8 @@ function parseQuarterString(str: string): ParsedQuarter | null {
 
 export function parseProgramConfig(config: ProgramConfig): ProgramDefinition {
   return {
-    forumUrl: config.forumUrl,
-    voteUrl: config.voteUrl,
+    name: config.name,
+    proposals: config.proposals,
     year1Quarters: config.year1Quarters
       .map(parseQuarterString)
       .filter((q): q is ParsedQuarter => q !== null),
@@ -69,11 +70,11 @@ function buildQuarterReport(
   return { status: computeQuarterStatus(year, quarter, now) };
 }
 
-async function fetchProvidersConfig(): Promise<ProvidersConfig | null> {
+async function fetchJson<T>(path: string): Promise<T | null> {
   try {
-    const response = await fetch(`${GITHUB_RAW_BASE}/providers.json`);
+    const response = await fetch(`${GITHUB_RAW_BASE}/${path}`);
     if (!response.ok) return null;
-    return (await response.json()) as ProvidersConfig;
+    return (await response.json()) as T;
   } catch {
     return null;
   }
@@ -109,16 +110,18 @@ async function fetchAvatarUrls(): Promise<Record<string, string>> {
 
 export const fetchServiceProvidersData =
   async (): Promise<ServiceProvidersResult | null> => {
-    const [config, avatarUrls] = await Promise.all([
-      fetchProvidersConfig(),
+    const [config, programsConfig, avatarUrls] = await Promise.all([
+      fetchJson<ProvidersConfig>("providers.json"),
+      fetchJson<ProgramsConfig>("programs.json"),
       fetchAvatarUrls(),
     ]);
 
-    if (!config) return null;
+    if (!config || !programsConfig) return null;
 
     const programs: Record<string, ProgramDefinition> = {};
-    for (const [key, programConfig] of Object.entries(config.programs)) {
-      programs[key] = parseProgramConfig(programConfig);
+    for (const [key, programConfig] of Object.entries(programsConfig)) {
+      if (key === "$schema") continue;
+      programs[key] = parseProgramConfig(programConfig as ProgramConfig);
     }
 
     const years = collectYears(programs);
