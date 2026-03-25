@@ -29,6 +29,17 @@ const MAX_TITLE_LENGTH = 200;
  *    (H2+), truncated to MAX_TITLE_LENGTH characters.
  */
 function parseProposalTitle(description: string): string {
+  // Try JSON first — some Tornado proposals use {"title":"...","description":"..."}
+  try {
+    const parsed = JSON.parse(description) as {
+      title?: string;
+      description?: string;
+    };
+    if (parsed.title) return parsed.title;
+  } catch {
+    // Not JSON, continue with markdown parsing
+  }
+
   // Normalize literal "\n" (two chars) into real newlines
   const normalized = description.replace(/\\n/g, "\n");
   const lines = normalized.split("\n");
