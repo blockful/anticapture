@@ -13,6 +13,7 @@ export enum DaoIdEnum {
   OBOL = "OBOL",
   ZK = "ZK",
   FLUID = "FLUID",
+  TORN = "TORN",
 }
 
 export const SECONDS_IN_DAY = 24 * 60 * 60;
