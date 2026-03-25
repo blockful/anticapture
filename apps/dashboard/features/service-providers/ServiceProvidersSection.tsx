@@ -74,7 +74,7 @@ export const ServiceProvidersSection = () => {
                     openInNewTab
                     href={activeProgramDef.budgetProposal.forumUrl}
                   >
-                    {activeProgramDef.budgetProposal.id}
+                    {activeProgramDef.budgetProposal.title.toUpperCase()}
                   </DefaultLink>
                   <BulletDivider />
                   <DefaultLink
@@ -82,7 +82,7 @@ export const ServiceProvidersSection = () => {
                     openInNewTab
                     href={activeProgramDef.selectionProposal.forumUrl}
                   >
-                    {activeProgramDef.selectionProposal.id}
+                    {activeProgramDef.selectionProposal.title.toUpperCase()}
                   </DefaultLink>
                 </div>
               )}
