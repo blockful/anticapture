@@ -8,7 +8,7 @@ import {
   delegatedVotesChanged,
   tokenTransfer,
 } from "@/eventHandlers";
-import { handleTransaction } from "@/eventHandlers/shared";
+import { createAddressSet, handleTransaction } from "@/eventHandlers/shared";
 import {
   BurningAddresses,
   MetricTypesEnum,
@@ -24,6 +24,18 @@ import {
 export function LilNounsTokenIndexer(address: Address, decimals: number) {
   const daoId = DaoIdEnum.LIL_NOUNS;
   const timelock = TreasuryAddresses[daoId].timelock!;
+  const burningAddressSet = createAddressSet(
+    Object.values(BurningAddresses[daoId]),
+  );
+  const treasuryAddressSet = createAddressSet(
+    Object.values(TreasuryAddresses[daoId]),
+  );
+  const delegationAddressSets = {
+    cex: createAddressSet([]),
+    dex: createAddressSet([]),
+    lending: createAddressSet([]),
+    burning: burningAddressSet,
+  };
 
   ponder.on("LilNounsToken:setup", async ({ context }) => {
     await context.db.insert(token).values({
@@ -51,15 +63,20 @@ export function LilNounsTokenIndexer(address: Address, decimals: number) {
       });
 
       if (toBal?.delegate === zeroAddress) {
-        await delegateChanged(context, daoId, {
-          delegator: event.args.to,
-          delegate: event.args.to,
-          tokenId: event.log.address,
-          previousDelegate: zeroAddress,
-          txHash: event.transaction.hash,
-          timestamp: event.block.timestamp,
-          logIndex: event.log.logIndex,
-        });
+        await delegateChanged(
+          context,
+          daoId,
+          {
+            delegator: event.args.to,
+            delegate: event.args.to,
+            tokenId: event.log.address,
+            previousDelegate: zeroAddress,
+            txHash: event.transaction.hash,
+            timestamp: event.block.timestamp,
+            logIndex: event.log.logIndex,
+          },
+          delegationAddressSets,
+        );
       }
 
       await tokenTransfer(
@@ -75,7 +92,7 @@ export function LilNounsTokenIndexer(address: Address, decimals: number) {
           logIndex: event.log.logIndex,
         },
         {
-          burning: Object.values(BurningAddresses[daoId]),
+          burning: burningAddressSet,
         },
       );
 
@@ -83,10 +100,10 @@ export function LilNounsTokenIndexer(address: Address, decimals: number) {
       const isToTimelock = isAddressEqual(event.args.to, timelock);
 
       if (isFromTimelock || isToTimelock) {
-        await updateSupplyMetric(
+        const treasuryChanged = await updateSupplyMetric(
           context,
           "treasury",
-          Object.values(TreasuryAddresses[daoId]),
+          treasuryAddressSet,
           MetricTypesEnum.TREASURY,
           zeroAddress,
           timelock,
@@ -96,12 +113,14 @@ export function LilNounsTokenIndexer(address: Address, decimals: number) {
           event.block.timestamp,
         );
 
-        await updateCirculatingSupply(
-          context,
-          daoId,
-          address,
-          event.block.timestamp,
-        );
+        if (treasuryChanged) {
+          await updateCirculatingSupply(
+            context,
+            daoId,
+            address,
+            event.block.timestamp,
+          );
+        }
       }
 
       if (!event.transaction.to) return;
@@ -120,7 +139,7 @@ export function LilNounsTokenIndexer(address: Address, decimals: number) {
   ponder.on(`LilNounsToken:NounCreated`, async ({ event, context }) => {
     await updateTotalSupply(
       context,
-      Object.values(BurningAddresses[daoId]),
+      burningAddressSet,
       MetricTypesEnum.TOTAL_SUPPLY,
       zeroAddress,
       timelock,
@@ -140,15 +159,20 @@ export function LilNounsTokenIndexer(address: Address, decimals: number) {
   });
 
   ponder.on(`LilNounsToken:DelegateChanged`, async ({ event, context }) => {
-    await delegateChanged(context, daoId, {
-      delegator: event.args.delegator,
-      delegate: event.args.toDelegate,
-      tokenId: event.log.address,
-      previousDelegate: event.args.fromDelegate,
-      txHash: event.transaction.hash,
-      timestamp: event.block.timestamp,
-      logIndex: event.log.logIndex,
-    });
+    await delegateChanged(
+      context,
+      daoId,
+      {
+        delegator: event.args.delegator,
+        delegate: event.args.toDelegate,
+        tokenId: event.log.address,
+        previousDelegate: event.args.fromDelegate,
+        txHash: event.transaction.hash,
+        timestamp: event.block.timestamp,
+        logIndex: event.log.logIndex,
+      },
+      delegationAddressSets,
+    );
 
     if (!event.transaction.to) return;
 

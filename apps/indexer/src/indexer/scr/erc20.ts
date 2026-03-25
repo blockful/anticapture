@@ -4,7 +4,11 @@ import { Address, getAddress, zeroAddress } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
 import { delegatedVotesChanged, tokenTransfer } from "@/eventHandlers";
-import { ensureAccountsExist, handleTransaction } from "@/eventHandlers/shared";
+import {
+  createAddressSet,
+  ensureAccountsExist,
+  handleTransaction,
+} from "@/eventHandlers/shared";
 import {
   BurningAddresses,
   CEXAddresses,
@@ -23,6 +27,20 @@ import {
 
 export function SCRTokenIndexer(address: Address, decimals: number) {
   const daoId = DaoIdEnum.SCR;
+  const cexAddressSet = createAddressSet(Object.values(CEXAddresses[daoId]));
+  const dexAddressSet = createAddressSet(Object.values(DEXAddresses[daoId]));
+  const lendingAddressSet = createAddressSet(
+    Object.values(LendingAddresses[daoId]),
+  );
+  const burningAddressSet = createAddressSet(
+    Object.values(BurningAddresses[daoId]),
+  );
+  const treasuryAddressSet = createAddressSet(
+    Object.values(TreasuryAddresses[daoId]),
+  );
+  const nonCirculatingAddressSet = createAddressSet(
+    Object.values(NonCirculatingAddresses[daoId]),
+  );
 
   ponder.on(`SCRToken:setup`, async ({ context }) => {
     await context.db.insert(token).values({
@@ -35,15 +53,6 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
   ponder.on(`SCRToken:Transfer`, async ({ event, context }) => {
     const { from, to, value } = event.args;
     const { timestamp } = event.block;
-
-    const cexAddressList = Object.values(CEXAddresses[daoId]);
-    const dexAddressList = Object.values(DEXAddresses[daoId]);
-    const lendingAddressList = Object.values(LendingAddresses[daoId]);
-    const burningAddressList = Object.values(BurningAddresses[daoId]);
-    const treasuryAddressList = Object.values(TreasuryAddresses[daoId]);
-    const nonCirculatingAddressList = Object.values(
-      NonCirculatingAddresses[daoId],
-    );
 
     await tokenTransfer(
       context,
@@ -58,17 +67,17 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
         logIndex: event.log.logIndex,
       },
       {
-        cex: cexAddressList,
-        dex: dexAddressList,
-        lending: lendingAddressList,
-        burning: burningAddressList,
+        cex: cexAddressSet,
+        dex: dexAddressSet,
+        lending: lendingAddressSet,
+        burning: burningAddressSet,
       },
     );
 
-    await updateSupplyMetric(
+    const lendingChanged = await updateSupplyMetric(
       context,
       "lendingSupply",
-      lendingAddressList,
+      lendingAddressSet,
       MetricTypesEnum.LENDING_SUPPLY,
       from,
       to,
@@ -78,10 +87,10 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
       timestamp,
     );
 
-    await updateSupplyMetric(
+    const cexChanged = await updateSupplyMetric(
       context,
       "cexSupply",
-      cexAddressList,
+      cexAddressSet,
       MetricTypesEnum.CEX_SUPPLY,
       from,
       to,
@@ -91,10 +100,10 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
       timestamp,
     );
 
-    await updateSupplyMetric(
+    const dexChanged = await updateSupplyMetric(
       context,
       "dexSupply",
-      dexAddressList,
+      dexAddressSet,
       MetricTypesEnum.DEX_SUPPLY,
       from,
       to,
@@ -104,10 +113,10 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
       timestamp,
     );
 
-    await updateSupplyMetric(
+    const treasuryChanged = await updateSupplyMetric(
       context,
       "treasury",
-      treasuryAddressList,
+      treasuryAddressSet,
       MetricTypesEnum.TREASURY,
       from,
       to,
@@ -117,10 +126,10 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
       timestamp,
     );
 
-    await updateSupplyMetric(
+    const nonCirculatingChanged = await updateSupplyMetric(
       context,
       "nonCirculatingSupply",
-      nonCirculatingAddressList,
+      nonCirculatingAddressSet,
       MetricTypesEnum.NON_CIRCULATING_SUPPLY,
       from,
       to,
@@ -130,9 +139,9 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
       timestamp,
     );
 
-    await updateTotalSupply(
+    const totalSupplyChanged = await updateTotalSupply(
       context,
-      burningAddressList,
+      burningAddressSet,
       MetricTypesEnum.TOTAL_SUPPLY,
       from,
       to,
@@ -142,7 +151,16 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
       timestamp,
     );
 
-    await updateCirculatingSupply(context, daoId, address, timestamp);
+    if (
+      lendingChanged ||
+      cexChanged ||
+      dexChanged ||
+      treasuryChanged ||
+      nonCirculatingChanged ||
+      totalSupplyChanged
+    ) {
+      await updateCirculatingSupply(context, daoId, address, timestamp);
+    }
 
     if (!event.transaction.to) return;
 
@@ -168,20 +186,6 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
     const normalizedDelegator = getAddress(delegator);
     const normalizedTokenId = getAddress(tokenId);
 
-    // Pre-compute address lists for flag determination
-    const lendingAddressList = Object.values(LendingAddresses[daoId] || {}).map(
-      getAddress,
-    );
-    const cexAddressList = Object.values(CEXAddresses[daoId] || {}).map(
-      getAddress,
-    );
-    const dexAddressList = Object.values(DEXAddresses[daoId] || {}).map(
-      getAddress,
-    );
-    const burningAddressList = Object.values(BurningAddresses[daoId] || {}).map(
-      getAddress,
-    );
-
     for (const { _delegatee: delegate, _numerator: percentage } of event.args
       .newDelegatees) {
       const normalizedDelegate = getAddress(delegate);
@@ -205,17 +209,17 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
 
       // Determine flags for the delegation
       const isCex =
-        cexAddressList.includes(normalizedDelegator) ||
-        cexAddressList.includes(normalizedDelegate);
+        cexAddressSet.has(normalizedDelegator) ||
+        cexAddressSet.has(normalizedDelegate);
       const isDex =
-        dexAddressList.includes(normalizedDelegator) ||
-        dexAddressList.includes(normalizedDelegate);
+        dexAddressSet.has(normalizedDelegator) ||
+        dexAddressSet.has(normalizedDelegate);
       const isLending =
-        lendingAddressList.includes(normalizedDelegator) ||
-        lendingAddressList.includes(normalizedDelegate);
+        lendingAddressSet.has(normalizedDelegator) ||
+        lendingAddressSet.has(normalizedDelegate);
       const isBurning =
-        burningAddressList.includes(normalizedDelegator) ||
-        burningAddressList.includes(normalizedDelegate);
+        burningAddressSet.has(normalizedDelegator) ||
+        burningAddressSet.has(normalizedDelegate);
       const isTotal = isBurning;
 
       await context.db
