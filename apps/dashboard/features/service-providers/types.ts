@@ -25,6 +25,8 @@ export type ProgramConfig = {
   quarters?: string[];
   year1Quarters?: string[];
   year2Quarters?: string[];
+  forumUrl?: string;
+  voteUrl?: string;
 };
 
 export type ProviderProgramEntry = {
@@ -52,6 +54,8 @@ export type ParsedQuarter = { year: number; quarter: QuarterKey };
 export type ProgramDefinition = {
   year1Quarters: ParsedQuarter[];
   year2Quarters: ParsedQuarter[];
+  forumUrl?: string;
+  voteUrl?: string;
 };
 
 export type ServiceProvider = {

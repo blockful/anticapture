@@ -9,7 +9,11 @@ import { useServiceProvidersData } from "@/features/service-providers/hooks/useS
 import { TheSectionLayout } from "@/shared/components/containers/TheSectionLayout";
 import { InlineAlert } from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
-import { SubSectionsContainer } from "@/shared/components/design-system/section";
+import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import {
+  BulletDivider,
+  SubSectionsContainer,
+} from "@/shared/components/design-system/section";
 import { PillTabGroup } from "@/shared/components/design-system/tabs/pill-tab-group/PillTabGroup";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 
@@ -22,6 +26,8 @@ export const ServiceProvidersSection = () => {
     selectedProgram && programKeys.includes(selectedProgram)
       ? selectedProgram
       : (programKeys[programKeys.length - 1] ?? null);
+
+  const activeProgramDef = activeProgram ? programs[activeProgram] : null;
 
   return (
     <TheSectionLayout
@@ -44,14 +50,42 @@ export const ServiceProvidersSection = () => {
       <SubSectionsContainer>
         <div className="flex flex-col gap-4">
           {programKeys.length > 1 && (
-            <PillTabGroup
-              tabs={programKeys.map((key) => ({
-                label: key,
-                value: key,
-              }))}
-              activeTab={activeProgram ?? ""}
-              onTabChange={(value) => setSelectedProgram(value)}
-            />
+            <div className="flex items-center gap-3">
+              <PillTabGroup
+                tabs={programKeys.map((key) => ({
+                  label: key,
+                  value: key,
+                }))}
+                activeTab={activeProgram ?? ""}
+                onTabChange={(value) => setSelectedProgram(value)}
+              />
+              {activeProgramDef &&
+                (activeProgramDef.forumUrl || activeProgramDef.voteUrl) && (
+                  <div className="flex items-center gap-1.5">
+                    {activeProgramDef.forumUrl && (
+                      <DefaultLink
+                        size="sm"
+                        openInNewTab
+                        href={activeProgramDef.forumUrl}
+                      >
+                        PROPOSAL
+                      </DefaultLink>
+                    )}
+                    {activeProgramDef.forumUrl && activeProgramDef.voteUrl && (
+                      <BulletDivider />
+                    )}
+                    {activeProgramDef.voteUrl && (
+                      <DefaultLink
+                        size="sm"
+                        openInNewTab
+                        href={activeProgramDef.voteUrl}
+                      >
+                        VOTE
+                      </DefaultLink>
+                    )}
+                  </div>
+                )}
+            </div>
           )}
 
           {activeProgram && (

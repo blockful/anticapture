@@ -32,8 +32,14 @@ function parseQuarterString(str: string): ParsedQuarter | null {
 }
 
 export function parseProgramConfig(config: ProgramConfig): ProgramDefinition {
+  const base = {
+    forumUrl: config.forumUrl,
+    voteUrl: config.voteUrl,
+  };
+
   if (config.year1Quarters || config.year2Quarters) {
     return {
+      ...base,
       year1Quarters: (config.year1Quarters ?? [])
         .map(parseQuarterString)
         .filter((q): q is ParsedQuarter => q !== null),
@@ -44,6 +50,7 @@ export function parseProgramConfig(config: ProgramConfig): ProgramDefinition {
   }
 
   return {
+    ...base,
     year1Quarters: (config.quarters ?? [])
       .map(parseQuarterString)
       .filter((q): q is ParsedQuarter => q !== null),
