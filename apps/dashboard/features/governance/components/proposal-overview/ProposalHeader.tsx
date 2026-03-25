@@ -12,6 +12,8 @@ import type { DaoIdEnum } from "@/shared/types/daos";
 interface ProposalHeaderProps {
   daoId: string;
   setIsVotingModalOpen: (isOpen: boolean) => void;
+  setIsQueueModalOpen: (isOpen: boolean) => void;
+  setIsExecuteModalOpen: (isOpen: boolean) => void;
   votingPower: string;
   votes: GetAccountPowerQuery["votesByProposalId"] | null;
   address: string | undefined;
@@ -23,10 +25,15 @@ export const ProposalHeader = ({
   votingPower,
   votes,
   setIsVotingModalOpen,
+  setIsQueueModalOpen,
+  setIsExecuteModalOpen,
   address,
   proposalStatus,
 }: ProposalHeaderProps) => {
   const supportValue = votes?.items[0]?.support;
+  const lowerStatus = proposalStatus.toLowerCase();
+
+  console.log({ proposalStatus, lowerStatus, supportValue });
 
   return (
     <div className="text-primary bg-surface-background border-border-default sticky -top-[57px] z-20 flex h-[65px] w-full shrink-0 items-center justify-between gap-6 border-b py-2 lg:top-0">
@@ -70,31 +77,44 @@ export const ProposalHeader = ({
             </div>
           )}
 
-          {/* If already voted: show voted badge */}
+          {/* Action buttons */}
           {address ? (
-            supportValue === undefined ? (
-              proposalStatus.toLowerCase() === "ongoing" && (
+            <>
+              {lowerStatus === "ongoing" &&
+                (supportValue === undefined ? (
+                  <Button
+                    className="hidden lg:flex"
+                    onClick={() => setIsVotingModalOpen(true)}
+                  >
+                    Cast your vote
+                    <ArrowRight className="size-[14px]" />
+                  </Button>
+                ) : (
+                  <div className="hidden items-center gap-4 lg:flex">
+                    <div className="bg-secondary ml-4 h-[28px] w-px shrink-0" />
+                    <VotedBadge vote={Number(supportValue)} />
+                  </div>
+                ))}
+              {lowerStatus === "succeeded" && (
                 <Button
                   className="hidden lg:flex"
-                  onClick={() => setIsVotingModalOpen(true)}
+                  onClick={() => setIsQueueModalOpen(true)}
                 >
-                  Cast your vote
-                  <ArrowRight className="size-[14px]" />
+                  Queue Proposal
                 </Button>
-              )
-            ) : (
-              <div className="hidden items-center gap-4 lg:flex">
-                <div className="bg-secondary ml-4 h-[28px] w-px shrink-0" />
-                <VotedBadge vote={Number(supportValue)} />
-              </div>
-            )
-          ) : proposalStatus.toLowerCase() === "ongoing" ? (
-            <div className="hidden lg:flex">
-              <ConnectWalletCustom />
-            </div>
+              )}
+              {lowerStatus === "pending_execution" && (
+                <Button
+                  className="hidden lg:flex"
+                  onClick={() => setIsExecuteModalOpen(true)}
+                >
+                  Execute Proposal
+                </Button>
+              )}
+            </>
           ) : (
             <div className="hidden lg:flex">
-              <ConnectWalletCustom label="Connect wallet" />
+              <ConnectWalletCustom />
             </div>
           )}
         </div>

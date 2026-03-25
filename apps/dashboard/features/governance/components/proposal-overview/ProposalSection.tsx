@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { useState, useCallback } from "react";
 import { useAccount } from "wagmi";
 
+import { GovernanceActionModal } from "@/features/governance/components/modals/GovernanceActionModal";
 import { VotingModal } from "@/features/governance/components/modals/VotingModal";
 import {
   getVoteText,
@@ -31,6 +32,8 @@ export const ProposalSection = () => {
   }>();
   const { address } = useAccount();
   const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
+  const [isQueueModalOpen, setIsQueueModalOpen] = useState(false);
+  const [isExecuteModalOpen, setIsExecuteModalOpen] = useState(false);
   const [drawerAddress, setDrawerAddress] = useState<string | null>(null);
   const daoEnum = daoId.toUpperCase() as DaoIdEnum;
   const { decimals } = daoConfig[daoEnum];
@@ -76,6 +79,8 @@ export const ProposalSection = () => {
       <ProposalHeader
         daoId={daoId as string}
         setIsVotingModalOpen={setIsVotingModalOpen}
+        setIsQueueModalOpen={setIsQueueModalOpen}
+        setIsExecuteModalOpen={setIsExecuteModalOpen}
         votingPower={votingPower}
         votes={votes}
         address={address}
@@ -110,6 +115,22 @@ export const ProposalSection = () => {
           daoId={daoEnum}
         />
 
+        <GovernanceActionModal
+          isOpen={isQueueModalOpen}
+          onClose={() => setIsQueueModalOpen(false)}
+          action="queue"
+          proposal={proposal}
+          daoId={daoEnum}
+        />
+
+        <GovernanceActionModal
+          isOpen={isExecuteModalOpen}
+          onClose={() => setIsExecuteModalOpen(false)}
+          action="execute"
+          proposal={proposal}
+          daoId={daoEnum}
+        />
+
         <HoldersAndDelegatesDrawer
           isOpen={!!drawerAddress}
           onClose={handleCloseDrawer}
@@ -122,17 +143,36 @@ export const ProposalSection = () => {
       {/* Fixed bottom bar for mobile voting */}
       <div className="bg-surface-background fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 p-4 lg:hidden dark:border-gray-800">
         {address ? (
-          supportValue === undefined ? (
-            <Button
-              className="flex w-full"
-              onClick={() => setIsVotingModalOpen(true)}
-            >
-              Cast your vote
-              <ArrowRight className="size-3.5" />
-            </Button>
-          ) : (
-            <VotedBadge vote={Number(supportValue)} />
-          )
+          <>
+            {proposal.status.toLowerCase() === "ongoing" &&
+              (supportValue === undefined ? (
+                <Button
+                  className="flex w-full"
+                  onClick={() => setIsVotingModalOpen(true)}
+                >
+                  Cast your vote
+                  <ArrowRight className="size-3.5" />
+                </Button>
+              ) : (
+                <VotedBadge vote={Number(supportValue)} />
+              ))}
+            {proposal.status.toLowerCase() === "succeeded" && (
+              <Button
+                className="flex w-full"
+                onClick={() => setIsQueueModalOpen(true)}
+              >
+                Queue Proposal
+              </Button>
+            )}
+            {proposal.status.toLowerCase() === "pending_execution" && (
+              <Button
+                className="flex w-full"
+                onClick={() => setIsExecuteModalOpen(true)}
+              >
+                Execute Proposal
+              </Button>
+            )}
+          </>
         ) : (
           <ConnectWalletCustom className="w-full" />
         )}

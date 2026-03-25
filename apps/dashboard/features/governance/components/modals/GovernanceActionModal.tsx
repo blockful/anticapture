@@ -1,0 +1,200 @@
+"use client";
+
+import type { GetProposalQuery } from "@anticapture/graphql-client/hooks";
+import { Check, Hourglass, PenLine } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { useAccount, useWalletClient } from "wagmi";
+
+import { showCustomToast } from "@/features/governance/utils/showCustomToast";
+import {
+  executeProposal,
+  queueProposal,
+  type GovernanceAction,
+} from "@/features/governance/utils/submitGovernanceAction";
+import { Modal } from "@/shared/components/design-system/modal/Modal";
+import { SpinIcon } from "@/shared/components/icons/SpinIcon";
+import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
+import { cn } from "@/shared/utils/cn";
+import daoConfigByDaoId from "@/shared/dao-config";
+import type { DaoIdEnum } from "@/shared/types/daos";
+
+type Proposal = NonNullable<GetProposalQuery["proposal"]>;
+
+type ActionStep = "waiting-signature" | "pending-tx" | "success" | "error";
+
+interface GovernanceActionModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  action: GovernanceAction;
+  proposal: Proposal;
+  daoId: DaoIdEnum;
+}
+
+export const GovernanceActionModal = ({
+  isOpen,
+  onClose,
+  action,
+  proposal,
+  daoId,
+}: GovernanceActionModalProps) => {
+  const [step, setStep] = useState<ActionStep>("waiting-signature");
+  const [error, setError] = useState<string | null>(null);
+
+  const { address } = useAccount();
+  const chain = daoConfigByDaoId[daoId].daoOverview.chain;
+  const { data: walletClient } = useWalletClient({ chainId: chain.id });
+
+  const title = action === "queue" ? "Confirm Queue" : "Confirm Execution";
+  const confirmLabel =
+    action === "queue"
+      ? "Confirm queuing in your wallet"
+      : "Confirm execution in your wallet";
+
+  const handleAction = useCallback(async () => {
+    if (!address || !walletClient) return;
+    if (step === "pending-tx" || step === "success") return;
+
+    setError(null);
+    setStep("waiting-signature");
+
+    try {
+      const handler = action === "queue" ? queueProposal : executeProposal;
+      await handler(
+        proposal.targets,
+        proposal.values,
+        proposal.calldatas,
+        proposal.description,
+        address,
+        daoId,
+        walletClient,
+        () => setStep("pending-tx"),
+      );
+      setStep("success");
+      showCustomToast(
+        action === "queue"
+          ? "Proposal queued successfully!"
+          : "Proposal executed successfully!",
+        "success",
+      );
+      onClose();
+      setTimeout(() => window.location.reload(), 2000);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Action failed.";
+      console.error("[GovernanceActionModal]", err);
+      let shortMessage: string;
+      if (message.includes("rejected") || message.includes("denied")) {
+        shortMessage = "Transaction rejected by user.";
+      } else if (message.includes("reverted")) {
+        shortMessage =
+          "Contract call reverted. The proposal may not be in the correct state.";
+      } else {
+        shortMessage =
+          message.split("\n")[0]?.slice(0, 100) ?? "Action failed.";
+      }
+      setError(shortMessage);
+      setStep("error");
+    }
+  }, [address, walletClient, step, action, proposal, daoId, onClose, chain]);
+
+  useEffect(() => {
+    if (!isOpen || !walletClient || step !== "waiting-signature") return;
+    handleAction();
+  }, [isOpen, walletClient, handleAction, step]);
+
+  const handleClose = () => {
+    setStep("waiting-signature");
+    setError(null);
+    onClose();
+  };
+
+  return (
+    <Modal
+      open={isOpen}
+      onOpenChange={(open) => !open && handleClose()}
+      title={title}
+    >
+      {/* Proposal info */}
+      <div className="flex flex-col gap-2 pb-4">
+        <div className="flex items-start gap-2">
+          <span className="text-secondary w-32 shrink-0 text-xs font-medium leading-5">
+            Proposal ID
+          </span>
+          <span className="text-primary text-sm leading-5">{proposal.id}</span>
+        </div>
+        <div className="flex items-start gap-2">
+          <span className="text-secondary w-32 shrink-0 text-xs font-medium leading-5">
+            Proposal name
+          </span>
+          <span className="text-primary text-sm leading-5">
+            {proposal.title}
+          </span>
+        </div>
+      </div>
+
+      {/* Stepper */}
+      <div className="border-border-default flex flex-col gap-1.5 border p-3">
+        <StepRow
+          done={step === "success" || step === "pending-tx"}
+          active={step === "waiting-signature"}
+          icon={<PenLine className="size-3.5 text-black" />}
+          label={confirmLabel}
+          error={step === "error" ? error : undefined}
+        />
+
+        <DividerDefault isVertical className="ml-3.5 h-6 w-0.5" />
+
+        <StepRow
+          done={step === "success"}
+          active={step === "pending-tx"}
+          icon={<Hourglass className="size-3.5 text-black" />}
+          label="Wait for transaction to complete"
+        />
+      </div>
+    </Modal>
+  );
+};
+
+interface StepRowProps {
+  done: boolean;
+  active: boolean;
+  icon: React.ReactNode;
+  label: string;
+  error?: string | null;
+}
+
+const StepRow = ({ done, active, icon, label, error }: StepRowProps) => {
+  const getBackgroundColor = () => {
+    if (done) return "bg-surface-opacity-success";
+    if (active) return "bg-primary";
+    return "bg-border-default";
+  };
+
+  return (
+    <div className="flex w-full flex-col gap-1">
+      <div className="flex w-full items-center gap-2">
+        <div className="relative flex size-8 shrink-0 items-center justify-center">
+          {active && (
+            <SpinIcon className="absolute inset-0 size-8 animate-spin text-orange-500" />
+          )}
+          <div
+            className={cn(
+              "flex size-6 shrink-0 items-center justify-center rounded-full",
+              getBackgroundColor(),
+            )}
+          >
+            <div className="border-border-default flex items-center justify-center rounded-full border p-2">
+              {done ? <Check className="text-success size-3.5" /> : icon}
+            </div>
+          </div>
+        </div>
+        <p className="text-primary text-sm leading-5">{label}</p>
+      </div>
+
+      {error && (
+        <p className="text-error ml-11 break-words text-xs leading-4">
+          {error}
+        </p>
+      )}
+    </div>
+  );
+};
