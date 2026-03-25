@@ -8,6 +8,7 @@ import { OBOL } from "@/shared/dao-config/obol";
 import { OP } from "@/shared/dao-config/op";
 import { SCR } from "@/shared/dao-config/scr";
 import { SHU } from "@/shared/dao-config/shu";
+import { TORN } from "@/shared/dao-config/torn";
 import { UNI } from "@/shared/dao-config/uni";
 import { AAVE } from "@/shared/dao-config/aave";
 
@@ -24,4 +25,5 @@ export default {
   COMP,
   OBOL,
   SHU,
+  TORN,
 } as const;
