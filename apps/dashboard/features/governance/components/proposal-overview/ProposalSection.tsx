@@ -84,7 +84,7 @@ export const ProposalSection = () => {
         votingPower={votingPower}
         votes={votes}
         address={address}
-        proposalStatus={proposal.status}
+        proposalStatus={proposal.status.toLowerCase()}
       />
       <div className="mx-auto w-full">
         <div className="bg-surface-background sticky top-[65px] z-10 hidden h-5 w-full lg:block" />

@@ -31,9 +31,6 @@ export const ProposalHeader = ({
   proposalStatus,
 }: ProposalHeaderProps) => {
   const supportValue = votes?.items[0]?.support;
-  const lowerStatus = proposalStatus.toLowerCase();
-
-  console.log({ proposalStatus, lowerStatus, supportValue });
 
   return (
     <div className="text-primary bg-surface-background border-border-default sticky -top-[57px] z-20 flex h-[65px] w-full shrink-0 items-center justify-between gap-6 border-b py-2 lg:top-0">
@@ -80,7 +77,7 @@ export const ProposalHeader = ({
           {/* Action buttons */}
           {address ? (
             <>
-              {lowerStatus === "ongoing" &&
+              {proposalStatus === "ongoing" &&
                 (supportValue === undefined ? (
                   <Button
                     className="hidden lg:flex"
@@ -95,7 +92,7 @@ export const ProposalHeader = ({
                     <VotedBadge vote={Number(supportValue)} />
                   </div>
                 ))}
-              {lowerStatus === "succeeded" && (
+              {proposalStatus === "succeeded" && (
                 <Button
                   className="hidden lg:flex"
                   onClick={() => setIsQueueModalOpen(true)}
@@ -103,7 +100,7 @@ export const ProposalHeader = ({
                   Queue Proposal
                 </Button>
               )}
-              {lowerStatus === "pending_execution" && (
+              {proposalStatus === "pending_execution" && (
                 <Button
                   className="hidden lg:flex"
                   onClick={() => setIsExecuteModalOpen(true)}
