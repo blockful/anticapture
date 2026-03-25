@@ -4,14 +4,11 @@ import {
   accountPower,
   feedEvent,
   proposalsOnchain,
+  votesOnchain,
 } from "ponder:schema";
 import { getAddress } from "viem";
 
-import {
-  delegateChanged,
-  updateProposalStatus,
-  voteCast,
-} from "@/eventHandlers";
+import { delegateChanged, updateProposalStatus } from "@/eventHandlers";
 import { ensureAccountExists } from "@/eventHandlers/shared";
 import { CONTRACT_ADDRESSES, ProposalStatus } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
@@ -143,18 +140,77 @@ export function TORNGovernorIndexer(blockTime: number) {
     });
   });
 
+  /**
+   * Voted — custom handler instead of shared voteCast() to handle potential
+   * duplicate vote events gracefully with onConflictDoUpdate.
+   *
+   * bool support mapped: true→1 (for), false→0 (against). No reason field.
+   */
   ponder.on("TORNGovernor:Voted", async ({ event, context }) => {
     const { proposalId, voter, support, votes } = event.args;
+    const proposalIdStr = proposalId.toString();
+    const supportNum = support ? 1 : 0;
 
-    await voteCast(context, daoId, {
-      proposalId: proposalId.toString(),
-      voter,
-      reason: "",
-      support: support ? 1 : 0,
-      timestamp: event.block.timestamp,
+    await ensureAccountExists(context, voter);
+
+    await context.db
+      .insert(accountPower)
+      .values({
+        accountId: getAddress(voter),
+        daoId,
+        votesCount: 1,
+        lastVoteTimestamp: event.block.timestamp,
+      })
+      .onConflictDoUpdate((current) => ({
+        votesCount: current.votesCount + 1,
+        lastVoteTimestamp: event.block.timestamp,
+      }));
+
+    // Use onConflictDoUpdate to handle potential duplicate vote events
+    await context.db
+      .insert(votesOnchain)
+      .values({
+        txHash: event.transaction.hash,
+        daoId,
+        proposalId: proposalIdStr,
+        voterAccountId: getAddress(voter),
+        support: supportNum.toString(),
+        votingPower: votes,
+        reason: "",
+        timestamp: event.block.timestamp,
+      })
+      .onConflictDoUpdate({
+        support: supportNum.toString(),
+        votingPower: votes,
+        txHash: event.transaction.hash,
+        timestamp: event.block.timestamp,
+      });
+
+    await context.db
+      .update(proposalsOnchain, { id: proposalIdStr })
+      .set((current) => ({
+        againstVotes: current.againstVotes + (supportNum === 0 ? votes : 0n),
+        forVotes: current.forVotes + (supportNum === 1 ? votes : 0n),
+      }));
+
+    const proposal = await context.db.find(proposalsOnchain, {
+      id: proposalIdStr,
+    });
+
+    await context.db.insert(feedEvent).values({
       txHash: event.transaction.hash,
-      votingPower: votes,
       logIndex: event.log.logIndex,
+      type: "VOTE",
+      value: votes,
+      timestamp: event.block.timestamp,
+      metadata: {
+        voter: getAddress(voter),
+        reason: "",
+        support: supportNum,
+        votingPower: votes,
+        proposalId: proposalIdStr,
+        title: proposal?.title ?? undefined,
+      },
     });
   });
 
