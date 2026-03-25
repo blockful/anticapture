@@ -3,7 +3,7 @@ query GetDelegators(
   $skip: NonNegativeInt
   $limit: PositiveInt = 10
   $orderBy: queryInput_delegators_orderBy = amount
-  $orderDirection: queryInput_delegators_orderDirection = desc
+  $orderDirection: OrderDirection = desc
 ) {
   delegators(
     address: $address

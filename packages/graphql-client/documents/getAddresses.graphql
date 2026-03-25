@@ -1,4 +1,4 @@
-query GetAddresses($addresses: JSON!) {
+query GetAddresses($addresses: [JSON]!) {
   getAddresses(addresses: $addresses) {
     results {
       address

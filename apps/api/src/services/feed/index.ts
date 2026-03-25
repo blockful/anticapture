@@ -20,7 +20,9 @@ export class FeedService {
   ) {}
 
   async getFeedEvents(req: FeedRequest): Promise<FeedResponse> {
-    const valueThresholds = this.getValueThresholds(req.relevance);
+    const valueThresholds = this.getValueThresholds(
+      (req.relevance as FeedRelevance | undefined) ?? FeedRelevance.MEDIUM,
+    );
     const response = await this.repo.getFeedEvents(req, valueThresholds);
     return {
       items: response.items.map((item) => ({

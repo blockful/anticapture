@@ -1,20 +1,20 @@
 query BalanceHistory(
   $address: String!
-  $offset: Float = 0
-  $limit: Float = 10
-  $sortBy: queryInput_transfers_sortBy
-  $sortOrder: queryInput_transfers_sortOrder
+  $offset: Int = 0
+  $limit: Int = 10
+  $orderBy: queryInput_transfers_orderBy
+  $orderDirection: OrderDirection
   $from: String
   $to: String
   $fromValue: String
   $toValue: String
-  $fromDate: Float
-  $toDate: Float
+  $fromDate: Int
+  $toDate: Int
 ) {
   transfers(
     address: $address
-    sortBy: $sortBy
-    sortOrder: $sortOrder
+    orderBy: $orderBy
+    orderDirection: $orderDirection
     limit: $limit
     offset: $offset
     from: $from

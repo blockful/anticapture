@@ -1,8 +1,8 @@
 "use client";
 
 import type {
+  GetProposalsActivityQuery,
   GetProposalsActivityQueryVariables,
-  Query_ProposalsActivity_Proposals_Items,
 } from "@anticapture/graphql-client";
 import { useGetProposalsActivityQuery } from "@anticapture/graphql-client/hooks";
 import { NetworkStatus } from "@apollo/client";
@@ -10,6 +10,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { getAuthHeaders } from "@/shared/utils/server-utils";
+
+type ProposalActivityItem = NonNullable<
+  NonNullable<
+    NonNullable<GetProposalsActivityQuery["proposalsActivity"]>["proposals"]
+  >[number]
+>;
 
 interface UseProposalsActivityParams extends GetProposalsActivityQueryVariables {
   limit: number;
@@ -23,7 +29,7 @@ type ProposalActivityData = {
   winRate: number;
   yesRate: number;
   avgTimeBeforeEnd: number;
-  proposals: Query_ProposalsActivity_Proposals_Items[];
+  proposals: ProposalActivityItem[];
 };
 
 interface UseProposalsActivityResult {
@@ -52,7 +58,7 @@ export const useProposalsActivity = ({
   limit,
 }: UseProposalsActivityParams): UseProposalsActivityResult => {
   const [accumulatedProposals, setAccumulatedProposals] = useState<
-    Query_ProposalsActivity_Proposals_Items[]
+    ProposalActivityItem[]
   >([]);
 
   const queryOptions = {
@@ -91,7 +97,7 @@ export const useProposalsActivity = ({
         setAccumulatedProposals(
           (data.proposalsActivity.proposals ?? []).filter(
             Boolean,
-          ) as Query_ProposalsActivity_Proposals_Items[],
+          ) as ProposalActivityItem[],
         );
       }
     }
@@ -141,10 +147,7 @@ export const useProposalsActivity = ({
                 n &&
                 !prevItems.some((p) => p?.proposal?.id === n?.proposal?.id),
             ),
-          ].filter(
-            (item): item is Query_ProposalsActivity_Proposals_Items =>
-              item !== null,
-          );
+          ].filter((item): item is ProposalActivityItem => item !== null);
 
           setAccumulatedProposals(merged);
           return {

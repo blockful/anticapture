@@ -1,17 +1,11 @@
 import { z } from "@hono/zod-openapi";
 
-import { FeedEventType, FeedRelevance } from "@/lib/constants";
+import { FeedEventTypeSchema, FeedRelevanceSchema } from "../shared";
 
 export const EventRelevanceThresholdQuerySchema = z
   .object({
-    type: z.nativeEnum(FeedEventType).openapi({
-      description: "Feed event type whose threshold is being queried.",
-      example: FeedEventType.TRANSFER,
-    }),
-    relevance: z.nativeEnum(FeedRelevance).openapi({
-      description: "Relevance bucket to resolve for the given event type.",
-      example: FeedRelevance.MEDIUM,
-    }),
+    type: FeedEventTypeSchema,
+    relevance: FeedRelevanceSchema,
   })
   .openapi("EventRelevanceThresholdQuery", {
     description:

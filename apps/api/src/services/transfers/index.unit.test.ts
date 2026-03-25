@@ -30,8 +30,8 @@ const defaultRequest: TransfersRequest = {
   address: "0x1111111111111111111111111111111111111111" as Address,
   limit: 10,
   offset: 0,
-  sortBy: "timestamp",
-  sortOrder: "asc",
+  orderBy: "timestamp",
+  orderDirection: "asc",
 };
 
 describe("TransfersService", () => {

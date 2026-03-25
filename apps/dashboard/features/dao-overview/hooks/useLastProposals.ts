@@ -1,5 +1,5 @@
 import {
-  QueryInput_Proposals_OrderDirection,
+  OrderDirection,
   useGetProposalsFromDaoQuery,
 } from "@anticapture/graphql-client/hooks";
 import type { ApolloError } from "@apollo/client";
@@ -30,7 +30,7 @@ export const useLastProposals = (daoId: DaoIdEnum): UseLastProposalsResult => {
     variables: {
       skip: 0,
       limit: LAST_PROPOSALS_LIMIT,
-      orderDirection: QueryInput_Proposals_OrderDirection.Desc,
+      orderDirection: OrderDirection.Desc,
     },
     context: {
       headers: {

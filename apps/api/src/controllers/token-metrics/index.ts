@@ -30,9 +30,11 @@ export function tokenMetrics(app: Hono, service: TokenMetricsService) {
       },
     }),
     async (ctx) => {
-      const serviceResult = await service.getMetricsForType(
-        ctx.req.valid("query"),
-      );
+      const query = ctx.req.valid("query");
+      const serviceResult = await service.getMetricsForType({
+        ...query,
+        orderDirection: query.orderDirection ?? "asc",
+      });
       const httpResponse = toTokenMetricsApi(serviceResult);
       return ctx.json(httpResponse, 200);
     },

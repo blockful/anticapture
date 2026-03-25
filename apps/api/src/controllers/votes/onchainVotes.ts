@@ -6,6 +6,7 @@ import {
   VotersResponseSchema,
   VotesRequestSchema,
   VotesResponseSchema,
+  voteSupportToCode,
 } from "@/mappers";
 import { VotesService } from "@/services";
 
@@ -54,7 +55,7 @@ export function votes(app: Hono, service: VotesService) {
         orderBy,
         orderDirection,
         voterAddressIn,
-        support,
+        voteSupportToCode(support),
         fromDate,
         toDate,
       );

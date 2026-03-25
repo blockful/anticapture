@@ -3,6 +3,7 @@ import { getAddress, isAddress } from "viem";
 
 import { delegation, votingPowerHistory } from "@/database";
 
+import { OrderDirectionSchema } from "../shared";
 import { DBTransfer } from "../transfers";
 
 type DBDelegation = typeof delegation.$inferSelect;
@@ -40,7 +41,7 @@ export const HistoricalVotingPowerRequestQuerySchema = z
       .optional()
       .default(10),
     orderBy: z.enum(["timestamp", "delta"]).optional().default("timestamp"),
-    orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
+    orderDirection: OrderDirectionSchema.optional().default("desc"),
     fromDate: z
       .string()
       .optional()
@@ -92,7 +93,7 @@ export const HistoricalVotingPowerResponseSchema = z
     votingPower: z.string(),
     delta: z.string(),
     timestamp: z.string(),
-    logIndex: z.number(),
+    logIndex: z.number().int(),
     delegation: HistoricalVotingPowerDelegationSchema.nullable(),
     transfer: HistoricalVotingPowerTransferSchema.nullable(),
   })
@@ -104,7 +105,7 @@ export const HistoricalVotingPowerResponseSchema = z
 export const HistoricalVotingPowersResponseSchema = z
   .object({
     items: z.array(HistoricalVotingPowerResponseSchema),
-    totalCount: z.number(),
+    totalCount: z.number().int(),
   })
   .openapi("HistoricalVotingPowersResponse", {
     description: "Paginated historical voting power records.",

@@ -3,7 +3,21 @@ import { Address, getAddress, isAddress } from "viem";
 
 import { accountPower } from "@/database";
 
-import { PeriodResponseSchema, TimestampResponseMapper } from "../shared";
+import {
+  normalizeQueryArray,
+  OrderDirectionSchema,
+  PeriodResponseSchema,
+  TimestampResponseMapper,
+} from "../shared";
+
+const AddressArraySchema = z
+  .array(
+    z
+      .string()
+      .refine((addr) => isAddress(addr, { strict: false }), "Invalid address")
+      .transform((addr) => getAddress(addr)),
+  )
+  .openapi("VotingPowerAddressList");
 
 export const VotingPowerVariationsByAccountIdRequestParamsSchema = z
   .object({
@@ -48,26 +62,9 @@ export const VotingPowerVariationsRequestQuerySchema = z
       .min(0, "Skip must be a non-negative integer")
       .optional()
       .default(0),
-    orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
+    orderDirection: OrderDirectionSchema.optional().default("desc"),
     addresses: z
-      .union([
-        z
-          .string()
-          .refine(
-            (addr) => isAddress(addr, { strict: false }),
-            "Invalid address",
-          )
-          .transform((addr) => [getAddress(addr)]),
-        z.array(
-          z
-            .string()
-            .refine(
-              (addr) => isAddress(addr, { strict: false }),
-              "Invalid addresses",
-            )
-            .transform((addr) => getAddress(addr)),
-        ),
-      ])
+      .preprocess(normalizeQueryArray, AddressArraySchema.optional())
       .optional(),
   })
   .extend(VotingPowerVariationsByAccountIdRequestQuerySchema.shape)
@@ -91,7 +88,7 @@ export const VotingPowersRequestSchema = z
       .min(0, "Skip must be a non-negative integer")
       .optional()
       .default(0),
-    orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
+    orderDirection: OrderDirectionSchema.optional().default("desc"),
     orderBy: z
       .enum([
         "votingPower",
@@ -104,24 +101,7 @@ export const VotingPowersRequestSchema = z
       .optional()
       .default("votingPower"),
     addresses: z
-      .union([
-        z
-          .string()
-          .refine(
-            (addr) => isAddress(addr, { strict: false }),
-            "Invalid address",
-          )
-          .transform((addr) => [getAddress(addr)]),
-        z.array(
-          z
-            .string()
-            .refine(
-              (addr) => isAddress(addr, { strict: false }),
-              "Invalid addresses",
-            )
-            .transform((addr) => getAddress(addr)),
-        ),
-      ])
+      .preprocess(normalizeQueryArray, AddressArraySchema.optional())
       .optional()
       .transform((val) => val ?? []),
     fromValue: z
@@ -199,9 +179,9 @@ export const VotingPowerResponseSchema = z
     votingPower: z
       .union([z.bigint().transform((val) => val.toString()), z.string()])
       .openapi({ type: "string" }),
-    votesCount: z.number(),
-    proposalsCount: z.number(),
-    delegationsCount: z.number(),
+    votesCount: z.number().int(),
+    proposalsCount: z.number().int(),
+    delegationsCount: z.number().int(),
     balance: z
       .bigint()
       .transform((val) => val.toString())
@@ -216,7 +196,7 @@ export const VotingPowerResponseSchema = z
 export const VotingPowersResponseSchema = z
   .object({
     items: z.array(VotingPowerResponseSchema),
-    totalCount: z.number(),
+    totalCount: z.number().int(),
   })
   .openapi("VotingPowersResponse", {
     description: "Paginated current voting power records.",

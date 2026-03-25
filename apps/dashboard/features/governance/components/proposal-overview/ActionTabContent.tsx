@@ -1,11 +1,11 @@
 "use client";
 
-import type { GetProposalQuery } from "@anticapture/graphql-client";
 import { Inbox } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 
 import { useDecodeCalldata } from "@/features/governance/hooks/useDecodeCalldata";
+import type { ProposalDetails } from "@/features/governance/types";
 import { BlankSlate, Button } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
@@ -40,7 +40,7 @@ const CalldataWithEns = ({ text }: { text: string }) => {
 export const ActionsTabContent = ({
   proposal,
 }: {
-  proposal: NonNullable<GetProposalQuery["proposal"]>;
+  proposal: ProposalDetails;
 }) => {
   const { daoId } = useParams<{ daoId: string }>();
   const daoIdKey = daoId?.toUpperCase() as DaoIdEnum;

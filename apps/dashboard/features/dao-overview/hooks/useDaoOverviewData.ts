@@ -1,5 +1,5 @@
 import {
-  QueryInput_VotingPowers_OrderDirection,
+  OrderDirection,
   useGetDelegatesQuery,
 } from "@anticapture/graphql-client/hooks";
 import { formatUnits } from "viem";
@@ -34,7 +34,7 @@ export const useDaoOverviewData = ({
 
   const delegates = useGetDelegatesQuery({
     variables: {
-      orderDirection: QueryInput_VotingPowers_OrderDirection.Desc,
+      orderDirection: OrderDirection.Desc,
       limit: 20,
     },
     context: {

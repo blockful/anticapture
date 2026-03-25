@@ -1,18 +1,12 @@
 import { z } from "@hono/zod-openapi";
 
-import { DaysEnum, DaysOpts } from "@/lib/enums";
+const GovernanceDaysWindowSchema = z
+  .enum(["7d", "30d", "90d", "180d", "365d"])
+  .openapi("DaysWindow");
 
 export const GovernanceActivityDaysQuerySchema = z
   .object({
-    days: z
-      .enum(DaysOpts)
-      .default("90d")
-      .openapi({
-        description:
-          "Comparison window to use for governance activity metrics.",
-        example: "90d",
-      })
-      .transform((val) => DaysEnum[val]),
+    days: GovernanceDaysWindowSchema.optional(),
   })
   .openapi("GovernanceActivityDaysQuery", {
     description:
@@ -32,11 +26,11 @@ export const ActiveSupplyResponseSchema = z
 
 export const ProposalsComparisonResponseSchema = z
   .object({
-    currentProposalsLaunched: z.number().openapi({
+    currentProposalsLaunched: z.number().int().openapi({
       description: "Number of proposals launched in the current period.",
       example: 8,
     }),
-    oldProposalsLaunched: z.number().openapi({
+    oldProposalsLaunched: z.number().int().openapi({
       description: "Number of proposals launched in the comparison period.",
       example: 5,
     }),
@@ -52,11 +46,11 @@ export const ProposalsComparisonResponseSchema = z
 
 export const VotesComparisonResponseSchema = z
   .object({
-    currentVotes: z.number().openapi({
+    currentVotes: z.number().int().openapi({
       description: "Number of votes cast in the current period.",
       example: 128,
     }),
-    oldVotes: z.number().openapi({
+    oldVotes: z.number().int().openapi({
       description: "Number of votes cast in the comparison period.",
       example: 96,
     }),

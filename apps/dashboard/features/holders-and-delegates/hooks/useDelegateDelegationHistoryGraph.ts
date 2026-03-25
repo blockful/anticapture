@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  QueryInput_HistoricalVotingPowerByAccountId_OrderDirection,
+  OrderDirection,
   QueryInput_HistoricalVotingPowerByAccountId_OrderBy,
   useGetDelegateDelegationHistoryGraphQuery,
 } from "@anticapture/graphql-client/hooks";
@@ -45,8 +45,7 @@ export function useDelegateDelegationHistoryGraph(
       fromTimestamp,
       toTimestamp,
       orderBy: QueryInput_HistoricalVotingPowerByAccountId_OrderBy.Timestamp,
-      orderDirection:
-        QueryInput_HistoricalVotingPowerByAccountId_OrderDirection.Desc,
+      orderDirection: OrderDirection.Desc,
     },
     context: {
       headers: {

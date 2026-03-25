@@ -2,7 +2,11 @@ import { z } from "@hono/zod-openapi";
 import { isAddress, getAddress } from "viem";
 
 import { offchainVotes } from "@/database";
-import { normalizeQueryArray, unixTimestampQueryParam } from "../shared";
+import {
+  normalizeQueryArray,
+  OrderDirectionSchema,
+  unixTimestampQueryParam,
+} from "../shared";
 
 export type DBOffchainVote = typeof offchainVotes.$inferSelect;
 
@@ -45,10 +49,7 @@ export const OffchainVotesRequestSchema = z
         description: "Sort votes by timestamp or voting power.",
         example: "timestamp",
       }),
-    orderDirection: z.enum(["asc", "desc"]).optional().default("desc").openapi({
-      description: "Sort direction for the selected order field.",
-      example: "desc",
-    }),
+    orderDirection: OrderDirectionSchema.optional().default("desc"),
     voterAddresses: z
       .preprocess(
         normalizeQueryArray,

@@ -1,6 +1,8 @@
 import { z } from "@hono/zod-openapi";
 import { Address, getAddress, isAddress } from "viem";
 
+import { OrderDirectionSchema } from "../shared";
+
 export type AggregatedDelegator = {
   delegatorAddress: Address;
   amount: bigint;
@@ -34,7 +36,7 @@ export const DelegatorsRequestQuerySchema = z
       .optional()
       .default(10),
     orderBy: z.enum(["amount", "timestamp"]).optional().default("amount"),
-    orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
+    orderDirection: OrderDirectionSchema.optional().default("desc"),
   })
   .openapi("DelegatorsRequestQuery", {
     description:
@@ -66,7 +68,7 @@ export const DelegatorItemSchema = z
 export const DelegatorsResponseSchema = z
   .object({
     items: z.array(DelegatorItemSchema),
-    totalCount: z.number(),
+    totalCount: z.number().int(),
   })
   .openapi("DelegatorsResponse", {
     description: "Paginated delegators for a delegate address.",

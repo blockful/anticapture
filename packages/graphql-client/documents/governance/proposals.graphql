@@ -1,9 +1,9 @@
 query GetProposalsFromDao(
   $skip: NonNegativeInt
   $limit: PositiveInt = 10
-  $orderDirection: queryInput_proposals_orderDirection = desc
-  $status: JSON
-  $fromDate: Float
+  $orderDirection: OrderDirection = desc
+  $status: [String]
+  $fromDate: Int
 ) {
   proposals(
     skip: $skip
@@ -35,35 +35,37 @@ query GetProposalsFromDao(
 
 query GetProposal($id: String!) {
   proposal(id: $id) {
-    id
-    daoId
-    txHash
-    proposerAccountId
-    title
-    description
-    quorum
-    timestamp
-    status
-    forVotes
-    againstVotes
-    abstainVotes
-    startTimestamp
-    endTimestamp
-    calldatas
-    targets
-    values
+    ... on OnchainProposal {
+      id
+      daoId
+      txHash
+      proposerAccountId
+      title
+      description
+      quorum
+      timestamp
+      status
+      forVotes
+      againstVotes
+      abstainVotes
+      startTimestamp
+      endTimestamp
+      calldatas
+      targets
+      values
+    }
   }
 }
 
 #  Get proposal votes
 query GetVotes(
   $proposalId: String!
-  $limit: Float
+  $limit: PositiveInt
   $skip: NonNegativeInt
   $orderBy: queryInput_votesByProposalId_orderBy = timestamp
-  $orderDirection: queryInput_votesByProposalId_orderDirection = desc
-  $support: Float
-  $voterAddressIn: JSON
+  $orderDirection: OrderDirection = desc
+  $support: VoteSupport
+  $voterAddressIn: [String]
 ) {
   votesByProposalId(
     limit: $limit
@@ -89,7 +91,7 @@ query GetVotes(
 
 # Get voting power change
 query GetVotingPowerChange(
-  $addresses: JSON!
+  $addresses: [String]
   $fromDate: String!
   $toDate: String!
 ) {
@@ -113,7 +115,7 @@ query GetProposalNonVoters(
   $id: String!
   $limit: PositiveInt
   $skip: NonNegativeInt
-  $orderDirection: queryInput_proposalNonVoters_orderDirection = desc
+  $orderDirection: OrderDirection = desc
 ) {
   proposalNonVoters(
     id: $id
@@ -134,7 +136,7 @@ query GetProposalNonVoters(
 # Get account power
 query GetAccountPower(
   $address: String!
-  $addresses: JSON!
+  $addresses: [String]
   $proposalId: String!
 ) {
   votingPowerByAccountId(accountId: $address) {

@@ -4,7 +4,7 @@ query getAccountInteractions(
   $maxAmount: String
   $minAmount: String
   $orderBy: queryInput_accountInteractions_orderBy
-  $orderDirection: queryInput_accountInteractions_orderDirection
+  $orderDirection: OrderDirection
   $skip: NonNegativeInt
   $filterAddress: String
 ) {

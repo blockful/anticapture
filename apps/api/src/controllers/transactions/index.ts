@@ -35,8 +35,7 @@ export function transactions(app: Hono, service: TransactionsService) {
       const {
         limit,
         offset,
-        sortBy,
-        sortOrder,
+        orderDirection,
         fromDate,
         toDate,
         from,
@@ -50,8 +49,7 @@ export function transactions(app: Hono, service: TransactionsService) {
       const result = await service.getTransactions({
         limit,
         offset,
-        sortBy,
-        sortOrder,
+        orderDirection,
         fromDate,
         toDate,
         from,

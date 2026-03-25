@@ -3,6 +3,7 @@ import { getAddress, isAddress } from "viem";
 
 import { balanceHistory } from "@/database";
 
+import { OrderDirectionSchema } from "../shared";
 import { DBTransfer } from "../transfers";
 
 export type DBHistoricalBalance = typeof balanceHistory.$inferSelect;
@@ -37,7 +38,7 @@ export const HistoricalBalanceRequestQuerySchema = z
       .optional()
       .default(10),
     orderBy: z.enum(["timestamp", "delta"]).optional().default("timestamp"),
-    orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
+    orderDirection: OrderDirectionSchema.optional().default("desc"),
     fromDate: z
       .string()
       .transform((val) => Number(val))
@@ -76,7 +77,7 @@ export const HistoricalBalanceResponseSchema = z
     balance: z.string(),
     delta: z.string(),
     timestamp: z.string(),
-    logIndex: z.number(),
+    logIndex: z.number().int(),
     transfer: HistoricalBalanceTransferSchema,
   })
   .openapi("HistoricalBalance", {
@@ -87,7 +88,7 @@ export const HistoricalBalanceResponseSchema = z
 export const HistoricalBalancesResponseSchema = z
   .object({
     items: z.array(HistoricalBalanceResponseSchema),
-    totalCount: z.number(),
+    totalCount: z.number().int(),
   })
   .openapi("HistoricalBalancesResponse", {
     description: "Paginated historical balance records for one account.",

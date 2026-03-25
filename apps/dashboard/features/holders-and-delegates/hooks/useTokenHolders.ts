@@ -1,8 +1,8 @@
 "use client";
 
 import {
+  OrderDirection,
   QueryInput_AccountBalances_OrderBy,
-  QueryInput_AccountBalances_OrderDirection,
 } from "@anticapture/graphql-client";
 import { useGetTokenHoldersQuery } from "@anticapture/graphql-client/hooks";
 import { NetworkStatus } from "@apollo/client";
@@ -54,7 +54,7 @@ interface UseTokenHoldersParams {
   daoId: DaoIdEnum;
   address?: string;
   orderBy?: QueryInput_AccountBalances_OrderBy;
-  orderDirection?: QueryInput_AccountBalances_OrderDirection;
+  orderDirection?: OrderDirection;
   limit?: number;
   days: TimeInterval;
 }
@@ -62,7 +62,7 @@ interface UseTokenHoldersParams {
 export const useTokenHolders = ({
   daoId,
   orderBy = QueryInput_AccountBalances_OrderBy.Balance,
-  orderDirection = QueryInput_AccountBalances_OrderDirection.Desc,
+  orderDirection = OrderDirection.Desc,
   limit = 10,
   address,
   days,
@@ -75,7 +75,7 @@ export const useTokenHolders = ({
     useState<boolean>(false);
 
   const fromDate = useMemo(() => {
-    return (Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[days]).toString();
+    return Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[days];
   }, [days]);
 
   const {

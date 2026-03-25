@@ -1,8 +1,8 @@
 import type {
-  Query_AccountInteractions_Items_Items,
+  GetAccountInteractionsQuery,
+  OrderDirection,
   QueryInput_AccountInteractions_OrderBy,
-  QueryInput_AccountInteractions_OrderDirection,
-} from "@anticapture/graphql-client";
+} from "@anticapture/graphql-client/hooks";
 import { useGetAccountInteractionsQuery } from "@anticapture/graphql-client/hooks";
 import { NetworkStatus } from "@apollo/client";
 import { useState, useCallback } from "react";
@@ -21,7 +21,11 @@ interface Interaction {
   transferCount: string;
   totalVolume: string;
   amountTransferred: string;
-  __typename?: Query_AccountInteractions_Items_Items["__typename"];
+  __typename?: NonNullable<
+    NonNullable<
+      GetAccountInteractionsQuery["accountInteractions"]
+    >["items"][number]
+  >["__typename"];
 }
 
 interface InteractionResponse {
@@ -83,8 +87,7 @@ export const useAccountInteractionsData = ({
       variables: {
         address,
         orderBy: sortBy as QueryInput_AccountInteractions_OrderBy,
-        orderDirection:
-          sortDirection as QueryInput_AccountInteractions_OrderDirection,
+        orderDirection: sortDirection as OrderDirection,
         minAmount: filterVariables?.minAmount,
         maxAmount: filterVariables?.maxAmount,
         limit,
@@ -115,8 +118,7 @@ export const useAccountInteractionsData = ({
         variables: {
           address,
           orderBy: sortBy as QueryInput_AccountInteractions_OrderBy,
-          orderDirection:
-            sortDirection as QueryInput_AccountInteractions_OrderDirection,
+          orderDirection: sortDirection as OrderDirection,
           minAmount: filterVariables?.minAmount,
           maxAmount: filterVariables?.maxAmount,
           limit,

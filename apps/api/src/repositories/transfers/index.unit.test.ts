@@ -34,8 +34,8 @@ const defaultReq = (
   address: ADDR_A,
   limit: 10,
   offset: 0,
-  sortBy: "timestamp",
-  sortOrder: "asc",
+  orderBy: "timestamp",
+  orderDirection: "asc",
   ...overrides,
 });
 
@@ -194,7 +194,7 @@ describe("TransfersRepository", () => {
       ]);
 
       const result = await repository.getTransfers(
-        defaultReq({ sortOrder: "desc" }),
+        defaultReq({ orderDirection: "desc" }),
       );
 
       expect(result.map((t) => t.transactionHash)).toEqual([

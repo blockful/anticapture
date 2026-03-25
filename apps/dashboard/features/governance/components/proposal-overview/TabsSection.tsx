@@ -1,17 +1,17 @@
 "use client";
 
-import type { GetProposalQuery } from "@anticapture/graphql-client";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 
 import { ActionsTabContent } from "@/features/governance/components/proposal-overview/ActionTabContent";
 import { DescriptionTabContent } from "@/features/governance/components/proposal-overview/DescriptionTabContent";
 import { VotesTabContent } from "@/features/governance/components/proposal-overview/VotesTabContent";
+import type { ProposalDetails } from "@/features/governance/types";
 import { cn } from "@/shared/utils";
 
 type TabId = "description" | "votes" | "actions";
 
 interface TabsSectionProps {
-  proposal: NonNullable<GetProposalQuery["proposal"]>;
+  proposal: ProposalDetails;
   onAddressClick?: (address: string) => void;
 }
 

@@ -1,7 +1,7 @@
 query BalanceHistoryGraph(
   $address: String!
   $orderBy: queryInput_historicalBalances_orderBy
-  $orderDirection: queryInput_historicalBalances_orderDirection
+  $orderDirection: OrderDirection
   $fromDate: String
 ) {
   historicalBalances(

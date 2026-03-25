@@ -10,8 +10,8 @@
   },
   "exports": {
     ".": {
-      "types": "./generated/types.ts",
-      "default": "./generated/types.ts"
+      "types": "./generated/hooks.ts",
+      "default": "./generated/hooks.ts"
     },
     "./hooks": {
       "types": "./generated/hooks.ts",

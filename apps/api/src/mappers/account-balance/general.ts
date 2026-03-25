@@ -5,6 +5,7 @@ import { accountBalance } from "@/database";
 
 import {
   normalizeQueryArray,
+  OrderDirectionSchema,
   PeriodResponseSchema,
   TimestampResponseMapper,
   unixTimestampQueryParam,
@@ -52,7 +53,7 @@ export const AccountBalancesRequestSchema = z
       .min(0, "Skip must be a non-negative integer")
       .optional()
       .default(0),
-    orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
+    orderDirection: OrderDirectionSchema.optional().default("desc"),
     orderBy: z
       .enum(["balance", "variation", "signedVariation"])
       .optional()

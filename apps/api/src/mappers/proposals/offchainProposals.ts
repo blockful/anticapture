@@ -1,7 +1,11 @@
 import { z } from "@hono/zod-openapi";
 
 import { offchainProposals } from "@/database";
-import { normalizeQueryArray, unixTimestampQueryParam } from "../shared";
+import {
+  normalizeQueryArray,
+  OrderDirectionSchema,
+  unixTimestampQueryParam,
+} from "../shared";
 
 export type DBOffchainProposal = typeof offchainProposals.$inferSelect;
 
@@ -92,10 +96,7 @@ export const OffchainProposalsRequestSchema = z
         description: "Maximum number of proposals to return.",
         example: 10,
       }),
-    orderDirection: z.enum(["asc", "desc"]).default("desc").optional().openapi({
-      description: "Sort direction for proposal creation timestamps.",
-      example: "desc",
-    }),
+    orderDirection: OrderDirectionSchema.default("desc").optional(),
     status: z
       .preprocess(normalizeQueryArray, StringArrayQuerySchema.optional())
       .openapi({

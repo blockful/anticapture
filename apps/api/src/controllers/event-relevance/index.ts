@@ -1,5 +1,7 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
+import { FeedEventType, FeedRelevance } from "@/lib/constants";
+
 import {
   EventRelevanceThresholdQuerySchema,
   EventRelevanceThresholdResponseSchema,
@@ -30,7 +32,10 @@ export function eventRelevance(app: Hono, service: EventRelevanceService) {
     }),
     async (context) => {
       const { type, relevance } = context.req.valid("query");
-      const threshold = service.getThreshold(type, relevance);
+      const threshold = service.getThreshold(
+        type as FeedEventType,
+        relevance as FeedRelevance,
+      );
       return context.json({ threshold }, 200);
     },
   );

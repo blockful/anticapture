@@ -3,7 +3,7 @@ import type {
   QueryProposalsArgs,
 } from "@anticapture/graphql-client/hooks";
 import {
-  QueryInput_Proposals_OrderDirection,
+  OrderDirection,
   useGetProposalsFromDaoQuery,
 } from "@anticapture/graphql-client/hooks";
 import type { ApolloError } from "@apollo/client";
@@ -44,7 +44,7 @@ export interface UseProposalsParams extends Omit<
 
 export const useProposals = ({
   fromDate,
-  orderDirection = QueryInput_Proposals_OrderDirection.Desc,
+  orderDirection = OrderDirection.Desc,
   status,
   itemsPerPage = 10,
   daoId,

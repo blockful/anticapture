@@ -5,6 +5,10 @@ import { transfer } from "@/database";
 
 export type DBTransfer = typeof transfer.$inferSelect;
 
+const TransfersOrderDirectionSchema = z
+  .enum(["asc", "desc"])
+  .openapi("OrderDirection");
+
 const AddressSchema = z
   .string()
   .refine((addr) => isAddress(addr, { strict: false }))
@@ -25,8 +29,8 @@ export const TransfersRequestQuerySchema = z
   .object({
     limit: z.coerce.number().int().optional().default(10),
     offset: z.coerce.number().int().optional().default(0),
-    sortBy: z.enum(["timestamp", "amount"]).optional().default("timestamp"),
-    sortOrder: z.enum(["asc", "desc"]).optional().default("asc"),
+    orderBy: z.enum(["timestamp", "amount"]).optional().default("timestamp"),
+    orderDirection: TransfersOrderDirectionSchema.optional(),
     from: z
       .string()
       .refine((addr) => isAddress(addr, { strict: false }), {

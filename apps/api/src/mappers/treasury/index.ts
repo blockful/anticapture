@@ -1,6 +1,12 @@
 import { z } from "@hono/zod-openapi";
 
-import { DaysOpts } from "@/lib/enums";
+const TreasuryDaysWindowSchema = z
+  .enum(["7d", "30d", "90d", "180d", "365d"])
+  .openapi("DaysWindow");
+
+const TreasuryOrderDirectionSchema = z
+  .enum(["asc", "desc"])
+  .openapi("OrderDirection");
 
 export const TreasuryItemSchema = z
   .object({
@@ -14,7 +20,7 @@ export const TreasuryItemSchema = z
 export const TreasuryResponseSchema = z
   .object({
     items: z.array(TreasuryItemSchema),
-    totalCount: z.number().describe("Total number of items"),
+    totalCount: z.number().int().describe("Total number of items"),
   })
   .openapi("TreasuryResponse", {
     description: "Paginated treasury time-series response.",
@@ -24,11 +30,8 @@ export type TreasuryResponse = z.infer<typeof TreasuryResponseSchema>;
 
 export const TreasuryQuerySchema = z
   .object({
-    days: z
-      .enum(DaysOpts)
-      .default("365d")
-      .transform((val) => parseInt(val.replace("d", ""))),
-    order: z.enum(["asc", "desc"]).optional().default("asc"),
+    days: TreasuryDaysWindowSchema.optional(),
+    orderDirection: TreasuryOrderDirectionSchema.optional(),
   })
   .openapi("TreasuryQuery", {
     description: "Query params used to fetch treasury time-series data.",

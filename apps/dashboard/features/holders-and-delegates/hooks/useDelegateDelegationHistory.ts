@@ -3,7 +3,7 @@
 import type {
   HistoricalVotingPowerByAccountQuery,
   HistoricalVotingPowerByAccountQueryVariables,
-  QueryInput_HistoricalVotingPowerByAccountId_OrderDirection,
+  OrderDirection,
 } from "@anticapture/graphql-client";
 import { useHistoricalVotingPowerByAccountQuery } from "@anticapture/graphql-client/hooks";
 import type { ApolloError } from "@apollo/client";
@@ -118,8 +118,7 @@ export function useDelegateDelegationHistory({
       limit,
       orderBy:
         orderBy as HistoricalVotingPowerByAccountQueryVariables["orderBy"],
-      orderDirection:
-        orderDirection as QueryInput_HistoricalVotingPowerByAccountId_OrderDirection,
+      orderDirection: orderDirection as OrderDirection,
       ...(filterVariables?.toValue && { toValue: filterVariables.toValue }),
       ...(filterVariables?.fromValue && {
         fromValue: filterVariables.fromValue,

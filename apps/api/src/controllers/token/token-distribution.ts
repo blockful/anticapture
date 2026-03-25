@@ -6,6 +6,7 @@ import { DaysEnum } from "@/lib/enums";
 import {
   SupplyComparisonResponseSchema,
   TokenDistributionComparisonQuerySchema,
+  daysWindowToEnum,
 } from "@/mappers";
 
 interface TokenDistributionRepository {
@@ -55,9 +56,12 @@ export function tokenDistribution(
         },
       }),
       async (ctx) => {
-        const { days } = ctx.req.valid("query");
+        const { days = "90d" } = ctx.req.valid("query");
 
-        const result = await repository.getSupplyComparison(metric, days);
+        const result = await repository.getSupplyComparison(
+          metric,
+          daysWindowToEnum(days),
+        );
 
         if (!result) {
           return ctx.json(

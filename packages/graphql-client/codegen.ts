@@ -8,17 +8,24 @@ const config: CodegenConfig = {
   documents: "./documents/**/*.graphql",
   ignoreNoDocuments: true,
   generates: {
-    // Build with React hooks (for React apps)
     "./generated/hooks.ts": {
       plugins: [
         "typescript",
         "typescript-operations",
         "typescript-react-apollo",
       ],
-    },
-    // Build with just types and operations (for non-React usage)
-    "./generated/types.ts": {
-      plugins: ["typescript", "typescript-operations"],
+      config: {
+        dedupeFragments: true,
+        avoidOptionals: true,
+        strictScalars: true,
+        scalars: {
+          BigInt: "string",
+          BigDecimal: "string",
+          Bytes: "string",
+          DateTime: "string",
+          JSON: "Record<string, unknown>",
+        },
+      },
     },
   },
 };

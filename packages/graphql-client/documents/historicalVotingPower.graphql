@@ -3,7 +3,7 @@ query HistoricalVotingPower(
   $skip: NonNegativeInt
   $limit: PositiveInt = 10
   $orderBy: queryInput_historicalVotingPower_orderBy = timestamp
-  $orderDirection: queryInput_historicalVotingPower_orderDirection = desc
+  $orderDirection: OrderDirection = desc
   $toValue: String
   $fromValue: String
   $fromDate: String

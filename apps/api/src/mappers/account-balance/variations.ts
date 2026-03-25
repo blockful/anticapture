@@ -2,7 +2,21 @@ import { z } from "@hono/zod-openapi";
 import { Address, getAddress, isAddress } from "viem";
 
 import { PERCENTAGE_NO_BASELINE } from "../constants";
-import { PeriodResponseSchema, TimestampResponseMapper } from "../shared";
+import {
+  normalizeQueryArray,
+  OrderDirectionSchema,
+  PeriodResponseSchema,
+  TimestampResponseMapper,
+} from "../shared";
+
+const AddressArraySchema = z
+  .array(
+    z
+      .string()
+      .refine(isAddress, "Invalid address")
+      .transform((addr) => getAddress(addr)),
+  )
+  .openapi("AccountBalanceVariationAddressList");
 
 export const AccountBalanceVariationsByAccountIdRequestParamsSchema = z
   .object({
@@ -46,20 +60,9 @@ export const AccountBalanceVariationsRequestQuerySchema =
       .min(0, "Skip must be a non-negative integer")
       .optional()
       .default(0),
-    orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
+    orderDirection: OrderDirectionSchema.optional().default("desc"),
     addresses: z
-      .union([
-        z
-          .string()
-          .refine(isAddress, "Invalid address")
-          .transform((addr) => [getAddress(addr)]),
-        z.array(
-          z
-            .string()
-            .refine(isAddress, "Invalid addresses")
-            .transform((addr) => getAddress(addr)),
-        ),
-      ])
+      .preprocess(normalizeQueryArray, AddressArraySchema.optional())
       .optional(),
   }).openapi("AccountBalanceVariationsRequestQuery", {
     description:

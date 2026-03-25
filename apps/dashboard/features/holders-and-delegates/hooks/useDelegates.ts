@@ -1,7 +1,9 @@
 "use client";
 
-import type { QueryInput_VotingPowers_OrderBy } from "@anticapture/graphql-client";
-import { QueryInput_VotingPowers_OrderDirection } from "@anticapture/graphql-client";
+import {
+  OrderDirection,
+  type QueryInput_VotingPowers_OrderBy,
+} from "@anticapture/graphql-client";
 import {
   useGetDelegatesQuery,
   useGetDelegateProposalsActivityLazyQuery,
@@ -57,7 +59,7 @@ interface UseDelegatesParams {
   daoId: DaoIdEnum;
   address?: string;
   orderBy?: QueryInput_VotingPowers_OrderBy;
-  orderDirection?: QueryInput_VotingPowers_OrderDirection;
+  orderDirection?: OrderDirection;
   limit?: number;
   skipActivity?: boolean;
 }
@@ -65,7 +67,7 @@ interface UseDelegatesParams {
 export const useDelegates = ({
   daoId,
   orderBy,
-  orderDirection = QueryInput_VotingPowers_OrderDirection.Desc,
+  orderDirection = OrderDirection.Desc,
   days,
   address,
   limit = 15,

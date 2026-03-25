@@ -24,7 +24,7 @@ export class TransactionsRepository {
           ${transaction.timestamp}
         FROM ${transaction}
         WHERE ${transaction.transactionHash} IN (SELECT transaction_hash FROM filtered_transactions)
-        ORDER BY ${transaction.timestamp} DESC
+        ORDER BY ${transaction.timestamp} ${sql.raw(filter.orderDirection.toUpperCase())}
         LIMIT ${filter.limit}
         OFFSET ${filter.offset ?? 0}
     ),
@@ -84,7 +84,7 @@ export class TransactionsRepository {
     FROM latest_filtered_transactions lt
     LEFT JOIN transfer_aggregates ta ON ta.transaction_hash = lt.transaction_hash
     LEFT JOIN delegation_aggregates da ON da.transaction_hash = lt.transaction_hash
-    ORDER BY lt.timestamp DESC;
+    ORDER BY lt.timestamp ${sql.raw(filter.orderDirection.toUpperCase())};
 `;
     const result = await this.db.execute<DBTransaction>(query);
 

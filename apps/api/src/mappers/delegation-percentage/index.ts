@@ -3,6 +3,12 @@ import { z } from "@hono/zod-openapi";
 import { daoMetricsDayBucket } from "@/database";
 import { SECONDS_IN_DAY } from "@/lib/enums";
 
+import { PageInfoSchema } from "../shared";
+
+const DelegationPercentageOrderDirectionSchema = z
+  .enum(["asc", "desc"])
+  .openapi("OrderDirection");
+
 export type DBTokenMetric = typeof daoMetricsDayBucket.$inferSelect;
 
 // === ZOD SCHEMAS ===
@@ -23,10 +29,7 @@ const BaseFiltersSchema = z.object({
       example: "1706745600",
     })
     .optional(),
-  orderDirection: z.enum(["asc", "desc"]).optional().openapi({
-    description: "Sort direction for the returned buckets.",
-    example: "asc",
-  }),
+  orderDirection: z.enum(["asc", "desc"]).optional(),
   limit: z.number().optional().openapi({
     description: "Optional limit used by internal filters.",
     example: 365,
@@ -58,10 +61,7 @@ export const DelegationPercentageRequestSchema = BaseFiltersSchema.extend({
       example: "1706745600",
     })
     .optional(),
-  orderDirection: z.enum(["asc", "desc"]).default("asc").openapi({
-    description: "Sort direction for the returned buckets.",
-    example: "asc",
-  }),
+  orderDirection: DelegationPercentageOrderDirectionSchema.optional(),
   limit: z.coerce.number().int().positive().max(1000).default(365).openapi({
     description: "Maximum number of buckets to return.",
     example: 365,
@@ -81,22 +81,6 @@ export const DelegationPercentageItemSchema = z
     }),
   })
   .openapi("DelegationPercentageItem");
-
-export const PageInfoSchema = z
-  .object({
-    hasNextPage: z
-      .boolean()
-      .openapi({ description: "Whether more items are available." }),
-    endDate: z
-      .string()
-      .nullable()
-      .openapi({ description: "End cursor for the current page." }),
-    startDate: z
-      .string()
-      .nullable()
-      .openapi({ description: "Start cursor for the current page." }),
-  })
-  .openapi("DelegationPercentagePageInfo");
 
 export const DelegationPercentageResponseSchema = z
   .object({
@@ -118,7 +102,6 @@ export type DelegationPercentageQuery = z.infer<
 export type DelegationPercentageItem = z.infer<
   typeof DelegationPercentageItemSchema
 >;
-export type PageInfo = z.infer<typeof PageInfoSchema>;
 export type DelegationPercentageResponse = z.infer<
   typeof DelegationPercentageResponseSchema
 >;
@@ -144,6 +127,7 @@ export function toApi(serviceResult: {
   items: DelegationPercentageItem[];
   totalCount: number;
   hasNextPage: boolean;
+  hasPreviousPage?: boolean;
   endDate: string | null;
   startDate: string | null;
 }): DelegationPercentageResponse {
@@ -152,6 +136,7 @@ export function toApi(serviceResult: {
     totalCount: serviceResult.totalCount,
     pageInfo: {
       hasNextPage: serviceResult.hasNextPage,
+      hasPreviousPage: serviceResult.hasPreviousPage ?? false,
       endDate: serviceResult.endDate,
       startDate: serviceResult.startDate,
     },

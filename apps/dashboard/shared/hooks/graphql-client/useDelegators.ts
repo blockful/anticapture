@@ -1,6 +1,6 @@
 import {
+  OrderDirection,
   QueryInput_Delegators_OrderBy,
-  QueryInput_Delegators_OrderDirection,
 } from "@anticapture/graphql-client";
 import type { GetDelegatorsQuery } from "@anticapture/graphql-client/hooks";
 import { useGetDelegatorsQuery } from "@anticapture/graphql-client/hooks";
@@ -37,7 +37,7 @@ interface UseVotingPowerParams {
   daoId: DaoIdEnum;
   address: string;
   orderBy?: QueryInput_Delegators_OrderBy;
-  orderDirection?: QueryInput_Delegators_OrderDirection;
+  orderDirection?: OrderDirection;
   limit?: number;
 }
 
@@ -45,7 +45,7 @@ export const useDelegators = ({
   daoId,
   address,
   orderBy = QueryInput_Delegators_OrderBy.Amount,
-  orderDirection = QueryInput_Delegators_OrderDirection.Desc,
+  orderDirection = OrderDirection.Desc,
   limit = 15,
 }: UseVotingPowerParams): UseDelegatorsResult => {
   const [currentPage, setCurrentPage] = useState<number>(1);

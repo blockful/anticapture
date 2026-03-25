@@ -2,6 +2,7 @@ import { z } from "@hono/zod-openapi";
 import { getAddress, isAddress } from "viem";
 
 import { VoteFilter } from "@/repositories/";
+import { OrderDirectionSchema, VoteSupportSchema } from "../shared";
 
 export const ProposalActivityRequestSchema = z
   .object({
@@ -48,10 +49,7 @@ export const ProposalActivityRequestSchema = z
         description: "Field used to sort proposal activity results.",
         example: "timestamp",
       }),
-    orderDirection: z.enum(["asc", "desc"]).optional().default("desc").openapi({
-      description: "Sort direction for the selected order field.",
-      example: "desc",
-    }),
+    orderDirection: OrderDirectionSchema.optional().default("desc"),
     userVoteFilter: z.nativeEnum(VoteFilter).optional().openapi({
       description:
         "Optional vote filter. Use yes, no, abstain, or no-vote to narrow the result set.",
@@ -96,7 +94,7 @@ export const ProposalActivityUserVoteSchema = z
     id: z.string(),
     voterAccountId: z.string(),
     proposalId: z.string(),
-    support: z.string().nullable(),
+    support: VoteSupportSchema.nullable(),
     votingPower: z
       .bigint()
       .transform((val) => val.toString())
@@ -121,8 +119,8 @@ export const ProposalActivityItemSchema = z
 export const ProposalActivityResponseSchema = z
   .object({
     address: z.string(),
-    totalProposals: z.number(),
-    votedProposals: z.number(),
+    totalProposals: z.number().int(),
+    votedProposals: z.number().int(),
     neverVoted: z.boolean(),
     winRate: z.number(),
     yesRate: z.number(),

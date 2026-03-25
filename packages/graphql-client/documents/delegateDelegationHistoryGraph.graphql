@@ -3,7 +3,7 @@ query GetDelegateDelegationHistoryGraph(
   $fromTimestamp: String
   $toTimestamp: String
   $orderBy: queryInput_historicalVotingPowerByAccountId_orderBy = timestamp
-  $orderDirection: queryInput_historicalVotingPowerByAccountId_orderDirection = desc
+  $orderDirection: OrderDirection = desc
 ) {
   historicalVotingPowerByAccountId(
     address: $accountId
@@ -11,7 +11,7 @@ query GetDelegateDelegationHistoryGraph(
     orderDirection: $orderDirection
     fromDate: $fromTimestamp
     toDate: $toTimestamp
-    limit: "1000"
+    limit: 1000
   ) {
     items {
       delta

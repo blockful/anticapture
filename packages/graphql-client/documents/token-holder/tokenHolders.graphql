@@ -1,10 +1,10 @@
 query GetTokenHolders(
   $limit: PositiveInt
   $skip: NonNegativeInt
-  $orderDirection: queryInput_accountBalances_orderDirection
+  $orderDirection: OrderDirection
   $orderBy: queryInput_accountBalances_orderBy = balance
-  $fromDate: String
-  $addresses: JSON
+  $fromDate: Int
+  $addresses: [String]
 ) {
   accountBalances(
     orderDirection: $orderDirection

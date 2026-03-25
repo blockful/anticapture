@@ -77,6 +77,7 @@ export class TokenMetricsService {
   }): Promise<{
     items: TokenMetricItem[];
     hasNextPage: boolean;
+    hasPreviousPage: boolean;
     startDate: string | null;
     endDate: string | null;
   }> {
@@ -102,6 +103,7 @@ export class TokenMetricsService {
       return {
         items: [],
         hasNextPage: false,
+        hasPreviousPage: false,
         startDate: null,
         endDate: null,
       };
@@ -137,6 +139,7 @@ export class TokenMetricsService {
       return {
         items: [],
         hasNextPage: false,
+        hasPreviousPage: (skip ?? 0) > 0,
         startDate: null,
         endDate: null,
       };
@@ -156,6 +159,7 @@ export class TokenMetricsService {
     return {
       items,
       hasNextPage,
+      hasPreviousPage: (skip ?? 0) > 0,
       startDate: items[0]?.date ?? null,
       endDate: items[items.length - 1]?.date ?? null,
     };

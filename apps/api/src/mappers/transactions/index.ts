@@ -9,6 +9,7 @@ import {
   TransferMapper,
   TransferResponseSchema,
 } from "../transfers";
+import { normalizeQueryArray, OrderDirectionSchema } from "../shared";
 
 export type DBTransaction = typeof transaction.$inferSelect & {
   transfers: DBTransfer[];
@@ -28,6 +29,14 @@ export enum TransactionType {
   DELEGATION = "DELEGATION",
 }
 
+const AffectedSupplyListSchema = z
+  .array(z.nativeEnum(AffectedSupply))
+  .openapi("AffectedSupplyList");
+
+const TransactionIncludeListSchema = z
+  .array(z.nativeEnum(TransactionType))
+  .openapi("TransactionIncludeList");
+
 export const TransactionsRequestSchema = z
   .object({
     limit: z.coerce
@@ -43,8 +52,7 @@ export const TransactionsRequestSchema = z
       .min(0, "Offset must be a non-negative integer")
       .optional()
       .default(0),
-    sortBy: z.enum(["timestamp"]).optional().default("timestamp"),
-    sortOrder: z.enum(["asc", "desc"]).optional().default("desc"),
+    orderDirection: OrderDirectionSchema.optional().default("desc"),
     fromDate: z.coerce.number().int("fromDate must be an integer").optional(),
     toDate: z.coerce.number().int("toDate must be an integer").optional(),
     from: z
@@ -66,10 +74,7 @@ export const TransactionsRequestSchema = z
       .transform((val) => BigInt(val))
       .optional(), //z.coerce.bigint().optional() doesn't work because of a bug with zod, zod asks for a string that satisfies REGEX ^d+$, when it should be ^\d+$
     affectedSupply: z
-      .union([
-        z.nativeEnum(AffectedSupply),
-        z.array(z.nativeEnum(AffectedSupply)),
-      ])
+      .preprocess(normalizeQueryArray, AffectedSupplyListSchema.optional())
       .optional()
       .describe(
         "Filter transactions by affected supply type. Can be: 'CEX', 'DEX', 'LENDING', or 'TOTAL'",
@@ -86,10 +91,7 @@ export const TransactionsRequestSchema = z
         };
       }),
     includes: z
-      .union([
-        z.nativeEnum(TransactionType),
-        z.array(z.nativeEnum(TransactionType)),
-      ])
+      .preprocess(normalizeQueryArray, TransactionIncludeListSchema.optional())
       .optional()
       .describe(
         "Filter by transaction type. Can be one of: 'TRANSFER', 'DELEGATION'",
@@ -135,7 +137,7 @@ export const DelegationResponseSchema = z
     delegatedValue: z.string(),
     previousDelegate: z.string().nullable(),
     timestamp: z.string(),
-    logIndex: z.number(),
+    logIndex: z.number().int(),
     isCex: z.boolean(),
     isDex: z.boolean(),
     isLending: z.boolean(),
@@ -166,7 +168,7 @@ export const TransactionResponseSchema = z
 export const TransactionsResponseSchema = z
   .object({
     items: z.array(TransactionResponseSchema),
-    totalCount: z.number(),
+    totalCount: z.number().int(),
   })
   .openapi("TransactionsResponse", {
     description:

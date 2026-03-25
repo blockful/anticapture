@@ -1,10 +1,12 @@
 "use client";
 
-import type { GetProposalQuery } from "@anticapture/graphql-client";
 import type { Address } from "viem";
 
 import { ProposalBadge } from "@/features/governance/components/proposal-overview/ProposalBadge";
-import type { ProposalStatus } from "@/features/governance/types";
+import type {
+  ProposalDetails,
+  ProposalStatus,
+} from "@/features/governance/types";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { BulletDivider } from "@/shared/components/design-system/section";
@@ -34,7 +36,7 @@ const DAO_TWITTER_HANDLES: Record<string, string> = {
 };
 
 interface TitleSectionProps {
-  proposal: NonNullable<GetProposalQuery["proposal"]>;
+  proposal: ProposalDetails;
   onAddressClick?: (address: string) => void;
 }
 

@@ -1,7 +1,8 @@
 import type {
+  OrderDirection,
   QueryInput_VotesByProposalId_OrderBy,
-  QueryInput_VotesByProposalId_OrderDirection,
 } from "@anticapture/graphql-client";
+import { VoteSupport } from "@anticapture/graphql-client";
 import type { GetVotesQuery } from "@anticapture/graphql-client/hooks";
 import {
   useGetVotesQuery,
@@ -72,9 +73,15 @@ export const useVotes = ({
       limit,
       skip: 0, // Always fetch from beginning, we'll handle append in fetchMore
       orderBy: orderBy as QueryInput_VotesByProposalId_OrderBy,
-      orderDirection:
-        orderDirection as QueryInput_VotesByProposalId_OrderDirection,
-      ...(support !== null && { support }),
+      orderDirection: orderDirection as OrderDirection,
+      ...(support !== null && {
+        support:
+          support === 1
+            ? VoteSupport.For
+            : support === 0
+              ? VoteSupport.Against
+              : VoteSupport.Abstain,
+      }),
       ...(voterAddress && { voterAddressIn: [voterAddress] }),
     };
   }, [proposalId, limit, orderBy, orderDirection, support, voterAddress]);

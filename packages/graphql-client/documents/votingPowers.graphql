@@ -1,8 +1,8 @@
 query GetDelegates(
-  $addresses: JSON
+  $addresses: [String]
   $limit: PositiveInt = 10
   $skip: NonNegativeInt = 0
-  $orderDirection: queryInput_votingPowers_orderDirection = desc
+  $orderDirection: OrderDirection = desc
   $orderBy: queryInput_votingPowers_orderBy = votingPower
   $fromDate: String
   $toDate: String

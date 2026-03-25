@@ -3,7 +3,7 @@ import { z } from "@hono/zod-openapi";
 export const DaoResponseSchema = z
   .object({
     id: z.string(),
-    chainId: z.number(),
+    chainId: z.number().int(),
     quorum: z.string(),
     proposalThreshold: z.string(),
     votingDelay: z.string(),

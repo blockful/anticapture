@@ -1,7 +1,11 @@
 import { z } from "@hono/zod-openapi";
 
 import { proposalsOnchain } from "@/database";
-import { normalizeQueryArray, unixTimestampQueryParam } from "../shared";
+import {
+  normalizeQueryArray,
+  OrderDirectionSchema,
+  unixTimestampQueryParam,
+} from "../shared";
 
 export type DBProposal = typeof proposalsOnchain.$inferSelect;
 
@@ -32,10 +36,7 @@ export const ProposalsRequestSchema = z
         description: "Maximum number of proposals to return.",
         example: 10,
       }),
-    orderDirection: z.enum(["asc", "desc"]).default("desc").optional().openapi({
-      description: "Sort direction for proposal timestamps.",
-      example: "desc",
-    }),
+    orderDirection: OrderDirectionSchema.default("desc").optional(),
     status: z
       .preprocess(normalizeQueryArray, StringArrayQuerySchema.optional())
       .transform((values) => values?.map((value) => value.toUpperCase()))

@@ -2,7 +2,12 @@ import { z } from "@hono/zod-openapi";
 import { getAddress, isAddress } from "viem";
 
 import { votesOnchain } from "@/database";
-import { normalizeQueryArray, unixTimestampQueryParam } from "../shared";
+import {
+  normalizeQueryArray,
+  OrderDirectionSchema,
+  unixTimestampQueryParam,
+  VoteSupportSchema,
+} from "../shared";
 
 export type DBVote = typeof votesOnchain.$inferSelect;
 
@@ -56,18 +61,8 @@ export const VotesRequestSchema = z
         description: "Sort votes by timestamp or voting power.",
         example: "timestamp",
       }),
-    orderDirection: z.enum(["asc", "desc"]).optional().default("desc").openapi({
-      description: "Sort direction for the selected order field.",
-      example: "desc",
-    }),
-    support: z
-      .string()
-      .regex(/^\d+$/, "Support must be a numeric vote choice")
-      .optional()
-      .openapi({
-        description: "Numeric support value encoded as a string.",
-        example: "1",
-      }),
+    orderDirection: OrderDirectionSchema.optional().default("desc"),
+    support: VoteSupportSchema.optional(),
     fromDate: unixTimestampQueryParam(
       "Earliest vote timestamp, in Unix seconds.",
     ),

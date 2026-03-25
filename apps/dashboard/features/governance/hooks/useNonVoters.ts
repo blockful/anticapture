@@ -1,7 +1,7 @@
 import type { GetProposalNonVotersQuery } from "@anticapture/graphql-client/hooks";
 import {
+  OrderDirection,
   useGetProposalNonVotersQuery,
-  QueryInput_ProposalNonVoters_OrderDirection,
 } from "@anticapture/graphql-client/hooks";
 import type { ApolloError } from "@apollo/client";
 import { NetworkStatus } from "@apollo/client";
@@ -48,9 +48,7 @@ export const useNonVoters = ({
       limit,
       skip: 0,
       orderDirection:
-        orderDirection === "asc"
-          ? QueryInput_ProposalNonVoters_OrderDirection.Asc
-          : QueryInput_ProposalNonVoters_OrderDirection.Desc,
+        orderDirection === "asc" ? OrderDirection.Asc : OrderDirection.Desc,
     }),
     [proposalId, limit, orderDirection],
   );
@@ -88,9 +86,7 @@ export const useNonVoters = ({
           limit,
           skip: nonVoters.length,
           orderDirection:
-            orderDirection === "asc"
-              ? QueryInput_ProposalNonVoters_OrderDirection.Asc
-              : QueryInput_ProposalNonVoters_OrderDirection.Desc,
+            orderDirection === "asc" ? OrderDirection.Asc : OrderDirection.Desc,
         },
         updateQuery: (prev, { fetchMoreResult }) => {
           if (!fetchMoreResult?.proposalNonVoters) return prev;

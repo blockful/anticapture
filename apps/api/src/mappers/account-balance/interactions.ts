@@ -1,7 +1,11 @@
 import { z } from "@hono/zod-openapi";
 import { getAddress, isAddress } from "viem";
 
-import { PeriodResponseSchema, TimestampResponseMapper } from "../shared";
+import {
+  OrderDirectionSchema,
+  PeriodResponseSchema,
+  TimestampResponseMapper,
+} from "../shared";
 
 import { DBAccountBalanceVariation } from "./variations";
 
@@ -39,7 +43,7 @@ export const AccountInteractionsQuerySchema = z
       .min(0, "Skip must be a non-negative integer")
       .optional()
       .default(0),
-    orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
+    orderDirection: OrderDirectionSchema.optional().default("desc"),
     minAmount: z
       .string()
       .transform((val) => BigInt(val))
@@ -74,7 +78,7 @@ export const AccountInteractionResponseSchema = z
 export const AccountInteractionsResponseSchema = z
   .object({
     period: PeriodResponseSchema,
-    totalCount: z.number(),
+    totalCount: z.number().int(),
     items: z.array(AccountInteractionResponseSchema),
   })
   .openapi("AccountInteractionsResponse", {

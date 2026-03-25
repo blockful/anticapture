@@ -2,6 +2,12 @@ import { z } from "@hono/zod-openapi";
 
 import { MetricTypesEnum } from "@/lib/constants";
 
+import { PageInfoSchema } from "../shared";
+
+const TokenMetricsOrderDirectionSchema = z
+  .enum(["asc", "desc"])
+  .openapi("OrderDirection");
+
 // === ZOD SCHEMAS ===
 
 export const TokenMetricsRequestSchema = z
@@ -20,9 +26,7 @@ export const TokenMetricsRequestSchema = z
       example: 1706745600,
       type: "integer",
     }),
-    orderDirection: z.enum(["asc", "desc"]).default("asc").openapi({
-      description: "Sort direction for the returned buckets.",
-    }),
+    orderDirection: TokenMetricsOrderDirectionSchema.optional(),
     limit: z.coerce.number().int().positive().max(1000).default(365).openapi({
       description: "Maximum number of buckets to return.",
       example: 365,
@@ -57,31 +61,12 @@ export const TokenMetricItemSchema = z
   .openapi("TokenMetricItem");
 
 /**
- * Page info schema
- */
-export const TokenMetricsPageInfoSchema = z
-  .object({
-    hasNextPage: z
-      .boolean()
-      .openapi({ description: "Whether more items are available." }),
-    startDate: z
-      .string()
-      .nullable()
-      .openapi({ description: "Start cursor for the current page." }),
-    endDate: z
-      .string()
-      .nullable()
-      .openapi({ description: "End cursor for the current page." }),
-  })
-  .openapi("TokenMetricsPageInfo");
-
-/**
  * Response for a single metric type
  */
 export const TokenMetricsResponseSchema = z
   .object({
     items: z.array(TokenMetricItemSchema),
-    pageInfo: TokenMetricsPageInfoSchema,
+    pageInfo: PageInfoSchema,
   })
   .openapi("TokenMetricsResponse");
 
@@ -96,6 +81,7 @@ export type TokenMetricItem = z.infer<typeof TokenMetricItemSchema>;
 export interface TokenMetricsServiceResult {
   items: TokenMetricItem[];
   hasNextPage: boolean;
+  hasPreviousPage?: boolean;
   startDate: string | null;
   endDate: string | null;
 }
@@ -110,6 +96,7 @@ export function toTokenMetricsApi(
     items: serviceResult.items,
     pageInfo: {
       hasNextPage: serviceResult.hasNextPage,
+      hasPreviousPage: serviceResult.hasPreviousPage ?? false,
       startDate: serviceResult.startDate,
       endDate: serviceResult.endDate,
     },

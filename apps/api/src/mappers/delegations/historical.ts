@@ -1,6 +1,17 @@
 import { z } from "@hono/zod-openapi";
 import { getAddress, isAddress } from "viem";
 
+import { normalizeQueryArray, OrderDirectionSchema } from "../shared";
+
+const DelegateAddressListSchema = z
+  .array(
+    z
+      .string()
+      .refine((val) => isAddress(val, { strict: false }))
+      .transform((val) => getAddress(val)),
+  )
+  .openapi("DelegateAddressList");
+
 export const HistoricalDelegationsRequestParamsSchema = z
   .object({
     address: z.string().refine((val) => isAddress(val, { strict: false })),
@@ -12,18 +23,7 @@ export const HistoricalDelegationsRequestParamsSchema = z
 export const HistoricalDelegationsRequestQuerySchema = z
   .object({
     delegateAddressIn: z
-      .union([
-        z
-          .string()
-          .refine((val) => isAddress(val, { strict: false }))
-          .transform((val) => [getAddress(val)]),
-        z.array(
-          z
-            .string()
-            .refine((val) => isAddress(val, { strict: false }))
-            .transform((val) => getAddress(val)),
-        ),
-      ])
+      .preprocess(normalizeQueryArray, DelegateAddressListSchema.optional())
       .optional(),
     skip: z.coerce
       .number()
@@ -46,7 +46,7 @@ export const HistoricalDelegationsRequestQuerySchema = z
       .string()
       .transform((val) => BigInt(val))
       .optional(),
-    orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
+    orderDirection: OrderDirectionSchema.optional().default("desc"),
   })
   .openapi("HistoricalDelegationsRequestQuery", {
     description: "Query params used to page and filter historical delegations.",
@@ -78,7 +78,7 @@ export const DelegationItemSchema = z
 export const DelegationsResponseSchema = z
   .object({
     items: z.array(DelegationItemSchema),
-    totalCount: z.number(),
+    totalCount: z.number().int(),
   })
   .openapi("DelegationsResponse", {
     description: "Paginated historical delegations response.",
