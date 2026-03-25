@@ -39,15 +39,17 @@ Tornado Cash does NOT use OpenZeppelin Governor or Compound GovernorAlpha/Bravo.
 
 ### Proposal States
 
-| On-chain State    | Value | Maps to Anticapture |
-| ----------------- | ----- | ------------------- |
-| Pending           | 0     | PENDING             |
-| Active            | 1     | ACTIVE              |
-| Defeated          | 2     | DEFEATED            |
-| Timelocked        | 3     | QUEUED              |
-| AwaitingExecution | 4     | PENDING_EXECUTION   |
-| Executed          | 5     | EXECUTED            |
-| Expired           | 6     | EXPIRED             |
+| On-chain State    | Value | Maps to Anticapture | How tracked                    |
+| ----------------- | ----- | ------------------- | ------------------------------ |
+| Pending           | 0     | PENDING             | Computed by API (time-based)   |
+| Active            | 1     | ACTIVE              | Computed by API (time-based)   |
+| Defeated          | 2     | DEFEATED            | Computed by API (vote tallies) |
+| Timelocked        | 3     | QUEUED              | Computed by API (time-based)   |
+| AwaitingExecution | 4     | PENDING_EXECUTION   | Computed by API (time-based)   |
+| Executed          | 5     | EXECUTED            | Indexed via ProposalExecuted   |
+| Expired           | 6     | EXPIRED             | Computed by API (time-based)   |
+
+**Note**: Unlike OZ governors, Tornado Cash does NOT emit events for state transitions (no `ProposalQueued`, no `ProposalCanceled`). Only `ProposalCreated` and `ProposalExecuted` are emitted. All intermediate states (Pending, Active, Defeated, Timelocked, AwaitingExecution, Expired) are computed at the API level via `TORNClient.getProposalStatus()` using timestamp comparisons. The indexer sets initial status to PENDING on `ProposalCreated` and EXECUTED on `ProposalExecuted`.
 
 ### Event Signatures (Governor)
 
@@ -67,7 +69,17 @@ No `DelegateChanged` or `DelegateVotesChanged` — TORN does not have built-in d
 
 ## Design
 
-### Indexer — Token Handler (`erc20.ts`)
+### Step 1: Enum Sync
+
+Add `TORN = "TORN"` to `DaoIdEnum` in all three locations:
+
+- `apps/indexer/src/lib/enums.ts`
+- `apps/api/src/lib/enums.ts`
+- `apps/dashboard/shared/types/daos.ts`
+
+### Step 2: Indexer
+
+#### Token Handler (`erc20.ts`)
 
 Handle `Transfer` events using the standard `tokenTransfer()` utility:
 
@@ -80,61 +92,104 @@ Handle `Transfer` events using the standard `tokenTransfer()` utility:
 - Transfer TO governor = lock (user locks TORN for voting power)
 - Transfer FROM governor = unlock (user withdraws TORN)
 - Use these to update `delegatedSupply` via `updateDelegatedSupply()` — locked TORN represents the total voting power pool
+- Amount: `+value` for lock (TO governor), `-value` for unlock (FROM governor)
 
-### Indexer — Governor Handler (`governor.ts`)
+**Address classification**: The governance contract address must be added to `NonCirculatingAddresses[DaoIdEnum.TORN]` since locked TORN is not part of circulating supply.
+
+#### Governor Handler (`governor.ts`) — Custom Implementation
+
+The governor handler uses **custom event handlers** (not the shared `proposalCreated()` utility) because Tornado Cash's `ProposalCreated` event provides timestamps, not block numbers. This follows the SHU precedent of writing directly to the schema when the shared utility doesn't fit.
 
 **`Voted` event** → mapped to `voteCast()`:
 
-- `bool support` mapped to `uint8`: `true → 1` (for), `false → 0` (against)
+- `bool support` converted via `event.args.support ? 1 : 0` (for=1, against=0)
 - No abstain support (Tornado Cash doesn't have it)
 - `votes` field provides the voting power used
+- `reason` field: pass empty string `""` (Tornado Cash `Voted` event has no reason parameter)
 
-**`ProposalCreated` event** → mapped to `proposalCreated()`:
+**`ProposalCreated` event** → custom handler (NOT shared `proposalCreated()`):
 
-- Uses `startTime`/`endTime` as timestamps (not block numbers like OZ)
+- Writes directly to `proposalsOnchain` table
+- `startTime` and `endTime` are stored as-is (timestamps, not block numbers)
+- `startBlock` / `endBlock` fields: store synthetic values by converting timestamps to estimated block numbers using `(timestamp - event.block.timestamp) / blockTime + event.block.number`
 - `target` is the proposal contract address (single target, not arrays)
-- `blockTime` parameter will be used to estimate block-based timing where needed
+- Initial status set to `PENDING`
 
 **`ProposalExecuted` event** → mapped to `updateProposalStatus(EXECUTED)`
 
 **`Delegated` event** → mapped to `delegateChanged()`:
 
-- `account` = delegator, `to` = new delegate
-- Previous delegate determined from `accountBalance.delegate` state
+- `delegator = event.args.account`, `delegate = event.args.to`
+- `previousDelegate` determined from `accountBalance.delegate` state
+- `tokenId` = TORN token address (not the governor address), to maintain consistency with how other DAOs key delegation records in the data model
 
 **`Undelegated` event** → mapped to `delegateChanged()`:
 
-- `account` = delegator, `from` = previous delegate
-- New delegate = self (reverts to self-delegation)
+- `delegator = event.args.account`, `delegate = event.args.account` (self)
+- `previousDelegate = event.args.from`
+- `tokenId` = TORN token address
 
-### Indexer — Ponder Config
+#### ABIs (`apps/indexer/src/indexer/torn/abi/`)
+
+- `token.ts`: Standard ERC20 ABI (Transfer event only — no delegation events)
+- `governor.ts`: Custom ABI for Tornado Cash governance (ProposalCreated, Voted, ProposalExecuted, Delegated, Undelegated)
+- `index.ts`: Re-exports both as `TORNTokenAbi` and `TORNGovernorAbi`
+
+#### Ponder Config (`apps/indexer/config/torn.config.ts`)
 
 - Chain: `ethereum_mainnet` (chain ID 1)
-- Two contracts: `TORNToken` (TORN ERC20) and `TORNGovernor` (Governance)
+- Two contracts: `TORNToken` and `TORNGovernor`
 - Start blocks: token at 11,474,599, governor at 11,474,695
 
-### API — Client
+#### Constants (`apps/indexer/src/lib/constants.ts`)
+
+Add `CONTRACT_ADDRESSES[DaoIdEnum.TORN]` with token and governor entries. Add governance contract to `NonCirculatingAddresses`. Add known CEX/DEX/Treasury addresses if available.
+
+#### Wiring
+
+- Import `torn.config.ts` in `apps/indexer/ponder.config.ts` and spread chains/contracts
+- Add switch case in `apps/indexer/src/index.ts` for `DaoIdEnum.TORN`
+
+### Step 3: API
+
+#### Client (`apps/api/src/clients/torn/index.ts`)
 
 `TORNClient extends GovernorBase implements DAOClient`:
 
 - `getDaoId()` → `"TORN"`
-- `getQuorum()` → calls `QUORUM_VOTES()` on governor (returns 100,000 TORN)
-- `getTimelockDelay()` → calls `EXECUTION_DELAY()` on governor (no separate timelock)
+- **Override** `getQuorum()` → calls `QUORUM_VOTES()` on governor (SCREAMING_SNAKE_CASE, not camelCase)
+- **Override** `getTimelockDelay()` → calls `EXECUTION_DELAY()` on governor (no separate timelock)
 - `calculateQuorum(votes)` → `votes.forVotes` (Tornado requires forVotes > quorum, no abstain counted)
-- `alreadySupportCalldataReview()` → `false` (proposals are contracts, not calldata)
-- Custom `getVotingDelay()` → calls `VOTING_DELAY()` (returns seconds, not blocks)
-- Custom `getVotingPeriod()` → calls `VOTING_PERIOD()` (returns seconds, not blocks)
-- Custom `getProposalThreshold()` → calls `PROPOSAL_THRESHOLD()`
+- `alreadySupportCalldataReview()` → `false`
+- **Override** `getVotingDelay()` → calls `VOTING_DELAY()` (SCREAMING_SNAKE_CASE, returns seconds)
+- **Override** `getVotingPeriod()` → calls `VOTING_PERIOD()` (SCREAMING_SNAKE_CASE, returns seconds)
+- **Override** `getProposalThreshold()` → calls `PROPOSAL_THRESHOLD()` (SCREAMING_SNAKE_CASE)
+- **Override** `getProposalStatus()` → **timestamp-based status computation** instead of block-based. This is critical because the base `GovernorBase.getProposalStatus()` compares `currentBlock` against `startBlock`/`endBlock`, but Tornado Cash uses timestamp-based governance. The override must use `currentTimestamp` against `startTime`/`endTime` and apply Tornado Cash's state machine logic: Pending → Active → (Defeated | Timelocked → AwaitingExecution → (Executed | Expired))
 
-### Gateway
+#### ABI
+
+Create `apps/api/src/clients/torn/abi.ts` with the governor ABI containing the SCREAMING_SNAKE_CASE function signatures.
+
+#### Wiring
+
+- Export from `apps/api/src/clients/index.ts`
+- Add to `getClient()` factory in `apps/api/src/lib/client.ts`
+
+#### Constants (`apps/api/src/lib/constants.ts`)
+
+Mirror `CONTRACT_ADDRESSES[DaoIdEnum.TORN]` from the indexer.
+
+### Step 4: Gateway
 
 Add `DAO_API_TORN=<api-url>` env var. No code changes needed.
 
-### Dashboard
+### Step 5: Dashboard
 
-- DAO config with feature flags
-- Color scheme TBD (can use Tornado Cash's green `#94FEBF` or similar)
-- Icon component needed
+#### DAO Config (`apps/dashboard/shared/dao-config/torn.ts`)
+
+- Color scheme: Tornado Cash green `#94FEBF` or similar
+- Icon component needed in `apps/dashboard/shared/components/icons/`
+- Feature flags: `resilienceStages: true`, `tokenDistribution: true`, `dataTables: true`, `governancePage: true`
 - `daoOverview.rules`:
   - `delay: true` (75s voting delay)
   - `changeVote: false`
@@ -143,13 +198,18 @@ Add `DAO_API_TORN=<api-url>` env var. No code changes needed.
   - `logic: "For"` (binary: for/against, no abstain)
   - `quorumCalculation: "Fixed at 100,000 TORN"`
 
+#### Wiring
+
+- Register config in `apps/dashboard/shared/dao-config/index.ts`
+- Add to `DaoIdEnum` in `apps/dashboard/shared/types/daos.ts` (covered in Step 1)
+
 ### RPC Considerations
 
 Merkle RPC (`eth.merkle.io`) blocks calls to Tornado Cash contracts with `"sanctioned"` error. Must use an alternative:
 
-- User's local reth node (for local dev/testing)
+- User's local reth node (for local dev/testing and indexer)
 - Llama RPC (`eth.llamarpc.com`) works but is unreliable (502 errors observed)
-- Production deployment needs a non-censoring RPC endpoint configured via env var
+- Production: configure a non-censoring RPC endpoint via `RPC_URL` env var (e.g., user's own reth node or a private RPC provider)
 
 ## Verification Strategy
 
@@ -170,12 +230,14 @@ Document these in `INTEGRATION.md`:
 
 2. **No abstain votes**: Tornado Cash uses binary voting (`bool support`). The `abstainVotes` field on proposals will always be 0. Dashboard should hide the abstain column for TORN.
 
-3. **Vote extension mechanism**: If a vote outcome flips in the last hour (`CLOSING_PERIOD`), voting extends by 6 hours (`VOTE_EXTEND_TIME`). Our indexer won't track this dynamic — `endTime` from `ProposalCreated` is the initial end time. The actual end time may differ for proposals where the extension triggered. This could cause brief status mismatches.
+3. **Vote extension mechanism**: If a vote outcome flips in the last hour (`CLOSING_PERIOD`), voting extends by 6 hours (`VOTE_EXTEND_TIME`). Our indexer won't track this dynamic — `endTime` from `ProposalCreated` is the initial end time. The actual end time may differ for proposals where the extension triggered. This could cause brief status mismatches during the extension window.
 
 4. **Staking rewards**: The `TornadoStakingRewards` contract distributes relayer fees to locked TORN holders. This is an economic dimension not captured by our indexer. It doesn't affect governance voting directly but is relevant context.
 
-5. **Governance attacks / upgrades**: The contract has been upgraded multiple times (current version: `"5.proposal-state-patch"`), including after the May 2023 governance attack. Our indexer will process all events from genesis, including the attack period. Proposal states should still be correct since we rely on emitted events.
+5. **Governance attacks / upgrades**: The contract has been upgraded multiple times (current version: `"5.proposal-state-patch"`), including after the May 2023 governance attack where an attacker gained majority voting power via a malicious proposal. Our indexer will process all events from genesis, including the attack period. The indexed data will accurately reflect this period, which may show unusual voting power concentration on the dashboard.
 
 6. **Cancel function**: Tornado Cash proposals cannot be canceled once created (no `ProposalCanceled` event). The `cancelFunction` rule should be set to `false`.
 
 7. **Proposal target decoding**: Proposals are deployed contracts executed via `delegatecall`. We index the `target` address but cannot decode what the proposal does without reading the target contract's bytecode. `alreadySupportCalldataReview` should be `false`.
+
+8. **Timestamp-based governance timing**: All governance parameters (voting delay, period, execution delay) are in seconds, not blocks. The `TORNClient.getProposalStatus()` override uses timestamp comparisons. Synthetic block numbers are stored for schema compatibility but are estimates.
