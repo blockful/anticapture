@@ -60,7 +60,7 @@ export default createConfig({
       abi: MainnetLGno,
       chain: "ethereum_mainnet",
       // https://etherscan.io/address/0x6810e776880C02933D47DB1b9fc05908e5386b96
-      address: "0x6810e776880C02933D47DB1b9fc05908e5386b96",
+      address: "0x4f8AD938eBA0CD19155a835f617317a6E788c868",
       startBlock: 14111111,
     },
   },
