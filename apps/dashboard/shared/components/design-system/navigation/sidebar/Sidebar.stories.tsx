@@ -9,41 +9,15 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-import { DaoAvatarIcon } from "@/shared/components/icons/DaoAvatarIcon";
+import { HeaderDAOSidebarDropdown } from "@/shared/components/dropdowns/HeaderDAOSidebarDropdown";
 import { Sidebar } from "@/shared/components/design-system/navigation/sidebar/Sidebar";
 import type { SidebarProps } from "@/shared/components/design-system/navigation/sidebar/Sidebar";
-import { SidebarDAODropdown } from "@/shared/components/design-system/navigation/sidebar-dao-dropdown/SidebarDAODropdown";
 import { SidebarNavItem } from "@/shared/components/design-system/navigation/sidebar-nav-item/SidebarNavItem";
-import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 // ---------------------------------------------------------------------------
 // Sample data
 // ---------------------------------------------------------------------------
-
-const uniswap = DaoIdEnum.UNISWAP;
-const uniswapLabel = daoConfigByDaoId[uniswap].name;
-
-const DAOAvatar = () => (
-  <DaoAvatarIcon daoId={uniswap} className="size-6" isRounded />
-);
-
-const DropdownItems = () => (
-  <>
-    {Object.values(DaoIdEnum).map((daoId) => (
-      <button
-        key={daoId}
-        type="button"
-        role="menuitem"
-        className="text-primary hover:bg-surface-default flex w-full items-center gap-2 px-3 py-2 text-sm font-normal transition-colors"
-      >
-        <DaoAvatarIcon daoId={daoId} className="size-4" isRounded />
-        {daoConfigByDaoId[daoId].name}
-      </button>
-    ))}
-  </>
-);
 
 const navItems = [
   { icon: PieChart, label: "Overview", isActive: true },
@@ -64,6 +38,12 @@ const meta: Meta<SidebarProps> = {
   parameters: {
     layout: "fullscreen",
     design: getFigmaDesignConfigByNodeId("7896-9014"),
+    nextjs: {
+      appDirectory: true,
+      navigation: {
+        pathname: "/uni",
+      },
+    },
   },
   tags: ["autodocs"],
   argTypes: {
@@ -102,11 +82,7 @@ type Story = StoryObj<SidebarProps>;
 export const Default: Story = {
   args: {
     isCollapsed: false,
-    header: (
-      <SidebarDAODropdown label={uniswapLabel} avatar={<DAOAvatar />}>
-        <DropdownItems />
-      </SidebarDAODropdown>
-    ),
+    header: <HeaderDAOSidebarDropdown />,
     children: (
       <>
         {navItems.map((item) => (
@@ -132,13 +108,7 @@ export const AllStates: Story = {
   render: () => (
     <div className="flex h-screen">
       {/* Expanded */}
-      <Sidebar
-        header={
-          <SidebarDAODropdown label={uniswapLabel} avatar={<DAOAvatar />}>
-            <DropdownItems />
-          </SidebarDAODropdown>
-        }
-      >
+      <Sidebar header={<HeaderDAOSidebarDropdown />}>
         {navItems.map((item) => (
           <SidebarNavItem
             key={item.label}
@@ -152,18 +122,7 @@ export const AllStates: Story = {
       </Sidebar>
 
       {/* Collapsed */}
-      <Sidebar
-        isCollapsed
-        header={
-          <SidebarDAODropdown
-            label={uniswapLabel}
-            avatar={<DAOAvatar />}
-            isCollapsed
-          >
-            <DropdownItems />
-          </SidebarDAODropdown>
-        }
-      >
+      <Sidebar isCollapsed header={<HeaderDAOSidebarDropdown isCollapsed />}>
         {navItems.map((item) => (
           <SidebarNavItem
             key={item.label}
@@ -191,14 +150,10 @@ export const Interactive: Story = {
         <Sidebar
           isCollapsed={isCollapsed}
           header={
-            <SidebarDAODropdown
-              label={uniswapLabel}
-              avatar={<DAOAvatar />}
+            <HeaderDAOSidebarDropdown
               isCollapsed={isCollapsed}
               onToggleCollapse={toggle}
-            >
-              <DropdownItems />
-            </SidebarDAODropdown>
+            />
           }
         >
           {navItems.map((item) => (
