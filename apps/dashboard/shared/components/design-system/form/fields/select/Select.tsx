@@ -36,7 +36,10 @@ export const Select = ({
   return (
     <PopoverPrimitive.Root
       open={open}
-      onOpenChange={disabled ? undefined : setOpen}
+      onOpenChange={(nextOpen) => {
+        if (disabled && nextOpen) return;
+        setOpen(nextOpen);
+      }}
     >
       <PopoverPrimitive.Trigger asChild>
         <button

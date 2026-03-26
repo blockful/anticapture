@@ -2,8 +2,8 @@ import type { ReactNode } from "react";
 
 export type CardTitleProps = {
   text: string;
-  isSmall?: boolean;
-  hasIcon?: boolean;
+  size?: "small" | "default";
+  icon?: ReactNode;
   avatar?: ReactNode;
   badge?: ReactNode;
   className?: string;
@@ -15,7 +15,7 @@ export type ClickableCardProps = {
   subtitle?: string;
   description?: string;
   badge?: ReactNode;
-  disabled?: boolean;
+  isDisabled?: boolean;
   onClick?: () => void;
   className?: string;
 };

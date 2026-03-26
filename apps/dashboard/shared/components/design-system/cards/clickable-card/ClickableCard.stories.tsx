@@ -45,7 +45,7 @@ const meta = {
       control: false,
       description: "Badge node shown after the title",
     },
-    disabled: {
+    isDisabled: {
       control: "boolean",
       description: "Disabled state — reduces opacity and blocks interaction",
     },
@@ -68,7 +68,7 @@ export const Default: Story = {
     title: uniswapLabel,
     subtitle: "October, 2024",
     avatar: <DAOAvatar />,
-    disabled: false,
+    isDisabled: false,
   },
   decorators: [
     (Story) => (
@@ -122,7 +122,7 @@ export const AllStates: Story = {
           title={uniswapLabel}
           subtitle="October, 2024"
           avatar={<DAOAvatar />}
-          disabled
+          isDisabled
         />
       </div>
 
@@ -135,7 +135,7 @@ export const AllStates: Story = {
           avatar={<DAOAvatar />}
           badge={<SampleBadge />}
           description="You're in crypto, so real-time governance alerts on Telegram are a must."
-          disabled
+          isDisabled
         />
       </div>
     </div>

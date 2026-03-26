@@ -1,3 +1,4 @@
+import { CheckCircle2 } from "lucide-react";
 import figma from "@figma/code-connect";
 
 import { RadioCard } from "@/shared/components/design-system/form/fields/radio-card/RadioCard";
@@ -9,27 +10,29 @@ figma.connect(
     props: {
       label: figma.string("label"),
       hasIcon: figma.boolean("hasIcon"),
-      isRadioRight: figma.boolean("isRadioRight"),
-      isSelected: figma.enum("status", {
+      placementRight: figma.boolean("isRadioRight"),
+      isActive: figma.enum("status", {
         active: true,
         default: false,
         hover: false,
         disabled: false,
       }),
-      disabled: figma.enum("status", {
+      isDisabled: figma.enum("status", {
         active: false,
         default: false,
         hover: false,
         disabled: true,
       }),
     },
-    example: ({ label, hasIcon, isRadioRight, isSelected, disabled }) => (
+    example: ({ label, hasIcon, placementRight, isActive, isDisabled }) => (
       <RadioCard
         label={label}
-        hasIcon={hasIcon}
-        isRadioRight={isRadioRight}
-        isSelected={isSelected}
-        disabled={disabled}
+        icon={
+          hasIcon ? <CheckCircle2 className="size-3.5 shrink-0" /> : undefined
+        }
+        placementRight={placementRight}
+        isActive={isActive}
+        isDisabled={isDisabled}
       />
     ),
   },

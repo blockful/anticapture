@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
+import { CheckCircle2 } from "lucide-react";
 
 import { BadgeStatus } from "@/shared/components/design-system/badges/badge-status/BadgeStatus";
 import { CardTitle } from "@/shared/components/design-system/cards/card-title/CardTitle";
@@ -17,13 +18,14 @@ const meta = {
       control: "text",
       description: "Title text content",
     },
-    isSmall: {
-      control: "boolean",
-      description: "Use smaller 14px size instead of 18px",
+    size: {
+      control: "select",
+      options: ["default", "small"],
+      description: "Size variant — default (18px) or small (14px)",
     },
-    hasIcon: {
-      control: "boolean",
-      description: "Show check-circle icon before the text",
+    icon: {
+      control: false,
+      description: "Icon node rendered before the text",
     },
     avatar: {
       control: false,
@@ -46,8 +48,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     text: "Card Title",
-    isSmall: false,
-    hasIcon: false,
+    size: "default",
   },
 };
 
@@ -56,12 +57,13 @@ export const AllStates: Story = {
   render: () => (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
-        <span className="text-secondary px-1 text-xs">
-          Large (isSmall=false)
-        </span>
+        <span className="text-secondary px-1 text-xs">Default size</span>
         <div className="flex flex-col gap-3">
           <CardTitle text="Card Title" />
-          <CardTitle text="Card Title" hasIcon />
+          <CardTitle
+            text="Card Title"
+            icon={<CheckCircle2 className="text-secondary size-4 shrink-0" />}
+          />
           <CardTitle
             text="Card Title"
             avatar={<div className="bg-surface-contrast size-6 rounded-full" />}
@@ -79,25 +81,27 @@ export const AllStates: Story = {
       </div>
 
       <div className="flex flex-col gap-2">
-        <span className="text-secondary px-1 text-xs">
-          Small (isSmall=true)
-        </span>
+        <span className="text-secondary px-1 text-xs">Small size</span>
         <div className="flex flex-col gap-3">
-          <CardTitle text="Card Title" isSmall />
-          <CardTitle text="Card Title" isSmall hasIcon />
+          <CardTitle text="Card Title" size="small" />
           <CardTitle
             text="Card Title"
-            isSmall
+            size="small"
+            icon={<CheckCircle2 className="text-secondary size-4 shrink-0" />}
+          />
+          <CardTitle
+            text="Card Title"
+            size="small"
             avatar={<div className="bg-surface-contrast size-5 rounded-full" />}
           />
           <CardTitle
             text="Card Title"
-            isSmall
+            size="small"
             badge={<BadgeStatus variant="secondary">Badge</BadgeStatus>}
           />
           <CardTitle
             text="Card Title"
-            isSmall
+            size="small"
             avatar={<div className="bg-surface-contrast size-5 rounded-full" />}
             badge={<BadgeStatus variant="secondary">Badge</BadgeStatus>}
           />

@@ -1,17 +1,17 @@
-import { CheckCircle2 } from "lucide-react";
-
 import { cn } from "@/shared/utils/cn";
 
 import type { CardTitleProps } from "@/shared/components/design-system/cards/types";
 
 export const CardTitle = ({
   text,
-  isSmall = false,
-  hasIcon = false,
+  size = "default",
+  icon,
   avatar,
   badge,
   className,
 }: CardTitleProps) => {
+  const isSmall = size === "small";
+
   return (
     <div
       className={cn(
@@ -20,7 +20,7 @@ export const CardTitle = ({
         className,
       )}
     >
-      {hasIcon && <CheckCircle2 className="text-secondary size-4 shrink-0" />}
+      {icon}
       {avatar}
       <span
         className={cn(

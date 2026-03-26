@@ -31,13 +31,14 @@ export const SidebarDAODropdown = ({
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const close = useCallback(() => {
+    if (!isOpen) return;
     if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
     setIsClosing(true);
     closeTimerRef.current = setTimeout(() => {
       setIsOpen(false);
       setIsClosing(false);
     }, ANIMATION_DURATION);
-  }, []);
+  }, [isOpen]);
 
   const open = useCallback(() => {
     if (closeTimerRef.current) clearTimeout(closeTimerRef.current);

@@ -1,3 +1,4 @@
+import { CheckCircle2 } from "lucide-react";
 import figma from "@figma/code-connect";
 
 import { CardTitle } from "@/shared/components/design-system/cards/card-title/CardTitle";
@@ -8,11 +9,19 @@ figma.connect(
   {
     props: {
       text: figma.string("text"),
-      isSmall: figma.enum("isSmall", { true: true, false: false }),
-      hasIcon: figma.enum("hasIcon", { true: true, false: false }),
+      size: figma.enum("size", { small: "small", default: "default" }),
+      hasIcon: figma.boolean("hasIcon"),
     },
-    example: ({ text, isSmall, hasIcon }) => (
-      <CardTitle text={text} isSmall={isSmall} hasIcon={hasIcon} />
+    example: ({ text, size, hasIcon }) => (
+      <CardTitle
+        text={text}
+        size={size}
+        icon={
+          hasIcon ? (
+            <CheckCircle2 className="text-secondary size-4 shrink-0" />
+          ) : undefined
+        }
+      />
     ),
   },
 );

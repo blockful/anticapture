@@ -7,17 +7,17 @@ figma.connect(
   "https://www.figma.com/design/DEKMQifA8YOb3oxznHboSY/%F0%9F%93%81-Orbit-UI?node-id=21632-1110",
   {
     props: {
-      disabled: figma.enum("status", {
+      isDisabled: figma.enum("status", {
         default: false,
         hover: false,
         disabled: true,
       }),
     },
-    example: ({ disabled }) => (
+    example: ({ isDisabled }) => (
       <ClickableCard
         title="Card Title"
         subtitle="October, 2024"
-        disabled={disabled}
+        isDisabled={isDisabled}
       />
     ),
   },
