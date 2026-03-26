@@ -1,8 +1,9 @@
+import { getAddress } from "viem";
 import { z } from "zod";
 
 export const rawVoteSchema = z.object({
   id: z.string(),
-  voter: z.string(),
+  voter: z.string().transform((val) => getAddress(val)),
   proposal: z.object({ id: z.string() }),
   choice: z.unknown(),
   vp: z
