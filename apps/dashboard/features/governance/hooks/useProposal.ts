@@ -16,11 +16,13 @@ export interface UseProposalResult {
 export interface UseProposalParams {
   proposalId: string;
   daoId: DaoIdEnum;
+  skip?: boolean;
 }
 
 export const useProposal = ({
   proposalId,
   daoId,
+  skip = false,
 }: UseProposalParams): UseProposalResult => {
   // Main proposal query
   const { data, loading, error } = useGetProposalQuery({
@@ -33,7 +35,7 @@ export const useProposal = ({
         ...getAuthHeaders(),
       },
     },
-    skip: !proposalId, // Skip query if no proposalId provided
+    skip: skip || !proposalId,
   });
 
   // Transform raw GraphQL data to governance proposal format

@@ -69,6 +69,14 @@ type RawOffchainProposal = NonNullable<
 
 function transformOffchainProposal(p: RawOffchainProposal): GovernanceProposal {
   const timeText = getTimeText(String(p.start), String(p.end));
+  const forVotes = p.scores?.forVotes ?? "0";
+  const againstVotes = p.scores?.againstVotes ?? "0";
+  const forNum = parseFloat(forVotes);
+  const againstNum = parseFloat(againstVotes);
+  const total = forNum + againstNum;
+  const forPercentage = total > 0 ? ((forNum / total) * 100).toFixed(2) : "0";
+  const againstPercentage =
+    total > 0 ? ((againstNum / total) * 100).toFixed(2) : "0";
   return {
     id: p.id,
     daoId: p.spaceId,
@@ -82,11 +90,11 @@ function transformOffchainProposal(p: RawOffchainProposal): GovernanceProposal {
     startTimestamp: String(p.start),
     endTimestamp: String(p.end),
     votes: {
-      for: "0",
-      against: "0",
-      total: "0",
-      forPercentage: "0",
-      againstPercentage: "0",
+      for: forVotes,
+      against: againstVotes,
+      total: total.toString(),
+      forPercentage,
+      againstPercentage,
     },
     quorum: "0",
     timeText,

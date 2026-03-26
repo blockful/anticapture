@@ -1388,6 +1388,11 @@ type offchainProposals_200_response {
   totalCount: Float!
 }
 
+type query_offchainProposals_items_scores {
+  forVotes: String!
+  againstVotes: String!
+}
+
 type query_offchainProposals_items_items {
   id: String!
   spaceId: String!
@@ -1403,6 +1408,7 @@ type query_offchainProposals_items_items {
   updated: Float!
   link: String!
   flagged: Boolean!
+  scores: query_offchainProposals_items_scores!
 }
 
 enum queryInput_offchainProposals_orderDirection {
@@ -1425,6 +1431,7 @@ type offchainProposalById_200_response {
   updated: Float!
   link: String!
   flagged: Boolean!
+  scores: query_offchainProposals_items_scores!
 }
 
 type votesOffchain_200_response {
