@@ -8,7 +8,6 @@ import {
   GovernanceActivityDaysQuerySchema,
   ProposalsComparisonResponseSchema,
   VotesComparisonResponseSchema,
-  daysWindowToEnum,
 } from "@/mappers";
 
 import {
@@ -56,8 +55,8 @@ export function governanceActivity(
       },
     }),
     async (context) => {
-      const { days = "90d" } = context.req.valid("query");
-      const data = await repository.getActiveSupply(daysWindowToEnum(days));
+      const { days } = context.req.valid("query");
+      const data = await repository.getActiveSupply(days);
       return context.json({ activeSupply: data?.activeSupply || "0" }, 200);
     },
   );
@@ -84,9 +83,9 @@ export function governanceActivity(
       },
     }),
     async (context) => {
-      const { days = "90d" } = context.req.valid("query");
+      const { days } = context.req.valid("query");
 
-      const data = await repository.getProposalsCompare(daysWindowToEnum(days));
+      const data = await repository.getProposalsCompare(days);
       if (!data) {
         return context.json(
           {
@@ -133,9 +132,9 @@ export function governanceActivity(
       },
     }),
     async (context) => {
-      const { days = "90d" } = context.req.valid("query");
+      const { days } = context.req.valid("query");
 
-      const data = await repository.getVotesCompare(daysWindowToEnum(days));
+      const data = await repository.getVotesCompare(days);
       if (!data) {
         return context.json(
           {
@@ -181,11 +180,9 @@ export function governanceActivity(
       },
     }),
     async (context) => {
-      const { days = "90d" } = context.req.valid("query");
+      const { days } = context.req.valid("query");
 
-      const data = await repository.getAverageTurnoutCompare(
-        daysWindowToEnum(days),
-      );
+      const data = await repository.getAverageTurnoutCompare(days);
       if (!data) {
         return context.json(
           {

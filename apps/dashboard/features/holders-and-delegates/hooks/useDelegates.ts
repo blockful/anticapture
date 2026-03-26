@@ -109,7 +109,8 @@ export const useDelegates = ({
       orderBy,
       limit,
       fromDate: fromDate.toString(),
-      ...(address && { addresses: [address] }),
+      toDate: null,
+      addresses: address ? [address] : null,
     },
     context: {
       headers: { "anticapture-dao-id": daoId, ...getAuthHeaders() },
@@ -124,7 +125,8 @@ export const useDelegates = ({
       orderDirection,
       orderBy,
       fromDate: fromDate.toString(),
-      ...(address && { addresses: [address] }),
+      toDate: null,
+      addresses: address ? [address] : null,
     });
   }, [orderDirection, address, refetch, orderBy, fromDate]);
 
@@ -240,7 +242,8 @@ export const useDelegates = ({
           orderDirection,
           orderBy,
           fromDate: fromDate.toString(),
-          ...(address && { addresses: [address] }),
+          toDate: null,
+          addresses: address ? [address] : null,
           skip: currentItemsCount,
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
@@ -279,7 +282,8 @@ export const useDelegates = ({
       orderDirection,
       orderBy,
       fromDate: fromDate.toString(),
-      ...(address && { addresses: [address] }),
+      toDate: null,
+      addresses: address ? [address] : null,
     });
   }, [refetch, orderDirection, address, orderBy, fromDate]);
 

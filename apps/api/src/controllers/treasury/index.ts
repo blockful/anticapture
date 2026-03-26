@@ -4,8 +4,6 @@ import {
   TreasuryResponseSchema,
   TreasuryQuerySchema,
 } from "@/mappers/treasury";
-import { daysWindowToEnum } from "@/mappers";
-
 import { TreasuryService } from "@/services/treasury";
 
 export function treasury(
@@ -37,10 +35,9 @@ export function treasury(
       },
     }),
     async (context) => {
-      const { days = "365d", orderDirection = "asc" } =
-        context.req.valid("query");
+      const { days, orderDirection = "asc" } = context.req.valid("query");
       const result = await treasuryService.getLiquidTreasury(
-        daysWindowToEnum(days) / (24 * 60 * 60),
+        days / (24 * 60 * 60),
         orderDirection,
       );
       return context.json(result, 200);
@@ -71,10 +68,9 @@ export function treasury(
       },
     }),
     async (context) => {
-      const { days = "365d", orderDirection = "asc" } =
-        context.req.valid("query");
+      const { days, orderDirection = "asc" } = context.req.valid("query");
       const result = await treasuryService.getTokenTreasury(
-        daysWindowToEnum(days) / (24 * 60 * 60),
+        days / (24 * 60 * 60),
         orderDirection,
         decimals,
       );
@@ -106,10 +102,9 @@ export function treasury(
       },
     }),
     async (context) => {
-      const { days = "365d", orderDirection = "asc" } =
-        context.req.valid("query");
+      const { days, orderDirection = "asc" } = context.req.valid("query");
       const result = await treasuryService.getTotalTreasury(
-        daysWindowToEnum(days) / (24 * 60 * 60),
+        days / (24 * 60 * 60),
         orderDirection,
         decimals,
       );

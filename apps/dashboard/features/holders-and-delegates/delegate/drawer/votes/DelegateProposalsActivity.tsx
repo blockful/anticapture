@@ -76,7 +76,7 @@ export const DelegateProposalsActivity = ({
       orderDirection: orderDirection as OrderDirection,
       userVoteFilter:
         userVoteFilter === "all"
-          ? undefined
+          ? null
           : (userVoteFilter as QueryInput_ProposalsActivity_UserVoteFilter),
       limit,
     });

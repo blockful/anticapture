@@ -45,9 +45,11 @@ export const VotesTabContent = ({
   const { data: delegatedSupplyData } = useTokenMetricsQuery({
     variables: {
       metricType: QueryInput_TokenMetrics_MetricType.DelegatedSupply,
+      startDate: null,
       endDate: Number(proposal.endTimestamp),
       orderDirection: OrderDirection.Desc,
       limit: 1,
+      skip: null,
     },
     context: {
       headers: {
@@ -61,6 +63,10 @@ export const VotesTabContent = ({
   const { data } = useGetVotesQuery({
     variables: {
       proposalId: proposal.id,
+      limit: null,
+      skip: null,
+      support: null,
+      voterAddressIn: null,
     },
     context: {
       headers: {
@@ -75,6 +81,7 @@ export const VotesTabContent = ({
     variables: {
       id: proposal.id,
       limit: 1, // We only need the count
+      skip: null,
     },
     context: {
       headers: {

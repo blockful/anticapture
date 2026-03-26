@@ -71,13 +71,13 @@ export const useDelegationHistory = ({
       limit,
       orderDirection:
         orderDirection === "asc" ? OrderDirection.Asc : OrderDirection.Desc,
-      ...(delegateAccountId && { delegate: [delegateAccountId] }),
-      ...(filterVariables?.fromValue && {
-        fromValue: filterVariables.fromValue.toString(),
-      }),
-      ...(filterVariables?.toValue && {
-        toValue: filterVariables.toValue.toString(),
-      }),
+      delegate: delegateAccountId ? [delegateAccountId] : null,
+      fromValue: filterVariables?.fromValue
+        ? filterVariables.fromValue.toString()
+        : null,
+      toValue: filterVariables?.toValue
+        ? filterVariables.toValue.toString()
+        : null,
     },
     context: {
       headers: {

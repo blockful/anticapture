@@ -64,8 +64,8 @@ export const useActivityFeed = ({
       orderDirection:
         filters.sortOrder === "asc" ? OrderDirection.Asc : OrderDirection.Desc,
       relevance: filters.relevance ?? FeedRelevance.Medium,
-      fromDate: filters.fromTimestamp,
-      toDate: filters.toTimestamp,
+      fromDate: filters.fromTimestamp ?? null,
+      toDate: filters.toTimestamp ?? null,
     }),
     [
       requestedLimit,
@@ -172,8 +172,8 @@ export const useActivityFeed = ({
     const items = activeQueries.flatMap(
       ({ query }) =>
         (query.data?.feedEvents?.items.filter(
-          (item): item is FeedEvent => item !== null,
-        ) as FeedEvent[]) ?? [],
+          (item): item is NonNullable<typeof item> => item !== null,
+        ) as unknown as FeedEvent[]) ?? [],
     );
 
     return items

@@ -2,12 +2,9 @@ import { z } from "@hono/zod-openapi";
 import { getAddress, isAddress } from "viem";
 
 import { transfer } from "@/database";
+import { OrderDirectionSchema } from "../shared";
 
 export type DBTransfer = typeof transfer.$inferSelect;
-
-const TransfersOrderDirectionSchema = z
-  .enum(["asc", "desc"])
-  .openapi("OrderDirection");
 
 const AddressSchema = z
   .string()
@@ -30,7 +27,7 @@ export const TransfersRequestQuerySchema = z
     limit: z.coerce.number().int().optional().default(10),
     offset: z.coerce.number().int().optional().default(0),
     orderBy: z.enum(["timestamp", "amount"]).optional().default("timestamp"),
-    orderDirection: TransfersOrderDirectionSchema.optional(),
+    orderDirection: OrderDirectionSchema.optional(),
     from: z
       .string()
       .refine((addr) => isAddress(addr, { strict: false }), {

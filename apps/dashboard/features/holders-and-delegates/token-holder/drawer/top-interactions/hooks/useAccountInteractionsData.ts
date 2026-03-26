@@ -88,10 +88,11 @@ export const useAccountInteractionsData = ({
         address,
         orderBy: sortBy as QueryInput_AccountInteractions_OrderBy,
         orderDirection: sortDirection as OrderDirection,
-        minAmount: filterVariables?.minAmount,
-        maxAmount: filterVariables?.maxAmount,
+        minAmount: filterVariables?.minAmount ?? null,
+        maxAmount: filterVariables?.maxAmount ?? null,
         limit,
-        filterAddress,
+        skip: null,
+        filterAddress: filterAddress ?? null,
       },
       context: {
         headers: {

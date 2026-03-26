@@ -3,6 +3,7 @@
 import type {
   HistoricalVotingPowerByAccountQuery,
   HistoricalVotingPowerByAccountQueryVariables,
+  InputMaybe,
   OrderDirection,
 } from "@anticapture/graphql-client";
 import { useHistoricalVotingPowerByAccountQuery } from "@anticapture/graphql-client/hooks";
@@ -92,41 +93,18 @@ export function useDelegateDelegationHistory({
     setCurrentPage(1);
   }, [orderBy, orderDirection, accountId, customFromFilter, customToFilter]);
 
-  const { fromFilter, toFilter } = useMemo(() => {
-    if (customToFilter && customToFilter !== accountId) {
-      return {
-        fromFilter: accountId,
-        toFilter: customToFilter,
-      };
-    }
-
-    if (customFromFilter && customFromFilter !== accountId) {
-      return {
-        fromFilter: customFromFilter,
-        toFilter: accountId,
-      };
-    }
-    return {
-      fromFilter: accountId,
-      toFilter: accountId,
-    };
-  }, [accountId, customFromFilter, customToFilter]);
-
   const queryVariables = useMemo(
     () => ({
       account: accountId,
+      skip: null as InputMaybe<number>,
       limit,
       orderBy:
         orderBy as HistoricalVotingPowerByAccountQueryVariables["orderBy"],
       orderDirection: orderDirection as OrderDirection,
-      ...(filterVariables?.toValue && { toValue: filterVariables.toValue }),
-      ...(filterVariables?.fromValue && {
-        fromValue: filterVariables.fromValue,
-      }),
-      ...(fromFilter && { delegator: fromFilter }),
-      ...(toFilter && { delegate: toFilter }),
-      ...(fromTimestamp && { fromDate: fromTimestamp.toString() }),
-      ...(toTimestamp && { toDate: toTimestamp.toString() }),
+      toValue: filterVariables?.toValue ?? null,
+      fromValue: filterVariables?.fromValue ?? null,
+      fromDate: fromTimestamp ? fromTimestamp.toString() : null,
+      toDate: toTimestamp ? toTimestamp.toString() : null,
     }),
     [
       accountId,
@@ -134,8 +112,6 @@ export function useDelegateDelegationHistory({
       orderBy,
       orderDirection,
       filterVariables,
-      fromFilter,
-      toFilter,
       fromTimestamp,
       toTimestamp,
     ],

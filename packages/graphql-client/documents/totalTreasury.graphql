@@ -1,0 +1,12 @@
+query TotalTreasury(
+  $orderDirection: OrderDirection = asc
+  $days: DaysWindow = _7d
+) {
+  getTotalTreasury(orderDirection: $orderDirection, days: $days) {
+    items {
+      date
+      value
+    }
+    totalCount
+  }
+}

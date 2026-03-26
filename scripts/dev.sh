@@ -45,6 +45,7 @@ log() { printf "${C_SCRIPT}[dev]${C_RESET} %s\n" "$*"; }
 run_with_prefix() {
   local color=$1 label=$2 ready_file=$3 ready_pattern=$4
   shift 4
+  log "Running: $*"
   "$@" 2>&1 | while IFS= read -r line; do
     printf "${color}[%s]${C_RESET} %s\n" "$label" "$line"
     if [ -n "$ready_file" ] && [ -n "$ready_pattern" ] && [[ "$line" == *"$ready_pattern"* ]]; then
@@ -57,6 +58,7 @@ run_with_prefix() {
 run_errors_only() {
   local color=$1 label=$2
   shift 2
+  log "Running: $*"
   "$@" 2>&1 | while IFS= read -r line; do
     if [[ "$line" =~ [Ee][Rr][Rr][Oo][Rr] ]] || [[ "$line" =~ [Ff][Aa][Ii][Ll] ]]; then
       printf "${color}[%s]${C_RESET} %s\n" "$label" "$line"
@@ -107,8 +109,10 @@ railway_run() {
   local service=$1
   shift
   if [ "$USE_RAILWAY" = true ]; then
+    log "railway_run: pnpm railway run -e dev -s $service $*"
     pnpm railway run -e dev -s "$service" "$@"
   else
+    log "railway_run (no --rw): $*"
     "$@"
   fi
 }
@@ -118,9 +122,10 @@ railway_run_api() {
   local service=$1
   shift
   if pnpm railway run -e dev -s "$service" true >/dev/null 2>&1; then
+    log "railway_run_api: pnpm railway run -e dev -s $service $*"
     pnpm railway run -e dev -s "$service" "$@"
   else
-    log "Railway service '$service' not found, using .env"
+    log "railway_run_api: Railway service '$service' not found, falling back to: $*"
     "$@"
   fi
 }
@@ -152,7 +157,8 @@ if [ "$RUN_API" = true ]; then
   run_with_prefix "$C_API" "🐙 api" "" "" railway_run_api "${DAO_ID}-api" pnpm api dev -- "$DAO_ID" &
 
   wait_for_port "$PORT_API" "API"
-  export "DAO_API_${DAO_ID}=http://localhost:${PORT_API}"
+  DAO_ID_UPPER=$(echo "$DAO_ID" | tr '[:lower:]' '[:upper:]')
+  export "DAO_API_${DAO_ID_UPPER}=http://localhost:${PORT_API}"
 else
   log "Skipping API (no DAO_ID provided, using DAO_API_* from .env)"
 fi

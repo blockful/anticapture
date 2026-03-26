@@ -1,10 +1,7 @@
 import { z } from "@hono/zod-openapi";
 
 import { token } from "@/database";
-
-const TokenDaysWindowSchema = z
-  .enum(["7d", "30d", "90d", "180d", "365d"])
-  .openapi("DaysWindow");
+import { DaysWindow } from "../shared";
 
 export const TokenHistoricalPriceRequest = z
   .object({
@@ -88,7 +85,7 @@ export const TokenPropertiesResponseSchema = TokenPropertiesSchema.extend({
 
 export const TokenDistributionComparisonQuerySchema = z
   .object({
-    days: TokenDaysWindowSchema.optional(),
+    days: DaysWindow.optional(),
   })
   .openapi("TokenDistributionComparisonQuery", {
     description:

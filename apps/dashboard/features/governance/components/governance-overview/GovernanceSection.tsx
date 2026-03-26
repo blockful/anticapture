@@ -26,6 +26,10 @@ export const GovernanceSection = () => {
     itemsPerPage: 10,
     orderDirection: OrderDirection.Desc,
     daoId: daoIdEnum,
+    fromDate: null,
+    status: null,
+    fromEndDate: null,
+    includeOptimisticProposals: null,
   });
 
   const loadMoreRef = useRef<HTMLDivElement>(null);

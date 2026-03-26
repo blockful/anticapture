@@ -42,8 +42,8 @@ export function useDelegateDelegationHistoryGraph(
   const { data, loading, error } = useGetDelegateDelegationHistoryGraphQuery({
     variables: {
       accountId,
-      fromTimestamp,
-      toTimestamp,
+      fromTimestamp: fromTimestamp ?? null,
+      toTimestamp: toTimestamp ?? null,
       orderBy: QueryInput_HistoricalVotingPowerByAccountId_OrderBy.Timestamp,
       orderDirection: OrderDirection.Desc,
     },

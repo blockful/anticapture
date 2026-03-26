@@ -36,6 +36,9 @@ export const useDaoOverviewData = ({
     variables: {
       orderDirection: OrderDirection.Desc,
       limit: 20,
+      addresses: null,
+      fromDate: null,
+      toDate: null,
     },
     context: {
       headers: {

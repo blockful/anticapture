@@ -1,5 +1,3 @@
-directive @resolveRoot(subgraph: String) on FIELD_DEFINITION
-
 directive @httpOperation(subgraph: String, path: String, operationSpecificHeaders: [[String]], httpMethod: HTTPMethod, isBinary: Boolean, requestBaseBody: ObjMap, queryParamArgMap: ObjMap, queryStringOptionsByParam: ObjMap, jsonApiFields: Boolean, queryStringOptions: ObjMap) on FIELD_DEFINITION
 
 directive @transport(subgraph: String, kind: String, location: String, headers: [[String]], queryStringOptions: ObjMap, queryParams: [[String]]) repeatable on SCHEMA
@@ -20,7 +18,12 @@ type Query {
   """
   Returns label information from Arkham, ENS data, and address type for multiple addresses. Maximum 100 addresses per request. Arkham data is stored permanently. ENS data is cached with a configurable TTL.
   """
-  getAddresses(addresses: [JSON]!): getAddresses_200_response
+  getAddresses(
+    """
+    One or more Ethereum addresses to enrich. Can be passed as a repeated query parameter or a single value. Maximum 100 addresses per request.
+    """
+    addresses: [String]!
+  ): getAddresses_200_response
 
   """
   Get historical delegations for an account, with optional filtering and sorting
@@ -36,15 +39,15 @@ type Query {
   """
   Get historical Liquid Treasury (treasury without DAO tokens) from external providers (DefiLlama/Dune)
   """
-  getLiquidTreasury(days: DaysWindow, orderDirection: OrderDirection = desc): TreasuryResponse
+  getLiquidTreasury(days: DaysWindow! = _365d, orderDirection: OrderDirection = desc): TreasuryResponse
 
   """
   Get historical DAO Token Treasury value (governance token quantity × token price)
   """
-  getDaoTokenTreasury(days: DaysWindow, orderDirection: OrderDirection = desc): TreasuryResponse
+  getDaoTokenTreasury(days: DaysWindow! = _365d, orderDirection: OrderDirection = desc): TreasuryResponse
 
   """Get historical Total Treasury (liquid treasury + DAO token treasury)"""
-  getTotalTreasury(days: DaysWindow, orderDirection: OrderDirection = desc): TreasuryResponse
+  getTotalTreasury(days: DaysWindow! = _365d, orderDirection: OrderDirection = desc): TreasuryResponse
 
   """Get historical market data for a specific token"""
   historicalTokenData(
@@ -65,37 +68,37 @@ type Query {
   getEventRelevanceThreshold(type: FeedEventType!, relevance: FeedRelevance!): EventRelevanceThresholdResponse
 
   """Compare total supply between periods"""
-  compareTotalSupply(days: DaysWindow): SupplyComparisonResponse
+  compareTotalSupply(days: DaysWindow! = _365d): SupplyComparisonResponse
 
   """Compare delegated supply between periods"""
-  compareDelegatedSupply(days: DaysWindow): SupplyComparisonResponse
+  compareDelegatedSupply(days: DaysWindow! = _365d): SupplyComparisonResponse
 
   """Compare circulating supply between periods"""
-  compareCirculatingSupply(days: DaysWindow): SupplyComparisonResponse
+  compareCirculatingSupply(days: DaysWindow! = _365d): SupplyComparisonResponse
 
   """Compare treasury between periods"""
-  compareTreasury(days: DaysWindow): SupplyComparisonResponse
+  compareTreasury(days: DaysWindow! = _365d): SupplyComparisonResponse
 
   """Compare cex supply between periods"""
-  compareCexSupply(days: DaysWindow): SupplyComparisonResponse
+  compareCexSupply(days: DaysWindow! = _365d): SupplyComparisonResponse
 
   """Compare dex supply between periods"""
-  compareDexSupply(days: DaysWindow): SupplyComparisonResponse
+  compareDexSupply(days: DaysWindow! = _365d): SupplyComparisonResponse
 
   """Compare lending supply between periods"""
-  compareLendingSupply(days: DaysWindow): SupplyComparisonResponse
+  compareLendingSupply(days: DaysWindow! = _365d): SupplyComparisonResponse
 
   """Get active token supply for DAO"""
-  compareActiveSupply(days: DaysWindow): ActiveSupplyResponse
+  compareActiveSupply(days: DaysWindow! = _365d): ActiveSupplyResponse
 
   """Compare number of proposals between time periods"""
-  compareProposals(days: DaysWindow): ProposalsComparisonResponse
+  compareProposals(days: DaysWindow! = _365d): ProposalsComparisonResponse
 
   """Compare number of votes between time periods"""
-  compareVotes(days: DaysWindow): VotesComparisonResponse
+  compareVotes(days: DaysWindow! = _365d): VotesComparisonResponse
 
   """Compare average turnout between time periods"""
-  compareAverageTurnout(days: DaysWindow): AverageTurnoutComparisonResponse
+  compareAverageTurnout(days: DaysWindow! = _365d): AverageTurnoutComparisonResponse
 
   """
   Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window
@@ -580,11 +583,6 @@ type query_getAddresses_results_items_ens {
   banner: String
 }
 
-"""
-The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
-"""
-scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
-
 enum HTTPMethod {
   GET
   HEAD
@@ -739,6 +737,11 @@ enum FeedRelevance {
   MEDIUM
   LOW
 }
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
 
 enum queryInput_feedEvents_orderBy {
   timestamp

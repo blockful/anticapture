@@ -4,7 +4,7 @@
 
 ### Always do
 
-- Run `pnpm <package> typecheck` and `pnpm <package> lint` on affected packages after every change
+- Run `pnpm <package> typecheck` and `pnpm <package> lint:fix` on affected packages after every change
 
 ### Never do
 

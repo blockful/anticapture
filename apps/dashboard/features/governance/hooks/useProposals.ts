@@ -42,13 +42,22 @@ export interface UseProposalsParams extends Omit<
   daoId?: DaoIdEnum;
 }
 
-export const useProposals = ({
-  fromDate,
-  orderDirection = OrderDirection.Desc,
-  status,
-  itemsPerPage = 10,
-  daoId,
-}: UseProposalsParams = {}): UseProposalsResult => {
+export const useProposals = (
+  {
+    fromDate = null,
+    orderDirection = OrderDirection.Desc,
+    status = null,
+    fromEndDate: _fromEndDate = null,
+    includeOptimisticProposals: _includeOptimisticProposals = null,
+    itemsPerPage = 10,
+    daoId,
+  }: UseProposalsParams = {
+    fromDate: null,
+    status: null,
+    fromEndDate: null,
+    includeOptimisticProposals: null,
+  },
+): UseProposalsResult => {
   const [isPaginationLoading, setIsPaginationLoading] = useState(false);
   const [allProposals, setAllProposals] = useState<GovernanceProposal[]>([]);
   const { decimals } = daoConfig[daoId as DaoIdEnum];

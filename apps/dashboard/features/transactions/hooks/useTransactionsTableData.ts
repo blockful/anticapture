@@ -74,27 +74,23 @@ export const useTransactionsTableData = ({
       variables: {
         limit,
         offset: 0,
-        ...(filters?.from && { from: filters?.from }),
-        ...(filters?.to && { to: filters?.to }),
-        ...(filters?.min && {
-          minAmount: parseUnits(filters.min.toString(), decimals).toString(),
-        }),
-        ...(filters?.max && {
-          maxAmount: parseUnits(filters.max.toString(), decimals).toString(),
-        }),
-        ...(filters?.sort && {
-          orderDirection: filters.sort as OrderDirection,
-        }),
-        ...(filters?.affectedSupply && {
-          affectedSupply:
-            filters.affectedSupply as QueryInput_Transactions_AffectedSupply_Items[],
-        }),
-        ...(filters?.fromDate && { fromDate: filters?.fromDate }),
-        ...(filters?.toDate && { toDate: filters?.toDate }),
-        ...(filters?.includes && {
-          includes:
-            filters.includes as QueryInput_Transactions_Includes_Items[],
-        }),
+        from: filters?.from ?? null,
+        to: filters?.to ?? null,
+        minAmount: filters?.min
+          ? parseUnits(filters.min.toString(), decimals).toString()
+          : null,
+        maxAmount: filters?.max
+          ? parseUnits(filters.max.toString(), decimals).toString()
+          : null,
+        orderDirection: (filters?.sort as OrderDirection) ?? null,
+        affectedSupply: filters?.affectedSupply
+          ? (filters.affectedSupply as QueryInput_Transactions_AffectedSupply_Items[])
+          : null,
+        fromDate: filters?.fromDate ?? null,
+        toDate: filters?.toDate ?? null,
+        includes: filters?.includes
+          ? (filters.includes as QueryInput_Transactions_Includes_Items[])
+          : null,
       },
       context: {
         headers: {

@@ -99,7 +99,7 @@ export function votes(app: Hono, service: VotesService) {
         toDate,
       });
 
-      return context.json(VotesResponseSchema.parse(result), 200);
+      return context.json(result);
     },
   );
 

@@ -2,11 +2,10 @@ import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 import { formatUnits, parseEther } from "viem";
 
 import { MetricTypesEnum } from "@/lib/constants";
-import { DaysEnum } from "@/lib/enums";
+import { DaysEnum, SECONDS_IN_DAY } from "@/lib/enums";
 import {
   SupplyComparisonResponseSchema,
   TokenDistributionComparisonQuerySchema,
-  daysWindowToEnum,
 } from "@/mappers";
 
 interface TokenDistributionRepository {
@@ -56,12 +55,9 @@ export function tokenDistribution(
         },
       }),
       async (ctx) => {
-        const { days = "90d" } = ctx.req.valid("query");
+        const { days = 90 * SECONDS_IN_DAY } = ctx.req.valid("query");
 
-        const result = await repository.getSupplyComparison(
-          metric,
-          daysWindowToEnum(days),
-        );
+        const result = await repository.getSupplyComparison(metric, days);
 
         if (!result) {
           return ctx.json(

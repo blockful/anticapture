@@ -1,12 +1,5 @@
 import { z } from "@hono/zod-openapi";
-
-const TreasuryDaysWindowSchema = z
-  .enum(["7d", "30d", "90d", "180d", "365d"])
-  .openapi("DaysWindow");
-
-const TreasuryOrderDirectionSchema = z
-  .enum(["asc", "desc"])
-  .openapi("OrderDirection");
+import { DaysWindow, OrderDirectionSchema } from "../shared";
 
 export const TreasuryItemSchema = z
   .object({
@@ -30,8 +23,8 @@ export type TreasuryResponse = z.infer<typeof TreasuryResponseSchema>;
 
 export const TreasuryQuerySchema = z
   .object({
-    days: TreasuryDaysWindowSchema.optional(),
-    orderDirection: TreasuryOrderDirectionSchema.optional(),
+    days: DaysWindow.default("_365d"),
+    orderDirection: OrderDirectionSchema.optional(),
   })
   .openapi("TreasuryQuery", {
     description: "Query params used to fetch treasury time-series data.",

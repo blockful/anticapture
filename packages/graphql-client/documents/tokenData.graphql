@@ -1,0 +1,18 @@
+query TokenData($currency: queryInput_token_currency = usd) {
+  token(currency: $currency) {
+    ... on TokenPropertiesResponse {
+      id
+      name
+      decimals
+      totalSupply
+      delegatedSupply
+      cexSupply
+      dexSupply
+      lendingSupply
+      circulatingSupply
+      nonCirculatingSupply
+      treasury
+      price
+    }
+  }
+}

@@ -73,6 +73,8 @@ export const useVoteCompositionData = (
     },
     variables: {
       address,
+      fromDate: null,
+      toDate: null,
     },
     skip: !isAave,
   });

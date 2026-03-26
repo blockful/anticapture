@@ -17,7 +17,10 @@ type ProposalActivityItem = NonNullable<
   >[number]
 >;
 
-interface UseProposalsActivityParams extends GetProposalsActivityQueryVariables {
+interface UseProposalsActivityParams extends Partial<
+  Omit<GetProposalsActivityQueryVariables, "address">
+> {
+  address: GetProposalsActivityQueryVariables["address"];
   limit: number;
   daoId: DaoIdEnum;
 }
@@ -77,12 +80,12 @@ export const useProposalsActivity = ({
     useGetProposalsActivityQuery({
       variables: {
         address,
-        fromDate,
-        skip,
+        fromDate: fromDate ?? null,
+        skip: skip ?? null,
         limit,
-        orderBy,
-        orderDirection,
-        userVoteFilter,
+        orderBy: orderBy ?? null,
+        orderDirection: orderDirection ?? null,
+        userVoteFilter: userVoteFilter ?? null,
       },
       ...queryOptions,
     });
@@ -124,12 +127,12 @@ export const useProposalsActivity = ({
       await fetchMore({
         variables: {
           address,
-          fromDate,
+          fromDate: fromDate ?? null,
           skip: accumulatedProposals.length,
           limit,
-          orderBy,
-          orderDirection,
-          userVoteFilter,
+          orderBy: orderBy ?? null,
+          orderDirection: orderDirection ?? null,
+          userVoteFilter: userVoteFilter ?? null,
         },
         updateQuery: (prev, { fetchMoreResult }) => {
           if (

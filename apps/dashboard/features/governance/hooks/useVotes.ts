@@ -74,15 +74,15 @@ export const useVotes = ({
       skip: 0, // Always fetch from beginning, we'll handle append in fetchMore
       orderBy: orderBy as QueryInput_VotesByProposalId_OrderBy,
       orderDirection: orderDirection as OrderDirection,
-      ...(support !== null && {
-        support:
-          support === 1
+      support:
+        support !== null
+          ? support === 1
             ? VoteSupport.For
             : support === 0
               ? VoteSupport.Against
-              : VoteSupport.Abstain,
-      }),
-      ...(voterAddress && { voterAddressIn: [voterAddress] }),
+              : VoteSupport.Abstain
+          : null,
+      voterAddressIn: voterAddress ? [voterAddress] : null,
     };
   }, [proposalId, limit, orderBy, orderDirection, support, voterAddress]);
 

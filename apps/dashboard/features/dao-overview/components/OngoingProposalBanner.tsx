@@ -12,6 +12,8 @@ export const OngoingProposalBanner = ({ daoId }: { daoId: string }) => {
     variables: {
       limit: 1,
       status: ProposalStatus.ONGOING,
+      skip: null,
+      fromDate: null,
     },
     context: {
       headers: {

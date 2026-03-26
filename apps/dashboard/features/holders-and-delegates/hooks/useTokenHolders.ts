@@ -91,7 +91,7 @@ export const useTokenHolders = ({
       orderDirection,
       orderBy,
       fromDate,
-      ...(address && { addresses: [address] }),
+      addresses: address ? [address] : null,
     },
     context: {
       headers: {
@@ -170,7 +170,7 @@ export const useTokenHolders = ({
           orderDirection,
           orderBy,
           fromDate,
-          ...(address && { addresses: [address] }),
+          addresses: address ? [address] : null,
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult?.accountBalances) return previousResult;
@@ -236,7 +236,7 @@ export const useTokenHolders = ({
           orderDirection,
           orderBy,
           fromDate,
-          ...(address && { addresses: [address] }),
+          addresses: address ? [address] : null,
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           if (!fetchMoreResult?.accountBalances) return previousResult;

@@ -3,11 +3,7 @@ import { z } from "@hono/zod-openapi";
 import { daoMetricsDayBucket } from "@/database";
 import { SECONDS_IN_DAY } from "@/lib/enums";
 
-import { PageInfoSchema } from "../shared";
-
-const DelegationPercentageOrderDirectionSchema = z
-  .enum(["asc", "desc"])
-  .openapi("OrderDirection");
+import { OrderDirectionSchema, PageInfoSchema } from "../shared";
 
 export type DBTokenMetric = typeof daoMetricsDayBucket.$inferSelect;
 
@@ -29,7 +25,7 @@ const BaseFiltersSchema = z.object({
       example: "1706745600",
     })
     .optional(),
-  orderDirection: z.enum(["asc", "desc"]).optional(),
+  orderDirection: OrderDirectionSchema.optional(),
   limit: z.number().optional().openapi({
     description: "Optional limit used by internal filters.",
     example: 365,
@@ -39,8 +35,8 @@ const BaseFiltersSchema = z.object({
 
 // Repository filters schema
 export const RepositoryFiltersSchema = BaseFiltersSchema.extend({
-  orderDirection: z.enum(["asc", "desc"]).default("asc"),
-  limit: z.number(), // Required in repository layer
+  orderDirection: OrderDirectionSchema.optional(),
+  limit: z.number().int(), // Required in repository layer
 });
 
 // HTTP query schema (extends base with pagination cursors and HTTP validations)
@@ -61,7 +57,7 @@ export const DelegationPercentageRequestSchema = BaseFiltersSchema.extend({
       example: "1706745600",
     })
     .optional(),
-  orderDirection: DelegationPercentageOrderDirectionSchema.optional(),
+  orderDirection: OrderDirectionSchema.optional(),
   limit: z.coerce.number().int().positive().max(1000).default(365).openapi({
     description: "Maximum number of buckets to return.",
     example: 365,

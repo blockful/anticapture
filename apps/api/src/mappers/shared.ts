@@ -1,13 +1,24 @@
 import { z } from "@hono/zod-openapi";
 
-import { DaysEnum, DaysOpts } from "@/lib/enums";
-
 import { PERIOD_UNBOUND } from "./constants";
+import { FeedEventType, FeedRelevance } from "@/lib/constants";
+import { DaysEnum } from "@/lib/enums";
 
 export type AmountFilter = {
   minAmount: number | bigint | undefined;
   maxAmount: number | bigint | undefined;
 };
+
+export const OrderDirectionSchema = z
+  .enum(["asc", "desc"])
+  .openapi("OrderDirection", {
+    description: "Sort direction for ordered query results.",
+  });
+
+export const DaysWindow = z
+  .enum(["_7d", "_30d", "_90d", "_180d", "_365d"]) // _ because graphql type cannot start with a number
+  .transform((val) => DaysEnum[val.slice(1) as keyof typeof DaysEnum])
+  .openapi("DaysWindow");
 
 export const PeriodResponseSchema = z
   .object({
@@ -29,50 +40,12 @@ export const ErrorResponseSchema = z
     description: "Generic error payload returned by the API.",
   });
 
-export const ValidationErrorDetailSchema = z
-  .string()
-  .openapi("ValidationErrorDetail", {
-    description: "Single validation issue produced while parsing a request.",
-    example: 'Expected number, received string at "limit"',
-  });
-
-export const ValidationErrorResponseSchema = z
-  .object({
-    error: z.literal("Validation Error").openapi({
-      description: "Static identifier for request validation failures.",
-      example: "Validation Error",
-    }),
-    message: z.string().openapi({
-      description: "Combined validation message.",
-      example: "Validation error: limit: Expected number, received string",
-    }),
-    details: z.array(ValidationErrorDetailSchema).optional().openapi({
-      description: "Optional list of individual validation issues.",
-    }),
-  })
-  .openapi("ValidationErrorResponse", {
-    description:
-      "Payload returned when request params, query, or body fail validation.",
-  });
-
-export const OrderDirectionSchema = z
-  .enum(["asc", "desc"])
-  .openapi("OrderDirection", {
-    description: "Sort direction for ordered query results.",
-    example: "desc",
-  });
-
-export const DaysWindowSchema = z.enum(DaysOpts).openapi("DaysWindow", {
-  description: "Reusable day-window selector for comparison queries.",
-  example: "90d",
-});
-
 export const FeedEventTypeSchema = z
-  .enum(["VOTE", "PROPOSAL", "DELEGATION", "TRANSFER", "PROPOSAL_EXTENDED"])
+  .nativeEnum(FeedEventType)
   .openapi("FeedEventType");
 
 export const FeedRelevanceSchema = z
-  .enum(["HIGH", "MEDIUM", "LOW"])
+  .nativeEnum(FeedRelevance)
   .openapi("FeedRelevance");
 
 export const VoteSupportSchema = z
@@ -129,18 +102,6 @@ export const unixTimestampQueryParam = (
     example,
   });
 
-export const daysWindowQueryParam = (
-  defaultValue: (typeof DaysOpts)[number],
-  description: string,
-) =>
-  DaysWindowSchema.default(defaultValue).openapi({
-    description,
-    example: defaultValue,
-  });
-
-export const daysWindowToEnum = (value: (typeof DaysOpts)[number]) =>
-  DaysEnum[value];
-
 export const voteSupportToCode = (
   value: z.infer<typeof VoteSupportSchema> | undefined,
 ) =>
@@ -151,10 +112,6 @@ export const voteSupportToCode = (
         ABSTAIN: "2",
       }[value]
     : undefined;
-
-export type PeriodResponse = z.infer<typeof PeriodResponseSchema>;
-export type OrderDirection = z.infer<typeof OrderDirectionSchema>;
-export type PageInfo = z.infer<typeof PageInfoSchema>;
 
 export const TimestampResponseMapper = (
   timestamp: number | undefined,

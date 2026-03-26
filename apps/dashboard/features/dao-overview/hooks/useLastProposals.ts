@@ -31,6 +31,8 @@ export const useLastProposals = (daoId: DaoIdEnum): UseLastProposalsResult => {
       skip: 0,
       limit: LAST_PROPOSALS_LIMIT,
       orderDirection: OrderDirection.Desc,
+      status: null,
+      fromDate: null,
     },
     context: {
       headers: {

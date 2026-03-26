@@ -1,0 +1,7 @@
+query CompareDelegatedSupply($days: DaysWindow! = _365d) {
+  compareDelegatedSupply(days: $days) {
+    previousValue
+    currentValue
+    changeRate
+  }
+}

@@ -1,12 +1,9 @@
 import { z } from "@hono/zod-openapi";
-
-const GovernanceDaysWindowSchema = z
-  .enum(["7d", "30d", "90d", "180d", "365d"])
-  .openapi("DaysWindow");
+import { DaysWindow } from "../shared";
 
 export const GovernanceActivityDaysQuerySchema = z
   .object({
-    days: GovernanceDaysWindowSchema.optional(),
+    days: DaysWindow,
   })
   .openapi("GovernanceActivityDaysQuery", {
     description:

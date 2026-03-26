@@ -1,0 +1,12 @@
+query LiquidTreasury(
+  $orderDirection: OrderDirection = asc
+  $days: DaysWindow = _7d
+) {
+  getLiquidTreasury(orderDirection: $orderDirection, days: $days) {
+    items {
+      date
+      value
+    }
+    totalCount
+  }
+}

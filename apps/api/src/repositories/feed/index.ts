@@ -17,10 +17,7 @@ export class FeedRepository {
     const { skip, limit, orderBy, orderDirection, type, fromDate, toDate } =
       req;
 
-    const relevanceFilter = this.buildRelevanceFilter(
-      type as FeedEventType | undefined,
-      valueThresholds,
-    );
+    const relevanceFilter = this.buildRelevanceFilter(type, valueThresholds);
 
     const where = and(
       fromDate ? gte(feedEvent.timestamp, fromDate) : undefined,

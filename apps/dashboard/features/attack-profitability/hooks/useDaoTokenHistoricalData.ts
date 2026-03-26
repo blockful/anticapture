@@ -1,73 +1,53 @@
-import axios from "axios";
-import type { SWRConfiguration } from "swr";
-import useSWR from "swr";
+import {
+  type HistoricalTokenDataQuery,
+  useHistoricalTokenDataQuery,
+} from "@anticapture/graphql-client/hooks";
 
 import { getOnlyClosedData } from "@/features/attack-profitability/utils/normalizeDataset";
 import type { PriceEntry } from "@/shared/dao-config/types";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { BACKEND_ENDPOINT, getAuthHeaders } from "@/shared/utils/server-utils";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
-export const fetchDaoTokenHistoricalData = async ({
-  daoId,
-  limit,
-}: {
-  daoId: DaoIdEnum;
-  limit?: number;
-}): Promise<PriceEntry[] | null> => {
-  const query = `query GetHistoricalTokenData($limit: Float) {
-    historicalTokenData(limit: $limit) {
-      price
-      timestamp
-    }
-  }`;
-  const response = await axios.post<{
-    data: { historicalTokenData: PriceEntry[] };
-  }>(
-    `${BACKEND_ENDPOINT}`,
-    {
-      query,
-      variables: {
-        limit,
-      },
-    },
-    {
-      headers: {
-        "anticapture-dao-id": daoId,
-        ...getAuthHeaders(),
-      },
-    },
-  );
-  return response.data.data.historicalTokenData;
-};
+type HistoricalTokenDataItem = NonNullable<
+  NonNullable<HistoricalTokenDataQuery["historicalTokenData"]>[number]
+>;
+
+const toPriceEntry = (item: HistoricalTokenDataItem): PriceEntry => ({
+  price: item.price,
+  timestamp: item.timestamp,
+});
 
 export const useDaoTokenHistoricalData = ({
   daoId,
-  config,
   limit,
   closedDataOnly = true,
 }: {
   daoId: DaoIdEnum;
   limit?: number;
-  config?: Partial<SWRConfiguration<PriceEntry[] | null, Error>>;
   closedDataOnly?: boolean;
 }) => {
-  const { data, error, isValidating, mutate } = useSWR<PriceEntry[] | null>(
-    ["daoTokenHistoricalData", daoId, limit],
-    () =>
-      fetchDaoTokenHistoricalData({
-        daoId,
-        limit,
-      }),
-    { revalidateOnFocus: false, ...config },
-  );
+  const { data, loading, error, refetch } = useHistoricalTokenDataQuery({
+    context: {
+      headers: {
+        "anticapture-dao-id": daoId,
+        ...getAuthHeaders(),
+      },
+    },
+    variables: { limit: limit ?? null, skip: null },
+    fetchPolicy: "network-only",
+  });
 
-  const closedDataOnlyData =
-    closedDataOnly && data ? getOnlyClosedData(data) : data;
+  const items =
+    data?.historicalTokenData
+      ?.filter((item): item is HistoricalTokenDataItem => item !== null)
+      .map(toPriceEntry) ?? [];
+
+  const result = closedDataOnly ? getOnlyClosedData(items) : items;
 
   return {
-    data: closedDataOnlyData ?? [],
-    loading: isValidating,
+    data: result,
+    loading,
     error,
-    refetch: mutate,
+    refetch,
   };
 };

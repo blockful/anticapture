@@ -2,11 +2,7 @@ import { z } from "@hono/zod-openapi";
 
 import { MetricTypesEnum } from "@/lib/constants";
 
-import { PageInfoSchema } from "../shared";
-
-const TokenMetricsOrderDirectionSchema = z
-  .enum(["asc", "desc"])
-  .openapi("OrderDirection");
+import { OrderDirectionSchema, PageInfoSchema } from "../shared";
 
 // === ZOD SCHEMAS ===
 
@@ -26,7 +22,7 @@ export const TokenMetricsRequestSchema = z
       example: 1706745600,
       type: "integer",
     }),
-    orderDirection: TokenMetricsOrderDirectionSchema.optional(),
+    orderDirection: OrderDirectionSchema.optional(),
     limit: z.coerce.number().int().positive().max(1000).default(365).openapi({
       description: "Maximum number of buckets to return.",
       example: 365,

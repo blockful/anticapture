@@ -66,13 +66,13 @@ export function useBalanceHistory({
       address: accountId,
       orderBy: orderBy as QueryInput_Transfers_OrderBy,
       orderDirection: orderDirection as OrderDirection,
-      fromValue: filterVariables?.fromValue,
-      toValue: filterVariables?.toValue,
+      fromValue: filterVariables?.fromValue ?? null,
+      toValue: filterVariables?.toValue ?? null,
       from: customFromFilter,
       to: customToFilter,
       offset: 0,
-      fromDate: fromTimestamp,
-      toDate: toTimestamp,
+      fromDate: fromTimestamp ?? null,
+      toDate: toTimestamp ?? null,
       limit,
     };
 
