@@ -14,5 +14,6 @@ export * from "./delegations";
 export * from "./votes/onchainVotes";
 export * from "./proposals/offchainProposals";
 export * from "./votes/offchainVotes";
+export * from "./votes/offchainNonVoters";
 export * from "./event-relevance";
 export * from "./feed";

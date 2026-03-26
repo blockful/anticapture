@@ -37,6 +37,7 @@ import {
   votes,
   offchainProposals,
   offchainVotes,
+  offchainNonVoters,
   eventRelevance,
   feed,
 } from "@/controllers";
@@ -73,6 +74,7 @@ import {
   AccountBalanceQueryFragments,
   OffchainProposalRepository,
   OffchainVoteRepository,
+  OffchainNonVotersRepositoryImpl,
 } from "@/repositories";
 import {
   AccountBalanceService,
@@ -97,6 +99,7 @@ import {
   FeedService,
   OffchainProposalsService,
   OffchainVotesService,
+  OffchainNonVotersService,
   EventRelevanceService,
 } from "@/services";
 import { AccountInteractionsService } from "@/services/account-balance/interactions";
@@ -154,8 +157,7 @@ const pgOffchainClient = drizzle(env.DATABASE_URL, {
   schema: offchainSchema,
   casing: "snake_case",
 });
-// Reserved for cross-schema queries (e.g., OffchainNonVotersRepository in Task 4)
-const _pgUnifiedClient = drizzle(env.DATABASE_URL, {
+const pgUnifiedClient = drizzle(env.DATABASE_URL, {
   schema: { ...schema, ...offchainSchema },
   casing: "snake_case",
 });
@@ -280,6 +282,11 @@ const offchainProposalsRepo = new OffchainProposalRepository(pgOffchainClient);
 const offchainVotesRepo = new OffchainVoteRepository(pgOffchainClient);
 offchainProposals(app, new OffchainProposalsService(offchainProposalsRepo));
 offchainVotes(app, new OffchainVotesService(offchainVotesRepo));
+
+const offchainNonVotersRepo = new OffchainNonVotersRepositoryImpl(
+  pgUnifiedClient,
+);
+offchainNonVoters(app, new OffchainNonVotersService(offchainNonVotersRepo));
 
 serve(
   {
