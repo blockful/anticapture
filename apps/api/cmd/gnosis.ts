@@ -24,6 +24,7 @@ import {
   accountInteractions,
   offchainProposals,
   offchainVotes,
+  feed,
 } from "@/controllers";
 import * as offchainSchema from "@/database/offchain-schema";
 import * as schema from "@/database/schema";
@@ -46,6 +47,7 @@ import {
   VotingPowerRepository,
   OffchainProposalRepository,
   OffchainVoteRepository,
+  FeedRepository,
 } from "@/repositories";
 import {
   AccountBalanceService,
@@ -60,6 +62,7 @@ import {
   VotingPowerService,
   OffchainProposalsService,
   OffchainVotesService,
+  FeedService,
 } from "@/services";
 import { AccountInteractionsService } from "@/services/account-balance/interactions";
 
@@ -171,6 +174,7 @@ const offchainProposalsRepo = new OffchainProposalRepository(pgOffchainClient);
 const offchainVotesRepo = new OffchainVoteRepository(pgOffchainClient);
 offchainProposals(app, new OffchainProposalsService(offchainProposalsRepo));
 offchainVotes(app, new OffchainVotesService(offchainVotesRepo));
+feed(app, new FeedService(env.DAO_ID, new FeedRepository(pgClient)));
 
 docs(app);
 

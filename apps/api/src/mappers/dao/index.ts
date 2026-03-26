@@ -9,7 +9,7 @@ export const DaoResponseSchema = z.object({
   votingPeriod: z.string(),
   timelockDelay: z.string(),
   alreadySupportCalldataReview: z.boolean(),
-  supportOffchainData: z.boolean(),
+  supportOffchainData: z.boolean().optional().default(false),
 });
 
 export type DaoResponse = z.infer<typeof DaoResponseSchema>;
