@@ -1,4 +1,5 @@
-import { DBOffchainProposal } from "@/mappers";
+import { DBOffchainProposal, OffchainProposalMapper } from "@/mappers";
+import type { OffchainProposalWithScores } from "@/repositories";
 
 interface OffchainProposalsRepository {
   getProposals(
@@ -8,7 +9,7 @@ interface OffchainProposalsRepository {
     state: string[] | undefined,
     fromDate: number | undefined,
     endDate: number | undefined,
-  ): Promise<DBOffchainProposal[]>;
+  ): Promise<DBOffchainProposal[] | OffchainProposalWithScores[]>;
   getProposalsCount(
     state?: string[] | undefined,
     fromDate?: number | undefined,
@@ -39,7 +40,7 @@ export class OffchainProposalsService {
       endDate,
     } = params;
 
-    const [items, totalCount] = await Promise.all([
+    const [rawItems, totalCount] = await Promise.all([
       this.repo.getProposals(
         skip,
         limit,
@@ -51,10 +52,14 @@ export class OffchainProposalsService {
       this.repo.getProposalsCount(status, fromDate, endDate),
     ]);
 
+    const items = rawItems.map(OffchainProposalMapper.toApi);
+
     return { items, totalCount };
   }
 
   async getProposalById(proposalId: string) {
-    return this.repo.getProposalById(proposalId);
+    const proposal = await this.repo.getProposalById(proposalId);
+    if (!proposal) return undefined;
+    return OffchainProposalMapper.toApi(proposal);
   }
 }

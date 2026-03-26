@@ -1,7 +1,22 @@
-import { and, asc, desc, eq, gte, inArray, SQL } from "drizzle-orm";
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  getTableColumns,
+  gte,
+  inArray,
+  sql,
+  SQL,
+} from "drizzle-orm";
 
-import { OffchainDrizzle, offchainProposals } from "@/database";
+import { OffchainDrizzle, offchainProposals, offchainVotes } from "@/database";
 import { DBOffchainProposal } from "@/mappers";
+
+export interface OffchainProposalWithScores extends DBOffchainProposal {
+  forVotes: string;
+  againstVotes: string;
+}
 
 export class OffchainProposalRepository {
   constructor(private readonly db: OffchainDrizzle) {}
@@ -13,7 +28,7 @@ export class OffchainProposalRepository {
     state: string[] | undefined,
     fromDate: number | undefined,
     endDate: number | undefined,
-  ): Promise<DBOffchainProposal[]> {
+  ): Promise<OffchainProposalWithScores[]> {
     const whereClauses: SQL<unknown>[] = [];
 
     if (state && state.length > 0) {
@@ -30,9 +45,38 @@ export class OffchainProposalRepository {
       whereClauses.push(gte(offchainProposals.end, endDate));
     }
 
-    return await this.db
-      .select()
+    const forVotesSq = this.db
+      .select({
+        proposalId: offchainVotes.proposalId,
+        total: sql<string>`COALESCE(SUM(${offchainVotes.vp}), '0')`.as("total"),
+      })
+      .from(offchainVotes)
+      .where(sql`${offchainVotes.choice}::text = '1'`)
+      .groupBy(offchainVotes.proposalId)
+      .as("for_votes");
+
+    const againstVotesSq = this.db
+      .select({
+        proposalId: offchainVotes.proposalId,
+        total: sql<string>`COALESCE(SUM(${offchainVotes.vp}), '0')`.as("total"),
+      })
+      .from(offchainVotes)
+      .where(sql`${offchainVotes.choice}::text = '2'`)
+      .groupBy(offchainVotes.proposalId)
+      .as("against_votes");
+
+    const rows = await this.db
+      .select({
+        ...getTableColumns(offchainProposals),
+        forVotes: sql<string>`COALESCE(${forVotesSq.total}, '0')`,
+        againstVotes: sql<string>`COALESCE(${againstVotesSq.total}, '0')`,
+      })
       .from(offchainProposals)
+      .leftJoin(forVotesSq, eq(offchainProposals.id, forVotesSq.proposalId))
+      .leftJoin(
+        againstVotesSq,
+        eq(offchainProposals.id, againstVotesSq.proposalId),
+      )
       .where(whereClauses.length > 0 ? and(...whereClauses) : undefined)
       .orderBy(
         orderDirection === "asc"
@@ -41,6 +85,8 @@ export class OffchainProposalRepository {
       )
       .limit(limit)
       .offset(skip);
+
+    return rows;
   }
 
   async getProposalById(
