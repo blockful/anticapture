@@ -154,6 +154,11 @@ const pgOffchainClient = drizzle(env.DATABASE_URL, {
   schema: offchainSchema,
   casing: "snake_case",
 });
+// Reserved for cross-schema queries (e.g., OffchainNonVotersRepository in Task 4)
+const _pgUnifiedClient = drizzle(env.DATABASE_URL, {
+  schema: { ...schema, ...offchainSchema },
+  casing: "snake_case",
+});
 
 const daoConfig = CONTRACT_ADDRESSES[env.DAO_ID];
 const { blockTime, tokenType } = daoConfig;
