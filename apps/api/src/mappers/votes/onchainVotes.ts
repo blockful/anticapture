@@ -80,7 +80,7 @@ export const VoteResponseSchema = z
     voterAddress: z.string(),
     transactionHash: z.string(),
     proposalId: z.string(),
-    support: z.string(),
+    support: VoteSupportSchema.optional(),
     votingPower: z
       .bigint()
       .transform((val) => val.toString())

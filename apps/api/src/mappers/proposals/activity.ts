@@ -94,11 +94,8 @@ export const ProposalActivityUserVoteSchema = z
     id: z.string(),
     voterAccountId: z.string(),
     proposalId: z.string(),
-    support: VoteSupportSchema.nullable(),
-    votingPower: z
-      .bigint()
-      .transform((val) => val.toString())
-      .openapi({ type: "string" }),
+    support: VoteSupportSchema,
+    votingPower: z.coerce.string().openapi({ type: "string" }),
     reason: z.string().nullable(),
     timestamp: z.coerce.string(),
   })

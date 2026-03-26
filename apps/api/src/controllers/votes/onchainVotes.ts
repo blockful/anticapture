@@ -6,7 +6,6 @@ import {
   VotersResponseSchema,
   VotesRequestSchema,
   VotesResponseSchema,
-  voteSupportToCode,
 } from "@/mappers";
 import { VotesService } from "@/services";
 
@@ -55,7 +54,7 @@ export function votes(app: Hono, service: VotesService) {
         orderBy,
         orderDirection,
         voterAddressIn,
-        voteSupportToCode(support),
+        support,
         fromDate,
         toDate,
       );
@@ -87,8 +86,15 @@ export function votes(app: Hono, service: VotesService) {
       },
     }),
     async (context) => {
-      const { limit, skip, orderBy, orderDirection, fromDate, toDate } =
-        context.req.valid("query");
+      const {
+        limit,
+        skip,
+        orderBy,
+        orderDirection,
+        fromDate,
+        toDate,
+        support,
+      } = context.req.valid("query");
 
       const result = await service.getVotes({
         limit,
@@ -97,6 +103,7 @@ export function votes(app: Hono, service: VotesService) {
         orderDirection,
         fromDate,
         toDate,
+        support,
       });
 
       return context.json(result);

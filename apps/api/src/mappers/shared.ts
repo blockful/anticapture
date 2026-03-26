@@ -15,8 +15,16 @@ export const OrderDirectionSchema = z
     description: "Sort direction for ordered query results.",
   });
 
+const DaysWindowEnum = z.enum(["_7d", "_30d", "_90d", "_180d", "_365d"]); // _ because graphql type cannot start with a number
+
 export const DaysWindow = z
-  .enum(["_7d", "_30d", "_90d", "_180d", "_365d"]) // _ because graphql type cannot start with a number
+  .preprocess((value) => {
+    if (typeof value === "string" && /^\d+d$/.test(value)) {
+      return `_${value}`;
+    }
+
+    return value;
+  }, DaysWindowEnum.default("_90d"))
   .transform((val) => DaysEnum[val.slice(1) as keyof typeof DaysEnum])
   .openapi("DaysWindow");
 
@@ -49,10 +57,10 @@ export const FeedRelevanceSchema = z
   .openapi("FeedRelevance");
 
 export const VoteSupportSchema = z
-  .enum(["AGAINST", "FOR", "ABSTAIN"])
+  .enum(["0", "1", "2"])
   .openapi("VoteSupport", {
     description: "Governance vote direction.",
-    example: "FOR",
+    example: "1",
   });
 
 export const PageInfoSchema = z
@@ -101,17 +109,6 @@ export const unixTimestampQueryParam = (
     description,
     example,
   });
-
-export const voteSupportToCode = (
-  value: z.infer<typeof VoteSupportSchema> | undefined,
-) =>
-  value
-    ? {
-        AGAINST: "0",
-        FOR: "1",
-        ABSTAIN: "2",
-      }[value]
-    : undefined;
 
 export const TimestampResponseMapper = (
   timestamp: number | undefined,
