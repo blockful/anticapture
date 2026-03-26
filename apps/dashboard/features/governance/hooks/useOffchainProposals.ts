@@ -81,24 +81,13 @@ function transformOffchainProposal(p: RawOffchainProposal): GovernanceProposal {
     timestamp: String(p.created),
     startTimestamp: String(p.start),
     endTimestamp: String(p.end),
-    votes: (() => {
-      const forVotes = p.scores?.forVotes ?? "0";
-      const againstVotes = p.scores?.againstVotes ?? "0";
-      const forNum = parseFloat(forVotes);
-      const againstNum = parseFloat(againstVotes);
-      const total = forNum + againstNum;
-      const forPercentage =
-        total > 0 ? ((forNum / total) * 100).toFixed(2) : "0";
-      const againstPercentage =
-        total > 0 ? ((againstNum / total) * 100).toFixed(2) : "0";
-      return {
-        for: forVotes,
-        against: againstVotes,
-        total: total.toString(),
-        forPercentage,
-        againstPercentage,
-      };
-    })(),
+    votes: {
+      for: "0",
+      against: "0",
+      total: "0",
+      forPercentage: "0",
+      againstPercentage: "0",
+    },
     quorum: "0",
     timeText,
     targets: [],
