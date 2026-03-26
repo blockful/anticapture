@@ -23,7 +23,7 @@ export type TreasuryResponse = z.infer<typeof TreasuryResponseSchema>;
 
 export const TreasuryQuerySchema = z
   .object({
-    days: DaysWindow.default("_365d"),
+    days: DaysWindow.default("365d"),
     orderDirection: OrderDirectionSchema.optional(),
   })
   .openapi("TreasuryQuery", {

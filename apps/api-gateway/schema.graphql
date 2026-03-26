@@ -39,15 +39,15 @@ type Query {
   """
   Get historical Liquid Treasury (treasury without DAO tokens) from external providers (DefiLlama/Dune)
   """
-  getLiquidTreasury(days: DaysWindow! = _365d, orderDirection: OrderDirection = desc): TreasuryResponse
+  getLiquidTreasury(days: DaysWindow, orderDirection: OrderDirection = desc): TreasuryResponse
 
   """
   Get historical DAO Token Treasury value (governance token quantity × token price)
   """
-  getDaoTokenTreasury(days: DaysWindow! = _365d, orderDirection: OrderDirection = desc): TreasuryResponse
+  getDaoTokenTreasury(days: DaysWindow, orderDirection: OrderDirection = desc): TreasuryResponse
 
   """Get historical Total Treasury (liquid treasury + DAO token treasury)"""
-  getTotalTreasury(days: DaysWindow! = _365d, orderDirection: OrderDirection = desc): TreasuryResponse
+  getTotalTreasury(days: DaysWindow, orderDirection: OrderDirection = desc): TreasuryResponse
 
   """Get historical market data for a specific token"""
   historicalTokenData(
@@ -68,37 +68,37 @@ type Query {
   getEventRelevanceThreshold(type: FeedEventType!, relevance: FeedRelevance!): EventRelevanceThresholdResponse
 
   """Compare total supply between periods"""
-  compareTotalSupply(days: DaysWindow! = _365d): SupplyComparisonResponse
+  compareTotalSupply(days: DaysWindow): SupplyComparisonResponse
 
   """Compare delegated supply between periods"""
-  compareDelegatedSupply(days: DaysWindow! = _365d): SupplyComparisonResponse
+  compareDelegatedSupply(days: DaysWindow): SupplyComparisonResponse
 
   """Compare circulating supply between periods"""
-  compareCirculatingSupply(days: DaysWindow! = _365d): SupplyComparisonResponse
+  compareCirculatingSupply(days: DaysWindow): SupplyComparisonResponse
 
   """Compare treasury between periods"""
-  compareTreasury(days: DaysWindow! = _365d): SupplyComparisonResponse
+  compareTreasury(days: DaysWindow): SupplyComparisonResponse
 
   """Compare cex supply between periods"""
-  compareCexSupply(days: DaysWindow! = _365d): SupplyComparisonResponse
+  compareCexSupply(days: DaysWindow): SupplyComparisonResponse
 
   """Compare dex supply between periods"""
-  compareDexSupply(days: DaysWindow! = _365d): SupplyComparisonResponse
+  compareDexSupply(days: DaysWindow): SupplyComparisonResponse
 
   """Compare lending supply between periods"""
-  compareLendingSupply(days: DaysWindow! = _365d): SupplyComparisonResponse
+  compareLendingSupply(days: DaysWindow): SupplyComparisonResponse
 
   """Get active token supply for DAO"""
-  compareActiveSupply(days: DaysWindow! = _365d): ActiveSupplyResponse
+  compareActiveSupply(days: DaysWindow): ActiveSupplyResponse
 
   """Compare number of proposals between time periods"""
-  compareProposals(days: DaysWindow! = _365d): ProposalsComparisonResponse
+  compareProposals(days: DaysWindow): ProposalsComparisonResponse
 
   """Compare number of votes between time periods"""
-  compareVotes(days: DaysWindow! = _365d): VotesComparisonResponse
+  compareVotes(days: DaysWindow): VotesComparisonResponse
 
   """Compare average turnout between time periods"""
-  compareAverageTurnout(days: DaysWindow! = _365d): AverageTurnoutComparisonResponse
+  compareAverageTurnout(days: DaysWindow): AverageTurnoutComparisonResponse
 
   """
   Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window
@@ -303,7 +303,9 @@ type Query {
     voterAddressIn: [String]
     orderBy: queryInput_votesByProposalId_orderBy = timestamp
     orderDirection: OrderDirection = desc
-    support: VoteSupport
+
+    """Governance vote direction."""
+    support: String
 
     """Earliest vote timestamp, in Unix seconds."""
     fromDate: Int
@@ -326,7 +328,9 @@ type Query {
     voterAddressIn: [String]
     orderBy: queryInput_votes_orderBy = timestamp
     orderDirection: OrderDirection = desc
-    support: VoteSupport
+
+    """Governance vote direction."""
+    support: String
 
     """Earliest vote timestamp, in Unix seconds."""
     fromDate: Int
@@ -842,17 +846,12 @@ type ProposalActivityUserVote {
   id: String!
   voterAccountId: String!
   proposalId: String!
-  support: VoteSupport
-  votingPower: String!
+
+  """Governance vote direction."""
+  support: String!
+  votingPower: String
   reason: String
   timestamp: String
-}
-
-"""Governance vote direction."""
-enum VoteSupport {
-  AGAINST
-  FOR
-  ABSTAIN
 }
 
 """Field used to sort proposal activity results."""
@@ -1233,7 +1232,9 @@ type OnchainVote {
   voterAddress: String!
   transactionHash: String!
   proposalId: String!
-  support: String!
+
+  """Governance vote direction."""
+  support: String
 
   """Voting power encoded as a decimal string."""
   votingPower: String!

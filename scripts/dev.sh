@@ -3,14 +3,14 @@ set -euo pipefail
 
 USE_RAILWAY=false
 RUN_INDEXER=false
-DAO_ID=""
+DAO_NAME=""
 
 # Parse arguments
 for arg in "$@"; do
   case "$arg" in
     --rw) USE_RAILWAY=true ;;
     --indexer) RUN_INDEXER=true ;;
-    *) DAO_ID="$arg" ;;
+    *) DAO_NAME="$arg" ;;
   esac
 done
 
@@ -23,10 +23,24 @@ PORT_DASHBOARD=3000
 PORT_ADDRESS_ENRICHMENT=3001
 PORTS=("$PORT_INDEXER" "$PORT_API" "$PORT_GATEWAY" "$PORT_GATEFUL" "$PORT_DASHBOARD" "$PORT_ADDRESS_ENRICHMENT")
 
+# DAO name → short ID mapping (used to run the API)
+dao_id_for() {
+  case "$1" in
+    uniswap)  echo "uni" ;;
+    gitcoin)  echo "gtc" ;;
+    scroll)   echo "scr" ;;
+    shutter)  echo "shu" ;;
+    compound) echo "comp" ;;
+    *)        echo "$1" ;;
+  esac
+}
+
 # Derived flags
 RUN_API=false
-if [ -n "$DAO_ID" ]; then
+DAO_ID=""
+if [ -n "$DAO_NAME" ]; then
   RUN_API=true
+  DAO_ID=$(dao_id_for "$DAO_NAME")
 fi
 
 # Colors per service
@@ -142,8 +156,8 @@ sleep 1
 
 # 1. Indexer (only with --indexer flag, requires API)
 if [ "$RUN_INDEXER" = true ] && [ "$RUN_API" = true ]; then
-  log "Starting Indexer for $DAO_ID..."
-  export RAILWAY_DEPLOYMENT_ID="${DAO_ID}-dev"
+  log "Starting Indexer for $DAO_NAME..."
+  export RAILWAY_DEPLOYMENT_ID="${DAO_NAME}-dev"
   run_with_prefix "$C_INDEXER" "⛓ indexer" "" "" pnpm indexer start -- --port "$PORT_INDEXER" &
 elif [ "$RUN_INDEXER" = true ]; then
   log "Skipping Indexer (requires DAO_ID to run)"
@@ -153,14 +167,14 @@ fi
 
 # 2. API (only when DAO_ID is provided)
 if [ "$RUN_API" = true ]; then
-  log "Starting API for $DAO_ID..."
-  run_with_prefix "$C_API" "🐙 api" "" "" railway_run_api "${DAO_ID}-api" pnpm api dev -- "$DAO_ID" &
+  log "Starting API for $DAO_NAME..."
+  run_with_prefix "$C_API" "🐙 api" "" "" railway_run_api "${DAO_NAME}-api" pnpm api dev -- "$DAO_NAME" &
 
   wait_for_port "$PORT_API" "API"
-  DAO_ID_UPPER=$(echo "$DAO_ID" | tr '[:lower:]' '[:upper:]')
-  export "DAO_API_${DAO_ID_UPPER}=http://localhost:${PORT_API}"
+  DAO_ID_UPPER=$(echo "$DAO_ID" | tr '[:lower:]' '[:upper:]')                                                                            
+  export "DAO_API_${DAO_ID_UPPER}=http://localhost:${PORT_API}" 
 else
-  log "Skipping API (no DAO_ID provided, using DAO_API_* from .env)"
+  log "Skipping API (no DAO_NAME provided, using DAO_API_* from .env)"
 fi
 
 # 3. Address Enrichment (always runs with railway env injection)
@@ -215,10 +229,10 @@ run_with_prefix "$C_DASHBOARD" "📺 dashboard" "" "" pnpm dashboard dev &
 echo ""
 log "All services running:"
 if [ "$RUN_INDEXER" = true ] && [ "$RUN_API" = true ]; then
-  printf "  ${C_INDEXER}⛓ Indexer${C_RESET}   http://localhost:${PORT_INDEXER}  ($DAO_ID)\n"
+  printf "  ${C_INDEXER}⛓ Indexer${C_RESET}   http://localhost:${PORT_INDEXER}  ($DAO_NAME)\n"
 fi
 if [ "$RUN_API" = true ]; then
-  printf "  ${C_API}🐙 API${C_RESET}       http://localhost:${PORT_API}  ($DAO_ID)\n"
+  printf "  ${C_API}🐙 API${C_RESET}       http://localhost:${PORT_API}  ($DAO_NAME)\n"
 fi
 printf "  ${C_ADDRESS_ENRICHMENT}💰 Enrichment${C_RESET} http://localhost:${PORT_ADDRESS_ENRICHMENT}\n"
 printf "  ${C_GATEWAY}🌎 Gateway${C_RESET}   http://localhost:${PORT_GATEWAY}\n"

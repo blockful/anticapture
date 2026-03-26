@@ -15,18 +15,21 @@ export const OrderDirectionSchema = z
     description: "Sort direction for ordered query results.",
   });
 
-const DaysWindowEnum = z.enum(["_7d", "_30d", "_90d", "_180d", "_365d"]); // _ because graphql type cannot start with a number
+const DaysWindowEnum = z.enum(["7d", "30d", "90d", "180d", "365d"]);
 
 export const DaysWindow = z
   .preprocess((value) => {
-    if (typeof value === "string" && /^\d+d$/.test(value)) {
-      return `_${value}`;
+    if (typeof value === "string" && value.startsWith("_")) {
+      return value.slice(1);
     }
 
     return value;
-  }, DaysWindowEnum.default("_90d"))
-  .transform((val) => DaysEnum[val.slice(1) as keyof typeof DaysEnum])
-  .openapi("DaysWindow");
+  }, DaysWindowEnum.default("90d"))
+  .transform((val) => DaysEnum[val as keyof typeof DaysEnum])
+  .openapi("DaysWindow", {
+    type: "string",
+    enum: ["7d", "30d", "90d", "180d", "365d"],
+  });
 
 export const PeriodResponseSchema = z
   .object({
@@ -56,12 +59,10 @@ export const FeedRelevanceSchema = z
   .nativeEnum(FeedRelevance)
   .openapi("FeedRelevance");
 
-export const VoteSupportSchema = z
-  .enum(["0", "1", "2"])
-  .openapi("VoteSupport", {
-    description: "Governance vote direction.",
-    example: "1",
-  });
+export const VoteSupportSchema = z.string().openapi("VoteSupport", {
+  description: "Governance vote direction.",
+  example: "1",
+});
 
 export const PageInfoSchema = z
   .object({
