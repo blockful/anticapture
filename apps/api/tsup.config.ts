@@ -4,6 +4,7 @@ export default defineConfig({
   entry: {
     index: "cmd/index.ts",
     aave: "cmd/aave.ts",
+    gnosis: "cmd/gnosis.ts",
     instrumentation: "src/instrumentation.ts",
   },
   format: ["esm"],
