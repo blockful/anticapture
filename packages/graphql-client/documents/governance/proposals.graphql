@@ -64,7 +64,7 @@ query GetVotes(
   $skip: NonNegativeInt
   $orderBy: queryInput_votesByProposalId_orderBy = timestamp
   $orderDirection: OrderDirection = desc
-  $support: VoteSupport
+  $support: String
   $voterAddressIn: [String]
 ) {
   votesByProposalId(

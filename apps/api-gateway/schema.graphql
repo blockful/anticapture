@@ -386,6 +386,9 @@ type Query {
 
     """Earliest proposal creation timestamp, in Unix seconds."""
     fromDate: Int
+
+    """Latest proposal creation timestamp, in Unix seconds."""
+    endDate: Int
   ): OffchainProposalsResponse
 
   """Returns a single offchain (Snapshot) proposal by its ID"""

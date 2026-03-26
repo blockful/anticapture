@@ -13,7 +13,7 @@ import {
   updateSupplyMetric,
   updateTotalSupply,
 } from "@/eventHandlers/metrics";
-import { handleTransaction } from "@/eventHandlers/shared";
+import { createAddressSet, handleTransaction } from "@/eventHandlers/shared";
 import {
   MetricTypesEnum,
   BurningAddresses,
@@ -27,6 +27,26 @@ import { DaoIdEnum } from "@/lib/enums";
 
 export function OPTokenIndexer(address: Address, decimals: number) {
   const daoId = DaoIdEnum.OP;
+  const cexAddressSet = createAddressSet(Object.values(CEXAddresses[daoId]));
+  const dexAddressSet = createAddressSet(Object.values(DEXAddresses[daoId]));
+  const lendingAddressSet = createAddressSet(
+    Object.values(LendingAddresses[daoId]),
+  );
+  const burningAddressSet = createAddressSet(
+    Object.values(BurningAddresses[daoId]),
+  );
+  const treasuryAddressSet = createAddressSet(
+    Object.values(TreasuryAddresses[daoId]),
+  );
+  const nonCirculatingAddressSet = createAddressSet(
+    Object.values(NonCirculatingAddresses[daoId]),
+  );
+  const delegationAddressSets = {
+    cex: cexAddressSet,
+    dex: dexAddressSet,
+    lending: lendingAddressSet,
+    burning: burningAddressSet,
+  };
 
   ponder.on("OPToken:setup", async ({ context }) => {
     await context.db.insert(token).values({
@@ -39,15 +59,6 @@ export function OPTokenIndexer(address: Address, decimals: number) {
   ponder.on(`OPToken:Transfer`, async ({ event, context }) => {
     const { from, to, value } = event.args;
     const { timestamp } = event.block;
-
-    const cexAddressList = Object.values(CEXAddresses[daoId]);
-    const dexAddressList = Object.values(DEXAddresses[daoId]);
-    const lendingAddressList = Object.values(LendingAddresses[daoId]);
-    const burningAddressList = Object.values(BurningAddresses[daoId]);
-    const treasuryAddressList = Object.values(TreasuryAddresses[daoId]);
-    const nonCirculatingAddressList = Object.values(
-      NonCirculatingAddresses[daoId],
-    );
 
     await tokenTransfer(
       context,
@@ -62,17 +73,17 @@ export function OPTokenIndexer(address: Address, decimals: number) {
         logIndex: event.log.logIndex,
       },
       {
-        cex: cexAddressList,
-        dex: dexAddressList,
-        lending: lendingAddressList,
-        burning: burningAddressList,
+        cex: cexAddressSet,
+        dex: dexAddressSet,
+        lending: lendingAddressSet,
+        burning: burningAddressSet,
       },
     );
 
-    await updateSupplyMetric(
+    const lendingChanged = await updateSupplyMetric(
       context,
       "lendingSupply",
-      lendingAddressList,
+      lendingAddressSet,
       MetricTypesEnum.LENDING_SUPPLY,
       from,
       to,
@@ -82,10 +93,10 @@ export function OPTokenIndexer(address: Address, decimals: number) {
       timestamp,
     );
 
-    await updateSupplyMetric(
+    const cexChanged = await updateSupplyMetric(
       context,
       "cexSupply",
-      cexAddressList,
+      cexAddressSet,
       MetricTypesEnum.CEX_SUPPLY,
       from,
       to,
@@ -95,10 +106,10 @@ export function OPTokenIndexer(address: Address, decimals: number) {
       timestamp,
     );
 
-    await updateSupplyMetric(
+    const dexChanged = await updateSupplyMetric(
       context,
       "dexSupply",
-      dexAddressList,
+      dexAddressSet,
       MetricTypesEnum.DEX_SUPPLY,
       from,
       to,
@@ -108,10 +119,10 @@ export function OPTokenIndexer(address: Address, decimals: number) {
       timestamp,
     );
 
-    await updateSupplyMetric(
+    const treasuryChanged = await updateSupplyMetric(
       context,
       "treasury",
-      treasuryAddressList,
+      treasuryAddressSet,
       MetricTypesEnum.TREASURY,
       from,
       to,
@@ -121,10 +132,10 @@ export function OPTokenIndexer(address: Address, decimals: number) {
       timestamp,
     );
 
-    await updateSupplyMetric(
+    const nonCirculatingChanged = await updateSupplyMetric(
       context,
       "nonCirculatingSupply",
-      nonCirculatingAddressList,
+      nonCirculatingAddressSet,
       MetricTypesEnum.NON_CIRCULATING_SUPPLY,
       from,
       to,
@@ -134,9 +145,9 @@ export function OPTokenIndexer(address: Address, decimals: number) {
       timestamp,
     );
 
-    await updateTotalSupply(
+    const totalSupplyChanged = await updateTotalSupply(
       context,
-      burningAddressList,
+      burningAddressSet,
       MetricTypesEnum.TOTAL_SUPPLY,
       from,
       to,
@@ -146,7 +157,16 @@ export function OPTokenIndexer(address: Address, decimals: number) {
       timestamp,
     );
 
-    await updateCirculatingSupply(context, daoId, address, timestamp);
+    if (
+      lendingChanged ||
+      cexChanged ||
+      dexChanged ||
+      treasuryChanged ||
+      nonCirculatingChanged ||
+      totalSupplyChanged
+    ) {
+      await updateCirculatingSupply(context, daoId, address, timestamp);
+    }
 
     if (!event.transaction.to) return;
 
@@ -158,24 +178,29 @@ export function OPTokenIndexer(address: Address, decimals: number) {
       event.block.timestamp,
       [event.args.from, event.args.to],
       {
-        cex: cexAddressList,
-        dex: dexAddressList,
-        lending: lendingAddressList,
-        burning: burningAddressList,
+        cex: cexAddressSet,
+        dex: dexAddressSet,
+        lending: lendingAddressSet,
+        burning: burningAddressSet,
       },
     );
   });
 
   ponder.on(`OPToken:DelegateChanged`, async ({ event, context }) => {
-    await delegateChanged(context, daoId, {
-      delegator: event.args.delegator,
-      delegate: event.args.toDelegate,
-      tokenId: event.log.address,
-      previousDelegate: event.args.fromDelegate,
-      txHash: event.transaction.hash,
-      timestamp: event.block.timestamp,
-      logIndex: event.log.logIndex,
-    });
+    await delegateChanged(
+      context,
+      daoId,
+      {
+        delegator: event.args.delegator,
+        delegate: event.args.toDelegate,
+        tokenId: event.log.address,
+        previousDelegate: event.args.fromDelegate,
+        txHash: event.transaction.hash,
+        timestamp: event.block.timestamp,
+        logIndex: event.log.logIndex,
+      },
+      delegationAddressSets,
+    );
 
     if (!event.transaction.to) return;
 

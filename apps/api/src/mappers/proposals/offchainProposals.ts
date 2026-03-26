@@ -107,5 +107,8 @@ export const OffchainProposalsRequestSchema = z
     fromDate: unixTimestampQueryParam(
       "Earliest proposal creation timestamp, in Unix seconds.",
     ),
+    endDate: unixTimestampQueryParam(
+      "Latest proposal creation timestamp, in Unix seconds.",
+    ),
   })
   .openapi("OffchainProposalsRequest");

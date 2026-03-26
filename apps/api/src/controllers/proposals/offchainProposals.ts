@@ -36,7 +36,7 @@ export function offchainProposals(
       },
     }),
     async (context) => {
-      const { skip, limit, orderDirection, status, fromDate } =
+      const { skip, limit, orderDirection, status, fromDate, endDate } =
         context.req.valid("query");
 
       const response = await service.getProposals({
@@ -45,6 +45,7 @@ export function offchainProposals(
         orderDirection,
         status,
         fromDate,
+        endDate,
       });
 
       return context.json(OffchainProposalsResponseSchema.parse(response), 200);

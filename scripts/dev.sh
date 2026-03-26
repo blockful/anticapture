@@ -120,6 +120,12 @@ trap cleanup INT TERM EXIT
 
 # Wrap a command with `railway run` for env injection when --rw flag is set
 railway_run() {
+  local -a overrides=()
+  while [[ "${1:-}" == *=* ]]; do
+    overrides+=("$1")
+    shift
+  done
+
   local service=$1
   shift
   if [ "$USE_RAILWAY" = true ]; then
@@ -187,7 +193,11 @@ export ADDRESS_ENRICHMENT_API_URL="http://localhost:${PORT_ADDRESS_ENRICHMENT}"
 GATEWAY_READY=$(mktemp)
 rm -f "$GATEWAY_READY"
 log "Starting Gateway..."
-run_with_prefix "$C_GATEWAY" "🌎 gateway" "$GATEWAY_READY" "Mesh running at" railway_run api-gateway pnpm gateway dev &
+GATEWAY_OVERRIDES=()
+if [ "$RUN_API" = true ]; then
+  GATEWAY_OVERRIDES+=("DAO_API_${DAO_ID}=http://localhost:${PORT_API}")
+fi
+run_with_prefix "$C_GATEWAY" "🌎 gateway" "$GATEWAY_READY" "Mesh running at" railway_run "${GATEWAY_OVERRIDES[@]}" api-gateway pnpm gateway dev &
 wait_for_ready "$GATEWAY_READY" "Gateway"
 
 # Watchdog: when API recovers after being down, touch the sentinel file so tsx reloads the gateway

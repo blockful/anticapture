@@ -61,6 +61,17 @@
       },
       "outFiles": ["${workspaceFolder}/**/*.js", "!**/node_modules/**"],
       "cwd": "${workspaceFolder}/apps/gateful"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Vitest (api)",
+      "skipFiles": ["<node_internals>/**"],
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["vitest", "run", "--no-coverage", "${file}"],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "cwd": "${workspaceFolder}/apps/api"
     }
   ]
 }
