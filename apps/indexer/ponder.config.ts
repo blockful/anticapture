@@ -12,6 +12,7 @@ import scrollConfig from "./config/scroll.config";
 import shutterConfig from "./config/shutter.config";
 import uniswapConfig from "./config/uniswap.config";
 import zkConfig from "./config/zk.config";
+import gnosisConfig from "./config/gnosis.config";
 
 export default {
   chains: {
@@ -29,6 +30,7 @@ export default {
     ...obolConfig.chains,
     ...zkConfig.chains,
     ...shutterConfig.chains,
+    ...gnosisConfig.chains,
   },
   contracts: {
     ...aaveConfig.contracts,
@@ -45,5 +47,6 @@ export default {
     ...obolConfig.contracts,
     ...zkConfig.contracts,
     ...shutterConfig.contracts,
+    ...gnosisConfig.contracts,
   },
 };
