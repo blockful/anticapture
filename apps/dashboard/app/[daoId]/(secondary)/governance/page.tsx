@@ -14,24 +14,21 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const daoId = params.daoId.toUpperCase() as DaoIdEnum;
 
-  const ogTitle = `Anticapture - ${daoId} DAO`;
-  const ogDescription = `Explore and mitigate governance risks in ${daoId} DAO.`;
-
   const canonicalPath = `/${params.daoId}/governance`;
 
   return {
-    title: ogTitle,
-    description: ogDescription,
+    title: `${daoId} DAO Governance Proposals | Security Analysis — Anticapture`,
+    description: `Browse and analyze governance proposals for ${daoId} DAO. Track voting patterns, delegate participation, and governance capture signals across on-chain proposals.`,
     alternates: { canonical: canonicalPath },
     openGraph: {
       url: canonicalPath,
-      title: ogTitle,
-      description: ogDescription,
+      title: `${daoId} DAO Governance Proposals | Security Analysis — Anticapture`,
+      description: `Browse and analyze governance proposals for ${daoId} DAO. Track voting patterns, delegate participation, and governance capture signals across on-chain proposals.`,
     },
     twitter: {
       card: "summary_large_image",
-      title: ogTitle,
-      description: ogDescription,
+      title: `${daoId} DAO Governance Proposals | Security Analysis — Anticapture`,
+      description: `Browse and analyze governance proposals for ${daoId} DAO. Track voting patterns, delegate participation, and governance capture signals across on-chain proposals.`,
     },
   };
 }

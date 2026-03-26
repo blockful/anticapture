@@ -19,18 +19,18 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const canonicalPath = `/${params.daoId}/risk-analysis`;
 
   return {
-    title: `Anticapture - ${daoId} DAO Risk Analysis`,
-    description: `Analyze governance risks and security threats for ${daoId} DAO.`,
+    title: `${daoId} DAO Governance Risk Analysis | Hostile Takeover Assessment — Anticapture`,
+    description: `Deep governance risk analysis for ${daoId} DAO — quantifying hostile takeover costs, governance capture vectors, voter apathy risks, and attack profitability metrics.`,
     alternates: { canonical: canonicalPath },
     openGraph: {
       url: canonicalPath,
-      title: `Anticapture - ${daoId} DAO Risk Analysis`,
-      description: `Analyze governance risks and security threats for ${daoId} DAO.`,
+      title: `${daoId} DAO Governance Risk Analysis | Hostile Takeover Assessment — Anticapture`,
+      description: `Deep governance risk analysis for ${daoId} DAO — quantifying hostile takeover costs, governance capture vectors, voter apathy risks, and attack profitability metrics.`,
     },
     twitter: {
       card: "summary_large_image",
-      title: `Anticapture - ${daoId} DAO Risk Analysis`,
-      description: `Analyze governance risks and security threats for ${daoId} DAO.`,
+      title: `${daoId} DAO Governance Risk Analysis | Hostile Takeover Assessment — Anticapture`,
+      description: `Deep governance risk analysis for ${daoId} DAO — quantifying hostile takeover costs, governance capture vectors, voter apathy risks, and attack profitability metrics.`,
     },
   };
 }

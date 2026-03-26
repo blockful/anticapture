@@ -15,18 +15,18 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const canonicalPath = `/${params.daoId}/holders-and-delegates`;
 
   return {
-    title: `Anticapture - ${daoId} DAO Holders and Delegates`,
-    description: `Explore ${daoId} DAO token holders and delegate distribution.`,
+    title: `${daoId} DAO Token Holders & Delegate Security Analysis — Anticapture`,
+    description: `Analyze token holder concentration and delegate distribution for ${daoId} DAO to identify governance capture risks, whale dominance, and delegate centralization threats.`,
     alternates: { canonical: canonicalPath },
     openGraph: {
       url: canonicalPath,
-      title: `Anticapture - ${daoId} DAO Holders and Delegates`,
-      description: `Explore ${daoId} DAO token holders and delegate distribution.`,
+      title: `${daoId} DAO Token Holders & Delegate Security Analysis — Anticapture`,
+      description: `Analyze token holder concentration and delegate distribution for ${daoId} DAO to identify governance capture risks, whale dominance, and delegate centralization threats.`,
     },
     twitter: {
       card: "summary_large_image",
-      title: `Anticapture - ${daoId} DAO Holders and Delegates`,
-      description: `Explore ${daoId} DAO token holders and delegate distribution.`,
+      title: `${daoId} DAO Token Holders & Delegate Security Analysis — Anticapture`,
+      description: `Analyze token holder concentration and delegate distribution for ${daoId} DAO to identify governance capture risks, whale dominance, and delegate centralization threats.`,
     },
   };
 }
