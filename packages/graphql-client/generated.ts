@@ -15,9 +15,12 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
+  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
+  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
+  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
 };
 
@@ -437,6 +440,7 @@ export type QueryOffchainProposalByIdArgs = {
 
 
 export type QueryOffchainProposalsArgs = {
+  endDate?: InputMaybe<Scalars['Float']['input']>;
   fromDate?: InputMaybe<Scalars['Float']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   orderDirection?: InputMaybe<QueryInput_OffchainProposals_OrderDirection>;
@@ -2062,6 +2066,17 @@ export type GetAddressesQueryVariables = Exact<{
 
 export type GetAddressesQuery = { __typename?: 'Query', getAddresses?: { __typename?: 'getAddresses_200_response', results: Array<{ __typename?: 'query_getAddresses_results_items', address: string, isContract: boolean, arkham?: { __typename?: 'query_getAddresses_results_items_arkham', entity?: string | null, entityType?: string | null, label?: string | null, twitter?: string | null } | null, ens?: { __typename?: 'query_getAddresses_results_items_ens', name?: string | null, avatar?: string | null, banner?: string | null } | null } | null> } | null };
 
+export type GetOffchainProposalsFromDaoQueryVariables = Exact<{
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderDirection?: InputMaybe<QueryInput_OffchainProposals_OrderDirection>;
+  status?: InputMaybe<Scalars['JSON']['input']>;
+  fromDate?: InputMaybe<Scalars['Float']['input']>;
+}>;
+
+
+export type GetOffchainProposalsFromDaoQuery = { __typename?: 'Query', offchainProposals?: { __typename?: 'offchainProposals_200_response', totalCount: number, items: Array<{ __typename?: 'query_offchainProposals_items_items', id: string, spaceId: string, author: string, title: string, start: number, end: number, state: string, created: number, link: string } | null> } | null };
+
 export type GetProposalsFromDaoQueryVariables = Exact<{
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
@@ -3157,6 +3172,70 @@ export type GetAddressesQueryHookResult = ReturnType<typeof useGetAddressesQuery
 export type GetAddressesLazyQueryHookResult = ReturnType<typeof useGetAddressesLazyQuery>;
 export type GetAddressesSuspenseQueryHookResult = ReturnType<typeof useGetAddressesSuspenseQuery>;
 export type GetAddressesQueryResult = Apollo.QueryResult<GetAddressesQuery, GetAddressesQueryVariables>;
+export const GetOffchainProposalsFromDaoDocument = gql`
+    query GetOffchainProposalsFromDao($skip: NonNegativeInt, $limit: PositiveInt = 10, $orderDirection: queryInput_offchainProposals_orderDirection = desc, $status: JSON, $fromDate: Float) {
+  offchainProposals(
+    skip: $skip
+    limit: $limit
+    orderDirection: $orderDirection
+    status: $status
+    fromDate: $fromDate
+  ) {
+    items {
+      id
+      spaceId
+      author
+      title
+      start
+      end
+      state
+      created
+      link
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useGetOffchainProposalsFromDaoQuery__
+ *
+ * To run a query within a React component, call `useGetOffchainProposalsFromDaoQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetOffchainProposalsFromDaoQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetOffchainProposalsFromDaoQuery({
+ *   variables: {
+ *      skip: // value for 'skip'
+ *      limit: // value for 'limit'
+ *      orderDirection: // value for 'orderDirection'
+ *      status: // value for 'status'
+ *      fromDate: // value for 'fromDate'
+ *   },
+ * });
+ */
+export function useGetOffchainProposalsFromDaoQuery(baseOptions?: Apollo.QueryHookOptions<GetOffchainProposalsFromDaoQuery, GetOffchainProposalsFromDaoQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetOffchainProposalsFromDaoQuery, GetOffchainProposalsFromDaoQueryVariables>(GetOffchainProposalsFromDaoDocument, options);
+      }
+export function useGetOffchainProposalsFromDaoLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetOffchainProposalsFromDaoQuery, GetOffchainProposalsFromDaoQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetOffchainProposalsFromDaoQuery, GetOffchainProposalsFromDaoQueryVariables>(GetOffchainProposalsFromDaoDocument, options);
+        }
+// @ts-ignore
+export function useGetOffchainProposalsFromDaoSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetOffchainProposalsFromDaoQuery, GetOffchainProposalsFromDaoQueryVariables>): Apollo.UseSuspenseQueryResult<GetOffchainProposalsFromDaoQuery, GetOffchainProposalsFromDaoQueryVariables>;
+export function useGetOffchainProposalsFromDaoSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetOffchainProposalsFromDaoQuery, GetOffchainProposalsFromDaoQueryVariables>): Apollo.UseSuspenseQueryResult<GetOffchainProposalsFromDaoQuery | undefined, GetOffchainProposalsFromDaoQueryVariables>;
+export function useGetOffchainProposalsFromDaoSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetOffchainProposalsFromDaoQuery, GetOffchainProposalsFromDaoQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetOffchainProposalsFromDaoQuery, GetOffchainProposalsFromDaoQueryVariables>(GetOffchainProposalsFromDaoDocument, options);
+        }
+export type GetOffchainProposalsFromDaoQueryHookResult = ReturnType<typeof useGetOffchainProposalsFromDaoQuery>;
+export type GetOffchainProposalsFromDaoLazyQueryHookResult = ReturnType<typeof useGetOffchainProposalsFromDaoLazyQuery>;
+export type GetOffchainProposalsFromDaoSuspenseQueryHookResult = ReturnType<typeof useGetOffchainProposalsFromDaoSuspenseQuery>;
+export type GetOffchainProposalsFromDaoQueryResult = Apollo.QueryResult<GetOffchainProposalsFromDaoQuery, GetOffchainProposalsFromDaoQueryVariables>;
 export const GetProposalsFromDaoDocument = gql`
     query GetProposalsFromDao($skip: NonNegativeInt, $limit: PositiveInt = 10, $orderDirection: queryInput_proposals_orderDirection = desc, $status: JSON, $fromDate: Float) {
   proposals(

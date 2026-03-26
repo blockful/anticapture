@@ -6,27 +6,44 @@ import { useParams } from "next/navigation";
 import { useCallback, useEffect, useRef } from "react";
 
 import { ProposalItem } from "@/features/governance/components/proposal-overview/ProposalItem";
+import { useOffchainProposals } from "@/features/governance/hooks/useOffchainProposals";
 import { useProposals } from "@/features/governance/hooks/useProposals";
 import { TheSectionLayout } from "@/shared/components";
 import { EmptyState } from "@/shared/components/design-system/table/components/EmptyState";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
+import daoConfigByDaoId from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
 export const GovernanceSection = () => {
   const { daoId }: { daoId: string } = useParams();
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
+  const isOffchainOnly =
+    !!daoConfigByDaoId[daoIdEnum]?.daoOverview?.snapshot &&
+    !daoConfigByDaoId[daoIdEnum]?.daoOverview?.contracts?.governor;
+
+  const onchain = useProposals({
+    itemsPerPage: 10,
+    orderDirection: QueryInput_Proposals_OrderDirection.Desc,
+    daoId: daoIdEnum,
+    // Skip the query entirely for offchain-only DAOs
+    skip: isOffchainOnly,
+  });
+
+  const offchain = useOffchainProposals({
+    itemsPerPage: 10,
+    daoId: daoIdEnum,
+    // Skip the query for DAOs that have onchain governance
+    skip: !isOffchainOnly,
+  });
+
   const {
-    proposals, // Now already normalized to Proposal[] format
+    proposals,
     loading,
     error,
     pagination,
     fetchNextPage,
     isPaginationLoading,
-  } = useProposals({
-    itemsPerPage: 10,
-    orderDirection: QueryInput_Proposals_OrderDirection.Desc,
-    daoId: daoIdEnum,
-  });
+  } = isOffchainOnly ? offchain : onchain;
 
   const loadMoreRef = useRef<HTMLDivElement>(null);
 

@@ -1,0 +1,28 @@
+query GetOffchainProposalsFromDao(
+  $skip: NonNegativeInt
+  $limit: PositiveInt = 10
+  $orderDirection: queryInput_offchainProposals_orderDirection = desc
+  $status: JSON
+  $fromDate: Float
+) {
+  offchainProposals(
+    skip: $skip
+    limit: $limit
+    orderDirection: $orderDirection
+    status: $status
+    fromDate: $fromDate
+  ) {
+    items {
+      id
+      spaceId
+      author
+      title
+      start
+      end
+      state
+      created
+      link
+    }
+    totalCount
+  }
+}
