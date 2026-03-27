@@ -4,7 +4,13 @@
     "@anticapture/observability#build": {
       "outputs": ["packages/observability/dist/**"]
     },
+    "@anticapture/dasbhoard#dev": {
+      "dependsOn": ["@anticapture/graphql-client#codegen"],
+      "persistent": true,
+      "cache": false
+    },
     "@anticapture/dasbhoard#build": {
+      "dependsOn": ["@anticapture/graphql-client#codegen"],
       "outputs": ["dist/**", ".next/**", ".next/cache/**"]
     },
     "build": {
