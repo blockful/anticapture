@@ -23,12 +23,9 @@ export const RadioCard = ({
   className,
 }: RadioCardProps) => {
   return (
-    <button
-      type="button"
-      role="radio"
-      aria-checked={isActive}
-      disabled={isDisabled}
-      onClick={onClick}
+    <label
+      aria-disabled={isDisabled}
+      onClick={isDisabled ? undefined : onClick}
       className={cn(
         // Base layout
         "group flex w-full items-center gap-2 px-2.5 py-2",
@@ -41,7 +38,7 @@ export const RadioCard = ({
         !isDisabled && "hover:bg-surface-contrast",
         // Disabled
         isDisabled &&
-          "bg-surface-contrast border-border-contrast cursor-not-allowed opacity-50",
+          "bg-surface-contrast border-border-contrast pointer-events-none cursor-not-allowed opacity-50",
         // Transition
         "transition-colors duration-200",
         // Radio right layout
@@ -76,6 +73,6 @@ export const RadioCard = ({
           {label}
         </span>
       </div>
-    </button>
+    </label>
   );
 };
