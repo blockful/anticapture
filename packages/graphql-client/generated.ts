@@ -2298,6 +2298,13 @@ export type GetOffchainProposalQuery = {
     link: string;
     scores: Array<number | null>;
     choices: Array<string | null>;
+    strategies?: Array<{
+      name: string;
+      network: string;
+      params: Record<string, unknown>;
+    }> | null;
+    network?: string | null;
+    snapshot?: number | null;
   } | null;
 };
 
@@ -4882,6 +4889,13 @@ export const GetOffchainProposalDocument = gql`
       link
       scores
       choices
+      strategies {
+        name
+        network
+        params
+      }
+      network
+      snapshot
     }
   }
 `;

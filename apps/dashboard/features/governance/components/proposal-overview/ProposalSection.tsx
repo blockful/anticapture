@@ -1,11 +1,12 @@
 "use client";
 
 import type { Query_Proposals_Items_Items } from "@anticapture/graphql-client/hooks";
-import { ArrowRight, ExternalLink } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState, useCallback, useMemo } from "react";
 import { useAccount } from "wagmi";
 
+import { OffchainVotingModal } from "@/features/governance/components/modals/OffchainVotingModal";
 import { VotingModal } from "@/features/governance/components/modals/VotingModal";
 import {
   getVoteText,
@@ -208,15 +209,23 @@ export const ProposalSection = ({
             />
           </>
         )}
+
+        {isOffchain && rawOffchainProposal && (
+          <OffchainVotingModal
+            isOpen={isVotingModalOpen}
+            onClose={() => setIsVotingModalOpen(false)}
+            proposal={rawOffchainProposal}
+          />
+        )}
       </div>
 
       {/* Fixed bottom bar for mobile */}
       <div className="bg-surface-background fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 p-4 lg:hidden dark:border-gray-800">
         <MobileBottomBar
           isOffchain={isOffchain}
-          snapshotLink={snapshotLink}
           address={address}
           supportValue={supportValue}
+          proposalStatus={proposal.status}
           onVoteClick={() => setIsVotingModalOpen(true)}
         />
       </div>
@@ -226,31 +235,25 @@ export const ProposalSection = ({
 
 const MobileBottomBar = ({
   isOffchain,
-  snapshotLink,
   address,
   supportValue,
+  proposalStatus,
   onVoteClick,
 }: {
   isOffchain: boolean;
-  snapshotLink: string | null | undefined;
   address: string | undefined;
   supportValue: number | undefined;
+  proposalStatus: string;
   onVoteClick: () => void;
 }) => {
   if (isOffchain) {
-    if (snapshotLink) {
+    const isOngoing = proposalStatus.toLowerCase() === "ongoing";
+    if (address && isOngoing) {
       return (
-        <a
-          href={snapshotLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex w-full"
-        >
-          <Button className="flex w-full">
-            <ExternalLink className="size-3.5" />
-            Vote on Snapshot
-          </Button>
-        </a>
+        <Button className="flex w-full" onClick={onVoteClick}>
+          Cast your vote
+          <ArrowRight className="size-3.5" />
+        </Button>
       );
     }
     return null;

@@ -1,7 +1,7 @@
 "use client";
 
 import type { GetAccountPowerQuery } from "@anticapture/graphql-client";
-import { ArrowLeft, ArrowRight, ExternalLink } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 import { Button, IconButton } from "@/shared/components";
@@ -104,17 +104,24 @@ export const ProposalHeader = ({
 
         <div className="flex items-center gap-4">
           {snapshotLink ? (
-            <a
-              href={snapshotLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden lg:flex"
-            >
-              <Button variant="outline" size="sm">
-                <ExternalLink className="size-3.5" />
-                Vote on Snapshot
-              </Button>
-            </a>
+            <>
+              {address && (
+                <div className="hidden flex-col items-end lg:flex">
+                  <p className="text-secondary flex items-center gap-2 text-[12px] font-medium leading-[16px]">
+                    Your voting power
+                  </p>
+                  <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+                    {votingPower}
+                  </p>
+                </div>
+              )}
+              <ProposalHeaderAction
+                address={address}
+                supportValue={undefined}
+                proposalStatus={proposalStatus}
+                setIsVotingModalOpen={setIsVotingModalOpen}
+              />
+            </>
           ) : (
             <>
               <p className="text-secondary flex items-center gap-2 whitespace-nowrap text-[14px] font-normal leading-[20px] lg:hidden">

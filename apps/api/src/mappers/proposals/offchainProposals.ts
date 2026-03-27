@@ -21,6 +21,15 @@ export const OffchainProposalResponseSchema = z.object({
   flagged: z.boolean(),
   scores: z.array(z.number()),
   choices: z.array(z.string()),
+  network: z.string(),
+  snapshot: z.number().nullable(),
+  strategies: z.array(
+    z.object({
+      name: z.string(),
+      network: z.string(),
+      params: z.record(z.unknown()),
+    }),
+  ),
 });
 
 export type OffchainProposalResponse = z.infer<
@@ -45,6 +54,9 @@ export const OffchainProposalMapper = {
     flagged: p.flagged,
     scores: p.scores,
     choices: p.choices,
+    network: p.network,
+    snapshot: p.snapshot,
+    strategies: p.strategies,
   }),
 };
 

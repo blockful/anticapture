@@ -37,6 +37,7 @@ query GetOffchainProposal($id: String!) {
     author
     title
     body
+    type
     state
     start
     end
@@ -45,6 +46,13 @@ query GetOffchainProposal($id: String!) {
     link
     scores
     choices
+    strategies {
+      name
+      network
+      params
+    }
+    network
+    snapshot
   }
 }
 

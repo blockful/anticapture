@@ -30,6 +30,13 @@ const PROPOSALS_QUERY = `
       flagged
       scores
       choices
+      network
+      snapshot
+      strategies {
+        name
+        network
+        params
+      }
     }
   }
 `;
