@@ -1,7 +1,7 @@
 import {
   GITHUB_API_BASE,
   GITHUB_RAW_BASE,
-} from "@/features/service-providers/constants/ens-service-providers";
+} from "@/features/service-providers/constants/github";
 import type {
   ParsedQuarter,
   ProgramConfig,

@@ -4,7 +4,7 @@ import { Building2, Pencil } from "lucide-react";
 import { useState } from "react";
 
 import { ServiceProvidersTable } from "@/features/service-providers/components/ServiceProvidersTable";
-import { UPDATE_STATUS_URL } from "@/features/service-providers/constants/ens-service-providers";
+import { UPDATE_STATUS_URL } from "@/features/service-providers/constants/github";
 import { useServiceProvidersData } from "@/features/service-providers/hooks/useServiceProvidersData";
 import { TheSectionLayout } from "@/shared/components/containers/TheSectionLayout";
 import { InlineAlert } from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
