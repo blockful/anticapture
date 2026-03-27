@@ -10,6 +10,7 @@ export * from "./uni";
 export * from "./shu";
 export * from "./aave";
 export * from "./fluid";
+export * from "./gnosis";
 
 export interface DAOClient {
   getDaoId: () => string;

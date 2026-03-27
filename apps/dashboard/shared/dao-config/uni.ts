@@ -1,6 +1,6 @@
 import { mainnet } from "viem/chains";
 
-import { UniswapIcon } from "@/shared/components/icons/UniswapIcon";
+import { UniswapIcon } from "@/shared/components/icons";
 import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
@@ -314,4 +314,5 @@ export const UNI: DaoConfiguration = {
   dataTables: true,
   activityFeed: true,
   governancePage: true,
+  proposalTypeConfiguration: "onchain",
 };

@@ -1,6 +1,6 @@
 import { scroll } from "viem/chains";
 
-import { ScrollIcon } from "@/shared/components/icons/ScrollIcon";
+import { ScrollIcon } from "@/shared/components/icons";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 import { RECOMMENDED_SETTINGS } from "@/shared/constants/recommended-settings";
@@ -318,4 +318,5 @@ export const SCR: DaoConfiguration = {
       },
     },
   },
+  proposalTypeConfiguration: "onchain",
 };

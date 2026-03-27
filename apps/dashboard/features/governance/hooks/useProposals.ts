@@ -40,6 +40,7 @@ export interface UseProposalsParams extends Omit<
 > {
   itemsPerPage?: number;
   daoId?: DaoIdEnum;
+  skip?: boolean;
 }
 
 export const useProposals = ({
@@ -48,6 +49,7 @@ export const useProposals = ({
   status,
   itemsPerPage = 10,
   daoId,
+  skip = false,
 }: UseProposalsParams = {}): UseProposalsResult => {
   const [isPaginationLoading, setIsPaginationLoading] = useState(false);
   const [allProposals, setAllProposals] = useState<GovernanceProposal[]>([]);
@@ -66,6 +68,7 @@ export const useProposals = ({
 
   // Main proposals query
   const { data, loading, error, fetchMore } = useGetProposalsFromDaoQuery({
+    skip,
     variables: queryVariables,
     notifyOnNetworkStatusChange: true,
     context: {

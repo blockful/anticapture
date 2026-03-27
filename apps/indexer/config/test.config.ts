@@ -7,7 +7,7 @@ export default createConfig({
   chains: {
     anvil: {
       id: 31337,
-      rpc: env.RPC_URL,
+      rpc: env.RPC_URLS[0],
       maxRequestsPerSecond: 10,
       pollingInterval: 1000,
       disableCache: true,

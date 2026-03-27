@@ -12,6 +12,7 @@
     "clean": "rm -rf node_modules *.tsbuildinfo dist",
     "start": "node --import ./dist/instrumentation.js dist/index.js",
     "start:aave": "node --import ./dist/instrumentation.js dist/aave.js",
+    "start:gnosis": "node --import ./dist/instrumentation.js dist/gnosis.js",
     "build": "tsup",
     "build:watch": "tsc --watch",
     "lint": "eslint src",

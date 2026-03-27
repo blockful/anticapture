@@ -6,7 +6,7 @@ import type { ModalHeaderProps } from "@/shared/components/design-system/modal/t
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta: Meta<ModalHeaderProps> = {
-  title: "Data Display/Modal/ModalHeader",
+  title: "Feedback/Modal/ModalHeader",
   component: ModalHeader,
   parameters: {
     layout: "centered",
