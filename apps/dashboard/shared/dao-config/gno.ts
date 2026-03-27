@@ -32,4 +32,5 @@ export const GNO: DaoConfiguration = {
   activityFeed: true,
   overviewPage: false,
   initialPage: "holders-and-delegates",
+  offchainProposals: true,
 };
