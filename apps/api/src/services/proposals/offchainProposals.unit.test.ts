@@ -23,6 +23,9 @@ const createMockProposal = (
   flagged: false,
   scores: [],
   choices: [],
+  network: "",
+  snapshot: null,
+  strategies: [],
   ...overrides,
 });
 
