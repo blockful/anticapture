@@ -1,5 +1,25 @@
 import type { Query_Proposals_Items_Items } from "@anticapture/graphql-client/hooks";
 
+export interface ProposalViewData {
+  id: string;
+  daoId: string;
+  txHash: string | null;
+  proposerAccountId: string;
+  title: string;
+  description: string;
+  quorum: string;
+  timestamp: string;
+  status: string;
+  forVotes: string;
+  againstVotes: string;
+  abstainVotes: string;
+  startTimestamp: string;
+  endTimestamp: string;
+  calldatas: Array<string | null> | null;
+  targets: Array<string | null>;
+  values: Array<string | null>;
+}
+
 export enum ProposalStatus {
   PENDING = "pending",
   ONGOING = "ongoing",
@@ -11,6 +31,7 @@ export enum ProposalStatus {
   SUCCEEDED = "succeeded",
   EXPIRED = "expired",
   NO_QUORUM = "no_quorum",
+  CLOSED = "closed",
 }
 
 export enum ProposalState {

@@ -28,6 +28,15 @@ const PROPOSALS_QUERY = `
       updated
       link
       flagged
+      scores
+      choices
+      network
+      snapshot
+      strategies {
+        name
+        network
+        params
+      }
     }
   }
 `;
