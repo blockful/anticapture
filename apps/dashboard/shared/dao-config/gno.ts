@@ -1,19 +1,19 @@
 import { mainnet } from "viem/chains";
 
-import { EnsIcon } from "@/shared/components/icons";
 import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
 import type { DaoConfiguration } from "@/shared/dao-config/types";
-import { EnsOgIcon } from "@/shared/og/dao-og-icons";
+import { GnosisOgIcon } from "@/shared/og/dao-og-icons";
+import { GnosisIcon } from "@/shared/components/icons";
 
 export const GNO: DaoConfiguration = {
-  name: "GNO",
+  name: "Gnosis",
   decimals: 18,
   color: {
     svgColor: "#0080bc",
     svgBgColor: "#fff",
   },
-  icon: EnsIcon,
-  ogIcon: EnsOgIcon,
+  icon: GnosisIcon,
+  ogIcon: GnosisOgIcon,
   daoOverview: {
     token: "ERC20",
     chain: { ...mainnet, icon: MainnetIcon, blockTime: 12 },
