@@ -8,10 +8,10 @@ interface GlossaryContentProps {
   availableLetters: GlossaryLetter[];
 }
 
-export function GlossaryContent({
+export const GlossaryContent = ({
   glossaryData,
   availableLetters,
-}: GlossaryContentProps) {
+}: GlossaryContentProps) => {
   return (
     <div className="space-y-4">
       {availableLetters.map((letter) => (
@@ -41,4 +41,4 @@ export function GlossaryContent({
       ))}
     </div>
   );
-}
+};

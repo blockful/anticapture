@@ -12,7 +12,7 @@ type Props = {
   params: Promise<{ daoId: string }>;
 };
 
-export async function generateMetadata(props: Props): Promise<Metadata> {
+export const generateMetadata = async (props: Props): Promise<Metadata> => {
   const params = await props.params;
   const daoId = params.daoId.toUpperCase() as DaoIdEnum;
 
@@ -33,13 +33,13 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       description: `Analyze governance risks and security threats for ${daoId} DAO.`,
     },
   };
-}
+};
 
-export default async function RiskAnalysisPage({
+const RiskAnalysisPage = async ({
   params,
 }: {
   params: Promise<{ daoId: DaoIdEnum }>;
-}) {
+}) => {
   const { daoId } = await params;
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
   const daoConstants = daoConfigByDaoId[daoIdEnum];
@@ -62,4 +62,6 @@ export default async function RiskAnalysisPage({
       </TheSectionLayout>
     </div>
   );
-}
+};
+
+export default RiskAnalysisPage;

@@ -23,7 +23,7 @@ export interface BalanceHistoryGraphItem {
   logIndex: number;
 }
 
-export function useBalanceHistoryGraph(
+export const useBalanceHistoryGraph = (
   accountId: string,
   daoId: DaoIdEnum,
   fromDate?: number,
@@ -31,7 +31,7 @@ export function useBalanceHistoryGraph(
   balanceHistory: BalanceHistoryGraphItem[];
   loading: boolean;
   error: boolean;
-} {
+} => {
   const { decimals } = daoConfig[daoId];
 
   const { data, loading, error } = useBalanceHistoryGraphQuery({
@@ -71,4 +71,4 @@ export function useBalanceHistoryGraph(
     loading,
     error: !!error,
   };
-}
+};

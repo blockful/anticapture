@@ -7,21 +7,21 @@ import { useMemo, useRef } from "react";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { BACKEND_ENDPOINT, getAuthHeaders } from "@/shared/utils/server-utils";
 
-function createDaoApolloClient() {
+const createDaoApolloClient = () => {
   return new ApolloClient({
     uri: BACKEND_ENDPOINT,
     cache: new InMemoryCache(),
     headers: getAuthHeaders(),
   });
-}
+};
 
-export function DaoApolloProvider({
+export const DaoApolloProvider = ({
   daoId,
   children,
 }: {
   daoId: DaoIdEnum;
   children: ReactNode;
-}) {
+}) => {
   const clientsRef = useRef<Partial<Record<DaoIdEnum, ApolloClient<object>>>>(
     {},
   );
@@ -34,4 +34,4 @@ export function DaoApolloProvider({
   }, [daoId]);
 
   return <ApolloProvider client={client}>{children}</ApolloProvider>;
-}
+};

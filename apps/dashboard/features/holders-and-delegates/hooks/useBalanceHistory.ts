@@ -19,7 +19,7 @@ import type { AmountFilterVariables } from "@/features/holders-and-delegates/hoo
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { getAuthHeaders } from "@/shared/utils/server-utils";
 
-export function useBalanceHistory({
+export const useBalanceHistory = ({
   accountId,
   daoId,
   orderBy = Timestamp_Const.Timestamp,
@@ -46,7 +46,7 @@ export function useBalanceHistory({
   fromTimestamp?: number;
   toTimestamp?: number;
   limit?: number;
-}) {
+}) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isPaginationLoading, setIsPaginationLoading] = useState(false);
 
@@ -190,4 +190,4 @@ export function useBalanceHistory({
     hasNextPage,
     hasPreviousPage: currentPage > 1,
   };
-}
+};

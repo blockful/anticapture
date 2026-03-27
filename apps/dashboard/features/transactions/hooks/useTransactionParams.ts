@@ -18,7 +18,7 @@ export interface TransactionsParamsType {
   setSort: (order: "asc" | "desc") => void;
 }
 
-export function useTransactionsTableParams(): TransactionsParamsType {
+export const useTransactionsTableParams = (): TransactionsParamsType => {
   const [from, setFrom] = useQueryState("from", parseAsAddress);
   const [to, setTo] = useQueryState("to", parseAsAddress);
   const [min, setMin] = useQueryState("min", parseAsInteger);
@@ -29,4 +29,4 @@ export function useTransactionsTableParams(): TransactionsParamsType {
   );
 
   return { from, to, min, max, sort, setFrom, setTo, setMin, setMax, setSort };
-}
+};

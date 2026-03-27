@@ -350,21 +350,21 @@ export const SAMPLE_GLOSSARY_DATA: GlossaryData = {
 /**
  * Get all letters that have at least one term
  */
-export function getAvailableLetters(
+export const getAvailableLetters = (
   glossaryData: GlossaryData,
-): GlossaryLetter[] {
+): GlossaryLetter[] => {
   return Object.entries(glossaryData)
     .filter(([, terms]) => terms.length > 0)
     .map(([letter]) => letter as GlossaryLetter);
-}
+};
 
 /**
  * Search terms across all letters
  */
-export function searchGlossary(
+export const searchGlossary = (
   glossaryData: GlossaryData,
   query: string,
-): GlossarySearchResult[] {
+): GlossarySearchResult[] => {
   const results: GlossarySearchResult[] = [];
   const lowerQuery = query.toLowerCase();
 
@@ -399,21 +399,21 @@ export function searchGlossary(
 
     return a.term.title.localeCompare(b.term.title);
   });
-}
+};
 
 /**
  * Get all terms flattened (useful for getting total count)
  */
-export function getAllTerms(glossaryData: GlossaryData): GlossaryTerm[] {
+export const getAllTerms = (glossaryData: GlossaryData): GlossaryTerm[] => {
   return Object.values(glossaryData).flat();
-}
+};
 
 /**
  * Get terms count by letter
  */
-export function getTermsCountByLetter(
+export const getTermsCountByLetter = (
   glossaryData: GlossaryData,
-): Record<GlossaryLetter, number> {
+): Record<GlossaryLetter, number> => {
   const counts = {} as Record<GlossaryLetter, number>;
 
   Object.entries(glossaryData).forEach(([letter, terms]) => {
@@ -421,4 +421,4 @@ export function getTermsCountByLetter(
   });
 
   return counts;
-}
+};

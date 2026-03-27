@@ -2,7 +2,10 @@ import * as React from "react";
 
 import { cn } from "@/shared/utils/";
 
-function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+const Card = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => {
   return (
     <div
       data-slot="card"
@@ -13,12 +16,12 @@ function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
       {...props}
     />
   );
-}
+};
 
-function CardHeader({
+const CardHeader = ({
   className,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+}: React.HTMLAttributes<HTMLDivElement>) => {
   return (
     <div
       data-slot="card-header"
@@ -26,12 +29,12 @@ function CardHeader({
       {...props}
     />
   );
-}
+};
 
-function CardTitle({
+const CardTitle = ({
   className,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+}: React.HTMLAttributes<HTMLDivElement>) => {
   return (
     <div
       data-slot="card-title"
@@ -42,12 +45,12 @@ function CardTitle({
       {...props}
     />
   );
-}
+};
 
-function CardDescription({
+const CardDescription = ({
   className,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+}: React.HTMLAttributes<HTMLDivElement>) => {
   return (
     <div
       data-slot="card-description"
@@ -55,12 +58,12 @@ function CardDescription({
       {...props}
     />
   );
-}
+};
 
-function CardContent({
+const CardContent = ({
   className,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+}: React.HTMLAttributes<HTMLDivElement>) => {
   return (
     <div
       data-slot="card-content"
@@ -68,12 +71,12 @@ function CardContent({
       {...props}
     />
   );
-}
+};
 
-function CardFooter({
+const CardFooter = ({
   className,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+}: React.HTMLAttributes<HTMLDivElement>) => {
   return (
     <div
       data-slot="card-footer"
@@ -81,7 +84,7 @@ function CardFooter({
       {...props}
     />
   );
-}
+};
 
 export {
   Card,

@@ -19,7 +19,7 @@ const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
 const RATE_LIMIT_MAX_REQUESTS = 30; // 30 requests per minute per IP
 
-function checkRateLimit(ip: string): boolean {
+const checkRateLimit = (ip: string): boolean => {
   const now = Date.now();
   const record = rateLimitMap.get(ip);
 
@@ -34,9 +34,9 @@ function checkRateLimit(ip: string): boolean {
 
   record.count++;
   return true;
-}
+};
 
-function getClientIP(request: NextRequest): string {
+const getClientIP = (request: NextRequest): string => {
   // Try various headers for IP (respects proxies)
   const forwarded = request.headers.get("x-forwarded-for");
   if (forwarded) {
@@ -47,23 +47,23 @@ function getClientIP(request: NextRequest): string {
     return realIP;
   }
   return "unknown";
-}
+};
 
-function validateFileId(fileId: string): boolean {
+const validateFileId = (fileId: string): boolean => {
   // Figma file IDs are alphanumeric strings, typically 15-30 characters
   // Basic validation - adjust based on your needs
   return /^[a-zA-Z0-9_-]{10,50}$/.test(fileId);
-}
+};
 
-function extractFileIdFromUrl(url: string): string | null {
+const extractFileIdFromUrl = (url: string): string | null => {
   // Extract file ID from Figma URL patterns:
   // https://www.figma.com/design/{fileId}/...
   // https://figma.com/design/{fileId}/...
   const match = url.match(/figma\.com\/design\/([a-zA-Z0-9_-]+)/);
   return match ? match[1] : null;
-}
+};
 
-export async function GET(request: NextRequest) {
+export const GET = async (request: NextRequest) => {
   try {
     // Rate limiting
     const clientIP = getClientIP(request);
@@ -153,10 +153,10 @@ export async function GET(request: NextRequest) {
       { status: 500 },
     );
   }
-}
+};
 
 // Handle OPTIONS for CORS preflight
-export async function OPTIONS() {
+export const OPTIONS = async () => {
   return new NextResponse(null, {
     status: 200,
     headers: {
@@ -165,4 +165,4 @@ export async function OPTIONS() {
       "Access-Control-Allow-Headers": "Content-Type",
     },
   });
-}
+};

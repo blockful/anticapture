@@ -4,11 +4,11 @@ import {
 } from "@/shared/constants/time-related";
 import { formatPlural } from "@/shared/utils";
 
-export function formatBlocksToUserReadable(
+export const formatBlocksToUserReadable = (
   num: number,
   blockTime: number,
   useAbbreviations: boolean = false,
-): string {
+): string => {
   // Handle zero or negative blocks
   if (num <= 0) return "0 sec";
 
@@ -21,13 +21,13 @@ export function formatBlocksToUserReadable(
   }
 
   return formatSecondsToReadable(totalSeconds, useAbbreviations);
-}
+};
 
 // Helper function to convert seconds to a readable time format with optional abbreviations
-export function formatSecondsToReadable(
+export const formatSecondsToReadable = (
   totalSeconds: number,
   useAbbreviations: boolean = false,
-): string {
+): string => {
   const days = Math.floor(totalSeconds / (SECONDS_PER_HOUR * 24));
   const hours = Math.floor(
     (totalSeconds % (SECONDS_PER_HOUR * 24)) / SECONDS_PER_HOUR,
@@ -58,4 +58,4 @@ export function formatSecondsToReadable(
   }
 
   return parts.join(useAbbreviations ? " " : ", ");
-}
+};

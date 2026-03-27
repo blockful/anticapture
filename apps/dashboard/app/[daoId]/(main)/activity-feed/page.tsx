@@ -8,7 +8,7 @@ type Props = {
   params: Promise<{ daoId: string }>;
 };
 
-export async function generateMetadata(props: Props): Promise<Metadata> {
+export const generateMetadata = async (props: Props): Promise<Metadata> => {
   const params = await props.params;
   const daoId = params.daoId.toUpperCase() as DaoIdEnum;
 
@@ -20,14 +20,16 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     alternates: { canonical: canonicalPath },
     openGraph: { url: canonicalPath },
   };
-}
+};
 
-export default async function ActivityFeedPage({
+const ActivityFeedPage = async ({
   params,
 }: {
   params: Promise<{ daoId: string }>;
-}) {
+}) => {
   await params;
 
   return <ActivityFeedSection />;
-}
+};
+
+export default ActivityFeedPage;

@@ -1,5 +1,9 @@
 /** AnticaptureGlobeIcon SVG – inlined for ImageResponse/Satori compatibility */
-export function AnticaptureGlobeLogoSvg({ width = 120 }: { width?: number }) {
+export const AnticaptureGlobeLogoSvg = ({
+  width = 120,
+}: {
+  width?: number;
+}) => {
   const height = (width * 200) / 600;
   return (
     <svg
@@ -59,4 +63,4 @@ export function AnticaptureGlobeLogoSvg({ width = 120 }: { width?: number }) {
       />
     </svg>
   );
-}
+};

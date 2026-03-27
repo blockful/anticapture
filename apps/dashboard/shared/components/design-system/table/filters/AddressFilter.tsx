@@ -34,11 +34,11 @@ const isEnsAddress = (address: string) => {
   return address.endsWith(".eth") && address.slice(0, -4).length >= 3;
 };
 
-export function AddressFilter({
+export const AddressFilter = ({
   onApply,
   currentFilter = "",
   className,
-}: AddressFilterProps) {
+}: AddressFilterProps) => {
   const [tempAddress, setTempAddress] = useState<string>(currentFilter);
   const [isResolving, setIsResolving] = useState<boolean>(false);
   const [ensAddressError, setEnsAddressError] = useState<string | null>(null);
@@ -186,4 +186,4 @@ export function AddressFilter({
       </PopoverContent>
     </Popover>
   );
-}
+};

@@ -9,7 +9,7 @@ import { cn } from "@/shared/utils/cn";
 
 import type { TooltipProps } from "./types";
 
-export function Tooltip({
+export const Tooltip = ({
   children,
   tooltipContent,
   className,
@@ -18,7 +18,7 @@ export function Tooltip({
   titleRight,
   asChild = false,
   disableMobileClick = false,
-}: TooltipProps) {
+}: TooltipProps) => {
   const [open, setOpen] = useState<boolean>(false);
   const { isMobile } = useScreenSize();
 
@@ -88,4 +88,4 @@ export function Tooltip({
       </Portal>
     </Root>
   );
-}
+};

@@ -10,10 +10,10 @@ import daoConfig from "@/shared/dao-config";
 import type { ChartDataSetPoint } from "@/shared/dao-config/types";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
-export function useTokenDistributionParams(
+export const useTokenDistributionParams = (
   chartData: ChartDataSetPoint[],
   daoId: DaoIdEnum,
-) {
+) => {
   const [metrics, setMetrics] = useQueryState("metrics");
   const [hasTransfer, setHasTransfer] = useQueryState("hasTransfer");
   const [startDate, setStartDate] = useQueryState("startDate", parseAsInteger);
@@ -92,4 +92,4 @@ export function useTokenDistributionParams(
     setStartDate,
     setEndDate,
   ]);
-}
+};

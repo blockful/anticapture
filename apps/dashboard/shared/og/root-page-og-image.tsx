@@ -23,9 +23,9 @@ export interface RootPageOgImageProps {
  * - AnticaptureGlobeIcon (top-right)
  * - Page title (main content)
  */
-export async function createRootPageOgImage({
+export const createRootPageOgImage = async ({
   pageTitle,
-}: RootPageOgImageProps) {
+}: RootPageOgImageProps) => {
   return new ImageResponse(
     <div
       style={{
@@ -120,4 +120,4 @@ export async function createRootPageOgImage({
       fonts: await loadLocalFonts(),
     },
   );
-}
+};

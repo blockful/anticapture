@@ -42,13 +42,13 @@ export interface ButtonProps
   asChild?: boolean;
 }
 
-function Button({
+const Button = ({
   className,
   variant,
   size,
   asChild = false,
   ...props
-}: ButtonProps) {
+}: ButtonProps) => {
   const Comp = asChild ? Slot : "button";
   return (
     <Comp
@@ -57,6 +57,6 @@ function Button({
       {...props}
     />
   );
-}
+};
 
 export { Button, buttonVariants };

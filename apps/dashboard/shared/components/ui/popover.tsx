@@ -8,12 +8,12 @@ import { cn } from "@/shared/utils/";
 const Popover = PopoverPrimitive.Root;
 const PopoverTrigger = PopoverPrimitive.Trigger;
 
-function PopoverContent({
+const PopoverContent = ({
   className,
   align = "center",
   sideOffset = 4,
   ...props
-}: React.ComponentProps<typeof PopoverPrimitive.Content>) {
+}: React.ComponentProps<typeof PopoverPrimitive.Content>) => {
   return (
     <PopoverPrimitive.Portal>
       <PopoverPrimitive.Content
@@ -27,6 +27,6 @@ function PopoverContent({
       />
     </PopoverPrimitive.Portal>
   );
-}
+};
 
 export { Popover, PopoverTrigger, PopoverContent };

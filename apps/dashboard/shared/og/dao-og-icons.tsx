@@ -7,7 +7,7 @@
  */
 const FILL = "#EC762E";
 
-export function EnsOgIcon({ size }: { size: number }) {
+export const EnsOgIcon = ({ size }: { size: number }) => {
   return (
     <svg width={size} height={size} viewBox="0 0 40 40" fill="none">
       <path
@@ -28,9 +28,9 @@ export function EnsOgIcon({ size }: { size: number }) {
       />
     </svg>
   );
-}
+};
 
-export function UniswapOgIcon({ size }: { size: number }) {
+export const UniswapOgIcon = ({ size }: { size: number }) => {
   return (
     <svg width={size} height={size} viewBox="0 0 400 400" fill="none">
       <path
@@ -75,9 +75,9 @@ export function UniswapOgIcon({ size }: { size: number }) {
       />
     </svg>
   );
-}
+};
 
-export function GitcoinOgIcon({ size }: { size: number }) {
+export const GitcoinOgIcon = ({ size }: { size: number }) => {
   return (
     <svg width={size} height={size} viewBox="0 0 40 40" fill="none">
       <path
@@ -94,9 +94,9 @@ export function GitcoinOgIcon({ size }: { size: number }) {
       />
     </svg>
   );
-}
+};
 
-export function ScrollOgIcon({ size }: { size: number }) {
+export const ScrollOgIcon = ({ size }: { size: number }) => {
   return (
     <svg width={size} height={size} viewBox="0 0 444 444" fill="none">
       <path
@@ -137,9 +137,9 @@ export function ScrollOgIcon({ size }: { size: number }) {
       />
     </svg>
   );
-}
+};
 
-export function NounsOgIcon({ size }: { size: number }) {
+export const NounsOgIcon = ({ size }: { size: number }) => {
   return (
     <svg width={size} height={size} viewBox="0 0 40 40" fill="none">
       <path d="M12 16.0127H16V24.063H12V16.0127Z" fill={FILL} opacity="0.5" />
@@ -154,9 +154,9 @@ export function NounsOgIcon({ size }: { size: number }) {
       />
     </svg>
   );
-}
+};
 
-export function ObolOgIcon({ size }: { size: number }) {
+export const ObolOgIcon = ({ size }: { size: number }) => {
   return (
     <svg
       width={size}
@@ -173,9 +173,9 @@ export function ObolOgIcon({ size }: { size: number }) {
       </g>
     </svg>
   );
-}
+};
 
-export function CompoundOgIcon({ size }: { size: number }) {
+export const CompoundOgIcon = ({ size }: { size: number }) => {
   return (
     <svg width={size} height={size} viewBox="0 0 40 40" fill="none">
       <path
@@ -186,9 +186,9 @@ export function CompoundOgIcon({ size }: { size: number }) {
       />
     </svg>
   );
-}
+};
 
-export function OptimismOgIcon({ size }: { size: number }) {
+export const OptimismOgIcon = ({ size }: { size: number }) => {
   return (
     <svg width={size} height={size} viewBox="0 0 40 40" fill="none">
       <path
@@ -205,9 +205,9 @@ export function OptimismOgIcon({ size }: { size: number }) {
       />
     </svg>
   );
-}
+};
 
-export function FluidOgIcon({ size }: { size: number }) {
+export const FluidOgIcon = ({ size }: { size: number }) => {
   return (
     <svg width={size} height={size} viewBox="0 0 40 40" fill="none">
       <path
@@ -220,9 +220,9 @@ export function FluidOgIcon({ size }: { size: number }) {
       />
     </svg>
   );
-}
+};
 
-export function ShutterOgIcon({ size }: { size: number }) {
+export const ShutterOgIcon = ({ size }: { size: number }) => {
   return (
     <svg
       width={size}
@@ -237,4 +237,4 @@ export function ShutterOgIcon({ size }: { size: number }) {
       />
     </svg>
   );
-}
+};

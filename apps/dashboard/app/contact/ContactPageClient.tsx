@@ -54,7 +54,7 @@ export default function ContactPage() {
     },
   });
 
-  async function onSubmit(data: ContactFormValues) {
+  const onSubmit = async (data: ContactFormValues) => {
     sendContact(data, {
       onSuccess: () => {
         showCustomToast(
@@ -70,7 +70,7 @@ export default function ContactPage() {
         showCustomToast("Failed to send message. Please try again.", "error");
       },
     });
-  }
+  };
 
   return (
     <div className="bg-surface-background dark flex h-screen">

@@ -9,7 +9,7 @@ type CountdownTime = {
   isLoading: boolean;
 };
 
-export function useCountdown(targetTimestamp?: number): CountdownTime {
+export const useCountdown = (targetTimestamp?: number): CountdownTime => {
   const [isClient, setIsClient] = useState<boolean>(false);
   const [timeLeft, setTimeLeft] = useState<CountdownTime>(() => ({
     ...calculateTimeLeft(targetTimestamp),
@@ -54,10 +54,10 @@ export function useCountdown(targetTimestamp?: number): CountdownTime {
   }, [targetTimestamp, updateCountdown, isClient]);
 
   return timeLeft;
-}
+};
 
 // time difference between now and targetTimestamp
-function calculateTimeLeft(targetTimestamp: number = 0): CountdownTime {
+const calculateTimeLeft = (targetTimestamp: number = 0): CountdownTime => {
   if (!targetTimestamp) {
     return {
       expired: true,
@@ -96,4 +96,4 @@ function calculateTimeLeft(targetTimestamp: number = 0): CountdownTime {
     seconds,
     isLoading: false,
   };
-}
+};

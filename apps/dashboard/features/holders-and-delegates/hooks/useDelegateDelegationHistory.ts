@@ -68,7 +68,7 @@ interface UseDelegateDelegationHistoryParams {
   limit?: number;
 }
 
-export function useDelegateDelegationHistory({
+export const useDelegateDelegationHistory = ({
   accountId,
   daoId,
   orderBy = "timestamp",
@@ -79,7 +79,7 @@ export function useDelegateDelegationHistory({
   fromTimestamp,
   toTimestamp,
   limit = 10,
-}: UseDelegateDelegationHistoryParams): UseDelegateDelegationHistoryResult {
+}: UseDelegateDelegationHistoryParams): UseDelegateDelegationHistoryResult => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isPaginationLoading, setIsPaginationLoading] =
     useState<boolean>(false);
@@ -275,4 +275,4 @@ export function useDelegateDelegationHistory({
     hasNextPage,
     hasPreviousPage: currentPage > 1,
   };
-}
+};

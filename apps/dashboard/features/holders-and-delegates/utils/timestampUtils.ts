@@ -6,9 +6,9 @@ interface TimestampRange {
   toTimestamp: number | undefined;
 }
 
-export function getTimestampRangeFromPeriod(
+export const getTimestampRangeFromPeriod = (
   selectedPeriod: TimePeriod,
-): TimestampRange {
+): TimestampRange => {
   if (selectedPeriod === "all") {
     return { fromTimestamp: undefined, toTimestamp: undefined };
   }
@@ -21,4 +21,4 @@ export function getTimestampRangeFromPeriod(
     fromTimestamp: Math.floor(nowInSeconds - daysInSeconds),
     toTimestamp: Math.floor(nowInSeconds),
   };
-}
+};

@@ -19,7 +19,7 @@ export interface UseActivityFeedParamsReturn {
   clearFilters: () => void;
 }
 
-export function useActivityFeedParams(): UseActivityFeedParamsReturn {
+export const useActivityFeedParams = (): UseActivityFeedParamsReturn => {
   const [sortOrder, setSortOrder] = useQueryState(
     "sort",
     parseAsStringEnum(["asc", "desc"]).withDefault("desc"),
@@ -85,4 +85,4 @@ export function useActivityFeedParams(): UseActivityFeedParamsReturn {
   }, [setSortOrder, setRelevance, setFromDate, setToDate, setEventType]);
 
   return { filters, setFilters, clearFilters };
-}
+};

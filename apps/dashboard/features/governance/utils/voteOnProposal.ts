@@ -92,14 +92,14 @@ const ozGovernorVoteHandler =
 /**
  * Returns the vote handler for a DAO. Add new cases for new governance frameworks.
  */
-function getVoteHandler(daoId: DaoIdEnum): VoteHandler {
+const getVoteHandler = (daoId: DaoIdEnum): VoteHandler => {
   switch (daoId) {
     case DaoIdEnum.SHU:
       return azoriusVoteHandler(daoId);
     default:
       return ozGovernorVoteHandler(daoId);
   }
-}
+};
 
 export const voteOnProposal = async (
   vote: "for" | "against" | "abstain",

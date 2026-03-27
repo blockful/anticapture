@@ -175,6 +175,9 @@ export default [
         },
       ],
 
+      // Enforce arrow-function expressions over function declarations
+      "func-style": ["error", "expression"],
+
       // No nested ternaries
       "no-nested-ternary": "warn",
 

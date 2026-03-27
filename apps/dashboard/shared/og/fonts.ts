@@ -8,7 +8,7 @@ const FONT_FILES = {
   regular: "RobotoMono-Regular.ttf",
 } as const;
 
-async function loadFont(fileName: string): Promise<Buffer> {
+const loadFont = async (fileName: string): Promise<Buffer> => {
   const path = join(FONTS_DIR, fileName);
   try {
     return await readFile(path);
@@ -16,9 +16,9 @@ async function loadFont(fileName: string): Promise<Buffer> {
     console.warn(`[OG] Failed to load font "${fileName}" from ${path}:`, error);
     throw error;
   }
-}
+};
 
-export async function loadLocalFonts() {
+export const loadLocalFonts = async () => {
   try {
     const [medium, regular] = await Promise.all([
       loadFont(FONT_FILES.medium),
@@ -42,4 +42,4 @@ export async function loadLocalFonts() {
     console.warn("[OG] Falling back to system fonts for OG image rendering");
     return [];
   }
-}
+};
