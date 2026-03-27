@@ -12,7 +12,22 @@ import { Context } from "ponder:registry";
 import { Address, getAddress, zeroAddress } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
+import { MetricTypesEnum } from "@/lib/constants";
 import { ensureAccountsExist } from "@/eventHandlers/shared";
+import {
+  updateCirculatingSupply,
+  updateSupplyMetric,
+  updateTotalSupply,
+} from "@/eventHandlers/metrics";
+
+export type AaveAddressSets = {
+  cex: ReadonlySet<Address>;
+  dex: ReadonlySet<Address>;
+  lending: ReadonlySet<Address>;
+  treasury: ReadonlySet<Address>;
+  nonCirculating: ReadonlySet<Address>;
+  burning: ReadonlySet<Address>;
+};
 
 export async function aaveSetup(
   context: Context,
@@ -46,6 +61,7 @@ export async function aaveTransfer(
   },
   address: Address,
   daoId: DaoIdEnum,
+  addressSets: AaveAddressSets,
 ) {
   const from = getAddress(_from);
   const to = getAddress(_to);
@@ -183,6 +199,96 @@ export async function aaveTransfer(
       amount: value,
     },
   });
+
+  const { cex, dex, lending, treasury, nonCirculating, burning } = addressSets;
+
+  const lendingChanged = await updateSupplyMetric(
+    context,
+    "lendingSupply",
+    lending,
+    MetricTypesEnum.LENDING_SUPPLY,
+    from,
+    to,
+    value,
+    daoId,
+    address,
+    timestamp,
+  );
+
+  const cexChanged = await updateSupplyMetric(
+    context,
+    "cexSupply",
+    cex,
+    MetricTypesEnum.CEX_SUPPLY,
+    from,
+    to,
+    value,
+    daoId,
+    address,
+    timestamp,
+  );
+
+  const dexChanged = await updateSupplyMetric(
+    context,
+    "dexSupply",
+    dex,
+    MetricTypesEnum.DEX_SUPPLY,
+    from,
+    to,
+    value,
+    daoId,
+    address,
+    timestamp,
+  );
+
+  const treasuryChanged = await updateSupplyMetric(
+    context,
+    "treasury",
+    treasury,
+    MetricTypesEnum.TREASURY,
+    from,
+    to,
+    value,
+    daoId,
+    address,
+    timestamp,
+  );
+
+  const nonCirculatingChanged = await updateSupplyMetric(
+    context,
+    "nonCirculatingSupply",
+    nonCirculating,
+    MetricTypesEnum.NON_CIRCULATING_SUPPLY,
+    from,
+    to,
+    value,
+    daoId,
+    address,
+    timestamp,
+  );
+
+  const totalSupplyChanged = await updateTotalSupply(
+    context,
+    burning,
+    MetricTypesEnum.TOTAL_SUPPLY,
+    from,
+    to,
+    value,
+    daoId,
+    address,
+    timestamp,
+  );
+
+  if (
+    lendingChanged ||
+    cexChanged ||
+    dexChanged ||
+    treasuryChanged ||
+    nonCirculatingChanged ||
+    totalSupplyChanged
+  ) {
+    await updateCirculatingSupply(context, daoId, address, timestamp);
+  }
 }
 
 export async function aaveDelegateChanged(

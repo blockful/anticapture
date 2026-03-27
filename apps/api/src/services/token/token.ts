@@ -1,7 +1,7 @@
 import { DaoIdEnum } from "@/lib/enums";
 import { DBToken } from "@/mappers";
 
-interface TokenRepository {
+export interface TokenRepository {
   getTokenPropertiesByName(
     tokenId: DaoIdEnum,
   ): Promise<DBToken | null | undefined>;

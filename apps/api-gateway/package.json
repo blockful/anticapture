@@ -5,11 +5,12 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "start": "node dist/src/index.js",
+    "start": "node --import ./dist/src/instrumentation.js dist/src/index.js",
     "build": "tsc",
     "clean": "rm -rf node_modules dist schema.graphql *.tsbuildinfo",
     "typecheck": "tsc --noEmit",
     "test": "jest",
+    "test:unit": "jest --testPathIgnorePatterns '.*\\.integration\\.test\\.ts'",
     "test:watch": "jest --watch"
   },
   "keywords": [],
@@ -31,8 +32,8 @@
     "@graphql-mesh/runtime": "^0.106.3",
     "@graphql-mesh/transform-filter-schema": "^0.104.19",
     "@graphql-mesh/transform-rename": "^0.105.7",
-    "@graphql-mesh/transform-filter-schema": "^0.104.18",
     "@graphql-mesh/types": "^0.104.3",
+    "@anticapture/observability": "workspace:*",
     "dotenv": "^16.5.0",
     "graphql": "^16.11.0"
   }

@@ -13,6 +13,7 @@ export interface DrawerHeaderProps {
   tabs?: DrawerTabConfig[];
   activeTab?: string;
   onTabChange?: (tabId: string) => void;
+  action?: ReactNode;
   className?: string;
 }
 

@@ -401,17 +401,23 @@ export const TabsVotedContent = ({
             return <div className="flex h-10 items-center p-2" />;
           }
 
-          const votingPowerNum = votingPower ? Number(votingPower) / 1e18 : 0;
+          const daoIdKey = (daoId as string)?.toUpperCase() as DaoIdEnum;
+          const decimals = daoConfigByDaoId[daoIdKey]?.decimals ?? 18;
+          const votingPowerNum = votingPower
+            ? Number(formatUnits(BigInt(votingPower), decimals))
+            : 0;
           const formattedVotingPower = formatNumberUserReadable(votingPowerNum);
 
-          // Calculate percentage - you might need to get total voting power from proposal
           const totalVotingPower =
-            Number(proposal.forVotes) +
-            Number(proposal.againstVotes) +
-            Number(proposal.abstainVotes);
+            BigInt(proposal.forVotes || "0") +
+            BigInt(proposal.againstVotes || "0") +
+            BigInt(proposal.abstainVotes || "0");
+          const totalVotingPowerNum = Number(
+            formatUnits(totalVotingPower, decimals),
+          );
           const percentage =
-            totalVotingPower > 0
-              ? ((votingPowerNum / (totalVotingPower / 1e18)) * 100).toFixed(1)
+            totalVotingPowerNum > 0
+              ? ((votingPowerNum / totalVotingPowerNum) * 100).toFixed(1)
               : "0.0";
 
           return (

@@ -45,6 +45,8 @@ export class DaoService {
       votingDelay: votingDelay.toString(),
       votingPeriod: votingPeriod.toString(),
       timelockDelay: timelockDelay.toString(),
+      alreadySupportCalldataReview: this.client.alreadySupportCalldataReview(),
+      supportOffchainData: this.client.supportOffchainData(),
     };
 
     // Cache and return

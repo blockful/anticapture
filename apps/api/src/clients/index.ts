@@ -9,6 +9,7 @@ export * from "./zk";
 export * from "./uni";
 export * from "./shu";
 export * from "./aave";
+export * from "./fluid";
 
 export interface DAOClient {
   getDaoId: () => string;
@@ -19,6 +20,8 @@ export interface DAOClient {
   getProposalThreshold: () => Promise<bigint>;
   getCurrentBlockNumber: () => Promise<number>;
   getBlockTime: (blockNumber: number) => Promise<number | null>;
+  alreadySupportCalldataReview: () => boolean;
+  supportOffchainData: () => boolean;
   calculateQuorum: (votes: {
     forVotes: bigint;
     againstVotes: bigint;

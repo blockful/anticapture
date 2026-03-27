@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
 import { DaoOverviewSection } from "@/features/dao-overview";
 import daoConfigByDaoId from "@/shared/dao-config";
@@ -37,9 +38,15 @@ export default async function DaoPage({
 }) {
   const { daoId } = await params;
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
-  const daoConstants = daoConfigByDaoId[daoIdEnum];
-  if (!daoConstants?.daoOverview) {
-    return null;
+  const daoConfig = daoConfigByDaoId[daoIdEnum];
+
+  if (daoConfig?.initialPage) {
+    redirect(`/${daoId.toLowerCase()}/${daoConfig.initialPage}`);
   }
+
+  if (!daoConfig?.daoOverview) {
+    redirect("/");
+  }
+
   return <DaoOverviewSection daoId={daoIdEnum} />;
 }

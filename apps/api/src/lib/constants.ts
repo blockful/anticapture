@@ -79,6 +79,21 @@ export const CONTRACT_ADDRESSES = {
       startBlock: 12497481,
     },
   },
+  [DaoIdEnum.LIL_NOUNS]: {
+    blockTime: 12,
+    tokenType: "ERC721",
+    token: {
+      // https://etherscan.io/address/0x4b10701Bfd7BFEdc47d50562b76b436fbB5BdB3B
+      address: "0x4b10701Bfd7BFEdc47d50562b76b436fbB5BdB3B",
+      decimals: 0,
+      startBlock: 14736710,
+    },
+    governor: {
+      // https://etherscan.io/address/0x5d2C31ce16924C2a71D317e5BbFd5ce387854039
+      address: "0x5d2C31ce16924C2a71D317e5BbFd5ce387854039",
+      startBlock: 14736719,
+    },
+  },
   [DaoIdEnum.NOUNS]: {
     blockTime: 12,
     tokenType: "ERC721",
@@ -161,6 +176,21 @@ export const CONTRACT_ADDRESSES = {
       startBlock: 55519658,
     },
   },
+  [DaoIdEnum.FLUID]: {
+    blockTime: 12,
+    tokenType: "ERC20",
+    // https://etherscan.io/address/0x6f40d4A6237C257fff2dB00FA0510DeEECd303eb
+    token: {
+      address: "0x6f40d4A6237C257fff2dB00FA0510DeEECd303eb",
+      decimals: 18,
+      startBlock: 12183236,
+    },
+    // https://etherscan.io/address/0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B
+    governor: {
+      address: "0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B",
+      startBlock: 12183245,
+    },
+  },
   [DaoIdEnum.SHU]: {
     blockTime: 12,
     tokenType: "ERC20",
@@ -206,10 +236,29 @@ export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     oldEthRegistrarController: "0x283Af0B28c62C092C9727F1Ee09c02CA627EB7F5",
     ethRegistrarController: "0x253553366Da8546fC250F225fe3d25d0C782303b",
   },
-  [DaoIdEnum.ARB]: {},
-  [DaoIdEnum.AAVE]: {},
-  [DaoIdEnum.OP]: {},
+  [DaoIdEnum.ARB]: {
+    // https://docs.arbitrum.foundation/deployment-addresses
+    "DAO Treasury": "0xF3FC178157fb3c87548bAA86F9d24BA38E649B58",
+    "L2 Treasury Timelock": "0xbFc1FECa8B09A5c5D3EFfE7429eBE24b9c09EF58",
+    "L2 Core Timelock": "0x34d45e99f7D8c45ed05B5cA72D54bbD1fb3F98f0",
+    "Foundation Vesting Wallet": "0x15533b77981cDa0F85c4F9a485237DF4285D6844",
+  },
+  [DaoIdEnum.AAVE]: {
+    // https://github.com/bgd-labs/aave-address-book
+    Collector: "0x464C71f6c2F760DdA6093dCB91C24c39e5d6e18c",
+    "Ecosystem Reserve": "0x25F2226B597E8F9514B3F68F00f494cF4f286491",
+  },
+  [DaoIdEnum.OP]: {
+    // https://gov.optimism.io/t/where-are-the-optimisms-main-treasury-addresses/8880
+    "Unallocated Treasury": "0x2A82Ae142b2e62Cb7D10b55E323ACB1Cab663a26",
+    "Foundation Budget": "0x2501c477D0A35545a387Aa4A3EEe4292A9a8B3F0",
+    "Foundation Grants": "0x19793c7824Be70ec58BB673CA42D2779d12581BE",
+    "Foundation Locked Grants": "0xE4553b743E74dA3424Ac51f8C1E586fd43aE226F",
+  },
   [DaoIdEnum.SHU]: { timelock: "0x36bD3044ab68f600f6d3e081056F34f2a58432c4" },
+  [DaoIdEnum.LIL_NOUNS]: {
+    timelock: "0xd5f279ff9EB21c6D40C8f345a66f2751C4eeA1fB",
+  },
   [DaoIdEnum.NOUNS]: {
     timelock: "0xb1a32fc9f9d8b2cf86c068cae13108809547ef71",
     auction: "0x830BD73E4184ceF73443C15111a1DF14e495C706",
@@ -334,6 +383,13 @@ export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   [DaoIdEnum.ZK]: {
     timelock: "0xe5d21A9179CA2E1F0F327d598D464CcF60d89c3d",
   },
+  [DaoIdEnum.FLUID]: {
+    "InstaDApp Treasury": "0x28849D2b63fA8D361e5fc15cB8aBB13019884d09",
+    "Fluid Liquidity": "0x52Aa899454998Be5b000Ad077a46Bbe360F4e497",
+    "Chainlink CCIP LockReleaseTokenPool":
+      "0x639f35C5E212D61Fe14Bd5CD8b66aAe4df11a50c",
+    InstaTimelock: "0xC7Cb1dE2721BFC0E0DA1b9D526bCdC54eF1C0eFC",
+  },
 };
 
 export enum ProposalStatus {
@@ -346,6 +402,7 @@ export enum ProposalStatus {
   EXPIRED = "EXPIRED",
   PENDING_EXECUTION = "PENDING_EXECUTION",
   EXECUTED = "EXECUTED",
+  VETOED = "VETOED",
   NO_QUORUM = "NO_QUORUM",
 }
 

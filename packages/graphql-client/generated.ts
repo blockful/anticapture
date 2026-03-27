@@ -15,12 +15,9 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
-  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
-  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
-  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
 };
 
@@ -723,10 +720,12 @@ export type CompareVotes_200_Response = {
 
 export type Dao_200_Response = {
   __typename?: 'dao_200_response';
+  alreadySupportCalldataReview: Scalars['Boolean']['output'];
   chainId: Scalars['Float']['output'];
   id: Scalars['String']['output'];
   proposalThreshold: Scalars['String']['output'];
   quorum: Scalars['String']['output'];
+  supportOffchainData: Scalars['Boolean']['output'];
   timelockDelay: Scalars['String']['output'];
   votingDelay: Scalars['String']['output'];
   votingPeriod: Scalars['String']['output'];
@@ -1849,6 +1848,7 @@ export type Token_200_Response = {
   id: Scalars['String']['output'];
   lendingSupply: Scalars['String']['output'];
   name?: Maybe<Scalars['String']['output']>;
+  nonCirculatingSupply: Scalars['String']['output'];
   price: Scalars['String']['output'];
   totalSupply: Scalars['String']['output'];
   treasury: Scalars['String']['output'];

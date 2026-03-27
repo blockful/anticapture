@@ -47,7 +47,7 @@ export interface ProposalWithUserVote {
     voterAccountId: string;
     proposalId: string;
     support: string;
-    votingPower: string;
+    votingPower: bigint;
     reason: string;
     timestamp: string;
   } | null;

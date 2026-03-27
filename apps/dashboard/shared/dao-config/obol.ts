@@ -335,4 +335,5 @@ export const OBOL: DaoConfiguration = {
       },
     },
   },
+  governancePage: true,
 };

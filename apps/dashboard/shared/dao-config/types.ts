@@ -129,6 +129,16 @@ export type AttackExposureConfig = {
   defenseAreas?: Partial<Record<RiskAreaEnum, DefenseAreaDescription>>;
 };
 
+/** Feature page slugs — the set of pages a DAO can enable. */
+export type DaoFeaturePageSlug =
+  | "holders-and-delegates"
+  | "governance"
+  | "activity-feed"
+  | "attack-profitability"
+  | "resilience-stages"
+  | "risk-analysis"
+  | "token-distribution";
+
 // Complete DAO configuration structure
 export interface DaoConfiguration extends BaseInfo {
   daoOverview: DaoOverviewConfig;
@@ -143,4 +153,8 @@ export interface DaoConfiguration extends BaseInfo {
   noStage?: boolean;
   governancePage?: boolean;
   serviceProviders?: boolean;
+  /** When false, hides the DAO Overview page from navigation. Defaults to true. */
+  overviewPage?: boolean;
+  /** When set, visiting /{daoId}/ redirects to /{daoId}/{initialPage}. */
+  initialPage?: DaoFeaturePageSlug;
 }

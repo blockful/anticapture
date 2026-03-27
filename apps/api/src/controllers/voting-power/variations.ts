@@ -12,7 +12,7 @@ import {
   DBVotingPowerVariation,
 } from "@/mappers/";
 
-interface VotingPowerService {
+export interface VotingPowerVariationsService {
   getVotingPowerVariations(
     startTimestamp: number | undefined,
     endTimestamp: number | undefined,
@@ -29,7 +29,10 @@ interface VotingPowerService {
   ): Promise<DBVotingPowerVariation>;
 }
 
-export function votingPowerVariations(app: Hono, service: VotingPowerService) {
+export function votingPowerVariations(
+  app: Hono,
+  service: VotingPowerVariationsService,
+) {
   app.openapi(
     createRoute({
       method: "get",

@@ -323,4 +323,5 @@ export const NOUNS: DaoConfiguration = {
       },
     },
   },
+  governancePage: true,
 };

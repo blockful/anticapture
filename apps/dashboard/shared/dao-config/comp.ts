@@ -351,4 +351,5 @@ export const COMP: DaoConfiguration = {
   tokenDistribution: true,
   dataTables: true,
   activityFeed: true,
+  governancePage: true,
 };

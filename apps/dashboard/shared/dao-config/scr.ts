@@ -288,6 +288,7 @@ export const SCR: DaoConfiguration = {
     },
   },
   resilienceStages: true,
+  governancePage: true,
   tokenDistribution: true,
   dataTables: true,
   activityFeed: true,

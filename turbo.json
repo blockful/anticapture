@@ -1,23 +1,82 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalEnv": [".env"],
   "tasks": {
+    "@anticapture/observability#build": {
+      "outputs": ["packages/observability/dist/**"]
+    },
+    "@anticapture/graphql-client#build": {
+      "outputs": ["packages/graphql-client/dist/**"]
+    },
+    "@anticapture/dasbhoard#build": {
+      "dependsOn": ["@anticapture/#graphql-client#build"],
+      "outputs": ["dist/**", ".next/**", ".next/cache/**"]
+    },
     "build": {
+      "dependsOn": ["^build"],
       "outputs": ["dist/**", ".next/**", ".next/cache/**"],
       "env": ["RESEND_API_KEY", "RESEND_FROM_EMAIL", "CONTACT_EMAIL"]
     },
     "storybook": {
-      "outputs": ["dist/**", ".next/**", ".next/cache/**"],
-      "env": ["FIGMA_TOKEN", "VALIDATE_FIGMA_TOKEN_API"]
+      "outputs": ["dist/**", ".next/**", ".next/cache/**"]
     },
     "build-storybook": {
-      "outputs": ["storybook-static/**"],
-      "env": ["FIGMA_TOKEN", "VALIDATE_FIGMA_TOKEN_API"]
+      "outputs": ["storybook-static/**"]
+    },
+    "start": {
+      "dependsOn": ["^build"],
+      "persistent": true,
+      "cache": false,
+      "passThroughEnv": ["*"]
     },
     "clean": {},
-    "lint": {},
-    "lint:fix": {},
-    "typecheck": {},
-    "test": {}
+    "lint": {
+      "inputs": [
+        "**/*.ts",
+        "**/*.tsx",
+        "**/*.js",
+        "**/*.jsx",
+        "eslint.config.*"
+      ]
+    },
+    "lint:fix": {
+      "inputs": [
+        "**/*.ts",
+        "**/*.tsx",
+        "**/*.js",
+        "**/*.jsx",
+        "eslint.config.*"
+      ]
+    },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json"]
+    },
+    "test": {
+      "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"]
+    },
+    "test:unit": {
+      "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"]
+    },
+    "codegen": {
+      "outputs": ["generated.ts", "types.ts"]
+    },
+    "db:generate": {
+      "inputs": ["src/**/*.ts"],
+      "outputs": ["drizzle/**"]
+    },
+    "@anticapture/api#dev": {
+      "dependsOn": ["@anticapture/observability#build"],
+      "passThroughEnv": ["*"]
+    },
+    "dev": {
+      "persistent": true,
+      "cache": false,
+      "passThroughEnv": ["*"]
+    },
+    "dev:rw": {
+      "persistent": true,
+      "cache": false,
+      "passThroughEnv": ["*"]
+    }
   }
 }

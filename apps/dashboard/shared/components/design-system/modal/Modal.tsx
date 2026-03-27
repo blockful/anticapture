@@ -19,7 +19,7 @@ export const Modal = ({
   title,
   description,
   children,
-  cancelLabel = "Cancel",
+  cancelLabel,
   confirmLabel,
   onCancel,
   onConfirm,
@@ -73,14 +73,16 @@ export const Modal = ({
           <div className="bg-surface-default w-full p-4">{children}</div>
 
           {/* Footer */}
-          <ModalFooter
-            cancelLabel={cancelLabel}
-            confirmLabel={confirmLabel}
-            onCancel={handleCancel}
-            onConfirm={onConfirm}
-            isConfirmLoading={isConfirmLoading}
-            isConfirmDisabled={isConfirmDisabled}
-          />
+          {(cancelLabel || confirmLabel) && (
+            <ModalFooter
+              cancelLabel={cancelLabel}
+              confirmLabel={confirmLabel}
+              onCancel={handleCancel}
+              onConfirm={onConfirm}
+              isConfirmLoading={isConfirmLoading}
+              isConfirmDisabled={isConfirmDisabled}
+            />
+          )}
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>
