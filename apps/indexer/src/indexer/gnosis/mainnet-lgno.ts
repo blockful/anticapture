@@ -11,7 +11,7 @@ import {
 } from "@/lib/constants";
 import { createAddressSet } from "@/eventHandlers/shared";
 import { Address } from "viem";
-import { tokenTransfer } from "@/eventHandlers";
+import { gnoVotingPowerTransfer, tokenTransfer } from "@/eventHandlers";
 import {
   updateCirculatingSupply,
   updateSupplyMetric,
@@ -56,6 +56,16 @@ export function MainnetLGnoTokenIndexer(address: Address) {
         burning: addressSets.burning,
       },
     );
+
+    // GNO DAO has no on-chain delegation; balance == voting power
+    await gnoVotingPowerTransfer(context, daoId, {
+      from,
+      to,
+      transactionHash: hash,
+      value,
+      timestamp,
+      logIndex,
+    });
 
     const lendingChanged = await updateSupplyMetric(
       context,
