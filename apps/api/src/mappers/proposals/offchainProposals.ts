@@ -4,11 +4,6 @@ import { offchainProposals } from "@/database";
 
 export type DBOffchainProposal = typeof offchainProposals.$inferSelect;
 
-export type DBOffchainProposalWithScores = DBOffchainProposal & {
-  forVotes: string;
-  againstVotes: string;
-};
-
 export const OffchainProposalResponseSchema = z.object({
   id: z.string(),
   spaceId: z.string(),
@@ -24,10 +19,6 @@ export const OffchainProposalResponseSchema = z.object({
   updated: z.number(),
   link: z.string(),
   flagged: z.boolean(),
-  scores: z.object({
-    forVotes: z.string(),
-    againstVotes: z.string(),
-  }),
 });
 
 export type OffchainProposalResponse = z.infer<
@@ -35,9 +26,7 @@ export type OffchainProposalResponse = z.infer<
 >;
 
 export const OffchainProposalMapper = {
-  toApi: (
-    p: DBOffchainProposal | DBOffchainProposalWithScores,
-  ): OffchainProposalResponse => ({
+  toApi: (p: DBOffchainProposal): OffchainProposalResponse => ({
     id: p.id,
     spaceId: p.spaceId,
     author: p.author,
@@ -52,10 +41,6 @@ export const OffchainProposalMapper = {
     updated: p.updated,
     link: p.link,
     flagged: p.flagged,
-    scores: {
-      forVotes: "forVotes" in p ? (p.forVotes ?? "0") : "0",
-      againstVotes: "againstVotes" in p ? (p.againstVotes ?? "0") : "0",
-    },
   }),
 };
 

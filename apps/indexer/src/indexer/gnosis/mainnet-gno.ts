@@ -1,10 +1,5 @@
 import { ponder } from "ponder:registry";
-import {
-  accountBalance,
-  accountPower,
-  token,
-  votingPowerHistory,
-} from "ponder:schema";
+import { token } from "ponder:schema";
 import { DaoIdEnum } from "@/lib/enums";
 import {
   BurningAddresses,
@@ -16,7 +11,7 @@ import {
   TreasuryAddresses,
 } from "@/lib/constants";
 import { createAddressSet, handleTransaction } from "@/eventHandlers/shared";
-import { Address, getAddress, zeroAddress } from "viem";
+import { Address } from "viem";
 import { tokenTransfer } from "@/eventHandlers";
 import {
   updateCirculatingSupply,
@@ -158,58 +153,6 @@ export function MainnetGnoTokenIndexer(address: Address, decimals: number) {
     ) {
       await updateCirculatingSupply(context, daoId, address, timestamp);
     }
-
-    // Sync voting power = balance for both addresses (GNO has no delegation)
-    const [receiverBalance, senderBalance] = await Promise.all([
-      context.db.find(accountBalance, {
-        accountId: getAddress(to),
-        tokenId: getAddress(address),
-      }),
-      from !== zeroAddress
-        ? context.db.find(accountBalance, {
-            accountId: getAddress(from),
-            tokenId: getAddress(address),
-          })
-        : Promise.resolve(null),
-    ]);
-
-    const syncVotingPower = async (
-      addr: Address,
-      newBalance: bigint,
-      vpLogIndex: number,
-    ) => {
-      await context.db
-        .insert(votingPowerHistory)
-        .values({
-          daoId,
-          transactionHash: hash,
-          accountId: getAddress(addr),
-          votingPower: newBalance,
-          delta: newBalance,
-          deltaMod: newBalance > 0n ? newBalance : -newBalance,
-          timestamp,
-          logIndex: vpLogIndex,
-        })
-        .onConflictDoNothing();
-
-      await context.db
-        .insert(accountPower)
-        .values({
-          accountId: getAddress(addr),
-          daoId,
-          votingPower: newBalance,
-        })
-        .onConflictDoUpdate(() => ({
-          votingPower: newBalance,
-        }));
-    };
-
-    await Promise.all([
-      syncVotingPower(to, receiverBalance?.balance ?? 0n, logIndex),
-      from !== zeroAddress
-        ? syncVotingPower(from, senderBalance?.balance ?? 0n, logIndex + 1)
-        : Promise.resolve(),
-    ]);
 
     if (!to) return;
 
