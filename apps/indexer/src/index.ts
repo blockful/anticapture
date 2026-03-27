@@ -44,6 +44,13 @@ import {
   ZKTokenIndexer,
   GovernorIndexer as ZKGovernorIndexer,
 } from "./indexer/zk";
+import {
+  GnosisGnoTokenIndexer,
+  GnosisLGnoTokenIndexer,
+  GnosisSGnoTokenIndexer,
+  MainnetGnoTokenIndexer,
+  MainnetLGnoTokenIndexer,
+} from "./indexer/gnosis";
 
 const { DAO_ID: daoId } = env;
 
@@ -125,6 +132,20 @@ switch (daoId) {
     AAVETokenIndexer(aave.address, aave.decimals);
     stkAAVETokenIndexer(stkAAVE.address, stkAAVE.decimals);
     aAAVETokenIndexer(aAAVE.address, aAAVE.decimals);
+    break;
+  }
+  case DaoIdEnum.GNO: {
+    // Mainnet GNO address will be the only one referenced in the DB since we'll always just use the sum of all balances
+    const {
+      mainnet: {
+        gno: { address, decimals },
+      },
+    } = CONTRACT_ADDRESSES[DaoIdEnum.GNO];
+    MainnetGnoTokenIndexer(address, decimals);
+    MainnetLGnoTokenIndexer(address);
+    GnosisGnoTokenIndexer(address);
+    GnosisLGnoTokenIndexer(address);
+    GnosisSGnoTokenIndexer(address);
     break;
   }
   default:

@@ -14,6 +14,7 @@ import {
   SHUClient,
   AAVEClient,
   FLUIDClient,
+  GnosisClient,
 } from "@/clients";
 
 import { CONTRACT_ADDRESSES } from "./constants";
@@ -83,6 +84,9 @@ export function getClient<
     }
     case DaoIdEnum.AAVE: {
       return new AAVEClient(client);
+    }
+    case DaoIdEnum.GNO: {
+      return new GnosisClient(client);
     }
     default:
       return null;

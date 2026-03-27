@@ -2,43 +2,89 @@
 
 import { QueryInput_Proposals_OrderDirection } from "@anticapture/graphql-client";
 import { Building2, Landmark } from "lucide-react";
+import { parseAsStringEnum, useQueryState } from "nuqs";
 import { useParams } from "next/navigation";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, type RefObject } from "react";
 
 import { ProposalItem } from "@/features/governance/components/proposal-overview/ProposalItem";
+import { useOffchainProposals } from "@/features/governance/hooks/useOffchainProposals";
 import { useProposals } from "@/features/governance/hooks/useProposals";
-import { TheSectionLayout } from "@/shared/components";
+import { TabGroup } from "@/shared/components/design-system/tabs/tab-group/TabGroup";
 import { EmptyState } from "@/shared/components/design-system/table/components/EmptyState";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
+import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
+import { TheSectionLayout } from "@/shared/components/containers/TheSectionLayout";
+
+const PROPOSAL_TABS = [
+  { label: "Onchain", value: "onchain" },
+  { label: "Offchain", value: "offchain" },
+];
 
 export const GovernanceSection = () => {
   const { daoId }: { daoId: string } = useParams();
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
+  const proposalType = daoConfig[daoIdEnum]?.proposalTypeConfiguration;
+  const hasOffchain =
+    proposalType === "offchain" || proposalType === "composite";
+  const hasOnchain = proposalType === "onchain" || proposalType === "composite";
+  const [activeTab, setActiveTab] = useQueryState(
+    "tab",
+    parseAsStringEnum<"onchain" | "offchain">([
+      "onchain",
+      "offchain",
+    ]).withDefault(hasOnchain ? "onchain" : "offchain"),
+  );
+
   const {
-    proposals, // Now already normalized to Proposal[] format
-    loading,
-    error,
-    pagination,
-    fetchNextPage,
-    isPaginationLoading,
+    proposals,
+    loading: onchainLoading,
+    error: onchainError,
+    pagination: onchainPagination,
+    fetchNextPage: fetchNextOnchain,
+    isPaginationLoading: isOnchainPaginationLoading,
   } = useProposals({
     itemsPerPage: 10,
     orderDirection: QueryInput_Proposals_OrderDirection.Desc,
     daoId: daoIdEnum,
+    skip: !hasOnchain,
   });
 
-  const loadMoreRef = useRef<HTMLDivElement>(null);
+  const {
+    proposals: offchainProposals,
+    loading: offchainLoading,
+    error: offchainError,
+    pagination: offchainPagination,
+    fetchNextPage: fetchNextOffchain,
+    isPaginationLoading: isOffchainPaginationLoading,
+  } = useOffchainProposals({
+    itemsPerPage: 10,
+    daoId: hasOffchain ? daoIdEnum : undefined,
+  });
 
-  // Infinite scroll implementation
+  const loadMoreOnchainRef = useRef<HTMLDivElement>(null);
+  const loadMoreOffchainRef = useRef<HTMLDivElement>(null);
+
+  const isOnchain = activeTab === "onchain" || (!hasOffchain && hasOnchain);
+  const error = isOnchain ? onchainError : offchainError;
+  const pagination = isOnchain ? onchainPagination : offchainPagination;
+  const isPaginationLoading = isOnchain
+    ? isOnchainPaginationLoading
+    : isOffchainPaginationLoading;
+  const fetchNextPage = isOnchain ? fetchNextOnchain : fetchNextOffchain;
+
   const handleLoadMore = useCallback(() => {
     if (!isPaginationLoading && pagination.hasNextPage) {
       fetchNextPage();
     }
   }, [fetchNextPage, isPaginationLoading, pagination.hasNextPage]);
 
-  // Intersection Observer for infinite scroll
   useEffect(() => {
+    const ref = isOnchain
+      ? loadMoreOnchainRef.current
+      : loadMoreOffchainRef.current;
+    if (!ref) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
@@ -48,12 +94,10 @@ export const GovernanceSection = () => {
       { threshold: 0.1 },
     );
 
-    if (loadMoreRef.current) {
-      observer.observe(loadMoreRef.current);
-    }
+    observer.observe(ref);
 
     return () => observer.disconnect();
-  }, [handleLoadMore]);
+  }, [handleLoadMore, isOnchain]);
 
   if (error) {
     return (
@@ -82,46 +126,96 @@ export const GovernanceSection = () => {
         description="View and vote on executable proposals from this DAO."
         className="lg:bg-transparent"
       >
+        {hasOffchain && (
+          <TabGroup
+            tabs={PROPOSAL_TABS}
+            activeTab={activeTab}
+            onTabChange={(value) =>
+              setActiveTab(value as "onchain" | "offchain")
+            }
+            className="mb-4"
+            size="md"
+          />
+        )}
+
         <div className="flex-1">
-          {loading && proposals.length === 0 && (
-            <div className="flex flex-col gap-2">
-              {Array.from({ length: 10 }).map((_, index) => (
-                <ProposalItemSkeleton key={index} />
+          {isOnchain ? (
+            <ProposalListSection
+              loading={onchainLoading}
+              hasItems={proposals.length > 0}
+              isPaginationLoading={isOnchainPaginationLoading}
+              loadMoreRef={loadMoreOnchainRef}
+              emptyMessage="No proposals found"
+            >
+              {proposals.map((proposal) => (
+                <ProposalItem key={proposal.id} proposal={proposal} />
               ))}
-            </div>
-          )}
-
-          {!loading && proposals.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-12">
-              <p className="text-muted-foreground mb-4">No proposals found</p>
-            </div>
-          )}
-
-          {proposals.length > 0 && (
-            <>
-              <div className="flex flex-col gap-2 space-y-0">
-                {proposals.map((proposal) => (
-                  <ProposalItem key={proposal.id} proposal={proposal} />
-                ))}
-              </div>
-
-              {/* Infinite scroll trigger */}
-              <div ref={loadMoreRef} className="py-4">
-                {isPaginationLoading && (
-                  <div className="flex flex-col gap-2">
-                    {Array.from({ length: 3 }).map((_, index) => (
-                      <ProposalItemSkeleton
-                        key={`pagination-skeleton-${index}`}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            </>
+            </ProposalListSection>
+          ) : (
+            <ProposalListSection
+              loading={offchainLoading}
+              hasItems={offchainProposals.length > 0}
+              isPaginationLoading={isOffchainPaginationLoading}
+              loadMoreRef={loadMoreOffchainRef}
+              emptyMessage="No off-chain proposals found"
+            >
+              {offchainProposals.map((proposal) => (
+                <ProposalItem key={proposal.id} offchainProposal={proposal} />
+              ))}
+            </ProposalListSection>
           )}
         </div>
       </TheSectionLayout>
     </div>
+  );
+};
+
+const ProposalListSection = ({
+  loading,
+  hasItems,
+  isPaginationLoading,
+  loadMoreRef,
+  emptyMessage,
+  children,
+}: {
+  loading: boolean;
+  hasItems: boolean;
+  isPaginationLoading: boolean;
+  loadMoreRef: RefObject<HTMLDivElement | null>;
+  emptyMessage: string;
+  children: React.ReactNode;
+}) => {
+  if (loading && !hasItems) {
+    return (
+      <div className="flex flex-col gap-2">
+        {Array.from({ length: 10 }).map((_, i) => (
+          <ProposalItemSkeleton key={i} />
+        ))}
+      </div>
+    );
+  }
+
+  if (!hasItems) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12">
+        <p className="text-muted-foreground mb-4">{emptyMessage}</p>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="flex flex-col gap-2 space-y-0">{children}</div>
+      <div ref={loadMoreRef} className="py-4">
+        {isPaginationLoading && (
+          <div className="flex flex-col gap-2">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <ProposalItemSkeleton key={`pagination-skeleton-${i}`} />
+            ))}
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 

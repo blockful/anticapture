@@ -324,4 +324,5 @@ export const GTC: DaoConfiguration = {
     },
   },
   governancePage: true,
+  proposalTypeConfiguration: "onchain",
 };

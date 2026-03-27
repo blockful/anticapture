@@ -139,6 +139,8 @@ export type DaoFeaturePageSlug =
   | "risk-analysis"
   | "token-distribution";
 
+export type ProposalTypeConfiguration = "onchain" | "offchain" | "composite";
+
 // Complete DAO configuration structure
 export interface DaoConfiguration extends BaseInfo {
   daoOverview: DaoOverviewConfig;
@@ -153,6 +155,7 @@ export interface DaoConfiguration extends BaseInfo {
   noStage?: boolean;
   governancePage?: boolean;
   serviceProviders?: boolean;
+  proposalTypeConfiguration: ProposalTypeConfiguration;
   /** When false, hides the DAO Overview page from navigation. Defaults to true. */
   overviewPage?: boolean;
   /** When set, visiting /{daoId}/ redirects to /{daoId}/{initialPage}. */

@@ -350,4 +350,5 @@ export const SHU: DaoConfiguration = {
   tokenDistribution: true,
   dataTables: true,
   governancePage: true,
+  proposalTypeConfiguration: "onchain",
 };

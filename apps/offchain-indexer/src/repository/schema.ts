@@ -17,6 +17,8 @@ export const proposals = snapshotSchema.table("proposals", (d) => ({
   updated: d.integer().notNull(),
   link: d.text().notNull().default(""),
   flagged: d.boolean().notNull().default(false),
+  scores: d.jsonb().$type<number[]>().notNull().default([]),
+  choices: d.jsonb().$type<string[]>().notNull().default([]),
 }));
 
 export const votes = snapshotSchema.table(

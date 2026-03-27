@@ -15,9 +15,12 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
+  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
+  /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
+  /** Integers that will have a value greater than 0. */
   PositiveInt: { input: any; output: any; }
 };
 
@@ -66,17 +69,50 @@ export type PageInfo = {
 
 export type Query = {
   __typename?: 'Query';
-  /** Returns account balance information for a specific address */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/accounts/{args.address}/balances`
+   * Returns account balance information for a specific address
+   *
+   */
   accountBalanceByAccountId?: Maybe<AccountBalanceByAccountId_200_Response>;
-  /** Returns a mapping of the biggest variations to account balances associated by account address */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/balances/variations`
+   * Returns a mapping of the biggest variations to account balances associated by account address
+   *
+   */
   accountBalanceVariations?: Maybe<AccountBalanceVariations_200_Response>;
-  /** Returns a the changes to balance by period and accountId */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/accounts/{args.address}/balances/variations`
+   * Returns a the changes to balance by period and accountId
+   *
+   */
   accountBalanceVariationsByAccountId?: Maybe<AccountBalanceVariationsByAccountId_200_Response>;
-  /** Returns sorted and paginated account balance records */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/balances`
+   * Returns sorted and paginated account balance records
+   *
+   */
   accountBalances?: Maybe<AccountBalances_200_Response>;
   /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/balances/{args.address}/interactions`
    * Returns a mapping of the largest interactions between accounts.
    * Positive amounts signify net token transfers FROM <address>, whilst negative amounts refer to net transfers TO <address>
+   *
    */
   accountInteractions?: Maybe<AccountInteractions_200_Response>;
   /**
@@ -85,99 +121,421 @@ export type Query = {
    * Only includes dates where ALL DAOs have data available.
    */
   averageDelegationPercentageByDay: AverageDelegationPercentagePage;
-  /** Get active token supply for DAO */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/active-supply/compare`
+   * Get active token supply for DAO
+   *
+   */
   compareActiveSupply?: Maybe<CompareActiveSupply_200_Response>;
-  /** Compare average turnout between time periods */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/average-turnout/compare`
+   * Compare average turnout between time periods
+   *
+   */
   compareAverageTurnout?: Maybe<CompareAverageTurnout_200_Response>;
-  /** Compare cex supply between periods */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/cex-supply/compare`
+   * Compare cex supply between periods
+   *
+   */
   compareCexSupply?: Maybe<CompareCexSupply_200_Response>;
-  /** Compare circulating supply between periods */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/circulating-supply/compare`
+   * Compare circulating supply between periods
+   *
+   */
   compareCirculatingSupply?: Maybe<CompareCirculatingSupply_200_Response>;
-  /** Compare delegated supply between periods */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/delegated-supply/compare`
+   * Compare delegated supply between periods
+   *
+   */
   compareDelegatedSupply?: Maybe<CompareDelegatedSupply_200_Response>;
-  /** Compare dex supply between periods */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/dex-supply/compare`
+   * Compare dex supply between periods
+   *
+   */
   compareDexSupply?: Maybe<CompareDexSupply_200_Response>;
-  /** Compare lending supply between periods */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/lending-supply/compare`
+   * Compare lending supply between periods
+   *
+   */
   compareLendingSupply?: Maybe<CompareLendingSupply_200_Response>;
-  /** Compare number of proposals between time periods */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/proposals/compare`
+   * Compare number of proposals between time periods
+   *
+   */
   compareProposals?: Maybe<CompareProposals_200_Response>;
-  /** Compare total supply between periods */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/total-supply/compare`
+   * Compare total supply between periods
+   *
+   */
   compareTotalSupply?: Maybe<CompareTotalSupply_200_Response>;
-  /** Compare treasury between periods */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/treasury/compare`
+   * Compare treasury between periods
+   *
+   */
   compareTreasury?: Maybe<CompareTreasury_200_Response>;
-  /** Compare number of votes between time periods */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/votes/compare`
+   * Compare number of votes between time periods
+   *
+   */
   compareVotes?: Maybe<CompareVotes_200_Response>;
-  /** Returns current governance parameters for this DAO */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/dao`
+   * Returns current governance parameters for this DAO
+   *
+   */
   dao?: Maybe<Dao_200_Response>;
   /** Get all DAOs */
   daos: DaoList;
-  /** Get delegation percentage day buckets with forward-fill */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/delegation-percentage`
+   * Get delegation percentage day buckets with forward-fill
+   *
+   */
   delegationPercentageByDay?: Maybe<DelegationPercentageByDay_200_Response>;
-  /** Get current delegations for an account */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/accounts/{args.address}/delegations`
+   * Get current delegations for an account
+   *
+   */
   delegations?: Maybe<Delegations_200_Response>;
-  /** Get current delegators of an account with voting power */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/accounts/{args.address}/delegators`
+   * Get current delegators of an account with voting power
+   *
+   */
   delegators?: Maybe<Delegators_200_Response>;
-  /** Get feed events */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/feed/events`
+   * Get feed events
+   *
+   */
   feedEvents?: Maybe<FeedEvents_200_Response>;
-  /** Returns label information from Arkham, ENS data, and whether the address is an EOA or contract. Arkham data is stored permanently. ENS data is cached with a configurable TTL. */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `https://address-enrichment-service-dev.up.railway.app`
+   * >**Path**: `/address/{args.address}`
+   * Returns label information from Arkham, ENS data, and whether the address is an EOA or contract. Arkham data is stored permanently. ENS data is cached with a configurable TTL.
+   *
+   */
   getAddress?: Maybe<GetAddress_200_Response>;
-  /** Returns label information from Arkham, ENS data, and address type for multiple addresses. Maximum 100 addresses per request. Arkham data is stored permanently. ENS data is cached with a configurable TTL. */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `https://address-enrichment-service-dev.up.railway.app`
+   * >**Path**: `/addresses`
+   * Returns label information from Arkham, ENS data, and address type for multiple addresses. Maximum 100 addresses per request. Arkham data is stored permanently. ENS data is cached with a configurable TTL.
+   *
+   */
   getAddresses?: Maybe<GetAddresses_200_Response>;
-  /** Get historical DAO Token Treasury value (governance token quantity × token price) */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/treasury/dao-token`
+   * Get historical DAO Token Treasury value (governance token quantity × token price)
+   *
+   */
   getDaoTokenTreasury?: Maybe<GetDaoTokenTreasury_200_Response>;
-  /** Get event relevance threshold */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/event-relevance/threshold`
+   * Get event relevance threshold
+   *
+   */
   getEventRelevanceThreshold?: Maybe<GetEventRelevanceThreshold_200_Response>;
-  /** Get historical Liquid Treasury (treasury without DAO tokens) from external providers (DefiLlama/Dune) */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/treasury/liquid`
+   * Get historical Liquid Treasury (treasury without DAO tokens) from external providers (DefiLlama/Dune)
+   *
+   */
   getLiquidTreasury?: Maybe<GetLiquidTreasury_200_Response>;
-  /** Get historical Total Treasury (liquid treasury + DAO token treasury) */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/treasury/total`
+   * Get historical Total Treasury (liquid treasury + DAO token treasury)
+   *
+   */
   getTotalTreasury?: Maybe<GetTotalTreasury_200_Response>;
-  /** TODO */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/accounts/{args.address}/balances/historical`
+   * TODO
+   *
+   */
   historicalBalances?: Maybe<HistoricalBalances_200_Response>;
-  /** Get historical delegations for an account, with optional filtering and sorting */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/accounts/{args.address}/delegations/historical`
+   * Get historical delegations for an account, with optional filtering and sorting
+   *
+   */
   historicalDelegations?: Maybe<HistoricalDelegations_200_Response>;
-  /** Get historical market data for a specific token */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/token/historical-data`
+   * Get historical market data for a specific token
+   *
+   */
   historicalTokenData?: Maybe<Array<Maybe<Query_HistoricalTokenData_Items>>>;
-  /** Returns a list of voting power changes. */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/voting-powers/historical`
+   * Returns a list of voting power changes.
+   *
+   */
   historicalVotingPower?: Maybe<HistoricalVotingPower_200_Response>;
-  /** Returns a list of voting power changes for a specific account */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/accounts/{args.address}/voting-powers/historical`
+   * Returns a list of voting power changes for a specific account
+   *
+   */
   historicalVotingPowerByAccountId?: Maybe<HistoricalVotingPowerByAccountId_200_Response>;
-  /** Get the last update time */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/last-update`
+   * Get the last update time
+   *
+   */
   lastUpdate?: Maybe<LastUpdate_200_Response>;
-  /** Returns a single offchain (Snapshot) proposal by its ID */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/offchain/proposals/{args.id}`
+   * Returns a single offchain (Snapshot) proposal by its ID
+   *
+   */
   offchainProposalById?: Maybe<OffchainProposalById_200_Response>;
-  /** Returns a list of offchain (Snapshot) proposals */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/offchain/proposals`
+   * Returns a list of offchain (Snapshot) proposals
+   *
+   */
   offchainProposals?: Maybe<OffchainProposals_200_Response>;
-  /** Returns a single proposal by its ID */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/proposals/{args.id}`
+   * Returns a single proposal by its ID
+   *
+   */
   proposal?: Maybe<Proposal_200_Response>;
-  /** Returns the active delegates that did not vote on a given proposal */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/proposals/{args.id}/non-voters`
+   * Returns the active delegates that did not vote on a given proposal
+   *
+   */
   proposalNonVoters?: Maybe<ProposalNonVoters_200_Response>;
-  /** Returns a list of proposal */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/proposals`
+   * Returns a list of proposal
+   *
+   */
   proposals?: Maybe<Proposals_200_Response>;
-  /** Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/proposals-activity`
+   * Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window
+   *
+   */
   proposalsActivity?: Maybe<ProposalsActivity_200_Response>;
-  /** Get property data for a specific token */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/token`
+   * Get property data for a specific token
+   *
+   */
   token?: Maybe<Token_200_Response>;
-  /** Returns token related metrics for a single metric type. */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/token-metrics`
+   * Returns token related metrics for a single metric type.
+   *
+   */
   tokenMetrics?: Maybe<TokenMetrics_200_Response>;
-  /** Get transactions with their associated transfers and delegations, with optional filtering and sorting */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/transactions`
+   * Get transactions with their associated transfers and delegations, with optional filtering and sorting
+   *
+   */
   transactions?: Maybe<Transactions_200_Response>;
-  /** Get transfers of a given address */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/accounts/{args.address}/transfers`
+   * Get transfers of a given address
+   *
+   */
   transfers?: Maybe<Transfers_200_Response>;
-  /** Get all votes ordered by timestamp or voting power */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/votes`
+   * Get all votes ordered by timestamp or voting power
+   *
+   */
   votes?: Maybe<Votes_200_Response>;
-  /** Returns a paginated list of votes cast on a specific proposal */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/proposals/{args.id}/votes`
+   * Returns a paginated list of votes cast on a specific proposal
+   *
+   */
   votesByProposalId?: Maybe<VotesByProposalId_200_Response>;
-  /** Returns a list of offchain (Snapshot) votes */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/offchain/votes`
+   * Returns a list of offchain (Snapshot) votes
+   *
+   */
   votesOffchain?: Maybe<VotesOffchain_200_Response>;
-  /** Returns a paginated list of offchain (Snapshot) votes for a specific proposal */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/offchain/proposals/{args.id}/votes`
+   * Returns a paginated list of offchain (Snapshot) votes for a specific proposal
+   *
+   */
   votesOffchainByProposalId?: Maybe<VotesOffchainByProposalId_200_Response>;
-  /** Returns voting power information for a specific address (account) */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/voting-powers/{args.accountId}`
+   * Returns voting power information for a specific address (account)
+   *
+   */
   votingPowerByAccountId?: Maybe<VotingPowerByAccountId_200_Response>;
-  /** Returns a mapping of the voting power changes within a time frame for the given addresses */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/accounts/voting-powers/variations`
+   * Returns a mapping of the voting power changes within a time frame for the given addresses
+   *
+   */
   votingPowerVariations?: Maybe<VotingPowerVariations_200_Response>;
-  /** Returns a the changes to voting power by period and accountId */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/accounts/{args.address}/voting-powers/variations`
+   * Returns a the changes to voting power by period and accountId
+   *
+   */
   votingPowerVariationsByAccountId?: Maybe<VotingPowerVariationsByAccountId_200_Response>;
-  /** Returns sorted and paginated account voting power records */
+  /**
+   *
+   * >**Method**: `GET`
+   * >**Base URL**: `http://localhost:42069`
+   * >**Path**: `/voting-powers`
+   * Returns sorted and paginated account voting power records
+   *
+   */
   votingPowers?: Maybe<VotingPowers_200_Response>;
 };
 
@@ -437,6 +795,7 @@ export type QueryOffchainProposalByIdArgs = {
 
 
 export type QueryOffchainProposalsArgs = {
+  endDate?: InputMaybe<Scalars['Float']['input']>;
   fromDate?: InputMaybe<Scalars['Float']['input']>;
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   orderDirection?: InputMaybe<QueryInput_OffchainProposals_OrderDirection>;
@@ -725,7 +1084,7 @@ export type Dao_200_Response = {
   id: Scalars['String']['output'];
   proposalThreshold: Scalars['String']['output'];
   quorum: Scalars['String']['output'];
-  supportOffchainData: Scalars['Boolean']['output'];
+  supportOffchainData?: Maybe<Scalars['Boolean']['output']>;
   timelockDelay: Scalars['String']['output'];
   votingDelay: Scalars['String']['output'];
   votingPeriod: Scalars['String']['output'];
@@ -828,12 +1187,14 @@ export type OffchainProposalById_200_Response = {
   __typename?: 'offchainProposalById_200_response';
   author: Scalars['String']['output'];
   body: Scalars['String']['output'];
+  choices: Array<Maybe<Scalars['String']['output']>>;
   created: Scalars['Float']['output'];
   discussion: Scalars['String']['output'];
   end: Scalars['Float']['output'];
   flagged: Scalars['Boolean']['output'];
   id: Scalars['String']['output'];
   link: Scalars['String']['output'];
+  scores: Array<Maybe<Scalars['Float']['output']>>;
   spaceId: Scalars['String']['output'];
   start: Scalars['Float']['output'];
   state: Scalars['String']['output'];
@@ -1574,12 +1935,14 @@ export type Query_OffchainProposals_Items_Items = {
   __typename?: 'query_offchainProposals_items_items';
   author: Scalars['String']['output'];
   body: Scalars['String']['output'];
+  choices: Array<Maybe<Scalars['String']['output']>>;
   created: Scalars['Float']['output'];
   discussion: Scalars['String']['output'];
   end: Scalars['Float']['output'];
   flagged: Scalars['Boolean']['output'];
   id: Scalars['String']['output'];
   link: Scalars['String']['output'];
+  scores: Array<Maybe<Scalars['Float']['output']>>;
   spaceId: Scalars['String']['output'];
   start: Scalars['Float']['output'];
   state: Scalars['String']['output'];
@@ -2061,6 +2424,33 @@ export type GetAddressesQueryVariables = Exact<{
 
 
 export type GetAddressesQuery = { __typename?: 'Query', getAddresses?: { __typename?: 'getAddresses_200_response', results: Array<{ __typename?: 'query_getAddresses_results_items', address: string, isContract: boolean, arkham?: { __typename?: 'query_getAddresses_results_items_arkham', entity?: string | null, entityType?: string | null, label?: string | null, twitter?: string | null } | null, ens?: { __typename?: 'query_getAddresses_results_items_ens', name?: string | null, avatar?: string | null, banner?: string | null } | null } | null> } | null };
+
+export type GetOffchainProposalsFromDaoQueryVariables = Exact<{
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderDirection?: InputMaybe<QueryInput_OffchainProposals_OrderDirection>;
+  status?: InputMaybe<Scalars['JSON']['input']>;
+  fromDate?: InputMaybe<Scalars['Float']['input']>;
+}>;
+
+
+export type GetOffchainProposalsFromDaoQuery = { __typename?: 'Query', offchainProposals?: { __typename?: 'offchainProposals_200_response', totalCount: number, items: Array<{ __typename?: 'query_offchainProposals_items_items', id: string, spaceId: string, author: string, title: string, type: string, state: string, start: number, end: number, created: number, updated: number, scores: Array<number | null>, choices: Array<string | null> } | null> } | null };
+
+export type GetOffchainProposalQueryVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type GetOffchainProposalQuery = { __typename?: 'Query', offchainProposalById?: { __typename?: 'offchainProposalById_200_response', id: string, spaceId: string, author: string, title: string, body: string, type: string, state: string, start: number, end: number, created: number, updated: number, link: string, scores: Array<number | null>, choices: Array<string | null> } | null };
+
+export type GetOffchainVotesByProposalIdQueryVariables = Exact<{
+  id: Scalars['String']['input'];
+  skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  limit?: InputMaybe<Scalars['Float']['input']>;
+}>;
+
+
+export type GetOffchainVotesByProposalIdQuery = { __typename?: 'Query', votesOffchainByProposalId?: { __typename?: 'votesOffchainByProposalId_200_response', totalCount: number, items: Array<{ __typename?: 'query_votesOffchainByProposalId_items_items', voter: string, choice?: any | null, vp?: number | null, reason: string, created: number } | null> } | null };
 
 export type GetProposalsFromDaoQueryVariables = Exact<{
   skip?: InputMaybe<Scalars['NonNegativeInt']['input']>;
@@ -3157,6 +3547,181 @@ export type GetAddressesQueryHookResult = ReturnType<typeof useGetAddressesQuery
 export type GetAddressesLazyQueryHookResult = ReturnType<typeof useGetAddressesLazyQuery>;
 export type GetAddressesSuspenseQueryHookResult = ReturnType<typeof useGetAddressesSuspenseQuery>;
 export type GetAddressesQueryResult = Apollo.QueryResult<GetAddressesQuery, GetAddressesQueryVariables>;
+export const GetOffchainProposalsFromDaoDocument = gql`
+    query GetOffchainProposalsFromDao($skip: NonNegativeInt, $limit: PositiveInt = 10, $orderDirection: queryInput_offchainProposals_orderDirection = desc, $status: JSON, $fromDate: Float) {
+  offchainProposals(
+    skip: $skip
+    limit: $limit
+    orderDirection: $orderDirection
+    status: $status
+    fromDate: $fromDate
+  ) {
+    items {
+      id
+      spaceId
+      author
+      title
+      type
+      state
+      start
+      end
+      created
+      updated
+      scores
+      choices
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useGetOffchainProposalsFromDaoQuery__
+ *
+ * To run a query within a React component, call `useGetOffchainProposalsFromDaoQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetOffchainProposalsFromDaoQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetOffchainProposalsFromDaoQuery({
+ *   variables: {
+ *      skip: // value for 'skip'
+ *      limit: // value for 'limit'
+ *      orderDirection: // value for 'orderDirection'
+ *      status: // value for 'status'
+ *      fromDate: // value for 'fromDate'
+ *   },
+ * });
+ */
+export function useGetOffchainProposalsFromDaoQuery(baseOptions?: Apollo.QueryHookOptions<GetOffchainProposalsFromDaoQuery, GetOffchainProposalsFromDaoQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetOffchainProposalsFromDaoQuery, GetOffchainProposalsFromDaoQueryVariables>(GetOffchainProposalsFromDaoDocument, options);
+      }
+export function useGetOffchainProposalsFromDaoLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetOffchainProposalsFromDaoQuery, GetOffchainProposalsFromDaoQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetOffchainProposalsFromDaoQuery, GetOffchainProposalsFromDaoQueryVariables>(GetOffchainProposalsFromDaoDocument, options);
+        }
+// @ts-ignore
+export function useGetOffchainProposalsFromDaoSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetOffchainProposalsFromDaoQuery, GetOffchainProposalsFromDaoQueryVariables>): Apollo.UseSuspenseQueryResult<GetOffchainProposalsFromDaoQuery, GetOffchainProposalsFromDaoQueryVariables>;
+export function useGetOffchainProposalsFromDaoSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetOffchainProposalsFromDaoQuery, GetOffchainProposalsFromDaoQueryVariables>): Apollo.UseSuspenseQueryResult<GetOffchainProposalsFromDaoQuery | undefined, GetOffchainProposalsFromDaoQueryVariables>;
+export function useGetOffchainProposalsFromDaoSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetOffchainProposalsFromDaoQuery, GetOffchainProposalsFromDaoQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetOffchainProposalsFromDaoQuery, GetOffchainProposalsFromDaoQueryVariables>(GetOffchainProposalsFromDaoDocument, options);
+        }
+export type GetOffchainProposalsFromDaoQueryHookResult = ReturnType<typeof useGetOffchainProposalsFromDaoQuery>;
+export type GetOffchainProposalsFromDaoLazyQueryHookResult = ReturnType<typeof useGetOffchainProposalsFromDaoLazyQuery>;
+export type GetOffchainProposalsFromDaoSuspenseQueryHookResult = ReturnType<typeof useGetOffchainProposalsFromDaoSuspenseQuery>;
+export type GetOffchainProposalsFromDaoQueryResult = Apollo.QueryResult<GetOffchainProposalsFromDaoQuery, GetOffchainProposalsFromDaoQueryVariables>;
+export const GetOffchainProposalDocument = gql`
+    query GetOffchainProposal($id: String!) {
+  offchainProposalById(id: $id) {
+    id
+    spaceId
+    author
+    title
+    body
+    type
+    state
+    start
+    end
+    created
+    updated
+    link
+    scores
+    choices
+  }
+}
+    `;
+
+/**
+ * __useGetOffchainProposalQuery__
+ *
+ * To run a query within a React component, call `useGetOffchainProposalQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetOffchainProposalQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetOffchainProposalQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGetOffchainProposalQuery(baseOptions: Apollo.QueryHookOptions<GetOffchainProposalQuery, GetOffchainProposalQueryVariables> & ({ variables: GetOffchainProposalQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetOffchainProposalQuery, GetOffchainProposalQueryVariables>(GetOffchainProposalDocument, options);
+      }
+export function useGetOffchainProposalLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetOffchainProposalQuery, GetOffchainProposalQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetOffchainProposalQuery, GetOffchainProposalQueryVariables>(GetOffchainProposalDocument, options);
+        }
+// @ts-ignore
+export function useGetOffchainProposalSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetOffchainProposalQuery, GetOffchainProposalQueryVariables>): Apollo.UseSuspenseQueryResult<GetOffchainProposalQuery, GetOffchainProposalQueryVariables>;
+export function useGetOffchainProposalSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetOffchainProposalQuery, GetOffchainProposalQueryVariables>): Apollo.UseSuspenseQueryResult<GetOffchainProposalQuery | undefined, GetOffchainProposalQueryVariables>;
+export function useGetOffchainProposalSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetOffchainProposalQuery, GetOffchainProposalQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetOffchainProposalQuery, GetOffchainProposalQueryVariables>(GetOffchainProposalDocument, options);
+        }
+export type GetOffchainProposalQueryHookResult = ReturnType<typeof useGetOffchainProposalQuery>;
+export type GetOffchainProposalLazyQueryHookResult = ReturnType<typeof useGetOffchainProposalLazyQuery>;
+export type GetOffchainProposalSuspenseQueryHookResult = ReturnType<typeof useGetOffchainProposalSuspenseQuery>;
+export type GetOffchainProposalQueryResult = Apollo.QueryResult<GetOffchainProposalQuery, GetOffchainProposalQueryVariables>;
+export const GetOffchainVotesByProposalIdDocument = gql`
+    query GetOffchainVotesByProposalId($id: String!, $skip: NonNegativeInt, $limit: Float = 10) {
+  votesOffchainByProposalId(id: $id, skip: $skip, limit: $limit) {
+    items {
+      voter
+      choice
+      vp
+      reason
+      created
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useGetOffchainVotesByProposalIdQuery__
+ *
+ * To run a query within a React component, call `useGetOffchainVotesByProposalIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetOffchainVotesByProposalIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetOffchainVotesByProposalIdQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      skip: // value for 'skip'
+ *      limit: // value for 'limit'
+ *   },
+ * });
+ */
+export function useGetOffchainVotesByProposalIdQuery(baseOptions: Apollo.QueryHookOptions<GetOffchainVotesByProposalIdQuery, GetOffchainVotesByProposalIdQueryVariables> & ({ variables: GetOffchainVotesByProposalIdQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetOffchainVotesByProposalIdQuery, GetOffchainVotesByProposalIdQueryVariables>(GetOffchainVotesByProposalIdDocument, options);
+      }
+export function useGetOffchainVotesByProposalIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetOffchainVotesByProposalIdQuery, GetOffchainVotesByProposalIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetOffchainVotesByProposalIdQuery, GetOffchainVotesByProposalIdQueryVariables>(GetOffchainVotesByProposalIdDocument, options);
+        }
+// @ts-ignore
+export function useGetOffchainVotesByProposalIdSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetOffchainVotesByProposalIdQuery, GetOffchainVotesByProposalIdQueryVariables>): Apollo.UseSuspenseQueryResult<GetOffchainVotesByProposalIdQuery, GetOffchainVotesByProposalIdQueryVariables>;
+export function useGetOffchainVotesByProposalIdSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetOffchainVotesByProposalIdQuery, GetOffchainVotesByProposalIdQueryVariables>): Apollo.UseSuspenseQueryResult<GetOffchainVotesByProposalIdQuery | undefined, GetOffchainVotesByProposalIdQueryVariables>;
+export function useGetOffchainVotesByProposalIdSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetOffchainVotesByProposalIdQuery, GetOffchainVotesByProposalIdQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetOffchainVotesByProposalIdQuery, GetOffchainVotesByProposalIdQueryVariables>(GetOffchainVotesByProposalIdDocument, options);
+        }
+export type GetOffchainVotesByProposalIdQueryHookResult = ReturnType<typeof useGetOffchainVotesByProposalIdQuery>;
+export type GetOffchainVotesByProposalIdLazyQueryHookResult = ReturnType<typeof useGetOffchainVotesByProposalIdLazyQuery>;
+export type GetOffchainVotesByProposalIdSuspenseQueryHookResult = ReturnType<typeof useGetOffchainVotesByProposalIdSuspenseQuery>;
+export type GetOffchainVotesByProposalIdQueryResult = Apollo.QueryResult<GetOffchainVotesByProposalIdQuery, GetOffchainVotesByProposalIdQueryVariables>;
 export const GetProposalsFromDaoDocument = gql`
     query GetProposalsFromDao($skip: NonNegativeInt, $limit: PositiveInt = 10, $orderDirection: queryInput_proposals_orderDirection = desc, $status: JSON, $fromDate: Float) {
   proposals(

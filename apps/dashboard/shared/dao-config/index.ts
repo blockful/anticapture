@@ -10,9 +10,11 @@ import { SCR } from "@/shared/dao-config/scr";
 import { SHU } from "@/shared/dao-config/shu";
 import { UNI } from "@/shared/dao-config/uni";
 import { AAVE } from "@/shared/dao-config/aave";
+import { GNO } from "@/shared/dao-config/gno";
 
 export default {
   AAVE,
+  GNO,
   UNI,
   ENS,
   FLUID,
