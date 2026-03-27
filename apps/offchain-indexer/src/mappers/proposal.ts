@@ -41,6 +41,24 @@ export const rawProposalSchema = z.object({
     .array(z.string())
     .nullish()
     .transform((val) => val ?? []),
+  network: z
+    .string()
+    .nullish()
+    .transform((val) => val ?? ""),
+  snapshot: z
+    .number()
+    .nullish()
+    .transform((val) => val ?? null),
+  strategies: z
+    .array(
+      z.object({
+        name: z.string(),
+        network: z.string(),
+        params: z.record(z.unknown()),
+      }),
+    )
+    .nullish()
+    .transform((val) => val ?? []),
 });
 
 export const offchainProposalSchema = (spaceId: string) =>
