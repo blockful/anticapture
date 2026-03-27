@@ -17,6 +17,8 @@ export const offchainProposals = snapshotSchema.table("proposals", (d) => ({
   updated: d.integer().notNull(),
   link: d.text().notNull().default(""),
   flagged: d.boolean().notNull().default(false),
+  scores: d.real().array().notNull().default([]),
+  choices: d.text().array().notNull().default([]),
 }));
 
 export const offchainVotes = snapshotSchema.table(
