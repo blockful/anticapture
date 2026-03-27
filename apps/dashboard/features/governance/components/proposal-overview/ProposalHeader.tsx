@@ -134,7 +134,7 @@ export const ProposalHeader = ({
 
               <ProposalHeaderAction
                 address={address}
-                supportValue={Number(supportValue)}
+                supportValue={supportValue ?? undefined}
                 proposalStatus={proposalStatus}
                 setIsVotingModalOpen={setIsVotingModalOpen}
               />
