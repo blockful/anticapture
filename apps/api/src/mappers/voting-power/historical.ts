@@ -3,7 +3,12 @@ import { getAddress, isAddress } from "viem";
 
 import { delegation, votingPowerHistory } from "@/database";
 
-import { OrderDirectionSchema } from "../shared";
+import {
+  OrderDirectionSchema,
+  paginationLimitQueryParam,
+  paginationSkipQueryParam,
+  unixTimestampQueryParam,
+} from "../shared";
 import { DBTransfer } from "../transfers";
 
 type DBDelegation = typeof delegation.$inferSelect;
@@ -27,31 +32,35 @@ export const HistoricalVotingPowerRequestParamsSchema = z
 
 export const HistoricalVotingPowerRequestQuerySchema = z
   .object({
-    skip: z.coerce
-      .number()
-      .int()
-      .min(0, "Skip must be a non-negative integer")
+    skip: paginationSkipQueryParam(
+      "Number of historical voting power rows to skip.",
+    ),
+    limit: paginationLimitQueryParam(
+      "Maximum number of historical voting power rows to return.",
+      10,
+      1000,
+    ),
+    orderBy: z
+      .enum(["timestamp", "delta"])
       .optional()
-      .default(0),
-    limit: z.coerce
-      .number()
-      .int()
-      .min(1, "Limit must be a positive integer")
-      .max(1000, "Limit cannot exceed 1000")
-      .optional()
-      .default(10),
-    orderBy: z.enum(["timestamp", "delta"]).optional().default("timestamp"),
+      .default("timestamp")
+      .openapi({
+        description: "Field used to sort historical voting power rows.",
+        example: "timestamp",
+      }),
     orderDirection: OrderDirectionSchema.optional().default("desc"),
-    fromDate: z
-      .string()
-      .optional()
-      .transform((val) => Number(val)),
-    toDate: z
-      .string()
-      .optional()
-      .transform((val) => Number(val)),
-    fromValue: z.string().optional(),
-    toValue: z.string().optional(),
+    fromDate: unixTimestampQueryParam(
+      "Inclusive lower bound for voting power timestamps, in Unix seconds.",
+    ),
+    toDate: unixTimestampQueryParam(
+      "Inclusive upper bound for voting power timestamps, in Unix seconds.",
+    ),
+    fromValue: z.string().optional().openapi({
+      description: "Minimum voting power delta encoded as a decimal string.",
+    }),
+    toValue: z.string().optional().openapi({
+      description: "Maximum voting power delta encoded as a decimal string.",
+    }),
   })
   .openapi("HistoricalVotingPowerRequestQuery", {
     description:
@@ -87,13 +96,22 @@ export const HistoricalVotingPowerTransferSchema = z
 
 export const HistoricalVotingPowerResponseSchema = z
   .object({
-    transactionHash: z.string(),
-    daoId: z.string(),
-    accountId: z.string(),
-    votingPower: z.string(),
-    delta: z.string(),
-    timestamp: z.string(),
-    logIndex: z.number().int(),
+    transactionHash: z.string().openapi({ description: "Transaction hash." }),
+    daoId: z.string().openapi({ description: "DAO identifier." }),
+    accountId: z.string().openapi({ description: "Account address." }),
+    votingPower: z.string().openapi({
+      description: "Voting power after the event, encoded as a decimal string.",
+    }),
+    delta: z.string().openapi({
+      description: "Voting power change introduced by the event.",
+    }),
+    timestamp: z.string().openapi({
+      description: "Event timestamp in Unix seconds as a string.",
+      example: "1704067200",
+    }),
+    logIndex: z.number().int().openapi({
+      description: "Log index within the transaction receipt.",
+    }),
     delegation: HistoricalVotingPowerDelegationSchema.nullable(),
     transfer: HistoricalVotingPowerTransferSchema.nullable(),
   })
@@ -105,7 +123,9 @@ export const HistoricalVotingPowerResponseSchema = z
 export const HistoricalVotingPowersResponseSchema = z
   .object({
     items: z.array(HistoricalVotingPowerResponseSchema),
-    totalCount: z.number().int(),
+    totalCount: z.number().int().openapi({
+      description: "Total number of matching historical voting power rows.",
+    }),
   })
   .openapi("HistoricalVotingPowersResponse", {
     description: "Paginated historical voting power records.",
@@ -164,6 +184,10 @@ export const HistoricalVotingPowerGlobalQuerySchema =
       .string()
       .refine((addr) => isAddress(addr, { strict: false }))
       .transform((addr) => getAddress(addr))
+      .openapi({
+        description:
+          "Optional account address used to scope the historical voting power results.",
+      })
       .optional(),
   }).openapi("HistoricalVotingPowerGlobalQuery", {
     description:

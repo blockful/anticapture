@@ -4,6 +4,8 @@ import { offchainProposals } from "@/database";
 import {
   normalizeQueryArray,
   OrderDirectionSchema,
+  paginationLimitQueryParam,
+  paginationSkipQueryParam,
   unixTimestampQueryParam,
 } from "../shared";
 
@@ -15,20 +17,38 @@ const StringArrayQuerySchema = z
 
 export const OffchainProposalResponseSchema = z
   .object({
-    id: z.string(),
-    spaceId: z.string(),
-    author: z.string(),
-    title: z.string(),
-    body: z.string(),
-    discussion: z.string(),
-    type: z.string(),
-    start: z.number().int(),
-    end: z.number().int(),
-    state: z.string(),
-    created: z.number().int(),
-    updated: z.number().int(),
-    link: z.string(),
-    flagged: z.boolean(),
+    id: z.string().openapi({ description: "Snapshot proposal identifier." }),
+    spaceId: z.string().openapi({ description: "Snapshot space identifier." }),
+    author: z
+      .string()
+      .openapi({ description: "Address or ENS of the author." }),
+    title: z.string().openapi({ description: "Proposal title." }),
+    body: z.string().openapi({ description: "Proposal body." }),
+    discussion: z
+      .string()
+      .openapi({ description: "Discussion URL or thread reference." }),
+    type: z.string().openapi({ description: "Snapshot proposal type." }),
+    start: z.number().int().openapi({
+      description: "Voting start timestamp in Unix seconds.",
+    }),
+    end: z.number().int().openapi({
+      description: "Voting end timestamp in Unix seconds.",
+    }),
+    state: z
+      .string()
+      .openapi({ description: "Current Snapshot proposal state." }),
+    created: z.number().int().openapi({
+      description: "Creation timestamp in Unix seconds.",
+    }),
+    updated: z.number().int().openapi({
+      description: "Last update timestamp in Unix seconds.",
+    }),
+    link: z
+      .string()
+      .openapi({ description: "Canonical Snapshot proposal URL." }),
+    flagged: z.boolean().openapi({
+      description: "Whether the proposal was flagged by Snapshot.",
+    }),
   })
   .openapi("OffchainProposal");
 
@@ -75,27 +95,8 @@ export const OffchainProposalRequestSchema = z
 
 export const OffchainProposalsRequestSchema = z
   .object({
-    skip: z.coerce
-      .number()
-      .int()
-      .min(0, "Skip must be a non-negative integer")
-      .optional()
-      .default(0)
-      .openapi({
-        description: "Number of proposals to skip before collecting results.",
-        example: 0,
-      }),
-    limit: z.coerce
-      .number()
-      .int()
-      .min(1, "Limit must be a positive integer")
-      .max(1000, "Limit cannot exceed 1000")
-      .optional()
-      .default(10)
-      .openapi({
-        description: "Maximum number of proposals to return.",
-        example: 10,
-      }),
+    skip: paginationSkipQueryParam(),
+    limit: paginationLimitQueryParam(),
     orderDirection: OrderDirectionSchema.default("desc").optional(),
     status: z
       .preprocess(normalizeQueryArray, StringArrayQuerySchema.optional())

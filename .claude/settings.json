@@ -25,5 +25,22 @@
       "Bash(git reset --hard *)",
       "Bash(git checkout -- *)"
     ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "PKG=$(echo \"$CLAUDE_FILE_PATH\" | grep -oE '(apps|packages)/[^/]+' | head -1) && [ -n \"$PKG\" ] && pnpm --filter \"./$PKG\" lint:fix 2>&1 || true"
+          },
+          {
+            "type": "command",
+            "command": "PKG=$(echo \"$CLAUDE_FILE_PATH\" | grep -oE '(apps|packages)/[^/]+' | head -1) && [ -n \"$PKG\" ] && pnpm --filter \"./$PKG\" typecheck 2>&1 || true"
+          }
+        ]
+      }
+    ]
   }
 }

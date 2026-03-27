@@ -1,26 +1,16 @@
 import { z } from "@hono/zod-openapi";
 
 import { token } from "@/database";
-import { DaysWindow } from "../shared";
+import {
+  DaysWindow,
+  paginationLimitQueryParam,
+  paginationSkipQueryParam,
+} from "../shared";
 
 export const TokenHistoricalPriceRequest = z
   .object({
-    skip: z.coerce
-      .number()
-      .int()
-      .min(0, "Skip must be a non-negative integer")
-      .optional()
-      .default(0)
-      .openapi({
-        description: "Number of rows to skip before returning results.",
-        example: 0,
-        type: "integer",
-      }),
-    limit: z.coerce.number().int().max(365).optional().default(365).openapi({
-      description: "Maximum number of historical points to return.",
-      example: 365,
-      type: "integer",
-    }),
+    skip: paginationSkipQueryParam(),
+    limit: paginationLimitQueryParam(),
   })
   .openapi("TokenHistoricalPriceRequest", {
     description: "Pagination query for historical token market data.",

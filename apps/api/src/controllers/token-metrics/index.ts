@@ -5,6 +5,7 @@ import {
   TokenMetricsResponseSchema,
   toTokenMetricsApi,
 } from "@/mappers/token-metrics";
+import {} from "@/mappers";
 
 import { TokenMetricsService } from "@/services/token-metrics";
 

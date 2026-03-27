@@ -2,7 +2,13 @@ import { z } from "@hono/zod-openapi";
 import { getAddress, isAddress } from "viem";
 
 import { VoteFilter } from "@/repositories/";
-import { OrderDirectionSchema, VoteSupportSchema } from "../shared";
+import {
+  OrderDirectionSchema,
+  paginationLimitQueryParam,
+  paginationSkipQueryParam,
+  unixTimestampQueryParam,
+  VoteSupportSchema,
+} from "../shared";
 
 export const ProposalActivityRequestSchema = z
   .object({
@@ -18,29 +24,15 @@ export const ProposalActivityRequestSchema = z
           "Delegate address whose proposal activity is being queried.",
         example: "0x1111111111111111111111111111111111111111",
       }),
-    fromDate: z
-      .string()
-      .transform((val) => Number(val))
-      .optional()
-      .openapi({
-        description: "Lower bound for proposal timestamps, in Unix seconds.",
-        example: "1704067200",
-      }),
-    skip: z.coerce.number().int().min(0).optional().default(0).openapi({
-      description: "Number of proposal activity records to skip.",
-      example: 0,
-    }),
-    limit: z.coerce
-      .number()
-      .int()
-      .min(1)
-      .max(100)
-      .optional()
-      .default(10)
-      .openapi({
-        description: "Maximum number of proposal activity records to return.",
-        example: 10,
-      }),
+    fromDate: unixTimestampQueryParam(
+      "Lower bound for proposal timestamps, in Unix seconds.",
+    ),
+    skip: paginationSkipQueryParam(
+      "Number of proposal activity records to skip.",
+    ),
+    limit: paginationLimitQueryParam(
+      "Maximum number of proposal activity records to return.",
+    ),
     orderBy: z
       .enum(["timestamp", "votingPower", "voteTiming"])
       .optional()
@@ -62,27 +54,41 @@ export const ProposalActivityRequestSchema = z
 
 export const ProposalActivityProposalSchema = z
   .object({
-    id: z.string(),
-    daoId: z.string(),
-    proposerAccountId: z.string(),
-    title: z.string(),
-    description: z.string(),
-    startBlock: z.number(),
-    endBlock: z.number(),
-    timestamp: z.coerce.string(),
-    status: z.string(),
+    id: z.string().openapi({ description: "Onchain proposal identifier." }),
+    daoId: z.string().openapi({ description: "DAO identifier." }),
+    proposerAccountId: z
+      .string()
+      .openapi({ description: "Address that created the proposal." }),
+    title: z.string().openapi({ description: "Proposal title." }),
+    description: z.string().openapi({ description: "Proposal body." }),
+    startBlock: z.number().openapi({ description: "Start block number." }),
+    endBlock: z.number().openapi({ description: "End block number." }),
+    timestamp: z.coerce.string().openapi({
+      description: "Proposal creation timestamp in Unix seconds as a string.",
+      example: "1704067200",
+    }),
+    status: z.string().openapi({ description: "Current proposal status." }),
     forVotes: z
       .bigint()
       .transform((val) => val.toString())
-      .openapi({ type: "string" }),
+      .openapi({
+        type: "string",
+        description: "Votes cast in favor, encoded as a decimal string.",
+      }),
     againstVotes: z
       .bigint()
       .transform((val) => val.toString())
-      .openapi({ type: "string" }),
+      .openapi({
+        type: "string",
+        description: "Votes cast against, encoded as a decimal string.",
+      }),
     abstainVotes: z
       .bigint()
       .transform((val) => val.toString())
-      .openapi({ type: "string" }),
+      .openapi({
+        type: "string",
+        description: "Abstain votes, encoded as a decimal string.",
+      }),
   })
   .openapi("ProposalActivityProposal", {
     description:
@@ -91,13 +97,23 @@ export const ProposalActivityProposalSchema = z
 
 export const ProposalActivityUserVoteSchema = z
   .object({
-    id: z.string(),
-    voterAccountId: z.string(),
-    proposalId: z.string(),
+    id: z.string().openapi({ description: "Vote identifier." }),
+    voterAccountId: z
+      .string()
+      .openapi({ description: "Address that cast the vote." }),
+    proposalId: z.string().openapi({ description: "Related proposal ID." }),
     support: VoteSupportSchema,
-    votingPower: z.coerce.string().openapi({ type: "string" }),
-    reason: z.string().nullable(),
-    timestamp: z.coerce.string(),
+    votingPower: z.coerce.string().openapi({
+      type: "string",
+      description: "Voting power used by the delegate, encoded as a string.",
+    }),
+    reason: z.string().nullable().openapi({
+      description: "Optional vote rationale.",
+    }),
+    timestamp: z.coerce.string().openapi({
+      description: "Vote timestamp in Unix seconds as a string.",
+      example: "1704067200",
+    }),
   })
   .openapi("ProposalActivityUserVote", {
     description: "Vote cast by the requested delegate for a given proposal.",
@@ -115,13 +131,28 @@ export const ProposalActivityItemSchema = z
 
 export const ProposalActivityResponseSchema = z
   .object({
-    address: z.string(),
-    totalProposals: z.number().int(),
-    votedProposals: z.number().int(),
-    neverVoted: z.boolean(),
-    winRate: z.number(),
-    yesRate: z.number(),
-    avgTimeBeforeEnd: z.number(),
+    address: z.string().openapi({ description: "Delegate address." }),
+    totalProposals: z
+      .number()
+      .int()
+      .openapi({ description: "Total proposals reviewed in the dataset." }),
+    votedProposals: z
+      .number()
+      .int()
+      .openapi({ description: "Number of proposals the delegate voted on." }),
+    neverVoted: z
+      .boolean()
+      .openapi({ description: "Whether the delegate never cast a vote." }),
+    winRate: z.number().openapi({
+      description: "Share of proposals where the delegate sided with outcome.",
+    }),
+    yesRate: z.number().openapi({
+      description: "Share of delegate votes cast in support.",
+    }),
+    avgTimeBeforeEnd: z.number().openapi({
+      description:
+        "Average seconds between the delegate vote and proposal end time.",
+    }),
     proposals: z.array(ProposalActivityItemSchema),
   })
   .openapi("ProposalActivityResponse", {

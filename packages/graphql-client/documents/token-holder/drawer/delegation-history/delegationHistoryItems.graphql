@@ -1,8 +1,8 @@
 query GetDelegationHistoryItems(
   $delegator: String!
   $delegate: [String]
-  $skip: NonNegativeInt
-  $limit: PositiveInt = 10
+  $skip: Int
+  $limit: Int = 10
   $fromValue: String
   $toValue: String
   $orderDirection: OrderDirection = desc

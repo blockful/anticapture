@@ -5,6 +5,7 @@ import {
   HistoricalDelegationsRequestQuerySchema,
   DelegationsResponseSchema,
 } from "@/mappers/delegations";
+import {} from "@/mappers";
 
 import { HistoricalDelegationsService } from "@/services/delegations";
 

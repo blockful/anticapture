@@ -1,4 +1,4 @@
-query GetProposals($fromDate: Int, $limit: PositiveInt = 365) {
+query GetProposals($fromDate: Int, $limit: Int = 365) {
   proposals(limit: $limit, orderDirection: asc, fromDate: $fromDate) {
     items {
       id

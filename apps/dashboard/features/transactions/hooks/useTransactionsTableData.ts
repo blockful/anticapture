@@ -73,7 +73,7 @@ export const useTransactionsTableData = ({
     useTransactionsQuery({
       variables: {
         limit,
-        offset: 0,
+        skip: 0,
         from: filters?.from ?? null,
         to: filters?.to ?? null,
         minAmount: filters?.min

@@ -42,7 +42,7 @@ export function votingPowerVariations(
         "Get voting power changes within a time frame for the given addresses",
       description:
         "Returns a mapping of the voting power changes within a time frame for the given addresses",
-      tags: ["voting-powers"],
+      tags: ["voting-power"],
       request: {
         query: VotingPowerVariationsRequestQuerySchema,
       },
@@ -86,7 +86,7 @@ export function votingPowerVariations(
         "Get top changes in voting power for a given period for a single account",
       description:
         "Returns a the changes to voting power by period and accountId",
-      tags: ["voting-powers"],
+      tags: ["voting-power"],
       request: {
         params: VotingPowerVariationsByAccountIdRequestParamsSchema,
         query: VotingPowerVariationsByAccountIdRequestQuerySchema,

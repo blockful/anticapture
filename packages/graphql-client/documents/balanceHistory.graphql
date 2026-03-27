@@ -1,6 +1,6 @@
 query BalanceHistory(
   $address: String!
-  $offset: Int = 0
+  $skip: Int = 0
   $limit: Int = 10
   $orderBy: queryInput_transfers_orderBy
   $orderDirection: OrderDirection
@@ -16,7 +16,7 @@ query BalanceHistory(
     orderBy: $orderBy
     orderDirection: $orderDirection
     limit: $limit
-    offset: $offset
+    skip: $skip
     from: $from
     to: $to
     fromValue: $fromValue

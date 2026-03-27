@@ -5,6 +5,7 @@ import {
   DelegatorsRequestParamsSchema,
   DelegatorsRequestQuerySchema,
 } from "@/mappers/delegations/delegators";
+import {} from "@/mappers";
 import { DelegatorsService } from "@/services/delegations/delegators";
 
 export function delegators(app: Hono, service: DelegatorsService) {

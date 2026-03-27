@@ -70,7 +70,7 @@ export function useBalanceHistory({
       toValue: filterVariables?.toValue ?? null,
       from: customFromFilter,
       to: customToFilter,
-      offset: 0,
+      skip: 0,
       fromDate: fromTimestamp ?? null,
       toDate: toTimestamp ?? null,
       limit,

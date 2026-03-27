@@ -4,6 +4,7 @@ import {
   DelegationsRequestParamsSchema,
   DelegationsResponseSchema,
 } from "@/mappers/delegations";
+import {} from "@/mappers";
 
 import { DelegationsService } from "@/services/delegations/current";
 

@@ -1,6 +1,7 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
+    "db:prune": { "cache": false },
     "@anticapture/observability#build": {
       "outputs": ["packages/observability/dist/**"]
     },
@@ -60,7 +61,8 @@
       "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"]
     },
     "codegen": {
-      "outputs": ["generated/**"]
+      "inputs": ["packages/graphql-client/documents/**/*"],
+      "outputs": ["packages/graphql-client/generated/**"]
     },
     "db:generate": {
       "inputs": ["src/**/*.ts"],

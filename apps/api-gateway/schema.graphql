@@ -28,13 +28,35 @@ type Query {
   """
   Get historical delegations for an account, with optional filtering and sorting
   """
-  historicalDelegations(address: String!, delegateAddressIn: [String], skip: NonNegativeInt, limit: PositiveInt = 10, fromValue: String, toValue: String, orderDirection: OrderDirection = desc): DelegationsResponse
+  historicalDelegations(
+    address: String!
+    delegateAddressIn: [String]
+
+    """Number of records to skip before collecting results."""
+    skip: Int
+
+    """Maximum number of records to return."""
+    limit: Int
+    fromValue: String
+    toValue: String
+    orderDirection: OrderDirection = desc
+  ): DelegationsResponse
 
   """Get current delegations for an account"""
   delegations(address: String!): DelegationsResponse
 
   """Get current delegators of an account with voting power"""
-  delegators(address: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_delegators_orderBy = amount, orderDirection: OrderDirection = desc): DelegatorsResponse
+  delegators(
+    address: String!
+
+    """Number of records to skip before collecting results."""
+    skip: Int
+
+    """Maximum number of records to return."""
+    limit: Int
+    orderBy: queryInput_delegators_orderBy = amount
+    orderDirection: OrderDirection = desc
+  ): DelegatorsResponse
 
   """
   Get historical Liquid Treasury (treasury without DAO tokens) from external providers (DefiLlama/Dune)
@@ -51,10 +73,10 @@ type Query {
 
   """Get historical market data for a specific token"""
   historicalTokenData(
-    """Number of rows to skip before returning results."""
+    """Number of records to skip before collecting results."""
     skip: Int
 
-    """Maximum number of historical points to return."""
+    """Maximum number of records to return."""
     limit: Int
   ): [TokenHistoricalPriceItem]
 
@@ -62,7 +84,23 @@ type Query {
   token(currency: queryInput_token_currency = usd): token_response
 
   """Get feed events"""
-  feedEvents(skip: Int, limit: Int = 10, orderBy: queryInput_feedEvents_orderBy = timestamp, orderDirection: OrderDirection = desc, relevance: FeedRelevance!, type: FeedEventType!, fromDate: Int, toDate: Int): FeedResponse
+  feedEvents(
+    """Number of feed events to skip before collecting results."""
+    skip: Int
+
+    """Maximum number of feed events to return."""
+    limit: Int
+    orderBy: queryInput_feedEvents_orderBy = timestamp
+    orderDirection: OrderDirection = desc
+    relevance: FeedRelevance!
+    type: FeedEventType!
+
+    """Earliest event timestamp, in Unix seconds."""
+    fromDate: Int
+
+    """Latest event timestamp, in Unix seconds."""
+    toDate: Int
+  ): FeedResponse
 
   """Get event relevance threshold"""
   getEventRelevanceThreshold(type: FeedEventType!, relevance: FeedRelevance!): EventRelevanceThresholdResponse
@@ -108,13 +146,13 @@ type Query {
     address: String!
 
     """Lower bound for proposal timestamps, in Unix seconds."""
-    fromDate: String
+    fromDate: Int
 
     """Number of proposal activity records to skip."""
-    skip: NonNegativeInt
+    skip: Int
 
     """Maximum number of proposal activity records to return."""
-    limit: PositiveInt = 10
+    limit: Int
     orderBy: queryInput_proposalsActivity_orderBy = timestamp
     orderDirection: OrderDirection = desc
     userVoteFilter: queryInput_proposalsActivity_userVoteFilter
@@ -122,11 +160,11 @@ type Query {
 
   """Returns a list of proposal"""
   proposals(
-    """Number of proposals to skip before collecting results."""
-    skip: NonNegativeInt
+    """Number of records to skip before collecting results."""
+    skip: Int
 
-    """Maximum number of proposals to return."""
-    limit: PositiveInt = 10
+    """Maximum number of records to return."""
+    limit: Int
     orderDirection: OrderDirection = desc
 
     """
@@ -153,16 +191,49 @@ type Query {
   """
   Returns historical balance deltas for one account, enriched with the transfer that caused each change.
   """
-  historicalBalances(address: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_historicalBalances_orderBy = timestamp, orderDirection: OrderDirection = desc, fromDate: String, toDate: String, fromValue: String, toValue: String): HistoricalBalancesResponse
+  historicalBalances(
+    address: String!
+
+    """Number of historical balance rows to skip."""
+    skip: Int
+
+    """Maximum number of historical balance rows to return."""
+    limit: Int
+    orderBy: queryInput_historicalBalances_orderBy = timestamp
+    orderDirection: OrderDirection = desc
+
+    """
+    Inclusive lower bound for historical balance timestamps, in Unix seconds.
+    """
+    fromDate: Int
+
+    """
+    Inclusive upper bound for historical balance timestamps, in Unix seconds.
+    """
+    toDate: Int
+
+    """Minimum balance delta encoded as a decimal string."""
+    fromValue: String
+
+    """Maximum balance delta encoded as a decimal string."""
+    toValue: String
+  ): HistoricalBalancesResponse
 
   """
   Get transactions with their associated transfers and delegations, with optional filtering and sorting
   """
   transactions(
-    limit: PositiveInt = 50
-    offset: NonNegativeInt
+    """Maximum number of records to return."""
+    limit: Int
+
+    """Number of records to skip before collecting results."""
+    skip: Int
     orderDirection: OrderDirection = desc
+
+    """Inclusive lower bound for transaction timestamps, in Unix seconds."""
     fromDate: Int
+
+    """Inclusive upper bound for transaction timestamps, in Unix seconds."""
     toDate: Int
     from: String
     to: String
@@ -183,50 +254,182 @@ type Query {
 
   """Get delegation percentage day buckets with forward-fill"""
   delegationPercentageByDay(
-    """Inclusive lower bound cursor as a Unix timestamp string."""
-    startDate: String
+    """Inclusive lower bound cursor in Unix seconds."""
+    startDate: Int
 
-    """Inclusive upper bound cursor as a Unix timestamp string."""
-    endDate: String
+    """Inclusive upper bound cursor in Unix seconds."""
+    endDate: Int
     orderDirection: OrderDirection = desc
 
-    """Maximum number of buckets to return."""
+    """Maximum number of records to return."""
     limit: Int
 
-    """Return items after this cursor (exclusive)."""
-    after: String
+    """Return items after this cursor, exclusive, in Unix seconds."""
+    after: Int
 
-    """Return items before this cursor (exclusive)."""
-    before: String
+    """Return items before this cursor, exclusive, in Unix seconds."""
+    before: Int
   ): DelegationPercentageResponse
 
   """Returns a list of voting power changes for a specific account"""
-  historicalVotingPowerByAccountId(address: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_historicalVotingPowerByAccountId_orderBy = timestamp, orderDirection: OrderDirection = desc, fromDate: String, toDate: String, fromValue: String, toValue: String): HistoricalVotingPowersResponse
+  historicalVotingPowerByAccountId(
+    address: String!
+
+    """Number of historical voting power rows to skip."""
+    skip: Int
+
+    """Maximum number of historical voting power rows to return."""
+    limit: Int
+    orderBy: queryInput_historicalVotingPowerByAccountId_orderBy = timestamp
+    orderDirection: OrderDirection = desc
+
+    """Inclusive lower bound for voting power timestamps, in Unix seconds."""
+    fromDate: Int
+
+    """Inclusive upper bound for voting power timestamps, in Unix seconds."""
+    toDate: Int
+
+    """Minimum voting power delta encoded as a decimal string."""
+    fromValue: String
+
+    """Maximum voting power delta encoded as a decimal string."""
+    toValue: String
+  ): HistoricalVotingPowersResponse
 
   """Returns a list of voting power changes."""
-  historicalVotingPower(skip: NonNegativeInt, limit: PositiveInt = 10, orderBy: queryInput_historicalVotingPower_orderBy = timestamp, orderDirection: OrderDirection = desc, fromDate: String, toDate: String, fromValue: String, toValue: String, address: String): HistoricalVotingPowersResponse
+  historicalVotingPower(
+    """Number of historical voting power rows to skip."""
+    skip: Int
+
+    """Maximum number of historical voting power rows to return."""
+    limit: Int
+    orderBy: queryInput_historicalVotingPower_orderBy = timestamp
+    orderDirection: OrderDirection = desc
+
+    """Inclusive lower bound for voting power timestamps, in Unix seconds."""
+    fromDate: Int
+
+    """Inclusive upper bound for voting power timestamps, in Unix seconds."""
+    toDate: Int
+
+    """Minimum voting power delta encoded as a decimal string."""
+    fromValue: String
+
+    """Maximum voting power delta encoded as a decimal string."""
+    toValue: String
+
+    """
+    Optional account address used to scope the historical voting power results.
+    """
+    address: String
+  ): HistoricalVotingPowersResponse
 
   """
   Returns a mapping of the voting power changes within a time frame for the given addresses
   """
-  votingPowerVariations(limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: OrderDirection = desc, addresses: [String], fromDate: String, toDate: String): VotingPowerVariationsResponse
+  votingPowerVariations(
+    """Maximum number of voting power variation rows to return."""
+    limit: Int
+
+    """Number of voting power variation rows to skip."""
+    skip: Int
+    orderDirection: OrderDirection = desc
+
+    """
+    Filter by one or more account addresses. Pass repeated query params or a comma-delimited list.
+    """
+    addresses: [String]
+
+    """Inclusive lower bound for the comparison window, in Unix seconds."""
+    fromDate: Int
+
+    """Inclusive upper bound for the comparison window, in Unix seconds."""
+    toDate: Int
+  ): VotingPowerVariationsResponse
 
   """Returns a the changes to voting power by period and accountId"""
-  votingPowerVariationsByAccountId(address: String!, fromDate: String, toDate: String): VotingPowerVariationsByAccountIdResponse
+  votingPowerVariationsByAccountId(
+    address: String!
+
+    """Inclusive lower bound for the comparison window, in Unix seconds."""
+    fromDate: Int
+
+    """Inclusive upper bound for the comparison window, in Unix seconds."""
+    toDate: Int
+  ): VotingPowerVariationsByAccountIdResponse
 
   """Returns sorted and paginated account voting power records"""
-  votingPowers(limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: OrderDirection = desc, orderBy: queryInput_votingPowers_orderBy = votingPower, addresses: [String], fromValue: String, toValue: String, fromDate: String, toDate: String): VotingPowersResponse
+  votingPowers(
+    """Maximum number of current voting power rows to return."""
+    limit: Int
+
+    """Number of current voting power rows to skip."""
+    skip: Int
+    orderDirection: OrderDirection = desc
+    orderBy: queryInput_votingPowers_orderBy = votingPower
+
+    """
+    Filter by one or more account addresses. Pass repeated query params or a comma-delimited list.
+    """
+    addresses: [String]
+
+    """Minimum voting power encoded as a decimal string."""
+    fromValue: String
+
+    """Maximum voting power encoded as a decimal string."""
+    toValue: String
+
+    """Inclusive lower bound for variation enrichment, in Unix seconds."""
+    fromDate: Int
+
+    """Inclusive upper bound for variation enrichment, in Unix seconds."""
+    toDate: Int
+  ): VotingPowersResponse
 
   """Returns voting power information for a specific address (account)"""
-  votingPowerByAccountId(accountId: String!, fromDate: Float, toDate: Float): VotingPower
+  votingPowerByAccountId(
+    accountId: String!
+
+    """Inclusive lower bound for variation enrichment, in Unix seconds."""
+    fromDate: Int
+
+    """Inclusive upper bound for variation enrichment, in Unix seconds."""
+    toDate: Int
+  ): VotingPower
 
   """
   Returns a mapping of the biggest variations to account balances associated by account address
   """
-  accountBalanceVariations(fromDate: String, toDate: String, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: OrderDirection = desc, addresses: [String]): AccountBalanceVariationsResponse
+  accountBalanceVariations(
+    """Inclusive lower bound for the comparison window, in Unix seconds."""
+    fromDate: Int
+
+    """Inclusive upper bound for the comparison window, in Unix seconds."""
+    toDate: Int
+
+    """Maximum number of account balance variations to return."""
+    limit: Int
+
+    """Number of account balance variations to skip."""
+    skip: Int
+    orderDirection: OrderDirection = desc
+
+    """
+    Filter by one or more account addresses. Pass repeated query params or a comma-delimited list.
+    """
+    addresses: [String]
+  ): AccountBalanceVariationsResponse
 
   """Returns a the changes to balance by period and accountId"""
-  accountBalanceVariationsByAccountId(address: String!, fromDate: String, toDate: String): AccountBalanceVariationsByAccountIdResponse
+  accountBalanceVariationsByAccountId(
+    address: String!
+
+    """Inclusive lower bound for the comparison window, in Unix seconds."""
+    fromDate: Int
+
+    """Inclusive upper bound for the comparison window, in Unix seconds."""
+    toDate: Int
+  ): AccountBalanceVariationsByAccountIdResponse
 
   """Returns sorted and paginated account balance records"""
   accountBalances(
@@ -235,16 +438,28 @@ type Query {
 
     """Inclusive upper bound for balance history filters, in Unix seconds."""
     toDate: Int
-    limit: PositiveInt = 20
-    skip: NonNegativeInt
+
+    """Maximum number of records to return."""
+    limit: Int
+
+    """Number of records to skip before collecting results."""
+    skip: Int
     orderDirection: OrderDirection = desc
     orderBy: queryInput_accountBalances_orderBy = balance
 
     """Whether DAO-owned addresses should be excluded from the results."""
     excludeDaoAddresses: Boolean
     addresses: [String]
+
+    """
+    Filter by one or more delegate addresses. Pass repeated query params or a comma-delimited list.
+    """
     delegates: [String]
+
+    """Minimum balance encoded as a decimal string."""
     fromValue: String
+
+    """Maximum balance encoded as a decimal string."""
     toValue: String
   ): AccountBalancesWithVariationResponse
 
@@ -268,21 +483,58 @@ type Query {
   Returns a mapping of the largest interactions between accounts. 
   Positive amounts signify net token transfers FROM <address>, whilst negative amounts refer to net transfers TO <address>
   """
-  accountInteractions(address: String!, fromDate: String, toDate: String, limit: PositiveInt = 20, skip: NonNegativeInt, orderDirection: OrderDirection = desc, minAmount: String, maxAmount: String, orderBy: queryInput_accountInteractions_orderBy = count, filterAddress: String): AccountInteractionsResponse
+  accountInteractions(
+    address: String!
+
+    """Inclusive lower bound for transfer timestamps, in Unix seconds."""
+    fromDate: Int
+
+    """Inclusive upper bound for transfer timestamps, in Unix seconds."""
+    toDate: Int
+
+    """Maximum number of interaction rows to return."""
+    limit: Int
+
+    """Number of interaction rows to skip."""
+    skip: Int
+    orderDirection: OrderDirection = desc
+
+    """Minimum net amount transferred, encoded as a decimal string."""
+    minAmount: String
+
+    """Maximum net amount transferred, encoded as a decimal string."""
+    maxAmount: String
+    orderBy: queryInput_accountInteractions_orderBy = count
+
+    """Optional counterparty address used to narrow the results."""
+    filterAddress: String
+  ): AccountInteractionsResponse
 
   """Get transfers of a given address"""
   transfers(
     """Wallet address whose transfers are being queried."""
     address: String!
-    limit: Int = 10
-    offset: Int
+
+    """Maximum number of records to return."""
+    limit: Int
+
+    """Number of records to skip before collecting results."""
+    skip: Int
     orderBy: queryInput_transfers_orderBy = timestamp
     orderDirection: OrderDirection = desc
     from: String
     to: String
+
+    """Earliest transfer timestamp, in Unix seconds."""
     fromDate: Int
+
+    """Latest transfer timestamp, in Unix seconds."""
     toDate: Int
+
+    """Minimum transfer amount encoded as a decimal string."""
     fromValue: String
+
+    """Maximum transfer amount encoded as a decimal string."""
     toValue: String
   ): TransfersResponse
 
@@ -291,11 +543,11 @@ type Query {
     """Onchain proposal identifier."""
     id: String!
 
-    """Number of votes to skip before collecting results."""
-    skip: NonNegativeInt
+    """Number of records to skip before collecting results."""
+    skip: Int
 
-    """Maximum number of votes to return."""
-    limit: PositiveInt = 10
+    """Maximum number of records to return."""
+    limit: Int
 
     """
     Filter by one or more voter addresses. Pass repeated query params or a comma-delimited list.
@@ -316,11 +568,11 @@ type Query {
 
   """Get all votes ordered by timestamp or voting power"""
   votes(
-    """Number of votes to skip before collecting results."""
-    skip: NonNegativeInt
+    """Number of records to skip before collecting results."""
+    skip: Int
 
-    """Maximum number of votes to return."""
-    limit: PositiveInt = 10
+    """Maximum number of records to return."""
+    limit: Int
 
     """
     Filter by one or more voter addresses. Pass repeated query params or a comma-delimited list.
@@ -343,8 +595,12 @@ type Query {
   proposalNonVoters(
     """Onchain proposal identifier."""
     id: String!
-    skip: NonNegativeInt
-    limit: PositiveInt = 10
+
+    """Number of records to skip before collecting results."""
+    skip: Int
+
+    """Maximum number of records to return."""
+    limit: Int
     orderDirection: OrderDirection = desc
     addresses: [String]
   ): VotersResponse
@@ -363,20 +619,20 @@ type Query {
     endDate: Int
     orderDirection: OrderDirection = desc
 
-    """Maximum number of buckets to return."""
+    """Maximum number of records to return."""
     limit: Int
 
-    """Number of buckets to skip before returning results."""
+    """Number of records to skip before collecting results."""
     skip: Int
   ): TokenMetricsResponse
 
   """Returns a list of offchain (Snapshot) proposals"""
   offchainProposals(
-    """Number of proposals to skip before collecting results."""
-    skip: NonNegativeInt
+    """Number of records to skip before collecting results."""
+    skip: Int
 
-    """Maximum number of proposals to return."""
-    limit: PositiveInt = 10
+    """Maximum number of records to return."""
+    limit: Int
     orderDirection: OrderDirection = desc
 
     """
@@ -399,11 +655,11 @@ type Query {
 
   """Returns a list of offchain (Snapshot) votes"""
   votesOffchain(
-    """Number of votes to skip before collecting results."""
-    skip: NonNegativeInt
+    """Number of records to skip before collecting results."""
+    skip: Int
 
-    """Maximum number of votes to return."""
-    limit: PositiveInt = 10
+    """Maximum number of records to return."""
+    limit: Int
     orderBy: queryInput_votesOffchain_orderBy = timestamp
     orderDirection: OrderDirection = desc
 
@@ -426,11 +682,11 @@ type Query {
     """Snapshot proposal identifier."""
     id: String!
 
-    """Number of votes to skip before collecting results."""
-    skip: NonNegativeInt
+    """Number of records to skip before collecting results."""
+    skip: Int
 
-    """Maximum number of votes to return."""
-    limit: PositiveInt = 10
+    """Maximum number of records to return."""
+    limit: Int
     orderBy: queryInput_votesOffchainByProposalId_orderBy = timestamp
     orderDirection: OrderDirection = desc
 
@@ -619,12 +875,6 @@ type DelegationItem {
   transactionHash: String!
 }
 
-"""Integers that will have a value of 0 or more."""
-scalar NonNegativeInt
-
-"""Integers that will have a value greater than 0."""
-scalar PositiveInt
-
 """Sort direction for ordered query results."""
 enum OrderDirection {
   asc
@@ -706,6 +956,9 @@ type TokenPropertiesResponse {
 type ErrorResponse {
   """Human-readable error message"""
   error: String!
+
+  """Optional implementation detail or validation context for the error."""
+  message: String
 }
 
 """Currency to use when fetching token price data."""
@@ -717,20 +970,32 @@ enum queryInput_token_currency {
 """Paginated governance activity feed response."""
 type FeedResponse {
   items: [FeedItem]!
+
+  """Total number of matching feed events."""
   totalCount: Int!
 }
 
 """Single event in the governance activity feed."""
 type FeedItem {
+  """Transaction hash."""
   txHash: String!
+
+  """Log index within the transaction receipt."""
   logIndex: Int!
   type: FeedEventType!
+
+  """Optional event value encoded as a decimal string when applicable."""
   value: String
+
+  """Event timestamp in Unix seconds."""
   timestamp: Int!
   relevance: FeedRelevance!
+
+  """Type-specific metadata for the feed event."""
   metadata: JSON
 }
 
+"""Filter events by governance activity type."""
 enum FeedEventType {
   VOTE
   PROPOSAL
@@ -739,6 +1004,7 @@ enum FeedEventType {
   PROPOSAL_EXTENDED
 }
 
+"""Filter events by relevance tier."""
 enum FeedRelevance {
   HIGH
   MEDIUM
@@ -750,6 +1016,7 @@ The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://
 """
 scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
 
+"""Field used to sort feed events."""
 enum queryInput_feedEvents_orderBy {
   timestamp
   value
@@ -812,12 +1079,25 @@ type AverageTurnoutComparisonResponse {
 
 """Delegate proposal activity metrics and proposal-by-proposal history."""
 type ProposalActivityResponse {
+  """Delegate address."""
   address: String!
+
+  """Total proposals reviewed in the dataset."""
   totalProposals: Int!
+
+  """Number of proposals the delegate voted on."""
   votedProposals: Int!
+
+  """Whether the delegate never cast a vote."""
   neverVoted: Boolean!
+
+  """Share of proposals where the delegate sided with outcome."""
   winRate: Float!
+
+  """Share of delegate votes cast in support."""
   yesRate: Float!
+
+  """Average seconds between the delegate vote and proposal end time."""
   avgTimeBeforeEnd: Float!
   proposals: [ProposalActivityItem]!
 }
@@ -830,30 +1110,64 @@ type ProposalActivityItem {
 
 """Proposal snapshot included in the delegate activity response."""
 type ProposalActivityProposal {
+  """Onchain proposal identifier."""
   id: String!
+
+  """DAO identifier."""
   daoId: String!
+
+  """Address that created the proposal."""
   proposerAccountId: String!
+
+  """Proposal title."""
   title: String!
+
+  """Proposal body."""
   description: String!
+
+  """Start block number."""
   startBlock: Float!
+
+  """End block number."""
   endBlock: Float!
+
+  """Proposal creation timestamp in Unix seconds as a string."""
   timestamp: String
+
+  """Current proposal status."""
   status: String!
+
+  """Votes cast in favor, encoded as a decimal string."""
   forVotes: String!
+
+  """Votes cast against, encoded as a decimal string."""
   againstVotes: String!
+
+  """Abstain votes, encoded as a decimal string."""
   abstainVotes: String!
 }
 
 """Vote cast by the requested delegate for a given proposal."""
 type ProposalActivityUserVote {
+  """Vote identifier."""
   id: String!
+
+  """Address that cast the vote."""
   voterAccountId: String!
+
+  """Related proposal ID."""
   proposalId: String!
 
   """Governance vote direction."""
   support: String!
+
+  """Voting power used by the delegate, encoded as a string."""
   votingPower: String
+
+  """Optional vote rationale."""
   reason: String
+
+  """Vote timestamp in Unix seconds as a string."""
   timestamp: String
 }
 
@@ -880,25 +1194,64 @@ type OnchainProposalsResponse {
 }
 
 type OnchainProposal {
+  """Onchain proposal identifier."""
   id: String!
+
+  """DAO identifier."""
   daoId: String!
+
+  """Proposal creation transaction hash."""
   txHash: String!
+
+  """Address that created the proposal."""
   proposerAccountId: String!
+
+  """Proposal title."""
   title: String!
+
+  """Proposal body."""
   description: String!
+
+  """Start block number."""
   startBlock: Int!
+
+  """End block number."""
   endBlock: Int!
+
+  """Proposal creation timestamp in Unix seconds."""
   timestamp: Int!
+
+  """Current proposal status."""
   status: String!
+
+  """Votes cast in favor, encoded as a decimal string."""
   forVotes: String!
+
+  """Votes cast against, encoded as a decimal string."""
   againstVotes: String!
+
+  """Abstain votes, encoded as a decimal string."""
   abstainVotes: String!
+
+  """Proposal start timestamp in Unix seconds."""
   startTimestamp: Int!
+
+  """Proposal end timestamp in Unix seconds."""
   endTimestamp: Int!
+
+  """Required quorum encoded as a decimal string."""
   quorum: String!
+
+  """Encoded calldata payloads executed by the proposal."""
   calldatas: [String]!
+
+  """ETH values attached to each call, encoded as strings."""
   values: [String]!
+
+  """Contract targets invoked by the proposal."""
   targets: [String]!
+
+  """Optional proposal type discriminator."""
   proposalType: Int
 }
 
@@ -907,28 +1260,49 @@ union proposal_response = OnchainProposal | ErrorResponse
 """Paginated historical balance records for one account."""
 type HistoricalBalancesResponse {
   items: [HistoricalBalance]!
+
+  """Total number of matching historical balance rows."""
   totalCount: Int!
 }
 
 """Single historical balance record enriched with transfer context."""
 type HistoricalBalance {
+  """Transaction hash."""
   transactionHash: String!
+
+  """DAO identifier."""
   daoId: String!
+
+  """Account address."""
   accountId: String!
+
+  """Account balance after the historical event."""
   balance: String!
+
+  """Balance change introduced by the historical event."""
   delta: String!
+
+  """Event timestamp in Unix seconds as a string."""
   timestamp: String!
+
+  """Log index within the transaction receipt."""
   logIndex: Int!
   transfer: HistoricalBalanceTransfer!
 }
 
 """Transfer event associated with a historical balance row."""
 type HistoricalBalanceTransfer {
+  """Transferred amount encoded as a decimal string."""
   value: String!
+
+  """Sender address."""
   from: String!
+
+  """Recipient address."""
   to: String!
 }
 
+"""Field used to sort historical balance rows."""
 enum queryInput_historicalBalances_orderBy {
   timestamp
   delta
@@ -937,51 +1311,114 @@ enum queryInput_historicalBalances_orderBy {
 """Paginated transactions with embedded transfer and delegation data."""
 type TransactionsResponse {
   items: [Transaction]!
+
+  """Total number of matching transactions."""
   totalCount: Int!
 }
 
 """Transaction response enriched with transfer and delegation events."""
 type Transaction {
+  """Transaction hash."""
   transactionHash: String!
+
+  """Resolved sender address, if known."""
   from: String
+
+  """Resolved recipient address, if known."""
   to: String
+
+  """Whether the transaction touched a centralized exchange."""
   isCex: Boolean!
+
+  """Whether the transaction touched a decentralized exchange."""
   isDex: Boolean!
+
+  """Whether the transaction touched a lending protocol."""
   isLending: Boolean!
+
+  """Whether the transaction counts toward total tracked supply."""
   isTotal: Boolean!
+
+  """Transaction timestamp in Unix seconds as a string."""
   timestamp: String!
   transfers: [Transfer]!
   delegations: [TransactionDelegation]!
 }
 
 type Transfer {
+  """Transaction hash."""
   transactionHash: String!
+
+  """DAO identifier."""
   daoId: String!
+
+  """Token contract address."""
   tokenId: String!
+
+  """Transferred amount encoded as a decimal string."""
   amount: String!
+
+  """Sender address."""
   fromAccountId: String!
+
+  """Recipient address."""
   toAccountId: String!
+
+  """Transfer timestamp in Unix seconds as a string."""
   timestamp: String!
+
+  """Log index within the transaction receipt."""
   logIndex: Int!
+
+  """Whether the transfer touched a centralized exchange."""
   isCex: Boolean!
+
+  """Whether the transfer touched a decentralized exchange."""
   isDex: Boolean!
+
+  """Whether the transfer touched a lending protocol."""
   isLending: Boolean!
+
+  """Whether the transfer counts toward total tracked supply."""
   isTotal: Boolean!
 }
 
 """Delegation event embedded within a transaction response."""
 type TransactionDelegation {
+  """Transaction hash."""
   transactionHash: String!
+
+  """DAO identifier."""
   daoId: String!
+
+  """Delegate address."""
   delegateAccountId: String!
+
+  """Delegator address."""
   delegatorAccountId: String!
+
+  """Delegated amount encoded as a decimal string."""
   delegatedValue: String!
+
+  """Previous delegate address, if one existed."""
   previousDelegate: String
+
+  """Delegation timestamp in Unix seconds as a string."""
   timestamp: String!
+
+  """Log index within the transaction receipt."""
   logIndex: Int!
+
+  """Whether the delegation touched a centralized exchange."""
   isCex: Boolean!
+
+  """Whether the delegation touched a decentralized exchange."""
   isDex: Boolean!
+
+  """Whether the delegation touched a lending protocol."""
   isLending: Boolean!
+
+  """Whether the delegation counts toward total tracked supply."""
   isTotal: Boolean!
 }
 
@@ -1042,6 +1479,8 @@ type PageInfo {
 """Paginated historical voting power records."""
 type HistoricalVotingPowersResponse {
   items: [HistoricalVotingPower]!
+
+  """Total number of matching historical voting power rows."""
   totalCount: Int!
 }
 
@@ -1049,12 +1488,25 @@ type HistoricalVotingPowersResponse {
 Single historical voting power record enriched with delegation and transfer context.
 """
 type HistoricalVotingPower {
+  """Transaction hash."""
   transactionHash: String!
+
+  """DAO identifier."""
   daoId: String!
+
+  """Account address."""
   accountId: String!
+
+  """Voting power after the event, encoded as a decimal string."""
   votingPower: String!
+
+  """Voting power change introduced by the event."""
   delta: String!
+
+  """Event timestamp in Unix seconds as a string."""
   timestamp: String!
+
+  """Log index within the transaction receipt."""
   logIndex: Int!
   delegation: HistoricalVotingPowerDelegation
   transfer: HistoricalVotingPowerTransfer
@@ -1075,11 +1527,13 @@ type HistoricalVotingPowerTransfer {
   to: String!
 }
 
+"""Field used to sort historical voting power rows."""
 enum queryInput_historicalVotingPowerByAccountId_orderBy {
   timestamp
   delta
 }
 
+"""Field used to sort historical voting power rows."""
 enum queryInput_historicalVotingPower_orderBy {
   timestamp
   delta
@@ -1101,10 +1555,19 @@ type PeriodResponse {
 
 """Voting power delta for a single account across two timestamps."""
 type VotingPowerVariation {
+  """Account address."""
   accountId: String!
+
+  """Voting power at the start of the comparison window."""
   previousVotingPower: String!
+
+  """Voting power at the end of the comparison window."""
   currentVotingPower: String!
+
+  """Absolute voting power change encoded as a decimal string."""
   absoluteChange: String!
+
+  """Relative voting power change encoded as a decimal string."""
   percentageChange: String!
 }
 
@@ -1117,16 +1580,29 @@ type VotingPowerVariationsByAccountIdResponse {
 """Paginated current voting power records."""
 type VotingPowersResponse {
   items: [VotingPower]!
+
+  """Total number of matching voting power rows."""
   totalCount: Int!
 }
 
 """Current voting power snapshot for one account."""
 type VotingPower {
+  """Account address."""
   accountId: String!
+
+  """Current voting power encoded as a decimal string."""
   votingPower: String!
+
+  """Total votes cast by the account."""
   votesCount: Int!
+
+  """Total proposals created by the account."""
   proposalsCount: Int!
+
+  """Total delegations associated with the account."""
   delegationsCount: Int!
+
+  """Current token balance encoded as a decimal string."""
   balance: String
   variation: VotingPowerVariationField!
 }
@@ -1156,10 +1632,19 @@ type AccountBalanceVariationsResponse {
 
 """Balance delta for a single account across two timestamps."""
 type AccountBalanceVariation {
+  """Account address."""
   accountId: String!
+
+  """Balance at the start of the comparison window."""
   previousBalance: String!
+
+  """Balance at the end of the comparison window."""
   currentBalance: String!
+
+  """Absolute balance change encoded as a decimal string."""
   absoluteChange: String!
+
+  """Relative balance change encoded as a decimal string."""
   percentageChange: String!
 }
 
@@ -1205,12 +1690,24 @@ type AccountInteractionsResponse {
 Aggregated interaction metrics between the requested account and another account.
 """
 type AccountInteraction {
+  """Counterparty account ID."""
   accountId: String!
+
+  """
+  Net amount transferred between the requested account and the counterparty.
+  """
   amountTransferred: String!
+
+  """
+  Gross transfer volume between the requested account and the counterparty.
+  """
   totalVolume: String!
+
+  """Number of transfers observed for the interaction pair."""
   transferCount: String!
 }
 
+"""Field used to sort interaction rows."""
 enum queryInput_accountInteractions_orderBy {
   volume
   count
@@ -1218,9 +1715,12 @@ enum queryInput_accountInteractions_orderBy {
 
 type TransfersResponse {
   items: [Transfer]!
+
+  """Total number of matching transfers."""
   totalCount: Int!
 }
 
+"""Field used to sort transfers."""
 enum queryInput_transfers_orderBy {
   timestamp
   amount
@@ -1320,19 +1820,46 @@ type OffchainProposalsResponse {
 }
 
 type OffchainProposal {
+  """Snapshot proposal identifier."""
   id: String!
+
+  """Snapshot space identifier."""
   spaceId: String!
+
+  """Address or ENS of the author."""
   author: String!
+
+  """Proposal title."""
   title: String!
+
+  """Proposal body."""
   body: String!
+
+  """Discussion URL or thread reference."""
   discussion: String!
+
+  """Snapshot proposal type."""
   type: String!
+
+  """Voting start timestamp in Unix seconds."""
   start: Int!
+
+  """Voting end timestamp in Unix seconds."""
   end: Int!
+
+  """Current Snapshot proposal state."""
   state: String!
+
+  """Creation timestamp in Unix seconds."""
   created: Int!
+
+  """Last update timestamp in Unix seconds."""
   updated: Int!
+
+  """Canonical Snapshot proposal URL."""
   link: String!
+
+  """Whether the proposal was flagged by Snapshot."""
   flagged: Boolean!
 }
 

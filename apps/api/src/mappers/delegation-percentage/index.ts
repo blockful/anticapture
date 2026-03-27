@@ -3,7 +3,12 @@ import { z } from "@hono/zod-openapi";
 import { daoMetricsDayBucket } from "@/database";
 import { SECONDS_IN_DAY } from "@/lib/enums";
 
-import { OrderDirectionSchema, PageInfoSchema } from "../shared";
+import {
+  OrderDirectionSchema,
+  PageInfoSchema,
+  paginationLimitQueryParam,
+  unixTimestampQueryParam,
+} from "../shared";
 
 export type DBTokenMetric = typeof daoMetricsDayBucket.$inferSelect;
 
@@ -11,20 +16,12 @@ export type DBTokenMetric = typeof daoMetricsDayBucket.$inferSelect;
 
 // Base schema for filters
 const BaseFiltersSchema = z.object({
-  startDate: z
-    .string()
-    .openapi({
-      description: "Inclusive lower bound cursor as a Unix timestamp string.",
-      example: "1704067200",
-    })
-    .optional(),
-  endDate: z
-    .string()
-    .openapi({
-      description: "Inclusive upper bound cursor as a Unix timestamp string.",
-      example: "1706745600",
-    })
-    .optional(),
+  startDate: unixTimestampQueryParam(
+    "Inclusive lower bound cursor in Unix seconds.",
+  ),
+  endDate: unixTimestampQueryParam(
+    "Inclusive upper bound cursor in Unix seconds.",
+  ),
   orderDirection: OrderDirectionSchema.optional(),
   limit: z.number().optional().openapi({
     description: "Optional limit used by internal filters.",
@@ -42,27 +39,15 @@ export const RepositoryFiltersSchema = BaseFiltersSchema.extend({
 // HTTP query schema (extends base with pagination cursors and HTTP validations)
 export const DelegationPercentageRequestSchema = BaseFiltersSchema.extend({
   // Cursor for pagination - returns items after this date (exclusive)
-  after: z
-    .string()
-    .openapi({
-      description: "Return items after this cursor (exclusive).",
-      example: "1704067200",
-    })
-    .optional(),
+  after: unixTimestampQueryParam(
+    "Return items after this cursor, exclusive, in Unix seconds.",
+  ),
   // Cursor for pagination - returns items before this date (exclusive)
-  before: z
-    .string()
-    .openapi({
-      description: "Return items before this cursor (exclusive).",
-      example: "1706745600",
-    })
-    .optional(),
+  before: unixTimestampQueryParam(
+    "Return items before this cursor, exclusive, in Unix seconds.",
+  ),
   orderDirection: OrderDirectionSchema.optional(),
-  limit: z.coerce.number().int().positive().max(1000).default(365).openapi({
-    description: "Maximum number of buckets to return.",
-    example: 365,
-    type: "integer",
-  }),
+  limit: paginationLimitQueryParam(),
 }).openapi("DelegationPercentageRequest");
 
 export const DelegationPercentageItemSchema = z
@@ -91,10 +76,10 @@ export const DelegationPercentageResponseSchema = z
 
 // === INFERRED TYPES ===
 
-export type RepositoryFilters = z.infer<typeof RepositoryFiltersSchema>;
 export type DelegationPercentageQuery = z.infer<
   typeof DelegationPercentageRequestSchema
 >;
+
 export type DelegationPercentageItem = z.infer<
   typeof DelegationPercentageItemSchema
 >;
@@ -110,7 +95,7 @@ export type DelegationPercentageResponse = z.infer<
  * @param timestamp - Unix timestamp in seconds as string
  * @returns Normalized timestamp at midnight UTC
  */
-export function normalizeTimestamp(timestamp: string): string {
+export function normalizeTimestamp(timestamp: string | number): string {
   const ts = BigInt(timestamp);
   const midnight = (ts / BigInt(SECONDS_IN_DAY)) * BigInt(SECONDS_IN_DAY);
   return midnight.toString();

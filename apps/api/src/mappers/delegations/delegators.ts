@@ -1,7 +1,11 @@
 import { z } from "@hono/zod-openapi";
 import { Address, getAddress, isAddress } from "viem";
 
-import { OrderDirectionSchema } from "../shared";
+import {
+  OrderDirectionSchema,
+  paginationLimitQueryParam,
+  paginationSkipQueryParam,
+} from "../shared";
 
 export type AggregatedDelegator = {
   delegatorAddress: Address;
@@ -22,19 +26,8 @@ export const DelegatorsRequestParamsSchema = z
 
 export const DelegatorsRequestQuerySchema = z
   .object({
-    skip: z.coerce
-      .number()
-      .int()
-      .min(0, "Skip must be a non-negative integer")
-      .optional()
-      .default(0),
-    limit: z.coerce
-      .number()
-      .int()
-      .min(1, "Limit must be a positive integer")
-      .max(100, "Limit cannot exceed 100")
-      .optional()
-      .default(10),
+    skip: paginationSkipQueryParam(),
+    limit: paginationLimitQueryParam(),
     orderBy: z.enum(["amount", "timestamp"]).optional().default("amount"),
     orderDirection: OrderDirectionSchema.optional().default("desc"),
   })

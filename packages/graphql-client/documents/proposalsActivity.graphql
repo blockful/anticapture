@@ -1,13 +1,21 @@
 query GetProposalsActivity(
-  $address: String!, 
-  $fromDate: String, 
-  $skip: NonNegativeInt,
-  $limit: PositiveInt,
-  $orderBy: queryInput_proposalsActivity_orderBy,
-  $orderDirection: OrderDirection, 
+  $address: String!
+  $fromDate: Int
+  $skip: Int
+  $limit: Int
+  $orderBy: queryInput_proposalsActivity_orderBy
+  $orderDirection: OrderDirection
   $userVoteFilter: queryInput_proposalsActivity_userVoteFilter
 ) {
-  proposalsActivity(address: $address, fromDate: $fromDate, skip: $skip, limit: $limit, orderBy: $orderBy, orderDirection: $orderDirection, userVoteFilter: $userVoteFilter) {
+  proposalsActivity(
+    address: $address
+    fromDate: $fromDate
+    skip: $skip
+    limit: $limit
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+    userVoteFilter: $userVoteFilter
+  ) {
     totalProposals
     votedProposals
     neverVoted
@@ -40,4 +48,4 @@ query GetProposalsActivity(
       }
     }
   }
-} 
+}

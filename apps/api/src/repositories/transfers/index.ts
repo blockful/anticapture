@@ -44,7 +44,7 @@ export class TransfersRepository {
           req.toValue ? lte(transfer.amount, req.toValue) : undefined,
         ),
       limit: req.limit,
-      offset: req.offset,
+      offset: req.skip,
       orderBy,
     });
   }

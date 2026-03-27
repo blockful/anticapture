@@ -5,6 +5,8 @@ import { votesOnchain } from "@/database";
 import {
   normalizeQueryArray,
   OrderDirectionSchema,
+  paginationLimitQueryParam,
+  paginationSkipQueryParam,
   unixTimestampQueryParam,
   VoteSupportSchema,
 } from "../shared";
@@ -21,27 +23,8 @@ const StringArrayQuerySchema = z
 
 export const VotesRequestSchema = z
   .object({
-    skip: z.coerce
-      .number()
-      .int()
-      .min(0, "Skip must be a non-negative integer")
-      .optional()
-      .default(0)
-      .openapi({
-        description: "Number of votes to skip before collecting results.",
-        example: 0,
-      }),
-    limit: z.coerce
-      .number()
-      .int()
-      .min(1, "Limit must be a positive integer")
-      .max(1000, "Limit cannot exceed 1000")
-      .optional()
-      .default(10)
-      .openapi({
-        description: "Maximum number of votes to return.",
-        example: 10,
-      }),
+    skip: paginationSkipQueryParam(),
+    limit: paginationLimitQueryParam(),
     voterAddressIn: z
       .preprocess(
         normalizeQueryArray,
@@ -66,10 +49,7 @@ export const VotesRequestSchema = z
     fromDate: unixTimestampQueryParam(
       "Earliest vote timestamp, in Unix seconds.",
     ),
-    toDate: unixTimestampQueryParam(
-      "Latest vote timestamp, in Unix seconds.",
-      1700086400,
-    ),
+    toDate: unixTimestampQueryParam("Latest vote timestamp, in Unix seconds."),
   })
   .openapi("OnchainVotesRequest");
 

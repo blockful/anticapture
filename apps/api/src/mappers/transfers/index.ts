@@ -2,7 +2,12 @@ import { z } from "@hono/zod-openapi";
 import { getAddress, isAddress } from "viem";
 
 import { transfer } from "@/database";
-import { OrderDirectionSchema } from "../shared";
+import {
+  OrderDirectionSchema,
+  paginationLimitQueryParam,
+  paginationSkipQueryParam,
+  unixTimestampQueryParam,
+} from "../shared";
 
 export type DBTransfer = typeof transfer.$inferSelect;
 
@@ -24,9 +29,16 @@ export const TransfersRequestRouteSchema = z
 
 export const TransfersRequestQuerySchema = z
   .object({
-    limit: z.coerce.number().int().optional().default(10),
-    offset: z.coerce.number().int().optional().default(0),
-    orderBy: z.enum(["timestamp", "amount"]).optional().default("timestamp"),
+    limit: paginationLimitQueryParam(),
+    skip: paginationSkipQueryParam(),
+    orderBy: z
+      .enum(["timestamp", "amount"])
+      .optional()
+      .default("timestamp")
+      .openapi({
+        description: "Field used to sort transfers.",
+        example: "timestamp",
+      }),
     orderDirection: OrderDirectionSchema.optional(),
     from: z
       .string()
@@ -42,15 +54,25 @@ export const TransfersRequestQuerySchema = z
       })
       .transform((addr) => getAddress(addr))
       .optional(),
-    fromDate: z.coerce.number().int().optional(),
-    toDate: z.coerce.number().int().optional(),
+    fromDate: unixTimestampQueryParam(
+      "Earliest transfer timestamp, in Unix seconds.",
+    ),
+    toDate: unixTimestampQueryParam(
+      "Latest transfer timestamp, in Unix seconds.",
+    ),
     fromValue: z
       .string()
       .transform((val) => BigInt(val))
+      .openapi({
+        description: "Minimum transfer amount encoded as a decimal string.",
+      })
       .optional(),
     toValue: z
       .string()
       .transform((val) => BigInt(val))
+      .openapi({
+        description: "Maximum transfer amount encoded as a decimal string.",
+      })
       .optional(),
   })
   .openapi("TransfersRequestQuery");
@@ -60,25 +82,42 @@ export type TransfersRequest = z.infer<typeof TransfersRequestQuerySchema> &
 
 export const TransferResponseSchema = z
   .object({
-    transactionHash: z.string(),
-    daoId: z.string(),
-    tokenId: z.string(),
-    amount: z.string(),
-    fromAccountId: z.string(),
-    toAccountId: z.string(),
-    timestamp: z.string(),
-    logIndex: z.number().int(),
-    isCex: z.boolean(),
-    isDex: z.boolean(),
-    isLending: z.boolean(),
-    isTotal: z.boolean(),
+    transactionHash: z.string().openapi({ description: "Transaction hash." }),
+    daoId: z.string().openapi({ description: "DAO identifier." }),
+    tokenId: z.string().openapi({ description: "Token contract address." }),
+    amount: z.string().openapi({
+      description: "Transferred amount encoded as a decimal string.",
+    }),
+    fromAccountId: z.string().openapi({ description: "Sender address." }),
+    toAccountId: z.string().openapi({ description: "Recipient address." }),
+    timestamp: z.string().openapi({
+      description: "Transfer timestamp in Unix seconds as a string.",
+      example: "1704067200",
+    }),
+    logIndex: z.number().int().openapi({
+      description: "Log index within the transaction receipt.",
+    }),
+    isCex: z.boolean().openapi({
+      description: "Whether the transfer touched a centralized exchange.",
+    }),
+    isDex: z.boolean().openapi({
+      description: "Whether the transfer touched a decentralized exchange.",
+    }),
+    isLending: z.boolean().openapi({
+      description: "Whether the transfer touched a lending protocol.",
+    }),
+    isTotal: z.boolean().openapi({
+      description: "Whether the transfer counts toward total tracked supply.",
+    }),
   })
   .openapi("Transfer");
 
 export const TransfersResponseSchema = z
   .object({
     items: z.array(TransferResponseSchema),
-    totalCount: z.number().int(),
+    totalCount: z.number().int().openapi({
+      description: "Total number of matching transfers.",
+    }),
   })
   .openapi("TransfersResponse");
 

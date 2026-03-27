@@ -34,8 +34,8 @@ export interface UseDelegateDelegationHistoryGraphResult {
 export function useDelegateDelegationHistoryGraph(
   accountId: string,
   daoId: DaoIdEnum,
-  fromTimestamp?: string,
-  toTimestamp?: string,
+  fromTimestamp?: number,
+  toTimestamp?: number,
 ): UseDelegateDelegationHistoryGraphResult {
   const { decimals } = daoConfig[daoId];
 

@@ -1,11 +1,11 @@
 query GetDelegates(
   $addresses: [String]
-  $limit: PositiveInt = 10
-  $skip: NonNegativeInt = 0
+  $limit: Int = 10
+  $skip: Int = 0
   $orderDirection: OrderDirection = desc
   $orderBy: queryInput_votingPowers_orderBy = votingPower
-  $fromDate: String
-  $toDate: String
+  $fromDate: Int
+  $toDate: Int
 ) {
   votingPowers(
     limit: $limit

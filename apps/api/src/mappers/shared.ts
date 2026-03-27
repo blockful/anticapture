@@ -46,18 +46,34 @@ export const ErrorResponseSchema = z
       description: "Human-readable error message",
       example: "Proposal not found",
     }),
+    message: z.string().optional().openapi({
+      description:
+        "Optional implementation detail or validation context for the error.",
+      example: "Validation error: Expected number, received string",
+    }),
   })
   .openapi("ErrorResponse", {
     description: "Generic error payload returned by the API.",
   });
 
+export const ValidationErrorResponseSchema = ErrorResponseSchema.openapi(
+  "ValidationErrorResponse",
+  {
+    description: "Validation error payload returned for invalid request input.",
+  },
+);
+
 export const FeedEventTypeSchema = z
   .nativeEnum(FeedEventType)
-  .openapi("FeedEventType");
+  .openapi("FeedEventType", {
+    description: "Filter events by governance activity type.",
+  });
 
 export const FeedRelevanceSchema = z
   .nativeEnum(FeedRelevance)
-  .openapi("FeedRelevance");
+  .openapi("FeedRelevance", {
+    description: "Filter events by relevance tier.",
+  });
 
 export const VoteSupportSchema = z.string().openapi("VoteSupport", {
   description: "Governance vote direction.",
@@ -83,6 +99,26 @@ export const PageInfoSchema = z
   })
   .openapi("PageInfo");
 
+export const paginationSkipQueryParam = (
+  description = "Number of records to skip before collecting results.",
+) =>
+  z.coerce.number().int().min(0).optional().default(0).openapi({
+    type: "integer",
+    description,
+    example: 0,
+  });
+
+export const paginationLimitQueryParam = (
+  description = "Maximum number of records to return.",
+  example = 10,
+  max = 1000,
+) =>
+  z.coerce.number().int().min(1).max(max).optional().default(example).openapi({
+    type: "integer",
+    description,
+    example,
+  });
+
 export const normalizeQueryArray = (value: unknown): unknown[] | undefined => {
   if (value == null || value === "") {
     return undefined;
@@ -101,15 +137,30 @@ export const normalizeQueryArray = (value: unknown): unknown[] | undefined => {
   return [value];
 };
 
-export const unixTimestampQueryParam = (
-  description: string,
-  example = 1700000000,
-) =>
+export const unixTimestampQueryParam = (description: string) =>
   z.coerce.number().int().optional().openapi({
     type: "integer",
     description,
-    example,
+    example: 1700000000,
   });
+
+const errorResponseContent = {
+  "application/json": {
+    schema: ErrorResponseSchema,
+  },
+} as const;
+
+// TODO not used today because of graphQL fragments, but will be used when we migrate to REST
+export const standardErrorResponses = {
+  400: {
+    description: "Validation error",
+    content: errorResponseContent,
+  },
+  500: {
+    description: "Internal server error",
+    content: errorResponseContent,
+  },
+} as const;
 
 export const TimestampResponseMapper = (
   timestamp: number | undefined,

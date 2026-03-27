@@ -5,8 +5,11 @@ import { PERCENTAGE_NO_BASELINE } from "../constants";
 import {
   normalizeQueryArray,
   OrderDirectionSchema,
+  paginationLimitQueryParam,
+  paginationSkipQueryParam,
   PeriodResponseSchema,
   TimestampResponseMapper,
+  unixTimestampQueryParam,
 } from "../shared";
 
 const AddressArraySchema = z
@@ -31,14 +34,12 @@ export const AccountBalanceVariationsByAccountIdRequestParamsSchema = z
 
 export const AccountBalanceVariationsByAccountIdRequestQuerySchema = z
   .object({
-    fromDate: z
-      .string()
-      .transform((val) => Number(val))
-      .optional(),
-    toDate: z
-      .string()
-      .transform((val) => Number(val))
-      .optional(),
+    fromDate: unixTimestampQueryParam(
+      "Inclusive lower bound for the comparison window, in Unix seconds.",
+    ),
+    toDate: unixTimestampQueryParam(
+      "Inclusive upper bound for the comparison window, in Unix seconds.",
+    ),
   })
   .openapi("AccountBalanceVariationsByAccountIdRequestQuery", {
     description:
@@ -47,22 +48,20 @@ export const AccountBalanceVariationsByAccountIdRequestQuerySchema = z
 
 export const AccountBalanceVariationsRequestQuerySchema =
   AccountBalanceVariationsByAccountIdRequestQuerySchema.extend({
-    limit: z.coerce
-      .number()
-      .int()
-      .min(1, "Limit must be a positive integer")
-      .max(100, "Limit cannot exceed 100")
-      .optional()
-      .default(20),
-    skip: z.coerce
-      .number()
-      .int()
-      .min(0, "Skip must be a non-negative integer")
-      .optional()
-      .default(0),
+    limit: paginationLimitQueryParam(
+      "Maximum number of account balance variations to return.",
+      20,
+    ),
+    skip: paginationSkipQueryParam(
+      "Number of account balance variations to skip.",
+    ),
     orderDirection: OrderDirectionSchema.optional().default("desc"),
     addresses: z
       .preprocess(normalizeQueryArray, AddressArraySchema.optional())
+      .openapi({
+        description:
+          "Filter by one or more account addresses. Pass repeated query params or a comma-delimited list.",
+      })
       .optional(),
   }).openapi("AccountBalanceVariationsRequestQuery", {
     description:
@@ -71,11 +70,19 @@ export const AccountBalanceVariationsRequestQuerySchema =
 
 export const AccountBalanceVariationSchema = z
   .object({
-    accountId: z.string(),
-    previousBalance: z.string(),
-    currentBalance: z.string(),
-    absoluteChange: z.string(),
-    percentageChange: z.string(),
+    accountId: z.string().openapi({ description: "Account address." }),
+    previousBalance: z.string().openapi({
+      description: "Balance at the start of the comparison window.",
+    }),
+    currentBalance: z.string().openapi({
+      description: "Balance at the end of the comparison window.",
+    }),
+    absoluteChange: z.string().openapi({
+      description: "Absolute balance change encoded as a decimal string.",
+    }),
+    percentageChange: z.string().openapi({
+      description: "Relative balance change encoded as a decimal string.",
+    }),
   })
   .openapi("AccountBalanceVariation", {
     description: "Balance delta for a single account across two timestamps.",

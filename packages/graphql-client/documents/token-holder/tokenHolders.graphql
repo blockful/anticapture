@@ -1,6 +1,6 @@
 query GetTokenHolders(
-  $limit: PositiveInt
-  $skip: NonNegativeInt
+  $limit: Int
+  $skip: Int
   $orderDirection: OrderDirection
   $orderBy: queryInput_accountBalances_orderBy = balance
   $fromDate: Int

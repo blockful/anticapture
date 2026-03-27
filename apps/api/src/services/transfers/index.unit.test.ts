@@ -29,7 +29,7 @@ const makeDBTransfer = (overrides = {}): DBTransfer => ({
 const defaultRequest: TransfersRequest = {
   address: "0x1111111111111111111111111111111111111111" as Address,
   limit: 10,
-  offset: 0,
+  skip: 0,
   orderBy: "timestamp",
   orderDirection: "asc",
 };

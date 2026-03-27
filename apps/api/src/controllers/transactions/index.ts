@@ -34,7 +34,7 @@ export function transactions(app: Hono, service: TransactionsService) {
     async (context) => {
       const {
         limit,
-        offset,
+        skip,
         orderDirection,
         fromDate,
         toDate,
@@ -48,7 +48,7 @@ export function transactions(app: Hono, service: TransactionsService) {
 
       const result = await service.getTransactions({
         limit,
-        offset,
+        skip,
         orderDirection,
         fromDate,
         toDate,

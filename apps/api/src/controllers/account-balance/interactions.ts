@@ -32,7 +32,7 @@ export function accountInteractions(app: Hono, service: InteractionsService) {
       summary: "Get top interactions between accounts for a given period",
       description: `Returns a mapping of the largest interactions between accounts. 
 Positive amounts signify net token transfers FROM <address>, whilst negative amounts refer to net transfers TO <address>`,
-      tags: ["transactions"],
+      tags: ["account-balances"],
       request: {
         params: AccountInteractionsParamsSchema,
         query: AccountInteractionsQuerySchema,

@@ -1,7 +1,12 @@
 import { z } from "@hono/zod-openapi";
 import { getAddress, isAddress } from "viem";
 
-import { normalizeQueryArray, OrderDirectionSchema } from "../shared";
+import {
+  normalizeQueryArray,
+  OrderDirectionSchema,
+  paginationLimitQueryParam,
+  paginationSkipQueryParam,
+} from "../shared";
 
 const AddressArraySchema = z
   .array(
@@ -14,19 +19,8 @@ const AddressArraySchema = z
 
 export const VotersRequestSchema = z
   .object({
-    skip: z.coerce
-      .number()
-      .int()
-      .min(0, "Skip must be a non-negative integer")
-      .optional()
-      .default(0),
-    limit: z.coerce
-      .number()
-      .int()
-      .min(1, "Limit must be a positive integer")
-      .max(100, "Limit cannot exceed 100")
-      .optional()
-      .default(10),
+    skip: paginationSkipQueryParam(),
+    limit: paginationLimitQueryParam(),
     orderDirection: OrderDirectionSchema.optional().default("desc"),
     addresses: z
       .preprocess(normalizeQueryArray, AddressArraySchema.optional())

@@ -77,8 +77,8 @@ export function useDelegateDelegationHistory({
   filterVariables,
   customFromFilter,
   customToFilter,
-  fromTimestamp,
-  toTimestamp,
+  fromTimestamp: fromDate,
+  toTimestamp: toDate,
   limit = 10,
 }: UseDelegateDelegationHistoryParams): UseDelegateDelegationHistoryResult {
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -103,8 +103,8 @@ export function useDelegateDelegationHistory({
       orderDirection: orderDirection as OrderDirection,
       toValue: filterVariables?.toValue ?? null,
       fromValue: filterVariables?.fromValue ?? null,
-      fromDate: fromTimestamp ? fromTimestamp.toString() : null,
-      toDate: toTimestamp ? toTimestamp.toString() : null,
+      fromDate: fromDate || null,
+      toDate: toDate || null,
     }),
     [
       accountId,
@@ -112,8 +112,8 @@ export function useDelegateDelegationHistory({
       orderBy,
       orderDirection,
       filterVariables,
-      fromTimestamp,
-      toTimestamp,
+      fromDate,
+      toDate,
     ],
   );
 

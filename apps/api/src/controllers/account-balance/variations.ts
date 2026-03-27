@@ -23,7 +23,7 @@ export function accountBalanceVariations(
       summary: "Get variations in account balances for a given period",
       description:
         "Returns a mapping of the biggest variations to account balances associated by account address",
-      tags: ["balances"],
+      tags: ["account-balances"],
       request: {
         query: AccountBalanceVariationsRequestQuerySchema,
       },
@@ -65,7 +65,7 @@ export function accountBalanceVariations(
       path: "/accounts/{address}/balances/variations",
       summary: "Get changes in balance for a given period for a single account",
       description: "Returns a the changes to balance by period and accountId",
-      tags: ["balances"],
+      tags: ["account-balances"],
       request: {
         params: AccountBalanceVariationsByAccountIdRequestParamsSchema,
         query: AccountBalanceVariationsByAccountIdRequestQuerySchema,

@@ -6,6 +6,8 @@ import { accountBalance } from "@/database";
 import {
   normalizeQueryArray,
   OrderDirectionSchema,
+  paginationLimitQueryParam,
+  paginationSkipQueryParam,
   PeriodResponseSchema,
   TimestampResponseMapper,
   unixTimestampQueryParam,
@@ -38,21 +40,9 @@ export const AccountBalancesRequestSchema = z
     ),
     toDate: unixTimestampQueryParam(
       "Inclusive upper bound for balance history filters, in Unix seconds.",
-      1700086400,
     ),
-    limit: z.coerce
-      .number()
-      .int()
-      .min(1, "Limit must be a positive integer")
-      .max(100, "Limit cannot exceed 100")
-      .optional()
-      .default(20),
-    skip: z.coerce
-      .number()
-      .int()
-      .min(0, "Skip must be a non-negative integer")
-      .optional()
-      .default(0),
+    limit: paginationLimitQueryParam(),
+    skip: paginationSkipQueryParam(),
     orderDirection: OrderDirectionSchema.optional().default("desc"),
     orderBy: z
       .enum(["balance", "variation", "signedVariation"])
@@ -71,14 +61,23 @@ export const AccountBalancesRequestSchema = z
         type: "boolean",
       }),
     addresses: AddressListSchema,
-    delegates: AddressListSchema,
+    delegates: AddressListSchema.openapi({
+      description:
+        "Filter by one or more delegate addresses. Pass repeated query params or a comma-delimited list.",
+    }),
     fromValue: z
       .string()
       .transform((val) => BigInt(val))
+      .openapi({
+        description: "Minimum balance encoded as a decimal string.",
+      })
       .optional(),
     toValue: z
       .string()
       .transform((val) => BigInt(val))
+      .openapi({
+        description: "Maximum balance encoded as a decimal string.",
+      })
       .optional(),
   })
   .openapi("AccountBalancesRequest");
@@ -101,17 +100,18 @@ export const AccountBalanceRequestQuerySchema = z
     ),
     toDate: unixTimestampQueryParam(
       "Inclusive upper bound for the returned balance period, in Unix seconds.",
-      1700086400,
     ),
   })
   .openapi("AccountBalanceRequestQuery");
 
 export const AccountBalanceResponseSchema = z
   .object({
-    address: z.string(),
-    balance: z.string(),
-    tokenId: z.string(),
-    delegate: z.string(),
+    address: z.string().openapi({ description: "Account address." }),
+    balance: z.string().openapi({
+      description: "Current token balance encoded as a decimal string.",
+    }),
+    tokenId: z.string().openapi({ description: "Token contract address." }),
+    delegate: z.string().openapi({ description: "Current delegate address." }),
   })
   .openapi("AccountBalance");
 

@@ -4,6 +4,7 @@ import {
   TreasuryResponseSchema,
   TreasuryQuerySchema,
 } from "@/mappers/treasury";
+import {} from "@/mappers";
 import { TreasuryService } from "@/services/treasury";
 
 export function treasury(

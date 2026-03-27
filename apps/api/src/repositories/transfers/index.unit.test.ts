@@ -33,7 +33,7 @@ const defaultReq = (
 ): TransfersRequest => ({
   address: ADDR_A,
   limit: 10,
-  offset: 0,
+  skip: 0,
   orderBy: "timestamp",
   orderDirection: "asc",
   ...overrides,

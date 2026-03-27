@@ -112,11 +112,8 @@ export const useVotes = ({
         const result = await getVotingPowerChange({
           variables: {
             addresses,
-            fromDate: (
-              proposalStartTimestamp / 1000 -
-              DAYS_IN_SECONDS["30d"]
-            ).toString(),
-            toDate: (proposalStartTimestamp / 1000).toString(),
+            fromDate: proposalStartTimestamp / 1000 - DAYS_IN_SECONDS["30d"],
+            toDate: proposalStartTimestamp / 1000,
           },
           context: {
             headers: {

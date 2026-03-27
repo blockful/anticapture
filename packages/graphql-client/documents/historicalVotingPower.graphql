@@ -1,13 +1,13 @@
 query HistoricalVotingPower(
   $address: String
-  $skip: NonNegativeInt
-  $limit: PositiveInt = 10
+  $skip: Int
+  $limit: Int = 10
   $orderBy: queryInput_historicalVotingPower_orderBy = timestamp
   $orderDirection: OrderDirection = desc
   $toValue: String
   $fromValue: String
-  $fromDate: String
-  $toDate: String
+  $fromDate: Int
+  $toDate: Int
 ) {
   historicalVotingPower(
     address: $address

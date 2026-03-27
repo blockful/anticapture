@@ -27,7 +27,7 @@ export class TransactionsRepository {
         WHERE ${transaction.transactionHash} IN (SELECT transaction_hash FROM filtered_transactions)
         ORDER BY ${transaction.timestamp} ${orderDirection}
         LIMIT ${filter.limit}
-        OFFSET ${filter.offset ?? 0}
+        OFFSET ${filter.skip ?? 0}
     ),
     transfer_aggregates AS (
         SELECT 

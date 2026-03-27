@@ -15,7 +15,7 @@ export function eventRelevance(app: Hono, service: EventRelevanceService) {
       operationId: "getEventRelevanceThreshold",
       path: "/event-relevance/threshold",
       summary: "Get event relevance threshold",
-      tags: ["event-relevance"],
+      tags: ["feed"],
       request: {
         query: EventRelevanceThresholdQuerySchema,
       },

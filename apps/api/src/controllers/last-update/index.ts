@@ -14,6 +14,7 @@ export function lastUpdate(app: Hono, db: Drizzle) {
       operationId: "lastUpdate",
       path: "/last-update",
       summary: "Get the last update time",
+      tags: ["metrics"],
       request: {
         query: LastUpdateQuerySchema,
       },

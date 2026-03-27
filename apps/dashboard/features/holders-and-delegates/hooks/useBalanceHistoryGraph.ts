@@ -37,7 +37,7 @@ export function useBalanceHistoryGraph(
   const { data, loading, error } = useBalanceHistoryGraphQuery({
     variables: {
       address: accountId,
-      fromDate: fromDate?.toString() ?? null,
+      fromDate: fromDate ?? null,
       orderBy: QueryInput_HistoricalBalances_OrderBy.Timestamp,
       orderDirection: OrderDirection.Desc,
     },

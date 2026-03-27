@@ -36,7 +36,7 @@ export function transfers(app: Hono, service: TransfersService) {
       const { from, to } = context.req.valid("query");
       const {
         limit,
-        offset,
+        skip: offset,
         orderBy,
         orderDirection = "asc",
         fromValue,
@@ -48,7 +48,7 @@ export function transfers(app: Hono, service: TransfersService) {
       const result = await service.getTransfers({
         address,
         limit,
-        offset,
+        skip: offset,
         orderBy,
         orderDirection,
         from,

@@ -1,7 +1,7 @@
 query GetDelegateDelegationHistoryGraph(
   $accountId: String!
-  $fromTimestamp: String
-  $toTimestamp: String
+  $fromTimestamp: Int
+  $toTimestamp: Int
   $orderBy: queryInput_historicalVotingPowerByAccountId_orderBy = timestamp
   $orderDirection: OrderDirection = desc
 ) {

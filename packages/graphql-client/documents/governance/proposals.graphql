@@ -1,6 +1,6 @@
 query GetProposalsFromDao(
-  $skip: NonNegativeInt
-  $limit: PositiveInt = 10
+  $skip: Int
+  $limit: Int = 10
   $orderDirection: OrderDirection = desc
   $status: [String]
   $fromDate: Int
@@ -60,8 +60,8 @@ query GetProposal($id: String!) {
 #  Get proposal votes
 query GetVotes(
   $proposalId: String!
-  $limit: PositiveInt
-  $skip: NonNegativeInt
+  $limit: Int
+  $skip: Int
   $orderBy: queryInput_votesByProposalId_orderBy = timestamp
   $orderDirection: OrderDirection = desc
   $support: String
@@ -92,8 +92,8 @@ query GetVotes(
 # Get voting power change
 query GetVotingPowerChange(
   $addresses: [String]
-  $fromDate: String!
-  $toDate: String!
+  $fromDate: Int!
+  $toDate: Int!
 ) {
   votingPowerVariations(
     addresses: $addresses
@@ -113,8 +113,8 @@ query GetVotingPowerChange(
 # Get proposal non-voters
 query GetProposalNonVoters(
   $id: String!
-  $limit: PositiveInt
-  $skip: NonNegativeInt
+  $limit: Int
+  $skip: Int
   $orderDirection: OrderDirection = desc
 ) {
   proposalNonVoters(

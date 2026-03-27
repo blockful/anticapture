@@ -9,7 +9,13 @@ import {
   TransferMapper,
   TransferResponseSchema,
 } from "../transfers";
-import { normalizeQueryArray, OrderDirectionSchema } from "../shared";
+import {
+  normalizeQueryArray,
+  OrderDirectionSchema,
+  paginationLimitQueryParam,
+  paginationSkipQueryParam,
+  unixTimestampQueryParam,
+} from "../shared";
 
 export type DBTransaction = typeof transaction.$inferSelect & {
   transfers: DBTransfer[];
@@ -39,22 +45,15 @@ const TransactionIncludeListSchema = z
 
 export const TransactionsRequestSchema = z
   .object({
-    limit: z.coerce
-      .number()
-      .int()
-      .min(1, "Limit must be a positive integer")
-      .max(100, "Limit cannot exceed 100")
-      .optional()
-      .default(50),
-    offset: z.coerce
-      .number()
-      .int()
-      .min(0, "Offset must be a non-negative integer")
-      .optional()
-      .default(0),
+    limit: paginationLimitQueryParam(),
+    skip: paginationSkipQueryParam(),
     orderDirection: OrderDirectionSchema.optional().default("desc"),
-    fromDate: z.coerce.number().int("fromDate must be an integer").optional(),
-    toDate: z.coerce.number().int("toDate must be an integer").optional(),
+    fromDate: unixTimestampQueryParam(
+      "Inclusive lower bound for transaction timestamps, in Unix seconds.",
+    ),
+    toDate: unixTimestampQueryParam(
+      "Inclusive upper bound for transaction timestamps, in Unix seconds.",
+    ),
     from: z
       .string()
       .refine((addr) => isAddress(addr, { strict: false }))
@@ -130,18 +129,37 @@ export type TransactionsRequest = z.infer<typeof TransactionsRequestSchema>;
 
 export const DelegationResponseSchema = z
   .object({
-    transactionHash: z.string(),
-    daoId: z.string(),
-    delegateAccountId: z.string(),
-    delegatorAccountId: z.string(),
-    delegatedValue: z.string(),
-    previousDelegate: z.string().nullable(),
-    timestamp: z.string(),
-    logIndex: z.number().int(),
-    isCex: z.boolean(),
-    isDex: z.boolean(),
-    isLending: z.boolean(),
-    isTotal: z.boolean(),
+    transactionHash: z.string().openapi({ description: "Transaction hash." }),
+    daoId: z.string().openapi({ description: "DAO identifier." }),
+    delegateAccountId: z.string().openapi({ description: "Delegate address." }),
+    delegatorAccountId: z
+      .string()
+      .openapi({ description: "Delegator address." }),
+    delegatedValue: z.string().openapi({
+      description: "Delegated amount encoded as a decimal string.",
+    }),
+    previousDelegate: z.string().nullable().openapi({
+      description: "Previous delegate address, if one existed.",
+    }),
+    timestamp: z.string().openapi({
+      description: "Delegation timestamp in Unix seconds as a string.",
+      example: "1704067200",
+    }),
+    logIndex: z.number().int().openapi({
+      description: "Log index within the transaction receipt.",
+    }),
+    isCex: z.boolean().openapi({
+      description: "Whether the delegation touched a centralized exchange.",
+    }),
+    isDex: z.boolean().openapi({
+      description: "Whether the delegation touched a decentralized exchange.",
+    }),
+    isLending: z.boolean().openapi({
+      description: "Whether the delegation touched a lending protocol.",
+    }),
+    isTotal: z.boolean().openapi({
+      description: "Whether the delegation counts toward total tracked supply.",
+    }),
   })
   .openapi("TransactionDelegation", {
     description: "Delegation event embedded within a transaction response.",
@@ -149,14 +167,30 @@ export const DelegationResponseSchema = z
 
 export const TransactionResponseSchema = z
   .object({
-    transactionHash: z.string(),
-    from: z.string().nullable(),
-    to: z.string().nullable(),
-    isCex: z.boolean(),
-    isDex: z.boolean(),
-    isLending: z.boolean(),
-    isTotal: z.boolean(),
-    timestamp: z.string(),
+    transactionHash: z.string().openapi({ description: "Transaction hash." }),
+    from: z.string().nullable().openapi({
+      description: "Resolved sender address, if known.",
+    }),
+    to: z.string().nullable().openapi({
+      description: "Resolved recipient address, if known.",
+    }),
+    isCex: z.boolean().openapi({
+      description: "Whether the transaction touched a centralized exchange.",
+    }),
+    isDex: z.boolean().openapi({
+      description: "Whether the transaction touched a decentralized exchange.",
+    }),
+    isLending: z.boolean().openapi({
+      description: "Whether the transaction touched a lending protocol.",
+    }),
+    isTotal: z.boolean().openapi({
+      description:
+        "Whether the transaction counts toward total tracked supply.",
+    }),
+    timestamp: z.string().openapi({
+      description: "Transaction timestamp in Unix seconds as a string.",
+      example: "1704067200",
+    }),
     transfers: z.array(TransferResponseSchema),
     delegations: z.array(DelegationResponseSchema),
   })
@@ -168,7 +202,9 @@ export const TransactionResponseSchema = z
 export const TransactionsResponseSchema = z
   .object({
     items: z.array(TransactionResponseSchema),
-    totalCount: z.number().int(),
+    totalCount: z.number().int().openapi({
+      description: "Total number of matching transactions.",
+    }),
   })
   .openapi("TransactionsResponse", {
     description:

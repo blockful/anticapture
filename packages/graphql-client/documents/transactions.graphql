@@ -1,6 +1,6 @@
 query Transactions(
-  $limit: PositiveInt
-  $offset: NonNegativeInt
+  $limit: Int
+  $skip: Int
   $from: String
   $to: String
   $minAmount: String
@@ -13,7 +13,7 @@ query Transactions(
 ) {
   transactions(
     limit: $limit
-    offset: $offset
+    skip: $skip
     from: $from
     to: $to
     minAmount: $minAmount

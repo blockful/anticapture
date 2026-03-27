@@ -108,7 +108,7 @@ export const useDelegates = ({
       orderDirection,
       orderBy,
       limit,
-      fromDate: fromDate.toString(),
+      fromDate,
       toDate: null,
       addresses: address ? [address] : null,
     },
@@ -124,7 +124,7 @@ export const useDelegates = ({
     refetch({
       orderDirection,
       orderBy,
-      fromDate: fromDate.toString(),
+      fromDate,
       toDate: null,
       addresses: address ? [address] : null,
     });
@@ -165,7 +165,7 @@ export const useDelegates = ({
       try {
         const activityPromises = newAddresses.map(async (addr) => {
           const result = await getDelegateProposalsActivity({
-            variables: { address: addr, fromDate: fromDate.toString() },
+            variables: { address: addr, fromDate },
           });
           return {
             address: addr,
@@ -241,7 +241,7 @@ export const useDelegates = ({
         variables: {
           orderDirection,
           orderBy,
-          fromDate: fromDate.toString(),
+          fromDate,
           toDate: null,
           addresses: address ? [address] : null,
           skip: currentItemsCount,
@@ -281,7 +281,7 @@ export const useDelegates = ({
     refetch({
       orderDirection,
       orderBy,
-      fromDate: fromDate.toString(),
+      fromDate,
       toDate: null,
       addresses: address ? [address] : null,
     });
