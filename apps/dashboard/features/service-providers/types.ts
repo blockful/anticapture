@@ -33,6 +33,12 @@ export type ProgramProposal = {
 
 export type ProgramConfig = {
   name: string;
+  /**
+   * Quarters are split into year1/year2 to model ENS SPP stream durations.
+   * All providers report in year1Quarters. Only providers with streamDuration: 2
+   * also report in year2Quarters. If SPP introduces 3+ year streams, extend
+   * this with year3Quarters (or refactor to a grouped quarters model).
+   */
   year1Quarters: string[];
   year2Quarters?: string[];
   budget: number;
@@ -42,12 +48,14 @@ export type ProgramConfig = {
   selectionProposal: ProgramProposal;
 };
 
-export type ProgramsConfig = Record<string, ProgramConfig>;
+export type ProgramsConfig = {
+  programs: Record<string, ProgramConfig>;
+};
 
 export type ProviderProgramEntry = {
   proposalUrl?: string;
   budget: number;
-  streamDuration?: 1 | 2;
+  streamDuration: 1 | 2;
 };
 
 export type ProviderEntry = {

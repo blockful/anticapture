@@ -11,7 +11,7 @@ import type {
   ServiceProvider,
 } from "@/features/service-providers/types";
 import { getDueDateLabel } from "@/features/service-providers/utils/computeQuarterStatus";
-import { getCurrentQuarter } from "@/features/service-providers/utils/getQuarterInfos";
+import { getCurrentQuarter } from "@/features/service-providers/utils/getCurrentQuarter";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
@@ -234,7 +234,8 @@ export const ServiceProvidersTable = ({
               <span
                 className={cn(
                   "text-xs",
-                  row.original.streamDuration === 2
+                  // chart-1 = blue (multi-year), chart-2 = orange (single-year)
+                  row.original.streamDuration >= 2
                     ? "text-[var(--base-chart-1)]"
                     : "text-[var(--base-chart-2)]",
                 )}

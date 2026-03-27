@@ -13,13 +13,9 @@ import type {
   YearData,
 } from "@/features/service-providers/types";
 import { computeQuarterStatus } from "@/features/service-providers/utils/computeQuarterStatus";
+import { isHttpUrl } from "@/features/service-providers/utils/isHttpUrl";
 
 const QUARTERS: QuarterKey[] = ["Q1", "Q2", "Q3", "Q4"];
-
-const isHttpUrl = (url: string): boolean => /^https?:\/\//.test(url);
-
-const sanitizeUrl = (url: string | undefined): string | undefined =>
-  url && isHttpUrl(url) ? url : undefined;
 
 export type ServiceProvidersData = Record<number, Record<string, YearData>>;
 
@@ -67,9 +63,9 @@ const buildQuarterReport = (
   reports: Record<string, string>,
   now: Date,
 ): QuarterReport => {
-  const reportUrl = sanitizeUrl(reports[`${year}/${quarter}`]);
+  const reportUrl = reports[`${year}/${quarter}`];
 
-  if (reportUrl) {
+  if (isHttpUrl(reportUrl)) {
     return { status: "published", reportUrl };
   }
 
@@ -120,12 +116,10 @@ export const fetchServiceProvidersData =
     ]);
 
     const programs = Object.fromEntries(
-      Object.entries(programsConfig)
-        .filter(([key]) => key !== "$schema")
-        .map(([key, value]) => [
-          key,
-          parseProgramConfig(value as ProgramConfig),
-        ]),
+      Object.entries(programsConfig.programs).map(([key, value]) => [
+        key,
+        parseProgramConfig(value),
+      ]),
     );
 
     const years = collectYears(programs);
@@ -142,7 +136,7 @@ export const fetchServiceProvidersData =
                 quarter,
                 buildQuarterReport(year, quarter, provider.reports, now),
               ]),
-            ) as YearData,
+            ) as YearData, // safe: maps over all 4 quarters
           ]),
         ),
       ]),

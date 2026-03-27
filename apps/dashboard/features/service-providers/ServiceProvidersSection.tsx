@@ -18,7 +18,7 @@ import { PillTabGroup } from "@/shared/components/design-system/tabs/pill-tab-gr
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 
 export const ServiceProvidersSection = () => {
-  const { programKeys, programs, getProvidersForProgram, isLoading } =
+  const { programKeys, programs, getProvidersForProgram, isLoading, isError } =
     useServiceProvidersData();
   const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
 
@@ -43,61 +43,70 @@ export const ServiceProvidersSection = () => {
         </a>
       }
     >
-      <InlineAlert
-        text="Report status updates are made via GitHub pull requests and must include a link to the published DAO forum post."
-        variant="info"
-      />
-      <SubSectionsContainer>
-        <div className="flex flex-col gap-4">
-          {programKeys.length > 1 && (
-            <div className="flex items-center justify-between gap-3">
-              <PillTabGroup
-                tabs={programKeys.map((key) => ({
-                  label: key,
-                  value: key,
-                }))}
-                activeTab={activeProgram ?? ""}
-                onTabChange={(value) => setSelectedProgram(value)}
-              />
-              {activeProgramDef && (
-                <div className="flex items-center gap-1.5">
-                  <DefaultLink
-                    size="sm"
-                    openInNewTab
-                    href={activeProgramDef.discussionUrl}
-                  >
-                    DISCUSSION
-                  </DefaultLink>
-                  <BulletDivider />
-                  <DefaultLink
-                    size="sm"
-                    openInNewTab
-                    href={activeProgramDef.budgetProposal.forumUrl}
-                  >
-                    {activeProgramDef.budgetProposal.title.toUpperCase()}
-                  </DefaultLink>
-                  <BulletDivider />
-                  <DefaultLink
-                    size="sm"
-                    openInNewTab
-                    href={activeProgramDef.selectionProposal.forumUrl}
-                  >
-                    {activeProgramDef.selectionProposal.title.toUpperCase()}
-                  </DefaultLink>
+      {isError ? (
+        <InlineAlert
+          text="Unable to load service provider data. Please try again later."
+          variant="error"
+        />
+      ) : (
+        <>
+          <InlineAlert
+            text="Report status updates are made via GitHub pull requests and must include a link to the published DAO forum post."
+            variant="info"
+          />
+          <SubSectionsContainer>
+            <div className="flex flex-col gap-4">
+              {programKeys.length > 1 && (
+                <div className="flex items-center justify-between gap-3">
+                  <PillTabGroup
+                    tabs={programKeys.map((key) => ({
+                      label: key,
+                      value: key,
+                    }))}
+                    activeTab={activeProgram ?? ""}
+                    onTabChange={(value) => setSelectedProgram(value)}
+                  />
+                  {activeProgramDef && (
+                    <div className="flex items-center gap-1.5">
+                      <DefaultLink
+                        size="sm"
+                        openInNewTab
+                        href={activeProgramDef.discussionUrl}
+                      >
+                        DISCUSSION
+                      </DefaultLink>
+                      <BulletDivider />
+                      <DefaultLink
+                        size="sm"
+                        openInNewTab
+                        href={activeProgramDef.budgetProposal.forumUrl}
+                      >
+                        {activeProgramDef.budgetProposal.title.toUpperCase()}
+                      </DefaultLink>
+                      <BulletDivider />
+                      <DefaultLink
+                        size="sm"
+                        openInNewTab
+                        href={activeProgramDef.selectionProposal.forumUrl}
+                      >
+                        {activeProgramDef.selectionProposal.title.toUpperCase()}
+                      </DefaultLink>
+                    </div>
+                  )}
                 </div>
               )}
-            </div>
-          )}
 
-          {activeProgram && (
-            <ServiceProvidersTable
-              providers={getProvidersForProgram(activeProgram)}
-              program={programs[activeProgram]}
-              isLoading={isLoading}
-            />
-          )}
-        </div>
-      </SubSectionsContainer>
+              {activeProgram && (
+                <ServiceProvidersTable
+                  providers={getProvidersForProgram(activeProgram)}
+                  program={programs[activeProgram]}
+                  isLoading={isLoading}
+                />
+              )}
+            </div>
+          </SubSectionsContainer>
+        </>
+      )}
     </TheSectionLayout>
   );
 };

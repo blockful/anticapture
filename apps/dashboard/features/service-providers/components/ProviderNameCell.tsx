@@ -33,6 +33,7 @@ export const ProviderNameCell = ({
             width={24}
             height={24}
             className="rounded-full"
+            unoptimized
           />
         ) : (
           initials
@@ -48,13 +49,11 @@ export const ProviderNameCell = ({
               WEBSITE
             </DefaultLink>
           )}
+          {websiteUrl && proposalUrl && <BulletDivider />}
           {proposalUrl && (
-            <>
-              <BulletDivider />
-              <DefaultLink size="sm" openInNewTab href={proposalUrl}>
-                PROPOSAL
-              </DefaultLink>
-            </>
+            <DefaultLink size="sm" openInNewTab href={proposalUrl}>
+              PROPOSAL
+            </DefaultLink>
           )}
         </div>
       </div>
