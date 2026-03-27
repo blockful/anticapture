@@ -318,4 +318,5 @@ export const SCR: DaoConfiguration = {
       },
     },
   },
+  proposalTypeConfiguration: "onchain",
 };

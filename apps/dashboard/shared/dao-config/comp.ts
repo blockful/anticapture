@@ -352,4 +352,5 @@ export const COMP: DaoConfiguration = {
   dataTables: true,
   activityFeed: true,
   governancePage: true,
+  proposalTypeConfiguration: "onchain",
 };

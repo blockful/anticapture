@@ -29,4 +29,5 @@ export const LIL_NOUNS: DaoConfiguration = {
   dataTables: true,
   activityFeed: true,
   tokenDistribution: true,
+  proposalTypeConfiguration: "onchain",
 };

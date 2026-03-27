@@ -336,4 +336,5 @@ export const OBOL: DaoConfiguration = {
     },
   },
   governancePage: true,
+  proposalTypeConfiguration: "onchain",
 };

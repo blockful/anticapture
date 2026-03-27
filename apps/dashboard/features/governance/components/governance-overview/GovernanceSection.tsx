@@ -24,13 +24,16 @@ const PROPOSAL_TABS = [
 export const GovernanceSection = () => {
   const { daoId }: { daoId: string } = useParams();
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
-  const hasOffchain = !!daoConfig[daoIdEnum]?.offchainProposals;
+  const proposalType = daoConfig[daoIdEnum]?.proposalTypeConfiguration;
+  const hasOffchain =
+    proposalType === "offchain" || proposalType === "composite";
+  const hasOnchain = proposalType === "onchain" || proposalType === "composite";
   const [activeTab, setActiveTab] = useQueryState(
     "tab",
     parseAsStringEnum<"onchain" | "offchain">([
       "onchain",
       "offchain",
-    ]).withDefault("onchain"),
+    ]).withDefault(hasOnchain ? "onchain" : "offchain"),
   );
 
   const {
@@ -44,6 +47,7 @@ export const GovernanceSection = () => {
     itemsPerPage: 10,
     orderDirection: QueryInput_Proposals_OrderDirection.Desc,
     daoId: daoIdEnum,
+    skip: !hasOnchain,
   });
 
   const {
@@ -61,7 +65,7 @@ export const GovernanceSection = () => {
   const loadMoreOnchainRef = useRef<HTMLDivElement>(null);
   const loadMoreOffchainRef = useRef<HTMLDivElement>(null);
 
-  const isOnchain = activeTab === "onchain" || !hasOffchain;
+  const isOnchain = activeTab === "onchain" || (!hasOffchain && hasOnchain);
   const error = isOnchain ? onchainError : offchainError;
   const pagination = isOnchain ? onchainPagination : offchainPagination;
   const isPaginationLoading = isOnchain

@@ -324,4 +324,5 @@ export const NOUNS: DaoConfiguration = {
     },
   },
   governancePage: true,
+  proposalTypeConfiguration: "onchain",
 };
