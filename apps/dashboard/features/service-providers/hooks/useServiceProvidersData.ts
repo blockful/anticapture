@@ -9,32 +9,34 @@ import {
   type ServiceProvidersResult,
 } from "@/features/service-providers/utils/fetchServiceProvidersData";
 
+const isHttpUrl = (url: string | undefined): url is string =>
+  !!url && /^https?:\/\//.test(url);
+
 const buildProviders = (
   result: ServiceProvidersResult,
   programKey: string,
-): ServiceProvider[] => {
-  const { config, data, avatarUrls } = result;
-
-  return config.providers
+): ServiceProvider[] =>
+  result.config.providers
     .filter((entry) => entry.programs[programKey])
     .map((entry) => {
       const programEntry = entry.programs[programKey];
       return {
         name: entry.name,
-        avatarUrl: avatarUrls[entry.slug],
-        websiteUrl: entry.website,
-        proposalUrl: programEntry.proposalUrl,
+        avatarUrl: result.avatarUrls[entry.slug],
+        websiteUrl: isHttpUrl(entry.website) ? entry.website : undefined,
+        proposalUrl: isHttpUrl(programEntry.proposalUrl)
+          ? programEntry.proposalUrl
+          : undefined,
         budget: programEntry.budget,
         githubSlug: entry.slug,
         streamDuration: programEntry.streamDuration ?? 1,
         years: Object.fromEntries(
-          Object.entries(data)
+          Object.entries(result.data)
             .filter(([, slugData]) => slugData[entry.slug])
             .map(([year, slugData]) => [year, slugData[entry.slug]]),
         ),
       };
     });
-};
 
 type ServiceProvidersDataResult = {
   providers: ServiceProvider[];
@@ -45,7 +47,7 @@ type ServiceProvidersDataResult = {
 };
 
 export const useServiceProvidersData = (): ServiceProvidersDataResult => {
-  const query = useQuery<ServiceProvidersResult | null>({
+  const query = useQuery<ServiceProvidersResult>({
     queryKey: ["serviceProviders"],
     queryFn: fetchServiceProvidersData,
     staleTime: 3600000,

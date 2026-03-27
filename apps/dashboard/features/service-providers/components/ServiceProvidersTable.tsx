@@ -239,7 +239,7 @@ export const ServiceProvidersTable = ({
                     : "text-[var(--base-chart-2)]",
                 )}
               >
-                {row.original.streamDuration === 2 ? "2 years" : "1 year"}
+                {`${row.original.streamDuration} year${row.original.streamDuration > 1 ? "s" : ""}`}
               </span>
             )}
           </div>

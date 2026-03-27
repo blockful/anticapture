@@ -16,6 +16,11 @@ import { computeQuarterStatus } from "@/features/service-providers/utils/compute
 
 const QUARTERS: QuarterKey[] = ["Q1", "Q2", "Q3", "Q4"];
 
+const isHttpUrl = (url: string): boolean => /^https?:\/\//.test(url);
+
+const sanitizeUrl = (url: string | undefined): string | undefined =>
+  url && isHttpUrl(url) ? url : undefined;
+
 export type ServiceProvidersData = Record<number, Record<string, YearData>>;
 
 export type ServiceProvidersResult = {
@@ -25,64 +30,61 @@ export type ServiceProvidersResult = {
   avatarUrls: Record<string, string>;
 };
 
-function parseQuarterString(str: string): ParsedQuarter | null {
+const parseQuarterString = (str: string): ParsedQuarter | null => {
   const match = str.match(/^(\d{4})\/(Q[1-4])$/);
   if (!match) return null;
   return { year: Number(match[1]), quarter: match[2] as QuarterKey };
-}
+};
 
-export function parseProgramConfig(config: ProgramConfig): ProgramDefinition {
-  return {
-    name: config.name,
-    discussionUrl: config.discussionUrl,
-    budgetProposal: config.budgetProposal,
-    selectionProposal: config.selectionProposal,
-    year1Quarters: config.year1Quarters
-      .map(parseQuarterString)
-      .filter((q): q is ParsedQuarter => q !== null),
-    year2Quarters: (config.year2Quarters ?? [])
-      .map(parseQuarterString)
-      .filter((q): q is ParsedQuarter => q !== null),
-  };
-}
+export const parseProgramConfig = (
+  config: ProgramConfig,
+): ProgramDefinition => ({
+  name: config.name,
+  discussionUrl: config.discussionUrl,
+  budgetProposal: config.budgetProposal,
+  selectionProposal: config.selectionProposal,
+  year1Quarters: config.year1Quarters
+    .map(parseQuarterString)
+    .filter((q): q is ParsedQuarter => q !== null),
+  year2Quarters: (config.year2Quarters ?? [])
+    .map(parseQuarterString)
+    .filter((q): q is ParsedQuarter => q !== null),
+});
 
-function collectYears(programs: Record<string, ProgramDefinition>): number[] {
-  const years = new Set<number>();
-  for (const program of Object.values(programs)) {
-    for (const q of [...program.year1Quarters, ...program.year2Quarters]) {
-      years.add(q.year);
-    }
-  }
-  return [...years].sort();
-}
+const collectYears = (
+  programs: Record<string, ProgramDefinition>,
+): number[] => [
+  ...new Set(
+    Object.values(programs).flatMap((p) =>
+      [...p.year1Quarters, ...p.year2Quarters].map((q) => q.year),
+    ),
+  ),
+];
 
-function buildQuarterReport(
+const buildQuarterReport = (
   year: number,
   quarter: QuarterKey,
   reports: Record<string, string>,
   now: Date,
-): QuarterReport {
-  const key = `${year}/${quarter}`;
-  const reportUrl = reports[key];
+): QuarterReport => {
+  const reportUrl = sanitizeUrl(reports[`${year}/${quarter}`]);
 
   if (reportUrl) {
     return { status: "published", reportUrl };
   }
 
   return { status: computeQuarterStatus(year, quarter, now) };
-}
+};
 
-async function fetchJson<T>(path: string): Promise<T | null> {
-  try {
-    const response = await fetch(`${GITHUB_RAW_BASE}/${path}`);
-    if (!response.ok) return null;
-    return (await response.json()) as T;
-  } catch {
-    return null;
+const fetchJson = async <T>(path: string): Promise<T> => {
+  const response = await fetch(`${GITHUB_RAW_BASE}/${path}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch ${path}: ${response.status}`);
   }
-}
+  return (await response.json()) as T;
+};
 
-async function fetchAvatarUrls(): Promise<Record<string, string>> {
+const fetchAvatarUrls = async (): Promise<Record<string, string>> => {
   try {
     const response = await fetch(
       `${GITHUB_API_BASE}/git/trees/main?recursive=1`,
@@ -92,55 +94,59 @@ async function fetchAvatarUrls(): Promise<Record<string, string>> {
     const { tree }: { tree: { path: string; type: string }[] } =
       await response.json();
 
-    const avatarUrls: Record<string, string> = {};
-    tree
-      .filter(
-        (item) =>
-          item.type === "blob" && /^avatars\/[^/]+\.[^.]+$/.test(item.path),
-      )
-      .forEach((item) => {
-        const fileName = item.path.slice("avatars/".length);
-        const slug = fileName.slice(0, fileName.lastIndexOf("."));
-        avatarUrls[slug] = `${GITHUB_RAW_BASE}/${item.path}`;
-      });
-
-    return avatarUrls;
+    return Object.fromEntries(
+      tree
+        .filter(
+          (item) =>
+            item.type === "blob" && /^avatars\/[^/]+\.[^.]+$/.test(item.path),
+        )
+        .map((item) => {
+          const fileName = item.path.slice("avatars/".length);
+          const slug = fileName.slice(0, fileName.lastIndexOf("."));
+          return [slug, `${GITHUB_RAW_BASE}/${item.path}`];
+        }),
+    );
   } catch {
     return {};
   }
-}
+};
 
 export const fetchServiceProvidersData =
-  async (): Promise<ServiceProvidersResult | null> => {
+  async (): Promise<ServiceProvidersResult> => {
     const [config, programsConfig, avatarUrls] = await Promise.all([
       fetchJson<ProvidersConfig>("providers.json"),
       fetchJson<ProgramsConfig>("programs.json"),
       fetchAvatarUrls(),
     ]);
 
-    if (!config || !programsConfig) return null;
-
-    const programs: Record<string, ProgramDefinition> = {};
-    for (const [key, programConfig] of Object.entries(programsConfig)) {
-      if (key === "$schema") continue;
-      programs[key] = parseProgramConfig(programConfig as ProgramConfig);
-    }
+    const programs = Object.fromEntries(
+      Object.entries(programsConfig)
+        .filter(([key]) => key !== "$schema")
+        .map(([key, value]) => [
+          key,
+          parseProgramConfig(value as ProgramConfig),
+        ]),
+    );
 
     const years = collectYears(programs);
     const now = new Date();
 
-    const data: ServiceProvidersData = {};
-    for (const year of years) {
-      data[year] = {};
-      for (const provider of config.providers) {
-        data[year][provider.slug] = Object.fromEntries(
-          QUARTERS.map((quarter) => [
-            quarter,
-            buildQuarterReport(year, quarter, provider.reports, now),
+    const data = Object.fromEntries(
+      years.map((year) => [
+        year,
+        Object.fromEntries(
+          config.providers.map((provider) => [
+            provider.slug,
+            Object.fromEntries(
+              QUARTERS.map((quarter) => [
+                quarter,
+                buildQuarterReport(year, quarter, provider.reports, now),
+              ]),
+            ) as YearData,
           ]),
-        ) as YearData;
-      }
-    }
+        ),
+      ]),
+    );
 
     return { config, programs, data, avatarUrls };
   };
