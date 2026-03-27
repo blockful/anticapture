@@ -5,7 +5,7 @@ import type { DrawerBodyProps } from "@/shared/components/design-system/drawer/t
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta: Meta<DrawerBodyProps> = {
-  title: "Data Display/Drawer/DrawerBody",
+  title: "Feedback/Drawer/DrawerBody",
   component: DrawerBody,
   parameters: {
     layout: "padded",

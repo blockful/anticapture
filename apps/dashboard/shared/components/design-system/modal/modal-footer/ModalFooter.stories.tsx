@@ -5,7 +5,7 @@ import type { ModalFooterProps } from "@/shared/components/design-system/modal/t
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta: Meta<ModalFooterProps> = {
-  title: "Data Display/Modal/ModalFooter",
+  title: "Feedback/Modal/ModalFooter",
   component: ModalFooter,
   parameters: {
     layout: "centered",

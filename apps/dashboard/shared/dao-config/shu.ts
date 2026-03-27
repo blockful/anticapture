@@ -1,6 +1,6 @@
 import { mainnet } from "viem/chains";
 
-import { ShutterIcon } from "@/shared/components/icons/ShutterIcon";
+import { ShutterIcon } from "@/shared/components/icons";
 import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
@@ -350,4 +350,5 @@ export const SHU: DaoConfiguration = {
   tokenDistribution: true,
   dataTables: true,
   governancePage: true,
+  proposalTypeConfiguration: "onchain",
 };
