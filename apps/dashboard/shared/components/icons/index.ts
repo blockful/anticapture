@@ -15,7 +15,6 @@ export * from "@/shared/components/icons/ScrollIcon";
 export * from "@/shared/components/icons/CompoundIcon";
 export * from "@/shared/components/icons/ObolIcon";
 export * from "@/shared/components/icons/ShutterIcon";
-// THE IMPORT OF DAO AVATAR ICON MUST BE LAST
 export * from "@/shared/components/icons/DaoAvatarIcon";
 export * from "@/shared/components/icons/CookieBackground";
 
