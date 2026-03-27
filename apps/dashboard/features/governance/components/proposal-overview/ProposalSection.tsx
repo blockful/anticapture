@@ -1,9 +1,9 @@
 "use client";
 
 import type { Query_Proposals_Items_Items } from "@anticapture/graphql-client/hooks";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ExternalLink } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useAccount } from "wagmi";
 
 import { VotingModal } from "@/features/governance/components/modals/VotingModal";
@@ -17,59 +17,132 @@ import { ProposalStatusSection } from "@/features/governance/components/proposal
 import { TabsSection } from "@/features/governance/components/proposal-overview/TabsSection";
 import { TitleSection } from "@/features/governance/components/proposal-overview/TitleSection";
 import { useVoterInfo } from "@/features/governance/hooks/useAccountPower";
+import { useOffchainProposal } from "@/features/governance/hooks/useOffchainProposal";
 import { useProposal } from "@/features/governance/hooks/useProposal";
+import type { ProposalViewData } from "@/features/governance/types";
+import {
+  getOffchainProposalStatus,
+  normalizeChoices,
+  normalizeScores,
+} from "@/features/governance/utils/offchainProposal";
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 import { Button } from "@/shared/components";
 import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCustom";
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
-export const ProposalSection = () => {
-  const { proposalId, daoId } = useParams<{
+interface ProposalSectionProps {
+  isOffchain?: boolean;
+}
+
+export const ProposalSection = ({
+  isOffchain = false,
+}: ProposalSectionProps) => {
+  const { proposalId: rawProposalId, daoId } = useParams<{
     proposalId: string;
     daoId: string;
   }>();
+
+  const proposalId = rawProposalId as string;
+  const offchainProposalId = isOffchain ? decodeURIComponent(proposalId) : "";
+
   const { address } = useAccount();
   const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
   const [drawerAddress, setDrawerAddress] = useState<string | null>(null);
-  const daoEnum = daoId.toUpperCase() as DaoIdEnum;
+  const daoEnum = (daoId as string).toUpperCase() as DaoIdEnum;
   const { decimals } = daoConfig[daoEnum];
 
-  const handleAddressClick = useCallback((address: string) => {
-    setDrawerAddress(address);
+  const handleAddressClick = useCallback((addr: string) => {
+    setDrawerAddress(addr);
   }, []);
 
   const handleCloseDrawer = useCallback(() => {
     setDrawerAddress(null);
   }, []);
 
-  const { proposal, loading, error } = useProposal({
-    proposalId,
+  const {
+    proposal: onchainProposal,
+    loading: onchainLoading,
+    error: onchainError,
+  } = useProposal({
+    proposalId: isOffchain ? "" : proposalId,
+    daoId: daoEnum,
+  });
+
+  const {
+    proposal: rawOffchainProposal,
+    loading: offchainLoading,
+    error: offchainError,
+  } = useOffchainProposal({
+    proposalId: offchainProposalId,
     daoId: daoEnum,
   });
 
   const { votingPower, rawVotingPower, votes } = useVoterInfo({
     address: address ?? "",
     daoId: daoEnum,
-    proposalId,
+    proposalId: isOffchain ? "" : proposalId,
     decimals,
   });
+
+  const loading = isOffchain ? offchainLoading : onchainLoading;
+  const error = isOffchain ? offchainError : onchainError;
+
+  const offchainScores = useMemo(
+    () => normalizeScores(rawOffchainProposal?.scores),
+    [rawOffchainProposal?.scores],
+  );
+  const offchainChoices = useMemo(
+    () => normalizeChoices(rawOffchainProposal?.choices),
+    [rawOffchainProposal?.choices],
+  );
+
+  const adaptedOffchainProposal: ProposalViewData | null = rawOffchainProposal
+    ? {
+        id: rawOffchainProposal.id,
+        daoId: daoId as string,
+        txHash: null,
+        proposerAccountId: rawOffchainProposal.author,
+        title: rawOffchainProposal.title,
+        description: rawOffchainProposal.body,
+        quorum: "0",
+        timestamp: String(rawOffchainProposal.created),
+        status: getOffchainProposalStatus(
+          rawOffchainProposal.state,
+          rawOffchainProposal.type,
+          offchainScores,
+        ),
+        forVotes: "0",
+        againstVotes: "0",
+        abstainVotes: "0",
+        startTimestamp: String(rawOffchainProposal.start),
+        endTimestamp: String(rawOffchainProposal.end),
+        calldatas: null,
+        targets: [],
+        values: [],
+      }
+    : null;
+
+  const proposal: ProposalViewData | null = isOffchain
+    ? adaptedOffchainProposal
+    : (onchainProposal ?? null);
+  const snapshotLink = isOffchain
+    ? (rawOffchainProposal?.link ?? null)
+    : undefined;
 
   if (loading) {
     return <ProposalSectionSkeleton />;
   }
 
-  // If there is an error, show error message - @todo: align with design
   if (error) {
     return <div className="text-primary p-4">Error: {error.message}</div>;
   }
 
-  // If proposal is not found, show 404 page - @todo: align with design
   if (!proposal) {
     return <div className="text-primary p-4">Proposal not found</div>;
   }
 
-  const supportValue = votes?.items[0]?.support;
+  const supportValue = votes?.items[0]?.support ?? undefined;
 
   return (
     <div className="w-full pb-20 lg:pb-0">
@@ -80,6 +153,7 @@ export const ProposalSection = () => {
         votes={votes}
         address={address}
         proposalStatus={proposal.status}
+        snapshotLink={snapshotLink}
       />
       <div className="mx-auto w-full">
         <div className="bg-surface-background sticky top-[65px] z-10 hidden h-5 w-full lg:block" />
@@ -90,58 +164,114 @@ export const ProposalSection = () => {
               proposal={proposal}
               onAddressClick={handleAddressClick}
             />
-            <ProposalInfoSection proposal={proposal} decimals={decimals} />
-            <ProposalStatusSection proposal={proposal} />
+            <ProposalInfoSection
+              proposal={proposal}
+              decimals={isOffchain ? 0 : decimals}
+              offchainChoices={isOffchain ? offchainChoices : undefined}
+              offchainScores={isOffchain ? offchainScores : undefined}
+            />
+            <ProposalStatusSection
+              proposal={proposal}
+              isOffchain={isOffchain}
+            />
           </div>
 
           <TabsSection
             proposal={proposal}
             onAddressClick={handleAddressClick}
+            isOffchain={isOffchain}
+            offchainProposalId={offchainProposalId}
+            offchainChoices={offchainChoices}
+            offchainScores={isOffchain ? offchainScores : undefined}
+            daoId={daoEnum}
           />
         </div>
 
-        <VotingModal
-          isOpen={isVotingModalOpen}
-          onClose={() => setIsVotingModalOpen(false)}
-          proposal={proposal as Query_Proposals_Items_Items}
-          votingPower={votingPower}
-          rawVotingPower={rawVotingPower}
-          decimals={decimals}
-          daoId={daoEnum}
-        />
+        {!isOffchain && (
+          <>
+            <VotingModal
+              isOpen={isVotingModalOpen}
+              onClose={() => setIsVotingModalOpen(false)}
+              proposal={onchainProposal as Query_Proposals_Items_Items}
+              votingPower={votingPower}
+              rawVotingPower={rawVotingPower}
+              decimals={decimals}
+              daoId={daoEnum}
+            />
 
-        <HoldersAndDelegatesDrawer
-          isOpen={!!drawerAddress}
-          onClose={handleCloseDrawer}
-          entityType="delegate"
-          address={drawerAddress || ""}
-          daoId={daoEnum}
-        />
+            <HoldersAndDelegatesDrawer
+              isOpen={!!drawerAddress}
+              onClose={handleCloseDrawer}
+              entityType="delegate"
+              address={drawerAddress || ""}
+              daoId={daoEnum}
+            />
+          </>
+        )}
       </div>
 
-      {/* Fixed bottom bar for mobile voting */}
+      {/* Fixed bottom bar for mobile */}
       <div className="bg-surface-background fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 p-4 lg:hidden dark:border-gray-800">
-        {address ? (
-          supportValue === undefined ? (
-            <Button
-              className="flex w-full"
-              onClick={() => setIsVotingModalOpen(true)}
-            >
-              Cast your vote
-              <ArrowRight className="size-3.5" />
-            </Button>
-          ) : (
-            <VotedBadge vote={Number(supportValue)} />
-          )
-        ) : (
-          <ConnectWalletCustom className="w-full" />
-        )}
+        <MobileBottomBar
+          isOffchain={isOffchain}
+          snapshotLink={snapshotLink}
+          address={address}
+          supportValue={supportValue}
+          onVoteClick={() => setIsVotingModalOpen(true)}
+        />
       </div>
     </div>
   );
 };
 
-export const VotedBadge = ({ vote }: { vote: number }) => {
+const MobileBottomBar = ({
+  isOffchain,
+  snapshotLink,
+  address,
+  supportValue,
+  onVoteClick,
+}: {
+  isOffchain: boolean;
+  snapshotLink: string | null | undefined;
+  address: string | undefined;
+  supportValue: number | undefined;
+  onVoteClick: () => void;
+}) => {
+  if (isOffchain) {
+    if (snapshotLink) {
+      return (
+        <a
+          href={snapshotLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex w-full"
+        >
+          <Button className="flex w-full">
+            <ExternalLink className="size-3.5" />
+            Vote on Snapshot
+          </Button>
+        </a>
+      );
+    }
+    return null;
+  }
+
+  if (address) {
+    if (supportValue === undefined) {
+      return (
+        <Button className="flex w-full" onClick={onVoteClick}>
+          Cast your vote
+          <ArrowRight className="size-3.5" />
+        </Button>
+      );
+    }
+    return <MobileVotedBadge vote={Number(supportValue)} />;
+  }
+
+  return <ConnectWalletCustom className="w-full" />;
+};
+
+const MobileVotedBadge = ({ vote }: { vote: number }) => {
   return (
     <div className="flex w-full items-center justify-center gap-2">
       <p className="text-secondary flex items-center gap-2 text-[12px] font-medium leading-4">

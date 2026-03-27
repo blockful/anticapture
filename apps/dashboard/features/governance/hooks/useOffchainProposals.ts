@@ -7,29 +7,20 @@ import {
   useGetOffchainProposalsFromDaoQuery,
 } from "@anticapture/graphql-client/hooks";
 import type { ApolloError } from "@apollo/client";
-import { useCallback, useMemo, useState, useEffect } from "react";
+import { useCallback, useMemo, useState } from "react";
 
-import type { Proposal as GovernanceProposal } from "@/features/governance/types";
-import { ProposalStatus, ProposalState } from "@/features/governance/types";
-import { getTimeText } from "@/features/governance/utils";
+import type { PaginationInfo } from "@/features/governance/hooks/useProposals";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { getAuthHeaders } from "@/shared/utils/server-utils";
 
-import type { PaginationInfo } from "./useProposals";
-
-type OffchainProposalArgs = Pick<
-  QueryOffchainProposalsArgs,
-  "status" | "fromDate"
+export type OffchainProposalItem = NonNullable<
+  NonNullable<
+    GetOffchainProposalsFromDaoQuery["offchainProposals"]
+  >["items"][number]
 >;
 
-export interface UseOffchainProposalsParams extends OffchainProposalArgs {
-  itemsPerPage?: number;
-  daoId?: DaoIdEnum;
-  skip?: boolean;
-}
-
 export interface UseOffchainProposalsResult {
-  proposals: GovernanceProposal[];
+  proposals: OffchainProposalItem[];
   loading: boolean;
   error: ApolloError | undefined;
   pagination: PaginationInfo;
@@ -37,89 +28,38 @@ export interface UseOffchainProposalsResult {
   isPaginationLoading: boolean;
 }
 
-function offchainStateToProposalStatus(state: string): ProposalStatus {
-  switch (state.toLowerCase()) {
-    case "active":
-      return ProposalStatus.ONGOING;
-    case "closed":
-      return ProposalStatus.EXECUTED;
-    case "pending":
-      return ProposalStatus.PENDING;
-    default:
-      return ProposalStatus.PENDING;
-  }
-}
-
-function offchainStateToProposalState(state: string): ProposalState {
-  switch (state.toLowerCase()) {
-    case "active":
-      return ProposalState.ACTIVE;
-    case "closed":
-      return ProposalState.COMPLETED;
-    default:
-      return ProposalState.WAITING_TO_START;
-  }
-}
-
-type RawOffchainProposal = NonNullable<
-  NonNullable<
-    NonNullable<GetOffchainProposalsFromDaoQuery["offchainProposals"]>["items"]
-  >[number]
->;
-
-function transformOffchainProposal(p: RawOffchainProposal): GovernanceProposal {
-  const timeText = getTimeText(String(p.start), String(p.end));
-  return {
-    id: p.id,
-    daoId: p.spaceId,
-    txHash: "",
-    title: p.title || "Untitled Proposal",
-    status: offchainStateToProposalStatus(p.state),
-    state: offchainStateToProposalState(p.state),
-    proposer: p.author,
-    proposerAccountId: p.author,
-    timestamp: String(p.created),
-    startTimestamp: String(p.start),
-    endTimestamp: String(p.end),
-    votes: {
-      for: "0",
-      against: "0",
-      total: "0",
-      forPercentage: "0",
-      againstPercentage: "0",
-    },
-    quorum: "0",
-    timeText,
-    targets: [],
-    values: [],
-  };
+export interface UseOffchainProposalsParams extends Omit<
+  QueryOffchainProposalsArgs,
+  "skip" | "limit"
+> {
+  itemsPerPage?: number;
+  daoId?: DaoIdEnum;
 }
 
 export const useOffchainProposals = ({
   fromDate,
+  orderDirection = QueryInput_OffchainProposals_OrderDirection.Desc,
   status,
   itemsPerPage = 10,
   daoId,
-  skip = false,
 }: UseOffchainProposalsParams = {}): UseOffchainProposalsResult => {
   const [isPaginationLoading, setIsPaginationLoading] = useState(false);
-  const [allProposals, setAllProposals] = useState<GovernanceProposal[]>([]);
 
   const queryVariables = useMemo(
     () => ({
       skip: 0,
       limit: itemsPerPage,
-      orderDirection: QueryInput_OffchainProposals_OrderDirection.Desc,
+      orderDirection,
       status,
       fromDate,
     }),
-    [itemsPerPage, status, fromDate],
+    [itemsPerPage, orderDirection, status, fromDate],
   );
 
   const { data, loading, error, fetchMore } =
     useGetOffchainProposalsFromDaoQuery({
-      skip,
       variables: queryVariables,
+      skip: !daoId,
       notifyOnNetworkStatusChange: true,
       context: {
         headers: {
@@ -129,72 +69,61 @@ export const useOffchainProposals = ({
       },
     });
 
-  const rawProposals = useMemo(() => {
+  const proposals = useMemo(() => {
     return (data?.offchainProposals?.items ?? []).filter(
-      (p): p is RawOffchainProposal => p !== null,
+      (p): p is OffchainProposalItem => p !== null,
     );
   }, [data]);
 
-  useEffect(() => {
-    if (rawProposals.length > 0 && allProposals.length === 0) {
-      setAllProposals(rawProposals.map(transformOffchainProposal));
-    }
-  }, [rawProposals, allProposals.length]);
-
   const pagination: PaginationInfo = useMemo(() => {
     const totalCount = data?.offchainProposals?.totalCount ?? 0;
-    const currentItemsCount = allProposals.length;
+    const currentItemsCount = proposals.length;
+    const hasNextPage = currentItemsCount < totalCount;
+    const currentPage = Math.ceil(currentItemsCount / itemsPerPage);
+    const totalPages = Math.ceil(totalCount / itemsPerPage);
+
     return {
-      hasNextPage: currentItemsCount < totalCount,
+      hasNextPage,
       totalCount,
-      currentPage: Math.ceil(currentItemsCount / itemsPerPage),
-      totalPages: Math.ceil(totalCount / itemsPerPage),
+      currentPage,
+      totalPages,
       itemsPerPage,
       currentItemsCount,
     };
-  }, [data?.offchainProposals?.totalCount, allProposals.length, itemsPerPage]);
+  }, [data?.offchainProposals?.totalCount, proposals.length, itemsPerPage]);
 
   const fetchNextPage = useCallback(async () => {
     if (!pagination.hasNextPage || isPaginationLoading) return;
+
     setIsPaginationLoading(true);
+
     try {
       await fetchMore({
-        variables: { ...queryVariables, skip: allProposals.length },
+        variables: { ...queryVariables, skip: proposals.length },
         updateQuery: (
-          prev: GetOffchainProposalsFromDaoQuery,
+          previousResult: GetOffchainProposalsFromDaoQuery,
           {
             fetchMoreResult,
           }: { fetchMoreResult: GetOffchainProposalsFromDaoQuery },
         ) => {
-          const newItems = (
-            fetchMoreResult?.offchainProposals?.items ?? []
-          ).filter((p): p is RawOffchainProposal => p !== null);
-
-          if (newItems.length > 0) {
-            setAllProposals((existing) => [
-              ...existing,
-              ...newItems.map(transformOffchainProposal),
-            ]);
+          if (!fetchMoreResult?.offchainProposals?.items?.length) {
+            return previousResult;
           }
 
           return {
             ...fetchMoreResult,
             offchainProposals: {
-              totalCount:
-                fetchMoreResult.offchainProposals?.totalCount ??
-                prev.offchainProposals?.totalCount ??
-                0,
               ...fetchMoreResult.offchainProposals,
               items: [
-                ...(prev.offchainProposals?.items ?? []),
+                ...(previousResult.offchainProposals?.items ?? []),
                 ...(fetchMoreResult.offchainProposals?.items ?? []),
               ],
             },
           };
         },
       });
-    } catch (e) {
-      console.error("Error fetching next offchain proposals page:", e);
+    } catch (err) {
+      console.error("Error fetching next page:", err);
     } finally {
       setIsPaginationLoading(false);
     }
@@ -203,11 +132,11 @@ export const useOffchainProposals = ({
     pagination.hasNextPage,
     isPaginationLoading,
     queryVariables,
-    allProposals.length,
+    proposals.length,
   ]);
 
   return {
-    proposals: allProposals,
+    proposals,
     loading,
     error,
     pagination,

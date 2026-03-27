@@ -28,6 +28,8 @@ const PROPOSALS_QUERY = `
       updated
       link
       flagged
+      scores
+      choices
     }
   }
 `;

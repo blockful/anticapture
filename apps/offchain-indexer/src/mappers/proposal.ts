@@ -33,6 +33,14 @@ export const rawProposalSchema = z.object({
     .boolean()
     .nullish()
     .transform((val) => val ?? false),
+  scores: z
+    .array(z.number())
+    .nullish()
+    .transform((val) => val ?? []),
+  choices: z
+    .array(z.string())
+    .nullish()
+    .transform((val) => val ?? []),
 });
 
 export const offchainProposalSchema = (spaceId: string) =>

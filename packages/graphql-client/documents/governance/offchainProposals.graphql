@@ -17,11 +17,50 @@ query GetOffchainProposalsFromDao(
       spaceId
       author
       title
+      type
+      state
       start
       end
-      state
       created
-      link
+      updated
+      scores
+      choices
+    }
+    totalCount
+  }
+}
+
+query GetOffchainProposal($id: String!) {
+  offchainProposalById(id: $id) {
+    id
+    spaceId
+    author
+    title
+    body
+    type
+    state
+    start
+    end
+    created
+    updated
+    link
+    scores
+    choices
+  }
+}
+
+query GetOffchainVotesByProposalId(
+  $id: String!
+  $skip: NonNegativeInt
+  $limit: Float = 10
+) {
+  votesOffchainByProposalId(id: $id, skip: $skip, limit: $limit) {
+    items {
+      voter
+      choice
+      vp
+      reason
+      created
     }
     totalCount
   }

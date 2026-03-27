@@ -5,37 +5,71 @@ import { parseAsStringEnum, useQueryState } from "nuqs";
 
 import { ActionsTabContent } from "@/features/governance/components/proposal-overview/ActionTabContent";
 import { DescriptionTabContent } from "@/features/governance/components/proposal-overview/DescriptionTabContent";
+import { OffchainVotesContent } from "@/features/governance/components/proposal-overview/OffchainVotesContent";
 import { VotesTabContent } from "@/features/governance/components/proposal-overview/VotesTabContent";
+import type { ProposalViewData } from "@/features/governance/types";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn } from "@/shared/utils";
 
 type TabId = "description" | "votes" | "actions";
 
 interface TabsSectionProps {
-  proposal: NonNullable<GetProposalQuery["proposal"]>;
+  proposal: ProposalViewData;
   onAddressClick?: (address: string) => void;
+  isOffchain?: boolean;
+  offchainProposalId?: string;
+  offchainChoices?: string[];
+  offchainScores?: number[];
+  daoId?: DaoIdEnum;
 }
 
-export const TabsSection = ({ proposal, onAddressClick }: TabsSectionProps) => {
+export const TabsSection = ({
+  proposal,
+  onAddressClick,
+  isOffchain = false,
+  offchainProposalId,
+  offchainChoices = [],
+  offchainScores,
+  daoId,
+}: TabsSectionProps) => {
+  const allowedTabs: TabId[] = isOffchain
+    ? ["description", "votes"]
+    : ["description", "votes", "actions"];
+
   const [activeTab, setActiveTab] = useQueryState(
     "tab",
-    parseAsStringEnum<TabId>(["description", "votes", "actions"]).withDefault(
-      "description",
-    ),
+    parseAsStringEnum<TabId>(allowedTabs).withDefault("description"),
   );
+
+  const totalVotingPower =
+    isOffchain && offchainScores
+      ? offchainScores.reduce((sum, s) => sum + s, 0)
+      : 0;
+
+  const onchainProposal = proposal as NonNullable<GetProposalQuery["proposal"]>;
 
   const renderTabContent = () => {
     switch (activeTab) {
       case "description":
-        return <DescriptionTabContent proposal={proposal} />;
+        return <DescriptionTabContent proposal={onchainProposal} />;
       case "votes":
-        return (
+        return isOffchain && offchainProposalId && daoId ? (
+          <OffchainVotesContent
+            proposalId={offchainProposalId}
+            daoId={daoId}
+            totalVotingPower={totalVotingPower}
+            choices={offchainChoices}
+          />
+        ) : (
           <VotesTabContent
-            proposal={proposal}
+            proposal={onchainProposal}
             onAddressClick={onAddressClick}
           />
         );
       case "actions":
-        return <ActionsTabContent proposal={proposal} />;
+        return isOffchain ? null : (
+          <ActionsTabContent proposal={onchainProposal} />
+        );
     }
   };
 
@@ -55,12 +89,14 @@ export const TabsSection = ({ proposal, onAddressClick }: TabsSectionProps) => {
         >
           Votes
         </Tab>
-        <Tab
-          isActive={activeTab === "actions"}
-          onClick={() => setActiveTab("actions")}
-        >
-          Actions
-        </Tab>
+        {!isOffchain && (
+          <Tab
+            isActive={activeTab === "actions"}
+            onClick={() => setActiveTab("actions")}
+          >
+            Actions
+          </Tab>
+        )}
       </div>
 
       <div className="flex-1">{renderTabContent()}</div>
