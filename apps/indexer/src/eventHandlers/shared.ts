@@ -6,6 +6,33 @@ import { MetricTypesEnum } from "@/lib/constants";
 import { delta, max, min } from "@/lib/utils";
 import { truncateTimestampToMidnight } from "@/lib/date-helpers";
 
+export type AddressCollection = readonly Address[] | ReadonlySet<Address>;
+
+const normalizeAddressCollection = (
+  addresses: AddressCollection,
+): Address[] => {
+  if (Array.isArray(addresses)) {
+    return [...new Set(addresses.map((address) => getAddress(address)))];
+  }
+
+  return [...addresses];
+};
+
+export const createAddressSet = (
+  addresses: readonly Address[],
+): ReadonlySet<Address> =>
+  new Set(addresses.map((address) => getAddress(address)));
+
+export const toAddressSet = (
+  addresses: AddressCollection,
+): ReadonlySet<Address> => {
+  if (Array.isArray(addresses)) {
+    return new Set(addresses.map((address) => getAddress(address)));
+  }
+
+  return addresses as ReadonlySet<Address>;
+};
+
 export const ensureAccountExists = async (
   context: Context,
   address: Address,
@@ -25,9 +52,15 @@ export const ensureAccountsExist = async (
   context: Context,
   addresses: Address[],
 ): Promise<void> => {
-  await Promise.all(
-    addresses.map((address) => ensureAccountExists(context, address)),
-  );
+  const normalizedAddresses = normalizeAddressCollection(addresses);
+  if (normalizedAddresses.length === 0) {
+    return;
+  }
+
+  await context.db
+    .insert(account)
+    .values(normalizedAddresses.map((id) => ({ id })))
+    .onConflictDoNothing();
 };
 
 export const storeDailyBucket = async (
@@ -68,58 +101,23 @@ export const storeDailyBucket = async (
     }));
 };
 
-export const createOrUpdateTransaction = async (
-  context: Context,
-  transactionHash: string,
-  from: Address,
-  to: Address,
-  timestamp: bigint,
-) => {
-  await context.db
-    .insert(transaction)
-    .values({
-      transactionHash,
-      fromAddress: getAddress(from),
-      toAddress: getAddress(to),
-      timestamp,
-    })
-    .onConflictDoNothing(); // Only create if doesn't exist
-};
-
-export const updateTransactionFlags = async (
-  context: Context,
-  transactionHash: string,
-  isCex: boolean,
-  isDex: boolean,
-  isLending: boolean,
-  isTotal: boolean,
-) => {
-  await context.db.update(transaction, { transactionHash }).set((existing) => ({
-    // Use OR logic to accumulate flags from multiple events
-    isCex: existing.isCex || isCex,
-    isDex: existing.isDex || isDex,
-    isLending: existing.isLending || isLending,
-    isTotal: existing.isTotal || isTotal,
-  }));
-};
-
 export const handleTransaction = async (
   context: Context,
   transactionHash: string,
   from: Address,
   to: Address,
   timestamp: bigint,
-  addresses: Address[], // The addresses involved in this event
+  addresses: AddressCollection, // The addresses involved in this event
   {
     cex = [],
     dex = [],
     lending = [],
     burning = [],
   }: {
-    cex?: Address[];
-    dex?: Address[];
-    lending?: Address[];
-    burning?: Address[];
+    cex?: AddressCollection;
+    dex?: AddressCollection;
+    lending?: AddressCollection;
+    burning?: AddressCollection;
   } = {
     cex: [],
     dex: [],
@@ -127,26 +125,41 @@ export const handleTransaction = async (
     burning: [],
   },
 ) => {
-  await createOrUpdateTransaction(
-    context,
-    transactionHash,
-    from,
-    to,
-    timestamp,
+  const normalizedAddresses = normalizeAddressCollection(addresses);
+  const normalizedCex = toAddressSet(cex);
+  const normalizedDex = toAddressSet(dex);
+  const normalizedLending = toAddressSet(lending);
+  const normalizedBurning = toAddressSet(burning);
+
+  const isCex = normalizedAddresses.some((addr) => normalizedCex.has(addr));
+  const isDex = normalizedAddresses.some((addr) => normalizedDex.has(addr));
+  const isLending = normalizedAddresses.some((addr) =>
+    normalizedLending.has(addr),
+  );
+  const isTotal = normalizedAddresses.some((addr) =>
+    normalizedBurning.has(addr),
   );
 
-  const normalizedAddresses = addresses.map((a) => getAddress(a));
-  const normalizedCex = cex.map((a) => getAddress(a));
-  const normalizedDex = dex.map((a) => getAddress(a));
-  const normalizedLending = lending.map((a) => getAddress(a));
-  const normalizedBurning = burning.map((a) => getAddress(a));
+  if (!(isCex || isDex || isLending || isTotal)) {
+    return;
+  }
 
-  await updateTransactionFlags(
-    context,
-    transactionHash,
-    normalizedAddresses.some((addr) => normalizedCex.includes(addr)),
-    normalizedAddresses.some((addr) => normalizedDex.includes(addr)),
-    normalizedAddresses.some((addr) => normalizedLending.includes(addr)),
-    normalizedAddresses.some((addr) => normalizedBurning.includes(addr)),
-  );
+  await context.db
+    .insert(transaction)
+    .values({
+      transactionHash,
+      fromAddress: getAddress(from),
+      toAddress: getAddress(to),
+      timestamp,
+      isCex,
+      isDex,
+      isLending,
+      isTotal,
+    })
+    .onConflictDoUpdate((existing) => ({
+      isCex: existing.isCex || isCex,
+      isDex: existing.isDex || isDex,
+      isLending: existing.isLending || isLending,
+      isTotal: existing.isTotal || isTotal,
+    }));
 };

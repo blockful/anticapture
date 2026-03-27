@@ -2,7 +2,7 @@ import { Address, getAddress } from "viem";
 import { token } from "ponder:schema";
 import { Context } from "ponder:registry";
 
-import { storeDailyBucket } from "../shared";
+import { AddressCollection, storeDailyBucket, toAddressSet } from "../shared";
 import { MetricTypesEnum } from "@/lib/constants";
 
 export const updateSupplyMetric = async (
@@ -13,7 +13,7 @@ export const updateSupplyMetric = async (
     | "dexSupply"
     | "treasury"
     | "nonCirculatingSupply",
-  addressList: Address[],
+  addressList: AddressCollection,
   metricType: MetricTypesEnum,
   from: Address,
   to: Address,
@@ -22,9 +22,9 @@ export const updateSupplyMetric = async (
   tokenAddress: Address,
   timestamp: bigint,
 ) => {
-  const normalizedAddressList = addressList.map((a) => getAddress(a));
-  const isToRelevant = normalizedAddressList.includes(getAddress(to));
-  const isFromRelevant = normalizedAddressList.includes(getAddress(from));
+  const normalizedAddressList = toAddressSet(addressList);
+  const isToRelevant = normalizedAddressList.has(getAddress(to));
+  const isFromRelevant = normalizedAddressList.has(getAddress(from));
 
   if ((isToRelevant || isFromRelevant) && !(isToRelevant && isFromRelevant)) {
     let currentSupply: bigint = 0n;
@@ -49,5 +49,9 @@ export const updateSupplyMetric = async (
       timestamp,
       tokenAddress,
     );
+
+    return true;
   }
+
+  return false;
 };

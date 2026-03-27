@@ -72,4 +72,5 @@ export const OffchainProposalsRequestSchema = z.object({
     .union([z.string().transform((a) => [a]), z.array(z.string())])
     .optional(),
   fromDate: z.coerce.number().optional(),
+  endDate: z.coerce.number().optional(),
 });

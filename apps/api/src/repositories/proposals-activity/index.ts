@@ -25,7 +25,7 @@ export type DbVote = {
   voter_account_id: string;
   proposal_id: string;
   support: string;
-  voting_power: string;
+  voting_power: bigint;
   reason: string;
   timestamp: string;
 };
@@ -215,7 +215,7 @@ export class DrizzleProposalsActivityRepository {
             voter_account_id: row.voter_account_id!,
             proposal_id: row.proposal_id!,
             support: row.support!,
-            voting_power: row.voting_power!,
+            voting_power: BigInt(row.voting_power!),
             reason: row.reason!,
             timestamp: row.vote_timestamp!,
           }

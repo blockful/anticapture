@@ -24,6 +24,10 @@ export const updateCirculatingSupply = async (
       };
     });
 
+  if (currentCirculatingSupply === newCirculatingSupply) {
+    return false;
+  }
+
   await storeDailyBucket(
     context,
     MetricTypesEnum.CIRCULATING_SUPPLY,
@@ -33,4 +37,6 @@ export const updateCirculatingSupply = async (
     timestamp,
     tokenAddress,
   );
+
+  return true;
 };
