@@ -4,22 +4,30 @@ import { Building2, Pencil } from "lucide-react";
 import { useState } from "react";
 
 import { ServiceProvidersTable } from "@/features/service-providers/components/ServiceProvidersTable";
-import { SPP_PROGRAMS } from "@/features/service-providers/constants/ens-service-providers";
+import { UPDATE_STATUS_URL } from "@/features/service-providers/constants/github";
 import { useServiceProvidersData } from "@/features/service-providers/hooks/useServiceProvidersData";
-import type { SPPKey } from "@/features/service-providers/types";
 import { TheSectionLayout } from "@/shared/components/containers/TheSectionLayout";
 import { InlineAlert } from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
-import { SubSectionsContainer } from "@/shared/components/design-system/section";
+import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import {
+  BulletDivider,
+  SubSectionsContainer,
+} from "@/shared/components/design-system/section";
 import { PillTabGroup } from "@/shared/components/design-system/tabs/pill-tab-group/PillTabGroup";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 
-const UPDATE_STATUS_URL =
-  "https://github.com/blockful/spp-accountability/blob/main/README.md";
-
 export const ServiceProvidersSection = () => {
-  const { data: providers = [], isLoading } = useServiceProvidersData();
-  const [selectedSpp, setSelectedSpp] = useState<SPPKey>("SPP2");
+  const { programKeys, programs, getProvidersForProgram, isLoading, isError } =
+    useServiceProvidersData();
+  const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
+
+  const activeProgram =
+    selectedProgram && programKeys.includes(selectedProgram)
+      ? selectedProgram
+      : (programKeys[programKeys.length - 1] ?? null);
+
+  const activeProgramDef = activeProgram ? programs[activeProgram] : null;
 
   return (
     <TheSectionLayout
@@ -35,28 +43,70 @@ export const ServiceProvidersSection = () => {
         </a>
       }
     >
-      <InlineAlert
-        text="Report status updates are made via GitHub pull requests and must include a link to the published DAO forum post."
-        variant="info"
-      />
-      <SubSectionsContainer>
-        <div className="flex flex-col gap-4">
-          <PillTabGroup
-            tabs={SPP_PROGRAMS.map((spp) => ({
-              label: spp,
-              value: spp,
-            }))}
-            activeTab={selectedSpp}
-            onTabChange={(value) => setSelectedSpp(value as SPPKey)}
+      {isError ? (
+        <InlineAlert
+          text="Unable to load service provider data. Please try again later."
+          variant="error"
+        />
+      ) : (
+        <>
+          <InlineAlert
+            text="Report status updates are made via GitHub pull requests and must include a link to the published DAO forum post."
+            variant="info"
           />
+          <SubSectionsContainer>
+            <div className="flex flex-col gap-4">
+              {programKeys.length > 1 && (
+                <div className="flex items-center justify-between gap-3">
+                  <PillTabGroup
+                    tabs={programKeys.map((key) => ({
+                      label: key,
+                      value: key,
+                    }))}
+                    activeTab={activeProgram ?? ""}
+                    onTabChange={(value) => setSelectedProgram(value)}
+                  />
+                  {activeProgramDef && (
+                    <div className="flex items-center gap-1.5">
+                      <DefaultLink
+                        size="sm"
+                        openInNewTab
+                        href={activeProgramDef.discussionUrl}
+                      >
+                        DISCUSSION
+                      </DefaultLink>
+                      <BulletDivider />
+                      <DefaultLink
+                        size="sm"
+                        openInNewTab
+                        href={activeProgramDef.budgetProposal.forumUrl}
+                      >
+                        {activeProgramDef.budgetProposal.title.toUpperCase()}
+                      </DefaultLink>
+                      <BulletDivider />
+                      <DefaultLink
+                        size="sm"
+                        openInNewTab
+                        href={activeProgramDef.selectionProposal.forumUrl}
+                      >
+                        {activeProgramDef.selectionProposal.title.toUpperCase()}
+                      </DefaultLink>
+                    </div>
+                  )}
+                </div>
+              )}
 
-          <ServiceProvidersTable
-            providers={providers}
-            spp={selectedSpp}
-            isLoading={isLoading}
-          />
-        </div>
-      </SubSectionsContainer>
+              {activeProgram && (
+                <ServiceProvidersTable
+                  providers={getProvidersForProgram(activeProgram)}
+                  program={programs[activeProgram]}
+                  isLoading={isLoading}
+                />
+              )}
+            </div>
+          </SubSectionsContainer>
+        </>
+      )}
     </TheSectionLayout>
   );
 };
