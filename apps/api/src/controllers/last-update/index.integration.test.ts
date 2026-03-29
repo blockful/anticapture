@@ -113,19 +113,10 @@ describe("lastUpdate Controller", () => {
       expect(res.status).toBe(400);
     });
 
-    it("should return 200 when chart query param is missing", async () => {
-      await db.insert(daoMetricsDayBucket).values(
-        createMetric({
-          metricType: MetricTypesEnum.TREASURY,
-          lastUpdate: expectedTimestamp,
-        }),
-      );
-
+    it("should return 400 when chart query param is missing", async () => {
       const res = await app.request("/last-update");
 
-      expect(res.status).toBe(200);
-      const body = await res.json();
-      expect(body).toEqual({ lastUpdate: "2023-11-14T22:13:20.000Z" });
+      expect(res.status).toBe(400);
     });
 
     it("should return the most recent lastUpdate when multiple records exist", async () => {

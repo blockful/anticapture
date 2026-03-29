@@ -74,8 +74,8 @@ describe("Token Distribution Controller (integration)", () => {
       expect(res.status).toBe(200);
       const body = await res.json();
       expect(body).toEqual({
-        oldTotalSupply: "0",
-        currentTotalSupply: "0",
+        previousValue: "0",
+        currentValue: "0",
         changeRate: 0,
       });
     });
@@ -101,9 +101,9 @@ describe("Token Distribution Controller (integration)", () => {
       expect(res.status).toBe(200);
       const body = await res.json();
       expect(body).toEqual({
-        currentTotalSupply: "1200000000000000000",
-        oldTotalSupply: "1000000000000000000",
-        changeRate: "0.20",
+        currentValue: "1200000000000000000",
+        previousValue: "1000000000000000000",
+        changeRate: 0.2,
       });
     });
 
@@ -128,8 +128,8 @@ describe("Token Distribution Controller (integration)", () => {
       expect(res.status).toBe(200);
       const body = await res.json();
       expect(body).toEqual({
-        currentTotalSupply: "1000000000000000000",
-        oldTotalSupply: "0",
+        currentValue: "1000000000000000000",
+        previousValue: "0",
         changeRate: 0,
       });
     });
@@ -140,8 +140,8 @@ describe("Token Distribution Controller (integration)", () => {
       expect(res.status).toBe(200);
       const body = await res.json();
       expect(body).toEqual({
-        oldTotalSupply: "0",
-        currentTotalSupply: "0",
+        previousValue: "0",
+        currentValue: "0",
         changeRate: 0,
       });
     });
@@ -167,9 +167,9 @@ describe("Token Distribution Controller (integration)", () => {
       expect(res.status).toBe(200);
       const body = await res.json();
       expect(body).toEqual({
-        currentTotalSupply: "1200000000000000000",
-        oldTotalSupply: "1000000000000000000",
-        changeRate: "0.20",
+        currentValue: "1200000000000000000",
+        previousValue: "1000000000000000000",
+        changeRate: 0.2,
       });
     });
   });
@@ -195,11 +195,9 @@ describe("Token Distribution Controller (integration)", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body).toEqual({
-        oldDelegatedSupply: 500,
-        currentDelegatedSupply: 600,
-        changeRate: "0.20",
-      });
+      expect(body.changeRate).toBe(0.2);
+      expect(String(body.previousValue)).toBe("500");
+      expect(String(body.currentValue)).toBe("600");
     });
   });
 
@@ -224,11 +222,9 @@ describe("Token Distribution Controller (integration)", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body).toEqual({
-        oldTreasury: 1000,
-        currentTreasury: 1100,
-        changeRate: "0.10",
-      });
+      expect(body.changeRate).toBe(0.1);
+      expect(String(body.previousValue)).toBe("1000");
+      expect(String(body.currentValue)).toBe("1100");
     });
   });
 
@@ -239,8 +235,8 @@ describe("Token Distribution Controller (integration)", () => {
       expect(res.status).toBe(200);
       const body = await res.json();
       expect(body).toEqual({
-        oldLendingSupply: "0",
-        currentLendingSupply: "0",
+        previousValue: "0",
+        currentValue: "0",
         changeRate: 0,
       });
     });

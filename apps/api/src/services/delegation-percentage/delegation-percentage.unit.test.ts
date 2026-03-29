@@ -71,6 +71,7 @@ describe("DelegationPercentageService", () => {
         items: [],
         totalCount: 0,
         hasNextPage: false,
+        hasPreviousPage: false,
         startDate: null,
         endDate: null,
       } satisfies DelegationPercentageServiceResult);
@@ -103,6 +104,7 @@ describe("DelegationPercentageService", () => {
         items: [{ date: "1600041600", high: "50.00" }],
         totalCount: 1,
         hasNextPage: false,
+        hasPreviousPage: false,
         startDate: "1600041600",
         endDate: "1600041600",
       } satisfies DelegationPercentageServiceResult);
@@ -156,6 +158,7 @@ describe("DelegationPercentageService", () => {
         ],
         totalCount: 3,
         hasNextPage: false,
+        hasPreviousPage: false,
         startDate: day1.toString(),
         endDate: day3.toString(),
       } satisfies DelegationPercentageServiceResult);
@@ -188,6 +191,7 @@ describe("DelegationPercentageService", () => {
         items: [{ date: "1600041600", high: "0.00" }],
         totalCount: 1,
         hasNextPage: false,
+        hasPreviousPage: false,
         startDate: "1600041600",
         endDate: "1600041600",
       } satisfies DelegationPercentageServiceResult);
@@ -231,6 +235,7 @@ describe("DelegationPercentageService", () => {
         ],
         totalCount: 3,
         hasNextPage: true,
+        hasPreviousPage: false,
         startDate: "1600041600",
         endDate: "1600214400",
       } satisfies DelegationPercentageServiceResult);
@@ -274,6 +279,7 @@ describe("DelegationPercentageService", () => {
         ],
         totalCount: 3,
         hasNextPage: false,
+        hasPreviousPage: false,
         startDate: "1600214400",
         endDate: "1600041600",
       } satisfies DelegationPercentageServiceResult);
@@ -301,6 +307,7 @@ describe("DelegationPercentageService", () => {
         items: [],
         totalCount: 0,
         hasNextPage: false,
+        hasPreviousPage: false,
         startDate: null,
         endDate: null,
       } satisfies DelegationPercentageServiceResult);
@@ -358,6 +365,7 @@ describe("DelegationPercentageService", () => {
         ],
         totalCount: 4,
         hasNextPage: false,
+        hasPreviousPage: false,
         startDate: day1.toString(),
         endDate: day4.toString(),
       } satisfies DelegationPercentageServiceResult);
@@ -418,6 +426,7 @@ describe("DelegationPercentageService", () => {
         items: expectedItems,
         totalCount: 6,
         hasNextPage: false,
+        hasPreviousPage: false,
         startDate: day100.toString(),
         endDate: day105.toString(),
       } satisfies DelegationPercentageServiceResult);
@@ -459,6 +468,7 @@ describe("DelegationPercentageService", () => {
         items: [{ date: day100.toString(), high: "30.00" }],
         totalCount: 1,
         hasNextPage: false,
+        hasPreviousPage: false,
         startDate: day100.toString(),
         endDate: day100.toString(),
       } satisfies DelegationPercentageServiceResult);
@@ -497,6 +507,7 @@ describe("DelegationPercentageService", () => {
         items: [{ date: day100.toString(), high: "50.00" }],
         totalCount: 1,
         hasNextPage: false,
+        hasPreviousPage: false,
         startDate: day100.toString(),
         endDate: day100.toString(),
       } satisfies DelegationPercentageServiceResult);
@@ -514,6 +525,7 @@ describe("DelegationPercentageService", () => {
         items: [],
         totalCount: 0,
         hasNextPage: false,
+        hasPreviousPage: false,
         startDate: null,
         endDate: null,
       } satisfies DelegationPercentageServiceResult);
@@ -557,6 +569,7 @@ describe("DelegationPercentageService", () => {
         items: [{ date: day100.toString(), high: "50.00" }],
         totalCount: 1,
         hasNextPage: false,
+        hasPreviousPage: false,
         startDate: day100.toString(),
         endDate: day100.toString(),
       } satisfies DelegationPercentageServiceResult);
@@ -626,6 +639,7 @@ describe("DelegationPercentageService", () => {
         items: expectedItems,
         totalCount: 6,
         hasNextPage: false,
+        hasPreviousPage: false,
         startDate: day10.toString(),
         endDate: day15.toString(),
       } satisfies DelegationPercentageServiceResult);
@@ -653,6 +667,7 @@ describe("DelegationPercentageService", () => {
         items: [],
         totalCount: 0,
         hasNextPage: false,
+        hasPreviousPage: false,
         startDate: null,
         endDate: null,
       } satisfies DelegationPercentageServiceResult);
@@ -742,6 +757,7 @@ describe("DelegationPercentageService", () => {
         items: limitedItems,
         totalCount: limitedItems.length,
         hasNextPage,
+        hasPreviousPage: true,
         startDate: limitedItems[0]?.date ?? null,
         endDate: limitedItems[limitedItems.length - 1]?.date ?? null,
       } satisfies DelegationPercentageServiceResult);
@@ -797,6 +813,7 @@ describe("DelegationPercentageService", () => {
         items: expectedItems,
         totalCount: expectedItems.length,
         hasNextPage: false,
+        hasPreviousPage: true,
         startDate: day1.toString(),
         endDate: day50.toString(),
       } satisfies DelegationPercentageServiceResult);
@@ -842,6 +859,7 @@ describe("DelegationPercentageService", () => {
         items: expectedItems,
         totalCount: 4,
         hasNextPage: false,
+        hasPreviousPage: false,
         startDate: threeDaysAgoMidnight.toString(),
         endDate: FIXED_TIMESTAMP.toString(),
       } satisfies DelegationPercentageServiceResult);
@@ -882,6 +900,7 @@ describe("DelegationPercentageService", () => {
         ],
         totalCount: 3,
         hasNextPage: false,
+        hasPreviousPage: false,
         startDate: twoDaysAgoMidnight.toString(),
         endDate: FIXED_TIMESTAMP.toString(),
       } satisfies DelegationPercentageServiceResult);
@@ -924,6 +943,7 @@ describe("DelegationPercentageService", () => {
         ],
         totalCount: 3,
         hasNextPage: true,
+        hasPreviousPage: false,
         startDate: tenDaysAgoMidnight.toString(),
         endDate: (tenDaysAgoMidnight + 2 * ONE_DAY).toString(),
       } satisfies DelegationPercentageServiceResult);
