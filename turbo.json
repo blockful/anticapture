@@ -15,6 +15,9 @@
       "persistent": true,
       "cache": false
     },
+    "@anticapture/graphql-client#dev": {
+      "persistent": true
+    },
     "@anticapture/dashboard#build": {
       "dependsOn": ["@anticapture/graphql-client#codegen"],
       "outputs": ["dist/**", ".next/**", ".next/cache/**"]
