@@ -69,8 +69,8 @@
       "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"]
     },
     "codegen": {
-      "inputs": ["packages/graphql-client/documents/**/*"],
-      "outputs": ["packages/graphql-client/generated/**"]
+      "inputs": ["documents/**/*", "codegen.ts"],
+      "outputs": ["generated/**"]
     },
     "db:generate": {
       "inputs": ["src/**/*.ts"],
