@@ -1,12 +1,12 @@
 query GetFeedEvents(
-  $skip: Float
-  $limit: Float = 10
+  $skip: Int
+  $limit: Int = 10
   $orderBy: queryInput_feedEvents_orderBy = timestamp
-  $orderDirection: queryInput_feedEvents_orderDirection = desc
-  $relevance: queryInput_feedEvents_relevance = MEDIUM
-  $type: queryInput_feedEvents_type
-  $fromDate: Float
-  $toDate: Float
+  $orderDirection: OrderDirection = desc
+  $relevance: FeedRelevance! = MEDIUM
+  $type: FeedEventType!
+  $fromDate: Int
+  $toDate: Int
 ) {
   feedEvents(
     skip: $skip

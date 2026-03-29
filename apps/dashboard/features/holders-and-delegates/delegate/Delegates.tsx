@@ -1,6 +1,6 @@
 "use client";
 
-import type { QueryInput_VotingPowers_OrderDirection } from "@anticapture/graphql-client";
+import type { OrderDirection } from "@anticapture/graphql-client";
 import { QueryInput_VotingPowers_OrderBy } from "@anticapture/graphql-client";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Plus } from "lucide-react";
@@ -111,7 +111,7 @@ export const Delegates = ({
     isActivityLoadingFor,
   } = useDelegates({
     orderBy: orderByMap[sortBy],
-    orderDirection: sortOrder as QueryInput_VotingPowers_OrderDirection,
+    orderDirection: sortOrder as OrderDirection,
     daoId,
     days: timePeriod,
     address: currentAddressFilter || undefined,

@@ -1,0 +1,5 @@
+query CompareActiveSupply($days: DaysWindow! = _365d) {
+  compareActiveSupply(days: $days) {
+    activeSupply
+  }
+}

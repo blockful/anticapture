@@ -1,4 +1,3 @@
-import type { GetProposalQuery } from "@anticapture/graphql-client";
 import {
   BarChart4,
   Check,
@@ -10,6 +9,7 @@ import {
 import { formatUnits } from "viem";
 
 import { ProposalInfoText } from "@/features/governance/components/proposal-overview/ProposalInfoText";
+import type { ProposalDetails } from "@/features/governance/types";
 import { getTimeLeftText } from "@/features/governance/utils";
 import { BulletDivider } from "@/shared/components/design-system/section";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
@@ -20,13 +20,13 @@ const VotingProgressBar = ({
   endTimestamp,
   timeLeftText,
 }: {
-  startTimestamp: string;
-  endTimestamp: string;
+  startTimestamp: number;
+  endTimestamp: number;
   timeLeftText: string;
 }) => {
   const now = Date.now() / 1000;
-  const startTime = parseInt(startTimestamp);
-  const endTime = parseInt(endTimestamp);
+  const startTime = Number(startTimestamp);
+  const endTime = Number(endTimestamp);
 
   // Calculate progress percentage (how much time has elapsed)
   const totalDuration = endTime - startTime;
@@ -64,7 +64,7 @@ export const ProposalInfoSection = ({
   proposal,
   decimals,
 }: {
-  proposal: NonNullable<GetProposalQuery["proposal"]>;
+  proposal: ProposalDetails;
   decimals: number;
 }) => {
   const totalVotes =
@@ -74,7 +74,7 @@ export const ProposalInfoSection = ({
 
   const quorumVotes = Number(proposal.forVotes) + Number(proposal.abstainVotes);
 
-  const timeLeftText = getTimeLeftText(proposal.endTimestamp);
+  const timeLeftText = getTimeLeftText(proposal.endTimestamp.toString());
 
   const forVotesPercentage =
     totalVotes === 0 ? 0 : (Number(proposal.forVotes) / totalVotes) * 100;

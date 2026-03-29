@@ -68,6 +68,7 @@ describe("DelegationPercentage Controller", () => {
         totalCount: 0,
         pageInfo: {
           hasNextPage: false,
+          hasPreviousPage: false,
           startDate: null,
           endDate: null,
         },
@@ -98,6 +99,7 @@ describe("DelegationPercentage Controller", () => {
         totalCount: 1,
         pageInfo: {
           hasNextPage: false,
+          hasPreviousPage: false,
           startDate: "1699920000",
           endDate: "1699920000",
         },
@@ -114,6 +116,7 @@ describe("DelegationPercentage Controller", () => {
         totalCount: 0,
         pageInfo: {
           hasNextPage: false,
+          hasPreviousPage: false,
           startDate: null,
           endDate: null,
         },
@@ -158,6 +161,7 @@ describe("DelegationPercentage Controller", () => {
         totalCount: 1,
         pageInfo: {
           hasNextPage: true,
+          hasPreviousPage: false,
           startDate: String(DATE_2),
           endDate: String(DATE_2),
         },

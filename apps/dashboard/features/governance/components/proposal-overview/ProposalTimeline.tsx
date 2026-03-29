@@ -1,9 +1,10 @@
-import type { GetProposalQuery } from "@anticapture/graphql-client";
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 
+import type { ProposalDetails } from "@/features/governance/types";
+
 interface ProposalTimelineProps {
-  proposal: NonNullable<GetProposalQuery["proposal"]>;
+  proposal: ProposalDetails;
   blockExplorerUrl?: string;
 }
 
@@ -12,9 +13,9 @@ export const ProposalTimeline = ({
   blockExplorerUrl = "https://etherscan.io",
 }: ProposalTimelineProps) => {
   const now = Date.now() / 1000;
-  const createdTime = parseInt(proposal.timestamp);
-  const startTime = parseInt(proposal.startTimestamp);
-  const endTime = parseInt(proposal.endTimestamp);
+  const createdTime = Number(proposal.timestamp);
+  const startTime = Number(proposal.startTimestamp);
+  const endTime = Number(proposal.endTimestamp);
 
   const formatTimestamp = (timestamp: number) => {
     return new Date(timestamp * 1000).toLocaleDateString("en-US", {

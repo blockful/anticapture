@@ -1,4 +1,3 @@
-import type { GetProposalQuery } from "@anticapture/graphql-client";
 import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { useParams } from "next/navigation";
@@ -7,6 +6,7 @@ import { formatUnits } from "viem";
 
 import { VotesTable } from "@/features/governance/components/proposal-overview/VotesTable";
 import type { NonVoter } from "@/features/governance/hooks/useNonVoters";
+import type { ProposalDetails } from "@/features/governance/types";
 import { useNonVoters } from "@/features/governance/hooks/useNonVoters";
 import { SkeletonRow, Button } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
@@ -18,7 +18,7 @@ import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 
 interface TabsDidntVoteContentProps {
-  proposal: NonNullable<GetProposalQuery["proposal"]>;
+  proposal: ProposalDetails;
   onAddressClick?: (address: string) => void;
 }
 

@@ -175,9 +175,6 @@ export default [
         },
       ],
 
-      // No nested ternaries
-      "no-nested-ternary": "warn",
-
       // Import boundaries: no barrel files, prefer @/* aliases
       "no-restricted-imports": [
         "warn",
@@ -220,7 +217,11 @@ export default [
 
   // Dashboard — enforce named exports (no default exports except App Router pages/layouts)
   {
-    files: ["apps/dashboard/features/**/*.{ts,tsx}", "apps/dashboard/shared/**/*.{ts,tsx}", "apps/dashboard/widgets/**/*.{ts,tsx}"],
+    files: [
+      "apps/dashboard/features/**/*.{ts,tsx}",
+      "apps/dashboard/shared/**/*.{ts,tsx}",
+      "apps/dashboard/widgets/**/*.{ts,tsx}",
+    ],
     rules: {
       "import/no-default-export": "warn",
     },

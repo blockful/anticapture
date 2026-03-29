@@ -1,7 +1,7 @@
-import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
+import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import { Drizzle } from "@/database";
-import { ChartType } from "@/mappers/";
+import { LastUpdateQuerySchema, LastUpdateResponseSchema } from "@/mappers/";
 import { LastUpdateRepositoryImpl } from "@/repositories";
 import { LastUpdateService } from "@/services";
 
@@ -14,19 +14,16 @@ export function lastUpdate(app: Hono, db: Drizzle) {
       operationId: "lastUpdate",
       path: "/last-update",
       summary: "Get the last update time",
+      tags: ["metrics"],
       request: {
-        query: z.object({
-          chart: z.nativeEnum(ChartType),
-        }),
+        query: LastUpdateQuerySchema,
       },
       responses: {
         200: {
           description: "Last update time",
           content: {
             "application/json": {
-              schema: z.object({
-                lastUpdate: z.string(),
-              }),
+              schema: LastUpdateResponseSchema,
             },
           },
         },

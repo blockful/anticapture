@@ -26,8 +26,8 @@ export class TransfersRepository {
 
   async getTransfers(req: TransfersRequest): Promise<DBTransfer[]> {
     const sortBy =
-      req.sortBy === "timestamp" ? transfer.timestamp : transfer.amount;
-    const orderBy = req.sortOrder === "desc" ? desc(sortBy) : asc(sortBy);
+      req.orderBy === "timestamp" ? transfer.timestamp : transfer.amount;
+    const orderBy = req.orderDirection === "desc" ? desc(sortBy) : asc(sortBy);
 
     const addressQuery = this.buildAddressQuery(req);
     if (!addressQuery) return [];
@@ -44,7 +44,7 @@ export class TransfersRepository {
           req.toValue ? lte(transfer.amount, req.toValue) : undefined,
         ),
       limit: req.limit,
-      offset: req.offset,
+      offset: req.skip,
       orderBy,
     });
   }

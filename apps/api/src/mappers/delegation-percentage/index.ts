@@ -1,7 +1,14 @@
-import { z } from "zod";
+import { z } from "@hono/zod-openapi";
 
 import { daoMetricsDayBucket } from "@/database";
 import { SECONDS_IN_DAY } from "@/lib/enums";
+
+import {
+  OrderDirectionSchema,
+  PageInfoSchema,
+  paginationLimitQueryParam,
+  unixTimestampQueryParam,
+} from "../shared";
 
 export type DBTokenMetric = typeof daoMetricsDayBucket.$inferSelect;
 
@@ -9,55 +16,73 @@ export type DBTokenMetric = typeof daoMetricsDayBucket.$inferSelect;
 
 // Base schema for filters
 const BaseFiltersSchema = z.object({
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
-  orderDirection: z.enum(["asc", "desc"]).optional(),
-  limit: z.number().optional(),
+  startDate: unixTimestampQueryParam(
+    "Inclusive lower bound cursor in Unix seconds.",
+  ),
+  endDate: unixTimestampQueryParam(
+    "Inclusive upper bound cursor in Unix seconds.",
+  ),
+  orderDirection: OrderDirectionSchema.optional(),
+  limit: z.number().optional().openapi({
+    description: "Optional limit used by internal filters.",
+    example: 365,
+    type: "integer",
+  }),
 });
 
 // Repository filters schema
 export const RepositoryFiltersSchema = BaseFiltersSchema.extend({
-  orderDirection: z.enum(["asc", "desc"]).default("asc"),
-  limit: z.number(), // Required in repository layer
+  orderDirection: OrderDirectionSchema.optional(),
+  limit: z.number().int(), // Required in repository layer
 });
 
 // HTTP query schema (extends base with pagination cursors and HTTP validations)
 export const DelegationPercentageRequestSchema = BaseFiltersSchema.extend({
   // Cursor for pagination - returns items after this date (exclusive)
-  after: z.string().optional(),
+  after: unixTimestampQueryParam(
+    "Return items after this cursor, exclusive, in Unix seconds.",
+  ),
   // Cursor for pagination - returns items before this date (exclusive)
-  before: z.string().optional(),
-  orderDirection: z.enum(["asc", "desc"]).default("asc"),
-  limit: z.coerce.number().int().positive().max(1000).default(365),
-});
+  before: unixTimestampQueryParam(
+    "Return items before this cursor, exclusive, in Unix seconds.",
+  ),
+  orderDirection: OrderDirectionSchema.optional(),
+  limit: paginationLimitQueryParam(),
+}).openapi("DelegationPercentageRequest");
 
-export const DelegationPercentageItemSchema = z.object({
-  date: z.string(),
-  high: z.string(),
-});
+export const DelegationPercentageItemSchema = z
+  .object({
+    date: z.string().openapi({
+      description: "Unix day bucket represented as a timestamp string.",
+      example: "1704067200",
+    }),
+    high: z.string().openapi({
+      description: "Delegation percentage value for the day bucket.",
+      example: "42.75",
+    }),
+  })
+  .openapi("DelegationPercentageItem");
 
-export const PageInfoSchema = z.object({
-  hasNextPage: z.boolean(),
-  endDate: z.string().nullable(),
-  startDate: z.string().nullable(),
-});
-
-export const DelegationPercentageResponseSchema = z.object({
-  items: z.array(DelegationPercentageItemSchema),
-  totalCount: z.number(),
-  pageInfo: PageInfoSchema,
-});
+export const DelegationPercentageResponseSchema = z
+  .object({
+    items: z.array(DelegationPercentageItemSchema),
+    totalCount: z.number().int().openapi({
+      description: "Total number of matching day buckets.",
+      example: 365,
+    }),
+    pageInfo: PageInfoSchema,
+  })
+  .openapi("DelegationPercentageResponse");
 
 // === INFERRED TYPES ===
 
-export type RepositoryFilters = z.infer<typeof RepositoryFiltersSchema>;
 export type DelegationPercentageQuery = z.infer<
   typeof DelegationPercentageRequestSchema
 >;
+
 export type DelegationPercentageItem = z.infer<
   typeof DelegationPercentageItemSchema
 >;
-export type PageInfo = z.infer<typeof PageInfoSchema>;
 export type DelegationPercentageResponse = z.infer<
   typeof DelegationPercentageResponseSchema
 >;
@@ -70,7 +95,7 @@ export type DelegationPercentageResponse = z.infer<
  * @param timestamp - Unix timestamp in seconds as string
  * @returns Normalized timestamp at midnight UTC
  */
-export function normalizeTimestamp(timestamp: string): string {
+export function normalizeTimestamp(timestamp: string | number): string {
   const ts = BigInt(timestamp);
   const midnight = (ts / BigInt(SECONDS_IN_DAY)) * BigInt(SECONDS_IN_DAY);
   return midnight.toString();
@@ -83,6 +108,7 @@ export function toApi(serviceResult: {
   items: DelegationPercentageItem[];
   totalCount: number;
   hasNextPage: boolean;
+  hasPreviousPage?: boolean;
   endDate: string | null;
   startDate: string | null;
 }): DelegationPercentageResponse {
@@ -91,6 +117,7 @@ export function toApi(serviceResult: {
     totalCount: serviceResult.totalCount,
     pageInfo: {
       hasNextPage: serviceResult.hasNextPage,
+      hasPreviousPage: serviceResult.hasPreviousPage ?? false,
       endDate: serviceResult.endDate,
       startDate: serviceResult.startDate,
     },

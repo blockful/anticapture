@@ -81,6 +81,7 @@ describe("TokenMetrics Controller", () => {
         items: [],
         pageInfo: {
           hasNextPage: false,
+          hasPreviousPage: false,
           startDate: null,
           endDate: null,
         },
@@ -107,6 +108,7 @@ describe("TokenMetrics Controller", () => {
         ],
         pageInfo: {
           hasNextPage: false,
+          hasPreviousPage: false,
           startDate: "1699920000",
           endDate: "1699920000",
         },

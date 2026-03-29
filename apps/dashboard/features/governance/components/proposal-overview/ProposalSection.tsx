@@ -1,6 +1,5 @@
 "use client";
 
-import type { Query_Proposals_Items_Items } from "@anticapture/graphql-client/hooks";
 import { ArrowRight } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState, useCallback } from "react";
@@ -103,7 +102,7 @@ export const ProposalSection = () => {
         <VotingModal
           isOpen={isVotingModalOpen}
           onClose={() => setIsVotingModalOpen(false)}
-          proposal={proposal as Query_Proposals_Items_Items}
+          proposal={proposal}
           votingPower={votingPower}
           rawVotingPower={rawVotingPower}
           decimals={decimals}

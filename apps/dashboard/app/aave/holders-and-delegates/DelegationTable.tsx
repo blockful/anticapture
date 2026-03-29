@@ -1,7 +1,7 @@
 "use client";
 
+import type { OrderDirection } from "@anticapture/graphql-client";
 import { QueryInput_VotingPowers_OrderBy } from "@anticapture/graphql-client";
-import type { QueryInput_VotingPowers_OrderDirection } from "@anticapture/graphql-client";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Plus } from "lucide-react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
@@ -88,7 +88,7 @@ export function DelegationTable({ days }: { days: TimeInterval }) {
   const { data, loading, error, pagination, fetchNextPage, fetchingMore } =
     useDelegates({
       orderBy: orderByMap[sortBy as DelegateSortKey],
-      orderDirection: sortOrder as QueryInput_VotingPowers_OrderDirection,
+      orderDirection: sortOrder as OrderDirection,
       daoId,
       days,
       address: currentAddressFilter || undefined,

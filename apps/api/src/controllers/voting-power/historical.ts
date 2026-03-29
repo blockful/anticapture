@@ -39,7 +39,7 @@ export function historicalVotingPower(
       summary: "Get voting power changes by account",
       description:
         "Returns a list of voting power changes for a specific account",
-      tags: ["proposals"],
+      tags: ["voting-power"],
       request: {
         params: HistoricalVotingPowerRequestParamsSchema,
         query: HistoricalVotingPowerRequestQuerySchema,
@@ -81,6 +81,7 @@ export function historicalVotingPower(
       );
       return context.json(
         HistoricalVotingPowersResponseMapper(items, totalCount),
+        200,
       );
     },
   );
@@ -92,7 +93,7 @@ export function historicalVotingPower(
       path: "/voting-powers/historical",
       summary: "Get voting power changes",
       description: "Returns a list of voting power changes.",
-      tags: ["proposals"],
+      tags: ["voting-power"],
       request: {
         query: HistoricalVotingPowerGlobalQuerySchema,
       },
@@ -133,6 +134,7 @@ export function historicalVotingPower(
       );
       return context.json(
         HistoricalVotingPowersResponseMapper(items, totalCount),
+        200,
       );
     },
   );

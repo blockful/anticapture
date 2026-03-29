@@ -10,6 +10,7 @@ import {
 
 const prometheusSerializer = new PrometheusSerializer();
 
+import "./_dev-reload";
 import config from "../meshrc";
 import { exporter } from "./instrumentation";
 import { validateAuthToken } from "./auth";
