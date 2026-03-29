@@ -8,6 +8,8 @@
     "clean": "rm -rf node_modules dist generated/*.ts *.tsbuildinfo",
     "dev": "graphql-codegen --watch"
   },
+  "main": "./generated/hooks.ts",
+  "types": "./generated/hooks.ts",
   "exports": {
     ".": {
       "types": "./generated/hooks.ts",

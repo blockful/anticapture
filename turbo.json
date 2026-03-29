@@ -5,12 +5,17 @@
     "@anticapture/observability#build": {
       "outputs": ["packages/observability/dist/**"]
     },
-    "@anticapture/dasbhoard#dev": {
+    "@anticapture/dashboard#start": {
+      "persistent": true,
+      "cache": false,
+      "env": ["RESEND_API_KEY", "RESEND_FROM_EMAIL", "CONTACT_EMAIL"]
+    },
+    "@anticapture/dashboard#dev": {
       "dependsOn": ["@anticapture/graphql-client#codegen"],
       "persistent": true,
       "cache": false
     },
-    "@anticapture/dasbhoard#build": {
+    "@anticapture/dashboard#build": {
       "dependsOn": ["@anticapture/graphql-client#codegen"],
       "outputs": ["dist/**", ".next/**", ".next/cache/**"]
     },
