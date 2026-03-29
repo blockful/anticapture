@@ -16,18 +16,18 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const canonicalPath = `/${params.daoId}`;
 
   return {
-    title: `Anticapture - ${daoId} DAO`,
-    description: `Explore and mitigate governance risks in ${daoId} DAO.`,
+    title: `${daoId} DAO Governance Security | Risk Dashboard — Anticapture`,
+    description: `Monitor governance security, hostile takeover risks, token concentration, and resilience scores for ${daoId} DAO. Powered by Anticapture's open security framework.`,
     alternates: { canonical: canonicalPath },
     openGraph: {
       url: canonicalPath,
-      title: `Anticapture - ${daoId} DAO`,
-      description: `Explore and mitigate governance risks in ${daoId} DAO.`,
+      title: `${daoId} DAO Governance Security | Risk Dashboard — Anticapture`,
+      description: `Monitor governance security, hostile takeover risks, token concentration, and resilience scores for ${daoId} DAO. Powered by Anticapture's open security framework.`,
     },
     twitter: {
       card: "summary_large_image",
-      title: `Anticapture - ${daoId} DAO`,
-      description: `Explore and mitigate governance risks in ${daoId} DAO.`,
+      title: `${daoId} DAO Governance Security | Risk Dashboard — Anticapture`,
+      description: `Monitor governance security, hostile takeover risks, token concentration, and resilience scores for ${daoId} DAO. Powered by Anticapture's open security framework.`,
     },
   };
 }

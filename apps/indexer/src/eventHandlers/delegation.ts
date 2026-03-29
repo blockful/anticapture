@@ -16,7 +16,18 @@ import {
 } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 
-import { ensureAccountExists, ensureAccountsExist } from "./shared";
+import {
+  createAddressSet,
+  ensureAccountExists,
+  ensureAccountsExist,
+} from "./shared";
+
+type DelegationAddressSets = {
+  cex: ReadonlySet<Address>;
+  dex: ReadonlySet<Address>;
+  lending: ReadonlySet<Address>;
+  burning: ReadonlySet<Address>;
+};
 
 /**
  * ### Creates:
@@ -45,6 +56,7 @@ export const delegateChanged = async (
     logIndex: number;
     delegatorBalance?: bigint;
   },
+  addressSets?: DelegationAddressSets,
 ) => {
   const {
     delegator,
@@ -71,32 +83,20 @@ export const delegateChanged = async (
       });
 
   // Pre-compute address lists for flag determination (normalized to checksum)
-  const lendingAddressList = Object.values(LendingAddresses[daoId] || {}).map(
-    getAddress,
-  );
-  const cexAddressList = Object.values(CEXAddresses[daoId] || {}).map(
-    getAddress,
-  );
-  const dexAddressList = Object.values(DEXAddresses[daoId] || {}).map(
-    getAddress,
-  );
-  const burningAddressList = Object.values(BurningAddresses[daoId] || {}).map(
-    getAddress,
-  );
+  const { cex, dex, lending, burning } = addressSets ?? {
+    cex: createAddressSet(Object.values(CEXAddresses[daoId] || {})),
+    dex: createAddressSet(Object.values(DEXAddresses[daoId] || {})),
+    lending: createAddressSet(Object.values(LendingAddresses[daoId] || {})),
+    burning: createAddressSet(Object.values(BurningAddresses[daoId] || {})),
+  };
 
   // Determine flags for the delegation
-  const isCex =
-    cexAddressList.includes(normalizedDelegator) ||
-    cexAddressList.includes(normalizedDelegate);
-  const isDex =
-    dexAddressList.includes(normalizedDelegator) ||
-    dexAddressList.includes(normalizedDelegate);
+  const isCex = cex.has(normalizedDelegator) || cex.has(normalizedDelegate);
+  const isDex = dex.has(normalizedDelegator) || dex.has(normalizedDelegate);
   const isLending =
-    lendingAddressList.includes(normalizedDelegator) ||
-    lendingAddressList.includes(normalizedDelegate);
+    lending.has(normalizedDelegator) || lending.has(normalizedDelegate);
   const isBurning =
-    burningAddressList.includes(normalizedDelegator) ||
-    burningAddressList.includes(normalizedDelegate);
+    burning.has(normalizedDelegator) || burning.has(normalizedDelegate);
   const isTotal = isBurning;
 
   await context.db
