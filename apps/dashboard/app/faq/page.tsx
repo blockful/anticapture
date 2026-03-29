@@ -6,16 +6,19 @@ import { HeaderSidebar } from "@/widgets";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
 
 export const metadata: Metadata = {
-  title: "Anticapture - FAQ",
-  description: "Frequently asked questions about DAO governance security.",
+  title: "DAO Governance Security FAQ | Anticapture",
+  description:
+    "Answers to common questions about DAO governance security, hostile takeover risks, governance capture, resilience metrics, and how Anticapture monitors and protects decentralized protocols.",
   openGraph: {
-    title: "Anticapture - FAQ",
-    description: "Frequently asked questions about DAO governance security.",
+    title: "DAO Governance Security FAQ | Anticapture",
+    description:
+      "Answers to common questions about DAO governance security, hostile takeover risks, governance capture, resilience metrics, and how Anticapture monitors and protects decentralized protocols.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Anticapture - FAQ",
-    description: "Frequently asked questions about DAO governance security.",
+    title: "DAO Governance Security FAQ | Anticapture",
+    description:
+      "Answers to common questions about DAO governance security, hostile takeover risks, governance capture, resilience metrics, and how Anticapture monitors and protects decentralized protocols.",
   },
 };
 
