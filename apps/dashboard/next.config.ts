@@ -1,14 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ["@anticapture/graphql-client"],
-  turbopack: {
-    resolveAlias: {
-      "@anticapture/graphql-client/hooks":
-        "@anticapture/graphql-client/generated/hooks.ts",
-      "@anticapture/graphql-client":
-        "@anticapture/graphql-client/generated/hooks.ts",
-    },
-  },
   images: {
     remotePatterns: [
       {
