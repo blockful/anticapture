@@ -1,4 +1,4 @@
-export function formatDateUserReadable(date: Date): string {
+export const formatDateUserReadable = (date: Date): string => {
   if (!(date instanceof Date) || isNaN(date.getTime())) {
     return "Invalid Date";
   }
@@ -8,4 +8,4 @@ export function formatDateUserReadable(date: Date): string {
   const year = date.getFullYear();
 
   return `${day} ${month}, ${year}`;
-}
+};

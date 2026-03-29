@@ -4,10 +4,10 @@ const format = (value: number, suffix: string, fixed: number) =>
     .replace(/(\.\d*?)0+$/, "$1")
     .replace(/\.$/, "") + suffix;
 
-export function formatNumberUserReadable(
+export const formatNumberUserReadable = (
   num: number,
   fixed: number = 2,
-): string {
+): string => {
   if (num >= 1e9) return format(num / 1e9, "B", fixed); // Billion
   if (num >= 1e6) return format(num / 1e6, "M", fixed); // Million
   if (num >= 1e3) return format(num / 1e3, "K", fixed); // Thousand
@@ -15,4 +15,4 @@ export function formatNumberUserReadable(
   const result = Number(num).toFixed(fixed);
   // Only remove trailing zeros after decimal point, not the whole number
   return result.includes(".") ? result.replace(/\.?0+$/, "") : result;
-}
+};

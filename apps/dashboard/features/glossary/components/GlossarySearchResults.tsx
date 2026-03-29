@@ -7,7 +7,9 @@ interface GlossarySearchResultsProps {
   results: GlossarySearchResult[];
 }
 
-export function GlossarySearchResults({ results }: GlossarySearchResultsProps) {
+export const GlossarySearchResults = ({
+  results,
+}: GlossarySearchResultsProps) => {
   return (
     <div className="space-y-6">
       <div className="mb-4">
@@ -43,4 +45,4 @@ export function GlossarySearchResults({ results }: GlossarySearchResultsProps) {
       </div>
     </div>
   );
-}
+};

@@ -31,12 +31,12 @@ export interface UseDelegateDelegationHistoryGraphResult {
   error: unknown;
 }
 
-export function useDelegateDelegationHistoryGraph(
+export const useDelegateDelegationHistoryGraph = (
   accountId: string,
   daoId: DaoIdEnum,
   fromTimestamp?: string,
   toTimestamp?: string,
-): UseDelegateDelegationHistoryGraphResult {
+): UseDelegateDelegationHistoryGraphResult => {
   const { decimals } = daoConfig[daoId];
 
   const { data, loading, error } = useGetDelegateDelegationHistoryGraphQuery({
@@ -96,4 +96,4 @@ export function useDelegateDelegationHistoryGraph(
     loading,
     error,
   };
-}
+};

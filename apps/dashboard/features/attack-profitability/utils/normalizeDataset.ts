@@ -6,12 +6,12 @@ import type {
   MultilineChartDataSetPoint,
 } from "@/shared/dao-config/types";
 
-export function normalizeDataset(
+export const normalizeDataset = (
   tokenPrices: PriceEntry[],
   key: string,
   multiplier: number | Pick<TokenMetricItem, "date" | "high">[],
   decimals: number,
-): MultilineChartDataSetPoint[] {
+): MultilineChartDataSetPoint[] => {
   if (!Array.isArray(multiplier)) {
     return tokenPrices
       .sort((a, b) => a.timestamp - b.timestamp)
@@ -37,7 +37,7 @@ export function normalizeDataset(
         ? Number(price) * multipliersByTs[timestamp]
         : null,
   }));
-}
+};
 
 /**
  * Filters historical data to only include entries with timestamps at midnight (00:00:00 UTC).

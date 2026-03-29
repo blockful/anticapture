@@ -25,11 +25,11 @@ const sendContactForm = async (
   return response.data;
 };
 
-export function useContactForm() {
+export const useContactForm = () => {
   return useMutation({
     mutationFn: sendContactForm,
     onError: (error) => {
       console.error("Error submitting contact form:", error);
     },
   });
-}
+};

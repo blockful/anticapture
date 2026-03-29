@@ -15,11 +15,11 @@ interface GlossarySearchProps {
   onClearSearch?: () => void;
 }
 
-export function GlossarySearch({
+export const GlossarySearch = ({
   glossaryData,
   onSearchResults,
   onClearSearch,
-}: GlossarySearchProps) {
+}: GlossarySearchProps) => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleSearch = (query: string) => {
@@ -43,4 +43,4 @@ export function GlossarySearch({
       />
     </div>
   );
-}
+};

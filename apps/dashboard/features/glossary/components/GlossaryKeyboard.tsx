@@ -19,10 +19,10 @@ const ALL_LETTERS = Object.freeze(
   Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i)),
 ) as GlossaryLetter[];
 
-export function GlossaryKeyboard({
+export const GlossaryKeyboard = ({
   glossaryData,
   onLetterClick,
-}: GlossaryKeyboardProps) {
+}: GlossaryKeyboardProps) => {
   const availableLetters = getAvailableLetters(glossaryData);
 
   const handleLetterClick = (letter: GlossaryLetter) => {
@@ -64,14 +64,14 @@ export function GlossaryKeyboard({
       </div>
     </>
   );
-}
+};
 
 // Export mobile keyboard as a separate component
-export function GlossaryMobileKeyboard({
+export const GlossaryMobileKeyboard = ({
   className,
   glossaryData,
   onLetterClick,
-}: GlossaryKeyboardProps) {
+}: GlossaryKeyboardProps) => {
   const availableLetters = getAvailableLetters(glossaryData);
 
   const handleLetterClick = (letter: GlossaryLetter) => {
@@ -113,7 +113,7 @@ export function GlossaryMobileKeyboard({
       })}
     </div>
   );
-}
+};
 
 const KeyboardButton = ({
   letter,

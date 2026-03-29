@@ -21,12 +21,12 @@ interface AmountFilterProps {
   className?: string;
 }
 
-export function AmountFilter({
+export const AmountFilter = ({
   onApply,
   currentMin,
   currentMax,
   className,
-}: AmountFilterProps) {
+}: AmountFilterProps) => {
   const [tempMin, setTempMin] = useState<string>(
     currentMin !== undefined ? String(currentMin) : "",
   );
@@ -134,4 +134,4 @@ export function AmountFilter({
       </PopoverContent>
     </Popover>
   );
-}
+};

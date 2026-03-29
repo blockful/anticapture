@@ -40,7 +40,7 @@ interface DelegateTableData {
   delegators: number;
 }
 
-export function DelegationTable({ days }: { days: TimeInterval }) {
+export const DelegationTable = ({ days }: { days: TimeInterval }) => {
   const pageLimit: number = 20;
 
   const [drawerAddress, setDrawerAddress] = useQueryState("drawerAddress");
@@ -494,4 +494,4 @@ export function DelegationTable({ days }: { days: TimeInterval }) {
       />
     </>
   );
-}
+};

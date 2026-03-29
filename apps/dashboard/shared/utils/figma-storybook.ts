@@ -33,7 +33,7 @@
  * @param nodeId - Figma node ID (e.g., '10150-19926')
  * @returns Configuration object for Storybook addon-designs
  */
-export function getFigmaDesignConfigByNodeId(nodeId: string) {
+export const getFigmaDesignConfigByNodeId = (nodeId: string) => {
   const figmaFileUrl =
     typeof process !== "undefined" && process.env
       ? process.env.FIGMA_FILE_URL
@@ -47,7 +47,7 @@ export function getFigmaDesignConfigByNodeId(nodeId: string) {
   }
 
   return getFigmaDesignConfig(`${figmaFileUrl}?node-id=${nodeId}`);
-}
+};
 
 /**
  * Gets the Figma design configuration for Storybook addon-designs
@@ -70,7 +70,7 @@ export function getFigmaDesignConfigByNodeId(nodeId: string) {
  * @param figmaUrl - Full Figma design URL
  * @returns Configuration object for Storybook addon-designs
  */
-export function getFigmaDesignConfig(figmaUrl: string) {
+export const getFigmaDesignConfig = (figmaUrl: string) => {
   // Get token from environment variables
   // In Storybook, this is injected into the browser bundle via webpack DefinePlugin
   // The token is loaded in .storybook/main.ts from .env.local
@@ -92,7 +92,7 @@ export function getFigmaDesignConfig(figmaUrl: string) {
     url: figmaUrl,
     accessToken: figmaToken,
   };
-}
+};
 
 /**
  * Alternative: Get Figma file data directly (for custom usage)
@@ -100,7 +100,7 @@ export function getFigmaDesignConfig(figmaUrl: string) {
  * This can be used if you need to fetch Figma data in Storybook
  * without using the addon-designs integration.
  */
-export async function fetchFigmaDataForStorybook(figmaUrl: string) {
+export const fetchFigmaDataForStorybook = async (figmaUrl: string) => {
   const fileIdMatch = figmaUrl.match(/figma\.com\/design\/([a-zA-Z0-9_-]+)/);
   if (!fileIdMatch) {
     throw new Error("Invalid Figma URL");
@@ -116,4 +116,4 @@ export async function fetchFigmaDataForStorybook(figmaUrl: string) {
   }
 
   return response.json();
-}
+};

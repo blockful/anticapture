@@ -50,7 +50,7 @@ export const StickyPageHeader = ({
     [router],
   );
 
-  function useLockBodyScroll(isLocked: boolean) {
+  const useLockBodyScroll = (isLocked: boolean) => {
     useEffect(() => {
       if (isLocked) {
         document.body.classList.add("overflow-hidden");
@@ -62,7 +62,7 @@ export const StickyPageHeader = ({
         document.body.classList.remove("overflow-hidden");
       };
     }, [isLocked]);
-  }
+  };
   useLockBodyScroll(isMenuOpen);
 
   const onToggleMenu = () => {

@@ -10,7 +10,7 @@ type Props = {
   params: Promise<{ daoId: string }>;
 };
 
-export async function generateMetadata(props: Props): Promise<Metadata> {
+export const generateMetadata = async (props: Props): Promise<Metadata> => {
   const params = await props.params;
   const daoId = params.daoId.toUpperCase() as DaoIdEnum;
 
@@ -34,9 +34,9 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       description: ogDescription,
     },
   };
-}
+};
 
-export default function DaoPage() {
+const DaoPage = () => {
   return (
     <div className="bg-surface-background dark flex h-screen overflow-hidden">
       <div className="active relative hidden h-screen lg:flex">
@@ -61,4 +61,6 @@ export default function DaoPage() {
       </main>
     </div>
   );
-}
+};
+
+export default DaoPage;

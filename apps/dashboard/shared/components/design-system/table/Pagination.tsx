@@ -14,7 +14,7 @@ interface PaginationProps {
   isLoading?: boolean;
 }
 
-export function Pagination({
+export const Pagination = ({
   currentPage,
   totalPages,
   onPrevious,
@@ -23,7 +23,7 @@ export function Pagination({
   hasNextPage = true,
   hasPreviousPage = true,
   isLoading = false,
-}: PaginationProps) {
+}: PaginationProps) => {
   const handlePrevious = () => {
     if (onPrevious) {
       onPrevious();
@@ -55,4 +55,4 @@ export function Pagination({
       />
     </div>
   );
-}
+};

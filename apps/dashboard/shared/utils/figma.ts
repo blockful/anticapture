@@ -24,9 +24,9 @@ export interface FigmaProxyOptions {
  * @returns Promise resolving to Figma file data
  * @throws Error if the request fails
  */
-export async function fetchFigmaFile(
+export const fetchFigmaFile = async (
   options: FigmaProxyOptions,
-): Promise<FigmaFileResponse> {
+): Promise<FigmaFileResponse> => {
   const { fileId, url } = options;
 
   if (!fileId && !url) {
@@ -63,7 +63,7 @@ export async function fetchFigmaFile(
   }
 
   return response.json();
-}
+};
 
 /**
  * Extracts file ID from a Figma URL
@@ -71,10 +71,10 @@ export async function fetchFigmaFile(
  * @param figmaUrl - Full Figma design URL
  * @returns File ID or null if invalid
  */
-export function extractFileIdFromUrl(figmaUrl: string): string | null {
+export const extractFileIdFromUrl = (figmaUrl: string): string | null => {
   const match = figmaUrl.match(/figma\.com\/design\/([a-zA-Z0-9_-]+)/);
   return match ? match[1] : null;
-}
+};
 
 /**
  * Gets Figma access token for Storybook addon-designs
@@ -85,7 +85,7 @@ export function extractFileIdFromUrl(figmaUrl: string): string | null {
  * @param figmaUrl - Full Figma design URL
  * @returns Proxy URL that can be used to fetch Figma data
  */
-export function getFigmaProxyUrl(figmaUrl: string): string {
+export const getFigmaProxyUrl = (figmaUrl: string): string => {
   const fileId = extractFileIdFromUrl(figmaUrl);
   if (!fileId) {
     throw new Error("Invalid Figma URL");
@@ -97,4 +97,4 @@ export function getFigmaProxyUrl(figmaUrl: string): string {
       : process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
   return `${baseUrl}/api/figma?fileId=${fileId}`;
-}
+};

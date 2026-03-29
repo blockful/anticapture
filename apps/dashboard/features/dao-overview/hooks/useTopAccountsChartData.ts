@@ -13,9 +13,9 @@ interface UseTopAccountsChartDataParams {
   daoId: DaoIdEnum;
 }
 
-export function useTopAccountsChartData({
+export const useTopAccountsChartData = ({
   chartData,
-}: UseTopAccountsChartDataParams) {
+}: UseTopAccountsChartDataParams) => {
   const addresses = useMemo(
     () => chartData.map((item) => item.address as Address),
     [chartData],
@@ -55,4 +55,4 @@ export function useTopAccountsChartData({
   return {
     data: processedData,
   };
-}
+};

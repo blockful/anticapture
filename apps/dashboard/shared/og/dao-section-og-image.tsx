@@ -21,9 +21,9 @@ export interface DaoSectionOgImageProps {
   sectionTitle: string;
 }
 
-function isValidDaoId(id: string): id is DaoIdEnum {
+const isValidDaoId = (id: string): id is DaoIdEnum => {
   return (ALL_DAOS as readonly string[]).includes(id);
-}
+};
 
 /**
  * Renders the OG image per Figma design:
@@ -34,10 +34,10 @@ function isValidDaoId(id: string): id is DaoIdEnum {
  * - AnticaptureGlobeIcon (top-right)
  * - DAO name + section title (main content)
  */
-export async function createDaoSectionOgImage({
+export const createDaoSectionOgImage = async ({
   daoId,
   sectionTitle,
-}: DaoSectionOgImageProps) {
+}: DaoSectionOgImageProps) => {
   if (!isValidDaoId(daoId)) {
     return new ImageResponse(
       <div
@@ -189,4 +189,4 @@ export async function createDaoSectionOgImage({
       fonts: await loadLocalFonts(),
     },
   );
-}
+};

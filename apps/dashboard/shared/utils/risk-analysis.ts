@@ -26,9 +26,9 @@ export interface RiskAreaInfo {
  * @param daoId The ID of the DAO to analyze
  * @returns Record of risk areas with their risk levels and governance implementation items
  */
-export function getDaoRiskAreas(
+export const getDaoRiskAreas = (
   daoId: DaoIdEnum,
-): Record<RiskAreaEnum, RiskAreaInfo> {
+): Record<RiskAreaEnum, RiskAreaInfo> => {
   const daoConfig = daoConfigByDaoId[daoId];
   const govImplFields = daoConfig.governanceImplementation?.fields || {};
 
@@ -113,4 +113,4 @@ export function getDaoRiskAreas(
   }
 
   return result;
-}
+};

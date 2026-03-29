@@ -11,7 +11,9 @@ const DAYS_PER_YEAR = 365;
 
 // Example: formatRelativeTime(1706889600) // "40 days ago"
 
-export function formatRelativeTime(timestampSeconds: number | string): string {
+export const formatRelativeTime = (
+  timestampSeconds: number | string,
+): string => {
   const timestamp =
     typeof timestampSeconds === "string"
       ? parseInt(timestampSeconds, 10)
@@ -42,10 +44,10 @@ export function formatRelativeTime(timestampSeconds: number | string): string {
     return `${diffInMinutes} minute${diffInMinutes > 1 ? "s" : ""} ago`;
   }
   return "Just now";
-}
+};
 
 // Formats timestamp in seconds to "YYYY-MM-DD HH:MM:SS" format
-export function formatFullDate(timestampSeconds: number | string): string {
+export const formatFullDate = (timestampSeconds: number | string): string => {
   const timestamp =
     typeof timestampSeconds === "string"
       ? parseInt(timestampSeconds, 10)
@@ -61,4 +63,4 @@ export function formatFullDate(timestampSeconds: number | string): string {
   const seconds = String(date.getSeconds()).padStart(2, "0");
 
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-}
+};

@@ -26,7 +26,7 @@ const TABS: { id: TabId; label: string }[] = [
   { id: "delegates", label: "DELEGATES" },
 ];
 
-function AavePageContent() {
+const AavePageContent = () => {
   const defaultDays = TimeInterval.NINETY_DAYS;
   const [days, setDays] = useQueryState(
     "days",
@@ -107,12 +107,14 @@ function AavePageContent() {
       </main>
     </div>
   );
-}
+};
 
-export default function AavePage() {
+const AavePage = () => {
   return (
     <Suspense>
       <AavePageContent />
     </Suspense>
   );
-}
+};
+
+export default AavePage;

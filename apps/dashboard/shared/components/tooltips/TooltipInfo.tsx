@@ -2,16 +2,16 @@ import { Info } from "lucide-react";
 
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 
-export function TooltipInfo({
+export const TooltipInfo = ({
   text = "",
   className,
 }: {
   text?: string;
   className?: string;
-}) {
+}) => {
   return (
     <Tooltip tooltipContent={text} className={className}>
       <Info className="text-secondary size-3.5" />
     </Tooltip>
   );
-}
+};
