@@ -1,24 +1,24 @@
 "use client";
 
-import { ChevronsLeft, ChevronsRight, ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown, ChevronsRight, ChevronsLeft } from "lucide-react";
 import { useParams, usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 
+import { Button } from "@/shared/components";
 import { DaoAvatarIcon } from "@/shared/components/icons";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { cn } from "@/shared/utils/";
 import { getDaoNavigationPath } from "@/shared/utils/dao-navigation";
 
-const ANIMATION_DURATION = 200;
-
-type DropdownItem = {
+type Item = {
   id: number;
-  daoId: DaoIdEnum;
   label: string;
+  icon: React.ReactNode;
+  name: string;
 };
 
-export interface HeaderDAOSidebarDropdownProps {
+interface HeaderDAOSidebarDropdownProps {
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
 }
@@ -27,71 +27,68 @@ export const HeaderDAOSidebarDropdown = ({
   isCollapsed = false,
   onToggleCollapse,
 }: HeaderDAOSidebarDropdownProps) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isClosing, setIsClosing] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [selectedHeaderSidebarItem, setSelectedHeaderSidebarItem] =
+    useState<number>(0);
   const router = useRouter();
   const pathname = usePathname();
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const { daoId } = useParams<{ daoId: string }>();
 
-  const close = useCallback(() => {
-    if (!isOpen) return;
-    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
-    setIsClosing(true);
-    closeTimerRef.current = setTimeout(() => {
-      setIsOpen(false);
-      setIsClosing(false);
-    }, ANIMATION_DURATION);
-  }, [isOpen]);
-
-  const open = useCallback(() => {
-    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
-    setIsClosing(false);
-    setIsOpen(true);
+  // restore selected item on mount
+  useEffect(() => {
+    const savedItem = sessionStorage.getItem("selectedHeaderSidebarItem");
+    if (savedItem) {
+      setSelectedHeaderSidebarItem(Number(savedItem));
+    }
   }, []);
 
-  const toggle = useCallback(() => {
-    if (isOpen && !isClosing) {
-      close();
-    } else {
-      open();
+  const handleClickOutside = useCallback((event: MouseEvent) => {
+    if (
+      dropdownRef.current &&
+      !dropdownRef.current.contains(event.target as Node)
+    ) {
+      setIsOpen(false);
     }
-  }, [isOpen, isClosing, close, open]);
+  }, []);
 
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        close();
-      }
-    };
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
-      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
     };
-  }, [close]);
+  }, [handleClickOutside]);
 
-  const dropdownItemsRef = useRef<DropdownItem[] | null>(null);
+  // stable, single-build dropdown items (imports are static)
+  const dropdownItemsRef = useRef<Item[] | null>(null);
   if (!dropdownItemsRef.current) {
     dropdownItemsRef.current = Object.values(DaoIdEnum).map(
       (daoIdValue, index) => ({
         id: index,
-        daoId: daoIdValue,
         label: daoConfigByDaoId[daoIdValue].name,
+        icon: (
+          <DaoAvatarIcon
+            daoId={daoIdValue}
+            className="size-icon-md"
+            isRounded
+          />
+        ),
+        name: daoIdValue,
       }),
     );
   }
-  const dropdownItems = dropdownItemsRef.current;
+  const dropdownItems = dropdownItemsRef.current!;
 
   const currentDaoId =
     daoId?.toUpperCase() ?? pathname.split("/")[1]?.toUpperCase();
-  const currentItem = dropdownItems.find((item) => item.daoId === currentDaoId);
+  const currentItem = dropdownItems.find((item) => item.name === currentDaoId);
+
+  const toggleDropdown = () => setIsOpen((prev) => !prev);
 
   const handleSelectItem = (id: number, targetDaoId: DaoIdEnum) => {
+    setSelectedHeaderSidebarItem(id);
     sessionStorage.setItem("selectedHeaderSidebarItem", id.toString());
-    close();
+    setIsOpen(false);
     router.push(
       getDaoNavigationPath({
         targetDaoId,
@@ -103,35 +100,23 @@ export const HeaderDAOSidebarDropdown = ({
 
   return (
     <div
-      ref={ref}
-      className="border-light-dark relative z-50 inline-block h-16 w-full shrink-0 border-b"
-      onMouseLeave={() => isOpen && close()}
+      className="border-light-dark relative z-50 inline-block h-[57px] w-full shrink-0 border-b lg:h-[65px]"
+      ref={dropdownRef}
+      onMouseLeave={() => setIsOpen(false)}
     >
-      <div className="flex h-full items-center">
-        <button
-          type="button"
-          onClick={toggle}
+      <div className="flex h-full items-center px-2 py-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="flex flex-1 items-center justify-between overflow-hidden rounded-none transition-all"
+          onClick={toggleDropdown}
           aria-expanded={isOpen}
           aria-haspopup="menu"
-          className="hover:bg-surface-contrast flex h-full flex-1 items-center justify-between overflow-hidden px-3 py-2 transition-colors"
         >
-          <div
-            className={cn(
-              "flex min-w-0 items-center gap-2",
-              isCollapsed && "w-full justify-center",
-            )}
-          >
-            {currentItem && (
-              <div className="shrink-0">
-                <DaoAvatarIcon
-                  daoId={currentItem.daoId}
-                  className="size-8"
-                  isRounded
-                />
-              </div>
-            )}
+          <div className="flex min-w-0 items-center gap-2">
+            <div className="shrink-0">{currentItem?.icon}</div>
             {!isCollapsed && (
-              <p className="text-primary min-w-0 flex-1 truncate whitespace-nowrap text-left text-[18px] font-medium leading-6">
+              <p className="text-primary truncate whitespace-nowrap text-[18px] font-medium leading-6">
                 {currentItem?.label}
               </p>
             )}
@@ -141,15 +126,13 @@ export const HeaderDAOSidebarDropdown = ({
               <ChevronsUpDown className="text-secondary size-5 transition-all duration-300" />
             </div>
           )}
-        </button>
+        </Button>
       </div>
-
       {onToggleCollapse && (
         <button
-          type="button"
           onClick={onToggleCollapse}
-          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           className="bg-surface-default border-light-dark hover:bg-surface-contrast absolute right-0 top-1/2 z-50 -translate-y-1/2 translate-x-[65%] cursor-pointer border p-1 transition-colors"
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? (
             <ChevronsRight className="text-primary size-[14px]" />
@@ -159,28 +142,37 @@ export const HeaderDAOSidebarDropdown = ({
         </button>
       )}
 
-      {(isOpen || isClosing) && (
+      {isOpen && (
         <div
-          role="menu"
           className={cn(
-            "border-light-dark bg-surface-default absolute z-50 flex flex-col border shadow-lg",
-            isCollapsed ? "left-0 top-full w-[200px]" : "left-0 right-0",
-            isClosing
-              ? "animate-fade-out [animation-duration:200ms]"
-              : "animate-fade-in [animation-duration:200ms]",
+            "border-light-dark bg-surface-default absolute z-50 rounded-lg border shadow-lg transition-all duration-200 ease-in-out",
+            isCollapsed
+              ? "left-0 top-full w-[200px]"
+              : "left-0 right-0 mx-4 w-auto lg:mx-0",
           )}
+          role="menu"
         >
           {dropdownItems.map((item) => (
-            <button
+            <Button
+              variant="ghost"
+              size="lg"
               key={item.id}
-              type="button"
-              role="menuitem"
-              onClick={() => handleSelectItem(item.id, item.daoId)}
-              className="text-primary hover:bg-surface-hover flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-sm font-normal transition-colors"
+              className={"w-full"}
+              onClick={() => handleSelectItem(item.id, item.name as DaoIdEnum)}
+              role="menuitemradio"
+              aria-checked={item.id === selectedHeaderSidebarItem}
             >
-              <DaoAvatarIcon daoId={item.daoId} className="size-4" isRounded />
-              {item.label}
-            </button>
+              <div className="flex w-full items-center gap-1.5 lg:gap-2">
+                <DaoAvatarIcon
+                  daoId={item.name as DaoIdEnum}
+                  className={cn("size-icon-xxs lg:size-icon-sm")}
+                  isRounded
+                />
+                <h1 className={cn("text-primary text-sm font-normal")}>
+                  {item.label}
+                </h1>
+              </div>
+            </Button>
           ))}
         </div>
       )}

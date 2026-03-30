@@ -1,9 +1,11 @@
 import { Context } from "ponder:registry";
 import {
   accountBalance,
+  accountPower,
   balanceHistory,
   feedEvent,
   transfer,
+  votingPowerHistory,
 } from "ponder:schema";
 import { Address, getAddress, Hex, zeroAddress } from "viem";
 
@@ -168,4 +170,84 @@ export const tokenTransfer = async (
       amount: value,
     },
   });
+};
+
+/**
+ * Mirrors balance updates into voting power tables for GNO, where token
+ * balance equals voting power (no on-chain delegation events exist).
+ *
+ * Must be called after `tokenTransfer` so that `accountBalance` already
+ * reflects the new balance — the same updated value is written to
+ * `accountPower.votingPower` and `votingPowerHistory`.
+ */
+export const gnoVotingPowerTransfer = async (
+  context: Context,
+  daoId: DaoIdEnum,
+  args: {
+    from: Address;
+    to: Address;
+    transactionHash: Hex;
+    value: bigint;
+    timestamp: bigint;
+    logIndex: number;
+  },
+) => {
+  const { from, to, transactionHash, value, timestamp, logIndex } = args;
+
+  const normalizedFrom = getAddress(from);
+  const normalizedTo = getAddress(to);
+
+  // --- receiver ---
+  const { votingPower: newReceiverVotingPower } = await context.db
+    .insert(accountPower)
+    .values({
+      accountId: normalizedTo,
+      daoId,
+      votingPower: value,
+    })
+    .onConflictDoUpdate((current) => ({
+      votingPower: current.votingPower + value,
+    }));
+
+  await context.db
+    .insert(votingPowerHistory)
+    .values({
+      daoId,
+      transactionHash,
+      accountId: normalizedTo,
+      votingPower: newReceiverVotingPower,
+      delta: value,
+      deltaMod: value > 0n ? value : -value,
+      timestamp,
+      logIndex,
+    })
+    .onConflictDoNothing();
+
+  // --- sender (skip mints from zero address) ---
+  if (from !== zeroAddress) {
+    const { votingPower: newSenderVotingPower } = await context.db
+      .insert(accountPower)
+      .values({
+        accountId: normalizedFrom,
+        daoId,
+        votingPower: -value,
+      })
+      .onConflictDoUpdate((current) => ({
+        votingPower: current.votingPower - value,
+      }));
+
+    await context.db
+      .insert(votingPowerHistory)
+      .values({
+        daoId,
+        transactionHash,
+        accountId: normalizedFrom,
+        votingPower: newSenderVotingPower,
+        delta: -value,
+        deltaMod: value > 0n ? value : -value,
+        timestamp,
+        logIndex,
+      })
+      .onConflictDoNothing();
+  }
 };

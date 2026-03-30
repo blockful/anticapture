@@ -38,4 +38,5 @@ export const FLUID: DaoConfiguration = {
   dataTables: true,
   activityFeed: false,
   governancePage: true,
+  proposalTypeConfiguration: "onchain",
 };

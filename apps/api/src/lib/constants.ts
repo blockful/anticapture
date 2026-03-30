@@ -220,6 +220,16 @@ export const CONTRACT_ADDRESSES = {
       startBlock: 12422079,
     },
   },
+  [DaoIdEnum.GNO]: {
+    blockTime: 12,
+    tokenType: "ERC20",
+    // https://etherscan.io/address/0x6810e776880C02933D47DB1b9fc05908e5386b96
+    token: {
+      address: "0x6810e776880C02933D47DB1b9fc05908e5386b96",
+      decimals: 18,
+      startBlock: 6481670,
+    },
+  },
 } as const;
 
 export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -390,6 +400,7 @@ export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
       "0x639f35C5E212D61Fe14Bd5CD8b66aAe4df11a50c",
     InstaTimelock: "0xC7Cb1dE2721BFC0E0DA1b9D526bCdC54eF1C0eFC",
   },
+  [DaoIdEnum.GNO]: {},
 };
 
 export enum ProposalStatus {

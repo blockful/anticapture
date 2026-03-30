@@ -230,6 +230,40 @@ export const CONTRACT_ADDRESSES = {
       address: "0xA700b4eB416Be35b2911fd5Dee80678ff64fF6C9",
     },
   },
+  [DaoIdEnum.GNO]: {
+    gnosis: {
+      blockTime: 5,
+      gno: {
+        address: "0x9C58BAcC331c9aa871AFD802DB6379a98e80CEdb",
+        decimals: 18,
+      },
+      lgno: {
+        address: "0xd4Ca39f78Bf14BfaB75226AC833b1858dB16f9a1",
+        decimals: 18,
+      },
+      sgno: {
+        address: "0xA4eF9Da5BA71Cc0D2e5E877a910A37eC43420445",
+        decimals: 18,
+      },
+    },
+    mainnet: {
+      blockTime: 12,
+      gno: {
+        address: "0x6810e776880C02933D47DB1b9fc05908e5386b96",
+        decimals: 18,
+      },
+      lgno: {
+        address: "0x6810e776880C02933D47DB1b9fc05908e5386b96",
+        decimals: 18,
+      },
+    },
+    // FIXME: quick n dirty fix
+    blockTime: 1,
+    token: {
+      decimals: 18,
+      address: zeroAddress,
+    },
+  },
 } as const;
 
 export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -403,6 +437,7 @@ export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
       "0x639f35C5E212D61Fe14Bd5CD8b66aAe4df11a50c",
     InstaTimelock: "0xC7Cb1dE2721BFC0E0DA1b9D526bCdC54eF1C0eFC",
   },
+  [DaoIdEnum.GNO]: {},
 };
 
 export const CEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -622,6 +657,7 @@ export const CEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     Gate: "0x0D0707963952f2fBA59dD06f2b425ace40b492Fe",
     Bitvavo: "0xaB782bc7D4a2b306825de5a7730034F8F63ee1bC",
   },
+  [DaoIdEnum.GNO]: {},
 };
 
 export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -695,6 +731,7 @@ export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   [DaoIdEnum.FLUID]: {
     "Uniswap V3 INST/WETH": "0xc1cd3D0913f4633b43FcdDBCd7342bC9b71C676f",
   },
+  [DaoIdEnum.GNO]: {},
 };
 
 export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -745,6 +782,7 @@ export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   },
   [DaoIdEnum.SHU]: {},
   [DaoIdEnum.FLUID]: {},
+  [DaoIdEnum.GNO]: {},
 };
 
 export const BurningAddresses: Record<
@@ -832,6 +870,11 @@ export const BurningAddresses: Record<
     Dead: "0x000000000000000000000000000000000000dEaD",
     TokenContract: "0x6f40d4A6237C257fff2dB00FA0510DeEECd303eb",
   },
+  [DaoIdEnum.GNO]: {
+    ZeroAddress: zeroAddress,
+    Dead: "0x000000000000000000000000000000000000dEaD",
+    TokenContract: "0x000000000000000000000000000000000000dEaD",
+  },
 };
 
 export const NonCirculatingAddresses: Record<
@@ -872,6 +915,7 @@ export const NonCirculatingAddresses: Record<
   },
   [DaoIdEnum.LIL_NOUNS]: {},
   [DaoIdEnum.SHU]: {},
+  [DaoIdEnum.GNO]: {},
 };
 
 export enum ProposalStatus {

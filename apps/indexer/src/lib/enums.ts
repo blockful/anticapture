@@ -14,6 +14,7 @@ export enum DaoIdEnum {
   SHU = "SHU",
   FLUID = "FLUID",
   LIL_NOUNS = "LIL_NOUNS",
+  GNO = "GNO",
 }
 
 export const SECONDS_IN_DAY = 24 * 60 * 60;

@@ -13,7 +13,7 @@ import {
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta = {
-  title: "Data Display/Drawer/Drawer",
+  title: "Feedback/Drawer/Drawer",
   component: DrawerRoot,
   parameters: {
     layout: "centered",

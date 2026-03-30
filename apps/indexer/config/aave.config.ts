@@ -12,7 +12,7 @@ export default createConfig({
   chains: {
     ethereum_mainnet: {
       id: 1,
-      rpc: env.RPC_URL,
+      rpc: env.RPC_URLS[0],
       maxRequestsPerSecond: env.MAX_REQUESTS_PER_SECOND,
       pollingInterval: env.POLLING_INTERVAL,
     },

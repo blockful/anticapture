@@ -12,10 +12,3 @@ export { Input } from "@/shared/components/design-system/form/fields/input/Input
 export type { InputProps } from "@/shared/components/design-system/form/fields/input/types";
 export { Textarea } from "@/shared/components/design-system/form/fields/textarea/Textarea";
 export type { TextareaProps } from "@/shared/components/design-system/form/fields/textarea/types";
-export { Select } from "@/shared/components/design-system/form/fields/select/Select";
-export type {
-  SelectProps,
-  SelectItem,
-} from "@/shared/components/design-system/form/fields/select/types";
-export { RadioCard } from "@/shared/components/design-system/form/fields/radio-card/RadioCard";
-export type { RadioCardProps } from "@/shared/components/design-system/form/fields/radio-card/RadioCard";

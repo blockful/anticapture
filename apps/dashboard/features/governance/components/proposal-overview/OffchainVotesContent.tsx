@@ -51,7 +51,7 @@ const getChoiceInfo = (choice: unknown, choices: string[]) => {
 
   if (Array.isArray(choice)) {
     const label = (choice as number[])
-      .map((choice) => choices[choice - 1] ?? `Choice ${choice}`)
+      .map((choice) => choices[choice] ?? `Choice ${choice}`)
       .join(", ");
     return { label, icon: null as React.ReactNode };
   }

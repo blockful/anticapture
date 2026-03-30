@@ -1,6 +1,6 @@
 import { mainnet } from "viem/chains";
 
-import { ObolIcon } from "@/shared/components/icons/ObolIcon";
+import { ObolIcon } from "@/shared/components/icons";
 import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
@@ -336,4 +336,5 @@ export const OBOL: DaoConfiguration = {
     },
   },
   governancePage: true,
+  proposalTypeConfiguration: "onchain",
 };

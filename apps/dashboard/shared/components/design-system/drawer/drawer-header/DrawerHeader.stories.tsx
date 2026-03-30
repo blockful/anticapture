@@ -8,7 +8,7 @@ import type { DrawerHeaderProps } from "@/shared/components/design-system/drawer
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta: Meta<DrawerHeaderProps> = {
-  title: "Data Display/Drawer/DrawerHeader",
+  title: "Feedback/Drawer/DrawerHeader",
   component: DrawerHeader,
   parameters: {
     layout: "padded",
