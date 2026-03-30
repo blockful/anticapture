@@ -1,6 +1,7 @@
 import { z } from "@hono/zod-openapi";
 
 import { feedEvent } from "@/database";
+import { FeedEventType, FeedRelevance } from "@/lib/constants";
 
 import {
   FeedEventTypeSchema,
@@ -30,8 +31,12 @@ export const FeedRequestSchema = z
         example: "timestamp",
       }),
     orderDirection: OrderDirectionSchema.optional().default("desc"),
-    relevance: FeedRelevanceSchema.optional(),
-    type: FeedEventTypeSchema.optional(),
+    relevance: z.enum(FeedRelevance).optional().openapi({
+      description: "Filter events by relevance tier.",
+    }),
+    type: z.enum(FeedEventType).optional().openapi({
+      description: "Filter events by governance activity type.",
+    }),
     fromDate: unixTimestampQueryParam(
       "Earliest event timestamp, in Unix seconds.",
     ),

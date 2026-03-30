@@ -92,8 +92,8 @@ type Query {
     limit: Int
     orderBy: queryInput_feedEvents_orderBy = timestamp
     orderDirection: OrderDirection = desc
-    relevance: FeedRelevance!
-    type: FeedEventType!
+    relevance: queryInput_feedEvents_relevance
+    type: queryInput_feedEvents_type
 
     """Earliest event timestamp, in Unix seconds."""
     fromDate: Int
@@ -1020,6 +1020,22 @@ scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/fi
 enum queryInput_feedEvents_orderBy {
   timestamp
   value
+}
+
+"""Filter events by relevance tier."""
+enum queryInput_feedEvents_relevance {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+"""Filter events by governance activity type."""
+enum queryInput_feedEvents_type {
+  VOTE
+  PROPOSAL
+  DELEGATION
+  TRANSFER
+  PROPOSAL_EXTENDED
 }
 
 """Resolved threshold for a feed event type and relevance level."""
