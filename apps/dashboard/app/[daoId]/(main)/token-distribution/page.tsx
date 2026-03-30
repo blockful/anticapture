@@ -19,18 +19,18 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const canonicalPath = `/${params.daoId}/token-distribution`;
 
   return {
-    title: `Anticapture - ${daoId} DAO Token Distribution`,
-    description: `Analyze token distribution and concentration for ${daoId} DAO.`,
+    title: `${daoId} DAO Token Distribution & Governance Concentration Risk — Anticapture`,
+    description: `Examine token distribution, concentration metrics, and Gini coefficient for ${daoId} DAO to assess governance security risks and hostile takeover susceptibility.`,
     alternates: { canonical: canonicalPath },
     openGraph: {
       url: canonicalPath,
-      title: `Anticapture - ${daoId} DAO Token Distribution`,
-      description: `Analyze token distribution and concentration for ${daoId} DAO.`,
+      title: `${daoId} DAO Token Distribution & Governance Concentration Risk — Anticapture`,
+      description: `Examine token distribution, concentration metrics, and Gini coefficient for ${daoId} DAO to assess governance security risks and hostile takeover susceptibility.`,
     },
     twitter: {
       card: "summary_large_image",
-      title: `Anticapture - ${daoId} DAO Token Distribution`,
-      description: `Analyze token distribution and concentration for ${daoId} DAO.`,
+      title: `${daoId} DAO Token Distribution & Governance Concentration Risk — Anticapture`,
+      description: `Examine token distribution, concentration metrics, and Gini coefficient for ${daoId} DAO to assess governance security risks and hostile takeover susceptibility.`,
     },
   };
 }

@@ -1,6 +1,6 @@
 import { mainnet } from "viem/chains";
 
-import { EnsIcon } from "@/shared/components/icons";
+import { EnsIcon } from "@/shared/components/icons/EnsIcon";
 import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
