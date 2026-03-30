@@ -126,7 +126,7 @@ export const GovernanceSection = () => {
         description="View and vote on executable proposals from this DAO."
         className="lg:bg-transparent"
       >
-        {hasOffchain && (
+        {proposalType === "composite" && (
           <TabGroup
             tabs={PROPOSAL_TABS}
             activeTab={activeTab}
