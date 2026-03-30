@@ -3,8 +3,8 @@ query GetFeedEvents(
   $limit: Int = 10
   $orderBy: queryInput_feedEvents_orderBy = timestamp
   $orderDirection: OrderDirection = desc
-  $relevance: FeedRelevance! = MEDIUM
-  $type: FeedEventType!
+  $relevance: queryInput_feedEvents_relevance = MEDIUM
+  $type: queryInput_feedEvents_type
   $fromDate: Int
   $toDate: Int
 ) {
