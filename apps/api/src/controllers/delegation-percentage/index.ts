@@ -32,13 +32,8 @@ export function delegationPercentage(
     }),
     async (ctx) => {
       const query = ctx.req.valid("query");
-      const serviceResult = await service.delegationPercentageByDay({
-        ...query,
-        orderDirection: query.orderDirection ?? "asc",
-      });
-      const httpResponse = toApi(serviceResult);
-
-      return ctx.json(httpResponse, 200);
+      const serviceResult = await service.delegationPercentageByDay(query);
+      return ctx.json(toApi(serviceResult), 200);
     },
   );
 }

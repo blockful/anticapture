@@ -46,8 +46,8 @@ export const DelegationPercentageRequestSchema = BaseFiltersSchema.extend({
   before: unixTimestampQueryParam(
     "Return items before this cursor, exclusive, in Unix seconds.",
   ),
-  orderDirection: OrderDirectionSchema.optional(),
-  limit: paginationLimitQueryParam(),
+  orderDirection: OrderDirectionSchema.optional().default("asc"),
+  limit: paginationLimitQueryParam().openapi({ example: "365" }),
 }).openapi("DelegationPercentageRequest");
 
 export const DelegationPercentageItemSchema = z
