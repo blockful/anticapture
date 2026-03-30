@@ -207,6 +207,11 @@ type Query {
   votesOffchainByProposalId(id: String!, skip: NonNegativeInt, limit: Float = 10, orderBy: queryInput_votesOffchainByProposalId_orderBy = timestamp, orderDirection: queryInput_votesOffchainByProposalId_orderDirection = desc, voterAddresses: JSON, fromDate: Float, toDate: Float): votesOffchainByProposalId_200_response
 
   """
+  Returns the active delegates that did not vote on a given offchain proposal
+  """
+  offchainProposalNonVoters(id: String!, skip: NonNegativeInt, limit: PositiveInt = 10, orderDirection: queryInput_offchainProposalNonVoters_orderDirection = desc, addresses: JSON): offchainProposalNonVoters_200_response
+
+  """
   Average delegation percentage across all supported DAOs by day.
   Returns the mean delegation percentage for each day in the specified range.
   Only includes dates where ALL DAOs have data available.
@@ -1473,6 +1478,21 @@ enum queryInput_votesOffchainByProposalId_orderBy {
 }
 
 enum queryInput_votesOffchainByProposalId_orderDirection {
+  asc
+  desc
+}
+
+type offchainProposalNonVoters_200_response {
+  items: [query_offchainProposalNonVoters_items_items]!
+  totalCount: Float!
+}
+
+type query_offchainProposalNonVoters_items_items {
+  voter: String!
+  votingPower: String!
+}
+
+enum queryInput_offchainProposalNonVoters_orderDirection {
   asc
   desc
 }
