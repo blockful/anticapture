@@ -1,9 +1,11 @@
 "use client";
 
-import { useGetProposalsFromDaoQuery } from "@anticapture/graphql-client/hooks";
+import {
+  useGetProposalsFromDaoQuery,
+  QueryInput_Proposals_Status_Items,
+} from "@anticapture/graphql-client/hooks";
 import { Info } from "lucide-react";
 
-import { ProposalStatus } from "@/features/governance";
 import { BannerAlert } from "@/shared/components/design-system/alerts/banner-alert/BannerAlert";
 import { getAuthHeaders } from "@/shared/utils/server-utils";
 
@@ -11,7 +13,7 @@ export const OngoingProposalBanner = ({ daoId }: { daoId: string }) => {
   const { data, loading } = useGetProposalsFromDaoQuery({
     variables: {
       limit: 1,
-      status: ProposalStatus.ONGOING,
+      status: QueryInput_Proposals_Status_Items.Active,
       skip: null,
       fromDate: null,
     },
