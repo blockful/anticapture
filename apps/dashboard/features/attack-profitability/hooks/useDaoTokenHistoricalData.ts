@@ -34,7 +34,7 @@ export const useDaoTokenHistoricalData = ({
       },
     },
     variables: { limit: limit ?? null, skip: null },
-    fetchPolicy: "network-only",
+    fetchPolicy: "no-cache",
   });
 
   const items =

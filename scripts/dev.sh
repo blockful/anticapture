@@ -197,7 +197,7 @@ GATEWAY_OVERRIDES=()
 if [ "$RUN_API" = true ]; then
   GATEWAY_OVERRIDES+=("DAO_API_${DAO_ID}=http://localhost:${PORT_API}")
 fi
-run_with_prefix "$C_GATEWAY" "🌎 gateway" "$GATEWAY_READY" "Mesh running at" railway_run "${GATEWAY_OVERRIDES[@]}" api-gateway pnpm gateway dev &
+run_with_prefix "$C_GATEWAY" "🌎 gateway" "$GATEWAY_READY" "Mesh running at" railway_run ${GATEWAY_OVERRIDES[@]+"${GATEWAY_OVERRIDES[@]}"} api-gateway pnpm gateway dev &
 wait_for_ready "$GATEWAY_READY" "Gateway"
 
 # Watchdog: when API recovers after being down, touch the sentinel file so tsx reloads the gateway
