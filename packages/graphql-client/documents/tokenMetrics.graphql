@@ -1,10 +1,10 @@
 query TokenMetrics(
   $metricType: queryInput_tokenMetrics_metricType!
-  $startDate: Float
-  $endDate: Float
-  $orderDirection: queryInput_tokenMetrics_orderDirection = asc
-  $limit: NonNegativeInt = 365
-  $skip: NonNegativeInt
+  $startDate: Int
+  $endDate: Int
+  $orderDirection: OrderDirection = asc
+  $limit: Int = 365
+  $skip: Int
 ) {
   tokenMetrics(
     metricType: $metricType

@@ -1,11 +1,11 @@
 query GetDelegationHistoryItems(
   $delegator: String!
-  $delegate: JSON
-  $skip: NonNegativeInt
-  $limit: PositiveInt = 10
+  $delegate: [String]
+  $skip: Int
+  $limit: Int = 10
   $fromValue: String
   $toValue: String
-  $orderDirection: queryInput_historicalDelegations_orderDirection = desc
+  $orderDirection: OrderDirection = desc
 ) {
   historicalDelegations(
     address: $delegator

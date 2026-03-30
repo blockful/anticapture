@@ -1,12 +1,13 @@
 import {
-  Query_FeedEvents_Items_Items_Relevance,
-  Query_FeedEvents_Items_Items_Type,
+  FeedEventType as GraphFeedEventType,
+  FeedRelevance as GraphFeedEventRelevance,
 } from "@anticapture/graphql-client";
 import type { Address } from "viem";
 
-export { Query_FeedEvents_Items_Items_Relevance as FeedEventRelevance };
-
-export { Query_FeedEvents_Items_Items_Type as FeedEventType };
+export {
+  GraphFeedEventRelevance as FeedEventRelevance,
+  GraphFeedEventType as FeedEventType,
+};
 
 export interface VoteDetail {
   voter: Address;
@@ -52,7 +53,7 @@ export interface DelegationVotesChangedDetail {
 
 type FeedEventBase = {
   logIndex: number;
-  relevance: Query_FeedEvents_Items_Items_Relevance;
+  relevance: GraphFeedEventRelevance;
   timestamp: number;
   txHash: string;
   value?: string | null;
@@ -60,23 +61,23 @@ type FeedEventBase = {
 
 export type FeedEvent =
   | (FeedEventBase & {
-      type: Query_FeedEvents_Items_Items_Type.Vote;
+      type: GraphFeedEventType.Vote;
       metadata?: VoteDetail;
     })
   | (FeedEventBase & {
-      type: Query_FeedEvents_Items_Items_Type.Proposal;
+      type: GraphFeedEventType.Proposal;
       metadata?: ProposalDetail;
     })
   | (FeedEventBase & {
-      type: Query_FeedEvents_Items_Items_Type.ProposalExtended;
+      type: GraphFeedEventType.ProposalExtended;
       metadata?: ProposalExtendedDetail;
     })
   | (FeedEventBase & {
-      type: Query_FeedEvents_Items_Items_Type.Transfer;
+      type: GraphFeedEventType.Transfer;
       metadata?: TransferDetail;
     })
   | (FeedEventBase & {
-      type: Query_FeedEvents_Items_Items_Type.Delegation;
+      type: GraphFeedEventType.Delegation;
       metadata?: DelegationDetail;
     });
 // | (FeedEventBase & {
@@ -90,14 +91,14 @@ export interface ActivityFeedFilters {
   sortOrder?: "asc" | "desc";
   fromTimestamp?: number;
   toTimestamp?: number;
-  type?: Query_FeedEvents_Items_Items_Type;
-  relevance?: Query_FeedEvents_Items_Items_Relevance;
+  type?: GraphFeedEventType;
+  relevance?: GraphFeedEventRelevance;
 }
 
 export interface ActivityFeedFilterState {
   sortOrder: "desc" | "asc";
-  type?: Query_FeedEvents_Items_Items_Type;
-  relevance?: Query_FeedEvents_Items_Items_Relevance;
+  type?: GraphFeedEventType;
+  relevance?: GraphFeedEventRelevance;
   fromDate: string;
   toDate: string;
 }

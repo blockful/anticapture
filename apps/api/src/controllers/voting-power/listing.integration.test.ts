@@ -282,8 +282,8 @@ describe("Voting Powers Controller", () => {
       expect(body).toEqual({ items: [BASE_ACCOUNT_POWER_ITEM], totalCount: 1 });
     });
 
-    it("should return 400 for limit exceeding 100", async () => {
-      const res = await app.request("/voting-powers?limit=200");
+    it("should return 400 for limit exceeding 1000", async () => {
+      const res = await app.request("/voting-powers?limit=1001");
 
       expect(res.status).toBe(400);
     });

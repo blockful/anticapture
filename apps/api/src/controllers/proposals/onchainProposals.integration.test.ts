@@ -115,8 +115,8 @@ const BASE_PROPOSAL_FIELDS = {
   description: "A test proposal description",
   startBlock: 10,
   endBlock: 110,
-  endTimestamp: "1700100000",
-  startTimestamp: "1700098800",
+  endTimestamp: 1700100000,
+  startTimestamp: 1700098800,
   status: "ACTIVE",
   forVotes: "5000",
   againstVotes: "1000",
@@ -144,7 +144,7 @@ describe("Onchain Proposals Controller", () => {
             ...BASE_PROPOSAL_FIELDS,
             id: "1",
             txHash: "0xabc123",
-            timestamp: "1700000000",
+            timestamp: 1700000000,
           },
         ],
       });
@@ -172,7 +172,7 @@ describe("Onchain Proposals Controller", () => {
             ...BASE_PROPOSAL_FIELDS,
             id: "1",
             txHash: "0xabc123",
-            timestamp: "1700000000",
+            timestamp: 1700000000,
           },
         ],
       });
@@ -200,13 +200,13 @@ describe("Onchain Proposals Controller", () => {
             ...BASE_PROPOSAL_FIELDS,
             id: "1",
             txHash: "0xabc123",
-            timestamp: "1700000000",
+            timestamp: 1700000000,
           },
           {
             ...BASE_PROPOSAL_FIELDS,
             id: "2",
             txHash: "0xdef456",
-            timestamp: "1700001000",
+            timestamp: 1700001000,
           },
         ],
       });
@@ -233,7 +233,7 @@ describe("Onchain Proposals Controller", () => {
             ...BASE_PROPOSAL_FIELDS,
             id: "2",
             txHash: "0xdef456",
-            timestamp: "1700500000",
+            timestamp: 1700500000,
           },
         ],
         totalCount: 2,
@@ -253,7 +253,7 @@ describe("Onchain Proposals Controller", () => {
         ...BASE_PROPOSAL_FIELDS,
         id: "42",
         txHash: "0xabc123",
-        timestamp: "1700000000",
+        timestamp: 1700000000,
       });
     });
 

@@ -36,9 +36,9 @@ export function transfers(app: Hono, service: TransfersService) {
       const { from, to } = context.req.valid("query");
       const {
         limit,
-        offset,
-        sortBy,
-        sortOrder,
+        skip: offset,
+        orderBy,
+        orderDirection = "asc",
         fromValue,
         toValue,
         fromDate,
@@ -48,9 +48,9 @@ export function transfers(app: Hono, service: TransfersService) {
       const result = await service.getTransfers({
         address,
         limit,
-        offset,
-        sortBy,
-        sortOrder,
+        skip: offset,
+        orderBy,
+        orderDirection,
         from,
         to,
         fromValue,
@@ -59,7 +59,7 @@ export function transfers(app: Hono, service: TransfersService) {
         toDate,
       });
 
-      return context.json(result);
+      return context.json(result, 200);
     },
   );
 }

@@ -31,9 +31,8 @@ const makeDBTransaction = (overrides = {}): DBTransaction => ({
 
 const defaultRequest: TransactionsRequest = {
   limit: 10,
-  offset: 0,
-  sortBy: "timestamp",
-  sortOrder: "desc",
+  skip: 0,
+  orderDirection: "desc",
   affectedSupply: {},
   includes: { transfers: true, delegations: true },
 };

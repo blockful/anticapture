@@ -4,6 +4,7 @@ import {
   TreasuryResponseSchema,
   TreasuryQuerySchema,
 } from "@/mappers/treasury";
+import {} from "@/mappers";
 import { TreasuryService } from "@/services/treasury";
 
 export function treasury(
@@ -35,9 +36,12 @@ export function treasury(
       },
     }),
     async (context) => {
-      const { days, order } = context.req.valid("query");
-      const result = await treasuryService.getLiquidTreasury(days, order);
-      return context.json(result);
+      const { days, orderDirection = "asc" } = context.req.valid("query");
+      const result = await treasuryService.getLiquidTreasury(
+        days / (24 * 60 * 60),
+        orderDirection,
+      );
+      return context.json(result, 200);
     },
   );
 
@@ -62,19 +66,16 @@ export function treasury(
             },
           },
         },
-        400: {
-          description: "Invalid DAO ID or missing configuration",
-        },
       },
     }),
     async (context) => {
-      const { days, order } = context.req.valid("query");
+      const { days, orderDirection = "asc" } = context.req.valid("query");
       const result = await treasuryService.getTokenTreasury(
-        days,
-        order,
+        days / (24 * 60 * 60),
+        orderDirection,
         decimals,
       );
-      return context.json(result);
+      return context.json(result, 200);
     },
   );
 
@@ -99,19 +100,16 @@ export function treasury(
             },
           },
         },
-        400: {
-          description: "Invalid DAO ID or missing configuration",
-        },
       },
     }),
     async (context) => {
-      const { days, order } = context.req.valid("query");
+      const { days, orderDirection = "asc" } = context.req.valid("query");
       const result = await treasuryService.getTotalTreasury(
-        days,
-        order,
+        days / (24 * 60 * 60),
+        orderDirection,
         decimals,
       );
-      return context.json(result);
+      return context.json(result, 200);
     },
   );
 }

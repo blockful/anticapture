@@ -1,10 +1,12 @@
-import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
-import { Address, getAddress, isAddress } from "viem";
+import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
+import { Address } from "viem";
 
 import {
   VotingPowersRequestSchema,
   VotingPowersResponseSchema,
   VotingPowerResponseSchema,
+  VotingPowerByAccountIdRequestParamsSchema,
+  VotingPowerByAccountIdRequestQuerySchema,
   AmountFilter,
   DBAccountPowerWithVariation,
 } from "@/mappers/";
@@ -95,6 +97,7 @@ export function votingPowers(app: Hono, service: VotingPowerService) {
             },
           })),
         }),
+        200,
       );
     },
   );
@@ -109,16 +112,8 @@ export function votingPowers(app: Hono, service: VotingPowerService) {
         "Returns voting power information for a specific address (account)",
       tags: ["voting-power"],
       request: {
-        params: z.object({
-          accountId: z
-            .string()
-            .refine((addr) => isAddress(addr, { strict: false }))
-            .transform((addr) => getAddress(addr)),
-        }),
-        query: z.object({
-          fromDate: z.coerce.number().optional(),
-          toDate: z.coerce.number().optional(),
-        }),
+        params: VotingPowerByAccountIdRequestParamsSchema,
+        query: VotingPowerByAccountIdRequestQuerySchema,
       },
       responses: {
         200: {
@@ -147,6 +142,7 @@ export function votingPowers(app: Hono, service: VotingPowerService) {
             absoluteChange: result.absoluteChange,
           },
         }),
+        200,
       );
     },
   );

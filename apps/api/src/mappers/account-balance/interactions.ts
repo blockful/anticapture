@@ -1,68 +1,96 @@
 import { z } from "@hono/zod-openapi";
-import { getAddress, isAddress } from "viem";
 
-import { PeriodResponseSchema, TimestampResponseMapper } from "../shared";
+import {
+  AddressSchema,
+  OrderDirectionSchema,
+  paginationLimitQueryParam,
+  paginationSkipQueryParam,
+  PeriodResponseSchema,
+  TimestampResponseMapper,
+  unixTimestampQueryParam,
+} from "../shared";
 
 import { DBAccountBalanceVariation } from "./variations";
 
-export const AccountInteractionsParamsSchema = z.object({
-  address: z
-    .string()
-    .refine(isAddress, "Invalid address")
-    .transform((addr) => getAddress(addr)),
-});
+export const AccountInteractionsParamsSchema = z
+  .object({
+    address: AddressSchema,
+  })
+  .openapi("AccountInteractionsParams", {
+    description: "Path params for account interaction queries.",
+  });
 
-export const AccountInteractionsQuerySchema = z.object({
-  fromDate: z
-    .string()
-    .transform((val) => Number(val))
-    .optional(),
-  toDate: z
-    .string()
-    .transform((val) => Number(val))
-    .optional(),
-  limit: z.coerce
-    .number()
-    .int()
-    .min(1, "Limit must be a positive integer")
-    .max(100, "Limit cannot exceed 100")
-    .optional()
-    .default(20),
-  skip: z.coerce
-    .number()
-    .int()
-    .min(0, "Skip must be a non-negative integer")
-    .optional()
-    .default(0),
-  orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
-  minAmount: z
-    .string()
-    .transform((val) => BigInt(val))
-    .optional(),
-  maxAmount: z
-    .string()
-    .transform((val) => BigInt(val))
-    .optional(),
-  orderBy: z.enum(["volume", "count"]).optional().default("count"),
-  filterAddress: z
-    .string()
-    .refine(isAddress, "Invalid address")
-    .transform((addr) => getAddress(addr))
-    .optional(),
-});
+export const AccountInteractionsQuerySchema = z
+  .object({
+    fromDate: unixTimestampQueryParam(
+      "Inclusive lower bound for transfer timestamps, in Unix seconds.",
+    ),
+    toDate: unixTimestampQueryParam(
+      "Inclusive upper bound for transfer timestamps, in Unix seconds.",
+    ),
+    limit: paginationLimitQueryParam(
+      "Maximum number of interaction rows to return.",
+      20,
+    ),
+    skip: paginationSkipQueryParam("Number of interaction rows to skip."),
+    orderDirection: OrderDirectionSchema.optional().default("desc"),
+    minAmount: z
+      .string()
+      .transform((val) => BigInt(val))
+      .openapi({
+        description:
+          "Minimum net amount transferred, encoded as a decimal string.",
+      })
+      .optional(),
+    maxAmount: z
+      .string()
+      .transform((val) => BigInt(val))
+      .openapi({
+        description:
+          "Maximum net amount transferred, encoded as a decimal string.",
+      })
+      .optional(),
+    orderBy: z.enum(["volume", "count"]).optional().default("count").openapi({
+      description: "Field used to sort interaction rows.",
+      example: "count",
+    }),
+    filterAddress: AddressSchema.openapi({
+      description: "Optional counterparty address used to narrow the results.",
+    }).optional(),
+  })
+  .openapi("AccountInteractionsQuery", {
+    description: "Query params used to filter and page account interactions.",
+  });
 
-export const AccountInteractionResponseSchema = z.object({
-  accountId: z.string(),
-  amountTransferred: z.string(),
-  totalVolume: z.string(),
-  transferCount: z.string(),
-});
+export const AccountInteractionResponseSchema = z
+  .object({
+    accountId: z.string().openapi({ description: "Counterparty account ID." }),
+    amountTransferred: z.string().openapi({
+      description:
+        "Net amount transferred between the requested account and the counterparty.",
+    }),
+    totalVolume: z.string().openapi({
+      description:
+        "Gross transfer volume between the requested account and the counterparty.",
+    }),
+    transferCount: z.string().openapi({
+      description: "Number of transfers observed for the interaction pair.",
+    }),
+  })
+  .openapi("AccountInteraction", {
+    description:
+      "Aggregated interaction metrics between the requested account and another account.",
+  });
 
-export const AccountInteractionsResponseSchema = z.object({
-  period: PeriodResponseSchema,
-  totalCount: z.number(),
-  items: z.array(AccountInteractionResponseSchema),
-});
+export const AccountInteractionsResponseSchema = z
+  .object({
+    period: PeriodResponseSchema,
+    totalCount: z.number().int(),
+    items: z.array(AccountInteractionResponseSchema),
+  })
+  .openapi("AccountInteractionsResponse", {
+    description: "Paginated list of account interaction aggregates.",
+  });
 
 export type AccountInteractionsResponse = z.infer<
   typeof AccountInteractionsResponseSchema

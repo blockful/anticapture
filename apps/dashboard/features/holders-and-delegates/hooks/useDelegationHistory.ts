@@ -1,7 +1,7 @@
 "use client";
 
 import type { GetDelegationHistoryItemsQuery } from "@anticapture/graphql-client";
-import { QueryInput_HistoricalDelegations_OrderDirection } from "@anticapture/graphql-client";
+import { OrderDirection } from "@anticapture/graphql-client";
 import { useGetDelegationHistoryItemsQuery } from "@anticapture/graphql-client/hooks";
 import { NetworkStatus } from "@apollo/client";
 import { useMemo, useCallback, useState, useEffect } from "react";
@@ -70,16 +70,14 @@ export const useDelegationHistory = ({
       skip: (currentPage - 1) * limit,
       limit,
       orderDirection:
-        orderDirection === "asc"
-          ? QueryInput_HistoricalDelegations_OrderDirection.Asc
-          : QueryInput_HistoricalDelegations_OrderDirection.Desc,
-      ...(delegateAccountId && { delegate: [delegateAccountId] }),
-      ...(filterVariables?.fromValue && {
-        fromValue: filterVariables.fromValue.toString(),
-      }),
-      ...(filterVariables?.toValue && {
-        toValue: filterVariables.toValue.toString(),
-      }),
+        orderDirection === "asc" ? OrderDirection.Asc : OrderDirection.Desc,
+      delegate: delegateAccountId ? [delegateAccountId] : null,
+      fromValue: filterVariables?.fromValue
+        ? filterVariables.fromValue.toString()
+        : null,
+      toValue: filterVariables?.toValue
+        ? filterVariables.toValue.toString()
+        : null,
     },
     context: {
       headers: {
@@ -98,9 +96,7 @@ export const useDelegationHistory = ({
       skip: 0,
       limit,
       orderDirection:
-        orderDirection === "asc"
-          ? QueryInput_HistoricalDelegations_OrderDirection.Asc
-          : QueryInput_HistoricalDelegations_OrderDirection.Desc,
+        orderDirection === "asc" ? OrderDirection.Asc : OrderDirection.Desc,
     });
   }, [orderDirection, refetch, limit]);
 
@@ -156,9 +152,7 @@ export const useDelegationHistory = ({
           skip,
           limit,
           orderDirection:
-            orderDirection === "asc"
-              ? QueryInput_HistoricalDelegations_OrderDirection.Asc
-              : QueryInput_HistoricalDelegations_OrderDirection.Desc,
+            orderDirection === "asc" ? OrderDirection.Asc : OrderDirection.Desc,
           ...(delegateAccountId && { delegate: [delegateAccountId] }),
           ...(filterVariables?.fromValue && {
             fromValue: filterVariables.fromValue.toString(),
@@ -234,9 +228,7 @@ export const useDelegationHistory = ({
           skip,
           limit,
           orderDirection:
-            orderDirection === "asc"
-              ? QueryInput_HistoricalDelegations_OrderDirection.Asc
-              : QueryInput_HistoricalDelegations_OrderDirection.Desc,
+            orderDirection === "asc" ? OrderDirection.Asc : OrderDirection.Desc,
           ...(delegateAccountId && { delegate: [delegateAccountId] }),
           ...(filterVariables?.fromValue && {
             fromValue: filterVariables.fromValue.toString(),

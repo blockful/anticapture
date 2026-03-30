@@ -1,24 +1,24 @@
 query Transactions(
-  $limit: PositiveInt
-  $offset: NonNegativeInt
+  $limit: Int
+  $skip: Int
   $from: String
   $to: String
   $minAmount: String
   $maxAmount: String
-  $sortOrder: queryInput_transactions_sortOrder
-  $affectedSupply: JSON
+  $orderDirection: OrderDirection
+  $affectedSupply: [queryInput_transactions_affectedSupply_items]
   $fromDate: Int
   $toDate: Int
-  $includes: JSON
+  $includes: [queryInput_transactions_includes_items]
 ) {
   transactions(
     limit: $limit
-    offset: $offset
+    skip: $skip
     from: $from
     to: $to
     minAmount: $minAmount
     maxAmount: $maxAmount
-    sortOrder: $sortOrder
+    orderDirection: $orderDirection
     affectedSupply: $affectedSupply
     fromDate: $fromDate
     toDate: $toDate

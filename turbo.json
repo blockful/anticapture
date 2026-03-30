@@ -1,23 +1,29 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
+    "db:prune": { "cache": false },
     "@anticapture/observability#build": {
       "outputs": ["packages/observability/dist/**"]
     },
-    "@anticapture/graphql-client#build": {
-      "outputs": ["packages/graphql-client/dist/**"]
+    "@anticapture/dashboard#dev": {
+      "dependsOn": ["@anticapture/graphql-client#codegen"],
+      "persistent": true,
+      "cache": false
     },
-    "@anticapture/dasbhoard#build": {
-      "dependsOn": ["@anticapture/#graphql-client#build"],
-      "outputs": ["dist/**", ".next/**", ".next/cache/**"]
+    "@anticapture/graphql-client#dev": {
+      "persistent": true
+    },
+    "@anticapture/dashboard#build": {
+      "dependsOn": ["@anticapture/graphql-client#codegen"],
+      "outputs": ["dist/**", ".next/**"],
+      "env": ["RESEND_API_KEY", "RESEND_FROM_EMAIL", "CONTACT_EMAIL"]
     },
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**", ".next/cache/**"],
-      "env": ["RESEND_API_KEY", "RESEND_FROM_EMAIL", "CONTACT_EMAIL"]
+      "outputs": ["dist/**", ".next/**"]
     },
     "storybook": {
-      "outputs": ["dist/**", ".next/**", ".next/cache/**"]
+      "outputs": ["dist/**"]
     },
     "build-storybook": {
       "outputs": ["storybook-static/**"]
@@ -28,7 +34,7 @@
       "cache": false,
       "passThroughEnv": ["*"]
     },
-    "clean": {},
+    "clean": { "cache": false },
     "lint": {
       "inputs": [
         "**/*.ts",
@@ -39,6 +45,7 @@
       ]
     },
     "lint:fix": {
+      "cache": false,
       "inputs": [
         "**/*.ts",
         "**/*.tsx",
@@ -58,7 +65,8 @@
       "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"]
     },
     "codegen": {
-      "outputs": ["generated.ts", "types.ts"]
+      "inputs": ["documents/**/*", "codegen.ts"],
+      "outputs": ["generated/**"]
     },
     "db:generate": {
       "inputs": ["src/**/*.ts"],

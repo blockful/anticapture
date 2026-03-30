@@ -28,5 +28,3 @@ export enum DaysEnum {
   "180d" = 180 * SECONDS_IN_DAY,
   "365d" = 365 * SECONDS_IN_DAY,
 }
-
-export const DaysOpts = ["7d", "30d", "90d", "180d", "365d"] as const;

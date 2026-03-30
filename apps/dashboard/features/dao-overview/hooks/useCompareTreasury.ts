@@ -1,5 +1,5 @@
 import {
-  QueryInput_CompareTreasury_Days,
+  DaysWindow,
   useCompareTreasuryQuery,
 } from "@anticapture/graphql-client/hooks";
 
@@ -8,8 +8,8 @@ import type { TimeInterval } from "@/shared/types/enums";
 
 interface CompareTreasury {
   changeRate: number;
-  currentTreasury: string;
-  oldTreasury: string;
+  currentValue: string;
+  previousValue: string;
 }
 
 interface UseCompareTreasuryResult {
@@ -25,7 +25,7 @@ export const useCompareTreasury = (
 ): UseCompareTreasuryResult => {
   const { data, loading, error, refetch } = useCompareTreasuryQuery({
     variables: {
-      days: QueryInput_CompareTreasury_Days[days],
+      days: DaysWindow[days],
     },
     context: {
       headers: {

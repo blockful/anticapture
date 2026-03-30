@@ -111,7 +111,7 @@ describe("VotesService", () => {
     voterAddress: VOTER_A,
     transactionHash: TX_HASH,
     proposalId: "1",
-    support: 1,
+    support: "1",
     votingPower: "1000",
     reason: null,
     timestamp: 1700000000,

@@ -1,8 +1,8 @@
 "use client";
 
 import {
+  OrderDirection,
   QueryInput_HistoricalBalances_OrderBy,
-  QueryInput_HistoricalBalances_OrderDirection,
 } from "@anticapture/graphql-client";
 import { useBalanceHistoryGraphQuery } from "@anticapture/graphql-client/hooks";
 import { useMemo } from "react";
@@ -37,9 +37,9 @@ export function useBalanceHistoryGraph(
   const { data, loading, error } = useBalanceHistoryGraphQuery({
     variables: {
       address: accountId,
-      fromDate: fromDate?.toString(),
+      fromDate: fromDate ?? null,
       orderBy: QueryInput_HistoricalBalances_OrderBy.Timestamp,
-      orderDirection: QueryInput_HistoricalBalances_OrderDirection.Desc,
+      orderDirection: OrderDirection.Desc,
     },
     context: {
       headers: {

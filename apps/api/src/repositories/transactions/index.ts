@@ -10,6 +10,7 @@ export class TransactionsRepository {
     filter: TransactionsRequest,
   ): Promise<DBTransaction[]> {
     const hashQuery = this.resolveTransactionHashQuery(filter);
+    const orderDirection = sql.raw(filter.orderDirection ?? "desc");
     const query = sql`
     WITH filtered_transactions AS (${hashQuery}),
     latest_filtered_transactions AS (
@@ -24,9 +25,9 @@ export class TransactionsRepository {
           ${transaction.timestamp}
         FROM ${transaction}
         WHERE ${transaction.transactionHash} IN (SELECT transaction_hash FROM filtered_transactions)
-        ORDER BY ${transaction.timestamp} DESC
+        ORDER BY ${transaction.timestamp} ${orderDirection}
         LIMIT ${filter.limit}
-        OFFSET ${filter.offset ?? 0}
+        OFFSET ${filter.skip ?? 0}
     ),
     transfer_aggregates AS (
         SELECT 
@@ -84,7 +85,7 @@ export class TransactionsRepository {
     FROM latest_filtered_transactions lt
     LEFT JOIN transfer_aggregates ta ON ta.transaction_hash = lt.transaction_hash
     LEFT JOIN delegation_aggregates da ON da.transaction_hash = lt.transaction_hash
-    ORDER BY lt.timestamp DESC;
+    ORDER BY lt.timestamp ${orderDirection};
 `;
     const result = await this.db.execute<DBTransaction>(query);
 

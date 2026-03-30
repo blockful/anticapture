@@ -124,10 +124,12 @@ export const MultilineChartAttackProfitability = ({
       datasets = mockedAttackProfitabilityDatasets;
     } else {
       const nonZeroLiquidTreasuryData = liquidTreasuryData.filter(
-        (item) => item.value > 0,
+        (item): item is NonNullable<typeof item> =>
+          item !== null && item.value > 0,
       );
       const nonZeroTotalTreasuryData = totalTreasuryData.filter(
-        (item) => item.value > 0,
+        (item): item is NonNullable<typeof item> =>
+          item !== null && item.value > 0,
       );
 
       datasets = {
