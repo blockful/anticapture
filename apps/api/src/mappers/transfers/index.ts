@@ -1,8 +1,8 @@
 import { z } from "@hono/zod-openapi";
-import { getAddress, isAddress } from "viem";
 
 import { transfer } from "@/database";
 import {
+  AddressSchema,
   OrderDirectionSchema,
   paginationLimitQueryParam,
   paginationSkipQueryParam,
@@ -10,11 +10,6 @@ import {
 } from "../shared";
 
 export type DBTransfer = typeof transfer.$inferSelect;
-
-const AddressSchema = z
-  .string()
-  .refine((addr) => isAddress(addr, { strict: false }))
-  .transform((addr) => getAddress(addr));
 
 export const TransfersRequestRouteSchema = z
   .object({
@@ -40,20 +35,8 @@ export const TransfersRequestQuerySchema = z
         example: "timestamp",
       }),
     orderDirection: OrderDirectionSchema.optional(),
-    from: z
-      .string()
-      .refine((addr) => isAddress(addr, { strict: false }), {
-        message: "Invalid address",
-      })
-      .transform((addr) => getAddress(addr))
-      .optional(),
-    to: z
-      .string()
-      .refine((addr) => isAddress(addr, { strict: false }), {
-        message: "Invalid address",
-      })
-      .transform((addr) => getAddress(addr))
-      .optional(),
+    from: AddressSchema.optional(),
+    to: AddressSchema.optional(),
     fromDate: unixTimestampQueryParam(
       "Earliest transfer timestamp, in Unix seconds.",
     ),

@@ -1,6 +1,7 @@
 import { z } from "@hono/zod-openapi";
 
 import { proposalsOnchain } from "@/database";
+import { ProposalStatus } from "@/lib/constants";
 import {
   normalizeQueryArray,
   OrderDirectionSchema,
@@ -11,39 +12,53 @@ import {
 
 export type DBProposal = typeof proposalsOnchain.$inferSelect;
 
-const StringArrayQuerySchema = z
-  .array(z.string())
-  .openapi("OnchainProposalStatusList");
+const OnchainProposalStatusValues = Object.values(ProposalStatus) as [
+  ProposalStatus,
+  ...ProposalStatus[],
+];
+
+const OnchainProposalStatusListSchema = z
+  .union([z.string(), z.array(z.string())])
+  .transform((value) => {
+    const statuses = normalizeQueryArray(value);
+    return statuses
+      ? z
+          .array(z.enum(OnchainProposalStatusValues))
+          .parse(statuses.map((status) => String(status).toUpperCase()))
+      : undefined;
+  });
 
 export const ProposalsRequestSchema = z
   .object({
     skip: paginationSkipQueryParam(),
     limit: paginationLimitQueryParam(),
     orderDirection: OrderDirectionSchema.default("desc").optional(),
-    status: z
-      .preprocess(normalizeQueryArray, StringArrayQuerySchema.optional())
-      .transform((values) => values?.map((value) => value.toUpperCase()))
-      .openapi({
+    status: OnchainProposalStatusListSchema.optional().openapi(
+      "OnchainProposalStatusList",
+      {
+        type: "array",
+        items: {
+          type: "string",
+          enum: OnchainProposalStatusValues,
+        },
         description:
           "Proposal status filter. Pass repeated query params or a comma-delimited list.",
         example: ["ACTIVE"],
-      }),
+      },
+    ),
     fromDate: unixTimestampQueryParam(
       "Earliest proposal timestamp, in Unix seconds.",
     ),
     fromEndDate: unixTimestampQueryParam(
       "Latest proposal end timestamp, in Unix seconds.",
     ),
-    includeOptimisticProposals: z
-      .preprocess(
-        (value) =>
-          value === "true" ? true : value === "false" ? false : value,
-        z.boolean().optional().default(true),
-      )
+    includeOptimisticProposals: z.coerce
+      .boolean()
+      .optional()
+      .default(true)
       .openapi({
         description: "Whether optimistic proposals should be included.",
         example: false,
-        type: "boolean",
       }),
   })
   .openapi("OnchainProposalsRequest");

@@ -137,13 +137,12 @@ export function useBalanceHistory({
     setIsPaginationLoading(true);
 
     const nextPage = currentPage + 1;
-    const offset = (nextPage - 1) * limit;
 
     try {
       await fetchMore({
         variables: {
           ...variables,
-          offset,
+          skip: (nextPage - 1) * limit,
         },
         updateQuery: (
           previousResult: BalanceHistoryQuery,

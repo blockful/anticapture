@@ -1,5 +1,4 @@
 import { z } from "@hono/zod-openapi";
-import { getAddress, isAddress } from "viem";
 
 import { transaction } from "@/database";
 
@@ -10,6 +9,7 @@ import {
   TransferResponseSchema,
 } from "../transfers";
 import {
+  AddressSchema,
   normalizeQueryArray,
   OrderDirectionSchema,
   paginationLimitQueryParam,
@@ -36,12 +36,40 @@ export enum TransactionType {
 }
 
 const AffectedSupplyListSchema = z
-  .array(z.nativeEnum(AffectedSupply))
-  .openapi("AffectedSupplyList");
+  .union([z.string(), z.array(z.string())])
+  .transform((value) => {
+    const items = normalizeQueryArray(value);
+    return items
+      ? z
+          .array(
+            z.enum(
+              Object.values(AffectedSupply) as [
+                AffectedSupply,
+                ...AffectedSupply[],
+              ],
+            ),
+          )
+          .parse(items)
+      : undefined;
+  });
 
 const TransactionIncludeListSchema = z
-  .array(z.nativeEnum(TransactionType))
-  .openapi("TransactionIncludeList");
+  .union([z.string(), z.array(z.string())])
+  .transform((value) => {
+    const items = normalizeQueryArray(value);
+    return items
+      ? z
+          .array(
+            z.enum(
+              Object.values(TransactionType) as [
+                TransactionType,
+                ...TransactionType[],
+              ],
+            ),
+          )
+          .parse(items)
+      : undefined;
+  });
 
 export const TransactionsRequestSchema = z
   .object({
@@ -54,16 +82,8 @@ export const TransactionsRequestSchema = z
     toDate: unixTimestampQueryParam(
       "Inclusive upper bound for transaction timestamps, in Unix seconds.",
     ),
-    from: z
-      .string()
-      .refine((addr) => isAddress(addr, { strict: false }))
-      .transform((addr) => getAddress(addr))
-      .optional(),
-    to: z
-      .string()
-      .refine((addr) => isAddress(addr, { strict: false }))
-      .transform((addr) => getAddress(addr))
-      .optional(),
+    from: AddressSchema.optional(),
+    to: AddressSchema.optional(),
     minAmount: z
       .string()
       .transform((val) => BigInt(val))
@@ -72,12 +92,16 @@ export const TransactionsRequestSchema = z
       .string()
       .transform((val) => BigInt(val))
       .optional(), //z.coerce.bigint().optional() doesn't work because of a bug with zod, zod asks for a string that satisfies REGEX ^d+$, when it should be ^\d+$
-    affectedSupply: z
-      .preprocess(normalizeQueryArray, AffectedSupplyListSchema.optional())
-      .optional()
-      .describe(
-        "Filter transactions by affected supply type. Can be: 'CEX', 'DEX', 'LENDING', or 'TOTAL'",
-      )
+    affectedSupply: AffectedSupplyListSchema.optional()
+      .openapi({
+        type: "array",
+        items: {
+          type: "string",
+          enum: ["CEX", "DEX", "LENDING", "TOTAL", "UNASSIGNED"],
+        },
+        description:
+          "Filter transactions by affected supply type. Can be: 'CEX', 'DEX', 'LENDING', or 'TOTAL'",
+      })
       .transform((affectedSupply) => {
         if (!affectedSupply?.length) return {};
 
@@ -89,12 +113,16 @@ export const TransactionsRequestSchema = z
           isUnassigned: affectedSupply.includes(AffectedSupply.UNASSIGNED),
         };
       }),
-    includes: z
-      .preprocess(normalizeQueryArray, TransactionIncludeListSchema.optional())
-      .optional()
-      .describe(
-        "Filter by transaction type. Can be one of: 'TRANSFER', 'DELEGATION'",
-      )
+    includes: TransactionIncludeListSchema.optional()
+      .openapi({
+        type: "array",
+        items: {
+          type: "string",
+          enum: ["TRANSFER", "DELEGATION"],
+        },
+        description:
+          "Filter by transaction type. Can be one of: 'TRANSFER', 'DELEGATION'",
+      })
       .transform((includeTypes) => {
         if (!includeTypes?.length)
           return {

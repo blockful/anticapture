@@ -1,9 +1,8 @@
 import { z } from "@hono/zod-openapi";
-import { isAddress, getAddress } from "viem";
 
 import { offchainVotes } from "@/database";
 import {
-  normalizeQueryArray,
+  AddressQueryArraySchema,
   OrderDirectionSchema,
   paginationLimitQueryParam,
   paginationSkipQueryParam,
@@ -11,14 +10,6 @@ import {
 } from "../shared";
 
 export type DBOffchainVote = typeof offchainVotes.$inferSelect;
-
-const StringArrayQuerySchema = z
-  .array(
-    z.string().refine((val) => isAddress(val, { strict: false }), {
-      message: "Invalid address",
-    }),
-  )
-  .openapi("SnapshotVoteAddressList");
 
 export const OffchainVotesRequestSchema = z
   .object({
@@ -33,17 +24,12 @@ export const OffchainVotesRequestSchema = z
         example: "timestamp",
       }),
     orderDirection: OrderDirectionSchema.optional().default("desc"),
-    voterAddresses: z
-      .preprocess(
-        normalizeQueryArray,
-        StringArrayQuerySchema.transform((values) =>
-          values.map((val) => getAddress(val)),
-        ).optional(),
-      )
-      .openapi({
-        description:
-          "Filter by one or more voter addresses. Pass repeated query params or a comma-delimited list.",
-      }),
+    voterAddresses: AddressQueryArraySchema.optional().openapi({
+      type: "array",
+      items: { type: "string" },
+      description:
+        "Filter by one or more voter addresses. Pass repeated query params or a comma-delimited list.",
+    }),
     fromDate: unixTimestampQueryParam(
       "Earliest vote timestamp, in Unix seconds.",
     ),

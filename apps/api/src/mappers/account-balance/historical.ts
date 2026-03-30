@@ -1,9 +1,9 @@
 import { z } from "@hono/zod-openapi";
-import { getAddress, isAddress } from "viem";
 
 import { balanceHistory } from "@/database";
 
 import {
+  AddressSchema,
   OrderDirectionSchema,
   paginationLimitQueryParam,
   paginationSkipQueryParam,
@@ -18,10 +18,7 @@ export type DBHistoricalBalanceWithRelations = DBHistoricalBalance & {
 
 export const HistoricalBalanceRequestParamsSchema = z
   .object({
-    address: z
-      .string()
-      .refine((addr) => isAddress(addr))
-      .transform((addr) => getAddress(addr)),
+    address: AddressSchema,
   })
   .openapi("HistoricalBalanceRequestParams", {
     description: "Path params for historical balance queries.",

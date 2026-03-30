@@ -2,7 +2,7 @@ query GetProposalsFromDao(
   $skip: Int
   $limit: Int = 10
   $orderDirection: OrderDirection = desc
-  $status: [String]
+  $status: [queryInput_proposals_status_items]
   $fromDate: Int
 ) {
   proposals(

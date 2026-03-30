@@ -1,9 +1,8 @@
 import { z } from "@hono/zod-openapi";
-import { getAddress, isAddress } from "viem";
 
 import { votesOnchain } from "@/database";
 import {
-  normalizeQueryArray,
+  AddressQueryArraySchema,
   OrderDirectionSchema,
   paginationLimitQueryParam,
   paginationSkipQueryParam,
@@ -13,29 +12,16 @@ import {
 
 export type DBVote = typeof votesOnchain.$inferSelect;
 
-const StringArrayQuerySchema = z
-  .array(
-    z.string().refine((val) => isAddress(val, { strict: false }), {
-      message: "Invalid address",
-    }),
-  )
-  .openapi("OnchainVoteAddressList");
-
 export const VotesRequestSchema = z
   .object({
     skip: paginationSkipQueryParam(),
     limit: paginationLimitQueryParam(),
-    voterAddressIn: z
-      .preprocess(
-        normalizeQueryArray,
-        StringArrayQuerySchema.transform((values) =>
-          values.map((val) => getAddress(val)),
-        ).optional(),
-      )
-      .openapi({
-        description:
-          "Filter by one or more voter addresses. Pass repeated query params or a comma-delimited list.",
-      }),
+    voterAddressIn: AddressQueryArraySchema.optional().openapi({
+      type: "array",
+      items: { type: "string" },
+      description:
+        "Filter by one or more voter addresses. Pass repeated query params or a comma-delimited list.",
+    }),
     orderBy: z
       .enum(["timestamp", "votingPower"])
       .optional()

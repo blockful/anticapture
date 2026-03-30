@@ -1,9 +1,10 @@
 import { z } from "@hono/zod-openapi";
-import { Address, getAddress, isAddress } from "viem";
+import { Address } from "viem";
 
 import { PERCENTAGE_NO_BASELINE } from "../constants";
 import {
-  normalizeQueryArray,
+  AddressQueryArraySchema,
+  AddressSchema,
   OrderDirectionSchema,
   paginationLimitQueryParam,
   paginationSkipQueryParam,
@@ -12,21 +13,9 @@ import {
   unixTimestampQueryParam,
 } from "../shared";
 
-const AddressArraySchema = z
-  .array(
-    z
-      .string()
-      .refine(isAddress, "Invalid address")
-      .transform((addr) => getAddress(addr)),
-  )
-  .openapi("AccountBalanceVariationAddressList");
-
 export const AccountBalanceVariationsByAccountIdRequestParamsSchema = z
   .object({
-    address: z
-      .string()
-      .refine(isAddress, "Invalid address")
-      .transform((addr) => getAddress(addr)),
+    address: AddressSchema,
   })
   .openapi("AccountBalanceVariationsByAccountIdRequestParams", {
     description: "Path params for a single-account balance variation request.",
@@ -56,13 +45,10 @@ export const AccountBalanceVariationsRequestQuerySchema =
       "Number of account balance variations to skip.",
     ),
     orderDirection: OrderDirectionSchema.optional().default("desc"),
-    addresses: z
-      .preprocess(normalizeQueryArray, AddressArraySchema.optional())
-      .openapi({
-        description:
-          "Filter by one or more account addresses. Pass repeated query params or a comma-delimited list.",
-      })
-      .optional(),
+    addresses: AddressQueryArraySchema.openapi({
+      description:
+        "Filter by one or more account addresses. Pass repeated query params or a comma-delimited list.",
+    }).optional(),
   }).openapi("AccountBalanceVariationsRequestQuery", {
     description:
       "Query params used to page and filter account balance variations.",

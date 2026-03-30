@@ -1,9 +1,9 @@
 import { z } from "@hono/zod-openapi";
-import { getAddress, isAddress } from "viem";
 
 import { delegation, votingPowerHistory } from "@/database";
 
 import {
+  AddressSchema,
   OrderDirectionSchema,
   paginationLimitQueryParam,
   paginationSkipQueryParam,
@@ -21,10 +21,7 @@ export type DBHistoricalVotingPowerWithRelations = DBHistoricalVotingPower & {
 
 export const HistoricalVotingPowerRequestParamsSchema = z
   .object({
-    address: z
-      .string()
-      .refine((addr) => isAddress(addr, { strict: false }))
-      .transform((addr) => getAddress(addr)),
+    address: AddressSchema,
   })
   .openapi("HistoricalVotingPowerRequestParams", {
     description: "Path params for historical voting power queries.",
@@ -180,15 +177,10 @@ export const HistoricalVotingPowersResponseMapper = (
 
 export const HistoricalVotingPowerGlobalQuerySchema =
   HistoricalVotingPowerRequestQuerySchema.extend({
-    address: z
-      .string()
-      .refine((addr) => isAddress(addr, { strict: false }))
-      .transform((addr) => getAddress(addr))
-      .openapi({
-        description:
-          "Optional account address used to scope the historical voting power results.",
-      })
-      .optional(),
+    address: AddressSchema.openapi({
+      description:
+        "Optional account address used to scope the historical voting power results.",
+    }).optional(),
   }).openapi("HistoricalVotingPowerGlobalQuery", {
     description:
       "Global historical voting power filters, optionally scoped to a single address.",

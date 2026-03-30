@@ -1,7 +1,7 @@
 import { z } from "@hono/zod-openapi";
-import { getAddress, isAddress } from "viem";
 
 import {
+  AddressSchema,
   OrderDirectionSchema,
   paginationLimitQueryParam,
   paginationSkipQueryParam,
@@ -14,10 +14,7 @@ import { DBAccountBalanceVariation } from "./variations";
 
 export const AccountInteractionsParamsSchema = z
   .object({
-    address: z
-      .string()
-      .refine(isAddress, "Invalid address")
-      .transform((addr) => getAddress(addr)),
+    address: AddressSchema,
   })
   .openapi("AccountInteractionsParams", {
     description: "Path params for account interaction queries.",
@@ -57,15 +54,9 @@ export const AccountInteractionsQuerySchema = z
       description: "Field used to sort interaction rows.",
       example: "count",
     }),
-    filterAddress: z
-      .string()
-      .refine(isAddress, "Invalid address")
-      .transform((addr) => getAddress(addr))
-      .openapi({
-        description:
-          "Optional counterparty address used to narrow the results.",
-      })
-      .optional(),
+    filterAddress: AddressSchema.openapi({
+      description: "Optional counterparty address used to narrow the results.",
+    }).optional(),
   })
   .openapi("AccountInteractionsQuery", {
     description: "Query params used to filter and page account interactions.",

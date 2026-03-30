@@ -1,30 +1,19 @@
 import { z } from "@hono/zod-openapi";
-import { getAddress, isAddress } from "viem";
 
 import {
-  normalizeQueryArray,
+  AddressQueryArraySchema,
+  AddressSchema,
   OrderDirectionSchema,
   paginationLimitQueryParam,
   paginationSkipQueryParam,
 } from "../shared";
-
-const AddressArraySchema = z
-  .array(
-    z
-      .string()
-      .refine((val) => isAddress(val, { strict: false }))
-      .transform((val) => getAddress(val)),
-  )
-  .openapi("VoterAddressList");
 
 export const VotersRequestSchema = z
   .object({
     skip: paginationSkipQueryParam(),
     limit: paginationLimitQueryParam(),
     orderDirection: OrderDirectionSchema.optional().default("desc"),
-    addresses: z
-      .preprocess(normalizeQueryArray, AddressArraySchema.optional())
-      .optional(),
+    addresses: AddressQueryArraySchema.optional(),
   })
   .openapi("VotersRequest", {
     description:
@@ -35,7 +24,7 @@ export type VotersRequest = z.infer<typeof VotersRequestSchema>;
 
 export const VoterResponseSchema = z
   .object({
-    voter: z.string().refine((val) => isAddress(val)),
+    voter: AddressSchema,
     votingPower: z.string(),
     lastVoteTimestamp: z.number(),
     votingPowerVariation: z.string(),

@@ -8,6 +8,7 @@ const DEFAULT_REQ: ProposalsRequest = {
   skip: 0,
   limit: 10,
   includeOptimisticProposals: true,
+  status: undefined,
 };
 
 const createMockProposal = (

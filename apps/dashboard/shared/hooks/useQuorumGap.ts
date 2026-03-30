@@ -54,7 +54,7 @@ export const useQuorumGap = (daoId: DaoIdEnum) => {
     error: turnoutError,
   } = useCompareAverageTurnoutQuery({
     variables: {
-      days: DaysWindow["_90d" as keyof typeof DaysWindow],
+      days: DaysWindow["90d"],
     },
     context,
     skip: !daoId,

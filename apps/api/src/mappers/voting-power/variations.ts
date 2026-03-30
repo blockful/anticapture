@@ -1,10 +1,11 @@
 import { z } from "@hono/zod-openapi";
-import { Address, getAddress, isAddress } from "viem";
+import { Address } from "viem";
 
 import { accountPower } from "@/database";
 
 import {
-  normalizeQueryArray,
+  AddressQueryArraySchema,
+  AddressSchema,
   OrderDirectionSchema,
   paginationLimitQueryParam,
   paginationSkipQueryParam,
@@ -13,21 +14,9 @@ import {
   unixTimestampQueryParam,
 } from "../shared";
 
-const AddressArraySchema = z
-  .array(
-    z
-      .string()
-      .refine((addr) => isAddress(addr, { strict: false }), "Invalid address")
-      .transform((addr) => getAddress(addr)),
-  )
-  .openapi("VotingPowerAddressList");
-
 export const VotingPowerVariationsByAccountIdRequestParamsSchema = z
   .object({
-    address: z
-      .string()
-      .refine((addr) => isAddress(addr, { strict: false }))
-      .transform((addr) => getAddress(addr)),
+    address: AddressSchema,
   })
   .openapi("VotingPowerVariationsByAccountIdRequestParams", {
     description:
@@ -58,13 +47,10 @@ export const VotingPowerVariationsRequestQuerySchema = z
       "Number of voting power variation rows to skip.",
     ),
     orderDirection: OrderDirectionSchema.optional().default("desc"),
-    addresses: z
-      .preprocess(normalizeQueryArray, AddressArraySchema.optional())
-      .openapi({
-        description:
-          "Filter by one or more account addresses. Pass repeated query params or a comma-delimited list.",
-      })
-      .optional(),
+    addresses: AddressQueryArraySchema.openapi({
+      description:
+        "Filter by one or more account addresses. Pass repeated query params or a comma-delimited list.",
+    }).optional(),
   })
   .extend(VotingPowerVariationsByAccountIdRequestQuerySchema.shape)
   .openapi("VotingPowerVariationsRequestQuery", {
@@ -93,13 +79,11 @@ export const VotingPowersRequestSchema = z
       ])
       .optional()
       .default("votingPower"),
-    addresses: z
-      .preprocess(normalizeQueryArray, AddressArraySchema.optional())
+    addresses: AddressQueryArraySchema.openapi({
+      description:
+        "Filter by one or more account addresses. Pass repeated query params or a comma-delimited list.",
+    })
       .optional()
-      .openapi({
-        description:
-          "Filter by one or more account addresses. Pass repeated query params or a comma-delimited list.",
-      })
       .transform((val) => val ?? []),
     fromValue: z
       .string()
@@ -129,10 +113,7 @@ export const VotingPowersRequestSchema = z
 
 export const VotingPowerByAccountIdRequestParamsSchema = z
   .object({
-    accountId: z
-      .string()
-      .refine((addr) => isAddress(addr, { strict: false }))
-      .transform((addr) => getAddress(addr)),
+    accountId: AddressSchema,
   })
   .openapi("VotingPowerByAccountIdRequestParams", {
     description:

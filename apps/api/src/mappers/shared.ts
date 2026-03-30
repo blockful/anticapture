@@ -1,4 +1,5 @@
 import { z } from "@hono/zod-openapi";
+import { getAddress, isAddress } from "viem";
 
 import { PERIOD_UNBOUND } from "./constants";
 import { FeedEventType, FeedRelevance } from "@/lib/constants";
@@ -15,21 +16,12 @@ export const OrderDirectionSchema = z
     description: "Sort direction for ordered query results.",
   });
 
-const DaysWindowEnum = z.enum(["7d", "30d", "90d", "180d", "365d"]);
-
 export const DaysWindow = z
-  .preprocess((value) => {
-    if (typeof value === "string" && value.startsWith("_")) {
-      return value.slice(1);
-    }
-
-    return value;
-  }, DaysWindowEnum.default("90d"))
+  .enum(["7d", "30d", "90d", "180d", "365d"])
+  .optional()
+  .prefault("90d")
   .transform((val) => DaysEnum[val as keyof typeof DaysEnum])
-  .openapi("DaysWindow", {
-    type: "string",
-    enum: ["7d", "30d", "90d", "180d", "365d"],
-  });
+  .openapi("DaysWindow");
 
 export const PeriodResponseSchema = z
   .object({
@@ -64,13 +56,13 @@ export const ValidationErrorResponseSchema = ErrorResponseSchema.openapi(
 );
 
 export const FeedEventTypeSchema = z
-  .nativeEnum(FeedEventType)
+  .enum(FeedEventType)
   .openapi("FeedEventType", {
     description: "Filter events by governance activity type.",
   });
 
 export const FeedRelevanceSchema = z
-  .nativeEnum(FeedRelevance)
+  .enum(FeedRelevance)
   .openapi("FeedRelevance", {
     description: "Filter events by relevance tier.",
   });
@@ -136,6 +128,21 @@ export const normalizeQueryArray = (value: unknown): unknown[] | undefined => {
 
   return [value];
 };
+
+export const AddressSchema = z
+  .string()
+  .refine((addr) => isAddress(addr, { strict: false }), "Invalid address")
+  .transform((addr) => getAddress(addr));
+
+export const AddressArraySchema = z.array(AddressSchema);
+
+export const AddressQueryArraySchema = z
+  .union([z.string(), z.array(z.string())])
+  .transform((value) => {
+    const addresses = normalizeQueryArray(value);
+    return addresses ? AddressArraySchema.parse(addresses) : undefined;
+  })
+  .openapi({ type: "array", items: { type: "string" } });
 
 export const unixTimestampQueryParam = (description: string) =>
   z.coerce.number().int().optional().openapi({

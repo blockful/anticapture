@@ -8,7 +8,7 @@ export enum ChartType {
 
 export const LastUpdateQuerySchema = z
   .object({
-    chart: z.nativeEnum(ChartType).openapi({
+    chart: z.enum(ChartType).openapi({
       description:
         "Chart identifier whose freshness timestamp should be returned.",
       example: ChartType.TokenDistribution,

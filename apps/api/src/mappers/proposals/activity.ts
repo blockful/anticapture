@@ -1,8 +1,8 @@
 import { z } from "@hono/zod-openapi";
-import { getAddress, isAddress } from "viem";
 
 import { VoteFilter } from "@/repositories/";
 import {
+  AddressSchema,
   OrderDirectionSchema,
   paginationLimitQueryParam,
   paginationSkipQueryParam,
@@ -12,18 +12,10 @@ import {
 
 export const ProposalActivityRequestSchema = z
   .object({
-    address: z
-      .string()
-      .refine(
-        (addr) => isAddress(addr, { strict: false }),
-        "Invalid Ethereum address",
-      )
-      .transform((addr) => getAddress(addr))
-      .openapi({
-        description:
-          "Delegate address whose proposal activity is being queried.",
-        example: "0x1111111111111111111111111111111111111111",
-      }),
+    address: AddressSchema.openapi({
+      description: "Delegate address whose proposal activity is being queried.",
+      example: "0x1111111111111111111111111111111111111111",
+    }),
     fromDate: unixTimestampQueryParam(
       "Lower bound for proposal timestamps, in Unix seconds.",
     ),
@@ -42,7 +34,7 @@ export const ProposalActivityRequestSchema = z
         example: "timestamp",
       }),
     orderDirection: OrderDirectionSchema.optional().default("desc"),
-    userVoteFilter: z.nativeEnum(VoteFilter).optional().openapi({
+    userVoteFilter: z.enum(VoteFilter).optional().openapi({
       description:
         "Optional vote filter. Use yes, no, abstain, or no-vote to narrow the result set.",
       example: VoteFilter.YES,

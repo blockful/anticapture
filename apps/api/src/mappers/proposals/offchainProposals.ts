@@ -11,9 +11,18 @@ import {
 
 export type DBOffchainProposal = typeof offchainProposals.$inferSelect;
 
-const StringArrayQuerySchema = z
-  .array(z.string())
-  .openapi("OffchainProposalStatusList");
+const OffchainProposalStateValues = ["active", "closed", "pending"] as const;
+
+const OffchainProposalStatusListSchema = z
+  .union([z.string(), z.array(z.string())])
+  .transform((value) => {
+    const statuses = normalizeQueryArray(value);
+    return statuses
+      ? z
+          .array(z.enum(OffchainProposalStateValues))
+          .parse(statuses.map((status) => String(status).toLowerCase()))
+      : undefined;
+  });
 
 export const OffchainProposalResponseSchema = z
   .object({
@@ -98,13 +107,19 @@ export const OffchainProposalsRequestSchema = z
     skip: paginationSkipQueryParam(),
     limit: paginationLimitQueryParam(),
     orderDirection: OrderDirectionSchema.default("desc").optional(),
-    status: z
-      .preprocess(normalizeQueryArray, StringArrayQuerySchema.optional())
-      .openapi({
+    status: OffchainProposalStatusListSchema.optional().openapi(
+      "OffchainProposalStatusList",
+      {
+        type: "array",
+        items: {
+          type: "string",
+          enum: [...OffchainProposalStateValues],
+        },
         description:
           "Snapshot proposal state filter. Pass repeated query params or a comma-delimited list.",
         example: ["active"],
-      }),
+      },
+    ),
     fromDate: unixTimestampQueryParam(
       "Earliest proposal creation timestamp, in Unix seconds.",
     ),

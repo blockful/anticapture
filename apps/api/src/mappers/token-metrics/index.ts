@@ -13,7 +13,7 @@ import {
 
 export const TokenMetricsRequestSchema = z
   .object({
-    metricType: z.nativeEnum(MetricTypesEnum).openapi({
+    metricType: z.enum(MetricTypesEnum).openapi({
       description: "Metric family to query.",
       example: MetricTypesEnum.TOTAL_SUPPLY,
     }),

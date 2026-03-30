@@ -1,10 +1,11 @@
 import { z } from "@hono/zod-openapi";
-import { Address, getAddress, isAddress } from "viem";
+import { Address } from "viem";
 
 import { accountBalance } from "@/database";
 
 import {
-  normalizeQueryArray,
+  AddressQueryArraySchema,
+  AddressSchema,
   OrderDirectionSchema,
   paginationLimitQueryParam,
   paginationSkipQueryParam,
@@ -17,21 +18,6 @@ import {
   AccountBalanceVariationSchema,
   PercentageChangeMapper,
 } from "./variations";
-
-const AddressSchema = z
-  .string()
-  .refine((addr) => isAddress(addr, { strict: false }))
-  .transform((addr) => getAddress(addr));
-
-const AddressListSchema = z.preprocess(
-  (value) => normalizeQueryArray(value) ?? [],
-  z.array(
-    z
-      .string()
-      .refine((addr) => isAddress(addr, { strict: false }), "Invalid address")
-      .transform((addr) => getAddress(addr)),
-  ),
-);
 
 export const AccountBalancesRequestSchema = z
   .object({
@@ -48,20 +34,13 @@ export const AccountBalancesRequestSchema = z
       .enum(["balance", "variation", "signedVariation"])
       .optional()
       .default("balance"),
-    excludeDaoAddresses: z
-      .preprocess(
-        (value) =>
-          value === "true" ? true : value === "false" ? false : value,
-        z.boolean().optional().default(false),
-      )
-      .openapi({
-        description:
-          "Whether DAO-owned addresses should be excluded from the results.",
-        example: false,
-        type: "boolean",
-      }),
-    addresses: AddressListSchema,
-    delegates: AddressListSchema.openapi({
+    excludeDaoAddresses: z.coerce.boolean().optional().default(false).openapi({
+      description:
+        "Whether DAO-owned addresses should be excluded from the results.",
+      example: false,
+    }),
+    addresses: AddressQueryArraySchema.default([]),
+    delegates: AddressQueryArraySchema.default([]).openapi({
       description:
         "Filter by one or more delegate addresses. Pass repeated query params or a comma-delimited list.",
     }),

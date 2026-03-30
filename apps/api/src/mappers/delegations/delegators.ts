@@ -1,7 +1,8 @@
 import { z } from "@hono/zod-openapi";
-import { Address, getAddress, isAddress } from "viem";
+import { Address } from "viem";
 
 import {
+  AddressSchema,
   OrderDirectionSchema,
   paginationLimitQueryParam,
   paginationSkipQueryParam,
@@ -15,10 +16,7 @@ export type AggregatedDelegator = {
 
 export const DelegatorsRequestParamsSchema = z
   .object({
-    address: z
-      .string()
-      .refine((val) => isAddress(val, { strict: false }))
-      .transform((val) => getAddress(val)),
+    address: AddressSchema,
   })
   .openapi("DelegatorsRequestParams", {
     description: "Path params for fetching delegators of a delegate address.",
@@ -42,10 +40,7 @@ export type DelegatorsRequestQuery = z.infer<
 
 export const DelegatorItemSchema = z
   .object({
-    delegatorAddress: z
-      .string()
-      .refine((val) => isAddress(val, { strict: false }))
-      .transform((val) => getAddress(val)),
+    delegatorAddress: AddressSchema,
     amount: z
       .union([z.bigint().transform((val) => val.toString()), z.string()])
       .openapi({ type: "string" }),
