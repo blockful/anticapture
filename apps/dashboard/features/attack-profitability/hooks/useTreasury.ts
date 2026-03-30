@@ -49,16 +49,19 @@ const useQueryByType = (
   const liquid = useLiquidTreasuryQuery({
     ...commonOptions,
     skip: type !== "liquid",
+    fetchPolicy: "no-cache",
   });
 
   const daoToken = useDaoTokenTreasuryQuery({
     ...commonOptions,
     skip: type !== "dao-token",
+    fetchPolicy: "no-cache",
   });
 
   const total = useTotalTreasuryQuery({
     ...commonOptions,
     skip: type !== "total",
+    fetchPolicy: "no-cache",
   });
 
   if (type === "liquid") return liquid;

@@ -19,6 +19,7 @@ export const apolloClient = new ApolloClient({
   uri: BACKEND_ENDPOINT,
   cache: new InMemoryCache(),
   headers: getAuthHeaders(),
+  queryDeduplication: false,
 });
 
 export const GlobalProviders = ({ children }: { children: ReactNode }) => {

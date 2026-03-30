@@ -29,6 +29,7 @@ export const useTokenData = (
       },
     },
     skip: !daoId || !currency,
+    fetchPolicy: "no-cache",
   });
 
   const token =

@@ -20,6 +20,7 @@ export const useActiveSupply = (daoId: DaoIdEnum, days: string) => {
       },
     },
     skip: !daoId || !days,
+    fetchPolicy: "no-cache",
   });
 
   return {
