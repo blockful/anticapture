@@ -222,7 +222,15 @@ export default [
       "apps/dashboard/widgets/**/*.{ts,tsx}",
     ],
     rules: {
-      "import/no-default-export": "warn",
+      // Replaces import/no-default-export which crashes on ESLint v10
+      // (eslint-plugin-import v2.x accesses removed context.parserOptions)
+      "no-restricted-syntax": [
+        "warn",
+        {
+          selector: "ExportDefaultDeclaration",
+          message: "Prefer named exports over default exports.",
+        },
+      ],
     },
   },
 
