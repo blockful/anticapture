@@ -5,7 +5,7 @@ export enum ProposalStatus {
   ONGOING = "ongoing",
   EXECUTED = "executed",
   DEFEATED = "defeated",
-  CANCELLED = "cancelled",
+  CANCELED = "canceled",
   QUEUED = "queued",
   PENDING_EXECUTION = "pending_execution",
   SUCCEEDED = "succeeded",

@@ -67,8 +67,8 @@ export const proposalsFinalResultMapping = {
     icon: <XCircle className="text-error size-4" />,
   },
   CANCELED: {
-    text: "Cancel",
-    icon: <CircleMinus className="text-secondary size-4" />,
+    text: "Canceled",
+    icon: <CircleMinus className="text-error size-4" />,
   },
   QUEUED: {
     text: "Queued",

@@ -13,8 +13,9 @@ export const getProposalStatus = (status: string): ProposalStatus => {
       return ProposalStatus.EXECUTED;
     case "defeated":
       return ProposalStatus.DEFEATED;
+    case "canceled":
     case "cancelled":
-      return ProposalStatus.CANCELLED;
+      return ProposalStatus.CANCELED;
     case "pending":
       return ProposalStatus.PENDING;
     case "no_quorum":
