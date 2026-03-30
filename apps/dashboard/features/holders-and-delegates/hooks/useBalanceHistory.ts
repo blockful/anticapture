@@ -1,17 +1,14 @@
 "use client";
 
 import type {
-  QueryInput_Transfers_SortBy,
-  QueryInput_Transfers_SortOrder,
+  OrderDirection,
+  QueryInput_Transfers_OrderBy,
 } from "@anticapture/graphql-client";
 import type {
   BalanceHistoryQueryVariables,
   BalanceHistoryQuery,
 } from "@anticapture/graphql-client/hooks";
-import {
-  Timestamp_Const,
-  useBalanceHistoryQuery,
-} from "@anticapture/graphql-client/hooks";
+import { useBalanceHistoryQuery } from "@anticapture/graphql-client/hooks";
 import { useMemo, useState, useEffect, useCallback } from "react";
 import { formatUnits } from "viem";
 
@@ -22,7 +19,7 @@ import { getAuthHeaders } from "@/shared/utils/server-utils";
 export function useBalanceHistory({
   accountId,
   daoId,
-  orderBy = Timestamp_Const.Timestamp,
+  orderBy = "timestamp",
   orderDirection = "desc",
   transactionType = "all",
   customFromFilter,
@@ -67,15 +64,15 @@ export function useBalanceHistory({
   const variables = useMemo(() => {
     const where: BalanceHistoryQueryVariables = {
       address: accountId,
-      sortBy: orderBy as QueryInput_Transfers_SortBy,
-      sortOrder: orderDirection as QueryInput_Transfers_SortOrder,
-      fromValue: filterVariables?.fromValue,
-      toValue: filterVariables?.toValue,
+      orderBy: orderBy as QueryInput_Transfers_OrderBy,
+      orderDirection: orderDirection as OrderDirection,
+      fromValue: filterVariables?.fromValue ?? null,
+      toValue: filterVariables?.toValue ?? null,
       from: customFromFilter,
       to: customToFilter,
-      offset: 0,
-      fromDate: fromTimestamp,
-      toDate: toTimestamp,
+      skip: 0,
+      fromDate: fromTimestamp ?? null,
+      toDate: toTimestamp ?? null,
       limit,
     };
 
@@ -140,13 +137,12 @@ export function useBalanceHistory({
     setIsPaginationLoading(true);
 
     const nextPage = currentPage + 1;
-    const offset = (nextPage - 1) * limit;
 
     try {
       await fetchMore({
         variables: {
           ...variables,
-          offset,
+          skip: (nextPage - 1) * limit,
         },
         updateQuery: (
           previousResult: BalanceHistoryQuery,

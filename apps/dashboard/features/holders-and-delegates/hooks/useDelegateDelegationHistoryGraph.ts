@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  QueryInput_HistoricalVotingPowerByAccountId_OrderDirection,
+  OrderDirection,
   QueryInput_HistoricalVotingPowerByAccountId_OrderBy,
   useGetDelegateDelegationHistoryGraphQuery,
 } from "@anticapture/graphql-client/hooks";
@@ -34,19 +34,18 @@ export interface UseDelegateDelegationHistoryGraphResult {
 export function useDelegateDelegationHistoryGraph(
   accountId: string,
   daoId: DaoIdEnum,
-  fromTimestamp?: string,
-  toTimestamp?: string,
+  fromTimestamp?: number,
+  toTimestamp?: number,
 ): UseDelegateDelegationHistoryGraphResult {
   const { decimals } = daoConfig[daoId];
 
   const { data, loading, error } = useGetDelegateDelegationHistoryGraphQuery({
     variables: {
       accountId,
-      fromTimestamp,
-      toTimestamp,
+      fromTimestamp: fromTimestamp ?? null,
+      toTimestamp: toTimestamp ?? null,
       orderBy: QueryInput_HistoricalVotingPowerByAccountId_OrderBy.Timestamp,
-      orderDirection:
-        QueryInput_HistoricalVotingPowerByAccountId_OrderDirection.Desc,
+      orderDirection: OrderDirection.Desc,
     },
     context: {
       headers: {

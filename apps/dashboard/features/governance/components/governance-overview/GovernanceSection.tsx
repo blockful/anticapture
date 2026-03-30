@@ -1,6 +1,6 @@
 "use client";
 
-import { QueryInput_Proposals_OrderDirection } from "@anticapture/graphql-client";
+import { OrderDirection } from "@anticapture/graphql-client";
 import { Building2, Landmark } from "lucide-react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { useParams } from "next/navigation";
@@ -42,8 +42,12 @@ export const GovernanceSection = () => {
     isPaginationLoading: isOnchainPaginationLoading,
   } = useProposals({
     itemsPerPage: 10,
-    orderDirection: QueryInput_Proposals_OrderDirection.Desc,
+    orderDirection: OrderDirection.Desc,
     daoId: daoIdEnum,
+    fromDate: null,
+    status: null,
+    fromEndDate: null,
+    includeOptimisticProposals: null,
   });
 
   const {

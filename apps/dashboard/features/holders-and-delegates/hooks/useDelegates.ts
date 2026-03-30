@@ -1,7 +1,9 @@
 "use client";
 
-import type { QueryInput_VotingPowers_OrderBy } from "@anticapture/graphql-client";
-import { QueryInput_VotingPowers_OrderDirection } from "@anticapture/graphql-client";
+import {
+  OrderDirection,
+  type QueryInput_VotingPowers_OrderBy,
+} from "@anticapture/graphql-client";
 import {
   useGetDelegatesQuery,
   useGetDelegateProposalsActivityLazyQuery,
@@ -57,7 +59,7 @@ interface UseDelegatesParams {
   daoId: DaoIdEnum;
   address?: string;
   orderBy?: QueryInput_VotingPowers_OrderBy;
-  orderDirection?: QueryInput_VotingPowers_OrderDirection;
+  orderDirection?: OrderDirection;
   limit?: number;
   skipActivity?: boolean;
 }
@@ -65,7 +67,7 @@ interface UseDelegatesParams {
 export const useDelegates = ({
   daoId,
   orderBy,
-  orderDirection = QueryInput_VotingPowers_OrderDirection.Desc,
+  orderDirection = OrderDirection.Desc,
   days,
   address,
   limit = 15,
@@ -106,8 +108,9 @@ export const useDelegates = ({
       orderDirection,
       orderBy,
       limit,
-      fromDate: fromDate.toString(),
-      ...(address && { addresses: [address] }),
+      fromDate,
+      toDate: null,
+      addresses: address ? [address] : null,
     },
     context: {
       headers: { "anticapture-dao-id": daoId, ...getAuthHeaders() },
@@ -121,8 +124,9 @@ export const useDelegates = ({
     refetch({
       orderDirection,
       orderBy,
-      fromDate: fromDate.toString(),
-      ...(address && { addresses: [address] }),
+      fromDate,
+      toDate: null,
+      addresses: address ? [address] : null,
     });
   }, [orderDirection, address, refetch, orderBy, fromDate]);
 
@@ -161,7 +165,7 @@ export const useDelegates = ({
       try {
         const activityPromises = newAddresses.map(async (addr) => {
           const result = await getDelegateProposalsActivity({
-            variables: { address: addr, fromDate: fromDate.toString() },
+            variables: { address: addr, fromDate },
           });
           return {
             address: addr,
@@ -237,8 +241,9 @@ export const useDelegates = ({
         variables: {
           orderDirection,
           orderBy,
-          fromDate: fromDate.toString(),
-          ...(address && { addresses: [address] }),
+          fromDate,
+          toDate: null,
+          addresses: address ? [address] : null,
           skip: currentItemsCount,
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
@@ -276,8 +281,9 @@ export const useDelegates = ({
     refetch({
       orderDirection,
       orderBy,
-      fromDate: fromDate.toString(),
-      ...(address && { addresses: [address] }),
+      fromDate,
+      toDate: null,
+      addresses: address ? [address] : null,
     });
   }, [refetch, orderDirection, address, orderBy, fromDate]);
 

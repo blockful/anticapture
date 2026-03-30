@@ -21,13 +21,13 @@ const VotingProgressBar = ({
   endTimestamp,
   timeLeftText,
 }: {
-  startTimestamp: string;
-  endTimestamp: string;
+  startTimestamp: number;
+  endTimestamp: number;
   timeLeftText: string;
 }) => {
   const now = Date.now() / 1000;
-  const startTime = parseInt(startTimestamp);
-  const endTime = parseInt(endTimestamp);
+  const startTime = Number(startTimestamp);
+  const endTime = Number(endTimestamp);
 
   // Calculate progress percentage (how much time has elapsed)
   const totalDuration = endTime - startTime;
@@ -182,8 +182,8 @@ export const ProposalInfoSection = ({
 
         {proposal.status.toLowerCase() === "ongoing" && (
           <VotingProgressBar
-            startTimestamp={proposal.startTimestamp}
-            endTimestamp={proposal.endTimestamp}
+            startTimestamp={Number(proposal.startTimestamp)}
+            endTimestamp={Number(proposal.endTimestamp)}
             timeLeftText={timeLeftText}
           />
         )}
@@ -308,8 +308,8 @@ export const ProposalInfoSection = ({
       {/* Time Left Progress Bar */}
       {proposal.status.toLowerCase() === "ongoing" && (
         <VotingProgressBar
-          startTimestamp={proposal.startTimestamp}
-          endTimestamp={proposal.endTimestamp}
+          startTimestamp={Number(proposal.startTimestamp)}
+          endTimestamp={Number(proposal.endTimestamp)}
           timeLeftText={timeLeftText}
         />
       )}

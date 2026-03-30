@@ -7,11 +7,11 @@ import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 interface TopTokenHolderNonDaoResponse {
   data:
-    | {
-        __typename?: "query_accountBalances_items_items";
-        address: string;
-        balance: string;
-      }
+    | NonNullable<
+        NonNullable<
+          GetDaoAddressesAccountBalancesQuery["accountBalances"]
+        >["items"][number]
+      >
     | null
     | undefined;
   loading: boolean;

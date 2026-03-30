@@ -21,14 +21,13 @@ describe("LastUpdateService", () => {
     expect(result).toBe(new Date(1700000000 * 1000).toISOString());
   });
 
-  it("throws RangeError when repository returns undefined (NaN timestamp)", async () => {
+  it("returns epoch ISO string when repository returns undefined", async () => {
     const service = new LastUpdateService(
       new SimpleLastUpdateRepository(undefined),
     );
 
-    await expect(
-      service.getLastUpdate(ChartType.AttackProfitability),
-    ).rejects.toThrow(RangeError);
+    const result = await service.getLastUpdate(ChartType.AttackProfitability);
+    expect(result).toBe("1970-01-01T00:00:00.000Z");
   });
 
   it("works for ChartType.AttackProfitability", async () => {

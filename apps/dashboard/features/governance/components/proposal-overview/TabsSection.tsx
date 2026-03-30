@@ -1,6 +1,5 @@
 "use client";
 
-import type { GetProposalQuery } from "@anticapture/graphql-client";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 
 import { ActionsTabContent } from "@/features/governance/components/proposal-overview/ActionTabContent";
@@ -9,7 +8,7 @@ import { OffchainVotesContent } from "@/features/governance/components/proposal-
 import { VotesTabContent } from "@/features/governance/components/proposal-overview/VotesTabContent";
 import type { ProposalViewData } from "@/features/governance/types";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { cn } from "@/shared/utils";
+import { cn } from "@/shared/utils/cn";
 
 type TabId = "description" | "votes" | "actions";
 

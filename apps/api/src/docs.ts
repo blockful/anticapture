@@ -4,9 +4,9 @@ export function docs(app: Hono) {
   app.doc("/docs", {
     openapi: "3.0.2",
     info: {
-      title: "Swagger Anticapture Server",
+      title: "Anticapture API",
       description:
-        "Anticapture is an application with the purpose of analyze and warn the main governance risks of each DAO",
+        "REST API for DAO governance analytics, monitoring, and risk exploration across Anticapture-supported protocols.",
       version: "1.0.0",
     },
     externalDocs: {

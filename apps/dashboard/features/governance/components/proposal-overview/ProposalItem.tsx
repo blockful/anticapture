@@ -38,7 +38,7 @@ export const getTextStatusColor = (status: ProposalStatus) => {
       return "text-success";
     case ProposalStatus.DEFEATED:
       return "text-error";
-    case ProposalStatus.CANCELLED:
+    case ProposalStatus.CANCELED:
       return "text-error";
     case ProposalStatus.QUEUED:
       return "text-success";
@@ -67,7 +67,7 @@ export const getStatusColorBar = (status: ProposalStatus) => {
       return "bg-success";
     case ProposalStatus.DEFEATED:
       return "bg-error";
-    case ProposalStatus.CANCELLED:
+    case ProposalStatus.CANCELED:
       return "bg-error";
     case ProposalStatus.QUEUED:
       return "bg-success";
@@ -96,7 +96,7 @@ export const getBackgroundStatusColor = (status: ProposalStatus) => {
       return "bg-surface-opacity-success";
     case ProposalStatus.DEFEATED:
       return "bg-surface-opacity-error";
-    case ProposalStatus.CANCELLED:
+    case ProposalStatus.CANCELED:
       return "bg-surface-opacity-error";
     case ProposalStatus.QUEUED:
       return "bg-surface-opacity-success";
@@ -125,7 +125,7 @@ export const getStatusText = (status: ProposalStatus) => {
       return "Executed";
     case ProposalStatus.DEFEATED:
       return "Defeated";
-    case ProposalStatus.CANCELLED:
+    case ProposalStatus.CANCELED:
       return "Cancelled";
     case ProposalStatus.QUEUED:
       return "Queued";

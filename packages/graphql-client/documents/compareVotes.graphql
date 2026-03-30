@@ -1,0 +1,7 @@
+query CompareVotes($days: DaysWindow! = _365d) {
+  compareVotes(days: $days) {
+    currentVotes
+    oldVotes
+    changeRate
+  }
+}

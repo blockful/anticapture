@@ -103,13 +103,13 @@ export const AttackCostBarChart = ({
 
   const mocked = useMemo(() => {
     return (
-      delegatedSupply.data?.currentDelegatedSupply === undefined &&
+      delegatedSupply.data?.currentValue === undefined &&
       activeSupply.data?.activeSupply === undefined &&
       averageTurnout.data?.currentAverageTurnout === undefined &&
       daoTopTokenHolderExcludingTheDao?.balance === undefined
     );
   }, [
-    delegatedSupply.data?.currentDelegatedSupply,
+    delegatedSupply.data?.currentValue,
     activeSupply.data?.activeSupply,
     averageTurnout.data?.currentAverageTurnout,
     daoTopTokenHolderExcludingTheDao?.balance,
@@ -153,7 +153,7 @@ export const AttackCostBarChart = ({
         value: formatValue(
           Number(
             formatUnits(
-              BigInt(delegatedSupply.data?.currentDelegatedSupply || 0),
+              BigInt(delegatedSupply.data?.currentValue || 0),
               daoConfig.decimals,
             ),
           ),
@@ -214,7 +214,7 @@ export const AttackCostBarChart = ({
     daoTokenPriceHistoricalData,
     valueMode,
     liquidTreasuryData,
-    delegatedSupply.data?.currentDelegatedSupply,
+    delegatedSupply.data?.currentValue,
     activeSupply.data?.activeSupply,
     averageTurnout.data?.currentAverageTurnout,
     daoTopTokenHolderExcludingTheDao?.balance,

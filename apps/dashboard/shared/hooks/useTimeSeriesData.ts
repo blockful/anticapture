@@ -1,5 +1,8 @@
-import axios from "axios";
-import useSWR from "swr";
+import type {
+  OrderDirection,
+  QueryInput_TokenMetrics_MetricType,
+} from "@anticapture/graphql-client/hooks";
+import { useTokenMetricsLazyQuery } from "@anticapture/graphql-client/hooks";
 
 import {
   DAYS_IN_SECONDS,
@@ -9,97 +12,10 @@ import type { TokenMetricItem } from "@/shared/dao-config/types";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import type { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import type { TimeInterval } from "@/shared/types/enums/TimeInterval";
-import { BACKEND_ENDPOINT, getAuthHeaders } from "@/shared/utils/server-utils";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
-interface TokenMetricsItem {
-  date: string;
-  high: string;
-  volume: string;
-}
+import { useCallback, useEffect, useState } from "react";
 
-interface TokenMetricsResponse {
-  items: TokenMetricsItem[];
-  pageInfo: {
-    hasNextPage: boolean;
-    startDate: string | null;
-    endDate: string | null;
-  };
-}
-
-const fetchSingleMetric = async (
-  daoId: DaoIdEnum,
-  metricType: MetricTypesEnum,
-  startDate: number,
-): Promise<TokenMetricItem[]> => {
-  const query = `query TokenMetrics {
-    tokenMetrics(
-      metricType: ${metricType}
-      startDate: ${startDate}
-      orderDirection: asc
-      limit: 365
-    ) {
-      items {
-        date
-        high
-        volume
-      }
-      pageInfo {
-        hasNextPage
-        startDate
-        endDate
-      }
-    }
-  }`;
-
-  const response = await axios.post<{
-    data: {
-      tokenMetrics: TokenMetricsResponse;
-    };
-  }>(
-    `${BACKEND_ENDPOINT}`,
-    { query },
-    {
-      headers: {
-        "Content-Type": "application/json",
-        "anticapture-dao-id": daoId,
-        ...getAuthHeaders(),
-      },
-    },
-  );
-
-  return response.data.data.tokenMetrics.items;
-};
-
-const fetchTimeSeries = async (
-  daoId: DaoIdEnum,
-  days: TimeInterval,
-  metricTypes: MetricTypesEnum[],
-): Promise<Record<MetricTypesEnum, TokenMetricItem[]>> => {
-  const startDate = Math.floor(
-    Date.now() / 1000 - DAYS_IN_SECONDS[days] - SECONDS_PER_DAY,
-  );
-
-  // Fetch all metric types in parallel
-  const results = await Promise.all(
-    metricTypes.map(async (metricType) => ({
-      metricType,
-      items: await fetchSingleMetric(daoId, metricType, startDate),
-    })),
-  );
-
-  // Transform results to Record<MetricTypesEnum, TokenMetricItem[]>
-  const metricsByType = {} as Record<MetricTypesEnum, TokenMetricItem[]>;
-  for (const { metricType, items } of results) {
-    metricsByType[metricType] = items;
-  }
-
-  return metricsByType;
-};
-
-/**
- * Hook for fetching time series data with optimized caching strategy.
- * Now uses the new tokenMetrics API endpoint which returns simplified data.
- */
 export const useTimeSeriesData = (
   daoId: DaoIdEnum,
   metricTypes: MetricTypesEnum[],
@@ -110,26 +26,78 @@ export const useTimeSeriesData = (
     revalidateOnReconnect?: boolean;
   },
 ) => {
+  const [data, setData] = useState<
+    Record<MetricTypesEnum, TokenMetricItem[]> | undefined
+  >();
+  const [error, setError] = useState<Error | undefined>();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [fetchTokenMetrics] = useTokenMetricsLazyQuery({
+    context: {
+      headers: {
+        "anticapture-dao-id": daoId,
+        ...getAuthHeaders(),
+      },
+    },
+    fetchPolicy: "network-only",
+  });
+
   const stableMetricTypes = [...metricTypes].sort();
 
-  const fetchKey =
-    daoId && stableMetricTypes.length > 0
-      ? [`timeSeriesData-bulk`, daoId, stableMetricTypes.join(",")]
-      : null;
+  const fetchAll = useCallback(async () => {
+    if (!daoId || stableMetricTypes.length === 0) return;
 
-  const { data, error, isLoading } = useSWR(
-    fetchKey,
-    () => fetchTimeSeries(daoId, days, stableMetricTypes),
-    {
-      refreshInterval: options?.refreshInterval ?? 0,
-      revalidateOnFocus: options?.revalidateOnFocus ?? true,
-      revalidateOnMount: true,
-      revalidateOnReconnect: options?.revalidateOnReconnect ?? true,
-      revalidateIfStale: true,
-      dedupingInterval: 5000,
-      keepPreviousData: true,
-    },
-  );
+    setIsLoading(true);
+    try {
+      const startDate = Math.floor(
+        Date.now() / 1000 - DAYS_IN_SECONDS[days] - SECONDS_PER_DAY,
+      );
+
+      const results = await Promise.all(
+        stableMetricTypes.map(async (metricType) => {
+          const result = await fetchTokenMetrics({
+            variables: {
+              metricType:
+                metricType as unknown as QueryInput_TokenMetrics_MetricType,
+              startDate,
+              endDate: null,
+              orderDirection: "asc" as OrderDirection,
+              limit: 365,
+              skip: null,
+            },
+          });
+          return {
+            metricType,
+            items: (result.data?.tokenMetrics?.items ??
+              []) as TokenMetricItem[],
+          };
+        }),
+      );
+
+      const metricsByType = {} as Record<MetricTypesEnum, TokenMetricItem[]>;
+      for (const { metricType, items } of results) {
+        metricsByType[metricType] = items;
+      }
+
+      setData(metricsByType);
+    } catch (err) {
+      setError(err as Error);
+    } finally {
+      setIsLoading(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [daoId, stableMetricTypes.join(","), days]);
+
+  useEffect(() => {
+    fetchAll();
+  }, [fetchAll]);
+
+  useEffect(() => {
+    if (options?.refreshInterval && options.refreshInterval > 0) {
+      const interval = setInterval(fetchAll, options.refreshInterval);
+      return () => clearInterval(interval);
+    }
+  }, [fetchAll, options?.refreshInterval]);
 
   return {
     data,

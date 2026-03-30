@@ -1,0 +1,5 @@
+query LastUpdate($chart: queryInput_lastUpdate_chart!) {
+  lastUpdate(chart: $chart) {
+    lastUpdate
+  }
+}

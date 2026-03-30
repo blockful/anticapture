@@ -1,6 +1,6 @@
 "use client";
 
-import type { QueryInput_AccountBalances_OrderDirection } from "@anticapture/graphql-client";
+import type { OrderDirection } from "@anticapture/graphql-client";
 import { QueryInput_AccountBalances_OrderBy } from "@anticapture/graphql-client";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Plus } from "lucide-react";
@@ -131,7 +131,7 @@ export const TokenHolders = ({
     daoId: daoId,
     limit: pageLimit,
     orderBy: orderByMap[sortBy],
-    orderDirection: sortOrder as QueryInput_AccountBalances_OrderDirection,
+    orderDirection: sortOrder as OrderDirection,
     address: currentAddressFilter || undefined,
     days: days,
   });

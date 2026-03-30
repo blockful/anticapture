@@ -1,4 +1,18 @@
-import type { Query_Proposals_Items_Items } from "@anticapture/graphql-client/hooks";
+import type {
+  GetProposalQuery,
+  GetProposalsFromDaoQuery,
+} from "@anticapture/graphql-client/hooks";
+
+type GraphqlProposalListItem = NonNullable<
+  NonNullable<
+    NonNullable<GetProposalsFromDaoQuery["proposals"]>["items"]
+  >[number]
+>;
+
+type GraphqlProposalDetails = Extract<
+  NonNullable<GetProposalQuery["proposal"]>,
+  { __typename?: "OnchainProposal" }
+>;
 
 export interface ProposalViewData {
   id: string;
@@ -25,7 +39,7 @@ export enum ProposalStatus {
   ONGOING = "ongoing",
   EXECUTED = "executed",
   DEFEATED = "defeated",
-  CANCELLED = "cancelled",
+  CANCELED = "canceled",
   QUEUED = "queued",
   PENDING_EXECUTION = "pending_execution",
   SUCCEEDED = "succeeded",
@@ -49,8 +63,13 @@ export interface Votes {
 }
 
 // Use the generated GraphQL type as base and extend with computed properties
+export type ProposalListItem = GraphqlProposalListItem;
+export type ProposalDetails = Omit<GraphqlProposalDetails, "status"> & {
+  status: ProposalStatus;
+};
+
 export interface Proposal extends Omit<
-  Query_Proposals_Items_Items,
+  ProposalListItem,
   | "endBlock"
   | "startBlock"
   | "forVotes"

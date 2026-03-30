@@ -1,73 +1,30 @@
-import axios from "axios";
-import type { SWRConfiguration } from "swr";
-import useSWR from "swr";
+import {
+  DaysWindow,
+  useCompareDelegatedSupplyQuery,
+} from "@anticapture/graphql-client/hooks";
 
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { BACKEND_ENDPOINT, getAuthHeaders } from "@/shared/utils/server-utils";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
-interface DelegatedSupplyResponse {
-  oldDelegatedSupply: string;
-  currentDelegatedSupply: string;
-  changeRate: string;
-}
+export const useDelegatedSupply = (daoId: DaoIdEnum, days: string) => {
+  const daysKey = days as keyof typeof DaysWindow;
 
-/* Fetch Dao Total Supply */
-export const fetchDelegatedSupply = async ({
-  daoId,
-  days,
-}: {
-  daoId: DaoIdEnum;
-  days: string;
-}): Promise<DelegatedSupplyResponse | null> => {
-  const query = `query DelegatedSupply {
-    compareDelegatedSupply(days: _${days}) {
-      oldDelegatedSupply
-      currentDelegatedSupply
-      changeRate
-    }
-  }`;
-  const response: {
-    data: { data: { compareDelegatedSupply: DelegatedSupplyResponse } };
-  } = await axios.post(
-    `${BACKEND_ENDPOINT}`,
-    {
-      query,
+  const { data, loading, error } = useCompareDelegatedSupplyQuery({
+    variables: {
+      days: DaysWindow[daysKey],
     },
-    {
+    context: {
       headers: {
         "anticapture-dao-id": daoId,
         ...getAuthHeaders(),
       },
     },
-  );
-  const { compareDelegatedSupply } = response.data.data as {
-    compareDelegatedSupply: DelegatedSupplyResponse;
+    skip: !daoId || !days,
+  });
+
+  return {
+    data: data?.compareDelegatedSupply ?? null,
+    isLoading: loading,
+    error: error || null,
   };
-  return compareDelegatedSupply;
-};
-
-/**
- * SWR hook to fetch and manage delegated supply data
- * @param daoId The DAO ID to fetch data for
- * @param days The number of days to compare
- * @param config Optional SWR configuration
- * @returns SWR response with delegated supply data
- */
-export const useDelegatedSupply = (
-  daoId: DaoIdEnum,
-  days: string,
-  config?: Partial<SWRConfiguration<DelegatedSupplyResponse | null, Error>>,
-) => {
-  const key = daoId && days ? [`delegatedSupply`, daoId, days] : null;
-
-  return useSWR<DelegatedSupplyResponse | null>(
-    key,
-    async () => {
-      return await fetchDelegatedSupply({ daoId, days });
-    },
-    {
-      revalidateOnFocus: false,
-      ...config,
-    },
-  );
 };

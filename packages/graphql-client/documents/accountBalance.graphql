@@ -1,7 +1,7 @@
 query AccountBalanceByAddress(
   $address: String!
-  $fromDate: String = ""
-  $toDate: String = ""
+  $fromDate: Int
+  $toDate: Int
 ) {
   accountBalanceByAccountId(
     address: $address

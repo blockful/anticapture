@@ -1,0 +1,6 @@
+query HistoricalTokenData($skip: Int, $limit: Int) {
+  historicalTokenData(skip: $skip, limit: $limit) {
+    price
+    timestamp
+  }
+}
