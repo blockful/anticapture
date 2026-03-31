@@ -314,4 +314,5 @@ export const UNI: DaoConfiguration = {
   dataTables: true,
   activityFeed: true,
   governancePage: true,
+  offchainProposals: true,
 };

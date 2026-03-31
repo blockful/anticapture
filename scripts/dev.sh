@@ -3,6 +3,7 @@ set -euo pipefail
 
 USE_RAILWAY=false
 RUN_INDEXER=false
+DEBUG_API=false
 DAO_NAME=""
 
 # Parse arguments
@@ -10,6 +11,7 @@ for arg in "$@"; do
   case "$arg" in
     --rw) USE_RAILWAY=true ;;
     --indexer) RUN_INDEXER=true ;;
+    --debug-api) DEBUG_API=true ;;
     *) DAO_NAME="$arg" ;;
   esac
 done
@@ -172,13 +174,18 @@ else
 fi
 
 # 2. API (only when DAO_ID is provided)
-if [ "$RUN_API" = true ]; then
+if [ "$DEBUG_API" = true ] && [ "$RUN_API" = true ]; then
+  log "Waiting for API on port $PORT_API (start it from your IDE debugger)..."
+  wait_for_port "$PORT_API" "API (debugger)"
+  DAO_ID_UPPER=$(echo "$DAO_ID" | tr '[:lower:]' '[:upper:]')
+  export "DAO_API_${DAO_ID_UPPER}=http://localhost:${PORT_API}"
+elif [ "$RUN_API" = true ]; then
   log "Starting API for $DAO_NAME..."
   run_with_prefix "$C_API" "🐙 api" "" "" railway_run_api "${DAO_NAME}-api" pnpm api dev -- "$DAO_NAME" &
 
   wait_for_port "$PORT_API" "API"
-  DAO_ID_UPPER=$(echo "$DAO_ID" | tr '[:lower:]' '[:upper:]')                                                                            
-  export "DAO_API_${DAO_ID_UPPER}=http://localhost:${PORT_API}" 
+  DAO_ID_UPPER=$(echo "$DAO_ID" | tr '[:lower:]' '[:upper:]')
+  export "DAO_API_${DAO_ID_UPPER}=http://localhost:${PORT_API}"
 else
   log "Skipping API (no DAO_NAME provided, using DAO_API_* from .env)"
 fi
@@ -193,11 +200,11 @@ export ADDRESS_ENRICHMENT_API_URL="http://localhost:${PORT_ADDRESS_ENRICHMENT}"
 GATEWAY_READY=$(mktemp)
 rm -f "$GATEWAY_READY"
 log "Starting Gateway..."
-GATEWAY_OVERRIDES=()
+declare -a GATEWAY_OVERRIDES=()
 if [ "$RUN_API" = true ]; then
   GATEWAY_OVERRIDES+=("DAO_API_${DAO_ID}=http://localhost:${PORT_API}")
 fi
-run_with_prefix "$C_GATEWAY" "🌎 gateway" "$GATEWAY_READY" "Mesh running at" railway_run "${GATEWAY_OVERRIDES[@]}" api-gateway pnpm gateway dev &
+run_with_prefix "$C_GATEWAY" "🌎 gateway" "$GATEWAY_READY" "Mesh running at" railway_run ${GATEWAY_OVERRIDES[@]+"${GATEWAY_OVERRIDES[@]}"} api-gateway pnpm gateway dev &
 wait_for_ready "$GATEWAY_READY" "Gateway"
 
 # Watchdog: when API recovers after being down, touch the sentinel file so tsx reloads the gateway
