@@ -5,7 +5,6 @@ export type Logger = pino.Logger;
 
 export function createLogger(service: string): Logger {
   const hasOtelEndpoint = !!process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
-
   return pino({
     name: service,
     level: process.env.LOG_LEVEL ?? "info",
