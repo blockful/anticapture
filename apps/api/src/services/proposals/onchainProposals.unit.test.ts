@@ -7,6 +7,7 @@ import { ProposalsRepository, ProposalsService } from "./onchainProposals";
 const DEFAULT_REQ: ProposalsRequest = {
   skip: 0,
   limit: 10,
+  status: undefined,
   includeOptimisticProposals: true,
 };
 
