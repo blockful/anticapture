@@ -1,3 +1,7 @@
 FROM grafana/loki:3.4.3
+USER root
+RUN apk add --no-cache su-exec
 COPY loki.yaml /etc/loki/local-config.yaml
-CMD ["-config.file=/etc/loki/local-config.yaml", "-config.expand-env=true"]
+COPY entrypoint.loki.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
