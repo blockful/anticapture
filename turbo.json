@@ -1,7 +1,18 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
-    "db:prune": { "cache": false },
+    "@anticapture/offchain-indexer#db:migrate": {
+      "cache": false,
+      "passThroughEnv": ["*"]
+    },
+    "@anticapture/offchain-indexer#db:push": {
+      "cache": false,
+      "passThroughEnv": ["*"]
+    },
+    "@anticapture/indexer#db:prune": {
+      "cache": false,
+      "passThroughEnv": ["*"]
+    },
     "@anticapture/observability#build": {
       "outputs": ["packages/observability/dist/**"]
     },
