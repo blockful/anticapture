@@ -25,10 +25,7 @@
       "persistent": true
     },
     "@anticapture/dashboard#build": {
-      "dependsOn": [
-        "@anticapture/graphql-client#codegen",
-        "@anticapture/observability#build"
-      ],
+      "dependsOn": ["@anticapture/graphql-client#codegen"],
       "outputs": ["dist/**", ".next/**"],
       "env": ["RESEND_API_KEY", "RESEND_FROM_EMAIL", "CONTACT_EMAIL"]
     },
@@ -48,7 +45,9 @@
       "cache": false,
       "passThroughEnv": ["*"]
     },
-    "clean": { "cache": false },
+    "clean": {
+      "cache": false
+    },
     "lint": {
       "inputs": [
         "**/*.ts",

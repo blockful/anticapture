@@ -50,19 +50,8 @@ const nextConfig = {
       },
     ];
   },
-  serverExternalPackages: [
-    "pino-pretty",
-    "@opentelemetry/sdk-node",
-    "@opentelemetry/sdk-trace-node",
-    "@opentelemetry/sdk-metrics",
-    "@opentelemetry/exporter-trace-otlp-http",
-    "@opentelemetry/exporter-prometheus",
-    "@opentelemetry/instrumentation-http",
-    "@opentelemetry/instrumentation-pg",
-    "@opentelemetry/host-metrics",
-  ],
+  serverExternalPackages: ["pino-pretty"],
   experimental: {
-    instrumentationHook: true,
     optimizePackageImports: [
       "lucide-react",
       "recharts",
