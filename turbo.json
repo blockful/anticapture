@@ -37,6 +37,7 @@
       "outputs": ["dist/**"]
     },
     "build-storybook": {
+      "dependsOn": ["@anticapture/graphql-client#codegen"],
       "outputs": ["storybook-static/**"]
     },
     "start": {
