@@ -3,7 +3,8 @@
 import type {
   HistoricalVotingPowerByAccountQuery,
   HistoricalVotingPowerByAccountQueryVariables,
-  QueryInput_HistoricalVotingPowerByAccountId_OrderDirection,
+  InputMaybe,
+  OrderDirection,
 } from "@anticapture/graphql-client";
 import { useHistoricalVotingPowerByAccountQuery } from "@anticapture/graphql-client/hooks";
 import type { ApolloError } from "@apollo/client";
@@ -76,8 +77,8 @@ export function useDelegateDelegationHistory({
   filterVariables,
   customFromFilter,
   customToFilter,
-  fromTimestamp,
-  toTimestamp,
+  fromTimestamp: fromDate,
+  toTimestamp: toDate,
   limit = 10,
 }: UseDelegateDelegationHistoryParams): UseDelegateDelegationHistoryResult {
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -92,42 +93,18 @@ export function useDelegateDelegationHistory({
     setCurrentPage(1);
   }, [orderBy, orderDirection, accountId, customFromFilter, customToFilter]);
 
-  const { fromFilter, toFilter } = useMemo(() => {
-    if (customToFilter && customToFilter !== accountId) {
-      return {
-        fromFilter: accountId,
-        toFilter: customToFilter,
-      };
-    }
-
-    if (customFromFilter && customFromFilter !== accountId) {
-      return {
-        fromFilter: customFromFilter,
-        toFilter: accountId,
-      };
-    }
-    return {
-      fromFilter: accountId,
-      toFilter: accountId,
-    };
-  }, [accountId, customFromFilter, customToFilter]);
-
   const queryVariables = useMemo(
     () => ({
       account: accountId,
+      skip: null as InputMaybe<number>,
       limit,
       orderBy:
         orderBy as HistoricalVotingPowerByAccountQueryVariables["orderBy"],
-      orderDirection:
-        orderDirection as QueryInput_HistoricalVotingPowerByAccountId_OrderDirection,
-      ...(filterVariables?.toValue && { toValue: filterVariables.toValue }),
-      ...(filterVariables?.fromValue && {
-        fromValue: filterVariables.fromValue,
-      }),
-      ...(fromFilter && { delegator: fromFilter }),
-      ...(toFilter && { delegate: toFilter }),
-      ...(fromTimestamp && { fromDate: fromTimestamp.toString() }),
-      ...(toTimestamp && { toDate: toTimestamp.toString() }),
+      orderDirection: orderDirection as OrderDirection,
+      toValue: filterVariables?.toValue ?? null,
+      fromValue: filterVariables?.fromValue ?? null,
+      fromDate: fromDate || null,
+      toDate: toDate || null,
     }),
     [
       accountId,
@@ -135,10 +112,8 @@ export function useDelegateDelegationHistory({
       orderBy,
       orderDirection,
       filterVariables,
-      fromFilter,
-      toFilter,
-      fromTimestamp,
-      toTimestamp,
+      fromDate,
+      toDate,
     ],
   );
 

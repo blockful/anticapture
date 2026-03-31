@@ -27,8 +27,7 @@ export default [
       "*.config.js",
       "*.config.ts",
       "*.config.mjs",
-      "packages/graphql-client/generated.ts",
-      "packages/graphql-client/types.ts",
+      "packages/graphql-client/generated/**.ts",
       "apps/api-gateway/schema.graphql",
       "**/storybook-static/**",
       "**/.storybook/**",
@@ -175,9 +174,6 @@ export default [
         },
       ],
 
-      // No nested ternaries
-      "no-nested-ternary": "warn",
-
       // Import boundaries: no barrel files, prefer @/* aliases
       "no-restricted-imports": [
         "warn",
@@ -220,9 +216,21 @@ export default [
 
   // Dashboard — enforce named exports (no default exports except App Router pages/layouts)
   {
-    files: ["apps/dashboard/features/**/*.{ts,tsx}", "apps/dashboard/shared/**/*.{ts,tsx}", "apps/dashboard/widgets/**/*.{ts,tsx}"],
+    files: [
+      "apps/dashboard/features/**/*.{ts,tsx}",
+      "apps/dashboard/shared/**/*.{ts,tsx}",
+      "apps/dashboard/widgets/**/*.{ts,tsx}",
+    ],
     rules: {
-      "import/no-default-export": "warn",
+      // Replaces import/no-default-export which crashes on ESLint v10
+      // (eslint-plugin-import v2.x accesses removed context.parserOptions)
+      "no-restricted-syntax": [
+        "warn",
+        {
+          selector: "ExportDefaultDeclaration",
+          message: "Prefer named exports over default exports.",
+        },
+      ],
     },
   },
 

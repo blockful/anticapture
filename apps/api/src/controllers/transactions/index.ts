@@ -34,9 +34,8 @@ export function transactions(app: Hono, service: TransactionsService) {
     async (context) => {
       const {
         limit,
-        offset,
-        sortBy,
-        sortOrder,
+        skip,
+        orderDirection,
         fromDate,
         toDate,
         from,
@@ -49,9 +48,8 @@ export function transactions(app: Hono, service: TransactionsService) {
 
       const result = await service.getTransactions({
         limit,
-        offset,
-        sortBy,
-        sortOrder,
+        skip,
+        orderDirection,
         fromDate,
         toDate,
         from,
@@ -62,7 +60,7 @@ export function transactions(app: Hono, service: TransactionsService) {
         includes,
       });
 
-      return context.json(result);
+      return context.json(result, 200);
     },
   );
 }

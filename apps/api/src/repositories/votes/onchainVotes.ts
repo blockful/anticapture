@@ -39,6 +39,7 @@ export class VotesRepository {
         ? gte(votesOnchain.timestamp, BigInt(req.fromDate))
         : undefined,
       req.toDate ? lte(votesOnchain.timestamp, BigInt(req.toDate)) : undefined,
+      req.support ? eq(votesOnchain.support, req.support) : undefined,
     );
 
     const [items, totalCount] = await Promise.all([

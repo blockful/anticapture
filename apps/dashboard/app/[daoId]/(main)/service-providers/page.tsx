@@ -12,17 +12,21 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const daoId = params.daoId.toUpperCase() as DaoIdEnum;
 
+  const canonicalPath = `/${params.daoId}/service-providers`;
+
   return {
-    title: `Anticapture - ${daoId} Service Providers`,
-    description: `Monitor the publication status of quarterly reports from ${daoId} DAO-funded service providers.`,
+    title: `${daoId} DAO Service Provider Accountability | Governance Transparency — Anticapture`,
+    description: `Track quarterly report compliance and accountability of ${daoId} DAO-funded service providers. Monitor governance transparency and identify reporting gaps that create security risks.`,
+    alternates: { canonical: canonicalPath },
     openGraph: {
-      title: `Anticapture - ${daoId} Service Providers`,
-      description: `Monitor the publication status of quarterly reports from ${daoId} DAO-funded service providers.`,
+      url: canonicalPath,
+      title: `${daoId} DAO Service Provider Accountability | Governance Transparency — Anticapture`,
+      description: `Track quarterly report compliance and accountability of ${daoId} DAO-funded service providers. Monitor governance transparency and identify reporting gaps that create security risks.`,
     },
     twitter: {
       card: "summary_large_image",
-      title: `Anticapture - ${daoId} Service Providers`,
-      description: `Monitor the publication status of quarterly reports from ${daoId} DAO-funded service providers.`,
+      title: `${daoId} DAO Service Provider Accountability | Governance Transparency — Anticapture`,
+      description: `Track quarterly report compliance and accountability of ${daoId} DAO-funded service providers. Monitor governance transparency and identify reporting gaps that create security risks.`,
     },
   };
 }

@@ -47,6 +47,11 @@ export class DrizzleRepository implements Repository {
             updated: sql`excluded.updated`,
             link: sql`excluded.link`,
             flagged: sql`excluded.flagged`,
+            scores: sql`excluded.scores`,
+            choices: sql`excluded.choices`,
+            network: sql`excluded.network`,
+            snapshot: sql`excluded.snapshot`,
+            strategies: sql`excluded.strategies`,
           },
         });
 

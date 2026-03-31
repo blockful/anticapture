@@ -6,16 +6,19 @@ import { HeaderSidebar } from "@/widgets";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
 
 export const metadata: Metadata = {
-  title: "Anticapture - Alerts",
-  description: "Stay updated with governance alerts and notifications.",
+  title: "DAO Governance Security Alerts | Anticapture",
+  description:
+    "Receive real-time alerts on governance security threats, hostile takeover attempts, abnormal voting patterns, and token concentration changes across monitored DAOs.",
   openGraph: {
-    title: "Anticapture - Alerts",
-    description: "Stay updated with governance alerts and notifications.",
+    title: "DAO Governance Security Alerts | Anticapture",
+    description:
+      "Receive real-time alerts on governance security threats, hostile takeover attempts, abnormal voting patterns, and token concentration changes across monitored DAOs.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Anticapture - Alerts",
-    description: "Stay updated with governance alerts and notifications.",
+    title: "DAO Governance Security Alerts | Anticapture",
+    description:
+      "Receive real-time alerts on governance security threats, hostile takeover attempts, abnormal voting patterns, and token concentration changes across monitored DAOs.",
   },
 };
 

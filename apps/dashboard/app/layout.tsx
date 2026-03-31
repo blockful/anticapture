@@ -29,23 +29,30 @@ const baseUrl =
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
-  title: "Anticapture",
+  title: "Anticapture | DAO Governance Security Dashboard",
   keywords: [
-    "governance",
-    "dao",
-    "data",
-    "risk",
-    "DAOs",
-    "governance security",
+    "DAO governance security",
+    "hostile takeover prevention",
+    "governance capture",
+    "governance risk analysis",
+    "DAO security framework",
+    "token distribution",
+    "delegate monitoring",
+    "resilience metrics",
+    "DeFi governance",
+    "on-chain governance security",
   ],
   openGraph: {
-    title: "Anticapture",
-    description: "Explore and address governance risks in top DAOs.",
+    title: "Anticapture — DAO Governance Security & Risk Analysis Platform",
+    description:
+      "Anticapture is a DAO governance security platform that quantifies hostile takeover risk, detects governance capture, and tracks resilience metrics across major DAOs.",
   },
   twitter: {
     card: "summary_large_image",
-    title: `Anticapture - DAO`,
-    description: `Explore and mitigate governance risks in DAO.`,
+    title:
+      "Anticapture | DAO Governance Security & Hostile Takeover Prevention",
+    description:
+      "Monitor governance security, hostile takeover risks, and token distribution across DAOs. Anticapture is the open security framework for decentralized governance.",
   },
 };
 

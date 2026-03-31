@@ -1,6 +1,6 @@
 import {
+  OrderDirection,
   QueryInput_Delegators_OrderBy,
-  QueryInput_Delegators_OrderDirection,
 } from "@anticapture/graphql-client";
 import {
   useAccountBalanceByAddressQuery,
@@ -46,7 +46,7 @@ export const useVoteCompositionData = (
     daoId,
     address,
     orderBy: QueryInput_Delegators_OrderBy.Amount,
-    orderDirection: QueryInput_Delegators_OrderDirection.Desc,
+    orderDirection: OrderDirection.Desc,
     limit: 5,
   });
 
@@ -73,6 +73,8 @@ export const useVoteCompositionData = (
     },
     variables: {
       address,
+      fromDate: null,
+      toDate: null,
     },
     skip: !isAave,
   });

@@ -1,5 +1,5 @@
 # Simple query for individual delegate proposals activity
-query GetDelegateProposalsActivity($address: String!, $fromDate: String) {
+query GetDelegateProposalsActivity($address: String!, $fromDate: Int) {
   proposalsActivity(address: $address, fromDate: $fromDate) {
     address
     totalProposals

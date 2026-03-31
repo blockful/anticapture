@@ -1,8 +1,8 @@
 query BalanceHistoryGraph(
   $address: String!
   $orderBy: queryInput_historicalBalances_orderBy
-  $orderDirection: queryInput_historicalBalances_orderDirection
-  $fromDate: String
+  $orderDirection: OrderDirection
+  $fromDate: Int
 ) {
   historicalBalances(
     address: $address
@@ -12,7 +12,7 @@ query BalanceHistoryGraph(
     limit: 1000
   ) {
     items {
-      balance 
+      balance
       logIndex
       timestamp
       transactionHash

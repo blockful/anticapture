@@ -19,7 +19,7 @@ export const useDelegationPercentageByDay = (
   const { data, loading, error, refetch } = useGetDelegatedSupplyHistoryQuery({
     variables: {
       startDate,
-      endDate,
+      endDate: endDate ?? null,
     },
   });
 

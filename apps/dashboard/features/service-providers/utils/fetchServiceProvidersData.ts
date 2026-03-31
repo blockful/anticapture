@@ -1,115 +1,146 @@
 import {
   GITHUB_API_BASE,
   GITHUB_RAW_BASE,
-  QUARTER_DUE_DATES,
-  QUARTERS,
-} from "@/features/service-providers/constants/ens-service-providers";
-import {
-  type QuarterKey,
-  type QuarterReport,
-  type YearData,
+} from "@/features/service-providers/constants/github";
+import type {
+  ParsedQuarter,
+  ProgramConfig,
+  ProgramDefinition,
+  ProgramsConfig,
+  ProvidersConfig,
+  QuarterKey,
+  QuarterReport,
+  YearData,
 } from "@/features/service-providers/types";
 import { computeQuarterStatus } from "@/features/service-providers/utils/computeQuarterStatus";
-import { extractUrlFromMarkdown } from "@/features/service-providers/utils/extractUrlFromMarkdown";
+import { isHttpUrl } from "@/features/service-providers/utils/isHttpUrl";
+
+const QUARTERS: QuarterKey[] = ["Q1", "Q2", "Q3", "Q4"];
 
 export type ServiceProvidersData = Record<number, Record<string, YearData>>;
 
 export type ServiceProvidersResult = {
+  config: ProvidersConfig;
+  programs: Record<string, ProgramDefinition>;
   data: ServiceProvidersData;
   avatarUrls: Record<string, string>;
 };
 
-const fetchQuarterReport = async (
-  year: number,
-  slug: string,
-  quarter: QuarterKey,
-  existingFiles: Set<string>,
-  now: Date,
-): Promise<QuarterReport> => {
-  const filePath = `${year}/${slug}/${quarter.toLowerCase()}.md`;
+const parseQuarterString = (str: string): ParsedQuarter | null => {
+  const match = str.match(/^(\d{4})\/(Q[1-4])$/);
+  if (!match) return null;
+  return { year: Number(match[1]), quarter: match[2] as QuarterKey };
+};
 
-  if (existingFiles.has(filePath)) {
-    const response = await fetch(`${GITHUB_RAW_BASE}/${filePath}`);
-    if (response.ok) {
-      const content = (await response.text()).trim();
-      if (content) {
-        return {
-          status: "published",
-          reportUrl: extractUrlFromMarkdown(content),
-        };
-      }
-    }
+export const parseProgramConfig = (
+  config: ProgramConfig,
+): ProgramDefinition => ({
+  name: config.name,
+  discussionUrl: config.discussionUrl,
+  budgetProposal: config.budgetProposal,
+  selectionProposal: config.selectionProposal,
+  year1Quarters: config.year1Quarters
+    .map(parseQuarterString)
+    .filter((q): q is ParsedQuarter => q !== null),
+  year2Quarters: (config.year2Quarters ?? [])
+    .map(parseQuarterString)
+    .filter((q): q is ParsedQuarter => q !== null),
+});
+
+const collectYears = (
+  programs: Record<string, ProgramDefinition>,
+): number[] => [
+  ...new Set(
+    Object.values(programs).flatMap((p) =>
+      [...p.year1Quarters, ...p.year2Quarters].map((q) => q.year),
+    ),
+  ),
+];
+
+const buildQuarterReport = (
+  year: number,
+  quarter: QuarterKey,
+  reports: Record<string, string>,
+  now: Date,
+): QuarterReport => {
+  const reportUrl = reports[`${year}/${quarter}`];
+
+  if (isHttpUrl(reportUrl)) {
+    return { status: "published", reportUrl };
   }
 
   return { status: computeQuarterStatus(year, quarter, now) };
 };
 
-export const fetchServiceProvidersData = async (
-  slugs: string[],
-): Promise<ServiceProvidersResult> => {
-  const treeResponse = await fetch(
-    `${GITHUB_API_BASE}/git/trees/main?recursive=1`,
-  );
-
-  if (!treeResponse.ok) return { data: {}, avatarUrls: {} };
-
-  const { tree }: { tree: { path: string; type: string }[] } =
-    await treeResponse.json();
-
-  const years = Object.keys(QUARTER_DUE_DATES).map(Number);
-
-  const existingFiles = new Set(
-    tree
-      .filter(
-        (item) =>
-          item.type === "blob" &&
-          /^\d{4}\/[\w-]+\/(q1|q2|q3|q4)\.md$/i.test(item.path),
-      )
-      .map((item) => item.path.toLowerCase()),
-  );
-
-  const avatarUrls: Record<string, string> = {};
-  tree
-    .filter(
-      (item) =>
-        item.type === "blob" && /^avatars\/[^/]+\.[^.]+$/.test(item.path),
-    )
-    .forEach((item) => {
-      const fileName = item.path.slice("avatars/".length);
-      const slug = fileName.slice(0, fileName.lastIndexOf("."));
-      avatarUrls[slug] = `${GITHUB_RAW_BASE}/${item.path}`;
-    });
-
-  const now = new Date();
-
-  const yearEntries = await Promise.all(
-    years.map(async (year) => {
-      const slugEntries = await Promise.all(
-        slugs.map(async (slug) => {
-          const quarterEntries = await Promise.all(
-            QUARTERS.map(
-              async (quarter) =>
-                [
-                  quarter,
-                  await fetchQuarterReport(
-                    year,
-                    slug,
-                    quarter,
-                    existingFiles,
-                    now,
-                  ),
-                ] as const,
-            ),
-          );
-          return [
-            slug,
-            Object.fromEntries(quarterEntries) as YearData,
-          ] as const;
-        }),
-      );
-      return [year, Object.fromEntries(slugEntries)] as const;
-    }),
-  );
-
-  return { data: Object.fromEntries(yearEntries), avatarUrls };
+const fetchJson = async <T>(path: string): Promise<T> => {
+  const response = await fetch(`${GITHUB_RAW_BASE}/${path}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch ${path}: ${response.status}`);
+  }
+  return (await response.json()) as T;
 };
+
+const fetchAvatarUrls = async (): Promise<Record<string, string>> => {
+  try {
+    const response = await fetch(
+      `${GITHUB_API_BASE}/git/trees/main?recursive=1`,
+    );
+    if (!response.ok) return {};
+
+    const { tree }: { tree: { path: string; type: string }[] } =
+      await response.json();
+
+    return Object.fromEntries(
+      tree
+        .filter(
+          (item) =>
+            item.type === "blob" && /^avatars\/[^/]+\.[^.]+$/.test(item.path),
+        )
+        .map((item) => {
+          const fileName = item.path.slice("avatars/".length);
+          const slug = fileName.slice(0, fileName.lastIndexOf("."));
+          return [slug, `${GITHUB_RAW_BASE}/${item.path}`];
+        }),
+    );
+  } catch {
+    return {};
+  }
+};
+
+export const fetchServiceProvidersData =
+  async (): Promise<ServiceProvidersResult> => {
+    const [config, programsConfig, avatarUrls] = await Promise.all([
+      fetchJson<ProvidersConfig>("providers.json"),
+      fetchJson<ProgramsConfig>("programs.json"),
+      fetchAvatarUrls(),
+    ]);
+
+    const programs = Object.fromEntries(
+      Object.entries(programsConfig.programs).map(([key, value]) => [
+        key,
+        parseProgramConfig(value),
+      ]),
+    );
+
+    const years = collectYears(programs);
+    const now = new Date();
+
+    const data = Object.fromEntries(
+      years.map((year) => [
+        year,
+        Object.fromEntries(
+          config.providers.map((provider) => [
+            provider.slug,
+            Object.fromEntries(
+              QUARTERS.map((quarter) => [
+                quarter,
+                buildQuarterReport(year, quarter, provider.reports, now),
+              ]),
+            ) as YearData, // safe: maps over all 4 quarters
+          ]),
+        ),
+      ]),
+    );
+
+    return { config, programs, data, avatarUrls };
+  };

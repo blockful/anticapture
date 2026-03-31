@@ -176,7 +176,9 @@ describe("Treasury Controller", () => {
       ];
       fakeProvider.setData(expected);
 
-      const resAsc = await app.request("/treasury/liquid?days=7d&order=asc");
+      const resAsc = await app.request(
+        "/treasury/liquid?days=7d&orderDirection=asc",
+      );
       expect(await resAsc.json()).toEqual({
         items: expected,
         totalCount: expected.length,
@@ -195,7 +197,9 @@ describe("Treasury Controller", () => {
       ];
       fakeProvider.setData(expected);
 
-      const res = await app.request("/treasury/liquid?days=7d&order=desc");
+      const res = await app.request(
+        "/treasury/liquid?days=7d&orderDirection=desc",
+      );
       expect(await res.json()).toEqual({
         items: expected.sort((a, b) => b.date - a.date),
         totalCount: 3,

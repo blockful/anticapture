@@ -3,16 +3,19 @@ import type { Metadata } from "next";
 import ContactPageClient from "@/app/contact/ContactPageClient";
 
 export const metadata: Metadata = {
-  title: "Anticapture - Contact",
-  description: "Get in touch with the Anticapture team.",
+  title: "Contact Anticapture | DAO Governance Security Team",
+  description:
+    "Contact the Anticapture team for governance security research partnerships, DAO integrations, or questions about hostile takeover risk analysis and the governance security framework.",
   openGraph: {
-    title: "Anticapture - Contact",
-    description: "Get in touch with the Anticapture team.",
+    title: "Contact Anticapture | DAO Governance Security Team",
+    description:
+      "Contact the Anticapture team for governance security research partnerships, DAO integrations, or questions about hostile takeover risk analysis and the governance security framework.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Anticapture - Contact",
-    description: "Get in touch with the Anticapture team.",
+    title: "Contact Anticapture | DAO Governance Security Team",
+    description:
+      "Contact the Anticapture team for governance security research partnerships, DAO integrations, or questions about hostile takeover risk analysis and the governance security framework.",
   },
 };
 

@@ -61,9 +61,8 @@ const defaultFilter = (
   overrides: Partial<TransactionsRequest> = {},
 ): TransactionsRequest => ({
   limit: 50,
-  offset: 0,
-  sortBy: "timestamp",
-  sortOrder: "desc",
+  skip: 0,
+  orderDirection: "desc",
   affectedSupply: {},
   includes: { transfers: true, delegations: true },
   ...overrides,
@@ -196,7 +195,7 @@ describe("TransactionsRepository", () => {
         ]);
 
       const result = await repository.getFilteredAggregateTransactions(
-        defaultFilter({ limit: 1, offset: 0 }),
+        defaultFilter({ limit: 1, skip: 0 }),
       );
 
       expect(result).toHaveLength(1);

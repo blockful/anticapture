@@ -4,27 +4,22 @@ import type { ColumnDef } from "@tanstack/react-table";
 
 import { ProviderNameCell } from "@/features/service-providers/components/ProviderNameCell";
 import { StatusCell } from "@/features/service-providers/components/StatusCell";
-import {
-  ENS_SERVICE_PROVIDERS,
-  QUARTER_DUE_DATES,
-  SPP1_YEAR_QUARTERS,
-  SPP2_YEAR1_QUARTERS,
-  SPP2_YEAR2_QUARTERS,
-} from "@/features/service-providers/constants/ens-service-providers";
-import {
-  type QuarterReport,
-  type ServiceProvider,
-  type SPPKey,
+import type {
+  ParsedQuarter,
+  ProgramDefinition,
+  QuarterReport,
+  ServiceProvider,
 } from "@/features/service-providers/types";
-import { getCurrentQuarter } from "@/features/service-providers/utils/getQuarterInfos";
+import { getDueDateLabel } from "@/features/service-providers/utils/computeQuarterStatus";
+import { getCurrentQuarter } from "@/features/service-providers/utils/getCurrentQuarter";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
-import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { Table } from "@/shared/components/design-system/table/Table";
+import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { cn } from "@/shared/utils/cn";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 
-type QuarterColumn = { year: number; quarter: "Q1" | "Q2" | "Q3" | "Q4" };
+const quarterKey = (col: ParsedQuarter) => `${col.year}_${col.quarter}`;
 
 interface ProviderRow {
   name: string;
@@ -36,9 +31,7 @@ interface ProviderRow {
   quarters: Record<string, QuarterReport>;
 }
 
-const quarterKey = (col: QuarterColumn) => `${col.year}_${col.quarter}`;
-
-const makeSkeletonRow = (cols: QuarterColumn[]): ProviderRow => ({
+const makeSkeletonRow = (cols: ParsedQuarter[]): ProviderRow => ({
   name: "",
   budget: 0,
   streamDuration: 1,
@@ -49,74 +42,68 @@ const makeSkeletonRow = (cols: QuarterColumn[]): ProviderRow => ({
 
 interface ServiceProvidersTableProps {
   providers: ServiceProvider[];
-  spp: SPPKey;
+  program: ProgramDefinition;
   isLoading?: boolean;
 }
 
 export const ServiceProvidersTable = ({
   providers,
-  spp,
+  program,
   isLoading = false,
 }: ServiceProvidersTableProps) => {
   const currentYear = new Date().getFullYear();
   const currentQuarter = getCurrentQuarter();
 
-  const year1Cols = spp === "SPP1" ? SPP1_YEAR_QUARTERS : SPP2_YEAR1_QUARTERS;
-  const year2Cols = spp === "SPP2" ? SPP2_YEAR2_QUARTERS : [];
-  const allCols = [...year1Cols, ...year2Cols];
-
-  const sppProviderList = ENS_SERVICE_PROVIDERS.filter((p) =>
-    p.sppPrograms.includes(spp),
-  );
+  const { year1Quarters, year2Quarters } = program;
+  const allCols = [...year1Quarters, ...year2Quarters];
+  const hasYear2 = year2Quarters.length > 0;
 
   const skeletonRows: ProviderRow[] = Array.from(
-    { length: sppProviderList.length },
+    { length: providers.length || 6 },
     () => makeSkeletonRow(allCols),
   );
 
   const data: ProviderRow[] = isLoading
     ? skeletonRows
-    : providers
-        .filter((p) => p.sppPrograms.includes(spp))
-        .map((provider) => {
-          const reportsByQuarter: Record<string, QuarterReport> = {};
+    : providers.map((provider) => {
+        const reportsByQuarter: Record<string, QuarterReport> = {};
 
-          for (const col of year1Cols) {
-            const yearData = provider.years[col.year];
-            reportsByQuarter[quarterKey(col)] = yearData?.[col.quarter] ?? {
-              status: "upcoming",
-            };
-          }
-
-          for (const col of year2Cols) {
-            reportsByQuarter[quarterKey(col)] =
-              provider.streamDuration === 1
-                ? { status: "1y_only" }
-                : (provider.years[col.year]?.[col.quarter] ?? {
-                    status: "upcoming",
-                  });
-          }
-
-          return {
-            name: provider.name,
-            avatarUrl: provider.avatarUrl,
-            websiteUrl: provider.websiteUrl,
-            proposalUrl: provider.proposalUrl,
-            budget: provider.budget,
-            streamDuration: provider.streamDuration,
-            quarters: reportsByQuarter,
+        for (const col of year1Quarters) {
+          const yearData = provider.years[col.year];
+          reportsByQuarter[quarterKey(col)] = yearData?.[col.quarter] ?? {
+            status: "upcoming",
           };
-        });
+        }
+
+        for (const col of year2Quarters) {
+          reportsByQuarter[quarterKey(col)] =
+            provider.streamDuration === 1
+              ? { status: "1y_only" }
+              : (provider.years[col.year]?.[col.quarter] ?? {
+                  status: "upcoming",
+                });
+        }
+
+        return {
+          name: provider.name,
+          avatarUrl: provider.avatarUrl,
+          websiteUrl: provider.websiteUrl,
+          proposalUrl: provider.proposalUrl,
+          budget: provider.budget,
+          streamDuration: provider.streamDuration,
+          quarters: reportsByQuarter,
+        };
+      });
 
   const buildQuarterColumn = (
-    col: QuarterColumn,
+    col: ParsedQuarter,
     year2ColIndex?: number,
   ): ColumnDef<ProviderRow> => {
     const key = quarterKey(col);
     const isYear2 = year2ColIndex !== undefined;
     const isCurrentQuarter =
       col.year === currentYear && col.quarter === currentQuarter;
-    const meta = QUARTER_DUE_DATES[col.year]?.[col.quarter];
+    const dueDateLabel = getDueDateLabel(col.quarter);
 
     return {
       id: key,
@@ -135,7 +122,7 @@ export const ServiceProvidersTable = ({
             )}
           </span>
           <span className="text-secondary text-xs font-normal">
-            {meta?.dueDateLabel}
+            {dueDateLabel}
           </span>
         </div>
       ),
@@ -154,7 +141,7 @@ export const ServiceProvidersTable = ({
         if (status === "1y_only" && isYear2) {
           return (
             <div className="bg-surface-contrast/30 absolute inset-0 flex items-center justify-center">
-              {year2ColIndex === 1 && (
+              {year2ColIndex === 0 && (
                 <span className="text-dimmed text-sm font-normal italic">
                   1Y only
                 </span>
@@ -166,7 +153,7 @@ export const ServiceProvidersTable = ({
         return <StatusCell status={status} reportUrl={reportUrl} />;
       },
       meta: {
-        columnClassName: cn(spp === "SPP2" && "w-[140px]", "px-2 relative"),
+        columnClassName: cn(hasYear2 && "w-[140px]", "px-2 relative"),
       },
     };
   };
@@ -197,8 +184,8 @@ export const ServiceProvidersTable = ({
         ),
       meta: {
         columnClassName: cn(
-          "w-[220px] px-2 sticky left-0 z-20 [&:is(th)]:bg-surface-contrast bg-surface-background lg:bg-surface-default",
-          spp === "SPP2" &&
+          "w-[260px] px-2 sticky left-0 z-20 [&:is(th)]:bg-surface-contrast bg-surface-background lg:bg-surface-default",
+          hasYear2 &&
             "after:absolute after:right-0 after:top-0 after:bottom-0 after:w-px after:content-[''] after:bg-border-default",
         ),
       },
@@ -225,7 +212,7 @@ export const ServiceProvidersTable = ({
               }
             />
           </div>
-          {spp === "SPP2" && (
+          {hasYear2 && (
             <span className="text-table-header whitespace-nowrap font-normal">
               Stream Duration
             </span>
@@ -243,16 +230,17 @@ export const ServiceProvidersTable = ({
             <span className="text-secondary text-sm">
               {formatNumberUserReadable(row.original.budget)}
             </span>
-            {spp === "SPP2" && (
+            {hasYear2 && (
               <span
                 className={cn(
                   "text-xs",
-                  row.original.streamDuration === 2
+                  // chart-1 = blue (multi-year), chart-2 = orange (single-year)
+                  row.original.streamDuration >= 2
                     ? "text-[var(--base-chart-1)]"
                     : "text-[var(--base-chart-2)]",
                 )}
               >
-                {row.original.streamDuration === 2 ? "2 years" : "1 year"}
+                {`${row.original.streamDuration} year${row.original.streamDuration > 1 ? "s" : ""}`}
               </span>
             )}
           </div>
@@ -261,8 +249,8 @@ export const ServiceProvidersTable = ({
       sortingFn: (rowA, rowB) => rowA.original.budget - rowB.original.budget,
       meta: { columnClassName: "w-[152px]" },
     },
-    ...year1Cols.map((col) => buildQuarterColumn(col)),
-    ...year2Cols.map((col, i) => buildQuarterColumn(col, i)),
+    ...year1Quarters.map((col) => buildQuarterColumn(col)),
+    ...year2Quarters.map((col, i) => buildQuarterColumn(col, i)),
   ];
 
   return (

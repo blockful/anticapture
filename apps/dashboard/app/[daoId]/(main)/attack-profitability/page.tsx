@@ -19,18 +19,18 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const canonicalPath = `/${params.daoId}/attack-profitability`;
 
   return {
-    title: `Anticapture - ${daoId} DAO Attack Profitability`,
-    description: `Analyze attack profitability and governance capture costs for ${daoId} DAO.`,
+    title: `${daoId} DAO Hostile Takeover Cost Analysis | Attack Profitability — Anticapture`,
+    description: `Calculate the economic cost of a hostile takeover of ${daoId} DAO — including token acquisition costs, governance capture thresholds, and attack profitability under different market scenarios.`,
     alternates: { canonical: canonicalPath },
     openGraph: {
       url: canonicalPath,
-      title: `Anticapture - ${daoId} DAO Attack Profitability`,
-      description: `Analyze attack profitability and governance capture costs for ${daoId} DAO.`,
+      title: `${daoId} DAO Hostile Takeover Cost Analysis | Attack Profitability — Anticapture`,
+      description: `Calculate the economic cost of a hostile takeover of ${daoId} DAO — including token acquisition costs, governance capture thresholds, and attack profitability under different market scenarios.`,
     },
     twitter: {
       card: "summary_large_image",
-      title: `Anticapture - ${daoId} DAO Attack Profitability`,
-      description: `Analyze attack profitability and governance capture costs for ${daoId} DAO.`,
+      title: `${daoId} DAO Hostile Takeover Cost Analysis | Attack Profitability — Anticapture`,
+      description: `Calculate the economic cost of a hostile takeover of ${daoId} DAO — including token acquisition costs, governance capture thresholds, and attack profitability under different market scenarios.`,
     },
   };
 }

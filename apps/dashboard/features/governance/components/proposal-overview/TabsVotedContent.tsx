@@ -1,4 +1,3 @@
-import type { GetProposalQuery } from "@anticapture/graphql-client";
 import type { ColumnDef } from "@tanstack/react-table";
 import {
   CheckCircle2,
@@ -16,6 +15,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { formatUnits } from "viem";
 
 import { VotesTable } from "@/features/governance/components/proposal-overview/VotesTable";
+import type { ProposalDetails } from "@/features/governance/types";
 import type { VoteWithHistoricalPower } from "@/features/governance/hooks/useVotes";
 import { useVotes } from "@/features/governance/hooks/useVotes";
 import { SkeletonRow, Button, BlankSlate } from "@/shared/components";
@@ -41,7 +41,7 @@ const choiceFilterOptions: FilterOption[] = [
 ];
 
 interface TabsVotedContentProps {
-  proposal: NonNullable<GetProposalQuery["proposal"]>;
+  proposal: ProposalDetails;
   onAddressClick?: (address: string) => void;
 }
 
@@ -194,7 +194,7 @@ export const TabsVotedContent = ({
         accessorKey: "support",
         size: 120,
         cell: ({ row }) => {
-          const support = row.getValue("support") as number;
+          const support = row.getValue("support") as string;
           const voterAddress = row.getValue("voterAddress") as string;
           const vote = row.original;
 
@@ -252,7 +252,7 @@ export const TabsVotedContent = ({
             }
           };
 
-          const choiceInfo = getChoiceInfo(support);
+          const choiceInfo = getChoiceInfo(Number(support));
 
           return (
             <div className="flex items-center gap-2 p-2">
@@ -639,7 +639,7 @@ export const TabsVotedContent = ({
           voterAddress: `__DESCRIPTION_${vote.voterAddress}__`,
           transactionHash: "",
           proposalId: vote.proposalId,
-          support: 0,
+          support: "0",
           votingPower: "",
           reason: vote.reason,
           timestamp: 0,
@@ -654,7 +654,7 @@ export const TabsVotedContent = ({
         voterAddress: "__LOADING_ROW__",
         transactionHash: "",
         proposalId: "",
-        support: 0,
+        support: "0",
         votingPower: "",
         reason: "",
         timestamp: 0,

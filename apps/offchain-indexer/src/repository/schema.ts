@@ -17,6 +17,17 @@ export const proposals = snapshotSchema.table("proposals", (d) => ({
   updated: d.integer().notNull(),
   link: d.text().notNull().default(""),
   flagged: d.boolean().notNull().default(false),
+  scores: d.jsonb().$type<number[]>().notNull().default([]),
+  choices: d.jsonb().$type<string[]>().notNull().default([]),
+  network: d.text().notNull().default(""),
+  snapshot: d.integer(),
+  strategies: d
+    .jsonb()
+    .$type<
+      Array<{ name: string; network: string; params: Record<string, unknown> }>
+    >()
+    .notNull()
+    .default([]),
 }));
 
 export const votes = snapshotSchema.table(

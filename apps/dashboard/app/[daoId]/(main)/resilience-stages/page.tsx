@@ -15,18 +15,18 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const canonicalPath = `/${params.daoId}/resilience-stages`;
 
   return {
-    title: `Anticapture - ${daoId} DAO Resilience Stages`,
-    description: `Assess ${daoId} DAO governance resilience and security stages.`,
+    title: `${daoId} DAO Governance Resilience Score & Security Stages — Anticapture`,
+    description: `Track the governance resilience stages of ${daoId} DAO — from vulnerable to fully decentralized — with security scores, milestone assessments, and anti-capture metrics.`,
     alternates: { canonical: canonicalPath },
     openGraph: {
       url: canonicalPath,
-      title: `Anticapture - ${daoId} DAO Resilience Stages`,
-      description: `Assess ${daoId} DAO governance resilience and security stages.`,
+      title: `${daoId} DAO Governance Resilience Score & Security Stages — Anticapture`,
+      description: `Track the governance resilience stages of ${daoId} DAO — from vulnerable to fully decentralized — with security scores, milestone assessments, and anti-capture metrics.`,
     },
     twitter: {
       card: "summary_large_image",
-      title: `Anticapture - ${daoId} DAO Resilience Stages`,
-      description: `Assess ${daoId} DAO governance resilience and security stages.`,
+      title: `${daoId} DAO Governance Resilience Score & Security Stages — Anticapture`,
+      description: `Track the governance resilience stages of ${daoId} DAO — from vulnerable to fully decentralized — with security scores, milestone assessments, and anti-capture metrics.`,
     },
   };
 }

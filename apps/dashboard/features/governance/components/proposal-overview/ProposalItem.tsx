@@ -3,19 +3,30 @@
 import { CheckCircle2, XCircle } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useMemo } from "react";
 import type { Address } from "viem";
 
+import type { OffchainProposalItem as OffchainProposalData } from "@/features/governance/hooks/useOffchainProposals";
 import type { Proposal } from "@/features/governance/types";
 import { ProposalStatus } from "@/features/governance/types";
+import { getTimeText } from "@/features/governance/utils/getTimeText";
+import {
+  getOffchainProposalStatus,
+  normalizeChoices,
+  normalizeScores,
+} from "@/features/governance/utils/offchainProposal";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { BulletDivider } from "@/shared/components/design-system/section";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 
-interface ProposalItemProps {
-  proposal: Proposal;
-  className?: string;
-}
+type ProposalItemProps =
+  | { proposal: Proposal; offchainProposal?: never; className?: string }
+  | {
+      proposal?: never;
+      offchainProposal: OffchainProposalData;
+      className?: string;
+    };
 
 export const getTextStatusColor = (status: ProposalStatus) => {
   switch (status) {
@@ -27,7 +38,7 @@ export const getTextStatusColor = (status: ProposalStatus) => {
       return "text-success";
     case ProposalStatus.DEFEATED:
       return "text-error";
-    case ProposalStatus.CANCELLED:
+    case ProposalStatus.CANCELED:
       return "text-error";
     case ProposalStatus.QUEUED:
       return "text-success";
@@ -38,6 +49,8 @@ export const getTextStatusColor = (status: ProposalStatus) => {
     case ProposalStatus.EXPIRED:
       return "text-error";
     case ProposalStatus.NO_QUORUM:
+      return "text-secondary";
+    case ProposalStatus.CLOSED:
       return "text-secondary";
     default:
       return "text-secondary";
@@ -54,7 +67,7 @@ export const getStatusColorBar = (status: ProposalStatus) => {
       return "bg-success";
     case ProposalStatus.DEFEATED:
       return "bg-error";
-    case ProposalStatus.CANCELLED:
+    case ProposalStatus.CANCELED:
       return "bg-error";
     case ProposalStatus.QUEUED:
       return "bg-success";
@@ -65,6 +78,8 @@ export const getStatusColorBar = (status: ProposalStatus) => {
     case ProposalStatus.EXPIRED:
       return "bg-error";
     case ProposalStatus.NO_QUORUM:
+      return "bg-secondary";
+    case ProposalStatus.CLOSED:
       return "bg-secondary";
     default:
       return "bg-secondary";
@@ -81,7 +96,7 @@ export const getBackgroundStatusColor = (status: ProposalStatus) => {
       return "bg-surface-opacity-success";
     case ProposalStatus.DEFEATED:
       return "bg-surface-opacity-error";
-    case ProposalStatus.CANCELLED:
+    case ProposalStatus.CANCELED:
       return "bg-surface-opacity-error";
     case ProposalStatus.QUEUED:
       return "bg-surface-opacity-success";
@@ -92,6 +107,8 @@ export const getBackgroundStatusColor = (status: ProposalStatus) => {
     case ProposalStatus.EXPIRED:
       return "bg-surface-opacity-error";
     case ProposalStatus.NO_QUORUM:
+      return "bg-surface-opacity";
+    case ProposalStatus.CLOSED:
       return "bg-surface-opacity";
     default:
       return "bg-surface-opacity";
@@ -108,7 +125,7 @@ export const getStatusText = (status: ProposalStatus) => {
       return "Executed";
     case ProposalStatus.DEFEATED:
       return "Defeated";
-    case ProposalStatus.CANCELLED:
+    case ProposalStatus.CANCELED:
       return "Cancelled";
     case ProposalStatus.QUEUED:
       return "Queued";
@@ -120,47 +137,184 @@ export const getStatusText = (status: ProposalStatus) => {
       return "Expired";
     case ProposalStatus.NO_QUORUM:
       return "No Quorum";
+    case ProposalStatus.CLOSED:
+      return "Closed";
     default:
       return status;
   }
 };
 
-export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
+export const ProposalItem = ({
+  proposal,
+  offchainProposal,
+  className,
+}: ProposalItemProps) => {
   const daoId = useParams().daoId as DaoIdEnum;
-  const quorumPercentage = proposal.votes.total
-    ? (Number(proposal.quorum) / Number(proposal.votes.total)) * 100
+
+  const {
+    offchainScores,
+    totalOffchainVotes,
+    offchainForPercentage,
+    offchainAgainstPercentage,
+  } = useMemo(() => {
+    const scores = normalizeScores(offchainProposal?.scores);
+    const choices = normalizeChoices(offchainProposal?.choices);
+
+    if (!offchainProposal)
+      return {
+        offchainScores: scores,
+        totalOffchainVotes: 0,
+        offchainForPercentage: 0,
+        offchainAgainstPercentage: 0,
+      };
+
+    const items = choices.map((label, i) => ({
+      label,
+      score: scores[i] ?? 0,
+    }));
+    const total = items.reduce((sum, c) => sum + c.score, 0);
+    const withPct = items.map((c) => ({
+      ...c,
+      percentage: total > 0 ? (c.score / total) * 100 : 0,
+    }));
+
+    const forItem = withPct.find((c) => c.label.toLowerCase() === "for");
+    const againstItem = withPct.find(
+      (c) => c.label.toLowerCase() === "against",
+    );
+
+    return {
+      offchainScores: scores,
+      totalOffchainVotes: total,
+      offchainForPercentage: forItem?.percentage ?? 0,
+      offchainAgainstPercentage: againstItem?.percentage ?? 0,
+    };
+  }, [offchainProposal?.scores, offchainProposal?.choices, offchainProposal]);
+
+  if (offchainProposal) {
+    const status = getOffchainProposalStatus(
+      offchainProposal.state,
+      offchainProposal.type ?? "single-choice",
+      offchainScores,
+    );
+    const isBasic = offchainProposal.type === "basic";
+    const timeText = getTimeText(
+      String(offchainProposal.start),
+      String(offchainProposal.end),
+    );
+    const encodedId = encodeURIComponent(offchainProposal.id);
+
+    return (
+      <Link
+        href={`/${daoId}/governance/offchain-proposal/${encodedId}`}
+        className={cn(
+          "text-primary bg-surface-default hover:bg-surface-contrast relative flex w-full cursor-pointer flex-col items-center justify-between gap-3 px-3 py-3 transition-colors duration-300 lg:flex-row lg:gap-6",
+          className,
+        )}
+        prefetch={true}
+        id={offchainProposal.id}
+      >
+        <div
+          className={cn(
+            "absolute left-0 top-1/2 h-[calc(100%-24px)] w-[2px] -translate-y-1/2",
+            getStatusColorBar(status),
+          )}
+        />
+
+        <div className="flex w-full flex-col items-start justify-between gap-0.5 lg:w-auto">
+          <h3 className="text-primary">{offchainProposal.title}</h3>
+          <div className="font-inter text-secondary flex items-center justify-center gap-2 text-[14px] font-normal not-italic leading-[20px]">
+            <p className={getTextStatusColor(status)}>
+              {getStatusText(status)}
+            </p>
+            <BulletDivider />
+            <p>{timeText}</p>
+            <BulletDivider />
+            <span>
+              by{" "}
+              <EnsAvatar
+                address={offchainProposal.author as Address}
+                showAvatar={false}
+                nameClassName="text-secondary"
+              />
+            </span>
+          </div>
+        </div>
+
+        <div className="flex w-full shrink-0 flex-col items-center gap-1 lg:w-[220px]">
+          <div className="font-inter text-secondary flex w-full items-center justify-between gap-2 text-[14px] font-normal not-italic leading-5">
+            <p className={cn("whitespace-nowrap", !isBasic && "ml-auto")}>
+              {totalOffchainVotes > 0
+                ? `${formatNumberUserReadable(totalOffchainVotes)} votes`
+                : "No votes yet"}
+            </p>
+            {isBasic ? (
+              <div className="flex items-center justify-center gap-2">
+                <div className="flex items-center justify-center gap-2">
+                  <CheckCircle2 className="text-success size-4" />
+                  <p>{offchainForPercentage.toFixed(0)}%</p>
+                </div>
+                <div className="flex items-center justify-center gap-2">
+                  <XCircle className="text-error size-4" />
+                  <p>{offchainAgainstPercentage.toFixed(0)}%</p>
+                </div>
+              </div>
+            ) : null}
+          </div>
+
+          {isBasic ? (
+            <div className="flex w-full items-center justify-center gap-2">
+              <div className="bg-surface-hover relative flex h-1 w-full">
+                <div
+                  style={{ width: `${offchainForPercentage}%` }}
+                  className={cn("bg-success h-full")}
+                />
+                <div
+                  style={{ width: `${offchainAgainstPercentage}%` }}
+                  className={cn("bg-error h-full")}
+                />
+              </div>
+            </div>
+          ) : null}
+        </div>
+      </Link>
+    );
+  }
+
+  const quorumPercentage = proposal!.votes.total
+    ? (Number(proposal!.quorum) / Number(proposal!.votes.total)) * 100
     : 0;
 
   return (
     <Link
-      href={`/${daoId}/governance/proposal/${proposal.id}`}
+      href={`/${daoId}/governance/proposal/${proposal!.id}`}
       className={cn(
         "text-primary bg-surface-default hover:bg-surface-contrast relative flex w-full cursor-pointer flex-col items-center justify-between gap-3 px-3 py-3 transition-colors duration-300 lg:flex-row lg:gap-6",
         className,
       )}
       prefetch={true}
-      id={proposal.id}
+      id={proposal!.id}
     >
       <div
         className={cn(
           "absolute left-0 top-1/2 h-[calc(100%-24px)] w-[2px] -translate-y-1/2",
-          getStatusColorBar(proposal.status),
+          getStatusColorBar(proposal!.status),
         )}
       />
 
       <div className="flex w-full flex-col items-start justify-between gap-0.5 lg:w-auto">
-        <h3 className="text-primary">{proposal.title}</h3>
+        <h3 className="text-primary">{proposal!.title}</h3>
         <div className="font-inter text-secondary flex items-center justify-center gap-2 text-[14px] font-normal not-italic leading-[20px]">
-          <p className={getTextStatusColor(proposal.status)}>
-            {getStatusText(proposal.status)}
+          <p className={getTextStatusColor(proposal!.status)}>
+            {getStatusText(proposal!.status)}
           </p>
           <BulletDivider />
-          <p>{proposal.timeText}</p>
+          <p>{proposal!.timeText}</p>
           <BulletDivider />
           <span>
             by{" "}
             <EnsAvatar
-              address={proposal.proposer as Address}
+              address={proposal!.proposer as Address}
               showAvatar={false}
               nameClassName="text-secondary"
             />
@@ -171,43 +325,36 @@ export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
       <div className="flex w-full shrink-0 flex-col items-center gap-1 lg:w-[220px]">
         <div className="font-inter text-secondary flex w-full items-center justify-between gap-2 text-[14px] font-normal not-italic leading-5">
           <p>
-            {" "}
-            {proposal.votes.total
-              ? `${formatNumberUserReadable(Number(proposal.votes.total))} votes`
+            {proposal!.votes.total
+              ? `${formatNumberUserReadable(Number(proposal!.votes.total))} votes`
               : "Waiting to start"}
           </p>
           <div className="flex items-center justify-center gap-2">
             <div className="flex items-center justify-center gap-2">
               <CheckCircle2 className="text-success size-4" />
-              <p>{proposal.votes.forPercentage}%</p>
+              <p>{proposal!.votes.forPercentage}%</p>
             </div>
             <div className="flex items-center justify-center gap-2">
               <XCircle className="text-error size-4" />
-              <p>{proposal.votes.againstPercentage}%</p>
+              <p>{proposal!.votes.againstPercentage}%</p>
             </div>
           </div>
         </div>
         <div className="flex w-full items-center justify-center gap-2">
           <div className="bg-surface-hover relative flex h-1 w-full">
             <div
-              style={{
-                width: `${proposal.votes.forPercentage}%`,
-              }}
+              style={{ width: `${proposal!.votes.forPercentage}%` }}
               className={cn("bg-success h-full")}
             />
             <div
-              style={{
-                width: `${proposal.votes.againstPercentage}%`,
-              }}
+              style={{ width: `${proposal!.votes.againstPercentage}%` }}
               className={cn("bg-error h-full")}
             />
 
             {quorumPercentage < 100 && (
               <div
                 className="bg-primary outline-surface-default absolute left-1/2 top-1/2 h-2 w-[2px] -translate-y-1/2 outline-2"
-                style={{
-                  left: `${quorumPercentage}%`,
-                }}
+                style={{ left: `${quorumPercentage}%` }}
               />
             )}
           </div>
@@ -222,7 +369,7 @@ export const ProposalItem = ({ proposal, className }: ProposalItemProps) => {
                 }}
                 className="font-inter text-secondary absolute flex items-center justify-center gap-2 whitespace-nowrap text-xs font-medium not-italic leading-4"
               >
-                Quorum: {formatNumberUserReadable(Number(proposal.quorum))}
+                Quorum: {formatNumberUserReadable(Number(proposal!.quorum))}
               </div>
               <div className="h-4 w-full"></div>
             </>
