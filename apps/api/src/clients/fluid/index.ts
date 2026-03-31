@@ -61,6 +61,10 @@ export class FLUIDClient<
     return this.cache.timelockDelay;
   }
 
+  async getGracePeriod(): Promise<bigint> {
+    return 1209600n; // 14 days
+  }
+
   calculateQuorum(votes: {
     forVotes: bigint;
     againstVotes: bigint;
