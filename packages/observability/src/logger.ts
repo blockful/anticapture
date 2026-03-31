@@ -16,10 +16,18 @@ export function createLogger(service: string): Logger {
     },
     transport: hasOtelEndpoint
       ? {
-          target: "pino-opentelemetry-transport",
-          options: {
-            resourceAttributes: { "service.name": service },
-          },
+          targets: [
+            {
+              target: "pino-opentelemetry-transport",
+              options: {
+                resourceAttributes: { "service.name": service },
+              },
+            },
+            {
+              target: "pino/file",
+              options: { destination: 1 },
+            },
+          ],
         }
       : {
           target: "pino-pretty",
