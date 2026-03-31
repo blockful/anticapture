@@ -1,6 +1,3 @@
 FROM grafana/loki:3.4.3
-USER root
-RUN mkdir -p /loki/rules /loki/chunks /loki/wal && chown -R 10001:10001 /loki
-USER 10001
 COPY loki.yaml /etc/loki/local-config.yaml
 CMD ["-config.file=/etc/loki/local-config.yaml", "-config.expand-env=true"]
