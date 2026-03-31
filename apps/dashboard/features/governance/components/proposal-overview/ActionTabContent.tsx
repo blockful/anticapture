@@ -1,20 +1,46 @@
 "use client";
 
-import { GetProposalQuery } from "@anticapture/graphql-client";
 import { Inbox } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 
 import { useDecodeCalldata } from "@/features/governance/hooks/useDecodeCalldata";
+import type { ProposalDetails } from "@/features/governance/types";
 import { BlankSlate, Button } from "@/shared/components";
+import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
+
+const ETH_ADDRESS_REGEX = /(0x[0-9a-fA-F]{40})(?![0-9a-fA-F])/g;
+
+const isEthAddress = (segment: string) => /^0x[0-9a-fA-F]{40}$/.test(segment);
+
+const CalldataWithEns = ({ text }: { text: string }) => {
+  const segments = text.split(ETH_ADDRESS_REGEX).filter(Boolean);
+
+  return (
+    <>
+      {segments.map((segment, i) =>
+        isEthAddress(segment) ? (
+          <EnsAvatar
+            key={`ens-${i}`}
+            address={segment as `0x${string}`}
+            showAvatar={false}
+            nameClassName="text-secondary font-mono text-sm font-normal not-italic leading-5"
+          />
+        ) : (
+          <span key={`text-${i}`}>{segment}</span>
+        ),
+      )}
+    </>
+  );
+};
 
 export const ActionsTabContent = ({
   proposal,
 }: {
-  proposal: NonNullable<GetProposalQuery["proposal"]>;
+  proposal: ProposalDetails;
 }) => {
   const { daoId } = useParams<{ daoId: string }>();
   const daoIdKey = daoId?.toUpperCase() as DaoIdEnum;
@@ -90,30 +116,40 @@ const ActionItem = ({
       </div>
       <div className="flex w-full flex-col gap-3 p-3">
         <div className="flex w-full gap-2">
-          <p className="min-w-[88px] font-mono text-sm font-normal not-italic leading-5">
+          <p className="min-w-22 font-mono text-sm font-normal not-italic leading-5">
             target:
           </p>
           <DefaultLink
             href={`${blockExplorerUrl}/address/${target}`}
             openInNewTab
-            className="text-secondary break-all font-mono text-sm font-normal not-italic leading-5"
+            className="font-mono text-sm font-normal not-italic leading-5"
           >
-            {target}
+            {target && (
+              <EnsAvatar
+                address={target as `0x${string}`}
+                showAvatar={false}
+                nameClassName="text-secondary font-mono text-sm font-normal not-italic leading-5"
+              />
+            )}
           </DefaultLink>
         </div>
         <div className="flex w-full gap-2">
-          <p className="min-w-[88px] shrink-0 font-mono text-sm font-normal not-italic leading-5">
+          <p className="min-w-22 shrink-0 font-mono text-sm font-normal not-italic leading-5">
             calldata:
           </p>
           <div className="border-border-contrast relative min-w-0 flex-1 border">
-            <div className="scrollbar-thin max-h-[248px] overflow-y-auto p-3">
-              <p
-                className={`text-secondary font-mono text-sm font-normal not-italic leading-5 ${
-                  isDecoded && !isLoading ? "whitespace-pre-wrap" : "break-all"
-                } ${isLoading ? "animate-pulse" : ""}`}
-              >
-                {displayCalldata}
-              </p>
+            <div className="scrollbar-thin max-h-62 overflow-y-auto p-3">
+              {isDecoded && !isLoading && decodedCalldata ? (
+                <div className="text-secondary whitespace-pre-wrap font-mono text-sm font-normal not-italic leading-5">
+                  <CalldataWithEns text={decodedCalldata} />
+                </div>
+              ) : (
+                <p
+                  className={`text-secondary break-all font-mono text-sm font-normal not-italic leading-5 ${isLoading ? "animate-pulse" : ""}`}
+                >
+                  {displayCalldata}
+                </p>
+              )}
             </div>
             {calldata && (
               <Button
@@ -129,7 +165,7 @@ const ActionItem = ({
           </div>
         </div>
         <div className="flex w-full gap-2">
-          <p className="min-w-[88px] font-mono text-sm font-normal not-italic leading-5">
+          <p className="min-w-22 font-mono text-sm font-normal not-italic leading-5">
             value:
           </p>
           <p className="text-secondary font-mono text-sm font-normal not-italic leading-5">

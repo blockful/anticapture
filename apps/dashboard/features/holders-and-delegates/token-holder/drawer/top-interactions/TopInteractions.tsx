@@ -7,7 +7,7 @@ import { TopInteractionsChart } from "@/features/holders-and-delegates/token-hol
 import { TopInteractionsTable } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/TopInteractionsTable";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 
 const ChartLegend = ({

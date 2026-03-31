@@ -6,7 +6,7 @@ import { TheSectionLayout } from "@/shared/components";
 import { SubSectionsContainer } from "@/shared/components/design-system/section";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 type Props = {
   params: Promise<{ daoId: string }>;
@@ -16,17 +16,21 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const daoId = params.daoId.toUpperCase() as DaoIdEnum;
 
+  const canonicalPath = `/${params.daoId}/token-distribution`;
+
   return {
-    title: `Anticapture - ${daoId} DAO Token Distribution`,
-    description: `Analyze token distribution and concentration for ${daoId} DAO.`,
+    title: `${daoId} DAO Token Distribution & Governance Concentration Risk — Anticapture`,
+    description: `Examine token distribution, concentration metrics, and Gini coefficient for ${daoId} DAO to assess governance security risks and hostile takeover susceptibility.`,
+    alternates: { canonical: canonicalPath },
     openGraph: {
-      title: `Anticapture - ${daoId} DAO Token Distribution`,
-      description: `Analyze token distribution and concentration for ${daoId} DAO.`,
+      url: canonicalPath,
+      title: `${daoId} DAO Token Distribution & Governance Concentration Risk — Anticapture`,
+      description: `Examine token distribution, concentration metrics, and Gini coefficient for ${daoId} DAO to assess governance security risks and hostile takeover susceptibility.`,
     },
     twitter: {
       card: "summary_large_image",
-      title: `Anticapture - ${daoId} DAO Token Distribution`,
-      description: `Analyze token distribution and concentration for ${daoId} DAO.`,
+      title: `${daoId} DAO Token Distribution & Governance Concentration Risk — Anticapture`,
+      description: `Examine token distribution, concentration metrics, and Gini coefficient for ${daoId} DAO to assess governance security risks and hostile takeover susceptibility.`,
     },
   };
 }

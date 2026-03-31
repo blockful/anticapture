@@ -1,16 +1,18 @@
-import {
+import type {
   GetProposalsFromDaoQuery,
-  QueryInput_Proposals_OrderDirection,
   QueryProposalsArgs,
+} from "@anticapture/graphql-client/hooks";
+import {
+  OrderDirection,
   useGetProposalsFromDaoQuery,
 } from "@anticapture/graphql-client/hooks";
-import { ApolloError } from "@apollo/client";
+import type { ApolloError } from "@apollo/client";
 import { useCallback, useMemo, useState, useEffect } from "react";
 
 import type { Proposal as GovernanceProposal } from "@/features/governance/types";
 import { transformToGovernanceProposal } from "@/features/governance/utils/transformToGovernanceProposal";
 import daoConfig from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 export interface PaginationInfo {
@@ -40,13 +42,22 @@ export interface UseProposalsParams extends Omit<
   daoId?: DaoIdEnum;
 }
 
-export const useProposals = ({
-  fromDate,
-  orderDirection = QueryInput_Proposals_OrderDirection.Desc,
-  status,
-  itemsPerPage = 10,
-  daoId,
-}: UseProposalsParams = {}): UseProposalsResult => {
+export const useProposals = (
+  {
+    fromDate = null,
+    orderDirection = OrderDirection.Desc,
+    status = null,
+    fromEndDate: _fromEndDate = null,
+    includeOptimisticProposals: _includeOptimisticProposals = null,
+    itemsPerPage = 10,
+    daoId,
+  }: UseProposalsParams = {
+    fromDate: null,
+    status: null,
+    fromEndDate: null,
+    includeOptimisticProposals: null,
+  },
+): UseProposalsResult => {
   const [isPaginationLoading, setIsPaginationLoading] = useState(false);
   const [allProposals, setAllProposals] = useState<GovernanceProposal[]>([]);
   const { decimals } = daoConfig[daoId as DaoIdEnum];

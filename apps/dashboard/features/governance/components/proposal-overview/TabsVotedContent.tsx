@@ -1,5 +1,4 @@
-import { GetProposalQuery } from "@anticapture/graphql-client";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import {
   CheckCircle2,
   CircleMinus,
@@ -16,22 +15,33 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { formatUnits } from "viem";
 
 import { VotesTable } from "@/features/governance/components/proposal-overview/VotesTable";
-import {
-  useVotes,
-  VoteWithHistoricalPower,
-} from "@/features/governance/hooks/useVotes";
+import type { ProposalDetails } from "@/features/governance/types";
+import type { VoteWithHistoricalPower } from "@/features/governance/hooks/useVotes";
+import { useVotes } from "@/features/governance/hooks/useVotes";
 import { SkeletonRow, Button, BlankSlate } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
+import {
+  CategoriesFilter,
+  type FilterOption,
+} from "@/shared/components/design-system/table/filters/CategoriesFilter";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 
+const choiceFilterOptions: FilterOption[] = [
+  { value: "all", label: "All Votes" },
+  { value: "1", label: "For" },
+  { value: "0", label: "Against" },
+  { value: "2", label: "Abstain" },
+];
+
 interface TabsVotedContentProps {
-  proposal: NonNullable<GetProposalQuery["proposal"]>;
+  proposal: ProposalDetails;
   onAddressClick?: (address: string) => void;
 }
 
@@ -46,11 +56,16 @@ export const TabsVotedContent = ({
   const [sortBy, setSortBy] = useState<string>("votingPower");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
+  // State for filters
+  const [choiceFilter, setChoiceFilter] = useState<string>("all");
+  const [voterFilter, setVoterFilter] = useState<string | undefined>(undefined);
+
+  const supportValue = choiceFilter === "all" ? null : Number(choiceFilter);
+
   // Handle sorting
   const handleSort = useCallback(
     (field: string) => {
       if (sortBy === field) {
-        // Toggle direction if same field
         setSortDirection(sortDirection === "asc" ? "desc" : "asc");
       } else {
         setSortBy(field);
@@ -65,12 +80,14 @@ export const TabsVotedContent = ({
     useVotes({
       proposalId: proposal.id,
       daoId: (daoId as string)?.toUpperCase() as DaoIdEnum,
-      limit: 10, // Load 10 items at a time
+      limit: 10,
       proposalStartTimestamp: proposal.startTimestamp
         ? Number(proposal.startTimestamp) * 1000
         : undefined,
       orderBy: sortBy,
       orderDirection: sortDirection,
+      support: supportValue,
+      voterAddress: voterFilter ?? null,
     });
 
   // Intersection observer on the loading row
@@ -164,8 +181,12 @@ export const TabsVotedContent = ({
           );
         },
         header: () => (
-          <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
+          <div className="text-table-header flex h-8 w-full items-center justify-start gap-1 px-2">
             <p>Voter</p>
+            <AddressFilter
+              onApply={(addr) => setVoterFilter(addr)}
+              currentFilter={voterFilter}
+            />
           </div>
         ),
       },
@@ -173,7 +194,7 @@ export const TabsVotedContent = ({
         accessorKey: "support",
         size: 120,
         cell: ({ row }) => {
-          const support = row.getValue("support") as number;
+          const support = row.getValue("support") as string;
           const voterAddress = row.getValue("voterAddress") as string;
           const vote = row.original;
 
@@ -231,7 +252,7 @@ export const TabsVotedContent = ({
             }
           };
 
-          const choiceInfo = getChoiceInfo(support);
+          const choiceInfo = getChoiceInfo(Number(support));
 
           return (
             <div className="flex items-center gap-2 p-2">
@@ -243,8 +264,13 @@ export const TabsVotedContent = ({
           );
         },
         header: () => (
-          <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
+          <div className="text-table-header flex h-8 w-full items-center justify-start gap-1 px-2">
             <p>Choice</p>
+            <CategoriesFilter
+              options={choiceFilterOptions}
+              selectedValue={choiceFilter}
+              onValueChange={setChoiceFilter}
+            />
           </div>
         ),
       },
@@ -375,17 +401,23 @@ export const TabsVotedContent = ({
             return <div className="flex h-10 items-center p-2" />;
           }
 
-          const votingPowerNum = votingPower ? Number(votingPower) / 1e18 : 0;
+          const daoIdKey = (daoId as string)?.toUpperCase() as DaoIdEnum;
+          const decimals = daoConfigByDaoId[daoIdKey]?.decimals ?? 18;
+          const votingPowerNum = votingPower
+            ? Number(formatUnits(BigInt(votingPower), decimals))
+            : 0;
           const formattedVotingPower = formatNumberUserReadable(votingPowerNum);
 
-          // Calculate percentage - you might need to get total voting power from proposal
           const totalVotingPower =
-            Number(proposal.forVotes) +
-            Number(proposal.againstVotes) +
-            Number(proposal.abstainVotes);
+            BigInt(proposal.forVotes || "0") +
+            BigInt(proposal.againstVotes || "0") +
+            BigInt(proposal.abstainVotes || "0");
+          const totalVotingPowerNum = Number(
+            formatUnits(totalVotingPower, decimals),
+          );
           const percentage =
-            totalVotingPower > 0
-              ? ((votingPowerNum / (totalVotingPower / 1e18)) * 100).toFixed(1)
+            totalVotingPowerNum > 0
+              ? ((votingPowerNum / totalVotingPowerNum) * 100).toFixed(1)
               : "0.0";
 
           return (
@@ -580,7 +612,16 @@ export const TabsVotedContent = ({
         ),
       },
     ],
-    [proposal, handleSort, sortBy, sortDirection, daoId, onAddressClick],
+    [
+      proposal,
+      handleSort,
+      sortBy,
+      sortDirection,
+      daoId,
+      onAddressClick,
+      voterFilter,
+      choiceFilter,
+    ],
   );
 
   // Prepare table data with description rows and loading row if needed
@@ -598,7 +639,7 @@ export const TabsVotedContent = ({
           voterAddress: `__DESCRIPTION_${vote.voterAddress}__`,
           transactionHash: "",
           proposalId: vote.proposalId,
-          support: 0,
+          support: "0",
           votingPower: "",
           reason: vote.reason,
           timestamp: 0,
@@ -613,7 +654,7 @@ export const TabsVotedContent = ({
         voterAddress: "__LOADING_ROW__",
         transactionHash: "",
         proposalId: "",
-        support: 0,
+        support: "0",
         votingPower: "",
         reason: "",
         timestamp: 0,

@@ -1,9 +1,10 @@
 "use client";
 
 import { cva } from "class-variance-authority";
-import { ElementType, ReactNode } from "react";
 
 import { cn } from "@/shared/utils/cn";
+
+import type { BlankSlateProps } from "./types";
 
 const blankSlateVariants = cva(
   "w-full flex items-center justify-center text-secondary p-4 gap-2 bg-surface-contrast",
@@ -33,15 +34,6 @@ const iconVariants = cva("size-6", {
     variant: "default",
   },
 });
-
-interface BlankSlateProps {
-  variant: "default" | "title" | "small";
-  icon: ElementType;
-  title?: string;
-  className?: string;
-  description: string;
-  children?: ReactNode;
-}
 
 export const BlankSlate = ({
   variant,

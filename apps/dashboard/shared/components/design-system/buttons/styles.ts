@@ -1,4 +1,4 @@
-import { ButtonVariant } from "@/shared/components/design-system/buttons/types";
+import type { ButtonVariant } from "@/shared/components/design-system/buttons/types";
 
 export const variantStyles: Record<ButtonVariant, string> = {
   primary:

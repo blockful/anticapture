@@ -1,26 +1,24 @@
-import { GetProposalQuery } from "@anticapture/graphql-client";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { formatUnits } from "viem";
 
 import { VotesTable } from "@/features/governance/components/proposal-overview/VotesTable";
-import {
-  useNonVoters,
-  NonVoter,
-} from "@/features/governance/hooks/useNonVoters";
+import type { NonVoter } from "@/features/governance/hooks/useNonVoters";
+import type { ProposalDetails } from "@/features/governance/types";
+import { useNonVoters } from "@/features/governance/hooks/useNonVoters";
 import { SkeletonRow, Button } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import daoConfig from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 
 interface TabsDidntVoteContentProps {
-  proposal: NonNullable<GetProposalQuery["proposal"]>;
+  proposal: ProposalDetails;
   onAddressClick?: (address: string) => void;
 }
 
@@ -231,17 +229,21 @@ export const TabsDidntVoteContent = ({
             );
           }
 
-          const votingPowerNum = votingPower ? Number(votingPower) / 1e18 : 0;
+          const votingPowerNum = votingPower
+            ? Number(formatUnits(BigInt(votingPower), decimals))
+            : 0;
           const formattedVotingPower = formatNumberUserReadable(votingPowerNum);
 
-          // Calculate percentage of total voting power
           const totalVotingPower =
-            Number(proposal.forVotes || 0) +
-            Number(proposal.againstVotes || 0) +
-            Number(proposal.abstainVotes || 0);
+            BigInt(proposal.forVotes || "0") +
+            BigInt(proposal.againstVotes || "0") +
+            BigInt(proposal.abstainVotes || "0");
+          const totalVotingPowerNum = Number(
+            formatUnits(totalVotingPower, decimals),
+          );
           const percentage =
-            totalVotingPower > 0
-              ? ((votingPowerNum / (totalVotingPower / 1e18)) * 100).toFixed(1)
+            totalVotingPowerNum > 0
+              ? ((votingPowerNum / totalVotingPowerNum) * 100).toFixed(1)
               : "0.0";
 
           return (

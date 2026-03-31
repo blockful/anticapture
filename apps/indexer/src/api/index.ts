@@ -8,7 +8,7 @@ import { exporter } from "@/metrics";
 
 const app = new Hono();
 
-app.get("/metrics", async (c) => {
+app.get("/otel-metrics", async (c) => {
   const result = await exporter.collect();
   const serialized = new PrometheusSerializer().serialize(
     result.resourceMetrics,

@@ -5,20 +5,20 @@ import { Footer } from "@/shared/components/design-system/footer/Footer";
 import { HeaderSidebar } from "@/widgets";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
 
-const metadataDescription =
-  "Anticapture | Monitor DAO governance risk. Track delegation shifts, voting power concentration, and onchain risk indicators across Ethereum DAOs.";
-
 export const metadata: Metadata = {
-  title: "Anticapture - Panel",
-  description: metadataDescription,
+  title: "Anticapture | DAO Security Dashboard — Governance Risk Overview",
+  description:
+    "Explore real-time governance security metrics across major DAOs. Anticapture's dashboard tracks hostile takeover risks, token concentration, delegate activity, and resilience scores.",
   openGraph: {
-    title: "Anticapture - Panel",
-    description: metadataDescription,
+    title: "Anticapture | DAO Security Dashboard — Governance Risk Overview",
+    description:
+      "Explore real-time governance security metrics across major DAOs. Anticapture's dashboard tracks hostile takeover risks, token concentration, delegate activity, and resilience scores.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Anticapture - Panel",
-    description: metadataDescription,
+    title: "Anticapture | DAO Security Dashboard — Governance Risk Overview",
+    description:
+      "Explore real-time governance security metrics across major DAOs. Anticapture's dashboard tracks hostile takeover risks, token concentration, delegate activity, and resilience scores.",
   },
 };
 

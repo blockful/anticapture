@@ -7,7 +7,7 @@ import Link from "next/link";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { TelegramIcon } from "@/shared/components/icons/TelegramIcon";
 import { useGitHubRelease } from "@/shared/hooks";
-import { cn } from "@/shared/utils";
+import { cn } from "@/shared/utils/cn";
 
 const footerVariant = cva(
   "w-full justify-center items-center px-4 py-3 opacity-60 hover:opacity-100 transition-opacity duration-300  ",
@@ -23,7 +23,7 @@ const footerVariant = cva(
   },
 );
 
-type FooterProps = VariantProps<typeof footerVariant> & {
+export type FooterProps = VariantProps<typeof footerVariant> & {
   className?: string;
 };
 

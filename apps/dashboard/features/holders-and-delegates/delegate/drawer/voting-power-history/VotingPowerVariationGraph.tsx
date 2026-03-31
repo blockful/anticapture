@@ -12,18 +12,16 @@ import {
   Dot,
 } from "recharts";
 
-import {
-  TimePeriod,
-  TimePeriodSwitcher,
-} from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
-import { DelegationHistoryGraphItem } from "@/features/holders-and-delegates/hooks";
+import type { TimePeriod } from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
+import { TimePeriodSwitcher } from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
+import type { DelegationHistoryGraphItem } from "@/features/holders-and-delegates/hooks";
 import { useDelegateDelegationHistoryGraph } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistoryGraph";
 import { getTimestampRangeFromPeriod } from "@/features/holders-and-delegates/utils";
 import { ChartExceptionState } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 import { ChartContainer } from "@/shared/components/ui/chart";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import {
   timestampToReadableDate,
   formatNumberUserReadable,
@@ -102,8 +100,8 @@ export const VotingPowerVariationGraph = ({
     useDelegateDelegationHistoryGraph(
       accountId,
       daoId,
-      fromTimestamp?.toString(),
-      toTimestamp?.toString(),
+      fromTimestamp,
+      toTimestamp,
     );
 
   const extendedChartData = useMemo(
@@ -186,6 +184,7 @@ export const VotingPowerVariationGraph = ({
   // Custom dot component to show each transfer/delegation point
   const CustomDot = (props: CustomDotProps) => {
     const { cx, cy, payload } = props;
+    if (!payload.transactionHash) return <></>;
     return (
       <Dot
         key={payload.transactionHash}
@@ -273,7 +272,7 @@ export const VotingPowerVariationGraph = ({
                   return (
                     <div className="bg-surface-contrast border-light-dark rounded-lg border p-3 shadow-lg">
                       <p className="text-primary text-sm font-medium">
-                        {timestampToReadableDate(data.timestamp / 1000)}
+                        {timestampToReadableDate(data.timestamp)}
                       </p>
                       <p className="text-secondary text-xs">
                         Voting Power:{" "}

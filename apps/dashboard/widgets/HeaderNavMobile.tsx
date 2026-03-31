@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { ButtonHeaderDAOSidebarMobile } from "@/shared/components";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 export const HeaderNavMobile = () => {
   const { daoId }: { daoId: string } = useParams();
@@ -19,7 +19,7 @@ export const HeaderNavMobile = () => {
     {
       page: PAGES_CONSTANTS.daoOverview.page,
       title: PAGES_CONSTANTS.daoOverview.title,
-      enabled: !!daoConfig.daoOverview,
+      enabled: daoConfig.overviewPage !== false && !!daoConfig.daoOverview,
     },
     {
       page: PAGES_CONSTANTS.holdersAndDelegates.page,
@@ -34,7 +34,7 @@ export const HeaderNavMobile = () => {
     {
       page: PAGES_CONSTANTS.activityFeed.page,
       title: PAGES_CONSTANTS.activityFeed.title,
-      enabled: true,
+      enabled: daoConfig.activityFeed,
       isNew: true,
     },
     {
@@ -56,6 +56,12 @@ export const HeaderNavMobile = () => {
       page: PAGES_CONSTANTS.tokenDistribution.page,
       title: PAGES_CONSTANTS.tokenDistribution.title,
       enabled: !!daoConfig.tokenDistribution,
+    },
+    {
+      page: PAGES_CONSTANTS.serviceProviders.page,
+      title: PAGES_CONSTANTS.serviceProviders.title,
+      enabled: !!daoConfig.serviceProviders,
+      isNew: true,
     },
   ];
 

@@ -3,13 +3,13 @@
 import { BookOpen } from "lucide-react";
 import { useState } from "react";
 
+import type { GlossarySearchResult } from "@/features/glossary";
 import {
   SAMPLE_GLOSSARY_DATA,
   getAvailableLetters,
   GlossaryKeyboard,
   GlossaryMobileKeyboard,
   GlossarySearch,
-  GlossarySearchResult,
   GlossarySearchResults,
   GlossaryContent,
 } from "@/features/glossary";

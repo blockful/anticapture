@@ -1,8 +1,9 @@
-import { GetProposalQuery } from "@anticapture/graphql-client";
 import Markdown from "markdown-to-jsx";
 
+import type { ProposalDetails } from "@/features/governance/types";
+
 interface DescriptionTabContentProps {
-  proposal: NonNullable<GetProposalQuery["proposal"]>;
+  proposal: ProposalDetails;
 }
 
 const cleanMarkdown = (content: string): string => {

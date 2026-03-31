@@ -4,11 +4,15 @@ import { Context } from "ponder:registry";
 
 import { DaoIdEnum } from "@/lib/enums";
 import { MetricTypesEnum } from "@/lib/constants";
-import { storeDailyBucket } from "@/eventHandlers/shared";
+import {
+  AddressCollection,
+  storeDailyBucket,
+  toAddressSet,
+} from "@/eventHandlers/shared";
 
 export const updateTotalSupply = async (
   context: Context,
-  addressList: Address[],
+  addressList: AddressCollection,
   metricType: MetricTypesEnum,
   from: Address,
   to: Address,
@@ -17,15 +21,15 @@ export const updateTotalSupply = async (
   tokenAddress: Address,
   timestamp: bigint,
 ) => {
-  const normalizedAddressList = addressList.map((a) => getAddress(a));
-  const isToBurningAddress = normalizedAddressList.includes(getAddress(to));
-  const isFromBurningAddress = normalizedAddressList.includes(getAddress(from));
+  const normalizedAddressList = toAddressSet(addressList);
+  const isToBurningAddress = normalizedAddressList.has(getAddress(to));
+  const isFromBurningAddress = normalizedAddressList.has(getAddress(from));
   const isTotalSupplyTransaction =
     (isToBurningAddress || isFromBurningAddress) &&
     !(isToBurningAddress && isFromBurningAddress);
 
   if (isTotalSupplyTransaction) {
-    const isBurningTokens = normalizedAddressList.includes(getAddress(to));
+    const isBurningTokens = normalizedAddressList.has(getAddress(to));
     let currentTotalSupply = 0n;
     const newTotalSupply = (
       await context.db
@@ -49,5 +53,9 @@ export const updateTotalSupply = async (
       timestamp,
       tokenAddress,
     );
+
+    return true;
   }
+
+  return false;
 };

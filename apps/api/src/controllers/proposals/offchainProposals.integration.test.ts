@@ -1,38 +1,24 @@
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
-import { describe, it, expect, beforeEach } from "vitest";
-
-import { DBOffchainProposal } from "@/mappers";
+import { PGlite } from "@electric-sql/pglite";
+import { pushSchema } from "drizzle-kit/api";
+import { drizzle } from "drizzle-orm/pglite";
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
+import type { OffchainDrizzle } from "@/database";
+import * as offchainSchema from "@/database/offchain-schema";
+import { offchainProposals } from "@/database/offchain-schema";
+import { OffchainProposalRepository } from "@/repositories/proposals/offchainProposals";
 import { OffchainProposalsService } from "@/services/proposals/offchainProposals";
+import { offchainProposals as offchainProposalsController } from "./offchainProposals";
 
-import { offchainProposals } from "./offchainProposals";
+let client: PGlite;
+let db: OffchainDrizzle;
+let app: Hono;
 
-class FakeOffchainProposalsRepository {
-  private proposals: DBOffchainProposal[] = [];
-  private count = 0;
+type OffchainProposalInsert = typeof offchainProposals.$inferInsert;
 
-  setData(proposals: DBOffchainProposal[], totalCount?: number) {
-    this.proposals = proposals;
-    this.count = totalCount ?? proposals.length;
-  }
-
-  async getProposals(): Promise<DBOffchainProposal[]> {
-    return this.proposals;
-  }
-
-  async getProposalsCount(): Promise<number> {
-    return this.count;
-  }
-
-  async getProposalById(
-    proposalId: string,
-  ): Promise<DBOffchainProposal | undefined> {
-    return this.proposals.find((p) => p.id === proposalId);
-  }
-}
-
-const createMockProposal = (
-  overrides: Partial<DBOffchainProposal> = {},
-): DBOffchainProposal => ({
+const createProposal = (
+  overrides: Partial<OffchainProposalInsert> = {},
+): OffchainProposalInsert => ({
   id: "proposal-1",
   spaceId: "ens.eth",
   author: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -47,44 +33,68 @@ const createMockProposal = (
   updated: 1700000000,
   link: "",
   flagged: false,
+  scores: [],
+  choices: [],
   ...overrides,
 });
 
-function createTestApp(service: OffchainProposalsService) {
-  const app = new Hono();
-  offchainProposals(app, service);
-  return app;
-}
+const BASE_PROPOSAL_ITEM = {
+  id: "proposal-1",
+  spaceId: "ens.eth",
+  author: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  title: "Test Proposal",
+  body: "Test body",
+  discussion: "",
+  type: "single-choice",
+  start: 1700000000,
+  end: 1700086400,
+  state: "active",
+  created: 1700000000,
+  updated: 1700000000,
+  link: "",
+  flagged: false,
+  scores: [],
+  choices: [],
+  network: "",
+  snapshot: null,
+  strategies: [],
+};
 
-describe("Offchain Proposals Controller - Integration Tests", () => {
-  let fakeRepo: FakeOffchainProposalsRepository;
-  let service: OffchainProposalsService;
-  let app: ReturnType<typeof createTestApp>;
+beforeAll(async () => {
+  client = new PGlite();
+  db = drizzle(client, { schema: offchainSchema });
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  const { apply } = await pushSchema(offchainSchema, db as any);
+  await apply();
+});
 
-  beforeEach(() => {
-    fakeRepo = new FakeOffchainProposalsRepository();
-    service = new OffchainProposalsService(fakeRepo);
-    app = createTestApp(service);
-  });
+afterAll(async () => {
+  await client.close();
+});
 
+beforeEach(async () => {
+  await db.delete(offchainProposals);
+
+  const repo = new OffchainProposalRepository(db);
+  const service = new OffchainProposalsService(repo);
+  app = new Hono();
+  offchainProposalsController(app, service);
+});
+
+describe("Offchain Proposals Controller", () => {
   describe("GET /offchain/proposals", () => {
     it("should return 200 with correct response shape", async () => {
-      const proposal = createMockProposal();
-      fakeRepo.setData([proposal]);
+      const proposal = createProposal();
+      await db.insert(offchainProposals).values(proposal);
 
       const res = await app.request("/offchain/proposals");
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body).toEqual({
-        items: [proposal],
-        totalCount: 1,
-      });
+      expect(body).toEqual({ items: [BASE_PROPOSAL_ITEM], totalCount: 1 });
     });
 
     it("should return 200 with empty items when no data", async () => {
-      fakeRepo.setData([]);
-
       const res = await app.request("/offchain/proposals");
 
       expect(res.status).toBe(200);
@@ -93,13 +103,15 @@ describe("Offchain Proposals Controller - Integration Tests", () => {
     });
 
     it("should accept query params: skip, limit, orderDirection, status, fromDate", async () => {
-      fakeRepo.setData([createMockProposal()]);
+      await db.insert(offchainProposals).values(createProposal());
 
       const res = await app.request(
         "/offchain/proposals?skip=0&limit=5&orderDirection=asc&status=active&fromDate=1700000000",
       );
 
       expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body).toEqual({ items: [BASE_PROPOSAL_ITEM], totalCount: 1 });
     });
 
     it("should return 400 for invalid parameter", async () => {
@@ -111,20 +123,18 @@ describe("Offchain Proposals Controller - Integration Tests", () => {
 
   describe("GET /offchain/proposals/{id}", () => {
     it("should return 200 with single proposal when found", async () => {
-      const proposal = createMockProposal({ id: "find-me" });
-      fakeRepo.setData([proposal]);
+      await db
+        .insert(offchainProposals)
+        .values(createProposal({ id: "find-me" }));
 
       const res = await app.request("/offchain/proposals/find-me");
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.id).toBe("find-me");
-      expect(body.title).toBe("Test Proposal");
+      expect(body).toEqual({ ...BASE_PROPOSAL_ITEM, id: "find-me" });
     });
 
     it("should return 404 when proposal not found", async () => {
-      fakeRepo.setData([]);
-
       const res = await app.request("/offchain/proposals/nonexistent");
 
       expect(res.status).toBe(404);

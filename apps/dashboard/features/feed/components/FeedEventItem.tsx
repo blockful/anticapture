@@ -11,21 +11,26 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Address, formatUnits, zeroAddress } from "viem";
+import type { Address } from "viem";
+import { formatUnits, zeroAddress } from "viem";
 
-import {
+import type {
+  DelegationDetail,
   FeedEvent,
-  FeedEventRelevance,
-  FeedEventType,
+  ProposalDetail,
+  ProposalExtendedDetail,
+  TransferDetail,
+  VoteDetail,
 } from "@/features/feed/types";
-import { EntityType } from "@/features/holders-and-delegates/components/HoldersAndDelegatesDrawer";
+import { FeedEventRelevance, FeedEventType } from "@/features/feed/types";
+import type { EntityType } from "@/features/holders-and-delegates/components/HoldersAndDelegatesDrawer";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
+import { BadgeStatus } from "@/shared/components/design-system/badges";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 import { BulletDivider } from "@/shared/components/design-system/section";
 import daoConfig from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 
 interface FeedEventItemProps {
@@ -162,42 +167,43 @@ export const FeedEventItem = ({
 
   const renderEventContent = () => {
     switch (event.type) {
-      case FeedEventType.Vote:
-        if (!event.metadata) return null;
+      case FeedEventType.Vote: {
+        const voteMetadata = event.metadata as VoteDetail | undefined;
+        if (!voteMetadata) return null;
         return (
           <div className="leading-relaxed">
             <AddressButton
-              address={event.metadata.voter}
+              address={voteMetadata.voter}
               entityType="delegate"
               onRowClick={onRowClick}
             />{" "}
             <CopyAndPasteButton
-              textToCopy={event.metadata.voter}
+              textToCopy={voteMetadata.voter}
               className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
               iconSize="md"
             />{" "}
             <span className="text-secondary">
               (
               <span className="text-primary">
-                {formatAmount(event.metadata.votingPower)} {tokenSymbol}
+                {formatAmount(voteMetadata.votingPower)} {tokenSymbol}
               </span>{" "}
               voting power)
             </span>{" "}
             <span className="text-secondary">voted</span>{" "}
             <span
               className={cn(
-                event.metadata.support === 1
+                voteMetadata.support === 1
                   ? "text-success"
-                  : event.metadata.support === 0
+                  : voteMetadata.support === 0
                     ? "text-error"
                     : "text-warning",
               )}
             >
               <CheckCircle2 className="inline size-4 align-middle" />{" "}
               <span className="font-medium capitalize">
-                {event.metadata.support === 1
+                {voteMetadata.support === 1
                   ? "Yes"
-                  : event.metadata.support === 0
+                  : voteMetadata.support === 0
                     ? "No"
                     : "Abstain"}
               </span>{" "}
@@ -206,17 +212,17 @@ export const FeedEventItem = ({
             <Link
               href={
                 config?.governancePage
-                  ? `/${daoId}/governance/proposal/${event.metadata.proposalId}`
-                  : `${config?.daoOverview?.govPlatform?.url ?? ""}${event.metadata.proposalId}`
+                  ? `/${daoId}/governance/proposal/${voteMetadata.proposalId}`
+                  : `${config?.daoOverview?.govPlatform?.url ?? ""}${voteMetadata.proposalId}`
               }
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:text-link font-medium transition-colors"
             >
-              {event.metadata.title ||
-                (event.metadata.proposalId.length > 10
-                  ? `${event.metadata.proposalId.slice(0, 6)}...${event.metadata.proposalId.slice(-4)}`
-                  : event.metadata.proposalId)}
+              {voteMetadata.title ||
+                (voteMetadata.proposalId.length > 10
+                  ? `${voteMetadata.proposalId.slice(0, 6)}...${voteMetadata.proposalId.slice(-4)}`
+                  : voteMetadata.proposalId)}
             </Link>{" "}
             <a
               href={explorerUrl}
@@ -228,25 +234,27 @@ export const FeedEventItem = ({
             </a>
           </div>
         );
+      }
 
-      case FeedEventType.Proposal:
-        if (!event.metadata) return null;
+      case FeedEventType.Proposal: {
+        const proposalMetadata = event.metadata as ProposalDetail | undefined;
+        if (!proposalMetadata) return null;
         return (
           <div className="leading-relaxed">
             <AddressButton
-              address={event.metadata.proposer}
+              address={proposalMetadata.proposer}
               entityType="delegate"
               onRowClick={onRowClick}
             />{" "}
             <CopyAndPasteButton
-              textToCopy={event.metadata.proposer}
+              textToCopy={proposalMetadata.proposer}
               className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
               iconSize="md"
             />{" "}
             <span className="text-secondary">
               (
               <span className="text-primary">
-                {formatAmount(event.metadata.votingPower)} {tokenSymbol}
+                {formatAmount(proposalMetadata.votingPower)} {tokenSymbol}
               </span>{" "}
               voting power)
             </span>{" "}
@@ -254,14 +262,14 @@ export const FeedEventItem = ({
             <Link
               href={
                 config?.governancePage
-                  ? `/${daoId}/governance/proposal/${event.metadata.id}`
-                  : `${config?.daoOverview?.govPlatform?.url ?? ""}${event.metadata.id}`
+                  ? `/${daoId}/governance/proposal/${proposalMetadata.id}`
+                  : `${config?.daoOverview?.govPlatform?.url ?? ""}${proposalMetadata.id}`
               }
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:text-link font-medium transition-colors"
             >
-              {event.metadata.title}
+              {proposalMetadata.title}
             </Link>{" "}
             <a
               href={explorerUrl}
@@ -273,9 +281,13 @@ export const FeedEventItem = ({
             </a>
           </div>
         );
+      }
 
-      case FeedEventType.ProposalExtended:
-        if (!event.metadata) return null;
+      case FeedEventType.ProposalExtended: {
+        const proposalExtendedMetadata = event.metadata as
+          | ProposalExtendedDetail
+          | undefined;
+        if (!proposalExtendedMetadata) return null;
         return (
           <div className="leading-relaxed">
             <span className="text-secondary">
@@ -283,16 +295,17 @@ export const FeedEventItem = ({
               <Link
                 href={
                   config?.governancePage
-                    ? `/${daoId}/governance/proposal/${event.metadata.id}`
-                    : `${config?.daoOverview?.govPlatform?.url ?? ""}${event.metadata.id}`
+                    ? `/${daoId}/governance/proposal/${proposalExtendedMetadata.id}`
+                    : `${config?.daoOverview?.govPlatform?.url ?? ""}${proposalExtendedMetadata.id}`
                 }
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary hover:text-link font-medium transition-colors"
               >
-                {event.metadata.title}
+                {proposalExtendedMetadata.title}
               </Link>{" "}
-              extended to {formatTime(Number(event.metadata.endTimestamp))}
+              extended to{" "}
+              {formatTime(Number(proposalExtendedMetadata.endTimestamp))}
             </span>{" "}
             <a
               href={explorerUrl}
@@ -304,33 +317,35 @@ export const FeedEventItem = ({
             </a>
           </div>
         );
+      }
 
-      case FeedEventType.Transfer:
-        if (!event.metadata) return null;
+      case FeedEventType.Transfer: {
+        const transferMetadata = event.metadata as TransferDetail | undefined;
+        if (!transferMetadata) return null;
         return (
           <div className="leading-relaxed">
             <AddressButton
-              address={event.metadata.from}
+              address={transferMetadata.from}
               entityType="tokenHolder"
               onRowClick={onRowClick}
             />{" "}
             <CopyAndPasteButton
-              textToCopy={event.metadata.from}
+              textToCopy={transferMetadata.from}
               className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
               iconSize="md"
             />{" "}
             <span className="text-secondary">transferred</span>{" "}
             <span className="text-primary font-medium">
-              {formatAmount(event.metadata.amount)} {tokenSymbol}
+              {formatAmount(transferMetadata.amount)} {tokenSymbol}
             </span>{" "}
             <span className="text-secondary">to</span>{" "}
             <AddressButton
-              address={event.metadata.to}
+              address={transferMetadata.to}
               entityType="tokenHolder"
               onRowClick={onRowClick}
             />{" "}
             <CopyAndPasteButton
-              textToCopy={event.metadata.to}
+              textToCopy={transferMetadata.to}
               className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
               iconSize="md"
             />
@@ -344,22 +359,26 @@ export const FeedEventItem = ({
             </a>
           </div>
         );
+      }
 
       case FeedEventType.Delegation: {
-        if (!event.metadata) return null;
+        const delegationMetadata = event.metadata as
+          | DelegationDetail
+          | undefined;
+        if (!delegationMetadata) return null;
         const hasRedelegation =
-          event.metadata.previousDelegate !== null &&
-          event.metadata.previousDelegate !== zeroAddress;
+          delegationMetadata.previousDelegate !== null &&
+          delegationMetadata.previousDelegate !== zeroAddress;
 
         return (
           <div className="leading-relaxed">
             <AddressButton
-              address={event.metadata.delegator}
+              address={delegationMetadata.delegator}
               entityType="tokenHolder"
               onRowClick={onRowClick}
             />{" "}
             <CopyAndPasteButton
-              textToCopy={event.metadata.delegator}
+              textToCopy={delegationMetadata.delegator}
               className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
               iconSize="md"
             />{" "}
@@ -367,18 +386,18 @@ export const FeedEventItem = ({
               {hasRedelegation ? "redelegated" : "delegated"}
             </span>{" "}
             <span className="text-success font-medium">
-              {formatAmount(event.metadata.amount)} {tokenSymbol}
+              {formatAmount(delegationMetadata.amount)} {tokenSymbol}
             </span>{" "}
             {hasRedelegation && (
               <>
                 <span className="text-secondary">from</span>{" "}
                 <AddressButton
-                  address={event.metadata.previousDelegate!}
+                  address={delegationMetadata.previousDelegate!}
                   entityType="delegate"
                   onRowClick={onRowClick}
                 />{" "}
                 <CopyAndPasteButton
-                  textToCopy={event.metadata.previousDelegate!}
+                  textToCopy={delegationMetadata.previousDelegate!}
                   className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
                   iconSize="md"
                 />{" "}
@@ -386,12 +405,12 @@ export const FeedEventItem = ({
             )}
             <span className="text-secondary">to</span>{" "}
             <AddressButton
-              address={event.metadata.delegate}
+              address={delegationMetadata.delegate}
               entityType="delegate"
               onRowClick={onRowClick}
             />{" "}
             <CopyAndPasteButton
-              textToCopy={event.metadata.delegate}
+              textToCopy={delegationMetadata.delegate}
               className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
               iconSize="md"
             />{" "}

@@ -2,11 +2,12 @@ import "@/app/globals.css";
 import "tailwindcss";
 import type { Metadata } from "next";
 import { Inter, Roboto_Mono } from "next/font/google";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Toaster } from "react-hot-toast";
 
 import { CookieConsent } from "@/features/cookie";
 import { HelpPopover } from "@/shared/components";
+import { ShutterAttackBanner } from "@/shared/components/banners/ShutterAttackBanner";
 import { GlobalProviders } from "@/shared/providers/GlobalProviders";
 import ConditionalPostHog from "@/shared/services/posthog/ConditionalPostHog";
 import UmamiScript from "@/shared/services/umami";
@@ -28,23 +29,30 @@ const baseUrl =
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
-  title: "Anticapture",
+  title: "Anticapture | DAO Governance Security Dashboard",
   keywords: [
-    "governance",
-    "dao",
-    "data",
-    "risk",
-    "DAOs",
-    "governance security",
+    "DAO governance security",
+    "hostile takeover prevention",
+    "governance capture",
+    "governance risk analysis",
+    "DAO security framework",
+    "token distribution",
+    "delegate monitoring",
+    "resilience metrics",
+    "DeFi governance",
+    "on-chain governance security",
   ],
   openGraph: {
-    title: "Anticapture",
-    description: "Explore and address governance risks in top DAOs.",
+    title: "Anticapture — DAO Governance Security & Risk Analysis Platform",
+    description:
+      "Anticapture is a DAO governance security platform that quantifies hostile takeover risk, detects governance capture, and tracks resilience metrics across major DAOs.",
   },
   twitter: {
     card: "summary_large_image",
-    title: `Anticapture - DAO`,
-    description: `Explore and mitigate governance risks in DAO.`,
+    title:
+      "Anticapture | DAO Governance Security & Hostile Takeover Prevention",
+    description:
+      "Monitor governance security, hostile takeover risks, and token distribution across DAOs. Anticapture is the open security framework for decentralized governance.",
   },
 };
 
@@ -65,6 +73,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           className="border-light-dark mx-auto max-w-screen-2xl overflow-x-hidden border xl:overflow-hidden"
         >
           <GlobalProviders>
+            <ShutterAttackBanner />
             {children}
             <CookieConsent />
             <HelpPopover />

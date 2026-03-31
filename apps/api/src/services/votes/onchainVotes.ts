@@ -9,7 +9,7 @@ import {
   VotersResponse,
 } from "@/mappers";
 
-interface VotesRepository {
+export interface VotesRepository {
   getProposalNonVoters(
     proposalId: string,
     skip: number,
@@ -120,6 +120,13 @@ export class VotesService {
       toDate,
     );
 
-    return VotesResponseSchema.parse(response);
+    return VotesResponseSchema.parse({
+      items: response.items.map((item) => ({
+        ...item,
+        transactionHash: item.txHash,
+        voterAddress: item.voterAccountId,
+      })),
+      totalCount: response.totalCount,
+    });
   }
 }

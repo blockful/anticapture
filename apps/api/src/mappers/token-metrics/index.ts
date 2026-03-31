@@ -1,43 +1,67 @@
-import { z } from "zod";
+import { z } from "@hono/zod-openapi";
 
 import { MetricTypesEnum } from "@/lib/constants";
 
+import {
+  OrderDirectionSchema,
+  PageInfoSchema,
+  paginationLimitQueryParam,
+  paginationSkipQueryParam,
+} from "../shared";
+
 // === ZOD SCHEMAS ===
 
-export const TokenMetricsRequestSchema = z.object({
-  metricType: z.nativeEnum(MetricTypesEnum),
-  startDate: z.coerce.number().optional(),
-  endDate: z.coerce.number().optional(),
-  orderDirection: z.enum(["asc", "desc"]).default("asc"),
-  limit: z.coerce.number().int().positive().max(1000).default(365),
-  skip: z.coerce.number().int().min(0).optional().default(0),
-});
+export const TokenMetricsRequestSchema = z
+  .object({
+    metricType: z.enum(MetricTypesEnum).openapi({
+      description: "Metric family to query.",
+      example: MetricTypesEnum.TOTAL_SUPPLY,
+    }),
+    startDate: z.coerce.number().int().optional().openapi({
+      description: "Inclusive lower bound as a Unix timestamp in seconds.",
+      example: 1704067200,
+      type: "integer",
+    }),
+    endDate: z.coerce.number().int().optional().openapi({
+      description: "Inclusive upper bound as a Unix timestamp in seconds.",
+      example: 1706745600,
+      type: "integer",
+    }),
+    orderDirection: OrderDirectionSchema.optional(),
+    limit: paginationLimitQueryParam(),
+    skip: paginationSkipQueryParam(),
+  })
+  .openapi("TokenMetricsRequest");
 
 /**
  * Single metric item
  */
-export const TokenMetricItemSchema = z.object({
-  date: z.string(),
-  high: z.string(),
-  volume: z.string(),
-});
-
-/**
- * Page info schema
- */
-export const TokenMetricsPageInfoSchema = z.object({
-  hasNextPage: z.boolean(),
-  startDate: z.string().nullable(),
-  endDate: z.string().nullable(),
-});
+export const TokenMetricItemSchema = z
+  .object({
+    date: z.string().openapi({
+      description: "Unix day bucket represented as a timestamp string.",
+      example: "1704067200",
+    }),
+    high: z.string().openapi({
+      description: "Highest observed value for the period.",
+      example: "14.25",
+    }),
+    volume: z.string().openapi({
+      description: "Total volume observed for the period.",
+      example: "1200.5",
+    }),
+  })
+  .openapi("TokenMetricItem");
 
 /**
  * Response for a single metric type
  */
-export const TokenMetricsResponseSchema = z.object({
-  items: z.array(TokenMetricItemSchema),
-  pageInfo: TokenMetricsPageInfoSchema,
-});
+export const TokenMetricsResponseSchema = z
+  .object({
+    items: z.array(TokenMetricItemSchema),
+    pageInfo: PageInfoSchema,
+  })
+  .openapi("TokenMetricsResponse");
 
 /**
  * === INFERRED TYPES ===
@@ -50,6 +74,7 @@ export type TokenMetricItem = z.infer<typeof TokenMetricItemSchema>;
 export interface TokenMetricsServiceResult {
   items: TokenMetricItem[];
   hasNextPage: boolean;
+  hasPreviousPage?: boolean;
   startDate: string | null;
   endDate: string | null;
 }
@@ -64,6 +89,7 @@ export function toTokenMetricsApi(
     items: serviceResult.items,
     pageInfo: {
       hasNextPage: serviceResult.hasNextPage,
+      hasPreviousPage: serviceResult.hasPreviousPage ?? false,
       startDate: serviceResult.startDate,
       endDate: serviceResult.endDate,
     },

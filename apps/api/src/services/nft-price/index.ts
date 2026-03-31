@@ -9,7 +9,7 @@ import { forwardFill, createDailyTimeline } from "@/lib/time-series";
 import { TokenHistoricalPriceResponse } from "@/mappers";
 import { PriceProvider } from "@/services/treasury/types";
 
-interface Repository {
+export interface NFTPriceRepository {
   getHistoricalNFTPrice(
     limit: number,
     offset: number,
@@ -21,7 +21,7 @@ export class NFTPriceService implements PriceProvider {
   private readonly client: AxiosInstance;
 
   constructor(
-    private readonly repo: Repository,
+    private readonly repo: NFTPriceRepository,
     coingeckoApiUrl: string,
     coingeckoApiKey: string,
   ) {

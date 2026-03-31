@@ -5,7 +5,7 @@ import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { lightTheme, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { WagmiProvider } from "wagmi";
 import "@rainbow-me/rainbowkit/styles.css";
 
@@ -19,6 +19,7 @@ export const apolloClient = new ApolloClient({
   uri: BACKEND_ENDPOINT,
   cache: new InMemoryCache(),
   headers: getAuthHeaders(),
+  queryDeduplication: false,
 });
 
 export const GlobalProviders = ({ children }: { children: ReactNode }) => {

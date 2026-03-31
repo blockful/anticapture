@@ -1,15 +1,15 @@
 "use client";
 
-import { Query_ProposalsActivity_Proposals_Items } from "@anticapture/graphql-client";
-import { ColumnDef } from "@tanstack/react-table";
+import type { GetProposalsActivityQuery } from "@anticapture/graphql-client/hooks";
+import type { ColumnDef } from "@tanstack/react-table";
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
-import { ReactNode, useMemo } from "react";
+import type { ReactNode } from "react";
+import { useMemo } from "react";
 
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 import {
   getUserVoteData,
-  extractProposalName,
   getVoteTimingData,
   proposalsFinalResultMapping,
 } from "@/features/holders-and-delegates/utils/proposalsTableUtils";
@@ -20,17 +20,21 @@ import {
   Button,
   IconButton,
 } from "@/shared/components";
-import {
-  CategoriesFilter,
-  FilterOption,
-} from "@/shared/components/design-system/table/filters/CategoriesFilter";
+import type { FilterOption } from "@/shared/components/design-system/table/filters/CategoriesFilter";
+import { CategoriesFilter } from "@/shared/components/design-system/table/filters/CategoriesFilter";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import daoConfig from "@/shared/dao-config";
 import { useDaoData } from "@/shared/hooks";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable, cn } from "@/shared/utils";
+
+type ProposalActivityItem = NonNullable<
+  NonNullable<
+    NonNullable<GetProposalsActivityQuery["proposalsActivity"]>["proposals"]
+  >[number]
+>;
 
 interface ProposalTableData {
   proposalId: string;
@@ -45,7 +49,7 @@ interface ProposalTableData {
 }
 
 interface ProposalsTableProps {
-  proposals: Query_ProposalsActivity_Proposals_Items[];
+  proposals: ProposalActivityItem[];
   loading: boolean;
   error: Error | null;
   userVoteFilter?: string;
@@ -95,7 +99,7 @@ export const ProposalsTable = ({
       );
       return {
         proposalId: item.proposal?.id || "",
-        proposalName: extractProposalName(item.proposal?.description || ""),
+        proposalName: item.proposal?.title || item.proposal?.description || "",
         finalResult: finalResult.text,
         userVote: userVote.text,
         finalResultIcon: finalResult.icon,
@@ -128,10 +132,11 @@ export const ProposalsTable = ({
     {
       accessorKey: "proposalName",
       meta: {
-        columnClassName: "w-32",
+        columnClassName: "w-50",
       },
       cell: ({ row }) => {
         const proposalName = row.getValue("proposalName") as string;
+        const proposalId = row.original.proposalId;
 
         if (loading) {
           return (
@@ -141,11 +146,21 @@ export const ProposalsTable = ({
           );
         }
 
+        const daoIdLower = daoIdEnum.toLowerCase();
+        const href = daoConfig[daoIdEnum]?.governancePage
+          ? `/${daoIdLower}/governance/proposal/${proposalId}`
+          : `${daoConfig[daoIdEnum]?.daoOverview?.govPlatform?.url ?? ""}${proposalId}`;
+
         return (
           <div className="flex items-center">
-            <span className="text-primary font-regular max-w-48 truncate text-sm">
+            <Link
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary font-regular hover:border-primary max-w-48 truncate border-b border-dashed border-[#3F3F46] text-sm transition-colors"
+            >
               {proposalName}
-            </span>
+            </Link>
           </div>
         );
       },
@@ -181,7 +196,7 @@ export const ProposalsTable = ({
     {
       accessorKey: "finalResult",
       meta: {
-        columnClassName: "w-28",
+        columnClassName: "w-40",
       },
       cell: ({ row }) => {
         const finalResult = row.getValue("finalResult") as string;
@@ -243,7 +258,7 @@ export const ProposalsTable = ({
     {
       accessorKey: "votingPower",
       meta: {
-        columnClassName: "min-w-32",
+        columnClassName: "w-32",
       },
       cell: ({ row }) => {
         const votingPower = row.getValue("votingPower") as number | null;

@@ -1,14 +1,40 @@
-import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
-import { getAddress, isAddress } from "viem";
+import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
+import { Address } from "viem";
 
 import {
   VotingPowersRequestSchema,
   VotingPowersResponseSchema,
-  VotingPowersMapper,
   VotingPowerResponseSchema,
+  VotingPowerByAccountIdRequestParamsSchema,
+  VotingPowerByAccountIdRequestQuerySchema,
+  AmountFilter,
+  DBAccountPowerWithVariation,
 } from "@/mappers/";
-import { VotingPowerMapper } from "@/mappers/voting-power/variations";
-import { VotingPowerService } from "@/services";
+
+interface VotingPowerService {
+  getVotingPowers(
+    skip: number,
+    limit: number,
+    orderDirection: "asc" | "desc",
+    orderBy:
+      | "votingPower"
+      | "delegationsCount"
+      | "variation"
+      | "total"
+      | "balance"
+      | "signedVariation",
+    amountFilter: AmountFilter,
+    addresses: Address[],
+    fromDate?: number,
+    toDate?: number,
+  ): Promise<{ items: DBAccountPowerWithVariation[]; totalCount: number }>;
+
+  getVotingPowersByAccountId(
+    accountId: Address,
+    fromDate?: number,
+    toDate?: number,
+  ): Promise<DBAccountPowerWithVariation>;
+}
 
 export function votingPowers(app: Hono, service: VotingPowerService) {
   app.openapi(
@@ -18,7 +44,7 @@ export function votingPowers(app: Hono, service: VotingPowerService) {
       path: "/voting-powers",
       summary: "Get voting powers",
       description: "Returns sorted and paginated account voting power records",
-      tags: ["proposals"],
+      tags: ["voting-power"],
       request: {
         query: VotingPowersRequestSchema,
       },
@@ -46,7 +72,7 @@ export function votingPowers(app: Hono, service: VotingPowerService) {
         toDate,
       } = context.req.valid("query");
 
-      const { items, totalCount } = await service.getVotingPowers(
+      const response = await service.getVotingPowers(
         skip,
         limit,
         orderDirection,
@@ -60,7 +86,19 @@ export function votingPowers(app: Hono, service: VotingPowerService) {
         toDate,
       );
 
-      return context.json(VotingPowersMapper(items, totalCount));
+      return context.json(
+        VotingPowersResponseSchema.parse({
+          ...response,
+          items: response.items.map((r) => ({
+            ...r,
+            variation: {
+              percentageChange: r.percentageChange,
+              absoluteChange: r.absoluteChange,
+            },
+          })),
+        }),
+        200,
+      );
     },
   );
 
@@ -72,18 +110,10 @@ export function votingPowers(app: Hono, service: VotingPowerService) {
       summary: "Get account powers",
       description:
         "Returns voting power information for a specific address (account)",
-      tags: ["proposals"],
+      tags: ["voting-power"],
       request: {
-        params: z.object({
-          accountId: z
-            .string()
-            .refine((addr) => isAddress(addr, { strict: false }))
-            .transform((addr) => getAddress(addr)),
-        }),
-        query: z.object({
-          fromDate: z.coerce.number().optional(),
-          toDate: z.coerce.number().optional(),
-        }),
+        params: VotingPowerByAccountIdRequestParamsSchema,
+        query: VotingPowerByAccountIdRequestQuerySchema,
       },
       responses: {
         200: {
@@ -104,7 +134,16 @@ export function votingPowers(app: Hono, service: VotingPowerService) {
         fromDate,
         toDate,
       );
-      return context.json(VotingPowerMapper(result));
+      return context.json(
+        VotingPowerResponseSchema.parse({
+          ...result,
+          variation: {
+            percentageChange: result.percentageChange,
+            absoluteChange: result.absoluteChange,
+          },
+        }),
+        200,
+      );
     },
   );
 }

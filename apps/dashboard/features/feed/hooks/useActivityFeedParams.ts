@@ -1,15 +1,14 @@
 "use client";
 
-import {
-  QueryInput_FeedEvents_Relevance,
-  QueryInput_FeedEvents_Type,
-} from "@anticapture/graphql-client";
 import { useQueryState, parseAsStringEnum, parseAsString } from "nuqs";
 import { useCallback, useMemo } from "react";
 
-import {
+import type {
   ActivityFeedFilterState,
   FeedEventRelevance,
+} from "@/features/feed/types";
+import {
+  FeedEventRelevance as FeedRelevance,
   FeedEventType,
 } from "@/features/feed/types";
 
@@ -27,31 +26,31 @@ export function useActivityFeedParams(): UseActivityFeedParamsReturn {
   const [relevance, setRelevance] = useQueryState(
     "relevance",
     parseAsStringEnum([
-      QueryInput_FeedEvents_Relevance.Low,
-      QueryInput_FeedEvents_Relevance.Medium,
-      QueryInput_FeedEvents_Relevance.High,
-    ]).withDefault(QueryInput_FeedEvents_Relevance.Medium),
+      FeedRelevance.Low,
+      FeedRelevance.Medium,
+      FeedRelevance.High,
+    ]).withDefault(FeedRelevance.Medium),
   );
   const [fromDate, setFromDate] = useQueryState("from", parseAsString);
   const [toDate, setToDate] = useQueryState("to", parseAsString);
   const [eventType, setEventType] = useQueryState(
     "type",
     parseAsStringEnum([
-      QueryInput_FeedEvents_Type.Vote,
-      QueryInput_FeedEvents_Type.Proposal,
-      QueryInput_FeedEvents_Type.ProposalExtended,
-      QueryInput_FeedEvents_Type.Transfer,
-      QueryInput_FeedEvents_Type.Delegation,
+      FeedEventType.Vote,
+      FeedEventType.Proposal,
+      FeedEventType.ProposalExtended,
+      FeedEventType.Transfer,
+      FeedEventType.Delegation,
     ]),
   );
 
   const filters: ActivityFeedFilterState = useMemo(
     () => ({
       sortOrder: sortOrder as "asc" | "desc",
-      relevance: relevance as unknown as FeedEventRelevance,
+      relevance: relevance as FeedEventRelevance,
       fromDate: fromDate ?? "",
       toDate: toDate ?? "",
-      type: (eventType as unknown as FeedEventType) ?? undefined,
+      type: (eventType as FeedEventType) ?? undefined,
     }),
     [sortOrder, relevance, fromDate, toDate, eventType],
   );
@@ -59,26 +58,17 @@ export function useActivityFeedParams(): UseActivityFeedParamsReturn {
   const setFilters = useCallback(
     (newFilters: ActivityFeedFilterState) => {
       setSortOrder(newFilters.sortOrder);
-      setRelevance(
-        newFilters.relevance as unknown as QueryInput_FeedEvents_Relevance,
-      );
+      setRelevance(newFilters.relevance ?? null);
       setFromDate(newFilters.fromDate || null);
       setToDate(newFilters.toDate || null);
-      setEventType(
-        (newFilters.type as unknown as
-          | QueryInput_FeedEvents_Type.Vote
-          | QueryInput_FeedEvents_Type.Proposal
-          | QueryInput_FeedEvents_Type.ProposalExtended
-          | QueryInput_FeedEvents_Type.Transfer
-          | QueryInput_FeedEvents_Type.Delegation) ?? null,
-      );
+      setEventType(newFilters.type ?? null);
     },
     [setSortOrder, setRelevance, setFromDate, setToDate, setEventType],
   );
 
   const clearFilters = useCallback(() => {
     setSortOrder("desc");
-    setRelevance(QueryInput_FeedEvents_Relevance.Medium);
+    setRelevance(FeedRelevance.Medium);
     setFromDate(null);
     setToDate(null);
     setEventType(null);

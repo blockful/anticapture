@@ -2,7 +2,7 @@
 
 import { useQuery, useQueries } from "@tanstack/react-query";
 import axios from "axios";
-import { Address } from "viem";
+import type { Address } from "viem";
 import { normalize } from "viem/ens";
 
 type EnsData = {

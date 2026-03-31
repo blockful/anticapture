@@ -2,10 +2,6 @@
 
 ## Boundaries
 
-### Always do
-
-- Run `pnpm <package> typecheck` and `pnpm <package> lint` on affected packages after every change
-
 ### Never do
 
 - Modify `.env` files containing secrets
@@ -59,7 +55,7 @@ Common development workflows:
 - **API feature**: Run API with dev envs, then gateway, then client + dashboard (only run gateway and frontend when asked)
 - **Full stack**: Start all services in order (rare, prefer using Railway dev services)
 
-> **For detailed file structure conventions and testing strategies, see each package's AGENTS.md file.**
+> **For detailed conventions and strategies per package, see the skills in `.agents/skills/`.**
 
 ## Code Style
 

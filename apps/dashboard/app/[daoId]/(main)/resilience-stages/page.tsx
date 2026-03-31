@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { ResilienceStagesSection } from "@/features/resilience-stages";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 type Props = {
   params: Promise<{ daoId: string }>;
@@ -12,17 +12,21 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const daoId = params.daoId.toUpperCase() as DaoIdEnum;
 
+  const canonicalPath = `/${params.daoId}/resilience-stages`;
+
   return {
-    title: `Anticapture - ${daoId} DAO Resilience Stages`,
-    description: `Assess ${daoId} DAO governance resilience and security stages.`,
+    title: `${daoId} DAO Governance Resilience Score & Security Stages — Anticapture`,
+    description: `Track the governance resilience stages of ${daoId} DAO — from vulnerable to fully decentralized — with security scores, milestone assessments, and anti-capture metrics.`,
+    alternates: { canonical: canonicalPath },
     openGraph: {
-      title: `Anticapture - ${daoId} DAO Resilience Stages`,
-      description: `Assess ${daoId} DAO governance resilience and security stages.`,
+      url: canonicalPath,
+      title: `${daoId} DAO Governance Resilience Score & Security Stages — Anticapture`,
+      description: `Track the governance resilience stages of ${daoId} DAO — from vulnerable to fully decentralized — with security scores, milestone assessments, and anti-capture metrics.`,
     },
     twitter: {
       card: "summary_large_image",
-      title: `Anticapture - ${daoId} DAO Resilience Stages`,
-      description: `Assess ${daoId} DAO governance resilience and security stages.`,
+      title: `${daoId} DAO Governance Resilience Score & Security Stages — Anticapture`,
+      description: `Track the governance resilience stages of ${daoId} DAO — from vulnerable to fully decentralized — with security scores, milestone assessments, and anti-capture metrics.`,
     },
   };
 }

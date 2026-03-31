@@ -1,0 +1,28 @@
+query TokenMetrics(
+  $metricType: queryInput_tokenMetrics_metricType!
+  $startDate: Int
+  $endDate: Int
+  $orderDirection: OrderDirection = asc
+  $limit: Int = 365
+  $skip: Int
+) {
+  tokenMetrics(
+    metricType: $metricType
+    startDate: $startDate
+    endDate: $endDate
+    orderDirection: $orderDirection
+    limit: $limit
+    skip: $skip
+  ) {
+    items {
+      date
+      high
+      volume
+    }
+    pageInfo {
+      hasNextPage
+      startDate
+      endDate
+    }
+  }
+}

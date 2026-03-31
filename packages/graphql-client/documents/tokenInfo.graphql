@@ -1,9 +1,11 @@
 query TokenInfo($currency: queryInput_token_currency = usd) {
   token(currency: $currency) {
-    circulatingSupply
-    delegatedSupply
-    lendingSupply
-    name
-    treasury
+    ... on TokenPropertiesResponse {
+      circulatingSupply
+      delegatedSupply
+      lendingSupply
+      name
+      treasury
+    }
   }
 }

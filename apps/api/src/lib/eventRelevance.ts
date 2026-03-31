@@ -26,6 +26,20 @@ function thresholds(
 const EMPTY_THRESHOLDS = thresholds(0n, 0n, 0n);
 
 const DAO_RELEVANCE_THRESHOLDS: Record<DaoIdEnum, EventRelevanceMap> = {
+  [DaoIdEnum.SHU]: {
+    [FeedEventType.TRANSFER]: EMPTY_THRESHOLDS,
+    [FeedEventType.DELEGATION]: EMPTY_THRESHOLDS,
+    [FeedEventType.VOTE]: EMPTY_THRESHOLDS,
+    [FeedEventType.PROPOSAL]: EMPTY_THRESHOLDS,
+    [FeedEventType.PROPOSAL_EXTENDED]: EMPTY_THRESHOLDS,
+  },
+  [DaoIdEnum.AAVE]: {
+    [FeedEventType.TRANSFER]: EMPTY_THRESHOLDS,
+    [FeedEventType.DELEGATION]: EMPTY_THRESHOLDS,
+    [FeedEventType.VOTE]: EMPTY_THRESHOLDS,
+    [FeedEventType.PROPOSAL]: EMPTY_THRESHOLDS,
+    [FeedEventType.PROPOSAL_EXTENDED]: EMPTY_THRESHOLDS,
+  },
   [DaoIdEnum.COMP]: {
     [FeedEventType.TRANSFER]: thresholds(
       parseEther("1500"),
@@ -61,6 +75,13 @@ const DAO_RELEVANCE_THRESHOLDS: Record<DaoIdEnum, EventRelevanceMap> = {
       parseEther("20000"),
       parseEther("40000"),
     ),
+    [FeedEventType.PROPOSAL]: EMPTY_THRESHOLDS,
+    [FeedEventType.PROPOSAL_EXTENDED]: EMPTY_THRESHOLDS,
+  },
+  [DaoIdEnum.LIL_NOUNS]: {
+    [FeedEventType.TRANSFER]: thresholds(2n, 4n, 6n),
+    [FeedEventType.DELEGATION]: thresholds(2n, 4n, 6n),
+    [FeedEventType.VOTE]: thresholds(2n, 4n, 6n),
     [FeedEventType.PROPOSAL]: EMPTY_THRESHOLDS,
     [FeedEventType.PROPOSAL_EXTENDED]: EMPTY_THRESHOLDS,
   },
@@ -201,6 +222,13 @@ const DAO_RELEVANCE_THRESHOLDS: Record<DaoIdEnum, EventRelevanceMap> = {
       parseEther("100000"),
       parseEther("1000000"),
     ),
+    [FeedEventType.PROPOSAL]: EMPTY_THRESHOLDS,
+    [FeedEventType.PROPOSAL_EXTENDED]: EMPTY_THRESHOLDS,
+  },
+  [DaoIdEnum.FLUID]: {
+    [FeedEventType.TRANSFER]: EMPTY_THRESHOLDS,
+    [FeedEventType.DELEGATION]: EMPTY_THRESHOLDS,
+    [FeedEventType.VOTE]: EMPTY_THRESHOLDS,
     [FeedEventType.PROPOSAL]: EMPTY_THRESHOLDS,
     [FeedEventType.PROPOSAL_EXTENDED]: EMPTY_THRESHOLDS,
   },

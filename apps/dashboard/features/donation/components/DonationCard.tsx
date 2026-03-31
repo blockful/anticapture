@@ -2,7 +2,7 @@ import { ExternalLink, Eye, BookOpen, Shield } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { DonationCardProps } from "@/features/donation/types";
+import type { DonationCardProps } from "@/features/donation/types";
 import { Button } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { Card, CardContent } from "@/shared/components/ui/card";

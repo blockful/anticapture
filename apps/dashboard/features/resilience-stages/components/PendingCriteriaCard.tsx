@@ -1,5 +1,5 @@
 import { PendingCriteriaItem } from "@/features/resilience-stages/components/PendingCriteriaItem";
-import { GovernanceImplementationField } from "@/shared/dao-config/types";
+import type { GovernanceImplementationField } from "@/shared/dao-config/types";
 import { Stage } from "@/shared/types/enums/Stage";
 import { cn } from "@/shared/utils";
 

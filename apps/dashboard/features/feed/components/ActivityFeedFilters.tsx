@@ -3,18 +3,15 @@
 import { Calendar } from "lucide-react";
 import { useState, useEffect } from "react";
 
-import {
-  FeedEventRelevance,
-  FeedEventType,
-  ActivityFeedFilterState,
-} from "@/features/feed/types";
+import type { ActivityFeedFilterState } from "@/features/feed/types";
+import { FeedEventRelevance, FeedEventType } from "@/features/feed/types";
 import {
   Button,
   DrawerRoot,
   DrawerContent,
   DrawerHeader,
 } from "@/shared/components";
-import { RadioButton } from "@/shared/components/design-system/buttons/RadioButton";
+import { RadioButton } from "@/shared/components/design-system/form/fields";
 import { Input } from "@/shared/components/design-system/form/fields/input/Input";
 
 interface ActivityFeedFiltersDrawerProps {

@@ -1,10 +1,8 @@
-import { QueryInput_Token_Currency } from "@anticapture/graphql-client";
-import {
-  useTokenInfoQuery,
-  TokenInfoQuery,
-} from "@anticapture/graphql-client/hooks";
+import type { QueryInput_Token_Currency } from "@anticapture/graphql-client";
+import type { TokenInfoQuery } from "@anticapture/graphql-client/hooks";
+import { useTokenInfoQuery } from "@anticapture/graphql-client/hooks";
 
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 interface UseTokenInfoResult {

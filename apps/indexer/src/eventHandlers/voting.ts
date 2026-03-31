@@ -8,7 +8,6 @@ import {
 import { Address, getAddress, Hex } from "viem";
 
 import { ProposalStatus } from "@/lib/constants";
-import { indexerEventsProcessed } from "@/metrics";
 
 import { ensureAccountExists } from "./shared";
 
@@ -105,9 +104,46 @@ export const voteCast = async (
       title: proposal?.title ?? undefined,
     },
   });
-
-  indexerEventsProcessed.add(1, { dao_id: daoId, event_type: "VoteCast" });
 };
+
+const MAX_TITLE_LENGTH = 200;
+
+/**
+ * Extracts a proposal title from a markdown description.
+ *
+ * Strategy:
+ * 1. Normalize literal `\n` sequences to real newlines (some proposers
+ *    submit descriptions with escaped newlines).
+ * 2. If the first non-empty line is an H1 (`# Title`), use it.
+ * 3. Otherwise, use the first non-empty line that is not a section header
+ *    (H2+), truncated to MAX_TITLE_LENGTH characters.
+ */
+function parseProposalTitle(description: string): string {
+  // Normalize literal "\n" (two chars) into real newlines
+  const normalized = description.replace(/\\n/g, "\n");
+  const lines = normalized.split("\n");
+
+  // Pass 1: look for an H1 among leading lines (before any content)
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    if (/^# /.test(trimmed)) {
+      return trimmed.replace(/^# +/, "");
+    }
+    break; // stop at first non-empty, non-H1 line
+  }
+
+  // Pass 2: no H1 found — use first non-empty, non-header line
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || /^#{1,6}\s/.test(trimmed)) continue;
+    return trimmed.length > MAX_TITLE_LENGTH
+      ? trimmed.substring(0, MAX_TITLE_LENGTH) + "..."
+      : trimmed;
+  }
+
+  return "";
+}
 
 /**
  * ### Creates:
@@ -161,7 +197,7 @@ export const proposalCreated = async (
 
   await ensureAccountExists(context, proposer);
 
-  const title = description.split("\n")[0]?.replace(/^#+\s*/, "") || null;
+  const title = parseProposalTitle(description);
   const blockDelta = parseInt(endBlock) - Number(blockNumber);
   await context.db.insert(proposalsOnchain).values({
     id: proposalId,
@@ -177,6 +213,7 @@ export const proposalCreated = async (
     title,
     description,
     timestamp,
+    logIndex,
     status: ProposalStatus.PENDING,
     endTimestamp: timestamp + BigInt(blockDelta * blockTime),
     proposalType: args.proposalType,
@@ -207,11 +244,6 @@ export const proposalCreated = async (
       votingPower: proposerVotingPower,
       title,
     },
-  });
-
-  indexerEventsProcessed.add(1, {
-    dao_id: daoId,
-    event_type: "ProposalCreated",
   });
 };
 

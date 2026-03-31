@@ -10,7 +10,11 @@ export const getProposalState = (status: string): ProposalState => {
     case "executed":
     case "defeated":
     case "pending_execution":
+    case "canceled":
     case "cancelled":
+    case "queued":
+    case "no_quorum":
+    case "expired":
       return ProposalState.COMPLETED;
     case "pending":
     default:

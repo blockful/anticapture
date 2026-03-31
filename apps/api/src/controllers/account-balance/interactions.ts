@@ -1,17 +1,29 @@
+import { Address } from "viem";
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import {
+  AccountInteractions,
   AccountInteractionsMapper,
   AccountInteractionsParamsSchema,
   AccountInteractionsQuerySchema,
   AccountInteractionsResponseSchema,
+  Filter,
 } from "../../mappers";
-import { BalanceVariationsService } from "../../services";
 
-export function accountInteractions(
-  app: Hono,
-  service: BalanceVariationsService,
-) {
+interface InteractionsService {
+  getAccountInteractions(
+    accountId: Address,
+    fromTimestamp: number | undefined,
+    toTimestamp: number | undefined,
+    skip: number,
+    limit: number,
+    orderBy: "volume" | "count",
+    orderDirection: "asc" | "desc",
+    filter: Filter,
+  ): Promise<AccountInteractions>;
+}
+
+export function accountInteractions(app: Hono, service: InteractionsService) {
   app.openapi(
     createRoute({
       method: "get",
@@ -20,7 +32,7 @@ export function accountInteractions(
       summary: "Get top interactions between accounts for a given period",
       description: `Returns a mapping of the largest interactions between accounts. 
 Positive amounts signify net token transfers FROM <address>, whilst negative amounts refer to net transfers TO <address>`,
-      tags: ["transactions"],
+      tags: ["account-balances"],
       request: {
         params: AccountInteractionsParamsSchema,
         query: AccountInteractionsQuerySchema,
@@ -65,7 +77,10 @@ Positive amounts signify net token transfers FROM <address>, whilst negative amo
         },
       );
 
-      return context.json(AccountInteractionsMapper(result, fromDate, toDate));
+      return context.json(
+        AccountInteractionsMapper(result, fromDate, toDate),
+        200,
+      );
     },
   );
 }

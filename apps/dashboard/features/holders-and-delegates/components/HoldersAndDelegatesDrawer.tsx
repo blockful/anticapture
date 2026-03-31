@@ -2,6 +2,7 @@
 
 import { parseAsString, useQueryState, useQueryStates } from "nuqs";
 
+import { DelegateButton } from "@/features/holders-and-delegates/delegate/DelegateButton";
 import { VoteComposition } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/VoteComposition";
 import { DelegateProposalsActivity } from "@/features/holders-and-delegates/delegate/drawer/votes/DelegateProposalsActivity";
 import { VotingPowerHistory } from "@/features/holders-and-delegates/delegate/drawer/voting-power-history/VotingPowerHistory";
@@ -15,7 +16,7 @@ import {
   DrawerHeader,
   DrawerRoot,
 } from "@/shared/components/design-system/drawer";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 export type EntityType = "delegate" | "tokenHolder";
 
@@ -25,6 +26,7 @@ interface HoldersAndDelegatesDrawerProps {
   entityType: EntityType;
   address: string;
   daoId: DaoIdEnum;
+  withVotes?: boolean;
 }
 
 export const HoldersAndDelegatesDrawer = ({
@@ -33,18 +35,23 @@ export const HoldersAndDelegatesDrawer = ({
   entityType,
   address,
   daoId,
+  withVotes = true,
 }: HoldersAndDelegatesDrawerProps) => {
   const entities = {
     delegate: {
       title: "Delegate",
       tabs: [
-        {
-          id: "votes",
-          label: "Votes",
-          content: (
-            <DelegateProposalsActivity address={address} daoId={daoId} />
-          ),
-        },
+        ...(withVotes
+          ? [
+              {
+                id: "votes",
+                label: "Votes",
+                content: (
+                  <DelegateProposalsActivity address={address} daoId={daoId} />
+                ),
+              },
+            ]
+          : []),
         {
           id: "voteComposition",
           label: "Vote Composition",
@@ -152,10 +159,33 @@ export const HoldersAndDelegatesDrawer = ({
           showFullAddress={false}
           showTags={true}
           showCopyAddress={true}
+          maxVisibleTags={2}
         />
       </div>
     </>
   );
+
+  const delegateAction =
+    entityType === "delegate" ? (
+      <>
+        {/* Desktop */}
+        <div className="hidden lg:block">
+          <DelegateButton
+            delegateAddress={address as `0x${string}`}
+            daoId={daoId}
+            size="md"
+          />
+        </div>
+        {/* Mobile */}
+        <div className="block lg:hidden">
+          <DelegateButton
+            delegateAddress={address as `0x${string}`}
+            daoId={daoId}
+            size="sm"
+          />
+        </div>
+      </>
+    ) : undefined;
 
   return (
     <DrawerRoot open={isOpen} onOpenChange={handleCloseDrawer}>
@@ -167,6 +197,7 @@ export const HoldersAndDelegatesDrawer = ({
           tabs={entities[entityType].tabs}
           activeTab={activeTab}
           onTabChange={handleTabChange}
+          action={delegateAction}
         />
         <DrawerBody>{renderTabContent(activeTab)}</DrawerBody>
       </DrawerContent>

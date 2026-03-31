@@ -1,16 +1,11 @@
 import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoConfiguration } from "@/shared/dao-config/types";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type {
+  DaoConfiguration,
+  DaoFeaturePageSlug,
+} from "@/shared/dao-config/types";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
-export type DaoFeaturePage =
-  | "/"
-  | "holders-and-delegates"
-  | "governance"
-  | "activity-feed"
-  | "attack-profitability"
-  | "resilience-stages"
-  | "risk-analysis"
-  | "token-distribution";
+export type DaoFeaturePage = "/" | DaoFeaturePageSlug;
 
 const FEATURE_PAGE_SET = new Set<DaoFeaturePage>([
   "/",
@@ -23,13 +18,13 @@ const FEATURE_PAGE_SET = new Set<DaoFeaturePage>([
   "token-distribution",
 ]);
 
-const isFeatureEnabledForDao = (
+export const isFeatureEnabledForDao = (
   daoConfig: DaoConfiguration,
   featurePage: DaoFeaturePage,
 ) => {
   switch (featurePage) {
     case "/":
-      return !!daoConfig.daoOverview;
+      return daoConfig.overviewPage !== false && !!daoConfig.daoOverview;
     case "holders-and-delegates":
       return !!daoConfig.dataTables;
     case "governance":
@@ -98,12 +93,13 @@ export const getDaoNavigationPath = ({
   }
 
   const currentFeaturePage = getCurrentDaoFeaturePage(pathname, currentDaoId);
+  const fallbackPage = targetDaoConfig.initialPage ?? "/";
   const targetFeaturePage = isFeatureEnabledForDao(
     targetDaoConfig,
     currentFeaturePage,
   )
     ? currentFeaturePage
-    : "/";
+    : fallbackPage;
 
   return targetFeaturePage === "/"
     ? `/${targetDaoSlug}`

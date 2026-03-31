@@ -1,9 +1,10 @@
-import { ReactNode, useMemo } from "react";
+import type { ReactNode } from "react";
+import { useMemo } from "react";
 
 import { DaoOverviewMetricCard } from "@/features/dao-overview/components/DaoOverviewMetricCard";
 import { useDaoOverviewData } from "@/features/dao-overview/hooks/useDaoOverviewData";
-import { DaoConfiguration } from "@/shared/dao-config/types";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoConfiguration } from "@/shared/dao-config/types";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import {
   formatBlocksToUserReadable,
   formatNumberUserReadable,

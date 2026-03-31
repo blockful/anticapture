@@ -20,6 +20,10 @@ export const token = onchainTable("token", (drizzle) => ({
   lendingSupply: drizzle.bigint("lending_supply").notNull().default(0n),
   circulatingSupply: drizzle.bigint("circulating_supply").notNull().default(0n),
   treasury: drizzle.bigint().notNull().default(0n),
+  nonCirculatingSupply: drizzle
+    .bigint("non_circulating_supply")
+    .notNull()
+    .default(0n),
 }));
 
 export const account = onchainTable("account", (drizzle) => ({
@@ -33,7 +37,7 @@ export const accountBalance = onchainTable(
     tokenId: drizzle.text("token_id").notNull(),
     balance: drizzle.bigint().notNull(),
     // This field represents for who the account is delegating their voting power to
-    delegate: drizzle.text().default(zeroAddress).notNull(),
+    delegate: drizzle.text().$type<Address>().notNull().default(zeroAddress),
   }),
   (table) => ({
     pk: primaryKey({
@@ -124,6 +128,7 @@ export const delegation = onchainTable(
     isDex: drizzle.boolean().notNull().default(false),
     isLending: drizzle.boolean().notNull().default(false),
     isTotal: drizzle.boolean().notNull().default(false),
+    type: drizzle.integer(),
   }),
   (table) => ({
     pk: primaryKey({
@@ -192,27 +197,25 @@ export const proposalsOnchain = onchainTable(
   "proposals_onchain",
   (drizzle) => ({
     id: drizzle.text().primaryKey(),
-    txHash: drizzle.text("tx_hash").notNull(),
-    daoId: drizzle.text("dao_id").notNull(),
-    proposerAccountId: drizzle
-      .text("proposer_account_id")
-      .$type<Address>()
-      .notNull(),
+    txHash: drizzle.text().notNull(),
+    daoId: drizzle.text().notNull(),
+    proposerAccountId: drizzle.text().$type<Address>().notNull(),
     targets: drizzle.json().$type<string[]>().notNull(),
     values: drizzle.json().$type<bigint[]>().notNull(),
     signatures: drizzle.json().$type<string[]>().notNull(),
     calldatas: drizzle.json().$type<string[]>().notNull(),
-    startBlock: drizzle.integer("start_block").notNull(),
-    endBlock: drizzle.integer("end_block").notNull(),
-    title: drizzle.text(),
+    startBlock: drizzle.integer().notNull(),
+    endBlock: drizzle.integer().notNull(),
+    title: drizzle.text().notNull(),
     description: drizzle.text().notNull(),
     timestamp: drizzle.bigint().notNull(),
-    endTimestamp: drizzle.bigint("end_timestamp").notNull(),
+    logIndex: drizzle.integer().notNull(),
+    endTimestamp: drizzle.bigint().notNull(),
     status: drizzle.text().notNull(),
-    forVotes: drizzle.bigint("for_votes").default(0n).notNull(),
-    againstVotes: drizzle.bigint("against_votes").default(0n).notNull(),
-    abstainVotes: drizzle.bigint("abstain_votes").default(0n).notNull(),
-    proposalType: drizzle.integer("proposal_type"),
+    forVotes: drizzle.bigint().default(0n).notNull(),
+    againstVotes: drizzle.bigint().default(0n).notNull(),
+    abstainVotes: drizzle.bigint().default(0n).notNull(),
+    proposalType: drizzle.integer(),
   }),
   (table) => ({
     proposalsOnchainProposerIdx: index().on(table.proposerAccountId),

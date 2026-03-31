@@ -1,9 +1,13 @@
 "use client";
 
-import { GetProposalQuery } from "@anticapture/graphql-client";
+import {
+  OrderDirection,
+  QueryInput_TokenMetrics_MetricType,
+} from "@anticapture/graphql-client";
 import {
   useGetProposalNonVotersQuery,
   useGetVotesQuery,
+  useTokenMetricsQuery,
 } from "@anticapture/graphql-client/hooks";
 import { useParams } from "next/navigation";
 import { parseAsStringEnum, useQueryState } from "nuqs";
@@ -11,15 +15,16 @@ import { formatUnits } from "viem";
 
 import { TabsDidntVoteContent } from "@/features/governance/components/proposal-overview/TabsDidntVoteContent";
 import { TabsVotedContent } from "@/features/governance/components/proposal-overview/TabsVotedContent";
+import type { ProposalDetails } from "@/features/governance/types";
 import daoConfig from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 type VoteTabId = "voted" | "didntVote";
 
 interface VotesTabContentProps {
-  proposal: NonNullable<GetProposalQuery["proposal"]>;
+  proposal: ProposalDetails;
   onAddressClick?: (address: string) => void;
 }
 
@@ -36,10 +41,32 @@ export const VotesTabContent = ({
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
   const { decimals } = daoConfig[daoIdEnum];
 
+  // Get delegated supply at proposal end time
+  const { data: delegatedSupplyData } = useTokenMetricsQuery({
+    variables: {
+      metricType: QueryInput_TokenMetrics_MetricType.DelegatedSupply,
+      startDate: null,
+      endDate: Number(proposal.endTimestamp),
+      orderDirection: OrderDirection.Desc,
+      limit: 1,
+      skip: null,
+    },
+    context: {
+      headers: {
+        "anticapture-dao-id": daoIdEnum,
+        ...getAuthHeaders(),
+      },
+    },
+  });
+
   // Get votes for this proposal
   const { data } = useGetVotesQuery({
     variables: {
       proposalId: proposal.id,
+      limit: null,
+      skip: null,
+      support: null,
+      voterAddressIn: null,
     },
     context: {
       headers: {
@@ -54,6 +81,7 @@ export const VotesTabContent = ({
     variables: {
       id: proposal.id,
       limit: 1, // We only need the count
+      skip: null,
     },
     context: {
       headers: {
@@ -63,16 +91,27 @@ export const VotesTabContent = ({
     },
   });
 
+  const totalVotesBigInt =
+    BigInt(proposal.forVotes) +
+    BigInt(proposal.againstVotes) +
+    BigInt(proposal.abstainVotes);
+
   const totalVotes = formatNumberUserReadable(
-    Number(
-      formatUnits(
-        BigInt(proposal.forVotes) +
-          BigInt(proposal.againstVotes) +
-          BigInt(proposal.abstainVotes),
-        decimals,
-      ),
-    ),
+    Number(formatUnits(totalVotesBigInt, decimals)),
   );
+
+  const historicalDelegatedSupply =
+    delegatedSupplyData?.tokenMetrics?.items?.[0]?.high;
+  const nonVoterVotingPower = historicalDelegatedSupply
+    ? formatNumberUserReadable(
+        Number(
+          formatUnits(
+            BigInt(historicalDelegatedSupply) - totalVotesBigInt,
+            decimals,
+          ),
+        ),
+      )
+    : null;
 
   return (
     <div className="text-primary flex w-full flex-col gap-3 py-4 lg:p-4">
@@ -99,6 +138,7 @@ export const VotesTabContent = ({
           Didn&apos;t vote
           <div className="text-secondary font-inter hidden text-[12px] font-normal not-italic leading-[16px] lg:block">
             {nonVotersData?.proposalNonVoters?.totalCount || 0} voters
+            {nonVoterVotingPower != null && ` / ${nonVoterVotingPower} VP`}
           </div>
         </div>
       </div>

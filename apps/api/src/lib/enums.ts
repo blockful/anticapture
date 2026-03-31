@@ -1,14 +1,18 @@
 export enum DaoIdEnum {
+  AAVE = "AAVE",
   UNI = "UNI",
   ENS = "ENS",
   ARB = "ARB",
   OP = "OP",
   GTC = "GTC",
+  LIL_NOUNS = "LIL_NOUNS",
   NOUNS = "NOUNS",
+  SHU = "SHU",
   SCR = "SCR",
   COMP = "COMP",
   OBOL = "OBOL",
   ZK = "ZK",
+  FLUID = "FLUID",
 }
 
 export const SECONDS_IN_DAY = 24 * 60 * 60;
@@ -24,5 +28,3 @@ export enum DaysEnum {
   "180d" = 180 * SECONDS_IN_DAY,
   "365d" = 365 * SECONDS_IN_DAY,
 }
-
-export const DaysOpts = ["7d", "30d", "90d", "180d", "365d"] as const;

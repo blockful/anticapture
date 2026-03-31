@@ -10,7 +10,7 @@ const envSchema = z.object({
   DATABASE_URL: z
     .string()
     .transform((val) => `${val}?options=-c%20search_path%3Danticapture`),
-  DAO_ID: z.nativeEnum(DaoIdEnum),
+  DAO_ID: z.enum(DaoIdEnum),
   CHAIN_ID: z.coerce.number(),
 
   // Treasury provider configuration
@@ -29,7 +29,7 @@ const envSchema = z.object({
 const _env = envSchema.safeParse(process.env);
 
 if (_env.success === false) {
-  console.error("Invalid environment variables", _env.error.format());
+  console.error("Invalid environment variables", _env.error.issues);
   throw new Error("Invalid environment variables");
 }
 

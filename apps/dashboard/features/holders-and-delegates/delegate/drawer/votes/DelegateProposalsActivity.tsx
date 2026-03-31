@@ -1,8 +1,8 @@
 "use client";
 
-import {
+import type {
+  OrderDirection,
   QueryInput_ProposalsActivity_OrderBy,
-  QueryInput_ProposalsActivity_OrderDirection,
   QueryInput_ProposalsActivity_UserVoteFilter,
 } from "@anticapture/graphql-client";
 import { Hand, Trophy, Check, Zap } from "lucide-react";
@@ -12,9 +12,9 @@ import { useState } from "react";
 import { ProposalsTable } from "@/features/holders-and-delegates";
 import { useProposalsActivity } from "@/features/holders-and-delegates/hooks/useProposalsActivity";
 import { MetricCard } from "@/shared/components";
-import { FilterOption } from "@/shared/components/design-system/table/filters/CategoriesFilter";
+import type { FilterOption } from "@/shared/components/design-system/table/filters/CategoriesFilter";
 import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 interface DelegateProposalsActivityProps {
   address: string;
@@ -73,11 +73,10 @@ export const DelegateProposalsActivity = ({
       address,
       daoId,
       orderBy: orderBy as QueryInput_ProposalsActivity_OrderBy,
-      orderDirection:
-        orderDirection as QueryInput_ProposalsActivity_OrderDirection,
+      orderDirection: orderDirection as OrderDirection,
       userVoteFilter:
         userVoteFilter === "all"
-          ? undefined
+          ? null
           : (userVoteFilter as QueryInput_ProposalsActivity_UserVoteFilter),
       limit,
     });

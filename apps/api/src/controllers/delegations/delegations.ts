@@ -4,6 +4,8 @@ import {
   DelegationsRequestParamsSchema,
   DelegationsResponseSchema,
 } from "@/mappers/delegations";
+import {} from "@/mappers";
+
 import { DelegationsService } from "@/services/delegations/current";
 
 export function delegations(app: Hono, service: DelegationsService) {
@@ -35,7 +37,7 @@ export function delegations(app: Hono, service: DelegationsService) {
 
       const result = await service.getDelegations(address);
 
-      return context.json(DelegationsResponseSchema.parse(result));
+      return context.json(DelegationsResponseSchema.parse(result), 200);
     },
   );
 }

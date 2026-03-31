@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import { useVoteCompositionData } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/hooks/useVoteCompositionData";
 import { ThePieChart } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/ThePieChart";
 import { VoteCompositionTable } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/VoteCompositionTable";
@@ -71,15 +73,39 @@ export const VoteComposition = ({
   address: string;
   daoId: DaoIdEnum;
 }) => {
+  const isAave = daoId === DaoIdEnum.AAVE;
+  const [includeBalance, setIncludeBalance] = useState(false);
+
   const {
     currentVotingPower,
     legendItems,
     pieData,
     chartConfig,
     loading: loadingVotingPowerData,
-  } = useVoteCompositionData(daoId, address);
+  } = useVoteCompositionData(daoId, address, includeBalance);
   return (
     <div className="flex h-full w-full flex-col gap-4 overflow-hidden p-4">
+      {isAave && (
+        <div className="flex items-center gap-2 self-end">
+          <span className="text-secondary text-xs font-medium">
+            Include own balance
+          </span>
+          <button
+            role="switch"
+            aria-checked={includeBalance}
+            onClick={() => setIncludeBalance((prev) => !prev)}
+            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors ${
+              includeBalance ? "bg-orange-500" : "bg-zinc-600"
+            }`}
+          >
+            <span
+              className={`inline-block size-3.5 rounded-full bg-white shadow transition-transform ${
+                includeBalance ? "translate-x-4.5" : "translate-x-0.5"
+              }`}
+            />
+          </button>
+        </div>
+      )}
       <div className="border-light-dark text-primary flex h-fit w-full shrink-0 flex-col gap-4 overflow-y-auto border p-4 lg:flex-row">
         <div className="flex h-full w-full flex-col">
           <div className="flex w-full flex-col gap-4 lg:flex-row">

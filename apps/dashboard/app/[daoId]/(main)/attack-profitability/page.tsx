@@ -6,7 +6,7 @@ import { TheSectionLayout } from "@/shared/components";
 import { SubSectionsContainer } from "@/shared/components/design-system/section";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 type Props = {
   params: Promise<{ daoId: string }>;
@@ -16,17 +16,21 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const daoId = params.daoId.toUpperCase() as DaoIdEnum;
 
+  const canonicalPath = `/${params.daoId}/attack-profitability`;
+
   return {
-    title: `Anticapture - ${daoId} DAO Attack Profitability`,
-    description: `Analyze attack profitability and governance capture costs for ${daoId} DAO.`,
+    title: `${daoId} DAO Hostile Takeover Cost Analysis | Attack Profitability — Anticapture`,
+    description: `Calculate the economic cost of a hostile takeover of ${daoId} DAO — including token acquisition costs, governance capture thresholds, and attack profitability under different market scenarios.`,
+    alternates: { canonical: canonicalPath },
     openGraph: {
-      title: `Anticapture - ${daoId} DAO Attack Profitability`,
-      description: `Analyze attack profitability and governance capture costs for ${daoId} DAO.`,
+      url: canonicalPath,
+      title: `${daoId} DAO Hostile Takeover Cost Analysis | Attack Profitability — Anticapture`,
+      description: `Calculate the economic cost of a hostile takeover of ${daoId} DAO — including token acquisition costs, governance capture thresholds, and attack profitability under different market scenarios.`,
     },
     twitter: {
       card: "summary_large_image",
-      title: `Anticapture - ${daoId} DAO Attack Profitability`,
-      description: `Analyze attack profitability and governance capture costs for ${daoId} DAO.`,
+      title: `${daoId} DAO Hostile Takeover Cost Analysis | Attack Profitability — Anticapture`,
+      description: `Calculate the economic cost of a hostile takeover of ${daoId} DAO — including token acquisition costs, governance capture thresholds, and attack profitability under different market scenarios.`,
     },
   };
 }

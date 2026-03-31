@@ -1,10 +1,10 @@
 import { Address } from "viem";
 
-import { TreasuryAddresses } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 import { AmountFilter, DBAccountBalanceWithVariation } from "@/mappers";
+import { TreasuryAddresses } from "@/lib/constants";
 
-interface AccountBalanceRepository {
+export interface AccountBalanceRepositoryInterface {
   getAccountBalancesWithVariation(
     variationFromTimestamp: number,
     variationToTimestamp: number,
@@ -18,7 +18,7 @@ interface AccountBalanceRepository {
     amountfilter: AmountFilter,
   ): Promise<{
     items: DBAccountBalanceWithVariation[];
-    totalCount: bigint;
+    totalCount: number;
   }>;
 
   getAccountBalanceWithVariation(
@@ -29,7 +29,7 @@ interface AccountBalanceRepository {
 }
 
 export class AccountBalanceService {
-  constructor(private readonly repo: AccountBalanceRepository) {}
+  constructor(private readonly repo: AccountBalanceRepositoryInterface) {}
 
   async getAccountBalances(
     daoId: DaoIdEnum,
@@ -42,11 +42,14 @@ export class AccountBalanceService {
     addresses: Address[],
     delegates: Address[],
     amountFilter: AmountFilter,
+    excludeDaoAddresses: boolean,
   ): Promise<{
     items: DBAccountBalanceWithVariation[];
-    totalCount: bigint;
+    totalCount: number;
   }> {
-    const excludeAddresses = Object.values(TreasuryAddresses[daoId]);
+    const daoAddresses = excludeDaoAddresses
+      ? Object.values(TreasuryAddresses[daoId])
+      : [];
     return await this.repo.getAccountBalancesWithVariation(
       variationFromTimestamp,
       variationToTimestamp,
@@ -56,7 +59,7 @@ export class AccountBalanceService {
       orderBy,
       addresses,
       delegates,
-      excludeAddresses,
+      daoAddresses,
       amountFilter,
     );
   }

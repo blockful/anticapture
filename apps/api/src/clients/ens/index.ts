@@ -1,5 +1,4 @@
 import { Account, Address, Chain, Client, Transport } from "viem";
-import { getBlockNumber, readContract } from "viem/actions";
 
 import { DAOClient } from "@/clients";
 
@@ -30,9 +29,9 @@ export class ENSClient<
 
   async getQuorum(): Promise<bigint> {
     return this.getCachedQuorum(async () => {
-      const blockNumber = await getBlockNumber(this.client);
+      const blockNumber = await this.getBlockNumber();
       const targetBlock = blockNumber - 10n;
-      return readContract(this.client, {
+      return this.readContract({
         abi: this.abi,
         address: this.address,
         functionName: "quorum",
@@ -43,12 +42,12 @@ export class ENSClient<
 
   async getTimelockDelay(): Promise<bigint> {
     if (!this.cache.timelockDelay) {
-      const timelockAddress = await readContract(this.client, {
+      const timelockAddress = await this.readContract({
         abi: this.abi,
         address: this.address,
         functionName: "timelock",
       });
-      this.cache.timelockDelay = await readContract(this.client, {
+      this.cache.timelockDelay = await this.readContract({
         abi: [
           {
             constant: true,
@@ -65,6 +64,14 @@ export class ENSClient<
       });
     }
     return this.cache.timelockDelay;
+  }
+
+  alreadySupportCalldataReview(): boolean {
+    return true;
+  }
+
+  supportOffchainData(): boolean {
+    return true;
   }
 
   calculateQuorum(votes: {

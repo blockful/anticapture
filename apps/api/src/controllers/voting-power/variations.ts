@@ -1,3 +1,4 @@
+import { Address } from "viem";
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import {
@@ -8,10 +9,30 @@ import {
   VotingPowerVariationsResponseMapper,
   VotingPowerVariationsRequestQuerySchema,
   VotingPowerVariationsByAccountIdRequestParamsSchema,
+  DBVotingPowerVariation,
 } from "@/mappers/";
-import { VotingPowerService } from "@/services";
 
-export function votingPowerVariations(app: Hono, service: VotingPowerService) {
+export interface VotingPowerVariationsService {
+  getVotingPowerVariations(
+    startTimestamp: number | undefined,
+    endTimestamp: number | undefined,
+    skip: number,
+    limit: number,
+    orderDirection: "asc" | "desc",
+    addresses?: Address[],
+  ): Promise<DBVotingPowerVariation[]>;
+
+  getVotingPowerVariationsByAccountId(
+    accountId: Address,
+    startTimestamp: number | undefined,
+    endTimestamp: number | undefined,
+  ): Promise<DBVotingPowerVariation>;
+}
+
+export function votingPowerVariations(
+  app: Hono,
+  service: VotingPowerVariationsService,
+) {
   app.openapi(
     createRoute({
       method: "get",
@@ -21,7 +42,7 @@ export function votingPowerVariations(app: Hono, service: VotingPowerService) {
         "Get voting power changes within a time frame for the given addresses",
       description:
         "Returns a mapping of the voting power changes within a time frame for the given addresses",
-      tags: ["voting-powers"],
+      tags: ["voting-power"],
       request: {
         query: VotingPowerVariationsRequestQuerySchema,
       },
@@ -65,7 +86,7 @@ export function votingPowerVariations(app: Hono, service: VotingPowerService) {
         "Get top changes in voting power for a given period for a single account",
       description:
         "Returns a the changes to voting power by period and accountId",
-      tags: ["voting-powers"],
+      tags: ["voting-power"],
       request: {
         params: VotingPowerVariationsByAccountIdRequestParamsSchema,
         query: VotingPowerVariationsByAccountIdRequestQuerySchema,
@@ -97,6 +118,7 @@ export function votingPowerVariations(app: Hono, service: VotingPowerService) {
           fromDate,
           toDate,
         ),
+        200,
       );
     },
   );

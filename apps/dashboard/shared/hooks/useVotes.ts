@@ -1,71 +1,30 @@
-import axios from "axios";
-import useSWR, { SWRConfiguration } from "swr";
+import {
+  DaysWindow,
+  useCompareVotesQuery,
+} from "@anticapture/graphql-client/hooks";
 
-import { DaoIdEnum } from "@/shared/types/daos";
-import { BACKEND_ENDPOINT, getAuthHeaders } from "@/shared/utils/server-utils";
+import type { DaoIdEnum } from "@/shared/types/daos";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
-interface VotesResponse {
-  currentVotes: string;
-  oldVotes: string;
-  changeRate: string;
-}
+export const useVotes = (daoId: DaoIdEnum, days: string) => {
+  const daysKey = days as keyof typeof DaysWindow;
 
-/* Fetch Votes */
-export const fetchVotes = async ({
-  daoId,
-  days,
-}: {
-  daoId: DaoIdEnum;
-  days: string;
-}): Promise<VotesResponse> => {
-  const query = `query Votes {
-    compareVotes(days: _${days}) {
-      currentVotes
-      oldVotes
-      changeRate
-    }
-  }`;
-  const response: { data: { data: { compareVotes: VotesResponse } } } =
-    await axios.post(
-      `${BACKEND_ENDPOINT}`,
-      {
-        query,
+  const { data, loading, error } = useCompareVotesQuery({
+    variables: {
+      days: DaysWindow[daysKey],
+    },
+    context: {
+      headers: {
+        "anticapture-dao-id": daoId,
+        ...getAuthHeaders(),
       },
-      {
-        headers: {
-          "anticapture-dao-id": daoId,
-          ...getAuthHeaders(),
-        },
-      },
-    );
-  const { compareVotes } = response.data.data as {
-    compareVotes: VotesResponse;
+    },
+    skip: !daoId || !days,
+  });
+
+  return {
+    data: data?.compareVotes ?? null,
+    isLoading: loading,
+    error: error || null,
   };
-  return compareVotes as VotesResponse;
-};
-
-/**
- * SWR hook to fetch and manage votes data
- * @param daoId The DAO ID to fetch data for
- * @param days The number of days to compare
- * @param config Optional SWR configuration
- * @returns SWR response with votes data
- */
-export const useVotes = (
-  daoId: DaoIdEnum,
-  days: string,
-  config?: Partial<SWRConfiguration<VotesResponse, Error>>,
-) => {
-  const key = daoId && days ? [`votes`, daoId, days] : null;
-
-  return useSWR<VotesResponse>(
-    key,
-    async () => {
-      return await fetchVotes({ daoId, days });
-    },
-    {
-      revalidateOnFocus: false,
-      ...config,
-    },
-  );
 };

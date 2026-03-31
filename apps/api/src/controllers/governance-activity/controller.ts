@@ -1,7 +1,14 @@
-import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
+import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 import { formatEther } from "viem";
 
-import { DaysEnum, DaysOpts } from "@/lib/enums";
+import { DaysEnum } from "@/lib/enums";
+import {
+  ActiveSupplyResponseSchema,
+  AverageTurnoutComparisonResponseSchema,
+  GovernanceActivityDaysQuerySchema,
+  ProposalsComparisonResponseSchema,
+  VotesComparisonResponseSchema,
+} from "@/mappers";
 
 import {
   ActiveSupplyQueryResult,
@@ -10,7 +17,7 @@ import {
   AverageTurnoutCompareQueryResult,
 } from "./types";
 
-interface GovernanceActivityRepository {
+export interface GovernanceActivityRepository {
   getActiveSupply(days: DaysEnum): Promise<ActiveSupplyQueryResult | undefined>;
   getProposalsCompare(
     days: DaysEnum,
@@ -34,30 +41,14 @@ export function governanceActivity(
       summary: "Get active token supply for DAO",
       tags: ["governance"],
       request: {
-        query: z.object({
-          days: z
-            .enum(DaysOpts)
-            .default("90d")
-            .openapi({
-              example: "90d",
-            })
-            .transform((val) => DaysEnum[val]),
-        }),
+        query: GovernanceActivityDaysQuerySchema,
       },
       responses: {
         200: {
           description: "Active supply value",
           content: {
             "application/json": {
-              schema: z
-                .object({
-                  activeSupply: z.string(),
-                })
-                .openapi({
-                  example: {
-                    activeSupply: "1000000000000000000000000",
-                  },
-                }),
+              schema: ActiveSupplyResponseSchema,
             },
           },
         },
@@ -66,7 +57,7 @@ export function governanceActivity(
     async (context) => {
       const { days } = context.req.valid("query");
       const data = await repository.getActiveSupply(days);
-      return context.json({ activeSupply: data?.activeSupply || "0" });
+      return context.json({ activeSupply: data?.activeSupply || "0" }, 200);
     },
   );
 
@@ -78,23 +69,14 @@ export function governanceActivity(
       summary: "Compare number of proposals between time periods",
       tags: ["governance"],
       request: {
-        query: z.object({
-          days: z
-            .enum(DaysOpts)
-            .default("90d")
-            .transform((val) => DaysEnum[val]),
-        }),
+        query: GovernanceActivityDaysQuerySchema,
       },
       responses: {
         200: {
           description: "Proposal comparison",
           content: {
             "application/json": {
-              schema: z.object({
-                currentProposalsLaunched: z.number(),
-                oldProposalsLaunched: z.number(),
-                changeRate: z.number(),
-              }),
+              schema: ProposalsComparisonResponseSchema,
             },
           },
         },
@@ -105,11 +87,14 @@ export function governanceActivity(
 
       const data = await repository.getProposalsCompare(days);
       if (!data) {
-        return context.json({
-          currentProposalsLaunched: 0,
-          oldProposalsLaunched: 0,
-          changeRate: 0,
-        });
+        return context.json(
+          {
+            currentProposalsLaunched: 0,
+            oldProposalsLaunched: 0,
+            changeRate: 0,
+          },
+          200,
+        );
       }
       const changeRate =
         data.oldProposalsLaunched &&
@@ -133,23 +118,14 @@ export function governanceActivity(
       summary: "Compare number of votes between time periods",
       tags: ["governance"],
       request: {
-        query: z.object({
-          days: z
-            .enum(DaysOpts)
-            .default("90d")
-            .transform((val) => DaysEnum[val]),
-        }),
+        query: GovernanceActivityDaysQuerySchema,
       },
       responses: {
         200: {
           description: "Vote comparison",
           content: {
             "application/json": {
-              schema: z.object({
-                currentVotes: z.number(),
-                oldVotes: z.number(),
-                changeRate: z.number(),
-              }),
+              schema: VotesComparisonResponseSchema,
             },
           },
         },
@@ -160,11 +136,14 @@ export function governanceActivity(
 
       const data = await repository.getVotesCompare(days);
       if (!data) {
-        return context.json({
-          currentVotes: 0,
-          oldVotes: 0,
-          changeRate: 0,
-        });
+        return context.json(
+          {
+            currentVotes: 0,
+            oldVotes: 0,
+            changeRate: 0,
+          },
+          200,
+        );
       }
 
       const changeRate = data.oldVotes && data.currentVotes / data.oldVotes - 1;
@@ -187,23 +166,14 @@ export function governanceActivity(
       summary: "Compare average turnout between time periods",
       tags: ["governance"],
       request: {
-        query: z.object({
-          days: z
-            .enum(DaysOpts)
-            .default("90d")
-            .transform((val) => DaysEnum[val]),
-        }),
+        query: GovernanceActivityDaysQuerySchema,
       },
       responses: {
         200: {
           description: "Average turnout comparison",
           content: {
             "application/json": {
-              schema: z.object({
-                currentAverageTurnout: z.string(),
-                oldAverageTurnout: z.string(),
-                changeRate: z.number(),
-              }),
+              schema: AverageTurnoutComparisonResponseSchema,
             },
           },
         },
@@ -214,11 +184,14 @@ export function governanceActivity(
 
       const data = await repository.getAverageTurnoutCompare(days);
       if (!data) {
-        return context.json({
-          currentAverageTurnout: "0",
-          oldAverageTurnout: "0",
-          changeRate: 0,
-        });
+        return context.json(
+          {
+            currentAverageTurnout: "0",
+            oldAverageTurnout: "0",
+            changeRate: 0,
+          },
+          200,
+        );
       }
 
       if (tokenType === "ERC721") {

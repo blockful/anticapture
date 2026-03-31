@@ -32,6 +32,7 @@ export interface ProposalWithUserVote {
     | "id"
     | "daoId"
     | "proposerAccountId"
+    | "title"
     | "description"
     | "startBlock"
     | "endBlock"
@@ -46,7 +47,7 @@ export interface ProposalWithUserVote {
     voterAccountId: string;
     proposalId: string;
     support: string;
-    votingPower: string;
+    votingPower: bigint;
     reason: string;
     timestamp: string;
   } | null;
@@ -155,6 +156,7 @@ export class ProposalsActivityService {
           id: item.proposal.id,
           daoId: item.proposal.dao_id,
           proposerAccountId: item.proposal.proposer_account_id as Address,
+          title: item.proposal.title,
           description: item.proposal.description,
           startBlock: item.proposal.start_block,
           endBlock: item.proposal.end_block,

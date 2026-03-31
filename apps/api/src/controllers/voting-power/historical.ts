@@ -6,10 +6,31 @@ import {
   HistoricalVotingPowersResponseMapper,
   HistoricalVotingPowerRequestParamsSchema,
   HistoricalVotingPowerGlobalQuerySchema,
+  DBHistoricalVotingPowerWithRelations,
 } from "@/mappers";
-import { VotingPowerService } from "@/services";
+import { Address } from "viem";
 
-export function historicalVotingPower(app: Hono, service: VotingPowerService) {
+export interface HistoricalVotingPowerService {
+  getHistoricalVotingPowers(
+    skip: number,
+    limit: number,
+    orderDirection: "asc" | "desc",
+    orderBy: "timestamp" | "delta",
+    accountId?: Address,
+    minDelta?: string,
+    maxDelta?: string,
+    fromDate?: number,
+    toDate?: number,
+  ): Promise<{
+    items: DBHistoricalVotingPowerWithRelations[];
+    totalCount: number;
+  }>;
+}
+
+export function historicalVotingPower(
+  app: Hono,
+  service: HistoricalVotingPowerService,
+) {
   app.openapi(
     createRoute({
       method: "get",
@@ -18,7 +39,7 @@ export function historicalVotingPower(app: Hono, service: VotingPowerService) {
       summary: "Get voting power changes by account",
       description:
         "Returns a list of voting power changes for a specific account",
-      tags: ["proposals"],
+      tags: ["voting-power"],
       request: {
         params: HistoricalVotingPowerRequestParamsSchema,
         query: HistoricalVotingPowerRequestQuerySchema,
@@ -60,6 +81,7 @@ export function historicalVotingPower(app: Hono, service: VotingPowerService) {
       );
       return context.json(
         HistoricalVotingPowersResponseMapper(items, totalCount),
+        200,
       );
     },
   );
@@ -71,7 +93,7 @@ export function historicalVotingPower(app: Hono, service: VotingPowerService) {
       path: "/voting-powers/historical",
       summary: "Get voting power changes",
       description: "Returns a list of voting power changes.",
-      tags: ["proposals"],
+      tags: ["voting-power"],
       request: {
         query: HistoricalVotingPowerGlobalQuerySchema,
       },
@@ -112,6 +134,7 @@ export function historicalVotingPower(app: Hono, service: VotingPowerService) {
       );
       return context.json(
         HistoricalVotingPowersResponseMapper(items, totalCount),
+        200,
       );
     },
   );

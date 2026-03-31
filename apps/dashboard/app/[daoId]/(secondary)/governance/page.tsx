@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { GovernanceSection } from "@/features/governance";
 import { Footer } from "@/shared/components/design-system/footer/Footer";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { HeaderDAOSidebar, HeaderSidebar, StickyPageHeader } from "@/widgets";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
 
@@ -14,20 +14,21 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const daoId = params.daoId.toUpperCase() as DaoIdEnum;
 
-  const ogTitle = `Anticapture - ${daoId} DAO`;
-  const ogDescription = `Explore and mitigate governance risks in ${daoId} DAO.`;
+  const canonicalPath = `/${params.daoId}/governance`;
 
   return {
-    title: ogTitle,
-    description: ogDescription,
+    title: `${daoId} DAO Governance Proposals | Security Analysis — Anticapture`,
+    description: `Browse and analyze governance proposals for ${daoId} DAO. Track voting patterns, delegate participation, and governance capture signals across on-chain proposals.`,
+    alternates: { canonical: canonicalPath },
     openGraph: {
-      title: ogTitle,
-      description: ogDescription,
+      url: canonicalPath,
+      title: `${daoId} DAO Governance Proposals | Security Analysis — Anticapture`,
+      description: `Browse and analyze governance proposals for ${daoId} DAO. Track voting patterns, delegate participation, and governance capture signals across on-chain proposals.`,
     },
     twitter: {
       card: "summary_large_image",
-      title: ogTitle,
-      description: ogDescription,
+      title: `${daoId} DAO Governance Proposals | Security Analysis — Anticapture`,
+      description: `Browse and analyze governance proposals for ${daoId} DAO. Track voting patterns, delegate participation, and governance capture signals across on-chain proposals.`,
     },
   };
 }

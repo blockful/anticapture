@@ -1,6 +1,6 @@
 "use client";
 
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import {
@@ -10,25 +10,24 @@ import {
   useQueryState,
   useQueryStates,
 } from "nuqs";
-import { Address, formatUnits, parseUnits, zeroAddress } from "viem";
+import type { Address } from "viem";
+import { formatUnits, parseUnits, zeroAddress } from "viem";
 
-import {
-  useDelegateDelegationHistory,
-  DelegationHistoryItem,
-} from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
+import type { DelegationHistoryItem } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
+import { useDelegateDelegationHistory } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 import { SkeletonRow, Button, IconButton } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { DateCell } from "@/shared/components/design-system/table/cells/DateCell";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
-import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components/FilterSort";
+import type { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components/FilterSort";
 import { useAmountFilterStore } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { cn } from "@/shared/utils";
+import type { DaoIdEnum } from "@/shared/types/daos";
+import { cn } from "@/shared/utils/cn";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 
 interface VotingPowerHistoryTableProps {
@@ -168,7 +167,7 @@ export const VotingPowerHistoryTable = ({
         );
       },
       meta: {
-        columnClassName: "w-32",
+        columnClassName: "w-20",
       },
     },
     {
@@ -233,12 +232,18 @@ export const VotingPowerHistoryTable = ({
 
         let amount = "0";
         if (item.delegation) {
+          const value = Number(
+            formatUnits(BigInt(item.delegation.value), decimals),
+          );
           amount = formatNumberUserReadable(
-            Number(formatUnits(BigInt(item.delegation.value), decimals)),
+            value > 0 && value < 1 ? 0.01 : value,
           );
         } else if (item.transfer) {
+          const value = Number(
+            formatUnits(BigInt(item.transfer.value), decimals),
+          );
           amount = formatNumberUserReadable(
-            Number(formatUnits(BigInt(item.transfer.value), decimals)),
+            value > 0 && value < 1 ? 0.01 : value,
           );
         } else {
           // Auto delegation protocols wont have neither delegation nor transfer, so we use the delta
@@ -260,7 +265,7 @@ export const VotingPowerHistoryTable = ({
         );
       },
       meta: {
-        columnClassName: "w-52",
+        columnClassName: "w-24",
       },
     },
     {
@@ -323,7 +328,7 @@ export const VotingPowerHistoryTable = ({
 
         return (
           <div className="group flex items-center gap-3">
-            <div className="overflow-truncate max-w-35 flex items-center gap-2">
+            <div className="overflow-truncate flex max-w-24 items-center gap-2">
               <EnsAvatar
                 address={delegatorAddress as `0x${string}`}
                 size="sm"
@@ -352,7 +357,7 @@ export const VotingPowerHistoryTable = ({
         );
       },
       meta: {
-        columnClassName: "w-32",
+        columnClassName: "w-24",
       },
     },
     {
@@ -370,7 +375,7 @@ export const VotingPowerHistoryTable = ({
         );
       },
       meta: {
-        columnClassName: "w-16",
+        columnClassName: "w-6",
       },
     },
     {
@@ -468,7 +473,7 @@ export const VotingPowerHistoryTable = ({
         );
       },
       meta: {
-        columnClassName: "w-32",
+        columnClassName: "w-26",
       },
     },
   ];
@@ -483,6 +488,7 @@ export const VotingPowerHistoryTable = ({
             : delegationHistory
         }
         size="sm"
+        mobileTableFixed={true}
         hasMore={hasNextPage}
         isLoadingMore={loading}
         onLoadMore={fetchNextPage}

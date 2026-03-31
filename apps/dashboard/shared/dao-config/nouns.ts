@@ -1,10 +1,10 @@
 import { mainnet } from "viem/chains";
 
-import { NounsIcon } from "@/shared/components/icons";
+import { NounsIcon } from "@/shared/components/icons/NounsIcon";
 import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { RECOMMENDED_SETTINGS } from "@/shared/constants/recommended-settings";
-import { DaoConfiguration } from "@/shared/dao-config/types";
+import type { DaoConfiguration } from "@/shared/dao-config/types";
 import { NounsOgIcon } from "@/shared/og/dao-og-icons";
 import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
@@ -49,6 +49,7 @@ export const NOUNS: DaoConfiguration = {
       proposalThreshold: "3 $NOUN (>0.25% Adjusted Supply)",
     },
   },
+  activityFeed: true,
   attackProfitability: {
     riskLevel: RiskLevel.LOW,
     supportsLiquidTreasuryCall: true,
@@ -322,4 +323,5 @@ export const NOUNS: DaoConfiguration = {
       },
     },
   },
+  governancePage: true,
 };

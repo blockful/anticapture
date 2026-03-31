@@ -4,7 +4,7 @@ import { InlineAlert } from "@/shared/components/design-system/alerts/inline-ale
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta: Meta<typeof InlineAlert> = {
-  title: "Design System/Alerts/InlineAlert",
+  title: "Feedback/Alerts/InlineAlert",
   component: InlineAlert,
   parameters: {
     layout: "centered",
@@ -12,10 +12,14 @@ const meta: Meta<typeof InlineAlert> = {
   },
   tags: ["autodocs"],
   argTypes: {
-    text: { control: "text" },
+    text: {
+      control: "text",
+      description: "Alert message text",
+    },
     variant: {
       control: "select",
       options: ["info", "warning", "error"],
+      description: "Visual variant",
     },
   },
 };
@@ -23,58 +27,44 @@ const meta: Meta<typeof InlineAlert> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Info: Story = {
+export const Default: Story = {
   args: {
     text: "This is an informational alert message.",
     variant: "info",
   },
+  decorators: [
+    (Story) => (
+      <div className="w-[400px]">
+        <Story />
+      </div>
+    ),
+  ],
 };
 
-export const Warning: Story = {
-  args: {
-    text: "This is a warning alert message that requires attention.",
-    variant: "warning",
-  },
-};
-
-export const Error: Story = {
-  args: {
-    text: "This is an error alert message indicating something went wrong.",
-    variant: "error",
-  },
-};
-
-export const LongText: Story = {
-  args: {
-    text: "This is a longer alert message that demonstrates how the component handles extended text content and maintains proper layout across different screen sizes while preserving readability.",
-    variant: "info",
-  },
-};
-
-export const GovernanceInfo: Story = {
-  args: {
-    text: "Governance proposal voting period has started.",
-    variant: "info",
-  },
-};
-
-export const SecurityWarning: Story = {
-  args: {
-    text: "Security council intervention may be required for this proposal.",
-    variant: "warning",
-  },
-};
-
-export const ValidationError: Story = {
-  args: {
-    text: "Unable to validate proposal parameters. Please check your input.",
-    variant: "error",
-  },
-};
-
-export const QuorumWarning: Story = {
-  args: {
-    text: "Current participation is below the required quorum threshold.",
-    variant: "warning",
-  },
+export const AllStates: Story = {
+  render: () => (
+    <div className="flex w-[400px] flex-col gap-4">
+      <div className="flex flex-col gap-1">
+        <span className="text-secondary text-xs">Info</span>
+        <InlineAlert
+          text="This is an informational alert message."
+          variant="info"
+        />
+      </div>
+      <div className="flex flex-col gap-1">
+        <span className="text-secondary text-xs">Warning</span>
+        <InlineAlert
+          text="This is a warning that requires your attention."
+          variant="warning"
+        />
+      </div>
+      <div className="flex flex-col gap-1">
+        <span className="text-secondary text-xs">Error</span>
+        <InlineAlert
+          text="Something went wrong. Please try again."
+          variant="error"
+        />
+      </div>
+    </div>
+  ),
 };

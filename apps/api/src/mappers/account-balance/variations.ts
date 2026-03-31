@@ -1,76 +1,97 @@
 import { z } from "@hono/zod-openapi";
-import { Address, getAddress, isAddress } from "viem";
+import { Address } from "viem";
 
 import { PERCENTAGE_NO_BASELINE } from "../constants";
-import { PeriodResponseSchema, TimestampResponseMapper } from "../shared";
+import {
+  AddressQueryArraySchema,
+  AddressSchema,
+  OrderDirectionSchema,
+  paginationLimitQueryParam,
+  paginationSkipQueryParam,
+  PeriodResponseSchema,
+  TimestampResponseMapper,
+  unixTimestampQueryParam,
+} from "../shared";
 
-export const AccountBalanceVariationsByAccountIdRequestParamsSchema = z.object({
-  address: z
-    .string()
-    .refine(isAddress, "Invalid address")
-    .transform((addr) => getAddress(addr)),
-});
+export const AccountBalanceVariationsByAccountIdRequestParamsSchema = z
+  .object({
+    address: AddressSchema,
+  })
+  .openapi("AccountBalanceVariationsByAccountIdRequestParams", {
+    description: "Path params for a single-account balance variation request.",
+  });
 
-export const AccountBalanceVariationsByAccountIdRequestQuerySchema = z.object({
-  fromDate: z
-    .string()
-    .transform((val) => Number(val))
-    .optional(),
-  toDate: z
-    .string()
-    .transform((val) => Number(val))
-    .optional(),
-});
+export const AccountBalanceVariationsByAccountIdRequestQuerySchema = z
+  .object({
+    fromDate: unixTimestampQueryParam(
+      "Inclusive lower bound for the comparison window, in Unix seconds.",
+    ),
+    toDate: unixTimestampQueryParam(
+      "Inclusive upper bound for the comparison window, in Unix seconds.",
+    ),
+  })
+  .openapi("AccountBalanceVariationsByAccountIdRequestQuery", {
+    description:
+      "Time-window filters for a single-account balance variation request.",
+  });
 
 export const AccountBalanceVariationsRequestQuerySchema =
   AccountBalanceVariationsByAccountIdRequestQuerySchema.extend({
-    limit: z.coerce
-      .number()
-      .int()
-      .min(1, "Limit must be a positive integer")
-      .max(100, "Limit cannot exceed 100")
-      .optional()
-      .default(20),
-    skip: z.coerce
-      .number()
-      .int()
-      .min(0, "Skip must be a non-negative integer")
-      .optional()
-      .default(0),
-    orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
-    addresses: z
-      .union([
-        z
-          .string()
-          .refine(isAddress, "Invalid address")
-          .transform((addr) => [getAddress(addr)]),
-        z.array(
-          z
-            .string()
-            .refine(isAddress, "Invalid addresses")
-            .transform((addr) => getAddress(addr)),
-        ),
-      ])
-      .optional(),
+    limit: paginationLimitQueryParam(
+      "Maximum number of account balance variations to return.",
+      20,
+    ),
+    skip: paginationSkipQueryParam(
+      "Number of account balance variations to skip.",
+    ),
+    orderDirection: OrderDirectionSchema.optional().default("desc"),
+    addresses: AddressQueryArraySchema.openapi({
+      description:
+        "Filter by one or more account addresses. Pass repeated query params or a comma-delimited list.",
+    }).optional(),
+  }).openapi("AccountBalanceVariationsRequestQuery", {
+    description:
+      "Query params used to page and filter account balance variations.",
   });
 
-export const AccountBalanceVariationSchema = z.object({
-  accountId: z.string(),
-  previousBalance: z.string(),
-  currentBalance: z.string(),
-  absoluteChange: z.string(),
-  percentageChange: z.string(),
-});
+export const AccountBalanceVariationSchema = z
+  .object({
+    accountId: z.string().openapi({ description: "Account address." }),
+    previousBalance: z.string().openapi({
+      description: "Balance at the start of the comparison window.",
+    }),
+    currentBalance: z.string().openapi({
+      description: "Balance at the end of the comparison window.",
+    }),
+    absoluteChange: z.string().openapi({
+      description: "Absolute balance change encoded as a decimal string.",
+    }),
+    percentageChange: z.string().openapi({
+      description: "Relative balance change encoded as a decimal string.",
+    }),
+  })
+  .openapi("AccountBalanceVariation", {
+    description: "Balance delta for a single account across two timestamps.",
+  });
 
-export const AccountBalanceVariationsByAccountIdResponseSchema = z.object({
-  period: PeriodResponseSchema,
-  data: AccountBalanceVariationSchema,
-});
+export const AccountBalanceVariationsByAccountIdResponseSchema = z
+  .object({
+    period: PeriodResponseSchema,
+    data: AccountBalanceVariationSchema,
+  })
+  .openapi("AccountBalanceVariationsByAccountIdResponse", {
+    description: "Balance variation response for a single account.",
+  });
 
-export const AccountBalanceVariationsResponseSchema = z.object({
-  period: PeriodResponseSchema,
-  items: z.array(AccountBalanceVariationSchema),
-});
+export const AccountBalanceVariationsResponseSchema = z
+  .object({
+    period: PeriodResponseSchema,
+    items: z.array(AccountBalanceVariationSchema),
+  })
+  .openapi("AccountBalanceVariationsResponse", {
+    description:
+      "List of balance variations for multiple accounts in the selected period.",
+  });
 
 export type AccountBalanceVariationsResponse = z.infer<
   typeof AccountBalanceVariationsResponseSchema

@@ -46,6 +46,7 @@ export interface DelegationPercentageServiceResult {
   items: DelegationPercentageItem[];
   totalCount: number;
   hasNextPage: boolean;
+  hasPreviousPage?: boolean;
   endDate: string | null;
   startDate: string | null;
 }
@@ -57,7 +58,7 @@ interface DateData {
   tokenId?: string;
 }
 
-interface DelegationPercentageRepository {
+export interface DelegationPercentageRepository {
   getMetricsByDateRange(filters: {
     metricTypes: string[];
     startDate?: string;
@@ -81,8 +82,14 @@ export class DelegationPercentageService {
   async delegationPercentageByDay(
     filters: DelegationPercentageQuery,
   ): Promise<DelegationPercentageServiceResult> {
-    const { after, before, startDate, endDate, orderDirection, limit } =
-      filters;
+    const {
+      after,
+      before,
+      startDate,
+      endDate,
+      orderDirection = "asc",
+      limit,
+    } = filters;
 
     // Normalize all timestamps to midnight UTC to align with database storage
     const normalizedStartDate = startDate
@@ -124,6 +131,7 @@ export class DelegationPercentageService {
         items: [],
         totalCount: 0,
         hasNextPage: false,
+        hasPreviousPage: Boolean(normalizedAfter || normalizedBefore),
         endDate: null,
         startDate: null,
       };
@@ -168,6 +176,7 @@ export class DelegationPercentageService {
       items,
       totalCount: items.length,
       hasNextPage,
+      hasPreviousPage: Boolean(normalizedAfter || normalizedBefore),
       endDate: items[items.length - 1]?.date ?? null,
       startDate: items[0]?.date ?? null,
     };

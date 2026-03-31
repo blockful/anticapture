@@ -3,7 +3,7 @@
 import Lottie from "lottie-react";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useRef } from "react";
-import { Data } from "react-csv/lib/core";
+import type { Data } from "react-csv/lib/core";
 import {
   CartesianGrid,
   Line,
@@ -23,17 +23,18 @@ import { normalizeDataset } from "@/features/attack-profitability/utils";
 import loadingAnimation from "@/public/loading-animation.json";
 import { ResearchPendingChartBlur } from "@/shared/components/charts/ResearchPendingChartBlur";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
-import { ChartConfig, ChartContainer } from "@/shared/components/ui/chart";
+import type { ChartConfig } from "@/shared/components/ui/chart";
+import { ChartContainer } from "@/shared/components/ui/chart";
 import { mockedAttackProfitabilityDatasets } from "@/shared/constants/mocked-data/mocked-attack-profitability-datasets";
 import daoConfigByDaoId from "@/shared/dao-config";
-import {
+import type {
   TokenMetricItem,
   MultilineChartDataSetPoint,
 } from "@/shared/dao-config/types";
 import { useDaoData, useTimeSeriesData } from "@/shared/hooks";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
-import { TimeInterval } from "@/shared/types/enums/TimeInterval";
+import type { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import {
   cn,
   formatNumberUserReadable,
@@ -123,10 +124,12 @@ export const MultilineChartAttackProfitability = ({
       datasets = mockedAttackProfitabilityDatasets;
     } else {
       const nonZeroLiquidTreasuryData = liquidTreasuryData.filter(
-        (item) => item.value > 0,
+        (item): item is NonNullable<typeof item> =>
+          item !== null && item.value > 0,
       );
       const nonZeroTotalTreasuryData = totalTreasuryData.filter(
-        (item) => item.value > 0,
+        (item): item is NonNullable<typeof item> =>
+          item !== null && item.value > 0,
       );
 
       datasets = {

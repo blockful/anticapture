@@ -1,10 +1,10 @@
 import { scroll } from "viem/chains";
 
-import { ScrollIcon } from "@/shared/components/icons";
+import { ScrollIcon } from "@/shared/components/icons/ScrollIcon";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 import { RECOMMENDED_SETTINGS } from "@/shared/constants/recommended-settings";
-import { DaoConfiguration } from "@/shared/dao-config/types";
+import type { DaoConfiguration } from "@/shared/dao-config/types";
 import { ScrollOgIcon } from "@/shared/og/dao-og-icons";
 import {
   RiskLevel,
@@ -288,8 +288,10 @@ export const SCR: DaoConfiguration = {
     },
   },
   resilienceStages: true,
+  governancePage: true,
   tokenDistribution: true,
   dataTables: true,
+  activityFeed: true,
   attackExposure: {
     defenseAreas: {
       [RiskAreaEnum.SPAM_RESISTANCE]: {

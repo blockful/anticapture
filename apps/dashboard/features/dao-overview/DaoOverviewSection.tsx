@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Suspense, useEffect } from "react";
+import { Suspense } from "react";
+import { Info } from "lucide-react";
 
 import { AccountBalanceChartCard } from "@/features/dao-overview/components/AccountBalanceChartCard";
 import { AttackProfitabilityChartCard } from "@/features/dao-overview/components/AttackProfitabilityChartCard";
@@ -19,25 +20,19 @@ import { RiskAreaCardEnum, RiskAreaCardWrapper } from "@/shared/components";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 import { DaoAvatarIcon } from "@/shared/components/icons";
 import daoConfigByDaoId from "@/shared/dao-config";
+import { Stage } from "@/shared/types/enums/Stage";
+import { BannerAlert } from "@/shared/components/design-system/alerts/banner-alert/BannerAlert";
 import {
   fieldsToArray,
   getDaoStageFromFields,
 } from "@/shared/dao-config/utils";
-import { apolloClient } from "@/shared/providers/GlobalProviders";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { getDaoRiskAreas } from "@/shared/utils/risk-analysis";
 
 export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const router = useRouter();
   const daoConfig = daoConfigByDaoId[daoId];
   const daoOverview = daoConfig.daoOverview;
-
-  useEffect(() => {
-    // FIXME:
-    //   This is only a workaround for now, as Apollo Client does not yet support HTTP header context for cache indexing;
-    //   https://github.com/apollographql/apollo-feature-requests/issues/326
-    apolloClient.cache.reset();
-  }, [daoId]);
 
   const currentDaoStage = getDaoStageFromFields({
     fields: fieldsToArray(daoConfig.governanceImplementation?.fields),
@@ -67,7 +62,11 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               className="border-inverted size-32 shrink-0 rounded-none border-2 lg:border-none"
             />
 
-            <DaoOverviewHeaderMetrics daoId={daoId} daoConfig={daoConfig} />
+            <DaoOverviewHeaderMetrics
+              daoId={daoId}
+              daoConfig={daoConfig}
+              reviewStage={currentDaoStage === Stage.UNKNOWN}
+            />
           </div>
         </div>
         <div className="block lg:hidden">
@@ -77,6 +76,21 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         {daoConfig.governancePage && (
           <div className="mx-5">
             <OngoingProposalBanner daoId={daoId} />
+          </div>
+        )}
+
+        {currentDaoStage === Stage.UNKNOWN && (
+          <div className="mx-5">
+            <BannerAlert
+              icon={<Info className="size-4" />}
+              text="This DAO is needing review. Enable monitoring for faster governance risk signals."
+              storageKey={`donate-banner-dismissed-${daoId}`}
+              links={{
+                url: `/donate`,
+                text: "Donate",
+                openInNewTab: true,
+              }}
+            />
           </div>
         )}
 
@@ -101,24 +115,33 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             }}
             variant={RiskAreaCardEnum.DAO_OVERVIEW}
             className="grid h-full grid-cols-2 gap-2 px-5 lg:px-0"
+            currentDaoStage={currentDaoStage}
           />
           <div className="block lg:hidden">
             <DividerDefault isHorizontal />
           </div>
         </div>
-        <div className="border-inverted mx-5 border-x">
-          <MetricsCard daoId={daoId} daoConfig={daoConfig} />
-        </div>
+        {currentDaoStage !== Stage.UNKNOWN && (
+          <div className="border-inverted mx-5 border-x">
+            <MetricsCard daoId={daoId} daoConfig={daoConfig} />
+          </div>
+        )}
         <div className="block lg:hidden">
           <DividerDefault isHorizontal />
         </div>
         <SecurityCouncilCard daoOverview={daoOverview} />
         <div className="border-inverted grid grid-cols-1 gap-5 border-x lg:mx-5 lg:grid-cols-2 lg:gap-2">
-          <AttackProfitabilityChartCard daoId={daoId} />
+          <AttackProfitabilityChartCard
+            daoId={daoId}
+            currentDaoStage={currentDaoStage}
+          />
           <div className="block lg:hidden">
             <DividerDefault isHorizontal />
           </div>
-          <TokenDistributionChartCard daoId={daoId} />
+          <TokenDistributionChartCard
+            daoId={daoId}
+            currentDaoStage={currentDaoStage}
+          />
         </div>
         <div className="block lg:hidden">
           <DividerDefault isHorizontal />

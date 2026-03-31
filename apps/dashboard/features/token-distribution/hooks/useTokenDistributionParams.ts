@@ -7,8 +7,8 @@ import { useBrushStore } from "@/features/token-distribution/store/useBrushStore
 import { useTokenDistributionStore } from "@/features/token-distribution/store/useTokenDistributionStore";
 import { initialMetrics } from "@/features/token-distribution/utils";
 import daoConfig from "@/shared/dao-config";
-import { ChartDataSetPoint } from "@/shared/dao-config/types";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { ChartDataSetPoint } from "@/shared/dao-config/types";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 export function useTokenDistributionParams(
   chartData: ChartDataSetPoint[],

@@ -12,19 +12,24 @@ enum AssetPlatformEnum {
 }
 
 export const CoingeckoTokenIdEnum: Record<DaoIdEnum, string> = {
+  AAVE: "aave",
   ENS: "ethereum-name-service",
   UNI: "uniswap",
   ARB: "arbitrum",
   OP: "optimism",
   GTC: "gitcoin",
+  LIL_NOUNS: "lil-nouns",
   NOUNS: "nouns",
   SCR: "scroll",
   COMP: "compound-governance-token",
   OBOL: "obol-2",
   ZK: "zksync",
+  SHU: "shutter",
+  FLUID: "fluid",
 } as const;
 
 export const CoingeckoIdToAssetPlatformId = {
+  [CoingeckoTokenIdEnum.AAVE]: AssetPlatformEnum.ETHEREUM,
   [CoingeckoTokenIdEnum.UNI]: AssetPlatformEnum.ETHEREUM,
   [CoingeckoTokenIdEnum.ENS]: AssetPlatformEnum.ETHEREUM,
   [CoingeckoTokenIdEnum.ARB]: AssetPlatformEnum.ARBITRUM,
@@ -34,6 +39,8 @@ export const CoingeckoIdToAssetPlatformId = {
   [CoingeckoTokenIdEnum.COMP]: AssetPlatformEnum.ETHEREUM,
   [CoingeckoTokenIdEnum.OBOL]: AssetPlatformEnum.ETHEREUM,
   [CoingeckoTokenIdEnum.ZK]: AssetPlatformEnum.ZKSYNC,
+  [CoingeckoTokenIdEnum.SHU]: AssetPlatformEnum.ETHEREUM,
+  [CoingeckoTokenIdEnum.FLUID]: AssetPlatformEnum.ETHEREUM,
 } as const;
 
 export interface CoingeckoHistoricalMarketData {

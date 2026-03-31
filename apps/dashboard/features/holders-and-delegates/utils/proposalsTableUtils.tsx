@@ -1,7 +1,4 @@
-import {
-  Query_ProposalsActivity_Proposals_Items_Proposal,
-  Query_ProposalsActivity_Proposals_Items_UserVote,
-} from "@anticapture/graphql-client";
+import type { GetProposalsActivityQuery } from "@anticapture/graphql-client/hooks";
 import {
   XCircle,
   CheckCircle,
@@ -10,9 +7,17 @@ import {
   Clock10,
   UserX,
 } from "lucide-react";
-import React, { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import { ActivityIndicator } from "@/shared/components";
+
+type ProposalActivityItem = NonNullable<
+  NonNullable<
+    NonNullable<GetProposalsActivityQuery["proposalsActivity"]>["proposals"]
+  >[number]
+>;
+type ProposalActivityProposal = ProposalActivityItem["proposal"];
+type ProposalActivityUserVote = ProposalActivityItem["userVote"];
 
 // Vote mapping object
 export const proposalsUserVoteMapping = {
@@ -51,7 +56,7 @@ export const proposalsFinalResultMapping = {
   },
   PENDING_EXECUTION: {
     text: "Pending Execution",
-    icon: <Clock10 className="text-secondary size-4" />,
+    icon: <Clock10 className="text-success size-4" />,
   },
   ACTIVE: {
     text: "Ongoing",
@@ -66,8 +71,8 @@ export const proposalsFinalResultMapping = {
     icon: <XCircle className="text-error size-4" />,
   },
   CANCELED: {
-    text: "Cancel",
-    icon: <CircleMinus className="text-secondary size-4" />,
+    text: "Canceled",
+    icon: <CircleMinus className="text-error size-4" />,
   },
   QUEUED: {
     text: "Queued",
@@ -161,8 +166,8 @@ const formatVoteTiming = (
 
 // Helper function to format vote timing and calculate percentage
 export const getVoteTimingData = (
-  userVote: Query_ProposalsActivity_Proposals_Items_UserVote | null | undefined,
-  proposal: Query_ProposalsActivity_Proposals_Items_Proposal,
+  userVote: ProposalActivityUserVote | null | undefined,
+  proposal: ProposalActivityProposal,
   finalResultStatus: string,
   daoVotingPeriod: number,
   daoVotingDelay: number,

@@ -1,7 +1,8 @@
 "use client";
 
 import { ResetIcon } from "@radix-ui/react-icons";
-import { ReactNode, useState } from "react";
+import type { ReactNode } from "react";
+import { useState } from "react";
 
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { ButtonFilter } from "@/shared/components/design-system/table/ButtonFilter";

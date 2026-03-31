@@ -3,6 +3,7 @@ export * from "@/shared/components/icons/ArrowUpDown";
 export * from "@/shared/components/icons/BulletPoint";
 export * from "@/shared/components/icons/CookieIcon";
 export * from "@/shared/components/icons/EnsIcon";
+export * from "@/shared/components/icons/FluidIcon";
 export * from "@/shared/components/icons/NounsIcon";
 export * from "@/shared/components/icons/OptimismIcon";
 export * from "@/shared/components/icons/TelegramIcon";
@@ -13,7 +14,7 @@ export * from "@/shared/components/icons/GitcoinIcon";
 export * from "@/shared/components/icons/ScrollIcon";
 export * from "@/shared/components/icons/CompoundIcon";
 export * from "@/shared/components/icons/ObolIcon";
-// THE IMPORT OF DAO AVATAR ICON MUST BE LAST
+export * from "@/shared/components/icons/ShutterIcon";
 export * from "@/shared/components/icons/DaoAvatarIcon";
 export * from "@/shared/components/icons/CookieBackground";
 

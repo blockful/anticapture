@@ -4,11 +4,11 @@ import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/
 import { getFigmaDesignConfigByNodeId } from "@/shared/utils/figma-storybook";
 
 const meta: Meta<typeof EnsAvatar> = {
-  title: "Design System/Avatars/EnsAvatar",
+  title: "Data Display/EnsAvatar",
   component: EnsAvatar,
   parameters: {
     layout: "centered",
-    design: getFigmaDesignConfigByNodeId("10166-18044"),
+    design: getFigmaDesignConfigByNodeId("8133-68025"),
   },
   tags: ["autodocs"],
   argTypes: {

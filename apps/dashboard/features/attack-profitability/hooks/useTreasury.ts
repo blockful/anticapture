@@ -1,9 +1,17 @@
-import axios from "axios";
-import useSWR from "swr";
+import {
+  DaysWindow,
+  OrderDirection,
+  type DaoTokenTreasuryQuery,
+  type LiquidTreasuryQuery,
+  type TotalTreasuryQuery,
+  useDaoTokenTreasuryQuery,
+  useLiquidTreasuryQuery,
+  useTotalTreasuryQuery,
+} from "@anticapture/graphql-client/hooks";
 
-import { DaoIdEnum } from "@/shared/types/daos";
-import { TimeInterval } from "@/shared/types/enums/TimeInterval";
-import { BACKEND_ENDPOINT, getAuthHeaders } from "@/shared/utils/server-utils";
+import type { DaoIdEnum } from "@/shared/types/daos";
+import type { TimeInterval } from "@/shared/types/enums/TimeInterval";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 export type TreasuryType = "liquid" | "dao-token" | "total";
 
@@ -12,73 +20,82 @@ export interface TreasuryDataPoint {
   date: number;
 }
 
-export interface TreasuryResponse {
-  items: TreasuryDataPoint[];
-  totalCount: number;
-}
+type TreasuryQueryResult =
+  | LiquidTreasuryQuery["getLiquidTreasury"]
+  | DaoTokenTreasuryQuery["getDaoTokenTreasury"]
+  | TotalTreasuryQuery["getTotalTreasury"];
 
-const QUERY_NAME_MAP: Record<TreasuryType, string> = {
-  liquid: "getLiquidTreasury",
-  "dao-token": "getDaoTokenTreasury",
-  total: "getTotalTreasury",
+const useQueryByType = (
+  type: TreasuryType,
+  daoId: DaoIdEnum,
+  days: TimeInterval,
+  order: "asc" | "desc",
+) => {
+  const daysKey = days as keyof typeof DaysWindow;
+  const commonOptions = {
+    variables: {
+      days: DaysWindow[daysKey],
+      orderDirection:
+        order === "asc" ? OrderDirection.Asc : OrderDirection.Desc,
+    },
+    context: {
+      headers: {
+        "anticapture-dao-id": daoId,
+        ...getAuthHeaders(),
+      },
+    },
+  };
+
+  const liquid = useLiquidTreasuryQuery({
+    ...commonOptions,
+    skip: type !== "liquid",
+    fetchPolicy: "no-cache",
+  });
+
+  const daoToken = useDaoTokenTreasuryQuery({
+    ...commonOptions,
+    skip: type !== "dao-token",
+    fetchPolicy: "no-cache",
+  });
+
+  const total = useTotalTreasuryQuery({
+    ...commonOptions,
+    skip: type !== "total",
+    fetchPolicy: "no-cache",
+  });
+
+  if (type === "liquid") return liquid;
+  if (type === "dao-token") return daoToken;
+  return total;
 };
 
-const fetchTreasury = async ({
-  daoId,
-  type = "total",
-  days = TimeInterval.ONE_YEAR,
-  order = "asc",
-}: {
-  daoId: DaoIdEnum;
-  type?: TreasuryType;
-  days?: TimeInterval;
-  order?: "asc" | "desc";
-}): Promise<TreasuryResponse> => {
-  const queryName = QUERY_NAME_MAP[type];
-  const daysParam = `_${days}`;
-
-  const query = `query GetTreasury {
-    ${queryName}(days: ${daysParam}, order: ${order}) {
-      items {
-        date
-        value
-      }
-      totalCount
-    }
-  }`;
-
-  const response: {
-    data: { data: { [key: string]: TreasuryResponse } };
-  } = await axios.post(
-    `${BACKEND_ENDPOINT}`,
-    { query },
-    {
-      headers: { "anticapture-dao-id": daoId, ...getAuthHeaders() },
-    },
-  );
-
-  return response.data.data[queryName];
+const extractTreasuryData = (
+  type: TreasuryType,
+  data: ReturnType<typeof useQueryByType>["data"],
+): TreasuryQueryResult | null => {
+  if (!data) return null;
+  if (type === "liquid" && "getLiquidTreasury" in data)
+    return (data as LiquidTreasuryQuery).getLiquidTreasury;
+  if (type === "dao-token" && "getDaoTokenTreasury" in data)
+    return (data as DaoTokenTreasuryQuery).getDaoTokenTreasury;
+  if (type === "total" && "getTotalTreasury" in data)
+    return (data as TotalTreasuryQuery).getTotalTreasury;
+  return null;
 };
 
 export const useTreasury = (
   daoId: DaoIdEnum,
   type: TreasuryType = "total",
-  days: TimeInterval = TimeInterval.ONE_YEAR,
+  days: TimeInterval = "365d" as TimeInterval,
   order: "asc" | "desc" = "asc",
 ) => {
-  const { data, error, isValidating } = useSWR<TreasuryResponse>(
-    ["treasury", daoId, type, days, order],
-    () => fetchTreasury({ daoId, type, days, order }),
-    {
-      revalidateOnFocus: false,
-      shouldRetryOnError: false,
-    },
-  );
+  const { data, loading, error } = useQueryByType(type, daoId, days, order);
+  const treasury = extractTreasuryData(type, data);
 
   return {
-    data: data?.items ?? [],
-    totalCount: data?.totalCount ?? 0,
-    loading: isValidating,
+    data: treasury?.items ?? [],
+    totalCount: treasury?.totalCount ?? 0,
+    loading,
     error,
   };
 };

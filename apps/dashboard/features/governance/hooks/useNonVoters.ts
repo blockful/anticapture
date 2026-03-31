@@ -1,12 +1,13 @@
+import type { GetProposalNonVotersQuery } from "@anticapture/graphql-client/hooks";
 import {
-  GetProposalNonVotersQuery,
+  OrderDirection,
   useGetProposalNonVotersQuery,
-  QueryInput_ProposalNonVoters_OrderDirection,
 } from "@anticapture/graphql-client/hooks";
-import { ApolloError, NetworkStatus } from "@apollo/client";
+import type { ApolloError } from "@apollo/client";
+import { NetworkStatus } from "@apollo/client";
 import { useMemo, useCallback } from "react";
 
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 // Non-voter type
@@ -47,9 +48,7 @@ export const useNonVoters = ({
       limit,
       skip: 0,
       orderDirection:
-        orderDirection === "asc"
-          ? QueryInput_ProposalNonVoters_OrderDirection.Asc
-          : QueryInput_ProposalNonVoters_OrderDirection.Desc,
+        orderDirection === "asc" ? OrderDirection.Asc : OrderDirection.Desc,
     }),
     [proposalId, limit, orderDirection],
   );
@@ -87,9 +86,7 @@ export const useNonVoters = ({
           limit,
           skip: nonVoters.length,
           orderDirection:
-            orderDirection === "asc"
-              ? QueryInput_ProposalNonVoters_OrderDirection.Asc
-              : QueryInput_ProposalNonVoters_OrderDirection.Desc,
+            orderDirection === "asc" ? OrderDirection.Asc : OrderDirection.Desc,
         },
         updateQuery: (prev, { fetchMoreResult }) => {
           if (!fetchMoreResult?.proposalNonVoters) return prev;

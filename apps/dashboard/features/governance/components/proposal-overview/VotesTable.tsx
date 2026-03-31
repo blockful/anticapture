@@ -1,20 +1,23 @@
 "use client";
 
-import {
+import type {
   ColumnDef,
-  flexRender,
   SortingState,
+  ColumnFiltersState,
+  TableOptions,
+  ExpandedState,
+} from "@tanstack/react-table";
+import {
+  flexRender,
   getCoreRowModel,
   getPaginationRowModel,
   getFilteredRowModel,
-  ColumnFiltersState,
   getSortedRowModel,
   useReactTable,
-  TableOptions,
-  ExpandedState,
   getExpandedRowModel,
 } from "@tanstack/react-table";
-import { ReactNode, useState } from "react";
+import type { ReactNode } from "react";
+import { useState } from "react";
 
 import { TreeLines } from "@/shared/components/tables/TreeLines";
 import {
@@ -211,9 +214,9 @@ export const VotesTable = <TData, TValue>({
                         return (
                           <TableCell colSpan={columns.length} className="p-0">
                             <div className="flex h-auto min-h-10 items-start gap-3 p-2 pl-5">
-                              <div className="flex w-full flex-row">
-                                <div className="border-secondary mr-2 h-6 w-4 -translate-y-3 border-b border-l"></div>
-                                <span className="text-secondary whitespace-pre-wrap break-words font-sans text-[14px] font-normal leading-[20px]">
+                              <div className="flex w-full min-w-0 flex-row">
+                                <div className="border-secondary mr-2 h-6 w-4 shrink-0 -translate-y-3 border-b border-l"></div>
+                                <span className="text-secondary min-w-0 whitespace-pre-wrap break-all font-sans text-[14px] font-normal leading-[20px]">
                                   {rowData.reason}
                                 </span>
                               </div>

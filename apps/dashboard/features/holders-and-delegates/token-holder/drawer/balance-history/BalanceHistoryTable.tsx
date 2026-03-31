@@ -1,6 +1,6 @@
 "use client";
 
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import {
   parseAsBoolean,
@@ -17,21 +17,19 @@ import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 import { SkeletonRow, Button, IconButton } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { BadgeStatus } from "@/shared/components/design-system/badges/BadgeStatus";
+import { BadgeStatus } from "@/shared/components/design-system/badges";
 import { DateCell } from "@/shared/components/design-system/table/cells/DateCell";
 import { AddressFilter } from "@/shared/components/design-system/table/filters";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
-import { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
+import type { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
 import { useAmountFilterStore } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
-import {
-  CategoriesFilter,
-  FilterOption,
-} from "@/shared/components/design-system/table/filters/CategoriesFilter";
+import type { FilterOption } from "@/shared/components/design-system/table/filters/CategoriesFilter";
+import { CategoriesFilter } from "@/shared/components/design-system/table/filters/CategoriesFilter";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { fetchAddressFromEnsName } from "@/shared/hooks/useEnsData";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn } from "@/shared/utils";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 

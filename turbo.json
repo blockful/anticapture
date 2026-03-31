@@ -1,24 +1,101 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalEnv": [".env"],
   "tasks": {
-    "build": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**", ".next/cache/**"],
+    "@anticapture/offchain-indexer#db:migrate": {
+      "cache": false,
+      "passThroughEnv": ["*"]
+    },
+    "@anticapture/offchain-indexer#db:push": {
+      "cache": false,
+      "passThroughEnv": ["*"]
+    },
+    "@anticapture/indexer#db:prune": {
+      "cache": false,
+      "passThroughEnv": ["*"]
+    },
+    "@anticapture/observability#build": {
+      "outputs": ["packages/observability/dist/**"]
+    },
+    "@anticapture/dashboard#dev": {
+      "dependsOn": ["@anticapture/graphql-client#codegen"],
+      "persistent": true,
+      "cache": false
+    },
+    "@anticapture/graphql-client#dev": {
+      "persistent": true
+    },
+    "@anticapture/dashboard#build": {
+      "dependsOn": ["@anticapture/graphql-client#codegen"],
+      "outputs": ["dist/**", ".next/**"],
       "env": ["RESEND_API_KEY", "RESEND_FROM_EMAIL", "CONTACT_EMAIL"]
     },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**"]
+    },
     "storybook": {
-      "outputs": ["dist/**", ".next/**", ".next/cache/**"],
-      "env": ["FIGMA_TOKEN", "VALIDATE_FIGMA_TOKEN_API"]
+      "outputs": ["dist/**"]
     },
     "build-storybook": {
-      "outputs": ["storybook-static/**"],
-      "env": ["FIGMA_TOKEN", "VALIDATE_FIGMA_TOKEN_API"]
+      "outputs": ["storybook-static/**"]
     },
-    "clean": {},
-    "lint": {},
-    "lint:fix": {},
-    "typecheck": {},
-    "test": {}
+    "start": {
+      "dependsOn": ["^build"],
+      "persistent": true,
+      "cache": false,
+      "passThroughEnv": ["*"]
+    },
+    "clean": { "cache": false },
+    "lint": {
+      "inputs": [
+        "**/*.ts",
+        "**/*.tsx",
+        "**/*.js",
+        "**/*.jsx",
+        "eslint.config.*"
+      ]
+    },
+    "lint:fix": {
+      "cache": false,
+      "inputs": [
+        "**/*.ts",
+        "**/*.tsx",
+        "**/*.js",
+        "**/*.jsx",
+        "eslint.config.*"
+      ]
+    },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json"]
+    },
+    "test": {
+      "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"]
+    },
+    "test:unit": {
+      "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"]
+    },
+    "codegen": {
+      "inputs": ["documents/**/*", "codegen.ts"],
+      "outputs": ["generated/**"]
+    },
+    "db:generate": {
+      "inputs": ["src/**/*.ts"],
+      "outputs": ["drizzle/**"]
+    },
+    "@anticapture/api#dev": {
+      "dependsOn": ["@anticapture/observability#build"],
+      "passThroughEnv": ["*"]
+    },
+    "dev": {
+      "persistent": true,
+      "cache": false,
+      "passThroughEnv": ["*"]
+    },
+    "dev:rw": {
+      "persistent": true,
+      "cache": false,
+      "passThroughEnv": ["*"]
+    }
   }
 }

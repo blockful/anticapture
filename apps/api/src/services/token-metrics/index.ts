@@ -31,7 +31,26 @@ import { applyCursorPagination } from "@/lib/query-helpers";
 import { forwardFill, generateOrderedTimeline } from "@/lib/time-series";
 import { logger } from "@/logger";
 import { TokenMetricItem } from "@/mappers/token-metrics";
-import { DaoMetricsDayBucketRepository } from "@/repositories/daoMetricsDayBucket";
+
+interface DaoMetricsRow {
+  date: bigint;
+  high: bigint;
+  volume: bigint;
+}
+
+export interface ITokenMetricsRepository {
+  getMetricsByDateRange(filters: {
+    metricTypes: string[];
+    startDate?: string;
+    endDate?: string;
+    orderDirection: "asc" | "desc";
+    limit: number;
+  }): Promise<DaoMetricsRow[]>;
+  getLastMetricBeforeDate(
+    metricType: string,
+    beforeDate: string,
+  ): Promise<DaoMetricsRow | null | undefined>;
+}
 
 interface MetricData {
   high: bigint;
@@ -44,7 +63,7 @@ interface MetricData {
 }
 
 export class TokenMetricsService {
-  constructor(private readonly repository: DaoMetricsDayBucketRepository) {}
+  constructor(private readonly repository: ITokenMetricsRepository) {}
 
   /**
    * Get metrics for a single type with forward-fill
@@ -59,6 +78,7 @@ export class TokenMetricsService {
   }): Promise<{
     items: TokenMetricItem[];
     hasNextPage: boolean;
+    hasPreviousPage: boolean;
     startDate: string | null;
     endDate: string | null;
   }> {
@@ -84,6 +104,7 @@ export class TokenMetricsService {
       return {
         items: [],
         hasNextPage: false,
+        hasPreviousPage: false,
         startDate: null,
         endDate: null,
       };
@@ -119,6 +140,7 @@ export class TokenMetricsService {
       return {
         items: [],
         hasNextPage: false,
+        hasPreviousPage: (skip ?? 0) > 0,
         startDate: null,
         endDate: null,
       };
@@ -138,6 +160,7 @@ export class TokenMetricsService {
     return {
       items,
       hasNextPage,
+      hasPreviousPage: (skip ?? 0) > 0,
       startDate: items[0]?.date ?? null,
       endDate: items[items.length - 1]?.date ?? null,
     };

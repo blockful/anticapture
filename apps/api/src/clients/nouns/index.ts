@@ -1,5 +1,4 @@
 import { Account, Address, Chain, Client as vClient, Transport } from "viem";
-import { readContract } from "viem/actions";
 
 import { DAOClient } from "@/clients";
 
@@ -30,13 +29,13 @@ export class Client<
 
   async getQuorum(): Promise<bigint> {
     return this.getCachedQuorum(async () => {
-      const lastProposalId = await readContract(this.client, {
+      const lastProposalId = await this.readContract({
         abi: this.abi,
         address: this.address,
         functionName: "proposalCount",
       });
 
-      return readContract(this.client, {
+      return this.readContract({
         abi: this.abi,
         address: this.address,
         functionName: "quorumVotes",
@@ -47,12 +46,12 @@ export class Client<
 
   async getTimelockDelay(): Promise<bigint> {
     if (!this.cache.timelockDelay) {
-      const timelockAddress = await readContract(this.client, {
+      const timelockAddress = await this.readContract({
         abi: this.abi,
         address: this.address,
         functionName: "timelock",
       });
-      this.cache.timelockDelay = await readContract(this.client, {
+      this.cache.timelockDelay = await this.readContract({
         abi: [
           {
             inputs: [],

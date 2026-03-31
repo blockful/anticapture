@@ -1,99 +1,93 @@
-import axios from "axios";
-import useSWR, { SWRConfiguration } from "swr";
 import { formatUnits } from "viem";
 
+import {
+  DaysWindow,
+  useCompareAverageTurnoutQuery,
+  useGetDaoDataQuery,
+  useGetProposalsFromDaoQuery,
+} from "@anticapture/graphql-client/hooks";
+
 import daoConfig from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { BACKEND_ENDPOINT, getAuthHeaders } from "@/shared/utils/server-utils";
+import type { DaoIdEnum } from "@/shared/types/daos";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
-interface QuorumGapResponse {
-  dao: {
-    quorum: string;
-  };
-  compareAverageTurnout: {
-    currentAverageTurnout: string;
-  };
-  proposals: {
-    items: [{ timestamp: string }];
-  };
-}
-
-/* Fetch Dao Total Supply */
-export const fetchQuorumGap = async ({
-  daoId,
-}: {
-  daoId: DaoIdEnum;
-}): Promise<number | null> => {
+export const useQuorumGap = (daoId: DaoIdEnum) => {
   const days = 90;
-  const limit = 1;
   const cutoffDate = Math.floor(
     new Date(new Date().setDate(new Date().getDate() - days)).getTime() / 1000,
   );
 
-  const query = `
-query GetDaoData {
-  dao {
-    quorum
+  const context = {
+    headers: {
+      "anticapture-dao-id": daoId,
+      ...getAuthHeaders(),
+    },
+  };
+
+  const {
+    data: daoData,
+    loading: daoLoading,
+    error: daoError,
+  } = useGetDaoDataQuery({
+    context,
+    skip: !daoId,
+  });
+
+  const {
+    data: proposalsData,
+    loading: proposalsLoading,
+    error: proposalsError,
+  } = useGetProposalsFromDaoQuery({
+    variables: {
+      skip: 0,
+      limit: 1,
+      fromDate: cutoffDate,
+      status: null,
+    },
+    context,
+    skip: !daoId,
+  });
+
+  const {
+    data: turnoutData,
+    loading: turnoutLoading,
+    error: turnoutError,
+  } = useCompareAverageTurnoutQuery({
+    variables: {
+      days: DaysWindow["90d"],
+    },
+    context,
+    skip: !daoId,
+  });
+
+  const isLoading = daoLoading || proposalsLoading || turnoutLoading;
+  const error = daoError || proposalsError || turnoutError;
+
+  let quorumGap: number | null = null;
+
+  if (!isLoading && !error && daoData && proposalsData && turnoutData) {
+    const { decimals } = daoConfig[daoId];
+
+    const isGapEligible = (proposalsData.proposals?.items?.length ?? 0) > 0;
+    const quorum = daoData.dao?.quorum
+      ? Number(formatUnits(BigInt(daoData.dao.quorum), decimals))
+      : null;
+    const avgTurnout = turnoutData.compareAverageTurnout?.currentAverageTurnout
+      ? Number(
+          formatUnits(
+            BigInt(turnoutData.compareAverageTurnout.currentAverageTurnout),
+            decimals,
+          ),
+        )
+      : null;
+    const gap = quorum && avgTurnout ? (avgTurnout / quorum - 1) * 100 : 0;
+
+    quorumGap = isGapEligible ? gap : null;
   }
-  proposals(limit: ${limit}, fromDate: ${cutoffDate}) {
-    items {
-      timestamp
-    }
-  }
-  compareAverageTurnout(days: _${days}d) {
-      currentAverageTurnout
-  }
-} `;
 
-  const response = await axios.post(
-    `${BACKEND_ENDPOINT}`,
-    {
-      query,
-    },
-    {
-      headers: {
-        "anticapture-dao-id": daoId,
-        ...getAuthHeaders(),
-      },
-    },
-  );
-
-  // TODO: move the logic to the backend and return the quorum gap directly
-  const data: QuorumGapResponse = response.data.data;
-
-  const { decimals } = daoConfig[daoId];
-
-  const isGapEligible = data.proposals.items.length > 0;
-  const quorum = data.dao.quorum
-    ? Number(formatUnits(BigInt(data.dao.quorum), decimals))
-    : null;
-  const avgTurnout = data.compareAverageTurnout.currentAverageTurnout
-    ? Number(
-        formatUnits(
-          BigInt(data.compareAverageTurnout.currentAverageTurnout),
-          decimals,
-        ),
-      )
-    : null;
-  const quorumGap = quorum && avgTurnout ? (avgTurnout / quorum - 1) * 100 : 0;
-
-  return isGapEligible ? quorumGap : null;
-};
-
-export const useQuorumGap = (
-  daoId: DaoIdEnum,
-  config?: Partial<SWRConfiguration<number | null, Error>>,
-) => {
-  const key = daoId ? [`quorumGap`, daoId] : null;
-
-  return useSWR<number | null>(
-    key,
-    async () => {
-      return await fetchQuorumGap({ daoId });
-    },
-    {
-      revalidateOnFocus: false,
-      ...config,
-    },
-  );
+  return {
+    data: quorumGap,
+    isLoading,
+    error: error || null,
+  };
 };

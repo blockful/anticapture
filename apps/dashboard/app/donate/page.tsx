@@ -6,16 +6,19 @@ import { HeaderSidebar } from "@/widgets";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
 
 export const metadata: Metadata = {
-  title: "Anticapture - Donate",
-  description: "Support DAO governance security research and development.",
+  title: "Support DAO Governance Security Research | Anticapture",
+  description:
+    "Support Anticapture's open-source research on DAO governance security, hostile takeover prevention, and governance capture detection. Help keep the security framework free and open.",
   openGraph: {
-    title: "Anticapture - Donate",
-    description: "Support DAO governance security research and development.",
+    title: "Support DAO Governance Security Research | Anticapture",
+    description:
+      "Support Anticapture's open-source research on DAO governance security, hostile takeover prevention, and governance capture detection. Help keep the security framework free and open.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Anticapture - Donate",
-    description: "Support DAO governance security research and development.",
+    title: "Support DAO Governance Security Research | Anticapture",
+    description:
+      "Support Anticapture's open-source research on DAO governance security, hostile takeover prevention, and governance capture detection. Help keep the security framework free and open.",
   },
 };
 

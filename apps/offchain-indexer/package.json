@@ -5,11 +5,14 @@
   "type": "module",
   "scripts": {
     "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
     "dev": "tsx src/index.ts",
     "dev:watch": "tsx watch src/index.ts",
     "build": "tsup",
     "start": "node dist/index.js",
     "test": "vitest",
+    "test:unit": "vitest run --exclude '**/*.integration.test.ts'",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf node_modules dist *.tsbuildinfo"
   },

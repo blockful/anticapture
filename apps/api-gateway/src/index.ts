@@ -10,6 +10,7 @@ import {
 
 const prometheusSerializer = new PrometheusSerializer();
 
+import "./_dev-reload";
 import config from "../meshrc";
 import { exporter } from "./instrumentation";
 import { validateAuthToken } from "./auth";
@@ -25,7 +26,11 @@ const bootstrap = async () => {
   });
 
   const server = createServer(async (req, res) => {
-    if (!validateAuthToken(req, res)) return;
+    if (req.url === "/health") {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ status: "ok" }));
+      return;
+    }
     if (req.url === "/metrics") {
       try {
         const result = await exporter.collect();
@@ -40,6 +45,7 @@ const bootstrap = async () => {
       }
       return;
     }
+    if (!validateAuthToken(req, res)) return;
     handler(req, res);
   });
 

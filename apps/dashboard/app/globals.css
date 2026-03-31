@@ -41,9 +41,12 @@
   --animate-accordion-up: accordion-up 0.2s ease-out;
   --animate-scroll-left: scroll-left 20s linear infinite;
   --animate-fade-in: fade-in 0.5s ease-in;
+  --animate-fade-out: fade-out 0.5s ease-in;
   --animate-toast-slide-in: toast-slide-in 0.3s ease-out forwards;
   --animate-toast-slide-out: toast-slide-out 0.2s ease-in forwards;
   --animate-pulse-ring: pulse-ring 1.5s ease-out infinite;
+  --animate-modal-in: modal-in 0.25s ease-out;
+  --animate-modal-out: modal-out 0.15s ease-in;
 
   /* Shadow Styles */
   --shadow-focus-ring: 0px 0px 0px 2px rgba(82, 82, 91, 0.3);
@@ -78,6 +81,10 @@
   --color-surface-destructive: var(--base-destructive);
   --color-surface-destructive-hover: var(--base-destructive-hover);
   --color-surface-disabled: var(--base-muted);
+
+  /* Banner Surface Colors — intentionally dark in both themes */
+  --color-surface-banner-default: #2c1810;
+  --color-surface-banner-highlight: #18181b;
 
   /* Opacity Surface Colors */
   --color-surface-opacity-success: var(--base-success-opacity);
@@ -116,6 +123,49 @@
   --text-alternative-xs: 12px;
   --text-alternative-xs--line-height: 16px;
   --text-alternative-xs--letter-spacing: 6%;
+
+  /* Typography Scale */
+  --text-display: 48px;
+  --text-display--line-height: 52px;
+  --text-display--letter-spacing: -0.02em;
+
+  --text-h1: 40px;
+  --text-h1--line-height: 44px;
+  --text-h1--letter-spacing: -0.012em;
+
+  --text-h2: 30px;
+  --text-h2--line-height: 36px;
+  --text-h2--letter-spacing: -0.0075em;
+
+  --text-h3: 24px;
+  --text-h3--line-height: 32px;
+  --text-h3--letter-spacing: -0.006em;
+
+  --text-h4: 20px;
+  --text-h4--line-height: 28px;
+  --text-h4--letter-spacing: -0.005em;
+
+  --text-h5: 18px;
+  --text-h5--line-height: 24px;
+
+  --text-h6: 16px;
+  --text-h6--line-height: 24px;
+
+  --text-body-lg: 16px;
+  --text-body-lg--line-height: 24px;
+
+  --text-body-md: 14px;
+  --text-body-md--line-height: 20px;
+
+  --text-body-sm: 12px;
+  --text-body-sm--line-height: 16px;
+
+  --text-caption: 11px;
+  --text-caption--line-height: 16px;
+
+  --text-overline: 11px;
+  --text-overline--line-height: 16px;
+  --text-overline--letter-spacing: 0.08em;
 
   @keyframes accordion-down {
     from {
@@ -205,6 +255,15 @@
     }
   }
 
+  @keyframes fade-out {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+
   /* Tooltip animation */
   @keyframes tooltip-show {
     from {
@@ -237,6 +296,31 @@
     to {
       opacity: 0;
       transform: translateY(10px) scale(0.95);
+    }
+  }
+
+  /* Modal animations - slide up from below.
+     Uses the `translate` CSS property (same as Tailwind's -translate-x-1/2 -translate-y-1/2)
+     so centering is preserved throughout the animation. */
+  @keyframes modal-in {
+    from {
+      opacity: 0;
+      translate: -50% calc(-50% + 20px);
+    }
+    to {
+      opacity: 1;
+      translate: -50% -50%;
+    }
+  }
+
+  @keyframes modal-out {
+    from {
+      opacity: 1;
+      translate: -50% -50%;
+    }
+    to {
+      opacity: 0;
+      translate: -50% calc(-50% + 20px);
     }
   }
 
@@ -347,7 +431,7 @@
 
   .scrollbar-thin {
     scrollbar-width: thin; /* Firefox */
-    scrollbar-color: #a1a1aa transparent; /* Firefox */
+    scrollbar-color: var(--base-dimmed) transparent; /* Firefox */
   }
 
   .scrollbar-thin::-webkit-scrollbar {
@@ -359,18 +443,18 @@
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: #a1a1aa; /* Chrome, Safari, Opera */
+    background: var(--base-dimmed); /* Chrome, Safari, Opera */
     border-radius: 3px;
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: #71717a; /* Chrome, Safari, Opera */
+    background: var(--base-ring); /* Chrome, Safari, Opera */
   }
 
   /* Thin scrollbar on hover */
   .hover\:scrollbar-thin:hover {
     scrollbar-width: thin; /* Firefox */
-    scrollbar-color: #a1a1aa transparent; /* Firefox */
+    scrollbar-color: var(--base-dimmed) transparent; /* Firefox */
   }
 
   .hover\:scrollbar-thin:hover::-webkit-scrollbar {
@@ -382,12 +466,12 @@
   }
 
   .hover\:scrollbar-thin:hover::-webkit-scrollbar-thumb {
-    background: #a1a1aa; /* Chrome, Safari, Opera */
+    background: var(--base-dimmed); /* Chrome, Safari, Opera */
     border-radius: 3px;
   }
 
   .hover\:scrollbar-thin:hover::-webkit-scrollbar-thumb:hover {
-    background: #71717a; /* Chrome, Safari, Opera */
+    background: var(--base-ring); /* Chrome, Safari, Opera */
   }
 
   .no-scroll {
@@ -477,7 +561,7 @@
 
   /* Recharts Brush tick formatting */
   .recharts-brush-texts text {
-    fill: #fafafa !important;
+    fill: var(--base-primary-foreground) !important;
     font-size: 10px;
   }
 

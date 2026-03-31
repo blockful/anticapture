@@ -1,17 +1,17 @@
-import {
+import type {
+  OrderDirection,
   QueryInput_VotesByProposalId_OrderBy,
-  QueryInput_VotesByProposalId_OrderDirection,
 } from "@anticapture/graphql-client";
+import type { GetVotesQuery } from "@anticapture/graphql-client/hooks";
 import {
-  GetVotesQuery,
   useGetVotesQuery,
   useGetVotingPowerChangeLazyQuery,
 } from "@anticapture/graphql-client/hooks";
-import { ApolloError } from "@apollo/client";
+import type { ApolloError } from "@apollo/client";
 import { useMemo, useState, useCallback, useEffect } from "react";
 
 import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 type VotingPowerVariation = {
@@ -47,6 +47,8 @@ export interface UseVotesParams {
   orderBy?: string;
   orderDirection?: string;
   proposalStartTimestamp?: number;
+  support?: number | null;
+  voterAddress?: string | null;
 }
 
 export const useVotes = ({
@@ -56,6 +58,8 @@ export const useVotes = ({
   limit = 10,
   orderBy = "timestamp",
   orderDirection = "desc",
+  support = null,
+  voterAddress = null,
 }: UseVotesParams = {}): UseVotesResult => {
   // State for infinite scroll
   const [allVotes, setAllVotes] = useState<VoteWithHistoricalPower[]>([]);
@@ -68,10 +72,11 @@ export const useVotes = ({
       limit,
       skip: 0, // Always fetch from beginning, we'll handle append in fetchMore
       orderBy: orderBy as QueryInput_VotesByProposalId_OrderBy,
-      orderDirection:
-        orderDirection as QueryInput_VotesByProposalId_OrderDirection,
+      orderDirection: orderDirection as OrderDirection,
+      support: support !== null ? String(support) : null,
+      voterAddressIn: voterAddress ? [voterAddress] : null,
     };
-  }, [proposalId, limit, orderBy, orderDirection]);
+  }, [proposalId, limit, orderBy, orderDirection, support, voterAddress]);
 
   // Main votes query
   const { data, loading, error, fetchMore } = useGetVotesQuery({
@@ -107,11 +112,8 @@ export const useVotes = ({
         const result = await getVotingPowerChange({
           variables: {
             addresses,
-            fromDate: (
-              proposalStartTimestamp / 1000 -
-              DAYS_IN_SECONDS["30d"]
-            ).toString(),
-            toDate: (proposalStartTimestamp / 1000).toString(),
+            fromDate: proposalStartTimestamp / 1000 - DAYS_IN_SECONDS["30d"],
+            toDate: proposalStartTimestamp / 1000,
           },
           context: {
             headers: {
@@ -156,11 +158,11 @@ export const useVotes = ({
     [daoId, getVotingPowerChange, proposalStartTimestamp],
   );
 
-  // Reset accumulated votes when sorting parameters change
+  // Reset accumulated votes when sorting or filter parameters change
   useEffect(() => {
     setAllVotes([]);
     setIsLoadingMore(false);
-  }, [orderBy, orderDirection]);
+  }, [orderBy, orderDirection, support, voterAddress]);
 
   // Initialize allVotes on first load or when data changes after reset
   useEffect(() => {

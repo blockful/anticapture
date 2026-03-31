@@ -1,11 +1,11 @@
 import { mainnet } from "viem/chains";
 
-import { ObolIcon } from "@/shared/components/icons";
+import { ObolIcon } from "@/shared/components/icons/ObolIcon";
 import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 import { RECOMMENDED_SETTINGS } from "@/shared/constants/recommended-settings";
-import { DaoConfiguration } from "@/shared/dao-config/types";
+import type { DaoConfiguration } from "@/shared/dao-config/types";
 import { ObolOgIcon } from "@/shared/og/dao-og-icons";
 import {
   RiskLevel,
@@ -20,9 +20,11 @@ export const OBOL: DaoConfiguration = {
     svgColor: "#0F7C76",
     svgBgColor: "#e8f2ff",
   },
+  forumLink: "https://community.obol.org/",
   icon: ObolIcon,
   ogIcon: ObolOgIcon,
   noStage: true,
+  activityFeed: true,
   daoOverview: {
     token: "ERC20",
     chain: { ...mainnet, icon: MainnetIcon },
@@ -333,4 +335,5 @@ export const OBOL: DaoConfiguration = {
       },
     },
   },
+  governancePage: true,
 };

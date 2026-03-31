@@ -2,7 +2,8 @@
 
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useRef } from "react";
-import { Data } from "react-csv/lib/core";
+import type { Data } from "react-csv/lib/core";
+import type { LabelProps } from "recharts";
 import {
   BarChart,
   Bar,
@@ -11,7 +12,6 @@ import {
   ResponsiveContainer,
   LabelList,
   Cell,
-  LabelProps,
 } from "recharts";
 import { formatUnits } from "viem";
 
@@ -30,7 +30,7 @@ import {
   useDelegatedSupply,
   useScreenSize,
 } from "@/shared/hooks";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { formatNumberUserReadable } from "@/shared/utils/";
 
@@ -103,13 +103,13 @@ export const AttackCostBarChart = ({
 
   const mocked = useMemo(() => {
     return (
-      delegatedSupply.data?.currentDelegatedSupply === undefined &&
+      delegatedSupply.data?.currentValue === undefined &&
       activeSupply.data?.activeSupply === undefined &&
       averageTurnout.data?.currentAverageTurnout === undefined &&
       daoTopTokenHolderExcludingTheDao?.balance === undefined
     );
   }, [
-    delegatedSupply.data?.currentDelegatedSupply,
+    delegatedSupply.data?.currentValue,
     activeSupply.data?.activeSupply,
     averageTurnout.data?.currentAverageTurnout,
     daoTopTokenHolderExcludingTheDao?.balance,
@@ -153,7 +153,7 @@ export const AttackCostBarChart = ({
         value: formatValue(
           Number(
             formatUnits(
-              BigInt(delegatedSupply.data?.currentDelegatedSupply || 0),
+              BigInt(delegatedSupply.data?.currentValue || 0),
               daoConfig.decimals,
             ),
           ),
@@ -214,7 +214,7 @@ export const AttackCostBarChart = ({
     daoTokenPriceHistoricalData,
     valueMode,
     liquidTreasuryData,
-    delegatedSupply.data?.currentDelegatedSupply,
+    delegatedSupply.data?.currentValue,
     activeSupply.data?.activeSupply,
     averageTurnout.data?.currentAverageTurnout,
     daoTopTokenHolderExcludingTheDao?.balance,

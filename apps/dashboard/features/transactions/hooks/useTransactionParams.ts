@@ -1,7 +1,7 @@
 "use client";
 
 import { parseAsInteger, parseAsStringEnum, useQueryState } from "nuqs";
-import { Address } from "viem";
+import type { Address } from "viem";
 
 import { parseAsAddress } from "@/shared/utils/parseAsAddress";
 

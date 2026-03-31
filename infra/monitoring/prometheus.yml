@@ -1,0 +1,128 @@
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["${ALERTMANAGER_ENDPOINT}"]
+
+rule_files:
+  - alerts.yml
+
+scrape_configs:
+  - job_name: anticapture-ens-indexer
+    metrics_path: "/otel-metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${ENS_INDEXER_ENDPOINT}"]
+
+  - job_name: anticapture-ens-api
+    metrics_path: "/metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${ENS_API_ENDPOINT}"]
+
+  - job_name: anticapture-aave-indexer
+    metrics_path: "/otel-metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${AAVE_INDEXER_ENDPOINT}"]
+
+  - job_name: anticapture-aave-api
+    metrics_path: "/metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${AAVE_API_ENDPOINT}"]
+
+  - job_name: anticapture-shutter-indexer
+    metrics_path: "/otel-metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${SHUTTER_INDEXER_ENDPOINT}"]
+
+  - job_name: anticapture-shutter-api
+    metrics_path: "/metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${SHUTTER_API_ENDPOINT}"]
+
+  - job_name: anticapture-scroll-indexer
+    metrics_path: "/otel-metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${SCROLL_INDEXER_ENDPOINT}"]
+
+  - job_name: anticapture-scroll-api
+    metrics_path: "/metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${SCROLL_API_ENDPOINT}"]
+
+  - job_name: anticapture-nouns-indexer
+    metrics_path: "/otel-metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${NOUNS_INDEXER_ENDPOINT}"]
+
+  - job_name: anticapture-nouns-api
+    metrics_path: "/metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${NOUNS_API_ENDPOINT}"]
+
+  - job_name: anticapture-gitcoin-indexer
+    metrics_path: "/otel-metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${GITCOIN_INDEXER_ENDPOINT}"]
+
+  - job_name: anticapture-gitcoin-api
+    metrics_path: "/metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${GITCOIN_API_ENDPOINT}"]
+
+  - job_name: anticapture-compound-indexer
+    metrics_path: "/otel-metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${COMPOUND_INDEXER_ENDPOINT}"]
+
+  - job_name: anticapture-compound-api
+    metrics_path: "/metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${COMPOUND_API_ENDPOINT}"]
+
+  - job_name: anticapture-uniswap-indexer
+    metrics_path: "/otel-metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${UNISWAP_INDEXER_ENDPOINT}"]
+
+  - job_name: anticapture-uniswap-api
+    metrics_path: "/metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${UNISWAP_API_ENDPOINT}"]
+
+  - job_name: anticapture-obol-indexer
+    metrics_path: "/otel-metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${OBOL_INDEXER_ENDPOINT}"]
+
+  - job_name: anticapture-obol-api
+    metrics_path: "/metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${OBOL_API_ENDPOINT}"]
+
+  - job_name: anticapture-gateway
+    metrics_path: "/metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${GATEWAY_ENDPOINT}"]
+
+  - job_name: tempo
+    metrics_path: "/metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${TEMPO_ENDPOINT}"]

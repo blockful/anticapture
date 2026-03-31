@@ -1,8 +1,8 @@
 "use client";
 
 import {
-  QueryInput_VotingPowers_OrderBy,
-  QueryInput_VotingPowers_OrderDirection,
+  OrderDirection,
+  type QueryInput_VotingPowers_OrderBy,
 } from "@anticapture/graphql-client";
 import {
   useGetDelegatesQuery,
@@ -12,8 +12,8 @@ import { NetworkStatus } from "@apollo/client";
 import { useMemo, useCallback, useState, useEffect } from "react";
 
 import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
-import { DaoIdEnum } from "@/shared/types/daos";
-import { TimeInterval } from "@/shared/types/enums";
+import type { DaoIdEnum } from "@/shared/types/daos";
+import type { TimeInterval } from "@/shared/types/enums";
 import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 interface ProposalsActivity {
@@ -34,6 +34,7 @@ export interface Delegate {
   accountId: string;
   proposalsActivity?: ProposalsActivity;
   variation: DelegateVariation;
+  balance?: string;
 }
 
 interface PaginationInfo {
@@ -58,7 +59,7 @@ interface UseDelegatesParams {
   daoId: DaoIdEnum;
   address?: string;
   orderBy?: QueryInput_VotingPowers_OrderBy;
-  orderDirection?: QueryInput_VotingPowers_OrderDirection;
+  orderDirection?: OrderDirection;
   limit?: number;
   skipActivity?: boolean;
 }
@@ -66,7 +67,7 @@ interface UseDelegatesParams {
 export const useDelegates = ({
   daoId,
   orderBy,
-  orderDirection = QueryInput_VotingPowers_OrderDirection.Desc,
+  orderDirection = OrderDirection.Desc,
   days,
   address,
   limit = 15,
@@ -107,8 +108,9 @@ export const useDelegates = ({
       orderDirection,
       orderBy,
       limit,
-      fromDate: fromDate.toString(),
-      ...(address && { addresses: [address] }),
+      fromDate,
+      toDate: null,
+      addresses: address ? [address] : null,
     },
     context: {
       headers: { "anticapture-dao-id": daoId, ...getAuthHeaders() },
@@ -122,8 +124,9 @@ export const useDelegates = ({
     refetch({
       orderDirection,
       orderBy,
-      fromDate: fromDate.toString(),
-      ...(address && { addresses: [address] }),
+      fromDate,
+      toDate: null,
+      addresses: address ? [address] : null,
     });
   }, [orderDirection, address, refetch, orderBy, fromDate]);
 
@@ -162,7 +165,7 @@ export const useDelegates = ({
       try {
         const activityPromises = newAddresses.map(async (addr) => {
           const result = await getDelegateProposalsActivity({
-            variables: { address: addr, fromDate: fromDate.toString() },
+            variables: { address: addr, fromDate },
           });
           return {
             address: addr,
@@ -206,9 +209,8 @@ export const useDelegates = ({
         const proposalsActivity = delegateActivities.get(delegate.accountId);
 
         return {
-          votingPower: delegate.votingPower,
-          delegationsCount: delegate.delegationsCount,
-          accountId: delegate.accountId,
+          ...delegate,
+          balance: delegate.balance ?? undefined,
           variation: delegate.variation
             ? {
                 absoluteChange: delegate.variation.absoluteChange,
@@ -239,8 +241,9 @@ export const useDelegates = ({
         variables: {
           orderDirection,
           orderBy,
-          fromDate: fromDate.toString(),
-          ...(address && { addresses: [address] }),
+          fromDate,
+          toDate: null,
+          addresses: address ? [address] : null,
           skip: currentItemsCount,
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
@@ -278,8 +281,9 @@ export const useDelegates = ({
     refetch({
       orderDirection,
       orderBy,
-      fromDate: fromDate.toString(),
-      ...(address && { addresses: [address] }),
+      fromDate,
+      toDate: null,
+      addresses: address ? [address] : null,
     });
   }, [refetch, orderDirection, address, orderBy, fromDate]);
 
