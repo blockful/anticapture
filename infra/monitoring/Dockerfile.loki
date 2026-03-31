@@ -1,6 +1,9 @@
+FROM alpine:3.19 AS su-exec-builder
+RUN apk add --no-cache su-exec
+
 FROM grafana/loki:3.4.3
 USER root
-RUN apk add --no-cache su-exec
+COPY --from=su-exec-builder /sbin/su-exec /sbin/su-exec
 COPY loki.yaml /etc/loki/local-config.yaml
 COPY entrypoint.loki.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
