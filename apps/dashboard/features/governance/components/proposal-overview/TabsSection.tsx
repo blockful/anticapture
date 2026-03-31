@@ -6,7 +6,10 @@ import { ActionsTabContent } from "@/features/governance/components/proposal-ove
 import { DescriptionTabContent } from "@/features/governance/components/proposal-overview/DescriptionTabContent";
 import { OffchainVotesContent } from "@/features/governance/components/proposal-overview/OffchainVotesContent";
 import { VotesTabContent } from "@/features/governance/components/proposal-overview/VotesTabContent";
-import type { ProposalViewData } from "@/features/governance/types";
+import type {
+  ProposalDetails,
+  ProposalViewData,
+} from "@/features/governance/types";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn } from "@/shared/utils/cn";
 
@@ -45,7 +48,7 @@ export const TabsSection = ({
       ? offchainScores.reduce((sum, s) => sum + s, 0)
       : 0;
 
-  const onchainProposal = proposal as NonNullable<GetProposalQuery["proposal"]>;
+  const onchainProposal = proposal as unknown as ProposalDetails;
 
   const renderTabContent = () => {
     switch (activeTab) {

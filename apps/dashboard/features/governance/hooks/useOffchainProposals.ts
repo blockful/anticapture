@@ -3,7 +3,7 @@ import type {
   QueryOffchainProposalsArgs,
 } from "@anticapture/graphql-client/hooks";
 import {
-  QueryInput_OffchainProposals_OrderDirection,
+  OrderDirection,
   useGetOffchainProposalsFromDaoQuery,
 } from "@anticapture/graphql-client/hooks";
 import type { ApolloError } from "@apollo/client";
@@ -28,9 +28,8 @@ export interface UseOffchainProposalsResult {
   isPaginationLoading: boolean;
 }
 
-export interface UseOffchainProposalsParams extends Omit<
-  QueryOffchainProposalsArgs,
-  "skip" | "limit"
+export interface UseOffchainProposalsParams extends Partial<
+  Omit<QueryOffchainProposalsArgs, "skip" | "limit">
 > {
   itemsPerPage?: number;
   daoId?: DaoIdEnum;
@@ -38,7 +37,7 @@ export interface UseOffchainProposalsParams extends Omit<
 
 export const useOffchainProposals = ({
   fromDate,
-  orderDirection = QueryInput_OffchainProposals_OrderDirection.Desc,
+  orderDirection = OrderDirection.Desc,
   status,
   itemsPerPage = 10,
   daoId,
@@ -50,8 +49,8 @@ export const useOffchainProposals = ({
       skip: 0,
       limit: itemsPerPage,
       orderDirection,
-      status,
-      fromDate,
+      status: status ?? null,
+      fromDate: fromDate ?? null,
     }),
     [itemsPerPage, orderDirection, status, fromDate],
   );

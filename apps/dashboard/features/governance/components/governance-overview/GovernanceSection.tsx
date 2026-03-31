@@ -107,6 +107,17 @@ export const GovernanceSection = () => {
           icon={<Building2 className="section-layout-icon" />}
           description="View and vote on executable proposals from this DAO."
         >
+          {hasOffchain && (
+            <TabGroup
+              tabs={PROPOSAL_TABS}
+              activeTab={activeTab}
+              onTabChange={(value) =>
+                setActiveTab(value as "onchain" | "offchain")
+              }
+              className="mb-4"
+              size="md"
+            />
+          )}
           <div className="flex flex-col items-center justify-center py-12">
             <EmptyState
               title="Unable to load proposals"

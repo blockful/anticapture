@@ -2,10 +2,10 @@ import { calculateDaysDiff } from "@/features/governance/utils/calculateDaysDiff
 
 // Helper function to calculate remaining hours after accounting for full days
 const calculateRemainingHours = (
-  timestamp: string,
+  timestamp: number | string,
   currentTime: number,
 ): number => {
-  const diffSeconds = Math.abs(parseInt(timestamp) - currentTime);
+  const diffSeconds = Math.abs(Number(timestamp) - currentTime);
   const remainingSeconds = diffSeconds % (24 * 60 * 60);
   return Math.floor(remainingSeconds / (60 * 60));
 };
@@ -21,9 +21,9 @@ const formatDaysAndHours = (days: number, hours: number): string => {
   }
 };
 
-export const getTimeLeftText = (endTimestamp: string) => {
+export const getTimeLeftText = (endTimestamp: number | string) => {
   const now = Date.now() / 1000;
-  const endTime = parseInt(endTimestamp);
+  const endTime = Number(endTimestamp);
 
   if (endTime > now) {
     const days = calculateDaysDiff(endTimestamp, now);
@@ -44,15 +44,21 @@ export const getTimeLeftText = (endTimestamp: string) => {
 };
 
 // Helper function to calculate hours difference (for getTimeText function)
-const calculateHoursDiff = (timestamp: string, currentTime: number): number => {
-  const diffSeconds = Math.abs(parseInt(timestamp) - currentTime);
+const calculateHoursDiff = (
+  timestamp: number | string,
+  currentTime: number,
+): number => {
+  const diffSeconds = Math.abs(Number(timestamp) - currentTime);
   return Math.floor(diffSeconds / (60 * 60));
 };
 
-export const getTimeText = (startTimestamp: string, endTimestamp: string) => {
+export const getTimeText = (
+  startTimestamp: number | string,
+  endTimestamp: number | string,
+) => {
   const now = Date.now() / 1000;
-  const startTime = parseInt(startTimestamp);
-  const endTime = parseInt(endTimestamp);
+  const startTime = Number(startTimestamp);
+  const endTime = Number(endTimestamp);
 
   if (startTime > now) {
     const days = calculateDaysDiff(startTimestamp, now);

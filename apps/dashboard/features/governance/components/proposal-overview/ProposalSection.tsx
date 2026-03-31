@@ -19,7 +19,10 @@ import { TitleSection } from "@/features/governance/components/proposal-overview
 import { useVoterInfo } from "@/features/governance/hooks/useAccountPower";
 import { useOffchainProposal } from "@/features/governance/hooks/useOffchainProposal";
 import { useProposal } from "@/features/governance/hooks/useProposal";
-import type { ProposalViewData } from "@/features/governance/types";
+import type {
+  ProposalDetails,
+  ProposalViewData,
+} from "@/features/governance/types";
 import {
   getOffchainProposalStatus,
   normalizeChoices,
@@ -70,13 +73,18 @@ export const ProposalSection = ({
   });
 
   const {
-    proposal: rawOffchainProposal,
+    proposal: rawOffchainResponse,
     loading: offchainLoading,
     error: offchainError,
   } = useOffchainProposal({
     proposalId: offchainProposalId,
     daoId: daoEnum,
   });
+
+  const rawOffchainProposal =
+    rawOffchainResponse?.__typename === "OffchainProposal"
+      ? rawOffchainResponse
+      : null;
 
   const { votingPower, rawVotingPower, votes } = useVoterInfo({
     address: address ?? "",
@@ -106,7 +114,7 @@ export const ProposalSection = ({
         title: rawOffchainProposal.title,
         description: rawOffchainProposal.body,
         quorum: "0",
-        timestamp: String(rawOffchainProposal.created),
+        timestamp: rawOffchainProposal.created,
         status: getOffchainProposalStatus(
           rawOffchainProposal.state,
           rawOffchainProposal.type,
@@ -115,8 +123,8 @@ export const ProposalSection = ({
         forVotes: "0",
         againstVotes: "0",
         abstainVotes: "0",
-        startTimestamp: String(rawOffchainProposal.start),
-        endTimestamp: String(rawOffchainProposal.end),
+        startTimestamp: rawOffchainProposal.start,
+        endTimestamp: rawOffchainProposal.end,
         calldatas: null,
         targets: [],
         values: [],
@@ -142,7 +150,10 @@ export const ProposalSection = ({
     return <div className="text-primary p-4">Proposal not found</div>;
   }
 
-  const supportValue = votes?.items[0]?.support ?? undefined;
+  const supportValue =
+    votes?.items[0]?.support != null
+      ? Number(votes.items[0].support)
+      : undefined;
 
   return (
     <div className="w-full pb-20 lg:pb-0">
@@ -192,7 +203,7 @@ export const ProposalSection = ({
             <VotingModal
               isOpen={isVotingModalOpen}
               onClose={() => setIsVotingModalOpen(false)}
-              proposal={onchainProposal as OnchainProposal}
+              proposal={onchainProposal as ProposalDetails}
               votingPower={votingPower}
               rawVotingPower={rawVotingPower}
               decimals={decimals}

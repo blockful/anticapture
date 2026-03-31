@@ -20,10 +20,15 @@ import { formatNumberUserReadable } from "@/shared/utils";
 
 type VoteChoice = number | number[] | Record<string, number>;
 
+type OffchainProposalData = Extract<
+  NonNullable<GetOffchainProposalQuery["offchainProposalById"]>,
+  { __typename?: "OffchainProposal" }
+>;
+
 interface OffchainVotingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  proposal: NonNullable<GetOffchainProposalQuery["offchainProposalById"]>;
+  proposal: OffchainProposalData;
 }
 
 export const OffchainVotingModal = ({
@@ -46,7 +51,13 @@ export const OffchainVotingModal = ({
     spaceId: proposal.spaceId,
     proposalId: proposal.id,
     snapshot: proposal.snapshot,
-    strategies: proposal.strategies,
+    strategies: proposal.strategies
+      ?.filter((s): s is NonNullable<typeof s> => s !== null)
+      .map((s) => ({
+        name: s.name,
+        network: s.network,
+        params: typeof s.params === "string" ? JSON.parse(s.params) : s.params,
+      })),
     network: proposal.network,
   });
 

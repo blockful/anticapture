@@ -72,7 +72,10 @@ export const ProposalHeader = ({
   proposalStatus,
   snapshotLink,
 }: ProposalHeaderProps) => {
-  const supportValue = votes?.items[0]?.support;
+  const supportValue =
+    votes?.items[0]?.support != null
+      ? Number(votes.items[0].support)
+      : undefined;
 
   return (
     <div className="text-primary bg-surface-background border-border-default sticky -top-[57px] z-20 flex h-[65px] w-full shrink-0 items-center justify-between gap-6 border-b py-2 lg:top-0">

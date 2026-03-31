@@ -22,13 +22,13 @@ export interface ProposalViewData {
   title: string;
   description: string;
   quorum: string;
-  timestamp: string;
+  timestamp: number;
   status: string;
   forVotes: string;
   againstVotes: string;
   abstainVotes: string;
-  startTimestamp: string;
-  endTimestamp: string;
+  startTimestamp: number;
+  endTimestamp: number;
   calldatas: Array<string | null> | null;
   targets: Array<string | null>;
   values: Array<string | null>;
