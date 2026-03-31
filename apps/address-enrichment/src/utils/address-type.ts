@@ -29,7 +29,6 @@ export async function isContract(
   try {
     const bytecode = await client.getCode({ address });
     // If bytecode exists and is not empty (0x), it's a contract
-    logger.debug({ address: address }, `Address bytecode: ${bytecode}`);
     return bytecode !== undefined && bytecode !== "0x";
   } catch (error) {
     logger.error({ err: error, address }, "failed to check address type");

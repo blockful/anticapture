@@ -1,7 +1,6 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 import { getAddress } from "viem";
 
-import { logger } from "@/logger";
 import { EnrichmentService } from "@/services/enrichment";
 
 import {
@@ -38,7 +37,6 @@ export function addressController(app: Hono, service: EnrichmentService) {
     async (context) => {
       const { address } = context.req.valid("param");
       const result = await service.getAddressEnrichment(address);
-      logger.debug({ address: address, enrichedData: result });
       const response = AddressResponseSchema.safeParse(result);
       return context.json(response.data);
     },
