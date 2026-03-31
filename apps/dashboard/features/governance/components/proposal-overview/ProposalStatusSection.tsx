@@ -2,14 +2,16 @@ import { Loader } from "lucide-react";
 import { useParams } from "next/navigation";
 
 import { ProposalTimeline } from "@/features/governance/components/proposal-overview/ProposalTimeline";
-import type { ProposalDetails } from "@/features/governance/types";
+import type { ProposalViewData } from "@/features/governance/types";
 import daoConfigByDaoId from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
 export const ProposalStatusSection = ({
   proposal,
+  isOffchain = false,
 }: {
-  proposal: ProposalDetails;
+  proposal: ProposalViewData;
+  isOffchain?: boolean;
 }) => {
   const { daoId } = useParams<{ daoId: string }>();
   const daoIdKey = daoId?.toUpperCase() as DaoIdEnum;
@@ -29,6 +31,7 @@ export const ProposalStatusSection = ({
       <ProposalTimeline
         proposal={proposal}
         blockExplorerUrl={blockExplorerUrl}
+        isOffchain={isOffchain}
       />
     </div>
   );

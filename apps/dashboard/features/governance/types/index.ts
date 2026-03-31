@@ -14,6 +14,26 @@ type GraphqlProposalDetails = Extract<
   { __typename?: "OnchainProposal" }
 >;
 
+export interface ProposalViewData {
+  id: string;
+  daoId: string;
+  txHash: string | null;
+  proposerAccountId: string;
+  title: string;
+  description: string;
+  quorum: string;
+  timestamp: number;
+  status: string;
+  forVotes: string;
+  againstVotes: string;
+  abstainVotes: string;
+  startTimestamp: number;
+  endTimestamp: number;
+  calldatas: Array<string | null> | null;
+  targets: Array<string | null>;
+  values: Array<string | null>;
+}
+
 export enum ProposalStatus {
   PENDING = "pending",
   ONGOING = "ongoing",
@@ -25,6 +45,7 @@ export enum ProposalStatus {
   SUCCEEDED = "succeeded",
   EXPIRED = "expired",
   NO_QUORUM = "no_quorum",
+  CLOSED = "closed",
 }
 
 export enum ProposalState {

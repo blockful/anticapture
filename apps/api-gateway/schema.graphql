@@ -1891,6 +1891,17 @@ type OffchainProposal {
 
   """Whether the proposal was flagged by Snapshot."""
   flagged: Boolean!
+  scores: [Float]!
+  choices: [String]!
+  network: String!
+  snapshot: Float
+  strategies: [query_offchainProposals_items_items_strategies_items]!
+}
+
+type query_offchainProposals_items_items_strategies_items {
+  name: String!
+  network: String!
+  params: JSON!
 }
 
 enum queryInput_offchainProposals_status_items {

@@ -4,8 +4,8 @@ import type { Address } from "viem";
 
 import { ProposalBadge } from "@/features/governance/components/proposal-overview/ProposalBadge";
 import type {
-  ProposalDetails,
   ProposalStatus,
+  ProposalViewData,
 } from "@/features/governance/types";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
@@ -36,7 +36,7 @@ const DAO_TWITTER_HANDLES: Record<string, string> = {
 };
 
 interface TitleSectionProps {
-  proposal: ProposalDetails;
+  proposal: ProposalViewData;
   onAddressClick?: (address: string) => void;
 }
 

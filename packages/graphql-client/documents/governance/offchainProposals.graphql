@@ -1,0 +1,76 @@
+query GetOffchainProposalsFromDao(
+  $skip: Int
+  $limit: Int = 10
+  $orderDirection: OrderDirection = desc
+  $status: [queryInput_offchainProposals_status_items]
+  $fromDate: Int
+) {
+  offchainProposals(
+    skip: $skip
+    limit: $limit
+    orderDirection: $orderDirection
+    status: $status
+    fromDate: $fromDate
+  ) {
+    items {
+      id
+      spaceId
+      author
+      title
+      type
+      state
+      start
+      end
+      created
+      updated
+      scores
+      choices
+    }
+    totalCount
+  }
+}
+
+query GetOffchainProposal($id: String!) {
+  offchainProposalById(id: $id) {
+    ... on OffchainProposal {
+      id
+      spaceId
+      author
+      title
+      body
+      type
+      state
+      start
+      end
+      created
+      updated
+      link
+      scores
+      choices
+      strategies {
+        name
+        network
+        params
+      }
+      network
+      snapshot
+    }
+  }
+}
+
+query GetOffchainVotesByProposalId(
+  $id: String!
+  $skip: Int
+  $limit: Int = 10
+) {
+  votesOffchainByProposalId(id: $id, skip: $skip, limit: $limit) {
+    items {
+      voter
+      choice
+      vp
+      reason
+      created
+    }
+    totalCount
+  }
+}

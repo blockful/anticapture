@@ -21,6 +21,11 @@ const createMockProposal = (
   updated: 1700000000,
   link: "",
   flagged: false,
+  scores: [],
+  choices: [],
+  network: "",
+  snapshot: null,
+  strategies: [],
   ...overrides,
 });
 

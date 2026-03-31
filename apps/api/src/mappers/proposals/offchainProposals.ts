@@ -58,6 +58,17 @@ export const OffchainProposalResponseSchema = z
     flagged: z.boolean().openapi({
       description: "Whether the proposal was flagged by Snapshot.",
     }),
+    scores: z.array(z.number()),
+    choices: z.array(z.string()),
+    network: z.string(),
+    snapshot: z.number().nullable(),
+    strategies: z.array(
+      z.object({
+        name: z.string(),
+        network: z.string(),
+        params: z.record(z.string(), z.unknown()),
+      }),
+    ),
   })
   .openapi("OffchainProposal");
 
@@ -81,6 +92,11 @@ export const OffchainProposalMapper = {
     updated: p.updated,
     link: p.link,
     flagged: p.flagged,
+    scores: p.scores,
+    choices: p.choices,
+    network: p.network,
+    snapshot: p.snapshot,
+    strategies: p.strategies,
   }),
 };
 

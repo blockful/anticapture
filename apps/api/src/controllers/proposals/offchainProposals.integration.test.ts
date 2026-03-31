@@ -33,6 +33,8 @@ const createProposal = (
   updated: 1700000000,
   link: "",
   flagged: false,
+  scores: [],
+  choices: [],
   ...overrides,
 });
 
@@ -51,6 +53,11 @@ const BASE_PROPOSAL_ITEM = {
   updated: 1700000000,
   link: "",
   flagged: false,
+  scores: [],
+  choices: [],
+  network: "",
+  snapshot: null,
+  strategies: [],
 };
 
 beforeAll(async () => {

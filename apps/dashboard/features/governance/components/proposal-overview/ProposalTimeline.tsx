@@ -1,16 +1,18 @@
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 
-import type { ProposalDetails } from "@/features/governance/types";
+import type { ProposalViewData } from "@/features/governance/types";
 
 interface ProposalTimelineProps {
-  proposal: ProposalDetails;
+  proposal: ProposalViewData;
   blockExplorerUrl?: string;
+  isOffchain?: boolean;
 }
 
 export const ProposalTimeline = ({
   proposal,
   blockExplorerUrl = "https://etherscan.io",
+  isOffchain = false,
 }: ProposalTimelineProps) => {
   const now = Date.now() / 1000;
   const createdTime = Number(proposal.timestamp);
@@ -35,10 +37,11 @@ export const ProposalTimeline = ({
 
   const proposalStatus = proposal.status.toLowerCase();
   const isQueued =
-    proposalStatus === "queued" ||
-    proposalStatus === "pending_execution" ||
-    proposalStatus === "executed";
-  const isExecuted = proposalStatus === "executed";
+    !isOffchain &&
+    (proposalStatus === "queued" ||
+      proposalStatus === "pending_execution" ||
+      proposalStatus === "executed");
+  const isExecuted = !isOffchain && proposalStatus === "executed";
 
   const timelineItems = [
     {
