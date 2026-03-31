@@ -55,6 +55,9 @@ const BASE_PROPOSAL_ITEM = {
   flagged: false,
   scores: [],
   choices: [],
+  network: "",
+  snapshot: null,
+  strategies: [],
 };
 
 beforeAll(async () => {
