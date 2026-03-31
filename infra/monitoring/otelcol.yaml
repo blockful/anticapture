@@ -12,6 +12,8 @@ exporters:
     endpoint: ${TEMPO_ENDPOINT}
     tls:
       insecure: true
+  otlphttp/loki:
+    endpoint: ${LOKI_ENDPOINT}/otlp
 
 service:
   pipelines:
@@ -19,3 +21,7 @@ service:
       receivers: [otlp]
       processors: [batch]
       exporters: [otlp_grpc/tempo]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlphttp/loki]
