@@ -1,14 +1,4 @@
-import {
-  and,
-  asc,
-  desc,
-  gt,
-  isNull,
-  eq,
-  inArray,
-  count,
-  sql,
-} from "drizzle-orm";
+import { and, asc, desc, gt, isNull, eq, inArray, count } from "drizzle-orm";
 import { Address } from "viem";
 
 import { UnifiedDrizzle, accountPower, offchainVotes } from "@/database";
@@ -44,7 +34,7 @@ export class OffchainNonVotersRepositoryImpl implements OffchainNonVotersReposit
         offchainVotes,
         and(
           eq(offchainVotes.proposalId, proposalId),
-          sql`${offchainVotes.voter} = ${accountPower.accountId}`,
+          eq(offchainVotes.voter, accountPower.accountId),
         ),
       )
       .where(
@@ -71,7 +61,7 @@ export class OffchainNonVotersRepositoryImpl implements OffchainNonVotersReposit
         offchainVotes,
         and(
           eq(offchainVotes.proposalId, proposalId),
-          sql`${offchainVotes.voter} = ${accountPower.accountId}`,
+          eq(offchainVotes.voter, accountPower.accountId),
         ),
       )
       .where(

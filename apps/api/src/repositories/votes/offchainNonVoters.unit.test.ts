@@ -75,12 +75,9 @@ describe("OffchainNonVotersRepositoryImpl", () => {
   beforeAll(async () => {
     client = new PGlite();
     const combinedSchema = { ...schema, ...offchainSchema };
-    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    db = drizzle(client, { schema: combinedSchema }) as any;
 
-    // Push both schemas together in a single call to avoid PGlite
-    // prepared-statement conflicts that occur when pushSchema is invoked twice
-    // on the same connection.
+    db = drizzle(client, { schema: combinedSchema });
+
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     const { apply } = await pushSchema(combinedSchema, db as any);
     await apply();

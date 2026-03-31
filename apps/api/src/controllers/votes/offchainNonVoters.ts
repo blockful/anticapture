@@ -1,9 +1,6 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 
-import {
-  OffchainVotersRequestSchema,
-  OffchainVotersResponseSchema,
-} from "@/mappers";
+import { VotersRequestSchema, OffchainVotersResponseSchema } from "@/mappers";
 import { OffchainNonVotersService } from "@/services";
 
 export function offchainNonVoters(
@@ -23,7 +20,7 @@ export function offchainNonVoters(
         params: z.object({
           id: z.string(),
         }),
-        query: OffchainVotersRequestSchema,
+        query: VotersRequestSchema,
       },
       responses: {
         200: {

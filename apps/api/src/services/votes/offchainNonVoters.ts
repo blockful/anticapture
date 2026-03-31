@@ -1,17 +1,7 @@
 import { Address } from "viem";
 
 import { OffchainVotersResponse } from "@/mappers";
-
-export interface OffchainNonVotersRepository {
-  getOffchainNonVoters(
-    proposalId: string,
-    skip: number,
-    limit: number,
-    orderDirection: "asc" | "desc",
-    addresses?: Address[],
-  ): Promise<{ voter: Address; votingPower: bigint }[]>;
-  getOffchainNonVotersCount(proposalId: string): Promise<number>;
-}
+import { OffchainNonVotersRepository } from "@/repositories";
 
 export class OffchainNonVotersService {
   constructor(private readonly repo: OffchainNonVotersRepository) {}
