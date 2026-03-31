@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@anticapture/graphql-client": "workspace:*",
+    "@anticapture/observability": "workspace:*",
     "@apollo/client": "^3.13.8",
     "@ethersproject/providers": "^5.8.0",
     "@hookform/resolvers": "^5.2.2",

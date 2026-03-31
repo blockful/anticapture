@@ -6,3 +6,4 @@ export {
   PrometheusSerializer,
   type ObservabilityProvider,
 } from "./observability.js";
+export { wrapWithTracing } from "./tracing.js";

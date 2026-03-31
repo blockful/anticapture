@@ -1,6 +1,7 @@
 import {
   PROMETHEUS_MIME_TYPE,
   PrometheusSerializer,
+  wrapWithTracing,
 } from "@anticapture/observability";
 import { serve } from "@hono/node-server";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
@@ -176,7 +177,7 @@ const optimisticProposalType =
 
 const repo = new DrizzleRepository(pgClient);
 const balanceQueryFragments = new AccountBalanceQueryFragments(pgClient);
-const votingPowerRepo = new VotingPowerRepository(pgClient);
+const votingPowerRepo = wrapWithTracing(new VotingPowerRepository(pgClient));
 const proposalsRepo = new DrizzleProposalsActivityRepository(pgClient);
 const transactionsRepo = new TransactionsRepository(pgClient);
 const daoMetricsDayBucketRepo = new DaoMetricsDayBucketRepository(pgClient);
@@ -195,11 +196,13 @@ const accountBalanceRepo = new AccountBalanceRepository(
 );
 const accountInteractionRepo = new AccountInteractionsRepository(pgClient);
 const transactionsService = new TransactionsService(transactionsRepo);
-const votingPowerService = new VotingPowerService(
-  env.DAO_ID === DaoIdEnum.NOUNS || env.DAO_ID === DaoIdEnum.LIL_NOUNS
-    ? new NounsVotingPowerRepository(pgClient)
-    : votingPowerRepo,
-  votingPowerRepo,
+const votingPowerService = wrapWithTracing(
+  new VotingPowerService(
+    env.DAO_ID === DaoIdEnum.NOUNS || env.DAO_ID === DaoIdEnum.LIL_NOUNS
+      ? new NounsVotingPowerRepository(pgClient)
+      : votingPowerRepo,
+    votingPowerRepo,
+  ),
 );
 const daoCache = new DaoCache();
 const daoService = new DaoService(daoClient, daoCache, env.CHAIN_ID);
