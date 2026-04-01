@@ -2,6 +2,7 @@ import { serve } from "@hono/node-server";
 import { swaggerUI } from "@hono/swagger-ui";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { cors } from "hono/cors";
+import { HTTPException } from "hono/http-exception";
 
 import { ArkhamClient } from "@/clients/arkham";
 import { ENSClient } from "@/clients/ens";
@@ -27,16 +28,23 @@ const app = new Hono();
 // Middleware
 app.use(async (c, next) => {
   const start = Date.now();
-  await next();
-  logger.info(
-    {
-      method: c.req.method,
-      url: c.req.path,
-      status: c.res.status,
-      durationMs: Date.now() - start,
-    },
-    "request",
-  );
+  let status: number | undefined;
+  try {
+    await next();
+  } catch (err) {
+    status = err instanceof HTTPException ? err.status : 500;
+    throw err;
+  } finally {
+    logger.info(
+      {
+        method: c.req.method,
+        url: c.req.path,
+        status: status ?? c.res?.status ?? 500,
+        durationMs: Date.now() - start,
+      },
+      "request",
+    );
+  }
 });
 app.use(
   cors({

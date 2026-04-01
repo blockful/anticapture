@@ -5,6 +5,7 @@ import {
 } from "@anticapture/observability";
 import { serve } from "@hono/node-server";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
+import { HTTPException } from "hono/http-exception";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { createPublicClient, http } from "viem";
 import { fromZodError } from "zod-validation-error";
@@ -120,16 +121,23 @@ const app = new Hono({
 
 app.use(async (c, next) => {
   const start = Date.now();
-  await next();
-  logger.info(
-    {
-      method: c.req.method,
-      url: c.req.path,
-      status: c.res.status,
-      durationMs: Date.now() - start,
-    },
-    "request",
-  );
+  let status: number | undefined;
+  try {
+    await next();
+  } catch (err) {
+    status = err instanceof HTTPException ? err.status : 500;
+    throw err;
+  } finally {
+    logger.info(
+      {
+        method: c.req.method,
+        url: c.req.path,
+        status: status ?? c.res?.status ?? 500,
+        durationMs: Date.now() - start,
+      },
+      "request",
+    );
+  }
 });
 app.onError(errorHandler);
 
