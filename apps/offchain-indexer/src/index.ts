@@ -4,12 +4,13 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 
 import { env } from "@/env";
 import { Indexer } from "@/indexer";
+import { logger } from "@/logger";
 import { SnapshotProvider } from "@/provider/dataProvider";
 import { DrizzleRepository } from "@/repository/db";
 import * as schema from "@/repository/schema";
 
 async function main() {
-  console.log(`Starting offchain indexer for DAO: ${env.PROVIDER_DAO_ID}`);
+  logger.info({ dao: env.PROVIDER_DAO_ID }, "starting offchain indexer");
 
   const db = drizzle(env.DATABASE_URL, { schema });
 
@@ -17,6 +18,7 @@ async function main() {
     migrationsFolder: "./drizzle",
     migrationsSchema: "snapshot",
   });
+  logger.info("database migrations completed");
 
   const repository = new DrizzleRepository(db);
   const provider = new SnapshotProvider(
@@ -34,6 +36,6 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error("Fatal error:", err);
+  logger.error({ err }, "fatal error");
   process.exit(1);
 });
