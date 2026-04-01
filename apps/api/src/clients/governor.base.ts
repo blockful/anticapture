@@ -1,3 +1,4 @@
+import { wrapWithTracing } from "@anticapture/observability";
 import {
   Abi,
   Account,
@@ -52,6 +53,7 @@ export abstract class GovernorBase<
     quorumCacheTtlMinutes: number = Infinity,
   ) {
     this.quorumCacheTtlMs = Math.max(1, quorumCacheTtlMinutes) * 60 * 1000;
+    wrapWithTracing(this);
   }
 
   protected async getCachedQuorum(

@@ -17,6 +17,7 @@ COPY --from=builder /app/turbo.json turbo.json
 RUN pnpm --filter @anticapture/observability build
 
 FROM base AS runner
+ENV NODE_ENV=production
 RUN apt-get update && apt-get install -y curl
 WORKDIR /app
 COPY --from=installer /app .

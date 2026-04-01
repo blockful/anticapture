@@ -48,7 +48,9 @@
       "cache": false,
       "passThroughEnv": ["*"]
     },
-    "clean": { "cache": false },
+    "clean": {
+      "cache": false
+    },
     "lint": {
       "inputs": [
         "**/*.ts",
@@ -73,9 +75,11 @@
       "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json"]
     },
     "test": {
+      "dependsOn": ["^build"],
       "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"]
     },
     "test:unit": {
+      "dependsOn": ["^build"],
       "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"]
     },
     "codegen": {

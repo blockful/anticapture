@@ -1,3 +1,4 @@
+import { logger } from "@/logger";
 import type { DataProvider } from "@/provider/dataProvider.interface";
 import type { Repository } from "@/repository/db.interface";
 import type { OffchainProposal } from "@/repository/schema";
@@ -16,7 +17,7 @@ export class Indexer {
 
   async start(forceBackfill: boolean): Promise<void> {
     if (forceBackfill) {
-      console.log("Force backfill enabled — resetting cursors");
+      logger.info("force backfill enabled — resetting cursors");
       await this.repository.resetCursor("proposals");
       await this.repository.resetCursor("votes");
     }
@@ -24,8 +25,12 @@ export class Indexer {
     this.proposalsCursor = await this.repository.getLastCursor("proposals");
     this.votesCursor = await this.repository.getLastCursor("votes");
 
-    console.log(
-      `Loaded cursors — proposals: ${this.proposalsCursor ?? "none"}, votes: ${this.votesCursor ?? "none"}`,
+    logger.info(
+      {
+        proposalsCursor: this.proposalsCursor ?? "none",
+        votesCursor: this.votesCursor ?? "none",
+      },
+      "loaded cursors",
     );
 
     while (true) {
@@ -38,13 +43,19 @@ export class Indexer {
     try {
       await this.syncProposals();
     } catch (err) {
-      console.error("Error syncing proposals:", err);
+      logger.error(
+        { err, cursor: this.proposalsCursor },
+        "error syncing proposals - will retry",
+      );
     }
 
     try {
       await this.syncVotes();
     } catch (err) {
-      console.error("Error syncing votes:", err);
+      logger.error(
+        { err, cursor: this.votesCursor },
+        "error syncing votes - will retry",
+      );
     }
   }
 
@@ -56,8 +67,9 @@ export class Indexer {
     this.updateProposalsCursor(data);
     await this.repository.saveProposals(data, this.proposalsCursor ?? "0");
 
-    console.log(
-      `Synced ${data.length} proposals (cursor: ${this.proposalsCursor})`,
+    logger.info(
+      { count: data.length, cursor: this.proposalsCursor },
+      "synced proposals",
     );
   }
 
@@ -90,7 +102,7 @@ export class Indexer {
     await this.repository.saveVotes(data, cursor);
     this.votesCursor = cursor;
 
-    console.log(`Synced ${data.length} votes (cursor: ${cursor})`);
+    logger.info({ count: data.length, cursor }, "synced votes");
   }
 
   private sleep(ms: number): Promise<void> {

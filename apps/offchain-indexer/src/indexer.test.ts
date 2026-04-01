@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { Indexer } from "@/indexer";
+import { logger } from "@/logger";
 import type { DataProvider } from "@/provider/dataProvider.interface";
 import type { Repository } from "@/repository/db.interface";
 import type { OffchainProposal, OffchainVote } from "@/repository/schema";
@@ -244,25 +245,27 @@ describe("Indexer", () => {
       failVotes: true,
     });
     const indexer = new Indexer(repo, provider, 1_000);
-    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const loggerSpy = vi
+      .spyOn(logger, "error")
+      .mockImplementation(() => logger);
 
     const promise = indexer.start(false);
     await vi.advanceTimersByTimeAsync(0);
 
-    expect(consoleSpy).toHaveBeenCalledWith(
-      "Error syncing proposals:",
-      expect.any(Error),
+    expect(loggerSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ cursor: null }),
+      "error syncing proposals - will retry",
     );
-    expect(consoleSpy).toHaveBeenCalledWith(
-      "Error syncing votes:",
-      expect.any(Error),
+    expect(loggerSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ cursor: null }),
+      "error syncing votes - will retry",
     );
 
     // Verify the loop continues — second tick fires after interval
     await vi.advanceTimersByTimeAsync(1_000);
     expect(provider.fetchProposals).toHaveBeenCalledTimes(2);
 
-    consoleSpy.mockRestore();
+    loggerSpy.mockRestore();
     void promise;
   });
 

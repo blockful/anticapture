@@ -1,6 +1,8 @@
 import { createPublicClient, http, type Address } from "viem";
 import { mainnet } from "viem/chains";
 
+import { logger } from "@/logger";
+
 /**
  * Creates a viem public client for checking address types
  */
@@ -29,7 +31,7 @@ export async function isContract(
     // If bytecode exists and is not empty (0x), it's a contract
     return bytecode !== undefined && bytecode !== "0x";
   } catch (error) {
-    console.error(`Failed to check address type for ${address}:`, error);
+    logger.error({ err: error, address }, "failed to check address type");
     // Default to false (EOA) on error to be conservative
     return false;
   }
