@@ -175,47 +175,60 @@ const optimisticProposalType =
     ? daoConfig.optimisticProposalType
     : undefined;
 
-const repo = new DrizzleRepository(pgClient);
+const repo = wrapWithTracing(new DrizzleRepository(pgClient));
 const balanceQueryFragments = new AccountBalanceQueryFragments(pgClient);
 const votingPowerRepo = wrapWithTracing(new VotingPowerRepository(pgClient));
-const proposalsRepo = new DrizzleProposalsActivityRepository(pgClient);
-const transactionsRepo = new TransactionsRepository(pgClient);
-const daoMetricsDayBucketRepo = new DaoMetricsDayBucketRepository(pgClient);
-const delegationPercentageService = new DelegationPercentageService(
-  daoMetricsDayBucketRepo,
+const proposalsRepo = wrapWithTracing(
+  new DrizzleProposalsActivityRepository(pgClient),
 );
-const tokenMetricsService = new TokenMetricsService(daoMetricsDayBucketRepo);
-const balanceVariationsRepo = new BalanceVariationsRepository(
-  pgClient,
-  balanceQueryFragments,
+const transactionsRepo = wrapWithTracing(new TransactionsRepository(pgClient));
+const daoMetricsDayBucketRepo = wrapWithTracing(
+  new DaoMetricsDayBucketRepository(pgClient),
 );
-const historicalBalancesRepo = new HistoricalBalanceRepository(pgClient);
-const accountBalanceRepo = new AccountBalanceRepository(
-  pgClient,
-  balanceQueryFragments,
+const delegationPercentageService = wrapWithTracing(
+  new DelegationPercentageService(daoMetricsDayBucketRepo),
 );
-const accountInteractionRepo = new AccountInteractionsRepository(pgClient);
-const transactionsService = new TransactionsService(transactionsRepo);
+const tokenMetricsService = wrapWithTracing(
+  new TokenMetricsService(daoMetricsDayBucketRepo),
+);
+const balanceVariationsRepo = wrapWithTracing(
+  new BalanceVariationsRepository(pgClient, balanceQueryFragments),
+);
+const historicalBalancesRepo = wrapWithTracing(
+  new HistoricalBalanceRepository(pgClient),
+);
+const accountBalanceRepo = wrapWithTracing(
+  new AccountBalanceRepository(pgClient, balanceQueryFragments),
+);
+const accountInteractionRepo = wrapWithTracing(
+  new AccountInteractionsRepository(pgClient),
+);
+const transactionsService = wrapWithTracing(
+  new TransactionsService(transactionsRepo),
+);
 const votingPowerService = wrapWithTracing(
   new VotingPowerService(
     env.DAO_ID === DaoIdEnum.NOUNS || env.DAO_ID === DaoIdEnum.LIL_NOUNS
-      ? new NounsVotingPowerRepository(pgClient)
+      ? wrapWithTracing(new NounsVotingPowerRepository(pgClient))
       : votingPowerRepo,
     votingPowerRepo,
   ),
 );
 const daoCache = new DaoCache();
-const daoService = new DaoService(daoClient, daoCache, env.CHAIN_ID);
-const balanceVariationsService = new BalanceVariationsService(
-  balanceVariationsRepo,
-  accountBalanceRepo,
+const daoService = wrapWithTracing(
+  new DaoService(daoClient, daoCache, env.CHAIN_ID),
 );
-const accountBalanceService = new AccountBalanceService(accountBalanceRepo);
+const balanceVariationsService = wrapWithTracing(
+  new BalanceVariationsService(balanceVariationsRepo, accountBalanceRepo),
+);
+const accountBalanceService = wrapWithTracing(
+  new AccountBalanceService(accountBalanceRepo),
+);
 
-const tokenPriceClient =
+const tokenPriceClient = wrapWithTracing(
   env.DAO_ID === DaoIdEnum.NOUNS || env.DAO_ID === DaoIdEnum.LIL_NOUNS
     ? new NFTPriceService(
-        new NFTPriceRepository(pgClient),
+        wrapWithTracing(new NFTPriceRepository(pgClient)),
         env.COINGECKO_API_URL,
         env.COINGECKO_API_KEY,
       )
@@ -223,26 +236,43 @@ const tokenPriceClient =
         env.COINGECKO_API_URL,
         env.COINGECKO_API_KEY,
         env.DAO_ID,
-      );
+      ),
+);
 
 historicalDelegations(
   app,
-  new HistoricalDelegationsService(
-    new HistoricalDelegationsRepository(pgClient),
+  wrapWithTracing(
+    new HistoricalDelegationsService(
+      wrapWithTracing(new HistoricalDelegationsRepository(pgClient)),
+    ),
   ),
 );
 
 // TODO: add support to partial delegations at some point
-delegations(app, new DelegationsService(new DelegationsRepository(pgClient)));
-delegators(app, new DelegatorsService(new DelegatorsRepository(pgClient)));
+delegations(
+  app,
+  wrapWithTracing(
+    new DelegationsService(
+      wrapWithTracing(new DelegationsRepository(pgClient)),
+    ),
+  ),
+);
+delegators(
+  app,
+  wrapWithTracing(
+    new DelegatorsService(wrapWithTracing(new DelegatorsRepository(pgClient))),
+  ),
+);
 
-const treasuryService = createTreasuryService(
-  new TreasuryRepository(pgClient),
-  tokenPriceClient,
-  parseTreasuryProviderConfig(
-    env.TREASURY_DATA_PROVIDER_ID,
-    env.TREASURY_DATA_PROVIDER_API_URL,
-    env.TREASURY_DATA_PROVIDER_API_KEY,
+const treasuryService = wrapWithTracing(
+  createTreasuryService(
+    wrapWithTracing(new TreasuryRepository(pgClient)),
+    tokenPriceClient,
+    parseTreasuryProviderConfig(
+      env.TREASURY_DATA_PROVIDER_ID,
+      env.TREASURY_DATA_PROVIDER_API_URL,
+      env.TREASURY_DATA_PROVIDER_API_KEY,
+    ),
   ),
 );
 const decimals = CONTRACT_ADDRESSES[env.DAO_ID].token.decimals;
@@ -252,22 +282,34 @@ tokenHistoricalData(app, tokenPriceClient);
 token(
   app,
   tokenPriceClient,
-  new TokenService(new TokenRepository(pgClient)),
+  wrapWithTracing(
+    new TokenService(wrapWithTracing(new TokenRepository(pgClient))),
+  ),
   env.DAO_ID,
 );
 
-feed(app, new FeedService(env.DAO_ID, new FeedRepository(pgClient)));
+feed(
+  app,
+  wrapWithTracing(
+    new FeedService(env.DAO_ID, wrapWithTracing(new FeedRepository(pgClient))),
+  ),
+);
 eventRelevance(app, new EventRelevanceService(env.DAO_ID));
 tokenDistribution(app, repo);
 governanceActivity(app, repo, tokenType);
 proposalsActivity(app, proposalsRepo, env.DAO_ID, daoClient);
 proposals(
   app,
-  new ProposalsService(repo, daoClient, optimisticProposalType),
+  wrapWithTracing(
+    new ProposalsService(repo, daoClient, optimisticProposalType),
+  ),
   daoClient,
   blockTime,
 );
-historicalBalances(app, new HistoricalBalancesService(historicalBalancesRepo));
+historicalBalances(
+  app,
+  wrapWithTracing(new HistoricalBalancesService(historicalBalancesRepo)),
+);
 transactions(app, transactionsService);
 lastUpdate(app, pgClient);
 delegationPercentage(app, delegationPercentageService);
@@ -278,18 +320,38 @@ accountBalanceVariations(app, balanceVariationsService);
 accountBalances(app, env.DAO_ID, accountBalanceService);
 accountInteractions(
   app,
-  new AccountInteractionsService(accountInteractionRepo),
+  wrapWithTracing(new AccountInteractionsService(accountInteractionRepo)),
 );
-transfers(app, new TransfersService(new TransfersRepository(pgClient)));
-votes(app, new VotesService(new VotesRepository(pgClient)));
+transfers(
+  app,
+  wrapWithTracing(
+    new TransfersService(wrapWithTracing(new TransfersRepository(pgClient))),
+  ),
+);
+votes(
+  app,
+  wrapWithTracing(
+    new VotesService(wrapWithTracing(new VotesRepository(pgClient))),
+  ),
+);
 dao(app, daoService);
 docs(app);
 tokenMetrics(app, tokenMetricsService);
 
-const offchainProposalsRepo = new OffchainProposalRepository(pgOffchainClient);
-const offchainVotesRepo = new OffchainVoteRepository(pgOffchainClient);
-offchainProposals(app, new OffchainProposalsService(offchainProposalsRepo));
-offchainVotes(app, new OffchainVotesService(offchainVotesRepo));
+const offchainProposalsRepo = wrapWithTracing(
+  new OffchainProposalRepository(pgOffchainClient),
+);
+const offchainVotesRepo = wrapWithTracing(
+  new OffchainVoteRepository(pgOffchainClient),
+);
+offchainProposals(
+  app,
+  wrapWithTracing(new OffchainProposalsService(offchainProposalsRepo)),
+);
+offchainVotes(
+  app,
+  wrapWithTracing(new OffchainVotesService(offchainVotesRepo)),
+);
 
 serve(
   {
