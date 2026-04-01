@@ -70,7 +70,7 @@ export default processConfig(
       }
 
       type DAOList {
-        items: [dao_200_response!]!
+        items: [DaoResponse!]!
         totalCount: Int!
       }
 
