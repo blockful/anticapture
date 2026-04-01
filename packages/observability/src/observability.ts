@@ -30,8 +30,7 @@ export interface ObservabilityProvider {
 export function createObservabilityProvider(
   serviceName: string,
 ): ObservabilityProvider {
-  const collectorEndpoint =
-    process.env.OTEL_EXPORTER_OTLP_ENDPOINT ?? "http://localhost:4318";
+  const collectorEndpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
 
   const resource = new Resource({ [ATTR_SERVICE_NAME]: serviceName });
 
@@ -44,13 +43,17 @@ export function createObservabilityProvider(
     readers: [prometheusExporter],
   });
 
-  const traceExporter = new OTLPTraceExporter({
-    url: `${collectorEndpoint}/v1/traces`,
-  });
+  const spanProcessors = collectorEndpoint
+    ? [
+        new BatchSpanProcessor(
+          new OTLPTraceExporter({ url: `${collectorEndpoint}/v1/traces` }),
+        ),
+      ]
+    : [];
 
   const tracerProvider = new NodeTracerProvider({
     resource,
-    spanProcessors: [new BatchSpanProcessor(traceExporter)],
+    spanProcessors,
   });
   tracerProvider.register();
 

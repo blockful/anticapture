@@ -18,6 +18,7 @@ RUN pnpm --filter @anticapture/observability build
 RUN pnpm run api build
 
 FROM base AS runner
+ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=installer /app .
 WORKDIR /app/apps/api
