@@ -29,10 +29,14 @@ export interface ObservabilityProvider {
 
 export function createObservabilityProvider(
   serviceName: string,
+  options?: { resourceAttributes?: Record<string, string> },
 ): ObservabilityProvider {
   const collectorEndpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
 
-  const resource = new Resource({ [ATTR_SERVICE_NAME]: serviceName });
+  const resource = new Resource({
+    [ATTR_SERVICE_NAME]: serviceName,
+    ...options?.resourceAttributes,
+  });
 
   const prometheusExporter = new PrometheusExporter({
     preventServerStart: true,

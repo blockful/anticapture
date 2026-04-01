@@ -1,3 +1,5 @@
 import { createLogger } from "@anticapture/observability";
 
-export const logger = createLogger("api");
+import { env } from "@/env";
+
+export const logger = createLogger("api", { dao: env.DAO_ID });

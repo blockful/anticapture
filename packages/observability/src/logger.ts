@@ -3,9 +3,14 @@ import pino from "pino";
 
 export type Logger = pino.Logger;
 
-export function createLogger(service: string): Logger {
+export function createLogger(
+  service: string,
+  bindings?: Record<string, string>,
+): Logger {
   const hasOtelEndpoint = !!process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
   const usePretty = !hasOtelEndpoint && process.env.NODE_ENV !== "production";
+
+  const resourceAttributes = { "service.name": service, ...bindings };
 
   let transport:
     | pino.TransportSingleOptions
@@ -17,9 +22,7 @@ export function createLogger(service: string): Logger {
       targets: [
         {
           target: "pino-opentelemetry-transport",
-          options: {
-            resourceAttributes: { "service.name": service },
-          },
+          options: { resourceAttributes },
         },
         {
           target: "pino/file",
@@ -41,6 +44,7 @@ export function createLogger(service: string): Logger {
   return pino({
     name: service,
     level: process.env.LOG_LEVEL ?? "info",
+    base: bindings ? { ...bindings } : undefined,
     mixin() {
       const span = trace.getActiveSpan();
       if (!span) return {};
