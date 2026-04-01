@@ -22,6 +22,9 @@ describe("health controller", () => {
 
   it("returns 503 when the database ping fails", async () => {
     const app = new Hono();
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
     const execute = vi
       .fn()
       .mockRejectedValue(new Error("database unavailable"));
@@ -34,8 +37,13 @@ describe("health controller", () => {
     await expect(response.json()).resolves.toEqual({
       status: "error",
       database: "error",
-      message: "database unavailable",
+      message: "Database health check failed",
     });
     expect(execute).toHaveBeenCalledOnce();
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "Health check database ping failed",
+      expect.any(Error),
+    );
+    consoleErrorSpy.mockRestore();
   });
 });

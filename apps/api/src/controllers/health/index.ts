@@ -14,6 +14,8 @@ const UnhealthyResponseSchema = z.object({
   message: z.string(),
 });
 
+const HEALTHCHECK_FAILURE_MESSAGE = "Database health check failed";
+
 export function health(app: Hono, db: Pick<Drizzle, "execute">) {
   app.openapi(
     createRoute({
@@ -53,16 +55,13 @@ export function health(app: Hono, db: Pick<Drizzle, "execute">) {
           200,
         );
       } catch (error) {
-        const message =
-          error instanceof Error
-            ? error.message
-            : "Database health check failed";
+        console.error("Health check database ping failed", error);
 
         return context.json(
           {
             status: "error",
             database: "error",
-            message,
+            message: HEALTHCHECK_FAILURE_MESSAGE,
           } as const,
           503,
         );
