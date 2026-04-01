@@ -10,6 +10,10 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "./src"),
+      "@anticapture/observability": path.resolve(
+        import.meta.dirname,
+        "../../packages/observability/src/index.ts",
+      ),
     },
   },
 });
