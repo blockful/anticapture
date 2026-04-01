@@ -14,7 +14,7 @@
       "passThroughEnv": ["*"]
     },
     "@anticapture/observability#build": {
-      "outputs": ["packages/observability/dist/**"]
+      "outputs": ["dist/**"]
     },
     "@anticapture/dashboard#dev": {
       "dependsOn": ["@anticapture/graphql-client#codegen"],
@@ -66,7 +66,7 @@
       ]
     },
     "typecheck": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "@anticapture/observability#build"],
       "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json"]
     },
     "test": {
