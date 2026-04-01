@@ -197,6 +197,7 @@ projects:
       allowedHeaders:
         - Content-Type
         - Authorization
+        - X-ERPC-Secret-Token
       exposedHeaders:
         - X-Request-ID
       allowCredentials: true
