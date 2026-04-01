@@ -16,6 +16,9 @@
     "@anticapture/observability#build": {
       "outputs": ["dist/**"]
     },
+    "@anticapture/graphql-client#build": {
+      "outputs": ["generated/**"]
+    },
     "@anticapture/dashboard#dev": {
       "dependsOn": ["@anticapture/graphql-client#codegen"],
       "persistent": true,
