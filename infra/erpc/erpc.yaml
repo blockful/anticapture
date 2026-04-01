@@ -1,44 +1,10 @@
-# =============================================================================
-# eRPC Configuration
-# =============================================================================
-#
-# Projects:
-#   - indexer: High-throughput project for Ponder blockchain indexing (300 req/s)
-#   - api:     Conservative per-IP rate-limited project for public API (20 req/s per IP)
-#   Access: http://erpc:4000/{indexer|api}/evm/{chainId}
-#
-# Caching Strategy:
-#   Uses a tiered caching approach with 3 memory connectors + Postgres:
-#
-#   1. Finalized eth_call/eth_getCode/eth_getStorageAt → Postgres (persistent)
-#      Heavy read methods cached permanently in Postgres, especially useful
-#      for Ponder indexing functions that replay the same calls. Max 4MB per item.
-#
-#   2. Other finalized data → memory-finalized (100k items, no TTL)
-#      All remaining finalized responses cached in a large in-memory store.
-#
-#   3. Unfinalized/unknown data → memory-unfinalized (4096 items, 2s TTL)
-#      Short-lived cache with 20KB item cap.
-#
-#   4. Realtime data → memory-realtime (4096 items, per-network TTL)
-#      Network-specific TTLs tuned to block times:
-#        - Scroll (534352): 1s TTL (shorter block times)
-#        - Ethereum (1):    2s TTL
-#
-# Rate Limiting:
-#   Chainstack's 400 req/s budget is split: 300 for indexer, 100 for api.
-#   Project-level limits mirror upstream limits to prevent overload.
-#
-# =============================================================================
-
 logLevel: ${LOG_LEVEL:-warn}
 
 server:
-  httpHostV4: "0.0.0.0"
-  httpPort: 4000
-  listenV6: true
   httpHostV6: "[::]"
   httpPortV6: 5000
+  listenV6: true
+  maxTimeout: 60s
 
 metrics:
   enabled: true
@@ -47,104 +13,263 @@ metrics:
   port: 4001
   listenV6: true
 
-# Two projects: indexer (high throughput) vs api (conservative per-IP limits)
-# Access via: http://erpc:4000/indexer/evm/<chainId> or http://erpc:4000/api/evm/<chainId>
 projects:
   - id: indexer
     rateLimitBudget: indexer-limit
     networks:
       - architecture: evm
+        failsafe:
+          timeout:
+            duration: 30s
+          retry:
+            maxAttempts: 5
+            delay: 500ms
+            backoffMaxDelay: 10s
+            backoffFactor: 0.5
+            jitter: 200ms
+          hedge:
+            delay: 3s
+            maxCount: 2
         evm:
           chainId: 1
       - architecture: evm
+        failsafe:
+          timeout:
+            duration: 30s
+          retry:
+            maxAttempts: 5
+            delay: 500ms
+            backoffMaxDelay: 10s
+            backoffFactor: 0.5
+            jitter: 200ms
+          hedge:
+            delay: 3s
+            maxCount: 2
+        evm:
+          chainId: 10
+      - architecture: evm
+        failsafe:
+          timeout:
+            duration: 30s
+          retry:
+            maxAttempts: 5
+            delay: 500ms
+            backoffMaxDelay: 10s
+            backoffFactor: 0.5
+            jitter: 200ms
+          hedge:
+            delay: 3s
+            maxCount: 2
         evm:
           chainId: 534352
     upstreams:
-      - id: chainstack
-        endpoint: chainstack://${CHAINSTACK_API_KEY}
-        rateLimitBudget: chainstack-indexer
-        group: primary
+      - id: nodeful
+        endpoint: ${NODEFUL_RPC_URL}
+        vendorName: nodeful
+        rateLimitBudget: nodeful
         autoIgnoreUnsupportedMethods: true
-        failsafe:
-          - matchMethod: "*"
-            timeout:
-              duration: 15s
-            retry:
-              maxAttempts: 3
-              delay: 300ms
-              backoffMaxDelay: 5s
-              backoffFactor: 1.5
+      - id: envio
+        endpoint: evm+envio://rpc.hypersync.xyz/${ENVIO_API_KEY}
+        vendorName: Envio
+        rateLimitBudget: envio
+        autoIgnoreUnsupportedMethods: true
+      - id: chainstack
+        endpoint: chainstack://${CHAINSTACK_API_KEY}?project=PR-494-784
+        vendorName: Chainstack
+        rateLimitBudget: chainstack
+        group: fallback
+        autoIgnoreUnsupportedMethods: true
 
   - id: api
     rateLimitBudget: api-limit
     networks:
       - architecture: evm
+        failsafe:
+          timeout:
+            duration: 15s
+          retry:
+            maxAttempts: 3
+            delay: 300ms
+            backoffMaxDelay: 5s
+            backoffFactor: 1.5
         evm:
           chainId: 1
       - architecture: evm
+        failsafe:
+          timeout:
+            duration: 15s
+          retry:
+            maxAttempts: 3
+            delay: 300ms
+            backoffMaxDelay: 5s
+            backoffFactor: 1.5
+        evm:
+          chainId: 10
+      - architecture: evm
+        failsafe:
+          timeout:
+            duration: 15s
+          retry:
+            maxAttempts: 3
+            delay: 300ms
+            backoffMaxDelay: 5s
+            backoffFactor: 1.5
         evm:
           chainId: 534352
     upstreams:
-      - id: envio
-        endpoint: envio://rpc.hypersync.xyz/${ENVIO_API_KEY}
-        group: primary
+      - id: nodeful
+        endpoint: ${NODEFUL_RPC_URL}
+        vendorName: nodeful
+        rateLimitBudget: nodeful
         autoIgnoreUnsupportedMethods: true
-        failsafe:
-          - matchMethod: "*"
-            timeout:
-              duration: 10s
-            retry:
-              maxAttempts: 2
-              delay: 200ms
+      - id: envio
+        endpoint: evm+envio://rpc.hypersync.xyz/${ENVIO_API_KEY}
+        vendorName: Envio
+        rateLimitBudget: envio
+        autoIgnoreUnsupportedMethods: true
       - id: chainstack
-        endpoint: chainstack://${CHAINSTACK_API_KEY}
-        rateLimitBudget: chainstack-api
+        endpoint: chainstack://${CHAINSTACK_API_KEY}?project=PR-494-784
+        vendorName: Chainstack
+        rateLimitBudget: chainstack
         group: fallback
         autoIgnoreUnsupportedMethods: true
+
+  - id: dashboard
+    rateLimitBudget: dashboard-limit
+    networks:
+      - architecture: evm
         failsafe:
-          - matchMethod: "*"
-            timeout:
-              duration: 10s
-            retry:
-              maxAttempts: 2
-              delay: 200ms
+          timeout:
+            duration: 15s
+          retry:
+            maxAttempts: 3
+            delay: 300ms
+            backoffMaxDelay: 5s
+            backoffFactor: 1.5
+        evm:
+          chainId: 1
+      - architecture: evm
+        failsafe:
+          timeout:
+            duration: 15s
+          retry:
+            maxAttempts: 3
+            delay: 300ms
+            backoffMaxDelay: 5s
+            backoffFactor: 1.5
+        evm:
+          chainId: 10
+      - architecture: evm
+        failsafe:
+          timeout:
+            duration: 15s
+          retry:
+            maxAttempts: 3
+            delay: 300ms
+            backoffMaxDelay: 5s
+            backoffFactor: 1.5
+        evm:
+          chainId: 534352
+    upstreams:
+      - id: nodeful
+        endpoint: ${NODEFUL_RPC_URL}
+        vendorName: nodeful
+        rateLimitBudget: nodeful
+        autoIgnoreUnsupportedMethods: true
+      - id: chainstack
+        endpoint: chainstack://${CHAINSTACK_API_KEY}?project=PR-494-784
+        vendorName: Chainstack
+        rateLimitBudget: chainstack
+        group: fallback
+        autoIgnoreUnsupportedMethods: true
+    auth:
+      strategies:
+        - type: secret
+          secret:
+            value: ${RPC_SECRET}
+    cors:
+      allowedOrigins:
+        - "*"
+      allowedMethods:
+        - GET
+        - POST
+        - OPTIONS
+      allowedHeaders:
+        - Content-Type
+        - Authorization
+      exposedHeaders:
+        - X-Request-ID
+      allowCredentials: true
+      maxAge: 3600
 
 rateLimiters:
   store:
     driver: memory
-
   budgets:
-    # Upstream-level: split Chainstack's 400 req/s between indexer and api
-    - id: chainstack-indexer
+    - id: nodeful
       rules:
         - method: "*"
-          maxCount: 300
-          period: second
-    - id: chainstack-api
+          maxCount: 250
+          period: 1s
+          waitTime: 5s
+        - method: eth_getLogs
+          maxCount: 15
+          period: 1s
+          waitTime: 10s
+        - method: eth_call
+          maxCount: 75
+          period: 1s
+          waitTime: 5s
+        - method: eth_getCode
+          maxCount: 75
+          period: 1s
+          waitTime: 5s
+        - method: eth_getStorageAt
+          maxCount: 75
+          period: 1s
+          waitTime: 5s
+    - id: envio
       rules:
         - method: "*"
-          maxCount: 100
-          period: second
-    # Project-level: self-imposed limits
+          maxCount: 400
+          period: 1s
+          waitTime: 30s
+        - method: eth_getLogs
+          maxCount: 150
+          period: 1s
+          waitTime: 10s
+    - id: chainstack
+      rules:
+        - method: "*"
+          maxCount: 400
+          period: 1s
+          waitTime: 30s
     - id: indexer-limit
       rules:
         - method: "*"
           maxCount: 300
-          period: second
+          period: 1s
     - id: api-limit
       rules:
         - method: "*"
           maxCount: 20
-          period: second
+          period: 1s
+          perIP: true
+    - id: dashboard-limit
+      rules:
+        - method: "*"
+          maxCount: 20
+          period: 1s
           perIP: true
 
 database:
   evmJsonRpcCache:
     connectors:
-      - id: memory-finalized
-        driver: memory
-        memory:
-          maxItems: 100000
+      - id: pg-main
+        driver: postgresql
+        postgresql:
+          connectionUri: "${DATABASE_URL}"
+          table: rpc_cache
       - id: memory-unfinalized
         driver: memory
         memory:
@@ -153,62 +278,40 @@ database:
         driver: memory
         memory:
           maxItems: 4096
-      - id: postgres-cache
-        driver: postgresql
-        postgresql:
-          connectionUri: "${DATABASE_URL}"
-          table: rpc_cache
     policies:
-      # eth_call/eth_getCode/eth_getStorageAt finalized → Postgres (useful for Ponder indexing)
-      - network: "*"
-        method: "eth_call"
-        finality: finalized
-        connector: postgres-cache
-        maxItemSize: 4MB
-        ttl: 0
-      - network: "*"
-        method: "eth_getCode"
-        finality: finalized
-        connector: postgres-cache
-        maxItemSize: 4MB
-        ttl: 0
-      - network: "*"
-        method: "eth_getStorageAt"
-        finality: finalized
-        connector: postgres-cache
-        maxItemSize: 4MB
-        ttl: 0
-      # Other finalized data → in-memory cache
-      - network: "*"
+      - connector: pg-main
+        network: "*"
         method: "*"
         finality: finalized
-        connector: memory-finalized
+        empty: allow
+        maxItemSize: 4MB
         ttl: 0
-      # Unfinalized data → in-memory, skip empty responses, cap item size
-      - network: "*"
+      - connector: memory-unfinalized
+        network: "*"
         method: "*"
         finality: unfinalized
-        connector: memory-unfinalized
-        maxItemSize: 20KB
-
+        empty: ignore
         ttl: 2s
-      - network: "*"
+        maxItemSize: 20KB
+      - connector: memory-unfinalized
+        network: "*"
         method: "*"
         finality: unknown
-        connector: memory-unfinalized
+        empty: ignore
+        ttl: 2s
         maxItemSize: 20KB
-
-        ttl: 2s
-      # Realtime data → per-network TTLs to match block times
-      - network: "evm:534352"
+      - connector: memory-realtime
+        network: "evm:1"
         method: "*"
         finality: realtime
-        connector: memory-realtime
-
+        ttl: 12s
+      - connector: memory-realtime
+        network: "evm:10"
+        method: "*"
+        finality: realtime
+        ttl: 2s
+      - connector: memory-realtime
+        network: "evm:534352"
+        method: "*"
+        finality: realtime
         ttl: 1s
-      - network: "evm:1"
-        method: "*"
-        finality: realtime
-        connector: memory-realtime
-
-        ttl: 2s
