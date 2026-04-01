@@ -23,6 +23,7 @@ import {
   historicalDelegations,
   token,
   accountInteractions,
+  health,
 } from "@/controllers";
 import * as schema from "@/database/schema";
 import { docs } from "@/docs";
@@ -105,6 +106,8 @@ if (!daoClient) {
 }
 
 const pgClient = drizzle(env.DATABASE_URL, { schema, casing: "snake_case" });
+
+health(app, pgClient);
 
 const daoCache = new DaoCache();
 
