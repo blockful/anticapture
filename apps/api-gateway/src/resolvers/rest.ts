@@ -25,6 +25,7 @@ const daoItemQueries = [
   "getTotalAssets",
   "getTotalTreasury",
   "getVotingPower",
+  "health",
   "historicalBalances",
   "historicalDelegations",
   "historicalTokenData",

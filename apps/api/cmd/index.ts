@@ -39,6 +39,7 @@ import {
   offchainVotes,
   eventRelevance,
   feed,
+  health,
 } from "@/controllers";
 import * as offchainSchema from "@/database/offchain-schema";
 import * as schema from "@/database/schema";
@@ -154,6 +155,8 @@ const pgOffchainClient = drizzle(env.DATABASE_URL, {
   schema: offchainSchema,
   casing: "snake_case",
 });
+
+health(app, pgClient);
 
 const daoConfig = CONTRACT_ADDRESSES[env.DAO_ID];
 const { blockTime, tokenType } = daoConfig;
