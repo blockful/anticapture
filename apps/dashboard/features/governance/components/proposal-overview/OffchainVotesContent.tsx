@@ -3,13 +3,7 @@
 import type { GetOffchainVotesByProposalIdQuery } from "@anticapture/graphql-client";
 import { useGetOffchainVotesByProposalIdQuery } from "@anticapture/graphql-client/hooks";
 import type { ColumnDef } from "@tanstack/react-table";
-import {
-  CheckCircle2,
-  CircleMinus,
-  Inbox,
-  ThumbsDown,
-  XCircle,
-} from "lucide-react";
+import { CheckCircle2, CircleMinus, Inbox, XCircle } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import type { Address } from "viem";
 
@@ -39,37 +33,19 @@ const getLabelDisplay = (label: string) => {
   return { label, icon: null as React.ReactNode };
 };
 
-const getChoiceInfo = (choice: unknown, choices: string[]) => {
-  if (choice === null || choice === undefined)
-    return { label: "—", icon: null as React.ReactNode };
+const getChoiceInfo = (choice: Array<number | null>, choices: string[]) => {
+  if (choice.length === 0) return { label: "—", icon: null as React.ReactNode };
 
-  if (typeof choice === "number" || typeof choice === "string") {
-    const choiceKey = Number(choice) - 1;
-    const label = choices[choiceKey] ?? `Choice ${Number(choice)}`;
+  if (choice.length === 1 && choice[0] != null) {
+    const label = choices[choice[0] - 1] ?? `Choice ${choice[0]}`;
     return getLabelDisplay(label);
   }
 
-  if (Array.isArray(choice)) {
-    const label = (choice as number[])
-      .map((choice) => choices[choice - 1] ?? `Choice ${choice}`)
-      .join(", ");
-    return { label, icon: null as React.ReactNode };
-  }
-
-  if (typeof choice === "object") {
-    const label = Object.entries(choice as Record<string, number>)
-      .map(
-        ([choiceKey, percent]) =>
-          `${choices[Number(choiceKey) - 1] ?? `Choice ${choiceKey}`} (${percent}%)`,
-      )
-      .join(", ");
-    return { label, icon: null as React.ReactNode };
-  }
-
-  return {
-    label: "Unknown",
-    icon: <ThumbsDown className="text-secondary size-4" />,
-  };
+  const label = choice
+    .filter((c): c is number => c != null)
+    .map((c) => choices[c - 1] ?? `Choice ${c}`)
+    .join(", ");
+  return { label, icon: null as React.ReactNode };
 };
 
 interface OffchainVotesContentProps {
@@ -248,7 +224,7 @@ export const OffchainVotesContent = ({
               </div>
             );
           }
-          const choice = row.getValue("choice");
+          const choice = row.getValue("choice") as Array<number | null>;
           const { icon, label } = getChoiceInfo(choice, choices);
           return (
             <div className="flex items-center gap-2 p-2">
