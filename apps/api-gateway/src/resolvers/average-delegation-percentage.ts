@@ -136,7 +136,7 @@ export async function fetchAndExtractDaoData(
       client
         .delegationPercentageByDay({
           root,
-          args: queryArgs,
+          args: { ...queryArgs, orderDirection: 'asc' },  
           context,
           selectionSet: `
             {

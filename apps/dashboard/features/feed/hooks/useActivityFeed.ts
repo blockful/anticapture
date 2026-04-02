@@ -1,18 +1,15 @@
 "use client";
 
-import type {
-  GetFeedEventsQuery,
-  QueryInput_FeedEvents_Relevance,
-  QueryInput_FeedEvents_Type,
-} from "@anticapture/graphql-client/hooks";
 import {
-  QueryInput_FeedEvents_OrderDirection,
+  OrderDirection,
   QueryInput_FeedEvents_OrderBy,
+  QueryInput_FeedEvents_Relevance,
+  type QueryInput_FeedEvents_Type,
   useGetFeedEventsQuery,
 } from "@anticapture/graphql-client/hooks";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-import type { ActivityFeedFilters } from "@/features/feed/types";
+import type { ActivityFeedFilters, FeedEvent } from "@/features/feed/types";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { getAuthHeaders } from "@/shared/utils/server-utils";
 
@@ -36,36 +33,40 @@ export const useActivityFeed = ({
   enabled = true,
 }: UseActivityFeedParams) => {
   const limit = filters.limit ?? 10;
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const queryVariables = useMemo(
-    () => ({
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    limit,
+    filters.sortOrder,
+    filters.relevance,
+    filters.type,
+    filters.fromTimestamp,
+    filters.toTimestamp,
+  ]);
+
+  const requestedLimit = limit * currentPage;
+
+  const {
+    data: queryData,
+    loading,
+    error,
+    refetch,
+  } = useGetFeedEventsQuery({
+    variables: {
       skip: 0,
-      limit,
+      limit: requestedLimit,
       orderBy: QueryInput_FeedEvents_OrderBy.Timestamp,
       orderDirection:
-        filters.sortOrder === "asc"
-          ? QueryInput_FeedEvents_OrderDirection.Asc
-          : QueryInput_FeedEvents_OrderDirection.Desc,
-      relevance: filters.relevance as unknown as
-        | QueryInput_FeedEvents_Relevance
-        | undefined,
-      type: filters.type as unknown as QueryInput_FeedEvents_Type | undefined,
-      fromDate: filters.fromTimestamp,
-      toDate: filters.toTimestamp,
-    }),
-    [
-      limit,
-      filters.sortOrder,
-      filters.relevance,
-      filters.type,
-      filters.fromTimestamp,
-      filters.toTimestamp,
-    ],
-  );
-
-  const { data, loading, error, fetchMore, refetch } = useGetFeedEventsQuery({
-    variables: queryVariables,
+        filters.sortOrder === "asc" ? OrderDirection.Asc : OrderDirection.Desc,
+      relevance:
+        (filters.relevance as unknown as QueryInput_FeedEvents_Relevance) ??
+        QueryInput_FeedEvents_Relevance.Medium,
+      type: (filters.type as unknown as QueryInput_FeedEvents_Type) ?? null,
+      fromDate: filters.fromTimestamp ?? null,
+      toDate: filters.toTimestamp ?? null,
+    },
     skip: !enabled,
     notifyOnNetworkStatusChange: true,
     context: {
@@ -76,66 +77,38 @@ export const useActivityFeed = ({
     },
   });
 
-  const totalCount = data?.feedEvents?.totalCount ?? 0;
+  const isLoadingMore = loading && currentPage > 1;
+
+  const data = useMemo(() => {
+    const items =
+      (queryData?.feedEvents?.items.filter(
+        (item): item is NonNullable<typeof item> => item !== null,
+      ) as unknown as FeedEvent[]) ?? [];
+
+    return items.slice(0, requestedLimit);
+  }, [queryData, requestedLimit]);
+
+  const totalCount = queryData?.feedEvents?.totalCount ?? 0;
+
+  const fetchNextPage = useCallback(async () => {
+    if (loading || data.length >= totalCount) return;
+
+    setCurrentPage((page) => page + 1);
+  }, [loading, data.length, totalCount]);
 
   const pagination: PaginationInfo = useMemo(
     () => ({
       totalCount,
-      hasNextPage: (data?.feedEvents?.items?.length ?? 0) < totalCount,
-      hasPreviousPage: false,
-      currentPage:
-        Math.ceil((data?.feedEvents?.items?.length ?? 0) / limit) || 1,
+      hasNextPage: data.length < totalCount,
+      hasPreviousPage: currentPage > 1,
+      currentPage,
       itemsPerPage: limit,
     }),
-    [totalCount, data?.feedEvents?.items?.length, limit],
+    [totalCount, data.length, currentPage, limit],
   );
 
-  const fetchNextPage = useCallback(async () => {
-    if (!pagination.hasNextPage || isLoadingMore) return;
-
-    setIsLoadingMore(true);
-
-    try {
-      await fetchMore({
-        variables: {
-          ...queryVariables,
-          skip: data?.feedEvents?.items?.length ?? 0,
-        },
-        updateQuery: (
-          previousResult: GetFeedEventsQuery,
-          { fetchMoreResult }: { fetchMoreResult: GetFeedEventsQuery },
-        ) => {
-          if (!fetchMoreResult?.feedEvents?.items?.length) {
-            return previousResult;
-          }
-
-          return {
-            ...fetchMoreResult,
-            feedEvents: {
-              ...fetchMoreResult.feedEvents,
-              items: [
-                ...(previousResult.feedEvents?.items ?? []),
-                ...(fetchMoreResult.feedEvents.items ?? []),
-              ],
-            },
-          };
-        },
-      });
-    } catch (err) {
-      console.error("Error fetching next page:", err);
-    } finally {
-      setIsLoadingMore(false);
-    }
-  }, [
-    fetchMore,
-    pagination.hasNextPage,
-    isLoadingMore,
-    queryVariables,
-    data?.feedEvents?.items?.length,
-  ]);
-
   return {
-    data: data?.feedEvents?.items.filter((item) => item !== null) ?? [],
+    data,
     totalCount,
     loading,
     error,

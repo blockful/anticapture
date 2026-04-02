@@ -4,6 +4,8 @@ export * from "./token-metrics";
 export * from "./account-balance";
 export * from "./dao";
 export * from "./delegation-percentage";
+export * from "./event-relevance";
+export * from "./governance-activity";
 export * from "./last-update";
 export * from "./proposals";
 export * from "./shared";

@@ -1,5 +1,4 @@
 import { z } from "@hono/zod-openapi";
-import { getAddress, isAddress } from "viem";
 
 import { transaction } from "@/database";
 
@@ -9,6 +8,14 @@ import {
   TransferMapper,
   TransferResponseSchema,
 } from "../transfers";
+import {
+  AddressSchema,
+  normalizeQueryArray,
+  OrderDirectionSchema,
+  paginationLimitQueryParam,
+  paginationSkipQueryParam,
+  unixTimestampQueryParam,
+} from "../shared";
 
 export type DBTransaction = typeof transaction.$inferSelect & {
   transfers: DBTransfer[];
@@ -28,35 +35,55 @@ export enum TransactionType {
   DELEGATION = "DELEGATION",
 }
 
+const AffectedSupplyListSchema = z
+  .union([z.string(), z.array(z.string())])
+  .transform((value) => {
+    const items = normalizeQueryArray(value);
+    return items
+      ? z
+          .array(
+            z.enum(
+              Object.values(AffectedSupply) as [
+                AffectedSupply,
+                ...AffectedSupply[],
+              ],
+            ),
+          )
+          .parse(items)
+      : undefined;
+  });
+
+const TransactionIncludeListSchema = z
+  .union([z.string(), z.array(z.string())])
+  .transform((value) => {
+    const items = normalizeQueryArray(value);
+    return items
+      ? z
+          .array(
+            z.enum(
+              Object.values(TransactionType) as [
+                TransactionType,
+                ...TransactionType[],
+              ],
+            ),
+          )
+          .parse(items)
+      : undefined;
+  });
+
 export const TransactionsRequestSchema = z
   .object({
-    limit: z.coerce
-      .number()
-      .int()
-      .min(1, "Limit must be a positive integer")
-      .max(100, "Limit cannot exceed 100")
-      .optional()
-      .default(50),
-    offset: z.coerce
-      .number()
-      .int()
-      .min(0, "Offset must be a non-negative integer")
-      .optional()
-      .default(0),
-    sortBy: z.enum(["timestamp"]).optional().default("timestamp"),
-    sortOrder: z.enum(["asc", "desc"]).optional().default("desc"),
-    fromDate: z.coerce.number().int("fromDate must be an integer").optional(),
-    toDate: z.coerce.number().int("toDate must be an integer").optional(),
-    from: z
-      .string()
-      .refine((addr) => isAddress(addr, { strict: false }))
-      .transform((addr) => getAddress(addr))
-      .optional(),
-    to: z
-      .string()
-      .refine((addr) => isAddress(addr, { strict: false }))
-      .transform((addr) => getAddress(addr))
-      .optional(),
+    limit: paginationLimitQueryParam(),
+    skip: paginationSkipQueryParam(),
+    orderDirection: OrderDirectionSchema.optional().default("desc"),
+    fromDate: unixTimestampQueryParam(
+      "Inclusive lower bound for transaction timestamps, in Unix seconds.",
+    ),
+    toDate: unixTimestampQueryParam(
+      "Inclusive upper bound for transaction timestamps, in Unix seconds.",
+    ),
+    from: AddressSchema.optional(),
+    to: AddressSchema.optional(),
     minAmount: z
       .string()
       .transform((val) => BigInt(val))
@@ -65,15 +92,16 @@ export const TransactionsRequestSchema = z
       .string()
       .transform((val) => BigInt(val))
       .optional(), //z.coerce.bigint().optional() doesn't work because of a bug with zod, zod asks for a string that satisfies REGEX ^d+$, when it should be ^\d+$
-    affectedSupply: z
-      .union([
-        z.nativeEnum(AffectedSupply),
-        z.array(z.nativeEnum(AffectedSupply)),
-      ])
-      .optional()
-      .describe(
-        "Filter transactions by affected supply type. Can be: 'CEX', 'DEX', 'LENDING', or 'TOTAL'",
-      )
+    affectedSupply: AffectedSupplyListSchema.optional()
+      .openapi({
+        type: "array",
+        items: {
+          type: "string",
+          enum: ["CEX", "DEX", "LENDING", "TOTAL", "UNASSIGNED"],
+        },
+        description:
+          "Filter transactions by affected supply type. Can be: 'CEX', 'DEX', 'LENDING', or 'TOTAL'",
+      })
       .transform((affectedSupply) => {
         if (!affectedSupply?.length) return {};
 
@@ -85,15 +113,16 @@ export const TransactionsRequestSchema = z
           isUnassigned: affectedSupply.includes(AffectedSupply.UNASSIGNED),
         };
       }),
-    includes: z
-      .union([
-        z.nativeEnum(TransactionType),
-        z.array(z.nativeEnum(TransactionType)),
-      ])
-      .optional()
-      .describe(
-        "Filter by transaction type. Can be one of: 'TRANSFER', 'DELEGATION'",
-      )
+    includes: TransactionIncludeListSchema.optional()
+      .openapi({
+        type: "array",
+        items: {
+          type: "string",
+          enum: ["TRANSFER", "DELEGATION"],
+        },
+        description:
+          "Filter by transaction type. Can be one of: 'TRANSFER', 'DELEGATION'",
+      })
       .transform((includeTypes) => {
         if (!includeTypes?.length)
           return {
@@ -118,42 +147,97 @@ export const TransactionsRequestSchema = z
       message: "fromDate must be less than or equal to toDate",
       path: ["fromDate"],
     },
-  );
+  )
+  .openapi("TransactionsRequest", {
+    description:
+      "Query params used to page and filter transactions with transfer and delegation context.",
+  });
 
 export type TransactionsRequest = z.infer<typeof TransactionsRequestSchema>;
 
-export const DelegationResponseSchema = z.object({
-  transactionHash: z.string(),
-  daoId: z.string(),
-  delegateAccountId: z.string(),
-  delegatorAccountId: z.string(),
-  delegatedValue: z.string(),
-  previousDelegate: z.string().nullable(),
-  timestamp: z.string(),
-  logIndex: z.number(),
-  isCex: z.boolean(),
-  isDex: z.boolean(),
-  isLending: z.boolean(),
-  isTotal: z.boolean(),
-});
+export const DelegationResponseSchema = z
+  .object({
+    transactionHash: z.string().openapi({ description: "Transaction hash." }),
+    daoId: z.string().openapi({ description: "DAO identifier." }),
+    delegateAccountId: z.string().openapi({ description: "Delegate address." }),
+    delegatorAccountId: z
+      .string()
+      .openapi({ description: "Delegator address." }),
+    delegatedValue: z.string().openapi({
+      description: "Delegated amount encoded as a decimal string.",
+    }),
+    previousDelegate: z.string().nullable().openapi({
+      description: "Previous delegate address, if one existed.",
+    }),
+    timestamp: z.string().openapi({
+      description: "Delegation timestamp in Unix seconds as a string.",
+      example: "1704067200",
+    }),
+    logIndex: z.number().int().openapi({
+      description: "Log index within the transaction receipt.",
+    }),
+    isCex: z.boolean().openapi({
+      description: "Whether the delegation touched a centralized exchange.",
+    }),
+    isDex: z.boolean().openapi({
+      description: "Whether the delegation touched a decentralized exchange.",
+    }),
+    isLending: z.boolean().openapi({
+      description: "Whether the delegation touched a lending protocol.",
+    }),
+    isTotal: z.boolean().openapi({
+      description: "Whether the delegation counts toward total tracked supply.",
+    }),
+  })
+  .openapi("TransactionDelegation", {
+    description: "Delegation event embedded within a transaction response.",
+  });
 
-export const TransactionResponseSchema = z.object({
-  transactionHash: z.string(),
-  from: z.string().nullable(),
-  to: z.string().nullable(),
-  isCex: z.boolean(),
-  isDex: z.boolean(),
-  isLending: z.boolean(),
-  isTotal: z.boolean(),
-  timestamp: z.string(),
-  transfers: z.array(TransferResponseSchema),
-  delegations: z.array(DelegationResponseSchema),
-});
+export const TransactionResponseSchema = z
+  .object({
+    transactionHash: z.string().openapi({ description: "Transaction hash." }),
+    from: z.string().nullable().openapi({
+      description: "Resolved sender address, if known.",
+    }),
+    to: z.string().nullable().openapi({
+      description: "Resolved recipient address, if known.",
+    }),
+    isCex: z.boolean().openapi({
+      description: "Whether the transaction touched a centralized exchange.",
+    }),
+    isDex: z.boolean().openapi({
+      description: "Whether the transaction touched a decentralized exchange.",
+    }),
+    isLending: z.boolean().openapi({
+      description: "Whether the transaction touched a lending protocol.",
+    }),
+    isTotal: z.boolean().openapi({
+      description:
+        "Whether the transaction counts toward total tracked supply.",
+    }),
+    timestamp: z.string().openapi({
+      description: "Transaction timestamp in Unix seconds as a string.",
+      example: "1704067200",
+    }),
+    transfers: z.array(TransferResponseSchema),
+    delegations: z.array(DelegationResponseSchema),
+  })
+  .openapi("Transaction", {
+    description:
+      "Transaction response enriched with transfer and delegation events.",
+  });
 
-export const TransactionsResponseSchema = z.object({
-  items: z.array(TransactionResponseSchema),
-  totalCount: z.number(),
-});
+export const TransactionsResponseSchema = z
+  .object({
+    items: z.array(TransactionResponseSchema),
+    totalCount: z.number().int().openapi({
+      description: "Total number of matching transactions.",
+    }),
+  })
+  .openapi("TransactionsResponse", {
+    description:
+      "Paginated transactions with embedded transfer and delegation data.",
+  });
 
 export type TransactionsResponse = z.infer<typeof TransactionsResponseSchema>;
 export type TransactionResponse = z.infer<typeof TransactionResponseSchema>;

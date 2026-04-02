@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
     "dev": "tsx src/index.ts",
     "dev:watch": "tsx watch src/index.ts",
     "build": "tsup",

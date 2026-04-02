@@ -1,6 +1,11 @@
-import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
+import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import { FeedEventType, FeedRelevance } from "@/lib/constants";
+
+import {
+  EventRelevanceThresholdQuerySchema,
+  EventRelevanceThresholdResponseSchema,
+} from "@/mappers";
 import { EventRelevanceService } from "@/services";
 
 export function eventRelevance(app: Hono, service: EventRelevanceService) {
@@ -10,21 +15,16 @@ export function eventRelevance(app: Hono, service: EventRelevanceService) {
       operationId: "getEventRelevanceThreshold",
       path: "/event-relevance/threshold",
       summary: "Get event relevance threshold",
-      tags: ["event-relevance"],
+      tags: ["feed"],
       request: {
-        query: z.object({
-          type: z.nativeEnum(FeedEventType),
-          relevance: z.nativeEnum(FeedRelevance),
-        }),
+        query: EventRelevanceThresholdQuerySchema,
       },
       responses: {
         200: {
           description: "Successfully retrieved threshold",
           content: {
             "application/json": {
-              schema: z.object({
-                threshold: z.string(),
-              }),
+              schema: EventRelevanceThresholdResponseSchema,
             },
           },
         },
@@ -32,8 +32,11 @@ export function eventRelevance(app: Hono, service: EventRelevanceService) {
     }),
     async (context) => {
       const { type, relevance } = context.req.valid("query");
-      const threshold = service.getThreshold(type, relevance);
-      return context.json({ threshold });
+      const threshold = service.getThreshold(
+        type as FeedEventType,
+        relevance as FeedRelevance,
+      );
+      return context.json({ threshold }, 200);
     },
   );
 }

@@ -1,6 +1,7 @@
-import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
+import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import {
+  OffchainProposalRequestSchema,
   OffchainVotesRequestSchema,
   OffchainVotesResponseSchema,
 } from "@/mappers";
@@ -52,6 +53,7 @@ export function offchainVotes(app: Hono, service: OffchainVotesService) {
 
       return context.json(
         OffchainVotesResponseSchema.parse({ items, totalCount }),
+        200,
       );
     },
   );
@@ -66,7 +68,7 @@ export function offchainVotes(app: Hono, service: OffchainVotesService) {
         "Returns a paginated list of offchain (Snapshot) votes for a specific proposal",
       tags: ["offchain"],
       request: {
-        params: z.object({ id: z.string() }),
+        params: OffchainProposalRequestSchema,
         query: OffchainVotesRequestSchema,
       },
       responses: {
@@ -104,6 +106,7 @@ export function offchainVotes(app: Hono, service: OffchainVotesService) {
 
       return context.json(
         OffchainVotesResponseSchema.parse({ items, totalCount }),
+        200,
       );
     },
   );

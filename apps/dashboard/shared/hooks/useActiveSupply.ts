@@ -1,68 +1,31 @@
-import axios from "axios";
-import type { SWRConfiguration } from "swr";
-import useSWR from "swr";
+import {
+  DaysWindow,
+  useCompareActiveSupplyQuery,
+} from "@anticapture/graphql-client/hooks";
 
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { BACKEND_ENDPOINT, getAuthHeaders } from "@/shared/utils/server-utils";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
-interface ActiveSupplyResponse {
-  activeSupply: string;
-}
+export const useActiveSupply = (daoId: DaoIdEnum, days: string) => {
+  const daysKey = days as keyof typeof DaysWindow;
 
-/* Fetch Active Supply */
-export const fetchActiveSupply = async ({
-  daoId,
-  days,
-}: {
-  daoId: DaoIdEnum;
-  days: string;
-}): Promise<ActiveSupplyResponse | null> => {
-  const query = `query ActiveSupply {
-    compareActiveSupply(days: _${days}) {
-      activeSupply
-    }
-  }`;
-
-  const response: {
-    data: { data: { compareActiveSupply: ActiveSupplyResponse } };
-  } = await axios.post(
-    `${BACKEND_ENDPOINT}`,
-    { query },
-    {
+  const { data, loading, error } = useCompareActiveSupplyQuery({
+    variables: {
+      days: DaysWindow[daysKey],
+    },
+    context: {
       headers: {
         "anticapture-dao-id": daoId,
         ...getAuthHeaders(),
       },
     },
-  );
-  const { compareActiveSupply } = response.data.data as {
-    compareActiveSupply: ActiveSupplyResponse;
+    skip: !daoId || !days,
+    fetchPolicy: "no-cache",
+  });
+
+  return {
+    data: data?.compareActiveSupply ?? null,
+    isLoading: loading,
+    error: error || null,
   };
-  return compareActiveSupply as ActiveSupplyResponse;
-};
-
-/**
- * SWR hook to fetch and manage active supply data
- * @param daoId The DAO ID to fetch data for
- * @param days The number of days to compare
- * @param config Optional SWR configuration
- * @returns SWR response with active supply data
- */
-export const useActiveSupply = (
-  daoId: DaoIdEnum,
-  days: string,
-  config?: Partial<SWRConfiguration<ActiveSupplyResponse | null, Error>>,
-) => {
-  const key = daoId && days ? [`activeSupply`, daoId, days] : null;
-
-  return useSWR<ActiveSupplyResponse | null>(
-    key,
-    async () => {
-      return await fetchActiveSupply({ daoId, days });
-    },
-    {
-      revalidateOnFocus: false,
-      ...config,
-    },
-  );
 };

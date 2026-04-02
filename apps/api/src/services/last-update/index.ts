@@ -7,7 +7,7 @@ export class LastUpdateService {
     const lastUpdateDate = await this.repository.getLastUpdate(chart);
 
     // Convert timestamp to ISO string format
-    const date = new Date(Number(lastUpdateDate) * 1000);
+    const date = new Date(Number(lastUpdateDate ?? 0n) * 1000);
     return date.toISOString();
   }
 }

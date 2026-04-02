@@ -19,6 +19,7 @@ function createStubRepo(
 const EMPTY_METRICS = {
   items: [],
   hasNextPage: false,
+  hasPreviousPage: false,
   startDate: null,
   endDate: null,
 };
@@ -69,6 +70,7 @@ describe("TokenMetricsService", () => {
       expect(result).toEqual({
         items: [{ date: DAY1.toString(), high: "1000", volume: "100" }],
         hasNextPage: false,
+        hasPreviousPage: false,
         startDate: DAY1.toString(),
         endDate: DAY1.toString(),
       });
@@ -107,6 +109,7 @@ describe("TokenMetricsService", () => {
           { date: day4.toString(), high: "800", volume: "80" },
         ],
         hasNextPage: false,
+        hasPreviousPage: false,
         startDate: DAY1.toString(),
         endDate: day4.toString(),
       });
@@ -169,6 +172,7 @@ describe("TokenMetricsService", () => {
           },
         ],
         hasNextPage: true,
+        hasPreviousPage: false,
         startDate: DAY1.toString(),
         endDate: (DAY1 + 4 * ONE_DAY).toString(),
       });
@@ -196,6 +200,7 @@ describe("TokenMetricsService", () => {
           { date: DAY1.toString(), high: "100", volume: "10" },
         ],
         hasNextPage: false,
+        hasPreviousPage: false,
         startDate: day2.toString(),
         endDate: DAY1.toString(),
       });
@@ -221,6 +226,7 @@ describe("TokenMetricsService", () => {
       expect(result).toEqual({
         items: [{ date: DAY1.toString(), high: "1000", volume: "100" }],
         hasNextPage: false,
+        hasPreviousPage: false,
         startDate: DAY1.toString(),
         endDate: DAY1.toString(),
       });

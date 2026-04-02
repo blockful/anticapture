@@ -1,6 +1,10 @@
 "use client";
 
-import type { QueryInput_Transactions_SortOrder } from "@anticapture/graphql-client/hooks";
+import type {
+  OrderDirection,
+  QueryInput_Transactions_AffectedSupply_Items,
+  QueryInput_Transactions_Includes_Items,
+} from "@anticapture/graphql-client/hooks";
 import { useTransactionsQuery } from "@anticapture/graphql-client/hooks";
 import { NetworkStatus } from "@apollo/client";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -69,24 +73,24 @@ export const useTransactionsTableData = ({
     useTransactionsQuery({
       variables: {
         limit,
-        offset: 0,
-        ...(filters?.from && { from: filters?.from }),
-        ...(filters?.to && { to: filters?.to }),
-        ...(filters?.min && {
-          minAmount: parseUnits(filters.min.toString(), decimals).toString(),
-        }),
-        ...(filters?.max && {
-          maxAmount: parseUnits(filters.max.toString(), decimals).toString(),
-        }),
-        ...(filters?.sort && {
-          sortOrder: filters?.sort as QueryInput_Transactions_SortOrder,
-        }),
-        ...(filters?.affectedSupply && {
-          affectedSupply: filters?.affectedSupply,
-        }),
-        ...(filters?.fromDate && { fromDate: filters?.fromDate }),
-        ...(filters?.toDate && { toDate: filters?.toDate }),
-        ...(filters?.includes && { includes: filters?.includes }),
+        skip: 0,
+        from: filters?.from ?? null,
+        to: filters?.to ?? null,
+        minAmount: filters?.min
+          ? parseUnits(filters.min.toString(), decimals).toString()
+          : null,
+        maxAmount: filters?.max
+          ? parseUnits(filters.max.toString(), decimals).toString()
+          : null,
+        orderDirection: (filters?.sort as OrderDirection) ?? null,
+        affectedSupply: filters?.affectedSupply
+          ? (filters.affectedSupply as QueryInput_Transactions_AffectedSupply_Items[])
+          : null,
+        fromDate: filters?.fromDate ?? null,
+        toDate: filters?.toDate ?? null,
+        includes: filters?.includes
+          ? (filters.includes as QueryInput_Transactions_Includes_Items[])
+          : null,
       },
       context: {
         headers: {

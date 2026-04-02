@@ -1,6 +1,6 @@
 import type {
+  OrderDirection,
   QueryInput_VotesByProposalId_OrderBy,
-  QueryInput_VotesByProposalId_OrderDirection,
 } from "@anticapture/graphql-client";
 import type { GetVotesQuery } from "@anticapture/graphql-client/hooks";
 import {
@@ -72,10 +72,9 @@ export const useVotes = ({
       limit,
       skip: 0, // Always fetch from beginning, we'll handle append in fetchMore
       orderBy: orderBy as QueryInput_VotesByProposalId_OrderBy,
-      orderDirection:
-        orderDirection as QueryInput_VotesByProposalId_OrderDirection,
-      ...(support !== null && { support }),
-      ...(voterAddress && { voterAddressIn: [voterAddress] }),
+      orderDirection: orderDirection as OrderDirection,
+      support: support !== null ? String(support) : null,
+      voterAddressIn: voterAddress ? [voterAddress] : null,
     };
   }, [proposalId, limit, orderBy, orderDirection, support, voterAddress]);
 
@@ -113,11 +112,8 @@ export const useVotes = ({
         const result = await getVotingPowerChange({
           variables: {
             addresses,
-            fromDate: (
-              proposalStartTimestamp / 1000 -
-              DAYS_IN_SECONDS["30d"]
-            ).toString(),
-            toDate: (proposalStartTimestamp / 1000).toString(),
+            fromDate: proposalStartTimestamp / 1000 - DAYS_IN_SECONDS["30d"],
+            toDate: proposalStartTimestamp / 1000,
           },
           context: {
             headers: {

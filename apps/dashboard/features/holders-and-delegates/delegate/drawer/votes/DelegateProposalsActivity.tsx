@@ -1,8 +1,8 @@
 "use client";
 
 import type {
+  OrderDirection,
   QueryInput_ProposalsActivity_OrderBy,
-  QueryInput_ProposalsActivity_OrderDirection,
   QueryInput_ProposalsActivity_UserVoteFilter,
 } from "@anticapture/graphql-client";
 import { Hand, Trophy, Check, Zap } from "lucide-react";
@@ -73,11 +73,10 @@ export const DelegateProposalsActivity = ({
       address,
       daoId,
       orderBy: orderBy as QueryInput_ProposalsActivity_OrderBy,
-      orderDirection:
-        orderDirection as QueryInput_ProposalsActivity_OrderDirection,
+      orderDirection: orderDirection as OrderDirection,
       userVoteFilter:
         userVoteFilter === "all"
-          ? undefined
+          ? null
           : (userVoteFilter as QueryInput_ProposalsActivity_UserVoteFilter),
       limit,
     });

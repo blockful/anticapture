@@ -1,11 +1,11 @@
 query getAccountInteractions(
   $address: String!
-  $limit: PositiveInt
+  $limit: Int
   $maxAmount: String
   $minAmount: String
   $orderBy: queryInput_accountInteractions_orderBy
-  $orderDirection: queryInput_accountInteractions_orderDirection
-  $skip: NonNegativeInt
+  $orderDirection: OrderDirection
+  $skip: Int
   $filterAddress: String
 ) {
   accountInteractions(

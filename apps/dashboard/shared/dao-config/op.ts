@@ -1,6 +1,6 @@
 import { optimism } from "viem/chains";
 
-import { OptimismIcon } from "@/shared/components/icons";
+import { OptimismIcon } from "@/shared/components/icons/OptimismIcon";
 import { OptimismChainIcon } from "@/shared/components/icons/OptimismChainIcon";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";

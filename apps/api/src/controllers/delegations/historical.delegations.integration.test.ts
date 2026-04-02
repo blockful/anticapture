@@ -203,9 +203,9 @@ describe("Historical Delegations Controller", () => {
       expect(res.status).toBe(400);
     });
 
-    it("should return 400 for a limit exceeding 100", async () => {
+    it("should return 400 for a limit exceeding 1000", async () => {
       const res = await app.request(
-        `/accounts/${VALID_ADDRESS}/delegations/historical?limit=101`,
+        `/accounts/${VALID_ADDRESS}/delegations/historical?limit=1001`,
       );
 
       expect(res.status).toBe(400);

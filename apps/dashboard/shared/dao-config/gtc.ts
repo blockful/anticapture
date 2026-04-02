@@ -1,6 +1,6 @@
 import { mainnet } from "viem/chains";
 
-import { GitcoinIcon } from "@/shared/components/icons";
+import { GitcoinIcon } from "@/shared/components/icons/GitcoinIcon";
 import { MainnetIcon } from "@/shared/components/icons/MainnetIcon";
 import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governance-implementations";
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
@@ -324,4 +324,5 @@ export const GTC: DaoConfiguration = {
     },
   },
   governancePage: true,
+  offchainProposals: true,
 };

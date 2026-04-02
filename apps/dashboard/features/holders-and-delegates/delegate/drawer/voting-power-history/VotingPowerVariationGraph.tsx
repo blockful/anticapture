@@ -100,8 +100,8 @@ export const VotingPowerVariationGraph = ({
     useDelegateDelegationHistoryGraph(
       accountId,
       daoId,
-      fromTimestamp?.toString(),
-      toTimestamp?.toString(),
+      fromTimestamp,
+      toTimestamp,
     );
 
   const extendedChartData = useMemo(

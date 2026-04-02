@@ -1,14 +1,14 @@
-import type { GetProposalQuery } from "@anticapture/graphql-client/hooks";
 import { useGetProposalQuery } from "@anticapture/graphql-client/hooks";
 import type { ApolloError } from "@apollo/client";
 import { useMemo } from "react";
 
+import type { ProposalDetails } from "@/features/governance/types";
 import { getProposalStatus } from "@/features/governance/utils";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 export interface UseProposalResult {
-  proposal: GetProposalQuery["proposal"] | null;
+  proposal: ProposalDetails | null;
   loading: boolean;
   error: ApolloError | undefined;
 }
@@ -38,7 +38,7 @@ export const useProposal = ({
 
   // Transform raw GraphQL data to governance proposal format
   const proposal = useMemo(() => {
-    if (!data?.proposal) {
+    if (!data?.proposal || data.proposal.__typename !== "OnchainProposal") {
       return null;
     }
 

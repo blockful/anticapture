@@ -308,7 +308,11 @@ export const EnsAvatar = ({
           <AddressDetailsTooltip
             address={address}
             arkhamData={arkhamData}
-            ens={ensData ? { name: ensData.ens ?? null } : null}
+            ens={
+              ensData
+                ? { name: ensData.ens ?? null, avatar: null, banner: null }
+                : null
+            }
             isContract={isContract}
             isLoading={isEnsLoading || isArkhamDataLoading}
           >
