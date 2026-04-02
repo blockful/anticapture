@@ -12,6 +12,7 @@ import {
   ProposalHeader,
 } from "@/features/governance/components/proposal-overview/ProposalHeader";
 import { ProposalInfoSection } from "@/features/governance/components/proposal-overview/ProposalInfoSection";
+import { ProposalParametersSection } from "@/features/governance/components/proposal-overview/ProposalParametersSection";
 import { ProposalSectionSkeleton } from "@/features/governance/components/proposal-overview/ProposalSectionSkeleton";
 import { ProposalStatusSection } from "@/features/governance/components/proposal-overview/ProposalStatusSection";
 import { TabsSection } from "@/features/governance/components/proposal-overview/TabsSection";
@@ -31,6 +32,7 @@ import {
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 import { Button } from "@/shared/components";
 import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCustom";
+import { TelegramBotMessage } from "@/shared/components/messages";
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
@@ -181,10 +183,16 @@ export const ProposalSection = ({
               offchainChoices={isOffchain ? offchainChoices : undefined}
               offchainScores={isOffchain ? offchainScores : undefined}
             />
+            {!isOffchain && <ProposalParametersSection daoId={daoEnum} />}
             <ProposalStatusSection
               proposal={proposal}
               isOffchain={isOffchain}
             />
+            {!isOffchain && supportValue !== undefined ? (
+              <div className="border-border-default bg-surface-default border px-4 py-3">
+                <TelegramBotMessage />
+              </div>
+            ) : null}
           </div>
 
           <TabsSection

@@ -1,8 +1,17 @@
+"use client";
+
 import { AlertTriangle } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 import { BannerAlert } from "@/shared/components/design-system/alerts/banner-alert/BannerAlert";
 
 export const ShutterAttackBanner = () => {
+  const pathname = usePathname();
+
+  if (pathname.startsWith("/whitelabel/")) {
+    return null;
+  }
+
   return (
     <BannerAlert
       icon={<AlertTriangle className="size-4" />}

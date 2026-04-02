@@ -1,13 +1,18 @@
 "use client";
 
 import type { GetAccountPowerQuery } from "@anticapture/graphql-client";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowRight, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
-import { Button, IconButton } from "@/shared/components";
-import { DaoAvatarIcon } from "@/shared/components/icons";
+import { Button } from "@/shared/components";
 import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCustom";
 import type { DaoIdEnum } from "@/shared/types/daos";
+import {
+  getDaoPagePath,
+  getWhitelabelBasePath,
+  WHITELABEL_ROUTES,
+} from "@/shared/utils/whitelabel";
 
 interface ProposalHeaderProps {
   daoId: string;
@@ -24,11 +29,13 @@ const ProposalHeaderAction = ({
   supportValue,
   proposalStatus,
   setIsVotingModalOpen,
+  hideConnectWallet,
 }: {
   address: string | undefined;
   supportValue: number | undefined;
   proposalStatus: string;
   setIsVotingModalOpen: (isOpen: boolean) => void;
+  hideConnectWallet?: boolean;
 }) => {
   const isOngoing = proposalStatus.toLowerCase() === "ongoing";
 
@@ -56,6 +63,10 @@ const ProposalHeaderAction = ({
     );
   }
 
+  if (hideConnectWallet) {
+    return null;
+  }
+
   return (
     <div className="hidden lg:flex">
       <ConnectWalletCustom label={isOngoing ? undefined : "Connect wallet"} />
@@ -72,36 +83,37 @@ export const ProposalHeader = ({
   proposalStatus,
   snapshotLink,
 }: ProposalHeaderProps) => {
+  const pathname = usePathname();
   const supportValue =
     votes?.items[0]?.support != null
       ? Number(votes.items[0].support)
       : undefined;
+  const isWhitelabelRoute = Boolean(
+    getWhitelabelBasePath({
+      daoId: daoId.toUpperCase() as DaoIdEnum,
+      pathname,
+    }),
+  );
 
   return (
     <div className="text-primary bg-surface-background border-border-default sticky -top-[57px] z-20 flex h-[65px] w-full shrink-0 items-center justify-between gap-6 border-b py-2 lg:top-0">
       <div className="mx-auto flex w-full flex-1 items-center justify-between px-5">
         <div className="flex items-center gap-2">
           <Link
-            href={`/${daoId}/governance${snapshotLink !== undefined ? "?tab=offchain" : ""}`}
+            href={`${getDaoPagePath({
+              daoId: daoId.toUpperCase() as DaoIdEnum,
+              pathname,
+              page: WHITELABEL_ROUTES.proposals,
+            })}${snapshotLink !== undefined ? "?tab=offchain" : ""}`}
+            className="text-secondary hover:text-primary inline-flex items-center gap-2 text-[14px] font-normal leading-[20px] transition-colors"
           >
-            <IconButton
-              icon={ArrowLeft}
-              size="lg"
-              variant="ghost"
-              className="size-[14px]"
-            />
+            <span>Proposals</span>
+            <ChevronRight className="size-4" />
           </Link>
-
-          <DaoAvatarIcon
-            daoId={daoId.toUpperCase() as DaoIdEnum}
-            className="size-icon-sm"
-            isRounded
-          />
-          <p className="text-secondary text-[14px] font-normal leading-[20px]">
-            {daoId.toUpperCase()}&apos;s{" "}
+          <p className="text-primary text-[14px] font-medium leading-[20px]">
             {snapshotLink !== undefined
-              ? "off-chain proposal"
-              : "proposal details"}
+              ? "Offchain proposal"
+              : "Proposal details"}
           </p>
         </div>
 
@@ -123,6 +135,7 @@ export const ProposalHeader = ({
                 supportValue={undefined}
                 proposalStatus={proposalStatus}
                 setIsVotingModalOpen={setIsVotingModalOpen}
+                hideConnectWallet={isWhitelabelRoute}
               />
             </>
           ) : (
@@ -147,6 +160,7 @@ export const ProposalHeader = ({
                 supportValue={supportValue ?? undefined}
                 proposalStatus={proposalStatus}
                 setIsVotingModalOpen={setIsVotingModalOpen}
+                hideConnectWallet={isWhitelabelRoute}
               />
             </>
           )}

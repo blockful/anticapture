@@ -121,6 +121,23 @@ export interface AttackProfitabilityConfig {
 }
 export type GovernanceImplementationConfig = GovernanceImplementation;
 
+export interface WhitelabelConfig {
+  theme: "light" | "dark";
+  requestFeatureUrl?: string;
+  customDomain?: string;
+  forumBaseUrl?: string;
+  branding?: {
+    appName?: string;
+    logo?: (props: DaoIconProps) => ReactNode;
+  };
+  governanceParameters?: Array<{
+    label: string;
+    value: string;
+    description?: string;
+  }>;
+  hostnames: string[];
+}
+
 export type DefenseAreaDescription = {
   description: string;
 };
@@ -134,6 +151,7 @@ export type DaoFeaturePageSlug =
   | "holders-and-delegates"
   | "governance"
   | "activity-feed"
+  | "service-providers"
   | "attack-profitability"
   | "resilience-stages"
   | "risk-analysis"
@@ -142,6 +160,7 @@ export type DaoFeaturePageSlug =
 // Complete DAO configuration structure
 export interface DaoConfiguration extends BaseInfo {
   daoOverview: DaoOverviewConfig;
+  whitelabel?: WhitelabelConfig;
   activityFeed?: boolean;
   attackProfitability?: AttackProfitabilityConfig;
   governanceImplementation?: GovernanceImplementationConfig;

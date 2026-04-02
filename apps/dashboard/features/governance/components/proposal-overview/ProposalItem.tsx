@@ -2,9 +2,10 @@
 
 import { CheckCircle2, XCircle } from "lucide-react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { useMemo } from "react";
 import type { Address } from "viem";
+import { useAccount } from "wagmi";
 
 import type { OffchainProposalItem as OffchainProposalData } from "@/features/governance/hooks/useOffchainProposals";
 import type { Proposal } from "@/features/governance/types";
@@ -17,8 +18,12 @@ import {
 } from "@/features/governance/utils/offchainProposal";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { BulletDivider } from "@/shared/components/design-system/section";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { useVoterInfo } from "@/features/governance/hooks/useAccountPower";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { cn, formatNumberUserReadable } from "@/shared/utils";
+import { cn } from "@/shared/utils/cn";
+import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
+import { getDaoProposalPath } from "@/shared/utils/whitelabel";
 
 type ProposalItemProps =
   | { proposal: Proposal; offchainProposal?: never; className?: string }
@@ -149,7 +154,21 @@ export const ProposalItem = ({
   offchainProposal,
   className,
 }: ProposalItemProps) => {
-  const daoId = useParams().daoId as DaoIdEnum;
+  const daoIdParam = useParams().daoId as string;
+  const daoId = daoIdParam.toUpperCase() as DaoIdEnum;
+  const pathname = usePathname();
+  const { address } = useAccount();
+  const decimals = daoConfigByDaoId[daoId].decimals;
+  const { votes } = useVoterInfo({
+    address: address ?? "",
+    daoId,
+    proposalId: proposal?.id ?? "",
+    decimals,
+  });
+  const supportValue =
+    votes?.items[0]?.support != null
+      ? Number(votes.items[0].support)
+      : undefined;
 
   const {
     offchainScores,
@@ -206,7 +225,12 @@ export const ProposalItem = ({
 
     return (
       <Link
-        href={`/${daoId}/governance/offchain-proposal/${encodedId}`}
+        href={getDaoProposalPath({
+          daoId,
+          pathname,
+          proposalId: encodedId,
+          isOffchain: true,
+        })}
         className={cn(
           "text-primary bg-surface-default hover:bg-surface-contrast relative flex w-full cursor-pointer flex-col items-center justify-between gap-3 px-3 py-3 transition-colors duration-300 lg:flex-row lg:gap-6",
           className,
@@ -287,7 +311,11 @@ export const ProposalItem = ({
 
   return (
     <Link
-      href={`/${daoId}/governance/proposal/${proposal!.id}`}
+      href={getDaoProposalPath({
+        daoId,
+        pathname,
+        proposalId: proposal!.id,
+      })}
       className={cn(
         "text-primary bg-surface-default hover:bg-surface-contrast relative flex w-full cursor-pointer flex-col items-center justify-between gap-3 px-3 py-3 transition-colors duration-300 lg:flex-row lg:gap-6",
         className,
@@ -308,6 +336,12 @@ export const ProposalItem = ({
           <p className={getTextStatusColor(proposal!.status)}>
             {getStatusText(proposal!.status)}
           </p>
+          {supportValue !== undefined ? (
+            <>
+              <BulletDivider />
+              <span className="text-link font-medium">You voted</span>
+            </>
+          ) : null}
           <BulletDivider />
           <p>{proposal!.timeText}</p>
           <BulletDivider />

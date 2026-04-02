@@ -12,6 +12,7 @@ const FEATURE_PAGE_SET = new Set<DaoFeaturePage>([
   "holders-and-delegates",
   "governance",
   "activity-feed",
+  "service-providers",
   "attack-profitability",
   "resilience-stages",
   "risk-analysis",
@@ -30,7 +31,9 @@ export const isFeatureEnabledForDao = (
     case "governance":
       return !!daoConfig.governancePage;
     case "activity-feed":
-      return true;
+      return !!daoConfig.activityFeed;
+    case "service-providers":
+      return !!daoConfig.serviceProviders;
     case "attack-profitability":
       return !!daoConfig.attackProfitability?.supportsLiquidTreasuryCall;
     case "resilience-stages":

@@ -14,7 +14,7 @@
       "passThroughEnv": ["*"]
     },
     "@anticapture/observability#build": {
-      "outputs": ["packages/observability/dist/**"]
+      "outputs": ["dist/**"]
     },
     "@anticapture/dashboard#dev": {
       "dependsOn": ["@anticapture/graphql-client#codegen"],

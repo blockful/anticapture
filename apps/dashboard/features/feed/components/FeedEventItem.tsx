@@ -10,7 +10,7 @@ import {
   Clock,
 } from "lucide-react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import type { Address } from "viem";
 import { formatUnits, zeroAddress } from "viem";
 
@@ -31,7 +31,9 @@ import { DividerDefault } from "@/shared/components/design-system/divider/Divide
 import { BulletDivider } from "@/shared/components/design-system/section";
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { cn, formatNumberUserReadable } from "@/shared/utils";
+import { cn } from "@/shared/utils/cn";
+import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
+import { getDaoProposalPath } from "@/shared/utils/whitelabel";
 
 interface FeedEventItemProps {
   event: FeedEvent;
@@ -148,6 +150,7 @@ export const FeedEventItem = ({
   onRowClick,
 }: FeedEventItemProps) => {
   const { daoId } = useParams<{ daoId: DaoIdEnum }>();
+  const pathname = usePathname();
   const config = daoConfig[daoId.toUpperCase() as DaoIdEnum];
 
   const BadgeIcon = getBadgeIcon(event.type);
@@ -212,7 +215,11 @@ export const FeedEventItem = ({
             <Link
               href={
                 config?.governancePage
-                  ? `/${daoId}/governance/proposal/${voteMetadata.proposalId}`
+                  ? getDaoProposalPath({
+                      daoId: daoId.toUpperCase() as DaoIdEnum,
+                      pathname,
+                      proposalId: voteMetadata.proposalId,
+                    })
                   : `${config?.daoOverview?.govPlatform?.url ?? ""}${voteMetadata.proposalId}`
               }
               target="_blank"
@@ -262,7 +269,11 @@ export const FeedEventItem = ({
             <Link
               href={
                 config?.governancePage
-                  ? `/${daoId}/governance/proposal/${proposalMetadata.id}`
+                  ? getDaoProposalPath({
+                      daoId: daoId.toUpperCase() as DaoIdEnum,
+                      pathname,
+                      proposalId: proposalMetadata.id,
+                    })
                   : `${config?.daoOverview?.govPlatform?.url ?? ""}${proposalMetadata.id}`
               }
               target="_blank"
@@ -295,7 +306,11 @@ export const FeedEventItem = ({
               <Link
                 href={
                   config?.governancePage
-                    ? `/${daoId}/governance/proposal/${proposalExtendedMetadata.id}`
+                    ? getDaoProposalPath({
+                        daoId: daoId.toUpperCase() as DaoIdEnum,
+                        pathname,
+                        proposalId: proposalExtendedMetadata.id,
+                      })
                     : `${config?.daoOverview?.govPlatform?.url ?? ""}${proposalExtendedMetadata.id}`
                 }
                 target="_blank"

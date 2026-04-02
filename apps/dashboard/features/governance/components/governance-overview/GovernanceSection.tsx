@@ -2,9 +2,9 @@
 
 import { OrderDirection } from "@anticapture/graphql-client";
 import { Building2, Landmark } from "lucide-react";
-import { parseAsStringEnum, useQueryState } from "nuqs";
+import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 import { useParams } from "next/navigation";
-import { useCallback, useEffect, useRef, type RefObject } from "react";
+import { useCallback, useEffect, useMemo, useRef, type RefObject } from "react";
 
 import { ProposalItem } from "@/features/governance/components/proposal-overview/ProposalItem";
 import { useOffchainProposals } from "@/features/governance/hooks/useOffchainProposals";
@@ -32,6 +32,7 @@ export const GovernanceSection = () => {
       "offchain",
     ]).withDefault("onchain"),
   );
+  const [search] = useQueryState("search", parseAsString.withDefault(""));
 
   const {
     proposals,
@@ -64,6 +65,21 @@ export const GovernanceSection = () => {
 
   const loadMoreOnchainRef = useRef<HTMLDivElement>(null);
   const loadMoreOffchainRef = useRef<HTMLDivElement>(null);
+  const normalizedSearch = search.trim().toLowerCase();
+  const filteredOnchainProposals = useMemo(
+    () =>
+      proposals.filter((proposal) =>
+        proposal.title.toLowerCase().includes(normalizedSearch),
+      ),
+    [normalizedSearch, proposals],
+  );
+  const filteredOffchainProposals = useMemo(
+    () =>
+      offchainProposals.filter((proposal) =>
+        proposal.title.toLowerCase().includes(normalizedSearch),
+      ),
+    [normalizedSearch, offchainProposals],
+  );
 
   const isOnchain = activeTab === "onchain" || !hasOffchain;
   const error = isOnchain ? onchainError : offchainError;
@@ -153,24 +169,32 @@ export const GovernanceSection = () => {
           {isOnchain ? (
             <ProposalListSection
               loading={onchainLoading}
-              hasItems={proposals.length > 0}
+              hasItems={filteredOnchainProposals.length > 0}
               isPaginationLoading={isOnchainPaginationLoading}
               loadMoreRef={loadMoreOnchainRef}
-              emptyMessage="No proposals found"
+              emptyMessage={
+                normalizedSearch
+                  ? "No proposals match your search"
+                  : "No proposals found"
+              }
             >
-              {proposals.map((proposal) => (
+              {filteredOnchainProposals.map((proposal) => (
                 <ProposalItem key={proposal.id} proposal={proposal} />
               ))}
             </ProposalListSection>
           ) : (
             <ProposalListSection
               loading={offchainLoading}
-              hasItems={offchainProposals.length > 0}
+              hasItems={filteredOffchainProposals.length > 0}
               isPaginationLoading={isOffchainPaginationLoading}
               loadMoreRef={loadMoreOffchainRef}
-              emptyMessage="No off-chain proposals found"
+              emptyMessage={
+                normalizedSearch
+                  ? "No off-chain proposals match your search"
+                  : "No off-chain proposals found"
+              }
             >
-              {offchainProposals.map((proposal) => (
+              {filteredOffchainProposals.map((proposal) => (
                 <ProposalItem key={proposal.id} offchainProposal={proposal} />
               ))}
             </ProposalListSection>

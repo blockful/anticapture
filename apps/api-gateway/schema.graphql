@@ -1956,10 +1956,6 @@ type AverageDelegationPercentagePage {
 }
 
 type DAOList {
-  items: [dao_200_response!]!
+  items: [DaoResponse!]!
   totalCount: Int!
-}
-
-type dao_200_response {
-  _fake: String
 }
