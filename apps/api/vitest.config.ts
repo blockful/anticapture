@@ -20,7 +20,6 @@ export default defineConfig({
         "src/env.ts",
         "src/docs.ts",
       ],
-      reporter: ["text"],
       thresholds: {
         lines: 80,
         functions: 80,
