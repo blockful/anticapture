@@ -3,7 +3,7 @@ FROM node:20-slim AS base
 FROM base AS builder
 WORKDIR /app
 COPY . .
-RUN npx turbo@2.3.1 prune @anticapture/indexer --docker
+RUN npx turbo@2.3.1 prune @anticapture/offchain-indexer --docker
 
 FROM base AS installer
 RUN apt-get update && apt-get install -y curl && npm install -g pnpm
@@ -15,12 +15,12 @@ RUN pnpm install
 COPY --from=builder /app/out/full/ .
 COPY --from=builder /app/turbo.json turbo.json
 RUN pnpm --filter @anticapture/observability build
+RUN pnpm run offchain-indexer build
 
 FROM base AS runner
 ENV NODE_ENV=production
-RUN apt-get update && apt-get install -y curl
 WORKDIR /app
 COPY --from=installer /app .
-WORKDIR /app/apps/indexer
+WORKDIR /app/apps/offchain-indexer
 
-ENTRYPOINT ["npm", "run", "start"]
+ENTRYPOINT ["node", "dist/index.js"]

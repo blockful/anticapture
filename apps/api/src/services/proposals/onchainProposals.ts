@@ -38,11 +38,17 @@ export class ProposalsService {
    */
   private prepareStatusForDatabase(statusArray: string[]): string[] {
     const mappedStatuses = statusArray.flatMap((status) => {
+      if (status === ProposalStatus.EXPIRED) {
+        return [
+          ProposalStatus.PENDING,
+          ProposalStatus.ACTIVE,
+          ProposalStatus.QUEUED,
+        ];
+      }
       if (
         status === ProposalStatus.ACTIVE ||
         status === ProposalStatus.DEFEATED ||
         status === ProposalStatus.SUCCEEDED ||
-        status === ProposalStatus.EXPIRED ||
         status === ProposalStatus.NO_QUORUM
       ) {
         return [ProposalStatus.PENDING, ProposalStatus.ACTIVE];

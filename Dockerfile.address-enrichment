@@ -18,6 +18,7 @@ RUN pnpm --filter @anticapture/observability build
 RUN pnpm --filter @anticapture/address-enrichment build
 
 FROM base AS runner
+ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=installer /app .
 WORKDIR /app/apps/address-enrichment

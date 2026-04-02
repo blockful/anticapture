@@ -3,6 +3,8 @@ import { HTTPException } from "hono/http-exception";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 
+import { logger } from "@/logger";
+
 export const errorHandler: ErrorHandler = (err, c) => {
   if (err instanceof HTTPException) {
     return err.getResponse();
@@ -18,6 +20,11 @@ export const errorHandler: ErrorHandler = (err, c) => {
       400,
     );
   }
+
+  logger.error(
+    { err, url: c.req.path, method: c.req.method },
+    "unhandled error",
+  );
 
   return c.json(
     {
