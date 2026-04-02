@@ -2,13 +2,14 @@ import { serve } from "@hono/node-server";
 import { swaggerUI } from "@hono/swagger-ui";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { cors } from "hono/cors";
-import { logger } from "hono/logger";
+import { HTTPException } from "hono/http-exception";
 
 import { ArkhamClient } from "@/clients/arkham";
 import { ENSClient } from "@/clients/ens";
 import { addressController } from "@/controllers/address";
 import { initDb } from "@/db";
 import { env } from "@/env";
+import { logger } from "@/logger";
 import { EnrichmentService } from "@/services/enrichment";
 
 // Initialize clients and services
@@ -25,7 +26,26 @@ const enrichmentService = new EnrichmentService(
 const app = new Hono();
 
 // Middleware
-app.use(logger());
+app.use(async (c, next) => {
+  const start = Date.now();
+  let status: number | undefined;
+  try {
+    await next();
+  } catch (err) {
+    status = err instanceof HTTPException ? err.status : 500;
+    throw err;
+  } finally {
+    logger.info(
+      {
+        method: c.req.method,
+        url: c.req.path,
+        status: status ?? c.res?.status ?? 500,
+        durationMs: Date.now() - start,
+      },
+      "request",
+    );
+  }
+});
 app.use(
   cors({
     origin: "*",
@@ -33,7 +53,10 @@ app.use(
 );
 
 app.onError((err, c) => {
-  console.error("Unhandled error:", err);
+  logger.error(
+    { err, url: c.req.path, method: c.req.method },
+    "unhandled error",
+  );
   return c.json(
     {
       error: "Internal server error",
@@ -67,12 +90,13 @@ app.get("/docs", swaggerUI({ url: "/docs/json" }));
 // Run migrations then start server
 initDb(env.DATABASE_URL);
 // runMigrations(env.DATABASE_URL);
-console.log(`🚀 Address Enrichment API starting on port ${env.PORT}`);
+logger.info({ port: env.PORT }, "address enrichment API starting");
 serve({
   fetch: app.fetch,
   port: env.PORT,
 });
 
-console.log(
-  `📚 API documentation available at http://localhost:${env.PORT}/docs`,
+logger.info(
+  { url: `http://localhost:${env.PORT}/docs` },
+  "API documentation available",
 );

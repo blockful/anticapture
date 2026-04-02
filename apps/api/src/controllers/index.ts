@@ -1,6 +1,7 @@
 export * from "./account-balance";
 export * from "./delegation-percentage";
 export * from "./governance-activity";
+export * from "./health";
 export * from "./last-update";
 export * from "./proposals";
 export * from "./token";
