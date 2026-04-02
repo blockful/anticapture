@@ -1,10 +1,10 @@
 "use client";
 
-import type { GetProposalQuery } from "@anticapture/graphql-client/hooks";
 import { Check, Hourglass, PenLine } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useAccount, useWalletClient } from "wagmi";
 
+import type { ProposalViewData } from "@/features/governance/types";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 import {
   executeProposal,
@@ -18,15 +18,13 @@ import { cn } from "@/shared/utils/cn";
 import daoConfigByDaoId from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
-type Proposal = NonNullable<GetProposalQuery["proposal"]>;
-
 type ActionStep = "waiting-signature" | "pending-tx" | "success" | "error";
 
 interface GovernanceActionModalProps {
   isOpen: boolean;
   onClose: () => void;
   action: GovernanceAction;
-  proposal: Proposal;
+  proposal: ProposalViewData;
   daoId: DaoIdEnum;
 }
 
@@ -62,7 +60,7 @@ export const GovernanceActionModal = ({
       await handler(
         proposal.targets,
         proposal.values,
-        proposal.calldatas,
+        proposal.calldatas ?? [],
         proposal.description,
         address,
         daoId,
