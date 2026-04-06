@@ -1,9 +1,12 @@
 import { z } from "@hono/zod-openapi";
-import { isAddress } from "viem";
+import { getAddress, isAddress } from "viem";
 
 export const OffchainVoterResponseSchema = z
   .object({
-    voter: z.string().refine((val) => isAddress(val)),
+    voter: z
+      .string()
+      .refine((val) => isAddress(val, { strict: false }))
+      .transform((val) => getAddress(val)),
     votingPower: z.string(),
   })
   .openapi("OffchainVote");

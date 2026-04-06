@@ -21,13 +21,13 @@ export const rawProposalSchema = z.object({
     .string()
     .nullish()
     .transform((val) => val ?? "single-choice"),
-  start: z.number(),
-  end: z.number(),
+  start: z.number().int(),
+  end: z.number().int(),
   state: z
     .string()
     .nullish()
     .transform((val) => val ?? "closed"),
-  created: z.number(),
+  created: z.number().int(),
   updated: z.number().nullish(),
   link: z
     .string()
