@@ -11,7 +11,10 @@ export interface OffchainNonVotersRepository {
     orderDirection: "asc" | "desc",
     addresses?: Address[],
   ): Promise<{ voter: Address; votingPower: bigint }[]>;
-  getOffchainNonVotersCount(proposalId: string): Promise<number>;
+  getOffchainNonVotersCount(
+    proposalId: string,
+    addresses?: Address[],
+  ): Promise<number>;
 }
 
 export class OffchainNonVotersRepositoryImpl implements OffchainNonVotersRepository {
@@ -53,7 +56,10 @@ export class OffchainNonVotersRepositoryImpl implements OffchainNonVotersReposit
       .offset(skip);
   }
 
-  async getOffchainNonVotersCount(proposalId: string): Promise<number> {
+  async getOffchainNonVotersCount(
+    proposalId: string,
+    addresses?: Address[],
+  ): Promise<number> {
     const countResult = await this.db
       .select({ count: count(accountPower.accountId) })
       .from(accountPower)
@@ -65,7 +71,11 @@ export class OffchainNonVotersRepositoryImpl implements OffchainNonVotersReposit
         ),
       )
       .where(
-        and(gt(accountPower.votingPower, 0n), isNull(offchainVotes.proposalId)),
+        and(
+          ...(addresses ? [inArray(accountPower.accountId, addresses)] : []),
+          gt(accountPower.votingPower, 0n),
+          isNull(offchainVotes.proposalId),
+        ),
       );
     return countResult[0]?.count || 0;
   }

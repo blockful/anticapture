@@ -22,9 +22,10 @@ export class OffchainNonVotersService {
     );
 
     return {
-      totalCount: addresses
-        ? addresses.length
-        : await this.repo.getOffchainNonVotersCount(proposalId),
+      totalCount: await this.repo.getOffchainNonVotersCount(
+        proposalId,
+        addresses,
+      ),
       items: nonVoters.map((v) => ({
         voter: v.voter,
         votingPower: v.votingPower.toString(),

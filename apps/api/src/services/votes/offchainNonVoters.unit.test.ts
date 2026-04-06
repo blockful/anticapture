@@ -77,9 +77,9 @@ describe("OffchainNonVotersService", () => {
       );
     });
 
-    it("should use addresses.length as totalCount when addresses filter is provided", async () => {
+    it("should use count query as totalCount when addresses filter is provided", async () => {
       repo.nonVoters = [{ voter: VOTER_A, votingPower: 500n }];
-      repo.nonVotersCount = 99;
+      repo.nonVotersCount = 1;
 
       const result = await service.getProposalNonVoters(
         "proposal-1",
@@ -89,9 +89,7 @@ describe("OffchainNonVotersService", () => {
         [VOTER_A, VOTER_B],
       );
 
-      expect(result.totalCount).toBe(2);
-      // Should NOT call getOffchainNonVotersCount
-      expect(repo.getOffchainNonVotersCount).not.toHaveBeenCalled();
+      expect(result.totalCount).toBe(1);
     });
 
     it("should return totalCount from count query when no addresses filter", async () => {
