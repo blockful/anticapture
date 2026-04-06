@@ -74,6 +74,10 @@ export class Client<
     return this.cache.timelockDelay;
   }
 
+  async getGracePeriod(): Promise<bigint> {
+    return 1814400n; // 21 days
+  }
+
   calculateQuorum(votes: {
     forVotes: bigint;
     againstVotes: bigint;
