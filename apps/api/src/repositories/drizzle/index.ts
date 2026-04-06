@@ -5,7 +5,9 @@ import {
   eq,
   gte,
   inArray,
+  ilike,
   notInArray,
+  or,
   sql,
   SQL,
 } from "drizzle-orm";
@@ -170,8 +172,41 @@ export class DrizzleRepository {
     });
   }
 
+  async searchProposals(
+    query: string,
+    skip: number,
+    limit: number,
+  ): Promise<DBProposal[]> {
+    const searchPattern = `%${query}%`;
+
+    return await this.db
+      .select()
+      .from(proposalsOnchain)
+      .where(
+        or(
+          ilike(proposalsOnchain.id, searchPattern),
+          ilike(proposalsOnchain.title, searchPattern),
+        ),
+      )
+      .orderBy(desc(proposalsOnchain.timestamp))
+      .limit(limit)
+      .offset(skip);
+  }
+
   async getProposalsCount(): Promise<number> {
     return this.db.$count(proposalsOnchain);
+  }
+
+  async getSearchProposalsCount(query: string): Promise<number> {
+    const searchPattern = `%${query}%`;
+
+    return this.db.$count(
+      proposalsOnchain,
+      or(
+        ilike(proposalsOnchain.id, searchPattern),
+        ilike(proposalsOnchain.title, searchPattern),
+      ),
+    );
   }
 
   now() {
