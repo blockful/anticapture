@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gte, inArray, SQL } from "drizzle-orm";
+import { and, asc, desc, eq, gte, ilike, inArray, or, SQL } from "drizzle-orm";
 
 import { OffchainDrizzle, offchainProposals } from "@/database";
 import { DBOffchainProposal } from "@/mappers";
@@ -74,6 +74,39 @@ export class OffchainProposalRepository {
     return this.db.$count(
       offchainProposals,
       whereClauses.length > 0 ? and(...whereClauses) : undefined,
+    );
+  }
+
+  async searchProposals(
+    query: string,
+    skip: number,
+    limit: number,
+  ): Promise<DBOffchainProposal[]> {
+    const searchPattern = `%${query}%`;
+
+    return await this.db
+      .select()
+      .from(offchainProposals)
+      .where(
+        or(
+          ilike(offchainProposals.id, searchPattern),
+          ilike(offchainProposals.title, searchPattern),
+        ),
+      )
+      .orderBy(desc(offchainProposals.created))
+      .limit(limit)
+      .offset(skip);
+  }
+
+  async getSearchProposalsCount(query: string): Promise<number> {
+    const searchPattern = `%${query}%`;
+
+    return this.db.$count(
+      offchainProposals,
+      or(
+        ilike(offchainProposals.id, searchPattern),
+        ilike(offchainProposals.title, searchPattern),
+      ),
     );
   }
 }

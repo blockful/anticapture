@@ -119,6 +119,63 @@ describe("Offchain Proposals Controller", () => {
 
       expect(res.status).toBe(400);
     });
+
+    it("should return partial matches for title or id", async () => {
+      await db.insert(offchainProposals).values([
+        createProposal({
+          id: "snapshot-upgrade-1",
+          title: "Treasury Upgrade",
+          created: 1700000000,
+          updated: 1700000000,
+        }),
+        createProposal({
+          id: "prop-special-42",
+          title: "Operations Budget",
+          created: 1700001000,
+          updated: 1700001000,
+        }),
+        createProposal({
+          id: "community-sync",
+          title: "Community Call",
+          created: 1700002000,
+          updated: 1700002000,
+        }),
+      ]);
+
+      const byTitleRes = await app.request(
+        "/offchain/proposals/search?query=grade",
+      );
+
+      expect(byTitleRes.status).toBe(200);
+      expect(await byTitleRes.json()).toEqual({
+        items: [
+          {
+            ...BASE_PROPOSAL_ITEM,
+            id: "snapshot-upgrade-1",
+            title: "Treasury Upgrade",
+          },
+        ],
+        totalCount: 1,
+      });
+
+      const byIdRes = await app.request(
+        "/offchain/proposals/search?query=special",
+      );
+
+      expect(byIdRes.status).toBe(200);
+      expect(await byIdRes.json()).toEqual({
+        items: [
+          {
+            ...BASE_PROPOSAL_ITEM,
+            id: "prop-special-42",
+            title: "Operations Budget",
+            created: 1700001000,
+            updated: 1700001000,
+          },
+        ],
+        totalCount: 1,
+      });
+    });
   });
 
   describe("GET /offchain/proposals/{id}", () => {
