@@ -12,7 +12,11 @@ export class OffchainNonVotersService {
     limit: number,
     orderDirection: "asc" | "desc",
     addresses?: Address[],
-  ): Promise<OffchainVotersResponse> {
+  ): Promise<OffchainVotersResponse | null> {
+    if (!(await this.repo.proposalExists(proposalId))) {
+      return null;
+    }
+
     const nonVoters = await this.repo.getOffchainNonVoters(
       proposalId,
       skip,

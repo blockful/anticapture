@@ -1,6 +1,10 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 
-import { VotersRequestSchema, OffchainVotersResponseSchema } from "@/mappers";
+import {
+  VotersRequestSchema,
+  OffchainVotersResponseSchema,
+  ErrorResponseSchema,
+} from "@/mappers";
 import { OffchainNonVotersService } from "@/services";
 
 export function offchainNonVoters(
@@ -31,6 +35,14 @@ export function offchainNonVoters(
             },
           },
         },
+        404: {
+          description: "Proposal not found",
+          content: {
+            "application/json": {
+              schema: ErrorResponseSchema,
+            },
+          },
+        },
       },
     }),
     async (context) => {
@@ -38,14 +50,22 @@ export function offchainNonVoters(
       const { skip, limit, orderDirection, addresses } =
         context.req.valid("query");
 
-      const { totalCount, items } = await service.getProposalNonVoters(
+      const result = await service.getProposalNonVoters(
         id,
         skip,
         limit,
         orderDirection,
         addresses,
       );
-      return context.json({ totalCount, items });
+
+      if (!result) {
+        return context.json(
+          ErrorResponseSchema.parse({ error: "Proposal not found" }),
+          404,
+        );
+      }
+
+      return context.json(result, 200);
     },
   );
 }

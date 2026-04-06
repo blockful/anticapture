@@ -8,8 +8,10 @@ const VOTER_B = getAddress("0x1234567890123456789012345678901234567890");
 
 function createStubRepo() {
   const stub = {
+    proposalExistsResult: true,
     nonVoters: [] as { voter: Address; votingPower: bigint }[],
     nonVotersCount: 0,
+    proposalExists: vi.fn(async () => stub.proposalExistsResult),
     getOffchainNonVoters: vi.fn(async () => stub.nonVoters),
     getOffchainNonVotersCount: vi.fn(async () => stub.nonVotersCount),
   };
@@ -89,7 +91,20 @@ describe("OffchainNonVotersService", () => {
         [VOTER_A, VOTER_B],
       );
 
-      expect(result.totalCount).toBe(1);
+      expect(result!.totalCount).toBe(1);
+    });
+
+    it("should return null when proposal does not exist", async () => {
+      repo.proposalExistsResult = false;
+
+      const result = await service.getProposalNonVoters(
+        "unknown-proposal",
+        0,
+        10,
+        "desc",
+      );
+
+      expect(result).toBeNull();
     });
 
     it("should return totalCount from count query when no addresses filter", async () => {
@@ -103,7 +118,7 @@ describe("OffchainNonVotersService", () => {
         "desc",
       );
 
-      expect(result.totalCount).toBe(42);
+      expect(result!.totalCount).toBe(42);
     });
   });
 });

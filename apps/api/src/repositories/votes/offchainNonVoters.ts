@@ -1,9 +1,15 @@
 import { and, asc, desc, gt, isNull, eq, inArray, count } from "drizzle-orm";
 import { Address } from "viem";
 
-import { UnifiedDrizzle, accountPower, offchainVotes } from "@/database";
+import {
+  UnifiedDrizzle,
+  accountPower,
+  offchainProposals,
+  offchainVotes,
+} from "@/database";
 
 export interface OffchainNonVotersRepository {
+  proposalExists(proposalId: string): Promise<boolean>;
   getOffchainNonVoters(
     proposalId: string,
     skip: number,
@@ -19,6 +25,14 @@ export interface OffchainNonVotersRepository {
 
 export class OffchainNonVotersRepositoryImpl implements OffchainNonVotersRepository {
   constructor(private readonly db: UnifiedDrizzle) {}
+
+  async proposalExists(proposalId: string): Promise<boolean> {
+    const result = await this.db
+      .select({ id: offchainProposals.id })
+      .from(offchainProposals)
+      .where(eq(offchainProposals.id, proposalId));
+    return result.length > 0;
+  }
 
   async getOffchainNonVoters(
     proposalId: string,
