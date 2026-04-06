@@ -294,6 +294,55 @@ describe("Onchain Proposals Controller", () => {
         ],
       });
     });
+
+    it("should treat % and _ as literal characters in search queries", async () => {
+      await db.insert(proposalsOnchain).values([
+        createProposal({
+          id: "proposal_100",
+          title: "Budget 100% Plan",
+          txHash: "0x444",
+          timestamp: 1700000000n,
+        }),
+        createProposal({
+          id: "proposal-plain",
+          title: "Ordinary Proposal",
+          txHash: "0x555",
+          timestamp: 1700001000n,
+        }),
+      ]);
+
+      const percentRes = await app.request("/proposals/search?query=%25");
+
+      expect(percentRes.status).toBe(200);
+      expect(await percentRes.json()).toEqual({
+        totalCount: 1,
+        items: [
+          {
+            ...BASE_PROPOSAL_FIELDS,
+            id: "proposal_100",
+            title: "Budget 100% Plan",
+            txHash: "0x444",
+            timestamp: 1700000000,
+          },
+        ],
+      });
+
+      const underscoreRes = await app.request("/proposals/search?query=_");
+
+      expect(underscoreRes.status).toBe(200);
+      expect(await underscoreRes.json()).toEqual({
+        totalCount: 1,
+        items: [
+          {
+            ...BASE_PROPOSAL_FIELDS,
+            id: "proposal_100",
+            title: "Budget 100% Plan",
+            txHash: "0x444",
+            timestamp: 1700000000,
+          },
+        ],
+      });
+    });
   });
 
   describe("GET /proposals/{id}", () => {

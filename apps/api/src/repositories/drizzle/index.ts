@@ -5,9 +5,7 @@ import {
   eq,
   gte,
   inArray,
-  ilike,
   notInArray,
-  or,
   sql,
   SQL,
 } from "drizzle-orm";
@@ -24,6 +22,19 @@ import { DBProposal } from "@/mappers";
 
 export class DrizzleRepository {
   constructor(private readonly db: Drizzle) {}
+
+  private escapeLikePattern(query: string): string {
+    return query.replace(/[\\%_]/g, "\\$&");
+  }
+
+  private buildProposalSearchWhere(query: string): SQL<unknown> {
+    const searchPattern = `%${this.escapeLikePattern(query)}%`;
+
+    return sql`(
+      ${proposalsOnchain.id} ILIKE ${searchPattern} ESCAPE '\\'
+      OR ${proposalsOnchain.title} ILIKE ${searchPattern} ESCAPE '\\'
+    )`;
+  }
 
   async getSupplyComparison(metricType: string, days: DaysEnum) {
     const query = sql`
@@ -177,17 +188,10 @@ export class DrizzleRepository {
     skip: number,
     limit: number,
   ): Promise<DBProposal[]> {
-    const searchPattern = `%${query}%`;
-
     return await this.db
       .select()
       .from(proposalsOnchain)
-      .where(
-        or(
-          ilike(proposalsOnchain.id, searchPattern),
-          ilike(proposalsOnchain.title, searchPattern),
-        ),
-      )
+      .where(this.buildProposalSearchWhere(query))
       .orderBy(desc(proposalsOnchain.timestamp))
       .limit(limit)
       .offset(skip);
@@ -198,14 +202,9 @@ export class DrizzleRepository {
   }
 
   async getSearchProposalsCount(query: string): Promise<number> {
-    const searchPattern = `%${query}%`;
-
     return this.db.$count(
       proposalsOnchain,
-      or(
-        ilike(proposalsOnchain.id, searchPattern),
-        ilike(proposalsOnchain.title, searchPattern),
-      ),
+      this.buildProposalSearchWhere(query),
     );
   }
 

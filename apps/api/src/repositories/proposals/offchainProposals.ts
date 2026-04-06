@@ -1,10 +1,23 @@
-import { and, asc, desc, eq, gte, ilike, inArray, or, SQL } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, sql, SQL } from "drizzle-orm";
 
 import { OffchainDrizzle, offchainProposals } from "@/database";
 import { DBOffchainProposal } from "@/mappers";
 
 export class OffchainProposalRepository {
   constructor(private readonly db: OffchainDrizzle) {}
+
+  private escapeLikePattern(query: string): string {
+    return query.replace(/[\\%_]/g, "\\$&");
+  }
+
+  private buildProposalSearchWhere(query: string): SQL<unknown> {
+    const searchPattern = `%${this.escapeLikePattern(query)}%`;
+
+    return sql`(
+      ${offchainProposals.id} ILIKE ${searchPattern} ESCAPE '\\'
+      OR ${offchainProposals.title} ILIKE ${searchPattern} ESCAPE '\\'
+    )`;
+  }
 
   async getProposals(
     skip: number,
@@ -82,31 +95,19 @@ export class OffchainProposalRepository {
     skip: number,
     limit: number,
   ): Promise<DBOffchainProposal[]> {
-    const searchPattern = `%${query}%`;
-
     return await this.db
       .select()
       .from(offchainProposals)
-      .where(
-        or(
-          ilike(offchainProposals.id, searchPattern),
-          ilike(offchainProposals.title, searchPattern),
-        ),
-      )
+      .where(this.buildProposalSearchWhere(query))
       .orderBy(desc(offchainProposals.created))
       .limit(limit)
       .offset(skip);
   }
 
   async getSearchProposalsCount(query: string): Promise<number> {
-    const searchPattern = `%${query}%`;
-
     return this.db.$count(
       offchainProposals,
-      or(
-        ilike(offchainProposals.id, searchPattern),
-        ilike(offchainProposals.title, searchPattern),
-      ),
+      this.buildProposalSearchWhere(query),
     );
   }
 }
