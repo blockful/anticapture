@@ -9,7 +9,7 @@ export const OffchainVoterResponseSchema = z
       .transform((val) => getAddress(val)),
     votingPower: z.string(),
   })
-  .openapi("OffchainVote");
+  .openapi("OffchainNonVoter");
 
 export type OffchainVoterResponse = z.infer<typeof OffchainVoterResponseSchema>;
 

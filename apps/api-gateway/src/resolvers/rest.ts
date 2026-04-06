@@ -34,6 +34,7 @@ const daoItemQueries = [
   "lastUpdate",
   "offchainProposals",
   "offchainProposalById",
+  "offchainProposalNonVoters",
   "votesOffchain",
   "votesOffchainByProposalId",
   "proposal",
