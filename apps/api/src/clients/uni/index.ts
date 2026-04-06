@@ -64,6 +64,10 @@ export class UNIClient<
     return this.cache.timelockDelay;
   }
 
+  async getGracePeriod(): Promise<bigint> {
+    return 1209600n; // 14 days
+  }
+
   alreadySupportCalldataReview(): boolean {
     return true;
   }

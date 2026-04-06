@@ -6,6 +6,7 @@ import { ArkhamClient } from "@/clients/arkham";
 import { ENSClient } from "@/clients/ens";
 import { getDb, addressEnrichment } from "@/db";
 import type { AddressEnrichment } from "@/db/schema";
+import { logger } from "@/logger";
 import { isContract, createRpcClient } from "@/utils/address-type";
 
 export const EnrichmentResultSchema = z.object({
@@ -73,6 +74,10 @@ export class EnrichmentService {
       }
 
       // ENS data is stale or missing — refetch
+      logger.info(
+        { address: normalizedAddress },
+        "ENS cache stale, refreshing",
+      );
       const ensData = await this.ensClient.getEnsData(normalizedAddress);
       const now = new Date();
 
@@ -139,6 +144,10 @@ export class EnrichmentService {
 
     // If insert failed due to race condition, fetch existing
     if (!inserted) {
+      logger.warn(
+        { address: normalizedAddress },
+        "address enrichment insert failed - likely race condition",
+      );
       const existingAfterRace = await db.query.addressEnrichment.findFirst({
         where: eq(addressEnrichment.address, normalizedAddress),
       });
@@ -146,6 +155,10 @@ export class EnrichmentService {
         return this.mapToResult(existingAfterRace);
       }
       // This shouldn't happen, but return fetched data anyway
+      logger.error(
+        { address: normalizedAddress },
+        "race condition fallback failed - record still not found",
+      );
       return {
         address: normalizedAddress,
         isContract: isContractAddress,

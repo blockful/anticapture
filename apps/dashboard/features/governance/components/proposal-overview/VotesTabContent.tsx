@@ -1,9 +1,8 @@
 "use client";
 
-import type { GetProposalQuery } from "@anticapture/graphql-client";
 import {
+  OrderDirection,
   QueryInput_TokenMetrics_MetricType,
-  QueryInput_TokenMetrics_OrderDirection,
 } from "@anticapture/graphql-client";
 import {
   useGetProposalNonVotersQuery,
@@ -16,6 +15,7 @@ import { formatUnits } from "viem";
 
 import { TabsDidntVoteContent } from "@/features/governance/components/proposal-overview/TabsDidntVoteContent";
 import { TabsVotedContent } from "@/features/governance/components/proposal-overview/TabsVotedContent";
+import type { ProposalDetails } from "@/features/governance/types";
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
@@ -24,7 +24,7 @@ import { getAuthHeaders } from "@/shared/utils/server-utils";
 type VoteTabId = "voted" | "didntVote";
 
 interface VotesTabContentProps {
-  proposal: NonNullable<GetProposalQuery["proposal"]>;
+  proposal: ProposalDetails;
   onAddressClick?: (address: string) => void;
 }
 
@@ -45,9 +45,11 @@ export const VotesTabContent = ({
   const { data: delegatedSupplyData } = useTokenMetricsQuery({
     variables: {
       metricType: QueryInput_TokenMetrics_MetricType.DelegatedSupply,
+      startDate: null,
       endDate: Number(proposal.endTimestamp),
-      orderDirection: QueryInput_TokenMetrics_OrderDirection.Desc,
+      orderDirection: OrderDirection.Desc,
       limit: 1,
+      skip: null,
     },
     context: {
       headers: {
@@ -61,6 +63,10 @@ export const VotesTabContent = ({
   const { data } = useGetVotesQuery({
     variables: {
       proposalId: proposal.id,
+      limit: null,
+      skip: null,
+      support: null,
+      voterAddressIn: null,
     },
     context: {
       headers: {
@@ -75,6 +81,7 @@ export const VotesTabContent = ({
     variables: {
       id: proposal.id,
       limit: 1, // We only need the count
+      skip: null,
     },
     context: {
       headers: {

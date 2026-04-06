@@ -82,6 +82,9 @@ importers:
 
   apps/address-enrichment:
     dependencies:
+      "@anticapture/observability":
+        specifier: workspace:*
+        version: link:../../packages/observability
       "@hono/node-server":
         specifier: ^1.13.7
         version: 1.19.11(hono@4.12.7)
@@ -106,6 +109,9 @@ importers:
       pg:
         specifier: ^8.13.1
         version: 8.20.0
+      pino-http:
+        specifier: ^10.4.0
+        version: 10.5.0
       viem:
         specifier: ^2.37.11
         version: 2.47.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76)
@@ -141,8 +147,8 @@ importers:
         specifier: ^1.19.9
         version: 1.19.11(hono@4.12.7)
       "@hono/zod-openapi":
-        specifier: ^0.19.6
-        version: 0.19.10(hono@4.12.7)(zod@3.25.76)
+        specifier: ^1.2.2
+        version: 1.2.2(hono@4.12.7)(zod@4.3.6)
       "@opentelemetry/api":
         specifier: ^1.9.0
         version: 1.9.0
@@ -164,15 +170,18 @@ importers:
       pg:
         specifier: ^8.17.2
         version: 8.20.0
+      pino-http:
+        specifier: ^10.4.0
+        version: 10.5.0
       viem:
         specifier: ^2.41.2
-        version: 2.47.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76)
+        version: 2.47.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6)
       zod:
-        specifier: ^3.25.3
-        version: 3.25.76
+        specifier: ^4.3.6
+        version: 4.3.6
       zod-validation-error:
-        specifier: ^3.4.1
-        version: 3.5.4(zod@3.25.76)
+        specifier: ^5.0.0
+        version: 5.0.0(zod@4.3.6)
     devDependencies:
       "@electric-sql/pglite":
         specifier: ^0.3.15
@@ -233,7 +242,7 @@ importers:
         version: 0.106.29(graphql@16.13.1)
       "@graphql-mesh/openapi":
         specifier: ^0.109.8
-        version: 0.109.37(graphql@16.13.1)
+        version: 0.109.37(graphql@16.13.1)(pino@9.14.0)
       "@graphql-mesh/runtime":
         specifier: ^0.106.3
         version: 0.106.27(graphql@16.13.1)
@@ -255,7 +264,7 @@ importers:
     devDependencies:
       "@graphql-mesh/cli":
         specifier: ^0.100.4
-        version: 0.100.36(@types/node@20.19.37)(bufferutil@4.0.9)(crossws@0.3.5)(graphql@16.13.1)(utf-8-validate@5.0.10)
+        version: 0.100.36(@types/node@20.19.37)(bufferutil@4.0.9)(crossws@0.3.5)(graphql@16.13.1)(pino@9.14.0)(utf-8-validate@5.0.10)
       "@types/jest":
         specifier: ^29.5.14
         version: 29.5.14
@@ -589,6 +598,9 @@ importers:
 
   apps/offchain-indexer:
     dependencies:
+      "@anticapture/observability":
+        specifier: workspace:*
+        version: link:../../packages/observability
       "@electric-sql/pglite":
         specifier: ^0.3.15
         version: 0.3.16
@@ -677,7 +689,7 @@ importers:
         version: 4.9.6
       forge-std:
         specifier: github:foundry-rs/forge-std
-        version: https://codeload.github.com/foundry-rs/forge-std/tar.gz/f5495c9b993bfc6e79dd52adfdcb7dac0a1da918
+        version: https://codeload.github.com/foundry-rs/forge-std/tar.gz/4540e4aadda88eeb19a54d2b5ad2117c2c7632ec
 
   packages/observability:
     dependencies:
@@ -717,7 +729,19 @@ importers:
       "@opentelemetry/semantic-conventions":
         specifier: ^1.27.0
         version: 1.40.0
+      pino:
+        specifier: ^9.14.0
+        version: 9.14.0
+      pino-opentelemetry-transport:
+        specifier: ^1.1.0
+        version: 1.1.0(@opentelemetry/api@1.9.0)(pino@9.14.0)
     devDependencies:
+      "@types/node":
+        specifier: ^20.16.5
+        version: 20.19.37
+      pino-pretty:
+        specifier: ^13.1.3
+        version: 13.1.3
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(jiti@2.6.1)(postcss@8.5.8)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
@@ -4555,6 +4579,21 @@ packages:
       }
     engines: { node: ">=18.0.0" }
 
+  "@grpc/grpc-js@1.14.3":
+    resolution:
+      {
+        integrity: sha512-Iq8QQQ/7X3Sac15oB6p0FmUg/klxQvXLeileoqrTRGJYLV+/9tubbr9ipz0GKHjmXVsgFPo/+W+2cA8eNcR+XA==,
+      }
+    engines: { node: ">=12.10.0" }
+
+  "@grpc/proto-loader@0.8.0":
+    resolution:
+      {
+        integrity: sha512-rc1hOQtjIWGxcxpb9aHAfLpIctjEnsDehj0DAiVfBlmT84uvR0uUtN2hEi/ecvWVjXUGf5qPF4qEgiLOx1YIMQ==,
+      }
+    engines: { node: ">=6" }
+    hasBin: true
+
   "@hono/node-server@1.19.11":
     resolution:
       {
@@ -5096,6 +5135,12 @@ packages:
         integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==,
       }
 
+  "@js-sdsl/ordered-map@4.4.2":
+    resolution:
+      {
+        integrity: sha512-iUKgm52T8HOE/makSxjqoWhe95ZJA1/G1sYsGev2JDKUSS14KAgg1LHb+Ba+IPow0xflbnSkOsZcO08C7w1gYw==,
+      }
+
   "@json-schema-tools/meta-schema@1.8.0":
     resolution:
       {
@@ -5551,6 +5596,13 @@ packages:
       }
     engines: { node: ">=8.0.0" }
 
+  "@opentelemetry/api-logs@0.206.0":
+    resolution:
+      {
+        integrity: sha512-yIVDu9jX//nV5wSMLZLdHdb1SKHIMj9k+wQVFtln5Flcgdldz9BkHtavvExQiJqBZg2OpEEJEZmzQazYztdz2A==,
+      }
+    engines: { node: ">=8.0.0" }
+
   "@opentelemetry/api-logs@0.57.2":
     resolution:
       {
@@ -5583,6 +5635,15 @@ packages:
     peerDependencies:
       "@opentelemetry/api": ">=1.0.0 <1.10.0"
 
+  "@opentelemetry/core@2.1.0":
+    resolution:
+      {
+        integrity: sha512-RMEtHsxJs/GiHHxYT58IY57UXAQTuUnZVco6ymDEqTNlJKTimM4qPUPVe8InNFyBjhHBEAx4k3Q8LtNayBsbUQ==,
+      }
+    engines: { node: ^18.19.0 || >=20.6.0 }
+    peerDependencies:
+      "@opentelemetry/api": ">=1.0.0 <1.10.0"
+
   "@opentelemetry/core@2.6.0":
     resolution:
       {
@@ -5591,6 +5652,42 @@ packages:
     engines: { node: ^18.19.0 || >=20.6.0 }
     peerDependencies:
       "@opentelemetry/api": ">=1.0.0 <1.10.0"
+
+  "@opentelemetry/core@2.6.1":
+    resolution:
+      {
+        integrity: sha512-8xHSGWpJP9wBxgBpnqGL0R3PbdWQndL1Qp50qrg71+B28zK5OQmUgcDKLJgzyAAV38t4tOyLMGDD60LneR5W8g==,
+      }
+    engines: { node: ^18.19.0 || >=20.6.0 }
+    peerDependencies:
+      "@opentelemetry/api": ">=1.0.0 <1.10.0"
+
+  "@opentelemetry/exporter-logs-otlp-grpc@0.206.0":
+    resolution:
+      {
+        integrity: sha512-kJKxKBaGwqWop95d6tcluz260IWwIgOG0BH8oVm6429tg8LxY2PJb7Om8d5s+5vOFM8DkUYCnIpn9d/13/RcKQ==,
+      }
+    engines: { node: ^18.19.0 || >=20.6.0 }
+    peerDependencies:
+      "@opentelemetry/api": ^1.3.0
+
+  "@opentelemetry/exporter-logs-otlp-http@0.206.0":
+    resolution:
+      {
+        integrity: sha512-VWcHEnS+1kN+sQTAdCgSn2anqHPxY1/e52fhpe2mcSnEaXI1srFf3RU5DAu7hzQO6T9DPQzOKG8kc76vCtyYDw==,
+      }
+    engines: { node: ^18.19.0 || >=20.6.0 }
+    peerDependencies:
+      "@opentelemetry/api": ^1.3.0
+
+  "@opentelemetry/exporter-logs-otlp-proto@0.206.0":
+    resolution:
+      {
+        integrity: sha512-CsYNXJwkn1qCXJGE+/JvvYucAjL8rpaxa2hnl+tDP6M5E0O3UVa8zG4ZUEebjr5J5Nc32egvslEZx5rgNOp3lQ==,
+      }
+    engines: { node: ^18.19.0 || >=20.6.0 }
+    peerDependencies:
+      "@opentelemetry/api": ^1.3.0
 
   "@opentelemetry/exporter-prometheus@0.57.2":
     resolution:
@@ -5655,12 +5752,39 @@ packages:
     peerDependencies:
       "@opentelemetry/api": ^1.3.0
 
+  "@opentelemetry/otlp-exporter-base@0.206.0":
+    resolution:
+      {
+        integrity: sha512-Rv54oSNKMHYS5hv+H5EGksfBUtvPQWFTK+Dk6MjJun9tOijCsFJrhRFvAqg5d67TWSMn+ZQYRKIeXh5oLVrpAQ==,
+      }
+    engines: { node: ^18.19.0 || >=20.6.0 }
+    peerDependencies:
+      "@opentelemetry/api": ^1.3.0
+
   "@opentelemetry/otlp-exporter-base@0.57.2":
     resolution:
       {
         integrity: sha512-XdxEzL23Urhidyebg5E6jZoaiW5ygP/mRjxLHixogbqwDy2Faduzb5N0o/Oi+XTIJu+iyxXdVORjXax+Qgfxag==,
       }
     engines: { node: ">=14" }
+    peerDependencies:
+      "@opentelemetry/api": ^1.3.0
+
+  "@opentelemetry/otlp-grpc-exporter-base@0.206.0":
+    resolution:
+      {
+        integrity: sha512-IA8EDbrB8OKtidMqErBY8sUc9mh03LOXuNPwp4/rdPrxSt45g1gBuZMovRXdEWfRyKKbF2E7MdipT2m11bs6SQ==,
+      }
+    engines: { node: ^18.19.0 || >=20.6.0 }
+    peerDependencies:
+      "@opentelemetry/api": ^1.3.0
+
+  "@opentelemetry/otlp-transformer@0.206.0":
+    resolution:
+      {
+        integrity: sha512-Li2Cik1WnmNbU2mmTnw7DxvRiXhMcnAuTfAclP8y/zy7h5+GrLDpTZ+Z0XUs+Q3MLkb/h3ry4uFrC/z+2a6X7g==,
+      }
+    engines: { node: ^18.19.0 || >=20.6.0 }
     peerDependencies:
       "@opentelemetry/api": ^1.3.0
 
@@ -5700,6 +5824,33 @@ packages:
     peerDependencies:
       "@opentelemetry/api": ">=1.0.0 <1.10.0"
 
+  "@opentelemetry/resources@2.1.0":
+    resolution:
+      {
+        integrity: sha512-1CJjf3LCvoefUOgegxi8h6r4B/wLSzInyhGP2UmIBYNlo4Qk5CZ73e1eEyWmfXvFtm1ybkmfb2DqWvspsYLrWw==,
+      }
+    engines: { node: ^18.19.0 || >=20.6.0 }
+    peerDependencies:
+      "@opentelemetry/api": ">=1.3.0 <1.10.0"
+
+  "@opentelemetry/resources@2.6.1":
+    resolution:
+      {
+        integrity: sha512-lID/vxSuKWXM55XhAKNoYXu9Cutoq5hFdkbTdI/zDKQktXzcWBVhNsOkiZFTMU9UtEWuGRNe0HUgmsFldIdxVA==,
+      }
+    engines: { node: ^18.19.0 || >=20.6.0 }
+    peerDependencies:
+      "@opentelemetry/api": ">=1.3.0 <1.10.0"
+
+  "@opentelemetry/sdk-logs@0.206.0":
+    resolution:
+      {
+        integrity: sha512-SQ2yTmqe4Mw9RI3a/glVkfjWPsXh6LySvnljXubiZq4zu+UP8NMJt2j82ZsYb+KpD7Eu+/41/7qlJnjdeVjz7Q==,
+      }
+    engines: { node: ^18.19.0 || >=20.6.0 }
+    peerDependencies:
+      "@opentelemetry/api": ">=1.4.0 <1.10.0"
+
   "@opentelemetry/sdk-logs@0.57.2":
     resolution:
       {
@@ -5718,6 +5869,15 @@ packages:
     peerDependencies:
       "@opentelemetry/api": ">=1.3.0 <1.10.0"
 
+  "@opentelemetry/sdk-metrics@2.1.0":
+    resolution:
+      {
+        integrity: sha512-J9QX459mzqHLL9Y6FZ4wQPRZG4TOpMCyPOh6mkr/humxE1W2S3Bvf4i75yiMW9uyed2Kf5rxmLhTm/UK8vNkAw==,
+      }
+    engines: { node: ^18.19.0 || >=20.6.0 }
+    peerDependencies:
+      "@opentelemetry/api": ">=1.9.0 <1.10.0"
+
   "@opentelemetry/sdk-trace-base@1.30.1":
     resolution:
       {
@@ -5726,6 +5886,15 @@ packages:
     engines: { node: ">=14" }
     peerDependencies:
       "@opentelemetry/api": ">=1.0.0 <1.10.0"
+
+  "@opentelemetry/sdk-trace-base@2.1.0":
+    resolution:
+      {
+        integrity: sha512-uTX9FBlVQm4S2gVQO1sb5qyBLq/FPjbp+tmGoxu4tIgtYGmBYB44+KX/725RFDe30yBSaA9Ml9fqphe1hbUyLQ==,
+      }
+    engines: { node: ^18.19.0 || >=20.6.0 }
+    peerDependencies:
+      "@opentelemetry/api": ">=1.3.0 <1.10.0"
 
   "@opentelemetry/sdk-trace-node@1.30.1":
     resolution:
@@ -5895,6 +6064,12 @@ packages:
         integrity: sha512-IHnV6A+zxU7XwmKFinmYjUcwlyK9+xkG3/s9KcQhI9BjQKycrJ1JRO+FbNYPwZiPKW3je/DR0k7w8/gLa5eaxQ==,
       }
     deprecated: 'The package is now available as "qr": npm install qr'
+
+  "@pinojs/redact@0.4.0":
+    resolution:
+      {
+        integrity: sha512-k2ENnmBugE/rzQfEcdWHcCY+/FM3VLzH9cYEsbdsoqrvzAKRhUZeRNhAZvB8OitQJ1TBed3yqWtdjzS6wJKBwg==,
+      }
 
   "@pkgjs/parseargs@0.11.0":
     resolution:
@@ -8644,6 +8819,7 @@ packages:
       {
         integrity: sha512-SSlIG6QEVxClgl1s0LMk4xr2wg4eT3Zn/Hb81IocyqNSGfXpjtawWxKxiC5/9Z95f1INyBD6MctJbL/R1oBwIw==,
       }
+    deprecated: "Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases"
 
   "@walletconnect/events@1.0.1":
     resolution:
@@ -8727,12 +8903,14 @@ packages:
       {
         integrity: sha512-z7h+PeLa5Au2R591d/8ZlziE0stJvdzP9jNFzFolf2RG/OiXulgFKum8PrIyXy+Rg2q95U9nRVUF9fWcn78yBA==,
       }
+    deprecated: "Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases"
 
   "@walletconnect/sign-client@2.21.1":
     resolution:
       {
         integrity: sha512-QaXzmPsMnKGV6tc4UcdnQVNOz4zyXgarvdIQibJ4L3EmLat73r5ZVl4c0cCOcoaV7rgM9Wbphgu5E/7jNcd3Zg==,
       }
+    deprecated: "Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases"
 
   "@walletconnect/time@1.0.2":
     resolution:
@@ -8757,12 +8935,14 @@ packages:
       {
         integrity: sha512-mtUQvewt+X0VBQay/xOJBvxsB3Xsm1lTwFjZ6WUwSOTR1X+FNb71hSApnV5kbsdDIpYPXeQUbGt2se1n5E5UBg==,
       }
+    deprecated: "Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases"
 
   "@walletconnect/universal-provider@2.21.1":
     resolution:
       {
         integrity: sha512-Wjx9G8gUHVMnYfxtasC9poGm8QMiPCpXpbbLFT+iPoQskDDly8BwueWnqKs4Mx2SdIAWAwuXeZ5ojk5qQOxJJg==,
       }
+    deprecated: "Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases"
 
   "@walletconnect/utils@2.21.0":
     resolution:
@@ -10804,6 +10984,12 @@ packages:
       }
     engines: { node: ">=0.11" }
 
+  dateformat@4.6.3:
+    resolution:
+      {
+        integrity: sha512-2P0p0pFGzHS5EMnhdxQi7aJN+iMheud0UhG4dlE1DLAlvL8JHjJJTX/CSm4JXwV0Ka5nGk3zC5mcb5bUQUxxMA==,
+      }
+
   dayjs@1.11.13:
     resolution:
       {
@@ -12158,6 +12344,12 @@ packages:
       }
     engines: { node: "> 0.1.90" }
 
+  fast-copy@4.0.2:
+    resolution:
+      {
+        integrity: sha512-ybA6PDXIXOXivLJK/z9e+Otk7ve13I4ckBvGO5I2RRmBU1gMHLVDJYEuJYhGwez7YNlYji2M2DvVU+a9mSFDlw==,
+      }
+
   fast-deep-equal@3.1.3:
     resolution:
       {
@@ -12468,10 +12660,10 @@ packages:
       }
     engines: { node: ">=14" }
 
-  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/f5495c9b993bfc6e79dd52adfdcb7dac0a1da918:
+  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/4540e4aadda88eeb19a54d2b5ad2117c2c7632ec:
     resolution:
       {
-        tarball: https://codeload.github.com/foundry-rs/forge-std/tar.gz/f5495c9b993bfc6e79dd52adfdcb7dac0a1da918,
+        tarball: https://codeload.github.com/foundry-rs/forge-std/tar.gz/4540e4aadda88eeb19a54d2b5ad2117c2c7632ec,
       }
     version: 1.15.0
 
@@ -13001,6 +13193,12 @@ packages:
     resolution:
       {
         integrity: sha512-IScLbePpkvO846sIwOtOTDjutRMWdXdJmXdMvk6gCBHxFO8d+QKOQedyZSxFTTFYRSmlgSTDtXqqq4pcenBXLQ==,
+      }
+
+  help-me@5.0.0:
+    resolution:
+      {
+        integrity: sha512-7xgomUX6ADmcYzFik0HzAxh/73YlKR9bmFzf51CZwR+b6YtzU2m0u49hQCqV6SvlqIqsaxovfwdvbnsw3b/zpg==,
       }
 
   hermes-estree@0.25.1:
@@ -15580,6 +15778,12 @@ packages:
       }
     engines: { node: ">=0.10.0" }
 
+  otlp-logger@1.1.13:
+    resolution:
+      {
+        integrity: sha512-r53tPnMLprtQSMOJUkj4Az4tR8NL+U+8C7M8BV1ZA9y7cDfAbWQp2mRL/eYS/O786oAi9KnN9hKsZ5cFKNchKw==,
+      }
+
   outvariant@1.4.3:
     resolution:
       {
@@ -16025,6 +16229,39 @@ packages:
         integrity: sha512-Guhh8EZfPCfH+PMXAb6rKOjGQEoy0xlAIn+irODG5kgfYV+BQ0rGYYWTIel3P5mmyXqkYkPmdIkywsn6QKUR1Q==,
       }
 
+  pino-abstract-transport@2.0.0:
+    resolution:
+      {
+        integrity: sha512-F63x5tizV6WCh4R6RHyi2Ml+M70DNRXt/+HANowMflpgGFMAym/VKm6G7ZOQRjqN7XbGxK1Lg9t6ZrtzOaivMw==,
+      }
+
+  pino-abstract-transport@3.0.0:
+    resolution:
+      {
+        integrity: sha512-wlfUczU+n7Hy/Ha5j9a/gZNy7We5+cXp8YL+X+PG8S0KXxw7n/JXA3c46Y0zQznIJ83URJiwy7Lh56WLokNuxg==,
+      }
+
+  pino-http@10.5.0:
+    resolution:
+      {
+        integrity: sha512-hD91XjgaKkSsdn8P7LaebrNzhGTdB086W3pyPihX0EzGPjq5uBJBXo4N5guqNaK6mUjg9aubMF7wDViYek9dRA==,
+      }
+
+  pino-opentelemetry-transport@1.1.0:
+    resolution:
+      {
+        integrity: sha512-yLOaODDxavgkEJX6ySLGHGjRDaX/xtUs35XHrw1C5U2IRBWKakZHJ8UVrFvDQQ0WxJBRUuChC/Vi2zhynIZXgA==,
+      }
+    peerDependencies:
+      pino: ^8.21.0 || ^9.0.0
+
+  pino-pretty@13.1.3:
+    resolution:
+      {
+        integrity: sha512-ttXRkkOz6WWC95KeY9+xxWL6AtImwbyMHrL1mSwqwW9u+vLp/WIElvHvCSDg0xO/Dzrggz1zv3rN5ovTRVowKg==,
+      }
+    hasBin: true
+
   pino-std-serializers@4.0.0:
     resolution:
       {
@@ -16035,6 +16272,12 @@ packages:
     resolution:
       {
         integrity: sha512-cHjPPsE+vhj/tnhCy/wiMh3M3z3h/j15zHQX+S9GkTBgqJuTuJzYJ4gUyACLhDaJ7kk9ba9iRDmbH2tJU03OiA==,
+      }
+
+  pino-std-serializers@7.1.0:
+    resolution:
+      {
+        integrity: sha512-BndPH67/JxGExRgiX1dX0w1FvZck5Wa4aal9198SrRhZjH3GxKQUKIBnYJTdj2HDN3UQAS06HlfcSbQj2OHmaw==,
       }
 
   pino@7.11.0:
@@ -16048,6 +16291,13 @@ packages:
     resolution:
       {
         integrity: sha512-ip4qdzjkAyDDZklUaZkcRFb2iA118H9SgRh8yzTkSQK8HilsOJF7rSY8HoW5+I0M46AZgX/pxbprf2vvzQCE0Q==,
+      }
+    hasBin: true
+
+  pino@9.14.0:
+    resolution:
+      {
+        integrity: sha512-8OEwKp5juEvb/MjpIc4hjqfgCNysrS94RIOMXYvpYCdm/jglrKEiAYmiumbmGhCvs+IcInsphYDFwqrjr7398w==,
       }
     hasBin: true
 
@@ -16448,6 +16698,12 @@ packages:
     resolution:
       {
         integrity: sha512-mqn0kFRl0EoqhnL0GQ0veqFHyIN1yig9RHh/InzORTUiZHFRAur+aMtRkELNwGs9aNwKS6tg/An4NYBPGwvtzQ==,
+      }
+
+  process-warning@5.0.0:
+    resolution:
+      {
+        integrity: sha512-a39t9ApHNx2L4+HBnQKqxxHNs1r7KF+Intd8Q/g1bUh6q0WIp9voPXJ/x0j+ZL45KF1pJd9+q2jLIRMfvEshkA==,
       }
 
   process@0.11.10:
@@ -17343,6 +17599,12 @@ packages:
         integrity: sha512-MuCAyrGZcTLfQoH2XoBlQ8C6bzwN88XT/0slOGz0pn8+gIP85BOAfYa44ZXQUTOwRwPU0QvgU+V+OSajl/59Xg==,
       }
 
+  secure-json-parse@4.1.0:
+    resolution:
+      {
+        integrity: sha512-l4KnYfEyqYJxDwlNVyRfO2E4NTHfMKAWdUuA8J0yve2Dz/E/PdBepY03RvyJpssIpRFwJoCD55wA+mEDs6ByWA==,
+      }
+
   semver-compare@1.0.0:
     resolution:
       {
@@ -17576,6 +17838,12 @@ packages:
     resolution:
       {
         integrity: sha512-y4Z8LCDBuum+PBP3lSV7RHrXscqksve/bi0as7mhwVnBW+/wUqKT/2Kb7um8yqcFy0duYbbPxzt89Zy2nOCaxg==,
+      }
+
+  sonic-boom@4.2.1:
+    resolution:
+      {
+        integrity: sha512-w6AxtubXa2wTXAUsZMMWERrsIRAdrK0Sc+FUytWvYAhBJLyuI4llrMIC1DtlNSdI99EI86KZum2MMq3EAZlF9Q==,
       }
 
   source-map-js@1.2.1:
@@ -17926,6 +18194,13 @@ packages:
       }
     engines: { node: ">=8" }
 
+  strip-json-comments@5.0.3:
+    resolution:
+      {
+        integrity: sha512-1tB5mhVo7U+ETBKNf92xT4hrQa3pm0MZ0PQvuDnWgAAGHDsfp4lPSpiS6psrSiet87wyGPh9ft6wmhOMQ0hDiw==,
+      }
+    engines: { node: ">=14.16" }
+
   strip-literal@3.0.0:
     resolution:
       {
@@ -18225,6 +18500,12 @@ packages:
     resolution:
       {
         integrity: sha512-qQiRWsU/wvNolI6tbbCKd9iKaTnCXsTwVxhhKM6nctPdujTyztjlbUkUTUymidWcMnZ5pWR0ej4a0tjsW021vw==,
+      }
+
+  thread-stream@3.1.0:
+    resolution:
+      {
+        integrity: sha512-OqyPZ9u96VohAyMfJykzmivOrY2wfMSf3C5TtFJVgN+Hm6aj+voFhlK+kZEIv2FBh1X6Xp3DlnCOfEQ3B2J86A==,
       }
 
   through@2.3.8:
@@ -19904,6 +20185,15 @@ packages:
     resolution:
       {
         integrity: sha512-Q6/nZLe6jxuU80qb/4uJ4t5v2VEZ44lzQjPDhYJNztRQ4wyWc6VF3D3Kb/fAuPetZQnhS3hnajCf9CsWesghLQ==,
+      }
+    engines: { node: ">=18.0.0" }
+    peerDependencies:
+      zod: ^3.25.0 || ^4.0.0
+
+  zod-validation-error@5.0.0:
+    resolution:
+      {
+        integrity: sha512-hmk+pkyKq7Q71PiWVSDUc3VfpzpvcRHZ3QPw9yEMVvmtCekaMeOHnbr3WbxfrgEnQTv6haGP4cmv0Ojmihzsxw==,
       }
     engines: { node: ">=18.0.0" }
     peerDependencies:
@@ -22437,7 +22727,9 @@ snapshots:
       parse-filepath: 1.0.2
       tslib: 2.6.3
 
-  "@graphql-hive/logger@1.1.0": {}
+  "@graphql-hive/logger@1.1.0(pino@9.14.0)":
+    optionalDependencies:
+      pino: 9.14.0
 
   "@graphql-hive/pubsub@2.1.1":
     dependencies:
@@ -22479,7 +22771,7 @@ snapshots:
       - "@nats-io/nats-core"
       - ioredis
 
-  "@graphql-mesh/cli@0.100.36(@types/node@20.19.37)(bufferutil@4.0.9)(crossws@0.3.5)(graphql@16.13.1)(utf-8-validate@5.0.10)":
+  "@graphql-mesh/cli@0.100.36(@types/node@20.19.37)(bufferutil@4.0.9)(crossws@0.3.5)(graphql@16.13.1)(pino@9.14.0)(utf-8-validate@5.0.10)":
     dependencies:
       "@graphql-codegen/core": 5.0.1(graphql@16.13.1)
       "@graphql-codegen/typed-document-node": 6.1.7(graphql@16.13.1)
@@ -22491,7 +22783,7 @@ snapshots:
       "@graphql-mesh/cross-helpers": 0.4.12(graphql@16.13.1)
       "@graphql-mesh/http": 0.106.29(graphql@16.13.1)
       "@graphql-mesh/include": 0.3.26(graphql@16.13.1)
-      "@graphql-mesh/incontext-sdk-codegen": 0.0.2(@types/node@20.19.37)(graphql@16.13.1)
+      "@graphql-mesh/incontext-sdk-codegen": 0.0.2(@types/node@20.19.37)(graphql@16.13.1)(pino@9.14.0)
       "@graphql-mesh/runtime": 0.106.27(graphql@16.13.1)
       "@graphql-mesh/store": 0.104.27(graphql@16.13.1)
       "@graphql-mesh/types": 0.104.23(graphql@16.13.1)
@@ -22583,13 +22875,13 @@ snapshots:
       - ioredis
       - supports-color
 
-  "@graphql-mesh/fusion-runtime@1.8.1(@types/node@20.19.37)(graphql@16.13.1)":
+  "@graphql-mesh/fusion-runtime@1.8.1(@types/node@20.19.37)(graphql@16.13.1)(pino@9.14.0)":
     dependencies:
       "@envelop/core": 5.5.1
       "@envelop/instrumentation": 1.0.0
-      "@graphql-hive/logger": 1.1.0
+      "@graphql-hive/logger": 1.1.0(pino@9.14.0)
       "@graphql-mesh/cross-helpers": 0.4.12(graphql@16.13.1)
-      "@graphql-mesh/transport-common": 1.0.15(graphql@16.13.1)
+      "@graphql-mesh/transport-common": 1.0.15(graphql@16.13.1)(pino@9.14.0)
       "@graphql-mesh/types": 0.104.23(graphql@16.13.1)
       "@graphql-mesh/utils": 0.104.25(graphql@16.13.1)
       "@graphql-tools/batch-execute": 10.0.7(graphql@16.13.1)
@@ -22667,14 +22959,14 @@ snapshots:
       - "@nats-io/nats-core"
       - ioredis
 
-  "@graphql-mesh/incontext-sdk-codegen@0.0.2(@types/node@20.19.37)(graphql@16.13.1)":
+  "@graphql-mesh/incontext-sdk-codegen@0.0.2(@types/node@20.19.37)(graphql@16.13.1)(pino@9.14.0)":
     dependencies:
       "@graphql-codegen/core": 5.0.1(graphql@16.13.1)
       "@graphql-codegen/plugin-helpers": 6.2.0(graphql@16.13.1)
       "@graphql-codegen/typescript": 5.0.9(graphql@16.13.1)
       "@graphql-mesh/cross-helpers": 0.4.12(graphql@16.13.1)
-      "@graphql-mesh/fusion-runtime": 1.8.1(@types/node@20.19.37)(graphql@16.13.1)
-      "@graphql-mesh/transport-common": 1.0.15(graphql@16.13.1)
+      "@graphql-mesh/fusion-runtime": 1.8.1(@types/node@20.19.37)(graphql@16.13.1)(pino@9.14.0)
+      "@graphql-mesh/transport-common": 1.0.15(graphql@16.13.1)(pino@9.14.0)
       "@graphql-mesh/types": 0.104.23(graphql@16.13.1)
       "@graphql-mesh/utils": 0.104.25(graphql@16.13.1)
       "@graphql-tools/utils": 11.0.0(graphql@16.13.1)
@@ -22719,13 +23011,13 @@ snapshots:
       - "@nats-io/nats-core"
       - ioredis
 
-  "@graphql-mesh/openapi@0.109.37(graphql@16.13.1)":
+  "@graphql-mesh/openapi@0.109.37(graphql@16.13.1)(pino@9.14.0)":
     dependencies:
       "@graphql-mesh/store": 0.104.27(graphql@16.13.1)
       "@graphql-mesh/string-interpolation": 0.5.11(graphql@16.13.1)
       "@graphql-mesh/types": 0.104.23(graphql@16.13.1)
       "@graphql-mesh/utils": 0.104.25(graphql@16.13.1)
-      "@omnigraph/openapi": 0.109.36(graphql@16.13.1)
+      "@omnigraph/openapi": 0.109.36(graphql@16.13.1)(pino@9.14.0)
       graphql: 16.13.1
       tslib: 2.8.1
     transitivePeerDependencies:
@@ -22808,10 +23100,10 @@ snapshots:
       - "@nats-io/nats-core"
       - ioredis
 
-  "@graphql-mesh/transport-common@1.0.15(graphql@16.13.1)":
+  "@graphql-mesh/transport-common@1.0.15(graphql@16.13.1)(pino@9.14.0)":
     dependencies:
       "@envelop/core": 5.5.1
-      "@graphql-hive/logger": 1.1.0
+      "@graphql-hive/logger": 1.1.0(pino@9.14.0)
       "@graphql-hive/pubsub": 2.1.1
       "@graphql-hive/signal": 2.0.0
       "@graphql-mesh/types": 0.104.23(graphql@16.13.1)
@@ -22827,11 +23119,11 @@ snapshots:
       - pino
       - winston
 
-  "@graphql-mesh/transport-rest@0.9.28(graphql@16.13.1)":
+  "@graphql-mesh/transport-rest@0.9.28(graphql@16.13.1)(pino@9.14.0)":
     dependencies:
       "@graphql-mesh/cross-helpers": 0.4.12(graphql@16.13.1)
       "@graphql-mesh/string-interpolation": 0.5.11(graphql@16.13.1)
-      "@graphql-mesh/transport-common": 1.0.15(graphql@16.13.1)
+      "@graphql-mesh/transport-common": 1.0.15(graphql@16.13.1)(pino@9.14.0)
       "@graphql-mesh/types": 0.104.23(graphql@16.13.1)
       "@graphql-mesh/utils": 0.104.25(graphql@16.13.1)
       "@graphql-tools/utils": 11.0.0(graphql@16.13.1)
@@ -23567,6 +23859,18 @@ snapshots:
       "@repeaterjs/repeater": 3.0.6
       tslib: 2.8.1
 
+  "@grpc/grpc-js@1.14.3":
+    dependencies:
+      "@grpc/proto-loader": 0.8.0
+      "@js-sdsl/ordered-map": 4.4.2
+
+  "@grpc/proto-loader@0.8.0":
+    dependencies:
+      lodash.camelcase: 4.3.0
+      long: 5.3.2
+      protobufjs: 7.5.4
+      yargs: 17.7.2
+
   "@hono/node-server@1.19.11(hono@4.12.7)":
     dependencies:
       hono: 4.12.7
@@ -23985,6 +24289,8 @@ snapshots:
       "@jridgewell/resolve-uri": 3.1.2
       "@jridgewell/sourcemap-codec": 1.5.5
 
+  "@js-sdsl/ordered-map@4.4.2": {}
+
   "@json-schema-tools/meta-schema@1.8.0": {}
 
   "@lit-labs/react@2.1.3(@types/react@19.2.8)":
@@ -24296,12 +24602,12 @@ snapshots:
 
   "@nolyfill/is-core-module@1.0.39": {}
 
-  "@omnigraph/json-schema@0.109.29(graphql@16.13.1)":
+  "@omnigraph/json-schema@0.109.29(graphql@16.13.1)(pino@9.14.0)":
     dependencies:
       "@graphql-mesh/cross-helpers": 0.4.12(graphql@16.13.1)
       "@graphql-mesh/string-interpolation": 0.5.11(graphql@16.13.1)
-      "@graphql-mesh/transport-common": 1.0.15(graphql@16.13.1)
-      "@graphql-mesh/transport-rest": 0.9.28(graphql@16.13.1)
+      "@graphql-mesh/transport-common": 1.0.15(graphql@16.13.1)(pino@9.14.0)
+      "@graphql-mesh/transport-rest": 0.9.28(graphql@16.13.1)(pino@9.14.0)
       "@graphql-mesh/types": 0.104.23(graphql@16.13.1)
       "@graphql-mesh/utils": 0.104.25(graphql@16.13.1)
       "@graphql-tools/delegate": 12.0.9(graphql@16.13.1)
@@ -24328,7 +24634,7 @@ snapshots:
       - pino
       - winston
 
-  "@omnigraph/openapi@0.109.36(graphql@16.13.1)":
+  "@omnigraph/openapi@0.109.36(graphql@16.13.1)(pino@9.14.0)":
     dependencies:
       "@graphql-mesh/cross-helpers": 0.4.12(graphql@16.13.1)
       "@graphql-mesh/fusion-composition": 0.8.32(graphql@16.13.1)
@@ -24336,7 +24642,7 @@ snapshots:
       "@graphql-mesh/types": 0.104.23(graphql@16.13.1)
       "@graphql-mesh/utils": 0.104.25(graphql@16.13.1)
       "@graphql-tools/utils": 11.0.0(graphql@16.13.1)
-      "@omnigraph/json-schema": 0.109.29(graphql@16.13.1)
+      "@omnigraph/json-schema": 0.109.29(graphql@16.13.1)(pino@9.14.0)
       change-case: 4.1.2
       graphql: 16.13.1
       json-machete: 0.97.6
@@ -24363,6 +24669,10 @@ snapshots:
     dependencies:
       "@opentelemetry/api": 1.9.0
 
+  "@opentelemetry/api-logs@0.206.0":
+    dependencies:
+      "@opentelemetry/api": 1.9.0
+
   "@opentelemetry/api-logs@0.57.2":
     dependencies:
       "@opentelemetry/api": 1.9.0
@@ -24378,10 +24688,50 @@ snapshots:
       "@opentelemetry/api": 1.9.0
       "@opentelemetry/semantic-conventions": 1.28.0
 
+  "@opentelemetry/core@2.1.0(@opentelemetry/api@1.9.0)":
+    dependencies:
+      "@opentelemetry/api": 1.9.0
+      "@opentelemetry/semantic-conventions": 1.40.0
+
   "@opentelemetry/core@2.6.0(@opentelemetry/api@1.9.0)":
     dependencies:
       "@opentelemetry/api": 1.9.0
       "@opentelemetry/semantic-conventions": 1.40.0
+
+  "@opentelemetry/core@2.6.1(@opentelemetry/api@1.9.0)":
+    dependencies:
+      "@opentelemetry/api": 1.9.0
+      "@opentelemetry/semantic-conventions": 1.40.0
+
+  "@opentelemetry/exporter-logs-otlp-grpc@0.206.0(@opentelemetry/api@1.9.0)":
+    dependencies:
+      "@grpc/grpc-js": 1.14.3
+      "@opentelemetry/api": 1.9.0
+      "@opentelemetry/core": 2.1.0(@opentelemetry/api@1.9.0)
+      "@opentelemetry/otlp-exporter-base": 0.206.0(@opentelemetry/api@1.9.0)
+      "@opentelemetry/otlp-grpc-exporter-base": 0.206.0(@opentelemetry/api@1.9.0)
+      "@opentelemetry/otlp-transformer": 0.206.0(@opentelemetry/api@1.9.0)
+      "@opentelemetry/sdk-logs": 0.206.0(@opentelemetry/api@1.9.0)
+
+  "@opentelemetry/exporter-logs-otlp-http@0.206.0(@opentelemetry/api@1.9.0)":
+    dependencies:
+      "@opentelemetry/api": 1.9.0
+      "@opentelemetry/api-logs": 0.206.0
+      "@opentelemetry/core": 2.1.0(@opentelemetry/api@1.9.0)
+      "@opentelemetry/otlp-exporter-base": 0.206.0(@opentelemetry/api@1.9.0)
+      "@opentelemetry/otlp-transformer": 0.206.0(@opentelemetry/api@1.9.0)
+      "@opentelemetry/sdk-logs": 0.206.0(@opentelemetry/api@1.9.0)
+
+  "@opentelemetry/exporter-logs-otlp-proto@0.206.0(@opentelemetry/api@1.9.0)":
+    dependencies:
+      "@opentelemetry/api": 1.9.0
+      "@opentelemetry/api-logs": 0.206.0
+      "@opentelemetry/core": 2.1.0(@opentelemetry/api@1.9.0)
+      "@opentelemetry/otlp-exporter-base": 0.206.0(@opentelemetry/api@1.9.0)
+      "@opentelemetry/otlp-transformer": 0.206.0(@opentelemetry/api@1.9.0)
+      "@opentelemetry/resources": 2.1.0(@opentelemetry/api@1.9.0)
+      "@opentelemetry/sdk-logs": 0.206.0(@opentelemetry/api@1.9.0)
+      "@opentelemetry/sdk-trace-base": 2.1.0(@opentelemetry/api@1.9.0)
 
   "@opentelemetry/exporter-prometheus@0.57.2(@opentelemetry/api@1.9.0)":
     dependencies:
@@ -24448,11 +24798,36 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  "@opentelemetry/otlp-exporter-base@0.206.0(@opentelemetry/api@1.9.0)":
+    dependencies:
+      "@opentelemetry/api": 1.9.0
+      "@opentelemetry/core": 2.1.0(@opentelemetry/api@1.9.0)
+      "@opentelemetry/otlp-transformer": 0.206.0(@opentelemetry/api@1.9.0)
+
   "@opentelemetry/otlp-exporter-base@0.57.2(@opentelemetry/api@1.9.0)":
     dependencies:
       "@opentelemetry/api": 1.9.0
       "@opentelemetry/core": 1.30.1(@opentelemetry/api@1.9.0)
       "@opentelemetry/otlp-transformer": 0.57.2(@opentelemetry/api@1.9.0)
+
+  "@opentelemetry/otlp-grpc-exporter-base@0.206.0(@opentelemetry/api@1.9.0)":
+    dependencies:
+      "@grpc/grpc-js": 1.14.3
+      "@opentelemetry/api": 1.9.0
+      "@opentelemetry/core": 2.1.0(@opentelemetry/api@1.9.0)
+      "@opentelemetry/otlp-exporter-base": 0.206.0(@opentelemetry/api@1.9.0)
+      "@opentelemetry/otlp-transformer": 0.206.0(@opentelemetry/api@1.9.0)
+
+  "@opentelemetry/otlp-transformer@0.206.0(@opentelemetry/api@1.9.0)":
+    dependencies:
+      "@opentelemetry/api": 1.9.0
+      "@opentelemetry/api-logs": 0.206.0
+      "@opentelemetry/core": 2.1.0(@opentelemetry/api@1.9.0)
+      "@opentelemetry/resources": 2.1.0(@opentelemetry/api@1.9.0)
+      "@opentelemetry/sdk-logs": 0.206.0(@opentelemetry/api@1.9.0)
+      "@opentelemetry/sdk-metrics": 2.1.0(@opentelemetry/api@1.9.0)
+      "@opentelemetry/sdk-trace-base": 2.1.0(@opentelemetry/api@1.9.0)
+      protobufjs: 7.5.4
 
   "@opentelemetry/otlp-transformer@0.57.2(@opentelemetry/api@1.9.0)":
     dependencies:
@@ -24481,6 +24856,25 @@ snapshots:
       "@opentelemetry/core": 1.30.1(@opentelemetry/api@1.9.0)
       "@opentelemetry/semantic-conventions": 1.28.0
 
+  "@opentelemetry/resources@2.1.0(@opentelemetry/api@1.9.0)":
+    dependencies:
+      "@opentelemetry/api": 1.9.0
+      "@opentelemetry/core": 2.1.0(@opentelemetry/api@1.9.0)
+      "@opentelemetry/semantic-conventions": 1.40.0
+
+  "@opentelemetry/resources@2.6.1(@opentelemetry/api@1.9.0)":
+    dependencies:
+      "@opentelemetry/api": 1.9.0
+      "@opentelemetry/core": 2.6.1(@opentelemetry/api@1.9.0)
+      "@opentelemetry/semantic-conventions": 1.40.0
+
+  "@opentelemetry/sdk-logs@0.206.0(@opentelemetry/api@1.9.0)":
+    dependencies:
+      "@opentelemetry/api": 1.9.0
+      "@opentelemetry/api-logs": 0.206.0
+      "@opentelemetry/core": 2.1.0(@opentelemetry/api@1.9.0)
+      "@opentelemetry/resources": 2.1.0(@opentelemetry/api@1.9.0)
+
   "@opentelemetry/sdk-logs@0.57.2(@opentelemetry/api@1.9.0)":
     dependencies:
       "@opentelemetry/api": 1.9.0
@@ -24494,12 +24888,25 @@ snapshots:
       "@opentelemetry/core": 1.30.1(@opentelemetry/api@1.9.0)
       "@opentelemetry/resources": 1.30.1(@opentelemetry/api@1.9.0)
 
+  "@opentelemetry/sdk-metrics@2.1.0(@opentelemetry/api@1.9.0)":
+    dependencies:
+      "@opentelemetry/api": 1.9.0
+      "@opentelemetry/core": 2.1.0(@opentelemetry/api@1.9.0)
+      "@opentelemetry/resources": 2.1.0(@opentelemetry/api@1.9.0)
+
   "@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0)":
     dependencies:
       "@opentelemetry/api": 1.9.0
       "@opentelemetry/core": 1.30.1(@opentelemetry/api@1.9.0)
       "@opentelemetry/resources": 1.30.1(@opentelemetry/api@1.9.0)
       "@opentelemetry/semantic-conventions": 1.28.0
+
+  "@opentelemetry/sdk-trace-base@2.1.0(@opentelemetry/api@1.9.0)":
+    dependencies:
+      "@opentelemetry/api": 1.9.0
+      "@opentelemetry/core": 2.1.0(@opentelemetry/api@1.9.0)
+      "@opentelemetry/resources": 2.1.0(@opentelemetry/api@1.9.0)
+      "@opentelemetry/semantic-conventions": 1.40.0
 
   "@opentelemetry/sdk-trace-node@1.30.1(@opentelemetry/api@1.9.0)":
     dependencies:
@@ -24583,6 +24990,8 @@ snapshots:
       "@parcel/watcher-win32-x64": 2.5.6
 
   "@paulmillr/qr@0.2.1": {}
+
+  "@pinojs/redact@0.4.0": {}
 
   "@pkgjs/parseargs@0.11.0":
     optional: true
@@ -28772,6 +29181,8 @@ snapshots:
     dependencies:
       "@babel/runtime": 7.28.6
 
+  dateformat@4.6.3: {}
+
   dayjs@1.11.13: {}
 
   dayjs@1.11.19: {}
@@ -29739,6 +30150,8 @@ snapshots:
 
   eyes@0.1.8: {}
 
+  fast-copy@4.0.2: {}
+
   fast-deep-equal@3.1.3: {}
 
   fast-diff@1.3.0: {}
@@ -29917,7 +30330,7 @@ snapshots:
       cross-spawn: 7.0.6
       signal-exit: 4.1.0
 
-  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/f5495c9b993bfc6e79dd52adfdcb7dac0a1da918:
+  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/4540e4aadda88eeb19a54d2b5ad2117c2c7632ec:
     {}
 
   fork-ts-checker-webpack-plugin@9.1.0(typescript@5.9.3)(webpack@5.105.4):
@@ -30298,6 +30711,8 @@ snapshots:
       tslib: 2.8.1
 
   headers-polyfill@4.0.3: {}
+
+  help-me@5.0.0: {}
 
   hermes-estree@0.25.1: {}
 
@@ -31977,6 +32392,17 @@ snapshots:
 
   os-tmpdir@1.0.2: {}
 
+  otlp-logger@1.1.13(@opentelemetry/api@1.9.0):
+    dependencies:
+      "@opentelemetry/api-logs": 0.206.0
+      "@opentelemetry/exporter-logs-otlp-grpc": 0.206.0(@opentelemetry/api@1.9.0)
+      "@opentelemetry/exporter-logs-otlp-http": 0.206.0(@opentelemetry/api@1.9.0)
+      "@opentelemetry/exporter-logs-otlp-proto": 0.206.0(@opentelemetry/api@1.9.0)
+      "@opentelemetry/resources": 2.6.1(@opentelemetry/api@1.9.0)
+      "@opentelemetry/sdk-logs": 0.206.0(@opentelemetry/api@1.9.0)
+    transitivePeerDependencies:
+      - "@opentelemetry/api"
+
   outvariant@1.4.3: {}
 
   own-keys@1.0.1:
@@ -32009,6 +32435,21 @@ snapshots:
       "@scure/bip32": 1.7.0
       "@scure/bip39": 1.6.0
       abitype: 1.2.3(typescript@5.9.3)(zod@3.25.76)
+      eventemitter3: 5.0.1
+    optionalDependencies:
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - zod
+
+  ox@0.14.0(typescript@5.9.3)(zod@4.3.6):
+    dependencies:
+      "@adraffy/ens-normalize": 1.11.1
+      "@noble/ciphers": 1.3.0
+      "@noble/curves": 1.9.1
+      "@noble/hashes": 1.8.0
+      "@scure/bip32": 1.7.0
+      "@scure/bip39": 1.6.0
+      abitype: 1.2.3(typescript@5.9.3)(zod@4.3.6)
       eventemitter3: 5.0.1
     optionalDependencies:
       typescript: 5.9.3
@@ -32263,9 +32704,50 @@ snapshots:
       readable-stream: 4.7.0
       split2: 4.2.0
 
+  pino-abstract-transport@2.0.0:
+    dependencies:
+      split2: 4.2.0
+
+  pino-abstract-transport@3.0.0:
+    dependencies:
+      split2: 4.2.0
+
+  pino-http@10.5.0:
+    dependencies:
+      get-caller-file: 2.0.5
+      pino: 9.14.0
+      pino-std-serializers: 7.1.0
+      process-warning: 5.0.0
+
+  pino-opentelemetry-transport@1.1.0(@opentelemetry/api@1.9.0)(pino@9.14.0):
+    dependencies:
+      otlp-logger: 1.1.13(@opentelemetry/api@1.9.0)
+      pino: 9.14.0
+      pino-abstract-transport: 2.0.0
+    transitivePeerDependencies:
+      - "@opentelemetry/api"
+
+  pino-pretty@13.1.3:
+    dependencies:
+      colorette: 2.0.20
+      dateformat: 4.6.3
+      fast-copy: 4.0.2
+      fast-safe-stringify: 2.1.1
+      help-me: 5.0.0
+      joycon: 3.1.1
+      minimist: 1.2.8
+      on-exit-leak-free: 2.1.2
+      pino-abstract-transport: 3.0.0
+      pump: 3.0.3
+      secure-json-parse: 4.1.0
+      sonic-boom: 4.2.1
+      strip-json-comments: 5.0.3
+
   pino-std-serializers@4.0.0: {}
 
   pino-std-serializers@6.2.2: {}
+
+  pino-std-serializers@7.1.0: {}
 
   pino@7.11.0:
     dependencies:
@@ -32294,6 +32776,20 @@ snapshots:
       safe-stable-stringify: 2.5.0
       sonic-boom: 3.8.1
       thread-stream: 2.7.0
+
+  pino@9.14.0:
+    dependencies:
+      "@pinojs/redact": 0.4.0
+      atomic-sleep: 1.0.0
+      on-exit-leak-free: 2.1.2
+      pino-abstract-transport: 2.0.0
+      pino-std-serializers: 7.1.0
+      process-warning: 5.0.0
+      quick-format-unescaped: 4.0.4
+      real-require: 0.2.0
+      safe-stable-stringify: 2.5.0
+      sonic-boom: 4.2.1
+      thread-stream: 3.1.0
 
   pirates@4.0.7: {}
 
@@ -32541,6 +33037,8 @@ snapshots:
   process-warning@1.0.0: {}
 
   process-warning@3.0.0: {}
+
+  process-warning@5.0.0: {}
 
   process@0.11.10: {}
 
@@ -33155,6 +33653,8 @@ snapshots:
 
   scuid@1.1.0: {}
 
+  secure-json-parse@4.1.0: {}
+
   semver-compare@1.0.0: {}
 
   semver@6.3.1: {}
@@ -33330,6 +33830,10 @@ snapshots:
       atomic-sleep: 1.0.0
 
   sonic-boom@3.8.1:
+    dependencies:
+      atomic-sleep: 1.0.0
+
+  sonic-boom@4.2.1:
     dependencies:
       atomic-sleep: 1.0.0
 
@@ -33566,6 +34070,8 @@ snapshots:
 
   strip-json-comments@3.1.1: {}
 
+  strip-json-comments@5.0.3: {}
+
   strip-literal@3.0.0:
     dependencies:
       js-tokens: 9.0.1
@@ -33726,6 +34232,10 @@ snapshots:
       real-require: 0.1.0
 
   thread-stream@2.7.0:
+    dependencies:
+      real-require: 0.2.0
+
+  thread-stream@3.1.0:
     dependencies:
       real-require: 0.2.0
 
@@ -34345,6 +34855,23 @@ snapshots:
       - utf-8-validate
       - zod
 
+  viem@2.47.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6):
+    dependencies:
+      "@noble/curves": 1.9.1
+      "@noble/hashes": 1.8.0
+      "@scure/bip32": 1.7.0
+      "@scure/bip39": 1.6.0
+      abitype: 1.2.3(typescript@5.9.3)(zod@4.3.6)
+      isows: 1.0.7(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+      ox: 0.14.0(typescript@5.9.3)(zod@4.3.6)
+      ws: 8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+    optionalDependencies:
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+      - zod
+
   vite-node@1.0.2(@types/node@20.19.37)(lightningcss@1.31.1)(terser@5.46.0):
     dependencies:
       cac: 6.7.14
@@ -34848,13 +35375,13 @@ snapshots:
     dependencies:
       zod: 3.25.58
 
-  zod-validation-error@3.5.4(zod@3.25.76):
-    dependencies:
-      zod: 3.25.76
-
   zod-validation-error@4.0.2(zod@3.25.76):
     dependencies:
       zod: 3.25.76
+
+  zod-validation-error@5.0.0(zod@4.3.6):
+    dependencies:
+      zod: 4.3.6
 
   zod@3.22.4: {}
 

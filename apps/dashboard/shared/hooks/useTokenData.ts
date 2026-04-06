@@ -1,87 +1,46 @@
-import axios from "axios";
-import type { SWRConfiguration } from "swr";
-import useSWR from "swr";
-import type { Address } from "viem";
+import type { QueryInput_Token_Currency } from "@anticapture/graphql-client";
+import {
+  type TokenDataQuery,
+  useTokenDataQuery,
+} from "@anticapture/graphql-client/hooks";
 
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { BACKEND_ENDPOINT, getAuthHeaders } from "@/shared/utils/server-utils";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
-export interface TokenDataResponse {
-  id: Address;
-  name: DaoIdEnum;
-  decimals: number;
-  cexSupply: string;
-  circulatingSupply: string;
-  delegatedSupply: string;
-  dexSupply: string;
-  lendingSupply: string;
-  price: number;
-  totalSupply: string;
-  treasury: string;
-}
+type TokenProperties = Extract<
+  NonNullable<TokenDataQuery["token"]>,
+  { __typename?: "TokenPropertiesResponse" }
+>;
 
-/* Fetch Token Property Data */
-export const fetchTokenData = async ({
-  daoId,
-  currency,
-}: {
-  daoId: DaoIdEnum;
-  currency: "usd" | "eth";
-}): Promise<TokenDataResponse | null> => {
-  const query = `query GetToken {
-  token(currency: ${currency}) {
-    cexSupply
-    circulatingSupply
-    decimals
-    delegatedSupply
-    dexSupply
-    id
-    lendingSupply
-    name
-    price
-    totalSupply
-    treasury
-  }
-}`;
-  const response: {
-    data: { data: { token: TokenDataResponse } };
-  } = await axios.post(
-    `${BACKEND_ENDPOINT}`,
-    {
-      query,
+export type TokenDataResponse = TokenProperties;
+
+export const useTokenData = (
+  daoId: DaoIdEnum,
+  currency: "usd" | "eth" = "usd",
+) => {
+  const { data, loading, error, refetch } = useTokenDataQuery({
+    variables: {
+      currency: currency as QueryInput_Token_Currency | undefined,
     },
-    {
+    context: {
       headers: {
         "anticapture-dao-id": daoId,
         ...getAuthHeaders(),
       },
     },
-  );
+    skip: !daoId || !currency,
+    fetchPolicy: "no-cache",
+  });
 
-  return response.data.data.token;
-};
+  const token =
+    data?.token?.__typename === "TokenPropertiesResponse"
+      ? (data.token as TokenProperties)
+      : null;
 
-/**
- * SWR hook to fetch and manage delegated token property data
- * @param daoId The DAO ID to fetch data for
- * @param currency Currency in which the token prive will be evaluated (optional; defaults to "usd")
- * @returns SWR response with delegated supply data
- */
-export const useTokenData = (
-  daoId: DaoIdEnum,
-  currency: "usd" | "eth" = "usd",
-  config?: Partial<SWRConfiguration<TokenDataResponse | null, Error>>,
-) => {
-  const key = daoId && currency ? [`delegatedSupply`, daoId, currency] : null;
-
-  return useSWR<TokenDataResponse | null>(
-    key,
-    async () => {
-      return await fetchTokenData({ daoId, currency });
-    },
-    {
-      revalidateOnFocus: false,
-      ...config,
-    },
-  );
+  return {
+    data: token,
+    isLoading: loading,
+    error: error || null,
+    mutate: refetch,
+  };
 };

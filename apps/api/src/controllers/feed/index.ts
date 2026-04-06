@@ -28,7 +28,7 @@ export function feed(app: Hono, service: FeedService) {
     async (context) => {
       const req = context.req.valid("query");
       const response = await service.getFeedEvents(req);
-      return context.json(FeedResponseSchema.parse(response));
+      return context.json(FeedResponseSchema.parse(response), 200);
     },
   );
 }

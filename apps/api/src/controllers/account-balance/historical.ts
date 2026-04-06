@@ -18,7 +18,8 @@ export function historicalBalances(
       operationId: "historicalBalances",
       path: "/accounts/{address}/balances/historical",
       summary: "Get historical token balances",
-      description: "TODO",
+      description:
+        "Returns historical balance deltas for one account, enriched with the transfer that caused each change.",
       tags: ["account-balances"],
       request: {
         params: HistoricalBalanceRequestParamsSchema,
@@ -60,7 +61,10 @@ export function historicalBalances(
         toDate,
       );
 
-      return context.json(HistoricalBalancesResponseMapper(items, totalCount));
+      return context.json(
+        HistoricalBalancesResponseMapper(items, totalCount),
+        200,
+      );
     },
   );
 }

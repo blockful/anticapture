@@ -1,6 +1,5 @@
 "use client";
 
-import type { Query_Proposals_Items_Items } from "@anticapture/graphql-client/hooks";
 import { Check, User2Icon, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Account } from "viem";
@@ -9,6 +8,7 @@ import { useAccount, useWalletClient } from "wagmi";
 
 import { LoadingComponent } from "@/features/governance/components/modals/LoadingContent";
 import { VoteOption } from "@/features/governance/components/proposal-overview/VoteOption";
+import type { ProposalDetails } from "@/features/governance/types";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 import { voteOnProposal } from "@/features/governance/utils/voteOnProposal";
 import { BadgeStatus, Button } from "@/shared/components";
@@ -18,7 +18,7 @@ import { formatNumberUserReadable } from "@/shared/utils";
 interface VotingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  proposal: Query_Proposals_Items_Items;
+  proposal: ProposalDetails;
   votingPower: string;
   rawVotingPower: string;
   decimals: number;

@@ -1,71 +1,30 @@
-import axios from "axios";
-import type { SWRConfiguration } from "swr";
-import useSWR from "swr";
+import {
+  DaysWindow,
+  useCompareAverageTurnoutQuery,
+} from "@anticapture/graphql-client/hooks";
 
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { BACKEND_ENDPOINT, getAuthHeaders } from "@/shared/utils/server-utils";
+import { getAuthHeaders } from "@/shared/utils/server-utils";
 
-export interface AverageTurnoutResponse {
-  currentAverageTurnout: string;
-  oldAverageTurnout: string;
-  changeRate: string;
-}
+export const useAverageTurnout = (daoId: DaoIdEnum, days: string) => {
+  const daysKey = days as keyof typeof DaysWindow;
 
-/* Fetch Average Turnout */
-export const fetchAverageTurnout = async ({
-  daoId,
-  days,
-}: {
-  daoId: DaoIdEnum;
-  days: string;
-}): Promise<AverageTurnoutResponse | null> => {
-  const query = `query AverageTurnout {
-    compareAverageTurnout(days: _${days}) {
-        currentAverageTurnout
-        oldAverageTurnout
-        changeRate
-    }
-  }`;
-  const response: {
-    data: { data: { compareAverageTurnout: AverageTurnoutResponse } };
-  } = await axios.post(
-    `${BACKEND_ENDPOINT}`,
-    { query },
-    {
+  const { data, loading, error } = useCompareAverageTurnoutQuery({
+    variables: {
+      days: DaysWindow[daysKey],
+    },
+    context: {
       headers: {
         "anticapture-dao-id": daoId,
         ...getAuthHeaders(),
       },
     },
-  );
-  const { compareAverageTurnout } = response.data.data as {
-    compareAverageTurnout: AverageTurnoutResponse;
+    skip: !daoId || !days,
+  });
+
+  return {
+    data: data?.compareAverageTurnout ?? null,
+    isLoading: loading,
+    error: error || null,
   };
-  return compareAverageTurnout as AverageTurnoutResponse;
-};
-
-/**
- * SWR hook to fetch and manage average turnout data
- * @param daoId The DAO ID to fetch data for
- * @param days The number of days to compare
- * @param config Optional SWR configuration
- * @returns SWR response with average turnout data
- */
-export const useAverageTurnout = (
-  daoId: DaoIdEnum,
-  days: string,
-  config?: Partial<SWRConfiguration<AverageTurnoutResponse | null, Error>>,
-) => {
-  const key = daoId && days ? [`averageTurnout`, daoId, days] : null;
-
-  return useSWR<AverageTurnoutResponse | null>(
-    key,
-    async () => {
-      return await fetchAverageTurnout({ daoId, days });
-    },
-    {
-      revalidateOnFocus: false,
-      ...config,
-    },
-  );
 };

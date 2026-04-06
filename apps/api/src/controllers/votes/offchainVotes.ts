@@ -1,6 +1,7 @@
-import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
+import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import {
+  OffchainProposalRequestSchema,
   OffchainVotesRequestSchema,
   OffchainVotesResponseSchema,
 } from "@/mappers";
@@ -40,7 +41,7 @@ export function offchainVotes(app: Hono, service: OffchainVotesService) {
         toDate,
       } = context.req.valid("query");
 
-      const { items, totalCount } = await service.getVotes({
+      const response = await service.getVotes({
         skip,
         limit,
         orderBy,
@@ -50,9 +51,7 @@ export function offchainVotes(app: Hono, service: OffchainVotesService) {
         toDate,
       });
 
-      return context.json(
-        OffchainVotesResponseSchema.parse({ items, totalCount }),
-      );
+      return context.json(OffchainVotesResponseSchema.parse(response), 200);
     },
   );
 
@@ -66,7 +65,7 @@ export function offchainVotes(app: Hono, service: OffchainVotesService) {
         "Returns a paginated list of offchain (Snapshot) votes for a specific proposal",
       tags: ["offchain"],
       request: {
-        params: z.object({ id: z.string() }),
+        params: OffchainProposalRequestSchema,
         query: OffchainVotesRequestSchema,
       },
       responses: {
@@ -92,7 +91,7 @@ export function offchainVotes(app: Hono, service: OffchainVotesService) {
         toDate,
       } = context.req.valid("query");
 
-      const { items, totalCount } = await service.getVotesByProposalId(id, {
+      const response = await service.getVotesByProposalId(id, {
         skip,
         limit,
         orderBy,
@@ -102,9 +101,7 @@ export function offchainVotes(app: Hono, service: OffchainVotesService) {
         toDate,
       });
 
-      return context.json(
-        OffchainVotesResponseSchema.parse({ items, totalCount }),
-      );
+      return context.json(OffchainVotesResponseSchema.parse(response), 200);
     },
   );
 }

@@ -5,9 +5,8 @@
   "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "vitest",
+    "test": "vitest run --coverage",
     "test:unit": "vitest run --exclude '**/*.integration.test.ts'",
-    "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "clean": "rm -rf node_modules *.tsbuildinfo dist",
     "start": "node --import ./dist/instrumentation.js dist/index.js",
@@ -16,7 +15,7 @@
     "build:watch": "tsc --watch",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
-    "dev": "sh -c 'dao_id=\"$1\"; if [ -n \"$dao_id\" ] && [ -f \"cmd/$dao_id.ts\" ]; then exec tsx watch \"cmd/$dao_id.ts\"; else exec tsx watch cmd/index.ts; fi' --",
+    "dev": "tsx watch cmd/index.ts",
     "dev:rw": "sh -c 'dao_id=\"$1\"; exec railway run -e dev -s \"${dao_id}-api\" -- pnpm dev' --"
   },
   "keywords": [],
@@ -26,7 +25,7 @@
   "dependencies": {
     "@anticapture/observability": "workspace:*",
     "@hono/node-server": "^1.19.9",
-    "@hono/zod-openapi": "^0.19.6",
+    "@hono/zod-openapi": "^1.2.2",
     "@opentelemetry/api": "^1.9.0",
     "@opentelemetry/semantic-conventions": "^1.40.0",
     "axios": "^1.9.0",
@@ -35,8 +34,9 @@
     "hono": "^4.7.10",
     "pg": "^8.17.2",
     "viem": "^2.41.2",
-    "zod": "^3.25.3",
-    "zod-validation-error": "^3.4.1"
+    "pino-http": "^10.4.0",
+    "zod": "^4.3.6",
+    "zod-validation-error": "^5.0.0"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.3.15",

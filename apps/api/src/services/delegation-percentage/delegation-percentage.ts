@@ -30,6 +30,7 @@ import { MetricTypesEnum } from "@/lib/constants";
 import { getEffectiveStartDate } from "@/lib/date-helpers";
 import { applyCursorPagination } from "@/lib/query-helpers";
 import { forwardFill, generateOrderedTimeline } from "@/lib/time-series";
+import { logger } from "@/logger";
 import {
   DBTokenMetric,
   DelegationPercentageItem,
@@ -45,6 +46,7 @@ export interface DelegationPercentageServiceResult {
   items: DelegationPercentageItem[];
   totalCount: number;
   hasNextPage: boolean;
+  hasPreviousPage?: boolean;
   endDate: string | null;
   startDate: string | null;
 }
@@ -80,8 +82,14 @@ export class DelegationPercentageService {
   async delegationPercentageByDay(
     filters: DelegationPercentageQuery,
   ): Promise<DelegationPercentageServiceResult> {
-    const { after, before, startDate, endDate, orderDirection, limit } =
-      filters;
+    const {
+      after,
+      before,
+      startDate,
+      endDate,
+      orderDirection = "asc",
+      limit,
+    } = filters;
 
     // Normalize all timestamps to midnight UTC to align with database storage
     const normalizedStartDate = startDate
@@ -123,6 +131,7 @@ export class DelegationPercentageService {
         items: [],
         totalCount: 0,
         hasNextPage: false,
+        hasPreviousPage: Boolean(normalizedAfter || normalizedBefore),
         endDate: null,
         startDate: null,
       };
@@ -167,6 +176,7 @@ export class DelegationPercentageService {
       items,
       totalCount: items.length,
       hasNextPage,
+      hasPreviousPage: Boolean(normalizedAfter || normalizedBefore),
       endDate: items[items.length - 1]?.date ?? null,
       startDate: items[0]?.date ?? null,
     };
@@ -196,7 +206,7 @@ export class DelegationPercentageService {
         total: totalRow?.high ?? 0n,
       };
     } catch (error) {
-      console.error("Error fetching initial values:", error);
+      logger.error({ err: error }, "error fetching initial values");
       return { delegated: 0n, total: 0n };
     }
   }

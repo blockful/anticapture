@@ -10,7 +10,7 @@ import daoConfigByDaoId from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { RiskAreaEnum } from "@/shared/types/enums";
 import { RiskLevel } from "@/shared/types/enums/RiskLevel";
-import { formatNumberUserReadable } from "@/shared/utils";
+import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 
 interface CostOfAttackCellProps {
   daoId: DaoIdEnum;

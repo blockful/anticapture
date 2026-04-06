@@ -1,20 +1,23 @@
-import type { GetProposalQuery } from "@anticapture/graphql-client";
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 
+import type { ProposalViewData } from "@/features/governance/types";
+
 interface ProposalTimelineProps {
-  proposal: NonNullable<GetProposalQuery["proposal"]>;
+  proposal: ProposalViewData;
   blockExplorerUrl?: string;
+  isOffchain?: boolean;
 }
 
 export const ProposalTimeline = ({
   proposal,
   blockExplorerUrl = "https://etherscan.io",
+  isOffchain = false,
 }: ProposalTimelineProps) => {
   const now = Date.now() / 1000;
-  const createdTime = parseInt(proposal.timestamp);
-  const startTime = parseInt(proposal.startTimestamp);
-  const endTime = parseInt(proposal.endTimestamp);
+  const createdTime = Number(proposal.timestamp);
+  const startTime = Number(proposal.startTimestamp);
+  const endTime = Number(proposal.endTimestamp);
 
   const formatTimestamp = (timestamp: number) => {
     return new Date(timestamp * 1000).toLocaleDateString("en-US", {
@@ -34,10 +37,11 @@ export const ProposalTimeline = ({
 
   const proposalStatus = proposal.status.toLowerCase();
   const isQueued =
-    proposalStatus === "queued" ||
-    proposalStatus === "pending_execution" ||
-    proposalStatus === "executed";
-  const isExecuted = proposalStatus === "executed";
+    !isOffchain &&
+    (proposalStatus === "queued" ||
+      proposalStatus === "pending_execution" ||
+      proposalStatus === "executed");
+  const isExecuted = !isOffchain && proposalStatus === "executed";
 
   const timelineItems = [
     {

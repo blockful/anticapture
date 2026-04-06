@@ -1,5 +1,7 @@
 import { HTTPException } from "hono/http-exception";
 
+import { logger } from "@/logger";
+
 import { DuneResponse } from "../treasury/providers/dune-provider";
 
 export class DuneService {
@@ -23,6 +25,10 @@ export class DuneService {
       const data = await response.json();
       return data as DuneResponse;
     } catch (error) {
+      logger.error(
+        { err: error, size },
+        "failed to fetch liquid treasury from Dune",
+      );
       throw new HTTPException(503, {
         message: "Failed to fetch liquid treasury data",
         cause: error,

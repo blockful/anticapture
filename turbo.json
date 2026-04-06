@@ -1,25 +1,48 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
+    "@anticapture/offchain-indexer#db:migrate": {
+      "cache": false,
+      "passThroughEnv": ["*"]
+    },
+    "@anticapture/offchain-indexer#db:push": {
+      "cache": false,
+      "passThroughEnv": ["*"]
+    },
+    "@anticapture/indexer#db:prune": {
+      "cache": false,
+      "passThroughEnv": ["*"]
+    },
     "@anticapture/observability#build": {
-      "outputs": ["packages/observability/dist/**"]
+      "outputs": ["dist/**"]
     },
     "@anticapture/graphql-client#build": {
-      "outputs": ["packages/graphql-client/dist/**"]
+      "outputs": ["generated/**"]
     },
-    "@anticapture/dasbhoard#build": {
-      "dependsOn": ["@anticapture/#graphql-client#build"],
-      "outputs": ["dist/**", ".next/**", ".next/cache/**"]
+    "@anticapture/dashboard#dev": {
+      "dependsOn": ["@anticapture/graphql-client#codegen"],
+      "persistent": true,
+      "cache": false
+    },
+    "@anticapture/graphql-client#dev": {
+      "persistent": true
+    },
+    "@anticapture/dashboard#build": {
+      "dependsOn": ["@anticapture/graphql-client#codegen"],
+      "outputs": ["dist/**", ".next/**"],
+      "env": ["RESEND_API_KEY", "RESEND_FROM_EMAIL", "CONTACT_EMAIL"]
     },
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**", ".next/cache/**"],
-      "env": ["RESEND_API_KEY", "RESEND_FROM_EMAIL", "CONTACT_EMAIL"]
+      "outputs": ["dist/**", ".next/**"]
     },
     "storybook": {
-      "outputs": ["dist/**", ".next/**", ".next/cache/**"]
+      "dependsOn": ["@anticapture/graphql-client#codegen"],
+      "persistent": true,
+      "cache": false
     },
     "build-storybook": {
+      "dependsOn": ["@anticapture/graphql-client#codegen"],
       "outputs": ["storybook-static/**"]
     },
     "start": {
@@ -28,7 +51,9 @@
       "cache": false,
       "passThroughEnv": ["*"]
     },
-    "clean": {},
+    "clean": {
+      "cache": false
+    },
     "lint": {
       "inputs": [
         "**/*.ts",
@@ -39,6 +64,7 @@
       ]
     },
     "lint:fix": {
+      "cache": false,
       "inputs": [
         "**/*.ts",
         "**/*.tsx",
@@ -48,17 +74,20 @@
       ]
     },
     "typecheck": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "@anticapture/observability#build"],
       "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json"]
     },
     "test": {
+      "dependsOn": ["^build"],
       "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"]
     },
     "test:unit": {
+      "dependsOn": ["^build"],
       "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"]
     },
     "codegen": {
-      "outputs": ["generated.ts", "types.ts"]
+      "inputs": ["documents/**/*", "codegen.ts"],
+      "outputs": ["generated/**"]
     },
     "db:generate": {
       "inputs": ["src/**/*.ts"],

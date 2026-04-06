@@ -71,6 +71,8 @@ const ACCOUNT_BALANCE_ITEM = {
   tokenId: TOKEN_ID,
   delegate: DELEGATE_ADDRESS,
   variation: {
+    accountId: VALID_ADDRESS,
+    currentBalance: "1200000000000000000",
     previousBalance: "1200000000000000000",
     absoluteChange: "0",
     percentageChange: "0",
@@ -192,6 +194,8 @@ describe("Account Balances Controller", () => {
             tokenId: TOKEN_ID,
             delegate: DELEGATE_ADDRESS,
             variation: {
+              accountId: VALID_ADDRESS,
+              currentBalance: "1000",
               previousBalance: "500",
               absoluteChange: "500",
               percentageChange: "100",
@@ -203,6 +207,8 @@ describe("Account Balances Controller", () => {
             tokenId: TOKEN_ID,
             delegate: DELEGATE_ADDRESS,
             variation: {
+              accountId: SECOND_ADDRESS,
+              currentBalance: "2000",
               previousBalance: "1900",
               absoluteChange: "100",
               percentageChange: "5.26",
@@ -237,6 +243,8 @@ describe("Account Balances Controller", () => {
             tokenId: TOKEN_ID,
             delegate: DELEGATE_ADDRESS,
             variation: {
+              accountId: VALID_ADDRESS,
+              currentBalance: "1000",
               previousBalance: "1000",
               absoluteChange: "0",
               percentageChange: "0",
@@ -248,6 +256,8 @@ describe("Account Balances Controller", () => {
             tokenId: TOKEN_ID,
             delegate: DELEGATE_ADDRESS,
             variation: {
+              accountId: SECOND_ADDRESS,
+              currentBalance: "2000",
               previousBalance: "2000",
               absoluteChange: "0",
               percentageChange: "0",
@@ -325,6 +335,8 @@ describe("Account Balances Controller", () => {
             ...ACCOUNT_BALANCE_ITEM,
             balance: "1000",
             variation: {
+              accountId: VALID_ADDRESS,
+              currentBalance: "1000",
               previousBalance: "1000",
               absoluteChange: "0",
               percentageChange: "0",

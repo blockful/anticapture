@@ -29,6 +29,7 @@ import {
 } from "@/lib/date-helpers";
 import { applyCursorPagination } from "@/lib/query-helpers";
 import { forwardFill, generateOrderedTimeline } from "@/lib/time-series";
+import { logger } from "@/logger";
 import { TokenMetricItem } from "@/mappers/token-metrics";
 
 interface DaoMetricsRow {
@@ -77,6 +78,7 @@ export class TokenMetricsService {
   }): Promise<{
     items: TokenMetricItem[];
     hasNextPage: boolean;
+    hasPreviousPage: boolean;
     startDate: string | null;
     endDate: string | null;
   }> {
@@ -102,6 +104,7 @@ export class TokenMetricsService {
       return {
         items: [],
         hasNextPage: false,
+        hasPreviousPage: false,
         startDate: null,
         endDate: null,
       };
@@ -137,6 +140,7 @@ export class TokenMetricsService {
       return {
         items: [],
         hasNextPage: false,
+        hasPreviousPage: (skip ?? 0) > 0,
         startDate: null,
         endDate: null,
       };
@@ -156,6 +160,7 @@ export class TokenMetricsService {
     return {
       items,
       hasNextPage,
+      hasPreviousPage: (skip ?? 0) > 0,
       startDate: items[0]?.date ?? null,
       endDate: items[items.length - 1]?.date ?? null,
     };
@@ -182,7 +187,7 @@ export class TokenMetricsService {
       }
       return undefined;
     } catch (error) {
-      console.error("Error fetching initial value:", error);
+      logger.error({ err: error }, "error fetching initial value");
       return undefined;
     }
   }

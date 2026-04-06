@@ -1,3 +1,4 @@
+import { wrapWithTracing } from "@anticapture/observability";
 import {
   Abi,
   Account,
@@ -52,6 +53,7 @@ export abstract class GovernorBase<
     quorumCacheTtlMinutes: number = Infinity,
   ) {
     this.quorumCacheTtlMs = Math.max(1, quorumCacheTtlMinutes) * 60 * 1000;
+    wrapWithTracing(this);
   }
 
   protected async getCachedQuorum(
@@ -120,6 +122,10 @@ export abstract class GovernorBase<
 
   abstract getTimelockDelay(): Promise<bigint>;
 
+  async getGracePeriod(): Promise<bigint | null> {
+    return null;
+  }
+
   async getProposalStatus(
     proposal: {
       id: string;
@@ -135,6 +141,17 @@ export abstract class GovernorBase<
     currentTimestamp: number,
   ): Promise<string> {
     const timelockDelay = await this.getTimelockDelay();
+    const gracePeriod = await this.getGracePeriod();
+
+    if (
+      proposal.status === ProposalStatus.QUEUED &&
+      gracePeriod !== null &&
+      currentTimestamp &&
+      BigInt(currentTimestamp) >=
+        proposal.endTimestamp + timelockDelay + gracePeriod
+    ) {
+      return ProposalStatus.EXPIRED;
+    }
 
     if (
       proposal.status === ProposalStatus.QUEUED &&

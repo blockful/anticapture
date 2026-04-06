@@ -38,8 +38,8 @@ export const transformToGovernanceProposal = (
 
   // Calculate time text using the helper function
   const timeText = getTimeText(
-    graphqlProposal.startTimestamp,
-    graphqlProposal.endTimestamp,
+    graphqlProposal.startTimestamp.toString(),
+    graphqlProposal.endTimestamp.toString(),
   );
 
   return {

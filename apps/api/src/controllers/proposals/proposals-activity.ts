@@ -1,14 +1,13 @@
-import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
-import { getAddress, isAddress } from "viem";
+import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import { DAOClient } from "@/clients";
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
-import { ProposalActivityResponseSchema } from "@/mappers";
 import {
-  DrizzleProposalsActivityRepository,
-  VoteFilter,
-} from "@/repositories/";
+  ProposalActivityRequestSchema,
+  ProposalActivityResponseSchema,
+} from "@/mappers";
+import { DrizzleProposalsActivityRepository } from "@/repositories/";
 import { ProposalsActivityService } from "@/services";
 
 export function proposalsActivity(
@@ -27,45 +26,9 @@ export function proposalsActivity(
       summary: "Get proposals activity for delegate",
       description:
         "Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window",
-      tags: ["proposals-activity"],
+      tags: ["proposals"],
       request: {
-        query: z.object({
-          address: z
-            .string()
-            .refine(
-              (addr) => isAddress(addr, { strict: false }),
-              "Invalid Ethereum address",
-            )
-            .transform((addr) => getAddress(addr)),
-          fromDate: z
-            .string()
-            .transform((val) => Number(val))
-            .optional(),
-          skip: z.coerce
-            .number()
-            .int()
-            .min(0, "Skip must be a non-negative integer")
-            .optional()
-            .default(0),
-          limit: z.coerce
-            .number()
-            .int()
-            .min(1, "Limit must be a positive integer")
-            .max(100, "Limit cannot exceed 100")
-            .optional()
-            .default(10),
-          orderBy: z
-            .enum(["timestamp", "votingPower", "voteTiming"])
-            .optional()
-            .default("timestamp"),
-          orderDirection: z.enum(["asc", "desc"]).optional().default("desc"),
-          userVoteFilter: z
-            .nativeEnum(VoteFilter)
-            .optional()
-            .describe(
-              "Filter proposals by vote type. Can be: 'yes' (For votes), 'no' (Against votes), 'abstain' (Abstain votes), 'no-vote' (Didn't vote)",
-            ),
-        }),
+        query: ProposalActivityRequestSchema,
       },
       responses: {
         200: {
@@ -103,7 +66,7 @@ export function proposalsActivity(
         userVoteFilter,
       });
 
-      return context.json(ProposalActivityResponseSchema.parse(result));
+      return context.json(ProposalActivityResponseSchema.parse(result), 200);
     },
   );
 }
