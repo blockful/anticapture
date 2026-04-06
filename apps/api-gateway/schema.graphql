@@ -7,17 +7,13 @@ directive @statusCodeTypeName(subgraph: String, typeName: String, statusCode: St
 directive @enum(subgraph: String, value: String) on ENUM_VALUE
 
 type Query {
-  """
-  Returns label information from Arkham, ENS data, and whether the address is an EOA or contract. Arkham data is stored permanently. ENS data is cached with a configurable TTL.
-  """
+  "\n>**Method**: `GET`\n>**Base URL**: `https://address-enrichment-service-dev.up.railway.app`\n>**Path**: `/address/{args.address}`\nReturns label information from Arkham, ENS data, and whether the address is an EOA or contract. Arkham data is stored permanently. ENS data is cached with a configurable TTL.\n"
   getAddress(
     """Ethereum address (checksummed or lowercase)"""
     address: String!
   ): getAddress_200_response
 
-  """
-  Returns label information from Arkham, ENS data, and address type for multiple addresses. Maximum 100 addresses per request. Arkham data is stored permanently. ENS data is cached with a configurable TTL.
-  """
+  "\n>**Method**: `GET`\n>**Base URL**: `https://address-enrichment-service-dev.up.railway.app`\n>**Path**: `/addresses`\nReturns label information from Arkham, ENS data, and address type for multiple addresses. Maximum 100 addresses per request. Arkham data is stored permanently. ENS data is cached with a configurable TTL.\n"
   getAddresses(
     """
     One or more Ethereum addresses to enrich. Can be passed as a repeated query parameter or a single value. Maximum 100 addresses per request.
@@ -25,9 +21,7 @@ type Query {
     addresses: [String]!
   ): getAddresses_200_response
 
-  """
-  Get historical delegations for an account, with optional filtering and sorting
-  """
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/accounts/{args.address}/delegations/historical`\nGet historical delegations for an account, with optional filtering and sorting\n"
   historicalDelegations(
     address: String!
     delegateAddressIn: [String]
@@ -42,10 +36,10 @@ type Query {
     orderDirection: OrderDirection = desc
   ): DelegationsResponse
 
-  """Get current delegations for an account"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/accounts/{args.address}/delegations`\nGet current delegations for an account\n"
   delegations(address: String!): DelegationsResponse
 
-  """Get current delegators of an account with voting power"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/accounts/{args.address}/delegators`\nGet current delegators of an account with voting power\n"
   delegators(
     address: String!
 
@@ -58,20 +52,16 @@ type Query {
     orderDirection: OrderDirection = desc
   ): DelegatorsResponse
 
-  """
-  Get historical Liquid Treasury (treasury without DAO tokens) from external providers (DefiLlama/Dune)
-  """
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/treasury/liquid`\nGet historical Liquid Treasury (treasury without DAO tokens) from external providers (DefiLlama/Dune)\n"
   getLiquidTreasury(days: DaysWindow = _365d, orderDirection: OrderDirection = desc): TreasuryResponse
 
-  """
-  Get historical DAO Token Treasury value (governance token quantity × token price)
-  """
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/treasury/dao-token`\nGet historical DAO Token Treasury value (governance token quantity × token price)\n"
   getDaoTokenTreasury(days: DaysWindow = _365d, orderDirection: OrderDirection = desc): TreasuryResponse
 
-  """Get historical Total Treasury (liquid treasury + DAO token treasury)"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/treasury/total`\nGet historical Total Treasury (liquid treasury + DAO token treasury)\n"
   getTotalTreasury(days: DaysWindow = _365d, orderDirection: OrderDirection = desc): TreasuryResponse
 
-  """Get historical market data for a specific token"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/token/historical-data`\nGet historical market data for a specific token\n"
   historicalTokenData(
     """Number of records to skip before collecting results."""
     skip: Int
@@ -80,10 +70,10 @@ type Query {
     limit: Int
   ): [TokenHistoricalPriceItem]
 
-  """Get property data for a specific token"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/token`\nGet property data for a specific token\n"
   token(currency: queryInput_token_currency = usd): token_response
 
-  """Get feed events"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/feed/events`\nGet feed events\n"
   feedEvents(
     """Number of feed events to skip before collecting results."""
     skip: Int
@@ -102,45 +92,43 @@ type Query {
     toDate: Int
   ): FeedResponse
 
-  """Get event relevance threshold"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/event-relevance/threshold`\nGet event relevance threshold\n"
   getEventRelevanceThreshold(type: FeedEventType!, relevance: FeedRelevance!): EventRelevanceThresholdResponse
 
-  """Compare total supply between periods"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/total-supply/compare`\nCompare total supply between periods\n"
   compareTotalSupply(days: DaysWindow = _365d): SupplyComparisonResponse
 
-  """Compare delegated supply between periods"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/delegated-supply/compare`\nCompare delegated supply between periods\n"
   compareDelegatedSupply(days: DaysWindow = _365d): SupplyComparisonResponse
 
-  """Compare circulating supply between periods"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/circulating-supply/compare`\nCompare circulating supply between periods\n"
   compareCirculatingSupply(days: DaysWindow = _365d): SupplyComparisonResponse
 
-  """Compare treasury between periods"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/treasury/compare`\nCompare treasury between periods\n"
   compareTreasury(days: DaysWindow = _365d): SupplyComparisonResponse
 
-  """Compare cex supply between periods"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/cex-supply/compare`\nCompare cex supply between periods\n"
   compareCexSupply(days: DaysWindow = _365d): SupplyComparisonResponse
 
-  """Compare dex supply between periods"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/dex-supply/compare`\nCompare dex supply between periods\n"
   compareDexSupply(days: DaysWindow = _365d): SupplyComparisonResponse
 
-  """Compare lending supply between periods"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/lending-supply/compare`\nCompare lending supply between periods\n"
   compareLendingSupply(days: DaysWindow = _365d): SupplyComparisonResponse
 
-  """Get active token supply for DAO"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/active-supply/compare`\nGet active token supply for DAO\n"
   compareActiveSupply(days: DaysWindow = _365d): ActiveSupplyResponse
 
-  """Compare number of proposals between time periods"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/proposals/compare`\nCompare number of proposals between time periods\n"
   compareProposals(days: DaysWindow = _365d): ProposalsComparisonResponse
 
-  """Compare number of votes between time periods"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/votes/compare`\nCompare number of votes between time periods\n"
   compareVotes(days: DaysWindow = _365d): VotesComparisonResponse
 
-  """Compare average turnout between time periods"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/average-turnout/compare`\nCompare average turnout between time periods\n"
   compareAverageTurnout(days: DaysWindow = _365d): AverageTurnoutComparisonResponse
 
-  """
-  Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window
-  """
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/proposals-activity`\nReturns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window\n"
   proposalsActivity(
     """Delegate address whose proposal activity is being queried."""
     address: String!
@@ -158,7 +146,7 @@ type Query {
     userVoteFilter: queryInput_proposalsActivity_userVoteFilter
   ): ProposalActivityResponse
 
-  """Returns a list of proposal"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/proposals`\nReturns a list of proposal\n"
   proposals(
     """Number of records to skip before collecting results."""
     skip: Int
@@ -182,15 +170,13 @@ type Query {
     includeOptimisticProposals: Boolean = true
   ): OnchainProposalsResponse
 
-  """Returns a single proposal by its ID"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/proposals/{args.id}`\nReturns a single proposal by its ID\n"
   proposal(
     """Onchain proposal identifier."""
     id: String!
   ): proposal_response
 
-  """
-  Returns historical balance deltas for one account, enriched with the transfer that caused each change.
-  """
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/accounts/{args.address}/balances/historical`\nReturns historical balance deltas for one account, enriched with the transfer that caused each change.\n"
   historicalBalances(
     address: String!
 
@@ -219,9 +205,7 @@ type Query {
     toValue: String
   ): HistoricalBalancesResponse
 
-  """
-  Get transactions with their associated transfers and delegations, with optional filtering and sorting
-  """
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/transactions`\nGet transactions with their associated transfers and delegations, with optional filtering and sorting\n"
   transactions(
     """Maximum number of records to return."""
     limit: Int
@@ -249,10 +233,10 @@ type Query {
     includes: [queryInput_transactions_includes_items]
   ): TransactionsResponse
 
-  """Get the last update time"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/last-update`\nGet the last update time\n"
   lastUpdate(chart: queryInput_lastUpdate_chart!): LastUpdateResponse
 
-  """Get delegation percentage day buckets with forward-fill"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/delegation-percentage`\nGet delegation percentage day buckets with forward-fill\n"
   delegationPercentageByDay(
     """Inclusive lower bound cursor in Unix seconds."""
     startDate: Int
@@ -271,7 +255,7 @@ type Query {
     before: Int
   ): DelegationPercentageResponse
 
-  """Returns a list of voting power changes for a specific account"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/accounts/{args.address}/voting-powers/historical`\nReturns a list of voting power changes for a specific account\n"
   historicalVotingPowerByAccountId(
     address: String!
 
@@ -296,7 +280,7 @@ type Query {
     toValue: String
   ): HistoricalVotingPowersResponse
 
-  """Returns a list of voting power changes."""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/voting-powers/historical`\nReturns a list of voting power changes.\n"
   historicalVotingPower(
     """Number of historical voting power rows to skip."""
     skip: Int
@@ -324,9 +308,7 @@ type Query {
     address: String
   ): HistoricalVotingPowersResponse
 
-  """
-  Returns a mapping of the voting power changes within a time frame for the given addresses
-  """
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/accounts/voting-powers/variations`\nReturns a mapping of the voting power changes within a time frame for the given addresses\n"
   votingPowerVariations(
     """Maximum number of voting power variation rows to return."""
     limit: Int
@@ -347,7 +329,7 @@ type Query {
     toDate: Int
   ): VotingPowerVariationsResponse
 
-  """Returns a the changes to voting power by period and accountId"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/accounts/{args.address}/voting-powers/variations`\nReturns a the changes to voting power by period and accountId\n"
   votingPowerVariationsByAccountId(
     address: String!
 
@@ -358,7 +340,7 @@ type Query {
     toDate: Int
   ): VotingPowerVariationsByAccountIdResponse
 
-  """Returns sorted and paginated account voting power records"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/voting-powers`\nReturns sorted and paginated account voting power records\n"
   votingPowers(
     """Maximum number of current voting power rows to return."""
     limit: Int
@@ -386,7 +368,7 @@ type Query {
     toDate: Int
   ): VotingPowersResponse
 
-  """Returns voting power information for a specific address (account)"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/voting-powers/{args.accountId}`\nReturns voting power information for a specific address (account)\n"
   votingPowerByAccountId(
     accountId: String!
 
@@ -397,9 +379,7 @@ type Query {
     toDate: Int
   ): VotingPower
 
-  """
-  Returns a mapping of the biggest variations to account balances associated by account address
-  """
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/balances/variations`\nReturns a mapping of the biggest variations to account balances associated by account address\n"
   accountBalanceVariations(
     """Inclusive lower bound for the comparison window, in Unix seconds."""
     fromDate: Int
@@ -420,7 +400,7 @@ type Query {
     addresses: [String]
   ): AccountBalanceVariationsResponse
 
-  """Returns a the changes to balance by period and accountId"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/accounts/{args.address}/balances/variations`\nReturns a the changes to balance by period and accountId\n"
   accountBalanceVariationsByAccountId(
     address: String!
 
@@ -431,7 +411,7 @@ type Query {
     toDate: Int
   ): AccountBalanceVariationsByAccountIdResponse
 
-  """Returns sorted and paginated account balance records"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/balances`\nReturns sorted and paginated account balance records\n"
   accountBalances(
     """Inclusive lower bound for balance history filters, in Unix seconds."""
     fromDate: Int
@@ -463,7 +443,7 @@ type Query {
     toValue: String
   ): AccountBalancesWithVariationResponse
 
-  """Returns account balance information for a specific address"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/accounts/{args.address}/balances`\nReturns account balance information for a specific address\n"
   accountBalanceByAccountId(
     """Wallet address whose balance is being queried."""
     address: String!
@@ -479,10 +459,7 @@ type Query {
     toDate: Int
   ): AccountBalanceWithVariationResponse
 
-  """
-  Returns a mapping of the largest interactions between accounts. 
-  Positive amounts signify net token transfers FROM <address>, whilst negative amounts refer to net transfers TO <address>
-  """
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/balances/{args.address}/interactions`\nReturns a mapping of the largest interactions between accounts. \nPositive amounts signify net token transfers FROM <address>, whilst negative amounts refer to net transfers TO <address>\n"
   accountInteractions(
     address: String!
 
@@ -510,7 +487,7 @@ type Query {
     filterAddress: String
   ): AccountInteractionsResponse
 
-  """Get transfers of a given address"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/accounts/{args.address}/transfers`\nGet transfers of a given address\n"
   transfers(
     """Wallet address whose transfers are being queried."""
     address: String!
@@ -538,7 +515,7 @@ type Query {
     toValue: String
   ): TransfersResponse
 
-  """Returns a paginated list of votes cast on a specific proposal"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/proposals/{args.id}/votes`\nReturns a paginated list of votes cast on a specific proposal\n"
   votesByProposalId(
     """Onchain proposal identifier."""
     id: String!
@@ -566,7 +543,7 @@ type Query {
     toDate: Int
   ): OnchainVotesResponse
 
-  """Get all votes ordered by timestamp or voting power"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/votes`\nGet all votes ordered by timestamp or voting power\n"
   votes(
     """Number of records to skip before collecting results."""
     skip: Int
@@ -591,7 +568,7 @@ type Query {
     toDate: Int
   ): OnchainVotesResponse
 
-  """Returns the active delegates that did not vote on a given proposal"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/proposals/{args.id}/non-voters`\nReturns the active delegates that did not vote on a given proposal\n"
   proposalNonVoters(
     """Onchain proposal identifier."""
     id: String!
@@ -605,10 +582,10 @@ type Query {
     addresses: [String]
   ): VotersResponse
 
-  """Returns current governance parameters for this DAO"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/dao`\nReturns current governance parameters for this DAO\n"
   dao: DaoResponse
 
-  """Returns token related metrics for a single metric type."""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/token-metrics`\nReturns token related metrics for a single metric type.\n"
   tokenMetrics(
     metricType: queryInput_tokenMetrics_metricType!
 
@@ -626,7 +603,7 @@ type Query {
     skip: Int
   ): TokenMetricsResponse
 
-  """Returns a list of offchain (Snapshot) proposals"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/offchain/proposals`\nReturns a list of offchain (Snapshot) proposals\n"
   offchainProposals(
     """Number of records to skip before collecting results."""
     skip: Int
@@ -647,13 +624,13 @@ type Query {
     endDate: Int
   ): OffchainProposalsResponse
 
-  """Returns a single offchain (Snapshot) proposal by its ID"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/offchain/proposals/{args.id}`\nReturns a single offchain (Snapshot) proposal by its ID\n"
   offchainProposalById(
     """Snapshot proposal identifier."""
     id: String!
   ): offchainProposalById_response
 
-  """Returns a list of offchain (Snapshot) votes"""
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/offchain/votes`\nReturns a list of offchain (Snapshot) votes\n"
   votesOffchain(
     """Number of records to skip before collecting results."""
     skip: Int
@@ -675,9 +652,7 @@ type Query {
     toDate: Int
   ): OffchainVotesResponse
 
-  """
-  Returns a paginated list of offchain (Snapshot) votes for a specific proposal
-  """
+  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/offchain/proposals/{args.id}/votes`\nReturns a paginated list of offchain (Snapshot) votes for a specific proposal\n"
   votesOffchainByProposalId(
     """Snapshot proposal identifier."""
     id: String!
@@ -1935,7 +1910,7 @@ type OffchainVotesResponse {
 type OffchainVote {
   voter: String!
   proposalId: String!
-  choice: JSON!
+  choice: [Int]!
   vp: Float
   reason: String!
   created: Int!

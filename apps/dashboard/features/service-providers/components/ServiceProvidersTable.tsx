@@ -184,7 +184,7 @@ export const ServiceProvidersTable = ({
         ),
       meta: {
         columnClassName: cn(
-          "w-[260px] px-2 sticky left-0 z-20 [&:is(th)]:bg-surface-contrast bg-surface-background lg:bg-surface-default",
+          "w-[130px] sm:w-[260px] px-2 sticky left-0 z-20 [&:is(th)]:bg-surface-contrast bg-surface-background lg:bg-surface-default",
           hasYear2 &&
             "after:absolute after:right-0 after:top-0 after:bottom-0 after:w-px after:content-[''] after:bg-border-default",
         ),
@@ -260,6 +260,7 @@ export const ServiceProvidersTable = ({
       wrapperClassName="overflow-x-auto overflow-y-visible"
       withDownloadCSV={true}
       withSorting={true}
+      mobileTableFixed
       fillHeight
     />
   );
