@@ -1,10 +1,13 @@
-import { getAddress } from "viem";
+import { getAddress, isAddress } from "viem";
 import { z } from "zod";
 
 // "nullish().transform" is necessary here because provider return null instead of undefined
 export const rawProposalSchema = z.object({
   id: z.string(),
-  author: z.string().transform((val) => getAddress(val)),
+  author: z
+    .string()
+    .refine((val) => isAddress(val, { strict: false }))
+    .transform((val) => getAddress(val)),
   title: z.string(),
   body: z
     .string()
