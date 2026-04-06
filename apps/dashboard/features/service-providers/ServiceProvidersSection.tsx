@@ -57,7 +57,7 @@ export const ServiceProvidersSection = () => {
           <SubSectionsContainer>
             <div className="flex flex-col gap-4">
               {programKeys.length > 1 && (
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:gap-3">
                   <PillTabGroup
                     tabs={programKeys.map((key) => ({
                       label: key,
@@ -67,7 +67,7 @@ export const ServiceProvidersSection = () => {
                     onTabChange={(value) => setSelectedProgram(value)}
                   />
                   {activeProgramDef && (
-                    <div className="flex items-center gap-1.5">
+                    <div className="mt-3 flex items-center gap-1.5 sm:mt-0">
                       <DefaultLink
                         size="sm"
                         openInNewTab
@@ -89,7 +89,7 @@ export const ServiceProvidersSection = () => {
                         openInNewTab
                         href={activeProgramDef.selectionProposal.forumUrl}
                       >
-                        {activeProgramDef.selectionProposal.title.toUpperCase()}
+                        PROVIDER SELECTION
                       </DefaultLink>
                     </div>
                   )}

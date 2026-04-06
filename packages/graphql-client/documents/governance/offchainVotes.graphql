@@ -1,0 +1,32 @@
+query GetOffchainVotesByProposalId(
+  $id: String!
+  $fromDate: Int
+  $limit: Int
+  $orderBy: queryInput_votesOffchainByProposalId_orderBy = timestamp
+  $orderDirection: OrderDirection = asc
+  $skip: Int
+  $toDate: Int
+  $voterAddresses: [String]
+) {
+  votesOffchainByProposalId(
+    fromDate: $fromDate
+    limit: $limit
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+    toDate: $toDate
+    voterAddresses: $voterAddresses
+    id: $id
+    skip: $skip
+  ) {
+    totalCount
+    items {
+      choice
+      created
+      proposalId
+      proposalTitle
+      reason
+      voter
+      vp
+    }
+  }
+}

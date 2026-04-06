@@ -11,7 +11,7 @@
     "test": "jest",
     "format": "prettier --write .",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build",
+    "build-storybook": "pnpm --filter @anticapture/graphql-client codegen && storybook build",
     "clean": "rm -rf node_modules .next out build coverage storybook-static *.tsbuildinfo *storybook.log",
     "typecheck": "tsc --noEmit"
   },
