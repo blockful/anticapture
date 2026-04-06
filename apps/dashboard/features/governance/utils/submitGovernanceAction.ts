@@ -64,105 +64,6 @@ type ActionArgs = {
   proposalId: string;
 };
 
-type ActionHandler = (
-  client: ReturnType<WalletClient["extend"]>,
-  address: `0x${string}`,
-  chain: Chain,
-  args: ActionArgs,
-) => Promise<`0x${string}`>;
-
-/**
- * OZ Governor: queue(targets, values, calldatas, descriptionHash)
- */
-const ozQueueHandler: ActionHandler = async (client, address, chain, args) => {
-  const contractArgs = [
-    args.targets,
-    args.values,
-    args.calldatas,
-    args.descriptionHash,
-  ] as const;
-  const { request } = await client.simulateContract({
-    abi: GovernorQueueAbi,
-    address,
-    functionName: "queue",
-    args: contractArgs,
-    account: args.account,
-    chain,
-  });
-  return client.writeContract(request);
-};
-
-/**
- * OZ Governor: execute(targets, values, calldatas, descriptionHash)
- */
-const ozExecuteHandler: ActionHandler = async (
-  client,
-  address,
-  chain,
-  args,
-) => {
-  const contractArgs = [
-    args.targets,
-    args.values,
-    args.calldatas,
-    args.descriptionHash,
-  ] as const;
-  const { request } = await client.simulateContract({
-    abi: GovernorExecuteAbi,
-    address,
-    functionName: "execute",
-    args: contractArgs,
-    account: args.account,
-    value: 0n,
-    chain,
-  });
-  return client.writeContract(request);
-};
-
-/**
- * Azorius: executeProposal(proposalId, targets, values, data, operations)
- * Azorius has no queue step — proposals execute directly after voting ends.
- */
-const azoriusExecuteHandler: ActionHandler = async (
-  client,
-  address,
-  chain,
-  args,
-) => {
-  // All operations are Call (0) for standard governance proposals
-  const operations = args.targets.map(() => 0);
-  const { request } = await client.simulateContract({
-    abi: AzoriusExecuteAbi,
-    address,
-    functionName: "executeProposal",
-    args: [
-      Number(args.proposalId),
-      args.targets,
-      args.values,
-      args.calldatas,
-      operations,
-    ],
-    account: args.account,
-    chain,
-  });
-  return client.writeContract(request);
-};
-
-function getActionHandler(
-  action: GovernanceAction,
-  daoId: DaoIdEnum,
-): ActionHandler {
-  switch (daoId) {
-    case DaoIdEnum.SHU:
-      if (action === "queue") {
-        throw new Error("Queue is not supported for Azorius governance (SHU)");
-      }
-      return azoriusExecuteHandler;
-    default:
-      return action === "queue" ? ozQueueHandler : ozExecuteHandler;
-  }
-}
-
 const submitAction = async (
   action: GovernanceAction,
   daoId: DaoIdEnum,
@@ -176,10 +77,68 @@ const submitAction = async (
   if (!address) throw new Error("DAO governance address not found");
   const chain = daoOverview.chain as Chain;
 
-  const handler = getActionHandler(action, daoId);
-  const hash = await handler(client, address, chain, args);
-  onTxHash(hash);
+  const ozContractArgs = [
+    args.targets,
+    args.values,
+    args.calldatas,
+    args.descriptionHash,
+  ] as const;
 
+  let hash: `0x${string}`;
+
+  switch (daoId) {
+    case DaoIdEnum.SHU: {
+      if (action === "queue") {
+        throw new Error("Queue is not supported for Azorius governance (SHU)");
+      }
+      // Azorius: executeProposal(proposalId, targets, values, data, operations)
+      // All operations are Call (0) for standard governance proposals
+      const operations = args.targets.map(() => 0);
+      const { request } = await client.simulateContract({
+        abi: AzoriusExecuteAbi,
+        address,
+        functionName: "executeProposal",
+        args: [
+          Number(args.proposalId),
+          args.targets,
+          args.values,
+          args.calldatas,
+          operations,
+        ],
+        account: args.account,
+        chain,
+      });
+      hash = await client.writeContract(request);
+      break;
+    }
+    default: {
+      if (action === "queue") {
+        const { request } = await client.simulateContract({
+          abi: GovernorQueueAbi,
+          address,
+          functionName: "queue",
+          args: ozContractArgs,
+          account: args.account,
+          chain,
+        });
+        hash = await client.writeContract(request);
+      } else {
+        const { request } = await client.simulateContract({
+          abi: GovernorExecuteAbi,
+          address,
+          functionName: "execute",
+          args: ozContractArgs,
+          account: args.account,
+          value: 0n,
+          chain,
+        });
+        hash = await client.writeContract(request);
+      }
+      break;
+    }
+  }
+
+  onTxHash(hash);
   const receipt = await client.waitForTransactionReceipt({ hash });
   return receipt;
 };
