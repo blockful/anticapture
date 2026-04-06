@@ -66,6 +66,7 @@ export const GovernanceActionModal = ({
         daoId,
         walletClient,
         () => setStep("pending-tx"),
+        proposal.id,
       );
       setStep("success");
       showCustomToast(

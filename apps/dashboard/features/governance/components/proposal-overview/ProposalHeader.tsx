@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Button, IconButton } from "@/shared/components";
 import { DaoAvatarIcon } from "@/shared/components/icons";
 import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCustom";
-import type { DaoIdEnum } from "@/shared/types/daos";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 interface ProposalHeaderProps {
   daoId: string;
@@ -152,22 +152,28 @@ export const ProposalHeader = ({
                 proposalStatus={proposalStatus}
                 setIsVotingModalOpen={setIsVotingModalOpen}
               />
-              {/* {proposalStatus === "succeeded" && ( */}
-              <Button
-                className="hidden lg:flex"
-                onClick={() => setIsQueueModalOpen(true)}
-              >
-                Queue Proposal
-              </Button>
-              {/* )} */}
-              {/* {proposalStatus === "pending_execution" && ( */}
-              <Button
-                className="hidden lg:flex"
-                onClick={() => setIsExecuteModalOpen(true)}
-              >
-                Execute Proposal
-              </Button>
-              {/* )} */}
+              {address &&
+                proposalStatus === "succeeded" &&
+                daoId.toUpperCase() !== DaoIdEnum.SHU && (
+                  <Button
+                    className="hidden lg:flex"
+                    onClick={() => setIsQueueModalOpen(true)}
+                  >
+                    Queue Proposal
+                  </Button>
+                )}
+              {address &&
+                (proposalStatus === "pending_execution" ||
+                  proposalStatus === "queued" ||
+                  (proposalStatus === "succeeded" &&
+                    daoId.toUpperCase() === DaoIdEnum.SHU)) && (
+                  <Button
+                    className="hidden lg:flex"
+                    onClick={() => setIsExecuteModalOpen(true)}
+                  >
+                    Execute Proposal
+                  </Button>
+                )}
             </>
           )}
         </div>
