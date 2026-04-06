@@ -14,7 +14,10 @@
       "passThroughEnv": ["*"]
     },
     "@anticapture/observability#build": {
-      "outputs": ["packages/observability/dist/**"]
+      "outputs": ["dist/**"]
+    },
+    "@anticapture/graphql-client#build": {
+      "outputs": ["generated/**"]
     },
     "@anticapture/dashboard#dev": {
       "dependsOn": ["@anticapture/graphql-client#codegen"],
@@ -34,9 +37,12 @@
       "outputs": ["dist/**", ".next/**"]
     },
     "storybook": {
-      "outputs": ["dist/**"]
+      "dependsOn": ["@anticapture/graphql-client#codegen"],
+      "persistent": true,
+      "cache": false
     },
     "build-storybook": {
+      "dependsOn": ["@anticapture/graphql-client#codegen"],
       "outputs": ["storybook-static/**"]
     },
     "start": {
@@ -45,7 +51,9 @@
       "cache": false,
       "passThroughEnv": ["*"]
     },
-    "clean": { "cache": false },
+    "clean": {
+      "cache": false
+    },
     "lint": {
       "inputs": [
         "**/*.ts",
@@ -66,13 +74,15 @@
       ]
     },
     "typecheck": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "@anticapture/observability#build"],
       "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json"]
     },
     "test": {
+      "dependsOn": ["^build"],
       "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"]
     },
     "test:unit": {
+      "dependsOn": ["^build"],
       "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"]
     },
     "codegen": {

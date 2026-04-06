@@ -30,6 +30,7 @@ import { MetricTypesEnum } from "@/lib/constants";
 import { getEffectiveStartDate } from "@/lib/date-helpers";
 import { applyCursorPagination } from "@/lib/query-helpers";
 import { forwardFill, generateOrderedTimeline } from "@/lib/time-series";
+import { logger } from "@/logger";
 import {
   DBTokenMetric,
   DelegationPercentageItem,
@@ -205,7 +206,7 @@ export class DelegationPercentageService {
         total: totalRow?.high ?? 0n,
       };
     } catch (error) {
-      console.error("Error fetching initial values:", error);
+      logger.error({ err: error }, "error fetching initial values");
       return { delegated: 0n, total: 0n };
     }
   }

@@ -18,6 +18,7 @@ RUN pnpm --filter @anticapture/observability build
 RUN pnpm run gateway build
 
 FROM base AS runner
+ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=installer /app .
 RUN npm install -g pnpm

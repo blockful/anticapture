@@ -13,6 +13,7 @@
     "clean": "rm -rf node_modules dist *.tsbuildinfo"
   },
   "dependencies": {
+    "@anticapture/observability": "workspace:*",
     "@hono/node-server": "^1.13.7",
     "@hono/swagger-ui": "^0.5.1",
     "@hono/zod-openapi": "^0.19.6",
@@ -21,6 +22,7 @@
     "drizzle-orm": "~0.41.0",
     "hono": "^4.7.10",
     "pg": "^8.13.1",
+    "pino-http": "^10.4.0",
     "viem": "^2.37.11",
     "zod": "^3.25.3"
   },

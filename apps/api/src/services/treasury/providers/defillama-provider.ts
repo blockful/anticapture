@@ -2,6 +2,7 @@ import { AxiosInstance } from "axios";
 
 import { truncateTimestampToMidnight } from "@/lib/date-helpers";
 import { filterWithFallback } from "@/lib/query-helpers";
+import { logger } from "@/logger";
 
 import { LiquidTreasuryDataPoint } from "../types";
 
@@ -44,9 +45,9 @@ export class DefiLlamaProvider implements TreasuryProvider {
 
       return filterWithFallback(data, cutoffTimestamp);
     } catch (error) {
-      console.error(
-        `[DefiLlamaProvider] Failed to fetch treasury data:`,
-        error,
+      logger.error(
+        { err: error },
+        "failed to fetch treasury data from DefiLlama",
       );
       return [];
     }

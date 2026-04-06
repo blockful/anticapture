@@ -1,0 +1,6 @@
+FROM grafana/loki:3.4.3
+USER root
+COPY loki.yaml /etc/loki/local-config.yaml
+COPY entrypoint.loki.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]

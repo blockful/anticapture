@@ -2,9 +2,13 @@ directive @httpOperation(subgraph: String, path: String, operationSpecificHeader
 
 directive @transport(subgraph: String, kind: String, location: String, headers: [[String]], queryStringOptions: ObjMap, queryParams: [[String]]) repeatable on SCHEMA
 
-directive @statusCodeTypeName(subgraph: String, typeName: String, statusCode: String) repeatable on UNION
-
 directive @enum(subgraph: String, value: String) on ENUM_VALUE
+
+directive @typescript(subgraph: String, type: String) on SCALAR | ENUM
+
+directive @example(subgraph: String, value: ObjMap) repeatable on FIELD_DEFINITION | OBJECT | INPUT_OBJECT | ENUM | SCALAR
+
+directive @statusCodeTypeName(subgraph: String, typeName: String, statusCode: String) repeatable on UNION
 
 type Query {
   """
@@ -24,6 +28,9 @@ type Query {
     """
     addresses: [String]!
   ): getAddresses_200_response
+
+  """Check API and database health"""
+  health: health_response
 
   """
   Get historical delegations for an account, with optional filtering and sorting
@@ -859,6 +866,27 @@ enum HTTPMethod {
 }
 
 scalar ObjMap
+
+union health_response = health_200_response | health_503_response
+
+type health_200_response {
+  status: ok_const!
+  database: ok_const!
+}
+
+enum ok_const {
+  ok
+}
+
+type health_503_response {
+  status: error_const!
+  database: error_const!
+  message: String!
+}
+
+enum error_const {
+  error
+}
 
 """Paginated historical delegations response."""
 type DelegationsResponse {
@@ -1920,7 +1948,7 @@ type OffchainVotesResponse {
 type OffchainVote {
   voter: String!
   proposalId: String!
-  choice: JSON!
+  choice: [String]!
   vp: Float
   reason: String!
   created: Int!
@@ -1956,10 +1984,6 @@ type AverageDelegationPercentagePage {
 }
 
 type DAOList {
-  items: [dao_200_response!]!
+  items: [DaoResponse!]!
   totalCount: Int!
-}
-
-type dao_200_response {
-  _fake: String
 }

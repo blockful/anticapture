@@ -22,7 +22,7 @@ const VOTER = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 const FULL_VOTE_ITEM = {
   voter: VOTER,
   proposalId: "proposal-1",
-  choice: { "1": 1 },
+  choice: ["1"],
   vp: 100,
   reason: "",
   created: 1700000000,
