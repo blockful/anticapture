@@ -1948,7 +1948,7 @@ type OffchainVotesResponse {
 type OffchainVote {
   voter: String!
   proposalId: String!
-  choice: [Int]!
+  choice: [String]!
   vp: Float
   reason: String!
   created: Int!
