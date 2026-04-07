@@ -31,6 +31,16 @@ export default [
       "apps/api-gateway/schema.graphql",
       "**/storybook-static/**",
       "**/.storybook/**",
+      // HyperIndex: ignore generated files and old Ponder files during migration
+      "apps/indexer/generated/**",
+      "apps/indexer/src/indexer/**",
+      "apps/indexer/src/index.ts",
+      "apps/indexer/src/metrics.ts",
+      "apps/indexer/src/api/**",
+      "apps/indexer/ponder.config.ts",
+      "apps/indexer/ponder.schema.ts",
+      "apps/indexer/ponder-env.d.ts",
+      "apps/indexer/config/**",
     ],
   },
 
@@ -123,6 +133,14 @@ export default [
       globals: {
         ...globals.jest,
       },
+    },
+  },
+
+  // Indexer lib — allow const + type with same name (enum-as-const pattern)
+  {
+    files: ["apps/indexer/src/lib/**/*.{js,ts}"],
+    rules: {
+      "@typescript-eslint/no-redeclare": "off",
     },
   },
 

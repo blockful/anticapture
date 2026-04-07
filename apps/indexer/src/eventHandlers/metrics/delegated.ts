@@ -1,28 +1,26 @@
-import { Address, getAddress } from "viem";
-import { token } from "ponder:schema";
-import { Context } from "ponder:registry";
+import type { Address } from "viem";
+import { getAddress } from "viem";
+import type { handlerContext } from "../../../generated/index.js";
 
-import { DaoIdEnum } from "@/lib/enums";
-import { MetricTypesEnum } from "@/lib/constants";
-import { storeDailyBucket } from "@/eventHandlers/shared";
+import { DaoIdEnum } from "../../lib/enums.ts";
+import { MetricTypesEnum } from "../../lib/constants.ts";
+import { storeDailyBucket } from "../shared.ts";
 
 export const updateDelegatedSupply = async (
-  context: Context,
+  context: handlerContext,
   daoId: DaoIdEnum,
   tokenId: Address,
   amount: bigint,
   timestamp: bigint,
 ) => {
-  let currentDelegatedSupply = 0n;
+  const normalizedId = getAddress(tokenId);
+  const token = await context.Token.get(normalizedId);
+  if (!token) return;
 
-  const { delegatedSupply: newDelegatedSupply } = await context.db
-    .update(token, { id: getAddress(tokenId) })
-    .set((current) => {
-      currentDelegatedSupply = current.delegatedSupply;
-      return {
-        delegatedSupply: current.delegatedSupply + amount,
-      };
-    });
+  const currentDelegatedSupply = token.delegatedSupply;
+  const newDelegatedSupply = currentDelegatedSupply + amount;
+
+  context.Token.set({ ...token, delegatedSupply: newDelegatedSupply });
 
   await storeDailyBucket(
     context,

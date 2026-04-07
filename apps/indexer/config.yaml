@@ -1,0 +1,37 @@
+name: anticapture-indexer
+description: Anticapture DAO governance indexer
+field_selection:
+  transaction_fields:
+    - hash
+    - to
+    - from
+
+contracts:
+  - name: ENSToken
+    abi_file_path: abis/ens-token.json
+    handler: src/eventHandlers/ENSToken.ts
+    events:
+      - event: "Transfer(address indexed from, address indexed to, uint256 value)"
+      - event: "DelegateChanged(address indexed delegator, address indexed fromDelegate, address indexed toDelegate)"
+      - event: "DelegateVotesChanged(address indexed delegate, uint256 previousBalance, uint256 newBalance)"
+  - name: ENSGovernor
+    abi_file_path: abis/ens-governor.json
+    handler: src/eventHandlers/ENSGovernor.ts
+    events:
+      - event: "ProposalCreated(uint256 proposalId, address proposer, address[] targets, uint256[] values, string[] signatures, bytes[] calldatas, uint256 startBlock, uint256 endBlock, string description)"
+      - event: "VoteCast(address indexed voter, uint256 proposalId, uint8 support, uint256 weight, string reason)"
+      - event: "ProposalCanceled(uint256 proposalId)"
+      - event: "ProposalExecuted(uint256 proposalId)"
+      - event: "ProposalQueued(uint256 proposalId, uint256 eta)"
+
+networks:
+  - id: 1
+    hypersync_config:
+      url: https://eth.hypersync.xyz
+    start_block: 9380410
+    contracts:
+      - name: ENSToken
+        address: "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72"
+      - name: ENSGovernor
+        address: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3"
+        start_block: 13533772

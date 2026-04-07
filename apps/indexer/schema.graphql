@@ -1,0 +1,202 @@
+enum MetricType {
+  total
+  delegated
+  cex
+  dex
+  lending
+  circulating
+  treasury
+  non_circulating
+}
+
+enum EventType {
+  VOTE
+  PROPOSAL
+  PROPOSAL_EXTENDED
+  DELEGATION
+  DELEGATION_VOTES_CHANGED
+  TRANSFER
+}
+
+type Token {
+  id: ID!
+  name: String
+  decimals: Int!
+  totalSupply: BigInt!
+  delegatedSupply: BigInt!
+  cexSupply: BigInt!
+  dexSupply: BigInt!
+  lendingSupply: BigInt!
+  circulatingSupply: BigInt!
+  treasury: BigInt!
+  nonCirculatingSupply: BigInt!
+}
+
+type Account {
+  id: ID!
+}
+
+# Composite PK: "{accountId}-{tokenId}"
+type AccountBalance {
+  id: ID!
+  accountId: String! @index
+  tokenId: String! @index
+  balance: BigInt!
+  delegate: String!
+}
+
+# Composite PK: "{accountId}"
+type AccountPower {
+  id: ID!
+  accountId: String! @index
+  daoId: String!
+  votingPower: BigInt!
+  votesCount: Int!
+  proposalsCount: Int!
+  delegationsCount: Int!
+  lastVoteTimestamp: BigInt!
+}
+
+# Composite PK: "{txHash}-{accountId}-{logIndex}"
+type VotingPowerHistory {
+  id: ID!
+  transactionHash: String! @index
+  daoId: String!
+  accountId: String! @index
+  votingPower: BigInt!
+  delta: BigInt!
+  deltaMod: BigInt!
+  timestamp: BigInt!
+  logIndex: Int!
+}
+
+# Composite PK: "{txHash}-{accountId}-{logIndex}"
+type BalanceHistory {
+  id: ID!
+  transactionHash: String! @index
+  daoId: String!
+  accountId: String! @index
+  balance: BigInt!
+  delta: BigInt!
+  deltaMod: BigInt!
+  timestamp: BigInt!
+  logIndex: Int!
+}
+
+# Composite PK: "{txHash}-{delegatorId}-{delegateId}"
+type Delegation {
+  id: ID!
+  transactionHash: String! @index
+  daoId: String!
+  delegateAccountId: String! @index
+  delegatorAccountId: String! @index
+  delegatedValue: BigInt!
+  previousDelegate: String
+  timestamp: BigInt! @index
+  logIndex: Int!
+  isCex: Boolean!
+  isDex: Boolean!
+  isLending: Boolean!
+  isTotal: Boolean!
+  delegationType: Int
+}
+
+# Composite PK: "{txHash}-{fromId}-{toId}"
+type Transfer {
+  id: ID!
+  transactionHash: String! @index
+  daoId: String!
+  tokenId: String! @index
+  amount: BigInt! @index
+  fromAccountId: String! @index
+  toAccountId: String! @index
+  timestamp: BigInt! @index
+  logIndex: Int!
+  isCex: Boolean!
+  isDex: Boolean!
+  isLending: Boolean!
+  isTotal: Boolean!
+}
+
+# Composite PK: "{voterId}-{proposalId}"
+type VoteOnchain {
+  id: ID!
+  txHash: String!
+  daoId: String!
+  voterAccountId: String! @index
+  proposalId: String! @index
+  support: String!
+  votingPower: BigInt!
+  reason: String
+  timestamp: BigInt!
+}
+
+type ProposalOnchain {
+  id: ID!
+  txHash: String!
+  daoId: String!
+  proposerAccountId: String! @index
+  targets: Json!
+  values: Json!
+  signatures: Json!
+  calldatas: Json!
+  startBlock: Int!
+  endBlock: Int!
+  title: String!
+  description: String!
+  timestamp: BigInt!
+  logIndex: Int!
+  endTimestamp: BigInt!
+  status: String!
+  forVotes: BigInt!
+  againstVotes: BigInt!
+  abstainVotes: BigInt!
+  proposalType: Int
+}
+
+# Composite PK: "{date}-{tokenId}-{metricType}"
+type DaoMetricsDayBucket {
+  id: ID!
+  date: BigInt!
+  daoId: String!
+  tokenId: String! @index
+  metricType: MetricType!
+  openValue: BigInt!
+  closeValue: BigInt!
+  low: BigInt!
+  high: BigInt!
+  average: BigInt!
+  volume: BigInt!
+  count: Int!
+  lastUpdate: BigInt!
+}
+
+type Transaction {
+  id: ID!
+  transactionHash: String!
+  fromAddress: String
+  toAddress: String
+  isCex: Boolean!
+  isDex: Boolean!
+  isLending: Boolean!
+  isTotal: Boolean!
+  timestamp: BigInt!
+}
+
+
+type TokenPrice {
+  id: ID!
+  price: BigInt!
+  timestamp: BigInt!
+}
+
+# Composite PK: "{txHash}-{logIndex}"
+type FeedEvent {
+  id: ID!
+  txHash: String! @index
+  logIndex: Int!
+  eventType: EventType!
+  value: BigInt! @index
+  timestamp: BigInt! @index
+  metadata: Json
+}

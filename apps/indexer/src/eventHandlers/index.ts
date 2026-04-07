@@ -1,3 +1,3 @@
-export * from "./transfer";
-export * from "./delegation";
-export * from "./voting";
+export * from "./transfer.ts";
+export * from "./delegation.ts";
+export * from "./voting.ts";

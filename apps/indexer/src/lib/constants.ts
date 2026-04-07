@@ -1,6 +1,7 @@
-import { Address, zeroAddress } from "viem";
+import type { Address } from "viem";
+import { zeroAddress } from "viem";
 
-import { DaoIdEnum } from "./enums";
+import { DaoIdEnum } from "./enums.ts";
 
 export const CONTRACT_ADDRESSES = {
   [DaoIdEnum.UNI]: {
@@ -874,28 +875,34 @@ export const NonCirculatingAddresses: Record<
   [DaoIdEnum.SHU]: {},
 };
 
-export enum ProposalStatus {
-  PENDING = "PENDING",
-  ACTIVE = "ACTIVE",
-  CANCELED = "CANCELED",
-  DEFEATED = "DEFEATED",
-  SUCCEEDED = "SUCCEEDED",
-  QUEUED = "QUEUED",
-  EXPIRED = "EXPIRED",
-  EXECUTED = "EXECUTED",
-  VETOED = "VETOED",
-  NO_QUORUM = "NO_QUORUM",
-}
+export const ProposalStatus = {
+  PENDING: "PENDING",
+  ACTIVE: "ACTIVE",
+  CANCELED: "CANCELED",
+  DEFEATED: "DEFEATED",
+  SUCCEEDED: "SUCCEEDED",
+  QUEUED: "QUEUED",
+  EXPIRED: "EXPIRED",
+  EXECUTED: "EXECUTED",
+  VETOED: "VETOED",
+  NO_QUORUM: "NO_QUORUM",
+} as const;
 
-export enum MetricTypesEnum {
-  TOTAL_SUPPLY = "TOTAL_SUPPLY",
-  DELEGATED_SUPPLY = "DELEGATED_SUPPLY",
-  CEX_SUPPLY = "CEX_SUPPLY",
-  DEX_SUPPLY = "DEX_SUPPLY",
-  LENDING_SUPPLY = "LENDING_SUPPLY",
-  CIRCULATING_SUPPLY = "CIRCULATING_SUPPLY",
-  TREASURY = "TREASURY",
-  NON_CIRCULATING_SUPPLY = "NON_CIRCULATING_SUPPLY",
-}
+export type ProposalStatus =
+  (typeof ProposalStatus)[keyof typeof ProposalStatus];
+
+export const MetricTypesEnum = {
+  TOTAL_SUPPLY: "TOTAL_SUPPLY",
+  DELEGATED_SUPPLY: "DELEGATED_SUPPLY",
+  CEX_SUPPLY: "CEX_SUPPLY",
+  DEX_SUPPLY: "DEX_SUPPLY",
+  LENDING_SUPPLY: "LENDING_SUPPLY",
+  CIRCULATING_SUPPLY: "CIRCULATING_SUPPLY",
+  TREASURY: "TREASURY",
+  NON_CIRCULATING_SUPPLY: "NON_CIRCULATING_SUPPLY",
+} as const;
+
+export type MetricTypesEnum =
+  (typeof MetricTypesEnum)[keyof typeof MetricTypesEnum];
 
 export const metricTypeArray = Object.values(MetricTypesEnum);

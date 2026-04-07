@@ -1,12 +1,16 @@
-import { Address, getAddress } from "viem";
-import { token } from "ponder:schema";
-import { Context } from "ponder:registry";
+import type { Address } from "viem";
+import { getAddress } from "viem";
+import type { handlerContext } from "../../../generated/index.js";
 
-import { AddressCollection, storeDailyBucket, toAddressSet } from "../shared";
-import { MetricTypesEnum } from "@/lib/constants";
+import {
+  AddressCollection,
+  storeDailyBucket,
+  toAddressSet,
+} from "../shared.ts";
+import { MetricTypesEnum } from "../../lib/constants.ts";
 
 export const updateSupplyMetric = async (
-  context: Context,
+  context: handlerContext,
   supplyField:
     | "lendingSupply"
     | "cexSupply"
@@ -27,18 +31,16 @@ export const updateSupplyMetric = async (
   const isFromRelevant = normalizedAddressList.has(getAddress(from));
 
   if ((isToRelevant || isFromRelevant) && !(isToRelevant && isFromRelevant)) {
-    let currentSupply: bigint = 0n;
+    const tokenId = getAddress(tokenAddress);
+    const token = await context.Token.get(tokenId);
+    if (!token) return false;
 
-    const { [supplyField]: newSupply } = await context.db
-      .update(token, { id: getAddress(tokenAddress) })
-      .set((current) => {
-        currentSupply = current[supplyField];
-        return {
-          [supplyField]: isToRelevant
-            ? current[supplyField] + value
-            : current[supplyField] - value,
-        };
-      });
+    const currentSupply = token[supplyField];
+    const newSupply = isToRelevant
+      ? currentSupply + value
+      : currentSupply - value;
+
+    context.Token.set({ ...token, [supplyField]: newSupply });
 
     await storeDailyBucket(
       context,

@@ -2,7 +2,7 @@
  * Date and timestamp utilities for time-series data processing.
  */
 
-import { SECONDS_IN_DAY } from "./enums";
+import { SECONDS_IN_DAY } from "./enums.ts";
 
 /**
  * Truncate timestamp (seconds) to midnight UTC

@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "ponder dev",
+    "envio": "envio dev",
     "start": "ponder start --views-schema=anticapture --schema=$RAILWAY_DEPLOYMENT_ID",
     "db:list": "ponder db list",
     "db:prune": "ponder db prune",
@@ -24,6 +25,7 @@
     "@types/node": "^20.16.5",
     "@types/pg": "^8.15.6",
     "dotenv": "^16.5.0",
+    "envio": "^2.32.12",
     "eslint": "^9",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
