@@ -25,6 +25,7 @@ export function dao(app: Hono, service: DaoService) {
     }),
     async (context) => {
       const daoData = await service.getDaoParameters();
+      context.header("Cache-Control", "public, max-age=1800");
       return context.json(daoData, 200);
     },
   );

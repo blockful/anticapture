@@ -61,6 +61,7 @@ export function historicalBalances(
         toDate,
       );
 
+      context.header("Cache-Control", "public, max-age=300");
       return context.json(
         HistoricalBalancesResponseMapper(items, totalCount),
         200,

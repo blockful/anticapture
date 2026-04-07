@@ -60,6 +60,7 @@ export function transactions(app: Hono, service: TransactionsService) {
         includes,
       });
 
+      context.header("Cache-Control", "public, max-age=120");
       return context.json(result, 200);
     },
   );

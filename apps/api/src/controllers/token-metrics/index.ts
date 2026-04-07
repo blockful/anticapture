@@ -37,6 +37,7 @@ export function tokenMetrics(app: Hono, service: TokenMetricsService) {
         orderDirection: query.orderDirection ?? "asc",
       });
       const httpResponse = toTokenMetricsApi(serviceResult);
+      ctx.header("Cache-Control", "public, max-age=300");
       return ctx.json(httpResponse, 200);
     },
   );

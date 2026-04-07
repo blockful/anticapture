@@ -37,6 +37,7 @@ export function delegations(app: Hono, service: DelegationsService) {
 
       const result = await service.getDelegations(address);
 
+      context.header("Cache-Control", "public, max-age=120");
       return context.json(DelegationsResponseSchema.parse(result), 200);
     },
   );

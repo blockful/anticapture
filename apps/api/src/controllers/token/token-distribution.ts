@@ -59,6 +59,7 @@ export function tokenDistribution(
 
         const result = await repository.getSupplyComparison(metric, days);
 
+        ctx.header("Cache-Control", "public, max-age=300");
         if (!result) {
           return ctx.json(
             { previousValue: "0", currentValue: "0", changeRate: 0 },

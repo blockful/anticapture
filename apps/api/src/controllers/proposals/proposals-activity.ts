@@ -66,6 +66,7 @@ export function proposalsActivity(
         userVoteFilter,
       });
 
+      context.header("Cache-Control", "public, max-age=300");
       return context.json(ProposalActivityResponseSchema.parse(result), 200);
     },
   );

@@ -36,6 +36,7 @@ export function eventRelevance(app: Hono, service: EventRelevanceService) {
         type as FeedEventType,
         relevance as FeedRelevance,
       );
+      context.header("Cache-Control", "public, max-age=1800");
       return context.json({ threshold }, 200);
     },
   );

@@ -65,6 +65,7 @@ export function proposals(
         client.getVotingDelay(),
       ]);
 
+      context.header("Cache-Control", "public, max-age=60");
       return context.json(
         {
           items: result.map((p, index) =>
@@ -124,6 +125,7 @@ export function proposals(
         client.getVotingDelay(),
       ]);
 
+      context.header("Cache-Control", "public, max-age=60");
       return context.json(
         ProposalMapper.toApi(proposal, quorum, blockTime),
         200,

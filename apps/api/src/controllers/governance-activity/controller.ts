@@ -57,6 +57,7 @@ export function governanceActivity(
     async (context) => {
       const { days } = context.req.valid("query");
       const data = await repository.getActiveSupply(days);
+      context.header("Cache-Control", "public, max-age=300");
       return context.json({ activeSupply: data?.activeSupply || "0" }, 200);
     },
   );
@@ -86,6 +87,7 @@ export function governanceActivity(
       const { days } = context.req.valid("query");
 
       const data = await repository.getProposalsCompare(days);
+      context.header("Cache-Control", "public, max-age=300");
       if (!data) {
         return context.json(
           {
@@ -135,6 +137,7 @@ export function governanceActivity(
       const { days } = context.req.valid("query");
 
       const data = await repository.getVotesCompare(days);
+      context.header("Cache-Control", "public, max-age=300");
       if (!data) {
         return context.json(
           {
@@ -183,6 +186,7 @@ export function governanceActivity(
       const { days } = context.req.valid("query");
 
       const data = await repository.getAverageTurnoutCompare(days);
+      context.header("Cache-Control", "public, max-age=300");
       if (!data) {
         return context.json(
           {

@@ -51,6 +51,7 @@ export function offchainVotes(app: Hono, service: OffchainVotesService) {
         toDate,
       });
 
+      context.header("Cache-Control", "public, max-age=120");
       return context.json(OffchainVotesResponseSchema.parse(response), 200);
     },
   );
@@ -101,6 +102,7 @@ export function offchainVotes(app: Hono, service: OffchainVotesService) {
         toDate,
       });
 
+      context.header("Cache-Control", "public, max-age=120");
       return context.json(OffchainVotesResponseSchema.parse(response), 200);
     },
   );

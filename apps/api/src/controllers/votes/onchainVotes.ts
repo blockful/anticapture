@@ -59,6 +59,7 @@ export function votes(app: Hono, service: VotesService) {
         toDate,
       );
 
+      context.header("Cache-Control", "public, max-age=60");
       return context.json({ totalCount, items }, 200);
     },
   );
@@ -106,6 +107,7 @@ export function votes(app: Hono, service: VotesService) {
         support,
       });
 
+      context.header("Cache-Control", "public, max-age=60");
       return context.json(result);
     },
   );
@@ -146,6 +148,7 @@ export function votes(app: Hono, service: VotesService) {
         orderDirection,
         addresses,
       );
+      context.header("Cache-Control", "public, max-age=60");
       return context.json({ totalCount, items }, 200);
     },
   );

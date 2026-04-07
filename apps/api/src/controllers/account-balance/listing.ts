@@ -74,6 +74,7 @@ export function accountBalances(
         excludeDaoAddresses,
       );
 
+      context.header("Cache-Control", "public, max-age=120");
       return context.json(
         AccountBalancesWithVariationResponseMapper(
           result.items,
@@ -122,6 +123,7 @@ export function accountBalances(
         toTimestamp,
       );
 
+      context.header("Cache-Control", "public, max-age=120");
       return context.json(
         AccountBalanceWithVariationResponseMapper(
           result,

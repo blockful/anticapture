@@ -60,6 +60,7 @@ export function historicalDelegations(
         limit,
       );
 
+      context.header("Cache-Control", "public, max-age=300");
       return context.json(DelegationsResponseSchema.parse(result), 200);
     },
   );

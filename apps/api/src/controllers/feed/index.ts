@@ -28,6 +28,7 @@ export function feed(app: Hono, service: FeedService) {
     async (context) => {
       const req = context.req.valid("query");
       const response = await service.getFeedEvents(req);
+      context.header("Cache-Control", "public, max-age=60");
       return context.json(FeedResponseSchema.parse(response), 200);
     },
   );

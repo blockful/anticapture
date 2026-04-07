@@ -32,6 +32,7 @@ export function lastUpdate(app: Hono, db: Drizzle) {
     async (context) => {
       const { chart } = context.req.valid("query");
       const lastUpdate = await service.getLastUpdate(chart);
+      context.header("Cache-Control", "public, max-age=30");
       return context.json({ lastUpdate }, 200);
     },
   );

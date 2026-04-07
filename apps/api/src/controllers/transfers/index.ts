@@ -59,6 +59,7 @@ export function transfers(app: Hono, service: TransfersService) {
         toDate,
       });
 
+      context.header("Cache-Control", "public, max-age=120");
       return context.json(result, 200);
     },
   );

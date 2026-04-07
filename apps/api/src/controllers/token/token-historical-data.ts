@@ -41,6 +41,7 @@ export function tokenHistoricalData(
     async (context) => {
       const { skip, limit } = context.req.valid("query");
       const data = await client.getHistoricalTokenData(limit, skip);
+      context.header("Cache-Control", "public, max-age=300");
       return context.json(data, 200);
     },
   );
