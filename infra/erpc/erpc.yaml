@@ -68,17 +68,17 @@ projects:
         vendorName: nodeful
         rateLimitBudget: nodeful
         autoIgnoreUnsupportedMethods: true
-      - id: envio
-        endpoint: evm+envio://rpc.hypersync.xyz/${ENVIO_API_KEY}
-        vendorName: Envio
-        rateLimitBudget: envio
-        autoIgnoreUnsupportedMethods: true
-      - id: chainstack
-        endpoint: chainstack://${CHAINSTACK_API_KEY}?project=PR-494-784
-        vendorName: Chainstack
-        rateLimitBudget: chainstack
-        group: fallback
-        autoIgnoreUnsupportedMethods: true
+      # - id: envio
+      #   endpoint: evm+envio://rpc.hypersync.xyz/${ENVIO_API_KEY}
+      #   vendorName: Envio
+      #   rateLimitBudget: envio
+      #   autoIgnoreUnsupportedMethods: true
+      # - id: chainstack
+      #   endpoint: chainstack://${CHAINSTACK_API_KEY}?project=PR-494-784
+      #   vendorName: Chainstack
+      #   rateLimitBudget: chainstack
+      #   group: fallback
+      #   autoIgnoreUnsupportedMethods: true
 
   - id: api
     rateLimitBudget: api-limit
@@ -122,17 +122,17 @@ projects:
         vendorName: nodeful
         rateLimitBudget: nodeful
         autoIgnoreUnsupportedMethods: true
-      - id: envio
-        endpoint: evm+envio://rpc.hypersync.xyz/${ENVIO_API_KEY}
-        vendorName: Envio
-        rateLimitBudget: envio
-        autoIgnoreUnsupportedMethods: true
-      - id: chainstack
-        endpoint: chainstack://${CHAINSTACK_API_KEY}?project=PR-494-784
-        vendorName: Chainstack
-        rateLimitBudget: chainstack
-        group: fallback
-        autoIgnoreUnsupportedMethods: true
+      # - id: envio
+      #   endpoint: evm+envio://rpc.hypersync.xyz/${ENVIO_API_KEY}
+      #   vendorName: Envio
+      #   rateLimitBudget: envio
+      #   autoIgnoreUnsupportedMethods: true
+      # - id: chainstack
+      #   endpoint: chainstack://${CHAINSTACK_API_KEY}?project=PR-494-784
+      #   vendorName: Chainstack
+      #   rateLimitBudget: chainstack
+      #   group: fallback
+      #   autoIgnoreUnsupportedMethods: true
 
   - id: dashboard
     rateLimitBudget: dashboard-limit
@@ -176,17 +176,17 @@ projects:
         vendorName: nodeful
         rateLimitBudget: nodeful
         autoIgnoreUnsupportedMethods: true
-      - id: chainstack
-        endpoint: chainstack://${CHAINSTACK_API_KEY}?project=PR-494-784
-        vendorName: Chainstack
-        rateLimitBudget: chainstack
-        group: fallback
-        autoIgnoreUnsupportedMethods: true
-    auth:
-      strategies:
-        - type: secret
-          secret:
-            value: ${RPC_SECRET}
+      # - id: chainstack
+      #   endpoint: chainstack://${CHAINSTACK_API_KEY}?project=PR-494-784
+      #   vendorName: Chainstack
+      #   rateLimitBudget: chainstack
+      #   group: fallback
+      #   autoIgnoreUnsupportedMethods: true
+    # auth:
+    #   strategies:
+    #     - type: secret
+    #       secret:
+    #         value: ${RPC_SECRET}
     cors:
       allowedOrigins:
         - "*"
