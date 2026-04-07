@@ -130,7 +130,7 @@ export const GovernanceSection = () => {
   }
 
   return (
-    <div className="bg-background flex min-h-screen flex-col">
+    <div>
       <TheSectionLayout
         title="Proposals"
         icon={<Landmark className="section-layout-icon" />}

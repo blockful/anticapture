@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+
 import { useState, useEffect, useMemo } from "react";
 
 import { ButtonHeaderSidebar, ConnectWallet } from "@/shared/components";
@@ -143,7 +144,7 @@ export const HeaderMobile = ({
         <div
           className={cn(
             `fixed left-0 right-0 z-50 flex h-[calc(100vh-57px)] w-screen bg-black/90 transition-all duration-300`,
-            pathname === "/" || !withMobileMenu ? "top-[57px]" : "top-[98px]",
+            pathname === "/" || !withMobileMenu ? "top-[57px]" : "top-[124px]",
             isMenuOpen
               ? "pointer-events-auto opacity-100"
               : "pointer-events-none opacity-0",

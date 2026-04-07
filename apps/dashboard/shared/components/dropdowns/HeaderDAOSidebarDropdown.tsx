@@ -21,11 +21,13 @@ type DropdownItem = {
 export interface HeaderDAOSidebarDropdownProps {
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
+  onOpenChange?: (isOpen: boolean) => void;
 }
 
 export const HeaderDAOSidebarDropdown = ({
   isCollapsed = false,
   onToggleCollapse,
+  onOpenChange,
 }: HeaderDAOSidebarDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -40,17 +42,19 @@ export const HeaderDAOSidebarDropdown = ({
     if (!isOpen) return;
     if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
     setIsClosing(true);
+    onOpenChange?.(false);
     closeTimerRef.current = setTimeout(() => {
       setIsOpen(false);
       setIsClosing(false);
     }, ANIMATION_DURATION);
-  }, [isOpen]);
+  }, [isOpen, onOpenChange]);
 
   const open = useCallback(() => {
     if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
     setIsClosing(false);
     setIsOpen(true);
-  }, []);
+    onOpenChange?.(true);
+  }, [onOpenChange]);
 
   const toggle = useCallback(() => {
     if (isOpen && !isClosing) {
