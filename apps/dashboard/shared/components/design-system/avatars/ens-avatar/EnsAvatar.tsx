@@ -100,6 +100,15 @@ export const EnsAvatar = ({
 
   const [imageError, setImageError] = useState(false);
   const [tagsExpanded, setTagsExpanded] = useState(false);
+  const [brandColor, setBrandColor] = useState("#ec762e");
+
+  const blockiesRef = (node: HTMLDivElement | null) => {
+    if (!node) return;
+    const value = getComputedStyle(node)
+      .getPropertyValue("--base-brand")
+      .trim();
+    if (value && value !== brandColor) setBrandColor(value);
+  };
 
   // Determine the final image URL to use
   const finalImageUrl = imageUrl || ensData?.avatarUrl;
@@ -170,13 +179,13 @@ export const EnsAvatar = ({
     }
 
     return (
-      <div className={baseClasses}>
+      <div ref={blockiesRef} className={baseClasses}>
         <Blockies
           seed={address as string}
           size={iconSizes[size]}
           scale={3}
           color="#18181b"
-          bgColor="#ec762e"
+          bgColor={brandColor}
           spotColor="#ffffff"
         />
       </div>
