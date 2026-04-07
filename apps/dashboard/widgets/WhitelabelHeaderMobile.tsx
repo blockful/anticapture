@@ -33,12 +33,16 @@ export const WhitelabelHeaderMobile = ({
           })}
           className="flex min-w-0 items-center gap-3"
         >
-          <DaoAvatarIcon
-            daoId={daoId}
-            className="size-9"
-            isRounded
-            showBackground={false}
-          />
+          {daoConfig.whitelabel?.branding?.logo ? (
+            <daoConfig.whitelabel.branding.logo className="size-9 shrink-0 rounded-full" />
+          ) : (
+            <DaoAvatarIcon
+              daoId={daoId}
+              className="size-9"
+              isRounded
+              showBackground={false}
+            />
+          )}
           <span className="text-primary truncate text-base font-semibold">
             {daoConfig.name}
           </span>

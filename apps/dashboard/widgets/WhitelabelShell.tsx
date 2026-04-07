@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, Landmark, Newspaper, UserCheck } from "lucide-react";
+import { Bell, Briefcase, Landmark, Newspaper, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
@@ -24,9 +24,9 @@ const NAV_ITEMS = [
     enabled: (daoId: DaoIdEnum) => !!daoConfigByDaoId[daoId].governancePage,
   },
   {
-    label: "Delegates",
-    page: WHITELABEL_ROUTES.delegates,
-    icon: UserCheck,
+    label: "Holders & Delegates",
+    page: WHITELABEL_ROUTES.holdersAndDelegates,
+    icon: Users,
     enabled: (daoId: DaoIdEnum) => !!daoConfigByDaoId[daoId].dataTables,
   },
   {
@@ -36,10 +36,16 @@ const NAV_ITEMS = [
     enabled: (daoId: DaoIdEnum) => !!daoConfigByDaoId[daoId].activityFeed,
   },
   {
-    label: "SPP Accountability",
-    page: WHITELABEL_ROUTES.sppAccountability,
-    icon: Building2,
-    enabled: (daoId: DaoIdEnum) => daoId === "ENS",
+    label: "Service Providers",
+    page: WHITELABEL_ROUTES.serviceProviders,
+    icon: Briefcase,
+    enabled: (daoId: DaoIdEnum) => !!daoConfigByDaoId[daoId].serviceProviders,
+  },
+  {
+    label: "Notifications",
+    page: WHITELABEL_ROUTES.notifications,
+    icon: Bell,
+    enabled: () => true,
   },
 ] as const;
 
@@ -70,13 +76,14 @@ export const WhitelabelShell = ({
 
   return (
     <div className="bg-surface-background text-primary flex min-h-screen">
-      <WhitelabelSidebar daoId={daoId} isCollapsed={isSidebarCollapsed} />
+      <WhitelabelSidebar
+        daoId={daoId}
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={() => setIsSidebarCollapsed((current) => !current)}
+      />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <WhitelabelHeader
-          isSidebarCollapsed={isSidebarCollapsed}
-          onToggleSidebar={() => setIsSidebarCollapsed((current) => !current)}
-        />
+        <WhitelabelHeader />
         <WhitelabelHeaderMobile
           daoId={daoId}
           isMenuOpen={isMobileMenuOpen}

@@ -92,8 +92,14 @@ const withBrandColor = ({
   return {
     ...variables,
     "--base-brand": brandColor,
-    "--base-brand-lighter": brandColor,
-    "--base-brand-opacity": `${brandColor}1f`,
+    "--base-brand-lighter": `color-mix(in srgb, ${brandColor} 70%, white)`,
+    "--base-brand-opacity": `color-mix(in srgb, ${brandColor} 12%, transparent)`,
+    "--color-tangerine": brandColor,
+    "--color-link": brandColor,
+    "--color-link-hover": brandColor,
+    "--color-highlight": brandColor,
+    "--color-surface-solid-brand": brandColor,
+    "--color-surface-opacity-brand": `color-mix(in srgb, ${brandColor} 12%, transparent)`,
   };
 };
 

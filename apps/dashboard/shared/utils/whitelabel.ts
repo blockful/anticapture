@@ -5,7 +5,11 @@ import type { DaoIdEnum } from "@/shared/types/daos";
 export const WHITELABEL_ROUTES = {
   proposals: "proposals",
   delegates: "delegates",
+  holdersAndDelegates: "holders-and-delegates",
   activityFeed: "activity-feed",
+  serviceProviders: "service-providers",
+  notifications: "notifications",
+  governanceSettings: "governance-settings",
   sppAccountability: "spp-accountability",
 } as const;
 
@@ -142,11 +146,19 @@ export const getWhitelabelInternalPath = ({
     "/",
     `/${WHITELABEL_ROUTES.proposals}`,
     `/${WHITELABEL_ROUTES.delegates}`,
-    "/activity-feed",
+    `/${WHITELABEL_ROUTES.holdersAndDelegates}`,
+    `/${WHITELABEL_ROUTES.activityFeed}`,
+    `/${WHITELABEL_ROUTES.serviceProviders}`,
+    `/${WHITELABEL_ROUTES.notifications}`,
+    `/${WHITELABEL_ROUTES.governanceSettings}`,
     `/${WHITELABEL_ROUTES.sppAccountability}`,
     `/${daoSlug}/${WHITELABEL_ROUTES.proposals}`,
     `/${daoSlug}/${WHITELABEL_ROUTES.delegates}`,
-    `/${daoSlug}/activity-feed`,
+    `/${daoSlug}/${WHITELABEL_ROUTES.holdersAndDelegates}`,
+    `/${daoSlug}/${WHITELABEL_ROUTES.activityFeed}`,
+    `/${daoSlug}/${WHITELABEL_ROUTES.serviceProviders}`,
+    `/${daoSlug}/${WHITELABEL_ROUTES.notifications}`,
+    `/${daoSlug}/${WHITELABEL_ROUTES.governanceSettings}`,
     `/${daoSlug}/${WHITELABEL_ROUTES.sppAccountability}`,
   ];
 
