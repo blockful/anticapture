@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { logger } from "@/logger";
+
 /**
  * ENS data response schema from ethfollow API
  * Based on https://api.ethfollow.xyz/api/v1/users/:addressOrENS/ens
@@ -49,8 +51,9 @@ export class ENSClient {
         if (response.status === 404) {
           return null;
         }
-        console.error(
-          `ENS API error: ${response.status} ${response.statusText}`,
+        logger.error(
+          { address, status: response.status, statusText: response.statusText },
+          "ENS API error",
         );
         return null;
       }
@@ -59,7 +62,10 @@ export class ENSClient {
       const parsed = EnsResponseSchema.safeParse(data);
 
       if (!parsed.success) {
-        console.error("Failed to parse ENS response:", parsed.error);
+        logger.error(
+          { err: parsed.error, address },
+          "failed to parse ENS response",
+        );
         return null;
       }
 
@@ -76,7 +82,7 @@ export class ENSClient {
         banner: ens.records?.header ?? null,
       };
     } catch (error) {
-      console.error("Failed to fetch ENS data:", error);
+      logger.error({ err: error, address }, "failed to fetch ENS data");
       return null;
     }
   }

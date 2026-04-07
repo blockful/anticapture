@@ -28,17 +28,25 @@ export const metricsMiddleware: MiddlewareHandler = async (c, next) => {
   } finally {
     const duration = (performance.now() - start) / 1000;
 
-    const spanContext = trace.getActiveSpan()?.spanContext();
-    const traceId = spanContext?.traceId;
+    const activeSpan = trace.getActiveSpan();
+    const traceId = activeSpan?.spanContext().traceId;
 
     if (traceId) {
       c.res.headers.set("X-Trace-Id", traceId);
     }
 
+    const clientSource =
+      c.req.header("x-client-source") === "notification-system"
+        ? "notification-system"
+        : "default";
+
+    activeSpan?.setAttribute("client.source", clientSource);
+
     const labels = {
       [ATTR_HTTP_REQUEST_METHOD]: c.req.method,
       [ATTR_HTTP_ROUTE]: routePath(c) ?? c.req.path,
       [ATTR_HTTP_RESPONSE_STATUS_CODE]: statusCode ?? c.res?.status ?? 500,
+      "client.source": clientSource,
     };
     httpRequestDuration.record(duration, labels);
     httpRequestTotal.add(1, labels);

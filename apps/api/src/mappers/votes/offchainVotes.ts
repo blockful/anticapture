@@ -40,8 +40,17 @@ export const OffchainVotesRequestSchema = z
 export type OffchainVotesRequest = z.infer<typeof OffchainVotesRequestSchema>;
 
 export const OffchainVoteChoiceSchema = z
-  .record(z.string(), z.number())
-  .openapi("SnapshotVoteChoice");
+  .union([
+    z
+      .number()
+      .int()
+      .transform((val) => [val]),
+    z.array(z.number().int()),
+  ])
+  .openapi("SnapshotVoteChoice", {
+    type: "array",
+    items: { type: "integer", nullable: false },
+  });
 
 export const OffchainVoteResponseSchema = z
   .object({

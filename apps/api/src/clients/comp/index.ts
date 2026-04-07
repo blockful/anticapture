@@ -70,6 +70,10 @@ export class COMPClient<
     return this.cache.timelockDelay;
   }
 
+  async getGracePeriod(): Promise<bigint> {
+    return 1209600n; // 14 days
+  }
+
   supportOffchainData(): boolean {
     return true;
   }

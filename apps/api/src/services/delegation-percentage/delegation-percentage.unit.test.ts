@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 
 import { MetricTypesEnum } from "@/lib/constants";
 import { DBTokenMetric } from "@/mappers/delegation-percentage";
+import { logger } from "@/logger";
 
 import {
   DelegationPercentageRepository,
@@ -534,10 +535,10 @@ describe("DelegationPercentageService", () => {
     it("should fallback to 0 when fetching previous values fails", async () => {
       const day100 = 1599955200;
 
-      // Mock console.error to suppress test output
+      // Mock logger.error to suppress test output
       const consoleErrorSpy = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
+        .spyOn(logger, "error")
+        .mockImplementation(() => logger);
 
       // Mock: error fetching previous values
       mockRepository.getLastMetricBeforeDate.mockRejectedValue(
@@ -576,8 +577,8 @@ describe("DelegationPercentageService", () => {
 
       // Verify error was logged
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        "Error fetching initial values:",
-        expect.any(Error),
+        expect.objectContaining({ err: expect.any(Error) }),
+        "error fetching initial values",
       );
 
       consoleErrorSpy.mockRestore();

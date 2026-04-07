@@ -5,9 +5,8 @@
   "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "vitest",
+    "test": "vitest run --coverage",
     "test:unit": "vitest run --exclude '**/*.integration.test.ts'",
-    "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "clean": "rm -rf node_modules *.tsbuildinfo dist",
     "start": "node --import ./dist/instrumentation.js dist/index.js",
@@ -35,6 +34,7 @@
     "hono": "^4.7.10",
     "pg": "^8.17.2",
     "viem": "^2.41.2",
+    "pino-http": "^10.4.0",
     "zod": "^4.3.6",
     "zod-validation-error": "^5.0.0"
   },

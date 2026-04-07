@@ -1,6 +1,8 @@
 import { AxiosInstance } from "axios";
 import { HTTPException } from "hono/http-exception";
 
+import { logger } from "@/logger";
+
 import { LiquidTreasuryDataPoint } from "../types";
 
 import { TreasuryProviderCache } from "./provider-cache";
@@ -49,6 +51,7 @@ export class CompoundProvider implements TreasuryProvider {
 
       return this.filterData(data, cutoffTimestamp);
     } catch (error) {
+      logger.error({ err: error }, "compound API fetch failed");
       throw new HTTPException(503, {
         message: "Failed to fetch total assets data",
         cause: error,

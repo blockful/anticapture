@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { logger } from "@/logger";
+
 /**
  * Arkham Intel API response schema for address intelligence
  * Based on https://docs.intel.arkm.com/
@@ -81,8 +83,9 @@ export class ArkhamClient {
             isContract: null,
           };
         }
-        console.error(
-          `Arkham API error: ${response.status} ${response.statusText}`,
+        logger.error(
+          { address, status: response.status, statusText: response.statusText },
+          "Arkham API error",
         );
         return null;
       }
@@ -91,7 +94,10 @@ export class ArkhamClient {
       const parsed = ArkhamAddressResponseSchema.safeParse(data);
 
       if (!parsed.success) {
-        console.error("Failed to parse Arkham response:", parsed.error);
+        logger.error(
+          { err: parsed.error, address },
+          "failed to parse Arkham response",
+        );
         return null;
       }
 
@@ -103,7 +109,7 @@ export class ArkhamClient {
         isContract: parsed.data.contract ?? null,
       };
     } catch (error) {
-      console.error("Failed to fetch from Arkham API:", error);
+      logger.error({ err: error, address }, "failed to fetch from Arkham API");
       return null;
     }
   }
