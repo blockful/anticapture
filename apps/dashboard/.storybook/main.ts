@@ -39,6 +39,14 @@ const config: StorybookConfig = {
       "@apollo/client": dirname(
         require.resolve("@apollo/client/package.json"),
       ),
+      "@anticapture/graphql-client$": resolve(
+        __dirname,
+        "../../../packages/graphql-client/generated/hooks.ts",
+      ),
+      "@anticapture/graphql-client/hooks": resolve(
+        __dirname,
+        "../../../packages/graphql-client/generated/hooks.ts",
+      ),
     };
     return config;
   },

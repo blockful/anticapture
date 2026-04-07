@@ -44,11 +44,14 @@ export const OffchainVoteChoiceSchema = z
     z
       .number()
       .int()
-      .transform((val) => [val]),
-    z.array(z.number().int()),
-    z.record(z.string(), z.number()),
+      .transform((val) => [val.toString()]),
+    z.array(z.string()),
+    z.record(z.string(), z.number()).transform((val) => Object.keys(val)),
   ])
-  .openapi("SnapshotVoteChoice", {});
+  .openapi("SnapshotVoteChoice", {
+    type: "array",
+    items: { type: "string", nullable: false },
+  });
 
 export const OffchainVoteResponseSchema = z
   .object({
