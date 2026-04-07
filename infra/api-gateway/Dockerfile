@@ -27,5 +27,6 @@ RUN addgroup --system app && adduser --system --ingroup app --home /home/app app
 WORKDIR /app
 COPY --from=installer --chown=app:app /app .
 USER app
+WORKDIR /app/apps/api-gateway
 EXPOSE 4000
-ENTRYPOINT ["pnpm", "gateway", "start"]
+ENTRYPOINT ["node", "--import", "./dist/src/instrumentation.js", "dist/src/index.js"]
